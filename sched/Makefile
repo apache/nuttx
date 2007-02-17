@@ -1,0 +1,130 @@
+############################################################
+# Makefile
+#
+#   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name Gregory Nutt nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################
+
+-include $(TOPDIR)/Make.defs
+
+MKDEP		= $(TOPDIR)/tools/mkdeps.sh
+
+ASRCS		= 
+AOBJS		= $(ASRCS:.S=.o)
+
+MISC_SRCS	= os_start.c get_errno_ptr.c \
+		  sched_setupstreams.c sched_getfiles.c sched_getstreams.c \
+		  sched_setupidlefiles.c sched_setuptaskfiles.c sched_setuppthreadfiles.c \
+		  sched_releasefiles.c
+TSK_SRCS	= task_create.c task_delete.c task_restart.c \
+		  exit.c abort.c atexit.c getpid.c  \
+		  sched_addreadytorun.c sched_removereadytorun.c sched_addprioritized.c \
+		  sched_mergepending.c sched_addblocked.c sched_removeblocked.c \
+		  sched_free.c sched_gettcb.c sched_releasetcb.c
+SCHED_SRCS	= sched_setparam.c sched_getparam.c \
+		  sched_setscheduler.c sched_getscheduler.c \
+		  sched_yield.c sched_rrgetinterval.c \
+		  sched_getprioritymax.c sched_getprioritymin.c \
+		  sched_lock.c sched_unlock.c sched_lockcount.c
+WDOG_SRCS	= wd_initialize.c wd_create.c wd_start.c wd_cancel.c wd_delete.c
+TIME_SRCS	= sched_processtimer.c clock_initialize.c mktime.c gmtime_r.c \
+		  clock_settime.c clock_gettime.c clock_getres.c sleep.c usleep.c
+SIGNAL_SRCS	= sig_initialize.c \
+		  sig_action.c sig_procmask.c sig_pending.c sig_suspend.c \
+		  sig_queue.c sig_waitinfo.c sig_timedwait.c \
+		  sig_emptyset.c sig_fillset.c sig_addset.c sig_delset.c \
+		  sig_ismember.c sig_findaction.c \
+		  sig_allocatependingsigaction.c sig_releasependingsigaction.c \
+                  sig_unmaskpendingsignal.c sig_removependingsignal.c \
+		  sig_releasependingsignal.c sig_lowest.c sig_mqnotempty.c \
+		  sig_cleanup.c sig_received.c sig_deliver.c
+MQUEUE_SRCS	= mq_open.c mq_close.c mq_unlink.c mq_send.c mq_receive.c \
+		  mq_notify.c mq_setattr.c mq_getattr.c \
+		  mq_initialize.c mq_descreate.c mq_findnamed.c \
+		  mq_msgfree.c mq_msgqfree.c
+PTHREAD_SRCS	= pthread_attrinit.c pthread_attrdestroy.c \
+		  pthread_attrsetschedpolicy.c pthread_attrgetschedpolicy.c \
+		  pthread_attrsetinheritsched.c pthread_attrgetinheritsched.c \
+		  pthread_attrsetstacksize.c pthread_attrgetstacksize.c \
+		  pthread_attrsetschedparam.c pthread_attrgetschedparam.c \
+		  pthread_create.c pthread_exit.c pthread_join.c pthread_detach.c \
+		  pthread_yield.c pthread_self.c \
+		  pthread_getschedparam.c pthread_setschedparam.c \
+		  pthread_mutexattrinit.c pthread_mutexattrdestroy.c \
+		  pthread_mutexattrgetpshared.c pthread_mutexattrsetpshared.c \
+		  pthread_mutexinit.c pthread_mutexdestroy.c \
+		  pthread_mutexlock.c pthread_mutextrylock.c pthread_mutexunlock.c \
+		  pthread_condinit.c pthread_conddestroy.c \
+		  pthread_condattrinit.c pthread_condattrdestroy.c \
+		  pthread_condwait.c pthread_condtimedwait.c \
+		  pthread_condsignal.c pthread_condbroadcast.c \
+		  pthread_cancel.c pthread_setcancelstate.c \
+		  pthread_keycreate.c pthread_setspecific.c pthread_getspecific.c pthread_keydelete.c \
+		  pthread_initialize.c pthread_completejoin.c pthread_findjoininfo.c \
+		  pthread_removejoininfo.c
+SEM_SRCS	= sem_initialize.c sem_init.c sem_destroy.c\
+		  sem_open.c sem_close.c sem_unlink.c \
+		  sem_wait.c sem_trywait.c sem_post.c sem_getvalue.c \
+                  sem_waitirq.c sem_findnamed.c
+IRQ_SRCS	= irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
+CSRCS		= $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS) $(WDOG_SRCS) $(TIME_SRCS) \
+		  $(SIGNAL_SRCS) $(MQUEUE_SRCS) $(PTHREAD_SRCS) $(SEM_SRCS) $(IRQ_SRCS)
+COBJS		= $(CSRCS:.c=.o)
+
+SRCS		= $(ASRCS) $(CSRCS)
+OBJS		= $(AOBJS) $(COBJS)
+
+BIN		= libsched.a
+
+all:	$(BIN)
+
+$(AOBJS): %.o: %.S
+	$(CC) -c $(CFLAGS) -D__ASSEMBLY__ $< -o $@
+
+$(COBJS): %.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@
+
+$(BIN): $(OBJS)
+	$(AR) rcs $@ $(OBJS)
+
+.depend: Makefile $(SRCS)
+	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	touch $@
+
+depend: .depend
+
+clean:
+	rm -f $(BIN) *.o *~
+
+distclean: clean
+	rm -f Make.dep .depend
+
+-include Make.dep

@@ -1,0 +1,449 @@
+/************************************************************
+ * up_vectors.S
+ *
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ************************************************************/
+
+/************************************************************
+ * Included Files
+ ************************************************************/
+
+#include <nuttx/config.h>
+#include <nuttx/irq.h>
+#include "c5471.h"
+
+/************************************************************
+ * Definitions
+ ************************************************************/
+
+/************************************************************
+ * Global Data
+ ************************************************************/
+
+	.data
+up_irqtmp:
+	.word	0		/* Saved lr */
+	.word	0		/* Saved spsr */
+up_undeftmp:
+	.word	0		/* Saved lr */
+	.word	0		/* Saved spsr */
+up_aborttmp:
+	.word	0		/* Saved lr */
+	.word	0		/* Saved spsr */
+
+/************************************************************
+ * Macros
+ ************************************************************/
+
+/************************************************************
+ * Private Functions
+ ************************************************************/
+
+	.text
+
+/************************************************************
+ * Public Functions
+ ************************************************************/
+
+	.text
+
+/************************************************************
+ * Name: up_vectorirq
+ *
+ * Description:
+ *   Interrupt excetpion. Entered in IRQ mode with spsr = SVC
+ *   CPSR, lr = SVC PC
+ ************************************************************/
+
+	.global	up_vectorirq
+	.type	up_vectorirq, %function
+up_vectorirq:
+	/* On entry, we are in IRQ mode.  We are free to use
+	 * the IRQ mode r13 and r14.
+         *
+	 */
+
+	ldr	r13, .Lirqtmp
+	sub	lr, lr, #4
+	str	lr, [r13]			@ save lr_IRQ
+	mrs	lr, spsr
+	str	lr, [r13, #4]			@ save spsr_IRQ
+
+	/* Then switch back to SVC mode */
+
+	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
+	orr	lr, lr, #I_BIT | SVC_MODE
+	msr	spsr_c, lr		/* Swith to SVC mode */
+
+	/* Create a context structure */
+
+	sub	sp, sp, #XCPTCONTEXT_SIZE
+	stmia	sp, {r0-r3, r12}	/* Save volatile regs */
+	ldr	r0, .Lirqtmp		/* Points to temp storage */
+	ldr	lr, [r0]		/* Recover lr */
+	ldr	r3, [r0, $4]		/* Recover SPSR */
+	add	r1, sp, #XCPTCONTEXT_UOFFSET
+	stmia	r1, {r3-r11, r13-r14}	/* Save SPSR+r4-r11+lr+sp */
+
+	/* Now decode the interrupt */
+
+#if 0
+	ldr	lr, =SRC_IRQ_BIN_REG	/* Fetch encoded IRQ */
+	ldr	r0, [lr]
+	and	r0, r0, #0x0f		/* Valid range is 0..15 */
+
+	/* Problems here... cannot read SRC_IRQ_BIN_REQ (and/or
+	 * SRC_IRQ_REQ because this will clear edge triggered
+	 * interrupts.  Plus, no way to validate spurious
+	 * interrupt.
+	 */
+#else
+	ldr	r6, =SRC_IRQ_REG
+	ldr     r6, [r6]		/* Get source IRQ reg */
+	mov     r0, #0			/* Assume IRQ0_IRQ set */
+.Lmorebits:
+	tst     r6, #1			/* Is IRQ set? */
+	bne     .Lhaveirq		/* Yes... we have the IRQ */
+	add     r0, r0, #1		/* Setup next IRQ */
+	mov     r6, r6, lsr #1		/* Shift right one */
+	cmp     r0, #16			/* Only 16 valid bits */
+	bcc     .Lmorebits		/* Keep until we have looked
+					 * at all bits */
+	b	.Lnoirqset		/* If we get here, there is
+					 * no pending interrupt */
+.Lhaveirq:
+#endif
+	/* Then call the data abort handler with interrupt disabled.
+	 * rq_dispatch(int irq, struct xcptcontext *xcp)
+	 */
+
+	mov	fp, #0			/* Init frame pointer */
+	mov	r1, sp			/* Get r1=xcp */
+	bl	up_prefetchabort	/* Call the handler */
+
+	/* Recover the SVC_MODE registers */
+.Lnoirqset:
+	add	r0, sp, #XCPTCONTEXT_UOFFSET
+	ldmia	r0, {r3-r11, r13-r14}
+	msr	spsr, r3
+	ldmia	sp, {r0-r3, r12}	/* recover volatile regs */
+	add	sp, sp, #XCPTCONTEXT_SIZE
+	movs	pc, lr			/* return & move spsr into cpsr */
+
+	@
+	@ now branch to the relevent MODE handling routine
+	@
+
+	and	lr, lr, #15
+	ldr	lr, [pc, lr, lsl #2]
+	movs	pc, lr				@ Changes mode and branches
+
+.Lirqtmp:
+	.word	up_irqtmp
+
+	.align	5
+
+/************************************************************
+ * Function: up_vectorswi
+ * 
+ * Description:
+ *   SWI interrupt. We enter the SWI in SVC mode
+ ************************************************************/
+
+	.align	5
+	.global	up_vectorswi
+	.type	up_vectorswi, %function
+up_vectorswi:
+
+	/* The c547x rrload bootloader intemediates all
+	 * interrupts.  For the* case of the SWI, it mucked
+	 * with the stack to create some temporary registers.
+	 * We'll have to recover from this mucking here.
+	 */
+
+	ldr	r14, [sp,#-0x4]		/* rrload workaround */
+
+	/* Create a context structure */
+
+	sub	sp, sp, #XCPTCONTEXT_SIZE
+	stmia	sp, {r0-r3, r12}	/* Save volatile regs */
+	mrs	r3, spsr		/* Get r3=interrupted CPSR */
+	add	r0, sp, #XCPTCONTEXT_UOFFSET
+	stmia	r0, {r3-r11, r13-r14}	/* Save CPSR+r4-r11+lr+sp */
+
+	/* Then call the SWI handler with interrupt disabled.
+	 * void up_syscall(struct xcptcontext *xcp)
+	 */
+
+	mov	fp, #0			/* Init frame pointer */
+	mov	r0, sp			/* Get r0=xcp */
+	bl	up_syscall		/* Call the handler */
+
+.LignoreSWI:
+	/* Recover the SVC_MODE registers */
+
+	add	r0, sp, #XCPTCONTEXT_UOFFSET
+	ldmia	r0, {r3-r11, r13-r14}
+	msr	spsr, r3
+	ldmia	sp, {r0-r3, r12}	/* recover volatile regs */
+	add	sp, sp, #XCPTCONTEXT_SIZE
+	movs	pc, lr			/* return & move spsr into cpsr */
+
+/************************************************************
+ * Name: up_vectordata
+ *
+ * Description:
+ *   Data abort Exception dispatcher. Give control to data
+ *   abort handler.  This function is entered in ABORT mode
+ *   with spsr = SVC CPSR, lr = SVC PC
+ *
+ ************************************************************/
+	
+	.text
+	.global	up_vectordata
+	.type	up_vectordata, %function
+up_vectordata:
+	/* On entry we are free to use the ABORT mode registers
+	 * r13 and r14
+	 */
+
+	ldr	r13, .Ldaborttmp	/* Points to temp storage */
+	sub	lr, lr, #8		/* Fixup return */
+	str	lr, [r13]		/* Save in temp storage */
+	mrs	lr, spsr		/* Get SPSR */
+	str	lr, [r13, #4]		/* Save in temp storage */
+
+	/* Then switch back to SVC mode */
+
+	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
+	orr	lr, lr, #I_BIT | SVC_MODE
+	msr	spsr_c, lr		/* Swith to SVC mode */
+
+	/* Create a context structure */
+
+	sub	sp, sp, #XCPTCONTEXT_SIZE
+	stmia	sp, {r0-r3, r12}	/* Save volatile regs */
+	ldr	r0, .Ldaborttmp		/* Points to temp storage */
+	ldr	lr, [r0]		/* Recover lr */
+	ldr	r3, [r0, $4]		/* Recover SPSR */
+	add	r1, sp, #XCPTCONTEXT_UOFFSET
+	stmia	r1, {r3-r11, r13-r14}	/* Save SPSR+r4-r11+lr+sp */
+
+	/* Then call the data abort handler with interrupt disabled.
+	 * void up_dataabort(struct xcptcontext *xcp)
+	 */
+
+	mov	fp, #0			/* Init frame pointer */
+	mov	r0, sp			/* Get r0=xcp */
+	bl	up_dataabort		/* Call the handler */
+
+	/* Recover the SVC_MODE registers */
+
+	add	r0, sp, #XCPTCONTEXT_UOFFSET
+	ldmia	r0, {r3-r11, r13-r14}
+	msr	spsr, r3
+	ldmia	sp, {r0-r3, r12}	/* recover volatile regs */
+	add	sp, sp, #XCPTCONTEXT_SIZE
+	movs	pc, lr			/* return & move spsr into cpsr */
+
+	@
+	@ now branch to the relevent MODE handling routine
+	@
+
+	and	lr, lr, #15
+	ldr	lr, [pc, lr, lsl #2]
+	movs	pc, lr				@ Changes mode and branches
+
+.Ldaborttmp:
+	.word	up_aborttmp
+
+	.align	5
+
+/************************************************************
+ * Name: up_vectorprefetch
+ *
+ * Description:
+ *    Prefetch abort exception.  Entered in ABT mode with
+ *    spsr = SVC CPSR, lr = SVC PC
+ ************************************************************/
+	
+	.global	up_vectorprefetch
+	.type	up_vectorprefetch, %function
+up_vectorprefetch:
+	/* On entry we are free to use the ABORT mode registers
+	 * r13 and r14
+	 */
+
+	ldr	r13, .Lpaborttmp	/* Points to temp storage */
+	sub	lr, lr, #4		/* Fixup return */
+	str	lr, [r13]		/* Save in temp storage */
+	mrs	lr, spsr		/* Get SPSR */
+	str	lr, [r13, #4]		/* Save in temp storage */
+
+	/* Then switch back to SVC mode */
+
+	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
+	orr	lr, lr, #I_BIT | SVC_MODE
+	msr	spsr_c, lr		/* Swith to SVC mode */
+
+	/* Create a context structure */
+
+	sub	sp, sp, #XCPTCONTEXT_SIZE
+	stmia	sp, {r0-r3, r12}	/* Save volatile regs */
+	ldr	r0, .Lpaborttmp		/* Points to temp storage */
+	ldr	lr, [r0]		/* Recover lr */
+	ldr	r3, [r0, $4]		/* Recover SPSR */
+	add	r1, sp, #XCPTCONTEXT_UOFFSET
+	stmia	r1, {r3-r11, r13-r14}	/* Save SPSR+r4-r11+lr+sp */
+
+	/* Then call the data abort handler with interrupt disabled.
+	 * void up_prefetchabort(struct xcptcontext *xcp)
+	 */
+
+	mov	fp, #0			/* Init frame pointer */
+	mov	r0, sp			/* Get r0=xcp */
+	bl	up_prefetchabort	/* Call the handler */
+
+	/* Recover the SVC_MODE registers */
+
+	add	r0, sp, #XCPTCONTEXT_UOFFSET
+	ldmia	r0, {r3-r11, r13-r14}
+	msr	spsr, r3
+	ldmia	sp, {r0-r3, r12}	/* recover volatile regs */
+	add	sp, sp, #XCPTCONTEXT_SIZE
+	movs	pc, lr			/* return & move spsr into cpsr */
+
+	@
+	@ now branch to the relevent MODE handling routine
+	@
+
+	and	lr, lr, #15
+	ldr	lr, [pc, lr, lsl #2]
+	movs	pc, lr				@ Changes mode and branches
+
+.Lpaborttmp:
+	.word	up_aborttmp
+
+	.align	5
+
+/************************************************************
+ * Name: up_vectorundefinsn
+ *
+ * Description:
+ *   Undefined instruction entry exception.  Entered in
+ *   UND mode, spsr = SVC  CPSR, lr = SVC PC
+ *
+ ************************************************************/
+	
+	.global	up_vectorundefinsn
+	.type	up_vectorundefinsn, %function
+up_vectorundefinsn:
+	/* On entry we are free to use the UND mode registers
+	 * r13 and r14
+	 */
+
+	ldr	r13, .Lundeftmp		/* Points to temp storage */
+	str	lr, [r13]		/* Save in temp storage */
+	mrs	lr, spsr		/* Get SPSR */
+	str	lr, [r13, #4]		/* Save in temp storage */
+
+	/* Then switch back to SVC mode */
+
+	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
+	orr	lr, lr, #I_BIT | SVC_MODE
+	msr	spsr_c, lr		/* Swith to SVC mode */
+
+	/* Create a context structure */
+
+	sub	sp, sp, #XCPTCONTEXT_SIZE
+	stmia	sp, {r0-r3, r12}	/* Save volatile regs */
+	ldr	r0, .Lundeftmp		/* Points to temp storage */
+	ldr	lr, [r0]		/* Recover lr */
+	ldr	r3, [r0, $4]		/* Recover SPSR */
+	add	r1, sp, #XCPTCONTEXT_UOFFSET
+	stmia	r1, {r3-r11, r13-r14}	/* Save SPSR+r4-r11+lr+sp */
+
+	/* Then call the data abort handler with interrupt disabled.
+	 * void up_undefinedinsn(struct xcptcontext *xcp)
+	 */
+
+	mov	fp, #0			/* Init frame pointer */
+	mov	r0, sp			/* Get r0=xcp */
+	bl	up_undefinedinsn	/* Call the handler */
+
+	/* Recover the SVC_MODE registers */
+
+	add	r0, sp, #XCPTCONTEXT_UOFFSET
+	ldmia	r0, {r3-r11, r13-r14}
+	msr	spsr, r3
+	ldmia	sp, {r0-r3, r12}	/* recover volatile regs */
+	add	sp, sp, #XCPTCONTEXT_SIZE
+	movs	pc, lr			/* return & move spsr into cpsr */
+
+	@
+	@ now branch to the relevent MODE handling routine
+	@
+
+	and	lr, lr, #15
+	ldr	lr, [pc, lr, lsl #2]
+	movs	pc, lr				@ Changes mode and branches
+
+.Lundeftmp:
+	.word	up_undeftmp
+
+	.align	5
+
+/************************************************************
+ * Name: up_vectorfiq
+ *
+ * Description:
+ *   Shouldn't happen
+ ************************************************************/
+
+	.global	up_vectorfiq
+	.type	up_vectorfiq, %function
+up_vectorfiq:
+	subs	pc, lr, #4
+
+/************************************************************
+ *  Name: up_vectoraddrexcption
+ *
+ * Description:
+ *   Shouldn't happen
+ *
+ ************************************************************/
+
+	.global	up_vectoraddrexcptn
+	.type	up_vectoraddrexcptn, %function
+up_vectoraddrexcptn:
+	b	up_vectoraddrexcptn
+	.end

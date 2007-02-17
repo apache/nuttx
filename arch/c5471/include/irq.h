@@ -1,0 +1,252 @@
+/************************************************************
+ * irq.h
+ *
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ************************************************************/
+
+/* This file should never be included directed but, rather,
+ * only indirectly through nuttx/irq.h
+ */
+
+#ifndef __ARCH_C5471_IRQ_H
+#define __ARCH_C5471_IRQ_H
+
+/************************************************************
+ * Included Files
+ ************************************************************/
+
+/************************************************************
+ * Definitions
+ ************************************************************/
+
+/* IRQ Stack Frame Format:
+ *
+ * Context is always saved/restored in the same way:
+ *
+ *   (1) stmia rx, {r0-r3, r12}
+ *   (2) stmia rx, (cpsr, r4-r11, r13-r14}
+ *
+ * This results in the following set of indices that
+ * can be used to access individual registers in the
+ * xcp.regs array:
+ */
+
+#define JB_R0                (0)
+#define JB_R1                (1)
+#define JB_R2                (2)
+#define JB_R3                (3)
+#define JB_R12               (4)
+
+#define XCPTCONTEXT_IRQ_REGS (5)
+#define XCPTCONTEXT_UOFFSET  (4 * XCPTCONTEXT_IRQ_REGS)
+
+#define JB_CPSR              (0 + XCPTCONTEXT_IRQ_REGS)
+#define JB_R4                (1 + XCPTCONTEXT_IRQ_REGS)
+#define JB_R5                (2 + XCPTCONTEXT_IRQ_REGS
+#define JB_R6                (3 + XCPTCONTEXT_IRQ_REGS)
+#define JB_R7                (4 + XCPTCONTEXT_IRQ_REGS)
+#define JB_R8                (5 + XCPTCONTEXT_IRQ_REGS)
+#define JB_R9                (6 + XCPTCONTEXT_IRQ_REGS)
+#define JB_R10               (7 + XCPTCONTEXT_IRQ_REGS)
+#define JB_R11               (8 + XCPTCONTEXT_IRQ_REGS)
+#define JB_R13               (9 + XCPTCONTEXT_IRQ_REGS)
+#define JB_R14               (10 + XCPTCONTEXT_IRQ_REGS)
+#define JB_R15               /* Not saved */
+
+#define XCPTCONTEXT_USER_REG (11)
+#define XCPTCONTEST_REGS     (XCPTCONTEXT_USER_REG+XCPTCONTEXT_IRQ_REGS)
+#define XCPTCONTEXT_SIZE     (4 * XCPTCONTEST_REGS)
+
+#define JB_A1                JB_R0
+#define JB_A2                JB_R1
+#define JB_A3                JB_R2
+#define JB_A4                JB_R3
+#define JB_V1                JB_R4
+#define JB_V2                JB_R5
+#define JB_V3                JB_R6
+#define JB_V4                JB_R7
+#define JB_V5                JB_R8
+#define JB_V6                JB_R9
+#define JB_V7                JB_R10
+#define JB_SB                JB_R9
+#define JB_SL                JB_R10
+#define JB_FP                JB_R11
+#define JB_IP                JB_R12
+#define JB_SP                JB_R13
+#define JB_LR                JB_R14
+#define JB_PC                JB_R15
+
+/* C5471 Interrupts */
+
+#define C5471_IRQ_TIMER0         0
+#define C5471_IRQ_TIMER1         1
+#define C5471_IRQ_TIMER2         2
+#define C5471_IRQ_GPIO0          3
+#define C5471_IRQ_ETHER          4
+#define C5471_IRQ_KBGPIO_0_7     5
+#define C5471_IRQ_UART           6
+#define C5471_IRQ_UART_IRDA      7
+#define C5471_IRQ_KBGPIO_8_15    8
+#define C5471_IRQ_GPIO3          9
+#define C5471_IRQ_GPIO2         10
+#define C5471_IRQ_I2C           11
+#define C5471_IRQ_GPIO1         12
+#define C5471_IRQ_SPI           13
+#define C5471_IRQ_GPIO_4_19     14
+#define C5471_IRQ_API           15
+
+#define C5471_IRQ_WATCHDOG      C5471_IRQ_TIMER0
+#define C5471_IRQ_SYSTIMER      C5471_IRQ_TIMER1
+#define NR_IRQS                 (C5471_IRQ_API+1)
+
+/************************************************************
+ * Public Types
+ ************************************************************/
+
+/* This struct defines the way the registers are stored.  We
+ * need to save:
+ *
+ *  1	CPSR
+ *  7	Static registers, v1-v7 (aka r4-r10)
+ *  1	Frame pointer, fp (aka r11)
+ *  1	Stack pointer, sp (aka r13)
+ *  1	Return address, lr (aka r14)
+ * ---
+ * 11	(XCPTCONTEXT_USER_REG)
+ *
+ * On interrupts, we also need to save:
+ *  4	Volatile registers, a1-a4 (aka r0-r3)
+ *  1	Scratch Register, ip (aka r12)
+ *---
+ *  5	(XCPTCONTEXT_IRQ_REGS)
+ *
+ * For a total of 17 (XCPTCONTEST_REGS)
+ */
+
+#ifndef __ASSEMBLY__
+struct xcptcontext
+{
+  /* The following function pointer is non-zero if there
+   * are pending signals to be processed.
+   */
+
+  void *sigdeliver; /* Actual type is sig_deliver_t */
+
+  /* These are saved copies of LR and CPSR used during
+   * signal processing.
+   */
+
+  uint32 saved_lr;
+  uint32 saved_cpsr;
+
+  /* Register save area */
+
+  uint32 regs[XCPTCONTEST_REGS];
+};
+#endif
+
+/************************************************************
+ * Inline functions
+ ************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/* Save the current interrupt enable state & disable IRQs */
+
+static inline uint32 irqsave(void)
+{
+  unsigned long flags;
+  unsigned long temp;
+  __asm__ __volatile__
+    (
+     "\tmrs    %0, cpsr\n"
+     "\torr    %1, %0, #128\n"
+     "\tmsr    cpsr_c, %1"
+     : "=r" (flags), "=r" (temp)
+     :
+     : "memory");
+  return flags;
+}
+
+/* Restore saved IRQ & FIQ state */
+
+static inline void irqrestore(uint32 flags)
+{
+  __asm__ __volatile__
+    (
+     "msr    cpsr_c, %0"
+     :
+     : "r" (flags)
+     : "memory");
+}
+
+static inline void system_call(swint_t func, uint32 parm1,
+			       uint32 parm2, uint32 parm3)
+{
+  __asm__ __volatile__
+    (
+     "mov\tr0,%0\n\t"
+     "mov\tr1,%1\n\t"
+     "mov\tr2,%2\n\t"
+     "mov\tr2,%3\n\t"
+     "swi\t0x900001\n\t"
+     :
+     : "r" ((long)(func)),  "r" ((long)(parm1)),
+       "r" ((long)(parm2)), "r" ((long)(parm3))
+     : "r0", "r1", "r2", "r3", "lr");
+}
+#endif
+
+/************************************************************
+ * Public Variables
+ ************************************************************/
+
+/************************************************************
+ * Public Function Prototypes
+ ************************************************************/
+
+#ifndef __ASSEMBLY__
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+#endif
+
+#endif /* __ARCH_C5471_IRQ_H */
+

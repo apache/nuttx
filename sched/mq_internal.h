@@ -1,0 +1,200 @@
+/************************************************************
+ * mq_internal.h
+ *
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ************************************************************/
+
+#ifndef __MQ_INTERNAL_H
+#define __MQ_INTERNAL_H
+
+/************************************************************
+ * Included Files
+ ************************************************************/
+
+#include <sys/types.h>
+#include <mqueue.h>
+#include <sched.h>
+#include <nuttx/compiler.h>
+
+/************************************************************
+ * Compilations Switches
+ ************************************************************/
+
+/************************************************************
+ * Definitions
+ ************************************************************/
+
+#define MQ_MAX_BYTES   CONFIG_MQ_MAXMSGSIZE
+#define MQ_MAX_HWORDS  ((MQ_MAX_BYTES + sizeof(uint16) - 1) / sizeof(uint16))
+#define MQ_MAX_MSGS    16
+#define MQ_PRIO_MAX    255
+
+/* This defines the number of messages descriptors to allocate
+ * at each "gulp."
+ */
+
+#define NUM_MSG_DESCRIPTORS 24
+
+/* This defines the number of messages to set aside for
+ * exclusive use by interrupt handlers
+ */
+
+#define NUM_INTERRUPT_MSGS   8
+
+/************************************************************
+ * Global Type Declarations
+ ************************************************************/
+
+enum mqalloc_e
+{
+  MQ_ALLOC_FIXED = 0,  /* pre-allocated; never freed */
+  MQ_ALLOC_DYN,        /* dynamically allocated; free when unused */
+  MQ_ALLOC_IRQ         /* Preallocated, reserved for interrupt handling */
+};
+typedef enum mqalloc_e mqalloc_t;
+
+/* This structure describes one buffered POSIX message. */
+/* NOTE:  This structure is allocated from the same pool as MQ_type.
+ * Therefore, (1) it must have a fixed "mail" size, and (2) must
+ * exactly match MQ_type in size.
+ */
+
+struct mqmsg
+{
+  /* The position of the following two field must exactly match
+   * MQ_type.
+   */
+
+  struct mqmsg  *next;        /* Forward link to next message */
+  ubyte          type;        /* (Used to manage allocations) */
+
+  ubyte          priority;    /* priority of message          */
+  ubyte          msglen;      /* Message data length          */
+  ubyte          pad;         /* Not used                     */
+  uint16         mail[MQ_MAX_HWORDS]; /* Message data         */
+};
+typedef struct mqmsg mqmsg_t;
+
+/* This structure defines a message queue */
+
+struct msgq_s
+{
+  struct msgq_s *flink;         /* Forward link to next message queue */
+  sq_queue_t     msglist;       /* Prioritized message list */
+  sint16         maxmsgs;       /* Maximum number of messages in the queue */
+  sint16         nmsgs;         /* Number of message in the queue */
+  sint16         nconnect;      /* Number of connections to message queue */
+  sint16         nwaitnotfull;  /* Number tasks waiting for not full */
+  sint16         nwaitnotempty; /* Number tasks waiting for not empty */
+  ubyte          maxmsgsize;    /* Max size of message in message queue */
+  boolean        unlinked;      /* TRUE if the msg queue has been unlinked */
+  struct mq_des *ntmqdes;       /* Notification: Owning mqdes (NULL if none) */
+  pid_t          ntpid;         /* Notification: Receiving Task's PID */
+  int            ntsigno;       /* Notification: Signal number */
+  union sigval   ntvalue;       /* Notification: Signal value */
+  char           name[1];       /* Start of the queue name */
+};
+typedef struct msgq_s msgq_t;
+
+#define SIZEOF_MQ_HEADER ((int)(((msgq_t*)NULL)->name))
+
+/* This describes the message queue descriptor that is held in the
+ * task's TCB
+ */
+
+struct mq_des
+{
+  struct mq_des *flink;       /* Forward link to next message descriptor */
+  msgq_t        *msgq;        /* Pointer to associated message queue */
+  int            oflags;      /* Flags set when message queue was opened */
+};
+
+/* This is the handle used to reference a message queue */
+
+typedef struct mq_des *mqd_t;
+
+/************************************************************
+ * Global Variables
+ ************************************************************/
+
+/* This is a list of all opened message queues */
+
+extern sq_queue_t  g_msgqueues;
+
+/* The g_msgfree is a list of messages that are available
+ * for general use.  The number of messages in this list is a
+ * system configuration item.
+ */
+
+extern sq_queue_t  g_msgfree;
+
+/* The g_msgfreeInt is a list of messages that are reserved
+ * for use by interrupt handlers.
+ */
+
+extern sq_queue_t  g_msgfreeirq;
+
+/* The g_desfree data structure is a list of message
+ * descriptors available to the operating system for general use.
+ * The number of messages in the pool is a constant.
+ */
+
+extern sq_queue_t  g_desfree;
+
+/************************************************************
+ * Global Function Prototypes
+ ************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/* Functions defined in mq_initialized.c *******************/
+
+EXTERN void weak_function mq_initialize(void);
+EXTERN void    mq_desblockalloc(void);
+
+EXTERN mqd_t   mq_descreate(_TCB* mtcb, msgq_t* msgq, int oflags);
+EXTERN msgq_t *mq_findnamed(const char *mq_name);
+EXTERN void    mq_msgfree(mqmsg_t *mqmsg);
+EXTERN void    mq_msgqfree(msgq_t *msgq);
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __MQ_INTERNAL_H */
+
