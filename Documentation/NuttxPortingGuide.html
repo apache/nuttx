@@ -1,0 +1,121 @@
+<html>
+
+<head>
+<title>Nuttx Porting Manual</title>
+<meta name="author" content="Gregory Nutt">
+</head>
+
+<body>
+<center>
+  <big><b>
+    <p>Nuttx Operating System</p>
+    <p>Porting Guide</p>
+  </b></big>
+  <p><small>by</small></p>
+  <p>Gregory Nutt</p>
+  <p><small>Last Update: February 8, 2007</small></p>
+</center>
+
+<center><h1>Table of Contents</h1></center>
+<li>1.0 <a href="#Introduction">1.0 Introduction</a></li>
+<li>2.0 <a href="#DirectoryStructure">Directory Structure</a></li>
+<ul>
+  <li>2.1 <a href="#DirStructDocumentation">Documentation</a></li>
+  <l1>2.2 <a href="#DirStructArch">arch</a></li>
+  <li>2.3 <a href="#DirStructDrivers">drivers</a></li>
+  <li>2.4 <a href="#DirStructExamples">examples</a></li>
+  <li>2.5 <a href="#DirStructFs">fs</a></li>
+  <li>2.6 <a href="#DirStructInclude">include</a></li>
+  <li>2.7 <a href="#DirStructLib">lib</a></li>
+  <li>2.8 <a href="#DirStructMm">mm</a></li>
+  <li>2.9 <a href="#DirStructSched">sched</a></li>
+  <li>2.10 <a href="#DirStructDrivers">tools</a></li>
+</ul>
+<li>3.0 <a href="#DirectoryConfiAndBuild">Configuring and Building</a></li>
+
+<hr>
+<h1>1.0 <a name="Introduction">Introduction</a></h1>
+
+<p><b>Overview</b>
+  This document provides and overview of the Nuttx build and configuration
+  logic and provides hints for the incorporation of new processor/board archectures
+  into the build.
+</p>
+<p>
+  See also arch/README.txt.
+</p>
+
+<p><b>General Philosophy</b>.
+
+<hr>
+<h1>2.0 <a name="DirectoryStructure">Directory Structure</a></h1>
+
+<p>The general directly layout for Nuttx is very similar to the directory structure
+of the Linux kernel -- at least at the most superficial layers.
+At the top level is the main makefile and a series of sub-directories identified
+below and discussed in the following paragraphs:</p>
+ 
+<ul><pre>
+.
+|-- Makefile
+|-- <a href="#DirStructDocumentation">Documentation</a>
+|   `-- <i>(documentation files)</i>
+|-- <a href="#DirStructArch">arch</a>
+|   |-- <i>(architecture)</i>
+|   |   |-- Make.defs
+|   |   |-- defconfig
+|   |   |-- include
+|   |   |-- setenv.sh
+|   |   `-- src
+|   `-- <i>(other architectures)</i>
+|-- <a href="#DirStructDrivers">drivers</a>
+|   |-- Makefile
+|   `-- <i>(driver source files)</i>
+|-- <a href="#DirStructExamples">examples</a>
+|   `-- <i>(example)</i>
+|       |-- Makefile
+|       `-- <i>(example source files)</i>
+|-- <a href="#DirStructFs">fs</a>
+|   |-- Makefile
+|   `-- <i>(fs source files)</i>
+|-- <a href="#DirStructInclude">include</a>
+|   |-- <i>(standard header files)</i>
+|   |-- nuttx
+|   |   `-- <i>(nuttx specific header files)</i>
+|   `- sys
+|   |   `-- <i>(more standard header files)</i>
+|-- <a href="#DirStructLib">lib</a>
+|   |-- Makefile
+|   `-- <i>(lib source files)</i>
+|-- <a href="#DirStructMm">mm</a>
+|   |-- Makefile
+|   `-- <i>(mm source files)</i>
+|-- <a href="#DirStructSched">sched</a>
+|   |-- Makefile
+|   `-- <i>(sched source files)</i>
+`-- <a href="#DirStructDrivers">tools</a>
+    |-- Makefile.mkconfig
+    |-- configure.sh
+    |-- mkconfig.c
+    |-- mkdeps.sh
+    `-- zipme
+</pre></ul>
+
+<h2>2.1 <a name="DirStructDocumentation">Documentation</a></h2>
+<h2>2.2 <a name="DirStructArch">arch</a></h2>
+<h2>2.3 <a name="DirStructDrivers">drivers</a></h2>
+<h2>2.4 <a name="DirStructExamples">examples</a></h2>
+<h2>2.5 <a name="DirStructFs">fs</a></h2>
+<h2>2.6 <a name="DirStructInclude">include</a></h2>
+<h2>2.7 <a name="DirStructLib">lib</a></h2>
+<h2>2.8 <a name="DirStructMm">mm</a></h2>
+<h2>2.9 <a name="DirStructSched">sched</a></h2>
+<h2>2.10 <a name="DirStructDrivers">tools</a></h2>
+
+<hr>
+<h1>3.0 <a name="DirectoryConfiAndBuild">Configuring and Building</a></h1>
+
+</body>
+</html>
+
+
