@@ -38,7 +38,8 @@
 MKDEP 	= $(TOPDIR)/tools/mkdeps.sh
 CFLAGS	+= -I$(TOPDIR)/sched
 
-ASRCS	= up_vectors.S up_saveusercontext.S up_fullcontextrestore.S
+ASRCS	= up_vectors.S up_saveusercontext.S up_fullcontextrestore.S \
+	  up_lowputc.S
 AOBJS	= $(ASRCS:.S=.o)
 
 CSRCS	= up_initialize.c up_initialstate.c up_idle.c \

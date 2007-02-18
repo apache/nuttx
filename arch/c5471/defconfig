@@ -98,11 +98,19 @@ CONFIG_ARCH_KMALLOC=n
 CONFIG_ARCH_KZMALLOC=n
 CONFIG_ARCH_KFREE=n
 
+#
 # General Compile environment setup
 #
 # CONFIG_HAVE_LONG_LONG - enable if your architecture supports
 #   long long types and if you plan to use them
 CONFIG_HAVE_LONG_LONG=n
+
+#
+# General build options
+#
+# CONFIG_RRLOAD_BINY - make the rrload binary format used with
+#   BSPs from www.ridgerun.com
+CONFIG_RRLOAD_BINARY=y
 
 #
 # Sizes of configurable things (0 disables)

@@ -105,15 +105,21 @@ examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE).a: context
 $(BIN):	context depend $(OBJS) $(LIBS)
 ifeq ($(CONFIG_ARCH),sim)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS) $(LDLIBS)
-	$(NM) $(BIN) | grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | sort > System.map
+	@$(NM) $(BIN) | grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | sort > System.map
 else
 	$(LD) --entry=__start $(LDFLAGS) -o $@ $(OBJS) $(LIBS) $(LDLIBS)
-	$(NM) $(BIN) | grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | sort > System.map
+	@$(NM) $(BIN) | grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | sort > System.map
 	@export vflashstart=`$(OBJDUMP) --all-headers $(BIN) | grep _vflashstart | cut -d' ' -f1`;  \
 	if [ ! -z "$$vflashstart" ]; then \
 		$(OBJCOPY) --adjust-section-vma=.vector=0x$$vflashstart $(BIN) $(BIN).flashimage; \
 		mv $(BIN).flashimage $(BIN); \
 	fi
+ifeq ($(CONFIG_RRLOAD_BINARY),y)
+	@tools/mkimage.sh nuttx nuttx.rr
+	@if [ -w /tftpboot ] ; then \
+		cp -f nuttx.rr /tftpboot/nuttx.rr.${CONFIG_ARCH}; \
+	fi
+endif
 endif
 
 depend:
@@ -127,7 +133,7 @@ clean:
 	done
 	$(MAKE) -C tools -f Makefile.mkconfig TOPDIR=$(TOPDIR) clean
 	$(MAKE) -C mm -f Makefile.test TOPDIR=$(TOPDIR) clean
-	rm -f $(BIN) context mm_test System.map *~ *.flashimage
+	rm -f $(BIN) $(BIN).rr $(BIN).stripped $(BIN).flashimage mm_test System.map *~
 
 distclean: clean clean_context
 	@for dir in $(SUBDIRS) ; do \
