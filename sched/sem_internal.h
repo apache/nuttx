@@ -87,7 +87,7 @@ extern "C" {
 #endif
 
 EXTERN void weak_function sem_initialize(void);
-EXTERN void               sem_waitirq(_TCB *wtcb);
+EXTERN void weak_function sem_waitirq(_TCB *wtcb);
 EXTERN nsem_t            *sem_findnamed(const char *name);
 
 #undef EXTERN

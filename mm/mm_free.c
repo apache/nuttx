@@ -115,7 +115,7 @@ void free(void *mem)
 
       node->size          += next->size;
       andbeyond->preceding =  node->size | (andbeyond->preceding & MM_ALLOC_BIT);
-      next                 = andbeyond;
+      next                 = (struct mm_freenode_s *)andbeyond;
     }
 
   /* Check if the preceding node is also free and, if so, merge

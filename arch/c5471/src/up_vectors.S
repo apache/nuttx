@@ -107,12 +107,11 @@ up_vectorirq:
 	/* Create a context structure */
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r3, r12}	/* Save volatile regs */
+	stmia	sp, {r0-r14}		/* Save the SVC mode regs */
 	ldr	r0, .Lirqtmp		/* Points to temp storage */
-	ldr	lr, [r0]		/* Recover lr */
-	ldr	r3, [r0, $4]		/* Recover SPSR */
-	add	r1, sp, #XCPTCONTEXT_UOFFSET
-	stmia	r1, {r3-r11, r13-r14}	/* Save SPSR+r4-r11+lr+sp */
+	ldmia	r0, {r1, r2}		/* Recover r1=lr_IRQ, r2=spsr_IRQ */
+	add	r0, sp, #(4*REG_PC)	/* Offset to pc, cpsr storage */
+	stmia	r0, {r1, r2}
 
 	/* Now decode the interrupt */
 
@@ -150,22 +149,11 @@ up_vectorirq:
 	mov	r1, sp			/* Get r1=xcp */
 	bl	up_prefetchabort	/* Call the handler */
 
-	/* Recover the SVC_MODE registers */
+	/* Restore the CPSR, SVC modr registers and return */
 .Lnoirqset:
-	add	r0, sp, #XCPTCONTEXT_UOFFSET
-	ldmia	r0, {r3-r11, r13-r14}
-	msr	spsr, r3
-	ldmia	sp, {r0-r3, r12}	/* recover volatile regs */
-	add	sp, sp, #XCPTCONTEXT_SIZE
-	movs	pc, lr			/* return & move spsr into cpsr */
-
-	@
-	@ now branch to the relevent MODE handling routine
-	@
-
-	and	lr, lr, #15
-	ldr	lr, [pc, lr, lsl #2]
-	movs	pc, lr				@ Changes mode and branches
+	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
+	msr	spsr, r0
+	ldmia	sp, {r0-r15}^		/* Return */
 
 .Lirqtmp:
 	.word	up_irqtmp
@@ -179,7 +167,6 @@ up_vectorirq:
  *   SWI interrupt. We enter the SWI in SVC mode
  ************************************************************/
 
-	.align	5
 	.global	up_vectorswi
 	.type	up_vectorswi, %function
 up_vectorswi:
@@ -195,10 +182,11 @@ up_vectorswi:
 	/* Create a context structure */
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r3, r12}	/* Save volatile regs */
-	mrs	r3, spsr		/* Get r3=interrupted CPSR */
-	add	r0, sp, #XCPTCONTEXT_UOFFSET
-	stmia	r0, {r3-r11, r13-r14}	/* Save CPSR+r4-r11+lr+sp */
+	stmia	sp, {r0-r14}		/* Save the SVC mode regs */
+	mrs	r2, spsr		/* Get the saved CPSR */
+	mov	r1, r14			/* Save r14 as the PC */
+	add	r0, sp, #(4*REG_PC)	/* Offset to pc, cpsr storage */
+	stmia	r0, {r1, r2}
 
 	/* Then call the SWI handler with interrupt disabled.
 	 * void up_syscall(struct xcptcontext *xcp)
@@ -208,15 +196,13 @@ up_vectorswi:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	up_syscall		/* Call the handler */
 
-.LignoreSWI:
-	/* Recover the SVC_MODE registers */
+	/* Restore the CPSR, SVC modr registers and return */
 
-	add	r0, sp, #XCPTCONTEXT_UOFFSET
-	ldmia	r0, {r3-r11, r13-r14}
-	msr	spsr, r3
-	ldmia	sp, {r0-r3, r12}	/* recover volatile regs */
-	add	sp, sp, #XCPTCONTEXT_SIZE
-	movs	pc, lr			/* return & move spsr into cpsr */
+	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
+	msr	spsr, r0
+	ldmia	sp, {r0-r15}^		/* Return */
+
+	.align	5
 
 /************************************************************
  * Name: up_vectordata
@@ -228,7 +214,6 @@ up_vectorswi:
  *
  ************************************************************/
 	
-	.text
 	.global	up_vectordata
 	.type	up_vectordata, %function
 up_vectordata:
@@ -251,12 +236,11 @@ up_vectordata:
 	/* Create a context structure */
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r3, r12}	/* Save volatile regs */
+	stmia	sp, {r0-r14}		/* Save the SVC mode regs */
 	ldr	r0, .Ldaborttmp		/* Points to temp storage */
-	ldr	lr, [r0]		/* Recover lr */
-	ldr	r3, [r0, $4]		/* Recover SPSR */
-	add	r1, sp, #XCPTCONTEXT_UOFFSET
-	stmia	r1, {r3-r11, r13-r14}	/* Save SPSR+r4-r11+lr+sp */
+	ldmia	r0, {r1, r2}		/* Recover r1=lr_IRQ, r2=spsr_IRQ */
+	add	r0, sp, #(4*REG_PC)	/* Offset to pc, cpsr storage */
+	stmia	r0, {r1, r2}
 
 	/* Then call the data abort handler with interrupt disabled.
 	 * void up_dataabort(struct xcptcontext *xcp)
@@ -266,22 +250,11 @@ up_vectordata:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	up_dataabort		/* Call the handler */
 
-	/* Recover the SVC_MODE registers */
+	/* Restore the CPSR, SVC modr registers and return */
 
-	add	r0, sp, #XCPTCONTEXT_UOFFSET
-	ldmia	r0, {r3-r11, r13-r14}
-	msr	spsr, r3
-	ldmia	sp, {r0-r3, r12}	/* recover volatile regs */
-	add	sp, sp, #XCPTCONTEXT_SIZE
-	movs	pc, lr			/* return & move spsr into cpsr */
-
-	@
-	@ now branch to the relevent MODE handling routine
-	@
-
-	and	lr, lr, #15
-	ldr	lr, [pc, lr, lsl #2]
-	movs	pc, lr				@ Changes mode and branches
+	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
+	msr	spsr, r0
+	ldmia	sp, {r0-r15}^		/* Return */
 
 .Ldaborttmp:
 	.word	up_aborttmp
@@ -318,12 +291,11 @@ up_vectorprefetch:
 	/* Create a context structure */
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r3, r12}	/* Save volatile regs */
+	stmia	sp, {r0-r14}		/* Save the SVC mode regs */
 	ldr	r0, .Lpaborttmp		/* Points to temp storage */
-	ldr	lr, [r0]		/* Recover lr */
-	ldr	r3, [r0, $4]		/* Recover SPSR */
-	add	r1, sp, #XCPTCONTEXT_UOFFSET
-	stmia	r1, {r3-r11, r13-r14}	/* Save SPSR+r4-r11+lr+sp */
+	ldmia	r0, {r1, r2}		/* Recover r1=lr_IRQ, r2=spsr_IRQ */
+	add	r0, sp, #(4*REG_PC)	/* Offset to pc, cpsr storage */
+	stmia	r0, {r1, r2}
 
 	/* Then call the data abort handler with interrupt disabled.
 	 * void up_prefetchabort(struct xcptcontext *xcp)
@@ -333,22 +305,11 @@ up_vectorprefetch:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	up_prefetchabort	/* Call the handler */
 
-	/* Recover the SVC_MODE registers */
+	/* Restore the CPSR, SVC modr registers and return */
 
-	add	r0, sp, #XCPTCONTEXT_UOFFSET
-	ldmia	r0, {r3-r11, r13-r14}
-	msr	spsr, r3
-	ldmia	sp, {r0-r3, r12}	/* recover volatile regs */
-	add	sp, sp, #XCPTCONTEXT_SIZE
-	movs	pc, lr			/* return & move spsr into cpsr */
-
-	@
-	@ now branch to the relevent MODE handling routine
-	@
-
-	and	lr, lr, #15
-	ldr	lr, [pc, lr, lsl #2]
-	movs	pc, lr				@ Changes mode and branches
+	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
+	msr	spsr, r0
+	ldmia	sp, {r0-r15}^		/* Return */
 
 .Lpaborttmp:
 	.word	up_aborttmp
@@ -385,12 +346,11 @@ up_vectorundefinsn:
 	/* Create a context structure */
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r3, r12}	/* Save volatile regs */
+	stmia	sp, {r0-r14}		/* Save the SVC mode regs */
 	ldr	r0, .Lundeftmp		/* Points to temp storage */
-	ldr	lr, [r0]		/* Recover lr */
-	ldr	r3, [r0, $4]		/* Recover SPSR */
-	add	r1, sp, #XCPTCONTEXT_UOFFSET
-	stmia	r1, {r3-r11, r13-r14}	/* Save SPSR+r4-r11+lr+sp */
+	ldmia	r0, {r1, r2}		/* Recover r1=lr_IRQ, r2=spsr_IRQ */
+	add	r0, sp, #(4*REG_PC)	/* Offset to pc, cpsr storage */
+	stmia	r0, {r1, r2}
 
 	/* Then call the data abort handler with interrupt disabled.
 	 * void up_undefinedinsn(struct xcptcontext *xcp)
@@ -400,22 +360,11 @@ up_vectorundefinsn:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	up_undefinedinsn	/* Call the handler */
 
-	/* Recover the SVC_MODE registers */
+	/* Restore the CPSR, SVC modr registers and return */
 
-	add	r0, sp, #XCPTCONTEXT_UOFFSET
-	ldmia	r0, {r3-r11, r13-r14}
-	msr	spsr, r3
-	ldmia	sp, {r0-r3, r12}	/* recover volatile regs */
-	add	sp, sp, #XCPTCONTEXT_SIZE
-	movs	pc, lr			/* return & move spsr into cpsr */
-
-	@
-	@ now branch to the relevent MODE handling routine
-	@
-
-	and	lr, lr, #15
-	ldr	lr, [pc, lr, lsl #2]
-	movs	pc, lr				@ Changes mode and branches
+	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
+	msr	spsr, r0
+	ldmia	sp, {r0-r15}^		/* Return */
 
 .Lundeftmp:
 	.word	up_undeftmp
