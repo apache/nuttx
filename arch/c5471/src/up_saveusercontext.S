@@ -89,29 +89,27 @@ up_saveusercontext:
 	 */
 
         mov	ip, #1
-	str	ip, [r0, #JB_R0]
+	str	ip, [r0, #(4*REG_R0)]
 
-	/* Get the offset to the user save area */
-
-	add	r0, r0, #XCPTCONTEXT_UOFFSET
-
-	/* Get the current cpsr as well */
-
-	mrs	r3, cpsr	/* R3 = CPSR value */
-
-	/* We need to save:
-	 *
-	 * Volatile register:	r3 (holds the cpsr value)
-	 * Static registers:	v1-v7 (aka r4-r10)
-	 * Frame pointer:	fp (aka r11)
-	 * Stack pointer:	sp (aka r13)
-	 * Return address:	lr (aka r14)
-	 *
-	 * These have to be save in the same order as is done
-	 * by the interrupt handling logic.
+	/* Save the volatile registers (plus r12 which really
+	 * doesn't need to be saved)
 	 */
 
-	stmia	r0, {r3-r11, r13-r14}
+	add	r1, r0, #(4*REG_R4)
+	stmia	r1, {r4-r14}
+
+	/* Save the current cpsr */
+
+	mrs	r2, cpsr		/* R3 = CPSR value */
+	add	r1, r0, #(4*REG_CPSR)
+	str	r2, [r1]
+
+	/* Finally save the return address as the PC so that we
+	 * return to the exit from this function.
+	 */
+
+        add	r1, r0, #(4*REG_PC)
+	str	lr, [r1]
 
 	/* Return 0 */
 

@@ -60,50 +60,45 @@
  * xcp.regs array:
  */
 
-#define JB_R0                (0)
-#define JB_R1                (1)
-#define JB_R2                (2)
-#define JB_R3                (3)
-#define JB_R12               (4)
+#define REG_R0                   (0)
+#define REG_R1                   (1)
+#define REG_R2                   (2)
+#define REG_R3                   (3)
+#define REG_R4                   (4)
+#define REG_R5                   (5
+#define REG_R6                   (6)
+#define REG_R7                   (7)
+#define REG_R8                   (8)
+#define REG_R9                   (9)
+#define REG_R10                  (10)
+#define REG_R11                  (11)
+#define REG_R12                  (12)
+#define REG_R13                  (13)
+#define REG_R14                  (14)
+#define REG_R15                  (15)
+#define REG_CPSR                 (16)
 
-#define XCPTCONTEXT_IRQ_REGS (5)
-#define XCPTCONTEXT_UOFFSET  (4 * XCPTCONTEXT_IRQ_REGS)
+#define XCPTCONTEST_REGS         (17)
+#define XCPTCONTEXT_SIZE         (4 * XCPTCONTEST_REGS)
 
-#define JB_CPSR              (0 + XCPTCONTEXT_IRQ_REGS)
-#define JB_R4                (1 + XCPTCONTEXT_IRQ_REGS)
-#define JB_R5                (2 + XCPTCONTEXT_IRQ_REGS
-#define JB_R6                (3 + XCPTCONTEXT_IRQ_REGS)
-#define JB_R7                (4 + XCPTCONTEXT_IRQ_REGS)
-#define JB_R8                (5 + XCPTCONTEXT_IRQ_REGS)
-#define JB_R9                (6 + XCPTCONTEXT_IRQ_REGS)
-#define JB_R10               (7 + XCPTCONTEXT_IRQ_REGS)
-#define JB_R11               (8 + XCPTCONTEXT_IRQ_REGS)
-#define JB_R13               (9 + XCPTCONTEXT_IRQ_REGS)
-#define JB_R14               (10 + XCPTCONTEXT_IRQ_REGS)
-#define JB_R15               /* Not saved */
-
-#define XCPTCONTEXT_USER_REG (11)
-#define XCPTCONTEST_REGS     (XCPTCONTEXT_USER_REG+XCPTCONTEXT_IRQ_REGS)
-#define XCPTCONTEXT_SIZE     (4 * XCPTCONTEST_REGS)
-
-#define JB_A1                JB_R0
-#define JB_A2                JB_R1
-#define JB_A3                JB_R2
-#define JB_A4                JB_R3
-#define JB_V1                JB_R4
-#define JB_V2                JB_R5
-#define JB_V3                JB_R6
-#define JB_V4                JB_R7
-#define JB_V5                JB_R8
-#define JB_V6                JB_R9
-#define JB_V7                JB_R10
-#define JB_SB                JB_R9
-#define JB_SL                JB_R10
-#define JB_FP                JB_R11
-#define JB_IP                JB_R12
-#define JB_SP                JB_R13
-#define JB_LR                JB_R14
-#define JB_PC                JB_R15
+#define REG_A1                   REG_R0
+#define REG_A2                   REG_R1
+#define REG_A3                   REG_R2
+#define REG_A4                   REG_R3
+#define REG_V1                   REG_R4
+#define REG_V2                   REG_R5
+#define REG_V3                   REG_R6
+#define REG_V4                   REG_R7
+#define REG_V5                   REG_R8
+#define REG_V6                   REG_R9
+#define REG_V7                   REG_R10
+#define REG_SB                   REG_R9
+#define REG_SL                   REG_R10
+#define REG_FP                   REG_R11
+#define REG_IP                   REG_R12
+#define REG_SP                   REG_R13
+#define REG_LR                   REG_R14
+#define REG_PC                   REG_R15
 
 /* C5471 Interrupts */
 
@@ -165,7 +160,7 @@ struct xcptcontext
    * signal processing.
    */
 
-  uint32 saved_lr;
+  uint32 saved_pc;
   uint32 saved_cpsr;
 
   /* Register save area */

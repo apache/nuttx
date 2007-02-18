@@ -85,8 +85,8 @@ void up_sigdeliver(void)
   /* Save the real return state on the stack. */
 
   up_copystate(regs, rtcb->xcp.regs);
-  regs[JB_LR]   = rtcb->xcp.saved_lr;
-  regs[JB_CPSR] = rtcb->xcp.saved_cpsr;
+  regs[REG_PC]   = rtcb->xcp.saved_pc;
+  regs[REG_CPSR] = rtcb->xcp.saved_cpsr;
 
   /* Get a local copy of the sigdeliver function pointer.
    * we do this so that we can nullify the sigdeliver
@@ -95,7 +95,7 @@ void up_sigdeliver(void)
    * signals.
    */
 
-  sigdeliver = rtcb->xcp.sigdeliver;
+  sigdeliver           = rtcb->xcp.sigdeliver;
   rtcb->xcp.sigdeliver = NULL;
 
   /* Then enable interrupts.  We should still be safe from

@@ -42,6 +42,7 @@
 #include <string.h>
 #include <nuttx/arch.h>
 #include "up_internal.h"
+#include "c5471.h"
 
 /************************************************************
  * Private Definitions
@@ -80,6 +81,7 @@ void up_initial_state(_TCB *tcb)
   /* Initialize the initial exception register context structure */
 
   memset(xcp, 0, sizeof(struct xcptcontext));
-  xcp->regs[JB_SP] = (uint32)tcb->adj_stack_ptr;
-  xcp->regs[JB_LR] = (uint32)tcb->start;
+  xcp->regs[REG_SP]   = (uint32)tcb->adj_stack_ptr;
+  xcp->regs[REG_PC]   = (uint32)tcb->start;
+  xcp->regs[REG_CPSR] = SVC_MODE | F_BIT;
 }

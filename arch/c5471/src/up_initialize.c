@@ -41,6 +41,7 @@
 #include <sys/types.h>
 #include <debug.h>
 #include <nuttx/arch.h>
+#include <nuttx/fs.h>
 #include "up_internal.h"
 
 /************************************************************
@@ -90,4 +91,8 @@ void up_initialize(void)
   up_disable_irq(C5471_IRQ_SYSTIMER);
   irq_attach(C5471_IRQ_SYSTIMER, (xcpt_t)up_timerisr);
   up_enable_irq(C5471_IRQ_SYSTIMER);
+
+  /* Register devices */
+
+  devnull_register();   /* Standard /dev/null */
 }

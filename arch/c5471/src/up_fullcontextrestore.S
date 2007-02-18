@@ -78,38 +78,40 @@ up_fullcontextrestore:
 
 	/* On entry, a1 (r0) holds address of the register save area */
 
-	/* Restore the volatile registers.  This is not necessary for
-	 * normally task-to-task context switches (where the context
-	 * was saved by up_saveusercontext()), but is necesary when
-	 * the full context was saved through interrupt handling.
+	/* Recover all registers except for r0, r1, R15, and CPSR */
+
+	add	r1, r0, #(4*REG_R2)	/* Offset to REG_R2 storage */
+	ldmia	r1, {r2-r14}		/* Recover registers */
+
+	/* Create a stack frame to hold the PC */
+
+	sub	sp, sp, #(3*4)		/* Frame for three registers */
+	ldr	r1, [r0, #(4*REG_R0)]	/* Fetch the stored r0 value */
+	str	r2, [sp, #8]		/* Save it at the top of the stack */
+	ldr	r1, [r0, #(4*REG_R1)]	/* Fetch the stored r1 value */
+	str	r2, [sp, #4]		/* Save it in the stack */
+	ldr	r1, [r0, #(4*REG_PC)]	/* Fetch the stored pc value */
+	str	r2, [sp]		/* Save it at the bottom of the stack */
+
+	/* Now we can restore the CPSR.  We wait until we are completely
+	 * finished with the context save data to do this. Restore the CPSR
+	 * may re-enable and interrupts and we couldt be in a context
+	 * where save structure is only protected by interrupts being disabled.
+         */
+
+	ldr	r1, [r0, #(4*REG_CPSR)]	/* Fetch the stored CPSR value */
+	msr	cpsr, r1		/* Set the CPSR */
+
+	/* Now recover r0 and r1 */
+
+	ldr	r0, [sp, #8]
+	ldr	r1, [sp, #4]
+	add	sp, sp, #(2*4)
+
+	/* Then return to the address at the stop of the stack,
+	 * destroying the stack frame
 	 */
 
-	/* Recover the user context (we will then have a new stack pointer) */
-
-	add	r1, r0, #XCPTCONTEXT_UOFFSET
-	ldmia	r1, {r3-r11, r13-r14}
-
-	/* Save the CSPR value and one scratch register on the stack */
-
-	sub	sp, sp, #2*4		/* Create a frame to hold two regs */
-	stmia	sp, {r3, r4}		/* Save the CPSR (r3) and scratch (r4) */
-
-	/* Then recover the remaining registers */
-
-	ldmia	r0, {r0-r3, r12}	/* Recover volatile regs */
-
-	/* Now we can restore the CPSR (probably re-enabling interrupts) */
-
-	ldr	r4, [sp]
-	msr	cpsr, r4
-
-	/* Then recover the correct r4 value */
-
-	ldr	r4, [sp, #4]
-
-	/* Destroy the temporary stack frame and return */
-
-	add	sp, sp, #2*4
-	movs	pc, lr
+	ldr	pc, [sp], #4
 	.size up_fullcontextrestore, . - up_fullcontextrestore
 
