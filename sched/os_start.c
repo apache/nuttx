@@ -192,7 +192,7 @@ void os_start(void)
   int init_taskid;
   int i;
 
-  lldbg("os_start:\n");
+  lldbg("%s: Entry\n", __FUNCTION__);
 
   /* Initialize all task lists */
 
@@ -349,7 +349,7 @@ void os_start(void)
    * started by spawning the user init thread of execution.
    */
 
-  dbg("os_start: Starting init thread\n");
+  dbg("%s: Starting init thread\n", __FUNCTION__);
   init_taskid = task_create("init", SCHED_PRIORITY_DEFAULT,
                             CONFIG_PROC_STACK_SIZE,
                             (main_t)user_start, 0, 0, 0, 0);
@@ -357,7 +357,7 @@ void os_start(void)
 
   /* When control is return to this point, the system is idle. */
 
-  dbg("os_start: Beginning Idle Loop\n");
+  dbg("%s: Beginning Idle Loop\n", __FUNCTION__);
   for (;;)
     {
       /* Check if there is anything in the delayed deallocation list. */

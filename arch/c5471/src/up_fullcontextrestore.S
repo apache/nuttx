@@ -87,11 +87,11 @@ up_fullcontextrestore:
 
 	sub	sp, sp, #(3*4)		/* Frame for three registers */
 	ldr	r1, [r0, #(4*REG_R0)]	/* Fetch the stored r0 value */
-	str	r2, [sp, #8]		/* Save it at the top of the stack */
+	str	r1, [sp]		/* Save it at the top of the stack */
 	ldr	r1, [r0, #(4*REG_R1)]	/* Fetch the stored r1 value */
-	str	r2, [sp, #4]		/* Save it in the stack */
+	str	r1, [sp, #4]		/* Save it in the stack */
 	ldr	r1, [r0, #(4*REG_PC)]	/* Fetch the stored pc value */
-	str	r2, [sp]		/* Save it at the bottom of the stack */
+	str	r1, [sp, #8]		/* Save it at the bottom of the frame */
 
 	/* Now we can restore the CPSR.  We wait until we are completely
 	 * finished with the context save data to do this. Restore the CPSR
@@ -104,7 +104,7 @@ up_fullcontextrestore:
 
 	/* Now recover r0 and r1 */
 
-	ldr	r0, [sp, #8]
+	ldr	r0, [sp]
 	ldr	r1, [sp, #4]
 	add	sp, sp, #(2*4)
 

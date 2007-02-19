@@ -367,7 +367,7 @@ EXTERN void up_disable_irq(int irq);
 EXTERN void up_enable_irq(int irq);
 
 /************************************************************
- * Name: up_acknowledge_irq
+ * Name: up_disable_irq
  *
  * Description:
  *   Disable the IRQ specified by 'irq'

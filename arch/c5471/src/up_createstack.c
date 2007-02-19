@@ -116,7 +116,7 @@ STATUS up_create_stack(_TCB *tcb, uint32 stack_size)
 
        /* Save the adjusted stack values in the _TCB */
 
-       tcb->adj_stack_size = top_of_stack;
+       tcb->adj_stack_ptr  = (uint32*)top_of_stack;
        tcb->adj_stack_size = size_of_stack;
 
        return OK;

@@ -41,6 +41,7 @@
 #include <sched.h>
 #include <string.h>
 #include <errno.h>
+#include <debug.h>
 #include <nuttx/arch.h>
 #include <nuttx/os_external.h>
 #include "os_internal.h"
@@ -225,6 +226,8 @@ STATUS _task_init(_TCB *tcb, char *name, int priority,
 {
   STATUS ret;
 
+  vdbg("%s: Entry\n", __FUNCTION__);
+
   /* Assign a unique task ID to the task. */
 
   ret = task_assignpid(tcb);
@@ -376,33 +379,35 @@ STATUS task_init(_TCB *tcb, char *name, int priority,
 STATUS task_activate(_TCB *tcb)
 {
 #ifdef CONFIG_SCHED_INSTRUMENTATION
-   uint32  savedState;
+  uint32  flags;
 #endif
+
+  vdbg("%s: Entry\n", __FUNCTION__);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
-   savedState = irqsave();
+  flags = irqsave();
 
-   /* Check if this is really a re-start */
+  /* Check if this is really a re-start */
 
-   if (tcb->task_state != TSTATE_TASK_INACTIVE)
-     {
-       /* Inform the instrumentation layer that the task
-        * has stopped
-        */
+  if (tcb->task_state != TSTATE_TASK_INACTIVE)
+    {
+      /* Inform the instrumentation layer that the task
+       * has stopped
+       */
 
-       sched_note_stop(tcb);
-     }
+      sched_note_stop(tcb);
+    }
 
-   /* Inform the instrumentation layer that the task
-    * has started
-    */
+  /* Inform the instrumentation layer that the task
+   * has started
+   */
 
-   sched_note_start(tcb);
-   irqrestore(savedState);
+  sched_note_start(tcb);
+  irqrestore(flags);
 #endif
 
-   up_unblock_task(tcb);
-   return OK;
+  up_unblock_task(tcb);
+  return OK;
 }
 
 /************************************************************
@@ -443,6 +448,8 @@ int task_create(char *name, int priority,
   _TCB *tcb;
   STATUS status;
   pid_t pid;
+
+  vdbg("%s: Entry\n", __FUNCTION__);
 
   /* Allocate a TCB for the new task. */
 

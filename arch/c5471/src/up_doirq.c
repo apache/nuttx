@@ -1,5 +1,5 @@
 /************************************************************
- * up_internal.h
+ * up_doirq.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,83 +33,51 @@
  *
  ************************************************************/
 
-#ifndef __UP_INTERNAL_H
-#define __UP_INTERNAL_H
-
 /************************************************************
  * Included Files
  ************************************************************/
+
+#include <nuttx/config.h>
+#include <sys/types.h>
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include "c5471.h"
+#include "up_internal.h"
 
 /************************************************************
  * Definitions
  ************************************************************/
 
 /************************************************************
- * Public Types
+ * Public Data
  ************************************************************/
-
-#ifndef __ASSEMBLY__
-typedef void (*up_vector_t)(void);
-#endif
 
 /************************************************************
- * Public Variables
+ * Private Data
  ************************************************************/
-
-#ifndef __ASSEMBLY__
-extern uint32 *current_regs;
-#endif
 
 /************************************************************
- * Inline Functions
+ * Private Functions
  ************************************************************/
-
 
 /************************************************************
- * Public Functions
+ * Public Funtions
  ************************************************************/
 
-#ifndef __ASSEMBLY__
+void up_doirq(int irq, uint32* regs)
+{
+  if ((unsigned)irq < NR_IRQS)
+    {
+       /* Mask and acknowledge the interrupt */
 
-/* Defined in files with the same name as the function */
+       up_maskack_irq(irq);
 
-extern void up_copystate(uint32 *dest, uint32 *src);
-extern void up_dataabort(uint32 *regs);
-extern void up_doirq(int irq, uint32* regs);
-extern void up_fullcontextrestore(uint32 *regs) __attribute__ ((noreturn));
-extern void up_irqinitialize(void);
-extern void up_prefetchabort(uint32 *regs);
-extern int  up_saveusercontext(uint32 *regs);
-extern void up_sigdeliver(void);
-extern void up_syscall(uint32 *regs);
-extern int  up_timerisr(int irq, uint32 *regs);
-extern void up_undefinedinsn(uint32 *regs);
+       /* Deliver the IRQ */
 
-#ifdef CONFIG_DEBUG
-extern void up_lowputc(char ch);
-#else
-# define up_lowputc(ch)
-#endif
+       irq_dispatch(irq, regs);
 
-/* Defined in up_vectors.S */
+       /* Then unmask it */
 
-extern void up_vectorundefinsn(void);
-extern void up_vectorswi(void);
-extern void up_vectorprefetch(void);
-extern void up_vectordata(void);
-extern void up_vectoraddrexcptn(void);
-extern void up_vectorirq(void);
-extern void up_vectorfiq(void);
-
-/* Defined in up_serial.c */
-
-extern void up_earlyserialinit(void);
-extern void up_serialinit(void);
-
-/* Defined in up_timerisr.c */
-
-extern void up_timerinit(void);
-
-#endif /* __ASSEMBLY__ */
-
-#endif  /* __UP_INTERNAL_H */
+       up_enable_irq(irq);
+    }
+}
