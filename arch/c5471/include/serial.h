@@ -1,5 +1,5 @@
 /************************************************************
- * up_initialize.c
+ * serial.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,67 +33,34 @@
  *
  ************************************************************/
 
+#ifndef __ARCH_SERIAL_H
+#define __ARCH_SERIAL_H
+
 /************************************************************
  * Included Files
  ************************************************************/
 
-#include <nuttx/config.h>
-#include <sys/types.h>
-#include <debug.h>
-#include <nuttx/arch.h>
-#include "up_internal.h"
+/************************************************************
+ * Definitions
+ ************************************************************/
+
+/* IOCTL commands supported by the C5471 serial driver */
+
+#define TIOCSBRK        0x5401  /* BSD compatibility */
+#define TIOCCBRK        0x5402  /* " " "           " */
+#define TIOCSERCONFIG   0x5403  /* Reconfigure the port */
+#define TIOCSERGSTRUCT  0x5458  /* Get up_dev_t for port */
 
 /************************************************************
- * Private Types
+ * Private Data
  ************************************************************/
 
 /************************************************************
- * Private Function Prototypes
+ * Private Functions
  ************************************************************/
 
 /************************************************************
- * Global Functions
+ * Public Functions
  ************************************************************/
 
-/************************************************************
- * Name: up_initialize
- *
- * Description:
- *   up_initialize will be called once during OS
- *   initialization after the basic OS services have been
- *   initialized.  The architecture specific details of
- *   initializing the OS will be handled here.  Such things as
- *   setting up interrupt service routines, starting the
- *   clock, and registering device drivers are some of the
- *   things that are different for each processor and hardware
- *   platform.
- *
- *   up_initialize is called after the OS initialized but
- *   before the init process has been started and before the
- *   libraries have been initialized.  OS services and driver
- *   services are available.
- *
- ************************************************************/
-
-void up_initialize(void)
-{
-  /* Initialize global variables */
-
-  current_regs = NULL;
-
-  /* Initialize the interrupt subsystem */
-
-  up_irqinitialize();
-
-  /* Initialize the system timer interrupt */
-
-  up_timerinit();
-
-  /* Register devices */
-
-  devnull_register();   /* Standard /dev/null */
-
-  /* Initialize the serial device driver */
-
-  up_serialinit();
-}
+#endif /* __ARCH_SERIAL_H */

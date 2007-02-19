@@ -79,7 +79,7 @@
  */
 
 	.text
-	.global	up_putc
+	.global	up_lowputc
 	.type	up_lowputc, function
 up_lowputc:
 	/* On entry, r0 holds the character to be printed */

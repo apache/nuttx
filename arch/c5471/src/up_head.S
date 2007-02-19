@@ -44,6 +44,18 @@
  * Definitions
  ************************************************************/
 
+	/* This macro will modify r0, r1, r2 and r14 */
+
+#ifdef CONFIG_DEBUG
+	.macro	showprogress, code
+	mov	r0, #\code
+	bl	up_lowputc
+	.endm
+#else
+	.macro	showprogress, code
+	.endm
+#endif
+
 /************************************************************
  * OS Entry Point
  ************************************************************/
@@ -56,24 +68,28 @@
 	.type	__start, #function
 __start:
 
-/* First, setup initial processor mode */
+	/* First, setup initial processor mode */
 
 	mov	r0, #(SVC_MODE | I_BIT | F_BIT )
 	msr	cpsr, r0
 
-/* Setup system stack (and get the BSS range) */
+	showprogress 'A'
+
+	/* Setup system stack (and get the BSS range) */
 
 	adr	r0, LC0
 	ldmia   r0, {r4, r5, sp}
 
-/* Clear system BSS section */
+	/* Clear system BSS section */
 
 	mov	r0, #0
 1:	cmp	r4, r5
 	strcc	r0, [r4], #4
 	bcc	1b
 
-/* Copy system .data sections to new home in RAM. */
+	showprogress 'B'
+
+	/* Copy system .data sections to new home in RAM. */
 
 #ifdef CONFIG_BOOT_FROM_FLASH
 
@@ -86,40 +102,33 @@ __start:
 	blt	1b
 
 #endif
-
-/* Initialize Kernel Stack Contents */
-
-#if 0
-	mov	r1, sp
-	sub	r1, r1, #INITIAL_STACK_SIZE
-	ldr	r0, L_STACK_MAGIC
-	str	r0, [r1], #4
-	ldr	r0, L_STACK_UNTOUCHED_MAGIC
-1:      cmp	r1, sp
-        strcc	r0, [r1], #4
-        bcc	1b
-#endif
-
-/* Jump to OS entry */
+	/* Perform early serial initialization */
 
 	mov	fp, #0
+	bl	up_earlyserialinit
+
+#ifdef CONFIG_DEBUG
+	mov	r0, #'C'
+	bl	up_putc
+	mov	r0, #'\n'
+	bl	up_putc
+#endif
+
+	/* Then jump to OS entry */
+
 	b	os_start
 
-/* Variables */
+	/* Variables */
 
 LC0:	.long	_sbss
 	.long	_ebss
-	.long	CONFIG_STACK_POINTER+CONFIG_PROC_STACK_SIZE-4
+	.long	_ebss+CONFIG_PROC_STACK_SIZE-4
 
 #ifdef CONFIG_BOOT_FROM_FLASH
-LC2:	.long	_eronly		@ Where .data defaults are stored in Flash.
-	.long	_sdata		@ Where .data needs to reside in SDRAM.
+LC2:	.long	_eronly	/* Where .data defaults are stored in FLASH */
+	.long	_sdata	/* Where .data needs to reside in SDRAM */
 	.long	_edata
 #endif
 
-#if 0
-L_STACK_UNTOUCHED_MAGIC: .long 0xfeef1ef0
-L_STACK_MAGIC:           .long 0xdeadbeef
-#endif
 	.end
 

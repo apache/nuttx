@@ -38,8 +38,10 @@
 MKDEP 	= $(TOPDIR)/tools/mkdeps.sh
 CFLAGS	+= -I$(TOPDIR)/sched
 
-ASRCS	= up_vectors.S up_saveusercontext.S up_fullcontextrestore.S \
-	  up_lowputc.S
+ASRCS	= up_vectors.S up_saveusercontext.S up_fullcontextrestore.S
+ifeq ($(CONFIG_DEBUG),y)
+ASRCS	+= up_lowputc.S
+endif
 AOBJS	= $(ASRCS:.S=.o)
 
 CSRCS	= up_initialize.c up_initialstate.c up_idle.c \
@@ -48,7 +50,7 @@ CSRCS	= up_initialize.c up_initialstate.c up_idle.c \
 	  up_createstack.c up_usestack.c up_releasestack.c \
 	  up_exit.c up_assert.c up_blocktask.c up_unblocktask.c \
 	  up_releasepending.c up_reprioritizertr.c up_copystate.c \
-	  up_schedulesigaction.c up_sigdeliver.c
+	  up_schedulesigaction.c up_sigdeliver.c up_serial.c
 COBJS	= $(CSRCS:.c=.o)
 
 SRCS	= $(ASRCS) $(CSRCS)
