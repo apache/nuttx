@@ -44,7 +44,7 @@ ASRCS	+= up_lowputc.S
 endif
 AOBJS	= $(ASRCS:.S=.o)
 
-CSRCS	= up_initialize.c up_initialstate.c up_idle.c \
+CSRCS	= up_initialize.c up_initialstate.c up_idle.c up_doirq.c \
 	  up_irq.c up_syscall.c up_dataabort.c up_prefetchabort.c \
 	  up_undefinedinsn.c up_interruptcontext.c up_timerisr.c \
 	  up_createstack.c up_usestack.c up_releasestack.c \

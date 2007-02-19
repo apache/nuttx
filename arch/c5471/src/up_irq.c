@@ -48,8 +48,8 @@
  * Definitions
  ************************************************************/
 
-#define EdgeSensitive 0x00000020
-#define Priority      0x0000001E
+#define ILR_EDGESENSITIVE 0x00000020
+#define ILR_PRIORITY      0x0000001E
 
 /************************************************************
  * Public Data
@@ -164,10 +164,10 @@ void up_irqinitialize(void)
 
   /* Override hardware defaults */
 
-  putreg32(EdgeSensitive | Priority, ILR_IRQ2_REG);
-  putreg32(EdgeSensitive | Priority, ILR_IRQ4_REG);
-  putreg32(Priority, ILR_IRQ6_REG);
-  putreg32(EdgeSensitive | Priority, ILR_IRQ15_REG);
+  putreg32(ILR_EDGESENSITIVE | ILR_PRIORITY, ILR_IRQ2_REG);
+  putreg32(ILR_EDGESENSITIVE | ILR_PRIORITY, ILR_IRQ4_REG);
+  putreg32(ILR_PRIORITY,                     ILR_IRQ6_REG);
+  putreg32(ILR_EDGESENSITIVE | ILR_PRIORITY, ILR_IRQ15_REG);
 
   /* Initialize hardware interrupt vectors */
 
@@ -214,30 +214,26 @@ void up_enable_irq(int irq)
 }
 
 /************************************************************
- * Name: up_acknowledge_irq
+ * Name: up_maskack_irq
  *
  * Description:
- *   Disable the IRQ specified by 'irq'
+ *   Mask the IRQ and acknowledge it
  *
  ************************************************************/
 
-/* Bit 0 of the Interrupt Control Rigster ==  New IRQ
- * agreement (NEW_IRQ_AGR). Reset IRQ output. Clear source
- * IRQ register. Enables a new IRQ generation. Reset by
- * internal logic.
- *
- * IRQ (FIQ) output and SRC_IRQ_REG and SRC_IRQ_BIN_REG
- * (SRC_FIQ_REG) registers are reset only if the bit in the
- * Interrupt register (IT_REG) corresponding to the interrupt
- * having requested MCU action is already cleared or masked.
- *
- * For an edge-sensitive interrupt, the Interrupt register bit is
- * deactivated when reading the SRC_IRQ_REG or SRC_IRQ_BIN_REG
- * (SRC_FIQ_REG) registers.
- */
-
-void up_acknowledge_irq(int irq)
+void up_maskack_irq(int irq)
 {
   uint32 reg = getreg32(INT_CTRL_REG);
+
+  /* Mask the interrupt */
+
+  reg = getreg32(MASK_IT_REG);
+  putreg32(reg | (1 << irq), MASK_IT_REG);
+
+  /* Set the NEW_IRQ_AGR bit.  This clears the IRQ src register
+   * enables generation of a new IRQ.
+   */
+
+  reg = getreg32(INT_CTRL_REG);
   putreg32(reg | 0x00000001, INT_CTRL_REG); /* write the NEW_IRQ_AGR bit. */
 }

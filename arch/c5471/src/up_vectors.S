@@ -147,7 +147,7 @@ up_vectorirq:
 
 	mov	fp, #0			/* Init frame pointer */
 	mov	r1, sp			/* Get r1=xcp */
-	bl	up_prefetchabort	/* Call the handler */
+	bl	up_doirq		/* Call the handler */
 
 	/* Restore the CPSR, SVC modr registers and return */
 .Lnoirqset:
