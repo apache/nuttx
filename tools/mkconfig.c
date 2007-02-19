@@ -52,16 +52,26 @@ static char *skip_space(char *ptr)
   return ptr;
 }
 
-static char *find_end(char *ptr)
+static char *find_name_end(char *ptr)
 {
   while (*ptr && (isalnum(*ptr) || *ptr == '_')) ptr++;
   return ptr;
 }
 
-static char *find_comment(char *ptr)
+static char *find_value_end(char *ptr)
 {
-  while (*ptr && *ptr != '"' && *ptr != '\n') ptr++;
-  if (*ptr == '"') ptr++;
+  while (*ptr && !isspace(*ptr))
+    {
+      if (*ptr == '"')
+        {
+           do ptr++; while (*ptr && *ptr != '"');
+           if (*ptr) ptr++;
+        }
+      else
+        {
+           do ptr++; while (*ptr && !isspace(*ptr) && *ptr != '"');
+        }
+    }
   return ptr;
 }
 
@@ -92,7 +102,7 @@ static void parse_line(char *ptr, char **varname, char **varval)
   *varname = ptr;
   *varval = NULL;
 
-   ptr = find_end(ptr);
+   ptr = find_name_end(ptr);
    if (*ptr && *ptr != '=')
     {
       *ptr = '\0';
@@ -106,14 +116,7 @@ static void parse_line(char *ptr, char **varname, char **varval)
       if (*ptr)
         {
           *varval = ptr;
-          if (*ptr == '"')
-            {
-              ptr = find_comment(ptr);
-            }
-          else
-            {
-              ptr = find_end(ptr);
-            }
+          ptr = find_value_end(ptr);
           *ptr = '\0';
         }
     }

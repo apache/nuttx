@@ -84,6 +84,12 @@ extern void up_syscall(uint32 *regs);
 extern int  up_timerisr(int irq, uint32 *regs);
 extern void up_undefinedinsn(uint32 *regs);
 
+#ifdef CONFIG_DEBUG
+extern void up_lowputc(char ch);
+#else
+# define up_lowputc(ch)
+#endif
+
 /* Defined in up_vectors.S */
 
 extern void up_vectorundefinsn(void);
@@ -93,6 +99,15 @@ extern void up_vectordata(void);
 extern void up_vectoraddrexcptn(void);
 extern void up_vectorirq(void);
 extern void up_vectorfiq(void);
+
+/* Defined in up_serial.c */
+
+extern void up_earlyserialinit(void);
+extern void up_serialinit(void);
+
+/* Defined in up_timerisr.c */
+
+extern void up_timerinit(void);
 
 #endif /* __ASSEMBLY__ */
 

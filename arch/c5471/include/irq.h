@@ -120,7 +120,7 @@
 #define C5471_IRQ_API           15
 
 #define C5471_IRQ_WATCHDOG      C5471_IRQ_TIMER0
-#define C5471_IRQ_SYSTIMER      C5471_IRQ_TIMER1
+#define C5471_IRQ_SYSTIMER      C5471_IRQ_TIMER2
 #define NR_IRQS                 (C5471_IRQ_API+1)
 
 /************************************************************
