@@ -48,10 +48,13 @@ args=
 # Accumulate CFLAGS up to "--"
 for i in $* ; do
   case $i in
-  --*)
+  -- )
     cc=$cflags
     cflags=$args
     args=
+    ;;
+  --debug )
+    set -x
     ;;
   *)
     args="$args $i"
