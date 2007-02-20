@@ -90,9 +90,9 @@ void sched_free(void *address)
     {
       /* Yes.. Delay the deallocation until a more appropriate time. */
 
-      uint32 savedState = irqsave();
+      uint32 saved_state = irqsave();
       sq_addlast((sq_entry_t*)address, &g_delayeddeallocations);
-      irqrestore(savedState);
+      irqrestore(saved_state);
     }
   else
     {

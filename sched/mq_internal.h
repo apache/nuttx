@@ -43,6 +43,7 @@
 #include <sys/types.h>
 #include <mqueue.h>
 #include <sched.h>
+#include <signal.h>
 #include <nuttx/compiler.h>
 
 /************************************************************
@@ -106,6 +107,8 @@ typedef struct mqmsg mqmsg_t;
 
 /* This structure defines a message queue */
 
+struct mq_des; /* forward reference */
+
 struct msgq_s
 {
   struct msgq_s *flink;         /* Forward link to next message queue */
@@ -123,7 +126,6 @@ struct msgq_s
   union sigval   ntvalue;       /* Notification: Signal value */
   char           name[1];       /* Start of the queue name */
 };
-typedef struct msgq_s msgq_t;
 
 #define SIZEOF_MQ_HEADER ((int)(((msgq_t*)NULL)->name))
 

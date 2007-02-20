@@ -260,7 +260,9 @@ void os_start(void)
 
   /* Initialize the interrupt handling subsystem (if included) */
 
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (irq_initialize != NULL)
+#endif
     {
       irq_initialize();
     }
@@ -270,56 +272,72 @@ void os_start(void)
    * is called only if it is provided in the link.
    */
 
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (user_initialize != NULL)
+#endif
     {
       user_initialize();
     }
 
   /* Initialize the POSIX timer facility (if included in the link) */
 
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (clock_initialize != NULL)
+#endif
     {
       clock_initialize();
     }
 
   /* Initialize the watchdog facility (if included in the link) */
 
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (wd_initialize != NULL)
+#endif
     {
       wd_initialize();
     }
 
   /* Initialize the signal facility (if in link) */
 
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (sig_initialize != NULL)
+#endif
     {
       sig_initialize();
     }
 
   /* Initialize the semaphore facility. (if in link) */
 
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (sem_initialize != NULL)
+#endif
     {
       sem_initialize();
     }
 
   /* Initialize the named message queue facility (if in link) */
 
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (mq_initialize != NULL)
+#endif
     {
       mq_initialize();
     }
 
   /* Initialize the thread-specific data facility (if in link) */
 
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (pthread_initialize != NULL)
+#endif
     {
       pthread_initialize();
     }
 
   /* Initialize the file system (needed to support device drivers) */
 
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (fs_initialize != NULL)
+#endif
     {
       fs_initialize();
     }
@@ -336,7 +354,9 @@ void os_start(void)
    * is done last because the libraries may depend on the above.
    */
 
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (lib_initialize != NULL)
+#endif
     {
       lib_initialize();
     }
@@ -366,9 +386,9 @@ void os_start(void)
 	{
 	  /* Remove the first delayed deallocation. */
 
-	  uint32 savedState = irqsave();
+	  uint32 saved_state = irqsave();
 	  void *address = (void*)sq_remfirst(&g_delayeddeallocations);
-	  irqrestore(savedState);
+	  irqrestore(saved_state);
 
 	  /* Then deallocate it */
 

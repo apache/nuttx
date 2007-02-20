@@ -175,8 +175,13 @@ extern void               sig_cleanup(_TCB *stcb);
 extern void               sig_deliver(_TCB *stcb);
 extern sigactq_t         *sig_findaction(_TCB *stcb, int signo);
 extern int                sig_lowest(sigset_t *set);
-extern int                sig_mqnotempty (int tid, int signo,
-                                          const union sigval value);
+#ifdef CONFIG_CAN_PASS_STRUCTS
+extern int                sig_mqnotempty(int tid, int signo,
+                                         const union sigval value);
+#else
+extern int                sig_mqnotempty(int tid, int signo,
+                                         void *sival_ptr);
+#endif
 extern int                sig_received(_TCB *stcb, siginfo_t *info);
 extern void               sig_releasependingsigaction(sigq_t *sigq);
 extern void               sig_releasependingsignal(sigpendq_t *sigpend);

@@ -107,11 +107,14 @@ CONFIG_ARCH_KFREE=n
 #   long long types and if you plan to use them
 # CONFIG_CAN_PASS_STRUCTS - enable if your compiler supports
 #   passing structures and unions as values
+# CONFIG_HAVE_WEAKFUNCTIONS - enable if you compiler supports
+#   weak functions (see include/nuttx/comp
 #
 CONFIG_HAVE_INLINE=y
 CONFIG_HAVE_DOUBLE=y
 CONFIG_HAVE_LONG_LONG=n
 CONFIG_CAN_PASS_STRUCTS=y
+CONFIG_HAVE_WEAKFUNCTIONS=y
 
 #
 # General build options
