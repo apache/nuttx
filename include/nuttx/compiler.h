@@ -44,10 +44,18 @@
  * Definitions
  ************************************************************/
 
-#define weak_alias(name, aliasname) \
- extern __typeof (name) aliasname __attribute__ ((weak, alias (#name)));
-#define weak_function __attribute__ ((weak))
-#define weak_const_function __attribute__ ((weak, __const__))
+#ifdef __GNUC__
+# define weak_alias(name, aliasname) \
+  extern __typeof (name) aliasname __attribute__ ((weak, alias (#name)));
+# define weak_function __attribute__ ((weak))
+# define weak_const_function __attribute__ ((weak, __const__))
+# define noreturn_function
+#else
+# define weak_alias(name, aliasname)
+# define weak_function
+# define weak_const_function
+# define noreturn_function
+#endif
 
 /************************************************************
  * Global Function Prototypes
