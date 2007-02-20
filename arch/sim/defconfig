@@ -99,9 +99,19 @@ CONFIG_ARCH_KFREE=n
 #
 # General Compile environment setup
 #
+# CONFIG_HAVE_INLINE - enable if your compiler supports
+#   inline functions
+# CONFIG_HAVE_DOUBLE - enable if your compiler supports type
+#   double.
 # CONFIG_HAVE_LONG_LONG - enable if your architecture supports
 #   long long types and if you plan to use them
+# CONFIG_CAN_PASS_STRUCTS - enable if your compiler supports
+#   passing structures and unions as values
+#
+CONFIG_HAVE_INLINE=y
+CONFIG_HAVE_DOUBLE=y
 CONFIG_HAVE_LONG_LONG=n
+CONFIG_CAN_PASS_STRUCTS=y
 
 #
 # General build options
