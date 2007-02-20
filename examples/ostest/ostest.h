@@ -88,4 +88,8 @@ extern void cancel_test(void);
 
 extern void timedwait_test(void);
 
+/* sighand.c ************************************************/
+
+extern void sighand_test(void);
+
 #endif /* __OSTEST_H */

@@ -49,7 +49,7 @@
 #include <sys/types.h>
 
 /************************************************************
- * Public Type Definitions
+ * Definitions
  ************************************************************/
 
 /************************************************************
@@ -63,18 +63,9 @@
  *
  ************************************************************/
 
-static inline int isspace(int c)
-{
-  if (c == ' '  || c == '\t' || c == '\n' || \
-      c == '\r' || c == '\f' || c == '\v')
-    {
-      return TRUE;
-    }
-  else
-    {
-      return FALSE;
-    }
-}
+#define isspace(c) \
+  (c == ' '  || c == '\t' || c == '\n' || \
+   c == '\r' || c == '\f' || c== '\v')
 
 /************************************************************
  * Function:  isdigit
@@ -84,10 +75,8 @@ static inline int isspace(int c)
  *
  ************************************************************/
 
-static inline int isdigit(int c)
-{
-  return (c >= '0' && c <= '9');
-}
+#define isdigit(c) \
+  (c >= '0' && c <= '9')
 
 /************************************************************
  * Function:  isascii
@@ -98,14 +87,11 @@ static inline int isdigit(int c)
  *
  ************************************************************/
 
-static inline int isascii(int c)
-{
-  return (c >= 0 && c <= 0177);
-}
-
+#define isascii(c) \
+  (c >= 0 && c <= 0177);
 
 /************************************************************
- * Function:  isascii
+ * Function:  isxdigit
  *
  * Description:
  *   isxdigit() checks for a hexadecimal digits, i.e. one of
@@ -113,60 +99,36 @@ static inline int isascii(int c)
  *
  ************************************************************/
 
-static inline int isxdigit(int c)
-{
-  if ((c >= '0' && c <= '9') ||
-      (c >= 'a' && c <= 'f') ||
-      (c >= 'A' && c <= 'F'))
-    {
-      return 1;
-    }
-  else
-    {
-
-      return 0;
-    }
-}
+#define isxdigit(c) \
+  ((c >= '0' && c <= '9') || \
+   (c >= 'a' && c <= 'f') || \
+   (c >= 'A' && c <= 'F'))
 
 /************************************************************
- * Function:  isascii
+ * Function:  toupper
  *
  * Description:
  *   toupper() converts the letter c to upper case, if possible.
  *
  ************************************************************/
 
-static inline int toupper(int c)
-{
-  if (c >= 'a' && c <= 'z')
-    {
-      return c - 'a' + 'A';
-    }
-  else
-    {
-      return c;
-    }
-}
+#define toupper(c) \
+  ((c >= 'a' && c <= 'z') ? ((c) - 'a' + 'A') : (c))
 
 /************************************************************
- * Function:  isascii
+ * Function:  tolower
  *
  * Description:
  *   tolower() converts the letter c to lower case, if possible.
  *
  ************************************************************/
 
-static inline int tolower(int c)
-{
-  if (c >= 'A' && c <= 'Z')
-    {
-      return c - 'A' + 'a';
-    }
-  else
-    {
-      return c;
-    }
-}
+#define tolower(c) \
+  ((c >= 'A' && c <= 'Z') ? ((c) - 'A' + 'a') : (c))
+
+/************************************************************
+ * Public Type Definitions
+ ************************************************************/
 
 /************************************************************
  * Public Functions

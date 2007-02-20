@@ -226,8 +226,6 @@ STATUS _task_init(_TCB *tcb, char *name, int priority,
 {
   STATUS ret;
 
-  vdbg("%s: Entry\n", __FUNCTION__);
-
   /* Assign a unique task ID to the task. */
 
   ret = task_assignpid(tcb);
@@ -382,8 +380,6 @@ STATUS task_activate(_TCB *tcb)
   uint32  flags;
 #endif
 
-  vdbg("%s: Entry\n", __FUNCTION__);
-
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   flags = irqsave();
 
@@ -448,8 +444,6 @@ int task_create(char *name, int priority,
   _TCB *tcb;
   STATUS status;
   pid_t pid;
-
-  vdbg("%s: Entry\n", __FUNCTION__);
 
   /* Allocate a TCB for the new task. */
 

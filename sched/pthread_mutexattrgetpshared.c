@@ -88,7 +88,7 @@ int pthread_mutexattr_getpshared(pthread_mutexattr_t *attr, int *pshared)
 {
   int ret = OK;
 
-  dbg("%s: attr=0x%p pshared=0x%p\n", __FUNCTION__, attr, pshared);
+  dbg("attr=0x%p pshared=0x%p\n", attr, pshared);
 
   if (!attr || !pshared)
     {
@@ -99,6 +99,6 @@ int pthread_mutexattr_getpshared(pthread_mutexattr_t *attr, int *pshared)
       *pshared = attr->pshared;
     }
 
-  dbg("%s: Returning %d\n", __FUNCTION__, ret);
+  dbg("Returning %d\n", ret);
   return ret;
 }

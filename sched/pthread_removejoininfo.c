@@ -81,7 +81,7 @@
  *
  ************************************************************/
 
-join_t *pthread_removejoininfo(int pid)
+join_t *pthread_removejoininfo(pid_t pid)
 {
   join_t *prev;
   join_t *join;
@@ -89,7 +89,7 @@ join_t *pthread_removejoininfo(int pid)
   /* Find the entry with the matching pid */
 
   for (prev = NULL, join = g_pthread_head;
-       (join && join->thread.pid != pid);
+       (join && (pid_t)join->thread != pid);
        prev = join, join = join->next);
 
   /* Remove it from the data set. */

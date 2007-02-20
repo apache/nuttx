@@ -52,39 +52,39 @@ static void *waiter_func(void *parameter)
   int status;
   int value;
 
-  printf("%s: Thread %d Started\n", __FUNCTION__, id);
+  printf("waiter_func: Thread %d Started\n",  id);
 
   /* Take the semaphore */
 
   status = sem_getvalue(&sem, &value);
   if (status < 0)
     {
-      printf("%s: ERROR thread %d could not get semaphore value\n", __FUNCTION__, id);
+      printf("waiter_func: ERROR thread %d could not get semaphore value\n",  id);
     }
   else
     {
-      printf("%s: Thread %d initial semaphore value = %d\n", __FUNCTION__, id, value);
+      printf("waiter_func: Thread %d initial semaphore value = %d\n",  id, value);
     }
 
-  printf("%s: Thread %d aiting on semaphore\n", __FUNCTION__, id);
+  printf("waiter_func: Thread %d aiting on semaphore\n",  id);
   status = sem_wait(&sem);
   if (status != 0)
     {
-      printf("%s: ERROR thread %d sem_wait failed\n", __FUNCTION__, id);
+      printf("waiter_func: ERROR thread %d sem_wait failed\n",  id);
     }
-  printf("%s: Thread %d awakened\n", __FUNCTION__, id);
+  printf("waiter_func: Thread %d awakened\n",  id);
 
   status = sem_getvalue(&sem, &value);
   if (status < 0)
     {
-      printf("%s: ERROR thread %d could not get semaphore value\n", __FUNCTION__, id);
+      printf("waiter_func: ERROR thread %d could not get semaphore value\n",  id);
     }
   else
     {
-      printf("%s: Thread %d new semaphore value = %d\n", __FUNCTION__, id, value);
+      printf("waiter_func: Thread %d new semaphore value = %d\n",  id, value);
     }
 
-  printf("%s: Thread %d done\n", __FUNCTION__, id);
+  printf("waiter_func: Thread %d done\n",  id);
   return NULL;
 }
 
@@ -94,7 +94,7 @@ static void *poster_func(void *parameter)
   int status;
   int value;
 
-  printf("%s: Thread %d started\n", __FUNCTION__, id);
+  printf("poster_func: Thread %d started\n",  id);
 
   /* Take the semaphore */
 
@@ -103,20 +103,20 @@ static void *poster_func(void *parameter)
       status = sem_getvalue(&sem, &value);
       if (status < 0)
         {
-          printf("%s: ERROR thread %d could not get semaphore value\n", __FUNCTION__, id);
+          printf("poster_func: ERROR thread %d could not get semaphore value\n",  id);
         }
       else
         {
-          printf("%s: Thread %d semaphore value = %d\n", __FUNCTION__, id, value);
+          printf("poster_func: Thread %d semaphore value = %d\n",  id, value);
         }
 
       if (value < 0)
         {
-          printf("%s: Thread %d posting semaphore\n", __FUNCTION__, id);
+          printf("poster_func: Thread %d posting semaphore\n",  id);
           status = sem_post(&sem);
           if (status != 0)
             {
-              printf("%s: ERROR thread %d sem_wait failed\n", __FUNCTION__, id);
+              printf("poster_func: ERROR thread %d sem_wait failed\n",  id);
             }
 
           pthread_yield();
@@ -124,17 +124,17 @@ static void *poster_func(void *parameter)
           status = sem_getvalue(&sem, &value);
           if (status < 0)
             {
-              printf("%s: ERROR thread %d could not get semaphore value\n", __FUNCTION__, id);
+              printf("poster_func: ERROR thread %d could not get semaphore value\n",  id);
             }
           else
             {
-              printf("%s: Thread %d new semaphore value = %d\n", __FUNCTION__, id, value);
+              printf("poster_func: Thread %d new semaphore value = %d\n",  id, value);
             }
         }
     }
   while (value < 0);
 
-  printf("%s: Thread %d done\n", __FUNCTION__, id);
+  printf("poster_func: Thread %d done\n",  id);
   return NULL;
 
 }
@@ -151,16 +151,16 @@ void sem_test(void)
   pthread_attr_t attr;
   int status;
 
-  printf("%s: Initializing semaphore to 0\n", __FUNCTION__);
+  printf("sem_test: Initializing semaphore to 0\n");
   sem_init(&sem, 0, 0);
 
   /* Start two waiter thread instances */
 
-  printf("%s: Starting waiter thread 1\n", __FUNCTION__);
+  printf("sem_test: Starting waiter thread 1\n");
   status = pthread_attr_init(&attr);
   if (status != OK)
     {
-      printf("%s: pthread_attr_init failed, status=%d\n", __FUNCTION__, status);
+      printf("sem_test: pthread_attr_init failed, status=%d\n",  status);
     }
 
   prio_min = sched_get_priority_min(SCHED_FIFO);
@@ -171,65 +171,65 @@ void sem_test(void)
   status = pthread_attr_setschedparam(&attr,&sparam);
   if (status != OK)
     {
-      printf("%s: pthread_attr_setschedparam failed, status=%d\n", __FUNCTION__, status);
+      printf("sem_test: pthread_attr_setschedparam failed, status=%d\n",  status);
     }
   else
     {
-      printf("%s: Set thread 1 priority to %d\n", __FUNCTION__, sparam.sched_priority);
+      printf("sem_test: Set thread 1 priority to %d\n",  sparam.sched_priority);
     }
 
   status = pthread_create(&waiter_thread1, &attr, waiter_func, (void*)1);
   if (status != 0)
     {
-      printf("%s: Error in thread 1 creation, status=%d\n", __FUNCTION__, status);
+      printf("sem_test: Error in thread 1 creation, status=%d\n",  status);
     }
 
-  printf("%s: Starting waiter thread 2\n", __FUNCTION__);
+  printf("sem_test: Starting waiter thread 2\n");
   status = pthread_attr_init(&attr);
   if (status != 0)
     {
-      printf("%s: pthread_attr_init failed, status=%d\n", __FUNCTION__, status);
+      printf("sem_test: pthread_attr_init failed, status=%d\n",  status);
     }
 
   sparam.sched_priority = prio_mid;
   status = pthread_attr_setschedparam(&attr,&sparam);
   if (status != OK)
     {
-      printf("%s: pthread_attr_setschedparam failed, status=%d\n", __FUNCTION__, status);
+      printf("sem_test: pthread_attr_setschedparam failed, status=%d\n",  status);
     }
   else
     {
-      printf("%s: Set thread 2 priority to %d\n", __FUNCTION__, sparam.sched_priority);
+      printf("sem_test: Set thread 2 priority to %d\n",  sparam.sched_priority);
     }
 
   status = pthread_create(&waiter_thread2, &attr, waiter_func, (void*)2);
   if (status != 0)
     {
-      printf("%s: Error in thread 2 creation, status=%d\n", __FUNCTION__, status);
+      printf("sem_test: Error in thread 2 creation, status=%d\n",  status);
     }
 
-  printf("%s: Starting poster thread 3\n", __FUNCTION__);
+  printf("sem_test: Starting poster thread 3\n");
   status = pthread_attr_init(&attr);
   if (status != 0)
     {
-      printf("%s: pthread_attr_init failed, status=%d\n", __FUNCTION__, status);
+      printf("sem_test: pthread_attr_init failed, status=%d\n",  status);
     }
 
   sparam.sched_priority = (prio_min + prio_mid) / 2;
   status = pthread_attr_setschedparam(&attr,&sparam);
   if (status != OK)
     {
-      printf("%s: pthread_attr_setschedparam failed, status=%d\n", __FUNCTION__, status);
+      printf("sem_test: pthread_attr_setschedparam failed, status=%d\n",  status);
     }
   else
     {
-      printf("%s: Set thread 3 priority to %d\n", __FUNCTION__, sparam.sched_priority);
+      printf("sem_test: Set thread 3 priority to %d\n",  sparam.sched_priority);
     }
 
   status = pthread_create(&poster_thread, &attr, poster_func, (void*)3);
   if (status != 0)
     {
-      printf("%s: Error in thread 3 creation, status=%d\n", __FUNCTION__, status);
+      printf("sem_test: Error in thread 3 creation, status=%d\n",  status);
     }
 
   pthread_join(waiter_thread1, NULL);

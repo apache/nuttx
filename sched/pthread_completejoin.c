@@ -79,7 +79,7 @@ static void pthread_destroyjoininfo(join_t *pjoin)
   int ntasks_waiting;
   int status;
 
-  dbg("%s: pjoin=0x%p\n", __FUNCTION__, pjoin);
+  dbg("pjoin=0x%p\n", pjoin);
 
   /* Are any tasks waiting for our exit value? */
 
@@ -150,7 +150,7 @@ int pthread_completejoin(pid_t pid, void *exit_value)
   join_t *pjoin;
   boolean detached = FALSE;
 
-  dbg("%s: process_id=%d exit_value=%p\n", __FUNCTION__, pid, exit_value);
+  dbg("process_id=%d exit_value=%p\n", pid, exit_value);
 
   /* First, find thread's structure in the private data set. */
 
@@ -170,7 +170,7 @@ int pthread_completejoin(pid_t pid, void *exit_value)
       detached = pjoin->detached;
       if (detached)
         {
-          dbg("%s: Detaching\n", __FUNCTION__);
+          dbg("Detaching\n");
 
           /* If so, then remove the thread's structure from the private
            * data set. After this point, no other thread can perform a join

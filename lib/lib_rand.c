@@ -81,11 +81,11 @@
  ************************************************************/
 
 static unsigned int nrand(unsigned int nLimit);
-static double frand1(void);
+static double_t frand1(void);
 #if (RND_ORDER > 1)
-static double frand2(void);
+static double_t frand2(void);
 #if (RND_ORDER > 2)
-static double frand3(void);
+static double_t frand3(void);
 #endif
 #endif
 
@@ -140,7 +140,7 @@ int rand(void)
 static unsigned int nrand(unsigned int nLimit)
 {
   unsigned long nResult;
-  double fRatio;
+  double_t fRatio;
 
   /* Loop to be sure a legal random number is generated */
   do {
@@ -155,7 +155,7 @@ static unsigned int nrand(unsigned int nLimit)
 #endif
 
     /* Then, produce the return-able value */
-    nResult = (unsigned long)(((double)nLimit) * fRatio);
+    nResult = (unsigned long)(((double_t)nLimit) * fRatio);
 
   } while (nResult >= (unsigned long)nLimit);
 
@@ -163,7 +163,7 @@ static unsigned int nrand(unsigned int nLimit)
 
 } /* end nrand */
 
-static double frand1(void)
+static double_t frand1(void)
 {
   unsigned long nRandInt;
 
@@ -172,12 +172,12 @@ static double frand1(void)
   g_nRandInt1 = nRandInt;
 
   /* Construct an floating point value in the range from 0.0 up to 1.0 */
-  return ((double)nRandInt) / ((double)RND_CONSTP);
+  return ((double_t)nRandInt) / ((double_t)RND_CONSTP);
 
 } /* end frand */
 
 #if (RND_ORDER > 1)
-static double frand2(void)
+static double_t frand2(void)
 {
   unsigned long nRandInt;
 
@@ -188,12 +188,12 @@ static double frand2(void)
   g_nRandInt1 = nRandInt;
 
   /* Construct an floating point value in the range from 0.0 up to 1.0 */
-  return ((double)nRandInt) / ((double)RND_CONSTP);
+  return ((double_t)nRandInt) / ((double_t)RND_CONSTP);
 
 } /* end frand */
 
 #if (RND_ORDER > 2)
-static double frand(void)
+static double_t frand(void)
 {
   unsigned long nRandInt;
 
@@ -205,7 +205,7 @@ static double frand(void)
   g_nRandInt1 = nRandInt;
 
   /* Construct an floating point value in the range from 0.0 up to 1.0 */
-  return ((double)nRandInt) / ((double)RND_CONSTP);
+  return ((double_t)nRandInt) / ((double_t)RND_CONSTP);
 
 } /* end frand */
 #endif

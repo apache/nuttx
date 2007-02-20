@@ -70,7 +70,6 @@ struct wdog_s
 };
 
 typedef struct wdog_s wdog_t;
-typedef struct wdog_s *WDOG_ID;
 
 /************************************************************
  * Public Variables

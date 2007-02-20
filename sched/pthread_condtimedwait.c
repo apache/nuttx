@@ -116,8 +116,7 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
   int             int_state;
   int             status;
 
-  dbg("%s: cond=0x%p mutex=0x%p abstime=0x%p\n",
-      __FUNCTION__, cond, mutex, abstime);
+  dbg("cond=0x%p mutex=0x%p abstime=0x%p\n", cond, mutex, abstime);
 
   /* Make sure that non-NULL references were provided. */
 
@@ -153,7 +152,7 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
         }
       else
         {
-          dbg("%s: Give up mutex...\n", __FUNCTION__);
+          dbg("Give up mutex...\n");
 
           /* We must disable pre-emption and interrupts here so that
            * the time stays valid until the wait begins.   This adds
@@ -263,7 +262,7 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
 
                           if (*get_errno_ptr() == EINTR)
                             {
-                              dbg("%s: Timedout!\n", __FUNCTION__);
+                              dbg("Timedout!\n");
                               ret = ETIMEDOUT;
                             }
                           else
@@ -275,7 +274,7 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
 
                   /* Reacquire the mutex (retaining the ret). */
 
-                  dbg("%s: Re-locking...\n", __FUNCTION__);
+                  dbg("Re-locking...\n");
                   status = pthread_takesemaphore((sem_t*)&mutex->sem);
                   if (!status)
                     {
@@ -300,7 +299,7 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
         }
     }
 
-  dbg("%s: Returning %d\n", __FUNCTION__, ret);
+  dbg("Returning %d\n", ret);
   return ret;
 }
 

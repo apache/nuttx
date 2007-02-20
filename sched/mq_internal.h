@@ -138,10 +138,6 @@ struct mq_des
   int            oflags;      /* Flags set when message queue was opened */
 };
 
-/* This is the handle used to reference a message queue */
-
-typedef struct mq_des *mqd_t;
-
 /************************************************************
  * Global Variables
  ************************************************************/

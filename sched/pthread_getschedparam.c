@@ -91,8 +91,7 @@ int pthread_getschedparam(pthread_t thread, int *policy,
 {
   int ret;
 
-  dbg("%s: thread ID=%d policy=0x%p param=0x%p\n",
-      __FUNCTION__, thread.pid, policy, param);
+  dbg("Thread ID=%d policy=0x%p param=0x%p\n", thread, policy, param);
 
   if (!policy || !param)
     {
@@ -102,7 +101,7 @@ int pthread_getschedparam(pthread_t thread, int *policy,
     {
       /* Get the schedparams of the thread. */
 
-      ret = sched_getparam(thread.pid, param);
+      ret = sched_getparam((pid_t)thread, param);
       if (ret != OK)
         {
           ret = EINVAL;
@@ -110,14 +109,14 @@ int pthread_getschedparam(pthread_t thread, int *policy,
 
       /* Return the policy. */
 
-      *policy = sched_getscheduler(thread.pid);
+      *policy = sched_getscheduler((pid_t)thread);
       if (*policy == ERROR)
         {
           ret = *get_errno_ptr();
         }
     }
 
-  dbg("%s: Returning %d\n", __FUNCTION__, ret);
+  dbg("Returning %d\n", ret);
   return ret;
 }
 

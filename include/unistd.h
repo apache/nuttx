@@ -41,6 +41,7 @@
  ************************************************************/
 
 #include <sys/types.h>
+#include <nuttx/compiler.h>
 
 /************************************************************
  * Definitions
@@ -67,7 +68,7 @@ extern "C" {
 /* Task Control Interfaces (based on ANSII APIs) */
 
 EXTERN pid_t getpid( void );
-EXTERN void _exit(int status) __attribute__ ((noreturn));
+EXTERN void _exit(int status) noreturn_function;
 EXTERN unsigned int sleep(unsigned int seconds);
 EXTERN void usleep(unsigned long usec);
 

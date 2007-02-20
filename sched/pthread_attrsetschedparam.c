@@ -89,7 +89,7 @@ int pthread_attr_setschedparam(pthread_attr_t *attr,
 {
   int ret;
 
-  dbg("%s: attr=0x%p param=0x%p\n", __FUNCTION__, attr, param);
+  dbg("attr=0x%p param=0x%p\n", attr, param);
 
   if (!attr || !param)
     {
@@ -100,7 +100,7 @@ int pthread_attr_setschedparam(pthread_attr_t *attr,
       attr->priority = (short)param->sched_priority;
       ret = OK;
     }
-  dbg("%s: Returning %d\n", __FUNCTION__, ret);
+  dbg("Returning %d\n", ret);
   return ret;
 }
 

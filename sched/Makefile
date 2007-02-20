@@ -76,8 +76,7 @@ PTHREAD_SRCS	= pthread_attrinit.c pthread_attrdestroy.c \
 		  pthread_attrsetstacksize.c pthread_attrgetstacksize.c \
 		  pthread_attrsetschedparam.c pthread_attrgetschedparam.c \
 		  pthread_create.c pthread_exit.c pthread_join.c pthread_detach.c \
-		  pthread_yield.c pthread_self.c \
-		  pthread_getschedparam.c pthread_setschedparam.c \
+		  pthread_yield.c pthread_getschedparam.c pthread_setschedparam.c \
 		  pthread_mutexattrinit.c pthread_mutexattrdestroy.c \
 		  pthread_mutexattrgetpshared.c pthread_mutexattrsetpshared.c \
 		  pthread_mutexinit.c pthread_mutexdestroy.c \

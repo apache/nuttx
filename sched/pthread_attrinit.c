@@ -90,7 +90,7 @@ int pthread_attr_init(pthread_attr_t *attr)
 {
   int ret = OK;
 
-  dbg("%s: attr=0x%p\n", __FUNCTION__, attr);
+  dbg("attr=0x%p\n", attr);
   if (!attr)
     {
       ret = ENOMEM;
@@ -105,7 +105,7 @@ int pthread_attr_init(pthread_attr_t *attr)
       memcpy(attr, &g_default_pthread_attr, sizeof(pthread_attr_t));
     }
 
-  dbg("%s: Returning %d\n", __FUNCTION__, ret);
+  dbg("Returning %d\n", ret);
   return ret;
 }
 

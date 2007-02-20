@@ -81,14 +81,14 @@
  *
  ************************************************************/
 
-join_t *pthread_findjoininfo(int pid)
+join_t *pthread_findjoininfo(pid_t pid)
 {
   join_t *pjoin;
 
   /* Find the entry with the matching pid */
 
   for (pjoin = g_pthread_head;
-       (pjoin && pjoin->thread.pid != pid);
+       (pjoin && (pid_t)pjoin->thread != pid);
        pjoin = pjoin->next);
 
   /* and return it */

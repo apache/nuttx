@@ -89,7 +89,7 @@ int pthread_mutex_init(pthread_mutex_t *mutex, pthread_mutexattr_t *attr)
   int pshared = 0;
   int status;
 
-  dbg("%s: mutex=0x%p attr=0x%p\n", __FUNCTION__, mutex, attr);
+  dbg("mutex=0x%p attr=0x%p\n", mutex, attr);
 
   if (!mutex)
     {
@@ -117,6 +117,6 @@ int pthread_mutex_init(pthread_mutex_t *mutex, pthread_mutexattr_t *attr)
         }
     }
 
-  dbg("%s: Returning %d\n", __FUNCTION__, ret);
+  dbg("Returning %d\n", ret);
   return ret;
 }

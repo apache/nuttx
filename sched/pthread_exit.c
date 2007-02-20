@@ -91,7 +91,7 @@ void pthread_exit(void *exit_value)
   int error_code = (int)exit_value;
   int status;
 
-  dbg("%s: exit_value=%p\n", __FUNCTION__, exit_value);
+  dbg("exit_value=%p\n", exit_value);
 
   /* Complete pending join operations */
 

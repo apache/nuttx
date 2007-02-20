@@ -97,8 +97,6 @@ void *memalign(size_t alignment, size_t size)
   size      = MM_ALIGN_UP(size);   /* Make mutliples of our granule size */
   allocsize = size + 2*alignment;  /* Add double full alignment size */
 
-  /* If the alignment is small
-
   /* Then malloc that size */
 
   rawchunk = (uint32)malloc(allocsize);

@@ -72,9 +72,9 @@
  * Private Variables
  ************************************************************/
 
-double rint(double x)
+double_t rint(double x)
 {
-  double retValue;
+  double_t retValue;
 
 /* If the current rounding mode rounds toward negative
  * infinity, rint() is identical to floor().  If the current
@@ -93,7 +93,7 @@ double rint(double x)
    * |rint(x)-x|=1/2, then rint(x) is even. */
 
   long dwInteger = (long)x;
-  double fRemainder = x - (double)dwInteger;
+  double_t fRemainder = x - (double_t)dwInteger;
 
   if (x < 0.0) {
 
@@ -116,7 +116,7 @@ double rint(double x)
     } /* end if */
   } /* end else */
 
-  retValue = (double)dwInteger;
+  retValue = (double_t)dwInteger;
 #endif
 
   return retValue;

@@ -76,27 +76,27 @@ static int user_main(int argc, char *argv[])
 {
   int i;
 
-  printf("%s: Started with argc=%d\n", __FUNCTION__, argc);
+  printf("user_main: Started with argc=%d\n", argc);
 
   /* Verify passed arguments */
 
   if (argc != NARGS + 1)
     {
-      fprintf(stderr, "%s: Error expected argc=%d got argc=%d\n",
-              __FUNCTION__, NARGS+1, argc);
+      fprintf(stderr, "user_main: Error expected argc=%d got argc=%d\n",
+              NARGS+1, argc);
     }
 
   for (i = 0; i <= NARGS; i++)
     {
-      printf("%s: argv[%d]=\"%s\"\n", __FUNCTION__, i, argv[i]);
+      printf("user_main: argv[%d]=\"%s\"\n", i, argv[i]);
     }
 
   for (i = 1; i <= NARGS; i++)
     {
       if (strcmp(argv[i], args[i-1]) != 0)
         {
-          fprintf(stderr, "%s: ERROR argv[%d]:  Expected \"%s\" found \"%s\"\n",
-                  __FUNCTION__, i, argv[i], args[i-1]);
+          fprintf(stderr, "user_main: ERROR argv[%d]:  Expected \"%s\" found \"%s\"\n",
+                  i, argv[i], args[i-1]);
         }
     }
 
@@ -158,9 +158,9 @@ int user_start(int parm1, int parm2, int parm3, int parm4)
   /* Verify that we can communicate */
 
   write(1, write_data1, sizeof(write_data1));
-  printf("%s: Standard I/O Check: printf\n", __FUNCTION__);
+  printf("user_start: Standard I/O Check: printf\n");
   write(2, write_data2, sizeof(write_data2));
-  fprintf(stderr, "%s: Standard I/O Check: fprintf to stderr\n", __FUNCTION__);
+  fprintf(stderr, "user_start: Standard I/O Check: fprintf to stderr\n");
 
   /* Verify that we can spawn a new task */
 
@@ -168,11 +168,11 @@ int user_start(int parm1, int parm2, int parm3, int parm4)
                        ARG1, ARG2, ARG3, ARG4);
   if (result == ERROR)
     {
-      fprintf(stderr, "%s: Failed to start user_main\n", __FUNCTION__);
+      fprintf(stderr, "user_start: Failed to start user_main\n");
     }
   else
     {
-       printf("%s: Started user_main at PID=%d\n", __FUNCTION__, result);
+       printf("user_start: Started user_main at PID=%d\n", result);
     }
   return 0;
 }

@@ -97,7 +97,7 @@ EXTERN int    atexit(void (*func)(void));
 /* String to binary conversions */
 #define atoi(nptr) strtol((nptr), (char**)NULL, 10)
 EXTERN long   strtol(const char *, char **, int);
-EXTERN double strtod(const char *, char **);
+EXTERN double_t strtod(const char *, char **);
 
 /* Memory Management */
 EXTERN void  *malloc(size_t);

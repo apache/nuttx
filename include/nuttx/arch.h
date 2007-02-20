@@ -405,7 +405,7 @@ EXTERN void sched_process_timer(void);
  *
  ***********************************************************/
 
-EXTERN void irq_dispatch(int irq, struct xcptcontext *xcp);
+EXTERN void irq_dispatch(int irq, void *context);
 
 /************************************************************
  * Debug interfaces exported by the architecture-specific

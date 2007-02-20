@@ -115,9 +115,9 @@ extern "C" {
 
 EXTERN void weak_function pthread_initialize(void);
 EXTERN int                pthread_completejoin(pid_t pid, void *exit_value);
-EXTERN join_t            *pthread_findjoininfo(int pid);
+EXTERN join_t            *pthread_findjoininfo(pid_t pid);
 EXTERN int                pthread_givesemaphore(sem_t *sem);
-EXTERN join_t            *pthread_removejoininfo(int pid);
+EXTERN join_t            *pthread_removejoininfo(pid_t pid);
 EXTERN int                pthread_takesemaphore(sem_t *sem);
 
 #undef EXTERN

@@ -87,13 +87,13 @@ int clock_settime(clockid_t clock_id, const struct timespec *tp)
 {
   int ret = OK;
 
-  dbg("%s: clock_id=%d\n", __FUNCTION__, clock_id);
+  dbg("clock_id=%d\n", clock_id);
 
   /* Only CLOCK_REALTIME is supported */
 
   if (clock_id != CLOCK_REALTIME || !tp) 
     {
-      dbg("%s: Returning ERROR\n", __FUNCTION__);
+      dbg("Returning ERROR\n");
       *get_errno_ptr() = EINVAL;
       ret = ERROR;
     }
@@ -109,8 +109,7 @@ int clock_settime(clockid_t clock_id, const struct timespec *tp)
 
       g_tickbias = g_system_timer;
 
-      dbg("%s: basetime=(%d,%d) tickbias=%d\n",
-          __FUNCTION__,
+      dbg("basetime=(%d,%d) tickbias=%d\n",
           (int)g_basetime.tv_sec, (int)g_basetime.tv_nsec,
           (int)g_tickbias);
   }

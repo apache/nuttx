@@ -89,15 +89,9 @@
 int pthread_setschedparam(pthread_t thread, int policy,
                           const struct sched_param *param)
 {
-  int ret;
-
-  dbg("%s: thread ID=%d policy=%d param=0x%p\n",
-      __FUNCTION__, thread.pid, policy, param);
+  dbg("thread ID=%d policy=%d param=0x%p\n", thread, policy, param);
 
   /* Let sched_setscheduler do all of the work */
 
-  ret = sched_setscheduler(thread.pid, policy, param);
-
-  dbg("%s: Returning %d\n", __FUNCTION__, ret);
-  return ret;
+  return sched_setscheduler((pid_t)thread, policy, param);
 }

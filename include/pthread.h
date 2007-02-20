@@ -40,10 +40,11 @@
  * Included Files
  ************************************************************/
 
-#include <nuttx/config.h> /* Default settings */
-#include <sys/types.h>    /* Needed for general types */
-#include <semaphore.h>    /* Needed for sem_t */
-#include <time.h>         /* Needed for struct timespec */
+#include <nuttx/config.h>   /* Default settings */
+#include <sys/types.h>      /* Needed for general types */
+#include <semaphore.h>      /* Needed for sem_t */
+#include <time.h>           /* Needed for struct timespec */
+#include <nuttx/compiler.h> /* For noreturn_function */
 
 /************************************************************
  * Compilation Switches
@@ -117,11 +118,7 @@ struct pthread_addr_s
 };
 typedef struct pthread_addr_s pthread_attr_t;
 
-struct pthread_s
-{
-  int pid;
-};
-typedef struct pthread_s pthread_t;
+typedef pid_t pthread_t;
 
 typedef int pthread_condattr_t;
 
@@ -215,7 +212,7 @@ EXTERN int pthread_detach(pthread_t thread);
  * execution of another thread.
  *----------------------------------------------------------*/
 
-EXTERN void pthread_exit(pthread_addr_t pvValue) __attribute__ ((noreturn));
+EXTERN void pthread_exit(pthread_addr_t pvValue) noreturn_function;
 EXTERN int  pthread_cancel(pthread_t thread);
 EXTERN int  pthread_setcancelstate(int state, int *oldstate);
 EXTERN void pthread_testcancel(void);
@@ -238,7 +235,7 @@ EXTERN void pthread_yield(void);
  * A thread may obtain a copy of its own thread handle.
  *----------------------------------------------------------*/
 
-EXTERN pthread_t pthread_self(void);
+#define pthread_self() ((pthread_t)getpid())
 
 /*----------------------------------------------------------*
  * Thread scheduling parameters

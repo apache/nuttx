@@ -98,13 +98,13 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
   join_t *pjoin;
   int ret;
 
-  dbg("%s: thread=%d\n", __FUNCTION__, thread.pid);
+  dbg("thread=%d\n", thread);
 
   /* First make sure that this is not an attempt to join to
    * ourself.
    */
 
-  if (thread.pid == getpid())
+  if ((pid_t)thread == getpid())
     {
       return EDEADLK;
     }
@@ -124,14 +124,14 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
    * was detached and has exitted.
    */
 
-  pjoin = pthread_findjoininfo(thread.pid);
+  pjoin = pthread_findjoininfo((pid_t)thread);
   if (!pjoin)
     {
       /* Determine what kind of error to return */
 
-      _TCB *tcb = sched_gettcb(thread.pid);
+      _TCB *tcb = sched_gettcb((pthread_t)thread);
 
-      dbg("%s: Could not find thread data\n", __FUNCTION__);
+      dbg("Could not find thread data\n");
 
       /* Case (1) or (3) -- we can't tell which.  Assume (3) */
 
@@ -153,26 +153,26 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
     }
   else if (pjoin->terminated)
     {
-      dbg("%s: Thread has terminated\n", __FUNCTION__);
+      dbg("Thread has terminated\n");
 
       /* Get the thread exit value from the terminated thread. */
 
       if (pexit_value)
         {
-          dbg("%s: exit_value=0x%p\n", __FUNCTION__, pjoin->exit_value);
+          dbg("exit_value=0x%p\n", pjoin->exit_value);
           *pexit_value = pjoin->exit_value;
         }
 
       /* Then remove and deallocate the thread entry. */
 
-      (void)pthread_removejoininfo(thread.pid);
+      (void)pthread_removejoininfo((pid_t)thread);
       (void)pthread_givesemaphore(&g_join_semaphore);
       sched_free(pjoin);
       ret = OK;
     }
   else
     {
-      dbg("%s: Thread is still running\n", __FUNCTION__);
+      dbg("Thread is still running\n");
 
       /* Relinquish the data set semaphore, making certain that
        * no task has the opportunity to run between the time
@@ -192,7 +192,7 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
       if (pexit_value)
         {
           *pexit_value = pjoin->exit_value;
-          dbg("%s: exit_value=0x%p\n", __FUNCTION__, pjoin->exit_value);
+          dbg("exit_value=0x%p\n", pjoin->exit_value);
         }
 
       /* Post the thread's join semaphore so that exitting thread
@@ -208,6 +208,6 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
       ret = OK;
     }
 
-  dbg("%s: Returning %d\n", __FUNCTION__, ret);
+  dbg("Returning %d\n", ret);
   return ret;
 }

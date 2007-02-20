@@ -48,17 +48,28 @@
 
 /* Debug macros to runtime filter the opsys debug messages */
 
+#ifdef __GNUC__
+# define EXTRA_FMT "%s: "
+# define EXTRA_ARG ,__FUNCTION__
+#else
+# define EXTRA_FMT
+# define EXTRA_ARG
+#endif
+
 #ifdef CONFIG_DEBUG
-# define dbg(format, arg...) lib_rawprintf(format, ##arg)
+# define dbg(format, arg...) \
+  lib_rawprintf(EXTRA_FMT format EXTRA_ARG, ##arg)
 
 # ifdef CONFIG_ARCH_LOWPUTC
-#  define lldbg(format, arg...) lib_lowprintf(format, ##arg)
+#  define lldbg(format, arg...) \
+     lib_lowprintf(EXTRA_FMT format EXTRA_ARG, ##arg)
 # else
 #  define lldbg(x...)
 # endif
 
 # ifdef CONFIG_DEBUG_VERBOSE
-#  define vdbg(format, arg...) lib_rawprintf(format, ##arg)
+#  define vdbg(format, arg...) \
+     lib_rawprintf(EXTRA_FMT format EXTRA_ARG, ##arg)
 # else
 #  define vdbg(x...)
 # endif

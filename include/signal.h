@@ -40,6 +40,7 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
 #include <time.h>      /* Needed for struct timespec */
 #include <sys/types.h> /* Needed for, e.g., sigset_t */
 
@@ -164,8 +165,12 @@ EXTERN int sigwaitinfo(const sigset_t *set,
 EXTERN int sigtimedwait(const sigset_t *set,
 			struct siginfo *value,
 			const struct timespec *timeout);
+#ifdef CONFIG_CAN_PASS_STRUCTS
 EXTERN int sigqueue(int tid, int signo,
 		    const union sigval value);
+#else
+EXTERN int sigqueue(int tid, int signo, void *sival_ptr);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

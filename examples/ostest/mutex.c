@@ -60,14 +60,14 @@ static void *thread_func(void *parameter)
       if (status != 0)
         {
           printf("ERROR thread %d: pthread_mutex_lock failed, status=%d\n",
-                      id, status);
+                  id, status);
         }
 
       if (my_mutex == 1)
         {
           printf("ERROR thread=%d: "
-                      "my_mutex should be zero, instead my_mutex=%d\n",
-                       id, my_mutex);
+                 "my_mutex should be zero, instead my_mutex=%d\n",
+                  id, my_mutex);
           nerrors[ndx]++;
         }
 
@@ -82,7 +82,7 @@ static void *thread_func(void *parameter)
       if (status != 0)
         {
           printf("ERROR thread %d: pthread_mutex_unlock failed, status=%d\n",
-                       id, status);
+                 id, status);
         }
     }
   pthread_exit(NULL);
@@ -114,7 +114,7 @@ void mutex_test(void)
   pthread_join(thread1, NULL);
   pthread_join(thread2, NULL);
 
-  printf("%s:\t\tThread1\tThread2\n", __FUNCTION__);
-  printf("%s:\tLoops\t%ld\t%ld\n", __FUNCTION__, nloops[0], nloops[1]);
-  printf("%s:\tErrors\t%ld\t%ld\n", __FUNCTION__, nerrors[0], nerrors[1]);
+  printf("\t\tThread1\tThread2\n");
+  printf("\tLoops\t%ld\t%ld\n", nloops[0], nloops[1]);
+  printf("\tErrors\t%ld\t%ld\n", nerrors[0], nerrors[1]);
 }

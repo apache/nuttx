@@ -88,7 +88,7 @@ int pthread_attr_getstacksize(pthread_attr_t *attr, long *stacksize)
 {
   int ret;
 
-  dbg("%s: attr=0x%p stacksize=0x%p\n", __FUNCTION__, attr, stacksize);
+  dbg("attr=0x%p stacksize=0x%p\n", attr, stacksize);
 
   if (!stacksize)
     {
@@ -100,7 +100,7 @@ int pthread_attr_getstacksize(pthread_attr_t *attr, long *stacksize)
       ret = OK;
     }
 
-  dbg("%s: Returning %d\n", __FUNCTION__, ret);
+  dbg("Returning %d\n", ret);
   return ret;
 }
 

@@ -88,7 +88,7 @@ int pthread_cond_signal(pthread_cond_t *cond)
   int ret = OK;
   int sval;
 
-  dbg("%s: cond=0x%p\n", __FUNCTION__, cond);
+  dbg("cond=0x%p\n", cond);
 
   if (!cond)
     {
@@ -110,16 +110,16 @@ int pthread_cond_signal(pthread_cond_t *cond)
 
       else
         {
-          dbg("%s: sval=%d\n", __FUNCTION__, sval);
+          dbg("sval=%d\n", sval);
           if (sval < 0)
             {
-              dbg("%s: Signalling...\n", __FUNCTION__);
+              dbg("Signalling...\n");
               ret = pthread_givesemaphore((sem_t*)&cond->sem);
             }
         }
     }
 
-  dbg("%s: Returning %d\n", __FUNCTION__, ret);
+  dbg("Returning %d\n", ret);
   return ret;
 }
 

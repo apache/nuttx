@@ -85,7 +85,7 @@ static void *sender_thread(void *arg)
   int nerrors = 0;
   int i;
 
-  printf("%s: Starting\n", __FUNCTION__);
+  printf("sender_thread: Starting\n");
 
   /* Fill in attributes for message queue */
 
@@ -107,7 +107,7 @@ static void *sender_thread(void *arg)
   mqfd = mq_open("testmq", O_WRONLY|O_CREAT, 0666, &attr);
   if (mqfd < 0)
     {
-	printf("%s: ERROR mq_open failed\n", __FUNCTION__);
+	printf("sender_thread: ERROR mq_open failed\n");
         pthread_exit((void*)1);
     }
 
@@ -122,12 +122,12 @@ static void *sender_thread(void *arg)
       status = mq_send(mqfd, msg_buffer, TEST_MSGLEN, 42);
       if (status < 0)
         {
-          printf("%s: ERROR mq_send failure=%d on msg %d\n", __FUNCTION__, status, i);
+          printf("sender_thread: ERROR mq_send failure=%d on msg %d\n", status, i);
           nerrors++;
         }
       else
         {
-          printf("%s: mq_send succeeded on msg %d\n", __FUNCTION__, i);
+          printf("sender_thread: mq_send succeeded on msg %d\n", i);
         }
     }
 
@@ -135,10 +135,10 @@ static void *sender_thread(void *arg)
 
   if (mq_close(mqfd) < 0)
     {
-      printf("%s: ERROR mq_close failed\n", __FUNCTION__);
+      printf("sender_thread: ERROR mq_close failed\n");
     }
 
-  printf("%s: returning nerrors=%d\n", __FUNCTION__, nerrors);
+  printf("sender_thread: returning nerrors=%d\n", nerrors);
   return (void*)nerrors;
 }
 
@@ -151,7 +151,7 @@ static void *receiver_thread(void *arg)
   int nerrors = 0;
   int i;
 
-  printf("%s: Starting\n", __FUNCTION__);
+  printf("receiver_thread: Starting\n");
 
   /* Fill in attributes for message queue */
 
@@ -173,7 +173,7 @@ static void *receiver_thread(void *arg)
    mqfd = mq_open("testmq", O_RDONLY|O_CREAT, 0666, &attr);
    if (mqfd < 0)
      {
-       printf("%s: ERROR mq_open failed\n", __FUNCTION__);
+       printf("receiver_thread: ERROR mq_open failed\n");
        pthread_exit((void*)1);
      }
 
@@ -184,33 +184,32 @@ static void *receiver_thread(void *arg)
       nbytes = mq_receive(mqfd, msg_buffer, TEST_MSGLEN, 0);
       if (nbytes < 0)
         {
-          printf("%s: ERROR mq_receive failure on msg %d\n", __FUNCTION__, i);
+          printf("receiver_thread: ERROR mq_receive failure on msg %d\n", i);
           nerrors++;
         }
       else if (nbytes != TEST_MSGLEN)
         {
-          printf("%s: mq_receive return bad size %d on msg %d\n", __FUNCTION__, nbytes, i);
+          printf("receiver_thread: mq_receive return bad size %d on msg %d\n", nbytes, i);
           nerrors++;
         }
       else if (memcmp(TEST_MESSAGE, msg_buffer, nbytes) != 0)
         {
           int j;
 
-          printf("%s: mq_receive returned corrupt message on msg %d\n", __FUNCTION__, i);
-          printf("%s:                  i  Expected Received\n", __FUNCTION__);
+          printf("receiver_thread: mq_receive returned corrupt message on msg %d\n", i);
+          printf("receiver_thread:                  i  Expected Received\n");
 
           for (j = 0; j < TEST_MSGLEN-1; j++)
             {
-              printf("%s:                  %2d %02x (%c) %02x\n",
-                     __FUNCTION__,
+              printf("receiver_thread:                  %2d %02x (%c) %02x\n",
                      j, TEST_MESSAGE[j], TEST_MESSAGE[j], msg_buffer[j] & 0x0ff);
             }
-          printf("%s:                  %2d 00     %02x\n",
-                  __FUNCTION__, j, msg_buffer[j] & 0xff);
+          printf("receiver_thread:                  %2d 00     %02x\n",
+                  j, msg_buffer[j] & 0xff);
         }
       else
         {
-          printf("%s: mq_receive succeeded on msg %d\n", __FUNCTION__, i);
+          printf("receiver_thread: mq_receive succeeded on msg %d\n", i);
         }
     }
 
@@ -218,7 +217,7 @@ static void *receiver_thread(void *arg)
 
   if (mq_close(mqfd) < 0)
     {
-      printf("%s: ERROR mq_close failed\n", __FUNCTION__);
+      printf("receiver_thread: ERROR mq_close failed\n");
       nerrors++;
     }
 
@@ -228,11 +227,11 @@ static void *receiver_thread(void *arg)
 
   if (mq_unlink("testmq") < 0)
     {
-      printf("%s: ERROR mq_close failed\n", __FUNCTION__);
+      printf("receiver_thread: ERROR mq_close failed\n");
       nerrors++;
     }
 
-  printf("%s: returning nerrors=%d\n", __FUNCTION__, nerrors);
+  printf("receiver_thread: returning nerrors=%d\n", nerrors);
   return (void*)nerrors;
 }
 
@@ -250,17 +249,17 @@ void mqueue_test(void)
 
   /* Start the sending thread at higher priority */
 
-  printf("%s: Starting receiver\n", __FUNCTION__);
+  printf("mqueue_test: Starting receiver\n");
   status = pthread_attr_init(&attr);
   if (status != 0)
     {
-      printf("%s: pthread_attr_init failed, status=%d\n", __FUNCTION__, status);
+      printf("mqueue_test: pthread_attr_init failed, status=%d\n", status);
     }
 
   status = pthread_attr_setstacksize(&attr, 16384);
   if (status != 0)
     {
-      printf("%s: pthread_attr_setstacksize failed, status=%d\n", __FUNCTION__, status);
+      printf("mqueue_test: pthread_attr_setstacksize failed, status=%d\n", status);
     }
 
   prio_min = sched_get_priority_min(SCHED_FIFO);
@@ -271,62 +270,62 @@ void mqueue_test(void)
   status = pthread_attr_setschedparam(&attr,&sparam);
   if (status != OK)
     {
-      printf("%s: pthread_attr_setschedparam failed, status=%d\n", __FUNCTION__, status);
+      printf("mqueue_test: pthread_attr_setschedparam failed, status=%d\n", status);
     }
   else
     {
-      printf("%s: Set receiver priority to %d\n", __FUNCTION__, sparam.sched_priority);
+      printf("mqueue_test: Set receiver priority to %d\n", sparam.sched_priority);
     }
 
   status = pthread_create(&receiver, &attr, receiver_thread, NULL);
   if (status != 0)
     {
-      printf("%s: pthread_create failed, status=%d\n", __FUNCTION__, status);
+      printf("mqueue_test: pthread_create failed, status=%d\n", status);
     }
 
   /* Start the sending thread at lower priority */
 
-  printf("%s: Starting sender\n", __FUNCTION__);
+  printf("mqueue_test: Starting sender\n");
   status = pthread_attr_init(&attr);
   if (status != 0)
     {
-      printf("%s: pthread_attr_init failed, status=%d\n", __FUNCTION__, status);
+      printf("mqueue_test: pthread_attr_init failed, status=%d\n", status);
     }
 
   status = pthread_attr_setstacksize(&attr, 16384);
   if (status != 0)
     {
-      printf("%s: pthread_attr_setstacksize failed, status=%d\n", __FUNCTION__, status);
+      printf("mqueue_test: pthread_attr_setstacksize failed, status=%d\n", status);
     }
 
   sparam.sched_priority = (prio_min + prio_mid) / 2;
   status = pthread_attr_setschedparam(&attr,&sparam);
   if (status != OK)
     {
-      printf("%s: pthread_attr_setschedparam failed, status=%d\n", __FUNCTION__, status);
+      printf("mqueue_test: pthread_attr_setschedparam failed, status=%d\n", status);
     }
   else
     {
-      printf("%s: Set sender thread priority to %d\n", __FUNCTION__, sparam.sched_priority);
+      printf("mqueue_test: Set sender thread priority to %d\n", sparam.sched_priority);
     }
 
   status = pthread_create(&sender, &attr, sender_thread, NULL);
   if (status != 0)
     {
-      printf("%s: pthread_create failed, status=%d\n", __FUNCTION__, status);
+      printf("mqueue_test: pthread_create failed, status=%d\n", status);
     }
 
   pthread_join(sender, &result);
   if (result != (void*)0)
     {
-      printf("%s: ERROR sender thread exited with %d errors\n", __FUNCTION__, (int)result);
+      printf("mqueue_test: ERROR sender thread exited with %d errors\n", (int)result);
     }
 
   pthread_cancel(receiver);
   pthread_join(receiver, &result);
   if (result != (void*)0)
     {
-      printf("%s: ERROR receiver thread exited with %d errors\n", __FUNCTION__, (int)result);
+      printf("mqueue_test: ERROR receiver thread exited with %d errors\n", (int)result);
     }
 }
 

@@ -807,7 +807,7 @@ int lib_vsprintf(struct lib_stream_s *obj, const char *src, va_list ap)
                   char tmpfmt[40];
                   const char *psrc;
                   char *pdst;
-                  double dbl;
+                  double_t dbl;
 
                   /* Reconstruct the floating point format. */
 
@@ -818,7 +818,7 @@ int lib_vsprintf(struct lib_stream_s *obj, const char *src, va_list ap)
 
                   /* Extract the floating point number. */
 
-                  dbl = va_arg(ap, double);
+                  dbl = va_arg(ap, double_t);
 
                   /* Then let the lib_sprintf do the work. */
 

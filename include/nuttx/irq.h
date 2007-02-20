@@ -60,11 +60,9 @@
 /* This struct defines the way the registers are stored */
 
 #ifndef __ASSEMBLY__
-struct xcptcontext; /* forward reference */
-
-typedef int (*xcpt_t)(int irq, struct xcptcontext *xcp);
+typedef int (*xcpt_t)(int irq, void *context);
 typedef int (*swint_t)(uint32 code, uint32 parm2, uint32 parm3,
-                        struct xcptcontext *xcp);
+                       void *context);
 #endif
 
 /* Now include architecture-specific types */

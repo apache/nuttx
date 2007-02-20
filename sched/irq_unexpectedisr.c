@@ -75,7 +75,7 @@
  *
  ************************************************************/
 
-int irq_unexpected_isr(int irq, struct xcptcontext *xcp)
+int irq_unexpected_isr(int irq, void *context)
 {
   (void)irqsave();
    PANIC(OSERR_UNEXPECTEDISR);

@@ -49,19 +49,19 @@ static void *thread_waiter(void *parameter)
 
   /* Take the mutex */
 
-  printf("%s: Taking mutex\n", __FUNCTION__);
+  printf("thread_waiter: Taking mutex\n");
   status = pthread_mutex_lock(&mutex);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_mutex_lock failed, status=%d\n", __FUNCTION__, status);
+      printf("thread_waiter: ERROR pthread_mutex_lock failed, status=%d\n", status);
     }
 
-  printf("%s: Starting 5 second wait for condition\n", __FUNCTION__);
+  printf("thread_waiter: Starting 5 second wait for condition\n");
 
   status = clock_gettime(CLOCK_REALTIME, &time);
   if (status != 0)
     {
-      printf("%s: ERROR clock_gettime failed\n", __FUNCTION__);
+      printf("thread_waiter: ERROR clock_gettime failed\n");
     }
   time.tv_sec += 5;
 
@@ -70,19 +70,19 @@ static void *thread_waiter(void *parameter)
   status = pthread_cond_timedwait(&cond, &mutex, &time);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_cond_timedwait failed, status=%d\n", __FUNCTION__, status);
+      printf("thread_waiter: ERROR pthread_cond_timedwait failed, status=%d\n", status);
     }
 
   /* Release the mutex */
 
-  printf("%s: Releasing mutex\n", __FUNCTION__);
+  printf("thread_waiter: Releasing mutex\n");
   status = pthread_mutex_unlock(&mutex);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_mutex_unlock failed, status=%d\n", __FUNCTION__, status);
+      printf("thread_waiter: ERROR pthread_mutex_unlock failed, status=%d\n", status);
     }
 
-  printf("%s: Exit with status 0x12345678\n", __FUNCTION__);
+  printf("thread_waiter: Exit with status 0x12345678\n");
   pthread_exit((void*)0x12345678);
   return NULL;
 }
@@ -98,36 +98,36 @@ void timedwait_test(void)
 
   /* Initialize the mutex */
 
-  printf("%s: Initializing mutex\n", __FUNCTION__);
+  printf("thread_waiter: Initializing mutex\n");
   status = pthread_mutex_init(&mutex, NULL);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_mutex_init failed, status=%d\n", __FUNCTION__, status);
+      printf("timedwait_test:  ERROR pthread_mutex_init failed, status=%d\n", status);
     }
 
   /* Initialize the condition variable */
 
-  printf("%s: Initializing cond\n", __FUNCTION__);
+  printf("timedwait_test:  Initializing cond\n");
   status = pthread_cond_init(&cond, NULL);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_condinit failed, status=%d\n", __FUNCTION__, status);
+      printf("timedwait_test:  ERROR pthread_condinit failed, status=%d\n", status);
     }
 
   /* Start the waiter thread at higher priority */
 
-  printf("%s: Starting waiter\n", __FUNCTION__);
+  printf("timedwait_test:  Starting waiter\n");
   status = pthread_attr_init(&attr);
   if (status != 0)
     {
-      printf("%s: pthread_attr_init failed, status=%d\n", __FUNCTION__, status);
+      printf("timedwait_test:  pthread_attr_init failed, status=%d\n", status);
     }
 
   prio_max = sched_get_priority_max(SCHED_FIFO);
   status = sched_getparam (getpid(), &sparam);
   if (status != 0)
     {
-      printf("%s: sched_getparam failed\n", __FUNCTION__);
+      printf("timedwait_test:  sched_getparam failed\n");
       sparam.sched_priority = PTHREAD_DEFAULT_PRIORITY;
     }
 
@@ -135,27 +135,27 @@ void timedwait_test(void)
   status = pthread_attr_setschedparam(&attr,&sparam);
   if (status != OK)
     {
-      printf("%s: pthread_attr_setschedparam failed, status=%d\n", __FUNCTION__, status);
+      printf("timedwait_test:  pthread_attr_setschedparam failed, status=%d\n", status);
     }
   else
     {
-      printf("%s: Set thread 2 priority to %d\n", __FUNCTION__, sparam.sched_priority);
+      printf("timedwait_test:  Set thread 2 priority to %d\n", sparam.sched_priority);
     }
 
   status = pthread_create(&waiter, &attr, thread_waiter, NULL);
   if (status != 0)
     {
-      printf("%s: pthread_create failed, status=%d\n", __FUNCTION__, status);
+      printf("timedwait_test:  pthread_create failed, status=%d\n", status);
     }
 
-  printf("%s: Joining\n", __FUNCTION__);
+  printf("timedwait_test:  Joining\n");
   status = pthread_join(waiter, &result);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_join failed, status=%d\n", __FUNCTION__, status);
+      printf("timedwait_test:  ERROR pthread_join failed, status=%d\n", status);
     }
   else
     {
-      printf("%s: waiter exited with result=%p\n", __FUNCTION__, result);
+      printf("timedwait_test:  waiter exited with result=%p\n", result);
     }
 }

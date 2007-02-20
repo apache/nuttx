@@ -297,7 +297,7 @@ int pthread_create(pthread_t *thread, pthread_attr_t *attr,
    */
 
   pid = (int)ptcb->pid;
-  pjoin->thread.pid = pid;
+  pjoin->thread = (pthread_t)pid;
 
   /* Initialize the semaphores in the join structure to zero. */
 
@@ -322,7 +322,7 @@ int pthread_create(pthread_t *thread, pthread_attr_t *attr,
 
       /* Return the thread information to the caller */
 
-      if (thread) thread->pid = pid;
+      if (thread) *thread = (pthread_t)pid;
       if (!pjoin->started) status = ERROR;
 
       sched_unlock();

@@ -67,7 +67,7 @@ int pthread_condattr_init(pthread_condattr_t *attr)
 {
   int ret = OK;
 
-  dbg("%s: attr=0x%p\n", __FUNCTION__, attr);
+  dbg("attr=0x%p\n", attr);
 
   if (!attr)
     {
@@ -78,7 +78,7 @@ int pthread_condattr_init(pthread_condattr_t *attr)
       *attr = 0;
     }
 
-  dbg("%s: Returning %d\n", __FUNCTION__, ret);
+  dbg("Returning %d\n", ret);
   return ret;
 }
 

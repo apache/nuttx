@@ -286,7 +286,7 @@ int vsscanf(char *buf, const char *s, va_list ap)
 		{
 		  /* strtod always returns a double */
 
-		  double dvalue = strtod(tmp, NULL);
+		  double_t dvalue = strtod(tmp, NULL);
 		  void *pv = va_arg(ap, void*);
 
 		  vdbg("vsscanf: Return %f to 0x%p\n", dvalue, pv);
@@ -295,11 +295,13 @@ int vsscanf(char *buf, const char *s, va_list ap)
 		   * float or a double.
 		   */
 
+#ifdef CONFIG_HAVE_DOUBLE
 		  if (lflag)
 		    {
-		      *((double*)pv) = dvalue;
+		      *((double_t*)pv) = dvalue;
 		    }
 		  else
+#endif
 		    {
 		      *((float*)pv) = (float)dvalue;
 		    }

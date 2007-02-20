@@ -92,8 +92,7 @@ int pthread_attr_getinheritsched(const pthread_attr_t *attr,
 {
   int ret;
 
-  dbg("%s: attr=0x%p inheritsched=0x%p\n",
-      __FUNCTION__,  attr, inheritsched);
+  dbg("attr=0x%p inheritsched=0x%p\n", attr, inheritsched);
 
   if (!attr || !inheritsched)
     {
@@ -105,7 +104,7 @@ int pthread_attr_getinheritsched(const pthread_attr_t *attr,
       ret = OK;
     }
 
-  dbg("%s: Returning %d\n", __FUNCTION__, ret);
+  dbg("Returning %d\n", ret);
   return ret;
 }
 

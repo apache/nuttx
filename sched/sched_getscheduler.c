@@ -103,7 +103,7 @@ int sched_getscheduler(pid_t pid)
 
   /* Verify that the pid corresponds to a real task */
 
-  if (pid = 0)
+  if (!pid)
     {
       tcb = (_TCB*)g_readytorun.head;
     }

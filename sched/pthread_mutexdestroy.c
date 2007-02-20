@@ -90,7 +90,7 @@ int pthread_mutex_destroy(pthread_mutex_t *mutex)
   int ret = OK;
   int status;
 
-  dbg("%s: mutex=0x%p\n", __FUNCTION__, mutex);
+  dbg("mutex=0x%p\n", mutex);
 
   if (!mutex)
     {
@@ -123,6 +123,6 @@ int pthread_mutex_destroy(pthread_mutex_t *mutex)
       sched_unlock();
     }
 
-  dbg("%s: Returning %d\n", __FUNCTION__, ret);
+  dbg("Returning %d\n", ret);
   return ret;
 }

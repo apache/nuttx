@@ -64,27 +64,27 @@ int dev_null(void)
   fd = open("/dev/null", O_RDWR);
   if (fd < 0)
     {
-      fprintf(stderr, "%s: Failed to open /dev/null\n", __FUNCTION__);
+      fprintf(stderr, "dev_null: Failed to open /dev/null\n");
       return -1;
     }
 
   nbytes = read(fd, buffer, 1024);
   if (nbytes < 0)
     {
-      fprintf(stderr, "%s: Failed to read from /dev/null\n", __FUNCTION__);
+      fprintf(stderr, "dev_null: Failed to read from /dev/null\n");
       close(fd);
       return -1;
     }
-  printf("%s: Read %d bytes from /dev/null\n", __FUNCTION__, nbytes);
+  printf("dev_null: Read %d bytes from /dev/null\n", nbytes);
 
   nbytes = write(fd, buffer, 1024);
   if (nbytes < 0)
     {
-      fprintf(stderr, "%s: Failed to write to /dev/null\n", __FUNCTION__);
+      fprintf(stderr, "dev_null: Failed to write to /dev/null\n");
       close(fd);
       return -1;
     }
-  printf("%s: Wrote %d bytes to /dev/null\n", __FUNCTION__, nbytes);
+  printf("dev_null: Wrote %d bytes to /dev/null\n", nbytes);
 
   close(fd);
   return 0;

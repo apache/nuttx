@@ -40,6 +40,7 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
 #include <arch/types.h>
 
 /************************************************************
@@ -109,6 +110,12 @@
 /************************************************************
  * Type Declarations
  ************************************************************/
+
+#ifndef CONFIG_HAVE_DOUBLE
+typedef float  double_t;
+#else
+typedef double double_t;
+#endif
 
 /* Misc. scalar types */
 

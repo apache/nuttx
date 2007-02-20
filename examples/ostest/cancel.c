@@ -48,24 +48,24 @@ static void *thread_waiter(void *parameter)
 
   /* Take the mutex */
 
-  printf("%s: Taking mutex\n", __FUNCTION__);
+  printf("thread_waiter: Taking mutex\n");
   status = pthread_mutex_lock(&mutex);
   if (status != 0)
     {
-       printf("%s: ERROR pthread_mutex_lock failed, status=%d\n", __FUNCTION__, status);
+       printf("thread_waiter: ERROR pthread_mutex_lock failed, status=%d\n", status);
     }
 
-  printf("%s: Starting wait for condition\n", __FUNCTION__);
+  printf("thread_waiter: Starting wait for condition\n");
 
   /* Are we a non-cancelable thread?   Yes, set the non-cancelable state */
 
   if (!parameter)
     {
-      printf("%s: Setting non-cancelable\n", __FUNCTION__);
+      printf("thread_waiter: Setting non-cancelable\n");
       status = pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
       if (status != 0)
         {
-           printf("%s: ERROR pthread_setcancelstate failed, status=%d\n", __FUNCTION__, status);
+           printf("thread_waiter: ERROR pthread_setcancelstate failed, status=%d\n", status);
         }
     }
 
@@ -74,28 +74,28 @@ static void *thread_waiter(void *parameter)
   status = pthread_cond_wait(&cond, &mutex);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_cond_wait failed, status=%d\n", __FUNCTION__, status);
+      printf("thread_waiter: ERROR pthread_cond_wait failed, status=%d\n", status);
     }
 
   /* Release the mutex */
 
-  printf("%s: Releasing mutex\n", __FUNCTION__);
+  printf("thread_waiter: Releasing mutex\n");
   status = pthread_mutex_unlock(&mutex);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_mutex_unlock failed, status=%d\n", __FUNCTION__, status);
+      printf("thread_waiter: ERROR pthread_mutex_unlock failed, status=%d\n", status);
     }
 
   /* Set the cancelable state */
 
-  printf("%s: Setting cancelable\n", __FUNCTION__);
+  printf("thread_waiter: Setting cancelable\n");
   status = pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_setcancelstate failed, status=%d\n", __FUNCTION__, status);
+      printf("thread_waiter: ERROR pthread_setcancelstate failed, status=%d\n", status);
     }
 
-  printf("%s: Exit with status 0x12345678\n", __FUNCTION__);
+  printf("thread_waiter: Exit with status 0x12345678\n");
   pthread_exit((void*)0x12345678);
   return NULL;
 }
@@ -107,20 +107,20 @@ static void start_thread(pthread_t *waiter, int cancelable)
 
   /* Initialize the mutex */
 
-  printf("%s: Initializing mutex\n", __FUNCTION__);
+  printf("start_thread: Initializing mutex\n");
   status = pthread_mutex_init(&mutex, NULL);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_mutex_init failed, status=%d\n", __FUNCTION__, status);
+      printf("start_thread: ERROR pthread_mutex_init failed, status=%d\n", status);
     }
 
   /* Initialize the condition variable */
 
-  printf("%s: Initializing cond\n", __FUNCTION__);
+  printf("start_thread: Initializing cond\n");
   status = pthread_cond_init(&cond, NULL);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_cond_init failed, status=%d\n", __FUNCTION__, status);
+      printf("start_thread: ERROR pthread_cond_init failed, status=%d\n", status);
     }
 
   /* Set up attributes */
@@ -128,27 +128,27 @@ static void start_thread(pthread_t *waiter, int cancelable)
   status = pthread_attr_init(&attr);
   if (status != 0)
     {
-      printf("%s: pthread_attr_init failed, status=%d\n", __FUNCTION__, status);
+      printf("start_thread: pthread_attr_init failed, status=%d\n", status);
     }
 
   status = pthread_attr_setstacksize(&attr, 16384);
   if (status != 0)
     {
-      printf("%s: pthread_attr_setstacksize failed, status=%d\n", __FUNCTION__, status);
+      printf("start_thread: pthread_attr_setstacksize failed, status=%d\n", status);
     }
 
   /* Start the waiter thread  */
 
-  printf("%s: Starting thread\n", __FUNCTION__);
+  printf("start_thread: Starting thread\n");
   status = pthread_create(waiter, NULL, thread_waiter, (void*)cancelable);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_create failed, status=%d\n", __FUNCTION__, status);
+      printf("start_thread: ERROR pthread_create failed, status=%d\n", status);
     }
 
   /* Make sure that the waiter thread gets a chance to run */
 
-  printf("%s: Yielding\n", __FUNCTION__);
+  printf("start_thread: Yielding\n");
   pthread_yield();
 
 }
@@ -159,25 +159,25 @@ static void restart_thread(pthread_t *waiter, int cancelable)
 
   /* Destroy the condition variable */
 
-  printf("%s: Destroying cond\n", __FUNCTION__);
+  printf("restart_thread: Destroying cond\n");
   status = pthread_cond_destroy(&cond);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_cond_destroy failed, status=%d\n", __FUNCTION__, status);
+      printf("restart_thread: ERROR pthread_cond_destroy failed, status=%d\n", status);
     }
 
   /* Destroy the mutex */
 
-  printf("%s: Destroying mutex\n", __FUNCTION__);
+  printf("restart_thread: Destroying mutex\n");
   status = pthread_cond_destroy(&cond);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_mutex_destroy failed, status=%d\n", __FUNCTION__, status);
+      printf("restart_thread: ERROR pthread_mutex_destroy failed, status=%d\n", status);
     }
 
   /* Then restart the thread */
 
-  printf("%s: Re-starting thread\n", __FUNCTION__);
+  printf("restart_thread: Re-starting thread\n");
   start_thread(waiter, cancelable);
 }
 
@@ -190,44 +190,44 @@ void cancel_test(void)
   /* Test 1: Normal Cancel *********************************************/
   /* Start the waiter thread  */
 
-  printf("%s: Test 1: Normal Cancelation\n", __FUNCTION__);
-  printf("%s: Starting thread\n", __FUNCTION__);
+  printf("cancel_test: Test 1: Normal Cancelation\n");
+  printf("cancel_test: Starting thread\n");
   start_thread(&waiter, 1);
 
   /* Then cancel it.  It should be in the pthread_cond_wait now */
 
-  printf("%s: Canceling thread\n", __FUNCTION__);
+  printf("cancel_test: Canceling thread\n");
   status = pthread_cancel(waiter);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_cancel failed, status=%d\n", __FUNCTION__, status);
+      printf("cancel_test: ERROR pthread_cancel failed, status=%d\n", status);
     }
 
   /* Then join to the thread to pick up the result */
 
-  printf("%s: Joining\n", __FUNCTION__);
+  printf("cancel_test: Joining\n");
   status = pthread_join(waiter, &result);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_join failed, status=%d\n", __FUNCTION__, status);
+      printf("cancel_test: ERROR pthread_join failed, status=%d\n", status);
     }
   else
     {
-      printf("%s: waiter exited with result=%p\n", __FUNCTION__, result);
+      printf("cancel_test: waiter exited with result=%p\n", result);
       if (result != PTHREAD_CANCELED)
         {
-          printf("%s: ERROR expected result=%p\n", __FUNCTION__, PTHREAD_CANCELED);
+          printf("cancel_test: ERROR expected result=%p\n", PTHREAD_CANCELED);
         }
       else
         {
-          printf("%s: PASS thread terminated with PTHREAD_CANCELED\n", __FUNCTION__);
+          printf("cancel_test: PASS thread terminated with PTHREAD_CANCELED\n");
         }
     }
 
   /* Test 2: Cancel Detached Thread ************************************/
 
-  printf("%s: Test 2: Cancelation of detached thread\n", __FUNCTION__);
-  printf("%s: Re-starting thread\n", __FUNCTION__);
+  printf("cancel_test: Test 2: Cancelation of detached thread\n");
+  printf("cancel_test: Re-starting thread\n");
   restart_thread(&waiter, 1);
 
   /* Detach the thread */
@@ -235,39 +235,39 @@ void cancel_test(void)
   status = pthread_detach(waiter);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_detach, status=%d\n", __FUNCTION__, status);
+      printf("cancel_test: ERROR pthread_detach, status=%d\n", status);
     }
 
   /* Then cancel it.  It should be in the pthread_cond_wait now */
 
-  printf("%s: Canceling thread\n", __FUNCTION__);
+  printf("cancel_test: Canceling thread\n");
   status = pthread_cancel(waiter);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_cancel failed, status=%d\n", __FUNCTION__, status);
+      printf("cancel_test: ERROR pthread_cancel failed, status=%d\n", status);
     }
 
   /* Join should now fail */
 
-  printf("%s: Joining\n", __FUNCTION__);
+  printf("cancel_test: Joining\n");
   status = pthread_join(waiter, &result);
   if (status == 0)
     {
-      printf("%s: ERROR pthread_join succeeded\n", __FUNCTION__);
+      printf("cancel_test: ERROR pthread_join succeeded\n");
     }
   else if (status != ESRCH)
     {
-      printf("%s: ERROR pthread_join failed but with wrong status=%d\n", __FUNCTION__, status);
+      printf("cancel_test: ERROR pthread_join failed but with wrong status=%d\n", status);
     }
   else
     {
-      printf("%s: PASS pthread_join failed with status=ESRCH\n", __FUNCTION__);
+      printf("cancel_test: PASS pthread_join failed with status=ESRCH\n");
     }
 
   /* Test 3: Non-cancelable threads ************************************/
 
-  printf("%s: Test 3: Non-cancelable threads\n", __FUNCTION__);
-  printf("%s: Re-starting thread (non-cancelable)\n", __FUNCTION__);
+  printf("cancel_test: Test 3: Non-cancelable threads\n");
+  printf("cancel_test: Re-starting thread (non-cancelable)\n");
   restart_thread(&waiter, 0);
 
   /* Then cancel it.  It should be in the pthread_cond_wait now.  The
@@ -277,11 +277,11 @@ void cancel_test(void)
    * The cancelation should succeed, because the cancelation is pending.
    */
 
-  printf("%s: Canceling thread\n", __FUNCTION__);
+  printf("cancel_test: Canceling thread\n");
   status = pthread_cancel(waiter);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_cancel failed, status=%d\n", __FUNCTION__, status);
+      printf("cancel_test: ERROR pthread_cancel failed, status=%d\n", status);
     }
 
   /* Signal the thread.  It should wake up an restore the cancelable state.
@@ -291,18 +291,18 @@ void cancel_test(void)
   status = pthread_mutex_lock(&mutex);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_mutex_lock failed, status=%d\n", __FUNCTION__, status);
+      printf("cancel_test: ERROR pthread_mutex_lock failed, status=%d\n", status);
     }
 
   status = pthread_cond_signal(&cond);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_cond_signal failed, status=%d\n", __FUNCTION__, status);
+      printf("cancel_test: ERROR pthread_cond_signal failed, status=%d\n", status);
     }
 
   status = pthread_mutex_unlock(&mutex);
   if (status != 0)
     {
-      printf("%s: ERROR pthread_mutex_unlock failed, status=%d\n", __FUNCTION__, status);
+      printf("cancel_test: ERROR pthread_mutex_unlock failed, status=%d\n", status);
     }
 }

@@ -113,7 +113,7 @@ void mm_takesemaphore(void)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      msemdbg("%s: PID=%d taking\n", __FUNCTION__, my_pid);
+      msemdbg("PID=%d taking\n", my_pid);
       while (sem_wait(&g_mm_semaphore) != 0)
        {
          /* The only case that an error should occur here is if
@@ -129,8 +129,8 @@ void mm_takesemaphore(void)
       g_counts_held = 1;
     }
 
-  msemdbg("%s: Holder=%d count=%d\n",
-          __FUNCTION__, g_holder, g_counts_held);
+  msemdbg("Holder=%d count=%d\n",
+          g_holder, g_counts_held);
 }
 
 /************************************************************
@@ -152,14 +152,14 @@ void mm_givesemaphore(void)
       /* Yes, just release one count and return */
 
       g_counts_held--;
-      msemdbg("%s: Holder=%d count=%d\n",
-              __FUNCTION__, g_holder, g_counts_held);
+      msemdbg("Holder=%d count=%d\n",
+              g_holder, g_counts_held);
     }
   else
     {
       /* Nope, this is the last reference I have */
 
-      msemdbg("%s: PID=%d giving\n", __FUNCTION__, my_pid);
+      msemdbg("PID=%d giving\n", my_pid);
       g_holder = -1;
       g_counts_held = 0;
       ASSERT(sem_post(&g_mm_semaphore) == 0);

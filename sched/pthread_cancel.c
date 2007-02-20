@@ -77,7 +77,7 @@ int pthread_cancel(pthread_t thread)
 
   /* First, make sure that the handle references a valid thread */
 
-  if (!thread.pid)
+  if (!thread)
     {
       /* pid == 0 is the IDLE task.  Callers cannot cancel the
        * IDLE task.
@@ -86,7 +86,7 @@ int pthread_cancel(pthread_t thread)
       return ESRCH;
     }
 
-  tcb = sched_gettcb(thread.pid);
+  tcb = sched_gettcb((pid_t)thread);
   if (!tcb)
     {
       /* The pid does not correspond to any known thread */
@@ -132,11 +132,11 @@ int pthread_cancel(pthread_t thread)
 
   /* Complete pending join operations */
 
-  (void)pthread_completejoin(thread.pid, PTHREAD_CANCELED);
+  (void)pthread_completejoin((pid_t)thread, PTHREAD_CANCELED);
 
   /* Then let pthread_delete do the real work */
 
-  task_delete(thread.pid);
+  task_delete((pid_t)thread);
   return OK;
 }
 

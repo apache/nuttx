@@ -145,7 +145,7 @@ mqmsg_t *mq_msgalloc(void)
 
           else
             {
-              dbg("%s: Out of messages\n", __FUNCTION__);
+              dbg("Out of messages\n");
               PANIC((uint32)OSERR_OUTOFMESSAGES);
             }
         }

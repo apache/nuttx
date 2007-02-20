@@ -90,15 +90,15 @@ int pthread_detach(pthread_t thread)
   join_t *pjoin;
   int ret;
 
-  dbg("%s: Thread=%d\n", __FUNCTION__, thread.pid);
+  dbg("Thread=%d\n", thread);
 
   /* Find the entry associated with this pthread. */
 
   (void)pthread_takesemaphore(&g_join_semaphore);
-  pjoin = pthread_findjoininfo(thread.pid);
+  pjoin = pthread_findjoininfo((pid_t)thread);
   if (!pjoin)
     {
-      dbg("%s: Could not find thread entry\n", __FUNCTION__);
+      dbg("Could not find thread entry\n");
       ret = EINVAL;
     }
   else
@@ -109,7 +109,7 @@ int pthread_detach(pthread_t thread)
         {
           /* YES.. just remove the thread entry. */
 
-          (void)pthread_removejoininfo(thread.pid);
+          (void)pthread_removejoininfo((pid_t)thread);
           sched_free(pjoin);
           pjoin = NULL;
         }
@@ -129,6 +129,6 @@ int pthread_detach(pthread_t thread)
     }
   (void)pthread_givesemaphore(&g_join_semaphore);
 
-  dbg("%s: Returning %d\n", __FUNCTION__, ret);
+  dbg("Returning %d\n", ret);
   return ret;
 }

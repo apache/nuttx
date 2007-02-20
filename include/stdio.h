@@ -200,6 +200,7 @@ typedef void DIR;
 
 /* Used to reference stdin, stdout, and stderr */
 
+#ifdef CONFIG_HAVE_INLINE
 static inline FILE *__stdfile(int fd)
 {
   if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
@@ -212,6 +213,9 @@ static inline FILE *__stdfile(int fd)
     }
   return NULL;
 }
+#else
+extern FILE *__stdfile(int fd);
+#endif
 
 /************************************************************
  * Public Function Prototypes

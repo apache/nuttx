@@ -76,7 +76,7 @@
  *
  ***********************************************************/
 
-void irq_dispatch(int irq, struct xcptcontext *xcp)
+void irq_dispatch(int irq, void *context)
 {
   xcpt_t vector;
 
@@ -93,6 +93,6 @@ void irq_dispatch(int irq, struct xcptcontext *xcp)
 
   /* Then dispatch to the interrupt handler */
 
-  vector(irq, xcp);
+  vector(irq, context);
 }
 

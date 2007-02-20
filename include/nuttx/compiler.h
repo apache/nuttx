@@ -49,7 +49,7 @@
   extern __typeof (name) aliasname __attribute__ ((weak, alias (#name)));
 # define weak_function __attribute__ ((weak))
 # define weak_const_function __attribute__ ((weak, __const__))
-# define noreturn_function
+# define noreturn_function __attribute__ ((noreturn))
 #else
 # define weak_alias(name, aliasname)
 # define weak_function
