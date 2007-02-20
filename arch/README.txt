@@ -149,17 +149,15 @@ include/types.h
 
 include/irq.h
   This file needs to define some architecture specific functions (usually
-  inline) and structure.  These include:
+  inline if the compiler supports inlining) and structure.  These include:
 
   - struct xcptcontext.  This structures represents the saved context
     of a thread.
 
-  - static inline uint32 irqsave(void) -- Used to disable
-    all interrupts.
+  - uint32 irqsave(void) -- Used to disable all interrupts.
 
-  - static inline void irqrestore(uint32 flags) -- Used to
-    restore interrupts enables to the same state as before irqsave
-    was called.
+  - void irqrestore(uint32 flags) -- Used to restore interrupt
+    enables to the same state as before irqsave was called.
 
   This file must also define NR_IRQS, the total number of IRQs supported
   by the board.
