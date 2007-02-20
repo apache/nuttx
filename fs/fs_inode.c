@@ -53,8 +53,11 @@
 #include "fs_internal.h"
 
 /************************************************************
- * Private types
+ * Definitions
  ************************************************************/
+
+#define INODE_SEMGIVE() \
+  sem_post(&tree_sem)
 
 /************************************************************
  * Private Variables
@@ -86,10 +89,7 @@ static void _inode_semtake(void)
     }
 }
 
-static inline void _inode_semgive(void)
-{
-  sem_post(&tree_sem);
-}
+#define _inode_semgive(void) sem_post(&tree_sem)
 
 static int _inode_compare(const char *fname,
                            struct inode *node)
@@ -152,20 +152,20 @@ static int _inode_compare(const char *fname,
     }
 }
 
-static inline int _inode_namelen(const char *name)
+static int _inode_namelen(const char *name)
 {
   const char *tmp = name;
   while(*tmp && *tmp != '/') tmp++;
   return tmp - name;
 }
 
-static inline void _inode_namecpy(char *dest, const char *src)
+static void _inode_namecpy(char *dest, const char *src)
 {
   while(*src && *src != '/') *dest++ = *src++;
   *dest='\0';
 }
 
-static inline const char *_inode_nextname(const char *name)
+static const char *_inode_nextname(const char *name)
 {
    while (*name && *name != '/') name++;
    if (*name) name++;

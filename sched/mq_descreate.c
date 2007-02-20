@@ -88,7 +88,7 @@
  *
  ************************************************************/
 
-static inline mqd_t mq_desalloc(void)
+static mqd_t mq_desalloc(void)
 {
   mqd_t mqdes;
 

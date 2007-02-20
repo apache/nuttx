@@ -55,22 +55,13 @@
  * Definitions
  ************************************************************/
 
+#define DUP_ISOPEN(fd, list) \
+  ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS && \
+   list->fl_files[fd].f_inode != NULL)
+
 /************************************************************
  * Private Functions
  ************************************************************/
-
-static inline boolean dup_isopen(int fd, struct filelist *list)
-{
-  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS ||
-       list->fl_files[fd].f_inode == NULL)
-    {
-      return FALSE;
-    }
-  else
-    {
-      return TRUE;
-    }
-}
 
 /************************************************************
  * Global Functions
@@ -92,7 +83,7 @@ int dup(int fildes)
 
  /* Verify that fildes is a valid, open file descriptor */
 
-  if (!dup_isopen(fildes, list))
+  if (!DUP_ISOPEN(fildes, list))
     {
       *get_errno_ptr() = EBADF;
       return ERROR;
@@ -131,7 +122,7 @@ int dup2(int fildes1, int fildes2)
 
  /* Verify that fildes is a valid, open file descriptor */
 
-  if (!dup_isopen(fildes1, list))
+  if (!DUP_ISOPEN(fildes1, list))
     {
       *get_errno_ptr() = EBADF;
       return ERROR;

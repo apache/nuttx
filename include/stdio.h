@@ -99,9 +99,9 @@
 
 /* The first three _iob entries are reserved for standard I/O */
 
-#define stdin  (__stdfile(0))
-#define stdout (__stdfile(1))
-#define stderr (__stdfile(2))
+#define stdin  (&sched_getstreams()->sl_streams[0])
+#define stdout (&sched_getstreams()->sl_streams[1])
+#define stderr (&sched_getstreams()->sl_streams[2])
 
 /* These APIs are not implemented and/or can be synthesized from
  * supported APIs.
@@ -193,29 +193,6 @@ typedef void DIR;
 /************************************************************
  * Public Variables
  ************************************************************/
-
-/************************************************************
- * Inline Functions
- ************************************************************/
-
-/* Used to reference stdin, stdout, and stderr */
-
-#ifdef CONFIG_HAVE_INLINE
-static inline FILE *__stdfile(int fd)
-{
-  if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
-    {
-      struct streamlist *streams = sched_getstreams();
-      if (streams)
-        {
-          return &streams->sl_streams[fd];
-        }
-    }
-  return NULL;
-}
-#else
-extern FILE *__stdfile(int fd);
-#endif
 
 /************************************************************
  * Public Function Prototypes

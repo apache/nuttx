@@ -67,19 +67,15 @@
  * Function: mq_desfree
  *
  * Description:
- *   Deallocate a message queue descriptor
+ *   Deallocate a message queue descriptor but returning it
+ *   to the free liest
  *
  * Inputs:
  *   mqdes - message queue descriptor to free
  *
  ************************************************************/
 
-static inline void mq_desfree(mqd_t mqdes)
-{
-  /* Just put it back on the free list */
-
-  sq_addlast((sq_entry_t*)mqdes, &g_desfree);
-}
+#define mq_desfree(mqdes) sq_addlast((sq_entry_t*)mqdes, &g_desfree)
 
 /************************************************************
  * Public Functions

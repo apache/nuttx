@@ -81,7 +81,7 @@
  *
  ************************************************************/
 
-static inline time_t clock_gregorian2utc(int year, int month, int day)
+static time_t clock_gregorian2utc(int year, int month, int day)
 {
   int temp;
 
@@ -95,7 +95,7 @@ static inline time_t clock_gregorian2utc(int year, int month, int day)
 }
 
 #ifdef CONFIG_JULIAN_TIME
-static inline time_t clock_julian2utc(int year, int month, int day)
+static time_t clock_julian2utc(int year, int month, int day)
 {
   return 367*year
     - (7*(year + 5001 + (month-9)/7))/4

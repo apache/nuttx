@@ -72,7 +72,7 @@
  * Private Functions
  ************************************************************/
 
-static inline void sched_process_timeslice(void)
+static void sched_process_timeslice(void)
 {
 #if CONFIG_RR_INTERVAL > 0
   _TCB *rtcb;

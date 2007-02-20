@@ -86,10 +86,7 @@ static void _files_semtake(struct filelist *list)
     }
 }
 
-static inline void _files_semgive(struct filelist *list)
-{
-  sem_post(&list->fl_sem);
-}
+#define _files_semgive(list) sem_post(&list->fl_sem)
 
 /************************************************************
  * Pulblic Functions

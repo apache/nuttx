@@ -123,7 +123,6 @@ static int     up_close(struct file *filep);
 static ssize_t up_read(struct file *filep, char *buffer, size_t buflen);
 static ssize_t up_write(struct file *filep, const char *buffer, size_t buflen);
 static int     up_ioctl(struct file *filep, int cmd, unsigned long arg);
-static void    up_consoleinit(up_dev_t *dev);
 static void    up_uartsetup(up_dev_t *dev);
 static void    up_delay(int milliseconds);
 
@@ -590,7 +589,7 @@ static void up_xmitchars(up_dev_t *dev)
  * serial driver.
  */
 
-static int up_interrupt(int irq, struct xcptcontext *xcp)
+static int up_interrupt(int irq, void *context)
 {
   up_dev_t         *dev;
   volatile uint32 cause;

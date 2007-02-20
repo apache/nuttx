@@ -71,10 +71,7 @@ static void _lib_semtake(struct streamlist *list)
     }
 }
 
-static inline void _lib_semgive(struct streamlist *list)
-{
-  sem_post(&list->sl_sem);
-}
+#define _lib_semgive(list) sem_post(&list->sl_sem)
 
 /************************************************************
  * Public Functions

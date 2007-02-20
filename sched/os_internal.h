@@ -229,10 +229,6 @@ extern pidhash_t g_pidhash[MAX_TASKS_ALLOWED];
 extern const tasklist_t g_tasklisttable[NUM_TASK_STATES];
 
 /************************************************************
- * Public Inline Functions
- ************************************************************/
-
-/************************************************************
  * Public Function Prototypes
  ************************************************************/
 
