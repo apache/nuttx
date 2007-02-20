@@ -118,7 +118,12 @@ __start:
 
 	b	os_start
 
-	/* Variables */
+	/* Variables:
+	 * _sbss is the start of the BSS region (see ld.script)
+	 * _ebss is the end of the BSS regsion (see ld.script)
+	 * The idle task stack starts at the end of BSS and is
+	 * of size CONFIG_PROC_STACK_SIZE
+	 */
 
 LC0:	.long	_sbss
 	.long	_ebss

@@ -88,7 +88,6 @@ struct up_dev_s
 					 * registers */
   unsigned int         baud_base;	/* Base baud for conversions */
   unsigned int         baud;		/* Configured baud */
-  int                  quotient;	/* Quotient for configured baud */
   ubyte                xmit_fifo_size;	/* Size of transmit FIFO */
   ubyte                irq;		/* IRQ associated with
 					 * this UART */
@@ -102,6 +101,7 @@ struct up_dev_s
 					 * for space in xmit.buffer */
   boolean              recvwaiting;	/* TRUE: User is waiting
 					 * for space in recv.buffer */
+  boolean              isconsole;       /* TRUE: This is the serila console */
   sem_t                closesem;	/* Looks out new opens while
 					 * close is in progress */
   sem_t                xmitsem;		/* Used to wakeup user waiting
@@ -214,9 +214,7 @@ static inline uint32 up_inserial(up_dev_t *dev, uint32 offset)
   return getreg32(dev->uartbase + offset);
 }
 
-static inline void up_serialout(up_dev_t *dev,
-                              uint32 offset,
-                              uint32 value)
+static inline void up_serialout(up_dev_t *dev, uint32 offset, uint32 value)
 {
   putreg32(value, dev->uartbase + offset);
 }
@@ -255,16 +253,16 @@ static inline void up_enablerxint(up_dev_t *dev)
   up_serialout(dev, UART_IER_OFFS, dev->regs.ier);
 }
 
-static inline void up_disableuartint(up_dev_t *dev, uint16 *msr)
+static inline void up_disableuartint(up_dev_t *dev, uint16 *ier)
 {
-  *msr = dev->regs.ier & UART_IER_AllInts;
+  *ier = dev->regs.ier & UART_IER_AllInts;
   dev->regs.ier &= ~UART_IER_AllInts;
   up_serialout(dev, UART_IER_OFFS, dev->regs.ier);
 }
 
-static inline void up_restoreuartint(up_dev_t *dev, uint16 msr)
+static inline void up_restoreuartint(up_dev_t *dev, uint16 ier)
 {
-  dev->regs.ier |= msr & (UART_IER_RecvInt|UART_IER_XmitInt);
+  dev->regs.ier |= ier & (UART_IER_RecvInt|UART_IER_XmitInt);
   up_serialout(dev, UART_IER_OFFS, dev->regs.ier);
 }
 
@@ -423,7 +421,7 @@ static inline ubyte up_txfifonotfull(up_dev_t *dev)
   return (up_inserial(dev, UART_SSR_OFFS) & UART_SSR_TXFULL) == 0;
 }
 
-static inline void up_waitforxmtr(up_dev_t *dev)
+static inline void up_waittxfifonotfull(up_dev_t *dev)
 {
   int tmp;
   for (tmp = 1000 ; tmp > 0 ; tmp--)
@@ -554,7 +552,7 @@ static inline void up_recvchars(up_dev_t *dev)
  * up_write adds data to the head of the xmit buffer.
  */
 
-static inline void up_xmitchars(up_dev_t *dev)
+static void up_xmitchars(up_dev_t *dev)
 {
   /* Send while we still have data & room in the fifo */
 
@@ -668,28 +666,8 @@ static int up_interrupt(int irq, struct xcptcontext *xcp)
 
 static void up_uartsetup(up_dev_t *dev)
 {
-  uint32  flags;
-  uint16  mrs;
-
-  flags = irqsave();
-
-  up_saveregisters(dev);
-  up_disableuartint(dev, &mrs);
-  up_clearfifos(dev);
-  up_disablebreaks(dev);
-  up_settxtrigger(dev, UART_FCR_FTL);
-  up_setrxtrigger(dev, UART_FCR_FTL);
-
-  irqrestore(flags);
-}
-
-/************************************************************
- * up_cval
- ************************************************************/
-
-static unsigned int up_cval(up_dev_t *dev)
-{
   unsigned int cval;
+  uint16  mrs;
 
   if (dev->bits == 7)
     {
@@ -714,67 +692,13 @@ static unsigned int up_cval(up_dev_t *dev)
       cval |= (UART_LCR_ParEn|UART_LCR_ParEven);
     }
 
-  return cval;
-}
-
-/************************************************************
- * Name: up_portstartup
- ************************************************************/
-
-static int up_portstartup(up_dev_t *dev)
-{
-  uint32   flags;
-  unsigned cval = up_cval(dev);
-  int      quotient = 0;
-  uint16   ier;
-  int      ret = OK;
-
-  flags = irqsave();
-
+  up_serialreset(dev);
   up_saveregisters(dev);
-  up_disableuartint(dev, &ier);
+  up_disableuartint(dev, &mrs);
   up_clearfifos(dev);
   up_disablebreaks(dev);
-
-  /* Attache and enabled the IRQ */
-
-  ret = irq_attach(dev->irq, up_interrupt);
-  if (ret != OK)
-    {
-      goto errout;
-    }
-
-  /* Mark the io buffers empty */
-
-  dev->xmit.head = 0;
-  dev->xmit.tail = 0;
-  dev->recv.head = 0;
-  dev->recv.tail = 0;
-
-  /* And set the speed of the serial port */
-
-  /* Determine divisor based on baud rate */
-
-  if (dev->baud == 134)
-    {
-      /* Special case since 134 is really 134.5 */
-
-      quotient = (2*dev->baud_base / 269);
-    }
-  else if (dev->baud)
-    {
-      quotient = (dev->baud_base / dev->baud) - 1;
-    }
-
-  /* If the quotient is zero, default to 9600 bps */
-
-  if (!quotient && dev->baud_base != dev->baud)
-    {
-      quotient = (dev->baud_base / 9600) - 1;
-    }
-
-  /* Set up parity check flag */
-
+  up_settxtrigger(dev, UART_FCR_FTL);
+  up_setrxtrigger(dev, UART_FCR_FTL);
   up_setrate(dev, dev->baud);
   up_setmode(dev, cval);
 
@@ -786,16 +710,6 @@ static int up_portstartup(up_dev_t *dev)
     {
       serial_disable_hw_flow_control(dev);
     }
-
-  /* Finally, enable interrupts */
-
-  up_enable_irq(dev->irq);
-  up_enablerxint(dev);
-  ret = 0;
-
-errout:
-  irqrestore(flags);
-  return ret;
 }
 
 /************************************************************
@@ -881,7 +795,10 @@ static ssize_t up_write(struct file *filep, const char *buffer, size_t buflen)
   if (dev->xmit.head != dev->xmit.tail)
     {
       up_xmitchars(dev);
-      up_enabletxint(dev);
+      if (dev->xmit.head != dev->xmit.tail)
+        {
+          up_enabletxint(dev);
+        }
     }
 
   return ret;
@@ -945,14 +862,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-    case TIOCSERCONFIG:
-      {
-        shutdown(dev);
-        up_uartsetup(dev);
-        ret = up_portstartup(dev);
-      }
-      break;
-
     case TIOCSERGSTRUCT:
       {
          up_dev_t *user = (up_dev_t*)arg;
@@ -1038,6 +947,7 @@ static int up_close(struct file *filep)
 
   shutdown(dev);
   up_givesem(&dev->closesem);
+  return OK;
  }
 
 /************************************************************
@@ -1064,8 +974,39 @@ static int up_open(struct file *filep)
 
   if (++dev->open_count == 1)
     {
-       up_uartsetup(dev);
-       ret = up_portstartup(dev);
+      int flags = irqsave();
+
+      /* If this is the console, then the UART has already
+       * been initialized.
+       */
+
+      if (!dev->isconsole)
+        {
+          up_uartsetup(dev);
+        }
+
+      /* But, in any event, we do have to configure for
+       * interrupt driven mode of operation.
+       */
+
+      /* Attache and enabled the IRQ */
+
+      ret = irq_attach(dev->irq, up_interrupt);
+      if (ret == OK)
+        {
+          /* Mark the io buffers empty */
+
+          dev->xmit.head = 0;
+          dev->xmit.tail = 0;
+          dev->recv.head = 0;
+          dev->recv.tail = 0;
+
+          /* Finally, enable interrupts */
+
+          up_enable_irq(dev->irq);
+          up_enablerxint(dev);
+        }
+      irqrestore(flags);
     }
 
   up_givesem(&dev->closesem);
@@ -1095,26 +1036,6 @@ static void up_devinit(up_dev_t *dev,
 }
 
 /************************************************************
- * Name: up_consoleinit
- ************************************************************/
-
-static void up_consoleinit(up_dev_t *dev)
-{
-  unsigned cval = up_cval(dev);
-  uint16   ier;
-
-  up_serialreset(dev);
-  up_saveregisters(dev);
-  up_disableuartint(dev, &ier);
-  up_clearfifos(dev);
-  up_setrate(dev, dev->baud);
-  up_setmode(dev, cval);
-  up_delay(5);
-
-  dev->open_count = 1;
-}
-
-/************************************************************
  * Public Funtions
  ************************************************************/
 
@@ -1141,7 +1062,8 @@ void up_earlyserialinit(void)
 
   /* Configure the console for use now */
 
-  up_consoleinit(&CONSOLE_DEV);
+  CONSOLE_DEV.isconsole = TRUE;
+  up_uartsetup(&CONSOLE_DEV);
 }
 
 /************************************************************
@@ -1174,7 +1096,7 @@ int up_putc(int ch)
   uint16  ier;
 
   up_disableuartint(&CONSOLE_DEV, &ier);
-  up_waitforxmtr(&CONSOLE_DEV);
+  up_waittxfifonotfull(&CONSOLE_DEV);
   up_outserialchar(&CONSOLE_DEV, ch);
 
   /* Check for LF */
@@ -1183,10 +1105,11 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_waitforxmtr(&CONSOLE_DEV);
+      up_waittxfifonotfull(&CONSOLE_DEV);
       up_outserialchar(&CONSOLE_DEV, 13);
     }
 
-  up_waitforxmtr(&CONSOLE_DEV);
+  up_waittxfifonotfull(&CONSOLE_DEV);
   up_restoreuartint(&CONSOLE_DEV, ier);
+  return ch;
 }

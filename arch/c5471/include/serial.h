@@ -48,8 +48,7 @@
 
 #define TIOCSBRK        0x5401  /* BSD compatibility */
 #define TIOCCBRK        0x5402  /* " " "           " */
-#define TIOCSERCONFIG   0x5403  /* Reconfigure the port */
-#define TIOCSERGSTRUCT  0x5458  /* Get up_dev_t for port */
+#define TIOCSERGSTRUCT  0x5403  /* Get up_dev_t for port */
 
 /************************************************************
  * Private Data
