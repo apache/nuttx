@@ -110,6 +110,10 @@ extern void up_serialinit(void);
 
 extern void up_timerinit(void);
 
+/* Defined in up_irq.c */
+
+extern void up_maskack_irq(int irq);
+
 #endif /* __ASSEMBLY__ */
 
 #endif  /* __UP_INTERNAL_H */

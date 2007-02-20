@@ -41,6 +41,7 @@
 #include <sys/types.h>
 #include <debug.h>
 #include <nuttx/arch.h>
+#include <nuttx/fs.h>
 #include "up_internal.h"
 
 /************************************************************
