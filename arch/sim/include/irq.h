@@ -44,6 +44,8 @@
  * Included Files
  ************************************************************/
 
+#include <sys/types.h>
+
 /************************************************************
  * Definitions
  ************************************************************/
@@ -72,12 +74,12 @@ struct xcptcontext
  ************************************************************/
 
 #ifndef __ASSEMBLY__
-static inline uint32 irqsave(void)
+static inline irqstate_t irqsave(void)
 {
   return 0;
 }
 
-static inline void irqrestore(uint32 flags)
+static inline void irqrestore(irqstate_t flags)
 {
 }
 #endif

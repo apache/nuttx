@@ -142,7 +142,18 @@ include/types.h
   This provides architecture/toolchain-specific definitions for
   standard types.  This file should typedef:
 
-  sbyte, ubyte, uint8, boolean, sint16, uint16, sint32, uint32, sint64, uint64
+    sbyte, ubyte, uint8, boolean, sint16, uint16, sint32, uint32
+
+  and
+
+    sint64, uint64
+
+  if the architecture supports 64-bit integers.
+
+    irqstate_t
+
+  Must be defined to the be the size required to hold the interrupt
+  enable/disable state.
 
   This file will be included by include/sys/types.h and be made
   available to all files.
@@ -154,9 +165,9 @@ include/irq.h
   - struct xcptcontext.  This structures represents the saved context
     of a thread.
 
-  - uint32 irqsave(void) -- Used to disable all interrupts.
+  - irqstate_t irqsave(void) -- Used to disable all interrupts.
 
-  - void irqrestore(uint32 flags) -- Used to restore interrupt
+  - void irqrestore(irqstate_t flags) -- Used to restore interrupt
     enables to the same state as before irqsave was called.
 
   This file must also define NR_IRQS, the total number of IRQs supported

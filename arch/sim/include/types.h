@@ -52,6 +52,10 @@
  * Type Declarations
  ************************************************************/
 
+#ifndef __ASSEMBLY__
+
+/* These are the sizes of the standard GNU types */
+
 typedef char sbyte;
 typedef unsigned char ubyte;
 typedef unsigned char uint8;
@@ -62,6 +66,14 @@ typedef int sint32;
 typedef unsigned int uint32;
 typedef long long sint64;
 typedef unsigned long long uint64;
+
+/* This is the size of the interrupt state save returned by
+ * irqsave()
+ */
+
+typedef unsigned int irqstate_t;
+
+#endif /* __ASSEMBLY__ */
 
 /************************************************************
  * Global Function Prototypes

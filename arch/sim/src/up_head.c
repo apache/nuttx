@@ -64,13 +64,13 @@ int main(int argc, char **argv, char **envp)
   return 0;
 }
 
-void up_assert(const ubyte *filename, uint32 line)
+void up_assert(const ubyte *filename, int line)
 {
   fprintf(stderr, "Assertion failed at file:%s line: %d\n", filename, line);
   longjmp(sim_abort, 1);
 }
 
-void up_assert_code(const ubyte *filename, uint32 line, uint16 code)
+void up_assert_code(const ubyte *filename, int line, int code)
 {
   fprintf(stderr, "Assertion failed at file:%s line: %d error code: %d\n", filename, line, code);
   longjmp(sim_abort, 1);

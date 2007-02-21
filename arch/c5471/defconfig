@@ -132,6 +132,8 @@ CONFIG_ARCH_KFREE=n
 #
 # General Compile environment setup
 #
+# CONFIG_SMALL_MEMORY - enable if your processor supports
+#   16-bit addressing; disable if it supports 32-bit.
 # CONFIG_HAVE_INLINE - enable if your compiler supports
 #   inline functions
 # CONFIG_HAVE_DOUBLE - enable if your compiler supports type
@@ -139,21 +141,26 @@ CONFIG_ARCH_KFREE=n
 # CONFIG_HAVE_LONG_LONG - enable if your architecture supports
 #   long long types and if you plan to use them
 # CONFIG_CAN_PASS_STRUCTS - enable if your compiler supports
-#   passing structures and unions as values
+#   passing and assiging structures and unions as values
+# CONFIG_CAN_CAST_POINTERS - enable if you can cast between
+#   integers and pointer.
 # CONFIG_HAVE_WEAKFUNCTIONS - enable if you compiler supports
 #   weak functions (see include/nuttx/comp
 #
+CONFIG_SMALL_MEMORY=n
 CONFIG_HAVE_INLINE=y
 CONFIG_HAVE_DOUBLE=y
 CONFIG_HAVE_LONG_LONG=n
 CONFIG_CAN_PASS_STRUCTS=y
+CONFIG_CAN_CAST_POINTERS=y
 CONFIG_HAVE_WEAKFUNCTIONS=y
 
 #
 # General build options
 #
-# CONFIG_RRLOAD_BINY - make the rrload binary format used with
+# CONFIG_RRLOAD_BINARY - make the rrload binary format used with
 #   BSPs from www.ridgerun.com
+#
 CONFIG_RRLOAD_BINARY=y
 
 #
@@ -175,6 +182,8 @@ CONFIG_RRLOAD_BINARY=y
 # CONFIG_MQ_MAXMSGSIZE - Message structures are allocated with
 #   a fixed payload size given by this settin (does not include
 #   other message structure overhead.
+# CONFIG_MAX_WDOGPARMS - Maximum number of parameters that
+#   can be passed to a watchdog handler
 # CONFIG_PREALLOC_WDOGS - The number of pre-allocated watchdog
 #   structures.  The system manages a pool of preallocated
 #   watchdog structures to minimize dynamic allocations
@@ -186,6 +195,7 @@ CONFIG_STDIO_BUFFER_SIZE=1024
 CONFIG_NUNGET_CHARS=2
 CONFIG_PREALLOC_MQ_MSGS=32
 CONFIG_MQ_MAXMSGSIZE=32
+CONFIG_MAX_WDOGPARMS=4
 CONFIG_PREALLOC_WDOGS=32
 
 #

@@ -81,18 +81,19 @@
  *
  ************************************************************/
 
-STATUS up_use_stack(_TCB *tcb, uint32 *stack, uint32 stack_size)
+STATUS up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
 {
   /* Move up to next even word boundary if necessary */
 
-  uint32 adj_stack_size = stack_size & ~3;
-  uint32 adj_stack_words = adj_stack_size >> 2;
+  size_t adj_stack_size = stack_size & ~3;
+  size_t adj_stack_words = adj_stack_size >> 2;
 
   /* This is the address of the last word in the allocation */
 
-  uint32 *adj_stack_ptr = &stack[adj_stack_words - 1];
+  size_t *adj_stack_ptr = &stack[adj_stack_words - 1];
 
   /* Save the values in the TCB */
+
   tcb->adj_stack_size  = adj_stack_size;
   tcb->stack_alloc_ptr = stack;
   tcb->adj_stack_ptr   = adj_stack_ptr;

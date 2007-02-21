@@ -721,7 +721,7 @@ static void up_uartsetup(up_dev_t *dev)
 
 static void shutdown(up_dev_t * dev)
 {
-  uint32 flags;
+  irqstate_t flags;
   uint16 msr;
 
   /* Free the IRQ */
@@ -878,7 +878,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
-        uint32 flags = irqsave();
+        irqstate_t flags = irqsave();
         up_enablebreaks(dev);
         irqrestore(flags);
       }
@@ -886,7 +886,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
       {
-        uint32 flags;
+        irqstate_t flags;
         flags = irqsave();
         up_disablebreaks(dev);
         irqrestore(flags);
@@ -973,7 +973,7 @@ static int up_open(struct file *filep)
 
   if (++dev->open_count == 1)
     {
-      int flags = irqsave();
+      irqstate_t flags = irqsave();
 
       /* If this is the console, then the UART has already
        * been initialized.

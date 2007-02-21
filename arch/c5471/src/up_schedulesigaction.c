@@ -101,7 +101,7 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
 
   if (!tcb->xcp.sigdeliver)
     {
-      uint32 flags;
+      irqstate_t flags;
 
       /* Make sure that interrupts are disabled */
 
