@@ -49,7 +49,7 @@ COBJS	= $(CSRCS:.c=.o)
 SRCS	= $(ASRCS) $(CSRCS)
 OBJS	= $(AOBJS) $(COBJS)
 
-all: up_head.o libarch.a
+all: up_head.o libarch$(LIBEXT)
 
 $(AOBJS): %.o: %.S
 	$(CC) -c $(CFLAGS) -D__ASSEMBLY__ $< -o $@
@@ -57,8 +57,11 @@ $(AOBJS): %.o: %.S
 $(COBJS) up_head.o: %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
-libarch.a: $(OBJS)
-	$(AR) rcs $@ $(OBJS)
+libarch$(LIBEXT): $(OBJS)
+	( for obj in $(OBJS) ; do \
+		$(AR) $@ $${obj} || \
+			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
+	done ; )
 
 .depend: Makefile $(SRCS)
 	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
@@ -67,7 +70,7 @@ libarch.a: $(OBJS)
 depend: .depend
 
 clean:
-	rm -f libarch.a *.o *~
+	rm -f libarch$(LIBEXT) *.o *~
 
 distclean: clean
 	rm -f Make.dep .depend

@@ -61,8 +61,13 @@
  *   losses.
  */
 
-#define MM_MIN_SHIFT      4  /* 16 bytes */
-#define MM_MAX_SHIFT     22  /* 4 Mb */
+#ifdef CONFIG_SMALL_MEMORY
+# define MM_MIN_SHIFT      4  /* 16 bytes */
+# define MM_MAX_SHIFT     15  /* 32 Kb */
+#else
+# define MM_MIN_SHIFT      4  /* 16 bytes */
+# define MM_MAX_SHIFT     22  /*  4 Mb */
+#endif
 
 /* All other definitions derive from these two */
 
@@ -79,7 +84,11 @@
  * an allocated chunk.
  */
 
-#define MM_ALLOC_BIT     0x80000000
+#ifdef CONFIG_SMALL_MEMORY
+# define MM_ALLOC_BIT    0x8000
+#else
+# define MM_ALLOC_BIT    0x80000000
+#endif
 #define MM_IS_ALLOCATED(n) \
   ((int)((struct mm_allocnode_s*)(n)->preceding) < 0))
 
@@ -94,11 +103,16 @@
 
 struct mm_allocnode_s
 {
-  uint32 size;           /* Size of this chunk */
-  uint32 preceding;      /* Size of the preceding chunk */
+  size_t size;           /* Size of this chunk */
+  size_t preceding;      /* Size of the preceding chunk */
 };
 
-#define SIZEOF_MM_ALLOCNODE    8
+#ifdef CONFIG_SMALL_MEMORY
+# define SIZEOF_MM_ALLOCNODE   4
+#else
+# define SIZEOF_MM_ALLOCNODE   8
+#endif
+
 #define CHECK_ALLOCNODE_SIZE \
   DEBUGASSERT(sizeof(struct mm_allocnode_s) == SIZEOF_MM_ALLOCNODE)
 
@@ -106,13 +120,17 @@ struct mm_allocnode_s
 
 struct mm_freenode_s
 {
-  uint32 size;                 /* Size of this chunk */
-  uint32 preceding;            /* Size of the preceding chunk */
+  size_t size;                 /* Size of this chunk */
+  size_t preceding;            /* Size of the preceding chunk */
   struct mm_freenode_s *flink; /* Supports a doubly linked list */
   struct mm_freenode_s *blink;
 };
 
-#define SIZEOF_MM_FREENODE	16
+#ifdef CONFIG_SMALL_MEMORY
+# define SIZEOF_MM_FREENODE    10
+#else
+# define SIZEOF_MM_FREENODE    16
+#endif
 #define CHECK_FREENODE_SIZE    \
   DEBUGASSERT(sizeof(struct mm_freenode_s) == SIZEOF_MM_FREENODE)
 
@@ -138,7 +156,7 @@ struct mallinfo
 
 /* This is the size of the heap provided to mm */
 
-extern uint32  g_heapsize;
+extern size_t  g_heapsize;
 
 /* This is the first and last nodes of the heap */
 
@@ -168,9 +186,9 @@ extern struct mm_freenode_s g_nodelist[MM_NNODES];
  extern struct mallinfo mallinfo(void);
 #endif
 
-extern void   mm_shrinkchunk(struct mm_allocnode_s *node, uint32 size);
+extern void   mm_shrinkchunk(struct mm_allocnode_s *node, size_t size);
 extern void   mm_addfreechunk(struct mm_freenode_s *node);
-extern int    mm_size2ndx(uint32 size);
+extern int    mm_size2ndx(size_t size);
 extern void   mm_seminitialize(void);
 extern void   mm_takesemaphore(void);
 extern void   mm_givesemaphore(void);

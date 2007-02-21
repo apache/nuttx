@@ -78,9 +78,9 @@ void *realloc(void *oldmem, size_t size)
   struct mm_allocnode_s *oldnode;
   struct mm_freenode_s  *prev;
   struct mm_freenode_s  *next;
-  uint32 oldsize;
-  uint32 prevsize = 0;
-  uint32 nextsize = 0;
+  size_t oldsize;
+  size_t prevsize = 0;
+  size_t nextsize = 0;
 
   /* If oldmem is NULL, then realloc is equivalent to malloc */
 
@@ -145,9 +145,9 @@ void *realloc(void *oldmem, size_t size)
 
   if (nextsize + prevsize + oldsize >= size)
     {
-      uint32 needed = size - oldsize;
-      uint32 takeprev;
-      uint32 takenext;
+      size_t needed = size - oldsize;
+      size_t takeprev;
+      size_t takenext;
 
       /* Check if we can extend into the previous chunk and if the
        * previous chunk is smaller than the next chunk.

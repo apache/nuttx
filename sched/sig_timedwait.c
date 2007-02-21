@@ -38,6 +38,7 @@
  ************************************************************/
 
 #include <sys/types.h>
+#include <string.h>
 #include <signal.h>
 #include <time.h>
 #include <wdog.h>
@@ -76,11 +77,24 @@
  *  A timeout elapsed while waiting for signals to be queued.
  ************************************************************/
 
-static void sig_timeout(int itcb, int parm2, int parm3, int parm4)
+static void sig_timeout(int argc, uint32 itcb, ...)
 {
-  _TCB *wtcb = (_TCB*)itcb;
+  /* On many small machines, pointers are encoded and cannot
+   * be simply cast from uint32 to _TCB*.  The following
+   * union works around this (see wdogparm_t).  This odd
+   * logic could be conditioned on CONFIG_CAN_CAST_POINTERS,
+   * but it is not too bad in any case.
+   */
 
-  if (!wtcb)
+  union
+    {
+      _TCB  *wtcb;
+      uint32 itcb;
+    } u;
+
+   u.itcb = itcb;
+
+  if (!u.wtcb)
     {
       PANIC(OSERR_TIMEOUTNOTCB);
     }
@@ -89,12 +103,12 @@ static void sig_timeout(int itcb, int parm2, int parm3, int parm4)
    * still waiting for a signal
    */
 
-  if (wtcb->task_state == TSTATE_WAIT_SIG)
+  if (u.wtcb->task_state == TSTATE_WAIT_SIG)
     {
-      wtcb->sigunbinfo.si_signo = ERROR;
-      wtcb->sigunbinfo.si_code = SI_TIMEOUT;
-      wtcb->sigunbinfo.si_value.sival_int = 0;
-      up_unblock_task(wtcb);
+      u.wtcb->sigunbinfo.si_signo = ERROR;
+      u.wtcb->sigunbinfo.si_code = SI_TIMEOUT;
+      u.wtcb->sigunbinfo.si_value.sival_int = 0;
+      up_unblock_task(u.wtcb);
     }
 }
 
@@ -150,7 +164,7 @@ int sigtimedwait(const sigset_t *set, struct siginfo *info,
   sigset_t       intersection;
   sigpendq_t    *sigpend;
   WDOG_ID        wdog;
-  uint32         saved_state;
+  irqstate_t     saved_state;
   sint32         waitticks;
   int            ret = ERROR;
 
@@ -184,7 +198,10 @@ int sigtimedwait(const sigset_t *set, struct siginfo *info,
 
       /* Return the signal info to the caller if so requested */
 
-      if (info) *info = sigpend->info;
+      if (info)
+        {
+          memcpy(info, &sigpend->info, sizeof(struct siginfo));
+        }
 
       /* Then dispose of the pending signal structure properly */
 
@@ -218,10 +235,18 @@ int sigtimedwait(const sigset_t *set, struct siginfo *info,
           wdog = wd_create();
           if (wdog)
             {
+              /* This little of nonsense is necessary for some
+               * processors where sizeof(pointer) < sizeof(uint32).
+               * see wdog.h.
+               */
+
+              wdparm_t wdparm;
+              wdparm.pvarg = (void*)rtcb;
+
               /* Start the watchdog */
 
               wd_start(wdog, waitticks, (wdentry_t)sig_timeout,
-                       (int)rtcb, 0, 0, 0);
+                       1, wdparm.dwarg);
 
               /* Now wait for either the signal or the watchdog */
 
@@ -252,7 +277,7 @@ int sigtimedwait(const sigset_t *set, struct siginfo *info,
 
       if (info)
         {
-          *info = rtcb->sigunbinfo;
+          memcpy(info, &rtcb->sigunbinfo, sizeof(struct siginfo));
         }
       irqrestore(saved_state);
 

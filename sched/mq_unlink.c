@@ -89,9 +89,9 @@
 
 int mq_unlink(const char *mq_name)
 {
-  msgq_t *msgq;
-  uint32  saved_state;
-  int     ret = ERROR;
+  msgq_t    *msgq;
+  irqstate_t saved_state;
+  int        ret = ERROR;
 
   /* Verify the input values */
 

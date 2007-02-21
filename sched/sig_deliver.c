@@ -83,12 +83,12 @@
 
 void sig_deliver(_TCB *stcb)
 {
-  pid_t    rpid;
-  sigq_t  *sigq;
-  sigq_t  *next;
-  sigset_t savesigprocmask;
-  uint32   saved_state;
-  int      saved_errno;
+  pid_t      rpid;
+  sigq_t    *sigq;
+  sigq_t    *next;
+  sigset_t   savesigprocmask;
+  irqstate_t saved_state;
+  int        saved_errno;
 
   sched_lock();
 

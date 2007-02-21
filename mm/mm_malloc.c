@@ -144,7 +144,7 @@ void *malloc(size_t size)
     {
       struct mm_freenode_s *remainder;
       struct mm_freenode_s *next;
-      uint32 remaining;
+      size_t remaining;
 
       /* Remove the node.  There must be a predecessor, but there may
        * not be a successor node.

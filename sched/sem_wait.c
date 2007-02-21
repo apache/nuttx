@@ -99,9 +99,9 @@
 
 int sem_wait (sem_t *sem)
 {
-  _TCB  *rtcb = (_TCB*)g_readytorun.head;
-  int    ret = ERROR;
-  uint32 saved_state;
+  _TCB      *rtcb = (_TCB*)g_readytorun.head;
+  int        ret = ERROR;
+  irqstate_t saved_state;
 
   /* Assume any errors reported are due to invalid arguments. */
 

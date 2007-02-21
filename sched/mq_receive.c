@@ -114,13 +114,13 @@
 
 int mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio)
 {
-  _TCB     *rtcb;
-  _TCB     *btcb;
-  msgq_t   *msgq;
-  mqmsg_t  *curr;
-  uint32    saved_state;
-  ubyte     rcvmsglen;
-  int       ret = ERROR;
+  _TCB      *rtcb;
+  _TCB      *btcb;
+  msgq_t    *msgq;
+  mqmsg_t   *curr;
+  irqstate_t saved_state;
+  ubyte      rcvmsglen;
+  int        ret = ERROR;
 
   /* Verify the input parameters */
 

@@ -40,7 +40,7 @@ MKDEP		= $(TOPDIR)/tools/mkdeps.sh
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=.o)
 
-MISC_SRCS	= os_start.c get_errno_ptr.c \
+MISC_SRCS	= os_start.c get_errno_ptr.c get_errorptr.c \
 		  sched_setupstreams.c sched_getfiles.c sched_getstreams.c \
 		  sched_setupidlefiles.c sched_setuptaskfiles.c sched_setuppthreadfiles.c \
 		  sched_releasefiles.c
@@ -101,7 +101,7 @@ COBJS		= $(CSRCS:.c=.o)
 SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
 
-BIN		= libsched.a
+BIN		= libsched$(LIBEXT)
 
 all:	$(BIN)
 
@@ -112,7 +112,10 @@ $(COBJS): %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(BIN): $(OBJS)
-	$(AR) rcs $@ $(OBJS)
+	( for obj in $(OBJS) ; do \
+		$(AR) $@ $${obj} || \
+			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
+	done ; )
 
 .depend: Makefile $(SRCS)
 	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep

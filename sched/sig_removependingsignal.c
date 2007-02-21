@@ -84,8 +84,9 @@
 
 sigpendq_t *sig_removependingsignal(_TCB *stcb, int signo)
 {
-  sigpendq_t *currsig, *prevsig;
-  uint32      saved_state;
+  sigpendq_t *currsig;
+  sigpendq_t *prevsig;
+  irqstate_t  saved_state;
 
   saved_state = irqsave();
   for (prevsig = NULL, currsig = (sigpendq_t*)stcb->sigpendingq.head;

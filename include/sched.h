@@ -171,17 +171,19 @@ struct _TCB
 
   /* Stack-Related Fields *********************************************/
 
-  uint32  adj_stack_size;         /* Stack size after adjustment      */
+  size_t  adj_stack_size;         /* Stack size after adjustment      */
                                   /* for hardware, processor, etc.    */
                                   /* (for debug purposes only)        */
-  uint32 *stack_alloc_ptr;        /* Pointer to allocated stack       */
+  void   *stack_alloc_ptr;        /* Pointer to allocated stack       */
                                   /* Need to deallocate stack         */
-  uint32 *adj_stack_ptr;          /* Adjusted StatckAllocPtr for HW   */
+  void   *adj_stack_ptr;          /* Adjusted StatckAllocPtr for HW   */
                                   /* The initial stack pointer value  */
 
   /* POSIX thread Specific Data ***************************************/
 
+#if CONFIG_NPTHREAD_KEYS > 0
   void   *pthread_data[CONFIG_NPTHREAD_KEYS];
+#endif
 
   /* POSIX Semaphore Control Fields ***********************************/
 

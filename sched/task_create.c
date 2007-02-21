@@ -377,11 +377,7 @@ STATUS task_init(_TCB *tcb, char *name, int priority,
 STATUS task_activate(_TCB *tcb)
 {
 #ifdef CONFIG_SCHED_INSTRUMENTATION
-  uint32  flags;
-#endif
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-  flags = irqsave();
+  irqstate_t flags = irqsave();
 
   /* Check if this is really a re-start */
 

@@ -94,8 +94,8 @@
 
 mqmsg_t *mq_msgalloc(void)
 {
-  mqmsg_t *mqmsg;
-  uint32  saved_state;
+  mqmsg_t   *mqmsg;
+  irqstate_t saved_state;
 
   /* If we were called from an interrupt handler, then try to
    * get the message from generally available list of messages.
@@ -202,14 +202,14 @@ mqmsg_t *mq_msgalloc(void)
 
 int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
 {
-  _TCB     *rtcb;
-  _TCB     *btcb;
-  msgq_t   *msgq;
-  mqmsg_t  *curr;
-  mqmsg_t  *next;
-  mqmsg_t  *prev;
-  uint32    saved_state;
-  int       ret = ERROR;
+  _TCB      *rtcb;
+  _TCB      *btcb;
+  msgq_t    *msgq;
+  mqmsg_t   *curr;
+  mqmsg_t   *next;
+  mqmsg_t   *prev;
+  irqstate_t saved_state;
+  int        ret = ERROR;
 
   /* Verify the input parameters */
 
@@ -343,7 +343,11 @@ int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
             {
               /* Remove the message notification data from the message queue. */
 
+#ifdef CONFIG_CAN_PASS_STRUCTS
               union sigval value      = msgq->ntvalue;
+#else
+              void *sival_ptr         = msgq->ntvalue.sival_ptr;
+#endif
               int signo               = msgq->ntsigno;
               int pid                 = msgq->ntpid;
 
@@ -356,7 +360,11 @@ int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
 
               /* Queue the signal -- What if this returns an error? */
 
+#ifdef CONFIG_CAN_PASS_STRUCTS
               sig_mqnotempty(pid, signo, value);
+#else
+              sig_mqnotempty(pid, signo, sival_ptr);
+#endif
             }
 
           /* Check if any tasks are waiting for the MQ not empty event. */

@@ -78,10 +78,10 @@
  *
  ************************************************************/
 
-STATUS up_use_stack(_TCB *tcb, uint32 *stack, uint32 stack_size)
+STATUS up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
 {
-  uint32 top_of_stack;
-  uint32 size_of_stack;
+  size_t top_of_stack;
+  size_t size_of_stack;
 
   if (tcb->stack_alloc_ptr)
     {

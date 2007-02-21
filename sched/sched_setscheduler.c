@@ -112,7 +112,7 @@ int sched_setscheduler(pid_t pid, int policy,
 {
   _TCB *tcb;
 #if CONFIG_RR_INTERVAL > 0
-  uint32 saved_state;
+  irqstate_t saved_state;
 #endif
   int ret;
 

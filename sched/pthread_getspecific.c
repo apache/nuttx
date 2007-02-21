@@ -37,6 +37,8 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sched.h>
 #include <errno.h>
@@ -103,6 +105,7 @@
 
 void *pthread_getspecific(pthread_key_t key)
 {
+#if CONFIG_NPTHREAD_KEYS > 0
   _TCB *rtcb = (_TCB*)g_readytorun.head;
   void *ret = NULL;
 
@@ -116,4 +119,7 @@ void *pthread_getspecific(pthread_key_t key)
     }
 
   return ret;
+#else
+  return NULL;
+#endif
 }

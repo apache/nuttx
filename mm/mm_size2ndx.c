@@ -50,7 +50,7 @@
 
 /* Convert the size to a nodelist index */
 
-int mm_size2ndx(uint32 size)
+int mm_size2ndx(size_t size)
 {
   int ndx = 0;
 

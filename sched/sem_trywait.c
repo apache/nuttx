@@ -98,9 +98,9 @@
 
 int sem_trywait(sem_t *sem)
 {
-  _TCB  *rtcb = (_TCB*)g_readytorun.head;
-  uint32 saved_state;
-  int    ret = ERROR;
+  _TCB      *rtcb = (_TCB*)g_readytorun.head;
+  irqstate_t saved_state;
+  int        ret = ERROR;
 
   /* Assume any errors reported are due to invalid arguments. */
 

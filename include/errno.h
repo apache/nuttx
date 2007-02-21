@@ -188,7 +188,15 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+/* Return a pointer to the thread specifid errno */
+
 extern int *get_errno_ptr(void);
+
+#ifndef CONFIG_CAN_CAST_POINTERS
+/* Return the value ERROR cast to (void*) */
+
+extern void *get_errorptr(void);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

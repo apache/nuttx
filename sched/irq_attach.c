@@ -80,7 +80,7 @@ int irq_attach(int irq, xcpt_t isr)
 
   if ((unsigned)irq < NR_IRQS)
     {
-      int state;
+      irqstate_t state;
 
       /* If the new ISR is NULL, then the ISR is being detached.
        * In this case, disable the ISR and direct any interrupts

@@ -87,10 +87,10 @@
 
 STATUS wd_cancel (WDOG_ID wdid)
 {
-  wdog_t *curr;
-  wdog_t *prev;
-  uint32  saved_state;
-  STATUS  ret = ERROR;
+  wdog_t    *curr;
+  wdog_t    *prev;
+  irqstate_t saved_state;
+  STATUS     ret = ERROR;
 
   /* Prohibit timer interactions with the timer queue until the
    * cancellation is complete

@@ -77,8 +77,8 @@
 
 sigq_t *sig_allocatependingsigaction(void)
 {
-  sigq_t *sigq;
-  uint32 saved_state;
+  sigq_t    *sigq;
+  irqstate_t saved_state;
 
   /* Check if we were called from an interrupt handler. */
 

@@ -94,7 +94,7 @@
 
 void sem_waitirq (_TCB *wtcb)
 {
-  uint32 saved_state;
+  irqstate_t saved_state;
 
   /* Disable interrupts.  This is necessary (unfortunately) because an
    * interrupt handler may attempt to post the semaphore while we are

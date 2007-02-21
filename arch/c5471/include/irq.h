@@ -177,10 +177,10 @@ struct xcptcontext
 
 /* Save the current interrupt enable state & disable IRQs */
 
-static inline uint32 irqsave(void)
+static inline irqstate_t irqsave(void)
 {
-  unsigned long flags;
-  unsigned long temp;
+  unsigned int flags;
+  unsigned int temp;
   __asm__ __volatile__
     (
      "\tmrs    %0, cpsr\n"
@@ -194,7 +194,7 @@ static inline uint32 irqsave(void)
 
 /* Restore saved IRQ & FIQ state */
 
-static inline void irqrestore(uint32 flags)
+static inline void irqrestore(irqstate_t flags)
 {
   __asm__ __volatile__
     (
@@ -204,8 +204,8 @@ static inline void irqrestore(uint32 flags)
      : "memory");
 }
 
-static inline void system_call(swint_t func, uint32 parm1,
-			       uint32 parm2, uint32 parm3)
+static inline void system_call(swint_t func, int parm1,
+			       int parm2, int parm3)
 {
   __asm__ __volatile__
     (

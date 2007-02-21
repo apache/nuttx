@@ -69,10 +69,10 @@ struct mallinfo mallinfo(void)
 {
   static struct mallinfo stats;
   struct mm_allocnode_s *node;
-  uint32 mxordblk = 0; 
+  size_t mxordblk = 0; 
   int    ordblks  = 0;  /* Number of non-inuse chunks */
-  uint32 uordblks = 0;  /* Total allocated space */
-  uint32 fordblks = 0;  /* Total non-inuse space */
+  size_t uordblks = 0;  /* Total allocated space */
+  size_t fordblks = 0;  /* Total non-inuse space */
 
   /* Visit each node in physical memory */
 

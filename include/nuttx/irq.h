@@ -61,7 +61,7 @@
 
 #ifndef __ASSEMBLY__
 typedef int (*xcpt_t)(int irq, void *context);
-typedef int (*swint_t)(uint32 code, uint32 parm2, uint32 parm3,
+typedef int (*swint_t)(int code, int parm2, int parm3,
                        void *context);
 #endif
 

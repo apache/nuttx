@@ -78,7 +78,7 @@
  *     must be allocated.
  ************************************************************/
 
-STATUS up_create_stack(_TCB *tcb, uint32 stack_size)
+STATUS up_create_stack(_TCB *tcb, size_t stack_size)
 {
   if (tcb->stack_alloc_ptr &&
       tcb->adj_stack_size != stack_size)
@@ -94,8 +94,8 @@ STATUS up_create_stack(_TCB *tcb, uint32 stack_size)
 
    if (tcb->stack_alloc_ptr)
      {
-       uint32 top_of_stack;
-       uint32 size_of_stack;
+       size_t top_of_stack;
+       size_t size_of_stack;
 
        /* The Arm7Tdmi uses a push-down stack:  the stack grows
 	* toward loweraddresses in memory.  The stack pointer

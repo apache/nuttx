@@ -44,9 +44,9 @@ SUBDIRS		= sched lib $(ARCH_SRC) mm fs drivers examples/$(CONFIG_EXAMPLE)
 
 OBJS		= $(ARCH_SRC)/up_head.o
 LIBGCC		= ${shell $(CC) -print-libgcc-file-name}
-LIBS		= sched/libsched.a $(ARCH_SRC)/libarch.a mm/libmm.a \
-		  fs/libfs.a drivers/libdrivers.a lib/liblib.a \
-		  examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE).a
+LIBS		= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEXT) \
+		  fs/libfs$(LIBEXT) drivers/libdrivers$(LIBEXT) lib/liblib$(LIBEXT) \
+		  examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT)
 LDLIBS		= -lsched -larch -lmm -lfs -ldrivers -llib -l$(CONFIG_EXAMPLE) $(LIBGCC) $(EXTRA_LIBS)
 
 BIN		= nuttx
@@ -78,29 +78,29 @@ check_context:
 		exit 1 ; \
 	fi
 
-sched/libsched.a: context
-	$(MAKE) -C sched TOPDIR=$(TOPDIR) libsched.a
+sched/libsched$(LIBEXT): context
+	$(MAKE) -C sched TOPDIR=$(TOPDIR) libsched$(LIBEXT)
 
-lib/liblib.a: context
-	$(MAKE) -C lib TOPDIR=$(TOPDIR) liblib.a
+lib/liblib$(LIBEXT): context
+	$(MAKE) -C lib TOPDIR=$(TOPDIR) liblib$(LIBEXT)
 
-$(ARCH_SRC)/libarch.a: context
-	$(MAKE) -C $(ARCH_SRC) TOPDIR=$(TOPDIR) libarch.a
+$(ARCH_SRC)/libarch$(LIBEXT): context
+	$(MAKE) -C $(ARCH_SRC) TOPDIR=$(TOPDIR) libarch$(LIBEXT)
 
 $(ARCH_SRC)/up_head.o: context
 	$(MAKE) -C $(ARCH_SRC) TOPDIR=$(TOPDIR) up_head.o
 
-mm/libmm.a: context
-	$(MAKE) -C mm TOPDIR=$(TOPDIR) libmm.a
+mm/libmm$(LIBEXT): context
+	$(MAKE) -C mm TOPDIR=$(TOPDIR) libmm$(LIBEXT)
 
-fs/libfs.a: context
-	$(MAKE) -C fs TOPDIR=$(TOPDIR) libfs.a
+fs/libfs$(LIBEXT): context
+	$(MAKE) -C fs TOPDIR=$(TOPDIR) libfs$(LIBEXT)
 
-drivers/libdrivers.a: context
-	$(MAKE) -C drivers TOPDIR=$(TOPDIR) libdrivers.a
+drivers/libdrivers$(LIBEXT): context
+	$(MAKE) -C drivers TOPDIR=$(TOPDIR) libdrivers$(LIBEXT)
 
-examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE).a: context
-	$(MAKE) -C examples/$(CONFIG_EXAMPLE) TOPDIR=$(TOPDIR) lib$(CONFIG_EXAMPLE).a
+examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT): context
+	$(MAKE) -C examples/$(CONFIG_EXAMPLE) TOPDIR=$(TOPDIR) lib$(CONFIG_EXAMPLE)$(LIBEXT)
 
 $(BIN):	context depend $(OBJS) $(LIBS)
 ifeq ($(CONFIG_ARCH),sim)

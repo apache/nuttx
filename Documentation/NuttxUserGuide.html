@@ -1806,7 +1806,7 @@ initialization time).
 <B>Function Prototype:</B> 
 <PRE>
     #include &lt;wdog.h&gt;
-    STATUS wd_delete (WDOG_ID wdId);
+    STATUS wd_delete (WDOG_ID wdog);
 </PRE>
 
 <P>
@@ -1816,7 +1816,7 @@ has been started.
 <P>
 <B>Input Parameters:</B> 
 <UL>
-<LI><I>wdId</I>. The watchdog ID to delete. This is actually a
+<LI><I>wdog</I>. The watchdog ID to delete. This is actually a
 pointer to a watchdog structure.
 </UL>
 
@@ -1834,7 +1834,7 @@ it.
 <B>  POSIX  Compatibility:</B> This is a NON-POSIX interface.
 VxWorks provides the following comparable interface:
 <PRE>
-    STATUS wdDelete (WDOG_ID wdId);
+    STATUS wdDelete (WDOG_ID wdog);
 </PRE>
 
 <P>
@@ -1850,8 +1850,8 @@ before de-allocating it (i.e., never returns ERROR).
 <B>Function Prototype:</B> 
 <PRE>
     #include &lt;wdog.h&gt;
-    STATUS wd_start( WDOG_ID wdId, int delay, wdentry_t wdentry,
-                     int parm1, int parm2, int parm3, int parm4 );
+    STATUS wd_start( WDOG_ID wdog, int delay, wdentry_t wdentry,
+                     intt argc, ....);
 </PRE>
 
 <P>
@@ -1867,15 +1867,16 @@ was called.
 Watchdog timers execute only once.
 <P>
 To replace either the timeout delay or the function to be executed,
-call wd_start again with the same wdId; only the most recent
+call wd_start again with the same wdog; only the most recent
 wd_start() on a given watchdog ID has any effect.
 <P>
 <B>Input Parameters:</B> 
 <UL>
-<LI><I>wdId</I>. Watchdog ID
+<LI><I>wdog</I>. Watchdog ID
 <LI><I>delay</I>. Delay count in clock ticks
 <LI><I>wdentry</I>. Function to call on timeout
-<LI><I>parm1..4</I>. Parameters to pass to wdentry
+<LI><I>argc</I>.  The number of uint32 parameters to pass to wdentry.
+<LI><I>...</I>. uint32 size parameters to pass to wdentry
 </UL>
 
 <P>
@@ -1892,14 +1893,15 @@ restrictions.
 <B>  POSIX  Compatibility:</B> This is a NON-POSIX interface.
 VxWorks provides the following comparable interface:
 <PRE>
-    STATUS wdStart (WDOG_ID wdId, int delay, FUNCPTR wdentry, int parameter);
+    STATUS wdStart (WDOG_ID wdog, int delay, FUNCPTR wdentry, int parameter);
 </PRE>
 
 <P>
 Differences from the VxWorks interface include:
 <UL>
-<LI>The present implementation supports four parameters passed
-to wdentry; VxWorks supports only a single parameter.
+<LI>The present implementation supports multiple parameters passed
+to wdentry; VxWorks supports only a single parameter.  The maximum
+number of parameters is determined by 
 </UL>
 
 <H3>2.6.4 wd_cancel</H3>
@@ -1908,7 +1910,7 @@ to wdentry; VxWorks supports only a single parameter.
 <B>Function Prototype:</B> 
 <PRE>
     #include &lt;wdog.h&gt;
-    STATUS wd_cancel (WDOG_ID wdId);
+    STATUS wd_cancel (WDOG_ID wdog);
 </PRE>
 
 <P>
@@ -1918,7 +1920,7 @@ level.
 <P>
 <B>Input Parameters:</B> 
 <UL>
-<LI><I>wdId</I>. ID of the watchdog to cancel.
+<LI><I>wdog</I>. ID of the watchdog to cancel.
 </UL>
 
 <P>
@@ -1933,7 +1935,7 @@ level.
 <B>  POSIX  Compatibility:</B> This is a NON-POSIX interface.
 VxWorks provides the following comparable interface:
 <PRE>
-    STATUS wdCancel (WDOG_ID wdId);
+    STATUS wdCancel (WDOG_ID wdog);
 </PRE>
 
 <HR>
@@ -4073,6 +4075,39 @@ notify a task when a message is available on a queue.
       int          sigev_notify;
     };
 </PRE>
+
+<H3>3.4.9 Watchdog Data Types</H3>
+
+<p>
+  When a watchdog expires, the callback function with this
+  type is called:
+</p>
+<pre>
+    typedef void (*wdentry_t)(int argc, ...);
+</pre>
+<p>
+  Where argc is the number of uint32 type arguments that follow.
+</p>
+  The arguments are passed as uint32 values.
+  For systems where the sizeof(pointer) &lt; sizeof(uint32), the
+  following union defines the alignment of the pointer within the
+  uint32.  For example, the SDCC MCS51 general pointer is
+  24-bits, but uint32 is 32-bits (of course).
+</p>
+<pre>
+    union wdparm_u
+    {
+      void   *pvarg;
+      uint32 *dwarg;
+    };
+    typedef union wdparm_u wdparm_t;
+</pre>
+<p>
+  For most 32-bit systems, pointers and uint32 are the same size
+  For systems where sizeof(pointer) > sizeof(uint32), we will
+  have to do some redesign.
+</p>
+
 <HR>
 
 <H1>4.0 <A NAME="Problems">Known Problems</A></H1>

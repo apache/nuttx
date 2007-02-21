@@ -1,5 +1,5 @@
 /************************************************************
- * assert.h
+ * get_errorptr.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,90 +33,51 @@
  *
  ************************************************************/
 
-#ifndef __ASSERT_H
-#define __ASSERT_H
-
 /************************************************************
  * Included Files
  ************************************************************/
 
 #include <sys/types.h>
+#include <errno.h>
 
 /************************************************************
- * Definitions
- ************************************************************/
-
-/* Macro Name: ASSERT, ASSERTCODE, et al. */
-
-#undef ASSERT
-#undef ASSERTFILE
-#undef ASSERTCODE
-#undef DEBUGASSERT
-
-#ifdef __GNUC__
-
-#  define ASSERT(f) \
-     { if (!(f)) up_assert((const ubyte *)__FILE__, (int)__LINE__); }
-
-#  define ASSERTCODE(f, errCode) \
-     { if (!(f)) up_assert_code((const ubyte *)__FILE__, (int)__LINE__, errCode); }
-
-#  ifdef CONFIG_DEBUG
-#    define DEBUGASSERT(f) \
-       { if (!(f)) up_assert((const ubyte *)__FILE__, (int)__LINE__); }
-#  else
-#    define DEBUGASSERT(f)
-#  endif /* CONFIG_DEBUG */
-
-#  define PANIC(errCode) \
-      up_assert_code((const ubyte *)__FILE__, (int)__LINE__, (errCode)|0x8000)
-
-#else
-#  define ASSERT(f) \
-     { if (!(f)) up_assert(); }
-
-#  define ASSERTCODE(f, errCode) \
-     { if (!(f)) up_assert_code(errCode); }
-
-#  ifdef CONFIG_DEBUG
-#    define DEBUGASSERT(f) \
-       { if (!(f)) up_assert(); }
-#  else
-#    define DEBUGASSERT(f)
-#  endif /* CONFIG_DEBUG */
-
-#  define PANIC(errCode) \
-      up_assert_code((errCode)|0x8000)
-
-#endif
-
-/************************************************************
- * Included Files
+ * Global Functions
  ************************************************************/
 
 /************************************************************
- * Global Function Prototypes
+ * Function:  get_errorptr
+ *
+ * Description:
+ *   Return a pointer that is just ERROR cast to void *.
+ *   most fully performing processors don't need anything
+ *   like this.  Hoever, this little of nonsense is necessary
+ *   for some processors where sizeof(pointer) < sizeof(uint32)
+ *   and which do not support casts of integers to pointers.
+ *
+ * Parameters:
+ *   None
+ *
+ * Return Value:
+ *   ERROR cast as a pointer value
+ *
+ * Assumptions:
+ *
  ************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
+void *get_errnorptr(void)
+{
+#ifdef CONFIG_CAN_CAST_POINTERS
+  return (void*)ERROR;
 #else
-#define EXTERN extern
-#endif
+  union
+  {
+    void  *verror;
+    sint32 ierror;
+  } u;
 
-#ifdef __GNUC__
-EXTERN void   up_assert(const ubyte *fileName, int lineNum);
-EXTERN void   up_assert_code(const ubyte *fileName, int lineNum,
-                             int error_code);
-#else
-EXTERN void   up_assert(void);
-EXTERN void   up_assert_code(int error_code);
+  u.ierror = ERROR;
+  return u.verror;
 #endif
-
-#undef EXTERN
-#ifdef __cplusplus
 }
-#endif
 
-#endif /* __ASSERT_H */
+

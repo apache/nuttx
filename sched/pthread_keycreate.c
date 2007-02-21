@@ -37,6 +37,8 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sched.h>
 #include <errno.h>
@@ -112,6 +114,7 @@
 
 int pthread_key_create(pthread_key_t *key, void (*destructor)(void*))
 {
+#if CONFIG_NPTHREAD_KEYS > 0
   int ret = EAGAIN;
 
   /* Check if we have exceeded the system-defined number of keys. */
@@ -132,4 +135,7 @@ int pthread_key_create(pthread_key_t *key, void (*destructor)(void*))
     }
 
   return ret;
+#else
+  return ENOSYS;
+#endif
 }

@@ -63,7 +63,7 @@
  * Name: up_assert
  ************************************************************/
 
-void up_assert(const ubyte *filename, uint32 lineno)
+void up_assert(const ubyte *filename, int lineno)
 {
   dbg("Assertion failed at file:%s line: %d\n",
       filename, lineno);
@@ -74,7 +74,7 @@ void up_assert(const ubyte *filename, uint32 lineno)
  * Name: up_assert_code
  ************************************************************/
 
-void up_assert_code(const ubyte *filename, uint32 lineno, uint16 errorcode)
+void up_assert_code(const ubyte *filename, int lineno, int errorcode)
 {
   dbg("Assertion failed at file:%s line: %d error code: %d\n",
        filename, lineno, errorcode);

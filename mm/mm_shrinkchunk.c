@@ -64,7 +64,7 @@
  *
  ************************************************************/
 
-void  mm_shrinkchunk(struct mm_allocnode_s *node, uint32 size)
+void  mm_shrinkchunk(struct mm_allocnode_s *node, size_t size)
 {
   struct mm_freenode_s *next;
 

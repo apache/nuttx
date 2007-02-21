@@ -50,7 +50,7 @@
 
 /* This is the size of the heap provided to mm */
 
-uint32  g_heapsize;
+size_t  g_heapsize;
 
 /* This is the first and last nodes of the heap */
 
@@ -97,8 +97,8 @@ void mm_initialize(void *heapstart, size_t heapsize)
    * both aligned with the MM_MIN_CHUNK size.
    */
 
-  uint32 heapbase = MM_ALIGN_UP((uint32)heapstart);
-  uint32 heapend  = MM_ALIGN_DOWN((uint32)heapstart + (uint32)heapsize);
+  size_t heapbase = MM_ALIGN_UP((size_t)heapstart);
+  size_t heapend  = MM_ALIGN_DOWN((size_t)heapstart + (size_t)heapsize);
 
   /* Save the size of the heap */
 

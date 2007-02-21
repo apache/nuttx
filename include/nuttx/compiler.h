@@ -52,6 +52,7 @@
 # define noreturn_function __attribute__ ((noreturn))
 # define reentrant_function
 #elif defined(__SDCC__)
+# pragma disable_warning 85
 # define weak_alias(name, aliasname)
 # define weak_function
 # define weak_const_function

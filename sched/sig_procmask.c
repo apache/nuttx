@@ -114,10 +114,10 @@
 
 int sigprocmask(int how, const sigset_t *set, sigset_t *oset)
 {
-  _TCB     *rtcb = (_TCB*)g_readytorun.head;
-  sigset_t  oldsigprocmask;
-  uint32    saved_state;
-  int       ret = OK;
+  _TCB      *rtcb = (_TCB*)g_readytorun.head;
+  sigset_t   oldsigprocmask;
+  irqstate_t saved_state;
+  int        ret = OK;
 
   sched_lock();
 

@@ -65,10 +65,10 @@
 
 pthread_attr_t g_default_pthread_attr =
 {
-  .stacksize    = PTHREAD_STACK_DEFAULT,
-  .priority     = PTHREAD_DEFAULT_PRIORITY,
-  .policy       = SCHED_RR,
-  .inheritsched = PTHREAD_EXPLICIT_SCHED,
+  PTHREAD_STACK_DEFAULT,    /* stacksize */
+  PTHREAD_DEFAULT_PRIORITY, /* priority */
+  SCHED_RR,                 /* policy */
+  PTHREAD_EXPLICIT_SCHED,   /* inheritsched */
 };
 
 /************************************************************

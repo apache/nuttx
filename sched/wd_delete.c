@@ -90,7 +90,7 @@
 
 STATUS wd_delete (WDOG_ID wdId)
 {
-  uint32 saved_state;
+  irqstate_t saved_state;
 
   /* Check if the watchdog has been started. */
 

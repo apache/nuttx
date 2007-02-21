@@ -66,10 +66,10 @@
 void *memalign(size_t alignment, size_t size)
 {
   struct mm_allocnode_s *node;
-  uint32 rawchunk;
-  uint32 alignedchunk;
-  uint32 mask = (uint32)(alignment - 1);
-  uint32 allocsize;
+  size_t rawchunk;
+  size_t alignedchunk;
+  size_t mask = (size_t)(alignment - 1);
+  size_t allocsize;
 
   /* If this requested alignement less than or equal to the
    * natural alignment of malloc, then just let malloc do the
@@ -99,7 +99,7 @@ void *memalign(size_t alignment, size_t size)
 
   /* Then malloc that size */
 
-  rawchunk = (uint32)malloc(allocsize);
+  rawchunk = (size_t)malloc(allocsize);
   if (!rawchunk)
     {
       return NULL;
@@ -127,7 +127,7 @@ void *memalign(size_t alignment, size_t size)
     {
       struct mm_allocnode_s *newnode;
       struct mm_allocnode_s *next;
-      uint32 precedingsize;
+      size_t precedingsize;
 
       /* Get the node the next node after the allocation. */
 
@@ -145,7 +145,7 @@ void *memalign(size_t alignment, size_t size)
        * SIZEOF_MM_ALLOCNODE
        */
 
-      precedingsize = (uint32)newnode - (uint32)node;
+      precedingsize = (size_t)newnode - (size_t)node;
 
       /* If we were unlucky, then the alignedchunk can lie in such
        * a position that precedingsize < SIZEOF_NODE_FREENODE.  We 
@@ -159,12 +159,12 @@ void *memalign(size_t alignment, size_t size)
         {
           alignedchunk += alignment;
           newnode       = (struct mm_allocnode_s*)(alignedchunk - SIZEOF_MM_ALLOCNODE);
-          precedingsize = (uint32)newnode - (uint32)node;
+          precedingsize = (size_t)newnode - (size_t)node;
         }
 
       /* Set up the size of the new node */
 
-      newnode->size = (uint32)next - (uint32)newnode;
+      newnode->size = (size_t)next - (size_t)newnode;
       newnode->preceding = precedingsize | MM_ALLOC_BIT;
 
       /* Reduce the size of the original chunk and mark it not allocated, */

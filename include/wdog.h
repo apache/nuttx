@@ -55,11 +55,28 @@
  * Global Type Declarations
  ************************************************************/
 
+/* The arguments are passed as uint32 values.  For systems
+ * where the sizeof(pointer) < sizeof(uint32), the following
+ * union defines the alignment of the pointer within the
+ * uint32.  For example, the SDCC MCS51 general pointer is
+ * 24-bits, but uint32 is 32-bits (of course).
+ *
+ * For systems where sizeof(pointer) > sizeof(uint32), we will
+ * have to do some redesign.
+ */
+
+union wdparm_u
+{
+  void   *pvarg;
+  uint32 *dwarg;
+};
+typedef union wdparm_u wdparm_t;
+
 /* This is the form of the function that is called when the
  * watchdog function expires.  Up to four parameters may be passed.
  */
 
-typedef void (*wdentry_t)(int arg1, ...);
+typedef void (*wdentry_t)(int argc, uint32 arg1, ...);
 
 /* Watchdog 'handle' */
 
@@ -81,10 +98,10 @@ extern "C" {
 #endif
 
 EXTERN WDOG_ID wd_create(void);
-EXTERN STATUS  wd_delete(WDOG_ID wdId);
-EXTERN STATUS  wd_start(WDOG_ID wdId, int delay, wdentry_t wdentry,
-			int parm1, int parm2, int parm3, int parm4);
-EXTERN STATUS  wd_cancel(WDOG_ID wdId);
+EXTERN STATUS  wd_delete(WDOG_ID wdog);
+EXTERN STATUS  wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,
+			int argc, ...);
+EXTERN STATUS  wd_cancel(WDOG_ID wdog);
 
 #undef EXTERN
 #ifdef __cplusplus

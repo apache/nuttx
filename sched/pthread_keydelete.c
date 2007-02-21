@@ -37,6 +37,8 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sched.h>
 #include <errno.h>
@@ -91,3 +93,4 @@ int pthread_key_delete(pthread_key_t key)
 {
   return ENOSYS;
 }
+

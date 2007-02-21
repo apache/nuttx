@@ -81,14 +81,14 @@
  *
  ************************************************************/
 
-STATUS up_create_stack(_TCB *tcb, uint32 stack_size)
+STATUS up_create_stack(_TCB *tcb, size_t stack_size)
 {
   STATUS ret = ERROR;
 
   /* Move up to next even word boundary if necessary */
 
-  uint32 adj_stack_size = (stack_size + 3) & ~3;
-  uint32 adj_stack_words = adj_stack_size >> 2;
+  size_t adj_stack_size = (stack_size + 3) & ~3;
+  size_t adj_stack_words = adj_stack_size >> 2;
 
   /* Allocate the memory for the stack */
 
@@ -97,9 +97,10 @@ STATUS up_create_stack(_TCB *tcb, uint32 stack_size)
     {
       /* This is the address of the last word in the allocation */
 
-      uint32 *adj_stack_ptr = &stack_alloc_ptr[adj_stack_words - 1];
+      size_t *adj_stack_ptr = &stack_alloc_ptr[adj_stack_words - 1];
 
       /* Save the values in the TCB */
+
       tcb->adj_stack_size  = adj_stack_size;
       tcb->stack_alloc_ptr = stack_alloc_ptr;
       tcb->adj_stack_ptr   = adj_stack_ptr;

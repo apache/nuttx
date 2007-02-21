@@ -68,7 +68,7 @@ COBJS		= $(CSRCS:.c=.o)
 SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
 
-BIN		= liblib.a
+BIN		= liblib$(LIBEXT)
 
 all:	$(BIN)
 
@@ -79,7 +79,10 @@ $(COBJS): %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(BIN):	$(OBJS)
-	$(AR) rcs $@ $(OBJS)
+	( for obj in $(OBJS) ; do \
+		$(AR) $@ $${obj} || \
+			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
+	done ; )
 
 .depend: Makefile $(SRCS)
 	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep

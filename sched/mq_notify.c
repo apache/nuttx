@@ -141,11 +141,11 @@ int mq_notify(mqd_t mqdes, const struct sigevent *notification)
             {
               /* Yes... Assign it to the current task. */
 
-              msgq->ntvalue = notification->sigev_value;
-              msgq->ntsigno = notification->sigev_signo;
-              msgq->ntpid   = rtcb->pid;
-              msgq->ntmqdes = mqdes;
-              ret           = OK;
+              msgq->ntvalue.sival_ptr = notification->sigev_value.sival_ptr;
+              msgq->ntsigno           = notification->sigev_signo;
+              msgq->ntpid             = rtcb->pid;
+              msgq->ntmqdes           = mqdes;
+              ret                     = OK;
             }
         }
 
@@ -159,7 +159,7 @@ int mq_notify(mqd_t mqdes, const struct sigevent *notification)
 
           msgq->ntpid             = INVALID_PROCESS_ID;
           msgq->ntsigno           = 0;
-          msgq->ntvalue.sival_int = 0;
+          msgq->ntvalue.sival_ptr = NULL;
           msgq->ntmqdes           = NULL;
           ret                     = OK;
         }

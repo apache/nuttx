@@ -38,9 +38,12 @@
  ************************************************************/
 
 #include <sys/types.h>
+#include <stdarg.h>
 #include <wdog.h>
 #include <unistd.h>
 #include <sched.h>
+#include <errno.h>
+#include "os_internal.h"
 #include "wd_internal.h"
 
 /************************************************************
@@ -50,6 +53,22 @@
 /************************************************************
  * Private Type Declarations
  ************************************************************/
+
+typedef void (*wdentry0_t)(int argc);
+#if CONFIG_MAX_WDOGPARMS > 0
+typedef void (*wdentry1_t)(int argc, uint32 arg1);
+#endif
+#if CONFIG_MAX_WDOGPARMS > 1
+typedef void (*wdentry2_t)(int argc, uint32 arg1, uint32 arg2);
+#endif
+#if CONFIG_MAX_WDOGPARMS > 2
+typedef void (*wdentry3_t)(int argc, uint32 arg1, uint32 arg2,
+                           uint32 arg3);
+#endif
+#if CONFIG_MAX_WDOGPARMS > 3
+typedef void (*wdentry4_t)(int argc, uint32 arg1, uint32 arg2,
+                           uint32 arg3, uint32 arg4);
+#endif
 
 /************************************************************
  * Global Variables
@@ -83,12 +102,12 @@
  *   Watchdog timers execute only once.
  *
  *   To replace either the timeout delay or the function to
- *   be executed, call wd_start again with the same wdId; only
+ *   be executed, call wd_start again with the same wdog; only
  *   the most recent wdStart() on a given watchdog ID has
  *   any effect.
  *
  * Parameters:
- *   wdId = watchdog ID
+ *   wdog = watchdog ID
  *   delay = Delay count in clock ticks
  *   wdentry = function to call on timeout
  *   parm1..4 = parameters to pass to wdentry
@@ -102,19 +121,22 @@
  *
  ************************************************************/
 
-STATUS wd_start(WDOG_ID wdId, int delay, wdentry_t wdentry,
-                int parm1, int parm2, int parm3, int parm4)
+STATUS wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,
+                int argc, ...)
 {
-  wdog_t *curr;
-  wdog_t *prev;
-  wdog_t *next;
-  sint32  now;
-  sint32  saved_state;
+  va_list    ap;
+  wdog_t    *curr;
+  wdog_t    *prev;
+  wdog_t    *next;
+  sint32     now;
+  irqstate_t saved_state;
+  int        i;
 
-  /* Verify the wdId */
+  /* Verify the wdog */
 
-  if (!wdId)
+  if (!wdog || argc > CONFIG_MAX_WDOGPARMS || delay < 0)
     {
+      *get_errno_ptr() = EINVAL;
       return ERROR;
     }
 
@@ -125,18 +147,28 @@ STATUS wd_start(WDOG_ID wdId, int delay, wdentry_t wdentry,
    */
 
   saved_state = irqsave();
-  if (wdId->active)
+  if (wdog->active)
     {
-      wd_cancel(wdId);
+      wd_cancel(wdog);
     }
 
   /* Save the data in the watchdog structure */
 
-  wdId->func    = wdentry;         /* Function to execute when delay expires */
-  wdId->parm[0] = parm1;           /* Same as the parameter to pass */
-  wdId->parm[1] = parm2;           /* 2nd parameter not used */
-  wdId->parm[2] = parm3;           /* 3rd parameter not used */
-  wdId->parm[3] = parm4;           /* 4th parameter not used */
+  wdog->func    = wdentry;         /* Function to execute when delay expires */
+  wdog->argc    = argc;
+
+  va_start(ap, argc);
+  for (i = 0; i < argc; i++)
+    {
+      wdog->parm[i] = va_arg(ap, uint32);
+    }
+#ifdef CONFIG_DEBUG
+  for (; i < CONFIG_MAX_WDOGPARMS; i++)
+    {
+      wdog->parm[i] = 0;
+    }
+#endif
+  va_end(ap);
 
   /* Calculate delay+1, forcing the delay into a range that we can handle */
 
@@ -153,7 +185,7 @@ STATUS wd_start(WDOG_ID wdId, int delay, wdentry_t wdentry,
 
   if (g_wdactivelist.head == NULL)
     {
-      sq_addlast((sq_entry_t*)wdId,&g_wdactivelist);
+      sq_addlast((sq_entry_t*)wdog,&g_wdactivelist);
     }
 
   /* There are other active watchdogs in the timer queue */
@@ -180,7 +212,7 @@ STATUS wd_start(WDOG_ID wdId, int delay, wdentry_t wdentry,
          now += curr->lag;
        }
 
-      /* Check if the new wdId must be inserted before the curr. */
+      /* Check if the new wdog must be inserted before the curr. */
 
       if (delay < now)
         {
@@ -196,18 +228,18 @@ STATUS wd_start(WDOG_ID wdId, int delay, wdentry_t wdentry,
 
           if (curr == (wdog_t*)g_wdactivelist.head)
             {
-              sq_addfirst((sq_entry_t*)wdId, &g_wdactivelist);
+              sq_addfirst((sq_entry_t*)wdog, &g_wdactivelist);
             }
           else
             {
-              sq_addafter((sq_entry_t*)prev, (sq_entry_t*)wdId,
+              sq_addafter((sq_entry_t*)prev, (sq_entry_t*)wdog,
                           &g_wdactivelist);
             }
         }
 
       /* The new watchdog delay time is greater than the curr delay time,
-       * so the new wdId must be inserted after the curr. This only occurs
-       * if the wdId is to be added to the end of the list.
+       * so the new wdog must be inserted after the curr. This only occurs
+       * if the wdog is to be added to the end of the list.
        */
 
       else
@@ -215,13 +247,13 @@ STATUS wd_start(WDOG_ID wdId, int delay, wdentry_t wdentry,
           delay -= now;
           if (!curr->next)
             {
-              sq_addlast((sq_entry_t*)wdId, &g_wdactivelist);
+              sq_addlast((sq_entry_t*)wdog, &g_wdactivelist);
             }
           else
             {
               next = curr->next;
               next->lag -= delay;
-              sq_addafter((sq_entry_t*)curr, (sq_entry_t*)wdId,
+              sq_addafter((sq_entry_t*)curr, (sq_entry_t*)wdog,
                           &g_wdactivelist);
             }
         }
@@ -229,8 +261,8 @@ STATUS wd_start(WDOG_ID wdId, int delay, wdentry_t wdentry,
 
   /* Put the lag into the watchdog structure and mark it as active. */
 
-  wdId->lag = delay;
-  wdId->active = TRUE;
+  wdog->lag = delay;
+  wdog->active = TRUE;
 
   irqrestore(saved_state);
   return OK;
@@ -304,8 +336,42 @@ void wd_timer(void)
 
               /* Execute the watchdog function */
 
-              (*wdog->func)(wdog->parm[0], wdog->parm[1],
-                            wdog->parm[2] ,wdog->parm[3]);
+              switch (wdog->argc)
+                {
+                  default:
+#ifdef CONFIG_DEBUG
+                    PANIC(OSERR_INTERNAL);
+#endif
+                  case 0:
+                    (*((wdentry0_t)(wdog->func)))(0);
+                    break;
+
+#if CONFIG_MAX_WDOGPARMS > 0
+                  case 1:
+                    (*((wdentry1_t)(wdog->func)))(1, wdog->parm[0]);
+                    break;
+#endif
+#if CONFIG_MAX_WDOGPARMS > 1
+                  case 2:
+                    (*((wdentry2_t)(wdog->func)))(2,
+                                    wdog->parm[0], wdog->parm[1]);
+                    break;
+#endif
+#if CONFIG_MAX_WDOGPARMS > 2
+                  case 3:
+                    (*((wdentry3_t)(wdog->func)))(3,
+                                    wdog->parm[0], wdog->parm[1],
+                                    wdog->parm[2]);
+                    break;
+#endif
+#if CONFIG_MAX_WDOGPARMS > 3
+                  case 4:
+                    (*((wdentry4_t)(wdog->func)))(4,
+                                    wdog->parm[0], wdog->parm[1],
+                                    wdog->parm[2] ,wdog->parm[3]);
+                    break;
+#endif
+                }
             }
         }
     }

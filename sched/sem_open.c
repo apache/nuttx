@@ -41,6 +41,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <semaphore.h>
+#include <errno.h>
 #include <nuttx/kmalloc.h>
 #include "sem_internal.h"
 
@@ -117,7 +118,11 @@ sem_t *sem_open (const char *name, int oflag, ...)
 {
   int          namelen;
   nsem_t      *psem;
+#ifdef CONFIG_CAN_CAST_POINTERS
   sem_t       *sem = (sem_t*)ERROR;
+#else
+  sem_t       *sem = get_errorptr();
+#endif
   va_list      arg;          /* Points to each un-named argument */
   mode_t       mode;         /* Creation mode parameter (ignored) */
   unsigned int value;        /* Semaphore value parameter */

@@ -150,7 +150,7 @@ EXTERN void up_initial_state(_TCB *tcb);
  *     must be allocated.
  ************************************************************/
 
-EXTERN STATUS up_create_stack(_TCB *tcb, uint32 stack_size);
+EXTERN STATUS up_create_stack(_TCB *tcb, size_t stack_size);
 
 /************************************************************
  * Name: up_use_stack
@@ -173,7 +173,7 @@ EXTERN STATUS up_create_stack(_TCB *tcb, uint32 stack_size);
  *
  ************************************************************/
 
-EXTERN STATUS up_use_stack(_TCB *tcb, uint32 *stack, uint32 stack_size);
+EXTERN STATUS up_use_stack(_TCB *tcb, void *stack, size_t stack_size);
 
 /************************************************************
  * Name: up_release_stack

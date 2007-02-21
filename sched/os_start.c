@@ -386,7 +386,7 @@ void os_start(void)
 	{
 	  /* Remove the first delayed deallocation. */
 
-	  uint32 saved_state = irqsave();
+	  irqstate_t saved_state = irqsave();
 	  void *address = (void*)sq_remfirst(&g_delayeddeallocations);
 	  irqrestore(saved_state);
 

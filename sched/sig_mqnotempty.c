@@ -80,7 +80,11 @@
  *
  ************************************************************/
 
+#ifdef CONFIG_CAN_PASS_STRUCTS
 int sig_mqnotempty (int pid, int signo, const union sigval value)
+#else
+int sig_mqnotempty (int pid, int signo, void *sival_ptr)
+#endif
 {
   _TCB     *stcb;
   siginfo_t info;
@@ -91,14 +95,22 @@ int sig_mqnotempty (int pid, int signo, const union sigval value)
   /* Get the TCB of the receiving task */
 
   stcb = sched_gettcb(pid);
-  dbg("sig_mqnotempty: TCB=0x%08x signo=%d value=%d\n",
-      stcb, signo, value.sival_int);
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  dbg("TCB=%p signo=%d value=%d\n", stcb, signo, value.sival_int);
+#else
+  dbg("TCB=%p signo=%d sival_ptr=%p\n", stcb, signo, sival_ptr);
+#endif
 
   /* Create the siginfo structure */
 
-  info.si_signo = signo;
-  info.si_code  = SI_MESGQ;
-  info.si_value = value;
+  info.si_signo           = signo;
+  info.si_code            = SI_MESGQ;
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  info.si_value           = value;
+#else
+  info.si_value.sival_ptr = sival_ptr;
+#endif
 
   /* Verify that we can perform the signalling operation */
 

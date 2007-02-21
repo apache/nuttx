@@ -95,10 +95,10 @@
 
 STATUS task_delete(pid_t pid)
 {
-  _TCB  *rtcb;
-  _TCB  *dtcb;
-  uint32 saved_state;
-  STATUS ret = ERROR;
+  _TCB      *rtcb;
+  _TCB      *dtcb;
+  irqstate_t saved_state;
+  STATUS     ret = ERROR;
 
    /* Check if the task to delete is the calling task */
 

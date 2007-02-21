@@ -38,6 +38,7 @@
  ************************************************************/
 
 #include <sys/types.h>
+#include <string.h>
 #include <signal.h>
 #include <unistd.h>
 #include <sched.h>
@@ -79,7 +80,7 @@ static int sig_queueaction(_TCB *stcb, siginfo_t *info)
 {
   sigactq_t *sigact;
   sigq_t    *sigq;
-  uint32     saved_state;
+  irqstate_t saved_state;
   int        ret = OK;
 
   sched_lock();
@@ -106,7 +107,7 @@ static int sig_queueaction(_TCB *stcb, siginfo_t *info)
 
            sigq->action.sighandler = sigact->act.sa_u._sa_sigaction;
            sigq->mask = sigact->act.sa_mask;
-           sigq->info = *info;
+           memcpy(&sigq->info, info, sizeof(siginfo_t));
 
            /* Put it at the end of the pending signals list */
 
@@ -131,7 +132,7 @@ static int sig_queueaction(_TCB *stcb, siginfo_t *info)
 static sigpendq_t *sig_findpendingsignal(_TCB *stcb, int signo)
 {
   sigpendq_t *sigpend = NULL;
-  uint32      saved_state;
+  irqstate_t  saved_state;
 
   /* Verify the caller's sanity */
 
@@ -163,7 +164,7 @@ static sigpendq_t *sig_findpendingsignal(_TCB *stcb, int signo)
 static sigpendq_t *sig_allocatependingsignal(void)
 {
   sigpendq_t *sigpend;
-  uint32 saved_state;
+  irqstate_t  saved_state;
 
   /* Check if we were called from an interrupt handler. */
 
@@ -227,7 +228,7 @@ static sigpendq_t *sig_allocatependingsignal(void)
 static sigpendq_t *sig_addpendingsignal(_TCB *stcb, siginfo_t *info)
 {
   sigpendq_t *sigpend;
-  uint32      saved_state;
+  irqstate_t  saved_state;
 
   /* Check if the signal is already pending */
 
@@ -236,7 +237,7 @@ static sigpendq_t *sig_addpendingsignal(_TCB *stcb, siginfo_t *info)
     {
       /* The signal is already pending... retain only one copy */
 
-      sigpend->info = *info;
+      memcpy(&sigpend->info, info, sizeof(siginfo_t));
     }
 
   /* No... There is nothing pending for this signo */
@@ -250,7 +251,7 @@ static sigpendq_t *sig_addpendingsignal(_TCB *stcb, siginfo_t *info)
         {
           /* Put the signal information into the allocated structure */
 
-          sigpend->info = *info;
+          memcpy(&sigpend->info, info, sizeof(siginfo_t));
 
           /* Add the structure to the pending signal list */
 
@@ -284,8 +285,8 @@ static sigpendq_t *sig_addpendingsignal(_TCB *stcb, siginfo_t *info)
 
 int sig_received(_TCB *stcb, siginfo_t *info)
 {
-  int ret = ERROR;
-  uint32 saved_state;
+  irqstate_t saved_state;
+  int        ret = ERROR;
 
   dbg("sig_received: TCB=0x%08x signo=%d code=%d value=%d\n",
       stcb, info->si_signo, info->si_code, info->si_value.sival_int);
@@ -310,7 +311,7 @@ int sig_received(_TCB *stcb, siginfo_t *info)
           if (stcb->task_state == TSTATE_WAIT_SIG &&
               sigismember(&stcb->sigwaitmask, info->si_signo))
             {
-              stcb->sigunbinfo  = *info;
+              memcpy(&stcb->sigunbinfo, info, sizeof(siginfo_t));
               stcb->sigwaitmask = NULL_SIGNAL_SET;
               up_unblock_task(stcb);
               irqrestore(saved_state);
@@ -352,7 +353,7 @@ int sig_received(_TCB *stcb, siginfo_t *info)
           saved_state = irqsave();
           if (stcb->task_state == TSTATE_WAIT_SIG)
             {
-              stcb->sigunbinfo  = *info;
+              memcpy(&stcb->sigunbinfo, info, sizeof(siginfo_t));
               stcb->sigwaitmask = NULL_SIGNAL_SET;
               up_unblock_task(stcb);
             }

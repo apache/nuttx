@@ -76,7 +76,7 @@
 
 void sig_releasependingsigaction(sigq_t *sigq)
 {
-  uint32 saved_state;
+  irqstate_t saved_state;
 
   /* If this is a generally available pre-allocated structyre,
    * then just put it back in the free list.

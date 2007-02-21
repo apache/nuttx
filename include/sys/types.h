@@ -112,6 +112,7 @@
  * Type Declarations
  ************************************************************/
 
+#ifndef __ASSEMBLY__
 #ifndef CONFIG_HAVE_DOUBLE
 typedef float  double_t;
 #else
@@ -120,15 +121,21 @@ typedef double double_t;
 
 /* Misc. scalar types */
 
-typedef uint32        mode_t;
+typedef unsigned int  mode_t;
+#ifdef CONFIG_SMALL_MEMORY
+typedef uint16        size_t;
+typedef sint16        ssize_t;
+typedef sint16        off_t;
+#else
 typedef uint32        size_t;
 typedef sint32        ssize_t;
-//typedef sint32      time_t;
 typedef sint32        off_t;
-typedef sint32        uid_t;
-typedef sint32        gid_t;
-typedef uint32        dev_t;
-typedef uint32        ino_t;
+#endif
+//typedef sint32      time_t;
+typedef sint16        uid_t;
+typedef sint16        gid_t;
+typedef uint16        dev_t;
+typedef uint16        ino_t;
 typedef unsigned int  sig_atomic_t;
 typedef int           pid_t;
 typedef int           STATUS;
@@ -143,6 +150,7 @@ struct sched_param
 {
   int sched_priority;
 };
+#endif
 
 /************************************************************
  * Global Function Prototypes

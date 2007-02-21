@@ -110,7 +110,7 @@ sigset_t sig_pendingset(_TCB *stcb)
 {
   sigset_t    sigpendset;
   sigpendq_t *sigpend;
-  uint32      saved_state;
+  irqstate_t  saved_state;
 
   sigpendset = NULL_SIGNAL_SET;
 

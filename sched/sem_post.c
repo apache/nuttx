@@ -106,9 +106,9 @@
 
 int sem_post (sem_t *sem)
 {
-  _TCB  *stcb;
-  STATUS ret = ERROR;
-  uint32 saved_state;
+  _TCB      *stcb;
+  STATUS     ret = ERROR;
+  irqstate_t saved_state;
 
   /* Make sure we were supplied with a valid semaphore. */
 

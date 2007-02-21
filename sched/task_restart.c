@@ -99,10 +99,10 @@
 
 STATUS task_restart(pid_t pid)
 {
-  _TCB   *rtcb;
-  _TCB   *tcb;
-  STATUS  status;
-  uint32  state;
+  _TCB      *rtcb;
+  _TCB      *tcb;
+  STATUS     status;
+  irqstate_t state;
 
   /* Make sure this task does not become ready-to-run while
    * we are futzing with its TCB

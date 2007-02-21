@@ -69,10 +69,6 @@
 
 #ifdef MM_TEST
 
-/* Standard types */
-
-typedef unsigned int uint32;
-
 /* Use the real system errno */
 
 # define mm_errno errno

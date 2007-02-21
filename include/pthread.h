@@ -63,29 +63,33 @@
  * Definitions
  ************************************************************/
 
-#define PTHREAD_PROCESS_PRIVATE 0
-#define PTHREAD_PROCESS_SHARED  1
+#define PTHREAD_PROCESS_PRIVATE  0
+#define PTHREAD_PROCESS_SHARED   1
 
-#define PTHREAD_STACK_MIN     CONFIG_PTHREAD_STACK_MIN
-#define PTHREAD_STACK_DEFAULT CONFIG_PTHREAD_STACK_DEFAULT
+#define PTHREAD_STACK_MIN        CONFIG_PTHREAD_STACK_MIN
+#define PTHREAD_STACK_DEFAULT    CONFIG_PTHREAD_STACK_DEFAULT
 
-#define PTHREAD_INHERIT_SCHED  0
-#define PTHREAD_EXPLICIT_SCHED 1
+#define PTHREAD_INHERIT_SCHED    0
+#define PTHREAD_EXPLICIT_SCHED   1
 
-#define PTHREAD_PRIO_NONE    0
-#define PTHREAD_PRIO_INHERIT 1
-#define PTHREAD_PRIO_PROTECT 2
+#define PTHREAD_PRIO_NONE        0
+#define PTHREAD_PRIO_INHERIT     1
+#define PTHREAD_PRIO_PROTECT     2
 
 #define PTHREAD_DEFAULT_PRIORITY 100
 
 /* Cancellation states returned by pthread_cancelstate() */
 
-#define PTHREAD_CANCEL_ENABLE   (0)
-#define PTHREAD_CANCEL_DISABLE  (1)
+#define PTHREAD_CANCEL_ENABLE    (0)
+#define PTHREAD_CANCEL_DISABLE   (1)
 
 /* Thread return value when a pthread is canceled */
 
-#define PTHREAD_CANCELED ((void*)-1)
+#ifdef CONFIG_CAN_CAST_POINTERS
+# define PTHREAD_CANCELED        ((void*)ERROR)
+#else
+# define PTHREAD_CANCELED        ((void*)pthread_create)
+#endif
 
 /************************************************************
  * Global Type Declarations

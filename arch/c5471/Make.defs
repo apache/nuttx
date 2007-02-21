@@ -52,7 +52,7 @@ ARCHSCRIPT		= -T$(TOPDIR)/arch/$(CONFIG_ARCH)/ld.script
 CROSSDEV		= arm-elf-
 CC			= $(CROSSDEV)gcc
 LD			= $(CROSSDEV)ld
-AR			= $(CROSSDEV)ar
+AR			= $(CROSSDEV)ar rcs
 NM			= $(CROSSDEV)nm
 OBJCOPY			= $(CROSSDEV)objcopy
 OBJDUMP			= $(CROSSDEV)objdump
@@ -62,6 +62,7 @@ CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 
 LDFLAGS			= $(ARCHSCRIPT)
 EXTRA_LIBS		=
+LIBEXT			= .a
 
 ifeq ("${CONFIG_DEBUG}","y")
   LDFLAGS		+= -g

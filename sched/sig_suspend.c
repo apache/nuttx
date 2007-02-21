@@ -115,7 +115,7 @@ int sigsuspend(const sigset_t *set)
   sigset_t    intersection;
   sigset_t    saved_sigprocmask;
   sigpendq_t *sigpend;
-  uint32      saved_state;
+  irqstate_t  saved_state;
   int         unblocksigno;
 
   /* Several operations must be performed below:  We must determine if any

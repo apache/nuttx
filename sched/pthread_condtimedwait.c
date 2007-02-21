@@ -71,14 +71,18 @@
  * Private Functions
  ************************************************************/
 
-static void pthread_condtimedout(int pid, int signo, int arg3, int arg4)
+static void pthread_condtimedout(int argc, uint32 pid, uint32 signo, ...)
 {
+#ifdef CONFIG_CAN_PASS_STRUCTS
   union sigval value;
 
   /* Send the specified signal to the specified task. */
 
-  value.sival_ptr = 0;
-  (void)sigqueue(pid, signo, value);
+  value.sival_ptr = NULL;
+  (void)sigqueue((int)pid, (int)signo, value);
+#else
+  (void)sigqueue((int)pid, (int)signo, NULL);
+#endif
 }
 
 /************************************************************
@@ -112,8 +116,8 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
   sint32          relusec;
   sint32          ticks;
   int             mypid = (int)getpid();
+  irqstate_t      int_state;
   int             ret = OK;
-  int             int_state;
   int             status;
 
   dbg("cond=0x%p mutex=0x%p abstime=0x%p\n", cond, mutex, abstime);
@@ -240,7 +244,7 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
                       /* Start the watchdog */
 
                       wd_start(wdog, ticks, (wdentry_t)pthread_condtimedout,
-                               mypid, ECHO_COND_WAIT_SIGNO, 0, 0);
+                               2, (uint32)mypid, (uint32)ECHO_COND_WAIT_SIGNO);
 
                       /* Take the condition semaphore.  Do not restore interrupts
                        * until we return from the wait.  This is necessary to

@@ -37,7 +37,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef unsigned int uint32;
 #include "mm_internal.h"
 
 /* Definitions */

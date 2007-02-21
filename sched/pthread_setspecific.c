@@ -37,6 +37,8 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sched.h>
 #include <errno.h>
@@ -111,6 +113,7 @@
 
 int pthread_setspecific(pthread_key_t key, void *value)
 {
+#if CONFIG_NPTHREAD_KEYS > 0
   _TCB *rtcb = (_TCB*)g_readytorun.head;
   int ret = EINVAL;
 
@@ -128,4 +131,9 @@ int pthread_setspecific(pthread_key_t key, void *value)
     }
 
   return ret;
+#else
+  return ENOSYS;
+#endif
 }
+
+

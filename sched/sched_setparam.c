@@ -105,12 +105,12 @@
 
 int sched_setparam(pid_t pid, const struct sched_param *param)
 {
-  _TCB     *rtcb;
-  _TCB     *tcb;
-  tstate_t  task_state;
-  uint32    saved_state;
-  int       sched_priority = param->sched_priority;
-  int       ret = 0;
+  _TCB      *rtcb;
+  _TCB      *tcb;
+  tstate_t   task_state;
+  irqstate_t saved_state;
+  int        sched_priority = param->sched_priority;
+  int        ret = 0;
 
   /* Verify that the requested priority is in the valid range */
 

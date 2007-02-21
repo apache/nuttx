@@ -113,10 +113,10 @@
 
 int mq_close(mqd_t mqdes)
 {
-  _TCB     *rtcb = (_TCB*)g_readytorun.head;
-  msgq_t   *msgq;
-  uint32    saved_state;
-  int       ret = ERROR;
+  _TCB      *rtcb = (_TCB*)g_readytorun.head;
+  msgq_t    *msgq;
+  irqstate_t saved_state;
+  int        ret = ERROR;
 
   /* Verify the inputs */
 

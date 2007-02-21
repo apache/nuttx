@@ -42,6 +42,7 @@
 #include <mqueue.h>
 #include <string.h>
 #include <sched.h>
+#include <errno.h>
 #include <debug.h>
 #include <nuttx/kmalloc.h>
 #include "os_internal.h"
@@ -217,7 +218,11 @@ mqd_t mq_open(const char *mq_name, int oflags, ...)
 
   if (mqdes == NULL)
     {
+#ifdef CONFIG_CAN_CAST_POINTERS
       return (mqd_t)ERROR;
+#else
+      return get_errorptr();
+#endif
     }
   else
     {

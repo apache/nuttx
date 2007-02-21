@@ -87,8 +87,8 @@
 
 WDOG_ID wd_create (void)
 {
-  wdog_t *wdog;
-  sint32  saved_state;
+  wdog_t    *wdog;
+  irqstate_t saved_state;
 
   saved_state = irqsave();
   wdog = (wdog_t*)sq_remfirst(&g_wdfreelist);
