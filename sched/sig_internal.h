@@ -104,7 +104,7 @@ struct sigq_s
   struct sigq_s   *flink;        /* Forward link */
   union
   {
-    saVxHandType  *sighandler;
+    void (*sighandler)(int signo, siginfo_t *info, void *context);
   } action;                      /* Signal action */
   sigset_t         mask;         /* Additional signals to mask while the
 				  * the signal-catching functin executes */

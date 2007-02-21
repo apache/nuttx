@@ -50,11 +50,19 @@
 # define weak_function __attribute__ ((weak))
 # define weak_const_function __attribute__ ((weak, __const__))
 # define noreturn_function __attribute__ ((noreturn))
+# define reentrant_function
+#elif defined(__SDCC__)
+# define weak_alias(name, aliasname)
+# define weak_function
+# define weak_const_function
+# define noreturn_function
+# define reentrant_function __reentrant
 #else
 # define weak_alias(name, aliasname)
 # define weak_function
 # define weak_const_function
 # define noreturn_function
+# define reentrant_function
 #endif
 
 /************************************************************

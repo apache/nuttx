@@ -37,6 +37,7 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
 #include <sys/types.h>
 #include <signal.h>
 #include <debug.h>
@@ -96,7 +97,11 @@
  *
  ************************************************************/
 
+#ifdef CONFIG_CAN_PASS_STRUCTS
 int sigqueue (int pid, int signo, const union sigval value)
+#else
+int sigqueue(int pid, int signo, void *sival_ptr)
+#endif
 {
   _TCB     *stcb;
   siginfo_t info;
@@ -107,14 +112,21 @@ int sigqueue (int pid, int signo, const union sigval value)
   /* Get the TCB of the receiving task */
 
   stcb = sched_gettcb(pid);
-  dbg("sigqueue: TCB=0x%08x signo=%d value=%d\n",
-      stcb, signo, value.sival_int);
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  dbg("TCB=0x%08x signo=%d value=%d\n", stcb, signo, value.sival_int);
+#else
+  dbg("TCB=0x%08x signo=%d value=%p\n", stcb, signo, sival_ptr);
+#endif
 
   /* Create the siginfo structure */
 
   info.si_signo = signo;
   info.si_code  = SI_QUEUE;
+#ifdef CONFIG_CAN_PASS_STRUCTS
   info.si_value = value;
+#else
+  info.si_value.sival_ptr = sival_ptr;
+#endif
 
   /* Verify that we can perform the signalling operation */
 

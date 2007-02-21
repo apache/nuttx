@@ -4019,23 +4019,18 @@ between Nuttx and a MoBY application:
 <P>
 The following structure defines the action to take for given signal:
 <PRE>
-    struct sigaction {
-      union {
-        saHandType      *_sa_handler;
-        saVxHandType    *_sa_sigaction;
+    struct sigaction
+    {
+      union
+      {
+        void (*_sa_handler)(int);
+        void (*_sa_sigaction)(int, siginfo_t *, void *);
       } sa_u;
       sigset_t           sa_mask;
       int                sa_flags;
     };
     #define sa_handler   sa_u._sa_handler
     #define sa_sigaction sa_u._sa_sigaction
-</PRE>
-
-<P>
-where:
-<PRE>
-    typedef void saHandType( int signo );
-    typedef void saVxHandType( int signo, siginfo_t *info, void *context );
 </PRE>
 
 <H3>3.4.6 struct siginfo/siginfo_t</H3>

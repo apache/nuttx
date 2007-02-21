@@ -48,6 +48,11 @@
  * Definitions
  ************************************************************/
 
+#define COPY_SIGACTION(t,f) \
+  { (t)->sa_sigaction = (f)->sa_sigaction; \
+    (t)->sa_mask      = (f)->sa_mask; \
+    (t)->sa_flags     = (f)->sa_flags; }
+
 /************************************************************
  * Private Type Declarations
  ************************************************************/
@@ -190,7 +195,7 @@ int sigaction(int signo, const struct sigaction *act,
         {
           if (sigact)
             {
-              *oact = sigact->act;
+              COPY_SIGACTION(oact, &sigact->act);
             }
           else
             {
@@ -236,7 +241,7 @@ int sigaction(int signo, const struct sigaction *act,
 
           if (act->sa_u._sa_handler)
             {
-              sigact->act = *act;
+              COPY_SIGACTION(&sigact->act, act);
             }
 
           /* No.. It is a request to remove the old handler */

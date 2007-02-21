@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <arch/types.h>
+#include <nuttx/compiler.h>
 
 /************************************************************
  * Definitions

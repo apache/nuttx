@@ -161,14 +161,18 @@ void sched_process_timer(void)
 {
   /* Increment the system time (if in the link) */
 
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (clock_timer != NULL)
+#endif
     {
       clock_timer();
     }
 
   /* Process watchdogs (if in the link) */
 
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (wd_timer != NULL)
+#endif
     {
       wd_timer();
     }

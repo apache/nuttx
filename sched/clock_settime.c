@@ -101,7 +101,8 @@ int clock_settime(clockid_t clock_id, const struct timespec *tp)
     {
       /* Save the new base time. */
 
-      g_basetime = *tp;
+      g_basetime.tv_sec  = tp->tv_sec;
+      g_basetime.tv_nsec = tp->tv_nsec;
 
       /* Get the elapsed time since power up (in milliseconds) biased
        * as appropriate.

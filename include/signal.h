@@ -118,14 +118,12 @@ typedef struct siginfo
 
 /* The following structure defines the action to take for given signal */
 
-typedef void saHandType(int signo);
-typedef void saVxHandType(int signo, siginfo_t *info, void *context);
 struct sigaction
 {
   union
   {
-    saHandType   *_sa_handler;
-    saVxHandType *_sa_sigaction;
+    void (*_sa_handler)(int);
+    void (*_sa_sigaction)(int, siginfo_t *, void *);
   } sa_u;
   sigset_t         sa_mask;
   int              sa_flags;
@@ -166,10 +164,10 @@ EXTERN int sigtimedwait(const sigset_t *set,
 			struct siginfo *value,
 			const struct timespec *timeout);
 #ifdef CONFIG_CAN_PASS_STRUCTS
-EXTERN int sigqueue(int tid, int signo,
+EXTERN int sigqueue(int pid, int signo,
 		    const union sigval value);
 #else
-EXTERN int sigqueue(int tid, int signo, void *sival_ptr);
+EXTERN int sigqueue(int pid, int signo, void *sival_ptr);
 #endif
 
 #undef EXTERN
