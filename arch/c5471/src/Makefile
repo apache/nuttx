@@ -35,26 +35,33 @@
 
 -include $(TOPDIR)/Make.defs
 
-MKDEP 	= $(TOPDIR)/tools/mkdeps.sh
-CFLAGS	+= -I$(TOPDIR)/sched
+MKDEP 		= $(TOPDIR)/tools/mkdeps.sh
+CFLAGS		+= -I$(TOPDIR)/sched
 
-ASRCS	= up_vectors.S up_saveusercontext.S up_fullcontextrestore.S
+ASRCS		= up_vectors.S up_saveusercontext.S up_fullcontextrestore.S
 ifeq ($(CONFIG_DEBUG),y)
-ASRCS	+= up_lowputc.S
+ASRCS		+= up_lowputc.S
 endif
-AOBJS	= $(ASRCS:.S=.o)
+AOBJS		= $(ASRCS:.S=.o)
 
-CSRCS	= up_initialize.c up_initialstate.c up_idle.c up_doirq.c \
-	  up_irq.c up_syscall.c up_dataabort.c up_prefetchabort.c \
-	  up_undefinedinsn.c up_interruptcontext.c up_timerisr.c \
-	  up_createstack.c up_usestack.c up_releasestack.c \
-	  up_exit.c up_assert.c up_blocktask.c up_unblocktask.c \
-	  up_releasepending.c up_reprioritizertr.c up_copystate.c \
-	  up_schedulesigaction.c up_sigdeliver.c up_serial.c
-COBJS	= $(CSRCS:.c=.o)
+CSRCS		= up_initialize.c up_initialstate.c up_idle.c up_doirq.c \
+		  up_irq.c up_syscall.c up_dataabort.c up_prefetchabort.c \
+		  up_undefinedinsn.c up_interruptcontext.c up_timerisr.c \
+		  up_createstack.c up_usestack.c up_releasestack.c \
+		  up_exit.c up_assert.c up_blocktask.c up_unblocktask.c \
+		  up_releasepending.c up_reprioritizertr.c up_copystate.c \
+		  up_schedulesigaction.c up_sigdeliver.c up_serial.c
+COBJS		= $(CSRCS:.c=.o)
 
-SRCS	= $(ASRCS) $(CSRCS)
-OBJS	= $(AOBJS) $(COBJS)
+SRCS		= $(ASRCS) $(CSRCS)
+OBJS		= $(AOBJS) $(COBJS)
+
+LINKOBJS	=
+LINKLIBS	=
+LDPATHES	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
+LDLIBS		= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
+
+LIBGCC		= ${shell $(CC) -print-libgcc-file-name}
 
 all: up_head.o libarch$(LIBEXT)
 
@@ -69,6 +76,25 @@ libarch$(LIBEXT): $(OBJS)
 		$(AR) $@ $${obj} || \
 			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
 	done ; )
+
+nuttx:
+	$(LD) --entry=__start $(LDFLAGS) $(LDPATHES) -o $(TOPDIR)/$@ \
+		$(addprefix $(TOPDIR)/,$(LINKOBJS)) \
+		--start-group $(LDLIBS) $(EXTRA_LIBS) $(LIBGCC) --end-group
+	@$(NM) $(TOPDIR)/$@ | \
+	grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
+	sort > $(TOPDIR)/System.map
+	@export vflashstart=`$(OBJDUMP) --all-headers $(TOPDIR)/$@ | grep _vflashstart | cut -d' ' -f1`;  \
+	if [ ! -z "$$vflashstart" ]; then \
+		$(OBJCOPY) --adjust-section-vma=.vector=0x$$vflashstart $(TOPDIR)/$@ $(TOPDIR)/$@.flashimage; \
+		mv $(TOPDIR)/$@.flashimage $(TOPDIR)/$@; \
+	fi
+ifeq ($(CONFIG_RRLOAD_BINARY),y)
+	@$(TOPDIR)/tools/mkimage.sh $(TOPDIR)/$@ $(TOPDIR)/$@.rr
+	@if [ -w /tftpboot ] ; then \
+		cp -f $(TOPDIR)/$@.rr /tftpboot/$@.rr.${CONFIG_ARCH}; \
+	fi
+endif
 
 .depend: Makefile $(SRCS)
 	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep

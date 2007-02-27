@@ -35,26 +35,33 @@
 
 -include $(TOPDIR)/Make.defs
 
-MKDEP 	= $(TOPDIR)/tools/mkdeps.sh
-CFLAGS	+= -I$(TOPDIR)/sched
+MKDEP 		= $(TOPDIR)/tools/mkdeps.sh
+CFLAGS		+= -I$(TOPDIR)/sched
 
-ASRCS	= up_setjmp.S
-AOBJS	= $(ASRCS:.S=.o)
-CSRCS	= up_initialize.c up_idle.c up_interruptcontext.c up_initialstate.c \
-	  up_createstack.c up_usestack.c up_releasestack.c \
-	  up_unblocktask.c up_blocktask.c up_releasepending.c up_reprioritizertr.c \
-	  up_exit.c up_schedulesigaction.c up_allocateheap.c up_devconsole.c
-COBJS	= $(CSRCS:.c=.o)
+ASRCS		= up_setjmp.S
+AOBJS		= $(ASRCS:.S=$(OBJEXT))
+CSRCS		= up_initialize.c up_idle.c up_interruptcontext.c \
+		  up_initialstate.c up_createstack.c up_usestack.c \
+		  up_releasestack.c  up_unblocktask.c up_blocktask.c \
+		  up_releasepending.c up_reprioritizertr.c \
+		  up_exit.c up_schedulesigaction.c up_allocateheap.c \
+		  up_devconsole.c
+COBJS		= $(CSRCS:.c=$(OBJEXT))
 
-SRCS	= $(ASRCS) $(CSRCS)
-OBJS	= $(AOBJS) $(COBJS)
+SRCS		= $(ASRCS) $(CSRCS)
+OBJS		= $(AOBJS) $(COBJS)
 
-all: up_head.o libarch$(LIBEXT)
+LINKOBJS	=
+LINKLIBS	=
+LDPATHES	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
+LDLIBS		= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
 
-$(AOBJS): %.o: %.S
+all: up_head$(OBJEXT) libarch$(LIBEXT)
+
+$(AOBJS): %$(OBJEXT): %.S
 	$(CC) -c $(CFLAGS) -D__ASSEMBLY__ $< -o $@
 
-$(COBJS) up_head.o: %.o: %.c
+$(COBJS) up_head$(OBJEXT): %$(OBJEXT): %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 libarch$(LIBEXT): $(OBJS)
@@ -63,6 +70,15 @@ libarch$(LIBEXT): $(OBJS)
 			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
 	done ; )
 
+nuttx:
+	$(CC) $(LDFLAGS) $(LDPATHES) -o $(TOPDIR)/$@ \
+		$(addprefix $(TOPDIR)/,$(LINKOBJS)) \
+		-Wl,--start-group $(LDLIBS) $(EXTRA_LIBS) -Wl,--end-group
+	@$(NM) $(TOPDIR)/$@ | \
+	grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
+	sort > $(TOPDIR)/System.map
+
+
 .depend: Makefile $(SRCS)
 	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	touch $@
@@ -70,10 +86,10 @@ libarch$(LIBEXT): $(OBJS)
 depend: .depend
 
 clean:
-	rm -f libarch$(LIBEXT) *.o *~
+	rm -f libarch$(LIBEXT) *~
+	if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
 
 distclean: clean
 	rm -f Make.dep .depend
-
 
 -include Make.dep

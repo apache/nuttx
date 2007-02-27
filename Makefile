@@ -42,16 +42,12 @@ ARCH_SRC	= $(ARCH_DIR)/src
 
 SUBDIRS		= sched lib $(ARCH_SRC) mm fs drivers examples/$(CONFIG_EXAMPLE)
 
-OBJS		= $(ARCH_SRC)/up_head.o
-LIBGCC		= ${shell $(CC) -print-libgcc-file-name}
-LIBS		= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEXT) \
+LINKOBJS	= $(ARCH_SRC)/up_head$(OBJEXT)
+LINKLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEXT) \
 		  fs/libfs$(LIBEXT) drivers/libdrivers$(LIBEXT) lib/liblib$(LIBEXT) \
 		  examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT)
-LDLIBS		= -lsched -larch -lmm -lfs -ldrivers -llib -l$(CONFIG_EXAMPLE) $(LIBGCC) $(EXTRA_LIBS)
 
 BIN		= nuttx
-
-LDFLAGS		+= -Lsched -Llib -L$(ARCH_SRC) -Lmm -Lfs -Ldrivers -Lexamples/$(CONFIG_EXAMPLE)
 
 all: $(BIN)
 .PHONY: clean context clean_context distclean
@@ -87,8 +83,8 @@ lib/liblib$(LIBEXT): context
 $(ARCH_SRC)/libarch$(LIBEXT): context
 	$(MAKE) -C $(ARCH_SRC) TOPDIR=$(TOPDIR) libarch$(LIBEXT)
 
-$(ARCH_SRC)/up_head.o: context
-	$(MAKE) -C $(ARCH_SRC) TOPDIR=$(TOPDIR) up_head.o
+$(ARCH_SRC)/up_head$(OBJEXT): context
+	$(MAKE) -C $(ARCH_SRC) TOPDIR=$(TOPDIR) up_head$(OBJEXT)
 
 mm/libmm$(LIBEXT): context
 	$(MAKE) -C mm TOPDIR=$(TOPDIR) libmm$(LIBEXT)
@@ -102,25 +98,8 @@ drivers/libdrivers$(LIBEXT): context
 examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT): context
 	$(MAKE) -C examples/$(CONFIG_EXAMPLE) TOPDIR=$(TOPDIR) lib$(CONFIG_EXAMPLE)$(LIBEXT)
 
-$(BIN):	context depend $(OBJS) $(LIBS)
-ifeq ($(CONFIG_ARCH),sim)
-	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS) $(LDLIBS)
-	@$(NM) $(BIN) | grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | sort > System.map
-else
-	$(LD) --entry=__start $(LDFLAGS) -o $@ $(OBJS) $(LIBS) $(LDLIBS)
-	@$(NM) $(BIN) | grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | sort > System.map
-	@export vflashstart=`$(OBJDUMP) --all-headers $(BIN) | grep _vflashstart | cut -d' ' -f1`;  \
-	if [ ! -z "$$vflashstart" ]; then \
-		$(OBJCOPY) --adjust-section-vma=.vector=0x$$vflashstart $(BIN) $(BIN).flashimage; \
-		mv $(BIN).flashimage $(BIN); \
-	fi
-ifeq ($(CONFIG_RRLOAD_BINARY),y)
-	@tools/mkimage.sh nuttx nuttx.rr
-	@if [ -w /tftpboot ] ; then \
-		cp -f nuttx.rr /tftpboot/nuttx.rr.${CONFIG_ARCH}; \
-	fi
-endif
-endif
+$(BIN):	context depend $(LINKOBJS) $(LINKLIBS)
+	$(MAKE) -C $(ARCH_SRC) TOPDIR=$(TOPDIR) LINKOBJS="$(LINKOBJS)" LINKLIBS="$(LINKLIBS)" $(BIN)
 
 depend:
 	@for dir in $(SUBDIRS) ; do \

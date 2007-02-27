@@ -61,6 +61,8 @@ CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 
 LDFLAGS			= $(ARCHSCRIPT)
 EXTRA_LIBS		= -lc
+
+OBJEXT			= .o
 LIBEXT			= .a
 
 ifeq ("${CONFIG_DEBUG}","y")

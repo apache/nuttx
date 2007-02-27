@@ -38,7 +38,7 @@
 MKDEP 		= $(TOPDIR)/tools/mkdeps.sh
 
 ASRCS		= 
-AOBJS		= $(ASRCS:.S=.o)
+AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 MISC_SRCS	= lib_init.c lib_streamsem.c lib_filesem.c
 STRING_SRCS	= lib_memset.c lib_memcpy.c lib_memcmp.c lib_memmove.c \
@@ -63,7 +63,7 @@ DQ_SRCS		= dq_addlast.c dq_addfirst.c dq_addafter.c dq_addbefore.c \
 
 CSRCS		= $(MISC_SRCS) $(STRING_SRCS) $(CTYPE_SRCS) $(STDIO_SRCS) \
 		  $(STDLIB_SRCS) $(MATH_SRCS) $(SQ_SRCS) $(DQ_SRCS)
-COBJS		= $(CSRCS:.c=.o)
+COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
@@ -72,10 +72,10 @@ BIN		= liblib$(LIBEXT)
 
 all:	$(BIN)
 
-$(AOBJS): %.o: %.S
+$(AOBJS): %$(OBJEXT): %.S
 	$(CC) -c $(CFLAGS) -D__ASSEMBLY__ $< -o $@
 
-$(COBJS): %.o: %.c
+$(COBJS): %$(OBJEXT): %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(BIN):	$(OBJS)
@@ -91,7 +91,7 @@ $(BIN):	$(OBJS)
 depend: .depend
 
 clean:
-	rm -f $(BIN) *.o *.asm *.lst *.sym *.adb *~
+	rm -f $(BIN) *.o *.rel *.asm *.lst *.sym *.adb *~
 
 distclean: clean
 	rm -f Make.dep .depend

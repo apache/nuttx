@@ -38,7 +38,7 @@
 MKDEP		= $(TOPDIR)/tools/mkdeps.sh
 
 ASRCS		= 
-AOBJS		= $(ASRCS:.S=.o)
+AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 MISC_SRCS	= os_start.c get_errno_ptr.c \
 		  sched_setupstreams.c sched_getfiles.c sched_getstreams.c \
@@ -96,7 +96,7 @@ SEM_SRCS	= sem_initialize.c sem_init.c sem_destroy.c\
 IRQ_SRCS	= irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 CSRCS		= $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS) $(WDOG_SRCS) $(TIME_SRCS) \
 		  $(SIGNAL_SRCS) $(MQUEUE_SRCS) $(PTHREAD_SRCS) $(SEM_SRCS) $(IRQ_SRCS)
-COBJS		= $(CSRCS:.c=.o)
+COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
@@ -105,10 +105,10 @@ BIN		= libsched$(LIBEXT)
 
 all:	$(BIN)
 
-$(AOBJS): %.o: %.S
+$(AOBJS): %$(OBJEXT): %.S
 	$(CC) -c $(CFLAGS) -D__ASSEMBLY__ $< -o $@
 
-$(COBJS): %.o: %.c
+$(COBJS): %$(OBJEXT): %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(BIN): $(OBJS)
@@ -124,7 +124,8 @@ $(BIN): $(OBJS)
 depend: .depend
 
 clean:
-	rm -f $(BIN) *.o *.asm *.lst *.sym *.adb *~
+	rm -f $(BIN) *.o *.rel *.asm *.lst *.sym *.adb *~
+	if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
 
 distclean: clean
 	rm -f Make.dep .depend

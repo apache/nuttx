@@ -38,11 +38,11 @@
 MKDEP	= $(TOPDIR)/tools/mkdeps.sh
 
 ASRCS		= 
-AOBJS		= $(ASRCS:.S=.o)
+AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		= fs_open.c fs_close.c fs_read.c fs_write.c fs_ioctl.c fs_dup.c \
 		  fs_files.c fs_inode.c
-COBJS		= $(CSRCS:.c=.o)
+COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
@@ -51,10 +51,10 @@ BIN		= libfs$(LIBEXT)
 
 all:	$(BIN)
 
-$(AOBJS): %.o: %.S
+$(AOBJS): %$(OBJEXT): %.S
 	$(CC) -c $(CFLAGS) -D__ASSEMBLY__ $< -o $@
 
-$(cOBJS): %.o: %.c
+$(cOBJS): %$(OBJEXT): %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(BIN):	$(OBJS)
@@ -70,7 +70,7 @@ $(BIN):	$(OBJS)
 depend: .depend
 
 clean:
-	rm -f $(BIN) *.o *.asm *.lst *.sym *.adb *~
+	rm -f $(BIN) *.o *.rel *.asm *.lst *.sym *.adb *~
 
 distclean: clean
 	rm -f Make.dep .depend
