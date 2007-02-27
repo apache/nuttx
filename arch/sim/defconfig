@@ -97,32 +97,6 @@ CONFIG_ARCH_KZMALLOC=n
 CONFIG_ARCH_KFREE=n
 
 #
-# General Compile environment setup
-#
-# CONFIG_SMALL_MEMORY - enable if your processor supports
-#   16-bit addressing; disable if it supports 32-bit.
-# CONFIG_HAVE_INLINE - enable if your compiler supports
-#   inline functions
-# CONFIG_HAVE_DOUBLE - enable if your compiler supports type
-#   double.
-# CONFIG_HAVE_LONG_LONG - enable if your architecture supports
-#   long long types and if you plan to use them
-# CONFIG_CAN_PASS_STRUCTS - enable if your compiler supports
-#   passing  and assiging structures and unions as values
-# CONFIG_CAN_CAST_POINTERS - enable if you can cast between
-#   integers and pointer.
-# CONFIG_HAVE_WEAKFUNCTIONS - enable if you compiler supports
-#   weak functions (see include/nuttx/comp
-#
-CONFIG_SMALL_MEMORY=n
-CONFIG_HAVE_INLINE=y
-CONFIG_HAVE_DOUBLE=y
-CONFIG_HAVE_LONG_LONG=n
-CONFIG_CAN_PASS_STRUCTS=y
-CONFIG_CAN_CAST_POINTERS=y
-CONFIG_HAVE_WEAKFUNCTIONS=y
-
-#
 # General build options
 #
 # CONFIG_RRLOAD_BINARY - make the rrload binary format used with
