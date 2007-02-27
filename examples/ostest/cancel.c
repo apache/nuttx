@@ -96,7 +96,7 @@ static void *thread_waiter(void *parameter)
     }
 
   printf("thread_waiter: Exit with status 0x12345678\n");
-  pthread_exit((void*)0x12345678);
+  pthread_exit((pthread_addr_t)0x12345678);
   return NULL;
 }
 
@@ -140,7 +140,7 @@ static void start_thread(pthread_t *waiter, int cancelable)
   /* Start the waiter thread  */
 
   printf("start_thread: Starting thread\n");
-  status = pthread_create(waiter, NULL, thread_waiter, (void*)cancelable);
+  status = pthread_create(waiter, &attr, thread_waiter, (pthread_addr_t)cancelable);
   if (status != 0)
     {
       printf("start_thread: ERROR pthread_create failed, status=%d\n", status);

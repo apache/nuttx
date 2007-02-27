@@ -101,9 +101,9 @@
  *
  ************************************************************/
 
-int sem_close (sem_t *sem)
+int sem_close(FAR sem_t *sem)
 {
-  nsem_t *psem;
+  FAR nsem_t *psem;
   int ret = ERROR;
 
   /* Verify the inputs */
@@ -114,7 +114,7 @@ int sem_close (sem_t *sem)
 
       /* Search the list of named semaphores */
 
-      for (psem = (nsem_t*)g_nsems.head;
+      for (psem = (FAR nsem_t*)g_nsems.head;
            ((psem) && (sem != &psem->sem));
            psem = psem->flink);
 
@@ -132,7 +132,7 @@ int sem_close (sem_t *sem)
 
           if (!psem->nconnect && psem->unlinked)
             {
-              dq_rem((dq_entry_t*)psem, &g_nsems);
+              dq_rem((FAR dq_entry_t*)psem, &g_nsems);
               sched_free(psem);
             }
           ret = OK;
@@ -142,3 +142,4 @@ int sem_close (sem_t *sem)
 
   return ret;
 }
+

@@ -75,7 +75,7 @@ EXTERN void   os_start(void); /* OS entry point called by boot logic */
 
 /* Functions contained in mm_init.c *************************/
 
-EXTERN void   mm_initialize(void *heap_start, size_t heap_size);
+EXTERN void   mm_initialize(FAR void *heap_start, size_t heap_size);
 
 #undef EXTERN
 #ifdef __cplusplus

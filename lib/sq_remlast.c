@@ -55,9 +55,9 @@
  *
  ************************************************************/
 
-sq_entry_t *sq_remlast(sq_queue_t *queue)
+FAR sq_entry_t *sq_remlast(sq_queue_t *queue)
 { 
-  sq_entry_t *ret = queue->tail;
+  FAR sq_entry_t *ret = queue->tail;
 
   if (ret)
     {
@@ -68,7 +68,7 @@ sq_entry_t *sq_remlast(sq_queue_t *queue)
         }
       else
         {
-          sq_entry_t *prev;
+          FAR sq_entry_t *prev;
           for(prev = queue->head;
               prev && prev->flink != ret;
               prev = prev->flink);

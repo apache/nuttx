@@ -90,7 +90,7 @@
 
 int sched_yield (void)
 {
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
   struct sched_param param;
 
   /* This equivalent to just resetting the task priority to

@@ -42,6 +42,7 @@
 #include <string.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/compiler.h>
 #include <nuttx/fs.h>
 #include <nuttx/lib.h>
 #include <nuttx/os_external.h>
@@ -170,7 +171,7 @@ const tasklist_t g_tasklisttable[NUM_TASK_STATES] =
  * for bringing up the rest of the system
  */
 
-static _TCB g_idletcb;
+static FAR _TCB g_idletcb;
 
 /************************************************************
  * Private Function Prototypes
@@ -239,7 +240,7 @@ void os_start(void)
 
   /* Then add the idle task's TCB to the head of the ready to run list */
 
-  dq_addfirst((dq_entry_t*)&g_idletcb, &g_readytorun);
+  dq_addfirst((FAR dq_entry_t*)&g_idletcb, &g_readytorun);
 
   /* Initialize the processor-specific portion of the TCB */
 
@@ -249,7 +250,7 @@ void os_start(void)
 
 #ifndef CONFIG_HEAP_BASE
   {
-    void *heap_start;
+    FAR void *heap_start;
     size_t heap_size;
     up_allocate_heap(&heap_start, &heap_size);
     mm_initialize(heap_start, heap_size);

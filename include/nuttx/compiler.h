@@ -44,26 +44,128 @@
  * Definitions
  ************************************************************/
 
+/* GCC-specific definitions *********************************/
+
 #ifdef __GNUC__
+
+/* GCC supports weak symbols which can be used to reduce
+ * code size because unnecessary "weak" functions can be
+ * excluded from the link.
+ */
+
+# define CONFIG_HAVE_WEAKFUNCTIONS 1
 # define weak_alias(name, aliasname) \
   extern __typeof (name) aliasname __attribute__ ((weak, alias (#name)));
 # define weak_function __attribute__ ((weak))
 # define weak_const_function __attribute__ ((weak, __const__))
+
+/* The noreturn attribute informs GCC that the function will
+ * not return.
+ */
+
 # define noreturn_function __attribute__ ((noreturn))
+
+/* GCC does not support the reentrant attribute */
+
 # define reentrant_function
-#elif defined(__SDCC__)
+
+/* GCC has does not use storage classes to qualify addressing */
+
+# define FAR
+# define NEAR
+
+/* Select the large, 32-bit addressing model */
+
+# undef  CONFIG_SMALL_MEMORY
+
+/* GCC supports inlined functions */
+
+# define CONFIG_HAVE_INLINE 1
+
+/* GCC supports both types double and long long */
+
+# define CONFIG_HAVE_DOUBLE 1
+# define CONFIG_HAVE_LONG_LONG 1
+
+/* Structures and unions can be assigned and passed as values */
+
+# define CONFIG_CAN_PASS_STRUCTS 1
+
+/* SDCC-specific definitions ********************************/
+
+#elif defined(SDCC)
+
+/* Disable warnings for unused function arguments */
+
 # pragma disable_warning 85
+
+/* SDCC does not support weak symbols */
+
+# undef  CONFIG_HAVE_WEAKFUNCTIONS
 # define weak_alias(name, aliasname)
 # define weak_function
 # define weak_const_function
+
+/* SDCC does not support the noreturn attribute */
+
 # define noreturn_function
+
+/* The reentrant attribute informs SDCC that the function
+ * must be reentrant.  In this case, SDCC will store input
+ * arguments on the stack to support reentrancy.
+ */
+
 # define reentrant_function __reentrant
+
+/* It is assumed that the system is build using the small
+ * data model with storage defaulting to internal RAM.
+ * The NEAR storage class can also be used to address data
+ * in internal RAM; FAR can be used to address data in
+ * external RAM.
+ */
+
+#define FAR  __xdata
+#define NEAR __data
+
+/* Select small, 16-bit address model */
+
+# define CONFIG_SMALL_MEMORY 1
+
+/* SDCC does not support inline functions */
+
+# undef  CONFIG_HAVE_INLINE
+
+/* SDCC does not support type long long or type double */
+
+# undef  CONFIG_HAVE_LONG_LONG
+# undef  CONFIG_HAVE_DOUBLE
+
+/* Structures and unions cannot be passed as values or used
+ * in assignments.
+ */
+
+# undef  CONFIG_CAN_PASS_STRUCTS
+
+/* Unknown compiler *****************************************/
+
 #else
+
+# undef  CONFIG_HAVE_WEAKFUNCTIONS
 # define weak_alias(name, aliasname)
 # define weak_function
 # define weak_const_function
 # define noreturn_function
 # define reentrant_function
+
+# define FAR
+# define NEAR
+
+# undef  CONFIG_SMALL_MEMORY
+# undef  CONFIG_HAVE_INLINE
+# undef  CONFIG_HAVE_LONG_LONG
+# undef  CONFIG_HAVE_DOUBLE
+# undef  CONFIG_CAN_PASS_STRUCTS
+
 #endif
 
 /************************************************************

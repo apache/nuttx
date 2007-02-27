@@ -61,10 +61,10 @@
  *
  ************************************************************/
 
-void mm_addfreechunk(struct mm_freenode_s *node)
+void mm_addfreechunk(FAR struct mm_freenode_s *node)
 {
-  struct mm_freenode_s *next;
-  struct mm_freenode_s *prev;
+  FAR struct mm_freenode_s *next;
+  FAR struct mm_freenode_s *prev;
 
   /* Convert the size to a nodelist index */
 

@@ -92,7 +92,7 @@
  *
  ************************************************************/
 
-void sem_waitirq (_TCB *wtcb)
+void sem_waitirq(FAR _TCB *wtcb)
 {
   irqstate_t saved_state;
 
@@ -126,3 +126,4 @@ void sem_waitirq (_TCB *wtcb)
 
   irqrestore(saved_state);
 }
+

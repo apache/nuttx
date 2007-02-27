@@ -58,8 +58,8 @@
  * is used to retain information about the spawned threads.
  */
 
-join_t *g_pthread_head = NULL;
-join_t *g_pthread_tail = NULL;
+FAR join_t *g_pthread_head = NULL;
+FAR join_t *g_pthread_tail = NULL;
 
 /* Mutually exclusive access to this data set is enforced with
  * the following (un-named) semaphore.
@@ -191,3 +191,4 @@ int pthread_givesemaphore(sem_t *sem)
       return ERROR;
     }
 }
+

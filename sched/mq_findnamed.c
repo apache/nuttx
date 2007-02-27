@@ -81,13 +81,13 @@
  *
  ************************************************************/
 
-msgq_t *mq_findnamed(const char *mq_name)
+FAR msgq_t *mq_findnamed(const char *mq_name)
 {
-  msgq_t *msgq;
+  FAR msgq_t *msgq;
 
   /* Search the list of named message queues */
 
-  for (msgq = (msgq_t*)g_msgqueues.head; (msgq); msgq = msgq->flink)
+  for (msgq = (FAR msgq_t*)g_msgqueues.head; (msgq); msgq = msgq->flink)
     {
       /* Break out of the lloop with a non-NULL msgq if the
        * name matches.

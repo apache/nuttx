@@ -90,7 +90,7 @@ static void sched_releasepid(pid_t pid)
  *
  ************************************************************/
 
-int sched_releasetcb(_TCB *tcb)
+int sched_releasetcb(FAR _TCB *tcb)
 {
   int ret = OK;
   int i;
@@ -137,6 +137,4 @@ int sched_releasetcb(_TCB *tcb)
     }
   return ret;
 }
-
-
 

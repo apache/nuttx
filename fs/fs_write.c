@@ -57,7 +57,7 @@
 
 int write(int fd, const void *buf, unsigned int nbytes)
 {
-  struct filelist *list;
+  FAR struct filelist *list;
   int ret = EBADF;
 
   /* Get the thread-specific file list */
@@ -73,7 +73,7 @@ int write(int fd, const void *buf, unsigned int nbytes)
 
   if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
     {
-      struct file *this_file = &list->fl_files[fd];
+      FAR struct file *this_file = &list->fl_files[fd];
 
       /* Was this file opened for write access? */
 

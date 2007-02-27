@@ -81,10 +81,10 @@
  *
  ************************************************************/
 
-join_t *pthread_removejoininfo(pid_t pid)
+FAR join_t *pthread_removejoininfo(pid_t pid)
 {
-  join_t *prev;
-  join_t *join;
+  FAR join_t *prev;
+  FAR join_t *join;
 
   /* Find the entry with the matching pid */
 
@@ -134,3 +134,4 @@ join_t *pthread_removejoininfo(pid_t pid)
 
   return join;
 }
+

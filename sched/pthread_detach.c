@@ -87,7 +87,7 @@
 
 int pthread_detach(pthread_t thread)
 {
-  join_t *pjoin;
+  FAR join_t *pjoin;
   int ret;
 
   dbg("Thread=%d\n", thread);

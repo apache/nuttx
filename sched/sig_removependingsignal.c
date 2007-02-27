@@ -82,21 +82,21 @@
  *  Remove the specified signal from the signal pending list
  ************************************************************/
 
-sigpendq_t *sig_removependingsignal(_TCB *stcb, int signo)
+FAR sigpendq_t *sig_removependingsignal(FAR _TCB *stcb, int signo)
 {
-  sigpendq_t *currsig;
-  sigpendq_t *prevsig;
+  FAR sigpendq_t *currsig;
+  FAR sigpendq_t *prevsig;
   irqstate_t  saved_state;
 
   saved_state = irqsave();
-  for (prevsig = NULL, currsig = (sigpendq_t*)stcb->sigpendingq.head;
+  for (prevsig = NULL, currsig = (FAR sigpendq_t*)stcb->sigpendingq.head;
        (currsig && currsig->info.si_signo != signo);
        prevsig = currsig, currsig = currsig->flink);
   if (currsig) 
     {
       if (prevsig)
         {
-          sq_remafter((sq_entry_t*)prevsig, &stcb->sigpendingq);
+          sq_remafter((FAR sq_entry_t*)prevsig, &stcb->sigpendingq);
         }
       else
         {

@@ -111,10 +111,10 @@
  *
  ************************************************************/
 
-int pthread_setspecific(pthread_key_t key, void *value)
+int pthread_setspecific(pthread_key_t key, FAR void *value)
 {
 #if CONFIG_NPTHREAD_KEYS > 0
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
   int ret = EINVAL;
 
   /* Check if the key is valid. */
@@ -135,5 +135,4 @@ int pthread_setspecific(pthread_key_t key, void *value)
   return ENOSYS;
 #endif
 }
-
 

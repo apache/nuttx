@@ -114,13 +114,13 @@
 
 int mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio)
 {
-  _TCB      *rtcb;
-  _TCB      *btcb;
-  msgq_t    *msgq;
-  mqmsg_t   *curr;
-  irqstate_t saved_state;
-  ubyte      rcvmsglen;
-  int        ret = ERROR;
+  FAR _TCB    *rtcb;
+  FAR _TCB    *btcb;
+  FAR msgq_t  *msgq;
+  FAR mqmsg_t *curr;
+  irqstate_t   saved_state;
+  ubyte        rcvmsglen;
+  int          ret = ERROR;
 
   /* Verify the input parameters */
 
@@ -142,7 +142,7 @@ int mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio)
 
       /* Get the message from the head of the queue */
 
-      while ((curr = (mqmsg_t*)sq_remfirst(&msgq->msglist)) == NULL)
+      while ((curr = (FAR mqmsg_t*)sq_remfirst(&msgq->msglist)) == NULL)
         {
           /* Should we block until there the above condition has been
            * satisfied?
@@ -152,7 +152,7 @@ int mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio)
             {
               /* Block and try again */
 
-              rtcb = (_TCB*)g_readytorun.head;
+              rtcb = (FAR _TCB*)g_readytorun.head;
               rtcb->msgwaitq = msgq;
               msgq->nwaitnotempty++;
               up_block_task(rtcb, TSTATE_WAIT_MQNOTEMPTY);
@@ -207,7 +207,7 @@ int mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio)
                */
 
               saved_state = irqsave();
-              for (btcb = (_TCB*)g_waitingformqnotfull.head;
+              for (btcb = (FAR _TCB*)g_waitingformqnotfull.head;
                    btcb && btcb->msgwaitq != msgq;
                    btcb = btcb->flink);
 

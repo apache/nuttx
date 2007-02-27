@@ -94,9 +94,9 @@
  *   the head of the g_readytorun list is changed.
  ************************************************************/
 
-boolean sched_addreadytorun(_TCB *btcb)
+boolean sched_addreadytorun(FAR _TCB *btcb)
 {
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
   boolean ret;
 
   /* Check if pre-emption is disabled for the current running task and

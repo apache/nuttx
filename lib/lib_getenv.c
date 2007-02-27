@@ -103,61 +103,68 @@ char *getenv(const char *name)
   const char *pend = &environment[size-1];
   const char *ptmp;
 
-  dbg("getenv(ge): name=\"%s\"\n", name);
+  dbg("name=\"%s\"\n", name);
 
-  if (name) {
+  if (name)
+    {
+      /* Process each string in the environment. */
 
-    /* Process each string in the environment. */
-    while (penv < pend) {
+      while (penv < pend)
+        {
+          vdbg("Compare to=\"%s\"\n", penv);
 
-      vdbg("(ge):\tCompare to=\"%s\"\n", penv);
+          /* The logic below basically implements a version of
+           * strcmp where the strings may be terminated with = signs.
+           */
 
-      /* The logic below basically implements a version of
-       * strcmp where the strings may be terminated with = signs. */
-      ptmp = name;
-      for (;;) {
+          ptmp = name;
+          for (;;)
+            {
+              /* Are we at the end of the name-to-matching?  */
 
-	/* Are we at the end of the name-to-matching?  */
-	if ((!*ptmp) || (*ptmp == '=')) {
+              if (!*ptmp || *ptmp == '=')
+                {
+                  /* Yes.. are we also at the end of the matching-name? */
 
-	  /* Yes.. are we also at the end of the matching-name? */
-	  if (*penv == '=') {
+                  if (*penv == '=')
+                    {
+                      /* Yes.. return the pointer to the value. */
 
-	    /* Yes.. return the pointer to the value. */
-	    dbg("(ge):\tReturning \"%s\"\n", penv+1);
-	    return ((char*)penv+1);
+                      dbg("Returning \"%s\"\n", penv+1);
+                      return ((char*)penv+1);
+                    }
+                  else
+                    {
+                      /* No.. Skip to the next name matching name candidate. */
 
-	  } /* end if */
-	  else {
+                      while(*penv++);
+                      break;
+                    }
+                }
 
-	    /* No.. Skip to the next name matching name candidate. */
-	    while(*penv++);
-	    break;
-	    
-	  } /* end else */
-	} /* end if */
+              /* NO.. are we at the end of the matching name candidate?
+               * OR.. do the corresponding characters not match.
+               */
 
-	/* NO.. are we at the end of the matching name candidate? */
-	/* OR.. do the corresponding characters not match. */
-	else if (*penv != *ptmp) {
+              else if (*penv != *ptmp)
+                {
+                  /* Yes.. Skip to the next name matching name candidate. */
 
-	  /* Yes.. Skip to the next name matching name candidate. */
-	  while(*penv++);
-	  break;
-	    
-	} /* end else if */
-	else {
+                  while(*penv++);
+                  break;
+                }
+              else
+                {
+                  /* No.. try the next characters. */
 
-	  /* No.. try the next characters. */
-	  penv++; ptmp++;
-
-	} /* end else */
-      } /* end for */
-    } /* end while */
-  } /* end if */
+                  penv++; ptmp++;
+                }
+            }
+        }
+    }
 
   /* If we got here, then no matching string was found. */
-		dbg("(ge):\tReturning NULL\n");
-  return NULL;
 
-} /* end getenv */
+  dbg("Returning NULL\n");
+  return NULL;
+}

@@ -87,8 +87,8 @@
 
 int sigpending(sigset_t *set)
 {
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
-  int   ret = ERROR;
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  int       ret  = ERROR;
 
   if (set)
     {
@@ -106,16 +106,16 @@ int sigpending(sigset_t *set)
  *   Convert the list of pending signals into a signal set
  ************************************************************/
 
-sigset_t sig_pendingset(_TCB *stcb)
+sigset_t sig_pendingset(FAR _TCB *stcb)
 {
-  sigset_t    sigpendset;
-  sigpendq_t *sigpend;
-  irqstate_t  saved_state;
+  sigset_t        sigpendset;
+  FAR sigpendq_t *sigpend;
+  irqstate_t      saved_state;
 
   sigpendset = NULL_SIGNAL_SET;
 
   saved_state = irqsave();
-  for (sigpend = (sigpendq_t*)stcb->sigpendingq.head;
+  for (sigpend = (FAR sigpendq_t*)stcb->sigpendingq.head;
        (sigpend); sigpend = sigpend->flink)
     {
       sigaddset(&sigpendset, sigpend->info.si_signo);

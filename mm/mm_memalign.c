@@ -63,9 +63,9 @@
  *
  ************************************************************/
 
-void *memalign(size_t alignment, size_t size)
+FAR void *memalign(size_t alignment, size_t size)
 {
-  struct mm_allocnode_s *node;
+  FAR struct mm_allocnode_s *node;
   size_t rawchunk;
   size_t alignedchunk;
   size_t mask = (size_t)(alignment - 1);
@@ -115,7 +115,7 @@ void *memalign(size_t alignment, size_t size)
    * node after the allocation.
    */
 
-  node = (struct mm_allocnode_s*)(rawchunk - SIZEOF_MM_ALLOCNODE);
+  node = (FAR struct mm_allocnode_s*)(rawchunk - SIZEOF_MM_ALLOCNODE);
 
   /* Find the aligned subregion */
 
@@ -125,13 +125,13 @@ void *memalign(size_t alignment, size_t size)
 
   if (alignedchunk != rawchunk)
     {
-      struct mm_allocnode_s *newnode;
-      struct mm_allocnode_s *next;
+      FAR struct mm_allocnode_s *newnode;
+      FAR struct mm_allocnode_s *next;
       size_t precedingsize;
 
       /* Get the node the next node after the allocation. */
 
-      next = (struct mm_allocnode_s*)((char*)node + node->size);
+      next = (FAR struct mm_allocnode_s*)((char*)node + node->size);
 
       /* Make sure that there is space to convert the preceding mm_allocnode_s
        * into an mm_freenode_s.  I think that this should always be true
@@ -139,7 +139,7 @@ void *memalign(size_t alignment, size_t size)
 
       DEBUGASSERT(alignedchunk >= rawchunk + 8);
 
-      newnode = (struct mm_allocnode_s*)(alignedchunk - SIZEOF_MM_ALLOCNODE);
+      newnode = (FAR struct mm_allocnode_s*)(alignedchunk - SIZEOF_MM_ALLOCNODE);
 
       /* Preceding size is full size of the new 'node,' including
        * SIZEOF_MM_ALLOCNODE
@@ -158,7 +158,7 @@ void *memalign(size_t alignment, size_t size)
       if (precedingsize < SIZEOF_MM_FREENODE)
         {
           alignedchunk += alignment;
-          newnode       = (struct mm_allocnode_s*)(alignedchunk - SIZEOF_MM_ALLOCNODE);
+          newnode       = (FAR struct mm_allocnode_s*)(alignedchunk - SIZEOF_MM_ALLOCNODE);
           precedingsize = (size_t)newnode - (size_t)node;
         }
 
@@ -184,7 +184,7 @@ void *memalign(size_t alignment, size_t size)
 
       /* Add the original, newly freed node to the free nodelist */
 
-      mm_addfreechunk((struct mm_freenode_s *)node);
+      mm_addfreechunk((FAR struct mm_freenode_s *)node);
 
       /* Replace the original node with the newlay realloaced,
        * aligned node
@@ -206,5 +206,5 @@ void *memalign(size_t alignment, size_t size)
     }
 
   mm_givesemaphore();
-  return (void*)alignedchunk;
+  return (FAR void*)alignedchunk;
 }

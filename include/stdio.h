@@ -129,12 +129,12 @@
 
 struct _dirent
 {
-  char *d_name;               /* name of directory entry */
+  FAR char *d_name;           /* name of directory entry */
 };
 struct dirent
 {
-  char *d_name;               /* A pointer to szName */
-  char szName[NAME_MAX+1];    /* name of the directory entry */
+  FAR char *d_name;           /* A pointer to d_szname */
+  char d_szname[NAME_MAX+1];  /* name of the directory entry */
 };
 
 typedef struct
@@ -147,7 +147,7 @@ typedef struct
 {
   unsigned long inode;
   int           generation;
-  char         *fileName;
+  FAR char     *filename;
 } HANDLE_TO_NAME_IOCTL;
 
 struct stat
@@ -186,7 +186,7 @@ struct statfs
 
 /* Streams */
 
-typedef struct file_struct FILE;
+typedef FAR struct file_struct FILE;
 
 typedef void DIR;
 
@@ -239,22 +239,22 @@ EXTERN int    close(int fd);
 EXTERN int    closedir(DIR *dirp);
 EXTERN int    creat(const char *path, mode_t mode);
 EXTERN FILE  *fdopen(int fd, const char *type);
-EXTERN int    fstat(int fd, struct stat *buf);
-EXTERN char  *getcwd(char *buf, size_t size);
+EXTERN int    fstat(int fd, FAR struct stat *buf);
+EXTERN char  *getcwd(FAR char *buf, size_t size);
 EXTERN int    ioctl(int fd, int req, unsigned long arg);
 EXTERN off_t  lseek(int fd, off_t offset, int whence);
 EXTERN int    mkdir(const char *path, mode_t mode);
-EXTERN int    open( const char *path, int oflag, ... );
+EXTERN int    open(const char *path, int oflag, ...);
 EXTERN DIR   *opendir(const char *path);
 EXTERN int    read(int fd, void *buf, unsigned int nbytes);
-EXTERN struct _dirent *readdir(DIR *dirp);
-EXTERN int    readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result);
-EXTERN void   rewinddir(DIR *dirp);
+EXTERN struct _dirent *readdir(FAR DIR *dirp);
+EXTERN int    readdir_r(FAR DIR *dirp, struct dirent *entry, FAR struct dirent **result);
+EXTERN void   rewinddir(FAR DIR *dirp);
 EXTERN int    rmdir(const char *path);
-EXTERN void   seekdir(DIR *dirp, int loc);
-EXTERN int    stat(const char *path, struct stat *buf);
-EXTERN int    statfs(const char *path, struct statfs *buf);
-EXTERN int    telldir(DIR *dirp);
+EXTERN void   seekdir(FAR DIR *dirp, int loc);
+EXTERN int    stat(const char *path, FAR struct stat *buf);
+EXTERN int    statfs(const char *path, FAR struct statfs *buf);
+EXTERN int    telldir(FAR DIR *dirp);
 EXTERN int    unlink(const char *path);
 EXTERN int    write(int fd, const void *buf, unsigned int nbytes);
 

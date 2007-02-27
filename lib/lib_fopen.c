@@ -130,14 +130,14 @@ static int lib_mode2oflags(const char *mode)
  * Public Functions
  ************************************************************/
 
-struct file_struct *lib_fdopen(int fd, const char *mode,
-                                struct filelist *flist,
-                                struct streamlist *slist)
+FAR struct file_struct *lib_fdopen(int fd, const char *mode,
+                                   FAR struct filelist *flist,
+                                   FAR struct streamlist *slist)
 {
-  struct inode      *inode = flist->fl_files[fd].f_inode;
-  FILE               *stream;
-  int                 oflags = lib_mode2oflags(mode);
-  int                 i;
+  FAR struct inode *inode = flist->fl_files[fd].f_inode;
+  FILE             *stream;
+  int               oflags = lib_mode2oflags(mode);
+  int               i;
 
   if (fd < 0 || !flist || !slist)
     {
@@ -209,19 +209,19 @@ struct file_struct *lib_fdopen(int fd, const char *mode,
 
 FILE *fdopen(int fd, const char *mode)
 {
-  struct filelist   *flist  = sched_getfiles();
-  struct streamlist *slist  = sched_getstreams();
+  FAR struct filelist   *flist = sched_getfiles();
+  FAR struct streamlist *slist = sched_getstreams();
   return lib_fdopen(fd, mode, flist, slist);
 }
 
 FILE *fopen(const char *path, const char *mode)
 {
-  struct filelist   *flist  = sched_getfiles();
-  struct streamlist *slist  = sched_getstreams();
-  int                 oflags = lib_mode2oflags(mode);
-  int                 fd     = open(path, oflags, 0666);
+  FAR struct filelist   *flist = sched_getfiles();
+  FAR struct streamlist *slist = sched_getstreams();
+  int oflags = lib_mode2oflags(mode);
+  int fd     = open(path, oflags, 0666);
 
-  FILE *ret   = lib_fdopen(fd, mode, flist, slist);
+  FILE *ret = lib_fdopen(fd, mode, flist, slist);
   if (!ret)
     {
       (void)close(fd);

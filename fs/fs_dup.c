@@ -69,7 +69,7 @@
 
 int dup(int fildes)
 {
-  struct filelist *list;
+  FAR struct filelist *list;
   int fildes2;
 
   /* Get the thread-specific file list */
@@ -109,7 +109,7 @@ int dup(int fildes)
 
 int dup2(int fildes1, int fildes2)
 {
-  struct filelist *list;
+  FAR struct filelist *list;
 
   /* Get the thread-specific file list */
 

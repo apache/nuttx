@@ -64,11 +64,11 @@ extern "C" {
 
 /* Functions contained in lib_init.c ************************/
 
-EXTERN void weak_function  lib_initialize(void);
+EXTERN void weak_function     lib_initialize(void);
 #if CONFIG_NFILE_STREAMS > 0
-EXTERN struct streamlist *lib_alloclist(void);
-EXTERN void                lib_addreflist(struct streamlist *list);
-EXTERN void                lib_releaselist(struct streamlist *list);
+EXTERN FAR struct streamlist *lib_alloclist(void);
+EXTERN void                   lib_addreflist(FAR struct streamlist *list);
+EXTERN void                   lib_releaselist(FAR struct streamlist *list);
 #endif
 
 #undef EXTERN

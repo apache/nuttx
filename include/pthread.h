@@ -41,6 +41,7 @@
  ************************************************************/
 
 #include <nuttx/config.h>   /* Default settings */
+#include <nuttx/compiler.h> /* Compiler settings */
 #include <sys/types.h>      /* Needed for general types */
 #include <semaphore.h>      /* Needed for sem_t */
 #include <time.h>           /* Needed for struct timespec */
@@ -85,11 +86,7 @@
 
 /* Thread return value when a pthread is canceled */
 
-#ifdef CONFIG_CAN_CAST_POINTERS
-# define PTHREAD_CANCELED        ((void*)ERROR)
-#else
-# define PTHREAD_CANCELED        ((void*)pthread_create)
-#endif
+# define PTHREAD_CANCELED        ((FAR void*)ERROR)
 
 /************************************************************
  * Global Type Declarations
@@ -107,7 +104,7 @@ extern "C" {
  *----------------------------------------------------------*/
 
 typedef int             pthread_key_t;
-typedef void           *pthread_addr_t;
+typedef FAR void       *pthread_addr_t;
 typedef pthread_addr_t  any_t;
 
 typedef pthread_addr_t (*pthread_startroutine_t)(pthread_addr_t);
@@ -115,10 +112,10 @@ typedef pthread_startroutine_t	pthread_func_t;
 
 struct pthread_addr_s
 {
-  unsigned long stacksize;    /* Size of the stack allocated for the pthead */
-  short         priority;     /* Priority of the pthread */
-  ubyte         policy;       /* Pthread scheduler policy */
-  ubyte         inheritsched; /* Inherit parent prio/policy? */
+  size_t stacksize;    /* Size of the stack allocated for the pthead */
+  short  priority;     /* Priority of the pthread */
+  ubyte  policy;       /* Pthread scheduler policy */
+  ubyte  inheritsched; /* Inherit parent prio/policy? */
 };
 typedef struct pthread_addr_s pthread_attr_t;
 
@@ -173,8 +170,10 @@ EXTERN int pthread_attr_destroy(pthread_attr_t *attr);
  * Set or obtain the default scheduling algorithm
  *----------------------------------------------------------*/
 
-EXTERN int pthread_attr_setschedpolicy(pthread_attr_t *attr, int policy);
-EXTERN int pthread_attr_getschedpolicy(pthread_attr_t *attr, int *policy);
+EXTERN int pthread_attr_setschedpolicy(pthread_attr_t *attr,
+                                       int policy);
+EXTERN int pthread_attr_getschedpolicy(pthread_attr_t *attr,
+                                       int *policy);
 EXTERN int pthread_attr_setschedparam(pthread_attr_t *attr,
 				      const struct sched_param *param);
 EXTERN int pthread_attr_getschedparam(pthread_attr_t *attr,
@@ -188,8 +187,10 @@ EXTERN int pthread_attr_getinheritsched(const pthread_attr_t *attr,
  * Set or obtain the default stack size
  *----------------------------------------------------------*/
 
-EXTERN int pthread_attr_setstacksize(pthread_attr_t *attr, long stacksize);
-EXTERN int pthread_attr_getstacksize(pthread_attr_t *attr, long *stackaddr);
+EXTERN int pthread_attr_setstacksize(pthread_attr_t *attr,
+                                     long stacksize);
+EXTERN int pthread_attr_getstacksize(pthread_attr_t *attr,
+                                     long *stackaddr);
 
 /*----------------------------------------------------------*
  * To create a thread object and runnable thread, a routine
@@ -200,7 +201,8 @@ EXTERN int pthread_attr_getstacksize(pthread_attr_t *attr, long *stackaddr);
  * specify details about the kind of thread being created.
  *----------------------------------------------------------*/
 
-EXTERN int pthread_create(pthread_t *thread, pthread_attr_t *attr,
+EXTERN int pthread_create(pthread_t *thread,
+                          pthread_attr_t *attr,
 			  pthread_startroutine_t startRoutine,
 			  pthread_addr_t arg);
 
@@ -216,7 +218,7 @@ EXTERN int pthread_detach(pthread_t thread);
  * execution of another thread.
  *----------------------------------------------------------*/
 
-EXTERN void pthread_exit(pthread_addr_t pvValue) noreturn_function;
+EXTERN void pthread_exit(pthread_addr_t value) noreturn_function;
 EXTERN int  pthread_cancel(pthread_t thread);
 EXTERN int  pthread_setcancelstate(int state, int *oldstate);
 EXTERN void pthread_testcancel(void);
@@ -226,7 +228,8 @@ EXTERN void pthread_testcancel(void);
  * the return value of the thread.
  *----------------------------------------------------------*/
 
-EXTERN int pthread_join(pthread_t thread, pthread_addr_t *ppvValue);
+EXTERN int pthread_join(pthread_t thread,
+                        pthread_addr_t *value);
 
 /*----------------------------------------------------------*
  * A thread may tell the scheduler that its processor can be
@@ -245,7 +248,8 @@ EXTERN void pthread_yield(void);
  * Thread scheduling parameters
  *----------------------------------------------------------*/
 
-EXTERN int pthread_getschedparam(pthread_t thread, int *policy,
+EXTERN int pthread_getschedparam(pthread_t thread,
+                                 int *policy,
 				 struct sched_param *param);
 EXTERN int pthread_setschedparam(pthread_t thread, int policy,
 				 const struct sched_param *param);
@@ -255,9 +259,9 @@ EXTERN int pthread_setschedparam(pthread_t thread, int policy,
  *----------------------------------------------------------*/
 
 EXTERN int pthread_key_create(pthread_key_t *key,
-			      void (*destructor)(void*));
-EXTERN int pthread_setspecific(pthread_key_t key, void *value);
-EXTERN void *pthread_getspecific(pthread_key_t key);
+			      FAR void (*destructor)(FAR void*));
+EXTERN int pthread_setspecific(pthread_key_t key, FAR void *value);
+EXTERN FAR void *pthread_getspecific(pthread_key_t key);
 EXTERN int pthread_key_delete(pthread_key_t key);
 
 /*----------------------------------------------------------*
@@ -294,7 +298,8 @@ EXTERN int pthread_condattr_destroy(pthread_condattr_t *attr);
  * A thread can create and delete condition variables.
  *----------------------------------------------------------*/
 
-EXTERN int pthread_cond_init(pthread_cond_t *cond, pthread_condattr_t *attr);
+EXTERN int pthread_cond_init(pthread_cond_t *cond,
+                             pthread_condattr_t *attr);
 EXTERN int pthread_cond_destroy(pthread_cond_t *cond);
 
 /*----------------------------------------------------------*
@@ -302,21 +307,23 @@ EXTERN int pthread_cond_destroy(pthread_cond_t *cond);
  *----------------------------------------------------------*/
 
 EXTERN int pthread_cond_broadcast(pthread_cond_t *cond);
-EXTERN int pthread_cond_signal(pthread_cond_t *dond);
+EXTERN int pthread_cond_signal(pthread_cond_t *cond);
 
 /*----------------------------------------------------------*
  * A thread can wait for a condition variable to be signalled
  * or broadcast.
  *----------------------------------------------------------*/
 
-EXTERN int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex);
+EXTERN int pthread_cond_wait(pthread_cond_t *cond,
+                             pthread_mutex_t *mutex);
 
 /*----------------------------------------------------------*
  * A thread can perform a timed wait on a condition variable.
  *----------------------------------------------------------*/
 
-EXTERN int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
-				  const struct timespec *abstime);
+EXTERN int pthread_cond_timedwait(pthread_cond_t *cond,
+                                  pthread_mutex_t *mutex,
+                                  const struct timespec *abstime);
 
 #undef EXTERN
 #ifdef __cplusplus

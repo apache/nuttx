@@ -78,7 +78,7 @@ struct sigevent {
 
 /* Message queue descriptor */
 
-typedef struct mq_des *mqd_t;
+typedef FAR struct mq_des *mqd_t;
 
 /************************************************************
  * Global Variables
@@ -95,8 +95,7 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN mqd_t   mq_open(const char *mq_name,
-                  int oflags, ... );
+EXTERN mqd_t   mq_open(const char *mq_name, int oflags, ... );
 EXTERN int     mq_close(mqd_t mqdes );
 EXTERN int     mq_unlink(const char *mq_name );
 EXTERN int     mq_send(mqd_t mqdes, const void *msg,

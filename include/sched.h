@@ -147,7 +147,8 @@ struct _TCB
 {
   /* Fields used to support list management ***************************/
 
-  struct _TCB *flink, *blink;      /* link in DQ of TCBs              */
+  FAR struct _TCB *flink;         /* link in DQ of TCBs               */
+  FAR struct _TCB *blink;
 
   /* Task Management Fields *******************************************/
 
@@ -159,7 +160,7 @@ struct _TCB
   tstate_t task_state;            /* Current state of the thread      */
   uint16   flags;                 /* Misc. general status flags       */
   sint16   lockcount;             /* 0=preemptable (not-locked)       */
-  void    *joininfo;              /* Detach-able info to support join */
+  FAR void *joininfo;             /* Detach-able info to support join */
 #if CONFIG_RR_INTERVAL > 0
   int      timeslice;             /* RR timeslice interval remaining  */
 #endif
@@ -167,27 +168,27 @@ struct _TCB
   /* Values needed to restart a task **********************************/
 
   ubyte    init_priority;         /* Initial priority of the task     */
-  char    *argv[NUM_TASK_ARGS+1]; /* Name + start-up parameters       */
+  FAR char *argv[NUM_TASK_ARGS+1]; /* Name + start-up parameters      */
 
   /* Stack-Related Fields *********************************************/
 
   size_t  adj_stack_size;         /* Stack size after adjustment      */
                                   /* for hardware, processor, etc.    */
                                   /* (for debug purposes only)        */
-  void   *stack_alloc_ptr;        /* Pointer to allocated stack       */
+  FAR void *stack_alloc_ptr;      /* Pointer to allocated stack       */
                                   /* Need to deallocate stack         */
-  void   *adj_stack_ptr;          /* Adjusted StatckAllocPtr for HW   */
+  FAR void *adj_stack_ptr;        /* Adjusted StatckAllocPtr for HW   */
                                   /* The initial stack pointer value  */
 
   /* POSIX thread Specific Data ***************************************/
 
 #if CONFIG_NPTHREAD_KEYS > 0
-  void   *pthread_data[CONFIG_NPTHREAD_KEYS];
+  FAR void *pthread_data[CONFIG_NPTHREAD_KEYS];
 #endif
 
   /* POSIX Semaphore Control Fields ***********************************/
 
-  sem_t  *waitsem;                /* Semaphore ID waiting on          */
+  sem_t *waitsem;                 /* Semaphore ID waiting on          */
 
   /* POSIX Signal Control Fields **************************************/
 
@@ -202,7 +203,7 @@ struct _TCB
   /* POSIX Named Message Queue Fields *********************************/
 
   sq_queue_t msgdesq;             /* List of opened message queues    */
-  msgq_t    *msgwaitq;            /* Waiting for this message queue   */
+  FAR msgq_t *msgwaitq;           /* Waiting for this message queue   */
 
   /* Library related fields *******************************************/
 
@@ -211,11 +212,11 @@ struct _TCB
   /* File system support **********************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  struct filelist *filelist;     /* Maps file descriptor to file     */
+  FAR struct filelist *filelist;  /* Maps file descriptor to file     */
 #endif
 
 #if CONFIG_NFILE_STREAMS > 0
-  struct streamlist *streams;    /* Holds C buffered I/O info        */
+  FAR struct streamlist *streams; /* Holds C buffered I/O info        */
 #endif
 
   /* State save areas *************************************************/
@@ -246,29 +247,31 @@ extern "C" {
 
 /* Task Control Interfaces (non-standard) */
 
-EXTERN STATUS  task_init(_TCB *tcb , char *name, int priority,
-                         uint32 *stack, uint32 stack_size, main_t entry,
-                         char *arg1, char *arg2, char *arg3, char *arg4);
-EXTERN STATUS  task_activate(_TCB *tcb);
-EXTERN int     task_create(char *name, int priority, int stack_size, main_t main,
-                           char *arg1, char *arg2, char *arg3, char *arg4);
+EXTERN STATUS  task_init(FAR _TCB *tcb, const char *name, int priority,
+                         FAR uint32 *stack, uint32 stack_size, main_t entry,
+                         FAR char *arg1, FAR char *arg2,
+                         FAR char *arg3, FAR char *arg4);
+EXTERN STATUS  task_activate(FAR _TCB *tcb);
+EXTERN int     task_create(const char *name, int priority, int stack_size, main_t main,
+                           FAR char *arg1, FAR char *arg2,
+                           FAR char *arg3, FAR char *arg4);
 EXTERN STATUS  task_delete(pid_t pid);
 EXTERN STATUS  task_restart(pid_t pid);
 
 /* Task Scheduling Interfaces (based on POSIX APIs) */
 
 EXTERN int     sched_setparam(pid_t pid,
-			      const struct sched_param * param);
+                              const struct sched_param *param);
 EXTERN int     sched_getparam(pid_t pid,
-			      struct sched_param * param);
+                              struct sched_param *param);
 EXTERN int     sched_setscheduler(pid_t pid, int policy,
-				  const struct sched_param * param);
+                                  const struct sched_param *param);
 EXTERN int     sched_getscheduler(pid_t pid);
 EXTERN int     sched_yield(void);
 EXTERN int     sched_get_priority_max(int policy);
 EXTERN int     sched_get_priority_min(int policy);
 EXTERN int     sched_rr_get_interval(pid_t pid,
-				     struct timespec * interval);
+                                     struct timespec *interval);
 
 /* Task Switching Interfaces (non-standard) */
 
@@ -282,9 +285,9 @@ EXTERN sint32  sched_lockcount(void);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
 
-EXTERN void sched_note_start(_TCB *tcb );
-EXTERN void sched_note_stop(_TCB *tcb );
-EXTERN void sched_note_switch(_TCB *pFromTcb, _TCB *pToTcb);
+EXTERN void sched_note_start(FAR _TCB *tcb );
+EXTERN void sched_note_stop(FAR _TCB *tcb );
+EXTERN void sched_note_switch(FAR _TCB *pFromTcb, FAR _TCB *pToTcb);
 
 #else
 # define sched_note_start(t)
@@ -295,9 +298,9 @@ EXTERN void sched_note_switch(_TCB *pFromTcb, _TCB *pToTcb);
 /* File system helpers */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-EXTERN struct filelist *sched_getfiles(void);
+EXTERN FAR struct filelist *sched_getfiles(void);
 #if CONFIG_NFILE_STREAMS > 0
-EXTERN struct streamlist *sched_getstreams(void);
+EXTERN FAR struct streamlist *sched_getstreams(void);
 #endif /* CONFIG_NFILE_STREAMS */
 #endif /* CONFIG_NFILE_DESCRIPTORS */
 

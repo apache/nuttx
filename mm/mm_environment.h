@@ -47,6 +47,7 @@
 
 #ifndef MM_TEST
 # include <nuttx/config.h>
+# include <nuttx/compiler.h>
 # include <sys/types.h>
 # include <stdlib.h>
 # include <string.h>

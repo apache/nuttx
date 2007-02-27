@@ -72,7 +72,7 @@
  * Private Functions
  ************************************************************/
 
-static void _files_semtake(struct filelist *list)
+static void _files_semtake(FAR struct filelist *list)
 {
   /* Take the semaphore (perhaps waiting) */
 
@@ -102,10 +102,10 @@ void files_initialize(void)
 
 /* Allocate a list of files for a new task */
 
-struct filelist *files_alloclist(void)
+FAR struct filelist *files_alloclist(void)
 {
-  struct filelist *list;
-  list = (struct filelist*)kzmalloc(sizeof(struct filelist));
+  FAR struct filelist *list;
+  list = (FAR struct filelist*)kzmalloc(sizeof(struct filelist));
   if (list)
     {
        /* Start with a reference count of one */
@@ -121,7 +121,7 @@ struct filelist *files_alloclist(void)
 
 /* Increase the reference count on a file list */
 
-int files_addreflist(struct filelist *list)
+int files_addreflist(FAR struct filelist *list)
 {
   if (list)
     {
@@ -136,7 +136,7 @@ int files_addreflist(struct filelist *list)
 
 /* Release a reference to the file list */
 
-int files_releaselist(struct filelist *list)
+int files_releaselist(FAR struct filelist *list)
 {
   int crefs;
   if (list)
@@ -159,7 +159,7 @@ int files_releaselist(struct filelist *list)
 
             for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
               {
-                struct inode *inode = list->fl_files[i].f_inode;
+                FAR struct inode *inode = list->fl_files[i].f_inode;
                 if (inode)
                   {
                     inode_release(inode);
@@ -179,9 +179,9 @@ int files_releaselist(struct filelist *list)
  * heart of dup2.
  */
 
-int files_dup(struct file *filep1, struct file *filep2)
+int files_dup(FAR struct file *filep1, FAR struct file *filep2)
 {
-  struct filelist *list;
+  FAR struct filelist *list;
 
   if (!filep1 || !filep1->f_inode || !filep2)
     {
@@ -225,34 +225,34 @@ int files_dup(struct file *filep1, struct file *filep2)
  * the files array.
  */
 
-int files_allocate(struct inode *inode, int oflags, off_t pos)
+int files_allocate(FAR struct inode *inode, int oflags, off_t pos)
 {
-  struct filelist *list;
+  FAR struct filelist *list;
   int i;
 
   list = sched_getfiles();
   if (list)
     {
-    _files_semtake(list);
-    for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
-      {
-        if (!list->fl_files[i].f_inode)
-          {
-             list->fl_files[i].f_oflags = oflags;
-             list->fl_files[i].f_pos    = pos;
-             list->fl_files[i].f_inode  = inode;
-             _files_semgive(list);
-             return i;
-          }
-      }
-    _files_semgive(list);
-  }
+      _files_semtake(list);
+      for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
+        {
+          if (!list->fl_files[i].f_inode)
+            {
+               list->fl_files[i].f_oflags = oflags;
+               list->fl_files[i].f_pos    = pos;
+               list->fl_files[i].f_inode  = inode;
+               _files_semgive(list);
+               return i;
+            }
+        }
+      _files_semgive(list);
+    }
   return ERROR;
 }
 
 void files_release(int filedes)
 {
-  struct filelist *list;
+  FAR struct filelist *list;
 
   list = sched_getfiles();
   if (list)

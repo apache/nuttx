@@ -39,13 +39,13 @@
 
 #include <nuttx/config.h>
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
-
 #include <unistd.h>
 #include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include "lib_internal.h"
+
+#if CONFIG_STDIO_BUFFER_SIZE > 0
 
 /************************************************************
  * Definitions
@@ -63,7 +63,7 @@
  * lib_sem_initialize
  ************************************************************/
 
-void lib_sem_initialize(struct file_struct *stream)
+void lib_sem_initialize(FAR struct file_struct *stream)
 {
   /* Initialize the LIB semaphore to one (to support one-at-
    * a-time access to private data sets.
@@ -79,7 +79,7 @@ void lib_sem_initialize(struct file_struct *stream)
  * lib_take_semaphore
  ************************************************************/
 
-void lib_take_semaphore(struct file_struct *stream)
+void lib_take_semaphore(FAR struct file_struct *stream)
 {
   pid_t my_pid = getpid();
 
@@ -115,7 +115,7 @@ void lib_take_semaphore(struct file_struct *stream)
  * lib_give_semaphore
  ************************************************************/
 
-void lib_give_semaphore(struct file_struct *stream)
+void lib_give_semaphore(FAR struct file_struct *stream)
 {
   pid_t my_pid = getpid();
 

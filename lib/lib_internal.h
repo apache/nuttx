@@ -104,8 +104,8 @@ struct lib_rawstream_s
 
 /* Defined in lib_streamsem.c */
 
-extern void  stream_semtake(struct streamlist *list);
-extern void  stream_semgive(struct streamlist *list);
+extern void  stream_semtake(FAR struct streamlist *list);
+extern void  stream_semgive(FAR struct streamlist *list);
 
 /* Defined in lib_memstream.c */
 
@@ -135,8 +135,8 @@ extern int lib_sprintf (struct lib_stream_s *obj,
 
 /* Defined lib_libvsprintf.c */
 
-extern int  lib_vsprintf(struct lib_stream_s *obj,
-                         const char *src, va_list ap);
+extern int lib_vsprintf(struct lib_stream_s *obj,
+                        const char *src, va_list ap);
 
 /* Defined in lib_libwrite.c */
 
@@ -149,9 +149,9 @@ extern ssize_t lib_fread(void *ptr, size_t count, FILE *stream);
 /* Defined in lib_sem.c */
 
 #if CONFIG_STDIO_BUFFER_SIZE > 0
-extern void lib_sem_initialize(struct file_struct *stream);
-extern void lib_take_semaphore(struct file_struct *stream);
-extern void lib_give_semaphore(struct file_struct *stream);
+extern void lib_sem_initialize(FAR struct file_struct *stream);
+extern void lib_take_semaphore(FAR struct file_struct *stream);
+extern void lib_give_semaphore(FAR struct file_struct *stream);
 #endif
 
 /* Defined in lib_libgetbase.c */

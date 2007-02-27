@@ -41,6 +41,7 @@
  ************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 #include <time.h>      /* Needed for struct timespec */
 #include <sys/types.h> /* Needed for, e.g., sigset_t */
 
@@ -123,7 +124,7 @@ struct sigaction
   union
   {
     void (*_sa_handler)(int);
-    void (*_sa_sigaction)(int, siginfo_t *, void *);
+    void (*_sa_sigaction)(int, FAR siginfo_t *, FAR void *);
   } sa_u;
   sigset_t         sa_mask;
   int              sa_flags;
@@ -155,7 +156,7 @@ EXTERN int sigaction(int sig,
 		     const struct sigaction *act,
 		     struct sigaction *oact);
 EXTERN int sigprocmask(int how, const sigset_t *set,
-		       sigset_t *oset);
+                       sigset_t *oset);
 EXTERN int sigpending(sigset_t *set);
 EXTERN int sigsuspend(const sigset_t *sigmask);
 EXTERN int sigwaitinfo(const sigset_t *set,

@@ -55,9 +55,9 @@
  *   calloc calculates the size and calls zalloc
  ************************************************************/
 
-void *calloc(size_t n, size_t elem_size)
+FAR void *calloc(size_t n, size_t elem_size)
 {
-  void *ret = NULL;
+  FAR void *ret = NULL;
 
   if (n > 0 && elem_size > 0)
     {

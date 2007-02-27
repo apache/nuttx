@@ -60,9 +60,9 @@
 /* This struct defines the way the registers are stored */
 
 #ifndef __ASSEMBLY__
-typedef int (*xcpt_t)(int irq, void *context);
+typedef int (*xcpt_t)(int irq, FAR void *context);
 typedef int (*swint_t)(int code, int parm2, int parm3,
-                       void *context);
+                       FAR void *context);
 #endif
 
 /* Now include architecture-specific types */

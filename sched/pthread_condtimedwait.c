@@ -37,6 +37,7 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/compiler.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -71,6 +72,25 @@
  * Private Functions
  ************************************************************/
 
+/************************************************************
+ * Function:  pthread_condtimedout
+ *
+ * Description:
+ *   This function is called if the timeout elapses before
+ *   the condition is signaled.
+ *
+ * Parameters:
+ *   argc  - the number of arguments (should be 2)
+ *   pid   - the task ID of the task to wateup
+ *   signo - The signal to use to wake up the task
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ************************************************************/
+
 static void pthread_condtimedout(int argc, uint32 pid, uint32 signo, ...)
 {
 #ifdef CONFIG_CAN_PASS_STRUCTS
@@ -86,6 +106,70 @@ static void pthread_condtimedout(int argc, uint32 pid, uint32 signo, ...)
 }
 
 /************************************************************
+ * Function:  pthread_timeoutticks
+ *
+ * Description:
+ *   Convert a timespec delay to system timer ticks.
+ *
+ * Parameters:
+ *   abstime - wait until this absolute time
+ *
+ * Return Value:
+ *   The relative number of ticks to wait (or ERROR on
+ *   failure;
+ *
+ * Assumptions:
+ *   Interrupts should be disabled so that the time is
+ *   not changing during the calculation
+ *
+ ************************************************************/
+
+int pthread_timeouticks(const struct timespec *abstime, int *ticks)
+{
+  struct timespec currtime;
+  struct timespec reltime;
+  sint32          relusec;
+  int             ret;
+
+  /* Convert the timespec to clock ticks.  NOTE: Here we use
+   * internal knowledge that CLOCK_REALTIME is defined to be zero!
+   */
+
+  ret = clock_gettime(0, &currtime);
+  if (ret)
+    {
+      return EINVAL;
+    }
+
+  /* The relative time to wait is the absolute time minus the
+   * current time.
+   */
+
+  reltime.tv_nsec = (abstime->tv_nsec - currtime.tv_nsec);
+  reltime.tv_sec  = (abstime->tv_sec  - currtime.tv_sec);
+
+  /* Check if we were supposed to borrow from the seconds to
+   * borrow from the seconds
+   */
+
+  if (reltime.tv_nsec < 0)
+    {
+      reltime.tv_nsec += NSEC_PER_SEC;
+      reltime.tv_sec  -= 1;
+    }
+
+  /* Convert this relative time into microseconds.*/
+
+  relusec = reltime.tv_sec * USEC_PER_SEC +
+            reltime.tv_nsec / NSEC_PER_USEC;
+
+  /* Convert microseconds to clock ticks */
+
+  *ticks = relusec / USEC_PER_TICK;
+  return OK;
+}
+
+/************************************************************
  * Public Functions
  ************************************************************/
 
@@ -96,10 +180,13 @@ static void pthread_condtimedout(int argc, uint32 pid, uint32 signo, ...)
  *   A thread can perform a timed wait on a condition variable.
  *
  * Parameters:
- *   None
+ *   cond   - the condition variable to wait on
+ *   mutex   - the mutex that protects the condition variable
+ *   abstime - wait until this absolute time
  *
  * Return Value:
- *   None
+ *   OK (0) on success; ERROR (-1) on failure with errno
+ *   set appropriately.
  *
  * Assumptions:
  *   Timing is of resolution 1 msec, with +/-1 millisecond
@@ -110,10 +197,7 @@ static void pthread_condtimedout(int argc, uint32 pid, uint32 signo, ...)
 int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
                            const struct timespec *abstime)
 {
-  struct timespec currtime;
-  struct timespec reltime;
   WDOG_ID         wdog;
-  sint32          relusec;
   sint32          ticks;
   int             mypid = (int)getpid();
   irqstate_t      int_state;
@@ -169,11 +253,9 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
 
           /* Convert the timespec to clock ticks.  We must disable pre-emption
            * here so that this time stays valid until the wait begins.
-           * NOTE:  Here we use internal knowledge that CLOCK_REALTIME is
-           * defined to be zero!
            */
 
-          ret = clock_gettime(0, &currtime);
+          ret = pthread_timeouticks(abstime, &ticks);
           if (ret)
             {
               /* Restore interrupts  (pre-emption will be enabled when
@@ -184,33 +266,6 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
             }
           else
             {
-              /* The relative time to wait is the absolute time minus the
-               * the current time.
-               */
-
-              reltime.tv_nsec = (abstime->tv_nsec - currtime.tv_nsec);
-              reltime.tv_sec  = (abstime->tv_sec  - currtime.tv_sec);
-
-              /* Check if we were supposed to borrow from the seconds
-               * to borrow from the seconds
-               */
-
-              if (reltime.tv_nsec < 0)
-                {
-                  reltime.tv_nsec += NSEC_PER_SEC;
-                  reltime.tv_sec  -= 1;
-                }
-
-              /* Convert this relative time into microseconds.*/
-
-              relusec =
-                reltime.tv_sec * USEC_PER_SEC +
-                reltime.tv_nsec / NSEC_PER_USEC;
-
-              /* Convert microseconds to clock ticks */
-
-              ticks = relusec / USEC_PER_TICK;
-
               /* Check the absolute time to wait.  If it is now or in the past, then
                * just return with the timedout condition.
                */

@@ -82,7 +82,7 @@
  *   Deallocate a pending signal list entry
  ************************************************************/
 
-void sig_releasependingsignal(sigpendq_t *sigpend)
+void sig_releasependingsignal(FAR sigpendq_t *sigpend)
 {
   irqstate_t saved_state;
 
@@ -96,7 +96,7 @@ void sig_releasependingsignal(sigpendq_t *sigpend)
        * list from interrupt handlers. */
 
       saved_state = irqsave();
-      sq_addlast((sq_entry_t*)sigpend, &g_sigpendingsignal);
+      sq_addlast((FAR sq_entry_t*)sigpend, &g_sigpendingsignal);
       irqrestore(saved_state);
     }
 
@@ -111,7 +111,7 @@ void sig_releasependingsignal(sigpendq_t *sigpend)
        */
 
       saved_state = irqsave();
-      sq_addlast((sq_entry_t*)sigpend, &g_sigpendingirqsignal);
+      sq_addlast((FAR sq_entry_t*)sigpend, &g_sigpendingirqsignal);
       irqrestore(saved_state);
    }
 

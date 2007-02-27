@@ -80,7 +80,7 @@ typedef void (*wdentry_t)(int argc, uint32 arg1, ...);
 
 /* Watchdog 'handle' */
 
-typedef struct wdog_s *WDOG_ID;
+typedef FAR struct wdog_s *WDOG_ID;
 
 /************************************************************
  * Global Variables

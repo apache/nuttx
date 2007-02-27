@@ -92,11 +92,6 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_ARCH_STRNCPY, CONFIG_ARCH_STRLEN, CONFIG_ARCH_BZERO
 		CONFIG_ARCH_KMALLOC, CONFIG_ARCH_KZMALLOC, CONFIG_ARCH_KFREE
 
-	General Compile environment setup
-
-		CONFIG_HAVE_LONG_LONG - enable if your architecture supports
-		  long long types and if you plan to use them
-
 	Sizes of configurable things (0 disables)
 
 		CONFIG_NPTHREAD_KEYS - The number of items of thread-

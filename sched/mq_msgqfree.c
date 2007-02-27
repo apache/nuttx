@@ -84,14 +84,14 @@
  *
  ************************************************************/
 
-void mq_msgqfree(msgq_t *msgq)
+void mq_msgqfree(FAR msgq_t *msgq)
 {
-  mqmsg_t  *curr;
-  mqmsg_t  *next;
+  FAR mqmsg_t *curr;
+  FAR mqmsg_t *next;
 
   /* Deallocate any stranded messages in the message queue. */
 
-  curr = (mqmsg_t*)msgq->msglist.head;
+  curr = (FAR mqmsg_t*)msgq->msglist.head;
   while (curr)
     {
       /* Deallocate the message structure. */

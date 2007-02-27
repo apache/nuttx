@@ -53,7 +53,7 @@
  * Public Functions
  ************************************************************/
 
-int sched_setupstreams(_TCB *tcb)
+int sched_setupstreams(FAR _TCB *tcb)
 {
   /* Allocate file strems for the TCB */
 

@@ -62,11 +62,11 @@
  *
  ************************************************************/
 
-void free(void *mem)
+void free(FAR void *mem)
 {
-  struct mm_freenode_s *node;
-  struct mm_freenode_s *prev;
-  struct mm_freenode_s *next;
+  FAR struct mm_freenode_s *node;
+  FAR struct mm_freenode_s *prev;
+  FAR struct mm_freenode_s *next;
 
   /* Protect against attempts to free a NULL reference */
 
@@ -83,22 +83,22 @@ void free(void *mem)
 
   /* Map the memory chunk into a free node */
 
-  node = (struct mm_freenode_s *)((char*)mem - SIZEOF_MM_ALLOCNODE);
+  node = (FAR struct mm_freenode_s *)((char*)mem - SIZEOF_MM_ALLOCNODE);
   node->preceding &= ~MM_ALLOC_BIT;
 
   /* Check if the following node is free and, if so, merge it */
 
-  next = (struct mm_freenode_s *)((char*)node + node->size);
+  next = (FAR struct mm_freenode_s *)((char*)node + node->size);
   if ((next->preceding & MM_ALLOC_BIT) == 0)
     {
-      struct mm_allocnode_s *andbeyond;
+      FAR struct mm_allocnode_s *andbeyond;
 
       /* Get the node following the next node (which will
        * become the new next node). We know that we can never
        * index past the tail chunk because it is always allocated.
        */
 
-      andbeyond = (struct mm_allocnode_s*)((char*)next + next->size);
+      andbeyond = (FAR struct mm_allocnode_s*)((char*)next + next->size);
 
       /* Remove the next node.  There must be a predecessor,
        * but there may not be a successor node.
@@ -115,14 +115,14 @@ void free(void *mem)
 
       node->size          += next->size;
       andbeyond->preceding =  node->size | (andbeyond->preceding & MM_ALLOC_BIT);
-      next                 = (struct mm_freenode_s *)andbeyond;
+      next                 = (FAR struct mm_freenode_s *)andbeyond;
     }
 
   /* Check if the preceding node is also free and, if so, merge
    * it with this node
    */
 
-  prev = (struct mm_freenode_s *)((char*)node - node->preceding);
+  prev = (FAR struct mm_freenode_s *)((char*)node - node->preceding);
   if ((prev->preceding & MM_ALLOC_BIT) == 0)
     {
       /* Remove the node.  There must be a predecessor, but there may
@@ -146,6 +146,5 @@ void free(void *mem)
   /* Add the merged node to the nodelist */
 
   mm_addfreechunk(node);
-
   mm_givesemaphore();
 }

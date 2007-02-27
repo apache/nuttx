@@ -114,15 +114,11 @@
  *
  ************************************************************/
 
-sem_t *sem_open (const char *name, int oflag, ...)
+FAR sem_t *sem_open (const char *name, int oflag, ...)
 {
   int          namelen;
-  nsem_t      *psem;
-#ifdef CONFIG_CAN_CAST_POINTERS
-  sem_t       *sem = (sem_t*)ERROR;
-#else
-  sem_t       *sem = get_errorptr();
-#endif
+  FAR nsem_t  *psem;
+  FAR sem_t   *sem = (FAR sem_t*)ERROR;
   va_list      arg;          /* Points to each un-named argument */
   mode_t       mode;         /* Creation mode parameter (ignored) */
   unsigned int value;        /* Semaphore value parameter */
@@ -178,7 +174,7 @@ sem_t *sem_open (const char *name, int oflag, ...)
                 {
                   /* Allocate memory for the new semaphore */
 
-                  psem = (nsem_t*)kmalloc((sizeof(nsem_t) + namelen + 1));
+                  psem = (FAR nsem_t*)kmalloc((sizeof(nsem_t) + namelen + 1));
                   if (psem)
                     {
                       /* Initialize the named semaphore */
@@ -188,14 +184,14 @@ sem_t *sem_open (const char *name, int oflag, ...)
 
                       psem->nconnect = 1;
                       psem->unlinked = FALSE;
-                      psem->name = (char*)psem + sizeof(nsem_t);
+                      psem->name = (FAR char*)psem + sizeof(nsem_t);
                       strcpy(psem->name, name);
 
                       /* Add the new semaphore to the list of named
                        * semaphores
                        */
 
-                      dq_addfirst((dq_entry_t*)psem, &g_nsems);
+                      dq_addfirst((FAR dq_entry_t*)psem, &g_nsems);
                     }
 
                   /* Clean-up variable argument stuff */
@@ -209,3 +205,4 @@ sem_t *sem_open (const char *name, int oflag, ...)
 
   return sem;
 }
+

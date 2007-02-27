@@ -114,7 +114,7 @@
 
 int sigprocmask(int how, const sigset_t *set, sigset_t *oset)
 {
-  _TCB      *rtcb = (_TCB*)g_readytorun.head;
+  FAR _TCB  *rtcb = (FAR _TCB*)g_readytorun.head;
   sigset_t   oldsigprocmask;
   irqstate_t saved_state;
   int        ret = OK;
@@ -124,48 +124,57 @@ int sigprocmask(int how, const sigset_t *set, sigset_t *oset)
   /* Return the old signal mask if requested */
 
   oldsigprocmask = rtcb->sigprocmask;
-  if (oset) *oset = oldsigprocmask;
+  if (oset)
+    {
+      *oset = oldsigprocmask;
+    }
 
   /* Modify the current signal mask if so requested */
-  if (set) {
-     /* Some of these operations are non-atomic.  We need to protect
-      * ourselves from attempts to process signals from interrupts */
 
-     saved_state = irqsave();
+  if (set)
+    {
+      /* Some of these operations are non-atomic.  We need to protect
+       * ourselves from attempts to process signals from interrupts
+       */
 
-     /* Okay, determine what we are supposed to do */
+      saved_state = irqsave();
 
-     switch (how) {
-        /* The resulting set is the union of the current set and the
-         * signal set pointed to by set. */
+      /* Okay, determine what we are supposed to do */
 
-         case SIG_BLOCK:
-           rtcb->sigprocmask |= *set;
-           break;
+      switch (how)
+        {
+          /* The resulting set is the union of the current set and the
+           * signal set pointed to by set.
+           */
 
-         /* The resulting set is the intersection of the current set and
-          * the complement of the signal set pointed to by _set. */
+          case SIG_BLOCK:
+            rtcb->sigprocmask |= *set;
+            break;
 
-         case SIG_UNBLOCK:
-           rtcb->sigprocmask &= ~(*set);
-           break;
+          /* The resulting set is the intersection of the current set and
+           * the complement of the signal set pointed to by _set.
+           */
 
-         /* The resulting set is the signal set pointed to by set. */
+          case SIG_UNBLOCK:
+            rtcb->sigprocmask &= ~(*set);
+            break;
 
-         case SIG_SETMASK:
-           rtcb->sigprocmask = *set;
-           break;
+          /* The resulting set is the signal set pointed to by set. */
 
-         default: 
-          ret = ERROR;
-          break;
-      } /* end switch */
+          case SIG_SETMASK:
+            rtcb->sigprocmask = *set;
+            break;
+
+          default: 
+            ret = ERROR;
+            break;
+        }
       irqrestore(saved_state);
 
       /* Now, process any pending signals that were just unmasked */
 
       sig_unmaskpendingsignal();
-   } /* end if */
+    }
 
    sched_unlock();
    return ret;

@@ -145,8 +145,10 @@ static int waiter_main(int argc, char *argv[])
       printf("waiter_main: ERROR sigaction failed, status=%d\n" , status);
     }
 
+#ifndef SDCC
   printf("waiter_main: oact.sigaction=%p oact.sa_flags=%x oact.sa_mask=%x\n",
           oact.sa_sigaction, oact.sa_flags, oact.sa_mask);
+#endif
 
   /* Take the semaphore */
 
@@ -225,7 +227,11 @@ void sighand_test(void)
   /* Then signal the waiter thread. */
 
   sigvalue.sival_int = SIGVALUE_INT;
+#ifdef CONFIG_CAN_PASS_STRUCTS
   status = sigqueue(waiterpid, WAKEUP_SIGNAL, sigvalue);
+#else
+  status = sigqueue(waiterpid, WAKEUP_SIGNAL, sigvalue.sival_ptr);
+#endif
   if (status != OK)
     {
       printf("sighand_test: ERROR sigqueue failed\n" );

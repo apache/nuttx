@@ -185,7 +185,7 @@ STATUS wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,
 
   if (g_wdactivelist.head == NULL)
     {
-      sq_addlast((sq_entry_t*)wdog,&g_wdactivelist);
+      sq_addlast((FAR sq_entry_t*)wdog,&g_wdactivelist);
     }
 
   /* There are other active watchdogs in the timer queue */
@@ -228,11 +228,11 @@ STATUS wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,
 
           if (curr == (wdog_t*)g_wdactivelist.head)
             {
-              sq_addfirst((sq_entry_t*)wdog, &g_wdactivelist);
+              sq_addfirst((FAR sq_entry_t*)wdog, &g_wdactivelist);
             }
           else
             {
-              sq_addafter((sq_entry_t*)prev, (sq_entry_t*)wdog,
+              sq_addafter((FAR sq_entry_t*)prev, (FAR sq_entry_t*)wdog,
                           &g_wdactivelist);
             }
         }
@@ -247,13 +247,13 @@ STATUS wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,
           delay -= now;
           if (!curr->next)
             {
-              sq_addlast((sq_entry_t*)wdog, &g_wdactivelist);
+              sq_addlast((FAR sq_entry_t*)wdog, &g_wdactivelist);
             }
           else
             {
               next = curr->next;
               next->lag -= delay;
-              sq_addafter((sq_entry_t*)curr, (sq_entry_t*)wdog,
+              sq_addafter((FAR sq_entry_t*)curr, (FAR sq_entry_t*)wdog,
                           &g_wdactivelist);
             }
         }

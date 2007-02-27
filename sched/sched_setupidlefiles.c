@@ -71,7 +71,7 @@
  *
  ************************************************************/
 
-int sched_setupidlefiles(_TCB *tcb)
+int sched_setupidlefiles(FAR _TCB *tcb)
 {
   int fd;
 

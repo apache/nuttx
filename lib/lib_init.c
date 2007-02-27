@@ -57,7 +57,7 @@
  * Private Functions
  ************************************************************/
 
-static void _lib_semtake(struct streamlist *list)
+static void _lib_semtake(FAR struct streamlist *list)
 {
   /* Take the semaphore (perhaps waiting) */
 
@@ -92,10 +92,10 @@ void weak_const_function lib_initialize(void)
  * creates the streamlist instance that is stored in the TCB.
  */
 
-struct streamlist *lib_alloclist(void)
+FAR struct streamlist *lib_alloclist(void)
 {
-  struct streamlist *list;
-  list = (struct streamlist*)kzmalloc(sizeof(struct streamlist));
+  FAR struct streamlist *list;
+  list = (FAR struct streamlist*)kzmalloc(sizeof(struct streamlist));
   if (list)
     {
       int i;
@@ -136,7 +136,7 @@ struct streamlist *lib_alloclist(void)
  * list.
  */
 
-void lib_addreflist(struct streamlist *list)
+void lib_addreflist(FAR struct streamlist *list)
 {
   if (list)
     {
@@ -153,7 +153,7 @@ void lib_addreflist(struct streamlist *list)
  * separately when the file descriptor list is freed.
  */
 
-void lib_releaselist(struct streamlist *list)
+void lib_releaselist(FAR struct streamlist *list)
 {
   int crefs;
   if (list)
@@ -178,7 +178,7 @@ void lib_releaselist(struct streamlist *list)
             sched_free(list);
 
             /* Initialize each FILE structure */
-
+#if CONFIG_STDIO_BUFFER_SIZE > 0
             for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
              {
                /* Destroy the semaphore that protects the IO buffer */
@@ -191,6 +191,7 @@ void lib_releaselist(struct streamlist *list)
                    free(list->sl_streams[i].fs_bufstart);
                  }
              }
+#endif
          }
      }
 }

@@ -135,7 +135,7 @@ STATUS wd_cancel (WDOG_ID wdid)
           /* Now, remove the watchdog from the timer queue */
 
           if (prev)
-            (void)sq_remafter((sq_entry_t*)prev, &g_wdactivelist);
+            (void)sq_remafter((FAR sq_entry_t*)prev, &g_wdactivelist);
           else
             (void)sq_remfirst(&g_wdactivelist);
           wdid->next = NULL;

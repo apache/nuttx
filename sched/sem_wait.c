@@ -97,9 +97,9 @@
  *
  ************************************************************/
 
-int sem_wait (sem_t *sem)
+int sem_wait(sem_t *sem)
 {
-  _TCB      *rtcb = (_TCB*)g_readytorun.head;
+  FAR _TCB  *rtcb = (FAR _TCB*)g_readytorun.head;
   int        ret = ERROR;
   irqstate_t saved_state;
 
@@ -172,3 +172,4 @@ int sem_wait (sem_t *sem)
 
   return ret;
 }
+

@@ -106,8 +106,8 @@ extern "C" {
 #endif
 
 #ifdef __GNUC__
-EXTERN void   up_assert(const ubyte *fileName, int lineNum);
-EXTERN void   up_assert_code(const ubyte *fileName, int lineNum,
+EXTERN void   up_assert(FAR const ubyte *filename, int linenum);
+EXTERN void   up_assert_code(FAR const ubyte *filename, int linenum,
                              int error_code);
 #else
 EXTERN void   up_assert(void);

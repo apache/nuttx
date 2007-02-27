@@ -58,10 +58,7 @@
  * Global Variables
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS >0
-extern struct file files[CONFIG_NFILE_DESCRIPTORS];
-#endif
-extern struct inode *root_inode;
+extern FAR struct inode *root_inode;
 
 /************************************************************
  * Pulblic Function Prototypes
@@ -77,23 +74,21 @@ extern "C" {
 
 /* fs_inode.c ***********************************************/
 
-EXTERN struct inode *inode_find(const char *path);
-EXTERN void inode_addref(struct inode *inode);
-EXTERN void inode_release(struct inode *inode);
+EXTERN FAR struct inode *inode_find(const char *path);
+EXTERN void inode_addref(FAR struct inode *inode);
+EXTERN void inode_release(FAR struct inode *inode);
 
 /* fs_files.c ***********************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS >0
 EXTERN void weak_function files_initialize(void);
-EXTERN int  files_allocate(struct inode *inode, int oflags, off_t pos);
+EXTERN int  files_allocate(FAR struct inode *inode, int oflags, off_t pos);
 EXTERN void files_release(int filedes);
 #endif
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
-#endif 
-
-
+#endif
 
 #endif /* __FS_INTERNAL_H */

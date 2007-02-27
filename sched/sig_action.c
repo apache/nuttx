@@ -77,13 +77,13 @@
  *
  ************************************************************/
 
-static sigactq_t *sig_allocateaction(void)
+static FAR sigactq_t *sig_allocateaction(void)
 {
-  sigactq_t *sigact;
+  FAR sigactq_t *sigact;
 
   /* Try to get the signal action structure from the free list */
 
-  sigact = (sigactq_t*)sq_remfirst(&g_sigfreeaction);
+  sigact = (FAR sigactq_t*)sq_remfirst(&g_sigfreeaction);
 
   /* Check if we got one. */
 
@@ -95,7 +95,7 @@ static sigactq_t *sig_allocateaction(void)
 
       /* And try again */
 
-      sigact = (sigactq_t*)sq_remfirst(&g_sigfreeaction);
+      sigact = (FAR sigactq_t*)sq_remfirst(&g_sigfreeaction);
       if (!sigact)
         {
           PANIC(OSERR_OUTOFMEMORY);
@@ -171,9 +171,9 @@ static sigactq_t *sig_allocateaction(void)
 int sigaction(int signo, const struct sigaction *act,
               struct sigaction *oact)
 {
-  _TCB      *rtcb = (_TCB*)g_readytorun.head;
-  sigactq_t *sigact;
-  int        ret = ERROR;  /* Assume failure */
+  FAR _TCB      *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR sigactq_t *sigact;
+  int            ret = ERROR;  /* Assume failure */
 
   /* Since sigactions can only be installed from the running
    * thread of execution, no special precautions should be
@@ -229,7 +229,7 @@ int sigaction(int signo, const struct sigaction *act,
 
               /* Add the new sigaction to sigactionq */
 
-              sq_addlast((sq_entry_t*)sigact, &rtcb->sigactionq);
+              sq_addlast((FAR sq_entry_t*)sigact, &rtcb->sigactionq);
             }
         }
 
@@ -250,7 +250,7 @@ int sigaction(int signo, const struct sigaction *act,
             {
               /* Remove the old sigaction from sigactionq */
 
-              sq_rem((sq_entry_t*)sigact, &rtcb->sigactionq);
+              sq_rem((FAR sq_entry_t*)sigact, &rtcb->sigactionq);
 
               /* And deallocate it */
 
@@ -270,9 +270,9 @@ int sigaction(int signo, const struct sigaction *act,
  *
  ************************************************************/
 
-void sig_releaseaction(sigactq_t *sigact)
+void sig_releaseaction(FAR sigactq_t *sigact)
 {
   /* Just put it back on the free list */
 
-  sq_addlast((sq_entry_t*)sigact, &g_sigfreeaction);
+  sq_addlast((FAR sq_entry_t*)sigact, &g_sigfreeaction);
 }

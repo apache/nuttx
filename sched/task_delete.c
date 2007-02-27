@@ -95,14 +95,14 @@
 
 STATUS task_delete(pid_t pid)
 {
-  _TCB      *rtcb;
-  _TCB      *dtcb;
+  FAR _TCB  *rtcb;
+  FAR _TCB  *dtcb;
   irqstate_t saved_state;
   STATUS     ret = ERROR;
 
    /* Check if the task to delete is the calling task */
 
-   rtcb = (_TCB*)g_readytorun.head;
+   rtcb = (FAR _TCB*)g_readytorun.head;
    if (pid == 0 || pid == rtcb->pid)
      {
        /* If it is, then what we really wanted to do was exit.
@@ -146,7 +146,7 @@ STATUS task_delete(pid_t pid)
 
   /* Remove the task from the OS's tasks lists. */
 
-  dq_rem((dq_entry_t*)dtcb, g_tasklisttable[dtcb->task_state].list);
+  dq_rem((FAR dq_entry_t*)dtcb, g_tasklisttable[dtcb->task_state].list);
   dtcb->task_state = TSTATE_TASK_INVALID;
   irqrestore(saved_state);
 
@@ -163,3 +163,4 @@ STATUS task_delete(pid_t pid)
   sched_releasetcb(dtcb);
   return ret;
 }
+

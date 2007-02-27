@@ -50,7 +50,11 @@
  **************************************************************************/
 
 #define TEST_MESSAGE "This is a test and only a test"
+#ifdef SDCC
+#define TEST_MSGLEN  (31)
+#else
 #define TEST_MSGLEN  (strlen(TEST_MESSAGE)+1)
+#endif
 
 /**************************************************************************
  * Private Types
@@ -108,7 +112,7 @@ static void *sender_thread(void *arg)
   if (mqfd < 0)
     {
 	printf("sender_thread: ERROR mq_open failed\n");
-        pthread_exit((void*)1);
+        pthread_exit((pthread_addr_t)1);
     }
 
   /* Fill in a test message buffer to send */
@@ -139,7 +143,7 @@ static void *sender_thread(void *arg)
     }
 
   printf("sender_thread: returning nerrors=%d\n", nerrors);
-  return (void*)nerrors;
+  return (pthread_addr_t)nerrors;
 }
 
 static void *receiver_thread(void *arg)
@@ -174,7 +178,7 @@ static void *receiver_thread(void *arg)
    if (mqfd < 0)
      {
        printf("receiver_thread: ERROR mq_open failed\n");
-       pthread_exit((void*)1);
+       pthread_exit((pthread_addr_t)1);
      }
 
    /* Perform the receive 10 times */
@@ -221,7 +225,7 @@ static void *receiver_thread(void *arg)
       nerrors++;
     }
 
-  pthread_exit((void*)nerrors);
+  pthread_exit((pthread_addr_t)nerrors);
 
   /* Destroy the queue */
 
@@ -232,7 +236,7 @@ static void *receiver_thread(void *arg)
     }
 
   printf("receiver_thread: returning nerrors=%d\n", nerrors);
-  return (void*)nerrors;
+  return (pthread_addr_t)nerrors;
 }
 
 void mqueue_test(void)

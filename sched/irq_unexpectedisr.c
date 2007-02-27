@@ -75,7 +75,7 @@
  *
  ************************************************************/
 
-int irq_unexpected_isr(int irq, void *context)
+int irq_unexpected_isr(int irq, FAR void *context)
 {
   (void)irqsave();
    PANIC(OSERR_UNEXPECTEDISR);

@@ -53,7 +53,7 @@ for i in $* ; do
     cflags=$args
     args=
     ;;
-  --debug )
+  --dep-debug )
     set -x
     ;;
   *)
@@ -75,6 +75,6 @@ fi
 
 for file in $files ; do
   $cc -M $cflags $file || \
-    { echo "$cc -M $cflags $file FAILED" ; exit 3 ; }
+    { echo "# $cc -M $cflags $file FAILED" ; exit 3 ; }
 done
 

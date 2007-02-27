@@ -65,15 +65,26 @@
  *
  ************************************************************/
 
+#ifdef CONFIG_CAN_PASS_STRUCTS
 struct mallinfo mallinfo(void)
+#else
+int mallinfo(struct mallinfo *info)
+#endif
 {
-  static struct mallinfo stats;
   struct mm_allocnode_s *node;
   size_t mxordblk = 0; 
   int    ordblks  = 0;  /* Number of non-inuse chunks */
   size_t uordblks = 0;  /* Total allocated space */
   size_t fordblks = 0;  /* Total non-inuse space */
 
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  static struct mallinfo info;
+#else
+  if (!info)
+    {
+      return ERROR;
+    }
+#endif
   /* Visit each node in physical memory */
 
   for (node = g_heapstart;
@@ -99,10 +110,19 @@ struct mallinfo mallinfo(void)
   uordblks += SIZEOF_MM_ALLOCNODE; /* account for the tail node */
   DEBUGASSERT(uordblks + fordblks == g_heapsize);
 
-  stats.arena    = g_heapsize;
-  stats.ordblks  = ordblks;
-  stats.mxordblk = mxordblk;
-  stats.uordblks = uordblks;
-  stats.fordblks = fordblks;
-  return stats;
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  info.arena    = g_heapsize;
+  info.ordblks  = ordblks;
+  info.mxordblk = mxordblk;
+  info.uordblks = uordblks;
+  info.fordblks = fordblks;
+  return info;
+#else
+  info->arena    = g_heapsize;
+  info->ordblks  = ordblks;
+  info->mxordblk = mxordblk;
+  info->uordblks = uordblks;
+  info->fordblks = fordblks;
+  return OK;
+#endif
 }

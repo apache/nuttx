@@ -76,6 +76,7 @@
 
 int irq_attach(int irq, xcpt_t isr)
 {
+#if NR_IRQS > 0
   int ret = ERROR;
 
   if ((unsigned)irq < NR_IRQS)
@@ -102,6 +103,9 @@ int irq_attach(int irq, xcpt_t isr)
     }
 
   return ret;
+#else
+  return OK;
+#endif
 }
 
 

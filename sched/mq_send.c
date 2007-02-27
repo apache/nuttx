@@ -37,6 +37,7 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/compiler.h>
 #include <nuttx/kmalloc.h>
 #include <sys/types.h>      /* uint32, etc. */
 #include <mqueue.h>
@@ -92,10 +93,10 @@
  *
  ************************************************************/
 
-mqmsg_t *mq_msgalloc(void)
+FAR mqmsg_t *mq_msgalloc(void)
 {
-  mqmsg_t   *mqmsg;
-  irqstate_t saved_state;
+  FAR mqmsg_t *mqmsg;
+  irqstate_t   saved_state;
 
   /* If we were called from an interrupt handler, then try to
    * get the message from generally available list of messages.
@@ -107,12 +108,12 @@ mqmsg_t *mq_msgalloc(void)
     {
       /* Try the general free list */
 
-      mqmsg = (mqmsg_t*)sq_remfirst(&g_msgfree);
+      mqmsg = (FAR mqmsg_t*)sq_remfirst(&g_msgfree);
       if (!mqmsg)
         {
           /* Try the free list reserved for interrupt handlers */
 
-          mqmsg = (mqmsg_t*)sq_remfirst(&g_msgfreeirq);
+          mqmsg = (FAR mqmsg_t*)sq_remfirst(&g_msgfreeirq);
         }
     }
 
@@ -125,14 +126,14 @@ mqmsg_t *mq_msgalloc(void)
        */
 
       saved_state = irqsave();
-      mqmsg = (mqmsg_t*)sq_remfirst(&g_msgfree);
+      mqmsg = (FAR mqmsg_t*)sq_remfirst(&g_msgfree);
       irqrestore(saved_state);
 
       /* If we cannot a message from the free list, then we will have to allocate one. */
 
       if (!mqmsg)
         {
-          mqmsg = (mqmsg_t *)kmalloc((sizeof (mqmsg_t)));
+          mqmsg = (FAR mqmsg_t *)kmalloc((sizeof (mqmsg_t)));
 
           /* Check if we got an allocated message */
 
@@ -152,7 +153,6 @@ mqmsg_t *mq_msgalloc(void)
     }
 
   return(mqmsg);
-
 }
 
 /************************************************************
@@ -202,14 +202,14 @@ mqmsg_t *mq_msgalloc(void)
 
 int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
 {
-  _TCB      *rtcb;
-  _TCB      *btcb;
-  msgq_t    *msgq;
-  mqmsg_t   *curr;
-  mqmsg_t   *next;
-  mqmsg_t   *prev;
-  irqstate_t saved_state;
-  int        ret = ERROR;
+  FAR _TCB    *rtcb;
+  FAR _TCB    *btcb;
+  FAR msgq_t  *msgq;
+  FAR mqmsg_t *curr;
+  FAR mqmsg_t *next;
+  FAR mqmsg_t *prev;
+  irqstate_t   saved_state;
+  int          ret = ERROR;
 
   /* Verify the input parameters */
 
@@ -267,7 +267,7 @@ int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
                    * When we are unblocked, we will try again
                    */
 
-                  rtcb = (_TCB*)g_readytorun.head;
+                  rtcb = (FAR _TCB*)g_readytorun.head;
                   rtcb->msgwaitq = msgq;
                   (msgq->nwaitnotfull)++;
                   up_block_task(rtcb, TSTATE_WAIT_MQNOTFULL);
@@ -314,7 +314,7 @@ int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
            * message. Each is list is maintained in ascending priority order.
            */
 
-          for (prev = NULL, next = (mqmsg_t*)msgq->msglist.head;
+          for (prev = NULL, next = (FAR mqmsg_t*)msgq->msglist.head;
                next && prio <= next->priority;
                prev = next, next = next->next);
 
@@ -322,12 +322,12 @@ int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
 
           if (prev)
             {
-              sq_addafter((sq_entry_t*)prev, (sq_entry_t*)curr,
+              sq_addafter((FAR sq_entry_t*)prev, (FAR sq_entry_t*)curr,
                           &msgq->msglist);
             }
           else
             {
-              sq_addfirst((sq_entry_t*)curr, &msgq->msglist);
+              sq_addfirst((FAR sq_entry_t*)curr, &msgq->msglist);
             }
 
           /* Increment the count of message in the queue */
@@ -378,7 +378,7 @@ int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
                * interrupts should never cause a change in this list
                */
 
-              for (btcb = (_TCB*)g_waitingformqnotempty.head;
+              for (btcb = (FAR _TCB*)g_waitingformqnotempty.head;
                    btcb && btcb->msgwaitq != msgq;
                    btcb = btcb->flink);
 

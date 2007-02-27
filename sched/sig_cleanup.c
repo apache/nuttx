@@ -76,36 +76,36 @@
  * to perform this action.
  ************************************************************/
 
-void sig_cleanup(_TCB *stcb)
+void sig_cleanup(FAR _TCB *stcb)
 {
-  sigactq_t  *sigact;
-  sigq_t     *sigq;
-  sigpendq_t *sigpend;
+  FAR sigactq_t  *sigact;
+  FAR sigq_t     *sigq;
+  FAR sigpendq_t *sigpend;
 
   /* Deallocate all entries in the list of signal actions */
 
-  while ((sigact = (sigactq_t*)sq_remfirst(&stcb->sigactionq)) != NULL)
+  while ((sigact = (FAR sigactq_t*)sq_remfirst(&stcb->sigactionq)) != NULL)
     {
       sig_releaseaction(sigact);
     }
 
   /* Deallocate all entries in the list of pending signals */
 
-  while ((sigpend = (sigpendq_t*)sq_remfirst(&stcb->sigpendingq)) != NULL)
+  while ((sigpend = (FAR sigpendq_t*)sq_remfirst(&stcb->sigpendingq)) != NULL)
     {
       sig_releasependingsignal(sigpend);
     }
 
   /* Deallocate all entries in the list of pending signal actions */
 
-  while ((sigq = (sigq_t*)sq_remfirst(&stcb->sigpendactionq)) != NULL)
+  while ((sigq = (FAR sigq_t*)sq_remfirst(&stcb->sigpendactionq)) != NULL)
     {
       sig_releasependingsigaction(sigq);
     }
 
   /* Deallocate all entries in the list of posted signal actions */
 
-  while ((sigq = (sigq_t*)sq_remfirst(&stcb->sigpostedq)) != NULL)
+  while ((sigq = (FAR sigq_t*)sq_remfirst(&stcb->sigpostedq)) != NULL)
     {
       sig_releasependingsigaction(sigq);
     }

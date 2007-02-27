@@ -56,7 +56,7 @@
  *
  ************************************************************/
 
-void dq_addafter(dq_entry_t *prev, dq_entry_t *node,
+void dq_addafter(FAR dq_entry_t *prev, FAR dq_entry_t *node,
                  dq_queue_t *queue)
 {
   if (!queue->head || prev == queue->tail)
@@ -65,10 +65,10 @@ void dq_addafter(dq_entry_t *prev, dq_entry_t *node,
     }
   else
     {
-      dq_entry_t *next = prev->flink;
-      node->blink      = prev;
-      node->flink      = next;
-      next->blink      = node;
-      prev->flink      = node;
+      FAR dq_entry_t *next = prev->flink;
+      node->blink = prev;
+      node->flink = next;
+      next->blink = node;
+      prev->flink = node;
     }
 }

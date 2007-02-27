@@ -40,7 +40,7 @@ MKDEP		= $(TOPDIR)/tools/mkdeps.sh
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=.o)
 
-MISC_SRCS	= os_start.c get_errno_ptr.c get_errorptr.c \
+MISC_SRCS	= os_start.c get_errno_ptr.c \
 		  sched_setupstreams.c sched_getfiles.c sched_getstreams.c \
 		  sched_setupidlefiles.c sched_setuptaskfiles.c sched_setuppthreadfiles.c \
 		  sched_releasefiles.c
@@ -124,7 +124,7 @@ $(BIN): $(OBJS)
 depend: .depend
 
 clean:
-	rm -f $(BIN) *.o *.asm *.lst *.sym *~
+	rm -f $(BIN) *.o *.asm *.lst *.sym *.adb *~
 
 distclean: clean
 	rm -f Make.dep .depend

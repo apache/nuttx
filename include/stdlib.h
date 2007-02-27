@@ -83,30 +83,40 @@ extern "C" {
 #endif
 
 /* Random number generation */
-EXTERN void   srand(unsigned int seed);
-EXTERN int    rand(void);
+
+EXTERN void      srand(unsigned int seed);
+EXTERN int       rand(void);
 
 /* Environment variable support */
-EXTERN char  *getenv(const char *name);
+
+EXTERN char     *getenv(const char *name);
 
 /* Process exit functions */
-EXTERN void   exit(int status);
-EXTERN void   abort(void);
-EXTERN int    atexit(void (*func)(void));
+
+EXTERN void      exit(int status);
+EXTERN void      abort(void);
+EXTERN int       atexit(void (*func)(void));
 
 /* String to binary conversions */
-#define atoi(nptr) strtol((nptr), (char**)NULL, 10)
-EXTERN long   strtol(const char *, char **, int);
-EXTERN double_t strtod(const char *, char **);
+
+#define atoi(nptr) strtol((nptr), (FAR char**)NULL, 10)
+EXTERN long      strtol(const char *, char **, int);
+EXTERN double_t  strtod(const char *, char **);
 
 /* Memory Management */
-EXTERN void  *malloc(size_t);
-EXTERN void   free(void*);
-EXTERN void  *realloc(void*, size_t);
-EXTERN void  *memalign(size_t, size_t);
-EXTERN void  *zalloc(size_t);
-EXTERN void  *calloc(size_t, size_t);
+
+EXTERN FAR void  *malloc(size_t);
+EXTERN void       free(FAR void*);
+EXTERN FAR void  *realloc(FAR void*, size_t);
+EXTERN FAR void  *memalign(size_t, size_t);
+EXTERN FAR void  *zalloc(size_t);
+EXTERN FAR void  *calloc(size_t, size_t);
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
 EXTERN struct mallinfo mallinfo(void);
+#else
+EXTERN int        mallinfo(struct mallinfo *info);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

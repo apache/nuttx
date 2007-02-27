@@ -37,6 +37,7 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/compiler.h>
 #include <sys/types.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -128,203 +129,214 @@ int vsscanf(char *buf, const char *s, va_list ap)
       /* Skip over white space */
 
       while (isspace(*s))
-	s++;
+        s++;
 
       /* Check for a conversion specifier */
 
       if (*s == '%')
-	{
-	  vdbg("vsscanf: Specifier found\n");
+        {
+          vdbg("vsscanf: Specifier found\n");
 
-	  /* Check for qualifiers on the conversion specifier */
-	  s++;
-	  for (; *s; s++)
-	    {
-	      vdbg("vsscanf: Processing %c\n", *s);
+          /* Check for qualifiers on the conversion specifier */
+          s++;
+          for (; *s; s++)
+            {
+              vdbg("vsscanf: Processing %c\n", *s);
 
-	      if (strchr("dibouxcsefg%", *s))
-		break;
-	      if (*s == '*')
-		noassign = 1;
-	      else if (*s == 'l' || *s == 'L')
-		lflag = 1;
-	      else if (*s >= '1' && *s <= '9') {
-		for (tc = s; isdigit(*s); s++);
-		strncpy(tmp, tc, s - tc);
-		tmp[s - tc] = '\0';
-		width = atoi(tmp);
-		/* atob(&width, tmp, 10); */
-		s--;
-	      }
-	    }
+              if (strchr("dibouxcsefg%", *s))
+                break;
+              if (*s == '*')
+                noassign = 1;
+              else if (*s == 'l' || *s == 'L')
+                lflag = 1;
+              else if (*s >= '1' && *s <= '9') {
+                for (tc = s; isdigit(*s); s++);
+                strncpy(tmp, tc, s - tc);
+                tmp[s - tc] = '\0';
+                width = atoi(tmp);
+                /* atob(&width, tmp, 10); */
+                s--;
+              }
+            }
 
-	  /* Process %s:  String conversion */
+          /* Process %s:  String conversion */
 
-	  if (*s == 's')
-	    {
-	      vdbg("vsscanf: Performing string conversion\n");
+          if (*s == 's')
+            {
+              vdbg("vsscanf: Performing string conversion\n");
 
-	      while (isspace(*buf))
-		buf++;
-	      if (!width)
-		{
-		  width = strcspn(buf, spaces);
-		}
-	      if (!noassign)
-		{
-		  tv = va_arg(ap, char*);
-		  strncpy(tv, buf, width);
-		  tv[width] = '\0';
-		}
-	      buf += width;
-	    }
+              while (isspace(*buf))
+                buf++;
+              if (!width)
+                {
+                  width = strcspn(buf, spaces);
+                }
+              if (!noassign)
+                {
+                  tv = va_arg(ap, char*);
+                  strncpy(tv, buf, width);
+                  tv[width] = '\0';
+                }
+              buf += width;
+            }
 
-	  /* Process %c:  Character conversion */
+          /* Process %c:  Character conversion */
 
-	  else if (*s == 'c')
-	    {
-	      vdbg("vsscanf: Performing character conversion\n");
+          else if (*s == 'c')
+            {
+              vdbg("vsscanf: Performing character conversion\n");
 
-	      if (!width)
-		width = 1;
-	      if (!noassign)
-		{
-		  tv = va_arg(ap, char*);
-		  strncpy(tv, buf, width);
-		  tv[width] = '\0';
-		}
-	      buf += width;
-	    }
+              if (!width)
+                width = 1;
+              if (!noassign)
+                {
+                  tv = va_arg(ap, char*);
+                  strncpy(tv, buf, width);
+                  tv[width] = '\0';
+                }
+              buf += width;
+            }
 
-	  /* Process %d, %o, %b, %x, %u:  Various integer conversions */
+          /* Process %d, %o, %b, %x, %u:  Various integer conversions */
 
-	  else if (strchr("dobxu", *s))
-	    {
-	      vdbg("vsscanf: Performing integer conversion\n");
+          else if (strchr("dobxu", *s))
+            {
+              vdbg("vsscanf: Performing integer conversion\n");
 
-	      /* Skip over any white space before the integer string */
+              /* Skip over any white space before the integer string */
 
-	      while (isspace(*buf))
-		buf++;
+              while (isspace(*buf))
+                buf++;
 
-	      /* The base of the integer conversion depends on the specific
-	       * conversion specification.
-	       */
+              /* The base of the integer conversion depends on the specific
+               * conversion specification.
+               */
 
-	      if (*s == 'd' || *s == 'u')
-		base = 10;
-	      else if (*s == 'x')
-		base = 16;
-	      else if (*s == 'o')
-		base = 8;
-	      else if (*s == 'b')
-		base = 2;
+              if (*s == 'd' || *s == 'u')
+                base = 10;
+              else if (*s == 'x')
+                base = 16;
+              else if (*s == 'o')
+                base = 8;
+              else if (*s == 'b')
+                base = 2;
 
-	      /* Copy the integer string into a temporary working buffer. */
+              /* Copy the integer string into a temporary working buffer. */
 
-	      if (!width)
-		{
-		  if (isspace(*(s + 1)) || *(s + 1) == 0)
-		    {
-		      width = strcspn(buf, spaces);
-		    }
-		  else
-		    {
-		      width = strchr(buf, *(s + 1)) - buf;
-		    }
-		}
-	      strncpy(tmp, buf, width);
-	      tmp[width] = '\0';
+              if (!width)
+                {
+                  if (isspace(*(s + 1)) || *(s + 1) == 0)
+                    {
+                      width = strcspn(buf, spaces);
+                    }
+                  else
+                    {
+                      width = strchr(buf, *(s + 1)) - buf;
+                    }
+                }
+              strncpy(tmp, buf, width);
+              tmp[width] = '\0';
 
-	      vdbg("vsscanf: tmp[]=\"%s\"\n", tmp);
+              vdbg("vsscanf: tmp[]=\"%s\"\n", tmp);
 
-	      /* Perform the integer conversion */
+              /* Perform the integer conversion */
 
-	      buf += width;
-	      if (!noassign)
-		{
-		  int *pint = va_arg(ap, int*);
-		  int tmpint = strtol(tmp, NULL, base);
-		  vdbg("vsscanf: Return %d to 0x%p\n", tmpint, pint);
-		  *pint = tmpint;
-		}
-	    }
+              buf += width;
+              if (!noassign)
+                {
+                  int *pint = va_arg(ap, int*);
+#ifdef SDCC
+                  char *endptr;
+                  int tmpint = strtol(tmp, &endptr, base);
+#else
+                  int tmpint = strtol(tmp, NULL, base);
+#endif
+                  vdbg("vsscanf: Return %d to 0x%p\n", tmpint, pint);
+                  *pint = tmpint;
+                }
+            }
 
-	  /* Process %f:  Floating point conversion */
+          /* Process %f:  Floating point conversion */
 
-	  else if (*s == 'f')
-	    {
-	      vdbg("vsscanf: Performing floating point conversion\n");
+          else if (*s == 'f')
+            {
+              vdbg("vsscanf: Performing floating point conversion\n");
 
-	      /* Skip over any white space before the real string */
+              /* Skip over any white space before the real string */
 
-	      while (isspace(*buf))
-		buf++;
+              while (isspace(*buf))
+                {
+                  buf++;
+                }
 
-	      /* Copy the real string into a temporary working buffer. */
+              /* Copy the real string into a temporary working buffer. */
 
-	      if (!width)
-		{
-		  if (isspace(*(s + 1)) || *(s + 1) == 0)
-		    {
-		      width = strcspn(buf, spaces);
-		    }
-		  else
-		    {
-		      width = strchr(buf, *(s + 1)) - buf;
-		    }
-		}
-	      strncpy(tmp, buf, width);
-	      tmp[width] = '\0';
-	      buf += width;
+              if (!width)
+                {
+                  if (isspace(*(s + 1)) || *(s + 1) == 0)
+                    {
+                      width = strcspn(buf, spaces);
+                    }
+                  else
+                    {
+                      width = strchr(buf, *(s + 1)) - buf;
+                    }
+                }
+              strncpy(tmp, buf, width);
+              tmp[width] = '\0';
+              buf += width;
 
-	      vdbg("vsscanf: tmp[]=\"%s\"\n", tmp);
+              vdbg("vsscanf: tmp[]=\"%s\"\n", tmp);
 
-	      /* Perform the floating point conversion */
+              /* Perform the floating point conversion */
 
-	      if (!noassign)
-		{
-		  /* strtod always returns a double */
+              if (!noassign)
+                {
+                  /* strtod always returns a double */
+#ifdef SDCC
+                  char *endptr;
+                  double_t dvalue = strtod(tmp,&endptr);
+#else
+                  double_t dvalue = strtod(tmp, NULL);
+#endif
+                  void *pv = va_arg(ap, void*);
 
-		  double_t dvalue = strtod(tmp, NULL);
-		  void *pv = va_arg(ap, void*);
+                  vdbg("vsscanf: Return %f to 0x%p\n", dvalue, pv);
 
-		  vdbg("vsscanf: Return %f to 0x%p\n", dvalue, pv);
-
-		  /* But we have to check whether we need to return a
-		   * float or a double.
-		   */
+                  /* But we have to check whether we need to return a
+                   * float or a double.
+                   */
 
 #ifdef CONFIG_HAVE_DOUBLE
-		  if (lflag)
-		    {
-		      *((double_t*)pv) = dvalue;
-		    }
-		  else
+                  if (lflag)
+                    {
+                      *((double_t*)pv) = dvalue;
+                    }
+                  else
 #endif
-		    {
-		      *((float*)pv) = (float)dvalue;
-		    }
-		}
-	    }
+                    {
+                      *((float*)pv) = (float)dvalue;
+                    }
+                }
+            }
 
-	  if (!noassign)
-	    count++;
-	  width = noassign = lflag = 0;
-	  s++;
-	}
+          if (!noassign)
+            count++;
+          width = noassign = lflag = 0;
+          s++;
+        }
 
     /* Its is not a conversion specifier */
 
       else
-	{
-	  while (isspace(*buf))
-	    buf++;
-	  if (*s != *buf)
-	    break;
-	  else
-	    s++, buf++;
-	}
+        {
+          while (isspace(*buf))
+            buf++;
+          if (*s != *buf)
+            break;
+          else
+            s++, buf++;
+        }
     }
   return count;
 }

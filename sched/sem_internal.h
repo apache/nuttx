@@ -58,12 +58,12 @@
 
 struct nsem_s
 {
-  struct nsem_s *flink;         /* Forward link */
-  struct nsem_s *blink;         /* Backward link */
-  uint16         nconnect;      /* Number of connections to semaphore */
-  char          *name;          /* Semaphore name (NULL if un-named) */
-  boolean        unlinked;      /* TRUE if the semaphore has been unlinked */
-  sem_t          sem;           /* The semaphore itself */
+  FAR struct nsem_s *flink;     /* Forward link */
+  FAR struct nsem_s *blink;     /* Backward link */
+  uint16             nconnect;  /* Number of connections to semaphore */
+  FAR char          *name;      /* Semaphore name (NULL if un-named) */
+  boolean            unlinked;  /* TRUE if the semaphore has been unlinked */
+  sem_t              sem;       /* The semaphore itself */
 };
 typedef struct nsem_s nsem_t;
 
@@ -87,8 +87,8 @@ extern "C" {
 #endif
 
 EXTERN void weak_function sem_initialize(void);
-EXTERN void               sem_waitirq(_TCB *wtcb);
-EXTERN nsem_t            *sem_findnamed(const char *name);
+EXTERN void               sem_waitirq(FAR _TCB *wtcb);
+EXTERN FAR nsem_t        *sem_findnamed(const char *name);
 
 #undef EXTERN
 #ifdef __cplusplus

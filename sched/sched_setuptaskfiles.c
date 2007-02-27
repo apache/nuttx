@@ -71,10 +71,10 @@
  *
  ************************************************************/
 
-int sched_setuptaskfiles(_TCB *tcb)
+int sched_setuptaskfiles(FAR _TCB *tcb)
 {
 #ifdef CONFIG_DEV_CONSOLE
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
   int i;
 #endif /* CONFIG_DEV_CONSOLE */
 

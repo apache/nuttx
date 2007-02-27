@@ -106,7 +106,7 @@
 int sched_rr_get_interval(pid_t pid, struct timespec *interval)
 {
 #if CONFIG_RR_INTERVAL > 0
-  _TCB  *rrtcb;
+  FAR _TCB  *rrtcb;
 
   /* If pid is zero, the timeslice for the calling process is
    * written into 'interval.'
@@ -114,7 +114,7 @@ int sched_rr_get_interval(pid_t pid, struct timespec *interval)
 
   if (!pid)
     {
-      rrtcb = (_TCB*)g_readytorun.head;
+      rrtcb = (FAR _TCB*)g_readytorun.head;
     }
 
   /* Return a special error code on invalid PID */

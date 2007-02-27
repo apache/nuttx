@@ -127,7 +127,7 @@ EXTERN void up_idle(void);
  *
  ************************************************************/
 
-EXTERN void up_initial_state(_TCB *tcb);
+EXTERN void up_initial_state(FAR _TCB *tcb);
 
 /************************************************************
  * Name: up_create_stack
@@ -150,7 +150,7 @@ EXTERN void up_initial_state(_TCB *tcb);
  *     must be allocated.
  ************************************************************/
 
-EXTERN STATUS up_create_stack(_TCB *tcb, size_t stack_size);
+EXTERN STATUS up_create_stack(FAR _TCB *tcb, size_t stack_size);
 
 /************************************************************
  * Name: up_use_stack
@@ -173,7 +173,7 @@ EXTERN STATUS up_create_stack(_TCB *tcb, size_t stack_size);
  *
  ************************************************************/
 
-EXTERN STATUS up_use_stack(_TCB *tcb, void *stack, size_t stack_size);
+EXTERN STATUS up_use_stack(FAR _TCB *tcb, FAR void *stack, size_t stack_size);
 
 /************************************************************
  * Name: up_release_stack
@@ -184,7 +184,7 @@ EXTERN STATUS up_use_stack(_TCB *tcb, void *stack, size_t stack_size);
  *
  ************************************************************/
 
-EXTERN void up_release_stack(_TCB *dtcb);
+EXTERN void up_release_stack(FAR _TCB *dtcb);
 
 /************************************************************
  * Name: up_unblock_task
@@ -202,7 +202,7 @@ EXTERN void up_release_stack(_TCB *dtcb);
  *
  ************************************************************/
 
-EXTERN void up_unblock_task(_TCB *tcb);
+EXTERN void up_unblock_task(FAR _TCB *tcb);
 
 /************************************************************
  * Name: up_block_task
@@ -224,7 +224,7 @@ EXTERN void up_unblock_task(_TCB *tcb);
  *
  ************************************************************/
 
-EXTERN void up_block_task(_TCB *tcb, tstate_t task_state);
+EXTERN void up_block_task(FAR _TCB *tcb, tstate_t task_state);
 
 /************************************************************
  * Name: up_release_pending
@@ -259,7 +259,7 @@ EXTERN void up_release_pending(void);
  *
  ************************************************************/
 
-EXTERN void up_reprioritize_rtr(_TCB *tcb, ubyte priority);
+EXTERN void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority);
 
 /************************************************************
  * Name: _exit
@@ -314,7 +314,7 @@ EXTERN void up_reprioritize_rtr(_TCB *tcb, ubyte priority);
  *
  ************************************************************/
 
-EXTERN void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver);
+EXTERN void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver);
 
 /************************************************************
  * Name: up_allocate_heap
@@ -328,7 +328,7 @@ EXTERN void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver);
  ************************************************************/
 
 #ifndef CONFIG_HEAP_BASE
-EXTERN void up_allocate_heap(void **heap_start, size_t *heap_size);
+EXTERN void up_allocate_heap(FAR void **heap_start, size_t *heap_size);
 #endif
 
 /************************************************************
@@ -401,7 +401,7 @@ EXTERN void sched_process_timer(void);
  *
  ***********************************************************/
 
-EXTERN void irq_dispatch(int irq, void *context);
+EXTERN void irq_dispatch(int irq, FAR void *context);
 
 /************************************************************
  * Debug interfaces exported by the architecture-specific

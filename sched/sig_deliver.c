@@ -81,14 +81,14 @@
  *
  ************************************************************/
 
-void sig_deliver(_TCB *stcb)
+void sig_deliver(FAR _TCB *stcb)
 {
-  pid_t      rpid;
-  sigq_t    *sigq;
-  sigq_t    *next;
-  sigset_t   savesigprocmask;
-  irqstate_t saved_state;
-  int        saved_errno;
+  pid_t       rpid;
+  FAR sigq_t *sigq;
+  FAR sigq_t *next;
+  sigset_t    savesigprocmask;
+  irqstate_t  saved_state;
+  int         saved_errno;
 
   sched_lock();
 
@@ -100,7 +100,7 @@ void sig_deliver(_TCB *stcb)
    */
 
   saved_errno = stcb->errno;
-  for (sigq = (sigq_t*)stcb->sigpendactionq.head; (sigq); sigq = next)
+  for (sigq = (FAR sigq_t*)stcb->sigpendactionq.head; (sigq); sigq = next)
     {
       next = sigq->flink;
       dbg("sig_deliver: Sending signal sigq=0x%x\n", sigq);
@@ -111,8 +111,8 @@ void sig_deliver(_TCB *stcb)
        */
 
       saved_state = irqsave();
-      sq_rem((sq_entry_t*)sigq, &(stcb->sigpendactionq));
-      sq_addlast((sq_entry_t*)sigq, &(stcb->sigpostedq));
+      sq_rem((FAR sq_entry_t*)sigq, &(stcb->sigpendactionq));
+      sq_addlast((FAR sq_entry_t*)sigq, &(stcb->sigpostedq));
       irqrestore(saved_state);
 
       /* Call the signal handler (unless the signal was cancelled)
@@ -150,7 +150,7 @@ void sig_deliver(_TCB *stcb)
       /* Remove the signal from the sigpostedq */
 
       saved_state = irqsave();
-      sq_rem((sq_entry_t*)sigq, &(stcb->sigpostedq));
+      sq_rem((FAR sq_entry_t*)sigq, &(stcb->sigpostedq));
       irqrestore(saved_state);
 
       /* Then deallocate it */

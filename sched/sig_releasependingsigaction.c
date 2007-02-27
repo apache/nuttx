@@ -74,7 +74,7 @@
  *
  ************************************************************/
 
-void sig_releasependingsigaction(sigq_t *sigq)
+void sig_releasependingsigaction(FAR sigq_t *sigq)
 {
   irqstate_t saved_state;
 
@@ -88,7 +88,7 @@ void sig_releasependingsigaction(sigq_t *sigq)
        * list from interrupt handlers. */
 
       saved_state = irqsave();
-      sq_addlast((sq_entry_t*)sigq, &g_sigpendingaction);
+      sq_addlast((FAR sq_entry_t*)sigq, &g_sigpendingaction);
       irqrestore(saved_state);
    }
 
@@ -102,7 +102,7 @@ void sig_releasependingsigaction(sigq_t *sigq)
        * list from interrupt handlers. */
 
       saved_state = irqsave();
-      sq_addlast((sq_entry_t*)sigq, &g_sigpendingirqaction);
+      sq_addlast((FAR sq_entry_t*)sigq, &g_sigpendingirqaction);
       irqrestore(saved_state);
    }
 

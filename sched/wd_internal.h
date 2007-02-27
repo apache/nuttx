@@ -88,7 +88,7 @@ extern sq_queue_t g_wdfreelist;
  * item.
  */
 
-extern wdog_t *g_wdpool;
+extern FAR wdog_t *g_wdpool;
 
 /* The g_wdactivelist data structure is a singly linked list
  * ordered by watchdog expiration time. When watchdog timers

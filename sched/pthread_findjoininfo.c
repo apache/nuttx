@@ -81,9 +81,9 @@
  *
  ************************************************************/
 
-join_t *pthread_findjoininfo(pid_t pid)
+FAR join_t *pthread_findjoininfo(pid_t pid)
 {
-  join_t *pjoin;
+  FAR join_t *pjoin;
 
   /* Find the entry with the matching pid */
 

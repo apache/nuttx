@@ -63,28 +63,28 @@ extern "C" {
 # include <stdlib.h>
 # define kmalloc(s) malloc(s)
 #else
-KMALLOC_EXTERN void  *kmalloc(size_t);
+KMALLOC_EXTERN FAR void  *kmalloc(size_t);
 #endif
 
 #ifndef CONFIG_ARCH_KZMALLOC
 # include <stdlib.h>
 # define kzmalloc(s) zalloc(s)
 #else
-KMALLOC_EXTERN void  *kzalloc(size_t);
+KMALLOC_EXTERN FAR void  *kzalloc(size_t);
 #endif
 
 #ifndef CONFIG_ARCH_KFREE
 # include <stdlib.h>
 # define kfree(p) free(p)
 #else
-KMALLOC_EXTERN void   kfree(void*);
+KMALLOC_EXTERN void   kfree(FAR void*);
 #endif
 
 /* Functions defined in os_list.c ***************************/
 
 /* Handles memory freed from an interrupt handler */
 
-KMALLOC_EXTERN void sched_free(void *address);
+KMALLOC_EXTERN void sched_free(FAR void *address);
 
 #undef KMALLOC_EXTERN
 #if defined(__cplusplus)

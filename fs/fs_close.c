@@ -60,7 +60,7 @@
 
 int close(int fd)
 {
-  struct filelist *list;
+  FAR struct filelist *list;
 
   /* Get the thread-specific file list */
 
@@ -73,7 +73,7 @@ int close(int fd)
 
   if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
     {
-      struct inode *inode = list->fl_files[fd].f_inode;
+      FAR struct inode *inode = list->fl_files[fd].f_inode;
       if (inode)
         {
           files_release(fd);

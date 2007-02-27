@@ -87,7 +87,7 @@
  *   the head of the g_readytorun list is changed.
  ************************************************************/
 
-boolean sched_removereadytorun(_TCB *rtcb)
+boolean sched_removereadytorun(FAR _TCB *rtcb)
 {
   boolean ret = FALSE;
 
@@ -110,7 +110,7 @@ boolean sched_removereadytorun(_TCB *rtcb)
 
   /* Remove the TCB from the ready-to-run list */
 
-  dq_rem((dq_entry_t*)rtcb, &g_readytorun);
+  dq_rem((FAR dq_entry_t*)rtcb, &g_readytorun);
 
   rtcb->task_state = TSTATE_TASK_INVALID;
   return ret;

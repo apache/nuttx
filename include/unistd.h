@@ -67,7 +67,7 @@ extern "C" {
 
 /* Task Control Interfaces (based on ANSII APIs) */
 
-EXTERN pid_t getpid( void );
+EXTERN pid_t getpid(void);
 EXTERN void _exit(int status) noreturn_function;
 EXTERN unsigned int sleep(unsigned int seconds);
 EXTERN void usleep(unsigned long usec);

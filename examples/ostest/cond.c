@@ -190,6 +190,9 @@ void cond_test(void)
   pthread_t waiter;
   pthread_t signaler;
   pthread_attr_t attr;
+#ifdef SDCC
+  pthread_addr_t result;
+#endif
   struct sched_param sparam;
   int prio_min;
   int prio_max;
@@ -270,7 +273,11 @@ void cond_test(void)
 
   /* Wait for the threads to stop */
 
+#ifdef SDCC
+  pthread_join(signaler, &result);
+#else
   pthread_join(signaler, NULL);
+#endif
   printf("cond_test: signaler terminated, now cancel the waiter\n");
   pthread_detach(waiter);
   pthread_cancel(waiter);

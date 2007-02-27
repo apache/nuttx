@@ -68,9 +68,9 @@
  *
  ************************************************************/
 
-struct streamlist *sched_getstreams(void)
+FAR struct streamlist *sched_getstreams(void)
 {
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
   return rtcb->streams;
 } 
 

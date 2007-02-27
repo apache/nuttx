@@ -80,7 +80,7 @@
  *
  ************************************************************/
 
-void sched_free(void *address)
+void sched_free(FAR void *address)
 {
   /* Check if this is an attempt to deallocate memory from
    * an exception handler.
@@ -91,7 +91,7 @@ void sched_free(void *address)
       /* Yes.. Delay the deallocation until a more appropriate time. */
 
       irqstate_t saved_state = irqsave();
-      sq_addlast((sq_entry_t*)address, &g_delayeddeallocations);
+      sq_addlast((FAR sq_entry_t*)address, &g_delayeddeallocations);
       irqrestore(saved_state);
     }
   else
@@ -101,3 +101,4 @@ void sched_free(void *address)
       kfree(address);
     }
 }
+

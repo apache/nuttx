@@ -61,9 +61,9 @@
  *
  ************************************************************/
 
-int *get_errno_ptr(void)
+FAR int *get_errno_ptr(void)
 {
-  _TCB *ptcb = (_TCB*)g_readytorun.head;
+  FAR _TCB *ptcb = (FAR _TCB*)g_readytorun.head;
   return &ptcb->errno;
 }
 

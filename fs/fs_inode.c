@@ -69,7 +69,7 @@ static sem_t tree_sem;
  * Public Variables
  ************************************************************/
 
-struct inode *root_inode = NULL;
+FAR struct inode *root_inode = NULL;
 
 /************************************************************
  * Private Functions
@@ -92,7 +92,7 @@ static void _inode_semtake(void)
 #define _inode_semgive(void) sem_post(&tree_sem)
 
 static int _inode_compare(const char *fname,
-                           struct inode *node)
+                          FAR struct inode *node)
 {
   char *nname = node->i_name;
 
@@ -172,12 +172,12 @@ static const char *_inode_nextname(const char *name)
    return name;
 }
 
-static struct inode *_inode_alloc(const char *name,
-                                   struct file_operations *fops,
-                                   mode_t mode, void *private)
+static FAR struct inode *_inode_alloc(const char *name,
+                                      struct file_operations *fops,
+                                      mode_t mode, void *private)
 {
   int namelen = _inode_namelen(name);
-  struct inode *node = malloc(FSNODE_SIZE(namelen));
+  FAR struct inode *node = (FAR struct inode*)malloc(FSNODE_SIZE(namelen));
   if (node)
     {
       node->i_peer    = NULL;
@@ -192,14 +192,14 @@ static struct inode *_inode_alloc(const char *name,
   return node;
 }
 
-static struct inode *_inode_find(const char **path,
-                                  struct inode **peer,
-                                  struct inode **parent)
+static FAR struct inode *_inode_find(const char **path,
+                                     FAR struct inode **peer,
+                                     FAR struct inode **parent)
 {
-  const char      *name  = *path + 1; /* Skip over leading '/' */
-  struct inode *node  = root_inode;
-  struct inode *left  = NULL;
-  struct inode *above = NULL;
+  const char       *name  = *path + 1; /* Skip over leading '/' */
+  FAR struct inode *node  = root_inode;
+  FAR struct inode *left  = NULL;
+  FAR struct inode *above = NULL;
 
   while (node)
     {
@@ -278,9 +278,9 @@ static struct inode *_inode_find(const char **path,
   return node;
 }
 
-static void _inode_insert(struct inode *node,
-                           struct inode *peer,
-                           struct inode *parent)
+static void _inode_insert(FAR struct inode *node,
+                          FAR struct inode *peer,
+                          FAR struct inode *parent)
 {
   /* If peer is non-null, then new node simply goes to the right
    * of that peer node.
@@ -342,7 +342,7 @@ static void _inode_remove(struct inode *node,
    node->i_peer    = NULL;
 }
 
-static void _inode_free(struct inode *node)
+static void _inode_free(FAR struct inode *node)
 {
   if (node)
     {
@@ -370,7 +370,9 @@ void fs_initialize(void)
 
   /* Initialize files array (if it is used) */
 
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (files_initialize != NULL)
+#endif
     {
       files_initialize();
     }
@@ -380,9 +382,9 @@ void fs_initialize(void)
  * to the inode associatged with a path.
  */
 
-struct inode *inode_find(const char *path)
+FAR struct inode *inode_find(const char *path)
 {
-  struct inode *node;
+  FAR struct inode *node;
 
   if (!*path || path[0] != '/')
     {
@@ -394,7 +396,7 @@ struct inode *inode_find(const char *path)
    */
 
   _inode_semtake();
-  node = _inode_find(&path, NULL, NULL);
+  node = _inode_find(&path, (FAR void*)NULL, (FAR void*)NULL);
   if (node) node->i_crefs++;
   _inode_semgive();
   return node;
@@ -404,7 +406,7 @@ struct inode *inode_find(const char *path)
  * descriptor is dup'ed.
  */
 
-void inode_addref(struct inode *inode)
+void inode_addref(FAR struct inode *inode)
 {
   if (inode)
     {
@@ -418,14 +420,17 @@ void inode_addref(struct inode *inode)
  * to the inode.
  */
 
-void inode_release(struct inode *node)
+void inode_release(FAR struct inode *node)
 {
   if (node)
     {
       /* Decrement the references of the inode */
 
       _inode_semtake();
-      if (node->i_crefs) node->i_crefs--;
+      if (node->i_crefs)
+        {
+          node->i_crefs--;
+        }
 
       /* If the subtree was previously deleted and the reference
        * count has decrement to zero,  then delete the inode
@@ -450,9 +455,9 @@ STATUS register_inode(const char *path,
                       struct file_operations *fops,
                       mode_t mode, void *private)
 {
-  const char      *name = path;
-  struct inode *left;
-  struct inode *parent;
+  const char       *name = path;
+  FAR struct inode *left;
+  FAR struct inode *parent;
 
   if (!*path || path[0] != '/')
     {
@@ -474,7 +479,7 @@ STATUS register_inode(const char *path,
 
   for (;;)
     {
-      struct inode *node;
+      FAR struct inode *node;
 
       /* Create a new node -- we need to know if this is the
        * the leaf node or some intermediary.  We can find this
@@ -519,10 +524,10 @@ STATUS register_inode(const char *path,
 
 STATUS unregister_inode(const char *path)
 {
-  const char      *name = path;
-  struct inode *node;
-  struct inode *left;
-  struct inode *parent;
+  const char       *name = path;
+  FAR struct inode *node;
+  FAR struct inode *left;
+  FAR struct inode *parent;
 
   if (*path && path[0] == '/')
     {

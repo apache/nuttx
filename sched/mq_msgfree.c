@@ -84,7 +84,7 @@
  *
  ************************************************************/
 
-void mq_msgfree(mqmsg_t * mqmsg)
+void mq_msgfree(FAR mqmsg_t *mqmsg)
 {
   irqstate_t saved_state;
 
@@ -99,7 +99,7 @@ void mq_msgfree(mqmsg_t * mqmsg)
        */
 
       saved_state = irqsave();
-      sq_addlast((sq_entry_t*)mqmsg, &g_msgfree);
+      sq_addlast((FAR sq_entry_t*)mqmsg, &g_msgfree);
       irqrestore(saved_state);
     }
 
@@ -114,7 +114,7 @@ void mq_msgfree(mqmsg_t * mqmsg)
        */
 
       saved_state = irqsave();
-      sq_addlast((sq_entry_t*)mqmsg, &g_msgfreeirq);
+      sq_addlast((FAR sq_entry_t*)mqmsg, &g_msgfreeirq);
       irqrestore(saved_state);
     }
 

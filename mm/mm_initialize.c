@@ -50,19 +50,19 @@
 
 /* This is the size of the heap provided to mm */
 
-size_t  g_heapsize;
+size_t g_heapsize;
 
 /* This is the first and last nodes of the heap */
 
-struct mm_allocnode_s *g_heapstart;
-struct mm_allocnode_s *g_heapend;
+FAR struct mm_allocnode_s *g_heapstart;
+FAR struct mm_allocnode_s *g_heapend;
 
 /* All free nodes are maintained in a doubly linked list.  This
  * array provides some hooks into the list at various points to
  * speed searches for free nodes.
  */
 
-struct mm_freenode_s g_nodelist[MM_NNODES];
+FAR struct mm_freenode_s g_nodelist[MM_NNODES];
 
 /************************************************************
  * Public Functions
@@ -85,9 +85,11 @@ struct mm_freenode_s g_nodelist[MM_NNODES];
  *
  ************************************************************/
 
-void mm_initialize(void *heapstart, size_t heapsize)
+void mm_initialize(FAR void *heapstart, size_t heapsize)
 {
-  struct mm_freenode_s *node;
+  FAR struct mm_freenode_s *node;
+  size_t heapbase;
+  size_t heapend;
   int i;
 
   CHECK_ALLOCNODE_SIZE;
@@ -97,8 +99,8 @@ void mm_initialize(void *heapstart, size_t heapsize)
    * both aligned with the MM_MIN_CHUNK size.
    */
 
-  size_t heapbase = MM_ALIGN_UP((size_t)heapstart);
-  size_t heapend  = MM_ALIGN_DOWN((size_t)heapstart + (size_t)heapsize);
+  heapbase = MM_ALIGN_UP((size_t)heapstart);
+  heapend  = MM_ALIGN_DOWN((size_t)heapstart + (size_t)heapsize);
 
   /* Save the size of the heap */
 
@@ -121,15 +123,15 @@ void mm_initialize(void *heapstart, size_t heapsize)
    * all available memory.
    */
 
-  g_heapstart            = (struct mm_allocnode_s *)heapbase;
+  g_heapstart            = (FAR struct mm_allocnode_s *)heapbase;
   g_heapstart->size      = SIZEOF_MM_ALLOCNODE;
   g_heapstart->preceding = MM_ALLOC_BIT;
 
-  node                   = (struct mm_freenode_s *)(heapbase + SIZEOF_MM_ALLOCNODE);
+  node                   = (FAR struct mm_freenode_s *)(heapbase + SIZEOF_MM_ALLOCNODE);
   node->size             = g_heapsize - 2*SIZEOF_MM_ALLOCNODE;
   node->preceding        = SIZEOF_MM_ALLOCNODE;
 
-  g_heapend              = (struct mm_allocnode_s *)(heapend - SIZEOF_MM_ALLOCNODE);
+  g_heapend              = (FAR struct mm_allocnode_s *)(heapend - SIZEOF_MM_ALLOCNODE);
   g_heapend->size        = SIZEOF_MM_ALLOCNODE;
   g_heapend->preceding   = node->size | MM_ALLOC_BIT;
 

@@ -63,7 +63,7 @@
 
 struct join_s 
 {
-  struct join_s *next;           /* Implements link list */
+  FAR struct join_s *next;       /* Implements link list */
   boolean        started;        /* TRUE: pthread started. */
   boolean        detached;       /* TRUE: pthread_detached'ed */
   boolean        terminated;     /* TRUE: detach'ed+exit'ed */
@@ -83,8 +83,8 @@ typedef struct join_s join_t;
  * is used to retain information about the spawned threads.
  */
 
-extern join_t *g_pthread_head;
-extern join_t *g_pthread_tail;
+extern FAR join_t *g_pthread_head;
+extern FAR join_t *g_pthread_tail;
 
 /* Mutually exclusive access to this data set is enforced with
  * the following (un-named) semaphore.
@@ -100,7 +100,7 @@ extern ubyte g_pthread_num_keys;
 
 /* Default pthread attributes */
 
-extern pthread_attr_t g_default_pthread_attr;
+extern FAR pthread_attr_t g_default_pthread_attr;
 
 /************************************************************
  * Public Function Prototypes
@@ -114,10 +114,10 @@ extern "C" {
 #endif
 
 EXTERN void weak_function pthread_initialize(void);
-EXTERN int                pthread_completejoin(pid_t pid, void *exit_value);
-EXTERN join_t            *pthread_findjoininfo(pid_t pid);
+EXTERN int                pthread_completejoin(pid_t pid, FAR void *exit_value);
+EXTERN FAR join_t        *pthread_findjoininfo(pid_t pid);
 EXTERN int                pthread_givesemaphore(sem_t *sem);
-EXTERN join_t            *pthread_removejoininfo(pid_t pid);
+EXTERN FAR join_t        *pthread_removejoininfo(pid_t pid);
 EXTERN int                pthread_takesemaphore(sem_t *sem);
 
 #undef EXTERN

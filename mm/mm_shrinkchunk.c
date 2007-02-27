@@ -64,24 +64,24 @@
  *
  ************************************************************/
 
-void  mm_shrinkchunk(struct mm_allocnode_s *node, size_t size)
+void  mm_shrinkchunk(FAR struct mm_allocnode_s *node, size_t size)
 {
-  struct mm_freenode_s *next;
+  FAR struct mm_freenode_s *next;
 
   /* Get a reference to the next node */
 
-  next = (struct mm_freenode_s*)((char*)node + node->size);
+  next = (FAR struct mm_freenode_s*)((char*)node + node->size);
 
   /* Check if it is free */
 
   if ((next->preceding & MM_ALLOC_BIT) == 0)
     {
-      struct mm_allocnode_s *andbeyond;
-      struct mm_freenode_s *newnode;
+      FAR struct mm_allocnode_s *andbeyond;
+      FAR struct mm_freenode_s *newnode;
 
       /* Get the chunk next the next node (which could be the tail chunk) */
 
-      andbeyond = (struct mm_allocnode_s*)((char*)next + next->size);
+      andbeyond = (FAR struct mm_allocnode_s*)((char*)next + next->size);
 
       /* Remove the next node.  There must be a predecessor, but there may
        * not be a successor node.
@@ -98,7 +98,7 @@ void  mm_shrinkchunk(struct mm_allocnode_s *node, size_t size)
        * and the tailing memory from the aligned chunk.
        */
 
-      newnode = (struct mm_freenode_s*)((char*)node + size);
+      newnode = (FAR struct mm_freenode_s*)((char*)node + size);
 
       /* Set up the size of the new node */
 
@@ -118,13 +118,13 @@ void  mm_shrinkchunk(struct mm_allocnode_s *node, size_t size)
 
   else if (node->size >= size + SIZEOF_MM_FREENODE)
     {
-      struct mm_freenode_s *newnode;
+      FAR struct mm_freenode_s *newnode;
 
       /* Create a new chunk that will hold both the next chunk
        * and the tailing memory from the aligned chunk.
        */
 
-      newnode = (struct mm_freenode_s*)((char*)node + size);
+      newnode = (FAR struct mm_freenode_s*)((char*)node + size);
 
       /* Set up the size of the new node */
 

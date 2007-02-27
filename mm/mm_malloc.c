@@ -85,9 +85,9 @@
  *
  ************************************************************/
 
-void *malloc(size_t size)
+FAR void *malloc(size_t size)
 {
-  struct mm_freenode_s *node;
+  FAR struct mm_freenode_s *node;
   void *ret = NULL;
   int ndx;
 
@@ -142,8 +142,8 @@ void *malloc(size_t size)
 
   if (node)
     {
-      struct mm_freenode_s *remainder;
-      struct mm_freenode_s *next;
+      FAR struct mm_freenode_s *remainder;
+      FAR struct mm_freenode_s *next;
       size_t remaining;
 
       /* Remove the node.  There must be a predecessor, but there may
@@ -169,11 +169,11 @@ void *malloc(size_t size)
         {
           /* Get a pointer to the next node in physical memory */
 
-          next = (struct mm_freenode_s*)(((char*)node) + node->size);
+          next = (FAR struct mm_freenode_s*)(((char*)node) + node->size);
 
           /* Create the remainder node */
 
-          remainder = (struct mm_freenode_s*)(((char*)node) + size);
+          remainder = (FAR struct mm_freenode_s*)(((char*)node) + size);
           remainder->size = remaining;
           remainder->preceding = size;
 

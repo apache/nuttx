@@ -78,10 +78,10 @@
 
 void sig_unmaskpendingsignal(void)
 {
-   _TCB       *rtcb = (_TCB*)g_readytorun.head;
-   sigset_t    unmaskedset;
-   sigpendq_t *pendingsig;
-   int         signo;
+   FAR _TCB       *rtcb = (FAR _TCB*)g_readytorun.head;
+   sigset_t        unmaskedset;
+   FAR sigpendq_t *pendingsig;
+   int             signo;
 
    /* Prohibit any context switches until we are done with this.
     * We may still be performing signal operations from interrupt
@@ -133,3 +133,4 @@ void sig_unmaskpendingsignal(void)
 
   sched_unlock();
 }
+

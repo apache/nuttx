@@ -75,7 +75,7 @@
  *
  ************************************************************/
 
-#define mq_desfree(mqdes) sq_addlast((sq_entry_t*)mqdes, &g_desfree)
+#define mq_desfree(mqdes) sq_addlast((FAR sq_entry_t*)mqdes, &g_desfree)
 
 /************************************************************
  * Public Functions
@@ -113,10 +113,10 @@
 
 int mq_close(mqd_t mqdes)
 {
-  _TCB      *rtcb = (_TCB*)g_readytorun.head;
-  msgq_t    *msgq;
-  irqstate_t saved_state;
-  int        ret = ERROR;
+  FAR _TCB    *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR msgq_t *msgq;
+  irqstate_t  saved_state;
+  int         ret = ERROR;
 
   /* Verify the inputs */
 
@@ -128,7 +128,7 @@ int mq_close(mqd_t mqdes)
         * list of message descriptors.
         */
 
-       sq_rem((sq_entry_t*)mqdes, &rtcb->msgdesq);
+       sq_rem((FAR sq_entry_t*)mqdes, &rtcb->msgdesq);
 
        /* Find the message queue associated with the message descriptor */
 
@@ -165,7 +165,7 @@ int mq_close(mqd_t mqdes)
             */
 
            saved_state = irqsave();
-           (void)sq_rem((sq_entry_t*)msgq, &g_msgqueues);
+           (void)sq_rem((FAR sq_entry_t*)msgq, &g_msgqueues);
            irqrestore(saved_state);
 
            /* Then deallocate it (and any messages left in it) */
@@ -183,3 +183,4 @@ int mq_close(mqd_t mqdes)
 
    return ret;
 }
+

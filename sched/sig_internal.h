@@ -40,6 +40,7 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/compiler.h>
 #include <queue.h>
 #include <sched.h>
 #include <nuttx/kmalloc.h>
@@ -75,9 +76,9 @@ typedef enum sigalloc_e sigalloc_t;
 
 struct sigactq
 {
-  struct sigactq   *flink;       /* Forward link */
-  struct sigaction  act;         /* Sigaction data */
-  ubyte             signo;       /* Signal associated with action */
+  FAR struct sigactq *flink;     /* Forward link */
+  struct sigaction act;          /* Sigaction data */
+  ubyte     signo;               /* Signal associated with action */
 };
 typedef struct sigactq  sigactq_t;
 
@@ -89,9 +90,9 @@ typedef struct sigactq  sigactq_t;
 
 struct sigpendq
 {
-  struct sigpendq *flink;        /* Forward link */
-  siginfo_t        info;         /* Signal information */
-  ubyte            type;         /* (Used to manage allocations) */
+  FAR struct sigpendq *flink;    /* Forward link */
+  siginfo_t info;                /* Signal information */
+  ubyte     type;                /* (Used to manage allocations) */
 };
 typedef struct sigpendq sigpendq_t;
 
@@ -101,15 +102,15 @@ typedef struct sigpendq sigpendq_t;
 
 struct sigq_s
 {
-  struct sigq_s   *flink;        /* Forward link */
+  FAR struct sigq_s *flink;      /* Forward link */
   union
   {
     void (*sighandler)(int signo, siginfo_t *info, void *context);
   } action;                      /* Signal action */
-  sigset_t         mask;         /* Additional signals to mask while the
+  sigset_t  mask;                /* Additional signals to mask while the
 				  * the signal-catching functin executes */
-  siginfo_t        info;         /* Signal information */
-  ubyte            type;         /* (Used to manage allocations) */
+  siginfo_t info;                /* Signal information */
+  ubyte     type;                /* (Used to manage allocations) */
 };
 typedef struct sigq_s sigq_t;
 
@@ -162,18 +163,18 @@ extern void               sig_allocateactionblock(void);
 
 /* sig_action.c */
 
-extern void               sig_releaseaction(sigactq_t *sigact);
+extern void               sig_releaseaction(FAR sigactq_t *sigact);
 
 /* sig_pending.c */
 
-extern sigset_t           sig_pendingset(_TCB *stcb);
+extern sigset_t           sig_pendingset(FAR _TCB *stcb);
 
 /* In files of the same name */
 
-extern sigq_t            *sig_allocatependingsigaction(void);
-extern void               sig_cleanup(_TCB *stcb);
-extern void               sig_deliver(_TCB *stcb);
-extern sigactq_t         *sig_findaction(_TCB *stcb, int signo);
+extern FAR sigq_t        *sig_allocatependingsigaction(void);
+extern void               sig_cleanup(FAR _TCB *stcb);
+extern void               sig_deliver(FAR _TCB *stcb);
+extern FAR sigactq_t     *sig_findaction(FAR _TCB *stcb, int signo);
 extern int                sig_lowest(sigset_t *set);
 #ifdef CONFIG_CAN_PASS_STRUCTS
 extern int                sig_mqnotempty(int tid, int signo,
@@ -182,10 +183,10 @@ extern int                sig_mqnotempty(int tid, int signo,
 extern int                sig_mqnotempty(int tid, int signo,
                                          void *sival_ptr);
 #endif
-extern int                sig_received(_TCB *stcb, siginfo_t *info);
-extern void               sig_releasependingsigaction(sigq_t *sigq);
-extern void               sig_releasependingsignal(sigpendq_t *sigpend);
-extern sigpendq_t        *sig_removependingsignal(_TCB *stcb, int signo);
+extern int                sig_received(FAR _TCB *stcb, siginfo_t *info);
+extern void               sig_releasependingsigaction(FAR sigq_t *sigq);
+extern void               sig_releasependingsignal(FAR sigpendq_t *sigpend);
+extern FAR sigpendq_t    *sig_removependingsignal(FAR _TCB *stcb, int signo);
 extern void               sig_unmaskpendingsignal(void);
 
 #endif /* __SIG_INTERNAL_H */

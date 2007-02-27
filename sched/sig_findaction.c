@@ -72,28 +72,28 @@
  *
  ************************************************************/
 
-sigactq_t *sig_findaction(_TCB *stcb, int signo)
+FAR sigactq_t *sig_findaction(FAR _TCB *stcb, int signo)
 {
-   sigactq_t *sigact = NULL;
+  FAR sigactq_t *sigact = NULL;
 
-   /* Verify the caller's sanity */
+  /* Verify the caller's sanity */
 
-   if (stcb)
-     {
-       /* Sigactions can only be assigned to the currently executing
-        * thread.  So, a simple lock ought to give us sufficient
-        * protection.
-        */
+  if (stcb)
+    {
+      /* Sigactions can only be assigned to the currently executing
+       * thread.  So, a simple lock ought to give us sufficient
+       * protection.
+       */
 
-       sched_lock();
+      sched_lock();
 
-       /* Seach the list for a sigaction on this signal */
+      /* Seach the list for a sigaction on this signal */
 
-       for(sigact = (sigactq_t*)stcb->sigactionq.head;
-           ((sigact) && (sigact->signo != signo));
-           sigact = sigact->flink);
+      for(sigact = (FAR sigactq_t*)stcb->sigactionq.head;
+          ((sigact) && (sigact->signo != signo));
+          sigact = sigact->flink);
 
-       sched_unlock();
+      sched_unlock();
    }
 
    return sigact;

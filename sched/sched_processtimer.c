@@ -42,6 +42,7 @@
  ************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 #include <sys/types.h>
 
 #if CONFIG_RR_INTERVAL > 0

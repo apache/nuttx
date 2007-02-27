@@ -71,7 +71,7 @@ extern "C" {
 #endif
 
 EXTERN void weak_function irq_initialize(void);
-EXTERN int irq_unexpected_isr(int irq, void *context);
+EXTERN int irq_unexpected_isr(int irq, FAR void *context);
 
 #undef EXTERN
 #ifdef __cplusplus

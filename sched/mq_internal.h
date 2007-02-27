@@ -95,13 +95,12 @@ struct mqmsg
    * MQ_type.
    */
 
-  struct mqmsg  *next;        /* Forward link to next message */
-  ubyte          type;        /* (Used to manage allocations) */
+  FAR struct mqmsg  *next;    /* Forward link to next message */
+  ubyte        type;          /* (Used to manage allocations) */
 
-  ubyte          priority;    /* priority of message          */
-  ubyte          msglen;      /* Message data length          */
-  ubyte          pad;         /* Not used                     */
-  uint16         mail[MQ_MAX_HWORDS]; /* Message data         */
+  ubyte        priority;      /* priority of message          */
+  ubyte        msglen;        /* Message data length          */
+  uint16       mail[MQ_MAX_HWORDS]; /* Message data           */
 };
 typedef struct mqmsg mqmsg_t;
 
@@ -111,20 +110,20 @@ struct mq_des; /* forward reference */
 
 struct msgq_s
 {
-  struct msgq_s *flink;         /* Forward link to next message queue */
-  sq_queue_t     msglist;       /* Prioritized message list */
-  sint16         maxmsgs;       /* Maximum number of messages in the queue */
-  sint16         nmsgs;         /* Number of message in the queue */
-  sint16         nconnect;      /* Number of connections to message queue */
-  sint16         nwaitnotfull;  /* Number tasks waiting for not full */
-  sint16         nwaitnotempty; /* Number tasks waiting for not empty */
-  ubyte          maxmsgsize;    /* Max size of message in message queue */
-  boolean        unlinked;      /* TRUE if the msg queue has been unlinked */
-  struct mq_des *ntmqdes;       /* Notification: Owning mqdes (NULL if none) */
-  pid_t          ntpid;         /* Notification: Receiving Task's PID */
-  int            ntsigno;       /* Notification: Signal number */
-  union sigval   ntvalue;       /* Notification: Signal value */
-  char           name[1];       /* Start of the queue name */
+  FAR struct msgq_s *flink;   /* Forward link to next message queue */
+  sq_queue_t   msglist;       /* Prioritized message list */
+  sint16       maxmsgs;       /* Maximum number of messages in the queue */
+  sint16       nmsgs;         /* Number of message in the queue */
+  sint16       nconnect;      /* Number of connections to message queue */
+  sint16       nwaitnotfull;  /* Number tasks waiting for not full */
+  sint16       nwaitnotempty; /* Number tasks waiting for not empty */
+  ubyte        maxmsgsize;    /* Max size of message in message queue */
+  boolean      unlinked;      /* TRUE if the msg queue has been unlinked */
+  FAR struct mq_des *ntmqdes; /* Notification: Owning mqdes (NULL if none) */
+  pid_t        ntpid;         /* Notification: Receiving Task's PID */
+  int          ntsigno;       /* Notification: Signal number */
+  union sigval ntvalue;       /* Notification: Signal value */
+  char         name[1];       /* Start of the queue name */
 };
 
 #define SIZEOF_MQ_HEADER ((int)(((msgq_t*)NULL)->name))
@@ -135,9 +134,9 @@ struct msgq_s
 
 struct mq_des
 {
-  struct mq_des *flink;       /* Forward link to next message descriptor */
-  msgq_t        *msgq;        /* Pointer to associated message queue */
-  int            oflags;      /* Flags set when message queue was opened */
+  FAR struct mq_des *flink;   /* Forward link to next message descriptor */
+  FAR msgq_t  *msgq;          /* Pointer to associated message queue */
+  int          oflags;        /* Flags set when message queue was opened */
 };
 
 /************************************************************
@@ -182,12 +181,12 @@ extern "C" {
 /* Functions defined in mq_initialized.c *******************/
 
 EXTERN void weak_function mq_initialize(void);
-EXTERN void    mq_desblockalloc(void);
+EXTERN void        mq_desblockalloc(void);
 
-EXTERN mqd_t   mq_descreate(_TCB* mtcb, msgq_t* msgq, int oflags);
-EXTERN msgq_t *mq_findnamed(const char *mq_name);
-EXTERN void    mq_msgfree(mqmsg_t *mqmsg);
-EXTERN void    mq_msgqfree(msgq_t *msgq);
+EXTERN mqd_t       mq_descreate(FAR _TCB* mtcb, FAR msgq_t* msgq, int oflags);
+EXTERN FAR msgq_t *mq_findnamed(const char *mq_name);
+EXTERN void        mq_msgfree(FAR mqmsg_t *mqmsg);
+EXTERN void        mq_msgqfree(FAR msgq_t *msgq);
 
 #undef EXTERN
 #ifdef __cplusplus

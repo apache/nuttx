@@ -124,10 +124,10 @@ static sigpendq_t *g_sigpendingirqsignalalloc;
  * Private Function Prototypes
  ************************************************************/
 
-static sigq_t     *sig_allocateblock(sq_queue_t *sigList, uint16 nSigs,
-                                     ubyte sigType);
-static sigpendq_t *sig_allocatependingsignalblock(sq_queue_t *sigList,
-                                                  uint16 nSigs, ubyte sigType);
+static sigq_t     *sig_allocateblock(sq_queue_t *siglist, uint16 nsigs,
+                                     ubyte sigtype);
+static sigpendq_t *sig_allocatependingsignalblock(sq_queue_t *siglist,
+                                                  uint16 nsigs, ubyte sigtype);
 
 /************************************************************
  * Private Functions
@@ -142,8 +142,8 @@ static sigpendq_t *sig_allocatependingsignalblock(sq_queue_t *sigList,
  *
  ************************************************************/
 
-static sigq_t *sig_allocateblock(sq_queue_t *sigList, uint16 nSigs,
-                                 ubyte sigType)
+static sigq_t *sig_allocateblock(sq_queue_t *siglist, uint16 nsigs,
+                                 ubyte sigtype)
 {
   sigq_t *sigqalloc;
   sigq_t *sigq;
@@ -151,13 +151,13 @@ static sigq_t *sig_allocateblock(sq_queue_t *sigList, uint16 nSigs,
 
   /* Allocate a block of pending signal actions */
 
-  sigqalloc = (sigq_t*)kmalloc((sizeof(sigq_t)) * nSigs);
+  sigqalloc = (sigq_t*)kmalloc((sizeof(sigq_t)) * nsigs);
 
   sigq = sigqalloc;
-  for (i = 0; i < nSigs; i++)
+  for (i = 0; i < nsigs; i++)
     {
-      sigq->type = sigType;
-      sq_addlast((sq_entry_t*)sigq++, sigList);
+      sigq->type = sigtype;
+      sq_addlast((FAR sq_entry_t*)sigq++, siglist);
     }
 
   return sigqalloc;
@@ -171,8 +171,8 @@ static sigq_t *sig_allocateblock(sq_queue_t *sigList, uint16 nSigs,
  * on the free list.
  ************************************************************/
 
-static sigpendq_t *sig_allocatependingsignalblock(sq_queue_t *sigList,
-                                           uint16 nSigs, ubyte sigType)
+static sigpendq_t *sig_allocatependingsignalblock(sq_queue_t *siglist,
+                                           uint16 nsigs, ubyte sigtype)
 {
   sigpendq_t *sigpendalloc;
   sigpendq_t *sigpend;
@@ -181,13 +181,13 @@ static sigpendq_t *sig_allocatependingsignalblock(sq_queue_t *sigList,
   /* Allocate a block of pending signal structures  */
 
   sigpendalloc =
-     (sigpendq_t*)kmalloc((sizeof(sigpendq_t)) * nSigs);
+     (sigpendq_t*)kmalloc((sizeof(sigpendq_t)) * nsigs);
 
   sigpend = sigpendalloc;
-  for (i = 0; i < nSigs; i++)
+  for (i = 0; i < nsigs; i++)
     {
-      sigpend->type = sigType;
-      sq_addlast((sq_entry_t*)sigpend++, sigList);
+      sigpend->type = sigtype;
+      sq_addlast((FAR sq_entry_t*)sigpend++, siglist);
     }
 
   return sigpendalloc;
@@ -255,7 +255,7 @@ void sig_allocateactionblock(void)
   sigact = g_sigactionalloc;
   for (i = 0; i < NUM_SIGNAL_ACTIONS; i++)
     {
-      sq_addlast((sq_entry_t*)sigact++, &g_sigfreeaction);
+      sq_addlast((FAR sq_entry_t*)sigact++, &g_sigfreeaction);
     }
 }
 

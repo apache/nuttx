@@ -132,7 +132,7 @@ static mqd_t mq_desalloc(void)
  *
  ************************************************************/
 
-mqd_t mq_descreate(_TCB* mtcb, msgq_t* msgq, int oflags)
+mqd_t mq_descreate(FAR _TCB* mtcb, FAR msgq_t* msgq, int oflags)
 {
   mqd_t mqdes;
 
@@ -149,7 +149,7 @@ mqd_t mq_descreate(_TCB* mtcb, msgq_t* msgq, int oflags)
 
       /* And add it to the specified tasks's TCB */
 
-      sq_addlast((sq_entry_t*)mqdes, &mtcb->msgdesq);
+      sq_addlast((FAR sq_entry_t*)mqdes, &mtcb->msgdesq);
     }
 
   return mqdes;

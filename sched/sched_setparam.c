@@ -105,8 +105,8 @@
 
 int sched_setparam(pid_t pid, const struct sched_param *param)
 {
-  _TCB      *rtcb;
-  _TCB      *tcb;
+  FAR _TCB  *rtcb;
+  FAR _TCB  *tcb;
   tstate_t   task_state;
   irqstate_t saved_state;
   int        sched_priority = param->sched_priority;
@@ -129,7 +129,7 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
 
   /* Check if the task to reprioritize is the calling task */
 
-  rtcb = (_TCB*)g_readytorun.head;
+  rtcb = (FAR _TCB*)g_readytorun.head;
   if (pid == 0 || pid == rtcb->pid)
     {
       tcb = rtcb;
@@ -236,7 +236,7 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
           {
             /* Remove the TCB from the prioritized task list */
 
-            dq_rem((dq_entry_t*)tcb, g_tasklisttable[task_state].list);
+            dq_rem((FAR dq_entry_t*)tcb, g_tasklisttable[task_state].list);
 
             /* Change the task priority */
 

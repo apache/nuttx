@@ -56,9 +56,9 @@
  *
  ************************************************************/
 
-void *zalloc(size_t size)
+FAR void *zalloc(size_t size)
 {
-  void *alloc = malloc(size);
+  FAR void *alloc = malloc(size);
   if (alloc)
     {
        memset(alloc, 0, size);

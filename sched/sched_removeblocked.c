@@ -90,7 +90,7 @@
  *
  ************************************************************/
 
-void sched_removeblocked(_TCB *btcb)
+void sched_removeblocked(FAR _TCB *btcb)
 {
   tstate_t task_state = btcb->task_state;
 
@@ -103,7 +103,7 @@ void sched_removeblocked(_TCB *btcb)
    * with this state
    */
 
-  dq_rem((dq_entry_t*)btcb, g_tasklisttable[task_state].list);
+  dq_rem((FAR dq_entry_t*)btcb, g_tasklisttable[task_state].list);
 
   /* Make sure the TCB's state corresponds to not being in
    * any list
@@ -111,3 +111,4 @@ void sched_removeblocked(_TCB *btcb)
 
   btcb->task_state = TSTATE_TASK_INVALID;
 }
+

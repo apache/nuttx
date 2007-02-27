@@ -111,12 +111,12 @@
 
 int sigsuspend(const sigset_t *set)
 {
-  _TCB       *rtcb = (_TCB*)g_readytorun.head;
-  sigset_t    intersection;
-  sigset_t    saved_sigprocmask;
-  sigpendq_t *sigpend;
-  irqstate_t  saved_state;
-  int         unblocksigno;
+  FAR _TCB       *rtcb = (FAR _TCB*)g_readytorun.head;
+  sigset_t        intersection;
+  sigset_t        saved_sigprocmask;
+  FAR sigpendq_t *sigpend;
+  irqstate_t      saved_state;
+  int             unblocksigno;
 
   /* Several operations must be performed below:  We must determine if any
    * signal is pending and, if not, wait for the signal.  Since signals can

@@ -99,8 +99,8 @@
 
 STATUS task_restart(pid_t pid)
 {
-  _TCB      *rtcb;
-  _TCB      *tcb;
+  FAR _TCB  *rtcb;
+  FAR _TCB  *tcb;
   STATUS     status;
   irqstate_t state;
 
@@ -112,7 +112,7 @@ STATUS task_restart(pid_t pid)
 
    /* Check if the task to restart is the calling task */
 
-   rtcb = (_TCB*)g_readytorun.head;
+   rtcb = (FAR _TCB*)g_readytorun.head;
    if ((pid == 0) || (pid == rtcb->pid))
      {
        /* Not implemented */
@@ -139,7 +139,7 @@ STATUS task_restart(pid_t pid)
         */
 
        state = irqsave();
-       dq_rem((dq_entry_t*)tcb, g_tasklisttable[tcb->task_state].list);
+       dq_rem((FAR dq_entry_t*)tcb, g_tasklisttable[tcb->task_state].list);
        tcb->task_state = TSTATE_TASK_INVALID;
        irqrestore(state);
 
@@ -159,7 +159,7 @@ STATUS task_restart(pid_t pid)
 
        /* Add the task to the inactive task list */
 
-       dq_addfirst((dq_entry_t*)tcb, &g_inactivetasks);
+       dq_addfirst((FAR dq_entry_t*)tcb, &g_inactivetasks);
        tcb->task_state = TSTATE_TASK_INACTIVE;
 
        /* Activate the task */
@@ -167,7 +167,7 @@ STATUS task_restart(pid_t pid)
        status = task_activate(tcb);
        if (status != OK)
          {
-           dq_rem((dq_entry_t*)tcb, &g_inactivetasks);
+           dq_rem((FAR dq_entry_t*)tcb, &g_inactivetasks);
            sched_releasetcb(tcb);
            return ERROR;
          }

@@ -53,14 +53,24 @@
 
 int ioctl(int fd, int req, unsigned long arg)
 {
+  FAR struct filelist *list;
   int ret = EBADF;
 
-  /* We we give a valid file descriptor? */
+  /* Get the thread-specific file list */
+
+  list = sched_getfiles();
+  if (!list)
+    {
+      *get_errno_ptr() = EMFILE;
+      return ERROR;
+    }
+
+  /* Were we give a valid file descriptor? */
 
   if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
     {
-      struct file *this_file      = &files[fd];
-      struct inode *inode         = this_file->f_inode;
+      FAR struct file *this_file = &list->fl_files[fd];
+      struct inode *inode        = this_file->f_inode;
 
       /* Is a driver registered? Does it support the ioctl method? */
 

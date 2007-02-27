@@ -104,9 +104,9 @@
  *
  ************************************************************/
 
-int sem_post (sem_t *sem)
+int sem_post(sem_t *sem)
 {
-  _TCB      *stcb;
+  FAR _TCB  *stcb;
   STATUS     ret = ERROR;
   irqstate_t saved_state;
 
@@ -138,7 +138,7 @@ int sem_post (sem_t *sem)
            * that we want.
            */
 
-          for (stcb = (_TCB*)g_waitingforsemaphore.head;
+          for (stcb = (FAR _TCB*)g_waitingforsemaphore.head;
                ((stcb) && (stcb->waitsem != sem));
                stcb = stcb->flink);
 

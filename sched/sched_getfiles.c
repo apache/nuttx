@@ -68,9 +68,9 @@
  *
  ************************************************************/
 
-struct filelist *sched_getfiles(void)
+FAR struct filelist *sched_getfiles(void)
 {
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
   return rtcb->filelist;
 }
 

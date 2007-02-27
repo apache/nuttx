@@ -71,9 +71,9 @@
  *
  ************************************************************/
 
-int sched_setuppthreadfiles(_TCB *tcb)
+int sched_setuppthreadfiles(FAR _TCB *tcb)
 {
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
 
   /* The child thread inherits the parent file descriptors */
 

@@ -74,7 +74,7 @@
  *
  ************************************************************/
 
-static void pthread_destroyjoininfo(join_t *pjoin)
+static void pthread_destroyjoininfo(FAR join_t *pjoin)
 {
   int ntasks_waiting;
   int status;
@@ -145,9 +145,9 @@ static void pthread_destroyjoininfo(join_t *pjoin)
  *
  ************************************************************/
 
-int pthread_completejoin(pid_t pid, void *exit_value)
+int pthread_completejoin(pid_t pid, FAR void *exit_value)
 {
-  join_t *pjoin;
+  FAR join_t *pjoin;
   boolean detached = FALSE;
 
   dbg("process_id=%d exit_value=%p\n", pid, exit_value);
@@ -186,7 +186,7 @@ int pthread_completejoin(pid_t pid, void *exit_value)
 
           /* Deallocate the join entry if it was detached. */
 
-          sched_free((void*)pjoin);
+          sched_free((FAR void*)pjoin);
         }
 
      /* No, then we can assume that some other thread is waiting for the join info */

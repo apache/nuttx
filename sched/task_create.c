@@ -67,7 +67,7 @@
  ************************************************************/
 
 static void     task_start(void);
-static STATUS   task_assignpid(_TCB* tcb);
+static STATUS   task_assignpid(FAR _TCB* tcb);
 
 /************************************************************
  * Private Functions
@@ -92,7 +92,7 @@ static STATUS   task_assignpid(_TCB* tcb);
 
 static void task_start(void)
 {
-  _TCB *tcb = (_TCB*)g_readytorun.head;
+  FAR _TCB *tcb = (FAR _TCB*)g_readytorun.head;
   int argc;
 
   /* Count how many non-null arguments we are passing */
@@ -127,7 +127,7 @@ static void task_start(void)
  *
  ************************************************************/
 
-static STATUS task_assignpid(_TCB *tcb)
+static STATUS task_assignpid(FAR _TCB *tcb)
 {
   pid_t next_pid;
   int   hash_ndx;
@@ -220,9 +220,10 @@ static STATUS task_assignpid(_TCB *tcb)
  *
  ************************************************************/
 
-STATUS _task_init(_TCB *tcb, char *name, int priority,
+STATUS _task_init(FAR _TCB *tcb, const char *name, int priority,
                   start_t start, main_t main, boolean pthread,
-                  char *arg1, char *arg2, char *arg3, char *arg4)
+                  FAR char *arg1, FAR char *arg2,
+                  FAR char *arg3, FAR char *arg4)
 {
   STATUS ret;
 
@@ -317,7 +318,7 @@ STATUS _task_init(_TCB *tcb, char *name, int priority,
       /* Add the task to the inactive task list */
 
       sched_lock();
-      dq_addfirst((dq_entry_t*)tcb, &g_inactivetasks);
+      dq_addfirst((FAR dq_entry_t*)tcb, &g_inactivetasks);
       tcb->task_state = TSTATE_TASK_INACTIVE;
       sched_unlock();
     }
@@ -348,9 +349,10 @@ STATUS _task_init(_TCB *tcb, char *name, int priority,
  *
  ************************************************************/
 
-STATUS task_init(_TCB *tcb, char *name, int priority,
-                 uint32 *stack, uint32 stack_size, main_t entry,
-                 char *arg1, char *arg2, char *arg3, char *arg4)
+STATUS task_init(FAR _TCB *tcb, const char *name, int priority,
+                 FAR uint32 *stack, uint32 stack_size, main_t entry,
+                 FAR char *arg1, FAR char *arg2,
+                 FAR char *arg3, FAR char *arg4)
 {
   up_use_stack(tcb, stack, stack_size);
   return _task_init(tcb, name, priority, task_start, entry,
@@ -374,7 +376,7 @@ STATUS task_init(_TCB *tcb, char *name, int priority,
  *
  ************************************************************/
 
-STATUS task_activate(_TCB *tcb)
+STATUS task_activate(FAR _TCB *tcb)
 {
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   irqstate_t flags = irqsave();
@@ -433,17 +435,18 @@ STATUS task_activate(_TCB *tcb)
  *
  ************************************************************/
 
-int task_create(char *name, int priority,
+int task_create(const char *name, int priority,
                 int stack_size, main_t entry,
-                char *arg1, char *arg2, char *arg3, char *arg4)
+                FAR char *arg1, FAR char *arg2,
+                FAR char *arg3, FAR char *arg4)
 {
-  _TCB *tcb;
+  FAR _TCB *tcb;
   STATUS status;
   pid_t pid;
 
   /* Allocate a TCB for the new task. */
 
-  tcb = (_TCB*)kzmalloc(sizeof(_TCB));
+  tcb = (FAR _TCB*)kzmalloc(sizeof(_TCB));
   if (!tcb)
     {
       *get_errno_ptr() = ENOMEM;
@@ -486,7 +489,7 @@ int task_create(char *name, int priority,
    status = task_activate(tcb);
    if (status != OK)
     {
-      dq_rem((dq_entry_t*)tcb, &g_inactivetasks);
+      dq_rem((FAR dq_entry_t*)tcb, &g_inactivetasks);
       sched_releasetcb(tcb);
       return ERROR;
     }

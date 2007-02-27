@@ -95,10 +95,10 @@
  *
  ************************************************************/
 
-int sem_unlink (const char *name)
+int sem_unlink(const char *name)
 {
-  nsem_t *psem;
-  int     ret = ERROR;
+  FAR nsem_t *psem;
+  int         ret = ERROR;
 
   /* Verify the input values */
 
@@ -119,7 +119,7 @@ int sem_unlink (const char *name)
            */
           if (!psem->nconnect)
             {
-              dq_rem((dq_entry_t*)psem, &g_nsems);
+              dq_rem((FAR dq_entry_t*)psem, &g_nsems);
               sched_free(psem);
             }
 
@@ -139,3 +139,4 @@ int sem_unlink (const char *name)
 
   return ret;
 }
+

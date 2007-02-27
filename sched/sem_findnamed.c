@@ -84,13 +84,13 @@
  *
  ************************************************************/
 
-nsem_t *sem_findnamed(const char *name)
+FAR nsem_t *sem_findnamed(const char *name)
 {
-  nsem_t *psem;
+  FAR nsem_t *psem;
 
   /* Search the list of named semaphores */
 
-  for (psem = (nsem_t*)g_nsems.head; (psem); psem = psem->flink)
+  for (psem = (FAR nsem_t*)g_nsems.head; (psem); psem = psem->flink)
     {
       if (!strcmp(name, psem->name))
         {

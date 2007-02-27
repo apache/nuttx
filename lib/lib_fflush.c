@@ -88,7 +88,7 @@
 
 /* Called by the OS when a task exits */
 
-void lib_flushall(struct streamlist *list)
+void lib_flushall(FAR struct streamlist *list)
 {
   /* Make sure that there are streams associated with this thread */
   if (list)

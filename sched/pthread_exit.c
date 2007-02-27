@@ -86,7 +86,7 @@
  *
  ************************************************************/
 
-void pthread_exit(void *exit_value)
+void pthread_exit(FAR void *exit_value)
 {
   int error_code = (int)exit_value;
   int status;
@@ -117,3 +117,4 @@ void pthread_exit(void *exit_value)
 
   _exit(error_code);
 }
+

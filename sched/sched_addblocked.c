@@ -86,7 +86,7 @@
  *
  ************************************************************/
 
-void sched_addblocked(_TCB *btcb, tstate_t task_state)
+void sched_addblocked(FAR _TCB *btcb, tstate_t task_state)
 {
    /* Make sure that we received a valid blocked state */
 
@@ -108,10 +108,11 @@ void sched_addblocked(_TCB *btcb, tstate_t task_state)
      {
        /* Add the task to a non-prioritized list */
 
-       dq_addlast((dq_entry_t*)btcb, g_tasklisttable[task_state].list);
+       dq_addlast((FAR dq_entry_t*)btcb, g_tasklisttable[task_state].list);
      }
 
    /* Make sure the TCB's state corresponds to the list */
 
    btcb->task_state = task_state;
 }
+

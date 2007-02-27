@@ -103,11 +103,11 @@
  *
  ************************************************************/
 
-void *pthread_getspecific(pthread_key_t key)
+FAR void *pthread_getspecific(pthread_key_t key)
 {
 #if CONFIG_NPTHREAD_KEYS > 0
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
-  void *ret = NULL;
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR void *ret = NULL;
 
   /* Check if the key is valid. */
 
@@ -123,3 +123,4 @@ void *pthread_getspecific(pthread_key_t key)
   return NULL;
 #endif
 }
+

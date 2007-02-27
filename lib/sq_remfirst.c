@@ -56,9 +56,9 @@
  *
  ************************************************************/
 
-sq_entry_t *sq_remfirst(sq_queue_t *queue)
+FAR sq_entry_t *sq_remfirst(sq_queue_t *queue)
 {
-  sq_entry_t *ret = queue->head;
+  FAR sq_entry_t *ret = queue->head;
 
   if (ret)
     {
@@ -73,3 +73,4 @@ sq_entry_t *sq_remfirst(sq_queue_t *queue)
 
   return ret;
 }
+

@@ -120,14 +120,14 @@ struct mm_allocnode_s
 
 struct mm_freenode_s
 {
-  size_t size;                 /* Size of this chunk */
-  size_t preceding;            /* Size of the preceding chunk */
-  struct mm_freenode_s *flink; /* Supports a doubly linked list */
-  struct mm_freenode_s *blink;
+  size_t size;                     /* Size of this chunk */
+  size_t preceding;                /* Size of the preceding chunk */
+  FAR struct mm_freenode_s *flink; /* Supports a doubly linked list */
+  FAR struct mm_freenode_s *blink;
 };
 
 #ifdef CONFIG_SMALL_MEMORY
-# define SIZEOF_MM_FREENODE    10
+# define SIZEOF_MM_FREENODE     8
 #else
 # define SIZEOF_MM_FREENODE    16
 #endif
@@ -160,15 +160,15 @@ extern size_t  g_heapsize;
 
 /* This is the first and last nodes of the heap */
 
-extern struct mm_allocnode_s *g_heapstart;
-extern struct mm_allocnode_s *g_heapend;
+extern FAR struct mm_allocnode_s *g_heapstart;
+extern FAR struct mm_allocnode_s *g_heapend;
 
 /* All free nodes are maintained in a doubly linked list.  This
  * array provides some hooks into the list at various points to
  * speed searches for free nodes.
  */
 
-extern struct mm_freenode_s g_nodelist[MM_NNODES];
+extern FAR struct mm_freenode_s g_nodelist[MM_NNODES];
 
 /************************************************************
  * Pulblic Function Prototypes
@@ -177,23 +177,28 @@ extern struct mm_freenode_s g_nodelist[MM_NNODES];
 /* Normally defined in malloc.h */
 
 #ifdef MM_TEST
- extern void *mm_malloc(size_t);
- extern void  mm_free(void*);
- extern void *mm_realloc(void*, size_t);
- extern void *mm_memalign(size_t, size_t);
- extern void *mm_zalloc(size_t);
- extern void *mm_calloc(size_t, size_t);
+ extern FAR void *mm_malloc(size_t);
+ extern void      mm_free(void*);
+ extern FAR void *mm_realloc(void*, size_t);
+ extern FAR void *mm_memalign(size_t, size_t);
+ extern FAR void *mm_zalloc(size_t);
+ extern FAR void *mm_calloc(size_t, size_t);
+#ifdef CONFIG_CAN_PASS_STRUCTS
  extern struct mallinfo mallinfo(void);
+#else
+ extern int       mallinfo(struct mallinfo *info);
+#endif
 #endif
 
-extern void   mm_shrinkchunk(struct mm_allocnode_s *node, size_t size);
-extern void   mm_addfreechunk(struct mm_freenode_s *node);
-extern int    mm_size2ndx(size_t size);
-extern void   mm_seminitialize(void);
-extern void   mm_takesemaphore(void);
-extern void   mm_givesemaphore(void);
+extern void       mm_shrinkchunk(FAR struct mm_allocnode_s *node,
+                                 size_t size);
+extern void       mm_addfreechunk(FAR struct mm_freenode_s *node);
+extern int        mm_size2ndx(size_t size);
+extern void       mm_seminitialize(void);
+extern void       mm_takesemaphore(void);
+extern void       mm_givesemaphore(void);
 #ifdef MM_TEST
- extern int   mm_getsemaphore(void);
+ extern int       mm_getsemaphore(void);
 #endif
 
 #endif /* __MM_INTERNAL_H */

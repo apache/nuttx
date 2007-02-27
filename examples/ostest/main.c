@@ -55,18 +55,18 @@
 #define STACKSIZE 8192
 #define NARGS        4
 
-#define ARG1      "Arg1"
-#define ARG2      "Arg2"
-#define ARG3      "Arg3"
-#define ARG4      "Arg4"
-
 /************************************************************
  * Private Data
  ************************************************************/
 
+static FAR char arg1[]    = "Arg1";
+static FAR char arg2[]    = "Arg2";
+static FAR char arg3[]    = "Arg3";
+static FAR char arg4[]    = "Arg4";
+
 static char write_data1[] = "Standard I/O Check: write fd=1\n";
 static char write_data2[] = "Standard I/O Check: write fd=2\n";
-static char *args[NARGS] = { ARG1, ARG2, ARG3, ARG4 };
+static char *args[NARGS]  = { arg1, arg2, arg3, arg4 };
 
 /************************************************************
  * Private Functions
@@ -165,7 +165,7 @@ int user_start(int parm1, int parm2, int parm3, int parm4)
   /* Verify that we can spawn a new task */
 
   result = task_create("ostest", PRIORITY, STACKSIZE, user_main,
-                       ARG1, ARG2, ARG3, ARG4);
+                       arg1, arg2, arg3, arg4);
   if (result == ERROR)
     {
       fprintf(stderr, "user_start: Failed to start user_main\n");

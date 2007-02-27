@@ -38,6 +38,7 @@
  ************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 #include <sys/types.h>
 #include <signal.h>
 #include <debug.h>
@@ -103,7 +104,7 @@ int sigqueue (int pid, int signo, const union sigval value)
 int sigqueue(int pid, int signo, void *sival_ptr)
 #endif
 {
-  _TCB     *stcb;
+  FAR _TCB *stcb;
   siginfo_t info;
   int       ret = ERROR;
 

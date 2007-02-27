@@ -73,11 +73,11 @@
  *
  ************************************************************/
 
-void *realloc(void *oldmem, size_t size)
+FAR void *realloc(FAR void *oldmem, size_t size)
 {
-  struct mm_allocnode_s *oldnode;
-  struct mm_freenode_s  *prev;
-  struct mm_freenode_s  *next;
+  FAR struct mm_allocnode_s *oldnode;
+  FAR struct mm_freenode_s  *prev;
+  FAR struct mm_freenode_s  *next;
   size_t oldsize;
   size_t prevsize = 0;
   size_t nextsize = 0;
@@ -106,7 +106,7 @@ void *realloc(void *oldmem, size_t size)
 
   /* Map the memory chunk into an allocated node structure */
 
-  oldnode = (struct mm_allocnode_s *)((char*)oldmem - SIZEOF_MM_ALLOCNODE);
+  oldnode = (FAR struct mm_allocnode_s *)((FAR char*)oldmem - SIZEOF_MM_ALLOCNODE);
 
   /* We need to hold the MM semaphore while we muck with the
    * nodelist.
@@ -129,13 +129,13 @@ void *realloc(void *oldmem, size_t size)
    * the best decision
    */
 
-  next = (struct mm_freenode_s *)((char*)oldnode + oldnode->size);
+  next = (FAR struct mm_freenode_s *)((FAR char*)oldnode + oldnode->size);
   if ((next->preceding & MM_ALLOC_BIT) == 0)
     {
       nextsize = next->size;
     }
 
-  prev = (struct mm_freenode_s *)((char*)oldnode - (oldnode->preceding & ~MM_ALLOC_BIT));
+  prev = (FAR struct mm_freenode_s *)((FAR char*)oldnode - (oldnode->preceding & ~MM_ALLOC_BIT));
   if ((prev->preceding & MM_ALLOC_BIT) == 0)
     {
       prevsize = prev->size;
@@ -145,9 +145,9 @@ void *realloc(void *oldmem, size_t size)
 
   if (nextsize + prevsize + oldsize >= size)
     {
-      size_t needed = size - oldsize;
-      size_t takeprev;
-      size_t takenext;
+      size_t needed   = size - oldsize;
+      size_t takeprev = 0;
+      size_t takenext = 0;
 
       /* Check if we can extend into the previous chunk and if the
        * previous chunk is smaller than the next chunk.
@@ -207,7 +207,7 @@ void *realloc(void *oldmem, size_t size)
 
       if (takeprev)
         {
-           struct mm_allocnode_s *newnode;
+           FAR struct mm_allocnode_s *newnode;
 
            /* Remove the previous node.  There must be a predecessor,
             * but there may not be a successor node.
@@ -222,7 +222,7 @@ void *realloc(void *oldmem, size_t size)
 
            /* Extend the node into the previous free chunk */
 
-           newnode = (struct mm_allocnode_s *)((char*)oldnode - takeprev);
+           newnode = (FAR struct mm_allocnode_s *)((FAR char*)oldnode - takeprev);
 
            /* Did we consume the entire preceding chunk? */
 
@@ -261,12 +261,12 @@ void *realloc(void *oldmem, size_t size)
 
       if (takenext)
         {
-           struct mm_freenode_s *newnode;
-           struct mm_allocnode_s *andbeyond;
+           FAR struct mm_freenode_s *newnode;
+           FAR struct mm_allocnode_s *andbeyond;
 
            /* Get the chunk following the next node (which could be the tail chunk) */
 
-           andbeyond = (struct mm_allocnode_s*)((char*)next + nextsize);
+           andbeyond = (FAR struct mm_allocnode_s*)((char*)next + nextsize);
 
            /* Remove the next node.  There must be a predecessor,
             * but there may not be a successor node.
@@ -282,7 +282,7 @@ void *realloc(void *oldmem, size_t size)
            /* Extend the node into the previous next chunk */
 
            oldnode->size = oldsize + takenext;
-           newnode       = (struct mm_freenode_s *)((char*)oldnode + oldnode->size);
+           newnode       = (FAR struct mm_freenode_s *)((char*)oldnode + oldnode->size);
 
            /* Did we consume the entire preceding chunk? */
 
@@ -310,19 +310,21 @@ void *realloc(void *oldmem, size_t size)
 
 
       mm_givesemaphore();
-      return (void*)((char*)oldnode + SIZEOF_MM_ALLOCNODE);
+      return (FAR void*)((FAR char*)oldnode + SIZEOF_MM_ALLOCNODE);
     }
 
   /* The current chunk cannot be extended.  Just allocate a new chunk and copy */
 
   else
     {
+       FAR void *newmem;
+
        /* Allocate a new block.  On failure, realloc must return NULL but
         * leave the original memory in place.
         */
 
        mm_givesemaphore();
-       char *newmem = (char*)malloc(size);
+       newmem = (FAR void*)malloc(size);
        if (newmem)
          {
            memcpy(newmem, oldmem, oldsize);

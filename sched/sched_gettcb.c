@@ -75,9 +75,9 @@
  *
  ************************************************************/
 
-_TCB *sched_gettcb(pid_t pid)
+FAR _TCB *sched_gettcb(pid_t pid)
 {
-  _TCB *ret = NULL;
+  FAR _TCB *ret = NULL;
   int hash_ndx;
 
   /* Verify that the PID is within range */
@@ -102,3 +102,4 @@ _TCB *sched_gettcb(pid_t pid)
 
   return ret;
 }
+

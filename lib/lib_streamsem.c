@@ -76,7 +76,7 @@
  * Public Functions
  ************************************************************/
 
-void stream_semtake(struct streamlist *list)
+void stream_semtake(FAR struct streamlist *list)
 {
   /* Take the semaphore (perhaps waiting) */
 
@@ -90,7 +90,7 @@ void stream_semtake(struct streamlist *list)
     }
 }
 
-void stream_semgive(struct streamlist *list)
+void stream_semgive(FAR struct streamlist *list)
 {
   sem_post(&list->sl_sem);
 }

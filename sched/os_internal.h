@@ -123,8 +123,8 @@ enum os_crash_codes_e
 
 struct pidhash_s
 {
-  _TCB *tcb;
-  pid_t pid;
+  FAR _TCB *tcb;
+  pid_t     pid;
 };
 typedef struct pidhash_s  pidhash_t;
 
@@ -135,8 +135,8 @@ typedef struct pidhash_s  pidhash_t;
 
 struct tasklist_s
 {
-  dq_queue_t *list;        /* Pointer to the task list */
-  boolean     prioritized; /* TRUE if the list is prioritized */
+  NEAR dq_queue_t *list;        /* Pointer to the task list */
+  boolean          prioritized; /* TRUE if the list is prioritized */
 };
 typedef struct tasklist_s tasklist_t;
 
@@ -232,32 +232,32 @@ extern const tasklist_t g_tasklisttable[NUM_TASK_STATES];
  * Public Function Prototypes
  ************************************************************/
 
-extern STATUS  _task_init(_TCB *tcb, char *name, int priority,
+extern STATUS  _task_init(FAR _TCB *tcb, const char *name, int priority,
                           start_t start, main_t main,
                           boolean pthread,
-                          char *arg1, char *arg2,
-                          char *arg3, char *arg4);
+                          FAR char *arg1, FAR char *arg2,
+                          FAR char *arg3, FAR char *arg4);
 
-extern boolean sched_addreadytorun(_TCB *rtrtcb);
-extern boolean sched_removereadytorun(_TCB *rtrtcb);
-extern boolean sched_addprioritized(_TCB *newTcb,
-                                    dq_queue_t *list);
+extern boolean sched_addreadytorun(FAR _TCB *rtrtcb);
+extern boolean sched_removereadytorun(FAR _TCB *rtrtcb);
+extern boolean sched_addprioritized(FAR _TCB *newTcb,
+                                    NEAR dq_queue_t *list);
 extern boolean sched_mergepending(void);
-extern void    sched_addblocked(_TCB *btcb, tstate_t task_state);
-extern void    sched_removeblocked(_TCB *btcb);
-extern _TCB   *sched_gettcb(pid_t pid);
+extern void    sched_addblocked(FAR _TCB *btcb, tstate_t task_state);
+extern void    sched_removeblocked(FAR _TCB *btcb);
+extern FAR _TCB *sched_gettcb(pid_t pid);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-extern int     sched_setupidlefiles(_TCB *tcb);
-extern int     sched_setuptaskfiles(_TCB *tcb);
-extern int     sched_setuppthreadfiles(_TCB *tcb);
+extern int     sched_setupidlefiles(FAR _TCB *tcb);
+extern int     sched_setuptaskfiles(FAR _TCB *tcb);
+extern int     sched_setuppthreadfiles(FAR _TCB *tcb);
 #if CONFIG_NFILE_STREAMS > 0
-extern int     sched_setupstreams(_TCB *tcb);
-extern int     sched_flushfiles(_TCB *tcb);
+extern int     sched_setupstreams(FAR _TCB *tcb);
+extern int     sched_flushfiles(FAR _TCB *tcb);
 #endif
-extern int     sched_releasefiles(_TCB *tcb);
+extern int     sched_releasefiles(FAR _TCB *tcb);
 #endif
 
-extern int     sched_releasetcb(_TCB *tcb);
+extern int     sched_releasetcb(FAR _TCB *tcb);
 
 #endif /* __OS_INTERNAL_H */

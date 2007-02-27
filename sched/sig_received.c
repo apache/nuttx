@@ -76,12 +76,12 @@
  *
  ************************************************************/
 
-static int sig_queueaction(_TCB *stcb, siginfo_t *info)
+static int sig_queueaction(FAR _TCB *stcb, siginfo_t *info)
 {
-  sigactq_t *sigact;
-  sigq_t    *sigq;
-  irqstate_t saved_state;
-  int        ret = OK;
+  FAR sigactq_t *sigact;
+  FAR sigq_t    *sigq;
+  irqstate_t     saved_state;
+  int            ret = OK;
 
   sched_lock();
 
@@ -112,7 +112,7 @@ static int sig_queueaction(_TCB *stcb, siginfo_t *info)
            /* Put it at the end of the pending signals list */
 
            saved_state = irqsave();
-           sq_addlast((sq_entry_t*)sigq, &(stcb->sigpendactionq));
+           sq_addlast((FAR sq_entry_t*)sigq, &(stcb->sigpendactionq));
            irqrestore(saved_state);
         }
     }
@@ -129,10 +129,10 @@ static int sig_queueaction(_TCB *stcb, siginfo_t *info)
  *
  ************************************************************/
 
-static sigpendq_t *sig_findpendingsignal(_TCB *stcb, int signo)
+static FAR sigpendq_t *sig_findpendingsignal(FAR _TCB *stcb, int signo)
 {
-  sigpendq_t *sigpend = NULL;
-  irqstate_t  saved_state;
+  FAR sigpendq_t *sigpend = NULL;
+  irqstate_t      saved_state;
 
   /* Verify the caller's sanity */
 
@@ -144,7 +144,7 @@ static sigpendq_t *sig_findpendingsignal(_TCB *stcb, int signo)
 
       /* Seach the list for a sigpendion on this signal */
 
-      for(sigpend = (sigpendq_t*)stcb->sigpendingq.head;
+      for(sigpend = (FAR sigpendq_t*)stcb->sigpendingq.head;
          (sigpend && sigpend->info.si_signo != signo);
          sigpend = sigpend->flink);
       irqrestore(saved_state);
@@ -161,10 +161,10 @@ static sigpendq_t *sig_findpendingsignal(_TCB *stcb, int signo)
  *
  ************************************************************/
 
-static sigpendq_t *sig_allocatependingsignal(void)
+static FAR sigpendq_t *sig_allocatependingsignal(void)
 {
-  sigpendq_t *sigpend;
-  irqstate_t  saved_state;
+  FAR sigpendq_t *sigpend;
+  irqstate_t      saved_state;
 
   /* Check if we were called from an interrupt handler. */
 
@@ -172,13 +172,13 @@ static sigpendq_t *sig_allocatependingsignal(void)
     {
       /* Try to get the pending signal structure from the free list */
 
-      sigpend = (sigpendq_t*)sq_remfirst(&g_sigpendingsignal);
+      sigpend = (FAR sigpendq_t*)sq_remfirst(&g_sigpendingsignal);
 
       /* If so, then try the special list of structures reserved for
        * interrupt handlers
        */
 
-      sigpend = (sigpendq_t*)sq_remfirst(&g_sigpendingirqsignal);
+      sigpend = (FAR sigpendq_t*)sq_remfirst(&g_sigpendingirqsignal);
     }
 
   /* If we were not called from an interrupt handler, then we are
@@ -189,18 +189,18 @@ static sigpendq_t *sig_allocatependingsignal(void)
       /* Try to get the pending signal structure from the free list */
 
       saved_state = irqsave();
-      sigpend = (sigpendq_t*)sq_remfirst(&g_sigpendingsignal);
+      sigpend = (FAR sigpendq_t*)sq_remfirst(&g_sigpendingsignal);
       irqrestore(saved_state);
 
       /* Check if we got one. */
 
       if (!sigpend)
         {
-          /* No...Try the resource pool */
+          /* No... Allocate the pending signal */
 
           if (!sigpend)
             {
-              sigpend = (sigpendq_t *)kmalloc((sizeof (sigpendq_t)));
+              sigpend = (FAR sigpendq_t *)kmalloc((sizeof (sigpendq_t)));
             }
 
           /* Check if we got an allocated message */
@@ -225,10 +225,10 @@ static sigpendq_t *sig_allocatependingsignal(void)
  * run-away sender cannot consume all of memory.
  ************************************************************/
 
-static sigpendq_t *sig_addpendingsignal(_TCB *stcb, siginfo_t *info)
+static FAR sigpendq_t *sig_addpendingsignal(FAR _TCB *stcb, siginfo_t *info)
 {
-  sigpendq_t *sigpend;
-  irqstate_t  saved_state;
+  FAR sigpendq_t *sigpend;
+  irqstate_t      saved_state;
 
   /* Check if the signal is already pending */
 
@@ -256,7 +256,7 @@ static sigpendq_t *sig_addpendingsignal(_TCB *stcb, siginfo_t *info)
           /* Add the structure to the pending signal list */
 
           saved_state = irqsave();
-          sq_addlast((sq_entry_t*)sigpend, &stcb->sigpendingq);
+          sq_addlast((FAR sq_entry_t*)sigpend, &stcb->sigpendingq);
           irqrestore(saved_state);
         }
     }
@@ -283,7 +283,7 @@ static sigpendq_t *sig_addpendingsignal(_TCB *stcb, siginfo_t *info)
  *
  ************************************************************/
 
-int sig_received(_TCB *stcb, siginfo_t *info)
+int sig_received(FAR _TCB *stcb, siginfo_t *info)
 {
   irqstate_t saved_state;
   int        ret = ERROR;

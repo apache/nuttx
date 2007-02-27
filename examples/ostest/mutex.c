@@ -91,6 +91,11 @@ static void *thread_func(void *parameter)
 void mutex_test(void)
 {
   pthread_t thread1, thread2;
+#ifdef SDCC
+  pthread_addr_t result1, result2;
+  pthread_attr_t attr;
+#endif
+  int status;
 
   /* Initialize the mutex */
 
@@ -100,19 +105,35 @@ void mutex_test(void)
   /* Start two thread instances */
 
   printf("Starting thread 1\n");
-  if ((pthread_create(&thread1, NULL, thread_func, (void*)1)) != 0)
+#ifdef SDCC
+  (void)pthread_attr_init(&attr);
+  status = pthread_create(&thread1, &attr, thread_func, (pthread_addr_t)1);
+#else
+  status = pthread_create(&thread1, NULL, thread_func, (pthread_addr_t)1);
+#endif
+  if (status != 0)
     {
       printf("Error in thread#1 creation\n");
     }
 
   printf("Starting thread 2\n");
-  if ((pthread_create(&thread2, NULL, thread_func, (void*)2)) != 0)
+#ifdef SDCC
+  status = pthread_create(&thread2, &attr, thread_func, (pthread_addr_t)2);
+#else
+  status = pthread_create(&thread2, NULL, thread_func, (pthread_addr_t)2);
+#endif
+  if (status != 0)
     {
       printf("Error in thread#2 creation\n");
     }
 
+#ifdef SDCC
+  pthread_join(thread1, &result1);
+  pthread_join(thread2, &result2);
+#else
   pthread_join(thread1, NULL);
   pthread_join(thread2, NULL);
+#endif
 
   printf("\t\tThread1\tThread2\n");
   printf("\tLoops\t%ld\t%ld\n", nloops[0], nloops[1]);

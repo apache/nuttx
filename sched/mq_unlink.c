@@ -89,9 +89,9 @@
 
 int mq_unlink(const char *mq_name)
 {
-  msgq_t    *msgq;
-  irqstate_t saved_state;
-  int        ret = ERROR;
+  FAR msgq_t *msgq;
+  irqstate_t  saved_state;
+  int         ret = ERROR;
 
   /* Verify the input values */
 
@@ -115,7 +115,7 @@ int mq_unlink(const char *mq_name)
                */
 
               saved_state = irqsave();
-              (void)sq_rem((sq_entry_t*)msgq, &g_msgqueues);
+              (void)sq_rem((FAR sq_entry_t*)msgq, &g_msgqueues);
               irqrestore(saved_state);
 
               /* Then deallocate it (and any messages left in it) */
@@ -140,3 +140,4 @@ int mq_unlink(const char *mq_name)
 
   return ret;
 }
+

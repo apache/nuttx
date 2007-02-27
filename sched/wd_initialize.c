@@ -67,7 +67,7 @@ sq_queue_t g_wdfreelist;
  * item.
  */
 
-wdog_t *g_wdpool;
+FAR wdog_t *g_wdpool;
 
 /* The g_wdactivelist data structure is a singly linked list
  * ordered by watchdog expiration time. When watchdog timers
@@ -118,15 +118,15 @@ void wd_initialize(void)
    * configured number of watchdogs.
    */
 
-  g_wdpool = (wdog_t*)kmalloc(sizeof(wdog_t) * CONFIG_PREALLOC_WDOGS);
+  g_wdpool = (FAR wdog_t*)kmalloc(sizeof(wdog_t) * CONFIG_PREALLOC_WDOGS);
   if (g_wdpool)
     {
-      wdog_t *wdog = g_wdpool;
+      FAR wdog_t *wdog = g_wdpool;
       int i;
 
       for (i = 0; i < CONFIG_PREALLOC_WDOGS; i++)
         {
-          sq_addlast((sq_entry_t*)wdog++, &g_wdfreelist);
+          sq_addlast((FAR sq_entry_t*)wdog++, &g_wdfreelist);
         }
     }
 

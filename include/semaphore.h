@@ -84,15 +84,15 @@ typedef struct sem_s sem_t;
 
 /* Counting Semaphore Interfaces (based on POSIX APIs) */
 
-EXTERN int     sem_init(sem_t *sem, int pshared, unsigned int value);
-EXTERN int     sem_destroy(sem_t *sem);
-EXTERN sem_t  *sem_open(const char *name, int oflag, ...);
-EXTERN int     sem_close(sem_t *sem);
-EXTERN int     sem_unlink(const char *name);
-EXTERN int     sem_wait(sem_t *sem);
-EXTERN int     sem_trywait(sem_t *sem);
-EXTERN int     sem_post(sem_t *sem);
-EXTERN int     sem_getvalue(sem_t *sem, int *sval);
+EXTERN int        sem_init(sem_t *sem, int pshared, unsigned int value);
+EXTERN int        sem_destroy(sem_t *sem);
+EXTERN FAR sem_t *sem_open(const char *name, int oflag, ...);
+EXTERN int        sem_close(FAR sem_t *sem);
+EXTERN int        sem_unlink(const char *name);
+EXTERN int        sem_wait(sem_t *sem);
+EXTERN int        sem_trywait(sem_t *sem);
+EXTERN int        sem_post(sem_t *sem);
+EXTERN int        sem_getvalue(sem_t *sem, int *sval);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -56,7 +56,7 @@
  *
  ************************************************************/
 
-void sq_addfirst(sq_entry_t *node, sq_queue_t *queue)
+void sq_addfirst(FAR sq_entry_t *node, sq_queue_t *queue)
 {
   node->flink = queue->head;
   if (!queue->head)

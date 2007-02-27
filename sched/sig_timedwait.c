@@ -88,8 +88,8 @@ static void sig_timeout(int argc, uint32 itcb, ...)
 
   union
     {
-      _TCB  *wtcb;
-      uint32 itcb;
+      FAR _TCB *wtcb;
+      uint32    itcb;
     } u;
 
    u.itcb = itcb;
@@ -160,13 +160,13 @@ static void sig_timeout(int argc, uint32 itcb, ...)
 int sigtimedwait(const sigset_t *set, struct siginfo *info,
                  const struct timespec *timeout)
 {
-  _TCB          *rtcb = (_TCB*)g_readytorun.head;
-  sigset_t       intersection;
-  sigpendq_t    *sigpend;
-  WDOG_ID        wdog;
-  irqstate_t     saved_state;
-  sint32         waitticks;
-  int            ret = ERROR;
+  FAR _TCB       *rtcb = (FAR _TCB*)g_readytorun.head;
+  sigset_t        intersection;
+  FAR sigpendq_t *sigpend;
+  WDOG_ID         wdog;
+  irqstate_t      saved_state;
+  sint32          waitticks;
+  int             ret = ERROR;
 
   sched_lock();  /* Not necessary */
 

@@ -88,7 +88,7 @@
  *
  ************************************************************/
 
-STATUS wd_delete (WDOG_ID wdId)
+STATUS wd_delete(WDOG_ID wdId)
 {
   irqstate_t saved_state;
 
@@ -99,7 +99,7 @@ STATUS wd_delete (WDOG_ID wdId)
 
   /* Put the watchdog back on the free list */
 
-  sq_addlast((sq_entry_t*)wdId, &g_wdfreelist);
+  sq_addlast((FAR sq_entry_t*)wdId, &g_wdfreelist);
   irqrestore(saved_state);
 
   /* Return success */

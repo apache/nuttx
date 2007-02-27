@@ -46,12 +46,12 @@
  * Global Functions
  ************************************************************/
 
-char *strdup(const char *s)
+FAR char *strdup(const char *s)
 {
-  char *news = NULL;
+  FAR char *news = NULL;
   if (s)
     {
-      news = malloc(strlen(s) + 1);
+      news = (FAR char*)malloc(strlen(s) + 1);
       if (news)
         {
           strcpy(news, s);

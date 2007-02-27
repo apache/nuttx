@@ -103,8 +103,8 @@
 
 mqd_t mq_open(const char *mq_name, int oflags, ...)
 {
-  _TCB           *rtcb = (_TCB*)g_readytorun.head;
-  msgq_t         *msgq;
+  FAR _TCB       *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR msgq_t     *msgq;
   mqd_t           mqdes = NULL;
   va_list         arg;          /* Points to each un-named argument */
   mode_t          mode;         /* MQ creation mode parameter (ignored) */
@@ -151,7 +151,7 @@ mqd_t mq_open(const char *mq_name, int oflags, ...)
                * of the message queue name+1.
                */
 
-              msgq = (msgq_t*)kzmalloc(SIZEOF_MQ_HEADER + namelen + 1);
+              msgq = (FAR msgq_t*)kzmalloc(SIZEOF_MQ_HEADER + namelen + 1);
               if (msgq)
                 {
                   /* Create a message queue descriptor for the TCB */
@@ -196,7 +196,7 @@ mqd_t mq_open(const char *mq_name, int oflags, ...)
                        * message queues
                        */
 
-                      sq_addlast((sq_entry_t*)msgq, &g_msgqueues);
+                      sq_addlast((FAR sq_entry_t*)msgq, &g_msgqueues);
 
                       /* Clean-up variable argument stuff */
 
@@ -218,11 +218,7 @@ mqd_t mq_open(const char *mq_name, int oflags, ...)
 
   if (mqdes == NULL)
     {
-#ifdef CONFIG_CAN_CAST_POINTERS
       return (mqd_t)ERROR;
-#else
-      return get_errorptr();
-#endif
     }
   else
     {

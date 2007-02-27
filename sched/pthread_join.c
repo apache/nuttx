@@ -95,7 +95,7 @@
 
 int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
 {
-  join_t *pjoin;
+  FAR join_t *pjoin;
   int ret;
 
   dbg("thread=%d\n", thread);
@@ -129,7 +129,7 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
     {
       /* Determine what kind of error to return */
 
-      _TCB *tcb = sched_gettcb((pthread_t)thread);
+      FAR _TCB *tcb = sched_gettcb((pthread_t)thread);
 
       dbg("Could not find thread data\n");
 
@@ -211,3 +211,4 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
   dbg("Returning %d\n", ret);
   return ret;
 }
+

@@ -75,9 +75,9 @@
  *   Allocate a new element for the pending signal action queue
  ************************************************************/
 
-sigq_t *sig_allocatependingsigaction(void)
+FAR sigq_t *sig_allocatependingsigaction(void)
 {
-  sigq_t    *sigq;
+  FAR sigq_t    *sigq;
   irqstate_t saved_state;
 
   /* Check if we were called from an interrupt handler. */
@@ -86,7 +86,7 @@ sigq_t *sig_allocatependingsigaction(void)
     {
       /* Try to get the pending signal action structure from the free list */
 
-      sigq = (sigq_t*)sq_remfirst(&g_sigpendingaction);
+      sigq = (FAR sigq_t*)sq_remfirst(&g_sigpendingaction);
 
       /* If so, then try the special list of structures reserved for
        * interrupt handlers
@@ -94,7 +94,7 @@ sigq_t *sig_allocatependingsigaction(void)
 
       if (!sigq)
         {
-          sigq = (sigq_t*)sq_remfirst(&g_sigpendingirqaction);
+          sigq = (FAR sigq_t*)sq_remfirst(&g_sigpendingirqaction);
         }
     }
 
@@ -106,7 +106,7 @@ sigq_t *sig_allocatependingsigaction(void)
       /* Try to get the pending signal action structure from the free list */
 
       saved_state = irqsave();
-      sigq = (sigq_t*)sq_remfirst(&g_sigpendingaction);
+      sigq = (FAR sigq_t*)sq_remfirst(&g_sigpendingaction);
       irqrestore(saved_state);
 
       /* Check if we got one. */
@@ -117,7 +117,7 @@ sigq_t *sig_allocatependingsigaction(void)
 
           if (!sigq)
             {
-              sigq = (sigq_t *)kmalloc((sizeof (sigq_t)));
+              sigq = (FAR sigq_t *)kmalloc((sizeof (sigq_t)));
             }
 
           /* Check if we got an allocated message */

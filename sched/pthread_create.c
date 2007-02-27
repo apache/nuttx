@@ -63,7 +63,7 @@
 
 /* Default pthread attributes */
 
-pthread_attr_t g_default_pthread_attr =
+FAR pthread_attr_t g_default_pthread_attr =
 {
   PTHREAD_STACK_DEFAULT,    /* stacksize */
   PTHREAD_DEFAULT_PRIORITY, /* priority */
@@ -96,7 +96,7 @@ pthread_attr_t g_default_pthread_attr =
  *
  ************************************************************/
 
-static void pthread_addjoininfo(join_t *pjoin)
+static void pthread_addjoininfo(FAR join_t *pjoin)
 {
   pjoin->next = NULL;
   if (!g_pthread_tail)
@@ -124,8 +124,8 @@ static void pthread_addjoininfo(join_t *pjoin)
 
 static void pthread_start(void)
 {
-  _TCB *ptcb = (_TCB*)g_readytorun.head;
-  join_t *pjoin = (join_t*)ptcb->joininfo;
+  FAR _TCB   *ptcb  = (FAR _TCB*)g_readytorun.head;
+  FAR join_t *pjoin = (FAR join_t*)ptcb->joininfo;
   pthread_addr_t exit_status;
 
   /* Sucessfully spawned, add the pjoin to our data set.
@@ -175,8 +175,8 @@ int pthread_create(pthread_t *thread, pthread_attr_t *attr,
                    pthread_startroutine_t startRoutine,
                    pthread_addr_t arg)
 {
-  _TCB *ptcb;
-  join_t *pjoin;
+  FAR _TCB *ptcb;
+  FAR join_t *pjoin;
   STATUS status;
   int priority;
 #if CONFIG_RR_INTERVAL > 0
@@ -193,7 +193,7 @@ int pthread_create(pthread_t *thread, pthread_attr_t *attr,
 
   /* Allocate a TCB for the new task. */
 
-  ptcb = (_TCB*)kzmalloc(sizeof(_TCB));
+  ptcb = (FAR _TCB*)kzmalloc(sizeof(_TCB));
   if (!ptcb)
     {
       *get_errno_ptr() = ENOMEM;
@@ -210,7 +210,7 @@ int pthread_create(pthread_t *thread, pthread_attr_t *attr,
 
   /* Allocate a detachable structure to support pthread_join logic */
 
-  pjoin = (join_t*)kzmalloc(sizeof(join_t));
+  pjoin = (FAR join_t*)kzmalloc(sizeof(join_t));
   if (!pjoin)
     {
       sched_releasetcb(ptcb);
@@ -242,6 +242,10 @@ int pthread_create(pthread_t *thread, pthread_attr_t *attr,
         {
           priority = param.sched_priority;
         }
+      else
+        {
+          priority = SCHED_FIFO;
+        }
 
       /* Get the scheduler policy for this thread */
 
@@ -266,7 +270,7 @@ int pthread_create(pthread_t *thread, pthread_attr_t *attr,
   /* Initialize the task */
 
   status = _task_init(ptcb, NULL, priority, pthread_start, (main_t)startRoutine,
-                      TRUE, (char*)arg, NULL, NULL, NULL);
+                      TRUE, (FAR char*)arg, NULL, NULL, NULL);
   if (status != OK)
     {
 
@@ -331,7 +335,7 @@ int pthread_create(pthread_t *thread, pthread_attr_t *attr,
   else
     {
       sched_unlock();
-      dq_rem((dq_entry_t*)ptcb, &g_inactivetasks);
+      dq_rem((FAR dq_entry_t*)ptcb, &g_inactivetasks);
       (void)sem_destroy(&pjoin->data_sem);
       (void)sem_destroy(&pjoin->exit_sem);
       sched_releasetcb(ptcb);

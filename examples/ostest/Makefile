@@ -70,7 +70,7 @@ $(BIN):	$(OBJS)
 depend: .depend
 
 clean:
-	rm -f $(BIN) *.o *~
+	rm -f $(BIN) *.o *.asm *.lst *.sym *.adb *~
 
 distclean: clean
 	rm -f Make.dep .depend

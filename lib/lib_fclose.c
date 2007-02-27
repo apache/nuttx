@@ -65,7 +65,7 @@ int fclose(FILE *stream)
           ret = close(stream->fs_filedes);
         }
 #warning REVIEW for race conditions
-#if CONFIG_NFILE_STREAMS > 0
+#if CONFIG_STDIO_BUFFER_SIZE > 0
       /* Destroy the semaphore */
       sem_destroy(&stream->fs_sem);
 

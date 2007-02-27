@@ -68,7 +68,7 @@
  * Public Functions
  ************************************************************/
 
-int inode_checkflags(struct inode *inode, int oflags)
+int inode_checkflags(FAR struct inode *inode, int oflags)
 {
   if (((oflags & O_RDOK) != 0 && !inode->i_ops->read) ||
       ((oflags & O_WROK) != 0 && !inode->i_ops->write))
@@ -85,7 +85,7 @@ int inode_checkflags(struct inode *inode, int oflags)
 int open(const char *path, int oflags, ...)
 {
   struct filelist *list;
-  struct inode *inode;
+  FAR struct inode *inode;
   int status;
   int fd;
 
@@ -150,7 +150,7 @@ int open(const char *path, int oflags, ...)
   status = OK;
   if (inode->i_ops && inode->i_ops->open)
     {
-      status = inode->i_ops->open(&list->fl_files[fd]);
+      status = inode->i_ops->open((FAR struct file*)&list->fl_files[fd]);
     }
 
   if (status != OK || !inode->i_ops)

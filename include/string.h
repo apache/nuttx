@@ -60,7 +60,7 @@ extern "C" {
 #endif
 
 EXTERN char  *strchr(const char *s, int c);
-EXTERN char  *strdup(const char *s);
+EXTERN FAR char *strdup(const char *s);
 EXTERN char  *strerror(int);
 EXTERN size_t strlen(const char *);
 EXTERN char  *strncat(char *, const char *, size_t);
@@ -74,7 +74,7 @@ EXTERN char  *strrchr(const char *, int);
 EXTERN size_t strspn(const char *, const char *);
 EXTERN size_t strcspn(const char *, const char *);
 EXTERN char  *strstr(const char *, const char *);
-EXTERN char  *strtok(char *, const char *);
+EXTERN char  *strtok(FAR char *, const char *);
 
 EXTERN void  *memset(void *s, int c, size_t n);
 EXTERN void  *memcpy(void *dest, const void *src, size_t n);

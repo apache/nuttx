@@ -96,8 +96,8 @@
 
 int sched_getparam (pid_t pid, struct sched_param * param)
 {
-  _TCB *rtcb;
-  _TCB *tcb;
+  FAR _TCB *rtcb;
+  FAR _TCB *tcb;
   int ret = OK;
 
   if (!param)
@@ -107,7 +107,7 @@ int sched_getparam (pid_t pid, struct sched_param * param)
 
   /* Check if the task to restart is the calling task */
 
-  rtcb = (_TCB*)g_readytorun.head;
+  rtcb = (FAR _TCB*)g_readytorun.head;
   if ((pid == 0) || (pid == rtcb->pid))
     {
        /* Return the priority if the calling task. */
@@ -140,3 +140,4 @@ int sched_getparam (pid_t pid, struct sched_param * param)
 
   return ret;
 }
+
