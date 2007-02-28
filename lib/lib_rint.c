@@ -72,7 +72,7 @@
  * Private Variables
  ************************************************************/
 
-double_t rint(double x)
+double_t rint(double_t x)
 {
   double_t retValue;
 
