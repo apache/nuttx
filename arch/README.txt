@@ -62,7 +62,7 @@ defconfig -- This is a configuration file similar to the Linux
 
 	General OS setup
 
-		CONFIG_EXAMPLE - identifies the subdirectgory in examples
+		CONFIG_EXAMPLE - identifies the subdirectory in examples
 		  that will be used in the build
 		CONFIG_DEBUG - enables built-in debug options
 		CONFIG_DEBUG_VERBOSE - enables verbose debug output
@@ -82,7 +82,21 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_DEV_CONSOLE - Set if architecture-specific logic
 		  provides /dev/console.  Enables stdout, stderr, stdin.
 
-	Allow for artchitecture optimized implementations
+	The following can be used to disable categories of APIs supported
+	by the OS.  If the compiler supports weak functions, then it
+	should not be necessary to disable functions unless you want to
+	restrict usage of those APIs.
+
+	There are certain dependency relationships in these features.
+
+	o mq_notify logic depends on signals to awaken tasks
+	  waiting for queues to become full or empty.
+	o pthread_condtimedwait() depends on signals to wake
+	  up waiting tasks.
+
+		CONFIG_DISABLE_SIGNALS, CONFIG_DISABLE_MQUEUE
+
+	Allow for architecture optimized implementations
 
 		The architecture can provide optimized versions of the
 		following to improve sysem performance

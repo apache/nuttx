@@ -59,7 +59,7 @@ OBJS		= $(AOBJS) $(COBJS)
 LDFLAGS		= $(ARCHSCRIPT)
 EXTRA_LIBS	=
 
-LINKOBJS	=
+LINKOBJS	= up_head$(OBJEXT)
 LINKLIBS	=
 LDPATHES	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
 LDLIBS		= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
@@ -68,7 +68,7 @@ LIBGCC		= ${shell $(CC) -print-libgcc-file-name}
 
 all: up_head.o libarch$(LIBEXT)
 
-$(AOBJS) up_head.o: %.o: %.S
+$(AOBJS) $(LINKOBJS): %.o: %.S
 	$(CC) -c $(CFLAGS) -D__ASSEMBLY__ $< -o $@
 
 $(COBJS): %.o: %.c
@@ -80,10 +80,9 @@ libarch$(LIBEXT): $(OBJS)
 			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
 	done ; )
 
-nuttx:
-	$(LD) --entry=__start $(LDFLAGS) $(LDPATHES) -o $(TOPDIR)/$@ \
-		$(addprefix $(TOPDIR)/,$(LINKOBJS)) \
-		--start-group $(LDLIBS) $(EXTRA_LIBS) $(LIBGCC) --end-group
+nuttx: $(LINKOBJS)
+	$(LD) --entry=__start $(LDFLAGS) $(LDPATHES) -o $(TOPDIR)/$@ $(LINKOBJS) \
+		--start-group $(LDLIBS) --end-group $(EXTRA_LIBS) $(LIBGCC) 
 	@$(NM) $(TOPDIR)/$@ | \
 	grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 	sort > $(TOPDIR)/System.map

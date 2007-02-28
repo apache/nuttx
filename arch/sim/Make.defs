@@ -41,7 +41,7 @@ else
   ARCHOPTIMIZATION	= -O2
 endif
 
-ARCHCPUFLAGS		= 
+ARCHCPUFLAGS		= -fno-builtin
 ARCHPICFLAGS		= -fpic
 ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
 ARCHDEFINES		=
@@ -61,6 +61,7 @@ CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 
 OBJEXT			= .o
 LIBEXT			= .a
+EXEEXT			=
 
 ifeq ("${CONFIG_DEBUG}","y")
   LDFLAGS		+= -g

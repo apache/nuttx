@@ -42,7 +42,7 @@ else
 			  -fomit-frame-pointer
 endif
 
-ARCHCPUFLAGS		= -mapcs-32 -mcpu=arm7tdmi -msoft-float 
+ARCHCPUFLAGS		= -mapcs-32 -mcpu=arm7tdmi -msoft-float -fno-builtin
 ARCHPICFLAGS		= -fpic
 ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
 ARCHDEFINES		=
@@ -62,6 +62,7 @@ CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 
 OBJEXT			= .o
 LIBEXT			= .a
+EXEEXT			=
 
 ifeq ("${CONFIG_DEBUG}","y")
   LDFLAGS		+= -g
