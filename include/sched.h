@@ -102,9 +102,13 @@ typedef enum tstate_e
 
   TSTATE_TASK_INACTIVE   = 4, /* BLOCKED - Initialized but not yet activated */
   TSTATE_WAIT_SEM        = 5, /* BLOCKED - Waiting for a semaphore */
+#ifndef CONFIG_DISABLE_MQUEUE
   TSTATE_WAIT_SIG        = 6, /* BLOCKED - Waiting for a signal */
-  TSTATE_WAIT_MQNOTEMPTY = 7, /* BLOCKED - Waiting for a MQ to become not empty. */
-  TSTATE_WAIT_MQNOTFULL  = 8  /* BLOCKED - Waiting for a MQ to become not full. */
+#endif
+#ifndef CONFIG_DISABLE_MQUEUE
+  TSTATE_WAIT_MQNOTEMPTY,     /* BLOCKED - Waiting for a MQ to become not empty. */
+  TSTATE_WAIT_MQNOTFULL       /* BLOCKED - Waiting for a MQ to become not full. */
+#endif
 };
 typedef enum tstate_e tstate_t;
 
@@ -113,8 +117,22 @@ typedef enum tstate_e tstate_t;
 #define FIRST_READY_TO_RUN_STATE TSTATE_TASK_READYTORUN
 #define LAST_READY_TO_RUN_STATE  TSTATE_TASK_RUNNING
 #define FIRST_BLOCKED_STATE      TSTATE_TASK_INACTIVE
-#define LAST_BLOCKED_STATE       TSTATE_WAIT_MQNOTFULL
-#define NUM_TASK_STATES          9
+#ifndef CONFIG_DISABLE_MQUEUE
+# define LAST_BLOCKED_STATE      TSTATE_WAIT_MQNOTFULL
+# ifndef CONFIG_DISABLE_SIGNALS
+#  define NUM_TASK_STATES        9
+# else
+#  define NUM_TASK_STATES        8
+# endif
+#else
+# ifndef CONFIG_DISABLE_SIGNALS
+#  define LAST_BLOCKED_STATE     TSTATE_WAIT_SIG
+#  define NUM_TASK_STATES        7
+# else
+#  define LAST_BLOCKED_STATE     TSTATE_WAIT_SEM
+#  define NUM_TASK_STATES        6
+# endif
+#endif
 
 /* The following is the form of a thread start-up function */
 
@@ -192,6 +210,7 @@ struct _TCB
 
   /* POSIX Signal Control Fields **************************************/
 
+#ifndef CONFIG_DISABLE_SIGNALS
   sigset_t   sigprocmask;         /* Signals that are blocked         */
   sigset_t   sigwaitmask;         /* Waiting for pending signals      */
   sq_queue_t sigactionq;          /* List of actions for signals      */
@@ -199,11 +218,14 @@ struct _TCB
   sq_queue_t sigpendactionq;      /* List of pending signal actions   */
   sq_queue_t sigpostedq;          /* List of posted signals           */
   siginfo_t  sigunbinfo;          /* Signal info when task unblocked  */
+#endif
 
   /* POSIX Named Message Queue Fields *********************************/
 
+#ifndef CONFIG_DISABLE_MQUEUE
   sq_queue_t msgdesq;             /* List of opened message queues    */
   FAR msgq_t *msgwaitq;           /* Waiting for this message queue   */
+#endif
 
   /* Library related fields *******************************************/
 

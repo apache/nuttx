@@ -308,8 +308,10 @@ STATUS _task_init(FAR _TCB *tcb, const char *name, int priority,
 
       /* Initialize other (non-zero) elements of the TCB */
 
+#ifndef CONFIG_DISABLE_SIGNALS
       tcb->sigprocmask  = ALL_SIGNAL_SET;
-      tcb->task_state    = TSTATE_TASK_INVALID;
+#endif
+      tcb->task_state   = TSTATE_TASK_INVALID;
 
       /* Initialize the processor-specific portion of the TCB */
 

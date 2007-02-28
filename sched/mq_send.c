@@ -37,17 +37,19 @@
  * Included Files
  ************************************************************/
 
-#include <nuttx/compiler.h>
-#include <nuttx/kmalloc.h>
-#include <sys/types.h>      /* uint32, etc. */
-#include <mqueue.h>
-#include <string.h>
-#include <sched.h>
-#include <debug.h>
-#include <nuttx/arch.h>
-#include "os_internal.h"
-#include "sig_internal.h"
-#include "mq_internal.h"
+#include  <nuttx/compiler.h>
+#include  <nuttx/kmalloc.h>
+#include  <sys/types.h>      /* uint32, etc. */
+#include  <mqueue.h>
+#include  <string.h>
+#include  <sched.h>
+#include  <debug.h>
+#include  <nuttx/arch.h>
+#include  "os_internal.h"
+#ifndef CONFIG_DISABLE_SIGNALS
+# include "sig_internal.h"
+#endif
+#include  "mq_internal.h"
 
 /************************************************************
  * Definitions
@@ -339,6 +341,7 @@ int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
            * message queue
            */
 
+#ifndef CONFIG_DISABLE_SIGNALS
           if (msgq->ntmqdes)
             {
               /* Remove the message notification data from the message queue. */
@@ -366,7 +369,7 @@ int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
               sig_mqnotempty(pid, signo, sival_ptr);
 #endif
             }
-
+#endif
           /* Check if any tasks are waiting for the MQ not empty event. */
 
           saved_state = irqsave();

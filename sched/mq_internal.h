@@ -119,10 +119,12 @@ struct msgq_s
   sint16       nwaitnotempty; /* Number tasks waiting for not empty */
   ubyte        maxmsgsize;    /* Max size of message in message queue */
   boolean      unlinked;      /* TRUE if the msg queue has been unlinked */
+#ifndef CONFIG_DISABLE_SIGNALS
   FAR struct mq_des *ntmqdes; /* Notification: Owning mqdes (NULL if none) */
   pid_t        ntpid;         /* Notification: Receiving Task's PID */
   int          ntsigno;       /* Notification: Signal number */
   union sigval ntvalue;       /* Notification: Signal value */
+#endif
   char         name[1];       /* Start of the queue name */
 };
 

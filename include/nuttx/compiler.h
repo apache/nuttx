@@ -73,6 +73,7 @@
 
 # define FAR
 # define NEAR
+# define DSEG
 
 /* Select the large, 32-bit addressing model */
 
@@ -127,6 +128,12 @@
 #define FAR  __xdata
 #define NEAR __data
 
+#if defined(SDCC_MODEL_SMALL)
+# define DSEG __data
+#else
+# define DSEG __xdata
+#endif
+
 /* Select small, 16-bit address model */
 
 # define CONFIG_SMALL_MEMORY 1
@@ -159,6 +166,7 @@
 
 # define FAR
 # define NEAR
+# define DSEG
 
 # undef  CONFIG_SMALL_MEMORY
 # undef  CONFIG_HAVE_INLINE

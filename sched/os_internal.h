@@ -135,7 +135,7 @@ typedef struct pidhash_s  pidhash_t;
 
 struct tasklist_s
 {
-  NEAR dq_queue_t *list;        /* Pointer to the task list */
+  DSEG dq_queue_t *list;        /* Pointer to the task list */
   boolean          prioritized; /* TRUE if the list is prioritized */
 };
 typedef struct tasklist_s tasklist_t;
@@ -177,19 +177,25 @@ extern dq_queue_t g_waitingforsemaphore;
 
 /* This is the list of all tasks that are blocked waiting for a signal */
 
+#ifndef CONFIG_DISABLE_SIGNALS
 extern dq_queue_t g_waitingforsignal;
+#endif
 
 /* This is the list of all tasks that are blocked waiting for a message
  * queue to become non-empty.
  */
 
+#ifndef CONFIG_DISABLE_MQUEUE
 extern dq_queue_t g_waitingformqnotempty;
+#endif
 
 /* This is the list of all tasks that are blocked waiting for a message
  * queue to become non-full.
  */
 
+#ifndef CONFIG_DISABLE_MQUEUE
 extern dq_queue_t g_waitingformqnotfull;
+#endif
 
 /* This the list of all tasks that have been initialized, but not yet
  * activated. NOTE:  This is the only list that is not prioritized.
@@ -241,7 +247,7 @@ extern STATUS  _task_init(FAR _TCB *tcb, const char *name, int priority,
 extern boolean sched_addreadytorun(FAR _TCB *rtrtcb);
 extern boolean sched_removereadytorun(FAR _TCB *rtrtcb);
 extern boolean sched_addprioritized(FAR _TCB *newTcb,
-                                    NEAR dq_queue_t *list);
+                                    DSEG dq_queue_t *list);
 extern boolean sched_mergepending(void);
 extern void    sched_addblocked(FAR _TCB *btcb, tstate_t task_state);
 extern void    sched_removeblocked(FAR _TCB *btcb);

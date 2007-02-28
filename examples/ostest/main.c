@@ -120,17 +120,25 @@ static int user_main(int argc, char *argv[])
 
   cond_test();
 
+#ifndef CONFIG_DISABLE_SIGNALS
   /* Verify pthreads and condition variable timed waits */
 
   timedwait_test();
+#endif
 
+#ifndef CONFIG_DISABLE_MQUEUE
   /* Verify pthreads and message queues */
 
   mqueue_test();
+#endif
 
+#ifndef CONFIG_DISABLE_SIGNALS
   /* Verify signal handlers */
 
   sighand_test();
+#endif
+
+  printf("user_main: Exitting\n");
   return 0;
 }
 

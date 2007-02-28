@@ -37,23 +37,25 @@
  * Included Files
  ************************************************************/
 
-#include <sys/types.h>
-#include <debug.h>
-#include <string.h>
+#include  <sys/types.h>
+#include  <debug.h>
+#include  <string.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/compiler.h>
-#include <nuttx/fs.h>
-#include <nuttx/lib.h>
-#include <nuttx/os_external.h>
-#include "os_internal.h"
-#include "sig_internal.h"
-#include "wd_internal.h"
-#include "sem_internal.h"
-#include "mq_internal.h"
-#include "pthread_internal.h"
-#include "clock_internal.h"
-#include "irq_internal.h"
+#include  <nuttx/arch.h>
+#include  <nuttx/compiler.h>
+#include  <nuttx/fs.h>
+#include  <nuttx/lib.h>
+#include  <nuttx/os_external.h>
+#include  "os_internal.h"
+#include  "sig_internal.h"
+#include  "wd_internal.h"
+#include  "sem_internal.h"
+#ifndef CONFIG_DISABLE_MQUEUE
+# include "mq_internal.h"
+#endif
+#include  "pthread_internal.h"
+#include  "clock_internal.h"
+#include  "irq_internal.h"
 
 /************************************************************
  * Definitions
@@ -99,19 +101,25 @@ dq_queue_t g_waitingforsemaphore;
 
 /* This is the list of all tasks that are blocked waiting for a signal */
 
+#ifndef CONFIG_DISABLE_SIGNALS
 dq_queue_t g_waitingforsignal;
+#endif
 
 /* This is the list of all tasks that are blocked waiting for a message
  * queue to become non-empty.
  */
 
+#ifndef CONFIG_DISABLE_MQUEUE
 dq_queue_t g_waitingformqnotempty;
+#endif
 
 /* This is the list of all tasks that are blocked waiting for a message
  * queue to become non-full.
  */
 
+#ifndef CONFIG_DISABLE_MQUEUE
 dq_queue_t g_waitingformqnotfull;
+#endif
 
 /* This the list of all tasks that have been initialized, but not yet
  * activated. NOTE:  This is the only list that is not prioritized.
@@ -156,9 +164,13 @@ const tasklist_t g_tasklisttable[NUM_TASK_STATES] =
   { &g_readytorun,           TRUE  },  /* TSTATE_TASK_RUNNING */
   { &g_inactivetasks,        FALSE },  /* TSTATE_TASK_INACTIVE */
   { &g_waitingforsemaphore,  TRUE  },  /* TSTATE_WAIT_SEM */
+#ifndef CONFIG_DISABLE_MQUEUE
   { &g_waitingforsignal,     FALSE },  /* TSTATE_WAIT_SIG */
+#endif
+#ifndef CONFIG_DISABLE_MQUEUE
   { &g_waitingformqnotempty, TRUE  },  /* TSTATE_WAIT_MQNOTEMPTY */
   { &g_waitingformqnotfull,  TRUE  }   /* TSTATE_WAIT_MQNOTFULL */
+#endif
 };
 
 /************************************************************
@@ -200,9 +212,13 @@ void os_start(void)
   dq_init(&g_readytorun);
   dq_init(&g_pendingtasks);
   dq_init(&g_waitingforsemaphore);
+#ifndef CONFIG_DISABLE_MQUEUE
   dq_init(&g_waitingforsignal);
+#endif
+#ifndef CONFIG_DISABLE_MQUEUE
   dq_init(&g_waitingformqnotfull);
   dq_init(&g_waitingformqnotempty);
+#endif
   dq_init(&g_inactivetasks);
   sq_init(&g_delayeddeallocations);
 
@@ -300,12 +316,14 @@ void os_start(void)
 
   /* Initialize the signal facility (if in link) */
 
+#ifndef CONFIG_DISABLE_SIGNALS
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (sig_initialize != NULL)
 #endif
     {
       sig_initialize();
     }
+#endif
 
   /* Initialize the semaphore facility. (if in link) */
 
@@ -318,12 +336,14 @@ void os_start(void)
 
   /* Initialize the named message queue facility (if in link) */
 
+#ifndef CONFIG_DISABLE_MQUEUE
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (mq_initialize != NULL)
 #endif
     {
       mq_initialize();
     }
+#endif
 
   /* Initialize the thread-specific data facility (if in link) */
 

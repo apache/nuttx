@@ -42,12 +42,11 @@ ARCH_SRC	= $(ARCH_DIR)/src
 
 SUBDIRS		= sched lib $(ARCH_SRC) mm fs drivers examples/$(CONFIG_EXAMPLE)
 
-LINKOBJS	= $(ARCH_SRC)/up_head$(OBJEXT)
 LINKLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEXT) \
 		  fs/libfs$(LIBEXT) drivers/libdrivers$(LIBEXT) lib/liblib$(LIBEXT) \
 		  examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT)
 
-BIN		= nuttx
+BIN		= nuttx$(EXEEXT)
 
 all: $(BIN)
 .PHONY: clean context clean_context distclean
@@ -83,9 +82,6 @@ lib/liblib$(LIBEXT): context
 $(ARCH_SRC)/libarch$(LIBEXT): context
 	$(MAKE) -C $(ARCH_SRC) TOPDIR=$(TOPDIR) libarch$(LIBEXT)
 
-$(ARCH_SRC)/up_head$(OBJEXT): context
-	$(MAKE) -C $(ARCH_SRC) TOPDIR=$(TOPDIR) up_head$(OBJEXT)
-
 mm/libmm$(LIBEXT): context
 	$(MAKE) -C mm TOPDIR=$(TOPDIR) libmm$(LIBEXT)
 
@@ -98,8 +94,8 @@ drivers/libdrivers$(LIBEXT): context
 examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT): context
 	$(MAKE) -C examples/$(CONFIG_EXAMPLE) TOPDIR=$(TOPDIR) lib$(CONFIG_EXAMPLE)$(LIBEXT)
 
-$(BIN):	context depend $(LINKOBJS) $(LINKLIBS)
-	$(MAKE) -C $(ARCH_SRC) TOPDIR=$(TOPDIR) LINKOBJS="$(LINKOBJS)" LINKLIBS="$(LINKLIBS)" $(BIN)
+$(BIN):	context depend $(LINKLIBS)
+	$(MAKE) -C $(ARCH_SRC) TOPDIR=$(TOPDIR) LINKLIBS="$(LINKLIBS)" $(BIN)
 
 depend:
 	@for dir in $(SUBDIRS) ; do \

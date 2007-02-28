@@ -91,7 +91,7 @@
  *   match the state associated with the list.
  ************************************************************/
 
-boolean sched_addprioritized(FAR _TCB *tcb, NEAR dq_queue_t *list)
+boolean sched_addprioritized(FAR _TCB *tcb, DSEG dq_queue_t *list)
 {
   FAR _TCB *next;
   FAR _TCB *prev;

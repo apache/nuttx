@@ -138,6 +138,7 @@ int mq_close(mqd_t mqdes)
         * the message queue via this mqdes.
         */
 
+#ifndef CONFIG_DISABLE_SIGNALS
        if (msgq->ntmqdes == mqdes)
          {
            msgq->ntpid   = INVALID_PROCESS_ID;
@@ -145,6 +146,7 @@ int mq_close(mqd_t mqdes)
            msgq->ntvalue.sival_int = 0;
            msgq->ntmqdes = NULL;
          }
+#endif
 
        /* Decrement the connection count on the message queue. */
 

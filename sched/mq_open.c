@@ -189,7 +189,9 @@ mqd_t mq_open(const char *mq_name, int oflags, ...)
                         }
 
                       msgq->nconnect = 1;
+#ifndef CONFIG_DISABLE_SIGNALS
                       msgq->ntpid    = INVALID_PROCESS_ID;
+#endif
                       strcpy(msgq->name, mq_name);
 
                       /* Add the new message queue to the list of

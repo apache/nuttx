@@ -67,9 +67,11 @@ SIGNAL_SRCS	= sig_initialize.c \
 		  sig_releasependingsignal.c sig_lowest.c sig_mqnotempty.c \
 		  sig_cleanup.c sig_received.c sig_deliver.c
 MQUEUE_SRCS	= mq_open.c mq_close.c mq_unlink.c mq_send.c mq_receive.c \
-		  mq_notify.c mq_setattr.c mq_getattr.c \
-		  mq_initialize.c mq_descreate.c mq_findnamed.c \
-		  mq_msgfree.c mq_msgqfree.c
+		  mq_setattr.c mq_getattr.c mq_initialize.c mq_descreate.c \
+		  mq_findnamed.c mq_msgfree.c mq_msgqfree.c
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+MQUEUE_SRCS	+= mq_notify.c
+endif
 PTHREAD_SRCS	= pthread_attrinit.c pthread_attrdestroy.c \
 		  pthread_attrsetschedpolicy.c pthread_attrgetschedpolicy.c \
 		  pthread_attrsetinheritsched.c pthread_attrgetinheritsched.c \
@@ -83,19 +85,28 @@ PTHREAD_SRCS	= pthread_attrinit.c pthread_attrdestroy.c \
 		  pthread_mutexlock.c pthread_mutextrylock.c pthread_mutexunlock.c \
 		  pthread_condinit.c pthread_conddestroy.c \
 		  pthread_condattrinit.c pthread_condattrdestroy.c \
-		  pthread_condwait.c pthread_condtimedwait.c \
-		  pthread_condsignal.c pthread_condbroadcast.c \
+		  pthread_condwait.c pthread_condsignal.c pthread_condbroadcast.c \
 		  pthread_cancel.c pthread_setcancelstate.c \
 		  pthread_keycreate.c pthread_setspecific.c pthread_getspecific.c pthread_keydelete.c \
 		  pthread_initialize.c pthread_completejoin.c pthread_findjoininfo.c \
 		  pthread_removejoininfo.c
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+PTHREAD_SRCS	+= pthread_condtimedwait.c
+endif
 SEM_SRCS	= sem_initialize.c sem_init.c sem_destroy.c\
 		  sem_open.c sem_close.c sem_unlink.c \
 		  sem_wait.c sem_trywait.c sem_post.c sem_getvalue.c \
                   sem_waitirq.c sem_findnamed.c
 IRQ_SRCS	= irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
+
 CSRCS		= $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS) $(WDOG_SRCS) $(TIME_SRCS) \
-		  $(SIGNAL_SRCS) $(MQUEUE_SRCS) $(PTHREAD_SRCS) $(SEM_SRCS) $(IRQ_SRCS)
+		  $(PTHREAD_SRCS) $(SEM_SRCS) $(IRQ_SRCS)
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+CSRCS		+= $(SIGNAL_SRCS)
+endif
+ifneq ($(CONFIG_DISABLE_MQUEUE),y)
+CSRCS		+= $(MQUEUE_SRCS)
+endif
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)

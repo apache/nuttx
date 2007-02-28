@@ -51,10 +51,10 @@ COBJS		= $(CSRCS:.c=$(OBJEXT))
 SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
 
-LDFLAGS			= $(ARCHSCRIPT)
-EXTRA_LIBS		= -lc
+LDFLAGS		= $(ARCHSCRIPT)
+EXTRA_LIBS	= -lc
 
-LINKOBJS	=
+LINKOBJS	= up_head$(OBJEXT)
 LINKLIBS	=
 LDPATHES	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
 LDLIBS		= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
@@ -64,7 +64,7 @@ all: up_head$(OBJEXT) libarch$(LIBEXT)
 $(AOBJS): %$(OBJEXT): %.S
 	$(CC) -c $(CFLAGS) -D__ASSEMBLY__ $< -o $@
 
-$(COBJS) up_head$(OBJEXT): %$(OBJEXT): %.c
+$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 libarch$(LIBEXT): $(OBJS)
@@ -73,10 +73,9 @@ libarch$(LIBEXT): $(OBJS)
 			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
 	done ; )
 
-nuttx:
-	$(CC) $(LDFLAGS) $(LDPATHES) -o $(TOPDIR)/$@ \
-		$(addprefix $(TOPDIR)/,$(LINKOBJS)) \
-		-Wl,--start-group $(LDLIBS) $(EXTRA_LIBS) -Wl,--end-group
+nuttx: $(LINKOBJS)
+	$(CC) $(LDFLAGS) $(LDPATHES) -o $(TOPDIR)/$@ $(LINKOBJS) \
+		-Wl,--start-group $(LDLIBS) -Wl,--end-group $(EXTRA_LIBS)
 	@$(NM) $(TOPDIR)/$@ | \
 	grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 	sort > $(TOPDIR)/System.map
