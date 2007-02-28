@@ -51,6 +51,9 @@ COBJS		= $(CSRCS:.c=$(OBJEXT))
 SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
 
+LDFLAGS			= $(ARCHSCRIPT)
+EXTRA_LIBS		= -lc
+
 LINKOBJS	=
 LINKLIBS	=
 LDPATHES	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
