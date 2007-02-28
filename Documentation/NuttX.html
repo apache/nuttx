@@ -22,10 +22,40 @@
 
 <h1>Supported Platforms</h1>
 
-<li>x86 Linux Simulation.  Fully functional.</li>
-<li>ARM7 (TI C5471).  In progress -- my board is dead at the moment</li>
-<li>8051.  In progress</li>
-<li>Freescale M68.  Next in the queue</li>
+<ul>
+<li><b>x86 Linux Simulation</b>.  Fully functional.</li>
+<li>TI <b>TMS320C5471</b> (also called <b>TMS320DM180</b>).
+    NuttX operates on the ARM7 of this dual core processor.
+    This port uses the <a href="http://www.spectrumdigital.com/">Spectrum Digital</a>
+    evaluation board with a GNU arm-elf toolchain*.
+    This port is in progress and partially functional (However,
+    my board is dead at the moment so it will be awhile before I fix it)</li>
+<li><b>8051 Microcontroller</b>.
+    This port uses the <a href="http://www.pjrc.com/">PJRC</a> 87C52 development system
+    and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain.
+    This port will require a few more weeks before it is ready for time prime.</li>
+<li><b>Motorola (Freescale) MC68HC908GP32 Microcontroller</b>.
+    Using the Axiom CMS8GP32 development board.
+    This is next in the queue.</li?
+<li><b>Other ports</b>.
+    I also have partial ports for the TI TMS320DM270 and for MIPS. 
+</ul>
+
+<blockquote>* A highly modified <a href="http://buildroot.uclibc.org/">buildroot</a>
+is available that be used to build a NuttX-compatible arm-elf toolchain.</blockquote>
+
+<h1>Memory Footprint</h1>
+
+<p>To be provided</p>
+
+<h1>Licensing</h1>
+
+<p>NuttX is available under the highly permissive
+  <a href="http://en.wikipedia.org/wiki/BSD_license">BSD license</a>.
+  Other than some fine print that you agree to respect my copyright
+  you should feel absolutely free to use NuttX in any environment and
+  without any concern for jeopardizing any proprietary software that
+  you may link with it.</p>
 
 <h1>Other Documentation</h1>
 
