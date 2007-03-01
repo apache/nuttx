@@ -94,6 +94,7 @@ defconfig -- This is a configuration file similar to the Linux
 	o pthread_condtimedwait() depends on signals to wake
 	  up waiting tasks.
 
+		CONFIG_DISABLE_CLOCK, CONFIG_DISABLE_PTHREAD.
 		CONFIG_DISABLE_SIGNALS, CONFIG_DISABLE_MQUEUE
 
 	Allow for architecture optimized implementations
@@ -108,6 +109,8 @@ defconfig -- This is a configuration file similar to the Linux
 
 	Sizes of configurable things (0 disables)
 
+		CONFIG_MAX_TASKS - The maximum number of simultaneously
+		  active tasks.  This value must be a power of two.
 		CONFIG_NPTHREAD_KEYS - The number of items of thread-
 		  specific data that can be retained
 		CONFIG_NFILE_DESCRIPTORS - The maximum number of file
