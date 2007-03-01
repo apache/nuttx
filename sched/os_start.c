@@ -306,12 +306,14 @@ void os_start(void)
 
   /* Initialize the POSIX timer facility (if included in the link) */
 
+#ifndef CONFIG_DISABLE_CLOCK
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (clock_initialize != NULL)
 #endif
     {
       clock_initialize();
     }
+#endif
 
   /* Initialize the watchdog facility (if included in the link) */
 

@@ -55,8 +55,9 @@ SCHED_SRCS	= sched_setparam.c sched_getparam.c \
 		  sched_getprioritymax.c sched_getprioritymin.c \
 		  sched_lock.c sched_unlock.c sched_lockcount.c
 WDOG_SRCS	= wd_initialize.c wd_create.c wd_start.c wd_cancel.c wd_delete.c
-TIME_SRCS	= sched_processtimer.c clock_initialize.c mktime.c gmtime_r.c \
-		  clock_settime.c clock_gettime.c clock_getres.c sleep.c usleep.c
+TIME_SRCS	= sched_processtimer.c sleep.c usleep.c
+CLOCK_SRCS	= clock_initialize.c mktime.c gmtime_r.c clock_settime.c \
+		  clock_gettime.c clock_getres.c
 SIGNAL_SRCS	= sig_initialize.c \
 		  sig_action.c sig_procmask.c sig_pending.c sig_suspend.c \
 		  sig_queue.c sig_waitinfo.c sig_timedwait.c \
@@ -101,6 +102,9 @@ IRQ_SRCS	= irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 
 CSRCS		= $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS) $(WDOG_SRCS) $(TIME_SRCS) \
 		  $(SEM_SRCS) $(IRQ_SRCS)
+ifneq ($(CONFIG_DISABLE_CLOCK),y)
+CSRCS		+= $(CLOCK_SRCS)
+endif
 ifneq ($(CONFIG_DISABLE_PTHREAD),y)
 CSRCS		+= $(PTHREAD_SRCS)
 endif
