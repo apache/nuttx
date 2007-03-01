@@ -42,9 +42,6 @@
  ************************************************************/
 
 #include <nuttx/config.h>  /* for CONFIG_STDIO_BUFFER_SIZE */
-
-#if CONFIG_NFILE_STREAMS > 0
-
 #include <stdio.h>
 #include <errno.h>
 #include <nuttx/fs.h>
@@ -83,10 +80,13 @@
  ************************************************************/
 
 /************************************************************
- * fflush
+ * Name: lib_fflushall
+ *
+ * Description:
+ *   Called by the OS when a task exits
  ************************************************************/
 
-/* Called by the OS when a task exits */
+#if CONFIG_NFILE_STREAMS > 0
 
 void lib_flushall(FAR struct streamlist *list)
 {
@@ -113,6 +113,10 @@ void lib_flushall(FAR struct streamlist *list)
        stream_semgive(list);
     }
 }
+
+/************************************************************
+ * Name: fflush
+ ************************************************************/
 
 int fflush(FILE *stream)
 {

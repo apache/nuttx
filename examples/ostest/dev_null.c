@@ -50,7 +50,9 @@
  * Private Data
  ************************************************************/
 
-static char buffer[1024];
+#if CONFIG_NFILE_DESCRIPTORS > 0
+
+static FAR char buffer[1024];
 
 /************************************************************
  * Public Functions
@@ -64,14 +66,14 @@ int dev_null(void)
   fd = open("/dev/null", O_RDWR);
   if (fd < 0)
     {
-      fprintf(stderr, "dev_null: Failed to open /dev/null\n");
+      printf("dev_null: ERROR Failed to open /dev/null\n");
       return -1;
     }
 
   nbytes = read(fd, buffer, 1024);
   if (nbytes < 0)
     {
-      fprintf(stderr, "dev_null: Failed to read from /dev/null\n");
+      printf("dev_null: ERROR Failed to read from /dev/null\n");
       close(fd);
       return -1;
     }
@@ -80,7 +82,7 @@ int dev_null(void)
   nbytes = write(fd, buffer, 1024);
   if (nbytes < 0)
     {
-      fprintf(stderr, "dev_null: Failed to write to /dev/null\n");
+      printf("dev_null: ERROR Failed to write to /dev/null\n");
       close(fd);
       return -1;
     }
@@ -89,3 +91,5 @@ int dev_null(void)
   close(fd);
   return 0;
 }
+
+#endif /*CONFIG_NFILE_DESCRIPTORS */

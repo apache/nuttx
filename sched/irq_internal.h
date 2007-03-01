@@ -53,7 +53,7 @@
  * Public Type Declarations
  ************************************************************/
 
-extern xcpt_t g_irqvector[NR_IRQS+1];
+extern FAR xcpt_t g_irqvector[NR_IRQS+1];
 
 /************************************************************
  * Public Variables

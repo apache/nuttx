@@ -38,9 +38,6 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 #include <sched.h>
 #include <errno.h>
 #include <nuttx/fs.h>
@@ -70,6 +67,8 @@
  * Assumptions:
  *
  ************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
 
 int sched_setuptaskfiles(FAR _TCB *tcb)
 {

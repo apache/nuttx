@@ -79,6 +79,8 @@
  * fwrite
  ************************************************************/
 
+#if CONFIG_NFILE_STREAMS > 0
+
 size_t fread(void *ptr, size_t size, size_t n_items, FILE *stream)
 {
   size_t  full_size = n_items * (size_t)size;
@@ -96,3 +98,6 @@ size_t fread(void *ptr, size_t size, size_t n_items, FILE *stream)
     }
   return items_read;
 }
+
+#endif /* CONFIG_NFILE_STREAMS */
+

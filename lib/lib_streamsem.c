@@ -42,17 +42,12 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-
-#if CONFIG_NFILE_STREAMS > 0
-
 #include <sys/types.h>
-
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <semaphore.h>
 #include <errno.h>
-
 #include <nuttx/fs.h>
 #include "lib_internal.h"
 
@@ -75,6 +70,8 @@
 /************************************************************
  * Public Functions
  ************************************************************/
+
+#if CONFIG_NFILE_STREAMS > 0
 
 void stream_semtake(FAR struct streamlist *list)
 {

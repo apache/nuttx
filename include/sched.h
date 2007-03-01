@@ -98,7 +98,7 @@ typedef enum tstate_e
 
   TSTATE_TASK_PENDING    = 1, /* READY_TO_RUN - Pending preemption unlock */
   TSTATE_TASK_READYTORUN = 2, /* READY-TO-RUN - But not running */
-  TSTATE_TASK_RUNNING    = 3, /* READY_TO_RUN - Aand running */
+  TSTATE_TASK_RUNNING    = 3, /* READY_TO_RUN - And running */
 
   TSTATE_TASK_INACTIVE   = 4, /* BLOCKED - Initialized but not yet activated */
   TSTATE_WAIT_SEM        = 5, /* BLOCKED - Waiting for a semaphore */
@@ -200,7 +200,7 @@ struct _TCB
 
   /* POSIX thread Specific Data ***************************************/
 
-#if CONFIG_NPTHREAD_KEYS > 0
+#if !defined(CONFIG_DISABLE_PTHREAD) && CONFIG_NPTHREAD_KEYS > 0
   FAR void *pthread_data[CONFIG_NPTHREAD_KEYS];
 #endif
 

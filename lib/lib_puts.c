@@ -81,10 +81,15 @@
  ************************************************************/
 
 /************************************************************
- * puts
+ * Name: puts
+ *
+ * Description:
+ *   puts() writes the string s and a trailing newline to
+ *   stdout.
  ************************************************************/
 
-/* puts() writes the string s and a trailing newline to stdout. */
+#if CONFIG_NFILE_STREAMS > 0
+
 int puts(const char *s)
 {
   int nwritten;
@@ -109,3 +114,5 @@ int puts(const char *s)
   lib_give_semaphore(stdout);
   return nput;
 }
+
+#endif /* CONFIG_NFILE_STREAMS */

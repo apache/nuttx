@@ -53,7 +53,9 @@
 #ifndef CONFIG_DISABLE_MQUEUE
 # include "mq_internal.h"
 #endif
-#include  "pthread_internal.h"
+#ifndef CONFIG_DISABLE_PTHREAD
+# include "pthread_internal.h"
+#endif
 #include  "clock_internal.h"
 #include  "irq_internal.h"
 
@@ -140,14 +142,16 @@ sq_queue_t g_delayeddeallocations;
 pid_t g_lastpid;
 
 /* The following hash table is used for two things:
+ *
  * 1. This hash table greatly speeds the determination of
  *    a new unique process ID for a task, and
  * 2. Is used to quickly map a process ID into a TCB.
  * It has the side effects of using more memory and limiting
- * the number of tasks to MAX_TASKS_ALLOWED.
+ *
+ * the number of tasks to CONFIG_MAX_TASKS.
  */
 
-pidhash_t g_pidhash[MAX_TASKS_ALLOWED];
+pidhash_t g_pidhash[CONFIG_MAX_TASKS];
 
 /* This is a table of task lists.  This table is indexed by
  * the task state enumeration type (tstate_t) and provides
@@ -184,6 +188,10 @@ const tasklist_t g_tasklisttable[NUM_TASK_STATES] =
  */
 
 static FAR _TCB g_idletcb;
+
+/* This is the name of the idle task */
+
+static FAR char g_idlename[] = "Idle Task";
 
 /************************************************************
  * Private Function Prototypes
@@ -225,7 +233,7 @@ void os_start(void)
   /* Initialize the logic that determine unique process IDs. */
 
   g_lastpid = 0;
-  for (i = 0; i < MAX_TASKS_ALLOWED; i++)
+  for (i = 0; i < CONFIG_MAX_TASKS; i++)
     {
       g_pidhash[i].tcb = NULL;
       g_pidhash[i].pid = INVALID_PROCESS_ID;
@@ -248,10 +256,10 @@ void os_start(void)
   g_idletcb.entry.main = (main_t)os_start;
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  strncpy(g_idletcb.name, "Idle Task", CONFIG_TASK_NAME_SIZE-1);
+  strncpy(g_idletcb.name, g_idlename, CONFIG_TASK_NAME_SIZE-1);
   g_idletcb.argv[0] = g_idletcb.name;
 #else
-  g_idletcb.argv[0] = "Idle Task";
+  g_idletcb.argv[0] = g_idlename;
 #endif /* CONFIG_TASK_NAME_SIZE */
 
   /* Then add the idle task's TCB to the head of the ready to run list */
@@ -347,21 +355,25 @@ void os_start(void)
 
   /* Initialize the thread-specific data facility (if in link) */
 
+#ifndef CONFIG_DISABLE_PTHREAD
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (pthread_initialize != NULL)
 #endif
     {
       pthread_initialize();
     }
+#endif
 
   /* Initialize the file system (needed to support device drivers) */
 
+#if CONFIG_NFILE_DESCRIPTORS > 0
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (fs_initialize != NULL)
 #endif
     {
       fs_initialize();
     }
+#endif
 
   /* The processor specific details of running the operating system
    * will be handled here.  Such things as setting up interrupt

@@ -138,6 +138,14 @@ extern int lib_sprintf (struct lib_stream_s *obj,
 extern int lib_vsprintf(struct lib_stream_s *obj,
                         const char *src, va_list ap);
 
+/* Defined lib_rawprintf.c */
+
+extern int lib_rawvprintf(const char *src, va_list ap);
+
+/* Defined lib_lowprintf.c */
+
+extern int lib_lowvprintf(const char *src, va_list ap);
+
 /* Defined in lib_libwrite.c */
 
 extern ssize_t lib_fwrite(const void *ptr, size_t count, FILE *stream);
@@ -157,6 +165,5 @@ extern void lib_give_semaphore(FAR struct file_struct *stream);
 /* Defined in lib_libgetbase.c */
 
 extern int lib_getbase(const char *nptr, const char **endptr);
-
 
 #endif /* __LIB_INTERNAL_H */

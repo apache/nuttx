@@ -38,10 +38,6 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-
-
-#if CONFIG_NFILE_DESCRIPTORS >0
-
 #include <string.h>
 #include <semaphore.h>
 #include <assert.h>
@@ -49,7 +45,6 @@
 #include <errno.h>
 #include <nuttx/fs.h>
 #include <nuttx/kmalloc.h>
-
 #include "fs_internal.h"
 
 /************************************************************
@@ -71,6 +66,8 @@
 /************************************************************
  * Private Functions
  ************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS >0
 
 static void _files_semtake(FAR struct filelist *list)
 {
@@ -267,4 +264,5 @@ void files_release(int filedes)
         }
     }
 }
+
 #endif /* CONFIG_NFILE_DESCRIPTORS */

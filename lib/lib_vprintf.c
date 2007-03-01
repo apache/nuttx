@@ -83,9 +83,14 @@
  * vprintf
  **********************************************************/
 
+#if CONFIG_NFILE_STREAMS > 0
+
 int vprintf(const char *fmt, va_list ap)
 {
   /* vfprintf into stdout */
 
   return vfprintf(stdout, fmt, ap);
 }
+
+#endif /* CONFIG_NFILE_STREAMS */
+

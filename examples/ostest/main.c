@@ -64,8 +64,10 @@ static FAR char arg2[]    = "Arg2";
 static FAR char arg3[]    = "Arg3";
 static FAR char arg4[]    = "Arg4";
 
+#if CONFIG_NFILE_DESCRIPTORS > 0
 static char write_data1[] = "Standard I/O Check: write fd=1\n";
 static char write_data2[] = "Standard I/O Check: write fd=2\n";
+#endif
 static char *args[NARGS]  = { arg1, arg2, arg3, arg4 };
 
 /************************************************************
@@ -82,8 +84,8 @@ static int user_main(int argc, char *argv[])
 
   if (argc != NARGS + 1)
     {
-      fprintf(stderr, "user_main: Error expected argc=%d got argc=%d\n",
-              NARGS+1, argc);
+      printf("user_main: Error expected argc=%d got argc=%d\n",
+             NARGS+1, argc);
     }
 
   for (i = 0; i <= NARGS; i++)
@@ -95,38 +97,48 @@ static int user_main(int argc, char *argv[])
     {
       if (strcmp(argv[i], args[i-1]) != 0)
         {
-          fprintf(stderr, "user_main: ERROR argv[%d]:  Expected \"%s\" found \"%s\"\n",
-                  i, argv[i], args[i-1]);
+          printf("user_main: ERROR argv[%d]:  Expected \"%s\" found \"%s\"\n",
+                 i, argv[i], args[i-1]);
         }
     }
 
+#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Checkout /dev/null */
 
   dev_null();
+#endif
 
+#ifndef CONFIG_DISABLE_PTHREAD
   /* Verify pthreads and pthread mutex */
 
   mutex_test();
+#endif
 
+#ifndef CONFIG_DISABLE_PTHREAD
   /* Verify pthread cancellation */
 
   cancel_test();
+#endif
 
+#ifndef CONFIG_DISABLE_PTHREAD
   /* Verify pthreads and semaphores */
 
   sem_test();
+#endif
 
+#ifndef CONFIG_DISABLE_PTHREAD
   /* Verify pthreads and condition variables */
 
   cond_test();
+#endif
 
-#ifndef CONFIG_DISABLE_SIGNALS
+#if !defined(CONFIG_DISABLE_SIGNALS) && !defined(CONFIG_DISABLE_PTHREAD)
   /* Verify pthreads and condition variable timed waits */
 
   timedwait_test();
 #endif
 
-#ifndef CONFIG_DISABLE_MQUEUE
+#if !defined(CONFIG_DISABLE_MQUEUE) && !defined(CONFIG_DISABLE_PTHREAD)
   /* Verify pthreads and message queues */
 
   mqueue_test();
@@ -165,10 +177,17 @@ int user_start(int parm1, int parm2, int parm3, int parm4)
 
   /* Verify that we can communicate */
 
+#if CONFIG_NFILE_DESCRIPTORS > 0
   write(1, write_data1, sizeof(write_data1));
+#endif
   printf("user_start: Standard I/O Check: printf\n");
+
+#if CONFIG_NFILE_DESCRIPTORS > 1
   write(2, write_data2, sizeof(write_data2));
+#endif
+#if CONFIG_NFILE_STREAMS > 0
   fprintf(stderr, "user_start: Standard I/O Check: fprintf to stderr\n");
+#endif
 
   /* Verify that we can spawn a new task */
 
@@ -176,11 +195,12 @@ int user_start(int parm1, int parm2, int parm3, int parm4)
                        arg1, arg2, arg3, arg4);
   if (result == ERROR)
     {
-      fprintf(stderr, "user_start: Failed to start user_main\n");
+      printf("user_start: ERROR Failed to start user_main\n");
     }
   else
     {
        printf("user_start: Started user_main at PID=%d\n", result);
     }
+
   return 0;
 }

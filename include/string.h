@@ -76,10 +76,10 @@ EXTERN size_t strcspn(const char *, const char *);
 EXTERN char  *strstr(const char *, const char *);
 EXTERN char  *strtok(FAR char *, const char *);
 
-EXTERN void  *memset(void *s, int c, size_t n);
-EXTERN void  *memcpy(void *dest, const void *src, size_t n);
-EXTERN int    memcmp(const void *s1, const void *s2, size_t n);
-EXTERN void  *memmove(void *dest, const void *src, size_t count);
+EXTERN void  *memset(FAR void *s, int c, size_t n);
+EXTERN void  *memcpy(FAR void *dest, FAR const void *src, size_t n);
+EXTERN int    memcmp(FAR const void *s1, FAR const void *s2, size_t n);
+EXTERN void  *memmove(FAR void *dest, FAR const void *src, size_t count);
 
 #ifndef CONFIG_ARCH_BZERO
 # define bzero(s,n) (void)memset(s,0,n)

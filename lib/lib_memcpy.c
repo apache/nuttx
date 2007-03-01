@@ -50,7 +50,7 @@
  ************************************************************/
 
 #ifndef CONFIG_ARCH_MEMCPY
-void *memcpy(void *dest, const void *src, size_t n)
+void *memcpy(FAR void *dest, FAR const void *src, size_t n)
 {
   unsigned char *pout = (unsigned char*)dest;
   unsigned char *pin  = (unsigned char*)src;

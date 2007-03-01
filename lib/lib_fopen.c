@@ -42,20 +42,18 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-
-#if CONFIG_NFILE_STREAMS > 0
-
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-
 #include "lib_internal.h"
 
 /************************************************************
  * Private Functions
  ************************************************************/
+
+#if CONFIG_NFILE_STREAMS > 0
 
 static int lib_mode2oflags(const char *mode)
 {
@@ -126,9 +124,13 @@ static int lib_mode2oflags(const char *mode)
   return oflags;
 }
 
+#endif /* CONFIG_NFILE_STREAMS */
+
 /************************************************************
  * Public Functions
  ************************************************************/
+
+#if CONFIG_NFILE_STREAMS > 0
 
 FAR struct file_struct *lib_fdopen(int fd, const char *mode,
                                    FAR struct filelist *flist,

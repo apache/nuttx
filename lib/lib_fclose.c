@@ -42,9 +42,6 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-
-#if CONFIG_NFILE_STREAMS > 0
-
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,6 +51,8 @@
 /************************************************************
  * Global Functions
  ************************************************************/
+
+#if CONFIG_NFILE_STREAMS > 0
 
 int fclose(FILE *stream)
 {

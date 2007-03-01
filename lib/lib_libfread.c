@@ -83,6 +83,8 @@
  * lib_fread
  ************************************************************/
 
+#if CONFIG_NFILE_STREAMS > 0
+
 ssize_t lib_fread(void *ptr, size_t count, FILE *stream)
 {
   unsigned char *dest  = (unsigned char*)ptr;
@@ -255,3 +257,5 @@ ssize_t lib_fread(void *ptr, size_t count, FILE *stream)
     }
   return bytes_read;
 }
+
+#endif /* CONFIG_NFILE_STREAMS */

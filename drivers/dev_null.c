@@ -61,11 +61,11 @@ static ssize_t devnull_write(struct file *, const char *, size_t);
 
 static struct file_operations devnull_fops =
 {
-  NULL,          /* open */
-  NULL,          /* close */
+  0,             /* open */
+  0,             /* close */
   devnull_read,  /* read */
   devnull_write, /* write */
-  NULL           /* ioctl */
+  0              /* ioctl */
 };
 
 /************************************************************

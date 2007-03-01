@@ -108,7 +108,7 @@ clean:
 	done
 	$(MAKE) -C tools -f Makefile.mkconfig TOPDIR=$(TOPDIR) clean
 	$(MAKE) -C mm -f Makefile.test TOPDIR=$(TOPDIR) clean
-	rm -f $(BIN) $(BIN).rr $(BIN).stripped $(BIN).flashimage mm_test System.map *~
+	rm -f $(BIN) $(BIN).* mm_test *.map *~
 
 distclean: clean clean_context
 	@for dir in $(SUBDIRS) ; do \

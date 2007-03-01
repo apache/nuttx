@@ -42,22 +42,15 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-
-#if CONFIG_NFILE_DESCRIPTORS >0
-
 #include <sys/types.h>
-
 #include <stdio.h>
 #include <sched.h>
 #include <errno.h>
-
 #ifdef CONFIG_FILE_MODE
 #include <stdarg.h>
 #endif
-
 #include <nuttx/fs.h>
 #include <errno.h>
-
 #include "fs_internal.h"
 
 /************************************************************
@@ -67,6 +60,8 @@
 /************************************************************
  * Public Functions
  ************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
 
 int inode_checkflags(FAR struct inode *inode, int oflags)
 {

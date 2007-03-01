@@ -50,7 +50,7 @@
  ************************************************************/
 
 #ifndef CONFIG_ARCH_MEMSET
-void *memset(void *s, int c, size_t n)
+void *memset(FAR void *s, int c, size_t n)
 {
   unsigned char *p = (unsigned char*)s;
   while (n-- > 0) *p++ = c;

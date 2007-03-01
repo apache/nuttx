@@ -57,6 +57,7 @@
  * Private Functions
  ************************************************************/
 
+#if CONFIG_NFILE_STREAMS > 0
 static void _lib_semtake(FAR struct streamlist *list)
 {
   /* Take the semaphore (perhaps waiting) */
@@ -71,7 +72,11 @@ static void _lib_semtake(FAR struct streamlist *list)
     }
 }
 
-#define _lib_semgive(list) sem_post(&list->sl_sem)
+# define _lib_semgive(list) sem_post(&list->sl_sem)
+#else
+# define _lib_semtake(list)
+# define _lib_semgive(list)
+#endif
 
 /************************************************************
  * Public Functions

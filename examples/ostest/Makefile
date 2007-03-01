@@ -40,12 +40,20 @@ MKDEP	= $(TOPDIR)/tools/mkdeps.sh
 
 ASRCS	= 
 AOBJS	= $(ASRCS:.S=$(OBJEXT))
-CSRCS	= main.c dev_null.c mutex.c cancel.c sem.c cond.c
+CSRCS	= main.c dev_null.c
+ifneq ($(CONFIG_DISABLE_PTHREAD),y)
+CSRCS	+= cancel.c cond.c mutex.c sem.c
+endif
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-CSRCS	+= timedwait.c sighand.c 
+CSRCS	+= sighand.c
+ifneq ($(CONFIG_DISABLE_PTHREAD),y)
+CSRCS	+= timedwait.c
+endif
 endif
 ifneq ($(CONFIG_DISABLE_MQUEUE),y)
+ifneq ($(CONFIG_DISABLE_PTHREAD),y)
 CSRCS	+= mqueue.c 
+endif
 endif
 
 COBJS	= $(CSRCS:.c=$(OBJEXT))

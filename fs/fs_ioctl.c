@@ -51,6 +51,8 @@
  * Global Functions
  ************************************************************/
 
+#if CONFIG_NFILE_DESCRIPTORS > 0
+
 int ioctl(int fd, int req, unsigned long arg)
 {
   FAR struct filelist *list;
@@ -83,3 +85,5 @@ int ioctl(int fd, int req, unsigned long arg)
     }
   return ret;
 }
+
+#endif /* CONFIG_NFILE_DESCRIPTORS */

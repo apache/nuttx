@@ -43,8 +43,6 @@
 
 #include <nuttx/config.h>
 
-#if CONFIG_NFILE_STREAMS > 0
-
 #include <stdio.h>
 #include <errno.h>
 #include <nuttx/fs.h>
@@ -89,6 +87,8 @@
 /************************************************************
  * fgetc
  **********************************************************/
+
+#if CONFIG_NFILE_STREAMS > 0
 
 int ungetc(int c, FILE *stream)
 {

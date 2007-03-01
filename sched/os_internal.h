@@ -85,14 +85,13 @@ enum os_crash_codes_e
 
 /* Although task IDs can take the (positive, non-zero)
  * range of pid_t, the number of tasks that will be supported
- * at any one time is (artificially) limited by the following
- * definition.  Limiting the number of tasks speeds certain
+ * at any one time is (artificially) limited by the CONFIG_MAX_TASKS
+ * configuration setting. Limiting the number of tasks speeds certain
  * OS functions (this is the only limitation in the number of
  * tasks built into the design).
  */
 
-#define MAX_TASKS_ALLOWED   64
-#define MAX_TASKS_MASK      0x3f
+#define MAX_TASKS_MASK      (CONFIG_MAX_TASKS-1)
 #define PIDHASH(pid)        ((pid) & MAX_TASKS_MASK)
 
 /* Stubs used when there are no file descriptors */
@@ -216,14 +215,16 @@ extern sq_queue_t g_delayeddeallocations;
 extern pid_t g_lastpid;
 
 /* The following hash table is used for two things:
+ *
  * 1. This hash table greatly speeds the determination of
  *    a new unique process ID for a task, and
  * 2. Is used to quickly map a process ID into a TCB.
+ *
  * It has the side effects of using more memory and limiting
- * the number of tasks to MAX_TASKS_ALLOWED.
+ * the number of tasks to CONFIG_MAX_TASKS.
  */
 
-extern pidhash_t g_pidhash[MAX_TASKS_ALLOWED];
+extern pidhash_t g_pidhash[CONFIG_MAX_TASKS];
 
 /* This is a table of task lists.  This table is indexed by
  * the task state enumeration type (tstate_t) and provides

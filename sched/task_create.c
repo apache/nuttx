@@ -62,6 +62,10 @@
  * Private Variables
  ************************************************************/
 
+/* This is the name for un-named tasks */
+
+static FAR char g_noname[] = "no name";
+
 /************************************************************
  * Private Function Prototypes
  ************************************************************/
@@ -141,7 +145,7 @@ static STATUS task_assignpid(FAR _TCB *tcb)
 
   /* We'll try every allowable pid */
 
-  for (tries = 0; tries < MAX_TASKS_ALLOWED; tries++)
+  for (tries = 0; tries < CONFIG_MAX_TASKS; tries++)
     {
       /* Get the next process ID candidate */
 
@@ -244,7 +248,7 @@ STATUS _task_init(FAR _TCB *tcb, const char *name, int priority,
 
       if (!name)
         {
-          name = "no name";
+          name = g_noname;
         }
 
       /* copy the name into the TCB */
@@ -257,7 +261,7 @@ STATUS _task_init(FAR _TCB *tcb, const char *name, int priority,
 #if CONFIG_TASK_NAME_SIZE > 0
       tcb->argv[0] = tcb->name;
 #else
-      tcb->argv[0] = "no name";
+      tcb->argv[0] = g_noname;
 #endif
 
       /* For pthreads, args are strictly pass-by-value; the char*

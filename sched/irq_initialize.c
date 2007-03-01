@@ -54,7 +54,7 @@
  * Global Variables
  ************************************************************/
 
-xcpt_t g_irqvector[NR_IRQS+1];
+FAR xcpt_t g_irqvector[NR_IRQS+1];
 
 /************************************************************
  * Private Variables

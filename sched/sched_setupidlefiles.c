@@ -38,9 +38,6 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 #include <stdio.h>
 #include <unistd.h>
 #include <sched.h>
@@ -70,6 +67,8 @@
  * Assumptions:
  *
  ************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
 
 int sched_setupidlefiles(FAR _TCB *tcb)
 {

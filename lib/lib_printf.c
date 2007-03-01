@@ -81,23 +81,26 @@
  **********************************************************/
 
 /************************************************************
- * printf
+ * Name: printf
  **********************************************************/
 
 int printf(const char *fmt, ...)
 {
-  struct lib_stdstream_s stdstream;
   va_list ap;
   int     ret;
 
-  /* Wrap the stdout in a stream object and let lib_vsprintf
-   * do the work.
-   */
-
-  lib_stdstream(&stdstream, stdout);
-
   va_start(ap, fmt);
-  ret= lib_vsprintf(&stdstream.public, fmt, ap);
+#if CONFIG_NFILE_STREAMS > 0
+  ret = vfprintf(stdout, fmt, ap);
+#elif CONFIG_NFILE_DESCRIPTORS > 0
+  ret = lib_rawvprintf(fmt, ap);
+#elif defined(CONFIG_ARCH_LOWPUTC)
+  ret = lib_lowvprintf(fmt, ap);
+#else
+# warning "printf has no data sink"
+#endif
   va_end(ap);
+
   return ret;
 }
+

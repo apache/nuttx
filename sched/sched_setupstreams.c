@@ -38,9 +38,6 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-
-#if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
-
 #include <sched.h>
 #include <nuttx/fs.h>
 #include <nuttx/lib.h>
@@ -52,6 +49,8 @@
 /************************************************************
  * Public Functions
  ************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
 
 int sched_setupstreams(FAR _TCB *tcb)
 {

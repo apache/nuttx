@@ -43,8 +43,6 @@
 
 #include <nuttx/config.h>
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 #include <sys/types.h>
 #include <unistd.h>
 #include <sched.h>
@@ -66,6 +64,8 @@
 /************************************************************
  * Global Functions
  ************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
 
 int dup(int fildes)
 {

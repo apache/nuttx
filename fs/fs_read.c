@@ -42,9 +42,6 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-
-#if CONFIG_NFILE_DESCRIPTORS >0
-
 #include <sys/types.h>
 #include <stdio.h>
 #include <sched.h>
@@ -54,6 +51,8 @@
 /************************************************************
  * Global Functions
  ************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
 
 int read(int fd, void *buf, unsigned int nbytes)
 {

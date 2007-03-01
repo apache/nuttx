@@ -38,9 +38,6 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 #include <sched.h>
 #include <nuttx/fs.h>
 #include <nuttx/lib.h>
@@ -68,6 +65,8 @@
  * Assumptions:
  *
  ************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
 
 int sched_releasefiles(_TCB *tcb)
 {

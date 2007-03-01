@@ -100,7 +100,10 @@ SEM_SRCS	= sem_initialize.c sem_init.c sem_destroy.c\
 IRQ_SRCS	= irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 
 CSRCS		= $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS) $(WDOG_SRCS) $(TIME_SRCS) \
-		  $(PTHREAD_SRCS) $(SEM_SRCS) $(IRQ_SRCS)
+		  $(SEM_SRCS) $(IRQ_SRCS)
+ifneq ($(CONFIG_DISABLE_PTHREAD),y)
+CSRCS		+= $(PTHREAD_SRCS)
+endif
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CSRCS		+= $(SIGNAL_SRCS)
 endif

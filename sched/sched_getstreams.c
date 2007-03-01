@@ -38,9 +38,6 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-
-#if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
-
 #include <sched.h>
 #include "os_internal.h"
 
@@ -67,6 +64,8 @@
  * Assumptions:
  *
  ************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
 
 FAR struct streamlist *sched_getstreams(void)
 {
