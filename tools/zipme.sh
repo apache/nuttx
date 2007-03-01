@@ -50,7 +50,7 @@ fi
 MYNAME=`basename $0`
 
 if [ -x ${WD}/${MYNAME} ] ; then
-   NUTTX=${WD}/..
+   NUTTX=`dirname ${WD}`
 else
    if [ -x ${WD}/tools/${MYNAME} ] ; then
      NUTTX=${WD}
@@ -59,13 +59,15 @@ else
      exit 1
    fi
 fi
-PROJECTS=${NUTTX}/..
+
+NUTTXDIR=`basename ${NUTTX}`
+PROJECTS=`dirname ${NUTTX}`
 
 cd ${PROJECTS} || \
    { echo "Failed to cd to ${PROJECTS}" ; exit 1 ; }
 
-if [ ! -d nuttx ] ; then
-   echo "${PROJECTS}/nuttx does not exist!"
+if [ ! -d ${NUTTXDIR} ] ; then
+   echo "${PROJECTS}/${NUTTXDIR} does not exist!"
    exit 1;
 fi
 
@@ -74,9 +76,9 @@ ZIP_NAME=${TAR_NAME}.bz2
 
 # Prepare the nuttx directory
 
-find nuttx -name '*~' -exec rm -f '{}' ';' || \
+find ${NUTTXDIR} -name '*~' -exec rm -f '{}' ';' || \
       { echo "Removal of emacs garbage failed!" ; exit 1 ; }
-find nuttx -name '*.swp' -exec rm -f '{}' ';' || \
+find ${NUTTXDIR} -name '*.swp' -exec rm -f '{}' ';' || \
       { echo "Removal of VI garbage failed!" ; exit 1 ; }
 
 make -C ${NUTTX} distclean
@@ -97,7 +99,7 @@ fi
 
 # Then zip it
 
-${TAR} ${TAR_NAME} nuttx || \
+${TAR} ${TAR_NAME} ${NUTTXDIR} || \
       { echo "tar of ${TAR_NAME} failed!" ; exit 1 ; }
 ${ZIP} ${TAR_NAME} || \
       { echo "zip of ${TAR_NAME} failed!" ; exit 1 ; }
