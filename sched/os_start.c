@@ -405,9 +405,14 @@ void os_start(void)
    */
 
   dbg("Starting init thread\n");
+#ifndef CONFIG_CUSTOM_STACK
   init_taskid = task_create("init", SCHED_PRIORITY_DEFAULT,
                             CONFIG_PROC_STACK_SIZE,
                             (main_t)user_start, 0, 0, 0, 0);
+#else
+  init_taskid = task_create("init", SCHED_PRIORITY_DEFAULT,
+                            (main_t)user_start, 0, 0, 0, 0);
+#endif
   ASSERT(init_taskid != ERROR);
 
   /* When control is return to this point, the system is idle. */

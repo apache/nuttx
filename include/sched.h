@@ -190,6 +190,7 @@ struct _TCB
 
   /* Stack-Related Fields *********************************************/
 
+#ifndef CONFIG_CUSTOM_STACK
   size_t  adj_stack_size;         /* Stack size after adjustment      */
                                   /* for hardware, processor, etc.    */
                                   /* (for debug purposes only)        */
@@ -197,6 +198,7 @@ struct _TCB
                                   /* Need to deallocate stack         */
   FAR void *adj_stack_ptr;        /* Adjusted StatckAllocPtr for HW   */
                                   /* The initial stack pointer value  */
+#endif
 
   /* POSIX thread Specific Data ***************************************/
 
@@ -269,14 +271,27 @@ extern "C" {
 
 /* Task Control Interfaces (non-standard) */
 
+#ifndef CONFIG_CUSTOM_STACK
 EXTERN STATUS  task_init(FAR _TCB *tcb, const char *name, int priority,
                          FAR uint32 *stack, uint32 stack_size, main_t entry,
                          FAR char *arg1, FAR char *arg2,
                          FAR char *arg3, FAR char *arg4);
+#else
+EXTERN STATUS  task_init(FAR _TCB *tcb, const char *name, int priority,
+                         main_t entry,
+                         FAR char *arg1, FAR char *arg2,
+                         FAR char *arg3, FAR char *arg4);
+#endif
 EXTERN STATUS  task_activate(FAR _TCB *tcb);
+#ifndef CONFIG_CUSTOM_STACK
 EXTERN int     task_create(const char *name, int priority, int stack_size, main_t main,
                            FAR char *arg1, FAR char *arg2,
                            FAR char *arg3, FAR char *arg4);
+#else
+EXTERN int     task_create(const char *name, int priority, main_t main,
+                           FAR char *arg1, FAR char *arg2,
+                           FAR char *arg3, FAR char *arg4);
+#endif
 EXTERN STATUS  task_delete(pid_t pid);
 EXTERN STATUS  task_restart(pid_t pid);
 

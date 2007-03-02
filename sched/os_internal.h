@@ -239,6 +239,7 @@ extern const tasklist_t g_tasklisttable[NUM_TASK_STATES];
  * Public Function Prototypes
  ************************************************************/
 
+extern void    task_start(void);
 extern STATUS  _task_init(FAR _TCB *tcb, const char *name, int priority,
                           start_t start, main_t main,
                           boolean pthread,

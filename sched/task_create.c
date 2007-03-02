@@ -70,52 +70,11 @@ static FAR char g_noname[] = "no name";
  * Private Function Prototypes
  ************************************************************/
 
-static void     task_start(void);
 static STATUS   task_assignpid(FAR _TCB* tcb);
 
 /************************************************************
  * Private Functions
  ************************************************************/
-
-/************************************************************
- * Name: task_start
- *
- * Description:
- *   This function is the low level entry point
- *   into the main thread of execution of a task.  It receives
- *   initial control when the task is started and calls main
- *   entry point of the newly started task.
- *
- * Inputs:
- *   None
- *
- * Return:
- *   None
- *
- ************************************************************/
-
-static void task_start(void)
-{
-  FAR _TCB *tcb = (FAR _TCB*)g_readytorun.head;
-  int argc;
-
-  /* Count how many non-null arguments we are passing */
-
-  for (argc = 1; argc <= NUM_TASK_ARGS; argc++)
-    {
-       /* The first non-null argument terminates the list */
-
-       if (!tcb->argv[argc])
-         {
-           break;
-         }
-    }
-
-  /* Call the 'main' entry point passing argc and argv.  If/when
-   * the task returns,  */
-
-  exit(tcb->entry.main(argc, tcb->argv));
-}
 
 /************************************************************
  * Name: task_assignpid
@@ -188,15 +147,55 @@ static STATUS task_assignpid(FAR _TCB *tcb)
  ************************************************************/
 
 /************************************************************
- * Name: _task_init and task_init
+ * Name: task_start
  *
  * Description:
- *   These functions initializes a Task Control Block (TCB)
+ *   This function is the low level entry point
+ *   into the main thread of execution of a task.  It receives
+ *   initial control when the task is started and calls main
+ *   entry point of the newly started task.
+ *
+ * Inputs:
+ *   None
+ *
+ * Return:
+ *   None
+ *
+ ************************************************************/
+
+void task_start(void)
+{
+  FAR _TCB *tcb = (FAR _TCB*)g_readytorun.head;
+  int argc;
+
+  /* Count how many non-null arguments we are passing */
+
+  for (argc = 1; argc <= NUM_TASK_ARGS; argc++)
+    {
+       /* The first non-null argument terminates the list */
+
+       if (!tcb->argv[argc])
+         {
+           break;
+         }
+    }
+
+  /* Call the 'main' entry point passing argc and argv.  If/when
+   * the task returns,  */
+
+  exit(tcb->entry.main(argc, tcb->argv));
+}
+
+/************************************************************
+ * Name: _task_init 
+ *
+ * Description:
+ *   This functions initializes a Task Control Block (TCB)
  *   in preparation for starting a new thread.  _task_init()
- *   is an internal version of the function that has some
- *   additional control arguments and task_init() is a wrapper
- *   function that creates a VxWorks-like user API.
- *   task_init() is, otherwise, not used by the OS.
+ *   is an internal version of the task_init() function that
+ *   has some  additional control arguments and task_init()
+ *   is a wrapper function that creates a VxWorks-like user
+ *   API. task_init() is, otherwise, not used by the OS.
  *
  *   _task_init() is called from task_init() and task_start().\
  *   It is also called from pthread_create() to create a 
@@ -333,39 +332,6 @@ STATUS _task_init(FAR _TCB *tcb, const char *name, int priority,
 }
 
 /************************************************************
- * Name: _task_init and task_init
- *
- * Description:
- *   This is a wrapper around the internal _task_init() that
- *   provides a VxWorks-like API.  See _task_init() for
- *   further information.
- *
- * Input Parameters:
- *   tcb        - Address of the new task's TCB
- *   name       - Name of the new task (not used)
- *   priority   - Priority of the new task
- *   stack      - start of the pre-allocated stack
- *   stack_size - size (in bytes) of the stack allocated
- *   entry      - Application start point of the new task
- *   arg1-4     - Four required task arguments to pass to
- *                the task when it is started.
- *
- * Return Value:
- *   see _task_init()
- *
- ************************************************************/
-
-STATUS task_init(FAR _TCB *tcb, const char *name, int priority,
-                 FAR uint32 *stack, uint32 stack_size, main_t entry,
-                 FAR char *arg1, FAR char *arg2,
-                 FAR char *arg3, FAR char *arg4)
-{
-  up_use_stack(tcb, stack, stack_size);
-  return _task_init(tcb, name, priority, task_start, entry,
-                    FALSE, arg1, arg2, arg3, arg4);
-}
-
-/************************************************************
  * Name: task_activate
  *
  * Description:
@@ -441,10 +407,17 @@ STATUS task_activate(FAR _TCB *tcb)
  *
  ************************************************************/
 
+#ifndef CONFIG_CUSTOM_STACK
 int task_create(const char *name, int priority,
                 int stack_size, main_t entry,
                 FAR char *arg1, FAR char *arg2,
                 FAR char *arg3, FAR char *arg4)
+#else
+int task_create(const char *name, int priority,
+                main_t entry,
+                FAR char *arg1, FAR char *arg2,
+                FAR char *arg3, FAR char *arg4)
+#endif
 {
   FAR _TCB *tcb;
   STATUS status;
@@ -469,12 +442,14 @@ int task_create(const char *name, int priority,
 
   /* Allocate the stack for the TCB */
 
+#ifndef CONFIG_CUSTOM_STACK
   status = up_create_stack(tcb, stack_size);
   if (status != OK)
     {
       sched_releasetcb(tcb);
       return ERROR;
     }
+#endif
 
    /* Initialize the task control block */
 

@@ -150,7 +150,9 @@ EXTERN void up_initial_state(FAR _TCB *tcb);
  *     must be allocated.
  ************************************************************/
 
+#ifndef CONFIG_CUSTOM_STACK
 EXTERN STATUS up_create_stack(FAR _TCB *tcb, size_t stack_size);
+#endif
 
 /************************************************************
  * Name: up_use_stack
@@ -173,7 +175,9 @@ EXTERN STATUS up_create_stack(FAR _TCB *tcb, size_t stack_size);
  *
  ************************************************************/
 
+#ifndef CONFIG_CUSTOM_STACK
 EXTERN STATUS up_use_stack(FAR _TCB *tcb, FAR void *stack, size_t stack_size);
+#endif
 
 /************************************************************
  * Name: up_release_stack
@@ -184,7 +188,9 @@ EXTERN STATUS up_use_stack(FAR _TCB *tcb, FAR void *stack, size_t stack_size);
  *
  ************************************************************/
 
+#ifndef CONFIG_CUSTOM_STACK
 EXTERN void up_release_stack(FAR _TCB *dtcb);
+#endif
 
 /************************************************************
  * Name: up_unblock_task
@@ -314,7 +320,9 @@ EXTERN void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority);
  *
  ************************************************************/
 
+#ifndef CONFIG_DISABLE_SIGNALS
 EXTERN void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver);
+#endif
 
 /************************************************************
  * Name: up_allocate_heap

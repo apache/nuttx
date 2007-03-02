@@ -73,10 +73,6 @@ typedef int (*swint_t)(int code, int parm2, int parm3,
  * Public Variables
  ************************************************************/
 
-#ifndef __ASSEMBLY__
-struct xcptcontext *current_xcp;
-#endif
-
 /************************************************************
  * Public Function Prototypes
  ************************************************************/

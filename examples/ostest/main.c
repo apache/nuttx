@@ -191,8 +191,13 @@ int user_start(int parm1, int parm2, int parm3, int parm4)
 
   /* Verify that we can spawn a new task */
 
+#ifndef CONFIG_CUSTOM_STACK
   result = task_create("ostest", PRIORITY, STACKSIZE, user_main,
                        arg1, arg2, arg3, arg4);
+#else
+  result = task_create("ostest", PRIORITY, user_main,
+                       arg1, arg2, arg3, arg4);
+#endif
   if (result == ERROR)
     {
       printf("user_start: ERROR Failed to start user_main\n");

@@ -1,5 +1,5 @@
 /************************************************************
- * sched_releasetcb.c
+ * task_init.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,109 +34,81 @@
  ************************************************************/
 
 /************************************************************
- * Compilation Switches
- ************************************************************/
-
-/************************************************************
  * Included Files
  ************************************************************/
 
+#include <sys/types.h>
 #include <sched.h>
-#include <errno.h>
-#include <nuttx/arch.h>
 #include "os_internal.h"
+
+/************************************************************
+ * Definitions
+ ************************************************************/
+
+/************************************************************
+ * Private Type Declarations
+ ************************************************************/
+
+/************************************************************
+ * Global Variables
+ ************************************************************/
+
+/************************************************************
+ * Private Variables
+ ************************************************************/
+
+/************************************************************
+ * Private Function Prototypes
+ ************************************************************/
 
 /************************************************************
  * Private Functions
  ************************************************************/
 
 /************************************************************
- * Name:  sched_releasepid
- *
- * Description:  When a task is destroyed, this function must
- * be called to make its process ID available for re-use.
- ************************************************************/
-
-static void sched_releasepid(pid_t pid)
-{
-   int hash_ndx = PIDHASH(pid);
-
-   /* Make any pid associated with this hash available.  Note: 
-    * no special precautions need be taken here because the
-    * following action is atomic
-    */
-
-   g_pidhash[hash_ndx].tcb = NULL;
-   g_pidhash[hash_ndx].pid = INVALID_PROCESS_ID;
-}
-
-/************************************************************
  * Public Functions
  ************************************************************/
 
 /************************************************************
- * Function:  sched_releasetcb
+ * Name: task_init
  *
  * Description:
- *   Free all resources contained in a TCB
+ *   This is a wrapper around the internal _task_init() that
+ *   provides a VxWorks-like API.  See _task_init() for
+ *   further information.
  *
- * Parameters:
- *   None
+ * Input Parameters:
+ *   tcb        - Address of the new task's TCB
+ *   name       - Name of the new task (not used)
+ *   priority   - Priority of the new task
+ *   stack      - start of the pre-allocated stack
+ *   stack_size - size (in bytes) of the stack allocated
+ *   entry      - Application start point of the new task
+ *   arg1-4     - Four required task arguments to pass to
+ *                the task when it is started.
  *
  * Return Value:
- *   OK on success; ERROR on failure
- *
- * Assumptions:
+ *   see _task_init()
  *
  ************************************************************/
 
-int sched_releasetcb(FAR _TCB *tcb)
-{
-  int ret = OK;
-  int i;
-
-  if (tcb)
-    {
-      /* Release the task's process ID if one was assigned.  PID
-       * zero is reserved for the IDLE task.  The TCB of the IDLE
-       * task is never release so a value of zero simply means that
-       * the process ID was never allocated to this TCB.
-       */
-
-      if (tcb->pid)
-        {
-          sched_releasepid(tcb->pid);
-        }
-
-      /* Delete the thread's stack if one has been allocated */
-
 #ifndef CONFIG_CUSTOM_STACK
-      if (tcb->stack_alloc_ptr)
-        {
-          up_release_stack(tcb);
-        }
-#endif
-
-      /* Release command line arguments that were allocated
-       * for task start/re-start.
-       */
-
-      if ((tcb->flags & TCB_FLAG_PTHREAD) == 0)
-        {
-          for (i = 1; i < NUM_TASK_ARGS+1 && tcb->argv[i]; i++)
-            {
-              sched_free(tcb->argv[i]);
-            }
-        }
-
-      /* Release any allocated file structures */
-
-      ret = sched_releasefiles(tcb);
-
-      /* And, finally, release the TCB itself */
-
-      sched_free(tcb);
-    }
-  return ret;
+STATUS task_init(FAR _TCB *tcb, const char *name, int priority,
+                 FAR uint32 *stack, uint32 stack_size, main_t entry,
+                 FAR char *arg1, FAR char *arg2,
+                 FAR char *arg3, FAR char *arg4)
+{
+  up_use_stack(tcb, stack, stack_size);
+  return _task_init(tcb, name, priority, task_start, entry,
+                    FALSE, arg1, arg2, arg3, arg4);
 }
-
+#else
+STATUS task_init(FAR _TCB *tcb, const char *name, int priority,
+                 main_t entry,
+                 FAR char *arg1, FAR char *arg2,
+                 FAR char *arg3, FAR char *arg4)
+{
+  return _task_init(tcb, name, priority, task_start, entry,
+                    FALSE, arg1, arg2, arg3, arg4);
+}
+#endif
