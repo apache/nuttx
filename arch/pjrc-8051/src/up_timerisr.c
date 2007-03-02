@@ -1,5 +1,5 @@
 /************************************************************
- * up_interruptcontext.c
+ * up_timerisr.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,9 +39,14 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <debug.h>
 #include <nuttx/arch.h>
-#include <nuttx/irq.h>
+#include "clock_internal.h"
 #include "up_internal.h"
+
+/************************************************************
+ * Definitions
+ ************************************************************/
 
 /************************************************************
  * Private Types
@@ -56,13 +61,31 @@
  ************************************************************/
 
 /************************************************************
- * Name: up_interrupt_context
+ * Function:  timer_isr
  *
- * Description: Return TRUE is we are currently executing in
- * the interrupt handler context.
+ * Description:
+ *   The timer ISR will perform a variety of services for
+ *   various portions of the systems.
+ *
  ************************************************************/
 
-boolean up_interrupt_context(void)
+int up_timerisr(int irq, FAR ubyte *frame)
 {
-   return g_irqtos != 0;
+   /* Process timer interrupt */
+
+   sched_process_timer();
+   return 0;
 }
+
+void up_timerinit(void)
+{
+  up_disable_irq(TIMER2_IRQ);
+
+#warning "Missing TIMER2 setup logic here"
+
+  /* Attach and enable the timer interrupt */
+
+  irq_attach(TIMER2_IRQ, (xcpt_t)up_timerisr);
+  up_enable_irq(TIMER2_IRQ);
+}
+

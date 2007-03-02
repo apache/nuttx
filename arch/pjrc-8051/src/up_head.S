@@ -54,7 +54,7 @@
  * Public Data
  ************************************************************/
 
-	.globl	_g_ininterrupt
+	.globl	_g_irqtos
 
 /************************************************************
  * Public Functions
@@ -174,6 +174,11 @@ _up_interrupt:
 	clr	psw
 	push	_bp
 
+	/* Mark that we are in an interrupt */
+
+	mov	dptr, #_g_irqtos
+        movx    @dptr, a
+
 	/* Now call void irq_dispatch(int irq, FAR void *context)
          *
 	 * First, create the first argument as (int)irqno
@@ -184,18 +189,31 @@ _up_interrupt:
 
         /* Create the second argument (void *context) on the stack */
 
-        push    sp
-        clr     a
-        push    acc
+	push	sp
+	clr	a
+	push	acc
 
-	/* Then dispatch the IRQ */
+	/* Then dispatch the IRQ.  On return, the stack is off by
+	 * by two because the above two pushes, but we fix that by
+	 * reloading sp from g_irqtos below.
+	 */
 
 	lcall	_irq_dispatch
 
-	/* Clean up the stack */
+	/* Get the stackpointer.  This might be the stack pointer that
+	 * we increment above or it might be the stack pointer of a
+	 * new task if the a context switch happened during the
+	 * interrupt handling.
+	 */
 
-        dec     sp
-        dec     sp
+	mov	dptr, #_g_irqtos
+	movx	a, @dptr
+	mov	sp, a
+
+	/* Indicate that we are no longer in an interrupt */
+
+	clr	a
+	movx	@dptr, a
 
 	/* Then return from the interrupt */
 

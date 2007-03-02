@@ -106,9 +106,13 @@
 
 #ifndef __ASSEMBLY__
 
-/* TRUE if processing an interrupt */
+/* This is the top of the stack containing the interrupt stack frame.  It
+ * is set when processing an interrupt.  It is also cleared when the
+ * interrupt returns so this can also be used like a boolean indication that
+ * we are in an interrupt.
+ */
 
-extern boolean g_ininterrupt;
+extern ubyte g_irqtos;
 
 #endif /* __ASSEMBLY */
 
@@ -118,8 +122,12 @@ extern boolean g_ininterrupt;
 
 #ifndef __ASSEMBLY__
 
-extern ubyte up_savecontext(FAR struct xcptcontext *context);
+extern void  up_irqinitialize(void);
 extern void  up_restorecontext(FAR struct xcptcontext *context);
+extern void up_restorestack(FAR struct xcptcontext *context);
+extern ubyte up_savecontext(FAR struct xcptcontext *context);
+extern void  up_savestack(FAR struct xcptcontext *context);
+extern void  up_timerinit(void);
 
 #endif /* __ASSEMBLY */
 #endif /* __ARCH_UP_INTERNAL_H */

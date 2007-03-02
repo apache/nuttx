@@ -1,5 +1,15 @@
 Architecture-Specific Code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+Table of Contents
+^^^^^^^^^^^^^^^^^
+
+  o Architecture-Specific Code
+  o Summary of Files
+  o Supported Architectures
+  o Configuring NuttX
+
+Architecture-Specific Code
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The file include/nuttx/arch.h identifies all of the APIs that must
 be provided by the architecture specific logic.  (It also includes
@@ -191,6 +201,30 @@ src/Makefile
   (power-on reset entry point, for example).  It will be used in
   the final link with libup.a and other system archives to generate the
   final executable.
+
+Supported Architectures
+^^^^^^^^^^^^^^^^^^^^^^^
+
+arch/c5471
+    TI TMS320C5471 (also called TMS320DM180).
+    NuttX operates on the ARM7 of this dual core processor. This port
+    uses the Spectrum Digital evaluation board with a GNU arm-elf toolchain*.
+    This port is in progress and partially functional (However, my board
+    is dead at the moment so it will be awhile before I fix it).
+
+arch/pjrc-8051
+    8051 Microcontroller.  This port uses the PJRC 87C52 development system
+    and the SDCC toolchain.   This port is not quite ready for prime time.
+
+arch/axiom-mc68
+    For the Motorola (Freescale) MC68HC908GP32 Microcontroller using the
+    Axiom CMS8GP32 development board. This has not yet been checked-in.
+
+arch/sim
+  x86 Linux Simulation</b>.  Fully functional.
+
+Other ports for the for the TI TMS320DM270 and for MIPS are in various states
+of progress
 
 Configuring NuttX
 ^^^^^^^^^^^^^^^^^

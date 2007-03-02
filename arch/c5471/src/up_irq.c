@@ -147,7 +147,7 @@ static inline void up_vectorinitialize(void)
  ************************************************************/
 
 /************************************************************
- * Name: irq_initialize
+ * Name: up_irqinitialize
  ************************************************************/
 
 void up_irqinitialize(void)
