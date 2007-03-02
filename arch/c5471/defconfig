@@ -200,6 +200,8 @@ CONFIG_PREALLOC_WDOGS=32
 #
 # CONFIG_BOOT_FROM_FLASH - Some configurations support XIP
 #   operation from FLASH.
+# CONFIG_CUSTOM_STACK - The up_ implementation will handle
+#   all stack operations outside of the nuttx model.
 # CONFIG_STACK_POINTER - The initial stack pointer (arm7tdmi only)
 # CONFIG_PROC_STACK_SIZE - The size of the initial stack
 # CONFIG_PTHREAD_STACK_MIN - Minimum pthread stack size
@@ -208,6 +210,7 @@ CONFIG_PREALLOC_WDOGS=32
 # CONFIG_HEAP_SIZE - The size of the heap
 #
 CONFIG_BOOT_FROM_FLASH=n
+CONFIG_CUSTOM_STACK=n
 CONFIG_STACK_POINTER=
 CONFIG_PROC_STACK_SIZE=4096
 CONFIG_PTHREAD_STACK_MIN=256

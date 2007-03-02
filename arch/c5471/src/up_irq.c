@@ -189,7 +189,7 @@ void up_irqinitialize(void)
 
 void up_disable_irq(int irq)
 {
-  if (irq < NR_IRQS)
+  if ((unsigned)irq < NR_IRQS)
     {
       uint32 reg = getreg32(MASK_IT_REG);
       putreg32(reg | (1 << irq), MASK_IT_REG);
@@ -206,7 +206,7 @@ void up_disable_irq(int irq)
 
 void up_enable_irq(int irq)
 {
-  if (irq < NR_IRQS)
+  if ((unsigned)irq < NR_IRQS)
     {
       uint32 reg = getreg32(MASK_IT_REG);
       putreg32(reg & ~(1 << irq), MASK_IT_REG);
