@@ -126,7 +126,7 @@ static ubyte up_pushcontext(void) __naked
  * Inputs:
  *   context - the context structure in which to save the stack info
  *
- * Return
+ * Return:
  *   0 = Normal state save return
  *   1 = This is the matching return from up_restorecontext()
  *
@@ -164,4 +164,40 @@ ubyte up_savecontext(FAR struct xcptcontext *context)
 
   irqrestore(flags);
   return 1;
+}
+
+/**************************************************************************
+ * Name: up_savestack
+ *
+ * Description:
+ *   Save the entire interrupt stack contents in the provided context
+ *   structure.
+ *
+ * Inputs:
+ *   context - the context structure in which to save the stack info
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   - We are in an interrupt handler with g_irqtos set
+ *   - Interrupts are disabled
+ *
+ **************************************************************************/
+
+void up_savestack(FAR struct xcptcontext *context)
+{
+  /* Now copy the current stack frame (including the saved execution
+   * context) from internal RAM to XRAM.
+   */
+
+  ubyte nbytes    = g_irqtos - (STACK_BASE-1);
+  FAR ubyte *src  = (FAR ubyte*)STACK_BASE;
+  FAR ubyte *dest = context->stack;
+
+  context->nbytes = nbytes;
+  while (nbytes--)
+    {
+      *dest++ = *src++;
+    }
 }

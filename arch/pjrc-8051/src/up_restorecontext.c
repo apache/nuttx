@@ -134,8 +134,8 @@ static void up_popcontext(ubyte newsp) __naked
 
 void up_restorecontext(FAR struct xcptcontext *context)
 {
-  int nbytes = context->nbytes;
-  FAR ubyte *src = context->stack;
+  int nbytes      = context->nbytes;
+  FAR ubyte *src  = context->stack;
   FAR ubyte *dest = (FAR ubyte*)STACK_BASE;
 
   /* Interrupts should be disabled for the following.  up_popcontext() will
@@ -149,8 +149,50 @@ void up_restorecontext(FAR struct xcptcontext *context)
       *src++ = *dest++;
     }
 
-  /* Then return to the restored context */
+  /* Then return to the restored context (probably restoring interrupts) */
 
   up_popcontext(context->nbytes + (STACK_BASE-1));
 }
+
+/**************************************************************************
+ * Name: up_restorestack
+ *
+ * Description:
+ *   Restore the entire interrupt stack contents in the provided context
+ *   structure.
+ *
+ * Inputs:
+ *   context - the context structure from  which to restore the stack info
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   - We are in an interrupt handler with g_irqtos set
+ *   - Interrupts are disabled
+ *
+ **************************************************************************/
+
+void up_restorestack(FAR struct xcptcontext *context)
+{
+  /* Now copy the current stack frame (including the saved execution
+   * context) from internal RAM to XRAM.
+   */
+
+  ubyte nbytes     = context->nbytes;
+  FAR ubyte *src   = context->stack;
+  FAR ubyte *dest  = (FAR ubyte*)STACK_BASE;
+
+  while (nbytes--)
+    {
+      *dest++ = *src++;
+    }
+
+  /* We are still in the interrupt context, but the size of the interrupt
+   * stack has changed.
+   */
+
+  g_irqtos = context->nbytes + (STACK_BASE-1);
+}
+
 

@@ -47,7 +47,8 @@ CSRCS		= up_initialize.c up_idle.c up_interruptcontext.c \
 		  up_initialstate.c up_unblocktask.c up_blocktask.c \
 		  up_releasepending.c up_reprioritizertr.c \
 		  up_exit.c up_assert.c up_allocateheap.c \
-		  up_irq.c up_savecontext.c up_restorecontext.c up_putc.c
+		  up_irq.c up_savecontext.c up_restorecontext.c \
+		  up_timerisr.c up_putc.c
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 SRCS		= $(SSRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)

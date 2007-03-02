@@ -51,9 +51,13 @@
  * Private Data
  ************************************************************/
 
-/* TRUE if processing an interrupt */
+/* This is the top of the stack containing the interrupt stack frame.  It
+ * is set when processing an interrupt.  It is also cleared when the
+ * interrupt returns so this can also be used like a boolean indication that
+ * we are in an interrupt.
+ */
 
-boolean g_ininterrupt;
+ubyte g_irqtos;
 
 /************************************************************
  * Private Functions
@@ -87,11 +91,15 @@ void up_initialize(void)
 {
  /* Initialize global variables */
 
-  g_ininterrupt = FALSE;
+  g_irqtos = 0;
 
   /* Initialize the interrupt subsystem */
 
+  up_irqinitialize();
+
   /* Initialize the system timer interrupt */
+
+  up_timerinit();
 
   /* Initialize the serial console support */
 }

@@ -116,27 +116,24 @@ void up_unblock_task(FAR _TCB *tcb)
           * Are we in an interrupt handler? 
           */
 
-          if (g_ininterrupt)
+          if (g_irqtos)
             {
-#if 0
-# warning REVISIT
               /* Yes, then we have to do things differently.
-               * Just copy the current registers into the OLD rtcb.
+               * Just copy the current stack into the OLD rtcb.
                */
 
-               up_copystate(&tcb->xcp, current_regs);
+               up_savestack(&rtcb->xcp);
 
               /* Restore the exception context of the rtcb at the (new) head 
                * of the g_readytorun task list.
                */
 
-              rtcb = (_TCB*)g_readytorun.head;
+              rtcb = (FAR _TCB*)g_readytorun.head;
               dbg("New Active Task TCB=%p\n", rtcb);
 
               /* Then switch contexts */
 
-              up_copystate(current_regs, &tcb->xcp);
-#endif
+              up_restorestack(&rtcb->xcp);
             }
 
          /* We are not in an interrupt andler.  Copy the user C context
