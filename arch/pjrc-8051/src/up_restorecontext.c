@@ -134,9 +134,9 @@ static void up_popcontext(ubyte newsp) __naked
 
 void up_restorecontext(FAR struct xcptcontext *context)
 {
-  int nbytes      = context->nbytes;
-  FAR ubyte *src  = context->stack;
-  FAR ubyte *dest = (FAR ubyte*)STACK_BASE;
+  int nbytes       = context->nbytes;
+  FAR  ubyte *src  = context->stack;
+  NEAR ubyte *dest = (NEAR ubyte*)STACK_BASE;
 
   /* Interrupts should be disabled for the following.  up_popcontext() will
    * set the new interrupt state correctly.
@@ -179,9 +179,9 @@ void up_restorestack(FAR struct xcptcontext *context)
    * context) from internal RAM to XRAM.
    */
 
-  ubyte nbytes     = context->nbytes;
-  FAR ubyte *src   = context->stack;
-  FAR ubyte *dest  = (FAR ubyte*)STACK_BASE;
+  ubyte nbytes      = context->nbytes;
+  FAR  ubyte *src   = context->stack;
+  NEAR ubyte *dest  = (NEAR ubyte*)STACK_BASE;
 
   while (nbytes--)
     {

@@ -142,9 +142,9 @@ ubyte up_savecontext(FAR struct xcptcontext *context)
        * context) from internal RAM to XRAM.
        */
 
-      ubyte nbytes    = sp - (STACK_BASE-1);
-      FAR ubyte *src  = (FAR ubyte*)STACK_BASE;
-      FAR ubyte *dest = context->stack;
+      ubyte nbytes     = sp - (STACK_BASE-1);
+      NEAR ubyte *src  = (NEAR ubyte*)STACK_BASE;
+      FAR  ubyte *dest = context->stack;
 
       /* Then copy the stack info into the context structure */
 
@@ -191,9 +191,9 @@ void up_savestack(FAR struct xcptcontext *context)
    * context) from internal RAM to XRAM.
    */
 
-  ubyte nbytes    = g_irqtos - (STACK_BASE-1);
-  FAR ubyte *src  = (FAR ubyte*)STACK_BASE;
-  FAR ubyte *dest = context->stack;
+  ubyte nbytes     = g_irqtos - (STACK_BASE-1);
+  NEAR ubyte *src  = (NEAR ubyte*)STACK_BASE;
+  FAR  ubyte *dest = context->stack;
 
   context->nbytes = nbytes;
   while (nbytes--)
