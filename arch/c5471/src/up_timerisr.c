@@ -79,7 +79,7 @@
  ************************************************************/
 
 /************************************************************
- * Function:  timer_isr
+ * Function:  up_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for
@@ -114,6 +114,15 @@ int up_timerisr(int irq, uint32 *regs)
    current_regs = saved_regs;
    return 0;
 }
+
+/************************************************************
+ * Function:  up_timerinit
+ *
+ * Description:
+ *   This function is called during start-up to initialize
+ *   the timer interrupt.
+ *
+ ************************************************************/
 
 void up_timerinit(void)
 {

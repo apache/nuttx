@@ -96,6 +96,59 @@
 #define PM2_VECTOR_UART    (PM2_VECTOR_BASE + 35)
 #define PM2_VECTOR_TIMER2  (PM2_VECTOR_BASE + 43)
 
+/* Registers.  8052 regiser definitions are provided in the SDCC header
+ * file 8052.h.  However, a few SFR registers are missing from that
+ * file (they can be found in mcs51reg.h, but that file is too much
+ * when the following simple addtions do the job).
+ */
+
+sfr at 0xc9 T2MOD ;
+
+/* Timing information.
+ *
+ * The PJRC board is based on a standard 87C52 CPU clocked at 22.1184 MHz.
+ * The CPU clock is divided by 12 to yield a clock frequency of 1.8432 MHz.
+ */
+
+#define CPU_CLOCK_HZ      22118400L
+#define TIMER_CLOCK_HZ     1843200L
+
+/* The 87C52 has three timers, timer 0, timer 1, and timer 2.  On the PJRC
+ * board, timer 1 and 2 have dedicated functions.  They provide baud support
+ * support for the boards two serial ports.  Unfortunately, only timer 2
+ * can generate the accurate 100Hz timer desired by the OS.
+ *
+ * Timer 0 provides only a 8-bit auto-reload mode.
+ */
+
+#define CONFIG_80C52_TIMER2 1
+#ifdef CONFIG_80C52_TIMER2
+
+/* To use timer 2 as the 100Hz system timer, we need to calculate a 16-bit
+ * reload value that results in 100Hz overflow interrupts.  That value
+ * is given by:
+ *
+ * Timer ticks   = TIMER_CLOCK_HZ / (desired ticks-per-second)
+ *               = 18432
+ * Capture value = 0xffff - (Timer ticks)
+ *               = 47103 = 0x67ff
+ */
+
+# define TIMER2_CAPTURE_LOW  0xff
+# define TIMER2_CAPTURE_HIGH 0x67
+
+#else
+
+/* Timer 0, mode 0 can be used as a system timer.  In that mode, the
+ * 1.8432 is further divided by 32.  A single 8-bit value is incremented
+ * at 57600 Hz, which results in 225 Timer 0 overflow interrupts per
+ * second.
+ */
+
+# warning "No support for timer 0 as the system timer"
+
+#endif
+
 /**************************************************************************
  * Public Types
  **************************************************************************/

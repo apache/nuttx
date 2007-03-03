@@ -66,33 +66,57 @@ LDLIBS		= $(addprefix -l,$(notdir $(LINKLIBS)))
 
 LDFLAGS		= --model-large --nostdlib \
 		  --data-loc 0x30 --iram-size 0x100 \
-		  --code-loc 0x2040 --code-size 0x5fc0 \
+		  --code-loc 0x20c0 --code-size 0x5f40 \
 		  --xram-loc 0x0100 --xram-size 0x1f00
 
-HEAP_START	= ${shell cat pass1.mem | grep "EXTERNAL RAM" | sed -e "s/[ ][ ]*/ /g" | cut -d' ' -f5}
-
 DEPSRCS		= $(SRCS) $(LINKSSRCS)
+
+HEAP1_BASE	= ${shell cat pass1.mem | grep "EXTERNAL RAM" | sed -e "s/[ ][ ]*/ /g" | cut -d' ' -f5}
+HEAP2_BASE	= ${shell cat pass1.mem | grep "ROM/EPROM/FLASH" | sed -e "s/[ ][ ]*/ /g" | cut -d' ' -f4}
+STACK_BASE	= ${shell cat pass1.mem | grep "Stack starts" | cut -d' ' -f4}
 
 all: up_head$(OBJEXT) libarch$(LIBEXT)
 
 $(ASRCS) $(LINKASRCS): %$(ASMEXT): %.S
-	$(CPP) -P $(CPPFLAGS) -D__ASSEMBLY__ -DUP_HEAP_START=0x0100 -DUP_HEAP_END=0x2000 $< -o $@
+	$(CPP) -P $(CPPFLAGS) -D__ASSEMBLY__ $< -o $@
 
 $(AOBJS) $(LINKOBJS): $(ASRCS) $(LINKASRCS)
 	$(AS) $(ASFLAGS) $<
 
 $(COBJS): %$(OBJEXT): %.c
-	$(CC) -c $(CFLAGS) -DUP_HEAP_START=0x0100 -DUP_HEAP_END=0x2000 $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
+
+# Create a header file that contains addressing information needed by the code
+
+pass1.mem:
+
+up_mem.h: pass1.mem
+	@echo "#ifndef __ARCH_MEM_H" >up_mem.h
+	@echo "#define __ARCH_MEM_H" >>up_mem.h
+	@if [ -e pass1.mem ]; then \
+		echo "#define UP_STACK_BASE $(STACK_BASE)" >>up_mem.h ; \
+		echo "#define UP_HEAP1_BASE $(HEAP1_BASE)" >> up_mem.h ; \
+		echo "#define UP_HEAP1_END  0x2000" >> up_mem.h ; \
+		echo "#define UP_HEAP2_BASE $(HEAP2_BASE)" >> up_mem.h ; \
+		echo "#define UP_HEAP2_END  0x8000" >> up_mem.h ; \
+	else \
+		echo "#define UP_STACK_BASE 0x30" >>up_mem.h ; \
+		echo "#define UP_HEAP1_BASE 0x0100" >> up_mem.h ; \
+		echo "#define UP_HEAP1_END  0x2000" >> up_mem.h ; \
+		echo "#define UP_HEAP2_BASE 0x6000" >> up_mem.h ; \
+		echo "#define UP_HEAP2_END  0x8000" >> up_mem.h ; \
+	fi
+	@echo "#endif /* __ARCH_MEM_H */" >>up_mem.h
 
 # Combine all objects in this directory into a library
 
-libarch$(LIBEXT): $(OBJS)
-	( for obj in $(OBJS) ; do \
+libarch$(LIBEXT): up_mem.h $(OBJS)
+	@( for obj in $(OBJS) ; do \
 		$(AR) $@ $${obj} || \
 			{ echo "$(AR) $@ $${obj} FAILED!" ; exit 1 ; } ; \
 	done ; )
 
-# This is a kludge to work around some conflicting symbols in libsdcc.lib
+# This is a kludge to work around some conflicting symbols in libsdcc.liXqueb
 
 $(SDCCLIBDIR)/libmysdcc.lib: $(SDCCLIBDIR)/libsdcc.lib
 	@cat $(SDCCLIBDIR)/libsdcc.lib | \
@@ -106,27 +130,31 @@ $(SDCCLIBDIR)/libmysdcc.lib: $(SDCCLIBDIR)/libsdcc.lib
 
 # This target builds the final executable
 
-pass1$(EXEEXT): $(SDCCLIBDIR)/libmysdcc.lib $(LINKOBJS)
-	$(CC) $(LDFLAGS) $(LDPATHES) $(SDCCPATH) $(LINKOBJS) $(LDLIBS) $(SDCCLIBS) -o pass1.ihx
+pass1.ihx: up_mem.h $(SDCCLIBDIR)/libmysdcc.lib $(LINKOBJS)
+	$(CC) $(LDFLAGS) $(LDPATHES) $(SDCCPATH) $(LINKOBJS) $(LDLIBS) $(SDCCLIBS) -o $@
+	@rm -f up_mem.h
+	@rm -f up_allocateheap$(OBJEXT) libarch$(LIBEXT)
+	@$(MAKE) TOPDIR=$(TOPDIR) libarch$(LIBEXT)
 
-nuttx$(EXEEXT): pass1$(EXEEXT)
-	$(CC) -c $(CFLAGS) -DUP_HEAP_START=$(HEAP_START) -DUP_HEAP_END=0x2000 \
-		up_allocateheap.c -o up_allocateheap$(OBJEXT)
+nuttx.ihx: up_mem.h $(SDCCLIBDIR)/libmysdcc.lib $(LINKOBJS)
+	$(CC) $(LDFLAGS) $(LDPATHES) $(SDCCPATH) $(LINKOBJS) $(LDLIBS) $(SDCCLIBS) -o $@
+
+nuttx$(EXEEXT): pass1.ihx nuttx.ihx
 	@rm -f pass1.*
-	$(CC) $(LDFLAGS) $(LDPATHES) $(SDCCPATH) $(LINKOBJS) $(LDLIBS) $(SDCCLIBS) -o nuttx.ihx
 	packihx nuttx.ihx > $(TOPDIR)/nuttx$(EXEEXT)
 	@cp -f nuttx.map $(TOPDIR)/.
 
 # Build dependencies
 
-.depend: Makefile $(DEPSRCS)
+.depend: Makefile up_mem.h $(DEPSRCS)
 	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	touch $@
 
 depend: .depend
 
 clean:
-	rm -f libarch$(LIBEXT) *.asm *.rel *.lst *.rst *.sym *.adb *.lnk *.map *.mem *.ihx *.hex *~
+	rm -f libarch$(LIBEXT) up_mem.h
+	rm -f *.asm *.rel *.lst *.rst *.sym *.adb *.lnk *.map *.mem *.ihx *.hex *~
 	if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
 
 distclean: clean
