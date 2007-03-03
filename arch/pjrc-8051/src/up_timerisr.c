@@ -41,6 +41,7 @@
 #include <sys/types.h>
 #include <debug.h>
 #include <nuttx/arch.h>
+#include <8052.h>
 #include "clock_internal.h"
 #include "up_internal.h"
 
@@ -61,7 +62,7 @@
  ************************************************************/
 
 /************************************************************
- * Function:  timer_isr
+ * Function:  up_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for
@@ -77,15 +78,45 @@ int up_timerisr(int irq, FAR ubyte *frame)
    return 0;
 }
 
+/************************************************************
+ * Function:  up_timerinit
+ *
+ * Description:
+ *   This function is called during start-up to initialize
+ *   the timer interrupt.
+ *
+ ************************************************************/
+
 void up_timerinit(void)
 {
+#ifdef CONFIG_80C52_TIMER2
   up_disable_irq(TIMER2_IRQ);
 
-#warning "Missing TIMER2 setup logic here"
+  /* Set up timer 2 -- See up_internal.h for details */
+
+  T2MOD  = 0;
+
+  /* Set up the capture count to generate 100Hz system
+   * interrupts.
+   */
+
+  RCAP2L = TIMER2_CAPTURE_LOW;
+  RCAP2H = TIMER2_CAPTURE_HIGH;
+
+  TL2    = TIMER2_CAPTURE_LOW;
+  TH2    = TIMER2_CAPTURE_HIGH;
+
+  /* Configure for interrupts */
+
+  T2CON  = 0x40;
 
   /* Attach and enable the timer interrupt */
 
   irq_attach(TIMER2_IRQ, (xcpt_t)up_timerisr);
   up_enable_irq(TIMER2_IRQ);
+
+#else
+# warning "No support for timer 0 as the system timer"
+#endif
 }
 
