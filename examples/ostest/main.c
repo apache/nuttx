@@ -178,12 +178,12 @@ int user_start(int parm1, int parm2, int parm3, int parm4)
   /* Verify that we can communicate */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  write(1, write_data1, sizeof(write_data1));
+  write(1, write_data1, sizeof(write_data1)-1);
 #endif
   printf("user_start: Standard I/O Check: printf\n");
 
 #if CONFIG_NFILE_DESCRIPTORS > 1
-  write(2, write_data2, sizeof(write_data2));
+  write(2, write_data2, sizeof(write_data2)-1);
 #endif
 #if CONFIG_NFILE_STREAMS > 0
   fprintf(stderr, "user_start: Standard I/O Check: fprintf to stderr\n");

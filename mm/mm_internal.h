@@ -160,8 +160,14 @@ extern size_t  g_heapsize;
 
 /* This is the first and last nodes of the heap */
 
-extern FAR struct mm_allocnode_s *g_heapstart;
-extern FAR struct mm_allocnode_s *g_heapend;
+extern FAR struct mm_allocnode_s *g_heapstart[CONFIG_MM_REGIONS];
+extern FAR struct mm_allocnode_s *g_heapend[CONFIG_MM_REGIONS];
+
+#if CONFIG_MM_REGIONS > 1
+extern int g_nregions;
+#else
+# define g_nregions 1
+#endif
 
 /* All free nodes are maintained in a doubly linked list.  This
  * array provides some hooks into the list at various points to

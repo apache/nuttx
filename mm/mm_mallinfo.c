@@ -76,6 +76,11 @@ int mallinfo(struct mallinfo *info)
   int    ordblks  = 0;  /* Number of non-inuse chunks */
   size_t uordblks = 0;  /* Total allocated space */
   size_t fordblks = 0;  /* Total non-inuse space */
+#if CONFIG_MM_REGIONS > 1
+  int region;
+#else
+# define region 0
+#endif
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
   static struct mallinfo info;
@@ -85,29 +90,39 @@ int mallinfo(struct mallinfo *info)
       return ERROR;
     }
 #endif
-  /* Visit each node in physical memory */
 
-  for (node = g_heapstart;
-       node < g_heapend;
-       node = (struct mm_allocnode_s *)((char*)node + node->size))
+  /* Visit each region */
+
+#if CONFIG_MM_REGIONS > 1
+  for (region = 0; region < g_nregions; region++)
+#endif
     {
-      if (node->preceding & MM_ALLOC_BIT)
+      /* Visit each node in the region */
+
+      for (node = g_heapstart[region];
+           node < g_heapend[region];
+           node = (struct mm_allocnode_s *)((char*)node + node->size))
         {
-          uordblks += node->size;
-        }
-      else
-        {
-          ordblks++;
-          fordblks += node->size;
-          if (node->size > mxordblk)
+          if (node->preceding & MM_ALLOC_BIT)
             {
-              mxordblk = node->size;
+              uordblks += node->size;
+            }
+          else
+            {
+              ordblks++;
+              fordblks += node->size;
+              if (node->size > mxordblk)
+                {
+                  mxordblk = node->size;
+                }
             }
         }
-    }
 
-  DEBUGASSERT(node == g_heapend);
-  uordblks += SIZEOF_MM_ALLOCNODE; /* account for the tail node */
+      DEBUGASSERT(node == g_heapend[region]);
+      uordblks += SIZEOF_MM_ALLOCNODE; /* account for the tail node */
+    }
+#undef region
+
   DEBUGASSERT(uordblks + fordblks == g_heapsize);
 
 #ifdef CONFIG_CAN_PASS_STRUCTS

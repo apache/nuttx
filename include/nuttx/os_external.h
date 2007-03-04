@@ -73,9 +73,10 @@ EXTERN int    user_start(int parm1, int parm2, int parm3, int parm4);
 
 EXTERN void   os_start(void); /* OS entry point called by boot logic */
 
-/* Functions contained in mm_init.c *************************/
+/* Functions contained in mm_initialize.c *******************/
 
 EXTERN void   mm_initialize(FAR void *heap_start, size_t heap_size);
+EXTERN void   mm_addregion(FAR void *heapstart, size_t heapsize);
 
 #undef EXTERN
 #ifdef __cplusplus

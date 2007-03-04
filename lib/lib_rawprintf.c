@@ -83,6 +83,8 @@
 
 int lib_rawvprintf(const char *fmt, va_list ap)
 {
+#if CONFIG_NFILE_DESCRIPTORS > 0
+
   struct lib_rawstream_s rawstream;
 
   /* Wrap the stdout in a stream object and let lib_vsprintf
@@ -91,6 +93,21 @@ int lib_rawvprintf(const char *fmt, va_list ap)
 
   lib_rawstream(&rawstream, 1);
   return lib_vsprintf(&rawstream.public, fmt, ap);
+
+#elif defined(CONFIG_ARCH_LOWPUTC)
+
+  struct lib_stream_s stream;
+
+  /* Wrap the stdout in a stream object and let lib_vsprintf
+   * do the work.
+   */
+
+  lib_lowstream(&stream);
+  return lib_vsprintf(&stream, fmt, ap);
+
+#else
+  return 0;
+#endif
 }
 
 /************************************************************

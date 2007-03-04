@@ -48,7 +48,7 @@
 
 static void _up_putc(int ch) __naked
 {
-#if 0
+#if 1
   ch; /* To avoid unreferenced argument warning */
   _asm
         mov     a, dpl
@@ -73,6 +73,10 @@ cout:   jnb     ti, cout
 int up_putc(int ch)
 {
   _up_putc(ch);
+  if (ch == '\n')
+    {
+      _up_putc('\r');
+    }
   return ch;  
 }
 

@@ -37,20 +37,23 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Fake NuttX dependencies */
+
+#define FAR
+#define CONFIG_MM_REGIONS 2
+#define CONFIG_CAN_PASS_STRUCTS 1
+#undef  CONFIG_SMALL_MEMORY
+
 #include "mm_internal.h"
 
 /* Definitions */
 
-#define TEST_HEAP_SIZE 0x00100000
+#define TEST_HEAP1_SIZE 0x00080000
+#define TEST_HEAP2_SIZE 0x00080000
 #define NTEST_ALLOCS 32
 
 /* #define STOP_ON_ERRORS do{}while(0) */
 #define STOP_ON_ERRORS exit(1)
-
-/* Heap provided to memory manager */
-
-unsigned long heap_base;
-unsigned long heap_size = TEST_HEAP_SIZE;
 
 /* Test allocations */
 
@@ -94,9 +97,10 @@ static const int alignment[NTEST_ALLOCS/2] =
     128,  2048, 131072,   8192,    32,  32768, 16384 , 262144,
     512,  4096,  65536,      8,     64,  1024,    16,       4
 };
-static void       *allocs[NTEST_ALLOCS];
-static struct      mallinfo alloc_info;
-static unsigned int g_adjheapsize = 0;
+static void        *allocs[NTEST_ALLOCS];
+static struct       mallinfo alloc_info;
+static unsigned int g_reportedheapsize = 0;
+static unsigned int g_actualheapsize = 0;
 
 /************************************************************
  * mm_showchunkinfo
@@ -121,33 +125,46 @@ static int mm_findinfreelist(struct mm_freenode_s *node)
 static void mm_showchunkinfo(void)
 {
   struct mm_allocnode_s *node;
+#if CONFIG_MM_REGIONS > 1
+  int region;
+#else
+# define region 0
+#endif
   int found;
-
-  /* Visit each node in physical memory */
 
   printf("     CHUNK LIST:\n");
 
-  for (node = g_heapstart;
-       node < g_heapend;
-       node = (struct mm_allocnode_s *)((char*)node + node->size))
+  /* Visit each region */
+
+#if CONFIG_MM_REGIONS > 1
+  for (region = 0; region < g_nregions; region++)
+#endif
     {
-      printf("       %p 0x%08x 0x%08x %s",
-             node, node->size, node->preceding & ~MM_ALLOC_BIT,
-             node->preceding & MM_ALLOC_BIT ? "Allocated" : "Free     ");
-      found = mm_findinfreelist((struct mm_freenode_s *)node);
-      if (found && (node->preceding & MM_ALLOC_BIT) != 0)
-        {
-          printf(" Should NOT have been in free list\n");
-        }
-      else if (!found && (node->preceding & MM_ALLOC_BIT) == 0)
-        {
-          printf(" SHOULD have been in free listT\n");
-        }
-      else
-        {
-          printf(" OK\n");
+      /* Visit each node in each region */
+
+      for (node = g_heapstart[region];
+           node < g_heapend[region];
+           node = (struct mm_allocnode_s *)((char*)node + node->size))
+         {
+           printf("       %p 0x%08x 0x%08x %s",
+                 node, node->size, node->preceding & ~MM_ALLOC_BIT,
+                 node->preceding & MM_ALLOC_BIT ? "Allocated" : "Free     ");
+          found = mm_findinfreelist((struct mm_freenode_s *)node);
+          if (found && (node->preceding & MM_ALLOC_BIT) != 0)
+            {
+              printf(" Should NOT have been in free list\n");
+            }
+          else if (!found && (node->preceding & MM_ALLOC_BIT) == 0)
+            {
+              printf(" SHOULD have been in free listT\n");
+            }
+          else
+            {
+              printf(" OK\n");
+            }
         }
     }
+#undef region
 }
 
 static void mm_showfreelist(void)
@@ -212,21 +229,21 @@ static void mm_showmallinfo(void)
       STOP_ON_ERRORS;
     }
 
-  if (!g_adjheapsize)
+  if (!g_reportedheapsize)
     {
-      g_adjheapsize = alloc_info.uordblks + alloc_info.fordblks;
-      if (g_adjheapsize > TEST_HEAP_SIZE + 16 ||
-          g_adjheapsize < TEST_HEAP_SIZE -16)
+      g_reportedheapsize = alloc_info.uordblks + alloc_info.fordblks;
+      if (g_reportedheapsize > g_actualheapsize + 16*CONFIG_MM_REGIONS ||
+          g_reportedheapsize < g_actualheapsize -16*CONFIG_MM_REGIONS)
         {
           fprintf(stderr, "Total memory %d not close to uordlbks=%d + fordblks=%d = %d\n",
-                 TEST_HEAP_SIZE, g_adjheapsize, alloc_info.uordblks, alloc_info.fordblks, g_adjheapsize);
+                 g_actualheapsize, alloc_info.uordblks, alloc_info.fordblks, g_reportedheapsize);
           STOP_ON_ERRORS;
         }
     }
-  else if (alloc_info.uordblks + alloc_info.fordblks != g_adjheapsize)
+  else if (alloc_info.uordblks + alloc_info.fordblks != g_reportedheapsize)
     {
       fprintf(stderr, "Total memory %d != uordlbks=%d + fordblks=%d\n",
-             g_adjheapsize, alloc_info.uordblks, alloc_info.fordblks);
+             g_reportedheapsize, alloc_info.uordblks, alloc_info.fordblks);
       STOP_ON_ERRORS;
     }
 }
@@ -389,23 +406,39 @@ static do_frees(void **mem, const int *size, const int *rand, int n)
 
 int main(int argc, char **argv, char **envp)
 {
-  void *heapbase;
+  void *heap1_base;
+  void *heap2_base;
   int i, j;
 
   /* Allocate a heap */
 
-  printf("Allocating test heap of %ldKb\n", TEST_HEAP_SIZE/1024);
-  heapbase = malloc(TEST_HEAP_SIZE);
-  printf("Allocated  heap_base=%p\n", heap_base);
-  if (heapbase == 0)
+  printf("Allocating test heap #1 of %ldKb\n", TEST_HEAP1_SIZE/1024);
+  heap1_base = malloc(TEST_HEAP1_SIZE);
+  printf("Allocated  heap1_base=%p\n", heap1_base);
+  if (heap1_base == 0)
     {
-      fprintf(stderr, "Failed to allocate test heap\n");
+      fprintf(stderr, "Failed to allocate test heap #1\n");
+      exit(1);
+    }
+
+  printf("Allocating test heap #2 of %ldKb\n", TEST_HEAP2_SIZE/1024);
+  heap2_base = malloc(TEST_HEAP2_SIZE);
+  printf("Allocated  heap2_base=%p\n", heap2_base);
+  if (heap2_base == 0)
+    {
+      fprintf(stderr, "Failed to allocate test heap #2\n");
       exit(1);
     }
 
   /* Initialize the memory manager */
 
-  mm_initialize(heapbase, TEST_HEAP_SIZE);
+  mm_initialize(heap1_base, TEST_HEAP1_SIZE);
+  g_actualheapsize = TEST_HEAP1_SIZE;
+  mm_showmallinfo();
+
+  mm_addregion(heap2_base, TEST_HEAP2_SIZE);
+  g_reportedheapsize = 0;
+  g_actualheapsize += TEST_HEAP2_SIZE;
   mm_showmallinfo();
 
   /* Allocate some memory */
@@ -431,7 +464,8 @@ int main(int argc, char **argv, char **envp)
 
   /* Clean up and exit */
 
-  free(heapbase);
+  free(heap1_base);
+  free(heap2_base);
 
   printf("TEST COMPLETE\n");
   return 0;

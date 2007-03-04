@@ -78,6 +78,10 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_DEBUG_VERBOSE - enables verbose debug output
 		CONFIG_HAVE_LOWPUTC - architecture supports low-level, boot
 		  time console output
+		CONFIG_MM_REGIONS - If the architecture includes multiple
+		  regions of memory to allocate from, this specifies the
+		  number of memory regions that the memory manager must
+		  handle and enables the API mm_addregion(start, end);
 		CONFIG_RR_INTERVAL - The round robin timeslice will be set
 		  this number of milliseconds;  Round robin scheduling can
 		  be disabled by setting this value to zero.

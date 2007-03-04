@@ -75,6 +75,6 @@ void up_assert(void)
 
 void up_assert_code(int errorcode)
 {
-  dbg("Assertion failed with error code: %d\n", errcode);
+  dbg("Assertion failed with error code: %d\n", errorcode);
   exit(errorcode);
 }

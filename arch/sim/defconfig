@@ -48,6 +48,10 @@ CONFIG_ARCH_SIM=y
 #   that will be used in the build
 # CONFIG_DEBUG - enables built-in debug options
 # CONFIG_DEBUG_VERBOSE - enables verbose debug output
+# CONFIG_MM_REGIONS - If the architecture includes multiple
+#   regions of memory to allocate from, this specifies the
+#   number of memory regions that the memory manager must
+#   handle and enables the API mm_addregion(start, end);
 # CONFIG_HAVE_LOWPUTC - architecture supports low-level, boot
 #   time console output
 # CONFIG_RR_INTERVAL - The round robin timeslice will be set
@@ -67,6 +71,7 @@ CONFIG_ARCH_SIM=y
 CONFIG_EXAMPLE=ostest
 CONFIG_DEBUG=y
 CONFIG_DEBUG_VERBOSE=y
+CONFIG_MM_REGIONS=1
 CONFIG_ARCH_LOWPUTC=y
 CONFIG_RR_INTERVAL=200
 CONFIG_SCHED_INSTRUMENTATION=n

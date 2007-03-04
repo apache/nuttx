@@ -150,7 +150,7 @@ int sched_rr_get_interval(pid_t pid, struct timespec *interval)
 
   return OK;
 #else
-  *get_errnor_ptr() = ENOSYS;
+  *get_errno_ptr() = ENOSYS;
   return ERROR;
 #endif
 }

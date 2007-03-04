@@ -54,6 +54,7 @@
 # include <debug.h>
 # include <errno.h>
 # include <assert.h>
+# include <nuttx/os_external.h>
 #else
 # include <sys/types.h>
 # include <string.h>
@@ -69,6 +70,15 @@
  */
 
 #ifdef MM_TEST
+
+/* Fake NuttX dependencies */
+
+# define FAR                        /* Normally in compiler.h */
+# define CONFIG_MM_REGIONS 2        /* Normally in config.h */
+# define CONFIG_CAN_PASS_STRUCTS 1  /* Normally in config.h */
+# undef  CONFIG_SMALL_MEMORY        /* Normally in config.h */
+
+extern void mm_addregion(FAR void *heapstart, size_t heapsize);
 
 /* Use the real system errno */
 

@@ -54,8 +54,12 @@ size_t g_heapsize;
 
 /* This is the first and last nodes of the heap */
 
-FAR struct mm_allocnode_s *g_heapstart;
-FAR struct mm_allocnode_s *g_heapend;
+FAR struct mm_allocnode_s *g_heapstart[CONFIG_MM_REGIONS];
+FAR struct mm_allocnode_s *g_heapend[CONFIG_MM_REGIONS];
+
+#if CONFIG_MM_REGIONS > 1
+int g_nregions;
+#endif
 
 /* All free nodes are maintained in a doubly linked list.  This
  * array provides some hooks into the list at various points to
@@ -76,7 +80,8 @@ FAR struct mm_freenode_s g_nodelist[MM_NNODES];
  *   boot time.
  *
  * Parameters:
- *   None
+ *   heapstart - Start of the initial heap region
+ *   heapsize  - Size of the initial heap region
  *
  * Return Value:
  *   None
@@ -95,16 +100,13 @@ void mm_initialize(FAR void *heapstart, size_t heapsize)
   CHECK_ALLOCNODE_SIZE;
   CHECK_FREENODE_SIZE;
 
-  /* Adjust the provide heap start and size so that they are
-   * both aligned with the MM_MIN_CHUNK size.
-   */
+  /* Set up global variables */
 
-  heapbase = MM_ALIGN_UP((size_t)heapstart);
-  heapend  = MM_ALIGN_DOWN((size_t)heapstart + (size_t)heapsize);
+  g_heapsize = 0;
 
-  /* Save the size of the heap */
-
-  g_heapsize = heapend - heapbase;
+#if CONFIG_MM_REGIONS > 1
+  g_nregions = 0;
+#endif
 
   /* Initialize the node array */
 
@@ -115,6 +117,58 @@ void mm_initialize(FAR void *heapstart, size_t heapsize)
       g_nodelist[i].blink   = &g_nodelist[i-1];
     }
 
+  /* Initialize the malloc semaphore to one (to support one-at-
+   * a-time access to private data sets.
+   */
+
+  mm_seminitialize();
+
+  /* Add the initial region of memory to the heap */
+
+  mm_addregion(heapstart, heapsize);
+}
+
+/************************************************************
+ * Function:  mm_addregion
+ *
+ * Description:
+ *   This function gives a region of contiguous memory to
+ *   the memory manager
+ *
+ * Parameters:
+ *   heapstart - Start of the heap region
+ *   heapsize  - Size of the heap region
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ************************************************************/
+
+void mm_addregion(FAR void *heapstart, size_t heapsize)
+{
+  FAR struct mm_freenode_s *node;
+  size_t heapbase;
+  size_t heapend;
+#if CONFIG_MM_REGIONS > 1
+  int IDX = g_nregions;
+#else
+# define IDX 0
+#endif
+
+  /* Adjust the provide heap start and size so that they are
+   * both aligned with the MM_MIN_CHUNK size.
+   */
+
+  heapbase = MM_ALIGN_UP((size_t)heapstart);
+  heapend  = MM_ALIGN_DOWN((size_t)heapstart + (size_t)heapsize);
+  heapsize = heapend - heapbase;
+
+  /* Add the size of this region to the total size of the heap */
+
+  g_heapsize += heapsize;
+
   /* Create two "allocated" guard nodes at the beginning and end of
    * the heap.  These only serve to keep us from allocating outside
    * of the heap.
@@ -123,25 +177,25 @@ void mm_initialize(FAR void *heapstart, size_t heapsize)
    * all available memory.
    */
 
-  g_heapstart            = (FAR struct mm_allocnode_s *)heapbase;
-  g_heapstart->size      = SIZEOF_MM_ALLOCNODE;
-  g_heapstart->preceding = MM_ALLOC_BIT;
+  g_heapstart[IDX]            = (FAR struct mm_allocnode_s *)heapbase;
+  g_heapstart[IDX]->size      = SIZEOF_MM_ALLOCNODE;
+  g_heapstart[IDX]->preceding = MM_ALLOC_BIT;
 
-  node                   = (FAR struct mm_freenode_s *)(heapbase + SIZEOF_MM_ALLOCNODE);
-  node->size             = g_heapsize - 2*SIZEOF_MM_ALLOCNODE;
-  node->preceding        = SIZEOF_MM_ALLOCNODE;
+  node                        = (FAR struct mm_freenode_s *)(heapbase + SIZEOF_MM_ALLOCNODE);
+  node->size                  = heapsize - 2*SIZEOF_MM_ALLOCNODE;
+  node->preceding             = SIZEOF_MM_ALLOCNODE;
 
-  g_heapend              = (FAR struct mm_allocnode_s *)(heapend - SIZEOF_MM_ALLOCNODE);
-  g_heapend->size        = SIZEOF_MM_ALLOCNODE;
-  g_heapend->preceding   = node->size | MM_ALLOC_BIT;
+  g_heapend[IDX]              = (FAR struct mm_allocnode_s *)(heapend - SIZEOF_MM_ALLOCNODE);
+  g_heapend[IDX]->size        = SIZEOF_MM_ALLOCNODE;
+  g_heapend[IDX]->preceding   = node->size | MM_ALLOC_BIT;
+
+#undef IDX
+
+#if CONFIG_MM_REGIONS > 1
+  g_nregions++;
+#endif
 
   /* Add the single, large free node to the nodelist */
 
   mm_addfreechunk(node);
-
-  /* Initialize the malloc semaphore to one (to support one-at-
-   * a-time access to private data sets.
-   */
-
-  mm_seminitialize();
 }

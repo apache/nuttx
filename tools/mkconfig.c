@@ -225,6 +225,10 @@ int main(int argc, char **argv, char **envp)
   printf("# undef CONFIG_NFILE_STREAMS\n");
   printf("# define CONFIG_NFILE_STREAMS 0\n");
   printf("#endif\n\n");
+  printf("/* There must be at least one memory region. */\n\n");
+  printf("#ifndef CONFIG_MM_REGIONS\n");
+  printf("# define CONFIG_MM_REGIONS 1\n");
+  printf("#endif\n\n");
   printf("/* If no file streams are configured, then make certain that\n");
   printf(" * buffered I/O support is disabled.\n");
   printf(" */\n\n");
