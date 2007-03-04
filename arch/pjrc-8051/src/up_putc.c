@@ -55,7 +55,7 @@ static void _up_putc(int ch) __naked
         ljmp    PM2_ENTRY_COUT
   _endasm;
 #else
-  ch;
+  ch; /* To avoid unreferenced argument warning */
   _asm
         mov     a, dpl
 cout:   jnb     ti, cout
