@@ -102,7 +102,9 @@
  * when the following simple addtions do the job).
  */
 
+#ifndef __ASSEMBLY__
 sfr at 0xc9 T2MOD ;
+#endif
 
 /* Timing information.
  *
@@ -175,9 +177,12 @@ extern ubyte g_irqtos;
 
 #ifndef __ASSEMBLY__
 
+#if CONFIG_MM_REGIONS > 1
+extern void  up_addregion(void);
+#endif
 extern void  up_irqinitialize(void);
 extern void  up_restorecontext(FAR struct xcptcontext *context);
-extern void up_restorestack(FAR struct xcptcontext *context);
+extern void  up_restorestack(FAR struct xcptcontext *context);
 extern ubyte up_savecontext(FAR struct xcptcontext *context);
 extern void  up_savestack(FAR struct xcptcontext *context);
 extern void  up_timerinit(void);

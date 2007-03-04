@@ -93,6 +93,12 @@ void up_initialize(void)
 
   g_irqtos = 0;
 
+  /* Add extra memory fragments to the memory manager */
+
+#if CONFIG_MM_REGIONS > 1
+  up_addregion();
+#endif
+
   /* Initialize the interrupt subsystem */
 
   up_irqinitialize();

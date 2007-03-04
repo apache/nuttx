@@ -78,3 +78,10 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   *heap_start = (FAR void*)UP_HEAP1_BASE;
   *heap_size = UP_HEAP1_END - UP_HEAP1_BASE;
 }
+
+#if CONFIG_MM_REGIONS > 1
+void up_addregion(void)
+{
+  mm_addregion((FAR void*)UP_HEAP2_BASE, UP_HEAP2_END - UP_HEAP2_BASE);
+}
+#endif
