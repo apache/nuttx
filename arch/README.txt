@@ -111,6 +111,12 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_DISABLE_CLOCK, CONFIG_DISABLE_PTHREAD.
 		CONFIG_DISABLE_SIGNALS, CONFIG_DISABLE_MQUEUE
 
+
+	Misc libc settings
+
+		CONFIG_NOPRINTF_FIELDWIDTH - sprintf-related logic is a
+		   little smaller if we do not support fieldwidthes
+
 	Allow for architecture optimized implementations
 
 		The architecture can provide optimized versions of the

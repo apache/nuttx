@@ -69,11 +69,15 @@
 
 void up_irqinitialize(void)
 {
+#if 1 /* remove me */
+  IE = 0;
+#else
   /* Enable interrupts globally, but disable all interrupt
    * sources.
    */
 
   IE = 0x80;
+#endif
 }
 
 /************************************************************
