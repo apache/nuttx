@@ -84,37 +84,31 @@
 
 	.org	PM2_VECTOR_EXTINT0
 	push	acc
-	push	ie
 	mov	a, #EXT_INT0_IRQ
 	ljmp	_up_interrupt
 
 	.org	PM2_VECTOR_TIMER0
 	push	acc
-	push	ie
 	mov	a, #TIMER0_IRQ
 	ljmp	_up_interrupt
 
 	.org	PM2_VECTOR_EXTINT1
 	push	acc
-	push	ie
 	mov	a, #EXT_INT1_IRQ
 	ljmp	_up_interrupt
 
 	.org	PM2_VECTOR_TIMER1
 	push	acc
-	push	ie
 	mov	a, #TIMER1_IRQ
 	ljmp	_up_interrupt
 
 	.org	PM2_VECTOR_UART
 	push	acc
-	push	ie
 	mov	a, #UART_IRQ
 	ljmp	_up_interrupt
 
 	.org	PM2_VECTOR_TIMER2
 	push	acc
-	push	ie
 	mov	a, #TIMER2_IRQ
 	ljmp	_up_interrupt
 
@@ -136,7 +130,7 @@ start:
  * Description:
  *   All interrupts vector to this point with:
  *
- *   (1) acc and ie on the stack and
+ *   (1) acc on the stack and
  *   (2) the IRQ number in the accumulator
  *
  ************************************************************/
@@ -151,9 +145,8 @@ _up_interrupt:
 	ar0 = 0x00
 	ar1 = 0x01
 
-	/* Push ACC and IE.  Then disable interrupts */
+	/* ACC already on the stack; push IE.  Then disable interrupts */
 
-	push	acc
 	push	ie
 	clr	ea
 
