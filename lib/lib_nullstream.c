@@ -1,5 +1,5 @@
 /************************************************************
- * up_allocateheap.c
+ * lib_nullstream.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,51 +37,26 @@
  * Included Files
  ************************************************************/
 
-#include <nuttx/config.h>
-#include <sys/types.h>
-#include <sched.h>
-#include <debug.h>
-#include <nuttx/arch.h>
-#include "os_internal.h"
-#include "up_internal.h"
-#include "up_mem.h"
-
-/************************************************************
- * Private Definitions
- ************************************************************/
-
-/************************************************************
- * Private Data
- ************************************************************/
+#include <stdio.h>
+#include <errno.h>
+#include "lib_internal.h"
 
 /************************************************************
  * Private Functions
  ************************************************************/
 
+static void nullstream_putc(struct lib_stream_s *this, int ch)
+{
+  this->nput++;
+}
+
 /************************************************************
  * Public Functions
  ************************************************************/
 
-/************************************************************
- * Name: up_allocate_heap
- *
- * Description:
- *   The heap may be statically allocated by
- *   defining CONFIG_HEAP_BASE and CONFIG_HEAP_SIZE.  If these
- *   are not defined, then this function will be called to
- *   dynamically set aside the heap region.
- *
- ************************************************************/
-
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+void lib_nullstream(struct lib_stream_s *nullstream)
 {
-  *heap_start = (FAR void*)UP_HEAP1_BASE;
-  *heap_size = UP_HEAP1_END - UP_HEAP1_BASE;
+  nullstream->put  = nullstream_putc;
+  nullstream->nput = 0;
 }
 
-#if CONFIG_MM_REGIONS > 1
-void up_addregion(void)
-{
-  mm_addregion((FAR void*)UP_HEAP2_BASE, UP_HEAP2_END - UP_HEAP2_BASE);
-}
-#endif

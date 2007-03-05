@@ -52,7 +52,8 @@ STDIO_SRCS	= lib_fopen.c lib_fclose.c \
 		  lib_ungetc.c \
 		  lib_printf.c lib_vprintf.c lib_fprintf.c  lib_rawprintf.c lib_lowprintf.c \
 		  lib_vfprintf.c lib_sprintf.c lib_libsprintf.c lib_vsprintf.c \
-		  lib_libvsprintf.c lib_stdstream.c lib_memstream.c lib_rawstream.c lib_lowstream.c \
+		  lib_libvsprintf.c lib_stdstream.c lib_memstream.c \
+		  lib_rawstream.c lib_lowstream.c lib_nullstream.c \
 		  lib_sscanf.c
 STDLIB_SRCS	= lib_getenv.c lib_rand.c
 MATH_SRCS	= lib_rint.c

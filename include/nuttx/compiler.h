@@ -80,6 +80,14 @@
 
 # undef  CONFIG_SMALL_MEMORY
 
+/* Long and int are (probably) the same size */
+
+# undef  CONFIG_LONG_IS_NOT_INT
+
+/* The pointers and int are the same size */
+
+# undef  CONFIG_PTR_IS_NOT_INT
+
 /* GCC supports inlined functions */
 
 # define CONFIG_HAVE_INLINE 1
@@ -140,6 +148,14 @@
 
 # define CONFIG_SMALL_MEMORY 1
 
+/* Long and int are not the same size */
+
+# define CONFIG_LONG_IS_NOT_INT 1
+
+/* The generic point and int are not the same size */
+
+# define CONFIG_PTR_IS_NOT_INT 1
+
 /* SDCC does not support inline functions */
 
 # undef  CONFIG_HAVE_INLINE
@@ -172,6 +188,8 @@
 # define CODE
 
 # undef  CONFIG_SMALL_MEMORY
+# undef  CONFIG_LONG_IS_NOT_INT
+# undef  CONFIG_PTR_IS_NOT_INT
 # undef  CONFIG_HAVE_INLINE
 # undef  CONFIG_HAVE_LONG_LONG
 # undef  CONFIG_HAVE_DOUBLE

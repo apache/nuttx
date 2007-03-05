@@ -136,6 +136,14 @@ CONFIG_DISABLE_SIGNALS=n
 CONFIG_DISABLE_MQUEUE=n
 
 #
+# Misc libc settings
+#
+# CONFIG_NOPRINTF_FIELDWIDTH - sprintf-related logic is a
+#   little smaller if we do not support fieldwidthes
+#
+CONFIG_NOPRINTF_FIELDWIDTH=n
+
+#
 # Allow for architecture optimized implementations
 #
 # The architecture can provide optimized versions of the

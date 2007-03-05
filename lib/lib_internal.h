@@ -128,6 +128,10 @@ extern void lib_rawstream(struct lib_rawstream_s *rawstream,
 extern void lib_lowstream(struct lib_stream_s *rawstream);
 #endif
 
+/* Defined in lib_nullstream.c */
+
+extern void lib_nullstream(struct lib_stream_s *nullstream);
+
 /* Defined in lib_libsprintf.c */
 
 extern int lib_sprintf (struct lib_stream_s *obj,
