@@ -142,8 +142,8 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN irqstate_t irqsave(void) __naked;
-EXTERN void       irqrestore(irqstate_t flags) __naked;
+EXTERN irqstate_t irqsave(void);
+EXTERN void       irqrestore(irqstate_t flags);
 
 #undef EXTERN
 #ifdef __cplusplus

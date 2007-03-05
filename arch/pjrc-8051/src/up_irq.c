@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <nuttx/irq.h>
+#include <8052.h>
 #include "up_internal.h"
 
 /************************************************************
@@ -68,6 +69,11 @@
 
 void up_irqinitialize(void)
 {
+  /* Enable interrupts globally, but disable all interrupt
+   * sources.
+   */
+
+  IE = 0x80;
 }
 
 /************************************************************
@@ -78,13 +84,11 @@ void up_irqinitialize(void)
  *
  ************************************************************/
 
-irqstate_t irqsave(void) _naked
+irqstate_t irqsave(void)
 {
-  _asm
-	mov	ie, dpl
-	clr	ea
-	ret
-  _endasm;
+  irqstate_t ret = IE;
+  EA = 0;
+  return ret;
 }
 
 /************************************************************
@@ -95,13 +99,9 @@ irqstate_t irqsave(void) _naked
  *
  ************************************************************/
 
-void irqrestore(irqstate_t flags) __naked
+void irqrestore(irqstate_t flags)
 {
-  flags; /* Avoid compiler warning about unused argument */
-  _asm
-	mov	ie, dpl
-	ret
-  _endasm;
+  IE = flags;
 }
 
 /************************************************************
@@ -112,21 +112,11 @@ void irqrestore(irqstate_t flags) __naked
  *
  ************************************************************/
 
-static void _up_disable_irq(ubyte iebit) __naked
-{
-  _asm
-	mov	a, ie
-	orl	a, dpl
-	mov	ie, a
-	ret
-  _endasm;
-}
-
 void up_disable_irq(int irq)
 {
   if ((unsigned)irq < NR_IRQS)
     {
-       _up_disable_irq(1 << irq);
+       IE |= (1 << irq);
     }
 }
 
@@ -138,20 +128,10 @@ void up_disable_irq(int irq)
  *
  ************************************************************/
 
-static void _up_enable_irq(ubyte iebit) __naked
-{
-  _asm
-	mov	a, ie
-	anl	a, dpl
-	mov	ie, a
-	ret
-  _endasm;
-}
-
 void up_enable_irq(int irq)
 {
   if ((unsigned)irq < NR_IRQS)
     {
-      _up_enable_irq(~(1 << irq));
+      IE &= ~(1 << irq);
     }
 }
