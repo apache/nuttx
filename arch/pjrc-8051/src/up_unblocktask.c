@@ -122,7 +122,7 @@ void up_unblock_task(FAR _TCB *tcb)
                * Just copy the current stack into the OLD rtcb.
                */
 
-               up_savestack(&rtcb->xcp);
+               up_savestack(&rtcb->xcp, g_irqtos);
 
               /* Restore the exception context of the rtcb at the (new) head 
                * of the g_readytorun task list.
@@ -131,9 +131,11 @@ void up_unblock_task(FAR _TCB *tcb)
               rtcb = (FAR _TCB*)g_readytorun.head;
               dbg("New Active Task TCB=%p\n", rtcb);
 
-              /* Then switch contexts */
+              /* Then setup so that the context will be performed on exit
+               * from the interrupt.
+               */
 
-              up_restorestack(&rtcb->xcp);
+              g_irqcontext = &rtcb->xcp;
             }
 
          /* We are not in an interrupt andler.  Copy the user C context

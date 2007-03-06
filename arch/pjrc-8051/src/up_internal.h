@@ -44,6 +44,13 @@
  * Public Definitions
  **************************************************************************/
 
+/* Bring-up debug configurations */
+
+#define CONFIG_FRAME_DUMP 1             /* Enabled stack/frame dumping logic */
+#define CONFIG_SUPPRESS_INTERRUPTS 1    /* Do not enable interrupts */
+#define CONFIG_SWITCH_FRAME_DUMP 1      /* Dump frames from normal switches */
+#undef  CONFIG_INTERRUPT_FRAME_DUMP     /* Dump frames from interrupt switches */
+
 /* Memory Map
  *
  * BEGIN  END     DESCRIPTION
@@ -161,13 +168,23 @@ sfr at 0xc9 T2MOD ;
 
 #ifndef __ASSEMBLY__
 
-/* This is the top of the stack containing the interrupt stack frame.  It
- * is set when processing an interrupt.  It is also cleared when the
- * interrupt returns so this can also be used like a boolean indication that
- * we are in an interrupt.
+/* This is the top of the stack containing the interrupt
+ * stack frame.  It is set when processing an interrupt.  It
+ * is also cleared when the interrupt returns so this can
+ * also be used like a boolean indication that we are in an
+ * interrupt.
  */
 
 extern ubyte g_irqtos;
+
+/* If during execution of an interrup handler, a context
+ * switch must be performed, the follwing will be set to
+ * to that address of the relevant context structure.  The
+ * actual switch will be deferred until the time that the
+ * the interrupt exits.
+ */
+
+extern FAR struct xcptcontext *g_irqcontext;
 
 #endif /* __ASSEMBLY */
 
@@ -181,11 +198,18 @@ extern ubyte g_irqtos;
 extern void  up_addregion(void);
 #endif
 extern void  up_irqinitialize(void);
-extern void  up_restorecontext(FAR struct xcptcontext *context);
-extern void  up_restorestack(FAR struct xcptcontext *context);
-extern ubyte up_savecontext(FAR struct xcptcontext *context);
-extern void  up_savestack(FAR struct xcptcontext *context);
+extern void  up_restorecontext(FAR struct xcptcontext *context) _naked;
+extern ubyte up_savecontext(FAR struct xcptcontext *context) __naked;
+extern void  up_savestack(FAR struct xcptcontext *context, ubyte tos);
 extern void  up_timerinit(void);
+
+#ifdef CONFIG_FRAME_DUMP
+extern void up_dumpstack(void);
+extern void up_dumpframe(FAR struct xcptcontext *context);
+#else
+# define up_dumpstack()
+# define up_dumpframe(x)
+#endif
 
 #endif /* __ASSEMBLY */
 #endif /* __ARCH_UP_INTERNAL_H */

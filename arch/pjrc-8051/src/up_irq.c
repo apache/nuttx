@@ -69,7 +69,9 @@
 
 void up_irqinitialize(void)
 {
-#if 1 /* remove me */
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
+  /* Disable all interrupts */
+
   IE = 0;
 #else
   /* Enable interrupts globally, but disable all interrupt

@@ -131,7 +131,7 @@ void up_block_task(FAR _TCB *tcb, tstate_t task_state)
                * Just copy the current registers into the OLD rtcb.
                */
 
-               up_savestack(&tcb->xcp);
+               up_savestack(&tcb->xcp, g_irqtos);
 
               /* Restore the exception context of the rtcb at the (new) head 
                * of the g_readytorun task list.
@@ -140,9 +140,11 @@ void up_block_task(FAR _TCB *tcb, tstate_t task_state)
               rtcb = (FAR _TCB*)g_readytorun.head;
               dbg("New Active Task TCB=%p\n", rtcb);
 
-              /* Then switch contexts */
+              /* Then setup so that the context will be performed on exit
+               * from the interrupt.
+               */
 
-              up_restorestack(&tcb->xcp);
+              g_irqcontext = &rtcb->xcp;
             }
 
           /* Copy the user C context into the TCB at the (old) head of the

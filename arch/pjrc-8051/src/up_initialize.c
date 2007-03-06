@@ -51,13 +51,23 @@
  * Private Data
  ************************************************************/
 
-/* This is the top of the stack containing the interrupt stack frame.  It
- * is set when processing an interrupt.  It is also cleared when the
- * interrupt returns so this can also be used like a boolean indication that
- * we are in an interrupt.
+/* This is the top of the stack containing the interrupt
+ * stack frame.  It is set when processing an interrupt.  It
+ * is also cleared when the interrupt returns so this can
+ * also be used like a boolean indication that we are in an
+ * interrupt.
  */
 
 ubyte g_irqtos;
+
+/* If during execution of an interrup handler, a context
+ * switch must be performed, the follwing will be set to
+ * to that address of the relevant context structure.  The
+ * actual switch will be deferred until the time that the
+ * the interrupt exits.
+ */
+
+FAR struct xcptcontext *g_irqcontext;
 
 /************************************************************
  * Private Functions
@@ -105,7 +115,9 @@ void up_initialize(void)
 
   /* Initialize the system timer interrupt */
 
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
   up_timerinit();
+#endif
 
   /* Initialize the serial console support */
 }
