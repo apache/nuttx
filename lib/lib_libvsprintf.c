@@ -270,15 +270,15 @@ static void utodec(struct lib_stream_s *obj, unsigned int n)
 
 static void utohex(struct lib_stream_s *obj, unsigned int n, ubyte a)
 {
-  boolean nonleading = FALSE;
+  boolean nonzero = FALSE;
   ubyte bits;
 
   for (bits = 8*sizeof(unsigned int); bits > 0; bits -= 4)
     {
       ubyte nibble = (ubyte)((n >> (bits - 4)) & 0xf);
-      if (nibble || nonleading)
+      if (nibble || nonzero)
         {
-          nonleading = TRUE;
+          nonzero = TRUE;
 
           if (nibble < 10)
             {
@@ -289,6 +289,11 @@ static void utohex(struct lib_stream_s *obj, unsigned int n, ubyte a)
               obj->put(obj, nibble + a - 10);
             }
         }
+    }
+
+  if (!nonzero)
+    {
+      obj->put(obj, '0');
     }
 }
 
@@ -518,15 +523,15 @@ static void lutodec(struct lib_stream_s *obj, unsigned long n)
 
 static void lutohex(struct lib_stream_s *obj, unsigned long n, ubyte a)
 {
-  boolean nonleading = FALSE;
+  boolean nonzero = FALSE;
   ubyte bits;
 
   for (bits = 8*sizeof(unsigned long); bits > 0; bits -= 4)
     {
       ubyte nibble = (ubyte)((n >> (bits - 4)) & 0xf);
-      if (nibble || nonleading)
+      if (nibble || nonzero)
         {
-          nonleading = TRUE;
+          nonzero = TRUE;
 
           if (nibble < 10)
             {
@@ -537,6 +542,11 @@ static void lutohex(struct lib_stream_s *obj, unsigned long n, ubyte a)
               obj->put(obj, nibble + a - 10);
             }
         }
+    }
+
+  if (!nonzero)
+    {
+      obj->put(obj, '0');
     }
 }
 
@@ -763,15 +773,15 @@ static void llutodec(struct lib_stream_s *obj, unsigned long long n)
 
 static void llutohex(struct lib_stream_s *obj, unsigned long long n, ubyte a)
 {
-  boolean nonleading = FALSE;
+  boolean nonzero = FALSE;
   ubyte bits;
 
   for (bits = 8*sizeof(unsigned long long); bits > 0; bits -= 4)
     {
       ubyte nibble = (ubyte)((n >> (bits - 4)) & 0xf);
-      if (nibble || nonleading)
+      if (nibble || nonzero)
         {
-          nonleading = TRUE;
+          nonzero = TRUE;
 
           if (nibble < 10)
             {
@@ -782,6 +792,11 @@ static void llutohex(struct lib_stream_s *obj, unsigned long long n, ubyte a)
               obj->put(obj, (nibble + a - 10));
             }
         }
+    }
+
+  if (!nonzero)
+    {
+      obj->put(obj, '0');
     }
 }
 
