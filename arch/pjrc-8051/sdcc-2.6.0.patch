@@ -1,0 +1,11 @@
+--- sdcc/device/lib/Makefile.orig	2007-03-06 09:55:01.000000000 -0600
++++ sdcc/device/lib/Makefile	2007-03-06 09:58:32.000000000 -0600
+@@ -242,7 +242,7 @@
+ model-mcs51-stack-auto:
+ 	if [ "`grep mcs51 $(top_builddir)ports.build`" = mcs51 ]; then \
+ 	  for model in $(MODELS); do \
+-	    $(MAKE) MODELFLAGS="--model-$$model --stack-auto" PORT=$$model PORTDIR=$(BUILDDIR)/$$model-stack-auto PORTINCDIR=$(INCDIR)/mcs51 objects; \
++	    $(MAKE) MODELFLAGS="--model-$$model --stack-auto --int-long-reent --float-reent" PORT=$$model PORTDIR=$(BUILDDIR)/$$model-stack-auto PORTINCDIR=$(INCDIR)/mcs51 objects; \
+ 	  done \
+ 	fi
+ 

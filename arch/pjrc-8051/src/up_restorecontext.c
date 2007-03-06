@@ -65,55 +65,6 @@
  **************************************************************************/
 
 /**************************************************************************
- * Name: up_popcontext
- *
- * Description:
- *   Pop the current execution context from the stack and return to the
- *   execution context.  Similar operations are executed from the interrupt
- *   state restore
- *
- * Inputs:
- *   None
- *
- * Return:
- *   This function does not return
- *
- **************************************************************************/
-
-static void up_popcontext(ubyte newsp) __naked
-
-{
-  _asm 
-	pop	_bp 
-	pop	psw
-	pop	ar1 
-	pop	ar0 
-	pop	ar7 
-	pop	ar6 
-	pop	ar5 
-	pop	ar4 
-	pop	ar3 
-	pop	ar2 
-	pop	b 
-	pop	dph
-	pop	dpl 
-
-	/* Restore the interrupt state per the stored IE value */
-
-	pop	acc
-	jb	acc.7,00001$
-	clr	ie.7
-	sjmp	00002$
-  00001$:
-	setb	ie.7
-  00002$:
-
-	pop acc
-	ret
-  _endasm;
-}
-
-/**************************************************************************
  * Public Functions
  **************************************************************************/
 
@@ -132,67 +83,125 @@ static void up_popcontext(ubyte newsp) __naked
  *
  **************************************************************************/
 
-void up_restorecontext(FAR struct xcptcontext *context)
+void up_restorecontext(FAR struct xcptcontext *context) __naked
 {
-  int nbytes       = context->nbytes;
-  FAR  ubyte *src  = context->stack;
-  NEAR ubyte *dest = (NEAR ubyte*)STACK_BASE;
+  _asm
+	ar2 = 0x02
+	ar3 = 0x03
+	ar4 = 0x04
+	ar5 = 0x05
+	ar6 = 0x06
+	ar7 = 0x07
+	ar0 = 0x00
+	ar1 = 0x01
 
-  /* Interrupts should be disabled for the following.  up_popcontext() will
-   * set the new interrupt state correctly.
-   */
+#ifdef CONFIG_SWITCH_FRAME_DUMP
+	push	dpl
+	push	dph
+	lcall	_up_dumpframe
+	pop	dph
+	pop	dpl
+#endif
 
-  (void)irqsave();
+	/* Interrupts should be disabled for the following.  up_popcontext() will
+	 * set the new interrupt state correctly.
+	 */
 
-  while (nbytes--)
-    {
-      *src++ = *dest++;
-    }
+	clr	ea
 
-  /* Then return to the restored context (probably restoring interrupts) */
+	/* Register usage in the following:
+	 *
+	 * R0   - Holds working the 8-bit IRAM pointer
+	 * R1   - Not used
+	 * R2-3 - Holds the working 16-bit XRAM pointer
+	 * R4   - Holds the working byte count
+	 * R5   - Holds the new stack pointer
+	 * R6-7 - Not used
+	 */
 
-  up_popcontext(context->nbytes + (STACK_BASE-1));
-}
+	/* Fetch r4 = context->nbytes */
 
-/**************************************************************************
- * Name: up_restorestack
- *
- * Description:
- *   Restore the entire interrupt stack contents in the provided context
- *   structure.
- *
- * Inputs:
- *   context - the context structure from  which to restore the stack info
- *
- * Return:
- *   None
- *
- * Assumptions:
- *   - We are in an interrupt handler with g_irqtos set
- *   - Interrupts are disabled
- *
- **************************************************************************/
+	movx	a, @dptr
+	mov	r4, a
 
-void up_restorestack(FAR struct xcptcontext *context)
-{
-  /* Now copy the current stack frame (including the saved execution
-   * context) from internal RAM to XRAM.
-   */
+	/* Save the new stack pointer in r5 */
 
-  ubyte nbytes      = context->nbytes;
-  FAR  ubyte *src   = context->stack;
-  NEAR ubyte *dest  = (NEAR ubyte*)STACK_BASE;
+	add	a, #(STACK_BASE-1)
+	mov	r5, a
 
-  while (nbytes--)
-    {
-      *dest++ = *src++;
-    }
+	/* Save r2-3 = &context->stack */
 
-  /* We are still in the interrupt context, but the size of the interrupt
-   * stack has changed.
-   */
+	inc	dptr
+	mov	r2, dpl
+	mov	r3, dph
 
-  g_irqtos = context->nbytes + (STACK_BASE-1);
+	/* Set r0 = stack base address */
+
+	mov	r0, #STACK_BASE
+
+	/* Top of the copy loop */
+00001$:
+	dec	r4
+	jz	00002$
+
+	/* Fetch the next byte from context->stack */
+
+	mov	dpl, r2
+	mov	dph, r3
+	movx	a,@dptr
+
+	/* Increment the XRAM pointer */
+
+	inc	dptr
+	mov	r2, dpl
+	mov	r3, dph
+
+	/* Save the next byte into IRAM */
+
+	mov	@r0, a
+
+	/* Increment the IRAM pointer */
+
+	inc	r0
+	sjmp	00001$
+00002$:
+
+	/* Set the new stack pointer */
+
+	mov	sp, r5
+
+#ifdef CONFIG_SWITCH_FRAME_DUMP
+	lcall	_up_dumpstack
+#endif
+	/* Then restore the context from the stack */
+
+	pop	_bp 
+	pop	psw
+	pop	ar1 
+	pop	ar0 
+	pop	ar7 
+	pop	ar6 
+	pop	ar5 
+	pop	ar4 
+	pop	ar3 
+	pop	ar2 
+	pop	b 
+	pop	dph
+	pop	dpl 
+
+	/* Restore the interrupt state per the stored IE value */
+
+	pop	acc
+	jb	acc.7,00003$
+	clr	ie.7
+	sjmp	00004$
+  00003$:
+	setb	ie.7
+  00004$:
+
+	pop acc
+	ret
+  _endasm;
 }
 
 

@@ -66,53 +66,6 @@
  **************************************************************************/
 
 /**************************************************************************
- * Name: up_pushcontext
- *
- * Description:
- *   Push the current execution context onto the before the stack.  Similar
- *   operations are executed from the interrupt state save.
- *
- * Inputs:
- *   None
- *
- * Return:
- *   Returns the stack pointer (always non-zero).  However, when
- *   up_popcontext() executes, it will appear as a return from this
- *   function with return value == 0
- *
- **************************************************************************/
-
-static ubyte up_pushcontext(void) __naked
-{
-  /* Push the current execution context onto the stack. */
-
-  _asm
-	push	acc
-	push	ie
-	mov	dptr, #0 /* Save return value (dpl) = 0 */
-	push	dpl
-	push	dph
-	push	b
-	push	ar2
-	push	ar3
-	push	ar4
-	push	ar5
-	push	ar6
-	push	ar7
-	push	ar0
-	push	ar1
-	push	psw
-	clr	psw
-	push	_bp
-
-	/* And return the current stack pointer value in dpl */
-
-	mov	dpl, sp
-	ret
-  _endasm;
-}
-
-/**************************************************************************
  * Public Functions
  **************************************************************************/
 
@@ -132,38 +85,61 @@ static ubyte up_pushcontext(void) __naked
  *
  **************************************************************************/
 
-ubyte up_savecontext(FAR struct xcptcontext *context)
+ubyte up_savecontext(FAR struct xcptcontext *context) _naked
 {
-  irqstate_t flags = irqsave();
-  ubyte sp = up_pushcontext();
-  if (sp)
-    {
-      /* Now copy the current stack frame (including the saved execution
-       * context) from internal RAM to XRAM.
-       */
+ _asm
+	/* Create the stack frame that we want when it is time to restore
+	 * this* context.  The return address will be the return address
+	 * of this function, the return value will be zero.
+	 */
 
-      ubyte nbytes     = sp - (STACK_BASE-1);
-      NEAR ubyte *src  = (NEAR ubyte*)STACK_BASE;
-      FAR  ubyte *dest = context->stack;
+	clr	a
+	push	acc	/* ACC = 0 */
+	push	ie
+	mov	a, #1
+	push	acc	/* DPL = 1 */
+	clr	a
+	push	acc	/* DPH = 0 */
+	push	b
+	push	ar2
+	push	ar3
+	push	ar4
+	push	ar5
+	push	ar6
+	push	ar7
+	push	ar0
+	push	ar1
+	push	psw
+	clr	psw
+	push	_bp
 
-      /* Then copy the stack info into the context structure */
+	/* Disable interrupts while we create a snapshot of the stack */
 
-      context->nbytes = nbytes;
-      while (nbytes--)
-        {
-          *dest++ = *src++;
-        }
+	push	ie
+	mov	ea, 0
 
-      /* Return zero so that the return behavior is similar to setjmp */
+	/* Now copy the current stack frame (including the saved execution
+	 * context) from internal RAM to XRAM.
+	 */
 
-      irqrestore(flags);
-      return 0;
-    }
+	push	sp
+	lcall	_up_savestack
+	pop	acc
 
-  /* Return one so that the return behavior is similar to setjmp */
+	/* Restore the interrupt state */
 
-  irqrestore(flags);
-  return 1;
+	pop	ie
+
+	/* Now that we have a snapshot of the desired stack frame saved,
+	 * restore the correct stackpointer.
+	 */
+
+	mov	a, sp
+	subb	a, #15
+	mov	sp, a
+	mov	dpl,#0
+	ret
+  _endasm;
 }
 
 /**************************************************************************
@@ -180,18 +156,17 @@ ubyte up_savecontext(FAR struct xcptcontext *context)
  *   None
  *
  * Assumptions:
- *   - We are in an interrupt handler with g_irqtos set
  *   - Interrupts are disabled
  *
  **************************************************************************/
 
-void up_savestack(FAR struct xcptcontext *context)
+void up_savestack(FAR struct xcptcontext *context, ubyte tos)
 {
   /* Now copy the current stack frame (including the saved execution
    * context) from internal RAM to XRAM.
    */
 
-  ubyte nbytes     = g_irqtos - (STACK_BASE-1);
+  ubyte nbytes     = tos - (STACK_BASE-1);
   NEAR ubyte *src  = (NEAR ubyte*)STACK_BASE;
   FAR  ubyte *dest = context->stack;
 

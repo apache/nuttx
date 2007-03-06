@@ -94,7 +94,7 @@ void up_release_pending(void)
            * Just copy the current registers into the OLD rtcb.
            */
 
-           up_savestack(&rtcb->xcp);
+           up_savestack(&rtcb->xcp, g_irqtos);
 
           /* Restore the exception context of the rtcb at the (new) head 
            * of the g_readytorun task list.
@@ -103,9 +103,11 @@ void up_release_pending(void)
           rtcb = (FAR _TCB*)g_readytorun.head;
           dbg("New Active Task TCB=%p\n", rtcb);
 
-          /* Then switch contexts */
+          /* Then setup so that the context will be performed on exit
+           * from the interrupt.
+           */
 
-          up_restorestack(&rtcb->xcp);
+          g_irqcontext = &rtcb->xcp;
         }
 
       /* Copy the exception context into the TCB of the task that

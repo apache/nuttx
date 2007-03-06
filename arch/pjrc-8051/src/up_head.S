@@ -55,6 +55,7 @@
  ************************************************************/
 
 	.globl	_g_irqtos
+	.globl	_g_irqcontext
 
 /************************************************************
  * Public Functions
@@ -167,18 +168,36 @@ _up_interrupt:
 	clr	psw
 	push	_bp
 
-	/* Mark that we are in an interrupt */
+	/* Save the IRQ number in r3 */
+
+	mov	r2, a
+
+	/* Mark that we are in an interrupt and provide the top
+	 * of stack pointer to the context switching logic.
+	 */
 
 	mov	dptr, #_g_irqtos
+	mov	a, sp
         movx    @dptr, a
+
+	/* Nullify the context pointer.  If a context switch is
+	 * needed, this will be set to the address of the context
+	 * structure.
+	 */
+
+	mov	dptr,#_g_irqcontext
+	clr	a
+	movx	@dptr,a
+	inc	dptr
+	movx	@dptr,a
 
 	/* Now call void irq_dispatch(int irq, FAR void *context)
          *
 	 * First, create the first argument as (int)irqno
 	 */
 
-        mov     dpl, a
-	clr	dph
+        mov     dpl, r2
+	mov	dph, #0
 
         /* Create the second argument (void *context) on the stack */
 
@@ -186,30 +205,120 @@ _up_interrupt:
 	clr	a
 	push	acc
 
-	/* Then dispatch the IRQ.  On return, the stack is off by
-	 * by two because the above two pushes, but we fix that by
-	 * reloading sp from g_irqtos below.
-	 */
+	/* Then dispatch the IRQ. */
 
 	lcall	_irq_dispatch
-
-	/* Get the stackpointer.  This might be the stack pointer that
-	 * we increment above or it might be the stack pointer of a
-	 * new task if the a context switch happened during the
-	 * interrupt handling.
-	 */
-
-	mov	dptr, #_g_irqtos
-	movx	a, @dptr
-	mov	sp, a
+	pop	acc
+	pop	acc
 
 	/* Indicate that we are no longer in an interrupt */
 
+	mov	dptr, #_g_irqtos
+	clr	a
+        movx    @dptr, a
+
+	/* Check if a context switch is pending */
+
+	mov	dptr,#_g_irqcontext
+	movx	a, @dptr
+	mov     r2, a
+	inc	dptr
+	movx	a, @dptr
+	mov	r3, a
+
+        orl     a, r2
+        jz      00003$
+
+	/* A conext switch is pending Clear g_irqcontext */
+
+	mov	dpl, r2
+	mov	dph, r3
 	clr	a
 	movx	@dptr, a
+	inc	dptr
+	movx	@dptr, a
 
-	/* Then return from the interrupt */
+#ifdef CONFIG_INTERRUPT_FRAME_DUMP
+	mov	dpl, r2
+	mov	dph, r3
+	push	ar2
+	push	ar3
+	lcall	_up_dumpframe
+	pop	ar3
+	pop	ar2
+#endif
 
+	/* Register usage in the following:
+	 *
+	 * R0   - Holds working the 8-bit IRAM pointer
+	 * R1   - Not used
+	 * R2-3 - Holds the working 16-bit XRAM pointer
+	 * R4   - Holds the working byte count
+	 * R5   - Holds the new stack pointer
+	 * R6-7 - Not used
+	 */
+
+	/* Fetch r4 = context->nbytes */
+
+	mov	dpl, r2
+	mov	dph, r3
+	movx	a, @dptr
+	mov	r4, a
+
+	/* Save the new stack pointer in r5 */
+
+	add	a, #(STACK_BASE-1)
+	mov	r5, a
+
+	/* Save r2-3 = &context->stack */
+
+	inc	dptr
+	mov	r2, dpl
+	mov	r3, dph
+
+	/* Set r0 = stack base address */
+
+	mov	r0, #STACK_BASE
+
+	/* Top of the copy loop */
+00001$:
+	dec	r4
+	jz	00002$
+
+	/* Fetch the next byte from context->stack */
+
+	mov	dpl, r2
+	mov	dph, r3
+	movx	a,@dptr
+
+	/* Increment the XRAM pointer */
+
+	inc	dptr
+	mov	r2, dpl
+	mov	r3, dph
+
+	/* Save the next byte into IRAM */
+
+	mov	@r0, a
+
+	/* Increment the IRAM pointer */
+
+	inc	r0
+	sjmp	00001$
+
+	/* Set the new stack pointer */
+
+00002$:
+	mov	sp, r5
+
+#ifdef CONFIG_INTERRUPT_FRAME_DUMP
+	lcall	_up_dumpstack
+#endif
+	/* Then restore the context from the stack and return
+	 * from the interrupt
+	 */
+
+00003$:
 	pop	_bp 
 	pop	psw
 	pop	ar1 
@@ -223,18 +332,6 @@ _up_interrupt:
 	pop	b
 	pop	dph
 	pop	dpl
-
-	/* Restore the interrupt state per the stored IE value */
-
+	pop	ie
 	pop	acc
-	jb	acc.7, 00001$
-	clr	ie.7
-	sjmp	00002$
-  00001$:
-	setb	ie.7
-  00002$:
-
-	/* Finally pop off the ACC, which was the first register saved. */
-
-	pop acc
 	reti

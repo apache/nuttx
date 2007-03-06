@@ -48,12 +48,12 @@ CSRCS		= up_initialize.c up_idle.c up_interruptcontext.c \
 		  up_releasepending.c up_reprioritizertr.c \
 		  up_exit.c up_assert.c up_allocateheap.c \
 		  up_irq.c up_savecontext.c up_restorecontext.c \
-		  up_timerisr.c up_putc.c
+		  up_timerisr.c up_putc.c up_debug.c
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 SRCS		= $(SSRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
 
-SDCCLIBDIR	= /usr/local/share/sdcc/lib/large
+SDCCLIBDIR	= /usr/local/share/sdcc/lib/large-stack-auto
 SDCCPATH	= -L$(SDCCLIBDIR)
 SDCCLIBS	= -llibfloat.lib -llibint.lib -lliblong.lib -llibmysdcc.lib -lmcs51.lib
 
@@ -66,7 +66,7 @@ LDLIBS		= $(addprefix -l,$(notdir $(LINKLIBS)))
 
 LDFLAGS		= --model-large --nostdlib \
 		  --data-loc 0x30 --iram-size 0x100 \
-		  --code-loc 0x20c0 --code-size 0x5f40 \
+		  --code-loc 0x2100 --code-size 0x5f40 \
 		  --xram-loc 0x0100 --xram-size 0x1f00
 
 DEPSRCS		= $(SRCS) $(LINKSSRCS)
