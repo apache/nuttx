@@ -64,6 +64,7 @@
  * us and that only leaves us having to do some os specific things
  * below.
  */
+	.text
         .global __start
 	.type	__start, #function
 __start:
@@ -122,7 +123,9 @@ __start:
 	 * _sbss is the start of the BSS region (see ld.script)
 	 * _ebss is the end of the BSS regsion (see ld.script)
 	 * The idle task stack starts at the end of BSS and is
-	 * of size CONFIG_PROC_STACK_SIZE
+	 * of size CONFIG_PROC_STACK_SIZE.  The heap continues
+	 * from there until the end of memory.  See g_heapstart
+	 * below.
 	 */
 
 LC0:	.long	_sbss
@@ -134,6 +137,20 @@ LC2:	.long	_eronly	/* Where .data defaults are stored in FLASH */
 	.long	_sdata	/* Where .data needs to reside in SDRAM */
 	.long	_edata
 #endif
+	.size	__start, .-__start
+
+	/* This global variable is unsigned long g_heapstart and is
+	 * exported from here only because of its coupling to LCO
+	 * above.
+	 */
+
+	.data
+	.align	4
+	.globl	g_heapstart
+	.type	g_heapstart, object
+g_heapstart:
+	.long	_ebss+CONFIG_PROC_STACK_SIZE
+	.size	g_heapstart, .-g_heapstart
 
 	.end
 

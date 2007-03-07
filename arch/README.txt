@@ -226,10 +226,6 @@ arch/pjrc-8051
     8051 Microcontroller.  This port uses the PJRC 87C52 development system
     and the SDCC toolchain.   This port is not quite ready for prime time.
 
-arch/axiom-mc68
-    For the Motorola (Freescale) MC68HC908GP32 Microcontroller using the
-    Axiom CMS8GP32 development board. This has not yet been checked-in.
-
 arch/sim
   x86 Linux Simulation</b>.  Fully functional.
 

@@ -176,7 +176,9 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts */
 
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
   irqrestore(SVC_MODE | F_BIT);
+#endif
 }
 
 /************************************************************
