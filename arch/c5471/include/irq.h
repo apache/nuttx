@@ -212,7 +212,7 @@ static inline void system_call(swint_t func, int parm1,
      "mov\tr0,%0\n\t"
      "mov\tr1,%1\n\t"
      "mov\tr2,%2\n\t"
-     "mov\tr2,%3\n\t"
+     "mov\tr3,%3\n\t"
      "swi\t0x900001\n\t"
      :
      : "r" ((long)(func)),  "r" ((long)(parm1)),

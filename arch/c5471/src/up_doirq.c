@@ -41,7 +41,9 @@
 #include <sys/types.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <assert.h>
 #include "c5471.h"
+#include "os_internal.h"
 #include "up_internal.h"
 
 /************************************************************
@@ -66,6 +68,9 @@
 
 void up_doirq(int irq, uint32* regs)
 {
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  PANIC(OSERR_ERREXCEPTION);
+#else
   if ((unsigned)irq < NR_IRQS)
     {
        /* Mask and acknowledge the interrupt */
@@ -80,4 +85,5 @@ void up_doirq(int irq, uint32* regs)
 
        up_enable_irq(irq);
     }
+#endif
 }

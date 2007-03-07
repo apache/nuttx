@@ -42,6 +42,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <debug.h>
+#include <nuttx/irq.h>
+#include "os_internal.h"
+#include "up_internal.h"
 
 /************************************************************
  * Definitions
@@ -55,6 +58,21 @@
  * Private Functions
  ************************************************************/
 
+static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
+{
+  /* Are we in an interrupt handler or the idle task? */
+
+  if (current_regs || ((_TCB*)g_readytorun.head)->pid == 0)
+    {
+       (void)irqsave();
+        for(;;);
+    }
+  else
+    {
+      exit(errorcode);
+    }
+}
+
 /************************************************************
  * Public Funtions
  ************************************************************/
@@ -67,7 +85,7 @@ void up_assert(const ubyte *filename, int lineno)
 {
   dbg("Assertion failed at file:%s line: %d\n",
       filename, lineno);
-  exit(EXIT_FAILURE);
+  _up_assert(EXIT_FAILURE);
 }
 
 /************************************************************
@@ -78,5 +96,5 @@ void up_assert_code(const ubyte *filename, int lineno, int errorcode)
 {
   dbg("Assertion failed at file:%s line: %d error code: %d\n",
        filename, lineno, errorcode);
-  exit(errorcode);
+  _up_assert(errorcode);
 }

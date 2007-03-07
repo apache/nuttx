@@ -96,8 +96,8 @@ struct up_dev_s
   ubyte                xmit_fifo_size;	/* Size of transmit FIFO */
   ubyte                irq;		/* IRQ associated with
 					 * this UART */
-  boolean              parity;		/* 0=none, 1=odd, 2=even */
-  boolean              bits;		/* Number of bits (7 or 8) */
+  ubyte                parity;		/* 0=none, 1=odd, 2=even */
+  ubyte                bits;		/* Number of bits (7 or 8) */
 #ifdef CONFIG_UART_HWFLOWCONTROL
   boolean              flowcontrol;	/* TRUE: Hardware flow control
 					 * is enabled. */
@@ -1140,3 +1140,4 @@ int up_putc(int ch)
   up_restoreuartint(&CONSOLE_DEV, ier);
   return ch;
 }
+

@@ -136,6 +136,7 @@ static inline void up_vectorinitialize(void)
   up_vector_t *src  = g_vectorinittab;
   up_vector_t *dest = (up_vector_t*)&_svectors;
   int i;
+
   for (i = 0; i < NVECTORS; i++)
     {
       *dest++ = *src++;

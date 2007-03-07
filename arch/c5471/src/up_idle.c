@@ -75,5 +75,12 @@
 
 void up_idle(void)
 {
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  /* If the system is idle, then process "fake" timer interrupts.
+   * Hopefully, something will wake up.
+   */
+
+  sched_process_timer();
+#endif
 }
 
