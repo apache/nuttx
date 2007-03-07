@@ -83,5 +83,9 @@ void up_initial_state(_TCB *tcb)
   memset(xcp, 0, sizeof(struct xcptcontext));
   xcp->regs[REG_SP]   = (uint32)tcb->adj_stack_ptr;
   xcp->regs[REG_PC]   = (uint32)tcb->start;
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  xcp->regs[REG_CPSR] = SVC_MODE | I_BIT | F_BIT;
+#else
   xcp->regs[REG_CPSR] = SVC_MODE | F_BIT;
+#endif
 }

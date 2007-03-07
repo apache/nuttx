@@ -43,6 +43,7 @@
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
+#include <debug.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs.h>
@@ -56,6 +57,10 @@
  ************************************************************/
 
 #define BASE_BAUD     115200
+
+#if defined(CONFIG_UART_IRDA_HWFLOWCONTROL) || defined(CONFIG_UART_MODEM_HWFLOWCONTROL)
+# define CONFIG_UART_HWFLOWCONTROL
+#endif
 
 /************************************************************
  * Private Types
@@ -93,15 +98,17 @@ struct up_dev_s
 					 * this UART */
   boolean              parity;		/* 0=none, 1=odd, 2=even */
   boolean              bits;		/* Number of bits (7 or 8) */
+#ifdef CONFIG_UART_HWFLOWCONTROL
   boolean              flowcontrol;	/* TRUE: Hardware flow control
 					 * is enabled. */
+#endif
   boolean              stopbits2;	/* TRUE: Configure with 2
 					 * stop bits instead of 1 */
   boolean              xmitwaiting;	/* TRUE: User is waiting
 					 * for space in xmit.buffer */
   boolean              recvwaiting;	/* TRUE: User is waiting
 					 * for space in recv.buffer */
-  boolean              isconsole;       /* TRUE: This is the serila console */
+  boolean              isconsole;       /* TRUE: This is the serial console */
   sem_t                closesem;	/* Looks out new opens while
 					 * close is in progress */
   sem_t                xmitsem;		/* Used to wakeup user waiting
@@ -124,7 +131,6 @@ static ssize_t up_read(struct file *filep, char *buffer, size_t buflen);
 static ssize_t up_write(struct file *filep, const char *buffer, size_t buflen);
 static int     up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static void    up_uartsetup(up_dev_t *dev);
-static void    up_delay(int milliseconds);
 
 /************************************************************
  * Private Variables
@@ -150,7 +156,9 @@ static up_dev_t g_irdaport =
   .baud           = CONFIG_UART_IRDA_BAUD,
   .parity         = CONFIG_UART_IRDA_PARITY,
   .bits           = CONFIG_UART_IRDA_BITS,
-  .flowcontrol    = CONFIG_UART_IRDA_HWFLOWCONTROL,
+#ifdef CONFIG_UART_IRDA_HWFLOWCONTROL
+  .flowcontrol    = TRUE,
+#endif
   .stopbits2      = CONFIG_UART_IRDA_2STOP,
 };
 
@@ -165,7 +173,9 @@ static up_dev_t g_modemport =
   .baud           = CONFIG_UART_MODEM_BAUD,
   .parity         = CONFIG_UART_MODEM_PARITY,
   .bits           = CONFIG_UART_MODEM_BITS,
-  .flowcontrol    = CONFIG_UART_MODEM_HWFLOWCONTROL,
+#ifdef CONFIG_UART_MODEM_HWFLOWCONTROL
+  .flowcontrol    = TRUE,
+#endif
   .stopbits2      = CONFIG_UART_MODEM_2STOP,
 };
 
@@ -464,22 +474,13 @@ static inline void up_saveregisters(up_dev_t *dev)
 {
   dev->regs.ier = up_inserial(dev, UART_IER_OFFS);
   dev->regs.lcr = up_inserial(dev, UART_LCR_OFFS);
+#ifdef CONFIG_UART_HWFLOWCONTROL
   if (dev->flowcontrol)
     {
       dev->regs.efr = up_inserial(dev, UART_EFR_OFFS);
       dev->regs.tcr = up_inserial(dev, UART_TCR_OFFS);
     }
-}
-
-#define LOOPS_PER_MSEC 1250
-
-static void up_delay(int milliseconds)
-{
-  volatile int i, j;
-  for (i = 0; i < milliseconds; i++) {
-    for (j = 0; j < LOOPS_PER_MSEC; j++) {
-    }
-  }
+#endif
 }
 
 /************************************************************
@@ -582,6 +583,51 @@ static void up_xmitchars(up_dev_t *dev)
 }
 
 /************************************************************
+ * Name: up_putxmitchar
+ ************************************************************/
+
+static void up_putxmitchar(up_dev_t *dev, int ch)
+{
+  int nexthead = dev->xmit.head + 1;
+  if (nexthead >= dev->xmit.size)
+    {
+      nexthead = 0;
+    }
+
+  if (nexthead != dev->xmit.tail)
+    {
+      dev->xmit.buffer[dev->xmit.head] = ch;
+      dev->xmit.head = nexthead;
+    }
+  else
+    {
+      /* Transfer some characters with interrupts disabled */
+
+      up_xmitchars(dev);
+
+      /* If we unsuccessful in making room in the buffer.
+       * then transmit the characters with interrupts
+       * enabled and wait for result.
+       */
+
+      if (nexthead == dev->xmit.tail)
+        {
+          /* Still no space */
+
+          dev->xmitwaiting = TRUE;
+
+          /* Wait for some characters to be sent from the buffer
+           * with the TX interrupt disabled.
+           */
+
+         up_enabletxint(dev);
+         up_takesem(&dev->xmitsem);
+         up_disabletxint(dev);
+       }
+   }
+}
+
+/************************************************************
  * Name: up_interrupt
  ************************************************************/
 
@@ -665,6 +711,7 @@ static int up_interrupt(int irq, void *context)
 
 static void up_uartsetup(up_dev_t *dev)
 {
+#ifdef CONFIG_SUPPRESS_UART_CONFIG
   unsigned int cval;
   uint16  mrs;
 
@@ -701,14 +748,17 @@ static void up_uartsetup(up_dev_t *dev)
   up_setrate(dev, dev->baud);
   up_setmode(dev, cval);
 
+#ifdef CONFIG_UART_HWFLOWCONTROL
   if (dev->flowcontrol)
     {
       serial_enable_hw_flow_control(dev);
     }
   else
+#endif
     {
       serial_disable_hw_flow_control(dev);
     }
+#endif
 }
 
 /************************************************************
@@ -749,46 +799,20 @@ static ssize_t up_write(struct file *filep, const char *buffer, size_t buflen)
    */
 
   up_disabletxint(dev);
-  while (buflen)
+  for (; buflen; buflen--)
     {
-      int nexthead = dev->xmit.head + 1;
-      if (nexthead >= dev->xmit.size)
+      int ch = *buffer++;
+
+      /* Put the character into the transmit buffer */
+
+      up_putxmitchar(dev, ch);
+ 
+     /* If this is the console, then we should replace LF with LF-CR */
+
+      if (ch == '\n')
         {
-          nexthead = 0;
+          up_putxmitchar(dev, '\r');
         }
-
-      if (nexthead != dev->xmit.tail)
-        {
-          dev->xmit.buffer[dev->xmit.head] = *buffer++;
-          dev->xmit.head = nexthead;
-          buflen--;
-        }
-      else
-        {
-          /* Transfer some characters with interrupts disabled */
-
-          up_xmitchars(dev);
-
-          /* If we unsuccessful in making room in the buffer.
-           * then transmit the characters with interrupts
-           * enabled and wait for result.
-           */
-
-          if (nexthead == dev->xmit.tail)
-            {
-              /* Still no space */
-
-              dev->xmitwaiting = TRUE;
-
-              /* Wait for some characters to be sent from the buffer
-               * with the TX interrupt disabled.
-               */
-
-             up_enabletxint(dev);
-             up_takesem(&dev->xmitsem);
-             up_disabletxint(dev);
-           }
-       }
     }
 
   if (dev->xmit.head != dev->xmit.tail)
@@ -923,6 +947,10 @@ static int up_close(struct file *filep)
       up_givesem(&dev->closesem);
       return OK;
     }
+
+  /* There are no more references to the port */
+
+  dev->open_count = 0;
 
   /* Stop accepting input */
 
@@ -1100,12 +1128,12 @@ int up_putc(int ch)
 
   /* Check for LF */
 
-  if (ch == 10)
+  if (ch == '\n')
     {
       /* Add CR */
 
       up_waittxfifonotfull(&CONSOLE_DEV);
-      up_outserialchar(&CONSOLE_DEV, 13);
+      up_outserialchar(&CONSOLE_DEV, '\r');
     }
 
   up_waittxfifonotfull(&CONSOLE_DEV);

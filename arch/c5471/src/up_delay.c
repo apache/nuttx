@@ -1,5 +1,5 @@
 /************************************************************
- * up_internal.h
+ * up_delay.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,106 +33,70 @@
  *
  ************************************************************/
 
-#ifndef __UP_INTERNAL_H
-#define __UP_INTERNAL_H
-
 /************************************************************
  * Included Files
  ************************************************************/
+
+#include <nuttx/config.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <semaphore.h>
+#include <string.h>
+#include <errno.h>
+#include <debug.h>
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <nuttx/fs.h>
+#include <arch/serial.h>
+#include "c5471.h"
+#include "os_internal.h"
+#include "up_internal.h"
 
 /************************************************************
  * Definitions
  ************************************************************/
 
-/* Bring-up debug configurations */
-
-#define CONFIG_SUPPRESS_INTERRUPTS  1 /* Do not enable interrupts */
-#define CONFIG_SUPPRESS_UART_CONFIG 1 /* Do not reconfig UART */
+#define LOOPS_PER_MSEC 1250
 
 /************************************************************
- * Public Types
+ * Private Types
  ************************************************************/
 
-#ifndef __ASSEMBLY__
-typedef void (*up_vector_t)(void);
-#endif
-
 /************************************************************
- * Public Variables
+ * Private Function Prototypes
  ************************************************************/
 
-#ifndef __ASSEMBLY__
-/* This holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during
- * interrupt processing.
- */
-
-extern uint32 *current_regs;
-
-/* This is the beginning of heap as provided from up_head.S.
- * This is the first address in DRAM after the loaded
- * program+bss+idle stack.  The end of the heap is
- * CONFIG_DRAM_END
- */
-
-extern uint32 g_heapstart;
-#endif
+/************************************************************
+ * Private Variables
+ ************************************************************/
 
 /************************************************************
- * Inline Functions
+ * Private Functions
  ************************************************************/
 
 
 /************************************************************
- * Public Functions
+ * Public Funtions
  ************************************************************/
 
-#ifndef __ASSEMBLY__
+/************************************************************
+ * Name: up_delay
+ *
+ * Description:
+ *   Delay inline for the requested number of milliseconds.
+ *   NOT multi-tasking friendly.
+ *
+ ************************************************************/
 
-/* Defined in files with the same name as the function */
+void up_delay(int milliseconds)
+{
+  volatile int i;
+  volatile int j;
 
-extern void up_copystate(uint32 *dest, uint32 *src);
-extern void up_dataabort(uint32 *regs);
-extern void up_delay(int milliseconds);
-extern void up_doirq(int irq, uint32* regs);
-extern void up_fullcontextrestore(uint32 *regs) __attribute__ ((noreturn));
-extern void up_irqinitialize(void);
-extern void up_prefetchabort(uint32 *regs);
-extern int  up_saveusercontext(uint32 *regs);
-extern void up_sigdeliver(void);
-extern void up_syscall(uint32 *regs);
-extern int  up_timerisr(int irq, uint32 *regs);
-extern void up_undefinedinsn(uint32 *regs);
-
-#ifdef CONFIG_DEBUG
-extern void up_lowputc(char ch);
-#else
-# define up_lowputc(ch)
-#endif
-
-/* Defined in up_vectors.S */
-
-extern void up_vectorundefinsn(void);
-extern void up_vectorswi(void);
-extern void up_vectorprefetch(void);
-extern void up_vectordata(void);
-extern void up_vectoraddrexcptn(void);
-extern void up_vectorirq(void);
-extern void up_vectorfiq(void);
-
-/* Defined in up_serial.c */
-
-extern void up_earlyserialinit(void);
-extern void up_serialinit(void);
-
-/* Defined in up_timerisr.c */
-
-extern void up_timerinit(void);
-
-/* Defined in up_irq.c */
-
-extern void up_maskack_irq(int irq);
-
-#endif /* __ASSEMBLY__ */
-
-#endif  /* __UP_INTERNAL_H */
+  for (i = 0; i < milliseconds; i++)
+    {
+        for (j = 0; j < LOOPS_PER_MSEC; j++)
+          {
+          }
+    }
+}

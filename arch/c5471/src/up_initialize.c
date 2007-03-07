@@ -88,7 +88,9 @@ void up_initialize(void)
 
   /* Initialize the system timer interrupt */
 
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
   up_timerinit();
+#endif
 
   /* Register devices */
 
