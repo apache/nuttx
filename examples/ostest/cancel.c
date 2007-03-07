@@ -150,7 +150,6 @@ static void start_thread(pthread_t *waiter, int cancelable)
 
   printf("start_thread: Yielding\n");
   pthread_yield();
-
 }
 
 static void restart_thread(pthread_t *waiter, int cancelable)

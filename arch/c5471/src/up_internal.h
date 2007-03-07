@@ -47,7 +47,7 @@
 /* Bring-up debug configurations */
 
 #define CONFIG_SUPPRESS_INTERRUPTS  1 /* Do not enable interrupts */
-#define CONFIG_SUPPRESS_UART_CONFIG 1 /* Do not reconfig UART */
+#undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
 
 /************************************************************
  * Public Types

@@ -75,8 +75,8 @@
 
 void up_idle(void)
 {
-  /* If the system, then process timer interrupts.  Hopefully
-   * something will wake up.
+  /* If the system is idle, then process "fake" timer interrupts.
+   * Hopefully, something will wake up.
    */
 
   sched_process_timer();

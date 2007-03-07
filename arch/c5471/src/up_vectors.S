@@ -141,7 +141,7 @@ up_vectorirq:
 					 * no pending interrupt */
 .Lhaveirq:
 #endif
-	/* Then call the data abort handler with interrupt disabled.
+	/* Then call the IRQ handler with interrupt disabled.
 	 * rq_dispatch(int irq, struct xcptcontext *xcp)
 	 */
 
@@ -297,7 +297,7 @@ up_vectorprefetch:
 	add	r0, sp, #(4*REG_PC)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1, r2}
 
-	/* Then call the data abort handler with interrupt disabled.
+	/* Then call the prefetch abort handler with interrupt disabled.
 	 * void up_prefetchabort(struct xcptcontext *xcp)
 	 */
 
@@ -352,7 +352,7 @@ up_vectorundefinsn:
 	add	r0, sp, #(4*REG_PC)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1, r2}
 
-	/* Then call the data abort handler with interrupt disabled.
+	/* Then call the undef insn handler with interrupt disabled.
 	 * void up_undefinedinsn(struct xcptcontext *xcp)
 	 */
 
