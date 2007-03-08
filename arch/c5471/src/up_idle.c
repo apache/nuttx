@@ -75,9 +75,10 @@
 
 void up_idle(void)
 {
-#ifdef CONFIG_SUPPRESS_INTERRUPTS
-  /* If the system is idle, then process "fake" timer interrupts.
-   * Hopefully, something will wake up.
+#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
+  /* If the system is idle and there are no timer interrupts,
+   * then process "fake" timer interrupts. Hopefully, something
+   * will wake up.
    */
 
   sched_process_timer();

@@ -252,14 +252,18 @@ static inline void up_disablerxint(up_dev_t *dev)
 
 static inline void up_enabletxint(up_dev_t *dev)
 {
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
   dev->regs.ier |= UART_IER_XmitInt;
   up_serialout(dev, UART_IER_OFFS, dev->regs.ier);
+#endif
 }
 
 static inline void up_enablerxint(up_dev_t *dev)
 {
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
   dev->regs.ier |= UART_IER_RecvInt;
   up_serialout(dev, UART_IER_OFFS, dev->regs.ier);
+#endif
 }
 
 static inline void up_disableuartint(up_dev_t *dev, uint16 *ier)
@@ -617,7 +621,7 @@ static void up_putxmitchar(up_dev_t *dev, int ch)
             {
               /* Still no space */
 
-#ifdef CONFIG_SUPPRESS_INTERRUPTS
+#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_SERIAL_INTS)
               up_waittxfifonotfull(dev);
 #else
               dev->xmitwaiting = TRUE;
@@ -876,7 +880,7 @@ static ssize_t up_read(struct file *filep, char *buffer, size_t buflen)
         }
     }
 
-  up_enabletxint(dev);
+  up_enablerxint(dev);
 
   return ret;
 }
@@ -1026,8 +1030,10 @@ static int up_open(struct file *filep)
 
       /* Attache and enabled the IRQ */
 
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
       ret = irq_attach(dev->irq, up_interrupt);
       if (ret == OK)
+#endif
         {
           /* Mark the io buffers empty */
 
@@ -1038,7 +1044,9 @@ static int up_open(struct file *filep)
 
           /* Finally, enable interrupts */
 
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
           up_enable_irq(dev->irq);
+#endif
           up_enablerxint(dev);
         }
       irqrestore(flags);
