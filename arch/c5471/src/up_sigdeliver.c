@@ -80,6 +80,7 @@ void up_sigdeliver(void)
   uint32 regs[XCPTCONTEST_REGS];
   sig_deliver_t sigdeliver;
 
+  up_ledon(LED_SIGNAL);
   ASSERT(rtcb->xcp.sigdeliver);
 
   /* Save the real return state on the stack. */
@@ -113,5 +114,6 @@ void up_sigdeliver(void)
    * execution.
    */
 
+  up_ledoff(LED_SIGNAL);
   up_fullcontextrestore(regs);
 }

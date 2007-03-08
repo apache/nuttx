@@ -68,6 +68,7 @@
 
 void up_doirq(int irq, uint32* regs)
 {
+  up_ledon(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC(OSERR_ERREXCEPTION);
 #else
@@ -85,5 +86,6 @@ void up_doirq(int irq, uint32* regs)
 
        up_enable_irq(irq);
     }
+  up_ledoff(LED_INIRQ);
 #endif
 }

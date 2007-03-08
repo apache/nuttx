@@ -119,6 +119,7 @@ STATUS up_create_stack(_TCB *tcb, size_t stack_size)
        tcb->adj_stack_ptr  = (uint32*)top_of_stack;
        tcb->adj_stack_size = size_of_stack;
 
+       up_ledon(LED_STACKCREATED);
        return OK;
      }
 

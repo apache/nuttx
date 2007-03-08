@@ -1,5 +1,5 @@
 /************************************************************
- * up_allocateheap.c
+ * up_leds.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,40 +39,69 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <debug.h>
-#include <nuttx/arch.h>
 #include "up_internal.h"
 
 /************************************************************
- * Private Definitions
+ * Definitions
  ************************************************************/
+
+#define CS2  *(volatile uint32*)0xffff2e08
+#define LEDS *(volatile uint32*)0x01000000
 
 /************************************************************
  * Private Data
  ************************************************************/
+
+static uint32 g_ledstate;
 
 /************************************************************
  * Private Functions
  ************************************************************/
 
 /************************************************************
- * Public Functions
+ * Public Funtions
  ************************************************************/
 
 /************************************************************
- * Name: up_allocate_heap
- *
- * Description:
- *   The heap may be statically allocated by
- *   defining CONFIG_HEAP_BASE and CONFIG_HEAP_SIZE.  If these
- *   are not defined, then this function will be called to
- *   dynamically set aside the heap region.
- *
+ * Name: up_ledinit
  ************************************************************/
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+#ifdef CONFIG_C5471_LEDS
+void up_ledinit(void)
 {
-  up_ledon(LED_HEAPALLOCATE);
-  *heap_start = (FAR void*)g_heapbase;
-  *heap_size = CONFIG_DRAM_END - g_heapbase;
+  /* Enable acces to LEDs */
+
+  CS2 = 0x000013db;
+
+  /* Turn LED 1-7 off; turn LED 0 on */
+
+  g_ledstate = 0x000000fe;
+  LEDS       = g_ledstate;
 }
+
+/************************************************************
+ * Name: up_ledon
+ ************************************************************/
+
+void up_ledon(int led)
+{
+  if (led < 8)
+    {
+      g_ledstate &= ~(1 << led);
+      LEDS        = g_ledstate;
+    }
+}
+
+/************************************************************
+ * Name: up_ledoff
+ ************************************************************/
+
+void up_ledoff(int led)
+{
+  if (led < 8)
+    {
+      g_ledstate |= (1 << led);
+      LEDS        = g_ledstate;
+    }
+}
+#endif /* CONFIG_C5471_LEDS */

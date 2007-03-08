@@ -99,4 +99,5 @@ void up_initialize(void)
   /* Initialize the serial device driver */
 
   up_serialinit();
+  up_ledon(LED_IRQSENABLED);
 }

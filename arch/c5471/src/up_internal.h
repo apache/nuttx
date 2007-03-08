@@ -48,6 +48,18 @@
 
 #define CONFIG_SUPPRESS_INTERRUPTS  1 /* Do not enable interrupts */
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
+#define CONFIG_C5471_LEDS           1 /* Use LEDs to show state */
+
+/* LED meanings */
+
+#define LED_STARTED                 0
+#define LED_HEAPALLOCATE            1
+#define LED_IRQSENABLED             2
+#define LED_STACKCREATED            3
+#define LED_INIRQ                   4
+#define LED_SIGNAL                  5
+#define LED_ASSERTION               6
+#define LED_PANIC                   7
 
 /************************************************************
  * Public Types
@@ -75,7 +87,7 @@ extern uint32 *current_regs;
  * CONFIG_DRAM_END
  */
 
-extern uint32 g_heapstart;
+extern uint32 g_heapbase;
 #endif
 
 /************************************************************
@@ -132,6 +144,18 @@ extern void up_timerinit(void);
 /* Defined in up_irq.c */
 
 extern void up_maskack_irq(int irq);
+
+/* Defined in up_leds.c */
+
+#ifdef CONFIG_C5471_LEDS
+extern void up_ledinit(void);
+extern void up_ledon(int led);
+extern void up_ledoff(int led);
+#else
+# define up_ledinit()
+# define up_ledon(led)
+# define up_ledoff(led)
+#endif
 
 #endif /* __ASSEMBLY__ */
 

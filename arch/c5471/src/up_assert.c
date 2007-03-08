@@ -65,7 +65,15 @@ static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
   if (current_regs || ((_TCB*)g_readytorun.head)->pid == 0)
     {
        (void)irqsave();
-        for(;;);
+        for(;;)
+          {
+#ifdef CONFIG_C5471_LEDS
+            up_ledon(LED_PANIC);
+            up_delay(250);
+            up_ledoff(LED_PANIC);
+            up_delay(250);
+#endif
+          }
     }
   else
     {
@@ -83,8 +91,9 @@ static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
 
 void up_assert(const ubyte *filename, int lineno)
 {
+  up_ledon(LED_ASSERTION);
   dbg("Assertion failed at file:%s line: %d\n",
-      filename, lineno);
+        filename, lineno);
   _up_assert(EXIT_FAILURE);
 }
 
@@ -94,7 +103,8 @@ void up_assert(const ubyte *filename, int lineno)
 
 void up_assert_code(const ubyte *filename, int lineno, int errorcode)
 {
+  up_ledon(LED_ASSERTION);
   dbg("Assertion failed at file:%s line: %d error code: %d\n",
-       filename, lineno, errorcode);
+        filename, lineno, errorcode);
   _up_assert(errorcode);
 }
