@@ -165,6 +165,8 @@ void mm_addregion(FAR void *heapstart, size_t heapsize)
   heapend  = MM_ALIGN_DOWN((size_t)heapstart + (size_t)heapsize);
   heapsize = heapend - heapbase;
 
+  lldbg("Region %d: base=%p size=%d\n", IDX+1, heapstart, heapsize);
+
   /* Add the size of this region to the total size of the heap */
 
   g_heapsize += heapsize;

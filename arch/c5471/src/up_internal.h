@@ -44,13 +44,16 @@
  * Definitions
  ************************************************************/
 
-/* Bring-up debug configurations */
+/* Bring-up debug configurations.  These are here (vs defconfig)
+ * because these should only be controlled during low level
+ * board bring-up and not part of normal platform configuration.
+ */
 
 #define CONFIG_SUPPRESS_INTERRUPTS  1 /* Do not enable interrupts */
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
-#define CONFIG_C5471_LEDS           1 /* Use LEDs to show state */
+#define CONFIG_C5471_STACKDUMP      1 /* Dump stack on assertion */
 
-/* LED meanings */
+/* LED definitions */
 
 #define LED_STARTED                 0
 #define LED_HEAPALLOCATE            1

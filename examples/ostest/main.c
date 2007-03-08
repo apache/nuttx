@@ -204,7 +204,7 @@ int user_start(int parm1, int parm2, int parm3, int parm4)
     }
   else
     {
-       printf("user_start: Started user_main at PID=%d\n", result);
+      printf("user_start: Started user_main at PID=%d\n", result);
     }
 
   return 0;

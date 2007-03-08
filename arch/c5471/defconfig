@@ -40,11 +40,13 @@
 # CONFIG_ROM_VECTORS - unique to c5471
 # CONFIG_DRAM_END - the size of installed DRAM.
 #   Unique to c5471
+# CONFIG_C5471_LEDS - Use LEDs to show state. Unique to c5471.
 #
 CONFIG_ARCH=c5471
 CONFIG_ARCH_C5471=y
 CONFIG_ROM_VECTORS=n
 CONFIG_DRAM_END=0x11000000
+CONFIG_C5471_LEDS=y
 
 #
 # C5471 specific device driver settings

@@ -589,14 +589,13 @@ static void up_xmitchars(up_dev_t *dev)
 static void up_putxmitchar(up_dev_t *dev, int ch)
 {
   int nexthead = dev->xmit.head + 1;
+  if (nexthead >= dev->xmit.size)
+    {
+      nexthead = 0;
+    }
 
   for(;;)
     {
-      if (nexthead >= dev->xmit.size)
-        {
-          nexthead = 0;
-        }
-
       if (nexthead != dev->xmit.tail)
         {
           dev->xmit.buffer[dev->xmit.head] = ch;

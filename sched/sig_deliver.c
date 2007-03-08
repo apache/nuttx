@@ -132,7 +132,7 @@ void sig_deliver(FAR _TCB *stcb)
 
       rpid = getpid();
 
-      /* Deliver the signal using its address environment */
+      /* Deliver the signal */
 
       (*sigq->action.sighandler)(sigq->info.si_signo, &sigq->info, NULL);
 

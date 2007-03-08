@@ -141,7 +141,7 @@ int files_releaselist(FAR struct filelist *list)
        /* Decrement the reference count */
 
        _files_semtake(list);
-       crefs = --list->fl_crefs;
+       crefs = --(list->fl_crefs);
        _files_semgive(list);
 
        /* If the count decrements to zero, then there is no reference

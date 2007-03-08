@@ -81,7 +81,10 @@ void up_sigdeliver(void)
   sig_deliver_t sigdeliver;
 
   up_ledon(LED_SIGNAL);
-  ASSERT(rtcb->xcp.sigdeliver);
+
+  dbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
+       rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
+  ASSERT(rtcb->xcp.sigdeliver != NULL);
 
   /* Save the real return state on the stack. */
 
@@ -99,12 +102,9 @@ void up_sigdeliver(void)
   sigdeliver           = rtcb->xcp.sigdeliver;
   rtcb->xcp.sigdeliver = NULL;
 
-  /* Then enable interrupts.  We should still be safe from
-   * any further signal handling actions until we also
-   * nullify tcb->xcp.sigdeliver.
-   */
+  /* Then restore the task interrupt statat. */
 
-  irqrestore(SVC_MODE | F_BIT);
+  irqrestore(regs[REG_CPSR]);
 
   /* Deliver the signals */
 
@@ -115,5 +115,6 @@ void up_sigdeliver(void)
    */
 
   up_ledoff(LED_SIGNAL);
+  dbg("Resuming\n");
   up_fullcontextrestore(regs);
 }
