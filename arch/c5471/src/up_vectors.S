@@ -50,13 +50,13 @@
  ************************************************************/
 
 	.data
-up_irqtmp:
+g_irqtmp:
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
-up_undeftmp:
+g_undeftmp:
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
-up_aborttmp:
+g_aborttmp:
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
 
@@ -102,7 +102,7 @@ up_vectorirq:
 
 	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
 	orr	lr, lr, #I_BIT | SVC_MODE
-	msr	spsr_c, lr		/* Swith to SVC mode */
+	msr	cpsr, lr		/* Swith to SVC mode */
 
 	/* Create a context structure */
 
@@ -156,7 +156,7 @@ up_vectorirq:
 	ldmia	sp, {r0-r15}^		/* Return */
 
 .Lirqtmp:
-	.word	up_irqtmp
+	.word	g_irqtmp
 
 	.align	5
 
@@ -231,7 +231,7 @@ up_vectordata:
 
 	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
 	orr	lr, lr, #I_BIT | SVC_MODE
-	msr	spsr_c, lr		/* Swith to SVC mode */
+	msr	cpsr, lr		/* Swith to SVC mode */
 
 	/* Create a context structure */
 
@@ -257,7 +257,7 @@ up_vectordata:
 	ldmia	sp, {r0-r15}^		/* Return */
 
 .Ldaborttmp:
-	.word	up_aborttmp
+	.word	g_aborttmp
 
 	.align	5
 
@@ -286,7 +286,7 @@ up_vectorprefetch:
 
 	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
 	orr	lr, lr, #I_BIT | SVC_MODE
-	msr	spsr_c, lr		/* Swith to SVC mode */
+	msr	cpsr, lr		/* Swith to SVC mode */
 
 	/* Create a context structure */
 
@@ -312,7 +312,7 @@ up_vectorprefetch:
 	ldmia	sp, {r0-r15}^		/* Return */
 
 .Lpaborttmp:
-	.word	up_aborttmp
+	.word	g_aborttmp
 
 	.align	5
 
@@ -341,7 +341,7 @@ up_vectorundefinsn:
 
 	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
 	orr	lr, lr, #I_BIT | SVC_MODE
-	msr	spsr_c, lr		/* Swith to SVC mode */
+	msr	cpsr, lr		/* Swith to SVC mode */
 
 	/* Create a context structure */
 
@@ -367,7 +367,7 @@ up_vectorundefinsn:
 	ldmia	sp, {r0-r15}^		/* Return */
 
 .Lundeftmp:
-	.word	up_undeftmp
+	.word	g_undeftmp
 
 	.align	5
 

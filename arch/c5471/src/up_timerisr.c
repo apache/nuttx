@@ -89,29 +89,9 @@
 
 int up_timerisr(int irq, uint32 *regs)
 {
-  uint32 *saved_regs;
-
-  /* Save the pointer to the interrupted context (exercising some
-   * logic for the unexpected case of nested interrupts).
-   */
-
-  if (!current_regs)
-    {
-      saved_regs = NULL;
-      current_regs = regs;
-    }
-  else
-    {
-      saved_regs = current_regs;
-    }
-
    /* Process timer interrupt */
 
    sched_process_timer();
-
-   /* Restore the previous context */
-
-   current_regs = saved_regs;
    return 0;
 }
 

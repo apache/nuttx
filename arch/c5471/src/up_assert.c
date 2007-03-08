@@ -155,10 +155,10 @@ void up_assert(const ubyte *filename, int lineno)
 
   up_ledon(LED_ASSERTION);
 #if CONFIG_TASK_NAME_SIZE > 0
-  dbg("Assertion failed at file:%s line: %d task: %s\n",
+  lldbg("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
 #else
-  dbg("Assertion failed at file:%s line: %d\n",
+  lldbg("Assertion failed at file:%s line: %d\n",
         filename, lineno);
 #endif
   up_stackdump();
@@ -177,10 +177,10 @@ void up_assert_code(const ubyte *filename, int lineno, int errorcode)
 
   up_ledon(LED_ASSERTION);
 #if CONFIG_TASK_NAME_SIZE > 0
-  dbg("Assertion failed at file:%s line: %d task: %s error code: %d\n",
+  lldbg("Assertion failed at file:%s line: %d task: %s error code: %d\n",
         filename, lineno, rtcb->name, errorcode);
 #else
-  dbg("Assertion failed at file:%s line: %d error code: %d\n",
+  lldbg("Assertion failed at file:%s line: %d error code: %d\n",
         filename, lineno, errorcode);
 #endif
   up_stackdump();

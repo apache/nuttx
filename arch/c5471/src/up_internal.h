@@ -49,7 +49,9 @@
  * board bring-up and not part of normal platform configuration.
  */
 
-#define CONFIG_SUPPRESS_INTERRUPTS  1 /* Do not enable interrupts */
+#undef  CONFIG_SUPPRESS_INTERRUPTS    /* Do not enable interrupts */
+#define CONFIG_SUPPRESS_TIMER_INTS  1 /* No timer */
+#define CONFIG_SUPPRESS_SERIAL_INTS 1 /* Console will poll */
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
 #define CONFIG_C5471_STACKDUMP      1 /* Dump stack on assertion */
 
