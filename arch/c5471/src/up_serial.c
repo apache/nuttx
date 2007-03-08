@@ -589,42 +589,51 @@ static void up_xmitchars(up_dev_t *dev)
 static void up_putxmitchar(up_dev_t *dev, int ch)
 {
   int nexthead = dev->xmit.head + 1;
-  if (nexthead >= dev->xmit.size)
+
+  for(;;)
     {
-      nexthead = 0;
-    }
-
-  if (nexthead != dev->xmit.tail)
-    {
-      dev->xmit.buffer[dev->xmit.head] = ch;
-      dev->xmit.head = nexthead;
-    }
-  else
-    {
-      /* Transfer some characters with interrupts disabled */
-
-      up_xmitchars(dev);
-
-      /* If we unsuccessful in making room in the buffer.
-       * then transmit the characters with interrupts
-       * enabled and wait for result.
-       */
-
-      if (nexthead == dev->xmit.tail)
+      if (nexthead >= dev->xmit.size)
         {
-          /* Still no space */
+          nexthead = 0;
+        }
 
-          dev->xmitwaiting = TRUE;
+      if (nexthead != dev->xmit.tail)
+        {
+          dev->xmit.buffer[dev->xmit.head] = ch;
+          dev->xmit.head = nexthead;
+          return;
+        }
+      else
+        {
+          /* Transfer some characters with interrupts disabled */
 
-          /* Wait for some characters to be sent from the buffer
-           * with the TX interrupt disabled.
+          up_xmitchars(dev);
+
+          /* If we unsuccessful in making room in the buffer.
+           * then transmit the characters with interrupts
+           * enabled and wait for result.
            */
 
-         up_enabletxint(dev);
-         up_takesem(&dev->xmitsem);
-         up_disabletxint(dev);
-       }
-   }
+          if (nexthead == dev->xmit.tail)
+            {
+              /* Still no space */
+
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+              up_waittxfifonotfull(dev);
+#else
+              dev->xmitwaiting = TRUE;
+
+              /* Wait for some characters to be sent from the buffer
+               * with the TX interrupt disabled.
+               */
+
+              up_enabletxint(dev);
+              up_takesem(&dev->xmitsem);
+              up_disabletxint(dev);
+#endif
+            }
+        }
+    }
 }
 
 /************************************************************

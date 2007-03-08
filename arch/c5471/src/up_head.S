@@ -38,10 +38,11 @@
  ************************************************************/
 
 #include <nuttx/config.h>
+#include "up_internal.h"
 #include "c5471.h"
 
 /************************************************************
- * Definitions
+ * Macros
  ************************************************************/
 
 	/* This macro will modify r0, r1, r2 and r14 */
@@ -114,6 +115,11 @@ __start:
 	mov	r0, #'\n'
 	bl	up_putc
 #endif
+	/* Initialize onboard LEDs */
+
+#ifdef CONFIG_C5471_LEDS
+	bl	up_ledinit
+#endif
 
 	/* Then jump to OS entry */
 
@@ -124,7 +130,7 @@ __start:
 	 * _ebss is the end of the BSS regsion (see ld.script)
 	 * The idle task stack starts at the end of BSS and is
 	 * of size CONFIG_PROC_STACK_SIZE.  The heap continues
-	 * from there until the end of memory.  See g_heapstart
+	 * from there until the end of memory.  See g_heapbase
 	 * below.
 	 */
 
@@ -139,18 +145,18 @@ LC2:	.long	_eronly	/* Where .data defaults are stored in FLASH */
 #endif
 	.size	__start, .-__start
 
-	/* This global variable is unsigned long g_heapstart and is
+	/* This global variable is unsigned long g_heapbase and is
 	 * exported from here only because of its coupling to LCO
 	 * above.
 	 */
 
 	.data
 	.align	4
-	.globl	g_heapstart
-	.type	g_heapstart, object
-g_heapstart:
+	.globl	g_heapbase
+	.type	g_heapbase, object
+g_heapbase:
 	.long	_ebss+CONFIG_PROC_STACK_SIZE
-	.size	g_heapstart, .-g_heapstart
+	.size	g_heapbase, .-g_heapbase
 
 	.end
 
