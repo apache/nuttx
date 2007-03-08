@@ -58,6 +58,64 @@
  * Private Functions
  ************************************************************/
 
+/************************************************************
+ * Name: up_getsp
+ ************************************************************/
+
+/* I don't know if the builtin to get SP is enabled */
+
+static inline uint32 up_getsp(void)
+{
+  uint32 sp;
+  __asm__
+  (
+    "\tmov %0, sp\n\t"
+    : "=r"(sp)
+  );
+  return sp;
+}
+
+/************************************************************
+ * Name: up_stackdump
+ ************************************************************/
+
+#ifdef CONFIG_C5471_STACKDUMP
+static void up_stackdump(void)
+{
+  _TCB *rtcb        = (_TCB*)g_readytorun.head;
+  uint32 stack_base = (uint32)rtcb->adj_stack_ptr;
+  uint32 sp         = up_getsp();
+
+  lldbg("stack_base: %08x\n", stack_base);
+  lldbg("stack_size: %08x\n", rtcb->adj_stack_size);
+  lldbg("sp:         %08x\n", sp);
+
+  if (sp >= stack_base || sp < stack_base - rtcb->adj_stack_size)
+    {
+      lldbg("ERROR: Stack pointer is not within allocated stack\n");
+      return;
+    }
+  else
+    {
+      uint32 stack = sp & ~0x1f;
+
+      for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
+        {
+          uint32 *ptr = (uint32*)stack;
+          lldbg("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+                 stack, ptr[0], ptr[1], ptr[2], ptr[3],
+                 ptr[4], ptr[5], ptr[6], ptr[7]);
+        }
+    }
+}
+#else
+# define up_stackdump()
+#endif
+
+/************************************************************
+ * Name: _up_assert
+ ************************************************************/
+
 static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
 {
   /* Are we in an interrupt handler or the idle task? */
@@ -91,9 +149,19 @@ static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
 
 void up_assert(const ubyte *filename, int lineno)
 {
+#if CONFIG_TASK_NAME_SIZE > 0
+  _TCB *rtcb = (_TCB*)g_readytorun.head;
+#endif
+
   up_ledon(LED_ASSERTION);
+#if CONFIG_TASK_NAME_SIZE > 0
+  dbg("Assertion failed at file:%s line: %d task: %s\n",
+        filename, lineno, rtcb->name);
+#else
   dbg("Assertion failed at file:%s line: %d\n",
         filename, lineno);
+#endif
+  up_stackdump();
   _up_assert(EXIT_FAILURE);
 }
 
@@ -103,8 +171,18 @@ void up_assert(const ubyte *filename, int lineno)
 
 void up_assert_code(const ubyte *filename, int lineno, int errorcode)
 {
+#if CONFIG_TASK_NAME_SIZE > 0
+  _TCB *rtcb = (_TCB*)g_readytorun.head;
+#endif
+
   up_ledon(LED_ASSERTION);
+#if CONFIG_TASK_NAME_SIZE > 0
+  dbg("Assertion failed at file:%s line: %d task: %s error code: %d\n",
+        filename, lineno, rtcb->name, errorcode);
+#else
   dbg("Assertion failed at file:%s line: %d error code: %d\n",
         filename, lineno, errorcode);
+#endif
+  up_stackdump();
   _up_assert(errorcode);
 }

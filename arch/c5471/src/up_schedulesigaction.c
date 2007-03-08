@@ -99,6 +99,8 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
 {
   /* Refuse to handle nested signal actions */
 
+  dbg("tcb=0x%p sigdeliver=0x%p\n", tcb, sigdeliver);
+
   if (!tcb->xcp.sigdeliver)
     {
       irqstate_t flags;
@@ -110,6 +112,8 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
       /* First, handle some special cases when the signal is
        * being delivered to the currently executing task.
        */
+
+      dbg("rtcb=0x%p current_regs=0x%p\n", g_readytorun.head, current_regs);
 
       if (tcb == (_TCB*)g_readytorun.head)
         {
