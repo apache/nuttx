@@ -79,10 +79,11 @@ struct uart_regs_s
 
 struct uart_buffer_s
 {
-  int   head;
-  int   tail;
-  int   size;
-  char *buffer;
+  sem_t  sem;    /* Used to control exclusive access to the buffer */
+  sint16 head;   /* Index to the head [IN] index in the buffer */
+  sint16 tail;   /* Index to the tail [OUT] index in the buffer */
+  sint16 size;   /* The allocated size of the buffer */
+  char  *buffer; /* Pointer to the allocated buffer memory */
 };
 
 struct up_dev_s
@@ -608,6 +609,7 @@ static void up_putxmitchar(up_dev_t *dev, int ch)
         }
       else
         {
+#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_SERIAL_INTS)
           /* Transfer some characters with interrupts disabled */
 
           up_xmitchars(dev);
@@ -621,20 +623,23 @@ static void up_putxmitchar(up_dev_t *dev, int ch)
             {
               /* Still no space */
 
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_SERIAL_INTS)
               up_waittxfifonotfull(dev);
-#else
-              dev->xmitwaiting = TRUE;
-
-              /* Wait for some characters to be sent from the buffer
-               * with the TX interrupt disabled.
-               */
-
-              up_enabletxint(dev);
-              up_takesem(&dev->xmitsem);
-              up_disabletxint(dev);
-#endif
             }
+#else
+          /* Inform the interrupt level logic that we are waiting */
+
+          dev->xmitwaiting = TRUE;
+
+          /* Wait for some characters to be sent from the buffer
+           * with the TX interrupt enabled.  When the TX interrupt
+           * is enabled, up_xmitchars should execute and remove
+           * some of the data from the TX buffer.
+           */
+
+          up_enabletxint(dev);
+          up_takesem(&dev->xmitsem);
+          up_disabletxint(dev);
+#endif
         }
     }
 }
@@ -805,6 +810,10 @@ static ssize_t up_write(struct file *filep, const char *buffer, size_t buflen)
   up_dev_t     *dev      = inode->i_private;
   ssize_t       ret      = buflen;
 
+  /* Only one user can be accessing dev->xmit.head at once */
+
+  up_takesem(&dev->xmit.sem);
+
   /* Loop while we still have data to copy to the transmit buffer.
    * we add data to the head of the buffer; up_xmitchars takes the
    * data from the end of the buffer.
@@ -829,13 +838,14 @@ static ssize_t up_write(struct file *filep, const char *buffer, size_t buflen)
 
   if (dev->xmit.head != dev->xmit.tail)
     {
+#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_SERIAL_INTS)
       up_xmitchars(dev);
-      if (dev->xmit.head != dev->xmit.tail)
-        {
-          up_enabletxint(dev);
-        }
+#else
+      up_enabletxint(dev);
+#endif
     }
 
+  up_givesem(&dev->xmit.sem);
   return ret;
 }
 
@@ -848,6 +858,10 @@ static ssize_t up_read(struct file *filep, char *buffer, size_t buflen)
   struct inode *inode = filep->f_inode;
   up_dev_t     *dev   = inode->i_private;
   ssize_t       ret   = buflen;
+
+  /* Only one user can be accessing dev->recv.tail at once */
+
+  up_takesem(&dev->recv.sem);
 
   /* Loop while we still have data to copy to the receive buffer.
    * we add data to the head of the buffer; up_xmitchars takes the
@@ -862,7 +876,7 @@ static ssize_t up_read(struct file *filep, char *buffer, size_t buflen)
           *buffer++ = dev->recv.buffer[dev->recv.tail];
           buflen--;
 
-          if (++dev->recv.tail >= dev->recv.size)
+          if (++(dev->recv.tail) >= dev->recv.size)
             {
               dev->recv.tail = 0;
             }
@@ -881,7 +895,7 @@ static ssize_t up_read(struct file *filep, char *buffer, size_t buflen)
     }
 
   up_enablerxint(dev);
-
+  up_takesem(&dev->recv.sem);
   return ret;
 }
 
@@ -1068,8 +1082,11 @@ static void up_devinit(up_dev_t *dev,
    * statically initialized.
    */
 
+  sem_init(&dev->xmit.sem, 0, 1);
   dev->xmit.size   = txbufsize;
   dev->xmit.buffer = txbuffer;
+
+  sem_init(&dev->recv.sem, 0, 1);
   dev->recv.size   = rxbufsize;
   dev->recv.buffer = rxbuffer;
 
