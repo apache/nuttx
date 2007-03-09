@@ -45,6 +45,10 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
+#ifdef CONFIG_DUMP_ON_EXIT
+#include <nuttx/fs.h>
+#endif
+
 /************************************************************
  * Private Definitions
  ************************************************************/
@@ -56,6 +60,57 @@
 /************************************************************
  * Private Funtions
  ************************************************************/
+
+/************************************************************
+ * Name: _up_dumponexit
+ *
+ * Description:
+ *   Dump the state of all tasks whenever on task exits.  This
+ *   is debug instrumentation that was added to check file-
+ *   related reference counting but could be useful again
+ *   sometime in the future.
+ *
+ ************************************************************/
+
+#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
+static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
+{
+  int i;
+  dbg("  TCB=%p name=%s\n", tcb, tcb->name);
+  if (tcb->filelist)
+    {
+      dbg("    filelist refcount=%d\n",
+          tcb->filelist->fl_crefs);
+
+      for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
+        {
+          struct inode *inode = tcb->filelist->fl_files[i].f_inode;
+          if (inode)
+            {
+              dbg("      fd=%d refcount=%d\n",
+                  i, inode->i_crefs);
+            }
+        }
+    }
+
+  if (tcb->streams)
+    {
+      dbg("    streamlist refcount=%d\n",
+          tcb->streams->sl_crefs);
+
+      for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
+        {
+          struct file_struct *filep = &tcb->streams->sl_streams[i];
+          if (filep->fs_filedes >= 0)
+            {
+              dbg("      fd=%d nbytes=%d\n",
+                  filep->fs_filedes,
+                  filep->fs_bufpos - filep->fs_bufstart);
+            }
+        }
+    }
+}
+#endif
 
 /************************************************************
  * Public Funtions
@@ -75,6 +130,11 @@ void _exit(int status)
   _TCB* tcb = (_TCB*)g_readytorun.head;
 
   dbg("TCB=%p exitting\n", tcb);
+
+#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
+  dbg("Other tasks:\n");
+  sched_foreach(_up_dumponexit, NULL);
+#endif
 
   /* Remove the tcb task from the ready-to-run list.  We can
    * ignore the return value because we know that a context

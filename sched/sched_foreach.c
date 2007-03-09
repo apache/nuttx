@@ -1,5 +1,5 @@
 /************************************************************
- * pthread_exit.c
+ * sched_foreach.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,84 +37,48 @@
  * Included Files
  ************************************************************/
 
-#include <sys/types.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <pthread.h>
-#include <errno.h>
-#include <debug.h>
-#include <nuttx/arch.h>
-#include "pthread_internal.h"
+#include <sched.h>
+#include "os_internal.h"
 
 /************************************************************
- * Definitions
+ * Global Functions
  ************************************************************/
 
 /************************************************************
- * Private Type Declarations
- ************************************************************/
-
-/************************************************************
- * Global Variables
- ************************************************************/
-
-/************************************************************
- * Private Variables
- ************************************************************/
-
-/************************************************************
- * Private Functions
- ************************************************************/
-
-/************************************************************
- * Public Functions
- ************************************************************/
-
-/************************************************************
- * Function:  pthread_exit
+ * Function:  sched_foreach
  *
  * Description:
- *   Terminate execution of a thread started with pthread_create.
+ *   Enumerate over each task and provide the TCB of each
+ *   task to a user callback functions.  Interrupts will be
+ *   disabled throughout this enumeration!
  *
  * Parameters:
- *   exit_valie
+ *   handler - The function to be called with the TCB of
+ *     each task
  *
- * Returned Value:
+ * Return Value:
  *   None
  *
  * Assumptions:
  *
  ************************************************************/
 
-void pthread_exit(FAR void *exit_value)
+void sched_foreach(sched_foreach_t handler, FAR void *arg)
 {
-  int error_code = (int)exit_value;
-  int status;
+  FAR _TCB *tcb;
+  irqstate_t flags = irqsave();
+  int ndx;
 
-  dbg("exit_value=%p\n", exit_value);
+  /* Verify that the PID is within range */
 
-  /* Complete pending join operations */
-
-  status = pthread_completejoin(getpid(), exit_value);
-  if (status != OK)
+  for (ndx = 0; ndx < CONFIG_MAX_TASKS; ndx++)
     {
-      /* Assume that the join completion failured becuase this
-       * not really a pthread.  Exit by calling exit() to flush
-       * and close all file descriptors and calling atexit()
-       * functions.
-       */
-
-      if (error_code == EXIT_SUCCESS)
-        {
-           error_code = EXIT_FAILURE;
-        }
-      exit(error_code);
+       if (g_pidhash[ndx].tcb)
+         {
+           handler(g_pidhash[ndx].tcb, arg);
+         }
     }
-
-  /* Then just exit, retaining all file descriptors and without
-   * calling atexit() functions.
-   */
-
-  _exit(error_code);
+  irqrestore(flags);
 }
+
 

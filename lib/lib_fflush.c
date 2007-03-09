@@ -91,6 +91,7 @@
 void lib_flushall(FAR struct streamlist *list)
 {
   /* Make sure that there are streams associated with this thread */
+
   if (list)
     {
        int i;
@@ -131,6 +132,10 @@ int fflush(FILE *stream)
       return ERROR;
     }
 
+  /* Make sure that we have exclusive access to the stream */
+
+  lib_take_semaphore(stream);
+
   /* How many bytes are used in the buffer now */
 
   nbuffer = stream->fs_bufpos - stream->fs_bufstart;
@@ -141,6 +146,7 @@ int fflush(FILE *stream)
   bytes_written = write(stream->fs_filedes, src, nbuffer);
   if (bytes_written < 0)
     {
+      lib_give_semaphore(stream);
       return bytes_written;
     }
 
@@ -166,6 +172,7 @@ int fflush(FILE *stream)
 
   /* Return the number of bytes remaining in the buffer */
 
+  lib_give_semaphore(stream);
   return stream->fs_bufpos - stream->fs_bufstart;
 #else
   return 0;

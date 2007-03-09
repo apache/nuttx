@@ -51,7 +51,7 @@ TSK_SRCS	= task_create.c task_init.c task_delete.c task_restart.c \
 		  sched_free.c sched_gettcb.c sched_releasetcb.c
 SCHED_SRCS	= sched_setparam.c sched_getparam.c \
 		  sched_setscheduler.c sched_getscheduler.c \
-		  sched_yield.c sched_rrgetinterval.c \
+		  sched_yield.c sched_rrgetinterval.c sched_foreach.c \
 		  sched_getprioritymax.c sched_getprioritymin.c \
 		  sched_lock.c sched_unlock.c sched_lockcount.c
 WDOG_SRCS	= wd_initialize.c wd_create.c wd_start.c wd_cancel.c wd_delete.c

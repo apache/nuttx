@@ -166,7 +166,7 @@ void lib_releaselist(FAR struct streamlist *list)
        /* Decrement the reference count */
 
        _lib_semtake(list);
-       crefs = --list->sl_crefs;
+       crefs = --(list->sl_crefs);
        _lib_semgive(list);
 
        /* If the count decrements to zero, then there is no reference

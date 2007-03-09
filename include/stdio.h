@@ -131,6 +131,7 @@ struct _dirent
 {
   FAR char *d_name;           /* name of directory entry */
 };
+
 struct dirent
 {
   FAR char *d_name;           /* A pointer to d_szname */

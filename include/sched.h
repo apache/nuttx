@@ -254,6 +254,11 @@ struct _TCB
 
 };
 typedef struct _TCB _TCB;
+
+/* This is the callback type used by sched_foreach() */
+
+typedef void (sched_foreach_t)(FAR _TCB *tcb, FAR void *arg);
+
 #endif /* __ASSEMBLY__ */
 
 /************************************************************
@@ -340,6 +345,13 @@ EXTERN FAR struct filelist *sched_getfiles(void);
 EXTERN FAR struct streamlist *sched_getstreams(void);
 #endif /* CONFIG_NFILE_STREAMS */
 #endif /* CONFIG_NFILE_DESCRIPTORS */
+
+/* sched_foreach will enumerate over each task and provide the
+ * TCB of each task to a user callback functions.  Interrupts
+ * will be disabled throughout this enumeration!
+ */
+
+EXTERN void sched_foreach(sched_foreach_t handler, FAR void *arg);
 
 #undef EXTERN
 #if defined(__cplusplus)
