@@ -161,6 +161,7 @@ void timedwait_test(void)
     }
 
   printf("timedwait_test: Joining\n");
+  fflush(stdout);
   status = pthread_join(waiter, &result);
   if (status != 0)
     {

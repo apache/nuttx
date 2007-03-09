@@ -28,8 +28,8 @@
     NuttX operates on the ARM7 of this dual core processor.
     This port uses the <a href="http://www.spectrumdigital.com/">Spectrum Digital</a>
     evaluation board with a GNU arm-elf toolchain*.
-    This port is in progress and partially functional (However,
-    my board is dead at the moment so it will be awhile before I fix it)</li>
+    This port is complete, verified, and included in the initial NuttX
+    release.</li>
 <li><b>8051 Microcontroller</b>.
     This port uses the <a href="http://www.pjrc.com/">PJRC</a> 87C52 development system
     and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain.
@@ -43,17 +43,18 @@ is available that be used to build a NuttX-compatible arm-elf toolchain.</blockq
 
 <h1>Memory Footprint</h1>
 
-<p>Details to be provided</p>
-
-<p>
-  I have a complete build for an ARM7 target that includes most of the OS
-  features and a broad range of OS tests.
-  That builds to an executable that requires about 85Kb for .text, .data., and .bss.
+<p><b>C5471 (Arm7)</b>
+  The build for this ARM7 target that includes most of the OS features and
+  a broad range of OS tests.  The size of this executable as given by the
+  Linux <tt>size</tt> command is:
 </p>
-<p>
-  I have a stripped down OS test for the 8051 target that requires only
-  18Kb.  A substantial effort was required to get to this size
-  (see <a href="codesize-070301.xls">spreadsheet</a> for details).
+<pre>
+   text    data     bss     dec     hex filename
+  53272     428    3568   57268    dfb4 nuttx
+</pre>
+<p><b>87C52</b>
+  A reduced functionality OS test for the 8051 target requires only
+  about 18Kb (see <a href="codesize-070301.xls">spreadsheet</a> for details).
 </p>
 
 <h1>Licensing</h1>

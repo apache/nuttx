@@ -216,15 +216,18 @@ void sighand_test(void)
     }
   else
     {
-       printf("sighand_test: Started waiter_main pid=%d\n" , waiterpid);
+      printf("sighand_test: Started waiter_main pid=%d\n", waiterpid);
     }
 
   /* Wait a bit */
 
   fflush(stdout);
-  usleep(500*1000);
+  sleep(2);
 
   /* Then signal the waiter thread. */
+
+  printf("sighand_test: Signaling pid=%d with signo=%d sigvalue=%d\n",
+         waiterpid, WAKEUP_SIGNAL, SIGVALUE_INT);
 
   sigvalue.sival_int = SIGVALUE_INT;
 #ifdef CONFIG_CAN_PASS_STRUCTS
@@ -241,7 +244,7 @@ void sighand_test(void)
   /* Wait a bit */
 
   fflush(stdout);
-  usleep(500*1000);
+  sleep(2);
 
   /* Then check the result */
 
