@@ -27,7 +27,7 @@ Gregory Nutt
 <H1>1.0 <A NAME="Introduction">Introduction</A></H1>
 
 <P>
-This user's manual is divided into five sections:
+This user's manual is divided into three sections:
 <UL>
 <LI><B>Section 1.0, <A HREF="#Introduction">Introduction</A></B>:
 This section provides an overview of the Nuttx user's manual.
@@ -48,8 +48,6 @@ into several paragraphs that describe different groups of OS interfaces:
 <LI><B>Section 3.0, <A HREF="#Data_Structures">OS Data Structures</A></B>:
 This section documents the data structures that are used at the Nuttx
 interface.
-<LI><B>Section 4.0, <A HREF="#Problems">Known Problems</A></B>.  This section
-lists known problems in the latest release of Nuttx.
 </UL>
 <HR>
 
@@ -4112,29 +4110,6 @@ notify a task when a message is available on a queue.
   For systems where sizeof(pointer) > sizeof(uint32), we will
   have to do some redesign.
 </p>
-
-<HR>
-
-<H1>4.0 <A NAME="Problems">Known Problems</A></H1>
-
-<P>
-This section documents know problems with Nuttx at the time
-of this writing.
-<P>
-<HR>
-<B>Problem</B>: 
-There is a problem with the unblock logic in os_signal.c when message queue
-becomes not-empty -- sig_mqnotempty() calls sig_received().
-sig_received() relies on task_state == TSTATE_WAIT_SIG and will ignore
-tasks that are waiting on a message queue to become non-empty.
-<P>
-<B>Priority</B>: <B>LOW</B>.  If a task is blocked a waiting for a message
-queue to become non-empty, it will be re-started anyway.
-<HR>
-
-<B>Problem</B>: task_restart won't restart a running task
-<P>
-<B>Priority</B>: <B>LOW</B>.
 
 </BODY>
 </HTML>
