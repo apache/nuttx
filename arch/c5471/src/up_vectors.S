@@ -102,16 +102,27 @@ up_vectorirq:
 
 	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
 	orr	lr, lr, #I_BIT | SVC_MODE
-	msr	cpsr, lr		/* Swith to SVC mode */
+	msr	cpsr_c, lr		/* Switch to SVC mode */
 
-	/* Create a context structure */
+	/* Create a context structure.  First set aside a stack frame
+	 * and store r0-r12 into the frame.
+	 */
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r14}		/* Save the SVC mode regs */
+	stmia	sp, {r0-r12}		/* Save the SVC mode regs */
+
+	/* Get the correct values of r13(sp) and r14(lr) in r1 and r2 */
+
+	add	r1, sp, #XCPTCONTEXT_SIZE
+	mov	r2, r14
+
+	/* Get the values for r15(pc) and CPSR in r3 and r4 */
+
 	ldr	r0, .Lirqtmp		/* Points to temp storage */
-	ldmia	r0, {r1, r2}		/* Recover r1=lr_IRQ, r2=spsr_IRQ */
-	add	r0, sp, #(4*REG_PC)	/* Offset to pc, cpsr storage */
-	stmia	r0, {r1, r2}
+	ldmia	r0, {r3, r4}		/* Recover r1=lr_IRQ, r2=spsr_IRQ */
+
+	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
+	stmia	r0, {r1-r4}
 
 	/* Now decode the interrupt */
 
@@ -179,14 +190,23 @@ up_vectorswi:
 
 	ldr	r14, [sp,#-0x4]		/* rrload workaround */
 
-	/* Create a context structure */
+	/* Create a context structure.  First set aside a stack frame
+	 * and store r0-r12 into the frame.
+	 */
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r14}		/* Save the SVC mode regs */
-	mrs	r2, spsr		/* Get the saved CPSR */
-	mov	r1, r14			/* Save r14 as the PC */
-	add	r0, sp, #(4*REG_PC)	/* Offset to pc, cpsr storage */
-	stmia	r0, {r1, r2}
+	stmia	sp, {r0-r12}		/* Save the SVC mode regs */
+
+	/* Get the correct values of r13(sp), r14(lr), r15(pc)
+	 * and CPSR in r1-r4 */
+
+	add	r1, sp, #XCPTCONTEXT_SIZE
+	mov	r2, r14			/* R14 is altered on return from SWI */
+	mov	r3, r14			/* Save r14 as the PC as well */
+	mrs	r4, spsr		/* Get the saved CPSR */
+
+	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
+	stmia	r0, {r1-r4}
 
 	/* Then call the SWI handler with interrupt disabled.
 	 * void up_syscall(struct xcptcontext *xcp)
@@ -231,16 +251,27 @@ up_vectordata:
 
 	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
 	orr	lr, lr, #I_BIT | SVC_MODE
-	msr	cpsr, lr		/* Swith to SVC mode */
+	msr	cpsr_c, lr		/* Switch to SVC mode */
 
-	/* Create a context structure */
+	/* Create a context structure.  First set aside a stack frame
+	 * and store r0-r12 into the frame.
+	 */
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r14}		/* Save the SVC mode regs */
+	stmia	sp, {r0-r12}		/* Save the SVC mode regs */
+
+	/* Get the correct values of r13(sp) and r14(lr) in r1 and r2 */
+
+	add	r1, sp, #XCPTCONTEXT_SIZE
+	mov	r2, r14
+
+	/* Get the values for r15(pc) and CPSR in r3 and r4 */
+
 	ldr	r0, .Ldaborttmp		/* Points to temp storage */
-	ldmia	r0, {r1, r2}		/* Recover r1=lr_IRQ, r2=spsr_IRQ */
-	add	r0, sp, #(4*REG_PC)	/* Offset to pc, cpsr storage */
-	stmia	r0, {r1, r2}
+	ldmia	r0, {r3, r4}		/* Recover r1=lr_IRQ, r2=spsr_IRQ */
+
+	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
+	stmia	r0, {r1-r4}
 
 	/* Then call the data abort handler with interrupt disabled.
 	 * void up_dataabort(struct xcptcontext *xcp)
@@ -253,7 +284,7 @@ up_vectordata:
 	/* Restore the CPSR, SVC modr registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr	spsr, r0
+	msr	spsr_cxsf, r0
 	ldmia	sp, {r0-r15}^		/* Return */
 
 .Ldaborttmp:
@@ -286,16 +317,27 @@ up_vectorprefetch:
 
 	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
 	orr	lr, lr, #I_BIT | SVC_MODE
-	msr	cpsr, lr		/* Swith to SVC mode */
+	msr	cpsr_c, lr		/* Switch to SVC mode */
 
-	/* Create a context structure */
+	/* Create a context structure.  First set aside a stack frame
+	 * and store r0-r12 into the frame.
+	 */
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r14}		/* Save the SVC mode regs */
+	stmia	sp, {r0-r12}		/* Save the SVC mode regs */
+
+	/* Get the correct values of r13(sp) and r14(lr) in r1 and r2 */
+
+	add	r1, sp, #XCPTCONTEXT_SIZE
+	mov	r2, r14
+
+	/* Get the values for r15(pc) and CPSR in r3 and r4 */
+
 	ldr	r0, .Lpaborttmp		/* Points to temp storage */
-	ldmia	r0, {r1, r2}		/* Recover r1=lr_IRQ, r2=spsr_IRQ */
-	add	r0, sp, #(4*REG_PC)	/* Offset to pc, cpsr storage */
-	stmia	r0, {r1, r2}
+	ldmia	r0, {r3, r4}		/* Recover r1=lr_IRQ, r2=spsr_IRQ */
+
+	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
+	stmia	r0, {r1-r4}
 
 	/* Then call the prefetch abort handler with interrupt disabled.
 	 * void up_prefetchabort(struct xcptcontext *xcp)
@@ -308,7 +350,7 @@ up_vectorprefetch:
 	/* Restore the CPSR, SVC modr registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr	spsr, r0
+	msr	spsr_cxsf, r0
 	ldmia	sp, {r0-r15}^		/* Return */
 
 .Lpaborttmp:
@@ -341,16 +383,27 @@ up_vectorundefinsn:
 
 	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
 	orr	lr, lr, #I_BIT | SVC_MODE
-	msr	cpsr, lr		/* Swith to SVC mode */
+	msr	cpsr_c, lr		/* Switch to SVC mode */
 
-	/* Create a context structure */
+	/* Create a context structure.  First set aside a stack frame
+	 * and store r0-r12 into the frame.
+	 */
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r14}		/* Save the SVC mode regs */
+	stmia	sp, {r0-r12}		/* Save the SVC mode regs */
+
+	/* Get the correct values of r13(sp) and r14(lr) in r1 and r2 */
+
+	add	r1, sp, #XCPTCONTEXT_SIZE
+	mov	r2, r14
+
+	/* Get the values for r15(pc) and CPSR in r3 and r4 */
+
 	ldr	r0, .Lundeftmp		/* Points to temp storage */
-	ldmia	r0, {r1, r2}		/* Recover r1=lr_IRQ, r2=spsr_IRQ */
-	add	r0, sp, #(4*REG_PC)	/* Offset to pc, cpsr storage */
-	stmia	r0, {r1, r2}
+	ldmia	r0, {r3, r4}		/* Recover r1=lr_IRQ, r2=spsr_IRQ */
+
+	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
+	stmia	r0, {r1-r4}
 
 	/* Then call the undef insn handler with interrupt disabled.
 	 * void up_undefinedinsn(struct xcptcontext *xcp)
@@ -363,7 +416,7 @@ up_vectorundefinsn:
 	/* Restore the CPSR, SVC modr registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr	spsr, r0
+	msr	spsr_cxsf, r0
 	ldmia	sp, {r0-r15}^		/* Return */
 
 .Lundeftmp:

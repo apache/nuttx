@@ -41,12 +41,14 @@
 # CONFIG_DRAM_END - the size of installed DRAM.
 #   Unique to c5471
 # CONFIG_C5471_LEDS - Use LEDs to show state. Unique to c5471.
+# CONFIG_C5471_STACKDUMP - Do stack dumps after assertions
 #
 CONFIG_ARCH=c5471
 CONFIG_ARCH_C5471=y
 CONFIG_ROM_VECTORS=n
 CONFIG_DRAM_END=0x11000000
 CONFIG_C5471_LEDS=y
+CONFIG_C5471_STACKDUMP=y
 
 #
 # C5471 specific device driver settings
@@ -107,7 +109,7 @@ CONFIG_UART_MODEM_2STOP=0
 #   provides /dev/console.  Enables stdout, stderr, stdin.
 #
 CONFIG_EXAMPLE=ostest
-CONFIG_DEBUG=y
+CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_MM_REGIONS=1
 CONFIG_ARCH_LOWPUTC=y
