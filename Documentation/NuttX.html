@@ -10,32 +10,97 @@
 <hr>
 <h1>Overview</h1>
 <p>
+  <b>Goals</b>.
   Nuttx is a real timed embedded operating system (RTOS).
   Its goals are:
 <p>
 <ol>
-  <li>A very small footprint usable in all but the tightest micro-controller environments,</li>
-  <li>Fully scalable from tiny (8-bit) to moderate embedded (32-bit),</li>
-  <li>High degree of standards compliance.</li>
-  <li>Totally open.</li>
+  <li><b>Small Footprint</b></li>
+    <p>
+      Usable in all but the tightest micro-controller environments,
+      The focus is on the tiny-to-small, deeply embedded environment.
+    </p>
+  <li><b>Rich Feature OS Set</b></li>
+    <p>
+      The goal is to provide most standard POSIX OS interfaces to support
+      a rich multi-threaded development environment.
+    </p>
+      NON-GOALS: (1) It is not a goal to provide OS subsystems such
+      as network or USB (but these could obviously be added).
+      (2) There is no MMU-based support for processes.
+      At present, NuttX assumes a flat address space.
+    </p>
+  <li><b>Highly Scalable</b></li>
+    <p>
+      Fully scalable from tiny (8-bit) to moderate embedded (32-bit).
+      Scalability with rich feature set is accomplished with:
+      Many tiny source files, link from static libraries, highly configurable, use of
+      weak symbols when available.
+    </p>
+  <li><b>Standards Compliance</b></li>
+    <p>
+      NuttX strives to achieve a high degree of standards compliance.
+      The primary governing standards are POSIX and ANSI standards.
+      Additional standard APIs from Unix and other common RTOS's are
+      adopted for functionality not available under these standards
+      or for functionaly that is not appropriate for the deeply-embedded
+      RTOS (such as <code>fork()</code>).
+    </p>
+    <p>
+      Because of this standards conformance, software developed under other
+      standard OSs (such as Linux) should port easily to NuttX.
+    </p>
+  <li><b>Real-Time</b></li>
+    <p>
+      Fully pre-emptible, fixed priority and round-robin scheduling.
+    </p>
+  <li><b>Totally Open</b></li>
+    <p>
+      Non-restrictive BSD license.
+    </p>
 </ol>
+
+<h1>Downloads</h1>
+
+<p>
+   The initial release of NuttX (nuttx-0.1.0) is avalable for download
+   from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
+   website.
+</p>
 
 <h1>Supported Platforms</h1>
 
 <ul>
-<li><b>x86 Linux Simulation</b>.  Fully functional.</li>
-<li>TI <b>TMS320C5471</b> (also called <b>TMS320DM180</b>).
-    NuttX operates on the ARM7 of this dual core processor.
-    This port uses the <a href="http://www.spectrumdigital.com/">Spectrum Digital</a>
-    evaluation board with a GNU arm-elf toolchain*.
-    This port is complete, verified, and included in the initial NuttX
-    release.</li>
-<li><b>8051 Microcontroller</b>.
-    This port uses the <a href="http://www.pjrc.com/">PJRC</a> 87C52 development system
-    and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain.
-    This port will require a few more weeks before it is ready for prime time.</li>
-<li><b>Other ports</b>.
-    I also have partial ports for the TI TMS320DM270 and for MIPS. 
+  <li><b>Linux User Mode</b></li>
+    <p>
+      A user-mode port of NuttX to the x86 Linux platform is available.
+      The purpose of this port is primarily to support OS feature developement.
+    </p>
+    <p>
+      STATUS: Does not support interrupts but is otherwise fully functional.
+    </p>
+  <li><b>TI TMS320C5471</b> (also called <b>TMS320DM180</b>).</li>
+    <p>
+      NuttX operates on the ARM7 of this dual core processor.
+      This port uses the <a href="http://www.spectrumdigital.com/">Spectrum Digital</a>
+      evaluation board with a GNU arm-elf toolchain*.
+    </p>
+    <p>
+      STATUS: This port is complete, verified, and included in the initial NuttX
+      release.
+    </p>
+  <li><b>8051 Microcontroller</b></li>
+    <p>
+      This port uses the <a href="http://www.pjrc.com/">PJRC</a> 87C52 development system
+      and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain.
+    </p>
+    <p>
+      STATUS: This port will require a few more weeks before it is ready for prime time.
+    </p>
+  <li><b>Other ports</b></li>
+    <p>
+      There are partial ports for the TI TMS320DM270 and for MIPS.
+    </p>
 </ul>
 
 <blockquote>* A highly modified <a href="http://buildroot.uclibc.org/">buildroot</a>
@@ -61,7 +126,7 @@ is available that be used to build a NuttX-compatible arm-elf toolchain.</blockq
 
 <p>NuttX is available under the highly permissive
   <a href="http://en.wikipedia.org/wiki/BSD_license">BSD license</a>.
-  Other than some fine print that you agree to respect my copyright
+  Other than some fine print that you agree to respect the copyright
   you should feel absolutely free to use NuttX in any environment and
   without any concern for jeopardizing any proprietary software that
   you may link with it.</p>
