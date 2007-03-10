@@ -521,7 +521,7 @@ static inline void up_givesem(sem_t *sem)
  * characters from the tail of the buffer.
  */
 
-static inline void up_recvchars(up_dev_t *dev)
+static void up_recvchars(up_dev_t *dev)
 {
   uint16 status;
   int nexthead = dev->recv.head + 1;
@@ -801,6 +801,32 @@ static void shutdown(up_dev_t * dev)
 }
 
 /************************************************************
+ * Name: up_irqwrite
+ ************************************************************/
+
+static ssize_t up_irqwrite(up_dev_t *dev, const char *buffer, size_t buflen)
+{
+  ssize_t ret = buflen;
+
+  /* Force each character through the low level interface */
+
+  for (; buflen; buflen--)
+    {
+      int ch = *buffer++;
+      up_lowputc(ch);
+
+     /* If this is the console, then we should replace LF with LF-CR */
+
+      if (ch == '\n')
+        {
+          up_lowputc('\r');
+        }
+    }
+
+  return ret;
+}
+
+/************************************************************
  * Name: up_write
  ************************************************************/
 
@@ -809,6 +835,23 @@ static ssize_t up_write(struct file *filep, const char *buffer, size_t buflen)
   struct inode *inode    = filep->f_inode;
   up_dev_t     *dev      = inode->i_private;
   ssize_t       ret      = buflen;
+
+  /* We may receive console writes through this path from
+   * interrupt handlers!  In this case, we will need to do
+   * things a little differently.
+   */
+
+  if (up_interrupt_context())
+    {
+      if (dev->isconsole)
+        {
+          return up_irqwrite(dev, buffer, buflen);
+        }
+      else
+        {
+          return ERROR;
+        }
+    }
 
   /* Only one user can be accessing dev->xmit.head at once */
 
@@ -827,10 +870,10 @@ static ssize_t up_write(struct file *filep, const char *buffer, size_t buflen)
       /* Put the character into the transmit buffer */
 
       up_putxmitchar(dev, ch);
- 
+
      /* If this is the console, then we should replace LF with LF-CR */
 
-      if (ch == '\n')
+      if (dev->isconsole && ch == '\n')
         {
           up_putxmitchar(dev, '\r');
         }
@@ -895,7 +938,7 @@ static ssize_t up_read(struct file *filep, char *buffer, size_t buflen)
     }
 
   up_enablerxint(dev);
-  up_takesem(&dev->recv.sem);
+  up_givesem(&dev->recv.sem);
   return ret;
 }
 

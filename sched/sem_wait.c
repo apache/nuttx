@@ -103,6 +103,15 @@ int sem_wait(sem_t *sem)
   int        ret = ERROR;
   irqstate_t saved_state;
 
+  /* This API should not be called from interrupt handlers */
+
+  if (up_interrupt_context())
+    {
+      /* We do not want to set the errno in this case */
+
+      return ERROR;
+    }
+
   /* Assume any errors reported are due to invalid arguments. */
 
   *get_errno_ptr() = EINVAL;

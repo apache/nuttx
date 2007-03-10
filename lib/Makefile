@@ -46,8 +46,8 @@ STRING_SRCS	= lib_memset.c lib_memcpy.c lib_memcmp.c lib_memmove.c \
 		  lib_strlen.c lib_strdup.c lib_strtol.c lib_strchr.c
 CTYPE_SRCS	= 
 STDIO_SRCS	= lib_fopen.c lib_fclose.c \
-		  lib_fread.c lib_libfread.c lib_fgetc.c\
-		  lib_fwrite.c lib_libfwrite.c lib_fflush.c\
+		  lib_fread.c lib_libfread.c lib_fgetc.c lib_fgets.c \
+		  lib_fwrite.c lib_libfwrite.c lib_fflush.c \
 		  lib_fputc.c lib_puts.c lib_fputs.c \
 		  lib_ungetc.c \
 		  lib_printf.c lib_vprintf.c lib_fprintf.c  lib_rawprintf.c lib_lowprintf.c \

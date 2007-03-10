@@ -95,8 +95,6 @@ void up_block_task(_TCB *tcb, tstate_t task_state)
       _TCB *rtcb = (_TCB*)g_readytorun.head;
       boolean switch_needed;
 
-      dbg("Blocking TCB=%p\n", tcb);
-
       /* Remove the tcb task from the ready-to-run list.  If we
        * are blocking the task at the head of the task list (the
        * most likely case), then a context switch to the next

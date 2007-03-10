@@ -74,6 +74,13 @@ void up_doirq(int irq, uint32* regs)
 #else
   if ((unsigned)irq < NR_IRQS)
     {
+       /* Current regs non-zero indicates that we are processing
+        * an interrupt; current_regs is also used to manage
+        * interrupt level context switches.
+        */
+
+       current_regs = regs;
+
        /* Mask and acknowledge the interrupt */
 
        up_maskack_irq(irq);
@@ -82,8 +89,15 @@ void up_doirq(int irq, uint32* regs)
 
        irq_dispatch(irq, regs);
 
-       /* Then unmask it */
+       /* Indicate that we are no long in an interrupt handler */
 
+       current_regs = NULL;
+
+       /* Unmask the last interrupt (global interrupts are still
+        * disabled.
+        */
+
+       current_regs = NULL;
        up_enable_irq(irq);
     }
   up_ledoff(LED_INIRQ);

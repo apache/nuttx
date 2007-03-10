@@ -224,6 +224,7 @@ EXTERN size_t fread(void *ptr, size_t size, size_t n_items,
 EXTERN int    fseek(FILE *stream, long int offset, int whence);
 EXTERN size_t fwrite(const void *ptr, size_t size,
 		     size_t n_items, FILE *stream);
+
 EXTERN int    printf(const char *format, ...);
 EXTERN int    puts(const char *s);
 EXTERN int    rename(const char *source, const char *target);

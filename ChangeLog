@@ -3,3 +3,16 @@
 	* Initial Release
 	* Support for Linux user mode simulation and TI
 	  TMS320C5471 (Arm7) provided
+
+0.1.1 2007-xx-xx  Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* Corrected an error in interrupt level context switching
+	  for C5471
+	* Added fgets logic; verified console read.
+	* Corrected error in reading from serial port.  Improper
+	  use of semaphore can cause deadlock.
+	* Attempts to use C5471 console from interrupt handlers
+	  can casue errors. Added a special path for this case.
+	* Refuse callse to sem_wait and sem_trywait from interrupt
+	  handlers.
+	* Documentation updates

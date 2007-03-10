@@ -139,7 +139,7 @@ int sem_post(sem_t *sem)
            */
 
           for (stcb = (FAR _TCB*)g_waitingforsemaphore.head;
-               ((stcb) && (stcb->waitsem != sem));
+               (stcb && stcb->waitsem != sem);
                stcb = stcb->flink);
 
           if (stcb)

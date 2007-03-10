@@ -102,6 +102,13 @@ int sem_trywait(sem_t *sem)
   irqstate_t saved_state;
   int        ret = ERROR;
 
+  if (up_interrupt_context())
+    {
+      /* We do not want to set the errno in this case */
+
+      return ERROR;
+    }
+
   /* Assume any errors reported are due to invalid arguments. */
 
   *get_errno_ptr() = EINVAL;
