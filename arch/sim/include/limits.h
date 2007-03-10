@@ -1,5 +1,5 @@
 /************************************************************
- * string.h
+ * limits.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,61 +33,42 @@
  *
  ************************************************************/
 
-#ifndef __STRING_H
-#define __STRING_H
+#ifndef __ARCH_LIMITS_H
+#define __ARCH_LIMITS_H
 
 /************************************************************
  * Included Files
  ************************************************************/
 
-#include <nuttx/config.h>
-#include <stddef.h> /* For size_t */
-
 /************************************************************
  * Definitions
  ************************************************************/
 
-/************************************************************
- * Global Function Prototypes
- ************************************************************/
+#define SCHAR_MIN	0x80
+#define SCHAR_MAX	0x7f
+#define UCHAR_MAX	0xff
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+/* These could be different on machines where char is unsigned */
 
-EXTERN char  *strchr(const char *s, int c);
-EXTERN FAR char *strdup(const char *s);
-EXTERN char  *strerror(int);
-EXTERN size_t strlen(const char *);
-EXTERN char  *strncat(char *, const char *, size_t);
-EXTERN int    strcmp(const char *, const char *);
-EXTERN int    strncmp(const char *, const char *, size_t);
-EXTERN char  *strcpy(char *dest, const char *src);
-EXTERN char  *strncpy(char *, const char *, size_t);
-EXTERN char  *strpbrk(const char *, const char *);
-EXTERN char  *strchr(const char *, int);
-EXTERN char  *strrchr(const char *, int);
-EXTERN size_t strspn(const char *, const char *);
-EXTERN size_t strcspn(const char *, const char *);
-EXTERN char  *strstr(const char *, const char *);
-EXTERN char  *strtok(char *, const char *);
-EXTERN char  *strtok_r(char *, const char *, char **);
+#define CHAR_MIN	SCHAR_MIN
+#define CHAR_MAX	SCHAR_MAX
 
-EXTERN void  *memset(void *s, int c, size_t n);
-EXTERN void  *memcpy(void *dest, const void *src, size_t n);
-EXTERN int    memcmp(const void *s1, const void *s2, size_t n);
-EXTERN void  *memmove(void *dest, const void *src, size_t count);
+#define SHRT_MIN	0x8000
+#define SHRT_MAX	0x7fff
+#define USHRT_MAX	0xffff
 
-#ifndef CONFIG_ARCH_BZERO
-# define bzero(s,n) (void)memset(s,0,n)
-#endif
+#define INT_MIN         0x80000000
+#define INT_MAX         0x7fffffff
+#define UINT_MAX	0xffffffff
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-#endif /* __STRING_H */
+/* These change on 32-bit and 64-bit platforms */
+
+#define LONG_MAX	0x80000000
+#define LONG_MIN	0x7fffffff
+#define ULONG_MAX	0xffffffff
+
+#define LLONG_MAX	0x8000000000000000
+#define LLONG_MIN	0x7fffffffffffffff
+#define ULLONG_MAX	0xffffffffffffffff
+
+#endif /* __ARCH_LIMITS_H */

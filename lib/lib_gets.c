@@ -1,5 +1,5 @@
 /************************************************************
- * sem_wait.c
+ * lib_gets.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,17 +37,9 @@
  * Included Files
  ************************************************************/
 
-#include <sys/types.h>
-#include <semaphore.h>
-#include <errno.h>
-#include <assert.h>
-#include <nuttx/arch.h>
-#include "os_internal.h"
-#include "sem_internal.h"
-
-/************************************************************
- * Compilation Switches
- ************************************************************/
+#include <stdio.h>
+#include <limits.h>
+#include <string.h>
 
 /************************************************************
  * Definitions
@@ -58,7 +50,23 @@
  ************************************************************/
 
 /************************************************************
+ * Private Function Prototypes
+ ************************************************************/
+
+/************************************************************
+ * Global Function Prototypes
+ ************************************************************/
+
+/************************************************************
+ * Global Constant Data
+ ************************************************************/
+
+/************************************************************
  * Global Variables
+ ************************************************************/
+
+/************************************************************
+ * Private Constant Data
  ************************************************************/
 
 /************************************************************
@@ -70,110 +78,45 @@
  ************************************************************/
 
 /************************************************************
- * Public Functions
+ * Global Functions
  ************************************************************/
 
 /************************************************************
- * Function:  sem_wait
+ * Name: gets
  *
  * Description:
- *   This function attempts to lock the semaphore referenced
- *   by sem.  If the semaphore value is (<=) zero, then the
- *   calling task will not return until it successfully
- *   acquires the lock.
+ *   gets() reads a line from stdin into the buffer pointed
+ *   to by s until either a terminating newline or EOF,
+ *   which it replaces with '\0'.  No check for buffer
+ *   overrun is performed
  *
- * Parameters:
- *   sem - Semaphore descriptor.
+ *   This API should not be used because it is inherently
+ *   unsafe.  Consider using fgets which is safer and
+ *   slightly more efficient.
  *
- * Return Value:
- *   0 (OK), or -1 (ERROR) is unsuccessful
- *   If this function returns -1 (ERROR), then the cause
- *   of the failure will be reported in "errno" as:
- *   - EINVAL:  Invalid attempt to get the semaphore
- *   - EINTR:   The wait was interrupted by the receipt of
- *              a signal.
- *
- * Assumptions:
- *
- ************************************************************/
+ **********************************************************/
 
-int sem_wait(sem_t *sem)
+char *gets(char *s)
 {
-  FAR _TCB  *rtcb = (FAR _TCB*)g_readytorun.head;
-  int        ret = ERROR;
-  irqstate_t saved_state;
+  /* gets is ALMOST the same as fgets using stdin and no
+   * lenght limit (hence, the unsafeness of gets).  So let
+   * fgets do most of the work.
+   */
 
-  /* This API should not be called from interrupt handlers */
-
-  DEBUGASSERT(!up_interrupt_context())
-
-  /* Assume any errors reported are due to invalid arguments. */
-
-  *get_errno_ptr() = EINVAL;
-
-  if (sem)
+  char *ret = fgets(s, INT_MAX, stdin);
+  if (ret)
     {
-      /* The following operations must be performed with interrupts
-       * disabled because sem_post() may be called from an interrupt
-       * handler.
+      /* Another subtle difference from fgets is that gets
+       * replaces end-of-line markers with null terminators.
+       * We will do that as a second step (with some loss
+       * in performance).
        */
 
-      saved_state = irqsave();
-
-      /* Check if the lock is available */
-
-      if (sem->semcount > 0)
+      int len = strlen(ret);
+      if (len > 0 && ret[len-1] == '\n')
         {
-          /* It is, let the task take the semaphore. */
-
-          sem->semcount--;
-          rtcb->waitsem = NULL;
-          ret = OK;
+           ret[len-1] = '\0';
         }
-
-      /* The semaphore is NOT available, We will have to block the
-       * current thread of execution.
-       */
-
-      else
-        {
-          /* First, verify that the task is not already waiting on a
-           * semaphore
-           */
-
-          if (rtcb->waitsem != NULL)
-            {
-              PANIC(OSERR_BADWAITSEM);
-            }
-
-          /* Handle the POSIX semaphore */
-
-          sem->semcount--;
-
-          /* Save the waited on semaphore in the TCB */
-
-          rtcb->waitsem = sem;
-
-          /* Add the TCB to the prioritized semaphore wait queue */
-
-          up_block_task(rtcb, TSTATE_WAIT_SEM);
-
-          /* When we resume at this point, either (1) the semaphore has been
-           * assigned to this thread of execution, or (2) the semaphore wait
-           * has been interrupted by a signal.
-           */
-
-          if (*get_errno_ptr() != EINTR)
-            ret = OK;
-          else
-            sem->semcount++;
-        }
-
-      /* Interrupts may now be enabled. */
-
-      irqrestore(saved_state);
     }
-
   return ret;
 }
-

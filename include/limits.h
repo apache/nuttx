@@ -1,5 +1,5 @@
 /************************************************************
- * string.h
+ * limits.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,61 +33,17 @@
  *
  ************************************************************/
 
-#ifndef __STRING_H
-#define __STRING_H
+#ifndef __LIMITS_H
+#define __LIMITS_H
 
 /************************************************************
  * Included Files
  ************************************************************/
 
-#include <nuttx/config.h>
-#include <stddef.h> /* For size_t */
+#include <arch/limits.h>
 
 /************************************************************
  * Definitions
  ************************************************************/
 
-/************************************************************
- * Global Function Prototypes
- ************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
-EXTERN char  *strchr(const char *s, int c);
-EXTERN FAR char *strdup(const char *s);
-EXTERN char  *strerror(int);
-EXTERN size_t strlen(const char *);
-EXTERN char  *strncat(char *, const char *, size_t);
-EXTERN int    strcmp(const char *, const char *);
-EXTERN int    strncmp(const char *, const char *, size_t);
-EXTERN char  *strcpy(char *dest, const char *src);
-EXTERN char  *strncpy(char *, const char *, size_t);
-EXTERN char  *strpbrk(const char *, const char *);
-EXTERN char  *strchr(const char *, int);
-EXTERN char  *strrchr(const char *, int);
-EXTERN size_t strspn(const char *, const char *);
-EXTERN size_t strcspn(const char *, const char *);
-EXTERN char  *strstr(const char *, const char *);
-EXTERN char  *strtok(char *, const char *);
-EXTERN char  *strtok_r(char *, const char *, char **);
-
-EXTERN void  *memset(void *s, int c, size_t n);
-EXTERN void  *memcpy(void *dest, const void *src, size_t n);
-EXTERN int    memcmp(const void *s1, const void *s2, size_t n);
-EXTERN void  *memmove(void *dest, const void *src, size_t count);
-
-#ifndef CONFIG_ARCH_BZERO
-# define bzero(s,n) (void)memset(s,0,n)
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-#endif /* __STRING_H */
+#endif /* __LIMITS_H */

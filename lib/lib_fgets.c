@@ -34,10 +34,6 @@
  ************************************************************/
 
 /************************************************************
- * Compilation Switches
- ************************************************************/
-
-/************************************************************
  * Included Files
  ************************************************************/
 
@@ -49,6 +45,22 @@
 /************************************************************
  * Definitions
  ************************************************************/
+
+/* In some systems, the underlying serial logic may
+ * automatically echo characters back to the console.  We
+ * will assume that that is not the case here
+ */
+
+#define CONFIG_FGETS_ECHO 1
+
+/* Some environments may return CR as end-of-line, others LF, and
+ * others both.  The logic here assumes either but not both.
+ */
+
+#undef  CONFIG_EOL_IS_CR
+#undef  CONFIG_EOL_IS_LF
+#undef  CONFIG_EOL_IS_BOTH_CRLF
+#define CONFIG_EOL_IS_EITHER_CRLF 1
 
 /************************************************************
  * Private Type Declarations
@@ -97,20 +109,24 @@ static inline int _lib_rawgetc(int fd)
  * Name: _lib_consoleputc
  ************************************************************/
 
+#ifdef CONFIG_FGETS_ECHO
 static inline void _lib_consoleputc(int ch)
 {
   char buffer = ch;
   (void)write(1, &buffer, 1);
 }
+#endif
 
 /************************************************************
  * Name: _lib_consoleputs
  ************************************************************/
 
+#ifdef CONFIG_FGETS_ECHO
 static inline void _lib_consoleputs(char *s)
 {
   (void)write(1, s, strlen(s));
 }
+#endif
 
 /************************************************************
  * Global Functions
@@ -138,8 +154,10 @@ static inline void _lib_consoleputs(char *s)
 
 char *fgets(FAR char *s, int n, FILE *stream)
 {
-  int     escape = 0;
+#ifdef CONFIG_FGETS_ECHO
   boolean console;
+#endif
+  int     escape = 0;
   int     nch = 0;
 
   /* Sanity checks */
@@ -157,6 +175,7 @@ char *fgets(FAR char *s, int n, FILE *stream)
 
   /* Check if the stream is stdin */
 
+#ifdef CONFIG_FGETS_ECHO
   console = (stream->fs_filedes == 0);
 
   /* <esc>[K is the VT100 command that erases to the end of the line. */
@@ -165,6 +184,7 @@ char *fgets(FAR char *s, int n, FILE *stream)
     {
       _lib_consoleputs("\033[K");
     }
+#endif
 
   /* Read characters until we have a full line. On each
    * the loop we must be assured that there are two free bytes
@@ -213,12 +233,14 @@ char *fgets(FAR char *s, int n, FILE *stream)
             {
               nch--;
 
+#ifdef CONFIG_FGETS_ECHO
               if (console)
                 {
                   /* Echo the backspace character on the console */
 
                   _lib_consoleputc(ch);
                 }
+#endif
             }
         }
 
@@ -231,9 +253,18 @@ char *fgets(FAR char *s, int n, FILE *stream)
           escape = 1;
         }
 
-      /* Check for end-of-line or end-of-file */
+      /* Check for end-of-line.  This is tricky only in that some
+       * environments may return CR as end-of-line, others LF, and
+       * others both.
+       */
 
-      else if (ch == 0x0d)
+#if  defined(CONFIG_EOL_IS_LF) || defined(CONFIG_EOL_IS_BOTH_CRLF)
+      else if (ch == '\n')
+#elif defined(CONFIG_EOL_IS_CR)
+      else if (ch == '\r')
+#elif CONFIG_EOL_IS_EITHER_CRLF
+      else if (ch == '\n' || ch == '\r')
+#endif
         {
           /* The newline is stored in the buffer along
            * with the null terminator.
@@ -242,17 +273,18 @@ char *fgets(FAR char *s, int n, FILE *stream)
           s[nch++] = '\n';
           s[nch]   = '\0';
 
+#ifdef CONFIG_FGETS_ECHO
           if (console)
             {
               /* Echo the newline to the console */
 
               _lib_consoleputc('\n');
             }
-
+#endif
           return s;
         }
 
-      /* Check for end-of-line or end-of-file */
+      /* Check for end-of-file */
 
       else if (ch == EOF)
         {
@@ -270,13 +302,14 @@ char *fgets(FAR char *s, int n, FILE *stream)
         {
           s[nch++] = ch;
 
+#ifdef CONFIG_FGETS_ECHO
           if (console)
             {
               /* Echo the character to the console */
 
               _lib_consoleputc(ch);
             }
-
+#endif
           /* Check if there is room for another character
            * and the line's null terminator.  If not then
            * we have to end the line now.
@@ -291,16 +324,3 @@ char *fgets(FAR char *s, int n, FILE *stream)
     }
 
 }
-
-/************************************************************
- * Name: gets
- *
- * Description:
- *   gets() reads a line from stdin into the buffer pointed
- *   to by s until either a terminating newline or EOF,
- *   which it replaces with '\0'.  No check for buffer
- *   overrun is performed
- *
- **********************************************************/
-
-/* gets() is not supported because it is inherently un-safe */
