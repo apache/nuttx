@@ -41,8 +41,10 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <sched.h>
 #include <debug.h>
 #include <8052.h>
+#include "os_internal.h"
 #include "up_internal.h"
 #include "up_mem.h"
 
@@ -59,6 +61,33 @@
  ************************************************************/
 
 /************************************************************
+ * Name: _up_assert
+ ************************************************************/
+
+static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
+{
+  /* Are we in an interrupt handler or the idle task? */
+
+  if (g_irqtos || ((FAR _TCB*)g_readytorun.head)->pid == 0)
+    {
+       (void)irqsave();
+        for(;;)
+          {
+#ifdef CONFIG_8051_LEDS
+            up_ledon(LED_PANIC);
+            up_delay(250);
+            up_ledoff(LED_PANIC);
+            up_delay(250);
+#endif
+          }
+    }
+  else
+    {
+      exit(errorcode);
+    }
+}
+
+/************************************************************
  * Public Functions
  ************************************************************/
 
@@ -68,9 +97,20 @@
 
 void up_assert(void)
 {
-  dbg("Assertion failed\n");
+#if CONFIG_TASK_NAME_SIZE > 0
+  _TCB *rtcb = (_TCB*)g_readytorun.head;
+#endif
+
+  up_ledon(LED_ASSERTION);
+
+#if CONFIG_TASK_NAME_SIZE > 0
+  lldbg("%s: Assertion failed\n", rtcb->name);
+#else
+  lldbg("Assertion failed\n");
+#endif
+
   up_dumpstack();
-  exit(EXIT_FAILURE);
+  _up_assert(EXIT_FAILURE);
 }
 
 /************************************************************
@@ -79,7 +119,18 @@ void up_assert(void)
 
 void up_assert_code(int errorcode)
 {
-  dbg("Assertion failed with error code: %d\n", errorcode);
+#if CONFIG_TASK_NAME_SIZE > 0
+  _TCB *rtcb = (_TCB*)g_readytorun.head;
+#endif
+
+  up_ledon(LED_ASSERTION);
+
+#if CONFIG_TASK_NAME_SIZE > 0
+  lldbg("%s: Assertion failed, error=%d\n", rtcb->name, errorcode);
+#else
+  lldbg("Assertion failed , error=%d\n", errorcode);
+#endif
+
   up_dumpstack();
-  exit(errorcode);
+ _up_assert(errorcode);
 }

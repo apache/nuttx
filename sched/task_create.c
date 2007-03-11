@@ -170,7 +170,7 @@ void task_start(void)
 
   /* Count how many non-null arguments we are passing */
 
-  for (argc = 1; argc <= NUM_TASK_ARGS; argc++)
+  for (argc = 1; argc <= CONFIG_MAX_TASK_ARGS; argc++)
     {
        /* The first non-null argument terminates the list */
 
@@ -212,8 +212,12 @@ void task_start(void)
  *   entry      - Entry point of a new task
  *   main       - Application start point of the new task
  *   pthread    - TRUE is the task emulates pthread behavior
- *   arg1-4     - Four required task arguments to pass to
- *                the task when it is started.
+ *   argv       - A pointer to an array of input parameters.
+ *                Up to CONFIG_MAX_TASK_ARG parameters may be
+ *                provided. If fewer than CONFIG_MAX_TASK_ARG
+ *                parameters are passed, the list should be
+ *                terminated with a NULL argv[] value.
+ *                If no parameters are required, argv may be NULL.
  *
  * Return Value:
  *  OK on success; ERROR on failure.
@@ -225,10 +229,10 @@ void task_start(void)
 
 STATUS _task_init(FAR _TCB *tcb, const char *name, int priority,
                   start_t start, main_t main, boolean pthread,
-                  FAR char *arg1, FAR char *arg2,
-                  FAR char *arg3, FAR char *arg4)
+                  char *argv[])
 {
   STATUS ret;
+  int i;
 
   /* Assign a unique task ID to the task. */
 
@@ -273,23 +277,16 @@ STATUS _task_init(FAR _TCB *tcb, const char *name, int priority,
       if (!pthread)
         {
           /* The first NULL argument terminates the list of 
-           * arguments.
+           * arguments.  The argv pointer may be NULL if no
+           * parameters are passed.
            */
 
-          if (arg1)
+          i = 1;
+          if (argv)
             {
-              tcb->argv[1] = strdup(arg1);
-              if (arg2)
+              for (; i < CONFIG_MAX_TASK_ARGS+1 && argv[i-1]; i++)
                 {
-                  tcb->argv[2] = strdup(arg2);
-                  if (arg3)
-                    {
-                      tcb->argv[3] = strdup(arg3);
-                      if (arg4)
-                        {
-                          tcb->argv[4] = strdup(arg4);
-                        }
-                    }
+                  tcb->argv[i] = strdup(argv[i-1]);
                 }
             }
         }
@@ -299,14 +296,20 @@ STATUS _task_init(FAR _TCB *tcb, const char *name, int priority,
 
           tcb->flags   |= TCB_FLAG_PTHREAD;
 
-          /* And just copy the argument.  (For pthreads, there
-           * is really only a single argument, arg1).
+          /* And just copy the argument. For pthreads, there
+           * is really only a single argument, argv[0].  It is
+           * copy as a value -- NOT duplicated.
            */
 
-          tcb->argv[1]  = arg1;
-          tcb->argv[2]  = arg2;
-          tcb->argv[3]  = arg3;
-          tcb->argv[4]  = arg4;
+          i = 2;
+          tcb->argv[1]  = argv[0];
+        }
+
+      /* Nullify any unused argument storage */
+
+      for (; i < CONFIG_MAX_TASK_ARGS+1; i++)
+        {
+          tcb->argv[i] = NULL;
         }
 
       /* Initialize other (non-zero) elements of the TCB */
@@ -409,14 +412,10 @@ STATUS task_activate(FAR _TCB *tcb)
 
 #ifndef CONFIG_CUSTOM_STACK
 int task_create(const char *name, int priority,
-                int stack_size, main_t entry,
-                FAR char *arg1, FAR char *arg2,
-                FAR char *arg3, FAR char *arg4)
+                int stack_size, main_t entry, char *argv[])
 #else
 int task_create(const char *name, int priority,
-                main_t entry,
-                FAR char *arg1, FAR char *arg2,
-                FAR char *arg3, FAR char *arg4)
+                main_t entry, char *argv[])
 #endif
 {
   FAR _TCB *tcb;
@@ -454,7 +453,7 @@ int task_create(const char *name, int priority,
    /* Initialize the task control block */
 
    status = _task_init(tcb, name, priority, task_start, entry,
-                       FALSE, arg1, arg2, arg3, arg4);
+                       FALSE, argv);
    if (status != OK)
      {
        sched_releasetcb(tcb);

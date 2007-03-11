@@ -65,7 +65,6 @@
 
 void sched_foreach(sched_foreach_t handler, FAR void *arg)
 {
-  FAR _TCB *tcb;
   irqstate_t flags = irqsave();
   int ndx;
 

@@ -233,7 +233,7 @@ static void ps_task(FAR _TCB *tcb, FAR void *arg)
          g_statenames[tcb->task_state]);
 
   printf("%s(", tcb->argv[0]);
-  for (i = 1; i < NUM_TASK_ARGS+1 && tcb->argv[i]; i++)
+  for (i = 1; i < CONFIG_MAX_TASK_ARGS+1 && tcb->argv[i]; i++)
     {
       if (needcomma)
         {
@@ -283,7 +283,7 @@ void user_initialize(void)
  * Name: user_start
  ************************************************************/
 
-int user_start(int parm1, int parm2, int parm3, int parm4)
+int user_start(int argc, char *argv[])
 {
   printf("NuttShell (NSH)\n");
   fflush(stdout);

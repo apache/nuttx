@@ -12,7 +12,7 @@
 <hr>
 <hr>
 <CENTER><BIG><B>
-Nuttx Operating System
+NuttX Operating System
 <P>
 User's Manual
 </B></BIG>
@@ -30,9 +30,9 @@ Gregory Nutt
 This user's manual is divided into three sections:
 <UL>
 <LI><B>Section 1.0, <A HREF="#Introduction">Introduction</A></B>:
-This section provides an overview of the Nuttx user's manual.
+This section provides an overview of the NuttX user's manual.
 <LI><B>Section 2.0, <A HREF="#OS_Interfaces">OS Interfaces</A></B>:
-This section details the  interfaces provided by Nuttx from the
+This section details the  interfaces provided by NuttX from the
 perspective of the firmware developer.  This section is divided
 into several paragraphs that describe different groups of OS interfaces:
 <UL>
@@ -46,7 +46,7 @@ into several paragraphs that describe different groups of OS interfaces:
 <LI>Paragraph 2.8 <A HREF="#Pthread">Pthread Interfaces</A>
 </UL>
 <LI><B>Section 3.0, <A HREF="#Data_Structures">OS Data Structures</A></B>:
-This section documents the data structures that are used at the Nuttx
+This section documents the data structures that are used at the NuttX
 interface.
 </UL>
 <HR>
@@ -54,7 +54,7 @@ interface.
 <H1>2.0 <A NAME="OS_Interfaces">OS Interfaces</A></H1>
 
 <P>
-This section describes each C-callable interface to the Nuttx
+This section describes each C-callable interface to the NuttX
 Operating System. The description of each interface is presented
 in the following format:
 <P>
@@ -77,10 +77,10 @@ the interface function or any non-obvious limitations to the use
 of the interface function will be indicated here.
 <P>
 <B>POSIX Compatibility:</B> Any significant differences between the
-Nuttx interface and its corresponding POSIX interface will be noted
+NuttX interface and its corresponding POSIX interface will be noted
 here.
 <P>
-NOTE: In order to achieve an independent name space for the Nuttx
+NOTE: In order to achieve an independent name space for the NuttX
 interface functions, differences in function names and types are
 to be expected and will not be identified as differences in these
 paragraphs.
@@ -90,9 +90,9 @@ paragraphs.
 
 <p>
 <b>Tasks</b>.
-Nuttx is a flat address OS.  As such it does not support &quot;processes&quot;
+NuttX is a flat address OS.  As such it does not support &quot;processes&quot;
 in the way that, say, Linux does.
-Nuttx only supports simple threads running within the same address space.
+NuttX only supports simple threads running within the same address space.
 However, the programming model makes a distinction between &quot;tasks&quot;
 and pthreads:
 <ul>
@@ -129,7 +129,7 @@ were started from the same parent thread.
         int priority,
         int stack_size,
         main_t entry,
-        char *arg1, char *arg2, char *arg3, char *arg4);
+        const char *argv[]);
 </PRE>
 
 <P>
@@ -144,16 +144,27 @@ were started from the same parent thread.
    The specified function will be called with four arguments.
    Should the specified routine return, a call to exit() will automatically be made.
 </P>
-<P>
-   Note that four (and only four) arguments must be passed for the
-   spawned functions.
-</P>
 <p>
-   The newly created task does not inherity characteristics
+   Note that an arbitrary number of arguments may be passed to the
+   spawned functions.  The maximum umber of arguments is an OS
+   configuration parameter (<code>CONFIG_MAX_TASK_ARGS</code>).
+</p>
+<p>
+   The arguments are copied (via <code>strdup</code>) so that the
+   life of the passed strings is not dependent on the life of the
+   caller to <code>task_create()</code>.
+</p>
+<p>
+   The newly created task does not inherit scheduler characteristics
    from the parent task:  The new task is started at the
    default system priority and with the SCHED_FIFO scheduling
    policy.  These characteristcs may be modified after the new
    task has been started.
+</p>
+<p>
+   The newly created task does inherit the first three file
+   descriptors (corresponding to stdin, stdout, and stderr) and
+   redirection of standard I/O is supported.
 </p>
 <P>
 <B>Input Parameters:</B> 
@@ -162,7 +173,11 @@ were started from the same parent thread.
     <LI><I>priority</I>. Priority of the new task</LI>
     <LI><I>stack_size</I>. size (in bytes) of the stack needed</LI>
     <LI><I>entry</I>. Entry point of a new task</LI>
-    <LI><I>arg1, arg2, arg3, and arg4</I>. Four required task arguments to pass to the task</LI>
+    <LI><I>argv</I>. A pointer to an array of input parameters.  Up to
+       <code>CONFIG_MAX_TASK_ARG</code> parameters may be provided.
+       If fewer than <code>CONFIG_MAX_TASK_ARG</code> parameters are
+       passed, the list should be terminated with a NULL argv[] value.
+       If no parameters are required, argv may be NULL.
   </UL>
 <P>
   <B>Returned Values:</B> 
@@ -192,14 +207,13 @@ VxWorks provides the following similar interface:
 </PRE>
 
 <P>
-The Nuttx task_create() differs from VxWorks' taskSpawn() in the
+The NuttX task_create() differs from VxWorks' taskSpawn() in the
 following ways:
 <UL>
-<LI>Function name
-<LI>Various differences in types or arguments
+<LI>Interface name
+<LI>Various differences in types of arguments
 <LI>There is no options arguement.
-<LI>One four parameters can be passed to a task (VxWorks allows
-ten).
+<LI>A variable number of parameters can be passed to a task (VxWorks supports ten).
 </UL>
 
 <H3>2.1.2 task_init</H3>
@@ -209,20 +223,21 @@ ten).
 <PRE>
    #include &lt;sched.h&gt;
    STATUS task_init(
-      _TCB *tcb,
-      char *name,
-      int priority,
-      uint32 *stack,
-      uint32 stack_size,
-      maint_t entry,
-      int arg1, int arg2, int arg3, int arg4);
+          _TCB *tcb,
+          char *name,
+          int priority,
+          uint32 *stack,
+          uint32 stack_size,
+          maint_t entry,
+          const char *argv[]);
 </PRE>
 
 <P>
 <B>Description:</B>
 <P>
   This function initializes a Task Control Block (TCB)
-   in preparation for starting a new thread.
+  in preparation for starting a new thread.  It performs a subset
+  of the functionality of <code>task_create()</code> (see above).
 </P>
 <P>
   Unlike task_create(), task_init() does not activate the task.
@@ -237,7 +252,11 @@ ten).
     <LI><I>stack</I>. Start of the pre-allocated stack
     <LI><I>stack_size</I>. size (in bytes) of the pre-allocated stack
     <LI><I>entry</I>. Entry point of a new task
-    <LI><I>arg1, arg2, arg3, and arg4</I>. Four required task arguments to pass to the task
+    <LI><I>argv</I>. A pointer to an array of input parameters.  Up to
+       <code>CONFIG_MAX_TASK_ARG</code> parameters may be provided.
+       If fewer than <code>CONFIG_MAX_TASK_ARG</code> parameters are
+       passed, the list should be terminated with a NULL argv[] value.
+       If no parameters are required, argv may be NULL.
   </UL>
 </p>
 <P>
@@ -272,13 +291,13 @@ VxWorks provides the following similar interface:
 </PRE>
 
 <P>
-The Nuttx task_init() differs from VxWorks' taskInit() in the
+The NuttX task_init() differs from VxWorks' taskInit() in the
 following ways:
 <UL>
-<LI>Function name
+<LI>Interface name
 <LI>Various differences in types or arguments
 <LI>There is no options argument.
-<LI>One four parameters can be passed to a task (VxWorks allows ten).
+<LI>A variable number of parameters can be passed to a task (VxWorks supports ten).
 </UL>
 
 <H3>2.1.3 task_activate</H3>
@@ -322,7 +341,7 @@ VxWorks provides the following similar interface:
 </PRE>
 
 <P>
-The Nuttx task_activate() differs from VxWorks' taskActivate() in the
+The NuttX task_activate() differs from VxWorks' taskActivate() in the
 following ways:
 <UL>
 <LI>Function name
@@ -371,7 +390,7 @@ VxWorks provides the following similar interface:
 </PRE>
 
 <P>
-The Nuttx task_delete() differs from VxWorks' taskDelete() in
+The NuttX task_delete() differs from VxWorks' taskDelete() in
 the following ways:
 <UL>
 <LI>No support is provided for calling the tasks deletion routines
@@ -419,7 +438,7 @@ And the unix interface:
 </PRE>
 
 <P>
-The Nuttx exit() differs from ANSI exit() in
+The NuttX exit() differs from ANSI exit() in
 the following ways:
 <UL>
 <LI>The <I>code</I> parameter is ignored.
@@ -468,7 +487,7 @@ VxWorks provides the following similar interface:
 </PRE>
 
 <P>
-The Nuttx task_restart() differs from VxWorks' taskRestart() in
+The NuttX task_restart() differs from VxWorks' taskRestart() in
 the following ways:
 <UL>
 <LI>Restart of the currently running task is not supported.
@@ -506,15 +525,15 @@ Compatible with the POSIX interface of the same name.
 <H2>2.2 <A NAME="Task_Schedule">Task Scheduling Interfaces</A></H2>
 
 <P>
-Nuttx performs strict priority scheduling: Tasks of higher
+NuttX performs strict priority scheduling: Tasks of higher
 priority have exclusive access to the CPU until they become blocked.
 At that time, the CPU is available to tasks of lower priority.
 Tasks of equal priority are scheduled FIFO.
 <P>
 The OS interfaces described in the following paragraphs provide
-a POSIX- compliant interface to the Nuttx scheduler. However, these
+a POSIX- compliant interface to the NuttX scheduler. However, these
 POSIX interfaces assume a greater range of scheduling options
-than those provided by the Nuttx scheduler. As a result, many of
+than those provided by the NuttX scheduler. As a result, many of
 these POSIX interfaces are little more than stubs.
 
 <H3>2.2.1 sched_setparam</H3>
@@ -921,7 +940,7 @@ on this thread of execution.
 <H2>2.4 <A NAME="Message_Queue">Named Message Queue Interfaces</A></H2>
 
 <P>
-The Nuttx supports POSIX named message queues for intertask communication.
+The NuttX supports POSIX named message queues for intertask communication.
 Any task may send or receive messages on named message queues.
 Interrupt handlers may send messages via named message queues.
 
@@ -1305,7 +1324,7 @@ interface of the same name.
 
 <P>
 <B>Semaphores</B>.  Semaphores are the basis for
-synchronization and mutual exclusion in Nuttx. Nuttx supports
+synchronization and mutual exclusion in NuttX. NuttX supports
 POSIX semaphores.
 <P>
 Semaphores are the preferred mechanism for gaining exclusive access to a
@@ -1336,7 +1355,7 @@ inversion</I>.
 <P>
 Some operating systems avoid priority inversion by <I>automatically</I>
 increasing the priority of the low-priority <I>Task C</I> (the operable
-buzz-word for this behavior is <I>mutex</I> semaphores).  The Nuttx does not
+buzz-word for this behavior is <I>mutex</I> semaphores).  The NuttX does not
 support this behavior.  As a consequence, it is left to the designer to
 provide implementations that will not suffer from priority inversion.
 The designer may, as examples:
@@ -1757,13 +1776,13 @@ interface of the same name.
 <H2>2.6 <A NAME="Watchdogs">Watchdog Timer Interfaces</A></H2>
 
 <P>
-The Nuttx provides a general watchdog timer facility. This
-facility allows the Nuttx user to specify a watchdog timer function
+The NuttX provides a general watchdog timer facility. This
+facility allows the NuttX user to specify a watchdog timer function
 that will run after a specified delay. The watchdog timer function
 will run in the context of the timer interrupt handler. Because
-of this, a limited number of Nuttx interfaces are available to
+of this, a limited number of NuttX interfaces are available to
 the watchdog timer function. However, the watchdog timer function
-may use mq_send(), and sigqueue() to communicate with Nuttx tasks.
+may use mq_send(), and sigqueue() to communicate with NuttX tasks.
 
 <H3>2.6.1 wd_create</H3>
 
@@ -1783,7 +1802,7 @@ by allocating the appropriate resources for the watchdog.
 <B>Returned Values:</B> 
 <UL>
 <LI>Pointer to watchdog that may be used as a handle in subsequent
-Nuttx calls (i.e., the watchdog ID), or NULL if insufficient resources
+NuttX calls (i.e., the watchdog ID), or NULL if insufficient resources
 are available to create the watchdogs.
 </UL>
 
@@ -1946,7 +1965,7 @@ VxWorks provides the following comparable interface:
 <H2>2.7 <A NAME="Signals">Signal Interfaces</A></H2>
 
 <P>
-The Nuttx provides signal interfaces for tasks. Signals are
+The NuttX provides signal interfaces for tasks. Signals are
 used to alter the flow control of tasks by communicating asynchronous
 events within or between task contexts. Any task or interrupt
 handler can post (or send) a signal to a particular task. The
@@ -3913,9 +3932,9 @@ interface of the same name.
 <H1>3.0 <A NAME="Data_Structures">OS Data Structures</A></H1>
 <H2>3.1 Scalar types</H2>
 <P>
-Many of the types used to communicate with Nuttx are simple
+Many of the types used to communicate with NuttX are simple
 scalar types. These types are used to provide architecture independence
-of the OS from the application. The scalar types used at the Nuttx
+of the OS from the application. The scalar types used at the NuttX
 interface include:
 <UL>
 <LI>pid_t
@@ -3927,7 +3946,7 @@ interface include:
 
 <H2>3.2 Hidden Interface Structures</H2>
 <P>
-Several of the types used to interface with Nuttx are
+Several of the types used to interface with NuttX are
 structures that are intended to be hidden from the application.
 From the standpoint of the application, these structures (and
 structure pointers) should be treated as simple handles to reference
@@ -3984,7 +4003,7 @@ in sys/types.h as:
 
 <P>
 This structure is used to pass scheduling priorities to and from
-Nuttx;
+NuttX;
 <PRE>
     struct sched_param
     {
@@ -3996,7 +4015,7 @@ Nuttx;
 
 <P>
 This structure is used to pass timing information between the
-Nuttx and a user application:
+NuttX and a user application:
 <PRE>
     struct timespec
     {
@@ -4009,7 +4028,7 @@ Nuttx and a user application:
 
 <P>
 This structure is used to communicate message queue attributes
-between Nuttx and a MoBY application:
+between NuttX and a MoBY application:
 <PRE>
     struct mq_attr {
       size_t       mq_maxmsg;   /* Max number of messages in queue */

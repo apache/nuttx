@@ -42,6 +42,8 @@
 #include <ctype.h>
 #include <debug.h>
 
+#if CONFIG_NFILE_STREAMS > 0
+
 /************************************************************
  * Definitions
  ************************************************************/
@@ -71,24 +73,16 @@
  ************************************************************/
 
 /************************************************************
- * Global Function Prototypes
+ * Public Data
  ************************************************************/
 
 /************************************************************
- * Global Constant Data
+ * Private Data
  ************************************************************/
 
-/************************************************************
- * Global Variables
- ************************************************************/
+/* <esc>[K is the VT100 command erases to the end of the line. */
 
-/************************************************************
- * Private Constant Data
- ************************************************************/
-
-/************************************************************
- * Private Variables
- ************************************************************/
+static const char g_erasetoeol[] = "\033[K";
 
 /************************************************************
  * Private Functions
@@ -122,7 +116,7 @@ static inline void _lib_consoleputc(int ch)
  ************************************************************/
 
 #ifdef CONFIG_FGETS_ECHO
-static inline void _lib_consoleputs(char *s)
+static inline void _lib_consoleputs(const char *s)
 {
   (void)write(1, s, strlen(s));
 }
@@ -182,7 +176,7 @@ char *fgets(FAR char *s, int n, FILE *stream)
 
   if (console)
     {
-      _lib_consoleputs("\033[K");
+      _lib_consoleputs(g_erasetoeol);
     }
 #endif
 
@@ -239,6 +233,7 @@ char *fgets(FAR char *s, int n, FILE *stream)
                   /* Echo the backspace character on the console */
 
                   _lib_consoleputc(ch);
+                  _lib_consoleputs(g_erasetoeol);
                 }
 #endif
             }
@@ -324,3 +319,5 @@ char *fgets(FAR char *s, int n, FILE *stream)
     }
 
 }
+
+#endif /* CONFIG_NFILE_STREAMS */

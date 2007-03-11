@@ -178,6 +178,7 @@ int pthread_create(pthread_t *thread, pthread_attr_t *attr,
   FAR _TCB *ptcb;
   FAR join_t *pjoin;
   STATUS status;
+  char *argv[2];
   int priority;
 #if CONFIG_RR_INTERVAL > 0
   int policy;
@@ -269,8 +270,10 @@ int pthread_create(pthread_t *thread, pthread_attr_t *attr,
 
   /* Initialize the task */
 
-  status = _task_init(ptcb, NULL, priority, pthread_start, (main_t)startRoutine,
-                      TRUE, (FAR char*)arg, NULL, NULL, NULL);
+  argv[0] = (char *)arg;
+  argv[1] = NULL;
+  status  = _task_init(ptcb, NULL, priority, pthread_start,
+                       (main_t)startRoutine, TRUE, argv);
   if (status != OK)
     {
 

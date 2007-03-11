@@ -67,7 +67,7 @@ extern "C" {
 /* These are functions that must be supplied by the application */
 
 EXTERN void   weak_function user_initialize(void);
-EXTERN int    user_start(int parm1, int parm2, int parm3, int parm4);
+EXTERN int    user_start(int argc, char *argv[]);
 
 /* Functions contained in os_task.c *************************/
 

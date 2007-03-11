@@ -408,10 +408,10 @@ void os_start(void)
 #ifndef CONFIG_CUSTOM_STACK
   init_taskid = task_create("init", SCHED_PRIORITY_DEFAULT,
                             CONFIG_PROC_STACK_SIZE,
-                            (main_t)user_start, 0, 0, 0, 0);
+                            (main_t)user_start, (char **)NULL);
 #else
   init_taskid = task_create("init", SCHED_PRIORITY_DEFAULT,
-                            (main_t)user_start, 0, 0, 0, 0);
+                            (main_t)user_start, (char **)NULL);
 #endif
   ASSERT(init_taskid != ERROR);
 

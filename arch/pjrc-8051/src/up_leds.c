@@ -1,5 +1,5 @@
 /************************************************************
- * sched_setuptaskfiles.c
+ * up_leds.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,74 +38,68 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-#include <sched.h>
-#include <errno.h>
-#include <nuttx/fs.h>
-#include "os_internal.h"
+#include <sys/types.h>
+#include "up_internal.h"
+
+/************************************************************
+ * Definitions
+ ************************************************************/
+
+/************************************************************
+ * Private Data
+ ************************************************************/
+
+static uint32 g_ledstate;
 
 /************************************************************
  * Private Functions
  ************************************************************/
 
 /************************************************************
- * Public Functions
+ * Public Funtions
  ************************************************************/
 
 /************************************************************
- * Function:  sched_setuptaskfiles
- *
- * Description:
- *   Configure a newly allocated TCB so that it will inherit
- *   file descriptors and streams from the parent task.
- *
- * Parameters:
- *   tcb - tcb of the new task.
- *
- * Return Value:
- *   None
- *
- * Assumptions:
- *
+ * Name: up_ledinit
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
-int sched_setuptaskfiles(FAR _TCB *tcb)
+#ifdef CONFIG_8051_LEDS
+void up_ledinit(void)
 {
-#ifdef CONFIG_DEV_CONSOLE
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
-  int i;
-#endif /* CONFIG_DEV_CONSOLE */
+  /* Set all ports as outputs */
 
-  /* Allocate file descriptors for the TCB */
+  p82c55_abc_config = 128;
+  p82c55_def_config = 128;
 
-  tcb->filelist = files_alloclist();
-  if (!tcb->filelist)
-    {
-      *get_errno_ptr() = ENOMEM;
-       return ERROR;
-    }
+  /* Turn LED 1-7 off; turn LED 0 on */
 
-#ifdef CONFIG_DEV_CONSOLE
- /* Duplicate the first three file descriptors */
-
-  if (rtcb->filelist)
-    {
-      for (i = 0; i < 3; i++)
-        {
-          (void)files_dup(&rtcb->filelist->fl_files[i],
-                          &tcb->filelist->fl_files[i]);
-        }
-    }
-
-#if CONFIG_NFILE_STREAMS > 0
-  /* Allocate file streams for the TCB */
-
-  return sched_setupstreams(tcb);
-#else
-  return OK;
-#endif /* CONFIG_NFILE_STREAMS */
-#endif /* CONFIG_DEV_CONSOLE */
+  g_ledstate    = 0x000000fe;
+  p82c55_port_e = g_ledstate;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */
+/************************************************************
+ * Name: up_ledon
+ ************************************************************/
+
+void up_ledon(int led)
+{
+  if (led < 8)
+    {
+      g_ledstate   &= ~(1 << led);
+      p82c55_port_e = g_ledstate;
+    }
+}
+
+/************************************************************
+ * Name: up_ledoff
+ ************************************************************/
+
+void up_ledoff(int led)
+{
+  if (led < 8)
+    {
+      g_ledstate   |= (1 << led);
+      p82c55_port_e = g_ledstate;
+    }
+}
+#endif /* CONFIG_8051_LEDS */

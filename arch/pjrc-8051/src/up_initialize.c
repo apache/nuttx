@@ -119,6 +119,6 @@ void up_initialize(void)
   up_timerinit();
 #endif
 
-  /* Initialize the serial console support */
+  up_ledon(LED_IRQSENABLED);
 }
 

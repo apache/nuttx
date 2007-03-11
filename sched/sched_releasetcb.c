@@ -123,9 +123,9 @@ int sched_releasetcb(FAR _TCB *tcb)
 
       if ((tcb->flags & TCB_FLAG_PTHREAD) == 0)
         {
-          for (i = 1; i < NUM_TASK_ARGS+1 && tcb->argv[i]; i++)
+          for (i = 1; i < CONFIG_MAX_TASK_ARGS+1 && tcb->argv[i]; i++)
             {
-              sched_free(tcb->argv[i]);
+              sched_free((FAR void*)tcb->argv[i]);
             }
         }
 

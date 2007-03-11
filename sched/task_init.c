@@ -39,6 +39,7 @@
 
 #include <sys/types.h>
 #include <sched.h>
+#include <nuttx/arch.h>
 #include "os_internal.h"
 
 /************************************************************
@@ -94,21 +95,18 @@
 
 #ifndef CONFIG_CUSTOM_STACK
 STATUS task_init(FAR _TCB *tcb, const char *name, int priority,
-                 FAR uint32 *stack, uint32 stack_size, main_t entry,
-                 FAR char *arg1, FAR char *arg2,
-                 FAR char *arg3, FAR char *arg4)
+                 FAR uint32 *stack, uint32 stack_size,
+                 main_t entry, char *argv[])
 {
   up_use_stack(tcb, stack, stack_size);
   return _task_init(tcb, name, priority, task_start, entry,
-                    FALSE, arg1, arg2, arg3, arg4);
+                    FALSE, argv);
 }
 #else
 STATUS task_init(FAR _TCB *tcb, const char *name, int priority,
-                 main_t entry,
-                 FAR char *arg1, FAR char *arg2,
-                 FAR char *arg3, FAR char *arg4)
+                 main_t entry, char *argv[])
 {
   return _task_init(tcb, name, priority, task_start, entry,
-                    FALSE, arg1, arg2, arg3, arg4);
+                    FALSE, argv);
 }
 #endif

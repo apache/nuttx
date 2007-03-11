@@ -55,14 +55,6 @@
 
 /* Task Management Definitins *******************************/
 
-/* This is the number of arguments that are passed to tasks
- * on start-up. This number was selected because this is the
- * number of parameters that can be passed to a MIPS function
- * in registers
- . */
-
-#define NUM_TASK_ARGS       4
-
 /* This is the maximum number of times that a lock can be set */
 
 #define MAX_LOCK_COUNT    127
@@ -186,7 +178,7 @@ struct _TCB
   /* Values needed to restart a task **********************************/
 
   ubyte    init_priority;         /* Initial priority of the task     */
-  FAR char *argv[NUM_TASK_ARGS+1]; /* Name + start-up parameters      */
+  char    *argv[CONFIG_MAX_TASK_ARGS+1]; /* Name+start-up parameters  */
 
   /* Stack-Related Fields *********************************************/
 
@@ -278,24 +270,19 @@ extern "C" {
 
 #ifndef CONFIG_CUSTOM_STACK
 EXTERN STATUS  task_init(FAR _TCB *tcb, const char *name, int priority,
-                         FAR uint32 *stack, uint32 stack_size, main_t entry,
-                         FAR char *arg1, FAR char *arg2,
-                         FAR char *arg3, FAR char *arg4);
+                         FAR uint32 *stack, uint32 stack_size,
+                         main_t entry, char *argv[]);
 #else
 EXTERN STATUS  task_init(FAR _TCB *tcb, const char *name, int priority,
-                         main_t entry,
-                         FAR char *arg1, FAR char *arg2,
-                         FAR char *arg3, FAR char *arg4);
+                         main_t entry, char *argv[]);
 #endif
 EXTERN STATUS  task_activate(FAR _TCB *tcb);
 #ifndef CONFIG_CUSTOM_STACK
-EXTERN int     task_create(const char *name, int priority, int stack_size, main_t main,
-                           FAR char *arg1, FAR char *arg2,
-                           FAR char *arg3, FAR char *arg4);
+EXTERN int     task_create(const char *name, int priority, int stack_size,
+                           main_t entry, char *argv[]);
 #else
-EXTERN int     task_create(const char *name, int priority, main_t main,
-                           FAR char *arg1, FAR char *arg2,
-                           FAR char *arg3, FAR char *arg4);
+EXTERN int     task_create(const char *name, int priority,
+                           main_t entry, char *argv[]);
 #endif
 EXTERN STATUS  task_delete(pid_t pid);
 EXTERN STATUS  task_restart(pid_t pid);

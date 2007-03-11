@@ -11,6 +11,8 @@
 	* Added fgets() and gets() logic; verified c5471 console read.
 	* Corrected error in reading from serial port.  Improper
 	  use of semaphore can cause deadlock.
+	* Tasks can now accept a configurable maximum number of
+	  input parameters (argc)
 	* Attempts to use C5471 console from interrupt handlers
 	  can casue errors. Added a special path for this case.
 	* Refuse calls to sem_wait and sem_trywait from interrupt

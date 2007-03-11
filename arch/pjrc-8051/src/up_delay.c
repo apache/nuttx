@@ -1,5 +1,5 @@
 /************************************************************
- * sched_setuptaskfiles.c
+ * up_delay.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,74 +38,55 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-#include <sched.h>
-#include <errno.h>
-#include <nuttx/fs.h>
-#include "os_internal.h"
+#include "up_internal.h"
+
+/************************************************************
+ * Definitions
+ ************************************************************/
+
+/************************************************************
+ * Private Types
+ ************************************************************/
+
+/************************************************************
+ * Private Function Prototypes
+ ************************************************************/
+
+/************************************************************
+ * Private Variables
+ ************************************************************/
 
 /************************************************************
  * Private Functions
  ************************************************************/
 
+
 /************************************************************
- * Public Functions
+ * Public Funtions
  ************************************************************/
 
 /************************************************************
- * Function:  sched_setuptaskfiles
+ * Name: up_delay
  *
  * Description:
- *   Configure a newly allocated TCB so that it will inherit
- *   file descriptors and streams from the parent task.
- *
- * Parameters:
- *   tcb - tcb of the new task.
- *
- * Return Value:
- *   None
- *
- * Assumptions:
+ *   Delay inline for the requested number of milliseconds.
+ *   NOT multi-tasking friendly.
  *
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
-int sched_setuptaskfiles(FAR _TCB *tcb)
+void up_delay(ubyte milliseconds) __naked
 {
-#ifdef CONFIG_DEV_CONSOLE
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
-  int i;
-#endif /* CONFIG_DEV_CONSOLE */
-
-  /* Allocate file descriptors for the TCB */
-
-  tcb->filelist = files_alloclist();
-  if (!tcb->filelist)
-    {
-      *get_errno_ptr() = ENOMEM;
-       return ERROR;
-    }
-
-#ifdef CONFIG_DEV_CONSOLE
- /* Duplicate the first three file descriptors */
-
-  if (rtcb->filelist)
-    {
-      for (i = 0; i < 3; i++)
-        {
-          (void)files_dup(&rtcb->filelist->fl_files[i],
-                          &tcb->filelist->fl_files[i]);
-        }
-    }
-
-#if CONFIG_NFILE_STREAMS > 0
-  /* Allocate file streams for the TCB */
-
-  return sched_setupstreams(tcb);
-#else
-  return OK;
-#endif /* CONFIG_NFILE_STREAMS */
-#endif /* CONFIG_DEV_CONSOLE */
+  _asm
+	mov	r0, dpl
+00001$: mov	r1, #230
+00002$: nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	djnz	r1, 00002$
+	djnz	r0, 00001$
+	ret
+  _endasm;
 }
-
-#endif /* CONFIG_NFILE_DESCRIPTORS */

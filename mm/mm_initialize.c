@@ -92,9 +92,6 @@ FAR struct mm_freenode_s g_nodelist[MM_NNODES];
 
 void mm_initialize(FAR void *heapstart, size_t heapsize)
 {
-  FAR struct mm_freenode_s *node;
-  size_t heapbase;
-  size_t heapend;
   int i;
 
   CHECK_ALLOCNODE_SIZE;

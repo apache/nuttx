@@ -37,9 +37,11 @@
 #
 # CONFIG_ARCH - identifies the arch subdirectory
 # CONFIG_ARCH_name - for use in C code
+# CONFIG_PJRC_LEDS - Use LEDs to show state. Unique to 8051.
 #
 CONFIG_ARCH=pjrc-8051
 CONFIG_ARCH_8051=y
+CONFIG_8051_LEDS=n
 
 #
 # General OS setup
@@ -142,6 +144,9 @@ CONFIG_RRLOAD_BINARY=n
 #
 # CONFIG_MAX_TASKS - The maximum number of simultaneously
 #   actived tasks.  This value must be a power of two.
+# CONFIG_MAX_TASK_ARGS - This controls the maximum number of
+#   of parameters that a task may receive (i.e., maxmum value
+#   of 'argc')
 # CONFIG_NPTHREAD_KEYS - The number of items of thread-
 #   specific data that can be retained
 # CONFIG_NFILE_DESCRIPTORS - The maximum number of file
@@ -165,6 +170,7 @@ CONFIG_RRLOAD_BINARY=n
 #   watchdog structures to minimize dynamic allocations
 #
 CONFIG_MAX_TASKS=8
+CONFIG_MAX_TASK_ARGS=4
 CONFIG_NPTHREAD_KEYS=0
 CONFIG_NFILE_DESCRIPTORS=0
 CONFIG_NFILE_STREAMS=0

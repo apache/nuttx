@@ -68,7 +68,7 @@ static FAR char arg4[]    = "Arg4";
 static char write_data1[] = "Standard I/O Check: write fd=1\n";
 static char write_data2[] = "Standard I/O Check: write fd=2\n";
 #endif
-static char *args[NARGS]  = { arg1, arg2, arg3, arg4 };
+static const char *g_argv[NARGS]  = { arg1, arg2, arg3, arg4 };
 
 /************************************************************
  * Private Functions
@@ -90,15 +90,15 @@ static int user_main(int argc, char *argv[])
 
   for (i = 0; i <= NARGS; i++)
     {
-      printf("user_main: argv[%d]=\"%s\"\n", i, argv[i]);
+      printf("user_main: argv[%d]=\"%s\"\n", i, (FAR char*)argv[i]);
     }
 
   for (i = 1; i <= NARGS; i++)
     {
-      if (strcmp(argv[i], args[i-1]) != 0)
+      if (strcmp(argv[i], g_argv[i-1]) != 0)
         {
           printf("user_main: ERROR argv[%d]:  Expected \"%s\" found \"%s\"\n",
-                 i, argv[i], args[i-1]);
+                 i, g_argv[i-1], argv[i]);
         }
     }
 
@@ -171,7 +171,7 @@ void user_initialize(void)
  * user_start
  ************************************************************/
 
-int user_start(int parm1, int parm2, int parm3, int parm4)
+int user_start(int argc, char *argv[])
 {
   int result;
 
@@ -192,11 +192,9 @@ int user_start(int parm1, int parm2, int parm3, int parm4)
   /* Verify that we can spawn a new task */
 
 #ifndef CONFIG_CUSTOM_STACK
-  result = task_create("ostest", PRIORITY, STACKSIZE, user_main,
-                       arg1, arg2, arg3, arg4);
+  result = task_create("ostest", PRIORITY, STACKSIZE, user_main, g_argv);
 #else
-  result = task_create("ostest", PRIORITY, user_main,
-                       arg1, arg2, arg3, arg4);
+  result = task_create("ostest", PRIORITY, user_main, g_argv);
 #endif
   if (result == ERROR)
     {

@@ -37,6 +37,7 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
 #include <nuttx/irq.h>
 #include "up_internal.h"
 
@@ -123,6 +124,11 @@
 
 start:
 	mov	sp, #(STACK_BASE-1)
+
+#ifdef CONFIG_8051_LEDS
+	lcall	_up_ledinit
+#endif
+
 	ljmp	_os_start
 
 /************************************************************
@@ -170,8 +176,14 @@ _up_interrupt:
 
 	/* Save the IRQ number in r3 */
 
+#ifdef CONFIG_8051_LEDS
+	push	acc
+	mov	dpl, #LED_INIRQ
+	lcall	_up_ledon
+	pop	ar2
+#else
 	mov	r2, a
-
+#endif
 	/* Mark that we are in an interrupt and provide the top
 	 * of stack pointer to the context switching logic.
 	 */
@@ -229,7 +241,7 @@ _up_interrupt:
         orl     a, r2
         jz      00003$
 
-	/* A conext switch is pending Clear g_irqcontext */
+	/* A context switch is pending, clear g_irqcontext */
 
 	mov	dpl, r2
 	mov	dph, r3
@@ -319,6 +331,10 @@ _up_interrupt:
 	 */
 
 00003$:
+#ifdef CONFIG_8051_LEDS
+	mov	dpl, #LED_INIRQ
+	lcall	_up_ledoff
+#endif
 	pop	_bp 
 	pop	psw
 	pop	ar1 
