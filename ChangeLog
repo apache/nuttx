@@ -13,6 +13,10 @@
 	  use of semaphore can cause deadlock.
 	* Tasks can now accept a configurable maximum number of
 	  input parameters (argc)
+	* _task_init() was divided into separate functions that
+	  require fewer parameters.  This was necessary to keep
+	  the stack usage down for the 8051/2 (which has only
+	  256 bytes of stack).
 	* Attempts to use C5471 console from interrupt handlers
 	  can casue errors. Added a special path for this case.
 	* Refuse calls to sem_wait and sem_trywait from interrupt
@@ -20,4 +24,5 @@
 	  were calling printf-like functions.
 	* Added strtok() and strtok_r()
 	* Added a simple shell called nsh (see examples/nsh).
+	* Many changes as part of 8052 bringup
 	* Documentation updates

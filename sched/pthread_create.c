@@ -167,12 +167,12 @@ static void pthread_start(void)
  * Input Parameters:
  *    thread
  *    attr
- *    startRoutine
+ *    start_routine
  *    arg
  ************************************************************/
 
 int pthread_create(pthread_t *thread, pthread_attr_t *attr,
-                   pthread_startroutine_t startRoutine,
+                   pthread_startroutine_t start_routine,
                    pthread_addr_t arg)
 {
   FAR _TCB *ptcb;
@@ -268,12 +268,10 @@ int pthread_create(pthread_t *thread, pthread_attr_t *attr,
 #endif
     }
 
-  /* Initialize the task */
+  /* Initialize the task control block */
 
-  argv[0] = (char *)arg;
-  argv[1] = NULL;
-  status  = _task_init(ptcb, NULL, priority, pthread_start,
-                       (main_t)startRoutine, TRUE, argv);
+  status  = task_schedsetup(ptcb, priority, pthread_start,
+                            (main_t)start_routine);
   if (status != OK)
     {
 
@@ -281,6 +279,14 @@ int pthread_create(pthread_t *thread, pthread_attr_t *attr,
       sched_free(pjoin);
       return ERROR;
     }
+
+  /* Configure the TCB for a pthread receiving on parameter
+   * passed by value
+   */
+
+  argv[0] = (char *)arg;
+  argv[1] = NULL;
+  (void)task_argsetup(ptcb, NULL, TRUE, argv);
 
   /* Attach the join info to the TCB. */
 

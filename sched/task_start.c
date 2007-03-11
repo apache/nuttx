@@ -1,5 +1,5 @@
 /************************************************************
- * task_init.c
+ * task_start.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,8 +39,9 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <stdlib.h>
 #include <sched.h>
-#include <nuttx/arch.h>
+#include <debug.h>
 #include "os_internal.h"
 
 /************************************************************
@@ -72,62 +73,41 @@
  ************************************************************/
 
 /************************************************************
- * Name: task_init
+ * Name: task_start
  *
  * Description:
- *   This function initializes a Task Control Block (TCB)
- *   in preparation for starting a new thread.  It performs a
- *   subset of the functionality of task_create()
+ *   This function is the low level entry point
+ *   into the main thread of execution of a task.  It receives
+ *   initial control when the task is started and calls main
+ *   entry point of the newly started task.
  *
- *   Unlike task_create(), task_init() does not activate the
- *   task. This must be done by calling task_activate().
+ * Inputs:
+ *   None
  *
- * Input Parameters:
- *   tcb        - Address of the new task's TCB
- *   name       - Name of the new task (not used)
- *   priority   - Priority of the new task
- *   stack      - Start of the pre-allocated stack
- *   stack_size - Size (in bytes) of the stack allocated
- *   entry      - Application start point of the new task
- *   arg        - A pointer to an array of input parameters.
- *                Up to  CONFIG_MAX_TASK_ARG parameters may
- *                be provided.  If fewer than CONFIG_MAX_TASK_ARG
- *                parameters are passed, the list should be
- *                terminated with a NULL argv[] value.
- *                If no parameters are required, argv may be
- *                NULL.
- *
- * Return Value:
- *   OK on success; ERROR on failure.  (See task_schedsetup()
- *   for possible failure conditions).
+ * Return:
+ *   None
  *
  ************************************************************/
 
-#ifndef CONFIG_CUSTOM_STACK
-STATUS task_init(FAR _TCB *tcb, const char *name, int priority,
-                 FAR uint32 *stack, uint32 stack_size,
-                 main_t entry, char *argv[])
-#else
-STATUS task_init(FAR _TCB *tcb, const char *name, int priority,
-                 main_t entry, char *argv[])
-#endif
+void task_start(void)
 {
-  STATUS ret;
+  FAR _TCB *tcb = (FAR _TCB*)g_readytorun.head;
+  int argc;
 
-  /* Configure the user provided stack region */
+  /* Count how many non-null arguments we are passing */
 
-#ifndef CONFIG_CUSTOM_STACK
-  up_use_stack(tcb, stack, stack_size);
-#endif
-
-  /* Initialize the task control block */
-
-  ret = task_schedsetup(tcb, priority, task_start, entry);
-  if (ret == OK)
+  for (argc = 1; argc <= CONFIG_MAX_TASK_ARGS; argc++)
     {
-      /* Setup to pass parameters to the new task */
+       /* The first non-null argument terminates the list */
 
-      (void)task_argsetup(tcb, name, FALSE, argv);
+       if (!tcb->argv[argc])
+         {
+           break;
+         }
     }
-  return ret;
- }
+
+  /* Call the 'main' entry point passing argc and argv.  If/when
+   * the task returns,  */
+
+  exit(tcb->entry.main(argc, tcb->argv));
+}

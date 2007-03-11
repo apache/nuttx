@@ -1,5 +1,5 @@
 /************************************************************
- * task_init.c
+ * task_activate.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,8 +40,8 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <sched.h>
+#include <debug.h>
 #include <nuttx/arch.h>
-#include "os_internal.h"
 
 /************************************************************
  * Definitions
@@ -72,62 +72,46 @@
  ************************************************************/
 
 /************************************************************
- * Name: task_init
+ * Name: task_activate
  *
  * Description:
- *   This function initializes a Task Control Block (TCB)
- *   in preparation for starting a new thread.  It performs a
- *   subset of the functionality of task_create()
- *
- *   Unlike task_create(), task_init() does not activate the
- *   task. This must be done by calling task_activate().
+ *   This function activates tasks initialized by
+ *   task_schedsetup(). Without activation, a task is
+ *   ineligible for execution  by the scheduler.
  *
  * Input Parameters:
- *   tcb        - Address of the new task's TCB
- *   name       - Name of the new task (not used)
- *   priority   - Priority of the new task
- *   stack      - Start of the pre-allocated stack
- *   stack_size - Size (in bytes) of the stack allocated
- *   entry      - Application start point of the new task
- *   arg        - A pointer to an array of input parameters.
- *                Up to  CONFIG_MAX_TASK_ARG parameters may
- *                be provided.  If fewer than CONFIG_MAX_TASK_ARG
- *                parameters are passed, the list should be
- *                terminated with a NULL argv[] value.
- *                If no parameters are required, argv may be
- *                NULL.
+ *   tcb - The TCB for the task for the task (same as the
+ *         task_init argument.
  *
  * Return Value:
- *   OK on success; ERROR on failure.  (See task_schedsetup()
- *   for possible failure conditions).
+ *  Always returns OK
  *
  ************************************************************/
 
-#ifndef CONFIG_CUSTOM_STACK
-STATUS task_init(FAR _TCB *tcb, const char *name, int priority,
-                 FAR uint32 *stack, uint32 stack_size,
-                 main_t entry, char *argv[])
-#else
-STATUS task_init(FAR _TCB *tcb, const char *name, int priority,
-                 main_t entry, char *argv[])
-#endif
+STATUS task_activate(FAR _TCB *tcb)
 {
-  STATUS ret;
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  irqstate_t flags = irqsave();
 
-  /* Configure the user provided stack region */
+  /* Check if this is really a re-start */
 
-#ifndef CONFIG_CUSTOM_STACK
-  up_use_stack(tcb, stack, stack_size);
+  if (tcb->task_state != TSTATE_TASK_INACTIVE)
+    {
+      /* Inform the instrumentation layer that the task
+       * has stopped
+       */
+
+      sched_note_stop(tcb);
+    }
+
+  /* Inform the instrumentation layer that the task
+   * has started
+   */
+
+  sched_note_start(tcb);
+  irqrestore(flags);
 #endif
 
-  /* Initialize the task control block */
-
-  ret = task_schedsetup(tcb, priority, task_start, entry);
-  if (ret == OK)
-    {
-      /* Setup to pass parameters to the new task */
-
-      (void)task_argsetup(tcb, name, FALSE, argv);
-    }
-  return ret;
- }
+  up_unblock_task(tcb);
+  return OK;
+}
