@@ -40,7 +40,10 @@
  * Included Files
  **************************************************************************/
 
-#include "pjrc.h"
+#include <nuttx/config.h>
+#ifdef CONFIG_ARCH_PJRC
+# include "pjrc.h"
+#endif
 
 /**************************************************************************
  * Public Definitions

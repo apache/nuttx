@@ -44,6 +44,8 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
+
 /************************************************************
  * Definitions
  ************************************************************/
@@ -65,7 +67,7 @@
 #define IRAM_BASE    0x0000
 #define IRAM_SIZE    0x0100
 
-#define STACK_BASE   0x0030
+#define STACK_BASE   0x0024
 #define STACK_SIZE   (IRAM_SIZE - STACK_BASE)
 
 /* This is the form of initial stack frame
