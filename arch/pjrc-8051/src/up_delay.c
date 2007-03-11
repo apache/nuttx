@@ -1,5 +1,5 @@
 /************************************************************
- * up_assert.c
+ * up_delay.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,99 +38,55 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <sched.h>
-#include <debug.h>
-#include <8052.h>
-#include "os_internal.h"
 #include "up_internal.h"
-#include "up_mem.h"
 
 /************************************************************
  * Definitions
  ************************************************************/
 
 /************************************************************
- * Private Data
+ * Private Types
+ ************************************************************/
+
+/************************************************************
+ * Private Function Prototypes
+ ************************************************************/
+
+/************************************************************
+ * Private Variables
  ************************************************************/
 
 /************************************************************
  * Private Functions
  ************************************************************/
 
+
 /************************************************************
- * Name: _up_assert
+ * Public Funtions
  ************************************************************/
 
-static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
+/************************************************************
+ * Name: up_delay
+ *
+ * Description:
+ *   Delay inline for the requested number of milliseconds.
+ *   NOT multi-tasking friendly.
+ *
+ ************************************************************/
+
+void up_delay(ubyte milliseconds) __naked
 {
-  /* Are we in an interrupt handler or the idle task? */
-
-  if (g_irqtos || ((FAR _TCB*)g_readytorun.head)->pid == 0)
-    {
-       (void)irqsave();
-        for(;;)
-          {
-#ifdef CONFIG_8051_LEDS
-            up_ledon(LED_PANIC);
-            up_delay(250);
-            up_ledoff(LED_PANIC);
-            up_delay(250);
-#endif
-          }
-    }
-  else
-    {
-      exit(errorcode);
-    }
-}
-
-/************************************************************
- * Public Functions
- ************************************************************/
-
-/************************************************************
- * Name: up_assert
- ************************************************************/
-
-void up_assert(void)
-{
-#if CONFIG_TASK_NAME_SIZE > 0
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
-#endif
-
-  up_ledon(LED_ASSERTION);
-
-#if CONFIG_TASK_NAME_SIZE > 0
-  lldbg("%s: Assertion failed\n", rtcb->name);
-#else
-  lldbg("Assertion failed\n");
-#endif
-
-  up_dumpstack();
-  _up_assert(EXIT_FAILURE);
-}
-
-/************************************************************
- * Name: up_assert_code
- ************************************************************/
-
-void up_assert_code(int errorcode)
-{
-#if CONFIG_TASK_NAME_SIZE > 0
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
-#endif
-
-  up_ledon(LED_ASSERTION);
-
-#if CONFIG_TASK_NAME_SIZE > 0
-  lldbg("%s: Assertion failed, error=%d\n", rtcb->name, errorcode);
-#else
-  lldbg("Assertion failed , error=%d\n", errorcode);
-#endif
-
-  up_dumpstack();
- _up_assert(errorcode);
+  _asm
+	mov	r0, dpl
+00001$: mov	r1, #230
+00002$: nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	djnz	r1, 00002$
+	djnz	r0, 00001$
+	ret
+  _endasm;
 }

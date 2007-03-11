@@ -90,7 +90,7 @@ STATUS up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
 
   /* This is the address of the last word in the allocation */
 
-  size_t *adj_stack_ptr = &stack[adj_stack_words - 1];
+  size_t *adj_stack_ptr = &((size_t*)stack)[adj_stack_words - 1];
 
   /* Save the values in the TCB */
 

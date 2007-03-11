@@ -48,7 +48,8 @@ CSRCS		= up_initialize.c up_idle.c up_interruptcontext.c \
 		  up_releasepending.c up_reprioritizertr.c \
 		  up_exit.c up_assert.c up_allocateheap.c \
 		  up_irq.c up_savecontext.c up_restorecontext.c \
-		  up_timerisr.c up_putc.c up_debug.c
+		  up_timerisr.c up_putc.c up_debug.c up_leds.c \
+		  up_delay.c
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 SRCS		= $(SSRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
@@ -64,16 +65,40 @@ LINKLIBS	=
 LDPATHES	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
 LDLIBS		= $(addprefix -l,$(notdir $(LINKLIBS)))
 
+IRAM_SIZE	= 0x100
+DEF_STACK_BASE	= 0x24
 LDFLAGS		= --model-large --nostdlib \
-		  --data-loc 0x30 --iram-size 0x100 \
+		  --data-loc $(DEF_STACK_BASE) --iram-size $(IRAM_SIZE) \
 		  --code-loc 0x2100 --code-size 0x5f40 \
-		  --xram-loc 0x0100 --xram-size 0x1f00
+		  --xram-loc $(IRAM_SIZE) --xram-size 0x1f00
 
 DEPSRCS		= $(SRCS) $(LINKSSRCS)
 
-HEAP1_BASE	= ${shell cat pass1.mem | grep "EXTERNAL RAM" | sed -e "s/[ ][ ]*/ /g" | cut -d' ' -f5}
-HEAP2_BASE	= ${shell cat pass1.mem | grep "ROM/EPROM/FLASH" | sed -e "s/[ ][ ]*/ /g" | cut -d' ' -f4}
-STACK_BASE	= ${shell cat pass1.mem | grep "Stack starts" | cut -d' ' -f4}
+HEAP1_BASE	= ${shell \
+			if [ -e pass1.mem ]; then \
+				cat pass1.mem | grep "EXTERNAL RAM" | \
+				sed -e "s/[ ][ ]*/ /g" | cut -d' ' -f5 ; \
+			else \
+				echo $(IRAM_SIZE) ; \
+			fi \
+		   }
+DEF_HEAP2_BASE	= 0x6000
+HEAP2_BASE	= ${shell \
+			if [ -e pass1.mem ]; then \
+				cat pass1.mem | grep "ROM/EPROM/FLASH" | \
+				sed -e "s/[ ][ ]*/ /g" | cut -d' ' -f4 ; \
+			else \
+				echo $(DEF_HEAP2_BASE) ; \
+			fi \
+		   }
+STACK_BASE	= ${shell \
+			if [ -e pass1.mem ]; then \
+				cat pass1.mem | grep "Stack starts" | \
+				cut -d' ' -f4 ; \
+			else \
+				echo $(DEF_STACK_BASE) ; \
+			fi \
+		   }
 
 all: up_head$(OBJEXT) libarch$(LIBEXT)
 
@@ -93,19 +118,24 @@ pass1.mem:
 up_mem.h: pass1.mem
 	@echo "#ifndef __ARCH_MEM_H" >up_mem.h
 	@echo "#define __ARCH_MEM_H" >>up_mem.h
-	@if [ -e pass1.mem ]; then \
-		echo "#define UP_STACK_BASE $(STACK_BASE)" >>up_mem.h ; \
-		echo "#define UP_HEAP1_BASE $(HEAP1_BASE)" >> up_mem.h ; \
-		echo "#define UP_HEAP1_END  0x2000" >> up_mem.h ; \
-		echo "#define UP_HEAP2_BASE $(HEAP2_BASE)" >> up_mem.h ; \
-		echo "#define UP_HEAP2_END  0x8000" >> up_mem.h ; \
-	else \
-		echo "#define UP_STACK_BASE 0x30" >>up_mem.h ; \
-		echo "#define UP_HEAP1_BASE 0x0100" >> up_mem.h ; \
-		echo "#define UP_HEAP1_END  0x2000" >> up_mem.h ; \
-		echo "#define UP_HEAP2_BASE 0x6000" >> up_mem.h ; \
-		echo "#define UP_HEAP2_END  0x8000" >> up_mem.h ; \
-	fi
+	@echo "" >>up_mem.h
+	@echo "#define UP_DEFAULT_STACK_BASE $(DEF_STACK_BASE)" >>up_mem.h
+	@echo "#define UP_DEFAULT_HEAP1_BASE $(IRAM_SIZE)" >> up_mem.h
+	@echo "#define UP_DEFAULT_HEAP2_BASE $(DEF_HEAP2_BASE)" >> up_mem.h
+	@echo "" >>up_mem.h
+	@echo "#define UP_STACK_BASE         $(STACK_BASE)" >>up_mem.h
+	@echo "#if UP_STACK_BASE > UP_DEFAULT_STACK_BASE" >>up_mem.h
+	@echo "#  error \"Stack overlap:  $(DEF_STACK_BASE) < $(STACK_BASE)\""  >>up_mem.h
+	@echo "#elif UP_STACK_BASE < UP_DEFAULT_STACK_BASE" >>up_mem.h
+	@echo "#  warning \"Wasted stack: $(DEF_STACK_BASE) > $(STACK_BASE)\""  >>up_mem.h
+	@echo "#endif" >>up_mem.h
+	@echo "" >>up_mem.h
+	@echo "#define UP_HEAP1_BASE          $(HEAP1_BASE)" >> up_mem.h
+	@echo "#define UP_HEAP1_END           0x2000" >> up_mem.h
+	@echo "" >>up_mem.h
+	@echo "#define UP_HEAP2_BASE          $(HEAP2_BASE)" >> up_mem.h
+	@echo "#define UP_HEAP2_END           0x8000" >> up_mem.h
+	@echo "" >>up_mem.h
 	@echo "#endif /* __ARCH_MEM_H */" >>up_mem.h
 
 # Combine all objects in this directory into a library

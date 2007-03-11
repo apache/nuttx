@@ -1,5 +1,5 @@
 /************************************************************
- * up_assert.c
+ * up_leds.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,14 +39,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <sched.h>
-#include <debug.h>
-#include <8052.h>
-#include "os_internal.h"
 #include "up_internal.h"
-#include "up_mem.h"
 
 /************************************************************
  * Definitions
@@ -56,81 +49,57 @@
  * Private Data
  ************************************************************/
 
+static uint32 g_ledstate;
+
 /************************************************************
  * Private Functions
  ************************************************************/
 
 /************************************************************
- * Name: _up_assert
+ * Public Funtions
  ************************************************************/
 
-static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
-{
-  /* Are we in an interrupt handler or the idle task? */
+/************************************************************
+ * Name: up_ledinit
+ ************************************************************/
 
-  if (g_irqtos || ((FAR _TCB*)g_readytorun.head)->pid == 0)
-    {
-       (void)irqsave();
-        for(;;)
-          {
 #ifdef CONFIG_8051_LEDS
-            up_ledon(LED_PANIC);
-            up_delay(250);
-            up_ledoff(LED_PANIC);
-            up_delay(250);
-#endif
-          }
-    }
-  else
+void up_ledinit(void)
+{
+  /* Set all ports as outputs */
+
+  p82c55_abc_config = 128;
+  p82c55_def_config = 128;
+
+  /* Turn LED 1-7 off; turn LED 0 on */
+
+  g_ledstate    = 0x000000fe;
+  p82c55_port_e = g_ledstate;
+}
+
+/************************************************************
+ * Name: up_ledon
+ ************************************************************/
+
+void up_ledon(int led)
+{
+  if (led < 8)
     {
-      exit(errorcode);
+      g_ledstate   &= ~(1 << led);
+      p82c55_port_e = g_ledstate;
     }
 }
 
 /************************************************************
- * Public Functions
+ * Name: up_ledoff
  ************************************************************/
 
-/************************************************************
- * Name: up_assert
- ************************************************************/
-
-void up_assert(void)
+void up_ledoff(int led)
 {
-#if CONFIG_TASK_NAME_SIZE > 0
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
-#endif
-
-  up_ledon(LED_ASSERTION);
-
-#if CONFIG_TASK_NAME_SIZE > 0
-  lldbg("%s: Assertion failed\n", rtcb->name);
-#else
-  lldbg("Assertion failed\n");
-#endif
-
-  up_dumpstack();
-  _up_assert(EXIT_FAILURE);
+  if (led < 8)
+    {
+      g_ledstate   |= (1 << led);
+      p82c55_port_e = g_ledstate;
+    }
 }
-
-/************************************************************
- * Name: up_assert_code
- ************************************************************/
-
-void up_assert_code(int errorcode)
-{
-#if CONFIG_TASK_NAME_SIZE > 0
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
-#endif
-
-  up_ledon(LED_ASSERTION);
-
-#if CONFIG_TASK_NAME_SIZE > 0
-  lldbg("%s: Assertion failed, error=%d\n", rtcb->name, errorcode);
-#else
-  lldbg("Assertion failed , error=%d\n", errorcode);
-#endif
-
-  up_dumpstack();
- _up_assert(errorcode);
-}
+#endif /* CONFIG_8051_LEDS */
