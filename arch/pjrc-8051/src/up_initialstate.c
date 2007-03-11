@@ -96,10 +96,7 @@ void up_initial_state(FAR _TCB *tcb)
    frame[FRAME_RETLS] = (((uint16)tcb->start) & 0xff);
    frame[FRAME_RETMS] = (((uint16)tcb->start) >> 8);
 
-  /* Then the context save area which can be indexed with
-   * the following definitions (relative to the beginning of
-   * the initial frame.
-   */
+  /* The context save area follows the return address. */
 
   frame[FRAME_IE]     = 0x80;
   frame[FRAME_PSW]    = 0;

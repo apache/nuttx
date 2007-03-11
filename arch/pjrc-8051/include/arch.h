@@ -67,6 +67,13 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+/* The 805x family has a tiny, 256 stack and can be easily
+ * overflowed. The following macro can be used to instrument
+ * code to dump the stack pointer at critical locations.
+ */
+
+EXTERN void up_showsp(ubyte ch) __naked;
+
 #undef EXTERN
 #ifdef __cplusplus
 }

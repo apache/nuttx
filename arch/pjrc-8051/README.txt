@@ -21,7 +21,10 @@ compatible with this build.  First start with the usual steps
   ./configure
   make
 
-But before installing,
+But before installing, we need to apply a patch to the SDCC 2.6.0 source.
+WARNING:  This patch is specific to the particular combination of CFLAGS
+that are used in the compilation.  If you change Make.defs, then you will
+likely have to change the patch as well.
 
   Apply sdcc-2.6.0.patch
   cd sdcc/device/lib

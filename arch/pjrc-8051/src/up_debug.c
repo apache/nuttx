@@ -160,3 +160,28 @@ void up_dumpframe(FAR struct xcptcontext *context)
   _up_dump8(" PSW  ", start[FRAME_PSW]);
 }
 #endif
+
+/************************************************************
+ * Name: up_dumpframe
+ ************************************************************/
+
+/* The 805x family has a tiny, 256 stack and can be easily
+ * overflowed. The following macro can be used to instrument
+ * code to dump the stack pointer at critical locations.
+ */
+
+#ifdef CONFIG_ARCH_PJRC
+void up_showsp(ubyte ch) __naked
+{
+  ch;
+  _asm
+	mov	a, dpl
+	lcall	PM2_ENTRY_COUT
+	mov	a, sp
+	lcall	PM2_ENTRY_PHEX
+	lcall	PM2_ENTRY_NEWLINE
+  _endasm;
+}
+#endif
+
+

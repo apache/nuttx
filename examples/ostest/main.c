@@ -59,19 +59,33 @@
  * Private Data
  ************************************************************/
 
-static FAR char arg1[]    = "Arg1";
-static FAR char arg2[]    = "Arg2";
-static FAR char arg3[]    = "Arg3";
-static FAR char arg4[]    = "Arg4";
+static const char arg1[] = "Arg1";
+static const char arg2[] = "Arg2";
+static const char arg3[] = "Arg3";
+static const char arg4[] = "Arg4";
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-static char write_data1[] = "Standard I/O Check: write fd=1\n";
-static char write_data2[] = "Standard I/O Check: write fd=2\n";
+static const char write_data1[] = "stdio_test: write fd=1\n";
+static const char write_data2[] = "stdio_test: write fd=2\n";
 #endif
-static const char *g_argv[NARGS]  = { arg1, arg2, arg3, arg4 };
+
+#ifdef SDCC
+/* I am not yet certain why SDCC does not like the following
+ * initializer.  It involves some issues with 2- vs 3-byte
+ * pointer types.
+ */
+
+static const char *g_argv[NARGS+1];
+#else
+static const char *g_argv[NARGS+1] = { arg1, arg2, arg3, arg4, NULL };
+#endif
 
 /************************************************************
  * Private Functions
+ ************************************************************/
+
+/************************************************************
+ * Name: user_main
  ************************************************************/
 
 static int user_main(int argc, char *argv[])
@@ -90,7 +104,7 @@ static int user_main(int argc, char *argv[])
 
   for (i = 0; i <= NARGS; i++)
     {
-      printf("user_main: argv[%d]=\"%s\"\n", i, (FAR char*)argv[i]);
+      printf("user_main: argv[%d]=\"%s\"\n", i, argv[i]);
     }
 
   for (i = 1; i <= NARGS; i++)
@@ -155,6 +169,27 @@ static int user_main(int argc, char *argv[])
 }
 
 /************************************************************
+ * Name: stdio_test
+ ************************************************************/
+
+static void stdio_test(void)
+{
+  /* Verify that we can communicate */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  write(1, write_data1, sizeof(write_data1)-1);
+#endif
+  printf("stdio_test: Standard I/O Check: printf\n");
+
+#if CONFIG_NFILE_DESCRIPTORS > 1
+  write(2, write_data2, sizeof(write_data2)-1);
+#endif
+#if CONFIG_NFILE_STREAMS > 0
+  fprintf(stderr, "stdio_test: Standard I/O Check: fprintf to stderr\n");
+#endif
+}
+
+/************************************************************
  * Public Functions
  ************************************************************/
 
@@ -175,18 +210,20 @@ int user_start(int argc, char *argv[])
 {
   int result;
 
-  /* Verify that we can communicate */
+  /* Verify that stdio works first */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  write(1, write_data1, sizeof(write_data1)-1);
-#endif
-  printf("user_start: Standard I/O Check: printf\n");
+  stdio_test();
 
-#if CONFIG_NFILE_DESCRIPTORS > 1
-  write(2, write_data2, sizeof(write_data2)-1);
-#endif
-#if CONFIG_NFILE_STREAMS > 0
-  fprintf(stderr, "user_start: Standard I/O Check: fprintf to stderr\n");
+#ifdef SDCC
+  /* I am not yet certain why SDCC does not like the initilizer.
+   * It involves some issues with 2- vs 3-byte pointer types.
+   */
+
+  g_argv[0] = arg1;
+  g_argv[1] = arg2;
+  g_argv[2] = arg3;
+  g_argv[3] = arg4;
+  g_argv[4] = NULL;
 #endif
 
   /* Verify that we can spawn a new task */
