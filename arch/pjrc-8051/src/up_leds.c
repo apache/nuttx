@@ -57,7 +57,7 @@ static ubyte g_ledstate;
  * Private Functions
  ************************************************************/
 
-#if defined(CONFIG_LED_DEBUG) && defined(CONFIG_8051_LEDS)
+#if defined(CONFIG_LED_DEBUG) && defined(CONFIG_ARCH_LEDS)
 static void _up_puthex(ubyte hex) __naked
 {
   hex; /* To avoid unreferenced argument warning */
@@ -122,7 +122,7 @@ static void _up_putnl(void) __naked
  * Name: up_ledinit
  ************************************************************/
 
-#ifdef CONFIG_8051_LEDS
+#ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void)
 {
   /* Set all ports as outputs */
@@ -143,6 +143,10 @@ void up_ledinit(void)
 
 void up_ledon(ubyte led)
 {
+  /* This may be called from an interrupt handler */
+
+  irqstate_t flags = irqsave();
+
 #ifdef RESET_KLUDGE_NEEDED
   /* I don't understand why this happens yet, but sometimes
    * it is necessary to reconfigure port E.
@@ -164,6 +168,7 @@ void up_ledon(ubyte led)
     }
 
   _up_showledon();
+  irqrestore(flags);
 }
 
 /************************************************************
@@ -172,6 +177,10 @@ void up_ledon(ubyte led)
 
 void up_ledoff(ubyte led)
 {
+  /* This may be called from an interrupt handler */
+
+  irqstate_t flags = irqsave();
+
 #ifdef RESET_KLUDGE_NEEDED
   /* I don't understand why this happens yet, but sometimes
    * it is necessary to reconfigure port E.
@@ -193,5 +202,6 @@ void up_ledoff(ubyte led)
     }
 
   _up_showledoff();
+  irqrestore(flags);
 }
-#endif /* CONFIG_8051_LEDS */
+#endif /* CONFIG_ARCH_LEDS */

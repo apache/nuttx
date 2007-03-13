@@ -51,6 +51,12 @@
 	.area REG_BANK_0	(REL,OVR,DATA)
 	.ds 8
 
+#ifndef CONFIG_8052_TIMER2
+	.area	XSEG
+_g_timer0tick:
+	.ds 1
+#endif
+
 /************************************************************
  * Public Data
  ************************************************************/
@@ -93,9 +99,12 @@
 
 	.org	PM2_VECTOR_TIMER0
 	push	acc
+#ifdef CONFIG_8052_TIMER2
 	mov	a, #TIMER0_IRQ
 	ljmp	_up_interrupt
-
+#else
+	ljmp	_up_timer0
+#endif
 	.org	PM2_VECTOR_EXTINT1
 	push	acc
 	mov	a, #EXT_INT1_IRQ
@@ -127,11 +136,75 @@
 start:
 	mov	sp, #(STACK_BASE-1)
 
-#ifdef CONFIG_8051_LEDS
+#ifdef CONFIG_ARCH_LEDS
 	lcall	_up_ledinit
 #endif
 
 	ljmp	_os_start
+
+/************************************************************
+ * Name: up_timer0
+ *
+ * Description:
+ *   Timer 0, mode 0 can be used as a system timer.  In that
+ *   mode, the 1.8432 MHz clock is divided by 32.  A single
+ *   8-bit value is incremented at 57600 Hz, which results
+ *   in 225 Timer 0 overflow interrupts per second.
+ *
+ *   The Timer0 interrupt vectors to this point which then
+ *   does a software divide by 2 to get a system timer of
+ *   112.5Hz.
+ *
+ *   On Entry:
+ *
+ *   (1) acc on the stack and
+ *   (2) the IRQ number(TIMER0_IRQ) in the accumulator
+ *
+ ************************************************************/
+
+#ifndef CONFIG_8052_TIMER2
+_up_timer0:
+	ar2 = 0x02
+	ar3 = 0x03
+	ar4 = 0x04
+	ar5 = 0x05
+	ar6 = 0x06
+	ar7 = 0x07
+	ar0 = 0x00
+	ar1 = 0x01
+
+	/* ACC already on the stack; push IE.  Then disable interrupts */
+
+	push	ie
+	clr	ea
+
+	/* Save the remaining registers with interrupts disabled 
+	 *
+	 * a, ie, and dptr go on the stack.
+	 */
+
+	push	dpl
+	push	dph
+
+	/* Increment the tick counter */
+
+	mov	dptr, #_g_timer0tick
+        movx    a, @dptr
+	inc	a
+	movx	@dptr, a
+
+	/* If bit 0 is '0', then just return from the interrupt */
+
+	anl	a, #0x01
+	jnz	00101$
+	ljmp	_up_timer0exit
+
+	/* If bit 0 is '1', then process the interrupt */
+
+00101$:
+	mov	a, #TIMER0_IRQ
+	sjmp	_up_timer0join
+#endif
 
 /************************************************************
  * Name: up_interrupt
@@ -167,6 +240,7 @@ _up_interrupt:
 	push	dpl
 	push	dph
 
+_up_timer0join:
 	/* Other registers go into the IRQ register save area */
 
 	push	acc
@@ -175,7 +249,7 @@ _up_interrupt:
 
 	/* Show interrupt status on the LEDs */
 
-#ifdef CONFIG_8051_LEDS
+#ifdef CONFIG_ARCH_LEDS
 	mov	dpl, #LED_INIRQ
 	lcall	_up_ledon
 #endif
@@ -343,12 +417,12 @@ _up_interrupt:
 	push	dpl
 	push	dph
 	lcall	_up_dumpstack
-	pop	dpl
 	pop	dph
+	pop	dpl
 #endif
 	/* Get the pointer to the register save area */
 
-	mov	a, #FRAME_SIZE
+	mov	a, #STACK_SIZE
 	add	a, dpl
 	mov	dpl, a
 	clr	a
@@ -365,18 +439,19 @@ _up_interrupt:
 	 * (context switch).
 	 */
 
-#ifdef CONFIG_8051_LEDS
+#ifdef CONFIG_ARCH_LEDS
 	push	dpl
 	push	dph
 	mov	dpl, #LED_INIRQ
 	lcall	_up_ledoff
-	pop	dpl
 	pop	dph
+	pop	dpl
 #endif
 	/* Restore registers from the register save area */
 
 	lcall	_up_restoreregisters
 
+_up_timer0exit:
 	/* Restore registers from the stack and return */
 
 	pop	dph

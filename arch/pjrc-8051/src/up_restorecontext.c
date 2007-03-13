@@ -37,6 +37,7 @@
  * Included Files
  **************************************************************************/
 
+#include <nuttx/config.h>
 #include <nuttx/irq.h>
 #include "up_internal.h"
 
@@ -260,7 +261,7 @@ void up_restorecontext(FAR struct xcptcontext *context) __naked
 #endif
 	/* Get the pointer to the register save area */
 
-	mov	a, #FRAME_SIZE
+	mov	a, #STACK_SIZE
 	add	a, dpl
 	mov	dpl, a
 	clr	a

@@ -89,10 +89,10 @@ int up_timerisr(int irq, FAR ubyte *frame)
 
 void up_timerinit(void)
 {
-#ifdef CONFIG_80C52_TIMER2
+#ifdef CONFIG_8052_TIMER2
   up_disable_irq(TIMER2_IRQ);
 
-  /* Set up timer 2 -- See up_internal.h for details */
+  /* Set up timer 2 -- See pjrc.h for details */
 
   T2MOD  = 0;
 
@@ -108,7 +108,7 @@ void up_timerinit(void)
 
   /* Configure for interrupts */
 
-  T2CON  = 0x40;
+  T2CON  = 0x04;
 
   /* Attach and enable the timer interrupt */
 
@@ -116,6 +116,29 @@ void up_timerinit(void)
   up_enable_irq(TIMER2_IRQ);
 
 #else
+  /* Timer 0, mode 0 can be used as a system timer.  In that mode, the
+   * 1.8432 MHz clock is divided by 32.  A single 8-bit value is incremented
+   * at 57600 Hz, which results in 225 Timer 0 overflow interrupts per
+   * second.
+   */
+
+  up_disable_irq(TIMER0_IRQ);
+
+  /* Initialize timer 0 */
+
+  TR0   = 0;     /* Make sure timer 0 is stopped */
+  TF0   = 0;     /* Clear the overflow flag */
+  TMOD &= 0xF0;  /* Set to mode 0 (without changing timer1) */
+  TL0   = 0;     /* Clear timer 0 value */
+  TH0   = 0;
+
+  /* Attach and enable the timer interrupt */
+
+  irq_attach(TIMER0_IRQ, (xcpt_t)up_timerisr);
+
+  TR0 = 1;       /* Start the timer */
+  up_enable_irq(TIMER0_IRQ);
+
 # warning "No support for timer 0 as the system timer"
 #endif
 }

@@ -71,6 +71,10 @@ extern int g_nints;
 
 void up_irqinitialize(void)
 {
+  /* Set interrupt priorities (all low) */
+
+  IP = 0;
+
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   /* Disable all interrupts */
 
