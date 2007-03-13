@@ -80,7 +80,7 @@ static void _up_putcolon(void) __naked
 {
   _asm
         mov     a, #0x3a
-        lcall	PM2_ENTRY_COUT
+        ljmp	PM2_ENTRY_COUT
   _endasm;
 }
 
@@ -126,7 +126,7 @@ static void _up_dump8(__code char *ptr, ubyte b)
 #ifdef CONFIG_FRAME_DUMP
 void up_dumpstack(void)
 {
-  NEAR ubyte *start = (NEAR ubyte *)(UP_STACK_BASE & 0xf0);
+  NEAR ubyte *start = (NEAR ubyte *)(STACK_BASE & 0xf0);
   NEAR ubyte *end   = (NEAR ubyte *)SP;
   ubyte i;
 
@@ -138,7 +138,16 @@ void up_dumpstack(void)
       for (i = 0; i < 8; i++)
         {
           _up_putspace();
-          _up_puthex(*start);
+          if (start < (NEAR ubyte *)(STACK_BASE) ||
+              start > end)
+            {
+              _up_putspace();
+              _up_putspace();
+            }
+          else
+            {
+              _up_puthex(*start);
+            }
           start++;
         }
       _up_putnl();
@@ -153,11 +162,52 @@ void up_dumpstack(void)
 #ifdef CONFIG_FRAME_DUMP
 void up_dumpframe(FAR struct xcptcontext *context)
 {
-  FAR ubyte *start = &context->stack[context->nbytes - FRAME_SIZE];
-  _up_dump16(" RET  ", start[FRAME_RETMS], start[FRAME_RETLS]);
-  _up_dump8(" IE   ", start[FRAME_IE]);
-  _up_dump16(" DPTR ", start[FRAME_DPH], start[FRAME_DPL]);
-  _up_dump8(" PSW  ", start[FRAME_PSW]);
+#ifdef CONFIG_FRAME_DUMP_SHORT
+  FAR ubyte *stack = &context->stack[context->nbytes - FRAME_SIZE];
+  FAR ubyte *regs  = context->regs;
+
+  _up_dump16(" RET  ", stack[FRAME_RETMS], stack[FRAME_RETLS]);
+  _up_dump8 (" IE   ", stack[FRAME_IE]);
+  _up_dump16(" DPTR ", stack[FRAME_DPH], stack[FRAME_DPL]);
+  _up_dump8 (" PSW  ", regs[REGS_PSW]);
+  _up_dump8 (" SP   ", context->nbytes + (STACK_BASE-1));
+#else
+  FAR ubyte *stack = &context->stack[context->nbytes - FRAME_SIZE];
+  FAR ubyte *regs  = context->regs;
+  ubyte i, j, k;
+
+  _up_dump8 ("  NBYTES ", context->nbytes);
+
+  for (i = 0; i < context->nbytes; i += 8)
+    {
+      _up_puthex(i);
+      _up_putcolon();
+
+      for (j = 0; j < 8; j++)
+        {
+          k = i + j;
+          _up_putspace();
+          if (k >= context->nbytes)
+            {
+              _up_putspace();
+              _up_putspace();
+            }
+          else
+            {
+              _up_puthex(context->stack[k]);
+            }
+        }
+      _up_putnl();
+    }
+
+  _up_puts("  REGS:");
+  for (i = 0; i < REGS_SIZE; i++)
+    {
+      _up_putspace();
+      _up_puthex(context->regs[i]);
+    }
+   _up_putnl();
+#endif
 }
 #endif
 

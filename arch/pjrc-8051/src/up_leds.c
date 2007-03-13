@@ -45,15 +45,74 @@
  * Definitions
  ************************************************************/
 
+#define RESET_KLUDGE_NEEDED 1
+
 /************************************************************
  * Private Data
  ************************************************************/
 
-static uint32 g_ledstate;
+static ubyte g_ledstate;
 
 /************************************************************
  * Private Functions
  ************************************************************/
+
+#if defined(CONFIG_LED_DEBUG) && defined(CONFIG_8051_LEDS)
+static void _up_puthex(ubyte hex) __naked
+{
+  hex; /* To avoid unreferenced argument warning */
+  _asm
+        mov     a, dpl
+        ljmp    PM2_ENTRY_PHEX
+  _endasm;
+}
+
+static void _up_putch(ubyte ch) __naked
+{
+  _asm
+        mov     a, dpl
+        ljmp	PM2_ENTRY_COUT
+  _endasm;
+}
+
+static void _up_putnl(void) __naked
+{
+  _asm
+	ljmp	PM2_ENTRY_NEWLINE
+  _endasm;
+}
+
+# define _up_showledinit() \
+  _up_putch('I'); \
+  _up_puthex(g_ledstate); _up_putch(':'); \
+  _up_puthex(p82c55_port_e); _up_putnl();
+
+# define _up_showledreset() \
+  _up_putch('R'); \
+  _up_puthex(led); _up_putch(':'); \
+  _up_puthex(g_ledstate); _up_putch(':'); \
+  _up_puthex(p82c55_port_e); _up_putnl();
+
+# define _up_showledon() \
+  _up_putch('+'); \
+  _up_puthex(led); _up_putch(':'); \
+  _up_puthex(g_ledstate); _up_putch(':'); \
+  _up_puthex(p82c55_port_e); _up_putnl();
+
+# define _up_showledoff() \
+  _up_putch('-'); \
+  _up_puthex(led); _up_putch(':'); \
+  _up_puthex(g_ledstate); _up_putch(':'); \
+  _up_puthex(p82c55_port_e); _up_putnl();
+
+#else
+
+# define _up_showledinit()
+# define _up_showledreset()
+# define _up_showledon()
+# define _up_showledoff()
+
+#endif
 
 /************************************************************
  * Public Funtions
@@ -68,38 +127,71 @@ void up_ledinit(void)
 {
   /* Set all ports as outputs */
 
-  p82c55_abc_config = 128;
   p82c55_def_config = 128;
 
   /* Turn LED 1-7 off; turn LED 0 on */
 
-  g_ledstate    = 0x000000fe;
+  g_ledstate    = 0xfe;
   p82c55_port_e = g_ledstate;
+
+  _up_showledinit();
 }
 
 /************************************************************
  * Name: up_ledon
  ************************************************************/
 
-void up_ledon(int led)
+void up_ledon(ubyte led)
 {
+#ifdef RESET_KLUDGE_NEEDED
+  /* I don't understand why this happens yet, but sometimes
+   * it is necessary to reconfigure port E.
+   */
+
+  if (g_ledstate != p82c55_port_e)
+    {
+      _up_showledreset();
+      p82c55_def_config = 128;
+    }
+#endif
+
+  /* Clear the bit in port E corresponding to LED to turn it on */
+
   if (led < 8)
     {
-      g_ledstate   &= ~(1 << led);
+      g_ledstate   &= ~(g_ntobit[led]);
       p82c55_port_e = g_ledstate;
     }
+
+  _up_showledon();
 }
 
 /************************************************************
  * Name: up_ledoff
  ************************************************************/
 
-void up_ledoff(int led)
+void up_ledoff(ubyte led)
 {
+#ifdef RESET_KLUDGE_NEEDED
+  /* I don't understand why this happens yet, but sometimes
+   * it is necessary to reconfigure port E.
+   */
+
+  if (g_ledstate != p82c55_port_e)
+    {
+      _up_showledreset();
+      p82c55_def_config = 128;
+    }
+#endif
+
+  /* Set the bit in port E corresponding to LED to turn it off */
+
   if (led < 8)
     {
-      g_ledstate   |= (1 << led);
+      g_ledstate   |= g_ntobit[led];
       p82c55_port_e = g_ledstate;
     }
+
+  _up_showledoff();
 }
 #endif /* CONFIG_8051_LEDS */

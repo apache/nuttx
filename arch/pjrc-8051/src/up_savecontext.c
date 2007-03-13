@@ -66,8 +66,132 @@
  **************************************************************************/
 
 /**************************************************************************
+ * Name: up_savestack
+ *
+ * Description:
+ *   Save the entire interrupt stack contents in the provided context
+ *   structure.
+ *
+ * Inputs:
+ *   context - the context structure in which to save the stack info
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   - Interrupts are disabled
+ *
+ **************************************************************************/
+
+static void up_savestack(FAR struct xcptcontext *context, ubyte tos)
+{
+  /* Copy the current stack frame from internal RAM to XRAM. */
+
+  ubyte nbytes     = tos - (STACK_BASE-1);
+  NEAR ubyte *src  = (NEAR ubyte*)STACK_BASE;
+  FAR  ubyte *dest = context->stack;
+
+  context->nbytes = nbytes;
+  while (nbytes--)
+    {
+      *dest++ = *src++;
+    }
+}
+
+/**************************************************************************
+ * Name: up_saveregs
+ *
+ * Description:
+ *   Save the interrupt registers into the TCB.
+ *
+ * Inputs:
+ *   context - the context structure in which to save the register info
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   - Interrupts are disabled
+ *
+ **************************************************************************/
+
+static void up_saveregs(FAR struct xcptcontext *context, ubyte tos)
+{
+  /* Copy the irq register save area into the TCB */
+
+  FAR ubyte *src  = g_irqregs;
+  FAR ubyte *dest = context->regs;
+  ubyte nbytes    = REGS_SIZE;
+
+  while (nbytes--)
+    {
+      *dest++ = *src++;
+    }
+}
+
+/**************************************************************************
  * Public Functions
  **************************************************************************/
+
+/**************************************************************************
+ * Name: up_saveregisters
+ *
+ * Description:
+ *   Save the current registers in the context save area.  This function
+ *   is called from up_savecontext (below) and also from interrupt
+ *   handling logic.
+ *
+ *   Note that this function does not save:
+ *   a, dptr, ie - these are saved in the stack area
+ *   sp - this can be inferred from g_irqtos or struct xcptontext.nbytes.
+ *
+ * Inputs:
+ *   regs - the context register array in which to save the register info
+ *
+ * Return:
+ *   None
+ *
+ **************************************************************************/
+
+void up_saveregisters(FAR ubyte *regs) _naked
+{
+ _asm
+	mov	a, b
+	movx	@dptr, a
+	inc	dptr
+	mov	a, r2
+	movx	@dptr, a
+	inc	dptr
+	mov	a, r3
+	movx	@dptr, a
+	inc	dptr
+	mov	a, r4
+	movx	@dptr, a
+	inc	dptr
+	mov	a, r5
+	movx	@dptr, a
+	inc	dptr
+	mov	a, r6
+	movx	@dptr, a
+	inc	dptr
+	mov	a, r7
+	movx	@dptr, a
+	inc	dptr
+	mov	a, r0
+	movx	@dptr, a
+	inc	dptr
+	mov	a, r1
+	movx	@dptr, a
+	inc	dptr
+	mov	a, psw
+	movx	@dptr, a
+	clr	psw
+	inc	dptr
+	mov	a, _bp
+	movx	@dptr, a
+	ret
+  _endasm;
+}
 
 /**************************************************************************
  * Name: up_savecontext
@@ -89,8 +213,14 @@ ubyte up_savecontext(FAR struct xcptcontext *context) _naked
 {
  _asm
 	/* Create the stack frame that we want when it is time to restore
-	 * this* context.  The return address will be the return address
+	 * this context.  The return address will be the return address
 	 * of this function, the return value will be zero.
+         *
+         * ...
+         * return address (2 bytes, already on the stack)
+         * register a=0   (1 byte)
+         * register ie    (1 byte)
+         * register dptr  (2 bytes)
 	 */
 
 	clr	a
@@ -100,42 +230,95 @@ ubyte up_savecontext(FAR struct xcptcontext *context) _naked
 	push	acc	/* DPL = 1 */
 	clr	a
 	push	acc	/* DPH = 0 */
-	push	b
-	push	ar2
-	push	ar3
-	push	ar4
-	push	ar5
-	push	ar6
-	push	ar7
-	push	ar0
-	push	ar1
-	push	psw
-	clr	psw
-	push	_bp
 
-	/* Disable interrupts while we create a snapshot of the stack */
+	/* Dump the stack contents before they are occupied into XRAM */
+
+#ifdef CONFIG_SWITCH_FRAME_DUMP
+	push	dpl
+	push	dph
+	lcall	_up_dumpstack
+	pop	dph
+	pop	dpl
+#endif
+	/* Disable interrupts while we create a snapshot of the stack
+         * and registers.  At this point, we have 5 bytes on the stack
+	 * to account for.
+         */
 
 	push	ie
 	mov	ea, 0
 
-	/* Now copy the current stack frame (including the saved execution
-	 * context) from internal RAM to XRAM.
+	/* Save the registers in the context save area */
+
+	push	dpl
+	push	dph
+	mov	a, #XCPT_REGS
+	add	a, dpl
+	mov	dpl, a
+	clr	a
+	addc	a, dph
+	mov	dph, a
+	lcall	_up_saveregisters
+	pop	dph
+	pop	dpl
+
+#ifdef CONFIG_SWITCH_FRAME_DUMP
+	/* Save the address of the context structure.  We will
+	 * need this later to dump the saved frame.  Now we have
+	 * 7 bytes on the stack to account for.
 	 */
 
-	push	sp
+	push	dpl
+	push	dph
+
+	/* Push the top of frame stack pointer.  We need to
+	 * decrement the current SP value by three to account
+	 * for dpst+IE on the stack above the end of the frame.
+	 */
+
+	mov	a, sp
+	subb	a, #3
+#else
+	/* Push the top of frame stack pointer.  We need to
+	 * decrement the current stack pointer by one to account
+	 * for IE that we saved on the stack.
+	 */
+
+	mov	a, sp
+	dec	a
+#endif
+	push	acc
+
+	/* Copy the current stack frame from internal RAM to XRAM. */
+
 	lcall	_up_savestack
 	pop	acc
+
+	/* Dump the contents of the saved frame after it has been
+	 * copied from  memory/registers.
+	 */
+
+#ifdef CONFIG_SWITCH_FRAME_DUMP
+	pop	dph
+	pop	dpl
+	push	dpl
+	push	dph
+	lcall	_up_dumpframe
+	pop	dph
+	pop	dpl
+	lcall	_up_dumpstack
+#endif
 
 	/* Restore the interrupt state */
 
 	pop	ie
 
 	/* Now that we have a snapshot of the desired stack frame saved,
-	 * restore the correct stackpointer.
+	 * we can release the stack frame (all but the return address)
 	 */
 
 	mov	a, sp
-	subb	a, #15
+	subb	a, #4
 	mov	sp, a
 	mov	dpl,#0
 	ret
@@ -143,14 +326,16 @@ ubyte up_savecontext(FAR struct xcptcontext *context) _naked
 }
 
 /**************************************************************************
- * Name: up_savestack
+ * Name: up_saveirqcontext
  *
  * Description:
- *   Save the entire interrupt stack contents in the provided context
- *   structure.
+ *   The interrupt context was saved in g_irqtos and g_irqregs when the
+ *   interrupt was taken.  If a context switch from the interrupted task
+ *   will be made at the interrupt level, then these saved values must be
+ *   copied into the TCB.
  *
  * Inputs:
- *   context - the context structure in which to save the stack info
+ *   context - the structure in which to save the context info
  *
  * Return:
  *   None
@@ -160,19 +345,17 @@ ubyte up_savecontext(FAR struct xcptcontext *context) _naked
  *
  **************************************************************************/
 
-void up_savestack(FAR struct xcptcontext *context, ubyte tos)
+void up_saveirqcontext(FAR struct xcptcontext *context)
 {
-  /* Now copy the current stack frame (including the saved execution
-   * context) from internal RAM to XRAM.
-   */
+  /* Save the number of bytes in the stack */
 
-  ubyte nbytes     = tos - (STACK_BASE-1);
-  NEAR ubyte *src  = (NEAR ubyte*)STACK_BASE;
-  FAR  ubyte *dest = context->stack;
+   context->nbytes = g_irqtos - (STACK_BASE-1);
 
-  context->nbytes = nbytes;
-  while (nbytes--)
-    {
-      *dest++ = *src++;
-    }
+  /* Copy the current stack frame from internal RAM to XRAM. */
+
+  up_savestack(context, g_irqtos);
+
+  /* Copy the saved registers into the TCB */
+
+  up_saveregisters(context->regs);
 }

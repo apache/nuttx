@@ -94,7 +94,7 @@ void up_release_pending(void)
            * Just copy the current registers into the OLD rtcb.
            */
 
-           up_savestack(&rtcb->xcp, g_irqtos);
+           up_saveirqcontext(&rtcb->xcp);
 
           /* Restore the exception context of the rtcb at the (new) head 
            * of the g_readytorun task list.

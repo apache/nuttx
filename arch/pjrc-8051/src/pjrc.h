@@ -150,7 +150,7 @@ xdata at 0xF903 ubyte p82c55_def_config;
 #define LED_STARTED                 0
 #define LED_HEAPALLOCATE            1
 #define LED_IRQSENABLED             2
-#define LED_UNUSED1                 3
+#define LED_IDLE                    3
 #define LED_UNUSED2                 4
 #define LED_INIRQ                   5
 #define LED_ASSERTION               6

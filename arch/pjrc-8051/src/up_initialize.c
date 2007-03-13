@@ -60,6 +60,16 @@
 
 ubyte g_irqtos;
 
+/* Registers are saved in the following global array during
+ * interrupt processing.  If a context switch is performed
+ * during the interrupt handling, these registers will be
+ * copied into the TCB again (NOTE:  We could save a copy
+ * if the interrupt handling logic saved the registers
+ * directly into (_TCB*)g_readytorun.head->xcp.regs).
+ */
+
+ubyte g_irqregs[REGS_SIZE];
+
 /* If during execution of an interrup handler, a context
  * switch must be performed, the follwing will be set to
  * to that address of the relevant context structure.  The
@@ -68,6 +78,13 @@ ubyte g_irqtos;
  */
 
 FAR struct xcptcontext *g_irqcontext;
+
+/* It is faster to look up 8-bit shifts in this table than
+ * to comput them.
+ */
+
+const ubyte g_ntobit[8] = 
+  { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 
 /************************************************************
  * Private Functions

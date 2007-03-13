@@ -57,12 +57,14 @@
 
 	.globl	_g_irqtos
 	.globl	_g_irqcontext
+	.globl	_g_irqregs
 
 /************************************************************
  * Public Functions
  ************************************************************/
 
 	.globl	_irq_dispatch
+	.globl	_up_restoreregisters
 
 /************************************************************
  * Program entry points
@@ -157,33 +159,31 @@ _up_interrupt:
 	push	ie
 	clr	ea
 
-	/* Now push the remaining registers with interrupt disabled */
+	/* Save the remaining registers with interrupts disabled 
+	 *
+	 * a, ie, and dptr go on the stack.
+	 */
 
 	push	dpl
 	push	dph
-	push	b
-	push	ar2
-	push	ar3
-	push	ar4
-	push	ar5
-	push	ar6
-	push	ar7
-	push	ar0
-	push	ar1
-	push	psw
-	clr	psw
-	push	_bp
 
-	/* Save the IRQ number in r3 */
+	/* Other registers go into the IRQ register save area */
+
+	push	acc
+	mov	dptr, #_g_irqregs
+	lcall	_up_saveregisters
+
+	/* Show interrupt status on the LEDs */
 
 #ifdef CONFIG_8051_LEDS
-	push	acc
 	mov	dpl, #LED_INIRQ
 	lcall	_up_ledon
-	pop	ar2
-#else
-	mov	r2, a
 #endif
+
+	/* Save the IRQ number in r2 */
+
+	pop	ar2
+
 	/* Mark that we are in an interrupt and provide the top
 	 * of stack pointer to the context switching logic.
 	 */
@@ -197,7 +197,7 @@ _up_interrupt:
 	 * structure.
 	 */
 
-	mov	dptr,#_g_irqcontext
+	mov	dptr, #_g_irqcontext
 	clr	a
 	movx	@dptr,a
 	inc	dptr
@@ -238,8 +238,17 @@ _up_interrupt:
 	movx	a, @dptr
 	mov	r3, a
 
-        orl     a, r2
-        jz      00003$
+	orl	a, r2
+	jnz	00001$
+
+	/* No context switch is pending.  Restore registers
+	 * from the interrupt register save area.
+	 */
+
+	mov	dptr, #_g_irqregs
+	sjmp	00004$
+
+00001$: /****************************************************/
 
 	/* A context switch is pending, clear g_irqcontext */
 
@@ -285,6 +294,8 @@ _up_interrupt:
 	/* Save r2-3 = &context->stack */
 
 	inc	dptr
+	push	dpl
+	push	dph
 	mov	r2, dpl
 	mov	r3, dph
 
@@ -293,9 +304,10 @@ _up_interrupt:
 	mov	r0, #STACK_BASE
 
 	/* Top of the copy loop */
-00001$:
-	dec	r4
-	jz	00002$
+00002$:
+	mov	a, r4	/* a = bytes left to transfer */
+	dec	r4	/* (for next time through the loop) */
+	jz	00003$	/* Jump if a = 0 (done) */
 
 	/* Fetch the next byte from context->stack */
 
@@ -316,38 +328,69 @@ _up_interrupt:
 	/* Increment the IRAM pointer */
 
 	inc	r0
-	sjmp	00001$
+	sjmp	00002$
 
-	/* Set the new stack pointer */
-
-00002$:
-	mov	sp, r5
-
-#ifdef CONFIG_INTERRUPT_FRAME_DUMP
-	lcall	_up_dumpstack
-#endif
-	/* Then restore the context from the stack and return
-	 * from the interrupt
+	/* The entire stack has been copied from XRAM into
+	 * IRAM.  Set the new stack pointer
 	 */
 
 00003$:
-#ifdef CONFIG_8051_LEDS
-	mov	dpl, #LED_INIRQ
-	lcall	_up_ledoff
-#endif
-	pop	_bp 
-	pop	psw
-	pop	ar1 
-	pop	ar0 
-	pop	ar7 
-	pop	ar6 
-	pop	ar5 
-	pop	ar4 
-	pop	ar3 
-	pop	ar2 
-	pop	b
 	pop	dph
 	pop	dpl
-	pop	ie
+	mov	sp, r5
+
+#ifdef CONFIG_INTERRUPT_FRAME_DUMP
+	push	dpl
+	push	dph
+	lcall	_up_dumpstack
+	pop	dpl
+	pop	dph
+#endif
+	/* Get the pointer to the register save area */
+
+	mov	a, #FRAME_SIZE
+	add	a, dpl
+	mov	dpl, a
+	clr	a
+	addc	a, dph
+	mov	dph, a
+	
+00004$: /****************************************************/
+
+	/* Restore the context from the register save area
+	 * and return from the interrupt.  At this point, dptr
+	 * holds the pointer to the memory region that holds
+	 * the register save area. This could be either
+	 * g_irqregs (no context switch) or &g_irqcontext->regs
+	 * (context switch).
+	 */
+
+#ifdef CONFIG_8051_LEDS
+	push	dpl
+	push	dph
+	mov	dpl, #LED_INIRQ
+	lcall	_up_ledoff
+	pop	dpl
+	pop	dph
+#endif
+	/* Restore registers from the register save area */
+
+	lcall	_up_restoreregisters
+
+	/* Restore registers from the stack and return */
+
+	pop	dph
+	pop	dpl
+
+	/* Restore the interrupt state per the stored IE value */
+
+	pop	acc
+	jb	acc.7,00005$
+	clr	ie.7
+	sjmp	00006$
+00005$:
+	setb	ie.7
+
+00006$:
 	pop	acc
 	reti
