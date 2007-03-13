@@ -58,17 +58,8 @@
  * Private Functions
  ************************************************************/
 
-#ifdef CONFIG_FRAME_DUMP
-static void _up_puthex(ubyte hex) __naked
-{
-  hex; /* To avoid unreferenced argument warning */
-  _asm
-        mov     a, dpl
-        ljmp    PM2_ENTRY_PHEX
-  _endasm;
-}
-
-static void _up_putspace(void) __naked
+#if defined(CONFIG_FRAME_DUMP) && defined(CONFIG_ARCH_BRINGUP)
+static void up_putspace(void) __naked
 {
   _asm
         mov     a, #0x20
@@ -84,34 +75,19 @@ static void _up_putcolon(void) __naked
   _endasm;
 }
 
-static void _up_putnl(void) __naked
-{
-  _asm
-	ljmp	PM2_ENTRY_NEWLINE
-  _endasm;
-}
-
-static void _up_puts(__code char *ptr)
-{
-  for (; *ptr; ptr++)
-    {
-       up_putc(*ptr);
-    }
-}
-
 static void _up_dump16(__code char *ptr, ubyte msb, ubyte lsb)
 {
-  _up_puts(ptr);
-  _up_puthex(msb);
-  _up_puthex(lsb);
-  _up_putnl();
+  up_puts(ptr);
+  up_puthex(msb);
+  up_puthex(lsb);
+  up_putnl();
 }
 
 static void _up_dump8(__code char *ptr, ubyte b)
 {
-  _up_puts(ptr);
-  _up_puthex(b);
-  _up_putnl();
+  up_puts(ptr);
+  up_puthex(b);
+  up_putnl();
 }
 #endif
 
@@ -120,10 +96,48 @@ static void _up_dump8(__code char *ptr, ubyte b)
  ************************************************************/
 
 /************************************************************
+ * Name: up_puthex, up_puthex16, up_putnl, up_puts
+ ************************************************************/
+
+#if defined(CONFIG_ARCH_BRINGUP)
+void up_puthex(ubyte hex) __naked
+{
+  hex; /* To avoid unreferenced argument warning */
+  _asm
+        mov     a, dpl
+        ljmp    PM2_ENTRY_PHEX
+  _endasm;
+}
+
+void up_puthex16(int hex) __naked
+{
+  hex; /* To avoid unreferenced argument warning */
+  _asm
+        ljmp    PM2_ENTRY_PHEX16
+  _endasm;
+}
+
+void up_putnl(void) __naked
+{
+  _asm
+	ljmp	PM2_ENTRY_NEWLINE
+  _endasm;
+}
+
+void up_puts(__code char *ptr)
+{
+  for (; *ptr; ptr++)
+    {
+       up_putc(*ptr);
+    }
+}
+#endif
+
+/************************************************************
  * Name: up_dumpstack
  ************************************************************/
 
-#ifdef CONFIG_FRAME_DUMP
+#if defined(CONFIG_FRAME_DUMP) && defined(CONFIG_ARCH_BRINGUP)
 void up_dumpstack(void)
 {
   NEAR ubyte *start = (NEAR ubyte *)(STACK_BASE & 0xf0);
@@ -132,25 +146,25 @@ void up_dumpstack(void)
 
   while (start < end)
     {
-      _up_puthex((ubyte)start);
+      up_puthex((ubyte)start);
       _up_putcolon();
 
       for (i = 0; i < 8; i++)
         {
-          _up_putspace();
+          up_putspace();
           if (start < (NEAR ubyte *)(STACK_BASE) ||
               start > end)
             {
-              _up_putspace();
-              _up_putspace();
+              up_putspace();
+              up_putspace();
             }
           else
             {
-              _up_puthex(*start);
+              up_puthex(*start);
             }
           start++;
         }
-      _up_putnl();
+      up_putnl();
     }
 }
 #endif
@@ -159,7 +173,7 @@ void up_dumpstack(void)
  * Name: up_dumpframe
  ************************************************************/
 
-#ifdef CONFIG_FRAME_DUMP
+#if defined(CONFIG_FRAME_DUMP) && defined(CONFIG_ARCH_BRINGUP)
 void up_dumpframe(FAR struct xcptcontext *context)
 {
 #ifdef CONFIG_FRAME_DUMP_SHORT
@@ -180,33 +194,33 @@ void up_dumpframe(FAR struct xcptcontext *context)
 
   for (i = 0; i < context->nbytes; i += 8)
     {
-      _up_puthex(i);
+      up_puthex(i);
       _up_putcolon();
 
       for (j = 0; j < 8; j++)
         {
           k = i + j;
-          _up_putspace();
+          up_putspace();
           if (k >= context->nbytes)
             {
-              _up_putspace();
-              _up_putspace();
+              up_putspace();
+              up_putspace();
             }
           else
             {
-              _up_puthex(context->stack[k]);
+              up_puthex(context->stack[k]);
             }
         }
-      _up_putnl();
+      up_putnl();
     }
 
-  _up_puts("  REGS:");
+  up_puts("  REGS:");
   for (i = 0; i < REGS_SIZE; i++)
     {
-      _up_putspace();
-      _up_puthex(context->regs[i]);
+      up_putspace();
+      up_puthex(context->regs[i]);
     }
-   _up_putnl();
+   up_putnl();
 #endif
 }
 #endif

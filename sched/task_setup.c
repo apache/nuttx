@@ -64,13 +64,13 @@
 
 /* This is the name for un-named tasks */
 
-static const char g_noname[] = "no name";
+static const char g_noname[] = "<noname>";
 
 /************************************************************
  * Private Function Prototypes
  ************************************************************/
 
-static STATUS   task_assignpid(FAR _TCB* tcb);
+static STATUS task_assignpid(FAR _TCB* tcb);
 
 /************************************************************
  * Private Functions
@@ -216,15 +216,13 @@ STATUS task_schedsetup(FAR _TCB *tcb, int priority,
  *   This functions sets up parameters in the Task Control
  *   Block (TCB) in preparation for starting a new thread.
  *
- *   task_argsetup() is called from task_init() and task_start()
- *   to create a new task (with arguments cloned via strdup)
- *   or pthread_create() which has one argument passed by
- *   value (distinguished by the pthread boolean argument).
+ *   task_argsetup() is called only from task_init() and
+ *   task_start() to create a new task.  Argumens are
+ *   cloned via strdup.
  *
  * Input Parameters:
  *   tcb        - Address of the new task's TCB
  *   name       - Name of the new task (not used)
- *   pthread    - TRUE is the task emulates pthread behavior
  *   argv       - A pointer to an array of input parameters.
  *                Up to CONFIG_MAX_TASK_ARG parameters may be
  *                provided. If fewer than CONFIG_MAX_TASK_ARG
@@ -237,68 +235,47 @@ STATUS task_schedsetup(FAR _TCB *tcb, int priority,
  *
  ************************************************************/
 
-STATUS task_argsetup(FAR _TCB *tcb, const char *name,
-                     boolean pthread, char *argv[])
+STATUS task_argsetup(FAR _TCB *tcb, const char *name, char *argv[])
 {
   int i;
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  /* Give a name to the unnamed threads */
+  /* Give a name to the unnamed tasks */
 
   if (!name)
     {
       name = (char *)g_noname;
     }
 
-  /* copy the name into the TCB */
+  /* Copy the name into the TCB */
 
   strncpy(tcb->name, name, CONFIG_TASK_NAME_SIZE);
-#endif /* CONFIG_TASK_NAME_SIZE */
 
-  /* Save the arguments in the TCB */
+  /* Save the name as the first argument */
 
-#if CONFIG_TASK_NAME_SIZE > 0
   tcb->argv[0] = tcb->name;
 #else
-  tcb->argv[0] = (char *)g_noname;
-#endif
+  /* Save the name as the first argument */
 
-  /* For pthreads, args are strictly pass-by-value; the char*
-   * arguments wrap some unknown value cast to char*.  However,
-   * for tasks, the life of the argument must be as long as
+  tcb->argv[0] = (char *)g_noname;
+#endif /* CONFIG_TASK_NAME_SIZE */
+
+  /* For tasks, the life of the argument must be as long as
    * the life of the task and the arguments must be strings.
    * So for tasks, we have to to dup the strings.
+   *
+   * The first NULL argument terminates the list of 
+   * arguments.  The argv pointer may be NULL if no
+   * parameters are passed.
    */
 
-  if (!pthread)
+  i = 1;
+  if (argv)
     {
-      /* The first NULL argument terminates the list of 
-       * arguments.  The argv pointer may be NULL if no
-       * parameters are passed.
-       */
-
-      i = 1;
-      if (argv)
+      for (; i < CONFIG_MAX_TASK_ARGS+1 && argv[i-1]; i++)
         {
-          for (; i < CONFIG_MAX_TASK_ARGS+1 && argv[i-1]; i++)
-            {
-              tcb->argv[i] = strdup(argv[i-1]);
-            }
+          tcb->argv[i] = strdup(argv[i-1]);
         }
-    }
-  else
-    {
-      /* Mark this task as a pthread */
-
-      tcb->flags   |= TCB_FLAG_PTHREAD;
-
-      /* And just copy the argument. For pthreads, there
-       * is really only a single argument, argv[0].  It is
-       * copied as a value -- NOT duplicated.
-       */
-
-      i = 2;
-      tcb->argv[1]  = argv[0];
     }
 
   /* Nullify any unused argument storage */

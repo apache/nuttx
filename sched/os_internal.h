@@ -243,7 +243,7 @@ extern void    task_start(void);
 extern STATUS  task_schedsetup(FAR _TCB *tcb, int priority,
                                start_t start, main_t main);
 extern STATUS  task_argsetup(FAR _TCB *tcb, const char *name,
-                             boolean pthread, char *argv[]);
+                             char *argv[]);
 
 extern boolean sched_addreadytorun(FAR _TCB *rtrtcb);
 extern boolean sched_removereadytorun(FAR _TCB *rtrtcb);

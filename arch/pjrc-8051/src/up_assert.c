@@ -73,7 +73,7 @@ static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
        (void)irqsave();
         for(;;)
           {
-#ifdef CONFIG_8051_LEDS
+#ifdef CONFIG_ARCH_LEDS
             up_ledon(LED_PANIC);
             up_delay(250);
             up_ledoff(LED_PANIC);

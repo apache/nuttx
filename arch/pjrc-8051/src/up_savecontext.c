@@ -37,6 +37,7 @@
  * Included Files
  **************************************************************************/
 
+#include <nuttx/config.h>
 #include <sys/types.h>
 #include <nuttx/irq.h>
 #include "up_internal.h"

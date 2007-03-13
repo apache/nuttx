@@ -75,9 +75,72 @@ FAR pthread_attr_t g_default_pthread_attr =
  * Private Variables
  ************************************************************/
 
+/* This is the name for name-less pthreads */
+
+static const char g_pthreadname[] = "<pthread>";
+
 /************************************************************
  * Private Functions
  ************************************************************/
+
+/************************************************************
+ * Name: pthread_argsetup
+ *
+ * Description:
+ *   This functions sets up parameters in the Task Control
+ *   Block (TCB) in preparation for starting a new thread.
+ *
+ *   pthread_argsetup() is called from task_init() and task_start()
+ *   to create a new task (with arguments cloned via strdup)
+ *   or pthread_create() which has one argument passed by
+ *   value (distinguished by the pthread boolean argument).
+ *
+ * Input Parameters:
+ *   tcb        - Address of the new task's TCB
+ *   name       - Name of the new task (not used)
+ *   argv       - A pointer to an array of input parameters.
+ *                Up to CONFIG_MAX_TASK_ARG parameters may be
+ *                provided. If fewer than CONFIG_MAX_TASK_ARG
+ *                parameters are passed, the list should be
+ *                terminated with a NULL argv[] value.
+ *                If no parameters are required, argv may be NULL.
+ *
+ * Return Value:
+ *  OK
+ *
+ ************************************************************/
+
+static void pthread_argsetup(FAR _TCB *tcb, pthread_addr_t arg)
+{
+  int i;
+
+#if CONFIG_TASK_NAME_SIZE > 0
+  /* Copy the pthread name into the TCB */
+
+  strncpy(tcb->name, g_pthreadname, CONFIG_TASK_NAME_SIZE);
+
+  /* Save the name as the first argument in the TCB */
+
+  tcb->argv[0] = tcb->name;
+#else
+  /* Save the name as the first argument in the TCB */
+
+  tcb->argv[0] = (char *)g_pthreadname;
+#endif /* CONFIG_TASK_NAME_SIZE */
+
+  /* For pthreads, args are strictly pass-by-value; that actual
+   * type wrapped by pthread_addr_t is unknown.
+   */
+
+  tcb->argv[1]  = (char*)arg;
+
+  /* Nullify the remaining, unused argument storage */
+
+  for (i = 2; i < CONFIG_MAX_TASK_ARGS+1; i++)
+    {
+      tcb->argv[i] = NULL;
+    }
+}
 
 /************************************************************
  * Function:  pthread_addjoininfo
@@ -178,7 +241,6 @@ int pthread_create(pthread_t *thread, pthread_attr_t *attr,
   FAR _TCB *ptcb;
   FAR join_t *pjoin;
   STATUS status;
-  char *argv[2];
   int priority;
 #if CONFIG_RR_INTERVAL > 0
   int policy;
@@ -280,13 +342,15 @@ int pthread_create(pthread_t *thread, pthread_attr_t *attr,
       return ERROR;
     }
 
+  /* Mark this task as a pthread */
+
+  ptcb->flags |= TCB_FLAG_PTHREAD;
+
   /* Configure the TCB for a pthread receiving on parameter
    * passed by value
    */
 
-  argv[0] = (char *)arg;
-  argv[1] = NULL;
-  (void)task_argsetup(ptcb, NULL, TRUE, argv);
+  (void)pthread_argsetup(ptcb, arg);
 
   /* Attach the join info to the TCB. */
 

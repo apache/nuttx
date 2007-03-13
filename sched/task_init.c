@@ -127,7 +127,7 @@ STATUS task_init(FAR _TCB *tcb, const char *name, int priority,
     {
       /* Setup to pass parameters to the new task */
 
-      (void)task_argsetup(tcb, name, FALSE, argv);
+      (void)task_argsetup(tcb, name, argv);
     }
   return ret;
  }

@@ -50,16 +50,6 @@
  * Public Definitions
  **************************************************************************/
 
-/* Bring-up debug configurations */
-
-#define CONFIG_8051_BRINGUP         1   /* Enables some bringup features */
-#define CONFIG_FRAME_DUMP           1   /* Enable stack/frame dumping logic */
-#undef  CONFIG_FRAME_DUMP_SHORT         /* Terse frame dump output */
-#define CONFIG_SUPPRESS_INTERRUPTS  1   /* Do not enable interrupts */
-#define CONFIG_SWITCH_FRAME_DUMP    1   /* Dump frames from normal switches */
-#undef  CONFIG_INTERRUPT_FRAME_DUMP     /* Dump frames from interrupt switches */
-#define CONFIG_LED_DEBUG            1   /* Enabled debug output from LED logic */
-
 /**************************************************************************
  * Public Types
  **************************************************************************/
@@ -124,9 +114,16 @@ extern void  up_saveregisters(FAR ubyte *regs) _naked;
 extern void  up_saveirqcontext(FAR struct xcptcontext *context);
 extern void  up_timerinit(void);
 
-/* Defined in up_assert.c */
+/* Defined in up_debug.c */
 
-#ifdef CONFIG_FRAME_DUMP
+#if defined(CONFIG_ARCH_BRINGUP)
+extern void up_puthex(ubyte hex) __naked;
+extern void up_puthex16(int hex) __naked;
+extern void up_putnl(void) __naked;
+extern void up_puts(__code char *ptr);
+#endif
+
+#if defined(CONFIG_FRAME_DUMP) && defined(CONFIG_ARCH_BRINGUP)
 extern void up_dumpstack(void);
 extern void up_dumpframe(FAR struct xcptcontext *context);
 #else
@@ -136,7 +133,7 @@ extern void up_dumpframe(FAR struct xcptcontext *context);
 
 /* Defined in up_leds.c */
 
-#ifdef CONFIG_8051_LEDS
+#ifdef CONFIG_ARCH_LEDS
 extern void up_ledinit(void);
 extern void up_ledon(ubyte led);
 extern void up_ledoff(ubyte led);

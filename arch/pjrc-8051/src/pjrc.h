@@ -183,8 +183,7 @@ sfr at 0xc9 T2MOD ;
  * Timer 0 provides only a 8-bit auto-reload mode.
  */
 
-#define CONFIG_80C52_TIMER2 1
-#ifdef CONFIG_80C52_TIMER2
+#ifdef CONFIG_8052_TIMER2
 
 /* To use timer 2 as the 100Hz system timer, we need to calculate a 16-bit
  * reload value that results in 100Hz overflow interrupts.  That value
@@ -206,8 +205,6 @@ sfr at 0xc9 T2MOD ;
  * at 57600 Hz, which results in 225 Timer 0 overflow interrupts per
  * second.
  */
-
-# warning "No support for timer 0 as the system timer"
 
 #endif
 

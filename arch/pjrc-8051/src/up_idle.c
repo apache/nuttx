@@ -50,7 +50,7 @@
  * Private Data
  ************************************************************/
 
-#if defined(CONFIG_8051_LEDS) && defined(CONFIG_8051_BRINGUP)
+#if defined(CONFIG_ARCH_LEDS) && defined(CONFIG_ARCH_BRINGUP)
 static ubyte g_ledtoggle = 0;
 #endif
 
@@ -79,7 +79,7 @@ static ubyte g_ledtoggle = 0;
 
 void up_idle(void)
 {
-#if defined(CONFIG_8051_LEDS) && defined(CONFIG_8051_BRINGUP)
+#if defined(CONFIG_ARCH_LEDS) && defined(CONFIG_ARCH_BRINGUP)
   g_ledtoggle++;
   if (g_ledtoggle == 0x80)
     {

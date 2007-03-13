@@ -33,16 +33,47 @@
 #
 ############################################################
 #
-# architecture selection
+# Architecture selection
 #
 # CONFIG_ARCH - identifies the arch subdirectory
-# CONFIG_ARCH_name - for use in C code
-# CONFIG_PJRC_LEDS - Use LEDs to show state. Unique to 8051.
+# CONFIG_ARCH_8051 - Set if processor is 8051 family
+# CONFIG_ARCH_8052 = Set if processor is 8052 family
 #
 CONFIG_ARCH=pjrc-8051
+CONFIG_ARCH_8051=n
 CONFIG_ARCH_8052=y
+
+#
+# Architecture-specific settings.  These may mean nothing to
+# other architectures.
+#
+# CONFIG-ARCH_PJRC - Set if using the PJRC 87C52 board
+# CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to 8051.
+# CONFIG_8052_TIMER2 - Use timer2 for the 100Hz system timer.
+#   (default is timer0 at 112.5Hz).
+#
+# These features are only supported when CONFIG_ARCH_BRINGUP
+# is set:
+#
+# CONFIG_ARCH_BRINGUP - Enables some bringup features
+# CONFIG_FRAME_DUMP - Enable stack/frame dumping logic
+# CONFIG_FRAME_DUMP_SHORT - Terse frame dump output
+# CONFIG_SUPPRESS_INTERRUPTS - Do not enable interrupts
+# CONFIG_SWITCH_FRAME_DUMP - Dump frames from normal switches
+# CONFIG_INTERRUPT_FRAME_DUMP - Dump frames from interrupt switches
+# CONFIG_LED_DEBUG - Enable debug output from LED logic
+#
 CONFIG_ARCH_PJRC=y
-CONFIG_8051_LEDS=y
+CONFIG_ARCH_LEDS=y
+CONFIG_8052_TIMER2=y
+
+CONFIG_ARCH_BRINGUP=y
+CONFIG_FRAME_DUMP=y
+CONFIG_FRAME_DUMP_SHORT=n
+CONFIG_SUPPRESS_INTERRUPTS=y
+CONFIG_SWITCH_FRAME_DUMP=y
+CONFIG_INTERRUPT_FRAME_DUMP=n
+CONFIG_LED_DEBUG=n
 
 #
 # General OS setup
