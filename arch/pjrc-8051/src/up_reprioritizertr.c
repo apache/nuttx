@@ -142,7 +142,7 @@ void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority)
                * Just copy the current registers into the OLD rtcb.
                */
 
-               up_savestack(&tcb->xcp, g_irqtos);
+               up_saveirqcontext(&tcb->xcp);
 
               /* Restore the exception context of the rtcb at the (new) head 
                * of the g_readytorun task list.

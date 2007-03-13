@@ -75,6 +75,7 @@
 void up_initial_state(FAR _TCB *tcb)
 {
   FAR ubyte *frame = tcb->xcp.stack;
+  FAR ubyte *regs  = tcb->xcp.regs;
 
   /* This is the form of initial stack frame
    *
@@ -96,10 +97,21 @@ void up_initial_state(FAR _TCB *tcb)
    frame[FRAME_RETLS] = (((uint16)tcb->start) & 0xff);
    frame[FRAME_RETMS] = (((uint16)tcb->start) >> 8);
 
-  /* The context save area follows the return address. */
+  /* The context save area for registers a, ie, and dpstr
+   * follows the return address in the stack frame.
+   */
 
-  frame[FRAME_IE]     = 0x80;
-  frame[FRAME_PSW]    = 0;
+  frame[FRAME_IE] = 0x80;
 
-  tcb->xcp.nbytes     = FRAME_SIZE;
+  /* Save the number of bytes in the frame (which will be used
+   * to intialize the stack pointer when the task is started).
+   */
+
+  tcb->xcp.nbytes = FRAME_SIZE;
+
+  /* Initialize the remaining register save area which is
+   * outside of the stack save area.
+   */
+
+  tcb->xcp.regs[REGS_PSW] = 0;
 }

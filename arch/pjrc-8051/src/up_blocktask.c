@@ -131,7 +131,7 @@ void up_block_task(FAR _TCB *tcb, tstate_t task_state)
                * Just copy the current registers into the OLD rtcb.
                */
 
-               up_savestack(&tcb->xcp, g_irqtos);
+               up_saveirqcontext(&tcb->xcp);
 
               /* Restore the exception context of the rtcb at the (new) head 
                * of the g_readytorun task list.

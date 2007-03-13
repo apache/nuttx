@@ -50,6 +50,10 @@
  * Private Data
  ************************************************************/
 
+#if defined(CONFIG_8051_LEDS) && defined(CONFIG_8051_BRINGUP)
+static ubyte g_ledtoggle = 0;
+#endif
+
 /************************************************************
  * Private Functions
  ************************************************************/
@@ -75,5 +79,16 @@
 
 void up_idle(void)
 {
+#if defined(CONFIG_8051_LEDS) && defined(CONFIG_8051_BRINGUP)
+  g_ledtoggle++;
+  if (g_ledtoggle == 0x80)
+    {
+      up_ledon(LED_IDLE);
+    }
+  else if (g_ledtoggle == 0x00)
+    {
+      up_ledoff(LED_IDLE);
+    }
+#endif
 }
 

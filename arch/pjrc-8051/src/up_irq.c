@@ -43,6 +43,8 @@
 #include <8052.h>
 #include "up_internal.h"
 
+#include <debug.h>
+extern int g_nints;
 /************************************************************
  * Definitions
  ************************************************************/
@@ -69,7 +71,7 @@
 
 void up_irqinitialize(void)
 {
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
   /* Disable all interrupts */
 
   IE = 0;
@@ -122,7 +124,7 @@ void up_disable_irq(int irq)
 {
   if ((unsigned)irq < NR_IRQS)
     {
-       IE |= (1 << irq);
+      IE &= ~(g_ntobit[irq]);
     }
 }
 
@@ -138,6 +140,6 @@ void up_enable_irq(int irq)
 {
   if ((unsigned)irq < NR_IRQS)
     {
-      IE &= ~(1 << irq);
+      IE |= g_ntobit[irq];
     }
 }

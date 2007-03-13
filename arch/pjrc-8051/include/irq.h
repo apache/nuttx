@@ -90,28 +90,52 @@
 #define FRAME_RETLS 0
 #define FRAME_RETMS 1
 
-/* Then a full context save area which can be indexed with
- * the following definitions (relative to the beginning of
- * the initial frame.
+/* Then a partial context context save area that can be
+ * indexed with the following definitions (relative to the
+ * beginning of the initial frame.
  */
 
 #define FRAME_ACC   2
 #define FRAME_IE    3
 #define FRAME_DPL   4
 #define FRAME_DPH   5
-#define FRAME_B     6
-#define FRAME_R2    7
-#define FRAME_R3    8
-#define FRAME_R4    9
-#define FRAME_R5    10
-#define FRAME_R6    11
-#define FRAME_R7    12
-#define FRAME_R0    13
-#define FRAME_R1    14
-#define FRAME_PSW   15
-#define FRAME_BP    16
 
-#define FRAME_SIZE  17
+#define FRAME_SIZE  6
+
+/* The remaining registers are not saved on the stack (due
+ * to the limited stack size of the 8051/2) but in an array
+ * in the TCB:
+ */
+
+#define REGS_B      0
+#define REGS_R2     1
+#define REGS_R3     2
+#define REGS_R4     3
+#define REGS_R5     4
+#define REGS_R6     5
+#define REGS_R7     6
+#define REGS_R0     7
+#define REGS_R1     8
+#define REGS_PSW    9
+#define REGS_BP     10
+
+#define REGS_SIZE   11
+
+/* Note that the stack pointer is not saved.  Rather, the
+ * size of the saved stack frame is saved in the 'nbytes'
+ * field.  Since that stack begins at a fixed location, the
+ * top-of-stack pointer can be derived from the saved size.
+ */
+
+/* These are offsets into struct xcptcontext that can be
+ * used from assembly language to access the structure.
+ */
+
+#define XCPT_NBYTES 0
+#define XCPT_STACK  1
+#define XCPT_REGS   (STACK_SIZE+1)
+
+#define XCPT_SIZE   (STACK_SIZE+REGS_SIZE+1)
 
 /************************************************************
  * Public Types
@@ -122,8 +146,26 @@
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
+   /* This is the number of valid bytes currently saved in
+    * stack[].  Since that stack begins at a fixed location,
+    * the top-of-stack pointer can be derived from this size.
+    */
+
    ubyte nbytes;
+
+   /* This is the saved stack.  Space is allocated for the 
+    * entire 256 byte IRAM (minus register and bit usage at
+    * the beginning).
+    */
+
    ubyte stack[STACK_SIZE];
+
+   /* These are save 8051/2 registers.  These are saved
+    * separately from the stack to increase the effective
+    * stack size.
+    */
+
+   ubyte regs[REGS_SIZE];
 };
 #endif /* __ASSEMBLY */
 

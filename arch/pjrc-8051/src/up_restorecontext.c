@@ -69,6 +69,66 @@
  **************************************************************************/
 
 /**************************************************************************
+ * Name: up_restoreregisters
+ *
+ * Description:
+ *   Restore the saved registers from the context save area.  This function
+ *   is called from up_restorecontext (below) and also from interrupt
+ *   handling logic.
+ *
+ *   Note that this function does not restore:
+ *   a, dptr, ie - these are saved in the stack area
+ *   sp - this can be inferred from g_irqtos or struct xcptontext.nbytes.
+ *
+ * Inputs:
+ *   context - the context register array from which to restore the
+ *   register values
+ *
+ * Return:
+ *   None
+ *
+ **************************************************************************/
+
+void up_restoreregisters(FAR ubyte *regs) _naked
+{
+ _asm
+	movx	a, @dptr
+	mov	b, a
+	inc	dptr
+	movx	a, @dptr
+	mov	r2, a
+	inc	dptr
+	movx	a, @dptr
+	mov	r3, a
+	inc	dptr
+	movx	a, @dptr
+	mov	r4, a
+	inc	dptr
+	movx	a, @dptr
+	mov	r5, a
+	inc	dptr
+	movx	a, @dptr
+	mov	r6, a
+	inc	dptr
+	movx	a, @dptr
+	mov	r7, a
+	inc	dptr
+	movx	a, @dptr
+	mov	r0, a
+	inc	dptr
+	movx	a, @dptr
+	mov	r1, a
+	inc	dptr
+	movx	a, @dptr
+	mov	psw, a
+	inc	dptr
+	movx	a, @dptr
+	mov	_bp, a
+	ret
+  _endasm;
+}
+
+/**************************************************************************
  * Name: up_restorecontext
  *
  * Description:
@@ -95,6 +155,10 @@ void up_restorecontext(FAR struct xcptcontext *context) __naked
 	ar0 = 0x00
 	ar1 = 0x01
 
+	/* Dump the contents of the saved frame before it is copied back
+	 * to memory/registers.
+	 */
+
 #ifdef CONFIG_SWITCH_FRAME_DUMP
 	push	dpl
 	push	dph
@@ -109,14 +173,17 @@ void up_restorecontext(FAR struct xcptcontext *context) __naked
 
 	clr	ea
 
-	/* Register usage in the following:
+	/* The following logic will copy the stack from the
+	 * context save structure into IRAM.  We cannot use
+	 * the stack in anyway during this copy.  Instead,
+	 * we will use registers as follows:
 	 *
-	 * R0   - Holds working the 8-bit IRAM pointer
+	 * R0   - Holds the working 8-bit IRAM pointer
 	 * R1   - Not used
 	 * R2-3 - Holds the working 16-bit XRAM pointer
 	 * R4   - Holds the working byte count
 	 * R5   - Holds the new stack pointer
-	 * R6-7 - Not used
+	 * R6-7 - Saved context pointer
 	 */
 
 	/* Fetch r4 = context->nbytes */
@@ -129,26 +196,32 @@ void up_restorecontext(FAR struct xcptcontext *context) __naked
 	add	a, #(STACK_BASE-1)
 	mov	r5, a
 
-	/* Save r2-3 = &context->stack */
+	/* Save r2-3 and r6-r7 = &context->stack */
 
 	inc	dptr
 	mov	r2, dpl
 	mov	r3, dph
+	mov	r6, dpl
+	mov	r7, dph
 
 	/* Set r0 = stack base address */
 
 	mov	r0, #STACK_BASE
 
-	/* Top of the copy loop */
+	/* Top of the copy loop -- we cannot use the stack
+	 * again until we finish the copy and set the new
+	 * stack pointer (saved in r5)
+	 */
 00001$:
-	dec	r4
-	jz	00002$
+	mov	a, r4	/* a = bytes left to transfer */
+	dec	r4	/* (for next time through the loop) */
+	jz	00002$	/* Jump if a = 0 (done) */
 
 	/* Fetch the next byte from context->stack */
 
 	mov	dpl, r2
 	mov	dph, r3
-	movx	a,@dptr
+	movx	a, @dptr
 
 	/* Increment the XRAM pointer */
 
@@ -166,26 +239,40 @@ void up_restorecontext(FAR struct xcptcontext *context) __naked
 	sjmp	00001$
 00002$:
 
-	/* Set the new stack pointer */
+	/* Set the new stack pointer and recover the
+	 * context->stack pointer.
+	 */
 
 	mov	sp, r5
+	mov	dpl, r6
+	mov	dph, r7
+
+	/* Dump the stack contents after they have
+	 * been restored to IRAM
+	 */
 
 #ifdef CONFIG_SWITCH_FRAME_DUMP
+	push	dpl
+	push	dph
 	lcall	_up_dumpstack
+	pop	dph
+	pop	dpl
 #endif
-	/* Then restore the context from the stack */
+	/* Get the pointer to the register save area */
 
-	pop	_bp 
-	pop	psw
-	pop	ar1 
-	pop	ar0 
-	pop	ar7 
-	pop	ar6 
-	pop	ar5 
-	pop	ar4 
-	pop	ar3 
-	pop	ar2 
-	pop	b 
+	mov	a, #FRAME_SIZE
+	add	a, dpl
+	mov	dpl, a
+	clr	a
+	addc	a, dph
+	mov	dph, a
+
+	/* Restore registers from the register save area */
+
+	lcall	_up_restoreregisters
+
+	/* Restore registers from the new stack */
+
 	pop	dph
 	pop	dpl 
 
@@ -197,8 +284,8 @@ void up_restorecontext(FAR struct xcptcontext *context) __naked
 	sjmp	00004$
   00003$:
 	setb	ie.7
-  00004$:
 
+  00004$:
 	pop acc
 	ret
   _endasm;

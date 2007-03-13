@@ -64,7 +64,7 @@
 
 /* This is the name for un-named tasks */
 
-static FAR char g_noname[] = "no name";
+static const char g_noname[] = "no name";
 
 /************************************************************
  * Private Function Prototypes
@@ -247,7 +247,7 @@ STATUS task_argsetup(FAR _TCB *tcb, const char *name,
 
   if (!name)
     {
-      name = g_noname;
+      name = (char *)g_noname;
     }
 
   /* copy the name into the TCB */
@@ -260,7 +260,7 @@ STATUS task_argsetup(FAR _TCB *tcb, const char *name,
 #if CONFIG_TASK_NAME_SIZE > 0
   tcb->argv[0] = tcb->name;
 #else
-  tcb->argv[0] = g_noname;
+  tcb->argv[0] = (char *)g_noname;
 #endif
 
   /* For pthreads, args are strictly pass-by-value; the char*
@@ -294,7 +294,7 @@ STATUS task_argsetup(FAR _TCB *tcb, const char *name,
 
       /* And just copy the argument. For pthreads, there
        * is really only a single argument, argv[0].  It is
-       * copy as a value -- NOT duplicated.
+       * copied as a value -- NOT duplicated.
        */
 
       i = 2;
