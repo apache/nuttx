@@ -3,12 +3,22 @@
 <title>NuttX</title>
 </head>
 <body background="backgd.gif">
-<hr>
-<hr>
-<center><h1><i>Under Construction</i></h1></center>
-<hr>
-<hr>
-<h1>Overview</h1>
+<center>
+  <hr><hr>
+  <h1><big><i>NuttX RTOS</i></big></h1>
+  <p>Last Updated: March 14, 2007</p>
+  <hr><hr>
+  <h1>Table of Contents</h1>
+</center>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#downloads">Downloads</a></li>
+<li><a href="#platforms">Supported Platforms</a></li>
+<li><a href="#footprint">Memory Footprint</a></li>
+<li><a href="#licensing">Licensing</a></li>
+<li><a href="#history">Release History</a></li>
+<li><a href="#documentation">Other Documentation</a></li>
+
+<a name="overview"><h1>Overview</h1></a>
 <p>
   <b>Goals</b>.
   Nuttx is a real timed embedded operating system (RTOS).
@@ -60,7 +70,7 @@
     </p>
 </ol>
 
-<h1>Downloads</h1>
+<a name="downloads"><h1>Downloads</h1></a>
 
 <p>
    The initial release of NuttX (nuttx-0.1.0) is avalable for download
@@ -68,7 +78,7 @@
    website.
 </p>
 
-<h1>Supported Platforms</h1>
+<a name="platforms"><h1>Supported Platforms</h1></a>
 
 <ul>
   <li><b>Linux User Mode</b></li>
@@ -95,7 +105,9 @@
       and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain.
     </p>
     <p>
-      STATUS: This port will require a few more weeks before it is ready for prime time.
+      STATUS: This port is complete but not stable with timer interrupts enabled.
+      There seems to be some issue when the stack pointer enters into the indirect IRAM
+      address space during interrupt handling.
     </p>
   <li><b>Other ports</b></li>
     <p>
@@ -106,7 +118,7 @@
 <blockquote>* A highly modified <a href="http://buildroot.uclibc.org/">buildroot</a>
 is available that be used to build a NuttX-compatible arm-elf toolchain.</blockquote>
 
-<h1>Memory Footprint</h1>
+<a name="footprint"><h1>Memory Footprint</h1></a>
 
 <p><b>C5471 (Arm7)</b>
   The build for this ARM7 target that includes most of the OS features and
@@ -118,11 +130,21 @@ is available that be used to build a NuttX-compatible arm-elf toolchain.</blockq
   53272     428    3568   57268    dfb4 nuttx
 </pre>
 <p><b>87C52</b>
-  A reduced functionality OS test for the 8051 target requires only
-  about 18Kb (see <a href="codesize-070301.xls">spreadsheet</a> for details).
+  A reduced functionality OS test for the 8052 target requires only
+  about 18-19Kb:
 </p>
+<pre>
+Stack starts at: 0x21 (sp set to 0x20) with 223 bytes available.
 
-<h1>Licensing</h1>
+Other memory:
+   Name             Start    End      Size     Max
+   ---------------- -------- -------- -------- --------
+   PAGED EXT. RAM                         0      256
+   EXTERNAL RAM     0x0100   0x02fd     510     7936
+   ROM/EPROM/FLASH  0x2100   0x6e55   19798    24384
+</pre>
+
+<a name="licensing"><h1>Licensing</h1></a>
 
 <p>NuttX is available under the highly permissive
   <a href="http://en.wikipedia.org/wiki/BSD_license">BSD license</a>.
@@ -131,7 +153,45 @@ is available that be used to build a NuttX-compatible arm-elf toolchain.</blockq
   without any concern for jeopardizing any proprietary software that
   you may link with it.</p>
 
-<h1>Other Documentation</h1>
+<a name="history"><h1>Release History</h1></a>
+
+<pre>
+0.1.0 2007-03-09  Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* Initial Release
+	* Support for Linux user mode simulation and TI
+	  TMS320C5471 (Arm7) provided
+
+0.1.1 2007-03-14  Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* Corrected an error in interrupt level context switching
+	  for C5471
+	* Added fgets() and gets() logic; verified c5471 console read.
+	* Corrected error in reading from the C5471 serial port:
+          Improper use of semaphore can cause deadlock.
+	* Fixed an error in the memory cleanup:  The idle task
+	  cannot take sempahores (because it must always be ready
+	  to run).
+	* Tasks can now accept a configurable maximum number of
+	  input parameters (argc)
+	* _task_init() was divided into separate functions that
+	  require fewer parameters.  This was necessary to keep
+	  the stack usage down for the 8051/2 (which has only
+	  256 bytes of stack).
+	* Attempts to use C5471 console from interrupt handlers
+	  can casue errors. Added a special path for this case.
+	* Refuse calls to sem_wait and sem_trywait from interrupt
+	  handlers.  This was happening because interrupt handlers
+	  were calling printf-like functions.
+	* Added strtok() and strtok_r()
+	* Added a simple shell called nsh (see examples/nsh).
+	* Platform support for 8052 is complete but not stable
+	  when the timer interrupt is enabled.  Seems to be an
+	  issue when SP enters indirect address space.
+	* Documentation updates
+</pre>
+
+<a name="documentation"><h1>Other Documentation</h1></a>
 
 <li><a href="NuttxUserGuide.html">User Guide</li>
 <li><a href="NuttxPortingGuide.html">Porting Guide</li>
