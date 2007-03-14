@@ -134,8 +134,8 @@ typedef struct pidhash_s  pidhash_t;
 
 struct tasklist_s
 {
-  DSEG dq_queue_t *list;        /* Pointer to the task list */
-  boolean          prioritized; /* TRUE if the list is prioritized */
+  DSEG volatile dq_queue_t *list; /* Pointer to the task list */
+  boolean prioritized;            /* TRUE if the list is prioritized */
 };
 typedef struct tasklist_s tasklist_t;
 
@@ -159,7 +159,7 @@ typedef struct tasklist_s tasklist_t;
  * list is always the idle task.
  */
 
-extern dq_queue_t g_readytorun;
+extern volatile dq_queue_t g_readytorun;
 
 /* This is the list of all tasks that are ready-to-run, but
  * cannot be placed in the g_readytorun list because:  (1) They
@@ -168,16 +168,16 @@ extern dq_queue_t g_readytorun;
  * disabled pre-emption.
  */
 
-extern dq_queue_t g_pendingtasks;
+extern volatile dq_queue_t g_pendingtasks;
 
 /* This is the list of all tasks that are blocked waiting for a semaphore */
 
-extern dq_queue_t g_waitingforsemaphore;
+extern volatile dq_queue_t g_waitingforsemaphore;
 
 /* This is the list of all tasks that are blocked waiting for a signal */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-extern dq_queue_t g_waitingforsignal;
+extern volatile dq_queue_t g_waitingforsignal;
 #endif
 
 /* This is the list of all tasks that are blocked waiting for a message
@@ -185,7 +185,7 @@ extern dq_queue_t g_waitingforsignal;
  */
 
 #ifndef CONFIG_DISABLE_MQUEUE
-extern dq_queue_t g_waitingformqnotempty;
+extern volatile dq_queue_t g_waitingformqnotempty;
 #endif
 
 /* This is the list of all tasks that are blocked waiting for a message
@@ -193,14 +193,14 @@ extern dq_queue_t g_waitingformqnotempty;
  */
 
 #ifndef CONFIG_DISABLE_MQUEUE
-extern dq_queue_t g_waitingformqnotfull;
+extern volatile dq_queue_t g_waitingformqnotfull;
 #endif
 
 /* This the list of all tasks that have been initialized, but not yet
  * activated. NOTE:  This is the only list that is not prioritized.
  */
 
-extern dq_queue_t g_inactivetasks;
+extern volatile dq_queue_t g_inactivetasks;
 
 /* This is the list of dayed memory deallocations that need to be handled
  * within the IDLE loop.  These deallocations get queued by sched_free()
@@ -208,11 +208,11 @@ extern dq_queue_t g_inactivetasks;
  * handler.
  */
 
-extern sq_queue_t g_delayeddeallocations;
+extern volatile sq_queue_t g_delayeddeallocations;
 
 /* This is the value of the last process ID assigned to a task */
 
-extern pid_t g_lastpid;
+extern volatile pid_t g_lastpid;
 
 /* The following hash table is used for two things:
  *

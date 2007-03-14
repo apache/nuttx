@@ -139,7 +139,6 @@ void up_timerinit(void)
   TR0 = 1;       /* Start the timer */
   up_enable_irq(TIMER0_IRQ);
 
-# warning "No support for timer 0 as the system timer"
 #endif
 }
 

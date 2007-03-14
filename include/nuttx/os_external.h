@@ -78,6 +78,11 @@ EXTERN void   os_start(void); /* OS entry point called by boot logic */
 EXTERN void   mm_initialize(FAR void *heap_start, size_t heap_size);
 EXTERN void   mm_addregion(FAR void *heapstart, size_t heapsize);
 
+/* Functions contained in mm_sem.c **************************/
+
+EXTERN int mm_trysemaphore(void);
+EXTERN void mm_givesemaphore(void);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

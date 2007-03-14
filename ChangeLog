@@ -4,13 +4,16 @@
 	* Support for Linux user mode simulation and TI
 	  TMS320C5471 (Arm7) provided
 
-0.1.1 2007-xx-xx  Gregory Nutt <spudmonkey@racsa.co.cr>
+0.1.1 2007-03-14  Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Corrected an error in interrupt level context switching
 	  for C5471
 	* Added fgets() and gets() logic; verified c5471 console read.
-	* Corrected error in reading from serial port.  Improper
-	  use of semaphore can cause deadlock.
+	* Corrected error in reading from the C5471 serial port:
+          Improper use of semaphore can cause deadlock.
+	* Fixed an error in the memory cleanup:  The idle task
+	  cannot take sempahores (because it must always be ready
+	  to run).
 	* Tasks can now accept a configurable maximum number of
 	  input parameters (argc)
 	* _task_init() was divided into separate functions that
@@ -24,5 +27,7 @@
 	  were calling printf-like functions.
 	* Added strtok() and strtok_r()
 	* Added a simple shell called nsh (see examples/nsh).
-	* Many changes as part of 8052 bringup
+	* Platform support for 8052 is complete but not stable
+	  when the timer interrupt is enabled.  Seems to be an
+	  issue when SP enters indirect address space.
 	* Documentation updates

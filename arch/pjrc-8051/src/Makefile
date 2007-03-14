@@ -65,6 +65,11 @@ LINKLIBS	=
 LDPATHES	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
 LDLIBS		= $(addprefix -l,$(notdir $(LINKLIBS)))
 
+TESTSRCS	= up_irqtest.c
+TESTOBJS	= $(TESTSRCS:.c=$(OBJEXT))
+TESTLINKOBJS	= up_head$(OBJEXT)
+TESTEXTRAOBJS	= up_savecontext$(OBJEXT) up_restorecontext$(OBJEXT)
+
 IRAM_SIZE	= 0x100
 DEF_STACK_BASE	= 0x24
 LDFLAGS		= --model-large --nostdlib \
@@ -108,7 +113,7 @@ $(ASRCS) $(LINKASRCS): %$(ASMEXT): %.S
 $(AOBJS) $(LINKOBJS): $(ASRCS) $(LINKASRCS)
 	$(AS) $(ASFLAGS) $<
 
-$(COBJS): %$(OBJEXT): %.c
+$(COBJS) $(TESTOBJS): %$(OBJEXT): %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 # Create a header file that contains addressing information needed by the code
@@ -173,6 +178,15 @@ nuttx$(EXEEXT): pass1.ihx nuttx.ihx
 	@rm -f pass1.*
 	packihx nuttx.ihx > $(TOPDIR)/nuttx$(EXEEXT)
 	@cp -f nuttx.map $(TOPDIR)/.
+
+# This target builds a test program to verify interrupt context switching.  irqtest is
+# a PHONY target that just sets upt the up_irqtest build correctly
+
+up_irqtest.ihx: $(TESTOBJS)
+	$(CC) $(LDFLAGS) -L. $(SDCCPATH) $(TESTLINKOBJS) $(TESTOBJS) $(TESTEXTRAOBJS) $(SDCCLIBS) -o $@
+
+irqtest:
+	$(MAKE) TOPDIR=../../.. up_irqtest.ihx
 
 # Build dependencies
 

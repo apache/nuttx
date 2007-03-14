@@ -86,7 +86,7 @@
  * list is always the idle task.
  */
 
-dq_queue_t g_readytorun;
+volatile dq_queue_t g_readytorun;
 
 /* This is the list of all tasks that are ready-to-run, but
  * cannot be placed in the g_readytorun list because:  (1) They
@@ -95,16 +95,16 @@ dq_queue_t g_readytorun;
  * disabled pre-emption.
  */
 
-dq_queue_t g_pendingtasks;
+volatile dq_queue_t g_pendingtasks;
 
 /* This is the list of all tasks that are blocked waiting for a semaphore */
 
-dq_queue_t g_waitingforsemaphore;
+volatile dq_queue_t g_waitingforsemaphore;
 
 /* This is the list of all tasks that are blocked waiting for a signal */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-dq_queue_t g_waitingforsignal;
+volatile dq_queue_t g_waitingforsignal;
 #endif
 
 /* This is the list of all tasks that are blocked waiting for a message
@@ -112,7 +112,7 @@ dq_queue_t g_waitingforsignal;
  */
 
 #ifndef CONFIG_DISABLE_MQUEUE
-dq_queue_t g_waitingformqnotempty;
+volatile dq_queue_t g_waitingformqnotempty;
 #endif
 
 /* This is the list of all tasks that are blocked waiting for a message
@@ -120,14 +120,14 @@ dq_queue_t g_waitingformqnotempty;
  */
 
 #ifndef CONFIG_DISABLE_MQUEUE
-dq_queue_t g_waitingformqnotfull;
+volatile dq_queue_t g_waitingformqnotfull;
 #endif
 
 /* This the list of all tasks that have been initialized, but not yet
  * activated. NOTE:  This is the only list that is not prioritized.
  */
 
-dq_queue_t g_inactivetasks;
+volatile dq_queue_t g_inactivetasks;
 
 /* This is the list of dayed memory deallocations that need to be handled
  * within the IDLE loop.  These deallocations get queued by sched_free()
@@ -135,11 +135,11 @@ dq_queue_t g_inactivetasks;
  * handler.
  */
 
-sq_queue_t g_delayeddeallocations;
+volatile sq_queue_t g_delayeddeallocations;
 
 /* This is the value of the last process ID assigned to a task */
 
-pid_t g_lastpid;
+volatile pid_t g_lastpid;
 
 /* The following hash table is used for two things:
  *
@@ -420,22 +420,35 @@ void os_start(void)
   dbg("Beginning Idle Loop\n");
   for (;;)
     {
-      /* Check if there is anything in the delayed deallocation list. */
+      /* Check if there is anything in the delayed deallocation list.
+       * If there is deallocate it now.  We must have exclusive access
+       * to the memory manager to do this BUT the idle task cannot
+       * wait on a semaphore.  So we only do the cleanup now if we
+       * can get the semaphore -- and this should be possible because
+       * since we are running, no other task is!
+       */
 
-      while (g_delayeddeallocations.head)
-	{
-	  /* Remove the first delayed deallocation. */
+      if (mm_trysemaphore() == 0)
+        {
+          while (g_delayeddeallocations.head)
+            {
+              /* Remove the first delayed deallocation. */
 
-	  irqstate_t saved_state = irqsave();
-	  void *address = (void*)sq_remfirst(&g_delayeddeallocations);
-	  irqrestore(saved_state);
+              irqstate_t saved_state = irqsave();
+              void *address          = (void*)sq_remfirst(&g_delayeddeallocations);
+              irqrestore(saved_state);
 
-	  /* Then deallocate it */
+              /* Then deallocate it */
 
-	  if (address) sched_free(address);
-      }
+              if (address)
+                {
+                  sched_free(address);
+                }
+            }
+          mm_givesemaphore();
+        }
 
-      /* Perform idle state operations */
+      /* Perform any processor-specific idle state operations */
 
       up_idle();
     }

@@ -122,11 +122,17 @@ int files_addreflist(FAR struct filelist *list)
 {
   if (list)
     {
-       /* Increment the reference count on the list */
+       /* Increment the reference count on the list.
+        * NOTE: that we disable interrupts to do this
+        * (vs. taking the list semaphore).  We do this
+        * because file cleanup operations often must be
+        * done from the IDLE task which cannot wait
+        * on semaphores.
+        */
 
-       _files_semtake(list);
+       register irqstate_t flags = irqsave();
        list->fl_crefs++;
-       _files_semgive(list);
+       irqrestore(flags);
     }
   return OK;
 }
@@ -138,14 +144,22 @@ int files_releaselist(FAR struct filelist *list)
   int crefs;
   if (list)
     {
-       /* Decrement the reference count */
+       /* Decrement the reference count on the list.
+        * NOTE: that we disable interrupts to do this
+        * (vs. taking the list semaphore).  We do this
+        * because file cleanup operations often must be
+        * done from the IDLE task which cannot wait
+        * on semaphores.
+        */
 
-       _files_semtake(list);
+       register irqstate_t flags = irqsave();
        crefs = --(list->fl_crefs);
-       _files_semgive(list);
+       irqrestore(flags);
 
        /* If the count decrements to zero, then there is no reference
-        * to the structure and it should be deallocated.
+        * to the structure and it should be deallocated.  Since there
+        * are references, it would be an error if any task still held
+        * a reference to the list's semaphore.
         */
 
        if (crefs <= 0)

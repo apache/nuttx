@@ -78,7 +78,11 @@ static  int   g_counts_held;
  ************************************************************/
 
 /************************************************************
- * mm_seminitialize
+ * Name: mm_seminitialize
+ *
+ * Description:
+ *   Initialize the MM mutex
+ *
  ************************************************************/
 
 void mm_seminitialize(void)
@@ -94,7 +98,56 @@ void mm_seminitialize(void)
 }
 
 /************************************************************
- * mm_takesemaphore
+ * Name: mm_trysemaphore
+ *
+ * Description:
+ *   Try to take the MM mutex.  This is called only from the
+ *   OS in certain conditions when it is necessary to have
+ *   exclusive access to the memory manager but it is
+ *   impossible to wait on a semaphore (e.g., the idle process
+ *   when it performs its background memory cleanup).
+ *
+ ************************************************************/
+
+#ifndef MM_TEST
+int mm_trysemaphore(void)
+{
+  pid_t my_pid = getpid();
+
+  /* Do I already have the semaphore? */
+
+  if (g_holder == my_pid)
+    {
+      /* Yes, just increment the number of references that I have */
+
+      g_counts_held++;
+      return OK;
+    }
+  else
+    {
+      /* Try to tak the semaphore (perhaps waiting) */
+
+      if (sem_trywait(&g_mm_semaphore) != 0)
+       {
+         return ERROR;
+       }
+
+      /* We have it.  Claim the stak and return */
+
+      g_holder      = my_pid;
+      g_counts_held = 1;
+      return OK;
+    }
+}
+#endif
+
+/************************************************************
+ * Name: mm_takesemaphore
+ *
+ * Description:
+ *   Take the MM mutex.  This is the normal action before all
+ *   memory management actions.
+ *
  ************************************************************/
 
 void mm_takesemaphore(void)
@@ -134,7 +187,11 @@ void mm_takesemaphore(void)
 }
 
 /************************************************************
- * mm_givesemaphore
+ * Name: mm_givesemaphore
+ *
+ * Description:
+ *   Release the MM mutex when it is not longer needed.
+ *
  ************************************************************/
 
 void mm_givesemaphore(void)
@@ -160,11 +217,20 @@ void mm_givesemaphore(void)
       /* Nope, this is the last reference I have */
 
       msemdbg("PID=%d giving\n", my_pid);
-      g_holder = -1;
+      g_holder      = -1;
       g_counts_held = 0;
       ASSERT(sem_post(&g_mm_semaphore) == 0);
     }
 }
+
+/************************************************************
+ * Name: mm_getsemaphore
+ *
+ * Description:
+ *   Return the current value of the MM semaphore (for test
+ *   purposes only)
+ *
+ ************************************************************/
 
 #ifdef MM_TEST
 int mm_getsemaphore(void)
