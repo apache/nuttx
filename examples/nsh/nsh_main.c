@@ -34,15 +34,12 @@
  ************************************************************/
 
 /************************************************************
- * Compilation Switches
- ************************************************************/
-
-/************************************************************
  * Included Files
  ************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <dirent.h>
 #include <string.h>
 #include <sched.h>
 
@@ -51,12 +48,13 @@
  ************************************************************/
 
 #define CONFIG_NSH_LINE_SIZE 80
+#undef  CONFIG_FULL_PATH
 
 /************************************************************
  * Private Types
  ************************************************************/
 
-typedef void (*cmd_t)(const char *cmd, const char *arg);
+typedef void (*cmd_t)(const char *cmd, char *arg);
 typedef void (*exec_t)(void);
 
 struct cmdmap_s
@@ -70,11 +68,11 @@ struct cmdmap_s
  * Private Function Prototypes
  ************************************************************/
 
-static void cmd_echo(const char *cmd, const char *arg);
-static void cmd_exec(const char *cmd, const char *arg);
-static void cmd_help(const char *cmd, const char *arg);
-static void cmd_ls(const char *cmd, const char *arg);
-static void cmd_ps(const char *cmd, const char *arg);
+static void cmd_echo(const char *cmd, char *arg);
+static void cmd_exec(const char *cmd, char *arg);
+static void cmd_help(const char *cmd, char *arg);
+static void cmd_ls(const char *cmd, char *arg);
+static void cmd_ps(const char *cmd, char *arg);
 
 /************************************************************
  * Private Data
@@ -114,9 +112,14 @@ static const char g_fmtargrequired[] = "nsh: %s: argument required\n";
 static const char g_fmtarginvalid[]  = "nsh: %s: argument invalid\n";
 static const char g_fmtcmdnotfound[] = "nsh: %s: command not found\n";
 static const char g_fmtcmdnotimpl[]  = "nsh: %s: command not implemented\n";
+static const char g_fmtnosuch[]      = "nsh: %s: no such %s: %s\n";
 
 /************************************************************
  * Private Functions
+ ************************************************************/
+
+/************************************************************
+ * Name: trim_arg
  ************************************************************/
 
 static char *trim_arg(char *arg)
@@ -129,7 +132,7 @@ static char *trim_arg(char *arg)
 
       while (strchr(" \t", *arg) != NULL) arg++;  
 
-      /* Skip any leading white space */
+      /* Skip any trailing white space */
 
       len = strlen(arg);
       if (len > 0)
@@ -149,10 +152,28 @@ static char *trim_arg(char *arg)
 }
 
 /************************************************************
+ * Name: trim_dir
+ ************************************************************/
+
+#ifdef CONFIG_FULL_PATH
+void trim_dir(char *arg)
+{
+ /* Skip any '/' characters white space */
+
+ int len = strlen(arg) - 1;
+ while (len > 0 && arg[len] == '/')
+   {
+      arg[len] = '\0';
+      len--;
+   }
+}
+#endif
+
+/************************************************************
  * Name: cmd_echo
  ************************************************************/
 
-static void cmd_echo(const char *cmd, const char *arg)
+static void cmd_echo(const char *cmd, char *arg)
 {
   /* Echo the rest of the line */
 
@@ -163,7 +184,7 @@ static void cmd_echo(const char *cmd, const char *arg)
  * Name: cmd_exec
  ************************************************************/
 
-static void cmd_exec(const char *cmd, const char *arg)
+static void cmd_exec(const char *cmd, char *arg)
 {
   char *endptr;
   long addr;
@@ -189,7 +210,7 @@ static void cmd_exec(const char *cmd, const char *arg)
  * Name: cmd_help
  ************************************************************/
 
-static void cmd_help(const char *cmd, const char *arg)
+static void cmd_help(const char *cmd, char *arg)
 {
   const struct cmdmap_s *ptr;
 
@@ -211,9 +232,47 @@ static void cmd_help(const char *cmd, const char *arg)
  * Name: cmd_ls
  ************************************************************/
 
-static void cmd_ls(const char *cmd, const char *arg)
+static void cmd_ls(const char *cmd, char *arg)
 {
-  printf(g_fmtcmdnotimpl, cmd);
+  DIR *dirp;
+
+#ifdef CONFIG_FULL_PATH
+  trim_dir(arg);
+#endif
+  dirp = opendir(arg);
+
+  if (!dirp)
+    {
+      printf(g_fmtnosuch, cmd, "directory", arg);
+    }
+
+  for (;;)
+    {
+      struct dirent *entryp = readdir(dirp);
+      if (!entryp)
+        {
+          break;
+        }
+
+      if (DIRENT_ISFILE(entryp->d_type))
+        {
+#ifdef CONFIG_FULL_PATH
+          printf("  %s/%s\n", arg, entryp->d_name);
+#else
+          printf("  %s\n", entryp->d_name);
+#endif
+        }
+
+      if (DIRENT_ISDIRECTORY(entryp->d_type))
+        {
+#ifdef CONFIG_FULL_PATH
+          printf("  %s/%s/\n", arg, entryp->d_name);
+#else
+          printf("  %s/\n", entryp->d_name);
+#endif
+        }
+    }
+  closedir(dirp);
 }
 
 /************************************************************
@@ -251,7 +310,7 @@ static void ps_task(FAR _TCB *tcb, FAR void *arg)
  * Name: cmd_ps
  ************************************************************/
 
-static void cmd_ps(const char *cmd, const char *arg)
+static void cmd_ps(const char *cmd, char *arg)
 {
   printf("PID   PRI SCHD TYPE   NP STATE    NAME\n");
   sched_foreach(ps_task, NULL);
@@ -261,7 +320,7 @@ static void cmd_ps(const char *cmd, const char *arg)
  * Name: cmd_unrecognized
  ************************************************************/
 
-static void cmd_unrecognized(const char *cmd, const char *arg)
+static void cmd_unrecognized(const char *cmd, char *arg)
 {
   printf(g_fmtcmdnotfound, cmd);
 }

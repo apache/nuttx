@@ -56,8 +56,8 @@
 #define DTYPE_FILE      0x01
 #define DTYPE_DIRECTORY 0x02
 
-#define DIRENT_ISFILE(dtype)      (((dtype) & DTYPE_FILE) != )
-#define DIRENT_ISDIRECTORY(dtype) (((dtype) & DTYPE_DIRECTORY) != )
+#define DIRENT_ISFILE(dtype)      (((dtype) & DTYPE_FILE) != 0 )
+#define DIRENT_ISDIRECTORY(dtype) (((dtype) & DTYPE_DIRECTORY) != 0 )
 
 /************************************************************
  * Public Type Definitions

@@ -79,7 +79,18 @@ FAR struct inode *inode_finddir(const char *path)
   FAR struct inode *node;
   FAR struct inode *child = NULL;
 
-  if (!*path || path[0] != '/')
+  /* If we are given 'nothing' then we will interpret this as
+   * request for the root inode.
+   */
+
+  if (!path || *path == 0 || strcmp(path, "/") == 0)
+    {
+       return root_inode;
+    }
+
+  /* We don't know what to do with relative pathes */
+
+  if (*path != '/')
     {
       return NULL;
     }
@@ -87,6 +98,9 @@ FAR struct inode *inode_finddir(const char *path)
   /* Find the node matching the path. */
 
   inode_semtake();
+
+  /* Handle some special cases */
+
   node = inode_search(&path, (FAR void*)NULL, (FAR void*)NULL);
   if (node)
     {

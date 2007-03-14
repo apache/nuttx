@@ -105,7 +105,7 @@ FAR DIR *opendir(const char *path)
    * container.
    */
 
-  dir = (FAR struct internal_dir_s *)zmalloc(sizeof(struct internal_dir_s *));
+  dir = (FAR struct internal_dir_s *)zalloc(sizeof(struct internal_dir_s));
   if (!dir)
     {
       /* Insufficient memory to complete the operation.*/

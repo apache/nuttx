@@ -115,7 +115,7 @@ FAR struct dirent *readdir(DIR *dirp)
 
   if (idir->next->i_child || !idir->next->i_ops)
     {
-      idir->dir.d_type |= DTYPE_FILE;
+      idir->dir.d_type |= DTYPE_DIRECTORY;
     }
 
   /* Now get the inode to vist next time that readdir() is called */

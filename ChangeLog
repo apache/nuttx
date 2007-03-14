@@ -35,3 +35,5 @@
 0.1.2 2007-xx-xx  Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Add dirent.h, opendir(), readdir(), closedir(), etc.
+	* Added 'ls' command to nsh
+
