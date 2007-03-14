@@ -92,11 +92,6 @@
 #define FILE_BUF_SIZE        (4 * SECTOR_ALIGN_BYTES)
 #define FILE_BUF_ALIGN_BYTES 16
 
-/* File type code for the EntryType field in dirent struct */
-
-#define FS_FILE_TYPE      0
-#define FS_DIRECTORY_TYPE 1
-
 /* The first three _iob entries are reserved for standard I/O */
 
 #define stdin  (&sched_getstreams()->sl_streams[0])
@@ -118,38 +113,6 @@
 /************************************************************
  * Public Type Definitions
  ************************************************************/
-
-/* The POSIX specification requires that the caller of readdir_r
- * provide storage "large enough for a dirent with the d_name
- * member and an array of char containing at least {NAME_MAX}
- * plus one elements.  The legacy dirent structure does not
- * contain such an array.  The legacy dirent structure is
- * renamed _dirent below.
- */
-
-struct _dirent
-{
-  FAR char *d_name;           /* name of directory entry */
-};
-
-struct dirent
-{
-  FAR char *d_name;           /* A pointer to d_szname */
-  char d_szname[NAME_MAX+1];  /* name of the directory entry */
-};
-
-typedef struct
-{
-  unsigned char EntryType;    /* FS_FILE_TYPE or FS_DIRECTORY_TYPE */
-  char szName[NAME_MAX];      /* name of the directory entry */
-} fsdirent;
-
-typedef struct
-{
-  unsigned long inode;
-  int           generation;
-  FAR char     *filename;
-} HANDLE_TO_NAME_IOCTL;
 
 struct stat
 {
@@ -188,8 +151,6 @@ struct statfs
 /* Streams */
 
 typedef FAR struct file_struct FILE;
-
-typedef void DIR;
 
 /************************************************************
  * Public Variables
@@ -239,7 +200,6 @@ EXTERN int    vsprintf(char *buf, const char *s, va_list ap);
 
 EXTERN int    chdir(const char *path);
 EXTERN int    close(int fd);
-EXTERN int    closedir(DIR *dirp);
 EXTERN int    creat(const char *path, mode_t mode);
 EXTERN FILE  *fdopen(int fd, const char *type);
 EXTERN int    fstat(int fd, FAR struct stat *buf);
@@ -248,16 +208,10 @@ EXTERN int    ioctl(int fd, int req, unsigned long arg);
 EXTERN off_t  lseek(int fd, off_t offset, int whence);
 EXTERN int    mkdir(const char *path, mode_t mode);
 EXTERN int    open(const char *path, int oflag, ...);
-EXTERN DIR   *opendir(const char *path);
 EXTERN int    read(int fd, void *buf, unsigned int nbytes);
-EXTERN struct _dirent *readdir(FAR DIR *dirp);
-EXTERN int    readdir_r(FAR DIR *dirp, struct dirent *entry, FAR struct dirent **result);
-EXTERN void   rewinddir(FAR DIR *dirp);
 EXTERN int    rmdir(const char *path);
-EXTERN void   seekdir(FAR DIR *dirp, int loc);
 EXTERN int    stat(const char *path, FAR struct stat *buf);
 EXTERN int    statfs(const char *path, FAR struct statfs *buf);
-EXTERN int    telldir(FAR DIR *dirp);
 EXTERN int    unlink(const char *path);
 EXTERN int    write(int fd, const void *buf, unsigned int nbytes);
 

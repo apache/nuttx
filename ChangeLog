@@ -31,3 +31,7 @@
 	  when the timer interrupt is enabled.  Seems to be an
 	  issue when SP enters indirect address space.
 	* Documentation updates
+
+0.1.2 2007-xx-xx  Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* Add dirent.h, opendir(), readdir(), closedir(), etc.

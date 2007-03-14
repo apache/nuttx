@@ -41,7 +41,10 @@ ASRCS		=
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		= fs_open.c fs_close.c fs_read.c fs_write.c fs_ioctl.c fs_dup.c \
-		  fs_files.c fs_inode.c
+		  fs_opendir.c fs_closedir.c fs_readdir.c fs_readdirr.c \
+		  fs_seekdir.c fs_telldir.c fs_rewinddir.c fs_files.c \
+		  fs_inode.c fs_inodefind.c fs_inodefinddir.c fs_registerinode.c \
+		  fs_unregisterinode.c fs_inodeaddref.c fs_inoderelease.c
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)

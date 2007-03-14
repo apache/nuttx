@@ -40,10 +40,19 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
+
+/* Architecture specific limits */
+
 #include <arch/limits.h>
 
 /************************************************************
  * Definitions
  ************************************************************/
+
+/* Configurable limits */
+
+#define NAME_MAX   CONFIG_NAME_MAX
+#define MAXNAMELEN CONFIG_NAME_MAX
 
 #endif /* __LIMITS_H */

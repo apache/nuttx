@@ -1,5 +1,5 @@
 /************************************************************
- * fs_internal.h
+ * fs_telldir.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,98 +33,74 @@
  *
  ************************************************************/
 
-#ifndef __FS_INTERNAL_H
-#define __FS_INTERNAL_H
-
 /************************************************************
  * Included Files
  ************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs.h>
+#include <sys/types.h>
 #include <dirent.h>
-#include <nuttx/compiler.h>
+#include <errno.h>
+#include <nuttx/fs.h>
+#include "fs_internal.h"
 
 /************************************************************
- * Definitions
+ * Private Functions
  ************************************************************/
-
-#define FSNODEFLAG_DELETED 0x00000001
 
 /************************************************************
- * Public Types
+ * Public Functions
  ************************************************************/
 
-/* The internal representation of type DIR is just a
- * container for an inode reference and a dirent structure.
- */
+/************************************************************
+ * Name: telldir
+ *
+ * Description:
+ *   The telldir() function returns the current location
+ *   associated with the directory stream dirp.
+ *
+ * Inputs:
+ *   dirp -- An instance of type DIR created by a previous
+ *     call to opendir();
+ *
+ * Return:
+ *   On success, the telldir() function returns the current
+ *   location in the directory stream.  On error, -1 is
+ *   returned, and errno is set appropriately.
+ *
+ *   EBADF - Invalid directory stream descriptor dir
+ *
+ ************************************************************/
 
-struct internal_dir_s
+#if CONFIG_NFILE_DESCRIPTORS > 0
+
+off_t telldir(FAR DIR *dirp)
 {
-  struct inode *root;  /* The start inode (in case we
-                        * rewind) */
-  struct inode *next;  /* The inode to use for the next call
-                        * to readdir() */
-  struct dirent dir;   /* Populated using inode when readdir
-                        * is called */
-};
+  struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
+  struct inode *curr;
+  off_t offs;
 
-/************************************************************
- * Global Variables
- ************************************************************/
+  if (!idir)
+    {
+      *get_errno_ptr() = EBADF;
+      return -1;
+    }
 
-extern FAR struct inode *root_inode;
+  /* Traverse the peer list starting at the 'root' of the
+   * the list until we find the 'next' node.  If devices
+   * are being registered and unregistered, then this can
+   * be a very unpredictable operation.
+   */
 
-/************************************************************
- * Pulblic Function Prototypes
- ************************************************************/
+  inode_semtake();
+  for (offs = 0, curr = idir->root;
+       curr && curr != idir->next;
+       offs++, curr = curr->i_peer);
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+  /* We should have an offset now corresponding to idir->next.*/
 
-/* fs_inode.c ***********************************************/
-
-EXTERN void inode_semtake(void);
-EXTERN void inode_semgive(void);
-EXTERN FAR struct inode *inode_search(const char **path,
-                                      FAR struct inode **peer,
-                                      FAR struct inode **parent);
-EXTERN void inode_free(FAR struct inode *node);
-EXTERN const char *inode_nextname(const char *name);
-
-
-/* fs_inodefind.c ********************************************/
-
-EXTERN FAR struct inode *inode_find(const char *path);
-
-/* fs_inodefinddir.c *****************************************/
-
-EXTERN FAR struct inode *inode_finddir(const char *path);
-
-/* fs_inodeaddref.c ******************************************/
-
-EXTERN void inode_addref(FAR struct inode *inode);
-
-/* fs_inoderelease.c *****************************************/
-
-EXTERN void inode_release(FAR struct inode *inode);
-
-/* fs_files.c ***********************************************/
-
-#if CONFIG_NFILE_DESCRIPTORS >0
-EXTERN void weak_function files_initialize(void);
-EXTERN int  files_allocate(FAR struct inode *inode, int oflags, off_t pos);
-EXTERN void files_release(int filedes);
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
+  inode_semgive();
+  return offs;
 }
-#endif
 
-#endif /* __FS_INTERNAL_H */
+#endif /* CONFIG_NFILE_DESCRIPTORS */

@@ -1,5 +1,5 @@
 /************************************************************
- * fs_internal.h
+ * fs_opendir.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,98 +33,94 @@
  *
  ************************************************************/
 
-#ifndef __FS_INTERNAL_H
-#define __FS_INTERNAL_H
-
 /************************************************************
  * Included Files
  ************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs.h>
+#include <sys/types.h>
+#include <stdlib.h>
 #include <dirent.h>
-#include <nuttx/compiler.h>
+#include <errno.h>
+#include <nuttx/fs.h>
+#include "fs_internal.h"
 
 /************************************************************
- * Definitions
+ * Private Functions
  ************************************************************/
-
-#define FSNODEFLAG_DELETED 0x00000001
 
 /************************************************************
- * Public Types
+ * Public Functions
  ************************************************************/
 
-/* The internal representation of type DIR is just a
- * container for an inode reference and a dirent structure.
- */
+/************************************************************
+ * Name: opendir
+ *
+ * Description:
+ *   The  opendir() function opens a directory stream
+ *   corresponding to the directory name, and returns a
+ *   pointer to the directory stream. The stream is
+ *   positioned at the first entry in the directory.
+ *
+ * Inputs:
+ *   path -- the directory to open
+ *
+ * Return:
+ *   The opendir() function returns a pointer to the
+ *   directory stream.  On error, NULL is returned, and
+ *   errno is set appropriately.
+ *
+ *   EACCES  - Permission denied.
+ *   EMFILE  - Too many file descriptors in use by process.
+ *   ENFILE  - Too many files are currently open in the
+ *             system.
+ *   ENOENT  - Directory does not exist, or name is an empty
+ *             string.
+ *   ENOMEM  - Insufficient memory to complete the operation.
+ *   ENOTDIR - 'path' is not a directory.
+ *
+ ************************************************************/
 
-struct internal_dir_s
+#if CONFIG_NFILE_DESCRIPTORS > 0
+
+FAR DIR *opendir(const char *path)
 {
-  struct inode *root;  /* The start inode (in case we
-                        * rewind) */
-  struct inode *next;  /* The inode to use for the next call
-                        * to readdir() */
-  struct dirent dir;   /* Populated using inode when readdir
-                        * is called */
-};
+  FAR struct inode *inode;
+  FAR struct internal_dir_s *dir;
 
-/************************************************************
- * Global Variables
- ************************************************************/
+  /* Get an inode corresponding to the path.  On successful
+   * return, we will hold on reference count on the inode.
+   */
 
-extern FAR struct inode *root_inode;
+  inode = inode_finddir(path);
+  if (!inode)
+    {
+      /* 'path' is not a directory.*/
 
-/************************************************************
- * Pulblic Function Prototypes
- ************************************************************/
+      *get_errno_ptr() = ENOTDIR;
+      return NULL;
+    }
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+  /* Allocate a type DIR -- which is little more than an inode
+   * container.
+   */
 
-/* fs_inode.c ***********************************************/
+  dir = (FAR struct internal_dir_s *)zmalloc(sizeof(struct internal_dir_s *));
+  if (!dir)
+    {
+      /* Insufficient memory to complete the operation.*/
 
-EXTERN void inode_semtake(void);
-EXTERN void inode_semgive(void);
-EXTERN FAR struct inode *inode_search(const char **path,
-                                      FAR struct inode **peer,
-                                      FAR struct inode **parent);
-EXTERN void inode_free(FAR struct inode *node);
-EXTERN const char *inode_nextname(const char *name);
+      *get_errno_ptr() = ENOMEM;
+      inode_release(inode);
+      return NULL;
+    }
 
+  /* Populate the DIR structure and return it to the caller */
 
-/* fs_inodefind.c ********************************************/
-
-EXTERN FAR struct inode *inode_find(const char *path);
-
-/* fs_inodefinddir.c *****************************************/
-
-EXTERN FAR struct inode *inode_finddir(const char *path);
-
-/* fs_inodeaddref.c ******************************************/
-
-EXTERN void inode_addref(FAR struct inode *inode);
-
-/* fs_inoderelease.c *****************************************/
-
-EXTERN void inode_release(FAR struct inode *inode);
-
-/* fs_files.c ***********************************************/
-
-#if CONFIG_NFILE_DESCRIPTORS >0
-EXTERN void weak_function files_initialize(void);
-EXTERN int  files_allocate(FAR struct inode *inode, int oflags, off_t pos);
-EXTERN void files_release(int filedes);
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
+  dir->root = inode;   /* Save where we started in case we rewind */
+  inode_addref(inode); /* Now we have two references on inode */
+  dir->next = inode;   /* This is the next node to use for readdir() */
+  return ((DIR*)dir);
 }
-#endif
 
-#endif /* __FS_INTERNAL_H */
+#endif /* CONFIG_NFILE_DESCRIPTORS */

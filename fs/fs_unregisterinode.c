@@ -1,5 +1,5 @@
 /************************************************************
- * fs_internal.h
+ * fs_unregisterinode.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,98 +33,123 @@
  *
  ************************************************************/
 
-#ifndef __FS_INTERNAL_H
-#define __FS_INTERNAL_H
-
 /************************************************************
  * Included Files
  ************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <errno.h>
 #include <nuttx/fs.h>
-#include <dirent.h>
-#include <nuttx/compiler.h>
+#include "fs_internal.h"
 
 /************************************************************
  * Definitions
  ************************************************************/
 
-#define FSNODEFLAG_DELETED 0x00000001
-
 /************************************************************
- * Public Types
+ * Private Variables
  ************************************************************/
 
-/* The internal representation of type DIR is just a
- * container for an inode reference and a dirent structure.
- */
+/************************************************************
+ * Public Variables
+ ************************************************************/
 
-struct internal_dir_s
+/************************************************************
+ * Private Functions
+ ************************************************************/
+
+/************************************************************
+ * Name: inode_remove
+ ************************************************************/
+
+static void inode_remove(struct inode *node,
+                         struct inode *peer,
+                         struct inode *parent)
 {
-  struct inode *root;  /* The start inode (in case we
-                        * rewind) */
-  struct inode *next;  /* The inode to use for the next call
-                        * to readdir() */
-  struct dirent dir;   /* Populated using inode when readdir
-                        * is called */
-};
+  /* If peer is non-null, then remove the node from the right of
+   * of that peer node.
+   */
 
-/************************************************************
- * Global Variables
- ************************************************************/
+   if (peer)
+     {
+       peer->i_peer = node->i_peer;
+     }
 
-extern FAR struct inode *root_inode;
+   /* If parent is non-null, then remove the node from head of
+    * of the list of children.
+    */
 
-/************************************************************
- * Pulblic Function Prototypes
- ************************************************************/
+   else if (parent)
+     {
+       parent->i_child = node->i_peer;
+     }
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+   /* Otherwise, we must be removing the root inode. */
 
-/* fs_inode.c ***********************************************/
-
-EXTERN void inode_semtake(void);
-EXTERN void inode_semgive(void);
-EXTERN FAR struct inode *inode_search(const char **path,
-                                      FAR struct inode **peer,
-                                      FAR struct inode **parent);
-EXTERN void inode_free(FAR struct inode *node);
-EXTERN const char *inode_nextname(const char *name);
-
-
-/* fs_inodefind.c ********************************************/
-
-EXTERN FAR struct inode *inode_find(const char *path);
-
-/* fs_inodefinddir.c *****************************************/
-
-EXTERN FAR struct inode *inode_finddir(const char *path);
-
-/* fs_inodeaddref.c ******************************************/
-
-EXTERN void inode_addref(FAR struct inode *inode);
-
-/* fs_inoderelease.c *****************************************/
-
-EXTERN void inode_release(FAR struct inode *inode);
-
-/* fs_files.c ***********************************************/
-
-#if CONFIG_NFILE_DESCRIPTORS >0
-EXTERN void weak_function files_initialize(void);
-EXTERN int  files_allocate(FAR struct inode *inode, int oflags, off_t pos);
-EXTERN void files_release(int filedes);
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
+   else
+     {
+        root_inode = node->i_peer;
+     }
+   node->i_peer    = NULL;
 }
-#endif
 
-#endif /* __FS_INTERNAL_H */
+/************************************************************
+ * Public Functions
+ ************************************************************/
+
+/************************************************************
+ * Name: unregister_inode
+ ************************************************************/
+
+STATUS unregister_inode(const char *path)
+{
+  const char       *name = path;
+  FAR struct inode *node;
+  FAR struct inode *left;
+  FAR struct inode *parent;
+
+  if (*path && path[0] == '/')
+    {
+      return ERROR;
+    }
+
+  /* Find the node to delete */
+
+  inode_semtake();
+  node = inode_search(&name, &left, &parent);
+  if (node)
+    {
+      /* Found it, now remove it from the tree */
+
+      inode_remove(node, left, parent);
+
+      /* We cannot delete it if there reference to the inode */
+
+      if (node->i_crefs)
+        {
+           /* In that case, we will mark it deleted, when the FS
+            * releases the inode, we will then, finally delete
+            * the subtree.
+            */
+
+           node->i_flags |= FSNODEFLAG_DELETED;
+           inode_semgive();
+         }
+       else
+         {
+          /* And delete it now -- recursively to delete all of its children */
+
+          inode_semgive();
+          inode_free(node->i_child);
+          free(node);
+          return OK;
+        }
+    }
+
+  /* The node does not exist or it has references */
+
+  inode_semgive();
+  return ERROR;
+}

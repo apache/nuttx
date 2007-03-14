@@ -185,6 +185,7 @@ CONFIG_RRLOAD_BINARY=n
 #   descriptors (one for each open)
 # CONFIG_NFILE_STREAMS - The maximum number of streams that
 #   can be fopen'ed
+# CONFIG_NAME_MAX - The maximum size of a file name.
 # CONFIG_STDIO_BUFFER_SIZE - Size of the buffer to allocate
 #   on fopen. (Only if CONFIG_NFILE_STREAMS > 0)
 # CONFIG_NUNGET_CHARS - Number of characters that can be
@@ -206,6 +207,7 @@ CONFIG_MAX_TASK_ARGS=4
 CONFIG_NPTHREAD_KEYS=0
 CONFIG_NFILE_DESCRIPTORS=0
 CONFIG_NFILE_STREAMS=0
+CONFIG_NAME_MAX=32
 CONFIG_STDIO_BUFFER_SIZE=0
 CONFIG_NUNGET_CHARS=0
 CONFIG_PREALLOC_MQ_MSGS=0

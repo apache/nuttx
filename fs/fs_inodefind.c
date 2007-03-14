@@ -1,5 +1,5 @@
 /************************************************************
- * fs_internal.h
+ * fs_inodefind.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,98 +33,64 @@
  *
  ************************************************************/
 
-#ifndef __FS_INTERNAL_H
-#define __FS_INTERNAL_H
-
 /************************************************************
  * Included Files
  ************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
+#include <errno.h>
 #include <nuttx/fs.h>
-#include <dirent.h>
-#include <nuttx/compiler.h>
+#include "fs_internal.h"
 
 /************************************************************
  * Definitions
  ************************************************************/
 
-#define FSNODEFLAG_DELETED 0x00000001
-
 /************************************************************
- * Public Types
+ * Private Variables
  ************************************************************/
 
-/* The internal representation of type DIR is just a
- * container for an inode reference and a dirent structure.
- */
+/************************************************************
+ * Public Variables
+ ************************************************************/
 
-struct internal_dir_s
+/************************************************************
+ * Private Functions
+ ************************************************************/
+
+/************************************************************
+ * Public Functions
+ ************************************************************/
+
+/************************************************************
+ * Name: inode_find
+ *
+ * Description:
+ *   This is called from the open() logic to get a reference
+ *   to the inode associated with a path.
+ *
+ ************************************************************/
+
+FAR struct inode *inode_find(const char *path)
 {
-  struct inode *root;  /* The start inode (in case we
-                        * rewind) */
-  struct inode *next;  /* The inode to use for the next call
-                        * to readdir() */
-  struct dirent dir;   /* Populated using inode when readdir
-                        * is called */
-};
+  FAR struct inode *node;
 
-/************************************************************
- * Global Variables
- ************************************************************/
+  if (!*path || path[0] != '/')
+    {
+      return NULL;
+    }
 
-extern FAR struct inode *root_inode;
+  /* Find the node matching the path.  If found,
+   * increment the count of references on the node.
+   */
 
-/************************************************************
- * Pulblic Function Prototypes
- ************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
-/* fs_inode.c ***********************************************/
-
-EXTERN void inode_semtake(void);
-EXTERN void inode_semgive(void);
-EXTERN FAR struct inode *inode_search(const char **path,
-                                      FAR struct inode **peer,
-                                      FAR struct inode **parent);
-EXTERN void inode_free(FAR struct inode *node);
-EXTERN const char *inode_nextname(const char *name);
-
-
-/* fs_inodefind.c ********************************************/
-
-EXTERN FAR struct inode *inode_find(const char *path);
-
-/* fs_inodefinddir.c *****************************************/
-
-EXTERN FAR struct inode *inode_finddir(const char *path);
-
-/* fs_inodeaddref.c ******************************************/
-
-EXTERN void inode_addref(FAR struct inode *inode);
-
-/* fs_inoderelease.c *****************************************/
-
-EXTERN void inode_release(FAR struct inode *inode);
-
-/* fs_files.c ***********************************************/
-
-#if CONFIG_NFILE_DESCRIPTORS >0
-EXTERN void weak_function files_initialize(void);
-EXTERN int  files_allocate(FAR struct inode *inode, int oflags, off_t pos);
-EXTERN void files_release(int filedes);
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
+  inode_semtake();
+  node = inode_search(&path, (FAR void*)NULL, (FAR void*)NULL);
+  if (node)
+    {
+      node->i_crefs++;
+    }
+  inode_semgive();
+  return node;
 }
-#endif
-
-#endif /* __FS_INTERNAL_H */

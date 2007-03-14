@@ -1,5 +1,5 @@
 /************************************************************
- * fs_internal.h
+ * dirent.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,50 +33,56 @@
  *
  ************************************************************/
 
-#ifndef __FS_INTERNAL_H
-#define __FS_INTERNAL_H
+#ifndef __DIRENT_H
+#define __DIRENT_H
 
 /************************************************************
  * Included Files
  ************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs.h>
-#include <dirent.h>
-#include <nuttx/compiler.h>
+#include <sys/types.h>
+#include <limits.h>
 
 /************************************************************
  * Definitions
  ************************************************************/
 
-#define FSNODEFLAG_DELETED 0x00000001
-
-/************************************************************
- * Public Types
- ************************************************************/
-
-/* The internal representation of type DIR is just a
- * container for an inode reference and a dirent structure.
+/* File type code for the d_type field in dirent struct.
+ * Note that because of the simplified filesystem organization
+ * of NuttX, an inode can be BOTH a file and a directory
  */
 
-struct internal_dir_s
-{
-  struct inode *root;  /* The start inode (in case we
-                        * rewind) */
-  struct inode *next;  /* The inode to use for the next call
-                        * to readdir() */
-  struct dirent dir;   /* Populated using inode when readdir
-                        * is called */
-};
+#define DTYPE_FILE      0x01
+#define DTYPE_DIRECTORY 0x02
+
+#define DIRENT_ISFILE(dtype)      (((dtype) & DTYPE_FILE) != )
+#define DIRENT_ISDIRECTORY(dtype) (((dtype) & DTYPE_DIRECTORY) != )
 
 /************************************************************
- * Global Variables
+ * Public Type Definitions
  ************************************************************/
 
-extern FAR struct inode *root_inode;
+/* The POSIX specification requires that the caller of readdir_r
+ * provide storage "large enough for a dirent with the d_name
+ * member and an array of char containing at least {NAME_MAX}
+ * plus one elements.
+ */
+
+struct dirent
+{
+  ubyte     d_type;             /* type of file */
+  char      d_name[NAME_MAX+1]; /* filename */
+};
+
+typedef void DIR;
 
 /************************************************************
- * Pulblic Function Prototypes
+ * Public Variables
+ ************************************************************/
+
+/************************************************************
+ * Public Function Prototypes
  ************************************************************/
 
 #undef EXTERN
@@ -87,44 +93,20 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* fs_inode.c ***********************************************/
+/* POSIX-like File System Interfaces */
 
-EXTERN void inode_semtake(void);
-EXTERN void inode_semgive(void);
-EXTERN FAR struct inode *inode_search(const char **path,
-                                      FAR struct inode **peer,
-                                      FAR struct inode **parent);
-EXTERN void inode_free(FAR struct inode *node);
-EXTERN const char *inode_nextname(const char *name);
-
-
-/* fs_inodefind.c ********************************************/
-
-EXTERN FAR struct inode *inode_find(const char *path);
-
-/* fs_inodefinddir.c *****************************************/
-
-EXTERN FAR struct inode *inode_finddir(const char *path);
-
-/* fs_inodeaddref.c ******************************************/
-
-EXTERN void inode_addref(FAR struct inode *inode);
-
-/* fs_inoderelease.c *****************************************/
-
-EXTERN void inode_release(FAR struct inode *inode);
-
-/* fs_files.c ***********************************************/
-
-#if CONFIG_NFILE_DESCRIPTORS >0
-EXTERN void weak_function files_initialize(void);
-EXTERN int  files_allocate(FAR struct inode *inode, int oflags, off_t pos);
-EXTERN void files_release(int filedes);
-#endif
+EXTERN int        closedir(DIR *dirp);
+EXTERN FAR DIR   *opendir(const char *path);
+EXTERN FAR struct dirent *readdir(FAR DIR *dirp);
+EXTERN int        readdir_r(FAR DIR *dirp, FAR struct dirent *entry,
+                            FAR struct dirent **result);
+EXTERN void       rewinddir(FAR DIR *dirp);
+EXTERN void       seekdir(FAR DIR *dirp, int loc);
+EXTERN int        telldir(FAR DIR *dirp);
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
 
-#endif /* __FS_INTERNAL_H */
+#endif /* __DIRENT_H */

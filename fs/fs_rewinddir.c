@@ -1,5 +1,5 @@
 /************************************************************
- * fs_internal.h
+ * fs_rewinddir.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,98 +33,69 @@
  *
  ************************************************************/
 
-#ifndef __FS_INTERNAL_H
-#define __FS_INTERNAL_H
-
 /************************************************************
  * Included Files
  ************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs.h>
+#include <sys/types.h>
 #include <dirent.h>
-#include <nuttx/compiler.h>
+#include <errno.h>
+#include <nuttx/fs.h>
+#include "fs_internal.h"
 
 /************************************************************
- * Definitions
+ * Private Functions
  ************************************************************/
-
-#define FSNODEFLAG_DELETED 0x00000001
 
 /************************************************************
- * Public Types
+ * Public Functions
  ************************************************************/
 
-/* The internal representation of type DIR is just a
- * container for an inode reference and a dirent structure.
- */
+/************************************************************
+ * Name: rewinddir
+ *
+ * Description:
+ *   The  rewinddir() function resets the position of the
+ *   directory stream dir to the beginning of the directory.
+ *
+ * Inputs:
+ *   dirp -- An instance of type DIR created by a previous
+ *     call to opendir();
+ *
+ * Return:
+ *   None
+ *
+ ************************************************************/
 
-struct internal_dir_s
+#if CONFIG_NFILE_DESCRIPTORS > 0
+
+void rewinddir(FAR DIR *dirp)
 {
-  struct inode *root;  /* The start inode (in case we
-                        * rewind) */
-  struct inode *next;  /* The inode to use for the next call
-                        * to readdir() */
-  struct dirent dir;   /* Populated using inode when readdir
-                        * is called */
-};
+  struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
+  struct inode *prev;
 
-/************************************************************
- * Global Variables
- ************************************************************/
+  if (idir)
+    {
+      inode_semtake();
 
-extern FAR struct inode *root_inode;
+      prev       = idir->next;
+      idir->next = idir->root; /* The next node to visit */
 
-/************************************************************
- * Pulblic Function Prototypes
- ************************************************************/
+      if (idir->next)
+        {
+          /* Increment the reference count on this next node */
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+          idir->next->i_crefs++;
+        }
 
-/* fs_inode.c ***********************************************/
+      inode_semgive();
 
-EXTERN void inode_semtake(void);
-EXTERN void inode_semgive(void);
-EXTERN FAR struct inode *inode_search(const char **path,
-                                      FAR struct inode **peer,
-                                      FAR struct inode **parent);
-EXTERN void inode_free(FAR struct inode *node);
-EXTERN const char *inode_nextname(const char *name);
-
-
-/* fs_inodefind.c ********************************************/
-
-EXTERN FAR struct inode *inode_find(const char *path);
-
-/* fs_inodefinddir.c *****************************************/
-
-EXTERN FAR struct inode *inode_finddir(const char *path);
-
-/* fs_inodeaddref.c ******************************************/
-
-EXTERN void inode_addref(FAR struct inode *inode);
-
-/* fs_inoderelease.c *****************************************/
-
-EXTERN void inode_release(FAR struct inode *inode);
-
-/* fs_files.c ***********************************************/
-
-#if CONFIG_NFILE_DESCRIPTORS >0
-EXTERN void weak_function files_initialize(void);
-EXTERN int  files_allocate(FAR struct inode *inode, int oflags, off_t pos);
-EXTERN void files_release(int filedes);
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
+      if (prev)
+        {
+          inode_release(prev);
+        }
+    }
 }
-#endif
 
-#endif /* __FS_INTERNAL_H */
+#endif /* CONFIG_NFILE_DESCRIPTORS */

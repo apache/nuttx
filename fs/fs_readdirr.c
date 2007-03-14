@@ -1,5 +1,5 @@
 /************************************************************
- * fs_internal.h
+ * fs_readdirr.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,98 +33,91 @@
  *
  ************************************************************/
 
-#ifndef __FS_INTERNAL_H
-#define __FS_INTERNAL_H
-
 /************************************************************
  * Included Files
  ************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs.h>
+#include <sys/types.h>
+#include <string.h>
 #include <dirent.h>
-#include <nuttx/compiler.h>
+#include <errno.h>
+#include <nuttx/fs.h>
+#include "fs_internal.h"
 
 /************************************************************
- * Definitions
+ * Private Functions
  ************************************************************/
-
-#define FSNODEFLAG_DELETED 0x00000001
 
 /************************************************************
- * Public Types
+ * Public Functions
  ************************************************************/
 
-/* The internal representation of type DIR is just a
- * container for an inode reference and a dirent structure.
- */
+/************************************************************
+ * Name: readdir_r
+ *
+ * Description:
+ *   The readdir() function returns a pointer to a dirent
+ *   structure representing the next directory entry in the
+ *   directory stream pointed to by dir.  It returns NULL on
+ *   reaching the end-of-file or if an error occurred.
+ *
+ * Inputs:
+ *   dirp -- An instance of type DIR created by a previous
+ *     call to opendir();
+ *   entry -- The  storage  pointed to by entry must be large
+ *     enough for a dirent with an array of char d_name
+ *     members containing at least {NAME_MAX}+1 elements.
+ *   result -- Upon successful return, the pointer returned
+ *     at *result shall have the  same  value  as  the 
+ *     argument entry. Upon reaching the end of the directory
+ *     stream, this pointer shall have the value NULL.
+ *
+ * Return:
+ *   If successful, the readdir_r() function return s zero;
+ *   otherwise, an error number is returned to indicate the
+ *   error.
+ *
+ *   EBADF   - Invalid directory stream descriptor dir
+ *
+ ************************************************************/
 
-struct internal_dir_s
+#if CONFIG_NFILE_DESCRIPTORS > 0
+
+int readdir_r(FAR DIR *dirp, FAR struct dirent *entry,
+              FAR struct dirent **result)
 {
-  struct inode *root;  /* The start inode (in case we
-                        * rewind) */
-  struct inode *next;  /* The inode to use for the next call
-                        * to readdir() */
-  struct dirent dir;   /* Populated using inode when readdir
-                        * is called */
-};
+  struct dirent *tmp;
 
-/************************************************************
- * Global Variables
- ************************************************************/
+  *get_errno_ptr() = 0;
+  tmp = readdir(dirp);
+  if (!tmp)
+    {
+       int error = *get_errno_ptr();
+       if (!error)
+          {
+            if (result)
+              {
+                *result = NULL;
+              }
+            return 0;
+          }
+       else
+          {
+            return error;
+          }
+    }
 
-extern FAR struct inode *root_inode;
+  if (entry)
+    {
+      memcpy(entry, tmp, sizeof(struct dirent));
+    }
 
-/************************************************************
- * Pulblic Function Prototypes
- ************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
-/* fs_inode.c ***********************************************/
-
-EXTERN void inode_semtake(void);
-EXTERN void inode_semgive(void);
-EXTERN FAR struct inode *inode_search(const char **path,
-                                      FAR struct inode **peer,
-                                      FAR struct inode **parent);
-EXTERN void inode_free(FAR struct inode *node);
-EXTERN const char *inode_nextname(const char *name);
-
-
-/* fs_inodefind.c ********************************************/
-
-EXTERN FAR struct inode *inode_find(const char *path);
-
-/* fs_inodefinddir.c *****************************************/
-
-EXTERN FAR struct inode *inode_finddir(const char *path);
-
-/* fs_inodeaddref.c ******************************************/
-
-EXTERN void inode_addref(FAR struct inode *inode);
-
-/* fs_inoderelease.c *****************************************/
-
-EXTERN void inode_release(FAR struct inode *inode);
-
-/* fs_files.c ***********************************************/
-
-#if CONFIG_NFILE_DESCRIPTORS >0
-EXTERN void weak_function files_initialize(void);
-EXTERN int  files_allocate(FAR struct inode *inode, int oflags, off_t pos);
-EXTERN void files_release(int filedes);
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
+  if (result)
+    {
+      *result = entry;
+    }
+  return 0;
 }
-#endif
 
-#endif /* __FS_INTERNAL_H */
+#endif /* CONFIG_NFILE_DESCRIPTORS */

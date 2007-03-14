@@ -1,5 +1,5 @@
 /************************************************************
- * fs_open.c
+ * fs_readdir.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,12 +39,9 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <stdio.h>
-#include <sched.h>
+#include <string.h>
+#include <dirent.h>
 #include <errno.h>
-#ifdef CONFIG_FILE_MODE
-#include <stdarg.h>
-#endif
 #include <nuttx/fs.h>
 #include "fs_internal.h"
 
@@ -56,102 +53,93 @@
  * Public Functions
  ************************************************************/
 
+/************************************************************
+ * Name: readdir
+ *
+ * Description:
+ *   The readdir() function returns a pointer to a dirent
+ *   structure representing the next directory entry in the
+ *   directory stream pointed to by dir.  It returns NULL on
+ *   reaching the end-of-file or if an error occurred.
+ *
+ * Inputs:
+ *   dirp -- An instance of type DIR created by a previous
+ *     call to opendir();
+ *
+ * Return:
+ *   The readdir() function returns a pointer to a dirent
+ *   structure, or NULL if an error occurs or end-of-file
+ *   is reached.  On error, errno is set appropriately.
+ *
+ *   EBADF   - Invalid directory stream descriptor dir
+ *
+ ************************************************************/
+
 #if CONFIG_NFILE_DESCRIPTORS > 0
 
-int inode_checkflags(FAR struct inode *inode, int oflags)
+FAR struct dirent *readdir(DIR *dirp)
 {
-  if (((oflags & O_RDOK) != 0 && !inode->i_ops->read) ||
-      ((oflags & O_WROK) != 0 && !inode->i_ops->write))
-    {
-      *get_errno_ptr() = EACCES;
-      return ERROR;
-    }
-  else
-    {
-      return OK;
-    }
-}
+  FAR struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
+  FAR struct inode *prev;
 
-int open(const char *path, int oflags, ...)
-{
-  struct filelist *list;
-  FAR struct inode *inode;
-  int status;
-  int fd;
-
-  /* Get the thread-specific file list */
-
-  list = sched_getfiles();
-  if (!list)
+  if (!idir)
     {
-      *get_errno_ptr() = EMFILE;
-      return ERROR;
+      *get_errno_ptr() = EBADF;
+      return NULL;
     }
 
-#ifdef CONFIG_FILE_MODE
-# warning "File creation not implemented"
-  mode_t mode = 0;
+  /* Check if we are at the end of the list */
 
-  /* If the file is opened for creation, then get the mode bits */
-
-  if (oflags & (O_WRONLY|O_CREAT) != 0)
+  if (!idir->next)
     {
-      va_list ap;
-      va_start(ap, oflags);
-      mode = va_arg(ap, mode_t);
-      va_end(ap);
-    }
-#endif
-
-  /* Get an inode for this file */
-
-  inode = inode_find(path);
-  if (!inode)
-    {
-      /* "O_CREAT is not set and the named file does not exist.  Or,
-       * a directory component in pathname does not exist or is a
-       * dangling symbolic link.
-       */
-
-      *get_errno_ptr() = ENOENT;
-      return ERROR;
+      return NULL;
     }
 
-  /* Make sure that the inode supports the requested access */
+  /* Copy the inode name into the dirent structure */
 
-  if (inode_checkflags(inode, oflags) != OK)
+  strncpy(idir->dir.d_name, idir->next->i_name, NAME_MAX+1);
+
+  /* If the node has file operations, we will say that it is
+   * a file.
+   */
+
+  idir->dir.d_type = 0;
+  if (idir->next->i_ops)
     {
-      inode_release(inode);
-      return ERROR;
+      idir->dir.d_type |= DTYPE_FILE;
     }
 
-  /* Associate the inode with a file structure */
+  /* If the node has child node(s), then we will say that it
+   * is a directory.  NOTE: that the node can be both!
+   */
 
-  fd = files_allocate(inode, oflags, 0);
-  if (fd < 0)
+  if (idir->next->i_child || !idir->next->i_ops)
     {
-      inode_release(inode);
-      *get_errno_ptr() = EMFILE;
-      return ERROR;
+      idir->dir.d_type |= DTYPE_FILE;
     }
 
-  /* Perform the driver open operation */
+  /* Now get the inode to vist next time that readdir() is called */
 
-  status = OK;
-  if (inode->i_ops && inode->i_ops->open)
+  inode_semtake();
+
+  prev       = idir->next;
+  idir->next = prev->i_peer; /* The next node to visit */
+
+  if (idir->next)
     {
-      status = inode->i_ops->open((FAR struct file*)&list->fl_files[fd]);
+      /* Increment the reference count on this next node */
+
+      idir->next->i_crefs++;
     }
 
-  if (status != OK || !inode->i_ops)
+  inode_semgive();
+
+  if (prev)
     {
-      files_release(fd);
-      inode_release(inode);
-      *get_errno_ptr() = ENODEV;
-      return ERROR;
+      inode_release(prev);
     }
 
-  return fd;
+  return &idir->dir;
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS */
