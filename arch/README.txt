@@ -137,6 +137,7 @@ defconfig -- This is a configuration file similar to the Linux
 		  descriptors (one for each open)
 		CONFIG_NFILE_STREAMS - The maximum number of streams that
 		  can be fopen'ed
+		CONFIG_NAME_MAX - The maximum size of a file name.
 		CONFIG_STDIO_BUFFER_SIZE - Size of the buffer to allocate
 		  on fopen. (Only if CONFIG_NFILE_STREAMS > 0)
 		CONFIG_NUNGET_CHARS - Number of characters that can be
