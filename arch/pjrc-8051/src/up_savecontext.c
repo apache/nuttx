@@ -274,7 +274,7 @@ ubyte up_savecontext(FAR struct xcptcontext *context) _naked
 
 	/* Push the top of frame stack pointer.  We need to
 	 * decrement the current SP value by three to account
-	 * for dpst+IE on the stack above the end of the frame.
+	 * for dptr+IE on the stack above the end of the frame.
 	 */
 
 	mov	a, sp

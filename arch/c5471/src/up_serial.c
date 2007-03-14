@@ -837,15 +837,19 @@ static ssize_t up_write(struct file *filep, const char *buffer, size_t buflen)
   ssize_t       ret      = buflen;
 
   /* We may receive console writes through this path from
-   * interrupt handlers!  In this case, we will need to do
-   * things a little differently.
+   * interrupt handlers and from debug output in the IDLE task!
+   * In these cases, we will need to do things a little
+   * differently.
    */
 
-  if (up_interrupt_context())
+  if (up_interrupt_context() || getpid() == 0)
     {
       if (dev->isconsole)
         {
-          return up_irqwrite(dev, buffer, buflen);
+          irqstate_t flags = irqsave();
+          ret = up_irqwrite(dev, buffer, buflen);
+          irqrestore(flags);
+          return ret;
         }
       else
         {
