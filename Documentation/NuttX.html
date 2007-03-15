@@ -3,34 +3,98 @@
 <title>NuttX</title>
 </head>
 <body background="backgd.gif">
-<center>
-  <hr><hr>
-  <h1><big><i>NuttX RTOS</i></big></h1>
-  <p>Last Updated: March 14, 2007</p>
-  <hr><hr>
+<hr><hr>
+<table width ="100%">
+  <tr align="center" bgcolor="#e4e4e4">
+    <td>
+      <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
+      <p>Last Updated: March 14, 2007</p>
+    </td>
+  </tr>
+</table>
+<hr><hr>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
   <h1>Table of Contents</h1>
-</center>
-<li><a href="#overview">Overview</a></li>
-<li><a href="#downloads">Downloads</a></li>
-<li><a href="#platforms">Supported Platforms</a></li>
-<li><a href="#footprint">Memory Footprint</a></li>
-<li><a href="#licensing">Licensing</a></li>
-<li><a href="#history">Release History</a></li>
-<li><a href="#documentation">Other Documentation</a></li>
+    </td>
+  </tr>
+</table>
 
-<a name="overview"><h1>Overview</h1></a>
+<center><table width ="80%">
+<tr>
+<td>
+<table>
+<tr>
+  <td><img src="favicon.ico"></td>
+  <td><a href="#overview">Overview</a></td>
+</tr>
+<tr>
+  <td><img src="favicon.ico"></td>
+  <td><a href="#downloads">Downloads</a></td>
+</tr>
+<tr>
+  <td><img src="favicon.ico"></td>
+  <td><a href="#platforms">Supported Platforms</a></td>
+</tr>
+<tr>
+  <td><img src="favicon.ico"></td>
+  <td><a href="#footprint">Memory Footprint</a></td>
+</tr>
+<tr>
+  <td><img src="favicon.ico"></td>
+  <td><a href="#licensing">Licensing</a></td>
+</tr>
+<tr>
+  <td><img src="favicon.ico"></td>
+  <td><a href="#history">Release History</a></td>
+</tr>
+<tr>
+  <td><img src="favicon.ico"></td>
+  <td><a href="#documentation">Other Documentation</a></td>
+</tr>
+</table>
+</td>
+</td>
+</table></center>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="overview"><h1>Overview</h1></a>
+  </td>
+  </tr>
+</table>
+
 <p>
   <b>Goals</b>.
   Nuttx is a real timed embedded operating system (RTOS).
   Its goals are:
 <p>
-<ol>
-  <li><b>Small Footprint</b></li>
+<center><table width="90%">
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Small Footprint</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
     <p>
       Usable in all but the tightest micro-controller environments,
       The focus is on the tiny-to-small, deeply embedded environment.
     </p>
-  <li><b>Rich Feature OS Set</b></li>
+</tr>
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Rich Feature OS Set</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
     <p>
       The goal is to provide most standard POSIX OS interfaces to support
       a rich multi-threaded development environment.
@@ -40,14 +104,32 @@
       (2) There is no MMU-based support for processes.
       At present, NuttX assumes a flat address space.
     </p>
-  <li><b>Highly Scalable</b></li>
+</tr>
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Highly Scalable</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
     <p>
       Fully scalable from tiny (8-bit) to moderate embedded (32-bit).
       Scalability with rich feature set is accomplished with:
       Many tiny source files, link from static libraries, highly configurable, use of
       weak symbols when available.
     </p>
-  <li><b>Standards Compliance</b></li>
+</tr>
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Standards Compliance</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
     <p>
       NuttX strives to achieve a high degree of standards compliance.
       The primary governing standards are POSIX and ANSI standards.
@@ -60,28 +142,67 @@
       Because of this standards conformance, software developed under other
       standard OSs (such as Linux) should port easily to NuttX.
     </p>
-  <li><b>Real-Time</b></li>
+</tr>
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Real-Time</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
     <p>
       Fully pre-emptible, fixed priority and round-robin scheduling.
     </p>
-  <li><b>Totally Open</b></li>
+</tr>
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Totally Open</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
     <p>
       Non-restrictive BSD license.
     </p>
-</ol>
+</tr>
+</table></center>
 
-<a name="downloads"><h1>Downloads</h1></a>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="downloads"><h1>Downloads</h1></a>
+  </td>
+  </tr>
+</table>
 
 <p>
-   The initial release of NuttX (nuttx-0.1.0) is avalable for download
+   The second release of NuttX (nuttx-0.1.1) is avalable for download
    from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
    website.
 </p>
 
-<a name="platforms"><h1>Supported Platforms</h1></a>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="platforms"><h1>Supported Platforms</h1></a>
+  </td>
+  </tr>
+</table>
 
-<ul>
-  <li><b>Linux User Mode</b></li>
+<center><table width="90%">
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Linux User Mode</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
     <p>
       A user-mode port of NuttX to the x86 Linux platform is available.
       The purpose of this port is primarily to support OS feature developement.
@@ -89,7 +210,17 @@
     <p>
       STATUS: Does not support interrupts but is otherwise fully functional.
     </p>
-  <li><b>TI TMS320C5471</b> (also called <b>TMS320DM180</b>).</li>
+   </td>
+</tr>
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>TI TMS320C5471</b> (also called <b>TMS320DM180</b>).
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
     <p>
       NuttX operates on the ARM7 of this dual core processor.
       This port uses the <a href="http://www.spectrumdigital.com/">Spectrum Digital</a>
@@ -99,7 +230,17 @@
       STATUS: This port is complete, verified, and included in the initial NuttX
       release.
     </p>
-  <li><b>8051 Microcontroller</b></li>
+   </td>
+</tr>
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>8052 Microcontroller</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
     <p>
       This port uses the <a href="http://www.pjrc.com/">PJRC</a> 87C52 development system
       and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain.
@@ -109,17 +250,36 @@
       There seems to be some issue when the stack pointer enters into the indirect IRAM
       address space during interrupt handling.
     </p>
-  <li><b>Other ports</b></li>
+   </td>
+</tr>
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Other ports</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
     <p>
       There are partial ports for the TI TMS320DM270 and for MIPS.
     </p>
-</ul>
+   </td>
+</tr>
+</table></center>
 
 <blockquote>* A highly modified <a href="http://buildroot.uclibc.org/">buildroot</a>
 is available that be used to build a NuttX-compatible arm-elf toolchain.</blockquote>
 
-<a name="footprint"><h1>Memory Footprint</h1></a>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="footprint"><h1>Memory Footprint</h1></a>
+  </td>
+  </tr>
+</table>
 
+<ul>
 <p><b>C5471 (Arm7)</b>
   The build for this ARM7 target that includes most of the OS features and
   a broad range of OS tests.  The size of this executable as given by the
@@ -143,19 +303,36 @@ Other memory:
    EXTERNAL RAM     0x0100   0x02fd     510     7936
    ROM/EPROM/FLASH  0x2100   0x6e55   19798    24384
 </pre>
+</ul>
 
-<a name="licensing"><h1>Licensing</h1></a>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="licensing"><h1>Licensing</h1></a>
+  </td>
+  </tr>
+</table>
 
-<p>NuttX is available under the highly permissive
+<ul>
+<p>
+  NuttX is available under the highly permissive
   <a href="http://en.wikipedia.org/wiki/BSD_license">BSD license</a>.
   Other than some fine print that you agree to respect the copyright
   you should feel absolutely free to use NuttX in any environment and
   without any concern for jeopardizing any proprietary software that
-  you may link with it.</p>
+  you may link with it.
+</p>
+</ul>
 
-<a name="history"><h1>Release History</h1></a>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="history"><h1>Release History</h1></a>
+  </td>
+  </tr>
+</table>
 
-<pre>
+<ul><pre>
 0.1.0 2007-03-09  Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Initial Release
@@ -189,12 +366,26 @@ Other memory:
 	  when the timer interrupt is enabled.  Seems to be an
 	  issue when SP enters indirect address space.
 	* Documentation updates
-</pre>
+</pre></ul>
 
-<a name="documentation"><h1>Other Documentation</h1></a>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="documentation"><h1>Other Documentation</h1></a>
+  </td>
+  </tr>
+</table>
 
-<li><a href="NuttxUserGuide.html">User Guide</li>
-<li><a href="NuttxPortingGuide.html">Porting Guide</li>
+<ul><table>
+<tr>
+  <td><img src="favicon.ico"></td>
+  <td><a href="NuttxUserGuide.html">User Guide</td>
+</tr>
+<tr>
+  <td><img src="favicon.ico"></td>
+  <td><a href="NuttxPortingGuide.html">Porting Guide</td>
+</tr>
+</center></ul>
 
 </body>
 </html>
