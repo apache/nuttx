@@ -21,7 +21,7 @@
 	  the stack usage down for the 8051/2 (which has only
 	  256 bytes of stack).
 	* Attempts to use C5471 console from interrupt handlers
-	  can casue errors. Added a special path for this case.
+	  can cause errors. Added a special path for this case.
 	* Refuse calls to sem_wait and sem_trywait from interrupt
 	  handlers.  This was happening because interrupt handlers
 	  were calling printf-like functions.
@@ -38,5 +38,12 @@
 	* Added 'ls' command to nsh
 	* Added C5471 watchdog driver
 	* Added support for the Neuros OSD / DM320
+	* Fixed another bug where free() is called from IDEL task.
+	  Can't do this; the caller must be able to wait for access
+	  to memory.
+	* Separated C5471 serial driver; a shareable part is
+	  in drivers/. ; the C5471 specific part is in arch/C5471.
+	  serial.h defines the interface.
+	* Fixed mq_receive() -- bad memcpy()
 
 
