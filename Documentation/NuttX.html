@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 14, 2007</p>
+      <p>Last Updated: March 16, 2007</p>
     </td>
   </tr>
 </table>
@@ -208,27 +208,51 @@
       The purpose of this port is primarily to support OS feature developement.
     </p>
     <p>
-      STATUS: Does not support interrupts but is otherwise fully functional.
+      <b>STATUS:</b>
+      Does not support interrupts but is otherwise fully functional.
     </p>
    </td>
 </tr>
 <tr>
   <td valign="top"><img src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <b>TI TMS320C5471</b> (also called <b>TMS320DM180</b>).
+    <b>ARM7TDMI</b>.
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
     <p>
+      <b>TI TMS320C5471</b> (also called a <b>C5471</b> or <b>TMS320DM180</b>).
       NuttX operates on the ARM7 of this dual core processor.
       This port uses the <a href="http://www.spectrumdigital.com/">Spectrum Digital</a>
       evaluation board with a GNU arm-elf toolchain*.
     </p>
     <p>
-      STATUS: This port is complete, verified, and included in the initial NuttX
-      release.
+      <b>STATUS:</b>
+      This port is complete, verified, and included in the initial NuttX release.
+    </p>
+   </td>
+</tr>
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>ARM9EJS</b>.
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>TI TMS320DM320</b> (also called <b>DM320</b>).
+      NuttX operates on the ARM9 of this dual core processor.
+      This port uses the
+      <a href="http://wiki.neurostechnology.com/index.php/Developer_Welcome">Neuros OSD</a>
+      with a GNU arm-elf toolchain*.
+    </p>
+    <p>
+      <b>STATUS:</b>
+      This port is code complete but totally untested due to hardware issues with my OSD.
     </p>
    </td>
 </tr>
@@ -242,11 +266,13 @@
   <td><br></td>
   <td>
     <p>
+      <b>PJRC 87C52 Development Board</b>.
       This port uses the <a href="http://www.pjrc.com/">PJRC</a> 87C52 development system
       and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain.
     </p>
     <p>
-      STATUS: This port is complete but not stable with timer interrupts enabled.
+     <b>STATUS:</b>
+      This port is complete but not stable with timer interrupts enabled.
       There seems to be some issue when the stack pointer enters into the indirect IRAM
       address space during interrupt handling.
     </p>
@@ -366,6 +392,22 @@ Other memory:
 	  when the timer interrupt is enabled.  Seems to be an
 	  issue when SP enters indirect address space.
 	* Documentation updates
+
+0.1.2 2007-xx-xx  Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* Add dirent.h, opendir(), readdir(), closedir(), etc.
+	* Added 'ls' command to nsh
+	* Added C5471 watchdog driver
+	* Added support for the Neuros OSD / DM320
+	* Fixed another bug where free() is called from IDEL task.
+	  Can't do this; the caller must be able to wait for access
+	  to memory.
+	* Separated C5471 serial driver; a shareable part is
+	  in drivers/. ; the C5471 specific part is in arch/C5471.
+	  serial.h defines the interface.
+	* Fixed mq_receive() -- bad memcpy()
+
+
 </pre></ul>
 
 <table width ="100%">
