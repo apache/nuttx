@@ -61,8 +61,6 @@
 
 /* File I/O constants ***************************************/
 
-#define MAXNAMLEN  100
-#define NAME_MAX   100
 #define PATH_MAX   101
 #define S_IFMT     0170000
 #define S_IFIFO    0010000
