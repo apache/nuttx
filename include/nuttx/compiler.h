@@ -159,6 +159,7 @@
 /* SDCC does not support inline functions */
 
 # undef  CONFIG_HAVE_INLINE
+# define inline
 
 /* SDCC does not support type long long or type double */
 
@@ -191,6 +192,7 @@
 # undef  CONFIG_LONG_IS_NOT_INT
 # undef  CONFIG_PTR_IS_NOT_INT
 # undef  CONFIG_HAVE_INLINE
+# define inline
 # undef  CONFIG_HAVE_LONG_LONG
 # undef  CONFIG_HAVE_DOUBLE
 # undef  CONFIG_CAN_PASS_STRUCTS
