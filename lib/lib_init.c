@@ -207,7 +207,7 @@ void lib_releaselist(FAR struct streamlist *list)
                /* Release the IO buffer */
                if (&list->sl_streams[i].fs_bufstart)
                  {
-                   free(list->sl_streams[i].fs_bufstart);
+                   sched_free(list->sl_streams[i].fs_bufstart);
                  }
              }
 #endif
