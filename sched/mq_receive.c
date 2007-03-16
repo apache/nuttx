@@ -183,7 +183,7 @@ int mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio)
 
           /* Copy the message into the caller's buffer */
 
-          memcpy((void*)curr->mail, msg, rcvmsglen);
+          memcpy(msg, (void*)curr->mail, rcvmsglen);
 
           /* Copy the message priority as well (if a buffer is provided) */
 
