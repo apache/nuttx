@@ -142,6 +142,10 @@ extern void up_vectorfiq(void);
 extern void up_earlyserialinit(void);
 extern void up_serialinit(void);
 
+/* Defined in up_watchdog.c */
+
+extern void up_wdtinit(void);
+
 /* Defined in up_timerisr.c */
 
 extern void up_timerinit(void);

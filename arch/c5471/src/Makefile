@@ -51,7 +51,7 @@ CSRCS		= up_initialize.c up_initialstate.c up_idle.c up_doirq.c \
 		  up_exit.c up_assert.c up_blocktask.c up_unblocktask.c \
 		  up_releasepending.c up_reprioritizertr.c up_copystate.c \
 		  up_schedulesigaction.c up_sigdeliver.c up_serial.c \
-		  up_delay.c up_allocateheap.c up_leds.c
+		  up_delay.c up_allocateheap.c up_leds.c up_watchdog.c
 COBJS		= $(CSRCS:.c=.o)
 
 SRCS		= $(ASRCS) $(CSRCS)
