@@ -36,4 +36,5 @@
 
 	* Add dirent.h, opendir(), readdir(), closedir(), etc.
 	* Added 'ls' command to nsh
+	* Added C5471 watchdog driver
 
