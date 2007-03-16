@@ -43,6 +43,8 @@
 #include <nuttx/fs.h>
 #include "fs_internal.h"
 
+#if CONFIG_NFILE_DESCRIPTORS >0
+
 /************************************************************
  * Definitions
  ************************************************************/
@@ -101,3 +103,5 @@ void inode_release(FAR struct inode *node)
         }
     }
 }
+
+#endif /* CONFIG_NFILE_DESCRIPTORS */

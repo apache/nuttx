@@ -43,6 +43,8 @@
 #include <nuttx/fs.h>
 #include "fs_internal.h"
 
+#if CONFIG_NFILE_DESCRIPTORS >0
+
 /************************************************************
  * Definitions
  ************************************************************/
@@ -122,3 +124,5 @@ FAR struct inode *inode_finddir(const char *path)
   inode_semgive();
   return child;
 }
+
+#endif /* CONFIG_NFILE_DESCRIPTORS */

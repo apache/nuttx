@@ -48,6 +48,8 @@
 #include <nuttx/fs.h>
 #include "fs_internal.h"
 
+#if CONFIG_NFILE_DESCRIPTORS >0
+
 /************************************************************
  * Definitions
  ************************************************************/
@@ -106,9 +108,11 @@ static int _inode_compare(const char *fname,
         }
 
       /* At end of find name?*/
+
       else if (!*fname || *fname == '/')
         {
            /* Yes... return find name < node name */
+
            return -1;
         }
 
@@ -318,3 +322,5 @@ const char *inode_nextname(const char *name)
    if (*name) name++;
    return name;
 }
+#endif /* CONFIG_NFILE_DESCRIPTORS */
+
