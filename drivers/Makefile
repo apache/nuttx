@@ -40,7 +40,7 @@ MKDEP	= $(TOPDIR)/tools/mkdeps.sh
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= dev_null.c
+CSRCS		= dev_null.c serial.c
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
