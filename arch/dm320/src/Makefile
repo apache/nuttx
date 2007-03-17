@@ -45,14 +45,14 @@ ASRCS		+= up_lowputc.S
 endif
 AOBJS		= $(ASRCS:.S=.o)
 
-CSRCS		= up_boot.c up_initialize.c up_initialstate.c up_idle.c up_doirq.c \
-		  up_irq.c up_syscall.c up_dataabort.c up_prefetchabort.c \
-		  up_undefinedinsn.c up_interruptcontext.c up_timerisr.c \
-		  up_createstack.c up_usestack.c up_releasestack.c \
-		  up_exit.c up_assert.c up_blocktask.c up_unblocktask.c \
-		  up_releasepending.c up_reprioritizertr.c up_copystate.c \
-		  up_schedulesigaction.c up_sigdeliver.c \
-		  up_delay.c up_allocateheap.c
+CSRCS		= up_allocateheap.c up_assert.c up_blocktask.c up_boot.c \
+		  up_copystate.c up_createstack.c up_dataabort.c up_delay.c \
+		  up_doirq.c up_exit.c up_idle.c up_initialize.c \
+		  up_initialstate.c up_interruptcontext.c up_irq.c \
+		  up_prefetchabort.c up_releasepending.c up_releasestack.c \
+		  up_reprioritizertr.c up_schedulesigaction.c up_serial.c \
+		  up_sigdeliver.c up_syscall.c up_timerisr.c up_unblocktask.c \
+		  up_undefinedinsn.c up_usestack.c
 COBJS		= $(CSRCS:.c=.o)
 
 SRCS		= $(ASRCS) $(CSRCS)

@@ -67,7 +67,7 @@
 #define UART_DTRR_FE          0x0400 /* Framing error */
 #define UART_DTRR_ORF         0x0200 /* Overrun flag */
 #define UART_DTRR_PEF         0x0100 /* Parity error */
-#define UART_DTRR_DTR_MAS K   0x00ff /* Data transmit/receive */
+#define UART_DTRR_DTR_MASK    0x00ff /* Data transmit/receive */
 
 /* UART BRSR register bit definitions */
 /* The UART clock is half of the ARM clock */

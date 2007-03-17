@@ -277,6 +277,13 @@ __start:
 
 	bl	up_boot
 
+	/* Perform early serial initialization */
+
+#ifdef CONFIG_DEV_CONSOLE
+	mov     fp, #0
+	bl      up_earlyserialinit
+#endif
+
 	/* Finally branch to the OS entry point */
 
 	mov	lr, #0

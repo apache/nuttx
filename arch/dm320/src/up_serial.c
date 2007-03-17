@@ -48,7 +48,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/serial.h>
 #include <arch/serial.h>
-#include "c5471.h"
+#include "dm320.h"
 #include "os_internal.h"
 #include "up_internal.h"
 
@@ -56,45 +56,24 @@
  * Definitions
  ************************************************************/
 
-#define BASE_BAUD     115200
-
-#if defined(CONFIG_UART_IRDA_HWFLOWCONTROL) || defined(CONFIG_UART_MODEM_HWFLOWCONTROL)
-# define CONFIG_UART_HWFLOWCONTROL
-#endif
+#define BASE_BAUD 115200
 
 /************************************************************
  * Private Types
  ************************************************************/
 
-struct uart_regs_s
-{
-  uint32  ier;
-  uint32  lcr;
-  uint32  fcr;
-#ifdef CONFIG_UART_HWFLOWCONTROL
-  uint32  efr;
-  uint32  tcr;
-#endif
-};
-
 struct up_dev_s
 {
-  unsigned int         uartbase;	/* Base address of UART
+  uint32               uartbase;	/* Base address of UART
 					 * registers */
-  unsigned int         baud_base;	/* Base baud for conversions */
-  unsigned int         baud;		/* Configured baud */
-  ubyte                xmit_fifo_size;	/* Size of transmit FIFO */
+  uint32               baud;		/* Configured baud */
+  uint16               msr;		/* Saved MSR value */
   ubyte                irq;		/* IRQ associated with
 					 * this UART */
   ubyte                parity;		/* 0=none, 1=odd, 2=even */
   ubyte                bits;		/* Number of bits (7 or 8) */
-#ifdef CONFIG_UART_HWFLOWCONTROL
-  boolean              flowcontrol;	/* TRUE: Hardware flow control
-					 * is enabled. */
-#endif
   boolean              stopbits2;	/* TRUE: Configure with 2
 					 * stop bits instead of 1 */
-  struct uart_regs_s   regs;		/* Shadow copy of readonly regs */
 };
 
 /************************************************************
@@ -105,7 +84,7 @@ static int     up_setup(struct uart_dev_s *dev);
 static void    up_shutdown(struct uart_dev_s *dev);
 static int     up_interrupt(int irq, void *context);
 static int     up_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int     up_receive(struct uart_dev_s *dev, unsigned int *status);
+static int     up_receive(struct uart_dev_s *dev, uint32 *status);
 static void    up_rxint(struct uart_dev_s *dev, boolean enable);
 static boolean up_rxfifonotempty(struct uart_dev_s *dev);
 static void    up_send(struct uart_dev_s *dev, int ch);
@@ -134,87 +113,77 @@ struct uart_ops_s g_uart_ops =
 
 /* I/O buffers */
 
-static char g_irdarxbuffer[CONFIG_UART_IRDA_RXBUFSIZE];
-static char g_irdatxbuffer[CONFIG_UART_IRDA_TXBUFSIZE];
-static char g_modemrxbuffer[CONFIG_UART_MODEM_RXBUFSIZE];
-static char g_modemtxbuffer[CONFIG_UART_MODEM_TXBUFSIZE];
+static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
+static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
+static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
+static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 
-/* This describes the state of the C5471 serial IRDA port. */
+/* This describes the state of the DM320 uart0 port. */
 
-static struct up_dev_s g_irdapriv =
+static struct up_dev_s g_uart0priv =
 {
-  .xmit_fifo_size = UART_IRDA_XMIT_FIFO_SIZE,
-  .baud_base      = BASE_BAUD,
-  .uartbase       = UART_IRDA_BASE,
-  .baud           = CONFIG_UART_IRDA_BAUD,
-  .parity         = CONFIG_UART_IRDA_PARITY,
-  .bits           = CONFIG_UART_IRDA_BITS,
-#ifdef CONFIG_UART_IRDA_HWFLOWCONTROL
-  .flowcontrol    = TRUE,
-#endif
-  .stopbits2      = CONFIG_UART_IRDA_2STOP,
+  .uartbase       = DM320_UART0_REGISTER_BASE,
+  .baud           = CONFIG_UART0_BAUD,
+  .parity         = CONFIG_UART0_PARITY,
+  .bits           = CONFIG_UART0_BITS,
+  .stopbits2      = CONFIG_UART0_2STOP,
 };
 
-static uart_dev_t g_irdaport =
+static uart_dev_t g_uart0port =
 {
-  .irq      = C5471_IRQ_UART_IRDA,
+  .irq      = DM320_IRQ_UART0,
   .recv     =
   {
-    .size   = CONFIG_UART_IRDA_RXBUFSIZE,
-    .buffer = g_irdarxbuffer,
+    .size   = CONFIG_UART0_RXBUFSIZE,
+    .buffer = g_uart0rxbuffer,
   },
   .xmit     =
   {
-    .size   = CONFIG_UART_IRDA_TXBUFSIZE,
-    .buffer = g_irdatxbuffer,
+    .size   = CONFIG_UART0_TXBUFSIZE,
+    .buffer = g_uart0txbuffer,
+  },
+  .ops      = &g_uart_ops,
+  .priv     = &g_uart0priv,
+};
+
+/* This describes the state of the DM320 uart1 port. */
+
+static struct up_dev_s g_uart1priv =
+{
+  .uartbase       = DM320_UART1_REGISTER_BASE,
+  .baud           = CONFIG_UART1_BAUD,
+  .parity         = CONFIG_UART1_PARITY,
+  .bits           = CONFIG_UART1_BITS,
+  .stopbits2      = CONFIG_UART1_2STOP,
+};
+
+static uart_dev_t g_uart1port =
+{
+  .irq      = DM320_IRQ_UART1,
+  .recv     =
+  {
+    .size   = CONFIG_UART1_RXBUFSIZE,
+    .buffer = g_uart1rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_UART1_TXBUFSIZE,
+    .buffer = g_uart1txbuffer,
    },
   .ops      = &g_uart_ops,
-  .priv     = &g_irdapriv,
-};
-
-/* This describes the state of the C5471 serial Modem port. */
-
-static struct up_dev_s g_modempriv =
-{
-  .xmit_fifo_size = UART_XMIT_FIFO_SIZE,
-  .baud_base      = BASE_BAUD,
-  .uartbase       = UART_MODEM_BASE,
-  .baud           = CONFIG_UART_MODEM_BAUD,
-  .parity         = CONFIG_UART_MODEM_PARITY,
-  .bits           = CONFIG_UART_MODEM_BITS,
-#ifdef CONFIG_UART_MODEM_HWFLOWCONTROL
-  .flowcontrol    = TRUE,
-#endif
-  .stopbits2      = CONFIG_UART_MODEM_2STOP,
-};
-
-static uart_dev_t g_modemport =
-{
-  .irq      = C5471_IRQ_UART,
-  .recv     =
-  {
-    .size   = CONFIG_UART_MODEM_RXBUFSIZE,
-    .buffer = g_modemrxbuffer,
-  },
-  .xmit     =
-  {
-    .size   = CONFIG_UART_MODEM_TXBUFSIZE,
-    .buffer = g_modemtxbuffer,
-  },
-  .ops      = &g_uart_ops,
-  .priv     = &g_modempriv,
+  .priv     = &g_uart1priv,
 };
 
 /* Now, which one with be tty0/console and which tty1? */
 
 #ifdef CONFIG_SERIAL_IRDA_CONSOLE
-# define CONSOLE_DEV     g_irdaport
-# define TTYS0_DEV       g_irdaport
-# define TTYS1_DEV       g_modemport
+# define CONSOLE_DEV     g_uart1port
+# define TTYS0_DEV       g_uart1port
+# define TTYS1_DEV       g_uart0port
 #else
-# define CONSOLE_DEV     g_modemport
-# define TTYS0_DEV       g_modemport
-# define TTYS1_DEV       g_irdaport
+# define CONSOLE_DEV     g_uart0port
+# define TTYS0_DEV       g_uart0port
+# define TTYS1_DEV       g_uart1port
 #endif
 
 /************************************************************
@@ -222,45 +191,46 @@ static uart_dev_t g_modemport =
  ************************************************************/
 
 /************************************************************
- * Name: up_inserial
+ * Name: up_serialin
  ************************************************************/
 
-static inline uint32 up_inserial(struct up_dev_s *priv, uint32 offset)
+static inline uint16 up_serialin(struct up_dev_s *priv, uint32 offset)
 {
-  return getreg32(priv->uartbase + offset);
+  return getreg16(priv->uartbase + offset);
 }
 
 /************************************************************
  * Name: up_serialout
  ************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, uint32 offset, uint32 value)
+static inline void up_serialout(struct up_dev_s *priv, uint32 offset, uint16 value)
 {
-  putreg32(value, priv->uartbase + offset);
+  putreg16(value, priv->uartbase + offset);
 }
 
 /************************************************************
  * Name: up_disableuartint
  ************************************************************/
 
-static inline void up_disableuartint(struct up_dev_s *priv, uint16 *ier)
+static inline void up_disableuartint(struct up_dev_s *priv, uint16 *msr)
 {
-  if (ier)
+  if (msr)
     {
-      *ier = priv->regs.ier & UART_IER_AllInts;
+      *msr = priv->msr & UART_MSR_ALLIE;
     }
-  priv->regs.ier &= ~UART_IER_AllInts;
-  up_serialout(priv, UART_IER_OFFS, priv->regs.ier);
+
+  priv->msr &= ~UART_MSR_ALLIE;
+  up_serialout(priv, UART_MSR, priv->msr);
 }
 
 /************************************************************
  * Name: up_restoreuartint
  ************************************************************/
 
-static inline void up_restoreuartint(struct up_dev_s *priv, uint16 ier)
+static inline void up_restoreuartint(struct up_dev_s *priv, uint16 msr)
 {
-  priv->regs.ier |= ier & (UART_IER_RecvInt|UART_IER_XmitInt);
-  up_serialout(priv, UART_IER_OFFS, priv->regs.ier);
+  priv->msr |= msr & UART_MSR_ALLIE;
+  up_serialout(priv, UART_MSR, priv->msr);
 }
 
 /************************************************************
@@ -273,70 +243,29 @@ static inline void up_waittxfifonotfull(struct up_dev_s *priv)
 
   for (tmp = 1000 ; tmp > 0 ; tmp--)
     {
-      if ((up_inserial(priv, UART_SSR_OFFS) & UART_SSR_TXFULL) == 0)
+      if ((up_serialin(priv, UART_SR) & UART_SR_TFTI) != 0)
         {
           break;
         }
     }
-}
-/************************************************************
- * Name: up_disablebreaks
- ************************************************************/
-
-static inline void up_disablebreaks(struct up_dev_s *priv)
-{
-  priv->regs.lcr &= ~UART_LCR_BOC;
-  up_serialout(priv, UART_LCR_OFFS, priv->regs.lcr);
 }
 
 /************************************************************
  * Name: up_enablebreaks
  ************************************************************/
 
-static inline void up_enablebreaks(struct up_dev_s *priv)
+static inline void up_enablebreaks(struct up_dev_s *priv, boolean enable)
 {
-  priv->regs.lcr |= UART_LCR_BOC;
-  up_serialout(priv, UART_LCR_OFFS, priv->regs.lcr);
-}
-
-/************************************************************
- * Name: up_setrate
- ************************************************************/
-
-static inline void up_setrate(struct up_dev_s *priv, unsigned int rate)
-{
-  uint32 div_bit_rate;
-
-  switch (rate)
+  uint16 lcr = up_serialin(priv, UART_LCR);
+  if (enable)
     {
-    case 115200:
-      div_bit_rate = BAUD_115200;
-      break;
-    case 57600:
-      div_bit_rate = BAUD_57600;
-      break;
-    case 38400:
-      div_bit_rate = BAUD_38400;
-      break;
-    case 19200:
-      div_bit_rate = BAUD_19200;
-      break;
-    case 4800:
-      div_bit_rate = BAUD_4800;
-      break;
-    case 2400:
-      div_bit_rate = BAUD_2400;
-      break;
-    case 1200:
-      div_bit_rate = BAUD_1200;
-      break;
-    case 9600:
-    default:
-      div_bit_rate = BAUD_9600;
-      break;
+      lcr |= UART_LCR_BOC;
     }
-
-  up_serialout(priv, UART_DIV_BIT_RATE_OFFS, div_bit_rate);
+  else
+    {
+      lcr &= ~UART_LCR_BOC;
+    }
+  up_serialout(priv, UART_LCR, lcr);
 }
 
 /************************************************************
@@ -352,94 +281,101 @@ static inline void up_setrate(struct up_dev_s *priv, unsigned int rate)
 static int up_setup(struct uart_dev_s *dev)
 {
 #ifdef CONFIG_SUPPRESS_UART_CONFIG
-  struct up_dev_s *priv = dev->priv;
-  unsigned int cval;
+  struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
+  uint16 brsr;
 
+  /* Clear fifos */
+
+  up_serialout(priv, UART_DM320_RFCR, 0x8000);
+  up_serialout(priv, UART_DM320_TFCR, 0x8000);
+
+  /* Set rx and tx triggers */
+
+  up_serialout(priv, UART_DM320_RFCR, UART_RFCR_RTL_1);
+  up_serialout(priv, UART_DM320_TFCR, UART_TFCR_TTL_1);
+
+  /* Set up the MSR */
+
+  priv->msr = up_serialin(priv, UART_MSR);
   if (priv->bits == 7)
     {
-      cval = UART_LCR_7bits;
+      priv->msr |= UART_DATABIT_7;
     }
   else
     {
-      cval = UART_LCR_8bits;
+      priv->msr &= ~UART_MSR_CLS;
     }
 
   if (priv->stopbits2)
     {
-      cval |= UART_LCR_2stop;
-    }
-
-  if (priv->parity == 1)   /* Odd parity */
-    {
-      cval |= (UART_LCR_ParEn|UART_LCR_ParOdd);
-    }
-  else if (priv->parity == 2)  /* Even parity */
-    {
-      cval |= (UART_LCR_ParEn|UART_LCR_ParEven);
-    }
-
-  /* Both the IrDA and MODEM UARTs support RESET and UART mode. */
-
-  up_serialout(priv, UART_MDR_OFFS, MDR_RESET_MODE);
-  up_delay(5);
-  up_serialout(priv, UART_MDR_OFFS, MDR_UART_MODE);
-  up_delay(5);
-
-  priv->regs.ier = up_inserial(priv, UART_IER_OFFS);
-  priv->regs.lcr = up_inserial(priv, UART_LCR_OFFS);
-#ifdef CONFIG_UART_HWFLOWCONTROL
-  if (priv->flowcontrol)
-    {
-      priv->regs.efr = up_inserial(priv, UART_EFR_OFFS);
-      priv->regs.tcr = up_inserial(priv, UART_TCR_OFFS);
-    }
-#endif
-
-  up_disableuartint(priv, NULL);
-
-  up_serialout(priv, UART_EFR_OFFS,  0x0010);           /* Enable fifo control */
-  up_serialout(priv, UART_TFCR_OFFS, 0);                /* Reset to 0 */
-  up_serialout(priv, UART_RFCR_OFFS, UART_FCR_RX_CLR);  /* Clear RX fifo */
-  up_serialout(priv, UART_TFCR_OFFS, UART_FCR_TX_CLR);  /* Clear TX fifo */
-  up_serialout(priv, UART_TFCR_OFFS, UART_FCR_FIFO_EN); /* Enable RX/TX fifos */
-
-  up_disablebreaks(priv);
-
-  priv->regs.fcr = (priv->regs.fcr & 0xffffffcf) | (val & 0x30);
-  up_serialout(priv, UART_RFCR_OFFS, priv->regs.fcr);
-
-  priv->regs.fcr = (priv->regs.fcr & 0xffffff3f) | (val & 0xc0);
-  up_serialout(priv, UART_RFCR_OFFS, priv->regs.fcr);
-
-  up_setrate(priv, priv->baud);
-
-  priv->regs.lcr &= 0xffffffe0;      /* clear original field, and... */
-  priv->regs.lcr |= (uint32)mode;    /* Set new bits in that field. */
-  up_serialout(priv, UART_LCR_OFFS, priv->regs.lcr);
-
-#ifdef CONFIG_UART_HWFLOWCONTROL
-  if (priv->flowcontrol)
-    {
-      /* Set the FIFO level triggers for flow control
-       * Halt = 48 bytes, resume = 12 bytes
-       */
-
-      priv->regs.tcr = (priv->regs.tcr & 0xffffff00) | 0x0000003c;
-      up_serialout(priv, UART_TCR_OFFS, priv->regs.tcr);
-
-      /* Enable RTS/CTS flow control */
-
-      priv->regs.efr |= 0x000000c0;
-      up_serialout(priv, UART_EFR_OFFS, priv->regs.efr);
+      priv->msr |= UART_STOPBIT_2;
     }
   else
     {
-      /* Disable RTS/CTS flow control */
-
-      priv->regs.efr &= 0xffffff3f;
-      up_serialout(priv, UART_EFR_OFFS, priv->regs.efr);
+      priv->msr &= ~UART_MSR_SBLS;
     }
-#endif
+
+  if (priv->parity == 1)
+    {
+      priv->msr |= UART_ODDPARITY;
+    }
+  else if (priv->parity == 2)
+    {
+      priv->msr |= UART_EVENPARITY;
+    }
+  else
+    {
+      priv->msr &= ~(UART_MSR_PSB|UART_MSR_PEB);
+    }
+
+  /* Set up the BRSR */
+
+  switch (dev->baud)
+    {
+      case 2400:
+        brsr = UART_BAUD_2400;
+        break;
+      case 4800:
+        brsr = UART_BAUD_4800;
+        break;
+      default:
+      case 9600:
+        brsr = UART_BAUD_9600;
+        break;
+      case 14400:
+        brsr = UART_BAUD_14400;
+        break;
+      case 19200:
+        brsr = UART_BAUD_19200;
+        break;
+      case 28800:
+        brsr = UART_BAUD_28800;
+        break;
+      case 3840:
+        brsr = UART_BAUD_38400;
+        break;
+      case 57600:
+        brsr = UART_BAUD_57600;
+        break;
+      case 115200:
+        brsr = UART_BAUD_115200;
+        break;
+      case 230400:
+        brsr = UART_BAUD_230400;
+        break;
+      case 460800:
+        brsr = UART_BAUD_460800;
+        break;
+      case 921600:
+        brsr = UART_BAUD_921600;
+        break;
+    }
+
+  /* Setup the new UART configuration */
+
+  up_serialout(priv,UART_MSR, priv->msr);
+  up_serialout(priv, UART_DM320_BRSR, brsr);
+  up_enablebreaks(priv, FALSE);
 #endif
   return OK;
 }
@@ -448,7 +384,8 @@ static int up_setup(struct uart_dev_s *dev)
  * Name: up_shutdown
  *
  * Description:
- *   Disable the UART.  This method is called when the serial port is closed
+ *   Disable the UART.  This method is called when the serial
+ *   port is closed
  *
  ************************************************************/
 
@@ -475,15 +412,17 @@ static int up_interrupt(int irq, void *context)
 {
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;
-  volatile uint32    cause;
+  uint16             status;
+  int                passes;
+  
 
-  if (g_irdaport.irq == irq)
+  if (g_uart1port.irq == irq)
     {
-      dev = &g_irdaport;
+      dev = &g_uart1port;
     }
-  else if (g_modemport.irq == irq)
+  else if (g_uart0port.irq == irq)
     {
-      dev = &g_modemport;
+      dev = &g_uart0port;
     }
   else
     {
@@ -491,56 +430,44 @@ static int up_interrupt(int irq, void *context)
     }
   priv = (struct up_dev_s*)dev->priv;
 
-  cause = up_inserial(priv, UART_ISR_OFFS) & 0x0000003f;
+  /* Loop until there are no characters to be transferred or,
+   * until we have been looping for a long time.
+   */
 
-  if ((cause & 0x0000000c) == 0x0000000c)
+  for(;;)
     {
-      uint32 ier_val = 0;
-
-      /* Is this an interrupt from the IrDA UART? */
-
-      if (irq == C5471_IRQ_UART_IRDA)
-         {
-           /* Save the currently enabled IrDA UART interrupts
-            * so that we can restore the IrDA interrupt state
-            * below.
-            */
-
-           ier_val = up_inserial(priv, UART_IER_OFFS);
-
-           /* Then disable all IrDA UART interrupts */
-
-           up_serialout(priv, UART_IER_OFFS, 0);
-         }
-
-      /* Receive characters from the RX fifo */
-
-      uart_recvchars(dev);
-
-      /* read UART_RHR to clear int condition
-       * toss = up_inserialchar(priv,&status);
+      /* Get the current UART status and check for loop
+       * termination conditions
        */
 
-      /* Is this an interrupt from the IrDA UART? */
+      status  = up_serialin(priv, UART_SR);
+      status &= (UART_SR_RFTI | UART_SR_TFTI);
 
-      if (irq == C5471_IRQ_UART_IRDA)
-         {
-           /* Restore the IrDA UART interrupt enables */
+      if (status == 0 || passes > 256) 
+        {
+          return OK;
+        }
 
-           up_serialout(priv, UART_IER_OFFS, ier_val);
-         }
+      /* Handline incoming, receive bytes */
+
+      if (status & UART_SR_RFTI)
+        {
+          uart_recvchars(dev);
+        }
+
+      /* Handle outgoing, transmit bytes */
+
+      if (status & UART_SR_TFTI)
+        {
+          uart_xmitchars(dev);
+        }
+
+      /* Keep track of how many times we do this in case there
+       * is some hardware failure condition.
+       */
+
+      passes++;
     }
-  else if ((cause & 0x0000000c) == 0x00000004)
-    {
-      uart_recvchars(dev);
-    }
-
-  if ((cause & 0x00000002) != 0)
-    {
-      uart_xmitchars(dev);
-    }
-
-  return OK;
 }
 
 /************************************************************
@@ -578,7 +505,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
         irqstate_t flags = irqsave();
-        up_enablebreaks(priv);
+        up_enablebreaks(priv, TRUE);
         irqrestore(flags);
       }
       break;
@@ -587,7 +514,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
       {
         irqstate_t flags;
         flags = irqsave();
-        up_disablebreaks(priv);
+        up_enablebreaks(priv, FALSE);
         irqrestore(flags);
       }
       break;
@@ -605,30 +532,20 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
  * Name: up_receive
  *
  * Description:
- * Called (usually) from the interrupt level to receive one character from
- * the UART.  Error bits associated with the receipt are provided in the
- * the return 'status'.
+ *   Called (usually) from the interrupt level to receive one
+ *   character from the UART.  Error bits associated with the
+ *   receipt are provided in the the return 'status'.
  *
  ************************************************************/
 
-static int up_receive(struct uart_dev_s *dev, unsigned int *status)
+static int up_receive(struct uart_dev_s *dev, uint32 *status)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  uint32 rhr;
-  uint32 lsr;
+  uint16 dtrr;
 
-  /* Construct a 16bit status word that uses the high byte to
-   * hold the status bits associated with framing,parity,break
-   * and a low byte that holds error bits of LSR for
-   * conditions such as overflow, etc.
-   */
-
-  rhr = up_inserial(priv, UART_RHR_OFFS);
-  lsr = up_inserial(priv, UART_LSR_OFFS);
-
-  *status = (unsigned int)((rhr & 0x0000ff00) | (lsr & 0x000000ff));
-
-  return rhr & 0x000000ff;
+  dtrr    = up_serialin(priv, UART_DTRR);
+  *status = dtrr;
+  return dtrr & UART_DTRR_DTR_MASK;
 }
 
 /************************************************************
@@ -645,15 +562,14 @@ static void up_rxint(struct uart_dev_s *dev, boolean enable)
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      priv->regs.ier |= UART_IER_RecvInt;
-      up_serialout(priv, UART_IER_OFFS, priv->regs.ier);
+      priv->msr |= UART_MSR_RFTIE;
 #endif
     }
   else
     {
-      priv->regs.ier &= ~UART_IER_RecvInt;
-      up_serialout(priv, UART_IER_OFFS, priv->regs.ier);
+      priv->msr &= ~UART_MSR_RFTIE;
     }
+  up_serialout(priv, UART_MSR, priv->msr);
 }
 
 /************************************************************
@@ -667,7 +583,7 @@ static void up_rxint(struct uart_dev_s *dev, boolean enable)
 static boolean up_rxfifonotempty(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  return up_inserial(priv, UART_LSR_OFFS) & UART_RX_FIFO_NOEMPTY;
+  return ((up_serialin(priv, UART_SR) & UART_SR_RFNEF) != 0);
 }
 
 /************************************************************
@@ -681,7 +597,7 @@ static boolean up_rxfifonotempty(struct uart_dev_s *dev)
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  up_serialout(priv, UART_THR_OFFS, (ubyte)ch);
+  up_serialout(priv, UART_DTRR, (uint16)ch);
 }
 
 /************************************************************
@@ -698,15 +614,14 @@ static void up_txint(struct uart_dev_s *dev, boolean enable)
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      priv->regs.ier |= UART_IER_XmitInt;
-      up_serialout(priv, UART_IER_OFFS, priv->regs.ier);
+      priv->msr |= UART_MSR_TFTIE;
 #endif
     }
   else
     {
-      priv->regs.ier &= ~UART_IER_XmitInt;
-      up_serialout(priv, UART_IER_OFFS, priv->regs.ier);
+      priv->msr &= ~UART_MSR_TFTIE;
     }
+  up_serialout(priv, UART_MSR, priv->msr);
 }
 
 /************************************************************
@@ -720,7 +635,7 @@ static void up_txint(struct uart_dev_s *dev, boolean enable)
 static boolean up_txfifonotfull(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  return (up_inserial(priv, UART_SSR_OFFS) & UART_SSR_TXFULL) == 0;
+  return ((up_serialin(priv, UART_SR) & UART_SR_TFTI) != 0);
 }
 
 /************************************************************
@@ -734,7 +649,7 @@ static boolean up_txfifonotfull(struct uart_dev_s *dev)
 static boolean up_txfifoempty(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  return (up_inserial(priv, UART_LSR_OFFS) & UART_LSR_TREF) != 0;
+  return ((up_serialin(priv, UART_SR) & UART_SR_TREF) == 0);
 }
 
 /************************************************************
@@ -792,7 +707,7 @@ int up_putc(int ch)
 
   up_disableuartint(priv, &ier);
   up_waittxfifonotfull(priv);
-  up_serialout(priv, UART_THR_OFFS, (ubyte)ch);
+  up_serialout(priv, UART_DTRR, (uint16)ch);
 
   /* Check for LF */
 
@@ -801,7 +716,7 @@ int up_putc(int ch)
       /* Add CR */
 
       up_waittxfifonotfull(priv);
-      up_serialout(priv, UART_THR_OFFS, '\r');
+      up_serialout(priv, UART_DTRR, '\r');
     }
 
   up_waittxfifonotfull(priv);

@@ -54,7 +54,6 @@ CONFIG_ARCH_STACKDUMP=y
 #
 # CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
 #   console and ttys0 (default is the UART0).
-# CONFIG_UARTn_HWFLOWCONTROL - enables hardware flow control
 # CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
 #   This specific the size of the receive buffer
 # CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
@@ -66,8 +65,6 @@ CONFIG_ARCH_STACKDUMP=y
 #
 CONFIG_UART0_SERIAL_CONSOLE=y
 CONFIG_UART1_SERIAL_CONSOLE=n
-CONFIG_UART0_HWFLOWCONTROL=n
-CONFIG_UART1_HWFLOWCONTROL=n
 CONFIG_UART0_TXBUFSIZE=256
 CONFIG_UART1_TXBUFSIZE=256
 CONFIG_UART0_RXBUFSIZE=256
