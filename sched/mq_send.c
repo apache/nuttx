@@ -306,7 +306,7 @@ int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
 
           /* Copy the message data into the message */
 
-          memcpy((void*)msg, (const void*)curr->mail, msglen);
+          memcpy((const void*)curr->mail, (void*)msg, msglen);
 
           /* Insert the new message in the message queue */
 
