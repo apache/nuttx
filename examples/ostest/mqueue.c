@@ -39,6 +39,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <pthread.h>
 #include <mqueue.h>
 #include <sched.h>
@@ -185,6 +186,7 @@ static void *receiver_thread(void *arg)
 
    for (i = 0; i < 10; i++)
     {
+      memset(msg_buffer, 0xaa, TEST_MSGLEN);
       nbytes = mq_receive(mqfd, msg_buffer, TEST_MSGLEN, 0);
       if (nbytes < 0)
         {
@@ -205,11 +207,19 @@ static void *receiver_thread(void *arg)
 
           for (j = 0; j < TEST_MSGLEN-1; j++)
             {
-              printf("receiver_thread:                  %2d %02x (%c) %02x\n",
-                     j, TEST_MESSAGE[j], TEST_MESSAGE[j], msg_buffer[j] & 0x0ff);
+              if (isprint(msg_buffer[j]))
+                {
+                 printf("receiver_thread:                  %2d %02x (%c) %02x (%c)\n",
+                         j, TEST_MESSAGE[j], TEST_MESSAGE[j], msg_buffer[j], msg_buffer[j]);
+                }
+              else
+                {
+                  printf("receiver_thread:                  %2d %02x (%c) %02x\n",
+                         j, TEST_MESSAGE[j], TEST_MESSAGE[j], msg_buffer[j]);
+                }
             }
-          printf("receiver_thread:                  %2d 00     %02x\n",
-                  j, msg_buffer[j] & 0xff);
+          printf("receiver_thread:                  %2d 00      %02x\n",
+                  j, msg_buffer[j]);
         }
       else
         {
