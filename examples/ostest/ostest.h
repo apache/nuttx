@@ -92,4 +92,8 @@ extern void timedwait_test(void);
 
 extern void sighand_test(void);
 
+/* roundrobin.c *********************************************/
+
+extern void rr_test(void);
+
 #endif /* __OSTEST_H */

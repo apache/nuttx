@@ -92,6 +92,7 @@
  *   whatever list it was in.
  * - The caller handles the condition that occurs if the
  *   the head of the g_readytorun list is changed.
+ *
  ************************************************************/
 
 boolean sched_addreadytorun(FAR _TCB *btcb)
@@ -99,14 +100,15 @@ boolean sched_addreadytorun(FAR _TCB *btcb)
   FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
   boolean ret;
 
-  /* Check if pre-emption is disabled for the current running task and
-   * if the rtrTask would cause the current running task to be preempted.
+  /* Check if pre-emption is disabled for the current running
+   * task and if the new ready-to-run task  would cause the
+   * current running task to be preempted.
    */
 
   if (rtcb->lockcount && rtcb->sched_priority < btcb->sched_priority)
     {
-      /* Yes.  Preemption would occur!  Add the btcb to the g_pendingtasks
-       * task list for now.
+      /* Yes.  Preemption would occur!  Add the new ready-to-run
+       * task to the g_pendingtasks task list for now.
        */
 
       sched_addprioritized(btcb, &g_pendingtasks);

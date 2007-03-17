@@ -91,31 +91,41 @@ static void sched_process_timeslice(void)
 
       if (rtcb->timeslice <= 1)
         {
-          /* We know we are at the head of the ready to run
-           * prioritized list.  We must be the highest priority
-           * task eligible for execution.  Check the next task
-           * in the ready to run list.  If it is the same
-           * priority, then we need to relinquish the CPU and
-           * give that task a shot.
+
+          /* Yes, Now check if the task has pre-emption disabled.
+           * If so, then we will freeze the timeslice count at
+           * the value until the next tick after pre-emption
+           * has been enabled.
            */
 
-          if (rtcb->flink &&
-              rtcb->flink->sched_priority >= rtcb->sched_priority)
+          if (!rtcb->lockcount)
             {
-              struct sched_param param;
-
-              /* Reset the timeslice */
+              /* Reset the timeslice in any case. */
 
               rtcb->timeslice = CONFIG_RR_INTERVAL;
 
-              /* Just resetting the task priority to its current
-               * value.  This this will cause the task to be
-               * rescheduled behind any other tasks at the same
-               * priority.
+              /* We know we are at the head of the ready to run
+               * prioritized list.  We must be the highest priority
+               * task eligible for execution.  Check the next task
+               * in the ready to run list.  If it is the same
+               * priority, then we need to relinquish the CPU and
+               * give that task a shot.
                */
 
-              param.sched_priority = rtcb->sched_priority;
-              (void)sched_setparam(0, &param);
+              if (rtcb->flink &&
+                  rtcb->flink->sched_priority >= rtcb->sched_priority)
+                {
+                  struct sched_param param;
+
+                  /* Just resetting the task priority to its current
+                   * value.  This this will cause the task to be
+                   * rescheduled behind any other tasks at the same
+                   * priority.
+                   */
+
+                  param.sched_priority = rtcb->sched_priority;
+                  (void)sched_setparam(0, &param);
+                }
             }
         }
       else

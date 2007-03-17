@@ -155,12 +155,13 @@ void up_reprioritize_rtr(_TCB *tcb, ubyte priority)
 
               up_copystate(current_regs, rtcb->xcp.regs);
             }
+
           /* Copy the exception context into the TCB at the (old) head of the
            * g_readytorun Task list. if up_saveusercontext returns a non-zero
            * value, then this is really the previously running task restarting!
            */
 
-          if (!up_saveusercontext(rtcb->xcp.regs))
+          else if (!up_saveusercontext(rtcb->xcp.regs))
             {
               /* Restore the exception context of the rtcb at the (new) head 
                * of the g_readytorun task list.

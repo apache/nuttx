@@ -164,6 +164,14 @@ static int user_main(int argc, char *argv[])
   sighand_test();
 #endif
 
+#if 0 /* Does not work yet */
+#if !defined(CONFIG_DISABLE_PTHREAD) && CONFIG_RR_INTERVAL > 0
+  /* Verify round robin scheduling */
+
+  rr_test();
+#endif
+#endif
+
   printf("user_main: Exitting\n");
   return 0;
 }
