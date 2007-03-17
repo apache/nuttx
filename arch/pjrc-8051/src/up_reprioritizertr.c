@@ -134,7 +134,7 @@ void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority)
               sched_mergepending();
             }
 
-         /* Are we in an interrupt handler? */
+          /* Are we in an interrupt handler? */
 
           if (g_irqtos)
             {
@@ -163,7 +163,7 @@ void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority)
            * value, then this is really the previously running task restarting!
            */
 
-          if (!up_savecontext(&rtcb->xcp))
+          else if (!up_savecontext(&rtcb->xcp))
             {
               /* Restore the exception context of the rtcb at the (new) head 
                * of the g_readytorun task list.
