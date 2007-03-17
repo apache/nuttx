@@ -39,12 +39,13 @@
 	* Added 'ls' command to nsh
 	* Added C5471 watchdog driver
 	* Added support for the Neuros OSD / DM320
-	* Fixed another bug where free() is called from IDEL task.
+	* Fixed another bug where free() is called from IDLE task.
 	  Can't do this; the caller must be able to wait for access
 	  to memory.
 	* Separated C5471 serial driver; a shareable part is
 	  in drivers/. ; the C5471 specific part is in arch/C5471.
 	  serial.h defines the interface.
-	* Fixed mq_receive() -- bad memcpy()
+	* Fixed mq_receive() and mq_send() -- bad memcpy()
+	* Added a test for roundrobin scheduler.
 
 

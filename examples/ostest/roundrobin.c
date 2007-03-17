@@ -47,7 +47,11 @@
  * Definitions
  ********************************************************************************/
 
-#define CONFIG_NINTEGERS 32768
+/* This number may need to be tuned for different processor speeds */
+
+/* #define CONFIG_NINTEGERS 32768 Takes forever on 60Mhz ARM7 */
+
+#define CONFIG_NINTEGERS 2048
 
 /********************************************************************************
  * Private Data
@@ -121,10 +125,16 @@ static void *sieve1(void *parameter)
   int i;
 
   printf("sieve1 started\n");
+  fflush(stdout);
+
   for (i = 0; i < 1000; i++)
     {
       dosieve(prime1);
     }
+
+  printf("sieve1 finished\n");
+  fflush(stdout);
+
   pthread_exit(NULL);
 }
 
@@ -137,10 +147,16 @@ static void *sieve2(void *parameter)
   int i;
 
   printf("sieve2 started\n");
+  fflush(stdout);
+
   for (i = 0; i < 1000; i++)
     {
       dosieve(prime2);
     }
+
+  printf("sieve2 finished\n");
+  fflush(stdout);
+
   pthread_exit(NULL);
 }
 
@@ -203,7 +219,11 @@ void rr_test(void)
       printf("rr_test: Error in thread 2 creation, status=%d\n",  status);
     }
 
-  printf("rr_test: Waiting for sieves to complete\n");
+  printf("rr_test: Waiting for sieves to complete -- this should take awhile\n");
+  printf("rr_test: If RR scheduling is working, they should complete at\n");
+  printf("rr_test: then same time\n");
+  fflush(stdout);
+
   pthread_join(sieve2_thread, &result);
   pthread_join(sieve1_thread, &result);
   printf("rr_test: Done\n");
