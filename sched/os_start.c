@@ -264,7 +264,7 @@ void os_start(void)
 
   /* Then add the idle task's TCB to the head of the ready to run list */
 
-  dq_addfirst((FAR dq_entry_t*)&g_idletcb, &g_readytorun);
+  dq_addfirst((FAR dq_entry_t*)&g_idletcb, (dq_queue_t*)&g_readytorun);
 
   /* Initialize the processor-specific portion of the TCB */
 
@@ -435,7 +435,7 @@ void os_start(void)
               /* Remove the first delayed deallocation. */
 
               irqstate_t saved_state = irqsave();
-              void *address          = (void*)sq_remfirst(&g_delayeddeallocations);
+              void *address = (void*)sq_remfirst((sq_queue_t*)&g_delayeddeallocations);
               irqrestore(saved_state);
 
               /* Then deallocate it */

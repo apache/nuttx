@@ -44,7 +44,7 @@ MISC_SRCS	= lib_init.c lib_streamsem.c lib_filesem.c
 STRING_SRCS	= lib_memset.c lib_memcpy.c lib_memcmp.c lib_memmove.c \
 		  lib_strcpy.c lib_strncpy.c lib_strcmp.c \
 		  lib_strlen.c lib_strdup.c lib_strtol.c lib_strchr.c \
-		  lib_strtok.c lib_strtokr.c
+		  lib_strtok.c lib_strtokr.c lib_strerror.c
 CTYPE_SRCS	= 
 STDIO_SRCS	= lib_fopen.c lib_fclose.c \
 		  lib_fread.c lib_libfread.c lib_fgetc.c lib_fgets.c lib_gets.c \
