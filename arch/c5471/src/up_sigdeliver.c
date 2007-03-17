@@ -77,7 +77,7 @@
 void up_sigdeliver(void)
 {
   _TCB  *rtcb = (_TCB*)g_readytorun.head;
-  uint32 regs[XCPTCONTEST_REGS];
+  uint32 regs[XCPTCONTEXT_REGS];
   sig_deliver_t sigdeliver;
 
   up_ledon(LED_SIGNAL);
