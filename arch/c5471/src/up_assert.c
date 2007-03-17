@@ -83,14 +83,26 @@ static inline uint32 up_getsp(void)
 static void up_stackdump(void)
 {
   _TCB *rtcb        = (_TCB*)g_readytorun.head;
-  uint32 stack_base = (uint32)rtcb->adj_stack_ptr;
   uint32 sp         = up_getsp();
+  uint32 stack_base;
+  uint32 stack_size;
+
+  if (rtcb->pid == 0)
+    {
+      stack_base = g_heapbase - CONFIG_PROC_STACK_SIZE;
+      stack_size = CONFIG_PROC_STACK_SIZE;
+    }
+  else
+    {
+      stack_base = (uint32)rtcb->adj_stack_ptr;
+      stack_size = (uint32)rtcb->adj_stack_size;
+    }
 
   lldbg("stack_base: %08x\n", stack_base);
-  lldbg("stack_size: %08x\n", rtcb->adj_stack_size);
+  lldbg("stack_size: %08x\n", stack_size);
   lldbg("sp:         %08x\n", sp);
 
-  if (sp >= stack_base || sp < stack_base - rtcb->adj_stack_size)
+  if (sp >= stack_base || sp < stack_base - stack_size)
     {
       lldbg("ERROR: Stack pointer is not within allocated stack\n");
       return;
