@@ -168,7 +168,7 @@ const tasklist_t g_tasklisttable[NUM_TASK_STATES] =
   { &g_readytorun,           TRUE  },  /* TSTATE_TASK_RUNNING */
   { &g_inactivetasks,        FALSE },  /* TSTATE_TASK_INACTIVE */
   { &g_waitingforsemaphore,  TRUE  },  /* TSTATE_WAIT_SEM */
-#ifndef CONFIG_DISABLE_MQUEUE
+#ifndef CONFIG_DISABLE_SIGNALS
   { &g_waitingforsignal,     FALSE },  /* TSTATE_WAIT_SIG */
 #endif
 #ifndef CONFIG_DISABLE_MQUEUE
@@ -220,7 +220,7 @@ void os_start(void)
   dq_init(&g_readytorun);
   dq_init(&g_pendingtasks);
   dq_init(&g_waitingforsemaphore);
-#ifndef CONFIG_DISABLE_MQUEUE
+#ifndef CONFIG_DISABLE_SIGNALS
   dq_init(&g_waitingforsignal);
 #endif
 #ifndef CONFIG_DISABLE_MQUEUE

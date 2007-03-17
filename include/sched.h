@@ -94,7 +94,7 @@ typedef enum tstate_e
 
   TSTATE_TASK_INACTIVE   = 4, /* BLOCKED - Initialized but not yet activated */
   TSTATE_WAIT_SEM        = 5, /* BLOCKED - Waiting for a semaphore */
-#ifndef CONFIG_DISABLE_MQUEUE
+#ifndef CONFIG_DISABLE_SIGNALS
   TSTATE_WAIT_SIG        = 6, /* BLOCKED - Waiting for a signal */
 #endif
 #ifndef CONFIG_DISABLE_MQUEUE
