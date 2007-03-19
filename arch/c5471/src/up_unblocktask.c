@@ -80,6 +80,7 @@
 void up_unblock_task(_TCB *tcb)
 {
   /* Verify that the context switch can be performed */
+
   if ((tcb->task_state < FIRST_BLOCKED_STATE) ||
       (tcb->task_state > LAST_BLOCKED_STATE))
     {
@@ -89,7 +90,7 @@ void up_unblock_task(_TCB *tcb)
     {
       _TCB *rtcb = (_TCB*)g_readytorun.head;
 
-      dbg("Unblocking TCB=%p\n", tcb);
+     lldbg("Unblocking TCB=%p\n", tcb);
 
      /* Remove the task from the blocked task list */
 
@@ -128,14 +129,14 @@ void up_unblock_task(_TCB *tcb)
                */
 
               rtcb = (_TCB*)g_readytorun.head;
-              dbg("New Active Task TCB=%p\n", rtcb);
+              lldbg("New Active Task TCB=%p\n", rtcb);
 
               /* Then switch contexts */
 
               up_copystate(current_regs, rtcb->xcp.regs);
             }
 
-         /* We are not in an interrupt andler.  Copy the user C context
+         /* We are not in an interrupt handler.  Copy the user C context
           * into the TCB of the task that was previously active.  if 
           * up_saveusercontext returns a non-zero value, then this is really the
           * previously running task restarting!
@@ -149,7 +150,7 @@ void up_unblock_task(_TCB *tcb)
               */
 
              rtcb = (_TCB*)g_readytorun.head;
-             dbg("New Active Task TCB=%p\n", rtcb);
+             lldbg("New Active Task TCB=%p\n", rtcb);
 
               /* Then switch contexts */
 

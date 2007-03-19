@@ -76,7 +76,7 @@ void up_release_pending(void)
 {
   _TCB *rtcb = (_TCB*)g_readytorun.head;
 
-  dbg("From TCB=%p\n", rtcb);
+  lldbg("From TCB=%p\n", rtcb);
 
   /* Merge the g_pendingtasks list into the g_readytorun task list */
 
@@ -101,7 +101,7 @@ void up_release_pending(void)
            */
 
           rtcb = (_TCB*)g_readytorun.head;
-          dbg("New Active Task TCB=%p\n", rtcb);
+          lldbg("New Active Task TCB=%p\n", rtcb);
 
           /* Then switch contexts */
 
@@ -121,7 +121,7 @@ void up_release_pending(void)
            */
 
           rtcb = (_TCB*)g_readytorun.head;
-          dbg("New Active Task TCB=%p\n", rtcb);
+          lldbg("New Active Task TCB=%p\n", rtcb);
 
            /* Then switch contexts */
 
