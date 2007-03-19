@@ -442,7 +442,7 @@ void os_start(void)
 
               if (address)
                 {
-                  sched_free(address);
+                  free(address);
                 }
             }
           mm_givesemaphore();
