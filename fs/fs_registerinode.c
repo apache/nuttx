@@ -90,11 +90,9 @@ static FAR struct inode *inode_alloc(const char *name,
                                      mode_t mode, void *private)
 {
   int namelen = inode_namelen(name);
-  FAR struct inode *node = (FAR struct inode*)malloc(FSNODE_SIZE(namelen));
+  FAR struct inode *node = (FAR struct inode*)zalloc(FSNODE_SIZE(namelen));
   if (node)
     {
-      node->i_peer    = NULL;
-      node->i_child   = NULL;
       node->i_ops     = fops;
 #ifdef CONFIG_FILE_MODE
       node->i_mode    = mode;
