@@ -296,6 +296,7 @@ int sig_received(FAR _TCB *stcb, siginfo_t *info)
       ret = OK;
 
       /****** MASKED SIGNAL HANDLING ******/
+
       /* Check if the signal is masked -- if it is, it will be added to the
        * list of pending signals.
        */
@@ -365,6 +366,7 @@ int sig_received(FAR _TCB *stcb, siginfo_t *info)
         }
 
       /****** OTHER SIGNAL HANDLING ******/
+
       /* If the task is blocked waiting for a semaphore, then that
        * task must be unblocked when a signal is received.
        */

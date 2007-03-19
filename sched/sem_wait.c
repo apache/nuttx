@@ -164,9 +164,13 @@ int sem_wait(sem_t *sem)
            */
 
           if (*get_errno_ptr() != EINTR)
-            ret = OK;
+            {
+              ret = OK;
+            }
           else
-            sem->semcount++;
+            {
+              sem->semcount++;
+            }
         }
 
       /* Interrupts may now be enabled. */
