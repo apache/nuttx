@@ -221,7 +221,7 @@ void rr_test(void)
 
   printf("rr_test: Waiting for sieves to complete -- this should take awhile\n");
   printf("rr_test: If RR scheduling is working, they should start and complete at\n");
-  printf("rr_test: about then same time\n");
+  printf("rr_test: about the same time\n");
   fflush(stdout);
 
   pthread_join(sieve2_thread, &result);
