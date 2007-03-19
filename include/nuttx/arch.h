@@ -141,13 +141,14 @@ EXTERN void up_initial_state(FAR _TCB *tcb);
  *     processor, etc.  This value is retained only for debug
  *     purposes.
  *   stack_alloc_ptr: Pointer to allocated stack
- *   adj_stack_ptr: Adjusted StatckAllocPtr for HW.  The
+ *   adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
  *     initial value of the stack pointer.
  *
  * Inputs:
  *   tcb: The TCB of new task
  *   stack_size:  The requested stack size.  At least this much
  *     must be allocated.
+ *
  ************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
@@ -166,7 +167,7 @@ EXTERN STATUS up_create_stack(FAR _TCB *tcb, size_t stack_size);
  *     processor, etc.  This value is retained only for debug
  *     purposes.
  *   stack_alloc_ptr: Pointer to allocated stack
- *   adj_stack_ptr: Adjusted StatckAllocPtr for HW.  The
+ *   adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
  *     initial value of the stack pointer.
  *
  * Inputs:
@@ -244,14 +245,16 @@ EXTERN void up_block_task(FAR _TCB *tcb, tstate_t task_state);
  * Name: up_release_pending
  *
  * Description:
- *   Release and ready-to-run tasks that have
- *   collected in the pending task list.  This can call a
- *   context switch if a new task is placed at the head of
- *   the ready to run list.
+ *   When tasks become ready-to-run but cannot run because
+ *   pre-emption is disabled, they are placed into a pending
+ *   task list.  This function releases and makes ready-to-run
+ *   all of the tasks that have collected in the pending task
+ *   list.  This can cause a context switch if a new task is
+ *   placed at the head of the ready to run list.
  *
  *   This function is called only from the NuttX scheduling
- *   logic.  Interrupts will always be disabled when this
- *   function is called.
+ *   logic when pre-emptioni is re-enabled.  Interrupts will
+ *   always be disabled when this function is called.
  *
  ************************************************************/
 
@@ -299,7 +302,7 @@ EXTERN void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority);
 /* Prototype is in unistd.h */
 
 /************************************************************
- * Name: ip_assert and up_assert_code
+ * Name: up_assert and up_assert_code
  *
  * Description:
  *   Assertions may be handled in an architecture-specific
