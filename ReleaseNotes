@@ -1,19 +1,19 @@
-Nuttx-0.1.1
+Nuttx-0.1.2
 ^^^^^^^^^^^
 
-This is the second release of NuttX.  This release includes the
-following.  See the ChangeLog for more detailed description of
-the changes.
+This is the third release of NuttX.  This release is primary a
+bugfix release with minimal new features.  See the ChangeLog
+for a more detailed description of the changes.
 
-(1) General OS bugfixes (see the ChangeLog for details),
-(2) bugfixes for the TI TMS320C5471 (Arm7) platform (see the
-    ChangeLog)
-(3) Complete support for the 87C52. (However, the 87C52 release
-    is not stable enough for general usage).
-(4) Added the beginning of a shell call NuttShell (nsh)
+(1) Several important OS and ARM7 bugfixes,
+(2) opendir(), closedir(), readdir(), etc. added
+(3) Added C5471 watchdog timer.
+(4) Created a shareable, serial driver.
+(5) Added 'ls' command to NuttShell (nsh)
+(6) Added a test of the round robin scheduler
 
 This release has been verified on the Linux user-mode platform,
-the  Spectrum Digital TMS320C5471 EVM, and the PJRC 87C52 development
-board using the test program under examples/ostest.
+the  Spectrum Digital TMS320C5471 EVM using the test program under
+examples/ostest.
 
-This tarball contains a complete CVS snapshot from March 14, 2007.
+This tarball contains a complete CVS snapshot from March 19, 2007.
