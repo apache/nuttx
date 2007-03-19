@@ -78,8 +78,8 @@
 #define REG_R15             (15)
 #define REG_CPSR            (16)
 
-#define XCPTCONTEST_REGS    (17)
-#define XCPTCONTEXT_SIZE    (4 * XCPTCONTEST_REGS)
+#define XCPTCONTEXT_REGS    (17)
+#define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 
 #define REG_A1              REG_R0
 #define REG_A2              REG_R1
@@ -173,7 +173,7 @@
  *---
  *  5	(XCPTCONTEXT_IRQ_REGS)
  *
- * For a total of 17 (XCPTCONTEST_REGS)
+ * For a total of 17 (XCPTCONTEXT_REGS)
  */
 
 #ifndef __ASSEMBLY__
@@ -194,7 +194,7 @@ struct xcptcontext
 
   /* Register save area */
 
-  uint32 regs[XCPTCONTEST_REGS];
+  uint32 regs[XCPTCONTEXT_REGS];
 };
 #endif
 
