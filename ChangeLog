@@ -42,10 +42,14 @@
 	* Fixed another bug where free() is called from IDLE task.
 	  Can't do this; the caller must be able to wait for access
 	  to memory.
+	* Cannot do debug output in middle of context switch logic.
+	* Interrupt must be disabled throughout all context switches.
 	* Separated C5471 serial driver; a shareable part is
 	  in drivers/. ; the C5471 specific part is in arch/C5471.
 	  serial.h defines the interface.
 	* Fixed mq_receive() and mq_send() -- bad memcpy()
+	* Fixed uninitialized variable in filesystem that could
+	  cause various problems
 	* Added a test for roundrobin scheduler.
 
 
