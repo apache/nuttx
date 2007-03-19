@@ -200,6 +200,10 @@ EXTERN void up_release_stack(FAR _TCB *dtcb);
  *   but has been prepped to execute.  Move the TCB to the
  *   ready-to-run list, restore its context, and start execution.
  *
+ *   This function is called only from the NuttX scheduling
+ *   logic.  Interrupts will always be disabled when this
+ *   function is called.
+ *
  * Inputs:
  *   tcb: Refers to the tcb to be unblocked.  This tcb is
  *     in one of the waiting tasks lists.  It must be moved to
@@ -217,6 +221,10 @@ EXTERN void up_unblock_task(FAR _TCB *tcb);
  *   The currently executing task at the head of
  *   the ready to run list must be stopped.  Save its context
  *   and move it to the inactive list specified by task_state.
+ *
+ *   This function is called only from the NuttX scheduling
+ *   logic.  Interrupts will always be disabled when this
+ *   function is called.
  *
  * Inputs:
  *   tcb: Refers to a task in the ready-to-run list (normally
@@ -241,6 +249,10 @@ EXTERN void up_block_task(FAR _TCB *tcb, tstate_t task_state);
  *   context switch if a new task is placed at the head of
  *   the ready to run list.
  *
+ *   This function is called only from the NuttX scheduling
+ *   logic.  Interrupts will always be disabled when this
+ *   function is called.
+ *
  ************************************************************/
 
 EXTERN void up_release_pending(void);
@@ -259,6 +271,10 @@ EXTERN void up_release_pending(void);
  *      the priority of the current, running task and it now has the
  *      priority.
  *
+ *   This function is called only from the NuttX scheduling
+ *   logic.  Interrupts will always be disabled when this
+ *   function is called.
+ *
  * Inputs:
  *   tcb: The TCB of the task that has been reprioritized
  *   priority: The new task priority
@@ -273,6 +289,11 @@ EXTERN void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority);
  * Description:
  *   This function causes the currently executing task to cease
  *   to exist.  This is a special case of task_delete().
+ *
+ *   Unlike other UP APIs, this function may be called
+ *   directly from user programs in various states.  The
+ *   implementation of this function should diable interrupts
+ *   before performing scheduling operations.
  *
  ************************************************************/
 /* Prototype is in unistd.h */

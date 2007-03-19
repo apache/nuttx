@@ -90,8 +90,9 @@
 
 STATUS task_activate(FAR _TCB *tcb)
 {
-#ifdef CONFIG_SCHED_INSTRUMENTATION
   irqstate_t flags = irqsave();
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
 
   /* Check if this is really a re-start */
 
@@ -109,9 +110,9 @@ STATUS task_activate(FAR _TCB *tcb)
    */
 
   sched_note_start(tcb);
-  irqrestore(flags);
 #endif
 
   up_unblock_task(tcb);
+  irqrestore(flags);
   return OK;
 }

@@ -76,26 +76,27 @@
 static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
 {
   int i;
-  dbg("  TCB=%p name=%s\n", tcb, tcb->name);
+
+  lldbg("  TCB=%p name=%s\n", tcb, tcb->argv[0]);
   if (tcb->filelist)
     {
-      dbg("    filelist refcount=%d\n",
-          tcb->filelist->fl_crefs);
+      lldbg("    filelist refcount=%d\n",
+            tcb->filelist->fl_crefs);
 
       for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
         {
           struct inode *inode = tcb->filelist->fl_files[i].f_inode;
           if (inode)
             {
-              dbg("      fd=%d refcount=%d\n",
-                  i, inode->i_crefs);
+              lldbg("      fd=%d refcount=%d\n",
+                    i, inode->i_crefs);
             }
         }
     }
 
   if (tcb->streams)
     {
-      dbg("    streamlist refcount=%d\n",
+      lldbg("    streamlist refcount=%d\n",
           tcb->streams->sl_crefs);
 
       for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
@@ -103,9 +104,9 @@ static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
           struct file_struct *filep = &tcb->streams->sl_streams[i];
           if (filep->fs_filedes >= 0)
             {
-              dbg("      fd=%d nbytes=%d\n",
-                  filep->fs_filedes,
-                  filep->fs_bufpos - filep->fs_bufstart);
+              lldbg("      fd=%d nbytes=%d\n",
+                    filep->fs_filedes,
+                    filep->fs_bufpos - filep->fs_bufstart);
             }
         }
     }
@@ -128,11 +129,12 @@ static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
 void _exit(int status)
 {
   _TCB* tcb = (_TCB*)g_readytorun.head;
+  irqstate_t flags = irqsave();
 
-  dbg("TCB=%p exitting\n", tcb);
+  lldbg("TCB=%p exitting\n", tcb);
 
 #if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
-  dbg("Other tasks:\n");
+  lldbg("Other tasks:\n");
   sched_foreach(_up_dumponexit, NULL);
 #endif
 
@@ -162,7 +164,7 @@ void _exit(int status)
    */
 
   tcb = (_TCB*)g_readytorun.head;
-  dbg("New Active Task TCB=%p\n", tcb);
+  lldbg("New Active Task TCB=%p\n", tcb);
 
   /* Then switch contexts */
 

@@ -93,6 +93,10 @@ STATUS sched_unlock(void)
 
   if (rtcb && !up_interrupt_context())
     {
+      /* Prevent context switches throughout the following */
+
+      irqstate_t flags = irqsave();
+
       /* Decrement the preemption lock counter */
 
       if (rtcb->lockcount)
@@ -117,6 +121,7 @@ STATUS sched_unlock(void)
              up_release_pending();
            }
         }
+      irqrestore(flags);
     }
   return OK;
 }
