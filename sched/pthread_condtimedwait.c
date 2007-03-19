@@ -308,7 +308,6 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
                        */
 
                       status = sem_wait((sem_t*)&cond->sem);
-                      irqrestore(int_state);
 
                       /* Did we get the condition semaphore. */
 
@@ -329,6 +328,14 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
                               ret = EINVAL;
                             }
                         }
+
+                      /* The interrupts stay disabled until after we sample the errno.
+                       * This is because when debug is enabled and the console is used
+                       * for debug output, then the errno can be altered by interrupt
+                       * handling! (bad)
+                       */
+
+                      irqrestore(int_state);
                     }
 
                   /* Reacquire the mutex (retaining the ret). */
