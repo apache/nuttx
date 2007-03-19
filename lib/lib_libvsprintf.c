@@ -457,7 +457,7 @@ static void fixup(ubyte fmt, ubyte *flags, int *n)
       case 'i':
         /* Signed base 10 */
 
-        if (n < 0)
+        if (*n < 0)
           {
             SET_NEGATE(*flags);
             CLR_SHOWPLUS(*flags);
@@ -1353,7 +1353,7 @@ int lib_vsprintf(struct lib_stream_s *obj, const char *src, va_list ap)
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
               int luwidth;
 #endif
-              /* Extract the long long value. */
+              /* Extract the long value. */
 
               ln = va_arg(ap, long);
 
@@ -1392,7 +1392,7 @@ int lib_vsprintf(struct lib_stream_s *obj, const char *src, va_list ap)
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
               int pwidth;
 #endif
-              /* Extract the long long value. */
+              /* Extract the integer value. */
 
               p = va_arg(ap, void *);
 
