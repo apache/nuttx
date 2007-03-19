@@ -77,8 +77,15 @@
 void up_sigdeliver(void)
 {
   _TCB  *rtcb = (_TCB*)g_readytorun.head;
-  uint32 regs[XCPTCONTEST_REGS];
+  uint32 regs[XCPTCONTEXT_REGS];
   sig_deliver_t sigdeliver;
+
+  /* Save the errno.  This must be preserved throughout the
+   * signal handling so that the the user code final gets
+   * the correct errno value (probably EINTR).
+   */
+
+  int saved_errno = rtcb->errno;
 
   dbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
@@ -108,10 +115,18 @@ void up_sigdeliver(void)
 
   sigdeliver(rtcb);
 
+  /* Output any debug messaged BEFORE restoreing errno
+   * (becuase they may alter errno), then restore the
+   * original errno that is needed by the user logic
+   * (it is probably EINTR).
+   */
+
+  dbg("Resuming\n");
+  rtcb->errno = saved_errno;
+
   /* Then restore the correct state for this thread of
    * execution.
    */
 
-  dbg("Resuming\n");
   up_fullcontextrestore(regs);
 }
