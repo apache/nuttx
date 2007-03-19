@@ -67,7 +67,7 @@
 void up_copystate(uint32 *dest, uint32 *src)
 {
   int i;
-  for (i = 0; i < XCPTCONTEST_REGS; i++)
+  for (i = 0; i < XCPTCONTEXT_REGS; i++)
     {
       *dest++ = *src++;
     }
