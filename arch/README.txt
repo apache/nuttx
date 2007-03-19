@@ -18,8 +18,8 @@ arch/<arch-name>/arch.h as described below).
 Directory Structure
 ^^^^^^^^^^^^^^^^^^^
 
-Thie arch directory contains architecture specific logic.  Each aructure
-provide a a subdirectory <arch-name>under arch/ with the folling characteristics:
+The arch directory contains architecture specific logic.  Each architecture must
+provide a subdirectory <arch-name> under arch/ with the folling characteristics:
 
 
 	<arch-name>
@@ -216,19 +216,29 @@ src/Makefile
 Supported Architectures
 ^^^^^^^^^^^^^^^^^^^^^^^
 
+arch/sim
+    A user-mode port of NuttX to the x86 Linux platform is available.
+    The purpose of this port is primarily to support OS feature developement.
+    This port does not support interrupts or a real timer (and hence no
+    round robin scheduler)  Otherwise, it is complete.
+
 arch/c5471
-    TI TMS320C5471 (also called TMS320DM180).
+    TI TMS320C5471 (also called TMS320DM180 or just C5471).
     NuttX operates on the ARM7 of this dual core processor. This port
     uses the Spectrum Digital evaluation board with a GNU arm-elf toolchain*.
-    This port is in progress and partially functional (However, my board
-    is dead at the moment so it will be awhile before I fix it).
+    This port is complete, verified, and included in the NuttX release.
+
+arch/dm320
+    TI TMS320DM320 (also called just DM320).
+    NuttX operates on the ARM9EJS of this dual core processor.
+    This port uses the Neuros OSD with a GNU arm-elf toolchain*:
+    see http://wiki.neurostechnology.com/index.php/Developer_Welcome .
+    STATUS: This port is code complete but totally untested due to
+    hardware issues with my OSD.
 
 arch/pjrc-8051
     8051 Microcontroller.  This port uses the PJRC 87C52 development system
     and the SDCC toolchain.   This port is not quite ready for prime time.
-
-arch/sim
-  x86 Linux Simulation</b>.  Fully functional.
 
 Other ports for the for the TI TMS320DM270 and for MIPS are in various states
 of progress
