@@ -89,7 +89,7 @@ void up_unblock_task(_TCB *tcb)
     {
       _TCB *rtcb = (_TCB*)g_readytorun.head;
 
-      dbg("Unblocking TCB=%p\n", tcb);
+      lldbg("Unblocking TCB=%p\n", tcb);
 
      /* Remove the task from the blocked task list */
 
@@ -128,7 +128,7 @@ void up_unblock_task(_TCB *tcb)
                */
 
               rtcb = (_TCB*)g_readytorun.head;
-              dbg("New Active Task TCB=%p\n", rtcb);
+              lldbg("New Active Task TCB=%p\n", rtcb);
 
               /* Then switch contexts */
 
@@ -149,7 +149,7 @@ void up_unblock_task(_TCB *tcb)
               */
 
              rtcb = (_TCB*)g_readytorun.head;
-             dbg("New Active Task TCB=%p\n", rtcb);
+             lldbg("New Active Task TCB=%p\n", rtcb);
 
               /* Then switch contexts */
 

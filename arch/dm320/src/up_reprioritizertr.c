@@ -97,7 +97,7 @@ void up_reprioritize_rtr(_TCB *tcb, ubyte priority)
       _TCB *rtcb = (_TCB*)g_readytorun.head;
       boolean switch_needed;
 
-      dbg("TCB=%p PRI=%d\n", tcb, priority);
+      lldbg("TCB=%p PRI=%d\n", tcb, priority);
 
       /* Remove the tcb task from the ready-to-run list.
        * sched_removereadytorun will return TRUE if we just
@@ -149,7 +149,7 @@ void up_reprioritize_rtr(_TCB *tcb, ubyte priority)
                */
 
               rtcb = (_TCB*)g_readytorun.head;
-              dbg("New Active Task TCB=%p\n", rtcb);
+              lldbg("New Active Task TCB=%p\n", rtcb);
 
               /* Then switch contexts */
 
@@ -168,7 +168,7 @@ void up_reprioritize_rtr(_TCB *tcb, ubyte priority)
                */
 
               rtcb = (_TCB*)g_readytorun.head;
-              dbg("New Active Task TCB=%p\n", rtcb);
+              lldbg("New Active Task TCB=%p\n", rtcb);
 
               /* Then switch contexts */
 
