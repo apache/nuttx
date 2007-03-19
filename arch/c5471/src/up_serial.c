@@ -247,9 +247,9 @@ static inline void up_disableuartint(struct up_dev_s *priv, uint16 *ier)
 {
   if (ier)
     {
-      *ier = priv->regs.ier & UART_IER_AllInts;
+      *ier = priv->regs.ier & UART_IER_INTMASK;
     }
-  priv->regs.ier &= ~UART_IER_AllInts;
+  priv->regs.ier &= ~UART_IER_INTMASK;
   up_serialout(priv, UART_IER_OFFS, priv->regs.ier);
 }
 
@@ -259,7 +259,7 @@ static inline void up_disableuartint(struct up_dev_s *priv, uint16 *ier)
 
 static inline void up_restoreuartint(struct up_dev_s *priv, uint16 ier)
 {
-  priv->regs.ier |= ier & (UART_IER_RecvInt|UART_IER_XmitInt);
+  priv->regs.ier |= ier & (UART_IER_RECVINT|UART_IER_XMITINT);
   up_serialout(priv, UART_IER_OFFS, priv->regs.ier);
 }
 
@@ -357,25 +357,25 @@ static int up_setup(struct uart_dev_s *dev)
 
   if (priv->bits == 7)
     {
-      cval = UART_LCR_7bits;
+      cval = UART_LCR_7BITS;
     }
   else
     {
-      cval = UART_LCR_8bits;
+      cval = UART_LCR_8BITS;
     }
 
   if (priv->stopbits2)
     {
-      cval |= UART_LCR_2stop;
+      cval |= UART_LCR_2STOP;
     }
 
   if (priv->parity == 1)   /* Odd parity */
     {
-      cval |= (UART_LCR_ParEn|UART_LCR_ParOdd);
+      cval |= (UART_LCR_PAREN|UART_LCR_PARODD);
     }
   else if (priv->parity == 2)  /* Even parity */
     {
-      cval |= (UART_LCR_ParEn|UART_LCR_ParEven);
+      cval |= (UART_LCR_PAREN|UART_LCR_PAREVEN);
     }
 
   /* Both the IrDA and MODEM UARTs support RESET and UART mode. */
@@ -645,13 +645,13 @@ static void up_rxint(struct uart_dev_s *dev, boolean enable)
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      priv->regs.ier |= UART_IER_RecvInt;
+      priv->regs.ier |= UART_IER_RECVINT;
       up_serialout(priv, UART_IER_OFFS, priv->regs.ier);
 #endif
     }
   else
     {
-      priv->regs.ier &= ~UART_IER_RecvInt;
+      priv->regs.ier &= ~UART_IER_RECVINT;
       up_serialout(priv, UART_IER_OFFS, priv->regs.ier);
     }
 }
@@ -698,13 +698,13 @@ static void up_txint(struct uart_dev_s *dev, boolean enable)
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      priv->regs.ier |= UART_IER_XmitInt;
+      priv->regs.ier |= UART_IER_XMITINT;
       up_serialout(priv, UART_IER_OFFS, priv->regs.ier);
 #endif
     }
   else
     {
-      priv->regs.ier &= ~UART_IER_XmitInt;
+      priv->regs.ier &= ~UART_IER_XMITINT;
       up_serialout(priv, UART_IER_OFFS, priv->regs.ier);
     }
 }

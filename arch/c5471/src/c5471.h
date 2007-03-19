@@ -157,30 +157,30 @@
                                         /* Bits 31-7: Reserved */
 #define UART_LCR_BOC         0x00000040 /* Bit 6: Break Control */
                                         /* Bit 5: Parity Type 2 */
-#define UART_LCR_ParEven     0x00000010 /* Bit 4: Parity Type 1 */
-#define UART_LCR_ParOdd      0x00000000
-#define UART_LCR_ParEn       0x00000008 /* Bit 3: Paity Enable */
-#define UART_LCR_ParDis      0x00000000
-#define UART_LCR_2stop       0x00000004 /* Bit 2: Number of stop bits */
-#define UART_LCR_1stop       0x00000000
-#define UART_LCR_5bits       0x00000000 /* Bits 0-1: Word-length */
-#define UART_LCR_6bits       0x00000001
-#define UART_LCR_7bits       0x00000002
-#define UART_LCR_8bits       0x00000003
+#define UART_LCR_PAREVEN     0x00000010 /* Bit 4: Parity Type 1 */
+#define UART_LCR_PARODD      0x00000000
+#define UART_LCR_PAREN       0x00000008 /* Bit 3: Paity Enable */
+#define UART_LCR_PARDIS      0x00000000
+#define UART_LCR_2STOP       0x00000004 /* Bit 2: Number of stop bits */
+#define UART_LCR_1STOP       0x00000000
+#define UART_LCR_5BITS       0x00000000 /* Bits 0-1: Word-length */
+#define UART_LCR_6BITS       0x00000001
+#define UART_LCR_7BITS       0x00000002
+#define UART_LCR_8BITS       0x00000003
 
 #define UART_FCR_FTL         0x00000000
 #define UART_FCR_FIFO_EN     0x00000001
 #define UART_FCR_TX_CLR      0x00000002
 #define UART_FCR_RX_CLR      0x00000004
 
-#define UART_IER_RecvInt     0x00000001
-#define UART_IER_XmitInt     0x00000002
-#define UART_IER_LineStsInt  0x00000004
-#define UART_IER_ModemStsInt 0x00000008 /* IrDA UART only */
-#define UART_IER_XoffInt     0x00000020
-#define UART_IER_RtsInt      0x00000040 /* IrDA UART only */
-#define UART_IER_CtsInt      0x00000080 /* IrDA UART only */
-#define UART_IER_AllInts     0x000000ff
+#define UART_IER_RECVINT     0x00000001
+#define UART_IER_XMITINT     0x00000002
+#define UART_IER_LINESTSINT  0x00000004
+#define UART_IER_MODEMSTSINT 0x00000008 /* IrDA UART only */
+#define UART_IER_XOFFINT     0x00000020
+#define UART_IER_RTSINT      0x00000040 /* IrDA UART only */
+#define UART_IER_CTSINT      0x00000080 /* IrDA UART only */
+#define UART_IER_INTMASK     0x000000ff
 
 #define BAUD_115200          0x00000001
 #define BAUD_57600           0x00000002
