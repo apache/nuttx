@@ -188,7 +188,7 @@ struct _TCB
                                   /* (for debug purposes only)        */
   FAR void *stack_alloc_ptr;      /* Pointer to allocated stack       */
                                   /* Need to deallocate stack         */
-  FAR void *adj_stack_ptr;        /* Adjusted StatckAllocPtr for HW   */
+  FAR void *adj_stack_ptr;        /* Adjusted stack_alloc_ptr for HW  */
                                   /* The initial stack pointer value  */
 #endif
 
