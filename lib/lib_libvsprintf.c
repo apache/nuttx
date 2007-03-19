@@ -705,7 +705,7 @@ static void lfixup(ubyte fmt, ubyte *flags, long *ln)
       case 'i':
         /* Signed base 10 */
 
-        if (ln < 0)
+        if (*ln < 0)
           {
             SET_NEGATE(*flags);
             CLR_SHOWPLUS(*flags);
@@ -955,7 +955,7 @@ static void llfixup(ubyte fmt, ubyte *flags, long long *lln)
       case 'i':
         /* Signed base 10 */
 
-        if (lln < 0)
+        if (*lln < 0)
           {
             SET_NEGATE(*flags);
             CLR_SHOWPLUS(*flags);
