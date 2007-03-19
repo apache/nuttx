@@ -41,6 +41,7 @@
 #include <sys/types.h>
 #include <sched.h>
 #include <debug.h>
+#include <8052.h>
 #include <nuttx/arch.h>
 #include "os_internal.h"
 #include "up_internal.h"
@@ -75,6 +76,12 @@ void _exit(int status)
   FAR _TCB* tcb = (FAR _TCB*)g_readytorun.head;
 
   dbg("TCB=%p exitting\n", tcb);
+
+  /* Disable interrupts.  Interrupts will remain disabled until
+   * the new task is resumed below when the save IE is restored.
+   */
+
+  EA = 0;
 
   /* Remove the tcb task from the ready-to-run list.  We can
    * ignore the return value because we know that a context

@@ -76,7 +76,7 @@
 static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
 {
   int i;
-  dbg("  TCB=%p name=%s\n", tcb, tcb->name);
+  dbg("  TCB=%p name=%s\n", tcb, tcb->argv[0]);
   if (tcb->filelist)
     {
       dbg("    filelist refcount=%d\n",
@@ -128,8 +128,9 @@ static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
 void _exit(int status)
 {
   _TCB* tcb = (_TCB*)g_readytorun.head;
+  irqstate_t flags = irqsave();
 
-  dbg("TCB=%p exitting\n", tcb);
+  lldbg("TCB=%p exitting\n", tcb);
 
 #if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
   dbg("Other tasks:\n");
@@ -162,7 +163,7 @@ void _exit(int status)
    */
 
   tcb = (_TCB*)g_readytorun.head;
-  dbg("New Active Task TCB=%p\n", tcb);
+  lldbg("New Active Task TCB=%p\n", tcb);
 
   /* Then switch contexts */
 
