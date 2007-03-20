@@ -111,14 +111,14 @@ boolean sched_addreadytorun(FAR _TCB *btcb)
        * task to the g_pendingtasks task list for now.
        */
 
-      sched_addprioritized(btcb, (dq_queue_t*)&g_pendingtasks);
+      sched_addprioritized(btcb, (FAR dq_queue_t*)&g_pendingtasks);
       btcb->task_state = TSTATE_TASK_PENDING;
       ret = FALSE;
     }
 
   /* Otherwise, add the new task to the g_readytorun task list */
 
-  else if (sched_addprioritized(btcb, (dq_queue_t*)&g_readytorun))
+  else if (sched_addprioritized(btcb, (FAR dq_queue_t*)&g_readytorun))
     {
       /* Information the instrumentation logic that we are switching tasks */
 

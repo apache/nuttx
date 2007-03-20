@@ -240,7 +240,7 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
           {
             /* Remove the TCB from the prioritized task list */
 
-            dq_rem((FAR dq_entry_t*)tcb, (dq_queue_t*)g_tasklisttable[task_state].list);
+            dq_rem((FAR dq_entry_t*)tcb, (FAR dq_queue_t*)g_tasklisttable[task_state].list);
 
             /* Change the task priority */
 
@@ -250,7 +250,7 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
              * position
              */
 
-            sched_addprioritized(tcb, (dq_queue_t*)g_tasklisttable[task_state].list);
+            sched_addprioritized(tcb, (FAR dq_queue_t*)g_tasklisttable[task_state].list);
           }
 
         /* CASE 3b. The task resides in a non-prioritized list. */
