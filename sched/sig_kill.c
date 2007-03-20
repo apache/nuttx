@@ -1,5 +1,5 @@
 /************************************************************
- * sig_queue.c
+ * sig_kill.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,86 +38,64 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
-#include <sys/types.h>
-#include <signal.h>
-#include <debug.h>
 #include <sched.h>
 #include <errno.h>
+#include <debug.h>
 #include "os_internal.h"
 #include "sig_internal.h"
 
 /************************************************************
- * Definitions
+ * Global Functions
  ************************************************************/
 
 /************************************************************
- * Private Type Declarations
- ************************************************************/
-
-/************************************************************
- * Global Variables
- ************************************************************/
-
-/************************************************************
- * Private Variables
- ************************************************************/
-
-/************************************************************
- * Private Functions
- ************************************************************/
-
-/************************************************************
- * Public Functions
- ************************************************************/
-
-/************************************************************
- * Function: sigqueue
+ * Function:  kill
  *
  * Description:
- *   This function sends the signal specified by signo with
- *   the signal parameter value to the process specified by
- *   pid.
+ *   The kill() system call can be used to send any signal to
+ *   any task.
  *
- *   If the receiving process has the signal blocked via the
- *   sigprocmask, the signal will pend until it is unmasked.
- *   Only one pending signal (per signo) is retained.  This
- *   is consistent with POSIX which states, "If a subsequent
- *   occurrence of a pending signal is generated, it is
- *   implementation defined as to whether the signal is
- *   delivered more than once."
+ *   Limitation: Sending of signals to 'process groups' is
+ *   not supported in NuttX
  *
  * Parameters:
- *   pid - Process ID of task to receive signal
- *   signo - Signal number
- *   value - Value to pass to task with signal
+ *   pid - The id of the task to receive the signal.  The
+ *     POSIX kill specification encodes process group
+ *     information as zero and negative pid values.  Only
+ *     positive, non-zero values of pid are supported by this
+ *     implementation.
+ *   signo - The signal number to send.
  *
  * Return Value:
  *    On  success (at least one signal was sent), zero is
  *    returned.  On error, -1 is returned, and errno is set
  *    appropriately.
  *
- *    EGAIN The limit of signals which may be queued has been reached.
- *    EINVAL sig was invalid.
- *    EPERM  The  process  does  not  have  permission to send the
- *      signal to the receiving process.
- *    ESRCH  No process has a PID matching pid.
+ *    EINVAL An invalid signal was specified.
+ *    EPERM  The process does not have permission to send the
+ *           signal to any of the target processes.
+ *    ESRCH  The pid or process group does not exist.
+ *    ENOSYS Do not support sending signals to process groups.
  *
  * Assumptions:
  *
  ************************************************************/
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-int sigqueue (int pid, int signo, const union sigval value)
-#else
-int sigqueue(int pid, int signo, void *sival_ptr)
-#endif
+int kill(pid_t pid, int signo)
 {
   FAR _TCB *stcb;
   siginfo_t info;
   int       ret = ERROR;
 
-  /* sanity checks */
+  /* We do not support sending signals to process groups */
+
+  if (pid <= 0)
+    {
+      *get_errno_ptr() = ENOSYS;
+      return ERROR;
+    }
+
+  /* Make sure that the signal is valid */
 
   if (!GOOD_SIGNO(signo))
     {
@@ -125,17 +103,15 @@ int sigqueue(int pid, int signo, void *sival_ptr)
       return ERROR;
     }
 
+  /* Keep things stationary through the following */
+
   sched_lock();
 
   /* Get the TCB of the receiving task */
 
   stcb = sched_gettcb(pid);
-#ifdef CONFIG_CAN_PASS_STRUCTS
-  dbg("TCB=0x%08x signo=%d value=%d\n", stcb, signo, value.sival_int);
-#else
-  dbg("TCB=0x%08x signo=%d value=%p\n", stcb, signo, sival_ptr);
-#endif
-  if (pid == 0 || !stcb)
+  dbg("TCB=0x%08x signo=%d\n", stcb, signo);
+  if (!stcb)
     {
       *get_errno_ptr() = ESRCH;
       sched_unlock();
@@ -144,13 +120,9 @@ int sigqueue(int pid, int signo, void *sival_ptr)
 
   /* Create the siginfo structure */
 
-  info.si_signo = signo;
-  info.si_code  = SI_QUEUE;
-#ifdef CONFIG_CAN_PASS_STRUCTS
-  info.si_value = value;
-#else
-  info.si_value.sival_ptr = sival_ptr;
-#endif
+  info.si_signo           = signo;
+  info.si_code            = SI_USER;
+  info.si_value.sival_ptr = NULL;
 
   /* Send the signal */
 
@@ -158,4 +130,5 @@ int sigqueue(int pid, int signo, void *sival_ptr)
   sched_unlock();
   return ret;
 }
+
 

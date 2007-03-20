@@ -61,7 +61,7 @@ CLOCK_SRCS	= clock_initialize.c mktime.c gmtime_r.c clock_settime.c \
 		  clock_gettime.c clock_getres.c
 SIGNAL_SRCS	= sig_initialize.c \
 		  sig_action.c sig_procmask.c sig_pending.c sig_suspend.c \
-		  sig_queue.c sig_waitinfo.c sig_timedwait.c \
+		  sig_kill.c sig_queue.c sig_waitinfo.c sig_timedwait.c \
 		  sig_emptyset.c sig_fillset.c sig_addset.c sig_delset.c \
 		  sig_ismember.c sig_findaction.c \
 		  sig_allocatependingsigaction.c sig_releasependingsigaction.c \

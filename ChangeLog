@@ -64,6 +64,7 @@
 	  POSIX compliance.
 	* Eliminate compilation warnings that that crept into
 	  recent check-ins
+	* Add kill()
 	* Some Documentation updates
 	* Added support for the Neuros OSD / DM320
 
