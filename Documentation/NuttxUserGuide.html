@@ -27,7 +27,7 @@ Gregory Nutt
 <H1>1.0 <A NAME="Introduction">Introduction</A></H1>
 
 <P>
-This user's manual is divided into three sections:
+This user's manual is divided into three sections plus a index:
 <UL>
 <LI><B>Section 1.0, <A HREF="#Introduction">Introduction</A></B>:
 This section provides an overview of the NuttX user's manual.
@@ -37,7 +37,7 @@ perspective of the firmware developer.  This section is divided
 into several paragraphs that describe different groups of OS interfaces:
 <UL>
 <LI>Paragraph 2.1 <A HREF="#Task_Control">Task Control Interfaces</A>
-<LI>Paragraph 2.2 <A HREF="#Task_Schedule">Task Scheduling Interfaces</A>
+8nnnnn<LI>Paragraph 2.2 <A HREF="#Task_Schedule">Task Scheduling Interfaces</A>
 <LI>Paragraph 2.3 <A HREF="#Task_Switch">Task Switching Interfaces</A>
 <LI>Paragraph 2.4 <A HREF="#Message_Queue">Named Message Queue Interfaces</A>
 <LI>Paragraph 2.5 <A HREF="#Semaphores">Counting Semaphore Interfaces</A>
@@ -48,7 +48,8 @@ into several paragraphs that describe different groups of OS interfaces:
 <LI><B>Section 3.0, <A HREF="#Data_Structures">OS Data Structures</A></B>:
 This section documents the data structures that are used at the NuttX
 interface.
-</UL>
+<li><a href="#index">Index</a></li>
+</ul>
 <HR>
 
 <H1>2.0 <A NAME="OS_Interfaces">OS Interfaces</A></H1>
@@ -89,47 +90,58 @@ paragraphs.
 <H2>2.1 <A NAME="Task_Control">Task Control Interfaces</A></H2>
 
 <p>
-<b>Tasks</b>.
-NuttX is a flat address OS.  As such it does not support &quot;processes&quot;
-in the way that, say, Linux does.
-NuttX only supports simple threads running within the same address space.
-However, the programming model makes a distinction between &quot;tasks&quot;
-and pthreads:
+  <b>Tasks</b>.
+  NuttX is a flat address OS.  As such it does not support &quot;processes&quot;
+  in the way that, say, Linux does.
+  NuttX only supports simple threads running within the same address space.
+  However, the programming model makes a distinction between &quot;tasks&quot;
+  and pthreads:
+</p>
 <ul>
-<li><i>tasks</i> are threads which have a degree of independence
-<li><a href="#Pthread"><i>pthreads</i></a> share some resources.
+  <li><i>tasks</i> are threads which have a degree of independence
+  <li><a href="#Pthread"><i>pthreads</i></a> share some resources.
 </ul>
 <p>
-<b>File Descriptors and Streams</b>.
-This applies, in particular, in the area of opened file descriptors and streams.
-When a task is started using the interfaces in this section, it will be created
-with at most three open files.
-
-If CONFIG_DEV_CONSOLE is defined, the first three file descriptors (corresponding
-to stdin, stdout, stderr) will be duplicated for the the new task.
-Since these file descriptors are duplicated, the child task can free close
-them or manipulate them in any way without effecting the parent task.
-File-related operations (open, close, etc.) within a task will have no effect
-on other tasks.
-Since the three file descriptors are duplicated, it is also possible to perform
-some level of redirection.
+  <b>File Descriptors and Streams</b>.
+  This applies, in particular, in the area of opened file descriptors and streams.
+  When a task is started using the interfaces in this section, it will be created
+  with at most three open files.
+</p>
+</p>
+  If CONFIG_DEV_CONSOLE is defined, the first three file descriptors (corresponding
+  to stdin, stdout, stderr) will be duplicated for the the new task.
+  Since these file descriptors are duplicated, the child task can free close
+  them or manipulate them in any way without effecting the parent task.
+  File-related operations (open, close, etc.) within a task will have no effect
+  on other tasks.
+  Since the three file descriptors are duplicated, it is also possible to perform
+  some level of redirection.
+</p>
 <p>
-pthreads, on the other hand, will always share file descriptors with the parent
-thread.  In this case, file operations will have effect only all pthreads the
-were started from the same parent thread.
+  pthreads, on the other hand, will always share file descriptors with the parent
+  thread.  In this case, file operations will have effect only all pthreads the
+  were started from the same parent thread.
+</p>
+<p>
+  The following task control interfaces are provided by Nuttx:
+</p>
+<ul>
+  <li><a href="#taskcreate">2.1.1 task_create</a></li>
+  <li><a href="#taskinit">2.1.2 task_init</a></li>
+  <li><a href="#taskactivate">2.1.3 task_activate</a></li>
+  <li><a href="#taskdelete">2.1.4 task_delete</a></li>
+  <li><a href="#exit">2.1.5 exit</a></li>
+  <li><a href="#taskrestart">2.1.6 task_restart</a></li>
+  <li><a href="#getpid">2.1.7 getpid</a></li>
+</ul>
 
-<H3>2.1.1 task_create</H3>
+<H3><a name="taskcreate">2.1.1 task_create</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
 <PRE>
    #include &lt;sched.h&gt;
-    int task_create(
-        char *name,
-        int priority,
-        int stack_size,
-        main_t entry,
-        const char *argv[]);
+   int task_create(char *name, int priority, int stack_size, main_t entry, const char *argv[]);
 </PRE>
 
 <P>
@@ -196,19 +208,15 @@ were started from the same parent thread.
 <B>POSIX Compatibility:</B> This is a NON-POSIX interface.
 VxWorks provides the following similar interface:
 <PRE>
-   int taskSpawn(
-      char *name,
-      int priority,
-      int options,
-      int stackSize,
-      FUNCPTR entryPt,
-      int arg1, int arg2, int arg3, int arg4, int arg5,
-      int arg6, int arg7, int arg8, int arg9, int arg10);
+   int taskSpawn(char *name, int priority, int options, int stackSize, FUNCPTR entryPt,
+                 int arg1, int arg2, int arg3, int arg4, int arg5,
+                 int arg6, int arg7, int arg8, int arg9, int arg10);
 </PRE>
 
 <P>
-The NuttX task_create() differs from VxWorks' taskSpawn() in the
-following ways:
+  The NuttX task_create() differs from VxWorks' taskSpawn() in the
+  following ways:
+</p>
 <UL>
 <LI>Interface name
 <LI>Various differences in types of arguments
@@ -216,20 +224,14 @@ following ways:
 <LI>A variable number of parameters can be passed to a task (VxWorks supports ten).
 </UL>
 
-<H3>2.1.2 task_init</H3>
+<H3><a name="taskinit">2.1.2 task_init</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
 <PRE>
    #include &lt;sched.h&gt;
-   STATUS task_init(
-          _TCB *tcb,
-          char *name,
-          int priority,
-          uint32 *stack,
-          uint32 stack_size,
-          maint_t entry,
-          const char *argv[]);
+   STATUS task_init(_TCB *tcb, char *name, int priority, uint32 *stack, uint32 stack_size,
+                    maint_t entry, const char *argv[]);
 </PRE>
 
 <P>
@@ -278,21 +280,15 @@ mechanism to initialize and start a new task.
 <B>POSIX Compatibility:</B> This is a NON-POSIX interface.
 VxWorks provides the following similar interface:
 <PRE>
-   STATUS taskInit(
-      WIND_TCB *pTcb,
-      char *name,
-      int priority,
-      int options,
-      uint32 *pStackBase,
-      int stackSize,
-      FUNCPTR entryPt,
-      int arg1, int arg2, int arg3, int arg4, int arg5,
-      int arg6, int arg7, int arg8, int arg9, int arg10);
+   STATUS taskInit(WIND_TCB *pTcb, char *name, int priority, int options, uint32 *pStackBase, int stackSize,
+                   FUNCPTR entryPt, int arg1, int arg2, int arg3, int arg4, int arg5,
+                   int arg6, int arg7, int arg8, int arg9, int arg10);
 </PRE>
 
 <P>
-The NuttX task_init() differs from VxWorks' taskInit() in the
-following ways:
+  The NuttX task_init() differs from VxWorks' taskInit() in the
+  following ways:
+</p>
 <UL>
 <LI>Interface name
 <LI>Various differences in types or arguments
@@ -300,7 +296,7 @@ following ways:
 <LI>A variable number of parameters can be passed to a task (VxWorks supports ten).
 </UL>
 
-<H3>2.1.3 task_activate</H3>
+<H3><a name="taskactivate">2.1.3 task_activate</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -341,15 +337,16 @@ VxWorks provides the following similar interface:
 </PRE>
 
 <P>
-The NuttX task_activate() differs from VxWorks' taskActivate() in the
-following ways:
+  The NuttX task_activate() differs from VxWorks' taskActivate() in the
+  following ways:
+</p>
 <UL>
 <LI>Function name
 <LI>With VxWork's taskActivate, the pid argument is supposed to be
 the pointer to the WIND_TCB cast to an integer.
 </UL>
 
-<H3>2.1.4 task_delete</H3>
+<H3><a name="taskdelete">2.1.4 task_delete</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -390,15 +387,16 @@ VxWorks provides the following similar interface:
 </PRE>
 
 <P>
-The NuttX task_delete() differs from VxWorks' taskDelete() in
-the following ways:
+  The NuttX task_delete() differs from VxWorks' taskDelete() in
+  the following ways:
+</p>
 <UL>
 <LI>No support is provided for calling the tasks deletion routines
 (because taskDeleteHookAdd() is not supported).
 <LI>Deletion of self is not supported.  Use _exit();
 </UL>
 
-<H3>2.1.5 exit</H3>
+<H3><a name="exit">2.1.5 exit</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -438,13 +436,13 @@ And the unix interface:
 </PRE>
 
 <P>
-The NuttX exit() differs from ANSI exit() in
-the following ways:
+  The NuttX exit() differs from ANSI exit() in the following ways:
+</p>
 <UL>
 <LI>The <I>code</I> parameter is ignored.
 </UL>
 
-<H3>2.1.6 task_restart</H3>
+<H3><a name="taskrestart">2.1.6 task_restart</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -487,15 +485,15 @@ VxWorks provides the following similar interface:
 </PRE>
 
 <P>
-The NuttX task_restart() differs from VxWorks' taskRestart() in
-the following ways:
+  The NuttX task_restart() differs from VxWorks' taskRestart() in the following ways:
+</p>
 <UL>
 <LI>Restart of the currently running task is not supported.
 <LI>The VxWorks description says that the ID, priority, etc. take
 the value that they had when the task was <I>terminated</I>.
 </UL>
 
-<H3>2.1.7 getpid</H3>
+<H3><a name="getpid">2.1.7 getpid</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -524,19 +522,35 @@ Compatible with the POSIX interface of the same name.
 
 <H2>2.2 <A NAME="Task_Schedule">Task Scheduling Interfaces</A></H2>
 
-<P>
-NuttX performs strict priority scheduling: Tasks of higher
-priority have exclusive access to the CPU until they become blocked.
-At that time, the CPU is available to tasks of lower priority.
-Tasks of equal priority are scheduled FIFO.
-<P>
-The OS interfaces described in the following paragraphs provide
-a POSIX- compliant interface to the NuttX scheduler. However, these
-POSIX interfaces assume a greater range of scheduling options
-than those provided by the NuttX scheduler. As a result, many of
-these POSIX interfaces are little more than stubs.
+<p>
+  By default, NuttX performs strict priority scheduling: Tasks of higher
+  priority have exclusive access to the CPU until they become blocked.
+  At that time, the CPU is available to tasks of lower priority.
+  Tasks of equal priority are scheduled FIFO.
+</p>
+<p>
+  Optionally, a Nuttx task or thread can be configured with round-robin
+  scheduler.  This is similar to priority scheduling <i>except</i> that
+  tasks with equal priority and share CPU time via <i>time-slicing</i>.
+  The time-slice interval is a constant determined by the configuration
+  setting <code>CONFIG_RR_INTERVAL</code>.
+</p>
+<p>
+  The OS interfaces described in the following paragraphs provide
+  a POSIX- compliant interface to the NuttX scheduler:
+</p>
+<ul>
+  <li><a href="#schedsetparam">2.2.1 sched_setparam</a></li>
+  <li><a href="#schedgetparam">2.2.2 sched_getparam</a></li>
+  <li><a href="#schedsetscheduler">2.2.3 sched_setscheduler</a></li>
+  <li><a href="#setgetscheduler">2.2.4 sched_getscheduler</a></li>
+  <li><a href="#sched_yield">2.2.5 sched_yield</a></li>
+  <li><a href="#schedgetprioritymax">2.2.6 sched_get_priority_max</a></li>
+  <li><a href="#schedgetprioritymin">2.2.7 sched_get_priority_min</a></li>
+  <li><a href="#schedgetrrinterval">2.2.8 sched_get_rr_interval</a></li>
+</ul>
 
-<H3>2.2.1 sched_setparam</H3>
+<H3><a name="schedsetparam">2.2.1 sched_setparam</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -583,7 +597,7 @@ Differences from the full POSIX implementation include:
 <LI>The range of priority values for the POSIX call is 0 to 255
 </UL>
 
-<H3>2.2.2 sched_getparam</H3>
+<H3><a name="schedgetparam">2.2.2 sched_getparam</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -617,7 +631,7 @@ element of this structure.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.2.3 sched_setscheduler</H3>
+<H3><a name="schedsetscheduler">2.2.3 sched_setscheduler</a></H3>
 <P>
 <B>Function Prototype:</B> 
 <PRE>
@@ -660,7 +674,7 @@ interface of the same name.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.2.4 sched_getscheduler</H3>
+<H3><a name="setgetscheduler">2.2.4 sched_getscheduler</a></H3>
 <P>
 <B>Function Prototype:</B> 
 <PRE>
@@ -670,7 +684,7 @@ interface of the same name.
 <P>
   <B>Description:</B>
   <i>sched_getscheduler()</i> returns the scheduling policy
-  currently applied to the process identified by pid. If
+  currently applied to the task identified by pid. If
   pid equals zero, the policy of the calling process will
   be retrieved.
  *
@@ -710,7 +724,7 @@ Differences from the full POSIX implementation include:
 <LI>Does not report errors via <I>errno</I>.
 </UL>
 
-<H3>2.2.5 sched_yield</H3>
+<H3><a name="sched_yield">2.2.5 sched_yield</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -736,7 +750,7 @@ up the CPU (only to other tasks at the same priority).
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.2.6 sched_get_priority_max</H3>
+<H3><a name="schedgetprioritymax">2.2.6 sched_get_priority_max</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -766,7 +780,7 @@ possible task priority for a specified scheduling policy.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.2.7 sched_get_priority_min</H3>
+<H3><a name="schedgetprioritymin">2.2.7 sched_get_priority_min</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -796,7 +810,7 @@ possible task priority for a specified scheduling policy.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.2.8 sched_get_rr_interval</H3>
+<H3><a name="schedgetrrinterval">2.2.8 sched_get_rr_interval</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -844,7 +858,13 @@ priority of the calling task is returned.
 
 <H2>2.3 <A NAME="Task_Switch">Task Switching Interfaces</A></H2>
 
-<H3>2.3.1 sched_lock</H3>
+<ul>
+  <li><a href="#schedlock">2.3.1 sched_lock</a></li>
+  <li><a href="#schedunlock">2.3.2 sched_unlock</a></li>
+  <li><a href="#schedlockcount">2.3.3 sched_lockcount</a></li>
+</ul>
+
+<H3><a name="schedlock">2.3.1 sched_lock</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -876,7 +896,7 @@ VxWorks provides the comparable interface:
     STATUS taskLock( void );
 </PRE>
 
-<H3>2.3.2 sched_unlock</H3>
+<H3><a name="schedunlock">2.3.2 sched_unlock</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -909,7 +929,7 @@ VxWorks provides the comparable interface:
     STATUS taskUnlock( void );
 </PRE>
 
-<H3>2.3.3 sched_lockcount</H3>
+<H3><a name="schedlockcount">2.3.3 sched_lockcount</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -939,12 +959,23 @@ on this thread of execution.
 
 <H2>2.4 <A NAME="Message_Queue">Named Message Queue Interfaces</A></H2>
 
-<P>
-The NuttX supports POSIX named message queues for intertask communication.
-Any task may send or receive messages on named message queues.
-Interrupt handlers may send messages via named message queues.
+<p>
+  NuttX supports POSIX named message queues for intertask communication.
+  Any task may send or receive messages on named message queues.
+  Interrupt handlers may send messages via named message queues.
+</p>
+<ul>
+  <li><a href="#mqopen">2.4.1 mq_open</a></li>
+  <li><a href="#mqclose">2.4.2 mq_close</a></li>
+  <li><a href="#mqunlink">2.4.3 mq_unlink</a></li>
+  <li><a href="#mqsend">2.4.4 mq_send</a></li>
+  <li><a href="#mqreceive">2.4.5 mq_receive</a></li>
+  <li><a href="#mqnotify">2.4.6 mq_notify</a></li>
+  <li><a href="#mqsetattr">2.4.7 mq_setattr</a></li>
+  <li><a href="#mqgetattr">2.4.8 mq_getattr</a></li>
+</ul>
 
-<H3>2.4.1 mq_open</H3>
+<H3><a name="mqopen">2.4.1 mq_open</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1013,7 +1044,7 @@ may be sent or received.  In the present implementation, this maximum
 message size is limited at 22 bytes.
 </UL>
 
-<H3>2.4.2 mq_close</H3>
+<H3><a name="mqclose">2.4.2 mq_close</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1058,7 +1089,7 @@ return from mq_close() is undefined.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX interface
 of the same name.
 
-<H3>2.4.3 mq_unlink</H3>
+<H3><a name="mqunlink">2.4.3 mq_unlink</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1087,7 +1118,7 @@ closed.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.4.4 mq_send</H3>
+<H3><a name="mqsend">2.4.4 mq_send</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1136,7 +1167,7 @@ Differences from the full POSIX implementation include:
 <LI>Control is not returned if a signal is received.
 </UL>
 
-<H3>2.4.5 mq_receive</H3>
+<H3><a name="mqreceive">2.4.5 mq_receive</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1186,7 +1217,7 @@ Differences from the full POSIX implementation include:
 <LI>Control is not returned if a signal is received.
 </UL>
 
-<H3>2.4.6 mq_notify</H3>
+<H3><a name="mqnotify">2.4.6 mq_notify</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1242,7 +1273,7 @@ appropriate <I>mq_receive()</I> ... The resulting behavior is as if the
 message queue remains empty, and no notification shall be sent.&quot;
 </UL>
 
-<H3>2.4.7 mq_setattr</H3>
+<H3><a name="mqsetattr">2.4.7 mq_setattr</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1281,7 +1312,7 @@ would have been returned by mq_getattr()).
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.4.8 mq_getattr</H3>
+<H3><a name="mqgetattr">2.4.8 mq_getattr</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1322,53 +1353,71 @@ interface of the same name.
 
 <H2>2.5 <A NAME="Semaphores">Counting Semaphore Interfaces</A></H2>
 
-<P>
-<B>Semaphores</B>.  Semaphores are the basis for
-synchronization and mutual exclusion in NuttX. NuttX supports
-POSIX semaphores.
-<P>
-Semaphores are the preferred mechanism for gaining exclusive access to a
-resource.  sched_lock() and sched_unlock() can also be used for this purpose.
-However, sched_lock() and sched_unlock() have other undesirable side-affects
-in the operation of the system:  sched_lock() also prevents higher-priority
-tasks from running that do not depend upon the semaphore-managed resource
-and, as a result, can adversely affect system response times.
-<P>
-<B>Priority Inversion</B>.  Proper use of semaphores avoids the issues of
-sched_lock().  However, consider the following example:
-<OL>
-<LI>Some low-priority task, <I>Task C</I>, acquires a semphore in order to
-get exclusive access to a protected resource.
-<LI><I>Task C</I> is suspended to allow some high-priority task,
-<I>Task A</I>, to execute.
-<LI><I>Task A</I> attempts to acquire the semaphore held by <I>Task C</I> and
-gets blocked until <I>Task C</I> relinquishes the semaphore.
-<LI><I>Task C</I> is allowed to execute again, but gets suspended by some
-medium-priority <I>Task B</I>.
-</OL>
-At this point, the high-priority <I>Task A</I> cannot execute until
-<I>Task B</I> (and possibly other medium-priority tasks) completes and until
-<I>Task C</I> relinquishes the semaphore.  In effect, the high-priority task,
-<I>Task A</I> behaves as though it were lower in priority than the
-low-priority task, <I>Task C</I>!  This phenomenon is called <I>priority
-inversion</I>.
-<P>
-Some operating systems avoid priority inversion by <I>automatically</I>
-increasing the priority of the low-priority <I>Task C</I> (the operable
-buzz-word for this behavior is <I>mutex</I> semaphores).  The NuttX does not
-support this behavior.  As a consequence, it is left to the designer to
-provide implementations that will not suffer from priority inversion.
-The designer may, as examples:
+<p>
+  <b>Semaphores</b>.  Semaphores are the basis for
+  synchronization and mutual exclusion in NuttX. NuttX supports
+  POSIX semaphores.
+</p>
+<p>
+  Semaphores are the preferred mechanism for gaining exclusive access to a
+  resource.  sched_lock() and sched_unlock() can also be used for this purpose.
+  However, sched_lock() and sched_unlock() have other undesirable side-affects
+  in the operation of the system:  sched_lock() also prevents higher-priority
+  tasks from running that do not depend upon the semaphore-managed resource
+  and, as a result, can adversely affect system response times.
+</p>
+<p>
+  <B>Priority Inversion</B>.  Proper use of semaphores avoids the issues of
+  sched_lock().  However, consider the following example:
+  <OL>
+    <LI>Some low-priority task, <I>Task C</I>, acquires a semphore in order to
+      get exclusive access to a protected resource.</li>
+    <LI><I>Task C</I> is suspended to allow some high-priority task,</li>
+      <I>Task A</I>, to execute.</li>
+    <LI><I>Task A</I> attempts to acquire the semaphore held by <I>Task C</I> and
+      gets blocked until <I>Task C</I> relinquishes the semaphore.</li>
+    <LI><I>Task C</I> is allowed to execute again, but gets suspended by some
+      medium-priority <I>Task B</I>.</li>
+  </OL>
+<p>
+  At this point, the high-priority <I>Task A</I> cannot execute until
+  <I>Task B</I> (and possibly other medium-priority tasks) completes and until
+  <I>Task C</I> relinquishes the semaphore.  In effect, the high-priority task,
+  <I>Task A</I> behaves as though it were lower in priority than the
+  low-priority task, <I>Task C</I>!  This phenomenon is called <I>priority
+  inversion</I>.
+</p>
+<p>
+  Some operating systems avoid priority inversion by <I>automatically</I>
+  increasing the priority of the low-priority <I>Task C</I> (the operable
+  buzz-word for this behavior is <I>priority inheritance</I>).  NuttX does not
+  support this behavior.  As a consequence, it is left to the designer to
+  provide implementations that will not suffer from priority inversion.
+  The designer may, as examples:
+</p>
 <UL>
-<LI>Implement all tasks that need the semphore-managed resources at the
-same priority level,
-<LI>Boost the priority of the low-priority task before the semaphore is
-acquired, or
-<LI>Use sched_lock() in the low-priority task.
+  <LI>Implement all tasks that need the semphore-managed resources at the
+    same priority level,</li>
+  <LI>Boost the priority of the low-priority task before the semaphore is
+    acquired, or</li>
+  <LI>Use sched_lock() in the low-priority task.</li>
 </UL>
-<P>
+<p>
+  POSIX semaphore interfaces:
+</p>
+<ul>
+  <li><a href="#seminit">2.5.1 sem_init</a></li>
+  <li><a href="#semdestroy">2.5.2 sem_destroy</a></li>
+  <li><a href="#semopen">2.5.3 sem_open</a></li>
+  <li><a href="#semclose">2.5.4 sem_close</a></li>
+  <li><a href="#semunlink">2.5.5 sem_unlink</a></li>
+  <li><a href="#semwait">2.5.6 sem_wait</a></li>
+  <li><a href="#semtrywait">2.5.7 sem_trywait</a></li>
+  <li><a href="#sempost">2.5.8 sem_post</a></li>
+  <li><a href="#semgetvalue">2.5.9 sem_getvalue</a></li>
+</ul>
 
-<H3>2.5.1 sem_init</H3>
+<H3><a name="seminit">2.5.1 sem_init</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1411,7 +1460,7 @@ Differences from the full POSIX implementation include:
 <LI>pshared is not used.
 </UL>
 
-<H3>2.5.2 sem_destroy</H3>
+<H3><a name="semdestroy">2.5.2 sem_destroy</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1448,7 +1497,7 @@ blocked is undefined.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.5.3 sem_open</H3>
+<H3><a name="semopen">2.5.3 sem_open</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1514,7 +1563,7 @@ Differences from the full POSIX implementation include:
 just a counting semaphore.
 </UL>
 
-<H3>2.5.4 sem_close</H3>
+<H3><a name="semclose">2.5.4 sem_close</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1559,7 +1608,7 @@ has already locked.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.5.5 sem_unlink</H3>
+<H3><a name="semunlink">2.5.5 sem_unlink</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1605,7 +1654,7 @@ refer to the same semaphore; POSIX specifies that a new semaphore with the
 same name should be created after sem_unlink() is called.
 </UL>
 
-<H3>2.5.6 sem_wait</H3>
+<H3><a name="semwait">2.5.6 sem_wait</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1648,7 +1697,7 @@ received by this task.  In this case, the semaphore has not be acquired.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.5.7 sem_trywait</H3>
+<H3><a name="semtrywait">2.5.7 sem_trywait</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1690,7 +1739,7 @@ not valid.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.5.8 sem_post</H3>
+<H3><a name="sempost">2.5.8 sem_post</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1733,7 +1782,7 @@ task is the one that is performing the unlock.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.5.9 sem_getvalue</H3>
+<H3><a name="semgetvalue">2.5.9 sem_getvalue</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1777,15 +1826,21 @@ interface of the same name.
 <H2>2.6 <A NAME="Watchdogs">Watchdog Timer Interfaces</A></H2>
 
 <P>
-The NuttX provides a general watchdog timer facility. This
-facility allows the NuttX user to specify a watchdog timer function
-that will run after a specified delay. The watchdog timer function
-will run in the context of the timer interrupt handler. Because
-of this, a limited number of NuttX interfaces are available to
-the watchdog timer function. However, the watchdog timer function
-may use mq_send(), and sigqueue() to communicate with NuttX tasks.
+  NuttX provides a general watchdog timer facility.
+  This facility allows the NuttX user to specify a watchdog timer function
+  that will run after a specified delay.
+  The watchdog timer function will run in the context of the timer interrupt handler.
+  Because of this, a limited number of NuttX interfaces are available to he watchdog timer function.
+  However, the watchdog timer function may use mq_send(), sigqueue(), or kill() to communicate with NuttX tasks.
+</p>
+<ul>
+  <li><a href="#wdcreate">2.6.1 wd_create</a></li>
+  <li><a href="#wddelete">2.6.2 wd_delete</a></li>
+  <li><a href="#wdstart">2.6.3 wd_start</a></li>
+  <li><a href="#wdcancel">2.6.4 wd_cancel</a></li>
+</ul>
 
-<H3>2.6.1 wd_create</H3>
+<H3><a name="wdcreate">2.6.1 wd_create</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1823,7 +1878,7 @@ Differences from the VxWorks interface include:
 initialization time).
 </UL>
 
-<H3>2.6.2 wd_delete</H3>
+<H3><a name="wddelete">2.6.2 wd_delete</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1867,7 +1922,7 @@ Differences from the VxWorks interface include:
 before de-allocating it (i.e., never returns ERROR).
 </UL>
 
-<H3>2.6.3 wd_start</H3>
+<H3><a name="wdstart">2.6.3 wd_start</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1927,7 +1982,7 @@ to wdentry; VxWorks supports only a single parameter.  The maximum
 number of parameters is determined by 
 </UL>
 
-<H3>2.6.4 wd_cancel</H3>
+<H3><a name="wdcancel">2.6.4 wd_cancel</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -1965,27 +2020,46 @@ VxWorks provides the following comparable interface:
 
 <H2>2.7 <A NAME="Signals">Signal Interfaces</A></H2>
 
-<P>
-The NuttX provides signal interfaces for tasks. Signals are
-used to alter the flow control of tasks by communicating asynchronous
-events within or between task contexts. Any task or interrupt
-handler can post (or send) a signal to a particular task. The
-task being signaled will execute task-specified signal handler
-function the next time that the task has priority.
-The signal handler is a user-supplied function that is bound to
-a specific signal and performs whatever actions are necessary
-whenever the signal is received.
-<P>
-Signal handlers execute in the context of the task that registered
-the signal handler.
-<P>
-There are no predefined actions for any signal.
-The default action for all signals (i.e., when no signal handler has
-been supplied by the user) is to ignore the signal.
-<P>
-Tasks may also suspend themselves and wait until a signal is received.
+<p>
+  NuttX provides signal interfaces for tasks. Signals are used to
+  alter the flow control of tasks by communicating asynchronous events
+  within or between task contexts.
+  Any task or interrupt handler can post (or send) a signal to a particular task.
+  The task being signaled will execute task-specified signal handler
+  function the next time that the task has priority.
+  The signal handler is a user-supplied function that is bound to
+  a specific signal and performs whatever actions are necessary
+  whenever the signal is received.
+</p>
+<p>
+  There are no predefined actions for any signal.
+  The default action for all signals (i.e., when no signal handler has
+  been supplied by the user) is to ignore the signal.
+  In this sense, all NuttX are <i>real time</i> signals.
+</p>
+<p>
+  Tasks may also suspend themselves and wait until a signal is received.
+</p>
+<p>
+  The following signal handling interfaces are provided by NuttX:
+</p>
+<ul>
+  <li><a href="#sigemptyset">2.7.1 sigemptyset</a></li>
+  <li><a href="#sigfillset">2.7.2 sigfillset</a></li>
+  <li><a href="#sigaddset">2.7.3 sigaddset</a></li>
+  <li><a href="#sigdelset">2.7.4 sigdelset</a></li>
+  <li><a href="#sigismember">2.7.5 sigismember</a></li>
+  <li><a href="#sigaction">2.7.6 sigaction</a></li>
+  <li><a href="#sigprocmask">2.7.7 sigprocmask</a></li>
+  <li><a href="#sigpending">2.7.8 sigpending</a></li>
+  <li><a href="#sigsuspend">2.7.9 sigsuspend</a></li>
+  <li><a href="#sigwaitinfo">2.7.10 sigwaitinfo</a></li>
+  <li><a href="#sigtimedwait">2.7.11 sigtimedwait</a></li>
+  <li><a href="#sigqueue">2.7.12 sigqueue</a></li>
+  <li><a href="#kill">2.7.13 kill</a></li>
+</ul>
 
-<H3>2.7.1 sigemptyset</H3>
+<H3><a name="sigemptyset">2.7.1 sigemptyset</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2015,7 +2089,7 @@ by set such that all signals are excluded.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.7.2 sigfillset</H3>
+<H3><a name="sigfillset">2.7.2 sigfillset</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2045,7 +2119,7 @@ by set such that all signals are included.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.7.3 sigaddset</H3>
+<H3><a name="sigaddset">2.7.3 sigaddset</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2076,7 +2150,7 @@ signo to the signal set specified by set.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.7.4 sigdelset</H3>
+<H3><a name="sigdelset">2.7.4 sigdelset</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2107,7 +2181,7 @@ by signo from the signal set specified by set.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.7.5 sigismember</H3>
+<H3><a name="sigismember">2.7.5 sigismember</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2140,7 +2214,7 @@ by signo is a member of the set specified by set.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.7.6 sigaction</H3>
+<H3><a name="sigaction">2.7.6 sigaction</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2213,7 +2287,7 @@ not handled (SIG_DFL, SIG_IGN).
 (all treated like SA_SIGINFO).
 </UL>
 
-<H3>2.7.7 sigprocmask</H3>
+<H3><a name="sigprocmask">2.7.7 sigprocmask</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2263,7 +2337,7 @@ pointed to by the <I>set</I> input parameter.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.7.8 sigpending</H3>
+<H3><a name="sigpending">2.7.8 sigpending</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2301,7 +2375,7 @@ is delivered more than once.&quot;
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.7.9 sigsuspend</H3>
+<H3><a name="sigsuspend">2.7.9 sigsuspend</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2349,7 +2423,7 @@ function or to terminate the task.&quot;  Only delivery of the signal
 is required in the present implementation (even if the signal is ignored).
 </UL>
 
-<H3>2.7.10 sigwaitinfo</H3>
+<H3><a name="sigwaitinfo">2.7.10 sigwaitinfo</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2381,7 +2455,7 @@ with a NULL timeout parameter. (see below).
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.7.11 sigtimedwait</H3>
+<H3><a name="sigtimedwait">2.7.11 sigtimedwait</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2447,7 +2521,7 @@ that the unblocked signal be caught; the task will be resumed even if
 the unblocked signal is ignored.
 </UL>
 
-<H3>2.7.12 sigqueue</H3>
+<H3><a name="sigqueue">2.7.12 sigqueue</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2470,7 +2544,7 @@ is delivered more than once.&quot;
 <P>
 <B>Input Parameters:</B> 
 <UL>
-<LI><I>tid</I>. Process ID of task to receive signal
+<LI><I>tid</I>. ID of the task to receive signal
 <LI><I>signo</I>. Signal number
 <LI><I>value</I>. Value to pass to task with signal
 </UL>
@@ -2478,7 +2552,15 @@ is delivered more than once.&quot;
 <P>
 <B>Returned Values:</B> 
 <UL>
-<LI>OK or ERROR
+<LI>
+  On  success (at least one signal was sent), zero (OK) is returned.
+  On error, -1 (ERROR) is returned, and errno is set appropriately.
+  <ul>
+    <li><code>EGAIN</code>. The limit of signals which may be queued has been reached.</li>
+    <li><code>EINVAL</code>. signo was invalid.</li>
+    <li><code>EPERM</code>.  The task does not have permission to send the signal to the receiving process.</li>
+    <li><code>ESRCH</code>. No process has a PID matching pid.</li>
+  </ul>
 </UL>
 
 <P>
@@ -2490,17 +2572,114 @@ Differences from the POSIX interface include:
 <UL>
 <LI>Default action is to ignore signals.
 <LI>Signals are processed one at a time in order
-<LI>Signals will (most likely) be processed on the caller's thread
-of execution.
 <LI>POSIX states that, &quot;If signo is zero (the null signal), error
 checking will be performed but no signal is actually sent.&quot;
 There is no null signal in the present implementation; a zero signal will
 be sent.
 </UL>
 
-<H2>2.8 <A NAME="Pthread">Pthread Interfaces</A></H2>
+<H3><a name="kill">2.7.13 kill</a></H3>
+
 <P>
-<H3>2.8.1 pthread_attr_init</A></H3>
+<B>Function Prototype:</B> 
+<PRE>
+   #include &lt;sys/types.h&gt;
+   #include &ltsignal.h&gt;
+   int kill(pid_t pid, int sig);
+</PRE>
+
+<P>
+<B>Description:</B> 
+  The kill() system call can be used to send any signal to
+  any task.
+</p>
+<p>
+  If the receiving task has the signal blocked via its sigprocmask,
+  the signal will pend until it is unmasked.  Only one pending signal
+  (for a given signo) is retained by the system.  This is consistent with
+  POSIX which states:  &quot;If a subsequent occurrence of a pending signal
+  is generated, it is implementation defined as to whether the signal
+  is delivered more than once.&quot;
+</p>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>pid</I>. The id of the task to receive the signal.
+  The POSIX <code>kill()</code> specification encodes process group
+  information as zero and negative pid values.
+  Only positive, non-zero values of pid are supported by this
+  implementation. ID of the task to receive signal
+<LI><I>signo</I>. The signal number to send.
+</UL>
+
+<p>
+  <B>Returned Values:</B> 
+  <UL>
+    <LI>OK or ERROR
+  </UL>
+</p>
+
+<p>
+  <B>Assumptions/Limitations:</B> 
+</p>
+<p>
+  <b>POSIX  Compatibility:</b>
+    Comparable to the POSIX interface of the same name.
+    Differences from the POSIX interface include:
+</p>
+<ul>
+  <li>Default action is to ignore signals.</li>
+  <li>Signals are processed one at a time in order </li>
+  <li>Sending of signals to 'process groups' is not supported in NuttX.</li>
+</ul>
+
+<H2>2.8 <A NAME="Pthread">Pthread Interfaces</A></H2>
+<ul>
+  <li><a href="#pthreadattrinit">2.8.1 pthread_attr_init</a></li>
+  <li><a href="#pthreadattrdestroy">2.8.2 pthread_attr_destroy</a></li>
+  <li><a href="#pthreadattrsetschedpolity">2.8.3 pthread_attr_setschedpolicy</a></li>
+  <li><a href="#pthreadattrgetschedpolicy">2.8.4 pthread_attr_getschedpolicy</a></li>
+  <li><a href="#pthreadattrsetschedparam">2.8.5 pthread_attr_setschedparam</a></li>
+  <li><a href="#pthreadattrgetschedparam">2.8.6 pthread_attr_getschedparam</a></li>
+  <li><a href="#pthreadattrsetinheritsched">2.8.7 pthread_attr_setinheritsched</a></li>
+  <li><a href="#pthreadattrgetinheritsched">2.8.8 pthread_attr_getinheritsched</a></li>
+  <li><a href="#pthreadattrsetstacksize">2.8.9 pthread_attr_setstacksize</a></li>
+  <li><a href="#pthreadattrgetstacksize">2.8.10 pthread_attr_getstacksize</a></li>
+  <li><a href="#pthreadcreate">2.8.11 pthread_create</a></li>
+  <li><a href="#pthreaddetach">2.8.12 pthread_detach</a></li>
+  <li><a href="#pthreadexit">2.8.13 pthread_exit</a></li>
+  <li><a href="#pthreadcancel">2.8.14 pthread_cancel</a></li>
+  <li><a href="#pthreadsetcancelstate">2.8.15 pthread_setcancelstate</a></li>
+  <li><a href="#pthreadtestcancelstate">2.8.16 pthread_testcancelstate</a></li>
+  <li><a href="#pthreadjoin">2.8.17 pthread_join</a></li>
+  <li><a href="#pthreadyield">2.8.18 pthread_yield</a></li>
+  <li><a href="#pthreadself">2.8.19 pthread_self</a></li>
+  <li><a href="#pthreadgetschedparam">2.8.20 pthread_getschedparam</a></li>
+  <li><a href="#pthreadsetschedparam">2.8.21 pthread_setschedparam</a></li>
+  <li><a href="#pthreadkeycreate">2.8.22 pthread_key_create</a></li>
+  <li><a href="#pthreadsetspecific">2.8.23 pthread_setspecific</a></li>
+  <li><a href="#pthreadgetspecific">2.8.24 pthread_getspecific</a></li>
+  <li><a href="#pthreadkeydelete">2.8.25 pthread_key_delete</a></li>
+  <li><a href="#pthreadmutexattrinit">2.8.26 pthread_mutexattr_init</a></li>
+  <li><a href="#pthreadmutexattrdestroy">2.8.27 pthread_mutexattr_destroy</a></li>
+  <li><a href="#pthreadmutexattrgetpshared">2.8.28 pthread_mutexattr_getpshared</a></li>
+  <li><a href="#pthreadmutexattrsetpshared">2.8.29 pthread_mutexattr_setpshared</a></li>
+  <li><a href="#pthreadmutexinit">2.8.30 pthread_mutex_init</a></li>
+  <li><a href="#pthreadmutexdestrory">2.8.31 pthread_mutex_destroy</a></li>
+  <li><a href="#pthreadmutexlock">2.8.32 pthread_mutex_lock</a></li>
+  <li><a href="#pthreadmutextrylock">2.8.33 pthread_mutex_trylock</a></li>
+  <li><a href="#pthreadmutexunlock">2.8.34 pthread_mutex_unlock</a></li>
+  <li><a href="#pthreadconaddrinit">2.8.35 pthread_condattr_init</a></li>
+  <li><a href="#pthreadocndattrdestroy">2.8.36 pthread_condattr_destroy</a></li>
+  <li><a href="#pthreadcondinit">2.8.37 pthread_cond_init</a></li>
+  <li><a href="#pthreadconddestroy">2.8.38 pthread_cond_destroy</a></li>
+  <li><a href="#pthreadcondbroadcast">2.8.39 pthread_cond_broadcast</a></li>
+  <li><a href="#pthreadcondsignal">2.8.40 pthread_cond_signal</a></li>
+  <li><a href="#pthreadcondwait">2.8.41 pthread_cond_wait</a></li>
+  <li><a href="#pthreadcondtimedwait">2.8.42 pthread_cond_timedwait</a></li>
+</ul>
+
+<H3><a name="pthreadattrinit">2.8.1 pthread_attr_init</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2533,7 +2712,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 <P>
-<H3>2.8.2 pthread_attr_destroy</A></H3>
+<H3><a name="pthreadattrdestroy">2.8.2 pthread_attr_destroy</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2565,7 +2744,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 <P>
-<H3>2.8.3 pthread_attr_setschedpolicy</A></H3>
+<H3><a name="pthreadattrsetschedpolity">2.8.3 pthread_attr_setschedpolicy</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2596,7 +2775,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.4 pthread_attr_getschedpolicy</A></H3>
+<H3><a name="pthreadattrgetschedpolicy">2.8.4 pthread_attr_getschedpolicy</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2627,7 +2806,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.5 pthread_attr_setschedparam</A></H3>
+<H3><a name="pthreadattrsetschedparam">2.8.5 pthread_attr_setschedparam</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2659,7 +2838,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.6 pthread_attr_getschedparam</A></H3>
+<H3><a name="pthreadattrgetschedparam">2.8.6 pthread_attr_getschedparam</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2691,7 +2870,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.7 pthread_attr_setinheritsched</A></H3>
+<H3><a name="pthreadattrsetinheritsched">2.8.7 pthread_attr_setinheritsched</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2723,7 +2902,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 <P>
-<H3>2.8.8 pthread_attr_getinheritsched</A></H3>
+<H3><a name="pthreadattrgetinheritsched">2.8.8 pthread_attr_getinheritsched</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2755,7 +2934,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.9 pthread_attr_setstacksize</A></H3>
+<H3><a name="pthreadattrsetstacksize">2.8.9 pthread_attr_setstacksize</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2786,7 +2965,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.10 pthread_attr_getstacksize</A></H3>
+<H3><a name="pthreadattrgetstacksize">2.8.10 pthread_attr_getstacksize</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2817,7 +2996,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.11 pthread_create</A></H3>
+<H3><a name="pthreadcreate">2.8.11 pthread_create</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2856,7 +3035,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.12 pthread_detach</A></H3>
+<H3><a name="pthreaddetach">2.8.12 pthread_detach</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2889,7 +3068,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.13 pthread_exit</A></H3>
+<H3><a name="pthreadexit">2.8.13 pthread_exit</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2921,7 +3100,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.14 pthread_cancel</A></H3>
+<H3><a name="pthreadcancel">2.8.14 pthread_cancel</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2977,7 +3156,7 @@ the time when cancelation is re-enabled.</li>
 <li>Thread cancellation at <i>cancellation points</i> is not supported.</li>
 </UL>
 
-<H3>2.8.15 pthread_setcancelstate</A></H3>
+<H3><a name="pthreadsetcancelstate">2.8.15 pthread_setcancelstate</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3019,17 +3198,17 @@ No thread could be found corresponding to that specified by the given thread ID.
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.16 pthread_setcancelstate</A></H3>
+<H3><a name="pthreadtestcancelstate">2.8.16 pthread_testcancelstate</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
 <PRE>
     #include &lt;pthread.h&gt;
-    int pthread_setcancelstate(int state, int *oldstate);
+    int pthread_setcancelstate(void);
 </PRE>
 <P>
 <B>Description:</B>
-<P>
+<P><b>NOT SUPPORTED</b>
 <B>Input Parameters:</B>
 <P>
 <UL>
@@ -3050,7 +3229,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.17 pthread_join</A></H3>
+<H3><a name="pthreadjoin">2.8.17 pthread_join</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3083,7 +3262,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.18 pthread_yield</A></H3>
+<H3><a name="pthreadyield">2.8.18 pthread_yield</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3116,7 +3295,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.19 pthread_self</A></H3>
+<H3><a name="pthreadself">2.8.19 pthread_self</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3148,7 +3327,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.20 pthread_getschedparam</A></H3>
+<H3><a name="pthreadgetschedparam">2.8.20 pthread_getschedparam</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3180,7 +3359,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.21 pthread_setschedparam</A></H3>
+<H3><a name="pthreadsetschedparam">2.8.21 pthread_setschedparam</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3212,7 +3391,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.22 pthread_key_create</A></H3>
+<H3><a name="pthreadkeycreate">2.8.22 pthread_key_create</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3267,7 +3446,7 @@ interface of the same name.
 <LI>The present implementation ignores the destructor argument.
 </UL>
 
-<H3>2.8.23 pthread_setspecific</A></H3>
+<H3><a name="pthreadsetspecific">2.8.23 pthread_setspecific</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3317,7 +3496,7 @@ interface of the same name.
 destructor function.
 </UL>
 
-<H3>2.8.24 pthread_getspecific</A></H3>
+<H3><a name="pthreadgetspecific">2.8.24 pthread_getspecific</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3358,7 +3537,7 @@ interface of the same name.
 destructor function.
 </UL>
 
-<H3>2.8.25 pthread_key_delete</A></H3>
+<H3><a name="pthreadkeydelete">2.8.25 pthread_key_delete</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3390,7 +3569,7 @@ this function does nothing in the present implementation.
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.26 pthread_mutexattr_init</A></H3>
+<H3><a name="pthreadmutexattrinit">2.8.26 pthread_mutexattr_init</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3421,7 +3600,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.27 pthread_mutexattr_destroy</A></H3>
+<H3><a name="pthreadmutexattrdestroy">2.8.27 pthread_mutexattr_destroy</A></H3>
 <P>
 <B>Function Protoype:</B>
 <P>
@@ -3452,7 +3631,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.28 pthread_mutexattr_getpshared</A></H3>
+<H3><a name="pthreadmutexattrgetpshared">2.8.28 pthread_mutexattr_getpshared</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3484,7 +3663,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.29 pthread_mutexattr_setpshared</A></H3>
+<H3><a name="pthreadmutexattrsetpshared">2.8.29 pthread_mutexattr_setpshared</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3516,7 +3695,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.30 pthread_mutex_init</A></H3>
+<H3><a name="pthreadmutexinit">2.8.30 pthread_mutex_init</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3548,7 +3727,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.31 pthread_mutex_destroy</A></H3>
+<H3><a name="pthreadmutexdestrory">2.8.31 pthread_mutex_destroy</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3579,7 +3758,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.32 pthread_mutex_lock</A></H3>
+<H3><a name="pthreadmutexlock">2.8.32 pthread_mutex_lock</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3610,7 +3789,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.33 pthread_mutex_trylock</A></H3>
+<H3><a name="pthreadmutextrylock">2.8.33 pthread_mutex_trylock</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3641,7 +3820,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.34 pthread_mutex_unlock</A></H3>
+<H3><a name="pthreadmutexunlock">2.8.34 pthread_mutex_unlock</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3672,7 +3851,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.35 pthread_condattr_init</A></H3>
+<H3><a name="pthreadconaddrinit">2.8.35 pthread_condattr_init</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3703,7 +3882,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.36 pthread_condattr_destroy</A></H3>
+<H3><a name="pthreadocndattrdestroy">2.8.36 pthread_condattr_destroy</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3734,7 +3913,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.37 pthread_cond_init</A></H3>
+<H3><a name="pthreadcondinit">2.8.37 pthread_cond_init</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3765,7 +3944,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.38 pthread_cond_destroy</A></H3>
+<H3><a name="pthreadconddestroy">2.8.38 pthread_cond_destroy</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3796,7 +3975,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.39 pthread_cond_broadcast</A></H3>
+<H3><a name="pthreadcondbroadcast">2.8.39 pthread_cond_broadcast</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3827,7 +4006,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.40 pthread_cond_signal</A></H3>
+<H3><a name="pthreadcondsignal">2.8.40 pthread_cond_signal</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3858,7 +4037,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.41 pthread_cond_wait</A></H3>
+<H3><a name="pthreadcondwait">2.8.41 pthread_cond_wait</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3889,7 +4068,7 @@ returned to indicate the error:
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3>2.8.42 pthread_cond_timedwait</A></H3>
+<H3><a name="pthreadcondtimedwait">2.8.42 pthread_cond_timedwait</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -4123,6 +4302,116 @@ notify a task when a message is available on a queue.
   For systems where sizeof(pointer) > sizeof(uint32), we will
   have to do some redesign.
 </p>
+
+<h1><a name="index">Index</a></h1>
+<ul>
+  <li><a href="#Data_Structures">Data structures</a>
+  <li><a href="#exit">exit</a></li>
+  <li><a href="#getpid">getpid</a></li>
+  <li><a href="#Introduction">Introduction</a>
+  <li><a href="#kill">kill</a></li>
+  <li><a href="#Message_Queue">Named Message Queue Interfaces</a>
+  <li><a href="#mqclose">mq_close</a></li>
+  <li><a href="#mqgetattr">mq_getattr</a></li>
+  <li><a href="#mqnotify">mq_notify</a></li>
+  <li><a href="#mqopen">mq_open</a></li>
+  <li><a href="#mqreceive">mq_receive</a></li>
+  <li><a href="#mqsend">mq_send</a></li>
+  <li><a href="#mqsetattr">mq_setattr</a></li>
+  <li><a href="#mqunlink">mq_unlink</a></li>
+  <li><a href="#OS_Interfaces">OS Interfaces</a>
+  <li><a href="#pthreadattrdestroy">pthread_attr_destroy</a></li>
+  <li><a href="#pthreadattrgetinheritsched">pthread_attr_getinheritsched</a></li>
+  <li><a href="#pthreadattrgetschedparam">pthread_attr_getschedparam</a></li>
+  <li><a href="#pthreadattrgetschedpolicy">pthread_attr_getschedpolicy</a></li>
+  <li><a href="#pthreadattrgetstacksize">0 pthread_attr_getstacksize</a></li>
+  <li><a href="#pthreadattrinit">pthread_attr_init</a></li>
+  <li><a href="#pthreadattrsetinheritsched">pthread_attr_setinheritsched</a></li>
+  <li><a href="#pthreadattrsetschedparam">pthread_attr_setschedparam</a></li>
+  <li><a href="#pthreadattrsetschedpolity">pthread_attr_setschedpolicy</a></li>
+  <li><a href="#pthreadattrsetstacksize">pthread_attr_setstacksize</a></li>
+  <li><a href="#pthreadcancel">pthread_cancel</a></li>
+  <li><a href="#pthreadconaddrinit">pthread_condattr_init</a></li>
+  <li><a href="#pthreadcondbroadcast">pthread_cond_broadcast</a></li>
+  <li><a href="#pthreadconddestroy">pthread_cond_destroy</a></li>
+  <li><a href="#pthreadcondinit">pthread_cond_init</a></li>
+  <li><a href="#pthreadcondsignal">pthread_cond_signal</a></li>
+  <li><a href="#pthreadcondtimedwait">pthread_cond_timedwait</a></li>
+  <li><a href="#pthreadcondwait">pthread_cond_wait</a></li>
+  <li><a href="#pthreadcreate">pthread_create</a></li>
+  <li><a href="#pthreaddetach">pthread_detach</a></li>
+  <li><a href="#pthreadexit">pthread_exit</a></li>
+  <li><a href="#pthreadgetschedparam">pthread_getschedparam</a></li>
+  <li><a href="#pthreadgetspecific">pthread_getspecific</a></li>
+  <li><a href="#Pthread"><i>pthreads</i></a> share some resources.
+  <li><a href="#pthreadjoin">pthread_join</a></li>
+  <li><a href="#pthreadkeycreate">pthread_key_create</a></li>
+  <li><a href="#pthreadkeydelete">pthread_key_delete</a></li>
+  <li><a href="#pthreadmutexattrdestroy">pthread_mutexattr_destroy</a></li>
+  <li><a href="#pthreadmutexattrgetpshared">pthread_mutexattr_getpshared</a></li>
+  <li><a href="#pthreadmutexattrinit">pthread_mutexattr_init</a></li>
+  <li><a href="#pthreadmutexattrsetpshared">pthread_mutexattr_setpshared</a></li>
+  <li><a href="#pthreadmutexdestrory">pthread_mutex_destroy</a></li>
+  <li><a href="#pthreadmutexinit">pthread_mutex_init</a></li>
+  <li><a href="#pthreadmutexlock">pthread_mutex_lock</a></li>
+  <li><a href="#pthreadmutextrylock">pthread_mutex_trylock</a></li>
+  <li><a href="#pthreadmutexunlock">pthread_mutex_unlock</a></li>
+  <li><a href="#pthreadocndattrdestroy">pthread_condattr_destroy</a></li>
+  <li><a href="#Pthread">Pthread Interfaces</a>
+  <li><a href="#pthreadself">pthread_self</a></li>
+  <li><a href="#pthreadsetcancelstate">pthread_setcancelstate</a></li>
+  <li><a href="#pthreadsetschedparam">pthread_setschedparam</a></li>
+  <li><a href="#pthreadsetspecific">pthread_setspecific</a></li>
+  <li><a href="#pthreadtestcancelstate">pthread_testcancelstate</a></li>
+  <li><a href="#pthreadyield">pthread_yield</a></li>
+  <li><a href="#schedgetparam">sched_getparam</a></li>
+  <li><a href="#schedgetprioritymax">sched_get_priority_max</a></li>
+  <li><a href="#schedgetprioritymin">sched_get_priority_min</a></li>
+  <li><a href="#schedgetrrinterval">sched_get_rr_interval</a></li>
+  <li><a href="#schedlockcount">sched_lockcount</a></li>
+  <li><a href="#schedlock">sched_lock</a></li>
+  <li><a href="#schedsetparam">sched_setparam</a></li>
+  <li><a href="#schedsetscheduler">sched_setscheduler</a></li>
+  <li><a href="#schedunlock">sched_unlock</a></li>
+  <li><a href="#sched_yield">sched_yield</a></li>
+  <li><a href="#Semaphores">Counting Semaphore Interfaces</a>
+  <li><a href="#semclose">sem_close</a></li>
+  <li><a href="#semdestroy">sem_destroy</a></li>
+  <li><a href="#semgetvalue">sem_getvalue</a></li>
+  <li><a href="#seminit">sem_init</a></li>
+  <li><a href="#semopen">sem_open</a></li>
+  <li><a href="#sempost">sem_post</a></li>
+  <li><a href="#semtrywait">sem_trywait</a></li>
+  <li><a href="#semunlink">sem_unlink</a></li>
+  <li><a href="#semwait">sem_wait</a></li>
+  <li><a href="#setgetscheduler">sched_getscheduler</a></li>
+  <li><a href="#sigaction">sigaction</a></li>
+  <li><a href="#sigaddset">sigaddset</a></li>
+  <li><a href="#sigdelset">sigdelset</a></li>
+  <li><a href="#sigemptyset">sigemptyset</a></li>
+  <li><a href="#sigfillset">sigfillset</a></li>
+  <li><a href="#sigismember">sigismember</a></li>
+  <li><a href="#Signals">Signal Interfaces</a>
+  <li><a href="#sigpending">sigpending</a></li>
+  <li><a href="#sigprocmask">sigprocmask</a></li>
+  <li><a href="#sigqueue">sigqueue</a></li>
+  <li><a href="#sigsuspend">sigsuspend</a></li>
+  <li><a href="#sigtimedwait">sigtimedwait</a></li>
+  <li><a href="#sigwaitinfo">sigwaitinfo</a></li>
+  <li><a href="#taskactivate">task_activate</a></li>
+  <li><a href="#Task_Control">Task Control Interfaces</a>
+  <li><a href="#taskcreate">task_create</a></li>
+  <li><a href="#taskdelete">task_delete</a></li>
+  <li><a href="#taskinit">task_init</a></li>
+  <li><a href="#taskrestart">task_restart</a></li>
+  <li><a href="#Task_Schedule">Task Scheduling Interfaces</a>
+  <li><a href="#Task_Switch">Task Switching Interfaces</a>
+  <li><a href="#Watchdogs">Watchdog Timer Interfaces</a>
+  <li><a href="#wdcancel">wd_cancel</a></li>
+  <li><a href="#wdcreate">wd_create</a></li>
+  <li><a href="#wddelete">wd_delete</a></li>
+  <li><a href="#wdstart">wd_start</a></li>
+</ul>
 
 </BODY>
 </HTML>
