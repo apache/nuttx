@@ -38,6 +38,7 @@
  ************************************************************/
 
 #include <sys/types.h>
+#include <limits.h>
 #include <semaphore.h>
 #include "sem_internal.h"
 
@@ -100,7 +101,7 @@ int sem_init (sem_t *sem, int pshared, unsigned int value)
 {
   int ret = ERROR;
 
-  if (sem && value <= SEM_MAX_VALUE)
+  if (sem && value <= SEM_VALUE_MAX)
     {
       sem->semcount = (sint16)value;
       ret = OK;

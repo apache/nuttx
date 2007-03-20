@@ -37,7 +37,7 @@
  * Included Files
  ************************************************************/
 
-#include <stdio.h>
+#include <unistd.h>
 #include <errno.h>
 #include "lib_internal.h"
 

@@ -40,6 +40,7 @@
 #include  <nuttx/compiler.h>
 #include  <nuttx/kmalloc.h>
 #include  <sys/types.h>      /* uint32, etc. */
+#include  <fcntl.h>
 #include  <mqueue.h>
 #include  <string.h>
 #include  <sched.h>
@@ -306,7 +307,7 @@ int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
 
           /* Copy the message data into the message */
 
-          memcpy((const void*)curr->mail, (void*)msg, msglen);
+          memcpy((void*)curr->mail, (const void*)msg, msglen);
 
           /* Insert the new message in the message queue */
 

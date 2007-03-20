@@ -43,6 +43,7 @@
 
 #include <nuttx/os_external.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <sched.h>
 #include "ostest.h"

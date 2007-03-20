@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <string.h>
 #include <pthread.h>
 #include <sched.h>
 #include <debug.h>
@@ -408,7 +409,7 @@ int pthread_create(pthread_t *thread, pthread_attr_t *attr,
   else
     {
       sched_unlock();
-      dq_rem((FAR dq_entry_t*)ptcb, &g_inactivetasks);
+      dq_rem((FAR dq_entry_t*)ptcb, (dq_queue_t*)&g_inactivetasks);
       (void)sem_destroy(&pjoin->data_sem);
       (void)sem_destroy(&pjoin->exit_sem);
       sched_releasetcb(ptcb);

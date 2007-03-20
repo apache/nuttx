@@ -170,7 +170,7 @@ int task_create(const char *name, int priority,
   status = task_activate(tcb);
   if (status != OK)
     {
-      dq_rem((FAR dq_entry_t*)tcb, &g_inactivetasks);
+      dq_rem((FAR dq_entry_t*)tcb, (dq_queue_t*)&g_inactivetasks);
       sched_releasetcb(tcb);
       return ERROR;
     }

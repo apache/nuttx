@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <stdio.h>
+#include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
 #ifdef CONFIG_FILE_MODE

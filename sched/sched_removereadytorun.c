@@ -110,7 +110,7 @@ boolean sched_removereadytorun(FAR _TCB *rtcb)
 
   /* Remove the TCB from the ready-to-run list */
 
-  dq_rem((FAR dq_entry_t*)rtcb, &g_readytorun);
+  dq_rem((FAR dq_entry_t*)rtcb, (dq_queue_t*)&g_readytorun);
 
   rtcb->task_state = TSTATE_TASK_INVALID;
   return ret;

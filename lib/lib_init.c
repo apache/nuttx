@@ -57,27 +57,6 @@
  * Private Functions
  ************************************************************/
 
-#if CONFIG_NFILE_STREAMS > 0
-static void _lib_semtake(FAR struct streamlist *list)
-{
-  /* Take the semaphore (perhaps waiting) */
-
-  while (sem_wait(&list->sl_sem) != 0)
-    {
-      /* The only case that an error should occr here is if
-       * the wait was awakened by a signal.
-       */
-
-      ASSERT(*get_errno_ptr() == EINTR);
-    }
-}
-
-# define _lib_semgive(list) sem_post(&list->sl_sem)
-#else
-# define _lib_semtake(list)
-# define _lib_semgive(list)
-#endif
-
 /************************************************************
  * Public Functions
  ************************************************************/

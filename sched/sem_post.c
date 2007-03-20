@@ -38,6 +38,7 @@
  ************************************************************/
 
 #include <sys/types.h>
+#include <limits.h>
 #include <semaphore.h>
 #include <sched.h>
 #include <nuttx/arch.h>
@@ -123,7 +124,7 @@ int sem_post(sem_t *sem)
 
       /* Perform the semaphore unlock operation. */
 
-      ASSERT(sem->semcount < SEM_MAX_VALUE);
+      ASSERT(sem->semcount < SEM_VALUE_MAX);
       sem->semcount++;
 
       /* If the result of of semaphore unlock is non-positive, then

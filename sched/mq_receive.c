@@ -40,6 +40,7 @@
 #include <sys/types.h>      /* uint32, etc. */
 #include <stdarg.h>         /* va_list */
 #include <unistd.h>
+#include <fcntl.h>          /* O_NONBLOCK */
 #include <string.h>
 #include <assert.h>
 #include <mqueue.h>
@@ -183,7 +184,7 @@ int mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio)
 
           /* Copy the message into the caller's buffer */
 
-          memcpy(msg, (void*)curr->mail, rcvmsglen);
+          memcpy(msg, (const void*)curr->mail, rcvmsglen);
 
           /* Copy the message priority as well (if a buffer is provided) */
 

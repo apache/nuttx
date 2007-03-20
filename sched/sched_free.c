@@ -93,7 +93,7 @@ void sched_free(FAR void *address)
       /* Yes.. Delay the deallocation until a more appropriate time. */
 
       irqstate_t saved_state = irqsave();
-      sq_addlast((FAR sq_entry_t*)address, &g_delayeddeallocations);
+      sq_addlast((FAR sq_entry_t*)address, (sq_queue_t*)&g_delayeddeallocations);
       irqrestore(saved_state);
     }
   else

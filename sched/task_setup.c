@@ -201,7 +201,7 @@ STATUS task_schedsetup(FAR _TCB *tcb, int priority,
       /* Add the task to the inactive task list */
 
       sched_lock();
-      dq_addfirst((FAR dq_entry_t*)tcb, &g_inactivetasks);
+      dq_addfirst((FAR dq_entry_t*)tcb, (dq_queue_t*)&g_inactivetasks);
       tcb->task_state = TSTATE_TASK_INACTIVE;
       sched_unlock();
     }

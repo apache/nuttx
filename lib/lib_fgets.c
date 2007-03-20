@@ -37,7 +37,9 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <ctype.h>
 #include <debug.h>

@@ -39,6 +39,8 @@
 
 #include <sys/types.h>
 #include <stdarg.h>
+#include <limits.h>
+#include <fcntl.h>
 #include <string.h>
 #include <semaphore.h>
 #include <errno.h>
@@ -105,7 +107,7 @@
  *     1. mode_t mode (ignored), and
  *     2. unsigned int value.  This initial value of the semaphore.
  *        valid initial values of the semaphore must be less than
- *         or equal to SEM_MAX_VALUE.
+ *         or equal to SEM_VALUE_MAX.
  *
  * Return Value:
  *   A pointer to sem_t or -1 (ERROR) if unsuccessful.
@@ -170,7 +172,7 @@ FAR sem_t *sem_open (const char *name, int oflag, ...)
 
               /* Verify that a legal initial value was selected. */
 
-              if (value <= SEM_MAX_VALUE)
+              if (value <= SEM_VALUE_MAX)
                 {
                   /* Allocate memory for the new semaphore */
 

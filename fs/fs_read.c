@@ -43,7 +43,8 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
 #include "fs_internal.h"

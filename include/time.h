@@ -1,4 +1,4 @@
-/************************************************************
+/********************************************************************************
  * time.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -31,49 +31,44 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ********************************************************************************/
 
 #ifndef _TIME_H_
 #define _TIME_H_
 
-/************************************************************
+/********************************************************************************
  * Included Files
- ************************************************************/
+ ********************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+#include <nuttx/config.h>
+#include <sys/types.h>
 
-/************************************************************
+/********************************************************************************
  * Compilations Switches
- ************************************************************/
+ ********************************************************************************/
 
-/************************************************************
+/********************************************************************************
  * Definitions
- ************************************************************/
+ ********************************************************************************/
 
-/* This must be set to the last known date */
+/* Clock tick of the system */
 
-#define CURRENT_YEAR 2000
-#define CURRENT_MONTH   5
-#define CURRENT_DAY    22
+#define CLK_TCK 100
 
 /* This is the only clock_id supported by the "Clock and Timer
  * Functions."
  */
 
 #define CLOCK_REALTIME 0
+#define CLOCK_ABSTIME
 
-/************************************************************
+/********************************************************************************
  * Global Type Declarations
- ************************************************************/
+ ********************************************************************************/
 
-typedef long time_t;
-typedef long clockid_t;
+typedef uint32 time_t;
+typedef ubyte  clockid_t;
+typedef ubyte  timer_t;
 
 struct timespec
 {
@@ -102,21 +97,50 @@ struct tm
 #endif
 };
 
-/************************************************************
+/* Struct itimerspec is used to define settings for an interval timer */
+
+struct itimerspec
+{
+  struct timespec it_value;    /* First time */
+  struct timespec it_interval; /* and thereafter */
+};
+
+/* forward reference (defined in signal.h) */
+
+struct sigevent;
+
+/********************************************************************************
  * Global Variables
- ************************************************************/
+ ********************************************************************************/
 
-/************************************************************
+/* extern char *tznames[]; not supported */
+
+/********************************************************************************
  * Global Function Prototypes
- ************************************************************/
+ ********************************************************************************/
 
-EXTERN int clock_settime(clockid_t clock_id, const struct timespec *tp);
-EXTERN int clock_gettime(clockid_t clock_id, struct timespec *tp);
-EXTERN int clock_getres(clockid_t clock_id, struct timespec *res);
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+EXTERN int clock_settime(clockid_t clockid, const struct timespec *tp);
+EXTERN int clock_gettime(clockid_t clockid, struct timespec *tp);
+EXTERN int clock_getres(clockid_t clockid, struct timespec *res);
 
 EXTERN time_t mktime(struct tm *tp);
 EXTERN struct tm *gmtime_r(const time_t *clock, struct tm *result);
 #define localtime_r(c,r) gmtime_r(c,r)
+
+EXTERN int timer_create(clockid_t clockid, struct sigevent *evp, timer_t *timerid);
+EXTERN int timer_delete(timer_t timerid);
+EXTERN int timer_settime(timer_t timerid, int flags, const struct itimerspec *value,
+                         struct itimerspec *ovalue);
+EXTERN int timer_gettime(timer_t timerid, struct itimerspec *value);
+EXTERN int timer_getoverrun(timer_t timerid);
 
 #undef EXTERN
 #if defined(__cplusplus)

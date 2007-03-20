@@ -59,37 +59,6 @@
 
 #define EOF        (-1)
 
-/* File I/O constants ***************************************/
-
-#define PATH_MAX   101
-#define S_IFMT     0170000
-#define S_IFIFO    0010000
-#define S_IFCHR    0020000
-#define S_IFDIR    0040000
-#define S_IFBLK    0060000
-#define S_IFREG    0100000
-#define S_IFLNK    0120000
-#define S_IFSOCK   0140000
-#define SEEK_SET   0
-#define SEEK_CUR   1
-#define SEEK_END   2
-
-/* Wind-River IOCTL constants */
-
-#define FIOFLUSH         2
-#define	FIONBIO         16
-#define	FIOSELECT       28
-#define FIOUNSELECT     29
-#define FIOTRUNC        42
-#define FIOHANDLETONAME 45
-#define FIOLABELGET     33
-#define SET_HIDDEN      0x1004
-#define PHYS_BLK_IO     255
-
-#define SECTOR_ALIGN_BYTES   512
-#define FILE_BUF_SIZE        (4 * SECTOR_ALIGN_BYTES)
-#define FILE_BUF_ALIGN_BYTES 16
-
 /* The first three _iob entries are reserved for standard I/O */
 
 #define stdin  (&sched_getstreams()->sl_streams[0])
@@ -106,7 +75,6 @@
 #define getchar()  fgetc(stdin)
 #define ftell(s)   fseek((s),0,SEEK_CUR)
 #define rewind(s)  ((void)fseek((s),0,SEEK_SET))
-#define fsync(f)
 
 /************************************************************
  * Public Type Definitions
@@ -197,21 +165,14 @@ EXTERN int    vsprintf(char *buf, const char *s, va_list ap);
 /* POSIX-like File System Interfaces */
 
 EXTERN int    chdir(const char *path);
-EXTERN int    close(int fd);
-EXTERN int    creat(const char *path, mode_t mode);
 EXTERN FILE  *fdopen(int fd, const char *type);
 EXTERN int    fstat(int fd, FAR struct stat *buf);
 EXTERN char  *getcwd(FAR char *buf, size_t size);
 EXTERN int    ioctl(int fd, int req, unsigned long arg);
-EXTERN off_t  lseek(int fd, off_t offset, int whence);
 EXTERN int    mkdir(const char *path, mode_t mode);
-EXTERN int    open(const char *path, int oflag, ...);
-EXTERN int    read(int fd, void *buf, unsigned int nbytes);
 EXTERN int    rmdir(const char *path);
 EXTERN int    stat(const char *path, FAR struct stat *buf);
 EXTERN int    statfs(const char *path, FAR struct statfs *buf);
-EXTERN int    unlink(const char *path);
-EXTERN int    write(int fd, const void *buf, unsigned int nbytes);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -41,6 +41,7 @@
  ************************************************************/
 
 #include <sys/types.h>
+#include <limits.h>
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -52,14 +53,6 @@ extern "C" {
 /************************************************************
  * Definitions
  ************************************************************/
-
-/* The maximum value that a semaphore may have. */
-
-#define SEM_MAX_VALUE 0x7fff /* Max value POSIX counting semaphore */
-
-/* The maximum number of semaphores that a task may have */
-
-#define SEM_NSEMS_MAX 0x7fffffff
 
 /************************************************************
  * Public Type Declarations

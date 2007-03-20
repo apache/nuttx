@@ -38,6 +38,7 @@
  ************************************************************/
 
 #include <sys/types.h>      /* uint32, etc. */
+#include <fcntl.h>          /* O_NONBLOCK */
 #include <mqueue.h>
 #include "mq_internal.h"
 

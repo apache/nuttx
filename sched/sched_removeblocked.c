@@ -103,7 +103,7 @@ void sched_removeblocked(FAR _TCB *btcb)
    * with this state
    */
 
-  dq_rem((FAR dq_entry_t*)btcb, g_tasklisttable[task_state].list);
+  dq_rem((FAR dq_entry_t*)btcb, (dq_queue_t*)g_tasklisttable[task_state].list);
 
   /* Make sure the TCB's state corresponds to not being in
    * any list

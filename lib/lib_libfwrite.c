@@ -43,6 +43,7 @@
 
 #include <nuttx/config.h>  /* for CONFIG_STDIO_BUFFER_SIZE */
 #include <stdio.h>
+#include <fcntl.h>
 #include <errno.h>
 #include "lib_internal.h"
 

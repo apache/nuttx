@@ -40,6 +40,7 @@
 #include <sys/types.h>      /* uint32, etc. */
 #include <stdarg.h>         /* va_list */
 #include <mqueue.h>
+#include <fcntl.h>
 #include <string.h>
 #include <sched.h>
 #include <errno.h>

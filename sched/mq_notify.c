@@ -38,6 +38,7 @@
  ************************************************************/
 
 #include <sys/types.h>      /* uint32, etc. */
+#include <signal.h>
 #include <mqueue.h>
 #include <sched.h>
 #include "os_internal.h"

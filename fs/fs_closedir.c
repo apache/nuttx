@@ -76,7 +76,6 @@
 int closedir(FAR DIR *dirp)
 {
   struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
-  off_t i;
 
   if (!idir)
     {

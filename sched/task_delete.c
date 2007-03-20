@@ -148,7 +148,7 @@ STATUS task_delete(pid_t pid)
 
   /* Remove the task from the OS's tasks lists. */
 
-  dq_rem((FAR dq_entry_t*)dtcb, g_tasklisttable[dtcb->task_state].list);
+  dq_rem((FAR dq_entry_t*)dtcb, (dq_queue_t*)g_tasklisttable[dtcb->task_state].list);
   dtcb->task_state = TSTATE_TASK_INVALID;
   irqrestore(saved_state);
 

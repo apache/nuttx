@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
 #include "os_internal.h"

@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <stdio.h>
+#include <unistd.h>
 #include <sched.h>
 #include <errno.h>
 #include <nuttx/fs.h>

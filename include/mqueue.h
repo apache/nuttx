@@ -1,4 +1,4 @@
-/************************************************************
+/********************************************************************************
  * mqueue.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -31,62 +31,54 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ********************************************************************************/
 
 #ifndef __MQUEUE_H
 #define __MQUEUE_H
 
-/************************************************************
+/********************************************************************************
  * Included Files
- ************************************************************/
+ ********************************************************************************/
 
 #include <sys/types.h>
 #include <signal.h>
 #include "queue.h"
 
-/************************************************************
+/********************************************************************************
  * Compilations Switches
- ************************************************************/
+ ********************************************************************************/
 
-/************************************************************
+/********************************************************************************
  * Definitions
- ************************************************************/
+ ********************************************************************************/
 
-/************************************************************
+#define MQ_NONBLOCK O_NONBLOCK
+
+/********************************************************************************
  * Global Type Declarations
- ************************************************************/
+ ********************************************************************************/
 
 /* Message queue attributes */
 
 struct mq_attr
 {
-  size_t         mq_maxmsg;   /* Max number of messages in queue */
-  size_t         mq_msgsize;  /* Max message size */
-  unsigned       mq_flags;    /* Queue flags */
-  size_t         mq_curmsgs;  /* Number of messages currently in queue */
-};
-
-/* The following is used to attach a signal to a message queue
- * to notify a task when a message is available on a queue
- */
-
-struct sigevent {
-   int          sigev_signo;
-   union sigval sigev_value;
-   int          sigev_notify;
+  size_t         mq_maxmsg;    /* Max number of messages in queue */
+  size_t         mq_msgsize;   /* Max message size */
+  unsigned       mq_flags;     /* Queue flags */
+  size_t         mq_curmsgs;   /* Number of messages currently in queue */
 };
 
 /* Message queue descriptor */
 
 typedef FAR struct mq_des *mqd_t;
 
-/************************************************************
+/********************************************************************************
  * Global Variables
- ************************************************************/
+ ********************************************************************************/
 
-/************************************************************
+/********************************************************************************
  * Global Function Prototypes
- ************************************************************/
+ ********************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -98,17 +90,12 @@ extern "C" {
 EXTERN mqd_t   mq_open(const char *mq_name, int oflags, ... );
 EXTERN int     mq_close(mqd_t mqdes );
 EXTERN int     mq_unlink(const char *mq_name );
-EXTERN int     mq_send(mqd_t mqdes, const void *msg,
-                  size_t msglen, int prio );
-EXTERN int     mq_receive(mqd_t mqdes, void *msg,
-                  size_t msglen, int *prio );
-EXTERN int     mq_notify(mqd_t mqdes,
-                  const struct sigevent *notification );
-EXTERN int     mq_setattr(mqd_t mqdes,
-                  const struct mq_attr *mq_stat,
+EXTERN int     mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio );
+EXTERN int     mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio );
+EXTERN int     mq_notify(mqd_t mqdes, const struct sigevent *notification );
+EXTERN int     mq_setattr(mqd_t mqdes, const struct mq_attr *mq_stat,
                   struct mq_attr *oldstat);
-EXTERN int     mq_getattr(mqd_t mqdes,
-                  struct mq_attr *mq_stat);
+EXTERN int     mq_getattr(mqd_t mqdes, struct mq_attr *mq_stat);
 
 #undef EXTERN
 #ifdef __cplusplus

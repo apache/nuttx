@@ -41,6 +41,7 @@
  ************************************************************/
 
 #include <sys/types.h>
+#include <limits.h>
 #include <mqueue.h>
 #include <sched.h>
 #include <signal.h>
@@ -57,7 +58,7 @@
 #define MQ_MAX_BYTES   CONFIG_MQ_MAXMSGSIZE
 #define MQ_MAX_HWORDS  ((MQ_MAX_BYTES + sizeof(uint16) - 1) / sizeof(uint16))
 #define MQ_MAX_MSGS    16
-#define MQ_PRIO_MAX    255
+#define MQ_PRIO_MAX    _POSIX_MQ_PRIO_MAX
 
 /* This defines the number of messages descriptors to allocate
  * at each "gulp."

@@ -44,6 +44,7 @@
  * Definitions
  ************************************************************/
 
+#define CHAR_BIT        8
 #define SCHAR_MIN	0x80
 #define SCHAR_MAX	0x7f
 #define UCHAR_MAX	0xff

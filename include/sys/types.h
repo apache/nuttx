@@ -69,12 +69,6 @@
 #undef  OK
 #define OK 0
 
-/* POSIX-like scheduling policies (only SCHED_FIFO is supported) */
-
-#define SCHED_FIFO  1  /* FIFO per priority scheduling policy */
-#define SCHED_RR    2  /* Round robin scheduling policy */
-#define SCHED_OTHER 4  /* Not used */
-
 /* HPUX-like MIN/MAX value */
 
 #define PRIOR_RR_MIN      0
@@ -91,22 +85,6 @@
 #define SCHED_PRIORITY_DEFAULT 100
 #define SCHED_PRIORITY_MIN       1
 #define SCHED_PRIORITY_IDLE      0
-
-/* oflag bit settings for sem_open and mq_open */
-
-#define O_RDONLY    0x01   /* Open for read access */
-#define O_WRONLY    0x02   /* Open for write access */
-#define O_RDWR      0x03   /* Open for both read & write access */
-#define O_CREAT     0x04   /* Create semaphore/message queue */
-#define O_EXCL      0x08   /* Name must not exist when opened  */
-#define O_APPEND    0x10
-#define O_TRUNC     0x20
-#define O_NONBLOCK  0x40   /* Don't wait for data */
-#define O_NDELAY    O_NONBLOCK
-#define O_LOCK      0x80
-
-#define O_RDOK      O_RDONLY /* Not POSIX */
-#define O_WROK      O_WRONLY /* Not POSIX */
 
 /************************************************************
  * Type Declarations
@@ -144,12 +122,6 @@ typedef int           STATUS;
 
 typedef int (*main_t)(int argc, char *argv[]);
 
-/* This is the POSIX-like scheduling parameter structure */
-
-struct sched_param
-{
-  int sched_priority;
-};
 #endif
 
 /************************************************************

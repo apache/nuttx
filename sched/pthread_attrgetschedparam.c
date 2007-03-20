@@ -40,6 +40,7 @@
 #include <sys/types.h>
 #include <pthread.h>
 #include <string.h>
+#include <sched.h>
 #include <debug.h>
 #include <errno.h>
 #include "pthread_internal.h"

@@ -76,7 +76,7 @@
  *
  ************************************************************/
 
-#define isascii(c) ((c) >= 0 && (c) <= 0x7f);
+#define isascii(c)   ((c) >= 0 && (c) <= 0x7f);
 
 /************************************************************
  * Function:  isprint
@@ -86,7 +86,17 @@
  *
  ************************************************************/
 
-#define isprint(c) ((c) >= 0x20 && (c) < 0x7f)
+#define isprint(c)   ((c) >= 0x20 && (c) < 0x7f)
+
+/************************************************************
+ * Function:  isgraph
+ *
+ * Description:
+ *  Checks for a printable character (excluding space)
+ *
+ ************************************************************/
+
+#define isgraph(c)   ((c) > 0x20 && (c) < 0x7f)
 
 /************************************************************
  * Function:  iscntrl
@@ -99,6 +109,36 @@
 #define iscontrol(c) (!isprint(c))
 
 /************************************************************
+ * Function:  islower
+ *
+ * Description:
+ *    Checks for an lowercase letter.
+ *
+ ************************************************************/
+
+#define islower(c)   ((c) >= 'a' && (c) <= 'z')
+
+/************************************************************
+ * Function:  isupper
+ *
+ * Description:
+ *    Checks for an uppercase letter.
+ *
+ ************************************************************/
+
+#define isupper(c)   ((c) >= 'a' && (c) <= 'z')
+
+/************************************************************
+ * Function:  isalpha
+ *
+ * Description:
+ *    Checks for an alphabetic character
+ *
+ ************************************************************/
+
+#define isalpha(c)   (islower(c) || isupper(c))
+
+/************************************************************
  * Function:  isdigit
  *
  * Description:
@@ -107,6 +147,27 @@
  ************************************************************/
 
 #define isdigit(c)   ((c) >= '0' && (c) <= '9')
+
+/************************************************************
+ * Function:  isalnum
+ *
+ * Description:
+ *    Checks for an alphanumeric character
+ *
+ ************************************************************/
+
+#define isalnum(c)   (isalpha(c) || isdigit(c))
+
+/************************************************************
+ * Function:  ispunct
+ *
+ * Description:
+ *  Checks for a printable character which is not a space
+ *  or an alphanumeric character
+ *
+ ************************************************************/
+
+#define ispunct(c)   (isgraph(c) && !isalnum(c))
 
 /************************************************************
  * Function:  isxdigit
