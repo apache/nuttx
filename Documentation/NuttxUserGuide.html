@@ -42,8 +42,10 @@ into several paragraphs that describe different groups of OS interfaces:
 <LI>Paragraph 2.4 <A HREF="#Message_Queue">Named Message Queue Interfaces</A>
 <LI>Paragraph 2.5 <A HREF="#Semaphores">Counting Semaphore Interfaces</A>
 <LI>Paragraph 2.6 <A HREF="#Watchdogs">Watchdog Timer Interfaces</A>
-<LI>Paragraph 2.7 <A HREF="#Signals">Signal Interfaces</A>
-<LI>Paragraph 2.8 <A HREF="#Pthread">Pthread Interfaces</A>
+<LI>Paragraph 2.7 <A HREF="#ClocksNTimers">Clocks and Timers</A>
+<LI>Paragraph 2.8 <A HREF="#Signals">Signal Interfaces</A>
+<LI>Paragraph 2.9 <A HREF="#Pthread">Pthread Interfaces</A>
+<LI>Paragraph 2.10 <A HREF="#FileSystem">Filesystem Interfaces</A>
 </UL>
 <LI><B>Section 3.0, <A HREF="#Data_Structures">OS Data Structures</A></B>:
 This section documents the data structures that are used at the NuttX
@@ -1983,7 +1985,6 @@ number of parameters is determined by
 </UL>
 
 <H3><a name="wdcancel">2.6.4 wd_cancel</a></H3>
-
 <P>
 <B>Function Prototype:</B> 
 <PRE>
@@ -2018,7 +2019,427 @@ VxWorks provides the following comparable interface:
 
 <HR>
 
-<H2>2.7 <A NAME="Signals">Signal Interfaces</A></H2>
+<H2><A NAME="ClocksNTimers">2.7 Clocks and Timers</A></H2>
+<ul>
+  <li><a href="#clocksettime">2.7.1 clock_settime</a></li>
+  <li><a href="#clockgettime">2.7.2 clock_gettime</a></li>
+  <li><a href="#clockgetres">2.7.3 clock_getres</a></li>
+  <li><a href="#mktime">2.7.4 mktime</a></li>
+  <li><a href="#gmtimer">2.7.5 gmtime_r</a></li>
+  <li><a href="#localtimer">2.7.6 localtime_r</a></li>
+  <li><a href="#timercreate">2.7.7 timer_create</a></li>
+  <li><a href="#timerdelete">2.7.8 timer_delete</a></li>
+  <li><a href="#timersettime">2.7.9 timer_settime</a></li>
+  <li><a href="#timergettime">2.7.10 timer_gettime</a></li>
+  <li><a href="#timergetoverrun">2.7.11 timer_getoverrun</a></li>
+</ul>
+
+<H3><a name="clocksettime">2.7.1 clock_settime</A></H3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;time.h&gt;
+    int clock_settime(clockid_t clockid, const struct timespec *tp);
+</pre>
+<p>
+  <b>Description:</b>
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>parm</code>. </li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+</p>
+<p>
+  If successful, the <I>clock_settime()</I> function will return zero (<I>OK</I>).
+  Otherwise, an non-zero error number will be returned to indicate the error:
+</p>
+<ul>
+  <li><code>Exxx</code>.</li>
+</ul>
+
+<H3><a name="clockgettime">2.7.2 clock_gettime</A></H3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;time.h&gt;
+    int clock_gettime(clockid_t clockid, struct timespec *tp);
+</pre>
+<p>
+  <b>Description:</b>
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>parm</code>. </li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+</p>
+<p>
+  If successful, the <I>clock_gettime()</I> function will return zero (<I>OK</I>).
+  Otherwise, an non-zero error number will be returned to indicate the error:
+</p>
+<ul>
+  <li><code>Exxx</code>.</li>
+</ul>
+
+<H3><a name="clockgetres">2.7.3 clock_getres</A></H3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;time.h&gt;
+    int clock_getres(clockid_t clockid, struct timespec *res);
+</pre>
+<p>
+  <b>Description:</b>
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>parm</code>. </li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+</p>
+<p>
+  If successful, the <I>clock_getres()</I> function will return zero (<I>OK</I>).
+  Otherwise, an non-zero error number will be returned to indicate the error:
+</p>
+<ul>
+  <li><code>Exxx</code>.</li>
+</ul>
+
+<H3><a name="mktime">2.7.4 mktime</A></H3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;time.h&gt;
+    time_t mktime(struct tm *tp);
+</pre>
+<p>
+  <b>Description:</b>
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>parm</code>. </li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+</p>
+<p>
+  If successful, the <I>mktime()</I> function will return zero (<I>OK</I>).
+  Otherwise, an non-zero error number will be returned to indicate the error:
+</p>
+<ul>
+  <li><code>Exxx</code>.</li>
+</ul>
+
+<H3><a name="gmtimer">2.7.5 gmtime_r</A></H3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;time.h&gt;
+    struct tm *gmtime_r(const time_t *clock, struct tm *result);
+</pre>
+<p>
+  <b>Description:</b>
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>parm</code>. </li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+</p>
+<p>
+  If successful, the <I>gmtime_r()</I> function will return zero (<I>OK</I>).
+  Otherwise, an non-zero error number will be returned to indicate the error:
+</p>
+<ul>
+  <li><code>Exxx</code>.</li>
+</ul>
+
+<H3><a name="localtimer">2.7.6 localtime_r</A></H3>
+<pre>
+    #include &lt;time.h&gt;
+    #define localtime_r(c,r) gmtime_r(c,r)
+</pre>
+
+<H3><a name="timercreate">2.7.7 timer_create</A></H3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;time.h&gt;
+    int timer_create(clockid_t clockid, struct sigevent *evp, timer_t *timerid);
+</pre>
+<p>
+  <b>Description:</b>
+  The  <code>timer_create()</code> function creates per-thread timer using the specified
+  clock, <code>clock_id</code>, as the timing base.
+  The <code>timer_create()</code> function returns, in
+  the location referenced by <code>timerid</code>, a timer ID of type timer_t used to identify
+  the timer in timer requests.
+  This timer ID is unique until the timer is deleted.
+  The particular clock, <code>clock_id<code>, is defined in <code>&lt;time.h&gt;<code>.
+  The timer whose ID is returned will be in a disarmed state upon return from
+  <code>timer_create()</code>.
+</p>
+<p>
+  The <code>evp</code> argument, if non-NULL, points to a <code>sigevent</code> structure.
+  This structure is allocated by the called and defines the asynchronous notification to occur.
+  If the <code>evp</code> argument is NULL, the effect is as if the <code>evp</code> argument pointed to
+  a <code>sigevent</code> structure with the <code>sigev_notify</code> member having the value <code>SIGEV_SIGNAL</code>,
+  the <code>sigev_signo</code> having a default signal number, and the <code>sigev_value</code> member
+  having the value of the timer ID.
+</p>
+<p>
+  Each implementation defines a set of clocks that can be used as timing bases
+  for per-thread timers. All implementations shall support a <code>clock_id</code> of
+  <code>CLOCK_REALTIME</code>.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>clockid</code>. Specifies the clock to use as the timing base.</li>
+  <li><code>evp</code>. Refers to a user allocated sigevent structure that defines the
+    asynchronous notification.  evp may be NULL (see above).</li>
+  <li><code>timerid</code>. The pre-thread timer created by the call to timer_create().</li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+</p>
+<p>
+  If the call succeeds, <code>timer_create()</code> will return 0 (<code>OK</code>) and update the
+  location referenced by <code>timerid</code> to a <code>timer_t</code>, which can be passed to the
+  other per-thread timer calls.  If an error occurs, the function will return
+  a value of -1 (<code>ERROR</code>) and set errno to indicate the error.
+</p>
+<ul>
+  <li><code>EAGAIN</code>. The system lacks sufficient signal queuing resources to honor the
+    request.</li>
+  <li><code>EAGAIN</code>. The calling process has already created all of the timers it is
+    allowed by this implementation.</li>
+  <li><code>EINVAL</code>. The specified clock ID is not defined.</li>
+  <li><code>ENOTSUP</code>. The implementation does not support the creation of a timer attached
+    to the CPU-time clock that is specified by clock_id and associated with a
+    thread different thread invoking timer_create().</li>
+</ul>
+
+<H3><a name="timerdelete">2.7.8 timer_delete</A></H3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;time.h&gt;
+    int timer_delete(timer_t timerid);
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>timer_delete()</code> function deletes the specified timer, <code>timerid</code>, previously
+  created by the <code>timer_create()</code> function.
+  If the timer is armed when <code>timer_delete()</code> is called, the timer will be automatically disarmed before
+  removal.
+  The disposition of pending signals for the deleted timer is unspecified.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>timerid</code>.
+  The pre-thread timer, previously created by the call to timer_create(), to be deleted.</li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+</p>
+<p>
+  If successful, the <I>timer_delete()</I> function will return zero (<I>OK</I>).
+  Otherwise, the function will return a value of -1 (ERROR) and set errno to indicate the error:
+</p>
+<ul>
+  <li><code>EINVAL</code>. The timer specified timerid is not valid.</li>
+</ul>
+
+<H3><a name="timersettime">2.7.9 timer_settime</A></H3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;time.h&gt;
+    int timer_settime(timer_t timerid, int flags, const struct itimerspec *value,
+                      struct itimerspec *ovalue);
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>timer_settime()</code> function sets the time until the next expiration of the
+  timer specified by <code>timerid</code> from the <code>it_value</code> member of the value argument
+  and arm the timer if the <code>it_value</code> member of value is non-zero. If the
+  specified timer was already armed when <code>timer_settime()</code> is called, this call
+  will reset the time until next expiration to the value specified. If the
+  <code>it_value</code> member of value is zero, the timer will be disarmed. The effect
+  of disarming or resetting a timer with pending expiration notifications is
+  unspecified.
+</p>
+<p>
+  If the flag <code>TIMER_ABSTIME</code> is not set in the argument flags, <code>timer_settime()</code>
+  will behave as if the time until next expiration is set to be equal to the
+  interval specified by the <code>it_value</code> member of value. That is, the timer will
+  expire in <code>it_value</code> nanoseconds from when the call is made. If the flag
+  <code>TIMER_ABSTIME</code> is set in the argument flags, <code>timer_settime()</code> will behave as
+  if the time until next expiration is set to be equal to the difference between
+  the absolute time specified by the <code>it_value</code> member of value and the current
+  value of the clock associated with <code>timerid</code>.  That is, the timer will expire
+  when the clock reaches the value specified by the <code>it_value</code> member of value.
+  If the specified time has already passed, the function will succeed and the
+  expiration notification will be made.
+</p>
+<p>
+  The reload value of the timer will be set to the value specified by the
+  <code>it_interval</code> member of value.  When a timer is armed with a non-zero
+  <code>it_interval</code>, a periodic (or repetitive) timer is specified.
+</p>
+<p>
+  Time values that are between two consecutive non-negative integer multiples
+  of the resolution of the specified timer will be rounded up to the larger
+  multiple of the resolution. Quantization error will not cause the timer to
+  expire earlier than the rounded time value.
+</p>
+<p>
+  If the argument <code>ovalue</code> is not NULL, the t<code>imer_settime()</code> function will store,
+  in the location referenced by <code>ovalue</code>, a value representing the previous
+  amount of time before the timer would have expired, or zero if the timer was
+  disarmed, together with the previous timer reload value. Timers will not
+  expire before their scheduled time.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+ <li><code>timerid</code>. The pre-thread timer, previously created by the call to timer_create(), to be be set.</li>
+ <li><code>flags</code>. Specifie characteristics of the timer (see above)</li>
+ <li><code>value</code>. Specifies the timer value to set</li>
+ <li><code>ovalue</code>. A location in which to return the time remaining from the previous timer setting.</li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+</p>
+<p>
+  If the timer_gettime() succeeds, a value of 0 (OK) will be returned.
+  If an error occurs, the value -1 (ERROR) will be returned, and errno set to indicate the error.
+</p>
+<ul>
+  <li><code>EINVAL</code>. The timerid argument does not correspond to an ID returned by timer_create() but not yet deleted by timer_delete().</li>
+  <li><code>EINVAL</code>. A value structure specified a nanosecond value less than zero or greater than or equal to 1000 million,
+    and the it_value member of that structure did not specify zero seconds and nanoseconds.</li>
+</ul>
+
+<H3><a name="timergettime">2.7.10 timer_gettime</A></H3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;time.h&gt;
+    int timer_gettime(timer_t timerid, struct itimerspec *value);
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>timer_gettime()</code> function will store the amount of time until the
+  specified timer, <code>timerid</code>, expires and the reload value of the timer into the
+  space pointed to by the <code>value</code> argument. The <code>it_value</code> member of this structure
+  will contain the amount of time before the timer expires, or zero if the timer
+  is disarmed. This value is returned as the interval until timer expiration,
+  even if the timer was armed with absolute time. The <code>it_interval</code> member of
+  <code>value</code> will contain the reload value last set by <code>timer_settime()</code>.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+ <li><code>timerid</code>. Specifies pre-thread timer, previously created by the call to
+ t<code>imer_create()</code>, whose remaining count will be returned.</li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+</p>
+<p>
+  If successful, the <I>timer_gettime()</I> function will return zero (<I>OK</I>).
+  Otherwise, an non-zero error number will be returned to indicate the error:
+</p>
+<ul>
+  <li><code>EINVAL</code>.
+  The <code>timerid</code> argument does not correspond to an ID returned by
+  <code>timer_create()</code> but not yet deleted by <code>timer_delete()</code>.</li>
+</ul>
+
+<H3><a name="timergetoverrun">2.7.11 timer_getoverrun</A></H3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;time.h&gt;
+    int timer_getoverrun(timer_t timerid);
+</pre>
+<p>
+  <b>Description:</b>
+  Only a single signal will be queued to the process for a given timer at any
+  point in time.  When a timer for which a signal is still pending expires, no
+  signal will be queued, and a timer overrun will occur. When a timer
+  expiration signal is delivered to or accepted by a process, if the
+  implementation  supports  the  <i>Realtime Signals Extension</i>, the
+  <code>timer_getoverrun()</code> function will return the timer expiration overrun count for
+  the specified timer. The overrun count returned contains the number of extra
+  timer expirations that occurred between the time the signal was generated
+  (queued) and when it was delivered or accepted, up to but not including an 
+  implementation-defined  maximum of <code>DELAYTIMER_MAX</code>. If the number of such
+  extra expirations is greater than or equal to <code>DELAYTIMER_MAX</code>, then the
+  overrun count will be set to <code>DELAYTIMER_MAX</code>. The value returned by
+  <code>timer_getoverrun()</code> will apply to the most recent expiration signal delivery
+  or acceptance for the timer.  If no expiration signal has been delivered
+  for the timer, or if the <i>Realtime Signals Extension</i> is not supported, the
+  return value of <code>timer_getoverrun()</code> is unspecified.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+ <li><code>timerid</code>. Specifies pre-thread timer, previously created by the call to
+ <code>timer_create()</code>, whose overrun count will be returned.</li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+  If the <code>timer_getoverrun()</code> function succeeds, it will return the timer
+  expiration overrun count as explained above. <code>timer_getoverrun()</code> will fail if:
+</p>
+<ul>
+  <li><code>EINVAL</code>.
+  The <code>timerid</code> argument does not correspond to an ID returned by
+  <code>timer_create()</code> but not yet deleted by <code>timer_delete()</code>.</li>
+</ul>
+
+<B>Assumptions/Limitations:</B>
+<P>
+<B>POSIX Compatibility:</B> Comparable to the POSIX
+interface of the same name.
+
+<HR>
+
+<H2>2.8 <A NAME="Signals">Signal Interfaces</A></H2>
 
 <p>
   NuttX provides signal interfaces for tasks. Signals are used to
@@ -2044,22 +2465,22 @@ VxWorks provides the following comparable interface:
   The following signal handling interfaces are provided by NuttX:
 </p>
 <ul>
-  <li><a href="#sigemptyset">2.7.1 sigemptyset</a></li>
-  <li><a href="#sigfillset">2.7.2 sigfillset</a></li>
-  <li><a href="#sigaddset">2.7.3 sigaddset</a></li>
-  <li><a href="#sigdelset">2.7.4 sigdelset</a></li>
-  <li><a href="#sigismember">2.7.5 sigismember</a></li>
-  <li><a href="#sigaction">2.7.6 sigaction</a></li>
-  <li><a href="#sigprocmask">2.7.7 sigprocmask</a></li>
-  <li><a href="#sigpending">2.7.8 sigpending</a></li>
-  <li><a href="#sigsuspend">2.7.9 sigsuspend</a></li>
-  <li><a href="#sigwaitinfo">2.7.10 sigwaitinfo</a></li>
-  <li><a href="#sigtimedwait">2.7.11 sigtimedwait</a></li>
-  <li><a href="#sigqueue">2.7.12 sigqueue</a></li>
-  <li><a href="#kill">2.7.13 kill</a></li>
+  <li><a href="#sigemptyset">2.8.1 sigemptyset</a></li>
+  <li><a href="#sigfillset">2.8.2 sigfillset</a></li>
+  <li><a href="#sigaddset">2.8.3 sigaddset</a></li>
+  <li><a href="#sigdelset">2.8.4 sigdelset</a></li>
+  <li><a href="#sigismember">2.8.5 sigismember</a></li>
+  <li><a href="#sigaction">2.8.6 sigaction</a></li>
+  <li><a href="#sigprocmask">2.8.7 sigprocmask</a></li>
+  <li><a href="#sigpending">2.8.8 sigpending</a></li>
+  <li><a href="#sigsuspend">2.8.9 sigsuspend</a></li>
+  <li><a href="#sigwaitinfo">2.8.10 sigwaitinfo</a></li>
+  <li><a href="#sigtimedwait">2.8.11 sigtimedwait</a></li>
+  <li><a href="#sigqueue">2.8.12 sigqueue</a></li>
+  <li><a href="#kill">2.8.13 kill</a></li>
 </ul>
 
-<H3><a name="sigemptyset">2.7.1 sigemptyset</a></H3>
+<H3><a name="sigemptyset">2.8.1 sigemptyset</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2089,7 +2510,7 @@ by set such that all signals are excluded.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigfillset">2.7.2 sigfillset</a></H3>
+<H3><a name="sigfillset">2.8.2 sigfillset</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2119,7 +2540,7 @@ by set such that all signals are included.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigaddset">2.7.3 sigaddset</a></H3>
+<H3><a name="sigaddset">2.8.3 sigaddset</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2150,7 +2571,7 @@ signo to the signal set specified by set.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigdelset">2.7.4 sigdelset</a></H3>
+<H3><a name="sigdelset">2.8.4 sigdelset</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2181,7 +2602,7 @@ by signo from the signal set specified by set.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigismember">2.7.5 sigismember</a></H3>
+<H3><a name="sigismember">2.8.5 sigismember</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2214,7 +2635,7 @@ by signo is a member of the set specified by set.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigaction">2.7.6 sigaction</a></H3>
+<H3><a name="sigaction">2.8.6 sigaction</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2287,7 +2708,7 @@ not handled (SIG_DFL, SIG_IGN).
 (all treated like SA_SIGINFO).
 </UL>
 
-<H3><a name="sigprocmask">2.7.7 sigprocmask</a></H3>
+<H3><a name="sigprocmask">2.8.7 sigprocmask</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2337,7 +2758,7 @@ pointed to by the <I>set</I> input parameter.
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigpending">2.7.8 sigpending</a></H3>
+<H3><a name="sigpending">2.8.8 sigpending</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2375,7 +2796,7 @@ is delivered more than once.&quot;
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigsuspend">2.7.9 sigsuspend</a></H3>
+<H3><a name="sigsuspend">2.8.9 sigsuspend</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2423,7 +2844,7 @@ function or to terminate the task.&quot;  Only delivery of the signal
 is required in the present implementation (even if the signal is ignored).
 </UL>
 
-<H3><a name="sigwaitinfo">2.7.10 sigwaitinfo</a></H3>
+<H3><a name="sigwaitinfo">2.8.10 sigwaitinfo</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2455,7 +2876,7 @@ with a NULL timeout parameter. (see below).
 <B>  POSIX  Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigtimedwait">2.7.11 sigtimedwait</a></H3>
+<H3><a name="sigtimedwait">2.8.11 sigtimedwait</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2521,7 +2942,7 @@ that the unblocked signal be caught; the task will be resumed even if
 the unblocked signal is ignored.
 </UL>
 
-<H3><a name="sigqueue">2.7.12 sigqueue</a></H3>
+<H3><a name="sigqueue">2.8.12 sigqueue</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2578,7 +2999,7 @@ There is no null signal in the present implementation; a zero signal will
 be sent.
 </UL>
 
-<H3><a name="kill">2.7.13 kill</a></H3>
+<H3><a name="kill">2.8.13 kill</a></H3>
 
 <P>
 <B>Function Prototype:</B> 
@@ -2633,53 +3054,53 @@ be sent.
   <li>Sending of signals to 'process groups' is not supported in NuttX.</li>
 </ul>
 
-<H2>2.8 <A NAME="Pthread">Pthread Interfaces</A></H2>
+<H2>2.9 <A NAME="Pthread">Pthread Interfaces</A></H2>
 <ul>
-  <li><a href="#pthreadattrinit">2.8.1 pthread_attr_init</a></li>
-  <li><a href="#pthreadattrdestroy">2.8.2 pthread_attr_destroy</a></li>
-  <li><a href="#pthreadattrsetschedpolity">2.8.3 pthread_attr_setschedpolicy</a></li>
-  <li><a href="#pthreadattrgetschedpolicy">2.8.4 pthread_attr_getschedpolicy</a></li>
-  <li><a href="#pthreadattrsetschedparam">2.8.5 pthread_attr_setschedparam</a></li>
-  <li><a href="#pthreadattrgetschedparam">2.8.6 pthread_attr_getschedparam</a></li>
-  <li><a href="#pthreadattrsetinheritsched">2.8.7 pthread_attr_setinheritsched</a></li>
-  <li><a href="#pthreadattrgetinheritsched">2.8.8 pthread_attr_getinheritsched</a></li>
-  <li><a href="#pthreadattrsetstacksize">2.8.9 pthread_attr_setstacksize</a></li>
-  <li><a href="#pthreadattrgetstacksize">2.8.10 pthread_attr_getstacksize</a></li>
-  <li><a href="#pthreadcreate">2.8.11 pthread_create</a></li>
-  <li><a href="#pthreaddetach">2.8.12 pthread_detach</a></li>
-  <li><a href="#pthreadexit">2.8.13 pthread_exit</a></li>
-  <li><a href="#pthreadcancel">2.8.14 pthread_cancel</a></li>
-  <li><a href="#pthreadsetcancelstate">2.8.15 pthread_setcancelstate</a></li>
-  <li><a href="#pthreadtestcancelstate">2.8.16 pthread_testcancelstate</a></li>
-  <li><a href="#pthreadjoin">2.8.17 pthread_join</a></li>
-  <li><a href="#pthreadyield">2.8.18 pthread_yield</a></li>
-  <li><a href="#pthreadself">2.8.19 pthread_self</a></li>
-  <li><a href="#pthreadgetschedparam">2.8.20 pthread_getschedparam</a></li>
-  <li><a href="#pthreadsetschedparam">2.8.21 pthread_setschedparam</a></li>
-  <li><a href="#pthreadkeycreate">2.8.22 pthread_key_create</a></li>
-  <li><a href="#pthreadsetspecific">2.8.23 pthread_setspecific</a></li>
-  <li><a href="#pthreadgetspecific">2.8.24 pthread_getspecific</a></li>
-  <li><a href="#pthreadkeydelete">2.8.25 pthread_key_delete</a></li>
-  <li><a href="#pthreadmutexattrinit">2.8.26 pthread_mutexattr_init</a></li>
-  <li><a href="#pthreadmutexattrdestroy">2.8.27 pthread_mutexattr_destroy</a></li>
-  <li><a href="#pthreadmutexattrgetpshared">2.8.28 pthread_mutexattr_getpshared</a></li>
-  <li><a href="#pthreadmutexattrsetpshared">2.8.29 pthread_mutexattr_setpshared</a></li>
-  <li><a href="#pthreadmutexinit">2.8.30 pthread_mutex_init</a></li>
-  <li><a href="#pthreadmutexdestrory">2.8.31 pthread_mutex_destroy</a></li>
-  <li><a href="#pthreadmutexlock">2.8.32 pthread_mutex_lock</a></li>
-  <li><a href="#pthreadmutextrylock">2.8.33 pthread_mutex_trylock</a></li>
-  <li><a href="#pthreadmutexunlock">2.8.34 pthread_mutex_unlock</a></li>
-  <li><a href="#pthreadconaddrinit">2.8.35 pthread_condattr_init</a></li>
-  <li><a href="#pthreadocndattrdestroy">2.8.36 pthread_condattr_destroy</a></li>
-  <li><a href="#pthreadcondinit">2.8.37 pthread_cond_init</a></li>
-  <li><a href="#pthreadconddestroy">2.8.38 pthread_cond_destroy</a></li>
-  <li><a href="#pthreadcondbroadcast">2.8.39 pthread_cond_broadcast</a></li>
-  <li><a href="#pthreadcondsignal">2.8.40 pthread_cond_signal</a></li>
-  <li><a href="#pthreadcondwait">2.8.41 pthread_cond_wait</a></li>
-  <li><a href="#pthreadcondtimedwait">2.8.42 pthread_cond_timedwait</a></li>
+  <li><a href="#pthreadattrinit">2.9.1 pthread_attr_init</a></li>
+  <li><a href="#pthreadattrdestroy">2.9.2 pthread_attr_destroy</a></li>
+  <li><a href="#pthreadattrsetschedpolity">2.9.3 pthread_attr_setschedpolicy</a></li>
+  <li><a href="#pthreadattrgetschedpolicy">2.9.4 pthread_attr_getschedpolicy</a></li>
+  <li><a href="#pthreadattrsetschedparam">2.9.5 pthread_attr_setschedparam</a></li>
+  <li><a href="#pthreadattrgetschedparam">2.9.6 pthread_attr_getschedparam</a></li>
+  <li><a href="#pthreadattrsetinheritsched">2.9.7 pthread_attr_setinheritsched</a></li>
+  <li><a href="#pthreadattrgetinheritsched">2.9.8 pthread_attr_getinheritsched</a></li>
+  <li><a href="#pthreadattrsetstacksize">2.9.9 pthread_attr_setstacksize</a></li>
+  <li><a href="#pthreadattrgetstacksize">2.9.10 pthread_attr_getstacksize</a></li>
+  <li><a href="#pthreadcreate">2.9.11 pthread_create</a></li>
+  <li><a href="#pthreaddetach">2.9.12 pthread_detach</a></li>
+  <li><a href="#pthreadexit">2.9.13 pthread_exit</a></li>
+  <li><a href="#pthreadcancel">2.9.14 pthread_cancel</a></li>
+  <li><a href="#pthreadsetcancelstate">2.9.15 pthread_setcancelstate</a></li>
+  <li><a href="#pthreadtestcancelstate">2.9.16 pthread_testcancelstate</a></li>
+  <li><a href="#pthreadjoin">2.9.17 pthread_join</a></li>
+  <li><a href="#pthreadyield">2.9.18 pthread_yield</a></li>
+  <li><a href="#pthreadself">2.9.19 pthread_self</a></li>
+  <li><a href="#pthreadgetschedparam">2.9.20 pthread_getschedparam</a></li>
+  <li><a href="#pthreadsetschedparam">2.9.21 pthread_setschedparam</a></li>
+  <li><a href="#pthreadkeycreate">2.9.22 pthread_key_create</a></li>
+  <li><a href="#pthreadsetspecific">2.9.23 pthread_setspecific</a></li>
+  <li><a href="#pthreadgetspecific">2.9.24 pthread_getspecific</a></li>
+  <li><a href="#pthreadkeydelete">2.9.25 pthread_key_delete</a></li>
+  <li><a href="#pthreadmutexattrinit">2.9.26 pthread_mutexattr_init</a></li>
+  <li><a href="#pthreadmutexattrdestroy">2.9.27 pthread_mutexattr_destroy</a></li>
+  <li><a href="#pthreadmutexattrgetpshared">2.9.28 pthread_mutexattr_getpshared</a></li>
+  <li><a href="#pthreadmutexattrsetpshared">2.9.29 pthread_mutexattr_setpshared</a></li>
+  <li><a href="#pthreadmutexinit">2.9.30 pthread_mutex_init</a></li>
+  <li><a href="#pthreadmutexdestrory">2.9.31 pthread_mutex_destroy</a></li>
+  <li><a href="#pthreadmutexlock">2.9.32 pthread_mutex_lock</a></li>
+  <li><a href="#pthreadmutextrylock">2.9.33 pthread_mutex_trylock</a></li>
+  <li><a href="#pthreadmutexunlock">2.9.34 pthread_mutex_unlock</a></li>
+  <li><a href="#pthreadconaddrinit">2.9.35 pthread_condattr_init</a></li>
+  <li><a href="#pthreadocndattrdestroy">2.9.36 pthread_condattr_destroy</a></li>
+  <li><a href="#pthreadcondinit">2.9.37 pthread_cond_init</a></li>
+  <li><a href="#pthreadconddestroy">2.9.38 pthread_cond_destroy</a></li>
+  <li><a href="#pthreadcondbroadcast">2.9.39 pthread_cond_broadcast</a></li>
+  <li><a href="#pthreadcondsignal">2.9.40 pthread_cond_signal</a></li>
+  <li><a href="#pthreadcondwait">2.9.41 pthread_cond_wait</a></li>
+  <li><a href="#pthreadcondtimedwait">2.9.42 pthread_cond_timedwait</a></li>
 </ul>
 
-<H3><a name="pthreadattrinit">2.8.1 pthread_attr_init</A></H3>
+<H3><a name="pthreadattrinit">2.9.1 pthread_attr_init</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2700,19 +3121,19 @@ for all of the individual attributes used by the implementation.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_attr_init()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 <P>
-<H3><a name="pthreadattrdestroy">2.8.2 pthread_attr_destroy</A></H3>
+<H3><a name="pthreadattrdestroy">2.9.2 pthread_attr_destroy</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2732,19 +3153,19 @@ An attributes object can be deleted when it is no longer needed.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_attr_destroy()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 <P>
-<H3><a name="pthreadattrsetschedpolity">2.8.3 pthread_attr_setschedpolicy</A></H3>
+<H3><a name="pthreadattrsetschedpolity">2.9.3 pthread_attr_setschedpolicy</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2763,19 +3184,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_attr_setschedpolicy()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrgetschedpolicy">2.8.4 pthread_attr_getschedpolicy</A></H3>
+<H3><a name="pthreadattrgetschedpolicy">2.9.4 pthread_attr_getschedpolicy</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2794,19 +3215,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_attr_getschedpolicy()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrsetschedparam">2.8.5 pthread_attr_setschedparam</A></H3>
+<H3><a name="pthreadattrsetschedparam">2.9.5 pthread_attr_getschedpolicy</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2826,19 +3247,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_attr_getschedpolicy()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrgetschedparam">2.8.6 pthread_attr_getschedparam</A></H3>
+<H3><a name="pthreadattrgetschedparam">2.9.6 pthread_attr_getschedparam</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2858,19 +3279,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_attr_getschedparam()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrsetinheritsched">2.8.7 pthread_attr_setinheritsched</A></H3>
+<H3><a name="pthreadattrsetinheritsched">2.9.7 pthread_attr_setinheritsched</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2890,19 +3311,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_attr_setinheritsched()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 <P>
-<H3><a name="pthreadattrgetinheritsched">2.8.8 pthread_attr_getinheritsched</A></H3>
+<H3><a name="pthreadattrgetinheritsched">2.9.8 pthread_attr_getinheritsched</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2922,19 +3343,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_attr_getinheritsched()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrsetstacksize">2.8.9 pthread_attr_setstacksize</A></H3>
+<H3><a name="pthreadattrsetstacksize">2.9.9 pthread_attr_setstacksize</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2953,19 +3374,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_attr_setstacksize()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrgetstacksize">2.8.10 pthread_attr_getstacksize</A></H3>
+<H3><a name="pthreadattrgetstacksize">2.9.10 pthread_attr_getstacksize</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -2984,19 +3405,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_attr_getstacksize()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcreate">2.8.11 pthread_create</A></H3>
+<H3><a name="pthreadcreate">2.9.11 pthread_create</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3023,19 +3444,19 @@ specify details about the kind of thread being created.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_create()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreaddetach">2.8.12 pthread_detach</A></H3>
+<H3><a name="pthreaddetach">2.9.12 pthread_detach</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3056,19 +3477,19 @@ return value and completion status will not be requested.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_detach()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadexit">2.8.13 pthread_exit</A></H3>
+<H3><a name="pthreadexit">2.9.13 pthread_exit</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3088,19 +3509,19 @@ A thread may terminate it's own execution.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_exit()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcancel">2.8.14 pthread_cancel</A></H3>
+<H3><a name="pthreadcancel">2.9.14 pthread_cancel</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3156,7 +3577,7 @@ the time when cancelation is re-enabled.</li>
 <li>Thread cancellation at <i>cancellation points</i> is not supported.</li>
 </UL>
 
-<H3><a name="pthreadsetcancelstate">2.8.15 pthread_setcancelstate</A></H3>
+<H3><a name="pthreadsetcancelstate">2.9.15 pthread_setcancelstate</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3198,7 +3619,7 @@ No thread could be found corresponding to that specified by the given thread ID.
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadtestcancelstate">2.8.16 pthread_testcancelstate</A></H3>
+<H3><a name="pthreadtestcancelstate">2.9.16 pthread_testcancelstate</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3217,19 +3638,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_setcancelstate()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadjoin">2.8.17 pthread_join</A></H3>
+<H3><a name="pthreadjoin">2.9.17 pthread_join</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3250,19 +3671,19 @@ the return value of the thread.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_join()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadyield">2.8.18 pthread_yield</A></H3>
+<H3><a name="pthreadyield">2.9.18 pthread_yield</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3283,19 +3704,19 @@ made available.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_yield()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadself">2.8.19 pthread_self</A></H3>
+<H3><a name="pthreadself">2.9.19 pthread_self</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3315,19 +3736,19 @@ A thread may obtain a copy of its own thread handle.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_self()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadgetschedparam">2.8.20 pthread_getschedparam</A></H3>
+<H3><a name="pthreadgetschedparam">2.9.20 pthread_getschedparam</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3347,19 +3768,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_getschedparam()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadsetschedparam">2.8.21 pthread_setschedparam</A></H3>
+<H3><a name="pthreadsetschedparam">2.9.21 pthread_setschedparam</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3379,19 +3800,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_setschedparam()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadkeycreate">2.8.22 pthread_key_create</A></H3>
+<H3><a name="pthreadkeycreate">2.9.22 pthread_key_create</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3446,7 +3867,7 @@ interface of the same name.
 <LI>The present implementation ignores the destructor argument.
 </UL>
 
-<H3><a name="pthreadsetspecific">2.8.23 pthread_setspecific</A></H3>
+<H3><a name="pthreadsetspecific">2.9.23 pthread_setspecific</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3496,7 +3917,7 @@ interface of the same name.
 destructor function.
 </UL>
 
-<H3><a name="pthreadgetspecific">2.8.24 pthread_getspecific</A></H3>
+<H3><a name="pthreadgetspecific">2.9.24 pthread_getspecific</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3537,7 +3958,7 @@ interface of the same name.
 destructor function.
 </UL>
 
-<H3><a name="pthreadkeydelete">2.8.25 pthread_key_delete</A></H3>
+<H3><a name="pthreadkeydelete">2.9.25 pthread_key_delete</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3569,7 +3990,7 @@ this function does nothing in the present implementation.
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrinit">2.8.26 pthread_mutexattr_init</A></H3>
+<H3><a name="pthreadmutexattrinit">2.9.26 pthread_mutexattr_init</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3588,19 +4009,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_mutexattr_init()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrdestroy">2.8.27 pthread_mutexattr_destroy</A></H3>
+<H3><a name="pthreadmutexattrdestroy">2.9.27 pthread_mutexattr_destroy</A></H3>
 <P>
 <B>Function Protoype:</B>
 <P>
@@ -3619,19 +4040,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_mutexattr_destroy()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrgetpshared">2.8.28 pthread_mutexattr_getpshared</A></H3>
+<H3><a name="pthreadmutexattrgetpshared">2.9.28 pthread_mutexattr_getpshared</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3651,19 +4072,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_mutexattr_getpshared()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrsetpshared">2.8.29 pthread_mutexattr_setpshared</A></H3>
+<H3><a name="pthreadmutexattrsetpshared">2.9.29 pthread_mutexattr_setpshared</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3683,19 +4104,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_mutexattr_setpshared()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexinit">2.8.30 pthread_mutex_init</A></H3>
+<H3><a name="pthreadmutexinit">2.9.30 pthread_mutex_init</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3715,19 +4136,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_mutex_init()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexdestrory">2.8.31 pthread_mutex_destroy</A></H3>
+<H3><a name="pthreadmutexdestrory">2.9.31 pthread_mutex_destroy</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3746,19 +4167,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_mutex_destroy()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexlock">2.8.32 pthread_mutex_lock</A></H3>
+<H3><a name="pthreadmutexlock">2.9.32 pthread_mutex_lock</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3777,19 +4198,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_mutex_lock()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutextrylock">2.8.33 pthread_mutex_trylock</A></H3>
+<H3><a name="pthreadmutextrylock">2.9.33 pthread_mutex_trylock</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3808,19 +4229,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_mutex_trylock()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexunlock">2.8.34 pthread_mutex_unlock</A></H3>
+<H3><a name="pthreadmutexunlock">2.9.34 pthread_mutex_unlock</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3839,19 +4260,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_mutex_unlock()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadconaddrinit">2.8.35 pthread_condattr_init</A></H3>
+<H3><a name="pthreadconaddrinit">2.9.35 pthread_condattr_init</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3870,19 +4291,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_condattr_init()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadocndattrdestroy">2.8.36 pthread_condattr_destroy</A></H3>
+<H3><a name="pthreadocndattrdestroy">2.9.36 pthread_condattr_destroy</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3901,19 +4322,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_condattr_destroy()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondinit">2.8.37 pthread_cond_init</A></H3>
+<H3><a name="pthreadcondinit">2.9.37 pthread_cond_init</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3932,19 +4353,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_cond_init()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadconddestroy">2.8.38 pthread_cond_destroy</A></H3>
+<H3><a name="pthreadconddestroy">2.9.38 pthread_cond_destroy</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3963,19 +4384,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_cond_destroy()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondbroadcast">2.8.39 pthread_cond_broadcast</A></H3>
+<H3><a name="pthreadcondbroadcast">2.9.39 pthread_cond_broadcast</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -3994,19 +4415,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_cond_broadcast()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondsignal">2.8.40 pthread_cond_signal</A></H3>
+<H3><a name="pthreadcondsignal">2.9.40 pthread_cond_signal</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -4025,19 +4446,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_cond_signal()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondwait">2.8.41 pthread_cond_wait</A></H3>
+<H3><a name="pthreadcondwait">2.9.41 pthread_cond_wait</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -4056,19 +4477,19 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_cond_wait()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
 <B>POSIX Compatibility:</B> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondtimedwait">2.8.42 pthread_cond_timedwait</A></H3>
+<H3><a name="pthreadcondtimedwait">2.9.42 pthread_cond_timedwait</A></H3>
 <P>
 <B>Function Prototype:</B>
 <P>
@@ -4088,12 +4509,12 @@ interface of the same name.
 <P>
 <B>Returned Values:</B>
 <P>
-If successful, the <I>xxx()</I> function will return
+If successful, the <I>pthread_cond_timedwait()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
 <P>
 <UL>
-<LI><I>Exxx</I>.
+  <li><code>Exxx</code>. </li>
 </UL>
 <B>Assumptions/Limitations:</B>
 <P>
@@ -4303,14 +4724,101 @@ notify a task when a message is available on a queue.
   have to do some redesign.
 </p>
 
+<h1><a name="FileSystem">2.10 Filesystem Interfaces</a></h1>
+<p>
+  The NuttX filesystem is very simple; it does not involve any block drivers or
+  particular filesystem (like FAT or EXT2 etc.).
+  The NuttX filesystem simply supports a set a filesystem APIs
+  (<code>open()</code>, <code>close()</code>, <code>read()</code>, <code>write</code>, etc.)
+  and a registration mechanism that allows devices drivers to a associated with <i>nodes</i>
+  in a file-system-like name space.
+</p>
+
+<h2><a name="driveroperations">2.10.1 Driver Operations</a></h2>
+<ul><pre>
+  #include &lt;fcntl.h&gt;
+  int open(const char *path, int oflag, ...);
+</pre></ul>
+
+<ul><pre>
+  #include &lt;unistd.h&gt;
+  int   close(int fd);
+  int   dup(int fildes);
+  int   dup2(int fildes1, int fildes2);
+  off_t lseek(int fd, off_t offset, int whence);
+  int   read(int fd, void *buf, unsigned int nbytes);
+  int   unlink(const char *path);
+  int   write(int fd, const void *buf, unsigned int nbytes);
+</pre></ul>
+
+<h2><a name="directoryoperations">2.10.2 Directory Operations</a></h2>
+<ul><pre>
+  #include &lt;dirent.h&gt;
+  int        closedir(DIR *dirp);
+  FAR DIR   *opendir(const char *path);
+  FAR struct dirent *readdir(FAR DIR *dirp);
+  int        readdir_r(FAR DIR *dirp, FAR struct dirent *entry, FAR struct dirent **result);
+  void       rewinddir(FAR DIR *dirp);
+  void       seekdir(FAR DIR *dirp, int loc);
+  int        telldir(FAR DIR *dirp);
+</pre></ul>
+
+<h2><a name="standardio">2.10.3 Standard I/O</a></h2>
+<ul><pre>
+  #include &lt;stdio.h&gt;
+  int    fclose(FILE *stream);
+  int    fflush(FILE *stream);
+  int    feof(FILE *stream);
+  int    ferror(FILE *stream);
+  int    fgetc(FILE *stream);
+  char  *fgets(char *s, int n, FILE *stream);
+  FILE  *fopen(const char *path, const char *type);
+  int    fprintf(FILE *stream, const char *format, ...);
+  int    fputc(int c, FILE *stream);
+  int    fputs(const char *s, FILE *stream);
+  size_t fread(void *ptr, size_t size, size_t n_items, FILE *stream);
+  int    fseek(FILE *stream, long int offset, int whence);
+  size_t fwrite(const void *ptr, size_t size, size_t n_items, FILE *stream);
+  char  *gets(char *s);
+
+  int    printf(const char *format, ...);
+  int    puts(const char *s);
+  int    rename(const char *source, const char *target);
+  int    sprintf(char *dest, const char *format, ...);
+  int    ungetc(int c, FILE *stream);
+  int    vprintf(const char *s, va_list ap);
+  int    vfprintf(FILE *stream, const char *s, va_list ap);
+  int    vsprintf(char *buf, const char *s, va_list ap);
+
+  int    chdir(const char *path);
+  FILE  *fdopen(int fd, const char *type);
+  int    fstat(int fd, FAR struct stat *buf);
+  char  *getcwd(FAR char *buf, size_t size);
+  int    ioctl(int fd, int req, unsigned long arg);
+  int    mkdir(const char *path, mode_t mode);
+  int    rmdir(const char *path);
+  int    stat(const char *path, FAR struct stat *buf);
+  int    statfs(const char *path, FAR struct statfs *buf);
+</pre></ul>
+
 <h1><a name="index">Index</a></h1>
 <ul>
-  <li><a href="#Data_Structures">Data structures</a>
+  <li><a href="#clockgetres">clock_getres</a></li>
+  <li><a href="#clockgettime">clock_gettime</a></li>
+  <li><a href="#ClocksNTimers">Clocks</a></li>
+  <li><a href="#clocksettime">clock_settime</a></li>
+  <li><a href="#Data_Structures">Data structures</a></li>
+  <li><a href="#directoryoperations">Directory operations</a></li>
+  <li><a href="#driveroperations">Driver operations</a></li>
   <li><a href="#exit">exit</a></li>
+  <li><a href="#FileSystem">Filesystem interfaces</a></li>
   <li><a href="#getpid">getpid</a></li>
+  <li><a href="#gmtimer">gmtime_r</a></li>
   <li><a href="#Introduction">Introduction</a>
   <li><a href="#kill">kill</a></li>
+  <li><a href="#localtimer">localtime_r</a></li>
   <li><a href="#Message_Queue">Named Message Queue Interfaces</a>
+  <li><a href="#mktime">mktime</a></li>
   <li><a href="#mqclose">mq_close</a></li>
   <li><a href="#mqgetattr">mq_getattr</a></li>
   <li><a href="#mqnotify">mq_notify</a></li>
@@ -4398,6 +4906,7 @@ notify a task when a message is available on a queue.
   <li><a href="#sigsuspend">sigsuspend</a></li>
   <li><a href="#sigtimedwait">sigtimedwait</a></li>
   <li><a href="#sigwaitinfo">sigwaitinfo</a></li>
+  <li><a href="#standardio">Standard I/O</a></li>
   <li><a href="#taskactivate">task_activate</a></li>
   <li><a href="#Task_Control">Task Control Interfaces</a>
   <li><a href="#taskcreate">task_create</a></li>
@@ -4406,6 +4915,12 @@ notify a task when a message is available on a queue.
   <li><a href="#taskrestart">task_restart</a></li>
   <li><a href="#Task_Schedule">Task Scheduling Interfaces</a>
   <li><a href="#Task_Switch">Task Switching Interfaces</a>
+  <li><a href="#timercreate">timer_create</a></li>
+  <li><a href="#timerdelete">timer_delete</a></li>
+  <li><a href="#timergetoverrun">timer_getoverrun</a></li>
+  <li><a href="#timergettime">timer_gettime</a></li>
+  <li><a href="#ClocksNTimers">Timers</a></li>
+  <li><a href="#timersettime">timer_settime</a></li>
   <li><a href="#Watchdogs">Watchdog Timer Interfaces</a>
   <li><a href="#wdcancel">wd_cancel</a></li>
   <li><a href="#wdcreate">wd_create</a></li>
