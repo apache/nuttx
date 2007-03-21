@@ -281,7 +281,7 @@ static inline void up_enablebreaks(struct up_dev_s *priv, boolean enable)
 static int up_setup(struct uart_dev_s *dev)
 {
 #ifdef CONFIG_SUPPRESS_UART_CONFIG
-  struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
+  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   uint16 brsr;
 
   /* Clear fifos */
@@ -292,7 +292,7 @@ static int up_setup(struct uart_dev_s *dev)
   /* Set rx and tx triggers */
 
   up_serialout(priv, UART_DM320_RFCR, UART_RFCR_RTL_1);
-  up_serialout(priv, UART_DM320_TFCR, UART_TFCR_TTL_1);
+  up_serialout(priv, UART_DM320_TFCR, UART_TFCR_TTL_16);
 
   /* Set up the MSR */
 
@@ -391,7 +391,7 @@ static int up_setup(struct uart_dev_s *dev)
 
 static void up_shutdown(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
+  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   up_disableuartint(priv, NULL);
 }
 
@@ -414,7 +414,6 @@ static int up_interrupt(int irq, void *context)
   struct up_dev_s   *priv;
   uint16             status;
   int                passes;
-  
 
   if (g_uart1port.irq == irq)
     {

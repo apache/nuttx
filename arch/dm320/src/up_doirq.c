@@ -96,7 +96,6 @@ void up_doirq(int irq, uint32* regs)
         * disabled.
         */
 
-       current_regs = NULL;
        up_enable_irq(irq);
     }
 #endif

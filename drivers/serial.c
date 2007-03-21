@@ -91,24 +91,6 @@ struct file_operations g_serialops =
  ************************************************************************************/
 
 /************************************************************************************
- * Name: uart_waittxfifonotfull
- ************************************************************************************/
-
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_SERIAL_INTS)
-static inline void uart_waittxfifonotfull(uart_dev_t *dev)
-{
-  int tmp;
-  for (tmp = 1000 ; tmp > 0 ; tmp--)
-    {
-      if (uart_txfifonotfull(dev))
-        {
-          break;
-        }
-    }
-}
-#endif
-
-/************************************************************************************
  * Name: uart_takesem
  ************************************************************************************/
 
@@ -155,23 +137,6 @@ static void uart_putxmitchar(uart_dev_t *dev, int ch)
         }
       else
         {
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_SERIAL_INTS)
-          /* Transfer some characters with interrupts disabled */
-
-          uart_xmitchars(dev);
-
-          /* If we unsuccessful in making room in the buffer.
-           * then transmit the characters with interrupts
-           * enabled and wait for result.
-           */
-
-          if (nexthead == dev->xmit.tail)
-            {
-              /* Still no space */
-
-              uart_waittxfifonotfull(dev);
-            }
-#else
           /* Inform the interrupt level logic that we are waiting */
 
           dev->xmitwaiting = TRUE;
@@ -185,7 +150,6 @@ static void uart_putxmitchar(uart_dev_t *dev, int ch)
           uart_enabletxint(dev);
           uart_takesem(&dev->xmitsem);
           uart_disabletxint(dev);
-#endif
         }
     }
 }
@@ -275,11 +239,7 @@ static ssize_t uart_write(struct file *filep, const char *buffer, size_t buflen)
 
   if (dev->xmit.head != dev->xmit.tail)
     {
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_SERIAL_INTS)
-      uart_xmitchars(dev);
-#else
       uart_enabletxint(dev);
-#endif
     }
 
   uart_givesem(&dev->xmit.sem);
@@ -446,10 +406,8 @@ static int uart_open(struct file *filep)
 
       /* Attache and enabled the IRQ */
 
-#ifndef CONFIG_SUPPRESS_SERIAL_INTS
       ret = irq_attach(dev->irq, dev->ops->handler);
       if (ret == OK)
-#endif
         {
           /* Mark the io buffers empty */
 
@@ -460,9 +418,7 @@ static int uart_open(struct file *filep)
 
           /* Finally, enable interrupts */
 
-#ifndef CONFIG_SUPPRESS_SERIAL_INTS
           up_enable_irq(dev->irq);
-#endif
           uart_enablerxint(dev);
         }
       irqrestore(flags);
