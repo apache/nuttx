@@ -53,7 +53,7 @@
 #undef  CONFIG_SUPPRESS_TIMER_INTS    /* No timer */
 #undef  CONFIG_SUPPRESS_SERIAL_INTS   /* Console will poll */
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
-#undef  CONFIG_DUMP_ON_EXIT           /* Dumpt task state on exit */
+#undef  CONFIG_DUMP_ON_EXIT           /* Dump task state on exit */
 
 /* LED definitions */
 

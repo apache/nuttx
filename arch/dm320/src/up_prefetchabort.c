@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <debug.h>
 #include <nuttx/irq.h>
 #include "os_internal.h"
 #include "up_internal.h"
@@ -65,5 +66,7 @@
 
 void up_prefetchabort(uint32 *regs)
 {
+  lldbg("Prefetch abort at 0x%x\n", regs[REG_PC]);
+  current_regs = regs;
   PANIC(OSERR_ERREXCEPTION);
 }
