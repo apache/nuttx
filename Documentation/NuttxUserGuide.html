@@ -4810,10 +4810,15 @@ notify a task when a message is available on a queue.
   int   close(int fd);
   int   dup(int fildes);
   int   dup2(int fildes1, int fildes2);
-  off_t lseek(int fd, off_t offset, int whence);
+  off_t lseek(int fd, off_t offset, int whence);           /* Prototyped but not implemented */
   int   read(int fd, void *buf, unsigned int nbytes);
   int   unlink(const char *path);
   int   write(int fd, const void *buf, unsigned int nbytes);
+</pre></ul>
+
+<ul><pre>
+  #include &lt;sys/ioctl.h&gt;
+  int    ioctl(int fd, int req, unsigned long arg);
 </pre></ul>
 
 <h2><a name="directoryoperations">2.10.2 Directory Operations</a></h2>
@@ -4833,8 +4838,8 @@ notify a task when a message is available on a queue.
   #include &lt;stdio.h&gt;
   int    fclose(FILE *stream);
   int    fflush(FILE *stream);
-  int    feof(FILE *stream);
-  int    ferror(FILE *stream);
+  int    feof(FILE *stream);                               /* Prototyped but not implemented */
+  int    ferror(FILE *stream);                             /* Prototyped but not implemented */
   int    fgetc(FILE *stream);
   char  *fgets(char *s, int n, FILE *stream);
   FILE  *fopen(const char *path, const char *type);
@@ -4842,28 +4847,27 @@ notify a task when a message is available on a queue.
   int    fputc(int c, FILE *stream);
   int    fputs(const char *s, FILE *stream);
   size_t fread(void *ptr, size_t size, size_t n_items, FILE *stream);
-  int    fseek(FILE *stream, long int offset, int whence);
+  int    fseek(FILE *stream, long int offset, int whence); /* Prototyped but not implemented */
   size_t fwrite(const void *ptr, size_t size, size_t n_items, FILE *stream);
   char  *gets(char *s);
 
   int    printf(const char *format, ...);
   int    puts(const char *s);
-  int    rename(const char *source, const char *target);
+  int    rename(const char *source, const char *target);   /* Prototyped but not implemented */
   int    sprintf(char *dest, const char *format, ...);
   int    ungetc(int c, FILE *stream);
   int    vprintf(const char *s, va_list ap);
   int    vfprintf(FILE *stream, const char *s, va_list ap);
   int    vsprintf(char *buf, const char *s, va_list ap);
 
-  int    chdir(const char *path);
+  int    chdir(const char *path);                          /* Prototyped but not implemented */
   FILE  *fdopen(int fd, const char *type);
-  int    fstat(int fd, FAR struct stat *buf);
-  char  *getcwd(FAR char *buf, size_t size);
-  int    ioctl(int fd, int req, unsigned long arg);
-  int    mkdir(const char *path, mode_t mode);
-  int    rmdir(const char *path);
-  int    stat(const char *path, FAR struct stat *buf);
-  int    statfs(const char *path, FAR struct statfs *buf);
+  int    fstat(int fd, FAR struct stat *buf);              /* Prototyped but not implemented */
+  char  *getcwd(FAR char *buf, size_t size);               /* Prototyped but not implemented */
+  int    mkdir(const char *path, mode_t mode);             /* Prototyped but not implemented */
+  int    rmdir(const char *path);                          /* Prototyped but not implemented */
+  int    stat(const char *path, FAR struct stat *buf);     /* Prototyped but not implemented */
+  int    statfs(const char *path, FAR struct statfs *buf); /* Prototyped but not implemented */
 </pre></ul>
 
 <h1><a name="index">Index</a></h1>
