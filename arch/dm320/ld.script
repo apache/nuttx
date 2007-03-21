@@ -39,7 +39,7 @@ SECTIONS
 {
 	/* The OS entry point is here */
 
-	. = 0x01008000;
+	. = 0x00008000;
 	.text : {
 		_stext = ABSOLUTE(.);
 		*(.text)
