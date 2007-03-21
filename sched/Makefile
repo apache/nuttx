@@ -99,10 +99,13 @@ SEM_SRCS	= sem_initialize.c sem_init.c sem_destroy.c\
 		  sem_open.c sem_close.c sem_unlink.c \
 		  sem_wait.c sem_trywait.c sem_post.c sem_getvalue.c \
                   sem_waitirq.c sem_findnamed.c
+ifneq ($(CONFIG_DISABLE_POSIX_TIMERSA),y)
+TIMERS_SRCS	= timer_create.c timer_delete.c timer_getoverrun.c timer_gettime.c timer_settime.c
+endif
 IRQ_SRCS	= irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 
 CSRCS		= $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS) $(WDOG_SRCS) $(TIME_SRCS) \
-		  $(SEM_SRCS) $(IRQ_SRCS)
+		  $(SEM_SRCS) $(TIMER_SRCS) $(IRQ_SRCS)
 ifneq ($(CONFIG_DISABLE_CLOCK),y)
 CSRCS		+= $(CLOCK_SRCS)
 endif

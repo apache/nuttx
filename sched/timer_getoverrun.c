@@ -1,5 +1,5 @@
 /********************************************************************************
- * time.h
+ * timer_getoverrun.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,122 +33,76 @@
  *
  ********************************************************************************/
 
-#ifndef _TIME_H_
-#define _TIME_H_
-
 /********************************************************************************
  * Included Files
  ********************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <time.h>
+#include <errno.h>
 
-/********************************************************************************
- * Compilations Switches
- ********************************************************************************/
+#ifndef CONFIG_DISABLE_POSIX_TIMERS
 
 /********************************************************************************
  * Definitions
  ********************************************************************************/
 
-/* Clock tick of the system */
-
-#define CLK_TCK 100
-
-/* This is the only clock_id supported by the "Clock and Timer
- * Functions."
- */
-
-#define CLOCK_REALTIME 0
-#define CLOCK_ABSTIME
-
-/* This is a flag that may be passed to the timer_settime() function */
-
-#define TIMER_ABSTIME 1
-
 /********************************************************************************
- * Global Type Declarations
+ * Private Data
  ********************************************************************************/
 
-typedef ubyte time_t;
-typedef ubyte clockid_t;
-typedef ubyte timer_t;
-
-struct timespec
-{
-  time_t tv_sec;                   /* Seconds */
-  long   tv_nsec;                  /* Nanoseconds */
-};
-
-struct timeval
-{
-  time_t tv_sec;                   /* Seconds */
-  long tv_usec;                    /* Microseconds */
-};
-
-struct tm
-{
-  int tm_sec;     /* second (0-61, allows for leap seconds) */
-  int tm_min;     /* minute (0-59) */
-  int tm_hour;    /* hour (0-23) */
-  int tm_mday;    /* day of the month (1-31) */
-  int tm_mon;     /* month (0-11) */
-  int tm_year;    /* years since 1900 */
-#if 0 /* not supported */
-  int tm_wday;    /* day of the week (0-6) */
-  int tm_yday;    /* day of the year (0-365) */
-  int tm_isdst;   /* non-0 if daylight savings time is in effect */
-#endif
-};
-
-/* Struct itimerspec is used to define settings for an interval timer */
-
-struct itimerspec
-{
-  struct timespec it_value;    /* First time */
-  struct timespec it_interval; /* and thereafter */
-};
-
-/* forward reference (defined in signal.h) */
-
-struct sigevent;
-
 /********************************************************************************
- * Global Variables
+ * Public Data
  ********************************************************************************/
 
-/* extern char *tznames[]; not supported */
-
 /********************************************************************************
- * Global Function Prototypes
+ * Private Functions
  ********************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+/********************************************************************************
+ * Public Functions
+ ********************************************************************************/
 
-EXTERN int clock_settime(clockid_t clockid, const struct timespec *tp);
-EXTERN int clock_gettime(clockid_t clockid, struct timespec *tp);
-EXTERN int clock_getres(clockid_t clockid, struct timespec *res);
+/********************************************************************************
+ * Function:  timer_getoverrun
+ *
+ * Description:
+ *   Only a single signal will be queued to the process for a given timer at any
+ *   point in time.  When a timer for which a signal is still pending expires, no
+ *   signal will be queued, and a timer overrun will occur. When a timer
+ *   expiration signal is delivered to or accepted by a process, if the
+ *   implementation  supports  the  Realtime Signals Extension, the
+ *   timer_getoverrun() function will return the timer expiration overrun count for
+ *   the specified timer. The overrun count returned contains the number of extra
+ *   timer expirations that occurred between the time the signal was generated
+ *   (queued) and when it was delivered or accepted, up to but not including an 
+ *   implementation-defined  maximum of DELAYTIMER_MAX. If the number of such
+ *   extra expirations is greater than or equal to DELAYTIMER_MAX, then the
+ *   overrun count will be set to DELAYTIMER_MAX. The value returned by
+ *   timer_getoverrun() will apply to the most recent expiration signal delivery
+ *   or acceptance for the timer.  If no expiration signal has been delivered
+ *   for the timer, or if the Realtime Signals Extension is not supported, the
+ *   return value of timer_getoverrun() is unspecified.
+ *
+ * Parameters:
+ *   timerid - The pre-thread timer, previously created by the call to
+ *   timer_create(), whose overrun count will be returned..
+ *
+ * Return Value:
+ *   If the timer_getoverrun() function succeeds, it will return the timer
+ *   expiration overrun count as explained above. timer_getoverrun() will fail if:
+ *
+ *   EINVAL - The timerid argument does not correspond to an ID returned by
+ *     timer_create() but not yet deleted by timer_delete().
+ *
+ * Assumptions:
+ *
+ ********************************************************************************/
 
-EXTERN time_t mktime(struct tm *tp);
-EXTERN struct tm *gmtime_r(const time_t *clock, struct tm *result);
-#define localtime_r(c,r) gmtime_r(c,r)
-
-EXTERN int timer_create(clockid_t clockid, FAR struct sigevent *evp, FAR timer_t *timerid);
-EXTERN int timer_delete(timer_t timerid);
-EXTERN int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value,
-                         FAR struct itimerspec *ovalue);
-EXTERN int timer_gettime(timer_t timerid, FAR struct itimerspec *value);
-EXTERN int timer_getoverrun(timer_t timerid);
-
-#undef EXTERN
-#if defined(__cplusplus)
+int timer_getoverrun(timer_t timerid)
+{
+#warning "Not Implemented"
+  return ENOTSUP;
 }
-#endif
 
-#endif  /* _TIME_H_ */
+#endif /* CONFIG_DISABLE_POSIX_TIMERS */
