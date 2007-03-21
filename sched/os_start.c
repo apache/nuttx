@@ -57,6 +57,7 @@
 # include "pthread_internal.h"
 #endif
 #include  "clock_internal.h"
+#include  "timer_internal.h"
 #include  "irq_internal.h"
 
 /************************************************************
@@ -304,6 +305,15 @@ void os_start(void)
       user_initialize();
     }
 
+  /* Initialize the watchdog facility (if included in the link) */
+
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+  if (wd_initialize != NULL)
+#endif
+    {
+      wd_initialize();
+    }
+
   /* Initialize the POSIX timer facility (if included in the link) */
 
 #ifndef CONFIG_DISABLE_CLOCK
@@ -315,14 +325,14 @@ void os_start(void)
     }
 #endif
 
-  /* Initialize the watchdog facility (if included in the link) */
-
+#ifndef CONFIG_DISABLE_POSIX_TIMERS
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (wd_initialize != NULL)
+  if (timer_initialize != NULL)
 #endif
     {
-      wd_initialize();
+      timer_initialize();
     }
+#endif
 
   /* Initialize the signal facility (if in link) */
 

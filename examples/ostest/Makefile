@@ -55,6 +55,9 @@ ifneq ($(CONFIG_DISABLE_PTHREAD),y)
 CSRCS	+= mqueue.c 
 endif
 endif
+ifneq ($(CONFIG_DISABLE_POSIX_TIMERS),y)
+CSRCS	+= posixtimer.c
+endif
 
 COBJS	= $(CSRCS:.c=$(OBJEXT))
 

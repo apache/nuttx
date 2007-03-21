@@ -55,10 +55,11 @@ SCHED_SRCS	= sched_setparam.c sched_getparam.c \
 		  sched_yield.c sched_rrgetinterval.c sched_foreach.c \
 		  sched_getprioritymax.c sched_getprioritymin.c \
 		  sched_lock.c sched_unlock.c sched_lockcount.c
-WDOG_SRCS	= wd_initialize.c wd_create.c wd_start.c wd_cancel.c wd_delete.c
+WDOG_SRCS	= wd_initialize.c wd_create.c wd_start.c wd_cancel.c wd_delete.c \
+		  wd_gettime.c
 TIME_SRCS	= sched_processtimer.c sleep.c usleep.c
-CLOCK_SRCS	= clock_initialize.c mktime.c gmtime_r.c clock_settime.c \
-		  clock_gettime.c clock_getres.c
+CLOCK_SRCS	= clock_initialize.c mktime.c gmtime_r.c clock_settime.c clock_gettime.c \
+		  clock_getres.c clock_time2ticks.c clock_abstime2ticks.c clock_ticks2time.c
 SIGNAL_SRCS	= sig_initialize.c \
 		  sig_action.c sig_procmask.c sig_pending.c sig_suspend.c \
 		  sig_kill.c sig_queue.c sig_waitinfo.c sig_timedwait.c \
@@ -99,8 +100,9 @@ SEM_SRCS	= sem_initialize.c sem_init.c sem_destroy.c\
 		  sem_open.c sem_close.c sem_unlink.c \
 		  sem_wait.c sem_trywait.c sem_post.c sem_getvalue.c \
                   sem_waitirq.c sem_findnamed.c
-ifneq ($(CONFIG_DISABLE_POSIX_TIMERSA),y)
-TIMERS_SRCS	= timer_create.c timer_delete.c timer_getoverrun.c timer_gettime.c timer_settime.c
+ifneq ($(CONFIG_DISABLE_POSIX_TIMERS),y)
+TIMER_SRCS	= timer_initialize.c timer_create.c timer_delete.c timer_getoverrun.c \
+		  timer_gettime.c timer_settime.c
 endif
 IRQ_SRCS	= irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 

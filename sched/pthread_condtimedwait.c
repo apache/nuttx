@@ -54,8 +54,6 @@
  * Definitions
  ************************************************************/
 
-#define ECHO_COND_WAIT_SIGNO 3
-
 /************************************************************
  * Private Type Declarations
  ************************************************************/
@@ -103,70 +101,6 @@ static void pthread_condtimedout(int argc, uint32 pid, uint32 signo, ...)
 #else
   (void)sigqueue((int)pid, (int)signo, NULL);
 #endif
-}
-
-/************************************************************
- * Function:  pthread_timeoutticks
- *
- * Description:
- *   Convert a timespec delay to system timer ticks.
- *
- * Parameters:
- *   abstime - wait until this absolute time
- *
- * Return Value:
- *   The relative number of ticks to wait (or ERROR on
- *   failure;
- *
- * Assumptions:
- *   Interrupts should be disabled so that the time is
- *   not changing during the calculation
- *
- ************************************************************/
-
-int pthread_timeouticks(const struct timespec *abstime, int *ticks)
-{
-  struct timespec currtime;
-  struct timespec reltime;
-  sint32          relusec;
-  int             ret;
-
-  /* Convert the timespec to clock ticks.  NOTE: Here we use
-   * internal knowledge that CLOCK_REALTIME is defined to be zero!
-   */
-
-  ret = clock_gettime(0, &currtime);
-  if (ret)
-    {
-      return EINVAL;
-    }
-
-  /* The relative time to wait is the absolute time minus the
-   * current time.
-   */
-
-  reltime.tv_nsec = (abstime->tv_nsec - currtime.tv_nsec);
-  reltime.tv_sec  = (abstime->tv_sec  - currtime.tv_sec);
-
-  /* Check if we were supposed to borrow from the seconds to
-   * borrow from the seconds
-   */
-
-  if (reltime.tv_nsec < 0)
-    {
-      reltime.tv_nsec += NSEC_PER_SEC;
-      reltime.tv_sec  -= 1;
-    }
-
-  /* Convert this relative time into microseconds.*/
-
-  relusec = reltime.tv_sec * USEC_PER_SEC +
-            reltime.tv_nsec / NSEC_PER_USEC;
-
-  /* Convert microseconds to clock ticks */
-
-  *ticks = relusec / USEC_PER_TICK;
-  return OK;
 }
 
 /************************************************************
@@ -255,7 +189,7 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
            * here so that this time stays valid until the wait begins.
            */
 
-          ret = pthread_timeouticks(abstime, &ticks);
+          ret = clock_abstime2ticks(CLOCK_REALTIME, abstime, &ticks);
           if (ret)
             {
               /* Restore interrupts  (pre-emption will be enabled when
@@ -299,7 +233,7 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
                       /* Start the watchdog */
 
                       wd_start(wdog, ticks, (wdentry_t)pthread_condtimedout,
-                               2, (uint32)mypid, (uint32)ECHO_COND_WAIT_SIGNO);
+                               2, (uint32)mypid, (uint32)SIGCONDTIMEDOUT);
 
                       /* Take the condition semaphore.  Do not restore interrupts
                        * until we return from the wait.  This is necessary to

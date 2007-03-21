@@ -65,7 +65,7 @@
 	* Eliminate compilation warnings that that crept into
 	  recent check-ins
 	* Add kill()
-	* Added the framework to support POSIX timers (more to be done)
+	* Added support for POSIX timers
 	* Some Documentation updates
 	* Added support for the Neuros OSD / DM320
 

@@ -1,5 +1,5 @@
 /********************************************************************************
- * time.h
+ * clock_time2ticks.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,122 +33,68 @@
  *
  ********************************************************************************/
 
-#ifndef _TIME_H_
-#define _TIME_H_
-
 /********************************************************************************
  * Included Files
  ********************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-
-/********************************************************************************
- * Compilations Switches
- ********************************************************************************/
+#include <time.h>
+#include "clock_internal.h"
 
 /********************************************************************************
  * Definitions
  ********************************************************************************/
 
-/* Clock tick of the system */
-
-#define CLK_TCK 100
-
-/* This is the only clock_id supported by the "Clock and Timer
- * Functions."
- */
-
-#define CLOCK_REALTIME 0
-#define CLOCK_ABSTIME
-
-/* This is a flag that may be passed to the timer_settime() function */
-
-#define TIMER_ABSTIME 1
-
 /********************************************************************************
- * Global Type Declarations
+ * Private Type Declarations
  ********************************************************************************/
-
-typedef uint32    time_t;         /* Holds time in seconds */
-typedef ubyte     clockid_t;      /* Identifies one time base source */
-typedef FAR void *timer_t;        /* Represents one POSIX timer */
-
-struct timespec
-{
-  time_t tv_sec;                   /* Seconds */
-  long   tv_nsec;                  /* Nanoseconds */
-};
-
-struct timeval
-{
-  time_t tv_sec;                   /* Seconds */
-  long tv_usec;                    /* Microseconds */
-};
-
-struct tm
-{
-  int tm_sec;     /* second (0-61, allows for leap seconds) */
-  int tm_min;     /* minute (0-59) */
-  int tm_hour;    /* hour (0-23) */
-  int tm_mday;    /* day of the month (1-31) */
-  int tm_mon;     /* month (0-11) */
-  int tm_year;    /* years since 1900 */
-#if 0 /* not supported */
-  int tm_wday;    /* day of the week (0-6) */
-  int tm_yday;    /* day of the year (0-365) */
-  int tm_isdst;   /* non-0 if daylight savings time is in effect */
-#endif
-};
-
-/* Struct itimerspec is used to define settings for an interval timer */
-
-struct itimerspec
-{
-  struct timespec it_value;    /* First time */
-  struct timespec it_interval; /* and thereafter */
-};
-
-/* forward reference (defined in signal.h) */
-
-struct sigevent;
 
 /********************************************************************************
  * Global Variables
  ********************************************************************************/
 
-/* extern char *tznames[]; not supported */
-
 /********************************************************************************
- * Global Function Prototypes
+ * Private Variables
  ********************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+/********************************************************************************
+ * Private Functions
+ ********************************************************************************/
 
-EXTERN int clock_settime(clockid_t clockid, const struct timespec *tp);
-EXTERN int clock_gettime(clockid_t clockid, struct timespec *tp);
-EXTERN int clock_getres(clockid_t clockid, struct timespec *res);
+/********************************************************************************
+ * Public Functions
+ ********************************************************************************/
 
-EXTERN time_t mktime(struct tm *tp);
-EXTERN struct tm *gmtime_r(const time_t *clock, struct tm *result);
-#define localtime_r(c,r) gmtime_r(c,r)
+/********************************************************************************
+ * Function:  clock_time2ticks
+ *
+ * Description:
+ *   Convert a timespec delay to system timer ticks.  This function is suitable
+ *   for calculating relative time delays and does not depend on the other
+ *   clock_* logic.
+ *
+ * Parameters:
+ *   reltime - Convert this relative time to system clock ticks.
+ *   ticks - Return the converted number of ticks here.
+ *
+ * Return Value:
+ *   Always returns OK
+ *
+ * Assumptions:
+ *
+ ********************************************************************************/
 
-EXTERN int timer_create(clockid_t clockid, FAR struct sigevent *evp, FAR timer_t *timerid);
-EXTERN int timer_delete(timer_t timerid);
-EXTERN int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value,
-                         FAR struct itimerspec *ovalue);
-EXTERN int timer_gettime(timer_t timerid, FAR struct itimerspec *value);
-EXTERN int timer_getoverrun(timer_t timerid);
+int clock_time2ticks(const struct timespec *reltime, int *ticks)
+{
+  sint32 relusec;
 
-#undef EXTERN
-#if defined(__cplusplus)
+  /* Convert the relative time into microseconds.*/
+
+  relusec = reltime->tv_sec * USEC_PER_SEC + reltime->tv_nsec / NSEC_PER_USEC;
+
+  /* Convert microseconds to clock ticks */
+
+  *ticks = relusec / USEC_PER_TICK;
+  return OK;
 }
-#endif
-
-#endif  /* _TIME_H_ */

@@ -1,0 +1,74 @@
+NuttX TODO List
+^^^^^^^^^^^^^^^
+
+Task/Scheduler
+^^^^^^^^^^^^^^
+
+- When a tasks exits, shouldn't all of its child pthreads also be terminated?
+- Should task_delete() cause atexit() function to be called?
+- Implement sys/mman.h and functions
+- Implement sys/wait.h and functions
+- Implement priority inheritance
+- Implement vfork().  Could be tricky because of stack references.
+- Make the system timer frequency configurable via defconfig.  See:
+   _POSIX_CLOCKRES_MIN in limits.h
+   CLK_TCK in time.h
+   Definitions in sched/clock_internal.h
+
+o Memory Managment
+- Add an option to free all memory allocated by a task when the task exits.
+  This may not be worth the overhead for a deeply embedded system.
+
+o Signals
+- 'Standard' signals and signal actions are not supported.  Does this
+  make since in a deeply embedded system?
+
+o pthreads
+- pthread_cancel():  Should implemenent cancellation points and pthread_testcancel()
+
+o Libraries
+
+o File system
+- This probabaly needs some rethinking.
+- Add some concept like mount points to handle mounted "real" filesystems.
+
+o Console Output
+
+o Documentation
+- Document fs & driver logic
+- Document filesystem, library
+
+o Build system
+- Something leaves garbage link 'include' in arch/*/include
+- Separate configurations from architectures.  arch/* contains
+  generic logic.  Like arch/armnommu, arch/arm, arch/805x, etc.
+  config/* has like config/pjrc-8052, config/c5471, etc.
+
+o Applications & Tests
+
+o C5471
+- At present, there is a failure in the examples/ostest POSIX timer
+  test when CONFIG_DEBUG is enabled.  This is almost certainly yet
+  another case where printf (or its kin) are being called from a 
+  sensitive area in the OS.
+
+o pjrc-8052 / MCS51
+* Current status:
+  - Basic OS task management seems OK
+  - Fails when interrupts enabled.  The stack pointer is around 0x6e
+    before the failure occurs.  It looks like some issue when the
+    stack pointer moves from the directly to indirectly addressable
+    region (0x80 boundary).
+  - Work on the 8052 is temporarily on hold
+- Use timer 0 as system timer.  Timer 2 is needed for second UART.
+  Logic is implemented, but there needs to be a system configuration
+  to change the ticks-per-second value to match the timer interrupt
+  rate
+- During build, there are several integer overflows reported:
+  gmtime_r.c aroud lines 184 and 185
+  clock_initialize.c at line 107
+  pthread_create.c at 330
+  sighand.c at 225 and 244
+
+o DM320
+- In progress

@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <nuttx/arch.h>
 #include "os_internal.h"
+#include "timer_internal.h"
 
 /************************************************************
  * Private Functions
@@ -87,6 +88,7 @@ static void sched_releasepid(pid_t pid)
  *   OK on success; ERROR on failure
  *
  * Assumptions:
+ *   Interrupts are disabled.
  *
  ************************************************************/
 
@@ -97,6 +99,21 @@ int sched_releasetcb(FAR _TCB *tcb)
 
   if (tcb)
     {
+      /* Relase any timers that the task might hold.  We do this
+       * before release the PID because it may still be trying to
+       * deliver signals (although interrupts are should be
+       * disabled here).
+       */
+
+#ifndef CONFIG_DISABLE_POSIX_TIMERS
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+     if (timer_deleteall != NULL)
+#endif
+        {
+          timer_deleteall(tcb->pid);
+        }
+#endif
+
       /* Release the task's process ID if one was assigned.  PID
        * zero is reserved for the IDLE task.  The TCB of the IDLE
        * task is never release so a value of zero simply means that

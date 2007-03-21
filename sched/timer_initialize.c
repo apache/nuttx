@@ -1,5 +1,5 @@
 /********************************************************************************
- * timer_gettime.c
+ * timer_initialize.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,8 +39,9 @@
 
 #include <nuttx/config.h>
 #include <time.h>
+#include <queue.h>
 #include <errno.h>
-#include "clock_internal.h"
+#include <nuttx/compiler.h>
 #include "timer_internal.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
@@ -53,9 +54,28 @@
  * Private Data
  ********************************************************************************/
 
+/* These are the preallocated times */
+
+#if CONFIG_PREALLOC_TIMERS > 0
+static struct posix_timer_s g_prealloctimers[CONFIG_PREALLOC_TIMERS];
+#endif
+
 /********************************************************************************
  * Public Data
  ********************************************************************************/
+
+/* This is a list of free, preallocated timer structures */
+
+#if CONFIG_PREALLOC_TIMERS > 0
+volatile sq_queue_t g_freetimers;
+#endif
+
+/* This is a list of instantiated timer structures -- active and inactive.  The
+ * timers are place on this list by timer_create() and removed from the list by
+ * timer_delete() or when the owning thread exits.
+ */
+
+volatile sq_queue_t g_alloctimers;
 
 /********************************************************************************
  * Private Functions
@@ -66,56 +86,78 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Function:  timer_gettime
+ * Function:  timer_initialize
  *
  * Description:
- *  The timer_gettime() function will store the amount of time until the
- *  specified timer, timerid, expires and the reload value of the timer into the
- *  space pointed to by the value argument. The it_value member of this structure
- *  will contain the amount of time before the timer expires, or zero if the timer
- *  is disarmed. This value is returned as the interval until timer expiration,
- *  even if the timer was armed with absolute time. The it_interval member of
- *  value will contain the reload value last set by timer_settime().
+ *   Boot up configuration of the POSIX timer facility.
  *
  * Parameters:
- *   timerid - The pre-thread timer, previously created by the call to
- *   timer_create(), whose remaining time count will be returned..
+ *   None
  *
  * Return Value:
- *   If the timer_gettime() succeeds, a value of 0 (OK) will be returned.
- *   If an error occurs, the value -1 (ERROR) will be returned, and errno set to
- *   indicate the error.
+ *   None
  *
- *   EINVAL - The timerid argument does not correspond to an ID returned by
- *     timer_create() but not yet deleted by timer_delete().
- *
- * Assumptions/Limitations:
- *   Due to the asynchronous operation of this function, the time reported
- *   by this function could be significantly more than that actual time
- *   remaining on the timer at any time.
+ * Assumptions:
  *
  ********************************************************************************/
 
-int timer_gettime(timer_t timerid, FAR struct itimerspec *value)
+void weak_function timer_initialize(void)
 {
-  FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)timerid;
-  int ticks;
+  int i;
 
-  if (!timer || !value)
+  /* Place all of the pre-allocated timers into the free timer list */
+
+#if CONFIG_PREALLOC_TIMERS > 0
+  sq_init((sq_queue_t*)&g_freetimers);
+
+  for (i = 0; i < CONFIG_PREALLOC_TIMERS; i++)
     {
-      *get_errno_ptr() = EINVAL;
-      return ERROR;
+      g_prealloctimers[i].pt_flags = PT_FLAGS_PREALLOCATED;
+      sq_addlast((FAR sq_entry_t*)&g_prealloctimers[i], (FAR sq_queue_t*)&g_freetimers);
     }
+#endif
 
-  /* Get the number of ticks before the underlying watchdog expires */
+  /* Initialize the list of allocated timers */
 
-  ticks = wd_gettime(timer->pt_wdog);
+  sq_init((sq_queue_t*)&g_alloctimers);
+}
 
-  /* Convert that to a struct timespec and return it */
+/********************************************************************************
+ * Function:  timer_deleteall
+ *
+ * Description:
+ *   This function is called whenever a thread exits.  Any timers owned by that
+ *   thread are deleted as though called by timer_delete().
+ *
+ *   It is provided in this file so that it can be weakly defined but also,
+ *   like timer_intitialize(), be brought into the link whenever the timer
+ *   resources are referenced.
+ *
+ * Parameters:
+ *   pid - the task ID of the thread that exitted
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ********************************************************************************/
 
-  (void)clock_ticks2time(ticks, &value->it_value);
-  (void)clock_ticks2time(timer->pt_delay, &value->it_interval);
-  return OK;
+void weak_function timer_deleteall(pid_t pid)
+{
+  FAR struct posix_timer_s *timer;
+  FAR struct posix_timer_s *next;
+  irqstate_t flags;
+
+  flags = irqsave();
+  for (timer = g_alloctimers.head; timer; timer = next)
+    {
+      next = timer->flink;
+      if (timer->pt_owner = pid)
+        {
+          timer_delete((timer_t)timer);
+        }
+    }
 }
 
 #endif /* CONFIG_DISABLE_POSIX_TIMERS */

@@ -40,6 +40,10 @@
 #include <nuttx/config.h>
 #include <time.h>
 #include <errno.h>
+#include "os_internal.h"
+#include "clock_internal.h"
+#include "sig_internal.h"
+#include "timer_internal.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 
@@ -56,8 +60,143 @@
  ********************************************************************************/
 
 /********************************************************************************
+ * Private Function Prototypes
+ ********************************************************************************/
+
+static void inline timer_sigqueue(FAR struct posix_timer_s *timer);
+static void inline timer_restart(FAR struct posix_timer_s *timer, uint32 itimer);
+static void timer_timeout(int argc, uint32 itimer, ...);
+
+/********************************************************************************
  * Private Functions
  ********************************************************************************/
+
+/********************************************************************************
+ * Function:  timer_sigqueue
+ *
+ * Description:
+ *   This function basically reimplements sigqueue() so that the si_code can
+ *   be correctly set to SI_TIMER
+ *
+ * Parameters:
+ *   timer - A reference to the POSIX timer that just timed out
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ *   This function executes in the context of the watchod timer interrupt.
+ *
+ ********************************************************************************/
+
+static void inline timer_sigqueue(FAR struct posix_timer_s *timer)
+{
+  FAR _TCB *tcb;
+
+  /* Get the TCB of the receiving task */
+
+  tcb = sched_gettcb(timer->pt_owner);
+  if (tcb)
+    {
+       siginfo_t info;
+
+       /* Create the siginfo structure */
+
+       info.si_signo           = timer->pt_signo;
+       info.si_code            = SI_TIMER;
+#ifndef CONFIG_CAN_PASS_STRUCTS
+       info.si_value           = timer->pt_value;
+#else
+       info.si_value.sival_ptr = timer->pt_value.sival_ptr;
+#endif
+
+       /* Send the signal */
+
+       (void)sig_received(tcb, &info);
+    }
+}
+
+/********************************************************************************
+ * Function:  timer_restart
+ *
+ * Description:
+ *   If a periodic timer has been selected, then restart the watchdog.
+ *
+ * Parameters:
+ *   timer - A reference to the POSIX timer that just timed out
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ *   This function executes in the context of the watchod timer interrupt.
+ *
+ ********************************************************************************/
+
+static void inline timer_restart(FAR struct posix_timer_s *timer, uint32 itimer)
+{
+  /* If this is a repetitive timer, then restart the watchdog */
+
+  if (timer->pt_delay)
+    {
+      (void)wd_start(timer->pt_wdog, timer->pt_delay, timer_timeout, 1, itimer);
+    }
+}
+
+/********************************************************************************
+ * Function:  timer_timeout
+ *
+ * Description:
+ *   This function is called if the timeout elapses before
+ *   the condition is signaled.
+ *
+ * Parameters:
+ *   argc   - the number of arguments (should be 1)
+ *   itimer - A reference to the POSIX timer that just timed out
+ *   signo  - The signal to use to wake up the task
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ *   This function executes in the context of the watchod timer interrupt.
+ *
+ ********************************************************************************/
+
+static void timer_timeout(int argc, uint32 itimer, ...)
+{
+#ifndef CONFIG_CAN_PASS_STRUCTS
+  /* On many small machines, pointers are encoded and cannot be simply cast from
+   * uint32 to _TCB*.  The following union works around this (see wdogparm_t).
+   */
+
+  union
+  {
+    FAR struct posix_timer_s *timer;
+    uint32                    itimer;
+  } u;
+
+  u.itimer = itimer;
+
+  /* Send the specified signal to the specified task. */
+
+  timer_sigqueue(u.timer);
+
+  /* If this is a repetitive timer, the restart the watchdog */
+
+  timer_restart(u.timer, itimer);
+#else
+  FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)itimer;
+
+  /* Send the specified signal to the specified task. */
+
+  timer_sigqueue(timer);
+
+  /* If this is a repetitive timer, the restart the watchdog */
+
+  timer_restart(timer, itimer);
+#endif
+}
 
 /********************************************************************************
  * Public Functions
@@ -109,7 +248,7 @@
  *   flags - Specifie characteristics of the timer (see above)
  *   value - Specifies the timer value to set
  *   ovalue - A location in which to return the time remaining from the previous
- *     timer setting.
+ *     timer setting. (ignored)
  *
  * Return Value:
  *   If the timer_settime() succeeds, a value of 0 (OK) will be returned.
@@ -129,8 +268,96 @@
 int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value,
                   FAR struct itimerspec *ovalue)
 {
-#warning "Not Implemented"
-  return ENOTSUP;
+  FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)timerid;
+  irqstate_t state;
+  int delay;
+  int ret = OK;
+
+  /* Some sanity checks */
+
+  if (!timer || !value)
+    {
+      *get_errno_ptr() = EINVAL;
+      return ERROR;
+    }
+
+  /* Disarm the timer (in case the timer was already armed when timer_settime()
+   * is called).
+   */
+
+  (void)wd_cancel(timer->pt_wdog);
+
+  /* If the it_value member of value is zero, the timer will not be re-armed */
+
+  if (value->it_value.tv_sec <= 0 && value->it_value.tv_nsec <= 0)
+    {
+      return OK;
+    }
+
+  /* Setup up any repititive timer */
+
+  if (value->it_interval.tv_sec > 0 || value->it_interval.tv_nsec > 0)
+    {
+       (void)clock_time2ticks(&value->it_interval, &timer->pt_delay);
+    }
+  else
+    {
+       timer->pt_delay = 0;
+    }
+
+  /* We need to disable timer interrupts through the following section so
+   * that the system timer is stable.
+   */
+
+  state = irqsave();
+
+  /* Check if abstime is selected */
+
+  if ((flags & TIMER_ABSTIME) != 0)
+    {
+#ifdef CONFIG_DISABLE_CLOCK
+       /* Absolute timing depends upon having access to clock functionality */
+
+       *get_errno_ptr() = ENOSYS;
+       return ERROR;
+#else
+       /* Calculate a delay corresponding to the absolute time in 'value'.
+        * NOTE:  We have internal knowledge the clock_abstime2ticks only
+        * returns an error if clockid != CLOCK_REALTIME.
+        */
+
+       (void)clock_abstime2ticks(CLOCK_REALTIME, &value->it_value, &delay);
+#endif
+    }
+  else
+    {
+       /* Calculate a delay assuming that 'value' holds the relative time
+        * to wait.  We have internal knowledge that clock_time2ticks always
+        * returns success.
+        */
+
+       (void)clock_time2ticks(&value->it_value, &delay);
+    }
+
+  /* If the time is in the past or now, then set up the next interval
+   * instead.
+   */
+
+  if (delay <= 0)
+    {
+      delay = timer->pt_delay;
+    }
+
+  /* Then start the watchdog */
+
+
+  if (delay > 0)
+    {
+      ret = wd_start(timer->pt_wdog, timer->pt_delay, timer_timeout, 1, (uint32)timer);
+    }
+
+  irqrestore(state);
+  return ret;
 }
 
 #endif /* CONFIG_DISABLE_POSIX_TIMERS */

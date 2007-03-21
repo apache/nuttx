@@ -39,7 +39,10 @@
 
 #include <nuttx/config.h>
 #include <time.h>
+#include <queue.h>
 #include <errno.h>
+#include <nuttx/kmalloc.h>
+#include "timer_internal.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 
@@ -58,6 +61,43 @@
 /********************************************************************************
  * Private Functions
  ********************************************************************************/
+
+/********************************************************************************
+ * Function:  timer_free
+ *
+ * Description:
+ *   Remove the timer from the allocated timer list and free it or return it to
+ *   the free list (depending on whether or not the timer is one of the
+ *   preallocated timers)
+ *
+ ********************************************************************************/
+
+static void timer_free(struct posix_timer_s *timer)
+{
+  irqstate_t flags;
+
+  /* Remove the timer from the allocated list */
+
+  flags = irqsave();
+  sq_rem((FAR sq_entry_t*)timer, (sq_queue_t*)&g_alloctimers);
+
+  /* Return it to the free list if it is one of the preallocated timers */
+
+#if CONFIG_PREALLOC_TIMERS > 0
+  if ((timer->pt_flags & PT_FLAGS_PREALLOCATED) != 0)
+    {
+      sq_addlast((FAR sq_entry_t*)&timer, (FAR sq_queue_t*)&g_freetimers);
+      irqrestore(flags);
+    }
+  else
+#endif
+    {
+      /* Otherwise, return it to the heap */
+
+      irqrestore(flags);
+      sched_free(timer);
+    }
+}
 
 /********************************************************************************
  * Public Functions
@@ -88,8 +128,24 @@
 
 int timer_delete(timer_t timerid)
 {
-#warning "Not Implemented"
-  return ENOTSUP;
+  FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)timerid;
+
+  /* Some sanity checks */
+
+  if (!timer)
+    {
+      *get_errno_ptr() = EINVAL;
+      return ERROR;
+    }
+
+  /* Disarm the timer */
+
+  (void)wd_cancel(timer->pt_wdog);
+
+  /* Release the timer structure */
+
+  timer_free(timer);
+  return OK;
 }
 
 #endif /* CONFIG_DISABLE_POSIX_TIMERS */

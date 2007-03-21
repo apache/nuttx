@@ -1,5 +1,5 @@
 /********************************************************************************
- * clock_internal.h
+ * clock_abstime2ticks.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,69 +33,97 @@
  *
  ********************************************************************************/
 
-#ifndef __CLOCK_INTERNAL_H
-#define __CLOCK_INTERNAL_H
-
 /********************************************************************************
  * Included Files
  ********************************************************************************/
 
+#include <nuttx/config.h>
 #include <sys/types.h>
-#include <nuttx/compiler.h>
+#include <time.h>
+#include <errno.h>
+#include <debug.h>
+#include "clock_internal.h"
 
 /********************************************************************************
  * Definitions
  ********************************************************************************/
 
-/* Timing constants */
-
-#define NSEC_PER_SEC          1000000000
-#define USEC_PER_SEC             1000000
-#define MSEC_PER_SEC                1000
-#define NSEC_PER_MSEC            1000000
-#define USEC_PER_MSEC               1000
-#define NSEC_PER_USEC               1000
-
-#define MSEC_PER_TICK                 10
-#define USEC_PER_TICK         (MSEC_PER_TICK * USEC_PER_MSEC)
-#define NSEC_PER_TICK         (MSEC_PER_TICK * NSEC_PER_MSEC)
-#define TICK_PER_SEC          (MSEC_PER_SEC / MSEC_PER_TICK)
-
-#define MSEC2TICK(msec)       (((msec)+(MSEC_PER_TICK/2))/MSEC_PER_TICK)
-#define USEC2TICK(usec)       (((usec)+(USEC_PER_TICK/2))/USEC_PER_TICK)
-
-#define JD_OF_EPOCH   2440588    /* Julian Date of noon, J1970 */
-
-#ifdef CONFIG_JULIAN_TIME
-# define GREG_DUTC    -141427    /* Default is October 15, 1582 */
-# define GREG_YEAR       1582
-# define GREG_MONTH        10
-# define GREG_DAY          15
-#endif /* CONFIG_JULIAN_TIME */
-
 /********************************************************************************
- * Public Type Definitions
+ * Private Type Declarations
  ********************************************************************************/
 
 /********************************************************************************
  * Global Variables
  ********************************************************************************/
 
-extern volatile uint32 g_system_timer;
-extern struct timespec g_basetime;
-extern uint32          g_tickbias;
-
 /********************************************************************************
- * Public Function Prototypes
+ * Private Variables
  ********************************************************************************/
 
-extern void weak_function clock_initialize(void);
-extern void weak_function clock_timer(void);
+/********************************************************************************
+ * Private Functions
+ ********************************************************************************/
 
-extern time_t clock_calendar2utc(int year, int month, int day);
-extern int    clock_abstime2ticks(clockid_t clockid, const struct timespec *abstime,
-                int *ticks);
-extern int    clock_time2ticks(const struct timespec *reltime, int *ticks);
-extern int    clock_ticks2time(int ticks, struct timespec *reltime);
+/********************************************************************************
+ * Public Functions
+ ********************************************************************************/
 
-#endif /* __CLOCK_INTERNAL_H */
+/********************************************************************************
+ * Function:  clock_abstime2ticks
+ *
+ * Description:
+ *   Convert an absolute timespec delay to system timer ticks.
+ *
+ * Parameters:
+ *   clockid - The timing source to use in the conversion
+ *   reltime - Convert this absolue time to system clock ticks.
+ *   ticks - Return the converted number of ticks here.
+ *
+ * Return Value:
+ *   OK on success; A non-zero error number on failure;
+ *
+ * Assumptions:
+ *   Interrupts should be disabled so that the time is not changing during the
+ *   calculation
+ *
+ ********************************************************************************/
+
+extern int clock_abstime2ticks(clockid_t clockid, const struct timespec *abstime,
+                               int *ticks)
+{
+  struct timespec currtime;
+  struct timespec reltime;
+  sint32          relusec;
+  int             ret;
+
+  /* Convert the timespec to clock ticks.  NOTE: Here we use
+   * internal knowledge that CLOCK_REALTIME is defined to be zero!
+   */
+
+  ret = clock_gettime(clockid, &currtime);
+  if (ret)
+    {
+      return EINVAL;
+    }
+
+  /* The relative time to wait is the absolute time minus the
+   * current time.
+   */
+
+  reltime.tv_nsec = (abstime->tv_nsec - currtime.tv_nsec);
+  reltime.tv_sec  = (abstime->tv_sec  - currtime.tv_sec);
+
+  /* Check if we were supposed to borrow from the seconds to
+   * borrow from the seconds
+   */
+
+  if (reltime.tv_nsec < 0)
+    {
+      reltime.tv_nsec += NSEC_PER_SEC;
+      reltime.tv_sec  -= 1;
+    }
+
+  /* Convert this relative time into microseconds.*/
+
+  return clock_time2ticks(&reltime, ticks);
+}

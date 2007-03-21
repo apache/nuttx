@@ -102,6 +102,7 @@ EXTERN STATUS  wd_delete(WDOG_ID wdog);
 EXTERN STATUS  wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,
 			int argc, ...);
 EXTERN STATUS  wd_cancel(WDOG_ID wdog);
+EXTERN int     wd_gettime(WDOG_ID wdog);
 
 #undef EXTERN
 #ifdef __cplusplus

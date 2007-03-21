@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 #include <time.h>
 #include <errno.h>
+#include "timer_internal.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 
@@ -102,7 +103,8 @@
 int timer_getoverrun(timer_t timerid)
 {
 #warning "Not Implemented"
-  return ENOTSUP;
+  *get_errno_ptr() = ENOSYS;
+  return ERROR;
 }
 
 #endif /* CONFIG_DISABLE_POSIX_TIMERS */

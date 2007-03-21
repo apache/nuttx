@@ -67,9 +67,14 @@
 #define SIGRTMIN        0  /* First real time signal */
 #define SIGRTMAX        31 /* Last real time signal */
 
-/* sigprocmask() "how" definitions.  Only one of the following
- * can be specified:
- */
+/* A few of the real time signals are used within the OS: */
+
+#define SIGALRM         2  /* Default signal used with POSIX timers (used only */
+                           /* no other signal is provided) */
+#define SIGCONDTIMEDOUT 3  /* Used in the implementation of */
+                           /* pthread_cond_timedwait */
+
+/* sigprocmask() "how" definitions. Only one of the following can be specified: */
 
 #define SIG_BLOCK       1  /* Block the given signals */
 #define SIG_UNBLOCK     2  /* Unblock the given signals */
@@ -97,44 +102,49 @@
 #define SIGEV_NONE      0 /* No notification desired */
 #define SIGEV_SIGNAL    1 /* Notify via signal */
 
+/* Special values of sigaction (all treated like NULL) */
+
+#define SIG_DFL         ((CODE void*)0)
+#define SIG_IGN         ((CODE void*)0)
+
 /********************************************************************************
  * Global Type Declarations
  ********************************************************************************/
 
 /* This defines a set of 32 signals (numbered 0 through 31). */
 
-typedef uint32 sigset_t;
+typedef uint32 sigset_t;     /* Bit set of 32 signals */
 
 /* This defines the type of the siginfo si_value field */
 
 union sigval
 {
-  int   sival_int;
-  void *sival_ptr;
+  int   sival_int;           /* Integer value */
+  void *sival_ptr;           /* Pointer value */
 };
 
-/* This structure contains elements that define a queue signal.
- * The following is used to attach a signal to a message queue
- * to notify a task when a message is available on a queue
+/* This structure contains elements that define a queue signal. The following is
+ * used to attach a signal to a message queue to notify a task when a message is
+ * available on a queue
  */
 
 struct sigevent
 {
-  int            sigev_signo;  /* Notification: SIGNAL or NONE */
-  union sigval   sigev_value;  /* Generate this signal */
-  int            sigev_notify; /* Queue this value */
+  ubyte        sigev_notify; /* Notification method: SIGEV_SIGNAL or SIGEV_NONE */
+  ubyte        sigev_signo;  /* Notification signal */
+  union sigval sigev_value;  /* Data passed with notification */
 };
 
-/* The following types is used to pass parameters to/from
- * signal handlers
- */
+/* The following types is used to pass parameters to/from signal handlers */
 
-typedef struct siginfo
+struct siginfo
 {
-  int          si_signo;
-  int          si_code;
-  union sigval si_value;
-} siginfo_t;
+  ubyte        si_signo;     /* Identifies signal */
+  ubyte        si_code;      /* Source: SI_USER, SI_QUEUE, SI_TIMER, SI_ASYNCIO, or SI_MESGQ */
+  union sigval si_value;     /* Data passed with signal */
+};
+
+typedef struct siginfo siginfo_t;
 
 /* The following structure defines the action to take for given signal */
 
@@ -142,8 +152,8 @@ struct sigaction
 {
   union
   {
-    void (*_sa_handler)(int);
-    void (*_sa_sigaction)(int, FAR siginfo_t *, FAR void *);
+    CODE void (*_sa_handler)(int);
+    CODE void (*_sa_sigaction)(int, FAR siginfo_t *, FAR void *);
   } sa_u;
   sigset_t         sa_mask;
   int              sa_flags;

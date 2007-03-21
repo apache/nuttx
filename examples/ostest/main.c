@@ -165,6 +165,12 @@ static int user_main(int argc, char *argv[])
   sighand_test();
 #endif
 
+#if !defined(CONFIG_DISABLE_POSIX_TIMERS) && !defined(CONFIG_DISABLE_SIGNALS)
+  /* Verify posix timers */
+
+  timer_test();
+#endif
+
 #if !defined(CONFIG_DISABLE_PTHREAD) && CONFIG_RR_INTERVAL > 0
   /* Verify round robin scheduling */
 

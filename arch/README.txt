@@ -108,7 +108,7 @@ defconfig -- This is a configuration file similar to the Linux
 	o pthread_condtimedwait() depends on signals to wake
 	  up waiting tasks.
 
-		CONFIG_DISABLE_CLOCK, CONFIG_DISABLE_PTHREAD.
+		CONFIG_DISABLE_CLOCK, CONFIG_DISABLE_POSIX_TIMERS, CONFIG_DISABLE_PTHREAD.
 		CONFIG_DISABLE_SIGNALS, CONFIG_DISABLE_MQUEUE
 
 

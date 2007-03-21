@@ -1,5 +1,5 @@
 /********************************************************************************
- * clock_internal.h
+ * timer_internal.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,69 +33,64 @@
  *
  ********************************************************************************/
 
-#ifndef __CLOCK_INTERNAL_H
-#define __CLOCK_INTERNAL_H
+#ifndef __TIMER_INTERNAL_H
+#define __TIMER_INTERNAL_H
 
 /********************************************************************************
  * Included Files
  ********************************************************************************/
 
+#include <nuttx/config.h>
 #include <sys/types.h>
+#include <wdog.h>
 #include <nuttx/compiler.h>
 
 /********************************************************************************
  * Definitions
  ********************************************************************************/
 
-/* Timing constants */
-
-#define NSEC_PER_SEC          1000000000
-#define USEC_PER_SEC             1000000
-#define MSEC_PER_SEC                1000
-#define NSEC_PER_MSEC            1000000
-#define USEC_PER_MSEC               1000
-#define NSEC_PER_USEC               1000
-
-#define MSEC_PER_TICK                 10
-#define USEC_PER_TICK         (MSEC_PER_TICK * USEC_PER_MSEC)
-#define NSEC_PER_TICK         (MSEC_PER_TICK * NSEC_PER_MSEC)
-#define TICK_PER_SEC          (MSEC_PER_SEC / MSEC_PER_TICK)
-
-#define MSEC2TICK(msec)       (((msec)+(MSEC_PER_TICK/2))/MSEC_PER_TICK)
-#define USEC2TICK(usec)       (((usec)+(USEC_PER_TICK/2))/USEC_PER_TICK)
-
-#define JD_OF_EPOCH   2440588    /* Julian Date of noon, J1970 */
-
-#ifdef CONFIG_JULIAN_TIME
-# define GREG_DUTC    -141427    /* Default is October 15, 1582 */
-# define GREG_YEAR       1582
-# define GREG_MONTH        10
-# define GREG_DAY          15
-#endif /* CONFIG_JULIAN_TIME */
+#define PT_FLAGS_PREALLOCATED 0x01
 
 /********************************************************************************
- * Public Type Definitions
+ * Public Types
  ********************************************************************************/
+
+/* This structure represents one POSIX timer */
+
+struct posix_timer_s
+{
+  FAR struct posix_timer_s *flink;
+
+  ubyte           pt_flags;        /* See PT_FLAGS_* definitions */
+  ubyte           pt_signo;        /* Notification signal */
+  pid_t           pt_owner;        /* Creator of timer */
+  int             pt_delay;        /* If non-zero, used to reset repetitive timers */
+  WDOG_ID         pt_wdog;         /* The watchdog that provides the timing */
+  union sigval    pt_value;        /* Data passed with notification */
+};
 
 /********************************************************************************
- * Global Variables
+ * Public Data
  ********************************************************************************/
 
-extern volatile uint32 g_system_timer;
-extern struct timespec g_basetime;
-extern uint32          g_tickbias;
+/* This is a list of free, preallocated timer structures */
+
+#if CONFIG_PREALLOC_TIMERS > 0
+extern volatile sq_queue_t g_freetimers;
+#endif
+
+/* This is a list of instantiated timer structures -- active and inactive.  The
+ * timers are place on this list by timer_create() and removed from the list by
+ * timer_delete() or when the owning thread exits.
+ */
+
+extern volatile sq_queue_t g_alloctimers;
 
 /********************************************************************************
  * Public Function Prototypes
  ********************************************************************************/
 
-extern void weak_function clock_initialize(void);
-extern void weak_function clock_timer(void);
+extern void weak_function timer_initialize(void);
+extern void weak_function timer_deleteall(pid_t pid);
 
-extern time_t clock_calendar2utc(int year, int month, int day);
-extern int    clock_abstime2ticks(clockid_t clockid, const struct timespec *abstime,
-                int *ticks);
-extern int    clock_time2ticks(const struct timespec *reltime, int *ticks);
-extern int    clock_ticks2time(int ticks, struct timespec *reltime);
-
-#endif /* __CLOCK_INTERNAL_H */
+#endif /* __TIMER_INTERNAL_H */

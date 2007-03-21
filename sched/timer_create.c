@@ -38,10 +38,14 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <time.h>
+#include <wdog.h>
 #include <errno.h>
+#include "timer_internal.h"
 
-#ifdef CONFIG_POSIX_TIMERS
+#ifndef CONFIG_DISABLE_POSIX_TIMERS
 
 /********************************************************************************
  * Definitions
@@ -58,6 +62,52 @@
 /********************************************************************************
  * Private Functions
  ********************************************************************************/
+
+/********************************************************************************
+ * Function:  timer_allocate
+ *
+ * Description:
+ *   Allocate one POSIX timer and place it into the allocated timer list.
+ *
+ ********************************************************************************/
+
+static struct posix_timer_s *timer_allocate(void)
+{
+  struct posix_timer_s *ret;
+  irqstate_t flags;
+
+  /* Try to get a preallocated timer from the free list */
+
+#if CONFIG_PREALLOC_TIMERS > 0
+  flags = irqsave();
+  ret   = (struct posix_timer_s*)sq_remfirst((sq_queue_t*)&g_freetimers);
+  irqrestore(flags);
+
+  /* Did we get one? */
+
+  if (!ret)
+#endif
+    {
+      /* Allocate a new timer from the heap */
+
+      ret = (struct posix_timer_s*)malloc(sizeof(struct posix_timer_s));
+      if (ret)
+        {
+          ret->pt_flags = 0;
+        }
+    }
+
+  /* If we have a timer, then put it into the allocated timer list */
+
+  if (ret)
+    {
+      flags = irqsave();
+      sq_addlast((sq_entry_t*)ret, (sq_queue_t*)&g_alloctimers);
+      irqrestore(flags);
+    }
+
+  return ret;
+}
 
 /********************************************************************************
  * Public Functions
@@ -113,8 +163,60 @@
 
 int timer_create(clockid_t clockid, FAR struct sigevent *evp, FAR timer_t *timerid)
 {
-#warning "Not Implemented"
-  return ENOTSUP;
+  struct posix_timer_s *ret;
+  WDOG_ID               wdog;
+
+  /* Sanity checks.  Also, we support only CLOCK_REALTIME */
+
+  if (!timerid || clockid != CLOCK_REALTIME)
+    {
+      *get_errno_ptr() = EINVAL;
+      return ERROR;
+    }
+
+  /* Allocate a watchdog to provide the underling CLOCK_REALTIME timer */
+
+  wdog = wd_create();
+  if (!wdog)
+    {
+      *get_errno_ptr() = EAGAIN;
+      return ERROR;
+    }
+
+  /* Allocate a timer instance to contain the watchdog */
+
+  ret = timer_allocate();
+  if (!ret)
+    {
+      *get_errno_ptr() = EAGAIN;
+      return ERROR;
+    }
+
+  /* Initialize the timer instance */
+
+  ret->pt_owner = getpid();
+  ret->pt_delay = 0;
+  ret->pt_wdog  = wdog;
+
+  if (evp)
+    {
+      ret->pt_signo           = evp->sigev_signo;
+#ifdef CONFIG_CAN_PASS_STRUCTS
+      ret->pt_value           = evp->sigev_value;
+#else
+      ret->pt_value.sival_ptr = evp->sigev_value.sigval_ptr;
+#endif
+    }
+  else
+    {
+      ret->pt_signo           = SIGALRM;
+      ret->pt_value.sival_ptr = ret;
+    }
+
+  /* Return the timer */
+
+  *timerid = ret;
+  return OK;
 }
 
-#endif /* CONFIG_POSIX_TIMERS */
+#endif /* CONFIG_DISABLE_POSIX_TIMERS */

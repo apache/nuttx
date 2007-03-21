@@ -1,5 +1,5 @@
 /********************************************************************************
- * clock_internal.h
+ * wd_gettime.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,69 +33,84 @@
  *
  ********************************************************************************/
 
-#ifndef __CLOCK_INTERNAL_H
-#define __CLOCK_INTERNAL_H
-
 /********************************************************************************
  * Included Files
  ********************************************************************************/
 
 #include <sys/types.h>
-#include <nuttx/compiler.h>
+#include <wdog.h>
+#include "os_internal.h"
+#include "wd_internal.h"
 
 /********************************************************************************
  * Definitions
  ********************************************************************************/
 
-/* Timing constants */
-
-#define NSEC_PER_SEC          1000000000
-#define USEC_PER_SEC             1000000
-#define MSEC_PER_SEC                1000
-#define NSEC_PER_MSEC            1000000
-#define USEC_PER_MSEC               1000
-#define NSEC_PER_USEC               1000
-
-#define MSEC_PER_TICK                 10
-#define USEC_PER_TICK         (MSEC_PER_TICK * USEC_PER_MSEC)
-#define NSEC_PER_TICK         (MSEC_PER_TICK * NSEC_PER_MSEC)
-#define TICK_PER_SEC          (MSEC_PER_SEC / MSEC_PER_TICK)
-
-#define MSEC2TICK(msec)       (((msec)+(MSEC_PER_TICK/2))/MSEC_PER_TICK)
-#define USEC2TICK(usec)       (((usec)+(USEC_PER_TICK/2))/USEC_PER_TICK)
-
-#define JD_OF_EPOCH   2440588    /* Julian Date of noon, J1970 */
-
-#ifdef CONFIG_JULIAN_TIME
-# define GREG_DUTC    -141427    /* Default is October 15, 1582 */
-# define GREG_YEAR       1582
-# define GREG_MONTH        10
-# define GREG_DAY          15
-#endif /* CONFIG_JULIAN_TIME */
-
 /********************************************************************************
- * Public Type Definitions
+ * Private Types
  ********************************************************************************/
 
 /********************************************************************************
  * Global Variables
  ********************************************************************************/
 
-extern volatile uint32 g_system_timer;
-extern struct timespec g_basetime;
-extern uint32          g_tickbias;
-
 /********************************************************************************
- * Public Function Prototypes
+ * Private Variables
  ********************************************************************************/
 
-extern void weak_function clock_initialize(void);
-extern void weak_function clock_timer(void);
+/********************************************************************************
+ * Private Functions
+ ********************************************************************************/
 
-extern time_t clock_calendar2utc(int year, int month, int day);
-extern int    clock_abstime2ticks(clockid_t clockid, const struct timespec *abstime,
-                int *ticks);
-extern int    clock_time2ticks(const struct timespec *reltime, int *ticks);
-extern int    clock_ticks2time(int ticks, struct timespec *reltime);
+/********************************************************************************
+ * Public Functions
+ ********************************************************************************/
 
-#endif /* __CLOCK_INTERNAL_H */
+/********************************************************************************
+ * Function:  wd_gettime
+ *
+ * Description:
+ *   This function returns the time remaining before the the specified watchdog
+ *   expires.
+ *
+ * Parameters:
+ *   wdog = watchdog ID
+ *
+ * Return Value:
+ *   The time in system ticks remaining until the watchdog time expires.  Zero
+ *   means either that wdog is not valid or that the wdog has already expired.
+ *
+ * Assumptions:
+ *
+ ********************************************************************************/
+
+int wd_gettime(WDOG_ID wdog)
+{
+  irqstate_t flags;
+
+  /* Verify the wdog */
+
+  flags = irqsave();
+  if (wdog && wdog->active)
+    {
+      /* Traverse the watchdog list accumulating lag times until we find the wdog
+       * that we are looking for
+       */
+
+      wdog_t *curr;
+      int delay = 0;
+
+      for (curr = (wdog_t*)g_wdactivelist.head; curr; curr = curr->next)
+        {
+          delay += curr->lag;
+          if (curr == wdog)
+            {
+              irqrestore(flags);
+              return delay;
+            }
+        }
+    }
+
+  irqrestore(flags);
+  return 0;
+}

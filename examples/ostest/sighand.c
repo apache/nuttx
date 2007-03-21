@@ -110,7 +110,6 @@ static void wakeup_action(int signo, siginfo_t *info, void *ucontext)
       printf("wakeup_action: ERROR sigprocmask=%x expected=%x\n",
               oldset, allsigs);
     }
-
 }
 
 static int waiter_main(int argc, char *argv[])
@@ -120,7 +119,7 @@ static int waiter_main(int argc, char *argv[])
   struct sigaction oact;
   int status;
 
-  printf("wakeup_action: Waiter started\n" );
+  printf("waiter_main: Waiter started\n" );
 
   printf("waiter_main: Unmasking signal %d\n" , WAKEUP_SIGNAL);
   (void)sigemptyset(&sigset);
@@ -172,6 +171,11 @@ static int waiter_main(int argc, char *argv[])
       printf("waiter_main: ERROR awakened with no error!\n" );
     }
 
+  /* Detach the signal handler */
+
+  act.sa_sigaction = SIG_DFL;
+  status = sigaction(WAKEUP_SIGNAL, &act, &oact);
+
   printf("waiter_main: done\n" );
   fflush(stdout);
   threadexited = TRUE;
@@ -186,14 +190,12 @@ void sighand_test(void)
   int policy;
   int status;
 
-  printf("waiter_main: Initializing semaphore to 0\n" );
+  printf("sighand_test: Initializing semaphore to 0\n" );
   sem_init(&sem, 0, 0);
 
   /* Start waiter thread  */
 
   printf("sighand_test: Starting waiter task\n" );
-
-
   status = sched_getparam (0, &param);
   if (status != OK)
     {
