@@ -168,7 +168,6 @@ EXTERN int    chdir(const char *path);
 EXTERN FILE  *fdopen(int fd, const char *type);
 EXTERN int    fstat(int fd, FAR struct stat *buf);
 EXTERN char  *getcwd(FAR char *buf, size_t size);
-EXTERN int    ioctl(int fd, int req, unsigned long arg);
 EXTERN int    mkdir(const char *path, mode_t mode);
 EXTERN int    rmdir(const char *path);
 EXTERN int    stat(const char *path, FAR struct stat *buf);

@@ -1,5 +1,5 @@
 /************************************************************
- * fs_ioctl.c
+ * ioctl.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,57 +33,36 @@
  *
  ************************************************************/
 
-/************************************************************
- * Compilation Switches
- ************************************************************/
+#ifndef __SYS_IOCTL_H
+#define __SYS_IOCTL_H
 
 /************************************************************
  * Included Files
  ************************************************************/
 
-#include <nuttx/config.h>
-#include <sys/types.h>
-#include <errno.h>
-#include <sys/ioctl.h>
-#include "fs_internal.h"
-
 /************************************************************
- * Global Functions
+ * Type Definitions
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
+/************************************************************
+ * Public Function Prototypes
+ ************************************************************/
 
-int ioctl(int fd, int req, unsigned long arg)
-{
-  FAR struct filelist *list;
-  int ret = EBADF;
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
 
-  /* Get the thread-specific file list */
+/* ioctl() is a non-standard UNIX-like API */
 
-  list = sched_getfiles();
-  if (!list)
-    {
-      *get_errno_ptr() = EMFILE;
-      return ERROR;
-    }
+EXTERN int ioctl(int fd, int req, unsigned long arg);
 
-  /* Were we give a valid file descriptor? */
-
-  if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
-    {
-      FAR struct file *this_file = &list->fl_files[fd];
-      struct inode *inode        = this_file->f_inode;
-
-      /* Is a driver registered? Does it support the ioctl method? */
-
-      if (inode && inode->i_ops && inode->i_ops->ioctl)
-	{
-	  /* Yes, then let it perform the ioctl */
-
-	  ret = (int)inode->i_ops->ioctl(this_file, req, arg);
-	}
-    }
-  return ret;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */
+#endif /* __SYS_IOCTL_H */
