@@ -83,14 +83,26 @@ static inline uint32 up_getsp(void)
 static void up_stackdump(void)
 {
   _TCB *rtcb        = (_TCB*)g_readytorun.head;
-  uint32 stack_base = (uint32)rtcb->adj_stack_ptr;
   uint32 sp         = up_getsp();
+  uint32 stack_base;
+  uint32 stack_size;
+
+  if (rtcb->pid == 0)
+    {
+      stack_base = g_heapbase - 4;
+      stack_size = CONFIG_PROC_STACK_SIZE;
+    }
+  else
+    {
+      stack_base = (uint32)rtcb->adj_stack_ptr;
+      stack_size = (uint32)rtcb->adj_stack_size;
+    }
 
   lldbg("stack_base: %08x\n", stack_base);
-  lldbg("stack_size: %08x\n", rtcb->adj_stack_size);
+  lldbg("stack_size: %08x\n", stack_size);
   lldbg("sp:         %08x\n", sp);
 
-  if (sp >= stack_base || sp < stack_base - rtcb->adj_stack_size)
+  if (sp >= stack_base || sp < stack_base - stack_size)
     {
       lldbg("ERROR: Stack pointer is not within allocated stack\n");
       return;
@@ -106,6 +118,20 @@ static void up_stackdump(void)
                  stack, ptr[0], ptr[1], ptr[2], ptr[3],
                  ptr[4], ptr[5], ptr[6], ptr[7]);
         }
+    }
+
+  if (current_regs)
+    {
+      int regs;
+
+      for (regs = REG_R0; regs <= REG_R15; regs += 8)
+        {
+          uint32 *ptr = (uint32*)&current_regs[regs];
+          lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+                 regs, ptr[0], ptr[1], ptr[2], ptr[3],
+                 ptr[4], ptr[5], ptr[6], ptr[7]);
+        }
+      lldbg("CPSR: %08x\n", current_regs[REG_CPSR]);
     }
 }
 #else

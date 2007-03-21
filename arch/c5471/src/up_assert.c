@@ -89,7 +89,7 @@ static void up_stackdump(void)
 
   if (rtcb->pid == 0)
     {
-      stack_base = g_heapbase - CONFIG_PROC_STACK_SIZE;
+      stack_base = g_heapbase - 4;
       stack_size = CONFIG_PROC_STACK_SIZE;
     }
   else

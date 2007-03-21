@@ -76,6 +76,7 @@ int sched_setuptaskfiles(FAR _TCB *tcb)
   FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
   int i;
 #endif /* CONFIG_DEV_CONSOLE */
+  int ret = OK;
 
   /* Allocate file descriptors for the TCB */
 
@@ -101,11 +102,10 @@ int sched_setuptaskfiles(FAR _TCB *tcb)
 #if CONFIG_NFILE_STREAMS > 0
   /* Allocate file streams for the TCB */
 
-  return sched_setupstreams(tcb);
-#else
-  return OK;
+  ret = sched_setupstreams(tcb);
 #endif /* CONFIG_NFILE_STREAMS */
 #endif /* CONFIG_DEV_CONSOLE */
+  return ret;
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS */
