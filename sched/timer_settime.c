@@ -139,6 +139,7 @@ static void inline timer_restart(FAR struct posix_timer_s *timer, uint32 itimer)
 
   if (timer->pt_delay)
     {
+      timer->pt_last = timer->pt_delay;
       (void)wd_start(timer->pt_wdog, timer->pt_delay, timer_timeout, 1, itimer);
     }
 }
@@ -353,6 +354,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
 
   if (delay > 0)
     {
+      timer->pt_last = delay;
       ret = wd_start(timer->pt_wdog, timer->pt_delay, timer_timeout, 1, (uint32)timer);
     }
 

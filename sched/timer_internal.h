@@ -65,6 +65,7 @@ struct posix_timer_s
   ubyte           pt_signo;        /* Notification signal */
   pid_t           pt_owner;        /* Creator of timer */
   int             pt_delay;        /* If non-zero, used to reset repetitive timers */
+  int             pt_last;         /* Last value used to set watchdog */
   WDOG_ID         pt_wdog;         /* The watchdog that provides the timing */
   union sigval    pt_value;        /* Data passed with notification */
 };
