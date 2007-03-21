@@ -135,6 +135,7 @@ CONFIG_DEV_CONSOLE=n
 #   up waiting tasks.
 #
 CONFIG_DISABLE_CLOCK=n
+CONFIG_DISABLE_POSIX_TIMERS=n
 CONFIG_DISABLE_PTHREAD=n
 CONFIG_DISABLE_SIGNALS=n
 CONFIG_DISABLE_MQUEUE=n
@@ -204,6 +205,10 @@ CONFIG_RRLOAD_BINARY=y
 # CONFIG_PREALLOC_WDOGS - The number of pre-allocated watchdog
 #   structures.  The system manages a pool of preallocated
 #   watchdog structures to minimize dynamic allocations
+# CONFIG_PREALLOC_TIMERS - The number of pre-allocated POSIX
+#   timer structures.  The system manages a pool of preallocated
+#   timer structures to minimize dynamic allocations.  Set to
+#   zero for all dynamic allocations.
 #
 CONFIG_MAX_TASKS=64
 CONFIG_MAX_TASK_ARGS=4
@@ -217,6 +222,7 @@ CONFIG_PREALLOC_MQ_MSGS=32
 CONFIG_MQ_MAXMSGSIZE=32
 CONFIG_MAX_WDOGPARMS=4
 CONFIG_PREALLOC_WDOGS=32
+CONFIG_PREALLOC_TIMERS=8
 
 #
 # Stack and heap information
