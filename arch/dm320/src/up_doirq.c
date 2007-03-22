@@ -1,4 +1,4 @@
-/************************************************************
+/********************************************************************************
  * up_doirq.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -31,72 +31,89 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ********************************************************************************/
 
-/************************************************************
+/********************************************************************************
  * Included Files
- ************************************************************/
+ ********************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <assert.h>
+#include <debug.h>
 #include "dm320.h"
 #include "os_internal.h"
 #include "up_internal.h"
 
-/************************************************************
+/********************************************************************************
  * Definitions
- ************************************************************/
+ ********************************************************************************/
 
-/************************************************************
+/********************************************************************************
  * Public Data
- ************************************************************/
+ ********************************************************************************/
 
-/************************************************************
+/********************************************************************************
  * Private Data
- ************************************************************/
+ ********************************************************************************/
 
-/************************************************************
+/********************************************************************************
  * Private Functions
- ************************************************************/
+ ********************************************************************************/
 
-/************************************************************
+/********************************************************************************
  * Public Funtions
- ************************************************************/
+ ********************************************************************************/
 
-void up_doirq(int irq, uint32* regs)
+void up_doirq(uint32* regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
+  lib_lowprintf("Unexpected IRQ\n");
+  current_regs = regs;
   PANIC(OSERR_ERREXCEPTION);
 #else
-  if ((unsigned)irq < NR_IRQS)
+  /* Decode the interrupt.  First, fetch the interrupt id register. */
+
+  uint16 irqentry = getreg16(DM320_INTC_IRQENTRY0);
+
+  /* The irqentry value is an offset into a table.  Zero means no interrupt. */
+
+  if (irqentry != 0)
     {
-       /* Current regs non-zero indicates that we are processing
-        * an interrupt; current_regs is also used to manage
-        * interrupt level context switches.
-        */
+      /* If non-zero, then we can map the table offset into an IRQ number */
 
-       current_regs = regs;
+      int irq = (irqentry >> 2) - 1;
 
-       /* Mask and acknowledge the interrupt */
+      /* Verify that the resulting IRQ number is valie */
 
-       up_maskack_irq(irq);
+      if ((unsigned)irq < NR_IRQS)
+        {
+          /* Mask and acknowledge the interrupt */
 
-       /* Deliver the IRQ */
+          up_maskack_irq(irq);
 
-       irq_dispatch(irq, regs);
+          /* Current regs non-zero indicates that we are processing an interrupt;
+           * current_regs is also used to manage interrupt level context switches.
+           */
 
-       /* Indicate that we are no long in an interrupt handler */
+          current_regs = regs;
 
-       current_regs = NULL;
+          /* Deliver the IRQ */
 
-       /* Unmask the last interrupt (global interrupts are still
-        * disabled.
-        */
+          irq_dispatch(irq, regs);
 
-       up_enable_irq(irq);
+          /* Indicate that we are no long in an interrupt handler */
+
+          current_regs = NULL;
+
+          /* Unmask the last interrupt (global interrupts are still
+           * disabled.
+           */
+
+          up_enable_irq(irq);
+        }
     }
 #endif
 }

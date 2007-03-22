@@ -140,12 +140,12 @@ void up_timerinit(void)
    * the rate MSEC_PER_TICK.
    */
 
-  putreg16(DM320_TMR0_PRSCL, DM320_TIMER1_TMPRSCL); /* Timer 0 Prescalar */
-  putreg16(DM320_TMR0_DIV, DM320_TIMER1_TMDIV);     /* Timer 0 Divisor (count) */
+  putreg16(DM320_TMR0_PRSCL, DM320_TIMER0_TMPRSCL); /* Timer 0 Prescalar */
+  putreg16(DM320_TMR0_DIV, DM320_TIMER0_TMDIV);     /* Timer 0 Divisor (count) */
 
   /* Start the timer */
 
-  putreg16(DM320_TMR0_MODE, DM320_TIMER1_TMMD); /* Timer 0 Mode */
+  putreg16(DM320_TMR0_MODE, DM320_TIMER0_TMMD); /* Timer 0 Mode */
 
   /* Attach and enable the timer interrupt */
 

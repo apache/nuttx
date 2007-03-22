@@ -39,10 +39,7 @@ MKDEP 		= $(TOPDIR)/tools/mkdeps.sh
 CFLAGS		+= -I$(TOPDIR)/sched
 
 ASRCS		= up_vectors.S up_saveusercontext.S up_fullcontextrestore.S \
-		  up_restart.S up_cache.S
-ifeq ($(CONFIG_DEBUG),y)
-ASRCS		+= up_lowputc.S
-endif
+		  up_restart.S up_cache.S up_lowputc.S
 AOBJS		= $(ASRCS:.S=.o)
 
 CSRCS		= up_allocateheap.c up_assert.c up_blocktask.c up_boot.c \

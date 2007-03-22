@@ -50,6 +50,7 @@
 #include "dm320-uart.h"
 #include "dm320-timer.h"
 #include "dm320-intc.h"
+#include "dm320-gio.h"
 
 /************************************************************************************
  * Definitions

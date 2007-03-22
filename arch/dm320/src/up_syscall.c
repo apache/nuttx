@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <debug.h>
 #include "dm320.h"
 #include "os_internal.h"
 #include "up_internal.h"
@@ -46,6 +47,15 @@
 /************************************************************
  * Definitions
  ************************************************************/
+
+/* Output debug info if stack dump is selected -- even if 
+ * debug is not selected.
+ */
+
+#ifdef CONFIG_ARCH_STACKDUMP
+# undef  lldbg
+# define lldbg lib_lowprintf
+#endif
 
 /************************************************************
  * Private Data
@@ -78,5 +88,7 @@
 
 void up_syscall(uint32 *regs)
 {
+  lldbg("Syscall from 0x%x\n", regs[REG_PC]);
+  current_regs = regs;
   PANIC(OSERR_ERREXCEPTION);
 }

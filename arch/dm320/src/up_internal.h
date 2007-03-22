@@ -101,7 +101,7 @@ extern void up_boot(void);
 extern void up_copystate(uint32 *dest, uint32 *src);
 extern void up_dataabort(uint32 *regs);
 extern void up_delay(int milliseconds);
-extern void up_doirq(int irq, uint32* regs);
+extern void up_doirq(uint32* regs);
 extern void up_fullcontextrestore(uint32 *regs) __attribute__ ((noreturn));
 extern void up_irqinitialize(void);
 extern void up_prefetchabort(uint32 *regs);

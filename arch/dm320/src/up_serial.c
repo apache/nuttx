@@ -413,7 +413,7 @@ static int up_interrupt(int irq, void *context)
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;
   uint16             status;
-  int                passes;
+  int                passes = 0;
 
   if (g_uart1port.irq == irq)
     {

@@ -124,21 +124,10 @@ up_vectorirq:
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
 
-	/* Now decode the interrupt.  First, fetch the interrupt id register. */
-
-	ldr	r1, =DM320_INTC_IRQENTRY0 /* Addr LS 16-bits of entry */
-	ldrh	r0, [r1]		/* LS 16-bits of entry */
-	movs	r0, r0, lsr #2		/* Convert to index (set Z) */
-	beq	.Lnoirqset		/* Exit if no IRQ set */
-
-	sub	r0, r0, #1		/* Otherwise, offset */
-
-	/* Then call the IRQ handler with interrupt disabled.
-	 * rq_dispatch(int irq, struct xcptcontext *xcp)
-	 */
+	/* Then call the IRQ handler with interrupts disabled. */
 
 	mov	fp, #0			/* Init frame pointer */
-	mov	r1, sp			/* Get r1=xcp */
+	mov	r0, sp			/* Get r1=xcp */
 	bl	up_doirq		/* Call the handler */
 
 	/* Restore the CPSR, SVC modr registers and return */
