@@ -152,9 +152,7 @@ up_vectorirq:
 					 * no pending interrupt */
 .Lhaveirq:
 #endif
-	/* Then call the IRQ handler with interrupt disabled.
-	 * rq_dispatch(int irq, struct xcptcontext *xcp)
-	 */
+	/* Then call the IRQ handler with interrupt disabled. */
 
 	mov	fp, #0			/* Init frame pointer */
 	mov	r1, sp			/* Get r1=xcp */
