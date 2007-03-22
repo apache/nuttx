@@ -1,5 +1,5 @@
 /********************************************************************************
- * dev_null.c
+ * roundrobin.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -125,7 +125,6 @@ static void *sieve1(void *parameter)
   int i;
 
   printf("sieve1 started\n");
-  fflush(stdout);
 
   for (i = 0; i < 1000; i++)
     {
@@ -133,7 +132,6 @@ static void *sieve1(void *parameter)
     }
 
   printf("sieve1 finished\n");
-  fflush(stdout);
 
   pthread_exit(NULL);
 }
@@ -147,7 +145,6 @@ static void *sieve2(void *parameter)
   int i;
 
   printf("sieve2 started\n");
-  fflush(stdout);
 
   for (i = 0; i < 1000; i++)
     {
@@ -155,7 +152,6 @@ static void *sieve2(void *parameter)
     }
 
   printf("sieve2 finished\n");
-  fflush(stdout);
 
   pthread_exit(NULL);
 }
@@ -222,7 +218,6 @@ void rr_test(void)
   printf("rr_test: Waiting for sieves to complete -- this should take awhile\n");
   printf("rr_test: If RR scheduling is working, they should start and complete at\n");
   printf("rr_test: about the same time\n");
-  fflush(stdout);
 
   pthread_join(sieve2_thread, &result);
   pthread_join(sieve1_thread, &result);
