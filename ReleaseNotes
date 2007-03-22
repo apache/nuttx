@@ -1,19 +1,19 @@
-Nuttx-0.1.2
+Nuttx-0.2.1
 ^^^^^^^^^^^
 
-This is the third release of NuttX.  This release is primary a
-bugfix release with minimal new features.  See the ChangeLog
-for a more detailed description of the changes.
+This is the fourth relese of NuttX.  This release adds adds
+support for a new platform, restructures many header files,
+and adds a few new features:
 
-(1) Several important OS and ARM7 bugfixes,
-(2) opendir(), closedir(), readdir(), etc. added
-(3) Added C5471 watchdog timer.
-(4) Created a shareable, serial driver.
-(5) Added 'ls' command to NuttShell (nsh)
-(6) Added a test of the round robin scheduler
+(1) Support for Neuros OSD / DM320
+(2) Restructuring of header files for better POSIX compliance
+(3) Added kill()
+(4) Added POSIX timers
+(5) bugfixes and documentation updates
 
 This release has been verified on the Linux user-mode platform,
-the  Spectrum Digital TMS320C5471 EVM using the test program under
-examples/ostest.
+the  Spectrum Digital TMS320C5471 EVM, and the Neuros OSD  using
+the test program under examples/ostest.  Because of the stability
+of these tests, the project status has been upgraded to 'beta.'
 
-This tarball contains a complete CVS snapshot from March 19, 2007.
+This tarball contains a complete CVS snapshot from March 22, 2007.
