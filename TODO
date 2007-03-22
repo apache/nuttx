@@ -27,6 +27,9 @@ o pthreads
 - pthread_cancel():  Should implemenent cancellation points and pthread_testcancel()
 
 o Libraries
+- There needs to be some kind of mutual exclusion protection on buffered
+  I/O.  If two threads try fflush-ing at the same time, there is corruption
+  of the output.
 
 o File system
 - This probabaly needs some rethinking.
@@ -71,4 +74,3 @@ o pjrc-8052 / MCS51
   sighand.c at 225 and 244
 
 o DM320
-- In progress
