@@ -48,6 +48,15 @@
  * Definitions
  ************************************************************/
 
+/* Output debug info if stack dump is selected -- even if 
+ * debug is not selected.
+ */
+
+#ifdef CONFIG_ARCH_STACKDUMP
+# undef  lldbg
+# define lldbg lib_lowprintf
+#endif
+
 /************************************************************
  * Private Data
  ************************************************************/
