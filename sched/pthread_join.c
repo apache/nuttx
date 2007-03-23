@@ -195,6 +195,10 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
           dbg("exit_value=0x%p\n", pjoin->exit_value);
         }
 
+      /* Then remove the thread entry. */
+
+      (void)pthread_removejoininfo((pid_t)thread);
+
       /* Post the thread's join semaphore so that exitting thread
        * will know that we have received the data.
        */
@@ -205,6 +209,9 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
 
       sched_unlock();
 
+      /* Deallocate the thread entry */
+
+      sched_free(pjoin);
       ret = OK;
     }
 

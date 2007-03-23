@@ -236,8 +236,6 @@ static void *receiver_thread(void *arg)
       nerrors++;
     }
 
-  pthread_exit((pthread_addr_t)nerrors);
-
   /* Destroy the queue */
 
   if (mq_unlink("testmq") < 0)
@@ -247,6 +245,7 @@ static void *receiver_thread(void *arg)
     }
 
   printf("receiver_thread: returning nerrors=%d\n", nerrors);
+  pthread_exit((pthread_addr_t)nerrors);
   return (pthread_addr_t)nerrors;
 }
 
@@ -330,12 +329,14 @@ void mqueue_test(void)
       printf("mqueue_test: pthread_create failed, status=%d\n", status);
     }
 
+  printf("mqueue_test: Waiting for sender to complete\n");
   pthread_join(sender, &result);
   if (result != (void*)0)
     {
       printf("mqueue_test: ERROR sender thread exited with %d errors\n", (int)result);
     }
 
+  printf("mqueue_test: Canceling receiver\n");
   pthread_cancel(receiver);
   pthread_join(receiver, &result);
   if (result != (void*)0)

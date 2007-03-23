@@ -41,11 +41,13 @@
  * Included Files
  ************************************************************/
 
-#include <nuttx/os_external.h>
+#include <nuttx/config.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <sched.h>
+#include <nuttx/os_external.h>
 #include "ostest.h"
 
 /************************************************************
@@ -81,9 +83,71 @@ static const char *g_argv[NARGS+1];
 static const char *g_argv[NARGS+1] = { arg1, arg2, arg3, arg4, NULL };
 #endif
 
+#ifndef CONFIG_DISABLE_SIGNALS
+static struct mallinfo g_mmbefore;
+static struct mallinfo g_mmprevious;
+static struct mallinfo g_mmafter;
+#endif
+
 /************************************************************
  * Private Functions
  ************************************************************/
+
+/************************************************************
+ * Name: show_memory_usage
+ ************************************************************/
+
+#ifndef CONFIG_DISABLE_SIGNALS
+static void show_memory_usage(struct mallinfo *mmbefore,
+                              struct mallinfo *mmafter)
+{
+  printf("VARIABLE  BEFORE   AFTER\n");
+  printf("======== ======== ========\n");
+  printf("arena    %8x %8x\n", mmbefore->arena,    mmafter->arena);
+  printf("ordblks  %8d %8d\n", mmbefore->ordblks,  mmafter->ordblks);
+  printf("mxordblk %8x %8x\n", mmbefore->mxordblk, mmafter->mxordblk);
+  printf("uordblks %8x %8x\n", mmbefore->uordblks, mmafter->uordblks);
+  printf("fordblks %8x %8x\n", mmbefore->fordblks, mmafter->fordblks);
+}
+#else
+# define show_memory_usage(mm1, mm2)
+#endif
+
+/************************************************************
+ * Name: check_test_memory_usage
+ ************************************************************/
+
+#ifndef CONFIG_DISABLE_SIGNALS
+static void check_test_memory_usage(void)
+{
+  /* Wait a little bit to let any threads terminate */
+
+  usleep(500*1000);
+
+  /* Get the current memory usage */
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  g_mmafter = mallinfo();
+#else
+  (void)mallinfo(&g_mmafter);
+#endif
+
+  /* Show the change from the previous time */
+
+  printf("\nEnd of test memory usage:\n");
+  show_memory_usage(&g_mmprevious, &g_mmafter);
+
+  /* Set up for the next test */
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  g_mmprevious = g_mmafter;
+#else
+  memcpy(&g_mmprevious, &g_mmafter, sizeof(struct mallinfo));
+#endif
+}
+#else
+# define check_test_memory_usage()
+#endif
 
 /************************************************************
  * Name: user_main
@@ -93,6 +157,21 @@ static int user_main(int argc, char *argv[])
 {
   int i;
 
+  /* Sample the memory usage now */
+
+#ifndef CONFIG_DISABLE_SIGNALS
+  usleep(500*1000);
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  g_mmbefore = mallinfo();
+  g_mmprevious = g_mmbefore;
+#else
+  (void)mallinfo(&g_mmbefore);
+  memcpy(g_mmprevious, g_mmbefore, sizeof(struct mallinfo));
+#endif
+#endif
+
+  printf("\nuser_main: Begin argument test\n");
   printf("user_main: Started with argc=%d\n", argc);
 
   /* Verify passed arguments */
@@ -116,65 +195,105 @@ static int user_main(int argc, char *argv[])
                  i, g_argv[i-1], argv[i]);
         }
     }
+  check_test_memory_usage();
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
   /* Checkout /dev/null */
 
+  printf("\nuser_main: /dev/null test\n");
   dev_null();
+  check_test_memory_usage();
 #endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Verify pthreads and pthread mutex */
 
+  printf("\nuser_main: mutex test\n");
   mutex_test();
+  check_test_memory_usage();
 #endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Verify pthread cancellation */
 
+  printf("\nuser_main: cancel test\n");
   cancel_test();
+  check_test_memory_usage();
 #endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Verify pthreads and semaphores */
 
+  printf("\nuser_main: semaphore test\n");
   sem_test();
+  check_test_memory_usage();
 #endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Verify pthreads and condition variables */
 
+  printf("\nuser_main: condition variable test\n");
   cond_test();
+  check_test_memory_usage();
 #endif
 
 #if !defined(CONFIG_DISABLE_SIGNALS) && !defined(CONFIG_DISABLE_PTHREAD)
   /* Verify pthreads and condition variable timed waits */
 
+  printf("\nuser_main: timed wait test\n");
   timedwait_test();
+  check_test_memory_usage();
 #endif
 
 #if !defined(CONFIG_DISABLE_MQUEUE) && !defined(CONFIG_DISABLE_PTHREAD)
   /* Verify pthreads and message queues */
 
+  printf("\nuser_main: message queue test\n");
   mqueue_test();
+  check_test_memory_usage();
 #endif
 
 #ifndef CONFIG_DISABLE_SIGNALS
   /* Verify signal handlers */
 
+  printf("\nuser_main: signal handler test\n");
   sighand_test();
+  check_test_memory_usage();
 #endif
 
 #if !defined(CONFIG_DISABLE_POSIX_TIMERS) && !defined(CONFIG_DISABLE_SIGNALS)
   /* Verify posix timers */
 
+  printf("\nuser_main: POSIX timer test\n");
   timer_test();
+  check_test_memory_usage();
 #endif
 
 #if !defined(CONFIG_DISABLE_PTHREAD) && CONFIG_RR_INTERVAL > 0
   /* Verify round robin scheduling */
 
+  printf("\nuser_main: round-robin scheduler test\n");
   rr_test();
+  check_test_memory_usage();
+#endif
+
+  /* Compare memory usage at time user_start started until
+   * user_main exits.  These should not be identical, but should
+   * be similar enough that we can detect any serious OS memory
+   * leaks.
+   */
+
+#ifndef CONFIG_DISABLE_SIGNALS
+  usleep(500*1000);
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  g_mmafter = mallinfo();
+#else
+  (void)mallinfo(&g_mmafter);
+#endif
+
+  printf("\nFinal memory usage:\n");
+  show_memory_usage(&g_mmbefore, &g_mmafter);
 #endif
 
   printf("user_main: Exitting\n");

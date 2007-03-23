@@ -202,7 +202,9 @@ void cancel_test(void)
       printf("cancel_test: ERROR pthread_cancel failed, status=%d\n", status);
     }
 
-  /* Then join to the thread to pick up the result */
+  /* Then join to the thread to pick up the result (if we don't do
+   * we will have a memory leak!)
+   */
 
   printf("cancel_test: Joining\n");
   status = pthread_join(waiter, &result);
@@ -283,7 +285,7 @@ void cancel_test(void)
       printf("cancel_test: ERROR pthread_cancel failed, status=%d\n", status);
     }
 
-  /* Signal the thread.  It should wake up an restore the cancelable state.
+  /* Signal the thread.  It should wake up and restore the cancelable state.
    * When the cancelable state is re-enabled, the thread should be canceled.
    */
 
@@ -304,4 +306,28 @@ void cancel_test(void)
     {
       printf("cancel_test: ERROR pthread_mutex_unlock failed, status=%d\n", status);
     }
+
+  /* Then join to the thread to pick up the result (if we don't do
+   * we will have a memory leak!)
+   */
+
+  printf("cancel_test: Joining\n");
+  status = pthread_join(waiter, &result);
+  if (status != 0)
+    {
+      printf("cancel_test: ERROR pthread_join failed, status=%d\n", status);
+    }
+  else
+    {
+      printf("cancel_test: waiter exited with result=%p\n", result);
+      if (result != PTHREAD_CANCELED)
+        {
+          printf("cancel_test: ERROR expected result=%p\n", PTHREAD_CANCELED);
+        }
+      else
+        {
+          printf("cancel_test: PASS thread terminated with PTHREAD_CANCELED\n");
+        }
+    }
+
 }
