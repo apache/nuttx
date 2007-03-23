@@ -16,7 +16,7 @@
   </b></big>
   <p><small>by</small></p>
   <p>Gregory Nutt</p>
-  <p><small>Last Update: March 20, 2007</small></p>
+  <p><small>Last Update: March 22, 2007</small></p>
 </center>
 
 <center><h1>Table of Contents</h1></center>
@@ -26,19 +26,25 @@
   <li>2.1 <a href="#DirStructDocumentation">Documentation</a></li>
   <l1>2.2 <a href="#DirStructArch">arch</a></li>
   <ul>
-    <li><a href="#sudirectorystructure">2.2.1 Subdirectory Structure</a></li>
-    <li><a href="#summaryoffiles">2.2.2 Summary of Files</a></li>
+    <li><a href="#archdirectorystructure">2.2.1 Subdirectory Structure</a></li>
+    <li><a href="#summaryofarchfiles">2.2.2 Summary of Files</a></li>
     <li><a href="#supportedarchitectures">2.2.3 Supported Architectures</a></li>
-    <li><a href="#configuringnuttx">2.2.4 Configuring NuttX</a></li>
   </ul>
-  <li>2.3 <a href="#DirStructDrivers">drivers</a></li>
-  <li>2.4 <a href="#DirStructExamples">examples</a></li>
-  <li>2.5 <a href="#DirStructFs">fs</a></li>
-  <li>2.6 <a href="#DirStructInclude">include</a></li>
-  <li>2.7 <a href="#DirStructLib">lib</a></li>
-  <li>2.8 <a href="#DirStructMm">mm</a></li>
-  <li>2.9 <a href="#DirStructSched">sched</a></li>
-  <li>2.10 <a href="#DirStructDrivers">tools</a></li>
+  <li>2.3 <a href="#DirStructConfigs">configs/</a></li>
+  <ul>
+    <li><a href="#configsdirectorystructure">2.3.1 Subdirectory Structure</a></li>
+    <li><a href="#summaryofconfigfiles">2.3.2 Summary of Files</a></li>
+    <li><a href="#supportedboards">2.3.3 Supported Boards</a></li>
+    <li><a href="#configuringnuttx">2.3.4 Configuring NuttX</a></li>
+  </ul>
+  <li>2.4 <a href="#DirStructDrivers">drivers</a></li>
+  <li>2.5 <a href="#DirStructExamples">examples</a></li>
+  <li>2.6 <a href="#DirStructFs">fs</a></li>
+  <li>2.7 <a href="#DirStructInclude">include</a></li>
+  <li>2.8 <a href="#DirStructLib">lib</a></li>
+  <li>2.9 <a href="#DirStructMm">mm</a></li>
+  <li>2.10 <a href="#DirStructSched">sched</a></li>
+  <li>2.11 <a href="#DirStructTools">tools</a></li>
 </ul>
 <li>3.0 <a href="#DirectoryConfiAndBuild">Configuring and Building</a></li>
 <li>4.0 <a href="#ArchAPIs">Architecture APIs</a></li>
@@ -101,13 +107,16 @@ below and discussed in the following paragraphs:</p>
 |-- <a href="#DirStructDocumentation">Documentation</a>
 |   `-- <i>(documentation files)</i>
 |-- <a href="#DirStructArch">arch</a>
-|   |-- <i>(architecture)</i>
+|   |-- <i>&lt;arch-name&gt;</i>
+|   |   |-- include
+|   |   `-- src
+|   `-- <i>&lt:;other-architectures&gt;</i>
+|-- <a href="#DirStructConfigs">configs</a>
+|   |-- <i>&lt;board-name&gt;</i>
 |   |   |-- Make.defs
 |   |   |-- defconfig
-|   |   |-- include
-|   |   |-- setenv.sh
-|   |   `-- src
-|   `-- <i>(other architectures)</i>
+|   |   `-- setenv.sh
+|   `-- <i>&lt:;other-architectures&gt;</i>
 |-- <a href="#DirStructDrivers">drivers</a>
 |   |-- Makefile
 |   `-- <i>(driver source files)</i>
@@ -149,68 +158,32 @@ below and discussed in the following paragraphs:</p>
 
 <h2>2.2 <a name="DirStructArch">arch</a></h2>
 
-<h3><a name="sudirectorystructure">2.2.1 Subdirectory Structure</a></h3>
+<h3><a name="archdirectorystructure">2.2.1 Subdirectory Structure</a></h3>
 <p>
   This directory contains several sub-directories, each containing
   architecture-specific logic.
-  The task of porting NuttX to a new processor or board consists of
+  The task of porting NuttX to a new processor consists of
   add a new sudirectory under <code>arch/</code> containing logic specific
   to the new architecuture.
+  The complete board port in is defined by the architecture-specific code in this
+  directory (plus the board-specific configurations in the <code>config/</code>
+  subdirectory).
   Each architecture must provide a subdirectory, &lt;<i>arch-name</i>&gt;
-  under <code>arch/</code> with the folling characteristics:
+  under <code>arch/</code> with the following characteristics:
 </p>
 <ul><pre>
 	&lt;<i>arch-name</i>&gt;
-	|-- Make.defs
-	|-- defconfig
-	|-- setenv.sh
 	|-- include
 	|   |-- arch.h
 	|   |-- irq.h
 	|   `-- types.h
 	`-- src
 	    |-- Makefile
-	    `-- (architecture-specific source files)
+	    `-- <i>(architecture-specific source files)</i>
 </pre></ul>
 
-<h3><a name="summaryoffiles">2.2.2 Summary of Files</a></h3>
+<h3><a name="summaryofarchfiles">2.2.2 Summary of Files</a></h3>
 <ul>
-  <li>
-    <code>Make.defs</code>: This makefile fragment provides architecture and
-    tool-specific build options.  It will be included by all other
-    makefiles in the build (once it is installed).  This make fragment
-    should define:
-    <ul>
-      <li>Tools: CC, LD, AR, NM, OBJCOPY, OBJDUMP</li>
-      <li>Tool options: CFLAGS, LDFLAGS</li>
-    </ul>
-    <p>
-      When this makefile fragment runs, it will be passed TOPDIR which
-      is the path to the root directory of the build.  This makefile
-      fragment may include ${TOPDIR}/.config to perform configuration
-      specific settings.  For example, the CFLAGS will most likely be
-      different if CONFIG_DEBUG=y.
-  </li>
-  <li>
-    <code>defconfig</code>: This is a configuration file similar to the Linux
-    configuration file.  In contains varialble/value pairs like:
-    <ul>
-      <li><code>CONFIG_VARIABLE</code>=value</li>
-    </ul>
-    <p>
-      This configuration file will be used at build time:
-    </p>
-    <ol>
-      <li>As a makefile fragment included in other makefiles, and</li>
-      <li>to generate <code>include/nuttx/config.h</code> which is included by
-          most C files in the system.</li>
-    </ol>
-  </li>
-  <li>
-    <code>setenv.sh</code>: This is a script that you can include that will be installed at
-    the toplevel of the directory structure and can be sourced to set any
-    necessary environment variables.
-  </li>
   <li>
     <code>include/arch.h</code>:
     This is a hook for any architecture specific definitions that may
@@ -273,6 +246,12 @@ below and discussed in the following paragraphs:</p>
     the final link with <code>libup.a</code> and other system archives to generate the
     final executable.
   </li>
+  <li>
+    <i>(architecture-specific source files)</i>.
+    The file <code>include/nuttx/arch.h</code> identifies all of the APIs that must
+    be provided by the architecture specific logic.  (It also includes
+    <code>arch/&lt;arch-name&gt;/arch.h</code> as described above).
+  </li>
 </ul>
 
 <h3><a name="supportedarchitectures">2.2.3 Supported Architectures</a></h3>
@@ -284,33 +263,126 @@ below and discussed in the following paragraphs:</p>
     round robin scheduler)  Otherwise, it is complete.
   <li><code>arch/c5471</code>:
     TI TMS320C5471 (also called TMS320DM180 or just C5471).
-    NuttX operates on the ARM7 of this dual core processor. This port
-    uses the Spectrum Digital evaluation board with a GNU arm-elf toolchain*.
-    This port is complete, verified, and included in the NuttX release.
+    NuttX operates on the ARM7 of this dual core processor.
+    This port is complete, verified, and included in the NuttX release 0.1.1.
   <li><code>arch/dm320</code>:
       TI TMS320DM320 (also called just DM320).
       NuttX operates on the ARM9EJS of this dual core processor.
-      This port uses the Neuros OSD with a GNU arm-elf toolchain*:
-      see http://wiki.neurostechnology.com/index.php/Developer_Welcome .
-      STATUS: This port is code complete but totally untested due to
-      hardware issues with my OSD.
+      This port complete, verified, and included in the NuttX release 0.2.1.
+  <li><code>arch/m68322</code>
+      A work in progress.</li>
   <li><code>arch/pjrc-8051</code>:
-    8051 Microcontroller.  This port uses the PJRC 87C52 development system
-    and the SDCC toolchain.   This port is not quite ready for prime time.
+    8051 Microcontroller.  This port is not quite ready for prime time.</li>
 </ul>
 <p>
   Other ports for the for the TI TMS320DM270 and for MIPS are in various states
   of progress
 </p>
 
-<h3><a name="configuringnuttx">2.2.4 Configuring NuttX</a></h3>
+<h2>2.3 <a name="DirStructConfigs">configs</a></h2>
+<p>
+  The <code>configs/</code> subdirectory contains configuration data for each board.
+  These board-specific configurations plus the architecture-specific configurations in
+  the <code>arch/</code> subdirectory complete define a customized port of NuttX.
+</p>
+
+<h3><a name="configsdirectorystructure">2.3.1 Subdirectory Structure</a></h3>
+<p>
+  The configs directory contains board specific configuration files.  Each board must
+  provide a subdirectory &lt;board-name&gt; under <code>configs/</code> with the following characteristics:
+</p>
+<ul><pre>
+	&lt;<i>board-name</i>&gt;
+	|-- Make.defs
+	|-- defconfig
+	`-- setenv.sh
+</pre></ul>
+
+<h3><a name="#summaryofconfigfiles">2.3.2 Summary of Files</a></h3>
+<ul>
+  <li>
+    <code>Make.defs</code>: This makefile fragment provides architecture and
+    tool-specific build options.  It will be included by all other
+    makefiles in the build (once it is installed).  This make fragment
+    should define:
+    <ul>
+      <li>Tools: CC, LD, AR, NM, OBJCOPY, OBJDUMP</li>
+      <li>Tool options: CFLAGS, LDFLAGS</li>
+    </ul>
+    <p>
+      When this makefile fragment runs, it will be passed TOPDIR which
+      is the path to the root directory of the build.  This makefile
+      fragment may include ${TOPDIR}/.config to perform configuration
+      specific settings.  For example, the CFLAGS will most likely be
+      different if CONFIG_DEBUG=y.
+  </li>
+  <li>
+    <code>defconfig</code>: This is a configuration file similar to the Linux
+    configuration file.  In contains varialble/value pairs like:
+    <ul>
+      <li><code>CONFIG_VARIABLE</code>=value</li>
+    </ul>
+    <p>
+      This configuration file will be used at build time:
+    </p>
+    <ol>
+      <li>As a makefile fragment included in other makefiles, and</li>
+      <li>to generate <code>include/nuttx/config.h</code> which is included by
+          most C files in the system.</li>
+    </ol>
+  </li>
+  <li>
+    <code>setenv.sh</code>: This is a script that you can include that will be installed at
+    the toplevel of the directory structure and can be sourced to set any
+    necessary environment variables.
+  </li>
+</ul>
+
+<h3><a name="#supportedboards">2.3.3 Supported Boards</a></h3>
+<ul>
+  <li><code>configs/sim</code>:
+    A user-mode port of NuttX to the x86 Linux platform is available.
+    The purpose of this port is primarily to support OS feature developement.
+    This port does not support interrupts or a real timer (and hence no
+    round robin scheduler)  Otherwise, it is complete.</li>
+
+  <li><code>configs/c5471evm</code>:
+    This is a port to the Spectrum Digital C5471 evaluation board.  The
+    C5471 is a dual core processor from TI with an ARM7TDMI general purpose
+    processor and a c54 SDP.  NuttX runs on the ARM core and is built with
+    with a GNU arm-elf toolchain*. This port is complete, verified, and
+    included in the NuttX release.</li>
+
+  <li><code>configs/ntosd-dm320</code>:
+    This port uses the Neuros OSD with a GNU arm-elf toolchain*.
+    See <a href="http://wiki.neurostechnology.com/index.php/Developer_Welcome">Neuros Wiki</a>
+    for futher information.
+    NuttX operates on the ARM9EJS of this dual core processor.
+    STATUS: This port is code complete, verified, and included in the
+    NuttX 0.2.1 release.</li>
+
+  <li><code>configs/m68322evb</code>:
+    This is a work in progress for the venerable m68322evb board from
+    Motorola.</li>
+
+  <li><code>configs/pjrc-8051</code>:
+    8051 Microcontroller.  This port uses the PJRC 87C52 development system
+    and the SDCC toolchain.   This port is not quite ready for prime time.</li>
+</ul>
+
+<p><small><blockquote>
+  * A customized version of the <a href="http://www.buildroot.org">buildroot</a>
+  is available to build these toolchains.
+</blockquote></small></p>
+
+<h3><a name="configuringnuttx">2.3.4 Configuring NuttX</a></h3>
 <p>
   Configuring NuttX requires only copying:
 </p>
 <ul>
-  <code>arch/&lt;<i>arch-name</i>&gt;/Make.def</code> to <code>${TOPDIR}/Make.defs</code>,
-  <code>arch/&lt;<i>arch-name</i>&gt;/setenv.sh</code> to <code>${TOPDIR}/setenv.sh</code>, and
-  <code.arch/&lt;<i>arch-name</i>&gt;/defconfig</code> to ${TOPDIR}/.config</code>
+  <code>configs/&lt;<i>board-name</i>&gt;/Make.def</code> to <code>${TOPDIR}/Make.defs</code>,
+  <code>configs/&lt;<i>board-name</i>&gt;/setenv.sh</code> to <code>${TOPDIR}/setenv.sh</code>, and
+  <code>configs/&lt;<i>board-name</i>&gt;/defconfig</code> to ${TOPDIR}/.config</code>
 </ul>
 <p>
   There is a script that automates these steps.  The following steps will
@@ -318,22 +390,22 @@ below and discussed in the following paragraphs:</p>
 </p>
 <ul><pre>
   cd tools
-  ./configure.sh &lt;<i>arch-name</i>&gt;
+  ./configure.sh &lt;<i>board-name</i>&gt;
 </pre></ul>
 
-<h2>2.3 <a name="DirStructDrivers">drivers</a></h2>
+<h2>2.4 <a name="DirStructDrivers">drivers</a></h2>
 
 <p>
   This directory holds architecture-independent device drivers.
 </p>
 
-<h2>2.4 <a name="DirStructExamples">examples</a></h2>
+<h2>2.5 <a name="DirStructExamples">examples</a></h2>
 
 <p>
   Example and test programs to build against.
 </p>
 
-<h2>2.5 <a name="DirStructFs">fs</a></h2>
+<h2>2.6 <a name="DirStructFs">fs</a></h2>
 
 <p>
   This directory contains the NuttX filesystem.
@@ -345,7 +417,7 @@ below and discussed in the following paragraphs:</p>
   in a file-system-like name space.
 </p>
 
-<h2>2.6 <a name="DirStructInclude">include</a></h2>
+<h2>2.7 <a name="DirStructInclude">include</a></h2>
 <p>
   This directory holds NuttX header files.
   Standard header files file retained in can be included in the <i>normal</i> fashion:
@@ -356,26 +428,26 @@ below and discussed in the following paragraphs:</p>
   etc.
 </ul>
 
-<h2>2.7 <a name="DirStructLib">lib</a></h2>
+<h2>2.8 <a name="DirStructLib">lib</a></h2>
 
 <p>
   This directory holds a collection of standard libc-like functions with custom
   interfaces into Nuttx.
 </p>
 
-<h2>2.8 <a name="DirStructMm">mm</a></h2>
+<h2>2.9 <a name="DirStructMm">mm</a></h2>
 
 <p>
   This is the NuttX memory manager.
 </p>
 
-<h2>2.9 <a name="DirStructSched">sched</a></h2>
+<h2>2.10 <a name="DirStructSched">sched</a></h2>
 
 <p>
   The files forming core of the NuttX RTOS reside here.
 </p>
 
-<h2>2.10 <a name="DirStructDrivers">tools</a></h2>
+<h2>2.11 <a name="DirStructTools">tools</a></h2>
 
 <p>
   This directory holds a collection of tools and scripts to simplify
