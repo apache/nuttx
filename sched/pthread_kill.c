@@ -1,5 +1,5 @@
 /************************************************************
- * sig_kill.c
+ * pthread_kill.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,98 +38,55 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-#include <sched.h>
+#include <signal.h>
+#include <pthread.h>
 #include <errno.h>
 #include <debug.h>
-#include "os_internal.h"
-#include "sig_internal.h"
 
 /************************************************************
  * Global Functions
  ************************************************************/
 
 /************************************************************
- * Function:  kill
+ * Function:  pthread_kill
  *
  * Description:
- *   The kill() system call can be used to send any signal to
- *   any task.
- *
- *   Limitation: Sending of signals to 'process groups' is
- *   not supported in NuttX
+ *   The pthread_kill() system call can be used to send any
+ *   signal to a thread.  See kill() for further information
+ *   as this is just a simple wrapper around the kill()
+ *   function.
  *
  * Parameters:
- *   pid - The id of the task to receive the signal.  The
- *     POSIX kill specification encodes process group
- *     information as zero and negative pid values.  Only
- *     positive, non-zero values of pid are supported by this
- *     implementation.
- *   signo - The signal number to send.  If signo is zero,
+ *   thread - The id of the thread to receive the signal. Only
+ *     positive, non-zero values of 'thread' are supported.
+ *   signo - The signal number to send.  If 'signo' is zero,
  *     no signal is sent, but all error checking is performed.
  *
- *
  * Return Value:
- *    On success (at least one signal was sent), zero is
- *    returned.  On error, -1 is returned, and errno is set
- *    appropriately.
+ *    On success the signal was send and zero is returned.
+ *    On error one of the following error numbers is returned.
  *
  *    EINVAL An invalid signal was specified.
- *    EPERM  The process does not have permission to send the
- *           signal to any of the target processes.
- *    ESRCH  The pid or process group does not exist.
+ *    EPERM  The thread does not have permission to send the
+ *           signal to the target thread.
+ *    ESRCH  No thread could be found corresponding to that
+ *           specified by the given thread ID
  *    ENOSYS Do not support sending signals to process groups.
  *
  * Assumptions:
  *
  ************************************************************/
 
-int kill(pid_t pid, int signo)
+int pthread_kill(pthread_t thread, int signo)
 {
-  FAR _TCB *stcb;
-  siginfo_t info;
-  int       ret = ERROR;
+  int ret;
 
-  /* We do not support sending signals to process groups */
-
-  if (pid <= 0)
+  *get_errno_ptr() = EINVAL;
+  ret = kill((pid_t)thread, signo);
+  if (ret != OK)
     {
-      *get_errno_ptr() = ENOSYS;
-      return ERROR;
+       ret = *get_errno_ptr();
     }
-
-  /* Make sure that the signal is valid */
-
-  if (!GOOD_SIGNO(signo))
-    {
-      *get_errno_ptr() = EINVAL;
-      return ERROR;
-    }
-
-  /* Keep things stationary through the following */
-
-  sched_lock();
-
-  /* Get the TCB of the receiving task */
-
-  stcb = sched_gettcb(pid);
-  dbg("TCB=0x%08x signo=%d\n", stcb, signo);
-  if (!stcb)
-    {
-      *get_errno_ptr() = ESRCH;
-      sched_unlock();
-      return ERROR;
-    }
-
-  /* Create the siginfo structure */
-
-  info.si_signo           = signo;
-  info.si_code            = SI_USER;
-  info.si_value.sival_ptr = NULL;
-
-  /* Send the signal */
-
-  ret = sig_received(stcb, &info);
-  sched_unlock();
   return ret;
 }
 

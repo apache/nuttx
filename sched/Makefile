@@ -89,12 +89,15 @@ PTHREAD_SRCS	= pthread_attrinit.c pthread_attrdestroy.c \
 		  pthread_condinit.c pthread_conddestroy.c \
 		  pthread_condattrinit.c pthread_condattrdestroy.c \
 		  pthread_condwait.c pthread_condsignal.c pthread_condbroadcast.c \
+		  pthread_barrierattrinit.c pthread_barrierattrdestroy.c \
+		  pthread_barrierattrgetpshared.c pthread_barrierattrsetpshared.c \
+		  pthread_barrierinit.c pthread_barrierdestroy.c pthread_barrierwait.c \
 		  pthread_cancel.c pthread_setcancelstate.c \
 		  pthread_keycreate.c pthread_setspecific.c pthread_getspecific.c pthread_keydelete.c \
 		  pthread_initialize.c pthread_completejoin.c pthread_findjoininfo.c \
-		  pthread_removejoininfo.c
+		  pthread_removejoininfo.c pthread_once.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-PTHREAD_SRCS	+= pthread_condtimedwait.c
+PTHREAD_SRCS	+= pthread_condtimedwait.c pthread_kill.c pthread_sigmask.c
 endif
 SEM_SRCS	= sem_initialize.c sem_init.c sem_destroy.c\
 		  sem_open.c sem_close.c sem_unlink.c \

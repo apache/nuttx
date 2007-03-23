@@ -1,5 +1,5 @@
 /********************************************************************************
- * clock_abstime2ticks.c
+ * pthread_barrierattrinit.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,12 +37,10 @@
  * Included Files
  ********************************************************************************/
 
-#include <nuttx/config.h>
 #include <sys/types.h>
-#include <time.h>
+#include <pthread.h>
 #include <errno.h>
 #include <debug.h>
-#include "clock_internal.h"
 
 /********************************************************************************
  * Definitions
@@ -61,7 +59,7 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Private Functions
+ * Private Function Prototypes
  ********************************************************************************/
 
 /********************************************************************************
@@ -69,60 +67,34 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Function:  clock_abstime2ticks
+ * Function: pthread_barrierattr_init
  *
  * Description:
- *   Convert an absolute timespec delay to system timer ticks.
+ *   The pthread_barrierattr_init() function will initialize a barrier attribute
+ *   object attr with the default value for all of the attributes defined by the
+ *   implementation.
  *
  * Parameters:
- *   clockid - The timing source to use in the conversion
- *   reltime - Convert this absolue time to system clock ticks.
- *   ticks - Return the converted number of ticks here.
+ *   attr - barrier attributes to be initialized.
  *
  * Return Value:
- *   OK on success; A non-zero error number on failure;
+ *   0 (OK) on success or EINVAL if attr is invalid.
  *
  * Assumptions:
- *   Interrupts should be disabled so that the time is not changing during the
- *   calculation
  *
  ********************************************************************************/
 
-extern int clock_abstime2ticks(clockid_t clockid, const struct timespec *abstime,
-                               int *ticks)
+int pthread_barrierattr_init(FAR pthread_barrierattr_t *attr)
 {
-  struct timespec currtime;
-  struct timespec reltime;
-  int             ret;
+  int ret = OK;
 
-  /* Convert the timespec to clock ticks.  NOTE: Here we use
-   * internal knowledge that CLOCK_REALTIME is defined to be zero!
-   */
-
-  ret = clock_gettime(clockid, &currtime);
-  if (ret)
+  if (!attr)
     {
-      return EINVAL;
+      ret = EINVAL;
     }
-
-  /* The relative time to wait is the absolute time minus the
-   * current time.
-   */
-
-  reltime.tv_nsec = (abstime->tv_nsec - currtime.tv_nsec);
-  reltime.tv_sec  = (abstime->tv_sec  - currtime.tv_sec);
-
-  /* Check if we were supposed to borrow from the seconds to
-   * borrow from the seconds
-   */
-
-  if (reltime.tv_nsec < 0)
+  else
     {
-      reltime.tv_nsec += NSEC_PER_SEC;
-      reltime.tv_sec  -= 1;
+      attr->pshared = PTHREAD_PROCESS_PRIVATE;
     }
-
-  /* Convert this relative time into microseconds.*/
-
-  return clock_time2ticks(&reltime, ticks);
+  return ret;
 }

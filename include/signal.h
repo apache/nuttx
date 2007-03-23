@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <time.h>      /* Needed for struct timespec */
-#include <sys/types.h> /* Needed for, e.g., sigset_t */
+#include <sys/types.h>
 
 /********************************************************************************
  * Compilations Switches

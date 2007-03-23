@@ -235,7 +235,7 @@ STATUS task_schedsetup(FAR _TCB *tcb, int priority,
  *
  ************************************************************/
 
-STATUS task_argsetup(FAR _TCB *tcb, const char *name, char *argv[])
+STATUS task_argsetup(FAR _TCB *tcb, const char *name, const char *argv[])
 {
   int i;
 

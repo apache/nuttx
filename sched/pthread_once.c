@@ -1,5 +1,5 @@
 /********************************************************************************
- * clock_abstime2ticks.c
+ * pthread_once.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,10 +39,10 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <time.h>
+#include <pthread.h>
+#include <sched.h>
 #include <errno.h>
 #include <debug.h>
-#include "clock_internal.h"
 
 /********************************************************************************
  * Definitions
@@ -61,7 +61,7 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Private Functions
+ * Private Function Prototypes
  ********************************************************************************/
 
 /********************************************************************************
@@ -69,60 +69,57 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Function:  clock_abstime2ticks
+ * Function: pthread_once
  *
  * Description:
- *   Convert an absolute timespec delay to system timer ticks.
+ *   The  first call to pthread_once() by any thread with a given once_control,
+ *   will call the init_routine with no arguments. Subsequent calls to
+ *   pthread_once() with the same once_control will have no effect.  On return
+ *   from pthread_once(), init_routine will have completed.
  *
  * Parameters:
- *   clockid - The timing source to use in the conversion
- *   reltime - Convert this absolue time to system clock ticks.
- *   ticks - Return the converted number of ticks here.
+ *   once_control - Determines if init_routine should be called.  once_control
+ *      should be declared and intialized as follows:
+ *
+ *        pthread_once_t once_control = PTHREAD_ONCE_INIT;
+ *
+ *       PTHREAD_ONCE_INIT is defined in pthread.h
+ *   init_routine - The initialization routine that will be called once.
  *
  * Return Value:
- *   OK on success; A non-zero error number on failure;
+ *   0 (OK) on success or EINVAL if either once_control or init_routine are invalid
  *
  * Assumptions:
- *   Interrupts should be disabled so that the time is not changing during the
- *   calculation
  *
  ********************************************************************************/
 
-extern int clock_abstime2ticks(clockid_t clockid, const struct timespec *abstime,
-                               int *ticks)
+int pthread_once(FAR pthread_once_t *once_control, CODE void (*init_routine)(void))
 {
-  struct timespec currtime;
-  struct timespec reltime;
-  int             ret;
+  /* Sanity checks */
 
-  /* Convert the timespec to clock ticks.  NOTE: Here we use
-   * internal knowledge that CLOCK_REALTIME is defined to be zero!
-   */
-
-  ret = clock_gettime(clockid, &currtime);
-  if (ret)
+  if (once_control && init_routine)
     {
-      return EINVAL;
+      /* Prohibit pre-emption while we test and set the once_control */
+
+      sched_lock();
+      if (!*once_control)
+        {
+          *once_control = TRUE;
+
+          /* Call the init_routine with pre-emption enabled. */
+
+          sched_unlock();
+          init_routine();
+          return OK;
+        }
+
+      /* The init_routine has already been called.  Restore pre-emption and return */
+
+      sched_unlock();
+      return OK;
     }
 
-  /* The relative time to wait is the absolute time minus the
-   * current time.
-   */
+  /* One of the two arguments is NULL */
 
-  reltime.tv_nsec = (abstime->tv_nsec - currtime.tv_nsec);
-  reltime.tv_sec  = (abstime->tv_sec  - currtime.tv_sec);
-
-  /* Check if we were supposed to borrow from the seconds to
-   * borrow from the seconds
-   */
-
-  if (reltime.tv_nsec < 0)
-    {
-      reltime.tv_nsec += NSEC_PER_SEC;
-      reltime.tv_sec  -= 1;
-    }
-
-  /* Convert this relative time into microseconds.*/
-
-  return clock_time2ticks(&reltime, ticks);
+  return EINVAL;
 }

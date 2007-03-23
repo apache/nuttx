@@ -1,5 +1,5 @@
 /********************************************************************************
- * clock_abstime2ticks.c
+ * pthread_barrieinit.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,12 +37,11 @@
  * Included Files
  ********************************************************************************/
 
-#include <nuttx/config.h>
 #include <sys/types.h>
-#include <time.h>
+#include <pthread.h>
+#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
-#include "clock_internal.h"
 
 /********************************************************************************
  * Definitions
@@ -61,7 +60,7 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Private Functions
+ * Private Function Prototypes
  ********************************************************************************/
 
 /********************************************************************************
@@ -69,60 +68,53 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Function:  clock_abstime2ticks
+ * Function: pthread_barrier_init
  *
  * Description:
- *   Convert an absolute timespec delay to system timer ticks.
+ *   The pthread_barrier_init() function allocates any resources required to use
+ *   the barrier referenced by 'barrier' and initialized the barrier with the
+ *   attributes referenced by attr.  If attr is NULL, the default barrier
+ *   attributes will be used. The results are undefined if pthread_barrier_init()
+ *   is called when any thread is blocked on the barrier. The results are
+ *   undefined if a barrier is used without first being initialized. The results
+ *   are undefined if pthread_barrier_init() is called specifying an already
+ *   initialized barrier.
  *
  * Parameters:
- *   clockid - The timing source to use in the conversion
- *   reltime - Convert this absolue time to system clock ticks.
- *   ticks - Return the converted number of ticks here.
+ *   barrier - the barrier to be initialized
+ *   attr - barrier attributes to be used in the initialization.
+ *   count - the count to be associated with the barrier.  The count argument
+ *     specifies the number of threads that must call pthread_barrier_wait() before
+ *     any of them successfully return from the call.  The value specified by
+ *     count must be greater than zero.
  *
  * Return Value:
- *   OK on success; A non-zero error number on failure;
+ *   0 (OK) on success or on of the following error numbers:
+ *
+ *   EAGAIN The system lacks the necessary resources to initialize another barrier.
+ *   EINVAL The barrier reference is invalid, or the values specified by attr are
+ *          invalid, or the value specified by count is equal to zero.
+ *   ENOMEM Insufficient memory exists to initialize the barrier.
+ *   EBUSY  The implementation has detected an attempt to reinitialize a barrier
+ *          while it is in use.
  *
  * Assumptions:
- *   Interrupts should be disabled so that the time is not changing during the
- *   calculation
  *
  ********************************************************************************/
 
-extern int clock_abstime2ticks(clockid_t clockid, const struct timespec *abstime,
-                               int *ticks)
+int pthread_barrier_init(FAR pthread_barrier_t *barrier,
+                         FAR const pthread_barrierattr_t *attr, unsigned int count)
 {
-  struct timespec currtime;
-  struct timespec reltime;
-  int             ret;
+  int ret = OK;
 
-  /* Convert the timespec to clock ticks.  NOTE: Here we use
-   * internal knowledge that CLOCK_REALTIME is defined to be zero!
-   */
-
-  ret = clock_gettime(clockid, &currtime);
-  if (ret)
+  if (!barrier || count == 0)
     {
-      return EINVAL;
+      ret = EINVAL;
     }
-
-  /* The relative time to wait is the absolute time minus the
-   * current time.
-   */
-
-  reltime.tv_nsec = (abstime->tv_nsec - currtime.tv_nsec);
-  reltime.tv_sec  = (abstime->tv_sec  - currtime.tv_sec);
-
-  /* Check if we were supposed to borrow from the seconds to
-   * borrow from the seconds
-   */
-
-  if (reltime.tv_nsec < 0)
+  else
     {
-      reltime.tv_nsec += NSEC_PER_SEC;
-      reltime.tv_sec  -= 1;
+      sem_init(&barrier->sem, 0, 0);
+      barrier->count = count;
     }
-
-  /* Convert this relative time into microseconds.*/
-
-  return clock_time2ticks(&reltime, ticks);
+  return ret;
 }

@@ -44,6 +44,7 @@
 #include <nuttx/compiler.h> /* Compiler settings */
 #include <sys/types.h>      /* Needed for general types */
 #include <semaphore.h>      /* Needed for sem_t */
+#include <signal.h>         /* Needed for sigset_t */
 #include <time.h>           /* Needed for struct timespec */
 #include <nuttx/compiler.h> /* For noreturn_function */
 
@@ -64,29 +65,43 @@
  * Definitions
  ********************************************************************************/
 
-#define PTHREAD_PROCESS_PRIVATE  0
-#define PTHREAD_PROCESS_SHARED   1
+/* Values for the process shared (pshared) attribute */
 
-#define PTHREAD_STACK_MIN        CONFIG_PTHREAD_STACK_MIN
-#define PTHREAD_STACK_DEFAULT    CONFIG_PTHREAD_STACK_DEFAULT
+#define PTHREAD_PROCESS_PRIVATE       0
+#define PTHREAD_PROCESS_SHARED        1
 
-#define PTHREAD_INHERIT_SCHED    0
-#define PTHREAD_EXPLICIT_SCHED   1
+/* Valid ranges for the pthread stacksize attribute */
 
-#define PTHREAD_PRIO_NONE        0
-#define PTHREAD_PRIO_INHERIT     1
-#define PTHREAD_PRIO_PROTECT     2
+#define PTHREAD_STACK_MIN             CONFIG_PTHREAD_STACK_MIN
+#define PTHREAD_STACK_DEFAULT         CONFIG_PTHREAD_STACK_DEFAULT
 
-#define PTHREAD_DEFAULT_PRIORITY 100
+/* Values for the pthread inheritsched attribute */
+
+#define PTHREAD_INHERIT_SCHED         0
+#define PTHREAD_EXPLICIT_SCHED        1
+
+#define PTHREAD_PRIO_NONE             0
+#define PTHREAD_PRIO_INHERIT          1
+#define PTHREAD_PRIO_PROTECT          2
+
+#define PTHREAD_DEFAULT_PRIORITY      100
 
 /* Cancellation states returned by pthread_cancelstate() */
 
-#define PTHREAD_CANCEL_ENABLE    (0)
-#define PTHREAD_CANCEL_DISABLE   (1)
+#define PTHREAD_CANCEL_ENABLE         (0)
+#define PTHREAD_CANCEL_DISABLE        (1)
 
 /* Thread return value when a pthread is canceled */
 
-# define PTHREAD_CANCELED        ((FAR void*)ERROR)
+#define PTHREAD_CANCELED              ((FAR void*)ERROR)
+
+/* Used to initialize a pthread_once_t */
+
+#define PTHREAD_ONCE_INIT             (FALSE)
+
+/* This is returned by pthread_wait.  It must not match any errno in errno.h */
+
+#define PTHREAD_BARRIER_SERIAL_THREAD 0x1000
 
 /********************************************************************************
  * Global Type Declarations
@@ -144,6 +159,21 @@ struct pthread_mutex_s
 typedef struct pthread_mutex_s pthread_mutex_t;
 #define PTHREAD_MUTEX_INITIALIZER {0, {1, 0xffff}}
 
+struct pthread_barrierattr_s
+{
+  int pshared;
+};
+typedef struct pthread_barrierattr_s pthread_barrierattr_t;
+
+struct pthread_barrier_s
+{
+  sem_t        sem;
+  unsigned int count;
+};
+typedef struct pthread_barrier_s pthread_barrier_t;
+
+typedef boolean pthread_once_t;
+
 /* Forware references */
 
 struct sched_param; /* Defined in sched.h */
@@ -155,6 +185,7 @@ struct sched_param; /* Defined in sched.h */
 /********************************************************************************
  * Global Function Prototypes
  ********************************************************************************/
+
 /* Initializes a thread attributes object (attr) with default values for all of
  * the individual attributes used by a given implementation.
  */
@@ -279,6 +310,33 @@ EXTERN int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex);
 
 EXTERN int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
                                   const struct timespec *abstime);
+
+/* Barrier attributes */
+
+EXTERN int pthread_barrierattr_destroy(FAR pthread_barrierattr_t *attr);
+EXTERN int pthread_barrierattr_init(FAR pthread_barrierattr_t *attr);
+EXTERN int pthread_barrierattr_getpshared(FAR const pthread_barrierattr_t *attr,
+                                          FAR int *pshared);
+EXTERN int pthread_barrierattr_setpshared(FAR pthread_barrierattr_t *attr,
+                                          int pshared);
+
+/* Barriers */
+
+EXTERN int pthread_barrier_destroy(FAR pthread_barrier_t *barrier);
+EXTERN int pthread_barrier_init(FAR pthread_barrier_t *barrier,
+                                FAR const pthread_barrierattr_t *attr,
+                                unsigned int count);
+EXTERN int pthread_barrier_wait(FAR pthread_barrier_t *barrier);
+
+/* Pthread initialization */
+
+EXTERN int pthread_once(FAR pthread_once_t *once_control,
+                        CODE void (*init_routine)(void));
+
+/* Pthread signal management APIs */
+
+EXTERN int pthread_kill(pthread_t thread, int sig);
+EXTERN int pthread_sigmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 
 #undef EXTERN
 #ifdef __cplusplus

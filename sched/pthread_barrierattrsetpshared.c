@@ -1,5 +1,5 @@
 /********************************************************************************
- * clock_abstime2ticks.c
+ * pthread_barrierattrsetpshared.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,12 +37,10 @@
  * Included Files
  ********************************************************************************/
 
-#include <nuttx/config.h>
 #include <sys/types.h>
-#include <time.h>
+#include <pthread.h>
 #include <errno.h>
 #include <debug.h>
-#include "clock_internal.h"
 
 /********************************************************************************
  * Definitions
@@ -61,7 +59,7 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Private Functions
+ * Private Function Prototypes
  ********************************************************************************/
 
 /********************************************************************************
@@ -69,60 +67,44 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Function:  clock_abstime2ticks
+ * Function: pthread_barrierattr_setpshared
  *
  * Description:
- *   Convert an absolute timespec delay to system timer ticks.
+ *   The process-shared attribute is set to PTHREAD_PROCESS_SHARED to permit a
+ *   barrier to be operated upon by any thread that has access to the memory where
+ *   the barrier is allocated. If the process-shared attribute is
+ *   PTHREAD_PROCESS_PRIVATE, the barrier can only be operated upon by threads
+ *   created within the same process as the thread that initialized the barrier.
+ *   If threads of different processes attempt to operate on such a barrier, the
+ *   behavior is undefined. The default value of the attribute is
+ *   PTHREAD_PROCESS_PRIVATE.
+ *
+ *   Both constants PTHREAD_PROCESS_SHARED and PTHREAD_PROCESS_PRIVATE are defined
+ *   in pthread.h.
  *
  * Parameters:
- *   clockid - The timing source to use in the conversion
- *   reltime - Convert this absolue time to system clock ticks.
- *   ticks - Return the converted number of ticks here.
+ *   attr - barrier attributes to be modified.
+ *   pshared - the new value of the pshared attribute.
  *
  * Return Value:
- *   OK on success; A non-zero error number on failure;
+ *   0 (OK) on success or EINVAL if either attr is invalid or pshared is not one
+ *   of PTHREAD_PROCESS_SHARED or PTHREAD_PROCESS_PRIVATE.
  *
  * Assumptions:
- *   Interrupts should be disabled so that the time is not changing during the
- *   calculation
  *
  ********************************************************************************/
 
-extern int clock_abstime2ticks(clockid_t clockid, const struct timespec *abstime,
-                               int *ticks)
+int pthread_barrierattr_setpshared(FAR pthread_barrierattr_t *attr, int pshared)
 {
-  struct timespec currtime;
-  struct timespec reltime;
-  int             ret;
+  int ret = OK;
 
-  /* Convert the timespec to clock ticks.  NOTE: Here we use
-   * internal knowledge that CLOCK_REALTIME is defined to be zero!
-   */
-
-  ret = clock_gettime(clockid, &currtime);
-  if (ret)
+  if (!attr || (pshared != PTHREAD_PROCESS_SHARED && pshared != PTHREAD_PROCESS_PRIVATE))
     {
-      return EINVAL;
+      ret = EINVAL;
     }
-
-  /* The relative time to wait is the absolute time minus the
-   * current time.
-   */
-
-  reltime.tv_nsec = (abstime->tv_nsec - currtime.tv_nsec);
-  reltime.tv_sec  = (abstime->tv_sec  - currtime.tv_sec);
-
-  /* Check if we were supposed to borrow from the seconds to
-   * borrow from the seconds
-   */
-
-  if (reltime.tv_nsec < 0)
+  else
     {
-      reltime.tv_nsec += NSEC_PER_SEC;
-      reltime.tv_sec  -= 1;
+      attr->pshared = pshared;
     }
-
-  /* Convert this relative time into microseconds.*/
-
-  return clock_time2ticks(&reltime, ticks);
+  return ret;
 }

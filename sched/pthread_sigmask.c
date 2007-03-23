@@ -1,5 +1,5 @@
 /************************************************************
- * sig_kill.c
+ * pthread_sigmask.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,100 +37,70 @@
  * Included Files
  ************************************************************/
 
-#include <nuttx/config.h>
-#include <sched.h>
+#include <sys/types.h>
+#include <signal.h>
+#include <pthread.h>
 #include <errno.h>
 #include <debug.h>
-#include "os_internal.h"
-#include "sig_internal.h"
 
 /************************************************************
- * Global Functions
+ * Definitions
  ************************************************************/
 
 /************************************************************
- * Function:  kill
+ * Private Type Declarations
+ ************************************************************/
+
+/************************************************************
+ * Global Variables
+ ************************************************************/
+
+/************************************************************
+ * Private Variables
+ ************************************************************/
+
+/************************************************************
+ * Private Function Prototypes
+ ************************************************************/
+
+/************************************************************
+ * Public Functions
+ ************************************************************/
+
+/************************************************************
+ * Function: pthread_sigmask
  *
  * Description:
- *   The kill() system call can be used to send any signal to
- *   any task.
- *
- *   Limitation: Sending of signals to 'process groups' is
- *   not supported in NuttX
+ *   This function is a simple wrapper around sigprocmask().
+ *   See the sigprocmask() function description for further
+ *   information.
  *
  * Parameters:
- *   pid - The id of the task to receive the signal.  The
- *     POSIX kill specification encodes process group
- *     information as zero and negative pid values.  Only
- *     positive, non-zero values of pid are supported by this
- *     implementation.
- *   signo - The signal number to send.  If signo is zero,
- *     no signal is sent, but all error checking is performed.
- *
+ *   how - How the signal mast will be changed:
+ *         SIG_BLOCK   - The resulting set is the union of
+ *                       the current set and the signal set
+ *                       pointed to by 'set'.
+ *         SIG_UNBLOCK - The resulting set is the intersection
+ *                       of the current set and the complement
+ *                       of the signal set pointed to by 'set'.
+ *         SIG_SETMASK - The resulting set is the signal set
+ *                       pointed to by 'set'.
+ *   set - Location of the new signal mask
+ *   oset - Location to store the old signal mask
  *
  * Return Value:
- *    On success (at least one signal was sent), zero is
- *    returned.  On error, -1 is returned, and errno is set
- *    appropriately.
- *
- *    EINVAL An invalid signal was specified.
- *    EPERM  The process does not have permission to send the
- *           signal to any of the target processes.
- *    ESRCH  The pid or process group does not exist.
- *    ENOSYS Do not support sending signals to process groups.
+ *   0 (OK) or EINVAL if how is invalid.
  *
  * Assumptions:
  *
  ************************************************************/
 
-int kill(pid_t pid, int signo)
+int pthread_sigmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
 {
-  FAR _TCB *stcb;
-  siginfo_t info;
-  int       ret = ERROR;
-
-  /* We do not support sending signals to process groups */
-
-  if (pid <= 0)
+  int ret = sigprocmask(how, set, oset);
+  if (ret != OK)
     {
-      *get_errno_ptr() = ENOSYS;
-      return ERROR;
+      ret = EINVAL;
     }
-
-  /* Make sure that the signal is valid */
-
-  if (!GOOD_SIGNO(signo))
-    {
-      *get_errno_ptr() = EINVAL;
-      return ERROR;
-    }
-
-  /* Keep things stationary through the following */
-
-  sched_lock();
-
-  /* Get the TCB of the receiving task */
-
-  stcb = sched_gettcb(pid);
-  dbg("TCB=0x%08x signo=%d\n", stcb, signo);
-  if (!stcb)
-    {
-      *get_errno_ptr() = ESRCH;
-      sched_unlock();
-      return ERROR;
-    }
-
-  /* Create the siginfo structure */
-
-  info.si_signo           = signo;
-  info.si_code            = SI_USER;
-  info.si_value.sival_ptr = NULL;
-
-  /* Send the signal */
-
-  ret = sig_received(stcb, &info);
-  sched_unlock();
   return ret;
 }
-
-

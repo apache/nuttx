@@ -150,10 +150,10 @@ void weak_function timer_deleteall(pid_t pid)
   irqstate_t flags;
 
   flags = irqsave();
-  for (timer = g_alloctimers.head; timer; timer = next)
+  for (timer = (FAR struct posix_timer_s*)g_alloctimers.head; timer; timer = next)
     {
       next = timer->flink;
-      if (timer->pt_owner = pid)
+      if (timer->pt_owner == pid)
         {
           timer_delete((timer_t)timer);
         }

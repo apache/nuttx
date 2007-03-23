@@ -14,6 +14,8 @@ Task/Scheduler
    _POSIX_CLOCKRES_MIN in limits.h
    CLK_TCK in time.h
    Definitions in sched/clock_internal.h
+- Consider implementing wait, waitpid, waitid.  At present, a parent has
+  no information about child tasks.
 
 o Memory Managment
 - Add an option to free all memory allocated by a task when the task exits.
@@ -45,6 +47,7 @@ o Build system
 - Something leaves garbage link 'include' in arch/*/include
 
 o Applications & Tests
+- Need a test for the pthread_barrierattr_* and pthread_barrier_* APIs.
 
 o C5471
 - At present, there is a failure in the examples/ostest POSIX timer

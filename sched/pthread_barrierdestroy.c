@@ -1,5 +1,5 @@
 /********************************************************************************
- * clock_abstime2ticks.c
+ * pthread_barriedestroy.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,12 +37,11 @@
  * Included Files
  ********************************************************************************/
 
-#include <nuttx/config.h>
 #include <sys/types.h>
-#include <time.h>
+#include <pthread.h>
+#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
-#include "clock_internal.h"
 
 /********************************************************************************
  * Definitions
@@ -61,7 +60,7 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Private Functions
+ * Private Function Prototypes
  ********************************************************************************/
 
 /********************************************************************************
@@ -69,60 +68,42 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Function:  clock_abstime2ticks
+ * Function: pthread_barrier_destroy
  *
  * Description:
- *   Convert an absolute timespec delay to system timer ticks.
+ *   The pthread_barrier_destroy() function destroys the barrier referenced by
+ *   'barrier' and releases any resources used by the barrier. The effect of
+ *   subsequent use of the barrier is undefined until the barrier is
+ *   reinitialized by another call to pthread_barrier_init(). The results are
+ *   undefined if pthread_barrier_destroy() is called when any thread is blocked
+ *   on the barrier, or if this function is called with an uninitialized barrier.
  *
  * Parameters:
- *   clockid - The timing source to use in the conversion
- *   reltime - Convert this absolue time to system clock ticks.
- *   ticks - Return the converted number of ticks here.
+ *   barrier - barrier to be destroyed.
  *
  * Return Value:
- *   OK on success; A non-zero error number on failure;
+ *   0 (OK) on success or on of the following error numbers:
+ *
+ *   EBUSY  The implementation has detected an attempt to destroy a barrier while
+ *           it is in use.
+ *   EINVAL The value specified by barrier is invalid.
  *
  * Assumptions:
- *   Interrupts should be disabled so that the time is not changing during the
- *   calculation
  *
  ********************************************************************************/
 
-extern int clock_abstime2ticks(clockid_t clockid, const struct timespec *abstime,
-                               int *ticks)
+int pthread_barrier_destroy(FAR pthread_barrier_t *barrier)
 {
-  struct timespec currtime;
-  struct timespec reltime;
-  int             ret;
+  int ret = OK;
 
-  /* Convert the timespec to clock ticks.  NOTE: Here we use
-   * internal knowledge that CLOCK_REALTIME is defined to be zero!
-   */
-
-  ret = clock_gettime(clockid, &currtime);
-  if (ret)
+  if (!barrier)
     {
-      return EINVAL;
+      ret = EINVAL;
     }
-
-  /* The relative time to wait is the absolute time minus the
-   * current time.
-   */
-
-  reltime.tv_nsec = (abstime->tv_nsec - currtime.tv_nsec);
-  reltime.tv_sec  = (abstime->tv_sec  - currtime.tv_sec);
-
-  /* Check if we were supposed to borrow from the seconds to
-   * borrow from the seconds
-   */
-
-  if (reltime.tv_nsec < 0)
+  else
     {
-      reltime.tv_nsec += NSEC_PER_SEC;
-      reltime.tv_sec  -= 1;
+      sem_destroy(&barrier->sem);
+      barrier->count = 0;
     }
-
-  /* Convert this relative time into microseconds.*/
-
-  return clock_time2ticks(&reltime, ticks);
+  return ret;
 }
