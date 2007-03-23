@@ -92,6 +92,10 @@ extern void timedwait_test(void);
 
 extern void sighand_test(void);
 
+/* posixtimers.c ********************************************/
+
+extern void timer_test(void);
+
 /* roundrobin.c *********************************************/
 
 extern void rr_test(void);
