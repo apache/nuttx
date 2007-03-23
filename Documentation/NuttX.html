@@ -433,6 +433,10 @@ Other memory:
 0.2.2 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 	* Created the configs/ directory; separated board configuration
 	  from processor architecture logic
+	* Add memory leak detection test to examples/ostest
+	* Corrected memory leak in OS pthread join logic
+	* Corrected memory leaks in examples/ostest due to failures
+	  to join or detach from pthreads.
 	* Started m68322
 </pre></ul>
 
