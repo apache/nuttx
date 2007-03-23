@@ -573,7 +573,7 @@ other tasks with the same priority.
 <UL>
 <LI><I>pid</I>. The task ID of the task. If pid is zero, the
 priority of the calling task is set.
-<LI><I>param</I>. A structure whose member sched_priority is the
+<li><code>param<code>.</li> A structure whose member sched_priority is the
 integer priority. The range of valid priority numbers is from
 SCHED_PRIORITY_MIN through SCHED_PRIORITY_MAX.
 </UL>
@@ -616,7 +616,7 @@ of the task specified by pid.
 <UL>
 <LI><I>pid</I>. The task ID of the task. If pid is zero, the
 priority of the calling task is returned.
-<LI><I>param</I>. A structure whose member sched_priority is the
+<li><code>param<code>.</li> A structure whose member sched_priority is the
 integer priority. The task's priority is copied to the sched_priority
 element of this structure.
 </UL>
@@ -655,7 +655,7 @@ interface of the same name.
     priority of the calling task is set.
   <LI><I>policy</I>. Scheduling policy requested (either SCHED_FIFO
     or SCHED_RR).
-  <LI><I>param</I>. A structure whose member sched_priority is the
+  <li><code>param<code>.</li> A structure whose member sched_priority is the
     integer priority. The range of valid priority numbers is from
     SCHED_PRIORITY_MIN through SCHED_PRIORITY_MAX.
 </UL>
@@ -3096,6 +3096,7 @@ be sent.
   Only positive, non-zero values of pid are supported by this
   implementation. ID of the task to receive signal
 <LI><I>signo</I>. The signal number to send.
+  If signo is zero, no signal is sent, but all error checking is performed.
 </UL>
 
 <p>
@@ -3163,6 +3164,16 @@ be sent.
   <li><a href="#pthreadcondsignal">2.9.40 pthread_cond_signal</a></li>
   <li><a href="#pthreadcondwait">2.9.41 pthread_cond_wait</a></li>
   <li><a href="#pthreadcondtimedwait">2.9.42 pthread_cond_timedwait</a></li>
+  <li><a href="#pthreadbarrierattrinit">2.9.43 pthread_barrierattr_init</a></li>
+  <li><a href="#pthreadbarrierattrdestroy">2.9.44 pthread_barrierattr_destroy</a></li>
+  <li><a href="#pthreadbarrierattrsetpshared">2.9.45 pthread_barrierattr_setpshared</a></li>
+  <li><a href="#pthreadbarrierattrgetpshared">2.9.46 pthread_barrierattr_getpshared</a></li>
+  <li><a href="#pthreadbarrierinit">2.9.47 pthread_barrier_init</a></li>
+  <li><a href="#pthreadbarrierdestroy">2.9.48 pthread_barrier_destroy</a></li>
+  <li><a href="#pthreadbarrierwait">2.9.49 pthread_barrier_wait</a></li>
+  <li><a href="#pthreadonce">2.9.50 pthread_once</a></li>
+  <li><a href="#pthreadkill">2.9.51 pthread_kill</a></li>
+  <li><a href="#pthreadsigmask">2.9.52 pthread_sigmask</a></li>
 </ul>
 
 <H3><a name="pthreadattrinit">2.9.1 pthread_attr_init</A></H3>
@@ -3181,7 +3192,7 @@ for all of the individual attributes used by the implementation.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3213,7 +3224,7 @@ An attributes object can be deleted when it is no longer needed.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3244,7 +3255,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3275,7 +3286,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3307,7 +3318,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3339,7 +3350,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3371,7 +3382,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3403,7 +3414,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3434,7 +3445,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3465,7 +3476,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3504,7 +3515,7 @@ specify details about the kind of thread being created.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3537,7 +3548,7 @@ return value and completion status will not be requested.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3569,7 +3580,7 @@ A thread may terminate it's own execution.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3698,7 +3709,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3731,7 +3742,7 @@ the return value of the thread.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3764,7 +3775,7 @@ made available.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3796,7 +3807,7 @@ A thread may obtain a copy of its own thread handle.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3828,7 +3839,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -3860,7 +3871,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -4069,7 +4080,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -4100,7 +4111,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -4132,7 +4143,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -4164,7 +4175,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -4196,7 +4207,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -4227,7 +4238,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -4258,7 +4269,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -4289,7 +4300,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -4320,7 +4331,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -4351,7 +4362,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -4382,7 +4393,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -4413,7 +4424,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -4444,7 +4455,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -4475,7 +4486,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -4506,7 +4517,7 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
 <B>Returned Values:</B>
@@ -4537,10 +4548,10 @@ interface of the same name.
 <B>Input Parameters:</B>
 <P>
 <UL>
-<LI><I>parm</I> 
+  <li><code>param<code>.</li>
 </UL>
 <P>
-<B>Returned Values:</B>
+  <b>Returned Values:</b>
 <P>
 If successful, the <I>pthread_cond_wait()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
@@ -4555,38 +4566,513 @@ returned to indicate the error:
 interface of the same name.
 
 <H3><a name="pthreadcondtimedwait">2.9.42 pthread_cond_timedwait</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
-<PRE>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
 				  const struct timespec *abstime);
-</PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-<LI><I>parm</I> 
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
-If successful, the <I>pthread_cond_timedwait()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
-returned to indicate the error:
-<P>
-<UL>
+</pre>
+<p>
+  <b>Description:</b>
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li><code>parm</code>.</li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+</p>
+<p>
+  If successful, the <code>pthread_cond_timedwait()</code> function will return
+  zero (<code>OK</code>).  Otherwise, an error number will be
+  returned to indicate the error:
+</p>
+<ul>
   <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
-interface of the same name.
+</ul>
+<p>
+  <b>Assumptions/Limitations:</b>
+</p>
+<p>
+  <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
 
-<P>
+<h3><a name="pthreadbarrierattrinit">2.9.43 pthread_barrierattr_init</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;pthread.h&gt;
+    int pthread_barrierattr_init(FAR pthread_barrierattr_t *attr);
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>pthread_barrierattr_init()</code> function will initialize a barrier
+  attribute object <code>attr</code> with the default value for all of the attributes
+  defined by the implementation.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li>
+    <code>attr</code>. Barrier attributes to be initialized.
+</li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+  0 (<code>OK</code>) on success or <code>EINVAL</code> if <code>attr</code> is invalid.
+</p>
+<p>
+  <b>Assumptions/Limitations:</b>
+</p>
+<p>
+  <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<h3><a name="pthreadbarrierattrdestroy">2.9.44 pthread_barrierattr_destroy</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;pthread.h&gt;
+    int pthread_barrierattr_destroy(FAR pthread_barrierattr_t *attr);
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>pthread_barrierattr_destroy()</code> function will destroy a barrier attributes object.
+  A destroyed attributes object can be reinitialized using <code>pthread_barrierattr_init()</code>;
+  the results of otherwise referencing the object after it has been destroyed are undefined.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li>
+    <code>attr</code>. Barrier attributes to be destroyed.
+</li>
+</ul>
+<p>
+  <b>Returned Values:</b> 0 (OK) on success or EINVAL if attr is invalid.
+</p>
+<p>
+  <b>Assumptions/Limitations:</b>
+</p>
+<p>
+  <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<h3><a name="pthreadbarrierattrsetpshared">2.9.45 pthread_barrierattr_setpshared</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;pthread.h&gt;
+    int pthread_barrierattr_setpshared(FAR pthread_barrierattr_t *attr, int pshared);
+</pre>
+<p>
+  <b>Description:</b>
+  The process-shared attribute is set to <code>PTHREAD_PROCESS_SHARED</code> to permit
+  a barrier to be operated upon by any thread that has access to the memory where the
+  barrier is allocated.
+  If the process-shared attribute is <code>PTHREAD_PROCESS_PRIVATE</code>, the barrier can
+  only be operated upon by threads created within the same process as the thread that
+  initialized the barrier.
+  If threads of different processes attempt to operate on such a barrier, the behavior is undefined.
+  The default value of the attribute is <code>PTHREAD_PROCESS_PRIVATE</code>.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>attr</code>. Barrier attributes to be modified.</li>
+  <li><code>pshared</code>. The new value of the pshared attribute.</li>
+</ul>
+<p>
+  <b>Returned Values:</b>  0 (<code>OK</code>) on success or <code>EINVAL</code> if either
+  <code>attr</code> is invalid or <code>pshared</code> is not one of
+  <code>PTHREAD_PROCESS_SHARED</code> or <code>PTHREAD_PROCESS_PRIVATE</code>.
+</p>
+<p>
+  <b>Assumptions/Limitations:</b>
+</p>
+<p>
+  <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<h3><a name="pthreadbarrierattrgetpshared">2.9.46 pthread_barrierattr_getpshared</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;pthread.h&gt;
+    int pthread_barrierattr_getpshared(FAR const pthread_barrierattr_t *attr, FAR int *pshared);
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>pthread_barrierattr_getpshared()</code> function will obtain the value of the
+  process-shared attribute from the attributes object referenced by <code>attr</code>.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li><code>attr</code>. Barrier attributes to be queried.</li>
+  <li><code>pshared</code>. The location to stored the current value of the pshared attribute.</li>
+</ul>
+<p>
+  <b>Returned Values:</b> 0 (<code>OK</code>) on success or <code>EINVAL</code> if
+  either <code>attr</code> or <code>pshared</code> is invalid.
+</p>
+<p>
+  <b>Assumptions/Limitations:</b>
+</p>
+<p>
+  <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<h3><a name="pthreadbarrierinit">2.9.47 pthread_barrier_init</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;pthread.h&gt;
+    int pthread_barrier_init(FAR pthread_barrier_t *barrier,
+                             FAR const pthread_barrierattr_t *attr, unsigned int count);
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>pthread_barrier_init()</code> function allocates any resources required to
+  use the barrier referenced by <code>barrier</code> and initialized the barrier with
+  the attributes referenced by <code>attr</code>. 
+  If <code>attr</code> is NULL, the default barrier attributes will be used.
+  The results are undefined if <code>pthread_barrier_init()</code> is called when any
+  thread is blocked on the barrier.
+  The results are undefined if a barrier is used without first being initialized.
+  The results are undefined if <code>pthread_barrier_init()</code> is called specifying
+  an already initialized barrier.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li>
+    <code>barrier</code>.
+    The barrier to be initialized.
+  </li>
+  <li>
+    <code>attr</code>.
+    Barrier attributes to be used in the initialization.
+  </li>
+  <li>
+    <code>count</code>.
+    The count to be associated with the barrier.
+    The count argument specifies the number of threads that must call
+    <code>pthread_barrier_wait()</code> before any of them successfully return from the call.
+    The value specified by count must be greater than zero.
+  </li>
+</ul>
+<p>
+  <b>Returned Values:</b>0 (OK) on success or on of the following error numbers:
+</p>
+<ul>
+  <li>
+    <code>EAGAIN</code>.
+    The system lacks the necessary resources to initialize another barrier.
+  </li>
+  <li>
+    <code>EINVAL</code>.
+    The barrier reference is invalid, or the values specified by attr are invalid, or
+    the value specified by count is equal to zero.
+  </li>
+  <li>
+    <code>ENOMEM</code>.
+    Insufficient memory exists to initialize the barrier.
+  </li>
+  <li>
+    <code>EBUSY</code>.
+    The implementation has detected an attempt to reinitialize a barrier while it is in use.
+  </li>
+</ul>
+<p>
+  <b>Assumptions/Limitations:</b>
+</p>
+<p>
+  <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<h3><a name="pthreadbarrierdestroy">2.9.48 pthread_barrier_destroy</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;pthread.h&gt;
+    int pthread_barrier_destroy(FAR pthread_barrier_t *barrier);
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>pthread_barrier_destroy()</code> function destroys the barrier referenced
+  by <code>barrie</code> and releases any resources used by the barrier.
+  The effect of subsequent use of the barrier is undefined until the barrier is
+  reinitialized by another call to <code>pthread_barrier_init()</code>.
+  The results are undefined if <code>pthread_barrier_destroy()</code> is called when
+  any thread is blocked on the barrier, or if this function is called with an
+  uninitialized barrier.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>barrier</code>. The barrier to be destroyed.</li>
+</ul>
+<p>
+  <b>Returned Values:</b> 0 (<code>OK</code>) on success or on of the following error numbers:
+</p>
+<ul>
+  <li>
+    <code>EBUSY</code>.
+    The implementation has detected an attempt to destroy a barrier while it is in use.
+  </li>
+  <li>
+    <code>EINVAL</code>.
+    The value specified by barrier is invalid.
+  </li>
+</ul>
+<p>
+  <b>Assumptions/Limitations:</b>
+</p>
+<p>
+  <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<h3><a name="pthreadbarrierwait">2.9.49 pthread_barrier_wait</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;pthread.h&gt;
+    int pthread_barrier_wait(FAR pthread_barrier_t *barrier);
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>pthread_barrier_wait()</code> function synchronizse participating
+  threads at the barrier referenced by <code>barrier</code>.
+  The calling thread is blocked until the required number of threads have called
+  <code>pthread_barrier_wait()</code> specifying the same <code>barrier</code>.
+  When the required number of threads have called <code>pthread_barrier_wait()</code>
+  specifying the <code>barrier</code>, the constant <code>PTHREAD_BARRIER_SERIAL_THREAD</code>
+  will be returned to one unspecified thread and zero will be returned to each of
+  the remaining threads.
+  At this point, the barrier will be reset to the state it had as a result of the most
+  recent <code>pthread_barrier_init()</code> function that referenced it.
+</p>
+<p>
+  The constant <code>PTHREAD_BARRIER_SERIAL_THREAD</code> is defined in 
+ <code>pthread.h</code> and its value must be distinct from any other value
+  returned by <code>pthread_barrier_wait()</code>.
+</p>
+<p>
+  The results are undefined if this function is called with an uninitialized barrier.
+</p>
+<p>
+  If a signal is delivered to a thread blocked on a barrier, upon return from the
+  signal handler the thread will resume waiting at the barrier if the barrier wait
+  has not completed.
+  Otherwise, the thread will continue as normal from the completed barrier wait.
+  Until the thread in the signal handler returns from it, it is unspecified whether
+  other threads may proceed past the barrier once they have all reached it.
+</p>
+<p>
+  A thread that has blocked on a barrier will not prevent any unblocked thread that
+  is eligible to use the same processing resources from eventually making forward
+  progress in its execution.
+  Eligibility for processing resources will be determined by the scheduling policy.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>barrier</code>. The barrier on which to wait.</li>
+</ul>
+<p>
+  <b>Returned Values:</b> 0 (<code>OK</code>) on success or <code>EINVAL</code> if the barrier is not valid.
+</p>
+<p>
+  <b>Assumptions/Limitations:</b>
+</p>
+<p>
+  <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+
+<h3><a name="pthreadonce">2.9.50 pthread_once</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;pthread.h&gt;
+    int pthread_once(FAR pthread_once_t *once_control, CODE void (*init_routine)(void));
+</pre>
+<p>
+  <b>Description:</b>
+  The  first  call to <code>pthread_once()</code> by any thread with a given
+  <code>once_control</code>, will call the <code>init_routine()</code> with no arguments.
+  Subsequent calls to <code>pthread_once()</code> with the same <code>once_control</code> will have no effect.
+  On return from <code>pthread_once()</code>, <code>init_routine()</code> will have completed.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li>
+    <code>once_control</code>.
+    Determines if <code>init_routine()</code> should be called.
+    <code>once_control</code> should be declared and intialized as follows:
+    <ul><pre>pthread_once_t once_control = PTHREAD_ONCE_INIT;
+    </pre></ul>
+    <code>PTHREAD_ONCE_INIT</code> is defined in <code>pthread.h</code>.
+  </li>
+  <li>
+    <code>init_routine</code>.
+    The initialization routine that will be called once.
+  </li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+  0 (OK) on success or EINVAL if either once_control or init_routine are invalid.
+</p>
+<p>
+  <b>Assumptions/Limitations:</b>
+</p>
+<p>
+  <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<h3><a name="pthreadkill">2.9.51 pthread_kill</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;signal.h&gt;
+    #include &lt;pthread.h&gt;
+    int pthread_kill(pthread_t thread, int signo)
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>pthread_kill()</code> system call can be used to send any
+  signal to a thread.  See <code>kill()</code> for further information
+  as this is just a simple wrapper around the <code>kill()</code>
+  function.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li>
+    <code>thread</code>.
+    The id of the thread to receive the signal. Only positive, non-zero values of <code>tthread</code>t are supported.
+  </li>
+  <li>
+    <code>signo</code>.
+    The signal number to send.  If <code>signo</code> is zero, no signal is sent, but all error checking is performed.
+  </li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+</p>
+<p>
+  On success, the signal was sent and zero is returned.
+  On error one of the following error numbers is returned.
+</p>
+<ul>
+  <li>
+    <code>EINVAL</code>.
+    An invalid signal was specified.
+  </li>
+  <li>
+    <code>EPERM</code>.
+    The thread does not have permission to send the signal to the target thread.
+  </li>
+  <li>
+    <code>ESRCH</code>.
+    No thread could be found corresponding to that specified by the given thread ID.
+  </li>
+  <li>
+    <code>ENOSYS</code>.
+    Do not support sending signals to process groups.
+  </li>
+</ul>
+<p>
+  <b>Assumptions/Limitations:</b>
+</p>
+<p>
+  <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<h3><a name="pthreadsigmask">2.9.52 pthread_sigmask</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;signal.h&gt;
+    #include &lt;pthread.h&gt;
+    int pthread_sigmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
+</pre>
+<p>
+  <b>Description:</b>
+  This function is a simple wrapper around <code>sigprocmask()</code>.
+  See the <code>sigprocmask()</code> function description for further information.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li>
+    <code>how</code>. How the signal mast will be changed:
+    <ul>
+      <li>
+        <code>SIG_BLOCK</code>:
+        The resulting set is the union of the current set and the signal set pointed to by <code>set</code>.
+      </li>
+      <li>
+        <code>SIG_UNBLOCK</code>:
+        The resulting set is the intersection of the current set and the complement of the signal set pointed to by <code>set</code>.
+      </li>
+      <li>
+        <code>SIG_SETMASK</code>:
+        The resulting set is the signal set pointed to by <code>set</code>.
+      </li>
+    </ul>
+  </li>
+  <li>
+    <code>set</code>. Location of the new signal mask.
+  </li>
+  <li>
+    <code>oset</code>. Location to store the old signal mask.
+  </li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+</p>
+<p>
+  0 (OK) on succes or EINVAL if <code>how</code> is invalid.
+</p>
+<p>
+  <b>Assumptions/Limitations:</b>
+</p>
+<p>
+  <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
 <HR>
 <H1>3.0 <A NAME="Data_Structures">OS Data Structures</A></H1>
 <H2>3.1 Scalar types</H2>
@@ -4897,6 +5383,7 @@ notify a task when a message is available on a queue.
   <li><a href="#mqsetattr">mq_setattr</a></li>
   <li><a href="#mqunlink">mq_unlink</a></li>
   <li><a href="#OS_Interfaces">OS Interfaces</a>
+  <li><a href="#Pthread">Pthread Interfaces</a>
   <li><a href="#pthreadattrdestroy">pthread_attr_destroy</a></li>
   <li><a href="#pthreadattrgetinheritsched">pthread_attr_getinheritsched</a></li>
   <li><a href="#pthreadattrgetschedparam">pthread_attr_getschedparam</a></li>
@@ -4907,6 +5394,13 @@ notify a task when a message is available on a queue.
   <li><a href="#pthreadattrsetschedparam">pthread_attr_setschedparam</a></li>
   <li><a href="#pthreadattrsetschedpolity">pthread_attr_setschedpolicy</a></li>
   <li><a href="#pthreadattrsetstacksize">pthread_attr_setstacksize</a></li>
+  <li><a href="#pthreadbarrierattrinit">pthread_barrierattr_init</a></li>
+  <li><a href="#pthreadbarrierattrdestroy">pthread_barrierattr_destroy</a></li>
+  <li><a href="#pthreadbarrierattrgetpshared">pthread_barrierattr_getpshared</a></li>
+  <li><a href="#pthreadbarrierattrsetpshared">pthread_barrierattr_setpshared</a></li>
+  <li><a href="#pthreadbarrierdestroy">pthread_barrier_destroy</a></li>
+  <li><a href="#pthreadbarrierinit">pthread_barrier_init</a></li>
+  <li><a href="#pthreadbarrierwait">pthread_barrier_wait</a></li>
   <li><a href="#pthreadcancel">pthread_cancel</a></li>
   <li><a href="#pthreadconaddrinit">pthread_condattr_init</a></li>
   <li><a href="#pthreadcondbroadcast">pthread_cond_broadcast</a></li>
@@ -4924,6 +5418,7 @@ notify a task when a message is available on a queue.
   <li><a href="#pthreadjoin">pthread_join</a></li>
   <li><a href="#pthreadkeycreate">pthread_key_create</a></li>
   <li><a href="#pthreadkeydelete">pthread_key_delete</a></li>
+  <li><a href="#pthreadkill">pthread_kill</a></li>
   <li><a href="#pthreadmutexattrdestroy">pthread_mutexattr_destroy</a></li>
   <li><a href="#pthreadmutexattrgetpshared">pthread_mutexattr_getpshared</a></li>
   <li><a href="#pthreadmutexattrinit">pthread_mutexattr_init</a></li>
@@ -4934,11 +5429,12 @@ notify a task when a message is available on a queue.
   <li><a href="#pthreadmutextrylock">pthread_mutex_trylock</a></li>
   <li><a href="#pthreadmutexunlock">pthread_mutex_unlock</a></li>
   <li><a href="#pthreadocndattrdestroy">pthread_condattr_destroy</a></li>
-  <li><a href="#Pthread">Pthread Interfaces</a>
+  <li><a href="#pthreadonce">pthread_once</a></li>
   <li><a href="#pthreadself">pthread_self</a></li>
   <li><a href="#pthreadsetcancelstate">pthread_setcancelstate</a></li>
   <li><a href="#pthreadsetschedparam">pthread_setschedparam</a></li>
   <li><a href="#pthreadsetspecific">pthread_setspecific</a></li>
+  <li><a href="#pthreadsigmask">pthread_sigmask</a></li>
   <li><a href="#pthreadtestcancelstate">pthread_testcancelstate</a></li>
   <li><a href="#pthreadyield">pthread_yield</a></li>
   <li><a href="#schedgetparam">sched_getparam</a></li>
