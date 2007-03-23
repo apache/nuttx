@@ -43,9 +43,6 @@ o Documentation
 
 o Build system
 - Something leaves garbage link 'include' in arch/*/include
-- Separate configurations from architectures.  arch/* contains
-  generic logic.  Like arch/armnommu, arch/arm, arch/805x, etc.
-  config/* has like config/pjrc-8052, config/c5471, etc.
 
 o Applications & Tests
 

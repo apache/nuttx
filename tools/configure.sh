@@ -33,46 +33,46 @@
 #
 #set -x
 
-ARCH=$1
+BOARD=$1
 WD=`pwd`
 TOPDIR=${WD}/..
 
 function show_usage ()
 {
-  echo "${0} <arch>"
+  echo "${0} <board-name>"
   exit 1
 }
 
-if [ "${ARCH}X" = "X" ]; then
+if [ "${BOARD}X" = "X" ]; then
   echo "Missing argument"
   show_usage
 fi
 
-ARCHDIR=${TOPDIR}/arch/${ARCH}
-if [ ! -d ${ARCHDIR} ]; then
-  echo "Directory ${ARCHDIR} does not exist"
+BOARDDIR=${TOPDIR}/configs/${BOARD}
+if [ ! -d ${BOARDDIR} ]; then
+  echo "Directory ${BOARDDIR} does not exist"
   show_usage
 fi
 
-if [ ! -r ${ARCHDIR}/Make.defs ]; then
-  echo "File ${ARCHDIR}/Make.defs does not exist"
+if [ ! -r ${BOARDDIR}/Make.defs ]; then
+  echo "File ${BOARDDIR}/Make.defs does not exist"
   exit 1
 fi
 
-if [ ! -r ${ARCHDIR}/setenv.sh ]; then
-  echo "File ${ARCHDIR}/setenv.sh does not exist"
+if [ ! -r ${BOARDDIR}/setenv.sh ]; then
+  echo "File ${BOARDDIR}/setenv.sh does not exist"
   exit 1
 fi
 
-if [ ! -r ${ARCHDIR}/defconfig ]; then
-  echo "File ${ARCHDIR}/defconfig does not exist"
+if [ ! -r ${BOARDDIR}/defconfig ]; then
+  echo "File ${BOARDDIR}/defconfig does not exist"
   exit 1
 fi
 
-cp -f ${ARCHDIR}/Make.defs ${TOPDIR}/. || \
-  { echo "Failed to copy ${ARCHDIR}/Make.defs" ; exit 1 ; }
-cp -f ${ARCHDIR}/setenv.sh ${TOPDIR}/. || \
-  { echo "Failed to copy ${ARCHDIR}/setenv.sh" ; exit 1 ; }
-cp -f ${ARCHDIR}/defconfig ${TOPDIR}/.config || \
-  { echo "Failed to copy ${ARCHDIR}/defconfig" ; exit 1 ; }
+cp -f ${BOARDDIR}/Make.defs ${TOPDIR}/. || \
+  { echo "Failed to copy ${BOARDDIR}/Make.defs" ; exit 1 ; }
+cp -f ${BOARDDIR}/setenv.sh ${TOPDIR}/. || \
+  { echo "Failed to copy ${BOARDDIR}/setenv.sh" ; exit 1 ; }
+cp -f ${BOARDDIR}/defconfig ${TOPDIR}/.config || \
+  { echo "Failed to copy ${BOARDDIR}/defconfig" ; exit 1 ; }
 

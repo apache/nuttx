@@ -54,8 +54,8 @@ all: $(BIN)
 tools/mkconfig:
 	$(MAKE) -C tools -f Makefile.mkconfig TOPDIR=$(TOPDIR)  mkconfig
 
-include/nuttx/config.h: $(ARCH_DIR)/defconfig tools/mkconfig
-	tools/mkconfig $(ARCH_DIR) > include/nuttx/config.h
+include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig
+	tools/mkconfig $(TOPDIR) > include/nuttx/config.h
 
 include/arch: include/nuttx/config.h
 	ln -sf $(TOPDIR)/$(ARCH_DIR)/include include/arch

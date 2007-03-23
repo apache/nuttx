@@ -41,7 +41,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#define DEFCONFIG "defconfig"
+#define DEFCONFIG ".config"
 #define LINESIZE  256
 
 static char line[LINESIZE+1];
@@ -156,7 +156,7 @@ static void parse_file(FILE *stream)
 
 static void show_usage(const char *progname)
 {
-  fprintf(stderr, "USAGE: %s <abs path to defconfig>\n", progname);
+  fprintf(stderr, "USAGE: %s <abs path to .config>\n", progname);
   exit(1);
 }
 
