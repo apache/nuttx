@@ -280,7 +280,6 @@ __start:
 	/* Perform early serial initialization */
 
 #ifdef CONFIG_DEV_CONSOLE
-	mov     fp, #0
 	bl      up_earlyserialinit
 #endif
 
