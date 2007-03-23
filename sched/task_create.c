@@ -108,10 +108,10 @@
 
 #ifndef CONFIG_CUSTOM_STACK
 int task_create(const char *name, int priority,
-                int stack_size, main_t entry, char *argv[])
+                int stack_size, main_t entry, const char *argv[])
 #else
 int task_create(const char *name, int priority,
-                main_t entry, char *argv[])
+                main_t entry, const char *argv[])
 #endif
 {
   FAR _TCB *tcb;

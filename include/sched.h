@@ -88,18 +88,18 @@ extern "C" {
 #ifndef CONFIG_CUSTOM_STACK
 EXTERN STATUS  task_init(FAR _TCB *tcb, const char *name, int priority,
                          FAR uint32 *stack, uint32 stack_size,
-                         main_t entry, char *argv[]);
+                         main_t entry, const char *argv[]);
 #else
 EXTERN STATUS  task_init(FAR _TCB *tcb, const char *name, int priority,
-                         main_t entry, char *argv[]);
+                         main_t entry, const char *argv[]);
 #endif
 EXTERN STATUS  task_activate(FAR _TCB *tcb);
 #ifndef CONFIG_CUSTOM_STACK
 EXTERN int     task_create(const char *name, int priority, int stack_size,
-                           main_t entry, char *argv[]);
+                           main_t entry, const char *argv[]);
 #else
 EXTERN int     task_create(const char *name, int priority,
-                           main_t entry, char *argv[]);
+                           main_t entry, const char *argv[]);
 #endif
 EXTERN STATUS  task_delete(pid_t pid);
 EXTERN STATUS  task_restart(pid_t pid);
