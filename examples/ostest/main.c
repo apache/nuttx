@@ -277,6 +277,14 @@ static int user_main(int argc, char *argv[])
   check_test_memory_usage();
 #endif
 
+#ifndef CONFIG_DISABLE_PTHREAD
+  /* Verify pthread barriers */
+
+  printf("\nuser_main: barrier test\n");
+  barrier_test();
+  check_test_memory_usage();
+#endif
+
   /* Compare memory usage at time user_start started until
    * user_main exits.  These should not be identical, but should
    * be similar enough that we can detect any serious OS memory

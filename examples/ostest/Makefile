@@ -42,7 +42,7 @@ ASRCS	=
 AOBJS	= $(ASRCS:.S=$(OBJEXT))
 CSRCS	= main.c dev_null.c
 ifneq ($(CONFIG_DISABLE_PTHREAD),y)
-CSRCS	+= cancel.c cond.c mutex.c sem.c roundrobin.c
+CSRCS	+= cancel.c cond.c mutex.c sem.c roundrobin.c barrier.c
 endif
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CSRCS	+= sighand.c

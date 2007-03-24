@@ -100,4 +100,8 @@ extern void timer_test(void);
 
 extern void rr_test(void);
 
+/* barrier.c ************************************************/
+
+extern void barrier_test(void);
+
 #endif /* __OSTEST_H */
