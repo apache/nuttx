@@ -132,8 +132,6 @@ int up_timerisr(int irq, uint32 *regs)
 
 void up_timerinit(void)
 {
-  uint32 val;
-
   up_disable_irq(DM320_IRQ_SYSTIMER);
 
   /* Start timer0 running so that an interrupt is generated at
