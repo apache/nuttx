@@ -95,7 +95,7 @@ PTHREAD_SRCS	= pthread_attrinit.c pthread_attrdestroy.c \
 		  pthread_cancel.c pthread_setcancelstate.c \
 		  pthread_keycreate.c pthread_setspecific.c pthread_getspecific.c pthread_keydelete.c \
 		  pthread_initialize.c pthread_completejoin.c pthread_findjoininfo.c \
-		  pthread_removejoininfo.c pthread_once.c
+		  pthread_removejoininfo.c pthread_once.c pthread_setschedprio.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 PTHREAD_SRCS	+= pthread_condtimedwait.c pthread_kill.c pthread_sigmask.c
 endif
