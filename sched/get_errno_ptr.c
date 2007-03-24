@@ -37,14 +37,22 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
 #include <sched.h>
 #include <errno.h>
+#include <nuttx/arch.h>
 #include "os_internal.h"
 
 #undef get_errno_ptr
 
 /************************************************************
- * Global Functions
+ * Private Data
+ ************************************************************/
+
+static int g_irqerrno;
+
+/************************************************************
+ * Public Functions
  ************************************************************/
 
 /************************************************************
@@ -65,8 +73,32 @@
 
 FAR int *get_errno_ptr(void)
 {
-  FAR _TCB *ptcb = (FAR _TCB*)g_readytorun.head;
-  return &ptcb->errno;
+  /* Check if this function was called from an interrupt
+   * handler.  In that case, we have to do things a little
+   * differently.
+   */
+
+  if (up_interrupt_context())
+    {
+      /* Yes, we were called from an interrupt handler.  Do
+       * not permit access to the errno in the TCB of the
+       * interrupt task.  Instead, use a separate errno just
+       * for interrupt handlers.  Of course, this would have
+       * to change if we ever wanted to support nested
+       * interrupts.
+       */
+
+      return &g_irqerrno;
+    }
+  else
+    {
+      /* We were called from the normal tasking context.  Return
+       * a reference to the thread-private errno in the TCB.
+       */
+
+      FAR _TCB *ptcb = (FAR _TCB*)g_readytorun.head;
+      return &ptcb->errno;
+    }
 }
 
 
