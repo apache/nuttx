@@ -437,10 +437,11 @@ Other memory:
 	* Corrected memory leak in OS pthread join logic
 	* Corrected memory leaks in examples/ostest due to failures
 	  to join or detach from pthreads.
-	* added pthread_once(), pthread_kill(), pthread_sigmask()
-	* added pthread_barrierattr_*() APIs
-	* added pthread_barrier_init(), pthread_barrier_destroy(), and
+	* Added pthread_once(), pthread_kill(), pthread_sigmask()
+	* Added pthread_barrierattr_*() APIs
+	* Added pthread_barrier_init(), pthread_barrier_destroy(), and
 	  pthread_barrier_wait();
+	* Added pthread barrier test
 	* Added protection so that errno cannot be modified from
 	  interrupt handling.
 	* sched_setparam(), sched_setscheduler() now correctly set
