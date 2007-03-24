@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <sched.h>
+#include <errno.h>
 #include <nuttx/arch.h>
 #include <nuttx/os_external.h>
 #include "os_internal.h"
@@ -90,14 +91,13 @@
  *      SCHED_PRIORITY_MIN through SCHED_PRIORITY_MAX.
  *
  * Return Value:
- *    OK if successful, otherwise ERROR.  This function can
- *    fail for the following reasons:
+ *   On success, sched_setparam() returns 0 (OK). On error, -1
+ *  (ERROR) is returned, and errno is set appropriately.
  *
- *    (1) parm is NULL or parm->sched_priority is out of
- *        range.
- *    (2) pid does not correspond to any task.
- *
- *    (errno is not set).
+ *  EINVAL The parameter 'param' is invalid or does not make
+ *         sense for the current scheduling policy.
+ *  EPERM  The calling task does not have appropriate privileges.
+ *  ESRCH  The task whose ID is pid could not be found.
  *
  * Assumptions:
  *
@@ -110,7 +110,6 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
   tstate_t   task_state;
   irqstate_t saved_state;
   int        sched_priority = param->sched_priority;
-  int        ret = 0;
 
   /* Verify that the requested priority is in the valid range */
 
@@ -118,6 +117,7 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
       param->sched_priority < SCHED_PRIORITY_MIN || 
       param->sched_priority > SCHED_PRIORITY_MAX)
     {
+      *get_errno_ptr() = EINVAL;
       return ERROR;
     }
 
@@ -144,6 +144,7 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
         {
           /* No task with this pid was found */
 
+          *get_errno_ptr() = ESRCH;
           sched_unlock();
           return ERROR;
         }
@@ -266,5 +267,5 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
 
   irqrestore(saved_state);
   sched_unlock();
-  return ret;
+  return OK;
 }

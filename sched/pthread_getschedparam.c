@@ -1,4 +1,4 @@
-/************************************************************
+/****************************************************************************
  * pthread_getschedparam.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <pthread.h>
@@ -44,47 +44,64 @@
 #include <debug.h>
 #include "pthread_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ *****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function:  pthread_getschedparam
  *
  * Description:
- *   Obtain the thread scheduling parameters.
+ *   The pthread_getschedparam() functions will get the scheduling policy and
+ *   parameters of threads. For SCHED_FIFO and SCHED_RR, the only required
+ *   member of the sched_param structure is the priority sched_priority.
  *
+ *   The pthread_getschedparam() function will retrieve the scheduling policy
+ *   and scheduling parameters for the thread whose thread ID is given by
+ *   'thread' and will store those values in 'policy' and 'param',
+ *   respectively. The priority value returned from pthread_getschedparam()
+ *   will be the value specified by the most recent pthread_setschedparam(),
+ *   pthread_setschedprio(), or pthread_create() call affecting the target
+ *   thread. It will not reflect any temporary adjustments to its priority (such
+ *   as might result of any priority inheritance, for example).
+ *
+ *   The policy parameter may have the value SCHED_FIFO, or SCHED_RR
+ *   (SCHED_OTHER and SCHED_SPORADIC, in particular, are not supported).
+ *   The SCHED_FIFO and SCHED_RR policies will have a single scheduling
+ *   parameter, sched_priority.
+*
  * Parameters:
- *   thread
- *   policy
- *   param
+ *   thread - The ID of thread whose scheduling parameters will be queried.
+ *   policy - The location to store the thread's scheduling policy.
+ *   param  - The location to store the thread's priority.
  *
  * Return Value:
- *   0 if successful.  Otherwise, an error code.
+ *   0 if successful.  Otherwise, the error code ESRCH if the value specified
+ *   by thread does not refer to an existing thread.
  *
  * Assumptions:
  *
- ************************************************************/
+ ****************************************************************************/
 
 int pthread_getschedparam(pthread_t thread, int *policy,
                           struct sched_param *param)
