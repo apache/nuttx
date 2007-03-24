@@ -263,6 +263,7 @@ EXTERN int pthread_getschedparam(pthread_t thread, int *policy,
                                  struct sched_param *param);
 EXTERN int pthread_setschedparam(pthread_t thread, int policy,
                                  const struct sched_param *param);
+EXTERN int pthread_setschedprio(pthread_t thread, int prio);
 
 /* Thread-specific Data Interfaces */
 
