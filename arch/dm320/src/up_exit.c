@@ -128,7 +128,12 @@ static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
 void _exit(int status)
 {
   _TCB* tcb = (_TCB*)g_readytorun.head;
-  irqstate_t flags = irqsave();
+
+  /* Disable interrupts.  They will be restored when the next
+   * task is started.
+   */
+
+  (void)irqsave();
 
   lldbg("TCB=%p exitting\n", tcb);
 
