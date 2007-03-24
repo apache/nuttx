@@ -93,11 +93,11 @@ paragraphs.
 
 <p>
   <b>Tasks</b>.
-  NuttX is a flat address OS.  As such it does not support &quot;processes&quot;
+  NuttX is a flat address OS.  As such it does not support <i>processes</i>
   in the way that, say, Linux does.
   NuttX only supports simple threads running within the same address space.
-  However, the programming model makes a distinction between &quot;tasks&quot;
-  and pthreads:
+  However, the programming model makes a distinction between <i>tasks</i>
+  and <i>pthreads</i>:
 </p>
 <ul>
   <li><i>tasks</i> are threads which have a degree of independence
@@ -553,51 +553,67 @@ Compatible with the POSIX interface of the same name.
 </ul>
 
 <H3><a name="schedsetparam">2.2.1 sched_setparam</a></H3>
-
-<P>
-<B>Function Prototype:</B> 
-<PRE>
+<p>
+  <b>Function Prototype:</b>
+<pre>
     #include &lt;sched.h&gt;
-    int sched_setparam( pid_t pid, const struct sched_param *param );
-</PRE>
+    int sched_setparam(pid_t pid, const struct sched_param *param);
+</pre>
+<p>
+  <b>Description:</B>
+  This function sets the priority of the task specified by pid input parameter.
+</p>
+<p>
+  NOTE: Setting a task's priority to the same value has the similar
+  effect to <code>sched_yield()</code>: The task will be moved to after all
+  other tasks with the same priority.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li>
+    <code>pid</code>.
+    The task ID of the task.
+    If <code>pid</code> is zero, the priority of the calling task is set.
+  </li>
+  <li>
+    <code>param</code>.
+    A structure whose member <code>sched_priority</code> is the integer priority.
+    The range of valid priority numbers is from <code>SCHED_PRIORITY_MIN</code> through <code>SCHED_PRIORITY_MAX</code>.
+  </li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+  On success, sched_setparam() returns 0 (OK).
+  On error, -1 (ERROR) is returned, and errno is set appropriately.
+</p>
+<ul>
 
-<P>
-<B>Description:</B> This function sets the priority of the task
-specified by pid input parameter.
-<P>
-NOTE: Setting a task's priority to the same value has the similar
-effect to sched_yield() -- The task will be moved to after all
-other tasks with the same priority.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>pid</I>. The task ID of the task. If pid is zero, the
-priority of the calling task is set.
-<li><code>param<code>.</li> A structure whose member sched_priority is the
-integer priority. The range of valid priority numbers is from
-SCHED_PRIORITY_MIN through SCHED_PRIORITY_MAX.
-</UL>
-
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>
-  0 (OK) if successful, otherwise -1 (ERROR).
-  This function can fail for the following reasons:
-  (1) parm is NULL or parm->sched_priority is out of range.
-  (2) pid does not correspond to any task.
-</LI>
-</UL>
-
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
-interface of the same name.
-Differences from the full POSIX implementation include:
-<UL>
-<LI>The range of priority values for the POSIX call is 0 to 255
-</UL>
+  <li>
+    <code>EINVAL</code>.
+     The parameter <code>param</code> is invalid or does not make sense for the current scheduling policy.
+  </li>
+  <li>
+    <code>EPERM</code>.
+    The calling task does not have appropriate privileges.
+  </li>
+  <li>
+    <code>ESRCH</code>.
+    The task whose ID is <code>pid</code> could not be found.
+  </li>
+</ul>
+<p>
+  <b>Assumptions/Limitations:</b>
+</p>
+<p>
+  <B>POSIX  Compatibility:</B>
+  Comparable to the POSIX interface of the same name.
+  Differences from the full POSIX implementation include:
+</p>
+<ul>
+  <li>The range of priority values for the POSIX call is 0 to 255.</li>
+</ul>
 
 <H3><a name="schedgetparam">2.2.2 sched_getparam</a></H3>
 
@@ -3121,6 +3137,16 @@ be sent.
 </ul>
 
 <H2>2.9 <A NAME="Pthread">Pthread Interfaces</A></H2>
+<p>
+  NuttX does not support <i>processes</i> in the way that, say, Linux does.
+  NuttX only supports simple threads or tasks running within the same address space.
+  For the most part, threads and tasks are interchangeable and differ primarily
+  only in such things as the inheritance of file descriptors.
+  Basically, threads are initialized and uninitialized differently and share a
+  few more resources than tasks.
+<p>
+  The following pthread interfaces are supported in some form by NuttX:
+</p>
 <ul>
   <li><a href="#pthreadattrinit">2.9.1 pthread_attr_init</a></li>
   <li><a href="#pthreadattrdestroy">2.9.2 pthread_attr_destroy</a></li>
@@ -3174,6 +3200,64 @@ be sent.
   <li><a href="#pthreadonce">2.9.50 pthread_once</a></li>
   <li><a href="#pthreadkill">2.9.51 pthread_kill</a></li>
   <li><a href="#pthreadsigmask">2.9.52 pthread_sigmask</a></li>
+</ul>
+<p>
+  No support for the ollowing pthread interfaces is provided by NuttX:
+</p>
+<ul>
+  <li><code>pthread_atfork</code>. register fork handlers.</li>
+  <li><code>pthread_attr_getdetachstate</code>. get and set the detachstate attribute.</li>
+  <li><code>pthread_attr_getguardsize</code>. get and set the thread guardsize attribute.</li>
+  <li><code>pthread_attr_getinheritsched</code>. get and set the inheritsched attribute.</li>
+  <li><code>pthread_attr_getscope</code>. get and set the contentionscope attribute.</li>
+  <li><code>pthread_attr_getstack</code>. get and set stack attributes.</li>
+  <li><code>pthread_attr_getstackaddr</code>. get and set the stackaddr attribute.</li>
+  <li><code>pthread_attr_setdetachstate</code>. get and set the detachstate attribute.</li>
+  <li><code>pthread_attr_setguardsize</code>. get and set the thread guardsize attribute.</li>
+  <li><code>pthread_attr_setscope</code>. get and set the contentionscope attribute.</li>
+  <li><code>pthread_attr_setstack</code>. get and set stack attributes.</li>
+  <li><code>pthread_attr_setstackaddr</code>. get and set the stackaddr attribute.</li>
+  <li><code>pthread_barrier_destroy</code>. destroy and initialize a barrier object.</li>
+  <li><code>pthread_barrier_init</code>. destroy and initialize a barrier object.</li>
+  <li><code>pthread_barrier_wait</code>. synchronize at a barrier.</li>
+  <li><code>pthread_cleanup_pop</code>. establish cancellation handlers.</li>
+  <li><code>pthread_cleanup_push</code>. establish cancellation handlers.</li>
+  <li><code>pthread_condattr_getclock</code>. get and set the clock selection condition variable attribute.</li>
+  <li><code>pthread_condattr_getpshared</code>. get and set the process-shared condition variable attributes.</li>
+  <li><code>pthread_condattr_setclock</code>. get and set the clock selection condition variable attribute.</li>
+  <li><code>pthread_condattr_setpshared</code>. get and set the process-shared condition variable attributes.</li>
+  <li><code>pthread_getconcurrency</code>. get and set the level of concurrency.</li>
+  <li><code>pthread_getcpuclockid</code>. access a thread CPU-time clock.</li>
+  <li><code>pthread_mutex_getprioceiling</code>. get and set the priority ceiling of a mutex.</li>
+  <li><code>pthread_mutex_setprioceiling</code>. get and set the priority ceiling of a mutex.</li>
+  <li><code>pthread_mutex_timedlock</code>. lock a mutex.</li>
+  <li><code>pthread_mutexattr_getprioceiling</code>. get and set the prioceiling attribute of the mutex attributes object.</li>
+  <li><code>pthread_mutexattr_getprotocol</code>. get and set the protocol attribute of the mutex attributes object.</li>
+  <li><code>pthread_mutexattr_gettype</code>. get and set the mutex type attribute.</li>
+  <li><code>pthread_mutexattr_setprioceiling</code>. get and set the prioceiling attribute of the mutex attributes object.</li>
+  <li><code>pthread_mutexattr_setprotocol</code>. get and set the protocol attribute of the mutex attributes object.</li>
+  <li><code>pthread_mutexattr_settype</code>. get and set the mutex type attribute.</li>
+  <li><code>pthread_rwlock_destroy</code>. destroy and initialize a read-write lock object.</li>
+  <li><code>pthread_rwlock_init</code>. destroy and initialize a read-write lock object.</li>
+  <li><code>pthread_rwlock_rdlock</code>. lock a read-write lock object for reading.</li>
+  <li><code>pthread_rwlock_timedrdlock</code>. lock a read-write lock for reading.</li>
+  <li><code>pthread_rwlock_timedwrlock</code>. lock a read-write lock for writing.</li>
+  <li><code>pthread_rwlock_tryrdlock</code>. lock a read-write lock object for reading.</li>
+  <li><code>pthread_rwlock_trywrlock</code>. lock a read-write lock object for writing.</li>
+  <li><code>pthread_rwlock_unlock</code>. unlock a read-write lock object.</li>
+  <li><code>pthread_rwlock_wrlock</code>. lock a read-write lock object for writing.</li>
+  <li><code>pthread_rwlockattr_destroy</code>. destroy and initialize the read-write lock attributes object.</li>
+  <li><code>pthread_rwlockattr_getpshared</code>. get and set the process-shared attribute of the read-write lock attributes object.</li>
+  <li><code>pthread_rwlockattr_init</code>. destroy and initialize the read-write lock attributes object.</li>
+  <li><code>pthread_rwlockattr_setpshared</code>. get and set the process-shared attribute of the read-write lock attributes object.</li>
+  <li><code>pthread_setcanceltype</code>. set cancelability state.</li>
+  <li><code>pthread_setconcurrency</code>. get and set the level of concurrency.</li>
+  <li><code>pthread_spin_destroy</code>. destroy or initialize a spin lock object.</li>
+  <li><code>pthread_spin_init</code>. destroy or initialize a spin lock object.</li>
+  <li><code>pthread_spin_lock</code>. lock a spin lock object.</li>
+  <li><code>pthread_spin_trylock</code>. lock a spin lock object.</li>
+  <li><code>pthread_spin_unlock</code>. unlock a spin lock object.</li>
+  <li><code>pthread_testcancel</code>. set cancelability state.</li>
 </ul>
 
 <H3><a name="pthreadattrinit">2.9.1 pthread_attr_init</A></H3>
@@ -3825,68 +3909,162 @@ returned to indicate the error:
 interface of the same name.
 
 <H3><a name="pthreadgetschedparam">2.9.20 pthread_getschedparam</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
-<PRE>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_getschedparam(pthread_t thread, int *policy,
-				 struct sched_param *param);
-</PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
-If successful, the <I>pthread_getschedparam()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
-returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
-interface of the same name.
+                              struct sched_param *param);
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>pthread_getschedparam()</code> functions will get the 
+  scheduling policy and parameters of threads.
+  For <code>SCHED_FIFO</code> and <code>SCHED_RR</code>, the only
+  required member of the <code>sched_param</code> structure is the
+  priority <code>sched_priority</code>.
+</p>
+<p>
+  The <code>pthread_getschedparam()</code> function will retrieve the
+  scheduling policy and scheduling parameters for the thread whose thread
+  ID is given by <code>thread</code> and will store those values in
+  <code>policy</code> and <code>param</code>, respectively.
+  The priority value returned from <code>pthread_getschedparam()</code>
+  will be the value specified by the most recent <code>pthread_setschedparam()</code>,
+  <code>pthread_setschedprio()</code>, or <code>pthread_create()</code> call
+  affecting the target thread.
+  It will not reflect any temporary adjustments to its priority (such as might
+  result of any priority inheritance, for example).
+</p>
+<p>
+  The policy parameter may have the value <code>SCHED_FIFO</code> or <code>SCHED_RR</code>
+  (<code>SCHED_OTHER</code> and <code>SCHED_SPORADIC</code>, in particular, are not supported).
+  The <code>SCHED_FIFO</code> and <code>SCHED_RR<code> policies will have a single
+  scheduling parameter, <code>sched_priority</code>.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li>
+    <code>thread</code>.
+    The ID of thread whose scheduling parameters will be queried.
+  </li>
+  <li>
+    <code>policy</code>.
+    The location to store the thread's scheduling policy.
+  </li>
+  <li>
+    <code>param</code>.
+    The location to store the thread's priority.
+  </li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+  0 (<code>OK</code>) if successful.
+  Otherwise, the error code <code>ESRCH</code> if the value specified by
+  <code>thread</code> does not refer to an existing thread.
+</p>
+<p>
+  <b>Assumptions/Limitations:</b>
+</p>
+<p>
+  <b>POSIX Compatibility:</b>
+  Comparable to the POSIX interface of the same name.
+</p>
 
 <H3><a name="pthreadsetschedparam">2.9.21 pthread_setschedparam</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
-<PRE>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_setschedparam(pthread_t thread, int policy,
-				 const struct sched_param *param);
-</PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
-If successful, the <I>pthread_setschedparam()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
-returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
-interface of the same name.
+                              const struct sched_param *param);
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>pthread_setschedparam()</code> functions will set the scheduling policy
+  and parameters of threads.
+  For <code>SCHED_FIFO</code> and <code>SCHED_RR</code>, the only required member
+  of the <code>sched_param</code> structure is the priority <code>sched_priority</code>.
+</p>
+</p>
+  The <code>pthread_setschedparam()</code> function will set the scheduling policy
+  and associated scheduling parameters for the thread whose thread ID is given by
+  <code>thread</code> to the policy and associated parameters provided in
+  <code>policy</code> and <code>param</code>, respectively.
+</p>
+<p>
+  The policy parameter may have the value <code>SCHED_FIFO</code> or <code>SCHED_RR</code>.
+  (<code>SCHED_OTHER</code> and <code>SCHED_SPORADIC</code>, in particular, are not supported).
+  The <code>SCHED_FIFO</code> and <code>SCHED_RR</code> policies will have a single
+  scheduling parameter, <code>sched_priority</code>.
+</p>
+<p>
+  If the <code>pthread_setschedparam()</code> function fails, the scheduling
+  parameters will not be changed for the target thread.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li>
+    <code>thread</code>.
+    The ID of thread whose scheduling parameters will be modified.
+  </li>
+  <li>
+    <code>policy</code>.
+    The new scheduling policy of the thread.
+    Either <code>SCHED_FIFO</code> or <code>SCHED_RR<code>.
+    <code>SCHED_OTHER<code> and <code>SCHED_SPORADIC<code> are not supported.
+  </li>
+  <li>
+    <code>param</code>.
+    The location to store the thread's priority.
+  </li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+</p>
+<p>
+  If successful, the <I>pthread_setschedparam()</I> function will return
+  zero (<I>OK</I>).  Otherwise, an error number will be
+  returned to indicate the error:
+</p>
+<ul>
+  <li>
+    <code>EINVAL</code>.
+    The value specified by <code>policy</code> or one of the scheduling parameters
+    associated with the scheduling policy <code>policy</code> is invalid.
+  </li>
+  <li>
+    <code>ENOTSUP</code>.
+    An attempt was made to set the policy or scheduling parameters to an unsupported
+    value (<code>SCHED_OTHER</code> and <code>SCHED_SPORADIC</code> in particular are
+    not supported)
+  </li>
+  <li>
+    <code>EPERM</code>.
+    The caller does not have the appropriate permission to set either the scheduling
+    parameters or the scheduling policy of the specified thread.
+    Or, the implementation does not allow the application to modify one of the
+    parameters to the value specified.
+
+  </li>
+  <li>
+    <code>ESRCH</code>.
+    The value specified by thread does not refer to a existing thread.
+  </li>
+</ul>
+<p>
+  <b>Assumptions/Limitations:</b>
+</p>
+<p>
+  <b>POSIX Compatibility:</b>
+  Comparable to the POSIX interface of the same name.
+</p>
 
 <H3><a name="pthreadkeycreate">2.9.22 pthread_key_create</A></H3>
 <P>
