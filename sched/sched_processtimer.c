@@ -47,6 +47,7 @@
 
 #if CONFIG_RR_INTERVAL > 0
 # include <sched.h>
+# include <nuttx/arch.h>
 #endif
 
 #include "os_internal.h"
@@ -115,16 +116,13 @@ static void sched_process_timeslice(void)
               if (rtcb->flink &&
                   rtcb->flink->sched_priority >= rtcb->sched_priority)
                 {
-                  struct sched_param param;
-
                   /* Just resetting the task priority to its current
                    * value.  This this will cause the task to be
                    * rescheduled behind any other tasks at the same
                    * priority.
                    */
 
-                  param.sched_priority = rtcb->sched_priority;
-                  (void)sched_setparam(0, &param);
+                  up_reprioritize_rtr(rtcb, rtcb->sched_priority);
                 }
             }
         }
