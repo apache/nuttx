@@ -106,7 +106,7 @@ void lib_take_semaphore(FAR struct file_struct *stream)
 
       /* We have it.  Claim the stak and return */
 
-      stream->fs_holder      = my_pid;
+      stream->fs_holder = my_pid;
       stream->fs_counts = 1;
     }
 }
