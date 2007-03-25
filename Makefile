@@ -58,7 +58,15 @@ include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig
 	tools/mkconfig $(TOPDIR) > include/nuttx/config.h
 
 include/arch: include/nuttx/config.h
-	ln -sf $(TOPDIR)/$(ARCH_DIR)/include include/arch
+	@if [ -e include/arch ]; then \
+		if [ -h include/arch ]; then \
+			rm -f include/arch ; \
+		else \
+			echo "include/arch exists but is not a symbolic link" ; \
+			exit 1 ; \
+		fi ; \
+	fi
+	@ln -s $(TOPDIR)/$(ARCH_DIR)/include include/arch
 
 context: check_context include/nuttx/config.h include/arch
 

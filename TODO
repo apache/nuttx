@@ -13,17 +13,16 @@ Task/Scheduler
 - Make the system timer frequency configurable via defconfig.  See:
    _POSIX_CLOCKRES_MIN in limits.h
    CLK_TCK in time.h
-   Definitions in sched/clock_internal.h
+   MSEC_PER_TICK in sched/clock_internal.h
 - Consider implementing wait, waitpid, waitid.  At present, a parent has
   no information about child tasks.
 
 o Memory Managment
 - Add an option to free all memory allocated by a task when the task exits.
-  This may not be worth the overhead for a deeply embedded system.
+  This is probably not be worth the overhead for a deeply embedded system.
 
 o Signals
-- 'Standard' signals and signal actions are not supported.  Does this
-  make since in a deeply embedded system?
+- 'Standard' signals and signal actions are not supported.
 
 o pthreads
 - pthread_cancel():  Should implemenent cancellation points and pthread_testcancel()
@@ -40,7 +39,6 @@ o Libraries
   Apparently printf has some thread safety issues.
 
 o File system
-- This probabaly needs some rethinking.
 - Add some concept like mount points to handle mounted "real" filesystems.
 
 o Console Output
@@ -50,11 +48,12 @@ o Documentation
 - Document filesystem, library
 
 o Build system
-- Something leaves garbage link 'include' in arch/*/include
 
 o Applications & Tests
 
 o C5471
+
+o DM320
 
 o pjrc-8052 / MCS51
 * Current status:
@@ -73,5 +72,3 @@ o pjrc-8052 / MCS51
   clock_initialize.c at line 107
   pthread_create.c at 330
   sighand.c at 225 and 244
-
-o DM320
