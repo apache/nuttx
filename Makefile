@@ -39,6 +39,7 @@ TOPDIR		= ${shell pwd}
 
 ARCH_DIR	= arch/$(CONFIG_ARCH)
 ARCH_SRC	= $(ARCH_DIR)/src
+ARCH_INC	= $(ARCH_DIR)/include
 BOARD_DIR	= configs/$(CONFIG_BOARD)
 
 SUBDIRS		= sched lib $(ARCH_SRC) mm fs drivers examples/$(CONFIG_EXAMPLE)
@@ -94,7 +95,7 @@ $(ARCH_SRC)/board: Make.defs
 context: check_context include/nuttx/config.h include/arch include/arch/board $(ARCH_SRC)/board
 
 clean_context:
-	rm -f include/nuttx/config.h include/arch include/arch/board $(ARCH_SRC)/board
+	rm -f include/nuttx/config.h include/arch $(ARCH_INC)/board $(ARCH_SRC)/board
 
 check_context:
 	@if [ ! -e ${TOPDIR}/.config -o ! -e ${TOPDIR}/Make.defs ]; then \
