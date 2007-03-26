@@ -40,6 +40,14 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
+
+#if defined(CONFIG_BOARD_C5471EVM)
+# include <arch/board/c5471evm.h>
+#else
+# warning "Undefined C5471 Board"
+#endif
+
 /************************************************************
  * Definitions
  ************************************************************/
@@ -54,17 +62,6 @@
 #undef  CONFIG_SUPPRESS_SERIAL_INTS   /* Console will poll */
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
 #undef  CONFIG_DUMP_ON_EXIT           /* Dump task state on exit */
-
-/* LED definitions */
-
-#define LED_STARTED                 0
-#define LED_HEAPALLOCATE            1
-#define LED_IRQSENABLED             2
-#define LED_STACKCREATED            3
-#define LED_INIRQ                   4
-#define LED_SIGNAL                  5
-#define LED_ASSERTION               6
-#define LED_PANIC                   7
 
 /************************************************************
  * Public Types

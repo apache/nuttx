@@ -40,8 +40,16 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
+
 #ifndef __ASSEMBLY__
 # include <sys/types.h>
+#endif
+
+#if defined(CONFIG_BOARD_C5471EVM)
+# include <arch/board/c5471evm.h>
+#else
+# warning "Undefined C5471 Board"
 #endif
 
 /************************************************************
@@ -71,10 +79,6 @@
 #define CC_C_BIT               (1 << 29)
 #define CC_Z_BIT               (1 << 30)
 #define CC_N_BIT               (1 << 31)
-
-/* Clocking *************************************************/
-
-#define C5471_CLOCK            47500000 /* 47.5 MHz */
 
 /* UARTs ****************************************************/
 
@@ -369,11 +373,6 @@ static inline void putreg16(uint16 val, unsigned int addr)
 {
  __asm__ __volatile__("\tstrh %0, [%1]\n\t": : "r"(val), "r"(addr));
 }
-
-/* Most C5471 registers are 16-bits wide */
-
-#define getreg(a)   getreg16(1)
-#define putreg(v,a) putreg16(v,a)
 
 #endif
 
