@@ -79,7 +79,7 @@ static inline uint32 up_getsp(void)
  * Name: up_stackdump
  ************************************************************/
 
-#ifdef CONFIG_C5471_STACKDUMP
+#ifdef CONFIG_ARCH_STACKDUMP
 static void up_stackdump(void)
 {
   _TCB *rtcb        = (_TCB*)g_readytorun.head;
@@ -137,7 +137,7 @@ static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
        (void)irqsave();
         for(;;)
           {
-#ifdef CONFIG_C5471_LEDS
+#ifdef CONFIG_ARCH_LEDS
             up_ledon(LED_PANIC);
             up_delay(250);
             up_ledoff(LED_PANIC);

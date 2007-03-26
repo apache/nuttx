@@ -153,7 +153,7 @@ extern void up_maskack_irq(int irq);
 
 /* Defined in up_leds.c */
 
-#ifdef CONFIG_C5471_LEDS
+#ifdef CONFIG_ARCH_LEDS
 extern void up_ledinit(void);
 extern void up_ledon(int led);
 extern void up_ledoff(int led);
