@@ -121,7 +121,6 @@ static void timer_expiration(int signo, siginfo_t *info, void *ucontext)
 
 void timer_test(void)
 {
-  struct sched_param param;
   sigset_t           sigset;
   struct sigaction   act;
   struct sigaction   oact;

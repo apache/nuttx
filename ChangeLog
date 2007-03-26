@@ -86,6 +86,7 @@
 	* sched_setparam(), sched_setscheduler() now correctly set
 	  errno; pthread_setscheduler() now returns the correct errno.
 	* Added pthread_setschedprio().
+	* Added directories to hold board-specific header files
 	* Started m68322
 
 

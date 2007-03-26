@@ -173,12 +173,12 @@ below and discussed in the following paragraphs:</p>
 </p>
 <ul><pre>
 	&lt;<i>arch-name</i>&gt;
-	|-- include
+	|-- include/
 	|   |-- arch.h
 	|   |-- irq.h
 	|   |-- types.h
 	|   `-- limits.h
-	`-- src
+	`-- src/
 	    |-- Makefile
 	    `-- <i>(architecture-specific source files)</i>
 </pre></ul>
@@ -294,6 +294,7 @@ below and discussed in the following paragraphs:</p>
 </p>
 <ul><pre>
 	&lt;<i>board-name</i>&gt;
+	|-- include/
 	|-- Make.defs
 	|-- defconfig
 	`-- setenv.sh
@@ -301,6 +302,14 @@ below and discussed in the following paragraphs:</p>
 
 <h3><a name="#summaryofconfigfiles">2.3.2 Summary of Files</a></h3>
 <ul>
+  <li>
+    <code>include/</code>:
+    This directory contains board specific header files.
+    This directory will be linked as <code>include/arch/board</code> at configuration time
+    and can be included via <code>#include &lt;arch/board/header.h&gt;</code>.
+    These header file can only be included by files in <code>arch/&lt;arch-name&gt;/include/</code>
+    and <code>arch/&lt;arch-name&gt;/src/</code>.
+  </li>
   <li>
     <code>Make.defs</code>: This makefile fragment provides architecture and
     tool-specific build options.  It will be included by all other
@@ -316,6 +325,7 @@ below and discussed in the following paragraphs:</p>
       fragment may include ${TOPDIR}/.config to perform configuration
       specific settings.  For example, the CFLAGS will most likely be
       different if CONFIG_DEBUG=y.
+    </p>
   </li>
   <li>
     <code>defconfig</code>: This is a configuration file similar to the Linux

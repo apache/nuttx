@@ -9,7 +9,6 @@ Task/Scheduler
 - Implement sys/mman.h and functions
 - Implement sys/wait.h and functions
 - Implement priority inheritance
-- Implement vfork().  Could be tricky because of stack references.
 - Make the system timer frequency configurable via defconfig.  See:
    _POSIX_CLOCKRES_MIN in limits.h
    CLK_TCK in time.h

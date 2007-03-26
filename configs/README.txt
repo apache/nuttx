@@ -24,12 +24,19 @@ following characteristics:
 
 
 	<board-name>
+	|-- include/
 	|-- Make.defs
 	|-- defconfig
 	`-- setenv.sh
 
 Summary of Files
 ^^^^^^^^^^^^^^^^
+
+include/ -- This directoy contains board specific header files.  This
+  directory will be linked as include/arch/board at configuration time and
+  can be included via '#include <arch/board/header.h>'.  These header file
+  can only be included by files in arch/<arch-name>include/ and
+  arch/<arch-name>/src
 
 Make.defs -- This makefile fragment provides architecture and
   tool-specific build options.  It will be included by all other

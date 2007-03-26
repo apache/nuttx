@@ -45,8 +45,12 @@
  * Definitions
  ************************************************************/
 
-#define CS2  *(volatile uint32*)0xffff2e08
-#define LEDS *(volatile uint32*)0x01000000
+#if defined(CONFIG_BOARD_C5471EVM)
+# define CS2  *(volatile uint32*)0xffff2e08
+# define LEDS *(volatile uint32*)0x01000000
+#else 
+# warning "Undefined C5471 board"
+#endif
 
 /************************************************************
  * Private Data
@@ -69,7 +73,8 @@ static uint32 g_ledstate;
 #ifdef CONFIG_C5471_LEDS
 void up_ledinit(void)
 {
-  /* Enable acces to LEDs */
+#if defined(CONFIG_BOARD_C5471EVM)
+  /* Enable access to LEDs */
 
   CS2 = 0x000013db;
 
@@ -77,6 +82,7 @@ void up_ledinit(void)
 
   g_ledstate = 0x000000fe;
   LEDS       = g_ledstate;
+#endif
 }
 
 /************************************************************

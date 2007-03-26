@@ -39,6 +39,7 @@ TOPDIR		= ${shell pwd}
 
 ARCH_DIR	= arch/$(CONFIG_ARCH)
 ARCH_SRC	= $(ARCH_DIR)/src
+BOARD_DIR	= configs/$(CONFIG_BOARD)
 
 SUBDIRS		= sched lib $(ARCH_SRC) mm fs drivers examples/$(CONFIG_EXAMPLE)
 
@@ -57,7 +58,7 @@ tools/mkconfig:
 include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig
 	tools/mkconfig $(TOPDIR) > include/nuttx/config.h
 
-include/arch: include/nuttx/config.h
+include/arch: Make.defs
 	@if [ -e include/arch ]; then \
 		if [ -h include/arch ]; then \
 			rm -f include/arch ; \
@@ -68,11 +69,23 @@ include/arch: include/nuttx/config.h
 	fi
 	@ln -s $(TOPDIR)/$(ARCH_DIR)/include include/arch
 
-context: check_context include/nuttx/config.h include/arch
+include/arch/board: Make.defs include/arch
+	@if [ -e include/arch/board ]; then \
+		if [ -h include/arch/board ]; then \
+			rm -f include/arch/board ; \
+		else \
+			echo "include/arch/board exists but is not a symbolic link" ; \
+			exit 1 ; \
+		fi ; \
+	fi
+	@ln -s $(TOPDIR)/$(BOARD_DIR)/include include/arch/board
+
+context: check_context include/nuttx/config.h include/arch include/arch/board
 
 clean_context:
 	rm -f include/nuttx/config.h
 	rm -f include/arch
+	rm -f include/arch/board
 
 check_context:
 	@if [ ! -e ${TOPDIR}/.config -o ! -e ${TOPDIR}/Make.defs ]; then \

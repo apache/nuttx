@@ -38,10 +38,14 @@
 # CONFIG_ARCH - identifies the arch subdirectory
 # CONFIG_ARCH_8051 - Set if processor is 8051 family
 # CONFIG_ARCH_8052 = Set if processor is 8052 family
+# CONFIG_BOARD - identifies the configs subdirectory
+# CONFIG_BARD_name - for use in C code
 #
 CONFIG_ARCH=pjrc-8051
 CONFIG_ARCH_8051=n
 CONFIG_ARCH_8052=y
+CONFIG_BOARD=pjrc-8051
+CONFIG_BOARD_PJRC_87C52=y
 
 #
 # Architecture-specific settings.  These may mean nothing to

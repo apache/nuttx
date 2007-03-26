@@ -42,8 +42,11 @@
 
 #include <nuttx/config.h>
 #include <arch/irq.h>
-#ifdef CONFIG_ARCH_PJRC
-# include "pjrc.h"
+
+#if defined(CONFIG_BOARD_PJRC_87C52)
+# include <arch/board/pjrc.h>
+#else
+# warning "805x board not recognized"
 #endif
 
 /**************************************************************************

@@ -37,12 +37,16 @@
 #
 # CONFIG_ARCH - identifies the arch subdirectory
 # CONFIG_ARCH_name - for use in C code
+# CONFIG_BOARD - identifies the configs subdirectory
+# CONFIG_BARD_name - for use in C code
 # CONFIG_DRAM_SIZE - Describes the installed DRAM.
 # CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 #
 CONFIG_ARCH=m68332evb
 CONFIG_ARCH_M68332=y
 CONFIG_ARCH_M68332EVB=y
+CONFIG_BOARD=m68332evb
+CONFIG_BOARD_M68332EVB=y
 CONFIG_DRAM_SIZE=0x003000
 CONFIG_DRAM_NUTTXENTRY=0x003000
 CONFIG_ARCH_STACKDUMP=y

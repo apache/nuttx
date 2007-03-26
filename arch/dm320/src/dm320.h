@@ -40,12 +40,19 @@
  * Included Files
  ************************************************************************************/
 
+#include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 # include <sys/types.h>
 #endif
 
 #include "arm9.h"
-#include "ntosd.h"
+
+#if defined(CONFIG_BOARD_NTOSD_DM320)
+# include <arch/board/ntosd.h>
+#else
+# warning "Unknown DM320 board"
+#endif
+
 #include "dm320-memorymap.h"
 #include "dm320-uart.h"
 #include "dm320-timer.h"

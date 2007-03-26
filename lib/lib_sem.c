@@ -104,9 +104,9 @@ void lib_take_semaphore(FILE *stream)
 	  ASSERT(*get_errno_ptr() == EINTR);
 	}
 
-      /* We have it.  Claim the stak and return */
+      /* We have it.  Stake the claim and return */
 
-      stream->holder      = my_pid;
+      stream->holder = my_pid;
       stream->counts = 1;
     }
 }
@@ -119,7 +119,7 @@ void lib_give_semaphore(FILE *stream)
 {
   pid_t my_pid = getpid();
 
-  /* I better be holding at least one reference to the semaphore */
+  /* I better be holding at least one count on the semaphore */
 
   ASSERT(stream->holder == my_pid);
 
