@@ -35,10 +35,14 @@
 #
 # architecture selection
 #
-# CONFIG_ARCH - identifies the arch subdirectory
-# CONFIG_ARCH_name - for use in C code
-# CONFIG_BOARD - identifies the configs subdirectory
-# CONFIG_BARD_name - for use in C code
+# CONFIG_ARCH - identifies the arch subdirectory and, hence, the
+#   processor architecture.
+# CONFIG_ARCH_name - for use in C code.  This identifies the
+#   particular chip or SoC that the architecture is implemented
+#   in.
+# CONFIG_BOARD - identifies the configs subdirectory and, hence,
+#   the board that supports the particular chip or SoC.
+# CONFIG_BOARD_name - for use in C code
 # CONFIG_DRAM_SIZE - Describes the installed DRAM.
 # CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 #

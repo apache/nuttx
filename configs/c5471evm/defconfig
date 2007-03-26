@@ -35,15 +35,19 @@
 #
 # architecture selection
 #
-# CONFIG_ARCH - identifies the arch subdirectory
-# CONFIG_ARCH_name - for use in C code
-# CONFIG_BOARD - identifies the configs subdirectory
-# CONFIG_BARD_name - for use in C code
+# CONFIG_ARCH - identifies the arch subdirectory and, hence, the
+#   processor architecture.
+# CONFIG_ARCH_name - for use in C code.  This identifies the
+#   particular chip or SoC that the architecture is implemented
+#   in.
+# CONFIG_BOARD - identifies the configs subdirectory and, hence,
+#   the board that supports the particular chip or SoC.
+# CONFIG_BOARD_name - for use in C code
 # CONFIG_ROM_VECTORS - unique to c5471
 # CONFIG_DRAM_END - the size of installed DRAM.
 #   Unique to c5471
-# CONFIG_C5471_LEDS - Use LEDs to show state. Unique to c5471.
-# CONFIG_C5471_STACKDUMP - Do stack dumps after assertions
+# CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to c5471.
+# CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 #
 CONFIG_ARCH=c5471
 CONFIG_ARCH_C5471=y
@@ -51,8 +55,8 @@ CONFIG_BOARD=c5471evm
 CONFIG_BOARD_C5471EVM=y
 CONFIG_ROM_VECTORS=n
 CONFIG_DRAM_END=0x11000000
-CONFIG_C5471_LEDS=y
-CONFIG_C5471_STACKDUMP=y
+CONFIG_ARCH_LEDS=y
+CONFIG_ARCH_STACKDUMP=y
 
 #
 # C5471 specific device driver settings
