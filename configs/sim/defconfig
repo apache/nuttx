@@ -37,9 +37,13 @@
 #
 # CONFIG_ARCH - identifies the arch subdirectory
 # CONFIG_ARCH_name - for use in C code
+# CONFIG_BOARD - identifies the configs subdirectory
+# CONFIG_BARD_name - for use in C code
 #
 CONFIG_ARCH=sim
 CONFIG_ARCH_SIM=y
+CONFIG_BOARD=sim
+CONFIG_BOARD_SIM=y
 
 #
 # General OS setup
