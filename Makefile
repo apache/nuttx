@@ -80,12 +80,21 @@ include/arch/board: Make.defs include/arch
 	fi
 	@ln -s $(TOPDIR)/$(BOARD_DIR)/include include/arch/board
 
-context: check_context include/nuttx/config.h include/arch include/arch/board
+$(ARCH_SRC)/board: Make.defs
+	@if [ -e $(ARCH_SRC)/board ]; then \
+		if [ -h $(ARCH_SRC)/board ]; then \
+			rm -f $(ARCH_SRC)/board ; \
+		else \
+			echo "$(ARCH_SRC)/board exists but is not a symbolic link" ; \
+			exit 1 ; \
+		fi ; \
+	fi
+	@ln -s $(TOPDIR)/$(BOARD_DIR)/src $(ARCH_SRC)/board
+
+context: check_context include/nuttx/config.h include/arch include/arch/board $(ARCH_SRC)/board
 
 clean_context:
-	rm -f include/nuttx/config.h
-	rm -f include/arch
-	rm -f include/arch/board
+	rm -f include/nuttx/config.h include/arch include/arch/board $(ARCH_SRC)/board
 
 check_context:
 	@if [ ! -e ${TOPDIR}/.config -o ! -e ${TOPDIR}/Make.defs ]; then \
@@ -123,19 +132,26 @@ depend:
 		$(MAKE) -C $$dir TOPDIR=$(TOPDIR) depend ; \
 	done
 
-clean:
+subdir_clean:
 	@for dir in $(SUBDIRS) ; do \
-		$(MAKE) -C $$dir TOPDIR=$(TOPDIR) clean ; \
+		if [ -e $$dir/Makefile ]; then \
+			$(MAKE) -C $$dir TOPDIR=$(TOPDIR) clean ; \
+		fi \
 	done
 	$(MAKE) -C tools -f Makefile.mkconfig TOPDIR=$(TOPDIR) clean
 	$(MAKE) -C mm -f Makefile.test TOPDIR=$(TOPDIR) clean
+
+clean: subdir_clean
 	rm -f $(BIN) $(BIN).* mm_test *.map *~
 
-distclean: clean clean_context
+subdir_distclean:
 	@for dir in $(SUBDIRS) ; do \
-		$(MAKE) -C $$dir TOPDIR=$(TOPDIR) distclean ; \
+		if [ -e $$dir/Makefile ]; then \
+			$(MAKE) -C $$dir TOPDIR=$(TOPDIR) distclean ; \
+		fi \
 	done
-	$(MAKE) -C examples/$(CONFIG_EXAMPLE) TOPDIR=$(TOPDIR) distclean
+
+distclean: clean subdir_distclean clean_context
 	rm -f Make.defs setenv.sh .config
 
 

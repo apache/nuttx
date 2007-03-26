@@ -27,15 +27,16 @@ o pthreads
 - pthread_cancel():  Should implemenent cancellation points and pthread_testcancel()
 
 o Libraries
-- There needs to be some kind of mutual exclusion protection on buffered
-  I/O.  If two threads try fflush-ing at the same time, there is corruption
-  of the output.
-- At present, there is a failure in the examples/ostest POSIX timer
-  test when CONFIG_DEBUG is enabled.  This is almost certainly yet
-  another case where printf (or its kin) are being called from a 
-  sensitive area in the OS.
-- I am now seeing the same thing with the dm320 barrier test.
-  Apparently printf has some thread safety issues.
+- There seems to be some kind of failure in the mutual exclusion logic on
+  buffered, "standard," IO.
+  - If two threads try fflush-ing at the same time, there is corruption
+    of the output.
+  - Yhere is a failure in the examples/ostest POSIX timer
+    test when CONFIG_DEBUG is enabled.  This is almost certainly yet
+    another case where printf (or its kin) are being called from a 
+    sensitive area in the OS.
+  - I am now seeing the same thing with the dm320 barrier test.
+    Apparently printf has some thread safety issues.
 
 o File system
 - Add some concept like mount points to handle mounted "real" filesystems.
@@ -47,6 +48,13 @@ o Documentation
 - Document filesystem, library
 
 o Build system
+- Names under arch are incorrect.  These should hold processor architectures.
+  c5471 should be arm7
+  dm320 should be arm9
+  pjrc-8051 should be 805x
+- SoC-specific logic should be in subdirectories under arch/<processor-name>.
+  Eg. arm7/include/c5471 should hold c5471 specific header files
+- configs/pjrc-8051 should be configs/pjrc-87c52
 
 o Applications & Tests
 

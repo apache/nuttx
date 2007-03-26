@@ -51,7 +51,7 @@ CSRCS		= up_initialize.c up_initialstate.c up_idle.c up_doirq.c \
 		  up_exit.c up_assert.c up_blocktask.c up_unblocktask.c \
 		  up_releasepending.c up_reprioritizertr.c up_copystate.c \
 		  up_schedulesigaction.c up_sigdeliver.c up_serial.c \
-		  up_delay.c up_allocateheap.c up_leds.c up_watchdog.c
+		  up_delay.c up_allocateheap.c up_watchdog.c
 COBJS		= $(CSRCS:.c=.o)
 
 SRCS		= $(ASRCS) $(CSRCS)
@@ -64,6 +64,8 @@ LINKOBJS	= up_head$(OBJEXT)
 LINKLIBS	=
 LDPATHES	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
 LDLIBS		= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
+
+BOARDDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src/board
 
 LIBGCC		= ${shell $(CC) -print-libgcc-file-name}
 
@@ -81,9 +83,12 @@ libarch$(LIBEXT): $(OBJS)
 			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
 	done ; )
 
-nuttx: $(LINKOBJS)
-	$(LD) --entry=__start $(LDFLAGS) $(LDPATHES) -o $(TOPDIR)/$@ $(LINKOBJS) \
-		--start-group $(LDLIBS) --end-group $(EXTRA_LIBS) $(LIBGCC) 
+board/libboard$(LIBEXT):
+	$(MAKE) -C board TOPDIR=$(TOPDIR) libboard$(LIBEXT)
+
+nuttx: $(LINKOBJS) board/libboard$(LIBEXT)
+	$(LD) --entry=__start $(LDFLAGS) $(LDPATHES) -L$(BOARDDIR) -o $(TOPDIR)/$@ $(LINKOBJS) \
+		--start-group $(LDLIBS) -lboard --end-group $(EXTRA_LIBS) $(LIBGCC) 
 	@$(NM) $(TOPDIR)/$@ | \
 	grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 	sort > $(TOPDIR)/System.map
@@ -100,15 +105,23 @@ ifeq ($(CONFIG_RRLOAD_BINARY),y)
 endif
 
 .depend: Makefile $(SRCS)
+	echo $(SRCS)
 	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(MAKE) -C board TOPDIR=$(TOPDIR) depend
 	touch $@
 
 depend: .depend
 
 clean:
 	rm -f libarch$(LIBEXT) *.o *~
+	@if [ -e board/Makefile ]; then \
+		$(MAKE) -C board TOPDIR=$(TOPDIR) clean ; \
+	fi
 
 distclean: clean
 	rm -f Make.dep .depend
+	@if [ -e board/Makefile ]; then \
+		$(MAKE) -C board TOPDIR=$(TOPDIR) distclean ; \
+	fi
 
 -include Make.dep

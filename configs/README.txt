@@ -25,6 +25,8 @@ following characteristics:
 
 	<board-name>
 	|-- include/
+	|-- src/
+	|   `-- Makefile
 	|-- Make.defs
 	|-- defconfig
 	`-- setenv.sh
@@ -32,11 +34,19 @@ following characteristics:
 Summary of Files
 ^^^^^^^^^^^^^^^^
 
-include/ -- This directoy contains board specific header files.  This
+include/ -- This directory contains board specific header files.  This
   directory will be linked as include/arch/board at configuration time and
   can be included via '#include <arch/board/header.h>'.  These header file
   can only be included by files in arch/<arch-name>include/ and
   arch/<arch-name>/src
+
+src/ -- This directory contains board specific drivers.  This
+  directory will be linked as arch/<arch-name>/src/board at configuration
+  time and will be integrated into the build system.
+
+src/Makefile -- This makefile will be invoked to build the board specific
+  drivers.  It must support the following targets:  libext$(LIBEXT), clean,
+  and distclean.
 
 Make.defs -- This makefile fragment provides architecture and
   tool-specific build options.  It will be included by all other

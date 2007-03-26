@@ -295,6 +295,8 @@ below and discussed in the following paragraphs:</p>
 <ul><pre>
 	&lt;<i>board-name</i>&gt;
 	|-- include/
+	|-- src/
+	|   `-- Makefile
 	|-- Make.defs
 	|-- defconfig
 	`-- setenv.sh
@@ -309,6 +311,17 @@ below and discussed in the following paragraphs:</p>
     and can be included via <code>#include &lt;arch/board/header.h&gt;</code>.
     These header file can only be included by files in <code>arch/&lt;arch-name&gt;/include/</code>
     and <code>arch/&lt;arch-name&gt;/src/</code>.
+  </li>
+  <li>
+    <code>src/</code>:
+    This directory contains board specific drivers.
+    This directory will be linked as <config>arch/&lt;arch-name&gt;/src/board</config> at configuration
+    time and will be integrated into the build system.
+  </li>
+  <li>
+    <code>src/Makefile</code>:
+    This makefile will be invoked to build the board specific drivers.
+    It must support the following targets:  <code>libext$(LIBEXT)</code>, <code>clean</code>, and <code>distclean</code>.
   </li>
   <li>
     <code>Make.defs</code>: This makefile fragment provides architecture and

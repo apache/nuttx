@@ -87,6 +87,7 @@
 	  errno; pthread_setscheduler() now returns the correct errno.
 	* Added pthread_setschedprio().
 	* Added directories to hold board-specific header files
+	* Added directories to hold board-specific drivers
 	* Started m68322
 
 

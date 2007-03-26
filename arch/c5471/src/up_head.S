@@ -117,7 +117,7 @@ __start:
 #endif
 	/* Initialize onboard LEDs */
 
-#ifdef CONFIG_C5471_LEDS
+#ifdef CONFIG_ARCH_LEDS
 	bl	up_ledinit
 #endif
 
