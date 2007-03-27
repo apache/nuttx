@@ -105,7 +105,6 @@ ifeq ($(CONFIG_RRLOAD_BINARY),y)
 endif
 
 .depend: Makefile $(SRCS)
-	echo $(SRCS)
 	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	$(MAKE) -C board TOPDIR=$(TOPDIR) depend
 	touch $@
@@ -113,15 +112,15 @@ endif
 depend: .depend
 
 clean:
-	rm -f libarch$(LIBEXT) *.o *~
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR=$(TOPDIR) clean ; \
 	fi
+	rm -f libarch$(LIBEXT) *.o *~
 
 distclean: clean
-	rm -f Make.dep .depend
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR=$(TOPDIR) distclean ; \
 	fi
+	rm -f Make.dep .depend
 
 -include Make.dep
