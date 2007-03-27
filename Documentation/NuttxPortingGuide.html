@@ -16,7 +16,7 @@
   </b></big>
   <p><small>by</small></p>
   <p>Gregory Nutt</p>
-  <p><small>Last Update: March 22, 2007</small></p>
+  <p><small>Last Update: March 26, 2007</small></p>
 </center>
 
 <center><h1>Table of Contents</h1></center>
@@ -34,8 +34,11 @@
   <ul>
     <li><a href="#configsdirectorystructure">2.3.1 Subdirectory Structure</a></li>
     <li><a href="#summaryofconfigfiles">2.3.2 Summary of Files</a></li>
+    <ul>
+      <li><a href="#boardlogic">2.3.2.1 Board Specific Logic</a></li>
+      <li><a href="#boardconfigfiles">2.3.2.2 Board Specific Configuration Files</a></li>
+    </ul>
     <li><a href="#supportedboards">2.3.3 Supported Boards</a></li>
-    <li><a href="#configuringnuttx">2.3.4 Configuring NuttX</a></li>
   </ul>
   <li>2.4 <a href="#DirStructDrivers">drivers</a></li>
   <li>2.5 <a href="#DirStructExamples">examples</a></li>
@@ -45,8 +48,13 @@
   <li>2.9 <a href="#DirStructMm">mm</a></li>
   <li>2.10 <a href="#DirStructSched">sched</a></li>
   <li>2.11 <a href="#DirStructTools">tools</a></li>
+  <li>2.12 <a href="#topmakefile">Makefile</a></li>
 </ul>
-<li>3.0 <a href="#DirectoryConfiAndBuild">Configuring and Building</a></li>
+<li>3.0 <a href="#configandbuild">Configuring and Building</a></li>
+<ul>
+  <li><a href="#configuringnuttx">3.1 Configuring NuttX</a></li>
+  <li><a href="#buildingnuttx">3.2 Building NuttX</a></li>
+</ul>
 <li>4.0 <a href="#ArchAPIs">Architecture APIs</a></li>
 <ul>
   <li><a href="#imports">4.1 APIs Exported by Architecture-Specific Logic to NuttX</a></li>
@@ -88,7 +96,7 @@
   into the build.
 </p>
 <p>
-  See also arch/README.txt.
+  See also <code>arch/README.txt</code> and <code>configs/README.txt</code>.
 </p>
 
 <p><b>General Philosophy</b>.
@@ -96,59 +104,106 @@
 <hr>
 <h1>2.0 <a name="DirectoryStructure">Directory Structure</a></h1>
 
-<p>The general directly layout for NuttX is very similar to the directory structure
-of the Linux kernel -- at least at the most superficial layers.
-At the top level is the main makefile and a series of sub-directories identified
-below and discussed in the following paragraphs:</p>
- 
+<p>
+  <b>Directory Structure</b>.
+  The general directly layout for NuttX is very similar to the directory structure
+  of the Linux kernel -- at least at the most superficial layers.
+  At the top level is the main makefile and a series of sub-directories identified
+  below and discussed in the following paragraphs:
+</p>
 <ul><pre>
 .
-|-- Makefile
+|-- <a href="#topmakefile">Makefile</a>
 |-- <a href="#DirStructDocumentation">Documentation</a>
-|   `-- <i>(documentation files)</i>
-|-- <a href="#DirStructArch">arch</a>
-|   |-- <i>&lt;arch-name&gt;</i>
-|   |   |-- include
-|   |   `-- src
-|   `-- <i>&lt:;other-architectures&gt;</i>
-|-- <a href="#DirStructConfigs">configs</a>
-|   |-- <i>&lt;board-name&gt;</i>
-|   |   |-- Make.defs
-|   |   |-- defconfig
-|   |   `-- setenv.sh
-|   `-- <i>&lt:;other-architectures&gt;</i>
+|   `-- <i>(documentation files)</i>/
+|-- <a href="#DirStructArch">arch</a>/
+|   |-- <i>&lt;arch-name&gt;</i>/
+|   |   |-- include/
+|   |   |   |--<i>&lt;chip-name&gt;</i>/
+|   |   |   |  `-- <i>(chip-specific header files)</i>
+|   |   |   |--<i>&lt;other-chips&gt;</i>/
+|   |   |   `-- <i>(architecture-specific header files)</i>
+|   |   `-- src/
+|   |       |--<i>&lt;chip-name&gt;</i>/
+|   |       |  `-- <i>(chip-specific source files)</i>
+|   |       |--<i>&lt;other-chips&gt;</i>/
+|   |       `-- <i>(architecture-specific source files)</i>
+|   `-- <i>&lt;other-architectures&gt;</i>/
+|-- <a href="#DirStructConfigs">configs</a>/
+|   |-- <i>&lt;board-name&gt;</i>/
+|   |   |-- include/
+|   |   |   `-- <i>(board-specific header files)</i>
+|   |   |-- src/
+|   |   |   |-- Makefile
+|   |   |  `-- <i>(board-specific source files)</i>
+|   |   `-- <i>(board-specific configuration files)</i>
+|   `-- <i>&lt;other-boards&gt;</i>/
 |-- <a href="#DirStructDrivers">drivers</a>
-|   |-- Makefile
-|   `-- <i>(driver source files)</i>
-|-- <a href="#DirStructExamples">examples</a>
-|   `-- <i>(example)</i>
+|   |-- Makefile/
+|   `-- <i>(common driver source files)</i>
+|-- <a href="#DirStructExamples">examples</a>/
+|   `-- <i>(example)</i>/
 |       |-- Makefile
 |       `-- <i>(example source files)</i>
-|-- <a href="#DirStructFs">fs</a>
+|-- <a href="#DirStructFs">fs</a>/
 |   |-- Makefile
 |   `-- <i>(fs source files)</i>
-|-- <a href="#DirStructInclude">include</a>
+|-- <a href="#DirStructInclude">include</a>/
 |   |-- <i>(standard header files)</i>
-|   |-- nuttx
+|   |-- nuttx/
 |   |   `-- <i>(nuttx specific header files)</i>
-|   `- sys
+|   `- sys/
 |   |   `-- <i>(more standard header files)</i>
-|-- <a href="#DirStructLib">lib</a>
+|-- <a href="#DirStructLib">lib</a>/
 |   |-- Makefile
 |   `-- <i>(lib source files)</i>
-|-- <a href="#DirStructMm">mm</a>
+|-- <a href="#DirStructMm">mm</a>/
 |   |-- Makefile
 |   `-- <i>(mm source files)</i>
-|-- <a href="#DirStructSched">sched</a>
+|-- <a href="#DirStructSched">sched</a>/
 |   |-- Makefile
 |   `-- <i>(sched source files)</i>
-`-- <a href="#DirStructDrivers">tools</a>
+`-- <a href="#DirStructDrivers">tools</a>/
     |-- Makefile.mkconfig
     |-- configure.sh
     |-- mkconfig.c
     |-- mkdeps.sh
     `-- zipme
 </pre></ul>
+
+<p>
+  <b>Configuration Files</b>.
+  The NuttX configuration consists of:
+</p>
+<ul>
+  <li>
+    <i>Processor architecture specific files</i>.
+    These are the files contained in the <code>arch/</code><i>&lt;arch-name&gt;</i><code>/</code> directory
+    and are discussed in a paragraph <a href="#archdirectorystructure">below</a>.
+  </li>
+  <li>
+    <i>Chip/SoC specific files</i>.
+    Each processor processor architecture is embedded in chip or <i>System-on-a-Chip</i> (SoC) architecture.
+    The full chip architecture includes the processor architecture plus chip-specific interrupt logic,
+    clocking logic, general purpose I/O (GIO) logic, and specialized, internal peripherals (such as UARTs, USB, etc.).
+    <p>
+      These chip-specific files are contained within chip-specific sub-directories in the
+      <code>arch/</code><i>&lt;arch-name&gt;</i><code>/</code> directory and are selected via
+      the <code>CONFIG_ARCH_name</code> selection.
+    </p>
+  </li>
+  <li>
+    <i>Board specific files</i>.
+    In order to be usable, the chip must be contained in a board environment.
+    The board configuration defines additional properties of the board including such things as
+    peripheral LEDs, external peripherals (such as network, USB, etc.).
+    <p>
+      These board-specific configuration files can be found in the
+      <code>configs/</code><i>&lt;board-name&gt;</i><code>/</code> sub-directories and are discussed
+      in a a paragraph <a href="#configsdirectorystructure">below</a>.
+    </p>
+  </li>
+</ul>
 
 <h2>2.1 <a name="DirStructDocumentation">Documentation</a></h2>
 
@@ -168,23 +223,33 @@ below and discussed in the following paragraphs:</p>
   The complete board port in is defined by the architecture-specific code in this
   directory (plus the board-specific configurations in the <code>config/</code>
   subdirectory).
-  Each architecture must provide a subdirectory, &lt;<i>arch-name</i>&gt;
+  Each architecture must provide a subdirectory, <i>&lt;arch-name&gt;</i>
   under <code>arch/</code> with the following characteristics:
 </p>
 <ul><pre>
-	&lt;<i>arch-name</i>&gt;
+	<i>&lt;arch-name&gt;</i>/
 	|-- include/
+	|   |--<i>&lt;chip-name&gt;</i>/
+	|   |  `-- <i>(chip-specific header files)</i>
+	|   |--<i>&lt;other-chips&gt;</i>/
 	|   |-- arch.h
 	|   |-- irq.h
 	|   |-- types.h
 	|   `-- limits.h
 	`-- src/
+	    |--<i>&lt;chip-name&gt;</i>/
+	    |  `-- <i>(chip-specific source files)</i>
+	    |--<i>&lt;other-chips&gt;</i>/
 	    |-- Makefile
 	    `-- <i>(architecture-specific source files)</i>
 </pre></ul>
 
 <h3><a name="summaryofarchfiles">2.2.2 Summary of Files</a></h3>
 <ul>
+  <li>
+    <code>include/</code><i>&lt;chip-name&gt;</i><code>/</code>
+    This sub-directory contains chip-specific header files.
+  </li>
   <li>
     <code>include/arch.h</code>:
     This is a hook for any architecture specific definitions that may
@@ -240,6 +305,10 @@ below and discussed in the following paragraphs:</p>
     </p>
   </li>
   <li>
+    <code>src/</code><i>&lt;chip-name&gt;</i><code>/</code>
+    This sub-directory contains chip-specific source files.
+  </li>
+  <li>
     <code>src/Makefile</code>:
     This makefile will be executed to build the targets <code>src/libup.a</code> and
     <code>src/up_head.o</code>.  The <code>up_head.o</code> file holds the entry point into the system
@@ -251,7 +320,7 @@ below and discussed in the following paragraphs:</p>
     <i>(architecture-specific source files)</i>.
     The file <code>include/nuttx/arch.h</code> identifies all of the APIs that must
     be provided by the architecture specific logic.  (It also includes
-    <code>arch/&lt;arch-name&gt;/arch.h</code> as described above).
+    <code>arch/</code><i>&lt;arch-name&gt;</i><code>/arch.h</code> as described above).
   </li>
 </ul>
 
@@ -293,29 +362,32 @@ below and discussed in the following paragraphs:</p>
   provide a subdirectory &lt;board-name&gt; under <code>configs/</code> with the following characteristics:
 </p>
 <ul><pre>
-	&lt;<i>board-name</i>&gt;
+	<i>&lt;board-name&gt;</i>
 	|-- include/
+	|   `-- <i>(board-specific header files)</i>
 	|-- src/
-	|   `-- Makefile
+	|   |-- Makefile
+	|   `-- <i>(board-specific source files)</i>
 	|-- Make.defs
 	|-- defconfig
 	`-- setenv.sh
 </pre></ul>
 
-<h3><a name="#summaryofconfigfiles">2.3.2 Summary of Files</a></h3>
+<h3><a name="summaryofconfigfiles">2.3.2 Summary of Files</a></h3>
+<h4><a name="boardlogic">2.3.2.1 Board Specific Logic</a></h4>
 <ul>
   <li>
     <code>include/</code>:
     This directory contains board specific header files.
     This directory will be linked as <code>include/arch/board</code> at configuration time
     and can be included via <code>#include &lt;arch/board/header.h&gt;</code>.
-    These header file can only be included by files in <code>arch/&lt;arch-name&gt;/include/</code>
-    and <code>arch/&lt;arch-name&gt;/src/</code>.
+    These header file can only be included by files in <code>arch/</code><i>&lt;arch-name&gt;</i><code>/include/</code>
+    and <code>arch/</code><i>&lt;arch-name&gt;</i><code>/src/</code>.
   </li>
   <li>
     <code>src/</code>:
     This directory contains board specific drivers.
-    This directory will be linked as <config>arch/&lt;arch-name&gt;/src/board</config> at configuration
+    This directory will be linked as <config>arch/</code><i>&lt;arch-name&gt;</i><code>/src/board</config> at configuration
     time and will be integrated into the build system.
   </li>
   <li>
@@ -323,6 +395,15 @@ below and discussed in the following paragraphs:</p>
     This makefile will be invoked to build the board specific drivers.
     It must support the following targets:  <code>libext$(LIBEXT)</code>, <code>clean</code>, and <code>distclean</code>.
   </li>
+</ul>
+<h4><a name="boardconfigfiles">2.3.2.2 Board Specific Configuration Files</a></h4>
+<p>
+  The <code>configs/</code><i>&lt;board-name&gt;</i><code>/</code> sub-directory holds all of the
+  files that are necessary to configure Nuttx for the particular board.
+  The procedure for configuring NuttX is described <a href="#configuringnuttx">below</a>,
+  This paragraph will describe the contents of these configuration files.
+</p>
+<ul>
   <li>
     <code>Make.defs</code>: This makefile fragment provides architecture and
     tool-specific build options.  It will be included by all other
@@ -362,7 +443,12 @@ below and discussed in the following paragraphs:</p>
   </li>
 </ul>
 
-<h3><a name="#supportedboards">2.3.3 Supported Boards</a></h3>
+<h3><a name="supportedboards">2.3.3 Supported Boards</a></h3>
+<p>
+  All of the specific boards supported by NuttX are identified below.
+  These the the specific <i>&lt;board-name&gt;</i>'s that may be used to configure NuttX
+  as described <a href="#configuringnuttx">below</a>.
+</p>
 <ul>
   <li><code>configs/sim</code>:
     A user-mode port of NuttX to the x86 Linux platform is available.
@@ -398,24 +484,6 @@ below and discussed in the following paragraphs:</p>
   * A customized version of the <a href="http://www.buildroot.org">buildroot</a>
   is available to build these toolchains.
 </blockquote></small></p>
-
-<h3><a name="configuringnuttx">2.3.4 Configuring NuttX</a></h3>
-<p>
-  Configuring NuttX requires only copying:
-</p>
-<ul>
-  <code>configs/&lt;<i>board-name</i>&gt;/Make.def</code> to <code>${TOPDIR}/Make.defs</code>,
-  <code>configs/&lt;<i>board-name</i>&gt;/setenv.sh</code> to <code>${TOPDIR}/setenv.sh</code>, and
-  <code>configs/&lt;<i>board-name</i>&gt;/defconfig</code> to ${TOPDIR}/.config</code>
-</ul>
-<p>
-  There is a script that automates these steps.  The following steps will
-  accomplish the same configuration:
-</p>
-<ul><pre>
-  cd tools
-  ./configure.sh &lt;<i>board-name</i>&gt;
-</pre></ul>
 
 <h2>2.4 <a name="DirStructDrivers">drivers</a></h2>
 
@@ -453,33 +521,112 @@ below and discussed in the following paragraphs:</p>
 </ul>
 
 <h2>2.8 <a name="DirStructLib">lib</a></h2>
-
 <p>
   This directory holds a collection of standard libc-like functions with custom
   interfaces into Nuttx.
 </p>
 
 <h2>2.9 <a name="DirStructMm">mm</a></h2>
-
 <p>
   This is the NuttX memory manager.
 </p>
 
 <h2>2.10 <a name="DirStructSched">sched</a></h2>
-
 <p>
   The files forming core of the NuttX RTOS reside here.
 </p>
 
 <h2>2.11 <a name="DirStructTools">tools</a></h2>
-
 <p>
   This directory holds a collection of tools and scripts to simplify
   configuring and building NuttX.
 </p>
 
+<h2>2.12 <a name="topmakefile">Makefile</a></h2>
+<p>
+  The top-level <code>Makefile</code> in the <code>${TOPDIR}</code> directory contains all of the top-level control
+  logic to build NuttX.
+  Use of this <code>Makefile</code> to build NuttX is described <a href="#buildingnuttx">below</a>.
+</p>
+
 <hr>
-<h1>3.0 <a name="DirectoryConfiAndBuild">Configuring and Building</a></h1>
+<h1>3.0 <a name="configandbuild">Configuring and Building</a></h1>
+<h2><a name="configuringnuttx">3.1 Configuring NuttX</a></h2>
+<p>
+  <b>Manual Configuration</b>.
+  Configuring NuttX requires only copying the
+  <a href="#boardconfigfiles">board-specific configuration files</a> into the top level directory which appears in the make files as the make variable, <code>${TOPDIR}</code>.
+  This could be done manually as follows:
+</p>
+<ul>
+  <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i></code>/Make.def</code> to <code>${TOPDIR}/Make.defs</code>,<li>
+  <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i></code>/setenv.sh</code> to <code>${TOPDIR}/setenv.sh</code>, and</li>
+  <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i></code>/defconfig</code> to <code>${TOPDIR}/.config</code></li>
+</ul>
+<p>
+  Where <i>&lt;board-name&gt;</i> is the name of one of the sub-directories of the
+  NuttX <a href="#DirStructConfigs"><code>configs/</code></a> directory.
+  This sub-directory name corresponds to one of the supported boards
+  identified <a href="#supportedboards">above</a>.
+</p>
+<p>
+  <b>Automated Configuration</b>.
+  There is a script that automates these steps.  The following steps will
+  accomplish the same configuration:
+</p>
+<ul><pre>
+  cd tools
+  ./configure.sh <i>&lt;board-name&gt;</i>
+</pre></ul>
+
+<p>
+  <b>Additional Configuration Steps</b>.
+  The remainder of configuration steps will be performed by <a href="#topmakefile"><code>${TOPDIR}/Makefile</code></a>
+  the first time the system is built as described below.
+</p>
+
+<h2><a name="buildingnuttx">3.2 Building NuttX</a></h2>
+<p>
+  <b>Building NuttX</b>.
+   Once NuttX has been configured as described <a href="#configuringnuttx">above</a>, it may be built as follows:
+</p>
+<ul><pre>
+cd ${TOPDIR}
+source ./setenv.sh
+make
+</pre></ul>
+<p>
+  The <code>${TOPDIR}</code> directory holds:
+</p>
+<ul>
+  <li>The top level <a href="#topmakefile"><code>Makefile</code></a> that controls the NuttX build.
+</ul>
+<p>
+  That directory also holds:
+</p>
+<ul>
+  <li>The makefile fragment <a href="#boardconfigfiles"><code>.config</code></a> that describes the current configuration.</li>
+  <li>The makefile fragment <a href="#boardconfigfiles"><code>Make.defs</code></a> that provides customized build targers, and</li>
+  <li>The shell script <a href="#boardconfigfiles"><code>setenv.sh</code></a> that sets up the configuration environment for the build.</li>
+</ul>
+<p>
+The <a href="#boardconfigfiles"><code>setenv.sh</code></a> contains Linux environmental settings that are needed for the build.
+The specific environmental definitions are unique for each board but should include, as a minimum, updates to the <code>PATH</code> variable to include the full path to the architecture-specific toolchain identified in <a href="#boardconfigfiles"><code>Make.defs</code></a>.
+The <a href="#boardconfigfiles"><code>setenv.sh</code></a> only needs to be source'ed at the beginning of a session.
+The system can be re-made subsequently by just typing <code>make</code>.
+</p>
+<p>
+  <b>First Time Make.</b>
+  Additional configuration actions will be taken the first time that system is built.
+  These additional steps include:
+</p>
+<ul>
+  <li>Auto-generating the file <code>include/nuttx/config.</code> using the <code>${TOPDIR}/.config</code> file.
+  <li>Creating a link to <code>${TOPDIR}/arch/</code><i>&lt;arch-name&gt;</i><code>/include</code> at <code>${TOPDIR}/include/arch</code>.
+  <li>Creating a link to <code>${TOPDIR}/configs/</code><i>&lt;board-name&gt;</i><code>/include</code> at <code>${TOPDIR}/include/arch/board</code>.
+  <li>Creating a link to <code>${TOPDIR}/configs/</code><i>&lt;board-name&gt;</i><code>/src</code> at <code>${TOPDIR}/arch/</code><i>&lt;arch-name&gt;</i><code>/src/board</code>
+  <li>Creating make dependencies.
+</ul>
 
 <h1>4.0 <a name="ArchAPIs">Architecture APIs</a></h1>
 
