@@ -48,8 +48,7 @@ CSRCS		= up_initialize.c up_idle.c up_interruptcontext.c \
 		  up_releasepending.c up_reprioritizertr.c \
 		  up_exit.c up_assert.c up_allocateheap.c \
 		  up_irq.c up_savecontext.c up_restorecontext.c \
-		  up_timerisr.c up_putc.c up_debug.c up_leds.c \
-		  up_delay.c
+		  up_timerisr.c up_putc.c up_debug.c up_delay.c
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 SRCS		= $(SSRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
@@ -69,6 +68,8 @@ TESTSRCS	= up_irqtest.c
 TESTOBJS	= $(TESTSRCS:.c=$(OBJEXT))
 TESTLINKOBJS	= up_head$(OBJEXT)
 TESTEXTRAOBJS	= up_savecontext$(OBJEXT) up_restorecontext$(OBJEXT)
+
+BOARDDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src/board
 
 IRAM_SIZE	= 0x100
 DEF_STACK_BASE	= 0x24
@@ -163,16 +164,23 @@ $(SDCCLIBDIR)/libmysdcc.lib: $(SDCCLIBDIR)/libsdcc.lib
 		> libmysdcc.lib
 	@sudo mv -f libmysdcc.lib $(SDCCLIBDIR)/libmysdcc.lib
 
+# This builds the libboard library in the board/ subdirectory 
+
+board/libboard$(LIBEXT):
+	$(MAKE) -C board TOPDIR=$(TOPDIR) libboard$(LIBEXT)
+
 # This target builds the final executable
 
-pass1.ihx: up_mem.h $(SDCCLIBDIR)/libmysdcc.lib $(LINKOBJS)
-	$(CC) $(LDFLAGS) $(LDPATHES) $(SDCCPATH) $(LINKOBJS) $(LDLIBS) $(SDCCLIBS) -o $@
+pass1.ihx: up_mem.h $(SDCCLIBDIR)/libmysdcc.lib $(LINKOBJS) board/libboard$(LIBEXT)
+	$(CC) $(LDFLAGS) $(LDPATHES) -L$(BOARDDIR) $(SDCCPATH) $(LINKOBJS) \
+		$(LDLIBS) -llibboard$(LIBEXT) $(SDCCLIBS) -o $@
 	@rm -f up_mem.h
 	@rm -f up_allocateheap$(OBJEXT) libarch$(LIBEXT)
 	@$(MAKE) TOPDIR=$(TOPDIR) libarch$(LIBEXT)
 
 nuttx.ihx: up_mem.h $(SDCCLIBDIR)/libmysdcc.lib $(LINKOBJS)
-	$(CC) $(LDFLAGS) $(LDPATHES) $(SDCCPATH) $(LINKOBJS) $(LDLIBS) $(SDCCLIBS) -o $@
+	$(CC) $(LDFLAGS) $(LDPATHES) -L$(BOARDDIR) $(SDCCPATH) $(LINKOBJS) \
+		$(LDLIBS) -llibboard$(LIBEXT) $(SDCCLIBS) -o $@
 
 nuttx$(EXEEXT): pass1.ihx nuttx.ihx
 	@rm -f pass1.*
@@ -191,17 +199,26 @@ irqtest:
 # Build dependencies
 
 .depend: Makefile up_mem.h $(DEPSRCS)
+	@if [ -e board/Makefile ]; then \
+		$(MAKE) -C board TOPDIR=$(TOPDIR) depend ; \
+	if
 	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	touch $@
 
 depend: .depend
 
 clean:
+	@if [ -e board/Makefile ]; then \
+		$(MAKE) -C board TOPDIR=$(TOPDIR) clean ; \
+	fi
 	rm -f libarch$(LIBEXT) up_mem.h
 	rm -f *.asm *.rel *.lst *.rst *.sym *.adb *.lnk *.map *.mem *.ihx *.hex *~
 	if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
 
 distclean: clean
+	@if [ -e board/Makefile ]; then \
+		$(MAKE) -C board TOPDIR=$(TOPDIR) distclean ; \
+	fi
 	rm -f Make.dep .depend
 
 -include Make.dep
