@@ -69,7 +69,7 @@
 	* Some Documentation updates
 	* Added support for the Neuros OSD / DM320
 
-0.2.2 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.2 2007-03-26 Gregory Nutt <spudmonkey@racsa.co.cr>
 	* Created the configs/ directory; separated board configuration
 	  from processor architecture logic
 	* Add memory leak detection test to examples/ostest
@@ -88,6 +88,9 @@
 	* Added pthread_setschedprio().
 	* Added directories to hold board-specific header files
 	* Added directories to hold board-specific drivers
+
+0.2.3 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
 	* Started m68322
 
 
