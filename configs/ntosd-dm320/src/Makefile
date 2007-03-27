@@ -40,11 +40,13 @@ CFLAGS		+= -I$(TOPDIR)/sched
 
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
-CSRCS		= 
+CSRCS		= up_leds.c
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
+
+CFLAGS		+= -I $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 
 all: libboard$(LIBEXT)
 
