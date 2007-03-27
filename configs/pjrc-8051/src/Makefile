@@ -40,11 +40,13 @@ CFLAGS		+= -I$(TOPDIR)/sched
 
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
-CSRCS		= 
+CSRCS		= up_leds.c
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
+
+CFLAGS		+= -I $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 
 all: libboard$(LIBEXT)
 
@@ -67,7 +69,8 @@ libboard$(LIBEXT): $(OBJS)
 depend: .depend
 
 clean:
-	rm -f libboard$(LIBEXT) *~
+	rm -f libboard$(LIBEXT)
+	rm -f *.asm *.rel *.lst *.rst *.sym *.adb *.lnk *.map *.mem *.ihx *.hex *~
 	if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
 
 distclean: clean
