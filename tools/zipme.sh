@@ -38,12 +38,21 @@ WD=`pwd`
 DATECODE=$1
 
 TAR="tar cvf"
-ZIP=bzip2
+ZIP=gzip
+
+# This is a list of bad directories that have creapt into the CVS tree
+# due to bad imports, renamed directories, etc.
+
+GARBAGEDIRS="\
+  configs/m68332evb/src/src\
+  configs/m68332evb/src/include\
+  configs/m68332evb/src/doc\
+"
 
 # Make sure we know what is going on
 
 if [ -z ${DATECODE} ] ; then
-   echo "You must supply a date code like MMDDYY as a parameter"
+   echo "You must supply a version like xx.yy.zz as a parameter"
    exit 1;
 fi
 
@@ -74,12 +83,21 @@ fi
 TAR_NAME=nuttx-${DATECODE}.tar
 ZIP_NAME=${TAR_NAME}.bz2
 
-# Prepare the nuttx directory
+# Prepare the nuttx directory -- Remove editor garbage
 
 find ${NUTTXDIR} -name '*~' -exec rm -f '{}' ';' || \
       { echo "Removal of emacs garbage failed!" ; exit 1 ; }
 find ${NUTTXDIR} -name '*.swp' -exec rm -f '{}' ';' || \
       { echo "Removal of VI garbage failed!" ; exit 1 ; }
+
+# Prepare the nuttx directory -- Remove garbage directories
+
+for dir in ${GARBAGEDIRS}; do
+	echo "Removing ${NUTTX}/${dir}"
+	rm -rf ${NUTTX}/${dir}
+done
+
+# Perform a full clean for the distribution
 
 make -C ${NUTTX} distclean
 
