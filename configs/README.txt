@@ -11,9 +11,33 @@ Table of Contents
 Board-Specific Configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+The NuttX configuration consists of:
+
+o Processor architecture specific files.  These are the files contained
+  in the arch/<arch-name>/ directory.
+
+o Chip/SoC specific files.  Each processor processor architecture
+  is embedded in chip or System-on-a-Chip (SoC) architecture.  The
+  full chip architecture includes the processor architecture plus
+  chip-specific interrupt logic, general purpose I/O (GIO) logic, and
+  specialized, internal peripherals (such as UARTs, USB, etc.).
+
+  These chip-specific files are contained within chip-specific
+  sub-directories in the arch/<arch-name>/ directory and are selected
+  via the CONFIG_ARCH_name selection
+
+o Board specific files.  In order to be usable, the chip must be
+  contained in a board environment.  The board configuration defines
+  additional properties of the board including such things as
+  peripheral LEDs, external peripherals (such as network, USB, etc.).
+
+  These board-specific configuration files can be found in the
+  configs/<board-name>/ sub-directories and are discussed in this
+  README.
+
 The configs/ subdirectory contains configuration data for each board.  These
 board-specific configurations plus the architecture-specific configurations in
-the arch/ subdirectory complete define a customized port of NuttX.
+the arch/ subdirectory completely define a customized port of NuttX.
 
 Directory Structure
 ^^^^^^^^^^^^^^^^^^^
@@ -25,8 +49,10 @@ following characteristics:
 
 	<board-name>
 	|-- include/
+	|   `-- (board-specific header files)
 	|-- src/
-	|   `-- Makefile
+	|   |-- Makefile
+	|   `-- (board-specific source files)
 	|-- Make.defs
 	|-- defconfig
 	`-- setenv.sh

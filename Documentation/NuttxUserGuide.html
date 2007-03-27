@@ -11,85 +11,110 @@
 <center><h1><i>Under Construction</i></h1></center>
 <hr>
 <hr>
-<CENTER><BIG><B>
+<CENTER><BIG><b>
 NuttX Operating System
-<P>
+<p>
 User's Manual
-</B></BIG>
-<P>
+</b></BIG>
+<p>
 <SMALL>by</SMALL>
-<P>
+<p>
 Gregory Nutt
-<P>
-<SMALL>Last Update: March 21, 2007</SMALL>
+<p>
+<SMALL>Last Update: March 26, 2007</SMALL>
 </CENTER>
 
-<H1>1.0 <A NAME="Introduction">Introduction</A></H1>
+<h1>1.0 <A NAME="Introduction">Introduction</a></h1>
 
-<P>
-This user's manual is divided into three sections plus a index:
-<UL>
-<LI><B>Section 1.0, <A HREF="#Introduction">Introduction</A></B>:
-This section provides an overview of the NuttX user's manual.
-<LI><B>Section 2.0, <A HREF="#OS_Interfaces">OS Interfaces</A></B>:
-This section details the  interfaces provided by NuttX from the
-perspective of the firmware developer.  This section is divided
-into several paragraphs that describe different groups of OS interfaces:
-<UL>
-<LI>Paragraph 2.1 <A HREF="#Task_Control">Task Control Interfaces</A>
-<LI>Paragraph 2.2 <A HREF="#Task_Schedule">Task Scheduling Interfaces</A>
-<LI>Paragraph 2.3 <A HREF="#Task_Switch">Task Switching Interfaces</A>
-<LI>Paragraph 2.4 <A HREF="#Message_Queue">Named Message Queue Interfaces</A>
-<LI>Paragraph 2.5 <A HREF="#Semaphores">Counting Semaphore Interfaces</A>
-<LI>Paragraph 2.6 <A HREF="#Watchdogs">Watchdog Timer Interfaces</A>
-<LI>Paragraph 2.7 <A HREF="#ClocksNTimers">Clocks and Timers</A>
-<LI>Paragraph 2.8 <A HREF="#Signals">Signal Interfaces</A>
-<LI>Paragraph 2.9 <A HREF="#Pthread">Pthread Interfaces</A>
-<LI>Paragraph 2.10 <A HREF="#FileSystem">Filesystem Interfaces</A>
-</UL>
-<LI><B>Section 3.0, <A HREF="#Data_Structures">OS Data Structures</A></B>:
-This section documents the data structures that are used at the NuttX
-interface.
-<li><a href="#index">Index</a></li>
+<p>
+  This manual provides general usage information for the NuttX RTOS from the
+    perspective of the firmware developer.
+
+<h2>1.1 <a name="overview">Document Overview</a></h2>
+<p>
+  This user's manual is divided into three sections plus a index:
+</p>
+<ul>
+  <li>
+    <b>Section 1.0, <a href="#Introduction">Introduction</a></b>:
+    This section provides an overview of the NuttX user's manual.
+  </li>
+  <li>
+    <b>Section 2.0, <a href="#OS_Interfaces">OS Interfaces</a></b>:
+    This section details the program interfaces provided by NuttX.
+    This section is divided into several paragraphs that describe different groups of OS interfaces:
+    <ul>
+      <li>Paragraph 2.1 <a href="#Task_Control">Task Control Interfaces</a></li>
+      <li>Paragraph 2.2 <a href="#Task_Schedule">Task Scheduling Interfaces</a></li>
+      <li>Paragraph 2.3 <a href="#Task_Switch">Task Switching Interfaces</a></li>
+      <li>Paragraph 2.4 <a href="#Message_Queue">Named Message Queue Interfaces</a></li>
+      <li>Paragraph 2.5 <a href="#Semaphores">Counting Semaphore Interfaces</a></li>
+      <li>Paragraph 2.6 <a href="#Watchdogs">Watchdog Timer Interfaces</a></li>
+      <li>Paragraph 2.7 <a href="#ClocksNTimers">Clocks and Timers</a></li>
+      <li>Paragraph 2.8 <a href="#Signals">Signal Interfaces</a></li>
+      <li>Paragraph 2.9 <a href="#Pthread">Pthread Interfaces</a></li>
+      <li>Paragraph 2.10 <a href="#FileSystem">Filesystem Interfaces</a></li>
+    </ul>
+  </li>
+  <li>
+    <b>Section 3.0, <a href="#Data_Structures">OS Data Structures</a></b>:
+    This section documents the data structures that are used at the NuttX
+    interface.
+  </li>
+  <li>
+    <a href="#index">Index</a>
+  </li>
 </ul>
-<HR>
 
-<H1>2.0 <A NAME="OS_Interfaces">OS Interfaces</A></H1>
+<h2>1.2 <a name="scope">Intended Audience and Scope</a></h2>
+<p>
+  The intended audience for this document are firmware developers who are implementing applications on NuttX.
+  Specifically, this documented is limited to addressing only NuttX RTOS APIs that are available to the application developer.
+  As such, this document does not focus on any technical details of the organization or implementation of NuttX.
+  Those technical details are provided in the <a href="NuttxPortingGuide.html">NuttX Porting Guide</a>.
+</p>
+<p>
+  Information about configuring and building NuttX is also needed by the application developer.
+  That information can also be found in the <a href="NuttxPortingGuide.html#configandbuild">NuttX Porting Guide</a>.
+</p>
 
-<P>
-This section describes each C-callable interface to the NuttX
-Operating System. The description of each interface is presented
-in the following format:
-<P>
-<B>Function Prototype:</B> The C prototype of the interface function
+<hr>
+
+<h1>2.0 <A NAME="OS_Interfaces">OS Interfaces</a></h1>
+<p>
+  This section describes each C-callable interface to the NuttX
+  Operating System. The description of each interface is presented
+  in the following format:
+<p>
+<b>Function Prototype:</b> The C prototype of the interface function
 is provided.
-<P>
-<B>Description:</B> The operation performed by the interface function
+<p>
+<b>Description:</b> The operation performed by the interface function
 is discussed.
-<P>
-<B>Input Parameters:</B> All input parameters are listed along
+<p>
+<b>Input Parameters:</b> All input parameters are listed along
 with brief descriptions of each input parameter.
-<P>
-<B>Returned Values:</B> All possible values returned by the interface
+<p>
+<b>Returned Values:</b> All possible values returned by the interface
 function are listed. Values returned as side-effects (through
 pointer input parameters or through global variables) will be
 addressed in the description of the interface function.
-<P>
-<B>Assumptions/Limitations:</B> Any unusual assumptions made by
+<p>
+<b>Assumptions/Limitations:</b> Any unusual assumptions made by
 the interface function or any non-obvious limitations to the use
 of the interface function will be indicated here.
-<P>
-<B>POSIX Compatibility:</B> Any significant differences between the
+<p>
+<b>POSIX Compatibility:</b> Any significant differences between the
 NuttX interface and its corresponding POSIX interface will be noted
 here.
-<P>
+<p>
 NOTE: In order to achieve an independent name space for the NuttX
 interface functions, differences in function names and types are
 to be expected and will not be identified as differences in these
 paragraphs.
-<HR>
+<hr>
 
-<H2>2.1 <A NAME="Task_Control">Task Control Interfaces</A></H2>
+<H2>2.1 <A NAME="Task_Control">Task Control Interfaces</a></H2>
 
 <p>
   <b>Tasks</b>.
@@ -139,20 +164,20 @@ paragraphs.
 
 <H3><a name="taskcreate">2.1.1 task_create</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
    #include &lt;sched.h&gt;
    int task_create(char *name, int priority, int stack_size, main_t entry, const char *argv[]);
 </PRE>
 
-<P>
-<B>Description:</B> 
+<p>
+<b>Description:</b> 
    This function creates and activates a new task with a
    specified priority and returns its system-assigned ID.
 </p>
 
-<P>The entry address entry is the address of the &quot;main&quot;
+<p>The entry address entry is the address of the &quot;main&quot;
    function of the task.
    This function will be called once the C environment has been set up.
    The specified function will be called with four arguments.
@@ -180,34 +205,34 @@ paragraphs.
    descriptors (corresponding to stdin, stdout, and stderr) and
    redirection of standard I/O is supported.
 </p>
-<P>
-<B>Input Parameters:</B> 
-  <UL>
-    <LI><I>name</I>. Name of the new task</LI>
-    <LI><I>priority</I>. Priority of the new task</LI>
-    <LI><I>stack_size</I>. size (in bytes) of the stack needed</LI>
-    <LI><I>entry</I>. Entry point of a new task</LI>
-    <LI><I>argv</I>. A pointer to an array of input parameters.  Up to
+<p>
+<b>Input Parameters:</b> 
+  <ul>
+    <li><I>name</I>. Name of the new task</LI>
+    <li><I>priority</I>. Priority of the new task</LI>
+    <li><I>stack_size</I>. size (in bytes) of the stack needed</LI>
+    <li><I>entry</I>. Entry point of a new task</LI>
+    <li><I>argv</I>. A pointer to an array of input parameters.  Up to
        <code>CONFIG_MAX_TASK_ARG</code> parameters may be provided.
        If fewer than <code>CONFIG_MAX_TASK_ARG</code> parameters are
        passed, the list should be terminated with a NULL argv[] value.
        If no parameters are required, argv may be NULL.
-  </UL>
-<P>
-  <B>Returned Values:</B> 
+  </ul>
+<p>
+  <b>Returned Values:</b> 
 </P>
-<UL>
-<LI>
+<ul>
+<li>
   Returns the non-zero task ID of the new task or
   ERROR if memory is insufficient or the task cannot be
   created (errno is not set).
 </LI>
-</UL>
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>POSIX Compatibility:</B> This is a NON-POSIX interface.
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>POSIX Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following similar interface:
 <PRE>
    int taskSpawn(char *name, int priority, int options, int stackSize, FUNCPTR entryPt,
@@ -215,71 +240,71 @@ VxWorks provides the following similar interface:
                  int arg6, int arg7, int arg8, int arg9, int arg10);
 </PRE>
 
-<P>
+<p>
   The NuttX task_create() differs from VxWorks' taskSpawn() in the
   following ways:
 </p>
-<UL>
-<LI>Interface name
-<LI>Various differences in types of arguments
-<LI>There is no options arguement.
-<LI>A variable number of parameters can be passed to a task (VxWorks supports ten).
-</UL>
+<ul>
+<li>Interface name
+<li>Various differences in types of arguments
+<li>There is no options arguement.
+<li>A variable number of parameters can be passed to a task (VxWorks supports ten).
+</ul>
 
 <H3><a name="taskinit">2.1.2 task_init</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
    #include &lt;sched.h&gt;
    STATUS task_init(_TCB *tcb, char *name, int priority, uint32 *stack, uint32 stack_size,
                     maint_t entry, const char *argv[]);
 </PRE>
 
-<P>
-<B>Description:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
   This function initializes a Task Control Block (TCB)
   in preparation for starting a new thread.  It performs a subset
   of the functionality of <code>task_create()</code> (see above).
 </P>
-<P>
+<p>
   Unlike task_create(), task_init() does not activate the task.
   This must be done by calling task_activate().
 </P>
-<P>
-<B>Input Parameters:</B> 
-  <UL>
-    <LI><I>tcb</I>. Address of the new task's TCB
-    <LI><I>name</I>. Name of the new task (not used)
-    <LI><I>priority</I>. Priority of the new task
-    <LI><I>stack</I>. Start of the pre-allocated stack
-    <LI><I>stack_size</I>. size (in bytes) of the pre-allocated stack
-    <LI><I>entry</I>. Entry point of a new task
-    <LI><I>argv</I>. A pointer to an array of input parameters.  Up to
+<p>
+<b>Input Parameters:</b> 
+  <ul>
+    <li><I>tcb</I>. Address of the new task's TCB
+    <li><I>name</I>. Name of the new task (not used)
+    <li><I>priority</I>. Priority of the new task
+    <li><I>stack</I>. Start of the pre-allocated stack
+    <li><I>stack_size</I>. size (in bytes) of the pre-allocated stack
+    <li><I>entry</I>. Entry point of a new task
+    <li><I>argv</I>. A pointer to an array of input parameters.  Up to
        <code>CONFIG_MAX_TASK_ARG</code> parameters may be provided.
        If fewer than <code>CONFIG_MAX_TASK_ARG</code> parameters are
        passed, the list should be terminated with a NULL argv[] value.
        If no parameters are required, argv may be NULL.
-  </UL>
+  </ul>
 </p>
-<P>
-<B>Returned Values:</B> 
+<p>
+<b>Returned Values:</b> 
 </p>
-<UL>
-  <LI><P>OK, or ERROR if the task cannot be initialized.</P>
-  <P>This function can only failure is it is unable to assign
+<ul>
+  <li><p>OK, or ERROR if the task cannot be initialized.</P>
+  <p>This function can only failure is it is unable to assign
     a new, unique task ID to the TCB (errno is not set).</P>
-</UL>
-<P>
-<B>Assumptions/Limitations:</B>
-<UL>
-<LI>task_init() is provided to support internal OS functionality.  It is
-<B>not recommended</B> for normal usage.  task_create() is the preferred
+</ul>
+<p>
+<b>Assumptions/Limitations:</b>
+<ul>
+<li>task_init() is provided to support internal OS functionality.  It is
+<b>not recommended</b> for normal usage.  task_create() is the preferred
 mechanism to initialize and start a new task.
-</UL>
-<P>
-<B>POSIX Compatibility:</B> This is a NON-POSIX interface.
+</ul>
+<p>
+<b>POSIX Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following similar interface:
 <PRE>
    STATUS taskInit(WIND_TCB *pTcb, char *name, int priority, int options, uint32 *pStackBase, int stackSize,
@@ -287,121 +312,121 @@ VxWorks provides the following similar interface:
                    int arg6, int arg7, int arg8, int arg9, int arg10);
 </PRE>
 
-<P>
+<p>
   The NuttX task_init() differs from VxWorks' taskInit() in the
   following ways:
 </p>
-<UL>
-<LI>Interface name
-<LI>Various differences in types or arguments
-<LI>There is no options argument.
-<LI>A variable number of parameters can be passed to a task (VxWorks supports ten).
-</UL>
+<ul>
+<li>Interface name
+<li>Various differences in types or arguments
+<li>There is no options argument.
+<li>A variable number of parameters can be passed to a task (VxWorks supports ten).
+</ul>
 
 <H3><a name="taskactivate">2.1.3 task_activate</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;sched.h&gt;
     STATUS task_activate( _TCB *tcb );
 </PRE>
 
-<P>
-<B>Description:</B> This function activates tasks created by task_init().
+<p>
+<b>Description:</b> This function activates tasks created by task_init().
 Without activation, a task is ineligible for execution by the
 scheduler.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>tcb</I>. The TCB for the task for the task (same as the
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>tcb</I>. The TCB for the task for the task (same as the
 task_init argument).
-</UL>
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>OK, or ERROR if the task cannot be activated (errno is not set).
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>OK, or ERROR if the task cannot be activated (errno is not set).
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B>
-<UL>
-<LI>task_activate() is provided to support internal OS functionality.  It is
-<B>not recommended</B> for normal usage.  task_create() is the preferred
+<p>
+<b>Assumptions/Limitations:</b>
+<ul>
+<li>task_activate() is provided to support internal OS functionality.  It is
+<b>not recommended</b> for normal usage.  task_create() is the preferred
 mechanism to initialize and start a new task.
-</UL>
-<P>
-<B>POSIX Compatibility:</B> This is a NON-POSIX interface.
+</ul>
+<p>
+<b>POSIX Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following similar interface:
 <PRE>
     STATUS taskActivate( int tid );
 </PRE>
 
-<P>
+<p>
   The NuttX task_activate() differs from VxWorks' taskActivate() in the
   following ways:
 </p>
-<UL>
-<LI>Function name
-<LI>With VxWork's taskActivate, the pid argument is supposed to be
+<ul>
+<li>Function name
+<li>With VxWork's taskActivate, the pid argument is supposed to be
 the pointer to the WIND_TCB cast to an integer.
-</UL>
+</ul>
 
 <H3><a name="taskdelete">2.1.4 task_delete</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;sched.h&gt;
     STATUS task_delete( pid_t pid );
 </PRE>
 
-<P>
-<B>Description:</B> This function causes a specified task to cease
+<p>
+<b>Description:</b> This function causes a specified task to cease
 to exist -- its stack and TCB will be deallocated. This function
 is the companion to task_create().
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>pid</I>. The task ID of the task to delete. An ID of
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>pid</I>. The task ID of the task to delete. An ID of
 zero signifies the calling task.
-</UL>
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>OK, or ERROR if the task cannot be deleted.
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>OK, or ERROR if the task cannot be deleted.
 This function can fail if the provided pid does not correspond to a task (errno is not set)
-</UL>
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
 task_delete() must be used with caution:  If the task holds resources
 (for example, allocated memory or semaphores needed by other tasks), then
 task_delete() can strand those resources.
-<P>
-<B>POSIX Compatibility:</B> This is a NON-POSIX interface.
+<p>
+<b>POSIX Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following similar interface:
 <PRE>
     STATUS taskDelete( int tid );
 </PRE>
 
-<P>
+<p>
   The NuttX task_delete() differs from VxWorks' taskDelete() in
   the following ways:
 </p>
-<UL>
-<LI>No support is provided for calling the tasks deletion routines
+<ul>
+<li>No support is provided for calling the tasks deletion routines
 (because taskDeleteHookAdd() is not supported).
-<LI>Deletion of self is not supported.  Use _exit();
-</UL>
+<li>Deletion of self is not supported.  Use _exit();
+</ul>
 
 <H3><a name="exit">2.1.5 exit</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;sched.h&gt;
     void exit( int code );
@@ -410,25 +435,25 @@ VxWorks provides the following similar interface:
     void _exit( int code );
 </PRE>
 
-<P>
-<B>Description:</B> This function causes the calling task to cease
+<p>
+<b>Description:</b> This function causes the calling task to cease
 to exist -- its stack and TCB will be deallocated.  exit differs from
 _exit in that it flushs streams, closes file descriptors and will
 execute any function registered with atexit().
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>code</I>. (ignored)
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>code</I>. (ignored)
+</ul>
 
-<P>
-<B>Returned Values:</B>  None.
+<p>
+<b>Returned Values:</b>  None.
 
-<P>
-<B>Assumptions/Limitations:</B> 
+<p>
+<b>Assumptions/Limitations:</b> 
 
-<P>
-<B>POSIX Compatibility:</B> This is equivalent to the ANSI interface:
+<p>
+<b>POSIX Compatibility:</b> This is equivalent to the ANSI interface:
 <PRE>
     void exit( int code );
 </PRE>
@@ -437,92 +462,92 @@ And the unix interface:
     void _exit( int code );
 </PRE>
 
-<P>
+<p>
   The NuttX exit() differs from ANSI exit() in the following ways:
 </p>
-<UL>
-<LI>The <I>code</I> parameter is ignored.
-</UL>
+<ul>
+<li>The <I>code</I> parameter is ignored.
+</ul>
 
 <H3><a name="taskrestart">2.1.6 task_restart</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;sched.h&gt;
     STATUS task_restart( pid_t pid );
 </PRE>
 
-<P>
-<B>Description:</B> This function &quot;restarts&quot; a task.
+<p>
+<b>Description:</b> This function &quot;restarts&quot; a task.
 The task is first terminated and then reinitialized with same
 ID, priority, original entry point, stack size, and parameters
 it had when it was first started.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>pid</I>. The task ID of the task to delete. An ID of
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>pid</I>. The task ID of the task to delete. An ID of
 zero signifies the calling task.
-</UL>
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>
   OK, or ERROR if the task ID is invalid or the task could
   not be restarted.
   This function can fail if:
   (1) A pid of zero or the pid of the calling task is provided (functionality not implemented)
   (2) The pid is not associated with any task known to the system.
 </LI>
-</UL>
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>POSIX Compatibility:</B> This is a NON-POSIX interface.
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>POSIX Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following similar interface:
 <PRE>
     STATUS taskRestart (int tid);
 </PRE>
 
-<P>
+<p>
   The NuttX task_restart() differs from VxWorks' taskRestart() in the following ways:
 </p>
-<UL>
-<LI>Restart of the currently running task is not supported.
-<LI>The VxWorks description says that the ID, priority, etc. take
+<ul>
+<li>Restart of the currently running task is not supported.
+<li>The VxWorks description says that the ID, priority, etc. take
 the value that they had when the task was <I>terminated</I>.
-</UL>
+</ul>
 
 <H3><a name="getpid">2.1.7 getpid</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;unistd.h&gt;
     pid_t getpid( void );
 </PRE>
 
-<P>
-<B>Description:</B> This function returns the task ID of the
+<p>
+<b>Description:</b> This function returns the task ID of the
 calling task. The task ID will be invalid if called at the interrupt
 level.
-<P>
-<B>Input Parameters:</B> None.
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>The task ID of the calling task.
-</UL>
+<p>
+<b>Input Parameters:</b> None.
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>The task ID of the calling task.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>POSIX Compatibility:</B>
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>POSIX Compatibility:</b>
 Compatible with the POSIX interface of the same name.
 
-<H2>2.2 <A NAME="Task_Schedule">Task Scheduling Interfaces</A></H2>
+<H2>2.2 <A NAME="Task_Schedule">Task Scheduling Interfaces</a></H2>
 
 <p>
   By default, NuttX performs strict priority scheduling: Tasks of higher
@@ -560,7 +585,7 @@ Compatible with the POSIX interface of the same name.
     int sched_setparam(pid_t pid, const struct sched_param *param);
 </pre>
 <p>
-  <b>Description:</B>
+  <b>Description:</b>
   This function sets the priority of the task specified by pid input parameter.
 </p>
 <p>
@@ -607,7 +632,7 @@ Compatible with the POSIX interface of the same name.
   <b>Assumptions/Limitations:</b>
 </p>
 <p>
-  <B>POSIX  Compatibility:</B>
+  <b>POSIX  Compatibility:</b>
   Comparable to the POSIX interface of the same name.
   Differences from the full POSIX implementation include:
 </p>
@@ -617,66 +642,75 @@ Compatible with the POSIX interface of the same name.
 
 <H3><a name="schedgetparam">2.2.2 sched_getparam</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;sched.h&gt;
     int sched_getparam (pid_t pid, struct sched_param *param);
 </PRE>
 
-<P>
-<B>Description:</B> This function gets the scheduling priority
+<p>
+<b>Description:</b> This function gets the scheduling priority
 of the task specified by pid.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>pid</I>. The task ID of the task. If pid is zero, the
-priority of the calling task is returned.
-<li><code>param<code>.</li> A structure whose member sched_priority is the
-integer priority. The task's priority is copied to the sched_priority
-element of this structure.
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li>
+  <code>pid</code>. The task ID of the task.
+  If pid is zero, the priority of the calling task is returned.
+</li>
+<li>
+  <code>param</code>.
+  A structure whose member <code>sched_priority</code> is the integer priority.
+   The task's priority is copied to the <code>sched_priority</code> element of this structure.
+</li>
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK) if successful, otherwise -1 (ERROR).
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK) if successful, otherwise -1 (ERROR).
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="schedsetscheduler">2.2.3 sched_setscheduler</a></H3>
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;sched.h&gt;
     int sched_setscheduler (pid_t pid, int policy, const struct sched_param *param);
 </PRE>
-<P>
-  <B>Description:</B>
+<p>
+  <b>Description:</b>
   <i>sched_setscheduler()</i>  sets both the scheduling policy
   and the priority for the task identified by pid.
   If pid equals zero, the scheduler of the calling
   thread will be set.
   The parameter 'param' holds the priority of the thread under the new policy.
 </p>
-<P>
-<B>Input Parameters:</B> 
-<UL>
-  <LI><I>pid</I>. The task ID of the task. If pid is zero, the
+<p>
+<b>Input Parameters:</b> 
+<ul>
+  <li>
+    <I>pid</I>. The task ID of the task. If pid is zero, the
     priority of the calling task is set.
-  <LI><I>policy</I>. Scheduling policy requested (either SCHED_FIFO
-    or SCHED_RR).
-  <li><code>param<code>.</li> A structure whose member sched_priority is the
+  </li>
+  <li>
+    <I>policy</I>. Scheduling policy requested (either SCHED_FIFO or SCHED_RR).
+  </li>
+  <li>
+    <code>param<code>. A structure whose member sched_priority is the
     integer priority. The range of valid priority numbers is from
     SCHED_PRIORITY_MIN through SCHED_PRIORITY_MAX.
-</UL>
-<P>
-  <B>Returned Values:</B> 
+  </li>
+</ul>
+<p>
+  <b>Returned Values:</b> 
   On success, <i>sched_setscheduler()</i> returns OK (zero).  On
   error, ERROR (-1) is returned, and errno is set appropriately:
 </p>
@@ -684,23 +718,23 @@ interface of the same name.
   <li>EINVAL The scheduling policy is not one of the
     recognized policies.</li>
   <li>ESRCH  The task whose ID is pid could not be found.</li>
-</UL>
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="setgetscheduler">2.2.4 sched_getscheduler</a></H3>
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;sched.h&gt;
     int sched_getscheduler (pid_t pid);
 </PRE>
-<P>
-  <B>Description:</B>
+<p>
+  <b>Description:</b>
   <i>sched_getscheduler()</i> returns the scheduling policy
   currently applied to the task identified by pid. If
   pid equals zero, the policy of the calling process will
@@ -712,18 +746,18 @@ interface of the same name.
 
  This function returns the current scheduling
 policy.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-  <LI><I>pid</I>.
+<p>
+<b>Input Parameters:</b> 
+<ul>
+  <li><I>pid</I>.
     The task ID of the task to query.
     If pid is zero, the calling task is queried.
   </LI>
-</UL>
-<P>
-<B>Returned Values:</B> 
-<UL>
-  <LI>
+</ul>
+<p>
+<b>Returned Values:</b> 
+<ul>
+  <li>
     On success, <i>sched_getscheduler()</i> returns the policy for
     the task (either SCHED_FIFO or SCHED_RR).
     On error,  ERROR (-1) is returned, and errno is set appropriately:
@@ -731,114 +765,114 @@ policy.
       <li>ESRCH  The task whose ID is pid could not be found.</li>
     </ul>
   </li>
-</UL>
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+</ul>
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 Differences from the full POSIX implementation include:
-<UL>
-<LI>Does not report errors via <I>errno</I>.
-</UL>
+<ul>
+<li>Does not report errors via <I>errno</I>.
+</ul>
 
 <H3><a name="sched_yield">2.2.5 sched_yield</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;sched.h&gt;
     int sched_yield( void );
 </PRE>
 
-<P>
-<B>Description:</B> This function forces the calling task to give
+<p>
+<b>Description:</b> This function forces the calling task to give
 up the CPU (only to other tasks at the same priority).
-<P>
-<B>Input Parameters:</B> None.
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK) or -1 (ERROR)
-</UL>
+<p>
+<b>Input Parameters:</b> None.
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK) or -1 (ERROR)
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="schedgetprioritymax">2.2.6 sched_get_priority_max</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;sched.h&gt;
     int sched_get_priority_max (int policy)
 </PRE>
 
-<P>
-<B>Description:</B> This function returns the value of the highest
+<p>
+<b>Description:</b> This function returns the value of the highest
 possible task priority for a specified scheduling policy.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>policy</I>. Scheduling policy requested.
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>policy</I>. Scheduling policy requested.
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>The maximum priority value or -1 (ERROR).
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>The maximum priority value or -1 (ERROR).
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="schedgetprioritymin">2.2.7 sched_get_priority_min</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;sched.h&gt;
     int sched_get_priority_min (int policy);
 </PRE>
 
-<P>
-<B>Description:</B> This function returns the value of the lowest
+<p>
+<b>Description:</b> This function returns the value of the lowest
 possible task priority for a specified scheduling policy.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>policy</I>. Scheduling policy requested.
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>policy</I>. Scheduling policy requested.
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>The minimum priority value or -1 (ERROR)
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>The minimum priority value or -1 (ERROR)
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="schedgetrrinterval">2.2.8 sched_get_rr_interval</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;sched.h&gt;
     int sched_get_rr_interval (pid_t pid, struct timespec *interval);
 </PRE>
 
-<P>
-  <B>Description:</B> 
+<p>
+  <b>Description:</b> 
   <i>sched_rr_get_interval()</i>  writes  the timeslice interval
   for task identified by <i>pid</i> into  the timespec structure
   pointed to by <i>interval</i>.  If pid is zero, the timeslice
@@ -846,35 +880,35 @@ interface of the same name.
   identified process should be running under the SCHED_RR
   scheduling policy.'
 </p>
-<P>
-  <B>Input Parameters:</B> 
+<p>
+  <b>Input Parameters:</b> 
 </p>
-<UL>
-<LI><I>pid</I>. The task ID of the task. If pid is zero, the
+<ul>
+<li><I>pid</I>. The task ID of the task. If pid is zero, the
 priority of the calling task is returned.
-<LI><I>interval</I>. A structure used to return the time slice.
-</UL>
+<li><I>interval</I>. A structure used to return the time slice.
+</ul>
 
-<P>
-  <B>Returned Values:</B> 
+<p>
+  <b>Returned Values:</b> 
   On success, sched_rr_get_interval() returns OK (0).  On
   error, ERROR (-1) is returned, and errno is set to:
 </p>
-<UL>
-  <LI>EFAULT Cannot copy to interval</LI>
-  <LI>EINVAL Invalid pid.</LI>
-  <LI>ENOSYS The system call is not yet implemented.</LI>
-  <LI>ESRCH  The process whose ID is pid could not be found.</LI>
-</UL>
+<ul>
+  <li>EFAULT Cannot copy to interval</LI>
+  <li>EINVAL Invalid pid.</LI>
+  <li>ENOSYS The system call is not yet implemented.</LI>
+  <li>ESRCH  The process whose ID is pid could not be found.</LI>
+</ul>
 
-<P>
-  <B>Assumptions/Limitations:</B> 
-<P>
-  <B>POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+  <b>Assumptions/Limitations:</b> 
+<p>
+  <b>POSIX  Compatibility:</b> Comparable to the POSIX
   interface of the same name.
 </P>
 
-<H2>2.3 <A NAME="Task_Switch">Task Switching Interfaces</A></H2>
+<H2>2.3 <A NAME="Task_Switch">Task Switching Interfaces</a></H2>
 
 <ul>
   <li><a href="#schedlock">2.3.1 sched_lock</a></li>
@@ -884,31 +918,31 @@ priority of the calling task is returned.
 
 <H3><a name="schedlock">2.3.1 sched_lock</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;sched.h&gt;
     STATUS sched_lock( void );
 </PRE>
 
-<P>
-<B>Description:</B> This function disables context switching by
+<p>
+<b>Description:</b> This function disables context switching by
 Disabling addition of new tasks to the ready-to-run task list.
 The task that calls this function will be the only task that is
 allowed to run until it either calls sched_unlock (the appropriate
 number of times) or until it blocks itself.
-<P>
-<B>Input Parameters:</B> None.
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>OK or ERROR.
-</UL>
+<p>
+<b>Input Parameters:</b> None.
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>OK or ERROR.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> This is a NON-POSIX interface.
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the comparable interface:
 <PRE>
     STATUS taskLock( void );
@@ -916,32 +950,32 @@ VxWorks provides the comparable interface:
 
 <H3><a name="schedunlock">2.3.2 sched_unlock</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;sched.h&gt;
     STATUS sched_unlock( void );
 </PRE>
 
-<P>
-<B>Description:</B> This function decrements the preemption lock
+<p>
+<b>Description:</b> This function decrements the preemption lock
 count. Typically this is paired with sched_lock() and concludes
 a critical section of code. Preemption will not be unlocked until
 sched_unlock() has been called as many times as sched_lock().
 When the lockCount is decremented to zero, any tasks that were
 eligible to preempt the current task will execute.
-<P>
-<B>Input Parameters:</B> None.
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>OK or ERROR.
-</UL>
+<p>
+<b>Input Parameters:</b> None.
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>OK or ERROR.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> This is a NON-POSIX interface.
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the comparable interface:
 <PRE>
     STATUS taskUnlock( void );
@@ -949,33 +983,33 @@ VxWorks provides the comparable interface:
 
 <H3><a name="schedlockcount">2.3.3 sched_lockcount</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;sched.h&gt;
     sint32 sched_lockcount( void )
 </PRE>
 
-<P>
-<B>Description:</B> This function returns the current value of
+<p>
+<b>Description:</b> This function returns the current value of
 the lockCount. If zero, preemption is enabled; if non-zero, this
 value indicates the number of times that sched_lock() has been called
 on this thread of execution.
-<P>
-<B>Input Parameters:</B> None.
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>The current value of the lockCount.
-</UL>
+<p>
+<b>Input Parameters:</b> None.
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>The current value of the lockCount.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> None.
-<HR>
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> None.
+<hr>
 
-<H2>2.4 <A NAME="Message_Queue">Named Message Queue Interfaces</A></H2>
+<H2>2.4 <A NAME="Message_Queue">Named Message Queue Interfaces</a></H2>
 
 <p>
   NuttX supports POSIX named message queues for intertask communication.
@@ -995,43 +1029,43 @@ on this thread of execution.
 
 <H3><a name="mqopen">2.4.1 mq_open</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;mqueue.h&gt;
     mqd_t mq_open( const char *mqName, int oflags, ... );
 </PRE>
 
-<P>
-<B>Description:</B> This function establish a connection between
+<p>
+<b>Description:</b> This function establish a connection between
 a named message queue and the calling task. After a successful
 call of mq_open(), the task can reference the message queue using
 the address returned by the call. The message queue remains usable
 until it is closed by a successful call to mq_close().
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>mqName</I>. Name of the queue to open
-<LI><I>oflags</I>. Open flags. These may be any combination of:
-<UL>
-<LI><I>O_RDONLY</I>. Open for read access.
-<LI><I>O_WRONLY</I>. Open for write access.
-<LI><I>O_RDWR</I>. Open for both read &amp; write access.
-<LI><I>O_CREAT</I>. Create message queue if it does not already
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>mqName</I>. Name of the queue to open
+<li><I>oflags</I>. Open flags. These may be any combination of:
+<ul>
+<li><I>O_RDONLY</I>. Open for read access.
+<li><I>O_WRONLY</I>. Open for write access.
+<li><I>O_RDWR</I>. Open for both read &amp; write access.
+<li><I>O_CREAT</I>. Create message queue if it does not already
 exist.
-<LI><I>O_EXCL</I>. Name must not exist when opened.
-<LI><I>O_NONBLOCK</I>. Don't wait for data.
-</UL>
+<li><I>O_EXCL</I>. Name must not exist when opened.
+<li><I>O_NONBLOCK</I>. Don't wait for data.
+</ul>
 
-<LI><I>... Optional parameters</I>.
+<li><I>... Optional parameters</I>.
 When the O_CREAT flag is specified, POSIX requires that a third
 and fourth parameter be supplied:
-<UL>
-<LI><I>mode</I>.  The mode parameter is of type mode_t.  In the POSIX
+<ul>
+<li><I>mode</I>.  The mode parameter is of type mode_t.  In the POSIX
 specification, this mode value provides file permission bits for the
 message queue.  This parameter is required but not used in the present
 implementation.
-<LI><I>attr</I>.  A pointer to an mq_attr that is provided to initialize.
+<li><I>attr</I>.  A pointer to an mq_attr that is provided to initialize.
 the message queue.  If attr is NULL, then the messages queue is created
 with implementation-defined default message queue attributes.  If attr is
 non-NULL, then the message queue mq_maxmsg attribute is set to the
@@ -1041,247 +1075,247 @@ addition attempts to send messages on the message queue fail or cause the
 sender to block; the mq_msgsize attribute determines the maximum size of a
 message that can be sent or received.  Other elements of attr are ignored
 (i.e, set to default message queue attributes).
-</UL>
-</UL>
+</ul>
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>A message queue descriptor or -1 (ERROR)
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>A message queue descriptor or -1 (ERROR)
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX interface
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX interface
 of the same name.
 Differences from the full POSIX implementation include:
-<UL>
-<LI>The mq_msgsize attributes determines the maximum size of a message that
+<ul>
+<li>The mq_msgsize attributes determines the maximum size of a message that
 may be sent or received.  In the present implementation, this maximum
 message size is limited at 22 bytes.
-</UL>
+</ul>
 
 <H3><a name="mqclose">2.4.2 mq_close</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;mqueue.h&gt;
     int mq_close( mqd_t mqdes );
 </PRE>
 
-<P>
-<B>Description:</B> This function is used to indicate that the
+<p>
+<b>Description:</b> This function is used to indicate that the
 calling task is finished with the specified message queued mqdes.
 The mq_close() deallocates any system resources allocated by the
 system for use by this task for its message queue.
-<P>
+<p>
 If the calling task has attached a notification request to the message
 queue via this <I>mqdes</I> (see mq_notify()), this attachment will be
 removed and the message queue is available for another task to attach
 for notification.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>mqdes</I>. Message queue descriptor.
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>mqdes</I>. Message queue descriptor.
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK) if the message queue is closed successfully, otherwise,
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK) if the message queue is closed successfully, otherwise,
 -1 (ERROR).
-</UL>
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<UL>
-<LI>The behavior of a task that is blocked on either a mq_send() or
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<ul>
+<li>The behavior of a task that is blocked on either a mq_send() or
 mq_receive() is undefined when mq_close() is called.
-<LI>The result of using this message queue descriptor after successful
+<li>The result of using this message queue descriptor after successful
 return from mq_close() is undefined.
-</UL>
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX interface
+</ul>
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX interface
 of the same name.
 
 <H3><a name="mqunlink">2.4.3 mq_unlink</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;mqueue.h&gt;
     int mq_unlink( const char *mqName );
 </PRE>
 
-<P>
-<B>Description:</B> This function removes the message queue named
+<p>
+<b>Description:</b> This function removes the message queue named
 by &quot;mqName.&quot; If one or more tasks have the message queue
 open when mq_unlink() is called, removal of the message queue
 is postponed until all references to the message queue have been
 closed.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>mqName</I>. Name of the message queue
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>mqName</I>. Name of the message queue
+</ul>
 
-<P>
-<B>Returned Values:</B> None.
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Returned Values:</b> None.
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="mqsend">2.4.4 mq_send</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;mqueue.h&gt;
     int mq_send( mqd_t mqdes, const void *msg, size_t msgLen, int msgPrio );
 </PRE>
 
-<P>
-<B>Description:</B> This function adds the specified message (msg)
+<p>
+<b>Description:</b> This function adds the specified message (msg)
 to the message queue (mqdes). The &quot;msgLen&quot; parameter
 specifies the length of the message in bytes pointed to by &quot;msg.&quot;
 This length must not exceed the maximum message length from the
 mq_getattr().
-<P>
+<p>
 If the message queue is not full, mq_send() will in the message
 in the message queue at the position indicated by the &quot;msgPrio&quot;
 argument. Messages with higher priority will be inserted before
 lower priority messages. The value of &quot;msgPrio&quot; must
 not exceed MQ_PRIO_MAX.
-<P>
+<p>
 If the specified message queue is full and O_NONBLOCK is not
 set in the message queue, then mq_send() will block until space
 becomes available to the queue the message.
-<P>
+<p>
 If the message queue is full and osNON_BLOCK is set, the message
 is not queued and ERROR is returned.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>mqdes</I>. Message queue descriptor
-<LI><I>msg</I>. Message to send
-<LI><I>msgLen</I>. The length of the message in bytes
-<LI><I>msgPrio</I>. The priority of the message
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>mqdes</I>. Message queue descriptor
+<li><I>msg</I>. Message to send
+<li><I>msgLen</I>. The length of the message in bytes
+<li><I>msgPrio</I>. The priority of the message
+</ul>
 
-<P>
-<B>Returned Values:</B> None.
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Returned Values:</b> None.
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 Differences from the full POSIX implementation include:
-<UL>
-<LI>Control is not returned if a signal is received.
-</UL>
+<ul>
+<li>Control is not returned if a signal is received.
+</ul>
 
 <H3><a name="mqreceive">2.4.5 mq_receive</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;mqueue.h&gt;
     int mq_receive( mqd_t mqdes, void *msg, size_t msgLen, int *msgPrio );
 </PRE>
 
-<P>
-<B>Description:</B> This function receives the oldest of the highest
+<p>
+<b>Description:</b> This function receives the oldest of the highest
 priority messages from the message queue specified by &quot;mqdes.&quot;
 If the size of the buffer in bytes (msgLen) is less than the &quot;mq_msgsize&quot;
 attribute of the message queue, mq_receive will return an error.
 Otherwise, the select message is removed from the queue and copied
 to &quot;msg.&quot;
-<P>
+<p>
 If the message queue is empty and O_NONBLOCK was not set, mq_receive()
 will block until a message is added to the message queue. If more
 than one task is waiting to receive a message, only the task with
 the highest priority that has waited the longest will be unblocked.
-<P>
+<p>
 If the queue is empty and O_NONBLOCK is set, ERROR will be
 returned.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>mqdes</I>. Message Queue Descriptor
-<LI><I>msg</I>. Buffer to receive the message
-<LI><I>msgLen</I>. Size of the buffer in bytes
-<LI><I>msgPrio</I>. If not NULL, the location to store message
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>mqdes</I>. Message Queue Descriptor
+<li><I>msg</I>. Buffer to receive the message
+<li><I>msgLen</I>. Size of the buffer in bytes
+<li><I>msgPrio</I>. If not NULL, the location to store message
 priority.
-</UL>
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>Length of the selected message in bytes, otherwise -1 (ERROR).
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>Length of the selected message in bytes, otherwise -1 (ERROR).
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 Differences from the full POSIX implementation include:
-<UL>
-<LI>Control is not returned if a signal is received.
-</UL>
+<ul>
+<li>Control is not returned if a signal is received.
+</ul>
 
 <H3><a name="mqnotify">2.4.6 mq_notify</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;mqueue.h&gt;
     int mq_notify( mqd_t mqdes, const struct sigevent *notification );
 </PRE>
 
-<P>
-<B>Description:</B> If the &quot;notification&quot; input parameter
+<p>
+<b>Description:</b> If the &quot;notification&quot; input parameter
 is not NULL, this function connects the task with the message queue such
 that the specified signal will be sent to the task whenever the message
 changes from empty to non-empty. One notification can be attached
 to a message queue.
-<P>
+<p>
 If &quot;notification&quot; is NULL, the attached notification
 is detached (if it was held by the calling task) and the queue
 is available to attach another notification.
-<P>
+<p>
 When the notification is sent to the registered task, its registration
 will be removed.  The message queue will then be available for
 registration.
-<P>
-<B>Input Parameters:</B>
-<UL>
-<LI><I>mqdes</I>. Message queue descriptor
-<LI><I>notification</I>. Real-time signal structure containing:
-<UL>
-<LI><I>sigev_notify</I>. Should be osSIGEV_SIGNAL (but actually
+<p>
+<b>Input Parameters:</b>
+<ul>
+<li><I>mqdes</I>. Message queue descriptor
+<li><I>notification</I>. Real-time signal structure containing:
+<ul>
+<li><I>sigev_notify</I>. Should be osSIGEV_SIGNAL (but actually
 ignored)
-<LI><I>sigev_signo</I>. The signo to use for the notification
-<LI><I>sigev_value</I>. Value associated with the signal
-</UL>
+<li><I>sigev_signo</I>. The signo to use for the notification
+<li><I>sigev_value</I>. Value associated with the signal
+</ul>
 
-</UL>
+</ul>
 
-<P>
-<B>Returned Values:</B> None.
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX interface
+<p>
+<b>Returned Values:</b> None.
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX interface
 of the same name.
 Differences from the full POSIX implementation include:
-<UL>
-<LI>The notification signal will be sent to the registered task even if
+<ul>
+<li>The notification signal will be sent to the registered task even if
 another task is waiting for the message queue to become non-empty.  This is
 inconsistent with the POSIX specification which states, &quot;If a process
 has registered for notification of message arrival at a message queue and
@@ -1289,87 +1323,87 @@ some process is blocked in <I>mq_receive</I> waiting to receive a message
 when a message arrives at the queue, the arriving message shall satisfy the
 appropriate <I>mq_receive()</I> ... The resulting behavior is as if the
 message queue remains empty, and no notification shall be sent.&quot;
-</UL>
+</ul>
 
 <H3><a name="mqsetattr">2.4.7 mq_setattr</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;mqueue.h&gt;
     int mq_setattr( mqd_t mqdes, const struct mq_attr *mqStat,
                      struct mq_attr *oldMqStat);
 </PRE>
 
-<P>
-<B>Description:</B> This function sets the attributes associated
+<p>
+<b>Description:</b> This function sets the attributes associated
 with the specified message queue &quot;mqdes.&quot; Only the &quot;O_NONBLOCK&quot;
 bit of the &quot;mq_flags&quot; can be changed.
-<P>
+<p>
 If &quot;oldMqStat&quot; is non-null, mq_setattr() will store
 the previous message queue attributes at that location (just as
 would have been returned by mq_getattr()).
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>mqdes</I>. Message queue descriptor
-<LI><I>mqStat</I>. New attributes
-<LI><I>oldMqState</I>. Old attributes
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>mqdes</I>. Message queue descriptor
+<li><I>mqStat</I>. New attributes
+<li><I>oldMqState</I>. Old attributes
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK) if attributes are set successfully, otherwise -1
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK) if attributes are set successfully, otherwise -1
 (ERROR).
-</UL>
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="mqgetattr">2.4.8 mq_getattr</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;mqueue.h&gt;
     int mq_getattr( mqd_t mqdes, struct mq_attr *mqStat);
 </PRE>
 
-<P>
-<B>Description:</B> This functions gets status information and
+<p>
+<b>Description:</b> This functions gets status information and
 attributes associated with the specified message queue.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>mqdes</I>. Message queue descriptor
-<LI><I>mqStat</I>. Buffer in which to return attributes. The returned
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>mqdes</I>. Message queue descriptor
+<li><I>mqStat</I>. Buffer in which to return attributes. The returned
 attributes include:
-<UL>
-<LI><I>mq_maxmsg</I>. Max number of messages in queue.
-<LI><I>mq_msgsize</I>. Max message size.
-<LI><I>mq_flags</I>. Queue flags.
-<LI><I>mq_curmsgs</I>. Number of messages currently in queue.
-</UL>
+<ul>
+<li><I>mq_maxmsg</I>. Max number of messages in queue.
+<li><I>mq_msgsize</I>. Max message size.
+<li><I>mq_flags</I>. Queue flags.
+<li><I>mq_curmsgs</I>. Number of messages currently in queue.
+</ul>
 
-</UL>
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK) if attributes provided, -1 (ERROR) otherwise.
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK) if attributes provided, -1 (ERROR) otherwise.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H2>2.5 <A NAME="Semaphores">Counting Semaphore Interfaces</A></H2>
+<H2>2.5 <A NAME="Semaphores">Counting Semaphore Interfaces</a></H2>
 
 <p>
   <b>Semaphores</b>.  Semaphores are the basis for
@@ -1385,16 +1419,16 @@ interface of the same name.
   and, as a result, can adversely affect system response times.
 </p>
 <p>
-  <B>Priority Inversion</B>.  Proper use of semaphores avoids the issues of
+  <b>Priority Inversion</b>.  Proper use of semaphores avoids the issues of
   sched_lock().  However, consider the following example:
   <OL>
-    <LI>Some low-priority task, <I>Task C</I>, acquires a semphore in order to
+    <li>Some low-priority task, <I>Task C</I>, acquires a semphore in order to
       get exclusive access to a protected resource.</li>
-    <LI><I>Task C</I> is suspended to allow some high-priority task,</li>
+    <li><I>Task C</I> is suspended to allow some high-priority task,</li>
       <I>Task A</I>, to execute.</li>
-    <LI><I>Task A</I> attempts to acquire the semaphore held by <I>Task C</I> and
+    <li><I>Task A</I> attempts to acquire the semaphore held by <I>Task C</I> and
       gets blocked until <I>Task C</I> relinquishes the semaphore.</li>
-    <LI><I>Task C</I> is allowed to execute again, but gets suspended by some
+    <li><I>Task C</I> is allowed to execute again, but gets suspended by some
       medium-priority <I>Task B</I>.</li>
   </OL>
 <p>
@@ -1413,13 +1447,13 @@ interface of the same name.
   provide implementations that will not suffer from priority inversion.
   The designer may, as examples:
 </p>
-<UL>
-  <LI>Implement all tasks that need the semphore-managed resources at the
+<ul>
+  <li>Implement all tasks that need the semphore-managed resources at the
     same priority level,</li>
-  <LI>Boost the priority of the low-priority task before the semaphore is
+  <li>Boost the priority of the low-priority task before the semaphore is
     acquired, or</li>
-  <LI>Use sched_lock() in the low-priority task.</li>
-</UL>
+  <li>Use sched_lock() in the low-priority task.</li>
+</ul>
 <p>
   POSIX semaphore interfaces:
 </p>
@@ -1437,413 +1471,413 @@ interface of the same name.
 
 <H3><a name="seminit">2.5.1 sem_init</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;semaphore.h&gt;
     int sem_init ( sem_t *sem, int pshared, unsigned int value );
 </PRE>
 
-<P>
-<B>Description:</B> This function initializes the UN-NAMED semaphore
+<p>
+<b>Description:</b> This function initializes the UN-NAMED semaphore
 sem. Following a successful call to sem_init(), the semaphore
 may be used in subsequent calls to sem_wait(), sem_post(), and
 sem_trywait(). The semaphore remains usable until it is destroyed.
-<P>
+<p>
 Only <I>sem</I> itself may be used for performing synchronization.  The
 result of referring to copies of <I>sem</I> in calls to <I>sem_wait()</I>,
 <I>sem_trywait()</I>, <I>sem_post()</I>, and <I>sem_destroy()</I>, is
 not defined.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>sem</I>. Semaphore to be initialized
-<LI><I>pshared</I>. Process sharing (not used)
-<LI><I>value</I>. Semaphore initialization value 
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>sem</I>. Semaphore to be initialized
+<li><I>pshared</I>. Process sharing (not used)
+<li><I>value</I>. Semaphore initialization value 
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK), or -1 (ERROR) if unsuccessful.
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK), or -1 (ERROR) if unsuccessful.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 Differences from the full POSIX implementation include:
-<UL>
-<LI>pshared is not used.
-</UL>
+<ul>
+<li>pshared is not used.
+</ul>
 
 <H3><a name="semdestroy">2.5.2 sem_destroy</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;semaphore.h&gt;
     int sem_destroy ( sem_t *sem );
 </PRE>
 
-<P>
-<B>Description:</B> This function is used to destroy the un-named semaphore
+<p>
+<b>Description:</b> This function is used to destroy the un-named semaphore
 indicated by <I>sem</I>.  Only a semaphore that was created using
 <I>sem_init()</I> may be destroyed using <I>sem_destroy()</I>.  The effect
 of calling <I>sem_destroy()</I> with a named semaphore is undefined.  The
 effect of subsequent use of the semaphore <I>sem</I> is undefined until
 <I>sem</I> is re-initialized by another call to <I>sem_init()</I>.
-<P>
+<p>
 The effect of destroying a semaphore upon which other tasks are currently
 blocked is undefined.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>sem</I>. Semaphore to be destroyed.
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>sem</I>. Semaphore to be destroyed.
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK), or -1 (ERROR) if unsuccessful.
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK), or -1 (ERROR) if unsuccessful.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="semopen">2.5.3 sem_open</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;semaphore.h&gt;
     sem_t *sem_open ( const char *name, int oflag, ...);
 </PRE>
 
-<P>
-<B>Description:</B> This function establishes a connection between
+<p>
+<b>Description:</b> This function establishes a connection between
 named semaphores and a task. Following a call to sem_open() with
 the semaphore name, the task may reference the semaphore associated
 with name using the address returned by this call. The semaphore
 may be used in subsequent calls to sem_wait(), sem_trywait(),
 and sem_post(). The semaphore remains usable until the semaphore
 is closed by a successful call to sem_close().
-<P>
+<p>
 If a task makes multiple calls to sem_open() with the same name,
 then the same semaphore address is returned (provided there have
 been no calls to sem_unlink()).
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>name</I>. Semaphore name
-<LI><I>oflag</I>. Semaphore creation options. This may one of
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>name</I>. Semaphore name
+<li><I>oflag</I>. Semaphore creation options. This may one of
 the following bit settings:
-<UL>
-<LI><I>oflag</I> = 0: Connect to the semaphore only if it already
+<ul>
+<li><I>oflag</I> = 0: Connect to the semaphore only if it already
 exists.
-<LI><I>oflag</I> = O_CREAT: Connect to the semaphore if it exists,
+<li><I>oflag</I> = O_CREAT: Connect to the semaphore if it exists,
 otherwise create the semaphore.
-<LI><I>oflag</I> = O_CREAT with O_EXCL (O_CREAT|O_EXCL): Create
+<li><I>oflag</I> = O_CREAT with O_EXCL (O_CREAT|O_EXCL): Create
 a new semaphore unless one of this name already exists.
-</UL>
-<LI>... Optional parameters.
+</ul>
+<li>... Optional parameters.
 NOTE:  When the O_CREAT flag is specified, POSIX requires that a third
 and fourth parameter be supplied:
-<UL>
-<LI><I>mode</I>.  The mode parameter is of type mode_t.  
+<ul>
+<li><I>mode</I>.  The mode parameter is of type mode_t.  
 This parameter is required but not used in the present
 implementation.
-<LI><I>value</I>.  The value parameter is type unsigned int.  The semaphore
+<li><I>value</I>.  The value parameter is type unsigned int.  The semaphore
 is created with an initial value of <I>value</I>.  Valid initial values for
 semaphores must be less than or equal to <I>SEM_VALUE_MAX</I> (defined in
 <CODE>include/limits.h</CODE>).
-</UL>
-</UL>
+</ul>
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>A pointer to sem_t or -1 (ERROR) if unsuccessful.
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>A pointer to sem_t or -1 (ERROR) if unsuccessful.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 Differences from the full POSIX implementation include:
-<UL>
-<LI>Treatment of links/connections is highly simplified. It is
+<ul>
+<li>Treatment of links/connections is highly simplified. It is
 just a counting semaphore.
-</UL>
+</ul>
 
 <H3><a name="semclose">2.5.4 sem_close</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;semaphore.h&gt;
     int sem_close ( sem_t *sem );
 </PRE>
 
-<P>
-<B>Description:</B> This function is called to indicate that the
+<p>
+<b>Description:</b> This function is called to indicate that the
 calling task is finished with the specified named semaphore, sem.
 The sem_close() deallocates any system resources allocated by
 the system for this named semaphore.
-<P>
+<p>
 If the semaphore has not been removed with a call to sem_unlink(),
 then sem_close() has no effect on the named semaphore. However,
 when the named semaphore has been fully unlinked, the semaphore
 will vanish when the last task closes it.
-<P>
+<p>
 Care must be taken to avoid risking the deletion of a semaphore
 that another calling task has already locked.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>sem</I>. Semaphore descriptor
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>sem</I>. Semaphore descriptor
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK), or -1 (ERROR) if unsuccessful.
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK), or -1 (ERROR) if unsuccessful.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B>
-<UL>
-<LI>Care must be taken to avoid deletion of a semaphore that another task
+<p>
+<b>Assumptions/Limitations:</b>
+<ul>
+<li>Care must be taken to avoid deletion of a semaphore that another task
 has already locked.
-<LI>sem_close() must not be called with an un-named semaphore.
-</UL>
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<li>sem_close() must not be called with an un-named semaphore.
+</ul>
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="semunlink">2.5.5 sem_unlink</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;semaphore.h&gt;
     int sem_unlink ( const char *name );
 </PRE>
 
-<P>
-<B>Description:</B> This function will remove the semaphore named by the
+<p>
+<b>Description:</b> This function will remove the semaphore named by the
 input name parameter.  If one or more tasks have the semaphore named by
 name oepn when sem_unlink() is called, destruction of the semaphore will
 be postponed until all references have been destroyed by calls to
 sem_close().
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>name</I>. Semaphore name
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>name</I>. Semaphore name
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK), or -1 (ERROR) if unsuccessful.
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK), or -1 (ERROR) if unsuccessful.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<UL>
-<LI>Care must be taken to avoid deletion of a semaphore that another task
+<p>
+<b>Assumptions/Limitations:</b> 
+<ul>
+<li>Care must be taken to avoid deletion of a semaphore that another task
 has already locked.
-<LI>sem_unlink() must not be called with an un-named semaphore.
-</UL>
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<li>sem_unlink() must not be called with an un-named semaphore.
+</ul>
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 Differences from the full POSIX implementation include:
-<UL>
-<LI>Treatment of links/connections is highly simplified. It is
+<ul>
+<li>Treatment of links/connections is highly simplified. It is
 just a counting semaphore.
-<LI>Calls to sem_open() to re-create or re-connect to the semaphore may
+<li>Calls to sem_open() to re-create or re-connect to the semaphore may
 refer to the same semaphore; POSIX specifies that a new semaphore with the
 same name should be created after sem_unlink() is called.
-</UL>
+</ul>
 
 <H3><a name="semwait">2.5.6 sem_wait</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;semaphore.h&gt;
     int sem_wait ( sem_t *sem );
 </PRE>
 
-<P>
-<B>Description:</B> This function attempts to lock the semaphore
+<p>
+<b>Description:</b> This function attempts to lock the semaphore
 referenced by sem. If the semaphore as already locked by another
 task, the calling task will not return until it either successfully acquires
 the lock or the call is interrupted by a signal.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>sem</I>. Semaphore descriptor.
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>sem</I>. Semaphore descriptor.
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK), or -1 (ERROR) is unsuccessful
-</UL>
-<P>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK), or -1 (ERROR) is unsuccessful
+</ul>
+<p>
 If <I>sem_wait</I> returns -1 (ERROR) then the cause of the failure
 will be indicated by the thread-specific <I>errno</I> value (a pointer
 to this value can be obtained using <I>get_errno_ptr()</I>).  The following
 lists the possible values for <I>errno</I>:
-<P>
-<UL>
-<LI><I>EINVAL</I>:  Indicates that the <I>sem</I> input parameter is
+<p>
+<ul>
+<li><I>EINVAL</I>:  Indicates that the <I>sem</I> input parameter is
 not valid.
-<LI><I>EINTR</I>:  Indicates that the wait was interrupt by a signal
+<li><I>EINTR</I>:  Indicates that the wait was interrupt by a signal
 received by this task.  In this case, the semaphore has not be acquired.
-</UL>
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+</ul>
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="semtrywait">2.5.7 sem_trywait</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;semaphore.h&gt;
     int sem_trywait ( sem_t *sem );
 </PRE>
 
-<P>
-<B>Description:</B> This function locks the specified semaphore
+<p>
+<b>Description:</b> This function locks the specified semaphore
 only if the semaphore is currently not locked.  In any event, the call
 returns without blocking.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>sem</I>. The semaphore descriptor
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>sem</I>. The semaphore descriptor
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK) or -1 (ERROR) if unsuccessful
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK) or -1 (ERROR) if unsuccessful
+</ul>
 If <I>sem_wait</I> returns -1 (ERROR) then the cause of the failure
 will be indicated by the thread-specific <I>errno</I> value (a pointer
 to this value can be obtained using <I>get_errno_ptr()</I>).  The following
 lists the possible values for <I>errno</I>:
-<P>
-<UL>
-<LI><I>EINVAL</I>:  Indicates that the <I>sem</I> input parameter is
+<p>
+<ul>
+<li><I>EINVAL</I>:  Indicates that the <I>sem</I> input parameter is
 not valid.
-<LI><I>EAGAIN</I>:  Indicates that the semaphore was not acquired.
-</UL>
-<P>
+<li><I>EAGAIN</I>:  Indicates that the semaphore was not acquired.
+</ul>
+<p>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="sempost">2.5.8 sem_post</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;semaphore.h&gt;
     int sem_post ( sem_t *sem );
 </PRE>
 
-<P>
-<B>Description:</B> When a task has finished with a semaphore,
+<p>
+<b>Description:</b> When a task has finished with a semaphore,
 it will call sem_post().  This function unlocks the semaphore referenced
 by <I>sem</I> by performing the semaphore unlock operation.
-<P>
+<p>
 If the semaphore value resulting from this operation is positive, then
 no tasks were blocked waiting for the semaphore to become unlocked;
 The semaphore value is simply incremented.
-<P>
+<p>
 If the value of the semaphore resulting from this operation is zero, then
 on of the tasks blocked waiting for the semaphore will be allowed to
 return successfully from its call to <I>sem_wait()</I>.
-<P>
-<B>NOTE</B>:  <I>sem_post()</I> may be called from an interrupt handler.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>sem</I>. Semaphore descriptor
-</UL>
+<p>
+<b>NOTE</b>:  <I>sem_post()</I> may be called from an interrupt handler.
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>sem</I>. Semaphore descriptor
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK) or -1 (ERROR) if unsuccessful.
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK) or -1 (ERROR) if unsuccessful.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> This function cannot be called
+<p>
+<b>Assumptions/Limitations:</b> This function cannot be called
 from an interrupt handler. It assumes the currently executing
 task is the one that is performing the unlock.
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="semgetvalue">2.5.9 sem_getvalue</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;semaphore.h&gt;
     int sem_getvalue ( sem_t *sem, int *sval );
 </PRE>
 
-<P>
-<B>Description:</B> This function updates the location referenced
+<p>
+<b>Description:</b> This function updates the location referenced
 by sval argument to have the value of the semaphore referenced
 by sem without effecting the state of the semaphore. The updated
 value represents the actual semaphore value that occurred at some
 unspecified time during the call, but may not reflect the actual
 value of the semaphore when it is returned to the calling task.
-<P>
+<p>
 If sem is locked, the value return by sem_getvalue() will either
 be zero or a negative number whose absolute value represents the
 number of tasks waiting for the semaphore.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>sem</I>. Semaphore descriptor
-<LI><I>sval</I>. Buffer by which the value is returned
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>sem</I>. Semaphore descriptor
+<li><I>sval</I>. Buffer by which the value is returned
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK) or -1 (ERROR) if unsuccessful.
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK) or -1 (ERROR) if unsuccessful.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<HR>
+<hr>
 
-<H2>2.6 <A NAME="Watchdogs">Watchdog Timer Interfaces</A></H2>
+<H2>2.6 <A NAME="Watchdogs">Watchdog Timer Interfaces</a></H2>
 
-<P>
+<p>
   NuttX provides a general watchdog timer facility.
   This facility allows the NuttX user to specify a watchdog timer function
   that will run after a specified delay.
@@ -1861,174 +1895,174 @@ interface of the same name.
 
 <H3><a name="wdcreate">2.6.1 wd_create</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;wdog.h&gt;
     WDOG_ID wd_create (void);
 </PRE>
 
-<P>
-<B>Description:</B> The wd_create function will create a watchdog
+<p>
+<b>Description:</b> The wd_create function will create a watchdog
 by allocating the appropriate resources for the watchdog.
-<P>
-<B>Input Parameters:</B> None.
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>Pointer to watchdog that may be used as a handle in subsequent
+<p>
+<b>Input Parameters:</b> None.
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>Pointer to watchdog that may be used as a handle in subsequent
 NuttX calls (i.e., the watchdog ID), or NULL if insufficient resources
 are available to create the watchdogs.
-</UL>
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> This is a NON-POSIX interface.
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following comparable interface:
 <PRE>
     WDOG_ID wdCreate (void);
 </PRE>
 
-<P>
+<p>
 Differences from the VxWorks interface include:
-<UL>
-<LI>The number of available watchdogs is fixed (configured at
+<ul>
+<li>The number of available watchdogs is fixed (configured at
 initialization time).
-</UL>
+</ul>
 
 <H3><a name="wddelete">2.6.2 wd_delete</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;wdog.h&gt;
     STATUS wd_delete (WDOG_ID wdog);
 </PRE>
 
-<P>
-<B>Description:</B> The wd_delete function will deallocate a
+<p>
+<b>Description:</b> The wd_delete function will deallocate a
 watchdog. The watchdog will be removed from the timer queue if
 has been started.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>wdog</I>. The watchdog ID to delete. This is actually a
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>wdog</I>. The watchdog ID to delete. This is actually a
 pointer to a watchdog structure.
-</UL>
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>OK or ERROR
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>OK or ERROR
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> It is the responsibility of the
+<p>
+<b>Assumptions/Limitations:</b> It is the responsibility of the
 caller to assure that the watchdog is inactive before deleting
 it.
-<P>
-<B>  POSIX  Compatibility:</B> This is a NON-POSIX interface.
+<p>
+<b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following comparable interface:
 <PRE>
     STATUS wdDelete (WDOG_ID wdog);
 </PRE>
 
-<P>
+<p>
 Differences from the VxWorks interface include:
-<UL>
-<LI>Does not make any checks to see if the watchdog is being used
+<ul>
+<li>Does not make any checks to see if the watchdog is being used
 before de-allocating it (i.e., never returns ERROR).
-</UL>
+</ul>
 
 <H3><a name="wdstart">2.6.3 wd_start</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;wdog.h&gt;
     STATUS wd_start( WDOG_ID wdog, int delay, wdentry_t wdentry,
                      intt argc, ....);
 </PRE>
 
-<P>
-<B>Description:</B> This function adds a watchdog to the timer
+<p>
+<b>Description:</b> This function adds a watchdog to the timer
 queue. The specified watchdog function will be called from the
 interrupt level after the specified number of ticks has elapsed.
 Watchdog timers may be started from the interrupt level.
-<P>
+<p>
 Watchdog times execute in the context of the timer interrupt handler, but
 with the PIC/PID address environment that was in place when wd_start()
 was called.
-<P>
+<p>
 Watchdog timers execute only once.
-<P>
+<p>
 To replace either the timeout delay or the function to be executed,
 call wd_start again with the same wdog; only the most recent
 wd_start() on a given watchdog ID has any effect.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>wdog</I>. Watchdog ID
-<LI><I>delay</I>. Delay count in clock ticks
-<LI><I>wdentry</I>. Function to call on timeout
-<LI><I>argc</I>.  The number of uint32 parameters to pass to wdentry.
-<LI><I>...</I>. uint32 size parameters to pass to wdentry
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>wdog</I>. Watchdog ID
+<li><I>delay</I>. Delay count in clock ticks
+<li><I>wdentry</I>. Function to call on timeout
+<li><I>argc</I>.  The number of uint32 parameters to pass to wdentry.
+<li><I>...</I>. uint32 size parameters to pass to wdentry
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>OK or ERROR
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>OK or ERROR
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> The watchdog routine runs in the
+<p>
+<b>Assumptions/Limitations:</b> The watchdog routine runs in the
 context of the timer interrupt handler and is subject to all ISR
 restrictions.
-<P>
-<B>  POSIX  Compatibility:</B> This is a NON-POSIX interface.
+<p>
+<b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following comparable interface:
 <PRE>
     STATUS wdStart (WDOG_ID wdog, int delay, FUNCPTR wdentry, int parameter);
 </PRE>
 
-<P>
+<p>
 Differences from the VxWorks interface include:
-<UL>
-<LI>The present implementation supports multiple parameters passed
+<ul>
+<li>The present implementation supports multiple parameters passed
 to wdentry; VxWorks supports only a single parameter.  The maximum
 number of parameters is determined by 
-</UL>
+</ul>
 
 <H3><a name="wdcancel">2.6.4 wd_cancel</a></H3>
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;wdog.h&gt;
     STATUS wd_cancel (WDOG_ID wdog);
 </PRE>
 
-<P>
-<B>Description:</B> This function cancels a currently running
+<p>
+<b>Description:</b> This function cancels a currently running
 watchdog timer. Watchdog timers may be canceled from the interrupt
 level.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>wdog</I>. ID of the watchdog to cancel.
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>wdog</I>. ID of the watchdog to cancel.
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>OK or ERROR
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>OK or ERROR
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> This is a NON-POSIX interface.
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following comparable interface:
 <PRE>
     STATUS wdCancel (WDOG_ID wdog);
@@ -2058,9 +2092,9 @@ VxWorks provides the following comparable interface:
   means either that wdog is not valid or that the wdog has already expired.
 </p>
 
-<HR>
+<hr>
 
-<H2><A NAME="ClocksNTimers">2.7 Clocks and Timers</A></H2>
+<H2><A NAME="ClocksNTimers">2.7 Clocks and Timers</a></H2>
 <ul>
   <li><a href="#clocksettime">2.7.1 clock_settime</a></li>
   <li><a href="#clockgettime">2.7.2 clock_gettime</a></li>
@@ -2075,7 +2109,7 @@ VxWorks provides the following comparable interface:
   <li><a href="#timergetoverrun">2.7.11 timer_getoverrun</a></li>
 </ul>
 
-<H3><a name="clocksettime">2.7.1 clock_settime</A></H3>
+<H3><a name="clocksettime">2.7.1 clock_settime</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -2100,10 +2134,10 @@ VxWorks provides the following comparable interface:
   Otherwise, an non-zero error number will be returned to indicate the error:
 </p>
 <ul>
-  <li><code>Exxx</code>.</li>
+  <li><code>To be provided</code>.</li>
 </ul>
 
-<H3><a name="clockgettime">2.7.2 clock_gettime</A></H3>
+<H3><a name="clockgettime">2.7.2 clock_gettime</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -2128,10 +2162,10 @@ VxWorks provides the following comparable interface:
   Otherwise, an non-zero error number will be returned to indicate the error:
 </p>
 <ul>
-  <li><code>Exxx</code>.</li>
+  <li><code>To be provided</code>.</li>
 </ul>
 
-<H3><a name="clockgetres">2.7.3 clock_getres</A></H3>
+<H3><a name="clockgetres">2.7.3 clock_getres</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -2156,10 +2190,10 @@ VxWorks provides the following comparable interface:
   Otherwise, an non-zero error number will be returned to indicate the error:
 </p>
 <ul>
-  <li><code>Exxx</code>.</li>
+  <li><code>To be provided</code>.</li>
 </ul>
 
-<H3><a name="mktime">2.7.4 mktime</A></H3>
+<H3><a name="mktime">2.7.4 mktime</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -2184,10 +2218,10 @@ VxWorks provides the following comparable interface:
   Otherwise, an non-zero error number will be returned to indicate the error:
 </p>
 <ul>
-  <li><code>Exxx</code>.</li>
+  <li><code>To be provided</code>.</li>
 </ul>
 
-<H3><a name="gmtimer">2.7.5 gmtime_r</A></H3>
+<H3><a name="gmtimer">2.7.5 gmtime_r</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -2212,16 +2246,16 @@ VxWorks provides the following comparable interface:
   Otherwise, an non-zero error number will be returned to indicate the error:
 </p>
 <ul>
-  <li><code>Exxx</code>.</li>
+  <li><code>To be provided</code>.</li>
 </ul>
 
-<H3><a name="localtimer">2.7.6 localtime_r</A></H3>
+<H3><a name="localtimer">2.7.6 localtime_r</a></H3>
 <pre>
     #include &lt;time.h&gt;
     #define localtime_r(c,r) gmtime_r(c,r)
 </pre>
 
-<H3><a name="timercreate">2.7.7 timer_create</A></H3>
+<H3><a name="timercreate">2.7.7 timer_create</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -2291,7 +2325,7 @@ VxWorks provides the following comparable interface:
   <li>Only <code>CLOCK_REALTIME</code> is supported for the <code>clockid</code> argument.</li>
 </ul>
 
-<H3><a name="timerdelete">2.7.8 timer_delete</A></H3>
+<H3><a name="timerdelete">2.7.8 timer_delete</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -2329,7 +2363,7 @@ VxWorks provides the following comparable interface:
   Comparable to the POSIX interface of the same name.
 </p>
 
-<H3><a name="timersettime">2.7.9 timer_settime</A></H3>
+<H3><a name="timersettime">2.7.9 timer_settime</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -2411,7 +2445,7 @@ VxWorks provides the following comparable interface:
   <li>The <code>ovalue</code> argument is ignored.</li>
 </ul>
 
-<H3><a name="timergettime">2.7.10 timer_gettime</A></H3>
+<H3><a name="timergettime">2.7.10 timer_gettime</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -2458,7 +2492,7 @@ VxWorks provides the following comparable interface:
   Comparable to the POSIX interface of the same name.
 </p>
 
-<H3><a name="timergetoverrun">2.7.11 timer_getoverrun</A></H3>
+<H3><a name="timergetoverrun">2.7.11 timer_getoverrun</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -2513,14 +2547,14 @@ VxWorks provides the following comparable interface:
   <li>This interface is not currently implemented by NuttX.</li>
 </ul>
 
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<HR>
+<hr>
 
-<H2>2.8 <A NAME="Signals">Signal Interfaces</A></H2>
+<H2>2.8 <A NAME="Signals">Signal Interfaces</a></H2>
 
 <p>
   NuttX provides signal interfaces for tasks. Signals are used to
@@ -2563,412 +2597,412 @@ interface of the same name.
 
 <H3><a name="sigemptyset">2.8.1 sigemptyset</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;signal.h&gt;
     int sigemptyset(sigset_t *set);
 </PRE>
 
-<P>
-<B>Description:</B> This function initializes the signal set specified
+<p>
+<b>Description:</b> This function initializes the signal set specified
 by set such that all signals are excluded.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>set</I>. Signal set to initialize.
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>set</I>. Signal set to initialize.
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK), or -1 (ERROR) if the signal set cannot be initialized.
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK), or -1 (ERROR) if the signal set cannot be initialized.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="sigfillset">2.8.2 sigfillset</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;signal.h&gt;
     int sigfillset(sigset_t *set);
 </PRE>
 
-<P>
-<B>Description:</B> This function initializes the signal set specified
+<p>
+<b>Description:</b> This function initializes the signal set specified
 by set such that all signals are included.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>set</I>. Signal set to initialize
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>set</I>. Signal set to initialize
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK), or -1 (ERROR) if the signal set cannot be initialized.
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK), or -1 (ERROR) if the signal set cannot be initialized.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="sigaddset">2.8.3 sigaddset</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;signal.h&gt;
     int sigaddset(sigset_t *set, int signo);
 </PRE>
 
-<P>
-<B>Description:</B> This function adds the signal specified by
+<p>
+<b>Description:</b> This function adds the signal specified by
 signo to the signal set specified by set.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>set</I>. Signal set to add signal to
-<LI><I>signo</I>. Signal to add
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>set</I>. Signal set to add signal to
+<li><I>signo</I>. Signal to add
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK), or -1 (ERROR) if the signal number is invalid.
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK), or -1 (ERROR) if the signal number is invalid.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="sigdelset">2.8.4 sigdelset</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;signal.h&gt;
     int sigdelset(sigset_t *set, int signo);
 </PRE>
 
-<P>
-<B>Description:</B> This function deletes the signal specified
+<p>
+<b>Description:</b> This function deletes the signal specified
 by signo from the signal set specified by set.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>set</I>. Signal set to delete the signal from
-<LI><I>signo</I>. Signal to delete
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>set</I>. Signal set to delete the signal from
+<li><I>signo</I>. Signal to delete
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK), or -1 (ERROR) if the signal number is invalid.
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK), or -1 (ERROR) if the signal number is invalid.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="sigismember">2.8.5 sigismember</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;signal.h&gt;
     int  sigismember(const sigset_t *set, int signo);
 </PRE>
 
-<P>
-<B>Description:</B> This function tests whether the signal specified
+<p>
+<b>Description:</b> This function tests whether the signal specified
 by signo is a member of the set specified by set.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>set</I>. Signal set to test
-<LI><I>signo</I>. Signal to test for
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>set</I>. Signal set to test
+<li><I>signo</I>. Signal to test for
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>1 (TRUE), if the specified signal is a member of the set,
-<LI>0 (OK or FALSE), if it is not, or
-<LI>-1 (ERROR) if the signal number is invalid.
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>1 (TRUE), if the specified signal is a member of the set,
+<li>0 (OK or FALSE), if it is not, or
+<li>-1 (ERROR) if the signal number is invalid.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="sigaction">2.8.6 sigaction</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;signal.h&gt;
     int sigaction( int signo, const struct sigaction *act,
                    struct sigaction *oact );
 </PRE>
 
-<P>
-<B>Description:</B> This function allows the calling task to
+<p>
+<b>Description:</b> This function allows the calling task to
 examine and/or specify the action to be associated with a specific
 signal.
-<P>
+<p>
 The structure sigaction, used to describe an action to be taken, is defined
 to include the following members:
-<UL>
-<LI><I>sa_u.sa_handler</I>.  A pointer to a signal-catching function.
-<LI><I>sa_u.sa_sigaction</I>.  An alternative form for the signal catching
+<ul>
+<li><I>sa_u.sa_handler</I>.  A pointer to a signal-catching function.
+<li><I>sa_u.sa_sigaction</I>.  An alternative form for the signal catching
 function.
-<LI><I>sa_mask</I>.  Additional set of signals to be blocked during
+<li><I>sa_mask</I>.  Additional set of signals to be blocked during
 execution of the signal-catching function.
-<LI><I>sa_flags</I>:  Special flags to affect behavior of a signal.
-</UL>
-<P>
+<li><I>sa_flags</I>:  Special flags to affect behavior of a signal.
+</ul>
+<p>
 If the argument act is not NULL, it points to a structure specifying the
 action to be associated with the specified signal.  If the argument oact
 is not NULL, the action previously associated with the signal is stored
 in the location pointed to by the argument oact.  If the argument act is
 NULL, signal handling is unchanged by this function call; thus, the call
 can be used to enquire about the current handling of a given signal.
-<P>
+<p>
 When a signal is caught by a signal-catching function installed by the
 sigaction() function, a new signal mask is calculated and installed for
 the duration of the signal-catching function.  This mask is formed by taking
 the union of the current signal mask and the value of the sa_mask for the
 signal being delivered, and then including the signal being delivered.  If
 and when the signal handler returns, the original signal mask is restored.
-<P>
+<p>
 Signal catching functions execute in the same address environment as the
 task that called sigaction() to install the signal-catching function.
-<P>
+<p>
 Once an action is installed for a specific signal, it remains installed
 until another action is explicitly requested by another call to
 sigaction().
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>sig</I>. Signal of interest
-<LI><I>act</I>. Location of new handler
-<LI><I>oact</I>. Location to store old handler
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>sig</I>. Signal of interest
+<li><I>act</I>. Location of new handler
+<li><I>oact</I>. Location to store old handler
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK), or -1 (ERROR) if the signal number is invalid.
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK), or -1 (ERROR) if the signal number is invalid.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 Differences from the POSIX implementation include:
-<UL>
-<LI>Special values of sa_handler in the struct sigaction act input
+<ul>
+<li>Special values of sa_handler in the struct sigaction act input
 not handled (SIG_DFL, SIG_IGN).
-<LI>All sa_flags in struct sigaction of act input are ignored
+<li>All sa_flags in struct sigaction of act input are ignored
 (all treated like SA_SIGINFO).
-</UL>
+</ul>
 
 <H3><a name="sigprocmask">2.8.7 sigprocmask</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;signal.h&gt;
     int sigprocmask(int how, const sigset_t *set, sigset_t *oset);
 </PRE>
 
-<P>
-<B>Description:</B> This function allows the calling task to
+<p>
+<b>Description:</b> This function allows the calling task to
 examine and/or change its signal mask. If the set is not NULL,
 then it points to a set of signals to be used to change the currently
 blocked set. The value of how indicates the manner in which the
 set is changed.
-<P>
+<p>
 If there are any pending unblocked signals after the call to sigprocmask(),
 those signals will be delivered before sigprocmask() returns.
-<P>
+<p>
 If sigprocmask() fails, the signal mask of the task is not changed.
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>how</I>. How the signal mast will be changed:
-<UL>
-<LI><I>osSIG_BLOCK</I>. The resulting set is the union of the
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>how</I>. How the signal mast will be changed:
+<ul>
+<li><I>osSIG_BLOCK</I>. The resulting set is the union of the
 current set and the signal set pointed to by the <I>set</I> input parameter.
-<LI><I>osSIG_UNBLOCK</I>. The resulting set is the intersection
+<li><I>osSIG_UNBLOCK</I>. The resulting set is the intersection
 of the current set and the complement of the signal set pointed
 to by the <I>set</I> input parameter.
-<LI><I>osSIG_SETMASK</I>. The resulting set is the signal set
+<li><I>osSIG_SETMASK</I>. The resulting set is the signal set
 pointed to by the <I>set</I> input parameter.
-</UL>
+</ul>
 
-<LI><I>set</I>. Location of the new signal mask
-<LI><I>oset</I>. Location to store the old signal mask
-</UL>
+<li><I>set</I>. Location of the new signal mask
+<li><I>oset</I>. Location to store the old signal mask
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK), or -1 (ERROR) if how is invalid.
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK), or -1 (ERROR) if how is invalid.
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="sigpending">2.8.8 sigpending</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;signal.h&gt;
     int sigpending( sigset_t *set );
 </PRE>
 
-<P>
-<B>Description:</B> This function stores the returns the set of
+<p>
+<b>Description:</b> This function stores the returns the set of
 signals that are blocked for delivery and that are pending for
 the calling task in the space pointed to by set.
-<P>
+<p>
 If the task receiving a signal has the signal blocked via its
 sigprocmask, the signal will pend until it is unmasked.  Only one pending
 signal (for a given signo) is retained by the system.  This is consistent
 with POSIX which states:  &quot;If a subsequent occurrence of a pending
 signal is generated, it is implementation defined as to whether the signal
 is delivered more than once.&quot;
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>set</I>. The location to return the pending signal set.
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>set</I>. The location to return the pending signal set.
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>0 (OK) or -1 (ERROR)
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK) or -1 (ERROR)
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="sigsuspend">2.8.9 sigsuspend</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;signal.h&gt;
     int sigsuspend( const sigset_t *set );
 </PRE>
 
-<P>
-<B>Description:</B> The sigsuspend() function replaces the signal mask
+<p>
+<b>Description:</b> The sigsuspend() function replaces the signal mask
 with the set of signals pointed to by the argument set and then suspends
 the task until delivery of a signal to the task.
-<P>
+<p>
 If the effect of the set argument is to unblock a pending signal, then
 no wait is performed.
-<P>
+<p>
 The original signal mask is restored when sigsuspend() returns.
-<P>
+<p>
 Waiting for an empty signal set stops a task without freeing any
 resources (a very bad idea).
-<P>
-<B>Input Parameters:</B>
-<UL>
-<LI><I>set</I>.  The value of the signal <B>mask</B> to use while
+<p>
+<b>Input Parameters:</b>
+<ul>
+<li><I>set</I>.  The value of the signal <b>mask</b> to use while
 suspended.
-</UL>
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>-1 (ERROR) always
-</UL>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>-1 (ERROR) always
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 Differences from the POSIX specification include:
-<UL>
-<LI>POSIX does not indicate that the original signal mask is restored.
-<LI>POSIX states that sigsuspend() &quot;suspends the task until
+<ul>
+<li>POSIX does not indicate that the original signal mask is restored.
+<li>POSIX states that sigsuspend() &quot;suspends the task until
 delivery of a signal whose action is either to execute a signal-catching
 function or to terminate the task.&quot;  Only delivery of the signal
 is required in the present implementation (even if the signal is ignored).
-</UL>
+</ul>
 
 <H3><a name="sigwaitinfo">2.8.10 sigwaitinfo</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;signal.h&gt;
     int sigwaitinfo(const sigset_t *set, struct siginfo *info);
 </PRE>
 
-<P>
-<B>Description:</B> This function is equivalent to sigtimedwait()
+<p>
+<b>Description:</b> This function is equivalent to sigtimedwait()
 with a NULL timeout parameter. (see below).
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>set</I>.  The set of pending signals to wait for.
-<LI><I>info</I>. The returned signal values
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>set</I>.  The set of pending signals to wait for.
+<li><I>info</I>. The returned signal values
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>Signal number that cause the wait to be terminated, otherwise
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>Signal number that cause the wait to be terminated, otherwise
 -1 (ERROR) is returned.
-</UL>
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
 <H3><a name="sigtimedwait">2.8.11 sigtimedwait</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;signal.h&gt;
     int sigtimedwait( const sigset_t *set, struct siginfo *info,
                       const struct timespec *timeout );
 </PRE>
 
-<P>
-<B>Description:</B> This function selects the pending signal set
+<p>
+<b>Description:</b> This function selects the pending signal set
 specified by the argument set. If multiple signals are pending in set,
 it will remove and return the lowest numbered one. If no signals in set
 are pending at the time of the call, the calling task will be suspended
@@ -2976,85 +3010,85 @@ until one of the signals in set becomes pending OR until the task
 interrupted by an unblocked signal OR until the time interval specified by
 timeout (if any), has expired. If timeout is NULL, then the timeout interval
 is forever.
-<P>
+<p>
 If the info argument is non-NULL, the selected signal number is
 stored in the si_signo member and the cause of the signal is store
 in the si_code member. The content of si_value is only meaningful
 if the signal was generated by sigqueue(). The following values
 for si_code are defined in signal.h:
-<UL>
-  <LI><I>SI_USER</I>. Signal sent from kill, raise, or abort
-  <LI><I>SI_QUEUE</I>. Signal sent from sigqueue
-  <LI><I>SI_TIMER</I>. Signal is result of timer expiration
-  <LI><I>SI_ASYNCIO</I>. Signal is the result of asynch IO completion 
-  <LI><I>SI_MESGQ</I>. Signal generated by arrival of a message on an empty message queue.
-</UL>
+<ul>
+  <li><I>SI_USER</I>. Signal sent from kill, raise, or abort
+  <li><I>SI_QUEUE</I>. Signal sent from sigqueue
+  <li><I>SI_TIMER</I>. Signal is result of timer expiration
+  <li><I>SI_ASYNCIO</I>. Signal is the result of asynch IO completion 
+  <li><I>SI_MESGQ</I>. Signal generated by arrival of a message on an empty message queue.
+</ul>
 
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>set</I>.  The set of pending signals to wait for.
-<LI><I>info</I>. The returned signal values
-<LI><I>timeout</I>. The amount of time to wait
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>set</I>.  The set of pending signals to wait for.
+<li><I>info</I>. The returned signal values
+<li><I>timeout</I>. The amount of time to wait
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>Signal number that cause the wait to be terminated, otherwise
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>Signal number that cause the wait to be terminated, otherwise
 -1 (ERROR) is returned.
-</UL>
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 Differences from the POSIX interface include:
-<UL>
-<LI>Values for si_codes differ
-<LI>No mechanism to return cause of ERROR. (It can be inferred
+<ul>
+<li>Values for si_codes differ
+<li>No mechanism to return cause of ERROR. (It can be inferred
 from si_code in a non-standard way).
-<LI>POSIX states that &quot;If no signal is pending at the time of the
+<li>POSIX states that &quot;If no signal is pending at the time of the
 call, the calling task shall be suspended until one or more signals
 in set become pending or until it is interrupted by an unblocked,
 <I>caught</I> signal.&quot;  The present implementation does not require
 that the unblocked signal be caught; the task will be resumed even if
 the unblocked signal is ignored.
-</UL>
+</ul>
 
 <H3><a name="sigqueue">2.8.12 sigqueue</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
     #include &lt;signal.h&gt;
     int sigqueue (int tid, int signo, const union sigval value);
 </PRE>
 
-<P>
-<B>Description:</B> This function sends the signal specified by
+<p>
+<b>Description:</b> This function sends the signal specified by
 signo with the signal parameter value to the task specified
 by tid.
-<P>
+<p>
 If the receiving task has the signal blocked via its sigprocmask,
 the signal will pend until it is unmasked.  Only one pending signal
 (for a given signo) is retained by the system.  This is consistent with
 POSIX which states:  &quot;If a subsequent occurrence of a pending signal
 is generated, it is implementation defined as to whether the signal
 is delivered more than once.&quot;
-<P>
-<B>Input Parameters:</B> 
-<UL>
-<LI><I>tid</I>. ID of the task to receive signal
-<LI><I>signo</I>. Signal number
-<LI><I>value</I>. Value to pass to task with signal
-</UL>
+<p>
+<b>Input Parameters:</b> 
+<ul>
+<li><I>tid</I>. ID of the task to receive signal
+<li><I>signo</I>. Signal number
+<li><I>value</I>. Value to pass to task with signal
+</ul>
 
-<P>
-<B>Returned Values:</B> 
-<UL>
-<LI>
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>
   On  success (at least one signal was sent), zero (OK) is returned.
   On error, -1 (ERROR) is returned, and errno is set appropriately.
   <ul>
@@ -3063,35 +3097,35 @@ is delivered more than once.&quot;
     <li><code>EPERM</code>.  The task does not have permission to send the signal to the receiving process.</li>
     <li><code>ESRCH</code>. No process has a PID matching pid.</li>
   </ul>
-</UL>
+</ul>
 
-<P>
-<B>Assumptions/Limitations:</B> 
-<P>
-<B>  POSIX  Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b> 
+<p>
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 Differences from the POSIX interface include:
-<UL>
-<LI>Default action is to ignore signals.
-<LI>Signals are processed one at a time in order
-<LI>POSIX states that, &quot;If signo is zero (the null signal), error
+<ul>
+<li>Default action is to ignore signals.
+<li>Signals are processed one at a time in order
+<li>POSIX states that, &quot;If signo is zero (the null signal), error
 checking will be performed but no signal is actually sent.&quot;
 There is no null signal in the present implementation; a zero signal will
 be sent.
-</UL>
+</ul>
 
 <H3><a name="kill">2.8.13 kill</a></H3>
 
-<P>
-<B>Function Prototype:</B> 
+<p>
+<b>Function Prototype:</b> 
 <PRE>
    #include &lt;sys/types.h&gt;
    #include &ltsignal.h&gt;
    int kill(pid_t pid, int sig);
 </PRE>
 
-<P>
-<B>Description:</B> 
+<p>
+<b>Description:</b> 
   The kill() system call can be used to send any signal to
   any task.
 </p>
@@ -3111,19 +3145,19 @@ be sent.
   information as zero and negative pid values.
   Only positive, non-zero values of pid are supported by this
   implementation. ID of the task to receive signal
-<LI><I>signo</I>. The signal number to send.
+<li><I>signo</I>. The signal number to send.
   If signo is zero, no signal is sent, but all error checking is performed.
-</UL>
+</ul>
 
 <p>
-  <B>Returned Values:</B> 
-  <UL>
-    <LI>OK or ERROR
-  </UL>
+  <b>Returned Values:</b> 
+  <ul>
+    <li>OK or ERROR
+  </ul>
 </p>
 
 <p>
-  <B>Assumptions/Limitations:</B> 
+  <b>Assumptions/Limitations:</b> 
 </p>
 <p>
   <b>POSIX  Compatibility:</b>
@@ -3136,7 +3170,7 @@ be sent.
   <li>Sending of signals to 'process groups' is not supported in NuttX.</li>
 </ul>
 
-<H2>2.9 <A NAME="Pthread">Pthread Interfaces</A></H2>
+<H2>2.9 <A NAME="Pthread">Pthread Interfaces</a></H2>
 <p>
   NuttX does not support <i>processes</i> in the way that, say, Linux does.
   NuttX only supports simple threads or tasks running within the same address space.
@@ -3260,437 +3294,437 @@ be sent.
   <li><code>pthread_testcancel</code>. set cancelability state.</li>
 </ul>
 
-<H3><a name="pthreadattrinit">2.9.1 pthread_attr_init</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadattrinit">2.9.1 pthread_attr_init</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_attr_init(pthread_attr_t *attr);
 </PRE>
-<P>
-<B>Description:</B>
+<p>
+<b>Description:</b>
 Initializes a thread attributes object (attr) with default values
 for all of the individual attributes used by the implementation.
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_attr_init()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
-<P>
-<H3><a name="pthreadattrdestroy">2.9.2 pthread_attr_destroy</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<p>
+<H3><a name="pthreadattrdestroy">2.9.2 pthread_attr_destroy</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_attr_destroy(pthread_attr_t *attr);
 </PRE>
-<P>
-<B>Description:</B>
+<p>
+<b>Description:</b>
 An attributes object can be deleted when it is no longer needed.
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_attr_destroy()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
-<P>
-<H3><a name="pthreadattrsetschedpolity">2.9.3 pthread_attr_setschedpolicy</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<p>
+<H3><a name="pthreadattrsetschedpolity">2.9.3 pthread_attr_setschedpolicy</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_attr_setschedpolicy(pthread_attr_t *attr, int policy);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_attr_setschedpolicy()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrgetschedpolicy">2.9.4 pthread_attr_getschedpolicy</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadattrgetschedpolicy">2.9.4 pthread_attr_getschedpolicy</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_attr_getschedpolicy(pthread_attr_t *attr, int *policy);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_attr_getschedpolicy()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrsetschedparam">2.9.5 pthread_attr_getschedpolicy</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadattrsetschedparam">2.9.5 pthread_attr_getschedpolicy</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
    #include &lt;pthread.h&gt;
     int pthread_attr_setschedparam(pthread_attr_t *attr,
 				      const struct sched_param *param);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_attr_getschedpolicy()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrgetschedparam">2.9.6 pthread_attr_getschedparam</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadattrgetschedparam">2.9.6 pthread_attr_getschedparam</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
    #include &lt;pthread.h&gt;
      int pthread_attr_getschedparam(pthread_attr_t *attr,
 				      struct sched_param *param);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_attr_getschedparam()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrsetinheritsched">2.9.7 pthread_attr_setinheritsched</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadattrsetinheritsched">2.9.7 pthread_attr_setinheritsched</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
    #include &lt;pthread.h&gt;
     int pthread_attr_setinheritsched(pthread_attr_t *attr,
 					int inheritsched);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_attr_setinheritsched()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
-<P>
-<H3><a name="pthreadattrgetinheritsched">2.9.8 pthread_attr_getinheritsched</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<p>
+<H3><a name="pthreadattrgetinheritsched">2.9.8 pthread_attr_getinheritsched</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
    #include &lt;pthread.h&gt;
      int pthread_attr_getinheritsched(const pthread_attr_t *attr,
 					int *inheritsched);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_attr_getinheritsched()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrsetstacksize">2.9.9 pthread_attr_setstacksize</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadattrsetstacksize">2.9.9 pthread_attr_setstacksize</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
    #include &lt;pthread.h&gt;
     int pthread_attr_setstacksize(pthread_attr_t *attr, long stacksize);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_attr_setstacksize()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrgetstacksize">2.9.10 pthread_attr_getstacksize</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadattrgetstacksize">2.9.10 pthread_attr_getstacksize</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
    int pthread_attr_getstacksize(pthread_attr_t *attr, long *stackaddr);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_attr_getstacksize()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcreate">2.9.11 pthread_create</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadcreate">2.9.11 pthread_create</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_create(pthread_t *thread, pthread_attr_t *attr,
 			  pthread_startroutine_t startRoutine,
 			  pthread_addr_t arg);
 </PRE>
-<P>
-<B>Description:</B>
+<p>
+<b>Description:</b>
 To create a thread object and runnable thread, a routine
 must be specified as the new thread's start routine.  An
 argument may be passed to this routine, as an untyped
 address; an untyped address may also be returned as the
 routine's value.  An attributes object may be used to
 specify details about the kind of thread being created.
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_create()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreaddetach">2.9.12 pthread_detach</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreaddetach">2.9.12 pthread_detach</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_detach(pthread_t thread);
 </PRE>
-<P>
-<B>Description:</B>
+<p>
+<b>Description:</b>
 A thread object may be "detached" to specify that the
 return value and completion status will not be requested.
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_detach()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadexit">2.9.13 pthread_exit</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadexit">2.9.13 pthread_exit</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     void pthread_exit(pthread_addr_t pvValue);
 </PRE>
-<P>
-<B>Description:</B>
+<p>
+<b>Description:</b>
 A thread may terminate it's own execution.
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_exit()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcancel">2.9.14 pthread_cancel</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadcancel">2.9.14 pthread_cancel</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_cancel(pthread_t thread);
 </PRE>
-<P>
-<B>Description:</B>
+<p>
+<b>Description:</b>
 
 <p>The  pthread_cancel() function shall request that thread
 be canceled. The target thread's cancelability state determines
@@ -3706,48 +3740,48 @@ calls pthread_testcancel().</p>
 <p>Cancelability is asynchronous; all cancels are acted upon
 immediately (when enable), interrupting the thread with its processing.</p>
 
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-<LI><I>thread</I>.
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+<li><I>thread</I>.
 Identifies the thread to be canceled.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>ptnread_cancel()</I> function will return zero (<I>OK</I>).
 Otherwise, an error number will be returned to indicate the error:
-<P>
-<UL>
-<LI><I>ESRCH</I>.
+<p>
+<ul>
+<li><I>ESRCH</I>.
 No thread could be found corresponding to that specified by the given thread ID.</li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.  Except:</p>
-<UL>
-<LI>The thread-specific data destructor functions shall be called for thread.
+<ul>
+<li>The thread-specific data destructor functions shall be called for thread.
 However, these destructors are not currently supported.</li>
 <li>Cancellation types are not supported.  The thread will be canceled
 at the time that pthread_cancel() is called or, if cancelation is disabled, at
 the time when cancelation is re-enabled.</li>
 <li><tt>pthread_testcancel()</tt> is not supported.</li>
 <li>Thread cancellation at <i>cancellation points</i> is not supported.</li>
-</UL>
+</ul>
 
-<H3><a name="pthreadsetcancelstate">2.9.15 pthread_setcancelstate</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadsetcancelstate">2.9.15 pthread_setcancelstate</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_setcancelstate(int state, int *oldstate);
 </PRE>
-<P>
-<B>Description:</B>
-<P>The <i>pthread_setcancelstate()</i> function atomically
+<p>
+<b>Description:</b>
+<p>The <i>pthread_setcancelstate()</i> function atomically
 sets both the calling thread's cancelability state to the indicated
 state and returns the previous cancelability  state at the location
 referenced by oldstate.
@@ -3756,159 +3790,159 @@ Legal values for state are PTHREAD_CANCEL_ENABLE and PTHREAD_CANCEL_DISABLE.<.li
 <p>Any pending thread cancelation may occur at the time that the
 cancelation state is set to PTHREAD_CANCEL_ENABLE.</p>
 
-<B>Input Parameters:</B>
-<P>
-<UL>
-<LI><I>state</I> 
+<b>Input Parameters:</b>
+<p>
+<ul>
+<li><I>state</I> 
 New cancelation state.  One of PTHREAD_CANCEL_ENABLE or PTHREAD_CANCEL_DISABLE.<.li>
-<LI><I>oldstate</I>.
+<li><I>oldstate</I>.
 Location to return the previous cancelation state.
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_setcancelstate()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be returned to indicate the error:
-<P>
-<UL>
-<LI><I>ESRCH</I>.
+<p>
+<ul>
+<li><I>ESRCH</I>.
 No thread could be found corresponding to that specified by the given thread ID.</li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadtestcancelstate">2.9.16 pthread_testcancelstate</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadtestcancelstate">2.9.16 pthread_testcancelstate</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_setcancelstate(void);
 </PRE>
-<P>
-<B>Description:</B>
-<P><b>NOT SUPPORTED</b>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p><b>NOT SUPPORTED</b>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_setcancelstate()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadjoin">2.9.17 pthread_join</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadjoin">2.9.17 pthread_join</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_join(pthread_t thread, pthread_addr_t *ppvValue);
 </PRE>
-<P>
-<B>Description:</B>
+<p>
+<b>Description:</b>
 A thread can await termination of another thread and retrieve
 the return value of the thread.
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_join()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadyield">2.9.18 pthread_yield</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadyield">2.9.18 pthread_yield</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     void pthread_yield(void);
 </PRE>
-<P>
-<B>Description:</B>
+<p>
+<b>Description:</b>
 A thread may tell the scheduler that its processor can be
 made available.
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_yield()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadself">2.9.19 pthread_self</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadself">2.9.19 pthread_self</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     pthread_t pthread_self(void);
 </PRE>
-<P>
-<B>Description:</B>
+<p>
+<b>Description:</b>
 A thread may obtain a copy of its own thread handle.
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_self()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadgetschedparam">2.9.20 pthread_getschedparam</A></H3>
+<H3><a name="pthreadgetschedparam">2.9.20 pthread_getschedparam</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -3974,7 +4008,7 @@ interface of the same name.
   Comparable to the POSIX interface of the same name.
 </p>
 
-<H3><a name="pthreadsetschedparam">2.9.21 pthread_setschedparam</A></H3>
+<H3><a name="pthreadsetschedparam">2.9.21 pthread_setschedparam</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4066,72 +4100,72 @@ interface of the same name.
   Comparable to the POSIX interface of the same name.
 </p>
 
-<H3><a name="pthreadkeycreate">2.9.22 pthread_key_create</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadkeycreate">2.9.22 pthread_key_create</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_key_create( pthread_key_t *key, void (*destructor)(void*) )
 </PRE>
-<P>
-<B>Description:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
 This function creates a thread-specific data key visible
 to all threads in the system.  Although the same key value
 may be used by different threads, the values bound to
 the key by <I>pthread_setspecific()</I> are maintained on a
 per-thread basis and persist for the life of the calling
 thread.
-<P>
+<p>
 Upon key creation, the value <I>NULL</I> will be associated with
 the the new key in all active threads.  Upon thread
 creation, the value <I>NULL</I> will be associated with all
 defined keys in the new thread.
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-<LI><I>key</I> is a pointer to the key to create.
-<LI><I>destructor</I> is an optional destructor() function that may
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+<li><I>key</I> is a pointer to the key to create.
+<li><I>destructor</I> is an optional destructor() function that may
 be associated with each key that is invoked when a
 thread exits.  However, this argument is ignored in
 the current implementation.
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_key_create()</I> function will
 store the newly created key value at *<I>key</I> and return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-<LI><I>EAGAIN</I>.  The system lacked sufficient resources
+<p>
+<ul>
+<li><I>EAGAIN</I>.  The system lacked sufficient resources
 to create another thread-specific data key, or the
 system-imposed limit on the total number of keys
 per task {<I>PTHREAD_KEYS_MAX</I>} has been exceeded
-<LI><I>ENONMEM</I>  Insufficient memory exists to create the key.
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<li><I>ENONMEM</I>  Insufficient memory exists to create the key.
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
-<UL>
-<LI>The present implementation ignores the destructor argument.
-</UL>
+<ul>
+<li>The present implementation ignores the destructor argument.
+</ul>
 
-<H3><a name="pthreadsetspecific">2.9.23 pthread_setspecific</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadsetspecific">2.9.23 pthread_setspecific</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_setspecific( pthread_key_t key, void *value )
 </PRE>
-<P>
-<B>Description:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
 The <I>pthread_setspecific()</I> function associates a thread-
 specific value with a key obtained via a previous call
 to <I>pthread_key_create()</I>.  Different threads may bind
@@ -4139,611 +4173,611 @@ different values to the same key.  These values are
 typically pointers to blocks of dynamically allocated
 memory that have been reserved for use by the calling
 thread.
-<P>
+<p>
 The effect of calling <I>pthread_setspecific()</I> with a key value
 not obtained from <I>pthread_key_create()</I> or after a key has been
 deleted with <I>pthread_key_delete()</I> is undefined.
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-<LI><I>key</I>.  The data key to set the binding for.
-<LI><I>value</I>. The value to bind to the key.
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+<li><I>key</I>.  The data key to set the binding for.
+<li><I>value</I>. The value to bind to the key.
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, <I>pthread_setspecific()</I> will return zero (<I>OK</I>).
 Otherwise, an error number will be returned:
-<P>
-<UL>
-<LI><I>ENOMEM</I>.  Insufficient memory exists to associate the value
+<p>
+<ul>
+<li><I>ENOMEM</I>.  Insufficient memory exists to associate the value
 with the key.
-<LI><I>EINVAL</I>.  The key value is invalid.
-</UL>
-<P>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<li><I>EINVAL</I>.  The key value is invalid.
+</ul>
+<p>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
-<UL>
-<LI>pthread_setspecific() may be called from a thread-specific data
+<ul>
+<li>pthread_setspecific() may be called from a thread-specific data
 destructor function.
-</UL>
+</ul>
 
-<H3><a name="pthreadgetspecific">2.9.24 pthread_getspecific</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadgetspecific">2.9.24 pthread_getspecific</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     void *pthread_getspecific( pthread_key_t key )
 </PRE>
-<P>
-<B>Description:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
 The <I>pthread_getspecific()</I> function returns the value
 currently bound to the specified key on behalf of the
 calling thread.
-<P>
+<p>
 The effect of calling <I>pthread_getspecific()</I> with a key value
 not obtained from <I>pthread_key_create()</I> or after a key has been
 deleted with <I>pthread_key_delete()</I> is undefined.
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-<LI><I>key</I>.  The data key to get the binding for.
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+<li><I>key</I>.  The data key to get the binding for.
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 The function <I>pthread_getspecific()</I> returns the thread-
 specific data associated with the given key.  If no
 thread specific data is associated with the key, then
 the value <I>NULL</I> is returned.
-<P>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
-<UL>
-<LI>pthread_getspecific() may be called from a thread-specific data
+<ul>
+<li>pthread_getspecific() may be called from a thread-specific data
 destructor function.
-</UL>
+</ul>
 
-<H3><a name="pthreadkeydelete">2.9.25 pthread_key_delete</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadkeydelete">2.9.25 pthread_key_delete</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_key_delete( pthread_key_t key )
 </PRE>
-<P>
-<B>Description:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
 This POSIX function should delete a thread-specific data
 key previously returned by <I>pthread_key_create()</I>.  However,
 this function does nothing in the present implementation.
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-<LI><I>key</I>.  The key to delete
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
-<UL>
-<LI>Always returns <I>EINVAL</I>.
-</UL>
-<P>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+<li><I>key</I>.  The key to delete
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
+<ul>
+<li>Always returns <I>EINVAL</I>.
+</ul>
+<p>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrinit">2.9.26 pthread_mutexattr_init</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadmutexattrinit">2.9.26 pthread_mutexattr_init</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_mutexattr_init(pthread_mutexattr_t *attr);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_mutexattr_init()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrdestroy">2.9.27 pthread_mutexattr_destroy</A></H3>
-<P>
-<B>Function Protoype:</B>
-<P>
+<H3><a name="pthreadmutexattrdestroy">2.9.27 pthread_mutexattr_destroy</a></H3>
+<p>
+<b>Function Protoype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_mutexattr_destroy(pthread_mutexattr_t *attr);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_mutexattr_destroy()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrgetpshared">2.9.28 pthread_mutexattr_getpshared</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadmutexattrgetpshared">2.9.28 pthread_mutexattr_getpshared</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_mutexattr_getpshared(pthread_mutexattr_t *attr,
 					int *pshared);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_mutexattr_getpshared()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrsetpshared">2.9.29 pthread_mutexattr_setpshared</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadmutexattrsetpshared">2.9.29 pthread_mutexattr_setpshared</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
    int pthread_mutexattr_setpshared(pthread_mutexattr_t *attr,
 					int pshared);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_mutexattr_setpshared()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexinit">2.9.30 pthread_mutex_init</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadmutexinit">2.9.30 pthread_mutex_init</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_mutex_init(pthread_mutex_t *mutex,
 			      pthread_mutexattr_t *attr);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_mutex_init()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexdestrory">2.9.31 pthread_mutex_destroy</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadmutexdestrory">2.9.31 pthread_mutex_destroy</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_mutex_destroy(pthread_mutex_t *mutex);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_mutex_destroy()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexlock">2.9.32 pthread_mutex_lock</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadmutexlock">2.9.32 pthread_mutex_lock</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_mutex_lock(pthread_mutex_t *mutex);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_mutex_lock()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutextrylock">2.9.33 pthread_mutex_trylock</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadmutextrylock">2.9.33 pthread_mutex_trylock</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_mutex_trylock(pthread_mutex_t *mutex);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_mutex_trylock()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexunlock">2.9.34 pthread_mutex_unlock</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadmutexunlock">2.9.34 pthread_mutex_unlock</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_mutex_unlock(pthread_mutex_t *mutex);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
   <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_mutex_unlock()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadconaddrinit">2.9.35 pthread_condattr_init</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadconaddrinit">2.9.35 pthread_condattr_init</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_condattr_init(pthread_condattr_t *attr);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_condattr_init()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadocndattrdestroy">2.9.36 pthread_condattr_destroy</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadocndattrdestroy">2.9.36 pthread_condattr_destroy</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_condattr_destroy(pthread_condattr_t *attr);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_condattr_destroy()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondinit">2.9.37 pthread_cond_init</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadcondinit">2.9.37 pthread_cond_init</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_cond_init(pthread_cond_t *cond, pthread_condattr_t *attr);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_cond_init()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadconddestroy">2.9.38 pthread_cond_destroy</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadconddestroy">2.9.38 pthread_cond_destroy</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_cond_destroy(pthread_cond_t *cond);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_cond_destroy()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondbroadcast">2.9.39 pthread_cond_broadcast</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadcondbroadcast">2.9.39 pthread_cond_broadcast</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_cond_broadcast(pthread_cond_t *cond);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_cond_broadcast()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondsignal">2.9.40 pthread_cond_signal</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadcondsignal">2.9.40 pthread_cond_signal</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_cond_signal(pthread_cond_t *dond);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
-<B>Returned Values:</B>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
 If successful, the <I>pthread_cond_signal()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondwait">2.9.41 pthread_cond_wait</A></H3>
-<P>
-<B>Function Prototype:</B>
-<P>
+<H3><a name="pthreadcondwait">2.9.41 pthread_cond_wait</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>
     #include &lt;pthread.h&gt;
     int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex);
 </PRE>
-<P>
-<B>Description:</B>
-<P>
-<B>Input Parameters:</B>
-<P>
-<UL>
-  <li><code>param<code>.</li>
-</UL>
-<P>
+<p>
+<b>Description:</b>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+<p>
   <b>Returned Values:</b>
-<P>
+<p>
 If successful, the <I>pthread_cond_wait()</I> function will return
 zero (<I>OK</I>).  Otherwise, an error number will be
 returned to indicate the error:
-<P>
-<UL>
-  <li><code>Exxx</code>. </li>
-</UL>
-<B>Assumptions/Limitations:</B>
-<P>
-<B>POSIX Compatibility:</B> Comparable to the POSIX
+<p>
+<ul>
+  <li><code>To be provided</code>. </li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondtimedwait">2.9.42 pthread_cond_timedwait</A></H3>
+<H3><a name="pthreadcondtimedwait">2.9.42 pthread_cond_timedwait</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4760,7 +4794,7 @@ interface of the same name.
 </p>
 <p>
 <ul>
-  <li><code>parm</code>.</li>
+  <li><code>To be provided</code>.</li>
 </ul>
 <p>
   <b>Returned Values:</b>
@@ -4771,7 +4805,7 @@ interface of the same name.
   returned to indicate the error:
 </p>
 <ul>
-  <li><code>Exxx</code>. </li>
+  <li><code>To be provided</code>. </li>
 </ul>
 <p>
   <b>Assumptions/Limitations:</b>
@@ -5251,71 +5285,71 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<HR>
-<H1>3.0 <A NAME="Data_Structures">OS Data Structures</A></H1>
+<hr>
+<h1>3.0 <A NAME="Data_Structures">OS Data Structures</a></h1>
 <H2>3.1 Scalar types</H2>
-<P>
+<p>
 Many of the types used to communicate with NuttX are simple
 scalar types. These types are used to provide architecture independence
 of the OS from the application. The scalar types used at the NuttX
 interface include:
-<UL>
-<LI>pid_t
-<LI>size_t
-<LI>sigset_t
-<LI>STATUS
-<LI>time_t
-</UL>
+<ul>
+<li>pid_t
+<li>size_t
+<li>sigset_t
+<li>STATUS
+<li>time_t
+</ul>
 
 <H2>3.2 Hidden Interface Structures</H2>
-<P>
+<p>
 Several of the types used to interface with NuttX are
 structures that are intended to be hidden from the application.
 From the standpoint of the application, these structures (and
 structure pointers) should be treated as simple handles to reference
 OS resources. These hidden structures include:
-<UL>
-<LI>_TCB
-<LI>mqd_t
-<LI>sem_t
-<LI>WDOG_ID
-<LI>pthread_key_t
-</UL>
-<P>
+<ul>
+<li>_TCB
+<li>mqd_t
+<li>sem_t
+<li>WDOG_ID
+<li>pthread_key_t
+</ul>
+<p>
 In order to maintain portability, applications should not reference
 specific elements within these hidden structures. These hidden
 structures will not be described further in this user's manual.
-<P>
+<p>
 
 <H2>3.3. Access to the <I>errno</I> Variable</H2>
-<P>
+<p>
 A pointer to the thread-specific <I>errno</I>. value is available through a
 function call:
-<P>
-<B>Function Prototype:</B>
-<P>
+<p>
+<b>Function Prototype:</b>
+<p>
 <PRE>    int *get_errno_ptr( void )</PRE>
-<P>
-<B>Description</B>:  <I>osGetErrnorPtr()</I> returns a pointer to
+<p>
+<b>Description</b>:  <I>osGetErrnorPtr()</I> returns a pointer to
 the thread-specific <I>errno</I> value.
-<P>
+<p>
 This differs somewhat from the use for errno in a multi-threaded process environment:
 Each pthread will have its own private copy of errno and the errno will not be shared
 between pthreads.
-<P>
-<B>Input Parameters</B>:  None
-<P>
-<B>Returned Values</B>:
-<P>
-<UL>
-<LI>A pointer to the thread-specific <I>errno</I> value.
-</UL>
-<P>
+<p>
+<b>Input Parameters</b>:  None
+<p>
+<b>Returned Values</b>:
+<p>
+<ul>
+<li>A pointer to the thread-specific <I>errno</I> value.
+</ul>
+<p>
 
 <H2>3.4 User Interface Structures</H2>
-<P>
+<p>
 <H3>3.4.1 main_t</H3>
-<P>
+<p>
 main_t defines the type of a task entry point. main_t is declared
 in sys/types.h as:
 <PRE>
@@ -5324,7 +5358,7 @@ in sys/types.h as:
 
 <H3>3.4.2 struct sched_param</H3>
 
-<P>
+<p>
 This structure is used to pass scheduling priorities to and from
 NuttX;
 <PRE>
@@ -5336,7 +5370,7 @@ NuttX;
 
 <H3>3.4.3 struct timespec</H3>
 
-<P>
+<p>
 This structure is used to pass timing information between the
 NuttX and a user application:
 <PRE>
@@ -5349,7 +5383,7 @@ NuttX and a user application:
 
 <H3>3.4.4 struct mq_attr</H3>
 
-<P>
+<p>
 This structure is used to communicate message queue attributes
 between NuttX and a MoBY application:
 <PRE>
@@ -5363,7 +5397,7 @@ between NuttX and a MoBY application:
 
 <H3>3.4.5 struct sigaction</H3>
 
-<P>
+<p>
 The following structure defines the action to take for given signal:
 <PRE>
     struct sigaction
@@ -5382,7 +5416,7 @@ The following structure defines the action to take for given signal:
 
 <H3>3.4.6 struct siginfo/siginfo_t</H3>
 
-<P>
+<p>
 The following types is used to pass parameters to/from signal
 handlers:
 <PRE>
@@ -5396,7 +5430,7 @@ handlers:
 
 <H3>3.4.7 union sigval</H3>
 
-<P>
+<p>
 This defines the type of the struct siginfo si_value field and
 is used to pass parameters with signals.
 <PRE>
@@ -5409,7 +5443,7 @@ is used to pass parameters with signals.
 
 <H3>3.4.8 struct sigevent</H3>
 
-<P>
+<p>
 The following is used to attach a signal to a message queue to
 notify a task when a message is available on a queue.
 <PRE>

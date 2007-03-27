@@ -11,8 +11,33 @@ Table of Contents
 Architecture-Specific Code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The file include/nuttx/arch.h identifies all of the APIs that must
-be provided by the architecture specific logic.  (It also includes
+The NuttX configuration consists of:
+
+o Processor architecture specific files.  These are the files contained
+  in the arch/<arch-name>/ directory discussed in this README.
+
+o Chip/SoC specific files.  Each processor processor architecture
+  is embedded in chip or System-on-a-Chip (SoC) architecture.  The
+  full chip architecture includes the processor architecture plus
+  chip-specific interrupt logic, general purpose I/O (GIO) logic, and
+  specialized, internal peripherals (such as UARTs, USB, etc.).
+
+  These chip-specific files are contained within chip-specific
+  sub-directories in the arch/<arch-name>/ directory and are selected
+  via the CONFIG_ARCH_name selection
+
+o Board specific files.  In order to be usable, the chip must be
+  contained in a board environment.  The board configuration defines
+  additional properties of the board including such things as
+  peripheral LEDs, external peripherals (such as network, USB, etc.).
+
+  These board-specific configuration files can be found in the
+  configs/<board-name>/ sub-directories.
+
+This README will address the processor architecture specific files
+that are contained in the arch/<arch-name>/ directory. The file
+include/nuttx/arch.h identifies all of the APIs that must
+be provided by this architecture specific logic.  (It also includes
 arch/<arch-name>/arch.h as described below).
 
 Directory Structure
@@ -25,17 +50,26 @@ subdirectory).  Each architecture must provide a subdirectory <arch-name>
 under arch/ with the following characteristics:
 
 
-	<arch-name>
-	|-- include
+	<arch-name>/
+	|-- include/
+	|   |--<chip-name>/
+	|   |  `-- (chip-specific header files)
+	|   |--<other-chips>/
 	|   |-- arch.h
 	|   |-- irq.h
 	|   `-- types.h
-	`-- src
+	`-- src/
+	    |--<chip-name>/
+	    |  `-- (chip-specific source files)
+	    |--<other-chips>/
 	    |-- Makefile
 	    `-- (architecture-specific source files)
 
 Summary of Files
 ^^^^^^^^^^^^^^^^
+
+include/<chip-name>/
+  This sub-directory contains chip-specific header files.
 
 include/arch.h
   This is a hook for any architecture specific definitions that may
@@ -75,6 +109,9 @@ include/irq.h
 
   This file must also define NR_IRQS, the total number of IRQs supported
   by the board.
+
+src/<chip-name>/
+  This sub-directory contains chip-specific source files.
 
 src/Makefile
   This makefile will be executed to build the targets src/libup.a and

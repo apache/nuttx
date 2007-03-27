@@ -44,8 +44,8 @@ o File system
 o Console Output
 
 o Documentation
-- Document fs & driver logic
-- Document filesystem, library
+- Document fs/ & driver/ logic
+- Document C-library APIs
 
 o Build system
 - Names under arch are incorrect.  These should hold processor architectures.
