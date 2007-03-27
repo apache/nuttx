@@ -134,7 +134,7 @@ extern void up_dumpframe(FAR struct xcptcontext *context);
 # define up_dumpframe(x)
 #endif
 
-/* Defined in up_leds.c */
+/* Defined in board/up_leds.c */
 
 #ifdef CONFIG_ARCH_LEDS
 extern void up_ledinit(void);
