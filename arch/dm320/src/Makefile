@@ -63,6 +63,8 @@ LINKLIBS	=
 LDPATHES	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
 LDLIBS		= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
 
+BOARDDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src/board
+
 LIBGCC		= ${shell $(CC) -print-libgcc-file-name}
 
 all: up_head.o libarch$(LIBEXT)
@@ -79,9 +81,12 @@ libarch$(LIBEXT): $(OBJS)
 			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
 	done ; )
 
-nuttx: $(LINKOBJS)
-	$(LD) --entry=__start $(LDFLAGS) $(LDPATHES) -o $(TOPDIR)/$@ $(LINKOBJS) \
-		--start-group $(LDLIBS) --end-group $(EXTRA_LIBS) $(LIBGCC) 
+board/libboard$(LIBEXT):
+	$(MAKE) -C board TOPDIR=$(TOPDIR) libboard$(LIBEXT)
+
+nuttx: $(LINKOBJS) board/libboard$(LIBEXT)
+	$(LD) --entry=__start $(LDFLAGS) $(LDPATHES) -L$(BOARDDIR) -o $(TOPDIR)/$@ $(LINKOBJS) \
+		--start-group $(LDLIBS) -lboard --end-group $(EXTRA_LIBS) $(LIBGCC) 
 	@$(NM) $(TOPDIR)/$@ | \
 	grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 	sort > $(TOPDIR)/System.map
@@ -98,15 +103,24 @@ ifeq ($(CONFIG_RRLOAD_BINARY),y)
 endif
 
 .depend: Makefile $(SRCS)
+	@if [ -e board/Makefile ]; then \
+		$(MAKE) -C board TOPDIR=$(TOPDIR) depend ; \
+	if
 	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	touch $@
 
 depend: .depend
 
 clean:
+	@if [ -e board/Makefile ]; then \
+		$(MAKE) -C board TOPDIR=$(TOPDIR) clean ; \
+	fi
 	rm -f libarch$(LIBEXT) *.o *~
 
 distclean: clean
+	@if [ -e board/Makefile ]; then \
+		$(MAKE) -C board TOPDIR=$(TOPDIR) distclean ; \
+	fi
 	rm -f Make.dep .depend
 
 -include Make.dep

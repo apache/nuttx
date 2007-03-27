@@ -144,6 +144,18 @@ extern void up_timerinit(void);
 
 extern void up_maskack_irq(int irq);
 
+/* Defined in board/up_leds.c */
+
+#ifdef CONFIG_ARCH_LEDS
+extern void up_ledinit(void);
+extern void up_ledon(int led);
+extern void up_ledoff(int led);
+#else
+# define up_ledinit()
+# define up_ledon(led)
+# define up_ledoff(led)
+#endif
+
 #endif /* __ASSEMBLY__ */
 
 #endif  /* __UP_INTERNAL_H */
