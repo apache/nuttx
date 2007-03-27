@@ -42,7 +42,7 @@ else
 			  -fomit-frame-pointer
 endif
 
-ARCHCPUFLAGS		= -mapcs-32 -mcpu=arm7tdmi -msoft-float -fno-builtin
+ARCHCPUFLAGS		= -mapcs-32 -mtune=arm9tdmi -march=armv5te -msoft-float -fno-builtin
 ARCHPICFLAGS		= -fpic
 ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
 ARCHDEFINES		=
