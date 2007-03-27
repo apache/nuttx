@@ -277,6 +277,11 @@ __start:
 
 	bl	up_boot
 
+	/* Set up the LEDs */
+
+#ifdef CONFIG_ARCH_LEDS
+	bl	up_ledinit
+#endif
 	/* Perform early serial initialization */
 
 #ifdef CONFIG_DEV_CONSOLE
