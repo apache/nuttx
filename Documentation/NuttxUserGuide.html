@@ -1,9 +1,9 @@
-<HTML>
+<html>
 
-<HEAD>
-<TITLE>NuttX Users Manual</TITLE>
-<META NAME="AUTHOR" CONTENT="Gregory Nutt">
-</HEAD>
+<head>
+<title>NuttX Users Manual</title>
+<meta name="AUTHOR" content="Gregory Nutt">
+</head>
 
 <body background="backgd.gif">
 <hr>
@@ -11,18 +11,18 @@
 <center><h1><i>Under Construction</i></h1></center>
 <hr>
 <hr>
-<CENTER><BIG><b>
+<center><BIG><b>
 NuttX Operating System
 <p>
 User's Manual
 </b></BIG>
 <p>
-<SMALL>by</SMALL>
+<small>by</small>
 <p>
 Gregory Nutt
 <p>
-<SMALL>Last Update: March 26, 2007</SMALL>
-</CENTER>
+<small>Last Update: March 28, 2007</small>
+</center>
 
 <h1>1.0 <A NAME="Introduction">Introduction</a></h1>
 
@@ -166,10 +166,10 @@ paragraphs.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
    #include &lt;sched.h&gt;
    int task_create(char *name, int priority, int stack_size, main_t entry, const char *argv[]);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> 
@@ -234,11 +234,11 @@ paragraphs.
 <p>
 <b>POSIX Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following similar interface:
-<PRE>
+<pre>
    int taskSpawn(char *name, int priority, int options, int stackSize, FUNCPTR entryPt,
                  int arg1, int arg2, int arg3, int arg4, int arg5,
                  int arg6, int arg7, int arg8, int arg9, int arg10);
-</PRE>
+</pre>
 
 <p>
   The NuttX task_create() differs from VxWorks' taskSpawn() in the
@@ -255,11 +255,11 @@ VxWorks provides the following similar interface:
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
    #include &lt;sched.h&gt;
    STATUS task_init(_TCB *tcb, char *name, int priority, uint32 *stack, uint32 stack_size,
                     maint_t entry, const char *argv[]);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b>
@@ -306,11 +306,11 @@ mechanism to initialize and start a new task.
 <p>
 <b>POSIX Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following similar interface:
-<PRE>
+<pre>
    STATUS taskInit(WIND_TCB *pTcb, char *name, int priority, int options, uint32 *pStackBase, int stackSize,
                    FUNCPTR entryPt, int arg1, int arg2, int arg3, int arg4, int arg5,
                    int arg6, int arg7, int arg8, int arg9, int arg10);
-</PRE>
+</pre>
 
 <p>
   The NuttX task_init() differs from VxWorks' taskInit() in the
@@ -327,10 +327,10 @@ VxWorks provides the following similar interface:
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;sched.h&gt;
     STATUS task_activate( _TCB *tcb );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function activates tasks created by task_init().
@@ -359,9 +359,9 @@ mechanism to initialize and start a new task.
 <p>
 <b>POSIX Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following similar interface:
-<PRE>
+<pre>
     STATUS taskActivate( int tid );
-</PRE>
+</pre>
 
 <p>
   The NuttX task_activate() differs from VxWorks' taskActivate() in the
@@ -377,10 +377,10 @@ the pointer to the WIND_TCB cast to an integer.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;sched.h&gt;
     STATUS task_delete( pid_t pid );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function causes a specified task to cease
@@ -409,9 +409,9 @@ task_delete() can strand those resources.
 <p>
 <b>POSIX Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following similar interface:
-<PRE>
+<pre>
     STATUS taskDelete( int tid );
-</PRE>
+</pre>
 
 <p>
   The NuttX task_delete() differs from VxWorks' taskDelete() in
@@ -427,13 +427,13 @@ VxWorks provides the following similar interface:
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;sched.h&gt;
     void exit( int code );
 
     #include &lt;nuttx/unistd.h&gt;
     void _exit( int code );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function causes the calling task to cease
@@ -454,13 +454,13 @@ execute any function registered with atexit().
 
 <p>
 <b>POSIX Compatibility:</b> This is equivalent to the ANSI interface:
-<PRE>
+<pre>
     void exit( int code );
-</PRE>
+</pre>
 And the unix interface:
-<PRE>
+<pre>
     void _exit( int code );
-</PRE>
+</pre>
 
 <p>
   The NuttX exit() differs from ANSI exit() in the following ways:
@@ -473,10 +473,10 @@ And the unix interface:
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;sched.h&gt;
     STATUS task_restart( pid_t pid );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function &quot;restarts&quot; a task.
@@ -507,9 +507,9 @@ zero signifies the calling task.
 <p>
 <b>POSIX Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following similar interface:
-<PRE>
+<pre>
     STATUS taskRestart (int tid);
-</PRE>
+</pre>
 
 <p>
   The NuttX task_restart() differs from VxWorks' taskRestart() in the following ways:
@@ -524,10 +524,10 @@ the value that they had when the task was <I>terminated</I>.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;unistd.h&gt;
     pid_t getpid( void );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function returns the task ID of the
@@ -644,10 +644,10 @@ Compatible with the POSIX interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;sched.h&gt;
     int sched_getparam (pid_t pid, struct sched_param *param);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function gets the scheduling priority
@@ -681,10 +681,10 @@ interface of the same name.
 <H3><a name="schedsetscheduler">2.2.3 sched_setscheduler</a></H3>
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;sched.h&gt;
     int sched_setscheduler (pid_t pid, int policy, const struct sched_param *param);
-</PRE>
+</pre>
 <p>
   <b>Description:</b>
   <i>sched_setscheduler()</i>  sets both the scheduling policy
@@ -729,10 +729,10 @@ interface of the same name.
 <H3><a name="setgetscheduler">2.2.4 sched_getscheduler</a></H3>
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;sched.h&gt;
     int sched_getscheduler (pid_t pid);
-</PRE>
+</pre>
 <p>
   <b>Description:</b>
   <i>sched_getscheduler()</i> returns the scheduling policy
@@ -780,10 +780,10 @@ Differences from the full POSIX implementation include:
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;sched.h&gt;
     int sched_yield( void );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function forces the calling task to give
@@ -806,10 +806,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;sched.h&gt;
     int sched_get_priority_max (int policy)
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function returns the value of the highest
@@ -836,10 +836,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;sched.h&gt;
     int sched_get_priority_min (int policy);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function returns the value of the lowest
@@ -866,10 +866,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;sched.h&gt;
     int sched_get_rr_interval (pid_t pid, struct timespec *interval);
-</PRE>
+</pre>
 
 <p>
   <b>Description:</b> 
@@ -920,10 +920,10 @@ priority of the calling task is returned.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;sched.h&gt;
     STATUS sched_lock( void );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function disables context switching by
@@ -944,18 +944,18 @@ number of times) or until it blocks itself.
 <p>
 <b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the comparable interface:
-<PRE>
+<pre>
     STATUS taskLock( void );
-</PRE>
+</pre>
 
 <H3><a name="schedunlock">2.3.2 sched_unlock</a></H3>
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;sched.h&gt;
     STATUS sched_unlock( void );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function decrements the preemption lock
@@ -977,18 +977,18 @@ eligible to preempt the current task will execute.
 <p>
 <b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the comparable interface:
-<PRE>
+<pre>
     STATUS taskUnlock( void );
-</PRE>
+</pre>
 
 <H3><a name="schedlockcount">2.3.3 sched_lockcount</a></H3>
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;sched.h&gt;
     sint32 sched_lockcount( void )
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function returns the current value of
@@ -1031,10 +1031,10 @@ on this thread of execution.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;mqueue.h&gt;
     mqd_t mq_open( const char *mqName, int oflags, ... );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function establish a connection between
@@ -1100,10 +1100,10 @@ message size is limited at 22 bytes.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;mqueue.h&gt;
     int mq_close( mqd_t mqdes );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function is used to indicate that the
@@ -1132,8 +1132,8 @@ for notification.
 <b>Assumptions/Limitations:</b> 
 <p>
 <ul>
-<li>The behavior of a task that is blocked on either a mq_send() or
-mq_receive() is undefined when mq_close() is called.
+<li>The behavior of a task that is blocked on either a <code>mq_send()</code> or
+<code>mq_receive()</code> is undefined when <code>mq_close()</code> is called.
 <li>The result of using this message queue descriptor after successful
 return from mq_close() is undefined.
 </ul>
@@ -1145,10 +1145,10 @@ of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;mqueue.h&gt;
     int mq_unlink( const char *mqName );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function removes the message queue named
@@ -1174,109 +1174,156 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+</p>
+<pre>
     #include &lt;mqueue.h&gt;
-    int mq_send( mqd_t mqdes, const void *msg, size_t msgLen, int msgPrio );
-</PRE>
-
+    int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio);
+</pre>
 <p>
-<b>Description:</b> This function adds the specified message (msg)
-to the message queue (mqdes). The &quot;msgLen&quot; parameter
-specifies the length of the message in bytes pointed to by &quot;msg.&quot;
-This length must not exceed the maximum message length from the
-mq_getattr().
+<b>Description:</b>
+  This function adds the specified message, <code>msg</code>,
+  to the message queue, <code>mqdes</code>.
+  The <code>msglen</code> parameter specifies the length of the message in bytes pointed to by <code>msg</code>.
+  This length must not exceed the maximum message length from the <code>mq_getattr()</code>.
+</p>
 <p>
-If the message queue is not full, mq_send() will in the message
-in the message queue at the position indicated by the &quot;msgPrio&quot;
-argument. Messages with higher priority will be inserted before
-lower priority messages. The value of &quot;msgPrio&quot; must
-not exceed MQ_PRIO_MAX.
+  If the message queue is not full, <code>mq_send()</code> will place the <code>msg</code>
+  in the message queue at the position indicated by the <code>prio</code> argument.
+  Messages with higher priority will be inserted before lower priority messages
+  The value of <code>prio</code> must not exceed <code>MQ_PRIO_MAX</code>.
+</p>
 <p>
-If the specified message queue is full and O_NONBLOCK is not
-set in the message queue, then mq_send() will block until space
-becomes available to the queue the message.
+  If the specified message queue is full and <code>O_NONBLOCK</code> is not
+  set in the message queue, then <code>mq_send()</code> will block until space
+  becomes available to the queue the message.
+</p>
 <p>
-If the message queue is full and osNON_BLOCK is set, the message
-is not queued and ERROR is returned.
+  If the message queue is full and <code>NON_BLOCK</code> is set, the message
+  is not queued and <code>ERROR</code> is returned.
+</p>
 <p>
-<b>Input Parameters:</b> 
+  <b>Input Parameters:</b> 
+</p>
 <ul>
-<li><I>mqdes</I>. Message queue descriptor
-<li><I>msg</I>. Message to send
-<li><I>msgLen</I>. The length of the message in bytes
-<li><I>msgPrio</I>. The priority of the message
+  <li><code>mqdes</code>. Message queue descriptor.</li>
+  <li><code>msg</code>. Message to send.</li>
+  <li><code>msglen</code>. The length of the message in bytes.</li>
+  <li><code>prio</code>. The priority of the message.</li>
 </ul>
-
 <p>
-<b>Returned Values:</b> None.
-<p>
-<b>Assumptions/Limitations:</b> 
-<p>
-<b>  POSIX  Compatibility:</b> Comparable to the POSIX
-interface of the same name.
-Differences from the full POSIX implementation include:
+  <b>Returned Values:</b>
+  On success, <code>mq_send()</code> returns 0 (<code>OK</code>);
+  on error, -1 (<code>ERROR</code>) is returned, with <code>errno</code> set
+  to indicate the error:
+</p>
 <ul>
-<li>Control is not returned if a signal is received.
+  <li>
+    <code>EAGAIN</code>.
+    The queue was empty, and the <code>O_NONBLOCK</code> flag was set for the message queue description referred to by <code>mqdes</code>.
+  </li>
+  <li>
+    <code>EINVAL</code>.
+    Either <code>msg</code> or <code>mqdes</code> is <code>NULL</code> or the value of <code>prio</code> is invalid.
+  </li>
+  <li>
+    <code>EPERM</code>.
+    Message queue opened not opened for writing.
+  </li>
+  <li>
+    <code>EMSGSIZE</code>.
+    <code>msglen</code> was greater than the <code>maxmsgsize</code> attribute of the message queue.
+  </li>
+  <li>
+    <code>EINTR</code>.
+    The call was interrupted by a signal handler.
+  </li>
 </ul>
-
-<H3><a name="mqreceive">2.4.5 mq_receive</a></H3>
-
 <p>
-<b>Function Prototype:</b> 
-<PRE>
+  <b>Assumptions/Limitations:</b> 
+</p>
+<p>
+  <b>POSIX  Compatibility:</b>
+  Comparable to the POSIX interface of the same name.
+</p>
+
+<h3><a name="mqreceive">2.4.5 mq_receive</a></h3>
+<p>
+  <b>Function Prototype:</b> 
+</p>
+<pre>
     #include &lt;mqueue.h&gt;
-    int mq_receive( mqd_t mqdes, void *msg, size_t msgLen, int *msgPrio );
-</PRE>
-
+    int mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio);
+</pre>
 <p>
-<b>Description:</b> This function receives the oldest of the highest
-priority messages from the message queue specified by &quot;mqdes.&quot;
-If the size of the buffer in bytes (msgLen) is less than the &quot;mq_msgsize&quot;
-attribute of the message queue, mq_receive will return an error.
-Otherwise, the select message is removed from the queue and copied
-to &quot;msg.&quot;
+  <b>Description:</b>
+  This function receives the oldest of the highest priority messages from the message
+  queue specified by <code>mqdes</code>.
+  If the size of the buffer in bytes, <code>msgLen</code>, is less than the
+  <code>mq_msgsize</code> attribute of the message queue, <code>mq_receive()</code> will
+  return an error.
+  Otherwise, the selected message is removed from the queue and copied to <code>msg</code>.
+</p>
 <p>
-If the message queue is empty and O_NONBLOCK was not set, mq_receive()
-will block until a message is added to the message queue. If more
-than one task is waiting to receive a message, only the task with
-the highest priority that has waited the longest will be unblocked.
+  If the message queue is empty and <code>O_NONBLOCK</code> was not set, <code>mq_receive()</code>
+  will block until a message is added to the message queue.
+  If more than one task is waiting to receive a message, only the task with the highest
+  priority that has waited the longest will be unblocked.
+</p>
 <p>
-If the queue is empty and O_NONBLOCK is set, ERROR will be
-returned.
+  If the queue is empty and <code>O_NONBLOCK</code> is set, <code>ERROR</code> will be returned.
+</p>
 <p>
-<b>Input Parameters:</b> 
+  <b>Input Parameters:</b> 
+</p>
 <ul>
-<li><I>mqdes</I>. Message Queue Descriptor
-<li><I>msg</I>. Buffer to receive the message
-<li><I>msgLen</I>. Size of the buffer in bytes
-<li><I>msgPrio</I>. If not NULL, the location to store message
-priority.
+  <li><code>mqdes</code>. Message Queue Descriptor.</li>
+  <li><code>msg</code>. Buffer to receive the message.</li>
+  <li><code>msglen</code>. Size of the buffer in bytes.</li>
+  <li><code>prio</code>. If not NULL, the location to store message priority.
 </ul>
-
 <p>
-<b>Returned Values:</b> 
+  <b>Returned Values:</b>.
+  One success, the length of the selected message in bytes is returned.
+  On failure, -1 (<code>ERROR</code>) is returned and the <code>errno</code> is set appropriately:
+</p>
 <ul>
-<li>Length of the selected message in bytes, otherwise -1 (ERROR).
+  <li>
+    <code>EAGAIN</code>
+    The queue was empty and the <code>O_NONBLOCK</code> flag was set for the message queue description referred to by <code>mqdes</code>.
+  </li>
+  <li>
+    <code>EPERM</code>
+    Message queue opened not opened for reading.
+  </li>
+  <li>
+    <code>EMSGSIZE</code>
+    <code>msglen</code> was less than the <code>maxmsgsize</code> attribute of the message queue.
+  </li>
+  <li>
+    <code>EINTR</code>
+    The call was interrupted by a signal handler.
+  </li>
+  <li>
+    <code>EINVAL</code>
+    Invalid <code>msg</code> or <code>mqdes</code>
+  </li>
 </ul>
-
 <p>
-<b>Assumptions/Limitations:</b> 
+  <b>Assumptions/Limitations:</b> 
+</p>
 <p>
-<b>  POSIX  Compatibility:</b> Comparable to the POSIX
-interface of the same name.
-Differences from the full POSIX implementation include:
-<ul>
-<li>Control is not returned if a signal is received.
-</ul>
+  <b>POSIX  Compatibility:</b>
+  Comparable to the POSIX interface of the same name.
+</p>
 
 <H3><a name="mqnotify">2.4.6 mq_notify</a></H3>
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;mqueue.h&gt;
-    int mq_notify( mqd_t mqdes, const struct sigevent *notification );
-</PRE>
+    int mq_notify(mqd_t mqdes, const struct sigevent *notification);
+</pre>
 
 <p>
 <b>Description:</b> If the &quot;notification&quot; input parameter
@@ -1329,11 +1376,11 @@ message queue remains empty, and no notification shall be sent.&quot;
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;mqueue.h&gt;
     int mq_setattr( mqd_t mqdes, const struct mq_attr *mqStat,
                      struct mq_attr *oldMqStat);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function sets the attributes associated
@@ -1368,10 +1415,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;mqueue.h&gt;
     int mq_getattr( mqd_t mqdes, struct mq_attr *mqStat);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This functions gets status information and
@@ -1473,10 +1520,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;semaphore.h&gt;
     int sem_init ( sem_t *sem, int pshared, unsigned int value );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function initializes the UN-NAMED semaphore
@@ -1516,10 +1563,10 @@ Differences from the full POSIX implementation include:
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;semaphore.h&gt;
     int sem_destroy ( sem_t *sem );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function is used to destroy the un-named semaphore
@@ -1553,10 +1600,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;semaphore.h&gt;
     sem_t *sem_open ( const char *name, int oflag, ...);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function establishes a connection between
@@ -1619,10 +1666,10 @@ just a counting semaphore.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;semaphore.h&gt;
     int sem_close ( sem_t *sem );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function is called to indicate that the
@@ -1664,10 +1711,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;semaphore.h&gt;
     int sem_unlink ( const char *name );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function will remove the semaphore named by the
@@ -1710,10 +1757,10 @@ same name should be created after sem_unlink() is called.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;semaphore.h&gt;
     int sem_wait ( sem_t *sem );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function attempts to lock the semaphore
@@ -1753,10 +1800,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;semaphore.h&gt;
     int sem_trywait ( sem_t *sem );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function locks the specified semaphore
@@ -1795,10 +1842,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;semaphore.h&gt;
     int sem_post ( sem_t *sem );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> When a task has finished with a semaphore,
@@ -1838,10 +1885,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;semaphore.h&gt;
     int sem_getvalue ( sem_t *sem, int *sval );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function updates the location referenced
@@ -1883,7 +1930,8 @@ interface of the same name.
   that will run after a specified delay.
   The watchdog timer function will run in the context of the timer interrupt handler.
   Because of this, a limited number of NuttX interfaces are available to he watchdog timer function.
-  However, the watchdog timer function may use mq_send(), sigqueue(), or kill() to communicate with NuttX tasks.
+  However, the watchdog timer function may use <code>mq_send()</code>, <code>sigqueue()</code>,
+  or <code>kill()</code> to communicate with NuttX tasks.
 </p>
 <ul>
   <li><a href="#wdcreate">2.6.1 wd_create</a></li>
@@ -1897,10 +1945,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;wdog.h&gt;
     WDOG_ID wd_create (void);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> The wd_create function will create a watchdog
@@ -1920,9 +1968,9 @@ are available to create the watchdogs.
 <p>
 <b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following comparable interface:
-<PRE>
+<pre>
     WDOG_ID wdCreate (void);
-</PRE>
+</pre>
 
 <p>
 Differences from the VxWorks interface include:
@@ -1935,10 +1983,10 @@ initialization time).
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;wdog.h&gt;
     STATUS wd_delete (WDOG_ID wdog);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> The wd_delete function will deallocate a
@@ -1964,9 +2012,9 @@ it.
 <p>
 <b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following comparable interface:
-<PRE>
+<pre>
     STATUS wdDelete (WDOG_ID wdog);
-</PRE>
+</pre>
 
 <p>
 Differences from the VxWorks interface include:
@@ -1979,11 +2027,11 @@ before de-allocating it (i.e., never returns ERROR).
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;wdog.h&gt;
     STATUS wd_start( WDOG_ID wdog, int delay, wdentry_t wdentry,
                      intt argc, ....);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function adds a watchdog to the timer
@@ -2023,9 +2071,9 @@ restrictions.
 <p>
 <b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following comparable interface:
-<PRE>
+<pre>
     STATUS wdStart (WDOG_ID wdog, int delay, FUNCPTR wdentry, int parameter);
-</PRE>
+</pre>
 
 <p>
 Differences from the VxWorks interface include:
@@ -2038,10 +2086,10 @@ number of parameters is determined by
 <H3><a name="wdcancel">2.6.4 wd_cancel</a></H3>
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;wdog.h&gt;
     STATUS wd_cancel (WDOG_ID wdog);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function cancels a currently running
@@ -2064,9 +2112,9 @@ level.
 <p>
 <b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following comparable interface:
-<PRE>
+<pre>
     STATUS wdCancel (WDOG_ID wdog);
-</PRE>
+</pre>
 
 <h3><a name="wdgettime">2.6.5 wd_gettime</a></h3>
 <p>
@@ -2599,10 +2647,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;signal.h&gt;
     int sigemptyset(sigset_t *set);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function initializes the signal set specified
@@ -2629,10 +2677,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;signal.h&gt;
     int sigfillset(sigset_t *set);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function initializes the signal set specified
@@ -2659,10 +2707,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;signal.h&gt;
     int sigaddset(sigset_t *set, int signo);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function adds the signal specified by
@@ -2690,10 +2738,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;signal.h&gt;
     int sigdelset(sigset_t *set, int signo);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function deletes the signal specified
@@ -2721,10 +2769,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;signal.h&gt;
     int  sigismember(const sigset_t *set, int signo);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function tests whether the signal specified
@@ -2754,11 +2802,11 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;signal.h&gt;
     int sigaction( int signo, const struct sigaction *act,
                    struct sigaction *oact );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function allows the calling task to
@@ -2827,10 +2875,10 @@ not handled (SIG_DFL, SIG_IGN).
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;signal.h&gt;
     int sigprocmask(int how, const sigset_t *set, sigset_t *oset);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function allows the calling task to
@@ -2877,10 +2925,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;signal.h&gt;
     int sigpending( sigset_t *set );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function stores the returns the set of
@@ -2915,10 +2963,10 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;signal.h&gt;
     int sigsuspend( const sigset_t *set );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> The sigsuspend() function replaces the signal mask
@@ -2963,10 +3011,10 @@ is required in the present implementation (even if the signal is ignored).
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;signal.h&gt;
     int sigwaitinfo(const sigset_t *set, struct siginfo *info);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function is equivalent to sigtimedwait()
@@ -2995,11 +3043,11 @@ interface of the same name.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;signal.h&gt;
     int sigtimedwait( const sigset_t *set, struct siginfo *info,
                       const struct timespec *timeout );
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function selects the pending signal set
@@ -3061,10 +3109,10 @@ the unblocked signal is ignored.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
     #include &lt;signal.h&gt;
     int sigqueue (int tid, int signo, const union sigval value);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> This function sends the signal specified by
@@ -3118,11 +3166,11 @@ be sent.
 
 <p>
 <b>Function Prototype:</b> 
-<PRE>
+<pre>
    #include &lt;sys/types.h&gt;
    #include &ltsignal.h&gt;
    int kill(pid_t pid, int sig);
-</PRE>
+</pre>
 
 <p>
 <b>Description:</b> 
@@ -3298,10 +3346,10 @@ be sent.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_attr_init(pthread_attr_t *attr);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 Initializes a thread attributes object (attr) with default values
@@ -3331,10 +3379,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_attr_destroy(pthread_attr_t *attr);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 An attributes object can be deleted when it is no longer needed.
@@ -3363,10 +3411,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_attr_setschedpolicy(pthread_attr_t *attr, int policy);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -3394,10 +3442,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_attr_getschedpolicy(pthread_attr_t *attr, int *policy);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -3425,11 +3473,11 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
    #include &lt;pthread.h&gt;
     int pthread_attr_setschedparam(pthread_attr_t *attr,
 				      const struct sched_param *param);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -3457,11 +3505,11 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
    #include &lt;pthread.h&gt;
      int pthread_attr_getschedparam(pthread_attr_t *attr,
 				      struct sched_param *param);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -3489,11 +3537,11 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
    #include &lt;pthread.h&gt;
     int pthread_attr_setinheritsched(pthread_attr_t *attr,
 					int inheritsched);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -3521,11 +3569,11 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
    #include &lt;pthread.h&gt;
      int pthread_attr_getinheritsched(const pthread_attr_t *attr,
 					int *inheritsched);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -3553,10 +3601,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
    #include &lt;pthread.h&gt;
     int pthread_attr_setstacksize(pthread_attr_t *attr, long stacksize);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -3584,10 +3632,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
    int pthread_attr_getstacksize(pthread_attr_t *attr, long *stackaddr);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -3615,12 +3663,12 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_create(pthread_t *thread, pthread_attr_t *attr,
 			  pthread_startroutine_t startRoutine,
 			  pthread_addr_t arg);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 To create a thread object and runnable thread, a routine
@@ -3654,10 +3702,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_detach(pthread_t thread);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 A thread object may be "detached" to specify that the
@@ -3687,10 +3735,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     void pthread_exit(pthread_addr_t pvValue);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 A thread may terminate it's own execution.
@@ -3719,10 +3767,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_cancel(pthread_t thread);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 
@@ -3775,10 +3823,10 @@ the time when cancelation is re-enabled.</li>
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_setcancelstate(int state, int *oldstate);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>The <i>pthread_setcancelstate()</i> function atomically
@@ -3817,10 +3865,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_setcancelstate(void);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p><b>NOT SUPPORTED</b>
@@ -3848,10 +3896,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_join(pthread_t thread, pthread_addr_t *ppvValue);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 A thread can await termination of another thread and retrieve
@@ -3881,10 +3929,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     void pthread_yield(void);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 A thread may tell the scheduler that its processor can be
@@ -3914,10 +3962,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     pthread_t pthread_self(void);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 A thread may obtain a copy of its own thread handle.
@@ -4104,10 +4152,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_key_create( pthread_key_t *key, void (*destructor)(void*) )
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4159,10 +4207,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_setspecific( pthread_key_t key, void *value )
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4209,10 +4257,10 @@ destructor function.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     void *pthread_getspecific( pthread_key_t key )
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4250,10 +4298,10 @@ destructor function.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_key_delete( pthread_key_t key )
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4282,10 +4330,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_mutexattr_init(pthread_mutexattr_t *attr);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4313,10 +4361,10 @@ interface of the same name.
 <p>
 <b>Function Protoype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_mutexattr_destroy(pthread_mutexattr_t *attr);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4344,11 +4392,11 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_mutexattr_getpshared(pthread_mutexattr_t *attr,
 					int *pshared);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4376,11 +4424,11 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
    int pthread_mutexattr_setpshared(pthread_mutexattr_t *attr,
 					int pshared);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4408,11 +4456,11 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_mutex_init(pthread_mutex_t *mutex,
 			      pthread_mutexattr_t *attr);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4440,10 +4488,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_mutex_destroy(pthread_mutex_t *mutex);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4471,10 +4519,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_mutex_lock(pthread_mutex_t *mutex);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4502,10 +4550,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_mutex_trylock(pthread_mutex_t *mutex);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4533,10 +4581,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_mutex_unlock(pthread_mutex_t *mutex);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4564,10 +4612,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_condattr_init(pthread_condattr_t *attr);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4595,10 +4643,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_condattr_destroy(pthread_condattr_t *attr);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4626,10 +4674,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_cond_init(pthread_cond_t *cond, pthread_condattr_t *attr);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4657,10 +4705,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_cond_destroy(pthread_cond_t *cond);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4688,10 +4736,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_cond_broadcast(pthread_cond_t *cond);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4719,10 +4767,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_cond_signal(pthread_cond_t *dond);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -4750,10 +4798,10 @@ interface of the same name.
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>
+<pre>
     #include &lt;pthread.h&gt;
     int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex);
-</PRE>
+</pre>
 <p>
 <b>Description:</b>
 <p>
@@ -5328,7 +5376,7 @@ function call:
 <p>
 <b>Function Prototype:</b>
 <p>
-<PRE>    int *get_errno_ptr( void )</PRE>
+<pre>    int *get_errno_ptr( void )</pre>
 <p>
 <b>Description</b>:  <I>osGetErrnorPtr()</I> returns a pointer to
 the thread-specific <I>errno</I> value.
@@ -5352,54 +5400,54 @@ between pthreads.
 <p>
 main_t defines the type of a task entry point. main_t is declared
 in sys/types.h as:
-<PRE>
+<pre>
     typedef int (*main_t)(int argc, char *argv[]);
-</PRE>
+</pre>
 
 <H3>3.4.2 struct sched_param</H3>
 
 <p>
 This structure is used to pass scheduling priorities to and from
 NuttX;
-<PRE>
+<pre>
     struct sched_param
     {
       int sched_priority;
     };
-</PRE>
+</pre>
 
 <H3>3.4.3 struct timespec</H3>
 
 <p>
 This structure is used to pass timing information between the
 NuttX and a user application:
-<PRE>
+<pre>
     struct timespec
     {
       time_t tv_sec;  /* Seconds */
       long   tv_nsec; /* Nanoseconds */
     };
-</PRE>
+</pre>
 
 <H3>3.4.4 struct mq_attr</H3>
 
 <p>
 This structure is used to communicate message queue attributes
 between NuttX and a MoBY application:
-<PRE>
+<pre>
     struct mq_attr {
       size_t       mq_maxmsg;   /* Max number of messages in queue */
       size_t       mq_msgsize;  /* Max message size */
       unsigned     mq_flags;    /* Queue flags */
       size_t       mq_curmsgs;  /* Number of messages currently in queue */
     };
-</PRE>
+</pre>
 
 <H3>3.4.5 struct sigaction</H3>
 
 <p>
 The following structure defines the action to take for given signal:
-<PRE>
+<pre>
     struct sigaction
     {
       union
@@ -5412,48 +5460,48 @@ The following structure defines the action to take for given signal:
     };
     #define sa_handler   sa_u._sa_handler
     #define sa_sigaction sa_u._sa_sigaction
-</PRE>
+</pre>
 
 <H3>3.4.6 struct siginfo/siginfo_t</H3>
 
 <p>
 The following types is used to pass parameters to/from signal
 handlers:
-<PRE>
+<pre>
     typedef struct siginfo
     {
       int          si_signo;
       int          si_code;
       union sigval si_value;
    } siginfo_t;
-</PRE>
+</pre>
 
 <H3>3.4.7 union sigval</H3>
 
 <p>
 This defines the type of the struct siginfo si_value field and
 is used to pass parameters with signals.
-<PRE>
+<pre>
     union sigval
     {
       int   sival_int;
       void *sival_ptr;
     };
-</PRE>
+</pre>
 
 <H3>3.4.8 struct sigevent</H3>
 
 <p>
 The following is used to attach a signal to a message queue to
 notify a task when a message is available on a queue.
-<PRE>
+<pre>
     struct sigevent
     {
       int          sigev_signo;
       union sigval sigev_value;
       int          sigev_notify;
     };
-</PRE>
+</pre>
 
 <H3>3.4.9 Watchdog Data Types</H3>
 
