@@ -87,7 +87,7 @@
  *   "mqdes."  If the size of the buffer in bytes (msglen) is
  *   less than the "mq_msgsize" attribute of the message
  *   queue, mq_receive will return an error.  Otherwise, the
- *   select message is removed from the queue and copied to
+ *   selected message is removed from the queue and copied to
  *   "msg."
  *
  *   If the message queue is empty and O_NONBLOCK was not
@@ -103,8 +103,7 @@
  *   mqdes - Message Queue Descriptor
  *   msg - Buffer to receive the message
  *   msglen - Size of the buffer in bytes
- *   prio - If not NULL, the location to store message
- *      priority.
+ *   prio - If not NULL, the location to store message priority.
  *
  * Return Value:
  *   One success, the length of the selected message in bytes.is

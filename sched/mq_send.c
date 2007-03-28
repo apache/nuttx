@@ -177,7 +177,7 @@ FAR mqmsg_t *mq_msgalloc(void)
  *   This length must not exceed the maximum message length
  *   from the mq_getattr().
  *
- *   If the message queue is not full, mq_send() will in the
+ *   If the message queue is not full, mq_send() place the
  *   message in the message queue at the position indicated
  *   by the "prio" argrument.  Messages with higher priority
  *   will be inserted before lower priority messages.  The
@@ -198,8 +198,8 @@ FAR mqmsg_t *mq_msgalloc(void)
  *   prio - The priority of the message
  *
  * Return Value:
- *   On success, mq_send() returns0 (OK); on error, -1 (ERROR)
- *   is returned, with errno set  to  indicate the error:
+ *   On success, mq_send() returns 0 (OK); on error, -1 (ERROR)
+ *   is returned, with errno set to indicate the error:
  *
  *   EAGAIN   The queue was empty, and the O_NONBLOCK flag was
  *            set for the message queue description referred to
