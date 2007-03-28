@@ -181,7 +181,7 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Functions defined in mq_initialized.c *******************/
+/* Functions defined in mq_initialize.c ********************/
 
 EXTERN void weak_function mq_initialize(void);
 EXTERN void        mq_desblockalloc(void);
@@ -190,6 +190,10 @@ EXTERN mqd_t       mq_descreate(FAR _TCB* mtcb, FAR msgq_t* msgq, int oflags);
 EXTERN FAR msgq_t *mq_findnamed(const char *mq_name);
 EXTERN void        mq_msgfree(FAR mqmsg_t *mqmsg);
 EXTERN void        mq_msgqfree(FAR msgq_t *msgq);
+
+/* mq_waitirq.c ********************************************/
+
+EXTERN void        mq_waitirq(FAR _TCB *wtcb);
 
 #undef EXTERN
 #ifdef __cplusplus

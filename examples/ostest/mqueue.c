@@ -37,13 +37,17 @@
  * Included Files
  **************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include <pthread.h>
 #include <mqueue.h>
 #include <sched.h>
+#include <errno.h>
 
 #include "ostest.h"
 
@@ -51,11 +55,18 @@
  * Private Definitions
  **************************************************************************/
 
-#define TEST_MESSAGE "This is a test and only a test"
+#define TEST_MESSAGE        "This is a test and only a test"
 #ifdef SDCC
-#define TEST_MSGLEN  (31)
+#define TEST_MSGLEN         (31)
 #else
-#define TEST_MSGLEN  (strlen(TEST_MESSAGE)+1)
+#define TEST_MSGLEN         (strlen(TEST_MESSAGE)+1)
+#endif
+
+#define TEST_SEND_NMSGS     (10)
+#ifndef CONFIG_DISABLE_SIGNALS
+# define TEST_RECEIVE_NMSGS (11)
+#else
+# define TEST_RECEIVE_NMSGS (10)
 #endif
 
 /**************************************************************************
@@ -121,9 +132,9 @@ static void *sender_thread(void *arg)
 
   memcpy(msg_buffer, TEST_MESSAGE, TEST_MSGLEN);
 
-  /* Perform the send 10 times */
+  /* Perform the send TEST_SEND_NMSGS times */
 
-  for (i = 0; i < 10; i++)
+  for (i = 0; i < TEST_SEND_NMSGS; i++)
     {
       status = mq_send(mqfd, msg_buffer, TEST_MSGLEN, 42);
       if (status < 0)
@@ -183,16 +194,27 @@ static void *receiver_thread(void *arg)
        pthread_exit((pthread_addr_t)1);
      }
 
-   /* Perform the receive 10 times */
+   /* Perform the receive TEST_RECEIVE_NMSGS times */
 
-   for (i = 0; i < 10; i++)
+   for (i = 0; i < TEST_RECEIVE_NMSGS; i++)
     {
       memset(msg_buffer, 0xaa, TEST_MSGLEN);
       nbytes = mq_receive(mqfd, msg_buffer, TEST_MSGLEN, 0);
       if (nbytes < 0)
         {
-          printf("receiver_thread: ERROR mq_receive failure on msg %d\n", i);
-          nerrors++;
+          /* mq_receive failed.  If the error is because of EINTR then
+           * it is not a failure.
+           */
+
+          if (*get_errno_ptr() != EINTR)
+            {
+              printf("receiver_thread: ERROR mq_receive failure on msg %d, errno=%d\n", i, *get_errno_ptr());
+              nerrors++;
+            }
+          else
+            {
+              printf("receiver_thread: mq_receive interrupted!\n", i);
+            }
         }
       else if (nbytes != TEST_MSGLEN)
         {
@@ -336,8 +358,26 @@ void mqueue_test(void)
       printf("mqueue_test: ERROR sender thread exited with %d errors\n", (int)result);
     }
 
+#ifndef CONFIG_DISABLE_SIGNALS
+  /* Wake up the receiver thread with a signal */
+
+  printf("mqueue_test: Killing receiver\n");
+  pthread_kill(receiver, 9);
+#endif
+
+  /* Wait a bit to see if the thread exits on its own */
+
+  usleep(500*1000);
+
+  /* Then cancel the thread and see if it did */
+
   printf("mqueue_test: Canceling receiver\n");
-  pthread_cancel(receiver);
+  status = pthread_cancel(receiver);
+  if (status == ESRCH)
+    {
+      printf("mqueue_test: receiver has already terminated\n");
+    }
+
   pthread_join(receiver, &result);
   if (result != (void*)0)
     {

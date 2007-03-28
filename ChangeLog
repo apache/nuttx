@@ -91,6 +91,8 @@
 
 0.2.3 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* mq_receive and mq_send now return errno's appropriately
+	* mq_receive and mq_send are now correctly awakened by signals.
 	* Started m68322
 
 

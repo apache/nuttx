@@ -1,5 +1,5 @@
 /************************************************************
- * sem_wait.c
+ * mq_waitirq.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,11 +38,9 @@
  ************************************************************/
 
 #include <sys/types.h>
-#include <semaphore.h>
+#include <sched.h>
 #include <errno.h>
-#include <assert.h>
 #include <nuttx/arch.h>
-#include "os_internal.h"
 #include "sem_internal.h"
 
 /************************************************************
@@ -74,112 +72,54 @@
  ************************************************************/
 
 /************************************************************
- * Function:  sem_wait
+ * Function:  sem_waitirq
  *
  * Description:
- *   This function attempts to lock the semaphore referenced
- *   by sem.  If the semaphore value is (<=) zero, then the
- *   calling task will not return until it successfully
- *   acquires the lock.
+ *   This function is called when a signal is received by a
+ *   task that is waiting on a message queue -- either for a
+ *   queue to becoming not full (on mq_send) or not empty
+ *   (on mq_receive).
  *
  * Parameters:
- *   sem - Semaphore descriptor.
+ *   wtcb - A pointer to the TCB of the task that is waiting
+ *      on a message queue, but has received a signal instead.
  *
  * Return Value:
- *   0 (OK), or -1 (ERROR) is unsuccessful
- *   If this function returns -1 (ERROR), then the cause
- *   of the failure will be reported in "errno" as:
- *   - EINVAL:  Invalid attempt to get the semaphore
- *   - EINTR:   The wait was interrupted by the receipt of
- *              a signal.
+ *   None
  *
  * Assumptions:
  *
  ************************************************************/
 
-int sem_wait(sem_t *sem)
+void mq_waitirq(FAR _TCB *wtcb)
 {
-  FAR _TCB  *rtcb = (FAR _TCB*)g_readytorun.head;
-  int        ret = ERROR;
   irqstate_t saved_state;
 
-  /* This API should not be called from interrupt handlers */
+  /* Disable interrupts.  This is necessary because an
+   * interrupt handler may attempt to send a message while we are
+   * doing this.
+   */
 
-  DEBUGASSERT(!up_interrupt_context())
+  saved_state = irqsave();
 
-  /* Assume any errors reported are due to invalid arguments. */
+  /* It is possible that an interrupt/context switch beat us to the
+   * punch and already changed the task's state.
+   */
 
-  *get_errno_ptr() = EINVAL;
-
-  if (sem)
+  if (wtcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
+      wtcb->task_state == TSTATE_WAIT_MQNOTFULL)
     {
-      /* The following operations must be performed with interrupts
-       * disabled because sem_post() may be called from an interrupt
-       * handler.
-       */
+      /* Mark the errno value for the thread. */
 
-      saved_state = irqsave();
+      wtcb->errno = EINTR;
 
-      /* Check if the lock is available */
+      /* Restart the the task. */
 
-      if (sem->semcount > 0)
-        {
-          /* It is, let the task take the semaphore. */
-
-          sem->semcount--;
-          rtcb->waitsem = NULL;
-          ret = OK;
-        }
-
-      /* The semaphore is NOT available, We will have to block the
-       * current thread of execution.
-       */
-
-      else
-        {
-          /* First, verify that the task is not already waiting on a
-           * semaphore
-           */
-
-          if (rtcb->waitsem != NULL)
-            {
-              PANIC(OSERR_BADWAITSEM);
-            }
-
-          /* Handle the POSIX semaphore */
-
-          sem->semcount--;
-
-          /* Save the waited on semaphore in the TCB */
-
-          rtcb->waitsem = sem;
-
-          /* Add the TCB to the prioritized semaphore wait queue */
-
-          *get_errno_ptr() = 0;
-          up_block_task(rtcb, TSTATE_WAIT_SEM);
-
-          /* When we resume at this point, either (1) the semaphore has been
-           * assigned to this thread of execution, or (2) the semaphore wait
-           * has been interrupted by a signal.  We can detect the latter case
-           * be examining the errno value.
-           */
-
-          if (*get_errno_ptr() != EINTR)
-            {
-              ret = OK;
-            }
-          else
-            {
-              sem->semcount++;
-            }
-        }
-
-      /* Interrupts may now be enabled. */
-
-      irqrestore(saved_state);
+      up_unblock_task(wtcb);
     }
 
-  return ret;
+  /* Interrupts may now be enabled. */
+
+  irqrestore(saved_state);
 }
 

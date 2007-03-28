@@ -47,6 +47,7 @@
 #include "os_internal.h"
 #include "sem_internal.h"
 #include "sig_internal.h"
+#include "mq_internal.h"
 
 /************************************************************
  * Definitions
@@ -380,7 +381,13 @@ int sig_received(FAR _TCB *stcb, siginfo_t *info)
        * task must be unblocked when a signal is received.
        */
 
-      /* NOT YET IMPLEMENTED. */
+#ifndef CONFIG_DISABLE_MQUEUE
+     if (stcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
+         stcb->task_state == TSTATE_WAIT_MQNOTFULL)
+        {
+          mq_waitirq(stcb);
+        }
+#endif
    }
 
   return ret;
