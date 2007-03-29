@@ -79,7 +79,7 @@
  *
  * Parameters:
  *   argc  - the number of arguments (should be 2)
- *   pid   - the task ID of the task to wateup
+ *   pid   - the task ID of the task to wakeup
  *   signo - The signal to use to wake up the task
  *
  * Return Value:
