@@ -76,9 +76,13 @@ extern void sem_test(void);
 
 extern void cond_test(void);
 
-/* queue.c **************************************************/
+/* mqueue.c *************************************************/
 
 extern void mqueue_test(void);
+
+/* timedmqueue.c ********************************************/
+
+extern void timedmqueue_test(void);
 
 /* cancel.c *************************************************/
 

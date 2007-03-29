@@ -47,12 +47,17 @@ endif
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CSRCS	+= sighand.c
 ifneq ($(CONFIG_DISABLE_PTHREAD),y)
+ifneq ($(CONFIG_DISABLE_CLOCK),y)
 CSRCS	+= timedwait.c
+endif
 endif
 endif
 ifneq ($(CONFIG_DISABLE_MQUEUE),y)
 ifneq ($(CONFIG_DISABLE_PTHREAD),y)
 CSRCS	+= mqueue.c 
+ifneq ($(CONFIG_DISABLE_CLOCK),y)
+CSRCS	+= timedmqueue.c 
+endif
 endif
 endif
 ifneq ($(CONFIG_DISABLE_POSIX_TIMERS),y)

@@ -237,7 +237,7 @@ static int user_main(int argc, char *argv[])
   check_test_memory_usage();
 #endif
 
-#if !defined(CONFIG_DISABLE_SIGNALS) && !defined(CONFIG_DISABLE_PTHREAD)
+#if !defined(CONFIG_DISABLE_SIGNALS) && !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_DISABLE_CLOCK)
   /* Verify pthreads and condition variable timed waits */
 
   printf("\nuser_main: timed wait test\n");
@@ -250,6 +250,14 @@ static int user_main(int argc, char *argv[])
 
   printf("\nuser_main: message queue test\n");
   mqueue_test();
+  check_test_memory_usage();
+#endif
+
+#if !defined(CONFIG_DISABLE_MQUEUE) && !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_DISABLE_CLOCK)
+  /* Verify pthreads and message queues */
+
+  printf("\nuser_main: timed message queue test\n");
+  timedmqueue_test();
   check_test_memory_usage();
 #endif
 
