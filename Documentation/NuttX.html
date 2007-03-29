@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 21, 2007</p>
+      <p>Last Updated: March 28, 2007</p>
     </td>
   </tr>
 </table>
@@ -459,6 +459,10 @@ Other memory:
 	  task_delete() can cause pending tasks to be merged and a
 	  context switch to occur.
 	* Added mq_timedreceive() and mq_timedsend()
+	* signal mask is now inherited by both child tasks and threads.
+	* Improved sharebility of stdout among pthreads (only).  Nothing
+	  was broken, but by moving the mutual exclusion logic to a
+	  higher level, the printf output is more readable.
 	* Started m68322
 </pre></ul>
 
