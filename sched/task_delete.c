@@ -118,9 +118,11 @@ STATUS task_delete(pid_t pid)
   /* Make sure the task does not become ready-to-run while
    * we are futzing with its TCB by locking ourselves as the
    * executing task.
-   *
-   * Frist, find for the TCB associated with matching pid 
    */
+
+  sched_lock();
+
+  /* Find for the TCB associated with matching pid */
 
    dtcb = sched_gettcb(pid);
    if (!dtcb)
