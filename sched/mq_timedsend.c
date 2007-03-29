@@ -109,7 +109,7 @@ static void mq_sndtimeout(int argc, uint32 pid, ...)
    * punch and already changed the task's state.
    */
 
-  if (wtcb && wtcb->task_state == TSTATE_WAIT_MQNOTEMPTY)
+  if (wtcb && wtcb->task_state == TSTATE_WAIT_MQNOTFULL)
     {
       /* Mark the errno value for the thread. */
 
