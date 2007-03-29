@@ -187,11 +187,18 @@ STATUS task_schedsetup(FAR _TCB *tcb, int priority,
       tcb->start          = start;
       tcb->entry.main     = main;
 
-      /* Initialize other (non-zero) elements of the TCB */
+      /* exec() and pthread_create() inherit the signal mask of the
+       * parent thread.  I suppose that task_create() should as well.
+       */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-      tcb->sigprocmask  = ALL_SIGNAL_SET;
+      (void)sigprocmask(SIG_SETMASK, NULL, &tcb->sigprocmask);
 #endif
+
+      /* Initialize the task state.  It does not get a valid state
+       * until it is activated.
+       */
+
       tcb->task_state   = TSTATE_TASK_INVALID;
 
       /* Initialize the processor-specific portion of the TCB */
