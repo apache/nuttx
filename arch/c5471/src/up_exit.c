@@ -145,6 +145,13 @@ void _exit(int status)
 
   (void)sched_removereadytorun(tcb);
 
+  /* We are not in a bad stack-- the head of the ready to run task list
+   * does not correspond to the thread that is running.  Disabling pre-
+   * emption on this TCB should be enough to keep things stable.
+   */
+
+  sched_lock();
+
   /* Move the TCB to the specified blocked task list and delete it */
 
   sched_addblocked(tcb, TSTATE_TASK_INACTIVE);
@@ -158,6 +165,10 @@ void _exit(int status)
     {
       (void)sched_mergepending();
     }
+
+  /* Now calling sched_unlock() should have no effect */
+
+  sched_unlock();
 
   /* Now, perform the context switch to the new ready-to-run task at the
    * head of the list.
