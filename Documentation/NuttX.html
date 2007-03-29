@@ -454,6 +454,11 @@ Other memory:
 
 	* mq_receive and mq_send now return errno's appropriately
 	* mq_receive and mq_send are now correctly awakened by signals.
+	* Fixed an unmatched sched_lock/unlock pair in task_delete().
+	* sched_lock must be called in _exit() because operation of
+	  task_delete() can cause pending tasks to be merged and a
+	  context switch to occur.
+	* Added mq_timedreceive() and mq_timedsend()
 	* Started m68322
 </pre></ul>
 

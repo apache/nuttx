@@ -1021,10 +1021,12 @@ on this thread of execution.
   <li><a href="#mqclose">2.4.2 mq_close</a></li>
   <li><a href="#mqunlink">2.4.3 mq_unlink</a></li>
   <li><a href="#mqsend">2.4.4 mq_send</a></li>
-  <li><a href="#mqreceive">2.4.5 mq_receive</a></li>
-  <li><a href="#mqnotify">2.4.6 mq_notify</a></li>
-  <li><a href="#mqsetattr">2.4.7 mq_setattr</a></li>
-  <li><a href="#mqgetattr">2.4.8 mq_getattr</a></li>
+  <li><a href="#mqtimedsend">2.4.5 mq_timedsend</a></li>
+  <li><a href="#mqreceive">2.4.6 mq_receive</a></li>
+  <li><a href="#mqtimedreceive">2.4.7 mq_timedreceive</a></li>
+  <li><a href="#mqnotify">2.4.8 mq_notify</a></li>
+  <li><a href="#mqsetattr">2.4.9 mq_setattr</a></li>
+  <li><a href="#mqgetattr">2.4.10 mq_getattr</a></li>
 </ul>
 
 <H3><a name="mqopen">2.4.1 mq_open</a></H3>
@@ -1171,7 +1173,6 @@ closed.
 interface of the same name.
 
 <H3><a name="mqsend">2.4.4 mq_send</a></H3>
-
 <p>
 <b>Function Prototype:</b> 
 </p>
@@ -1246,13 +1247,96 @@ interface of the same name.
   Comparable to the POSIX interface of the same name.
 </p>
 
+<h3><a name="mqtimedsend">mq_timedsend</a></h3>
+<b>Function Prototype:</b> 
+</p>
+<pre>
+    #include &lt;mqueue.h&gt;
+    int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
+                     const struct timespec *abstime);
+</pre>
+<p>
+<b>Description:</b>
+  This function adds the specified message, <code>msg</code>,
+  to the message queue, <code>mqdes</code>.
+  The <code>msglen</code> parameter specifies the length of the message in bytes pointed to by <code>msg</code>.
+  This length must not exceed the maximum message length from the <code>mq_getattr()</code>.
+</p>
+<p>
+  If the message queue is not full, <code>mq_timedsend()</code> will place the <code>msg</code>
+  in the message queue at the position indicated by the <code>prio</code> argument.
+  Messages with higher priority will be inserted before lower priority messages
+  The value of <code>prio</code> must not exceed <code>MQ_PRIO_MAX</code>.
+</p>
+<p>
+  If the specified message queue is full and <code>O_NONBLOCK</code> is not
+  set in the message queue, then <code>mq_send()</code> will block until space
+  becomes available to the queue the message or until a timeout occurs.
+</p>
+<p>
+  <code>mq_timedsend()</code> behaves just like <code>mq_send()</code>, except
+  that if the queue is full and the <code>O_NONBLOCK</code> flag is not enabled
+  for the message queue description, then <code>abstime</code> points to a
+  structure which specifies a ceiling on the time for which the call will block.
+  This ceiling is an absolute timeout in seconds and nanoseconds since the
+  Epoch (midnight on the morning of 1 January 1970).
+</p>
+<p>
+  If the message queue is full, and the timeout has already expired by the time
+  of the call, <code>mq_timedsend()<code> returns immediately.
+</p>
+<p>
+  <b>Input Parameters:</b> 
+</p>
+<ul>
+  <li><code>mqdes</code>. Message queue descriptor.</li>
+  <li><code>msg</code>. Message to send.</li>
+  <li><code>msglen</code>. The length of the message in bytes.</li>
+  <li><code>prio</code>. The priority of the message.</li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+  On success, <code>mq_send()</code> returns 0 (<code>OK</code>);
+  on error, -1 (<code>ERROR</code>) is returned, with <code>errno</code> set
+  to indicate the error:
+</p>
+<ul>
+  <li>
+    <code>EAGAIN</code>.
+    The queue was empty, and the <code>O_NONBLOCK</code> flag was set for the message queue description referred to by <code>mqdes</code>.
+  </li>
+  <li>
+    <code>EINVAL</code>.
+    Either <code>msg</code> or <code>mqdes</code> is <code>NULL</code> or the value of <code>prio</code> is invalid.
+  </li>
+  <li>
+    <code>EPERM</code>.
+    Message queue opened not opened for writing.
+  </li>
+  <li>
+    <code>EMSGSIZE</code>.
+    <code>msglen</code> was greater than the <code>maxmsgsize</code> attribute of the message queue.
+  </li>
+  <li>
+    <code>EINTR</code>.
+    The call was interrupted by a signal handler.
+  </li>
+</ul>
+<p>
+  <b>Assumptions/Limitations:</b> 
+</p>
+<p>
+  <b>POSIX  Compatibility:</b>
+  Comparable to the POSIX interface of the same name.
+</p>
+
 <h3><a name="mqreceive">2.4.5 mq_receive</a></h3>
 <p>
   <b>Function Prototype:</b> 
 </p>
 <pre>
     #include &lt;mqueue.h&gt;
-    int mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio);
+    ssize_t mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio);
 </pre>
 <p>
   <b>Description:</b>
@@ -1316,7 +1400,92 @@ interface of the same name.
   Comparable to the POSIX interface of the same name.
 </p>
 
-<H3><a name="mqnotify">2.4.6 mq_notify</a></H3>
+<h3><a name="mqtimedreceive">2.4.6 mq_timedreceive</a></h3>
+<p>
+  <b>Function Prototype:</b> 
+</p>
+<pre>
+    #include &lt;mqueue.h&gt;
+    ssize_t mq_timedreceive(mqd_t mqdes, void *msg, size_t msglen,
+                            int *prio, const struct timespec *abstime);
+</pre>
+<p>
+  <b>Description:</b>
+  This function receives the oldest of the highest priority messages from the message
+  queue specified by <code>mqdes</code>.
+  If the size of the buffer in bytes, <code>msgLen</code>, is less than the
+  <code>mq_msgsize</code> attribute of the message queue, <code>mq_timedreceive()</code> will
+  return an error.
+  Otherwise, the selected message is removed from the queue and copied to <code>msg</code>.
+</p>
+<p>
+  If the message queue is empty and <code>O_NONBLOCK</code> was not set, <code>mq_timedreceive()</code>
+  will block until a message is added to the message queue (or until a timeout occurs).
+  If more than one task is waiting to receive a message, only the task with the highest
+  priority that has waited the longest will be unblocked.
+</p>
+<p>
+  <code>mq_timedreceive()</code> behaves just like <code>mq_receive()<code>, except
+  that if the queue is empty and the <code>O_NONBLOCK<c/ode> flag is not enabled
+  for the message queue description, then <code>abstime</code> points to a structure
+  which specifies a ceiling on the time for which the call will block.
+  This ceiling is an absolute timeout in seconds and nanoseconds since the Epoch
+  (midnight on the morning of 1 January 1970).
+</p>
+<p>
+  If no message is available, and the timeout has already expired by the time of
+  the call, <code>mq_timedreceive()</code> returns immediately.
+</p>
+<p>
+  <b>Input Parameters:</b> 
+</p>
+<ul>
+  <li><code>mqdes</code>. Message Queue Descriptor.</li>
+  <li><code>msg</code>. Buffer to receive the message.</li>
+  <li><code>msglen</code>. Size of the buffer in bytes.</li>
+  <li><code>prio</code>. If not NULL, the location to store message priority.
+  <li><code>abstime</code>. The absolute time to wait until a timeout is declared.
+</ul>
+<p>
+  <b>Returned Values:</b>.
+  One success, the length of the selected message in bytes is returned.
+  On failure, -1 (<code>ERROR</code>) is returned and the <code>errno</code> is set appropriately:
+</p>
+<ul>
+  <li>
+    <code>EAGAIN</code>:
+    The queue was empty and the <code>O_NONBLOCK</code> flag was set for the message queue description referred to by <code>mqdes</code>.
+  </li>
+  <li>
+    <code>EPERM</code>:
+    Message queue opened not opened for reading.
+  </li>
+  <li>
+    <code>EMSGSIZE</code>:
+    <code>msglen</code> was less than the <code>maxmsgsize</code> attribute of the message queue.
+  </li>
+  <li>
+    <code>EINTR</code>:
+    The call was interrupted by a signal handler.
+  </li>
+  <li>
+    <code>EINVAL</code>:
+    Invalid <code>msg</code> or <code>mqdes</code> or <code>abstime</code>
+  </li>
+  <li>
+    <code>ETIMEDOUT</code>:
+    The call timed out before a message could be transferred.
+  </li>
+</ul>
+<p>
+  <b>Assumptions/Limitations:</b> 
+</p>
+<p>
+  <b>POSIX  Compatibility:</b>
+  Comparable to the POSIX interface of the same name.
+</p>
+
+<h3><a name="mqnotify">2.4.7 mq_notify</a></h3>
 
 <p>
 <b>Function Prototype:</b> 
@@ -1372,7 +1541,7 @@ appropriate <I>mq_receive()</I> ... The resulting behavior is as if the
 message queue remains empty, and no notification shall be sent.&quot;
 </ul>
 
-<H3><a name="mqsetattr">2.4.7 mq_setattr</a></H3>
+<H3><a name="mqsetattr">2.4.8 mq_setattr</a></H3>
 
 <p>
 <b>Function Prototype:</b> 
@@ -1411,7 +1580,7 @@ would have been returned by mq_getattr()).
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="mqgetattr">2.4.8 mq_getattr</a></H3>
+<H3><a name="mqgetattr">2.4.9 mq_getattr</a></H3>
 
 <p>
 <b>Function Prototype:</b> 
@@ -5641,6 +5810,8 @@ notify a task when a message is available on a queue.
   <li><a href="#mqreceive">mq_receive</a></li>
   <li><a href="#mqsend">mq_send</a></li>
   <li><a href="#mqsetattr">mq_setattr</a></li>
+  <li><a href="#mqtimedreceive">mq_timedreceive</a></li>
+  <li><a href="#mqtimedsend">mq_timedsend</a></li>
   <li><a href="#mqunlink">mq_unlink</a></li>
   <li><a href="#OS_Interfaces">OS Interfaces</a>
   <li><a href="#Pthread">Pthread Interfaces</a>
