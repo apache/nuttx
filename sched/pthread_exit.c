@@ -40,6 +40,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <signal.h>
 #include <pthread.h>
 #include <errno.h>
 #include <debug.h>
@@ -92,6 +93,17 @@ void pthread_exit(FAR void *exit_value)
   int status;
 
   dbg("exit_value=%p\n", exit_value);
+
+  /* Block any signal actions that would awaken us while were
+   * are performing the JOIN handshake.
+   */
+
+#ifndef CONFIG_DISABLE_SIGNALS
+  {
+    sigset_t set = ALL_SIGNAL_SET;
+    (void)sigprocmask(SIG_SETMASK, &set, NULL);
+  }
+#endif
 
   /* Complete pending join operations */
 
