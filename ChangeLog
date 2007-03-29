@@ -98,6 +98,9 @@
 	  task_delete() can cause pending tasks to be merged and a
 	  context switch to occur.
 	* Added mq_timedreceive() and mq_timedsend()
+	* signal mask is now inherited by both child tasks and threads.
+	* Improved sharebility of stdout among pthreads (only).  Nothing
+	  was broken, but by moving the mutual exclusion logic to a
+	  higher level, the printf output is more readable.
 	* Started m68322
-
 

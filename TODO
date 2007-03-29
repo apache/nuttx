@@ -1,9 +1,7 @@
 NuttX TODO List
 ^^^^^^^^^^^^^^^
 
-Task/Scheduler
-^^^^^^^^^^^^^^
-
+o Task/Scheduler
 - When a tasks exits, shouldn't all of its child pthreads also be terminated?
 - Should task_delete() cause atexit() function to be called?
 - Implement sys/mman.h and functions
@@ -27,16 +25,6 @@ o pthreads
 - pthread_cancel():  Should implemenent cancellation points and pthread_testcancel()
 
 o Libraries
-- There seems to be some kind of failure in the mutual exclusion logic on
-  buffered, "standard," IO.
-  - If two threads try fflush-ing at the same time, there is corruption
-    of the output.
-  - Yhere is a failure in the examples/ostest POSIX timer
-    test when CONFIG_DEBUG is enabled.  This is almost certainly yet
-    another case where printf (or its kin) are being called from a 
-    sensitive area in the OS.
-  - I am now seeing the same thing with the dm320 barrier test.
-    Apparently printf has some thread safety issues.
 
 o File system
 - Add some concept like mount points to handle mounted "real" filesystems.
@@ -63,7 +51,7 @@ o C5471
 o DM320
 
 o pjrc-8052 / MCS51
-* Current status:
+- Current status:
   - Basic OS task management seems OK
   - Fails when interrupts enabled.  The stack pointer is around 0x6e
     before the failure occurs.  It looks like some issue when the

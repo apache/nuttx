@@ -87,7 +87,15 @@ int vfprintf(FILE *stream, const char *fmt, va_list ap)
        */
 
       lib_stdstream(&stdstream, stream);
+
+      /* Hold the stream semaphore throughout the lib_vsprintf
+       * call so that this thread can get its entire message out
+       * before being pre-empted by the next thread.
+       */
+
+      lib_take_semaphore(stream);
       n = lib_vsprintf(&stdstream.public, fmt, ap);
+      lib_give_semaphore(stream);
     }
   return n;
 }
