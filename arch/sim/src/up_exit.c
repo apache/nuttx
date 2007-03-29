@@ -73,6 +73,7 @@
 void _exit(int status)
 {
   _TCB* tcb = (_TCB*)g_readytorun.head;
+  irqstate_t flags;
 
   dbg("TCB=%p exitting\n", tcb);
 
@@ -83,19 +84,30 @@ void _exit(int status)
 
   (void)sched_removereadytorun(tcb);
 
+  /* We are not in a bad stack-- the head of the ready to run task list
+   * does not correspond to the thread that is running.  Disabling pre-
+   * emption on this TCB should be enough to keep things stable.
+   */
+
+  sched_lock();
+
   /* Move the TCB to the specified blocked task list and delete it */
 
   sched_addblocked(tcb, TSTATE_TASK_INACTIVE);
   task_delete(tcb->pid);
 
   /* If there are any pending tasks, then add them to the g_readytorun
-   * task list now
+   * task list now.
    */
 
   if (g_pendingtasks.head)
     {
       (void)sched_mergepending();
     }
+
+  /* Now calling sched_unlock() should have no effect */
+
+  sched_unlock();
 
   /* Now, perform the context switch to the new ready-to-run task at the
    * head of the list.
