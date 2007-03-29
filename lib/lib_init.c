@@ -173,9 +173,9 @@ void lib_releaselist(FAR struct streamlist *list)
             /* Destroy the semaphore and release the filelist */
 
             (void)sem_destroy(&list->sl_sem);
-            sched_free(list);
 
-            /* Initialize each FILE structure */
+            /* Release each stream in the list */
+
 #if CONFIG_STDIO_BUFFER_SIZE > 0
             for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
              {
@@ -190,6 +190,9 @@ void lib_releaselist(FAR struct streamlist *list)
                  }
              }
 #endif
+           /* Finally, release the list itself */
+
+            sched_free(list);
          }
      }
 }
