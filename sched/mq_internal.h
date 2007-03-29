@@ -1,4 +1,4 @@
-/************************************************************
+/****************************************************************************
  * mq_internal.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __MQ_INTERNAL_H
 #define __MQ_INTERNAL_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <limits.h>
@@ -47,16 +47,15 @@
 #include <signal.h>
 #include <nuttx/compiler.h>
 
-/************************************************************
+/****************************************************************************
  * Compilations Switches
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
 #define MQ_MAX_BYTES   CONFIG_MQ_MAXMSGSIZE
-#define MQ_MAX_HWORDS  ((MQ_MAX_BYTES + sizeof(uint16) - 1) / sizeof(uint16))
 #define MQ_MAX_MSGS    16
 #define MQ_PRIO_MAX    _POSIX_MQ_PRIO_MAX
 
@@ -72,9 +71,9 @@
 
 #define NUM_INTERRUPT_MSGS   8
 
-/************************************************************
+/****************************************************************************
  * Global Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
 enum mqalloc_e
 {
@@ -85,23 +84,18 @@ enum mqalloc_e
 typedef enum mqalloc_e mqalloc_t;
 
 /* This structure describes one buffered POSIX message. */
-/* NOTE:  This structure is allocated from the same pool as MQ_type.
- * Therefore, (1) it must have a fixed "mail" size, and (2) must
- * exactly match MQ_type in size.
- */
 
 struct mqmsg
 {
-  /* The position of the following two field must exactly match
-   * MQ_type.
-   */
-
   FAR struct mqmsg  *next;    /* Forward link to next message */
   ubyte        type;          /* (Used to manage allocations) */
-
   ubyte        priority;      /* priority of message          */
+#if MQ_MAX_BYTES < 256
   ubyte        msglen;        /* Message data length          */
-  uint16       mail[MQ_MAX_HWORDS]; /* Message data           */
+#else
+  uint16       msglen;        /* Message data length          */
+#endif
+  ubyte        mail[MQ_MAX_BYTES]; /* Message data            */
 };
 typedef struct mqmsg mqmsg_t;
 
@@ -142,9 +136,9 @@ struct mq_des
   int          oflags;        /* Flags set when message queue was opened */
 };
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
 /* This is a list of all opened message queues */
 
@@ -170,9 +164,9 @@ extern sq_queue_t  g_msgfreeirq;
 
 extern sq_queue_t  g_desfree;
 
-/************************************************************
+/****************************************************************************
  * Global Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -181,19 +175,35 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Functions defined in mq_initialize.c ********************/
+/* Functions defined in mq_initialize.c ************************************/
 
 EXTERN void weak_function mq_initialize(void);
-EXTERN void        mq_desblockalloc(void);
+EXTERN void         mq_desblockalloc(void);
 
-EXTERN mqd_t       mq_descreate(FAR _TCB* mtcb, FAR msgq_t* msgq, int oflags);
-EXTERN FAR msgq_t *mq_findnamed(const char *mq_name);
-EXTERN void        mq_msgfree(FAR mqmsg_t *mqmsg);
-EXTERN void        mq_msgqfree(FAR msgq_t *msgq);
+EXTERN mqd_t        mq_descreate(FAR _TCB* mtcb, FAR msgq_t* msgq, int oflags);
+EXTERN FAR msgq_t  *mq_findnamed(const char *mq_name);
+EXTERN void         mq_msgfree(FAR mqmsg_t *mqmsg);
+EXTERN void         mq_msgqfree(FAR msgq_t *msgq);
 
-/* mq_waitirq.c ********************************************/
+/* mq_waitirq.c ************************************************************/
 
-EXTERN void        mq_waitirq(FAR _TCB *wtcb);
+EXTERN void         mq_waitirq(FAR _TCB *wtcb);
+
+/* mq_rcvinternal.c ********************************************************/
+
+EXTERN int          mq_verifyreceive(mqd_t mqdes, void *msg, size_t msglen);
+EXTERN FAR mqmsg_t *mq_waitreceive(mqd_t mqdes);
+EXTERN ssize_t      mq_doreceive(mqd_t mqdes, mqmsg_t *mqmsg, void *ubuffer,
+                                 int *prio);
+
+/* mq_sndinternal.c ********************************************************/
+
+EXTERN int          mq_verifysend(mqd_t mqdes, const void *msg, size_t msglen,
+                                  int prio);
+EXTERN FAR mqmsg_t *mq_msgalloc(void);
+EXTERN int          mq_waitsend(mqd_t mqdes);
+EXTERN int          mq_dosend(mqd_t mqdes, FAR mqmsg_t *mqmsg, const void *msg,
+                              size_t msglen, int prio);
 
 #undef EXTERN
 #ifdef __cplusplus

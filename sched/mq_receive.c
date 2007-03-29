@@ -37,21 +37,12 @@
  * Included Files
  ************************************************************/
 
-#include <sys/types.h>      /* uint32, etc. */
-#include <stdarg.h>         /* va_list */
-#include <unistd.h>
-#include <fcntl.h>          /* O_NONBLOCK */
-#include <string.h>
-#include <assert.h>
+#include <nuttx/config.h>
+#include <sys/types.h>
 #include <errno.h>
 #include <mqueue.h>
-#include <sched.h>
 #include <debug.h>
-#include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
-#include <nuttx/os_external.h>
-#include "os_internal.h"
-#include "sig_internal.h"
 #include "mq_internal.h"
 
 /************************************************************
@@ -122,155 +113,53 @@
  *
  ************************************************************/
 
-int mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio)
+ssize_t mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio)
 {
-  FAR _TCB    *rtcb;
-  FAR _TCB    *btcb;
-  FAR msgq_t  *msgq;
-  FAR mqmsg_t *curr;
+  FAR mqmsg_t *mqmsg;
   irqstate_t   saved_state;
-  ubyte        rcvmsglen;
-  int          ret = ERROR;
+  ssize_t      ret = ERROR;
 
-  /* Verify the input parameters */
+  DEBUGASSERT(!up_interrupt_context());
 
-  if (!msg || !mqdes)
+  /* Verify the input parameters and, in case of an error, set
+   * errno appropriately.
+   */
+
+  if (mq_verifyreceive(mqdes, msg, msglen) != OK)
     {
-      *get_errno_ptr() = EINVAL;
       return ERROR;
     }
 
-  if ((mqdes->oflags & O_RDOK) == 0)
-    {
-      *get_errno_ptr() = EPERM;
-      return ERROR;
-    }
-
-  if (msglen < (size_t)mqdes->msgq->maxmsgsize)
-    {
-      *get_errno_ptr() = EMSGSIZE;
-      return ERROR;
-    }
-
-  /* Get a pointer to the message queue */
+  /* Get the next mesage from the message queue.  We will disable
+   * pre-emption until we have completed the message received.  This
+   * is not too bad because if the receipt takes a long time, it will
+   * be because we are blocked waiting for a message and pre-emption
+   * will be re-enabled while we are blocked
+   */
 
   sched_lock();
-  msgq = mqdes->msgq;
 
-  /* Several operations must be performed below:  We must determine if
-   * a message is pending and, if not, wait for the message.  Since
-   * messages can be sent from the interrupt level, there is a race
-   * condition that can only be eliminated by disabling interrupts!
+  /* Furthermore, mq_waitreceive() expects to have interrupts disabled
+   * because messages can be sent from interrupt level.
    */
 
   saved_state = irqsave();
 
-  /* Get the message from the head of the queue */
+  /* Get the message from the message queue */
 
-  while ((curr = (FAR mqmsg_t*)sq_remfirst(&msgq->msglist)) == NULL)
-    {
-      /* Should we block until there the above condition has been
-       * satisfied?
-       */
-
-      if (!(mqdes->oflags & O_NONBLOCK))
-        {
-          /* Block and try again */
-
-          rtcb = (FAR _TCB*)g_readytorun.head;
-          rtcb->msgwaitq = msgq;
-          msgq->nwaitnotempty++;
-
-          *get_errno_ptr() = OK;
-          up_block_task(rtcb, TSTATE_WAIT_MQNOTEMPTY);
-
-          /* When we resume at this point, either (1) the message queue
-           * is no longer empty, or (2) the wait has been interrupted by
-           * a signal.  We can detect the latter case be examining the
-           * errno value (should be EINTR).
-           */
-
-          if (*get_errno_ptr() != OK)
-            {
-              break;
-            }
-        }
-      else
-        {
-          /* The queue was empty, and the O_NONBLOCK flag was set for the
-           * message queue description referred to by 'mqdes'.
-           */
-
-         *get_errno_ptr() = EAGAIN;
-          break;
-        }
-    }
-
-  /* If we got message, then decrement the number of messages in
-   * the queue while we are still in the critical section
-   */
-
-  if (curr)
-    {
-      msgq->nmsgs--;
-    }
+  mqmsg = mq_waitreceive(mqdes);
   irqrestore(saved_state);
 
-  /* Check (again) if we got a message from the message queue*/
+  /* Check if we got a message from the message queue.  We might
+   * not have a message if:
+   *
+   * - The message queue is empty and O_NONBLOCK is set in the mqdes
+   * - The wait was interrupted by a signal
+   */
 
-  if (curr)
+  if (mqmsg)
     {
-      /* Get the length of the message (also the return value) */
-
-      ret = rcvmsglen = curr->msglen;
-
-      /* Copy the message into the caller's buffer */
-
-      memcpy(msg, (const void*)curr->mail, rcvmsglen);
-
-      /* Copy the message priority as well (if a buffer is provided) */
-
-      if (prio)
-        {
-          *prio = curr->priority;
-        }
-
-      /* We are done with the message.  Deallocate it now. */
-
-      mq_msgfree(curr);
-
-      /* Check if any tasks are waiting for the MQ not full event. */
-
-      if (msgq->nwaitnotfull > 0)
-        {
-          /* Find the highest priority task that is waiting for
-           * this queue to be not-full in g_waitingformqnotfull list.
-           * This must be performed in a critical section because
-           * messages can be sent from interrupt handlers.
-           */
-
-          saved_state = irqsave();
-          for (btcb = (FAR _TCB*)g_waitingformqnotfull.head;
-               btcb && btcb->msgwaitq != msgq;
-               btcb = btcb->flink);
-
-          /* If one was found, unblock it.  NOTE:  There is a race
-           * condition here:  the queue might be full again by the
-           * time the task is unblocked
-           */
-
-          if (!btcb)
-            {
-              PANIC(OSERR_MQNOTFULLCOUNT);
-            }
-          else
-            {
-              btcb->msgwaitq = NULL;
-              msgq->nwaitnotfull--;
-              up_unblock_task(btcb);
-            }
-          irqrestore(saved_state);
-        }
+      ret = mq_doreceive(mqdes, mqmsg, msg, prio);
     }
 
   sched_unlock();

@@ -87,12 +87,16 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN mqd_t   mq_open(const char *mq_name, int oflags, ... );
+EXTERN mqd_t   mq_open(const char *mq_name, int oflags, ...);
 EXTERN int     mq_close(mqd_t mqdes );
-EXTERN int     mq_unlink(const char *mq_name );
-EXTERN int     mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio );
-EXTERN int     mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio );
-EXTERN int     mq_notify(mqd_t mqdes, const struct sigevent *notification );
+EXTERN int     mq_unlink(const char *mq_name);
+EXTERN int     mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio);
+EXTERN int     mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
+                            const struct timespec *abstime);
+EXTERN ssize_t mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio);
+EXTERN ssize_t mq_timedreceive(mqd_t mqdes, void *msg, size_t msglen,
+                               int *prio, const struct timespec *abstime);
+EXTERN int     mq_notify(mqd_t mqdes, const struct sigevent *notification);
 EXTERN int     mq_setattr(mqd_t mqdes, const struct mq_attr *mq_stat,
                   struct mq_attr *oldstat);
 EXTERN int     mq_getattr(mqd_t mqdes, struct mq_attr *mq_stat);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * mq_send.c
+ * mq_timedsend.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,14 +37,17 @@
  * Included Files
  ****************************************************************************/
 
-#include  <nuttx/config.h>
-#include  <sys/types.h>
-#include  <mqueue.h>
-#include  <errno.h>
-#include  <debug.h>
-#include  <nuttx/arch.h>
-#include  "os_internal.h"
-#include  "mq_internal.h"
+#include <nuttx/config.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <mqueue.h>
+#include <wdog.h>
+#include <errno.h>
+#include <debug.h>
+#include <nuttx/arch.h>
+#include "clock_internal.h"
+#include "os_internal.h"
+#include "mq_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -67,6 +70,62 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Function:  mq_sndtimeout
+ *
+ * Description:
+ *   This function is called if the timeout elapses before the message queue
+ *   becomes non-full.
+ *
+ * Parameters:
+ *   argc  - the number of arguments (should be 1)
+ *   pid   - the task ID of the task to wakeup
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void mq_sndtimeout(int argc, uint32 pid, ...)
+{
+  FAR _TCB *wtcb;
+  irqstate_t saved_state;
+
+  /* Disable interrupts.  This is necessary because an
+   * interrupt handler may attempt to send a message while we are
+   * doing this.
+   */
+
+  saved_state = irqsave();
+
+  /* Get the TCB associated with this pid.  It is possible that
+   * task may no longer be active when this watchdog goes off.
+   */
+
+  wtcb = sched_gettcb((pid_t)pid);
+
+  /* It is also possible that an interrupt/context switch beat us to the
+   * punch and already changed the task's state.
+   */
+
+  if (wtcb && wtcb->task_state == TSTATE_WAIT_MQNOTEMPTY)
+    {
+      /* Mark the errno value for the thread. */
+
+      wtcb->errno = ETIMEDOUT;
+
+      /* Restart the the task. */
+
+      up_unblock_task(wtcb);
+    }
+
+  /* Interrupts may now be enabled. */
+
+  irqrestore(saved_state);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -79,23 +138,31 @@
  *   in bytes pointed to by "msg."  This length must not exceed the maximum
  *   message length from the mq_getattr().
  *
- *   If the message queue is not full, mq_send() place the message in the
+ *   If the message queue is not full, mq_timedsend() place the message in the
  *   message queue at the position indicated by the "prio" argrument.
  *   Messages with higher priority will be inserted before lower priority
  *   messages.  The value of "prio" must not exceed MQ_PRIO_MAX.
  *
  *   If the specified message queue is full and O_NONBLOCK is not set in the
- *   message queue, then mq_send() will block until space becomes available
- *   to the queue the message.
+ *   message queue, then mq_timedsend() will block until space becomes available
+ *   to the queue the message or a timeout occurs.
  *
- *   If the message queue is full and O_NONBLOCK is set, the message is not
- *   queued and ERROR is returned.
+ *   mq_timedsend() behaves just like mq_send(), except that if the queue
+ *   is full and the O_NONBLOCK flag is not enabled for the message queue
+ *   description, then abstime points to a structure which specifies a
+ *   ceiling on the time for which the call will block.  This ceiling is an
+ *   absolute timeout in seconds and nanoseconds since the Epoch (midnight
+ *   on the morning of 1 January 1970).
+ *
+ *   If the message queue is full, and the timeout has already expired by
+ *   the time of the call, mq_timedsend() returns immediately.
  * 
  * Parameters:
  *   mqdes - Message queue descriptor
  *   msg - Message to send
  *   msglen - The length of the message in bytes
  *   prio - The priority of the message
+ *   abstime - the absolute time to wait until a timeout is decleared
  *
  * Return Value:
  *   On success, mq_send() returns 0 (OK); on error, -1 (ERROR)
@@ -113,12 +180,16 @@
  *
  ****************************************************************************/
 
-int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
+int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
+                 const struct timespec *abstime)
 {
+  WDOG_ID      wdog;
   FAR msgq_t  *msgq;
   FAR mqmsg_t *mqmsg = NULL;
   irqstate_t   saved_state;
   int          ret = ERROR;
+
+  DEBUGASSERT(!up_interrupt_context());
 
   /* Verify the input parameters -- setting errno appropriately
    * on any failures to verify.
@@ -129,22 +200,37 @@ int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
       return ERROR;
     }
 
+  if (!abstime || abstime->tv_sec < 0 || abstime->tv_nsec > 1000000000)
+    {
+      *get_errno_ptr() = EINVAL;
+      return ERROR;
+    }
+
   /* Get a pointer to the message queue */
 
-  sched_lock();
   msgq = mqdes->msgq;
 
-  /* Allocate a message structure:
-   * - Immediately if we are called from an interrupt handler.
-   * - Immediately if the message queue is not full, or
-   * - After successfully waiting for the message queue to become
-   *   non-FULL.  This would fail with EAGAIN, EINTR, or ETIMEOUT.
+  /* Create a watchdog.  We will not actually need this watchdog
+   * unless the queue is full, but we will reserve it up front
+   * before we enter the following critical section.
    */
 
+  wdog = wd_create();
+  if (!wdog)
+    {
+      *get_errno_ptr() = EINVAL;
+      return ERROR;
+    }
+
+  /* Allocate a message structure:
+   * - If we are called from an interrupt handler, or
+   * - If the message queue is not full, or
+   */
+
+  sched_lock();
   saved_state = irqsave();
   if (up_interrupt_context()      || /* In an interrupt handler */
-      msgq->nmsgs < msgq->maxmsgs || /* OR Message queue not full */
-      mq_waitsend(mqdes) == OK)      /* OR Successfully waited for mq not full */
+      msgq->nmsgs < msgq->maxmsgs)   /* OR Message queue not full */
     {
       /* Allocate the message */
 
@@ -153,14 +239,63 @@ int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
     }
   else
     {
-      /* We cannot send the message (and didn't even try to allocate it)
-       * because:
-       * - We are not in an interrupt handler AND
-       * - The message queue is full AND
-       * - When we tried waiting, the wait was unsuccessful.
+      sint32 ticks;
+      int    result;
+
+      /* We are not in an interupt handler and the message queue is full.
+       * set up a timed wait for the message queue to become non-full.
+       *
+       * Convert the timespec to clock ticks.  We must have interrupts
+       * disabled here so that this time stays valid until the wait begins.
        */
 
+      result = clock_abstime2ticks(CLOCK_REALTIME, abstime, &ticks);
+
+      /* If the time has already expired and the message queue is empty,
+       * return immediately.
+       */
+
+      if (result == OK && ticks <= 0)
+        {
+          result = ETIMEDOUT;
+        }
+
+      /* Handle any time-related errors */
+
+      if (result == OK)
+        {
+          /* Start the watchdog */
+
+          wd_start(wdog, ticks, (wdentry_t)mq_sndtimeout, 1, getpid());
+
+          /* And wait for the message queue to be non-empty */
+
+          result = mq_waitsend(mqdes);
+
+          /* This may return with an error and errno set to either EINTR
+           * or ETIMEOUT.  Cancel the watchdog timer in any event.
+           */
+
+          wd_cancel(wdog);
+        }
+
+      /* That is the end of the atomic operations */
+
       irqrestore(saved_state);
+
+      /* If any of the above failed, set the errno.  Otherwise, there should
+       * be space for another message in the message queue.  NOW we can allocate
+       * the message structure.
+       */
+
+      if (result != OK)
+        {
+          *get_errno_ptr() = result;
+        }
+      else
+        {
+          mqmsg = mq_msgalloc();
+        }
     }
 
   /* Check if we were able to get a message structure -- this can fail
@@ -176,6 +311,7 @@ int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
     }
 
   sched_unlock();
+  wd_delete(wdog);
   return ret;
 }
 

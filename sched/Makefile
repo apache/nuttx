@@ -69,7 +69,9 @@ SIGNAL_SRCS	= sig_initialize.c \
                   sig_unmaskpendingsignal.c sig_removependingsignal.c \
 		  sig_releasependingsignal.c sig_lowest.c sig_mqnotempty.c \
 		  sig_cleanup.c sig_received.c sig_deliver.c
-MQUEUE_SRCS	= mq_open.c mq_close.c mq_unlink.c mq_send.c mq_receive.c \
+MQUEUE_SRCS	= mq_open.c mq_close.c mq_unlink.c \
+		  mq_send.c mq_timedsend.c mq_sndinternal.c \
+		  mq_receive.c mq_timedreceive.c mq_rcvinternal.c \
 		  mq_setattr.c mq_getattr.c mq_initialize.c mq_descreate.c \
 		  mq_findnamed.c mq_msgfree.c mq_msgqfree.c mq_waitirq.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
