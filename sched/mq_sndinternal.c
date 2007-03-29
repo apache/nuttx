@@ -227,7 +227,7 @@ FAR mqmsg_t *mq_msgalloc(void)
  *   mqdes - Message queue descriptor
  *
  * Return Value:
- *   On success, mq_waitmqnotfull() returns 0 (OK); on error, -1 (ERROR) is
+ *   On success, mq_send() returns 0 (OK); on error, -1 (ERROR) is
  *   returned, with errno set to indicate the error:
  *
  *   EAGAIN   The queue was empty, and the O_NONBLOCK flag was set for the
@@ -285,7 +285,7 @@ int mq_waitsend(mqd_t mqdes)
 
               rtcb = (FAR _TCB*)g_readytorun.head;
               rtcb->msgwaitq = msgq;
-              (msgq->nwaitnotfull)++;
+              (msgq->nwaitnotempty)++;
 
               *get_errno_ptr() = OK;
               up_block_task(rtcb, TSTATE_WAIT_MQNOTFULL);

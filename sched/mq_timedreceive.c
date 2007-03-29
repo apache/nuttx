@@ -248,22 +248,22 @@ ssize_t mq_timedreceive(mqd_t mqdes, void *msg, size_t msglen,
        * disabled here so that this time stays valid until the wait begins.
        */
 
-      ret = clock_abstime2ticks(CLOCK_REALTIME, abstime, &ticks);
+      int result = clock_abstime2ticks(CLOCK_REALTIME, abstime, &ticks);
 
       /* If the time has already expired and the message queue is empty,
        * return immediately.
        */
 
-      if (ret == OK && ticks <= 0)
+      if (result == OK && ticks <= 0)
         {
-          ret = ETIMEDOUT;
+          result = ETIMEDOUT;
         }
 
       /* Handle any time-related errors */
 
-      if (ret != OK)
+      if (result != OK)
         {
-          *get_errno_ptr() = ret;
+          *get_errno_ptr() = result;
           irqrestore(saved_state);
           sched_unlock();
           wd_delete(wdog);

@@ -240,7 +240,6 @@ int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
   else
     {
       sint32 ticks;
-      int    result;
 
       /* We are not in an interupt handler and the message queue is full.
        * set up a timed wait for the message queue to become non-full.
@@ -249,7 +248,7 @@ int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
        * disabled here so that this time stays valid until the wait begins.
        */
 
-      result = clock_abstime2ticks(CLOCK_REALTIME, abstime, &ticks);
+      int result = clock_abstime2ticks(CLOCK_REALTIME, abstime, &ticks);
 
       /* If the time has already expired and the message queue is empty,
        * return immediately.
@@ -262,6 +261,14 @@ int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
 
       /* Handle any time-related errors */
 
+      if (result != OK)
+        {
+         *get_errno_ptr() = result;
+          ret = ERROR;
+        }
+
+      /* Start the watchdog and begin the wait for MQ not full */
+
       if (result == OK)
         {
           /* Start the watchdog */
@@ -270,7 +277,7 @@ int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
 
           /* And wait for the message queue to be non-empty */
 
-          result = mq_waitsend(mqdes);
+          ret = mq_waitsend(mqdes);
 
           /* This may return with an error and errno set to either EINTR
            * or ETIMEOUT.  Cancel the watchdog timer in any event.
@@ -288,11 +295,7 @@ int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
        * the message structure.
        */
 
-      if (result != OK)
-        {
-          *get_errno_ptr() = result;
-        }
-      else
+      if (ret == OK)
         {
           mqmsg = mq_msgalloc();
         }
@@ -305,7 +308,7 @@ int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
 
   if (mqmsg)
     {
-      /* Yes, peforrm the message send. */
+      /* Yes, peform the message send. */
 
       ret = mq_dosend(mqdes, mqmsg, msg, msglen, prio);
     }
