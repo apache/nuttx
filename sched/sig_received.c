@@ -289,8 +289,8 @@ int sig_received(FAR _TCB *stcb, siginfo_t *info)
   irqstate_t saved_state;
   int        ret = ERROR;
 
-  dbg("sig_received: TCB=0x%08x signo=%d code=%d value=%d\n",
-      stcb, info->si_signo, info->si_code, info->si_value.sival_int);
+  dbg("sig_received: TCB=0x%08x signo=%d code=%d value=%d mask=%08x\n",
+      stcb, info->si_signo, info->si_code, info->si_value.sival_int, stcb->sigprocmask);
 
   if (stcb && info)
     {
@@ -363,31 +363,32 @@ int sig_received(FAR _TCB *stcb, siginfo_t *info)
 
           /* If the task neither was waiting for the signal nor had a signal
            * handler attached to the signal, then the default action is
-           * simply to ignore the signal */
-        }
+           * simply to ignore the signal
+           */
 
-      /****** OTHER SIGNAL HANDLING ******/
+          /****** OTHER SIGNAL HANDLING ******/
 
-      /* If the task is blocked waiting for a semaphore, then that
-       * task must be unblocked when a signal is received.
-       */
+         /* If the task is blocked waiting for a semaphore, then that
+          * task must be unblocked when a signal is received.
+          */
 
-      if (stcb->task_state == TSTATE_WAIT_SEM)
-        {
-          sem_waitirq(stcb);
-        }
+         if (stcb->task_state == TSTATE_WAIT_SEM)
+           {
+             sem_waitirq(stcb);
+           }
 
-      /* If the task is blocked waiting on a message queue, then that
-       * task must be unblocked when a signal is received.
-       */
+         /* If the task is blocked waiting on a message queue, then that
+          * task must be unblocked when a signal is received.
+          */
 
 #ifndef CONFIG_DISABLE_MQUEUE
-     if (stcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
-         stcb->task_state == TSTATE_WAIT_MQNOTFULL)
-        {
-          mq_waitirq(stcb);
-        }
+        if (stcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
+            stcb->task_state == TSTATE_WAIT_MQNOTFULL)
+           {
+             mq_waitirq(stcb);
+           }
 #endif
+       }
    }
 
   return ret;
