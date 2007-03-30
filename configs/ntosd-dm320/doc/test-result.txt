@@ -8,9 +8,9 @@ DM9000 work in 16 bus width
 TFTP from server 10.0.0.1; our IP address is 10.0.0.2
 Filename 'nuttx.dm320'.
 Load address: 0x10
-Loading: ############################
+Loading: #############################
 done
-Bytes transferred = 141981 (22a9d hex)
+Bytes transferred = 146570 (23c8a hex)
 Neuros Devboard >  go 1008000
 ## Starting application at 0x01008000 ...
 stdio_test: write fd=1
@@ -30,11 +30,11 @@ user_main: argv[4]="Arg4"
 End of test memory usage:
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
-arena      fe1a50   fe1a50
+arena      fe0f10   fe0f10
 ordblks         2        2
-mxordblk   fda4f0   fda4f0
+mxordblk   fd99b0   fd99b0
 uordblks     53f0     53f0
-fordblks   fdc660   fdc660
+fordblks   fdbb20   fdbb20
 
 user_main: /dev/null test
 dev_null: Read 0 bytes from /dev/null
@@ -43,11 +43,11 @@ dev_null: Wrote 1024 bytes to /dev/null
 End of test memory usage:
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
-arena      fe1a50   fe1a50
+arena      fe0f10   fe0f10
 ordblks         2        2
-mxordblk   fda4f0   fda4f0
+mxordblk   fd99b0   fd99b0
 uordblks     53f0     53f0
-fordblks   fdc660   fdc660
+fordblks   fdbb20   fdbb20
 
 user_main: mutex test
 Initializing mutex
@@ -60,11 +60,11 @@ Starting thread 2
 End of test memory usage:
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
-arena      fe1a50   fe1a50
+arena      fe0f10   fe0f10
 ordblks         2        2
-mxordblk   fda4f0   fda4f0
+mxordblk   fd99b0   fd99b0
 uordblks     53f0     53f0
-fordblks   fdc660   fdc660
+fordblks   fdbb20   fdbb20
 
 user_main: cancel test
 cancel_test: Test 1: Normal Cancelation
@@ -115,11 +115,11 @@ cancel_test: PASS thread terminated with PTHREAD_CANCELED
 End of test memory usage:
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
-arena      fe1a50   fe1a50
+arena      fe0f10   fe0f10
 ordblks         2        2
-mxordblk   fda4f0   fda4f0
+mxordblk   fd99b0   fd99b0
 uordblks     53f0     53f0
-fordblks   fdc660   fdc660
+fordblks   fdbb20   fdbb20
 
 user_main: semaphore test
 sem_test: Initializing semaphore to 0
@@ -153,11 +153,11 @@ poster_func: Thread 3 done
 End of test memory usage:
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
-arena      fe1a50   fe1a50
+arena      fe0f10   fe0f10
 ordblks         2        2
-mxordblk   fda4f0   fda4f0
+mxordblk   fd99b0   fd99b0
 uordblks     53f0     53f0
-fordblks   fdc660   fdc660
+fordblks   fdbb20   fdbb20
 
 user_main: condition variable test
 cond_test: Initializing mutex
@@ -181,11 +181,11 @@ cond_test: 0 times, the waiter was in an unexpected state when the signaler ran
 End of test memory usage:
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
-arena      fe1a50   fe1a50
+arena      fe0f10   fe0f10
 ordblks         2        2
-mxordblk   fda4f0   fda4f0
+mxordblk   fd99b0   fd99b0
 uordblks     53f0     53f0
-fordblks   fdc660   fdc660
+fordblks   fdbb20   fdbb20
 
 user_main: timed wait test
 thread_waiter: Initializing mutex
@@ -203,11 +203,11 @@ timedwait_test: waiter exited with result=12345678
 End of test memory usage:
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
-arena      fe1a50   fe1a50
+arena      fe0f10   fe0f10
 ordblks         2        2
-mxordblk   fda4f0   fda4f0
+mxordblk   fd99b0   fd99b0
 uordblks     53f0     53f0
-fordblks   fdc660   fdc660
+fordblks   fdbb20   fdbb20
 
 user_main: message queue test
 mqueue_test: Starting receiver
@@ -247,29 +247,62 @@ mqueue_test: receiver has already terminated
 End of test memory usage:
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
-arena      fe1a50   fe1a50
+arena      fe0f10   fe0f10
 ordblks         2        2
-mxordblk   fda4f0   fda4f0
+mxordblk   fd99b0   fd99b0
 uordblks     53f0     53f0
-fordblks   fdc660   fdc660
+fordblks   fdbb20   fdbb20
+
+user_main: timed message queue test
+timedmqueue_test: Starting sender
+sender_thread: Starting
+sender_thread: mq_timedsend succeeded on msg 0
+sender_thread: mq_timedsend succeeded on msg 1
+sender_thread: mq_timedsend succeeded on msg 2
+sender_thread: mq_timedsend succeeded on msg 3
+sender_thread: mq_timedsend succeeded on msg 4
+sender_thread: mq_timedsend succeeded on msg 5
+sender_thread: mq_timedsend succeeded on msg 6
+sender_thread: mq_timedsend succeeded on msg 7
+sender_thread: mq_timedsend succeeded on msg 8
+timedmqueue_test: Waiting for sender to complete
+sender_thread: mq_timedsend 9 timed out as expected
+sender_thread: returning nerrors=0
+timedmqueue_test: Starting receiver
+receiver_thread: Starting
+receiver_thread: mq_timedreceive succeeded on msg 0
+receiver_thread: mq_timedreceive succeeded on msg 1
+receiver_thread: mq_timedreceive succeeded on msg 2
+receiver_thread: mq_timedreceive succeeded on msg 3
+receiver_thread: mq_timedreceive succeeded on msg 4
+receiver_thread: mq_timedreceive succeeded on msg 5
+receiver_thread: mq_timedreceive succeeded on msg 6
+receiver_thread: mq_timedreceive succeeded on msg 7
+receiver_thread: mq_timedreceive succeeded on msg 8
+timedmqueue_test: Waiting for sender to complete
+receiver_thread: Receive 9 timed out as expected
+receiver_thread: returning nerrors=0
+timedmqueue_test: Test complete
+
+End of test memory usage:
+VARIABLE  BEFORE   AFTER
+======== ======== ========
+arena      fe0f10   fe0f10
+ordblks         2        2
+mxordblk   fd99b0   fd99b0
+uordblks     53f0     53f0
+fordblks   fdbb20   fdbb20
 
 user_main: signal handler test
 sighand_test: Initializing semaphore to 0
 sighand_test: Starting waiter task
-sighand_test: Started waiter_main pid=16
+sighand_test: Started waiter_main pid=18
 waiter_main: Waiter started
 waiter_main: Unmasking signal 17
 waiter_main: Registering signal handler
 waiter_main: oact.sigaction=0 oact.sa_flags=0 oact.sa_mask=0
 waiter_main: Waiting on semaphore
-sighand_test: Signaling pid=16 with signo=17 sigvalue=42
-MALLOC(272)->207f0
-MALLOC(400)->20900
-MALLOC(656)->20a90
-MALLOC(1040)->20d20
-MALLOC(1040)->21130
-MALLOC(1040)->21540
-MALLOC(4112)->21950
+sighand_test: Signaling pid=18 with signo=17 sigvalue=42
 wakeup_action: Received signal 17
 wakeup_action: sival_int=42
 wakeup_action: si_code=1
@@ -277,22 +310,15 @@ wakeup_action: ucontext=0
 waiter_main: sem_wait() successfully interrupted by signal
 waiter_main: done
 sighand_test: done
-FREE(21950)
-FREE(20900)
-FREE(20d20)
-FREE(21130)
-FREE(21540)
-FREE(20a90)
-FREE(207f0)
 
 End of test memory usage:
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
-arena      fe1a50   fe1a50
+arena      fe0f10   fe0f10
 ordblks         2        2
-mxordblk   fda4f0   fda4f0
+mxordblk   fd99b0   fd99b0
 uordblks     53f0     53f0
-fordblks   fdc660   fdc660
+fordblks   fdbb20   fdbb20
 
 user_main: POSIX timer test
 timer_test: Initializing semaphore to 0
@@ -342,11 +368,11 @@ timer_test: done
 End of test memory usage:
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
-arena      fe1a50   fe1a50
+arena      fe0f10   fe0f10
 ordblks         2        2
-mxordblk   fda4f0   fda4f0
+mxordblk   fd99b0   fd99b0
 uordblks     53f0     53f0
-fordblks   fdc660   fdc660
+fordblks   fdbb20   fdbb20
 
 user_main: round-robin scheduler test
 rr_test: Starting sieve1 thread
@@ -365,11 +391,11 @@ rr_test: Done
 End of test memory usage:
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
-arena      fe1a50   fe1a50
+arena      fe0f10   fe0f10
 ordblks         2        2
-mxordblk   fda4f0   fda4f0
+mxordblk   fd99b0   fd99b0
 uordblks     53f0     53f0
-fordblks   fdc660   fdc660
+fordblks   fdbb20   fdbb20
 
 user_main: barrier test
 barrier_test: Initializing barrier
@@ -425,18 +451,18 @@ barrier_test: Thread 7 completed with result=0
 End of test memory usage:
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
-arena      fe1a50   fe1a50
+arena      fe0f10   fe0f10
 ordblks         2        2
-mxordblk   fda4f0   fda4f0
+mxordblk   fd99b0   fd99b0
 uordblks     53f0     53f0
-fordblks   fdc660   fdc660
+fordblks   fdbb20   fdbb20
 
 Final memory usage:
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
-arena      fe1a50   fe1a50
+arena      fe0f10   fe0f10
 ordblks         2        2
-mxordblk   fda4f0   fda4f0
+mxordblk   fd99b0   fd99b0
 uordblks     53f0     53f0
-fordblks   fdc660   fdc660
+fordblks   fdbb20   fdbb20
 user_main: Exitting

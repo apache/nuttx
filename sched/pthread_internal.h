@@ -64,6 +64,7 @@
 struct join_s 
 {
   FAR struct join_s *next;       /* Implements link list */
+  ubyte          crefs;          /* Reference count */
   boolean        started;        /* TRUE: pthread started. */
   boolean        detached;       /* TRUE: pthread_detached'ed */
   boolean        terminated;     /* TRUE: detach'ed+exit'ed */
@@ -115,6 +116,7 @@ extern "C" {
 
 EXTERN void weak_function pthread_initialize(void);
 EXTERN int                pthread_completejoin(pid_t pid, FAR void *exit_value);
+EXTERN void               pthread_destroyjoin(FAR join_t *pjoin);
 EXTERN FAR join_t        *pthread_findjoininfo(pid_t pid);
 EXTERN int                pthread_givesemaphore(sem_t *sem);
 EXTERN FAR join_t        *pthread_removejoininfo(pid_t pid);

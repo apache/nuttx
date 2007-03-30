@@ -65,16 +65,16 @@
  ************************************************************/
 
 /************************************************************
- * Function:  pthread_destroyjoininfo
+ * Function:  pthread_notifywaiters
  *
  * Description:
- *   Destroy a join_t structure.  This must
- *   be done by the child thread at child thread destruction
- *   time.
+ *   Notify all other threads waiting in phread join for this
+ *   thread's exit data.  This must  be done by the child
+ *   at child thread destruction time.
  *
  ************************************************************/
 
-static void pthread_destroyjoininfo(FAR join_t *pjoin)
+static boolean pthread_notifywaiters(FAR join_t *pjoin)
 {
   int ntasks_waiting;
   int status;
@@ -111,14 +111,9 @@ static void pthread_destroyjoininfo(FAR join_t *pjoin)
        */
 
       (void)pthread_takesemaphore(&pjoin->data_sem);
-      (void)sem_destroy(&pjoin->data_sem);
+      return TRUE;
     }
-
-  /* All of the joined threads have had received the exit value.
-   * Now we can destroy this thread's exit semaphore
-   */
-
-  (void)sem_destroy(&pjoin->exit_sem);
+  return FALSE;
 }
 
 /************************************************************
@@ -148,7 +143,6 @@ static void pthread_destroyjoininfo(FAR join_t *pjoin)
 int pthread_completejoin(pid_t pid, FAR void *exit_value)
 {
   FAR join_t *pjoin;
-  boolean detached = FALSE;
 
   dbg("process_id=%d exit_value=%p\n", pid, exit_value);
 
@@ -164,48 +158,72 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
     }
   else
     {
-      /* Has the thread been marked as detached? */
+      boolean waiters;
+
+      /* Save the return exit value in the thread structure. */
 
       pjoin->terminated = TRUE;
-      detached = pjoin->detached;
-      if (detached)
+      pjoin->exit_value = exit_value;
+
+      /* Notify waiters of the availability of the exit value */
+
+      waiters = pthread_notifywaiters(pjoin);
+
+      /* If there are no waiters and if the thread is marked as detached.
+       * then discard the join information now.  Otherwise, the pthread
+       * join logic will call pthread_destroyjoin() when all of the threads
+       * have sampled the exit value.
+       */
+
+      if (!waiters && pjoin->detached)
         {
-          dbg("Detaching\n");
-
-          /* If so, then remove the thread's structure from the private
-           * data set. After this point, no other thread can perform a join
-           * operation.
-           */
-
-          (void)pthread_removejoininfo(pid);
-          (void)pthread_givesemaphore(&g_join_semaphore);
-
-          /* Destroy this thread data structure. */
-
-          pthread_destroyjoininfo(pjoin);
-
-          /* Deallocate the join entry if it was detached. */
-
-          sched_free((FAR void*)pjoin);
+           pthread_destroyjoin(pjoin);
         }
 
-     /* No, then we can assume that some other thread is waiting for the join info */
+      /* Giving the following semaphore will allow the waiters
+       * to call pthread_destroyjoin.
+       */
 
-      else
-        {
-          /* Save the return exit value in the thread structure. */
-
-          pjoin->exit_value = exit_value;
-
-          /* Destroy this thread data structure. */
-
-          pthread_destroyjoininfo(pjoin);
-
-          /* pthread_join may now access the thread entry structure. */
-
-          (void)pthread_givesemaphore(&g_join_semaphore);
-        }
+      (void)pthread_givesemaphore(&g_join_semaphore);
     }
 
   return OK;
 }
+
+/************************************************************
+ * Function:  pthread_destroyjoin
+ *
+ * Description:
+ *   This is called from pthread_completejoin if the join
+ *   info was detached or from pthread_join when the last
+ *   waiting thread has received the thread exit info.
+ *
+ *   Or it may never be called if the join info was never
+ *   detached or if no thread ever calls pthread_join.  In
+ *   case, there is a memory leak!
+ *
+ * Assumptions:
+ *   The caller holds g_join_semaphore
+ *
+ ************************************************************/
+
+void pthread_destroyjoin(FAR join_t *pjoin)
+{
+  int status;
+
+  dbg("pjoin=0x%p\n", pjoin);
+
+  /* Remove the join info from the set of joins */
+
+  (void)pthread_removejoininfo((pid_t)pjoin->thread);
+
+  /* Destroy its semaphores */
+
+  (void)sem_destroy(&pjoin->data_sem);
+  (void)sem_destroy(&pjoin->exit_sem);
+
+  /* And deallocate the pjoin structure */
+
+  sched_free(pjoin);
+}
+

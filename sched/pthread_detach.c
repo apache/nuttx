@@ -109,9 +109,7 @@ int pthread_detach(pthread_t thread)
         {
           /* YES.. just remove the thread entry. */
 
-          (void)pthread_removejoininfo((pid_t)thread);
-          sched_free(pjoin);
-          pjoin = NULL;
+          pthread_destroyjoin(pjoin);
         }
       else
         {

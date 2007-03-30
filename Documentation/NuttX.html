@@ -468,6 +468,9 @@ Other memory:
 	* Fixed a bug in the wait-for-message-queue-not-empty logic.
 	* Added a test of timed mqueue operations; detected and corrected
 	  some mqueue errors.
+	* Identified and corrected a race condition associated with
+	  pthread_join.  In the failure condition, memory was being
+	  deallocated while still in use.
 	* Started m68322
 </pre></ul>
 

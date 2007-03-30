@@ -181,6 +181,7 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
        */
 
       sched_lock();
+      pjoin->crefs++;
       (void)pthread_givesemaphore(&g_join_semaphore);
 
       /* Take the thread's join semaphore */
@@ -195,10 +196,6 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
           dbg("exit_value=0x%p\n", pjoin->exit_value);
         }
 
-      /* Then remove the thread entry. */
-
-      (void)pthread_removejoininfo((pid_t)thread);
-
       /* Post the thread's join semaphore so that exitting thread
        * will know that we have received the data.
        */
@@ -211,7 +208,12 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
 
       /* Deallocate the thread entry */
 
-      sched_free(pjoin);
+      (void)pthread_takesemaphore(&g_join_semaphore);
+      if (--pjoin->crefs <= 0)
+        {
+         (void)pthread_destroyjoin(pjoin);
+        }
+      (void)pthread_givesemaphore(&g_join_semaphore);
       ret = OK;
     }
 
