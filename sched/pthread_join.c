@@ -82,12 +82,13 @@
  *
  * Return Value:
  *   0 if successful.  Otherwise, one of the following error codes:
- *       EINVAL  The value specified by thread does not refer to a
- *               joinable thread.
- *       ESRCH   No thread could be found corresponding to that
- *               specified by the given thread ID.
- *       EDEADLK A deadlock was detected or the value of thread
- *               specifies the calling thread.
+ *
+ *   EINVAL  The value specified by thread does not refer to a
+ *           joinable thread.
+ *   ESRCH   No thread could be found corresponding to that
+ *           specified by the given thread ID.
+ *   EDEADLK A deadlock was detected or the value of thread
+ *           specifies the calling thread.
  *
  * Assumptions:
  *
@@ -144,76 +145,99 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
        * case, it must be a task and not a pthread.
        */
 
-      else /* if ((tcb->flags & EDEADLK) == 0) */
+      else
         {
           ret = EINVAL;
         }
 
       (void)pthread_givesemaphore(&g_join_semaphore);
     }
-  else if (pjoin->terminated)
-    {
-      dbg("Thread has terminated\n");
-
-      /* Get the thread exit value from the terminated thread. */
-
-      if (pexit_value)
-        {
-          dbg("exit_value=0x%p\n", pjoin->exit_value);
-          *pexit_value = pjoin->exit_value;
-        }
-
-      /* Then remove and deallocate the thread entry. */
-
-      (void)pthread_removejoininfo((pid_t)thread);
-      (void)pthread_givesemaphore(&g_join_semaphore);
-      sched_free(pjoin);
-      ret = OK;
-    }
   else
     {
-      dbg("Thread is still running\n");
-
-      /* Relinquish the data set semaphore, making certain that
-       * no task has the opportunity to run between the time
-       * we relinquish the data set semaphore and the time that
-       * we wait on the join semaphore.
+      /* We found the join info structure.  Increment for the reference
+       * to the join structure that we have.  This will keep things
+       * stable for we have to do
        */
 
       sched_lock();
       pjoin->crefs++;
-      (void)pthread_givesemaphore(&g_join_semaphore);
 
-      /* Take the thread's join semaphore */
-
-      (void)pthread_takesemaphore(&pjoin->exit_sem);
-
-      /* Get the thread exit value */
-
-      if (pexit_value)
-        {
-          *pexit_value = pjoin->exit_value;
-          dbg("exit_value=0x%p\n", pjoin->exit_value);
-        }
-
-      /* Post the thread's join semaphore so that exitting thread
-       * will know that we have received the data.
+      /* Check if the thread is still running.  If not, then things are
+       * simpler.  There are still race conditions to be concerned with.
+       * For example, there could be multiple threads executing in the
+       * 'else' block below when we enter!
        */
 
-      (void)pthread_givesemaphore(&pjoin->data_sem);
+      if (pjoin->terminated)
+        {
+          dbg("Thread has terminated\n");
 
-      /* Pre-emption is okay now. */
+          /* Get the thread exit value from the terminated thread. */
+
+          if (pexit_value)
+            {
+              dbg("exit_value=0x%p\n", pjoin->exit_value);
+              *pexit_value = pjoin->exit_value;
+            }
+        }
+      else
+        {
+          dbg("Thread is still running\n");
+
+          /* Relinquish the data set semaphore.  Since pre-emption is
+           * disabled, we can be certain that no task has the
+           * opportunity to run between the time we relinquish the
+           * join semaphore and the time that we wait on the thread exit
+           * semaphore.
+           */
+
+          (void)pthread_givesemaphore(&g_join_semaphore);
+
+          /* Take the thread's thread exit semaphore.  We will sleep here
+           * until the thread exits.  We need to exercise caution because
+           * there could be multiple threads waiting here for the same
+           * pthread to exit.
+           */
+
+          (void)pthread_takesemaphore(&pjoin->exit_sem);
+
+          /* The thread has exited! Get the thread exit value */
+
+          if (pexit_value)
+            {
+             *pexit_value = pjoin->exit_value;
+              dbg("exit_value=0x%p\n", pjoin->exit_value);
+            }
+
+          /* Post the thread's data semaphore so that the exitting thread
+           * will know that we have received the data.
+           */
+
+          (void)pthread_givesemaphore(&pjoin->data_sem);
+
+          /* Retake the join semaphore, we need to hold this when
+           * pthread_destroyjoin is called.
+           */
+
+          (void)pthread_takesemaphore(&g_join_semaphore);
+        }
+
+      /* Pre-emption is okay now. The logic still cannot be re-entered
+       * because we hold the join semaphore
+       */
 
       sched_unlock();
 
-      /* Deallocate the thread entry */
+      /* Release our reference to the join structure and, if the reference
+       * count decrements to zero, deallocate the join structure.
+       */
 
-      (void)pthread_takesemaphore(&g_join_semaphore);
       if (--pjoin->crefs <= 0)
         {
-         (void)pthread_destroyjoin(pjoin);
+          (void)pthread_destroyjoin(pjoin);
         }
       (void)pthread_givesemaphore(&g_join_semaphore);
+
       ret = OK;
     }
 
