@@ -95,31 +95,9 @@
 #                 leading "0x".
 ########################################################
 
-if [ "${CADENUX_ARCH}" = "dsc21" ] ; then
-  prefix="arm-uclinux-"
-elif [ "${CADENUX_ARCH}" = "dsc24" ] ; then
-  prefix="arm-uclinux-"
-elif [ "${CADENUX_ARCH}" = "dsc25" ] ; then
-  prefix="arm-uclinux-"
-elif [ "${CADENUX_ARCH}" = "dm270" ] ; then
-  prefix="arm-uclinux-"
-elif [ "${CADENUX_ARCH}" = "c5471" ] ; then
-  prefix="arm-uclinux-"
-elif [ "${CADENUX_ARCH}" = "ti925" ] ; then
-  prefix="arm-linux-"
-elif [ "${CADENUX_ARCH}" = "omap710" ] ; then
-  prefix="arm-linux-"
-elif [ "${CADENUX_ARCH}" = "omap1510" ] ; then
-  prefix="arm-linux-"
-elif [ "${CADENUX_ARCH}" = "dm310" ] ; then
-  prefix="arm-linux-"
-else
-  prefix=""
-fi
-
 if [ $# -lt 2 ] ; then
   echo "Error: missing argument"
-  echo "Usage: mkimage [--LAddr n] [--EAddr n] [--NoHeader] <input-Bin> <out-RR>"
+  echo "Usage: mkimage [--Prefix prefix] [--LAddr n] [--EAddr n] [--NoHeader] <input-Bin> <out-RR>"
   exit 1
 fi
 
@@ -128,6 +106,7 @@ fi
 LoadAddr="00000000"     # Note: hex val *without* proceeding "0x"
 EntryAddr="0xFFFFFFFF"  # Note: hex val *with* procedding  "0x"
 
+unset prefix
 Header="y"
 LAddrSupplied="n"
 EAddrSupplied="n"
@@ -135,6 +114,11 @@ compress="n"
 
 while [ $# -gt 0 ] ; do
   case "$1" in
+  --Prefix)
+     shift;
+     prefix="$1"
+     shift
+     ;;
   --LAddr )
      shift
      LoadAddr="$1"
