@@ -96,7 +96,7 @@ nuttx: $(LINKOBJS) board/libboard$(LIBEXT)
 		mv $(TOPDIR)/$@.flashimage $(TOPDIR)/$@; \
 	fi
 ifeq ($(CONFIG_RRLOAD_BINARY),y)
-	@$(TOPDIR)/tools/mkimage.sh $(TOPDIR)/$@ $(TOPDIR)/$@.rr
+	@$(TOPDIR)/tools/mkimage.sh --Prefix $(CROSSDEV) $(TOPDIR)/$@ $(TOPDIR)/$@.rr
 	@if [ -w /tftpboot ] ; then \
 		cp -f $(TOPDIR)/$@.rr /tftpboot/$@.rr.${CONFIG_ARCH}; \
 	fi
