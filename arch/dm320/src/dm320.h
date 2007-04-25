@@ -47,7 +47,7 @@
 
 #include "arm9.h"
 
-#if defined(CONFIG_BOARD_NTOSD_DM320)
+#if defined(CONFIG_ARCH_BOARD_NTOSD_DM320)
 # include <arch/board/ntosd.h>
 #else
 # warning "Unknown DM320 board"

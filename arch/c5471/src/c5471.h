@@ -46,7 +46,7 @@
 # include <sys/types.h>
 #endif
 
-#if defined(CONFIG_BOARD_C5471EVM)
+#if defined(CONFIG_ARCH_BOARD_C5471EVM)
 # include <arch/board/c5471evm.h>
 #else
 # warning "Undefined C5471 Board"
