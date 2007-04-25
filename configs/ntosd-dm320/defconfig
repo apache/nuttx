@@ -40,17 +40,17 @@
 # CONFIG_ARCH_name - for use in C code.  This identifies the
 #   particular chip or SoC that the architecture is implemented
 #   in.
-# CONFIG_BOARD - identifies the configs subdirectory and, hence,
+# CONFIG_ARCH_BOARD - identifies the configs subdirectory and, hence,
 #   the board that supports the particular chip or SoC.
-# CONFIG_BOARD_name - for use in C code
+# CONFIG_ARCH_BOARD_name - for use in C code
 # CONFIG_ROM_VECTORS - unique to dm320
 # CONFIG_DRAM_SIZE - Describes the installed DRAM.
 # CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 #
 CONFIG_ARCH=dm320
 CONFIG_ARCH_DM320=y
-CONFIG_BOARD=ntosd-dm320
-CONFIG_BOARD_NTOSD_DM320=y
+CONFIG_ARCH_BOARD=ntosd-dm320
+CONFIG_ARCH_BOARD_NTOSD_DM320=y
 CONFIG_ROM_VECTORS=n
 CONFIG_DRAM_SIZE=0x01000000
 CONFIG_DRAM_NUTTXENTRY=0x01008000

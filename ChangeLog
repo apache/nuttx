@@ -114,4 +114,5 @@
 0.2.4 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Verfied c5471 build under Cygwin on WinXP
+	* Makesystem changes to better support different SoCs.
 	* Started m68322

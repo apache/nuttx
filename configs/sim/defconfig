@@ -40,14 +40,14 @@
 # CONFIG_ARCH_name - for use in C code.  This identifies the
 #   particular chip or SoC that the architecture is implemented
 #   in.
-# CONFIG_BOARD - identifies the configs subdirectory and, hence,
+# CONFIG_ARCH_BOARD - identifies the configs subdirectory and, hence,
 #   the board that supports the particular chip or SoC.
-# CONFIG_BOARD_name - for use in C code
+# CONFIG_ARCH_BOARD_name - for use in C code
 #
 CONFIG_ARCH=sim
 CONFIG_ARCH_SIM=y
-CONFIG_BOARD=sim
-CONFIG_BOARD_SIM=y
+CONFIG_ARCH_BOARD=sim
+CONFIG_ARCH_BOARD_SIM=y
 
 #
 # General OS setup
