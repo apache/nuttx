@@ -104,8 +104,13 @@ defconfig -- This is a configuration file similar to the Linux
 
 	Architecture selection:
 
-		CONFIG_ARCH - identifies the arch/ subdirectory
-		CONFIG_ARCH_name - for use in C code
+		CONFIG_ARCH - Identifies the arch/ subdirectory
+		CONFIG_ARCH_name - For use in C code
+		CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
+		CONFIG_ARCH_CHIP_name - For use in C code
+		CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+		   hence, the board that supports the particular chip or SoC.
+		CONFIG_ARCH_BOARD_name - For use in C code
 
 	General OS setup
 
@@ -219,6 +224,10 @@ configs/c5471evm
     processor and a c54 SDP.  NuttX runs on the ARM core and is built with
     with a GNU arm-elf toolchain*. This port is complete, verified, and
     included in the NuttX release.
+
+configs/mcu123-lpc214x
+    This is a port to the mcu123.com lpc214x development board.
+    This OS is also built with the the arm-elf toolchain*
 
 configs/ntosd-dm320
     This port uses the Neuros OSD with a GNU arm-elf toolchain*:
