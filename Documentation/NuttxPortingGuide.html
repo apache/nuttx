@@ -331,16 +331,24 @@
     The purpose of this port is primarily to support OS feature developement.
     This port does not support interrupts or a real timer (and hence no
     round robin scheduler)  Otherwise, it is complete.
+
   <li><code>arch/c5471</code>:
     TI TMS320C5471 (also called TMS320DM180 or just C5471).
     NuttX operates on the ARM7 of this dual core processor.
     This port is complete, verified, and included in the NuttX release 0.1.1.
+
+  <li><code>configs/mcu123-lpc214x</code>:
+    The mcu123.com lpc214x development board.
+    This is a work in progress.
+
   <li><code>arch/dm320</code>:
-      TI TMS320DM320 (also called just DM320).
-      NuttX operates on the ARM9EJS of this dual core processor.
-      This port complete, verified, and included in the NuttX release 0.2.1.
+    TI TMS320DM320 (also called just DM320).
+    NuttX operates on the ARM9EJS of this dual core processor.
+    This port complete, verified, and included in the NuttX release 0.2.1.
+
   <li><code>arch/m68322</code>
-      A work in progress.</li>
+    A work in progress.</li>
+
   <li><code>arch/pjrc-8051</code>:
     8051 Microcontroller.  This port is not quite ready for prime time.</li>
 </ul>
@@ -462,6 +470,10 @@
     processor and a c54 SDP.  NuttX runs on the ARM core and is built with
     with a GNU arm-elf toolchain*. This port is complete, verified, and
     included in the NuttX release.</li>
+
+  <li><code>configs/mcu123-lpc214x</code>:
+    This is a port to the mcu123.com lpc214x development board.
+    This OS is also built with the arm-elf toolchain*.</li>
 
   <li><code>configs/ntosd-dm320</code>:
     This port uses the Neuros OSD with a GNU arm-elf toolchain*.
@@ -1035,8 +1047,19 @@ The system can be re-made subsequently by just typing <code>make</code>.
 <h2>Architecture selection</h2>
 
 <ul>
-  <li><code>CONFIG_ARCH</code>: identifies the arch subdirectory
-  <li><code>CONFIG_ARCH_name</code>: for use in C code
+  <li><code>CONFIG_ARCH</code>:
+    Identifies the arch subdirectory</li>
+  <li><code>CONFIG_ARCH_name</code>:
+    For use in C code</li>
+  <li><code>CONFIG_ARCH_CHIP</code>:
+    Identifies the arch/*/chip subdirectory</li>
+  <li><code>CONFIG_ARCH_CHIP_name</code>:
+    For use in C code</li>
+  <li><code>CONFIG_ARCH_BOARD</code>:
+     Identifies the configs subdirectory and hence, the board that supports
+     the particular chip or SoC.</li>
+  <li><code>CONFIG_ARCH_BOARD_name</code>:
+     For use in C code</li>
 </ul>
 
 <h2>General OS setup</h2>
