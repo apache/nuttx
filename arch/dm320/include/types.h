@@ -1,5 +1,5 @@
 /************************************************************
- * types.h
+ * arch/types.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,8 +37,8 @@
  * only indirectly through sys/types.h
  */
 
-#ifndef __ARCH_DM320_TYPES_H
-#define __ARCH_DM320_TYPES_H
+#ifndef __ARCH_TYPES_H
+#define __ARCH_TYPES_H
 
 /************************************************************
  * Included Files
@@ -79,4 +79,4 @@ typedef unsigned int irqstate_t;
  * Global Function Prototypes
  ************************************************************/
 
-#endif /* __ARCH_DM320_TYPES_H */
+#endif /* __ARCH_TYPES_H */
