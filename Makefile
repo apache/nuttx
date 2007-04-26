@@ -87,10 +87,10 @@ include/arch/board: Make.defs include/arch
 
 # Link the configs/<board-name>/src dir to arch/<arch-name>/src/board
 $(ARCH_SRC)/board: Make.defs
-	@if [ -e $(ARCH_SRC)/board ]; then \
-		if [ -h $(ARCH_SRC)/board ]; then \
-			rm -f $(ARCH_SRC)/board ; \
-		else \
+	@if [ -h $(ARCH_SRC)/board ]; then \
+		rm -f $(ARCH_SRC)/board ; \
+	else \
+		if [ -e $(ARCH_SRC)/board ]; then \
 			echo "$(ARCH_SRC)/board exists but is not a symbolic link" ; \
 			exit 1 ; \
 		fi ; \
@@ -100,10 +100,10 @@ $(ARCH_SRC)/board: Make.defs
 # Link arch/<arch-name>/include/<chip-name> to arch/<arch-name>/include/chip
 $(ARCH_SRC)/chip: Make.defs
 ifneq ($(CONFIG_ARCH_CHIP),)
-	@if [ -e $(ARCH_SRC)/chip ]; then \
-		if [ -h $(ARCH_SRC)/chip ]; then \
-			rm -f $(ARCH_SRC)/chip ; \
-		else \
+	@if [ -h $(ARCH_SRC)/chip ]; then \
+		rm -f $(ARCH_SRC)/chip ; \
+	else \
+		if [ -e $(ARCH_SRC)/chip ]; then \
 			echo "$(ARCH_SRC)/chip exists but is not a symbolic link" ; \
 			exit 1 ; \
 		fi ; \

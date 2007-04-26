@@ -13,6 +13,7 @@ o Task/Scheduler
    MSEC_PER_TICK in sched/clock_internal.h
 - Consider implementing wait, waitpid, waitid.  At present, a parent has
   no information about child tasks.
+- Several APIs do not set errno.  Need to review all APIs.
 
 o Memory Managment
 - Add an option to free all memory allocated by a task when the task exits.
@@ -23,6 +24,11 @@ o Signals
 
 o pthreads
 - pthread_cancel():  Should implemenent cancellation points and pthread_testcancel()
+
+o Network
+- Port FreeBSD TCP/IP stack
+
+o USB
 
 o Libraries
 
@@ -37,11 +43,10 @@ o Documentation
 
 o Build system
 - Names under arch are incorrect.  These should hold processor architectures.
-  c5471 should be arm7
-  dm320 should be arm9
+  c5471 and dm320 should be arm
   pjrc-8051 should be 805x
 - SoC-specific logic should be in subdirectories under arch/<processor-name>.
-  Eg. arm7/include/c5471 should hold c5471 specific header files
+  Eg. arm/include/c5471 should hold c5471 specific header files
 - configs/pjrc-8051 should be configs/pjrc-87c52
 
 o Applications & Tests

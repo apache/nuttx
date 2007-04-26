@@ -40,6 +40,8 @@
 # CONFIG_ARCH_name - for use in C code.  This identifies the
 #   particular chip or SoC that the architecture is implemented
 #   in.
+# CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
+# CONFIG_ARCH_CHIP_name - For use in C code
 # CONFIG_ARCH_BOARD - identifies the configs subdirectory and, hence,
 #   the board that supports the particular chip or SoC.
 # CONFIG_ARCH_BOARD_name - for use in C code
@@ -51,6 +53,8 @@
 #
 CONFIG_ARCH=c5471
 CONFIG_ARCH_C5471=y
+CONFIG_ARCH_CHIP=c5471
+CONFIG_ARCH_CHIP_C5471=y
 CONFIG_ARCH_BOARD=c5471evm
 CONFIG_ARCH_BOARD_C5471EVM=y
 CONFIG_ROM_VECTORS=n

@@ -115,4 +115,6 @@
 
 	* Verfied c5471 build under Cygwin on WinXP
 	* Makesystem changes to better support different SoCs.
+	* Made arch/c5471/include and arch/dm320/include identiry in
+	  preparation for merging into arch/arm
 	* Started m68322

@@ -1,5 +1,5 @@
 /************************************************************
- * irq.h
+ * arch/irq.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,12 +37,14 @@
  * only indirectly through nuttx/irq.h
  */
 
-#ifndef __ARCH_C5471_IRQ_H
-#define __ARCH_C5471_IRQ_H
+#ifndef __ARCH_IRQ_H
+#define __ARCH_IRQ_H
 
 /************************************************************
  * Included Files
  ************************************************************/
+
+#include <arch/chip/irq.h>
 
 /************************************************************
  * Definitions
@@ -60,68 +62,45 @@
  * xcp.regs array:
  */
 
-#define REG_R0                   (0)
-#define REG_R1                   (1)
-#define REG_R2                   (2)
-#define REG_R3                   (3)
-#define REG_R4                   (4)
-#define REG_R5                   (5
-#define REG_R6                   (6)
-#define REG_R7                   (7)
-#define REG_R8                   (8)
-#define REG_R9                   (9)
-#define REG_R10                  (10)
-#define REG_R11                  (11)
-#define REG_R12                  (12)
-#define REG_R13                  (13)
-#define REG_R14                  (14)
-#define REG_R15                  (15)
-#define REG_CPSR                 (16)
+#define REG_R0              (0)
+#define REG_R1              (1)
+#define REG_R2              (2)
+#define REG_R3              (3)
+#define REG_R4              (4)
+#define REG_R5              (5)
+#define REG_R6              (6)
+#define REG_R7              (7)
+#define REG_R8              (8)
+#define REG_R9              (9)
+#define REG_R10             (10)
+#define REG_R11             (11)
+#define REG_R12             (12)
+#define REG_R13             (13)
+#define REG_R14             (14)
+#define REG_R15             (15)
+#define REG_CPSR            (16)
 
-#define XCPTCONTEXT_REGS         (17)
-#define XCPTCONTEXT_SIZE         (4 * XCPTCONTEXT_REGS)
+#define XCPTCONTEXT_REGS    (17)
+#define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 
-#define REG_A1                   REG_R0
-#define REG_A2                   REG_R1
-#define REG_A3                   REG_R2
-#define REG_A4                   REG_R3
-#define REG_V1                   REG_R4
-#define REG_V2                   REG_R5
-#define REG_V3                   REG_R6
-#define REG_V4                   REG_R7
-#define REG_V5                   REG_R8
-#define REG_V6                   REG_R9
-#define REG_V7                   REG_R10
-#define REG_SB                   REG_R9
-#define REG_SL                   REG_R10
-#define REG_FP                   REG_R11
-#define REG_IP                   REG_R12
-#define REG_SP                   REG_R13
-#define REG_LR                   REG_R14
-#define REG_PC                   REG_R15
-
-/* C5471 Interrupts */
-
-#define C5471_IRQ_TIMER0         0
-#define C5471_IRQ_TIMER1         1
-#define C5471_IRQ_TIMER2         2
-#define C5471_IRQ_GPIO0          3
-#define C5471_IRQ_ETHER          4
-#define C5471_IRQ_KBGPIO_0_7     5
-#define C5471_IRQ_UART           6
-#define C5471_IRQ_UART_IRDA      7
-#define C5471_IRQ_KBGPIO_8_15    8
-#define C5471_IRQ_GPIO3          9
-#define C5471_IRQ_GPIO2         10
-#define C5471_IRQ_I2C           11
-#define C5471_IRQ_GPIO1         12
-#define C5471_IRQ_SPI           13
-#define C5471_IRQ_GPIO_4_19     14
-#define C5471_IRQ_API           15
-
-#define C5471_IRQ_WATCHDOG      C5471_IRQ_TIMER0
-#define C5471_IRQ_SYSTIMER      C5471_IRQ_TIMER2
-#define NR_IRQS                 (C5471_IRQ_API+1)
+#define REG_A1              REG_R0
+#define REG_A2              REG_R1
+#define REG_A3              REG_R2
+#define REG_A4              REG_R3
+#define REG_V1              REG_R4
+#define REG_V2              REG_R5
+#define REG_V3              REG_R6
+#define REG_V4              REG_R7
+#define REG_V5              REG_R8
+#define REG_V6              REG_R9
+#define REG_V7              REG_R10
+#define REG_SB              REG_R9
+#define REG_SL              REG_R10
+#define REG_FP              REG_R11
+#define REG_IP              REG_R12
+#define REG_SP              REG_R13
+#define REG_LR              REG_R14
+#define REG_PC              REG_R15
 
 /************************************************************
  * Public Types
@@ -243,5 +222,5 @@ extern "C" {
 #endif
 #endif
 
-#endif /* __ARCH_C5471_IRQ_H */
+#endif /* __ARCH_IRQ_H */
 

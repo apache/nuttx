@@ -1,5 +1,5 @@
 /************************************************************
- * serial.h
+ * arch/serial.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -44,7 +44,7 @@
  * Definitions
  ************************************************************/
 
-/* IOCTL commands supported by the DM320 serial driver */
+/* IOCTL commands supported by the ARM serial driver */
 
 #define TIOCSBRK        0x5401  /* BSD compatibility */
 #define TIOCCBRK        0x5402  /* " " "           " */
