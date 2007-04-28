@@ -16,7 +16,7 @@
   </b></big>
   <p><small>by</small></p>
   <p>Gregory Nutt</p>
-  <p><small>Last Update: March 26, 2007</small></p>
+  <p><small>Last Update: April 30, 2007</small></p>
 </center>
 
 <center><h1>Table of Contents</h1></center>
@@ -325,32 +325,75 @@
 </ul>
 
 <h3><a name="supportedarchitectures">2.2.3 Supported Architectures</a></h3>
+<p>
+   <b>Archictecture- and Chip-Specific Directories</b>.
+   All processor architecture-specific directories are maintained in sub-directories of
+   the <code>arch/</code> directory.
+   Different chips or SoC's may implement the same processor core.
+   Chip-specific logic can be found in sub-directories under the architecture
+   directory.
+   Current architecture/chip directories are summarized below:
+</p>
 <ul>
   <li><code>arch/sim</code>:
     A user-mode port of NuttX to the x86 Linux platform is available.
     The purpose of this port is primarily to support OS feature developement.
     This port does not support interrupts or a real timer (and hence no
     round robin scheduler)  Otherwise, it is complete.
+  </li>
 
-  <li><code>arch/c5471</code>:
-    TI TMS320C5471 (also called TMS320DM180 or just C5471).
-    NuttX operates on the ARM7 of this dual core processor.
-    This port is complete, verified, and included in the NuttX release 0.1.1.
+  <li><code>arch/arm</code>:
+    This directory holds common ARM architectures.  At present, this includes
+    the following subdirectories:
+    <ul>
+      <li><code>arch/arm/include</code> and <code>arch/arm/common</code>:
+          Common ARM logic.
+      </li>
+
+      <li><code>arch/arm/include/c5471</code> and <code>arch/arm/src/c5471</code>:
+        TI TMS320C5471 (also called TMS320DM180 or just C5471).
+        NuttX operates on the ARM7 of this dual core processor.
+        This port is complete, verified, and included in the NuttX release 0.1.1.
+      </li>
+
+      <li><code>arch/arm/include/dm320</code> and <code>arch/arm/src/dm320</code>:
+        TI TMS320DM320 (also called just DM320).
+        NuttX operates on the ARM9EJS of this dual core processor.
+        This port complete, verified, and included in the NuttX release 0.2.1.
+      </li>
+    </ul>
+  </li>
 
   <li><code>configs/mcu123-lpc214x</code>:
     The mcu123.com lpc214x development board.
     This is a work in progress.
-
-  <li><code>arch/dm320</code>:
-    TI TMS320DM320 (also called just DM320).
-    NuttX operates on the ARM9EJS of this dual core processor.
-    This port complete, verified, and included in the NuttX release 0.2.1.
+  </li>
 
   <li><code>arch/m68322</code>
     A work in progress.</li>
+  </li>
 
   <li><code>arch/pjrc-8051</code>:
     8051 Microcontroller.  This port is not quite ready for prime time.</li>
+  </li>
+</ul>
+
+<p>
+  <b>Deprecated Architecture Directories</b>.
+  The following architecture directories are deprecated.  They have been
+  replaced by the logic in <code>arm/arm</code> and will deleted when
+  <code>arch/arm</code> is fully verified.
+</p>
+<ul>
+  <li><code>arch/c5471</code>:
+    Replaced with <code>arch/arm/include/c5471</code> and
+    <code>arch/arm/src/c5471<code>.
+  </li>
+
+  <li><code>arch/dm320</code>:
+    Replaced with <code>arch/arm/include/dm320</code> and
+    <code>arch/arm/src/dm320<code>.
+  </li>
 </ul>
 <p>
   Other ports for the for the TI TMS320DM270 and for MIPS are in various states
@@ -1045,7 +1088,10 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h2>Architecture selection</h2>
-
+<p>
+  The following configuration itemes select the architecture, chip, and
+  board configuration for the build.
+</p>
 <ul>
   <li><code>CONFIG_ARCH</code>:
     Identifies the arch subdirectory</li>
@@ -1060,6 +1106,18 @@ The system can be re-made subsequently by just typing <code>make</code>.
      the particular chip or SoC.</li>
   <li><code>CONFIG_ARCH_BOARD_name</code>:
      For use in C code</li>
+</ul>
+
+<p>
+  Some architectures require a description of the the RAM configuration:
+</p>
+<ul>
+  <li><code>CONFIG_DRAM_SIZE</code>:
+    Describes the installed DRAM.</li>
+  <li><code>CONFIG_DRAM_START</code>:
+    The start address of DRAM (physical)</li>
+  <li><code>CONFIG_DRAM_VSTART</code>:
+    The startaddress of DRAM (virtual)</li>
 </ul>
 
 <h2>General OS setup</h2>
