@@ -115,6 +115,9 @@
 
 	* Verfied c5471 build under Cygwin on WinXP
 	* Makesystem changes to better support different SoCs.
-	* Made arch/c5471/include and arch/dm320/include identiry in
+	* Made arch/c5471/include and arch/dm320/include identical in
 	  preparation for merging into arch/arm
+	* Logic from arch/c5471 and arch/dm320 combined into arch/arm.
+	  arch/c5471 and arch/dm320 are deprecated and will be removed
+	  when the new c5471 and dm320 logic is verified.
 	* Started m68322

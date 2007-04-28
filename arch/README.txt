@@ -129,21 +129,38 @@ arch/sim
     This port does not support interrupts or a real timer (and hence no
     round robin scheduler)  Otherwise, it is complete.
 
-arch/c5471
-    TI TMS320C5471 (also called TMS320DM180 or just C5471).
-    NuttX operates on the ARM7 of this dual core processor. This port
-    complete, verified, and included in the NuttX release 0.1.1.
+arch/arm
+    This directory holds common ARM architectures.  At present, this includes
+    the following subdirectories:
 
-arch/dm320
-    TI TMS320DM320 (also called just DM320).
-    NuttX operates on the ARM9EJS of this dual core processor.  This port
-    complete, verified, and included in the NuttX release 0.2.1.
+    arch/arm/include and arch/arm/common
+        Common ARM logic.
+
+    arch/arm/include/c5471 and arch/arm/src/c5471
+        TI TMS320C5471 (also called TMS320DM180 or just C5471).
+        NuttX operates on the ARM7 of this dual core processor. This port
+        complete, verified, and included in the NuttX release 0.1.1.
+
+    arch/arm/include/dm320 and arch/arm/src/dm320
+        TI TMS320DM320 (also called just DM320).
+        NuttX operates on the ARM9EJS of this dual core processor.  This port
+        complete, verified, and included in the NuttX release 0.2.1.
 
 arch/m68322
     A work in progress.
 
 arch/pjrc-8051
     8051 Microcontroller.  This port is not quite ready for prime time.
+
+The following architecture directories are deprecated.  They have been
+replaced by the logic in arm/arm and will deleted when arch/arm is fully
+verified.
+
+arch/c5471
+    Replaced with arch/arm/include/c5471 and arch/arm/src/c5471
+
+arch/dm320
+    Replaced with arch/arm/include/dm320 and arch/arm/src/dm320
 
 Other ports for the for the TI TMS320DM270 and for MIPS are in various states
 of progress
