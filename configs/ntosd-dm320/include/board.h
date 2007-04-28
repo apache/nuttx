@@ -1,5 +1,5 @@
 /************************************************************************************
- * ntosd.h
+ * arch/board/board.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __NTOSD_H
-#define __NTOSD_H
+#ifndef __ARCH_BOARD_BOARD_H
+#define __ARCH_BOARD_BOARD_H
 
 /************************************************************************************
  * Included Files
@@ -101,4 +101,4 @@
 
 #endif
 
-#endif  /* __NTOSD_H */
+#endif  /* __ARCH_BOARD_BOARD_H */

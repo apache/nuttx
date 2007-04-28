@@ -112,6 +112,12 @@ defconfig -- This is a configuration file similar to the Linux
 		   hence, the board that supports the particular chip or SoC.
 		CONFIG_ARCH_BOARD_name - For use in C code
 
+	Some architectures require a description of the the RAM configuration:
+
+		CONFIG_DRAM_SIZE - Describes the installed DRAM.
+		CONFIG_DRAM_START - The start address of DRAM (physical)
+		CONFIG_DRAM_VSTART - The startaddress of DRAM (virtual)
+
 	General OS setup
 
 		CONFIG_EXAMPLE - identifies the subdirectory in examples
