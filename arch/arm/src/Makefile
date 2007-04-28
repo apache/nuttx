@@ -1,0 +1,124 @@
+############################################################################
+# Makefile
+#
+#   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name Gregory Nutt nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+-include $(TOPDIR)/Make.defs
+-include chip/Make.defs
+
+MKDEP 		= $(TOPDIR)/tools/mkdeps.sh
+ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(TOPDIR)/sched
+
+HEAD_AOBJ	= $(HEAD_ASRC:.S=$(OBJEXT))
+
+ASRCS		= $(CHIP_ASRCS) $(CMN_ASRCS)
+AOBJS		= $(ASRCS:.S=$(OBJEXT))
+
+CSRCS		= $(CHIP_CSRCS) $(CMN_CSRCS)
+COBJS		= $(CSRCS:.c=$(OBJEXT))
+
+SRCS		= $(ASRCS) $(CSRCS)
+OBJS		= $(AOBJS) $(COBJS)
+
+LDFLAGS		= $(ARCHSCRIPT)
+EXTRA_LIBS	=
+
+LINKLIBS	=
+LDPATHES	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
+LDLIBS		= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
+
+BOARDDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src/board
+
+LIBGCC		= ${shell $(CC) -print-libgcc-file-name}
+
+VPATH		= chip:common
+
+all: $(HEAD_OBJ) libarch$(LIBEXT)
+
+$(AOBJS) $(HEAD_AOBJ): %$(OBJEXT): %.S
+	$(CC) -c $(CFLAGS) -D__ASSEMBLY__ $< -o $@
+
+$(COBJS): %$(OBJEXT): %.c
+	$(CC) -c $(CFLAGS) $< -o $@
+
+libarch$(LIBEXT): $(OBJS)
+	@( for obj in $(OBJS) ; do \
+		$(AR) $@ $${obj} || \
+			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
+	done ; )
+
+board/libboard$(LIBEXT):
+	$(MAKE) -C board TOPDIR=$(TOPDIR) libboard$(LIBEXT)
+
+nuttx: $(HEAD_AOBJ) board/libboard$(LIBEXT)
+	$(LD) --entry=__start $(LDFLAGS) $(LDPATHES) -L$(BOARDDIR) -o $(TOPDIR)/$@ $(HEAD_AOBJ) \
+		--start-group $(LDLIBS) -lboard --end-group $(EXTRA_LIBS) $(LIBGCC) 
+	@$(NM) $(TOPDIR)/$@ | \
+	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
+	sort > $(TOPDIR)/System.map
+	@export vflashstart=`$(OBJDUMP) --all-headers $(TOPDIR)/$@ | grep _vflashstart | cut -d' ' -f1`;  \
+	if [ ! -z "$$vflashstart" ]; then \
+		$(OBJCOPY) --adjust-section-vma=.vector=0x$$vflashstart $(TOPDIR)/$@ $(TOPDIR)/$@.flashimage; \
+		mv $(TOPDIR)/$@.flashimage $(TOPDIR)/$@; \
+	fi
+ifeq ($(CONFIG_RRLOAD_BINARY),y)
+	@$(TOPDIR)/tools/mkimage.sh --Prefix $(CROSSDEV) $(TOPDIR)/$@ $(TOPDIR)/$@.rr
+	@if [ -w /tftpboot ] ; then \
+		cp -f $(TOPDIR)/$@.rr /tftpboot/$@.rr.${CONFIG_ARCH}; \
+	fi
+endif
+
+.depend: Makefile $(SRCS)
+	@if [ -e board/Makefile ]; then \
+		$(MAKE) -C board TOPDIR=$(TOPDIR) depend ; \
+	if
+	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@touch $@
+
+depend: .depend
+
+clean:
+	@if [ -e board/Makefile ]; then \
+		$(MAKE) -C board TOPDIR=$(TOPDIR) clean ; \
+	fi
+	@rm -f libarch$(LIBEXT) *~
+	@if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
+
+distclean: clean
+	@if [ -e board/Makefile ]; then \
+		$(MAKE) -C board TOPDIR=$(TOPDIR) distclean ; \
+	fi
+	@rm -f Make.dep .depend
+
+-include Make.dep
