@@ -180,7 +180,7 @@
 </table>
 
 <p>
-   The sixth release of NuttX (nuttx-0.2.3) is available for download
+   The seventh release of NuttX (nuttx-0.2.4) is available for download
    from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
    website.
 </p>
@@ -472,9 +472,18 @@ Other memory:
 	  pthread_join.  In the failure condition, memory was being
 	  deallocated while still in use.
 
-0.2.4 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.4 2007-04-28 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Verfied c5471 build under Cygwin on WinXP
+	* Makesystem changes to better support different SoCs.
+	* Made arch/c5471/include and arch/dm320/include identical in
+	  preparation for merging into arch/arm
+	* Logic from arch/c5471 and arch/dm320 combined into arch/arm.
+	  arch/c5471 and arch/dm320 are deprecated and will be removed
+	  when the new c5471 and dm320 logic is verified.
+
+0.2.5 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
 	* Started m68322
 </pre></ul>
 

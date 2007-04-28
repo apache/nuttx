@@ -47,6 +47,10 @@ GARBAGEDIRS="\
   configs/m68332evb/src/src\
   configs/m68332evb/src/include\
   configs/m68332evb/src/doc\
+  configs/sim/doc/include\
+  configs/sim/doc/src\
+  arch/c5471\
+  arch/dm320
 "
 
 # Make sure we know what is going on

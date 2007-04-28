@@ -1,16 +1,16 @@
-This is the output from running examples/ostest on March 28, 2007
+This is the output from running examples/ostest on April 28, 2007
 =================================================================
 
-Neuros Devboard >  tftpboot 10.0.0.1 nuttx.dm320
+Neuros Devboard >  tftpboot 192.168.0.100 nuttx.dm320
 Found DM9000 ID:90000a46 at address 60000300 !
 DM9000 work in 16 bus width
 [eth_init]MAC:0:18:11:80:10:6:
-TFTP from server 10.0.0.1; our IP address is 10.0.0.2
+TFTP from server 192.168.0.100; our IP address is 192.168.0.101
 Filename 'nuttx.dm320'.
-Load address: 0x10
+Load address: 0x1000000
 Loading: #############################
 done
-Bytes transferred = 146570 (23c8a hex)
+Bytes transferred = 146617 (23cb9 hex)
 Neuros Devboard >  go 1008000
 ## Starting application at 0x01008000 ...
 stdio_test: write fd=1
@@ -53,9 +53,9 @@ user_main: mutex test
 Initializing mutex
 Starting thread 1
 Starting thread 2
-                Thread1 Thread2
-        Loops   32      32
-        Errors  0       0
+		Thread1	Thread2
+	Loops	32	32
+	Errors	0	0
 
 End of test memory usage:
 VARIABLE  BEFORE   AFTER
@@ -170,10 +170,10 @@ cond_test: Set thread 2 priority to 64
 thread_signaler: Started
 thread_signaler: Terminating
 cond_test: signaler terminated, now cancel the waiter
-cond_test:      Waiter  Signaler
-cond_test: Loops        32      32
-cond_test: Errors       0       0
-cond_test:
+cond_test: 	Waiter	Signaler
+cond_test: Loops	32	32
+cond_test: Errors	0	0
+cond_test: 
 0 times, waiter did not have to wait for data
 cond_test: 0 times, data was already available when the signaler run
 cond_test: 0 times, the waiter was in an unexpected state when the signaler ran
@@ -375,10 +375,10 @@ uordblks     53f0     53f0
 fordblks   fdbb20   fdbb20
 
 user_main: round-robin scheduler test
-rr_test: Starting sieve1 thread
+rr_test: Starting sieve1 thread 
 rr_test: Set thread priority to 1
 rr_test: Set thread policty to SCHED_RR
-rr_test: Starting sieve1 thread
+rr_test: Starting sieve1 thread 
 sieve1 started
 sieve1 finished
 rr_test: Waiting for sieves to complete -- this should take awhile
