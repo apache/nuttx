@@ -1,4 +1,4 @@
-############################################################
+############################################################################
 # Makefile
 #
 #   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -31,7 +31,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################
+############################################################################
 
 -include $(TOPDIR)/Make.defs
 
@@ -46,7 +46,8 @@ COBJS		= $(CSRCS:.c=$(OBJEXT))
 SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
 
-CFLAGS		+= -I $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common
 
 all: libboard$(LIBEXT)
 

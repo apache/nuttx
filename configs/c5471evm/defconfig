@@ -45,18 +45,20 @@
 # CONFIG_ARCH_BOARD - identifies the configs subdirectory and, hence,
 #   the board that supports the particular chip or SoC.
 # CONFIG_ARCH_BOARD_name - for use in C code
+# CONFIG_BOARD_LOOPSPERMSEC - for delay loops
 # CONFIG_ROM_VECTORS - unique to c5471
 # CONFIG_DRAM_END - the size of installed DRAM.
 #   Unique to c5471
 # CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to c5471.
 # CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 #
-CONFIG_ARCH=c5471
-CONFIG_ARCH_C5471=y
+CONFIG_ARCH=arm
+CONFIG_ARCH_ARM=y
 CONFIG_ARCH_CHIP=c5471
 CONFIG_ARCH_CHIP_C5471=y
 CONFIG_ARCH_BOARD=c5471evm
 CONFIG_ARCH_BOARD_C5471EVM=y
+CONFIG_BOARD_LOOPSPERMSEC=1250
 CONFIG_ROM_VECTORS=n
 CONFIG_DRAM_END=0x11000000
 CONFIG_ARCH_LEDS=y
