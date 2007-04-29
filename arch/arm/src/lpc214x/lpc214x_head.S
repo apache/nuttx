@@ -80,22 +80,14 @@
 
 /* Phase Locked Loop (PLL) initialization values
  *
- * <e> PLL Setup
- * <i> 
- * <i> CCLK - Processor Clock
- * <i> Fcco - PLL Oscillator
- *   <o1.0..4>   MSEL: PLL Multiplier Selection
- *               <1-32><#-1>
- *               <i> PLL Multiplier "M" Value
- *               <i> CCLK = M * Fosc
- *   <o1.5..6>   PSEL: PLL Divider Selection
- *               <0=> 1   <1=> 2   <2=> 4   <3=> 8
- *               <i> PLL Divider "P" Value
- *               <i> Fcco = CCLK * 2 * P
- *               <i> 156MHz <= Fcco <= 320MHz
- * </e>
-*/
-#defin LPC214X_PLLCFG_VALUE 0x00000024
+ * BIT 0:4 MSEL: PLL Multiplier "M" Value
+ *               CCLK = M * Fosc
+ * BIT 5:6 PSEL: PLL Divider "P" Value 
+ *               Fcco = CCLK * 2 * P
+ *               156MHz <= Fcco <= 320MHz
+ */
+
+#define LPC214X_PLLCFG_VALUE 0x00000024
 
 /* Memory Accelerator Module (MAM) initialization values
  *
@@ -333,7 +325,6 @@ _vector_table:
 .Lfiqhandler:
 	.long	up_vectorfiq
 	.size	_vector_table, . - _vector_table
-	.end
 
 /********************************************************************
  * Name: __start
