@@ -242,9 +242,15 @@ configs/ntosd-dm320
     STATUS: This port is code complete, verified, and included in the
     NuttX 0.2.1 release.
 
+configs/mcu123-lpc214x
+    This port is for the NXP LPC2148 as provided on the mcu123.com
+    lpc214x development board.
+    STATUS: This port is in progress and should be available in the
+    nuttx-0.2.5 release.
+
 configs/m68322evb
     This is a work in progress for the venerable m68322evb board from
-    Motorola.
+    Motorola. This OS is also built with the the arm-elf toolchain*.
 
 configs/pjrc-8051
     8051 Microcontroller.  This port uses the PJRC 87C52 development system
