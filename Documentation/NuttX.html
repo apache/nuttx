@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 28, 2007</p>
+      <p>Last Updated: April 29, 2007</p>
     </td>
   </tr>
 </table>
@@ -233,6 +233,21 @@
       This port is complete, verified, and included in the initial NuttX release.
     </p>
    </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>NXP LPC214x</b>.
+      Support is provided for the NXP LPC214x family of processors.  In particular,
+      support is provided for the mcu123.com lpc214x evaluation board (LPC2148).
+      This port also used the GNU arm-eld toolchain*.
+    </p>
+    <p>
+      <b>STATUS:</b>
+        This port is in progress and should be available in the nuttx-0.2.5 release.
+    </p>
+  </td>
 </tr>
 <tr>
   <td valign="top"><img src="favicon.ico"></td>
@@ -484,6 +499,10 @@ Other memory:
 
 0.2.5 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* Added support for the NXP 214x processor on the mcu123.com lpc214x
+	  development board.
+	* Corrected some build/configuration issues introduced with the
+	  last release.
 	* Started m68322
 </pre></ul>
 

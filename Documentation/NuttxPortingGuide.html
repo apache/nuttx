@@ -361,6 +361,14 @@
         NuttX operates on the ARM9EJS of this dual core processor.
         This port complete, verified, and included in the NuttX release 0.2.1.
       </li>
+
+      <li><code>arch/arm/include/lpc214x</code> and <code>arch/arm/src/lpc214x</code>:
+        These directories provide support for NXP LPC214x family of
+        processors.
+        STATUS: This port is in progress and should be available in the
+        nuttx-0.2.5 release.
+      </li>
+
     </ul>
   </li>
 
@@ -505,18 +513,24 @@
     A user-mode port of NuttX to the x86 Linux platform is available.
     The purpose of this port is primarily to support OS feature developement.
     This port does not support interrupts or a real timer (and hence no
-    round robin scheduler)  Otherwise, it is complete.</li>
+    round robin scheduler)  Otherwise, it is complete.
+  </li>
 
   <li><code>configs/c5471evm</code>:
     This is a port to the Spectrum Digital C5471 evaluation board.  The
     C5471 is a dual core processor from TI with an ARM7TDMI general purpose
     processor and a c54 SDP.  NuttX runs on the ARM core and is built with
     with a GNU arm-elf toolchain*. This port is complete, verified, and
-    included in the NuttX release.</li>
+    included in the NuttX release.
+  </li>
 
   <li><code>configs/mcu123-lpc214x</code>:
-    This is a port to the mcu123.com lpc214x development board.
-    This OS is also built with the arm-elf toolchain*.</li>
+    This port is for the NXP LPC2148 as provided on the mcu123.com
+    lpc214x development board.
+    This OS is also built with the arm-elf toolchain*.
+    STATUS: This port is in progress and should be available in the
+    nuttx-0.2.5 release.
+  </li>
 
   <li><code>configs/ntosd-dm320</code>:
     This port uses the Neuros OSD with a GNU arm-elf toolchain*.
@@ -524,15 +538,18 @@
     for futher information.
     NuttX operates on the ARM9EJS of this dual core processor.
     STATUS: This port is code complete, verified, and included in the
-    NuttX 0.2.1 release.</li>
+    NuttX 0.2.1 release.
+  </li>
 
   <li><code>configs/m68322evb</code>:
     This is a work in progress for the venerable m68322evb board from
-    Motorola.</li>
+    Motorola.
+  </li>
 
   <li><code>configs/pjrc-8051</code>:
     8051 Microcontroller.  This port uses the PJRC 87C52 development system
-    and the SDCC toolchain.   This port is not quite ready for prime time.</li>
+    and the SDCC toolchain.   This port is not quite ready for prime time.
+  </li>
 </ul>
 
 <p><small><blockquote>
