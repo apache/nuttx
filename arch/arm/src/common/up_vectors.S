@@ -128,7 +128,7 @@ up_vectorirq:
 
 	mov	fp, #0			/* Init frame pointer */
 	mov	r0, sp			/* Get r0=xcp */
-	bl	up_doirq		/* Call the handler */
+	bl	up_decodeirq		/* Call the handler */
 
 	/* Restore the CPSR, SVC modr registers and return */
 .Lnoirqset:
@@ -138,6 +138,7 @@ up_vectorirq:
 
 .Lirqtmp:
 	.word	g_irqtmp
+	.size	up_vectorirq, . - up_vectorirq
 
 	.align	5
 
@@ -183,6 +184,7 @@ up_vectorswi:
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr	spsr, r0
 	ldmia	sp, {r0-r15}^		/* Return */
+	.size	up_vectorswi, . - up_vectorswi
 
 	.align	5
 
@@ -251,6 +253,7 @@ up_vectordata:
 
 .Ldaborttmp:
 	.word	g_aborttmp
+	.size	up_vectordata, . - up_vectordata
 
 	.align	5
 
@@ -317,6 +320,7 @@ up_vectorprefetch:
 
 .Lpaborttmp:
 	.word	g_aborttmp
+	.size	up_vectorprefetch, . - up_vectorprefetch
 
 	.align	5
 
@@ -383,6 +387,7 @@ up_vectorundefinsn:
 
 .Lundeftmp:
 	.word	g_undeftmp
+	.size	up_vectorundefinsn, . - up_vectorundefinsn
 
 	.align	5
 
@@ -397,6 +402,9 @@ up_vectorundefinsn:
 	.type	up_vectorfiq, %function
 up_vectorfiq:
 	subs	pc, lr, #4
+	.size	up_vectofiq, . - up_vectorfiq
+
+	.align	5
 
 /********************************************************************
  *  Name: up_vectoraddrexcption
@@ -410,40 +418,5 @@ up_vectorfiq:
 	.type	up_vectoraddrexcptn, %function
 up_vectoraddrexcptn:
 	b	up_vectoraddrexcptn
-
-/**************************************************************************
- * Vector initialization block.
- **************************************************************************/
-
-/* These will be relocated to VECTOR_BASE. */
-
-	.globl	_vector_start
-_vector_start:
-	ldr	pc, .Lresethandler		/* 0x00: Reset */
-	ldr	pc, .Lundefinedhandler		/* 0x04: Undefined instruction */
-	ldr	pc, .Lswihandler		/* 0x08: Software interrupt */
-	ldr	pc, .Lprefetchaborthandler	/* 0x0c: Prefetch abort */
-	ldr	pc, .Ldataaborthandler		/* 0x10: Data abort */
-	ldr	pc, .Laddrexcptnhandler		/* 0x14: Address exception */
-	ldr	pc, .Lirqhandler		/* 0x18: IRQ */
-	ldr	pc, .Lfiqhandler		/* 0x1c: FIQ */
-
-.Lresethandler:
-	.long   __start
-.Lundefinedhandler:
-	.long	up_vectorundefinsn
-.Lswihandler:
-	.long	up_vectorswi
-.Lprefetchaborthandler:
-	.long	up_vectorprefetch
-.Ldataaborthandler:
-	.long	up_vectordata
-.Laddrexcptnhandler:
-	.long	up_vectoraddrexcptn
-.Lirqhandler:
-	.long	up_vectorirq
-.Lfiqhandler:
-	.long	up_vectorfiq
-	.globl	_vector_end
-_vector_end:
+	.size	up_vectoaddrexcptn, . - up_vectoraddrexcptn
 	.end

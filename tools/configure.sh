@@ -50,7 +50,10 @@ fi
 
 BOARDDIR=${TOPDIR}/configs/${BOARD}
 if [ ! -d ${BOARDDIR} ]; then
-  echo "Directory ${BOARDDIR} does not exist"
+  echo "Directory ${BOARDDIR} does not exist.  Options are:"
+  echo ""
+  echo `cd ${TOPDIR}/configs ; ls -1 | grep -v CVS | grep -v README.txt`
+  echo ""
   show_usage
 fi
 

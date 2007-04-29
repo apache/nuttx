@@ -123,4 +123,8 @@
 
 0.2.5 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* Added support for the NXP 214x processor on the mcu123.com lpc214x
+	  development board.
+	* Corrected some build/configuration issues introduced with the
+	  last release.
 	* Started m68322

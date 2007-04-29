@@ -42,18 +42,21 @@ o Documentation
 - Document C-library APIs
 
 o Build system
-- Names under arch are incorrect.  These should hold processor architectures.
-  c5471 and dm320 should be arm
-  pjrc-8051 should be 805x
-- SoC-specific logic should be in subdirectories under arch/<processor-name>.
-  Eg. arm/include/c5471 should hold c5471 specific header files
+- Some names under arch are still incorrect.  These should be processor architecture
+  names:  pjrc-8051 should be 805x
 - configs/pjrc-8051 should be configs/pjrc-87c52
+- Last change to create the arch/arm directory breaks dependencies in arch/arm/src.
+  Probably need to add the path to the chip or common subdirectorys when
+  running tools/mkdeps.sh
 
 o Applications & Tests
 
 o C5471
 
 o DM320
+
+o LPC214x
+- Finish
 
 o pjrc-8052 / MCS51
 - Current status:

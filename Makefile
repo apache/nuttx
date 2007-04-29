@@ -63,10 +63,10 @@ include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig
 
 # link the arch/<arch-name>/include dir to include/arch
 include/arch: Make.defs
-	@if [ -e include/arch ]; then \
-		if [ -h include/arch ]; then \
-			rm -f include/arch ; \
-		else \
+	@if [ -h include/arch ]; then \
+		rm -f include/arch ; \
+	else \
+		if [ -e include/arch ]; then \
 			echo "include/arch exists but is not a symbolic link" ; \
 			exit 1 ; \
 		fi ; \
@@ -75,10 +75,10 @@ include/arch: Make.defs
 
 # Link the configs/<board-name>/include dir to include/arch/board
 include/arch/board: Make.defs include/arch
-	@if [ -e include/arch/board ]; then \
-		if [ -h include/arch/board ]; then \
+	@if [ -h include/arch/board ]; then \
 			rm -f include/arch/board ; \
-		else \
+	else \
+		if [ -e include/arch/board ]; then \
 			echo "include/arch/board exists but is not a symbolic link" ; \
 			exit 1 ; \
 		fi ; \

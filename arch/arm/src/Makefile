@@ -99,10 +99,10 @@ ifeq ($(CONFIG_RRLOAD_BINARY),y)
 	fi
 endif
 
-.depend: Makefile $(SRCS)
+.depend: Makefile chip/Make.defs $(SRCS)
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR=$(TOPDIR) depend ; \
-	if
+	fi
 	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 
