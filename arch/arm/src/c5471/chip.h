@@ -316,8 +316,4 @@
  * Public Function Prototypes
  ************************************************************/
 
-#ifndef __ASSEMBLY__
-extern void c5471_doirq(int irq, uint32* regs);
-#endif
-
 #endif  /* __C5471_CHIP_H */

@@ -146,8 +146,15 @@ arch/arm
         NuttX operates on the ARM9EJS of this dual core processor.  This port
         complete, verified, and included in the NuttX release 0.2.1.
 
+    arch/arm/include/lpc214x and arch/arm/src/lpc214x
+        These directories provide support for NXP LPC214x family of
+        processors.
+        STATUS: This port is in progress and should be available in the
+        nuttx-0.2.5 release.
+
 arch/m68322
     A work in progress.
+    STATUS:  Stalled for the moment.
 
 arch/pjrc-8051
     8051 Microcontroller.  This port is not quite ready for prime time.

@@ -1,5 +1,5 @@
 /********************************************************************************
- * dm320/dm320_doirq.c
+ * dm320/dm320_decodeirq.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -67,7 +67,7 @@
  * Public Funtions
  ********************************************************************************/
 
-void up_doirq(uint32* regs)
+void up_decodeirq(uint32* regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   lib_lowprintf("Unexpected IRQ\n");

@@ -35,7 +35,8 @@
 
 HEAD_ASRC	= up_head.S
 
-CMN_ASRCS	= up_cache.S up_fullcontextrestore.S up_saveusercontext.S
+CMN_ASRCS	= up_cache.S up_fullcontextrestore.S up_saveusercontext.S \
+		  up_vectors.S up_vectortab.S
 CMN_CSRCS	= up_assert.c up_blocktask.c up_copystate.c up_createstack.c \
 		  up_dataabort.c up_delay.c up_exit.c up_idle.c \
 		  up_initialize.c up_initialstate.c up_interruptcontext.c \
@@ -44,7 +45,7 @@ CMN_CSRCS	= up_assert.c up_blocktask.c up_copystate.c up_createstack.c \
 		  up_sigdeliver.c up_syscall.c up_unblocktask.c \
 		  up_undefinedinsn.c up_usestack.c
 
-CHIP_ASRCS	= dm320_lowputc.S dm320_restart.S dm320_vectors.S
-CHIP_CSRCS	= dm320_allocateheap.c dm320_boot.c dm320_doirq.c dm320_irq.c \
-		  dm320_serial.c dm320_timerisr.c
+CHIP_ASRCS	= dm320_lowputc.S dm320_restart.S
+CHIP_CSRCS	= dm320_allocateheap.c dm320_boot.c dm320_decodeirq.c \
+		  dm320_irq.c dm320_serial.c dm320_timerisr.c
 
