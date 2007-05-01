@@ -48,7 +48,11 @@
 
 #define LPC214X_FLASH_BASE      0x00000000
 #define LPC214X_ONCHIP_RAM_BASE 0x40000000
+#define LPC214X_USBDMA_RAM_BASE 0x7fd00000
+#define LPC214X_BOOT_BLOCK      0x7fffd000
 #define LPC214X_EXTMEM_BASE     0x80000000
+#define LPC214X_APB_BASE        0xe0000000
+#define LPC214X_AHB_BASE        0xf0000000
 
 /* Interrupts **********************************************************************/
 
