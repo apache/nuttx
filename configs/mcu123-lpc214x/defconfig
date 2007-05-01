@@ -79,6 +79,35 @@ CONFIG_BCFG2_SETUP=n
 CONFIG_BCFG3_SETUP=n
 
 #
+# LPC214X specific device driver settings
+#
+# CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
+#   console and ttys0 (default is the UART0).
+# CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
+#   This specific the size of the receive buffer
+# CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
+#   being sent.  This specific the size of the transmit buffer
+# CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
+# CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
+# CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity, 3=mark 1, 4=space 0
+# CONFIG_UARTn_2STOP - Two stop bits
+#
+CONFIG_UART0_SERIAL_CONSOLE=y
+CONFIG_UART1_SERIAL_CONSOLE=n
+CONFIG_UART0_TXBUFSIZE=256
+CONFIG_UART1_TXBUFSIZE=256
+CONFIG_UART0_RXBUFSIZE=256
+CONFIG_UART1_RXBUFSIZE=256
+CONFIG_UART0_BAUD=115200
+CONFIG_UART1_BAUD=115200
+CONFIG_UART0_BITS=8
+CONFIG_UART1_BITS=8
+CONFIG_UART0_PARITY=0
+CONFIG_UART1_PARITY=0
+CONFIG_UART0_2STOP=n
+CONFIG_UART1_2STOP=n
+
+#
 # General OS setup
 #
 # CONFIG_EXAMPLE - identifies the subdirectory in examples
