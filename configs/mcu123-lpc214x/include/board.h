@@ -50,6 +50,22 @@
 
 /* Clocking *************************************************/
 
+#define LPC214X_FOSC      12000000
+#define LPC214X_PLL_M     5
+#define LPC214X_MSEL      (PLL_M-1)
+#define LPC214X_PLL_P     2
+
+#define LPC214X_PSEL0     5
+#define LPC214X_PSEL1     6
+
+#define LPC214X_PLLE      0
+#define LPC214X_PLLC      1
+
+#define LPC214X_PLOCK     10
+
+#define LPC214X_PLL_FEED1 0xaa
+#define LPC214X_PLL_FEED2 0x55
+
 /* LED definitions ******************************************/
 
 /************************************************************

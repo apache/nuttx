@@ -87,7 +87,10 @@
  *               156MHz <= Fcco <= 320MHz
  */
 
-#define LPC214X_PLLCFG_VALUE 0x00000024
+
+#ifndef CONFIG_PLLCFG_VALUE /* Can be selected from config file */
+#  define CONFIG_PLLCFG_VALUE 0x00000024
+#endif
 
 /* Memory Accelerator Module (MAM) initialization values
  *
@@ -108,8 +111,13 @@
  *           7 = 7
  */
 
-#define LPC214X_MAMCR_VALUE  0x00000002
-#define LPC214x_MAMTIM_VALUE 0x00000004
+#ifndef CONFIG_MAMCR_VALUE /* Can be selected from config file */
+#  define CONFIG_MAMCR_VALUE  0x00000002
+#endif
+
+#ifndef CONFIG_MAMTIM_VALUE /* Can be selected from config file */
+#  define CONFIG_MAMTIM_VALUE 0x00000004
+#endif
 
 /* VPBDIV initialization values
  *
@@ -123,14 +131,18 @@
  *          2 = XCLK Pin = CPU Clock / 2
  */
 
-#define LPC214X_VPBDIV_VALUE 0x00000001
+#ifndef CONFIG_VPBDIV_VALUE /* Can be selected from config file */
+#  define CONFIG_VPBDIV_VALUE 0x00000001
+#endif
 
 /* External Memory Pins definitions
  *
  * CS0..3, OE, WE, BLS0..3,  D0..31, A2..23, JTAG Pins
  */
 
-#define LPC214X_PINSEL2_VALUE 0x0e6149e4
+#ifndef CONFIG_PINSEL2_VALUE /* Can be selected from config file */
+#  define CONFIG_PINSEL2_VALUE 0x0e6149e4
+#endif
 
 /* External Memory Controller (EMC) initialization values
  *
@@ -144,10 +156,30 @@
  *    BIT 28:29 MW: Memory Width  (0=8-bit 1=16-bit 2=32-bit 3=Reserved)
  */
 
-#define LPC214X_BCFG0_VALUE   0x0000fbef
-#define LPC214X_BCFG1_VALUE   0x0000fbef
-#define LPC214X_BCFG2_VALUE   0x0000fbef
-#define LPC214X_BCFG3_VALUE   0x0000fbef
+#ifndef CONFIG_BCFG0_VALUE /* Can be selected from config file */
+#  define CONFIG_BCFG0_VALUE   0x0000fbef
+#endif
+
+#ifndef CONFIG_BCFG1_VALUE /* Can be selected from config file */
+#  define CONFIG_BCFG1_VALUE   0x0000fbef
+#endif
+
+#ifndef CONFIG_BCFG2_VALUE /* Can be selected from config file */
+#  define CONFIG_BCFG2_VALUE   0x0000fbef
+#endif
+
+#ifndef CONFIG_BCFG3_VALUE /* Can be selected from config file */
+#  define CONFIG_BCFG3_VALUE   0x0000fbef
+#endif
+
+/* The following are used to configure the ADC/DAC */
+#ifndef CONFIG_AD0CR_VALUE
+#  define CONFIG_AD0CR_VALUE   0x00200402; /* Setup A/D: 10-bit AIN0 @ 3MHz */
+#endif
+
+#ifndef CONFIG_PINSEL1_VALUE
+#  define CONFIG_PINSEL1_VALUE 0x01000000; /* Enable DAC */
+#endif
 
 /********************************************************************
  * Macros
@@ -169,7 +201,7 @@
 	.macro	configpinsel2, base, val
 #ifdef CONFIG_EXTMEM_MODE
 	ldr	\base, =LPC214X_PINSEL2
-	ldr	\val, =LPC214X_PINSEL2_VALUE
+	ldr	\val, =CONFIG_PINSEL2_VALUE
 	str	\val, [\base]
 #endif
 	.endm
@@ -181,22 +213,22 @@
 	ldr	\base, =LPC214X_EMC_BASE
 
 #ifdef CONFIG_BCFG0_SETUP
-	ldr	\val, =LPC214X_BCFG0_VALUE
+	ldr	\val, =CONFIG_BCFG0_VALUE
 	str	\val, [\base, #LPC214X_BCFG0_OFFSET]
 #endif
 
 #ifdef CONFIG_BCFG1_SETUP
-	ldr	\val, =LPC214X_BCFG1_VALUE
+	ldr	\val, =CONFIG_BCFG1_VALUE
 	str	\val, [\base, #LPC214X_BCFG1_OFFSET]
 #endif
 
 #ifdef CONFIG_BCFG2_SETUP
-	ldr	\val, =LPC214X_BCFG2_VALUE
+	ldr	\val, =CONFIG_BCFG2_VALUE
 	str	\val, [\base, #LPC214X_BCFG2_OFFSET]
 #endif
 
 #ifdef CONFIG_BCFG3_SETUP
-	ldr	\val, =LPC214X_BCFG3_VALUE
+	ldr	\val, =CONFIG_BCFG3_VALUE
 	str	\val, [\base, #LPC214X_BCFG3_OFFSET]
 #endif
 #endif
@@ -207,7 +239,7 @@
 	.macro	configvpbdiv, base, val
 #ifdef CONFIG_VPBDIV_SETUP
 	ldr	\base, =LPC214X_VPBDIV
-	ldr	\val, =LPC214X_VPBDIV_VALUE
+	ldr	\val, =CONFIG_VPBDIV_VALUE
 	str	\val, [\base]
 #endif
 	.endm
@@ -222,7 +254,7 @@
 
 	/* Configure and Enable PLL */
 
-	mov	\val3, #LPC214X_PLLCFG_VALUE
+	mov	\val3, #CONFIG_PLLCFG_VALUE
 	str	\val3, [\base, #LPC214X_PLLCFG_OFFSET] 
 	mov	\val3, #LPC214X_PLLCON_PLLE
 	str	\val3, [\base, #LPC214X_PLLCON_OFFSET]
@@ -249,9 +281,9 @@
 	.macro	configmam, base, val
 #ifdef CONFIG_MAM_SETUP
 	ldr	\base, =LPC214X_MAM_BASE
-	mov	\val, #LPC214x_MAMTIM_VALUE
+	mov	\val, #CONFIG_MAMTIM_VALUE
 	str	\val, [\base, #LPC214x_MAMTIM_OFFSET] 
-	mov	\val, #LPC214X_MAMCR_VALUE
+	mov	\val, #CONFIG_MAMCR_VALUE
 	str	\val, [\base, #LPC214X_MAMCR_OFFSET] 
 #endif
 	.endm
@@ -259,15 +291,27 @@
 /* Setup MEMMAP for the selected mode of operation */
 
 	.macro	configmemmap, base, val
-	ldr	r0, =LPC214X_MEMMAP
+	ldr	\base, =LPC214X_MEMMAP
 #if defined(CONFIG_EXTMEM_MODE)
-	mov	r1, #3
+	mov	\val, #3
 #elif defined(CONFIG_RAM_MODE)
-	mov	r1, #2
+	mov	\val, #2
 #else /* Setting the default should not be necessary */
-	mov	r1, #1
+	mov	\val, #1
 #endif
-	str	r1, [r0]
+	str	\val, [\base]
+	.endm
+
+	.macro	configdac, base, tmp
+#ifdef CONFIG_ADC_SETUP
+	ldr	\base, =LPC214X_AD0CR
+	ldr	\tmp, =CONFIG_AD0CR_VALUE
+	str	\tmp, [\base]
+
+	ldr	\base,=LPC214X_PINSEL1
+	ldr	\tmp, =CONFIG_PINSEL1_VALUE
+	str	\tmp, [\base]
+#endif
 	.endm
 
 /********************************************************************
@@ -368,7 +412,16 @@ __start:
 	/* Setup MEMMAP for the selected mode of operation */
 
 	configmemmap	r0, r1
+
+	/* Configure the DAC and ADC */
 	
+	configdac	r0, r1
+
+	/* Configure the uart so that we can get debug output as soon
+	 * as possible.  Modifies r0, r1, r2, and r14.
+	 */
+
+        bl	up_lowsetup
 	showprogress 'A'
 
 	/* Setup system stack (and get the BSS range) */
