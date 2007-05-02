@@ -43,12 +43,18 @@
 #include <nuttx/arch.h>
 #include <assert.h>
 #include <debug.h>
+
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
+#include "lpc214x_vic.h"
 
 /********************************************************************************
  * Definitions
+ ********************************************************************************/
+
+/********************************************************************************
+ * Private Types
  ********************************************************************************/
 
 /********************************************************************************
@@ -64,10 +70,37 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Public Funtions
+ * Public Funstions
  ********************************************************************************/
 
-void up_decodeirq(uint32* regs)
+/********************************************************************************
+ * up_decodeirq() and/or lpc214x_decodeirq()
+ *
+ * Description:
+ *   The vectored interrupt controller (VIC) takes 32 interrupt request inputs
+ *   and programmatically assigns them into 3 categories:  FIQ, vectored IRQ,
+ *   and non-vectored IRQ.
+ *
+ *   - FIQs have the highest priority.  There is a single FIQ vector, but multiple
+ *     interrupt sources can be ORed to this FIQ vector.
+ *
+ *   - Vectored IRQs have the middle priority.  Any 16 of the 32 interrupt sources
+ *     can be assigned to vectored IRQs.
+ *
+ *   - Non-vectored IRQs have the lowest priority.
+ *
+ *   The general flow of IRQ processing is to simply read the VIC vector address
+ *   and jump to the address of the vector provided in the register.  The VIC will
+ *   provide the address of the highest priority vectored IRQ.  If a non-vectored
+ *   IRQ is requesting, the address of a default handler is provided.
+ *
+ ********************************************************************************/
+
+#ifndef CONFIG_VECTORED_INTERRUPTS
+void up_decodeirq(uint32 *regs)
+#else
+static void lpc214x_decodeirq( uint32 *regs)
+#endif
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   lib_lowprintf("Unexpected IRQ\n");
@@ -110,3 +143,11 @@ void up_decodeirq(uint32* regs)
     }
 #endif
 }
+
+#ifdef CONFIG_VECTORED_INTERRUPTS
+void up_decodeirq(uint32 *regs)
+{
+  vic_vector_t vector = (vic_vector)vic_getreg(LPC214X_VIC_VECTADDR_OFFSET);
+  vector(regs);
+}
+#endif

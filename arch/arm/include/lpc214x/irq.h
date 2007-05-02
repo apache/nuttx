@@ -80,6 +80,8 @@
  * Public Types
  ************************************************************/
 
+typedef void (*vic_vector_t)(uint32 *regs);
+
 /************************************************************
  * Inline functions
  ************************************************************/
@@ -98,6 +100,11 @@
 extern "C" {
 #else
 #define EXTERN extern
+#endif
+
+#ifndef CONFIG_VECTORED_INTERRUPTS
+EXTERN void up_attach_vector(int irq, int vector, vic_vector_t handler);
+EXTERN void up_detach_vector(int vector);
 #endif
 
 #undef EXTERN
