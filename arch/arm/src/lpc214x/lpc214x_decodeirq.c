@@ -121,7 +121,7 @@ static void lpc214x_decodeirq( uint32 *regs)
   unsigned int irq_base;
   unsigned int irq = NR_IRQS;
 
-  /* Search in groups of four bits.  For 22 sources, this is at most five
+  /* Search in groups of four bits.  For 22 sources, this is at most six
    * times through the loop.
    */
 
@@ -131,9 +131,9 @@ static void lpc214x_decodeirq( uint32 *regs)
     {
       if (nibble)
         {
-	  irq = irq_base + g_nibblemap[nibble];
+          irq = irq_base + g_nibblemap[nibble];
           break;
-	}
+        }
     }
 
   /* Verify that the resulting IRQ number is valid */
