@@ -76,12 +76,14 @@ void up_irqinitialize(void)
 {
   int reg;
 
-  /* Acknowledge and disable all interrupts */
+  /* Disable all interrupts.  We do this by writing zero to the IntEnable
+   * register.  This is equivalent to writing all ones to the IntClearEnable
+   * register.
+   */
 
-  vic_putreg(0, LPC214X_VIC_INTENCLEAR_OFFSET);
   vic_putreg(0, LPC214X_VIC_INTENABLE_OFFSET);
 
-  /* All IRQs, no FIQs */
+  /* Select all IRQs, no FIQs */
 
   vic_putreg(0, LPC214X_VIC_INTSELECT_OFFSET);
 
@@ -97,8 +99,6 @@ void up_irqinitialize(void)
     {
       vic_putreg(0, reg);
     }
-
-#warning "Not implemented"
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
@@ -121,7 +121,16 @@ void up_irqinitialize(void)
 
 void up_disable_irq(int irq)
 {
-#warning "Not implemented"
+  /* Verify that the IRQ number is within range */
+
+  if (irq < NR_IRQS)
+    {
+      /* Disable the irq by setting the corresponding bit in the VIC
+       * Interrupt Enable Clear register.
+       */
+
+      vic_putreg((1 << irq), LPC214X_VIC_INTENCLEAR_OFFSET);
+    }
 }
 
 /****************************************************************************
@@ -134,34 +143,55 @@ void up_disable_irq(int irq)
 
 void up_enable_irq(int irq)
 {
-#warning "Not implemented"
-}
+  /* Verify that the IRQ number is within range */
 
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
+  if (irq < NR_IRQS)
+    {
+      /* Disable all interrupts */
 
-void up_maskack_irq(int irq)
-{
-#warning "Not implemented"
+      irqstate_t flags = irqsave();
+
+      /* Enable the irq by setting the corresponding bit in the VIC
+       * Interrupt Enable register.
+       */
+
+      uint32 val = vic_getreg(LPC214X_VIC_INTENABLE_OFFSET);
+      vic_putreg(val | (1 << irq), LPC214X_VIC_INTENCLEAR_OFFSET);
+      irqrestore(flags);
+    }
 }
 
 /****************************************************************************
  * Name: up_attach_vector
  *
  * Description:
- *   Assign
+ *   Attach a user-supplied handler to a vectored interrupt
  *
  ****************************************************************************/
 
 #ifndef CONFIG_VECTORED_INTERRUPTS
 void up_attach_vector(int irq, int vector, vic_vector_t handler)
 {
-#warning "Not implemented"
+  /* Verify that the IRQ number and vector number are within range */
+
+  if (irq < NR_IRQS && vector < 16 && handler)
+    {
+      int offset = vector << 2;
+
+      /* Disable all interrupts */
+
+      irqstate_t flags = irqsave();
+
+      /* Save the vector address */
+
+      vic_putreg((uint32)handler, LPC214X_VIC_VECTADDR0_OFFSET + offset);
+
+      /* Enable the vectored interrupt */
+
+      vic_putreg(((irq << LPC214X_VECTCNTL_IRQSHIFT) | LPC214X_VECTCNTL_ENABLE),
+		 LPC214X_VIC_VECTCNTL0_OFFSET + offset);
+      irqrestore(flags);
+    }
 }
 #endif
 
@@ -169,13 +199,21 @@ void up_attach_vector(int irq, int vector, vic_vector_t handler)
  * Name: up_detach_vector
  *
  * Description:
- *   Mask the IRQ and acknowledge it
+ *   Detach a user-supplied handler from a vectored interrupt
  *
  ****************************************************************************/
 
 #ifndef CONFIG_VECTORED_INTERRUPTS
 void up_detach_vector(int vector)
 {
-#warning "Not implemented"
+  /* Verify that the vector number is within range */
+
+  if (vector < 16)
+    {
+      /* Disable the vectored interrupt */
+
+      int offset = vector << 2;
+      vic_putreg(0, LPC214X_VIC_VECTCNTL0_OFFSET + offset);
+    }
 }
 #endif

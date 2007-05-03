@@ -65,6 +65,10 @@
  * Private Data
  ********************************************************************************/
 
+/* This type arry maps 4 bits into the bit number of the lowest bit that it set */
+
+static uint8 g_nibblemap[16] = { 0, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0 };
+
 /********************************************************************************
  * Private Functions
  ********************************************************************************/
@@ -108,19 +112,34 @@ static void lpc214x_decodeirq( uint32 *regs)
   PANIC(OSERR_ERREXCEPTION);
 #else
 
-  /* Decode the interrupt.  First, fetch the interrupt id register. */
+  /* Decode the interrupt. We have to do this by search for the lowest numbered
+   * non-zero bit in the interrupt status register.
+   */
 
-  int irq = 0;
-#warning "Need to decode the interrupt here"
+  uint32 pending = vic_getreg(LPC214X_VIC_IRQSTATUS_OFFSET) & 0x007fffff;
+  unsigned int nibble;
+  unsigned int irq_base;
+  unsigned int irq = NR_IRQS;
 
-  /* Verify that the resulting IRQ number is valie */
+  /* Search in groups of four bits.  For 22 sources, this is at most five
+   * times through the loop.
+   */
 
-  if ((unsigned)irq < NR_IRQS)
+  for (nibble = pending & 0xff, irq_base = 0;
+       pending && irq < NR_IRQS;
+       pending >>= 4, nibble = pending & 0xff, irq_base += 4)
     {
-      /* Mask and acknowledge the interrupt */
+      if (nibble)
+        {
+	  irq = irq_base + g_nibblemap[nibble];
+          break;
+	}
+    }
 
-      up_maskack_irq(irq);
+  /* Verify that the resulting IRQ number is valid */
 
+  if (irq < NR_IRQS)
+    {
       /* Current regs non-zero indicates that we are processing an interrupt;
        * current_regs is also used to manage interrupt level context switches.
        */
@@ -134,12 +153,6 @@ static void lpc214x_decodeirq( uint32 *regs)
       /* Indicate that we are no long in an interrupt handler */
 
       current_regs = NULL;
-
-      /* Unmask the last interrupt (global interrupts are still
-       * disabled.
-       */
-
-      up_enable_irq(irq);
     }
 #endif
 }

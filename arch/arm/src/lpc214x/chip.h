@@ -68,7 +68,7 @@
 #define LPC214X_PLL_BASE                0xe01fc080  /* Phase Locked Loop (PLL) Base Address */
 #define LPC214X_VPBDIV                  0xe01fc100  /* VPBDIV Address */
 #define LPC214X_EMC_BASE                0xffe00000  /* External Memory Controller (EMC) Base Address */
-#define LPC214X_VIC_BASE                0xffff0000  /* Vectored Interrupt Controller (VIC) Base */
+#define LPC214X_VIC_BASE                0xfffff000  /* Vectored Interrupt Controller (VIC) Base */
 
 /* UART0/1 Register Offsets */
 
