@@ -80,7 +80,9 @@
  * Public Types
  ************************************************************/
 
+#ifndef __ASSEMBLY__
 typedef void (*vic_vector_t)(uint32 *regs);
+#endif
 
 /************************************************************
  * Inline functions
