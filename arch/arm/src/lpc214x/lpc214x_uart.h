@@ -63,7 +63,8 @@
 #define LPC214X_IER_ERBFI          (1 << 0)    /* Enable receive data available int */
 #define LPC214X_IER_ETBEI          (1 << 1)    /* Enable THR empty Interrupt */
 #define LPC214X_IER_ELSI           (1 << 2)    /* Enable receive line status int */
-#define LPC214X_IER_EDSSI          (1 << 3)    /* Enable MODEM atatus interrupt */
+#define LPC214X_IER_EDSSI          (1 << 3)    /* Enable MODEM atatus interrupt (2146/6/8 UART1 Only) */
+#define LPC214X_IER_ALLIE          0x0f        /* All interrupts */
 
 /* Interrupt ID Register(IIR) bit definitions */
 
