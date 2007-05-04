@@ -166,7 +166,7 @@ up_lowsetup:
 
 	ldr	r0, =LPC214X_PINSEL0
 	ldr	r1, [r0]
-	ldr	r2, =LPC214X_UART_PINMASK
+	ldr	r2, =~LPC214X_UART_PINMASK
 	and	r1, r2
 	ldr	r2, =LPC214X_UART_PINSEL
 	orr	r1, r2
