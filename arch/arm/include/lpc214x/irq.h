@@ -74,7 +74,14 @@
 #define LPC214X_ADC1_IRQ      21 /* ADC 1 */
 #define LPC214X_USB_IRQ       22 /* USB */
 
+#define LPC214X_IRQ_SYSTIMER  LPC214X_TIMER0_IRQ
 #define NR_IRQS               23
+
+/* There are 16 vectored interrupts.  If vectored interrupts are enabled, the
+ * following will be used by the system.
+ */
+
+#define LPC214X_SYSTEMER_VEC  0 /* System timer */
 
 /****************************************************************************
  * Public Types

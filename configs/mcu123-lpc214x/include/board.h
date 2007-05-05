@@ -55,6 +55,8 @@
 #define LPC214X_MSEL      (PLL_M-1)
 #define LPC214X_PLL_P     2
 
+#define LPC214X_PCLKFREQ  (LPC214X_FOSC/4) /* PCLK must be FOSC/4 */
+
 #define LPC214X_PSEL0     5
 #define LPC214X_PSEL1     6
 
