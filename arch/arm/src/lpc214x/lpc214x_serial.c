@@ -220,7 +220,7 @@ static inline void up_disableuartint(struct up_dev_s *priv, ubyte *ier)
     }
 
   priv->ier &= ~LPC214X_IER_ALLIE;
-  up_serialout(priv, LPC214X_IER_OFFSET, priv->ier);
+  up_serialout(priv, LPC214X_UART_IER_OFFSET, priv->ier);
 }
 
 /****************************************************************************
@@ -230,7 +230,7 @@ static inline void up_disableuartint(struct up_dev_s *priv, ubyte *ier)
 static inline void up_restoreuartint(struct up_dev_s *priv, ubyte ier)
 {
   priv->ier |= ier & LPC214X_IER_ALLIE;
-  up_serialout(priv, LPC214X_IER_OFFSET, priv->ier);
+  up_serialout(priv, LPC214X_UART_IER_OFFSET, priv->ier);
 }
 
 /****************************************************************************
@@ -245,7 +245,7 @@ static inline void up_waittxfifonotfull(struct up_dev_s *priv)
   for (tmp = 1000 ; tmp > 0 ; tmp--)
     {
       /* Check if the tranmitter holding register (THR) is empty */
-      if ((up_serialin(priv, LPC214X_LSR_OFFSET) & LPC214X_LSR_THRE) != 0)
+      if ((up_serialin(priv, LPC214X_UART_LSR_OFFSET) & LPC214X_LSR_THRE) != 0)
         {
           /* The THR is empty, return */
           break;
@@ -259,7 +259,7 @@ static inline void up_waittxfifonotfull(struct up_dev_s *priv)
 
 static inline void up_enablebreaks(struct up_dev_s *priv, boolean enable)
 {
-  ubyte lcr = up_serialin(priv, LPC214X_LCR_OFFSET);
+  ubyte lcr = up_serialin(priv, LPC214X_UART_LCR_OFFSET);
   if (enable)
     {
       lcr |= LPC214X_LCR_BREAK_ENABLE;
@@ -268,7 +268,7 @@ static inline void up_enablebreaks(struct up_dev_s *priv, boolean enable)
     {
       lcr &= ~LPC214X_LCR_BREAK_ENABLE;
     }
-  up_serialout(priv, LPC214X_LCR_OFFSET, lcr);
+  up_serialout(priv, LPC214X_UART_LCR_OFFSET, lcr);
 }
 
 /****************************************************************************
@@ -290,15 +290,15 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Clear fifos */
 
-  up_serialout(priv, LPC214X_FCR_OFFSET, (LPC214X_FCR_RX_FIFO_RESET|LPC214X_FCR_TX_FIFO_RESET));
+  up_serialout(priv, LPC214X_UART_FCR_OFFSET, (LPC214X_FCR_RX_FIFO_RESET|LPC214X_FCR_TX_FIFO_RESET));
  
   /* Set trigger */
 
-  up_serialout(priv, LPC214X_FCR_OFFSET, (LPC214X_FCR_FIFO_ENABLE|LPC214X_FCR_FIFO_TRIG14));
+  up_serialout(priv, LPC214X_UART_FCR_OFFSET, (LPC214X_FCR_FIFO_ENABLE|LPC214X_FCR_FIFO_TRIG14));
 
   /* Set up the IER */
 
-  priv->ier = up_serialin(priv, LPC214X_IER_OFFSET);
+  priv->ier = up_serialin(priv, LPC214X_UART_IER_OFFSET);
   
   /* Set up the LCR */
   
@@ -329,17 +329,17 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Enter DLAB=1 */
     
-  up_serialout(priv, LPC214X_LCR_OFFSET, (lcr | LPC214X_LCR_DLAB_ENABLE));
+  up_serialout(priv, LPC214X_UART_LCR_OFFSET, (lcr | LPC214X_LCR_DLAB_ENABLE));
  
   /* Set the BAUD divisor */
 
   baud = UART_BAUD(priv->baud);
-  up_serialout(priv, LPC214X_DLM_OFFSET, baud >> 8);
-  up_serialout(priv, LPC214X_DLL_OFFSET, baud & 0xff);
+  up_serialout(priv, LPC214X_UART_DLM_OFFSET, baud >> 8);
+  up_serialout(priv, LPC214X_UART_DLL_OFFSET, baud & 0xff);
  
   /* Clear DLAB */
 
- up_serialout(priv, LPC214X_LCR_OFFSET, lcr);
+ up_serialout(priv, LPC214X_UART_LCR_OFFSET, lcr);
 #endif
   return OK;
 }
@@ -403,7 +403,7 @@ static int up_interrupt(int irq, void *context)
        * termination conditions
        */
 
-       status  = up_serialin(priv, LPC214X_IIR_OFFSET);
+       status  = up_serialin(priv, LPC214X_UART_IIR_OFFSET);
       
       /* The NO INTERRUPT should be zero */
       
@@ -429,7 +429,7 @@ static int up_interrupt(int irq, void *context)
            {
              /* Read the modem status regisgter (MSR) to clear */
             
-             (void)up_serialin(priv, LPC214X_MSR_OFFSET);
+             (void)up_serialin(priv, LPC214X_UART_MSR_OFFSET);
            }
 
           /* Just clear any line status interrupts */
@@ -438,7 +438,7 @@ static int up_interrupt(int irq, void *context)
             {
               /* Read the line status register (LSR) to clear */
             
-              (void)up_serialin(priv, LPC214X_LSR_OFFSET);
+              (void)up_serialin(priv, LPC214X_UART_LSR_OFFSET);
             }
         }
     }
@@ -518,8 +518,8 @@ static int up_receive(struct uart_dev_s *dev, uint32 *status)
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   ubyte rbr;
 
-  rbr     = up_serialin(priv, LPC214X_RBR_OFFSET);
-  *status = up_serialin(priv, LPC214X_RBR_OFFSET);
+  rbr     = up_serialin(priv, LPC214X_UART_RBR_OFFSET);
+  *status = up_serialin(priv, LPC214X_UART_RBR_OFFSET);
   return rbr;
 }
 
@@ -544,7 +544,7 @@ static void up_rxint(struct uart_dev_s *dev, boolean enable)
     {
       priv->ier &= ~LPC214X_IER_ERBFI;
     }
-  up_serialout(priv, LPC214X_IER_OFFSET, priv->ier);
+  up_serialout(priv, LPC214X_UART_IER_OFFSET, priv->ier);
 }
 
 /****************************************************************************
@@ -558,7 +558,7 @@ static void up_rxint(struct uart_dev_s *dev, boolean enable)
 static boolean up_rxfifonotempty(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  return ((up_serialin(priv, LPC214X_LSR_OFFSET) & LPC214X_LSR_RDR) != 0);
+  return ((up_serialin(priv, LPC214X_UART_LSR_OFFSET) & LPC214X_LSR_RDR) != 0);
 }
 
 /****************************************************************************
@@ -572,7 +572,7 @@ static boolean up_rxfifonotempty(struct uart_dev_s *dev)
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  up_serialout(priv, LPC214X_THR_OFFSET, (ubyte)ch);
+  up_serialout(priv, LPC214X_UART_THR_OFFSET, (ubyte)ch);
 }
 
 /****************************************************************************
@@ -596,7 +596,7 @@ static void up_txint(struct uart_dev_s *dev, boolean enable)
     {
       priv->ier &= ~LPC214X_IER_ETBEI;
     }
-  up_serialout(priv, LPC214X_IER_OFFSET, priv->ier);
+  up_serialout(priv, LPC214X_UART_IER_OFFSET, priv->ier);
 }
 
 /****************************************************************************
@@ -610,7 +610,7 @@ static void up_txint(struct uart_dev_s *dev, boolean enable)
 static boolean up_txfifonotfull(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  return ((up_serialin(priv, LPC214X_LSR_OFFSET) & LPC214X_LSR_THRE) != 0);
+  return ((up_serialin(priv, LPC214X_UART_LSR_OFFSET) & LPC214X_LSR_THRE) != 0);
 }
 
 /****************************************************************************
@@ -624,7 +624,7 @@ static boolean up_txfifonotfull(struct uart_dev_s *dev)
 static boolean up_txfifoempty(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  return ((up_serialin(priv, LPC214X_LSR_OFFSET) & LPC214X_LSR_THRE) != 0);
+  return ((up_serialin(priv, LPC214X_UART_LSR_OFFSET) & LPC214X_LSR_THRE) != 0);
 }
 
 /****************************************************************************
@@ -693,7 +693,7 @@ int up_putc(int ch)
 
   up_disableuartint(priv, &ier);
   up_waittxfifonotfull(priv);
-  up_serialout(priv, LPC214X_THR_OFFSET, (ubyte)ch);
+  up_serialout(priv, LPC214X_UART_THR_OFFSET, (ubyte)ch);
 
   /* Check for LF */
 
@@ -702,7 +702,7 @@ int up_putc(int ch)
       /* Add CR */
 
       up_waittxfifonotfull(priv);
-      up_serialout(priv, LPC214X_THR_OFFSET, '\r');
+      up_serialout(priv, LPC214X_UART_THR_OFFSET, '\r');
     }
 
   up_waittxfifonotfull(priv);
