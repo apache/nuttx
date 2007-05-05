@@ -92,44 +92,44 @@
 #define LPC214X_WD_FEED_OFFSET          0x08 /* Watchdog Feed Register */
 #define LPC214X_WD_TV_OFFSET            0x0C /* Watchdog Time Value Register */
 
-/* Timer 0 register offsets */
+/* Timer 0/1 register offsets */
 
-#define LPC214X_TMR_IR_OFFSET           0x00   /* Interrupt Register */
-#define LPC214X_TMR_TCR_OFFSET          0x04   /* Timer Control Register */
-#define LPC214X_TMR_TC_OFFSET           0x08   /* Timer Counter */
-#define LPC214X_TMR_PR_OFFSET           0x0c   /* Prescale Register */
-#define LPC214X_TMR_PC_OFFSET           0x10   /* Prescale Counter Register */
-#define LPC214X_TMR_MCR_OFFSET          0x14   /* Match Control Register */
-#define LPC214X_TMR_MR0_OFFSET          0x18   /* Match Register 0 */
-#define LPC214X_TMR_MR1_OFFSET          0x1c   /* Match Register 1 */
-#define LPC214X_TMR_MR2_OFFSET          0x20   /* Match Register 2 */
-#define LPC214X_TMR_MR3_OFFSET          0x24   /* Match Register 3 */
-#define LPC214X_TMR_CCR_OFFSET          0x28   /* Capture Control Register */
-#define LPC214X_TMR_CR0_OFFSET          0x2c   /* Capture Register 0 */
-#define LPC214X_TMR_CR1_OFFSET          0x30   /* Capture Register 1 */
-#define LPC214X_TMR_CR2_OFFSET          0x34   /* Capture Register 2 */
-#define LPC214X_TMR_CR3_OFFSET          0x38   /* Capture Register 3 */
-#define LPC214X_TMR_EMR_OFFSET          0x3c   /* External Match Register */
+#define LPC214X_TMR_IR_OFFSET           0x00   /* RW:Interrupt Register */
+#define LPC214X_TMR_TCR_OFFSET          0x04   /* RW: Timer Control Register */
+#define LPC214X_TMR_TC_OFFSET           0x08   /* RW: Timer Counter */
+#define LPC214X_TMR_PR_OFFSET           0x0c   /* RW: Prescale Register */
+#define LPC214X_TMR_PC_OFFSET           0x10   /* RW: Prescale Counter Register */
+#define LPC214X_TMR_MCR_OFFSET          0x14   /* RW: Match Control Register */
+#define LPC214X_TMR_MR0_OFFSET          0x18   /* RW: Match Register 0 */
+#define LPC214X_TMR_MR1_OFFSET          0x1c   /* RW: Match Register 1 */
+#define LPC214X_TMR_MR2_OFFSET          0x20   /* RW: Match Register 2 */
+#define LPC214X_TMR_MR3_OFFSET          0x24   /* RW: Match Register 3 */
+#define LPC214X_TMR_CCR_OFFSET          0x28   /* RW: Capture Control Register */
+#define LPC214X_TMR_CR0_OFFSET          0x2c   /* R: Capture Register 0 */
+#define LPC214X_TMR_CR1_OFFSET          0x30   /* R: Capture Register 1 */
+#define LPC214X_TMR_CR2_OFFSET          0x34   /* R: Capture Register 2 */
+#define LPC214X_TMR_CR3_OFFSET          0x38   /* RW: Capture Register 3 */
+#define LPC214X_TMR_EMR_OFFSET          0x3c   /* RW: External Match Register */
 
-#define LPC214X_TMR_CTCR_OFFSET         0x70   /* Count Control Register */
+#define LPC214X_TMR_CTCR_OFFSET         0x70   /* RW: Count Control Register */
 
 /* UART0/1 Register Offsets */
 
 #define LPC214X_UART_RBR_OFFSET         0x00   /* R: Receive Buffer Register (DLAB=0) */
 #define LPC214X_UART_THR_OFFSET         0x00   /* W: Transmit Holding Register (DLAB=0) */
-#define LPC214X_UART_DLL_OFFSET         0x00   /* W: Divisor Latch Register (LSB) */
+#define LPC214X_UART_DLL_OFFSET         0x00   /* W: Divisor Latch Register (LSB, DLAB=1) */
 #define LPC214X_UART_IER_OFFSET         0x04   /* W: Interrupt Enable Register (DLAB=0) */
-#define LPC214X_UART_DLM_OFFSET         0x04   /* R/W: Divisor Latch Register (MSB, DLAB=1) */
-#define LPC214X_UART_IIR_OFFSET         0x08   /* R: Interrupt ID Register (DLAB=) */
+#define LPC214X_UART_DLM_OFFSET         0x04   /* RW: Divisor Latch Register (MSB, DLAB=1) */
+#define LPC214X_UART_IIR_OFFSET         0x08   /* R: Interrupt ID Register */
 #define LPC214X_UART_FCR_OFFSET         0x08   /* W: FIFO Control Register */
-#define LPC214X_UART_LCR_OFFSET         0x0c   /* R/W: Line Control Register */
-#define LPC214X_UART_MCR_OFFSET         0x10   /* R/W: Modem Control REgister (2146/6/8 UART1 Only) */
+#define LPC214X_UART_LCR_OFFSET         0x0c   /* RW: Line Control Register */
+#define LPC214X_UART_MCR_OFFSET         0x10   /* RW: Modem Control REgister (2146/6/8 UART1 Only) */
 #define LPC214X_UART_LSR_OFFSET         0x14   /* R: Scratch Pad Register */
-#define LPC214X_UART_MSR_OFFSET         0x18   /* R/W: MODEM Status Register (2146/6/8 UART1 Only) */
-#define LPC214X_UART_SCR_OFFSET         0x1c   /* R/W: Line Status Register */
-#define LPC214X_UART_ACR_OFFSET         0x20   /* R/W: Autobaud Control Register */
-#define LPC214X_UART_FDR_OFFSET         0x28   /* R/W: Fractional Divider Register */
-#define LPC214X_UART_TER_OFFSET         0x30   /* R/W: Transmit Enable Register */
+#define LPC214X_UART_MSR_OFFSET         0x18   /* RW: MODEM Status Register (2146/6/8 UART1 Only) */
+#define LPC214X_UART_SCR_OFFSET         0x1c   /* RW: Line Status Register */
+#define LPC214X_UART_ACR_OFFSET         0x20   /* RW: Autobaud Control Register */
+#define LPC214X_UART_FDR_OFFSET         0x28   /* RW: Fractional Divider Register */
+#define LPC214X_UART_TER_OFFSET         0x30   /* RW: Transmit Enable Register */
 
 /* PWM register offsets */
 

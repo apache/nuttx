@@ -1,5 +1,5 @@
 /************************************************************************************
- * lpc214x/vic.h
+ * lpc214x/lpc214x_vic.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -49,7 +49,7 @@
 #define vic_getreg(o)   getreg32(LPC214X_VIC_BASE+(o))
 #define vic_putreg(v,o) putreg32((v),LPC214X_VIC_BASE+(o))
 
-// Vector Control Register bit definitions
+/* Vector Control Register bit definitions */
 
 #define LPC214X_VECTCNTL_IRQMASK  (0x0000001f)
 #define LPC214X_VECTCNTL_IRQSHIFT (0)
