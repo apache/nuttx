@@ -62,7 +62,9 @@
 
 #define LPC214X_UART0_BASE              0xe000c000  /* UART0 Base Address */
 #define LPC214X_UART1_BASE              0xe0010000  /* UART1 Base Address */
-#define LPC214X_PINSEL_BASE             0xc002c000  /* Pin funtion select registers */
+#define LPC214X_PINSEL_BASE             0xe002c000  /* Pin funtion select registers */
+#define LPC214X_AD0_BASE                0xe0034000  /* Analog to Digital Converter 0 Base Address*/
+#define LPC214X_AD1_BASE                0xe0060000  /* Analog to Digital Converter 1 Base Address */
 #define LPC214X_MAM_BASE                0xe01fc000  /* Memory Accelerator Module (MAM) Base Address */
 #define LPC214X_MEMMAP                  0xe01fc040  /* Memory Mapping Control */
 #define LPC214X_PLL_BASE                0xe01fc080  /* Phase Locked Loop (PLL) Base Address */
@@ -93,6 +95,21 @@
 #define LPC214X_PINSEL0_OFFSET          0x00        /* Pin function select register 0 */
 #define LPC214X_PINSEL1_OFFSET          0x04        /* Pin function select register 1 */
 #define LPC214X_PINSEL2_OFFSET          0x14        /* Pin function select register 2 */
+
+/* Analog to Digital (AD) Converter registger offsets */
+#define LPC214X_AD_ADCR_OFFSET          0x00        /* A/D Control Register */
+#define LPC214X_AD_ADGDR_OFFSET         0x04        /* A/D Global Data Register (only one common registger!) */
+#define LPC214X_AD_ADGSR_OFFSET         0x08        /* A/D Global Start Register */
+#define LPC214X_AD_ADINTEN_OFFSET       0x0c        /* A/D Interrupt Enable Register */
+#define LPC214X_AD_ADDR0_OFFSET         0x10        /* A/D Chanel 0 Data Register */
+#define LPC214X_AD_ADDR1_OFFSET         0x14        /* A/D Chanel 0 Data Register */
+#define LPC214X_AD_ADDR2_OFFSET         0x18        /* A/D Chanel 0 Data Register */
+#define LPC214X_AD_ADDR3_OFFSET         0x1c        /* A/D Chanel 0 Data Register */
+#define LPC214X_AD_ADDR4_OFFSET         0x20        /* A/D Chanel 0 Data Register */
+#define LPC214X_AD_ADDR5_OFFSET         0x24        /* A/D Chanel 0 Data Register */
+#define LPC214X_AD_ADDR6_OFFSET         0x28        /* A/D Chanel 0 Data Register */
+#define LPC214X_AD_ADDR7_OFFSET         0x2c        /* A/D Chanel 0 Data Register */
+#define LPC214X_AD_ADSTAT_OFFSET        0x30        /* A/D Status Register */
 
 /* Pin function select registers (these are normally referenced as offsets) */
 
