@@ -182,7 +182,7 @@
 #ifndef CONFIG_PINSEL1_VALUE /* Can be selected from the config file */
 #  ifdef CONFIG_ADC_SETUP
 #    define CONFIG_PINSEL1_VALUE 0x01000000; /* Enable DAC */
-#  elsel
+#  else
 #    define CONFIG_PINSEL1_VALUE 0x00000000; /* Reset value */
 #  endif
 #endif
@@ -300,9 +300,9 @@
 #ifdef CONFIG_MAM_SETUP
 	ldr	\base, =LPC214X_MAM_BASE
 	mov	\val, #CONFIG_MAMTIM_VALUE
-	str	\val, [\base, #LPC214x_MAMTIM_OFFSET] 
+	str	\val, [\base, #LPC214x_MAM_TIM_OFFSET] 
 	mov	\val, #CONFIG_MAMCR_VALUE
-	str	\val, [\base, #LPC214X_MAMCR_OFFSET] 
+	str	\val, [\base, #LPC214X_MAM_CR_OFFSET] 
 #endif
 	.endm
 

@@ -140,11 +140,11 @@ up_lowputc:
 	/* On entry, r0 holds the character to be printed */
 
 	ldr	r1, =LPC214X_UART_BASE
-	strb	r0, [r1, #LPC214X_THR_OFFSET]
+	strb	r0, [r1, #LPC214X_UART_THR_OFFSET]
 
 	/* Wait for the byte to be transferred */
 
-1:	ldr	r0, [r1, #LPC214X_LSR_OFFSET]
+1:	ldr	r0, [r1, #LPC214X_UART_LSR_OFFSET]
 	ands	r0, #LPC214X_LSR_TEMT  /* Transmitter empty */
 	beq	1b
 
@@ -176,20 +176,20 @@ up_lowsetup:
 
 	ldr	r0, =LPC214X_UART0_BASE
 	mov	r1, #(LPC214X_LCR_VALUE | LPC214X_LCR_DLAB_ENABLE)
-	strb	r1, [r0, #LPC214X_LCR_OFFSET]
+	strb	r1, [r0, #LPC214X_UART_LCR_OFFSET]
 
 	/* Set the BAUD divisor */
 
 	mov	r1, #(UART_BAUD(LPC214X_UART_BAUD) >> 8)
-	strb	r1, [r0, #LPC214X_DLM_OFFSET]
+	strb	r1, [r0, #LPC214X_UART_DLM_OFFSET]
 
 	mov	r1, #(UART_BAUD(LPC214X_UART_BAUD) & 0xff)
-	strb	r1, [r0, #LPC214X_DLL_OFFSET]
+	strb	r1, [r0, #LPC214X_UART_DLL_OFFSET]
 
 	/* Clear DLAB */
 	
 	mov	r1, #LPC214X_LCR_VALUE
-	strb	r1, [r0, #LPC214X_LCR_OFFSET]
+	strb	r1, [r0, #LPC214X_UART_LCR_OFFSET]
 
 	/* And return */
 
