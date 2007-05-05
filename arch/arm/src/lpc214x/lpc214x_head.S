@@ -135,15 +135,6 @@
 #  define CONFIG_VPBDIV_VALUE 0x00000001
 #endif
 
-/* External Memory Pins definitions
- *
- * CS0..3, OE, WE, BLS0..3,  D0..31, A2..23, JTAG Pins
- */
-
-#ifndef CONFIG_PINSEL2_VALUE /* Can be selected from config file */
-#  define CONFIG_PINSEL2_VALUE 0x0e6149e4
-#endif
-
 /* External Memory Controller (EMC) initialization values
  *
  * Bank Configuration n (BCFG0..3)
@@ -177,8 +168,35 @@
 #  define CONFIG_AD0CR_VALUE   0x00200402; /* Setup A/D: 10-bit AIN0 @ 3MHz */
 #endif
 
-#ifndef CONFIG_PINSEL1_VALUE
-#  define CONFIG_PINSEL1_VALUE 0x01000000; /* Enable DAC */
+/* GIO Pin Selection Register settings
+ *
+ * PINSEL0 configures GPIO 0.0 through 0.15
+ */
+
+#ifndef CONFIG_PINSEL0_VALUE /* Can be selected from config file */
+#  define CONFIG_PINSEL0_VALUE 0x00000000 /* Reset value */
+#endif
+
+/* PINSEL1 configures GPIO 0.16 through 0.30 and GPO */
+
+#ifndef CONFIG_PINSEL1_VALUE /* Can be selected from the config file */
+#  ifdef CONFIG_ADC_SETUP
+#    define CONFIG_PINSEL1_VALUE 0x01000000; /* Enable DAC */
+#  elsel
+#    define CONFIG_PINSEL1_VALUE 0x00000000; /* Reset value */
+#  endif
+#endif
+
+/* External Memory Pins definitions
+ * BIT 0:1  Reserved
+ * BIT 2    GPIO/DEBUG
+ * BIT 3    GPIO/TRACE
+ * BIT 31:4 Reserved
+ * CS0..3, OE, WE, BLS0..3,  D0..31, A2..23, JTAG Pins
+ */
+
+#ifndef CONFIG_PINSEL2_VALUE /* Can be selected from config file */
+#  define CONFIG_PINSEL2_VALUE 0x0e6149e4
 #endif
 
 /********************************************************************
@@ -304,9 +322,9 @@
 
 	.macro	configdac, base, tmp
 #ifdef CONFIG_ADC_SETUP
-	ldr	\base, =LPC214X_AD0CR
+	ldr	\base, =LPC214X_AD0_BASE
 	ldr	\tmp, =CONFIG_AD0CR_VALUE
-	str	\tmp, [\base]
+	str	\tmp, [\base, #LPC214X_AD_ADCR_OFFSET]
 
 	ldr	\base,=LPC214X_PINSEL1
 	ldr	\tmp, =CONFIG_PINSEL1_VALUE
