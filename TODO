@@ -18,6 +18,10 @@ o Task/Scheduler
 o Memory Managment
 - Add an option to free all memory allocated by a task when the task exits.
   This is probably not be worth the overhead for a deeply embedded system.
+- Current logic adapts size_t for 16-bit address machines vs. 32-bit address
+  machines.  But a small memory option should also be provided so that
+  the small offset option can be used with 32-bit machines that have small
+  RAM memories (like the lpc2148)
 
 o Signals
 - 'Standard' signals and signal actions are not supported.
