@@ -83,11 +83,11 @@ int read(int fd, void *buf, unsigned int nbytes)
 
           /* Is a driver registered? Does it support the read method? */
 
-          if (inode && inode->i_ops && inode->i_ops->read)
+          if (inode && inode->u.i_ops && inode->u.i_ops->read)
             {
               /* Yes, then let it perform the read */
 
-              ret = (int)inode->i_ops->read(this_file, (char*)buf, (size_t)nbytes);
+              ret = (int)inode->u.i_ops->read(this_file, (char*)buf, (size_t)nbytes);
             }
         }
     }

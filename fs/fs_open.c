@@ -60,8 +60,8 @@
 
 int inode_checkflags(FAR struct inode *inode, int oflags)
 {
-  if (((oflags & O_RDOK) != 0 && !inode->i_ops->read) ||
-      ((oflags & O_WROK) != 0 && !inode->i_ops->write))
+  if (((oflags & O_RDOK) != 0 && !inode->u.i_ops->read) ||
+      ((oflags & O_WROK) != 0 && !inode->u.i_ops->write))
     {
       *get_errno_ptr() = EACCES;
       return ERROR;
@@ -105,15 +105,26 @@ int open(const char *path, int oflags, ...)
 
   /* Get an inode for this file */
 
-  inode = inode_find(path);
+  const char *relpath = NULL;
+  inode = inode_find(path, &relpath);
   if (!inode)
     {
       /* "O_CREAT is not set and the named file does not exist.  Or,
-       * a directory component in pathname does not exist or is a
-       * dangling symbolic link.
+       *  a directory component in pathname does not exist or is a
+       *  dangling symbolic link."
        */
 
       *get_errno_ptr() = ENOENT;
+      return ERROR;
+    }
+
+  /* Verify that the inode is either a "normal" or a mountpoint.  We
+   * specifically exclude block drivers.
+   */
+
+  if (!INODE_IS_DRIVER(inode) && !INODE_IS_MOUNTPT(inode))
+    {
+      *get_errno_ptr() = ENXIO;
       return ERROR;
     }
 
@@ -138,12 +149,19 @@ int open(const char *path, int oflags, ...)
   /* Perform the driver open operation */
 
   status = OK;
-  if (inode->i_ops && inode->i_ops->open)
+  if (inode->u.i_ops && inode->u.i_ops->open)
     {
-      status = inode->i_ops->open((FAR struct file*)&list->fl_files[fd]);
+      if (INODE_IS_MOUNTPT(inode))
+        {
+          status = inode->u.i_ops->open((FAR struct file*)&list->fl_files[fd]);
+        }
+      else
+        {
+          status = inode->u.i_mops->open((FAR struct file*)&list->fl_files[fd], relpath);
+        }
     }
 
-  if (status != OK || !inode->i_ops)
+  if (status != OK || !inode->u.i_ops)
     {
       files_release(fd);
       inode_release(inode);

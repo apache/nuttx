@@ -1,5 +1,5 @@
 /************************************************************
- * fs_registerinode.c
+ * fs_registerreserve.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -85,19 +85,12 @@ static void inode_namecpy(char *dest, const char *src)
  * Name: inode_alloc
  ************************************************************/
 
-static FAR struct inode *inode_alloc(const char *name,
-                                     struct file_operations *fops,
-                                     mode_t mode, void *private)
+static FAR struct inode *inode_alloc(const char *name)
 {
   int namelen = inode_namelen(name);
   FAR struct inode *node = (FAR struct inode*)zalloc(FSNODE_SIZE(namelen));
   if (node)
     {
-      node->i_ops     = fops;
-#ifdef CONFIG_FILE_MODE
-      node->i_mode    = mode;
-#endif
-      node->i_private = private;
       inode_namecpy(node->i_name, name);
     }
   return node;
@@ -145,12 +138,10 @@ static void inode_insert(FAR struct inode *node,
  ************************************************************/
 
 /************************************************************
- * Name: register_inode
+ * Name: inode_reserve
  ************************************************************/
 
-STATUS register_inode(const char *path,
-                      struct file_operations *fops,
-                      mode_t mode, void *private)
+FAR struct inode *inode_reserve(const char *path)
 {
   const char       *name = path;
   FAR struct inode *left;
@@ -158,18 +149,16 @@ STATUS register_inode(const char *path,
 
   if (!*path || path[0] != '/')
     {
-      return ERROR;
+      return NULL;
     }
 
   /* Find the location to insert the new subtree */
 
-  inode_semtake();
-  if (inode_search(&name, &left, &parent) != NULL)
+  if (inode_search(&name, &left, &parent, NULL) != NULL)
     {
       /* Is is an error if the node already exists in the tree */
 
-      inode_semgive();
-      return ERROR;
+      return NULL;
     }
 
   /* Now we now where to insert the subtree */
@@ -188,7 +177,7 @@ STATUS register_inode(const char *path,
         {
           /* Insert an operationless node */
 
-          node = inode_alloc(name, NULL, mode, NULL);
+          node = inode_alloc(name);
           if (node)
             {
               inode_insert(node, left, parent);
@@ -203,18 +192,15 @@ STATUS register_inode(const char *path,
         }
       else
         {
-          node = inode_alloc(name, fops, mode, private);
+          node = inode_alloc(name);
           if (node)
             {
               inode_insert(node, left, parent);
-              inode_semgive();
-              return 0;
+              return node;
             }
         }
 
       /* We get here on failures to allocate node memory */
-
-      inode_semgive();
-      return ERROR;
+      return NULL;
     }
 }

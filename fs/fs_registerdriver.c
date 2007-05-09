@@ -1,5 +1,5 @@
 /************************************************************
- * fs_inodefind.c
+ * fs_registerdriver.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -43,8 +43,6 @@
 #include <nuttx/fs.h>
 #include "fs_internal.h"
 
-#if CONFIG_NFILE_DESCRIPTORS >0
-
 /************************************************************
  * Definitions
  ************************************************************/
@@ -66,37 +64,38 @@
  ************************************************************/
 
 /************************************************************
- * Name: inode_find
- *
- * Description:
- *   This is called from the open() logic to get a reference
- *   to the inode associated with a path.
- *
+ * Name: register_driver
  ************************************************************/
 
-FAR struct inode *inode_find(const char *path, const char **relpath)
+STATUS register_driver(const char *path,
+                       const struct file_operations *fops,
+                       mode_t mode, void *private)
 {
-  FAR struct inode *node;
+  struct inode *node;
+  STATUS ret = ERROR;
 
-  if (!*path || path[0] != '/')
-    {
-      return NULL;
-    }
-
-  /* Find the node matching the path.  If found,
-   * increment the count of references on the node.
+  /* Insert a dummy node -- we need to hold the inode semaphore
+   * to do this because we will have a momentarily bad structure.
    */
 
   inode_semtake();
-  node = inode_search(&path, (FAR void*)NULL, (FAR void*)NULL, relpath);
-  if (node)
+  node = inode_reserve(path);
+  if (node != NULL)
     {
-      node->i_crefs++;
+        /* We have it, now populate it with driver specific
+         * information.
+         */
+
+        INODE_SET_DRIVER(node);
+
+        node->u.i_ops   = fops;
+#ifdef CONFIG_FILE_MODE
+        node->i_mode    = mode;
+#endif
+        node->i_private = private;
+        ret             = OK;
     }
+
   inode_semgive();
-  return node;
+  return ret;
 }
-
-#endif /* CONFIG_NFILE_DESCRIPTORS */
-
-

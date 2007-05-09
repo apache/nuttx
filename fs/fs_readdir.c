@@ -104,7 +104,7 @@ FAR struct dirent *readdir(DIR *dirp)
    */
 
   idir->dir.d_type = 0;
-  if (idir->next->i_ops)
+  if (idir->next->u.i_ops)
     {
       idir->dir.d_type |= DTYPE_FILE;
     }
@@ -113,7 +113,7 @@ FAR struct dirent *readdir(DIR *dirp)
    * is a directory.  NOTE: that the node can be both!
    */
 
-  if (idir->next->i_child || !idir->next->i_ops)
+  if (idir->next->i_child || !idir->next->u.i_ops)
     {
       idir->dir.d_type |= DTYPE_DIRECTORY;
     }

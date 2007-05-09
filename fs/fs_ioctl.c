@@ -77,11 +77,11 @@ int ioctl(int fd, int req, unsigned long arg)
 
       /* Is a driver registered? Does it support the ioctl method? */
 
-      if (inode && inode->i_ops && inode->i_ops->ioctl)
+      if (inode && inode->u.i_ops && inode->u.i_ops->ioctl)
 	{
 	  /* Yes, then let it perform the ioctl */
 
-	  ret = (int)inode->i_ops->ioctl(this_file, req, arg);
+	  ret = (int)inode->u.i_ops->ioctl(this_file, req, arg);
 	}
     }
   return ret;

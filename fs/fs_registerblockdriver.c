@@ -1,5 +1,5 @@
 /************************************************************
- * fs_unregisterinode.c
+ * fs_registerblockdriver.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <stdlib.h>
 #include <errno.h>
 #include <nuttx/fs.h>
 #include "fs_internal.h"
@@ -61,95 +60,41 @@
  ************************************************************/
 
 /************************************************************
- * Name: inode_remove
- ************************************************************/
-
-static void inode_remove(struct inode *node,
-                         struct inode *peer,
-                         struct inode *parent)
-{
-  /* If peer is non-null, then remove the node from the right of
-   * of that peer node.
-   */
-
-   if (peer)
-     {
-       peer->i_peer = node->i_peer;
-     }
-
-   /* If parent is non-null, then remove the node from head of
-    * of the list of children.
-    */
-
-   else if (parent)
-     {
-       parent->i_child = node->i_peer;
-     }
-
-   /* Otherwise, we must be removing the root inode. */
-
-   else
-     {
-        root_inode = node->i_peer;
-     }
-   node->i_peer    = NULL;
-}
-
-/************************************************************
  * Public Functions
  ************************************************************/
 
 /************************************************************
- * Name: unregister_inode
+ * Name: register_driver
  ************************************************************/
 
-STATUS unregister_inode(const char *path)
+STATUS register_blockdriver(const char *path,
+                            const struct block_operations *bops,
+                            mode_t mode, void *private)
 {
-  const char       *name = path;
-  FAR struct inode *node;
-  FAR struct inode *left;
-  FAR struct inode *parent;
+  struct inode *node;
+  STATUS ret = ERROR;
 
-  if (*path && path[0] == '/')
-    {
-      return ERROR;
-    }
-
-  /* Find the node to delete */
+  /* Insert a dummy node -- we need to hold the inode semaphore
+   * to do this because we will have a momentarily bad structure.
+   */
 
   inode_semtake();
-  node = inode_search(&name, &left, &parent);
-  if (node)
+  node = inode_reserve(path);
+  if (node != NULL)
     {
-      /* Found it, now remove it from the tree */
+        /* We have it, now populate it with block driver specific
+         * information.
+         */
 
-      inode_remove(node, left, parent);
+        INODE_SET_BLOCK(node);
 
-      /* We cannot delete it if there reference to the inode */
-
-      if (node->i_crefs)
-        {
-           /* In that case, we will mark it deleted, when the FS
-            * releases the inode, we will then, finally delete
-            * the subtree.
-            */
-
-           node->i_flags |= FSNODEFLAG_DELETED;
-           inode_semgive();
-         }
-       else
-         {
-          /* And delete it now -- recursively to delete all of its children */
-
-          inode_semgive();
-          inode_free(node->i_child);
-          free(node);
-          return OK;
-        }
+        node->u.i_bops  = bops;
+#ifdef CONFIG_FILE_MODE
+        node->i_mode    = mode;
+#endif
+        node->i_private = private;
+        ret             = OK;
     }
-
-  /* The node does not exist or it has references */
-
   inode_semgive();
-  return ERROR;
+  return ret;
 }

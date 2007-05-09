@@ -83,11 +83,11 @@ int write(int fd, const void *buf, unsigned int nbytes)
 
           /* Is a driver registered? Does it support the write method? */
 
-          if (inode && inode->i_ops && inode->i_ops->write)
+          if (inode && inode->u.i_ops && inode->u.i_ops->write)
             {
               /* Yes, then let it perform the write */
 
-              ret = inode->i_ops->write(this_file, buf, nbytes);
+              ret = inode->u.i_ops->write(this_file, buf, nbytes);
             }
         }
     }

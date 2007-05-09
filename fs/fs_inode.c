@@ -209,7 +209,8 @@ void inode_semgive(void)
 
 FAR struct inode *inode_search(const char **path,
                                FAR struct inode **peer,
-                               FAR struct inode **parent)
+                               FAR struct inode **parent,
+                               const char **relpath)
 {
   const char       *name  = *path + 1; /* Skip over leading '/' */
   FAR struct inode *node  = root_inode;
@@ -247,18 +248,25 @@ FAR struct inode *inode_search(const char **path,
 
       else
         {
-          /* Now there are two more possibilities:
+          /* Now there are three more possibilities:
            *   (1) This is the node that we are looking for or,
-           *   (2) the node we are looking for is "blow" this one.
+           *   (2) The node we are looking for is "below" this one.
+           *   (3) This node is a mountpoint and will absorb all request
+           *       below this one
            */
 
           name = inode_nextname(name);
-          if (!*name)
+          if (!*name || INODE_IS_MOUNTPT(node))
             {
-              /* We are at the end of the path, so this must be
-               * the node we are looking for.
+              /* Either (1) we are at the end of the path, so this must be the
+               * node we are looking for or else (2) this node is a mountpoint
+               * and will handle the remaining part of the pathname
                */
 
+              if (relpath)
+                {
+                  *relpath = name;
+                }
               break;
             }
           else
