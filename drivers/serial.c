@@ -83,6 +83,7 @@ struct file_operations g_serialops =
   uart_close, /* close */
   uart_read,  /* read */
   uart_write, /* write */
+  0,          /* seek */
   uart_ioctl  /* ioctl */
 };
 
@@ -449,7 +450,7 @@ int uart_register(const char *path, uart_dev_t *dev)
   sem_init(&dev->recvsem,  0, 0);
 
   dbg("Registering %s\n", path);
-  return register_inode(path, &g_serialops, 0666, dev);
+  return register_driver(path, &g_serialops, 0666, dev);
 }
 
 /************************************************************************************

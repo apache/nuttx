@@ -65,6 +65,7 @@ static struct file_operations devnull_fops =
   0,             /* close */
   devnull_read,  /* read */
   devnull_write, /* write */
+  0,             /* seek */
   0              /* ioctl */
 };
 
@@ -88,5 +89,5 @@ static ssize_t devnull_write(struct file *filp, const char *buffer, size_t len)
 
 void devnull_register(void)
 {
-  (void)register_inode("/dev/null", &devnull_fops, 0666, NULL);
+  (void)register_driver("/dev/null", &devnull_fops, 0666, NULL);
 }
