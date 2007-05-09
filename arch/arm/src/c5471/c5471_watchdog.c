@@ -365,7 +365,7 @@ int up_wdtinit(void)
 
   /* Register as /dev/wdt */
 
-  ret = register_inode("/dev/wdt", &g_wdtops, 0666, NULL);
+  ret = register_driver("/dev/wdt", &g_wdtops, 0666, NULL);
   if (ret)
     {
       return ERROR;
@@ -384,7 +384,7 @@ int up_wdtinit(void)
   ret = irq_attach(C5471_IRQ_WATCHDOG, wdt_interrupt);
   if (ret)
     {
-      unregister_inode("/dev/wdt");
+      unregister_driver("/dev/wdt");
       return ERROR;
     }
 
