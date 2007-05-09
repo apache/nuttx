@@ -125,7 +125,7 @@ static ssize_t devconsole_write(struct file *filp, const char *buffer, size_t le
 
 void up_devconsole(void)
 {
-  (void)register_inode("/dev/console", &devconsole_fops, 0666, NULL);
+  (void)register_driver("/dev/console", &devconsole_fops, 0666, NULL);
 }
 
 int up_putc(int ch)
