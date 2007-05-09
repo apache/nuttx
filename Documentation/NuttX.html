@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: April 29, 2007</p>
+      <p>Last Updated: May 8, 2007</p>
     </td>
   </tr>
 </table>
@@ -97,10 +97,13 @@
   <td>
     <p>
       The goal is to provide most standard POSIX OS interfaces to support
-      a rich multi-threaded development environment.
+      a rich, multi-threaded development environment for deeply embedded
+      processors.
     </p>
-      NON-GOALS: (1) It is not a goal to provide OS subsystems such
-      as network or USB (but these could obviously be added).
+      NON-GOALS: (1) It is not a goal to provide the rich level of OS
+      features like those provided with Linux.
+      Small footprint is more important than features.
+      Standard compliance is more important than small footprint.
       (2) There is no MMU-based support for processes.
       At present, NuttX assumes a flat address space.
     </p>
@@ -501,6 +504,7 @@ Other memory:
 
 	* Added support for the NXP 214x processor on the mcu123.com lpc214x
 	  development board.
+	* Added support for block devices.
 	* Corrected some build/configuration issues introduced with the
 	  last release.
 	* Started m68322
