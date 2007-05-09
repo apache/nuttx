@@ -83,6 +83,7 @@ void up_initialize(void)
 {
   /* Register devices */
 
-  devnull_register();   /* Standard /dev/null */
-  up_devconsole();      /* Our private /dev/console */
+  devnull_register();       /* Standard /dev/null */
+  up_devconsole();          /* Our private /dev/console */
+  up_registerblockdevice(); /* Our simulated block device /dev/blkdev */
 }

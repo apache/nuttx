@@ -86,6 +86,7 @@ extern void up_longjmp(int *jb, int val) __attribute__ ((noreturn));
 /* up_devconsole **********************************************************/
 
 extern void up_devconsole(void);
+extern void up_registerblockdevice(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_UP_INTERNAL_H */
