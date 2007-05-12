@@ -139,6 +139,8 @@ static void inode_insert(FAR struct inode *node,
 
 /************************************************************
  * Name: inode_reserve
+ *
+ * NOTE: Caller must hold the inode semaphore
  ************************************************************/
 
 FAR struct inode *inode_reserve(const char *path)

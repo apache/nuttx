@@ -1,0 +1,272 @@
+/****************************************************************************
+ * fs_mount.c
+ *
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+#include <sys/types.h>
+#include <sys/mount.h>
+#include <string.h>
+#include <errno.h>
+#include <nuttx/fs.h>
+#include "fs_internal.h"
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+
+/* At least one filesystem must be defined, or this file will not compile.
+ * It may be desire-able to make filesystems dynamically registered at
+ * some time in the future, but at present, this file needs to know about
+ * every configured filesystem.
+ */
+
+#ifdef CONFIG_FS_FAT
+
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct fsmap_t
+{
+  const char                      *fs_filesystemtype;
+  const struct mountpt_operations *fs_mops;
+};
+
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_FAT
+extern const struct mountpt_operations fat_operations;
+#endif
+
+static const struct fsmap_t g_fsmap[] =
+{
+#ifdef CONFIG_FS_FAT
+    { "vfat", &fat_operations },
+#endif
+    { NULL,   NULL },
+};
+
+/****************************************************************************
+ * Public Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: mount_findfs
+ *
+ * Description:
+ *    find the specified filesystem
+ *
+ ****************************************************************************/
+
+static FAR const struct mountpt_operations *mount_findfs(const char *filesystemtype )
+{
+  const struct fsmap_t *fsmap;
+  for (fsmap = g_fsmap; fsmap->fs_filesystemtype; fsmap++)
+    {
+      if (strcmp(filesystemtype, fsmap->fs_filesystemtype) == 0)
+        {
+            return fsmap->fs_mops;
+        }
+    }
+  return NULL;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: mount
+ *
+ * Description:
+ *   mount() attaches the filesystem specified by the 'source' block device
+ *   name into the root file system at the path specified by 'target.'
+ *
+ * Return:
+ *   Zero is returned on success; -1 is returned on an error and errno is
+ *   set appropriately:
+ *
+ *   EACCES A component of a path was not searchable or mounting a read-only
+ *      filesystem was attempted without giving the MS_RDONLY flag.
+ *   EBUSY 'source' is already  mounted.
+ *   EFAULT One of the pointer arguments points outside the user address
+ *      space.
+ *   EINVAL 'source' had an invalid superblock.
+ *   ENODEV 'filesystemtype' not configured
+ *   ENOENT A pathname was empty or had a nonexistent component.
+ *   ENOMEM Could not allocate a memory to copy filenames or data into.
+ *   ENOTBLK 'source' is not a block device
+ *
+ ****************************************************************************/
+
+int mount(const char *source, const char *target,
+          const char *filesystemtype, unsigned long mountflags,
+          const void *data)
+{
+  FAR struct inode *blkdrvr_inode;
+  FAR struct inode *mountpt_inode;
+  FAR const struct mountpt_operations *mops;
+  void *fshandle;
+  int errcode;
+  int status;
+
+  /* Verify required pointer arguments */
+
+  if (!source || !target || !filesystemtype)
+    {
+      errcode = EFAULT;
+      goto errout;
+    }
+
+  /* Find the specified filesystem */
+  mops = mount_findfs(filesystemtype);
+  if (!mops)
+    {
+      errcode = ENODEV;
+      goto errout;
+    }
+
+  /* Find the block driver */
+
+  blkdrvr_inode = inode_find(source, NULL);
+  if (!blkdrvr_inode)
+    {
+      errcode = ENOENT;
+      goto errout;
+    }
+
+  /* Verify that the inode is a block driver. */
+
+  if (!INODE_IS_BLOCK(blkdrvr_inode))
+    { 
+      errcode = ENOTBLK;
+      goto errout_with_blkdrvr;
+   }
+
+  /* Make sure that the inode supports the requested access */
+
+  if (!blkdrvr_inode->u.i_mops->read ||
+      (!blkdrvr_inode->u.i_mops->write && (mountflags & MS_RDONLY) == 0))
+    {
+      errcode = EACCES;
+      goto errout_with_blkdrvr;
+    }
+
+  /* Insert a dummy node -- we need to hold the inode semaphore
+   * to do this because we will have a momentarily bad structure.
+   */
+
+  inode_semtake();
+  mountpt_inode = inode_reserve(target);
+  if (!mountpt_inode)
+    {
+      /* inode_reserve can fail for a couple of reasons, but the most likely
+       * one is that the inode already exists.
+       */
+
+      errcode = EBUSY;
+      goto errout_with_semaphore;
+    }
+
+  /* Bind the block driver to an instance of the file system.  The file
+   * system returns a reference to some opaque, fs-dependent structure
+   * that encapsulates this binding.
+   */
+
+  if (!mops->bind)
+    {
+      /* The filesystem does not support the bind operation ??? */
+
+      errcode = EINVAL;
+      goto errout_with_mountpt;
+    }
+
+  /* On failure, the bind method returns -errorcode */
+
+  status = mops->bind(blkdrvr_inode, data, &fshandle);
+  if (status != 0)
+  {
+      /* The inode is unhappy with the blkdrvr for some reason */
+
+      errcode = -status;
+      goto errout_with_mountpt;
+  }
+
+  /* We have it, now populate it with driver specific information. */
+
+  INODE_SET_MOUNTPT(mountpt_inode);
+
+  mountpt_inode->u.i_mops  = mops;
+#ifdef CONFIG_FILE_MODE
+  mountpt_inode->i_mode    = mode;
+#endif
+  mountpt_inode->i_private = fshandle;
+  inode_semgive();
+
+ /* We can release our reference to the blkdrver_inode, if the filesystem
+  * wants to retain the blockdriver inode (which it should), then it must
+  * have called inode_addref().  There is one reference on mountpt_inode
+  * that will persist until umount() is called.
+  */
+
+  inode_release(blkdrvr_inode);
+  return OK;
+
+  /* A lot of goto's!  But they make the error handling much simpler */
+
+ errout_with_mountpt:
+  inode_release(mountpt_inode);
+ errout_with_semaphore:
+  inode_semgive();
+ errout_with_blkdrvr:
+  inode_release(blkdrvr_inode);
+ errout:
+  *get_errno_ptr() = errcode;
+  return ERROR;
+}
+
+#endif /* Need at least filesystem */
+#endif /* Need file descriptor support */

@@ -153,11 +153,11 @@ int open(const char *path, int oflags, ...)
     {
       if (INODE_IS_MOUNTPT(inode))
         {
-          status = inode->u.i_ops->open((FAR struct file*)&list->fl_files[fd]);
+          status = inode->u.i_mops->open((FAR struct file*)&list->fl_files[fd], relpath);
         }
       else
         {
-          status = inode->u.i_mops->open((FAR struct file*)&list->fl_files[fd], relpath);
+          status = inode->u.i_ops->open((FAR struct file*)&list->fl_files[fd]);
         }
     }
 

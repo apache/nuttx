@@ -66,8 +66,8 @@
   ((i)->i_flags &= ~FSNODEFLAG_TYPE_MASK)
 #define INODE_SET_BLOCK(i) \
   ((i)->i_flags = (((i)->i_flags & ~FSNODEFLAG_TYPE_MASK) | FSNODEFLAG_TYPE_BLOCK))
-#define INODE_SET_MOUNTP(i) \
-  ((i)->i_flags = (((i)->i_flags & ~FSNODEFLAG_TYPE_MASK) | FSNODEFLAG_TYPE_MOUNTP))
+#define INODE_SET_MOUNTPT(i) \
+  ((i)->i_flags = (((i)->i_flags & ~FSNODEFLAG_TYPE_MASK) | FSNODEFLAG_TYPE_MOUNTPT))
 
 /****************************************************************************
  * Public Types

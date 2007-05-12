@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs_inoderemove.c
+ * fs_umount.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,13 +39,19 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <stdlib.h>
+#include <sys/mount.h>
 #include <errno.h>
 #include <nuttx/fs.h>
 #include "fs_internal.h"
 
+#if CONFIG_NFILE_DESCRIPTORS > 0
+
 /****************************************************************************
  * Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -61,97 +67,110 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: inode_unlink
- ****************************************************************************/
-
-static void inode_unlink(struct inode *node,
-                         struct inode *peer,
-                         struct inode *parent)
-{
-  /* If peer is non-null, then remove the node from the right of
-   * of that peer node.
-   */
-
-   if (peer)
-     {
-       peer->i_peer = node->i_peer;
-     }
-
-   /* If parent is non-null, then remove the node from head of
-    * of the list of children.
-    */
-
-   else if (parent)
-     {
-       parent->i_child = node->i_peer;
-     }
-
-   /* Otherwise, we must be removing the root inode. */
-
-   else
-     {
-        root_inode = node->i_peer;
-     }
-   node->i_peer    = NULL;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: inode_remove
+ * Name: umount
  *
- * NOTE: Caller must hold the inode semaphore
+ * Description:
+ *   umount() detaches the filesystem mounted at the path specified by
+ *  'target.'
+ *
+ * Return:
+ *   Zero is returned on success; -1 is returned on an error and errno is
+ *   set appropriately:
+ *
+ *   EACCES A component of a path was not searchable or mounting a read-only
+ *      filesystem was attempted without giving the MS_RDONLY flag.
+ *   EBUSY The target could not be unmounted because it is busy.
+ *   EFAULT The pointer argument points outside the user address space.
+ *
  ****************************************************************************/
 
-STATUS inode_remove(const char *path)
+int umount(const char *target)
 {
-  const char       *name = path;
-  FAR struct inode *node;
-  FAR struct inode *left;
-  FAR struct inode *parent;
+  FAR struct inode *mountpt_inode;
+  int errcode;
+  int status;
 
-  if (*path && path[0] == '/')
+  /* Verify required pointer arguments */
+
+  if (!target)
     {
-      return ERROR;
+      errcode = EFAULT;
+      goto errout;
     }
 
-  /* Find the node to delete */
+  /* Find the mountpt */
 
   inode_semtake();
-  node = inode_search(&name, &left, &parent, NULL);
-  if (node)
+  mountpt_inode = inode_find(target, NULL);
+  if (!mountpt_inode)
     {
-      /* Found it, now remove it from the tree */
-
-      inode_unlink(node, left, parent);
-
-      /* We cannot delete it if there reference to the inode */
-
-      if (node->i_crefs)
-        {
-           /* In that case, we will mark it deleted, when the FS
-            * releases the inode, we will then, finally delete
-            * the subtree.
-            */
-
-           node->i_flags |= FSNODEFLAG_DELETED;
-           inode_semgive();
-         }
-       else
-         {
-          /* And delete it now -- recursively to delete all of its children */
-
-          inode_semgive();
-          inode_free(node->i_child);
-          free(node);
-          return OK;
-        }
+      errcode = ENOENT;
+      goto errout_with_semaphore;
     }
 
-  /* The node does not exist or it has references */
+  /* Verify that the inode is a mountpoint */
 
+  if (!INODE_IS_MOUNTPT(mountpt_inode))
+    { 
+      errcode = EINVAL;
+      goto errout_with_mountpt;
+   }
+
+  /* Unbind the block driver from the file system (destroying any fs
+   * private data.
+   */
+
+  if (!mountpt_inode->u.i_mops->unbind)
+    {
+      /* The filesystem does not support the unbind operation ??? */
+
+      errcode = EINVAL;
+      goto errout_with_mountpt;
+    }
+
+  /* The unbind method returns the number of references to the
+   * filesystem (i.e., open files), zero if the unbind was
+   * performed, or a negated error code on a failure.
+   */
+
+  status = mountpt_inode->u.i_mops->unbind( mountpt_inode->i_private );
+  if (status < 0)
+    {
+      /* The inode is unhappy with the blkdrvr for some reason */
+
+      errcode = -status;
+      goto errout_with_mountpt;
+    }
+  else if (status > 0)
+    {
+      errcode = EBUSY;
+      goto errout_with_mountpt;
+    }
+
+  /* Successfully unbound */
+
+  mountpt_inode->i_private = NULL;
+
+  /* Remove the inode */
+
+  inode_release(mountpt_inode);
+  status = inode_remove(target);
   inode_semgive();
+  return status;
+
+  /* A lot of goto's!  But they make the error handling much simpler */
+
+ errout_with_mountpt:
+  inode_release(mountpt_inode);
+ errout_with_semaphore:
+  inode_semgive();
+ errout:
+  *get_errno_ptr() = errcode;
   return ERROR;
 }
+
+#endif /* CONFIG_NFILE_DESCRIPTORS */
