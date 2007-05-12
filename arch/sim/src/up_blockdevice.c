@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <stdlib.h>
 #include <string.h>
 #include <nuttx/fs.h>
 #include <errno.h>
@@ -50,8 +49,8 @@
  * Private Definitions
  ****************************************************************************/
 
-#define NSECTORS    128
-#define SECTOR_SIZE 512
+#define NSECTORS            2048
+#define LOGICAL_SECTOR_SIZE 512
 
 /****************************************************************************
  * Private Types
@@ -95,12 +94,12 @@ static const struct block_operations g_bops =
 
 static int up_open(FAR struct file *filp)
 {
-  filp->f_priv = (void*)malloc(NSECTORS*SECTOR_SIZE);
+    filp->f_priv = (void*)up_deviceimage();
   return 0;
 }
 
 /****************************************************************************
- * Name: up_close
+ * Name: up_closel
  *
  * Description: close the block device
  *
@@ -131,7 +130,7 @@ static ssize_t up_read(FAR struct file *filp, char *buffer,
       start_sector < NSECTORS &&
       start_sector + nsectors < NSECTORS)
     {
-      memcpy(buffer, &src[start_sector*SECTOR_SIZE], nsectors*SECTOR_SIZE);
+      memcpy(buffer, &src[start_sector*LOGICAL_SECTOR_SIZE], nsectors*LOGICAL_SECTOR_SIZE);
       return OK;
     }
   else
@@ -155,7 +154,7 @@ static ssize_t up_write(FAR struct file *filp, const char *buffer,
       start_sector < NSECTORS &&
       start_sector + nsectors < NSECTORS)
     {
-      memcpy(&dest[start_sector*SECTOR_SIZE], buffer, nsectors*SECTOR_SIZE);
+      memcpy(&dest[start_sector*LOGICAL_SECTOR_SIZE], buffer, nsectors*LOGICAL_SECTOR_SIZE);
       return OK;
     }
   else
@@ -177,7 +176,7 @@ static size_t up_geometry(FAR struct file *filp, struct geometry *geometry)
      {
        geometry->geo_available  = (filp->f_priv != NULL);
        geometry->geo_nsectors   = NSECTORS;
-       geometry->geo_sectorsize = SECTOR_SIZE;
+       geometry->geo_sectorsize = LOGICAL_SECTOR_SIZE;
        return OK;
      }
    return -EINVAL;

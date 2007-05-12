@@ -65,6 +65,20 @@
 
 #define SIM_HEAP_SIZE (4*1024*1024)
 
+/* These definitions characterize the compressed filesystem image */
+
+#define BLOCK_COUNT         1024
+#define SECTOR_OF_BACKUPT   6
+#define NUMBER_OF_FATS      2
+#define FAT_SIZE            32
+#define NUM_HIDDEN_SECTORS  0
+#define VOLUME_NAME         "NuttXTestVol"
+#define USE_WHOLE_DEVICE    1
+#define ROOT_DIR_ENTRIES    512
+#define RESERVED_SECTORS    32
+#define SECTORS_PER_CLUSTER 4
+#define LOGICAL_SECTOR_SIZE 512
+
 /**************************************************************************
  * Public Types
  **************************************************************************/
@@ -78,15 +92,20 @@
  **************************************************************************/
 
 #ifndef __ASSEMBLY__
+
 /* up_setjmp.S ************************************************************/
 
 extern int  up_setjmp(int *jb);
 extern void up_longjmp(int *jb, int val) __attribute__ ((noreturn));
 
-/* up_devconsole **********************************************************/
+/* up_devconsole.c ********************************************************/
 
 extern void up_devconsole(void);
 extern void up_registerblockdevice(void);
+
+/* up_deviceimage.c *******************************************************/
+
+extern char *up_deviceimage(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_UP_INTERNAL_H */
