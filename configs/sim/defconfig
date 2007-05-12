@@ -43,6 +43,7 @@
 # CONFIG_ARCH_BOARD - identifies the configs subdirectory and, hence,
 #   the board that supports the particular chip or SoC.
 # CONFIG_ARCH_BOARD_name - for use in C code
+# CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
 #
 CONFIG_ARCH=sim
 CONFIG_ARCH_SIM=y
@@ -194,6 +195,11 @@ CONFIG_MQ_MAXMSGSIZE=32
 CONFIG_MAX_WDOGPARMS=4
 CONFIG_PREALLOC_WDOGS=32
 CONFIG_PREALLOC_TIMERS=8
+
+#
+# FAT filesystem configuration
+# CONFIG_FAT - Enable FAT filesystem support
+CONFIG_FS_FAT=y
 
 #
 # Stack and heap information
