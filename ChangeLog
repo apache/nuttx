@@ -123,9 +123,11 @@
 
 0.2.5 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* Corrected some build/configuration issues introduced with the
+	  last release.
 	* Added support for the NXP 214x processor on the mcu123.com lpc214x
 	  development board (untested)
 	* Added support for block devices.
-	* Corrected some build/configuration issues introduced with the
-	  last release.
+	* Simulated target now exports a VFAT filesystem
+	* Added mount() and umount()
 	* Started m68322
