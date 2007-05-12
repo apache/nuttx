@@ -59,12 +59,22 @@
 struct file;
 struct file_operations
 {
+  /* The device driver open method differs from the mountpoint open method */
+
   int     (*open)(FAR struct file *filp);
+
+  /* The following methods must be identical in signature and position because
+   * the struct file_operations and struct mountp_operations are treated like
+   * unions.
+   */
+
   int     (*close)(FAR struct file *filp);
   ssize_t (*read)(FAR struct file *filp, char *buffer, size_t buflen);
   ssize_t (*write)(FAR struct file *filp, const char *buffer, size_t buflen);
   off_t   (*seek)(FAR struct file *filp, off_t offset, int whence);
   int     (*ioctl)(FAR struct file *filp, int cmd, unsigned long arg);
+
+  /* The two structures need not be common after this point */
 };
 
 /* This structure provides information about the state of a block driver */
@@ -98,14 +108,33 @@ struct block_operations
  * struct file_operations or struct mountpt_operations
  */
 
+struct inode;
 struct mountpt_operations
 {
+  /* The mountpoint open method differs from the driver open method
+   * because it receives the relative path into the mountpoint.
+   */
+
   int     (*open)(FAR struct file *filp, const char *rel_path);
+
+  /* The following methods must be identical in signature and position because
+   * the struct file_operations and struct mountp_operations are treated like
+   * unions.
+   */
+
   int     (*close)(FAR struct file *filp);
   ssize_t (*read)(FAR struct file *filp, char *buffer, size_t buflen);
   ssize_t (*write)(FAR struct file *filp, const char *buffer, size_t buflen);
   off_t   (*seek)(FAR struct file *filp, off_t offset, int whence);
   int     (*ioctl)(FAR struct file *filp, int cmd, unsigned long arg);
+
+  /* The two structures need not be common after this point.  For the
+   * case of struct mountpt_operations, additional operations are included
+   * that used only for mounting and unmounting the volume.
+   */
+
+  int   (*bind)(FAR struct inode *blkdriver, const void *data, void **handle);
+  int   (*unbind)(void *handle);
 };
 
 /* This structure represents one inode in the Nuttx psuedo-file system */
@@ -125,7 +154,7 @@ struct inode
 #ifdef CONFIG_FILE_MODE
   mode_t                       i_mode;       /* Access mode flags */
 #endif
-  FAR void                    *i_private;    /* Driver private data */
+  FAR void                    *i_private;    /* Per inode driver private data */
   char                         i_name[1];    /* Name of inode (variable) */
 };
 #define FSNODE_SIZE(n) (sizeof(struct inode) + (n))
@@ -220,11 +249,13 @@ EXTERN STATUS register_blockdriver(const char *path,
                                    const struct block_operations *bops,
                                    mode_t mode, void *private);
 
-/* fs_inoderemove.c *********************************************************/
+/* fs_unregisterdriver.c ****************************************************/
 
-EXTERN STATUS inode_remove(const char *path);
-#define unregister_driver(p) inode_remove(p)
-#define unregister_blockdriver(p) inode_remove(p)
+EXTERN STATUS unregister_driver(const char *path);
+
+/* fs_unregisterblockdriver.c ***********************************************/
+
+EXTERN STATUS unregister_blockdriver(const char *path);
 
 /* fs_open.c ****************************************************************/
 
