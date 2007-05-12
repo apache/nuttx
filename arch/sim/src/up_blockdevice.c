@@ -94,8 +94,7 @@ static const struct block_operations g_bops =
 
 static int up_open(FAR struct file *filp)
 {
-    filp->f_priv = (void*)up_deviceimage();
-  return 0;
+  return OK;
 }
 
 /****************************************************************************
@@ -107,12 +106,7 @@ static int up_open(FAR struct file *filp)
 
 static int up_close(FAR struct file *filp)
 {
-  if (filp->f_priv)
-    {
-        free(filp->f_priv);
-        filp->f_priv = NULL;
-    }
-  return 0;
+  return OK;
 }
 
 /****************************************************************************
@@ -125,18 +119,21 @@ static int up_close(FAR struct file *filp)
 static ssize_t up_read(FAR struct file *filp, char *buffer,
                        size_t start_sector, size_t nsectors)
 {
-  char *src = filp->f_priv;
-  if (src &&
-      start_sector < NSECTORS &&
-      start_sector + nsectors < NSECTORS)
+  struct inode *inode = filp->f_inode;
+  if (inode)
     {
-      memcpy(buffer, &src[start_sector*LOGICAL_SECTOR_SIZE], nsectors*LOGICAL_SECTOR_SIZE);
-      return OK;
+      char *src = inode->i_private;
+      if (src &&
+          start_sector < NSECTORS &&
+          start_sector + nsectors < NSECTORS)
+        {
+          memcpy(buffer,
+                 &src[start_sector*LOGICAL_SECTOR_SIZE],
+                 nsectors*LOGICAL_SECTOR_SIZE);
+          return OK;
+        }
     }
-  else
-    {
-      return -EINVAL;
-    }
+  return -EINVAL;
 }
 
 /****************************************************************************
@@ -149,18 +146,21 @@ static ssize_t up_read(FAR struct file *filp, char *buffer,
 static ssize_t up_write(FAR struct file *filp, const char *buffer,
                         size_t start_sector, size_t nsectors)
 {
-  char *dest = filp->f_priv;
-  if (dest &&
-      start_sector < NSECTORS &&
-      start_sector + nsectors < NSECTORS)
+  struct inode *inode = filp->f_inode;
+  if (inode)
     {
-      memcpy(&dest[start_sector*LOGICAL_SECTOR_SIZE], buffer, nsectors*LOGICAL_SECTOR_SIZE);
-      return OK;
+      char *dest = inode->i_private;
+      if (dest &&
+          start_sector < NSECTORS &&
+          start_sector + nsectors < NSECTORS)
+        {
+          memcpy(&dest[start_sector*LOGICAL_SECTOR_SIZE],
+                 buffer,
+                 nsectors*LOGICAL_SECTOR_SIZE);
+          return OK;
+        }
     }
-  else
-    {
-      return -EINVAL;
-    }
+  return -EINVAL;
 }
 
 /****************************************************************************
@@ -172,9 +172,10 @@ static ssize_t up_write(FAR struct file *filp, const char *buffer,
 
 static size_t up_geometry(FAR struct file *filp, struct geometry *geometry)
  {
+   struct inode *inode = filp->f_inode;
    if (geometry)
      {
-       geometry->geo_available  = (filp->f_priv != NULL);
+       geometry->geo_available  = (inode->i_private != NULL);
        geometry->geo_nsectors   = NSECTORS;
        geometry->geo_sectorsize = LOGICAL_SECTOR_SIZE;
        return OK;
@@ -195,7 +196,7 @@ static size_t up_geometry(FAR struct file *filp, struct geometry *geometry)
 
 void up_registerblockdevice(void)
 {
-   (void)register_blockdriver("/dev/blkdev", &g_bops, 0, NULL);
+  /* Inode private data is a filesystem image */
+  void *priv = (void*)up_deviceimage();
+  (void)register_blockdriver("/dev/blkdev", &g_bops, 0, priv);
 }
-
-
