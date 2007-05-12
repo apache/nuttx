@@ -44,6 +44,7 @@
 # CONFIG_ARCH_CHIP_name - For use in C code
 # CONFIG_ARCH_BOARD - identifies the configs subdirectory and, hence,
 #   the board that supports the particular chip or SoC.
+# CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
 # CONFIG_ARCH_BOARD_name - for use in C code
 # CONFIG_BOARD_LOOPSPERMSEC - for delay loops
 # CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to lpc2148.

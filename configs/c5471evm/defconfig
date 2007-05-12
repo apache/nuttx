@@ -46,6 +46,7 @@
 #   the board that supports the particular chip or SoC.
 # CONFIG_ARCH_BOARD_name - for use in C code
 # CONFIG_BOARD_LOOPSPERMSEC - for delay loops
+# CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
 # CONFIG_ROM_VECTORS - unique to c5471
 # CONFIG_DRAM_END - the size of installed DRAM.
 #   Unique to c5471

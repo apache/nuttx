@@ -42,6 +42,7 @@
 # CONFIG_ARCH_BOARD - identifies the configs subdirectory and, hence,
 #   the board that supports the particular chip or SoC.
 # CONFIG_ARCH_BOARD_name - for use in C code
+# CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
 #
 CONFIG_ARCH=pjrc-8051
 CONFIG_ARCH_8051=n
