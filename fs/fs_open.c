@@ -76,6 +76,7 @@ int open(const char *path, int oflags, ...)
 {
   struct filelist *list;
   FAR struct inode *inode;
+  mode_t mode = 0666;
   int status;
   int fd;
 
@@ -90,7 +91,6 @@ int open(const char *path, int oflags, ...)
 
 #ifdef CONFIG_FILE_MODE
 # warning "File creation not implemented"
-  mode_t mode = 0;
 
   /* If the file is opened for creation, then get the mode bits */
 
@@ -153,7 +153,8 @@ int open(const char *path, int oflags, ...)
     {
       if (INODE_IS_MOUNTPT(inode))
         {
-          status = inode->u.i_mops->open((FAR struct file*)&list->fl_files[fd], relpath);
+          status = inode->u.i_mops->open((FAR struct file*)&list->fl_files[fd],
+                                         relpath, oflags, mode);
         }
       else
         {

@@ -120,7 +120,8 @@ struct mountpt_operations
    * because it receives the relative path into the mountpoint.
    */
 
-  int     (*open)(FAR struct file *filp, const char *rel_path);
+  int     (*open)(FAR struct file *filp, const char *rel_path,
+                  int oflags, mode_t mode);
 
   /* The following methods must be identical in signature and position because
    * the struct file_operations and struct mountp_operations are treated like

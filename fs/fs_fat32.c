@@ -214,13 +214,16 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     fat_open(FAR struct file *filp, const char *rel_path);
+static int     fat_open(FAR struct file *filp, const char *rel_path,
+                        int oflags, mode_t mode);
 static int     fat_close(FAR struct file *filp);
 static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen);
-static ssize_t fat_write(FAR struct file *filp, const char *buffer, size_t buflen);
+static ssize_t fat_write(FAR struct file *filp, const char *buffer,
+                         size_t buflen);
 static off_t   fat_seek(FAR struct file *filp, off_t offset, int whence);
 static int     fat_ioctl(FAR struct file *filp, int cmd, unsigned long arg);
-static int     fat_bind(FAR struct inode *blkdriver, const void *data, void **handle);
+static int     fat_bind(FAR struct inode *blkdriver, const void *data,
+                        void **handle);
 static int     fat_unbind(void *handle);
 
 /****************************************************************************
@@ -372,7 +375,10 @@ static int fat_checkmount(struct fat_mountpt_s *fs)
     {
       struct fat_file_s *file;
 
-      /* We still think the mount is healthy.  Check an see if this is still the case */
+      /* We still think the mount is healthy.  Check an see if this is
+       * still the case
+       */
+
       if (fs->fs_blkdriver)
         {
           struct inode *inode = fs->fs_blkdriver;
@@ -416,7 +422,8 @@ static int fat_bread(struct fat_mountpt_s *fs, size_t sector)
       struct inode *inode = fs->fs_blkdriver;
       if (inode && inode->u.i_bops && inode->u.i_bops->read)
         {
-          ssize_t nSectorsRead = inode->u.i_bops->read(inode, fs->fs_buffer, sector, 1);
+          ssize_t nSectorsRead = inode->u.i_bops->read(inode, fs->fs_buffer,
+                                                       sector, 1);
           if (nSectorsRead == 1)
             {
               ret = OK;
@@ -604,8 +611,9 @@ static int fat_mount(struct fat_mountpt_s *fs, boolean writeable)
       goto errout;
     }
 
-  /* Search FAT boot record on the drive.  First check at sector zero.  This could
-   * be either the boot record or a partition that refers to the boot record.
+  /* Search FAT boot record on the drive.  First check at sector zero.  This
+   * could be either the boot record or a partition that refers to the boot
+   * record.
    *
    * First read sector zero.  This will be the first access to the drive and a
    * likely failure point.
@@ -620,10 +628,11 @@ static int fat_mount(struct fat_mountpt_s *fs, boolean writeable)
 
   if (fat_checkbootrecord(fs) != OK)
     {
-      /* The contents of sector 0 is not a boot record.  It could be a partition,
-       * however.  Assume it is a partition and get the offset into the partition
-       * table.  This table is at offset MBR_TABLE and is indexed by 16x the
-       * partition number.  Here we support only parition 0.
+      /* The contents of sector 0 is not a boot record.  It could be a
+       * partition, however.  Assume it is a partition and get the offset
+       * into the partition table.  This table is at offset MBR_TABLE and is
+       * indexed by 16x the partition number.  Here we support only
+       * parition 0.
        */
 
       ubyte *partition = &fs->fs_buffer[MBR_TABLE + 0];
@@ -683,7 +692,8 @@ static int fat_mount(struct fat_mountpt_s *fs, boolean writeable)
  * Name: fat_open
  ****************************************************************************/
 
-static int fat_open(FAR struct file *filp, const char *rel_path)
+static int fat_open(FAR struct file *filp, const char *rel_path,
+                    int oflags, mode_t mode)
 {
   struct fat_mountpt_s *fs = filp->f_priv;
   int ret;
@@ -705,15 +715,11 @@ static int fat_open(FAR struct file *filp, const char *rel_path)
 static int fat_close(FAR struct file *filp)
 {
   struct fat_mountpt_s *fs = filp->f_priv;
-  int ret;
 
-  /* Make sure that the mount is still healthy */
+  /* Do not check if the mount is healthy.  We must support closing of
+   * the file even when there is healthy mount.
+   */
 
-  ret = fat_checkmount(fs);
-  if (ret != OK)
-    {
-      return ret;
-    }
   return -ENOSYS;
 }
 
@@ -740,7 +746,8 @@ static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
  * Name: fat_write
  ****************************************************************************/
 
-static ssize_t fat_write(FAR struct file *filp, const char *buffer, size_t buflen)
+static ssize_t fat_write(FAR struct file *filp, const char *buffer,
+                         size_t buflen)
 {
   struct fat_mountpt_s *fs = filp->f_priv;
   int ret;
@@ -806,7 +813,8 @@ static int fat_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int fat_bind(FAR struct inode *blkdriver, const void *data, void **handle)
+static int fat_bind(FAR struct inode *blkdriver, const void *data,
+                    void **handle)
 {
   struct fat_mountpt_s *fs;
   int ret;
@@ -850,7 +858,48 @@ static int fat_bind(FAR struct inode *blkdriver, const void *data, void **handle
 
 static int fat_unbind(void *handle)
 {
-  return -ENOSYS;
+  struct fat_mountpt_s *fs = (struct fat_mountpt_s*)handle;
+  int ret;
+
+  if ( !fs )
+    {
+      return -EINVAL;
+    }
+
+  /* Check if there are sill any files opened on the filesystem. */
+
+  ret = OK; /* Assume success */
+  fat_semtake(fs);
+  if (fs->fs_head)
+    {
+      /* We cannot unmount now.. there are open files */
+
+      ret = -EBUSY;
+    }
+  else
+    {
+       /* Unmount ... close the block driver */
+
+      if (fs->fs_blkdriver)
+        {
+          struct inode *inode = fs->fs_blkdriver;
+          if (inode && inode->u.i_bops && inode->u.i_bops->close)
+            {
+              (void)inode->u.i_bops->close(inode);
+            }
+        }
+
+      /* Release the mountpoint private data */
+
+      if (fs->fs_buffer)
+        {
+          free(fs->fs_buffer);
+        }
+      free(fs);
+    }
+
+  fat_semgive(fs);
+  return ret;
 }
 
 /****************************************************************************
