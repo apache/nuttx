@@ -13,6 +13,10 @@ examples/nsh
 	shell-like application.  With some additional development, NSH will
 	someday be a great NuttX application debugger.
 
+examples/mount
+
+	This contains a simple test of filesystem mountpoints.
+
 examples/null
 
 	This is the do nothing application.  It is only used for bringing

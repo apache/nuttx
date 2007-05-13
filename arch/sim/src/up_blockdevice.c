@@ -129,7 +129,7 @@ static ssize_t up_read(FAR struct inode *inode, unsigned char *buffer,
           memcpy(buffer,
                  &src[start_sector*LOGICAL_SECTOR_SIZE],
                  nsectors*LOGICAL_SECTOR_SIZE);
-          return OK;
+          return nsectors;
         }
     }
   return -EINVAL;
@@ -155,7 +155,7 @@ static ssize_t up_write(FAR struct inode *inode, const unsigned char *buffer,
           memcpy(&dest[start_sector*LOGICAL_SECTOR_SIZE],
                  buffer,
                  nsectors*LOGICAL_SECTOR_SIZE);
-          return OK;
+          return nsectors;
         }
     }
   return -EINVAL;

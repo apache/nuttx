@@ -37,7 +37,10 @@ o USB
 o Libraries
 
 o File system
-- Add some concept like mount points to handle mounted "real" filesystems.
+- Add disk usage stats, stat(), sync(), unlink(), mkdir(), chmod(), rename(),
+etc.
+- FAT32:  long file names
+
 
 o Console Output
 

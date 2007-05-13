@@ -480,8 +480,6 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
   if (MBR_GETSIGNATURE(fs->fs_buffer) != 0xaa55 ||
       MBR_GETROOTENTCNT(fs->fs_buffer) != 0 ||
-      MBR_GETFATSZ16(fs->fs_buffer) != 0 ||
-      MBR_GETTOTSEC16(fs->fs_buffer) != 0 ||
       MBR_GETBYTESPERSEC(fs->fs_buffer) != fs->fs_hwsectorsize)
     {
       return -ENODEV;
@@ -495,7 +493,12 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
    * Determine the number of sectors in a FAT.
    */
 
-  fs->fs_fatsize = MBR_GETFATSZ32(fs->fs_buffer);
+  fs->fs_fatsize = MBR_GETFATSZ16(fs->fs_buffer); /* Should be zero */
+  if (!fs->fs_fatsize)
+    {
+      fs->fs_fatsize = MBR_GETFATSZ32(fs->fs_buffer);
+    }
+
   if (fs->fs_fatsize >= fs->fs_hwnsectors)
     {
       return -ENODEV;
@@ -503,7 +506,12 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
   /* Get the total number of sectors on the volume. */
 
-  fs->fs_fattotsec  = MBR_GETTOTSEC32(fs->fs_buffer);
+  fs->fs_fattotsec = MBR_GETTOTSEC16(fs->fs_buffer); /* Should be zero */
+  if (!fs->fs_fattotsec)
+    {
+      fs->fs_fattotsec = MBR_GETTOTSEC32(fs->fs_buffer);
+    }
+
   if (fs->fs_fattotsec > fs->fs_hwnsectors)
     {
       return -ENODEV;
