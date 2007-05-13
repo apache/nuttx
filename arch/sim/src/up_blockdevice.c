@@ -60,13 +60,13 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     up_open(FAR struct file *filp);
-static int     up_close(FAR struct file *filp);
-static ssize_t up_read(FAR struct file *filp, char *buffer,
+static int     up_open(FAR struct inode *inode);
+static int     up_close(FAR struct inode *inode);
+static ssize_t up_read(FAR struct inode *inode, unsigned char *buffer,
                        size_t start_sector, size_t nsectors);
-static ssize_t up_write(FAR struct file *filp, const char *buffer,
+static ssize_t up_write(FAR struct inode *inode, const unsigned char *buffer,
                         size_t start_sector, size_t nsectors);
-static size_t  up_geometry(FAR struct file *filp, struct geometry *geometry);
+static int     up_geometry(FAR struct inode *inode, struct geometry *geometry);
 
 /****************************************************************************
  * Private Data
@@ -92,7 +92,7 @@ static const struct block_operations g_bops =
  *
  ****************************************************************************/
 
-static int up_open(FAR struct file *filp)
+static int up_open(FAR struct inode *inode)
 {
   return OK;
 }
@@ -104,7 +104,7 @@ static int up_open(FAR struct file *filp)
  *
  ****************************************************************************/
 
-static int up_close(FAR struct file *filp)
+static int up_close(FAR struct inode *inode)
 {
   return OK;
 }
@@ -116,10 +116,9 @@ static int up_close(FAR struct file *filp)
  *
  ****************************************************************************/
 
-static ssize_t up_read(FAR struct file *filp, char *buffer,
+static ssize_t up_read(FAR struct inode *inode, unsigned char *buffer,
                        size_t start_sector, size_t nsectors)
 {
-  struct inode *inode = filp->f_inode;
   if (inode)
     {
       char *src = inode->i_private;
@@ -143,10 +142,9 @@ static ssize_t up_read(FAR struct file *filp, char *buffer,
  *
  ****************************************************************************/
 
-static ssize_t up_write(FAR struct file *filp, const char *buffer,
+static ssize_t up_write(FAR struct inode *inode, const unsigned char *buffer,
                         size_t start_sector, size_t nsectors)
 {
-  struct inode *inode = filp->f_inode;
   if (inode)
     {
       char *dest = inode->i_private;
@@ -170,14 +168,15 @@ static ssize_t up_write(FAR struct file *filp, const char *buffer,
  *
  ****************************************************************************/
 
-static size_t up_geometry(FAR struct file *filp, struct geometry *geometry)
+static int up_geometry(FAR struct inode *inode, struct geometry *geometry)
  {
-   struct inode *inode = filp->f_inode;
    if (geometry)
      {
-       geometry->geo_available  = (inode->i_private != NULL);
-       geometry->geo_nsectors   = NSECTORS;
-       geometry->geo_sectorsize = LOGICAL_SECTOR_SIZE;
+       geometry->geo_available     = (inode->i_private != NULL);
+       geometry->geo_mediachanged  = FALSE;
+       geometry->geo_writeenabled  = TRUE;
+       geometry->geo_nsectors      = NSECTORS;
+       geometry->geo_sectorsize    = LOGICAL_SECTOR_SIZE;
        return OK;
      }
    return -EINVAL;

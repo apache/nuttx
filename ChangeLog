@@ -129,5 +129,6 @@
 	  development board (untested)
 	* Added support for block devices.
 	* Simulated target now exports a VFAT filesystem
+	* Begin support for VFAT filesystem (not yet functional)
 	* Added mount() and umount()
 	* Started m68322

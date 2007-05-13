@@ -81,25 +81,30 @@ struct file_operations
 
 struct geometry
 {
-  boolean geo_available;  /* False if the device is not available */
-  size_t  geo_nsectors;   /* Number of sectors on the device */
-  size_t  geo_sectorsize; /* Size of one sector */
+  boolean geo_available;    /* TRUE: The device is vailable */
+  boolean geo_mediachanged; /* TRUE: The media has changed since last query */
+  boolean geo_writeenabled; /* TRUE: It is okay to write to this device */
+  size_t  geo_nsectors;     /* Number of sectors on the device */
+  size_t  geo_sectorsize;   /* Size of one sector */
 };
 
 /* This structure is provided by block devices when they register with the
- * system.  It is used by file systems to perform filesystem transfers.
+ * system.  It is used by file systems to perform filesystem transfers.  It
+ * differs from the normal driver vtable in several ways -- most notably in
+ * that it deals in struct inode vs. struct filep.
  */
 
+struct inode;
 struct block_operations
 {
-  int     (*open)(FAR struct file *filp);
-  int     (*close)(FAR struct file *filp);
-  ssize_t (*read)(FAR struct file *filp, char *buffer,
+  int     (*open)(FAR struct inode *inode);
+  int     (*close)(FAR struct inode *inode);
+  ssize_t (*read)(FAR struct inode *inode, unsigned char *buffer,
                   size_t start_sector, size_t nsectors);
-  ssize_t (*write)(FAR struct file *filp, const char *buffer,
+  ssize_t (*write)(FAR struct inode *inode, const unsigned char *buffer,
                    size_t start_sector, size_t nsectors);
-  size_t  (*geometry)(FAR struct file *filp, struct geometry *geometry);
-  int     (*ioctl)(FAR struct file *, int, unsigned long);
+  int     (*geometry)(FAR struct inode *inode, struct geometry *geometry);
+  int     (*ioctl)(FAR struct inode *inode, int cmd, unsigned long arg);
 };
 
 /* This structure is provided by a filesystem to describe a mount point.
@@ -135,6 +140,10 @@ struct mountpt_operations
 
   int   (*bind)(FAR struct inode *blkdriver, const void *data, void **handle);
   int   (*unbind)(void *handle);
+
+  /* NOTE:  More operations will be needed here to support:  disk usage stats, stat(),
+   * sync(), unlink(), mkdir(), chmod(), rename(), etc.
+   */
 };
 
 /* This structure represents one inode in the Nuttx psuedo-file system */
