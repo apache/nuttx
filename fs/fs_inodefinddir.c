@@ -104,7 +104,7 @@ FAR struct inode *inode_finddir(const char *path)
 
   /* Handle some special cases */
 
-  node = inode_search(&path, (FAR void*)NULL, (FAR void*)NULL, (FAR const char*)NULL);
+  node = inode_search(&path, (FAR void*)NULL, (FAR void*)NULL, (FAR const char**)NULL);
   if (node)
     {
        /* Does the inode have a child?  If so that the child
