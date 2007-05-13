@@ -78,14 +78,18 @@
 #define MBR_GETSECPERCLUS(p)      UBYTE_VAL(p,BS_SECPERCLUS)
 #define MBR_GETNUMFATS(p)         UBYTE_VAL(p,BS_NUMFATS)
 #define MBR_GETMEDIA(p)           UBYTE_VAL(p,BS_MEDIA)
-#define MBR_GETDRVNUM(p)          UBYTE_VAL(p,BS32_DRVNUM)
-#define MBR_GETBOOTSIG(p)         UBYTE_VAL(p,BS32_BOOTSIG)
+#define MBR_GETDRVNUM16(p)        UBYTE_VAL(p,BS16_DRVNUM)
+#define MBR_GETDRVNUM32(p)        UBYTE_VAL(p,BS32_DRVNUM)
+#define MBR_GETBOOTSIG16(p)       UBYTE_VAL(p,BS16_BOOTSIG)
+#define MBR_GETBOOTSIG32(p)       UBYTE_VAL(p,BS32_BOOTSIG)
 
 #define MBR_PUTSECPERCLUS(p,v)    UBYTE_PUT(p,BS_SECPERCLUS),v)
 #define MBR_PUTNUMFATS(p,v)       UBYTE_PUT(p,BS_NUMFATS,v)
 #define MBR_PUTMEDIA(p,v)         UBYTE_PUT(p,BS_MEDIA,v)
-#define MBR_PUTDRVNUM(p,v)        UBYTE_PUT(p,BS32_DRVNUM,v)
-#define MBR_PUTBOOTSIG(p,v)       UBYTE_PUT(p,BS32_BOOTSIG,v)
+#define MBR_PUTDRVNUM16(p,v)      UBYTE_PUT(p,BS16_DRVNUM,v)
+#define MBR_PUTDRVNUM32(p,v)      UBYTE_PUT(p,BS32_DRVNUM,v)
+#define MBR_PUTBOOTSIG16(p,v)     UBYTE_PUT(p,BS16_BOOTSIG,v)
+#define MBR_PUTBOOTSIG32(p,v)     UBYTE_PUT(p,BS32_BOOTSIG,v)
 
 /* For the all targets, unaligned values need to be accessed byte-by-byte.
  * Some architectures may handle unaligned accesses with special interrupt
@@ -97,12 +101,14 @@
 #define MBR_GETBYTESPERSEC(p)      fat_getuint16(UBYTE_PTR(p,BS_BYTESPERSEC))
 #define MBR_GETROOTENTCNT(p)       fat_getuint16(UBYTE_PTR(p,BS_ROOTENTCNT))
 #define MBR_GETTOTSEC16(p)         fat_getuint16(UBYTE_PTR(p,BS_TOTSEC16))
-#define MBR_GETVOLID(p)            fat_getuint32(UBYTE_PTR(p,BS32_VOLID))
+#define MBR_GETVOLID16(p)          fat_getuint32(UBYTE_PTR(p,BS16_VOLID))
+#define MBR_GETVOLID32(p)          fat_getuint32(UBYTE_PTR(p,BS32_VOLID))
 
 #define MBR_PUTBYTESPERSEC(p,v)    fat_putuint16(UBYTE_PTR(p,BS_BYTESPERSEC),v)
 #define MBR_PUTROOTENTCNT(p,v)     fat_putuint16(UBYTE_PTR(p,BS_ROOTENTCNT),v)
 #define MBR_PUTTOTSEC16(p,v)       fat_putuint16(UBYTE_PTR(p,BS_TOTSEC16),v)
-#define MBR_PUTVOLID(p,v)          fat_putuint32(UBYTE_PTR(p,BS32_VOLID),v)
+#define MBR_PUTVOLID16(p,v)        fat_putuint32(UBYTE_PTR(p,BS16_VOLID),v)
+#define MBR_PUTVOLID32(p,v)        fat_putuint32(UBYTE_PTR(p,BS32_VOLID),v)
 
 /* But for multi-byte values, the endian-ness of the target vs. the little
  * endian order of the byte stream or alignment of the data within the byte
@@ -468,8 +474,11 @@ static int fat_readfsinfo(struct fat_mountpt_s *fs)
 
 static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 {
-  uint32 ndatasectors;
-  uint32 fatsize;
+  uint32  ndatasectors;
+  uint32  fatsize;
+  uint16  rootentcnt;
+  uint16  rootdirsectors = 0;
+  boolean notfat32 = FALSE;
 
   /* Verify the MBR signature at offset 510 in the sector (true even
    * if the sector size is greater than 512.  All FAT file systems have
@@ -479,7 +488,6 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
    */
 
   if (MBR_GETSIGNATURE(fs->fs_buffer) != 0xaa55 ||
-      MBR_GETROOTENTCNT(fs->fs_buffer) != 0 ||
       MBR_GETBYTESPERSEC(fs->fs_buffer) != fs->fs_hwsectorsize)
     {
       return -ENODEV;
@@ -490,16 +498,30 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
    * volume has < 4085 cluseter, a FAT16 volume has fewer than 65,525
    * clusters, and any larger is FAT32.
    *
-   * Determine the number of sectors in a FAT.
+   * Get the number of 32-bit directory entries in root directory (zero
+   * for FAT32.
    */
 
+  fs->fs_rootentcnt = MBR_GETROOTENTCNT(fs->fs_buffer);
+  if (fs->fs_rootentcnt != 0)
+  {
+      notfat32       = TRUE; /* Must be zero for FAT32 */
+      rootdirsectors = (32 * fs->fs_rootentcnt  + fs->fs_hwsectorsize - 1) / fs->fs_hwsectorsize;
+  }
+
+  /* Determine the number of sectors in a FAT. */
+
   fs->fs_fatsize = MBR_GETFATSZ16(fs->fs_buffer); /* Should be zero */
-  if (!fs->fs_fatsize)
+  if (fs->fs_fatsize)
+    {
+      notfat32 = TRUE; /* Must be zero for FAT32 */
+    }
+  else
     {
       fs->fs_fatsize = MBR_GETFATSZ32(fs->fs_buffer);
     }
 
-  if (fs->fs_fatsize >= fs->fs_hwnsectors)
+  if (!fs->fs_fatsize || fs->fs_fatsize >= fs->fs_hwnsectors)
     {
       return -ENODEV;
     }
@@ -507,12 +529,16 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
   /* Get the total number of sectors on the volume. */
 
   fs->fs_fattotsec = MBR_GETTOTSEC16(fs->fs_buffer); /* Should be zero */
-  if (!fs->fs_fattotsec)
+  if (fs->fs_fattotsec)
+    {
+      notfat32 = TRUE; /* Must be zero for FAT32 */
+    }
+  else
     {
       fs->fs_fattotsec = MBR_GETTOTSEC32(fs->fs_buffer);
     }
 
-  if (fs->fs_fattotsec > fs->fs_hwnsectors)
+  if (!fs->fs_fattotsec || fs->fs_fattotsec > fs->fs_hwnsectors)
     {
       return -ENODEV;
     }
@@ -532,7 +558,7 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
   /* Get the total number of data sectors */
 
-  ndatasectors = fs->fs_fattotsec - fs->fs_fatresvdseccount - fatsize;
+  ndatasectors = fs->fs_fattotsec - fs->fs_fatresvdseccount - fatsize - rootdirsectors;
   if (ndatasectors > fs->fs_hwnsectors)
     {
       return -ENODEV;
@@ -548,7 +574,23 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
   /* Finally, the test: */
 
-  if (fs->fs_nclusters < 65525)
+  if (fs->fs_nclusters < 4085)
+    {
+      fs->fs_fsinfo = 0;
+      fs->fs_type   = FSTYPE_FAT12;
+    }
+  else if (fs->fs_nclusters < 65525)
+    {
+      fs->fs_fsinfo = 0;
+      fs->fs_type   = FSTYPE_FAT16;
+    }
+
+  else if (!notfat32)
+    {
+      fs->fs_fsinfo   = fs->fs_fatbase + MBR_GETFSINFO(fs->fs_buffer);
+      fs->fs_type     = FSTYPE_FAT32;
+    }
+  else
     {
       return -ENODEV;
     }
@@ -557,10 +599,18 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
    * from the boot record that we will need later.
    */
 
-  fs->fs_fsinfo       = fs->fs_fatbase + MBR_GETFSINFO(fs->fs_buffer);
   fs->fs_fatbase     += fs->fs_fatresvdseccount;
-  fs->fs_database     = fs->fs_fatbase + fatsize; 
-  fs->fs_rootclus     = MBR_GETROOTCLUS(fs->fs_buffer);
+
+  if (fs->fs_type == FSTYPE_FAT32)
+  {
+      fs->fs_rootbase = MBR_GETROOTCLUS(fs->fs_buffer);
+  }
+  else
+  {
+      fs->fs_rootbase = fs->fs_fatbase + fatsize; 
+  }
+
+  fs->fs_database     = fs->fs_fatbase + fatsize + fs->fs_rootentcnt / (fs->fs_hwsectorsize / 32); 
   fs->fs_fsifreecount = 0xffffffff;
 
   return OK;
@@ -675,13 +725,16 @@ static int fat_mount(struct fat_mountpt_s *fs, boolean writeable)
     }
 
   /* We have what appears to be a valid FAT filesystem! Now read the
-   * FSINFO sector.
+   * FSINFO sector (FAT32 only)
    */
 
-  ret = fat_readfsinfo(fs);
-  if (ret != OK)
+  if (fs->fs_type == FSTYPE_FAT32)
   {
-    goto errout_with_buffer;
+      ret = fat_readfsinfo(fs);
+      if (ret != OK)
+      {
+          goto errout_with_buffer;
+      }
   }
 
   /* We did it! */

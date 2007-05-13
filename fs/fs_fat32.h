@@ -61,7 +61,7 @@
 #define BS_SECPERCLUS      13 /*  1@13: Sectors per allocation unit: 2**n, n=0..7 */
 #define BS_RESVDSECCOUNT   14 /*  2@14: Reserved sector count: Usually 32 */
 #define BS_NUMFATS         16 /*  1@16: Number of FAT data structures: always 2 */
-#define BS_ROOTENTCNT      17 /*  2@17: FAT12/16: Must be 0 for FAT32*/
+#define BS_ROOTENTCNT      17 /*  2@17: FAT12/16: Must be 0 for FAT32 */
 #define BS_TOTSEC16        19 /*  2@19: FAT12/16: Must be 0, see BS32_totsec32 */
 #define BS_MEDIA           21 /*  1@21: Media code: f0, f8, f9-fa, fc-ff */ 
 #define BS_FATSZ16         22 /*  2@22: FAT12/16: Must be 0, see BS32_fatsz32 */
@@ -69,6 +69,15 @@
 #define BS_NUMHEADS        26 /*  2@26: Number of heads geometry value */
 #define BS_HIDSEC          28 /*  4@28: Count of hidden sectors preceding FAT */
 #define BS_TOTSEC32        32 /*  4@32: Total count of sectors on the volume */
+
+/* The following fields are only valid for FAT12/16 */
+
+#define BS16_DRVNUM        36 /*  1@36: Drive number for MSDOS bootstrap */
+                              /*  1@37: Reserverd (zero) */
+#define BS16_BOOTSIG       38 /*  1@38: Extended boot signature: 0x29 if following valid */
+#define BS16_VOLID         39 /*  4@39: Volume serial number */
+#define BS16_VOLLAB        43 /* 11@43: Volume label */
+#define BS16_FILESYSTYPE   54 /*  8@54: "FAT12  ", "FAT16  ", or "FAT    " */
 
 /* The following fields are only valid for FAT32 */
 
@@ -95,6 +104,12 @@
 /* The magic bytes at the end of the MBR are common to FAT12/16/32 */
 
 #define BS_SIGNATURE      510 /*  2@510: Valid MBRs have 0x55aa here */
+
+/* File system types */
+
+#define FSTYPE_FAT12        0
+#define FSTYPE_FAT16        1
+#define FSTYPE_FAT32        2
 
 /****************************************************************************
  * These offset describe the FSINFO sector
@@ -157,15 +172,17 @@ struct fat_mountpt_s
   size_t   fs_hwsectorsize;        /* HW: Sector size reported by block driver*/
   size_t   fs_hwnsectors;          /* HW: The number of sectors reported by the hardware */
   size_t   fs_fatbase;             /* Logical block of start of filesystem (past resd sectors) */
+  size_t   fs_rootbase;            /* MBR: Cluster no. of 1st cluster of root dir */
   size_t   fs_database;            /* Logical block of start data sectors */
   size_t   fs_fsinfo;              /* MBR: Sector number of FSINFO sector */
   uint32   fs_nclusters;           /* Maximum number of data clusters */
-  uint32   fs_rootclus;            /* MBR: Cluster no. of 1st cluster of root dir */
   uint32   fs_fatsize;             /* MBR: Count of sectors occupied by one fat */
   uint32   fs_fattotsec;           /* MBR: Total count of sectors on the volume */
   uint32   fs_fsifreecount;        /* FSI: Last free cluster count on volume */
   uint32   fs_fsinextfree;         /* FSI: Cluster number of 1st free cluster */
   uint16   fs_fatresvdseccount;    /* MBR: The total number of reserved sectors */
+  uint16   fs_rootentcnt;          /* MBR: Count of 32-bit root directory entries */
+  ubyte    fs_type;                /* FSTYPE_FAT12, FSTYPE_FAT16, or FSTYPE_FAT32 */
   ubyte    fs_fatnumfats;          /* MBR: Number of FATs (probably 2) */
   ubyte    fs_fatsecperclus;       /* MBR: Sectors per allocation unit: 2**n, n=0..7 */
   ubyte   *fs_buffer;              /* This is an allocated buffer to hold one sector
