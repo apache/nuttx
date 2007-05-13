@@ -43,6 +43,7 @@
 #include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/fs.h>
 
@@ -476,7 +477,6 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 {
   uint32  ndatasectors;
   uint32  fatsize;
-  uint16  rootentcnt;
   uint16  rootdirsectors = 0;
   boolean notfat32 = FALSE;
 
@@ -602,13 +602,13 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
   fs->fs_fatbase     += fs->fs_fatresvdseccount;
 
   if (fs->fs_type == FSTYPE_FAT32)
-  {
+    {
       fs->fs_rootbase = MBR_GETROOTCLUS(fs->fs_buffer);
-  }
+    }
   else
-  {
+    {
       fs->fs_rootbase = fs->fs_fatbase + fatsize; 
-  }
+    }
 
   fs->fs_database     = fs->fs_fatbase + fatsize + fs->fs_rootentcnt / (fs->fs_hwsectorsize / 32); 
   fs->fs_fsifreecount = 0xffffffff;
@@ -738,6 +738,23 @@ static int fat_mount(struct fat_mountpt_s *fs, boolean writeable)
   }
 
   /* We did it! */
+
+  dbg("FAT%d:\n", fs->fs_type == 0 ? 12 : fs->fs_type == 1  ? 16 : 32);
+  dbg("\tHW  sector size:     %d\n", fs->fs_hwsectorsize);
+  dbg("\t    sectors:         %d\n", fs->fs_hwnsectors);
+  dbg("\tFAT reserved:        %d\n", fs->fs_fatresvdseccount);
+  dbg("\t    sectors:         %d\n", fs->fs_fattotsec);
+  dbg("\t    start sector:    %d\n", fs->fs_fatbase);
+  dbg("\t    root sector:     %d\n", fs->fs_rootbase);
+  dbg("\t    root entries:    %d\n", fs->fs_rootentcnt);
+  dbg("\t    data sector:     %d\n", fs->fs_database);
+  dbg("\t    FSINFO sector:   %d\n", fs->fs_fsinfo);
+  dbg("\t    Num FATs:        %d\n", fs->fs_fatnumfats);
+  dbg("\t    FAT size:        %d\n", fs->fs_fatsize);
+  dbg("\t    sectors/cluster: %d\n", fs->fs_fatsecperclus);
+  dbg("\t    max clusters:    %d\n", fs->fs_nclusters);
+  dbg("\tFSI free count       %d\n", fs->fs_fsifreecount);
+  dbg("\t    next free        %d\n", fs->fs_fsinextfree);
 
   return OK;
 
