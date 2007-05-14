@@ -37,8 +37,15 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdio.h>
 #include <sys/mount.h>
+#include <sys/types.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <fcntl.h>
+#include <errno.h>
 
 /****************************************************************************
  * Definitions
@@ -52,9 +59,13 @@
  * Private Data
  ****************************************************************************/
 
-static const char g_source[]         ="/dev/blkdev";
+static const char g_source[]         = "/dev/blkdev";
 static const char g_target[]         = "/mnt/fs";
 static const char g_filesystemtype[] = "vfat";
+
+static const char g_testfile1[]      = "/mnt/fs/nuttx-test/test-file.txt";
+static const char g_testfile2[]      = "/mnt/fs/nuttx-test/write-test.txt";
+static const char g_testmsg[]        = "This is a write test";
 
 /****************************************************************************
  * Private Functions
@@ -85,6 +96,41 @@ int user_start(int argc, char *argv[])
 
   ret = mount(g_source, g_target, g_filesystemtype, 0, NULL);
   printf("main: mount() returned %d\n", ret);
+
+  if (ret == 0)
+    {
+      printf("main: opening %s for reading\n", g_testfile1);
+
+      int fd = open(g_testfile1, O_RDONLY);
+      if (fd < 0)
+        {
+          printf("main: failed open %s, errno=%d\n", g_testfile1, *get_errno_ptr());
+        }
+      else
+        {
+          close(fd);
+        }
+
+      printf("main: opening %s for reading\n", g_testfile2);
+
+      fd = open(g_testfile2, O_WRONLY|O_CREAT|O_TRUNC, 0644);
+      if (fd < 0)
+        {
+          printf("main: failed open %s, errno=%d\n", g_testfile2, *get_errno_ptr());
+        }
+      else
+        {
+          int nbytes = write(fd, g_testmsg, strlen(g_testmsg));
+          if (nbytes < 0)
+            {
+              printf("main: failed to write to %s, errno=%d\n", g_testfile2, *get_errno_ptr());
+            }
+          close(fd);
+        }
+
+      ret = umount(g_target);
+      printf("main: umount() returned %d\n", ret);
+    }
   
   fflush(stdout);
   return 0;
