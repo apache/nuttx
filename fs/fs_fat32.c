@@ -221,8 +221,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     fat_open(FAR struct file *filp, const char *rel_path,
-                        int oflags, mode_t mode);
+static int     fat_open(FAR struct file *filp, FAR struct inode *inode,
+                        const char *rel_path, int oflags, mode_t mode);
 static int     fat_close(FAR struct file *filp);
 static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen);
 static ssize_t fat_write(FAR struct file *filp, const char *buffer,
@@ -770,20 +770,62 @@ static int fat_mount(struct fat_mountpt_s *fs, boolean writeable)
  * Name: fat_open
  ****************************************************************************/
 
-static int fat_open(FAR struct file *filp, const char *rel_path,
-                    int oflags, mode_t mode)
+static int fat_open(FAR struct file *filp, FAR struct inode *inode,
+                    const char *rel_path, int oflags, mode_t mode)
 {
-  struct fat_mountpt_s *fs = filp->f_priv;
-  int ret;
+  struct fat_mountpt_s *fs = (struct fat_mountpt_s *)inode->i_private;
+  struct fat_file_s *ff;
+  int ret = OK;
  
   /* Make sure that the mount is still healthy */
+  if (!fs)
+    {
+      ret = -ENOSYS;
+      goto errout;
+    }
 
- ret = fat_checkmount(fs);
+  fat_semtake(fs);
+  ret = fat_checkmount(fs);
   if (ret != OK)
     {
-      return ret;
+      goto errout_with_semaphore;
     }
-  return -ENOSYS;
+
+  /* Allocate a new private instance for the struct file */
+
+  ff = (struct fat_file_s *)malloc(sizeof(struct fat_file_s));
+  if (!ff)
+    {
+      ret = -ENOMEM;
+      goto errout_with_semaphore;
+    }
+
+  /* Find the requested path and open or create the file */
+#warning "Open logic missing"
+
+  /* Initialize the new private instance */
+
+  ff->ff_parent = fs;
+  ff->ff_open   = TRUE;
+
+  /* Then insert the new instance into the mountpoint structure.
+   * It needs to be there (1) to handle error conditions that effect
+   * all files, and (2) to inform the umount logic that we are busy
+   * (but a simple reference count could have done that).
+   */
+
+  ff->ff_next = fs->fs_head;
+  fs->fs_head = ff->ff_next;
+
+  fat_semgive(fs);
+  return OK;
+
+ errout_with_alloc:
+  free(ff);
+ errout_with_semaphore:
+  fat_semgive(fs);
+ errout:
+  return ret;
 }
 
 /****************************************************************************
@@ -792,7 +834,13 @@ static int fat_open(FAR struct file *filp, const char *rel_path,
 
 static int fat_close(FAR struct file *filp)
 {
-  struct fat_mountpt_s *fs = filp->f_priv;
+  struct fat_file_s *ff = filp->f_priv;
+  struct fat_mountpt_s *fs;
+
+  if (!ff || !(fs = ff->ff_parent))
+    {
+      return -EINVAL;
+    }
 
   /* Do not check if the mount is healthy.  We must support closing of
    * the file even when there is healthy mount.
@@ -807,8 +855,14 @@ static int fat_close(FAR struct file *filp)
 
 static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
 {
-  struct fat_mountpt_s *fs = filp->f_priv;
+  struct fat_file_s *ff = filp->f_priv;
+  struct fat_mountpt_s *fs;
   int ret;
+
+  if (!ff || !(fs = ff->ff_parent))
+    {
+      return -EINVAL;
+    }
 
   /* Make sure that the mount is still healthy */
 
@@ -827,8 +881,14 @@ static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
 static ssize_t fat_write(FAR struct file *filp, const char *buffer,
                          size_t buflen)
 {
-  struct fat_mountpt_s *fs = filp->f_priv;
+  struct fat_file_s *ff = filp->f_priv;
+  struct fat_mountpt_s *fs;
   int ret;
+
+  if (!ff || !(fs = ff->ff_parent))
+    {
+      return -EINVAL;
+    }
 
   /* Make sure that the mount is still healthy */
 
@@ -846,8 +906,14 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
 
 static off_t fat_seek(FAR struct file *filp, off_t offset, int whence)
 {
-  struct fat_mountpt_s *fs = filp->f_priv;
+  struct fat_file_s *ff = filp->f_priv;
+  struct fat_mountpt_s *fs;
   int ret;
+
+  if (!ff || !(fs = ff->ff_parent))
+    {
+      return -EINVAL;
+    }
 
   /* Make sure that the mount is still healthy */
 
@@ -865,8 +931,14 @@ static off_t fat_seek(FAR struct file *filp, off_t offset, int whence)
 
 static int fat_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
 {
-  struct fat_mountpt_s *fs = filp->f_priv;
+  struct fat_file_s *ff = filp->f_priv;
+  struct fat_mountpt_s *fs;
   int ret;
+
+  if (!ff || !(fs = ff->ff_parent))
+    {
+      return -EINVAL;
+    }
 
   /* Make sure that the mount is still healthy */
 

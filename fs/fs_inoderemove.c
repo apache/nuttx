@@ -112,9 +112,9 @@ STATUS inode_remove(const char *path)
   FAR struct inode *left;
   FAR struct inode *parent;
 
-  if (*path && path[0] == '/')
+  if (!*path || path[0] != '/')
     {
-      return ERROR;
+      return -EINVAL;
     }
 
   /* Find the node to delete */

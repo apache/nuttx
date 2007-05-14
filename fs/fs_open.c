@@ -154,7 +154,7 @@ int open(const char *path, int oflags, ...)
       if (INODE_IS_MOUNTPT(inode))
         {
           status = inode->u.i_mops->open((FAR struct file*)&list->fl_files[fd],
-                                         relpath, oflags, mode);
+                                         inode, relpath, oflags, mode);
         }
       else
         {

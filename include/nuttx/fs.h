@@ -117,11 +117,13 @@ struct inode;
 struct mountpt_operations
 {
   /* The mountpoint open method differs from the driver open method
-   * because it receives the relative path into the mountpoint.
+   * because it receives (1) the inode that contains the mountpoint
+   * private data, (2) the relative path into the mountpoint, and (3)
+   * information to manage privileges.
    */
 
-  int     (*open)(FAR struct file *filp, const char *rel_path,
-                  int oflags, mode_t mode);
+  int     (*open)(FAR struct file *filp, FAR struct inode *inode, 
+                  const char *rel_path, int oflags, mode_t mode);
 
   /* The following methods must be identical in signature and position because
    * the struct file_operations and struct mountp_operations are treated like

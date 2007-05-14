@@ -196,6 +196,7 @@ struct fat_mountpt_s
 struct fat_file_s
 {
   struct fat_file_s *ff_next;     /* File structures are retained in a singly linked list */
+  struct fat_mountpt_s *ff_parent;
   boolean  ff_open;               /* TRUE: The file is (still) open */
 };
 

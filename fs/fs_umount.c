@@ -104,12 +104,11 @@ int umount(const char *target)
 
   /* Find the mountpt */
 
-  inode_semtake();
   mountpt_inode = inode_find(target, NULL);
   if (!mountpt_inode)
     {
       errcode = ENOENT;
-      goto errout_with_semaphore;
+      goto errout;
     }
 
   /* Verify that the inode is a mountpoint */
@@ -137,18 +136,19 @@ int umount(const char *target)
    * performed, or a negated error code on a failure.
    */
 
+  inode_semtake(); /* Hold the semaphore through the unbind logic */
   status = mountpt_inode->u.i_mops->unbind( mountpt_inode->i_private );
   if (status < 0)
     {
       /* The inode is unhappy with the blkdrvr for some reason */
 
       errcode = -status;
-      goto errout_with_mountpt;
+      goto errout_with_semaphore;
     }
   else if (status > 0)
     {
       errcode = EBUSY;
-      goto errout_with_mountpt;
+      goto errout_with_semaphore;
     }
 
   /* Successfully unbound */
@@ -157,17 +157,20 @@ int umount(const char *target)
 
   /* Remove the inode */
 
+  inode_semgive(); /* Need to release for inode_release */
   inode_release(mountpt_inode);
+
+  inode_semtake(); /* Need to hold for inode_remove */
   status = inode_remove(target);
   inode_semgive();
   return status;
 
   /* A lot of goto's!  But they make the error handling much simpler */
 
- errout_with_mountpt:
-  inode_release(mountpt_inode);
  errout_with_semaphore:
   inode_semgive();
+ errout_with_mountpt:
+  inode_release(mountpt_inode);
  errout:
   *get_errno_ptr() = errcode;
   return ERROR;
