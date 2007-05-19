@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs_fat.h
+ * fs_fat32.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -105,11 +105,64 @@
 
 #define BS_SIGNATURE      510 /*  2@510: Valid MBRs have 0x55aa here */
 
+/****************************************************************************
+ * Each FAT directory entry is 32-bytes long.  The following define offsets
+ * relative to the beginning of a directory entry.
+ */
+
+#define DIR_NAME            0 /* 11@ 0: NAME: 8 bytes + 3 byte extension */
+#define DIR_ATTRIBUTES     11 /*  1@11: File attibutes (see below) */
+#define DIR_NTRES          12 /*  1@12: Reserved for use by NT */
+#define DIR_CRTTIMETENTH   13 /*  1@13: Tenth sec creation timestamp */
+#define DIR_CRTIME         14 /*  2@14: Time file created */
+#define DIR_CRDATE         16 /*  2@16: Date file created */
+#define DIR_LASTACCDATE    18 /*  2@19: Last access date */
+#define DIR_FSTCLUSTHI     20 /*  2@20: MS first cluster number */
+#define DIR_WRTTIME        22 /*  2@22: Time of last write */
+#define DIR_WRTDATE        24 /*  2@24: Date of last write */
+#define DIR_FSTCLUSTLO     26 /*  2@26: LS first cluster number */
+#define DIR_FILESIZE       28 /*  4@28: File size in bytes */
+
+/* First byte of the directory name has special meanings: */
+
+#define DIR0_EMPTY        0xe5 /* The directory entry is empty */
+#define DIR0_ALLEMPTY     0x00 /* This entry and all following are empty */
+#define DIR0_E5           0x05 /* The actual value is 0xe5 */
+
+/* NTRES flags in the FAT directory */
+
+#define FATNTRES_LCNAME   0x08 /* Lower case in name */
+#define FATNTRES_LCEXT    0x10 /* Lower case in extension */
+
+/* File attribute bits in FAT directory entry */
+
+#define FATATTR_READONLY  0x01
+#define FATATTR_HIDDEN    0x02
+#define FATATTR_SYSTEM    0x04
+#define FATATTR_VOLUMEID  0x08
+#define FATATTR_DIRECTORY 0x10
+#define FATATTR_ARCHIVE   0x20
+
+#define FATATTR_LONGNAME \
+  (FATATTR_READONLY|FATATTR_HIDDEN|FATATTR_SYSTEM|FATATTR_VOLUMEID)
+
 /* File system types */
 
 #define FSTYPE_FAT12        0
 #define FSTYPE_FAT16        1
 #define FSTYPE_FAT32        2
+
+/* Directory indexing helper.  Each directory entry is 32-bytes in length.
+ * The number of directory entries in a sector then varies with the size
+ * of the sector supported in hardware.
+ */
+
+#define DIRSEC_NDXMASK(f)   (((f)->fs_hwsectorsize - 1) >> 5)
+#define DIRSEC_NDIRS(f)     (((f)->fs_hwsectorsize) >> 5)
+#define DIRSEC_BYTENDX(f,i) (((i) & DIRSEC_NDXMASK(fs)) << 5)
+
+#define SEC_NDXMASK(f)      ((f)->fs_hwsectorsize - 1)
+#define SEC_NSECTORS(f,n)   ((n) / (f)->fs_hwsectorsize)
 
 /****************************************************************************
  * These offset describe the FSINFO sector
@@ -124,37 +177,223 @@
 #define FSI_TRAILSIG      508 /*   4@508: 0xaa550000 */
 
 /****************************************************************************
+ * Access to data in raw sector data */
+
+#define UBYTE_VAL(p,o)            (((ubyte*)(p))[o])
+#define UBYTE_PTR(p,o)            &UBYTE_VAL(p,o)
+#define UBYTE_PUT(p,o,v)          (UBYTE_VAL(p,o)=(ubyte)(v))
+
+#define UINT16_PTR(p,o)           ((uint16*)UBYTE_PTR(p,o))
+#define UINT16_VAL(p,o)           (*UINT16_PTR(p,o))
+#define UINT16_PUT(p,o,v)         (UINT16_VAL(p,o)=(uint16)(v))
+
+#define UINT32_PTR(p,o)           ((uint32*)UBYTE_PTR(p,o))
+#define UINT32_VAL(p,o)           (*UINT32_PTR(p,o))
+#define UINT32_PUT(p,o,v)         (UINT32_VAL(p,o)=(uint32)(v))
+
+/* Regardless of the endian-ness of the target or alignment of the data, no
+ * special operations are required for byte, string or byte array accesses.
+ * The FAT data stream is little endian so multiple byte values must be
+ * accessed byte-by-byte for big-endian targets.
+ */
+
+#define MBR_GETSECPERCLUS(p)      UBYTE_VAL(p,BS_SECPERCLUS)
+#define MBR_GETNUMFATS(p)         UBYTE_VAL(p,BS_NUMFATS)
+#define MBR_GETMEDIA(p)           UBYTE_VAL(p,BS_MEDIA)
+#define MBR_GETDRVNUM16(p)        UBYTE_VAL(p,BS16_DRVNUM)
+#define MBR_GETDRVNUM32(p)        UBYTE_VAL(p,BS32_DRVNUM)
+#define MBR_GETBOOTSIG16(p)       UBYTE_VAL(p,BS16_BOOTSIG)
+#define MBR_GETBOOTSIG32(p)       UBYTE_VAL(p,BS32_BOOTSIG)
+
+#define DIR_GETATTRIBUTES(p)      UBYTE_VAL(p,DIR_ATTRIBUTES)
+#define DIR_GETNTRES(p)           UBYTE_VAL(p,DIR_NTRES)
+#define DIR_GETCRTTIMETENTH(p)    UBYTE_VAL(p,DIR_CRTTIMETENTH)
+
+#define MBR_PUTSECPERCLUS(p,v)    UBYTE_PUT(p,BS_SECPERCLUS),v)
+#define MBR_PUTNUMFATS(p,v)       UBYTE_PUT(p,BS_NUMFATS,v)
+#define MBR_PUTMEDIA(p,v)         UBYTE_PUT(p,BS_MEDIA,v)
+#define MBR_PUTDRVNUM16(p,v)      UBYTE_PUT(p,BS16_DRVNUM,v)
+#define MBR_PUTDRVNUM32(p,v)      UBYTE_PUT(p,BS32_DRVNUM,v)
+#define MBR_PUTBOOTSIG16(p,v)     UBYTE_PUT(p,BS16_BOOTSIG,v)
+#define MBR_PUTBOOTSIG32(p,v)     UBYTE_PUT(p,BS32_BOOTSIG,v)
+
+#define DIR_PUTATTRIBUTES(p,v)    UBYTE_PUT(p,DIR_ATTRIBUTES,v)
+#define DIR_PUTNTRES(p,v)         UBYTE_PUT(p,DIR_NTRES,v)
+#define DIR_PUTCRTTIMETENTH(p,v)  UBYTE_PUT(p,DIR_CRTTIMETENTH,v)
+
+/* For the all targets, unaligned values need to be accessed byte-by-byte.
+ * Some architectures may handle unaligned accesses with special interrupt
+ * handlers.  But even in that case, it is more efficient to avoid the traps.
+ */
+
+/* Unaligned multi-byte access macros */
+
+#define MBR_GETBYTESPERSEC(p)      fat_getuint16(UBYTE_PTR(p,BS_BYTESPERSEC))
+#define MBR_GETROOTENTCNT(p)       fat_getuint16(UBYTE_PTR(p,BS_ROOTENTCNT))
+#define MBR_GETTOTSEC16(p)         fat_getuint16(UBYTE_PTR(p,BS_TOTSEC16))
+#define MBR_GETVOLID16(p)          fat_getuint32(UBYTE_PTR(p,BS16_VOLID))
+#define MBR_GETVOLID32(p)          fat_getuint32(UBYTE_PTR(p,BS32_VOLID))
+
+#define MBR_PUTBYTESPERSEC(p,v)    fat_putuint16(UBYTE_PTR(p,BS_BYTESPERSEC),v)
+#define MBR_PUTROOTENTCNT(p,v)     fat_putuint16(UBYTE_PTR(p,BS_ROOTENTCNT),v)
+#define MBR_PUTTOTSEC16(p,v)       fat_putuint16(UBYTE_PTR(p,BS_TOTSEC16),v)
+#define MBR_PUTVOLID16(p,v)        fat_putuint32(UBYTE_PTR(p,BS16_VOLID),v)
+#define MBR_PUTVOLID32(p,v)        fat_putuint32(UBYTE_PTR(p,BS32_VOLID),v)
+
+/* But for multi-byte values, the endian-ness of the target vs. the little
+ * endian order of the byte stream or alignment of the data within the byte
+ * stream can force special, byte-by-byte accesses.
+ */
+
+#ifdef CONFIG_ARCH_BIGENDIAN
+
+/* If the target is big-endian, then even aligned multi-byte values must be
+ * accessed byte-by-byte.
+ */
+
+# define MBR_GETRESVDSECCOUNT(p)   fat_getuint16(UBYTE_PTR(p,BS_RESVDSECCOUNT))
+# define MBR_GETFATSZ16(p)         fat_getuint16(UBYTE_PTR(p,BS_FATSZ16))
+# define MBR_GETSECPERTRK(p)       fat_getuint16(UBYTE_PTR(p,BS_SECPERTRK))
+# define MBR_GETNUMHEADS(p)        fat_getuint16(UBYTE_PTR(p,BS_NUMHEADS))
+# define MBR_GETHIDSEC(p)          fat_getuint32(UBYTE_PTR(p,BS_HIDSEC))
+# define MBR_GETTOTSEC32(p)        fat_getuint32(UBYTE_PTR(p,BS_TOTSEC32))
+# define MBR_GETFATSZ32(p)         fat_getuint32(UBYTE_PTR(p,BS32_FATSZ32))
+# define MBR_GETEXTFLAGS(p)        fat_getuint16(UBYTE_PTR(p,BS32_EXTFLAGS))
+# define MBR_GETFSVER(p)           fat_getuint16(UBYTE_PTR(p,BS32_FSVER))
+# define MBR_GETROOTCLUS(p)        fat_getuint32(UBYTE_PTR(p,BS32_ROOTCLUS))
+# define MBR_GETFSINFO(p)          fat_getuint16(UBYTE_PTR(p,BS32_FSINFO))
+# define MBR_GETBKBOOTSEC(p)       fat_getuint16(UBYTE_PTR(p,BS32_BKBOOTSEC))
+# define MBR_GETSIGNATURE(p)       fat_getuint16(UBYTE_PTR(p,BS_SIGNATURE))
+
+# define MBR_GETPARTSECTOR(s)      fat_getuint32(s)
+
+# define FSI_GETLEADSIG(p)         fat_getuint32(UBYTE_PTR(p,FSI_LEADSIG))
+# define FSI_GETSTRUCTSIG(p)       fat_getuint32(UBYTE_PTR(p,FSI_STRUCTSIG))
+# define FSI_GETFREECOUNT(p)       fat_getuint32(UBYTE_PTR(p,FSI_FREECOUNT))
+# define FSI_GETNXTFREE(p)         fat_getuint32(UBYTE_PTR(p,FSI_NXTFREE))
+# define FSI_GETTRAILSIG(p)        fat_getuint32(UBYTE_PTR(p,FSI_TRAILSIG))
+
+# define DIR_GETCRTIME(p)          fat_getuint16(UBYTE_PTR(p,DIR_CRTIME))
+# define DIR_GETCRDATE(p)          fat_getuint16(UBYTE_PTR(p,DIR_CRDATE))
+# define DIR_GETLASTACCDATE(p)     fat_getuint16(UBYTE_PTR(p,DIR_LASTACCDTE))
+# define DIR_GETFSTCLUSTHI(p)      fat_getuint16(UBYTE_PTR(p,DIR_FSTCLUSTHI))
+# define DIR_GETWRTTIME(p)         fat_getuint16(UBYTE_PTR(p,DIR_WRTTIME))
+# define DIR_GETWRTDATE(p)         fat_getuint16(UBYTE_PTR(p,DIR_WRTDATE))
+# define DIR_GETFSTCLUSTLO(p)      fat_getuint16(UBYTE_PTR(p,DIR_FSTCLUSTLO))
+# define DIR_GETFILESIZE(p)        fat_getuint32(UBYTE_PTR(p,DIR_FILESIZE))
+
+# define FAT_GETFAT16(p,i)         fat_getuint16(UBYTE_PTR(p,i))
+# define FAT_GETFAT32(p,i)         fat_getuint32(UBYTE_PTR(p,i))
+
+# define MBR_PUTRESVDSECCOUNT(p,v) fat_putuint16(UBYTE_PTR(p,BS_RESVDSECCOUNT,v))
+# define MBR_PUTFATSZ16(p,v)       fat_putuint16(UBYTE_PTR(p,BS_FATSZ16,v))
+# define MBR_PUTSECPERTRK(p,v)     fat_putuint16(UBYTE_PTR(p,BS_SECPERTRK,v))
+# define MBR_PUTNUMHEADS(p,v)      fat_putuint16(UBYTE_PTR(p,BS_NUMHEADS,v))
+# define MBR_PUTHIDSEC(p,v)        fat_putuint32(UBYTE_PTR(p,BS_HIDSEC,v))
+# define MBR_PUTTOTSEC32(p,v)      fat_putuint32(UBYTE_PTR(p,BS_TOTSEC32,v))
+# define MBR_PUTFATSZ32(p,v)       fat_putuint32(UBYTE_PTR(p,BS32_FATSZ32,v))
+# define MBR_PUTEXTFLAGS(p,v)      fat_putuint16(UBYTE_PTR(p,BS32_EXTFLAGS,v))
+# define MBR_PUTFSVER(p,v)         fat_putuint16(UBYTE_PTR(p,BS32_FSVER,v))
+# define MBR_PUTROOTCLUS(p,v)      fat_putuint32(UBYTE_PTR(p,BS32_ROOTCLUS,v))
+# define MBR_PUTFSINFO(p,v)        fat_putuint16(UBYTE_PTR(p,BS32_FSINFO,v))
+# define MBR_PUTBKBOOTSEC(p,v)     fat_putuint16(UBYTE_PTR(p,BS32_BKBOOTSEC,v))
+# define MBR_PUTSIGNATURE(p,v)     fat_getuint16(UBYTE_PTR(p,BS_SIGNATURE),v)
+
+# define FSI_PUTLEADSIG(p,v)       fat_putuint32(UBYTE_PTR(p,FSI_LEADSIG),v)
+# define FSI_PUTSTRUCTSIG(p,v)     fat_putuint32(UBYTE_PTR(p,FSI_STRUCTSIG),v)
+# define FSI_PUTFREECOUNT(p,v)     fat_putuint32(UBYTE_PTR(p,FSI_FREECOUNT),v)
+# define FSI_PUTNXTFREE(p,v)       fat_putuint32(UBYTE_PTR(p,FSI_NXTFREE),v)
+# define FSI_PUTTRAILSIG(p,v)      fat_putuint32(UBYTE_PTR(p,FSI_TRAILSIG),v)
+
+# define DIR_PUTCRTIME(p,v)        fat_putuint16(UBYTE_PTR(p,DIR_CRTIME),v)
+# define DIR_PUTCRDATE(p,v)        fat_putuint16(UBYTE_PTR(p,DIR_CRDATE),v)
+# define DIR_PUTLASTACCDATE(p,v)   fat_putuint16(UBYTE_PTR(p,DIR_LASTACCDTE),v)
+# define DIR_PUTFSTCLUSTHI(p,v)    fat_putuint16(UBYTE_PTR(p,DIR_FSTCLUSTHI),v)
+# define DIR_PUTWRTTIME(p,v)       fat_putuint16(UBYTE_PTR(p,DIR_WRTTIME),v)
+# define DIR_PUTWRTDATE(p,v)       fat_putuint16(UBYTE_PTR(p,DIR_WRTDATE),v)
+# define DIR_PUTFSTCLUSTLO(p,v)    fat_putuint16(UBYTE_PTR(p,DIR_FSTCLUSTLO),v)
+# define DIR_PUTFILESIZE(p,v)      fat_putuint32(UBYTE_PTR(p,DIR_FILESIZE),v)
+
+# define FAT_PUTFAT16(p,i,v)       fat_putuint16(UBYTE_PTR(p,i),v)
+# define FAT_PUTFAT32(p,i,v)       fat_putuint32(UBYTE_PTR(p,i),v)
+
+#else
+
+/* But nothing special has to be done for the little endian-case for access
+ * to aligned mulitbyte values.
+ */
+
+# define MBR_GETRESVDSECCOUNT(p)   UINT16_VAL(p,BS_RESVDSECCOUNT)
+# define MBR_GETFATSZ16(p)         UINT16_VAL(p,BS_FATSZ16)
+# define MBR_GETSECPERTRK(p)       UINT16_VAL(p,BS_SECPERTRK)
+# define MBR_GETNUMHEADS(p)        UINT16_VAL(p,BS_NUMHEADS)
+# define MBR_GETHIDSEC(p)          UINT32_VAL(p,BS_HIDSEC)
+# define MBR_GETTOTSEC32(p)        UINT32_VAL(p,BS_TOTSEC32)
+# define MBR_GETFATSZ32(p)         UINT32_VAL(p,BS32_FATSZ32)
+# define MBR_GETEXTFLAGS(p)        UINT16_VAL(p,BS32_EXTFLAGS)
+# define MBR_GETFSVER(p)           UINT16_VAL(p,BS32_FSVER)
+# define MBR_GETROOTCLUS(p)        UINT32_VAL(p,BS32_ROOTCLUS)
+# define MBR_GETFSINFO(p)          UINT16_VAL(p,BS32_FSINFO)
+# define MBR_GETBKBOOTSEC(p)       UINT16_VAL(p,BS32_BKBOOTSEC)
+# define MBR_GETSIGNATURE(p)       UINT16_VAL(p,BS_SIGNATURE)
+
+# define MBR_GETPARTSECTOR(s)      (*((uint32*)(s)))
+
+# define FSI_GETLEADSIG(p)         UINT32_VAL(p,FSI_LEADSIG)
+# define FSI_GETSTRUCTSIG(p)       UINT32_VAL(p,FSI_STRUCTSIG)
+# define FSI_GETFREECOUNT(p)       UINT32_VAL(p,FSI_FREECOUNT)
+# define FSI_GETNXTFREE(p)         UINT32_VAL(p,FSI_NXTFREE)
+# define FSI_GETTRAILSIG(p)        UINT32_VAL(p,FSI_TRAILSIG)
+
+# define DIR_GETCRTIME(p)          UINT16_VAL(p,DIR_CRTIME)
+# define DIR_GETCRDATE(p)          UINT16_VAL(p,DIR_CRDATE)
+# define DIR_GETLASTACCDATE(p)     UINT16_VAL(p,DIR_LASTACCDTE)
+# define DIR_GETFSTCLUSTHI(p)      UINT16_VAL(p,DIR_FSTCLUSTHI)
+# define DIR_GETWRTTIME(p)         UINT16_VAL(p,DIR_WRTTIME)
+# define DIR_GETWRTDATE(p)         UINT16_VAL(p,DIR_WRTDATE)
+# define DIR_GETFSTCLUSTLO(p)      UINT16_VAL(p,DIR_FSTCLUSTLO)
+# define DIR_GETFILESIZE(p)        UINT32_VAL(p,DIR_FILESIZE)
+
+# define FAT_GETFAT16(p,i)         UINT16_VAL(p,i)
+# define FAT_GETFAT32(p,i)         UINT32_VAL(p,i)
+
+# define MBR_PUTRESVDSECCOUNT(p,v) UINT16_PUT(p,BS_RESVDSECCOUNT,v)
+# define MBR_PUTFATSZ16(p,v)       UINT16_PUT(p,BS_FATSZ16,v)
+# define MBR_PUTSECPERTRK(p,v)     UINT16_PUT(p,BS_SECPERTRK,v)
+# define MBR_PUTNUMHEADS(p,v)      UINT16_PUT(p,BS_NUMHEADS,v)
+# define MBR_PUTHIDSEC(p,v)        UINT32_PUT(p,BS_HIDSEC,v)
+# define MBR_PUTTOTSEC32(p,v)      UINT32_PUT(p,BS_TOTSEC32,v)
+# define MBR_PUTFATSZ32(p,v)       UINT32_PUT(p,BS32_FATSZ32,v)
+# define MBR_PUTEXTFLAGS(p,v)      UINT16_PUT(p,BS32_EXTFLAGS,v)
+# define MBR_PUTFSVER(p,v)         UINT16_PUT(p,BS32_FSVER,v)
+# define MBR_PUTROOTCLUS(p,v)      UINT32_PUT(p,BS32_ROOTCLUS,v)
+# define MBR_PUTFSINFO(p,v)        UINT16_PUT(p,BS32_FSINFO,v)
+# define MBR_PUTBKBOOTSEC(p,v)     UINT16_PUT(p,BS32_BKBOOTSEC,v)
+# define MBR_PUTSIGNATURE(p,v)     UINT16_PUT(p,BS_SIGNATURE,v)
+
+# define FSI_PUTLEADSIG(p,v)       UINT32_PUT(p,FSI_LEADSIG,v)
+# define FSI_PUTSTRUCTSIG(p,v)     UINT32_PUT(p,FSI_STRUCTSIG,v)
+# define FSI_PUTFREECOUNT(p,v)     UINT32_PUT(p,FSI_FREECOUNT,v)
+# define FSI_PUTNXTFREE(p,v)       UINT32_PUT(p,FSI_NXTFREE,v)
+# define FSI_PUTTRAILSIG(p,v)      UINT32_PUT(p,FSI_TRAILSIG,v)
+
+# define DIR_PUTCRTIME(p,v)        UINT16_PUT(p,DIR_CRTIME,v)
+# define DIR_PUTCRDATE(p,v)        UINT16_PUT(p,DIR_CRDATE,v)
+# define DIR_PUTLASTACCDATE(p,v)   UINT16_PUT(p,DIR_LASTACCDTE,v)
+# define DIR_PUTFSTCLUSTHI(p,v)    UINT16_PUT(p,DIR_FSTCLUSTHI,v)
+# define DIR_PUTWRTTIME(p,v)       UINT16_PUT(p,DIR_WRTTIME,v)
+# define DIR_PUTWRTDATE(p,v)       UINT16_PUT(p,DIR_WRTDATE,v)
+# define DIR_PUTFSTCLUSTLO(p,v)    UINT16_PUT(p,DIR_FSTCLUSTLO,v)
+# define DIR_PUTFILESIZE(p,v)      UINT32_PUT(p,DIR_FILESIZE,v)
+
+# define FAT_PUTFAT16(p,i,v)       UINT16_PUT(p,i,v)
+# define FAT_PUTFAT32(p,i,v)       UINT32_PUT(p,i,v)
+
+#endif
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
-
-struct fat_direntry_s
-{
-    ubyte fde_name[8];         /* name */
-    ubyte fde_ext[3];          /* name and extension */
-    ubyte fde_attr;            /* attribute bits */
-    ubyte fde_lcase;           /* Case for base and extension */
-    ubyte fde_ctimecs;         /* Creation time, centiseconds (0-199) */
-    ubyte fde_ctime[2];        /* Creation time */
-    ubyte fde_cdate[2];        /* Creation date */
-    ubyte fde_adate[2];        /* Last access date */
-    ubyte fde_starthi[2];      /* High 16 bits of cluster in FAT32 */
-    ubyte fde_time[2];         /* Date */
-    ubyte fde_date[2];         /* Time */
-    ubyte fde_start[2];        /* First cluster */
-    ubyte fde_size[4];         /* file size (in bytes) */
-};
-
-struct fat_dirslot_s
-{
-    ubyte fds_id;             /* sequence number for slot */
-    ubyte fds_name0_4[10];    /* first 5 characters in name */
-    ubyte fds_attr;           /* attribute byte */
-    ubyte fds_reserved;       /* always 0 */
-    ubyte fds_alias_checksum; /* checksum for 8.3 alias */
-    ubyte fds_name5_10[12];   /* 6 more characters in name */
-    ubyte fds_start[2];       /* starting cluster number, 0 in long slots */
-    ubyte fds_name11_12[4];   /* last 2 characters in name */
-};
 
 /* This structure represents the overall mountpoint state.  An instance of this
  * structure is retained as inode private data on each mountpoint that is
@@ -167,7 +406,6 @@ struct fat_mountpt_s
   struct inode      *fs_blkdriver; /* The block driver inode that hosts the FAT32 fs */
   struct fat_file_s *fs_head;      /* A list to all files opened on this mountpoint */
 
-  boolean  fs_mounted;             /* TRUE: The file system is ready */
   sem_t    fs_sem;                 /* Used to assume thread-safe access */
   size_t   fs_hwsectorsize;        /* HW: Sector size reported by block driver*/
   size_t   fs_hwnsectors;          /* HW: The number of sectors reported by the hardware */
@@ -175,6 +413,7 @@ struct fat_mountpt_s
   size_t   fs_rootbase;            /* MBR: Cluster no. of 1st cluster of root dir */
   size_t   fs_database;            /* Logical block of start data sectors */
   size_t   fs_fsinfo;              /* MBR: Sector number of FSINFO sector */
+  size_t   fs_sector;              /* The sector number buffered in fs_buffer */
   uint32   fs_nclusters;           /* Maximum number of data clusters */
   uint32   fs_fatsize;             /* MBR: Count of sectors occupied by one fat */
   uint32   fs_fattotsec;           /* MBR: Total count of sectors on the volume */
@@ -182,6 +421,8 @@ struct fat_mountpt_s
   uint32   fs_fsinextfree;         /* FSI: Cluster number of 1st free cluster */
   uint16   fs_fatresvdseccount;    /* MBR: The total number of reserved sectors */
   uint16   fs_rootentcnt;          /* MBR: Count of 32-bit root directory entries */
+  boolean  fs_mounted;             /* TRUE: The file system is ready */
+  boolean  fs_dirty;               /* TRUE: fs_buffer is dirty */
   ubyte    fs_type;                /* FSTYPE_FAT12, FSTYPE_FAT16, or FSTYPE_FAT32 */
   ubyte    fs_fatnumfats;          /* MBR: Number of FATs (probably 2) */
   ubyte    fs_fatsecperclus;       /* MBR: Sectors per allocation unit: 2**n, n=0..7 */
@@ -189,15 +430,38 @@ struct fat_mountpt_s
                                     * from the device */
 };
 
-/* This structure represents on open file under the mountpoint.  An instance of this
- * structure is retained as struct file specific information on each opened file.
+/* This structure represents on open file under the mountpoint.  An instance
+ * of this structure is retained as struct file specific information on each
+ * opened file.
  */
 
 struct fat_file_s
 {
-  struct fat_file_s *ff_next;     /* File structures are retained in a singly linked list */
-  struct fat_mountpt_s *ff_parent;
-  boolean  ff_open;               /* TRUE: The file is (still) open */
+  struct fat_file_s *ff_next;      /* Retained in a singly linked list */
+  boolean  ff_open;                /* TRUE: The file is (still) open */
+  ubyte    ff_oflags;              /* Flags provided when file was opened */
+  ubyte    ff_sectorsincluster;    /* Sectors remaining in cluster */
+  uint16   ff_dirindex;            /* Index into ff_dirsector to directory entry */
+  size_t   ff_dirsector;           /* Sector containing the directory entry */
+  size_t   ff_position;            /* File position for read/write/seek in bytes */
+  size_t   ff_size;                /* Size of the file in bytes */
+  size_t   ff_startcluster;        /* Start cluster of file on media */
+};
+
+/* This structure is used internally for describing directory entries */
+
+struct fat_dirinfo_s
+{
+  struct fat_mountpt_s *fs;        /* Pointer to the parent mountpoint */
+  ubyte    fd_name[8+3];           /* Filename -- directory format*/
+#ifdef CONFIG_FAT_LCNAMES
+  ubyte    fd_ntflags;             /* NTRes lower case flags */
+#endif
+  uint16   fd_index;               /* Current index */
+  size_t   fd_startcluster;        /* Start cluster number */
+  size_t   fd_currcluster;         /* Current cluster number */
+  size_t   fd_currsector;          /* Current sector */
+  ubyte   *fd_entry;               /* A pointer to the raw 32-byte entry */
 };
 
 /****************************************************************************
@@ -216,9 +480,22 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+EXTERN uint16 fat_getuint16(ubyte *ptr);
+EXTERN uint32 fat_getuint32(ubyte *ptr);
+EXTERN void   fat_putuint16(ubyte *ptr, uint16 value16);
+EXTERN void   fat_putuint32(ubyte *ptr, uint32 value32);
+EXTERN void   fat_semtake(struct fat_mountpt_s *fs);
+EXTERN void   fat_semgive(struct fat_mountpt_s *fs);
+EXTERN int    fat_mount(struct fat_mountpt_s *fs, boolean writeable);
+EXTERN int    fat_checkmount(struct fat_mountpt_s *fs);
+EXTERN int    fat_nextdirentry(struct fat_dirinfo_s *dirinfo);
+EXTERN int    fat_finddirentry(struct fat_dirinfo_s *dirinfo, const char *path);
+EXTERN int    fat_dirtruncate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
+EXTERN int    fat_dircreate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
 
-#endif /* __FS_FAT_H */
+#endif /* __FS_FAT32_H */

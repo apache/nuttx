@@ -100,9 +100,9 @@ struct block_operations
   int     (*open)(FAR struct inode *inode);
   int     (*close)(FAR struct inode *inode);
   ssize_t (*read)(FAR struct inode *inode, unsigned char *buffer,
-                  size_t start_sector, size_t nsectors);
+                  size_t start_sector, unsigned int nsectors);
   ssize_t (*write)(FAR struct inode *inode, const unsigned char *buffer,
-                   size_t start_sector, size_t nsectors);
+                   size_t start_sector, unsigned int nsectors);
   int     (*geometry)(FAR struct inode *inode, struct geometry *geometry);
   int     (*ioctl)(FAR struct inode *inode, int cmd, unsigned long arg);
 };
@@ -122,8 +122,8 @@ struct mountpt_operations
    * information to manage privileges.
    */
 
-  int     (*open)(FAR struct file *filp, FAR struct inode *inode, 
-                  const char *rel_path, int oflags, mode_t mode);
+  int     (*open)(FAR struct file *filp, const char *rel_path,
+                  int oflags, mode_t mode);
 
   /* The following methods must be identical in signature and position because
    * the struct file_operations and struct mountp_operations are treated like
@@ -189,8 +189,8 @@ struct file
 #if CONFIG_NFILE_DESCRIPTORS > 0
 struct filelist
 {
-  sem_t   fl_sem;         /* Manage access to the file list */
-  sint16  fl_crefs;       /* Reference count */
+  sem_t  fl_sem;          /* Manage access to the file list */
+  sint16 fl_crefs;        /* Reference count */
   struct file fl_files[CONFIG_NFILE_DESCRIPTORS];
 };
 #endif

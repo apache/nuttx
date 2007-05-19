@@ -63,9 +63,9 @@
 static int     up_open(FAR struct inode *inode);
 static int     up_close(FAR struct inode *inode);
 static ssize_t up_read(FAR struct inode *inode, unsigned char *buffer,
-                       size_t start_sector, size_t nsectors);
+                       size_t start_sector, unsigned int nsectors);
 static ssize_t up_write(FAR struct inode *inode, const unsigned char *buffer,
-                        size_t start_sector, size_t nsectors);
+                        size_t start_sector, unsigned int nsectors);
 static int     up_geometry(FAR struct inode *inode, struct geometry *geometry);
 
 /****************************************************************************
@@ -117,7 +117,7 @@ static int up_close(FAR struct inode *inode)
  ****************************************************************************/
 
 static ssize_t up_read(FAR struct inode *inode, unsigned char *buffer,
-                       size_t start_sector, size_t nsectors)
+                       size_t start_sector, unsigned int nsectors)
 {
   if (inode)
     {
@@ -143,7 +143,7 @@ static ssize_t up_read(FAR struct inode *inode, unsigned char *buffer,
  ****************************************************************************/
 
 static ssize_t up_write(FAR struct inode *inode, const unsigned char *buffer,
-                        size_t start_sector, size_t nsectors)
+                        size_t start_sector, unsigned int nsectors)
 {
   if (inode)
     {

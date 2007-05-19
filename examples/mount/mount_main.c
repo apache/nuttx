@@ -63,8 +63,8 @@ static const char g_source[]         = "/dev/blkdev";
 static const char g_target[]         = "/mnt/fs";
 static const char g_filesystemtype[] = "vfat";
 
-static const char g_testfile1[]      = "/mnt/fs/nuttx-test/test-file.txt";
-static const char g_testfile2[]      = "/mnt/fs/nuttx-test/write-test.txt";
+static const char g_testfile1[]      = "/mnt/fs/TestDir/TestFile.txt";
+static const char g_testfile2[]      = "/mnt/fs/TestDir/WriteTest.txt";
 static const char g_testmsg[]        = "This is a write test";
 
 /****************************************************************************
