@@ -63,7 +63,7 @@ int memcmp(const void *s1, const void *s2, size_t n)
         }
       else if (*p1 > *p2)
         {
-          return 0;
+          return 1;
         }
 
       p1++;
