@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 13, 2007</p>
+      <p>Last Updated: May 19, 2007</p>
     </td>
   </tr>
 </table>
@@ -510,6 +510,10 @@ Other memory:
 	* Simulated target now exports a VFAT filesystem
 	* Begin support for VFAT filesystem (not yet functional)
 	* Added mount() and umount()
+	* Fix bug in memcmp return value
+	* Fix errors in timeslice calculation (several places)
+	* Added missing irqrestore() in timer_deletall().
+	* close() was not closing the underlying device.
 	* Started m68322
 </pre></ul>
 
