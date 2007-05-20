@@ -71,27 +71,22 @@ int close(int fd)
         {
           int ret = OK;
 
-          /* Get then nullify the operations to prohibit any other
-           * use of the driver while it is closing.
+          /* Close the driver.  NOTES: (1) there is no semaphore protection
+           * here, the driver must be able to handle concurrent close and
+           * open operations.  (2) The driver may have been opened numerous
+           * times (for different file descriptors) and must also handle
+           * being closed numerous times.
            */
 
-          struct file_operations *fops = inode->u.i_ops;
-          inode->u.i_ops = NULL;
-
-          /* At this point, there can be no other access to the underlying
-           * driver.  We can safely close the driver as well.
-           */
-
-          if (fops && fops->close)
+          if (inode->u.i_ops && inode->u.i_ops->close)
             {
               /* Perform the close operation (by the driver) */
 
-              int status = fops->close(fd);
+              int status = inode->u.i_ops->close(fd);
               if (status < 0)
                 {
                   /* An error occurred while closing the driver */
 
-                  inode->u.i_ops = fops;
                   *get_errno_ptr() = -status;
                   ret = ERROR;
                 }

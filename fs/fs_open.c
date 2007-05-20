@@ -146,7 +146,10 @@ int open(const char *path, int oflags, ...)
       return ERROR;
     }
 
-  /* Perform the driver open operation */
+  /* Perform the driver open operation.  NOTE that the open method may
+   * be called many times.  The driver/mountpoint logic should handled this
+   * becuase it may also be closed that many times.
+   */
 
   status = OK;
   if (inode->u.i_ops && inode->u.i_ops->open)
