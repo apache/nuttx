@@ -131,4 +131,9 @@
 	* Simulated target now exports a VFAT filesystem
 	* Begin support for VFAT filesystem (not yet functional)
 	* Added mount() and umount()
+	* Fix bug in memcmp return value
+	* Fix errors in timeslice calculation (several places)
+	* Added missing irqrestore() in timer_deletall().
+	* close() was not closing the underlying device.
 	* Started m68322
+

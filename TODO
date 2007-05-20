@@ -35,6 +35,7 @@ o Network
 o USB
 
 o Libraries
+- sscanf() needs strtod and strcspn
 
 o File system
 - Add disk usage stats, stat(), sync(), unlink(), mkdir(), chmod(), rename(),
