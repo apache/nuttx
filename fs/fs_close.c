@@ -69,11 +69,45 @@ int close(int fd)
       FAR struct inode *inode = list->fl_files[fd].f_inode;
       if (inode)
         {
+          int ret = OK;
+
+          /* Get then nullify the operations to prohibit any other
+           * use of the driver while it is closing.
+           */
+
+          struct file_operations *fops = inode->u.i_ops;
+          inode->u.i_ops = NULL;
+
+          /* At this point, there can be no other access to the underlying
+           * driver.  We can safely close the driver as well.
+           */
+
+          if (fops && fops->close)
+            {
+              /* Perform the close operation (by the driver) */
+
+              int status = fops->close(fd);
+              if (status < 0)
+                {
+                  /* An error occurred while closing the driver */
+
+                  inode->u.i_ops = fops;
+                  *get_errno_ptr() = -status;
+                  ret = ERROR;
+                }
+            }
+
+          /* Release the file descriptor */
+
           files_release(fd);
+
+          /* Then remove the inode, eliminating the name from the namespace */
+
           inode_release(inode);
-          return OK;
+          return ret;
         }
     }
+
   *get_errno_ptr() = EBADF;
   return ERROR;
 }
