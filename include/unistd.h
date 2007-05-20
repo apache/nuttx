@@ -94,7 +94,7 @@
 #undef  _POSIX_ASYNC_IO
 #undef  _POSIX_PRIO_IO
 
-#define fsync(f)
+#define fdatasync(f) fsync(f)
 
 /************************************************************
  * Global Function Prototypes
@@ -118,8 +118,9 @@ EXTERN void  usleep(unsigned long usec);
 /* File descriptor operations */
 
 EXTERN int   close(int fd);
-EXTERN int   dup(int fildes);
-EXTERN int   dup2(int fildes1, int fildes2);
+EXTERN int   dup(int fd);
+EXTERN int   dup2(int fd1, int fd2);
+EXTERN int   fsync(int fd);
 EXTERN off_t lseek(int fd, off_t offset, int whence);
 EXTERN int   read(int fd, void *buf, unsigned int nbytes);
 EXTERN int   unlink(const char *path);

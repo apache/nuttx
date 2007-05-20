@@ -136,16 +136,23 @@ struct mountpt_operations
   off_t   (*seek)(FAR struct file *filp, off_t offset, int whence);
   int     (*ioctl)(FAR struct file *filp, int cmd, unsigned long arg);
 
+  /* The two structures need not be common after this point. The following
+   * are extended methods needed to deal with the unique needs of mounted
+   * file systems.
+   */
+
+  int     (*sync)(FAR struct file *filp);
+
   /* The two structures need not be common after this point.  For the
    * case of struct mountpt_operations, additional operations are included
    * that used only for mounting and unmounting the volume.
    */
 
-  int   (*bind)(FAR struct inode *blkdriver, const void *data, void **handle);
-  int   (*unbind)(void *handle);
+  int     (*bind)(FAR struct inode *blkdriver, const void *data, void **handle);
+  int     (*unbind)(void *handle);
 
-  /* NOTE:  More operations will be needed here to support:  disk usage stats, stat(),
-   * sync(), unlink(), mkdir(), chmod(), rename(), etc.
+  /* NOTE:  More operations will be needed here to support:  disk usage stats
+   * stat(), unlink(), mkdir(), chmod(), rename(), etc.
    */
 };
 
