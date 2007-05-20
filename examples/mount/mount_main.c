@@ -64,7 +64,7 @@ static const char g_target[]         = "/mnt/fs";
 static const char g_filesystemtype[] = "vfat";
 
 static const char g_testfile1[]      = "/mnt/fs/TestDir/TestFile.txt";
-static const char g_testfile2[]      = "/mnt/fs/TestDir/WriteTest.txt";
+static const char g_testfile2[]      = "/mnt/fs/TestDir/WritTest.txt";
 static const char g_testmsg[]        = "This is a write test";
 
 /****************************************************************************
@@ -89,7 +89,9 @@ void user_initialize(void)
 
 int user_start(int argc, char *argv[])
 {
-  int ret;
+  char buffer[128];
+  int  nbytes;
+  int  ret;
 
   printf("main: mounting %s filesystem at target=%s with source=%s\n",
          g_filesystemtype, g_target, g_source);
@@ -104,12 +106,12 @@ int user_start(int argc, char *argv[])
       int fd = open(g_testfile1, O_RDONLY);
       if (fd < 0)
         {
-          printf("main: failed open %s, errno=%d\n", g_testfile1, *get_errno_ptr());
+          printf("main: failed to open %s, errno=%d\n", g_testfile1, *get_errno_ptr());
         }
       else
         {
-          char buffer[128];
-          int nbytes = read(fd, buffer, 128);
+          memset(buffer, 0, 128);
+          nbytes = read(fd, buffer, 128);
           if (nbytes < 0)
             {
               printf("main: failed to read from %s, errno=%d\n", g_testfile1, *get_errno_ptr());
@@ -127,7 +129,7 @@ int user_start(int argc, char *argv[])
       fd = open(g_testfile2, O_WRONLY|O_CREAT|O_TRUNC, 0644);
       if (fd < 0)
         {
-          printf("main: failed open %s, errno=%d\n", g_testfile2, *get_errno_ptr());
+          printf("main: failed to open %s for writing, errno=%d\n", g_testfile2, *get_errno_ptr());
         }
       else
         {
@@ -136,6 +138,33 @@ int user_start(int argc, char *argv[])
             {
               printf("main: failed to write to %s, errno=%d\n", g_testfile2, *get_errno_ptr());
             }
+          else
+            {
+              printf("main: wrote %d bytes to %s\n", nbytes, g_testfile2);
+            }
+          close(fd);
+        }
+
+      printf("main: opening %s for reading\n", g_testfile2);
+
+      fd = open(g_testfile2, O_RDONLY);
+      if (fd < 0)
+        {
+          printf("main: failed to open %s for reading, errno=%d\n", g_testfile2, *get_errno_ptr());
+        }
+      else
+        {
+          memset(buffer, 0, 128);
+          nbytes = read(fd, buffer, 128);
+          if (nbytes < 0)
+            {
+              printf("main: failed to read from %s, errno=%d\n", g_testfile2, *get_errno_ptr());
+            }
+          else
+          {
+              buffer[127]='\0';
+              printf("main: Read \"%s\" from %s\n", buffer, g_testfile2);
+          }
           close(fd);
         }
 

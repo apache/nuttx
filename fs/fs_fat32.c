@@ -4,6 +4,11 @@
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
+ * References:
+ *   Microsoft FAT documentation
+ *   FAT implementation 'Copyright (C) 2007, ChaN, all right reserved.'
+ *     which has an unrestricted license.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -377,7 +382,7 @@ static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
   struct inode         *inode;
   struct fat_mountpt_s *fs;
   struct fat_file_s    *ff;
-  unsigned int          cluster;
+  uint32                cluster;
   unsigned int          bytesread;
   unsigned int          readsize;
   unsigned int          nsectors;
@@ -461,10 +466,12 @@ static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
             }
           else
             {
-              /* No.. Handle a special case of the first sector */
+              /* No.. Handle the case of the first sector of the file */
 
               if (ff->ff_position == 0)
                 {
+                  /* Get the first cluster of the file */
+
                   cluster = ff->ff_startcluster;
                 }
 
@@ -499,8 +506,8 @@ static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
           nsectors = buflen / fs->fs_hwsectorsize;
           if (nsectors > 0)
             {
-              /* Read maximum contiguous sectors directly without using
-               * our tiny read buffer.
+              /* Read maximum contiguous sectors directly to the user's
+               * buffer without using our tiny read buffer.
                *
                * Limit the number of sectors that we read on this time
                * through the loop to the remaining contiguous sectors
@@ -580,6 +587,12 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
   struct inode         *inode;
   struct fat_mountpt_s *fs;
   struct fat_file_s    *ff;
+  sint32                cluster;
+  size_t                writesector;
+  unsigned int          byteswritten;
+  unsigned int          writesize;
+  unsigned int          nsectors;
+  ubyte                *userbuffer = (ubyte*)buffer;
   int                   ret;
 
   /* Sanity checks */
@@ -600,12 +613,211 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
   ret = fat_checkmount(fs);
   if (ret != OK)
     {
-      fat_semgive(fs);
-      return ret;
+      goto errout_with_semaphore;
+    }
+
+  /* Check if the file was opened for write access */
+
+  if ((ff->ff_oflags & O_WROK) == 0)
+    {
+      ret= -EACCES;
+      goto errout_with_semaphore;
+    }
+
+  /* Check if the file size would exceed the range of size_t */
+
+  if (ff->ff_size + buflen < ff->ff_size)
+    {
+      ret = -EFBIG;
+      goto errout_with_semaphore;
+    }
+
+  /* Loop until either (1) all data has been transferred, or (2) an
+   * error occurs.
+   */
+
+  byteswritten = 0;
+  while (buflen > 0)
+    {
+      /* Get offset into the sector where we begin the read */
+
+      int sectorindex = ff->ff_position & SEC_NDXMASK(fs);
+
+      /* Check if the current read stream happens to lie on a
+       * sector boundary.
+       */
+
+      if (sectorindex == 0)
+        {
+          /* Decrement the number of sectors left in this cluster */
+
+          ff->ff_sectorsincluster--;
+
+          /* Are there unwritten sectors remaining in this cluster */
+
+          if (ff->ff_sectorsincluster > 0)
+            {
+              /* Yes.. There are more sectors in this cluster to be written.
+               * just increment the current sector number and write.
+               */
+
+              writesector = ff->ff_currentsector + 1;
+            }
+          else
+            {
+              /* No.. Handle the case of the first sector of the file */
+
+              if (ff->ff_position == 0)
+                {
+                  /* Check the first cluster of the file.  Zero means that
+                   * the file is empty -- perhaps the file was truncated or
+                   * created when it was opened
+                   */
+
+                  if (ff->ff_startcluster == 0)
+                    {
+                      /* In this case, we have to create a new cluster chain */
+
+                      ff->ff_startcluster = fat_createchain(fs);
+                    }
+
+                  /* Start writing at the first cluster of the file */
+
+                  cluster = ff->ff_startcluster;
+                }
+
+              /* But in the general case, we have to extend the current
+               * cluster by one (unless lseek was used to move the file
+               * position back from the end of the file)
+               */
+
+              else
+                {
+                    /* Extend the chain by adding a new cluster after
+                     * the last one
+                     */
+
+                    cluster = fat_extendchain(fs, ff->ff_currentcluster);
+                }
+
+              /* Verify the cluster number */
+
+              if (cluster < 0)
+                {
+                  ret = cluster;
+                  goto errout_with_semaphore;
+                }
+              else if (cluster < 2 || cluster >= fs->fs_nclusters)
+                {
+                  ret = -ENOSPC;
+                  goto errout_with_semaphore;
+                }
+
+              /* Setup to write the first sector from the new cluster */
+
+              ff->ff_currentcluster   = cluster;
+              writesector             = fat_cluster2sector(fs, cluster);
+              ff->ff_sectorsincluster = fs->fs_fatsecperclus;
+            }
+        }
+
+      /* Check if there is unwritten data in the file buffer */
+
+      ret = fat_ffcacheflush(fs, ff);
+      if (ret < 0)
+        {
+          goto errout_with_semaphore;
+        }
+
+      /* Check if the user has provided a buffer large enough to
+       * hold one or more complete sectors.
+       */
+
+      nsectors = buflen / fs->fs_hwsectorsize;
+      if (nsectors > 0)
+        {
+          /* Write maximum contiguous sectors directly from the user's
+           * buffer without using our tiny read buffer.
+           *
+           * Limit the number of sectors that we write on this time
+           * through the loop to the remaining contiguous sectors
+           * in this cluster
+           */
+
+          if (nsectors > ff->ff_sectorsincluster)
+            {
+              nsectors = ff->ff_sectorsincluster;
+            }
+
+          /* We are not sure of the state of the file buffer so
+           * the safest thing to do is just invalidate it
+           */
+
+          (void)fat_ffcacheinvalidate(fs, ff);
+
+          /* Write all of the sectors directory from user memory */
+
+          ret = fat_hwwrite(fs, userbuffer, writesector, nsectors);
+          if (ret < 0)
+            {
+              goto errout_with_semaphore;
+            }
+
+          ff->ff_sectorsincluster -= nsectors - 1;
+          writesize                = nsectors * fs->fs_hwsectorsize;
+          ff->ff_bflags           |= FFBUFF_MODIFIED;
+        }
+      else
+        {
+          /* We are write a partial sector.  We will first have to
+           * read the full sector in memory as part of a read-modify-write
+           * operation.
+           */
+
+          if (ff->ff_position < ff->ff_size)
+            {
+              ff->ff_currentsector = writesector;
+              ret = fat_ffcacheread(fs, ff, writesector);
+              if (ret < 0)
+                {
+                  goto errout_with_semaphore;
+                }
+            }
+          
+          /* Copy the partial sector from the user buffer */
+
+          writesize = fs->fs_hwsectorsize - sectorindex;
+          if (writesize > buflen)
+            {
+              writesize = buflen;
+            }
+
+          memcpy(&ff->ff_buffer[sectorindex], userbuffer, writesize);
+          ff->ff_currentsector = writesector;
+          ff->ff_bflags |= (FFBUFF_DIRTY|FFBUFF_VALID|FFBUFF_MODIFIED);
+        }
+
+      /* Set up for the next write */
+
+      userbuffer += writesize;
+      ff->ff_position += writesize;
+      byteswritten += writesize;
+      buflen -= writesize;
+    }
+
+  /* The transfer has completed without error.  Update the file size */
+
+  if (ff->ff_position > ff->ff_size)
+    {
+      ff->ff_size = ff->ff_position;
     }
 
   fat_semgive(fs);
-  return -ENOSYS;
+  return byteswritten;
+
+ errout_with_semaphore:
+  fat_semgive(fs);
+  return ret;
 }
 
 /****************************************************************************
@@ -761,7 +973,8 @@ static int fat_sync(FAR struct file *filp)
       DIR_PUTFSTCLUSTHI(direntry, ff->ff_startcluster >> 16);
 
       wrttime = fat_gettime();
-      DIR_PUTWRTTIME(direntry, wrttime);
+      DIR_PUTWRTTIME(direntry, wrttime & 0xffff);
+      DIR_PUTWRTDATE(direntry, wrttime >> 16);
 
       /* Clear the modified bit in the flags */
 

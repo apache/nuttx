@@ -544,12 +544,16 @@ EXTERN int    fat_hwread(struct fat_mountpt_s *fs, ubyte *buffer,
 EXTERN int    fat_hwwrite(struct fat_mountpt_s *fs, ubyte *buffer,
                           size_t sector, unsigned int nsectors);
 
-/* Cluster access helpers */
+/* Cluster / cluster chain access helpers */
 
 EXTERN ssize_t fat_cluster2sector(struct fat_mountpt_s *fs,  uint32 cluster );
-EXTERN ssize_t fat_getcluster(struct fat_mountpt_s *fs, unsigned int clusterno);
-EXTERN int    fat_putcluster(struct fat_mountpt_s *fs, unsigned int clusterno,
+EXTERN ssize_t fat_getcluster(struct fat_mountpt_s *fs, uint32 clusterno);
+EXTERN int    fat_putcluster(struct fat_mountpt_s *fs, uint32 clusterno,
                              size_t startsector);
+EXTERN int    fat_removechain(struct fat_mountpt_s *fs, uint32 cluster);
+EXTERN sint32 fat_extendchain(struct fat_mountpt_s *fs, uint32 cluster);
+
+#define fat_createchain(fs) fat_extendchain(fs, 0)
 
 /* Help for traverseing directory trees */
 
