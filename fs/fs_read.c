@@ -1,4 +1,4 @@
-/************************************************************
+/****************************************************************************
  * fs_read.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -31,15 +31,15 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Compilation Switches
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
@@ -49,9 +49,9 @@
 #include <errno.h>
 #include "fs_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Global Functions
- ************************************************************/
+ ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 
@@ -81,11 +81,16 @@ int read(int fd, void *buf, unsigned int nbytes)
         {
           struct inode *inode = this_file->f_inode;
 
-          /* Is a driver registered? Does it support the read method? */
+          /* Is a driver or mountpoint registered? If so, does it support
+           * the read method?
+           */
 
           if (inode && inode->u.i_ops && inode->u.i_ops->read)
             {
-              /* Yes, then let it perform the read */
+              /* Yes, then let it perform the read.  NOTE that for the case
+               * of the mountpoint, we depend on the read methods bing
+               * identical in signal and position in the operations vtable.
+               */
 
               ret = (int)inode->u.i_ops->read(this_file, (char*)buf, (size_t)nbytes);
             }

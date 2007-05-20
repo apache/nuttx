@@ -1,4 +1,4 @@
-/************************************************************
+/****************************************************************************
  * fs_close.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
@@ -45,9 +45,9 @@
 #include <nuttx/fs.h>
 #include "fs_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Global Functions
- ************************************************************/
+ ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 
@@ -71,18 +71,21 @@ int close(int fd)
         {
           int ret = OK;
 
-          /* Close the driver.  NOTES: (1) there is no semaphore protection
-           * here, the driver must be able to handle concurrent close and
-           * open operations.  (2) The driver may have been opened numerous
-           * times (for different file descriptors) and must also handle
-           * being closed numerous times.
+          /* Close the driver or mountpoint.  NOTES: (1) there is no
+           * exclusion mechanism here , the driver or mountpoint must be
+           * able to handle concurrent operations internally, (2) The driver
+           * may have been opened numerous times (for different file
+           * descriptors) and must also handle being closed numerous times.
+           * (3) for the case of the mountpoint, we depend on the close
+           *  methods bing identical in signal and position in the operations
+           * vtable.
            */
 
           if (inode->u.i_ops && inode->u.i_ops->close)
             {
               /* Perform the close operation (by the driver) */
 
-              int status = inode->u.i_ops->close(fd);
+              int status = inode->u.i_ops->close(&list->fl_files[fd]);
               if (status < 0)
                 {
                   /* An error occurred while closing the driver */
@@ -96,7 +99,9 @@ int close(int fd)
 
           files_release(fd);
 
-          /* Then remove the inode, eliminating the name from the namespace */
+          /* Decrement the reference count on the inode. This may remove the inode and
+           * eliminate the name from the namespace
+           */
 
           inode_release(inode);
           return ret;

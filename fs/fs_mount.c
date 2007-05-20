@@ -188,8 +188,8 @@ int mount(const char *source, const char *target,
 
   /* Make sure that the inode supports the requested access */
 
-  if (!blkdrvr_inode->u.i_mops->read ||
-      (!blkdrvr_inode->u.i_mops->write && (mountflags & MS_RDONLY) == 0))
+  if (!blkdrvr_inode->u.i_bops->read ||
+      (!blkdrvr_inode->u.i_bops->write && (mountflags & MS_RDONLY) == 0))
     {
       errcode = EACCES;
       goto errout_with_blkdrvr;
@@ -259,10 +259,13 @@ int mount(const char *source, const char *target,
 
  errout_with_mountpt:
   inode_release(mountpt_inode);
+
  errout_with_semaphore:
   inode_semgive();
+
  errout_with_blkdrvr:
   inode_release(blkdrvr_inode);
+
  errout:
   *get_errno_ptr() = errcode;
   return ERROR;
