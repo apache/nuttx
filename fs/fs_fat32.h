@@ -289,6 +289,12 @@
 # define DIR_GETFSTCLUSTLO(p)      fat_getuint16(UBYTE_PTR(p,DIR_FSTCLUSTLO))
 # define DIR_GETFILESIZE(p)        fat_getuint32(UBYTE_PTR(p,DIR_FILESIZE))
 
+# define FSI_GETLEADSIG(p)         fat_getuint32(UBYTE_PTR(p,FSI_LEADSIG))
+# define FSI_GETSTRUCTSIG(p)       fat_getuint32(UBYTE_PTR(p,FSI_STRUCTSIG))
+# define FSI_GETFREECOUNT(p)       fat_getuint32(UBYTE_PTR(p,FSI_FREECOUNT))
+# define FSI_GETNXTFREE(p)         fat_getuint32(UBYTE_PTR(p,FSI_NXTFREE))
+# define FSI_GETTRAILSIG(p)        fat_getuint32(UBYTE_PTR(p,FSI_TRAILSIG))
+
 # define FAT_GETFAT16(p,i)         fat_getuint16(UBYTE_PTR(p,i))
 # define FAT_GETFAT32(p,i)         fat_getuint32(UBYTE_PTR(p,i))
 
@@ -320,6 +326,12 @@
 # define DIR_PUTWRTDATE(p,v)       fat_putuint16(UBYTE_PTR(p,DIR_WRTDATE),v)
 # define DIR_PUTFSTCLUSTLO(p,v)    fat_putuint16(UBYTE_PTR(p,DIR_FSTCLUSTLO),v)
 # define DIR_PUTFILESIZE(p,v)      fat_putuint32(UBYTE_PTR(p,DIR_FILESIZE),v)
+
+# define FSI_PUTLEADSIG(p,v)       fat_putuint32(UBYTE_PTR(p,FSI_LEADSIG),v)
+# define FSI_PUTSTRUCTSIG(p,v)     fat_putuint32(UBYTE_PTR(p,FSI_STRUCTSIG),v)
+# define FSI_PUTFREECOUNT(p,v)     fat_putuint32(UBYTE_PTR(p,FSI_FREECOUNT),v)
+# define FSI_PUTNXTFREE(p,v)       fat_putuint32(UBYTE_PTR(p,FSI_NXTFREE),v)
+# define FSI_PUTTRAILSIG(p,v)      fat_putuint32(UBYTE_PTR(p,FSI_TRAILSIG),v)
 
 # define FAT_PUTFAT16(p,i,v)       fat_putuint16(UBYTE_PTR(p,i),v)
 # define FAT_PUTFAT32(p,i,v)       fat_putuint32(UBYTE_PTR(p,i),v)
@@ -361,6 +373,12 @@
 # define DIR_GETFSTCLUSTLO(p)      UINT16_VAL(p,DIR_FSTCLUSTLO)
 # define DIR_GETFILESIZE(p)        UINT32_VAL(p,DIR_FILESIZE)
 
+# define FSI_GETLEADSIG(p)         UINT32_VAL(p,FSI_LEADSIG)
+# define FSI_GETSTRUCTSIG(p)       UINT32_VAL(p,FSI_STRUCTSIG)
+# define FSI_GETFREECOUNT(p)       UINT32_VAL(p,FSI_FREECOUNT)
+# define FSI_GETNXTFREE(p)         UINT32_VAL(p,FSI_NXTFREE)
+# define FSI_GETTRAILSIG(p)        UINT32_VAL(p,FSI_TRAILSIG)
+
 # define FAT_GETFAT16(p,i)         UINT16_VAL(p,i)
 # define FAT_GETFAT32(p,i)         UINT32_VAL(p,i)
 
@@ -392,6 +410,12 @@
 # define DIR_PUTWRTDATE(p,v)       UINT16_PUT(p,DIR_WRTDATE,v)
 # define DIR_PUTFSTCLUSTLO(p,v)    UINT16_PUT(p,DIR_FSTCLUSTLO,v)
 # define DIR_PUTFILESIZE(p,v)      UINT32_PUT(p,DIR_FILESIZE,v)
+
+# define FSI_PUTLEADSIG(p,v)       UINT32_PUT(p,FSI_LEADSIG,v)
+# define FSI_PUTSTRUCTSIG(p,v)     UINT32_PUT(p,FSI_STRUCTSIG,v)
+# define FSI_PUTFREECOUNT(p,v)     UINT32_PUT(p,FSI_FREECOUNT,v)
+# define FSI_PUTNXTFREE(p,v)       UINT32_PUT(p,FSI_NXTFREE,v)
+# define FSI_PUTTRAILSIG(p,v)      UINT32_PUT(p,FSI_TRAILSIG,v)
 
 # define FAT_PUTFAT16(p,i,v)       UINT16_PUT(p,i,v)
 # define FAT_PUTFAT32(p,i,v)       UINT32_PUT(p,i,v)
@@ -430,6 +454,7 @@ struct fat_mountpt_s
   uint16   fs_rootentcnt;          /* MBR: Count of 32-bit root directory entries */
   boolean  fs_mounted;             /* TRUE: The file system is ready */
   boolean  fs_dirty;               /* TRUE: fs_buffer is dirty */
+  boolean  fs_fsidirty;            /* TRUE: FSINFO sector must be written to disk */
   ubyte    fs_type;                /* FSTYPE_FAT12, FSTYPE_FAT16, or FSTYPE_FAT32 */
   ubyte    fs_fatnumfats;          /* MBR: Number of FATs (probably 2) */
   ubyte    fs_fatsecperclus;       /* MBR: Sectors per allocation unit: 2**n, n=0..7 */
@@ -446,7 +471,7 @@ struct fat_file_s
 {
   struct fat_file_s *ff_next;      /* Retained in a singly linked list */
   boolean  ff_open;                /* TRUE: The file is (still) open */
-  boolean  ff_bflags;              /* The file buffer flags */
+  ubyte    ff_bflags;              /* The file buffer flags */
   ubyte    ff_oflags;              /* Flags provided when file was opened */
   ubyte    ff_sectorsincluster;    /* Sectors remaining in cluster */
   uint16   ff_dirindex;            /* Index into ff_dirsector to directory entry */
@@ -503,6 +528,10 @@ EXTERN void   fat_putuint32(ubyte *ptr, uint32 value32);
 EXTERN void   fat_semtake(struct fat_mountpt_s *fs);
 EXTERN void   fat_semgive(struct fat_mountpt_s *fs);
 
+/* Get the current time for FAT creation and write times */
+
+EXTERN uint32 fat_gettime(void);
+
 /* Handle hardware interactions for mounting */
 
 EXTERN int    fat_mount(struct fat_mountpt_s *fs, boolean writeable);
@@ -510,16 +539,17 @@ EXTERN int    fat_checkmount(struct fat_mountpt_s *fs);
 
 /* low-level hardware access */
 
-EXTERN int fat_hwread(struct fat_mountpt_s *fs, ubyte *buffer,  size_t sector,
-                      unsigned int nsectors);
-EXTERN int fat_hwwrite(struct fat_mountpt_s *fs, ubyte *buffer, size_t sector,
-                       unsigned int nsectors);
+EXTERN int    fat_hwread(struct fat_mountpt_s *fs, ubyte *buffer,
+                         size_t sector, unsigned int nsectors);
+EXTERN int    fat_hwwrite(struct fat_mountpt_s *fs, ubyte *buffer,
+                          size_t sector, unsigned int nsectors);
 
 /* Cluster access helpers */
 
 EXTERN ssize_t fat_cluster2sector(struct fat_mountpt_s *fs,  uint32 cluster );
 EXTERN ssize_t fat_getcluster(struct fat_mountpt_s *fs, unsigned int clusterno);
-EXTERN int    fat_putcluster(struct fat_mountpt_s *fs, unsigned int clusterno, size_t startsector);
+EXTERN int    fat_putcluster(struct fat_mountpt_s *fs, unsigned int clusterno,
+                             size_t startsector);
 
 /* Help for traverseing directory trees */
 
@@ -531,11 +561,16 @@ EXTERN int    fat_finddirentry(struct fat_dirinfo_s *dirinfo, const char *path);
 EXTERN int    fat_dirtruncate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
 EXTERN int    fat_dircreate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
 
-/* File buffer cache (for partial sector accesses) */
+/* Mountpoint and fFile buffer cache (for partial sector accesses) */
 
-EXTERN int fat_ffcacheflush(struct fat_mountpt_s *fs, struct fat_file_s *ff);
-EXTERN int fat_ffcacheread(struct fat_mountpt_s *fs, struct fat_file_s *ff, size_t sector);
-EXTERN int fat_ffcacheinvalidate(struct fat_mountpt_s *fs, struct fat_file_s *ff);
+EXTERN int    fat_fscacheread(struct fat_mountpt_s *fs, size_t sector);
+EXTERN int    fat_ffcacheflush(struct fat_mountpt_s *fs, struct fat_file_s *ff);
+EXTERN int    fat_ffcacheread(struct fat_mountpt_s *fs, struct fat_file_s *ff, size_t sector);
+EXTERN int    fat_ffcacheinvalidate(struct fat_mountpt_s *fs, struct fat_file_s *ff);
+
+/* FSINFO sector support */
+
+EXTERN int fat_updatefsinfo(struct fat_mountpt_s *fs);
 
 #undef EXTERN
 #if defined(__cplusplus)

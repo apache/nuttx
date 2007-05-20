@@ -89,7 +89,7 @@ int read(int fd, void *buf, unsigned int nbytes)
             {
               /* Yes, then let it perform the read.  NOTE that for the case
                * of the mountpoint, we depend on the read methods bing
-               * identical in signal and position in the operations vtable.
+               * identical in signature and position in the operations vtable.
                */
 
               ret = (int)inode->u.i_ops->read(this_file, (char*)buf, (size_t)nbytes);

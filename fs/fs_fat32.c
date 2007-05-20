@@ -75,6 +75,7 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
                          size_t buflen);
 static off_t   fat_seek(FAR struct file *filp, off_t offset, int whence);
 static int     fat_ioctl(FAR struct file *filp, int cmd, unsigned long arg);
+static int     fat_sync(FAR struct file *filp);
 static int     fat_bind(FAR struct inode *blkdriver, const void *data,
                         void **handle);
 static int     fat_unbind(void *handle);
@@ -100,6 +101,7 @@ const struct mountpt_operations fat_operations =
   fat_write,
   fat_seek,
   fat_ioctl,
+  fat_sync,
   fat_bind,
   fat_unbind
 };
@@ -326,12 +328,13 @@ static int fat_close(FAR struct file *filp)
   struct inode         *inode;
   struct fat_mountpt_s *fs;
   struct fat_file_s    *ff;
+  int                   ret = OK;
 
   /* Sanity checks */
 
   DEBUGASSERT(filp->f_priv != NULL && filp->f_inode != NULL);
 
-  /* Recover our private data from struct file instance */
+  /* Recover our private data from the struct file instance */
 
   ff    = filp->f_priv;
   inode = filp->f_inode;
@@ -343,7 +346,26 @@ static int fat_close(FAR struct file *filp)
    * the file even when there is healthy mount.
    */
 
-  return -ENOSYS;
+  /* Synchronize the file buffers and disk content; update times */
+
+  ret = fat_sync(filp);
+
+  /* Then deallocate the memory structures created when the open method
+   * was called.
+   *
+   * Free the sector buffer that was used to manage partial sector accesses.
+   */
+
+  if (ff->ff_buffer)
+  {
+      free(ff->ff_buffer);
+  }
+
+  /* Then free the file structure itself. */
+
+  free(ff);
+  filp->f_priv = NULL;
+  return ret;
 }
 
 /****************************************************************************
@@ -361,14 +383,14 @@ static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
   unsigned int          nsectors;
   size_t                readsector;
   size_t                bytesleft;
-  char                 *userbuffer = buffer;
+  ubyte                 *userbuffer = (ubyte*)buffer;
   int                   ret;
 
   /* Sanity checks */
 
   DEBUGASSERT(filp->f_priv != NULL && filp->f_inode != NULL);
 
-  /* Recover our private data from struct file instance */
+  /* Recover our private data from the struct file instance */
 
   ff    = filp->f_priv;
   inode = filp->f_inode;
@@ -564,7 +586,7 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
 
   DEBUGASSERT(filp->f_priv != NULL && filp->f_inode != NULL);
 
-  /* Recover our private data from struct file instance */
+  /* Recover our private data from the struct file instance */
 
   ff    = filp->f_priv;
   inode = filp->f_inode;
@@ -578,8 +600,11 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
   ret = fat_checkmount(fs);
   if (ret != OK)
     {
+      fat_semgive(fs);
       return ret;
     }
+
+  fat_semgive(fs);
   return -ENOSYS;
 }
 
@@ -598,7 +623,7 @@ static off_t fat_seek(FAR struct file *filp, off_t offset, int whence)
 
   DEBUGASSERT(filp->f_priv != NULL && filp->f_inode != NULL);
 
-  /* Recover our private data from struct file instance */
+  /* Recover our private data from the struct file instance */
 
   ff    = filp->f_priv;
   inode = filp->f_inode;
@@ -612,8 +637,11 @@ static off_t fat_seek(FAR struct file *filp, off_t offset, int whence)
   ret = fat_checkmount(fs);
   if (ret != OK)
     {
+      fat_semgive(fs);
       return ret;
     }
+
+  fat_semgive(fs);
   return -ENOSYS;
 }
 
@@ -632,7 +660,7 @@ static int fat_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
 
   DEBUGASSERT(filp->f_priv != NULL && filp->f_inode != NULL);
 
-  /* Recover our private data from struct file instance */
+  /* Recover our private data from the struct file instance */
 
   ff    = filp->f_priv;
   inode = filp->f_inode;
@@ -646,11 +674,110 @@ static int fat_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
   ret = fat_checkmount(fs);
   if (ret != OK)
     {
+      fat_semgive(fs);
       return ret;
     }
 
   /* ioctl calls are just passed through to the contained block driver */
+
+  fat_semgive(fs);
   return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: fat_sync
+ *
+ * Description: Synchronize the file state on disk to match internal, in-
+ *   memory state.
+ *
+ ****************************************************************************/
+
+static int fat_sync(FAR struct file *filp)
+{
+  struct inode         *inode;
+  struct fat_mountpt_s *fs;
+  struct fat_file_s    *ff;
+  uint32                wrttime;
+  ubyte                *direntry;
+  int                   ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(filp->f_priv != NULL && filp->f_inode != NULL);
+
+  /* Recover our private data from the struct file instance */
+
+  ff    = filp->f_priv;
+  inode = filp->f_inode;
+  fs    = inode->i_private;
+
+  DEBUGASSERT(fs != NULL);
+
+  /* Make sure that the mount is still healthy */
+
+  fat_semtake(fs);
+  ret = fat_checkmount(fs);
+  if (ret != OK)
+    {
+      goto errout_with_semaphore;
+    }
+
+  /* Check if the has been modified in any way */
+  if ((ff->ff_bflags & FFBUFF_MODIFIED) != 0)
+    {
+      /* Flush any unwritten data in the file buffer */
+
+      ret = fat_ffcacheflush(fs, ff);
+      if (ret < 0)
+        {
+          goto errout_with_semaphore;
+        }
+
+      /* Update the directory entry.  First read the directory
+       * entry into the fs_buffer (preserving the ff_buffer)
+       */
+
+      ret = fat_fscacheread(fs, ff->ff_dirsector);
+      if (ret < 0)
+        {
+          goto errout_with_semaphore;
+        }
+
+      /* Recover a pointer to the specific directory entry
+       * in the sector using the saved directory index.
+       */
+
+      direntry = &fs->fs_buffer[ff->ff_dirindex];
+
+      /* Set the archive bit, set the write time, and update
+       * anything that may have* changed in the directory
+       * entry: the file size, and the start cluster
+       */
+
+      direntry[DIR_ATTRIBUTES] |= FATATTR_ARCHIVE;
+
+      DIR_PUTFILESIZE(direntry, ff->ff_size);
+      DIR_PUTFSTCLUSTLO(direntry, ff->ff_startcluster);
+      DIR_PUTFSTCLUSTHI(direntry, ff->ff_startcluster >> 16);
+
+      wrttime = fat_gettime();
+      DIR_PUTWRTTIME(direntry, wrttime);
+
+      /* Clear the modified bit in the flags */
+
+      ff->ff_bflags &= ~FFBUFF_MODIFIED;
+
+      /* Flush these change to disk and update FSINFO (if
+       * appropriate.
+       */
+
+      fs->fs_dirty = TRUE;
+      ret          = fat_updatefsinfo(fs);
+    }
+
+ errout_with_semaphore:
+  fat_semgive(fs);
+  return ret;
 }
 
 /****************************************************************************

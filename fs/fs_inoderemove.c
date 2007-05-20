@@ -119,7 +119,6 @@ STATUS inode_remove(const char *path)
 
   /* Find the node to delete */
 
-  inode_semtake();
   node = inode_search(&name, &left, &parent, NULL);
   if (node)
     {
@@ -137,13 +136,11 @@ STATUS inode_remove(const char *path)
             */
 
            node->i_flags |= FSNODEFLAG_DELETED;
-           inode_semgive();
          }
        else
          {
           /* And delete it now -- recursively to delete all of its children */
 
-          inode_semgive();
           inode_free(node->i_child);
           free(node);
           return OK;
@@ -152,6 +149,5 @@ STATUS inode_remove(const char *path)
 
   /* The node does not exist or it has references */
 
-  inode_semgive();
   return ERROR;
 }

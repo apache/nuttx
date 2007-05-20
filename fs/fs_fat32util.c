@@ -129,51 +129,6 @@ static int fat_fscacheflush(struct fat_mountpt_s *fs)
 }
 
 /****************************************************************************
- * Name: fat_fscacheread
- *
- * Desciption: Read the specified sector into the sector cache, flushing any
- *   existing dirty sectors as necessary.
- *
- ****************************************************************************/
-
-static int fat_fscacheread(struct fat_mountpt_s *fs, size_t sector)
-{
-  int ret;
-
-  /* fs->fs_currentsector holds the current sector that is buffered in
-   * fs->fs_buffer. If the requested sector is the same as this sector, then
-   * we do nothing. Otherwise, we will have to read the new sector.
-   */
-
-    if (fs->fs_currentsector != sector)
-      {
-        /* We will need to read the new sector.  First, flush the cached
-         * sector if it is dirty.
-         */
-
-        ret = fat_fscacheflush(fs);
-        if (ret < 0)
-          {
-              return ret;
-          }
-
-        /* Then read the specified sector into the cache */
-
-        ret = fat_hwread(fs, fs->fs_buffer, sector, 1);
-        if (ret < 0)
-          {
-            return ret;
-          }
-
-        /* Update the cached sector number */
-
-        fs->fs_currentsector = sector;
-    }
-
-    return OK;
-}
-
-/****************************************************************************
  * Name: fat_path2dirname
  *
  * Desciption:  Convert a user filename into a properly formatted FAT
@@ -724,6 +679,28 @@ void fat_semtake(struct fat_mountpt_s *fs)
 void fat_semgive(struct fat_mountpt_s *fs)
 {
    sem_post(&fs->fs_sem);
+}
+
+/****************************************************************************
+ * Name: fat_gettime
+ *
+ * Desciption: Get the time and date suitble for writing into the FAT FS.
+ *    TIME in LS 16-bits:
+ *      Bits 0:4   = 2 second count (0-29 representing 0-58 seconds)
+ *      Bits 5-10  = minutes (0-59)
+ *      Bits 11-15 = hours (0-23)
+ *    DATE in MS 16-bits
+ *      Bits 0:4   = Day of month (0-31)
+ *      Bits 5:8   = Month of year (1-12)
+ *      Bits 9:15  = Year from 1980 (0-127 representing 1980-2107)
+ *
+ *
+ ****************************************************************************/
+
+uint32 fat_gettime(void)
+{
+#warning "Time not implemented"
+    return 0;
 }
 
 /****************************************************************************
@@ -1542,6 +1519,51 @@ int fat_dircreate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 }
 
 /****************************************************************************
+ * Name: fat_fscacheread
+ *
+ * Desciption: Read the specified sector into the sector cache, flushing any
+ *   existing dirty sectors as necessary.
+ *
+ ****************************************************************************/
+
+int fat_fscacheread(struct fat_mountpt_s *fs, size_t sector)
+{
+  int ret;
+
+  /* fs->fs_currentsector holds the current sector that is buffered in
+   * fs->fs_buffer. If the requested sector is the same as this sector, then
+   * we do nothing. Otherwise, we will have to read the new sector.
+   */
+
+    if (fs->fs_currentsector != sector)
+      {
+        /* We will need to read the new sector.  First, flush the cached
+         * sector if it is dirty.
+         */
+
+        ret = fat_fscacheflush(fs);
+        if (ret < 0)
+          {
+              return ret;
+          }
+
+        /* Then read the specified sector into the cache */
+
+        ret = fat_hwread(fs, fs->fs_buffer, sector, 1);
+        if (ret < 0)
+          {
+            return ret;
+          }
+
+        /* Update the cached sector number */
+
+        fs->fs_currentsector = sector;
+    }
+
+    return OK;
+}
+
+/****************************************************************************
  * Name: fat_ffcacheflush
  *
  * Desciption: Flush any dirty sectors as necessary
@@ -1647,6 +1669,54 @@ int fat_ffcacheinvalidate(struct fat_mountpt_s *fs, struct fat_file_s *ff)
         ff->ff_bflags &= ~FFBUFF_VALID;
     }
     return OK;
+}
+
+/****************************************************************************
+ * Name: fat_updatefsinfo
+ *
+ * Desciption: Flush evertyhing buffered for the mountpoint and update
+ *  the FSINFO sector, if appropriate
+ *
+ ****************************************************************************/
+
+int fat_updatefsinfo(struct fat_mountpt_s *fs)
+{
+  int ret;
+
+  /* Flush the fs_buffer if it is dirty */
+
+  ret = fat_fscacheflush(fs);
+  if (ret == OK)
+    {
+      /* The FSINFO sector only has to be update for the case of a FAT32 file
+       * system.  Check if the file system type.. If this is a FAT32 file
+       * system then the fs_fsidirty flag will indicate if the FSINFO sector
+       * needs to be re-written.
+       */
+
+      if (fs->fs_type == FSTYPE_FAT32 && fs->fs_fsidirty)
+        {
+          /* Create an image of the FSINFO sector in the fs_buffer */
+
+          memset(fs->fs_buffer, 0, fs->fs_hwsectorsize);
+          FSI_PUTLEADSIG(fs->fs_buffer, 0x41615252);
+          FSI_PUTSTRUCTSIG(fs->fs_buffer, 0x61417272);
+          FSI_PUTFREECOUNT(fs->fs_buffer, fs->fs_fsifreecount);
+          FSI_PUTNXTFREE(fs->fs_buffer, fs->fs_fsinextfree);
+          FSI_PUTTRAILSIG(fs->fs_buffer, 0xaa550000);
+        
+          /* Then flush this to disk */
+
+          fs->fs_currentsector = fs->fs_fsinfo;
+          fs->fs_dirty         = TRUE;
+          ret                  = fat_fscacheflush(fs);
+
+          /* No longer dirty */
+
+          fs->fs_fsidirty = FALSE;
+        }
+    }
+  return ret;
 }
 
 #endif /* CONFIG_FS_FAT */

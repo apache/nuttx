@@ -77,7 +77,7 @@ int close(int fd)
            * may have been opened numerous times (for different file
            * descriptors) and must also handle being closed numerous times.
            * (3) for the case of the mountpoint, we depend on the close
-           *  methods bing identical in signal and position in the operations
+           *  methods bing identical in signature and position in the operations
            * vtable.
            */
 
