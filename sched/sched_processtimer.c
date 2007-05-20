@@ -103,7 +103,7 @@ static void sched_process_timeslice(void)
             {
               /* Reset the timeslice in any case. */
 
-              rtcb->timeslice = CONFIG_RR_INTERVAL;
+              rtcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
 
               /* We know we are at the head of the ready to run
                * prioritized list.  We must be the highest priority

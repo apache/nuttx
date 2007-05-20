@@ -365,7 +365,7 @@ int pthread_create(pthread_t *thread, pthread_attr_t *attr,
   if (policy == SCHED_RR)
     {
       ptcb->flags    |= TCB_FLAG_ROUND_ROBIN;
-      ptcb->timeslice = CONFIG_RR_INTERVAL;
+      ptcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
     }
 #endif
 
