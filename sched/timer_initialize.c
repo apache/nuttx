@@ -158,6 +158,7 @@ void weak_function timer_deleteall(pid_t pid)
           timer_delete((timer_t)timer);
         }
     }
+  irqrestore(flags);
 }
 
 #endif /* CONFIG_DISABLE_POSIX_TIMERS */
