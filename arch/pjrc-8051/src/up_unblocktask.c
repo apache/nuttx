@@ -101,7 +101,7 @@ void up_unblock_task(FAR _TCB *tcb)
       */
 
 #if CONFIG_RR_INTERVAL > 0
-     tcb->timeslice = CONFIG_RR_INTERVAL;
+     tcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_SEC;
 #endif
 
      /* Add the task in the correct location in the prioritized
