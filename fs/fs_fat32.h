@@ -146,12 +146,6 @@
 #define FATATTR_LONGNAME \
   (FATATTR_READONLY|FATATTR_HIDDEN|FATATTR_SYSTEM|FATATTR_VOLUMEID)
 
-/* File system types */
-
-#define FSTYPE_FAT12        0
-#define FSTYPE_FAT16        1
-#define FSTYPE_FAT32        2
-
 /* Directory indexing helper.  Each directory entry is 32-bytes in length.
  * The number of directory entries in a sector then varies with the size
  * of the sector supported in hardware.
@@ -163,6 +157,19 @@
 
 #define SEC_NDXMASK(f)      ((f)->fs_hwsectorsize - 1)
 #define SEC_NSECTORS(f,n)   ((n) / (f)->fs_hwsectorsize)
+
+/****************************************************************************
+ * File system types */
+
+#define FSTYPE_FAT12        0
+#define FSTYPE_FAT16        1
+#define FSTYPE_FAT32        2
+
+/* File buffer flags */
+
+#define FFBUFF_VALID        1
+#define FFBUFF_DIRTY        2
+#define FFBUFF_MODIFIED     4
 
 /****************************************************************************
  * These offset describe the FSINFO sector
@@ -413,7 +420,7 @@ struct fat_mountpt_s
   size_t   fs_rootbase;            /* MBR: Cluster no. of 1st cluster of root dir */
   size_t   fs_database;            /* Logical block of start data sectors */
   size_t   fs_fsinfo;              /* MBR: Sector number of FSINFO sector */
-  size_t   fs_sector;              /* The sector number buffered in fs_buffer */
+  size_t   fs_currentsector;       /* The sector number buffered in fs_buffer */
   uint32   fs_nclusters;           /* Maximum number of data clusters */
   uint32   fs_fatsize;             /* MBR: Count of sectors occupied by one fat */
   uint32   fs_fattotsec;           /* MBR: Total count of sectors on the volume */
@@ -439,13 +446,17 @@ struct fat_file_s
 {
   struct fat_file_s *ff_next;      /* Retained in a singly linked list */
   boolean  ff_open;                /* TRUE: The file is (still) open */
+  boolean  ff_bflags;              /* The file buffer flags */
   ubyte    ff_oflags;              /* Flags provided when file was opened */
   ubyte    ff_sectorsincluster;    /* Sectors remaining in cluster */
   uint16   ff_dirindex;            /* Index into ff_dirsector to directory entry */
+  uint32   ff_currentcluster;      /* Current cluster being accessed */
   size_t   ff_dirsector;           /* Sector containing the directory entry */
   size_t   ff_position;            /* File position for read/write/seek in bytes */
   size_t   ff_size;                /* Size of the file in bytes */
   size_t   ff_startcluster;        /* Start cluster of file on media */
+  size_t   ff_currentsector;       /* Current sector in the file buffer */
+  ubyte   *ff_buffer;              /* File buffer (for partial sector accesses) */
 };
 
 /* This structure is used internally for describing directory entries */
@@ -480,18 +491,51 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+/* Utitilies to handle unaligned or byte swapped accesses */
+
 EXTERN uint16 fat_getuint16(ubyte *ptr);
 EXTERN uint32 fat_getuint32(ubyte *ptr);
 EXTERN void   fat_putuint16(ubyte *ptr, uint16 value16);
 EXTERN void   fat_putuint32(ubyte *ptr, uint32 value32);
+
+/* Manage the per-mount semaphore that protects access to shared resources */
+
 EXTERN void   fat_semtake(struct fat_mountpt_s *fs);
 EXTERN void   fat_semgive(struct fat_mountpt_s *fs);
+
+/* Handle hardware interactions for mounting */
+
 EXTERN int    fat_mount(struct fat_mountpt_s *fs, boolean writeable);
 EXTERN int    fat_checkmount(struct fat_mountpt_s *fs);
+
+/* low-level hardware access */
+
+EXTERN int fat_hwread(struct fat_mountpt_s *fs, ubyte *buffer,  size_t sector,
+                      unsigned int nsectors);
+EXTERN int fat_hwwrite(struct fat_mountpt_s *fs, ubyte *buffer, size_t sector,
+                       unsigned int nsectors);
+
+/* Cluster access helpers */
+
+EXTERN ssize_t fat_cluster2sector(struct fat_mountpt_s *fs,  uint32 cluster );
+EXTERN ssize_t fat_getcluster(struct fat_mountpt_s *fs, unsigned int clusterno);
+EXTERN int    fat_putcluster(struct fat_mountpt_s *fs, unsigned int clusterno, size_t startsector);
+
+/* Help for traverseing directory trees */
+
 EXTERN int    fat_nextdirentry(struct fat_dirinfo_s *dirinfo);
 EXTERN int    fat_finddirentry(struct fat_dirinfo_s *dirinfo, const char *path);
+
+/* File creation helpers */
+
 EXTERN int    fat_dirtruncate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
 EXTERN int    fat_dircreate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
+
+/* File buffer cache (for partial sector accesses) */
+
+EXTERN int fat_ffcacheflush(struct fat_mountpt_s *fs, struct fat_file_s *ff);
+EXTERN int fat_ffcacheread(struct fat_mountpt_s *fs, struct fat_file_s *ff, size_t sector);
+EXTERN int fat_ffcacheinvalidate(struct fat_mountpt_s *fs, struct fat_file_s *ff);
 
 #undef EXTERN
 #if defined(__cplusplus)

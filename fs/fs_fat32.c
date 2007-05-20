@@ -254,6 +254,15 @@ static int fat_open(FAR struct file *filp, const char *rel_path,
       goto errout_with_semaphore;
     }
   
+  /* Create a file buffer to support partial sector accesses */
+
+  ff->ff_buffer = (ubyte*)malloc(fs->fs_hwsectorsize);
+  if (!ff->ff_buffer)
+    {
+      ret = -ENOMEM;
+      goto errout_with_struct;
+    }
+
   /* Initialize the file private data (only need to initialize non-zero elements) */
 
   ff->ff_open             = TRUE;
@@ -262,7 +271,7 @@ static int fat_open(FAR struct file *filp, const char *rel_path,
 
   /* Save information that can be used later to recover the directory entry */
 
-  ff->ff_dirsector        = fs->fs_sector;
+  ff->ff_dirsector        = fs->fs_currentsector;
   ff->ff_dirindex         = dirinfo.fd_index;
 
   /* File cluster/size info */
@@ -279,7 +288,6 @@ static int fat_open(FAR struct file *filp, const char *rel_path,
     {
         ff->ff_position   = ff->ff_size;
     }
-    return OK;
 
   /* Attach the private date to the struct file instance */
 
@@ -297,7 +305,12 @@ static int fat_open(FAR struct file *filp, const char *rel_path,
   fat_semgive(fs);
   return OK;
 
-  /* Error exits */
+  /* Error exits -- goto's are nasty things, but they sure can make error
+   * handling a lot simpler.
+   */
+
+ errout_with_struct:
+  free(ff);
 
  errout_with_semaphore:
   fat_semgive(fs);
@@ -342,6 +355,13 @@ static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
   struct inode         *inode;
   struct fat_mountpt_s *fs;
   struct fat_file_s    *ff;
+  unsigned int          cluster;
+  unsigned int          bytesread;
+  unsigned int          readsize;
+  unsigned int          nsectors;
+  size_t                readsector;
+  size_t                bytesleft;
+  char                 *userbuffer = buffer;
   int                   ret;
 
   /* Sanity checks */
@@ -358,12 +378,174 @@ static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
 
   /* Make sure that the mount is still healthy */
 
+  fat_semtake(fs);
   ret = fat_checkmount(fs);
   if (ret != OK)
     {
-      return ret;
+      goto errout_with_semaphore;
     }
-  return -ENOSYS;
+
+  /* Check if the file was opened with read access */
+
+  if ((ff->ff_oflags & O_RDOK) == 0)
+    {
+      ret= -EACCES;
+      goto errout_with_semaphore;
+    }
+
+  /* Get the number of bytes left in the file */
+
+  bytesleft = ff->ff_size - ff->ff_position;
+
+  /* Truncate read count so that it does not exceed the number
+   * of bytes left in the file.
+   */
+
+  if (buflen > bytesleft)
+  {
+      buflen = bytesleft;
+  }
+
+  /* Loop until either (1) all data has been transferred, or (2) an
+   * error occurs.
+   */
+
+  readsize = 0;
+  while (buflen > 0)
+    {
+      /* Get offset into the sector where we begin the read */
+
+      int sectorindex = ff->ff_position & SEC_NDXMASK(fs);
+
+      /* Check if the current read stream happens to lie on a
+       * sector boundary.
+       */
+
+      if (sectorindex == 0)
+        {
+          /* Try to read another contiguous sector from the cluster */
+
+          ff->ff_sectorsincluster--;
+
+          /* Are there unread sectors remaining in the cluster? */
+
+          if (ff->ff_sectorsincluster > 0)
+            {
+              /* Yes.. There are more sectors in this cluster to be read
+               * just increment the current sector number and read.
+               */
+
+              readsector = ff->ff_currentsector + 1;
+            }
+          else
+            {
+              /* No.. Handle a special case of the first sector */
+
+              if (ff->ff_position == 0)
+                {
+                  cluster = ff->ff_startcluster;
+                }
+
+              /* But in the general case, we have to find the next cluster
+               * in the FAT.
+               */
+
+              else
+                {
+                  cluster = fat_getcluster(fs, ff->ff_currentcluster);
+                }
+
+              /* Verify the cluster number */
+
+              if (cluster < 2 || cluster >= fs->fs_nclusters)
+                {
+                  ret = -EINVAL; /* Not the right error */
+                  goto errout_with_semaphore;
+                }
+
+              /* Setup to read the first sector from the new cluster */
+
+              ff->ff_currentcluster   = cluster;
+              readsector              = fat_cluster2sector(fs, cluster);
+              ff->ff_sectorsincluster = fs->fs_fatsecperclus;
+            }
+
+          /* Check if the user has provided a buffer large enough to
+           * hold one or more complete sectors.
+           */
+
+          nsectors = buflen / fs->fs_hwsectorsize;
+          if (nsectors > 0)
+            {
+              /* Read maximum contiguous sectors directly without using
+               * our tiny read buffer.
+               *
+               * Limit the number of sectors that we read on this time
+               * through the loop to the remaining contiguous sectors
+               * in this cluster
+               */
+
+              if (nsectors > ff->ff_sectorsincluster)
+                {
+                  nsectors = ff->ff_sectorsincluster;
+                }
+
+              /* We are not sure of the state of the file buffer so
+               * the safest thing to do is just invalidate it
+               */
+
+              (void)fat_ffcacheinvalidate(fs, ff);
+
+              /* Read all of the sectors directory into user memory */
+
+              ret = fat_hwread(fs, userbuffer, readsector, nsectors);
+              if (ret < 0)
+                {
+                  goto errout_with_semaphore;
+                }
+
+              ff->ff_sectorsincluster -= nsectors - 1;
+              bytesread                = nsectors * fs->fs_hwsectorsize;
+            }
+          else
+            {
+              /* We are reading a partial sector.  First, read the whole sector
+               * into the file data buffer.  This is a caching buffer so if
+               * it is already there then all is well.
+               */
+
+              ret = fat_ffcacheread(fs, ff, readsector);
+              if (ret < 0)
+                {
+                  goto errout_with_semaphore;
+                }
+
+              /* Copy the partial sector into the user buffer */
+
+              bytesread = fs->fs_hwsectorsize - sectorindex;
+              if (bytesread > buflen)
+                {
+                  bytesread = buflen;
+                }
+
+              memcpy(userbuffer, &ff->ff_buffer[sectorindex], bytesread);
+            }
+
+          /* Set up for the next sector read */
+
+          userbuffer      += bytesread;
+          ff->ff_position += bytesread;
+          readsize        += bytesread;
+          buflen          -= bytesread;
+        }
+    }
+
+  fat_semgive(fs);
+  return readsize;
+
+ errout_with_semaphore:
+  fat_semgive(fs);
+  return ret;
 }
 
 /****************************************************************************
@@ -392,6 +574,7 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
 
   /* Make sure that the mount is still healthy */
 
+  fat_semtake(fs);
   ret = fat_checkmount(fs);
   if (ret != OK)
     {
@@ -425,6 +608,7 @@ static off_t fat_seek(FAR struct file *filp, off_t offset, int whence)
 
   /* Make sure that the mount is still healthy */
 
+  fat_semtake(fs);
   ret = fat_checkmount(fs);
   if (ret != OK)
     {
@@ -458,6 +642,7 @@ static int fat_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
 
   /* Make sure that the mount is still healthy */
 
+  fat_semtake(fs);
   ret = fat_checkmount(fs);
   if (ret != OK)
     {
@@ -485,7 +670,21 @@ static int fat_bind(FAR struct inode *blkdriver, const void *data,
   struct fat_mountpt_s *fs;
   int ret;
 
+  /* Open the block driver */
+
+  if (!blkdriver || !blkdriver->u.i_bops)
+    {
+      return -ENODEV;
+    }
+
+  if ( blkdriver->u.i_bops->open &&
+       blkdriver->u.i_bops->open(blkdriver) != OK)
+    {
+      return -ENODEV;
+    }
+
   /* Create an instance of the mountpt state structure */
+
   fs = (struct fat_mountpt_s *)zalloc(sizeof(struct fat_mountpt_s));
   if ( !fs )
     {
