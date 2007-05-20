@@ -35,13 +35,12 @@ o Network
 o USB
 
 o Libraries
-- sscanf() needs strtod and strcspn
+- sscanf() and lib_vsprintf() do not support floating point values.
 
 o File system
-- Add disk usage stats, stat(), sync(), unlink(), mkdir(), chmod(), rename(),
+- Add disk usage stats, stat(), unlink(), mkdir(), chmod(), rename(),
 etc.
 - FAT32:  long file names
-
 
 o Console Output
 

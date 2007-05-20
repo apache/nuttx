@@ -260,6 +260,13 @@ int vsscanf(char *buf, const char *s, va_list ap)
 
           else if (*s == 'f')
             {
+#if 1
+# warning "No floating point conversions"
+              void *pv = va_arg(ap, void*);
+
+              vdbg("vsscanf: Return 0.0 to %p\n", pv);
+              *((double_t*)pv) = 0.0;
+#else
               vdbg("vsscanf: Performing floating point conversion\n");
 
               /* Skip over any white space before the real string */
@@ -301,7 +308,7 @@ int vsscanf(char *buf, const char *s, va_list ap)
 #endif
                   void *pv = va_arg(ap, void*);
 
-                  vdbg("vsscanf: Return %f to 0x%p\n", dvalue, pv);
+                  vdbg("vsscanf: Return %f to %p\n", dvalue, pv);
 
                   /* But we have to check whether we need to return a
                    * float or a double.
@@ -318,6 +325,7 @@ int vsscanf(char *buf, const char *s, va_list ap)
                       *((float*)pv) = (float)dvalue;
                     }
                 }
+#endif
             }
 
           if (!noassign)
