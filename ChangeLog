@@ -121,7 +121,7 @@
 	  arch/c5471 and arch/dm320 are deprecated and will be removed
 	  when the new c5471 and dm320 logic is verified.
 
-0.2.5 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.5 2007-05-19 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Corrected some build/configuration issues introduced with the
 	  last release.
@@ -129,7 +129,7 @@
 	  development board (untested)
 	* Added support for block devices.
 	* Simulated target now exports a VFAT filesystem
-	* Begin support for VFAT filesystem (not yet functional)
+	* Begin support for VFAT filesystem (missing functionalit)
 	* Added mount() and umount()
 	* Fix bug in memcmp return value
 	* Fix errors in timeslice calculation (several places)
@@ -137,5 +137,8 @@
 	* close() was not closing the underlying device.
 	* Added fsync()
 	* Added strspn() and strcspn()
+
+0.2.6 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
 	* Started m68322
 

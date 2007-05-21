@@ -1,20 +1,18 @@
-nuttx-0.2.4
+nuttx-0.2.5
 ^^^^^^^^^^^^
 
-This is the 7th release of NuttX.  This release is only to roll out
-build changes to better support different SoC's that use the same
-processor architecture.  In particular, the two existing ARM architectures,
-c5471 and DM320 were combined into a single ARM directory.  This was done
-in preparation for an LPC2148 port that is currently in progress.  There
-is NO new functionality or significant bufixes in this release.
+This is the 8th release of NuttX.  This release includes:
+
+(1) Several bug fixes
+(2) Initial support for FAT filesystems.  Testing has not been
+    exhaustive and some functionality is missing (mkdir, stat, unlink
+    chmod, and rename functionality is not yet implemented).
+(3) Support for the NXP lpc2148 processor is included but is
+    untested as of this writing.  The current implementation includes
+    only support for serial console and timer interrupt.
 
 See the ChangeLog for a complete list of changes.
 
-This release has been verified on the Linux user-mode platform
-and the Neuros OSD using the test program under examples/ostest.
-The results of the testing is available in the source tree under
-configs/ntosd-dm320/doc/test-results and under configs/sim/doc/test-results.
-There are no known, critical defects but the project development status
-remains at 'beta' status pending further test and evaluation.
+This release has been verified only on the Linux user-mode platform.
 
-This tarball contains a complete CVS snapshot from April 28, 2007.
+This tarball contains a complete CVS snapshot from May 19, 2007.

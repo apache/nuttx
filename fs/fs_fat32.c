@@ -46,6 +46,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <semaphore.h>
 #include <assert.h>
@@ -829,6 +830,10 @@ static off_t fat_seek(FAR struct file *filp, off_t offset, int whence)
   struct inode         *inode;
   struct fat_mountpt_s *fs;
   struct fat_file_s    *ff;
+  sint32                cluster;
+  ssize_t               position;
+  unsigned int          clustersize;
+  unsigned int          sectoroffset;
   int                   ret;
 
   /* Sanity checks */
@@ -843,18 +848,208 @@ static off_t fat_seek(FAR struct file *filp, off_t offset, int whence)
 
   DEBUGASSERT(fs != NULL);
 
+  /* Map the offset according to the whence option */
+  switch (whence)
+  {
+      case SEEK_SET: /* The offset is set to offset bytes. */
+          position = offset;
+          break;
+
+      case SEEK_CUR: /* The offset is set to its current location plus
+                      * offset bytes. */
+
+          position = offset + ff->ff_position;
+          break;
+
+      case SEEK_END: /* The offset is set to the size of the file plus
+                      * offset bytes. */
+
+          position = offset + ff->ff_size;
+          break;
+
+      default:
+          return -EINVAL;
+  }
+
   /* Make sure that the mount is still healthy */
 
   fat_semtake(fs);
   ret = fat_checkmount(fs);
   if (ret != OK)
     {
-      fat_semgive(fs);
-      return ret;
+        goto errout_with_semaphore;
+    }
+
+  /* Check if there is unwritten data in the file buffer */
+
+  ret = fat_ffcacheflush(fs, ff);
+  if (ret < 0)
+  {
+      goto errout_with_semaphore;
+  }
+
+  /* Attempts to set the position beyound the end of file will
+   * work if the file is open for write access.
+   */
+
+  if (position > ff->ff_size && (ff->ff_oflags & O_WROK) == 0)
+    {
+        /* Otherwise, the position is limited to the file size */
+        position = ff->ff_size;
+    }
+
+  /* Set file position to the beginning of the file */
+
+  ff->ff_position         = 0;
+  ff->ff_sectorsincluster = 1;
+
+  /* Move file position if necessary */
+
+  if (position)
+    {
+        /* Get the start cluster of the file */
+
+        cluster = ff->ff_startcluster;
+        if (!cluster)
+        {
+            /* Create a new cluster chain if the file does not have one */
+
+            cluster = fat_createchain(fs);
+            if (cluster < 0)
+            {
+                ret = cluster;
+                goto errout_with_semaphore;
+            }
+            ff->ff_startcluster = cluster;
+        }
+
+        if (cluster)
+        {
+            /* If the file has a cluster chain, follow it to the
+             * requested position.
+             */
+
+            clustersize = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
+            for (;;)
+            {
+                /* Skip over clusters prior to the one containing
+                 * the requested position.
+                 */
+
+                ff->ff_currentcluster = cluster;
+                if (position <= clustersize)
+                {
+                    break;
+                }
+
+                /* Extend the cluster chain if write in enabled.  NOTE:
+                 * this is not consistent with the lseek description:
+                 * "The  lseek() function allows the file offset to be
+                 * set beyond the end of the file (but this does not
+                 * change the size of the file).  If data is later written
+                 * at  this  point, subsequent reads of the data in the
+                 * gap (a "hole") return null bytes ('\0') until data
+                 * is actually written into the gap."
+                 */
+
+                if ((ff->ff_oflags & O_WROK) != 0)
+                {
+                    /* Extend the cluster chain (fat_extendchain
+                     * will follow the existing chain or add new
+                     * clusters as needed.
+                     */
+
+                    cluster = fat_extendchain(fs, cluster);
+                }
+                else
+                {
+                    /* Other we can only follong the existing chain */
+
+                    cluster = fat_getcluster(fs, cluster);
+                }
+
+                if (cluster < 0)
+                {
+                    /* An error occurred getting the cluster */
+
+                    ret = cluster;
+                    goto errout_with_semaphore;
+                }
+
+                /* Zero means that there is no further clusters available
+                 * in the chain.
+                 */
+
+                if (cluster == 0)
+                {
+                    /* At the position to the current locaiton and
+                     * break out.
+                     */
+
+                    position = clustersize;
+                    break;
+                }
+
+                if (cluster >= fs->fs_nclusters)
+                {
+                    ret = -ENOSPC;
+                    goto errout_with_semaphore;
+                }
+
+                /* Otherwise, update the position and continue looking */
+
+                ff->ff_position += clustersize;
+                position        -= clustersize;
+            }
+
+            /* We get here after we have found the sector containing
+             * the requested position.
+             */
+
+            sectoroffset = (position - 1) / fs->fs_hwsectorsize;
+
+            /* And get the current sector from the cluster and
+             * the sectoroffset into the cluster.
+             */
+
+            ff->ff_currentsector =
+                fat_cluster2sector(fs, cluster) + sectoroffset;
+
+            /* Load the sector corresponding to the position */
+
+            if ((position & SEC_NDXMASK(fs)) != 0)
+            {
+                ret = fat_ffcacheread(fs, ff, ff->ff_currentsector);
+                if (ret < 0)
+                {
+                    goto errout_with_semaphore;
+                }
+            }
+
+            /* Save the number of sectors left in the cluster */
+
+            ff->ff_sectorsincluster = fs->fs_fatsecperclus - sectoroffset;
+
+            /* And save the new file position */
+
+            ff->ff_position += position;
+        }
+    }
+
+  /* If we extended the size of the file, then mark the file as modified. */
+  
+  if ((ff->ff_oflags & O_WROK) != 0 &&  ff->ff_position > ff->ff_size)
+    {
+        ff->ff_size    = ff->ff_position;
+        ff->ff_bflags |= FFBUFF_MODIFIED;
     }
 
   fat_semgive(fs);
-  return -ENOSYS;
+  return OK;
+
+ errout_with_semaphore:
+  fat_semgive(fs);
+  return ret;
 }
 
 /****************************************************************************
@@ -959,7 +1154,7 @@ static int fat_sync(FAR struct file *filp)
        * in the sector using the saved directory index.
        */
 
-      direntry = &fs->fs_buffer[ff->ff_dirindex];
+      direntry = &fs->fs_buffer[ff->ff_dirindex * 32];
 
       /* Set the archive bit, set the write time, and update
        * anything that may have* changed in the directory
