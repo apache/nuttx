@@ -139,20 +139,24 @@ struct mountpt_operations
   /* The two structures need not be common after this point. The following
    * are extended methods needed to deal with the unique needs of mounted
    * file systems.
+   *
+   * Additional open-file-specific mountpoint operations:
    */
 
   int     (*sync)(FAR struct file *filp);
 
-  /* The two structures need not be common after this point.  For the
-   * case of struct mountpt_operations, additional operations are included
-   * that used only for mounting and unmounting the volume.
-   */
+  /* General volume-related mountpoint operations: */
 
   int     (*bind)(FAR struct inode *blkdriver, const void *data, void **handle);
   int     (*unbind)(void *handle);
 
+  int     (*unlink)(struct inode *mountpt, const char *rel_path);
+  int     (*mkdir)(struct inode *mountpt, const char *rel_path, mode_t mode);
+  int     (*rmdir)(struct inode *mountpt, const char *rel_path);
+  int     (*rename)(struct inode *mountpt, const char *old_relpath, const char *new_relpath);
+
   /* NOTE:  More operations will be needed here to support:  disk usage stats
-   * stat(), unlink(), mkdir(), chmod(), rename(), etc.
+   * file stat(), file attributes, file truncation, etc.
    */
 };
 

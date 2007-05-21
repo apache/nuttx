@@ -63,8 +63,7 @@ int inode_checkflags(FAR struct inode *inode, int oflags)
   if (((oflags & O_RDOK) != 0 && !inode->u.i_ops->read) ||
       ((oflags & O_WROK) != 0 && !inode->u.i_ops->write))
     {
-      *get_errno_ptr() = EACCES;
-      return ERROR;
+      return -EACCES;
     }
   else
     {
@@ -74,19 +73,20 @@ int inode_checkflags(FAR struct inode *inode, int oflags)
 
 int open(const char *path, int oflags, ...)
 {
-  struct filelist *list;
+  struct filelist  *list;
   FAR struct inode *inode;
-  mode_t mode = 0666;
-  int status;
-  int fd;
+  const char       *relpath = NULL;
+  mode_t            mode = 0666;
+  int               ret;
+  int               fd;
 
   /* Get the thread-specific file list */
 
   list = sched_getfiles();
   if (!list)
     {
-      *get_errno_ptr() = EMFILE;
-      return ERROR;
+      ret = EMFILE;
+      goto errout;
     }
 
 #ifdef CONFIG_FILE_MODE
@@ -105,7 +105,6 @@ int open(const char *path, int oflags, ...)
 
   /* Get an inode for this file */
 
-  const char *relpath = NULL;
   inode = inode_find(path, &relpath);
   if (!inode)
     {
@@ -114,26 +113,27 @@ int open(const char *path, int oflags, ...)
        *  dangling symbolic link."
        */
 
-      *get_errno_ptr() = ENOENT;
-      return ERROR;
+      ret = ENOENT;
+      goto errout;
     }
 
-  /* Verify that the inode is either a "normal" or a mountpoint.  We
+  /* Verify that the inode is valid and either a "normal" or a mountpoint.  We
    * specifically exclude block drivers.
    */
 
-  if (!INODE_IS_DRIVER(inode) && !INODE_IS_MOUNTPT(inode))
+  if ((!INODE_IS_DRIVER(inode) && !INODE_IS_MOUNTPT(inode)) || !inode->u.i_ops)
     {
-      *get_errno_ptr() = ENXIO;
-      return ERROR;
+      ret = ENXIO;
+      goto errout_with_inode;
     }
 
   /* Make sure that the inode supports the requested access */
 
-  if (inode_checkflags(inode, oflags) != OK)
+  ret = inode_checkflags(inode, oflags);
+  if (ret < 0)
     {
-      inode_release(inode);
-      return ERROR;
+      ret = -ret;
+      goto errout_with_inode;
     }
 
   /* Associate the inode with a file structure */
@@ -141,9 +141,8 @@ int open(const char *path, int oflags, ...)
   fd = files_allocate(inode, oflags, 0);
   if (fd < 0)
     {
-      inode_release(inode);
-      *get_errno_ptr() = EMFILE;
-      return ERROR;
+      ret = EMFILE;
+      goto errout_with_inode;
     }
 
   /* Perform the driver open operation.  NOTE that the open method may
@@ -151,29 +150,35 @@ int open(const char *path, int oflags, ...)
    * becuase it may also be closed that many times.
    */
 
-  status = OK;
-  if (inode->u.i_ops && inode->u.i_ops->open)
+  ret = OK;
+  if (inode->u.i_ops->open)
     {
       if (INODE_IS_MOUNTPT(inode))
         {
-          status = inode->u.i_mops->open((FAR struct file*)&list->fl_files[fd],
-                                         relpath, oflags, mode);
+          ret = inode->u.i_mops->open((FAR struct file*)&list->fl_files[fd],
+                                      relpath, oflags, mode);
         }
       else
         {
-          status = inode->u.i_ops->open((FAR struct file*)&list->fl_files[fd]);
+          ret = inode->u.i_ops->open((FAR struct file*)&list->fl_files[fd]);
         }
     }
 
-  if (status != OK || !inode->u.i_ops)
+  if (ret < 0)
     {
-      files_release(fd);
-      inode_release(inode);
-      *get_errno_ptr() = ENODEV;
-      return ERROR;
+      ret = -ret;
+      goto errout_with_fd;
     }
 
   return fd;
+
+ errout_with_fd:
+  files_release(fd);
+ errout_with_inode:
+  inode_release(inode);
+ errout:
+  *get_errno_ptr() = ret;
+  return ERROR;
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS */

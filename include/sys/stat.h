@@ -46,4 +46,23 @@
  * Type Definitions
  ************************************************************/
 
+/************************************************************
+ * Global Function Prototypes
+ ************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+EXTERN int mkdir(const char *pathname, mode_t mode);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
 #endif /* __SYS_STAT_H */

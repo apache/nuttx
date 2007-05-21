@@ -108,7 +108,7 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Task Control Interfaces (based on ANSII APIs) */
+/* Task Control Interfaces */
 
 EXTERN pid_t getpid(void);
 EXTERN void _exit(int status) noreturn_function;
@@ -125,6 +125,11 @@ EXTERN off_t lseek(int fd, off_t offset, int whence);
 EXTERN int   read(int fd, void *buf, unsigned int nbytes);
 EXTERN int   unlink(const char *path);
 EXTERN int   write(int fd, const void *buf, unsigned int nbytes);
+
+/* File path operations */
+
+EXTERN int unlink(const char *pathname);
+EXTERN int rmdir(const char *pathname);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -82,9 +82,16 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
 static off_t   fat_seek(FAR struct file *filp, off_t offset, int whence);
 static int     fat_ioctl(FAR struct file *filp, int cmd, unsigned long arg);
 static int     fat_sync(FAR struct file *filp);
+
 static int     fat_bind(FAR struct inode *blkdriver, const void *data,
                         void **handle);
 static int     fat_unbind(void *handle);
+static int     fat_unlink(struct inode *mountpt, const char *rel_path);
+static int     fat_mkdir(struct inode *mountpt, const char *rel_path,
+                         mode_t mode);
+static int     fat_rmdir(struct inode *mountpt, const char *rel_path);
+static int     fat_rename(struct inode *mountpt, const char *old_relpath,
+                          const char *new_relpath);
 
 /****************************************************************************
  * Private Variables
@@ -108,8 +115,12 @@ const struct mountpt_operations fat_operations =
   fat_seek,
   fat_ioctl,
   fat_sync,
+
   fat_bind,
-  fat_unbind
+  fat_unbind,
+  fat_unlink,
+  fat_mkdir,
+  fat_rename
 };
 
 /****************************************************************************
@@ -1298,6 +1309,155 @@ static int fat_unbind(void *handle)
       free(fs);
     }
 
+  fat_semgive(fs);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: fat_unlink
+ *
+ * Description: Remove a file
+ *
+ ****************************************************************************/
+
+static int fat_unlink(struct inode *mountpt, const char *rel_path)
+{
+  struct fat_mountpt_s *fs;
+  int                   ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt && mountpt->i_private);
+
+  /* Get the mountpoint private data from the inode structure */
+
+  fs = mountpt->i_private;
+
+  /* Check if the mount is still healthy */
+
+  fat_semtake(fs);
+  ret = fat_checkmount(fs);
+  if (ret != OK)
+    {
+      goto errout_with_semaphore;
+    }
+
+#warning "fat_unlink is not implemented"
+  ret = -ENOSYS;
+
+ errout_with_semaphore:
+  fat_semgive(fs);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: fat_mkdir
+ *
+ * Description: Create a directory
+ *
+ ****************************************************************************/
+
+static int fat_mkdir(struct inode *mountpt, const char *rel_path, mode_t mode)
+{
+  struct fat_mountpt_s *fs;
+  int                   ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt && mountpt->i_private);
+
+  /* Get the mountpoint private data from the inode structure */
+
+  fs = mountpt->i_private;
+
+  /* Check if the mount is still healthy */
+
+  fat_semtake(fs);
+  ret = fat_checkmount(fs);
+  if (ret != OK)
+    {
+      goto errout_with_semaphore;
+    }
+
+#warning "fat_mkdir is not implemented"
+  ret = -ENOSYS;
+
+ errout_with_semaphore:
+  fat_semgive(fs);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: fat_rmdir
+ *
+ * Description: Remove a directory
+ *
+ ****************************************************************************/
+
+int fat_rmdir(struct inode *mountpt, const char *rel_path)
+{
+  struct fat_mountpt_s *fs;
+  int                   ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt && mountpt->i_private);
+
+  /* Get the mountpoint private data from the inode structure */
+
+  fs = mountpt->i_private;
+
+  /* Check if the mount is still healthy */
+
+  fat_semtake(fs);
+  ret = fat_checkmount(fs);
+  if (ret != OK)
+    {
+      goto errout_with_semaphore;
+    }
+
+#warning "fat_rmdir is not implemented"
+  ret = -ENOSYS;
+
+ errout_with_semaphore:
+  fat_semgive(fs);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: fat_rename
+ *
+ * Description: Rename a file or directory
+ *
+ ****************************************************************************/
+
+int fat_rename(struct inode *mountpt, const char *old_relpath,
+               const char *new_relpath)
+{
+  struct fat_mountpt_s *fs;
+  int                   ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt && mountpt->i_private);
+
+  /* Get the mountpoint private data from the inode structure */
+
+  fs = mountpt->i_private;
+
+  /* Check if the mount is still healthy */
+
+  fat_semtake(fs);
+  ret = fat_checkmount(fs);
+  if (ret != OK)
+    {
+      goto errout_with_semaphore;
+    }
+
+#warning "fat_rename is not implemented"
+  ret = -ENOSYS;
+
+ errout_with_semaphore:
   fat_semgive(fs);
   return ret;
 }
