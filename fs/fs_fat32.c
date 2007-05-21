@@ -90,8 +90,8 @@ static int     fat_unlink(struct inode *mountpt, const char *relpath);
 static int     fat_mkdir(struct inode *mountpt, const char *relpath,
                          mode_t mode);
 static int     fat_rmdir(struct inode *mountpt, const char *relpath);
-static int     fat_rename(struct inode *mountpt, const char *old_relpath,
-                          const char *new_relpath);
+static int     fat_rename(struct inode *mountpt, const char *oldrelpath,
+                          const char *newrelpath);
 
 /****************************************************************************
  * Private Variables
@@ -1615,10 +1615,15 @@ int fat_rmdir(struct inode *mountpt, const char *relpath)
  *
  ****************************************************************************/
 
-int fat_rename(struct inode *mountpt, const char *old_relpath,
-               const char *new_relpath)
+int fat_rename(struct inode *mountpt, const char *oldrelpath,
+               const char *newrelpath)
 {
   struct fat_mountpt_s *fs;
+  struct fat_dirinfo_s  dirinfo;
+  size_t                oldsector;
+  ubyte                *olddirentry;
+  ubyte                *newdirentry;
+  ubyte                 dirstate[32-11];
   int                   ret;
 
   /* Sanity checks */
@@ -1638,8 +1643,103 @@ int fat_rename(struct inode *mountpt, const char *old_relpath,
       goto errout_with_semaphore;
     }
 
-#warning "fat_rename is not implemented"
-  ret = -ENOSYS;
+  /* Find the directory entry for the oldrelpath */
+
+  ret = fat_finddirentry(fs, &dirinfo, oldrelpath);
+  if (ret != OK)
+    {
+      /* Some error occurred -- probably -ENOENT */
+
+      goto errout_with_semaphore;
+    }
+
+  /* Save the information that will need to recover the
+   * directory sector and directory entry offset to the
+   * old directory.
+   */
+
+  olddirentry = dirinfo.fd_entry;
+
+  /* One more check:  Make sure that the oldrelpath does
+   * not refer to the root directory.  We can't rename the
+   * root directory.
+   */
+
+  if (!olddirentry)
+    {
+      ret = -EXDEV;
+      goto errout_with_semaphore;
+    }
+
+  oldsector   = fs->fs_currentsector;
+  memcpy(dirstate, &olddirentry[DIR_ATTRIBUTES], 32-11);
+
+  /* No find the directory where we should create the newpath object */
+
+  ret = fat_finddirentry(fs, &dirinfo, newrelpath);
+  if (ret == OK)
+    {
+      /* It is an error if the object at newrelpath already exists */
+
+      ret = -EEXIST;
+      goto errout_with_semaphore;
+    }
+
+  /* What we expect is -ENOENT mean that the full directory path was
+   * followed but that the object does not exists in the terminal directory.
+   */
+
+  if (ret != -ENOENT)
+    {
+      goto errout_with_semaphore;
+    }
+
+  /* Reserve a directory entry */
+
+  ret = fat_allocatedirentry(fs, &dirinfo);
+  if (ret != OK)
+    {
+      goto errout_with_semaphore;
+    }
+
+  /* Create the new directory entry */
+
+  newdirentry = dirinfo.fd_entry;
+
+  memcpy(&newdirentry[DIR_ATTRIBUTES], dirstate, 32-11);
+  memcpy(&newdirentry[DIR_NAME], dirinfo.fd_name, 8+3);
+#ifdef CONFIG_FLAT_LCNAMES
+  DIR_PUTNTRES(newdirentry, dirinfo.fd_ntflags);
+#else
+  DIR_PUTNTRES(newdirentry, 0);
+#endif
+  fs->fs_dirty = TRUE;
+
+  /* Now flush the new directory entry to disk and read the sector
+   * containing the old directory entry.
+   */
+
+  ret = fat_fscacheread(fs, oldsector);
+  if (ret < 0)
+    {
+      goto errout_with_semaphore;
+    }
+
+  /* Remove the old entry */
+
+  olddirentry[DIR_NAME] = DIR0_EMPTY;
+  fs->fs_dirty = TRUE;
+
+  /* Write the old entry to disk and update FSINFO if necessary */
+
+  ret = fat_updatefsinfo(fs);
+  if (ret < 0)
+    {
+      goto errout_with_semaphore;
+    }
+
+  fat_semgive(fs);
+  return OK;
 
  errout_with_semaphore:
   fat_semgive(fs);

@@ -65,10 +65,13 @@ static const char g_target[]         = "/mnt/fs";
 static const char g_filesystemtype[] = "vfat";
 
 static const char g_testdir1[]       = "/mnt/fs/TestDir";
-static const char g_testdir2[]       = "/mnt/fs/NewDir";
+static const char g_testdir2[]       = "/mnt/fs/NewDir1";
+static const char g_testdir3[]       = "/mnt/fs/NewDir2";
+static const char g_testdir4[]       = "/mnt/fs/NewDir3";
 static const char g_testfile1[]      = "/mnt/fs/TestDir/TestFile.txt";
-static const char g_testfile2[]      = "/mnt/fs/TestDir/WritTest.txt";
-static const char g_testfile3[]      = "/mnt/fs/NewDir/WritTest.txt";
+static const char g_testfile2[]      = "/mnt/fs/TestDir/WrTest1.txt";
+static const char g_testfile3[]      = "/mnt/fs/NewDir1/WrTest2.txt";
+static const char g_testfile4[]      = "/mnt/fs/NewDir3/Renamed.txt";
 static const char g_testmsg[]        = "This is a write test";
 
 static int        g_nerrors          = 0;
@@ -316,6 +319,52 @@ static void succeed_unlink(const char *path)
 }
 
 /****************************************************************************
+ * Name: fail_rename
+ ****************************************************************************/
+
+static void fail_rename(const char *oldpath, const char *newpath, int expectederror)
+{
+  int ret;
+
+  /* Try rename() against a file or directory.  It should fail with expectederror */
+
+  printf("fail_rename: Try rename(%s->%s)\n", oldpath, newpath);
+
+  ret = rename(oldpath, newpath);
+  if (ret == 0)
+    {
+      printf("fail_rename: ERROR rename(%s->%s) succeeded\n",
+             oldpath, newpath);
+      g_nerrors++;
+    }
+  else if (*get_errno_ptr() != expectederror)
+    {
+      printf("fail_rename: ERROR rename(%s->%s) failed with errno=%d (expected %d)\n",
+             oldpath, newpath, *get_errno_ptr(), expectederror);
+      g_nerrors++;
+    }
+}
+
+/****************************************************************************
+ * Name: succeed_rename
+ ****************************************************************************/
+
+static void succeed_rename(const char *oldpath, const char *newpath)
+{
+  int ret;
+
+  printf("succeed_rename: Try rename(%s->%s)\n", oldpath, newpath);
+
+  ret = rename(oldpath, newpath);
+  if (ret != 0)
+    {
+      printf("succeed_rename: ERROR rename(%s->%s) failed with errno=%d\n",
+             oldpath, newpath, *get_errno_ptr());
+      g_nerrors++;
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -412,6 +461,30 @@ int user_start(int argc, char *argv[])
       /* Read the file that we just wrote */
 
       read_test_file(g_testfile3);
+
+      /* Use mkdir() to create test dir3.  It should succeed */
+
+      succeed_mkdir(g_testdir3);
+
+      /* Try rename() on the root directory. Should fail with EXDEV*/
+
+      fail_rename(g_target, g_testdir4, EXDEV);
+
+      /* Try rename() to an existing directory.  Should fail with EEXIST */
+
+      fail_rename(g_testdir2, g_testdir3, EEXIST);
+
+      /* Try rename() to a non-existing directory.  Should succeed */
+
+      succeed_rename(g_testdir3, g_testdir4);
+
+      /* Try rename() of file.  Should work. */
+
+      succeed_rename(g_testfile3, g_testfile4);
+
+      /* Make sure that we can still read the renamed file */
+
+      read_test_file(g_testfile4);
 
       /* Unmount the file system */
 
