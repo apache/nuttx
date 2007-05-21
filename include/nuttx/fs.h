@@ -122,7 +122,7 @@ struct mountpt_operations
    * information to manage privileges.
    */
 
-  int     (*open)(FAR struct file *filp, const char *rel_path,
+  int     (*open)(FAR struct file *filp, const char *relpath,
                   int oflags, mode_t mode);
 
   /* The following methods must be identical in signature and position because
@@ -150,10 +150,10 @@ struct mountpt_operations
   int     (*bind)(FAR struct inode *blkdriver, const void *data, void **handle);
   int     (*unbind)(void *handle);
 
-  int     (*unlink)(struct inode *mountpt, const char *rel_path);
-  int     (*mkdir)(struct inode *mountpt, const char *rel_path, mode_t mode);
-  int     (*rmdir)(struct inode *mountpt, const char *rel_path);
-  int     (*rename)(struct inode *mountpt, const char *old_relpath, const char *new_relpath);
+  int     (*unlink)(struct inode *mountpt, const char *relpath);
+  int     (*mkdir)(struct inode *mountpt, const char *relpath, mode_t mode);
+  int     (*rmdir)(struct inode *mountpt, const char *relpath);
+  int     (*rename)(struct inode *mountpt, const char *oldrelpath, const char *newrelpath);
 
   /* NOTE:  More operations will be needed here to support:  disk usage stats
    * file stat(), file attributes, file truncation, etc.

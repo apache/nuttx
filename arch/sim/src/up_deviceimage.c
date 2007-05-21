@@ -82,7 +82,11 @@
  *   xxd -g 1 nuttx-test.vfat.gz >some-file
  *
  * Then manually massaged from the gzip xxd output to zlib format.  See
- * http://www.faqs.org/rfcs/rfc1952.html
+ * http://www.faqs.org/rfcs/rfc1952.html.  This amounts to:
+ *
+ *   Remove all of the leading bytes through the null terminator of the file name
+ *   Remove the last 8 bytes
+ *   Add 0x08, 0x1d to the beginning.
  */
 
 static const unsigned char g_vfatdata[] =

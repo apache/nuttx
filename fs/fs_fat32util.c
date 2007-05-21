@@ -471,7 +471,7 @@ static int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *
           return OK;
         }
 
-      ret = fat_nextdirentry(dirinfo);
+      ret = fat_nextdirentry(fs, dirinfo);
       if (ret < 0)
         {
           return ret;
@@ -1583,9 +1583,8 @@ sint32 fat_extendchain(struct fat_mountpt_s *fs, uint32 cluster)
  *
  ****************************************************************************/
 
-int fat_nextdirentry(struct fat_dirinfo_s *dirinfo)
+int fat_nextdirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 {
-  struct fat_mountpt_s *fs = dirinfo->fs;
   unsigned int cluster;
   unsigned int ndx;
 
@@ -1674,9 +1673,9 @@ int fat_nextdirentry(struct fat_dirinfo_s *dirinfo)
  *
  ****************************************************************************/
 
-int fat_finddirentry(struct fat_dirinfo_s *dirinfo, const char *path)
+int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
+                     const char *path)
 {
-  struct fat_mountpt_s *fs = dirinfo->fs;
   size_t cluster;
   ubyte *direntry = NULL;
   char terminator;
@@ -1778,7 +1777,7 @@ int fat_finddirentry(struct fat_dirinfo_s *dirinfo, const char *path)
 
           /* No... get the next directory index and try again */
 
-          if (fat_nextdirentry(dirinfo) != OK)
+          if (fat_nextdirentry(fs, dirinfo) != OK)
             {
               return -ENOENT;
             }
@@ -1932,6 +1931,184 @@ int fat_dircreate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
   DIR_PUTCRDATE(dirinfo->fd_entry, time >> 16);
 
   fs->fs_dirty = TRUE;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: fat_remove
+ *
+ * Desciption: Remove a directory or file from the file system.  This
+ *   implements both rmdir() and unlink().
+ *
+ ****************************************************************************/
+
+int fat_remove(struct fat_mountpt_s *fs, const char *relpath, boolean directory)
+{
+  struct fat_dirinfo_s dirinfo;
+  uint32  dircluster;
+  size_t  dirsector;
+  int     ret;
+
+  /* Find the directory entry referring to the entry to be deleted */
+
+  ret = fat_finddirentry(fs, &dirinfo, relpath);
+  if (ret != OK)
+    {
+      /* No such path */
+
+      return -ENOENT;
+    }
+
+  /* Check if this is a FAT12/16 root directory */
+
+  if (dirinfo.fd_entry == NULL)
+    {
+      /* The root directory cannot be removed */
+
+      return -EPERM;
+    }
+
+  /* The object has to have write access to be deleted */
+
+  if ((DIR_GETATTRIBUTES(dirinfo.fd_entry) & FATATTR_READONLY) != 0)
+    {
+      /* It is a read-only entry */
+
+      return -EACCES;
+    }
+
+  /* Get the directory sector and cluster containing the
+   * entry to be deleted
+   */
+
+  dirsector  = fs->fs_currentsector;
+  dircluster =
+      ((uint32)DIR_GETFSTCLUSTHI(dirinfo.fd_entry) << 16) |
+      DIR_GETFSTCLUSTLO(dirinfo.fd_entry);
+
+  /* Is this entry a directory? */
+
+  if (DIR_GETATTRIBUTES(dirinfo.fd_entry) & FATATTR_DIRECTORY)
+    {
+      /* It is a sub-directory. Check if we are be asked to remove
+       * a directory or a file.
+       */
+
+      if (!directory)
+        {
+          /* We are asked to delete a file */
+
+          return -EISDIR;
+        }
+
+      /* We are asked to delete a directory. Check if this
+       * sub-directory is empty
+       */
+
+      dirinfo.fd_currcluster = dircluster;
+      dirinfo.fd_currsector  = fat_cluster2sector(fs, dircluster);
+      dirinfo.fd_index       = 2;
+
+      /* Loop until either (1) an entry is found in the directory
+       * (error), (2) the directory is found to be empty, or (3) some
+       * error occurs.
+       */
+
+      for (;;)
+        {
+          unsigned int subdirindex;
+          ubyte       *subdirentry;
+
+          /* Make sure that the sector containing the of the
+           * subdirectory sector is in the cache
+           */
+
+          ret = fat_fscacheread(fs, dirinfo.fd_currsector);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          /* Get a reference to the next entry in the directory */
+
+          subdirindex = (dirinfo.fd_index & DIRSEC_NDXMASK(fs)) * 32;
+          subdirentry = &fs->fs_buffer[subdirindex];
+
+          /* Is this the last entry in the direcory? */
+
+          if (subdirentry[DIR_NAME] == DIR0_ALLEMPTY)
+            {
+              /* Yes then the directory is empty.  Break out of the
+               * loop and delete the directory.
+               */
+
+              break;
+            }
+
+          /* Check if the next entry refers to a file or directory */
+
+          if (subdirentry[DIR_NAME] != DIR0_EMPTY &&
+              !(DIR_GETATTRIBUTES(subdirentry) & FATATTR_VOLUMEID))
+            {
+              /* The directory is not empty */
+
+              return -ENOTEMPTY;
+            }
+
+          /* Get the next directgory entry */
+
+          ret = fat_nextdirentry(fs, &dirinfo);
+          if (ret < 0)
+            {
+              return ret;
+            }
+        }
+    }
+  else
+    {
+      /* It is a file. Check if we are be asked to remove a directory
+       * or a file.
+       */
+
+      if (directory)
+        {
+          /* We are asked to remove a directory */
+
+          return -ENOTDIR;
+        }
+    }
+
+  /* Make sure that the directory containing the entry to be deleted is
+   * in the cache.
+   */
+
+  ret = fat_fscacheread(fs, dirsector);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Mark the directory entry 'deleted' */
+
+  dirinfo.fd_entry[DIR_NAME] = DIR0_EMPTY;
+  fs->fs_dirty = TRUE;
+
+  /* And remove the cluster chain making up the subdirectory */
+
+  ret = fat_removechain(fs, dircluster);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Update the FSINFO sector (FAT32) */
+
+  ret = fat_updatefsinfo(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   return OK;
 }
 
@@ -2092,7 +2269,7 @@ int fat_ffcacheinvalidate(struct fat_mountpt_s *fs, struct fat_file_s *ff)
  * Name: fat_updatefsinfo
  *
  * Desciption: Flush evertyhing buffered for the mountpoint and update
- *  the FSINFO sector, if appropriate
+ *   the FSINFO sector, if appropriate
  *
  ****************************************************************************/
 

@@ -488,7 +488,6 @@ struct fat_file_s
 
 struct fat_dirinfo_s
 {
-  struct fat_mountpt_s *fs;        /* Pointer to the parent mountpoint */
   ubyte    fd_name[8+3];           /* Filename -- directory format*/
 #ifdef CONFIG_FAT_LCNAMES
   ubyte    fd_ntflags;             /* NTRes lower case flags */
@@ -557,15 +556,17 @@ EXTERN sint32 fat_extendchain(struct fat_mountpt_s *fs, uint32 cluster);
 
 /* Help for traverseing directory trees */
 
-EXTERN int    fat_nextdirentry(struct fat_dirinfo_s *dirinfo);
-EXTERN int    fat_finddirentry(struct fat_dirinfo_s *dirinfo, const char *path);
+EXTERN int    fat_nextdirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
+EXTERN int    fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
+                               const char *path);
 
-/* File creation helpers */
+/* File creation and removal helpers */
 
 EXTERN int    fat_dirtruncate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
 EXTERN int    fat_dircreate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
+EXTERN int    fat_remove(struct fat_mountpt_s *fs, const char *relpath, boolean directory);
 
-/* Mountpoint and fFile buffer cache (for partial sector accesses) */
+/* Mountpoint and file buffer cache (for partial sector accesses) */
 
 EXTERN int    fat_fscacheread(struct fat_mountpt_s *fs, size_t sector);
 EXTERN int    fat_ffcacheflush(struct fat_mountpt_s *fs, struct fat_file_s *ff);

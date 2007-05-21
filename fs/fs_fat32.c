@@ -73,7 +73,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     fat_open(FAR struct file *filp, const char *rel_path,
+static int     fat_open(FAR struct file *filp, const char *relpath,
                         int oflags, mode_t mode);
 static int     fat_close(FAR struct file *filp);
 static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen);
@@ -86,10 +86,10 @@ static int     fat_sync(FAR struct file *filp);
 static int     fat_bind(FAR struct inode *blkdriver, const void *data,
                         void **handle);
 static int     fat_unbind(void *handle);
-static int     fat_unlink(struct inode *mountpt, const char *rel_path);
-static int     fat_mkdir(struct inode *mountpt, const char *rel_path,
+static int     fat_unlink(struct inode *mountpt, const char *relpath);
+static int     fat_mkdir(struct inode *mountpt, const char *relpath,
                          mode_t mode);
-static int     fat_rmdir(struct inode *mountpt, const char *rel_path);
+static int     fat_rmdir(struct inode *mountpt, const char *relpath);
 static int     fat_rename(struct inode *mountpt, const char *old_relpath,
                           const char *new_relpath);
 
@@ -120,6 +120,7 @@ const struct mountpt_operations fat_operations =
   fat_unbind,
   fat_unlink,
   fat_mkdir,
+  fat_rmdir,
   fat_rename
 };
 
@@ -131,7 +132,7 @@ const struct mountpt_operations fat_operations =
  * Name: fat_open
  ****************************************************************************/
 
-static int fat_open(FAR struct file *filp, const char *rel_path,
+static int fat_open(FAR struct file *filp, const char *relpath,
                     int oflags, mode_t mode)
 {
   struct fat_dirinfo_s  dirinfo;
@@ -165,13 +166,12 @@ static int fat_open(FAR struct file *filp, const char *rel_path,
   /* Initialize the directory info structure */
 
   memset(&dirinfo, 0, sizeof(struct fat_dirinfo_s));
-  dirinfo.fs = fs;
 
   /* Locate the directory entry for this path */
 
-  ret = fat_finddirentry(&dirinfo, rel_path);
+  ret = fat_finddirentry(fs, &dirinfo, relpath);
 
-  /* Three possibililities: (1) a node exists for the rel_path and
+  /* Three possibililities: (1) a node exists for the relpath and
    * dirinfo describes the directory entry of the entity, (2) the
    * node does not exist, or (3) some error occurred.
    */
@@ -206,7 +206,7 @@ static int fat_open(FAR struct file *filp, const char *rel_path,
       /* Check if the caller has sufficient privileges to open the file */
 
       readonly = ((DIR_GETATTRIBUTES(dirinfo.fd_entry) & FATATTR_READONLY) != 0);
-      if (((oflags && O_WRONLY) != 0) && readonly)
+      if (((oflags & O_WRONLY) != 0) && readonly)
         {
           ret = -EACCES;
           goto errout_with_semaphore;
@@ -236,7 +236,7 @@ static int fat_open(FAR struct file *filp, const char *rel_path,
     {
       /* The file does not exist.  Were we asked to create it? */
 
-      if ((oflags && O_CREAT) == 0)
+      if ((oflags & O_CREAT) == 0)
         {
           /* No.. then we fail with -ENOENT */
           ret = -ENOENT;
@@ -303,7 +303,7 @@ static int fat_open(FAR struct file *filp, const char *rel_path,
 
   /* In write/append mode, we need to set the file pointer to the end of the file */
 
-  if ((oflags && (O_APPEND|O_WRONLY)) == (O_APPEND|O_WRONLY))
+  if ((oflags & (O_APPEND|O_WRONLY)) == (O_APPEND|O_WRONLY))
     {
         ff->ff_position   = ff->ff_size;
     }
@@ -1320,7 +1320,7 @@ static int fat_unbind(void *handle)
  *
  ****************************************************************************/
 
-static int fat_unlink(struct inode *mountpt, const char *rel_path)
+static int fat_unlink(struct inode *mountpt, const char *relpath)
 {
   struct fat_mountpt_s *fs;
   int                   ret;
@@ -1337,15 +1337,20 @@ static int fat_unlink(struct inode *mountpt, const char *rel_path)
 
   fat_semtake(fs);
   ret = fat_checkmount(fs);
-  if (ret != OK)
+  if (ret == OK)
     {
-      goto errout_with_semaphore;
+      /* If the file is open, the correct behavior is to remove the file
+       * name, but to keep the file cluster chain in place until the last
+       * open reference to the file is closed.
+       */
+
+#warning "Need to defer deleting cluster chain if the file is open"
+
+      /* Remove the file */
+
+      ret = fat_remove(fs, relpath, FALSE);
     }
 
-#warning "fat_unlink is not implemented"
-  ret = -ENOSYS;
-
- errout_with_semaphore:
   fat_semgive(fs);
   return ret;
 }
@@ -1357,7 +1362,7 @@ static int fat_unlink(struct inode *mountpt, const char *rel_path)
  *
  ****************************************************************************/
 
-static int fat_mkdir(struct inode *mountpt, const char *rel_path, mode_t mode)
+static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
 {
   struct fat_mountpt_s *fs;
   int                   ret;
@@ -1394,7 +1399,7 @@ static int fat_mkdir(struct inode *mountpt, const char *rel_path, mode_t mode)
  *
  ****************************************************************************/
 
-int fat_rmdir(struct inode *mountpt, const char *rel_path)
+int fat_rmdir(struct inode *mountpt, const char *relpath)
 {
   struct fat_mountpt_s *fs;
   int                   ret;
@@ -1411,15 +1416,20 @@ int fat_rmdir(struct inode *mountpt, const char *rel_path)
 
   fat_semtake(fs);
   ret = fat_checkmount(fs);
-  if (ret != OK)
+  if (ret == OK)
     {
-      goto errout_with_semaphore;
+      /* If the directory is open, the correct behavior is to remove the directory
+       * name, but to keep the directory cluster chain in place until the last
+       * open reference to the directory is closed.
+       */
+
+#warning "Need to defer deleting cluster chain if the directory is open"
+
+      /* Remove the directory */
+
+      ret = fat_remove(fs, relpath, TRUE);
     }
 
-#warning "fat_rmdir is not implemented"
-  ret = -ENOSYS;
-
- errout_with_semaphore:
   fat_semgive(fs);
   return ret;
 }
