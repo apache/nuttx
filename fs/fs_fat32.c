@@ -1365,7 +1365,16 @@ static int fat_unlink(struct inode *mountpt, const char *relpath)
 static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
 {
   struct fat_mountpt_s *fs;
-  int                   ret;
+  struct fat_dirinfo_s  dirinfo;
+  ubyte       *direntry;
+  ubyte       *direntry2;
+  size_t       parentsector;
+  ssize_t      dirsector;
+  sint32       dircluster;
+  uint32       parentcluster;
+  uint32       crtime;
+  unsigned int i;
+  int          ret;
 
   /* Sanity checks */
 
@@ -1384,8 +1393,173 @@ static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
       goto errout_with_semaphore;
     }
 
-#warning "fat_mkdir is not implemented"
-  ret = -ENOSYS;
+  /* Find the directory where the new directory should be created. */
+
+  ret = fat_finddirentry(fs, &dirinfo, relpath);
+
+  /* If anything exists at this location, then we fail with EEXIST */
+
+  if (ret == OK)
+    {
+      ret = -EEXIST;
+      goto errout_with_semaphore;
+    }
+
+  /* What we want to see is for fat_finddirentry to fail with -ENOENT.
+   * This error means that no failure occurred but that nothing exists
+   * with this name.
+   */
+
+  if (ret != -ENOENT)
+    {
+      goto errout_with_semaphore;
+    }
+
+  /* NOTE: There is no check that dirinfo.fd_name contains the final
+   * directory name.  We could be creating an intermediate directory
+   * in the full relpath.
+   */
+
+  /* Allocate a directory entry for the new directory in this directory */
+
+  ret = fat_allocatedirentry(fs, &dirinfo);
+  if (ret != OK)
+    {
+      goto errout_with_semaphore;
+    }
+  parentsector = fs->fs_currentsector;
+
+  /* Allocate a cluster for new directory */
+
+  dircluster = fat_createchain(fs);
+  if (dircluster < 0)
+    {
+      ret = dircluster;
+      goto errout_with_semaphore;
+    }
+  else if (dircluster < 2)
+    {
+      ret = -ENOSPC;
+      goto errout_with_semaphore;
+    }
+
+  dirsector = fat_cluster2sector(fs, dircluster);
+  if (dirsector < 0)
+    {
+      ret = dirsector;
+      goto errout_with_semaphore;
+    }
+
+  /* Flush any existing, dirty data in fs_buffer (because we need 
+   * it to create the directory entries.
+   */
+
+  ret = fat_fscacheflush(fs);
+  if (ret < 0)
+    {
+      goto errout_with_semaphore;
+    }
+
+  /* Get a pointer to the first directory entry in the sector */
+
+  direntry = fs->fs_buffer;
+
+  /* Now erase the contents of fs_buffer */
+
+  fs->fs_currentsector = dirsector;
+  memset(direntry, 0, fs->fs_hwsectorsize);
+
+  /* Now clear all sectors in the new directory cluster (except for the first) */
+
+  for (i = 1; i < fs->fs_fatsecperclus; i++)
+    {
+      ret = fat_hwwrite(fs, direntry, ++dirsector, 1);
+      if (ret < 0)
+        {
+          goto errout_with_semaphore;
+        }
+    }
+
+  /* Now create the "." directory entry in the first directory slot */
+
+  memset(&direntry[DIR_NAME], ' ', 8+3);
+  direntry[DIR_NAME] = '.';
+  DIR_PUTATTRIBUTES(direntry, FATATTR_DIRECTORY);
+
+  crtime = fat_gettime();
+  DIR_PUTCRTIME(direntry, crtime & 0xffff);
+  DIR_PUTWRTTIME(direntry, crtime & 0xffff);
+  DIR_PUTCRDATE(direntry, crtime >> 16);
+  DIR_PUTWRTDATE(direntry, crtime >> 16);
+
+  /* Create ".." directory entry in the second directory slot */
+
+  direntry2 = direntry + 32;
+
+  /* So far, the two entries are nearly the same */
+
+  memcpy(direntry2, direntry, 32);
+  direntry2[DIR_NAME+1] = '.';
+
+  /* Now add the cluster information to both directory entries */
+
+  DIR_PUTFSTCLUSTHI(direntry, dircluster >> 16);
+  DIR_PUTFSTCLUSTLO(direntry, dircluster);
+
+  parentcluster = dirinfo.fd_startcluster;
+  if (fs->fs_type != FSTYPE_FAT32 && parentcluster == fs->fs_rootbase)
+    {
+      parentcluster = 0;
+    }
+
+  DIR_PUTFSTCLUSTHI(direntry2, parentcluster >> 16);
+  DIR_PUTFSTCLUSTLO(direntry2, parentcluster);
+
+  /* Save the first sector of the directory cluster and re-read
+   *  the parentsector
+   */
+
+  fs->fs_dirty = TRUE;
+  ret = fat_fscacheread(fs, parentsector);
+  if (ret < 0)
+    {
+      goto errout_with_semaphore;
+    }
+
+  /* Initialize the new entry directory entry in the parent directory */
+
+  direntry = dirinfo.fd_entry;
+  memset(direntry, 0, 32);
+
+  memcpy(direntry, dirinfo.fd_name, 8+3);
+#ifdef CONFIG_FLAT_LCNAMES
+  DIR_PUTNTRES(direntry, dirinfo.fd_ntflags);
+#endif
+  DIR_PUTATTRIBUTES(dirinfo.fd_entry, FATATTR_DIRECTORY);
+
+  /* Same creation time as for . and .. */
+
+  DIR_PUTCRTIME(dirinfo.fd_entry, crtime & 0xffff);
+  DIR_PUTWRTTIME(dirinfo.fd_entry, crtime & 0xffff);
+  DIR_PUTCRDATE(dirinfo.fd_entry, crtime >> 16);
+  DIR_PUTWRTDATE(dirinfo.fd_entry, crtime >> 16);
+
+  /* Set subdirectory start cluster */
+
+  DIR_PUTFSTCLUSTLO(dirinfo.fd_entry, dircluster);
+  DIR_PUTFSTCLUSTHI(dirinfo.fd_entry, dircluster >> 16);
+
+  /* Now update the FAT32 FSINFO sector */
+
+  fs->fs_dirty = TRUE;
+  ret = fat_updatefsinfo(fs);
+  if (ret < 0)
+    {
+      goto errout_with_semaphore;
+    }
+
+  fat_semgive(fs);
+  return OK;
 
  errout_with_semaphore:
   fat_semgive(fs);

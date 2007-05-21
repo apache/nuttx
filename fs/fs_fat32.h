@@ -559,6 +559,7 @@ EXTERN sint32 fat_extendchain(struct fat_mountpt_s *fs, uint32 cluster);
 EXTERN int    fat_nextdirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
 EXTERN int    fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
                                const char *path);
+EXTERN int    fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
 
 /* File creation and removal helpers */
 
@@ -568,6 +569,7 @@ EXTERN int    fat_remove(struct fat_mountpt_s *fs, const char *relpath, boolean 
 
 /* Mountpoint and file buffer cache (for partial sector accesses) */
 
+EXTERN int    fat_fscacheflush(struct fat_mountpt_s *fs);
 EXTERN int    fat_fscacheread(struct fat_mountpt_s *fs, size_t sector);
 EXTERN int    fat_ffcacheflush(struct fat_mountpt_s *fs, struct fat_file_s *ff);
 EXTERN int    fat_ffcacheread(struct fat_mountpt_s *fs, struct fat_file_s *ff, size_t sector);

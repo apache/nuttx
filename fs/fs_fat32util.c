@@ -84,56 +84,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: fat_fscacheflush
- *
- * Desciption: Flush any dirty sectors as necessary
- *
- ****************************************************************************/
-
-static int fat_fscacheflush(struct fat_mountpt_s *fs)
-{
-  int ret;
-
-  /* Check if the fs_buffer is dirty.  In this case, we will write back the
-   * contents of fs_buffer.
-   */
-
-  if (fs->fs_dirty)
-  {
-      /* Write the dirty sector */
-
-      ret = fat_hwwrite(fs, fs->fs_buffer, fs->fs_currentsector, 1);
-      if (ret < 0)
-      {
-          return ret;
-      }
-
-      /* Does the sector lie in the FAT region? */
-
-      if (fs->fs_currentsector < fs->fs_fatbase + fs->fs_fatsize)
-      {
-          /* Yes, then make the change in the FAT copy as well */
-          int i;
-
-          for (i = fs->fs_fatnumfats; i >= 2; i--)
-          { 
-              fs->fs_currentsector += fs->fs_fatsize;
-              ret = fat_hwwrite(fs, fs->fs_buffer, fs->fs_currentsector, 1);
-              if (ret < 0)
-              {
-                  return ret;
-              }
-          }
-      }
-
-      /* No longer dirty */
-
-      fs->fs_dirty = FALSE;
-  }
-  return OK;
-}
-
-/****************************************************************************
  * Name: fat_path2dirname
  *
  * Desciption:  Convert a user filename into a properly formatted FAT
@@ -407,127 +357,6 @@ static inline int fat_dirname2path(char *path, struct fat_dirinfo_s *dirinfo)
 
     *path = '\0';
     return OK;
-}
-
-/****************************************************************************
- * Name: fat_allocatedirentry
- *
- * Desciption: Find a free directory entry
- *
- ****************************************************************************/
-
-static int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
-{
-  sint32 cluster;
-  size_t sector;
-  ubyte *direntry;
-  ubyte  ch;
-  int    ret;
-  int    i;
-
-  /* Re-initialize directory object */
-
-  cluster = dirinfo->fd_startcluster;
-  if (cluster)
-    {
-     /* Cluster chain can be extended */
-
-      dirinfo->fd_currcluster = cluster;
-      dirinfo->fd_currsector  = fat_cluster2sector(fs, cluster);
-    }
-  else
-    {
-      /* Fixed size FAT12/16 root directory is at fixxed offset/size */
-
-      dirinfo->fd_currsector = fs->fs_rootbase;
-    }
-  dirinfo->fd_index = 0;
-
-  for (;;)
-    {
-      unsigned int dirindex;
-
-      /* Read the directory sector into fs_buffer */
-
-      ret = fat_fscacheread(fs, dirinfo->fd_currsector);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      /* Get a pointer to the entry at fd_index */
-
-      dirindex = (dirinfo->fd_index & DIRSEC_NDXMASK(fs)) * 32;
-      direntry = &fs->fs_buffer[dirindex];
-
-      /* Check if this directory entry is empty */
-
-      ch = direntry[DIR_NAME];
-      if (ch == DIR0_ALLEMPTY || ch == DIR0_EMPTY)
-        {
-          /* It is empty -- we have found a directory entry */
-
-          dirinfo->fd_entry = direntry;
-          return OK;
-        }
-
-      ret = fat_nextdirentry(fs, dirinfo);
-      if (ret < 0)
-        {
-          return ret;
-        }
-    }
-
-  /* If we get here, then we have reached the end of the directory table
-   * in this sector without finding a free directory enty.
-   *
-   * It this is a fixed size dirctory entry, then this is an error.
-   * Otherwise, we can try to extend the directory cluster chain to
-   * make space for the new directory entry.
-   */
-
-  if (!cluster)
-    {
-      /* The size is fixed */
-      return -ENOSPC;
-    }
-
-  /* Try to extend the cluster chain for this directory */
-
-  cluster = fat_extendchain(fs, dirinfo->fd_currcluster);
-  if (cluster < 0)
-    {
-      return cluster;
-    }
-
- /* Flush out any cached date in fs_buffer.. we are going to use
-  * it to initialize the new directory cluster.
-  */
-
-  ret = fat_fscacheflush(fs);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Clear all sectors comprising the new directory cluster */
-
-  fs->fs_currentsector = fat_cluster2sector(fs, cluster);
-  memset(fs->fs_buffer, 0, fs->fs_hwsectorsize);
-
-  sector = sector;
-  for (i = fs->fs_fatsecperclus; i; i--)
-    {
-      ret = fat_hwwrite(fs, fs->fs_buffer, sector, 1);
-      if ( ret < 0)
-        {
-          return ret;
-        }
-      sector++;
-    }
-
-  dirinfo->fd_entry = fs->fs_buffer;
-  return OK;
 }
 
 /****************************************************************************
@@ -1824,6 +1653,127 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 }
 
 /****************************************************************************
+ * Name: fat_allocatedirentry
+ *
+ * Desciption: Find a free directory entry
+ *
+ ****************************************************************************/
+
+int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
+{
+  sint32 cluster;
+  size_t sector;
+  ubyte *direntry;
+  ubyte  ch;
+  int    ret;
+  int    i;
+
+  /* Re-initialize directory object */
+
+  cluster = dirinfo->fd_startcluster;
+  if (cluster)
+    {
+     /* Cluster chain can be extended */
+
+      dirinfo->fd_currcluster = cluster;
+      dirinfo->fd_currsector  = fat_cluster2sector(fs, cluster);
+    }
+  else
+    {
+      /* Fixed size FAT12/16 root directory is at fixxed offset/size */
+
+      dirinfo->fd_currsector = fs->fs_rootbase;
+    }
+  dirinfo->fd_index = 0;
+
+  for (;;)
+    {
+      unsigned int dirindex;
+
+      /* Read the directory sector into fs_buffer */
+
+      ret = fat_fscacheread(fs, dirinfo->fd_currsector);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Get a pointer to the entry at fd_index */
+
+      dirindex = (dirinfo->fd_index & DIRSEC_NDXMASK(fs)) * 32;
+      direntry = &fs->fs_buffer[dirindex];
+
+      /* Check if this directory entry is empty */
+
+      ch = direntry[DIR_NAME];
+      if (ch == DIR0_ALLEMPTY || ch == DIR0_EMPTY)
+        {
+          /* It is empty -- we have found a directory entry */
+
+          dirinfo->fd_entry = direntry;
+          return OK;
+        }
+
+      ret = fat_nextdirentry(fs, dirinfo);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+
+  /* If we get here, then we have reached the end of the directory table
+   * in this sector without finding a free directory enty.
+   *
+   * It this is a fixed size dirctory entry, then this is an error.
+   * Otherwise, we can try to extend the directory cluster chain to
+   * make space for the new directory entry.
+   */
+
+  if (!cluster)
+    {
+      /* The size is fixed */
+      return -ENOSPC;
+    }
+
+  /* Try to extend the cluster chain for this directory */
+
+  cluster = fat_extendchain(fs, dirinfo->fd_currcluster);
+  if (cluster < 0)
+    {
+      return cluster;
+    }
+
+ /* Flush out any cached date in fs_buffer.. we are going to use
+  * it to initialize the new directory cluster.
+  */
+
+  ret = fat_fscacheflush(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Clear all sectors comprising the new directory cluster */
+
+  fs->fs_currentsector = fat_cluster2sector(fs, cluster);
+  memset(fs->fs_buffer, 0, fs->fs_hwsectorsize);
+
+  sector = sector;
+  for (i = fs->fs_fatsecperclus; i; i--)
+    {
+      ret = fat_hwwrite(fs, fs->fs_buffer, sector, 1);
+      if ( ret < 0)
+        {
+          return ret;
+        }
+      sector++;
+    }
+
+  dirinfo->fd_entry = fs->fs_buffer;
+  return OK;
+}
+
+/****************************************************************************
  * Name: fat_dirtruncate
  *
  * Desciption: Truncate an existing file to zero length
@@ -2109,6 +2059,56 @@ int fat_remove(struct fat_mountpt_s *fs, const char *relpath, boolean directory)
       return ret;
     }
 
+  return OK;
+}
+
+/****************************************************************************
+ * Name: fat_fscacheflush
+ *
+ * Desciption: Flush any dirty sector if fs_buffer as necessary
+ *
+ ****************************************************************************/
+
+int fat_fscacheflush(struct fat_mountpt_s *fs)
+{
+  int ret;
+
+  /* Check if the fs_buffer is dirty.  In this case, we will write back the
+   * contents of fs_buffer.
+   */
+
+  if (fs->fs_dirty)
+  {
+      /* Write the dirty sector */
+
+      ret = fat_hwwrite(fs, fs->fs_buffer, fs->fs_currentsector, 1);
+      if (ret < 0)
+      {
+          return ret;
+      }
+
+      /* Does the sector lie in the FAT region? */
+
+      if (fs->fs_currentsector < fs->fs_fatbase + fs->fs_fatsize)
+      {
+          /* Yes, then make the change in the FAT copy as well */
+          int i;
+
+          for (i = fs->fs_fatnumfats; i >= 2; i--)
+          { 
+              fs->fs_currentsector += fs->fs_fatsize;
+              ret = fat_hwwrite(fs, fs->fs_buffer, fs->fs_currentsector, 1);
+              if (ret < 0)
+              {
+                  return ret;
+              }
+          }
+      }
+
+      /* No longer dirty */
+
+      fs->fs_dirty = FALSE;
+  }
   return OK;
 }
 
