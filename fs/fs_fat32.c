@@ -59,7 +59,8 @@
 #include "fs_internal.h"
 #include "fs_fat32.h"
 
-#if CONFIG_FS_FAT
+#ifdef CONFIG_FS_FAT
+#ifndef CONFIG_DISABLE_MOUNTPOUNT
 
 /****************************************************************************
  * Definitions
@@ -85,6 +86,8 @@ static int     fat_sync(FAR struct file *filp);
 
 static int     fat_opendir(struct inode *mountpt, const char *relpath,
                            struct internal_dir_s *dir);
+static int     fat_readdir(struct inode *mountpt, struct internal_dir_s *dir);
+static int     fat_rewinddir(struct inode *mountpt, struct internal_dir_s *dir);
 
 static int     fat_bind(FAR struct inode *blkdriver, const void *data,
                         void **handle);
@@ -120,6 +123,9 @@ const struct mountpt_operations fat_operations =
   fat_sync,
 
   fat_opendir,
+  NULL,
+  fat_readdir,
+  fat_rewinddir,
 
   fat_bind,
   fat_unbind,
@@ -296,7 +302,7 @@ static int fat_open(FAR struct file *filp, const char *relpath,
   /* Save information that can be used later to recover the directory entry */
 
   ff->ff_dirsector        = fs->fs_currentsector;
-  ff->ff_dirindex         = dirinfo.fd_index;
+  ff->ff_dirindex         = dirinfo.dir.fd_index;
 
   /* File cluster/size info */
 
@@ -1248,10 +1254,10 @@ static int fat_opendir(struct inode *mountpt, const char *relpath, struct intern
     {
       /* Handler the FAT12/16 root directory */
 
-      dir->u.fat.startcluster = 0;
-      dir->u.fat.currcluster  = 0;
-      dir->u.fat.currsector   = fs->fs_rootbase;
-      dir->u.fat.dirindex     = 2;
+      dir->u.fat.fd_startcluster = 0;
+      dir->u.fat.fd_currcluster  = 0;
+      dir->u.fat.fd_currsector   = fs->fs_rootbase;
+      dir->u.fat.fd_index        = 2;
     }
 
   /* This is not the root directory.  Verify that it is some kind of directory */
@@ -1266,12 +1272,168 @@ static int fat_opendir(struct inode *mountpt, const char *relpath, struct intern
     {
        /* The entry is a directory */
 
-      dir->u.fat.startcluster = 
+      dir->u.fat.fd_startcluster = 
           ((uint32)DIR_GETFSTCLUSTHI(dirinfo.fd_entry) << 16) |
                    DIR_GETFSTCLUSTLO(dirinfo.fd_entry);
-      dir->u.fat.currcluster  = dir->u.fat.startcluster;
-      dir->u.fat.currsector   = fat_cluster2sector(fs, dir->u.fat.currcluster);
-      dir->u.fat.dirindex     = 2;
+      dir->u.fat.fd_currcluster  = dir->u.fat.fd_startcluster;
+      dir->u.fat.fd_currsector   = fat_cluster2sector(fs, dir->u.fat.fd_currcluster);
+      dir->u.fat.fd_index        = 2;
+    }
+
+  fat_semgive(fs);
+  return OK;
+
+errout_with_semaphore:
+  fat_semgive(fs);
+  return ERROR;
+}
+
+/****************************************************************************
+ * Name: fat_readdir
+ *
+ * Description: Read the next directory entry
+ *
+ ****************************************************************************/
+
+static int fat_readdir(struct inode *mountpt, struct internal_dir_s *dir)
+{
+  struct fat_mountpt_s *fs;
+  unsigned int            dirindex;
+  ubyte                  *direntry;
+  ubyte                   ch;
+  ubyte                   attribute;
+  int                     ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL);
+
+  /* Recover our private data from the inode instance */
+
+  fs = mountpt->i_private;
+
+  /* Make sure that the mount is still healthy */
+
+  fat_semtake(fs);
+  ret = fat_checkmount(fs);
+  if (ret != OK)
+    {
+      goto errout_with_semaphore;
+    }
+
+  /* Read the next directory entry */
+
+  dir->fd_dir.d_name[0] = '\0';
+  while (dir->u.fat.fd_currsector && dir->fd_dir.d_name[0] == '\0')
+    {
+      ret = fat_fscacheread(fs, dir->u.fat.fd_currsector);
+      if ( ret < 0)
+        {
+          goto errout_with_semaphore;
+        }
+
+      /* Get a reference to the current directory entry */
+
+      dirindex = (dir->u.fat.fd_index & DIRSEC_NDXMASK(fs)) * 32;
+      direntry = &fs->fs_buffer[dirindex];
+
+      /* Has it reached to end of the directory */
+
+      ch = *direntry;
+      if (ch == DIR0_ALLEMPTY)
+        {
+          /* We signal the end of the directory by returning the
+           * special error -ENOENT
+           */
+
+          ret = -ENOENT;
+          goto errout_with_semaphore;
+        }
+
+      /* No, is the current entry a valid entry? */
+
+      attribute = DIR_GETATTRIBUTES(direntry);
+      if (ch != DIR0_EMPTY && (attribute & FATATTR_VOLUMEID) == 0)
+        {
+          /* Yes.. get the name from the directory info */
+
+          (void)fat_dirname2path(dir->fd_dir.d_name, direntry);
+
+          /* And the file type */
+
+          if ((attribute & FATATTR_DIRECTORY) == 0)
+            {
+              dir->fd_dir.d_type = DTYPE_FILE;
+            }
+          else
+            {
+              dir->fd_dir.d_type = DTYPE_DIRECTORY;
+            }
+        }
+
+      /* Set up the next directory index */
+
+      if (fat_nextdirentry(fs, &dir->u.fat) != OK)
+        {
+          dir->u.fat.fd_currsector = 0;
+        }
+    }
+
+  fat_semgive(fs);
+  return OK;
+
+errout_with_semaphore:
+  fat_semgive(fs);
+  return ERROR;
+}
+
+/****************************************************************************
+ * Name: fat_rewindir
+ *
+ * Description: Reset directory read to the first entry
+ *
+ ****************************************************************************/
+
+static int fat_rewinddir(struct inode *mountpt, struct internal_dir_s *dir)
+{
+  struct fat_mountpt_s *fs;
+  int ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL);
+
+  /* Recover our private data from the inode instance */
+
+  fs = mountpt->i_private;
+
+  /* Make sure that the mount is still healthy */
+
+  fat_semtake(fs);
+  ret = fat_checkmount(fs);
+  if (ret != OK)
+    {
+      goto errout_with_semaphore;
+    }
+
+  /* Check if this is the root directory */
+
+  if (dir->u.fat.fd_startcluster == 0)
+    {
+      /* Handler the FAT12/16 root directory */
+
+      dir->u.fat.fd_currcluster  = 0;
+      dir->u.fat.fd_currsector   = fs->fs_rootbase;
+      dir->u.fat.fd_index        = 2;
+    }
+
+  /* This is not the root directory */
+
+  else
+    {
+      dir->u.fat.fd_currcluster  = dir->u.fat.fd_startcluster;
+      dir->u.fat.fd_currsector   = fat_cluster2sector(fs, dir->u.fat.fd_currcluster);
+      dir->u.fat.fd_index        = 2;
     }
 
   fat_semgive(fs);
@@ -1589,7 +1751,7 @@ static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
   DIR_PUTFSTCLUSTHI(direntry, dircluster >> 16);
   DIR_PUTFSTCLUSTLO(direntry, dircluster);
 
-  parentcluster = dirinfo.fd_startcluster;
+  parentcluster = dirinfo.dir.fd_startcluster;
   if (fs->fs_type != FSTYPE_FAT32 && parentcluster == fs->fs_rootbase)
     {
       parentcluster = 0;
@@ -1833,4 +1995,5 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
  * Public Functions
  ****************************************************************************/
 
+#endif /* CONFIG_DISABLE_MOUNTPOUNT */
 #endif /* CONFIG_FS_FAT */

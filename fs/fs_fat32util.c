@@ -57,7 +57,8 @@
 #include "fs_internal.h"
 #include "fs_fat32.h"
 
-#if CONFIG_FS_FAT
+#ifdef CONFIG_FS_FAT
+#ifndef CONFIG_DISABLE_MOUNTPOUNT
 
 /****************************************************************************
  * Definitions
@@ -250,113 +251,6 @@ static inline int fat_path2dirname(const char **path, struct fat_dirinfo_s *diri
 
  errout:
     return -EINVAL;
-}
-
-/****************************************************************************
- * Name: fat_dirname2path
- *
- * Desciption:  Convert a filename in a raw directory entry into a user
- *    filename.  This is essentially the inverse operation of that performed
- *    by fat_path2dirname.  See that function for more details.
- *
- ****************************************************************************/
-
-static inline int fat_dirname2path(char *path, struct fat_dirinfo_s *dirinfo)
-{
-    const unsigned char *direntry = dirinfo->fd_entry;
-    int  ch;
-    int  ndx;
-
-    /* Check if we will be doing upper to lower case conversions */
-
-#ifdef CONFIG_FAT_LCNAMES
-    dirinfo->fd_ntflags = DIR_GETNTRES(direntry);
-#endif
-
-    /* Get the 8-byte filename */
-
-    for (ndx = 0; ndx < 8; ndx++)
-      {
-        /* Get the next filename character from the directory entry */
-
-        ch = direntry[ndx];
-
-        /* Any space (or ndx==8) terminates the filename */
-
-        if (ch == ' ')
-          {
-            break;
-          }
-
-        /* In this version, we never write 0xe5 in the directoryfilenames
-         * (because we do not handle any character sets where 0xe5 is valid
-         * in a filaname), but we could encounted this in a filesystem
-         * written by some other system
-         */
-
-        if (ndx == 0 && ch == DIR0_E5)
-          {
-            ch = 0xe5;
-          }
-
-        /* Check if we should perform upper to lower case conversion
-         * of the (whole) filename.
-         */
-
-#ifdef CONFIG_FAT_LCNAMES
-        if (dirinfo->fd_ntflags & FATNTRES_LCNAME && isupper(ch))
-          {
-            ch = tolower(ch);
-          }
-#endif
-        /* Copy the next character into the filename */
-
-        *path++ = ch;
-      }
-
-    /* Check if there is an extension */
-
-    if (direntry[8] != ' ')
-      {
-        /* Yes, output the dot before the extension */
-
-        *path++ = '.';
-
-        /* Then output the (up to) 3 character extension */
-
-        for (ndx = 8; ndx < 11; ndx++)
-          {
-            /* Get the next extensions character from the directory entry */
-
-            ch = dirinfo->fd_name[ndx];
-
-            /* Any space (or ndx==11) terminates the extension */
-
-            if (ch == ' ')
-              {
-                break;
-              }
-
-            /* Check if we should perform upper to lower case conversion
-             * of the (whole) filename.
-             */
-
-#ifdef CONFIG_FAT_LCNAMES
-            if (ntflags & FATNTRES_LCEXT && isupper(ch))
-              {
-                ch = tolower(ch);
-              }
-#endif
-        /* Copy the next character into the filename */
-
-            *path++ = ch;
-          }
-      }
-
-    /* Put a null terminator at the end of the filename */
-
-    *path = '\0';
-    return OK;
 }
 
 /****************************************************************************
@@ -1412,14 +1306,14 @@ sint32 fat_extendchain(struct fat_mountpt_s *fs, uint32 cluster)
  *
  ****************************************************************************/
 
-int fat_nextdirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
+int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
 {
   unsigned int cluster;
   unsigned int ndx;
 
   /* Increment the index to the next 32-byte directory entry */
 
-  ndx = dirinfo->fd_index + 1;
+  ndx = dir->fd_index + 1;
 
   /* Check if all of the directory entries in this sectory have
    * been examined.
@@ -1429,13 +1323,13 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
     {
       /* Yes, then we will have to read the next sector */
 
-      dirinfo->fd_currsector++;
+      dir->fd_currsector++;
 
       /* For FAT12/16, the root directory is a group of sectors relative
        * to the first sector of the fat volume.
        */
 
-      if (!dirinfo->fd_currcluster)
+      if (!dir->fd_currcluster)
         {
           /* For FAT12/13, the boot record tells us number of 32-bit directories
            * that are contained in the root directory.  This should correspond to
@@ -1470,7 +1364,7 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
             {
               /* Get next cluster */
 
-              cluster = fat_getcluster(fs, dirinfo->fd_currcluster);
+              cluster = fat_getcluster(fs, dir->fd_currcluster);
 
               /* Check if a valid cluster was obtained. */
 
@@ -1482,15 +1376,15 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 
               /* Initialize for new cluster */
 
-              dirinfo->fd_currcluster = cluster;
-              dirinfo->fd_currsector  = fat_cluster2sector(fs, cluster);
+              dir->fd_currcluster = cluster;
+              dir->fd_currsector  = fat_cluster2sector(fs, cluster);
             }
         }
     }
 
-  /* Save the new index into dirinfo->fd_currsector */
+  /* Save the new index into dir->fd_currsector */
 
-  dirinfo->fd_index = ndx;
+  dir->fd_index = ndx;
   return OK;
 }
 
@@ -1522,9 +1416,9 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
        * the first cluster of the root directory.
        */
 
-      dirinfo->fd_startcluster = cluster;
-      dirinfo->fd_currcluster  = cluster;
-      dirinfo->fd_currsector   = fat_cluster2sector(fs, cluster);
+      dirinfo->dir.fd_startcluster = cluster;
+      dirinfo->dir.fd_currcluster  = cluster;
+      dirinfo->dir.fd_currsector   = fat_cluster2sector(fs, cluster);
     }
   else
     {
@@ -1532,14 +1426,14 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
        * relative to the first sector of the fat volume.
        */
 
-      dirinfo->fd_startcluster = 0;
-      dirinfo->fd_currcluster  = 0;
-      dirinfo->fd_currsector   = cluster;
+      dirinfo->dir.fd_startcluster = 0;
+      dirinfo->dir.fd_currcluster  = 0;
+      dirinfo->dir.fd_currsector   = cluster;
     }
 
   /* fd_index is the index into the current directory table */
 
-  dirinfo->fd_index = 0;
+  dirinfo->dir.fd_index = 0;
 
   /* If no path was provided, then the root directory must be exactly
    * what the caller is looking for.
@@ -1577,7 +1471,7 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
         {
           /* Read the next sector into memory */
 
-          ret = fat_fscacheread(fs, dirinfo->fd_currsector);
+          ret = fat_fscacheread(fs, dirinfo->dir.fd_currsector);
           if (ret < 0)
             {
               return ret;
@@ -1585,7 +1479,7 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 
           /* Get a pointer to the directory entry */
 
-          direntry = &fs->fs_buffer[DIRSEC_BYTENDX(fs, dirinfo->fd_index)];
+          direntry = &fs->fs_buffer[DIRSEC_BYTENDX(fs, dirinfo->dir.fd_index)];
 
           /* Check if we are at the end of the directory */
 
@@ -1606,7 +1500,7 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 
           /* No... get the next directory index and try again */
 
-          if (fat_nextdirentry(fs, dirinfo) != OK)
+          if (fat_nextdirentry(fs, &dirinfo->dir) != OK)
             {
               return -ENOENT;
             }
@@ -1646,9 +1540,9 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 
       /* The restart scanning at the new directory */
 
-      dirinfo->fd_currcluster = dirinfo->fd_startcluster = cluster;
-      dirinfo->fd_currsector  = fat_cluster2sector(fs, cluster);
-      dirinfo->fd_index       = 2;
+      dirinfo->dir.fd_currcluster = dirinfo->dir.fd_startcluster = cluster;
+      dirinfo->dir.fd_currsector  = fat_cluster2sector(fs, cluster);
+      dirinfo->dir.fd_index       = 2;
     }
 }
 
@@ -1670,21 +1564,21 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 
   /* Re-initialize directory object */
 
-  cluster = dirinfo->fd_startcluster;
+  cluster = dirinfo->dir.fd_startcluster;
   if (cluster)
     {
      /* Cluster chain can be extended */
 
-      dirinfo->fd_currcluster = cluster;
-      dirinfo->fd_currsector  = fat_cluster2sector(fs, cluster);
+      dirinfo->dir.fd_currcluster = cluster;
+      dirinfo->dir.fd_currsector  = fat_cluster2sector(fs, cluster);
     }
   else
     {
       /* Fixed size FAT12/16 root directory is at fixxed offset/size */
 
-      dirinfo->fd_currsector = fs->fs_rootbase;
+      dirinfo->dir.fd_currsector = fs->fs_rootbase;
     }
-  dirinfo->fd_index = 0;
+  dirinfo->dir.fd_index = 0;
 
   for (;;)
     {
@@ -1692,7 +1586,7 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 
       /* Read the directory sector into fs_buffer */
 
-      ret = fat_fscacheread(fs, dirinfo->fd_currsector);
+      ret = fat_fscacheread(fs, dirinfo->dir.fd_currsector);
       if (ret < 0)
         {
           return ret;
@@ -1700,7 +1594,7 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 
       /* Get a pointer to the entry at fd_index */
 
-      dirindex = (dirinfo->fd_index & DIRSEC_NDXMASK(fs)) * 32;
+      dirindex = (dirinfo->dir.fd_index & DIRSEC_NDXMASK(fs)) * 32;
       direntry = &fs->fs_buffer[dirindex];
 
       /* Check if this directory entry is empty */
@@ -1714,7 +1608,7 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
           return OK;
         }
 
-      ret = fat_nextdirentry(fs, dirinfo);
+      ret = fat_nextdirentry(fs, &dirinfo->dir);
       if (ret < 0)
         {
           return ret;
@@ -1737,7 +1631,7 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 
   /* Try to extend the cluster chain for this directory */
 
-  cluster = fat_extendchain(fs, dirinfo->fd_currcluster);
+  cluster = fat_extendchain(fs, dirinfo->dir.fd_currcluster);
   if (cluster < 0)
     {
       return cluster;
@@ -1771,6 +1665,115 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 
   dirinfo->fd_entry = fs->fs_buffer;
   return OK;
+}
+
+/****************************************************************************
+ * Name: fat_dirname2path
+ *
+ * Desciption:  Convert a filename in a raw directory entry into a user
+ *    filename.  This is essentially the inverse operation of that performed
+ *    by fat_path2dirname.  See that function for more details.
+ *
+ ****************************************************************************/
+
+int fat_dirname2path(char *path, ubyte *direntry)
+{
+#ifdef CONFIG_FAT_LCNAMES
+    ubyte ntflags;
+#endif
+    int  ch;
+    int  ndx;
+
+    /* Check if we will be doing upper to lower case conversions */
+
+#ifdef CONFIG_FAT_LCNAMES
+    ntflags = DIR_GETNTRES(direntry);
+#endif
+
+    /* Get the 8-byte filename */
+
+    for (ndx = 0; ndx < 8; ndx++)
+      {
+        /* Get the next filename character from the directory entry */
+
+        ch = direntry[ndx];
+
+        /* Any space (or ndx==8) terminates the filename */
+
+        if (ch == ' ')
+          {
+            break;
+          }
+
+        /* In this version, we never write 0xe5 in the directoryfilenames
+         * (because we do not handle any character sets where 0xe5 is valid
+         * in a filaname), but we could encounted this in a filesystem
+         * written by some other system
+         */
+
+        if (ndx == 0 && ch == DIR0_E5)
+          {
+            ch = 0xe5;
+          }
+
+        /* Check if we should perform upper to lower case conversion
+         * of the (whole) filename.
+         */
+
+#ifdef CONFIG_FAT_LCNAMES
+        if (ntflags & FATNTRES_LCNAME && isupper(ch))
+          {
+            ch = tolower(ch);
+          }
+#endif
+        /* Copy the next character into the filename */
+
+        *path++ = ch;
+      }
+
+    /* Check if there is an extension */
+
+    if (direntry[8] != ' ')
+      {
+        /* Yes, output the dot before the extension */
+
+        *path++ = '.';
+
+        /* Then output the (up to) 3 character extension */
+
+        for (ndx = 8; ndx < 11; ndx++)
+          {
+            /* Get the next extensions character from the directory entry */
+
+            ch = direntry[DIR_NAME + ndx];
+
+            /* Any space (or ndx==11) terminates the extension */
+
+            if (ch == ' ')
+              {
+                break;
+              }
+
+            /* Check if we should perform upper to lower case conversion
+             * of the (whole) filename.
+             */
+
+#ifdef CONFIG_FAT_LCNAMES
+            if (ntflags & FATNTRES_LCEXT && isupper(ch))
+              {
+                ch = tolower(ch);
+              }
+#endif
+        /* Copy the next character into the filename */
+
+            *path++ = ch;
+          }
+      }
+
+    /* Put a null terminator at the end of the filename */
+
+    *path = '\0';
+    return OK;
 }
 
 /****************************************************************************
@@ -1955,9 +1958,9 @@ int fat_remove(struct fat_mountpt_s *fs, const char *relpath, boolean directory)
        * sub-directory is empty
        */
 
-      dirinfo.fd_currcluster = dircluster;
-      dirinfo.fd_currsector  = fat_cluster2sector(fs, dircluster);
-      dirinfo.fd_index       = 2;
+      dirinfo.dir.fd_currcluster = dircluster;
+      dirinfo.dir.fd_currsector  = fat_cluster2sector(fs, dircluster);
+      dirinfo.dir.fd_index       = 2;
 
       /* Loop until either (1) an entry is found in the directory
        * (error), (2) the directory is found to be empty, or (3) some
@@ -1973,7 +1976,7 @@ int fat_remove(struct fat_mountpt_s *fs, const char *relpath, boolean directory)
            * subdirectory sector is in the cache
            */
 
-          ret = fat_fscacheread(fs, dirinfo.fd_currsector);
+          ret = fat_fscacheread(fs, dirinfo.dir.fd_currsector);
           if (ret < 0)
             {
               return ret;
@@ -1981,7 +1984,7 @@ int fat_remove(struct fat_mountpt_s *fs, const char *relpath, boolean directory)
 
           /* Get a reference to the next entry in the directory */
 
-          subdirindex = (dirinfo.fd_index & DIRSEC_NDXMASK(fs)) * 32;
+          subdirindex = (dirinfo.dir.fd_index & DIRSEC_NDXMASK(fs)) * 32;
           subdirentry = &fs->fs_buffer[subdirindex];
 
           /* Is this the last entry in the direcory? */
@@ -2007,7 +2010,7 @@ int fat_remove(struct fat_mountpt_s *fs, const char *relpath, boolean directory)
 
           /* Get the next directgory entry */
 
-          ret = fat_nextdirentry(fs, &dirinfo);
+          ret = fat_nextdirentry(fs, &dirinfo.dir);
           if (ret < 0)
             {
               return ret;
@@ -2298,7 +2301,7 @@ int fat_updatefsinfo(struct fat_mountpt_s *fs)
           FSI_PUTFREECOUNT(fs->fs_buffer, fs->fs_fsifreecount);
           FSI_PUTNXTFREE(fs->fs_buffer, fs->fs_fsinextfree);
           FSI_PUTTRAILSIG(fs->fs_buffer, 0xaa550000);
-        
+
           /* Then flush this to disk */
 
           fs->fs_currentsector = fs->fs_fsinfo;
@@ -2313,4 +2316,5 @@ int fat_updatefsinfo(struct fat_mountpt_s *fs)
   return ret;
 }
 
+#endif /* CONFIG_DISABLE_MOUNTPOUNT */
 #endif /* CONFIG_FS_FAT */

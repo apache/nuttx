@@ -43,6 +43,8 @@
 #include <nuttx/fs.h>
 #include "fs_internal.h"
 
+#ifndef CONFIG_DISABLE_MOUNTPOUNT
+
 /************************************************************
  * Definitions
  ************************************************************/
@@ -98,3 +100,5 @@ STATUS register_blockdriver(const char *path,
   inode_semgive();
   return ret;
 }
+
+#endif /* CONFIG_DISABLE_MOUNTPOUNT */

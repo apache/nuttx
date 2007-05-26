@@ -76,8 +76,12 @@
 int closedir(FAR DIR *dirp)
 {
   struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
+#ifndef CONFIG_DISABLE_MOUNTPOUNT
+  struct inode *inode;
+#endif
+  int ret;
 
-  if (!idir || !idir->root)
+  if (!idir || !idir->fd_root)
     {
       *get_errno_ptr() = EBADF;
       return ERROR;
@@ -87,31 +91,44 @@ int closedir(FAR DIR *dirp)
    * inode we have open.
    */
 
-  if (IS_MOUNTPT_INODE(idir->root))
+#ifndef CONFIG_DISABLE_MOUNTPOUNT
+  inode = idir->fd_root;
+  if (INODE_IS_MOUNTPT(inode))
     {
-      /* The node is a file system mointpoint */
+      /* The node is a file system mointpoint. Verify that the mountpoint
+       * supports the closedir() method (not an error if it does not)
+       */
 
-#warning "Mountpoint support not implemented"
-      *get_errno_ptr() = ENOSYS;
-      return ERROR;
+      if (inode->u.i_mops && inode->u.i_mops->closedir)
+         {
+           /* Perform the closedir() operation */
+
+          ret = inode->u.i_mops->closedir(inode, idir);
+          if (ret < 0)
+            {
+              *get_errno_ptr() = -ret;
+              return ERROR;
+            }
+        }
     }
   else
+#endif
     {
       /* The node is part of the root psuedo file system, release
        * our contained reference to the 'next' inode.
        */
 
-      if (idir->u.psuedo.next)
+      if (idir->u.psuedo.fd_next)
         {
-          inode_release(idir->u.psuedo.next);
+          inode_release(idir->u.psuedo.fd_next);
         }
     }
 
   /* Release our references on the contained 'root' inode */
 
-  if (idir->root)
+  if (idir->fd_root)
     {
-      inode_release(idir->root);
+      inode_release(idir->fd_root);
     }
 
   /* Then release the container */

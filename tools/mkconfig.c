@@ -236,6 +236,12 @@ int main(int argc, char **argv, char **envp)
   printf("# undef CONFIG_STDIO_BUFFER_SIZE\n");
   printf("# define CONFIG_STDIO_BUFFER_SIZE 0\n");
   printf("#endif\n\n");
+  printf("/* If mountpoint support in not included, then no filesystem can\n");
+  printf(" * be supported.\n");
+  printf(" */\n\n");
+  printf("#ifdef CONFIG_DISABLE_MOUNTPOINT\n");
+  printf("# undef CONFIG_FS_FAT\n");
+  printf("#endif\n\n");
   printf("/* Verbose debug only makes sense if debug is enabled */\n\n");
   printf("#ifndef CONFIG_DEBUG\n");
   printf("# undef CONFIG_DEBUG_VERBOSE\n");

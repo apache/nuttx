@@ -53,52 +53,59 @@
  * Name: readpsuedodir
  ************************************************************/
 
-static inline FAR struct dirent *readpsuedodir(struct internal_dir_s *idir)
+#if CONFIG_NFILE_DESCRIPTORS > 0
+
+static inline int readpsuedodir(struct internal_dir_s *idir)
 {
   FAR struct inode *prev;
 
   /* Check if we are at the end of the list */
 
-  if (!idir->u.psuedo.next)
+  if (!idir->u.psuedo.fd_next)
     {
-      return NULL;
+      /* End of file and error conditions are not distinguishable
+       * with readdir.  Here we return -ENOENT to signal the end
+       * of the directory.
+       */
+
+      return -ENOENT;
     }
 
   /* Copy the inode name into the dirent structure */
 
-  strncpy(idir->dir.d_name, idir->u.psuedo.next->i_name, NAME_MAX+1);
+  strncpy(idir->fd_dir.d_name, idir->u.psuedo.fd_next->i_name, NAME_MAX+1);
 
   /* If the node has file operations, we will say that it is
    * a file.
    */
 
-  idir->dir.d_type = 0;
-  if (idir->u.psuedo.next->u.i_ops)
+  idir->fd_dir.d_type = 0;
+  if (idir->u.psuedo.fd_next->u.i_ops)
     {
-      idir->dir.d_type |= DTYPE_FILE;
+      idir->fd_dir.d_type |= DTYPE_FILE;
     }
 
   /* If the node has child node(s), then we will say that it
    * is a directory.  NOTE: that the node can be both!
    */
 
-  if (idir->u.psuedo.next->i_child || !idir->u.psuedo.next->u.i_ops)
+  if (idir->u.psuedo.fd_next->i_child || !idir->u.psuedo.fd_next->u.i_ops)
     {
-      idir->dir.d_type |= DTYPE_DIRECTORY;
+      idir->fd_dir.d_type |= DTYPE_DIRECTORY;
     }
 
   /* Now get the inode to vist next time that readdir() is called */
 
   inode_semtake();
 
-  prev                = idir->u.psuedo.next;
-  idir->u.psuedo.next = prev->i_peer; /* The next node to visit */
+  prev                   = idir->u.psuedo.fd_next;
+  idir->u.psuedo.fd_next = prev->i_peer; /* The next node to visit */
 
-  if (idir->u.psuedo.next)
+  if (idir->u.psuedo.fd_next)
     {
       /* Increment the reference count on this next node */
 
-      idir->u.psuedo.next->i_crefs++;
+      idir->u.psuedo.fd_next->i_crefs++;
     }
 
   inode_semgive();
@@ -108,7 +115,7 @@ static inline FAR struct dirent *readpsuedodir(struct internal_dir_s *idir)
       inode_release(prev);
     }
 
-  return &idir->dir;
+  return OK;
 }
 
 /************************************************************
@@ -137,39 +144,72 @@ static inline FAR struct dirent *readpsuedodir(struct internal_dir_s *idir)
  *
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 FAR struct dirent *readdir(DIR *dirp)
 {
   FAR struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
+  struct inode *inode;
+  int ret;
 
   /* Sanity checks */
 
-  if (!idir || !idir->root)
+  if (!idir || !idir->fd_root)
     {
-      *get_errno_ptr() = EBADF;
-      return NULL;
+      ret = EBADF;
+      goto errout;
     }
 
   /* The way we handle the readdir depends on the type of inode
    * that we are dealing with.
    */
 
-  if (INODE_IS_MOUNTPT(idir->root))
+  inode = idir->fd_root;
+  if (INODE_IS_MOUNTPT(inode))
     {
-      /* The node is a file system mointpoint */
+      /* The node is a file system mointpoint. Verify that the mountpoint
+       * supports the readdir() method
+       */
 
-#warning "Mountpoint support not implemented"
-      *get_errno_ptr() = ENOSYS;
-      return NULL;
+      if (!inode->u.i_mops || !inode->u.i_mops->readdir)
+         {
+           ret = EACCES;
+           goto errout;
+         }
+
+      /* Perform the readdir() operation */
+
+      ret = inode->u.i_mops->readdir(inode, idir);
     }
   else
     {
       /* The node is part of the root psuedo file system, release
        * our contained reference to the 'next' inode.
        */
-      return readpsuedodir(idir);
+      ret = readpsuedodir(idir);
     }
+
+  /* ret < 0 is an error.  Special case: ret = -ENOENT is end of file */
+
+  if ( ret < 0)
+    {
+      if (ret == -ENOENT)
+        {
+          ret = OK;
+        }
+      else
+        {
+          ret = -ret;
+        }
+      goto errout;
+    }
+
+  /* Success */
+
+  idir->fd_position++;
+  return &idir->fd_dir;
+
+errout:
+  *get_errno_ptr() = ret;
+  return NULL;
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS */

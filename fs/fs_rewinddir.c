@@ -48,6 +48,10 @@
  * Private Functions
  ************************************************************/
 
+/************************************************************
+ * Name: rewindpsuedodir
+ ************************************************************/
+
 #if CONFIG_NFILE_DESCRIPTORS > 0
 
 static inline void rewindpsuedodir(struct internal_dir_s *idir)
@@ -58,15 +62,15 @@ static inline void rewindpsuedodir(struct internal_dir_s *idir)
 
   /* Reset the position to the beginning */
 
-  prev                = idir->u.psuedo.next; /* (Save to delete later) */
-  idir->u.psuedo.next = idir->root;          /* The next node to visit */
-  idir->position      = 0;                   /* Reset position */
+  prev                   = idir->u.psuedo.fd_next; /* (Save to delete later) */
+  idir->u.psuedo.fd_next = idir->fd_root;          /* The next node to visit */
+  idir->fd_position      = 0;                      /* Reset position */
 
   /* Increment the reference count on the root=next node.  We
    * should now have two references on the inode.
    */
 
-  idir->root->i_crefs++;
+  idir->fd_root->i_crefs++;
   inode_semgive();
 
   /* Then release the reference to the old next inode */
@@ -100,10 +104,13 @@ static inline void rewindpsuedodir(struct internal_dir_s *idir)
 void rewinddir(FAR DIR *dirp)
 {
   struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
+#ifndef CONFIG_DISABLE_MOUNTPOUNT
+  struct inode *inode;
+#endif
 
   /* Sanity checks */
 
-  if (!idir || !idir->root)
+  if (!idir || !idir->fd_root)
     {
       return;
     }
@@ -112,13 +119,23 @@ void rewinddir(FAR DIR *dirp)
    * that we are dealing with.
    */
 
-  if (INODE_IS_MOUNTPT(idir->root))
+#ifndef CONFIG_DISABLE_MOUNTPOUNT
+  inode = idir->fd_root;
+  if (INODE_IS_MOUNTPT(inode))
     {
-      /* The node is a file system mointpoint */
+      /* The node is a file system mointpoint. Verify that the mountpoint
+       * supports the rewinddir() method
+       */
 
-#warning "Mountpoint support not implemented"
+      if (inode->u.i_mops && inode->u.i_mops->rewinddir)
+        {
+          /* Perform the rewinddir() operation */
+
+          inode->u.i_mops->rewinddir(inode, idir);
+        }
     }
   else
+#endif
     {
       /* The node is part of the root psuedo file system */
 

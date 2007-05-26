@@ -143,5 +143,9 @@
 	* Added unlink(), mkdir(), rmdir(), and rename()
 	* Fixed several serious FAT errors with oflags handling (&& instead of &)
 	* Added FAT support for unlink(), mkdir(), rmdir(), and rename
+	* Added FAT support for opendir(), closedir(), readdir(), seekdir(),
+	  telldir(), rewindir().
+	* Fixed ARM compilation errors introduced in 1.2.5 (that is what I get
+	  for only testing on the simulation).
 	* Started m68322
 

@@ -78,7 +78,7 @@ off_t telldir(FAR DIR *dirp)
 {
   struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
 
-  if (!idir || !idir->root)
+  if (!idir || !idir->fd_root)
     {
       *get_errno_ptr() = EBADF;
       return (off_t)-1;
@@ -86,7 +86,7 @@ off_t telldir(FAR DIR *dirp)
 
   /* Just return the current position */
 
-  return idir->position;
+  return idir->fd_position;
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS */

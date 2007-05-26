@@ -45,6 +45,7 @@
 #include "fs_internal.h"
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
+#ifndef CONFIG_DISABLE_MOUNTPOUNT
 
 /****************************************************************************
  * Definitions
@@ -176,4 +177,5 @@ int umount(const char *target)
   return ERROR;
 }
 
+#endif /* CONFIG_DISABLE_MOUNTPOUNT */
 #endif /* CONFIG_NFILE_DESCRIPTORS */

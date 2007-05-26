@@ -48,6 +48,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include "os_internal.h"
+#include "clock_internal.h"
 #include "pthread_internal.h"
 
 /************************************************************

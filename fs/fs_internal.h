@@ -73,9 +73,33 @@
  * Public Types
  ****************************************************************************/
 
-/* The internal representation of type DIR is just a
- * container for an inode reference and a dirent structure.
+/* The internal representation of type DIR is just a container for an inode
+ * reference, a position, a dirent structure, and file-system-specific
+ * information.
+ *
+ * For the root psuedo-file system, we need retain only the 'next' inode
+ * need for the next readdir() operation.  We hold a reference on this
+ * inode so we know that it will persist until closedir is called.
  */
+
+struct fs_psuedodir_s
+{
+  struct inode *fd_next;             /* The inode for the next call to readdir() */
+};
+
+#ifdef CONFIG_FS_FAT
+/* For fat, we need to retun the start cluster, current cluster, current
+ * sector and current directory index.
+ */
+
+struct fs_fatdir_s
+{
+  uint32       fd_startcluster;        /* Start cluster number of the directory*/
+  uint32       fd_currcluster;         /* Current cluster number being read*/
+  size_t       fd_currsector;          /* Current sector being read*/
+  unsigned int fd_index;               /* Current index of the directory entry to read */
+};
+#endif
 
 struct internal_dir_s
 {
@@ -87,11 +111,11 @@ struct internal_dir_s
    * closedir() is called (although inodes linked to this inode may change).
    */
 
-  struct inode *root;
+  struct inode *fd_root;
 
   /* This keeps track of the current directory position for telldir */
 
-  off_t position;
+  off_t fd_position;
 
   /* Retained control information depends on the type of file system that
    * provides is provides the mountpoint.  Ideally this information should
@@ -101,34 +125,15 @@ struct internal_dir_s
 
   union
     {
-      /* For the root psuedo-file system, we need retain only the 'next' inode
-       * need for the next readdir() operation.  We hold a reference on this
-       * inode so we know that it will persist until closedir is called.
-       */
-
-      struct
-        {
-          struct inode *next;      /* The inode for the next call to readdir() */
-        } psuedo;
-
+      struct fs_psuedodir_s psuedo;
 #ifdef CONFIG_FS_FAT
-      /* For fat, we need to retun the start cluster, current cluster, current
-       * sector and current directory index.
-       */
-
-      struct
-        {
-          uint32       startcluster;  /* Starting cluster of directory */
-          uint32       currcluster;   /* The current cluster being read */
-          size_t       currsector;    /* The current sector being read */
-          unsigned int dirindex;      /* The next directory entry to read */
-        } fat;
+      struct fs_fatdir_s    fat;
 #endif
    } u;
 
   /* In any event, this the actual struct dirent that is returned by readdir */
 
-  struct dirent dir;                /* Populated when readdir is called */
+  struct dirent fd_dir;              /* Populated when readdir is called */
 };
 
 /****************************************************************************

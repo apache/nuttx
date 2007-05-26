@@ -492,10 +492,7 @@ struct fat_dirinfo_s
 #ifdef CONFIG_FAT_LCNAMES
   ubyte    fd_ntflags;             /* NTRes lower case flags */
 #endif
-  uint16   fd_index;               /* Current index */
-  size_t   fd_startcluster;        /* Start cluster number */
-  size_t   fd_currcluster;         /* Current cluster number */
-  size_t   fd_currsector;          /* Current sector */
+  struct fs_fatdir_s dir;        /* Used with opendir, readdir, etc. */
   ubyte   *fd_entry;               /* A pointer to the raw 32-byte entry */
 };
 
@@ -556,10 +553,12 @@ EXTERN sint32 fat_extendchain(struct fat_mountpt_s *fs, uint32 cluster);
 
 /* Help for traverseing directory trees */
 
-EXTERN int    fat_nextdirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
+EXTERN int    fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir);
 EXTERN int    fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
                                const char *path);
 EXTERN int    fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
+
+EXTERN int    fat_dirname2path(char *path, ubyte *direntry);
 
 /* File creation and removal helpers */
 

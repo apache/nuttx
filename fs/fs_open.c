@@ -153,12 +153,14 @@ int open(const char *path, int oflags, ...)
   ret = OK;
   if (inode->u.i_ops->open)
     {
+#ifndef CONFIG_DISABLE_MOUNTPOUNT
       if (INODE_IS_MOUNTPT(inode))
         {
           ret = inode->u.i_mops->open((FAR struct file*)&list->fl_files[fd],
                                       relpath, oflags, mode);
         }
       else
+#endif
         {
           ret = inode->u.i_ops->open((FAR struct file*)&list->fl_files[fd]);
         }

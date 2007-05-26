@@ -197,11 +197,12 @@ FAR DIR *opendir(const char *path)
    * inode or a file system mountpoint.
    */
 
-  dir->root     = inode;  /* Save the inode where we start */
-  dir->position = 0;      /* This is the position in the read stream */
+  dir->fd_root     = inode;  /* Save the inode where we start */
+  dir->fd_position = 0;      /* This is the position in the read stream */
 
   /* Is this a not in the psuedo filesystem? */
 
+#ifndef CONFIG_DISABLE_MOUNTPOUNT
   if (INODE_IS_MOUNTPT(inode))
     {
       /* The node is a file system mointpoint. Verify that the mountpoint
@@ -224,11 +225,12 @@ FAR DIR *opendir(const char *path)
         }
     }
   else
+#endif
     {
       /* The node is part of the root psuedo file system */
 
-      inode_addref(inode);         /* Now we have two references on inode */
-      dir->u.psuedo.next = inode;  /* This is the next node to use for readdir() */
+      inode_addref(inode);           /* Now we have two references on inode */
+      dir->u.psuedo.fd_next = inode; /* This is the next node to use for readdir() */
     }
 
   return ((DIR*)dir);

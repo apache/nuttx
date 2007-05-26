@@ -45,11 +45,14 @@ CSRCS		= fs_open.c fs_close.c fs_read.c fs_write.c fs_ioctl.c fs_dup.c \
 		  fs_seekdir.c fs_telldir.c fs_rewinddir.c fs_fsync.c fs_files.c \
 		  fs_inode.c fs_inodefind.c fs_inodereserve.c \
 		  fs_inoderemove.c fs_registerdriver.c fs_unregisterdriver.c \
-		  fs_registerblockdriver.c fs_unregisterblockdriver.c \
+		  fs_inodeaddref.c fs_inoderelease.c
+ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
+CSRCS		+= fs_registerblockdriver.c fs_unregisterblockdriver.c \
 		  fs_mount.c fs_umount.c fs_unlink.c fs_mkdir.c fs_rmdir.c \
-		  fs_rename.c fs_inodeaddref.c fs_inoderelease.c
+		  fs_rename.c
 ifeq ($(CONFIG_FS_FAT),y)
 CSRCS		+= fs_fat32.c fs_fat32util.c
+endif
 endif
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 

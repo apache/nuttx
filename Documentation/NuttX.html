@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 21, 2007</p>
+      <p>Last Updated: May 26, 2007</p>
     </td>
   </tr>
 </table>
@@ -574,6 +574,10 @@ Other memory:
 	* Added unlink(), mkdir(), rmdir(), and rename()
 	* Fixed several serious FAT errors with oflags handling (&& instead of &)
 	* Added FAT support for unlink(), mkdir(), rmdir(), and rename()
+	* Added FAT support for opendir(), closedir(), readdir(), seekdir(),
+	  telldir(), rewindir().
+	* Fixed ARM compilation errors introduced in 1.2.5 (that is what I get
+	  for only testing on the simulation).
 	* Started m68322
 </pre></ul>
 

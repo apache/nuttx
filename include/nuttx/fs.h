@@ -79,6 +79,7 @@ struct file_operations
 
 /* This structure provides information about the state of a block driver */
 
+#ifndef CONFIG_DISABLE_MOUNTPOUNT
 struct geometry
 {
   boolean geo_available;    /* TRUE: The device is vailable */
@@ -114,6 +115,7 @@ struct block_operations
  */
 
 struct inode;
+struct internal_dir_s;
 struct mountpt_operations
 {
   /* The mountpoint open method differs from the driver open method
@@ -148,6 +150,9 @@ struct mountpt_operations
   /* Directory operations */
 
   int     (*opendir)(struct inode *mountpt, const char *relpath, struct internal_dir_s *dir);
+  int     (*closedir)(struct inode *mountpt, struct internal_dir_s *dir);
+  int     (*readdir)(struct inode *mountpt, struct internal_dir_s *dir);
+  int     (*rewinddir)(struct inode *mountpt, struct internal_dir_s *dir);
 
   /* General volume-related mountpoint operations: */
 
@@ -163,6 +168,7 @@ struct mountpt_operations
    * file stat(), file attributes, file truncation, etc.
    */
 };
+#endif /* CONFIG_DISABLE_MOUNTPOUNT */
 
 /* This structure represents one inode in the Nuttx psuedo-file system */
 
@@ -175,8 +181,10 @@ struct inode
   union
   {
     const struct file_operations    *i_ops;  /* Driver operations for inode */
+#ifndef CONFIG_DISABLE_MOUNTPOUNT
     const struct block_operations   *i_bops; /* Block driver operations */
     const struct mountpt_operations *i_mops; /* Operations on a mountpoint */
+#endif
   } u;
 #ifdef CONFIG_FILE_MODE
   mode_t                       i_mode;       /* Access mode flags */

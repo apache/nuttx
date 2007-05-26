@@ -50,6 +50,10 @@
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 
+/************************************************************
+ * Name: seekpsuedodir
+ ************************************************************/
+
 static inline void seekpsuedodir(struct internal_dir_s *idir, off_t offset)
 {
   struct inode *curr;
@@ -62,15 +66,15 @@ static inline void seekpsuedodir(struct internal_dir_s *idir, off_t offset)
    * "rewind" to the root dir.
    */
 
-  if ( offset < idir->position )
+  if ( offset < idir->fd_position )
     {
        pos  = 0;
-       curr = idir->root;
+       curr = idir->fd_root;
     }
   else
     {
-       pos  = idir->position;
-       curr = idir->u.psuedo.next;
+       pos  = idir->fd_position;
+       curr = idir->u.psuedo.fd_next;
     }
 
   /* Traverse the peer list starting at the 'root' of the
@@ -84,9 +88,9 @@ static inline void seekpsuedodir(struct internal_dir_s *idir, off_t offset)
 
   /* Now get the inode to vist next time that readdir() is called */
 
-  prev                = idir->u.psuedo.next;
-  idir->u.psuedo.next = curr; /* The next node to visit (might be null) */
-  idir->position      = pos;  /* Might be beyond the last dirent */
+  prev                   = idir->u.psuedo.fd_next;
+  idir->u.psuedo.fd_next = curr; /* The next node to visit (might be null) */
+  idir->fd_position      = pos;  /* Might be beyond the last dirent */
 
   if (curr)
     {
@@ -102,6 +106,73 @@ static inline void seekpsuedodir(struct internal_dir_s *idir, off_t offset)
       inode_release(prev);
     }
 }
+
+/************************************************************
+ * Name: seekmountptdir
+ ************************************************************/
+
+#ifndef CONFIG_DISABLE_MOUNTPOUNT
+static inline void seekmountptdir(struct internal_dir_s *idir, off_t offset)
+{
+  struct inode *inode;
+  off_t pos;
+
+  /* Determine a starting point for the seek.  If the seek
+   * is "forward" from the current position, then we will
+   * start at the current poisition.  Otherwise, we will
+   * "rewind" to the root dir.
+   */
+
+  inode = idir->fd_root;
+  if ( offset < idir->fd_position )
+    {
+      if (inode->u.i_mops && inode->u.i_mops->rewinddir)
+        {
+          /* Perform the rewinddir() operation */
+
+          inode->u.i_mops->rewinddir(inode, idir);
+          pos = 0;
+        }
+      else
+        {
+           /* We can't do the seek and there is no way to return
+           * an error indication.
+           */
+
+          return;
+        }
+    }
+  else
+    {
+       pos  = idir->fd_position;
+    }
+
+  /* This is a brute force approach... we will just read
+   * directory entries until we are at the desired position.
+   */
+
+  while (pos < offset)
+    {
+       if (!inode->u.i_mops || !inode->u.i_mops->readdir ||
+            inode->u.i_mops->readdir(inode, idir) < 0)
+         {
+           /* We can't read the next entry and there is no way to return
+           * an error indication.
+           */
+
+            return;
+         }
+
+       /* Increment the position on each successful read */
+
+       pos++;
+    }
+
+  /* If we get here the the directory position has been successfully set */
+
+  idir->fd_position = pos;
+}
+#endif
 
 /************************************************************
  * Public Functions
@@ -132,7 +203,7 @@ void seekdir(FAR DIR *dirp, off_t offset)
 
   /* Sanity checks */
 
-  if (!idir || !idir->root)
+  if (!idir || !idir->fd_root)
     {
       return;
     }
@@ -141,13 +212,15 @@ void seekdir(FAR DIR *dirp, off_t offset)
    * that we are dealing with.
    */
 
-  if (INODE_IS_MOUNTPT(idir->root))
+#ifndef CONFIG_DISABLE_MOUNTPOUNT
+  if (INODE_IS_MOUNTPT(idir->fd_root))
     {
       /* The node is a file system mointpoint */
 
-#warning "Mountpoint support not implemented"
+      seekmountptdir(idir, offset);
     }
   else
+#endif
     {
       /* The node is part of the root psuedo file system */
 
