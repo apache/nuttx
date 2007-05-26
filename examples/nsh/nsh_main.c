@@ -254,15 +254,6 @@ static void cmd_ls(const char *cmd, char *arg)
           break;
         }
 
-      if (DIRENT_ISFILE(entryp->d_type))
-        {
-#ifdef CONFIG_FULL_PATH
-          printf("  %s/%s\n", arg, entryp->d_name);
-#else
-          printf("  %s\n", entryp->d_name);
-#endif
-        }
-
       if (DIRENT_ISDIRECTORY(entryp->d_type))
         {
 #ifdef CONFIG_FULL_PATH
@@ -271,6 +262,15 @@ static void cmd_ls(const char *cmd, char *arg)
           printf("  %s/\n", entryp->d_name);
 #endif
         }
+      else
+        {
+#ifdef CONFIG_FULL_PATH
+          printf("  %s/%s\n", arg, entryp->d_name);
+#else
+          printf("  %s\n", entryp->d_name);
+#endif
+        }
+
     }
   closedir(dirp);
 }

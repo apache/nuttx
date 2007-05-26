@@ -54,9 +54,13 @@
  */
 
 #define DTYPE_FILE      0x01
-#define DTYPE_DIRECTORY 0x02
+#define DTYPE_CHR       0x02
+#define DTYPE_BLK       0x04
+#define DTYPE_DIRECTORY 0x08
 
 #define DIRENT_ISFILE(dtype)      (((dtype) & DTYPE_FILE) != 0 )
+#define DIRENT_ISCHR(dtype)       (((dtype) & DTYPE_CHR) != 0 )
+#define DIRENT_ISBLK(dtype)       (((dtype) & DTYPE_BLK) != 0 )
 #define DIRENT_ISDIRECTORY(dtype) (((dtype) & DTYPE_DIRECTORY) != 0 )
 
 /************************************************************

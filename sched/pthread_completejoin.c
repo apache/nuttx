@@ -209,8 +209,6 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
 
 void pthread_destroyjoin(FAR join_t *pjoin)
 {
-  int status;
-
   dbg("pjoin=0x%p\n", pjoin);
 
   /* Remove the join info from the set of joins */

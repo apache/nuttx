@@ -46,6 +46,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#include <dirent.h>
 #include <errno.h>
 
 /****************************************************************************
@@ -76,9 +77,53 @@ static const char g_testmsg[]        = "This is a write test";
 
 static int        g_nerrors          = 0;
 
+static char       g_namebuffer[256];
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: fail_read_open
+ ****************************************************************************/
+
+static void show_directories( const char *path, int indent )
+{
+  DIR *dirp;
+  struct dirent *direntry;
+  int i;
+
+  dirp = opendir(path);
+  if ( !dirp )
+    {
+      printf("show_directories: ERROR opendir(\"%s\") failed with errno=%d\n", path, *get_errno_ptr());
+      g_nerrors++;
+      return;
+    }
+
+  for (direntry = readdir(dirp); direntry; direntry = readdir(dirp))
+    {
+      for (i = 0; i < 2*indent; i++)
+        {
+          putchar(' ');
+        }
+      if (DIRENT_ISDIRECTORY(direntry->d_type))
+        {
+          char *subdir;
+          printf("%s/\n", direntry->d_name);
+          sprintf(g_namebuffer, "%s/%s", path, direntry->d_name);
+          subdir = strdup(g_namebuffer);
+          show_directories( subdir, indent + 1);
+          free(subdir);
+        }
+      else
+        {
+          printf("%s\n", direntry->d_name);
+        }
+    }
+
+  closedir(dirp);
+}
 
 /****************************************************************************
  * Name: fail_read_open
@@ -396,11 +441,13 @@ int user_start(int argc, char *argv[])
     {
       /* Read a test file that is already on the test file system image */
 
+      show_directories("", 0);
       read_test_file(g_testfile1);
 
       /* Write a test file into a pre-existing directory on the test file system */
 
       write_test_file(g_testfile2);
+      show_directories("", 0);
 
       /* Read the file that we just wrote */
 
@@ -421,6 +468,7 @@ int user_start(int argc, char *argv[])
       /* Try unlink() against the test file1.  It should succeed. */
 
       succeed_unlink(g_testfile1);
+      show_directories("", 0);
 
       /* Attempt to open testfile1 should fail with ENOENT */
 
@@ -437,6 +485,7 @@ int user_start(int argc, char *argv[])
       /* Try unlink() against the test file2.  It should succeed. */
 
       succeed_unlink(g_testfile2);
+      show_directories("", 0);
 
       /* Try mkdir() against the test dir1.  It should fail with EEXIST. */
 
@@ -445,10 +494,12 @@ int user_start(int argc, char *argv[])
       /* Try rmdir() against the test directory.  It should now succeed. */
 
       succeed_rmdir(g_testdir1);
+      show_directories("", 0);
 
       /* Try mkdir() against the test dir2.  It should succeed */
 
       succeed_mkdir(g_testdir2);
+      show_directories("", 0);
 
       /* Try mkdir() against the test dir2.  It should fail with EXIST */
 
@@ -457,6 +508,7 @@ int user_start(int argc, char *argv[])
       /* Write a test file into a new directory on the test file system */
 
       write_test_file(g_testfile3);
+      show_directories("", 0);
 
       /* Read the file that we just wrote */
 
@@ -465,6 +517,7 @@ int user_start(int argc, char *argv[])
       /* Use mkdir() to create test dir3.  It should succeed */
 
       succeed_mkdir(g_testdir3);
+      show_directories("", 0);
 
       /* Try rename() on the root directory. Should fail with EXDEV*/
 
@@ -477,10 +530,12 @@ int user_start(int argc, char *argv[])
       /* Try rename() to a non-existing directory.  Should succeed */
 
       succeed_rename(g_testdir3, g_testdir4);
+      show_directories("", 0);
 
       /* Try rename() of file.  Should work. */
 
       succeed_rename(g_testfile3, g_testfile4);
+      show_directories("", 0);
 
       /* Make sure that we can still read the renamed file */
 

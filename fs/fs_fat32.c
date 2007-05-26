@@ -1262,7 +1262,7 @@ static int fat_opendir(struct inode *mountpt, const char *relpath, struct intern
 
   /* This is not the root directory.  Verify that it is some kind of directory */
 
-  else if (DIR_GETATTRIBUTES(dirinfo.fd_entry) & FATATTR_DIRECTORY)
+  else if ((DIR_GETATTRIBUTES(dirinfo.fd_entry) & FATATTR_DIRECTORY) == 0)
     {
        /* The entry is not a directory */
        ret = -ENOTDIR;

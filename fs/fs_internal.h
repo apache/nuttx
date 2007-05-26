@@ -69,6 +69,13 @@
 #define INODE_SET_MOUNTPT(i) \
   ((i)->i_flags = (((i)->i_flags & ~FSNODEFLAG_TYPE_MASK) | FSNODEFLAG_TYPE_MOUNTPT))
 
+/* Mountpoint fd_flags values */
+
+#define DIRENTFLAGS_PSUEDONODE 1
+
+#define DIRENT_SETPSUEDONODE(f) do (f) |= DIRENTFLAGS_PSUEDONODE; while (0)
+#define DIRENT_ISPSUEDONODE(f) (((f) & DIRENTFLAGS_PSUEDONODE) != 0)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -87,7 +94,7 @@ struct fs_psuedodir_s
   struct inode *fd_next;             /* The inode for the next call to readdir() */
 };
 
-#ifdef CONFIG_FS_FAT
+#if defined(CONFIG_FS_FAT) && !defined(CONFIG_DISABLE_MOUNTPOINT)
 /* For fat, we need to retun the start cluster, current cluster, current
  * sector and current directory index.
  */
@@ -113,6 +120,12 @@ struct internal_dir_s
 
   struct inode *fd_root;
 
+  /* At present, only mountpoints require special handling flags */
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+  unsigned int fd_flags;
+#endif
+
   /* This keeps track of the current directory position for telldir */
 
   off_t fd_position;
@@ -125,9 +138,16 @@ struct internal_dir_s
 
   union
     {
+      /* Private data used by the built-in psuedo-file system */
+
       struct fs_psuedodir_s psuedo;
+
+      /* Private data used by other file systems */
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 #ifdef CONFIG_FS_FAT
       struct fs_fatdir_s    fat;
+#endif
 #endif
    } u;
 

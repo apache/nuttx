@@ -82,7 +82,20 @@ static inline int readpsuedodir(struct internal_dir_s *idir)
   idir->fd_dir.d_type = 0;
   if (idir->u.psuedo.fd_next->u.i_ops)
     {
-      idir->fd_dir.d_type |= DTYPE_FILE;
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+      if (INODE_IS_BLOCK(idir->u.psuedo.fd_next)) 
+        {
+           idir->fd_dir.d_type |= DTYPE_BLK;
+        }
+      if (INODE_IS_MOUNTPT(idir->u.psuedo.fd_next)) 
+        {
+           idir->fd_dir.d_type |= DTYPE_DIRECTORY;
+        }
+      else
+#endif
+        {
+           idir->fd_dir.d_type |= DTYPE_CHR;
+        }
     }
 
   /* If the node has child node(s), then we will say that it
@@ -147,7 +160,9 @@ static inline int readpsuedodir(struct internal_dir_s *idir)
 FAR struct dirent *readdir(DIR *dirp)
 {
   FAR struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   struct inode *inode;
+#endif
   int ret;
 
   /* Sanity checks */
@@ -162,8 +177,9 @@ FAR struct dirent *readdir(DIR *dirp)
    * that we are dealing with.
    */
 
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   inode = idir->fd_root;
-  if (INODE_IS_MOUNTPT(inode))
+  if (INODE_IS_MOUNTPT(inode) && !DIRENT_ISPSUEDONODE(idir->fd_flags))
     {
       /* The node is a file system mointpoint. Verify that the mountpoint
        * supports the readdir() method
@@ -172,7 +188,7 @@ FAR struct dirent *readdir(DIR *dirp)
       if (!inode->u.i_mops || !inode->u.i_mops->readdir)
          {
            ret = EACCES;
-           goto errout;
+            goto errout;
          }
 
       /* Perform the readdir() operation */
@@ -180,10 +196,10 @@ FAR struct dirent *readdir(DIR *dirp)
       ret = inode->u.i_mops->readdir(inode, idir);
     }
   else
+#endif
     {
-      /* The node is part of the root psuedo file system, release
-       * our contained reference to the 'next' inode.
-       */
+      /* The node is part of the root psuedo file system */
+
       ret = readpsuedodir(idir);
     }
 
