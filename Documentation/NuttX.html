@@ -183,7 +183,7 @@
 </table>
 
 <p>
-   The 8th release of NuttX (nuttx-0.2.5) is available for download
+   The 9th release of NuttX (nuttx-0.2.6) is available for download
    from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
    website.
    The change log associated with the release is available <a href="#currentrelease">here</a>.
@@ -251,7 +251,7 @@
     </p>
     <p>
       <b>STATUS:</b>
-        This port is in progress and should be available in the nuttx-0.2.6 release.
+        This port is in progress and should be available in the nuttx-0.2.7 release.
     </p>
   </td>
 </tr>
@@ -531,17 +531,7 @@ Other memory:
 	* Logic from arch/c5471 and arch/dm320 combined into arch/arm.
 	  arch/c5471 and arch/dm320 are deprecated and will be removed
 	  when the new c5471 and dm320 logic is verified.
-</pre></ul>
 
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="currentrelease">ChangeLog for Current Release</a>
-  </td>
-  </tr>
-</table>
-
-<pre><ul>
 0.2.5 2007-05-19 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Corrected some build/configuration issues introduced with the
@@ -563,21 +553,35 @@ Other memory:
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
+    <a name="currentrelease">ChangeLog for Current Release</a>
+  </td>
+  </tr>
+</table>
+
+<pre><ul>
+0.2.6 2007-05-26 Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* Added unlink(), mkdir(), rmdir(), and rename()
+	* Fixed several serious FAT errors with oflags handling (&& instead of &)
+	* Added FAT support for unlink(), mkdir(), rmdir(), and rename
+	* Added FAT support for opendir(), closedir(), readdir(), seekdir(),
+	  telldir(), rewindir().
+	* Fixed ARM compilation errors introduced in 0.2.5 (that is what I get
+	  for only testing on the simulation).
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
     <a name="pendingchanges">Unreleased Changes</a>
   </td>
   </tr>
 </table>
 
 <pre><ul>
-0.2.6 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* Added unlink(), mkdir(), rmdir(), and rename()
-	* Fixed several serious FAT errors with oflags handling (&& instead of &)
-	* Added FAT support for unlink(), mkdir(), rmdir(), and rename()
-	* Added FAT support for opendir(), closedir(), readdir(), seekdir(),
-	  telldir(), rewindir().
-	* Fixed ARM compilation errors introduced in 1.2.5 (that is what I get
-	  for only testing on the simulation).
+0.2.7 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
 	* Started m68322
 </pre></ul>
 

@@ -39,7 +39,7 @@ o Libraries
 
 o File system
 - Add disk usage stats, stat(), chmod(), truncate().
-- FAT32: long file names, unlink(), mkdir(), rmdir(), rename()
+- FAT32: long file names
 
 o Console Output
 
