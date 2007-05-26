@@ -41,6 +41,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include <string.h>
 #include <errno.h>
 #include <nuttx/fs.h>
 #include "fs_internal.h"
@@ -48,6 +49,92 @@
 /************************************************************
  * Private Functions
  ************************************************************/
+
+/************************************************************
+ * Name: fs_finddirnode
+ *
+ * Description:
+ *   This is called from the opendir() logic to get a reference
+ *   to the inode associated with a directory.  There are no
+ *   real directories in this design; For our purposes, a
+ *   directory inode is simply one that has children or one
+ *   that is a mountpoint for a "real" file system
+ *
+ ************************************************************/
+
+static inline FAR struct inode *fs_finddirnode(const char *path, const char **relpath)
+{
+  FAR struct inode *node;
+  FAR struct inode *root = NULL;
+
+  /* If we are given 'nothing' then we will interpret this as
+   * request for the root inode.
+   */
+
+  if (!path || *path == 0 || strcmp(path, "/") == 0)
+    {
+       return root_inode;
+    }
+
+  /* We don't know what to do with relative pathes */
+
+  if (*path != '/')
+    {
+      return NULL;
+    }
+
+  /* Find the node matching the path. */
+
+  inode_semtake();
+  node = inode_search(&path, (FAR void*)NULL, (FAR void*)NULL, relpath);
+  if (node)
+    {
+
+      /* Is this a not in the psuedo filesystem? */
+
+      if (INODE_IS_MOUNTPT(node))
+        {
+           /* Yes, then return the inode itself as the 'root' of
+           * the directory.  The actually directory is at relpath into the
+           * mounted filesystem.  Increment the count of references
+           * on the inode.
+           */
+
+           root = node;
+           root->i_crefs++;
+        }
+      else
+        {
+          /* It is a node in the psuedo filesystem.  Does the inode have a child?
+           * If so that the child would be the 'root' of a list of nodes under
+           * the directory.
+           */
+
+          root = node->i_child;
+          if (root)
+            {
+              /* If found, then  increment the count of
+               * references on the child node.
+               */
+
+              root->i_crefs++;
+            }
+        }
+    }
+  inode_semgive();
+  return root;
+}
+
+/************************************************************
+ * Name: fs_openmountptdir
+ ************************************************************/
+
+static inline int fs_openmountptdir(struct inode *inode, const char *relpath,
+                                     struct internal_dir_s *dir)
+{
+#warning "Mountpoint support not implemented"
+  return -ENOSYS;
+}
 
 /************************************************************
  * Public Functions
@@ -87,18 +174,20 @@ FAR DIR *opendir(const char *path)
 {
   FAR struct inode *inode;
   FAR struct internal_dir_s *dir;
+  const char *relpath;
+  int ret;
 
   /* Get an inode corresponding to the path.  On successful
    * return, we will hold on reference count on the inode.
    */
 
-  inode = inode_finddir(path);
+  inode = fs_finddirnode(path, &relpath);
   if (!inode)
     {
       /* 'path' is not a directory.*/
 
-      *get_errno_ptr() = ENOTDIR;
-      return NULL;
+      ret = ENOTDIR;
+      goto errout;
     }
 
   /* Allocate a type DIR -- which is little more than an inode
@@ -110,17 +199,50 @@ FAR DIR *opendir(const char *path)
     {
       /* Insufficient memory to complete the operation.*/
 
-      *get_errno_ptr() = ENOMEM;
-      inode_release(inode);
-      return NULL;
+      ret = ENOMEM;
+      goto errout_with_inode;
     }
 
-  /* Populate the DIR structure and return it to the caller */
+  /* Populate the DIR structure and return it to the caller.  The way that
+   * we do this depends on whenever this is a "normal" psuedo-file-system
+   * inode or a file system mountpoint.
+   */
 
-  dir->root = inode;   /* Save where we started in case we rewind */
-  inode_addref(inode); /* Now we have two references on inode */
-  dir->next = inode;   /* This is the next node to use for readdir() */
+  dir->root     = inode;  /* Save the inode where we start */
+  dir->position = 0;      /* This is the position in the read stream */
+
+  /* Is this a not in the psuedo filesystem? */
+
+  if (INODE_IS_MOUNTPT(inode))
+    {
+      /* The node is a file system mointpoint */
+
+      ret = fs_openmountptdir(inode, relpath, dir);
+      if (ret < 0)
+        {
+          ret = -ret;
+          goto errout_with_direntry;
+        }
+    }
+  else
+    {
+      /* The node is part of the root psuedo file system */
+
+      inode_addref(inode);         /* Now we have two references on inode */
+      dir->u.psuedo.next = inode;  /* This is the next node to use for readdir() */
+    }
+
   return ((DIR*)dir);
+
+  /* Nasty goto's make error handling simpler */
+
+errout_with_direntry:
+  free(dir);
+errout_with_inode:
+  inode_release(inode);
+errout:
+  *get_errno_ptr() = ret;
+  return NULL;
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS */

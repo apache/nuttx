@@ -77,30 +77,16 @@
 off_t telldir(FAR DIR *dirp)
 {
   struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
-  struct inode *curr;
-  off_t offs;
 
-  if (!idir)
+  if (!idir || !idir->root)
     {
       *get_errno_ptr() = EBADF;
-      return -1;
+      return (off_t)-1;
     }
 
-  /* Traverse the peer list starting at the 'root' of the
-   * the list until we find the 'next' node.  If devices
-   * are being registered and unregistered, then this can
-   * be a very unpredictable operation.
-   */
+  /* Just return the current position */
 
-  inode_semtake();
-  for (offs = 0, curr = idir->root;
-       curr && curr != idir->next;
-       offs++, curr = curr->i_peer);
-
-  /* We should have an offset now corresponding to idir->next.*/
-
-  inode_semgive();
-  return offs;
+  return idir->position;
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS */

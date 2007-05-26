@@ -48,6 +48,35 @@
  * Private Functions
  ************************************************************/
 
+#if CONFIG_NFILE_DESCRIPTORS > 0
+
+static inline void rewindpsuedodir(struct internal_dir_s *idir)
+{
+  struct inode *prev;
+
+  inode_semtake();
+
+  /* Reset the position to the beginning */
+
+  prev                = idir->u.psuedo.next; /* (Save to delete later) */
+  idir->u.psuedo.next = idir->root;          /* The next node to visit */
+  idir->position      = 0;                   /* Reset position */
+
+  /* Increment the reference count on the root=next node.  We
+   * should now have two references on the inode.
+   */
+
+  idir->root->i_crefs++;
+  inode_semgive();
+
+  /* Then release the reference to the old next inode */
+
+  if (prev)
+    {
+      inode_release(prev);
+    }
+}
+
 /************************************************************
  * Public Functions
  ************************************************************/
@@ -68,33 +97,32 @@
  *
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 void rewinddir(FAR DIR *dirp)
 {
   struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
-  struct inode *prev;
 
-  if (idir)
+  /* Sanity checks */
+
+  if (!idir || !idir->root)
     {
-      inode_semtake();
+      return;
+    }
 
-      prev       = idir->next;
-      idir->next = idir->root; /* The next node to visit */
+  /* The way we handle the readdir depends on the type of inode
+   * that we are dealing with.
+   */
 
-      if (idir->next)
-        {
-          /* Increment the reference count on this next node */
+  if (INODE_IS_MOUNTPT(idir->root))
+    {
+      /* The node is a file system mointpoint */
 
-          idir->next->i_crefs++;
-        }
+#warning "Mountpoint support not implemented"
+    }
+  else
+    {
+      /* The node is part of the root psuedo file system */
 
-      inode_semgive();
-
-      if (prev)
-        {
-          inode_release(prev);
-        }
+      rewindpsuedodir(idir);
     }
 }
 

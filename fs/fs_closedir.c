@@ -77,22 +77,41 @@ int closedir(FAR DIR *dirp)
 {
   struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
 
-  if (!idir)
+  if (!idir || !idir->root)
     {
       *get_errno_ptr() = EBADF;
       return ERROR;
     }
 
-  /* Release our references on the contained inodes */
+  /* The way that we handle the close operation depends on what kind of root
+   * inode we have open.
+   */
+
+  if (IS_MOUNTPT_INODE(idir->root))
+    {
+      /* The node is a file system mointpoint */
+
+#warning "Mountpoint support not implemented"
+      *get_errno_ptr() = ENOSYS;
+      return ERROR;
+    }
+  else
+    {
+      /* The node is part of the root psuedo file system, release
+       * our contained reference to the 'next' inode.
+       */
+
+      if (idir->u.psuedo.next)
+        {
+          inode_release(idir->u.psuedo.next);
+        }
+    }
+
+  /* Release our references on the contained 'root' inode */
 
   if (idir->root)
     {
       inode_release(idir->root);
-    }
-
-  if (idir->next)
-    {
-      inode_release(idir->next);
     }
 
   /* Then release the container */

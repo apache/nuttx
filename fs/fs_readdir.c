@@ -50,6 +50,68 @@
  ************************************************************/
 
 /************************************************************
+ * Name: readpsuedodir
+ ************************************************************/
+
+static inline FAR struct dirent *readpsuedodir(struct internal_dir_s *idir)
+{
+  FAR struct inode *prev;
+
+  /* Check if we are at the end of the list */
+
+  if (!idir->u.psuedo.next)
+    {
+      return NULL;
+    }
+
+  /* Copy the inode name into the dirent structure */
+
+  strncpy(idir->dir.d_name, idir->u.psuedo.next->i_name, NAME_MAX+1);
+
+  /* If the node has file operations, we will say that it is
+   * a file.
+   */
+
+  idir->dir.d_type = 0;
+  if (idir->u.psuedo.next->u.i_ops)
+    {
+      idir->dir.d_type |= DTYPE_FILE;
+    }
+
+  /* If the node has child node(s), then we will say that it
+   * is a directory.  NOTE: that the node can be both!
+   */
+
+  if (idir->u.psuedo.next->i_child || !idir->u.psuedo.next->u.i_ops)
+    {
+      idir->dir.d_type |= DTYPE_DIRECTORY;
+    }
+
+  /* Now get the inode to vist next time that readdir() is called */
+
+  inode_semtake();
+
+  prev                = idir->u.psuedo.next;
+  idir->u.psuedo.next = prev->i_peer; /* The next node to visit */
+
+  if (idir->u.psuedo.next)
+    {
+      /* Increment the reference count on this next node */
+
+      idir->u.psuedo.next->i_crefs++;
+    }
+
+  inode_semgive();
+
+  if (prev)
+    {
+      inode_release(prev);
+    }
+
+  return &idir->dir;
+}
+
+/************************************************************
  * Public Functions
  ************************************************************/
 
@@ -80,66 +142,34 @@
 FAR struct dirent *readdir(DIR *dirp)
 {
   FAR struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
-  FAR struct inode *prev;
 
-  if (!idir)
+  /* Sanity checks */
+
+  if (!idir || !idir->root)
     {
       *get_errno_ptr() = EBADF;
       return NULL;
     }
 
-  /* Check if we are at the end of the list */
+  /* The way we handle the readdir depends on the type of inode
+   * that we are dealing with.
+   */
 
-  if (!idir->next)
+  if (INODE_IS_MOUNTPT(idir->root))
     {
+      /* The node is a file system mointpoint */
+
+#warning "Mountpoint support not implemented"
+      *get_errno_ptr() = ENOSYS;
       return NULL;
     }
-
-  /* Copy the inode name into the dirent structure */
-
-  strncpy(idir->dir.d_name, idir->next->i_name, NAME_MAX+1);
-
-  /* If the node has file operations, we will say that it is
-   * a file.
-   */
-
-  idir->dir.d_type = 0;
-  if (idir->next->u.i_ops)
+  else
     {
-      idir->dir.d_type |= DTYPE_FILE;
+      /* The node is part of the root psuedo file system, release
+       * our contained reference to the 'next' inode.
+       */
+      return readpsuedodir(idir);
     }
-
-  /* If the node has child node(s), then we will say that it
-   * is a directory.  NOTE: that the node can be both!
-   */
-
-  if (idir->next->i_child || !idir->next->u.i_ops)
-    {
-      idir->dir.d_type |= DTYPE_DIRECTORY;
-    }
-
-  /* Now get the inode to vist next time that readdir() is called */
-
-  inode_semtake();
-
-  prev       = idir->next;
-  idir->next = prev->i_peer; /* The next node to visit */
-
-  if (idir->next)
-    {
-      /* Increment the reference count on this next node */
-
-      idir->next->i_crefs++;
-    }
-
-  inode_semgive();
-
-  if (prev)
-    {
-      inode_release(prev);
-    }
-
-  return &idir->dir;
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS */

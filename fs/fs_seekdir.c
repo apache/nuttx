@@ -48,6 +48,61 @@
  * Private Functions
  ************************************************************/
 
+#if CONFIG_NFILE_DESCRIPTORS > 0
+
+static inline void seekpsuedodir(struct internal_dir_s *idir, off_t offset)
+{
+  struct inode *curr;
+  struct inode *prev;
+  off_t pos;
+
+  /* Determine a starting point for the seek.  If the seek
+   * is "forward" from the current position, then we will
+   * start at the current poisition.  Otherwise, we will
+   * "rewind" to the root dir.
+   */
+
+  if ( offset < idir->position )
+    {
+       pos  = 0;
+       curr = idir->root;
+    }
+  else
+    {
+       pos  = idir->position;
+       curr = idir->u.psuedo.next;
+    }
+
+  /* Traverse the peer list starting at the 'root' of the
+   * the list until we find the node at 'offset".  If devices
+   * are being registered and unregistered, then this can
+   * be a very unpredictable operation.
+   */
+
+  inode_semtake();
+  for (; curr && pos != offset; pos++, curr = curr->i_peer);
+
+  /* Now get the inode to vist next time that readdir() is called */
+
+  prev                = idir->u.psuedo.next;
+  idir->u.psuedo.next = curr; /* The next node to visit (might be null) */
+  idir->position      = pos;  /* Might be beyond the last dirent */
+
+  if (curr)
+    {
+      /* Increment the reference count on this next node */
+
+      curr->i_crefs++;
+    }
+
+  inode_semgive();
+
+  if (prev)
+    {
+      inode_release(prev);
+    }
+}
+
 /************************************************************
  * Public Functions
  ************************************************************/
@@ -71,46 +126,32 @@
  *
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 void seekdir(FAR DIR *dirp, off_t offset)
 {
   struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
-  struct inode *curr;
-  struct inode *prev;
-  off_t i;
 
-  if (idir)
+  /* Sanity checks */
+
+  if (!idir || !idir->root)
     {
-      /* Traverse the peer list starting at the 'root' of the
-       * the list until we find the node at 'offset".  If devices
-       * are being registered and unregistered, then this can
-       * be a very unpredictable operation.
-       */
+      return;
+    }
 
-      inode_semtake();
-      for (i = 0, curr = idir->root;
-           curr && i != offset;
-           i++, curr = curr->i_peer);
+  /* The way we handle the readdir depends on the type of inode
+   * that we are dealing with.
+   */
 
-      /* Now get the inode to vist next time that readdir() is called */
+  if (INODE_IS_MOUNTPT(idir->root))
+    {
+      /* The node is a file system mointpoint */
 
-      prev       = idir->next;
-      idir->next = curr; /* The next node to visit */
+#warning "Mountpoint support not implemented"
+    }
+  else
+    {
+      /* The node is part of the root psuedo file system */
 
-      if (curr)
-        {
-          /* Increment the reference count on this next node */
-
-          curr->i_crefs++;
-        }
-
-      inode_semgive();
-
-      if (prev)
-        {
-          inode_release(prev);
-        }
+      seekpsuedodir(idir, offset);
     }
 }
 

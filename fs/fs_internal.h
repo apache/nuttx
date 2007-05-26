@@ -79,12 +79,56 @@
 
 struct internal_dir_s
 {
-  struct inode *root;  /* The start inode (in case we
-                        * rewind) */
-  struct inode *next;  /* The inode to use for the next call
-                        * to readdir() */
-  struct dirent dir;   /* Populated using inode when readdir
-                        * is called */
+  /* This is the node that was opened by opendir.  The type of the inode
+   * determines the way that the readdir() operations are performed. For the
+   * psuedo root psuedo-file system, it is also used to support rewind.
+   *
+   * We hold a reference on this inode so we know that it will persist until
+   * closedir() is called (although inodes linked to this inode may change).
+   */
+
+  struct inode *root;
+
+  /* This keeps track of the current directory position for telldir */
+
+  off_t position;
+
+  /* Retained control information depends on the type of file system that
+   * provides is provides the mountpoint.  Ideally this information should
+   * be hidden behind an opaque, file-system-dependent void *, but we put
+   * the private definitions in line here for now to reduce allocations.
+   */
+
+  union
+    {
+      /* For the root psuedo-file system, we need retain only the 'next' inode
+       * need for the next readdir() operation.  We hold a reference on this
+       * inode so we know that it will persist until closedir is called.
+       */
+
+      struct
+        {
+          struct inode *next;      /* The inode for the next call to readdir() */
+        } psuedo;
+
+#ifdef CONFIG_FS_FAT
+      /* For fat, we need to retun the start cluster, current cluster, current
+       * sector and current directory index.
+       */
+
+      struct
+        {
+          uint32       startcluster;  /* Starting cluster of directory */
+          uint32       currcluster;   /* The current cluster being read */
+          size_t       currsector;    /* The current sector being read */
+          unsigned int dirindex;      /* The next directory entry to read */
+        } fat;
+#endif
+   } u;
+
+  /* In any event, this the actual struct dirent that is returned by readdir */
+
+  struct dirent dir;                /* Populated when readdir is called */
 };
 
 /****************************************************************************
@@ -127,10 +171,6 @@ EXTERN STATUS inode_remove(const char *path);
 /* fs_inodefind.c ************************************************************/
 
 EXTERN FAR struct inode *inode_find(const char *path, const char **relpath);
-
-/* fs_inodefinddir.c *********************************************************/
-
-EXTERN FAR struct inode *inode_finddir(const char *path);
 
 /* fs_inodeaddref.c **********************************************************/
 
