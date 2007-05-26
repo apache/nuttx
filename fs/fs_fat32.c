@@ -83,6 +83,9 @@ static off_t   fat_seek(FAR struct file *filp, off_t offset, int whence);
 static int     fat_ioctl(FAR struct file *filp, int cmd, unsigned long arg);
 static int     fat_sync(FAR struct file *filp);
 
+static int     fat_opendir(struct inode *mountpt, const char *relpath,
+                           struct internal_dir_s *dir);
+
 static int     fat_bind(FAR struct inode *blkdriver, const void *data,
                         void **handle);
 static int     fat_unbind(void *handle);
@@ -115,6 +118,8 @@ const struct mountpt_operations fat_operations =
   fat_seek,
   fat_ioctl,
   fat_sync,
+
+  fat_opendir,
 
   fat_bind,
   fat_unbind,
@@ -795,7 +800,7 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
                   goto errout_with_semaphore;
                 }
             }
-          
+
           /* Copy the partial sector from the user buffer */
 
           writesize = fs->fs_hwsectorsize - sectorindex;
@@ -1048,7 +1053,7 @@ static off_t fat_seek(FAR struct file *filp, off_t offset, int whence)
     }
 
   /* If we extended the size of the file, then mark the file as modified. */
-  
+
   if ((ff->ff_oflags & O_WROK) != 0 &&  ff->ff_position > ff->ff_size)
     {
         ff->ff_size    = ff->ff_position;
@@ -1197,6 +1202,84 @@ static int fat_sync(FAR struct file *filp)
  errout_with_semaphore:
   fat_semgive(fs);
   return ret;
+}
+
+/****************************************************************************
+ * Name: fat_opendir
+ *
+ * Description: Open a directory for read access
+ *
+ ****************************************************************************/
+
+static int fat_opendir(struct inode *mountpt, const char *relpath, struct internal_dir_s *dir)
+{
+  struct fat_mountpt_s *fs;
+  struct fat_dirinfo_s  dirinfo;
+  int                     ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL);
+
+  /* Recover our private data from the inode instance */
+
+  fs = mountpt->i_private;
+
+  /* Make sure that the mount is still healthy */
+
+  fat_semtake(fs);
+  ret = fat_checkmount(fs);
+  if (ret != OK)
+    {
+      goto errout_with_semaphore;
+    }
+
+  /* Find the requested directory */
+
+  ret = fat_finddirentry(fs, &dirinfo, relpath);
+  if (ret < 0)
+    {
+      goto errout_with_semaphore;
+    }
+
+  /* Check if this is the root directory */
+
+  if (dirinfo.fd_entry == NULL)
+    {
+      /* Handler the FAT12/16 root directory */
+
+      dir->u.fat.startcluster = 0;
+      dir->u.fat.currcluster  = 0;
+      dir->u.fat.currsector   = fs->fs_rootbase;
+      dir->u.fat.dirindex     = 2;
+    }
+
+  /* This is not the root directory.  Verify that it is some kind of directory */
+
+  else if (DIR_GETATTRIBUTES(dirinfo.fd_entry) & FATATTR_DIRECTORY)
+    {
+       /* The entry is not a directory */
+       ret = -ENOTDIR;
+       goto errout_with_semaphore;
+    }
+  else
+    {
+       /* The entry is a directory */
+
+      dir->u.fat.startcluster = 
+          ((uint32)DIR_GETFSTCLUSTHI(dirinfo.fd_entry) << 16) |
+                   DIR_GETFSTCLUSTLO(dirinfo.fd_entry);
+      dir->u.fat.currcluster  = dir->u.fat.startcluster;
+      dir->u.fat.currsector   = fat_cluster2sector(fs, dir->u.fat.currcluster);
+      dir->u.fat.dirindex     = 2;
+    }
+
+  fat_semgive(fs);
+  return OK;
+
+errout_with_semaphore:
+  fat_semgive(fs);
+  return ERROR;
 }
 
 /****************************************************************************

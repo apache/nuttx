@@ -145,6 +145,10 @@ struct mountpt_operations
 
   int     (*sync)(FAR struct file *filp);
 
+  /* Directory operations */
+
+  int     (*opendir)(struct inode *mountpt, const char *relpath, struct internal_dir_s *dir);
+
   /* General volume-related mountpoint operations: */
 
   int     (*bind)(FAR struct inode *blkdriver, const void *data, void **handle);

@@ -126,17 +126,6 @@ static inline FAR struct inode *fs_finddirnode(const char *path, const char **re
 }
 
 /************************************************************
- * Name: fs_openmountptdir
- ************************************************************/
-
-static inline int fs_openmountptdir(struct inode *inode, const char *relpath,
-                                     struct internal_dir_s *dir)
-{
-#warning "Mountpoint support not implemented"
-  return -ENOSYS;
-}
-
-/************************************************************
  * Public Functions
  ************************************************************/
 
@@ -215,9 +204,19 @@ FAR DIR *opendir(const char *path)
 
   if (INODE_IS_MOUNTPT(inode))
     {
-      /* The node is a file system mointpoint */
+      /* The node is a file system mointpoint. Verify that the mountpoint
+       * supports the opendir() method
+       */
 
-      ret = fs_openmountptdir(inode, relpath, dir);
+      if (!inode->u.i_mops || !inode->u.i_mops->opendir)
+         {
+           ret = ENOSYS;
+           goto errout_with_direntry;
+         }
+
+      /* Perform the opendir() operation */
+
+      ret = inode->u.i_mops->opendir(inode, relpath, dir);
       if (ret < 0)
         {
           ret = -ret;
