@@ -42,6 +42,7 @@
 #include <sched.h>
 #include <debug.h>
 #include <nuttx/arch.h>
+#include "clock_internal.h"
 #include "os_internal.h"
 #include "up_internal.h"
 
@@ -101,7 +102,7 @@ void up_unblock_task(FAR _TCB *tcb)
       */
 
 #if CONFIG_RR_INTERVAL > 0
-     tcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_SEC;
+     tcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
 #endif
 
      /* Add the task in the correct location in the prioritized
