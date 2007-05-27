@@ -157,7 +157,7 @@ struct mountpt_operations
   /* General volume-related mountpoint operations: */
 
   int     (*bind)(FAR struct inode *blkdriver, const void *data, void **handle);
-  int     (*unbind)(void *handle);
+  int     (*unbind)(void *handle, FAR struct inode **blkdriver);
 
   int     (*unlink)(struct inode *mountpt, const char *relpath);
   int     (*mkdir)(struct inode *mountpt, const char *relpath, mode_t mode);

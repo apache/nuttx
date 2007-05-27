@@ -91,7 +91,7 @@ static int     fat_rewinddir(struct inode *mountpt, struct internal_dir_s *dir);
 
 static int     fat_bind(FAR struct inode *blkdriver, const void *data,
                         void **handle);
-static int     fat_unbind(void *handle);
+static int     fat_unbind(void *handle, FAR struct inode **blkdriver);
 static int     fat_unlink(struct inode *mountpt, const char *relpath);
 static int     fat_mkdir(struct inode *mountpt, const char *relpath,
                          mode_t mode);
@@ -1517,7 +1517,7 @@ static int fat_bind(FAR struct inode *blkdriver, const void *data,
  *
  ****************************************************************************/
 
-static int fat_unbind(void *handle)
+static int fat_unbind(void *handle, FAR struct inode **blkdriver)
 {
   struct fat_mountpt_s *fs = (struct fat_mountpt_s*)handle;
   int ret;
@@ -1551,9 +1551,16 @@ static int fat_unbind(void *handle)
                   (void)inode->u.i_bops->close(inode);
                 }
 
-              /* Release our reference to the block driver */
+              /* We hold a reference to the block driver but should
+               * not but mucking with inodes in this context.  So, we will just return
+               * our contained reference to the block driver inode and let the umount
+               * logic dispose of it.
+               */
 
-              inode_release(inode);
+              if (blkdriver)
+                {
+                  *blkdriver = inode;
+                }
             }
         }
 

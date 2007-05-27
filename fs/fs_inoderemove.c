@@ -136,6 +136,7 @@ STATUS inode_remove(const char *path)
             */
 
            node->i_flags |= FSNODEFLAG_DELETED;
+           return -EBUSY;
          }
        else
          {
@@ -149,5 +150,5 @@ STATUS inode_remove(const char *path)
 
   /* The node does not exist or it has references */
 
-  return ERROR;
+  return -ENOENT;
 }

@@ -92,7 +92,8 @@
 int umount(const char *target)
 {
   FAR struct inode *mountpt_inode;
-  int errcode;
+  FAR struct inode *blkdrvr_inode = NULL;
+  int errcode = OK;
   int status;
 
   /* Verify required pointer arguments */
@@ -138,7 +139,7 @@ int umount(const char *target)
    */
 
   inode_semtake(); /* Hold the semaphore through the unbind logic */
-  status = mountpt_inode->u.i_mops->unbind( mountpt_inode->i_private );
+  status = mountpt_inode->u.i_mops->unbind( mountpt_inode->i_private, &blkdrvr_inode);
   if (status < 0)
     {
       /* The inode is unhappy with the blkdrvr for some reason */
@@ -156,15 +157,39 @@ int umount(const char *target)
 
   mountpt_inode->i_private = NULL;
 
-  /* Remove the inode */
+  /* Successfully unbound, remove the mountpoint inode from
+   * the inode tree.  The inode will not be deleted yet because
+   * there is still at least reference on it (from the mount)
+   */
 
-  inode_semgive(); /* Need to release for inode_release */
-  inode_release(mountpt_inode);
-
-  inode_semtake(); /* Need to hold for inode_remove */
   status = inode_remove(target);
   inode_semgive();
-  return status;
+
+  /* The return value of -EBUSY is normal (in fact, it should
+   * not be OK)
+   */
+
+  if (status != OK && status != -EBUSY)
+    {
+      errcode = -status;
+      goto errout_with_mountpt;
+    }
+
+  /* Release the mountpoint inode and any block driver inode
+   * returned by the file system unbind above.  This should cause
+   * the inode to be deleted (unless there are other references)
+   */
+
+  inode_release(mountpt_inode);
+
+  /* Did the unbind method return a contained block driver */
+
+  if (blkdrvr_inode)
+    {
+      inode_release(blkdrvr_inode);
+    }
+
+  return OK;
 
   /* A lot of goto's!  But they make the error handling much simpler */
 
@@ -172,6 +197,10 @@ int umount(const char *target)
   inode_semgive();
  errout_with_mountpt:
   inode_release(mountpt_inode);
+  if (blkdrvr_inode)
+    {
+      inode_release(blkdrvr_inode);
+    }
  errout:
   *get_errno_ptr() = errcode;
   return ERROR;

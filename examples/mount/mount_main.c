@@ -53,6 +53,9 @@
  * Definitions
  ****************************************************************************/
 
+#define TEST_USE_STAT         1
+#define TEST_SHOW_DIRECTORIES 1
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -83,6 +86,7 @@ static char       g_namebuffer[256];
  * Private Functions
  ****************************************************************************/
 
+#ifdef TEST_USE_STAT
 static void show_stat(const char *path, struct stat *ps)
 {
   printf("%s stat:\n", path);
@@ -111,15 +115,17 @@ static void show_stat(const char *path, struct stat *ps)
   printf("\tsize        : %d (bytes)\n",  ps->st_size);
   printf("\tblock size  : %d (bytes)\n",  ps->st_blksize);
   printf("\tsize        : %d (blocks)\n", ps->st_blocks);
-  printf("\taccess time : %d (blocks)\n", ps->st_atime);
-  printf("\tmodify time : %d (blocks)\n", ps->st_mtime);
-  printf("\tchange time : %d (blocks)\n", ps->st_ctime);
+  printf("\taccess time : %d\n", ps->st_atime);
+  printf("\tmodify time : %d\n", ps->st_mtime);
+  printf("\tchange time : %d\n", ps->st_ctime);
 }
+#endif
 
 /****************************************************************************
  * Name: show_directories
  ****************************************************************************/
 
+#ifdef TEST_SHOW_DIRECTORIES
 static void show_directories(const char *path, int indent)
 {
   DIR *dirp;
@@ -157,6 +163,9 @@ static void show_directories(const char *path, int indent)
 
   closedir(dirp);
 }
+#else
+# define show_directories(p,i)
+#endif
 
 /****************************************************************************
  * Name: fail_read_open
@@ -446,6 +455,7 @@ static void succeed_rename(const char *oldpath, const char *newpath)
  * Name: fail_stat
  ****************************************************************************/
 
+#ifdef TEST_USE_STAT
 static void fail_stat(const char *path, int expectederror)
 {
   struct stat buf;
@@ -469,11 +479,15 @@ static void fail_stat(const char *path, int expectederror)
       g_nerrors++;
     }
 }
+#else
+# define fail_stat(p,e);
+#endif
 
 /****************************************************************************
  * Name: succeed_stat
  ****************************************************************************/
 
+#ifdef TEST_USE_STAT
 static void succeed_stat(const char *path)
 {
   struct stat buf;
@@ -494,6 +508,9 @@ static void succeed_stat(const char *path)
       show_stat(path, &buf);
     }
 }
+#else
+#define succeed_stat(p)
+#endif
 
 /****************************************************************************
  * Public Functions
