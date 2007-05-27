@@ -80,17 +80,6 @@
  * Public Type Definitions
  ************************************************************/
 
-struct statfs
-{
-  long          f_bavail;    /* free blocks available to non-superuser */
-  long          f_bfree;     /* free blocks */
-  long          f_blocks;    /* total blocks in file system */
-  long          f_bsize;     /* fundamental file system block (bytes) */
-  long          f_ffree;     /* free file nodes in file system */
-  long          f_files;     /* total file nodes in file system */
-  long          f_type;      /* type of info, zero for now */
-};
-
 /* Streams */
 
 typedef FAR struct file_struct FILE;
