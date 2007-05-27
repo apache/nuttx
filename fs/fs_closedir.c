@@ -76,24 +76,27 @@
 int closedir(FAR DIR *dirp)
 {
   struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
   struct inode *inode;
-#endif
   int ret;
 
   if (!idir || !idir->fd_root)
     {
-      *get_errno_ptr() = EBADF;
-      return ERROR;
+      ret = EBADF;
+      goto errout;
     }
+
+  /* This is the 'root' inode of the directory.  This means different
+   * things wih different filesystems.
+   */
+
+  inode = idir->fd_root;
 
   /* The way that we handle the close operation depends on what kind of root
    * inode we have open.
    */
 
 #ifndef CONFIG_DISABLE_MOUNTPOUNT
-  inode = idir->fd_root;
-  if (INODE_IS_MOUNTPT(inode))
+  if (INODE_IS_MOUNTPT(inode) && !DIRENT_ISPSUEDONODE(idir->fd_flags))
     {
       /* The node is a file system mointpoint. Verify that the mountpoint
        * supports the closedir() method (not an error if it does not)
@@ -106,8 +109,8 @@ int closedir(FAR DIR *dirp)
           ret = inode->u.i_mops->closedir(inode, idir);
           if (ret < 0)
             {
-              *get_errno_ptr() = -ret;
-              return ERROR;
+              ret = -ret;
+              goto errout_with_inode;
             }
         }
     }
@@ -126,15 +129,20 @@ int closedir(FAR DIR *dirp)
 
   /* Release our references on the contained 'root' inode */
 
-  if (idir->fd_root)
-    {
-      inode_release(idir->fd_root);
-    }
+  inode_release(idir->fd_root);
 
   /* Then release the container */
 
   free(idir);
   return OK;
+
+errout_with_inode:
+  inode_release(inode);
+  free(idir);
+
+errout:
+  *get_errno_ptr() = ret;
+  return ERROR;
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS */

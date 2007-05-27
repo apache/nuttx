@@ -73,7 +73,6 @@
 void _exit(int status)
 {
   _TCB* tcb = (_TCB*)g_readytorun.head;
-  irqstate_t flags;
 
   dbg("TCB=%p exitting\n", tcb);
 

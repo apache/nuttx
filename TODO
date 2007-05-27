@@ -38,7 +38,7 @@ o Libraries
 - sscanf() and lib_vsprintf() do not support floating point values.
 
 o File system
-- Add disk usage stats, stat(), chmod(), truncate().
+- Add statfs(), chmod(), truncate().
 - FAT32: long file names
 
 o Console Output

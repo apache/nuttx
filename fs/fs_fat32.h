@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <semaphore.h>
+#include <time.h>
 
 /****************************************************************************
  * Definitions
@@ -282,7 +283,7 @@
 
 # define DIR_GETCRTIME(p)          fat_getuint16(UBYTE_PTR(p,DIR_CRTIME))
 # define DIR_GETCRDATE(p)          fat_getuint16(UBYTE_PTR(p,DIR_CRDATE))
-# define DIR_GETLASTACCDATE(p)     fat_getuint16(UBYTE_PTR(p,DIR_LASTACCDTE))
+# define DIR_GETLASTACCDATE(p)     fat_getuint16(UBYTE_PTR(p,DIR_LASTACCDATE))
 # define DIR_GETFSTCLUSTHI(p)      fat_getuint16(UBYTE_PTR(p,DIR_FSTCLUSTHI))
 # define DIR_GETWRTTIME(p)         fat_getuint16(UBYTE_PTR(p,DIR_WRTTIME))
 # define DIR_GETWRTDATE(p)         fat_getuint16(UBYTE_PTR(p,DIR_WRTDATE))
@@ -320,7 +321,7 @@
 
 # define DIR_PUTCRTIME(p,v)        fat_putuint16(UBYTE_PTR(p,DIR_CRTIME),v)
 # define DIR_PUTCRDATE(p,v)        fat_putuint16(UBYTE_PTR(p,DIR_CRDATE),v)
-# define DIR_PUTLASTACCDATE(p,v)   fat_putuint16(UBYTE_PTR(p,DIR_LASTACCDTE),v)
+# define DIR_PUTLASTACCDATE(p,v)   fat_putuint16(UBYTE_PTR(p,DIR_LASTACCDATE),v)
 # define DIR_PUTFSTCLUSTHI(p,v)    fat_putuint16(UBYTE_PTR(p,DIR_FSTCLUSTHI),v)
 # define DIR_PUTWRTTIME(p,v)       fat_putuint16(UBYTE_PTR(p,DIR_WRTTIME),v)
 # define DIR_PUTWRTDATE(p,v)       fat_putuint16(UBYTE_PTR(p,DIR_WRTDATE),v)
@@ -366,7 +367,7 @@
 
 # define DIR_GETCRTIME(p)          UINT16_VAL(p,DIR_CRTIME)
 # define DIR_GETCRDATE(p)          UINT16_VAL(p,DIR_CRDATE)
-# define DIR_GETLASTACCDATE(p)     UINT16_VAL(p,DIR_LASTACCDTE)
+# define DIR_GETLASTACCDATE(p)     UINT16_VAL(p,DIR_LASTACCDATE)
 # define DIR_GETFSTCLUSTHI(p)      UINT16_VAL(p,DIR_FSTCLUSTHI)
 # define DIR_GETWRTTIME(p)         UINT16_VAL(p,DIR_WRTTIME)
 # define DIR_GETWRTDATE(p)         UINT16_VAL(p,DIR_WRTDATE)
@@ -404,7 +405,7 @@
 
 # define DIR_PUTCRTIME(p,v)        UINT16_PUT(p,DIR_CRTIME,v)
 # define DIR_PUTCRDATE(p,v)        UINT16_PUT(p,DIR_CRDATE,v)
-# define DIR_PUTLASTACCDATE(p,v)   UINT16_PUT(p,DIR_LASTACCDTE,v)
+# define DIR_PUTLASTACCDATE(p,v)   UINT16_PUT(p,DIR_LASTACCDATE,v)
 # define DIR_PUTFSTCLUSTHI(p,v)    UINT16_PUT(p,DIR_FSTCLUSTHI,v)
 # define DIR_PUTWRTTIME(p,v)       UINT16_PUT(p,DIR_WRTTIME,v)
 # define DIR_PUTWRTDATE(p,v)       UINT16_PUT(p,DIR_WRTDATE,v)
@@ -526,7 +527,8 @@ EXTERN void   fat_semgive(struct fat_mountpt_s *fs);
 
 /* Get the current time for FAT creation and write times */
 
-EXTERN uint32 fat_gettime(void);
+EXTERN uint32 fat_systime2fattime(void);
+EXTERN time_t fat_fattime2systime(uint16 time, uint16 date);
 
 /* Handle hardware interactions for mounting */
 
@@ -551,7 +553,7 @@ EXTERN sint32 fat_extendchain(struct fat_mountpt_s *fs, uint32 cluster);
 
 #define fat_createchain(fs) fat_extendchain(fs, 0)
 
-/* Help for traverseing directory trees */
+/* Help for traversing directory trees */
 
 EXTERN int    fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir);
 EXTERN int    fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,

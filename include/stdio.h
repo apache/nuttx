@@ -80,29 +80,6 @@
  * Public Type Definitions
  ************************************************************/
 
-struct stat
-{
-  dev_t          st_dev;     /* ID of device containing a */
-                             /* directory entry for this file */
-  ino_t          st_ino;     /* Inode number */
-  unsigned short st_mode;    /* File type, attributes, and */
-                             /* access control summary */
-  unsigned short st_nlink;   /* Number of links */
-  uid_t          st_uid;     /* User ID of file owner */
-  gid_t          st_gid;     /* Group ID of file group */
-  dev_t          st_rdev;    /* Device ID; this entry defined */
-                             /* only for char or blk spec files */
-  off_t          st_size;    /* File size (bytes) */
-  time_t         st_atime;   /* Time of last access */
-  time_t         st_mtime;   /* Last modification time */
-  time_t         st_ctime;   /* Last file status change time */
-                             /* Measured in secs since */
-                             /* 00:00:00 GMT, Jan 1, 1970 */
-  long          st_blksize;  /* Non-standard, Wind-River field */
-  unsigned long st_blocks;   /* Non-standard, Wind-River field */
-  long          st_gen;      /* file generation value: Non-standard, Wind-River field */
-};
-
 struct statfs
 {
   long          f_bavail;    /* free blocks available to non-superuser */
@@ -166,9 +143,7 @@ EXTERN int    vsprintf(char *buf, const char *s, va_list ap);
 
 EXTERN int    chdir(const char *path);
 EXTERN FILE  *fdopen(int fd, const char *type);
-EXTERN int    fstat(int fd, FAR struct stat *buf);
 EXTERN char  *getcwd(FAR char *buf, size_t size);
-EXTERN int    stat(const char *path, FAR struct stat *buf);
 EXTERN int    statfs(const char *path, FAR struct statfs *buf);
 
 #undef EXTERN

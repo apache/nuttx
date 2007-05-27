@@ -225,6 +225,10 @@ int mount(const char *source, const char *target,
       goto errout_with_mountpt;
     }
 
+  /* Increment reference count for the reference we pass to the file system */
+
+  blkdrvr_inode->i_crefs++;
+
   /* On failure, the bind method returns -errorcode */
 
   status = mops->bind(blkdrvr_inode, data, &fshandle);
@@ -233,7 +237,7 @@ int mount(const char *source, const char *target,
       /* The inode is unhappy with the blkdrvr for some reason */
 
       errcode = -status;
-      goto errout_with_mountpt;
+      goto errout_with_blkdrvr2;
   }
 
   /* We have it, now populate it with driver specific information. */
@@ -257,6 +261,9 @@ int mount(const char *source, const char *target,
   return OK;
 
   /* A lot of goto's!  But they make the error handling much simpler */
+
+ errout_with_blkdrvr2:
+  inode_release(blkdrvr_inode);
 
  errout_with_mountpt:
   inode_release(mountpt_inode);

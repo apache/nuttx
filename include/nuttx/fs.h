@@ -163,6 +163,7 @@ struct mountpt_operations
   int     (*mkdir)(struct inode *mountpt, const char *relpath, mode_t mode);
   int     (*rmdir)(struct inode *mountpt, const char *relpath);
   int     (*rename)(struct inode *mountpt, const char *oldrelpath, const char *newrelpath);
+  int     (*stat)(struct inode *mountpt, const char *relpath, struct stat *buf);
 
   /* NOTE:  More operations will be needed here to support:  disk usage stats
    * file stat(), file attributes, file truncation, etc.

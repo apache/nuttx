@@ -98,6 +98,7 @@ static int     fat_mkdir(struct inode *mountpt, const char *relpath,
 static int     fat_rmdir(struct inode *mountpt, const char *relpath);
 static int     fat_rename(struct inode *mountpt, const char *oldrelpath,
                           const char *newrelpath);
+static int     fat_stat(struct inode *mountpt, const char *relpath, struct stat *buf);
 
 /****************************************************************************
  * Private Variables
@@ -132,7 +133,8 @@ const struct mountpt_operations fat_operations =
   fat_unlink,
   fat_mkdir,
   fat_rmdir,
-  fat_rename
+  fat_rename,
+  fat_stat
 };
 
 /****************************************************************************
@@ -1189,7 +1191,7 @@ static int fat_sync(FAR struct file *filp)
       DIR_PUTFSTCLUSTLO(direntry, ff->ff_startcluster);
       DIR_PUTFSTCLUSTHI(direntry, ff->ff_startcluster >> 16);
 
-      wrttime = fat_gettime();
+      wrttime = fat_systime2fattime();
       DIR_PUTWRTTIME(direntry, wrttime & 0xffff);
       DIR_PUTWRTDATE(direntry, wrttime >> 16);
 
@@ -1482,10 +1484,13 @@ static int fat_bind(FAR struct inode *blkdriver, const void *data,
       return -ENOMEM;
     }
 
-  /* Initialize the allocated mountpt state structure */
+  /* Initialize the allocated mountpt state structure.  The filesystem is
+   * responsible for one reference ont the blkdriver inode and does not
+   * have to addref() here (but does have to release in ubind().
+   */
 
-  fs->fs_blkdriver = blkdriver;
-  sem_init(&fs->fs_sem, 0, 0);
+  fs->fs_blkdriver = blkdriver;  /* Save the block driver reference */
+  sem_init(&fs->fs_sem, 0, 0);   /* Initialize the semaphore that controls access */
 
   /* Then get information about the FAT32 filesystem on the devices managed
    * by this block driver.
@@ -1539,9 +1544,16 @@ static int fat_unbind(void *handle)
       if (fs->fs_blkdriver)
         {
           struct inode *inode = fs->fs_blkdriver;
-          if (inode && inode->u.i_bops && inode->u.i_bops->close)
+          if (inode)
             {
-              (void)inode->u.i_bops->close(inode);
+              if (inode->u.i_bops && inode->u.i_bops->close)
+                {
+                  (void)inode->u.i_bops->close(inode);
+                }
+
+              /* Release our reference to the block driver */
+
+              inode_release(inode);
             }
         }
 
@@ -1731,7 +1743,7 @@ static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
   direntry[DIR_NAME] = '.';
   DIR_PUTATTRIBUTES(direntry, FATATTR_DIRECTORY);
 
-  crtime = fat_gettime();
+  crtime = fat_systime2fattime();
   DIR_PUTCRTIME(direntry, crtime & 0xffff);
   DIR_PUTWRTTIME(direntry, crtime & 0xffff);
   DIR_PUTCRDATE(direntry, crtime >> 16);
@@ -1985,6 +1997,121 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
 
   fat_semgive(fs);
   return OK;
+
+ errout_with_semaphore:
+  fat_semgive(fs);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: fat_stat
+ *
+ * Description: Return information about a file or directory
+ *
+ ****************************************************************************/
+
+static int fat_stat(struct inode *mountpt, const char *relpath, struct stat *buf)
+{
+  struct fat_mountpt_s *fs;
+  struct fat_dirinfo_s  dirinfo;
+  uint16                date;
+  uint16                date2;
+  uint16                time;
+  ubyte                 attribute;
+  int                   ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt && mountpt->i_private);
+
+  /* Get the mountpoint private data from the inode structure */
+
+  fs = mountpt->i_private;
+
+  /* Check if the mount is still healthy */
+
+  fat_semtake(fs);
+  ret = fat_checkmount(fs);
+  if (ret != OK)
+    {
+      goto errout_with_semaphore;
+    }
+
+  /* Find the directory entry corresponding to relpath. */
+
+  ret = fat_finddirentry(fs, &dirinfo, relpath);
+
+  /* If nothing was found, then we fail with EEXIST */
+
+  if (ret < 0)
+    {
+      goto errout_with_semaphore;
+    }
+
+  if (! dirinfo.fd_entry)
+    {
+      ret = -ENOENT;
+      goto errout_with_semaphore;
+    }
+
+  /* Get the FAT attribute and map it so some meaningful mode_t values */
+
+  attribute = DIR_GETATTRIBUTES(dirinfo.fd_entry);
+  if ((attribute & FATATTR_VOLUMEID) != 0)
+    {
+      ret = -ENOENT;
+      goto errout_with_semaphore;
+    }
+
+  /* Set the access permissions.  The file/directory is always readable
+   * by everyone but may be writeable by no-one.
+   */
+
+  memset(buf, 0, sizeof(struct stat));
+  buf->st_mode = S_IROTH|S_IRGRP|S_IRUSR;
+  if ((attribute & FATATTR_READONLY) == 0)
+    {
+      buf->st_mode |= S_IWOTH|S_IWGRP|S_IWUSR;
+    }
+
+  /* We will report only types file or directory */
+
+  if ((attribute & FATATTR_DIRECTORY) != 0)
+    {
+      buf->st_mode |= S_IFDIR;
+    }
+  else
+    {
+      buf->st_mode |= S_IFREG;
+    }
+
+  /* File/directory size, access block size */
+
+  buf->st_size      = DIR_GETFILESIZE(dirinfo.fd_entry);
+  buf->st_blksize   = fs->fs_hwsectorsize;
+  buf->st_blocks    = SEC_NSECTORS(fs, buf->st_size + SEC_NDXMASK(fs));
+
+  /* Times */
+
+  date              = DIR_GETWRTDATE(dirinfo.fd_entry);
+  time              = DIR_GETWRTTIME(dirinfo.fd_entry);
+  buf->st_mtime     = fat_fattime2systime(time, date);
+
+  date2             = DIR_GETLASTACCDATE(dirinfo.fd_entry);
+  if (date == date2)
+    {
+      buf->st_atime = buf->st_mtime;
+    }
+  else
+    {
+      buf->st_atime = fat_fattime2systime(0, date2);
+    }
+
+  date              = DIR_GETCRDATE(dirinfo.fd_entry);
+  time              = DIR_GETCRTIME(dirinfo.fd_entry);
+  buf->st_ctime     = fat_fattime2systime(time, date);
+
+  ret = OK;
 
  errout_with_semaphore:
   fat_semgive(fs);

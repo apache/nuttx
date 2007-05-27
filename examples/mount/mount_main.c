@@ -83,11 +83,44 @@ static char       g_namebuffer[256];
  * Private Functions
  ****************************************************************************/
 
+static void show_stat(const char *path, struct stat *ps)
+{
+  printf("%s stat:\n", path);
+  printf("\tmode        : %08x\n", ps->st_mode);
+  if (S_ISREG(ps->st_mode))
+    {
+      printf("\ttype        : File\n");
+    }
+  else if (S_ISDIR(ps->st_mode))
+    {
+      printf("\ttype        : Directory\n");
+    }
+  else if (S_ISCHR(ps->st_mode))
+    {
+      printf("\ttype        : Character driver\n");
+    }
+  else if (S_ISBLK(ps->st_mode))
+    {
+      printf("\ttype        : Block driver\n");
+    }
+  else
+    {
+      printf("\ttype        : Unknown\n");
+    }
+
+  printf("\tsize        : %d (bytes)\n",  ps->st_size);
+  printf("\tblock size  : %d (bytes)\n",  ps->st_blksize);
+  printf("\tsize        : %d (blocks)\n", ps->st_blocks);
+  printf("\taccess time : %d (blocks)\n", ps->st_atime);
+  printf("\tmodify time : %d (blocks)\n", ps->st_mtime);
+  printf("\tchange time : %d (blocks)\n", ps->st_ctime);
+}
+
 /****************************************************************************
- * Name: fail_read_open
+ * Name: show_directories
  ****************************************************************************/
 
-static void show_directories( const char *path, int indent )
+static void show_directories(const char *path, int indent)
 {
   DIR *dirp;
   struct dirent *direntry;
@@ -410,6 +443,59 @@ static void succeed_rename(const char *oldpath, const char *newpath)
 }
 
 /****************************************************************************
+ * Name: fail_stat
+ ****************************************************************************/
+
+static void fail_stat(const char *path, int expectederror)
+{
+  struct stat buf;
+  int ret;
+
+  /* Try stat() against a file or directory.  It should fail with expectederror */
+
+  printf("fail_stat: Try stat(%s)\n", path);
+
+  ret = stat(path, &buf);
+  if (ret == 0)
+    {
+      printf("fail_stat: ERROR stat(%s) succeeded\n", path);
+      show_stat(path, &buf);
+      g_nerrors++;
+    }
+  else if (*get_errno_ptr() != expectederror)
+    {
+      printf("fail_stat: ERROR stat(%s) failed with errno=%d (expected %d)\n",
+             path, *get_errno_ptr(), expectederror);
+      g_nerrors++;
+    }
+}
+
+/****************************************************************************
+ * Name: succeed_stat
+ ****************************************************************************/
+
+static void succeed_stat(const char *path)
+{
+  struct stat buf;
+  int ret;
+
+  printf("succeed_stat: Try stat(%s)\n", path);
+
+  ret = stat(path, &buf);
+  if (ret != 0)
+    {
+      printf("succeed_stat: ERROR stat(%s) failed with errno=%d\n",
+             path, *get_errno_ptr());
+      g_nerrors++;
+    }
+  else
+    {
+      printf("succeed_stat: stat(%s) succeeded\n", path);
+      show_stat(path, &buf);
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -442,12 +528,15 @@ int user_start(int argc, char *argv[])
       /* Read a test file that is already on the test file system image */
 
       show_directories("", 0);
+      succeed_stat(g_testfile1);
       read_test_file(g_testfile1);
 
       /* Write a test file into a pre-existing directory on the test file system */
 
+      fail_stat(g_testfile2, ENOENT);
       write_test_file(g_testfile2);
       show_directories("", 0);
+      succeed_stat(g_testfile2);
 
       /* Read the file that we just wrote */
 
@@ -468,6 +557,7 @@ int user_start(int argc, char *argv[])
       /* Try unlink() against the test file1.  It should succeed. */
 
       succeed_unlink(g_testfile1);
+      fail_stat(g_testfile1, ENOENT);
       show_directories("", 0);
 
       /* Attempt to open testfile1 should fail with ENOENT */
@@ -486,20 +576,23 @@ int user_start(int argc, char *argv[])
 
       succeed_unlink(g_testfile2);
       show_directories("", 0);
+      fail_stat(g_testfile2, ENOENT);
 
       /* Try mkdir() against the test dir1.  It should fail with EEXIST. */
 
       fail_mkdir(g_testdir1, EEXIST);
 
-      /* Try rmdir() against the test directory.  It should now succeed. */
+      /* Try rmdir() against the test directory.  mkdir should now succeed. */
 
       succeed_rmdir(g_testdir1);
       show_directories("", 0);
+      fail_stat(g_testdir1, ENOENT);
 
       /* Try mkdir() against the test dir2.  It should succeed */
 
       succeed_mkdir(g_testdir2);
       show_directories("", 0);
+      succeed_stat(g_testdir2);
 
       /* Try mkdir() against the test dir2.  It should fail with EXIST */
 
@@ -507,8 +600,10 @@ int user_start(int argc, char *argv[])
 
       /* Write a test file into a new directory on the test file system */
 
+      fail_stat(g_testfile3, ENOENT);
       write_test_file(g_testfile3);
       show_directories("", 0);
+      succeed_stat(g_testfile3);
 
       /* Read the file that we just wrote */
 
@@ -516,8 +611,10 @@ int user_start(int argc, char *argv[])
 
       /* Use mkdir() to create test dir3.  It should succeed */
 
+      fail_stat(g_testdir3, ENOENT);
       succeed_mkdir(g_testdir3);
       show_directories("", 0);
+      succeed_stat(g_testdir3);
 
       /* Try rename() on the root directory. Should fail with EXDEV*/
 
@@ -529,13 +626,19 @@ int user_start(int argc, char *argv[])
 
       /* Try rename() to a non-existing directory.  Should succeed */
 
+      fail_stat(g_testdir4, ENOENT);
       succeed_rename(g_testdir3, g_testdir4);
       show_directories("", 0);
+      fail_stat(g_testdir3, ENOENT);
+      succeed_stat(g_testdir4);
 
       /* Try rename() of file.  Should work. */
 
+      fail_stat(g_testfile4, ENOENT);
       succeed_rename(g_testfile3, g_testfile4);
       show_directories("", 0);
+      fail_stat(g_testfile3, ENOENT);
+      succeed_stat(g_testfile4);
 
       /* Make sure that we can still read the renamed file */
 
@@ -554,7 +657,7 @@ int user_start(int argc, char *argv[])
 
       printf("user_start: %d errors reported\n", g_nerrors);
     }
-  
+
   fflush(stdout);
   return 0;
 }

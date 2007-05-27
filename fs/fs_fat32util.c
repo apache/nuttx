@@ -530,9 +530,11 @@ void fat_semgive(struct fat_mountpt_s *fs)
 }
 
 /****************************************************************************
- * Name: fat_gettime
+ * Name: fat_systime2fattime
  *
- * Desciption: Get the time and date suitble for writing into the FAT FS.
+ * Desciption: Get the system time convertto a time and and date suitble
+ * for writing into the FAT FS.
+ *
  *    TIME in LS 16-bits:
  *      Bits 0:4   = 2 second count (0-29 representing 0-58 seconds)
  *      Bits 5-10  = minutes (0-59)
@@ -542,10 +544,31 @@ void fat_semgive(struct fat_mountpt_s *fs)
  *      Bits 5:8   = Month of year (1-12)
  *      Bits 9:15  = Year from 1980 (0-127 representing 1980-2107)
  *
+ ****************************************************************************/
+
+uint32 fat_systime2fattime(void)
+{
+#warning "Time not implemented"
+    return 0;
+}
+
+/****************************************************************************
+ * Name: fat_fattime2systime
+ *
+ * Desciption: Convert FAT data and time to a system time_t
+ *
+ *    16-bit FAT time:
+ *      Bits 0:4   = 2 second count (0-29 representing 0-58 seconds)
+ *      Bits 5-10  = minutes (0-59)
+ *      Bits 11-15 = hours (0-23)
+ *    16-bit FAT date:
+ *      Bits 0:4   = Day of month (0-31)
+ *      Bits 5:8   = Month of year (1-12)
+ *      Bits 9:15  = Year from 1980 (0-127 representing 1980-2107)
  *
  ****************************************************************************/
 
-uint32 fat_gettime(void)
+time_t fat_fattime2systime(uint16 fattime, uint16 fatdate)
 {
 #warning "Time not implemented"
     return 0;
@@ -1812,7 +1835,7 @@ int  fat_dirtruncate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 
   DIR_PUTATTRIBUTES(dirinfo->fd_entry, FATATTR_ARCHIVE);
  
-  writetime = fat_gettime();
+  writetime = fat_systime2fattime();
   DIR_PUTWRTTIME(dirinfo->fd_entry, writetime & 0xffff);
   DIR_PUTWRTDATE(dirinfo->fd_entry, writetime > 16);
 
@@ -1877,7 +1900,7 @@ int fat_dircreate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
   /* ARCHIVE attribute, write time, creation time */
   DIR_PUTATTRIBUTES(dirinfo->fd_entry, FATATTR_ARCHIVE);
  
-  time = fat_gettime();
+  time = fat_systime2fattime();
   DIR_PUTWRTTIME(dirinfo->fd_entry, time & 0xffff);
   DIR_PUTCRTIME(dirinfo->fd_entry, time & 0xffff);
   DIR_PUTWRTDATE(dirinfo->fd_entry, time >> 16);

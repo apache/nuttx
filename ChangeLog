@@ -150,5 +150,7 @@
 
 0.2.7 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* Added stat() to fs layer
+	* Added stat() supported to FAT
 	* Started m68322
 
