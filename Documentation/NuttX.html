@@ -296,6 +296,8 @@
       This port is complete but not stable with timer interrupts enabled.
       There seems to be some issue when the stack pointer enters into the indirect IRAM
       address space during interrupt handling.
+      This architecture has not been built in some time will likely have some compilation
+      problems because of SDCC compiler differences.
     </p>
    </td>
 </tr>
@@ -582,6 +584,8 @@ Other memory:
 
 0.2.7 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* Added stat() to fs layer
+	* Added stat() supported to FAT
 	* Started m68322
 </pre></ul>
 
