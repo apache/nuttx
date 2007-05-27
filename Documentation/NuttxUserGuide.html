@@ -21,7 +21,7 @@ User's Manual
 <p>
 Gregory Nutt
 <p>
-<small>Last Update: March 28, 2007</small>
+<small>Last Update: May 27, 2007</small>
 </center>
 
 <h1>1.0 <A NAME="Introduction">Introduction</a></h1>
@@ -5725,7 +5725,7 @@ notify a task when a message is available on a queue.
   int   close(int fd);
   int   dup(int fildes);
   int   dup2(int fildes1, int fildes2);
-  off_t lseek(int fd, off_t offset, int whence);           /* Prototyped but not implemented */
+  off_t lseek(int fd, off_t offset, int whence);
   int   read(int fd, void *buf, unsigned int nbytes);
   int   unlink(const char *path);
   int   write(int fd, const void *buf, unsigned int nbytes);
@@ -5768,7 +5768,7 @@ notify a task when a message is available on a queue.
 
   int    printf(const char *format, ...);
   int    puts(const char *s);
-  int    rename(const char *source, const char *target);   /* Prototyped but not implemented */
+  int    rename(const char *source, const char *target);
   int    sprintf(char *dest, const char *format, ...);
   int    ungetc(int c, FILE *stream);
   int    vprintf(const char *s, va_list ap);
@@ -5779,9 +5779,9 @@ notify a task when a message is available on a queue.
   FILE  *fdopen(int fd, const char *type);
   int    fstat(int fd, FAR struct stat *buf);              /* Prototyped but not implemented */
   char  *getcwd(FAR char *buf, size_t size);               /* Prototyped but not implemented */
-  int    mkdir(const char *path, mode_t mode);             /* Prototyped but not implemented */
-  int    rmdir(const char *path);                          /* Prototyped but not implemented */
-  int    stat(const char *path, FAR struct stat *buf);     /* Prototyped but not implemented */
+  int    mkdir(const char *path, mode_t mode);
+  int    rmdir(const char *path);
+  int    stat(const char *path, FAR struct stat *buf);
   int    statfs(const char *path, FAR struct statfs *buf); /* Prototyped but not implemented */
 </pre></ul>
 
