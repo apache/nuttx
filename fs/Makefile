@@ -51,7 +51,7 @@ CSRCS		+= fs_registerblockdriver.c fs_unregisterblockdriver.c \
 		  fs_mount.c fs_umount.c fs_unlink.c fs_mkdir.c fs_rmdir.c \
 		  fs_rename.c
 ifeq ($(CONFIG_FS_FAT),y)
-CSRCS		+= fs_fat32.c fs_fat32util.c
+CSRCS		+= fs_fat32.c fs_fat32util.c fs_fat32attrib.c
 endif
 endif
 COBJS		= $(CSRCS:.c=$(OBJEXT))

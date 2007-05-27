@@ -135,18 +135,6 @@
 #define FATNTRES_LCNAME   0x08 /* Lower case in name */
 #define FATNTRES_LCEXT    0x10 /* Lower case in extension */
 
-/* File attribute bits in FAT directory entry */
-
-#define FATATTR_READONLY  0x01
-#define FATATTR_HIDDEN    0x02
-#define FATATTR_SYSTEM    0x04
-#define FATATTR_VOLUMEID  0x08
-#define FATATTR_DIRECTORY 0x10
-#define FATATTR_ARCHIVE   0x20
-
-#define FATATTR_LONGNAME \
-  (FATATTR_READONLY|FATATTR_HIDDEN|FATATTR_SYSTEM|FATATTR_VOLUMEID)
-
 /* Directory indexing helper.  Each directory entry is 32-bytes in length.
  * The number of directory entries in a sector then varies with the size
  * of the sector supported in hardware.
