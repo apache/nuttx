@@ -45,6 +45,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/statfs.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -93,6 +94,8 @@ static int     fat_rewinddir(struct inode *mountpt, struct internal_dir_s *dir);
 static int     fat_bind(FAR struct inode *blkdriver, const void *data,
                         void **handle);
 static int     fat_unbind(void *handle, FAR struct inode **blkdriver);
+static int     fat_statfs(struct inode *mountpt, struct statfs *buf);
+
 static int     fat_unlink(struct inode *mountpt, const char *relpath);
 static int     fat_mkdir(struct inode *mountpt, const char *relpath,
                          mode_t mode);
@@ -131,6 +134,8 @@ const struct mountpt_operations fat_operations =
 
   fat_bind,
   fat_unbind,
+  fat_statfs,
+
   fat_unlink,
   fat_mkdir,
   fat_rmdir,
@@ -1574,6 +1579,59 @@ static int fat_unbind(void *handle, FAR struct inode **blkdriver)
       free(fs);
     }
 
+  fat_semgive(fs);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: fat_statfs
+ *
+ * Description: Return filesystem statistics
+ *
+ ****************************************************************************/
+
+static int fat_statfs(struct inode *mountpt, struct statfs *buf)
+{
+  struct fat_mountpt_s *fs;
+  int                   ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt && mountpt->i_private);
+
+  /* Get the mountpoint private data from the inode structure */
+
+  fs = mountpt->i_private;
+
+  /* Check if the mount is still healthy */
+
+  fat_semtake(fs);
+  ret = fat_checkmount(fs);
+  if (ret < 0)
+    {
+       goto errout_with_semaphore;
+    }
+
+  /* Fill in the statfs info */
+
+  memset(buf, 0, sizeof(struct statfs));
+  buf->f_type    = MSDOS_SUPER_MAGIC;
+
+  /* We will claim that the optimal transfer size is the size of a cluster in bytes */
+
+  buf->f_bsize   = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
+
+  /* Everything else follows in units of clusters */
+
+  buf->f_blocks  = fs->fs_nclusters;                        /* Total data blocks in the file system */
+  ret = fat_nfreeclusters(fs, &buf->f_bfree);               /* Free blocks in the file system */
+  buf->f_bavail  = buf->f_bfree;                            /* Free blocks avail to non-superuser */
+  buf->f_namelen = (8+1+3);                                 /* Maximum length of filenames */
+
+  fat_semgive(fs);
+  return OK;
+
+errout_with_semaphore:
   fat_semgive(fs);
   return ret;
 }

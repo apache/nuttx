@@ -567,6 +567,7 @@ EXTERN int    fat_ffcacheinvalidate(struct fat_mountpt_s *fs, struct fat_file_s 
 /* FSINFO sector support */
 
 EXTERN int fat_updatefsinfo(struct fat_mountpt_s *fs);
+EXTERN int fat_nfreeclusters(struct fat_mountpt_s *fs, size_t *pfreeclusters);
 
 #undef EXTERN
 #if defined(__cplusplus)

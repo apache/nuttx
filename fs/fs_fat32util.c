@@ -861,7 +861,7 @@ ssize_t fat_cluster2sector(struct fat_mountpt_s *fs,  uint32 cluster )
  *
  * Desciption: Get the cluster start sector into the FAT.
  *
- * Return:  <0: error, >=0: sector number
+ * Return:  <0: error, 0:cluster unassigned, >=0: start sector of cluster
  *
  ****************************************************************************/
 
@@ -2338,6 +2338,111 @@ int fat_updatefsinfo(struct fat_mountpt_s *fs)
         }
     }
   return ret;
+}
+
+/****************************************************************************
+ * Name: fat_nfreeclusters
+ *
+ * Desciption: Get the number of free clusters
+ *
+ ****************************************************************************/
+
+int fat_nfreeclusters(struct fat_mountpt_s *fs, size_t *pfreeclusters)
+{
+  uint32 nfreeclusters;
+
+  /* If number of the first free cluster is valid, then just return that value. */
+
+  if (fs->fs_fsifreecount <= fs->fs_nclusters - 2)
+    {
+      *pfreeclusters = fs->fs_fsifreecount;
+      return OK;
+    }
+
+  /* Otherwise, we will have to count the number of free clusters */
+
+  nfreeclusters = 0;
+  if (fs->fs_type == FSTYPE_FAT12)
+    {
+      size_t sector;
+
+      /* Examine every cluster in the fat */
+
+      for (sector = 2; sector < fs->fs_nclusters; sector++)
+        {
+
+          /* If the cluster is unassigned, then increment the count of free clusters */
+
+          if ((uint16)fat_getcluster(fs, sector) == 0)
+            {
+              nfreeclusters++;
+            }
+        }
+    }
+  else
+    {
+      unsigned int cluster;
+      size_t       fatsector;
+      unsigned int offset;
+      int          ret;
+
+      fatsector    = fs->fs_fatbase;
+      offset       = fs->fs_hwsectorsize;
+
+      /* Examine each cluster in the fat */
+
+      for (cluster = fs->fs_nclusters; cluster > 0; cluster--)
+        {
+          /* If we are starting a new sector, then read the new sector in fs_buffer */
+
+          if (offset >= fs->fs_hwsectorsize)
+            {
+              ret = fat_fscacheread(fs, fatsector++);
+              if (ret < 0)
+                {
+                  return ret;
+                }
+
+              /* Reset the offset to the next FAT entry.
+               * Increment the sector number to read next time around.
+               */
+
+              offset = 0;
+              fatsector++;
+            }
+
+          /* FAT16 and FAT32 differ only on the size of each cluster start
+           * sector number in the FAT.
+           */
+
+          if (fs->fs_type == FSTYPE_FAT16)
+            {
+              if (FAT_GETFAT16(fs->fs_buffer, offset) == 0)
+                {
+                  nfreeclusters++;
+                }
+              offset += 2;
+            }
+          else
+            {
+              if (FAT_GETFAT32(fs->fs_buffer, offset) == 0)
+                {
+                  nfreeclusters++;
+                }
+
+              offset += 4;
+            }
+        }
+    }
+
+    fs->fs_fsifreecount = nfreeclusters;
+    if (fs->fs_type == FSTYPE_FAT32)
+      {
+        fs->fs_fsidirty = TRUE;
+      }
+
+    *pfreeclusters = nfreeclusters;
+    return OK;
 }
 
 #endif /* CONFIG_DISABLE_MOUNTPOUNT */

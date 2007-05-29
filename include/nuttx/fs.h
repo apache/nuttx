@@ -116,6 +116,8 @@ struct block_operations
 
 struct inode;
 struct internal_dir_s;
+struct stat;
+struct statfs;
 struct mountpt_operations
 {
   /* The mountpoint open method differs from the driver open method
@@ -158,6 +160,10 @@ struct mountpt_operations
 
   int     (*bind)(FAR struct inode *blkdriver, const void *data, void **handle);
   int     (*unbind)(void *handle, FAR struct inode **blkdriver);
+
+  int     (*statfs)(struct inode *mountpt, struct statfs *buf);
+
+  /* Operations on pathes */
 
   int     (*unlink)(struct inode *mountpt, const char *relpath);
   int     (*mkdir)(struct inode *mountpt, const char *relpath, mode_t mode);
