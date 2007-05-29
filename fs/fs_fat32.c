@@ -2154,8 +2154,8 @@ static int fat_stat(struct inode *mountpt, const char *relpath, struct stat *buf
   /* File/directory size, access block size */
 
   buf->st_size      = DIR_GETFILESIZE(dirinfo.fd_entry);
-  buf->st_blksize   = fs->fs_hwsectorsize;
-  buf->st_blocks    = SEC_NSECTORS(fs, buf->st_size + SEC_NDXMASK(fs));
+  buf->st_blksize   = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
+  buf->st_blocks    = (buf->st_size + buf->st_blksize - 1) / buf->st_blksize;
 
   /* Times */
 
