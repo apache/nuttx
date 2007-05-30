@@ -40,6 +40,7 @@
 #include <sys/mount.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/statfs.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,6 +56,7 @@
 
 #define TEST_USE_STAT         1
 #define TEST_SHOW_DIRECTORIES 1
+#define TEST_USE_STATFS       1
 
 /****************************************************************************
  * Private Types
@@ -65,6 +67,7 @@
  ****************************************************************************/
 
 static const char g_source[]         = "/dev/blkdev";
+static const char g_mntdir[]         = "/mnt";
 static const char g_target[]         = "/mnt/fs";
 static const char g_filesystemtype[] = "vfat";
 
@@ -119,6 +122,43 @@ static void show_stat(const char *path, struct stat *ps)
   printf("\tmodify time : %d\n", ps->st_mtime);
   printf("\tchange time : %d\n", ps->st_ctime);
 }
+#endif
+
+/****************************************************************************
+ * Name: show_statfs
+ ****************************************************************************/
+
+#ifdef TEST_USE_STATFS
+static void show_statfs(const char *path)
+{
+  struct statfs buf;
+  int ret;
+
+  /* Try stat() against a file or directory.  It should fail with expectederror */
+
+  printf("show_statfs: Try statfs(%s)\n", path);
+  ret = statfs(path, &buf);
+  if (ret == 0)
+    {
+      printf("show_statfs: statfs(%s) succeeded\n", path);
+      printf("\tFS Type           : %0x\n", buf.f_type);
+      printf("\tBlock size        : %d\n", buf.f_bsize);
+      printf("\tNumber of blocks  : %d\n", buf.f_blocks);
+      printf("\tFree blocks       : %d\n", buf.f_bfree);
+      printf("\tFree user blocks  : %d\n", buf.f_bavail);
+      printf("\tNumber file nodes : %d\n", buf.f_files);
+      printf("\tFree file nodes   : %d\n", buf.f_ffree);
+      printf("\tFile name length  : %d\n", buf.f_namelen);
+    }
+  else
+    {
+      printf("show_statfs: ERROR statfs(%s) failed with errno=%d\n",
+             path, *get_errno_ptr());
+      g_nerrors++;
+    }
+}
+#else
+# define show_statfs(p)
 #endif
 
 /****************************************************************************
@@ -542,10 +582,14 @@ int user_start(int argc, char *argv[])
 
   if (ret == 0)
     {
+      show_statfs(g_mntdir);
+      show_statfs(g_target);
+
       /* Read a test file that is already on the test file system image */
 
       show_directories("", 0);
       succeed_stat(g_testfile1);
+      show_statfs(g_testfile1);
       read_test_file(g_testfile1);
 
       /* Write a test file into a pre-existing directory on the test file system */
@@ -554,6 +598,7 @@ int user_start(int argc, char *argv[])
       write_test_file(g_testfile2);
       show_directories("", 0);
       succeed_stat(g_testfile2);
+      show_statfs(g_testfile2);
 
       /* Read the file that we just wrote */
 
@@ -610,6 +655,7 @@ int user_start(int argc, char *argv[])
       succeed_mkdir(g_testdir2);
       show_directories("", 0);
       succeed_stat(g_testdir2);
+      show_statfs(g_testdir2);
 
       /* Try mkdir() against the test dir2.  It should fail with EXIST */
 
@@ -621,6 +667,7 @@ int user_start(int argc, char *argv[])
       write_test_file(g_testfile3);
       show_directories("", 0);
       succeed_stat(g_testfile3);
+      show_statfs(g_testfile3);
 
       /* Read the file that we just wrote */
 
@@ -632,6 +679,7 @@ int user_start(int argc, char *argv[])
       succeed_mkdir(g_testdir3);
       show_directories("", 0);
       succeed_stat(g_testdir3);
+      show_statfs(g_testdir3);
 
       /* Try rename() on the root directory. Should fail with EXDEV*/
 
@@ -648,6 +696,7 @@ int user_start(int argc, char *argv[])
       show_directories("", 0);
       fail_stat(g_testdir3, ENOENT);
       succeed_stat(g_testdir4);
+      show_statfs(g_testdir4);
 
       /* Try rename() of file.  Should work. */
 
@@ -656,6 +705,7 @@ int user_start(int argc, char *argv[])
       show_directories("", 0);
       fail_stat(g_testfile3, ENOENT);
       succeed_stat(g_testfile4);
+      show_statfs(g_testfile4);
 
       /* Make sure that we can still read the renamed file */
 
