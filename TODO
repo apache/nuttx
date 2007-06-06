@@ -29,10 +29,14 @@ o Signals
 o pthreads
 - pthread_cancel():  Should implemenent cancellation points and pthread_testcancel()
 
+o C++ Support
+- Need to call static constructors
+
 o Network
 - Port FreeBSD TCP/IP stack
 
 o USB
+- Implement USB device support
 
 o Libraries
 - sscanf() and lib_vsprintf() do not support floating point values.
@@ -62,7 +66,8 @@ o C5471
 o DM320
 
 o LPC214x
-- Finish
+- Finish bringup
+- Add MMC and USB support
 
 o pjrc-8052 / MCS51
 - Current status:
