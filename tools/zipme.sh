@@ -85,7 +85,7 @@ if [ ! -d ${NUTTXDIR} ] ; then
 fi
 
 TAR_NAME=nuttx-${DATECODE}.tar
-ZIP_NAME=${TAR_NAME}.bz2
+ZIP_NAME=${TAR_NAME}.gz
 
 # Prepare the nuttx directory -- Remove editor garbage
 
