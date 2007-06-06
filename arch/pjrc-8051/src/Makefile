@@ -201,7 +201,7 @@ irqtest:
 .depend: Makefile up_mem.h $(DEPSRCS)
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR=$(TOPDIR) depend ; \
-	if
+	fi	
 	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	touch $@
 
