@@ -167,7 +167,7 @@ static int user_main(int argc, char *argv[])
   g_mmprevious = g_mmbefore;
 #else
   (void)mallinfo(&g_mmbefore);
-  memcpy(g_mmprevious, g_mmbefore, sizeof(struct mallinfo));
+  memcpy(&g_mmprevious, &g_mmbefore, sizeof(struct mallinfo));
 #endif
 #endif
 
