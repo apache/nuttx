@@ -176,9 +176,7 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
            {
              /* A context switch will occur. */
 
-             irqstate_t flags = irqsave();
              up_reprioritize_rtr(tcb, (ubyte)sched_priority);
-             irqrestore(flags);
            }
 
          /* Otherwise, we can just change priority since it has no effect */
@@ -205,9 +203,7 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
            {
              /* A context switch will occur. */
 
-             irqstate_t flags = irqsave();
              up_reprioritize_rtr(tcb, (ubyte)sched_priority);
-             irqrestore(flags);
            }
 
          /* Otherwise, we can just change priority and re-schedule (since it
