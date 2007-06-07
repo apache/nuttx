@@ -588,6 +588,14 @@ Other memory:
 	* Fixed reference counting errors associated with mounted filesystems
 	* Added fat_getattrib() and fat_setattrib()
 	* Added statfs() to fs layer and to FAT
+	* Correct file name extension in tools/zipme.sh
+	* Fix error in dependencies in 8051/2 Makefile
+	* sched/Makefile: Don't build sleep() or usleep() if signals are disabled
+	* sched/sched_setparam.c: Remove redundant disabling of interrupts
+	* sched/usleep.c: Fixed nsec calculation
+	* lib/lib_strcspn.c: Function incorrectly named strspn().
+	* examples/ostest/main.c:  Errors in SDCC version of a memcpy() call
+	* examples/ostest/sighandl.c: Don't call fflush() if streams are disabled
 	* Started m68322
 </pre></ul>
 
