@@ -57,7 +57,10 @@ SCHED_SRCS	= sched_setparam.c sched_getparam.c \
 		  sched_lock.c sched_unlock.c sched_lockcount.c
 WDOG_SRCS	= wd_initialize.c wd_create.c wd_start.c wd_cancel.c wd_delete.c \
 		  wd_gettime.c
-TIME_SRCS	= sched_processtimer.c sleep.c usleep.c
+TIME_SRCS	= sched_processtimer.c
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+TIME_SRCS	+= sleep.c usleep.c
+endif
 CLOCK_SRCS	= clock_initialize.c mktime.c gmtime_r.c clock_settime.c clock_gettime.c \
 		  clock_getres.c clock_time2ticks.c clock_abstime2ticks.c clock_ticks2time.c
 SIGNAL_SRCS	= sig_initialize.c \
