@@ -151,7 +151,11 @@ static int waiter_main(int argc, char *argv[])
   /* Take the semaphore */
 
   printf("waiter_main: Waiting on semaphore\n" );
+
+#if CONFIG_NFILE_STREAMS > 0
   fflush(stdout);
+#endif
+
   status = sem_wait(&sem);
   if (status != 0)
     {
@@ -176,7 +180,11 @@ static int waiter_main(int argc, char *argv[])
   status = sigaction(WAKEUP_SIGNAL, &act, &oact);
 
   printf("waiter_main: done\n" );
+
+#if CONFIG_NFILE_STREAMS > 0
   fflush(stdout);
+#endif
+
   threadexited = TRUE;
   return 0;
 }
@@ -222,7 +230,9 @@ void sighand_test(void)
 
   /* Wait a bit */
 
+#if CONFIG_NFILE_STREAMS > 0
   fflush(stdout);
+#endif
   sleep(2);
 
   /* Then signal the waiter thread. */
@@ -244,7 +254,9 @@ void sighand_test(void)
 
   /* Wait a bit */
 
+#if CONFIG_NFILE_STREAMS > 0
   fflush(stdout);
+#endif
   sleep(2);
 
   /* Then check the result */
@@ -260,5 +272,7 @@ void sighand_test(void)
     }
 
   printf("sighand_test: done\n" );
+#if CONFIG_NFILE_STREAMS > 0
   fflush(stdout);
+#endif
 }
