@@ -92,7 +92,7 @@ void usleep(unsigned long usec)
     {
       (void)sigemptyset(&set);
       ts.tv_sec  = usec / 1000000;
-      ts.tv_nsec = usec % 1000;
+      ts.tv_nsec = (usec % 1000000) * 1000;
       (void)sigtimedwait(&set, &value, &ts);
   }
 }
