@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 26, 2007</p>
+      <p>Last Updated: June 9, 2007</p>
     </td>
   </tr>
 </table>
@@ -595,7 +595,9 @@ Other memory:
 	* sched/usleep.c: Fixed nsec calculation
 	* lib/lib_strcspn.c: Function incorrectly named strspn().
 	* examples/ostest/main.c:  Errors in SDCC version of a memcpy() call
-	* examples/ostest/sighandl.c: Don't call fflush() if streams are disabled
+	* examples/ostest/sighand.c: Don't call fflush() if streams are disabled
+	* include/limits.h, include/time.h, sched/clock_internal.h: A support for
+	  using selectable system timer frequency.
 	* Started m68322
 </pre></ul>
 
