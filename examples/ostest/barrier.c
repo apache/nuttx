@@ -49,7 +49,9 @@ static void *barrier_func(void *parameter)
   int status;
 
   printf("barrier_func: Thread %d started\n",  id);
+#ifndef CONFIG_DISABLE_SIGNALS
   usleep(500*1000);
+#endif
 
   /* Take the semaphore */
 
@@ -68,7 +70,9 @@ static void *barrier_func(void *parameter)
       printf("barrier_func: ERROR thread %d could not get semaphore value\n",  id);
     }
 
+#ifndef CONFIG_DISABLE_SIGNALS
   usleep(500*1000);
+#endif
   printf("barrier_func: Thread %d done\n",  id);
   return NULL;
 }
