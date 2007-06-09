@@ -608,6 +608,8 @@ Other memory:
 	* include/nuttx/compiler.h: Fix for using SDCC with the Z80.
 	* include/assert.h & arch/pjrc-8051/src/up_assert.c: SDCC does support
 	  __FILE__and __LINE__ (not tested)
+	* examples/ostest/barrier.c: Don't call usleep() when signals are
+	  disabled.
 	* Started m68322
 </pre></ul>
 
