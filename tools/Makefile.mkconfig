@@ -40,4 +40,4 @@ mkconfig: mkconfig.c
 	gcc -O2 -Wall -o mkconfig mkconfig.c
 
 clean:
-	rm -f mkconfig *~
+	@rm -f mkconfig mkconfig.exe *~
