@@ -132,6 +132,11 @@ defconfig -- This is a configuration file similar to the Linux
 		  regions of memory to allocate from, this specifies the
 		  number of memory regions that the memory manager must
 		  handle and enables the API mm_addregion(start, end);
+		CONFIG_TICKS_PER_MSEC - The default system timer is 100Hz
+		  or TICKS_PER_MSEC=10.  This setting may be defined to
+		  inform NuttX that the processor hardware is providing
+		  system timer interrupts at some interrupt interval other
+		  than 10 msec.
 		CONFIG_RR_INTERVAL - The round robin timeslice will be set
 		  this number of milliseconds;  Round robin scheduling can
 		  be disabled by setting this value to zero.
