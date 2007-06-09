@@ -603,6 +603,8 @@ Other memory:
 	* Restructured some Makefiles to better handle enabling and disabling
 	  NuttX features without having so much conditional compilation in the
 	  source files.
+	* tools/mkconfig.c: No long depends on asprintf() and _GNU_SOURCE and
+	  so should now build in non-GNU, non-GLIBC environments.
 	* Started m68322
 </pre></ul>
 

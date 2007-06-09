@@ -33,16 +33,16 @@
  *
  ************************************************************/
 
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include <ctype.h>
 #include <unistd.h>
 #include <errno.h>
 
 #define DEFCONFIG ".config"
-#define LINESIZE  256
+#define LINESIZE  ( PATH_MAX > 256 ? PATH_MAX : 256 )
 
 static char line[LINESIZE+1];
 
@@ -154,6 +154,13 @@ static void parse_file(FILE *stream)
   while (ptr);
 }
 
+static inline char *getfilepath(const char *name)
+{
+  snprintf(line, PATH_MAX, "%s/" DEFCONFIG, name);
+  line[PATH_MAX] = '\0';
+  return strdup(line);
+}
+
 static void show_usage(const char *progname)
 {
   fprintf(stderr, "USAGE: %s <abs path to .config>\n", progname);
@@ -164,7 +171,6 @@ int main(int argc, char **argv, char **envp)
 {
   char *filepath;
   FILE *stream;
-  int status;
 
   if (argc != 2)
     {
@@ -172,10 +178,10 @@ int main(int argc, char **argv, char **envp)
       show_usage(argv[0]);
     }
 
-  status = asprintf(&filepath, "%s/" DEFCONFIG, argv[1]);
-  if (status < 0)
+  filepath = getfilepath(argv[1]);
+  if (!filepath)
     {
-      fprintf(stderr, "asprintf failed\n");
+      fprintf(stderr, "getfilepath failed\n");
       exit(2);
     }
 
