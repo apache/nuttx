@@ -44,8 +44,6 @@
 #include <ctype.h>
 #include <debug.h>
 
-#if CONFIG_NFILE_STREAMS > 0
-
 /************************************************************
  * Definitions
  ************************************************************/
@@ -322,4 +320,3 @@ char *fgets(FAR char *s, int n, FILE *stream)
 
 }
 
-#endif /* CONFIG_NFILE_STREAMS */

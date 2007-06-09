@@ -61,9 +61,6 @@
 #include "fs_internal.h"
 #include "fs_fat32.h"
 
-#ifdef CONFIG_FS_FAT
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
-
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -2188,5 +2185,3 @@ static int fat_stat(struct inode *mountpt, const char *relpath, struct stat *buf
  * Public Functions
  ****************************************************************************/
 
-#endif /* CONFIG_DISABLE_MOUNTPOUNT */
-#endif /* CONFIG_FS_FAT */

@@ -48,8 +48,6 @@
  * Private Functions
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 /************************************************************
  * Name: seekpsuedodir
  ************************************************************/
@@ -111,7 +109,7 @@ static inline void seekpsuedodir(struct internal_dir_s *idir, off_t offset)
  * Name: seekmountptdir
  ************************************************************/
 
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 static inline void seekmountptdir(struct internal_dir_s *idir, off_t offset)
 {
   struct inode *inode;
@@ -212,7 +210,7 @@ void seekdir(FAR DIR *dirp, off_t offset)
    * that we are dealing with.
    */
 
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   if (INODE_IS_MOUNTPT(idir->fd_root))
     {
       /* The node is a file system mointpoint */
@@ -228,4 +226,3 @@ void seekdir(FAR DIR *dirp, off_t offset)
     }
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */

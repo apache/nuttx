@@ -88,8 +88,6 @@
  *   Called by the OS when a task exits
  ************************************************************/
 
-#if CONFIG_NFILE_STREAMS > 0
-
 void lib_flushall(FAR struct streamlist *list)
 {
   /* Make sure that there are streams associated with this thread */
@@ -181,4 +179,3 @@ int fflush(FILE *stream)
 #endif
 }
 
-#endif /* CONFIG_NFILE_STREAMS */

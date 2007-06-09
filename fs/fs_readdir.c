@@ -53,8 +53,6 @@
  * Name: readpsuedodir
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 static inline int readpsuedodir(struct internal_dir_s *idir)
 {
   FAR struct inode *prev;
@@ -228,4 +226,3 @@ errout:
   return NULL;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */

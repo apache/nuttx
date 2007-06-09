@@ -119,7 +119,7 @@ STATUS inode_remove(const char *path)
 
   /* Find the node to delete */
 
-  node = inode_search(&name, &left, &parent, NULL);
+  node = inode_search(&name, &left, &parent, (const char **)NULL);
   if (node)
     {
       /* Found it, now remove it from the tree */

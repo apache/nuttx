@@ -43,9 +43,6 @@
 
 #include "fs_internal.h"
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
-
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -83,5 +80,3 @@ STATUS unregister_blockdriver(const char *path)
   return ret;
 }
 
-#endif /* CONFIG_DISABLE_MOUNTPOUNT */
-#endif

@@ -207,11 +207,9 @@ EXTERN void inode_release(FAR struct inode *inode);
 
 /* fs_files.c ***************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS >0
 EXTERN void weak_function files_initialize(void);
 EXTERN int  files_allocate(FAR struct inode *inode, int oflags, off_t pos);
 EXTERN void files_release(int filedes);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

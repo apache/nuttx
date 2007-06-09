@@ -83,8 +83,6 @@
  * lib_fwrite
  ************************************************************/
 
-#if CONFIG_NFILE_STREAMS > 0
-
 ssize_t lib_fwrite(const void *ptr, size_t count, FILE *stream)
 #if CONFIG_STDIO_BUFFER_SIZE > 0
 {
@@ -164,4 +162,3 @@ ssize_t lib_fwrite(const void *ptr, size_t count, FILE *stream)
 }
 #endif /* CONFIG_STDIO_BUFFER_SIZE */
 
-#endif /* CONFIG_NFILE_STREAMS */

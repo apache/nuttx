@@ -56,8 +56,6 @@
  * Public Functions
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 int inode_checkflags(FAR struct inode *inode, int oflags)
 {
   if (((oflags & O_RDOK) != 0 && !inode->u.i_ops->read) ||
@@ -153,7 +151,7 @@ int open(const char *path, int oflags, ...)
   ret = OK;
   if (inode->u.i_ops->open)
     {
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
+#ifndef CONFIG_DISABLE_MOUNTPOINT
       if (INODE_IS_MOUNTPT(inode))
         {
           ret = inode->u.i_mops->open((FAR struct file*)&list->fl_files[fd],
@@ -183,4 +181,3 @@ int open(const char *path, int oflags, ...)
   return ERROR;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */

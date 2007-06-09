@@ -51,8 +51,6 @@
 #include "fs_internal.h"
 #include "fs_fat32.h"
 
-#if defined(CONFIG_FS_FAT) && !defined(CONFIG_DISABLE_MOUNTPOUNT)
-
 /************************************************************
  * Private Functions
  ************************************************************/
@@ -189,6 +187,4 @@ int fat_setattrib(const char *path, fat_attrib_t setbits, fat_attrib_t clearbits
 {
   return fat_attrib(path, NULL, setbits, clearbits);
 }
-
-#endif /* CONFIG_FS_FAT && !CONFIG_DISABLE_MOUNTPOUNT */
 

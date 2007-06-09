@@ -48,8 +48,6 @@
 #include <nuttx/fs.h>
 #include "fs_internal.h"
 
-#if CONFIG_NFILE_DESCRIPTORS >0
-
 /************************************************************
  * Definitions
  ************************************************************/
@@ -330,5 +328,4 @@ const char *inode_nextname(const char *name)
    if (*name) name++;
    return name;
 }
-#endif /* CONFIG_NFILE_DESCRIPTORS */
 

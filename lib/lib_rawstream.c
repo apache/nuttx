@@ -45,8 +45,6 @@
  * Private Functions
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 static void rawstream_putc(struct lib_stream_s *this, int ch)
 {
   struct lib_rawstream_s *rthis = (struct lib_rawstream_s *)this;
@@ -76,7 +74,4 @@ void lib_rawstream(struct lib_rawstream_s *rawstream, int fd)
   rawstream->public.nput = 0;
   rawstream->fd          = fd;
 }
-
-#endif /* CONFIG_NFILE_DESCRIPTORS */
-
 

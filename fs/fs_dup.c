@@ -65,8 +65,6 @@
  * Global Functions
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 int dup(int fildes)
 {
   FAR struct filelist *list;
@@ -146,4 +144,3 @@ int dup2(int fildes1, int fildes2)
   return files_dup(&list->fl_files[fildes1], &list->fl_files[fildes2]);
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */

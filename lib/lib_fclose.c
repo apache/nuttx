@@ -53,8 +53,6 @@
  * Global Functions
  ************************************************************/
 
-#if CONFIG_NFILE_STREAMS > 0
-
 int fclose(FILE *stream)
 {
   int ret = OK;
@@ -95,4 +93,3 @@ int fclose(FILE *stream)
   return ret;
 }
 
-#endif /* CONFIG_NFILE_STREAMS */

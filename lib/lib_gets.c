@@ -41,8 +41,6 @@
 #include <limits.h>
 #include <string.h>
 
-#if CONFIG_NFILE_STREAMS > 0
-
 /************************************************************
  * Definitions
  ************************************************************/
@@ -123,4 +121,3 @@ char *gets(char *s)
   return ret;
 }
 
-#endif /* CONFIG_NFILE_STREAMS */

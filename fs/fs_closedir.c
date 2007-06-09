@@ -71,8 +71,6 @@
  *
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 int closedir(FAR DIR *dirp)
 {
   struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
@@ -95,7 +93,7 @@ int closedir(FAR DIR *dirp)
    * inode we have open.
    */
 
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   if (INODE_IS_MOUNTPT(inode) && !DIRENT_ISPSUEDONODE(idir->fd_flags))
     {
       /* The node is a file system mointpoint. Verify that the mountpoint
@@ -145,4 +143,3 @@ errout:
   return ERROR;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */

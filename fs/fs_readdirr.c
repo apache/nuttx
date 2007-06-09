@@ -82,8 +82,6 @@
  *
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 int readdir_r(FAR DIR *dirp, FAR struct dirent *entry,
               FAR struct dirent **result)
 {
@@ -120,4 +118,3 @@ int readdir_r(FAR DIR *dirp, FAR struct dirent *entry,
   return 0;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */

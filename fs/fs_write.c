@@ -53,8 +53,6 @@
  * Global Functions
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 int write(int fd, const void *buf, unsigned int nbytes)
 {
   FAR struct filelist *list;
@@ -93,6 +91,4 @@ int write(int fd, const void *buf, unsigned int nbytes)
     }
   return ret;
 }
-
-#endif /* CONFIG_NFILE_DESCRIPTORS */
 

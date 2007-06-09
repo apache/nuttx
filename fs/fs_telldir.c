@@ -72,8 +72,6 @@
  *
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 off_t telldir(FAR DIR *dirp)
 {
   struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
@@ -89,4 +87,3 @@ off_t telldir(FAR DIR *dirp)
   return idir->fd_position;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */

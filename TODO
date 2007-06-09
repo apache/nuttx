@@ -51,7 +51,7 @@ o Build system
 - Some names under arch are still incorrect.  These should be processor architecture
   names:  pjrc-8051 should be 805x
 - configs/pjrc-8051 should be configs/pjrc-87c52
-- Last change to create the arch/arm directory breaks dependencies in arch/arm/src.
+- 0.2.4 changes to create the arch/arm directory breaks dependency target in arch/arm/src.
   Probably need to add the path to the chip or common subdirectorys when
   running tools/mkdeps.sh
 

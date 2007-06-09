@@ -88,8 +88,6 @@
  * fgetc
  **********************************************************/
 
-#if CONFIG_NFILE_STREAMS > 0
-
 int ungetc(int c, FILE *stream)
 {
 #if CONFIG_NUNGET_CHARS > 0
@@ -121,4 +119,3 @@ int ungetc(int c, FILE *stream)
     }
 }
 
-#endif /* CONFIG_NFILE_STREAMS */

@@ -53,8 +53,6 @@
  * Private Functions
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 /****************************************************************************
  * Name: statpsuedo
  ****************************************************************************/
@@ -161,7 +159,7 @@ int stat(const char *path, FAR struct stat *buf)
    * are dealing with.
    */
 
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   if (INODE_IS_MOUNTPT(inode))
     {
       /* The node is a file system mointpoint. Verify that the mountpoint
@@ -205,4 +203,3 @@ int stat(const char *path, FAR struct stat *buf)
   return ERROR;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */

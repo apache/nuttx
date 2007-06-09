@@ -98,7 +98,7 @@ int lib_rawvprintf(const char *fmt, va_list ap)
 
   struct lib_stream_s stream;
 
-  /* Wrap the stdout in a stream object and let lib_vsprintf
+  /* Wrap the low-level output in a stream object and let lib_vsprintf
    * do the work.
    */
 

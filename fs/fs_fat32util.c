@@ -58,9 +58,6 @@
 #include "fs_internal.h"
 #include "fs_fat32.h"
 
-#ifdef CONFIG_FS_FAT
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
-
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -2445,5 +2442,3 @@ int fat_nfreeclusters(struct fat_mountpt_s *fs, size_t *pfreeclusters)
     return OK;
 }
 
-#endif /* CONFIG_DISABLE_MOUNTPOUNT */
-#endif /* CONFIG_FS_FAT */

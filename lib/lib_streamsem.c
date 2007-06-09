@@ -71,8 +71,6 @@
  * Public Functions
  ************************************************************/
 
-#if CONFIG_NFILE_STREAMS > 0
-
 void stream_semtake(FAR struct streamlist *list)
 {
   /* Take the semaphore (perhaps waiting) */
@@ -92,5 +90,4 @@ void stream_semgive(FAR struct streamlist *list)
   sem_post(&list->sl_sem);
 }
 
-#endif /* CONFIG_NFILE_STREAMS */
 

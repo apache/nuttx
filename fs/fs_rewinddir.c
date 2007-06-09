@@ -52,8 +52,6 @@
  * Name: rewindpsuedodir
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 static inline void rewindpsuedodir(struct internal_dir_s *idir)
 {
   struct inode *prev;
@@ -104,7 +102,7 @@ static inline void rewindpsuedodir(struct internal_dir_s *idir)
 void rewinddir(FAR DIR *dirp)
 {
   struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   struct inode *inode;
 #endif
 
@@ -119,7 +117,7 @@ void rewinddir(FAR DIR *dirp)
    * that we are dealing with.
    */
 
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   inode = idir->fd_root;
   if (INODE_IS_MOUNTPT(inode))
     {
@@ -143,4 +141,3 @@ void rewinddir(FAR DIR *dirp)
     }
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */

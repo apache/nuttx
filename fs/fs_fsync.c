@@ -47,9 +47,6 @@
 
 #include "fs_internal.h"
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
-
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -138,5 +135,3 @@ int fsync(int fd)
   return ERROR;
 }
 
-#endif /* CONFIG_DISABLE_MOUNTPOINT */
-#endif /* CONFIG_NFILE_DESCRIPTORS */

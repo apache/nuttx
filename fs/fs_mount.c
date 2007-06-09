@@ -45,9 +45,6 @@
 #include <nuttx/fs.h>
 #include "fs_internal.h"
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
-
 /* At least one filesystem must be defined, or this file will not compile.
  * It may be desire-able to make filesystems dynamically registered at
  * some time in the future, but at present, this file needs to know about
@@ -279,6 +276,5 @@ int mount(const char *source, const char *target,
   return ERROR;
 }
 
-#endif /* Need at least filesystem */
-#endif /* CONFIG_DISABLE_MOUNTPOUNT */
-#endif /* Need file descriptor support */
+#endif /* Need at least one filesystem */
+

@@ -156,7 +156,7 @@ FAR struct inode *inode_reserve(const char *path)
 
   /* Find the location to insert the new subtree */
 
-  if (inode_search(&name, &left, &parent, NULL) != NULL)
+  if (inode_search(&name, &left, &parent, (const char **)NULL) != NULL)
     {
       /* Is is an error if the node already exists in the tree */
 

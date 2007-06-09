@@ -49,8 +49,6 @@
  * Global Functions
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 int close(int fd)
 {
   FAR struct filelist *list;
@@ -112,4 +110,3 @@ int close(int fd)
   return ERROR;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */

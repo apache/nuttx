@@ -43,8 +43,6 @@
 
 #include "fs_internal.h"
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -82,4 +80,3 @@ STATUS unregister_driver(const char *path)
   return ret;
 }
 
-#endif

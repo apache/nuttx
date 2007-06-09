@@ -67,8 +67,6 @@
  * Private Functions
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS >0
-
 static void _files_semtake(FAR struct filelist *list)
 {
   /* Take the semaphore (perhaps waiting) */
@@ -279,4 +277,3 @@ void files_release(int filedes)
     }
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */

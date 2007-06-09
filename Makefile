@@ -37,17 +37,45 @@ TOPDIR		= ${shell pwd}
 -include ${TOPDIR}/.config
 -include ${TOPDIR}/Make.defs
 
+# Process architecture and board-specific directories
+
 ARCH_DIR	= arch/$(CONFIG_ARCH)
 ARCH_SRC	= $(ARCH_DIR)/src
 ARCH_INC	= $(ARCH_DIR)/include
 BOARD_DIR	= configs/$(CONFIG_ARCH_BOARD)
 
-SUBDIRS		= sched lib $(ARCH_SRC) mm fs drivers examples/$(CONFIG_EXAMPLE)
+# FSDIRS depend on file descriptor support; NONFSDIRS do not
+#   (except for parts of FSDIRS).  We will exclude FSDIRS
+#   from the build if file descriptor support is disabled
+
+NONFSDIRS	= sched lib $(ARCH_SRC) mm examples/$(CONFIG_EXAMPLE)
+FSDIRS		= fs drivers
+
+# CLEANDIRS are the directories that will clean in.  These are
+#   all directories that we know about.
+# MAKEDIRS are the directories in which we will build targets
+
+CLEANDIRS	= $(NONFSDIRS) $(FSDIRS)
+
+ifeq ($(CONFIG_NFILE_DESCRIPTORS),0)
+MAKEDIRS	= $(NONFSDIRS)
+else
+MAKEDIRS	= $(NONFSDIRS) $(FSDIRS)
+endif
+
+# LINKLIBS is the list of NuttX libraries that is passed to the
+#   processor-specific Makefile to build the final target.
+#   Libraries in FSDIRS are excluded if file descriptor support
+#   is disabled.
 
 LINKLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEXT) \
-		  fs/libfs$(LIBEXT) drivers/libdrivers$(LIBEXT) lib/liblib$(LIBEXT) \
-		  examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT)
+		  lib/liblib$(LIBEXT) examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT)
 
+ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
+LINKLIBS	+= fs/libfs$(LIBEXT) drivers/libdrivers$(LIBEXT) 
+endif
+
+# This is the name of the final target
 BIN		= nuttx$(EXEEXT)
 
 all: $(BIN)
@@ -169,12 +197,12 @@ $(BIN):	context depend $(LINKLIBS)
 	$(MAKE) -C $(ARCH_SRC) TOPDIR=$(TOPDIR) LINKLIBS="$(LINKLIBS)" $(BIN)
 
 depend:
-	@for dir in $(SUBDIRS) ; do \
+	@for dir in $(MAKEDIRS) ; do \
 		$(MAKE) -C $$dir TOPDIR=$(TOPDIR) depend ; \
 	done
 
 subdir_clean:
-	@for dir in $(SUBDIRS) ; do \
+	@for dir in $(CLEANDIRS) ; do \
 		if [ -e $$dir/Makefile ]; then \
 			$(MAKE) -C $$dir TOPDIR=$(TOPDIR) clean ; \
 		fi \
@@ -186,7 +214,7 @@ clean: subdir_clean
 	rm -f $(BIN) $(BIN).* mm_test *.map *~
 
 subdir_distclean:
-	@for dir in $(SUBDIRS) ; do \
+	@for dir in $(CLEANDIRS) ; do \
 		if [ -e $$dir/Makefile ]; then \
 			$(MAKE) -C $$dir TOPDIR=$(TOPDIR) distclean ; \
 		fi \

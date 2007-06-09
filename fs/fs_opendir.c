@@ -82,8 +82,6 @@
  *
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 FAR DIR *opendir(const char *path)
 {
   FAR struct inode *inode = NULL;
@@ -228,4 +226,3 @@ errout_with_semaphore:
   return NULL;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */

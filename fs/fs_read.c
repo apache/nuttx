@@ -53,8 +53,6 @@
  * Global Functions
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 int read(int fd, void *buf, unsigned int nbytes)
 {
   FAR struct filelist *list;
@@ -99,4 +97,3 @@ int read(int fd, void *buf, unsigned int nbytes)
   return ret;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */
