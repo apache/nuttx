@@ -605,6 +605,9 @@ Other memory:
 	  source files.
 	* tools/mkconfig.c: No long depends on asprintf() and _GNU_SOURCE and
 	  so should now build in non-GNU, non-GLIBC environments.
+	* include/nuttx/compiler.h: Fix for using SDCC with the Z80.
+	* include/assert.h & arch/pjrc-8051/src/up_assert.c: SDCC does support
+	  __FILE__and __LINE__ (not tested)
 	* Started m68322
 </pre></ul>
 

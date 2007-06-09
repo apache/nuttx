@@ -95,7 +95,7 @@ static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
  * Name: up_assert
  ************************************************************/
 
-void up_assert(void)
+void up_assert(const ubyte *filename, int lineno)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   _TCB *rtcb = (_TCB*)g_readytorun.head;
@@ -104,9 +104,11 @@ void up_assert(void)
   up_ledon(LED_ASSERTION);
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  lldbg("%s: Assertion failed\n", rtcb->name);
+  lldbg("Assertion failed at file:%s line: %d task: %s\n",
+        filename, lineno, rtcb->name);
 #else
-  lldbg("Assertion failed\n");
+  lldbg("Assertion failed at file:%s line: %d\n",
+        filename, lineno);
 #endif
 
   up_dumpstack();
@@ -117,7 +119,7 @@ void up_assert(void)
  * Name: up_assert_code
  ************************************************************/
 
-void up_assert_code(int errorcode)
+void up_assert_code(const ubyte *filename, int lineno, int errorcode)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   _TCB *rtcb = (_TCB*)g_readytorun.head;
@@ -126,9 +128,11 @@ void up_assert_code(int errorcode)
   up_ledon(LED_ASSERTION);
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  lldbg("%s: Assertion failed, error=%d\n", rtcb->name, errorcode);
+  lldbg("Assertion failed at file:%s line: %d task: %s error code: %d\n",
+        filename, lineno, rtcb->name, errorcode);
 #else
-  lldbg("Assertion failed , error=%d\n", errorcode);
+  lldbg("Assertion failed at file:%s line: %d error code: %d\n",
+        filename, lineno, errorcode);
 #endif
 
   up_dumpstack();

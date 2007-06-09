@@ -53,7 +53,7 @@
 #undef ASSERTCODE
 #undef DEBUGASSERT
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(SDCC)
 
 #  define ASSERT(f) \
      { if (!(f)) up_assert((const ubyte *)__FILE__, (int)__LINE__); }
@@ -105,9 +105,9 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-#ifdef __GNUC__
-EXTERN void   up_assert(FAR const ubyte *filename, int linenum);
-EXTERN void   up_assert_code(FAR const ubyte *filename, int linenum,
+#if defined(__GNUC__) || defined(SDCC)
+EXTERN void   up_assert(const ubyte *filename, int linenum);
+EXTERN void   up_assert_code(const ubyte *filename, int linenum,
                              int error_code);
 #else
 EXTERN void   up_assert(void);

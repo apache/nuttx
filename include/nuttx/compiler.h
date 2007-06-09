@@ -84,7 +84,7 @@
 
 # undef  CONFIG_LONG_IS_NOT_INT
 
-/* The pointers and int are the same size */
+/* Pointers and int are the same size */
 
 # undef  CONFIG_PTR_IS_NOT_INT
 
@@ -152,9 +152,13 @@
 
 # define CONFIG_LONG_IS_NOT_INT 1
 
-/* The generic point and int are not the same size */
-
+/* The generic pointer and int are not the same size
+ * (for some SDCC architectures)
+ */
+ 
+#if !defined(__z80) && defined(__gbz80)
 # define CONFIG_PTR_IS_NOT_INT 1
+#endif
 
 /* SDCC does not support inline functions */
 
