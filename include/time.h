@@ -51,9 +51,16 @@
  * Definitions
  ********************************************************************************/
 
-/* Clock tick of the system */
+/* Clock tick of the system (frequency Hz).  The default value is 100Hz, but this
+ * default setting can be overridden by defining the clock interval in
+ * milliseconds as CONFIG_MSEC_PER_TICK in the board configuration file.
+ */
 
-#define CLK_TCK 100
+#ifdef CONFIG_MSEC_PER_TICK
+# define CLK_TCK (1000/CONFIG_MSEC_PER_TICK)
+#else
+# define CLK_TCK (100)
+#endif
 
 /* This is the only clock_id supported by the "Clock and Timer
  * Functions."

@@ -114,11 +114,27 @@
 #define _POSIX_RTSIG_MAX      31
 #define _POSIX_SIGQUEUE_MAX   32
 
-/* Required for POSIX timers */
+/* Required for POSIX timers.
+ *
+ * _POSIX_DELAYTIMER_MAX is the number of timer expiration overruns.
+ *
+ * _POSIX_TIMER_MAX is the per-process number of timers.
+ *
+ * _POSIX_CLOCKRES_MIN is the resolution of the CLOCK_REALTIME clock in nanoseconds.
+ * CLOCK_REALTIME is controlled by the NuttX system time.  The default value is the
+ * system timer which has a resolution of 10 milliseconds.  This default setting can
+ * be overridden by defining the clock interval in milliseconds as CONFIG_MSEC_PER_TICK
+ * in the board configuration file.
+ */
 
 #define _POSIX_DELAYTIMER_MAX 32
 #define _POSIX_TIMER_MAX      32
-#define _POSIX_CLOCKRES_MIN   10000000
+
+#ifdef CONFIG_MSEC_PER_TICK
+# define _POSIX_CLOCKRES_MIN  ((CONFIG_MSEC_PER_TICK)*1000000)
+#else
+# define _POSIX_CLOCKRES_MIN  (10*1000000)
+#endif
 
 /* Required for asynchronous I/O */
 

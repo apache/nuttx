@@ -40,6 +40,7 @@
  * Included Files
  ********************************************************************************/
 
+#include <nuttx/config.h>
 #include <sys/types.h>
 #include <nuttx/compiler.h>
 
@@ -56,7 +57,20 @@
 #define USEC_PER_MSEC               1000
 #define NSEC_PER_USEC               1000
 
-#define MSEC_PER_TICK                 10
+/* The interrupt interval of the system timer is given by MSEC_PER_TICK.  This
+ * is the expected number of milliseconds between calls from the processor-
+ * specific logic to sched_process_timer().  The default value of MSEC_PER_TICK
+ * is 10 milliseconds (100KHz).  However, this default setting can be overridden
+ * by defining the interval in milliseconds as CONFIG_MSEC_PER_TICK in the board
+ * configuration file.
+ */
+
+#ifdef CONFIG_MSEC_PER_TICK
+# define MSEC_PER_TICK        (CONFIG_MSEC_PER_TICK)
+#else
+# define MSEC_PER_TICK        (10)
+#endif
+
 #define USEC_PER_TICK         (MSEC_PER_TICK * USEC_PER_MSEC)
 #define NSEC_PER_TICK         (MSEC_PER_TICK * NSEC_PER_MSEC)
 #define TICK_PER_SEC          (MSEC_PER_SEC / MSEC_PER_TICK)
@@ -64,13 +78,15 @@
 #define MSEC2TICK(msec)       (((msec)+(MSEC_PER_TICK/2))/MSEC_PER_TICK)
 #define USEC2TICK(usec)       (((usec)+(USEC_PER_TICK/2))/USEC_PER_TICK)
 
-#define JD_OF_EPOCH   2440588    /* Julian Date of noon, J1970 */
+#define JD_OF_EPOCH           2440588    /* Julian Date of noon, J1970 */
 
 #ifdef CONFIG_JULIAN_TIME
-# define GREG_DUTC    -141427    /* Default is October 15, 1582 */
-# define GREG_YEAR       1582
-# define GREG_MONTH        10
-# define GREG_DAY          15
+
+# define GREG_DUTC           -141427    /* Default is October 15, 1582 */
+# define GREG_YEAR            1582
+# define GREG_MONTH           10
+# define GREG_DAY             15
+
 #endif /* CONFIG_JULIAN_TIME */
 
 /********************************************************************************

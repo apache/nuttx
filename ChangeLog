@@ -161,6 +161,8 @@
 	* sched/usleep.c: Fixed nsec calculation
 	* lib/lib_strcspn.c: Function incorrectly named strspn().
 	* examples/ostest/main.c:  Errors in SDCC version of a memcpy() call
-	* examples/ostest/sighandl.c: Don't call fflush() if streams are disabled
+	* examples/ostest/sighand.c: Don't call fflush() if streams are disabled
+	* include/limits.h, include/time.h, sched/clock_internal.h: A support for
+	  using selectable system timer frequency.
 	* Started m68322
 

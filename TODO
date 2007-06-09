@@ -7,10 +7,6 @@ o Task/Scheduler
 - Implement sys/mman.h and functions
 - Implement sys/wait.h and functions
 - Implement priority inheritance
-- Make the system timer frequency configurable via defconfig.  See:
-   _POSIX_CLOCKRES_MIN in limits.h
-   CLK_TCK in time.h
-   MSEC_PER_TICK in sched/clock_internal.h
 - Consider implementing wait, waitpid, waitid.  At present, a parent has
   no information about child tasks.
 - Several APIs do not set errno.  Need to review all APIs.
