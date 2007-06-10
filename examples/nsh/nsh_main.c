@@ -1,4 +1,4 @@
-/************************************************************
+/****************************************************************************
  * nsh_main.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -31,17 +31,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <sys/types.h>
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
 # include <sys/stat.h>
+# include <fcntl.h>
+#endif
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
 # include <sys/mount.h>
 #endif
 
@@ -49,23 +52,28 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <limits.h>
 #include <string.h>
 #include <sched.h>
 #include <errno.h>
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
 #define CONFIG_NSH_LINE_SIZE 80
 #undef  CONFIG_FULL_PATH
 #define NSH_MAX_ARGUMENTS     6
 
+#define LSFLAGS_SIZE          1
+#define LSFLAGS_LONG          2
+#define LSFLAGS_RECURSIVE     4
+
 #define errno                (*get_errno_ptr())
 
-/************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************/
+ ****************************************************************************/
 
 typedef void (*cmd_t)(int argc, char **argv);
 typedef void (*exec_t)(void);
@@ -79,42 +87,54 @@ struct cmdmap_s
   const char *usage;      /* Usage instructions for 'help' command */
 };
 
-/************************************************************
- * Private Function Prototypes
- ************************************************************/
+typedef int (*direntry_handler_t)(const char *, struct dirent *, void *);
 
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+static void cmd_cat(int argc, char **argv);
+#endif
 static void cmd_echo(int argc, char **argv);
 static void cmd_exec(int argc, char **argv);
 static void cmd_help(int argc, char **argv);
+#if CONFIG_NFILE_DESCRIPTORS > 0
 static void cmd_ls(int argc, char **argv);
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#endif
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
 static void cmd_mkdir(int argc, char **argv);
 static void cmd_mount(int argc, char **argv);
 #endif
 static void cmd_ps(int argc, char **argv);
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
 static void cmd_umount(int argc, char **argv);
 #endif
 
-/************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************/
+ ****************************************************************************/
 
 static char line[CONFIG_NSH_LINE_SIZE];
 static const char delim[] = " \t\n";
 
 static const struct cmdmap_s g_cmdmap[] =
 {
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  { "cat",    cmd_cat,    2, 2, "<path>" },
+#endif
   { "echo",   cmd_echo,   2, 2, "<string>" },
   { "exec",   cmd_exec,   2, 3, "<hex-address>" },
   { "help",   cmd_help,   1, 1, NULL },
-  { "ls",     cmd_ls,     2, 2, "<path>" },
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  { "ls",     cmd_ls,     2, 5, "[-lRs] <path>" },
+#endif
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
   { "mkdir",  cmd_mkdir,  2, 2, "<path>" },
   { "mount",  cmd_mount,  4, 5, "-t <fstype> <device> <dir>" },
 #endif
   { "ps",     cmd_ps,     1, 1, NULL },
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
   { "umount", cmd_umount, 2, 2, "<mountpoint-dir>" },
 #endif
   { NULL,     NULL,       1, 1, NULL }
@@ -145,13 +165,13 @@ static const char g_fmtnosuch[]      = "nsh: %s: no such %s: %s\n";
 static const char g_fmttoomanyargs[] = "nsh: %s: too many arguments\n";
 static const char g_fmtcmdfailed[]   = "nsh: %s: %s failed: %s\n";
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: trim_dir
- ************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_FULL_PATH
 void trim_dir(char *arg)
@@ -167,9 +187,147 @@ void trim_dir(char *arg)
 }
 #endif
 
-/************************************************************
+/****************************************************************************
+ * Name: getdirpath
+ ****************************************************************************/
+
+static char *getdirpath(const char *path, const char *file)
+{
+  char buffer[PATH_MAX+1];
+  if (strcmp(path, "/") == 0)
+    {
+      sprintf(buffer, "/%s", file);
+    }
+  else
+    {
+      sprintf(buffer, "%s/%s", path, file);
+    }
+
+  buffer[PATH_MAX] = '\0';
+  return strdup(buffer);
+}
+
+/****************************************************************************
+ * Name: foreach_direntry
+ ****************************************************************************/
+
+static int foreach_direntry(const char *cmd, const char *dirpath,
+                            direntry_handler_t handler, void *pvarg)
+{
+  DIR *dirp;
+  int ret = OK;
+
+  /* Trim trailing '/' from directory names */
+
+#ifdef CONFIG_FULL_PATH
+  trim_dir(arg);
+#endif
+
+  /* Open the directory */
+
+  dirp = opendir(dirpath);
+
+  if (!dirp)
+    {
+      /* Failed to open the directory */
+
+      printf(g_fmtnosuch, cmd, "directory", dirpath);
+      return ERROR;
+    }
+
+  /* Read each directory entry */
+
+  for (;;)
+    {
+      struct dirent *entryp = readdir(dirp);
+      if (!entryp)
+        {
+          /* Finished with this directory */
+
+          break;
+        }
+
+      /* Call the handler with this directory entry */
+
+      if (handler(dirpath, entryp, pvarg) <  0)
+        {
+          /* The handler reported a problem */
+
+          ret = ERROR;
+          break;
+        }
+    }
+
+  closedir(dirp);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cmd_cat
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+static void cmd_cat(int argc, char **argv)
+{
+  char buffer[1024];
+
+  /* Open the file for reading */
+
+  int fd = open(argv[1], O_RDONLY);
+  if (fd < 0)
+    {
+      printf(g_fmtcmdfailed, argv[0], "open", strerror(errno));
+      return;
+    }
+
+  /* And just dump it byte for byte into stdout */
+
+  for (;;)
+    {
+      int nbytesread = read(fd, buffer, 1024);
+
+      /* Check for read errors */
+
+      if (nbytesread < 0)
+        {
+          printf(g_fmtcmdfailed, argv[0], "read", strerror(errno));
+          break;
+        }
+
+      /* Check for data successfully read */
+
+      else if (nbytesread > 0)
+        {
+          int nbyteswritten = 0;
+          char *ptr = buffer;
+
+          while (nbyteswritten < nbytesread)
+            {
+              int n = write(1, buffer, nbytesread);
+              if (n < 0)
+                {
+                  printf(g_fmtcmdfailed, argv[0], "write", strerror(errno));
+                  break;
+                }
+              nbyteswritten += n;
+            }
+        }
+
+      /* Otherwise, it is the end of file */
+
+      else
+        {
+          break;
+        }
+    }
+
+  (void)close(fd);
+}
+#endif
+
+/****************************************************************************
  * Name: cmd_echo
- ************************************************************/
+ ****************************************************************************/
 
 static void cmd_echo(int argc, char **argv)
 {
@@ -178,9 +336,9 @@ static void cmd_echo(int argc, char **argv)
   puts(argv[1]);
 }
 
-/************************************************************
+/****************************************************************************
  * Name: cmd_exec
- ************************************************************/
+ ****************************************************************************/
 
 static void cmd_exec(int argc, char **argv)
 {
@@ -198,9 +356,9 @@ static void cmd_exec(int argc, char **argv)
   ((exec_t)addr)();
 }
 
-/************************************************************
+/****************************************************************************
  * Name: cmd_help
- ************************************************************/
+ ****************************************************************************/
 
 static void cmd_help(int argc, char **argv)
 {
@@ -220,58 +378,220 @@ static void cmd_help(int argc, char **argv)
     }
 }
 
-/************************************************************
- * Name: cmd_ls
- ************************************************************/
+/****************************************************************************
+ * Name: ls_handler
+ ****************************************************************************/
 
+#if CONFIG_NFILE_DESCRIPTORS > 0
+static int ls_handler(const char *dirpath, struct dirent *entryp, void *pvarg)
+{
+  unsigned int lsflags = (unsigned int)pvarg;
+  int ret;
+
+  /* Check if any options will require that we stat the file */
+
+  if ((lsflags & (LSFLAGS_SIZE|LSFLAGS_LONG)) != 0)
+    {
+      struct stat buf;
+      char *fullpath = getdirpath(dirpath, entryp->d_name);
+
+      /* Yes, stat the file */
+
+      ret = stat(fullpath, &buf);
+      free(fullpath);
+      if (ret != 0)
+        {
+          printf(g_fmtcmdfailed, "ls", "stat", strerror(errno));
+          return OK;
+        }
+
+      if ((lsflags & LSFLAGS_LONG) != 0)
+        {
+          char details[] = "----------";
+          if (S_ISDIR(buf.st_mode))
+            {
+              details[0]='d';
+            }
+          else if (S_ISCHR(buf.st_mode))
+            {
+              details[0]='c';
+            }
+          else if (S_ISBLK(buf.st_mode))
+            {
+              details[0]='b';
+            }
+
+          if ((buf.st_mode & S_IRUSR) != 0)
+            {
+              details[1]='r';
+            }
+
+          if ((buf.st_mode & S_IWUSR) != 0)
+            {
+              details[2]='w';
+            }
+
+          if ((buf.st_mode & S_IXUSR) != 0)
+            {
+              details[3]='x';
+            }
+
+          if ((buf.st_mode & S_IRGRP) != 0)
+            {
+              details[4]='r';
+            }
+
+          if ((buf.st_mode & S_IWGRP) != 0)
+            {
+              details[5]='w';
+            }
+
+          if ((buf.st_mode & S_IXGRP) != 0)
+            {
+              details[6]='x';
+            }
+
+          if ((buf.st_mode & S_IROTH) != 0)
+            {
+              details[7]='r';
+            }
+
+          if ((buf.st_mode & S_IWOTH) != 0)
+            {
+              details[8]='w';
+            }
+
+          if ((buf.st_mode & S_IXOTH) != 0)
+            {
+              details[9]='x';
+            }
+
+          printf(" %s", details);
+        }
+
+      if ((lsflags & LSFLAGS_SIZE) != 0)
+        {
+          printf("%8d", buf.st_size);
+        }
+    }
+
+  /* then provide the filename that is common to normal and verbose output */
+
+#ifdef CONFIG_FULL_PATH
+  printf(" %s/%s", arg, entryp->d_name);
+#else
+  printf(" %s", entryp->d_name);
+#endif
+
+  if (DIRENT_ISDIRECTORY(entryp->d_type))
+    {
+      printf("/\n");
+    }
+  else
+    {
+      putchar('\n');
+    }
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: ls_recursive
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+static int ls_recursive(const char *dirpath, struct dirent *entryp, void *pvarg)
+{
+  /* Is this entry a directory? */
+
+  if (DIRENT_ISDIRECTORY(entryp->d_type))
+    {
+      /* Yes.. */
+
+      char *newpath;
+      newpath = getdirpath(dirpath, entryp->d_name);
+
+      /* List the directory contents */
+
+      printf("%s:\n", newpath);
+      foreach_direntry("ls", newpath, ls_handler, pvarg);
+
+      /* Then recurse to list each directory within the directory */
+
+      foreach_direntry("ls", newpath, ls_recursive, pvarg);
+      free(newpath);
+    }
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: cmd_ls
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
 static void cmd_ls(int argc, char **argv)
 {
-  DIR *dirp;
+  unsigned int lsflags = 0;
+  int ret;
 
-#ifdef CONFIG_FULL_PATH
-  trim_dir(arg);
-#endif
-  dirp = opendir(argv[1]);
+  /* Get the ls options */
 
-  if (!dirp)
+  int option;
+  while ((option = getopt(argc, argv, "lRs")) != ERROR)
     {
-      printf(g_fmtnosuch, argv[0], "directory", argv[1]);
+      switch (option)
+        {
+          case 'l':
+            lsflags |= (LSFLAGS_SIZE|LSFLAGS_LONG);
+            break;
+
+          case 'R':
+            lsflags |= LSFLAGS_RECURSIVE;
+            break;
+
+          case 's':
+            lsflags |= LSFLAGS_SIZE;
+            break;
+
+          case '?':
+          default:
+            printf(g_fmtarginvalid, argv[0]);
+            return;
+        }
     }
 
-  for (;;)
+  /* There are one required arguments after the options */
+
+  if (optind + 1 <  argc)
     {
-      struct dirent *entryp = readdir(dirp);
-      if (!entryp)
-        {
-          break;
-        }
-
-      if (DIRENT_ISDIRECTORY(entryp->d_type))
-        {
-#ifdef CONFIG_FULL_PATH
-          printf("  %s/%s/\n", arg, entryp->d_name);
-#else
-          printf("  %s/\n", entryp->d_name);
-#endif
-        }
-      else
-        {
-#ifdef CONFIG_FULL_PATH
-          printf("  %s/%s\n", arg, entryp->d_name);
-#else
-          printf("  %s\n", entryp->d_name);
-#endif
-        }
-
+      printf(g_fmttoomanyargs, argv[0]);
+      return;
     }
-  closedir(dirp);
+  else if (optind + 1 >  argc)
+    {
+      printf(g_fmtargrequired, argv[0]);
+      return;
+    }
+
+  /* List the directory contents */
+
+  printf("%s:\n", argv[optind]);
+  ret = foreach_direntry("ls", argv[optind], ls_handler, (void*)lsflags);
+  if (ret == OK && (lsflags & LSFLAGS_RECURSIVE) != 0)
+    {
+      /* Then recurse to list each directory within the directory */
+
+      ret = foreach_direntry("ls", argv[optind], ls_recursive, (void*)lsflags);
+    }
 }
+#endif
 
-/************************************************************
+/****************************************************************************
  * Name: cmd_mount
- ************************************************************/
+ ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
 static void cmd_mkdir(int argc, char **argv)
 {
   int result = mkdir(argv[1], 0777);
@@ -282,11 +602,11 @@ static void cmd_mkdir(int argc, char **argv)
 }
 #endif
 
-/************************************************************
+/****************************************************************************
  * Name: cmd_mount
- ************************************************************/
+ ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
 static void cmd_mount(int argc, char **argv)
 {
   char *filesystem = 0;
@@ -316,7 +636,12 @@ static void cmd_mount(int argc, char **argv)
 
   /* There are two required arguments after the options */
 
-  if (optind + 2 >  argc)
+  if (optind + 2 <  argc)
+    {
+      printf(g_fmttoomanyargs, argv[0]);
+      return;
+    }
+  else if (optind + 2 >  argc)
     {
       printf(g_fmtargrequired, argv[0]);
       return;
@@ -331,9 +656,9 @@ static void cmd_mount(int argc, char **argv)
 }
 #endif
 
-/************************************************************
+/****************************************************************************
  * Name: ps_task
- ************************************************************/
+ ****************************************************************************/
 
 static void ps_task(FAR _TCB *tcb, FAR void *arg)
 {
@@ -362,9 +687,9 @@ static void ps_task(FAR _TCB *tcb, FAR void *arg)
   printf(")\n");
 }
 
-/************************************************************
+/****************************************************************************
  * Name: cmd_ps
- ************************************************************/
+ ****************************************************************************/
 
 static void cmd_ps(int argc, char **argv)
 {
@@ -372,11 +697,11 @@ static void cmd_ps(int argc, char **argv)
   sched_foreach(ps_task, NULL);
 }
 
-/************************************************************
+/****************************************************************************
  * Name: cmd_umount
- ************************************************************/
+ ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
 static void cmd_umount(int argc, char **argv)
 {
   /* Perform the umount */
@@ -388,31 +713,31 @@ static void cmd_umount(int argc, char **argv)
 }
 #endif
 
-/************************************************************
+/****************************************************************************
  * Name: cmd_unrecognized
- ************************************************************/
+ ****************************************************************************/
 
 static void cmd_unrecognized(int argc, char **argv)
 {
   printf(g_fmtcmdnotfound, argv[0]);
 }
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: user_initialize
- ************************************************************/
+ ****************************************************************************/
 
 void user_initialize(void)
 {
   /* stub */
 }
 
-/************************************************************
+/****************************************************************************
  * Name: user_start
- ************************************************************/
+ ****************************************************************************/
 
 int user_start(int argc, char *argv[])
 {
