@@ -36,45 +36,112 @@
 
 function show_usage ()
 {
-  echo "$0  CC -- CFLAGS -- files"
+  echo ""
+  echo "$progname  [OPTIONS] CC -- CFLAGS -- file [file [file...]]"
+  echo ""
+  echo "Where:"
+  echo "  CC"
+  echo "    A variable number of arguments that define how to execute the compiler"
+  echo "  CFLAGS"
+  echo "    The compiler compilation flags"
+  echo "  file"
+  echo "    One or more C files whose dependencies will be checked.  Each file is expected"
+  echo "    to reside in the current directory unless --dep-path is provided on the command line"
+  echo ""
+  echo "And [OPTIONS] include:"
+  echo "  --dep-debug"
+  echo "    Enable script debug"
+  echo "  --dep-path <path>"
+  echo "    Do not look in the current directory for the file.  Instead, look in <path> to see"
+  echo "    if the file resides there.  --dep-path may be used multiple times to specifid"
+  echo "    multiple alternative location"
+  echo "  --help"
+  echo "    Shows this message and exits"
   exit 1
 }
 
-cc=
-cflags=
-files=
-args=
+function dodep ()
+{
+  unset fullpath
+  if [ -z "$altpath" ]; then
+    if [ -r $1 ]; then
+      fullpath=$1
+    else
+      echo "# ERROR: No readable file at $1"
+      show_usage
+    fi
+  else
+    for path in $altpath; do
+      tmppath=$path/$1
+      if [ -r $tmppath ]; then
+        fullpath=$tmppath
+        break;
+      fi
+    done
+    if [ -z "$fullpath" ]; then
+      echo "# ERROR: No readable file for $1 found at any location"
+      show_usage
+    fi
+  fi
+
+  $cc -M $cflags $fullpath || \
+    { echo "# ERROR: $cc -M $cflags $fullpath FAILED" ; exit 4 ; }
+}
+
+unset cc
+unset cflags
+unset files
+unset args
+unset altpath
 
 # Accumulate CFLAGS up to "--"
-for i in $* ; do
-  case $i in
+progname=$0
+while [ ! -z "$1" ]; do
+  case $1 in
   -- )
     cc=$cflags
     cflags=$args
     args=
     ;;
   --dep-debug )
-    set -x
+    if [ -z "$args" ]; then
+      set -x
+    else
+      args="$args $1"
+    fi
+    ;;
+  --dep-path )
+    if [ -z "$args" ]; then
+      shift
+      altpath="$altpath $1"
+    else
+      args="$args $1"
+    fi
+    ;;
+  --help )
+    show_usage
     ;;
   *)
-    args="$args $i"
+    args="$args $1"
     ;;
   esac
+  shift
 done
 files=$args
 
 if [ -z "$cc" ]; then
-  echo "No compiler specified"
+  echo "ERROR: No compiler specified"
+  show_usage
   exit 1
 fi
 
 if [ -z "$files" ]; then
   echo "No files specified"
+  show_usage
   exit 2
 fi
 
 for file in $files ; do
-  $cc -M $cflags $file || \
-    { echo "# $cc -M $cflags $file FAILED" ; exit 3 ; }
+    dodep $file
 done
 
