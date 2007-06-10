@@ -94,9 +94,9 @@ FAR DIR *opendir(const char *path)
    * request for the root inode.
    */
 
+  inode_semtake();
   if (!path || *path == 0 || strcmp(path, "/") == 0)
     {
-       inode_semgive();
        inode = root_inode;
        isroot = TRUE;
     }
@@ -106,12 +106,12 @@ FAR DIR *opendir(const char *path)
 
        if (*path != '/')
         {
-          return NULL;
+          ret = -ENOTDIR;
+          goto errout_with_semaphore;
         }
 
       /* Find the node matching the path. */
 
-      inode_semtake();
       inode = inode_search(&path, (FAR void*)NULL, (FAR void*)NULL, &relpath);
     }
 
@@ -166,9 +166,11 @@ FAR DIR *opendir(const char *path)
            goto errout_with_direntry;
         }
 
-      /* Take reference to the mountpoint inode (fd_root) */
+      /* Take reference to the mountpoint inode (fd_root).  Note that we do
+      * not use inode_addref() because we already hold the tree semaphore.
+      */
 
-      inode_addref(inode);
+      inode->i_crefs++;
 
       /* Perform the opendir() operation */
 
@@ -199,10 +201,12 @@ FAR DIR *opendir(const char *path)
 
       /* It looks we have a valid psuedo-filesystem node.  Take two references
       * on the inode -- one for the parent (fd_root) and one for the child (fd_next).
+      * Note that we do not call inode_addref because we are holding
+      * the tree semaphore and that would result in deadlock.
       */
 
-      inode_addref(inode); 
-      inode_addref(inode); 
+      inode->i_crefs++;
+      inode->i_crefs++;
       dir->u.psuedo.fd_next = inode; /* This is the next node to use for readdir() */
 
       /* Flag the inode as belonging to the psuedo-filesystem */
