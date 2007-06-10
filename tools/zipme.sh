@@ -35,7 +35,7 @@
 #set -x
 
 WD=`pwd`
-DATECODE=$1
+VERSION=$1
 
 TAR="tar cvf"
 ZIP=gzip
@@ -55,10 +55,13 @@ GARBAGEDIRS="\
 
 # Make sure we know what is going on
 
-if [ -z ${DATECODE} ] ; then
+if [ -z ${VERSION} ] ; then
    echo "You must supply a version like xx.yy.zz as a parameter"
    exit 1;
 fi
+
+# Find the directory we were executed from and were we expect to
+# see the directory to tar up
 
 MYNAME=`basename $0`
 
@@ -68,23 +71,32 @@ else
    if [ -x ${WD}/tools/${MYNAME} ] ; then
      NUTTX=${WD}
    else
-     echo "You must cd NUTTX directory to execute this script."
+     echo "You must cd into the NUTTX directory to execute this script."
      exit 1
    fi
 fi
 
+# Get the NuttX directory name and the path to the parent directory
+
 NUTTXDIR=`basename ${NUTTX}`
 PROJECTS=`dirname ${NUTTX}`
+
+# The name of the directory must match the version number
+
+if [ "X$NUTTXDIR" != "Xnuttx-${VERSION}" ]; then
+   echo "Expected directory name to be nuttx-${VERSION} found ${NUTTXDIR}"
+   exit 1
+fi
 
 cd ${PROJECTS} || \
    { echo "Failed to cd to ${PROJECTS}" ; exit 1 ; }
 
 if [ ! -d ${NUTTXDIR} ] ; then
    echo "${PROJECTS}/${NUTTXDIR} does not exist!"
-   exit 1;
+   exit 1
 fi
 
-TAR_NAME=nuttx-${DATECODE}.tar
+TAR_NAME=nuttx-${VERSION}.tar
 ZIP_NAME=${TAR_NAME}.gz
 
 # Prepare the nuttx directory -- Remove editor garbage
