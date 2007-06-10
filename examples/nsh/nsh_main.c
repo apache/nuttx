@@ -37,11 +37,21 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
+
+#include <sys/types.h>
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+# include <sys/stat.h>
+# include <sys/mount.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <dirent.h>
 #include <string.h>
 #include <sched.h>
+#include <errno.h>
 
 /************************************************************
  * Definitions
@@ -49,30 +59,42 @@
 
 #define CONFIG_NSH_LINE_SIZE 80
 #undef  CONFIG_FULL_PATH
+#define NSH_MAX_ARGUMENTS     6
+
+#define errno                (*get_errno_ptr())
 
 /************************************************************
  * Private Types
  ************************************************************/
 
-typedef void (*cmd_t)(const char *cmd, char *arg);
+typedef void (*cmd_t)(int argc, char **argv);
 typedef void (*exec_t)(void);
 
 struct cmdmap_s
 {
-  const char *cmd;
-  cmd_t       handler;
-  const char *usage;
+  const char *cmd;        /* Name of the command */
+  cmd_t       handler;    /* Function that handles the command */
+  ubyte       minargs;    /* Minimum number of arguments (including command) */
+  ubyte       maxargs;    /* Maximum number of arguments (including command) */
+  const char *usage;      /* Usage instructions for 'help' command */
 };
 
 /************************************************************
  * Private Function Prototypes
  ************************************************************/
 
-static void cmd_echo(const char *cmd, char *arg);
-static void cmd_exec(const char *cmd, char *arg);
-static void cmd_help(const char *cmd, char *arg);
-static void cmd_ls(const char *cmd, char *arg);
-static void cmd_ps(const char *cmd, char *arg);
+static void cmd_echo(int argc, char **argv);
+static void cmd_exec(int argc, char **argv);
+static void cmd_help(int argc, char **argv);
+static void cmd_ls(int argc, char **argv);
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+static void cmd_mkdir(int argc, char **argv);
+static void cmd_mount(int argc, char **argv);
+#endif
+static void cmd_ps(int argc, char **argv);
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+static void cmd_umount(int argc, char **argv);
+#endif
 
 /************************************************************
  * Private Data
@@ -83,12 +105,19 @@ static const char delim[] = " \t\n";
 
 static const struct cmdmap_s g_cmdmap[] =
 {
-  { "echo", cmd_echo, "<string>" },
-  { "exec", cmd_exec, "<hex-address>" },
-  { "help", cmd_help, NULL },
-  { "ls",   cmd_ls,   "<path>" },
-  { "ps",   cmd_ps,   NULL },
-  { NULL,   NULL,     NULL }
+  { "echo",   cmd_echo,   2, 2, "<string>" },
+  { "exec",   cmd_exec,   2, 3, "<hex-address>" },
+  { "help",   cmd_help,   1, 1, NULL },
+  { "ls",     cmd_ls,     2, 2, "<path>" },
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+  { "mkdir",  cmd_mkdir,  2, 2, "<path>" },
+  { "mount",  cmd_mount,  4, 5, "-t <fstype> <device> <dir>" },
+#endif
+  { "ps",     cmd_ps,     1, 1, NULL },
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+  { "umount", cmd_umount, 2, 2, "<mountpoint-dir>" },
+#endif
+  { NULL,     NULL,       1, 1, NULL }
 };
 
 static const char *g_statenames[] =
@@ -108,48 +137,17 @@ static const char *g_statenames[] =
 #endif
 };
 
-static const char g_fmtargrequired[] = "nsh: %s: argument required\n";
+static const char g_fmtargrequired[] = "nsh: %s: missing required argument(s)\n";
 static const char g_fmtarginvalid[]  = "nsh: %s: argument invalid\n";
 static const char g_fmtcmdnotfound[] = "nsh: %s: command not found\n";
 static const char g_fmtcmdnotimpl[]  = "nsh: %s: command not implemented\n";
 static const char g_fmtnosuch[]      = "nsh: %s: no such %s: %s\n";
+static const char g_fmttoomanyargs[] = "nsh: %s: too many arguments\n";
+static const char g_fmtcmdfailed[]   = "nsh: %s: %s failed: %s\n";
 
 /************************************************************
  * Private Functions
  ************************************************************/
-
-/************************************************************
- * Name: trim_arg
- ************************************************************/
-
-static char *trim_arg(char *arg)
-{
-  if (arg)
-    {
-      int len;
-
-      /* Skip any leading white space */
-
-      while (strchr(" \t", *arg) != NULL) arg++;  
-
-      /* Skip any trailing white space */
-
-      len = strlen(arg);
-      if (len > 0)
-        {
-          char *ptr;
-
-          for (ptr = &arg[strlen(arg)-1];
-               ptr >= arg &&
-               strchr(" \t\n", *ptr) != NULL;
-               ptr--)
-            {
-              *ptr = '\0';
-            }
-        }
-    }
-  return arg;
-}
 
 /************************************************************
  * Name: trim_dir
@@ -173,32 +171,26 @@ void trim_dir(char *arg)
  * Name: cmd_echo
  ************************************************************/
 
-static void cmd_echo(const char *cmd, char *arg)
+static void cmd_echo(int argc, char **argv)
 {
   /* Echo the rest of the line */
 
-  puts(arg);
+  puts(argv[1]);
 }
 
 /************************************************************
  * Name: cmd_exec
  ************************************************************/
 
-static void cmd_exec(const char *cmd, char *arg)
+static void cmd_exec(int argc, char **argv)
 {
   char *endptr;
   long addr;
 
-  if (!arg)
+  addr = strtol(argv[1], &endptr, 0);
+  if (!addr || endptr == argv[1] || *endptr != '\0')
     {
-       printf(g_fmtargrequired, "exec");
-       return;
-    }
-
-  addr = strtol(arg, &endptr, 0);
-  if (!addr || endptr == arg || *endptr != '\0')
-    {
-       printf(g_fmtarginvalid, "exec");
+       printf(g_fmtarginvalid, argv[0]);
        return;
     }
 
@@ -210,7 +202,7 @@ static void cmd_exec(const char *cmd, char *arg)
  * Name: cmd_help
  ************************************************************/
 
-static void cmd_help(const char *cmd, char *arg)
+static void cmd_help(int argc, char **argv)
 {
   const struct cmdmap_s *ptr;
 
@@ -232,18 +224,18 @@ static void cmd_help(const char *cmd, char *arg)
  * Name: cmd_ls
  ************************************************************/
 
-static void cmd_ls(const char *cmd, char *arg)
+static void cmd_ls(int argc, char **argv)
 {
   DIR *dirp;
 
 #ifdef CONFIG_FULL_PATH
   trim_dir(arg);
 #endif
-  dirp = opendir(arg);
+  dirp = opendir(argv[1]);
 
   if (!dirp)
     {
-      printf(g_fmtnosuch, cmd, "directory", arg);
+      printf(g_fmtnosuch, argv[0], "directory", argv[1]);
     }
 
   for (;;)
@@ -274,6 +266,70 @@ static void cmd_ls(const char *cmd, char *arg)
     }
   closedir(dirp);
 }
+
+/************************************************************
+ * Name: cmd_mount
+ ************************************************************/
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+static void cmd_mkdir(int argc, char **argv)
+{
+  int result = mkdir(argv[1], 0777);
+  if ( result < 0)
+    {
+      printf(g_fmtcmdfailed, argv[0], "mkdir", strerror(errno));
+    }
+}
+#endif
+
+/************************************************************
+ * Name: cmd_mount
+ ************************************************************/
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+static void cmd_mount(int argc, char **argv)
+{
+  char *filesystem = 0;
+  int result;
+
+  /* Get the mount options */
+
+  int option;
+  while ((option = getopt(argc, argv, ":t:")) != ERROR)
+    {
+      switch (option)
+        {
+          case 't':
+            filesystem = optarg;
+            break;
+
+          case ':':
+            printf(g_fmtargrequired, argv[0]);
+            return;
+
+          case '?':
+          default:
+            printf(g_fmtarginvalid, argv[0]);
+            return;
+        }
+    }
+
+  /* There are two required arguments after the options */
+
+  if (optind + 2 >  argc)
+    {
+      printf(g_fmtargrequired, argv[0]);
+      return;
+    }
+
+  /* Perform the mount */
+  result = mount(argv[optind], argv[optind+1], filesystem, 0, NULL);
+  if ( result < 0)
+    {
+      printf(g_fmtcmdfailed, argv[0], "mount", strerror(errno));
+    }
+}
+#endif
 
 /************************************************************
  * Name: ps_task
@@ -310,19 +366,35 @@ static void ps_task(FAR _TCB *tcb, FAR void *arg)
  * Name: cmd_ps
  ************************************************************/
 
-static void cmd_ps(const char *cmd, char *arg)
+static void cmd_ps(int argc, char **argv)
 {
   printf("PID   PRI SCHD TYPE   NP STATE    NAME\n");
   sched_foreach(ps_task, NULL);
 }
 
 /************************************************************
+ * Name: cmd_umount
+ ************************************************************/
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+static void cmd_umount(int argc, char **argv)
+{
+  /* Perform the umount */
+  int result = umount(argv[1]);
+  if ( result < 0)
+    {
+      printf(g_fmtcmdfailed, argv[0], "umount", strerror(errno));
+    }
+}
+#endif
+
+/************************************************************
  * Name: cmd_unrecognized
  ************************************************************/
 
-static void cmd_unrecognized(const char *cmd, char *arg)
+static void cmd_unrecognized(int argc, char **argv)
 {
-  printf(g_fmtcmdnotfound, cmd);
+  printf(g_fmtcmdnotfound, argv[0]);
 }
 
 /************************************************************
@@ -349,10 +421,9 @@ int user_start(int argc, char *argv[])
 
   for (;;)
     {
-      const struct cmdmap_s *cmd;
-      cmd_t handler = cmd_unrecognized;
+      const struct cmdmap_s *cmdmap;
       char *saveptr;
-      char *token;
+      char *cmd;
 
       /* Get the next line of input */
 
@@ -360,20 +431,78 @@ int user_start(int argc, char *argv[])
 
       /* Parse out the command at the beginning of the line */
 
-      token = strtok_r(line, " \t\n", &saveptr);
-      if (token)
+      cmd = strtok_r(line, " \t\n", &saveptr);
+      if (cmd)
         {
-          /* See if the command is one that we understand */
+          cmd_t handler = cmd_unrecognized;
 
-          for (cmd = g_cmdmap; cmd->cmd; cmd++)
+          /* Parse all of the arguments following the command name */
+
+          char *cmd_argv[NSH_MAX_ARGUMENTS+1];
+          int   cmd_argc;
+
+          cmd_argv[0] = cmd;
+          for (cmd_argc = 1; cmd_argc < NSH_MAX_ARGUMENTS+1; cmd_argc++)
             {
-              if (strcmp(cmd->cmd, token) == 0)
+              cmd_argv[cmd_argc] = strtok_r( NULL, " \t\n", &saveptr);
+              if ( !cmd_argv[cmd_argc] )
                 {
-                  handler = cmd->handler;
                   break;
                 }
             }
-          handler(token, trim_arg(saveptr));
+
+          if (cmd_argc > NSH_MAX_ARGUMENTS)
+            {
+              printf(g_fmttoomanyargs, cmd);
+            }
+
+          /* See if the command is one that we understand */
+
+          for (cmdmap = g_cmdmap; cmdmap->cmd; cmdmap++)
+            {
+              if (strcmp(cmdmap->cmd, cmd) == 0)
+                {
+                  /* Check if a valid number of arguments was provided.  We
+               * do this simple, imperfect checking here so that it does
+               * not have to be performed in each command.
+               */
+
+                  if (cmd_argc < cmdmap->minargs)
+                    {
+                      /* Fewer than the minimum number were provided */
+
+                      printf(g_fmtargrequired, cmd);
+                      handler = NULL;
+                      break;
+                    }
+                  else if (cmd_argc > cmdmap->maxargs)
+                    {
+                      /* More than the maximum number were provided */
+
+                      printf(g_fmttoomanyargs, cmd);
+                      handler = NULL;
+                      break;
+                    }
+                  else
+                    {
+                      /* A valid number of arguments were provided (this does
+                  * not mean they are right.
+                  */
+
+                      handler = cmdmap->handler;
+                      break;
+                    }
+              }
+            }
+
+          /* If a error was detected above, handler will be nullified to
+         * prevent reporting multiple errors.
+         */
+
+          if (handler)
+            {
+              handler(cmd_argc, cmd_argv);
+            }
         }
       fflush(stdout);
     }
