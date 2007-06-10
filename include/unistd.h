@@ -97,7 +97,7 @@
 #define fdatasync(f) fsync(f)
 
 /************************************************************
- * Global Function Prototypes
+ * Global Variables
  ************************************************************/
 
 #undef EXTERN
@@ -107,6 +107,16 @@ extern "C" {
 #else
 #define EXTERN extern
 #endif
+
+/* Used by getopt (obviously NOT thread safe!) */
+
+EXTERN char *optarg; /* Optional argument following option */
+EXTERN int   optind; /* Index into argv */
+EXTERN int   optopt; /* unrecognized option character */
+
+/************************************************************
+ * Global Function Prototypes
+ ************************************************************/
 
 /* Task Control Interfaces */
 
@@ -130,6 +140,10 @@ EXTERN int   write(int fd, const void *buf, unsigned int nbytes);
 
 EXTERN int unlink(const char *pathname);
 EXTERN int rmdir(const char *pathname);
+
+/* Other */
+
+EXTERN int getopt(int argc, char *const argv[], const char *optstring);
 
 #undef EXTERN
 #if defined(__cplusplus)

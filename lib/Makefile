@@ -74,6 +74,8 @@ STDLIB_SRCS	= lib_getenv.c lib_rand.c
 
 MATH_SRCS	= lib_rint.c
 
+UNISTD_SRCS	= lib_getopt.c
+
 SQ_SRCS		= sq_addlast.c sq_addfirst.c sq_addafter.c \
 		  sq_rem.c sq_remlast.c sq_remfirst.c sq_remafter.c
 
@@ -81,7 +83,7 @@ DQ_SRCS		= dq_addlast.c dq_addfirst.c dq_addafter.c dq_addbefore.c \
 		  dq_rem.c dq_remlast.c dq_remfirst.c
 
 CSRCS		= $(MISC_SRCS) $(STRING_SRCS) $(CTYPE_SRCS) $(STDIO_SRCS) \
-		  $(STDLIB_SRCS) $(MATH_SRCS) $(SQ_SRCS) $(DQ_SRCS)
+		  $(STDLIB_SRCS) $(MATH_SRCS) $(UNISTD_SRCS) $(SQ_SRCS) $(DQ_SRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
