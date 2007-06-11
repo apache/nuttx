@@ -205,8 +205,7 @@ FAR DIR *opendir(const char *path)
       * the tree semaphore and that would result in deadlock.
       */
 
-      inode->i_crefs++;
-      inode->i_crefs++;
+      inode->i_crefs += 2;
       dir->u.psuedo.fd_next = inode; /* This is the next node to use for readdir() */
 
       /* Flag the inode as belonging to the psuedo-filesystem */
