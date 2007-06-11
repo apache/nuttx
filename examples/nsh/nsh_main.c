@@ -290,8 +290,13 @@ static void cmd_cat(int argc, char **argv)
 
       if (nbytesread < 0)
         {
-          printf(g_fmtcmdfailed, argv[0], "read", strerror(errno));
-          break;
+          /* EINTR is not an error */
+
+          if (errno != EINTR)
+            {
+              printf(g_fmtcmdfailed, argv[0], "read", strerror(errno));
+              break;
+            }
         }
 
       /* Check for data successfully read */
@@ -306,10 +311,18 @@ static void cmd_cat(int argc, char **argv)
               int n = write(1, buffer, nbytesread);
               if (n < 0)
                 {
-                  printf(g_fmtcmdfailed, argv[0], "write", strerror(errno));
-                  break;
+                  /* EINTR is not an error */
+
+                  if (errno != EINTR)
+                    {
+                      printf(g_fmtcmdfailed, argv[0], "write", strerror(errno));
+                      break;
+                    }
                 }
-              nbyteswritten += n;
+              else
+                {
+                  nbyteswritten += n;
+                }
             }
         }
 
