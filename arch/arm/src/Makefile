@@ -103,7 +103,7 @@ endif
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR=$(TOPDIR) depend ; \
 	fi
-	$(MKDEP) --dep-debug --dep-path chip --dep-path common $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(MKDEP) --dep-path chip --dep-path common $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 
 depend: .depend
