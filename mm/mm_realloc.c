@@ -120,7 +120,16 @@ FAR void *realloc(FAR void *oldmem, size_t size)
   oldsize = oldnode->size;
   if (size <= oldsize)
     {
-      mm_shrinkchunk(oldnode, size);
+      /* Handle the special case where we are not going to change the
+       * size of the allocation.
+       */
+      if (size < oldsize)
+        {
+          mm_shrinkchunk(oldnode, size);
+      }
+
+      /* Then return the original address */
+
       mm_givesemaphore();
       return oldmem;
     }
@@ -206,6 +215,7 @@ FAR void *realloc(FAR void *oldmem, size_t size)
 
       /* Extend into the previous free chunk */
 
+      newmem = oldmem;
       if (takeprev)
         {
            FAR struct mm_allocnode_s *newnode;
@@ -229,7 +239,7 @@ FAR void *realloc(FAR void *oldmem, size_t size)
 
            if (takeprev < prevsize)
              {
-               /* No, just take what we need from the previous chunk
+               /* No.. just take what we need from the previous chunk
                 * and put it back into the free list
                 */
 
@@ -248,14 +258,22 @@ FAR void *realloc(FAR void *oldmem, size_t size)
              }
            else
              {
-                /* Yes update its size (newnode->preceding is already set) */
+                /* Yes.. update its size (newnode->preceding is already set) */
 
-               newnode->size  += oldsize;
-               next->preceding = newnode->size;
+               newnode->size      += oldsize;
+               newnode->preceding |= MM_ALLOC_BIT;
+               next->preceding     = newnode->size | (next->preceding & MM_ALLOC_BIT);
              }
 
            oldnode = newnode;
            oldsize = newnode->size;
+
+          /* Now we have to move the user contents 'down' in memory.  memcpy should
+           * should be save for this.
+           */
+
+          newmem = (FAR void*)((FAR char*)newnode + SIZEOF_MM_ALLOCNODE);
+          memcpy(newmem, oldmem, oldsize - SIZEOF_MM_ALLOCNODE);
         }
 
       /* Extend into the next free chunk */
@@ -309,12 +327,6 @@ FAR void *realloc(FAR void *oldmem, size_t size)
             }
         }
 
-      /* Now we have to move the user contents 'down' in memory.  memcpy should
-       * should be save for this.
-       */
-
-      newmem = (FAR void*)((FAR char*)oldnode + SIZEOF_MM_ALLOCNODE);
-      memcpy(newmem, oldmem, oldsize - SIZEOF_MM_ALLOCNODE);
       mm_givesemaphore();
       return newmem;
     }
