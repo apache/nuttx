@@ -44,6 +44,7 @@
 #include <debug.h>
 #include <nuttx/arch.h>
 #include "os_internal.h"
+#include "env_internal.h"
 
 /************************************************************
  * Definitions
@@ -136,6 +137,10 @@ int task_create(const char *name, int priority,
       return ERROR;
     }
 #endif
+
+  /* Clone the parent's task environment */
+
+  (void)env_dup(tcb);
 
   /* Allocate the stack for the TCB */
 

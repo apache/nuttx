@@ -619,7 +619,10 @@ Other memory:
 	* fs/fs_opendir.c: Correct errors in semaphore usage that can cause deadlock.
 	* lib/lib_getopt.c: Added getopt() support
 	* examples/nsh:  NSH now supports cat, mount, umount, and mkdir.  ls supports
-          -l -s, and -R
+	  -l -s, and -R
+	* Added basic OS support to manage environment variables:  environment
+	  storage, cloning on task creation, sharing on pthread creation, destruction
+	  on thread/task exit.
 	* Started m68322
 </pre></ul>
 

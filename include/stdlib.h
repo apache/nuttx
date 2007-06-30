@@ -40,6 +40,7 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
 #include <sys/types.h>
 
 /************************************************************
@@ -53,6 +54,15 @@
 
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
+
+/* The environ variable, normally 'extern char **environ;' is
+ * not implemented as a function call.  However, get_environ_ptr()
+ * can be used in its place.
+ */
+
+#ifndef CONFIG_DISABLE_ENIVRON
+# define environ get_environ_ptr()
+#endif
 
 /************************************************************
  * Global Type Definitions
@@ -74,6 +84,10 @@ struct mallinfo
  * Global Function Prototypes
  ************************************************************/
 
+/************************************************************
+ * Global Function Prototypes
+ ************************************************************/
+
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
@@ -89,7 +103,14 @@ EXTERN int       rand(void);
 
 /* Environment variable support */
 
-EXTERN char     *getenv(const char *name);
+#ifndef CONFIG_DISABLE_ENIVRON
+EXTERN FAR char **get_environ_ptr( void );
+EXTERN FAR char *getenv(const char *name);
+EXTERN int       putenv(char *string);
+EXTERN int       clearenv(void);
+EXTERN int       setenv(const char *name, const char *value, int overwrite);
+EXTERN int       unsetenv(const char *name);
+#endif
 
 /* Process exit functions */
 

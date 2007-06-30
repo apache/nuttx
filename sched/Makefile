@@ -55,6 +55,8 @@ SCHED_SRCS	= sched_setparam.c sched_getparam.c \
 		  sched_yield.c sched_rrgetinterval.c sched_foreach.c \
 		  sched_getprioritymax.c sched_getprioritymin.c \
 		  sched_lock.c sched_unlock.c sched_lockcount.c
+ENV_SRCS	= env_getenvironptr.c env_dup.c env_share.c env_release.c \
+		  env_clearenv.c
 WDOG_SRCS	= wd_initialize.c wd_create.c wd_start.c wd_cancel.c wd_delete.c \
 		  wd_gettime.c
 TIME_SRCS	= sched_processtimer.c
@@ -127,6 +129,9 @@ CSRCS		+= $(SIGNAL_SRCS)
 endif
 ifneq ($(CONFIG_DISABLE_MQUEUE),y)
 CSRCS		+= $(MQUEUE_SRCS)
+endif
+ifneq ($(CONFIG_DISABLE_ENVIRON),y)
+CSRCS		+= $(ENV_SRCS)
 endif
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 

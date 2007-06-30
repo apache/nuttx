@@ -147,6 +147,19 @@ typedef void (*exitfunc_t)(void);
 
 typedef struct msgq_s msgq_t;
 
+/* The structure used to maintain environment variables */
+#ifndef CONFIG_DISABLE_ENVIRON
+struct environ_s
+{
+  unsigned int ev_crefs;      /* Reference count used when environment
+                               * is shared by threads */
+  size_t       ev_alloc;      /* Number of bytes allocated in environment */
+  ubyte        ev_env[1];     /* Environment strings */
+};
+typedef struct environ_s environ_t;
+# define SIZEOF_ENVIRON_T(alloc) (sizeof(environ_t) + alloc - 1)
+#endif
+
 /* This is the task control block (TCB) */
 
 struct _TCB
@@ -175,11 +188,14 @@ struct _TCB
 
   ubyte    init_priority;                /* Initial priority of the task        */
   char    *argv[CONFIG_MAX_TASK_ARGS+1]; /* Name+start-up parameters            */
+#ifndef CONFIG_DISABLE_ENVIRON
+  FAR environ_t *envp;                   /* Environment variables               */
+#endif
 
   /* Stack-Related Fields *******************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
-  size_t  adj_stack_size;                /* Stack size after adjustment         */
+  size_t    adj_stack_size;              /* Stack size after adjustment         */
                                          /* for hardware, processor, etc.       */
                                          /* (for debug purposes only)           */
   FAR void *stack_alloc_ptr;             /* Pointer to allocated stack          */

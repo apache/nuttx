@@ -46,6 +46,7 @@
 #include <nuttx/arch.h>
 #include "os_internal.h"
 #include "timer_internal.h"
+#include "env_internal.h"
 
 /************************************************************
  * Private Functions
@@ -149,6 +150,10 @@ int sched_releasetcb(FAR _TCB *tcb)
       /* Release any allocated file structures */
 
       ret = sched_releasefiles(tcb);
+
+      /* Release environment variables */
+
+      (void)env_release(tcb);
 
       /* And, finally, release the TCB itself */
 
