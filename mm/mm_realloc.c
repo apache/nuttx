@@ -81,6 +81,7 @@ FAR void *realloc(FAR void *oldmem, size_t size)
   size_t oldsize;
   size_t prevsize = 0;
   size_t nextsize = 0;
+  FAR void *newmem;
 
   /* If oldmem is NULL, then realloc is equivalent to malloc */
 
@@ -261,64 +262,67 @@ FAR void *realloc(FAR void *oldmem, size_t size)
 
       if (takenext)
         {
-           FAR struct mm_freenode_s *newnode;
-           FAR struct mm_allocnode_s *andbeyond;
+          FAR struct mm_freenode_s *newnode;
+          FAR struct mm_allocnode_s *andbeyond;
 
-           /* Get the chunk following the next node (which could be the tail chunk) */
+          /* Get the chunk following the next node (which could be the tail chunk) */
 
-           andbeyond = (FAR struct mm_allocnode_s*)((char*)next + nextsize);
+          andbeyond = (FAR struct mm_allocnode_s*)((char*)next + nextsize);
 
-           /* Remove the next node.  There must be a predecessor,
-            * but there may not be a successor node.
-            */
+          /* Remove the next node.  There must be a predecessor,
+           * but there may not be a successor node.
+           */
 
-           DEBUGASSERT(next->blink);
-           next->blink->flink = next->flink;
-           if (next->flink)
-             {
-               next->flink->blink = next->blink;
-             }
+          DEBUGASSERT(next->blink);
+          next->blink->flink = next->flink;
+          if (next->flink)
+            {
+              next->flink->blink = next->blink;
+            }
 
-           /* Extend the node into the previous next chunk */
+          /* Extend the node into the next chunk */
 
-           oldnode->size = oldsize + takenext;
-           newnode       = (FAR struct mm_freenode_s *)((char*)oldnode + oldnode->size);
+          oldnode->size = oldsize + takenext;
+          newnode       = (FAR struct mm_freenode_s *)((char*)oldnode + oldnode->size);
 
-           /* Did we consume the entire preceding chunk? */
+          /* Did we consume the entire preceding chunk? */
 
-           if (takenext < nextsize)
-             {
-               /* No, take what we need from the next chunk and return it
-                * to the free nodelist.
-                */
+          if (takenext < nextsize)
+            {
+              /* No, take what we need from the next chunk and return it
+               * to the free nodelist.
+               */
 
-               newnode->size        = nextsize - takenext;
-               newnode->preceding   = oldnode->size;
-               andbeyond->preceding = newnode->size | (andbeyond->preceding & MM_ALLOC_BIT);
+              newnode->size        = nextsize - takenext;
+              newnode->preceding   = oldnode->size;
+              andbeyond->preceding = newnode->size | (andbeyond->preceding & MM_ALLOC_BIT);
 
-               /* Add the new free node to the nodelist (with the new size) */
+              /* Add the new free node to the nodelist (with the new size) */
 
-               mm_addfreechunk(newnode);
-             }
-           else
-             {
-               /* Yes, just update some pointers. */
+              mm_addfreechunk(newnode);
+            }
+          else
+            {
+              /* Yes, just update some pointers. */
 
-               andbeyond->preceding = oldnode->size | (andbeyond->preceding & MM_ALLOC_BIT);
-             }
+              andbeyond->preceding = oldnode->size | (andbeyond->preceding & MM_ALLOC_BIT);
+            }
         }
 
+      /* Now we have to move the user contents 'down' in memory.  memcpy should
+       * should be save for this.
+       */
 
+      newmem = (FAR void*)((FAR char*)oldnode + SIZEOF_MM_ALLOCNODE);
+      memcpy(newmem, oldmem, oldsize - SIZEOF_MM_ALLOCNODE);
       mm_givesemaphore();
-      return (FAR void*)((FAR char*)oldnode + SIZEOF_MM_ALLOCNODE);
+      return newmem;
     }
 
   /* The current chunk cannot be extended.  Just allocate a new chunk and copy */
 
   else
     {
-       FAR void *newmem;
-
        /* Allocate a new block.  On failure, realloc must return NULL but
         * leave the original memory in place.
         */
