@@ -21,7 +21,7 @@ User's Manual
 <p>
 Gregory Nutt
 <p>
-<small>Last Update: May 27, 2007</small>
+<small>Last Update: June 30, 2007</small>
 </center>
 
 <h1>1.0 <A NAME="Introduction">Introduction</a></h1>
@@ -53,7 +53,8 @@ Gregory Nutt
       <li>Paragraph 2.7 <a href="#ClocksNTimers">Clocks and Timers</a></li>
       <li>Paragraph 2.8 <a href="#Signals">Signal Interfaces</a></li>
       <li>Paragraph 2.9 <a href="#Pthread">Pthread Interfaces</a></li>
-      <li>Paragraph 2.10 <a href="#FileSystem">Filesystem Interfaces</a></li>
+      <li>Paragraph 2.10 <a href="#Environ">Environment Variables</a></li>
+      <li>Paragraph 2.11 <a href="#FileSystem">Filesystem Interfaces</a></li>
     </ul>
   </li>
   <li>
@@ -2208,9 +2209,7 @@ queue. The specified watchdog function will be called from the
 interrupt level after the specified number of ticks has elapsed.
 Watchdog timers may be started from the interrupt level.
 <p>
-Watchdog times execute in the context of the timer interrupt handler, but
-with the PIC/PID address environment that was in place when wd_start()
-was called.
+Watchdog times execute in the context of the timer interrupt handler.
 <p>
 Watchdog timers execute only once.
 <p>
@@ -5502,6 +5501,272 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
+<h1><a name="Environ">2.10 Environment Variables</a></h1>
+<p><b>Overview</b>.
+  NuttX supports environment variables that can be used to control the behavior of programs.
+  In the spirit of NuttX the environment variable behavior attempts to emulate the behavior of
+  environment variables in the mulit-processing OS:
+</p>
+<ul>
+  <li><b>Task environments</b>.
+    When a new task is created using <a href="#taskcreate">task_create</a>, the environment
+    of the child task is an inherited, exact copy of the environment of the parent.
+    However, after child task has been created, subsequent operations by the child task on
+    its environment does not alter the environment of the parent.
+    No do operations by the parent effect the child's environment.
+    The environments start identical but are independent and may diverge.
+  </li>
+  <li><b>Thread environments</b>.
+    When a pthread is created using <a href="#pthreadcreate">pthread_create</a>, the child
+    thread also inherits that envirnment of the parent.
+    However, the child does not recieve a copy of the environment but, rather, shares the same
+    environment.
+    Changes to the environment are visiable to all threads with the same parentage.
+  </li>
+</ul>
+<p><b>Programming Interfaces</b>.
+  The following environment variable programming interfaces are provided by Nuttx and are
+  described in detail in the following paragraphs.
+</p>
+<ul>
+  <li><a href="#getenv">2.10.1 <code>getenv</code></a></li>
+  <li><a href="#putenv">2.10.2 <code>putenv</code></a></li>
+  <li><a href="#clearenv">2.10.3 <code>clearenv</code></a></li>
+  <li><a href="#setenv">2.10.4 <code>setenv</code></a></li>
+  <li><a href="#unsetenv">2.10.5 <code>unsetenv</code></a></li>
+</ul>
+<p><b>Disabling Environment Variable Support</b>.
+  All support for environment variables can be disabled by setting <code>CONFIG_DISABLE_ENVIRONMENT</code>
+  in the board configuration file.
+</p>
+
+<h2><a name="getenv">2.10.1 <code>getenv</code></a></h2>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include <stdlib.h>
+  FAR char *getenv(const char *name);
+</pre>
+<p>
+  <b>Description:</b>
+    The <code>getenv()</code> function searches the environment list for a string that
+    matches the string pointed to by <code>name</code>.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li>
+    <code>name</code>.
+    The name of the variable to find.
+  </li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+   The value of the valiable (read-only) or NULL on failure.
+</p>
+
+<h2><a name="putenv">2.10.2 <code>putenv</code></a></h2>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include <stdlib.h>
+  int putenv(char *string);
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>putenv()</code> function adds or changes the value of environment variables.
+  The argument string is of the form <i>name=value</i>. If name does not already
+  exist in  the  environment, then string is added to the environment. If
+  name does exist, then the value of name in the environment is changed to
+  value.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li>
+    <code>string</code>
+    name=value string describing the environment setting to add/modify.
+  </li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+  Zero on sucess.
+</p>
+
+<h2><a name="clearenv">2.10.3 <code>clearenv</code></a></h2>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include <stdlib.h>
+  int clearenv(void);
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>clearenv()</code> function clears the environment of all name-value pairs
+  and sets the value of the external variable environ to NULL.
+</p>
+<p>
+  <b>Input Parameters:</b>
+  None
+</p>
+<p>
+  <b>Returned Values:</b>
+  Zero on success.
+</p>
+
+<h2><a name="setenv">2.10.4 <code>setenv</code></a></h2>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include <stdlib.h>
+  int setenv(const char *name, const char *value, int overwrite);
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>setenv()</code> function adds the variable <code>name</code> to the environment with the
+  specified <code>value</code> if the variable <code>name</code> does not exist. If the <code>name</code>
+  does exist in the environment, then its value is changed to <code>value</code> if <code>overwrite</code>
+  is non-zero; if <code>overwrite</code> is zero, then the value of <code>name</code> is unaltered.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li>
+    <code>name</code>
+    The name of the variable to change.
+  </li>
+  <li>
+    <code>value</code>
+    The new value of the variable.
+  </li>
+  <li>
+    <code>value</code>
+    Replace any existing value if non-zero.
+  </li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+  Zero on success.
+</p>
+
+<h2><a name="unsetenv">2.10.5 <code>unsetenv</code></a></h2>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include <stdlib.h>
+  int unsetenv(const char *name);
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>unsetenv()</code> function deletes the variable <code>name</code> from the environment.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li>
+    <code>name</code>
+    The name of the variable to delete.
+  </li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+  Zero on success.
+</p>
+
+<h1><a name="FileSystem">2.11 Filesystem Interfaces</a></h1>
+<p>
+  The NuttX filesystem is very simple; it does not involve any block drivers or
+  particular filesystem (like FAT or EXT2 etc.).
+  The NuttX filesystem simply supports a set a filesystem APIs
+  (<code>open()</code>, <code>close()</code>, <code>read()</code>, <code>write</code>, etc.)
+  and a registration mechanism that allows devices drivers to a associated with <i>nodes</i>
+  in a file-system-like name space.
+</p>
+
+<h2><a name="driveroperations">2.11.1 Driver Operations</a></h2>
+<ul><pre>
+  #include &lt;fcntl.h&gt;
+  int open(const char *path, int oflag, ...);
+</pre></ul>
+
+<ul><pre>
+  #include &lt;unistd.h&gt;
+  int   close(int fd);
+  int   dup(int fildes);
+  int   dup2(int fildes1, int fildes2);
+  off_t lseek(int fd, off_t offset, int whence);
+  int   read(int fd, void *buf, unsigned int nbytes);
+  int   unlink(const char *path);
+  int   write(int fd, const void *buf, unsigned int nbytes);
+</pre></ul>
+
+<ul><pre>
+  #include &lt;sys/ioctl.h&gt;
+  int    ioctl(int fd, int req, unsigned long arg);
+</pre></ul>
+
+<h2><a name="directoryoperations">2.11.2 Directory Operations</a></h2>
+<ul><pre>
+  #include &lt;dirent.h&gt;
+  int        closedir(DIR *dirp);
+  FAR DIR   *opendir(const char *path);
+  FAR struct dirent *readdir(FAR DIR *dirp);
+  int        readdir_r(FAR DIR *dirp, FAR struct dirent *entry, FAR struct dirent **result);
+  void       rewinddir(FAR DIR *dirp);
+  void       seekdir(FAR DIR *dirp, int loc);
+  int        telldir(FAR DIR *dirp);
+</pre></ul>
+
+<h2><a name="standardio">2.11.3 Standard I/O</a></h2>
+<ul><pre>
+  #include &lt;stdio.h&gt;
+  int    fclose(FILE *stream);
+  int    fflush(FILE *stream);
+  int    feof(FILE *stream);                               /* Prototyped but not implemented */
+  int    ferror(FILE *stream);                             /* Prototyped but not implemented */
+  int    fgetc(FILE *stream);
+  char  *fgets(char *s, int n, FILE *stream);
+  FILE  *fopen(const char *path, const char *type);
+  int    fprintf(FILE *stream, const char *format, ...);
+  int    fputc(int c, FILE *stream);
+  int    fputs(const char *s, FILE *stream);
+  size_t fread(void *ptr, size_t size, size_t n_items, FILE *stream);
+  int    fseek(FILE *stream, long int offset, int whence); /* Prototyped but not implemented */
+  size_t fwrite(const void *ptr, size_t size, size_t n_items, FILE *stream);
+  char  *gets(char *s);
+
+  int    printf(const char *format, ...);
+  int    puts(const char *s);
+  int    rename(const char *source, const char *target);
+  int    sprintf(char *dest, const char *format, ...);
+  int    ungetc(int c, FILE *stream);
+  int    vprintf(const char *s, va_list ap);
+  int    vfprintf(FILE *stream, const char *s, va_list ap);
+  int    vsprintf(char *buf, const char *s, va_list ap);
+
+  int    chdir(const char *path);                          /* Prototyped but not implemented */
+  FILE  *fdopen(int fd, const char *type);
+  int    fstat(int fd, FAR struct stat *buf);              /* Prototyped but not implemented */
+  char  *getcwd(FAR char *buf, size_t size);               /* Prototyped but not implemented */
+  int    mkdir(const char *path, mode_t mode);
+  int    rmdir(const char *path);
+  int    stat(const char *path, FAR struct stat *buf);
+  int    statfs(const char *path, FAR struct statfs *buf); /* Prototyped but not implemented */
+</pre></ul>
+
 <hr>
 <h1>3.0 <A NAME="Data_Structures">OS Data Structures</a></h1>
 <H2>3.1 Scalar types</H2>
@@ -5703,87 +5968,6 @@ notify a task when a message is available on a queue.
   For systems where sizeof(pointer) > sizeof(uint32), we will
   have to do some redesign.
 </p>
-
-<h1><a name="FileSystem">2.10 Filesystem Interfaces</a></h1>
-<p>
-  The NuttX filesystem is very simple; it does not involve any block drivers or
-  particular filesystem (like FAT or EXT2 etc.).
-  The NuttX filesystem simply supports a set a filesystem APIs
-  (<code>open()</code>, <code>close()</code>, <code>read()</code>, <code>write</code>, etc.)
-  and a registration mechanism that allows devices drivers to a associated with <i>nodes</i>
-  in a file-system-like name space.
-</p>
-
-<h2><a name="driveroperations">2.10.1 Driver Operations</a></h2>
-<ul><pre>
-  #include &lt;fcntl.h&gt;
-  int open(const char *path, int oflag, ...);
-</pre></ul>
-
-<ul><pre>
-  #include &lt;unistd.h&gt;
-  int   close(int fd);
-  int   dup(int fildes);
-  int   dup2(int fildes1, int fildes2);
-  off_t lseek(int fd, off_t offset, int whence);
-  int   read(int fd, void *buf, unsigned int nbytes);
-  int   unlink(const char *path);
-  int   write(int fd, const void *buf, unsigned int nbytes);
-</pre></ul>
-
-<ul><pre>
-  #include &lt;sys/ioctl.h&gt;
-  int    ioctl(int fd, int req, unsigned long arg);
-</pre></ul>
-
-<h2><a name="directoryoperations">2.10.2 Directory Operations</a></h2>
-<ul><pre>
-  #include &lt;dirent.h&gt;
-  int        closedir(DIR *dirp);
-  FAR DIR   *opendir(const char *path);
-  FAR struct dirent *readdir(FAR DIR *dirp);
-  int        readdir_r(FAR DIR *dirp, FAR struct dirent *entry, FAR struct dirent **result);
-  void       rewinddir(FAR DIR *dirp);
-  void       seekdir(FAR DIR *dirp, int loc);
-  int        telldir(FAR DIR *dirp);
-</pre></ul>
-
-<h2><a name="standardio">2.10.3 Standard I/O</a></h2>
-<ul><pre>
-  #include &lt;stdio.h&gt;
-  int    fclose(FILE *stream);
-  int    fflush(FILE *stream);
-  int    feof(FILE *stream);                               /* Prototyped but not implemented */
-  int    ferror(FILE *stream);                             /* Prototyped but not implemented */
-  int    fgetc(FILE *stream);
-  char  *fgets(char *s, int n, FILE *stream);
-  FILE  *fopen(const char *path, const char *type);
-  int    fprintf(FILE *stream, const char *format, ...);
-  int    fputc(int c, FILE *stream);
-  int    fputs(const char *s, FILE *stream);
-  size_t fread(void *ptr, size_t size, size_t n_items, FILE *stream);
-  int    fseek(FILE *stream, long int offset, int whence); /* Prototyped but not implemented */
-  size_t fwrite(const void *ptr, size_t size, size_t n_items, FILE *stream);
-  char  *gets(char *s);
-
-  int    printf(const char *format, ...);
-  int    puts(const char *s);
-  int    rename(const char *source, const char *target);
-  int    sprintf(char *dest, const char *format, ...);
-  int    ungetc(int c, FILE *stream);
-  int    vprintf(const char *s, va_list ap);
-  int    vfprintf(FILE *stream, const char *s, va_list ap);
-  int    vsprintf(char *buf, const char *s, va_list ap);
-
-  int    chdir(const char *path);                          /* Prototyped but not implemented */
-  FILE  *fdopen(int fd, const char *type);
-  int    fstat(int fd, FAR struct stat *buf);              /* Prototyped but not implemented */
-  char  *getcwd(FAR char *buf, size_t size);               /* Prototyped but not implemented */
-  int    mkdir(const char *path, mode_t mode);
-  int    rmdir(const char *path);
-  int    stat(const char *path, FAR struct stat *buf);
-  int    statfs(const char *path, FAR struct statfs *buf); /* Prototyped but not implemented */
-</pre></ul>
 
 <h1><a name="index">Index</a></h1>
 <ul>

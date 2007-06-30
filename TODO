@@ -37,6 +37,8 @@ o USB
 
 o Libraries
 - sscanf() and lib_vsprintf() do not support floating point values.
+- The definition of environ in stdlib.h is bogus and will not work as it should.  This
+  is because the underlying representation of the environment is not an arry of pointers.
 
 o File system
 - Add chmod(), truncate().
