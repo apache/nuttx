@@ -89,6 +89,21 @@ static struct mallinfo g_mmprevious;
 static struct mallinfo g_mmafter;
 #endif
 
+#ifndef CONFIG_DISABLE_ENVIRON
+const char g_var1_name[]    = "Variable1";
+const char g_var1_value[]   = "GoodValue1";
+const char g_var2_name[]    = "Variable2";
+const char g_var2_value[]   = "GoodValue2";
+const char g_var3_name[]    = "Variable3";
+const char g_var3_value[]   = "GoodValue3";
+
+const char g_bad_value1[]   = "BadValue1";
+const char g_bad_value2[]   = "BadValue2";
+
+const char g_putenv_value[] = "Variable1=BadValue3";
+
+#endif
+
 /************************************************************
  * Private Functions
  ************************************************************/
@@ -150,6 +165,55 @@ static void check_test_memory_usage(void)
 #endif
 
 /************************************************************
+ * Name: show_environment
+ ************************************************************/
+
+#ifndef CONFIG_DISABLE_ENVIRON
+static void show_variable(const char *var_name, const char *exptd_value, boolean var_valid)
+{
+  char *actual_value = getenv(var_name);
+  if (actual_value)
+    {
+      if (var_valid)
+        {
+          if (strcmp(actual_value, exptd_value) == 0)
+            {
+              printf("show_variable: Variable=%s has value=%s\n", var_name, exptd_value);
+            }
+          else
+            {
+              printf("show_variable: ERROR Variable=%s has the wrong value\n", var_name);
+              printf("show_variable:       found=%s expected=%s\n", actual_value, exptd_value);
+            }
+        }
+      else
+        {
+          printf("show_variable: ERROR Variable=%s has a value when it should not\n", var_name);
+          printf("show_variable:       value=%s\n", actual_value);
+        }
+    }
+  else if (var_valid)
+    {
+      printf("show_variable: ERROR Variable=%s has no value\n", var_name);
+      printf("show_variable:       Should have had value=%s\n", exptd_value);
+    }
+  else
+    {
+      printf("show_variable: Variable=%s has no value\n", var_name);
+    }
+}
+
+static show_environment(boolean var1_valid, boolean var2_valid, boolean var3_valid)
+{
+  show_variable( g_var1_name, g_var1_value, var1_valid);
+  show_variable( g_var2_name, g_var2_value, var2_valid);
+  show_variable( g_var3_name, g_var3_value, var3_valid);
+}
+#else
+# define show_environment()
+#endif
+
+/************************************************************
  * Name: user_main
  ************************************************************/
 
@@ -196,6 +260,19 @@ static int user_main(int argc, char *argv[])
         }
     }
   check_test_memory_usage();
+
+  /* Check environment variables */
+#ifndef CONFIG_DISABLE_ENVIRON
+  show_environment(TRUE, TRUE, TRUE);
+
+  unsetenv(g_var1_name);
+  show_environment(FALSE, TRUE, TRUE);
+  check_test_memory_usage();
+
+  clearenv();
+  show_environment(FALSE, FALSE, FALSE);
+  check_test_memory_usage();
+#endif
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
   /* Checkout /dev/null */
@@ -372,6 +449,26 @@ int user_start(int argc, char *argv[])
   g_argv[2] = arg3;
   g_argv[3] = arg4;
   g_argv[4] = NULL;
+#endif
+
+  /* Set up some environment variables */
+
+#ifndef CONFIG_DISABLE_ENVIRON
+  printf("user_start: putenv(%s)\n", g_putenv_value);
+  putenv(g_putenv_value);                   /* Varaible1=BadValue3 */
+  printf("user_start: setenv(%s, %s, TRUE)\n", g_var1_name, g_var1_value);
+  setenv(g_var1_name, g_var1_value, TRUE);  /* Variable1=GoodValue1 */
+
+  printf("user_start: setenv(%s, %s, FALSE)\n", g_var2_name, g_bad_value1);
+  setenv(g_var2_name, g_bad_value1, FALSE); /* Variable2=BadValue1 */
+  printf("user_start: setenv(%s, %s, TRUE)\n", g_var2_name, g_var2_value);
+  setenv(g_var2_name, g_var2_value, TRUE);  /* Variable2=GoodValue2 */
+
+  printf("user_start: setenv(%s, %s, FALSE)\n", g_var3_name, g_var3_name);
+  setenv(g_var3_name, g_var3_value, FALSE); /* Variable3=GoodValue3 */
+  printf("user_start: setenv(%s, %s, FALSE)\n", g_var3_name, g_var3_name);
+  setenv(g_var3_name, g_bad_value2, FALSE); /* Variable3=GoodValue3 */
+  show_environment(TRUE, TRUE, TRUE);
 #endif
 
   /* Verify that we can spawn a new task */
