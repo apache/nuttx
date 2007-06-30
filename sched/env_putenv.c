@@ -1,5 +1,5 @@
 /****************************************************************************
- * env_internal.h
+ * env_putenv.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,63 +33,88 @@
  *
  ****************************************************************************/
 
-#ifndef __ENV_INTERNAL_H
-#define __ENV_INTERNAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/sched.h>
-#include "os_internal.h"
-
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_DISABLE_ENVIRON
-# define env_dup(ptcb)     (0)
-# define env_share(ptcb)   (0)
-# define env_release(ptcb) (0)
-#endif
-
-/****************************************************************************
- * Public Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
 
 #ifndef CONFIG_DISABLE_ENVIRON
-/* functions used by the task/pthread creation and destruction logic */
 
-EXTERN int env_dup(FAR _TCB *ptcb);
-EXTERN int env_share(FAR _TCB *ptcb);
-EXTERN int env_release(FAR _TCB *ptcb);
+#include <sched.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
 
-/* functions used internally the environment handling logic */
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-EXTERN FAR char *env_findvar(environ_t *envp, const char *pname);
-EXTERN int env_removevar(environ_t *envp, char *pvar);
-#endif
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-#undef EXTERN
-#ifdef __cplusplus
+/****************************************************************************
+ * Function:  putenv
+ *
+ * Description:
+ *   The putenv() function adds or changes the value of environment variables.
+ *   The argument string is of the form name=value. If name does not already
+ *   exist in  the  environment, then string is added to the environment. If
+ *   name does exist, then the value of name in the environment is changed to
+ *   value.
+ *
+ * Parameters:
+ *   name=value string describing the environment setting to add/modify
+ *
+ * Return Value:
+ *   Zero on sucess
+ *
+ * Assumptions:
+ *   Not called from an interrupt handler
+ *
+ ****************************************************************************/
+
+int putenv(char *string)
+{
+  char *pname;
+  char *pequal;
+  int ret = OK;
+
+  /* Verify that a string was passed */
+
+  if (!string)
+    {
+      ret = EINVAL;
+      goto errout;
+    }
+
+  /* Parse the name=value string */
+
+  pname = strdup(string);
+  if (!pname)
+    {
+      ret = ENOMEM;
+      goto errout;
+    }
+
+  pequal = strchr( pname, '=');
+  if (pequal)
+    {
+      /* Then let setenv do all of the work */
+
+      *pequal = '\0';
+      ret = setenv(pname, pequal+1, TRUE);
+    }
+  free(pname);
+  return ret;
+
+errout:
+  *get_errno_ptr() = ret;
+  return ERROR;
 }
-#endif
 
-#endif /* __ENV_INTERNAL_H */
+#endif /* CONFIG_DISABLE_ENVIRON */
+
+
 

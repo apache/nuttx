@@ -1,5 +1,5 @@
 /****************************************************************************
- * env_internal.h
+ * env_findvar.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,63 +33,94 @@
  *
  ****************************************************************************/
 
-#ifndef __ENV_INTERNAL_H
-#define __ENV_INTERNAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/sched.h>
-#include "os_internal.h"
-
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_DISABLE_ENVIRON
-# define env_dup(ptcb)     (0)
-# define env_share(ptcb)   (0)
-# define env_release(ptcb) (0)
-#endif
-
-/****************************************************************************
- * Public Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
 
 #ifndef CONFIG_DISABLE_ENVIRON
-/* functions used by the task/pthread creation and destruction logic */
 
-EXTERN int env_dup(FAR _TCB *ptcb);
-EXTERN int env_share(FAR _TCB *ptcb);
-EXTERN int env_release(FAR _TCB *ptcb);
+#include <string.h>
+#include <sched.h>
 
-/* functions used internally the environment handling logic */
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-EXTERN FAR char *env_findvar(environ_t *envp, const char *pname);
-EXTERN int env_removevar(environ_t *envp, char *pvar);
-#endif
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
-#undef EXTERN
-#ifdef __cplusplus
+/****************************************************************************
+ * Function: env_cmpname
+ ****************************************************************************/
+
+static boolean env_cmpname(const char *pszname, const char *peqname)
+{
+  /* Search until we find anything different in the two names */
+
+  for (; *pszname == *peqname; pszname++, peqname++);
+
+  /* On sucess, pszname will end with '\0' and peqname with '=' */
+
+  if ( *pszname == '\0' && *peqname == '=' )
+    {
+      return TRUE;
+    }
+  return FALSE;
 }
-#endif
 
-#endif /* __ENV_INTERNAL_H */
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  env_findvar
+ *
+ * Description:
+ *   Search the provided environment structure for the variable of the
+ *   specified name.
+ *
+ * Parameters:
+ *   envp The environment structre to be searched.
+ *   pname The variable name to find
+ *
+ * Return Value:
+ *   A pointer to the name=value string in the environment
+ *
+ * Assumptions:
+ *   - Not called from an interrupt handler
+ *   - Pre-emptions is disabled by caller
+ *
+ ****************************************************************************/
+
+FAR char *env_findvar(environ_t *envp, const char *pname)
+{
+  char *ret = NULL;
+
+  /* Verify input parameters */
+
+  if (envp && pname)
+    {
+      char *ptr;
+      char *end = &envp->ev_env[envp->ev_alloc];
+
+      /* Search for a name=value string with matching name */
+
+      for (ptr = envp->ev_env; ptr < end && !env_cmpname( pname, ptr); ptr += (strlen(ptr) + 1));
+
+      /* Check for success */
+
+      if (ptr < end)
+        {
+          ret = ptr;
+        }
+    }
+  return ret;
+}
+
+#endif /* CONFIG_DISABLE_ENVIRON */
+
+
 

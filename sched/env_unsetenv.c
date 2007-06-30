@@ -1,5 +1,5 @@
 /****************************************************************************
- * env_internal.h
+ * env_unsetenv.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,63 +33,105 @@
  *
  ****************************************************************************/
 
-#ifndef __ENV_INTERNAL_H
-#define __ENV_INTERNAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/sched.h>
-#include "os_internal.h"
-
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_DISABLE_ENVIRON
-# define env_dup(ptcb)     (0)
-# define env_share(ptcb)   (0)
-# define env_release(ptcb) (0)
-#endif
-
-/****************************************************************************
- * Public Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
 
 #ifndef CONFIG_DISABLE_ENVIRON
-/* functions used by the task/pthread creation and destruction logic */
 
-EXTERN int env_dup(FAR _TCB *ptcb);
-EXTERN int env_share(FAR _TCB *ptcb);
-EXTERN int env_release(FAR _TCB *ptcb);
+#include <sched.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
 
-/* functions used internally the environment handling logic */
+#include "os_internal.h"
+#include "env_internal.h"
 
-EXTERN FAR char *env_findvar(environ_t *envp, const char *pname);
-EXTERN int env_removevar(environ_t *envp, char *pvar);
-#endif
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-#undef EXTERN
-#ifdef __cplusplus
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  unsetenv
+ *
+ * Description:
+ *   The unsetenv() function deletes the variable name from the environment.
+ *
+ * Parameters:
+ *   name - The name of the variable to delete
+ *
+ * Return Value:
+ *   Zero on success
+ *
+ * Assumptions:
+ *   Not called from an interrupt handler
+ *
+ ****************************************************************************/
+
+int unsetenv(const char *name)
+{
+  FAR _TCB      *rtcb;
+  FAR environ_t *envp;
+  FAR char      *pvar;
+  int ret = OK;
+
+  /* Verify input parameter */
+
+  if (!name)
+    {
+      ret = EINVAL;
+      goto errout;
+    }
+
+  /* Get a reference to the thread-private environ in the TCB.*/
+
+  sched_lock();
+  rtcb = (FAR _TCB*)g_readytorun.head;
+  envp = rtcb->envp;
+
+  /* Check if the variable exists */
+
+  if ( envp && (pvar = env_findvar(envp, name)) != NULL)
+    {
+      int        alloc;
+      environ_t *tmp;
+
+      /* It does!  Remove the name=value pair from the environment. */
+
+      (void)env_removevar(envp, pvar);
+
+      /* Reallocate the new environment buffer */
+
+      alloc = envp->ev_alloc;
+      tmp   = (environ_t*)realloc(envp, SIZEOF_ENVIRON_T(alloc));
+      if (!tmp)
+        {
+          ret = ENOMEM;
+          goto errout_with_lock;
+        }
+
+      /* Save the new environment pointer (it might have changed due to reallocation. */
+
+      rtcb->envp = tmp;
+    }
+
+  sched_unlock();
+  return OK;
+
+errout_with_lock:
+  sched_unlock();
+errout:
+  *get_errno_ptr() = ret;
+  return ERROR;
 }
-#endif
 
-#endif /* __ENV_INTERNAL_H */
+#endif /* CONFIG_DISABLE_ENVIRON */
+
+
 

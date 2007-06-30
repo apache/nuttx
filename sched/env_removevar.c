@@ -1,5 +1,5 @@
 /****************************************************************************
- * env_internal.h
+ * env_removevar.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,63 +33,86 @@
  *
  ****************************************************************************/
 
-#ifndef __ENV_INTERNAL_H
-#define __ENV_INTERNAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/sched.h>
-#include "os_internal.h"
-
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_DISABLE_ENVIRON
-# define env_dup(ptcb)     (0)
-# define env_share(ptcb)   (0)
-# define env_release(ptcb) (0)
-#endif
-
-/****************************************************************************
- * Public Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
 
 #ifndef CONFIG_DISABLE_ENVIRON
-/* functions used by the task/pthread creation and destruction logic */
 
-EXTERN int env_dup(FAR _TCB *ptcb);
-EXTERN int env_share(FAR _TCB *ptcb);
-EXTERN int env_release(FAR _TCB *ptcb);
+#include <string.h>
+#include <sched.h>
 
-/* functions used internally the environment handling logic */
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-EXTERN FAR char *env_findvar(environ_t *envp, const char *pname);
-EXTERN int env_removevar(environ_t *envp, char *pvar);
-#endif
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-#undef EXTERN
-#ifdef __cplusplus
+/****************************************************************************
+ * Function:  env_removevar
+ *
+ * Description:
+ *   Remove the referenced name=value pair from the environment
+ *
+ * Parameters:
+ *   envp The environment containing the name=value pair
+ *   pvar A pointer to the name=value pair in the restroom
+ *
+ * Return Value:
+ *   Zero on success
+ *
+ * Assumptions:
+ *   - Not called from an interrupt handler
+ *   - Caller has pre-emptions disabled
+ *   - Caller will reallocate the environment structure to the correct size
+ *
+ ****************************************************************************/
+
+int env_removevar(environ_t *envp, char *pvar)
+{
+  int ret = ERROR;
+  if (envp && pvar)
+    {
+      /* Verify that the pointer lies within the environment region */
+
+      int   alloc = envp->ev_alloc;       /* Size of the allocated environment */
+      char *end   = &envp->ev_env[alloc]; /* Pointer to the end+1 of the environment */
+
+      if (pvar >= envp->ev_env && pvar < end)
+        {
+          /* Set up for the removal */
+
+          int   len  = strlen(pvar) + 1;  /* Length of name=value string to remove */
+          char *src  = &pvar[len];        /* Address of name=value string after */
+          char *dest = pvar;              /* Location to move the next string */
+          int   count = end - src;         /* Number of bytes to move (might be zero) */
+
+          /* Move all of the environment strings after the removed one 'down.'
+           * this is inefficient, but robably not high duty.
+           */
+
+          while (count-- > 0)
+            {
+              *dest++ = *src++;
+            }
+
+          /* Then set to the new allocation size.  The caller is expected to
+           * call realloc at some point but we don't do that here because the
+           * caller may add more stuff to the environment.
+           */
+
+          envp->ev_alloc -= len;
+          ret = OK;
+        }
+    }
+  return ret;
 }
-#endif
 
-#endif /* __ENV_INTERNAL_H */
+#endif /* CONFIG_DISABLE_ENVIRON */
+
+
 

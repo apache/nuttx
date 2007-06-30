@@ -154,7 +154,7 @@ struct environ_s
   unsigned int ev_crefs;      /* Reference count used when environment
                                * is shared by threads */
   size_t       ev_alloc;      /* Number of bytes allocated in environment */
-  ubyte        ev_env[1];     /* Environment strings */
+  char         ev_env[1];     /* Environment strings */
 };
 typedef struct environ_s environ_t;
 # define SIZEOF_ENVIRON_T(alloc) (sizeof(environ_t) + alloc - 1)
