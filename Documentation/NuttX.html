@@ -628,7 +628,9 @@ Other memory:
 	* Add environment variables APIs:  environ, getenv, putenv, clearenv, setenv,
 	  unsetenv
 	* Correct an error in realloc() when the block is extended "down" in memory.
-	  In this case, the old memory contents need to be copied to the new location.
+	  In this case, the old memory contents need to be copied to the new location
+	  and an allocated bit was not being set.
+	* examples/ostest: Added an environment variable test.
 	* Started m68322
 </pre></ul>
 

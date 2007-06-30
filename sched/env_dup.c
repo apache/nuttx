@@ -99,7 +99,7 @@ int env_dup(FAR _TCB *ptcb)
         {
           /* Yes..The parent task has an environment, duplicate it */
 
-          size_t envlen =  ptcb->envp->ev_alloc;
+          size_t envlen =  parent->envp->ev_alloc;
           envp          = (environ_t*)malloc(SIZEOF_ENVIRON_T( envlen ));
           if (!envp)
             {
@@ -109,7 +109,7 @@ int env_dup(FAR _TCB *ptcb)
             {
               envp->ev_crefs = 1;
               envp->ev_alloc = envlen;
-              memcmp( envp->ev_env, ptcb->envp->ev_env, envlen );
+              memcpy( envp->ev_env, parent->envp->ev_env, envlen );
             }
         }
 

@@ -100,7 +100,7 @@ FAR char *getenv(const char *name)
 
   /* Check if the variable exists */
 
-  if ( envp && (pvar = env_findvar(envp, name)) != NULL)
+  if ( !envp || (pvar = env_findvar(envp, name)) == NULL)
     {
       ret = ENOENT;
       goto errout_with_lock;
