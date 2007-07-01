@@ -47,16 +47,17 @@ endif
 
 STRING_SRCS	= lib_memset.c lib_memcpy.c lib_memcmp.c lib_memmove.c \
 		  lib_strcpy.c lib_strncpy.c lib_strcmp.c \
-		  lib_strlen.c lib_strdup.c lib_strtol.c lib_strchr.c \
+		  lib_strlen.c lib_strdup.c lib_strtol.c lib_strchr.c lib_strrchr.c \
 		  lib_strspn.c lib_strcspn.c \
 		  lib_strtok.c lib_strtokr.c lib_strerror.c
-		  
+
 CTYPE_SRCS	= 
 
 STDIO_SRCS	= lib_printf.c lib_rawprintf.c lib_lowprintf.c \
 		  lib_sprintf.c lib_libsprintf.c lib_vsprintf.c lib_libvsprintf.c \
 		  lib_memstream.c lib_lowstream.c lib_nullstream.c \
 		  lib_sscanf.c
+
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 STDIO_SRCS	+= lib_rawstream.c
 ifneq ($(CONFIG_NFILE_STREAMS),0)
@@ -76,6 +77,8 @@ MATH_SRCS	= lib_rint.c
 
 UNISTD_SRCS	= lib_getopt.c
 
+LIBGEN_SRCS	= lib_basename.c lib_dirname.c
+
 SQ_SRCS		= sq_addlast.c sq_addfirst.c sq_addafter.c \
 		  sq_rem.c sq_remlast.c sq_remfirst.c sq_remafter.c
 
@@ -83,7 +86,8 @@ DQ_SRCS		= dq_addlast.c dq_addfirst.c dq_addafter.c dq_addbefore.c \
 		  dq_rem.c dq_remlast.c dq_remfirst.c
 
 CSRCS		= $(MISC_SRCS) $(STRING_SRCS) $(CTYPE_SRCS) $(STDIO_SRCS) \
-		  $(STDLIB_SRCS) $(MATH_SRCS) $(UNISTD_SRCS) $(SQ_SRCS) $(DQ_SRCS)
+		  $(STDLIB_SRCS) $(MATH_SRCS) $(UNISTD_SRCS) $(LIBGEN_SRCS) \
+		  $(SQ_SRCS) $(DQ_SRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
