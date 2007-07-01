@@ -85,6 +85,8 @@ void cmd_mount(int argc, char **argv);
 #endif
 void cmd_ps(int argc, char **argv);
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+void cmd_rm(int argc, char **argv);
+void cmd_rmdir(int argc, char **argv);
 void cmd_umount(int argc, char **argv);
 #endif
 

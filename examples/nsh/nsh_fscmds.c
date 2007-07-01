@@ -684,6 +684,34 @@ void cmd_mount(int argc, char **argv)
 #endif
 
 /****************************************************************************
+ * Name: cmd_rm
+ ****************************************************************************/
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+void cmd_rm(int argc, char **argv)
+{
+  if (unlink(argv[1]) < 0)
+    {
+      printf(g_fmtcmdfailed, argv[0], "unlink", strerror(errno));
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: cmd_rm
+ ****************************************************************************/
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+void cmd_rmdir(int argc, char **argv)
+{
+  if (rmdir(argv[1]) < 0)
+    {
+      printf(g_fmtcmdfailed, argv[0], "rmdir", strerror(errno));
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: cmd_umount
  ****************************************************************************/
 
