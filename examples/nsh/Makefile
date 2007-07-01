@@ -40,7 +40,7 @@ MKDEP	= $(TOPDIR)/tools/mkdeps.sh
 
 ASRCS	= 
 AOBJS	= $(ASRCS:.S=$(OBJEXT))
-CSRCS	= nsh_main.c
+CSRCS	= nsh_main.c nsh_fscmds.c nsh_proccmds.c
 COBJS	= $(CSRCS:.c=$(OBJEXT))
 
 SRCS	= $(ASRCS) $(CSRCS)
