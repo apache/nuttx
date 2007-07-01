@@ -1,5 +1,5 @@
 /****************************************************************************
- * nsh_proccmds.c
+ * nsh_envcmds.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -42,7 +42,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sched.h>
+#include <string.h>
+#include <errno.h>
 
 #include "nsh.h"
 
@@ -54,8 +55,6 @@
  * Private Types
  ****************************************************************************/
 
-typedef void (*exec_t)(void);
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -63,23 +62,6 @@ typedef void (*exec_t)(void);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-static const char *g_statenames[] =
-{
-  "INVALID ",
-  "PENDING ",
-  "READY   ", 
-  "RUNNING ", 
-  "INACTIVE", 
-  "WAITSEM ", 
-#ifndef CONFIG_DISABLE_MQUEUE
-  "WAITSIG ", 
-#endif
-#ifndef CONFIG_DISABLE_MQUEUE
-  "MQNEMPTY", 
-  "MQNFULL "
-#endif
-};
 
 /****************************************************************************
  * Public Data
@@ -90,66 +72,67 @@ static const char *g_statenames[] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ps_task
- ****************************************************************************/
-
-static void ps_task(FAR _TCB *tcb, FAR void *arg)
-{
-  boolean needcomma = FALSE;
-  int i;
-  printf("%5d %3d %4s %7s%c%c %8s ",
-         tcb->pid, tcb->sched_priority,
-         tcb->flags & TCB_FLAG_ROUND_ROBIN ? "RR  " : "FIFO",
-         tcb->flags & TCB_FLAG_PTHREAD ? "PTHREAD" : "TASK   ",
-         tcb->flags & TCB_FLAG_NONCANCELABLE ? 'N' : ' ',
-         tcb->flags & TCB_FLAG_CANCEL_PENDING ? 'P' : ' ',
-         g_statenames[tcb->task_state]);
-
-  printf("%s(", tcb->argv[0]);
-  for (i = 1; i < CONFIG_MAX_TASK_ARGS+1 && tcb->argv[i]; i++)
-    {
-      if (needcomma)
-        {
-          printf(", %p", tcb->argv[i]);
-        }
-      else
-        {
-          printf("%p", tcb->argv[i]);
-        }
-     }
-  printf(")\n");
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: cmd_exec
+ * Name: cmd_echo
  ****************************************************************************/
 
-void cmd_exec(int argc, char **argv)
+void cmd_echo(int argc, char **argv)
 {
-  char *endptr;
-  long addr;
+  int i;
 
-  addr = strtol(argv[1], &endptr, 0);
-  if (!addr || endptr == argv[1] || *endptr != '\0')
+  /* echo each argument, separated by a space as it must have been on the
+   * command line
+   */
+
+  for (i = 1; i < argc; i++)
     {
-       printf(g_fmtarginvalid, argv[0]);
-       return;
-    }
+      /* Check for references to environment variables */
 
-  printf("Calling %p\n", (exec_t)addr);
-  ((exec_t)addr)();
+#ifndef CONFIG_DISABLE_ENVIRON
+      if (argv[i][0] == '$')
+        {
+          char *value = getenv(argv[i]+1);
+          if (value)
+            {
+              printf("%s ", value);
+            }
+        }
+      else
+#endif
+        {
+          printf("%s ", argv[i]);
+        }
+    }
+  putchar('\n');
 }
 
 /****************************************************************************
- * Name: cmd_ps
+ * Name: cmd_set
  ****************************************************************************/
 
-void cmd_ps(int argc, char **argv)
+#ifndef CONFIG_DISABLE_ENVIRON
+void cmd_set(int argc, char **argv)
 {
-  printf("PID   PRI SCHD TYPE   NP STATE    NAME\n");
-  sched_foreach(ps_task, NULL);
+  if (setenv(argv[1], argv[2], TRUE) < 0)
+    {
+      printf(g_fmtcmdfailed, argv[0], "setenv", strerror(errno));
+    }
 }
+#endif
+
+/****************************************************************************
+ * Name: cmd_unset
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_ENVIRON
+void cmd_unset(int argc, char **argv)
+{
+  if (unsetenv(argv[1]) < 0)
+    {
+      printf(g_fmtcmdfailed, argv[0], "unsetenv", strerror(errno));
+    }
+}
+#endif

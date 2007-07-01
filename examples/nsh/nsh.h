@@ -72,22 +72,29 @@ extern const char g_fmtcmdoutofmemory[];
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_cat(int argc, char **argv);
-void cmd_cp(int argc, char **argv);
+extern void cmd_cat(int argc, char **argv);
+extern void cmd_cp(int argc, char **argv);
 #endif
-void cmd_exec(int argc, char **argv);
+extern void cmd_echo(int argc, char **argv);
+extern void cmd_exec(int argc, char **argv);
 #if CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_ls(int argc, char **argv);
+extern void cmd_ls(int argc, char **argv);
 #endif
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_mkdir(int argc, char **argv);
-void cmd_mount(int argc, char **argv);
+extern void cmd_mkdir(int argc, char **argv);
+extern void cmd_mount(int argc, char **argv);
 #endif
-void cmd_ps(int argc, char **argv);
+extern void cmd_ps(int argc, char **argv);
+#ifndef CONFIG_DISABLE_ENVIRON
+extern void cmd_set(int argc, char **argv);
+#endif
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_rm(int argc, char **argv);
-void cmd_rmdir(int argc, char **argv);
-void cmd_umount(int argc, char **argv);
+extern void cmd_rm(int argc, char **argv);
+extern void cmd_rmdir(int argc, char **argv);
+extern void cmd_umount(int argc, char **argv);
+#endif
+#ifndef CONFIG_DISABLE_ENVIRON
+extern void cmd_unset(int argc, char **argv);
 #endif
 
 #endif /* __NSH_H */

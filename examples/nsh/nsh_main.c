@@ -71,7 +71,6 @@ struct cmdmap_s
  ****************************************************************************/
 
 static void cmd_help(int argc, char **argv);
-static void cmd_echo(int argc, char **argv);
 static void cmd_unrecognized(int argc, char **argv);
 
 /****************************************************************************
@@ -87,7 +86,11 @@ static const struct cmdmap_s g_cmdmap[] =
   { "cat",    cmd_cat,    2, 2, "<path>" },
   { "cp",     cmd_cp,     3, 3, "<source-path> <dest-path>" },
 #endif
-  { "echo",   cmd_echo,   2, 2, "<string>" },
+#ifndef CONFIG_DISABLE_ENVIRON
+  { "echo",   cmd_echo,   0, NSH_MAX_ARGUMENTS, "[<string|$name> [<string|$name>...]]" },
+#else
+  { "echo",   cmd_echo,   0, NSH_MAX_ARGUMENTS, "[<string> [<string>...]]" },
+#endif
   { "exec",   cmd_exec,   2, 3, "<hex-address>" },
   { "help",   cmd_help,   1, 1, NULL },
 #if CONFIG_NFILE_DESCRIPTORS > 0
@@ -98,10 +101,16 @@ static const struct cmdmap_s g_cmdmap[] =
   { "mount",  cmd_mount,  4, 5, "-t <fstype> <block-device> <dir-path>" },
 #endif
   { "ps",     cmd_ps,     1, 1, NULL },
+#ifndef CONFIG_DISABLE_ENVIRON
+  { "set",    cmd_set,    3, 3, "<name> <value>" },
+#endif
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
   { "rm",     cmd_rm,     2, 2, "<file-path>" },
   { "rmdir",  cmd_rmdir,  2, 2, "<dir-path>" },
   { "umount", cmd_umount, 2, 2, "<dir-path>" },
+#endif
+#ifndef CONFIG_DISABLE_ENVIRON
+  { "unset",  cmd_unset,  2, 2, "<name>" },
 #endif
   { NULL,     NULL,       1, 1, NULL }
 };
@@ -122,17 +131,6 @@ const char g_fmtcmdoutofmemory[] = "nsh: %s: out of memory\n";
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: cmd_echo
- ****************************************************************************/
-
-static void cmd_echo(int argc, char **argv)
-{
-  /* Echo the rest of the line */
-
-  puts(argv[1]);
-}
 
 /****************************************************************************
  * Name: cmd_help
@@ -260,7 +258,7 @@ int user_start(int argc, char *argv[])
                       handler = cmdmap->handler;
                       break;
                     }
-              }
+                }
             }
 
           /* If a error was detected above, handler will be nullified to
