@@ -614,7 +614,7 @@ Other memory:
 0.2.8 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* tools/Makefile.mkconfig: Under Cygwin, executable has a different name
-	* tools/mkdeps.sh & arch/arm/src/Makefile: Corrected a problem makeing dependencies
+	* tools/mkdeps.sh & arch/arm/src/Makefile: Corrected a problem making dependencies
 	* tools/zipme.sh: Force directory name to be nuttx-xx.yy.zz
 	* fs/fs_opendir.c: Correct errors in semaphore usage that can cause deadlock.
 	* lib/lib_getopt.c: Added getopt() support
@@ -631,6 +631,9 @@ Other memory:
 	  In this case, the old memory contents need to be copied to the new location
 	  and an allocated bit was not being set.
 	* examples/ostest: Added an environment variable test.
+	* examples/nsh/: Break into several files.
+	* lib/: Added strrchr, basename, dirname
+	* examples/nsh/: Add cp command
 	* Started m68322
 </pre></ul>
 
