@@ -65,6 +65,7 @@ extern const char g_fmtcmdnotimpl[];
 extern const char g_fmtnosuch[];
 extern const char g_fmttoomanyargs[];
 extern const char g_fmtcmdfailed[];
+extern const char g_fmtcmdoutofmemory[];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -72,6 +73,7 @@ extern const char g_fmtcmdfailed[];
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 void cmd_cat(int argc, char **argv);
+void cmd_cp(int argc, char **argv);
 #endif
 void cmd_exec(int argc, char **argv);
 #if CONFIG_NFILE_DESCRIPTORS > 0

@@ -55,7 +55,7 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN char *dirname(char *path);
+EXTERN char *basename(char *path);
 EXTERN char *dirname(char *path);
 
 #undef EXTERN

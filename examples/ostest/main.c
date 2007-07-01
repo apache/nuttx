@@ -55,8 +55,14 @@
  ************************************************************/
 
 #define PRIORITY   100
-#define STACKSIZE 8192
 #define NARGS        4
+
+/* The task_create task size can be specified in the defconfig file */
+#ifdef CONFIG_OSTEST_STACKSIZE
+# define STACKSIZE CONFIG_OSTEST_STACKSIZE
+#else
+# define STACKSIZE 8192
+#endif
 
 /************************************************************
  * Private Data

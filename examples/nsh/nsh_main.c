@@ -85,6 +85,7 @@ static const struct cmdmap_s g_cmdmap[] =
 {
 #if CONFIG_NFILE_DESCRIPTORS > 0
   { "cat",    cmd_cat,    2, 2, "<path>" },
+  { "cp",     cmd_cp,     3, 3, "<source-path> <dest-path>" },
 #endif
   { "echo",   cmd_echo,   2, 2, "<string>" },
   { "exec",   cmd_exec,   2, 3, "<hex-address>" },
@@ -107,13 +108,14 @@ static const struct cmdmap_s g_cmdmap[] =
  * Public Data
  ****************************************************************************/
 
-const char g_fmtargrequired[] = "nsh: %s: missing required argument(s)\n";
-const char g_fmtarginvalid[]  = "nsh: %s: argument invalid\n";
-const char g_fmtcmdnotfound[] = "nsh: %s: command not found\n";
-const char g_fmtcmdnotimpl[]  = "nsh: %s: command not implemented\n";
-const char g_fmtnosuch[]      = "nsh: %s: no such %s: %s\n";
-const char g_fmttoomanyargs[] = "nsh: %s: too many arguments\n";
-const char g_fmtcmdfailed[]   = "nsh: %s: %s failed: %s\n";
+const char g_fmtargrequired[]    = "nsh: %s: missing required argument(s)\n";
+const char g_fmtarginvalid[]     = "nsh: %s: argument invalid\n";
+const char g_fmtcmdnotfound[]    = "nsh: %s: command not found\n";
+const char g_fmtcmdnotimpl[]     = "nsh: %s: command not implemented\n";
+const char g_fmtnosuch[]         = "nsh: %s: no such %s: %s\n";
+const char g_fmttoomanyargs[]    = "nsh: %s: too many arguments\n";
+const char g_fmtcmdfailed[]      = "nsh: %s: %s failed: %s\n";
+const char g_fmtcmdoutofmemory[] = "nsh: %s: out of memory\n";
 
 /****************************************************************************
  * Private Functions

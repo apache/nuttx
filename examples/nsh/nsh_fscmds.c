@@ -53,11 +53,9 @@
 #include <unistd.h>
 #include <string.h>
 #include <dirent.h>
-#include <errno.h>
-#if 0
 #include <limits.h>
-#include <sched.h>
-#endif
+#include <libgen.h>
+#include <errno.h>
 
 #include "nsh.h"
 
@@ -68,6 +66,25 @@
 #define LSFLAGS_SIZE          1
 #define LSFLAGS_LONG          2
 #define LSFLAGS_RECURSIVE     4
+
+/* The size of the I/O buffer may be specified in the
+ * configs/<board-name>defconfig file -- provided that it is at least as
+ * large as PATH_MAX.
+ */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+#  ifdef CONFIG_NSH_IOBUFFERSIZE
+#    if CONFIG_NSH_IOBUFFERSIZE > (PATH_MAX + 1)
+#      define IOBUFFERSIZE CONFIG_NSH_IOBUFFERSIZE
+#    else
+#      define IOBUFFERSIZE (PATH_MAX + 1)
+#    endif
+#  else
+#    define IOBUFFERSIZE      1024
+#  endif
+# else
+#    define IOBUFFERSIZE (PATH_MAX + 1)
+#endif
 
 /****************************************************************************
  * Private Types
@@ -83,6 +100,8 @@ typedef int (*direntry_handler_t)(const char *, struct dirent *, void *);
  * Private Data
  ****************************************************************************/
 
+static char g_iobuffer[IOBUFFERSIZE];
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -95,10 +114,9 @@ typedef int (*direntry_handler_t)(const char *, struct dirent *, void *);
  * Name: trim_dir
  ****************************************************************************/
 
-#ifdef CONFIG_FULL_PATH
 static void trim_dir(char *arg)
 {
- /* Skip any '/' characters white space */
+ /* Skip any trailing '/' characters (unless it is also the leading '/') */
 
  int len = strlen(arg) - 1;
  while (len > 0 && arg[len] == '/')
@@ -107,7 +125,6 @@ static void trim_dir(char *arg)
       len--;
    }
 }
-#endif
 
 /****************************************************************************
  * Name: getdirpath
@@ -115,18 +132,19 @@ static void trim_dir(char *arg)
 
 static char *getdirpath(const char *path, const char *file)
 {
-  char buffer[PATH_MAX+1];
+  /* Handle the case where all that is left is '/' */
+
   if (strcmp(path, "/") == 0)
     {
-      sprintf(buffer, "/%s", file);
+      sprintf(g_iobuffer, "/%s", file);
     }
   else
     {
-      sprintf(buffer, "%s/%s", path, file);
+      sprintf(g_iobuffer, "%s/%s", path, file);
     }
 
-  buffer[PATH_MAX] = '\0';
-  return strdup(buffer);
+  g_iobuffer[PATH_MAX] = '\0';
+  return strdup(g_iobuffer);
 }
 
 /****************************************************************************
@@ -407,6 +425,130 @@ void cmd_cat(int argc, char **argv)
     }
 
   (void)close(fd);
+}
+#endif
+
+/****************************************************************************
+ * Name: cmd_cp
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+void cmd_cp(int argc, char **argv)
+{
+  struct stat buf;
+  char *fullpath = NULL;
+  const char *wrpath = argv[2];
+  int oflags = O_WRONLY|O_CREAT|O_TRUNC;
+  int rdfd;
+  int wrfd;
+  int ret;
+
+  /* Open the source file for reading */
+
+  rdfd = open(argv[1], O_RDONLY);
+  if (rdfd < 0)
+    {
+      printf(g_fmtcmdfailed, argv[0], "open", strerror(errno));
+      return;
+    }
+
+  /* Check if the destination is a directory */
+
+  ret = stat(wrpath, &buf);
+  if (ret == 0)
+    {
+      /* Something exists here... is it a directory? */
+
+      if (S_ISDIR(buf.st_mode))
+        {
+          /* Yes, it is a directory. Remove any trailing '/' characters from the path */
+
+          trim_dir(argv[2]);
+
+          /* Construct the full path to the new file */
+
+          fullpath = getdirpath(argv[2], basename(argv[1]) );
+          if (!fullpath)
+            {
+              printf(g_fmtcmdoutofmemory, argv[0]);
+              goto out_with_rdfd;
+            }
+
+          /* Open then fullpath for writing */
+          wrpath = fullpath;
+        }
+      else if (!S_ISREG(buf.st_mode))
+        {
+          /* Maybe it is a driver? */
+
+          oflags = O_WRONLY;
+        }
+    }
+
+  /* Now open the destination */
+
+  wrfd = open(wrpath, oflags, 0666);
+  if (wrfd < 0)
+    {
+      printf(g_fmtcmdfailed, argv[0], "open", strerror(errno));
+      goto out_with_fullpath;
+    }
+
+  /* Now copy the file */
+
+  for (;;)
+    {
+      int nbytesread;
+      int nbyteswritten;
+
+      do
+        {
+          nbytesread = read(rdfd, g_iobuffer, IOBUFFERSIZE);
+          if (nbytesread == 0)
+            {
+              /* End of file */
+
+              goto out_with_wrfd;
+            }
+          else if (nbytesread < 0 && errno != EINTR)
+            {
+              /* Read error */
+
+              printf(g_fmtcmdfailed, argv[0], "read", strerror(errno));
+              goto out_with_wrfd;
+            }
+        }
+      while (nbytesread <= 0);
+
+      do
+        {
+          nbyteswritten = write(wrfd, g_iobuffer, nbytesread);
+          if (nbyteswritten >= 0)
+            {
+              nbytesread -= nbyteswritten;
+            }
+          else if (errno != EINTR)
+            {
+              /* Read error */
+
+              printf(g_fmtcmdfailed, argv[0], "write", strerror(errno));
+              goto out_with_wrfd;
+            }
+        }
+      while (nbytesread > 0);
+    }
+
+out_with_wrfd:
+  close(wrfd);
+
+out_with_fullpath:
+  if (fullpath)
+    {
+      free(fullpath);
+    }
+
+out_with_rdfd:
+  close(rdfd);
 }
 #endif
 
