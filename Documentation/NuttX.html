@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 30, 2007</p>
+      <p>Last Updated: July 2, 2007</p>
     </td>
   </tr>
 </table>
@@ -183,7 +183,7 @@
 </table>
 
 <p>
-   The 10th release of NuttX (nuttx-0.2.7) is available for download
+   The 11th release of NuttX (nuttx-0.2.8) is available for download
    from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
    website.
    The change log associated with the release is available <a href="#currentrelease">here</a>.
@@ -560,17 +560,7 @@ Other memory:
 	  telldir(), rewindir().
 	* Fixed ARM compilation errors introduced in 0.2.5 (that is what I get
 	  for only testing on the simulation).
-</pre></ul>
 
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="currentrelease">ChangeLog for Current Release</a>
-  </td>
-  </tr>
-</table>
-
-<pre><ul>
 0.2.7 2007-06-09 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Added stat() to fs layer and to FAT
@@ -592,13 +582,45 @@ Other memory:
 	* Restructured some Makefiles to better handle enabling and disabling
 	  NuttX features without having so much conditional compilation in the
 	  source files.
-	* tools/mkconfig.c: No long depends on asprintf() and _GNU_SOURCE and
+	* tools/mkconfig.c: No longer depends on asprintf() and _GNU_SOURCE and
 	  so should now build in non-GNU, non-GLIBC environments.
 	* include/nuttx/compiler.h: Fix for using SDCC with the Z80.
 	* include/assert.h & arch/pjrc-8051/src/up_assert.c: SDCC does support
 	  __FILE__and __LINE__ (not tested)
 	* examples/ostest/barrier.c: Don't call usleep() when signals are
 	  disabled.
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="currentrelease">ChangeLog for Current Release</a>
+  </td>
+  </tr>
+</table>
+
+<pre><ul>
+0.2.8 2007-07-02 Gregory Nutt <spudmonkey@racsa.co.cr>
+	* tools/Makefile.mkconfig: Under Cygwin, executable has a different name
+	* tools/mkdeps.sh & arch/arm/src/Makefile: Corrected a problem makeing dependencies
+	* tools/zipme.sh: Force directory name to be nuttx-xx.yy.zz
+	* fs/fs_opendir.c: Correct errors in semaphore usage that can cause deadlock.
+	* lib/lib_getopt.c: Added getopt() support
+	* examples/nsh/:  NSH now supports cat, mount, umount, and mkdir.  ls supports
+	  -l -s, and -R
+	* Added basic OS support to manage environment variables:  environment
+	  storage, cloning on task creation, sharing on pthread creation, destruction
+	  on thread/task exit.
+	* Add environment variables APIs:  environ, getenv, putenv, clearenv, setenv,
+	  unsetenv
+	* Correct an error in realloc() when the block is extended "down" in memory.
+	  In this case, the old memory contents need to be copied to the new location
+	  and an allocated bit was not being set.
+	* examples/ostest/: Added an environment variable test.
+	* examples/nsh/: Break into several files.
+	* lib/: Added strrchr, basename, dirname
+	* examples/nsh/: Add cp, rm, rmdir, set, unset commands. echo will now print
+	  environment variables.
 </pre></ul>
 
 <table width ="100%">
@@ -611,31 +633,8 @@ Other memory:
 
 <pre><ul>
 
-0.2.8 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.9 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* tools/Makefile.mkconfig: Under Cygwin, executable has a different name
-	* tools/mkdeps.sh & arch/arm/src/Makefile: Corrected a problem making dependencies
-	* tools/zipme.sh: Force directory name to be nuttx-xx.yy.zz
-	* fs/fs_opendir.c: Correct errors in semaphore usage that can cause deadlock.
-	* lib/lib_getopt.c: Added getopt() support
-	* examples/nsh:  NSH now supports cat, mount, umount, and mkdir.  ls supports
-	  -l -s, and -R
-	* Added basic OS support to manage environment variables:  environment
-	  storage, cloning on task creation, sharing on pthread creation, destruction
-	  on thread/task exit.
-	* Add environment variables APIs:  environ, getenv, putenv, clearenv, setenv,
-	  unsetenv
-	* Add environment variables APIs:  environ, getenv, putenv, clearenv, setenv,
-	  unsetenv
-	* Correct an error in realloc() when the block is extended "down" in memory.
-	  In this case, the old memory contents need to be copied to the new location
-	  and an allocated bit was not being set.
-	* examples/ostest: Added an environment variable test.
-	* examples/nsh/: Break into several files.
-	* lib/: Added strrchr, basename, dirname
-	* examples/nsh/: Add cp, rm, rmdir, set, unset commands. echo will now print
-	  environment variables.
-	* Started m68322
 </pre></ul>
 
 <table width ="100%">
