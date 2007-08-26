@@ -51,6 +51,10 @@ BOARD_DIR	= configs/$(CONFIG_ARCH_BOARD)
 NONFSDIRS	= sched lib $(ARCH_SRC) mm examples/$(CONFIG_EXAMPLE)
 FSDIRS		= fs drivers
 
+ifeq ($(CONFIG_NET_UIP),y)
+NONFSDIRS	+= net netutils
+endif
+
 # CLEANDIRS are the directories that will clean in.  These are
 #   all directories that we know about.
 # MAKEDIRS are the directories in which we will build targets
@@ -73,6 +77,10 @@ LINKLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEXT
 
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 LINKLIBS	+= fs/libfs$(LIBEXT) drivers/libdrivers$(LIBEXT) 
+endif
+
+ifeq ($(CONFIG_NET_UIP),y)
+LINKLIBS	+= net/libnet$(LIBEXT) netutils/libnetutils$(LIBEXT) 
 endif
 
 # This is the name of the final target
@@ -183,6 +191,12 @@ $(ARCH_SRC)/libarch$(LIBEXT): context
 
 mm/libmm$(LIBEXT): context
 	$(MAKE) -C mm TOPDIR=$(TOPDIR) libmm$(LIBEXT)
+
+net/libnet$(LIBEXT): context
+	$(MAKE) -C net TOPDIR=$(TOPDIR) libnet$(LIBEXT)
+
+netutils/libnetutils$(LIBEXT): context
+	$(MAKE) -C netutils TOPDIR=$(TOPDIR) libnetutils$(LIBEXT)
 
 fs/libfs$(LIBEXT): context
 	$(MAKE) -C fs TOPDIR=$(TOPDIR) libfs$(LIBEXT)

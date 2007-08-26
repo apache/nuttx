@@ -49,6 +49,9 @@ CSRCS		= up_initialize.c up_idle.c up_interruptcontext.c \
 ifeq ($(CONFIG_FS_FAT),y)
 CSRCS		+= up_blockdevice.c up_deviceimage.c
 endif
+ifeq ($(CONFIG_NET_UIP),y)
+CSRCS		+= up_uipdriver.c
+endif
 
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 

@@ -29,7 +29,7 @@ o C++ Support
 - Need to call static constructors
 
 o Network
-- Port FreeBSD TCP/IP stack
+- Finish integratin of uIP
 
 o USB
 - Implement USB device support

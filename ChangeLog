@@ -201,3 +201,5 @@
 
 0.2.9 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* Imported uIP into the tree (see
+	   http://www.sics.se/~adam/uip/index.php/Main_Page)
