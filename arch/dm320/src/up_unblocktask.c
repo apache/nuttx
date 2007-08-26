@@ -42,6 +42,7 @@
 #include <sched.h>
 #include <debug.h>
 #include <nuttx/arch.h>
+#include "clock_internal.h"
 #include "os_internal.h"
 #include "up_internal.h"
 
@@ -96,11 +97,11 @@ void up_unblock_task(_TCB *tcb)
      sched_removeblocked(tcb);
 
      /* Reset its timeslice.  This is only meaningful for round
-      * robin tasks but it doesn't here to do it for everything
+      * robin tasks but it doesn't hurt to do it for all tasks.
       */
 
 #if CONFIG_RR_INTERVAL > 0
-     tcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_SEC;
+     tcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
 #endif
 
      /* Add the task in the correct location in the prioritized
