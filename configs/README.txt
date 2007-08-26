@@ -208,6 +208,33 @@ defconfig -- This is a configuration file similar to the Linux
 		  structures.  The system manages a pool of preallocated
 		  watchdog structures to minimize dynamic allocations
 
+	TCP/IP support via uIP
+		CONFIG_NET_UIP - Enable or disable all uIP features
+		CONFIG_NET_UIP_IPv6 - Build in support for IPv6
+		CONFIG_UIP_MAX_CONNECTIONS - Maximum number of TCP connections
+		CONFIG_UIP_MAX_LISTENPORTS - Maximum number of listening TCP ports
+		CONFIG_UIP_BUFFER_SIZE - uIP buffer size
+		CONFIG_UIP_LOGGING - Logging on or off
+		CONFIG_UIP_UDP - UDP support on or off
+		CONFIG_UIP_UDP_CHECKSUMS - UDP checksums on or off
+		CONFIG_UIP_UDP_CONNS - The maximum amount of concurrent UDP
+		  connections
+		CONFIG_UIP_STATISTICS - uIP statistics on or off
+		CONFIG_UIP_PINGADDRCONF - Use "ping" packet for setting IP address
+		CONFIG_UIP_RECEIVE_WINDOW - The size of the advertised receiver's
+		  window
+		CONFIG_UIP_ARPTAB_SIZE - The size of the ARP table
+		CONFIG_UIP_BROADCAST - Broadcast support
+		CONFIG_UIP_LLH_LEN - The link level header length
+		CONFIG_UIP_EXTERNAL_BUFFER - Incoming packet buffer (uip_buf)
+		  is defined externally
+		CONFIG_UIP_FWCACHE_SIZE - number of packets to remember when
+		  looking for duplicates
+
+	UIP Network Utilities
+		CONFIG_UIP_DHCP_LIGHT - Reduces size of DHCP
+		CONFIG_UIP_RESOLV_ENTRIES - Number of resolver entries
+
 	Stack and heap information
 
 		CONFIG_BOOT_FROM_FLASH - Some configurations support XIP
