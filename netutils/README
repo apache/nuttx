@@ -1,0 +1,5 @@
+netutils
+^^^^^^^^
+
+This directory contains most of the network applications contained under the uIP-1.0 apps directory.
+As the uIP apps/README says, there applications "are not all heavily tested."
