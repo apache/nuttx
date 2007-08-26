@@ -86,4 +86,7 @@ void up_initialize(void)
   devnull_register();       /* Standard /dev/null */
   up_devconsole();          /* Our private /dev/console */
   up_registerblockdevice(); /* Our simulated block device /dev/blkdev */
+#ifdef CONFIG_NET_UIP
+  uipdriver_init();         /* Our "real" netwok driver */
+#endif
 }

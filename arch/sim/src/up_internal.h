@@ -107,5 +107,12 @@ extern void up_registerblockdevice(void);
 
 extern char *up_deviceimage(void);
 
+/* up_uipdriver.c *********************************************************/
+
+#ifdef CONFIG_NET_UIP
+extern int uipdriver_init(void);
+extern void uipdriver_loop(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_UP_INTERNAL_H */
