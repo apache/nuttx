@@ -107,9 +107,18 @@ extern void up_registerblockdevice(void);
 
 extern char *up_deviceimage(void);
 
+/* up_tapdev.c ************************************************************/
+
+#ifdef CONFIG_NET_UIP 
+extern unsigned long up_getwalltime( void );
+extern void tapdev_init(void);
+extern unsigned int tapdev_read(char *buf, unsigned int buflen);
+extern void tapdev_send(char *buf, unsigned int buflen);
+#endif
+
 /* up_uipdriver.c *********************************************************/
 
-#ifdef CONFIG_NET_UIP
+#ifdef CONFIG_NET_UIP 
 extern int uipdriver_init(void);
 extern void uipdriver_loop(void);
 #endif

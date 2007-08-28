@@ -51,12 +51,14 @@ CSRCS		+= up_blockdevice.c up_deviceimage.c
 endif
 ifeq ($(CONFIG_NET_UIP),y)
 CSRCS		+= up_uipdriver.c
+SPECSRCS	+= up_tapdev.c
 endif
 
 COBJS		= $(CSRCS:.c=$(OBJEXT))
+SPECOBJS	= $(SPECSRCS:.c=$(OBJEXT))
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+SRCS		= $(ASRCS) $(CSRCS) $(SPECSRCS)
+OBJS		= $(AOBJS) $(COBJS) $(SPECOBJS)
 
 LDFLAGS		= $(ARCHSCRIPT)
 EXTRA_LIBS	= -lc
@@ -76,6 +78,9 @@ $(AOBJS): %$(OBJEXT): %.S
 
 $(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
 	$(CC) -c $(CFLAGS) $< -o $@
+
+$(SPECOBJS): %$(OBJEXT): %.c
+	$(CC) -c $(HOSTCFLAGS) $< -o $@
 
 libarch$(LIBEXT): $(OBJS)
 	( for obj in $(OBJS) ; do \
