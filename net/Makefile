@@ -14,7 +14,7 @@
 #    notice, this list of conditions and the following disclaimer in
 #    the documentation and/or other materials provided with the
 #    distribution.
-# 3. Neither the name Gregory Nutt nor the names of its contributors may be
+# 3. Neither the name NuttX nor the names of its contributors may be
 #    used to endorse or promote products derived from this software
 #    without specific prior written permission.
 #
@@ -38,13 +38,15 @@
 MKDEP		= $(TOPDIR)/tools/mkdeps.sh
 
 ifeq ($(CONFIG_NET_UIP),y)
+STD_ASRCS	=
+STD_CSRCS	= socket.c bind.c
 include uip/Make.defs
 endif
 
-ASRCS		= $(UIP_ASRCS)
+ASRCS		= $(STD_ASRCS) $(UIP_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= $(UIP_CSRCS)
+CSRCS		= $(STD_CSRCS) $(UIP_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
@@ -70,7 +72,7 @@ $(BIN): $(OBJS)
 
 .depend: Makefile $(SRCS)
 ifeq ($(CONFIG_NET_UIP),y)
-	$(MKDEP) --dep-path uip $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(MKDEP) --dep-path . --dep-path uip $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 endif
 	touch $@
 

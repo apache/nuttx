@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -122,6 +122,9 @@ typedef uint16       ino_t;
 typedef unsigned int sig_atomic_t;
 typedef int          pid_t;
 typedef int          STATUS;
+
+typedef unsigned int socklen_t;
+typedef uint16       sa_family_t;
 
 /* Process entry point */
 
