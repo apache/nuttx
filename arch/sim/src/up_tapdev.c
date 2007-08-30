@@ -38,6 +38,10 @@
  *
  ****************************************************************************/
 
+#ifndef linux
+# error "Sorry, this will only work with Linux"
+#endif
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -55,20 +59,8 @@
 #include <unistd.h>
 #include <string.h>
 
-#if 0
-#include "uip/uip.h"
-#include <net/uip/uip-arch.h>
-#include <net/uip/uip-arp.h>
-#endif
-
-#ifdef linux
-# include <sys/ioctl.h>
-# include <linux/if.h>
-# include <linux/if_tun.h>
-# define DEVTAP "/dev/net/tun"
-#else  /* linux */
-# define DEVTAP "/dev/tap0"
-#endif /* linux */
+#include <linux/if.h>
+#include <linux/if_tun.h>
 
 extern int lib_rawprintf(const char *format, ...);
 
@@ -77,6 +69,8 @@ extern int lib_rawprintf(const char *format, ...);
  ****************************************************************************/
 
 #define TAPDEV_DEBUG    1
+
+#define DEVTAP          "/dev/net/tun"
 
 #define UIP_DRIPADDR0   192
 #define UIP_DRIPADDR1   168
