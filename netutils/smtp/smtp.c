@@ -1,6 +1,11 @@
-/* smtp.c
+/****************************************************************************
+ * smtp.c
  * smtp SMTP E-mail sender
- * Author: Adam Dunkels <adam@dunkels.com>
+ *
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Heavily leveraged from uIP 1.0 which also has a BSD-like license:
  *
  * The Simple Mail Transfer Protocol (SMTP) as defined by RFC821 is
  * the standard way of sending and transfering e-mail on the
@@ -8,8 +13,9 @@
  * example of how to implement protocols in uIP, and is able to send
  * out e-mail but has not been extensively tested.
  *
- * Copyright (c) 2004, Adam Dunkels.
- * All rights reserved.
+ *   Author: Adam Dunkels <adam@dunkels.com>
+ *   Copyright (c) 2004, Adam Dunkels.
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,16 +40,16 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * This file is part of the uIP TCP/IP stack.
- *
- * Author: Adam Dunkels <adam@sics.se>
- *
- * $Id: smtp.c,v 1.1.1.1 2007-08-26 23:07:06 patacongo Exp $
- */
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <string.h>
+#include <stdlib.h>
+#include <semaphore.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/psock.h>
@@ -51,10 +57,7 @@
 
 #include "smtp-strings.h"
 
-static struct smtp_state s;
-
-static char *localhostname;
-static uip_ipaddr_t smtpserver;
+#define SMTP_INPUT_BUFFER_SIZE 512
 
 #define ISO_nl 0x0a
 #define ISO_cr 0x0d
@@ -66,110 +69,141 @@ static uip_ipaddr_t smtpserver;
 #define ISO_4  0x34
 #define ISO_5  0x35
 
+/* This structure represents the state of a single SMTP transaction */
 
-/*---------------------------------------------------------------------------*/
-static
-void smtp_thread(void)
+struct smtp_state
 {
-  psock_readto(&s.psock, ISO_nl);
+  uint8   state;
+  boolean connected;
+  sem_t   sem;
+  struct psock psock;
+  uip_ipaddr_t smtpserver;
+  char   *localhostname;
+  char   *to;
+  char   *cc;
+  char   *from;
+  char   *subject;
+  char   *msg;
+  int     msglen;
+  int     sentlen;
+  int     textlen;
+  int     sendptr;
+  int     result;
+  char    buffer[SMTP_INPUT_BUFFER_SIZE];
+};
 
-  if(strncmp(s.inputbuffer, smtp_220, 3) != 0) {
-    PSOCK_CLOSE(&s.psock);
-    smtp_done(2);
-    pthread_exit(NULL);
-  }
+static volatile struct smtp_state *gpsmtp = 0;
 
-  PSOCK_SEND_STR(&s.psock, (char *)smtp_helo);
-  PSOCK_SEND_STR(&s.psock, localhostname);
-  PSOCK_SEND_STR(&s.psock, (char *)smtp_crnl);
+static void smtp_send_message(struct smtp_state *psmtp)
+{
+  psock_readto(&psmtp->psock, ISO_nl);
 
-  psock_readto(&s.psock, ISO_nl);
-
-  if(s.inputbuffer[0] != ISO_2) {
-    PSOCK_CLOSE(&s.psock);
-    smtp_done(3);
-    pthread_exit(NULL);
-  }
-
-  PSOCK_SEND_STR(&s.psock, (char *)smtp_mail_from);
-  PSOCK_SEND_STR(&s.psock, s.from);
-  PSOCK_SEND_STR(&s.psock, (char *)smtp_crnl);
-
-  psock_readto(&s.psock, ISO_nl);
-
-  if(s.inputbuffer[0] != ISO_2) {
-    PSOCK_CLOSE(&s.psock);
-    smtp_done(4);
-    pthread_exit(NULL);
-  }
-
-  PSOCK_SEND_STR(&s.psock, (char *)smtp_rcpt_to);
-  PSOCK_SEND_STR(&s.psock, s.to);
-  PSOCK_SEND_STR(&s.psock, (char *)smtp_crnl);
-
-  psock_readto(&s.psock, ISO_nl);
-
-  if(s.inputbuffer[0] != ISO_2) {
-    PSOCK_CLOSE(&s.psock);
-    smtp_done(5);
-    pthread_exit(NULL);
-  }
-
-  if(s.cc != 0) {
-    PSOCK_SEND_STR(&s.psock, (char *)smtp_rcpt_to);
-    PSOCK_SEND_STR(&s.psock, s.cc);
-    PSOCK_SEND_STR(&s.psock, (char *)smtp_crnl);
-
-    psock_readto(&s.psock, ISO_nl);
-
-    if(s.inputbuffer[0] != ISO_2) {
-      PSOCK_CLOSE(&s.psock);
-      smtp_done(6);
-      pthread_exit(NULL);
+  if (strncmp(psmtp->buffer, smtp_220, 3) != 0)
+    {
+      PSOCK_CLOSE(&psmtp->psock);
+      psmtp->result = 2;
+      return;
     }
-  }
 
-  PSOCK_SEND_STR(&s.psock, (char *)smtp_data);
+  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_helo);
+  PSOCK_SEND_STR(&psmtp->psock, psmtp->localhostname);
+  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnl);
 
-  psock_readto(&s.psock, ISO_nl);
+  psock_readto(&psmtp->psock, ISO_nl);
 
-  if(s.inputbuffer[0] != ISO_3) {
-    PSOCK_CLOSE(&s.psock);
-    smtp_done(7);
-    pthread_exit(NULL);
-  }
+  if (psmtp->buffer[0] != ISO_2)
+    {
+      PSOCK_CLOSE(&psmtp->psock);
+      psmtp->result = 3;
+      return;
+    }
 
-  PSOCK_SEND_STR(&s.psock, (char *)smtp_to);
-  PSOCK_SEND_STR(&s.psock, s.to);
-  PSOCK_SEND_STR(&s.psock, (char *)smtp_crnl);
-  
-  if(s.cc != 0) {
-    PSOCK_SEND_STR(&s.psock, (char *)smtp_cc);
-    PSOCK_SEND_STR(&s.psock, s.cc);
-    PSOCK_SEND_STR(&s.psock, (char *)smtp_crnl);
-  }
+  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_mail_from);
+  PSOCK_SEND_STR(&psmtp->psock, psmtp->from);
+  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnl);
 
-  PSOCK_SEND_STR(&s.psock, (char *)smtp_from);
-  PSOCK_SEND_STR(&s.psock, s.from);
-  PSOCK_SEND_STR(&s.psock, (char *)smtp_crnl);
+  psock_readto(&psmtp->psock, ISO_nl);
 
-  PSOCK_SEND_STR(&s.psock, (char *)smtp_subject);
-  PSOCK_SEND_STR(&s.psock, s.subject);
-  PSOCK_SEND_STR(&s.psock, (char *)smtp_crnl);
+  if (psmtp->buffer[0] != ISO_2)
+    {
+      PSOCK_CLOSE(&psmtp->psock);
+      psmtp->result = 3;
+      return;
+    }
 
-  psock_send(&s.psock, s.msg, s.msglen);
+  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_rcpt_to);
+  PSOCK_SEND_STR(&psmtp->psock, psmtp->to);
+  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnl);
 
-  PSOCK_SEND_STR(&s.psock, (char *)smtp_crnlperiodcrnl);
+  psock_readto(&psmtp->psock, ISO_nl);
 
-  psock_readto(&s.psock, ISO_nl);
-  if(s.inputbuffer[0] != ISO_2) {
-    PSOCK_CLOSE(&s.psock);
-    smtp_done(8);
-    pthread_exit(NULL);
-  }
+  if (psmtp->buffer[0] != ISO_2)
+    {
+      PSOCK_CLOSE(&psmtp->psock);
+      psmtp->result = 5;
+      return;
+    }
 
-  PSOCK_SEND_STR(&s.psock, (char *)smtp_quit);
-  smtp_done(SMTP_ERR_OK);
+  if (psmtp->cc != 0)
+    {
+      PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_rcpt_to);
+      PSOCK_SEND_STR(&psmtp->psock, psmtp->cc);
+      PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnl);
+
+      psock_readto(&psmtp->psock, ISO_nl);
+
+      if (psmtp->buffer[0] != ISO_2)
+        {
+          PSOCK_CLOSE(&psmtp->psock);
+          psmtp->result = 6;
+          return;
+        }
+    }
+
+  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_data);
+
+  psock_readto(&psmtp->psock, ISO_nl);
+
+  if (psmtp->buffer[0] != ISO_3)
+    {
+      PSOCK_CLOSE(&psmtp->psock);
+      psmtp->result = 7;
+      return;
+    }
+
+  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_to);
+  PSOCK_SEND_STR(&psmtp->psock, psmtp->to);
+  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnl);
+
+  if (psmtp->cc != 0)
+    {
+      PSOCK_SEND_STR(&psmtp->psock, (char *)psmtp->cc);
+      PSOCK_SEND_STR(&psmtp->psock, psmtp->cc);
+      PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnl);
+    }
+
+  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_from);
+  PSOCK_SEND_STR(&psmtp->psock, psmtp->from);
+  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnl);
+
+  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_subject);
+  PSOCK_SEND_STR(&psmtp->psock, psmtp->subject);
+  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnl);
+
+  psock_send(&psmtp->psock, psmtp->msg, psmtp->msglen);
+
+  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnlperiodcrnl);
+
+  psock_readto(&psmtp->psock, ISO_nl);
+  if (psmtp->buffer[0] != ISO_2)
+    {
+      PSOCK_CLOSE(&psmtp->psock);
+      psmtp->result = 8;
+      return;
+    }
+
+  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_quit);
+  psmtp->result = 0;
 }
 
 /* This function is called by the UIP interrupt handling logic whenevent an
@@ -178,75 +212,109 @@ void smtp_thread(void)
 
 void uip_interrupt_event(void)
 {
-  if(uip_closed()) {
-    s.connected = 0;
-    return;
-  }
-  if(uip_aborted() || uip_timedout()) {
-    s.connected = 0;
-    smtp_done(1);
-    return;
-  }
-  smtp_thread();
+  if (gpsmtp)
+    {
+      if (uip_closed())
+        {
+          gpsmtp->connected = FALSE;
+          return;
+        }
+
+      if (uip_aborted() || uip_timedout())
+        {
+          gpsmtp->connected = FALSE;
+        }
+
+      sem_post((sem_t*)&gpsmtp->sem);
+    }
 }
 
-/*---------------------------------------------------------------------------*/
-/**
- * Specificy an SMTP server and hostname.
+/* Specificy an SMTP server and hostname.
  *
  * This function is used to configure the SMTP module with an SMTP
  * server and the hostname of the host.
  *
- * \param lhostname The hostname of the uIP host.
+ * lhostname The hostname of the uIP host.
  *
- * \param server A pointer to a 4-byte array representing the IP
+ * server A pointer to a 4-byte array representing the IP
  * address of the SMTP server to be configured.
  */
-void
-smtp_configure(char *lhostname, void *server)
+
+void smtp_configure(void *handle, char *lhostname, void *server)
 {
-  localhostname = lhostname;
-  uip_ipaddr_copy(smtpserver, server);
+  struct smtp_state *psmtp = (struct smtp_state *)handle;
+  psmtp->localhostname = lhostname;
+  uip_ipaddr_copy(psmtp->smtpserver, server);
 }
-/*---------------------------------------------------------------------------*/
-/**
- * Send an e-mail.
+
+/* Send an e-mail.
  *
- * \param to The e-mail address of the receiver of the e-mail.
- * \param cc The e-mail address of the CC: receivers of the e-mail.
- * \param from The e-mail address of the sender of the e-mail.
- * \param subject The subject of the e-mail.
- * \param msg The actual e-mail message.
- * \param msglen The length of the e-mail message.
+ * to The e-mail address of the receiver of the e-mail.
+ * cc The e-mail address of the CC: receivers of the e-mail.
+ * from The e-mail address of the sender of the e-mail.
+ * subject The subject of the e-mail.
+ * msg The actual e-mail message.
+ * msglen The length of the e-mail message.
  */
-unsigned char
-smtp_send(char *to, char *cc, char *from,
-	  char *subject, char *msg, uint16 msglen)
+
+int smtp_send(void *handle, char *to, char *cc, char *from, char *subject, char *msg, int msglen)
 {
+  struct smtp_state *psmtp = (struct smtp_state *)handle;
   struct uip_conn *conn;
 
-  conn = uip_connect(smtpserver, HTONS(25));
-  if(conn == NULL) {
-    return 0;
-  }
-  s.connected = 1;
-  s.to = to;
-  s.cc = cc;
-  s.from = from;
-  s.subject = subject;
-  s.msg = msg;
-  s.msglen = msglen;
+  conn = uip_connect(&psmtp->smtpserver, HTONS(25));
+  if (conn == NULL)
+    {
+      return ERROR;
+    }
 
-  psock_init(&s.psock, s.inputbuffer, sizeof(s.inputbuffer));
-  
-  return 1;
+  psmtp->connected = TRUE;
+  psmtp->to        = to;
+  psmtp->cc        = cc;
+  psmtp->from      = from;
+  psmtp->subject   = subject;
+  psmtp->msg       = msg;
+  psmtp->msglen    = msglen;
+  psmtp->result    = OK;
+
+  gpsmtp           = psmtp;
+  psock_init(&psmtp->psock, psmtp->buffer, SMTP_INPUT_BUFFER_SIZE);
+
+  /* And wait for the the socket to be connected */
+  sem_wait(&psmtp->sem);
+  gpsmtp           = 0;
+
+  /* Was an error reported by interrupt handler? */
+  if (psmtp->result == OK )
+    {
+      /* No... Send the message */
+      smtp_send_message(psmtp);
+    }
+
+  return psmtp->result;
 }
-/*---------------------------------------------------------------------------*/
-void
-smtp_init(void)
+
+void *smtp_open(void)
 {
-  s.connected = 0;
+  /* Allocate the handle */
+
+  struct smtp_state *psmtp = (struct smtp_state *)malloc(sizeof(struct smtp_state));
+  if (psmtp)
+    {
+      /* Initialize the handle */
+
+      memset(psmtp, 0, sizeof(struct smtp_state));
+     (void)sem_init(&psmtp->sem, 0, 0);
+    }
+  return (void*)psmtp;
 }
-/*---------------------------------------------------------------------------*/
-/** @} */
-/** @} */
+
+void smtp_close(void *handle)
+{
+  struct smtp_state *psmtp = (struct smtp_state *)handle;
+  if (psmtp)
+    {
+      sem_destroy(&psmtp->sem);
+      free(psmtp);
+    }
+}

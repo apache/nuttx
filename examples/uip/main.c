@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: main.c,v 1.1.1.1 2007-08-26 23:10:37 patacongo Exp $
+ * $Id: main.c,v 1.2 2007-08-30 23:57:58 patacongo Exp $
  *
  */
 
@@ -66,14 +66,17 @@ int user_start(int argc, char *argv[])
   int i;
   uip_ipaddr_t ipaddr;
 #if defined(CONFIG_EXAMPLE_UIP_DHCPC)
-  uint16 mac[6] = {1,2,3,4,5,6};
+  uint16 mac[6] = {1, 2, 3, 4, 5, 6};
+#endif
+#ifdef CONFIG_EXAMPLE_UIP_SMTP
+  void *handle;
 #endif
 
-  uip_ipaddr(ipaddr, 192,168,0,2);
+  uip_ipaddr(ipaddr, 192, 168, 0, 2);
   uip_sethostaddr(ipaddr);
-  uip_ipaddr(ipaddr, 192,168,0,1);
+  uip_ipaddr(ipaddr, 192, 168, 0, 1);
   uip_setdraddr(ipaddr);
-  uip_ipaddr(ipaddr, 255,255,255,0);
+  uip_ipaddr(ipaddr, 255, 255, 255, 0);
   uip_setnetmask(ipaddr);
 
 #if defined(CONFIG_EXAMPLE_UIP_WEBSERVER)
@@ -83,15 +86,19 @@ int user_start(int argc, char *argv[])
 #elif defined(CONFIG_EXAMPLE_UIP_DHCPC)
   dhcpc_init(&mac, 6);
 #elif defined(CONFIG_EXAMPLE_UIP_SMTP)
-  uip_ipaddr(ipaddr, 127,0,0,1);
-  smtp_configure("localhost", ipaddr);
-  SMTP_SEND("adam@sics.se", NULL, "uip-testing@example.com",
-	    "Testing SMTP from uIP",
-	    "Test message sent by uIP\r\n");
+  uip_ipaddr(ipaddr, 127, 0, 0, 1);
+  handle = smtp_init();
+  if (handle)
+    {
+      smtp_configure("localhost", ipaddr);
+      smtp_send("adam@sics.se", NULL, "uip-testing@example.com",
+                "Testing SMTP from uIP", "Test message sent by uIP\r\n");
+      smtp_close(handle);
+    }
 #elif defined(CONFIG_EXAMPLE_UIP_WEBCLIENT)
   webclient_init();
   resolv_init();
-  uip_ipaddr(ipaddr, 195,54,122,204);
+  uip_ipaddr(ipaddr, 195, 54, 122, 204);
   resolv_conf(ipaddr);
   resolv_query("www.sics.se");
 #endif
@@ -133,11 +140,6 @@ void dhcpc_configured(const struct dhcpc_state *s)
   resolv_conf(s->dnsaddr);
 }
 #endif /* __DHCPC_H__ */
-
-void smtp_done(unsigned char code)
-{
-  printf("SMTP done with code %d\n", code);
-}
 
 void webclient_closed(void)
 {

@@ -33,6 +33,5 @@
 #
 ############################################################################
 
-# Does not build
-# SMTP_ASRCS  =
-# SMTP_CSRCS  = smtp.c smtp-strings.c
+SMTP_ASRCS  =
+SMTP_CSRCS  = smtp.c smtp-strings.c

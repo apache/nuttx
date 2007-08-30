@@ -1,9 +1,15 @@
+/****************************************************************************
 /* smtp.h
  * SMTP header file
- * Author: Adam Dunkels <adam@dunkels.com>
  *
- * Copyright (c) 2002, Adam Dunkels.
- * All rights reserved.
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Heavily leveraged from uIP 1.0 which also has a BSD-like license:
+ *
+ *   Author: Adam Dunkels <adam@dunkels.com>
+ *   Copyright (c) 2002, Adam Dunkels.
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,48 +34,31 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ *
+ ****************************************************************************/
 
 #ifndef __SMTP_H__
 #define __SMTP_H__
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <sys/types.h>
 
 #include <net/uip/uipopt.h>
 
-/* Error number that signifies a non-error condition. */
+/****************************************************************************
+ * Type Definitions
+ ****************************************************************************/
 
-#define SMTP_ERR_OK 0
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-/* Callback function that is called when an e-mail transmission is
- * done.
- *
- * This function must be implemented by the module that uses the SMTP
- * module.
- *
- * error The number of the error if an error occured, or
- * SMTP_ERR_OK.
- */
-
-void smtp_done(unsigned char error);
-
-void smtp_init(void);
-void smtp_configure(char *localhostname, uint16 *smtpserver);
-unsigned char smtp_send(char *to, char *from,
-			char *subject, char *msg,
-			uint16 msglen);
-
-struct smtp_state
-{
-  uint8 state;
-  char *to;
-  char *from;
-  char *subject;
-  char *msg;
-  uint16 msglen;
-
-  uint16 sentlen, textlen;
-  uint16 sendptr;
-};
+extern void *smtp_open(void);
+extern void  smtp_configure(void *handle, char *localhostname, void *smtpserver);
+extern int   smtp_send(void *handle, char *to, char *cc, char *from, char *subject, char *msg, int msglen);
+extern void  smtp_close(void *handle);
 
 #endif /* __SMTP_H__ */
