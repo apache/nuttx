@@ -69,9 +69,9 @@
 #define UIP_POLL_REQUEST  3 /* Tells uIP that a connection should be polled. */
 #define UIP_UDP_SEND_CONN 4 /* Tells uIP that a UDP datagram should be constructed in the
                              * uip_buf buffer. */
-#if UIP_UDP
+ #ifdef CONFIG_NET_UDP
 # define UIP_UDP_TIMER    5
-#endif /* UIP_UDP */
+#endif  /* CONFIG_NET_UDP */
 
 /* uIP device driver functions
  *
@@ -194,7 +194,7 @@
 #define uip_poll_conn(conn) do { uip_conn = conn; uip_interrupt(UIP_POLL_REQUEST); } while (0)
 
 
-#if UIP_UDP
+ #ifdef CONFIG_NET_UDP
 /* Periodic processing for a UDP connection identified by its number.
  *
  * This function is essentially the same as uip_periodic(), but for
@@ -241,7 +241,7 @@
                                          uip_interrupt(UIP_UDP_TIMER); } while (0)
 
 
-#endif /* UIP_UDP */
+#endif  /* CONFIG_NET_UDP */
 
 /****************************************************************************
  * Public Types

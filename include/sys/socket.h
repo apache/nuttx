@@ -101,6 +101,7 @@ extern "C" {
 
 EXTERN int socket(int domain, int type, int protocol);
 EXTERN int bind(int sockfd, const struct sockaddr *my_addr, socklen_t addrlen);
+EXTERN int connect(int sockfd, const struct sockaddr *serv_addr, socklen_t addrlen);
 
 #undef EXTERN
 #if defined(__cplusplus)

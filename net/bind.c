@@ -38,9 +38,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#ifdef CONFIG_NET
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
+
+#include "net_internal.h"
 
 /****************************************************************************
  * Global Functions
@@ -50,10 +54,10 @@
  * Function: bind
  *
  * Description:
- *  bind() gives the socket sockfd the local address my_addr. my_addr is
- *  addrlen bytes long. Traditionally, this is called “assigning a name to a
- *  socket.” When a socket is created with socket(2), it exists in a name space
- *  (address family) but has no name assigned.
+ *   bind() gives the socket sockfd the local address my_addr. my_addr is
+ *   addrlen bytes long. Traditionally, this is called “assigning a name to
+ *   a socket.” When a socket is created with socket(2), it exists in a name
+ *   space (address family) but has no name assigned.
  *
  * Parameters:
  *   sockfd   Socket descriptor from socket
@@ -63,13 +67,57 @@
  * Returned Value:
  *   0 on success; -1 on error with errno set appropriately
  *
+ *   EACCES
+ *     The address is protected, and the user is not the superuser.
+ *   EADDRINUSE
+ *     The given address is already in use.
+ *   EBADF
+ *     sockfd is not a valid descriptor.
+ *   EINVAL
+ *     The socket is already bound to an address.
+ *   ENOTSOCK
+ *     sockfd is a descriptor for a file, not a socket.
+ *
  * Assumptions:
  *
  ****************************************************************************/
 
 int bind(int sockfd, const struct sockaddr *my_addr, socklen_t addrlen)
 {
-  *get_errno_ptr() = ENOSYS;
+  FAR struct socket *psock = sockfd_socket(sockfd);
+  int err;
+
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (!psock || psock->s_crefs <= 0)
+    {
+      err = EBADF;
+      goto errout;
+    }
+
+  /* Perform the binding depending on the protocol type */
+  switch (psock->s_type)
+    {
+      case SOCK_STREAM:
+        /* Put TCP/IP binding logic here */
+        break;
+
+#ifdef CONFIG_NET_UDP
+      case SOCK_DGRAM:
+        /* Put UDP binding logic here */
+        break;
+#endif
+      default:
+        err = EBADF;
+        goto errout;
+    }
+
+  err = ENOSYS;
+  /*return OK;*/
+
+errout:
+  *get_errno_ptr() = err;
   return ERROR;
 }
 
+#endif /* CONFIG_NET */

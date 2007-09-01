@@ -145,14 +145,6 @@
 
 /* UDP configuration options */
 
-/* Toggles wether UDP support should be compiled in or not. */
-
-#ifdef CONFIG_NET_UDP
-# define UIP_UDP CONFIG_NET_UDP
-#else /* CONFIG_NET_UDP */
-# define UIP_UDP           0
-#endif /* CONFIG_NET_UDP */
-
 /* Toggles if UDP checksums should be used or not.
  *
  * Note: Support for UDP checksums is currently not included in uIP,

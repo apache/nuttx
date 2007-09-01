@@ -159,7 +159,7 @@ void uipdriver_loop(void)
             }
         }
 
-#if UIP_UDP
+#ifdef CONFIG_NET_UDP
       for(i = 0; i < UIP_UDP_CONNS; i++)
         {
           uip_udp_periodic(i);
@@ -175,7 +175,7 @@ void uipdriver_loop(void)
               tapdev_send((char*)uip_buf, uip_len);
             }
         }
-#endif /* UIP_UDP */
+#endif /* CONFIG_NET_UDP */
 
       /* Call the ARP timer function every 10 seconds. */
 

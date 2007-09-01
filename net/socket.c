@@ -38,9 +38,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#ifdef CONFIG_NET
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
+
+#include "net_internal.h"
 
 /****************************************************************************
  * Global Functions
@@ -60,13 +64,88 @@
  * Returned Value:
  *   0 on success; -1 on error with errno set appropriately
  *
+ *   EACCES
+ *     Permission to create a socket of the specified type and/or protocol
+ *     is denied.
+ *   EAFNOSUPPORT
+ *     The implementation does not support the specified address family.
+ *   EINVAL
+ *     Unknown protocol, or protocol family not available.
+ *   EMFILE
+ *     Process file table overflow.
+ *   ENFILE
+ *     The system limit on the total number of open files has been reached.
+ *   ENOBUFS or ENOMEM
+ *     Insufficient memory is available. The socket cannot be created until
+ *     sufficient resources are freed.
+ *   EPROTONOSUPPORT
+ *     The protocol type or the specified protocol is not supported within
+ *     this domain.
+ *
  * Assumptions:
  *
  ****************************************************************************/
 
 int socket(int domain, int type, int protocol)
 {
-  *get_errno_ptr() = ENOSYS;
+#ifdef CONFIG_NET_UDP
+  FAR struct socket *psock;
+#endif
+  int sockfd;
+  int err;
+
+  /* Only PF_INET or PF_INET6 domains supported */
+
+#ifdef CONFIG_NET_IPv6
+  if ( domain != PF_INET6)
+#else
+  if ( domain != PF_INET)
+#endif
+    {
+      err = EAFNOSUPPORT;
+      goto errout;
+    }
+
+  /* Only SOCK_STREAM and possible SOCK_DRAM are supported */
+
+#ifdef CONFIG_NET_UDP
+  if (protocol != 0 || (type != SOCK_STREAM && type != SOCK_DGRAM))
+#else
+  if (protocol != 0 || type != SOCK_STREAM)
+#endif
+    {
+      err = EPROTONOSUPPORT;
+      goto errout;
+    }
+
+  /* Everything looks good.  Allocate a socket descriptor */
+
+  sockfd = sockfd_allocate();
+  if (sockfd < 0)
+    {
+      err = ENFILE;
+      goto errout;
+    }
+
+  /* Initialize the socket structure */
+
+#ifdef CONFIG_NET_UDP
+  psock = sockfd_socket(sockfd);
+  if (psock)
+    {
+      /* Save the protocol type */
+
+      psock->s_type = type;
+    }
+#endif
+
+  return sockfd;
+
+errout:
+  *get_errno_ptr() = err;
   return ERROR;
 }
+
+#endif /* CONFIG_NET */
+
 

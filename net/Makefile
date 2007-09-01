@@ -39,7 +39,7 @@ MKDEP		= $(TOPDIR)/tools/mkdeps.sh
 
 ifeq ($(CONFIG_NET),y)
 STD_ASRCS	=
-STD_CSRCS	= socket.c bind.c net_sockets.c
+STD_CSRCS	= socket.c bind.c connect.c net_sockets.c
 include uip/Make.defs
 endif
 

@@ -179,10 +179,10 @@ struct uip_conn uip_conns[UIP_CONNS];
                                  /* The uip_conns array holds all TCP connections. */
 uint16 uip_listenports[UIP_LISTENPORTS];
                                  /* The uip_listenports list all currently listning ports. */
-#if UIP_UDP
+ #ifdef CONFIG_NET_UDP
 struct uip_udp_conn *uip_udp_conn;
 struct uip_udp_conn uip_udp_conns[UIP_UDP_CONNS];
-#endif /* UIP_UDP */
+#endif   /* CONFIG_NET_UDP */
 
 /* Temporary variables. */
 uint8 uip_acc32[4];
@@ -367,7 +367,7 @@ struct uip_conn *uip_find_conn( uint16 portno )
   return NULL;
 }
 
-#if UIP_UDP
+ #ifdef CONFIG_NET_UDP
 struct uip_udp_conn *uip_find_udp_conn( uint16 portno )
 {
   struct uip_udp_conn *conn;
@@ -383,7 +383,7 @@ struct uip_udp_conn *uip_find_udp_conn( uint16 portno )
 
   return NULL;
 }
-#endif /* UIP_UDP */
+#endif   /* CONFIG_NET_UDP */
 
 /****************************************************************************
  * Public Functions
@@ -426,7 +426,7 @@ uint16 uip_tcpchksum(void)
 
 /* Calculate the UDP checksum of the packet in uip_buf and uip_appdata. */
 
-#if UIP_UDP_CHECKSUMS
+ #ifdef CONFIG_NET_UDP_CHECKSUMS
 uint16 uip_udpchksum(void)
 {
   return upper_layer_chksum(UIP_PROTO_UDP);
@@ -447,12 +447,12 @@ void uip_init(void)
     }
   lastport = 1024;
 
-#if UIP_UDP
+ #ifdef CONFIG_NET_UDP
   for (c = 0; c < UIP_UDP_CONNS; ++c)
     {
       uip_udp_conns[c].lport = 0;
     }
-#endif /* UIP_UDP */
+#endif   /* CONFIG_NET_UDP */
 
   /* IPv4 initialization. */
 #if UIP_FIXEDADDR == 0
@@ -469,7 +469,7 @@ struct uip_conn *uip_connect(uip_ipaddr_t *ripaddr, uint16 rport)
    * number that is not being used by any other connection.
    */
 
- do
+  do
     {
       /* Guess that the next available port number will be the one after
        * the last port number assigned.
@@ -537,7 +537,7 @@ struct uip_conn *uip_connect(uip_ipaddr_t *ripaddr, uint16 rport)
   return conn;
 }
 
-#if UIP_UDP
+#ifdef CONFIG_NET_UDP
 struct uip_udp_conn *uip_udp_new(uip_ipaddr_t *ripaddr, uint16 rport)
 {
   struct uip_udp_conn *conn;
@@ -547,7 +547,7 @@ struct uip_udp_conn *uip_udp_new(uip_ipaddr_t *ripaddr, uint16 rport)
    * number that is not being used by any other connection.
    */
 
- do
+  do
     {
       /* Guess that the next available port number will be the one after
        * the last port number assigned.
@@ -600,7 +600,7 @@ struct uip_udp_conn *uip_udp_new(uip_ipaddr_t *ripaddr, uint16 rport)
 
   return conn;
 }
-#endif /* UIP_UDP */
+#endif   /* CONFIG_NET_UDP */
 
 void uip_unlisten(uint16 port)
 {
@@ -768,12 +768,12 @@ void uip_interrupt(uint8 flag)
 {
   register struct uip_conn *uip_connr = uip_conn;
 
-#if UIP_UDP
+ #ifdef CONFIG_NET_UDP
   if (flag == UIP_UDP_SEND_CONN)
     {
       goto udp_send;
     }
-#endif /* UIP_UDP */
+#endif   /* CONFIG_NET_UDP */
 
   uip_sappdata = uip_appdata = &uip_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
 
@@ -935,7 +935,7 @@ void uip_interrupt(uint8 flag)
     goto drop;
   }
 
-#if UIP_UDP
+ #ifdef CONFIG_NET_UDP
   if (flag == UIP_UDP_TIMER)
     {
       if (uip_udp_conn->lport != 0)
@@ -1105,12 +1105,12 @@ void uip_interrupt(uint8 flag)
         goto tcp_input;
       }
 
-#if UIP_UDP
+ #ifdef CONFIG_NET_UDP
     if (BUF->proto == UIP_PROTO_UDP)
       {
         goto udp_input;
       }
-#endif /* UIP_UDP */
+#endif   /* CONFIG_NET_UDP */
 
 #ifndef CONFIG_NET_IPv6
     /* ICMPv4 processing code follows. */
@@ -1247,14 +1247,14 @@ void uip_interrupt(uint8 flag)
 
 #endif /* !CONFIG_NET_IPv6 */
 
-#if UIP_UDP
+ #ifdef CONFIG_NET_UDP
     /* UDP input processing. */
  udp_input:
     /* UDP processing is really just a hack. We don't do anything to the
        UDP/IP headers, but let the UDP application do all the hard
        work. If the application sets uip_slen, it has a packet to
        send. */
-#if UIP_UDP_CHECKSUMS
+ #ifdef CONFIG_NET_UDP_CHECKSUMS
     uip_len = uip_len - UIP_IPUDPH_LEN;
     uip_appdata = &uip_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
     if (UDPBUF->udpchksum != 0 && uip_udpchksum() != 0xffff)
@@ -1336,7 +1336,7 @@ void uip_interrupt(uint8 flag)
 
     uip_appdata = &uip_buf[UIP_LLH_LEN + UIP_IPTCPH_LEN];
 
-#if UIP_UDP_CHECKSUMS
+ #ifdef CONFIG_NET_UDP_CHECKSUMS
     /* Calculate UDP checksum. */
     UDPBUF->udpchksum = ~(uip_udpchksum());
     if (UDPBUF->udpchksum == 0)
@@ -1346,7 +1346,7 @@ void uip_interrupt(uint8 flag)
 #endif /* UIP_UDP_CHECKSUMS */
 
     goto ip_send_nolen;
-#endif /* UIP_UDP */
+#endif   /* CONFIG_NET_UDP */
 
     /* TCP input processing. */
  tcp_input:
@@ -2119,9 +2119,9 @@ void uip_interrupt(uint8 flag)
     BUF->tcpchksum = 0;
     BUF->tcpchksum = ~(uip_tcpchksum());
 
-#if UIP_UDP
+ #ifdef CONFIG_NET_UDP
  ip_send_nolen:
-#endif /* UIP_UDP */
+#endif   /* CONFIG_NET_UDP */
 
 #ifdef CONFIG_NET_IPv6
     BUF->vtc = 0x60;

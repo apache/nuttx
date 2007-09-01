@@ -43,11 +43,25 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
+#include <semaphore.h>
+
+#include <net/uip/uip.h>
 #include <net/uip/psock.h>
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+/* Socket descriptors are the index into the TCB sockets list, offset by the
+ * following amount. This offset is used to distinquish file descriptors from
+ * socket descriptors
+ */
+
+#ifdef CONFIG_NFILE_DESCRIPTORS
+# define __SOCKFD_OFFSET CONFIG_NFILE_DESCRIPTORS
+#else
+# define __SOCKFD_OFFSET 0
+#endif
 
 /****************************************************************************
  * Public Types
@@ -59,9 +73,23 @@
 
 struct socket
 {
+  /* Socket state info */
+
+  int   s_crefs;          /* Reference counts on the socket */
+  uint8 s_type;           /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
+
   /* Proto-socket */
 
-  struct psock psock;
+  struct psock s_psock;
+
+  /* Connection */
+
+  union
+    {
+      struct uip_udp_conn udp;
+      struct uip_conn     tcp;
+    }
+  s_conn;
 };
 
 /* This defines a list of sockets indexed by the socket descriptor */

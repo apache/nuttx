@@ -187,7 +187,7 @@ struct uip_conn
   void *private;
 };
 
-#if UIP_UDP
+ #ifdef CONFIG_NET_UDP
 /* Representation of a uIP UDP connection. */
 
 struct uip_udp_conn
@@ -203,7 +203,7 @@ struct uip_udp_conn
 
   void *private;
 };
-#endif /* UIP_UDP */
+#endif  /* CONFIG_NET_UDP */
 
 /**
  * The structure holding the TCP/IP statistics that are gathered if
@@ -247,14 +247,14 @@ struct uip_stats {
     uip_stats_t synrst;   /* Number of SYNs for closed ports,
                              triggering a RST. */
   } tcp;                  /* TCP statistics. */
-#if UIP_UDP
+ #ifdef CONFIG_NET_UDP
   struct {
     uip_stats_t drop;     /* Number of dropped UDP segments. */
     uip_stats_t recv;     /* Number of recived UDP segments. */
     uip_stats_t sent;     /* Number of sent UDP segments. */
     uip_stats_t chkerr;   /* Number of UDP segments with a bad checksum. */
   } udp;                  /* UDP statistics. */
-#endif /* UIP_UDP */
+#endif  /* CONFIG_NET_UDP */
 };
 
 /* The TCP and IP headers. */
@@ -471,10 +471,10 @@ extern uint8 uip_acc32[4];
 
 /* The current UDP connection. */
 
-#if UIP_UDP
+ #ifdef CONFIG_NET_UDP
 extern struct uip_udp_conn *uip_udp_conn;
 extern struct uip_udp_conn uip_udp_conns[UIP_UDP_CONNS];
-#endif /* UIP_UDP */
+#endif  /* CONFIG_NET_UDP */
 
 /* The uIP TCP/IP statistics.
  *
@@ -601,7 +601,7 @@ void uip_setipid(uint16 id);
  */
 
 void uip_interrupt_event(void);
-#if UIP_UDP
+ #ifdef CONFIG_NET_UDP
 void uip_interrupt_udp_event(void);
 #endif
 

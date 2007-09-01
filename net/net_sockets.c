@@ -169,3 +169,86 @@ int net_releaselist(FAR struct socketlist *list)
   return OK;
 }
 
+int sockfd_allocate(void)
+{
+  FAR struct socketlist *list;
+  int i;
+
+  /* Get the socket list for this task/thread */
+
+  list = sched_getsockets();
+  if (list)
+    {
+      /* Search for a socket structure with no references */
+
+      _net_semtake(list);
+      for (i = 0; i < CONFIG_NSOCKET_DESCRIPTORS; i++)
+        {
+          /* Are there references on this socket? */
+          if (!list->sl_sockets[i].s_crefs)
+            {
+              /* No take the reference and return the index + an offset
+               * as the socket descriptor.
+               */
+               memset(&list->sl_sockets[i], 0, sizeof(struct socket));
+               list->sl_sockets[i].s_crefs = 1;
+               _net_semgive(list);
+               return i + __SOCKFD_OFFSET;
+            }
+        }
+      _net_semgive(list);
+    }
+  return ERROR;
+}
+
+void sockfd_release(int sockfd)
+{
+  FAR struct socket *psock;
+
+  /* Get the socket structure for this sockfd */
+
+  psock = sockfd_socket(sockfd);
+  if (psock)
+    {
+      /* Take the list semaphore so that there will be no accesses
+       * to this socket structure.
+       */
+
+      FAR struct socketlist *list = sched_getsockets();
+      if (list)
+        {
+          /* Decrement the count if there the socket will persist
+           * after this.
+           */
+
+          _net_semtake(list);
+          if (psock && psock->s_crefs > 1)
+            {
+              psock->s_crefs--;
+            }
+          else
+            {
+              /* The socket will not persist... reset it */
+
+              memset(psock, 0, sizeof(struct socket));
+            }
+          _net_semgive(list);
+        }
+    }
+}
+
+FAR struct socket *sockfd_socket(int sockfd)
+{
+  FAR struct socketlist *list;
+  int ndx = sockfd - __SOCKFD_OFFSET;
+
+  if (ndx >=0 && ndx < CONFIG_NSOCKET_DESCRIPTORS)
+    {
+      list = sched_getsockets();
+      if (list)
+        {
+          return &list->sl_sockets[ndx];
+        }
+    }
+  return NULL;
+}

@@ -72,6 +72,9 @@ extern "C" {
 /* net_sockets.c *************************************************************/
 
 EXTERN void weak_function net_initialize(void);
+EXTERN int  sockfd_allocate(void);
+EXTERN void sockfd_release(int sockfd);
+EXTERN FAR struct socket *sockfd_socket(int sockfd);
 
 #undef EXTERN
 #if defined(__cplusplus)
