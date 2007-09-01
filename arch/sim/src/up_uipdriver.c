@@ -106,7 +106,7 @@ void uipdriver_loop(void)
 {
   int i;
 
-  uip_len = tapdev_read(uip_buf, UIP_BUFSIZE);
+  uip_len = tapdev_read((char*)uip_buf, UIP_BUFSIZE);
   if (uip_len > 0)
     {
       if (BUF->type == htons(UIP_ETHTYPE_IP))
@@ -122,7 +122,7 @@ void uipdriver_loop(void)
           if (uip_len > 0)
             {
               uip_arp_out();
-              tapdev_send(uip_buf, uip_len);
+              tapdev_send((char*)uip_buf, uip_len);
             }
         }
       else if (BUF->type == htons(UIP_ETHTYPE_ARP))
@@ -136,7 +136,7 @@ void uipdriver_loop(void)
 
           if (uip_len > 0)
             {
-              tapdev_send(uip_buf, uip_len);
+              tapdev_send((char*)uip_buf, uip_len);
             }
         }
     }
@@ -155,7 +155,7 @@ void uipdriver_loop(void)
           if (uip_len > 0)
             {
               uip_arp_out();
-              tapdev_send(uip_buf, uip_len);
+              tapdev_send((char*)uip_buf, uip_len);
             }
         }
 
@@ -172,7 +172,7 @@ void uipdriver_loop(void)
           if (uip_len > 0)
             {
               uip_arp_out();
-              tapdev_send(uip_buf, uip_len);
+              tapdev_send((char*)uip_buf, uip_len);
             }
         }
 #endif /* UIP_UDP */
