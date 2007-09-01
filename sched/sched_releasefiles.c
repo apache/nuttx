@@ -38,8 +38,11 @@
  ************************************************************/
 
 #include <nuttx/config.h>
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
+
 #include <sched.h>
 #include <nuttx/fs.h>
+#include <nuttx/net.h>
 #include <nuttx/lib.h>
 
 /************************************************************
@@ -66,12 +69,11 @@
  *
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 int sched_releasefiles(_TCB *tcb)
 {
   if (tcb)
     {
+#if CONFIG_NFILE_DESCRIPTORS > 0
        /* Free the file descriptor list */
 
        files_releaselist(tcb->filelist);
@@ -83,7 +85,17 @@ int sched_releasefiles(_TCB *tcb)
        lib_releaselist(tcb->streams);
        tcb->streams = NULL;
 #endif /* CONFIG_NFILE_STREAMS */
+#endif /* CONFIG_NFILE_DESCRIPTORS */
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+       /* Free the file descriptor list */
+
+       net_releaselist(tcb->sockets);
+       tcb->sockets = NULL;
+
+#endif /* CONFIG_NSOCKET_DESCRIPTORS */
     }
   return OK;
 }
-#endif /* CONFIG_NFILE_DESCRIPTORS */
+
+#endif /* CONFIG_NFILE_DESCRIPTORS || CONFIG_NSOCKET_DESCRIPTORS */

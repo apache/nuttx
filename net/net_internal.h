@@ -1,5 +1,5 @@
-/************************************************************
- * sched_setupstreams.c
+/****************************************************************************
+ * net_internal.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -31,50 +31,52 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+#ifndef __NET_INTERNAL_H
+#define __NET_INTERNAL_H
+
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
-#if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_NET
 
-#include <sched.h>
-#include <nuttx/fs.h>
 #include <nuttx/net.h>
-#include <nuttx/lib.h>
 
-/************************************************************
- * Private Functions
- ************************************************************/
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
 
-/************************************************************
- * Public Functions
- ************************************************************/
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
-int sched_setupstreams(FAR _TCB *tcb)
-{
-  /* Allocate file strems for the TCB */
+/****************************************************************************
+ * Public Variables
+ ****************************************************************************/
 
-  tcb->streams = lib_alloclist();
-  if (tcb->streams)
-    {
-      /* fdopen to get the stdin, stdout and stderr streams.
-       * The following logic depends on the fact that the library
-       * layer will allocate FILEs in order.
-       *
-       * fd = 0 is stdin
-       * fd = 1 is stdout
-       * fd = 2 is stderr
-       */
+/****************************************************************************
+ * Pulblic Function Prototypes
+ ****************************************************************************/
 
-      (void)lib_fdopen(0, "r", tcb->filelist, tcb->streams);
-      (void)lib_fdopen(1, "w", tcb->filelist, tcb->streams);
-      (void)lib_fdopen(2, "w", tcb->filelist, tcb->streams);
-    }
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
 
-  return OK;
+/* net_sockets.c *************************************************************/
+
+EXTERN void weak_function net_initialize(void);
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
-#endif /* CONFIG_NFILE_STREAMS && CONFIG_NFILE_STREAMS*/
+#endif /* CONFIG_NET */
+#endif /* __NET_INTERNAL_H */

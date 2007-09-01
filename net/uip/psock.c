@@ -30,7 +30,7 @@
  *
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: psock.c,v 1.1.1.1 2007-08-26 23:04:11 patacongo Exp $
+ * $Id: psock.c,v 1.2 2007-09-01 18:06:13 patacongo Exp $
  */
 
 #include <stdio.h>
@@ -375,3 +375,4 @@ void psock_init(register struct psock *psock, char *buffer, unsigned int buffers
   psock->bufsize = buffersize;
   buf_setup(&psock->buf, (uint8*)buffer, buffersize);
 }
+

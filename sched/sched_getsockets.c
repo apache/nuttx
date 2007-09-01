@@ -1,5 +1,5 @@
 /************************************************************
- * up_idle.c
+ * sched_getsockets.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
+ * 3. Neither the name Gregory Nutt nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -38,53 +38,39 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <nuttx/arch.h>
-#include "up_internal.h"
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+
+#include <sched.h>
+#include "os_internal.h"
 
 /************************************************************
- * Private Definitions
+ * Private Functions
  ************************************************************/
 
 /************************************************************
- * Private Data
+ * Public Functions
  ************************************************************/
 
 /************************************************************
- * Private Funtions
- ************************************************************/
-
-/************************************************************
- * Public Funtions
- ************************************************************/
-
-/************************************************************
- * Name: up_idle
+ * Function:  sched_getsockets
  *
  * Description:
- *   up_idle() is the logic that will be executed when their
- *   is no other ready-to-run task.  This is processor idle
- *   time and will continue until some interrupt occurs to
- *   cause a context switch from the idle task.
+ *   Return a pointer to the socket list for this thread
  *
- *   Processing in this state may be processor-specific. e.g.,
- *   this is where power management operations might be
- *   performed.
+ * Parameters:
+ *   None
+ *
+ * Return Value:
+ *   A pointer to the errno.
+ *
+ * Assumptions:
  *
  ************************************************************/
 
-void up_idle(void)
+FAR struct socketlist *sched_getsockets(void)
 {
-  /* If the system is idle, then process "fake" timer interrupts.
-   * Hopefully, something will wake up.
-   */
-
-  sched_process_timer();
-
-  /* Run the network if enabled */
-
-#ifdef CONFIG_NET
-  uipdriver_loop();
-#endif
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  return rtcb->sockets;
 }
 
+#endif /* CONFIG_NSOCKET_DESCRIPTORS */

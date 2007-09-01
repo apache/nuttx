@@ -1,7 +1,6 @@
 /****************************************************************************
  * uipopt.h
  * Configuration options for uIP.
- * author Adam Dunkels <adam@dunkels.com>
  *
  * This file is used for tweaking various configuration options for
  * uIP. You should make a copy of this file into one of your project's
@@ -17,8 +16,14 @@
  * Note: Most of the configuration options in the uipopt.h should not
  * be changed, but rather the per-project defconfig file.
  *
- * Copyright (c) 2001-2003, Adam Dunkels.
- * All rights reserved.
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * This logic was leveraged from uIP which also has a BSD-style license:
+ *
+ *   Author: Adam Dunkels <adam@dunkels.com>
+ *   Copyright (c) 2001-2003, Adam Dunkels.
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,22 +49,27 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This file is part of the uIP TCP/IP stack.
- *
- * $Id: uipopt.h,v 1.1.1.1 2007-08-26 23:12:17 patacongo Exp $
- *
- */
+ ****************************************************************************/
 
 #ifndef __UIPOPT_H__
 #define __UIPOPT_H__
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <sys/types.h>
 #include <nuttx/config.h>
 
-/*------------------------------------------------------------------------------*/
+/****************************************************************************
+ * Public Definitions
+ ****************************************************************************/
 
-/**
- * \name Static configuration options
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+/* Static configuration options
  *
  * These configuration options can be used for setting the IP address
  * settings statically, but only if UIP_FIXEDADDR is set to 1. The
@@ -69,64 +79,52 @@
  * if uIP should be run over Ethernet.
  *
  * All of these should be changed to suit your project.
-*/
-
-/**
- * Statistics datatype
- *
- * This typedef defines the dataype used for keeping statistics in
- * uIP.
  */
-typedef uint16 uip_stats_t;
 
-/**
- * Determines if uIP should use a fixed IP address or not.
+/* Determines if uIP should use a fixed IP address or not.
  *
  * If uIP should use a fixed IP address, the settings are set in the
  * uipopt.h file. If not, the macros uip_sethostaddr(),
  * uip_setdraddr() and uip_setnetmask() should be used instead.
  */
+
 #define UIP_FIXEDADDR    0
 
-/**
- * Ping IP address asignment.
+/* Ping IP address asignment.
  *
  * uIP uses a "ping" packets for setting its own IP address if this
  * option is set. If so, uIP will start with an empty IP address and
  * the destination IP address of the first incoming "ping" (ICMP echo)
  * packet will be used for setting the hosts IP address.
  *
- * \note This works only if UIP_FIXEDADDR is 0.
+ * Note: This works only if UIP_FIXEDADDR is 0.
  */
 
-#ifdef CONFIG_UIP_PINGADDRCONF
-#define UIP_PINGADDRCONF CONFIG_UIP_PINGADDRCONF
-#else /* CONFIG_UIP_PINGADDRCONF */
+#ifdef CONFIG_NET_PINGADDRCONF
+#define UIP_PINGADDRCONF CONFIG_NET_PINGADDRCONF
+#else /* CONFIG_NET_PINGADDRCONF */
 #define UIP_PINGADDRCONF 0
-#endif /* CONFIG_UIP_PINGADDRCONF */
+#endif /* CONFIG_NET_PINGADDRCONF */
 
-/**
- * Specifies if the uIP ARP module should be compiled with a fixed
+/* Specifies if the uIP ARP module should be compiled with a fixed
  * Ethernet MAC address or not.
  *
  * If this configuration option is 0, the macro uip_setethaddr() can
  * be used to specify the Ethernet address at run-time.
  */
+
 #define UIP_FIXEDETHADDR 0
 
-/*------------------------------------------------------------------------------*/
-/**
- * \name IP configuration options
- */
-/**
- * The IP TTL (time to live) of IP packets sent by uIP.
+/* IP configuration options */
+
+/* The IP TTL (time to live) of IP packets sent by uIP.
  *
  * This should normally not be changed.
  */
+
 #define UIP_TTL         64
 
-/**
- * Turn on support for IP packet reassembly.
+/* Turn on support for IP packet reassembly.
  *
  * uIP supports reassembly of fragmented IP packets. This features
  * requires an additonal amount of RAM to hold the reassembly buffer
@@ -134,268 +132,222 @@ typedef uint16 uip_stats_t;
  * reassembly buffer is of the same size as the uip_buf buffer
  * (configured by UIP_BUFSIZE).
  *
- * \note IP packet reassembly is not heavily tested.
+ * Note: IP packet reassembly is not heavily tested.
  */
+
 #define UIP_REASSEMBLY 0
 
-/**
- * The maximum time an IP fragment should wait in the reassembly
+/* The maximum time an IP fragment should wait in the reassembly
  * buffer before it is dropped.
- *
  */
+
 #define UIP_REASS_MAXAGE 40
 
-/*------------------------------------------------------------------------------*/
-/**
- * \name UDP configuration options
- */
+/* UDP configuration options */
 
-/**
- * Toggles wether UDP support should be compiled in or not.
- */
-#ifdef CONFIG_UIP_UDP
-# define UIP_UDP CONFIG_UIP_UDP
-#else /* CONFIG_UIP_UDP */
+/* Toggles wether UDP support should be compiled in or not. */
+
+#ifdef CONFIG_NET_UDP
+# define UIP_UDP CONFIG_NET_UDP
+#else /* CONFIG_NET_UDP */
 # define UIP_UDP           0
-#endif /* CONFIG_UIP_UDP */
+#endif /* CONFIG_NET_UDP */
 
-/**
- * Toggles if UDP checksums should be used or not.
+/* Toggles if UDP checksums should be used or not.
  *
- * \note Support for UDP checksums is currently not included in uIP,
+ * Note: Support for UDP checksums is currently not included in uIP,
  * so this option has no function.
  */
-#ifdef CONFIG_UIP_UDP_CHECKSUMS
-# define UIP_UDP_CHECKSUMS CONFIG_UIP_UDP_CHECKSUMS
+
+#ifdef CONFIG_NET_UDP_CHECKSUMS
+# define UIP_UDP_CHECKSUMS CONFIG_NET_UDP_CHECKSUMS
 #else
 # define UIP_UDP_CHECKSUMS 0
 #endif
 
-/**
- * The maximum amount of concurrent UDP connections.
- */
-#ifdef CONFIG_UIP_UDP_CONNS
-# define UIP_UDP_CONNS CONFIG_UIP_UDP_CONNS
-#else /* CONFIG_UIP_UDP_CONNS */
+/* The maximum amount of concurrent UDP connections. */
+
+#ifdef CONFIG_NET_UDP_CONNS
+# define UIP_UDP_CONNS CONFIG_NET_UDP_CONNS
+#else /* CONFIG_NET_UDP_CONNS */
 # define UIP_UDP_CONNS    10
-#endif /* CONFIG_UIP_UDP_CONNS */
+#endif /* CONFIG_NET_UDP_CONNS */
 
-/**
- * The name of the function that should be called when UDP datagrams arrive.
- */
+/* TCP configuration options */
 
-
-/*------------------------------------------------------------------------------*/
-/**
- * \name TCP configuration options
- */
-
-/**
- * Determines if support for opening connections from uIP should be
- * compiled in.
- *
- * If the applications that are running on top of uIP for this project
- * do not need to open outgoing TCP connections, this configration
- * option can be turned off to reduce the code size of uIP.
- */
-#define UIP_ACTIVE_OPEN 1
-
-/**
- * The maximum number of simultaneously open TCP connections.
+/* The maximum number of simultaneously open TCP connections.
  *
  * Since the TCP connections are statically allocated, turning this
  * configuration knob down results in less RAM used. Each TCP
  * connection requires approximatly 30 bytes of memory.
  */
-#ifndef CONFIG_UIP_MAX_CONNECTIONS
-# define UIP_CONNS       10
-#else /* CONFIG_UIP_MAX_CONNECTIONS */
-# define UIP_CONNS CONFIG_UIP_MAX_CONNECTIONS
-#endif /* CONFIG_UIP_MAX_CONNECTIONS */
 
-/**
- * The maximum number of simultaneously listening TCP ports.
+#ifndef CONFIG_NET_MAX_CONNECTIONS
+# define UIP_CONNS       10
+#else /* CONFIG_NET_MAX_CONNECTIONS */
+# define UIP_CONNS CONFIG_NET_MAX_CONNECTIONS
+#endif /* CONFIG_NET_MAX_CONNECTIONS */
+
+/* The maximum number of simultaneously listening TCP ports.
  *
  * Each listening TCP port requires 2 bytes of memory.
  */
-#ifndef CONFIG_UIP_MAX_LISTENPORTS
-# define UIP_LISTENPORTS 20
-#else /* CONFIG_UIP_MAX_LISTENPORTS */
-# define UIP_LISTENPORTS CONFIG_UIP_MAX_LISTENPORTS
-#endif /* CONFIG_UIP_MAX_LISTENPORTS */
 
-/**
- * Determines if support for TCP urgent data notification should be
+#ifndef CONFIG_NET_MAX_LISTENPORTS
+# define UIP_LISTENPORTS 20
+#else /* CONFIG_NET_MAX_LISTENPORTS */
+# define UIP_LISTENPORTS CONFIG_NET_MAX_LISTENPORTS
+#endif /* CONFIG_NET_MAX_LISTENPORTS */
+
+/* Determines if support for TCP urgent data notification should be
  * compiled in.
  *
  * Urgent data (out-of-band data) is a rarely used TCP feature that
  * very seldom would be required.
  */
+
 #define UIP_URGDATA      0
 
-/**
- * The initial retransmission timeout counted in timer pulses.
+/* The initial retransmission timeout counted in timer pulses.
  *
  * This should not be changed.
  */
+
 #define UIP_RTO         3
 
-/**
- * The maximum number of times a segment should be retransmitted
+/* The maximum number of times a segment should be retransmitted
  * before the connection should be aborted.
  *
  * This should not be changed.
  */
+
 #define UIP_MAXRTX      8
 
-/**
- * The maximum number of times a SYN segment should be retransmitted
+/* The maximum number of times a SYN segment should be retransmitted
  * before a connection request should be deemed to have been
  * unsuccessful.
  *
  * This should not need to be changed.
  */
+
 #define UIP_MAXSYNRTX      5
 
-/**
- * The TCP maximum segment size.
+/* The TCP maximum segment size.
  *
  * This is should not be to set to more than
  * UIP_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN.
  */
+
 #define UIP_TCP_MSS     (UIP_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN)
 
-/**
- * The size of the advertised receiver's window.
+/* The size of the advertised receiver's window.
  *
  * Should be set low (i.e., to the size of the uip_buf buffer) is the
  * application is slow to process incoming data, or high (32768 bytes)
  * if the application processes data quickly.
  */
-#ifndef CONFIG_UIP_RECEIVE_WINDOW
+
+#ifndef CONFIG_NET_RECEIVE_WINDOW
 # define UIP_RECEIVE_WINDOW UIP_TCP_MSS
 #else
-# define UIP_RECEIVE_WINDOW CONFIG_UIP_RECEIVE_WINDOW
+# define UIP_RECEIVE_WINDOW CONFIG_NET_RECEIVE_WINDOW
 #endif
 
-/**
- * How long a connection should stay in the TIME_WAIT state.
+/* How long a connection should stay in the TIME_WAIT state.
  *
  * This configiration option has no real implication, and it should be
  * left untouched.
  */
+
 #define UIP_TIME_WAIT_TIMEOUT 120
 
+/* ARP configuration options */
 
-/*------------------------------------------------------------------------------*/
-/**
- * \name ARP configuration options
- */
-
-/**
- * The size of the ARP table.
+/* The size of the ARP table.
  *
  * This option should be set to a larger value if this uIP node will
  * have many connections from the local network.
  */
-#ifdef CONFIG_UIP_ARPTAB_SIZE
-# define UIP_ARPTAB_SIZE CONFIG_UIP_ARPTAB_SIZE
+
+#ifdef CONFIG_NET_ARPTAB_SIZE
+# define UIP_ARPTAB_SIZE CONFIG_NET_ARPTAB_SIZE
 #else
 # define UIP_ARPTAB_SIZE 8
 #endif
 
-/**
- * The maxium age of ARP table entries measured in 10ths of seconds.
+/* The maxium age of ARP table entries measured in 10ths of seconds.
  *
  * An UIP_ARP_MAXAGE of 120 corresponds to 20 minutes (BSD
  * default).
  */
+
 #define UIP_ARP_MAXAGE 120
 
-/*------------------------------------------------------------------------------*/
+/* General configuration options */
 
-/**
- * \name General configuration options
- */
-
-/**
- * The size of the uIP packet buffer.
+/* The size of the uIP packet buffer.
  *
  * The uIP packet buffer should not be smaller than 60 bytes, and does
  * not need to be larger than 1500 bytes. Lower size results in lower
  * TCP throughput, larger size results in higher TCP throughput.
  */
-#ifndef CONFIG_UIP_BUFFER_SIZE
+
+#ifndef CONFIG_NET_BUFFER_SIZE
 # define UIP_BUFSIZE     400
-#else /* CONFIG_UIP_BUFFER_SIZE */
-# define UIP_BUFSIZE CONFIG_UIP_BUFFER_SIZE
-#endif /* CONFIG_UIP_BUFFER_SIZE */
+#else /* CONFIG_NET_BUFFER_SIZE */
+# define UIP_BUFSIZE CONFIG_NET_BUFFER_SIZE
+#endif /* CONFIG_NET_BUFFER_SIZE */
 
-
-/**
- * Determines if statistics support should be compiled in.
+/* Determines if statistics support should be compiled in.
  *
  * The statistics is useful for debugging and to show the user.
  */
 
-#ifndef CONFIG_UIP_STATISTICS
+#ifndef CONFIG_NET_STATISTICS
 # define UIP_STATISTICS  0
-#else /* CONFIG_UIP_STATISTICS */
-# define UIP_STATISTICS CONFIG_UIP_STATISTICS
-#endif /* CONFIG_UIP_STATISTICS */
+#else /* CONFIG_NET_STATISTICS */
+# define UIP_STATISTICS CONFIG_NET_STATISTICS
+#endif /* CONFIG_NET_STATISTICS */
 
-/**
- * Determines if logging of certain events should be compiled in.
+/* Determines if logging of certain events should be compiled in.
  *
  * This is useful mostly for debugging. The function uip_log()
  * must be implemented to suit the architecture of the project, if
  * logging is turned on.
  */
 
-#ifndef CONFIG_UIP_LOGGING
+#ifndef CONFIG_NET_LOGGING
 # define UIP_LOGGING     0
-#else /* CONFIG_UIP_LOGGING */
-# define UIP_LOGGING     CONFIG_UIP_LOGGING
-#endif /* CONFIG_UIP_LOGGING */
+#else /* CONFIG_NET_LOGGING */
+# define UIP_LOGGING     CONFIG_NET_LOGGING
+#endif /* CONFIG_NET_LOGGING */
 
-/**
- * Broadcast support.
+/* Broadcast support.
  *
  * This flag configures IP broadcast support. This is useful only
  * together with UDP.
  */
 
-#ifndef CONFIG_UIP_BROADCAST
+#ifndef CONFIG_NET_BROADCAST
 # define UIP_BROADCAST 0
-#else /* CONFIG_UIP_BROADCAST */
-# define UIP_BROADCAST CONFIG_UIP_BROADCAST
-#endif /* CONFIG_UIP_BROADCAST */
+#else /* CONFIG_NET_BROADCAST */
+# define UIP_BROADCAST CONFIG_NET_BROADCAST
+#endif /* CONFIG_NET_BROADCAST */
 
-/**
- * Print out a uIP log message.
- *
- * This function must be implemented by the module that uses uIP, and
- * is called by uIP whenever a log message is generated.
- */
-void uip_log(char *msg);
-
-/**
- * The link level header length.
+/* The link level header length.
  *
  * This is the offset into the uip_buf where the IP header can be
  * found. For Ethernet, this should be set to 14. For SLIP, this
  * should be set to 0.
  */
 
-#ifdef CONFIG_UIP_LLH_LEN
-# define UIP_LLH_LEN CONFIG_UIP_LLH_LEN
-#else /* CONFIG_UIP_LLH_LEN */
+#ifdef CONFIG_NET_LLH_LEN
+# define UIP_LLH_LEN CONFIG_NET_LLH_LEN
+#else /* CONFIG_NET_LLH_LEN */
 # define UIP_LLH_LEN     14
-#endif /* CONFIG_UIP_LLH_LEN */
+#endif /* CONFIG_NET_LLH_LEN */
 
-/*------------------------------------------------------------------------------*/
-/**
- * \name CPU architecture configuration
+/* CPU architecture configuration
  *
  * The CPU architecture configuration is where the endianess of the
  * CPU on which uIP is to be run is specified. Most CPUs today are
@@ -404,8 +356,7 @@ void uip_log(char *msg);
  * if uIP is to be run on a big endian architecture.
  */
 
-/**
- * The byte order of the CPU architecture on which uIP is to be run.
+/* The byte order of the CPU architecture on which uIP is to be run.
  *
  * This option can be either CONFIG_ENDIAN_BIG (Motorola byte order) or
  * default little endian byte order (Intel byte order).
@@ -419,5 +370,29 @@ void uip_log(char *msg);
 #else
 # define UIP_BYTE_ORDER     UIP_LITTLE_ENDIAN
 #endif
+
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+/* Statistics datatype
+ *
+ * This typedef defines the dataype used for keeping statistics in
+ * uIP.
+ */
+
+typedef uint16 uip_stats_t;
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/* Print out a uIP log message.
+ *
+ * This function must be implemented by the module that uses uIP, and
+ * is called by uIP whenever a log message is generated.
+ */
+
+void uip_log(char *msg);
 
 #endif /* __UIPOPT_H__ */

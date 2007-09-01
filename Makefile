@@ -51,7 +51,7 @@ BOARD_DIR	= configs/$(CONFIG_ARCH_BOARD)
 NONFSDIRS	= sched lib $(ARCH_SRC) mm examples/$(CONFIG_EXAMPLE)
 FSDIRS		= fs drivers
 
-ifeq ($(CONFIG_NET_UIP),y)
+ifeq ($(CONFIG_NET),y)
 NONFSDIRS	+= net netutils
 endif
 
@@ -79,7 +79,7 @@ ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 LINKLIBS	+= fs/libfs$(LIBEXT) drivers/libdrivers$(LIBEXT) 
 endif
 
-ifeq ($(CONFIG_NET_UIP),y)
+ifeq ($(CONFIG_NET),y)
 LINKLIBS	+= net/libnet$(LIBEXT) netutils/libnetutils$(LIBEXT) 
 endif
 

@@ -1,14 +1,19 @@
-/**
+/****************************************************************************
  * uip.h
  * Header file for the uIP TCP/IP stack.
- * author Adam Dunkels <adam@dunkels.com>
  *
  * The uIP TCP/IP stack header file contains definitions for a number
  * of C macros that are used by uIP programs as well as internal uIP
  * structures, TCP/IP header structures and function declarations.
  *
- * Copyright (c) 2001-2003, Adam Dunkels.
- * All rights reserved.
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * This logic was leveraged from uIP which also has a BSD-style license:
+ *
+ *   Author Adam Dunkels <adam@dunkels.com>
+ *   Copyright (c) 2001-2003, Adam Dunkels.
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,14 +39,10 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This file is part of the uIP TCP/IP stack.
- *
- * $Id: uip.h,v 1.1.1.1 2007-08-26 23:12:16 patacongo Exp $
- *
  ****************************************************************************/
 
-#ifndef __UIP_H__
-#define __UIP_H__
+#ifndef __NET_UIP_UIP_H
+#define __NET_UIP_UIP_H
 
 /****************************************************************************
  * Included Files
@@ -117,11 +118,11 @@
 #define UIP_PROTO_ICMP6 58
 
 /* Header sizes. */
-#ifdef CONFIG_NET_UIP_IPv6
+#ifdef CONFIG_NET_IPv6
 # define UIP_IPH_LEN    40
-#else /* CONFIG_NET_UIP_IPv6 */
+#else /* CONFIG_NET_IPv6 */
 # define UIP_IPH_LEN    20    /* Size of IP header */
-#endif /* CONFIG_NET_UIP_IPv6 */
+#endif /* CONFIG_NET_IPv6 */
 #define UIP_UDPH_LEN    8     /* Size of UDP header */
 #define UIP_TCPH_LEN    20    /* Size of TCP header */
 #define UIP_IPUDPH_LEN (UIP_UDPH_LEN + UIP_IPH_LEN)    /* Size of IP + UDP header */
@@ -137,11 +138,11 @@
 typedef uint16 uip_ip4addr_t[2];
 typedef uint16 uip_ip6addr_t[8];
 
-#ifdef CONFIG_NET_UIP_IPv6
+#ifdef CONFIG_NET_IPv6
 typedef uip_ip6addr_t uip_ipaddr_t;
-#else /* CONFIG_NET_UIP_IPv6 */
+#else /* CONFIG_NET_IPv6 */
 typedef uip_ip4addr_t uip_ipaddr_t;
-#endif /* CONFIG_NET_UIP_IPv6 */
+#endif /* CONFIG_NET_IPv6 */
 
 /* Representation of a uIP TCP connection.
  *
@@ -259,7 +260,7 @@ struct uip_stats {
 /* The TCP and IP headers. */
 
 struct uip_tcpip_hdr {
-#ifdef CONFIG_NET_UIP_IPv6
+#ifdef CONFIG_NET_IPv6
   /* IPv6 header. */
 
   uint8 vtc,
@@ -268,7 +269,7 @@ struct uip_tcpip_hdr {
   uint8 len[2];
   uint8 proto, ttl;
   uip_ip6addr_t srcipaddr, destipaddr;
-#else /* CONFIG_NET_UIP_IPv6 */
+#else /* CONFIG_NET_IPv6 */
   /* IPv4 header. */
 
   uint8 vhl,
@@ -281,7 +282,7 @@ struct uip_tcpip_hdr {
   uint16 ipchksum;
   uint16 srcipaddr[2],
     destipaddr[2];
-#endif /* CONFIG_NET_UIP_IPv6 */
+#endif /* CONFIG_NET_IPv6 */
 
   /* TCP header. */
 
@@ -300,7 +301,7 @@ struct uip_tcpip_hdr {
 /* The ICMP and IP headers. */
 
 struct uip_icmpip_hdr {
-#ifdef CONFIG_NET_UIP_IPv6
+#ifdef CONFIG_NET_IPv6
   /* IPv6 header. */
 
   uint8 vtc,
@@ -309,7 +310,7 @@ struct uip_icmpip_hdr {
   uint8 len[2];
   uint8 proto, ttl;
   uip_ip6addr_t srcipaddr, destipaddr;
-#else /* CONFIG_NET_UIP_IPv6 */
+#else /* CONFIG_NET_IPv6 */
   /* IPv4 header. */
 
   uint8 vhl,
@@ -322,24 +323,24 @@ struct uip_icmpip_hdr {
   uint16 ipchksum;
   uint16 srcipaddr[2],
     destipaddr[2];
-#endif /* CONFIG_NET_UIP_IPv6 */
+#endif /* CONFIG_NET_IPv6 */
 
   /* ICMP (echo) header. */
   uint8 type, icode;
   uint16 icmpchksum;
-#ifndef CONFIG_NET_UIP_IPv6
+#ifndef CONFIG_NET_IPv6
   uint16 id, seqno;
-#else /* !CONFIG_NET_UIP_IPv6 */
+#else /* !CONFIG_NET_IPv6 */
   uint8 flags, reserved1, reserved2, reserved3;
   uint8 icmp6data[16];
   uint8 options[1];
-#endif /* !CONFIG_NET_UIP_IPv6 */
+#endif /* !CONFIG_NET_IPv6 */
 };
 
 /* The UDP and IP headers. */
 
 struct uip_udpip_hdr {
-#ifdef CONFIG_NET_UIP_IPv6
+#ifdef CONFIG_NET_IPv6
   /* IPv6 header. */
 
   uint8 vtc,
@@ -348,7 +349,7 @@ struct uip_udpip_hdr {
   uint8 len[2];
   uint8 proto, ttl;
   uip_ip6addr_t srcipaddr, destipaddr;
-#else /* CONFIG_NET_UIP_IPv6 */
+#else /* CONFIG_NET_IPv6 */
   /* IP header. */
 
   uint8 vhl,
@@ -361,7 +362,7 @@ struct uip_udpip_hdr {
   uint16 ipchksum;
   uint16 srcipaddr[2],
     destipaddr[2];
-#endif /* CONFIG_NET_UIP_IPv6 */
+#endif /* CONFIG_NET_IPv6 */
 
   /* UDP header. */
 
@@ -633,9 +634,6 @@ void uip_unlisten(uint16 port);
  * sent out the next time this connection is periodically processed,
  * which usually is done within 0.5 seconds after the call to
  * uip_connect().
- *
- * Note: This function is avaliable only if support for active open
- * has been configured by defining UIP_ACTIVE_OPEN to 1 in uipopt.h.
  *
  * Note: Since this function requires the port number to be in network
  * byte order, a conversion using HTONS() or htons() is necessary.
@@ -972,14 +970,14 @@ struct uip_udp_conn *uip_udp_new(uip_ipaddr_t *ripaddr, uint16 rport);
  * src The source from where to copy.
  */
 
-#ifndef CONFIG_NET_UIP_IPv6
+#ifndef CONFIG_NET_IPv6
 #define uip_ipaddr_copy(dest, src) do { \
                      ((uint16 *)dest)[0] = ((uint16 *)src)[0]; \
                      ((uint16 *)dest)[1] = ((uint16 *)src)[1]; \
                   } while(0)
-#else /* !CONFIG_NET_UIP_IPv6 */
+#else /* !CONFIG_NET_IPv6 */
 #define uip_ipaddr_copy(dest, src) memcpy(dest, src, sizeof(uip_ip6addr_t))
-#endif /* !CONFIG_NET_UIP_IPv6 */
+#endif /* !CONFIG_NET_IPv6 */
 
 /* Compare two IP addresses
  *
@@ -996,12 +994,12 @@ struct uip_udp_conn *uip_udp_new(uip_ipaddr_t *ripaddr, uint16 rport);
  * addr2 The second IP address.
  */
 
-#ifndef CONFIG_NET_UIP_IPv6
+#ifndef CONFIG_NET_IPv6
 #define uip_ipaddr_cmp(addr1, addr2) (((uint16 *)addr1)[0] == ((uint16 *)addr2)[0] && \
 				      ((uint16 *)addr1)[1] == ((uint16 *)addr2)[1])
-#else /* !CONFIG_NET_UIP_IPv6 */
+#else /* !CONFIG_NET_IPv6 */
 #define uip_ipaddr_cmp(addr1, addr2) (memcmp(addr1, addr2, sizeof(uip_ip6addr_t)) == 0)
-#endif /* !CONFIG_NET_UIP_IPv6 */
+#endif /* !CONFIG_NET_IPv6 */
 
 /**
  * Compare two IP addresses with netmasks
@@ -1169,4 +1167,4 @@ extern int uip_event_timedwait(uint16 waitflags, int timeout);
 
 extern void uip_event_signal(void);
 
-#endif /* __UIP_H__ */
+#endif /* __NET_UIP_UIP_H */

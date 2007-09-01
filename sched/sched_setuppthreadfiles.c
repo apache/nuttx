@@ -38,9 +38,14 @@
  ************************************************************/
 
 #include <nuttx/config.h>
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
+
 #include <sched.h>
+
 #include <nuttx/fs.h>
+#include <nuttx/net.h>
 #include <nuttx/lib.h>
+
 #include "os_internal.h"
 
 /************************************************************
@@ -68,12 +73,11 @@
  *
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 int sched_setuppthreadfiles(FAR _TCB *tcb)
 {
   FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
 
+#if CONFIG_NFILE_DESCRIPTORS > 0
   /* The child thread inherits the parent file descriptors */
 
   tcb->filelist = rtcb->filelist;
@@ -86,8 +90,17 @@ int sched_setuppthreadfiles(FAR _TCB *tcb)
   lib_addreflist(tcb->streams);
 
 #endif /* CONFIG_NFILE_STREAMS */
+#endif /* CONFIG_NFILE_DESCRIPTORS */
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+  /* The child thread inherits the parent file descriptors */
+
+  tcb->sockets = rtcb->sockets;
+  net_addreflist(tcb->sockets);
+
+#endif /* CONFIG_NSOCKET_DESCRIPTORS */
 
   return OK;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */
+#endif /* CONFIG_NFILE_DESCRIPTORS || CONFIG_NSOCKET_DESCRIPTORS */

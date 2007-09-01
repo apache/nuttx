@@ -31,11 +31,12 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: main.c,v 1.2 2007-08-30 23:57:58 patacongo Exp $
+ * $Id: main.c,v 1.3 2007-09-01 18:06:12 patacongo Exp $
  *
  */
 
 #include <stdio.h>
+#include <unistd.h>
 #include <time.h>
 
 #include <net/uip/uip.h>
@@ -63,12 +64,11 @@
 
 int user_start(int argc, char *argv[])
 {
-  int i;
   uip_ipaddr_t ipaddr;
 #if defined(CONFIG_EXAMPLE_UIP_DHCPC)
   uint16 mac[6] = {1, 2, 3, 4, 5, 6};
 #endif
-#ifdef CONFIG_EXAMPLE_UIP_SMTP
+#if defined(CONFIG_EXAMPLE_UIP_DHCPC) || defined(CONFIG_EXAMPLE_UIP_SMTP)
   void *handle;
 #endif
 
@@ -84,10 +84,20 @@ int user_start(int argc, char *argv[])
 #elif defined(CONFIG_EXAMPLE_UIP_TELNETD)
   telnetd_init();
 #elif defined(CONFIG_EXAMPLE_UIP_DHCPC)
-  dhcpc_init(&mac, 6);
+  handle = dhcpc_open(&mac, 6);
+  if (handle)
+    {
+        struct dhcpc_state ds;
+        (void)dhcpc_request(handle, &ds);
+        uip_sethostaddr(ds.ipaddr);
+        uip_setnetmask(ds.netmask);
+        uip_setdraddr(ds.default_router);
+        resolv_conf(ds.dnsaddr);
+        dhcpc_close(handle);
+    }
 #elif defined(CONFIG_EXAMPLE_UIP_SMTP)
   uip_ipaddr(ipaddr, 127, 0, 0, 1);
-  handle = smtp_init();
+  handle = smtp_open();
   if (handle)
     {
       smtp_configure("localhost", ipaddr);
@@ -130,16 +140,6 @@ void resolv_found(char *name, uint16 *ipaddr)
       /* webclient_get("www.sics.se", 80, "/~adam/uip");*/
     }
 }
-
-#ifdef __DHCPC_H__
-void dhcpc_configured(const struct dhcpc_state *s)
-{
-  uip_sethostaddr(s->ipaddr);
-  uip_setnetmask(s->netmask);
-  uip_setdraddr(s->default_router);
-  resolv_conf(s->dnsaddr);
-}
-#endif /* __DHCPC_H__ */
 
 void webclient_closed(void)
 {

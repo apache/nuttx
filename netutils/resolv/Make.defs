@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_UIP_UDP),y)
+ifeq ($(CONFIG_NET_UDP),y)
 RESOLV_ASRCS  =
 RESOLV_CSRCS  = resolv.c
 endif

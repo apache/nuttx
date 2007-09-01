@@ -38,11 +38,17 @@
  ************************************************************/
 
 #include <nuttx/config.h>
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
+
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
+
+#include <nuttx/fs.h>
+#include <nuttx/net.h>
+
 #include "os_internal.h"
 
 /************************************************************
@@ -69,12 +75,11 @@
  *
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 int sched_setupidlefiles(FAR _TCB *tcb)
 {
   int fd;
 
+#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Allocate file descriptors for the TCB */
 
   tcb->filelist = files_alloclist();
@@ -83,8 +88,20 @@ int sched_setupidlefiles(FAR _TCB *tcb)
       *get_errno_ptr() = ENOMEM;
       return ERROR;
     }
+#endif /* CONFIG_NFILE_DESCRIPTORS */
 
-#ifdef CONFIG_DEV_CONSOLE
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+  /* Allocate socket descriptors for the TCB */
+
+  tcb->sockets = net_alloclist();
+  if (!tcb->sockets)
+    {
+      *get_errno_ptr() = ENOMEM;
+      return ERROR;
+    }
+#endif /* CONFIG_NSOCKET_DESCRIPTORS */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_DEV_CONSOLE)
   /* Open stdin, dup to get stdout and stderr. */
 
   fd = open("/dev/console", O_RDWR);
@@ -107,7 +124,7 @@ int sched_setupidlefiles(FAR _TCB *tcb)
 #else
   return OK;
 #endif /* CONFIG_NFILE_STREAMS */
-#endif /* CONFIG_DEV_CONSOLE */
+#endif /* CONFIG_NFILE_DESCRIPTORS && CONFIG_DEV_CONSOLE */
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */
+#endif /* CONFIG_NFILE_DESCRIPTORS || CONFIG_NSOCKET_DESCRIPTORS */

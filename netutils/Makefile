@@ -37,7 +37,7 @@
 
 MKDEP		= $(TOPDIR)/tools/mkdeps.sh
 
-ifeq ($(CONFIG_NET_UIP),y)
+ifeq ($(CONFIG_NET),y)
 include uiplib/Make.defs
 include dhcpc/Make.defs
 include resolv/Make.defs
@@ -77,7 +77,7 @@ $(BIN): $(OBJS)
 	done ; )
 
 .depend: Makefile $(SRCS)
-ifeq ($(CONFIG_NET_UIP),y)
+ifeq ($(CONFIG_NET),y)
 	$(MKDEP) --dep-path uiplib --dep-path dhcpc --dep-path smtp --dep-path webclient \
 		 --dep-path resolv --dep-path telnetd --dep-path webserver \
 	$(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep

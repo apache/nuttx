@@ -48,6 +48,7 @@
 #include <mqueue.h>
 #include <time.h>
 #include <nuttx/irq.h>
+#include <nuttx/net.h>
 
 /********************************************************************************
  * Definitions
@@ -166,7 +167,7 @@ struct _TCB
 {
   /* Fields used to support list management *************************************/
 
-  FAR struct _TCB *flink;         /* link in DQ of TCBs                         */
+  FAR struct _TCB *flink;                /* link in DQ of TCBs                  */
   FAR struct _TCB *blink;
 
   /* Task Management Fields *****************************************************/
@@ -247,6 +248,12 @@ struct _TCB
   FAR struct streamlist *streams;        /* Holds C buffered I/O info           */
 #endif
 
+  /* Network socket *************************************************************/
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+  FAR struct socketlist *sockets;        /* Maps file descriptor to file        */
+#endif
+
   /* State save areas ***********************************************************/
   /* The form and content of these fields are processor-specific.               */
 
@@ -286,6 +293,10 @@ EXTERN FAR struct filelist *sched_getfiles(void);
 EXTERN FAR struct streamlist *sched_getstreams(void);
 #endif /* CONFIG_NFILE_STREAMS */
 #endif /* CONFIG_NFILE_DESCRIPTORS */
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+EXTERN FAR struct socketlist *sched_getsockets(void);
+#endif /* CONFIG_NSOCKET_DESCRIPTORS */
 
 /* sched_foreach will enumerate over each task and provide the
  * TCB of each task to a user callback functions.  Interrupts

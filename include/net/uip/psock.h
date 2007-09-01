@@ -1,9 +1,15 @@
-/* psock.h
+/****************************************************************************
+ * psock.h
  * Protosocket library header file
- * Author: Adam Dunkels <adam@sics.se>
  *
- * Copyright (c) 2004, Swedish Institute of Computer Science.
- * All rights reserved.
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * This logic was leveraged from uIP which also has a BSD-style license:
+ *
+ *   Author: Adam Dunkels <adam@sics.se>
+ *   Copyright (c) 2004, Swedish Institute of Computer Science.
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,7 +34,10 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */
+ ****************************************************************************/
+
+#ifndef __NET_UIP_PSOCK_H
+#define __NET_UIP_PSOCK_H
 
 /* psock Protosockets library
  *
@@ -65,11 +74,19 @@
  *
  */
 
-#ifndef __PSOCK_H__
-#define __PSOCK_H__
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+#ifdef CONFIG_NET
 
 #include <sys/types.h>
 #include <net/uip/uipopt.h>
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
 /* The structure that holds the state of a buffer.
  *
@@ -102,6 +119,10 @@ struct psock
   unsigned int bufsize;    /* The size of the input buffer. */
   unsigned char state;     /* The state of the protosocket. */
 };
+
+/****************************************************************************
+ * Public FunctionPrototypes
+ ****************************************************************************/
 
 /* Initialize a protosocket.
  *
@@ -232,6 +253,5 @@ extern boolean psock_checknewdata(struct psock *s);
 
 extern void psock_waitnewdata(struct psock *s);
 
-#endif /* __PSOCK_H__ */
-
-/** @} */
+#endif /* CONFIG_NET */
+#endif /* __NET_UIP_PSOCK_H */

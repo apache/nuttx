@@ -61,25 +61,25 @@ uip_split_output(void)
     /* Create the first packet. This is done by altering the length
        field of the IP header and updating the checksums. */
     uip_len = len1 + UIP_TCPIP_HLEN;
-#ifdef CONFIG_NET_UIP_IPv6
+#ifdef CONFIG_NET_IPv6
     /* For IPv6, the IP length field does not include the IPv6 IP header
        length. */
     BUF->len[0] = ((uip_len - UIP_IPH_LEN) >> 8);
     BUF->len[1] = ((uip_len - UIP_IPH_LEN) & 0xff);
-#else /* CONFIG_NET_UIP_IPv6 */
+#else /* CONFIG_NET_IPv6 */
     BUF->len[0] = uip_len >> 8;
     BUF->len[1] = uip_len & 0xff;
-#endif /* CONFIG_NET_UIP_IPv6 */
+#endif /* CONFIG_NET_IPv6 */
 
     /* Recalculate the TCP checksum. */
     BUF->tcpchksum = 0;
     BUF->tcpchksum = ~(uip_tcpchksum());
 
-#ifndef CONFIG_NET_UIP_IPv6
+#ifndef CONFIG_NET_IPv6
     /* Recalculate the IP checksum. */
     BUF->ipchksum = 0;
     BUF->ipchksum = ~(uip_ipchksum());
-#endif /* CONFIG_NET_UIP_IPv6 */
+#endif /* CONFIG_NET_IPv6 */
     
     /* Transmit the first packet. */
     /*    uip_fw_output();*/
@@ -91,15 +91,15 @@ uip_split_output(void)
        memory. This place is detemined by the length of the first
        packet (len1). */
     uip_len = len2 + UIP_TCPIP_HLEN;
-#ifdef CONFIG_NET_UIP_IPv6
+#ifdef CONFIG_NET_IPv6
     /* For IPv6, the IP length field does not include the IPv6 IP header
        length. */
     BUF->len[0] = ((uip_len - UIP_IPH_LEN) >> 8);
     BUF->len[1] = ((uip_len - UIP_IPH_LEN) & 0xff);
-#else /* CONFIG_NET_UIP_IPv6 */
+#else /* CONFIG_NET_IPv6 */
     BUF->len[0] = uip_len >> 8;
     BUF->len[1] = uip_len & 0xff;
-#endif /* CONFIG_NET_UIP_IPv6 */
+#endif /* CONFIG_NET_IPv6 */
 
     /*    uip_appdata += len1;*/
     memcpy(uip_appdata, (uint8 *)uip_appdata + len1, len2);
@@ -114,11 +114,11 @@ uip_split_output(void)
     BUF->tcpchksum = 0;
     BUF->tcpchksum = ~(uip_tcpchksum());
 
-#ifndef CONFIG_NET_UIP_IPv6
+#ifndef CONFIG_NET_IPv6
     /* Recalculate the IP checksum. */
     BUF->ipchksum = 0;
     BUF->ipchksum = ~(uip_ipchksum());
-#endif /* CONFIG_NET_UIP_IPv6 */
+#endif /* CONFIG_NET_IPv6 */
 
     /* Transmit the second packet. */
     /*    uip_fw_output();*/

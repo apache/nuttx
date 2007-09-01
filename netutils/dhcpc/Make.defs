@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_UIP_UDP),y)
+ifeq ($(CONFIG_NET_UDP),y)
 DHCPC_ASRCS =
 DHCPC_CSRCS = dhcpc.c
 endif

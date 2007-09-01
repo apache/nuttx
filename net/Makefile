@@ -37,9 +37,9 @@
 
 MKDEP		= $(TOPDIR)/tools/mkdeps.sh
 
-ifeq ($(CONFIG_NET_UIP),y)
+ifeq ($(CONFIG_NET),y)
 STD_ASRCS	=
-STD_CSRCS	= socket.c bind.c
+STD_CSRCS	= socket.c bind.c net_sockets.c
 include uip/Make.defs
 endif
 
@@ -71,7 +71,7 @@ $(BIN): $(OBJS)
 	done ; )
 
 .depend: Makefile $(SRCS)
-ifeq ($(CONFIG_NET_UIP),y)
+ifeq ($(CONFIG_NET),y)
 	$(MKDEP) --dep-path . --dep-path uip $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 endif
 	touch $@

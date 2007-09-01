@@ -96,7 +96,7 @@ enum os_crash_codes_e
 
 /* Stubs used when there are no file descriptors */
 
-#if CONFIG_NFILE_DESCRIPTORS <= 0
+#if CONFIG_NFILE_DESCRIPTORS <= 0 && CONFIG_NSOCKET_DESCRIPTORS <= 0
 # define sched_setupidlefiles(t)    (OK)
 # define sched_setuptaskfiles(t)    (OK)
 # define sched_setuppthreadfiles(t) (OK)
@@ -254,11 +254,11 @@ extern void    sched_addblocked(FAR _TCB *btcb, tstate_t task_state);
 extern void    sched_removeblocked(FAR _TCB *btcb);
 extern FAR _TCB *sched_gettcb(pid_t pid);
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
 extern int     sched_setupidlefiles(FAR _TCB *tcb);
 extern int     sched_setuptaskfiles(FAR _TCB *tcb);
 extern int     sched_setuppthreadfiles(FAR _TCB *tcb);
-#if CONFIG_NFILE_STREAMS > 0
+#if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
 extern int     sched_setupstreams(FAR _TCB *tcb);
 extern int     sched_flushfiles(FAR _TCB *tcb);
 #endif

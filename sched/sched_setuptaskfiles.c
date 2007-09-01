@@ -38,9 +38,14 @@
  ************************************************************/
 
 #include <nuttx/config.h>
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
+
 #include <sched.h>
 #include <errno.h>
+
 #include <nuttx/fs.h>
+#include <nuttx/net.h>
+
 #include "os_internal.h"
 
 /************************************************************
@@ -68,16 +73,15 @@
  *
  ************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 int sched_setuptaskfiles(FAR _TCB *tcb)
 {
-#ifdef CONFIG_DEV_CONSOLE
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_DEV_CONSOLE)
   FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
   int i;
 #endif /* CONFIG_DEV_CONSOLE */
   int ret = OK;
 
+#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Allocate file descriptors for the TCB */
 
   tcb->filelist = files_alloclist();
@@ -86,8 +90,20 @@ int sched_setuptaskfiles(FAR _TCB *tcb)
       *get_errno_ptr() = ENOMEM;
        return ERROR;
     }
+#endif /* CONFIG_NFILE_DESCRIPTORS */
 
-#ifdef CONFIG_DEV_CONSOLE
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+  /* Allocate socket descriptors for the TCB */
+
+  tcb->sockets = net_alloclist();
+  if (!tcb->sockets)
+    {
+      *get_errno_ptr() = ENOMEM;
+      return ERROR;
+    }
+#endif /* CONFIG_NSOCKET_DESCRIPTORS */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_DEV_CONSOLE)
  /* Duplicate the first three file descriptors */
 
   if (rtcb->filelist)
@@ -104,8 +120,8 @@ int sched_setuptaskfiles(FAR _TCB *tcb)
 
   ret = sched_setupstreams(tcb);
 #endif /* CONFIG_NFILE_STREAMS */
-#endif /* CONFIG_DEV_CONSOLE */
+#endif /* CONFIG_NFILE_DESCRIPTORS && CONFIG_DEV_CONSOLE */
   return ret;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */
+#endif /* CONFIG_NFILE_DESCRIPTORS || CONFIG_NSOCKET_DESCRIPTORS */

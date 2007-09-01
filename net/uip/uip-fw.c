@@ -136,8 +136,8 @@ struct fwcache_entry {
 /*
  * The number of packets to remember when looking for duplicates.
  */
-#ifdef CONFIG_UIP_FWCACHE_SIZE
-# define FWCACHE_SIZE CONFIG_UIP_FWCACHE_SIZE
+#ifdef CONFIG_NET_FWCACHE_SIZE
+# define FWCACHE_SIZE CONFIG_NET_FWCACHE_SIZE
 #else
 # define FWCACHE_SIZE 2
 #endif

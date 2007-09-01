@@ -262,6 +262,10 @@ int smtp_send(void *handle, char *to, char *cc, char *from, char *subject, char 
   struct smtp_state *psmtp = (struct smtp_state *)handle;
   struct uip_conn *conn;
 
+  /* This is the moral equivalent of socket() + bind().  It returns the
+   * initialized connection structure 
+   */
+
   conn = uip_connect(&psmtp->smtpserver, HTONS(25));
   if (conn == NULL)
     {
@@ -277,14 +281,21 @@ int smtp_send(void *handle, char *to, char *cc, char *from, char *subject, char 
   psmtp->msglen    = msglen;
   psmtp->result    = OK;
 
+  /* Make this instance globally visible */
+
   gpsmtp           = psmtp;
+
+  /* Initialized the psock structure inside the smtp state structure */
+
   psock_init(&psmtp->psock, psmtp->buffer, SMTP_INPUT_BUFFER_SIZE);
 
   /* And wait for the the socket to be connected */
+
   sem_wait(&psmtp->sem);
   gpsmtp           = 0;
 
   /* Was an error reported by interrupt handler? */
+
   if (psmtp->result == OK )
     {
       /* No... Send the message */

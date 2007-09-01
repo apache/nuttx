@@ -1,6 +1,13 @@
-/*
- * Copyright (c) 2005, Swedish Institute of Computer Science
- * All rights reserved.
+/****************************************************************************
+ * dhcpc.c
+ *
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * This logic was leveraged from uIP which also has a BSD-style license:
+ *
+ *   Copyright (c) 2005, Swedish Institute of Computer Science
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,34 +32,41 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * This file is part of the uIP TCP/IP stack
- *
- * @(#)$Id: dhcpc.h,v 1.1.1.1 2007-08-26 23:07:02 patacongo Exp $
  */
-#ifndef __DHCPC_H__
-#define __DHCPC_H__
+
+#ifndef NET_UIP_DHCP_H__
+#define NET_UIP_DHCP_H__
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <sys/types.h>
 
-struct dhcpc_state {
-  char state;
-  struct uip_udp_conn *conn;
-  uint16 ticks;
-  const void *mac_addr;
-  int mac_len;
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
 
-  uint8 serverid[4];
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
+struct dhcpc_state
+{
   uint16 lease_time[2];
+  uint8  serverid[4];
   uint16 ipaddr[2];
   uint16 netmask[2];
   uint16 dnsaddr[2];
   uint16 default_router[2];
 };
 
-void dhcpc_init(const void *mac_addr, int mac_len);
-void dhcpc_request(void);
-void dhcpc_configured(const struct dhcpc_state *s);
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-#endif /* __DHCPC_H__ */
+void *dhcpc_open(const void *mac_addr, int mac_len);
+int  dhcpc_request(void *handle, struct dhcpc_state *ds);
+void dhcpc_close(void *handle);
+
+#endif /* NET_UIP_DHCP_H__ */

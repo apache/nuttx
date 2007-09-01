@@ -1,4 +1,4 @@
-############################################################
+############################################################################
 # Makefile
 #
 #   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -31,7 +31,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################
+############################################################################
 
 -include $(TOPDIR)/Make.defs
 
@@ -41,7 +41,7 @@ ASRCS		=
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 MISC_SRCS	= os_start.c get_errno_ptr.c \
-		  sched_setupstreams.c sched_getfiles.c sched_getstreams.c \
+		  sched_setupstreams.c sched_getfiles.c sched_getsockets.c sched_getstreams.c \
 		  sched_setupidlefiles.c sched_setuptaskfiles.c sched_setuppthreadfiles.c \
 		  sched_releasefiles.c
 TSK_SRCS	= task_create.c task_init.c task_setup.c task_activate.c \
