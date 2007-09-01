@@ -1295,68 +1295,71 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </ul>
 
 <h2>Network Support</h2>
-<h3>TCP/IP support via uIP</h2>
+<h3>TCP/IP and UDP support via uIP</h2>
 <ul>
   <li>
-    <code>CONFIG_NET_UIP</code>: Enable or disable all uIP features
+    <code>CONFIG_NET</code>: Enable or disable all network features
   </li>
   <li>
-    <code>CONFIG_NET_UIP_IPv6</code>: Build in support for IPv6
+    <code>CONFIG_NET_IPv6</code>: Build in support for IPv6
   </li>
   <li>
-    <code>CONFIG_UIP_MAX_CONNECTIONS</code>: Maximum number of TCP connections
+    <code>CONFIG_NSOCKET_DESCRIPTORS</code>: Maximum number of socket descriptors per task/thread.
   </li>
   <li>
-    <code>CONFIG_UIP_MAX_LISTENPORTS</code>: Maximum number of listening TCP ports
+    <code>CONFIG_NET_MAX_CONNECTIONS</code>: Maximum number of TCP connections
   </li>
   <li>
-    <code>CONFIG_UIP_BUFFER_SIZE</code>: uIP buffer size
+    <code>CONFIG_NET_MAX_LISTENPORTS</code>: Maximum number of listening TCP ports
   </li>
   <li>
-    <code>CONFIG_UIP_LOGGING</code>: Logging on or off
+    <code>CONFIG_NET_BUFFER_SIZE</code>: uIP buffer size
   </li>
   <li>
-    <code>CONFIG_UIP_UDP</code>: UDP support on or off
+    <code>CONFIG_NET_LOGGING</code>: Logging on or off
   </li>
   <li>
-    <code>CONFIG_UIP_UDP_CHECKSUMS</code>: UDP checksums on or off
+    <code>CONFIG_NET_UDP</code>: UDP support on or off
   </li>
   <li>
-    <code>CONFIG_UIP_UDP_CONNS</code>: The maximum amount of concurrent UDP connections
+    <code>CONFIG_NET_UDP_CHECKSUMS</code>: UDP checksums on or off
   </li>
   <li>
-    <code>CONFIG_UIP_STATISTICS</code>: uIP statistics on or off
+    <code>CONFIG_NET_UDP_CONNS</code>: The maximum amount of concurrent UDP connections
   </li>
   <li>
-    <code>CONFIG_UIP_PINGADDRCONF</code>: Use "ping" packet for setting IP address
+    <code>CONFIG_NET_STATISTICS</code>: uIP statistics on or off
   </li>
   <li>
-    <code>CONFIG_UIP_RECEIVE_WINDOW</code>: The size of the advertised receiver's window
+    <code>CONFIG_NET_PINGADDRCONF</code>: Use "ping" packet for setting IP address
   </li>
   <li>
-    <code>CONFIG_UIP_ARPTAB_SIZE</code>: The size of the ARP table
+    <code>CONFIG_NET_RECEIVE_WINDOW</code>: The size of the advertised receiver's window
   </li>
   <li>
-    <code>CONFIG_UIP_BROADCAST</code>: Broadcast support
+    <code>CONFIG_NET_ARPTAB_SIZE</code>: The size of the ARP table
   </li>
   <li>
-    <code>CONFIG_UIP_LLH_LEN</code>: The link level header length
+    <code>CONFIG_NET_BROADCAST</code>: Broadcast support
   </li>
   <li>
-    <code>CONFIG_UIP_EXTERNAL_BUFFER</code>: Incoming packet buffer (uip_buf) is defined externally
+    <code>CONFIG_NET_LLH_LEN</code>: The link level header length
   </li>
   <li>
-    <code>CONFIG_UIP_FWCACHE_SIZE</code>: number of packets to remember when looking for duplicates
+    <code>CONFIG_NET_EXTERNAL_BUFFER</code>: Incoming packet buffer (uip_buf) is defined externally
+  </li>
+  <li>
+    <code>CONFIG_NET_FWCACHE_SIZE</code>: number of packets to remember when looking for duplicates
   </li>
 </ul>
 
 <h3>UIP Network Utilities</h3>
 <ul>
   <li>
-    <code>CONFIG_UIP_DHCP_LIGHT</code>: Reduces size of DHCP
+    <code>CONFIG_NET_DHCP_LIGHT</code>: Reduces size of DHCP
   </li>
   <li>
-    <code>CONFIG_UIP_RESOLV_ENTRIES</code>: Number of resolver entries
+    <code>CONFIG_NET_RESOLV_ENTRIES</code>: Number of resolver entries
   </li>
 </ul>
 
