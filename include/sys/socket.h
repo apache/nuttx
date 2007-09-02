@@ -50,6 +50,8 @@
  * the protocol family which will be used for communication.
  */
 
+/* Protocol families */
+
 #define PF_UNIX       0 /* Local communication */
 #define PF_LOCAL      1 /* Local communication */
 #define PF_INET       2 /* IPv4 Internet protocols */
@@ -61,6 +63,20 @@
 #define PF_ATMPVC     8 /* Access to raw ATM PVCs */
 #define PF_APPLETALK  9 /* Appletalk */
 #define PF_PACKET    10 /* Low level packet interface */
+
+/* Address families */
+
+#define AF_UNIX         PF_UNIX
+#define AF_LOCAL        PF_LOCAL
+#define AF_INET         PF_INET
+#define AF_INET6        PF_INET6
+#define AF_IPX          PF_IPX
+#define AF_NETLINK      PF_NETLINK
+#define AF_X25          PF_X25
+#define AF_AX25         PF_AX25
+#define AF_ATMPVC       PF_ATMPVC
+#define AF_APPLETALK    PF_APPLETALK
+#define AF_PACKET       PF_PACKET
 
 /*The socket created by socket() has the indicated type, which specifies
  * the communication semantics.
@@ -100,9 +116,12 @@ extern "C" {
 #endif
 
 EXTERN int socket(int domain, int type, int protocol);
-EXTERN int bind(int sockfd, const struct sockaddr *my_addr, socklen_t addrlen);
-EXTERN int connect(int sockfd, const struct sockaddr *serv_addr, socklen_t addrlen);
+EXTERN int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+EXTERN int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 
+EXTERN ssize_t send(int s, const void *buf, size_t len, int flags);
+EXTERN ssize_t sendto(int s, const void *buf, size_t len, int flags,
+                      const struct sockaddr *to, socklen_t tolen);
 #undef EXTERN
 #if defined(__cplusplus)
 }

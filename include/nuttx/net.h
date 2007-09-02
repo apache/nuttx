@@ -1,5 +1,5 @@
 /****************************************************************************
- * net.h
+ * nuttx/net.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -73,23 +73,9 @@
 
 struct socket
 {
-  /* Socket state info */
-
-  int   s_crefs;          /* Reference counts on the socket */
+  int   s_crefs;          /* Reference count on the socket */
   uint8 s_type;           /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
-
-  /* Proto-socket */
-
-  struct psock s_psock;
-
-  /* Connection */
-
-  union
-    {
-      struct uip_udp_conn udp;
-      struct uip_conn     tcp;
-    }
-  s_conn;
+  void *s_conn;           /* Connection: struct uip_conn * or uip_udp_conn * */
 };
 
 /* This defines a list of sockets indexed by the socket descriptor */

@@ -34,6 +34,7 @@
 ############################################################
 
 -include $(TOPDIR)/Make.defs
+CFLAGS		+= -I./uip
 
 MKDEP		= $(TOPDIR)/tools/mkdeps.sh
 

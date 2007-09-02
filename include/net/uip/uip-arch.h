@@ -141,38 +141,39 @@
  * The ususal way of calling the function is through a for() loop like
  * this:
  *
- *     for(i = 0; i < UIP_CONNS; ++i) {
- *       uip_periodic(i);
- *       if(uip_len > 0) {
- *         devicedriver_send();
+ *     for(i = 0; i < UIP_CONNS; ++i)
+ *       {
+ *         uip_tcppoll(i);
+ *         if (uip_len > 0)
+ *           {
+ *             devicedriver_send();
+ *           }
  *       }
- *     }
  *
  * Note: If you are writing a uIP device driver that needs ARP
  * (Address Resolution Protocol), e.g., when running uIP over
  * Ethernet, you will need to call the uip_arp_out() function before
  * calling the device driver:
  *
- *     for(i = 0; i < UIP_CONNS; ++i) {
- *       uip_periodic(i);
- *       if(uip_len > 0) {
- *         uip_arp_out();
- *         ethernet_devicedriver_send();
+ *     for(i = 0; i < UIP_CONNS; ++i)
+ *       {
+ *         uip_tcppoll(i);
+ *         if (uip_len > 0)
+ *           {
+ *             uip_arp_out();
+ *             ethernet_devicedriver_send();
+ *           }
  *       }
- *     }
  *
  * conn The number of the connection which is to be periodically polled.
  */
 
-#define uip_periodic(conn) do { uip_conn = &uip_conns[conn]; \
-                                uip_interrupt(UIP_TIMER); } while (0)
-
-#define uip_conn_active(conn) (uip_conns[conn].tcpstateflags != UIP_CLOSED)
+extern void uip_tcppoll( unsigned int conn );
 
 /* Perform periodic processing for a connection identified by a pointer
  * to its structure.
  *
- * Same as uip_periodic() but takes a pointer to the actual uip_conn
+ * Same as uip_tcppoll() but takes a pointer to the actual uip_conn
  * struct instead of an integer as its argument. This function can be
  * used to force periodic processing of a specific connection.
  *
@@ -180,11 +181,11 @@
  * be processed.
  */
 
-#define uip_periodic_conn(conn) do { uip_conn = conn; uip_interrupt(UIP_TIMER); } while (0)
+#define uip_tcppoll_conn(conn) do { uip_conn = conn; uip_interrupt(UIP_TIMER); } while (0)
 
 /* Request that a particular connection should be polled.
  *
- * Similar to uip_periodic_conn() but does not perform any timer
+ * Similar to uip_tcppoll_conn() but does not perform any timer
  * processing. The application is polled for new data.
  *
  * conn A pointer to the uip_conn struct for the connection to
@@ -197,9 +198,9 @@
  #ifdef CONFIG_NET_UDP
 /* Periodic processing for a UDP connection identified by its number.
  *
- * This function is essentially the same as uip_periodic(), but for
+ * This function is essentially the same as uip_tcppoll(), but for
  * UDP connections. It is called in a similar fashion as the
- * uip_periodic() function:
+ * uip_tcppoll() function:
  *
  *     for(i = 0; i < UIP_UDP_CONNS; i++) {
  *       uip_udp_periodic(i);
@@ -208,7 +209,7 @@
  *       }
  *     }
  *
- * Note: As for the uip_periodic() function, special care has to be
+ * Note: As for the uip_tcppoll() function, special care has to be
  * taken when using uIP together with ARP and Ethernet:
  *
  *     for(i = 0; i < UIP_UDP_CONNS; i++) {
@@ -287,9 +288,7 @@ extern void uip_interrupt(uint8 flag);
  * op16 A 16-bit integer in host byte order.
  */
 
-#if UIP_ARCH_ADD32
 extern void uip_add32(uint8 *op32, uint16 op16);
-#endif
 
 /* Calculate the Internet checksum over a buffer.
  *

@@ -86,17 +86,18 @@
 
 /* The TCP states used in the uip_conn->tcpstateflags. */
 
-#define UIP_CLOSED      0
-#define UIP_SYN_RCVD    1
-#define UIP_SYN_SENT    2
-#define UIP_ESTABLISHED 3
-#define UIP_FIN_WAIT_1  4
-#define UIP_FIN_WAIT_2  5
-#define UIP_CLOSING     6
-#define UIP_TIME_WAIT   7
-#define UIP_LAST_ACK    8
-#define UIP_TS_MASK     15
+#define UIP_CLOSED      0 /* The connection is not in use and available */
+#define UIP_ALLOCATED   1 /* The connection is allocated, but not yet initialized */
+#define UIP_SYN_RCVD    2
+#define UIP_SYN_SENT    3
+#define UIP_ESTABLISHED 4
+#define UIP_FIN_WAIT_1  5
+#define UIP_FIN_WAIT_2  6
+#define UIP_CLOSING     7
+#define UIP_TIME_WAIT   8
+#define UIP_LAST_ACK    9
 
+#define UIP_TS_MASK     15
 #define UIP_STOPPED     16
 
 /* The buffer size available for user data in the \ref uip_buf buffer.
@@ -112,18 +113,19 @@
 
 #define UIP_APPDATA_SIZE (UIP_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN)
 
-
 #define UIP_PROTO_ICMP  1
 #define UIP_PROTO_TCP   6
 #define UIP_PROTO_UDP   17
 #define UIP_PROTO_ICMP6 58
 
 /* Header sizes. */
+
 #ifdef CONFIG_NET_IPv6
 # define UIP_IPH_LEN    40
 #else /* CONFIG_NET_IPv6 */
 # define UIP_IPH_LEN    20    /* Size of IP header */
 #endif /* CONFIG_NET_IPv6 */
+
 #define UIP_UDPH_LEN    8     /* Size of UDP header */
 #define UIP_TCPH_LEN    20    /* Size of TCP header */
 #define UIP_IPUDPH_LEN (UIP_UDPH_LEN + UIP_IPH_LEN)    /* Size of IP + UDP header */
@@ -188,7 +190,7 @@ struct uip_conn
   void *private;
 };
 
- #ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_UDP
 /* Representation of a uIP UDP connection. */
 
 struct uip_udp_conn
@@ -206,13 +208,14 @@ struct uip_udp_conn
 };
 #endif  /* CONFIG_NET_UDP */
 
-/**
- * The structure holding the TCP/IP statistics that are gathered if
+/* The structure holding the TCP/IP statistics that are gathered if
  * UIP_STATISTICS is set to 1.
- *
  */
-struct uip_stats {
-  struct {
+
+struct uip_stats
+{
+  struct
+  {
     uip_stats_t drop;     /* Number of dropped packets at the IP layer. */
     uip_stats_t recv;     /* Number of received packets at the IP layer. */
     uip_stats_t sent;     /* Number of sent packets at the IP layer. */
@@ -229,13 +232,15 @@ struct uip_stats {
     uip_stats_t protoerr; /* Number of packets dropped since they
                              were neither ICMP, UDP nor TCP. */
   } ip;                   /* IP statistics. */
-  struct {
+  struct
+  {
     uip_stats_t drop;     /* Number of dropped ICMP packets. */
     uip_stats_t recv;     /* Number of received ICMP packets. */
     uip_stats_t sent;     /* Number of sent ICMP packets. */
     uip_stats_t typeerr;  /* Number of ICMP packets with a wrong type. */
   } icmp;                 /* ICMP statistics. */
-  struct {
+  struct
+  {
     uip_stats_t drop;     /* Number of dropped TCP segments. */
     uip_stats_t recv;     /* Number of recived TCP segments. */
     uip_stats_t sent;     /* Number of sent TCP segments. */
@@ -248,8 +253,9 @@ struct uip_stats {
     uip_stats_t synrst;   /* Number of SYNs for closed ports,
                              triggering a RST. */
   } tcp;                  /* TCP statistics. */
- #ifdef CONFIG_NET_UDP
-  struct {
+#ifdef CONFIG_NET_UDP
+  struct
+  {
     uip_stats_t drop;     /* Number of dropped UDP segments. */
     uip_stats_t recv;     /* Number of recived UDP segments. */
     uip_stats_t sent;     /* Number of sent UDP segments. */
@@ -260,70 +266,76 @@ struct uip_stats {
 
 /* The TCP and IP headers. */
 
-struct uip_tcpip_hdr {
+struct uip_tcpip_hdr
+{
 #ifdef CONFIG_NET_IPv6
   /* IPv6 header. */
 
-  uint8 vtc,
-    tcflow;
+  uint8 vtc;
+  uint8 tcflow;
   uint16 flow;
   uint8 len[2];
   uint8 proto, ttl;
   uip_ip6addr_t srcipaddr, destipaddr;
+
 #else /* CONFIG_NET_IPv6 */
   /* IPv4 header. */
 
-  uint8 vhl,
-    tos,
-    len[2],
-    ipid[2],
-    ipoffset[2],
-    ttl,
-    proto;
+  uint8  vhl;
+  uint8  tos;
+  uint8  len[2];
+  uint8  ipid[2];
+  uint8  ipoffset[2];
+  uint8  ttl;
+  uint8  proto;
   uint16 ipchksum;
-  uint16 srcipaddr[2],
-    destipaddr[2];
+  uint16 srcipaddr[2];
+  uint16 destipaddr[2];
 #endif /* CONFIG_NET_IPv6 */
 
   /* TCP header. */
 
-  uint16 srcport,
-    destport;
-  uint8 seqno[4],
-    ackno[4],
-    tcpoffset,
-    flags,
-    wnd[2];
+  uint16 srcport;
+  uint16 destport;
+  uint8  seqno[4];
+  uint8  ackno[4];
+  uint8  tcpoffset;
+  uint8  flags;
+  uint8  wnd[2];
   uint16 tcpchksum;
-  uint8 urgp[2];
-  uint8 optdata[4];
+  uint8  urgp[2];
+  uint8  optdata[4];
 };
 
 /* The ICMP and IP headers. */
 
-struct uip_icmpip_hdr {
+struct uip_icmpip_hdr
+{
 #ifdef CONFIG_NET_IPv6
   /* IPv6 header. */
 
-  uint8 vtc,
-    tcf;
+  uint8  vtc;
+  uint8  tcf;
   uint16 flow;
-  uint8 len[2];
-  uint8 proto, ttl;
-  uip_ip6addr_t srcipaddr, destipaddr;
+  uint8  len[2];
+  uint8  proto;
+  uint8  ttl;
+  uip_ip6addr_t srcipaddr;
+  uip_ip6addr_t destipaddr;
+
 #else /* CONFIG_NET_IPv6 */
   /* IPv4 header. */
 
-  uint8 vhl,
-    tos,
-    len[2],
-    ipid[2],
-    ipoffset[2],
-    ttl,
-    proto;
+  uint8  vhl;
+  uint8  tos;
+  uint8  len[2];
+  uint8  ipid[2];
+  uint8  ipoffset[2];
+  uint8  ttl;
+  uint8  proto;
   uint16 ipchksum;
-  uint16 srcipaddr[2],
-    destipaddr[2];
+  uint16 srcipaddr[2];
+  uint16 destipaddr[2];
 #endif /* CONFIG_NET_IPv6 */
 
   /* ICMP (echo) header. */
@@ -340,42 +352,45 @@ struct uip_icmpip_hdr {
 
 /* The UDP and IP headers. */
 
-struct uip_udpip_hdr {
+struct uip_udpip_hdr
+{
 #ifdef CONFIG_NET_IPv6
   /* IPv6 header. */
 
-  uint8 vtc,
-    tcf;
+  uint8 vtc;
+  uint8  tcf;
   uint16 flow;
   uint8 len[2];
   uint8 proto, ttl;
-  uip_ip6addr_t srcipaddr, destipaddr;
+  uip_ip6addr_t srcipaddr;
+  uip_ip6addr_t destipaddr;
 #else /* CONFIG_NET_IPv6 */
   /* IP header. */
 
-  uint8 vhl,
-    tos,
-    len[2],
-    ipid[2],
-    ipoffset[2],
-    ttl,
-    proto;
+  uint8  vhl;
+  uint8  tos;
+  uint8  len[2];
+  uint8  ipid[2];
+  uint8  ipoffset[2];
+  uint8  ttl;
+  uint8  proto;
   uint16 ipchksum;
-  uint16 srcipaddr[2],
-    destipaddr[2];
+  uint16 srcipaddr[2];
+  uint16 destipaddr[2];
 #endif /* CONFIG_NET_IPv6 */
 
   /* UDP header. */
 
-  uint16 srcport,
-    destport;
+  uint16 srcport;
+  uint16 destport;
   uint16 udplen;
   uint16 udpchksum;
 };
 
 /* Representation of a 48-bit Ethernet address. */
 
-struct uip_eth_addr {
+struct uip_eth_addr
+{
   uint8 addr[6];
 };
 
@@ -463,16 +478,13 @@ extern uint16 uip_urglen, uip_surglen;
 
 extern struct uip_conn *uip_conn;
 
-/* The array containing all uIP connections. */
-extern struct uip_conn uip_conns[UIP_CONNS];
-
 /* 4-byte array used for the 32-bit sequence number calculations.*/
 
 extern uint8 uip_acc32[4];
 
 /* The current UDP connection. */
 
- #ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_UDP
 extern struct uip_udp_conn *uip_udp_conn;
 extern struct uip_udp_conn uip_udp_conns[UIP_UDP_CONNS];
 #endif  /* CONFIG_NET_UDP */
@@ -601,9 +613,27 @@ void uip_setipid(uint16 id);
  * detected that may be of interest to the application.
  */
 
-void uip_interrupt_event(void);
- #ifdef CONFIG_NET_UDP
-void uip_interrupt_udp_event(void);
+extern void uip_interrupt_event(void);
+#ifdef CONFIG_NET_UDP
+extern void uip_interrupt_udp_event(void);
+#endif
+
+/* Find a free connection structure and allocate it for use. This is
+ * normally something done by the implementation of the socket() API
+ */
+
+extern struct uip_conn *uip_tcpalloc(void);
+#ifdef CONFIG_NET_UDP
+extern struct uip_udp_conn *uip_udpalloc(void);
+#endif
+
+/* Free a connection structure that is no longer in use. This should
+ * be done by the implementation of close()
+ */
+
+extern void uip_tcpfree(struct uip_conn *conn);
+#ifdef CONFIG_NET_UDP
+extern void uip_udpfree(struct uip_udp_conn *conn);
 #endif
 
 /* Start listening to the specified port.
@@ -625,37 +655,6 @@ void uip_listen(uint16 port);
  */
 
 void uip_unlisten(uint16 port);
-
-/* Connect to a remote host using TCP.
- *
- * This function is used to start a new connection to the specified
- * port on the specied host. It allocates a new connection identifier,
- * sets the connection to the SYN_SENT state and sets the
- * retransmission timer to 0. This will cause a TCP SYN segment to be
- * sent out the next time this connection is periodically processed,
- * which usually is done within 0.5 seconds after the call to
- * uip_connect().
- *
- * Note: Since this function requires the port number to be in network
- * byte order, a conversion using HTONS() or htons() is necessary.
- *
- * Example:
- *
- *   uip_ipaddr_t ipaddr;
- *
- *   uip_ipaddr(&ipaddr, 192,168,1,2);
- *   uip_connect(&ipaddr, HTONS(80));
- *
- * ripaddr The IP address of the remote hot.
- *
- * port A 16-bit port number in network byte order.
- *
- * Return:  A pointer to the uIP connection identifier for the new connection,
- * or NULL if no connection could be allocated.
- */
-
-struct uip_conn *uip_connect(uip_ipaddr_t *ripaddr, uint16 port);
-
 
 /* Check if a connection has outstanding (i.e., unacknowledged) data.
  *
@@ -837,7 +836,7 @@ void uip_send(const void *data, int len);
  * connection.
  */
 
-#define uip_initialmss()             (uip_conn->initialmss)
+#define uip_initialmss() (uip_conn->initialmss)
 
 /* Get the current maxium segment size that can be sent on the current
  * connection.
@@ -848,7 +847,7 @@ void uip_send(const void *data, int len);
  * uip_initialmss()).
  */
 
-#define uip_mss()             (uip_conn->mss)
+#define uip_mss()        (uip_conn->mss)
 
 /* Set up a new UDP connection.
  *

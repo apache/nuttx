@@ -52,6 +52,7 @@
 
 #include <sys/types.h>
 #include <string.h>
+#include <debug.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/resolv.h>

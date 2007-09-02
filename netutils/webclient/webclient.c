@@ -38,12 +38,13 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: webclient.c,v 1.1.1.1 2007-08-26 23:07:05 patacongo Exp $
+ * $Id: webclient.c,v 1.2 2007-09-02 21:58:34 patacongo Exp $
  *
  */
 
 #include <sys/types.h>
 #include <string.h>
+#include <sys/socket.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/resolv.h>
@@ -118,24 +119,43 @@ void webclient_close(void)
 
 unsigned char webclient_get(char *host, uint16 port, char *file)
 {
-  struct uip_conn *conn;
   uip_ipaddr_t *ipaddr;
   static uip_ipaddr_t addr;
+  struct sockaddr_in server;
+  int sockfd;
 
   /* First check if the host is an IP address. */
-  ipaddr = &addr;
-  if (uiplib_ipaddrconv(host, (unsigned char *)addr) == 0) {
-    ipaddr = (uip_ipaddr_t *)resolv_lookup(host);
 
-    if (ipaddr == NULL) {
-      return 0;
-    }
+  ipaddr = &addr;
+  if (uiplib_ipaddrconv(host, (unsigned char *)addr) == 0)
+    {
+      ipaddr = (uip_ipaddr_t *)resolv_lookup(host);
+
+      if (ipaddr == NULL) {
+        return 0;
+      }
   }
 
-  conn = uip_connect(ipaddr, htons(port));
+  /* Create a socket */
 
-  if (conn == NULL) {
-    return 0;
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sockfd < 0)
+    {
+      return ERROR;
+    }
+
+  /* Connect to server.  First we have to set some fields in the
+   * 'server' structure.  The system will assign me an arbitrary
+   * local port that is not in use.
+   */
+
+  server.sin_family = AF_INET;
+  memcpy(&server.sin_addr.s_addr, &host, sizeof(in_addr_t));
+  server.sin_port = htons(port);
+
+  if (connect(sockfd, (struct sockaddr *)&server, sizeof(struct sockaddr_in)) < 0)
+    {
+      return ERROR;
   }
 
   s.port = port;
@@ -143,7 +163,7 @@ unsigned char webclient_get(char *host, uint16 port, char *file)
   strncpy(s.host, host, sizeof(s.host));
 
   init_connection();
-  return 1;
+  return OK;
 }
 
 static char *copy_string(char *dest, const char *src, int len)

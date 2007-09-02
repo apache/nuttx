@@ -39,21 +39,73 @@
 #include <stdio.h>
 #include <string.h>
 
+#define CONFIG_HTTPDCGI_FILESTATS 1
+#undef CONFIG_HTTPDCGI_DCPSTATS
+#define CONFIG_HTTPDCGI_NETSTATS 1
+
 HTTPD_CGI_CALL(file, "file-stats", file_stats);
+#if CONFIG_HTTPDCGI_TCPSTATS
 HTTPD_CGI_CALL(tcp, "tcp-connections", tcp_stats);
+#endif
 HTTPD_CGI_CALL(net, "net-stats", net_stats);
 
+#if 0 /* Revisit */
 static const struct httpd_cgi_call *calls[] = { &file, &tcp, &net, NULL };
+#else
+static const struct httpd_cgi_call *calls[] = {
 
-/*---------------------------------------------------------------------------*/
-static
-void nullfunction(struct httpd_state *s, char *ptr)
+#ifdef CONFIG_HTTPDCGI_FILESTATS
+  &file,
+#endif
+#ifdef CONFIG_HTTPDCGI_DCPSTATS
+  &tcp,
+#endif
+#ifdef CONFIG_HTTPDCGI_NETSTATS
+  &net,
+#endif
+  NULL
+};
+#endif
+
+static const char closed[] =   /*  "CLOSED",*/
+{0x43, 0x4c, 0x4f, 0x53, 0x45, 0x44, 0};
+static const char syn_rcvd[] = /*  "SYN-RCVD",*/
+{0x53, 0x59, 0x4e, 0x2d, 0x52, 0x43, 0x56, 0x44,  0};
+static const char syn_sent[] = /*  "SYN-SENT",*/
+{0x53, 0x59, 0x4e, 0x2d, 0x53, 0x45, 0x4e, 0x54,  0};
+static const char established[] = /*  "ESTABLISHED",*/
+{0x45, 0x53, 0x54, 0x41, 0x42, 0x4c, 0x49, 0x53, 0x48, 0x45, 0x44, 0};
+static const char fin_wait_1[] = /*  "FIN-WAIT-1",*/
+{0x46, 0x49, 0x4e, 0x2d, 0x57, 0x41, 0x49, 0x54, 0x2d, 0x31, 0};
+static const char fin_wait_2[] = /*  "FIN-WAIT-2",*/
+{0x46, 0x49, 0x4e, 0x2d, 0x57, 0x41, 0x49, 0x54, 0x2d, 0x32, 0};
+static const char closing[] = /*  "CLOSING",*/
+{0x43, 0x4c, 0x4f, 0x53, 0x49, 0x4e, 0x47, 0};
+static const char time_wait[] = /*  "TIME-WAIT,"*/
+{0x54, 0x49, 0x4d, 0x45, 0x2d, 0x57, 0x41, 0x49, 0x54, 0};
+static const char last_ack[] = /*  "LAST-ACK"*/
+{0x4c, 0x41, 0x53, 0x54, 0x2d, 0x41, 0x43, 0x4b, 0};
+
+#if CONFIG_HTTPDCGI_TCPSTATS
+static const char *states[] =
+{
+  closed,
+  syn_rcvd,
+  syn_sent,
+  established,
+  fin_wait_1,
+  fin_wait_2,
+  closing,
+  time_wait,
+  last_ack
+};
+#endif
+
+static void nullfunction(struct httpd_state *s, char *ptr)
 {
 }
 
-/*---------------------------------------------------------------------------*/
-httpd_cgifunction
-httpd_cgi(char *name)
+httpd_cgifunction httpd_cgi(char *name)
 {
   const struct httpd_cgi_call **f;
 
@@ -66,66 +118,26 @@ httpd_cgi(char *name)
 #warning REVISIT -- must wait to return
   return nullfunction;
 }
-/*---------------------------------------------------------------------------*/
-static unsigned short
-generate_file_stats(void *arg)
+
+#ifdef CONFIG_HTTPDCGI_FILESTATS
+static unsigned short generate_file_stats(void *arg)
 {
   char *f = (char *)arg;
   return snprintf((char *)uip_appdata, UIP_APPDATA_SIZE, "%5u", httpd_fs_count(f));
 }
-/*---------------------------------------------------------------------------*/
-static
-void file_stats(struct httpd_state *s, char *ptr)
+
+static void file_stats(struct httpd_state *s, char *ptr)
 {
   psock_generator_send(&s->sout, generate_file_stats, strchr(ptr, ' ') + 1);
 }
+#endif
 
-/*---------------------------------------------------------------------------*/
-static const char closed[] =   /*  "CLOSED",*/
-{0x43, 0x4c, 0x4f, 0x53, 0x45, 0x44, 0};
-static const char syn_rcvd[] = /*  "SYN-RCVD",*/
-{0x53, 0x59, 0x4e, 0x2d, 0x52, 0x43, 0x56,
- 0x44,  0};
-static const char syn_sent[] = /*  "SYN-SENT",*/
-{0x53, 0x59, 0x4e, 0x2d, 0x53, 0x45, 0x4e,
- 0x54,  0};
-static const char established[] = /*  "ESTABLISHED",*/
-{0x45, 0x53, 0x54, 0x41, 0x42, 0x4c, 0x49, 0x53, 0x48,
- 0x45, 0x44, 0};
-static const char fin_wait_1[] = /*  "FIN-WAIT-1",*/
-{0x46, 0x49, 0x4e, 0x2d, 0x57, 0x41, 0x49,
- 0x54, 0x2d, 0x31, 0};
-static const char fin_wait_2[] = /*  "FIN-WAIT-2",*/
-{0x46, 0x49, 0x4e, 0x2d, 0x57, 0x41, 0x49,
- 0x54, 0x2d, 0x32, 0};
-static const char closing[] = /*  "CLOSING",*/
-{0x43, 0x4c, 0x4f, 0x53, 0x49,
- 0x4e, 0x47, 0};
-static const char time_wait[] = /*  "TIME-WAIT,"*/
-{0x54, 0x49, 0x4d, 0x45, 0x2d, 0x57, 0x41,
- 0x49, 0x54, 0};
-static const char last_ack[] = /*  "LAST-ACK"*/
-{0x4c, 0x41, 0x53, 0x54, 0x2d, 0x41, 0x43,
- 0x4b, 0};
-
-static const char *states[] = {
-  closed,
-  syn_rcvd,
-  syn_sent,
-  established,
-  fin_wait_1,
-  fin_wait_2,
-  closing,
-  time_wait,
-  last_ack};
-  
-
-static unsigned short
-generate_tcp_stats(void *arg)
+#if CONFIG_HTTPDCGI_TCPSTATS
+static unsigned short generate_tcp_stats(void *arg)
 {
   struct uip_conn *conn;
   struct httpd_state *s = (struct httpd_state *)arg;
-    
+
   conn = &uip_conns[s->count];
   return snprintf((char *)uip_appdata, UIP_APPDATA_SIZE,
 		 "<tr><td>%d</td><td>%u.%u.%u.%u:%u</td><td>%s</td><td>%u</td><td>%u</td><td>%c %c</td></tr>\r\n",
@@ -141,38 +153,34 @@ generate_tcp_stats(void *arg)
 		 (uip_outstanding(conn))? '*':' ',
 		 (uip_stopped(conn))? '!':' ');
 }
-/*---------------------------------------------------------------------------*/
-static
-void tcp_stats(struct httpd_state *s, char *ptr)
-{
-  for(s->count = 0; s->count < UIP_CONNS; ++s->count) {
-    if((uip_conns[s->count].tcpstateflags & UIP_TS_MASK) != UIP_CLOSED) {
-      psock_generator_send(&s->sout, generate_tcp_stats, s);
-    }
-  }
-}
 
-/*---------------------------------------------------------------------------*/
-static unsigned short
-generate_net_stats(void *arg)
+static void tcp_stats(struct httpd_state *s, char *ptr)
+{
+  for(s->count = 0; s->count < UIP_CONNS; ++s->count)
+    {
+      if((uip_conns[s->count].tcpstateflags & UIP_TS_MASK) != UIP_CLOSED)
+        {
+          psock_generator_send(&s->sout, generate_tcp_stats, s);
+        }
+    }
+}
+#endif
+
+#ifdef CONFIG_HTTPDCGI_NETSTATS
+static unsigned short generate_net_stats(void *arg)
 {
   struct httpd_state *s = (struct httpd_state *)arg;
-  return snprintf((char *)uip_appdata, UIP_APPDATA_SIZE,
+  return snprintf((char*)uip_appdata, UIP_APPDATA_SIZE,
 		  "%5u\n", ((uip_stats_t *)&uip_stat)[s->count]);
 }
 
-static
-void net_stats(struct httpd_state *s, char *ptr)
+static void net_stats(struct httpd_state *s, char *ptr)
 {
 #if UIP_STATISTICS
-
-  for(s->count = 0; s->count < sizeof(uip_stat) / sizeof(uip_stats_t);
-      ++s->count) {
-    psock_generator_send(&s->sout, generate_net_stats, s);
-  }
-  
+  for(s->count = 0; s->count < sizeof(uip_stat) / sizeof(uip_stats_t); ++s->count)
+    {
+      psock_generator_send(&s->sout, generate_net_stats, s);
+    }
 #endif /* UIP_STATISTICS */
 }
-
-/*---------------------------------------------------------------------------*/
-/** @} */
+#endif

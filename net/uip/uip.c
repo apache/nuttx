@@ -93,6 +93,8 @@ extern void uip_log(char *msg);
 # define UIP_LOG(m)
 #endif /* UIP_LOGGING == 1 */
 
+#include "uip-internal.h"
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -175,11 +177,9 @@ uint16 uip_flags;                /* The uip_flags variable is used for communica
                                   * program. */
 struct uip_conn *uip_conn;       /* uip_conn always points to the current connection. */
 
-struct uip_conn uip_conns[UIP_CONNS];
-                                 /* The uip_conns array holds all TCP connections. */
 uint16 uip_listenports[UIP_LISTENPORTS];
                                  /* The uip_listenports list all currently listning ports. */
- #ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_UDP
 struct uip_udp_conn *uip_udp_conn;
 struct uip_udp_conn uip_udp_conns[UIP_UDP_CONNS];
 #endif   /* CONFIG_NET_UDP */
@@ -222,11 +222,10 @@ struct uip_eth_addr uip_ethaddr = {{ 0,0,0,0,0,0 }};
 static uint16 ipid;              /* Ths ipid variable is an increasing number that is
                                   * used for the IP ID field. */
 
-static uint8 iss[4];             /* The iss variable is used for the TCP initial
-                                  * sequence number. */
-
-static uint16 lastport;          /* Keeps track of the last port used for a new
+#ifdef CONFIG_NET_UDP
+static uint16 g_last_udp_port;          /* Keeps track of the last port used for a new
                                   * connection. */
+#endif
 
 /* Temporary variables. */
 static uint8 c, opt;
@@ -235,38 +234,6 @@ static uint16 tmp16;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-#if !UIP_ARCH_ADD32
-static void uip_add32(uint8 *op32, uint16 op16)
-{
-  uip_acc32[3] = op32[3] + (op16 & 0xff);
-  uip_acc32[2] = op32[2] + (op16 >> 8);
-  uip_acc32[1] = op32[1];
-  uip_acc32[0] = op32[0];
-
-  if (uip_acc32[2] < (op16 >> 8))
-    {
-      ++uip_acc32[1];
-      if (uip_acc32[1] == 0)
-        {
-          ++uip_acc32[0];
-        }
-    }
-
-  if (uip_acc32[3] < (op16 & 0xff))
-    {
-      ++uip_acc32[2];
-      if (uip_acc32[2] == 0)
-        {
-          ++uip_acc32[1];
-          if (uip_acc32[1] == 0)
-            {
-              ++uip_acc32[0];
-            }
-        }
-    }
-}
-#endif /* UIP_ARCH_ADD32 */
 
 #if !UIP_ARCH_CHKSUM
 static uint16 chksum(uint16 sum, const uint8 *data, uint16 len)
@@ -340,34 +307,7 @@ static uint16 uip_icmp6chksum(void)
 
 #endif /* UIP_ARCH_CHKSUM */
 
-/* Given a port number, find the socket bound to the port number.
- * Primary use: to determine if a port number is available.
- */
-
-struct uip_conn *uip_find_conn( uint16 portno )
-{
-  struct uip_conn *conn;
-  int i;
-
-  /* Check if this port number is already in use, and if so try to find
-   * another one.
-   */
-
-  for (i = 0; i < UIP_CONNS; i++)
-    {
-      conn = &uip_conns[i];
-      if (conn->tcpstateflags != UIP_CLOSED && conn->lport == htons(lastport))
-        {
-          /* The portnumber is in use */
-
-          return conn;
-        }
-    }
-
-  return NULL;
-}
-
- #ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_UDP
 struct uip_udp_conn *uip_find_udp_conn( uint16 portno )
 {
   struct uip_udp_conn *conn;
@@ -375,7 +315,7 @@ struct uip_udp_conn *uip_find_udp_conn( uint16 portno )
 
   for (i = 0; i < UIP_UDP_CONNS; i++)
     {
-      if (uip_udp_conns[i].lport == htons(lastport))
+      if (uip_udp_conns[i].lport == htons(g_last_udp_port))
         {
           return conn;
         }
@@ -397,6 +337,38 @@ void uip_setipid(uint16 id)
 }
 
 /* Calculate the Internet checksum over a buffer. */
+
+#if !UIP_ARCH_ADD32
+void uip_add32(uint8 *op32, uint16 op16)
+{
+  uip_acc32[3] = op32[3] + (op16 & 0xff);
+  uip_acc32[2] = op32[2] + (op16 >> 8);
+  uip_acc32[1] = op32[1];
+  uip_acc32[0] = op32[0];
+
+  if (uip_acc32[2] < (op16 >> 8))
+    {
+      ++uip_acc32[1];
+      if (uip_acc32[1] == 0)
+        {
+          ++uip_acc32[0];
+        }
+    }
+
+  if (uip_acc32[3] < (op16 & 0xff))
+    {
+      ++uip_acc32[2];
+      if (uip_acc32[2] == 0)
+        {
+          ++uip_acc32[1];
+          if (uip_acc32[1] == 0)
+            {
+              ++uip_acc32[0];
+            }
+        }
+    }
+}
+#endif /* UIP_ARCH_ADD32 */
 
 #if !UIP_ARCH_CHKSUM
 uint16 uip_chksum(uint16 *data, uint16 len)
@@ -426,7 +398,7 @@ uint16 uip_tcpchksum(void)
 
 /* Calculate the UDP checksum of the packet in uip_buf and uip_appdata. */
 
- #ifdef CONFIG_NET_UDP_CHECKSUMS
+#ifdef CONFIG_NET_UDP_CHECKSUMS
 uint16 uip_udpchksum(void)
 {
   return upper_layer_chksum(UIP_PROTO_UDP);
@@ -441,100 +413,25 @@ void uip_init(void)
       uip_listenports[c] = 0;
     }
 
-  for (c = 0; c < UIP_CONNS; ++c)
-    {
-      uip_conns[c].tcpstateflags = UIP_CLOSED;
-    }
-  lastport = 1024;
+  /* Initialize the TCP/IP connection structures */
 
- #ifdef CONFIG_NET_UDP
+  uip_tcpinit();
+
+  /* Initialize the UDP connection structures */
+
+#ifdef CONFIG_NET_UDP
   for (c = 0; c < UIP_UDP_CONNS; ++c)
     {
       uip_udp_conns[c].lport = 0;
     }
+
+  g_last_udp_port = 1024;
 #endif   /* CONFIG_NET_UDP */
 
   /* IPv4 initialization. */
 #if UIP_FIXEDADDR == 0
   /*  uip_hostaddr[0] = uip_hostaddr[1] = 0;*/
 #endif /* UIP_FIXEDADDR */
-}
-
-struct uip_conn *uip_connect(uip_ipaddr_t *ripaddr, uint16 rport)
-{
-  struct uip_conn *conn, *cconn;
-  int i;
-
-  /* Find an unused local port number.  Loop until we find a valid listen port
-   * number that is not being used by any other connection.
-   */
-
-  do
-    {
-      /* Guess that the next available port number will be the one after
-       * the last port number assigned.
-       */
-
-      ++lastport;
-
-      /* Make sure that the port number is within range */
-      if (lastport >= 32000)
-        {
-          lastport = 4096;
-        }
-    }
-  while (uip_find_conn(lastport));
-
-  /* Now find an available connection structure */
-
-  conn = 0;
-  for (i = 0; i < UIP_CONNS; i++)
-    {
-      cconn = &uip_conns[i];
-      if (cconn->tcpstateflags == UIP_CLOSED)
-        {
-          conn = cconn;
-          break;
-        }
-
-      if (cconn->tcpstateflags == UIP_TIME_WAIT)
-        {
-          if (conn == 0 || cconn->timer > conn->timer)
-            {
-              conn = cconn;
-            }
-        }
-    }
-
-  /* Return an error if no connection is available */
-
-  if (conn == 0)
-    {
-      return 0;
-    }
-
-  /* Initialize and return the connection structure, bind it to the port number */
-
-  conn->tcpstateflags = UIP_SYN_SENT;
-
-  conn->snd_nxt[0] = iss[0];
-  conn->snd_nxt[1] = iss[1];
-  conn->snd_nxt[2] = iss[2];
-  conn->snd_nxt[3] = iss[3];
-
-  conn->initialmss = conn->mss = UIP_TCP_MSS;
-
-  conn->len   = 1;    /* TCP length of the SYN is one. */
-  conn->nrtx  = 0;
-  conn->timer = 1;    /* Send the SYN next time around. */
-  conn->rto   = UIP_RTO;
-  conn->sa    = 0;
-  conn->sv    = 16;   /* Initial value of the RTT variance. */
-  conn->lport = htons(lastport);
-  conn->rport = rport;
-  uip_ipaddr_copy(&conn->ripaddr, ripaddr);
-
-  return conn;
 }
 
 #ifdef CONFIG_NET_UDP
@@ -553,15 +450,15 @@ struct uip_udp_conn *uip_udp_new(uip_ipaddr_t *ripaddr, uint16 rport)
        * the last port number assigned.
        */
 
-      ++lastport;
+      ++g_last_udp_port;
 
       /* Make sure that the port number is within range */
-      if (lastport >= 32000)
+      if (g_last_udp_port >= 32000)
         {
-          lastport = 4096;
+          g_last_udp_port = 4096;
         }
     }
-  while (uip_find_udp_conn(lastport));
+  while (uip_find_udp_conn(g_last_udp_port));
 
   /* Now find an available UDP connection structure */
 
@@ -584,7 +481,7 @@ struct uip_udp_conn *uip_udp_new(uip_ipaddr_t *ripaddr, uint16 rport)
 
   /* Initialize and return the connection structure, bind it to the port number */
 
-  conn->lport = HTONS(lastport);
+  conn->lport = HTONS(g_last_udp_port);
   conn->rport = rport;
 
   if (ripaddr == NULL)
@@ -616,15 +513,17 @@ void uip_unlisten(uint16 port)
 
 void uip_listen(uint16 port)
 {
-  for (c = 0; c < UIP_LISTENPORTS; ++c) {
-    if (uip_listenports[c] == 0) {
-      uip_listenports[c] = port;
-      return;
+  for (c = 0; c < UIP_LISTENPORTS; ++c)
+    {
+      if (uip_listenports[c] == 0)
+        {
+          uip_listenports[c] = port;
+          return;
+        }
     }
-  }
 }
 
-/* XXX: IP fragment reassembly: not well-tested. */
+/* IP fragment reassembly: not well-tested. */
 
 #if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
 #define UIP_REASS_BUFSIZE (UIP_BUFSIZE - UIP_LLH_LEN)
@@ -644,113 +543,133 @@ static uint8 uip_reass(void)
   uint16 i;
 
   /* If ip_reasstmr is zero, no packet is present in the buffer, so we
-     write the IP header of the fragment into the reassembly
-     buffer. The timer is updated with the maximum age. */
-  if (uip_reasstmr == 0) {
-    memcpy(uip_reassbuf, &BUF->vhl, UIP_IPH_LEN);
-    uip_reasstmr = UIP_REASS_MAXAGE;
-    uip_reassflags = 0;
-    /* Clear the bitmap. */
-    memset(uip_reassbitmap, 0, sizeof(uip_reassbitmap));
-  }
+   * write the IP header of the fragment into the reassembly
+   * buffer. The timer is updated with the maximum age.
+   */
+
+  if (uip_reasstmr == 0)
+    {
+      memcpy(uip_reassbuf, &BUF->vhl, UIP_IPH_LEN);
+      uip_reasstmr = UIP_REASS_MAXAGE;
+      uip_reassflags = 0;
+
+      /* Clear the bitmap. */
+      memset(uip_reassbitmap, 0, sizeof(uip_reassbitmap));
+    }
 
   /* Check if the incoming fragment matches the one currently present
-     in the reasembly buffer. If so, we proceed with copying the
-     fragment into the buffer. */
-  if (BUF->srcipaddr[0] == FBUF->srcipaddr[0] &&
-     BUF->srcipaddr[1] == FBUF->srcipaddr[1] &&
-     BUF->destipaddr[0] == FBUF->destipaddr[0] &&
-     BUF->destipaddr[1] == FBUF->destipaddr[1] &&
-     BUF->ipid[0] == FBUF->ipid[0] &&
-     BUF->ipid[1] == FBUF->ipid[1]) {
+   * in the reasembly buffer. If so, we proceed with copying the
+   * fragment into the buffer.
+   */
 
-    len = (BUF->len[0] << 8) + BUF->len[1] - (BUF->vhl & 0x0f) * 4;
-    offset = (((BUF->ipoffset[0] & 0x3f) << 8) + BUF->ipoffset[1]) * 8;
+  if (BUF->srcipaddr[0] == FBUF->srcipaddr[0] && BUF->srcipaddr[1] == FBUF->srcipaddr[1] &&
+      BUF->destipaddr[0] == FBUF->destipaddr[0] && BUF->destipaddr[1] == FBUF->destipaddr[1] &&
+      BUF->ipid[0] == FBUF->ipid[0] && BUF->ipid[1] == FBUF->ipid[1])
+    {
+      len = (BUF->len[0] << 8) + BUF->len[1] - (BUF->vhl & 0x0f) * 4;
+      offset = (((BUF->ipoffset[0] & 0x3f) << 8) + BUF->ipoffset[1]) * 8;
 
-    /* If the offset or the offset + fragment length overflows the
-       reassembly buffer, we discard the entire packet. */
-    if (offset > UIP_REASS_BUFSIZE ||
-       offset + len > UIP_REASS_BUFSIZE) {
-      uip_reasstmr = 0;
-      goto nullreturn;
-    }
+      /* If the offset or the offset + fragment length overflows the
+       * reassembly buffer, we discard the entire packet.
+       */
 
-    /* Copy the fragment into the reassembly buffer, at the right
-       offset. */
-    memcpy(&uip_reassbuf[UIP_IPH_LEN + offset],
-	   (char *)BUF + (int)((BUF->vhl & 0x0f) * 4),
-	   len);
+      if (offset > UIP_REASS_BUFSIZE || offset + len > UIP_REASS_BUFSIZE)
+        {
+          uip_reasstmr = 0;
+          goto nullreturn;
+        }
+
+      /* Copy the fragment into the reassembly buffer, at the right offset. */
+
+      memcpy(&uip_reassbuf[UIP_IPH_LEN + offset], (char *)BUF + (int)((BUF->vhl & 0x0f) * 4), len);
 
     /* Update the bitmap. */
-    if (offset / (8 * 8) == (offset + len) / (8 * 8)) {
-      /* If the two endpoints are in the same byte, we only update
-	 that byte. */
 
-      uip_reassbitmap[offset / (8 * 8)] |=
-	     bitmap_bits[(offset / 8 ) & 7] &
-	     ~bitmap_bits[((offset + len) / 8 ) & 7];
-    } else {
-      /* If the two endpoints are in different bytes, we update the
-	 bytes in the endpoints and fill the stuff inbetween with
-	 0xff. */
-      uip_reassbitmap[offset / (8 * 8)] |=
-	bitmap_bits[(offset / 8 ) & 7];
-      for (i = 1 + offset / (8 * 8); i < (offset + len) / (8 * 8); ++i) {
-	uip_reassbitmap[i] = 0xff;
+    if (offset / (8 * 8) == (offset + len) / (8 * 8))
+      {
+        /* If the two endpoints are in the same byte, we only update that byte. */
+
+        uip_reassbitmap[offset / (8 * 8)] |=
+          bitmap_bits[(offset / 8 ) & 7] & ~bitmap_bits[((offset + len) / 8 ) & 7];
+
       }
-      uip_reassbitmap[(offset + len) / (8 * 8)] |=
-	~bitmap_bits[((offset + len) / 8 ) & 7];
-    }
+    else
+      {
+        /* If the two endpoints are in different bytes, we update the bytes
+         * in the endpoints and fill the stuff inbetween with 0xff.
+         */
 
-    /* If this fragment has the More Fragments flag set to zero, we
-       know that this is the last fragment, so we can calculate the
-       size of the entire packet. We also set the
-       IP_REASS_FLAG_LASTFRAG flag to indicate that we have received
-       the final fragment. */
-
-    if ((BUF->ipoffset[0] & IP_MF) == 0) {
-      uip_reassflags |= UIP_REASS_FLAG_LASTFRAG;
-      uip_reasslen = offset + len;
-    }
-
-    /* Finally, we check if we have a full packet in the buffer. We do
-       this by checking if we have the last fragment and if all bits
-       in the bitmap are set. */
-    if (uip_reassflags & UIP_REASS_FLAG_LASTFRAG) {
-      /* Check all bytes up to and including all but the last byte in
-	 the bitmap. */
-      for (i = 0; i < uip_reasslen / (8 * 8) - 1; ++i) {
-	if (uip_reassbitmap[i] != 0xff) {
-	  goto nullreturn;
-	}
+        uip_reassbitmap[offset / (8 * 8)] |= bitmap_bits[(offset / 8 ) & 7];
+        for (i = 1 + offset / (8 * 8); i < (offset + len) / (8 * 8); ++i)
+          {
+            uip_reassbitmap[i] = 0xff;
+          }
+        uip_reassbitmap[(offset + len) / (8 * 8)] |= ~bitmap_bits[((offset + len) / 8 ) & 7];
       }
 
-      /* Check the last byte in the bitmap. It should contain just the
-	 right amount of bits. */
-      if (uip_reassbitmap[uip_reasslen / (8 * 8)] !=
-	 (uint8)~bitmap_bits[uip_reasslen / 8 & 7]) {
-	goto nullreturn;
+    /* If this fragment has the More Fragments flag set to zero, we know that
+     * this is the last fragment, so we can calculate the size of the entire
+     * packet. We also set the IP_REASS_FLAG_LASTFRAG flag to indicate that
+     * we have received the final fragment.
+     */
+
+    if ((BUF->ipoffset[0] & IP_MF) == 0)
+      {
+        uip_reassflags |= UIP_REASS_FLAG_LASTFRAG;
+        uip_reasslen = offset + len;
       }
 
-      /* If we have come this far, we have a full packet in the
-	 buffer, so we allocate a pbuf and copy the packet into it. We
-	 also reset the timer. */
-      uip_reasstmr = 0;
-      memcpy(BUF, FBUF, uip_reasslen);
+    /* Finally, we check if we have a full packet in the buffer. We do this
+     * by checking if we have the last fragment and if all bits in the bitmap
+     * are set.
+     */
 
-      /* Pretend to be a "normal" (i.e., not fragmented) IP packet
-	 from now on. */
-      BUF->ipoffset[0] = BUF->ipoffset[1] = 0;
-      BUF->len[0] = uip_reasslen >> 8;
-      BUF->len[1] = uip_reasslen & 0xff;
-      BUF->ipchksum = 0;
-      BUF->ipchksum = ~(uip_ipchksum());
+    if (uip_reassflags & UIP_REASS_FLAG_LASTFRAG)
+      {
+        /* Check all bytes up to and including all but the last byte in
+         * the bitmap.
+         */
 
-      return uip_reasslen;
-    }
+        for (i = 0; i < uip_reasslen / (8 * 8) - 1; ++i)
+          {
+            if (uip_reassbitmap[i] != 0xff)
+              {
+                goto nullreturn;
+              }
+          }
+
+        /* Check the last byte in the bitmap. It should contain just the
+         * right amount of bits.
+         */
+
+        if (uip_reassbitmap[uip_reasslen / (8 * 8)] != (uint8)~bitmap_bits[uip_reasslen / 8 & 7])
+          {
+            goto nullreturn;
+          }
+
+        /* If we have come this far, we have a full packet in the buffer,
+         * so we allocate a pbuf and copy the packet into it. We also reset
+         * the timer.
+         */
+
+        uip_reasstmr = 0;
+        memcpy(BUF, FBUF, uip_reasslen);
+
+        /* Pretend to be a "normal" (i.e., not fragmented) IP packet from
+         * now on.
+         */
+
+        BUF->ipoffset[0] = BUF->ipoffset[1] = 0;
+        BUF->len[0] = uip_reasslen >> 8;
+        BUF->len[1] = uip_reasslen & 0xff;
+        BUF->ipchksum = 0;
+        BUF->ipchksum = ~(uip_ipchksum());
+
+        return uip_reasslen;
+      }
   }
 
- nullreturn:
+nullreturn:
   return 0;
 }
 #endif /* UIP_REASSEMBLY */
@@ -768,7 +687,7 @@ void uip_interrupt(uint8 flag)
 {
   register struct uip_conn *uip_connr = uip_conn;
 
- #ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_UDP
   if (flag == UIP_UDP_SEND_CONN)
     {
       goto udp_send;
@@ -805,22 +724,13 @@ void uip_interrupt(uint8 flag)
         }
 #endif /* UIP_REASSEMBLY */
 
-      /* Increase the initial sequence number */
+      /* Increase the TCP sequence number */
 
-      if (++iss[3] == 0)
-        {
-          if (++iss[2] == 0)
-            {
-              if (++iss[1] == 0)
-                {
-                  ++iss[0];
-                }
-            }
-        }
+      uip_tcpnextsequence();
 
       /* Reset the length variables. */
 
-      uip_len = 0;
+      uip_len  = 0;
       uip_slen = 0;
 
       /* Check if the connection is in a state in which we simply wait
@@ -935,7 +845,7 @@ void uip_interrupt(uint8 flag)
     goto drop;
   }
 
- #ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_UDP
   if (flag == UIP_UDP_TIMER)
     {
       if (uip_udp_conn->lport != 0)
@@ -1105,7 +1015,7 @@ void uip_interrupt(uint8 flag)
         goto tcp_input;
       }
 
- #ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_UDP
     if (BUF->proto == UIP_PROTO_UDP)
       {
         goto udp_input;
@@ -1247,14 +1157,14 @@ void uip_interrupt(uint8 flag)
 
 #endif /* !CONFIG_NET_IPv6 */
 
- #ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_UDP
     /* UDP input processing. */
  udp_input:
     /* UDP processing is really just a hack. We don't do anything to the
        UDP/IP headers, but let the UDP application do all the hard
        work. If the application sets uip_slen, it has a packet to
        send. */
- #ifdef CONFIG_NET_UDP_CHECKSUMS
+#ifdef CONFIG_NET_UDP_CHECKSUMS
     uip_len = uip_len - UIP_IPUDPH_LEN;
     uip_appdata = &uip_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
     if (UDPBUF->udpchksum != 0 && uip_udpchksum() != 0xffff)
@@ -1269,9 +1179,8 @@ void uip_interrupt(uint8 flag)
 #endif /* UIP_UDP_CHECKSUMS */
 
     /* Demultiplex this UDP packet between the UDP "connections". */
-    for (uip_udp_conn = &uip_udp_conns[0];
-          uip_udp_conn < &uip_udp_conns[UIP_UDP_CONNS];
-          ++uip_udp_conn)
+
+    for (uip_udp_conn = &uip_udp_conns[0]; uip_udp_conn < &uip_udp_conns[UIP_UDP_CONNS]; uip_udp_conn++)
       {
         /* If the local UDP port is non-zero, the connection is considered
          * to be used. If so, the local port number is checked against the
@@ -1282,13 +1191,12 @@ void uip_interrupt(uint8 flag)
          * address of the packet is checked.
          */
 
-        if (uip_udp_conn->lport != 0 &&
-            UDPBUF->destport == uip_udp_conn->lport &&
+        if (uip_udp_conn->lport != 0 && UDPBUF->destport == uip_udp_conn->lport &&
             (uip_udp_conn->rport == 0 ||
-            UDPBUF->srcport == uip_udp_conn->rport) &&
-            (uip_ipaddr_cmp(uip_udp_conn->ripaddr, all_zeroes_addr) ||
-            uip_ipaddr_cmp(uip_udp_conn->ripaddr, all_ones_addr) ||
-            uip_ipaddr_cmp(BUF->srcipaddr, uip_udp_conn->ripaddr)))
+             UDPBUF->srcport == uip_udp_conn->rport) &&
+              (uip_ipaddr_cmp(uip_udp_conn->ripaddr, all_zeroes_addr) ||
+               uip_ipaddr_cmp(uip_udp_conn->ripaddr, all_ones_addr) ||
+               uip_ipaddr_cmp(BUF->srcipaddr, uip_udp_conn->ripaddr)))
           {
             goto udp_found;
           }
@@ -1336,7 +1244,7 @@ void uip_interrupt(uint8 flag)
 
     uip_appdata = &uip_buf[UIP_LLH_LEN + UIP_IPTCPH_LEN];
 
- #ifdef CONFIG_NET_UDP_CHECKSUMS
+#ifdef CONFIG_NET_UDP_CHECKSUMS
     /* Calculate UDP checksum. */
     UDPBUF->udpchksum = ~(uip_udpchksum());
     if (UDPBUF->udpchksum == 0)
@@ -1357,30 +1265,27 @@ void uip_interrupt(uint8 flag)
     if (uip_tcpchksum() != 0xffff)
       {
         /* Compute and check the TCP checksum. */
+
         UIP_STAT(++uip_stat.tcp.drop);
         UIP_STAT(++uip_stat.tcp.chkerr);
         UIP_LOG("tcp: bad checksum.");
         goto drop;
       }
 
-    /* Demultiplex this segment. */
-    /* First check any active connections. */
-    for (uip_connr = &uip_conns[0]; uip_connr <= &uip_conns[UIP_CONNS - 1];
-          ++uip_connr)
+    /* Demultiplex this segment. First check any active connections. */
+
+    uip_connr = uip_tcpactive(BUF);
+    if (uip_connr)
       {
-        if (uip_connr->tcpstateflags != UIP_CLOSED &&
-            BUF->destport == uip_connr->lport &&
-            BUF->srcport == uip_connr->rport &&
-            uip_ipaddr_cmp(BUF->srcipaddr, uip_connr->ripaddr))
-          {
-            goto found;
-          }
+        goto found;
       }
 
     /* If we didn't find and active connection that expected the packet,
-       either this packet is an old duplicate, or this is a SYN packet
-       destined for a connection in LISTEN. If the SYN flag isn't set,
-       it is an old packet and we send a RST. */
+     * either this packet is an old duplicate, or this is a SYN packet
+     * destined for a connection in LISTEN. If the SYN flag isn't set,
+     * it is an old packet and we send a RST.
+     */
+
     if ((BUF->flags & TCP_CTL) != TCP_SYN)
       {
         goto reset;
@@ -1455,57 +1360,43 @@ void uip_interrupt(uint8 flag)
     goto tcp_send_noconn;
 
     /* This label will be jumped to if we matched the incoming packet
-       with a connection in LISTEN. In that case, we should create a new
-       connection and send a SYNACK in return. */
- found_listen:
-    /* First we check if there are any connections avaliable. Unused
-       connections are kept in the same table as used connections, but
-       unused ones have the tcpstate set to CLOSED. Also, connections in
-       TIME_WAIT are kept track of and we'll use the oldest one if no
-       CLOSED connections are found. Thanks to Eddie C. Dost for a very
-       nice algorithm for the TIME_WAIT search. */
-    uip_connr = 0;
-    for (c = 0; c < UIP_CONNS; ++c)
-      {
-        if (uip_conns[c].tcpstateflags == UIP_CLOSED)
-          {
-            uip_connr = &uip_conns[c];
-            break;
-          }
-        if (uip_conns[c].tcpstateflags == UIP_TIME_WAIT)
-          {
-            if (uip_connr == 0 || uip_conns[c].timer > uip_connr->timer)
-              {
-                uip_connr = &uip_conns[c];
-              }
-          }
-      }
+     * with a connection in LISTEN. In that case, we should create a new
+     * connection and send a SYNACK in return.
+     */
 
-    if (uip_connr == 0)
+found_listen:
+
+    /* First allocate a new connection structure */
+
+    uip_connr = uip_tcpalloc();
+    if (!uip_connr)
       {
         /* All connections are used already, we drop packet and hope that
-           the remote end will retransmit the packet at a time when we
-           have more spare connections. */
+         * the remote end will retransmit the packet at a time when we
+         * have more spare connections.
+         */
+
         UIP_STAT(++uip_stat.tcp.syndrop);
-      UIP_LOG("tcp: found no unused connections.");
-      goto drop;
-    }
+        UIP_LOG("tcp: found no unused connections.");
+        goto drop;
+      }
     uip_conn = uip_connr;
 
     /* Fill in the necessary fields for the new connection. */
-    uip_connr->rto = uip_connr->timer = UIP_RTO;
-    uip_connr->sa = 0;
-    uip_connr->sv = 4;
-    uip_connr->nrtx = 0;
+
+    uip_connr->rto   = uip_connr->timer = UIP_RTO;
+    uip_connr->sa    = 0;
+    uip_connr->sv    = 4;
+    uip_connr->nrtx  = 0;
     uip_connr->lport = BUF->destport;
     uip_connr->rport = BUF->srcport;
     uip_ipaddr_copy(uip_connr->ripaddr, BUF->srcipaddr);
     uip_connr->tcpstateflags = UIP_SYN_RCVD;
 
-    uip_connr->snd_nxt[0] = iss[0];
-    uip_connr->snd_nxt[1] = iss[1];
-    uip_connr->snd_nxt[2] = iss[2];
-    uip_connr->snd_nxt[3] = iss[3];
+    uip_connr->snd_nxt[0] = g_tcp_sequence[0];
+    uip_connr->snd_nxt[1] = g_tcp_sequence[1];
+    uip_connr->snd_nxt[2] = g_tcp_sequence[2];
+    uip_connr->snd_nxt[3] = g_tcp_sequence[3];
     uip_connr->len = 1;
 
     /* rcv_nxt should be the seqno from the incoming packet + 1. */
@@ -2119,7 +2010,7 @@ void uip_interrupt(uint8 flag)
     BUF->tcpchksum = 0;
     BUF->tcpchksum = ~(uip_tcpchksum());
 
- #ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_UDP
  ip_send_nolen:
 #endif   /* CONFIG_NET_UDP */
 

@@ -50,6 +50,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <semaphore.h>
+#include <sys/socket.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/psock.h>
@@ -260,17 +261,10 @@ void smtp_configure(void *handle, char *lhostname, void *server)
 int smtp_send(void *handle, char *to, char *cc, char *from, char *subject, char *msg, int msglen)
 {
   struct smtp_state *psmtp = (struct smtp_state *)handle;
-  struct uip_conn *conn;
+  struct sockaddr_in server;
+  int sockfd;
 
-  /* This is the moral equivalent of socket() + bind().  It returns the
-   * initialized connection structure 
-   */
-
-  conn = uip_connect(&psmtp->smtpserver, HTONS(25));
-  if (conn == NULL)
-    {
-      return ERROR;
-    }
+  /* Setup */
 
   psmtp->connected = TRUE;
   psmtp->to        = to;
@@ -281,11 +275,35 @@ int smtp_send(void *handle, char *to, char *cc, char *from, char *subject, char 
   psmtp->msglen    = msglen;
   psmtp->result    = OK;
 
-  /* Make this instance globally visible */
+  /* Create a socket */
 
-  gpsmtp           = psmtp;
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sockfd < 0)
+    {
+      return ERROR;
+    }
 
-  /* Initialized the psock structure inside the smtp state structure */
+  /* Make this instance globally visible (we will get interrupts as
+   * soon as we connect
+   */
+
+  gpsmtp = psmtp;
+
+  /* Connect to server.  First we have to set some fields in the
+   * 'server' structure.  The system will assign me an arbitrary
+   * local port that is not in use.
+   */
+
+  server.sin_family = AF_INET;
+  memcpy(&server.sin_addr.s_addr, &psmtp->smtpserver, sizeof(in_addr_t));
+  server.sin_port = HTONS(25);
+
+  if (connect(sockfd, (struct sockaddr *)&server, sizeof(struct sockaddr_in)) < 0)
+    {
+      return ERROR;
+  }
+
+  /* Initialize the psock structure inside the smtp state structure */
 
   psock_init(&psmtp->psock, psmtp->buffer, SMTP_INPUT_BUFFER_SIZE);
 

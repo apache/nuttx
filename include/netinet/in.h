@@ -43,34 +43,68 @@
 #include <sys/types.h>
 
 /****************************************************************************
- * Public Type Definitions
+ * Public Macro Definitions
  ****************************************************************************/
 
-/* Address to accept any incoming messages. */
-#define INADDR_ANY              ((in_addr_t)0x00000000)
+/* Values for protocol argument to socket() */
 
-/* Address to send to all hosts.  */
-#define INADDR_BROADCAST        ((in_addr_t)0xffffffff)
+#define IPPROTO_TCP      1
+#define IPPROTO_UDP      2
 
-/* Address indicating an error return.  */
-#define INADDR_NONE             ((in_addr_t)0xffffffff)
+/* Special values of in_addr_t */
+
+#define INADDR_ANY       ((in_addr_t)0x00000000) /* Address to accept any incoming messages */
+#define INADDR_BROADCAST ((in_addr_t)0xffffffff) /* Address to send to all hosts */
+#define INADDR_NONE      ((in_addr_t)0xffffffff) /* Address indicating an error return */
+
+#define IN6ADDR_ANY_INIT {{{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}}
+
+/* struct in6_addr union selectors */
+
+#define s6_addr          in6_u.u6_addr8
+#define s6_addr16        in6_u.u6_addr16
+#define s6_addr32        in6_u.u6_addr32
 
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
 
-/* Internet address. */
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+/* IPv4 Internet address */
+
 typedef uint32 in_addr_t;
 struct in_addr
 {
-  in_addr_t   s_addr;         /* address in network byte order */
+  in_addr_t    s_addr;        /* Address (network byte order) */
 };
 
 struct sockaddr_in
 {
-  sa_family_t sin_family;     /* address family: AF_INET */
-  uint16      sin_port;       /* port in network byte order */
-  struct in_addr sin_addr;  /* internet address */
+  sa_family_t sin_family;      /* address family: AF_INET */
+  uint16      sin_port;        /* port in network byte order */
+  struct in_addr sin_addr;   /* internet address */
+};
+
+/* IPv6 Internet address */
+
+struct in6_addr
+{
+  union
+  {
+    uint8     u6_addr8[16];
+    uint16    u6_addr16[8];
+    uint32    u6_addr32[4];
+  } in6_u;
+};
+
+struct sockaddr_in6
+{
+  sa_family_t sin_family;      /* Address family: AF_INET */
+  uint16      sin_port;        /* Port in network byte order */
+  struct in6_addr sin6_addr; /* IPv6 internet address */
 };
 
 /****************************************************************************

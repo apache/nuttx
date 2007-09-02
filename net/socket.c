@@ -1,5 +1,5 @@
 /****************************************************************************
- * socket.c
+ * net/socket.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -129,15 +129,25 @@ int socket(int domain, int type, int protocol)
 
   /* Initialize the socket structure */
 
-#ifdef CONFIG_NET_UDP
   psock = sockfd_socket(sockfd);
   if (psock)
     {
       /* Save the protocol type */
 
       psock->s_type = type;
+
+      /* Allocate a TCP connection structure */
+
+      psock->s_conn = uip_tcpalloc();
+      if (!psock->s_conn)
+        {
+          /* Failed to reserve a connection structure */
+
+          sockfd_release(sockfd);
+          err = ENFILE;
+          goto errout;
+        }
     }
-#endif
 
   return sockfd;
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net_internal.h
+ * netinet/ip6.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,55 +33,22 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_INTERNAL_H
-#define __NET_INTERNAL_H
+#ifndef __NETINET_IP6_H
+#define __NETINET_IP6_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#ifdef CONFIG_NET
-
-#include <nuttx/net.h>
-
-#include "net_internal.h"
+#include <sys/socket.h>
+#include <netinet/in.h>
 
 /****************************************************************************
- * Definitions
+ * Public Type Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
+ * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Pulblic Function Prototypes
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
-/* net_sockets.c *************************************************************/
-
-EXTERN void weak_function net_initialize(void);
-EXTERN int  sockfd_allocate(void);
-EXTERN void sockfd_release(int sockfd);
-EXTERN FAR struct socket *sockfd_socket(int sockfd);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* CONFIG_NET */
-#endif /* __NET_INTERNAL_H */
+#endif /* __NETINET_IP6_H */
