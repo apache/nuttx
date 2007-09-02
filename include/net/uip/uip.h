@@ -50,6 +50,7 @@
 
 #include <sys/types.h>
 #include <nuttx/config.h>
+#include <arpa/inet.h>
 #include <net/uip/uipopt.h>
 
 /****************************************************************************
@@ -1124,37 +1125,6 @@ struct uip_udp_conn *uip_udp_new(uip_ipaddr_t *ripaddr, uint16 rport);
  */
 
 #define uip_ipaddr4(addr) (htons(((uint16 *)(addr))[1]) & 0xff)
-
-/* Convert 16-bit quantity from host byte order to network byte order.
- *
- * This macro is primarily used for converting constants from host
- * byte order to network byte order. For converting variables to
- * network byte order, use the htons() function instead.
- */
-
-#ifndef HTONS
-#   if UIP_BYTE_ORDER == UIP_BIG_ENDIAN
-#      define HTONS(n) (n)
-#   else /* UIP_BYTE_ORDER == UIP_BIG_ENDIAN */
-#      define HTONS(n) (uint16)((((uint16) (n)) << 8) | (((uint16) (n)) >> 8))
-#   endif /* UIP_BYTE_ORDER == UIP_BIG_ENDIAN */
-#else
-#error "HTONS already defined!"
-#endif /* HTONS */
-
-/* Convert 16-bit quantity from host byte order to network byte order.
- *
- * This function is primarily used for converting variables from host
- * byte order to network byte order. For converting constants to
- * network byte order, use the HTONS() macro instead.
- */
-
-#ifndef htons
-uint16 htons(uint16 val);
-#endif /* htons */
-#ifndef ntohs
-#define ntohs htons
-#endif
 
 /* This function is called user code to set up the wait */
 

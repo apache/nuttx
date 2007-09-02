@@ -2157,11 +2157,6 @@ void uip_interrupt(uint8 flag)
     return;
 }
 
-uint16 htons(uint16 val)
-{
-  return HTONS(val);
-}
-
 void uip_send(const void *data, int len)
 {
   if (len > 0)

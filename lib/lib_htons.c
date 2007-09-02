@@ -1,5 +1,5 @@
-/****************************************************************************
- * netinet/in.h
+/************************************************************
+ * lib_htons.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -31,50 +31,33 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************/
 
-#ifndef __NETINET_IP_H
-#define __NETINET_IP_H
+/************************************************************
+ * Compilation Switches
+ ************************************************************/
 
-/****************************************************************************
+/************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+#include <arpa/inet.h>
 
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
+/************************************************************
+ * Global Functions
+ ************************************************************/
 
-/* Address to accept any incoming messages. */
-#define INADDR_ANY              ((in_addr_t)0x00000000)
-
-/* Address to send to all hosts.  */
-#define INADDR_BROADCAST        ((in_addr_t)0xffffffff)
-
-/* Address indicating an error return.  */
-#define INADDR_NONE             ((in_addr_t)0xffffffff)
-
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
-
-/* Internet address. */
-typedef uint32 in_addr_t;
-struct in_addr
+uint16 htons(uint16 hs)
 {
-  in_addr_t   s_addr;         /* address in network byte order */
-};
+  return HTONS(hs);
+}
 
-struct sockaddr_in
+uint16 ntohs (uint16 ns)
 {
-  sa_family_t sin_family;     /* address family: AF_INET */
-  uint16      sin_port;       /* port in network byte order */
-  struct in_addr sin_addr;  /* internet address */
-};
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#endif /* __NETINET_IP_H */
+#ifdef CONFIG_ENDIAN_BIG
+  return ns
+#else
+  return htons(ns);
+#endif
+}
