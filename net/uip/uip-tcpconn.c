@@ -1,8 +1,13 @@
 /****************************************************************************
- * uip_tcpbind.c
+ * uip_tcpconn.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Large parts of this file were leveraged from uIP logic:
+ *
+ *   Copyright (c) 2001-2003, Adam Dunkels.
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,25 +16,23 @@
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote
+ *    products derived from this software without specific prior
+ *    written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+ * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
@@ -46,6 +49,7 @@
 
 #include <sys/types.h>
 #include <string.h>
+#include <errno.h>
 #include <arch/irq.h>
 
 #include <net/uip/uipopt.h>
@@ -66,7 +70,7 @@ uint8 g_tcp_sequence[4];
  * Private Data
  ****************************************************************************/
 
-/* The array containing all uIP connections. */
+/* The array containing all uIP TCP connections. */
 
 static struct uip_conn g_tcp_connections[UIP_CONNS];
 
@@ -113,8 +117,8 @@ static struct uip_conn *uip_find_conn(uint16 portno)
  * Name: uip_tcpinit()
  *
  * Description:
- *   Initialize the TCP/IP connection structures.  Called only from the UIP
- *   layer.
+ *   Initialize the TCP/IP connection structures.  Called only once and only
+ *   from the UIP layer.
  *
  ****************************************************************************/
 
@@ -237,9 +241,14 @@ struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf)
            buf->destport == conn->lport && buf->srcport == conn->rport &&
            uip_ipaddr_cmp(buf->srcipaddr, conn->ripaddr))
         {
+          /* Matching connection found.. return a reference to it */
+
           return conn;
         }
     }
+
+  /* No match found */
+
   return NULL;
 }
 
@@ -247,7 +256,7 @@ struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf)
  * Name: uip_tcppoll()
  *
  * Description:
- *   Periodic processing for a connection identified by its number.
+ *   Periodic processing for a TCP connection identified by its number.
  *   This function does the necessary periodic processing (timers,
  *   polling) for a uIP TCP conneciton, and should be called by the UIP
  *   device driver when the periodic uIP timer goes off. It should be
@@ -267,7 +276,7 @@ void uip_tcppoll(unsigned int conn)
 }
 
 /****************************************************************************
- * Name: uip_tcpactive()
+ * Name: uip_tcpnextsequence()
  *
  * Description:
  *   Increment the TCP/IP sequence number
@@ -312,11 +321,11 @@ int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr)
 #endif
 {
 #warning "Need to implement bind logic"
-  return ERROR;
+  return -ENOSYS;
 }
 
 /****************************************************************************
- * Name: uip_tcpbind()
+ * Name: uip_tcpconnect()
  *
  * Description:
  *   This function implements the UIP specific parts of the standard
@@ -342,7 +351,6 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr )
 #endif
 {
   uint16 port;
-  int i;
 
   /* If the TCP port has not alread been bound to a local port, then select
    * one now.

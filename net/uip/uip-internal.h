@@ -61,6 +61,9 @@
 
 extern uint8 g_tcp_sequence[4];
 
+extern const uip_ipaddr_t all_ones_addr;
+extern const uip_ipaddr_t all_zeroes_addr;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -77,6 +80,11 @@ extern "C" {
 EXTERN void uip_tcpinit(void);
 EXTERN struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf);
 EXTERN void uip_tcpnextsequence(void);
+
+/* Defined in uip_udpconn.c *************************************************/
+
+EXTERN void uip_udpinit(void);
+EXTERN struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf);
 
 #undef EXTERN
 #ifdef __cplusplus

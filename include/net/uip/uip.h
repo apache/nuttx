@@ -486,7 +486,6 @@ extern uint8 uip_acc32[4];
 
 #ifdef CONFIG_NET_UDP
 extern struct uip_udp_conn *uip_udp_conn;
-extern struct uip_udp_conn uip_udp_conns[UIP_UDP_CONNS];
 #endif  /* CONFIG_NET_UDP */
 
 /* The uIP TCP/IP statistics.

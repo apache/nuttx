@@ -181,7 +181,6 @@ uint16 uip_listenports[UIP_LISTENPORTS];
                                  /* The uip_listenports list all currently listning ports. */
 #ifdef CONFIG_NET_UDP
 struct uip_udp_conn *uip_udp_conn;
-struct uip_udp_conn uip_udp_conns[UIP_UDP_CONNS];
 #endif   /* CONFIG_NET_UDP */
 
 /* Temporary variables. */
@@ -194,23 +193,23 @@ struct uip_stats uip_stat;
 # define UIP_STAT(s)
 #endif /* UIP_STATISTICS == 1 */
 
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-static const uip_ipaddr_t all_ones_addr =
+const uip_ipaddr_t all_ones_addr =
 #ifdef CONFIG_NET_IPv6
   {0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff};
 #else /* CONFIG_NET_IPv6 */
   {0xffff,0xffff};
 #endif /* CONFIG_NET_IPv6 */
 
-static const uip_ipaddr_t all_zeroes_addr =
+const uip_ipaddr_t all_zeroes_addr =
 #ifdef CONFIG_NET_IPv6
   {0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000};
 #else /* CONFIG_NET_IPv6 */
   {0x0000,0x0000};
 #endif /* CONFIG_NET_IPv6 */
+
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
 
 #if UIP_FIXEDETHADDR
 const struct uip_eth_addr uip_ethaddr =
@@ -221,11 +220,6 @@ struct uip_eth_addr uip_ethaddr = {{ 0,0,0,0,0,0 }};
 
 static uint16 ipid;              /* Ths ipid variable is an increasing number that is
                                   * used for the IP ID field. */
-
-#ifdef CONFIG_NET_UDP
-static uint16 g_last_udp_port;          /* Keeps track of the last port used for a new
-                                  * connection. */
-#endif
 
 /* Temporary variables. */
 static uint8 c, opt;
@@ -306,24 +300,6 @@ static uint16 uip_icmp6chksum(void)
 #endif /* CONFIG_NET_IPv6 */
 
 #endif /* UIP_ARCH_CHKSUM */
-
-#ifdef CONFIG_NET_UDP
-struct uip_udp_conn *uip_find_udp_conn( uint16 portno )
-{
-  struct uip_udp_conn *conn;
-  int i;
-
-  for (i = 0; i < UIP_UDP_CONNS; i++)
-    {
-      if (uip_udp_conns[i].lport == htons(g_last_udp_port))
-        {
-          return conn;
-        }
-    }
-
-  return NULL;
-}
-#endif   /* CONFIG_NET_UDP */
 
 /****************************************************************************
  * Public Functions
@@ -419,85 +395,13 @@ void uip_init(void)
 
   /* Initialize the UDP connection structures */
 
-#ifdef CONFIG_NET_UDP
-  for (c = 0; c < UIP_UDP_CONNS; ++c)
-    {
-      uip_udp_conns[c].lport = 0;
-    }
-
-  g_last_udp_port = 1024;
-#endif   /* CONFIG_NET_UDP */
+  uip_udpinit();
 
   /* IPv4 initialization. */
 #if UIP_FIXEDADDR == 0
   /*  uip_hostaddr[0] = uip_hostaddr[1] = 0;*/
 #endif /* UIP_FIXEDADDR */
 }
-
-#ifdef CONFIG_NET_UDP
-struct uip_udp_conn *uip_udp_new(uip_ipaddr_t *ripaddr, uint16 rport)
-{
-  struct uip_udp_conn *conn;
-  int i;
-
-  /* Find an unused local port number.  Loop until we find a valid listen port
-   * number that is not being used by any other connection.
-   */
-
-  do
-    {
-      /* Guess that the next available port number will be the one after
-       * the last port number assigned.
-       */
-
-      ++g_last_udp_port;
-
-      /* Make sure that the port number is within range */
-      if (g_last_udp_port >= 32000)
-        {
-          g_last_udp_port = 4096;
-        }
-    }
-  while (uip_find_udp_conn(g_last_udp_port));
-
-  /* Now find an available UDP connection structure */
-
-  conn = 0;
-  for (i = 0; i < UIP_UDP_CONNS; i++)
-    {
-      if (uip_udp_conns[c].lport == 0)
-        {
-          conn = &uip_udp_conns[c];
-          break;
-        }
-    }
-
-  /* Return an error if no connection is available */
-
-  if (conn == 0)
-    {
-      return 0;
-    }
-
-  /* Initialize and return the connection structure, bind it to the port number */
-
-  conn->lport = HTONS(g_last_udp_port);
-  conn->rport = rport;
-
-  if (ripaddr == NULL)
-    {
-      memset(conn->ripaddr, 0, sizeof(uip_ipaddr_t));
-    }
-  else
-    {
-      uip_ipaddr_copy(&conn->ripaddr, ripaddr);
-    }
-
-  conn->ttl = UIP_TTL;
-
-  return conn;
-}
-#endif   /* CONFIG_NET_UDP */
 
 void uip_unlisten(uint16 port)
 {
@@ -1180,26 +1084,10 @@ void uip_interrupt(uint8 flag)
 
     /* Demultiplex this UDP packet between the UDP "connections". */
 
-    for (uip_udp_conn = &uip_udp_conns[0]; uip_udp_conn < &uip_udp_conns[UIP_UDP_CONNS]; uip_udp_conn++)
+    uip_udp_conn = uip_udpactive(UDPBUF);
+    if (uip_udp_conn)
       {
-        /* If the local UDP port is non-zero, the connection is considered
-         * to be used. If so, the local port number is checked against the
-         * destination port number in the received packet. If the two port
-         * numbers match, the remote port number is checked if the
-         * connection is bound to a remote port. Finally, if the
-         * connection is bound to a remote IP address, the source IP
-         * address of the packet is checked.
-         */
-
-        if (uip_udp_conn->lport != 0 && UDPBUF->destport == uip_udp_conn->lport &&
-            (uip_udp_conn->rport == 0 ||
-             UDPBUF->srcport == uip_udp_conn->rport) &&
-              (uip_ipaddr_cmp(uip_udp_conn->ripaddr, all_zeroes_addr) ||
-               uip_ipaddr_cmp(uip_udp_conn->ripaddr, all_ones_addr) ||
-               uip_ipaddr_cmp(BUF->srcipaddr, uip_udp_conn->ripaddr)))
-          {
-            goto udp_found;
-          }
+        goto udp_found;
       }
 
     UIP_LOG("udp: no matching connection found");
