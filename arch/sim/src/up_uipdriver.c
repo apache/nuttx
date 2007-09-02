@@ -162,7 +162,7 @@ void uipdriver_loop(void)
 #ifdef CONFIG_NET_UDP
       for(i = 0; i < UIP_UDP_CONNS; i++)
         {
-          uip_udp_periodic(i);
+          uip_udppoll(i);
 
           /* If the above function invocation resulted in data that
            * should be sent out on the network, the global variable
