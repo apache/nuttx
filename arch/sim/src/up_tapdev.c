@@ -198,7 +198,7 @@ void tapdev_init(void)
     struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
     ifr.ifr_flags = IFF_TAP|IFF_NO_PI;
-    if (up_ioctl(gtapdevfd, TUNSETIFF, (void *) &ifr) < 0)
+    if (up_ioctl(gtapdevfd, TUNSETIFF, (unsigned long *) &ifr) < 0)
       {
         lib_rawprintf(buf);
         return;

@@ -145,7 +145,7 @@ void uipdriver_loop(void)
       timer_reset(&periodic_timer);
       for(i = 0; i < UIP_CONNS; i++)
         {
-          uip_periodic(i);
+          uip_tcppoll(i);
 
           /* If the above function invocation resulted in data that
            * should be sent out on the network, the global variable
