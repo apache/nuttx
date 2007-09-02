@@ -122,7 +122,9 @@ EXTERN char  *gets(char *s);
 EXTERN int    printf(const char *format, ...);
 EXTERN int    puts(const char *s);
 EXTERN int    rename(const char *oldpath, const char *newpath);
-EXTERN int    sprintf(char *dest, const char *format, ...);
+EXTERN int    sprintf(char *buf, const char *format, ...);
+EXTERN int    snprintf(char *buf, size_t size, const char *format, ...);
+
 EXTERN int    ungetc(int c, FILE *stream);
 EXTERN int    vprintf(const char *s, va_list ap);
 EXTERN int    vfprintf(FILE *stream, const char *s, va_list ap);
