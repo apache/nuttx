@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: main.c,v 1.3 2007-09-01 18:06:12 patacongo Exp $
+ * $Id: main.c,v 1.4 2007-09-03 20:34:43 patacongo Exp $
  *
  */
 
@@ -84,6 +84,7 @@ int user_start(int argc, char *argv[])
 #elif defined(CONFIG_EXAMPLE_UIP_TELNETD)
   telnetd_init();
 #elif defined(CONFIG_EXAMPLE_UIP_DHCPC)
+  resolv_init();
   handle = dhcpc_open(&mac, 6);
   if (handle)
     {
@@ -124,21 +125,6 @@ int user_start(int argc, char *argv[])
 void uip_log(char *m)
 {
   printf("uIP log message: %s\n", m);
-}
-
-void resolv_found(char *name, uint16 *ipaddr)
-{
-  if (ipaddr == NULL)
-    {
-      printf("Host '%s' not found.\n", name);
-    }
-  else
-    {
-      printf("Found name '%s' = %d.%d.%d.%d\n", name,
-      htons(ipaddr[0]) >> 8, htons(ipaddr[0]) & 0xff,
-      htons(ipaddr[1]) >> 8, htons(ipaddr[1]) & 0xff);
-      /* webclient_get("www.sics.se", 80, "/~adam/uip");*/
-    }
 }
 
 void webclient_closed(void)

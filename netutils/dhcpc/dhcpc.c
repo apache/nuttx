@@ -402,6 +402,7 @@ void dhcpc_close(void *handle)
 
 void uip_interrupt_udp_event(void)
 {
+#error OBSOLETE
   if (gpdhcpc)
     {
       sem_post(&gpdhcpc->sem);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/socket.c
+ * net/send.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -51,128 +51,100 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: socket
+ * Function: send
  *
  * Description:
- *   socket() creates an endpoint for communication and returns a descriptor.
+ *   The send() call may be used only when the socket is in a connected state
+ *   (so that the intended recipient is known). The only difference between
+ *   send() and write() is the presence of flags. With zero flags parameter,
+ *   send() is equivalent to write(). Also, send(s,buf,len,flags) is
+ *   equivalent to sendto(s,buf,len,flags,NULL,0).
  *
  * Parameters:
- *   domain   (see sys/socket.h)
- *   type     (see sys/socket.h)
- *   protocol (see sys/socket.h)
+ *   sockfd   Socket descriptor of socket
+ *   buf      Data to send
+ *   len      Length of data to send
+ *   flags    Send flags
  *
  * Returned Value:
- *   0 on success; -1 on error with errno set appropriately
+ *   On success, returns the number of characters sent.  On  error,
+ *   -1 is returned, and errno is set appropriately:
  *
- *   EACCES
- *     Permission to create a socket of the specified type and/or protocol
- *     is denied.
- *   EAFNOSUPPORT
- *     The implementation does not support the specified address family.
+ *   EAGAIN or EWOULDBLOCK
+ *     The socket is marked non-blocking and the requested operation
+ *     would block.
+ *   EBADF
+ *     An invalid descriptor was specified.
+ *   ECONNRESET
+ *     Connection reset by peer.
+ *   EDESTADDRREQ
+ *     The socket is not connection-mode, and no peer address is set.
+ *   EFAULT
+ *      An invalid user space address was specified for a parameter.
+ *   EINTR
+ *      A signal occurred before any data was transmitted.
  *   EINVAL
- *     Unknown protocol, or protocol family not available.
- *   EMFILE
- *     Process file table overflow.
- *   ENFILE
- *     The system limit on the total number of open files has been reached.
- *   ENOBUFS or ENOMEM
- *     Insufficient memory is available. The socket cannot be created until
- *     sufficient resources are freed.
- *   EPROTONOSUPPORT
- *     The protocol type or the specified protocol is not supported within
- *     this domain.
+ *      Invalid argument passed.
+ *   EISCONN
+ *     The connection-mode socket was connected already but a recipient
+ *     was specified. (Now either this error is returned, or the recipient
+ *     specification is ignored.)
+ *   EMSGSIZE
+ *     The socket type requires that message be sent atomically, and the
+ *     size of the message to be sent made this impossible.
+ *   ENOBUFS
+ *     The output queue for a network interface was full. This generally
+ *     indicates that the interface has stopped sending, but may be
+ *     caused by transient congestion.
+ *   ENOMEM
+ *     No memory available.
+ *   ENOTCONN
+ *     The socket is not connected, and no target has been given.
+ *   ENOTSOCK
+ *     The argument s is not a socket.
+ *   EOPNOTSUPP
+ *     Some bit in the flags argument is inappropriate for the socket
+ *     type.
+ *   EPIPE
+ *     The local end has been shut down on a connection oriented socket.
+ *     In this case the process will also receive a SIGPIPE unless
+ *     MSG_NOSIGNAL is set.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int socket(int domain, int type, int protocol)
+ssize_t send(int sockfd, const void *buf, size_t len, int flags)
 {
-#ifdef CONFIG_NET_UDP
-  FAR struct socket *psock;
-#endif
-  int sockfd;
+  FAR struct socket *psock = sockfd_socket(sockfd);
   int err;
 
-  /* Only PF_INET or PF_INET6 domains supported */
+  /* Verify that the sockfd corresponds to valid, allocated socket */
 
-#ifdef CONFIG_NET_IPv6
-  if ( domain != PF_INET6)
-#else
-  if ( domain != PF_INET)
-#endif
+  if (!psock || psock->s_crefs <= 0)
     {
-      err = EAFNOSUPPORT;
+      err = EBADF;
       goto errout;
     }
 
-  /* Only SOCK_STREAM and possible SOCK_DRAM are supported */
+  /* If this is a connected socket, then return ENOTCONN */
 
-#ifdef CONFIG_NET_UDP
-  if (protocol != 0 || (type != SOCK_STREAM && type != SOCK_DGRAM))
-#else
-  if (protocol != 0 || type != SOCK_STREAM)
-#endif
+  if (psock->s_type != SOCK_STREAM)
     {
-      err = EPROTONOSUPPORT;
+      err = ENOTCONN;
       goto errout;
     }
 
-  /* Everything looks good.  Allocate a socket descriptor */
+  /* Perform the TCP send operation */
 
-  sockfd = sockfd_allocate();
-  if (sockfd < 0)
-    {
-      err = ENFILE;
-      goto errout;
-    }
-
-  /* Initialize the socket structure */
-
-  psock = sockfd_socket(sockfd);
-  if (psock)
-    {
-      /* Save the protocol type */
-
-      psock->s_type = type;
-      psock->s_conn = NULL;
-
-      /* Allocate the appropriate connection structure */
-
-      switch (type)
-        {
-          case SOCK_STREAM:
-            psock->s_conn = uip_tcpalloc();
-            break;
-
-#ifdef CONFIG_NET_UDP
-          case SOCK_DGRAM:
-            psock->s_conn = uip_udpalloc();
-            break;
-#endif
-          default:
-            break;
-        }
-
-      /* Did we succesfully allocate some kind of connection structure? */
-
-      if (!psock->s_conn)
-        {
-          /* Failed to reserve a connection structure */
-
-          sockfd_release(sockfd);
-          err = ENFILE;
-          goto errout;
-        }
-    }
-
-  return sockfd;
+#warning "send() not implemented"
+  err = ENOSYS;
 
 errout:
-  *get_errno_ptr() = err;
+  *get_errno_ptr() = ENOSYS;
+  return ERROR;
+  *get_errno_ptr() = ENOSYS;
   return ERROR;
 }
 
 #endif /* CONFIG_NET */
-
-

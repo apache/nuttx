@@ -54,7 +54,7 @@
 #include <string.h>
 #include <debug.h>
 
-#include <net/uip/uip.h>
+#include <sys/socket.h>
 #include <net/uip/resolv.h>
 
 /****************************************************************************
@@ -87,11 +87,8 @@
 #define DNS_FLAG2_ERR_NONE        0x00
 #define DNS_FLAG2_ERR_NAME        0x03
 
-#define STATE_UNUSED 0
-#define STATE_NEW    1
-#define STATE_ASKING 2
-#define STATE_DONE   3
-#define STATE_ERROR  4
+#define SEND_BUFFER_SIZE 64
+#define RECV_BUFFER_SIZE 64
 
 /****************************************************************************
  * Private Types
@@ -140,8 +137,13 @@ struct namemap
  ****************************************************************************/
 
 static struct namemap names[RESOLV_ENTRIES];
-static uint8 seqno;
-static struct uip_udp_conn *resolv_conn = NULL;
+static uint8 gseqno;
+static int g_sockfd = -1;
+#ifdef CONFIG_NET_IPv6
+static struct sockaddr_in6 gdnsserver;
+#else
+static struct sockaddr_in gdnsserver;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -171,90 +173,76 @@ static unsigned char *parse_name(unsigned char *query)
  * not yet been queried and, if so, sends out a query.
  */
 
-static void check_entries(void)
+static int send_query(const char name)
 {
   register struct dns_hdr *hdr;
-  char *query, *nptr, *nameptr;
+  char *query;
+  char *nptr;
+  char **nameptr;
   static uint8 i;
   static uint8 n;
-  register struct namemap *namemapptr;
+  uint8 state = NEW_STATE;
+  uint8 seqno = gsegno++;
+  uint8 err;
+  static unsigned char endquery[] = {0,0,1,0,1};
+  char buffer[SEND_BUFFER_SIZE];
 
-  for(i = 0; i < RESOLV_ENTRIES; ++i)
-    {
-      namemapptr = &names[i];
-      if (namemapptr->state == STATE_NEW ||
-          namemapptr->state == STATE_ASKING)
-        {
-          if (namemapptr->state == STATE_ASKING)
-            {
-              if (--namemapptr->tmr == 0)
-                {
-                  if (++namemapptr->retries == MAX_RETRIES)
-                    {
-                      namemapptr->state = STATE_ERROR;
-                      resolv_found(namemapptr->name, NULL);
-                      continue;
-                    }
-                  namemapptr->tmr = namemapptr->retries;
-                }
-              else
-                {
-                  /* Its timer has not run out, so we move on to next entry. */
-                  continue;
-                }
-            }
-          else
-            {
-              namemapptr->state = STATE_ASKING;
-              namemapptr->tmr = 1;
-              namemapptr->retries = 0;
-            }
-          hdr = (struct dns_hdr *)uip_appdata;
-          memset(hdr, 0, sizeof(struct dns_hdr));
-          hdr->id = htons(i);
-          hdr->flags1 = DNS_FLAG1_RD;
-          hdr->numquestions = HTONS(1);
-          query = (char *)uip_appdata + 12;
-          nameptr = namemapptr->name;
-          --nameptr;
+  hdr               = (struct dns_hdr*)buffer;
+  memset(hdr, 0, sizeof(struct dns_hdr));
+  hdr->id           = htons(seqno);
+  hdr->flags1       = DNS_FLAG1_RD;
+  hdr->numquestions = HTONS(1);
+  query             = buffer + 12;
 
-          /* Convert hostname into suitable query format. */
-          do
-            {
-              ++nameptr;
-              nptr = query;
-              ++query;
-              for (n = 0; *nameptr != '.' && *nameptr != 0; ++nameptr)
-                {
-                  *query = *nameptr;
-                  ++query;
-                  ++n;
-                }
-              *nptr = n;
-            }
-          while(*nameptr != 0);
-            {
-              static unsigned char endquery[] = {0,0,1,0,1};
-              memcpy(query, endquery, 5);
-            }
-          uip_udp_send((unsigned char)(query + 5 - (char *)uip_appdata));
-          break;
-        }
-    }
+  /* Convert hostname into suitable query format. */
+
+  nameptr = name - 1;
+  do
+   {
+     nameptr++;
+     nptr = query++;
+     for (n = 0; *nameptr != '.' && *nameptr != 0; ++nameptr)
+       {
+         *query = *nameptr;
+         ++query;
+         ++n;
+       }
+     *nptr = n;
+   }
+  while(*nameptr != 0);
+
+  memcpy(query, endquery, 5);
+  return sendto(gsockfd, buffer, query + 5 - buffer);
 }
 
 /* Called when new UDP data arrives */
 
-static void newdata(void)
+#ifdef CONFIG_NET_IPv6
+#error "Not implemented
+#else
+int recv_response(struct sockaddr_in *addr)
+#endif
+
+hdr->flags2 & DNS_FLAG2_ERR_MASKstatic int (void)
 {
   unsigned char *nameptr;
+  char buffer[RECV_BUFFER_SIZE];
   struct dns_answer *ans;
   struct dns_hdr *hdr;
-  static uint8 nquestions, nanswers;
-  static uint8 i;
-  register struct namemap *namemapptr;
+  uint8 nquestions;
+  uint8 nanswers;
+  uint8 i;
+  int ret;
 
-  hdr = (struct dns_hdr *)uip_appdata;
+  /* Receive the response */
+
+  ret = recv(g_sockfd, buffer, RECV_BUFFER_SIZE);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  hdr = (struct dns_hdr *)b
 
   dbg( "ID %d\n", htons(hdr->id));
   dbg( "Query %d\n", hdr->flags1 & DNS_FLAG1_RESPONSE);
@@ -263,226 +251,123 @@ static void newdata(void)
        htons(hdr->numquestions), htons(hdr->numanswers),
        htons(hdr->numauthrr), htons(hdr->numextrarr));
 
-  /* The ID in the DNS header should be our entry into the name
-   * table.
+  /* Check for error. If so, call callback to inform */
+
+  if ((hdr->flags2 & DNS_FLAG2_ERR_MASK) != 0)
+    {
+      return ERROR;
+    }
+
+  /* We only care about the question(s) and the answers. The authrr
+   * and the extrarr are simply discarded.
    */
 
-  i = htons(hdr->id);
-  namemapptr = &names[i];
-  if (i < RESOLV_ENTRIES && namemapptr->state == STATE_ASKING)
+  nquestions = htons(hdr->numquestions);
+  nanswers   = htons(hdr->numanswers);
+
+  /* Skip the name in the question. XXX: This should really be
+   * checked agains the name in the question, to be sure that they
+   * match.
+    */
+
+  nameptr = parse_name((unsigned char *)buffer + 12) + 4;
+
+  for (; nanswers > 0; nanswers--)
     {
-      /* This entry is now finished */
+      /* The first byte in the answer resource record determines if it
+       * is a compressed record or a normal one.
+       */
 
-      namemapptr->state = STATE_DONE;
-      namemapptr->err = hdr->flags2 & DNS_FLAG2_ERR_MASK;
-
-      /* Check for error. If so, call callback to inform */
-
-      if (namemapptr->err != 0)
+      if (*nameptr & 0xc0)
         {
-          namemapptr->state = STATE_ERROR;
-          resolv_found(namemapptr->name, NULL);
-          return;
+          /* Compressed name. */
+
+          nameptr +=2;
+          dbg("Compressed anwser\n");
+        }
+      else
+        {
+          /* Not compressed name. */
+          nameptr = parse_name(nameptr);
         }
 
-      /* We only care about the question(s) and the answers. The authrr
-       * and the extrarr are simply discarded.
-       */
+      ans = (struct dns_answer *)nameptr;
+      dbg("Answer: type %x, class %x, ttl %x, length %x\n",
+          htons(ans->type), htons(ans->class), (htons(ans->ttl[0]) << 16) | htons(ans->ttl[1]),
+          htons(ans->len));
 
-      nquestions = htons(hdr->numquestions);
-      nanswers = htons(hdr->numanswers);
+      /* Check for IP address type and Internet class. Others are discarded. */
 
-      /* Skip the name in the question. XXX: This should really be
-       * checked agains the name in the question, to be sure that they
-       * match.
-       */
-
-      nameptr = parse_name((unsigned char *)uip_appdata + 12) + 4;
-
-      while(nanswers > 0)
+      if (ans->type == HTONS(1) && ans->class == HTONS(1) && ans->len == HTONS(4))
         {
-          /* The first byte in the answer resource record determines if it
-           * is a compressed record or a normal one.
+          dbg("IP address %d.%d.%d.%d\n",
+              htons(ans->ipaddr[0]) >> 8, htons(ans->ipaddr[0]) & 0xff,
+              htons(ans->ipaddr[1]) >> 8, htons(ans->ipaddr[1]) & 0xff);
+
+           /* XXX: we should really check that this IP address is the one
+           * we want.
            */
 
-          if (*nameptr & 0xc0)
-            {
-              /* Compressed name. */
-
-              nameptr +=2;
-              dbg("Compressed anwser\n");
-            }
-          else
-            {
-              /* Not compressed name. */
-              nameptr = parse_name(nameptr);
-            }
-
-          ans = (struct dns_answer *)nameptr;
-          dbg("Answer: type %x, class %x, ttl %x, length %x\n",
-              htons(ans->type), htons(ans->class), (htons(ans->ttl[0]) << 16) | htons(ans->ttl[1]),
-              htons(ans->len));
-
-          /* Check for IP address type and Internet class. Others are discarded. */
-
-          if (ans->type == HTONS(1) && ans->class == HTONS(1) && ans->len == HTONS(4))
-            {
-              dbg("IP address %d.%d.%d.%d\n",
-                  htons(ans->ipaddr[0]) >> 8, htons(ans->ipaddr[0]) & 0xff,
-                  htons(ans->ipaddr[1]) >> 8, htons(ans->ipaddr[1]) & 0xff);
-
-              /* XXX: we should really check that this IP address is the one
-               * we want.
-               */
-
-              namemapptr->ipaddr[0] = ans->ipaddr[0];
-              namemapptr->ipaddr[1] = ans->ipaddr[1];
-
-              resolv_found(namemapptr->name, namemapptr->ipaddr);
-              return;
-            }
-          else
-            {
-              nameptr = nameptr + 10 + htons(ans->len);
-            }
-          --nanswers;
+          addr->sin_addr.s_addr = ((uint32)ans->ipaddr[0] << 16) | (uint32)ans->ipaddr[1];
+          return OK;
+        }
+      else
+        {
+          nameptr = nameptr + 10 + htons(ans->len);
         }
     }
 }
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
-/* This function is called by the UIP interrupt handling logic whenevent an
- * event of interest occurs.
- */
+/* Get the binding for name. */
 
-void uip_interrupt_udp_event(void)
+#ifdef CONFIG_NET_IPv6
+int resolv_query(char *name, struct sockaddr_in6 *addr)
+#else
+int resolv_query(char *name, struct sockaddr_in *addr)
+#endif
 {
-  if (uip_udp_conn->rport == HTONS(53))
+  int ret = send_query(name);
+  if (ret == 0)
     {
-      if (uip_poll())
-        {
-          check_entries();
-        }
-      if (uip_newdata())
-        {
-          newdata();
-        }
+      ret = recv_response(addr);
     }
+  return ret;
 }
 
-/* Queues a name so that a question for the name will be sent out. */
+/* Obtain the currently configured DNS server. */
 
-void resolv_query(char *name)
+#ifdef CONFIG_NET_IPv6
+void resolv_getserver(const struct sockaddr_in6 *dnsserver)
+#else
+void resolv_getserver(const struct sockaddr_in *dnsserver)
+#endif
 {
-  static uint8 i;
-  static uint8 lseq, lseqi;
-  register struct namemap *nameptr;
-
-  lseq = lseqi = 0;
-
-  for(i = 0; i < RESOLV_ENTRIES; ++i)
-    {
-      nameptr = &names[i];
-      if (nameptr->state == STATE_UNUSED)
-        {
-          break;
-        }
-      if (seqno - nameptr->seqno > lseq)
-        {
-          lseq = seqno - nameptr->seqno;
-          lseqi = i;
-        }
-    }
-
-  if (i == RESOLV_ENTRIES)
-    {
-      i = lseqi;
-      nameptr = &names[i];
-    }
-
-  dbg("Using entry %d\n", i);
-
-  strcpy(nameptr->name, name);
-  nameptr->state = STATE_NEW;
-  nameptr->seqno = seqno;
-  ++seqno;
+  memcpy(dnsserver, gdnsserver, sizeof(gdnsserver));
 }
 
-/* Look up a hostname in the array of known hostnames.
- *
- * Note: This function only looks in the internal array of known
- * hostnames, it does not send out a query for the hostname if none
- * was found. The function resolv_query() can be used to send a query
- * for a hostname.
- *
- * Return A pointer to a 4-byte representation of the hostname's IP
- * address, or NULL if the hostname was not found in the array of
- * hostnames.
- */
+/* Configure which DNS server to use for queries */
 
-uint16 *resolv_lookup(char *name)
+#ifdef CONFIG_NET_IPv6
+void resolv_conf(const struct sockaddr_in6 *dnsserver)
+#else
+void resolv_conf(const struct sockaddr_in *dnsserver)
+#endif
 {
-  static uint8 i;
-  struct namemap *nameptr;
-
-  /* Walk through the list to see if the name is in there. If it is
-   * not, we return NULL.
-   */
-
-  for(i = 0; i < RESOLV_ENTRIES; ++i)
-    {
-      nameptr = &names[i];
-      if (nameptr->state == STATE_DONE && strcmp(name, nameptr->name) == 0)
-        {
-          return nameptr->ipaddr;
-        }
-    }
-  return NULL;
-}
-
-/* Obtain the currently configured DNS server.
- *
- * Return: A pointer to a 4-byte representation of the IP address of
- * the currently configured DNS server or NULL if no DNS server has
- * been configured.
- */
-
-uint16 *resolv_getserver(void)
-{
-  if (resolv_conn == NULL)
-    {
-      return NULL;
-    }
-  return resolv_conn->ripaddr;
-}
-
-/* Configure which DNS server to use for queries.
- *
- * dnsserver A pointer to a 4-byte representation of the IP
- * address of the DNS server to be configured.
- */
-
-void resolv_conf(uint16 *dnsserver)
-{
-  if (resolv_conn != NULL)
-    {
-      uip_udp_remove(resolv_conn);
-    }
-
-  resolv_conn = uip_udp_new(dnsserver, HTONS(53));
+  memcpy(&gdnsserver, dnsserver, sizeof(gdnsserver));
 }
 
 /* Initalize the resolver. */
 
-void resolv_init(void)
+int resolv_init(void)
 {
-  static uint8 i;
-
-  for(i = 0; i < RESOLV_ENTRIES; ++i)
+  g_sockfd = socket(PF_INET, SOCK_DGRAM, 0);
+  if (g_sockfd < 0)
     {
-      names[i].state = STATE_DONE;
+      return ERROR;
     }
+  return OK;
 }

@@ -43,70 +43,120 @@
 #include <sched.h>
 #include <errno.h>
 #include <nuttx/fs.h>
+
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+# include <nuttx/net.h>
+#endif
+
 #include "fs_internal.h"
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Function: close
+ *
+ * Description:
+ *   close() closes a file descriptor, so that it no longer refers to any
+ *   file and may be reused. Any record locks (see fcntl(2)) held on the file
+ *   it was associated with, and owned by the process, are removed (regardless
+ *   of the file descriptor that was used to obtain the lock).
+ *
+ *   If fd is the last copy of a particular file descriptor the resources
+ *   associated with it are freed; if the descriptor was the last reference
+ *   to a file which has been removed using unlink(2) the file is deleted.
+ *
+ * Parameters:
+ *   fd   file descriptor to close
+ *
+ * Returned Value:
+ *   0 on success; -1 on error with errno set appropriately.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
 int close(int fd)
 {
   FAR struct filelist *list;
+  FAR struct inode *inode;
+  int err;
 
+  /* Did we get a valid file descriptor? */
+
+  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
+    {
+      /* Close a socket descriptor */
+
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
+        {
+          return net_close(fd);
+        }
+      else
+#endif
+        {
+          err = EBADF;
+          goto errout;
+        }
+    }
   /* Get the thread-specific file list */
 
   list = sched_getfiles();
   if (!list)
     {
-      *get_errno_ptr() = EMFILE;
-      return ERROR;
+      err = EMFILE;
+      goto errout;
     }
 
-  if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
+  /* If the file was properly opened, there should be an inode assigned */
+
+  inode = list->fl_files[fd].f_inode;
+  if (!inode)
+   {
+     err = EBADF;
+     goto errout;
+   }
+
+  /* Close the driver or mountpoint.  NOTES: (1) there is no
+   * exclusion mechanism here , the driver or mountpoint must be
+   * able to handle concurrent operations internally, (2) The driver
+   * may have been opened numerous times (for different file
+   * descriptors) and must also handle being closed numerous times.
+   * (3) for the case of the mountpoint, we depend on the close
+   * methods bing identical in signature and position in the operations
+   * vtable.
+   */
+
+  if (inode->u.i_ops && inode->u.i_ops->close)
     {
-      FAR struct inode *inode = list->fl_files[fd].f_inode;
-      if (inode)
+      /* Perform the close operation (by the driver) */
+
+      int ret = inode->u.i_ops->close(&list->fl_files[fd]);
+      if (ret < 0)
         {
-          int ret = OK;
+          /* An error occurred while closing the driver */
 
-          /* Close the driver or mountpoint.  NOTES: (1) there is no
-           * exclusion mechanism here , the driver or mountpoint must be
-           * able to handle concurrent operations internally, (2) The driver
-           * may have been opened numerous times (for different file
-           * descriptors) and must also handle being closed numerous times.
-           * (3) for the case of the mountpoint, we depend on the close
-           *  methods bing identical in signature and position in the operations
-           * vtable.
-           */
-
-          if (inode->u.i_ops && inode->u.i_ops->close)
-            {
-              /* Perform the close operation (by the driver) */
-
-              int status = inode->u.i_ops->close(&list->fl_files[fd]);
-              if (status < 0)
-                {
-                  /* An error occurred while closing the driver */
-
-                  *get_errno_ptr() = -status;
-                  ret = ERROR;
-                }
-            }
-
-          /* Release the file descriptor */
-
-          files_release(fd);
-
-          /* Decrement the reference count on the inode. This may remove the inode and
-           * eliminate the name from the namespace
-           */
-
-          inode_release(inode);
-          return ret;
+          err = -ret;
+          goto errout;
         }
     }
 
-  *get_errno_ptr() = EBADF;
+  /* Release the file descriptor */
+
+  files_release(fd);
+
+  /* Decrement the reference count on the inode. This may remove the inode and
+   * eliminate the name from the namespace
+   */
+
+  inode_release(inode);
+
+  return OK;
+
+errout:
+  *get_errno_ptr() = err;
   return ERROR;
 }
 

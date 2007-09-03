@@ -36,25 +36,31 @@
 #include <sys/types.h>
 #include <net/uip/uipopt.h>
 
-/* Callback function which is called when a hostname is found.
- *
- * This function must be implemented by the module that uses the DNS
- * resolver. It is called when a hostname is found, or when a hostname
- * was not found.
- *
- * name A pointer to the name that was looked up.  \param
- * ipaddr A pointer to a 4-byte array containing the IP address of the
- * hostname, or NULL if the hostname could not be found.
- */
-
-extern void resolv_found(char *name, uint16 *ipaddr);
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
 
 /* Functions. */
 
-extern void resolv_conf(uint16 *dnsserver);
-extern uint16 *resolv_getserver(void);
-extern void resolv_init(void);
-extern uint16 *resolv_lookup(char *name);
-extern void resolv_query(char *name);
+EXTERN int resolv_init(void);
+
+#ifdef CONFIG_NET_IPv6
+EXTERN void resolv_conf(const struct sockaddr_in6 *dnsserver);
+EXTERN void resolv_getserver(const struct sockaddr_in6 *dnsserver);
+EXTERN int  resolv_query(char *name, struct sockaddr_in6 *addr);
+#else
+EXTERN void resolv_conf(const struct sockaddr_in *dnsserver);
+EXTERN void resolv_getserver(const struct sockaddr_in *dnsserver);
+EXTERN int  resolv_query(char *name, struct sockaddr_in *addr);
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* __UIP_RESOLV_H__ */

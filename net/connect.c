@@ -149,7 +149,8 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
       goto errout;
   }
 
-  /* Perform the binding depending on the protocol type */
+  /* Perform the connection depending on the protocol type */
+
   switch (psock->s_type)
     {
       case SOCK_STREAM:

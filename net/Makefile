@@ -1,4 +1,4 @@
-############################################################
+############################################################################
 # Makefile
 #
 #   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -31,7 +31,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################
+############################################################################
 
 -include $(TOPDIR)/Make.defs
 CFLAGS		+= -I./uip
@@ -40,7 +40,8 @@ MKDEP		= $(TOPDIR)/tools/mkdeps.sh
 
 ifeq ($(CONFIG_NET),y)
 STD_ASRCS	=
-STD_CSRCS	= socket.c bind.c connect.c net_sockets.c
+STD_CSRCS	= socket.c bind.c connect.c send.c sendto.c recv.c recvfrom.c \
+		  net_sockets.c net-close.c
 include uip/Make.defs
 endif
 

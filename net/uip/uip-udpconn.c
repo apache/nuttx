@@ -1,4 +1,4 @@
-/************************************************************
+/****************************************************************************
  * uip-udpconn.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -34,21 +34,23 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Compilation Switches
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_UDP)
 
 #include <sys/types.h>
 #include <string.h>
+#include <semaphore.h>
+#include <assert.h>
 #include <errno.h>
 #include <arch/irq.h>
 
@@ -58,43 +60,93 @@
 
 #include "uip-internal.h"
 
-/************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************/
+ ****************************************************************************/
 
 /* The array containing all uIP UDP connections. */
 
-struct uip_udp_conn uip_udp_conns[UIP_UDP_CONNS];
+struct uip_udp_conn g_udp_connections[UIP_UDP_CONNS];
+
+/* A list of all free UDP connections */
+
+static dq_queue_t g_free_udp_connections;
+static sem_t g_free_sem;
+
+/* A list of all allocated UDP connections */
+
+static dq_queue_t g_active_udp_connections;
 
 /* Last port used by a UDP connection connection. */
 
 static uint16 g_last_udp_port;
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-#ifdef CONFIG_NET_UDP
-struct uip_udp_conn *uip_find_udp_conn( uint16 portno )
+/****************************************************************************
+ * Name: _uip_semtake() and _uip_semgive()
+ *
+ * Description:
+ *   Take/give semaphore
+ *
+ ****************************************************************************/
+
+static inline void _uip_semtake(sem_t *sem)
+{
+  /* Take the semaphore (perhaps waiting) */
+
+  while (sem_wait(sem) != 0)
+    {
+      /* The only case that an error should occr here is if
+       * the wait was awakened by a signal.
+       */
+
+      ASSERT(*get_errno_ptr() == EINTR);
+    }
+}
+
+#define _uip_semgive(sem) sem_post(sem)
+
+/****************************************************************************
+ * Name: uip_find_conn()
+ *
+ * Description:
+ *   Find the UDP connection that uses this local port number.  Called only
+ *   from user, non-interrupt level logic.
+ *
+ ****************************************************************************/
+
+struct uip_udp_conn *uip_find_conn( uint16 portno )
 {
   struct uip_udp_conn *conn;
-  int i;
+  uint16 nlastport = htons(g_last_udp_port);
+  irqstate_t flags;
 
-  for (i = 0; i < UIP_UDP_CONNS; i++)
+  /* Now search each active connection structure.  This list is modifiable
+   * from interrupt level, we we must diable interrupts to access it safely.
+   */
+
+  flags = irqsave();
+  conn = (struct uip_udp_conn *)g_active_udp_connections.head;
+  while (conn)
     {
-      if (uip_udp_conns[i].lport == htons(g_last_udp_port))
+      if (conn->lport == nlastport)
         {
-          return conn;
+          break;
         }
+
+      conn = (struct uip_udp_conn *)conn->node.flink;
     }
 
-  return NULL;
+  irqrestore(flags);
+  return conn;
 }
-#endif   /* CONFIG_NET_UDP */
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: uip_udpinit()
@@ -108,9 +160,19 @@ struct uip_udp_conn *uip_find_udp_conn( uint16 portno )
 void uip_udpinit(void)
 {
   int i;
+
+  /* Initialize the queues */
+
+  dq_init(&g_free_udp_connections);
+  dq_init(&g_active_udp_connections);
+  sem_init(&g_free_sem, 0, 1);
+
   for (i = 0; i < UIP_UDP_CONNS; i++)
     {
-      uip_udp_conns[i].lport = 0;
+      /* Mark the connection closed and move it to the free list */
+
+      g_udp_connections[i].lport = 0;
+      dq_addlast(&g_udp_connections[i].node, &g_free_udp_connections);
     }
 
   g_last_udp_port = 1024;
@@ -120,15 +182,28 @@ void uip_udpinit(void)
  * Name: uip_udpalloc()
  *
  * Description:
- *   Find a free UDP connection structure and allocate it for use.  This is
- *   normally something done by the implementation of the socket() API.
+ *   Alloc a new, uninitialized UDP connection structure.
  *
  ****************************************************************************/
 
 struct uip_udp_conn *uip_udpalloc(void)
 {
-#warning "Need to implement allocation logic"
-  return NULL;
+  struct uip_udp_conn *conn;
+
+  /* The free list is only accessed from user, non-interrupt level and
+   * is protected by a semaphore (that behaves like a mutex).
+   */
+
+  _uip_semtake(&g_free_sem);
+  conn = (struct uip_udp_conn *)dq_remfirst(&g_free_udp_connections);
+  if (conn)
+    {
+      /* Make sure that the connectin is marked as uninitialized */
+
+      conn->lport = 0;
+    }
+  _uip_semgive(&g_free_sem);
+  return conn;
 }
 
 /****************************************************************************
@@ -142,7 +217,27 @@ struct uip_udp_conn *uip_udpalloc(void)
 
 void uip_udpfree(struct uip_udp_conn *conn)
 {
-#warning "Need to implement release logic"
+  irqstate_t flags;
+
+  /* The active list is accessed from the interrupt level and me must be
+   * certain that no interrupts occur while the active list is modified.
+   */
+
+  flags = irqsave();
+  if (conn->lport != 0)
+    {
+      dq_rem(&conn->node, &g_active_udp_connections);
+    }
+  irqrestore(flags);
+
+  /* The free list is only accessed from user, non-interrupt level and
+   * is protected by a semaphore (that behaves like a mutex).
+   */
+
+  _uip_semtake(&g_free_sem);
+  conn->lport = 0;
+  dq_addlast(&conn->node, &g_free_udp_connections);
+  _uip_semgive(&g_free_sem);
 }
 
 /****************************************************************************
@@ -159,8 +254,8 @@ void uip_udpfree(struct uip_udp_conn *conn)
 
 struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf)
 {
-  struct uip_udp_conn *conn;
-  for (conn = &uip_udp_conns[0]; conn < &uip_udp_conns[UIP_UDP_CONNS]; conn++)
+  struct uip_udp_conn *conn = (struct uip_udp_conn *)g_active_udp_connections.head;
+  while (conn)
     {
       /* If the local UDP port is non-zero, the connection is considered
        * to be used. If so, the local port number is checked against the
@@ -179,11 +274,13 @@ struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf)
         {
           /* Matching connection found.. return a reference to it */
 
-          return conn;
+          break;
         }
-    }
 
-  /* No match found */
+      /* Look at the next active connection */
+
+      conn = (struct uip_udp_conn *)conn->node.flink;
+    }
 
   return NULL;
 }
@@ -207,63 +304,26 @@ struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf)
 
 void uip_udppoll(unsigned int conn)
 {
-  uip_udp_conn = &uip_udp_conns[conn];
+  uip_udp_conn = &g_udp_connections[conn];
   uip_interrupt(UIP_UDP_TIMER);
 }
 
-/****************************************************************************
- * Name: uip_tcpbind()
- *
- * Description:
- *   This function implements the UIP specific parts of the standard TCP
- *   bind() operation.
- *
- * Assumptions:
- *   This function is called from normal user level code.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_IPv6
-int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in6 *addr)
-#else
-int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
-#endif
-{
-#warning "Need to implement bind logic"
-  return -ENOSYS;
-}
-
-/* Set up a new UDP connection.
- *
- * This function sets up a new UDP connection. The function will
+/* This function sets up a new UDP connection. The function will
  * automatically allocate an unused local port for the new
  * connection. However, another port can be chosen by using the
- * uip_udp_bind() call, after the uip_udp_new() function has been
+ * uip_udpbind() call, after the uip_udpconnect() function has been
  * called.
  *
- * Example:
- *
- *   uip_ipaddr_t addr;
- *   struct uip_udp_conn *c;
- * 
- *   uip_ipaddr(&addr, 192,168,2,1);
- *   c = uip_udp_new(&addr, HTONS(12345));
- *   if(c != NULL) {
- *     uip_udp_bind(c, HTONS(12344));
- *   }
- *
- * ripaddr The IP address of the remote host.
- *
- * rport The remote port number in network byte order.
- *
- * Return:  The uip_udp_conn structure for the new connection or NULL
- * if no connection could be allocated.
+ * addr The address of the remote host.
  */
 
-struct uip_udp_conn *uip_udp_new(uip_ipaddr_t *ripaddr, uint16 rport)
+#ifdef CONFIG_NET_IPv6
+int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in6 *addr)
+#else
+int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
+#endif
 {
-  struct uip_udp_conn *conn;
-  int i;
+  irqstate_t flags;
 
   /* Find an unused local port number.  Loop until we find a valid listen port
    * number that is not being used by any other connection.
@@ -283,42 +343,32 @@ struct uip_udp_conn *uip_udp_new(uip_ipaddr_t *ripaddr, uint16 rport)
           g_last_udp_port = 4096;
         }
     }
-  while (uip_find_udp_conn(g_last_udp_port));
-
-  /* Now find an available UDP connection structure */
-
-  conn = 0;
-  for (i = 0; i < UIP_UDP_CONNS; i++)
-    {
-      if (uip_udp_conns[i].lport == 0)
-        {
-          conn = &uip_udp_conns[i];
-          break;
-        }
-    }
-
-  /* Return an error if no connection is available */
-
-  if (conn == 0)
-    {
-      return 0;
-    }
+  while (uip_find_conn(g_last_udp_port));
 
   /* Initialize and return the connection structure, bind it to the port number */
 
   conn->lport = HTONS(g_last_udp_port);
-  conn->rport = rport;
 
-  if (ripaddr == NULL)
+  if (addr)
     {
-      memset(conn->ripaddr, 0, sizeof(uip_ipaddr_t));
+      conn->rport = addr->sin_port;
+      uip_ipaddr_copy(&conn->ripaddr, &addr->sin_addr.s_addr);
     }
   else
     {
-      uip_ipaddr_copy(&conn->ripaddr, ripaddr);
-    }
+       conn->rport = 0;
+       uip_ipaddr_copy(&conn->ripaddr, &all_zeroes_addr);
+   }
+  conn->ttl   = UIP_TTL;
 
-  conn->ttl = UIP_TTL;
+  /* Now add the connection structure to the active connectionlist. This list
+   * is modifiable from interrupt level, we we must diable interrupts to
+   * access it safely.
+   */
+
+  flags = irqsave();
+  dq_addlast(&conn->node, &g_active_udp_connections);
+  irqrestore(flags);
 
   return conn;
 }

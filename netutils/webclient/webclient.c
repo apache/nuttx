@@ -38,7 +38,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: webclient.c,v 1.2 2007-09-02 21:58:34 patacongo Exp $
+ * $Id: webclient.c,v 1.3 2007-09-03 20:34:44 patacongo Exp $
  *
  */
 
@@ -129,11 +129,10 @@ unsigned char webclient_get(char *host, uint16 port, char *file)
   ipaddr = &addr;
   if (uiplib_ipaddrconv(host, (unsigned char *)addr) == 0)
     {
-      ipaddr = (uip_ipaddr_t *)resolv_lookup(host);
-
-      if (ipaddr == NULL) {
-        return 0;
-      }
+      if (resolv_query(host, &ipaddr) < 0)
+        {
+          return ERROR;
+        }
   }
 
   /* Create a socket */
@@ -460,9 +459,14 @@ void uip_interrupt_event(void)
         }
       else
         {
-          if (resolv_lookup(s.host) == NULL)
+#ifdef CONFIG_NET_IPv6
+          struct sockaddr_in6 addr;
+#else
+          struct sockaddr_in addr;
+#endif
+          if (resolv_query(s.host, &addr) < 0)
             {
-              resolv_query(s.host);
+              return ERROR;
             }
           webclient_get(s.host, s.port, s.file);
         }

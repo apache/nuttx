@@ -57,10 +57,6 @@
  * Public Data
  ****************************************************************************/
 
-/* g_tcp_sequence[] is used to generate TCP sequence numbers */
-
-extern uint8 g_tcp_sequence[4];
-
 extern const uip_ipaddr_t all_ones_addr;
 extern const uip_ipaddr_t all_zeroes_addr;
 
@@ -79,6 +75,7 @@ extern "C" {
 
 EXTERN void uip_tcpinit(void);
 EXTERN struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf);
+EXTERN struct uip_conn *uip_tcplistener(struct uip_tcpip_hdr *buf);
 EXTERN void uip_tcpnextsequence(void);
 
 /* Defined in uip_udpconn.c *************************************************/

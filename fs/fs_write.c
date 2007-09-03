@@ -47,48 +47,134 @@
 #include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
+
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+# include <sys/socket.h>
+#endif
+
 #include "fs_internal.h"
 
 /************************************************************
  * Global Functions
  ************************************************************/
 
+/****************************************************************************
+ * Function: send
+ *
+ * Description:
+ *  write() writes up to nytes bytes to the file referenced by the file
+ *  descriptor fd from the buffer starting at buf.
+ *
+ * Parameters:
+ *   fd       file descriptor (or socket descriptor) to write to
+ *   buf      Data to write
+ *   nbytes   Length of data to write
+ *
+ * Returned Value:
+ *  On success, the number of bytes  written are returned (zero indicates
+ *  nothing was written). On error, -1 is returned, and errno is set appro‐
+ *  priately:
+ *
+ *  EAGAIN
+ *    Non-blocking I/O has been selected using O_NONBLOCK and the write
+ *    would block.
+ *  EBADF
+ *    fd is not a valid file descriptor or is not open for writing.
+ *  EFAULT
+ *    buf is outside your accessible address space.
+ *  EFBIG
+ *    An attempt was made to write a file that exceeds the implementation
+ *    defined maximum file size or the process' file size limit, or
+ *    to write at a position past the maximum allowed offset.
+ *  EINTR
+ *    The call was interrupted by a signal before any data was written.
+ *  EINVAL
+ *    fd is attached to an object which is unsuitable for writing; or
+ *    the file was opened with the O_DIRECT flag, and either the address
+ *    specified in buf, the value specified in count, or the current
+ *     file offset is not suitably aligned.
+ *  EIO
+ *    A low-level I/O error occurred while modifying the inode.
+ *  ENOSPC
+ *    The device containing the file referred to by fd has no room for
+ *    the data.
+ *  EPIPE
+ *    fd is connected to a pipe or socket whose reading end is closed.
+ *    When this happens the writing process will also receive a SIGPIPE
+ *    signal. (Thus, the write return value is seen only if the program
+ *    catches, blocks or ignores this signal.)
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
 int write(int fd, const void *buf, unsigned int nbytes)
 {
   FAR struct filelist *list;
-  int ret = EBADF;
+  FAR struct file *this_file;
+  FAR struct inode *inode;
+  int err;
+  int ret;
+
+  /* Did we get a valid file descriptor? */
+
+  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
+    {
+      /* Write to a socket descriptor is equivalent to send with flags == 0 */
+
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
+        {
+          return send(fd, buf, nbytes, 0);
+        }
+      else
+#endif
+        {
+          err = EBADF;
+          goto errout;
+        }
+    }
 
   /* Get the thread-specific file list */
 
   list = sched_getfiles();
   if (!list)
     {
-      *get_errno_ptr() = EMFILE;
-      return ERROR;
+      err = EMFILE;
+      goto errout;
     }
 
-  /* Did we get a valid file descriptor? */
+  /* Was this file opened for write access? */
 
-  if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
+  this_file = &list->fl_files[fd];
+  if ((this_file->f_oflags & O_WROK) == 0)
     {
-      FAR struct file *this_file = &list->fl_files[fd];
-
-      /* Was this file opened for write access? */
-
-      if ((this_file->f_oflags & O_WROK) != 0)
-        {
-          struct inode *inode = this_file->f_inode;
-
-          /* Is a driver registered? Does it support the write method? */
-
-          if (inode && inode->u.i_ops && inode->u.i_ops->write)
-            {
-              /* Yes, then let it perform the write */
-
-              ret = inode->u.i_ops->write(this_file, buf, nbytes);
-            }
-        }
+      err = EBADF;
+      goto errout;
     }
+
+  /* Is a driver registered? Does it support the write method? */
+
+  inode = this_file->f_inode;
+  if (!inode || !inode->u.i_ops && inode->u.i_ops->write)
+    {
+      err = EBADF;
+      goto errout;
+    }
+
+  /* Yes, then let the driver perform the write */
+
+  ret = inode->u.i_ops->write(this_file, buf, nbytes);
+  if (ret < 0)
+    {
+      err = -ret;
+      goto errout;
+    }
+
   return ret;
+
+errout:
+  *get_errno_ptr() = err;
+  return ERROR;
 }
 

@@ -17,6 +17,7 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -587,6 +588,18 @@ static void uip_add_rcv_nxt(uint16 n)
   uip_conn->rcv_nxt[3] = uip_acc32[3];
 }
 
+static uip_udp_callback(void)
+{
+  /* Some sanity checking */
+
+  if (uip_udp_conn && uip_udp_conn->callback)
+    {
+      /* Perform the callback */
+
+      uip_udp_conn->callback(uip_udp_conn->private);
+    }
+}
+
 void uip_interrupt(uint8 flag)
 {
   register struct uip_conn *uip_connr = uip_conn;
@@ -759,7 +772,7 @@ void uip_interrupt(uint8 flag)
           uip_len = uip_slen = 0;
           uip_flags = UIP_POLL;
           uip_event_signal();
-          uip_interrupt_udp_event();
+          up_udp_callback();
           goto udp_send;
         }
       else
@@ -1099,7 +1112,7 @@ void uip_interrupt(uint8 flag)
     uip_sappdata = uip_appdata = &uip_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
     uip_slen = 0;
     uip_event_signal();
-    uip_interrupt_udp_event();
+    up_udp_callback();
 
  udp_send:
     if (uip_slen == 0)
@@ -1256,7 +1269,7 @@ found_listen:
 
     /* First allocate a new connection structure */
 
-    uip_connr = uip_tcpalloc();
+    uip_connr = uip_tcplistener(BUF);
     if (!uip_connr)
       {
         /* All connections are used already, we drop packet and hope that
@@ -1268,33 +1281,12 @@ found_listen:
         UIP_LOG("tcp: found no unused connections.");
         goto drop;
       }
+
+    uip_add_rcv_nxt(1);
     uip_conn = uip_connr;
 
-    /* Fill in the necessary fields for the new connection. */
-
-    uip_connr->rto   = uip_connr->timer = UIP_RTO;
-    uip_connr->sa    = 0;
-    uip_connr->sv    = 4;
-    uip_connr->nrtx  = 0;
-    uip_connr->lport = BUF->destport;
-    uip_connr->rport = BUF->srcport;
-    uip_ipaddr_copy(uip_connr->ripaddr, BUF->srcipaddr);
-    uip_connr->tcpstateflags = UIP_SYN_RCVD;
-
-    uip_connr->snd_nxt[0] = g_tcp_sequence[0];
-    uip_connr->snd_nxt[1] = g_tcp_sequence[1];
-    uip_connr->snd_nxt[2] = g_tcp_sequence[2];
-    uip_connr->snd_nxt[3] = g_tcp_sequence[3];
-    uip_connr->len = 1;
-
-    /* rcv_nxt should be the seqno from the incoming packet + 1. */
-    uip_connr->rcv_nxt[3] = BUF->seqno[3];
-    uip_connr->rcv_nxt[2] = BUF->seqno[2];
-    uip_connr->rcv_nxt[1] = BUF->seqno[1];
-    uip_connr->rcv_nxt[0] = BUF->seqno[0];
-    uip_add_rcv_nxt(1);
-
     /* Parse the TCP MSS option, if present. */
+
     if ((BUF->tcpoffset & 0xf0) > 0x50)
       {
         for (c = 0; c < ((BUF->tcpoffset >> 4) - 5) << 2 ;)
@@ -1338,7 +1330,7 @@ found_listen:
       }
 
     /* Our response will be a SYNACK. */
-    tcp_send_synack:
+tcp_send_synack:
     BUF->flags = TCP_ACK;
 
  tcp_send_syn:

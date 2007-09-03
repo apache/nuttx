@@ -106,6 +106,10 @@ EXTERN FAR struct socketlist *net_alloclist(void);
 EXTERN int net_addreflist(FAR struct socketlist *list);
 EXTERN int net_releaselist(FAR struct socketlist *list);
 
+/* net-close.c ***************************************************************/
+
+EXTERN int net_close(int sockfd);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

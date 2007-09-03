@@ -62,10 +62,6 @@
  * Public Data
  ****************************************************************************/
 
-/* g_tcp_sequence[] is used to generate TCP sequence numbers */
-
-uint8 g_tcp_sequence[4];
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -74,17 +70,34 @@ uint8 g_tcp_sequence[4];
 
 static struct uip_conn g_tcp_connections[UIP_CONNS];
 
+/* A list of all free TCP connections */
+
+static dq_queue_t g_free_tcp_connections;
+
+/* A list of all connected TCP connections */
+
+static dq_queue_t g_active_tcp_connections;
+
 /* Last port used by a TCP connection connection. */
 
 static uint16 g_last_tcp_port;
+
+/* g_tcp_sequence[] is used to generate TCP sequence numbers */
+
+static uint8 g_tcp_sequence[4];
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-/* Given a port number, find the socket bound to the port number.
- * Primary use: to determine if a port number is available.
- */
+/****************************************************************************
+ * Name: uip_find_conn()
+ *
+ * Description:
+ *   Given a port number, find the socket bound to the port number.
+ *   Primary use: to determine if a port number is available.
+ *
+ ****************************************************************************/
 
 static struct uip_conn *uip_find_conn(uint16 portno)
 {
@@ -118,16 +131,27 @@ static struct uip_conn *uip_find_conn(uint16 portno)
  *
  * Description:
  *   Initialize the TCP/IP connection structures.  Called only once and only
- *   from the UIP layer.
+ *   from the UIP layer at startup in normal user mode.
  *
  ****************************************************************************/
 
 void uip_tcpinit(void)
 {
   int i;
+
+  /* Initialize the queues */
+
+  dq_init(&g_free_tcp_connections);
+  dq_init(&g_active_tcp_connections);
+
+  /* Now initialize each connection structure */
+
   for (i = 0; i < UIP_CONNS; i++)
     {
+      /* Mark the connection closed and move it to the free list */
+
       g_tcp_connections[i].tcpstateflags = UIP_CLOSED;
+      dq_addlast(&g_tcp_connections[i].node, &g_free_tcp_connections);
     }
 
   g_last_tcp_port = 1024;
@@ -146,60 +170,67 @@ void uip_tcpinit(void)
 
 struct uip_conn *uip_tcpalloc(void)
 {
-#if 0 /* Revisit */
-  struct uip_conn *oldest = NULL;
-#endif
+  struct uip_conn *conn;
   irqstate_t flags;
-  unsigned int i;
 
   /* Because this routine is called from both interrupt level and
    * and from user level, we have not option but to disable interrupts
-   * while accessing g_tcp_connections[];
+   * while accessing g_free_tcp_connections[];
    */
 
   flags = irqsave();
 
-  /* Check if there are any available connections. */
+  /* Return the entry from the head of the free list */
 
-  for (i = 0; i < UIP_CONNS; i++)
-    {
-      /* First, check if any connections structures are marked as
-       * CLOSED in the table of pre-allocated connection structures.
-       */
-
-      if (g_tcp_connections[i].tcpstateflags == UIP_CLOSED)
-        {
-          /* We found an unused structure. Mark as allocated, but not
-           * initialized.
-           */
-
-          memset(&g_tcp_connections[i], 0, sizeof(struct uip_conn));
-          g_tcp_connections[i].tcpstateflags = UIP_ALLOCATED;
-
-          irqrestore(flags);
-          return &g_tcp_connections[i];
-        }
+  conn = (struct uip_conn *)dq_remfirst(&g_free_tcp_connections);
 
 #if 0 /* Revisit */
+  /* Is the free list empty? */
+
+  if (!conn)
+    {
       /* As a fallback, check for connection structures in the TIME_WAIT
        * state.  If no CLOSED connections are found, then take the oldest
        */
 
-      if (g_tcp_connections[i].tcpstateflags == UIP_TIME_WAIT)
+      struct uip_conn *tmp = g_active_tcp_connections.head;
+      while (tmp)
         {
-          if (!oldest || g_tcp_connections[i].timer > oldest->timer)
+          /* Is this connectin in the UIP_TIME_WAIT state? */
+
+          if (tmp->tcpstateflags == UIP_TIME_WAIT)
             {
-              oldest = &g_tcp_connections[i];
+              /* Is it the oldest one we have seen so far? */
+
+              if (!conn || tmp->timer > conn->timer)
+                {
+                  /* Yes.. remember it */
+
+                  conn = tmp;
+                }
             }
+
+          /* Look at the next active connection */
+
+          tmp = tmp->node.flink;
         }
+
+      /* If we found one, remove it from the active connection list */
+
+      dq_rem(&conn->node, &g_active_tcp_connections);
     }
-  return oldest;
-#else
-    }
+#endif
 
   irqrestore(flags);
-  return NULL;
-#endif
+
+  /* Mark the connection allocated */
+
+  if (conn)
+    {
+      conn->tcpstateflags = UIP_ALLOCATED;
+    }
+
+  return conn;
 }
 
 /****************************************************************************
@@ -213,9 +244,31 @@ struct uip_conn *uip_tcpalloc(void)
 
 void uip_tcpfree(struct uip_conn *conn)
 {
-  /* this action is atomic and should require no special protetion */
+  irqstate_t flags;
+
+  /* Because g_free_tcp_connections is accessed from user level and interrupt
+   * level, code, it is necessary to keep interrupts disabled during this
+   * operation.
+   */
+
+  flags = irqsave();
+
+  /* UIP_ALLOCATED means that that the connection is not in the active list
+   * yet.
+   */
+
+  if (conn->tcpstateflags != UIP_ALLOCATED)
+    {
+      /* Remove the connection from the active list */
+
+      dq_rem(&conn->node, &g_free_tcp_connections);
+    }
+
+  /* Mark the connection available and put it into the free list */
 
   conn->tcpstateflags = UIP_CLOSED;
+  dq_addlast(&conn->node, &g_free_tcp_connections);
+  irqrestore(flags);
 }
 
 /****************************************************************************
@@ -232,8 +285,8 @@ void uip_tcpfree(struct uip_conn *conn)
 
 struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf)
 {
-  struct uip_conn *conn;
-  for (conn = g_tcp_connections; conn <= &g_tcp_connections[UIP_CONNS - 1]; conn++)
+  struct uip_conn *conn = (struct uip_conn *)g_active_tcp_connections.head;
+  while (conn)
     {
       /* Find an open connection matching the tcp input */
 
@@ -241,15 +294,64 @@ struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf)
            buf->destport == conn->lport && buf->srcport == conn->rport &&
            uip_ipaddr_cmp(buf->srcipaddr, conn->ripaddr))
         {
-          /* Matching connection found.. return a reference to it */
+          /* Matching connection found.. break out of the loop and return a
+           * reference to it.
+           */
 
-          return conn;
+          break;
         }
+
+      /* Look at the next active connection */
+
+      conn = (struct uip_conn *)conn->node.flink;
     }
 
-  /* No match found */
+  return conn;
+}
 
-  return NULL;
+/****************************************************************************
+ * Name: uip_tcpactive()
+ *
+ * Description:
+ *    Called when uip_interupt matches the incoming packet with a connection
+ *    in LISTEN. In that case, this function will create a new connection and
+ *    initialize it to send a SYNACK in return.
+ *
+ * Assumptions:
+ *   This function is called from UIP logic at interrupt level
+ *
+ ****************************************************************************/
+
+struct uip_conn *uip_tcplistener(struct uip_tcpip_hdr *buf)
+{
+  struct uip_conn *conn = uip_tcpalloc();
+  if (conn)
+    {
+      /* Fill in the necessary fields for the new connection. */
+
+      conn->rto   = conn->timer = UIP_RTO;
+      conn->sa    = 0;
+      conn->sv    = 4;
+      conn->nrtx  = 0;
+      conn->lport = buf->destport;
+      conn->rport = buf->srcport;
+      uip_ipaddr_copy(conn->ripaddr, buf->srcipaddr);
+      conn->tcpstateflags = UIP_SYN_RCVD;
+
+      conn->snd_nxt[0] = g_tcp_sequence[0];
+      conn->snd_nxt[1] = g_tcp_sequence[1];
+      conn->snd_nxt[2] = g_tcp_sequence[2];
+      conn->snd_nxt[3] = g_tcp_sequence[3];
+      conn->len = 1;
+
+      /* rcv_nxt should be the seqno from the incoming packet + 1. */
+
+      conn->rcv_nxt[3] = buf->seqno[3];
+      conn->rcv_nxt[2] = buf->seqno[2];
+      conn->rcv_nxt[1] = buf->seqno[1];
+      conn->rcv_nxt[0] = buf->seqno[0];
+  }
+  return conn;
 }
 
 /****************************************************************************
@@ -345,12 +447,23 @@ int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in6 *addr )
+int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in6 *addr)
 #else
-int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr )
+int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
 #endif
 {
+  irqstate_t flags;
   uint16 port;
+
+  /* The connection is expected to be in the UIP_ALLOCATED state.. i.e., 
+   * allocated via up_tcpalloc(), but not yet put into the active connections
+   * list.
+   */
+
+  if (!conn || conn->tcpstateflags != UIP_ALLOCATED)
+    {
+      return -EISCONN;
+    }
 
   /* If the TCP port has not alread been bound to a local port, then select
    * one now.
@@ -407,6 +520,17 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr )
   /* The sockaddr address is 32-bits in network order. */
 
   uip_ipaddr_copy(&conn->ripaddr, addr->sin_addr.s_addr);
+
+  /* And, finally, put the connection structure into the active
+   * list. Because g_active_tcp_connections is accessed from user level and
+   * interrupt level, code, it is necessary to keep interrupts disabled during
+   * this operation.
+   */
+
+  flags = irqsave();
+  dq_addlast(&conn->node, &g_active_tcp_connections);
+  irqrestore(flags);
+
   return OK;
 }
 

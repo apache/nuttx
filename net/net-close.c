@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/socket.c
+ * net/net-close.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -51,122 +51,58 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: socket
+ * Function: net_close
  *
  * Description:
- *   socket() creates an endpoint for communication and returns a descriptor.
+ *   Performs the close operation on socket descriptors
  *
  * Parameters:
- *   domain   (see sys/socket.h)
- *   type     (see sys/socket.h)
- *   protocol (see sys/socket.h)
+ *   sockfd   Socket descriptor of socket
  *
  * Returned Value:
- *   0 on success; -1 on error with errno set appropriately
- *
- *   EACCES
- *     Permission to create a socket of the specified type and/or protocol
- *     is denied.
- *   EAFNOSUPPORT
- *     The implementation does not support the specified address family.
- *   EINVAL
- *     Unknown protocol, or protocol family not available.
- *   EMFILE
- *     Process file table overflow.
- *   ENFILE
- *     The system limit on the total number of open files has been reached.
- *   ENOBUFS or ENOMEM
- *     Insufficient memory is available. The socket cannot be created until
- *     sufficient resources are freed.
- *   EPROTONOSUPPORT
- *     The protocol type or the specified protocol is not supported within
- *     this domain.
+ *   0 on success; -1 on error with errno set appropriately.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int socket(int domain, int type, int protocol)
+int net_close(int sockfd)
 {
-#ifdef CONFIG_NET_UDP
-  FAR struct socket *psock;
-#endif
-  int sockfd;
+  FAR struct socket *psock = sockfd_socket(sockfd);
   int err;
 
-  /* Only PF_INET or PF_INET6 domains supported */
+  /* Verify that the sockfd corresponds to valid, allocated socket */
 
-#ifdef CONFIG_NET_IPv6
-  if ( domain != PF_INET6)
-#else
-  if ( domain != PF_INET)
-#endif
+  if (!psock || psock->s_crefs <= 0)
     {
-      err = EAFNOSUPPORT;
+      err = EBADF;
       goto errout;
     }
 
-  /* Only SOCK_STREAM and possible SOCK_DRAM are supported */
+  /* Perform the close depending on the protocol type */
+
+  switch (psock->s_type)
+    {
+      case SOCK_STREAM:
+        uip_tcpfree(psock->s_conn);
+        break;
 
 #ifdef CONFIG_NET_UDP
-  if (protocol != 0 || (type != SOCK_STREAM && type != SOCK_DGRAM))
-#else
-  if (protocol != 0 || type != SOCK_STREAM)
+      case SOCK_DGRAM:
+        uip_udpfree(psock->s_conn);
+        break;
 #endif
-    {
-      err = EPROTONOSUPPORT;
-      goto errout;
+      default:
+        err = -EBADF;
+        goto errout;
     }
 
-  /* Everything looks good.  Allocate a socket descriptor */
+  /* Save the protocol type */
 
-  sockfd = sockfd_allocate();
-  if (sockfd < 0)
-    {
-      err = ENFILE;
-      goto errout;
-    }
+  psock->s_type = 0;
+  psock->s_conn = NULL;
 
-  /* Initialize the socket structure */
-
-  psock = sockfd_socket(sockfd);
-  if (psock)
-    {
-      /* Save the protocol type */
-
-      psock->s_type = type;
-      psock->s_conn = NULL;
-
-      /* Allocate the appropriate connection structure */
-
-      switch (type)
-        {
-          case SOCK_STREAM:
-            psock->s_conn = uip_tcpalloc();
-            break;
-
-#ifdef CONFIG_NET_UDP
-          case SOCK_DGRAM:
-            psock->s_conn = uip_udpalloc();
-            break;
-#endif
-          default:
-            break;
-        }
-
-      /* Did we succesfully allocate some kind of connection structure? */
-
-      if (!psock->s_conn)
-        {
-          /* Failed to reserve a connection structure */
-
-          sockfd_release(sockfd);
-          err = ENFILE;
-          goto errout;
-        }
-    }
-
-  return sockfd;
+  return OK;
 
 errout:
   *get_errno_ptr() = err;
@@ -174,5 +110,3 @@ errout:
 }
 
 #endif /* CONFIG_NET */
-
-

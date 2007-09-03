@@ -48,8 +48,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
 #include <nuttx/config.h>
+#include <sys/types.h>
+#include <queue.h>
 #include <arpa/inet.h>
 #include <net/uip/uipopt.h>
 
@@ -158,12 +159,11 @@ typedef uip_ip4addr_t uip_ipaddr_t;
 
 struct uip_conn
 {
+  dq_entry_t node;        /* Implements a doubly linked list */
   uip_ipaddr_t ripaddr;   /* The IP address of the remote host. */
-
   uint16 lport;           /* The local TCP port, in network byte order. */
   uint16 rport;           /* The local remote TCP port, in network byte
                          order. */
-
   uint8 rcv_nxt[4];       /* The sequence number that we expect to
                          receive next. */
   uint8 snd_nxt[4];       /* The sequence number that was last sent by
@@ -188,6 +188,7 @@ struct uip_conn
    */
 
   void *private;
+  void (*callback)(void *private);
 };
 
 #ifdef CONFIG_NET_UDP
@@ -195,16 +196,16 @@ struct uip_conn
 
 struct uip_udp_conn
 {
+  dq_entry_t node;        /* Implements a doubly linked list */
   uip_ipaddr_t ripaddr;   /* The IP address of the remote peer. */
   uint16 lport;           /* The local port number in network byte order. */
   uint16 rport;           /* The remote port number in network byte order. */
   uint8  ttl;             /* Default time-to-live. */
 
-  /* Higher level logic can retain application specific information
-   * in the following:
-   */
+  /* Defines the UDP callback */
 
   void *private;
+  void (*callback)(void *private);
 };
 #endif  /* CONFIG_NET_UDP */
 
@@ -613,9 +614,6 @@ void uip_setipid(uint16 id);
  */
 
 extern void uip_interrupt_event(void);
-#ifdef CONFIG_NET_UDP
-extern void uip_interrupt_udp_event(void);
-#endif
 
 /* Find a free connection structure and allocate it for use. This is
  * normally something done by the implementation of the socket() API
@@ -633,6 +631,34 @@ extern struct uip_udp_conn *uip_udpalloc(void);
 extern void uip_tcpfree(struct uip_conn *conn);
 #ifdef CONFIG_NET_UDP
 extern void uip_udpfree(struct uip_udp_conn *conn);
+#endif
+
+/* Bind a TCP connection to a local address */
+
+#ifdef CONFIG_NET_IPv6
+extern int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in6 *addr);
+#else
+extern int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr);
+#endif
+
+/* This function implements the UIP specific parts of the standard
+ * TCP connect() operation:  It connects to a remote host using TCP.
+ *
+ * This function is used to start a new connection to the specified
+ * port on the specied host. It uses the connection structure that was
+ * allocated by a preceding socket() call.  It sets the connection to
+ * the SYN_SENT state and sets the retransmission timer to 0. This will
+ * cause a TCP SYN segment to be sent out the next time this connection
+ * is periodically processed, which usually is done within 0.5 seconds
+ * after the call to uip_tcpconnect().
+ *
+ * This function is called from normal user level code.
+ */
+
+#ifdef CONFIG_NET_IPv6
+extern int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in6 *addr);
+#else
+extern int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr);
 #endif
 
 /* Start listening to the specified port.
@@ -848,51 +874,31 @@ void uip_send(const void *data, int len);
 
 #define uip_mss()        (uip_conn->mss)
 
-/* Set up a new UDP connection.
- *
- * This function sets up a new UDP connection. The function will
+/* Bind a UDP connection to a local address */
+
+#ifdef CONFIG_NET_IPv6
+extern int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in6 *addr);
+#else
+extern int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in *addr);
+#endif
+
+/* This function sets up a new UDP connection. The function will
  * automatically allocate an unused local port for the new
  * connection. However, another port can be chosen by using the
- * uip_udp_bind() call, after the uip_udp_new() function has been
+ * uip_udpbind() call, after the uip_udpconnect() function has been
  * called.
  *
- * Example:
+ * This function is called as part of the implementation of sendto
+ * and recvfrom.
  *
- *   uip_ipaddr_t addr;
- *   struct uip_udp_conn *c;
- * 
- *   uip_ipaddr(&addr, 192,168,2,1);
- *   c = uip_udp_new(&addr, HTONS(12345));
- *   if(c != NULL) {
- *     uip_udp_bind(c, HTONS(12344));
- *   }
- *
- * ripaddr The IP address of the remote host.
- *
- * rport The remote port number in network byte order.
- *
- * Return:  The uip_udp_conn structure for the new connection or NULL
- * if no connection could be allocated.
+ * addr The address of the remote host.
  */
 
-struct uip_udp_conn *uip_udp_new(uip_ipaddr_t *ripaddr, uint16 rport);
-
-/* Removed a UDP connection.
- *
- * conn A pointer to the uip_udp_conn structure for the connection.
- */
-
-#define uip_udp_remove(conn) (conn)->lport = 0
-
-/* Bind a UDP connection to a local port.
- *
- * conn A pointer to the uip_udp_conn structure for the
- * connection.
- *
- * port The local port number, in network byte order.
- */
-
-#define uip_udp_bind(conn, port) (conn)->lport = port
+#ifdef CONFIG_NET_IPv6
+extern int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in6 *addr);
+#else
+extern int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr);
+#endif
 
 /* Send a UDP datagram of length len on the current connection.
  *

@@ -93,6 +93,28 @@
 #define SOCK_RDM       4 /* Provides a reliable datagram layer that does not guarantee ordering. */
 #define SOCK_PACKET    5 /* Obsolete and should not be used in new programs */
 
+
+/* Bits in the FLAGS argument to `send', `recv', et al. These are the bits
+ * recognized by Linus, not all are supported by NuttX.
+ */
+
+#define MSG_OOB        0x0001 /* Process out-of-band data.  */
+#define MSG_PEEK       0x0002 /* Peek at incoming messages.  */
+#define MSG_DONTROUTE  0x0004 /* Don't use local routing.  */
+#define MSG_CTRUNC     0x0008 /* Control data lost before delivery.  */
+#define MSG_PROXY      0x0010 /* Supply or ask second address.  */
+#define MSG_TRUNC      0x0020
+#define MSG_DONTWAIT   0x0040 /* Enable nonblocking IO.  */
+#define MSG_EOR        0x0080 /* End of record.  */
+#define MSG_WAITALL    0x0100 /* Wait for a full request.  */
+#define MSG_FIN        0x0200
+#define MSG_SYN        0x0400
+#define MSG_CONFIRM    0x0800 /* Confirm path validity.  */
+#define MSG_RST        0x1000
+#define MSG_ERRQUEUE   0x2000 /* Fetch message from error queue.  */
+#define MSG_NOSIGNAL   0x4000 /* Do not generate SIGPIPE.  */
+#define MSG_MORE       0x8000 /* Sender will send more.  */
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
@@ -119,9 +141,15 @@ EXTERN int socket(int domain, int type, int protocol);
 EXTERN int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 EXTERN int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 
-EXTERN ssize_t send(int s, const void *buf, size_t len, int flags);
-EXTERN ssize_t sendto(int s, const void *buf, size_t len, int flags,
+EXTERN ssize_t send(int sockfd, const void *buf, size_t len, int flags);
+EXTERN ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
                       const struct sockaddr *to, socklen_t tolen);
+
+EXTERN ssize_t recv(int sockfd, void *buf, size_t len, int flags);
+EXTERN ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
+                        struct sockaddr *from, socklen_t *fromlen);
+
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
