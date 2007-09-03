@@ -55,6 +55,8 @@
 #include <debug.h>
 
 #include <sys/socket.h>
+#include <arpa/inet.h>
+
 #include <net/uip/resolv.h>
 
 /****************************************************************************
@@ -90,6 +92,12 @@
 #define SEND_BUFFER_SIZE 64
 #define RECV_BUFFER_SIZE 64
 
+#ifdef CONFIG_NET_IPv6
+#define ADDRLEN sizeof(struct sockaddr_in6)
+#else
+#define ADDRLEN sizeof(struct sockaddr_in)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -118,7 +126,10 @@ struct dns_answer
   uint16 class;
   uint16 ttl[2];
   uint16 len;
-  uip_ipaddr_t ipaddr;
+#ifdef CONFIG_NET_IPv6
+#else
+  uint16 ipaddr[2];
+#endif
 };
 
 struct namemap
@@ -129,20 +140,22 @@ struct namemap
   uint8 seqno;
   uint8 err;
   char name[32];
-  uip_ipaddr_t ipaddr;
+#ifdef CONFIG_NET_IPv6
+#else
+  uint16 ipaddr[2];
+#endif
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct namemap names[RESOLV_ENTRIES];
-static uint8 gseqno;
+static uint8 g_seqno;
 static int g_sockfd = -1;
 #ifdef CONFIG_NET_IPv6
-static struct sockaddr_in6 gdnsserver;
+static struct sockaddr_in6 g_dnsserver;
 #else
-static struct sockaddr_in gdnsserver;
+static struct sockaddr_in g_dnsserver;
 #endif
 
 /****************************************************************************
@@ -173,19 +186,20 @@ static unsigned char *parse_name(unsigned char *query)
  * not yet been queried and, if so, sends out a query.
  */
 
-static int send_query(const char name)
+#ifdef CONFIG_NET_IPv6
+static int send_query(const char *name, struct sockaddr_in6 *addr)
+#else
+static int send_query(const char *name, struct sockaddr_in *addr)
+#endif
 {
   register struct dns_hdr *hdr;
   char *query;
   char *nptr;
-  char **nameptr;
-  static uint8 i;
-  static uint8 n;
-  uint8 state = NEW_STATE;
-  uint8 seqno = gsegno++;
-  uint8 err;
+  const char *nameptr;
+  uint8 seqno = g_seqno++;
   static unsigned char endquery[] = {0,0,1,0,1};
   char buffer[SEND_BUFFER_SIZE];
+  int n;
 
   hdr               = (struct dns_hdr*)buffer;
   memset(hdr, 0, sizeof(struct dns_hdr));
@@ -201,18 +215,17 @@ static int send_query(const char name)
    {
      nameptr++;
      nptr = query++;
-     for (n = 0; *nameptr != '.' && *nameptr != 0; ++nameptr)
+     for (n = 0; *nameptr != '.' && *nameptr != 0; nameptr++)
        {
-         *query = *nameptr;
-         ++query;
-         ++n;
+         *query++ = *nameptr;
+         n++;
        }
      *nptr = n;
    }
   while(*nameptr != 0);
 
   memcpy(query, endquery, 5);
-  return sendto(gsockfd, buffer, query + 5 - buffer);
+  return sendto(g_sockfd, buffer, query + 5 - buffer, 0, (struct sockaddr*)addr, ADDRLEN);
 }
 
 /* Called when new UDP data arrives */
@@ -222,8 +235,6 @@ static int send_query(const char name)
 #else
 int recv_response(struct sockaddr_in *addr)
 #endif
-
-hdr->flags2 & DNS_FLAG2_ERR_MASKstatic int (void)
 {
   unsigned char *nameptr;
   char buffer[RECV_BUFFER_SIZE];
@@ -231,18 +242,17 @@ hdr->flags2 & DNS_FLAG2_ERR_MASKstatic int (void)
   struct dns_hdr *hdr;
   uint8 nquestions;
   uint8 nanswers;
-  uint8 i;
   int ret;
 
   /* Receive the response */
 
-  ret = recv(g_sockfd, buffer, RECV_BUFFER_SIZE);
+  ret = recv(g_sockfd, buffer, RECV_BUFFER_SIZE, 0);
   if (ret < 0)
     {
       return ret;
     }
 
-  hdr = (struct dns_hdr *)b
+  hdr = (struct dns_hdr *)buffer;
 
   dbg( "ID %d\n", htons(hdr->id));
   dbg( "Query %d\n", hdr->flags1 & DNS_FLAG1_RESPONSE);
@@ -316,6 +326,7 @@ hdr->flags2 & DNS_FLAG2_ERR_MASKstatic int (void)
           nameptr = nameptr + 10 + htons(ans->len);
         }
     }
+  return ERROR;
 }
 
 /****************************************************************************
@@ -325,12 +336,12 @@ hdr->flags2 & DNS_FLAG2_ERR_MASKstatic int (void)
 /* Get the binding for name. */
 
 #ifdef CONFIG_NET_IPv6
-int resolv_query(char *name, struct sockaddr_in6 *addr)
+int resolv_query(const char *name, struct sockaddr_in6 *addr)
 #else
-int resolv_query(char *name, struct sockaddr_in *addr)
+int resolv_query(const char *name, struct sockaddr_in *addr)
 #endif
 {
-  int ret = send_query(name);
+  int ret = send_query(name, addr);
   if (ret == 0)
     {
       ret = recv_response(addr);
@@ -346,7 +357,7 @@ void resolv_getserver(const struct sockaddr_in6 *dnsserver)
 void resolv_getserver(const struct sockaddr_in *dnsserver)
 #endif
 {
-  memcpy(dnsserver, gdnsserver, sizeof(gdnsserver));
+  memcpy(dnsserver, &g_dnsserver, ADDRLEN);
 }
 
 /* Configure which DNS server to use for queries */
@@ -357,7 +368,7 @@ void resolv_conf(const struct sockaddr_in6 *dnsserver)
 void resolv_conf(const struct sockaddr_in *dnsserver)
 #endif
 {
-  memcpy(&gdnsserver, dnsserver, sizeof(gdnsserver));
+  memcpy(&g_dnsserver, dnsserver, ADDRLEN);
 }
 
 /* Initalize the resolver. */

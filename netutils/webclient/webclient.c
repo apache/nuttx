@@ -38,7 +38,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: webclient.c,v 1.3 2007-09-03 20:34:44 patacongo Exp $
+ * $Id: webclient.c,v 1.4 2007-09-03 23:35:17 patacongo Exp $
  *
  */
 
@@ -117,7 +117,7 @@ void webclient_close(void)
   s.state = WEBCLIENT_STATE_CLOSE;
 }
 
-unsigned char webclient_get(char *host, uint16 port, char *file)
+unsigned char webclient_get(const char *host, uint16 port, char *file)
 {
   uip_ipaddr_t *ipaddr;
   static uip_ipaddr_t addr;
@@ -397,6 +397,7 @@ static void newdata(void)
 
 void uip_interrupt_event(void)
 {
+#warning OBSOLETE -- needs to be redesigned
   if (uip_connected())
     {
       s.timer = 0;
@@ -466,7 +467,7 @@ void uip_interrupt_event(void)
 #endif
           if (resolv_query(s.host, &addr) < 0)
             {
-              return ERROR;
+              return;
             }
           webclient_get(s.host, s.port, s.file);
         }

@@ -253,6 +253,7 @@ static void handle_connection(struct httpd_state *s)
 
 void uip_interrupt_event(void)
 {
+#warning OBSOLETE -- needs to be redesigned
   /* Get the private application specific data */
   struct httpd_state *s = (struct httpd_state *)(uip_conn->private);
 

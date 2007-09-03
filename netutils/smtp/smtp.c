@@ -213,6 +213,7 @@ static void smtp_send_message(struct smtp_state *psmtp)
 
 void uip_interrupt_event(void)
 {
+#warning OBSOLETE -- needs to be redesigned
   if (gpsmtp)
     {
       if (uip_closed())

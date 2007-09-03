@@ -608,14 +608,7 @@ void uip_setipid(uint16 id);
  * functions for opening and closing connections, sending and receiving
  * data, etc.
  *
- * The following function must be provided by the application logic.  It
- * is called from the UIP interrupt handler when interesting events are
- * detected that may be of interest to the application.
- */
-
-extern void uip_interrupt_event(void);
-
-/* Find a free connection structure and allocate it for use. This is
+ * Find a free connection structure and allocate it for use. This is
  * normally something done by the implementation of the socket() API
  */
 

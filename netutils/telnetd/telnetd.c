@@ -25,11 +25,6 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This file is part of the uIP TCP/IP stack
- *
- * $Id: telnetd.c,v 1.1.1.1 2007-08-26 23:07:06 patacongo Exp $
- *
  */
 
 #include <sys/types.h>
@@ -293,6 +288,7 @@ newdata(void)
 
 void uip_interrupt_event(void)
 {
+#warning OBSOLETE -- needs to be redesigned
   static unsigned int i;
   if(uip_connected()) {
     /*    tcp_markconn(uip_conn, &s);*/

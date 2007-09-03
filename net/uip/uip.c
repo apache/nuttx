@@ -588,8 +588,10 @@ static void uip_add_rcv_nxt(uint16 n)
   uip_conn->rcv_nxt[3] = uip_acc32[3];
 }
 
-static uip_udp_callback(void)
+static void uip_udp_callback(void)
 {
+  uip_event_signal();
+
   /* Some sanity checking */
 
   if (uip_udp_conn && uip_udp_conn->callback)
@@ -597,6 +599,20 @@ static uip_udp_callback(void)
       /* Perform the callback */
 
       uip_udp_conn->callback(uip_udp_conn->private);
+    }
+}
+
+static void uip_tcp_callback(void)
+{
+  uip_event_signal();
+
+  /* Some sanity checking */
+
+  if (uip_conn && uip_conn->callback)
+    {
+      /* Perform the callback */
+
+      uip_conn->callback(uip_conn->private);
     }
 }
 
@@ -623,8 +639,7 @@ void uip_interrupt(uint8 flag)
            !uip_outstanding(uip_connr))
         {
           uip_flags = UIP_POLL;
-          uip_event_signal();
-          uip_interrupt_event();
+          uip_tcp_callback();
           goto appsend;
         }
         goto drop;
@@ -683,14 +698,13 @@ void uip_interrupt(uint8 flag)
                   {
                     uip_connr->tcpstateflags = UIP_CLOSED;
 
-                    /* We call uip_interrupt_event() with uip_flags set to
+                    /* We call uip_tcp_callback() with uip_flags set to
                      * UIP_TIMEDOUT to inform the application that the
                      * connection has timed out.
                      */
 
                     uip_flags = UIP_TIMEDOUT;
-                    uip_event_signal();
-                    uip_interrupt_event();
+                    uip_tcp_callback();
 
                     /* We also send a reset packet to the remote host. */
 
@@ -734,8 +748,7 @@ void uip_interrupt(uint8 flag)
                        */
 
                       uip_flags = UIP_REXMIT;
-                      uip_event_signal();
-                      uip_interrupt_event();
+                      uip_tcp_callback();
                       goto apprexmit;
 
                     case UIP_FIN_WAIT_1:
@@ -754,8 +767,7 @@ void uip_interrupt(uint8 flag)
              */
 
             uip_flags = UIP_POLL;
-            uip_event_signal();
-            uip_interrupt_event();
+            uip_tcp_callback();
             goto appsend;
           }
       }
@@ -771,8 +783,7 @@ void uip_interrupt(uint8 flag)
           uip_sappdata = uip_appdata = &uip_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
           uip_len = uip_slen = 0;
           uip_flags = UIP_POLL;
-          uip_event_signal();
-          up_udp_callback();
+          uip_udp_callback();
           goto udp_send;
         }
       else
@@ -1111,8 +1122,7 @@ void uip_interrupt(uint8 flag)
     uip_flags = UIP_NEWDATA;
     uip_sappdata = uip_appdata = &uip_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
     uip_slen = 0;
-    uip_event_signal();
-    up_udp_callback();
+    uip_udp_callback();
 
  udp_send:
     if (uip_slen == 0)
@@ -1362,8 +1372,7 @@ tcp_send_synack:
         uip_connr->tcpstateflags = UIP_CLOSED;
         UIP_LOG("tcp: got reset, aborting connection.");
         uip_flags = UIP_ABORT;
-        uip_event_signal();
-        uip_interrupt_event();
+        uip_tcp_callback();
         goto drop;
       }
 
@@ -1471,8 +1480,7 @@ tcp_send_synack:
                   uip_add_rcv_nxt(uip_len);
                 }
               uip_slen = 0;
-              uip_event_signal();
-              uip_interrupt_event();
+              uip_tcp_callback();
               goto appsend;
             }
           goto drop;
@@ -1537,15 +1545,13 @@ tcp_send_synack:
               uip_connr->len = 0;
               uip_len = 0;
               uip_slen = 0;
-              uip_event_signal();
-              uip_interrupt_event();
+              uip_tcp_callback();
               goto appsend;
             }
 
           /* Inform the application that the connection failed */
           uip_flags = UIP_ABORT;
-          uip_event_signal();
-          uip_interrupt_event();
+          uip_tcp_callback();
 
           /* The connection is closed after we send the RST */
           uip_conn->tcpstateflags = UIP_CLOSED;
@@ -1575,8 +1581,7 @@ tcp_send_synack:
                 {
                   uip_flags |= UIP_NEWDATA;
                 }
-              uip_event_signal();
-              uip_interrupt_event();
+              uip_tcp_callback();
               uip_connr->len = 1;
               uip_connr->tcpstateflags = UIP_LAST_ACK;
               uip_connr->nrtx = 0;
@@ -1660,8 +1665,7 @@ tcp_send_synack:
           if (uip_flags & (UIP_NEWDATA | UIP_ACKDATA))
             {
               uip_slen = 0;
-              uip_event_signal();
-              uip_interrupt_event();
+              uip_tcp_callback();
 
  appsend:
               if (uip_flags & UIP_ABORT)
@@ -1753,8 +1757,7 @@ tcp_send_synack:
             {
               uip_connr->tcpstateflags = UIP_CLOSED;
               uip_flags = UIP_CLOSE;
-              uip_event_signal();
-              uip_interrupt_event();
+              uip_tcp_callback();
             }
           break;
 
@@ -1780,8 +1783,7 @@ tcp_send_synack:
                 }
               uip_add_rcv_nxt(1);
               uip_flags = UIP_CLOSE;
-              uip_event_signal();
-              uip_interrupt_event();
+              uip_tcp_callback();
               goto tcp_send_ack;
             }
           else if (uip_flags & UIP_ACKDATA)
@@ -1807,8 +1809,7 @@ tcp_send_synack:
               uip_connr->timer = 0;
               uip_add_rcv_nxt(1);
               uip_flags = UIP_CLOSE;
-              uip_event_signal();
-              uip_interrupt_event();
+              uip_tcp_callback();
               goto tcp_send_ack;
             }
           if (uip_len > 0)

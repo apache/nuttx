@@ -25,11 +25,6 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This file is part of the uIP TCP/IP stack.
- *
- * $Id: shell.c,v 1.1.1.1 2007-08-26 23:07:06 patacongo Exp $
- *
  */
 
 #include "shell.h"
@@ -43,9 +38,7 @@ struct ptentry {
 
 #define SHELL_PROMPT "uIP 1.0> "
 
-/*---------------------------------------------------------------------------*/
-static void
-parse(register char *str, struct ptentry *t)
+static void parse(register char *str, struct ptentry *t)
 {
   struct ptentry *p;
   for(p = t; p->commandstr != NULL; ++p) {
@@ -56,25 +49,8 @@ parse(register char *str, struct ptentry *t)
 
   p->pfunc(str);
 }
-/*---------------------------------------------------------------------------*/
-static void
-inttostr(register char *str, unsigned int i)
-{
-  str[0] = '0' + i / 100;
-  if(str[0] == '0') {
-    str[0] = ' ';
-  }
-  str[1] = '0' + (i / 10) % 10;
-  if(str[0] == ' ' && str[1] == '0') {
-    str[1] = ' ';
-  }
-  str[2] = '0' + i % 10;
-  str[3] = ' ';
-  str[4] = 0;
-}
-/*---------------------------------------------------------------------------*/
-static void
-help(char *str)
+
+static void help(char *str)
 {
   shell_output("Available commands:", "");
   shell_output("stats   - show network statistics", "");
@@ -82,15 +58,14 @@ help(char *str)
   shell_output("help, ? - show help", "");
   shell_output("exit    - exit shell", "");
 }
-/*---------------------------------------------------------------------------*/
-static void
-unknown(char *str)
+
+static void unknown(char *str)
 {
   if(strlen(str) > 0) {
     shell_output("Unknown command: ", str);
   }
 }
-/*---------------------------------------------------------------------------*/
+
 static struct ptentry parsetab[] =
   {{"stats", help},
    {"conn", help},
@@ -100,24 +75,20 @@ static struct ptentry parsetab[] =
 
    /* Default action */
    {NULL, unknown}};
-/*---------------------------------------------------------------------------*/
-void
-shell_init(void)
+
+void shell_init(void)
 {
 }
-/*---------------------------------------------------------------------------*/
-void
-shell_start(void)
+
+void shell_start(void)
 {
   shell_output("uIP command shell", "");
   shell_output("Type '?' and return for help", "");
   shell_prompt(SHELL_PROMPT);
 }
-/*---------------------------------------------------------------------------*/
-void
-shell_input(char *cmd)
+
+void shell_input(char *cmd)
 {
   parse(cmd, parsetab);
   shell_prompt(SHELL_PROMPT);
 }
-/*---------------------------------------------------------------------------*/

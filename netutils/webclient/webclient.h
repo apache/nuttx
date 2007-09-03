@@ -30,12 +30,8 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This file is part of the uIP TCP/IP stack.
- *
- * $Id: webclient.h,v 1.1.1.1 2007-08-26 23:07:04 patacongo Exp $
- *
  */
+
 #ifndef __WEBCLIENT_H__
 #define __WEBCLIENT_H__
 
@@ -46,7 +42,8 @@
 
 #define WEBCLIENT_CONF_MAX_URLLEN 100
 
-struct webclient_state {
+struct webclient_state
+{
   uint8 timer;
   uint8 state;
   uint8 httpflag;
@@ -63,8 +60,7 @@ struct webclient_state {
   char mimetype[32];
 };
 
-/**
- * Callback function that is called from the webclient code when HTTP
+/* Callback function that is called from the webclient code when HTTP
  * data has been received.
  *
  * This function must be implemented by the module that uses the
@@ -72,58 +68,57 @@ struct webclient_state {
  * when HTTP data has been received. The function is not called when
  * HTTP headers are received, only for the actual data.
  *
- * \note This function is called many times, repetedly, when data is
+ * Note: This function is called many times, repetedly, when data is
  * being received, and not once when all data has been received.
  *
- * \param data A pointer to the data that has been received.
- * \param len The length of the data that has been received.
+ * data A pointer to the data that has been received.
+ * len The length of the data that has been received.
  */
+
 void webclient_datahandler(char *data, uint16 len);
 
-/**
- * Callback function that is called from the webclient code when the
+/* Callback function that is called from the webclient code when the
  * HTTP connection has been connected to the web server.
  *
  * This function must be implemented by the module that uses the
  * webclient code.
  */
+
 void webclient_connected(void);
 
-/**
- * Callback function that is called from the webclient code if the
+/* Callback function that is called from the webclient code if the
  * HTTP connection to the web server has timed out.
  *
  * This function must be implemented by the module that uses the
  * webclient code.
  */
+
 void webclient_timedout(void);
 
-/**
- * Callback function that is called from the webclient code if the
+/* Callback function that is called from the webclient code if the
  * HTTP connection to the web server has been aborted by the web
  * server.
  *
  * This function must be implemented by the module that uses the
  * webclient code.
  */
+
 void webclient_aborted(void);
 
-/**
- * Callback function that is called from the webclient code when the
+/* Callback function that is called from the webclient code when the
  * HTTP connection to the web server has been closed.
  *
  * This function must be implemented by the module that uses the
  * webclient code.
  */
+
 void webclient_closed(void);
 
-/**
- * Initialize the webclient module.
- */
+/* Initialize the webclient module. */
+
 void webclient_init(void);
 
-/**
- * Open an HTTP connection to a web server and ask for a file using
+/* Open an HTTP connection to a web server and ask for a file using
  * the GET method.
  *
  * This function opens an HTTP connection to the specified web server
@@ -140,75 +135,73 @@ void webclient_init(void);
  * When the HTTP request has been completed and the HTTP connection is
  * closed, the webclient_closed() callback function will be called.
  *
- * \note If the function is passed a host name, it must already be in
+ * Note: If the function is passed a host name, it must already be in
  * the resolver cache in order for the function to connect to the web
  * server. It is therefore up to the calling module to implement the
  * resolver calls and the signal handler used for reporting a resolv
  * query answer.
  *
- * \param host A pointer to a string containing either a host name or
+ * host A pointer to a string containing either a host name or
  * a numerical IP address in dotted decimal notation (e.g., 192.168.23.1).
  *
- * \param port The port number to which to connect, in host byte order.
+ * port The port number to which to connect, in host byte order.
  *
- * \param file A pointer to the name of the file to get.
+ * file A pointer to the name of the file to get.
  *
- * \retval 0 if the host name could not be found in the cache, or
+ * Return:  0 if the host name could not be found in the cache, or
  * if a TCP connection could not be created.
  *
- * \retval 1 if the connection was initiated.
+ * Return:  1 if the connection was initiated.
  */
-unsigned char webclient_get(char *host, uint16 port, char *file);
 
-/**
- * Close the currently open HTTP connection.
- */
+unsigned char webclient_get(const char *host, uint16 port, char *file);
+
+/* Close the currently open HTTP connection. */
+
 void webclient_close(void);
 
-/**
- * Obtain the MIME type of the current HTTP data stream.
+/* Obtain the MIME type of the current HTTP data stream.
  *
- * \return A pointer to a string contaning the MIME type. The string
+ * Return:  A pointer to a string contaning the MIME type. The string
  * may be empty if no MIME type was reported by the web server.
  */
+
 char *webclient_mimetype(void);
 
-/**
- * Obtain the filename of the current HTTP data stream.
+/* Obtain the filename of the current HTTP data stream.
  *
  * The filename of an HTTP request may be changed by the web server,
  * and may therefore not be the same as when the original GET request
  * was made with webclient_get(). This function is used for obtaining
  * the current filename.
  *
- * \return A pointer to the current filename.
+ * Return:  A pointer to the current filename.
  */
+
 char *webclient_filename(void);
 
-/**
- * Obtain the hostname of the current HTTP data stream.
+/* Obtain the hostname of the current HTTP data stream.
  *
  * The hostname of the web server of an HTTP request may be changed
  * by the web server, and may therefore not be the same as when the
  * original GET request was made with webclient_get(). This function
  * is used for obtaining the current hostname.
  *
- * \return A pointer to the current hostname.
+ * Return:  A pointer to the current hostname.
  */
+
 char *webclient_hostname(void);
 
-/**
- * Obtain the port number of the current HTTP data stream.
+/* Obtain the port number of the current HTTP data stream.
  *
  * The port number of an HTTP request may be changed by the web
  * server, and may therefore not be the same as when the original GET
  * request was made with webclient_get(). This function is used for
  * obtaining the current port number.
  *
- * \return The port number of the current HTTP data stream, in host byte order.
+ * Return:  The port number of the current HTTP data stream, in host byte order.
  */
+
 unsigned short webclient_port(void);
 
 #endif /* __WEBCLIENT_H__ */
-
-/** @} */

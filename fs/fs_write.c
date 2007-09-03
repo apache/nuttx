@@ -156,7 +156,7 @@ int write(int fd, const void *buf, unsigned int nbytes)
   /* Is a driver registered? Does it support the write method? */
 
   inode = this_file->f_inode;
-  if (!inode || !inode->u.i_ops && inode->u.i_ops->write)
+  if (!inode || !inode->u.i_ops || !inode->u.i_ops->write)
     {
       err = EBADF;
       goto errout;
