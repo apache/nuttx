@@ -370,7 +370,7 @@ int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
   dq_addlast(&conn->node, &g_active_udp_connections);
   irqrestore(flags);
 
-  return conn;
+  return OK;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_UDP */
