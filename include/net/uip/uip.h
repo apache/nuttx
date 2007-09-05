@@ -932,10 +932,11 @@ extern int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *a
  * addr3 The forth octet of the IP address.
  */
 
-#define uip_ipaddr(addr, addr0,addr1,addr2,addr3) do { \
-                     ((uint16 *)(addr))[0] = HTONS(((addr0) << 8) | (addr1)); \
-                     ((uint16 *)(addr))[1] = HTONS(((addr2) << 8) | (addr3)); \
-                  } while(0)
+#define uip_ipaddr(addr, addr0, addr1, addr2, addr3) \
+  do { \
+    ((uint16 *)(addr))[0] = HTONS(((addr0) << 8) | (addr1)); \
+    ((uint16 *)(addr))[1] = HTONS(((addr2) << 8) | (addr3)); \
+  } while(0)
 
 /* Construct an IPv6 address from eight 16-bit words.
  *

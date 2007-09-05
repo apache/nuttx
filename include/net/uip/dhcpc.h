@@ -12,6 +12,7 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -66,7 +67,7 @@ struct dhcpc_state
  ****************************************************************************/
 
 void *dhcpc_open(const void *mac_addr, int mac_len);
-int  dhcpc_request(void *handle, struct dhcpc_state *ds);
-void dhcpc_close(void *handle);
+int   dhcpc_request(void *handle, struct dhcpc_state *ds);
+void  dhcpc_close(void *handle);
 
 #endif /* NET_UIP_DHCP_H__ */

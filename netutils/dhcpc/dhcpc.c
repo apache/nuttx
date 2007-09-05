@@ -49,6 +49,7 @@
 #include <semaphore.h>
 #include <time.h>
 #include <debug.h>
+#include <sys/socket.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/dhcpc.h>
@@ -101,39 +102,42 @@
 
 struct dhcpc_state_internal
 {
-  char state;
-  sem_t sem;
   struct uip_udp_conn *conn;
-  uint16 ticks;
-  const void *mac_addr;
-  int mac_len;
-  struct dhcpc_state *result;
+  struct dhcpc_state  *result;
+  const void            *mac_addr;
+  int                    mac_len;
+  int                    sockfd;
+  uint16                 ticks;
+  char                   state;
 };
 
 struct dhcp_msg
 {
-  uint8 op, htype, hlen, hops;
-  uint8 xid[4];
-  uint16 secs, flags;
-  uint8 ciaddr[4];
-  uint8 yiaddr[4];
-  uint8 siaddr[4];
-  uint8 giaddr[4];
-  uint8 chaddr[16];
+  uint8  op;
+  uint8  htype;
+  uint8  hlen;
+  uint8  hops;
+  uint8  xid[4];
+  uint16 secs;
+  uint16 flags;
+  uint8  ciaddr[4];
+  uint8  yiaddr[4];
+  uint8  siaddr[4];
+  uint8  giaddr[4];
+  uint8  chaddr[16];
 #ifndef CONFIG_NET_DHCP_LIGHT
-  uint8 sname[64];
-  uint8 file[128];
+  uint8  sname[64];
+  uint8  file[128];
 #endif
-  uint8 options[312];
+  uint8  options[312];
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const uint8 xid[4] = {0xad, 0xde, 0x12, 0x23};
+static const uint8 xid[4]          = {0xad, 0xde, 0x12, 0x23};
 static const uint8 magic_cookie[4] = {99, 130, 83, 99};
-static volatile struct dhcpc_state_internal *gpdhcpc;
 
 /****************************************************************************
  * Private Functions
@@ -181,12 +185,12 @@ static uint8 *add_end(uint8 *optptr)
 
 static void create_msg(struct dhcpc_state_internal *pdhcpc, struct dhcp_msg *m)
 {
-  m->op = DHCP_REQUEST;
+  m->op    = DHCP_REQUEST;
   m->htype = DHCP_HTYPE_ETHERNET;
-  m->hlen = pdhcpc->mac_len;
-  m->hops = 0;
+  m->hlen  = pdhcpc->mac_len;
+  m->hops  = 0;
   memcpy(m->xid, xid, sizeof(m->xid));
-  m->secs = 0;
+  m->secs  = 0;
   m->flags = HTONS(BOOTP_BROADCAST); /*  Broadcast bit. */
   /*  uip_ipaddr_copy(m->ciaddr, uip_hostaddr);*/
   memcpy(m->ciaddr, uip_hostaddr, sizeof(m->ciaddr));
@@ -203,33 +207,47 @@ static void create_msg(struct dhcpc_state_internal *pdhcpc, struct dhcp_msg *m)
   memcpy(m->options, magic_cookie, sizeof(magic_cookie));
 }
 
-static void send_discover(struct dhcpc_state_internal *pdhcpc)
+static int send_discover(struct dhcpc_state_internal *pdhcpc)
 {
-  uint8 *end;
-  struct dhcp_msg *m = (struct dhcp_msg *)uip_appdata;
+  struct dhcp_msg msg;
+  struct sockaddr_in addr;
+  uint8 *pend;
+  int len;
 
-  create_msg(pdhcpc, m);
+  create_msg(pdhcpc, &msg);
+  pend = add_msg_type(&msg.options[4], DHCPDISCOVER);
+  pend = add_req_options(pend);
+  pend = add_end(pend);
+  len  = pend - (uint8*)&msg;
 
-  end = add_msg_type(&m->options[4], DHCPDISCOVER);
-  end = add_req_options(end);
-  end = add_end(end);
+  addr.sin_family      = AF_INET;
+  addr.sin_port        = HTONS(DHCPC_SERVER_PORT);
+  addr.sin_addr.s_addr = INADDR_BROADCAST;
 
-  uip_send(uip_appdata, end - (uint8 *)uip_appdata);
+  return sendto(pdhcpc->sockfd, &msg, len, 0,
+                (struct sockaddr*)&addr, sizeof(struct sockaddr_in));
 }
 
-static void send_request(struct dhcpc_state_internal *pdhcpc)
+static int send_request(struct dhcpc_state_internal *pdhcpc)
 {
-  uint8 *end;
-  struct dhcp_msg *m = (struct dhcp_msg *)uip_appdata;
+  struct dhcp_msg msg;
+  struct sockaddr_in addr;
+  uint8 *pend;
+  int len;
 
-  create_msg(pdhcpc, m);
+  create_msg(pdhcpc, &msg);
+  pend = add_msg_type(&msg.options[4], DHCPREQUEST);
+  pend = add_server_id(pdhcpc->result, pend);
+  pend = add_req_ipaddr(pdhcpc->result, pend);
+  pend = add_end(pend);
+  len  = pend - (uint8*)&msg;
 
-  end = add_msg_type(&m->options[4], DHCPREQUEST);
-  end = add_server_id(pdhcpc->result, end);
-  end = add_req_ipaddr(pdhcpc->result, end);
-  end = add_end(end);
+  addr.sin_family      = AF_INET;
+  addr.sin_port        = HTONS(DHCPC_SERVER_PORT);
+  addr.sin_addr.s_addr = INADDR_BROADCAST;
 
-  uip_send(uip_appdata, end - (uint8 *)uip_appdata);
+  return sendto(pdhcpc->sockfd, &msg, len, 0,
+                (struct sockaddr*)&addr, sizeof(struct sockaddr_in));
 }
 
 static uint8 parse_options(struct dhcpc_state *presult, uint8 *optptr, int len)
@@ -283,7 +301,7 @@ static uint8 parse_msg(struct dhcpc_state_internal *pdhcpc)
   return 0;
 }
 
-static void handle_dhcp(struct dhcpc_state_internal *pdhcpc)
+static int handle_dhcp(struct dhcpc_state_internal *pdhcpc)
 {
   struct dhcpc_state *presult = pdhcpc->result;
 
@@ -297,8 +315,11 @@ restart:
 
       send_discover(pdhcpc);
 
-      /* Wait for the response */
+      /* Set up a watchdog to timeout the recvfrom */
+#warning need to implement timeout;
 
+      /* Wait for the response */
+#warning need to use recvfrom
       uip_event_timedwait(UIP_NEWDATA, CLOCK_SECOND);
 
       if (uip_newdata() && parse_msg(pdhcpc) == DHCPOFFER)
@@ -322,7 +343,11 @@ restart:
 
       send_request(pdhcpc);
 
+      /* Set up a watchdog to timeout the recvfrom */
+#warning need to implement timeout;
+
       /* Then wait to received the response */
+#warning need to use recvfrom
 
       uip_event_timedwait(UIP_NEWDATA, CLOCK_SECOND);
 
@@ -357,6 +382,7 @@ restart:
       uip_ipaddr3(presult->default_router), uip_ipaddr4(presult->default_router));
   dbg("Lease expires in %ld seconds\n",
       ntohs(presult->lease_time[0])*65536ul + ntohs(presult->lease_time[1]));
+  return OK;
 }
 
 /****************************************************************************
@@ -365,23 +391,42 @@ restart:
 
 void *dhcpc_open(const void *mac_addr, int mac_len)
 {
-  uip_ipaddr_t addr;
   struct dhcpc_state_internal *pdhcpc;
+  struct sockaddr_in addr;
+
+  /* Allocate an internal DHCP structure */
 
   pdhcpc = (struct dhcpc_state_internal *)malloc(sizeof(struct dhcpc_state_internal));
   if (pdhcpc)
     {
+      /* Initialize the allocated structure */
+
       memset(pdhcpc, 0, sizeof(struct dhcpc_state_internal));
       pdhcpc->mac_addr = mac_addr;
       pdhcpc->mac_len  = mac_len;
       pdhcpc->state    = STATE_INITIAL;
-      sem_init(&pdhcpc->sem, 0, 0);
 
-      uip_ipaddr(addr, 255,255,255,255);
-      pdhcpc->conn = uip_udp_new(&addr, HTONS(DHCPC_SERVER_PORT));
-      if (pdhcpc->conn != NULL)
+      /* Create a UDP socket */
+
+      pdhcpc->sockfd    = socket(PF_INET, SOCK_DGRAM, 0);
+      if (pdhcpc->sockfd < 0)
         {
-          uip_udp_bind(pdhcpc->conn, HTONS(DHCPC_CLIENT_PORT));
+          free(pdhcpc);
+          pdhcpc = NULL;
+        }
+      else
+        {
+          /* bind the socket */
+
+          addr.sin_family      = AF_INET;
+          addr.sin_port        = HTONS(DHCPC_CLIENT_PORT);
+          addr.sin_addr.s_addr = INADDR_ANY;
+
+          if (bind(pdhcpc->sockfd, &addr, sizeof(struct sockaddr_in)) < 0)
+            {
+              free(pdhcpc);
+              pdhcpc = NULL;
+            }
         }
     }
   return (void*)pdhcpc;
@@ -393,19 +438,6 @@ void dhcpc_close(void *handle)
   if (pdhcpc)
     {
       free(pdhcpc);
-    }
-}
-
-/* This function is called by the UIP interrupt handling logic whenevent an
- * event of interest occurs.
- */
-
-void uip_interrupt_udp_event(void)
-{
-#warning OBSOLETE
-  if (gpdhcpc)
-    {
-      sem_post(&gpdhcpc->sem);
     }
 }
 
@@ -421,9 +453,5 @@ int dhcpc_request(void *handle, struct dhcpc_state *ds)
     }
 
   pdhcpc->result = ds;
-  gpdhcpc = pdhcpc;
-  sem_wait(&pdhcpc->sem);
-  gpdhcpc = NULL;
-  handle_dhcp(pdhcpc);
-  return OK;
+  return handle_dhcp(pdhcpc);
 }

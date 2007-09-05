@@ -154,7 +154,9 @@ const uip_ipaddr_t uip_netmask =
   {HTONS((UIP_NETMASK0 << 8) | UIP_NETMASK1),
    HTONS((UIP_NETMASK2 << 8) | UIP_NETMASK3)};
 #else
-uip_ipaddr_t uip_hostaddr, uip_draddr, uip_netmask;
+uip_ipaddr_t uip_hostaddr;
+uip_ipaddr_t uip_draddr;
+uip_ipaddr_t uip_netmask;
 #endif /* UIP_FIXEDADDR */
 
 #ifndef CONFIG_NET_EXTERNAL_BUFFER
@@ -179,12 +181,13 @@ uint16 uip_flags;                /* The uip_flags variable is used for communica
 struct uip_conn *uip_conn;       /* uip_conn always points to the current connection. */
 
 uint16 uip_listenports[UIP_LISTENPORTS];
-                                 /* The uip_listenports list all currently listning ports. */
+                                 /* The uip_listenports list all currently listening ports. */
 #ifdef CONFIG_NET_UDP
 struct uip_udp_conn *uip_udp_conn;
 #endif   /* CONFIG_NET_UDP */
 
 /* Temporary variables. */
+
 uint8 uip_acc32[4];
 
 #if UIP_STATISTICS == 1
@@ -223,7 +226,9 @@ static uint16 ipid;              /* Ths ipid variable is an increasing number th
                                   * used for the IP ID field. */
 
 /* Temporary variables. */
-static uint8 c, opt;
+
+static uint8  c;
+static uint8  opt;
 static uint16 tmp16;
 
 /****************************************************************************
@@ -1472,14 +1477,16 @@ tcp_send_synack:
           if (uip_flags & UIP_ACKDATA)
             {
               uip_connr->tcpstateflags = UIP_ESTABLISHED;
-              uip_flags = UIP_CONNECTED;
-              uip_connr->len = 0;
+              uip_flags                = UIP_CONNECTED;
+              uip_connr->len           = 0;
+
               if (uip_len > 0)
                 {
-                  uip_flags |= UIP_NEWDATA;
+                  uip_flags           |= UIP_NEWDATA;
                   uip_add_rcv_nxt(uip_len);
                 }
-              uip_slen = 0;
+
+              uip_slen                 = 0;
               uip_tcp_callback();
               goto appsend;
             }
@@ -1535,6 +1542,7 @@ tcp_send_synack:
                         }
                     }
                 }
+
               uip_connr->tcpstateflags = UIP_ESTABLISHED;
               uip_connr->rcv_nxt[0] = BUF->seqno[0];
               uip_connr->rcv_nxt[1] = BUF->seqno[1];
@@ -1575,12 +1583,15 @@ tcp_send_synack:
                 {
                   goto drop;
                 }
+
               uip_add_rcv_nxt(1 + uip_len);
               uip_flags |= UIP_CLOSE;
+
               if (uip_len > 0)
                 {
                   uip_flags |= UIP_NEWDATA;
                 }
+
               uip_tcp_callback();
               uip_connr->len = 1;
               uip_connr->tcpstateflags = UIP_LAST_ACK;
@@ -1781,6 +1792,7 @@ tcp_send_synack:
                 {
                   uip_connr->tcpstateflags = UIP_CLOSING;
                 }
+
               uip_add_rcv_nxt(1);
               uip_flags = UIP_CLOSE;
               uip_tcp_callback();

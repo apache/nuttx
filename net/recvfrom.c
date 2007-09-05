@@ -72,6 +72,11 @@ void recvfrom_interrupt(void *private)
   struct recvfrom_s *pstate = (struct recvfrom_s *)private;
   size_t recvlen;
 
+  /* If new data is available and we are correctly intialized, then complete
+   * the read action.  We could also check for POLL events here in order to
+   * implement SO_RECVTIMEO.
+   */
+
   if (uip_newdata() && private)
     {
       /* Get the length of the data to return */
@@ -88,12 +93,14 @@ void recvfrom_interrupt(void *private)
 
       memcpy(pstate->rf_buffer, uip_appdata, recvlen);
 
-      /* Don't allow any furhter call backs. */
+      /* Don't allow any further call backs. */
 
       uip_conn->private = NULL;
       uip_conn->callback = NULL;
 
-      /* Wake up the waiting thread */
+      /* Wake up the waiting thread, returning the number of bytes
+       * actually read.
+       */
 
       pstate->rf_buflen = recvlen;
       sem_post(&pstate-> rf_sem);
@@ -202,7 +209,7 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *
 
   save = irqsave();
   memset(&state, 0, sizeof(struct recvfrom_s));
-  sem_init(&state. rf_sem, 0, 0);
+  (void)sem_init(&state. rf_sem, 0, 0); /* Doesn't really fail */
   state. rf_buflen = len;
   state. rf_buffer = buf;
 
@@ -221,10 +228,31 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *
   udp_conn = (struct uip_udp_conn *)psock->s_conn;
   udp_conn->private  = (void*)&state;
   udp_conn->callback = recvfrom_interrupt;
+
+  /* Wait for either the read to complete:  NOTES:  (1) sem_wait will also
+   * terminate if a signal is received, (2) interrupts are disabled!  They
+   * will be re-enabled while the task sleeps and automatically re-enabled
+   * when the task restarts.
+   */
+
+  ret = sem_wait(&state. rf_sem);
+
+  /* Make sure that no further interrupts are processed */
+
+  uip_conn->private = NULL;
+  uip_conn->callback = NULL;
+  sem_destroy(&state. rf_sem);
   irqrestore(save);
 
-  sem_wait(&state. rf_sem);
-  sem_destroy(&state. rf_sem);
+  /* If sem_wait failed, then we were probably reawakened by a signal. In
+   * this case, sem_wait will have set errno appropriately.
+   */
+
+  if (ret < 0)
+    {
+      return ERROR;
+    }
+
   return state.rf_buflen;
 #warning "Needs to return server address"
 #else
