@@ -1,5 +1,5 @@
 /****************************************************************************
- * socket.h
+ * sys/socket.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -117,37 +117,41 @@
 
 /* Socket options */
 
-#define SO_DEBUG        1 /* Enables recording of debugging information (get/set).
+#define SO_DEBUG        0 /* Enables recording of debugging information (get/set).
                            * arg: integer contain boolean value */
-#define SO_ACCEPTCONN   2 /* Reports whether socket listening is enabled (get only).
+#define SO_ACCEPTCONN   1 /* Reports whether socket listening is enabled (get only).
                            * arg: returns integer contain boolean value */
-#define SO_BROADCAST    3 /* Permits sending of broadcast messages (get/set).
+#define SO_BROADCAST    2 /* Permits sending of broadcast messages (get/set).
                            * arg: integer contain boolean value */
-#define SO_REUSEADDR    4 /* Allow reuse of local addresses (get/set)
+#define SO_REUSEADDR    3 /* Allow reuse of local addresses (get/set)
                            * arg: integer contain boolean value */
-#define SO_KEEPALIVE    5 /* Keeps connections active by enabling the periodic transmission
+#define SO_KEEPALIVE    4 /* Keeps connections active by enabling the periodic transmission
                            * of messages (get/set). arg: int */
-#define SO_LINGER       6 /* Lingers on a close() if data is present (get/set)
+#define SO_LINGER       5 /* Lingers on a close() if data is present (get/set)
                            * arg: struct linger */
-#define SO_OOBINLINE    7 /* Leaves received out-of-band data (data marked urgent) inline
+#define SO_OOBINLINE    6 /* Leaves received out-of-band data (data marked urgent) inline
                            * (get/set) arg: integer contain boolean value */
-#define SO_SNDBUF       8 /* Sets send buffer size. arg: integer value (get/set). */
-#define SO_RCVBUF       9 /* Sets receive buffer size. arg: integer value (get/set). */
-#define SO_ERROR       10 /* Reports and clears error statust (get only).  arg: returns
+#define SO_SNDBUF       7 /* Sets send buffer size. arg: integer value (get/set). */
+#define SO_RCVBUF       8 /* Sets receive buffer size. arg: integer value (get/set). */
+#define SO_ERROR        9 /* Reports and clears error statust (get only).  arg: returns
                            * an integer value
-#define SO_TYPE        11 /* Reports the socket type (get only). return: int */
-#define SO_DONTROUTE   12 /* equests that outgoing messages bypass standard routing
+#define SO_TYPE        10 /* Reports the socket type (get only). return: int */
+#define SO_DONTROUTE   11 /* equests that outgoing messages bypass standard routing (get/set)
                            * arg: integer contain boolean value */
-#define SO_RCVLOWAT    13 /* Sets the minimum number of bytes to process for socket input
+#define SO_RCVLOWAT    12 /* Sets the minimum number of bytes to process for socket input
                            * (get/set). arg: integer value */
-#define SO_RCVTIMEO    14 /* Sets the timeout value that specifies the maximum amount of time
+#define SO_RCVTIMEO    13 /* Sets the timeout value that specifies the maximum amount of time
                            * an input function waits until it completes (get/set).
                            * arg: struct timeval */
-#define SO_SNDLOWAT    15 /* Sets the minimum number of bytes to process for socket output
+#define SO_SNDLOWAT    14 /* Sets the minimum number of bytes to process for socket output
                            * (get/set). arg: integer value */
-#define SO_SNDTIMEO    16 /* Sets the timeout value specifying the amount of time that an
+#define SO_SNDTIMEO    15 /* Sets the timeout value specifying the amount of time that an
                            * output function blocks because flow control prevents data from
                            * being sent(get/set). arg: struct timeval */
+
+/* Protocol levels supported by get/setsockopt(): */
+
+#define SOL_SOCKET     0  /* Only socket-level options supported */
 
 /****************************************************************************
  * Type Definitions
@@ -185,8 +189,8 @@ EXTERN ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
 
 EXTERN int setsockopt(int sockfd, int level, int option,
                       const void *value, socklen_t value_len);
-EXTERN int setsockopt(int sockfd, int level, int option,
-                      const void *value, socklen_t value_len);
+EXTERN int getsockopt(int sockfd, int level, int option,
+                      void *value, socklen_t *value_len);
 
 #undef EXTERN
 #if defined(__cplusplus)

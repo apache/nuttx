@@ -51,6 +51,47 @@
  * Definitions
  ****************************************************************************/
 
+/* These define bit positions for each socket option (see sys/socket.h) */
+
+#define _SO_DEBUG        (1 << SO_DEBUG)
+#define _SO_ACCEPTCONN   (1 << SO_ACCEPTCONN)
+#define _SO_BROADCAST    (1 << SO_BROADCAST)
+#define _SO_REUSEADDR    (1 << SO_REUSEADDR)
+#define _SO_KEEPALIVE    (1 << SO_KEEPALIVE)
+#define _SO_LINGER       (1 << SO_LINGER)
+#define _SO_OOBINLINE    (1 << SO_OOBINLINE)
+#define _SO_SNDBUF       (1 << SO_SNDBUF)
+#define _SO_RCVBUF       (1 << SO_RCVBUF)
+#define _SO_ERROR        (1 << SO_ERROR)
+#define _SO_TYPE         (1 << SO_TYPE)
+#define _SO_DONTROUTE    (1 << SO_DONTROUTE)
+#define _SO_RCVLOWAT     (1 << SO_RCVLOWAT)
+#define _SO_RCVTIMEO     (1 << SO_RCVTIMEO)
+#define _SO_SNDLOWAT     (1 << SO_SNDLOWAT)
+#define _SO_SNDTIMEO     (1 << SO_SNDTIMEO)
+
+/* This idenfies the options that have been implemented.  Someday this
+ * should be 0xffff
+ */
+
+#define _SO_IMPLEMENTED  0x0000
+
+/* The set of all valid options is a subset of those that are implemented
+ * and those that can be supported within the kernel OS configuration.
+ */
+
+#ifdef CONFIG_DISABLE_CLOCK
+# define _SO_ALLOPTIONS  (_SO_IMPLEMENTED & ~(_SO_RCVTIMEO|_SO_SNDTIMEO)
+#else
+# define _SO_ALLOPTIONS  (_SO_IMPLEMENTED)
+#endif
+
+/* This is the set of options valid for getsockopt and setsockopt */
+
+#define _SO_GETONLY      (_SO_ACCEPTCONN|_SO_ERROR|_SO_TYPE)
+#define _SO_SETOPTS      (_SO_ALLOPTIONS & ~_SO_GETONLY)
+#define _SO_GETOTPS      _SO_ALLOPTIONS
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

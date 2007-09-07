@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/net.h
+ * net/getsockopt.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,9 +33,6 @@
  *
  ****************************************************************************/
 
-#ifndef __NUTTX_NET_H
-#define __NUTTX_NET_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -43,88 +40,63 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
-#include <semaphore.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <errno.h>
 
-#include <net/uip/uip.h>
-#include <net/uip/psock.h>
-
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/* Socket descriptors are the index into the TCB sockets list, offset by the
- * following amount. This offset is used to distinquish file descriptors from
- * socket descriptors
- */
-
-#ifdef CONFIG_NFILE_DESCRIPTORS
-# define __SOCKFD_OFFSET CONFIG_NFILE_DESCRIPTORS
-#else
-# define __SOCKFD_OFFSET 0
-#endif
+#include "net_internal.h"
 
 /****************************************************************************
- * Public Types
+ * Global Functions
  ****************************************************************************/
 
-/* This defines a bitmap big enough for one bit for each socket option */
+/****************************************************************************
+ * Function: getsockopt
+ *
+ * Description:
+ *   getsockopt() retrieve thse value for the option specified by the
+ *   'option' argument for the socket specified by the 'sockfd' argument. If
+ *   the size of the option value is greater than 'value_len', the value
+ *   stored in the object pointed to by the 'value' argument will be silently
+ *   truncated. Otherwise, the length pointed to by the 'value_len' argument
+ *   will be modified to indicate the actual length of the'value'.
+ *
+ *   The 'level' argument specifies the protocol level of the option. To
+ *   retrieve options at the socket level, specify the level argument as
+ *   SOL_SOCKET.
+ *
+ *   See <sys/socket.h> a complete list of values for the 'option' argument.
+ *
+ * Parameters:
+ *   sockfd    Socket descriptor of socket
+ *   level     Protocol level to set the option
+ *   option    identifies the option to get
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ * Returned Value:
+ *
+ *  EBADF
+ *    The 'sockfd' argument is not a valid socket descriptor.
+ *  EINVAL
+ *    The specified option is invalid at the specified socket 'level' or the
+ *    socket has been shutdown.
+ *  ENOPROTOOPT
+ *    The 'option' is not supported by the protocol.
+ *  ENOTSOCK
+ *    The 'sockfd' argument does not refer to a socket.
+ *  ENOBUFS
+ *    Insufficient resources are available in the system to complete the
+ *    call.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
 
-typedef uint16 sockopt_t;
-
-/* This is the internal representation of a socket reference by a file
- * descriptor.
- */
-
-struct socket
+int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_len)
 {
-  int       s_crefs;      /* Reference count on the socket */
-  uint8     s_type;       /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
-#ifdef CONFIG_NET_SOCKOPTS
-  sockopt_t s_options;    /* Selected socket options */
-#endif
-  void     *s_conn;       /* Connection: struct uip_conn * or uip_udp_conn * */
-};
-
-/* This defines a list of sockets indexed by the socket descriptor */
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-struct socketlist
-{
-  sem_t  sl_sem;          /* Manage access to the socket list */
-  sint16 sl_crefs;        /* Reference count */
-  struct socket sl_sockets[CONFIG_NSOCKET_DESCRIPTORS];
-};
-#endif
-
-/* This defines a bitmap big enough for one bit for each socket option */
-
-typedef uint16 sockopt_t;
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
-/* net_sockets.c *************************************************************/
-
-EXTERN FAR struct socketlist *net_alloclist(void);
-EXTERN int net_addreflist(FAR struct socketlist *list);
-EXTERN int net_releaselist(FAR struct socketlist *list);
-
-/* net-close.c ***************************************************************/
-
-EXTERN int net_close(int sockfd);
-
-#undef EXTERN
-#ifdef __cplusplus
+  *get_errno_ptr() = ENOPROTOOPT;
+  return ERROR;
 }
-#endif
 
 #endif /* CONFIG_NET */
-#endif /* __NUTTX_NET_H */
