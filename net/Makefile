@@ -46,7 +46,7 @@ STD_CSRCS	= socket.c bind.c connect.c send.c sendto.c recv.c recvfrom.c \
 ifeq ($(CONFIG_NET_SOCKOPTS),y)
 STD_CSRCS       += setsockopt.c getsockopt.c 
 ifneq ($(CONFIG_DISABLE_CLOCK),y)
-STD_CSRCS	+= net-timeout.c net-dsec2timeval.c net-timeval2dsec.c
+STD_CSRCS	+= net-timeo.c net-dsec2timeval.c net-timeval2dsec.c
 endif
 endif
 

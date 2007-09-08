@@ -1,10 +1,21 @@
-/*
- * Copyright (c) 2004, Swedish Institute of Computer Science.
- * All rights reserved.
+/****************************************************************************
+ * net/uip/uip-split.h
+ * Module for splitting outbound TCP segments in two to avoid the
+ * delayed ACK throughput degradation.
+ *
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Based on uIP which also has a BSD style license:
+ *
+ *   Author: Adam Dunkels <adam@sics.se>
+ *   Copyright (c) 2004, Swedish Institute of Computer Science.
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -26,20 +37,9 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * This file is part of the uIP TCP/IP stack
- *
- * Author: Adam Dunkels <adam@sics.se>
- *
- * $Id: uip-split.h,v 1.1.1.1 2007-08-26 23:04:08 patacongo Exp $
- */
-/**
- * \addtogroup uip
- * @{
- */
+ ****************************************************************************/
 
-/**
- * \defgroup uipsplit uIP TCP throughput booster hack
- * @{
+/* uipsplit uIP TCP throughput booster hack
  *
  * The basic uIP TCP implementation only allows each TCP connection to
  * have a single TCP segment in flight at any given time. Because of
@@ -59,15 +59,9 @@
  * to work.
  */
 
-
-/**
- * \file
- * Module for splitting outbound TCP segments in two to avoid the
- * delayed ACK throughput degradation.
- * \author
- * Adam Dunkels <adam@sics.se>
- *
- */
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #ifndef __UIP_SPLIT_H__
 #define __UIP_SPLIT_H__

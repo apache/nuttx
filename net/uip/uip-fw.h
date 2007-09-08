@@ -1,21 +1,20 @@
-/**
- * \addtogroup uipfw
- * @{
- */
-
-/**
- * \file
+/****************************************************************************
+ * net/uip/uip-fw.h
  * uIP packet forwarding header file.
- * \author Adam Dunkels <adam@sics.se>
- */
-
-/*
- * Copyright (c) 2004, Swedish Institute of Computer Science.
- * All rights reserved.
+ *
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Based on uIP which also has a BSD style license:
+ *
+ *   Author: Adam Dunkels <adam@sics.se>
+ *   Copyright (c) 2004, Swedish Institute of Computer Science.
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -37,21 +36,21 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * This file is part of the uIP TCP/IP stack
- *
- * Author: Adam Dunkels <adam@sics.se>
- *
- * $Id: uip-fw.h,v 1.1.1.1 2007-08-26 23:04:07 patacongo Exp $
- */
+ ****************************************************************************/
+
 #ifndef __UIP_FW_H__
 #define __UIP_FW_H__
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <net/uip/uip.h>
 
-/**
- * Representation of a uIP network interface.
- */
-struct uip_fw_netif {
+/* Representation of a uIP network interface. */
+
+struct uip_fw_netif
+{
   struct uip_fw_netif *next;  /**< Pointer to the next interface when
 				 linked in a list. */
   uint16 ipaddr[2];           /**< The IP address of this interface. */

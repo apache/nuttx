@@ -1,10 +1,18 @@
-/* main.c
- * Copyright (c) 2001, Adam Dunkels.
- * All rights reserved.
+/****************************************************************************
+ * examples/uip/main.c
+ *
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Based on uIP which also has a BSD style license:
+ *
+ *   Copyright (c) 2001, Adam Dunkels.
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -29,11 +37,11 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This file is part of the uIP TCP/IP stack.
- *
- * $Id: main.c,v 1.4 2007-09-03 20:34:43 patacongo Exp $
- *
- */
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <stdio.h>
 #include <unistd.h>

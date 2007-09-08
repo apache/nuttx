@@ -1,11 +1,21 @@
-/*
- * Copyright (c) 2004, Adam Dunkels and the Swedish Institute of
- * Computer Science.
- * All rights reserved.
+/****************************************************************************
+ * netutils/uiplib/uiplib.c
+ * Various uIP library functions.
+ *
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Based on uIP which also has a BSD style license:
+ *
+ *   Author: Adam Dunkels <adam@sics.se>
+ *   Copyright (c) 2004, Adam Dunkels and the Swedish Institute of
+ *   Computer Science.
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -27,19 +37,17 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This file is part of the uIP TCP/IP stack
- *
- * $Id: uiplib.c,v 1.1.1.1 2007-08-26 23:07:05 patacongo Exp $
- *
- */
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <net/uip/uip.h>
 
 #include "uiplib.h"
 
-/*-----------------------------------------------------------------------------------*/
-unsigned char
-uiplib_ipaddrconv(char *addrstr, unsigned char *ipaddr)
+unsigned char uiplib_ipaddrconv(char *addrstr, unsigned char *ipaddr)
 {
   unsigned char tmp;
   char c;
@@ -69,5 +77,3 @@ uiplib_ipaddrconv(char *addrstr, unsigned char *ipaddr)
   }
   return 1;
 }
-
-/*-----------------------------------------------------------------------------------*/

@@ -1,15 +1,15 @@
-/* webclient.c
+/****************************************************************************
+ * netutils/webclient/webclient.c
  * Implementation of the HTTP client.
- * Author: Adam Dunkels <adam@dunkels.com>
  *
- * This example shows a HTTP client that is able to download web pages
- * and files from web servers. It requires a number of callback
- * functions to be implemented by the module that utilizes the code:
- * webclient_datahandler(), webclient_connected(),
- * webclient_timedout(), webclient_aborted(), webclient_closed().
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
- * Copyright (c) 2002, Adam Dunkels.
- * All rights reserved.
+ * Based on uIP which also has a BSD style license:
+ *
+ *   Author: Adam Dunkels <adam@dunkels.com>
+ *   Copyright (c) 2002, Adam Dunkels.
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,11 +36,18 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This file is part of the uIP TCP/IP stack.
- *
- * $Id: webclient.c,v 1.4 2007-09-03 23:35:17 patacongo Exp $
- *
+ ****************************************************************************/
+
+/* This example shows a HTTP client that is able to download web pages
+ * and files from web servers. It requires a number of callback
+ * functions to be implemented by the module that utilizes the code:
+ * webclient_datahandler(), webclient_connected(),
+ * webclient_timedout(), webclient_aborted(), webclient_closed().
  */
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <string.h>

@@ -1,21 +1,20 @@
-/**
- * \file
+/****************************************************************************
+ * netutils/telnetd/shell.h
  * Interface for the Contiki shell.
- * \author Adam Dunkels <adam@dunkels.com>
  *
- * Some of the functions declared in this file must be implemented as
- * a shell back-end in the architecture specific files of a Contiki
- * port.
- */
-
-
-/*
- * Copyright (c) 2003, Adam Dunkels.
- * All rights reserved.
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Based on uIP which also has a BSD style license:
+ *
+ *   Author: Adam Dunkels <adam@dunkels.com>
+ *   Copyright (c) 2003, Adam Dunkels.
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -37,68 +36,68 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This file is part of the Contiki desktop OS.
- *
- * $Id: shell.h,v 1.1.1.1 2007-08-26 23:07:06 patacongo Exp $
- *
+ ****************************************************************************/
+
+/* Some of the functions declared in this file must be implemented as
+ * a shell back-end in the architecture specific files of a Contiki
+ * port.
  */
+
 #ifndef __SHELL_H__
 #define __SHELL_H__
 
-/**
- * Initialize the shell.
+/* Initialize the shell.
  *
  * Called when the shell front-end process starts. This function may
  * be used to start listening for signals.
  */
+
 void shell_init(void);
 
-/**
- * Start the shell back-end.
+/* Start the shell back-end.
  *
  * Called by the front-end when a new shell is started.
  */
+
 void shell_start(void);
 
-/**
- * Process a shell command.
+/* Process a shell command.
  *
  * This function will be called by the shell GUI / telnet server whan
  * a command has been entered that should be processed by the shell
  * back-end.
  *
- * \param command The command to be processed.
+ * command The command to be processed.
  */
+
 void shell_input(char *command);
 
-/**
- * Quit the shell.
- *
- */
+/* Quit the shell. */
+
 void shell_quit(char *);
 
 
-/**
- * Print a string to the shell window.
+/* Print a string to the shell window.
  *
  * This function is implemented by the shell GUI / telnet server and
  * can be called by the shell back-end to output a string in the
  * shell window. The string is automatically appended with a linebreak.
  *
- * \param str1 The first half of the string to be output.
- * \param str2 The second half of the string to be output.
+ * str1 The first half of the string to be output.
+ * str2 The second half of the string to be output.
  */
+
 void shell_output(char *str1, char *str2);
 
-/**
- * Print a prompt to the shell window.
+/* Print a prompt to the shell window.
  *
  * This function can be used by the shell back-end to print out a
  * prompt to the shell window.
  *
- * \param prompt The prompt to be printed.
+ * prompt The prompt to be printed.
  *
  */
+
 void shell_prompt(char *prompt);
 
 #endif /* __SHELL_H__ */

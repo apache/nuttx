@@ -110,7 +110,7 @@ int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_
 
   /* Verify that the socket option if valid (but might not be supported ) */
 
-  if (!_SO_GETVALID(option) || !value)
+  if (!_SO_GETVALID(option) || !value || !value_len)
     {
       err = EINVAL;
       goto errout;
@@ -138,7 +138,7 @@ int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_
            * that 'value' is properly aligned for an 'int'
            */
 
-          if (value_len != sizeof(int))
+          if (*value_len < sizeof(int))
             {
               err = EINVAL;
               goto errout;
@@ -150,8 +150,9 @@ int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_
            * a macro will do.
            */
 
-          optionset = psock->options;
+          optionset    = psock->s_options;
           *(int*)value = _SO_GETOPT(optionset, option);
+          *value_len   = sizeof(int);
         }
         break;
 
@@ -161,7 +162,7 @@ int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_
            * that 'value' is properly aligned for an 'int'
            */
 
-          if (value_len != sizeof(int))
+          if (*value_len < sizeof(int))
             {
               err = EINVAL;
               goto errout;
@@ -170,6 +171,7 @@ int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_
           /* Return the socket type */
 
           *(int*)value = psock->s_type;
+          *value_len   = sizeof(int);
         }
         break;
 
@@ -185,7 +187,7 @@ int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_
            * that 'value' is properly aligned for an 'int'
            */
 
-          if (value_len != sizeof(struct timeval))
+          if (*value_len < sizeof(struct timeval))
             {
               err = EINVAL;
               goto errout;
@@ -207,6 +209,7 @@ int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_
           /* Then return the timeout value to the caller */
 
           net_dsec2timeval(timeo, (struct timeval *)value);
+          *value_len   = sizeof(struct timeval);
         }
         break;
 #endif

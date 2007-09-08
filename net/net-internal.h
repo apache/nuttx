@@ -124,7 +124,7 @@ EXTERN FAR struct socket *sockfd_socket(int sockfd);
 
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
 EXTERN int net_timeo(uint32 start_time, socktimeo_t timeo);
-EXTERN socktimeo_t socktimeo_t net_timeval2dsec(struct timeval *tv);
+EXTERN socktimeo_t net_timeval2dsec(struct timeval *tv);
 EXTERN void net_dsec2timeval(uint16 dsec, struct timeval *tv);
 #endif
 

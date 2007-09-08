@@ -135,7 +135,7 @@
 #define SO_SNDBUF       7 /* Sets send buffer size. arg: integer value (get/set). */
 #define SO_RCVBUF       8 /* Sets receive buffer size. arg: integer value (get/set). */
 #define SO_ERROR        9 /* Reports and clears error status (get only).  arg: returns
-                           * an integer value
+                           * an integer value */
 #define SO_TYPE        10 /* Reports the socket type (get only). return: int */
 #define SO_DONTROUTE   11 /* Requests that outgoing messages bypass standard routing (get/set)
                            * arg: pointer to integer containing a boolean value */

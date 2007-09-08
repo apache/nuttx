@@ -1,10 +1,19 @@
-/*
- * Copyright (c) 2001, Swedish Institute of Computer Science.
- * All rights reserved.
+/****************************************************************************
+ * netutils/webserver/httpd-fs.c
+ *
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Based on uIP which also has a BSD style license:
+ *
+ *   Author: Adam Dunkels <adam@sics.se>
+ *   Copyright (c) 2001, Swedish Institute of Computer Science.
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -26,12 +35,11 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * This file is part of the lwIP TCP/IP stack.
- *
- * Author: Adam Dunkels <adam@sics.se>
- *
- * $Id: httpd-fs.c,v 1.1.1.1 2007-08-26 23:07:02 patacongo Exp $
- */
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <sys/types.h>
 
@@ -49,9 +57,7 @@
 static uint16 count[HTTPD_FS_NUMFILES];
 #endif /* HTTPD_FS_STATISTICS */
 
-/*-----------------------------------------------------------------------------------*/
-static uint8
-httpd_fs_strcmp(const char *str1, const char *str2)
+static uint8 httpd_fs_strcmp(const char *str1, const char *str2)
 {
   uint8 i;
   i = 0;
@@ -71,9 +77,8 @@ httpd_fs_strcmp(const char *str1, const char *str2)
   ++i;
   goto loop;
 }
-/*-----------------------------------------------------------------------------------*/
-int
-httpd_fs_open(const char *name, struct httpd_fs_file *file)
+
+int httpd_fs_open(const char *name, struct httpd_fs_file *file)
 {
 #if HTTPD_FS_STATISTICS
   uint16 i = 0;
@@ -99,9 +104,8 @@ httpd_fs_open(const char *name, struct httpd_fs_file *file)
   }
   return 0;
 }
-/*-----------------------------------------------------------------------------------*/
-void
-httpd_fs_init(void)
+
+void httpd_fs_init(void)
 {
 #if HTTPD_FS_STATISTICS
   uint16 i;
@@ -110,10 +114,9 @@ httpd_fs_init(void)
   }
 #endif /* HTTPD_FS_STATISTICS */
 }
-/*-----------------------------------------------------------------------------------*/
+
 #if HTTPD_FS_STATISTICS
-uint16 httpd_fs_count
-(char *name)
+uint16 httpd_fs_count(char *name)
 {
   struct httpd_fsdata_file_noconst *f;
   uint16 i;
@@ -131,4 +134,3 @@ uint16 httpd_fs_count
   return 0;
 }
 #endif /* HTTPD_FS_STATISTICS */
-/*-----------------------------------------------------------------------------------*/

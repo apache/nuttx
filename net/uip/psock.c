@@ -1,10 +1,18 @@
-/*
- * Copyright (c) 2004, Swedish Institute of Computer Science.
- * All rights reserved.
+/****************************************************************************
+ * net/uip/psock.c
+ *
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Based on uIP which also has a BSD style license:
+ *
+ *   Copyright (c) 2004, Swedish Institute of Computer Science.
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -26,12 +34,11 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * This file is part of the uIP TCP/IP stack
- *
- * Author: Adam Dunkels <adam@sics.se>
- *
- * $Id: psock.c,v 1.2 2007-09-01 18:06:13 patacongo Exp $
- */
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <stdio.h>
 #include <string.h>

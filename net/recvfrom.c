@@ -59,7 +59,7 @@
 struct recvfrom_s
 {
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-  FAR struct socket *rf_sock        /* The parent socket structure */
+  FAR struct socket *rf_sock;       /* The parent socket structure */
 #endif
   sem_t              rf_sem;        /* Semaphore signals recv completion */
   sint16             rf_buflen;     /* Length of receive buffer (error if <0) */
@@ -102,7 +102,7 @@ void recvfrom_interrupt(void *private)
 
           /* Don't allow any further call backs. */
 
-          uip_conn->private = NULL;
+          uip_conn->private  = NULL;
           uip_conn->callback = NULL;
 
           /* Wake up the waiting thread, returning the number of bytes
@@ -113,23 +113,33 @@ void recvfrom_interrupt(void *private)
           sem_post(&pstate-> rf_sem);
         }
 
-      /* No data has been received.  If this is a poll event, then check
-       * for a timeout.
+      /* No data has been received -- this is some other event... probably a
+       * poll -- check for a timeout.
        */
 
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-      else if (uip_newdata() && pstate->rf_sock)
+      else if (pstate->rf_sock)
         {
           /* Check if SO_RCVTIMEO has been selected for this socket */
 
-          uint rcvtimeo = ;
           if (pstate->rf_sock->s_rcvtimeo)
             {
               /* Yes.. Check if the timeout has elapsed */
 
               if (net_timeo(pstate->rf_starttime, pstate->rf_sock->s_rcvtimeo))
                 {
-                }
+                  /* Don't allow any further call backs. */
+
+                  uip_conn->private  = NULL;
+                  uip_conn->callback = NULL;
+
+                  /* Wake up the waiting thread, returning the error -EAGAIN
+                   * that signals the timeout event
+                   */
+
+                  pstate->rf_buflen = -EAGAIN;
+                  sem_post(&pstate-> rf_sem);
+                 }
             }
         }
 #endif

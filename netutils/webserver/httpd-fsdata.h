@@ -1,6 +1,14 @@
-/*
- * Copyright (c) 2001, Swedish Institute of Computer Science.
- * All rights reserved.
+/****************************************************************************
+ * netutils/webserver/httpd-fsdata.h
+ *
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Based on uIP which also has a BSD style license:
+ *
+ *   Author: Adam Dunkels <adam@sics.se>
+ *   Copyright (c) 2001, Swedish Institute of Computer Science.
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,14 +34,14 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * This file is part of the lwIP TCP/IP stack.
- *
- * Author: Adam Dunkels <adam@sics.se>
- *
- * $Id: httpd-fsdata.h,v 1.1.1.1 2007-08-26 23:07:04 patacongo Exp $
- */
+ ****************************************************************************/
+
 #ifndef __HTTPD_FSDATA_H__
 #define __HTTPD_FSDATA_H__
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <net/uip/uip.h>

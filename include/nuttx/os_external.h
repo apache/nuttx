@@ -87,8 +87,8 @@
 #define NSEC2TICK(nsec)       (((nsec)+(NSEC_PER_TICK/2))/NSEC_PER_TICK) /* Rounds */
 #define USEC2TICK(usec)       (((usec)+(USEC_PER_TICK/2))/USEC_PER_TICK) /* Rounds */
 #define MSEC2TICK(msec)       (((msec)+(MSEC_PER_TICK/2))/MSEC_PER_TICK) /* Rounds */
-#define DSEC2TICK(dsec)       MSEC2TICK((dsec)*DSEC_PER_MSEC)
-#define SEC2TICK(sec)         MSEC2TICK((sec)*SEC_PER_MSEC)
+#define DSEC2TICK(dsec)       MSEC2TICK((dsec)*MSEC_PER_DSEC)
+#define SEC2TICK(sec)         MSEC2TICK((sec)*MSEC_PER_SEC)
 
 /****************************************************************************
  * Global Data
