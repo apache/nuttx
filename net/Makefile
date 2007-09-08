@@ -41,12 +41,12 @@ MKDEP		= $(TOPDIR)/tools/mkdeps.sh
 ifeq ($(CONFIG_NET),y)
 STD_ASRCS	=
 STD_CSRCS	= socket.c bind.c connect.c send.c sendto.c recv.c recvfrom.c \
-		  net_sockets.c net-close.c
+		  net-sockets.c net-close.c
 
 ifeq ($(CONFIG_NET_SOCKOPTS),y)
 STD_CSRCS       += setsockopt.c getsockopt.c 
 ifneq ($(CONFIG_DISABLE_CLOCK),y)
-STD_CSRCS	+= net_timeout.c net_dsec2timeval.c net_timeval2dsec.c
+STD_CSRCS	+= net-timeout.c net-dsec2timeval.c net-timeval2dsec.c
 endif
 endif
 

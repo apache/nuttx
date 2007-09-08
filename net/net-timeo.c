@@ -42,7 +42,7 @@
 
 #include <sys/types.h>
 #include <nuttx/os_external.h>
-#include "net_internal.h"
+#include "net-internal.h"
 
 /****************************************************************************
  * Global Functions

@@ -44,7 +44,7 @@
 #include <sys/socket.h>
 #include <errno.h>
 
-#include "net_internal.h"
+#include "net-internal.h"
 
 /****************************************************************************
  * Global Functions

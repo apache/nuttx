@@ -1,5 +1,5 @@
 /****************************************************************************
- * net_internal.h
+ * net-internal.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -45,7 +45,7 @@
 
 #include <nuttx/net.h>
 
-#include "net_internal.h"
+#include "net-internal.h"
 
 /****************************************************************************
  * Definitions
@@ -113,7 +113,7 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* net_sockets.c *************************************************************/
+/* net-sockets.c *************************************************************/
 
 EXTERN void weak_function net_initialize(void);
 EXTERN int  sockfd_allocate(void);
