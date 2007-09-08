@@ -1350,10 +1350,13 @@ The system can be re-made subsequently by just typing <code>make</code>.
     <code>CONFIG_NSOCKET_DESCRIPTORS</code>: Maximum number of socket descriptors per task/thread.
   </li>
   <li>
-    <code>CONFIG_NET_MAX_CONNECTIONS</code>: Maximum number of TCP connections
+    <code>CONFIG_NET_MAX_CONNECTIONS</code>: Maximum number of TCP connections (all tasks).
   </li>
   <li>
-    <code>CONFIG_NET_MAX_LISTENPORTS</code>: Maximum number of listening TCP ports
+    <code>CONFIG_NET_MAX_LISTENPORTS</code>: Maximum number of listening TCP ports (all tasks).
+  </li>
+  <li>
+    <code>CONFIG_NET_SOCKOPTS</code>: Enable or disable support for socket options.
   </li>
   <li>
     <code>CONFIG_NET_BUFFER_SIZE</code>: uIP buffer size
