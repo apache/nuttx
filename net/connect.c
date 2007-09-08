@@ -55,15 +55,15 @@
  *
  * Description:
  *   connect() connects the socket referred to by the file descriptor sockfd
- *   to the address specified by serv_addr. The addrlen argument specifies
- *   the size of serv_addr.  The format of the address in serv_addr is
+ *   to the address specified by 'addr'. The addrlen argument specifies
+ *   the size of 'addr'.  The format of the address in 'addr' is
  *   determined by the address space of the socket sockfd.
  *
- *   If the socket sockfd is of type SOCK_DGRAM then serv_addr is the address
+ *   If the socket sockfd is of type SOCK_DGRAM then 'addr' is the address
  *   to which datagrams are sent by default, and the only address from which
  *   datagrams are received. If the socket is of type SOCK_STREAM or
  *   SOCK_SEQPACKET, this call attempts to make a connection to the socket
- *   that is bound to the address specified by serv_addr.
+ *   that is bound to the address specified by 'addr'.
  *
  *   Generally, connection-based protocol sockets may successfully connect()
  *   only once; connectionless protocol sockets may use connect() multiple
@@ -73,8 +73,8 @@
  *
  * Parameters:
  *   sockfd    Socket descriptor returned by socket()
- *   serv_addr Server address (form depends on type of socket)
- *   addrlen   Lenght of actual serv_addr
+ *   addr      Server address (form depends on type of socket)
+ *   addrlen   Length of actual 'addr'
  *
  * Returned Value:
  *   0 on success; -1 on error with errno set appropriately

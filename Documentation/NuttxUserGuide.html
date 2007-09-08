@@ -21,7 +21,7 @@ User's Manual
 <p>
 Gregory Nutt
 <p>
-<small>Last Update: June 30, 2007</small>
+<small>Last Update: September 8, 2007</small>
 </center>
 
 <h1>1.0 <A NAME="Introduction">Introduction</a></h1>
@@ -55,6 +55,7 @@ Gregory Nutt
       <li>Paragraph 2.9 <a href="#Pthread">Pthread Interfaces</a></li>
       <li>Paragraph 2.10 <a href="#Environ">Environment Variables</a></li>
       <li>Paragraph 2.11 <a href="#FileSystem">Filesystem Interfaces</a></li>
+      <li>Paragraph 2.12 <a href="#Network">Network Interfaces</a></li>
     </ul>
   </li>
   <li>
@@ -612,7 +613,7 @@ Compatible with the POSIX interface of the same name.
 <p>
   <b>Returned Values:</b>
   On success, sched_setparam() returns 0 (OK).
-  On error, -1 (ERROR) is returned, and errno is set appropriately.
+  On error, -1 (ERROR) is returned, and<code>errno</code>is set appropriately.
 </p>
 <ul>
 
@@ -713,7 +714,7 @@ interface of the same name.
 <p>
   <b>Returned Values:</b> 
   On success, <i>sched_setscheduler()</i> returns OK (zero).  On
-  error, ERROR (-1) is returned, and errno is set appropriately:
+  error, ERROR (-1) is returned, and<code>errno</code>is set appropriately:
 </p>
 <ul>
   <li>EINVAL The scheduling policy is not one of the
@@ -761,7 +762,7 @@ policy.
   <li>
     On success, <i>sched_getscheduler()</i> returns the policy for
     the task (either SCHED_FIFO or SCHED_RR).
-    On error,  ERROR (-1) is returned, and errno is set appropriately:
+    On error,  ERROR (-1) is returned, and<code>errno</code>is set appropriately:
     <ul>
       <li>ESRCH  The task whose ID is pid could not be found.</li>
     </ul>
@@ -893,7 +894,7 @@ priority of the calling task is returned.
 <p>
   <b>Returned Values:</b> 
   On success, sched_rr_get_interval() returns OK (0).  On
-  error, ERROR (-1) is returned, and errno is set to:
+  error, ERROR (-1) is returned, and<code>errno</code>is set to:
 </p>
 <ul>
   <li>EFAULT Cannot copy to interval</LI>
@@ -2521,7 +2522,7 @@ VxWorks provides the following comparable interface:
   If the call succeeds, <code>timer_create()</code> will return 0 (<code>OK</code>) and update the
   location referenced by <code>timerid</code> to a <code>timer_t</code>, which can be passed to the
   other per-thread timer calls.  If an error occurs, the function will return
-  a value of -1 (<code>ERROR</code>) and set errno to indicate the error.
+  a value of -1 (<code>ERROR</code>) and set<code>errno</code>to indicate the error.
 </p>
 <ul>
   <li><code>EAGAIN</code>. The system lacks sufficient signal queuing resources to honor the
@@ -2569,7 +2570,7 @@ VxWorks provides the following comparable interface:
 </p>
 <p>
   If successful, the <I>timer_delete()</I> function will return zero (<I>OK</I>).
-  Otherwise, the function will return a value of -1 (ERROR) and set errno to indicate the error:
+  Otherwise, the function will return a value of -1 (ERROR) and set<code>errno</code>to indicate the error:
 </p>
 <ul>
   <li><code>EINVAL</code>. The timer specified timerid is not valid.</li>
@@ -2646,7 +2647,7 @@ VxWorks provides the following comparable interface:
 </p>
 <p>
   If the timer_gettime() succeeds, a value of 0 (OK) will be returned.
-  If an error occurs, the value -1 (ERROR) will be returned, and errno set to indicate the error.
+  If an error occurs, the value -1 (ERROR) will be returned, and<code>errno</code>set to indicate the error.
 </p>
 <ul>
   <li><code>EINVAL</code>. The timerid argument does not correspond to an ID returned by timer_create() but not yet deleted by timer_delete().</li>
@@ -3306,7 +3307,7 @@ is delivered more than once.&quot;
 <ul>
 <li>
   On  success (at least one signal was sent), zero (OK) is returned.
-  On error, -1 (ERROR) is returned, and errno is set appropriately.
+  On error, -1 (ERROR) is returned, and<code>errno</code>is set appropriately.
   <ul>
     <li><code>EGAIN</code>. The limit of signals which may be queued has been reached.</li>
     <li><code>EINVAL</code>. signo was invalid.</li>
@@ -5767,6 +5768,501 @@ interface of the same name.
   int    statfs(const char *path, FAR struct statfs *buf); /* Prototyped but not implemented */
 </pre></ul>
 
+<h2>2.12 <a name="Network">Network Interfaces</a></h2>
+<p>NuttX includes a simple interface layer based on uIP (see <a href="http://www.sics.se/~adam/uip/index.php/Main_Page">http://www.sics.se</a>).
+NuttX supports subset of a standard socket interface to uIP.
+These network feature can be enabled by settings in the architecture
+<a href="NuttxPortingGuide.html#apndxconfigs">configuration file</a>.
+Those socket APIs are discussed in the following paragraphs.</p>
+<ul>
+<li>
+</li>
+<li><a href="#socket">2.12.1 socket</a></li>
+<li><a href="#bind">2.12.2 bind</a></li>
+<li><a href="#connect">2.12.3 connect</a></li>
+<li><a href="#send">2.12.4 send</a></li>
+<li><a href="#sendto">2.12.5 sendto</a></li>
+<li><a href="#recv">2.12.6 recv</a></li>
+<li><a href="#recvfrom">2.12.7 recvfrom</a></li>
+<li><a href="#setsockopt">2.12.8 setsockopt</a></li>
+<li><a href="#getsockopt">2.12.9 getsockopt</a></li>
+</ul>
+
+<h3><a name="socket">2.12.1 <code>socket</code></a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include <sys/socket.h>
+  int socket(int domain, int type, int protocol);
+</pre>
+<p>
+  <b>Description:</b>
+   socket() creates an endpoint for communication and returns a descriptor.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li><code>domain</code>: (see sys/socket.h)</li>
+  <li><code>type</code>: (see sys/socket.h)</li>
+  <li><code>protocol</code>: (see sys/socket.h)</li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+  0 on success; -1 on error with<code>errno</code>set appropriately:
+</p>
+<ul>
+  <li><code>EACCES</code>.
+    Permission to create a socket of the specified type and/or protocol is denied.</li>
+  <li><code>EAFNOSUPPORT</code>.
+    The implementation does not support the specified address family.</li>
+  <li><code>EINVAL</code>.
+    Unknown protocol, or protocol family not available.</li>
+  <li><code>EMFILE</code>.
+    Process file table overflow.</li>
+  <li><code>ENFILE</code>
+    The system limit on the total number of open files has been reached.</li>
+  <li><code>ENOBUFS</code> or <code>ENOMEM</code>.
+    Insufficient memory is available. The socket cannot be created until sufficient resources are freed.</li>
+  <li><code>EPROTONOSUPPORT</code>.
+    The protocol type or the specified protocol is not supported within this domain.</li>
+</ul>
+
+<h3><a name="bind">2.12.2 <code>bind</code></a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include <sys/socket.h>
+  int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+</pre>
+<p>
+  <b>Description:</b>
+   <code>bind()</code> gives the socket sockfd the local address <code>addr</code>.
+   <code>addr</code> is <code>addrlen</code> bytes long. Traditionally, this is called
+   &quot;assigning a name to a socket.&quot; When a socket is created with <code>socket()</code>,
+   it exists in a name space (address family) but has no name assigned.
+<p>
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li><code>sockfd</code>: Socket descriptor from socket.</li>
+  <li><code>addr</code>: Socket local address.</li>
+  <li><code>addrlen</code>: Length of <code>addr</code>.</li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+  0 on success; -1 on error with<code>errno</code>set appropriately:
+</p>
+<ul>
+  <li><code>EACCES</code>
+    The address is protected, and the user is not the superuser.</li>
+  <li><code>EADDRINUSE</code>
+    The given address is already in use.</li>
+  <li><code>EBADF</code>
+    <code>sockfd</code> is not a valid descriptor.</li>
+  <li><code>EINVAL</code>
+    The socket is already bound to an address.</li>
+  <li><code>ENOTSOCK</code>
+    <code>sockfd</code> is a descriptor for a file, not a socket.</li>
+</ul>
+
+<h3><a name="connect">2.12.3 <code>connect</code></a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include <sys/socket.h>
+  int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+</pre>
+<p>
+  <b>Description:</b>
+  <code>connect()</code> connects the socket referred to by the file descriptor
+  <code>sockfd</code> to the address specified by <code>addr</code>.
+  The <code>addrlen</code> argument specifies the size of <code>addr</code>.
+  The format of the address in <code>addr</code> is determined by the address space
+  of the socket sockfd.
+
+  If the socket sockfd is of type SOCK_DGRAM then <code>addr</code> is the address
+  to which datagrams are sent by default, and the only address from which
+  datagrams are received. If the socket is of type SOCK_STREAM or
+  SOCK_SEQPACKET, this call attempts to make a connection to the socket
+  that is bound to the address specified by <code>addr</code>.
+
+  Generally, connection-based protocol sockets may successfully <code>connect()</code>
+  only once; connectionless protocol sockets may use <code>connect()</code> multiple
+  times to change their association.  Connectionless sockets may dissolve
+  the association by connecting to an address with the sa_family member of
+  sockaddr set to AF_UNSPEC.
+<p>
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li><code>sockfd</code>: Socket descriptor returned by <code>socket()</code></li>
+  <li><code>addr</code>: Server address (form depends on type of socket)</li>
+  <li><code>addrlen</code>: Length of actual <code>addr</code></li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+  0 on success; -1 on error with<code>errno</code>set appropriately:
+</p>
+  <li><code>EACCES</code> or </code>EPERM</code>:
+    The user tried to connect to a broadcast address without having the
+    socket broadcast flag enabled or the connection request failed
+    because of a local firewall rule.</li>
+  <li><code>EADDRINUSE</code>
+    Local address is already in use.</li>
+  <li><code>EAFNOSUPPORT</code>
+    The passed address didn't have the correct address family in its
+    sa_family field.</li>
+  <li><code>EAGAIN</code>
+    No more free local ports or insufficient entries in the routing
+    cache. For PF_INET.</li>
+  <li><code>EALREADY</code>
+    The socket is non-blocking and a previous connection attempt has
+    not yet been completed.</li>
+  <li><code>EBADF</code>
+    The file descriptor is not a valid index in the descriptor table.</li>
+  <li><code>ECONNREFUSED</code>
+    No one listening on the remote address.</li>
+  <li><code>EFAULT</code>
+    The socket structure address is outside the user's address space.</li>
+  <li><code>EINPROGRESS</code>
+    The socket is non-blocking and the connection cannot be completed
+    immediately.</li>
+  <li><code>EINTR</code>
+    The system call was interrupted by a signal that was caught.</li>
+  <li><code>EISCONN</code>
+    The socket is already connected.</li>
+  <li><code>ENETUNREACH</code>
+    Network is unreachable.</li>
+  <li><code>ENOTSOCK</code>
+    The file descriptor is not associated with a socket.</li>
+  <li><code>ETIMEDOUT</code>
+    Timeout while attempting connection. The server may be too busy
+    to accept new connections.</li>
+</ul>
+
+<h3><a name="send">2.12.4 <code>send</code></a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include <sys/socket.h>
+  ssize_t send(int sockfd, const void *buf, size_t len, int flags);
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>send()</code> call may be used only when the socket is in a connected state
+  (so that the intended recipient is known).
+  The only difference between <code>send()</code> and <code>write()</code> is the
+  presence of <code>flags</code>.
+  With <code>zero</code> flags parameter, <code>send()</code> is equivalent to
+  <code>write()</code>. Also, <code>send(s,buf,len,flags)</code> is
+  equivalent to <code>sendto(s,buf,len,flags,NULL,0)</code>.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>sockfd</code>: Socket descriptor of socket
+  <li><code>buf</code>: Data to send
+  <li><code>len</code>: Length of data to send
+  <li><code>flags</code>: Send flags
+</ul>
+<p>
+  <b>Returned Values:</b>
+  See <a href="#sendto"><code>sendto()</code></a>.
+</p>
+
+<h3><a name="sendto">2.12.5 <code>sendto</code></a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include <sys/socket.h>
+  ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
+                 const struct sockaddr *to, socklen_t tolen);
+</pre>
+<p>
+  <b>Description:</b>
+  If <code>sendto()</code> is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
+  socket, the parameters to and tolen are ignored (and the error EISCONN
+  may be returned when they are not NULL and 0), and the error ENOTCONN is
+  returned when the socket was not actually connected.
+<p>
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>sockfd</code>: Socket descriptor of socket
+  <li><code>buf</code>: Data to send
+  <li><code>len</code>: Length of data to send
+  <li><code>flags</code>: Send flags
+  <li><code>to</code>: Address of recipient
+  <li><code>tolen</code>: The length of the address structure
+</ul>
+<p>
+  <b>Returned Values:</b>
+  On success, returns the number of characters sent.  On  error, -1 is returned, and<code>errno</code>is set appropriately:
+</p>
+<ul>
+  <li><code>EAGAIN</code> or <code>EWOULDBLOCK</code>.
+    The socket is marked non-blocking and the requested operation would block.
+  <li><code>EBADF</code>.
+    An invalid descriptor was specified.
+  <li><code>ECONNRESET</code>.
+    Connection reset by peer.
+  <li><code>EDESTADDRREQ</code>.
+    The socket is not connection-mode, and no peer address is set.
+  <li><code>EFAULT</code>.
+    An invalid user space address was specified for a parameter.
+  <li><code>EINTR</code>.
+    A signal occurred before any data was transmitted.
+  <li><code>EINVAL</code>.
+    Invalid argument passed.
+  <li><code>EISCONN</code>.
+    The connection-mode socket was connected already but a recipient
+    was specified. (Now either this error is returned, or the recipient
+    specification is ignored.)
+  <li><code>EMSGSIZE</code>.
+    The socket type requires that message be sent atomically, and the
+    size of the message to be sent made this impossible.
+  <li><code>ENOBUFS</code>.
+    The output queue for a network interface was full. This generally
+    indicates that the interface has stopped sending, but may be
+    caused by transient congestion.
+  <li><code>ENOMEM</code>.
+    No memory available.
+  <li><code>ENOTCONN</code>.
+    The socket is not connected, and no target has been given.
+  <li><code>ENOTSOCK</code>.
+    The argument s is not a socket.
+  <li><code>EOPNOTSUPP</code>.
+    Some bit in the flags argument is inappropriate for the socket type.
+  <li><code>EPIPE</code>.
+    The local end has been shut down on a connection oriented socket.
+    In this case the process will also receive a SIGPIPE unless
+    MSG_NOSIGNAL is set.
+</ul>
+
+<h3><a name="recv">2.12.6 <code>recv</code></a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include <sys/socket.h>
+  ssize_t recv(int sockfd, void *buf, size_t len, int flags);
+</pre>
+<p>
+  <b>Description:</b>
+  The <code>recv()</code> call is identical to
+  <a href="#recvfrom"><code>recvfrom()</code></a> with a NULL
+  <code>from</code> parameter.
+<p>
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  </li>
+  <li>sockfd</code>: Socket descriptor of socket </li>
+  <li>buf</code>: Buffer to receive data </li>
+  <li>len</code>: Length of buffer </li>
+  <li>flags</code>: Receive flags </li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+  see <a href="#recvfrom"><code>recvfrom()</code></a>.
+  Zero on success.
+</p>
+
+<h3><a name="recvfrom">2.12.7 <code>recvfrom</code></a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include <sys/socket.h>
+  ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
+                   struct sockaddr *from, socklen_t *fromlen);
+</pre>
+<p>
+  <b>Description:</b>
+  <code>recvfrom()</code> receives messages from a socket, and may be used to receive
+  data on a socket whether or not it is connection-oriented.
+</p>
+<p>
+  If <code>from</code> is not NULL, and the underlying protocol provides the source
+  address, this source address is filled in. The argument <code>fromlen</code>
+  initialized to the size of the buffer associated with <code>from</code>, and modified
+  on return to indicate the actual size of the address stored there.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+    <li><code>sockfd</code>: Socket descriptor of socket.</li>
+    <li><code>buf</code>:  Buffer to receive data.</li>
+    <li><code>len</code>: Length of buffer.</li>
+    <li><code>flags</code>: Receive flags.</li>
+    <li><code>from</code>: Address of source.</li>
+    <li><code>fromlen</code>: The length of the address structure.</li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+  On success, returns the number of characters sent.
+  On error, -1 is returned, and errno is set appropriately:
+</p>
+<ul>
+    <li><code>EAGAIN</code>.
+      The socket is marked non-blocking and the receive operation would block,
+      or a receive timeout had been set and the timeout expired before data
+      was received.
+    <li><code>EBADF</code>.
+      The argument <code>sockfd</code> is an invalid descriptor.
+    <li><code>ECONNREFUSED</code>.
+      A remote host refused to allow the network connection (typically because
+      it is not running the requested service).
+    <li><code>EFAULT</code>.
+      The receive buffer pointer(s) point outside the process's address space.
+    <li><code>EINTR</code>.
+      The receive was interrupted by delivery of a signal before any data were
+      available.
+    <li><code>EINVAL</code>.
+      Invalid argument passed.
+    <li><code>ENOMEM</code>.
+      Could not allocate memory.
+    <li><code>ENOTCONN</code>.
+      The socket is associated with a connection-oriented protocol and has
+      not been connected.
+    <li><code>ENOTSOCK</code>.
+      The argument <code>sockfd</code> does not refer to a socket.
+</ul>
+
+<h3><a name="setsockopt">2.12.8 <code>setsockopt</code></a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include <sys/socket.h>
+  int setsockopt(int sockfd, int level, int option,
+                 const void *value, socklen_t value_len);
+</pre>
+<p>
+  <b>Description:</b>
+  <code>setsockopt()</code> sets the option specified by the <code>option</code> argument,
+  at the protocol level specified by the <code>level</code> argument, to the value
+  pointed to by the <code>value</code> argument for the socket associated with the
+  file descriptor specified by the <code>sockfd</code> argument.
+</p>
+<p>
+  The <code>level</code> argument specifies the protocol level of the option. To set
+  options at the socket level, specify the level argument as SOL_SOCKET.
+</p>
+<p>
+  See <sys/socket.h> a complete list of values for the <code>option</code> argument.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>sockfd</code>: Socket descriptor of socket
+  <li><code>level</code>: Protocol level to set the option
+  <li><code>option</code>: identifies the option to set
+  <li><code>value</code>: Points to the argument value
+  <li><code>value_len</code>: The length of the argument value
+</ul>
+<p>
+  <b>Returned Values:</b>
+  On success, returns the number of characters sent.
+  On error, -1 is returned, and errno is set appropriately:
+</p>
+<ul>
+  <li><code>BADF</code>.
+     The <code>sockfd</code> argument is not a valid socket descriptor.
+  <li><code>DOM</code>.
+     The send and receive timeout values are too big to fit into the
+     timeout fields in the socket structure.
+  <li><code>INVAL</code>.
+     The specified option is invalid at the specified socket <code>level</code> or the
+     socket has been shut down.
+  <li><code>ISCONN</code>.
+     The socket is already connected, and a specified option cannot be set
+     while the socket is connected.
+  <li><code>NOPROTOOPT</code>.
+     The <code>option</code> is not supported by the protocol.
+  <li><code>NOTSOCK</code>.
+     The <code>sockfd</code> argument does not refer to a socket.
+  <li><code>NOMEM</code>.
+     There was insufficient memory available for the operation to complete.
+  <li><code>NOBUFS</code>.
+     Insufficient resources are available in the system to complete the call.
+</ul>
+
+<h3><a name="getsockopt">2.12.9 <code>getsockopt</code></a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include <sys/socket.h>
+  int getsockopt(int sockfd, int level, int option,
+                 void *value, socklen_t *value_len);
+</pre>
+<p>
+  <b>Description:</b>
+  <code>getsockopt()</code> retrieve thse value for the option specified by the
+  <code>option</code> argument for the socket specified by the <code>sockfd</code> argument. If
+  the size of the option value is greater than <code>value_len</code>, the value
+  stored in the object pointed to by the <code>value</code> argument will be silently
+  truncated. Otherwise, the length pointed to by the <code>value_len</code> argument
+  will be modified to indicate the actual length of the<code>value</code>.
+</p>
+<p>
+  The <code>level</code> argument specifies the protocol level of the option. To
+  retrieve options at the socket level, specify the level argument as
+  SOL_SOCKET.
+</p>
+<p>
+  See <sys/socket.h> a complete list of values for the <code>option</code> argument.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>sockfd    Socket descriptor of socket
+  <li><code>level     Protocol level to set the option
+  <li><code>option    identifies the option to get
+  <li><code>value     Points to the argument value
+  <li><code>value_len The length of the argument value
+</ul>
+<p>
+  <b>Returned Values:</b>
+  On success, returns the number of characters sent.
+  On error, -1 is returned, and errno is set appropriately:
+</p>
+<ul>
+  <li><code>BADF</code>.
+    The <code>sockfd</code> argument is not a valid socket descriptor.</li>
+  <li><code>INVAL</code>.
+    The specified option is invalid at the specified socket <code>level</code> or the
+    socket has been shutdown.</li>
+  <li><code>NOPROTOOPT</code>.
+    The <code>option</code> is not supported by the protocol.</li>
+  <li><code>NOTSOCK</code>.
+    The <code>sockfd</code> argument does not refer to a socket.</li>
+  <li><code>NOBUFS
+    Insufficient resources are available in the system to complete the call.</li>
+</ul>
+
 <hr>
 <h1>3.0 <A NAME="Data_Structures">OS Data Structures</a></h1>
 <H2>3.1 Scalar types</H2>
@@ -5815,8 +6311,8 @@ function call:
 <b>Description</b>:  <I>osGetErrnorPtr()</I> returns a pointer to
 the thread-specific <I>errno</I> value.
 <p>
-This differs somewhat from the use for errno in a multi-threaded process environment:
-Each pthread will have its own private copy of errno and the errno will not be shared
+This differs somewhat from the use for<code>errno</code>in a multi-threaded process environment:
+Each pthread will have its own private copy of<code>errno</code>and the<code>errno</code>will not be shared
 between pthreads.
 <p>
 <b>Input Parameters</b>:  None
@@ -5970,17 +6466,22 @@ notify a task when a message is available on a queue.
 </p>
 
 <h1><a name="index">Index</a></h1>
-<ul>
+<table width="100%">
+<tr>
+<td>
+  <li><a href="#bind">bind</a></li>
   <li><a href="#clockgetres">clock_getres</a></li>
   <li><a href="#clockgettime">clock_gettime</a></li>
   <li><a href="#ClocksNTimers">Clocks</a></li>
   <li><a href="#clocksettime">clock_settime</a></li>
+  <li><a href="#connect">connect</a></li>
   <li><a href="#Data_Structures">Data structures</a></li>
   <li><a href="#directoryoperations">Directory operations</a></li>
   <li><a href="#driveroperations">Driver operations</a></li>
   <li><a href="#exit">exit</a></li>
   <li><a href="#FileSystem">Filesystem interfaces</a></li>
   <li><a href="#getpid">getpid</a></li>
+  <li><a href="#getsockopt">getsockopt</a></li>
   <li><a href="#gmtimer">gmtime_r</a></li>
   <li><a href="#Introduction">Introduction</a>
   <li><a href="#kill">kill</a></li>
@@ -5997,6 +6498,7 @@ notify a task when a message is available on a queue.
   <li><a href="#mqtimedreceive">mq_timedreceive</a></li>
   <li><a href="#mqtimedsend">mq_timedsend</a></li>
   <li><a href="#mqunlink">mq_unlink</a></li>
+  <li><a href="#Network">Network Interfaces</a></li>
   <li><a href="#OS_Interfaces">OS Interfaces</a>
   <li><a href="#Pthread">Pthread Interfaces</a>
   <li><a href="#pthreadattrdestroy">pthread_attr_destroy</a></li>
@@ -6040,6 +6542,8 @@ notify a task when a message is available on a queue.
   <li><a href="#pthreadmutexattrsetpshared">pthread_mutexattr_setpshared</a></li>
   <li><a href="#pthreadmutexdestrory">pthread_mutex_destroy</a></li>
   <li><a href="#pthreadmutexinit">pthread_mutex_init</a></li>
+</td>
+<td>
   <li><a href="#pthreadmutexlock">pthread_mutex_lock</a></li>
   <li><a href="#pthreadmutextrylock">pthread_mutex_trylock</a></li>
   <li><a href="#pthreadmutexunlock">pthread_mutex_unlock</a></li>
@@ -6052,6 +6556,8 @@ notify a task when a message is available on a queue.
   <li><a href="#pthreadsigmask">pthread_sigmask</a></li>
   <li><a href="#pthreadtestcancelstate">pthread_testcancelstate</a></li>
   <li><a href="#pthreadyield">pthread_yield</a></li>
+  <li><a href="#recv">recv</a></li>
+  <li><a href="#recvfrom">recvfrom</a></li>
   <li><a href="#schedgetparam">sched_getparam</a></li>
   <li><a href="#schedgetprioritymax">sched_get_priority_max</a></li>
   <li><a href="#schedgetprioritymin">sched_get_priority_min</a></li>
@@ -6073,6 +6579,9 @@ notify a task when a message is available on a queue.
   <li><a href="#semunlink">sem_unlink</a></li>
   <li><a href="#semwait">sem_wait</a></li>
   <li><a href="#setgetscheduler">sched_getscheduler</a></li>
+  <li><a href="#send">send</a></li>
+  <li><a href="#sendto">sendto</a></li>
+  <li><a href="#setsockopt">setsockopt</a></li>
   <li><a href="#sigaction">sigaction</a></li>
   <li><a href="#sigaddset">sigaddset</a></li>
   <li><a href="#sigdelset">sigdelset</a></li>
@@ -6086,6 +6595,7 @@ notify a task when a message is available on a queue.
   <li><a href="#sigsuspend">sigsuspend</a></li>
   <li><a href="#sigtimedwait">sigtimedwait</a></li>
   <li><a href="#sigwaitinfo">sigwaitinfo</a></li>
+  <li><a href="#socket">socket</a></li>
   <li><a href="#standardio">Standard I/O</a></li>
   <li><a href="#taskactivate">task_activate</a></li>
   <li><a href="#Task_Control">Task Control Interfaces</a>
@@ -6107,7 +6617,9 @@ notify a task when a message is available on a queue.
   <li><a href="#wddelete">wd_delete</a></li>
   <li><a href="#wdgettime">wd_gettime</a></li>
   <li><a href="#wdstart">wd_start</a></li>
-</ul>
+</td>
+</tr>
+</table>
 
 </BODY>
 </HTML>

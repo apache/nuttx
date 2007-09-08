@@ -208,3 +208,5 @@
 	* Added send() and sendto(); integrate write() and close() with socket descriptors.
         * Added recv() and recvfrom().
 	* Added getsockopt() and setsockopt()
+	* Documentation updated to address socket interfaces.
+

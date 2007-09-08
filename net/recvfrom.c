@@ -152,7 +152,7 @@ void recvfrom_interrupt(void *private)
  *   EINVAL
  *     Invalid argument passed.
  *   ENOMEM
- *     Could not allocate memory for recvmsg().
+ *     Could not allocate memory.
  *   ENOTCONN
  *     The socket is associated with a connection-oriented protocol and has
  *     not been connected.

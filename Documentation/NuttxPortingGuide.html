@@ -16,7 +16,7 @@
   </b></big>
   <p><small>by</small></p>
   <p>Gregory Nutt</p>
-  <p><small>Last Update: May 26, 2007</small></p>
+  <p><small>Last Update: September 8, 2007</small></p>
 </center>
 
 <center><h1>Table of Contents</h1></center>
@@ -46,9 +46,11 @@
   <li><a href="#DirStructInclude">2.7 include/</a></li>
   <li><a href="#DirStructLib">2.8 lib/</a></li>
   <li><a href="#DirStructMm">2.9 mm/</a></li>
-  <li><a href="#DirStructSched">2.10 sched/</a></li>
-  <li><a href="#DirStructTools">2.11 tools/</a></li>
-  <li><a href="#topmakefile">2.12 Makefile</a></li>
+  <li><a href="#DirStructNet">2.10 net</a></li>
+  <li><a href="#DirStructNetUtils">2.11 netutils</a></li>
+  <li><a href="#DirStructSched">2.12 sched/</a></li>
+  <li><a href="#DirStructTools">2.13 tools/</a></li>
+  <li><a href="#topmakefile">2.14 Makefile</a></li>
 </ul>
 <li><a href="#configandbuild">3.0 Configuring and Building</a></li>
 <ul>
@@ -139,8 +141,8 @@
 |   |   |  `-- <i>(board-specific source files)</i>
 |   |   `-- <i>(board-specific configuration files)</i>
 |   `-- <i>&lt;other-boards&gt;</i>/
-|-- <a href="#DirStructDrivers">drivers</a>
-|   |-- Makefile/
+|-- <a href="#DirStructDrivers">drivers</a>/
+|   |-- Makefile
 |   `-- <i>(common driver source files)</i>
 |-- <a href="#DirStructExamples">examples</a>/
 |   `-- <i>(example)</i>/
@@ -148,9 +150,16 @@
 |       `-- <i>(example source files)</i>
 |-- <a href="#DirStructFs">fs</a>/
 |   |-- Makefile
-|   `-- <i>(fs source files)</i>
+|   `-- <i>(common file system source files)</i>
 |-- <a href="#DirStructInclude">include</a>/
 |   |-- <i>(standard header files)</i>
+|   |-- arpa/
+|   |   `-- <i>(standard header files)</i>
+|   |-- net/
+|   |   `-- uip/
+|   |       `-- <i>(uIP specific header files)</i>
+|   |-- netinet/
+|   |   `-- <i>(standard header files)</i>
 |   |-- nuttx/
 |   |   `-- <i>(nuttx specific header files)</i>
 |   `- sys/
@@ -160,7 +169,29 @@
 |   `-- <i>(lib source files)</i>
 |-- <a href="#DirStructMm">mm</a>/
 |   |-- Makefile
-|   `-- <i>(mm source files)</i>
+|   `-- <i>(memory management source files)</i>
+|-- <a href="#DirStructNet">net</a>/
+|   |-- Makefile
+|   |-- uip/
+|   |   `-- <i>(uip source files)</i>
+|   `-- <i>(socket source files)</i>
+|-- <a href="#DirStructNetUtils">netutils</a>/
+|   |-- dhcp/
+|   |   `-- <i>(dhcp source files)</i>
+|   |-- resolv/
+|   |   `-- <i>(resolv source files)</i>
+|   |-- smtp/
+|   |   `-- <i>(smtp source files)</i>
+|   |-- telnetd/
+|   |   `-- <i>(telnetd source files)</i>
+|   |-- uiplib/
+|   |   `-- <i>(uiplib source files)</i>
+|   |-- weblclient/
+|   |   `-- <i>(webclient source files)</i>
+|   |-- webserver/
+|   |   `-- <i>(webserver source files)</i>
+|   |-- Makefile
+|   `-- <i>(fs source files)</i>
 |-- <a href="#DirStructSched">sched</a>/
 |   |-- Makefile
 |   `-- <i>(sched source files)</i>
@@ -604,18 +635,30 @@
   This is the NuttX memory manager.
 </p>
 
-<h2>2.10 <a name="DirStructSched">sched</a></h2>
+<h2>2.10 <a name="DirStructNet">net</a></h2>
+<p>
+  This directory contains the implementation of the socket APIs.
+  The subdirectory, <code>uip</code> contians the uIP port.
+</P>
+
+<h2>2.11 <a name="DirStructNetUtils">netutils</a></h2>
+<p>
+  This directory contains most of the network applications contained under the uIP-1.0 apps directory.
+  As the uIP apps/README says, these applications "are not all heavily tested."
+</p>
+
+<h2>2.12 <a name="DirStructSched">sched</a></h2>
 <p>
   The files forming core of the NuttX RTOS reside here.
 </p>
 
-<h2>2.11 <a name="DirStructTools">tools</a></h2>
+<h2>2.13 <a name="DirStructTools">tools</a></h2>
 <p>
   This directory holds a collection of tools and scripts to simplify
   configuring and building NuttX.
 </p>
 
-<h2>2.12 <a name="topmakefile">Makefile</a></h2>
+<h2>2.14 <a name="topmakefile">Makefile</a></h2>
 <p>
   The top-level <code>Makefile</code> in the <code>${TOPDIR}</code> directory contains all of the top-level control
   logic to build NuttX.

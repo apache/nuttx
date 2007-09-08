@@ -54,15 +54,15 @@
  * Function: bind
  *
  * Description:
- *   bind() gives the socket sockfd the local address my_addr. my_addr is
- *   addrlen bytes long. Traditionally, this is called “assigning a name to
- *   a socket.” When a socket is created with socket(2), it exists in a name
+ *   bind() gives the socket 'sockfd' the local address 'addr'. 'addr' is
+ *   'addrlen' bytes long. Traditionally, this is called “assigning a name to
+ *   a socket.” When a socket is created with socket, it exists in a name
  *   space (address family) but has no name assigned.
  *
  * Parameters:
  *   sockfd   Socket descriptor from socket
  *   addr     Socket local address
- *   addrlen  Length of my_addr
+ *   addrlen  Length of 'addr'
  *
  * Returned Value:
  *   0 on success; -1 on error with errno set appropriately
