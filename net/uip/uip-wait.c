@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 #include <semaphore.h>
-#include <wdog.h>
 #include <arch/irq.h>
 #include <net/uip/uip.h>
 
@@ -63,31 +62,18 @@ static uint16 uip_waitflags = 0;     /* UIP flags to wait for */
  * Private Functions
  ************************************************************/
 
-/* Called from the timer interrupt handler when a event wait
- * watchdog expires.
- */
-
-static void uip_event_timeout(int argc, uint32 itcb, ...)
-{
-  irqstate_t save = irqsave();  /* Should not be necessary */
-  uip_flags |= UIP_APPTIMEOUT;  /* Set software timeout event */
-  uip_event_signal();           /* Signal the waiting thread/task */
-  irqrestore(save);             /* Restore interrupts */
-}
-
 /************************************************************
  * Global Functions
  ************************************************************/
 
 /* This function is called user code to set up the wait */
 
-int uip_event_timedwait(uint16 waitflags, int timeout)
+int uip_event_wait(uint16 waitflags)
 {
   /* Prevent conflicts with the interrupt level operation of
    * uip_event_signal().
    */
   irqstate_t save = irqsave();
-  WDOG_ID wdog;
 
   /* At present, we support only a single waiter. If uip_waitflags
    * is non-zero on entry, then there is a problem.
@@ -111,51 +97,16 @@ int uip_event_timedwait(uint16 waitflags, int timeout)
 
       uip_waitflags = waitflags;
 
-      /* Was a timeut requested as well? */
-
-      if (timeout)
-        {
-          /* Yes, then set the application timeout event as well */
-
-          uip_waitflags |= UIP_APPTIMEOUT;
-
-          /* Create a watchdog */
-
-          wdog = wd_create();
-          if (!wdog)
-            {
-              goto errout_with_irqdisabled;
-            }
-
-          /* Start the watchdog */
-
-          wd_start(wdog, timeout, (wdentry_t)uip_event_timeout, 0);
-        }
-
-      /* Wait for the event (or timeout) to occur */
+      /* Wait for the event to occur */
 
       if (sem_wait(&uip_waitsem) != 0)
         {
-          goto errout_with_watchdog;
-        }
-
-      /* We no longer need the watchdog */
-
-      if (wdog)
-        {
-          wd_delete(wdog);
-          wdog = NULL;
+          goto errout_with_irqdisabled;
         }
     }
 
     irqrestore(save);
     return OK;
-
-errout_with_watchdog:
-  if (wdog)
-    {
-      wd_delete(wdog);
-    }
 
 errout_with_irqdisabled:
   irqrestore(save);

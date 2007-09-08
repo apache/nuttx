@@ -58,9 +58,15 @@
 
 struct recvfrom_s
 {
-  sem_t   rf_sem;
-  uint16  rf_buflen;
-  char  * rf_buffer;
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+  FAR struct socket *rf_sock        /* The parent socket structure */
+#endif
+  sem_t              rf_sem;        /* Semaphore signals recv completion */
+  sint16             rf_buflen;     /* Length of receive buffer (error if <0) */
+  char              *rf_buffer;     /* Pointer to receive buffer */
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+  uint32             rf_starttime;  /* rcv start time for determining timeout */
+#endif
 };
 
 /****************************************************************************
@@ -72,38 +78,61 @@ void recvfrom_interrupt(void *private)
   struct recvfrom_s *pstate = (struct recvfrom_s *)private;
   size_t recvlen;
 
-  /* If new data is available and we are correctly intialized, then complete
-   * the read action.  We could also check for POLL events here in order to
-   * implement SO_RECVTIMEO.
-   */
+  /* 'private' might be null in some race conditions (?) */
 
-  if (uip_newdata() && private)
+  if (pstate)
     {
-      /* Get the length of the data to return */
-      if (uip_len > pstate-> rf_buflen)
+      /* If new data is available, then complete the read action. */
+
+      if (uip_newdata())
         {
-          recvlen = pstate-> rf_buflen;
+          /* Get the length of the data to return */
+          if (uip_len > pstate-> rf_buflen)
+            {
+              recvlen = pstate-> rf_buflen;
+            }
+          else
+            {
+            recvlen = uip_len;
+            }
+
+          /* Copy the appdate into the user data and send it */
+
+          memcpy(pstate->rf_buffer, uip_appdata, recvlen);
+
+          /* Don't allow any further call backs. */
+
+          uip_conn->private = NULL;
+          uip_conn->callback = NULL;
+
+          /* Wake up the waiting thread, returning the number of bytes
+           * actually read.
+           */
+
+          pstate->rf_buflen = recvlen;
+          sem_post(&pstate-> rf_sem);
         }
-      else
-        {
-          recvlen = uip_len;
-        }
 
-      /* Copy the appdate into the user data and send it */
-
-      memcpy(pstate->rf_buffer, uip_appdata, recvlen);
-
-      /* Don't allow any further call backs. */
-
-      uip_conn->private = NULL;
-      uip_conn->callback = NULL;
-
-      /* Wake up the waiting thread, returning the number of bytes
-       * actually read.
+      /* No data has been received.  If this is a poll event, then check
+       * for a timeout.
        */
 
-      pstate->rf_buflen = recvlen;
-      sem_post(&pstate-> rf_sem);
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+      else if (uip_newdata() && pstate->rf_sock)
+        {
+          /* Check if SO_RCVTIMEO has been selected for this socket */
+
+          uint rcvtimeo = ;
+          if (pstate->rf_sock->s_rcvtimeo)
+            {
+              /* Yes.. Check if the timeout has elapsed */
+
+              if (net_timeo(pstate->rf_starttime, pstate->rf_sock->s_rcvtimeo))
+                {
+                }
+            }
+        }
+#endif
     }
 }
 
@@ -213,6 +242,12 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *
   state. rf_buflen = len;
   state. rf_buffer = buf;
 
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+  /* Set up the start time for the timeout */
+
+  state.rf_starttime = g_system_timer;
+#endif
+
   /* Setup the UDP socket */
 
   ret = uip_udpconnect(psock->s_conn, NULL);
@@ -244,6 +279,20 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *
   sem_destroy(&state. rf_sem);
   irqrestore(save);
 
+  /* Check for a timeout.  Errors are signaled by negative errno values
+   * for the rcv length
+   */
+
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+  if (state.rf_buflen < 0)
+    {
+      /* Return EGAIN on a timeout */
+
+      err = -state.rf_buflen;
+      goto errout;
+    }
+#endif
+
   /* If sem_wait failed, then we were probably reawakened by a signal. In
    * this case, sem_wait will have set errno appropriately.
    */
@@ -253,8 +302,9 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *
       return ERROR;
     }
 
-  return state.rf_buflen;
 #warning "Needs to return server address"
+  return state.rf_buflen;
+
 #else
   err = ENOSYS;
 #endif

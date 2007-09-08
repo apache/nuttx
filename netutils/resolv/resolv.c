@@ -52,6 +52,9 @@
 
 #include <sys/types.h>
 #include <string.h>
+#include <unistd.h>
+#include <time.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <sys/socket.h>
@@ -341,10 +344,29 @@ int resolv_query(const char *name, struct sockaddr_in6 *addr)
 int resolv_query(const char *name, struct sockaddr_in *addr)
 #endif
 {
-  int ret = send_query(name, addr);
-  if (ret == 0)
+  int retries;
+  int ret;
+
+  // Loop while receive timeout errors occur and there are remaining retries
+  for (retries = 0; retries < 3; retries++)
     {
+      if (send_query(name, addr) < 0)
+        {
+          return ERROR;
+        }
+
       ret = recv_response(addr);
+      if (ret >= 0)
+        {
+          /* Response received successfully */
+          return OK;
+        }
+
+      else if (*get_errno_ptr() != EAGAIN)
+        {
+          /* Some failure other than receive timeout occurred */
+          return ERROR;
+        }
     }
   return ret;
 }
@@ -352,9 +374,9 @@ int resolv_query(const char *name, struct sockaddr_in *addr)
 /* Obtain the currently configured DNS server. */
 
 #ifdef CONFIG_NET_IPv6
-void resolv_getserver(const struct sockaddr_in6 *dnsserver)
+void resolv_getserver(struct sockaddr_in6 *dnsserver)
 #else
-void resolv_getserver(const struct sockaddr_in *dnsserver)
+void resolv_getserver(struct sockaddr_in *dnsserver)
 #endif
 {
   memcpy(dnsserver, &g_dnsserver, ADDRLEN);
@@ -375,10 +397,23 @@ void resolv_conf(const struct sockaddr_in *dnsserver)
 
 int resolv_init(void)
 {
+  struct timeval tv;
   g_sockfd = socket(PF_INET, SOCK_DGRAM, 0);
   if (g_sockfd < 0)
     {
       return ERROR;
     }
+
+  /* Set up a receive timeout */
+
+  tv.tv_sec  = 30;
+  tv.tv_usec = 0;
+  if (setsockopt(g_sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval)) < 0)
+    {
+      close(g_sockfd);
+      g_sockfd = -1;
+      return ERROR;
+    }
+
   return OK;
 }

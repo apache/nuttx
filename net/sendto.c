@@ -58,9 +58,9 @@
 
 struct sendto_s
 {
-  sem_t       st_sem;
-  uint16      st_buflen;
-  const char *st_buffer;
+  sem_t       st_sem;        /* Semaphore signals sendto completion */
+  uint16      st_buflen;     /* Length of send buffer (error if <0) */
+  const char *st_buffer;     /* Pointer to send buffer */
 };
 
 /****************************************************************************

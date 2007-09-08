@@ -1126,8 +1126,7 @@ extern int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *a
 
 /* This function is called user code to set up the wait */
 
-#define uip_event_wait(waitflags) uip_event_timedwait(waitflags,0)
-extern int uip_event_timedwait(uint16 waitflags, int timeout);
+extern int uip_event_wait(uint16 waitflags);
 
 /* This function is called from uip_interrupt() to wake up any
  * waiting threads/tasks.

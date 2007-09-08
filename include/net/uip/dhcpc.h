@@ -67,7 +67,7 @@ struct dhcpc_state
  ****************************************************************************/
 
 void *dhcpc_open(const void *mac_addr, int mac_len);
-int   dhcpc_request(void *handle, struct dhcpc_state *ds);
+int   dhcpc_request(void *handle, struct dhcpc_state *presult);
 void  dhcpc_close(void *handle);
 
 #endif /* NET_UIP_DHCP_H__ */
