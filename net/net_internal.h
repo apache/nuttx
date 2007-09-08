@@ -51,46 +51,47 @@
  * Definitions
  ****************************************************************************/
 
+/* This macro converts a socket option value into a bit setting */
+
+#define _SO_BIT(o)       (1 << (o))
+
 /* These define bit positions for each socket option (see sys/socket.h) */
 
-#define _SO_DEBUG        (1 << SO_DEBUG)
-#define _SO_ACCEPTCONN   (1 << SO_ACCEPTCONN)
-#define _SO_BROADCAST    (1 << SO_BROADCAST)
-#define _SO_REUSEADDR    (1 << SO_REUSEADDR)
-#define _SO_KEEPALIVE    (1 << SO_KEEPALIVE)
-#define _SO_LINGER       (1 << SO_LINGER)
-#define _SO_OOBINLINE    (1 << SO_OOBINLINE)
-#define _SO_SNDBUF       (1 << SO_SNDBUF)
-#define _SO_RCVBUF       (1 << SO_RCVBUF)
-#define _SO_ERROR        (1 << SO_ERROR)
-#define _SO_TYPE         (1 << SO_TYPE)
-#define _SO_DONTROUTE    (1 << SO_DONTROUTE)
-#define _SO_RCVLOWAT     (1 << SO_RCVLOWAT)
-#define _SO_RCVTIMEO     (1 << SO_RCVTIMEO)
-#define _SO_SNDLOWAT     (1 << SO_SNDLOWAT)
-#define _SO_SNDTIMEO     (1 << SO_SNDTIMEO)
+#define _SO_DEBUG        _SO_BIT(SO_DEBUG)
+#define _SO_ACCEPTCONN   _SO_BIT(SO_ACCEPTCONN)
+#define _SO_BROADCAST    _SO_BIT(SO_BROADCAST)
+#define _SO_REUSEADDR    _SO_BIT(SO_REUSEADDR)
+#define _SO_KEEPALIVE    _SO_BIT(SO_KEEPALIVE)
+#define _SO_LINGER       _SO_BIT(SO_LINGER)
+#define _SO_OOBINLINE    _SO_BIT(SO_OOBINLINE)
+#define _SO_SNDBUF       _SO_BIT(SO_SNDBUF)
+#define _SO_RCVBUF       _SO_BIT(SO_RCVBUF)
+#define _SO_ERROR        _SO_BIT(SO_ERROR)
+#define _SO_TYPE         _SO_BIT(SO_TYPE)
+#define _SO_DONTROUTE    _SO_BIT(SO_DONTROUTE)
+#define _SO_RCVLOWAT     _SO_BIT(SO_RCVLOWAT)
+#define _SO_RCVTIMEO     _SO_BIT(SO_RCVTIMEO)
+#define _SO_SNDLOWAT     _SO_BIT(SO_SNDLOWAT)
+#define _SO_SNDTIMEO     _SO_BIT(SO_SNDTIMEO)
 
-/* This idenfies the options that have been implemented.  Someday this
- * should be 0xffff
+/* This is the larget option value */
+
+#define _SO_MAXOPT       (15)
+
+/* Macros to set, test, clear options */
+
+#define _SO_SETOPT(s,o)  ((s) |= _SO_BIT(o))
+#define _SO_CLROPT(s,o)  ((s) &= ~_SO_BIT(o))
+#define _SO_GETOPT(s,o)  (((s) & _SO_BIT(o)) != 0)
+
+/* These are macros that can be used to determine if socket option code is
+ * valid (in range) and supported by API.
  */
 
-#define _SO_IMPLEMENTED  0x0000
-
-/* The set of all valid options is a subset of those that are implemented
- * and those that can be supported within the kernel OS configuration.
- */
-
-#ifdef CONFIG_DISABLE_CLOCK
-# define _SO_ALLOPTIONS  (_SO_IMPLEMENTED & ~(_SO_RCVTIMEO|_SO_SNDTIMEO)
-#else
-# define _SO_ALLOPTIONS  (_SO_IMPLEMENTED)
-#endif
-
-/* This is the set of options valid for getsockopt and setsockopt */
-
-#define _SO_GETONLY      (_SO_ACCEPTCONN|_SO_ERROR|_SO_TYPE)
-#define _SO_SETOPTS      (_SO_ALLOPTIONS & ~_SO_GETONLY)
-#define _SO_GETOTPS      _SO_ALLOPTIONS
+#define _SO_GETONLYSET   (_SO_ACCEPTCONN|_SO_ERROR|_SO_TYPE)
+#define _SO_GETONLY(o)   ((_SO_BIT(o) & _SO_GETONLYSET) != 0)
+#define _SO_GETVALID(o)  (((unsigned int)(o)) <= _SO_MAXOPT)
+#define _SO_SETVALID(o)  ((((unsigned int)(o)) <= _SO_MAXOPT) && !_SO_GETONLY(o))
 
 /****************************************************************************
  * Public Types
@@ -118,6 +119,14 @@ EXTERN void weak_function net_initialize(void);
 EXTERN int  sockfd_allocate(void);
 EXTERN void sockfd_release(int sockfd);
 EXTERN FAR struct socket *sockfd_socket(int sockfd);
+
+/* sockopt support ***********************************************************/
+
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+EXTERN int net_timeo(uint32 start_time, socktimeo_t timeo);
+EXTERN socktimeo_t socktimeo_t net_timeval2dsec(struct timeval *tv);
+EXTERN void net_dsec2timeval(uint16 dsec, struct timeval *tv);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

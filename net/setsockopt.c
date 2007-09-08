@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && defined(CONFIG_NET_SOCKOPTS)
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -101,8 +101,147 @@
 
 int setsockopt(int sockfd, int level, int option, const void *value, socklen_t value_len)
 {
-  *get_errno_ptr() = ENOPROTOOPT;
+  FAR struct socket *psock;
+  irqstate_t flags;
+  int err;
+
+  /* Get the underlying socket structure */
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  psock = sockfd_socket(sockfd);
+  if (!psock || psock->s_crefs <= 0)
+    {
+      err = EBADF;
+      goto errout;
+    }
+
+  /* Verify that the socket option if valid (but might not be supported ) */
+
+  if (!_SO_SETVALID(option) || !value)
+    {
+      err = EINVAL;
+      goto errout;
+    }
+
+  /* Process the option */
+  switch (option)
+    {
+      /* The following options take a point to an integer boolean value.
+       * We will blindly set the bit here although the implementation
+       * is outside of the scope of setsockopt.
+       */
+
+      case SO_DEBUG:      /* Enables recording of debugging information */
+      case SO_BROADCAST:  /* Permits sending of broadcast messages */
+      case SO_REUSEADDR:  /* Allow reuse of local addresses */
+      case SO_KEEPALIVE:  /* Keeps connections active by enabling the
+                           * periodic transmission */
+      case SO_OOBINLINE:  /* Leaves received out-of-band data inline */
+      case SO_DONTROUTE:  /* Requests outgoing messages bypass standard routing */
+        {
+          int setting;
+
+          /* Verify that option is the size of an 'int'.  Should also check
+           * that 'value' is properly aligned for an 'int'
+           */
+
+          if (value_len != sizeof(int))
+            {
+              err = EINVAL;
+              goto errout;
+           }
+
+          /* Get the value.  Is the option being set or cleared? */
+
+          setting = *(int*)value;
+
+          /* Disable interrupts so that there is no conflict with interrupt
+           * level access to options.
+           */
+
+           flags = irqsave();
+
+          /* Set or clear the option bit */
+
+          if (setting)
+            {
+              _SO_SETOPT(psock->s_options, option);
+            }
+          else
+            {
+              _SO_CLROPT(psock->s_options, option);
+            }
+        }
+        break;
+
+      /* The following are valid only if the OS CLOCK feature is enabled */
+
+      case SO_RCVTIMEO:
+      case SO_SNDTIMEO:
+#ifndef CONFIG_DISABLE_CLOCK
+        {
+          socktimeo_t timeo;
+
+          /* Verify that option is the size of an 'struct timeval'. */
+
+          if (value_len != sizeof(struct timeval))
+            {
+              err = EINVAL;
+              goto errout;
+           }
+
+          /* Get the timeout value */
+
+          timeo = net_timeval2dsec((struct timeval *)value);
+
+          /* Save the timeout value */
+
+          if (option == SO_RCVTIMEO)
+            {
+              psock->s_rcvtimeo = timeo;
+            }
+          else
+            {
+              psock->s_sndtimeo = timeo;
+            }
+
+          /* Set/clear the corresponding enable/disable bit */
+
+          if (timeo)
+            {
+              _SO_CLROPT(psock->s_options, option);
+            }
+          else
+            {
+              _SO_SETOPT(psock->s_options, option);
+            }
+        }
+        break;
+#endif
+
+      /* The following are not yet implemented */
+
+      case SO_LINGER:
+      case SO_SNDBUF:     /* Sets send buffer size */
+      case SO_RCVBUF:     /* Sets receive buffer size */
+      case SO_RCVLOWAT:   /* Sets the minimum number of bytes to input */
+      case SO_SNDLOWAT:   /* Sets the minimum number of bytes to output */
+
+      /* There options are only valid when used with getopt */
+
+      case SO_ACCEPTCONN: /* Reports whether socket listening is enabled */
+      case SO_ERROR:      /* Reports and clears error status. */
+      case SO_TYPE:       /* Reports the socket type */
+
+      default:
+        err = ENOPROTOOPT;
+        goto errout;
+    }
+  return OK;
+
+errout:
+  *get_errno_ptr() = err;
   return ERROR;
 }
 
-#endif /* CONFIG_NET */
+#endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS */

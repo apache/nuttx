@@ -45,6 +45,7 @@
 
 #include <semaphore.h>
 
+#include <nuttx/os_external.h>
 #include <net/uip/uip.h>
 #include <net/uip/psock.h>
 
@@ -71,18 +72,30 @@
 
 typedef uint16 sockopt_t;
 
+/* This defines the storage size of a timeout value.  This effects only
+ * range of supported timeout values.  With an LSB in seciseconds, the
+ * 16-bit maximum of 65535 corresponds to 1 hr 49 min 13.5 sec at decisecond
+ * resolution.
+ */
+
+typedef uint16 socktimeo_t;
+
 /* This is the internal representation of a socket reference by a file
  * descriptor.
  */
 
 struct socket
 {
-  int       s_crefs;      /* Reference count on the socket */
-  uint8     s_type;       /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
+  int         s_crefs;     /* Reference count on the socket */
+  uint8       s_type;      /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
 #ifdef CONFIG_NET_SOCKOPTS
-  sockopt_t s_options;    /* Selected socket options */
+  sockopt_t   s_options;   /* Selected socket options */
+#ifndef CONFIG_DISABLE_CLOCK
+  socktimeo_t s_rcvtimeo;  /* Receive timeout value (in deciseconds) */
+  socktimeo_t s_sndtimeo;  /* Send timeout value (in deciseconds) */
 #endif
-  void     *s_conn;       /* Connection: struct uip_conn * or uip_udp_conn * */
+#endif
+  void       *s_conn;      /* Connection: struct uip_conn or uip_udp_conn */
 };
 
 /* This defines a list of sockets indexed by the socket descriptor */

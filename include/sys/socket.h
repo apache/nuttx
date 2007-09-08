@@ -118,26 +118,27 @@
 /* Socket options */
 
 #define SO_DEBUG        0 /* Enables recording of debugging information (get/set).
-                           * arg: integer contain boolean value */
+                           * arg: pointer to integer containing a boolean value */
 #define SO_ACCEPTCONN   1 /* Reports whether socket listening is enabled (get only).
-                           * arg: returns integer contain boolean value */
+                           * arg: pointer to integer containing a boolean value */
 #define SO_BROADCAST    2 /* Permits sending of broadcast messages (get/set).
-                           * arg: integer contain boolean value */
+                           * arg: pointer to integer containing a boolean value */
 #define SO_REUSEADDR    3 /* Allow reuse of local addresses (get/set)
-                           * arg: integer contain boolean value */
+                           * arg: pointer to integer containing a boolean value */
 #define SO_KEEPALIVE    4 /* Keeps connections active by enabling the periodic transmission
-                           * of messages (get/set). arg: int */
+                           * of messages (get/set).
+                           * arg: pointer to integer containing a boolean value */
 #define SO_LINGER       5 /* Lingers on a close() if data is present (get/set)
                            * arg: struct linger */
 #define SO_OOBINLINE    6 /* Leaves received out-of-band data (data marked urgent) inline
-                           * (get/set) arg: integer contain boolean value */
+                           * (get/set) arg: pointer to integer containing a boolean value */
 #define SO_SNDBUF       7 /* Sets send buffer size. arg: integer value (get/set). */
 #define SO_RCVBUF       8 /* Sets receive buffer size. arg: integer value (get/set). */
-#define SO_ERROR        9 /* Reports and clears error statust (get only).  arg: returns
+#define SO_ERROR        9 /* Reports and clears error status (get only).  arg: returns
                            * an integer value
 #define SO_TYPE        10 /* Reports the socket type (get only). return: int */
-#define SO_DONTROUTE   11 /* equests that outgoing messages bypass standard routing (get/set)
-                           * arg: integer contain boolean value */
+#define SO_DONTROUTE   11 /* Requests that outgoing messages bypass standard routing (get/set)
+                           * arg: pointer to integer containing a boolean value */
 #define SO_RCVLOWAT    12 /* Sets the minimum number of bytes to process for socket input
                            * (get/set). arg: integer value */
 #define SO_RCVTIMEO    13 /* Sets the timeout value that specifies the maximum amount of time
