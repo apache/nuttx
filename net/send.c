@@ -42,12 +42,125 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <string.h>
 #include <errno.h>
+#include <arch/irq.h>
 
 #include "net-internal.h"
 
 /****************************************************************************
- * Global Functions
+ * Definitions
+ ****************************************************************************/
+
+#define STATE_POLLWAIT   1
+#define STATE_DATA_SENT  2
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* This structure holds the state of the send operation until it can be
+ * operated upon from the interrupt level.
+ */
+
+struct send_s
+{
+  FAR struct socket *snd_sock;    /* Points to the parent socket structure */
+  sem_t                snd_sem;     /* Used to wake up the waiting thread */
+  FAR const uint8     *snd_buffer;  /* Points to the buffer of data to send */
+  size_t               snd_buflen;  /* Number of bytes in the buffer to send */
+  ssize_t              snd_sent;    /* The number of bytes sent */
+  uint8                snd_state;   /* The state of the send operation. */
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function: send_Interrupt
+ *
+ * Description:
+ *   This function is called from the interrupt level to perform the actual
+ *   send operation when polled by the uIP layer.
+ *
+ * Parameters:
+ *   private  An instance of struct send_s cast to void*
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+static void send_interrupt(void *private)
+{
+  struct send_s *pstate = (struct send_s *)private;
+  struct uip_conn *conn;
+
+  /* If the data has not been sent OR if it needs to be retransmitted,
+   * then send it now.
+   */
+
+  if (pstate->snd_state != STATE_DATA_SENT || uip_rexmit())
+    {
+      if (pstate->snd_buflen > uip_mss())
+        {
+          uip_send(pstate->snd_buffer, uip_mss());
+        }
+      else
+        {
+          uip_send(pstate->snd_buffer, pstate->snd_buflen);
+        }
+
+      pstate->snd_state = STATE_DATA_SENT;
+    }
+
+  /* Check if all data has been sent and acknowledged */
+
+  else if (pstate->snd_state == STATE_DATA_SENT && uip_acked())
+    {
+      /* Yes.. the data has been sent AND acknowledge */
+
+      if (pstate->snd_buflen > uip_mss())
+        {
+          /* Not all data has been sent */
+
+          pstate->snd_sent   += uip_mss();
+          pstate->snd_buflen -= uip_mss();
+          pstate->snd_buffer += uip_mss();
+
+          /* Send again on the next poll */
+
+          pstate->snd_state = STATE_POLLWAIT;
+        }
+      else
+        {
+          /* All data has been sent */
+
+          pstate->snd_sent   += pstate->snd_buflen;
+          pstate->snd_buffer += pstate->snd_buflen;
+          pstate->snd_buflen  = 0;
+
+          /* Don't allow any further call backs. */
+
+          conn           = (struct uip_conn *)pstate->snd_sock->s_conn;
+          conn->private  = NULL;
+          conn->callback = NULL;
+
+          /* Wake up the waiting thread, returning the number of bytes
+           * actually sent.
+           */
+
+          sem_post(&pstate->snd_sem);
+        }
+    }
+}
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -57,8 +170,8 @@
  *   The send() call may be used only when the socket is in a connected state
  *   (so that the intended recipient is known). The only difference between
  *   send() and write() is the presence of flags. With zero flags parameter,
- *   send() is equivalent to write(). Also, send(s,buf,len,flags) is
- *   equivalent to sendto(s,buf,len,flags,NULL,0).
+ *   send() is equivalent to write(). Also, send(sockfd,buf,len,flags) is
+ *   equivalent to sendto(sockfd,buf,len,flags,NULL,0).
  *
  * Parameters:
  *   sockfd   Socket descriptor of socket
@@ -117,7 +230,11 @@
 ssize_t send(int sockfd, const void *buf, size_t len, int flags)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
+  struct uip_conn *conn;
+  struct send_s state;
+  irqstate_t save;
   int err;
+  int ret;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
@@ -129,21 +246,86 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
 
   /* If this is a connected socket, then return ENOTCONN */
 
-  if (psock->s_type != SOCK_STREAM)
+  if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
     {
       err = ENOTCONN;
       goto errout;
     }
 
+  /* Set the socket state to sending */
+
+  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
+
   /* Perform the TCP send operation */
 
-#warning "send() not implemented"
-  err = ENOSYS;
+  /* Initialize the state structure.  This is done with interrupts
+   * disabled because we don't want anything to happen until we
+   * are ready.
+   */
+
+  save                = irqsave();
+  memset(&state, 0, sizeof(struct send_s));
+  (void)sem_init(&state. snd_sem, 0, 0); /* Doesn't really fail */
+  state.snd_sock      = psock;
+  state.snd_buflen    = len;
+  state.snd_buffer    = buf;
+  state.snd_state     = STATE_POLLWAIT;
+
+  if (len > 0)
+    {
+      /* Set up the callback in the connection */
+
+      conn           = (struct uip_conn *)psock->s_conn;
+      conn->private  = (void*)&state;
+      conn->callback = send_interrupt;
+
+    /* Wait for the send to complete or an error to occur:  NOTES: (1)
+     * sem_wait will also terminate if a signal is received, (2) interrupts
+     * are disabled!  They will be re-enabled while the task sleeps and
+     * automatically re-enabled when the task restarts.
+     */
+
+    ret = sem_wait(&state. snd_sem);
+
+    /* Make sure that no further interrupts are processed */
+
+    conn->private  = NULL;
+    conn->callback = NULL;
+  }
+
+  sem_destroy(&state. snd_sem);
+  irqrestore(save);
+
+  /* Set the socket state to idle */
+
+  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
+
+  /* Check for a errors.  Errors are signaled by negative errno values
+   * for the send length
+   */
+
+  if (state.snd_sent < 0)
+    {
+      err = state.snd_sent;
+      goto errout;
+    }
+
+  /* If sem_wait failed, then we were probably reawakened by a signal. In
+   * this case, sem_wait will have set errno appropriately.
+   */
+
+  if (ret < 0)
+    {
+      err = -ret;
+      goto errout;
+    }
+
+  /* Return the number of bytes actually sent */
+
+  return state.snd_sent;
 
 errout:
-  *get_errno_ptr() = ENOSYS;
-  return ERROR;
-  *get_errno_ptr() = ENOSYS;
+  *get_errno_ptr() = err;
   return ERROR;
 }
 

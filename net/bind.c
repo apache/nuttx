@@ -119,6 +119,7 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
     {
       case SOCK_STREAM:
         ret = uip_tcpbind(psock->s_conn, inaddr);
+        psock->s_flags |= _SF_BOUND;
         break;
 
 #ifdef CONFIG_NET_UDP

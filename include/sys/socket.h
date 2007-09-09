@@ -177,21 +177,21 @@ extern "C" {
 #endif
 
 EXTERN int socket(int domain, int type, int protocol);
-EXTERN int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
-EXTERN int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+EXTERN int bind(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen);
+EXTERN int connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen);
 
-EXTERN ssize_t send(int sockfd, const void *buf, size_t len, int flags);
-EXTERN ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
-                      const struct sockaddr *to, socklen_t tolen);
+EXTERN ssize_t send(int sockfd, FAR const void *buf, size_t len, int flags);
+EXTERN ssize_t sendto(int sockfd, FAR const void *buf, size_t len, int flags,
+                      FAR const struct sockaddr *to, socklen_t tolen);
 
-EXTERN ssize_t recv(int sockfd, void *buf, size_t len, int flags);
-EXTERN ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
-                        struct sockaddr *from, socklen_t *fromlen);
+EXTERN ssize_t recv(int sockfd, FAR void *buf, size_t len, int flags);
+EXTERN ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
+                        FAR struct sockaddr *from, FAR socklen_t *fromlen);
 
 EXTERN int setsockopt(int sockfd, int level, int option,
-                      const void *value, socklen_t value_len);
+                      FAR const void *value, socklen_t value_len);
 EXTERN int getsockopt(int sockfd, int level, int option,
-                      void *value, socklen_t *value_len);
+                      FAR void *value, FAR socklen_t *value_len);
 
 #undef EXTERN
 #if defined(__cplusplus)

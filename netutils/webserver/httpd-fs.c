@@ -45,6 +45,7 @@
 
 #include <net/uip/httpd.h>
 
+#include "httpd.h"
 #include "httpd-fsdata.h"
 
 #ifndef NULL

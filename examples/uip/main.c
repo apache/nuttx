@@ -89,6 +89,7 @@ int user_start(int argc, char *argv[])
 
 #if defined(CONFIG_EXAMPLE_UIP_WEBSERVER)
   httpd_init();
+  httpd_listen();
 #elif defined(CONFIG_EXAMPLE_UIP_TELNETD)
   telnetd_init();
 #elif defined(CONFIG_EXAMPLE_UIP_DHCPC)

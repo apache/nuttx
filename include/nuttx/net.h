@@ -46,7 +46,6 @@
 #include <semaphore.h>
 
 #include <net/uip/uip.h>
-#include <net/uip/psock.h>
 
 /****************************************************************************
  * Definitions
@@ -87,6 +86,7 @@ struct socket
 {
   int         s_crefs;     /* Reference count on the socket */
   uint8       s_type;      /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
+  uint8       s_flags;     /* See _SF_* definitions */
 #ifdef CONFIG_NET_SOCKOPTS
   sockopt_t   s_options;   /* Selected socket options */
 #ifndef CONFIG_DISABLE_CLOCK

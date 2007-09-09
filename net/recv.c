@@ -69,7 +69,7 @@
  *
  ****************************************************************************/
 
-ssize_t recv(int sockfd, void *buf, size_t len, int flags)
+ssize_t recv(int sockfd, FAR void *buf, size_t len, int flags)
 {
   return recvfrom(sockfd, buf, len, flags, NULL, 0);
 }

@@ -123,6 +123,69 @@ static struct uip_conn *uip_find_conn(uint16 portno)
 }
 
 /****************************************************************************
+ * Name: uip_selectport()
+ *
+ * Description:
+ *   If the portnumber is zero; select an unused port for the connection.
+ *   If the portnumber is non-zero, verify that no other connection has
+ *   been created with this port number.
+ *
+ * Input Parameters:
+ *   portno -- the selected port number in host order. Zero means no port
+ *     selected.
+ *
+ * Return:
+ *   0 on success, -ERRNO on failure
+ *
+ * Assumptions:
+ *   Interrupts are disabled
+ *
+ ****************************************************************************/
+
+static int uip_selectport(uint16 portno)
+{
+  if (portno == 0)
+    {
+      /* No local port assigned. Loop until we find a valid listen port number
+       * that is not being used by any other connection.
+       */
+
+      do
+        {
+          /* Guess that the next available port number will be the one after
+           * the last port number assigned.
+           */
+          portno = ++g_last_tcp_port;
+
+          /* Make sure that the port number is within range */
+
+          if (g_last_tcp_port >= 32000)
+            {
+              g_last_tcp_port = 4096;
+            }
+        }
+      while (uip_find_conn(g_last_tcp_port));
+    }
+  else
+    {
+      /* A port number has been supplied.  Verify that no other TCP/IP
+       * connection is using this local port.
+       */
+
+      if (uip_find_conn(portno))
+        {
+          /* It is in use... return EADDRINUSE */
+
+          return -EADDRINUSE;
+        }
+    }
+
+  /* Return the selecte or verified port number */
+
+  return portno;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -422,6 +485,20 @@ int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in6 *addr)
 int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr)
 #endif
 {
+  irqstate_t flags;
+  int port;
+
+  /* Verify or select a local port */
+
+  flags = irqsave();
+  port = uip_selectport(ntohs(conn->lport));
+  irqrestore(flags);
+
+  if (port < 0)
+    {
+      return port;
+    }
+
 #warning "Need to implement bind logic"
   return -ENOSYS;
 }
@@ -453,7 +530,7 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
 #endif
 {
   irqstate_t flags;
-  uint16 port;
+  int port;
 
   /* The connection is expected to be in the UIP_ALLOCATED state.. i.e., 
    * allocated via up_tcpalloc(), but not yet put into the active connections
@@ -469,29 +546,13 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
    * one now.
    */
 
-  port = ntohs(conn->lport);
-  if (port == 0)
+  flags = irqsave();
+  port = uip_selectport(ntohs(conn->lport));
+  irqrestore(flags);
+
+  if (port < 0)
     {
-      /* No local port assigned. Loop until we find a valid listen port number\
-       * that is not being used by any other connection.
-       */
-
-      do
-        {
-          /* Guess that the next available port number will be the one after
-           * the last port number assigned.
-           */
-#warning "This need protection from other threads and from interrupts"
-          port = ++g_last_tcp_port;
-
-          /* Make sure that the port number is within range */
-
-          if (g_last_tcp_port >= 32000)
-            {
-              g_last_tcp_port = 4096;
-            }
-        }
-      while (uip_find_conn(g_last_tcp_port));
+      return port;
     }
 
   /* Initialize and return the connection structure, bind it to the port number */
@@ -511,7 +572,7 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
   conn->rto        = UIP_RTO;
   conn->sa         = 0;
   conn->sv         = 16;   /* Initial value of the RTT variance. */
-  conn->lport      = htons(port);
+  conn->lport      = htons((uint16)port);
 
   /* The sockaddr port is 16 bits and already in network order */
 

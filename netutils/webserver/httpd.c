@@ -35,9 +35,12 @@
  */
 
 #include <stdlib.h>
+#include <sys/socket.h>
+
 #include <net/uip/uip.h>
 #include <net/uip/httpd.h>
 
+#include "httpd.h"
 #include "httpd-cgi.h"
 #include "http-strings.h"
 
@@ -54,244 +57,208 @@
 #define ISO_slash   0x2f
 #define ISO_colon   0x3a
 
-static unsigned short generate_part_of_file(void *state)
+#define SEND_STR(psock, str) psock_send(psock, str, strlen(str))
+
+static inline int send_file(struct httpd_state *pstate)
 {
-  struct httpd_state *s = (struct httpd_state *)state;
-
-  if (s->file.len > uip_mss()) {
-    s->len = uip_mss();
-  } else {
-    s->len = s->file.len;
-  }
-  memcpy(uip_appdata, s->file.data, s->len);
-
-  return s->len;
+  return send(pstate->sockout, pstate->file.data, pstate->file.len, 0);
 }
 
-static void send_file(struct httpd_state *s)
+static inline int send_part_of_file(struct httpd_state *pstate)
 {
-  do {
-    psock_generator_send(&s->sout, generate_part_of_file, s);
-    s->file.len -= s->len;
-    s->file.data += s->len;
-  } while(s->file.len > 0);
-#warning REVISIT must not return until file sent
+  return send(pstate->sockout, pstate->file.data, pstate->len, 0);
 }
 
-static void send_part_of_file(struct httpd_state *s)
-{
-  psock_send(&s->sout, s->file.data, s->len);
-#warning REVISIT must not return until file sent
-}
-
-static void next_scriptstate(struct httpd_state *s)
+static void next_scriptstate(struct httpd_state *pstate)
 {
   char *p;
-  p = strchr(s->scriptptr, ISO_nl) + 1;
-  s->scriptlen -= (unsigned short)(p - s->scriptptr);
-  s->scriptptr = p;
+  p = strchr(pstate->scriptptr, ISO_nl) + 1;
+  pstate->scriptlen -= (unsigned short)(p - pstate->scriptptr);
+  pstate->scriptptr = p;
 }
 
-static void handle_script(struct httpd_state *s)
+static void handle_script(struct httpd_state *pstate)
 {
   char *ptr;
-  
-  while(s->file.len > 0) {
+
+  while(pstate->file.len > 0) {
 
     /* Check if we should start executing a script. */
-    if (*s->file.data == ISO_percent &&
-       *(s->file.data + 1) == ISO_bang) {
-      s->scriptptr = s->file.data + 3;
-      s->scriptlen = s->file.len - 3;
-      if (*(s->scriptptr - 1) == ISO_colon) {
-	httpd_fs_open(s->scriptptr + 1, &s->file);
-	send_file(s);
+    if (*pstate->file.data == ISO_percent &&
+       *(pstate->file.data + 1) == ISO_bang) {
+      pstate->scriptptr = pstate->file.data + 3;
+      pstate->scriptlen = pstate->file.len - 3;
+      if (*(pstate->scriptptr - 1) == ISO_colon) {
+	httpd_fs_open(pstate->scriptptr + 1, &pstate->file);
+	send_file(pstate);
       } else {
-        httpd_cgi(s->scriptptr)(s, s->scriptptr);
+        httpd_cgi(pstate->scriptptr)(pstate, pstate->scriptptr);
       }
-      next_scriptstate(s);
+      next_scriptstate(pstate);
 
       /* The script is over, so we reset the pointers and continue
 	 sending the rest of the file. */
-      s->file.data = s->scriptptr;
-      s->file.len = s->scriptlen;
+      pstate->file.data = pstate->scriptptr;
+      pstate->file.len = pstate->scriptlen;
     } else {
       /* See if we find the start of script marker in the block of HTML
 	 to be sent. */
 
-      if (s->file.len > uip_mss()) {
-	s->len = uip_mss();
+      if (pstate->file.len > uip_mss()) {
+	pstate->len = uip_mss();
       } else {
-	s->len = s->file.len;
+	pstate->len = pstate->file.len;
       }
 
-      if (*s->file.data == ISO_percent) {
-	ptr = strchr(s->file.data + 1, ISO_percent);
+      if (*pstate->file.data == ISO_percent) {
+	ptr = strchr(pstate->file.data + 1, ISO_percent);
       } else {
-	ptr = strchr(s->file.data, ISO_percent);
+	ptr = strchr(pstate->file.data, ISO_percent);
       }
       if (ptr != NULL &&
-	 ptr != s->file.data) {
-	s->len = (int)(ptr - s->file.data);
-	if (s->len >= uip_mss()) {
-	  s->len = uip_mss();
+	 ptr != pstate->file.data) {
+	pstate->len = (int)(ptr - pstate->file.data);
+	if (pstate->len >= uip_mss()) {
+	  pstate->len = uip_mss();
 	}
       }
-      send_part_of_file(s);
-      s->file.data += s->len;
-      s->file.len -= s->len;
+      send_part_of_file(pstate);
+      pstate->file.data += pstate->len;
+      pstate->file.len -= pstate->len;
     }
   }
-#warning REVISIT must not return until sent
 }
 
-static void send_headers(struct httpd_state *s, const char *statushdr)
+static int send_headers(struct httpd_state *pstate, const char *statushdr)
 {
   char *ptr;
+  int ret;
 
-  PSOCK_SEND_STR(&s->sout, statushdr);
+  ret = send(pstate->sockout, statushdr, strlen(statushdr), 0);
 
-  ptr = strrchr(s->filename, ISO_period);
-  if (ptr == NULL) {
-    PSOCK_SEND_STR(&s->sout, http_content_type_binary);
-  } else if (strncmp(http_html, ptr, 5) == 0 ||
-	    strncmp(http_shtml, ptr, 6) == 0) {
-    PSOCK_SEND_STR(&s->sout, http_content_type_html);
-  } else if (strncmp(http_css, ptr, 4) == 0) {
-    PSOCK_SEND_STR(&s->sout, http_content_type_css);
-  } else if (strncmp(http_png, ptr, 4) == 0) {
-    PSOCK_SEND_STR(&s->sout, http_content_type_png);
-  } else if (strncmp(http_gif, ptr, 4) == 0) {
-    PSOCK_SEND_STR(&s->sout, http_content_type_gif);
-  } else if (strncmp(http_jpg, ptr, 4) == 0) {
-    PSOCK_SEND_STR(&s->sout, http_content_type_jpg);
-  } else {
-    PSOCK_SEND_STR(&s->sout, http_content_type_plain);
-  }
-#warning REVISIT must not return until sent
-}
-
-static void handle_output(struct httpd_state *s)
-{
-  char *ptr;
-
-  if (!httpd_fs_open(s->filename, &s->file))
+  ptr = strrchr(pstate->filename, ISO_period);
+  if (ptr == NULL)
     {
-      httpd_fs_open(http_404_html, &s->file);
-      strcpy(s->filename, http_404_html);
-      send_headers(s, http_header_404);
-      send_file(s);
+      ret = send(pstate->sockout, http_content_type_binary, strlen(http_content_type_binary), 0);
+    }
+  else if (strncmp(http_html, ptr, 5) == 0 || strncmp(http_shtml, ptr, 6) == 0)
+    {
+      ret = send(pstate->sockout, http_content_type_html, strlen(http_content_type_html), 0);
+    }
+  else if (strncmp(http_css, ptr, 4) == 0)
+    {
+      ret = send(pstate->sockout, http_content_type_css, strlen(http_content_type_css), 0);
+    }
+  else if (strncmp(http_png, ptr, 4) == 0)
+    {
+      ret = send(pstate->sockout, http_content_type_png, strlen(http_content_type_png), 0);
+    }
+  else if (strncmp(http_gif, ptr, 4) == 0)
+    {
+      ret = send(pstate->sockout, http_content_type_gif, strlen(http_content_type_gif), 0);
+    }
+  else if (strncmp(http_jpg, ptr, 4) == 0)
+    {
+      ret = send(pstate->sockout, http_content_type_jpg, strlen(http_content_type_jpg), 0);
     }
   else
     {
-      send_headers(s, http_header_200);
-      ptr = strchr(s->filename, ISO_period);
+      ret = send(pstate->sockout, http_content_type_plain, strlen(http_content_type_plain), 0);
+    }
+  return ret;
+}
+
+static void handle_output(struct httpd_state *pstate)
+{
+  char *ptr;
+
+  if (!httpd_fs_open(pstate->filename, &pstate->file))
+    {
+      httpd_fs_open(http_404_html, &pstate->file);
+      strcpy(pstate->filename, http_404_html);
+      send_headers(pstate, http_header_404);
+      send_file(pstate);
+    }
+  else
+    {
+      send_headers(pstate, http_header_200);
+      ptr = strchr(pstate->filename, ISO_period);
       if (ptr != NULL && strncmp(ptr, http_shtml, 6) == 0)
         {
-          handle_script(s);
+          handle_script(pstate);
         }
       else
         {
-        send_file(s);
+        send_file(pstate);
         }
     }
-  PSOCK_CLOSE(&s->sout);
 }
 
-static void handle_input(struct httpd_state *s)
+static int handle_input(struct httpd_state *pstate)
 {
-  psock_readto(&s->sin, ISO_space);
+  ssize_t recvlen;
 
-  if (strncmp(s->inputbuf, http_get, 4) != 0)
+  if (recv(pstate->sockin, pstate->inputbuf, HTTPD_INBUFFER_SIZE, 0) < 0)
     {
-      PSOCK_CLOSE(&s->sin);
-      return;
+      return ERROR;
+    }
+
+  if (strncmp(pstate->inputbuf, http_get, 4) != 0)
+    {
+      return ERROR;
   }
 
-  psock_readto(&s->sin, ISO_space);
+  recvlen = recv(pstate->sockin, pstate->inputbuf, HTTPD_INBUFFER_SIZE, 0);
+  if (recvlen < 0)
+    {
+      return ERROR;
+    }
 
-  if (s->inputbuf[0] != ISO_slash)
+  if (pstate->inputbuf[0] != ISO_slash)
   {
-    PSOCK_CLOSE(&s->sin);
-    return;
+    return ERROR;
   }
 
-  if (s->inputbuf[1] == ISO_space)
+  if (pstate->inputbuf[1] == ISO_space)
     {
-      strncpy(s->filename, http_index_html, sizeof(s->filename));
+      strncpy(pstate->filename, http_index_html, sizeof(pstate->filename));
     }
   else
     {
-      s->inputbuf[psock_datalen(&s->sin) - 1] = 0;
-      strncpy(s->filename, &s->inputbuf[0], sizeof(s->filename));
+      pstate->inputbuf[recvlen - 1] = 0;
+      strncpy(pstate->filename, &pstate->inputbuf[0], sizeof(pstate->filename));
     }
 
-  s->state = STATE_OUTPUT;
+  pstate->state = STATE_OUTPUT;
 
   while(1)
     {
-      psock_readto(&s->sin, ISO_nl);
-
-      if (strncmp(s->inputbuf, http_referer, 8) == 0)
+      recvlen = recv(pstate->sockin, pstate->inputbuf, HTTPD_INBUFFER_SIZE, 0);
+      if (recvlen < 0)
         {
-          s->inputbuf[psock_datalen(&s->sin) - 2] = 0;
+          return ERROR;
+        }
+
+      if (strncmp(pstate->inputbuf, http_referer, 8) == 0)
+        {
+          pstate->inputbuf[recvlen - 2] = 0;
         }
     }
+
+  return OK;
 }
 
-static void handle_connection(struct httpd_state *s)
+static void handle_connection(struct httpd_state *pstate)
 {
-  handle_input(s);
-  if (s->state == STATE_OUTPUT) {
-    handle_output(s);
+  handle_input(pstate);
+  if (pstate->state == STATE_OUTPUT) {
+    handle_output(pstate);
   }
 }
 
-/* This function is called by the UIP interrupt handling logic whenevent an
- * event of interest occurs.
- */
-
-void uip_interrupt_event(void)
+void httpd_listen(void)
 {
-#warning OBSOLETE -- needs to be redesigned
-  /* Get the private application specific data */
-  struct httpd_state *s = (struct httpd_state *)(uip_conn->private);
-
-  /* Has application specific data been allocate yet? */
-
-  if (!s)
-    {
-       /* No.. allocate it now */
-       s = (struct httpd_state *)malloc(sizeof(struct httpd_state));
-       if (!s)
-         {
-           return;
-         }
-
-       /* And assign the private instance to the connection */
-       uip_conn->private = s;
-    }
-
-  if (uip_closed() || uip_aborted() || uip_timedout()) {
-  } else if (uip_connected()) {
-    psock_init(&s->sin, s->inputbuf, sizeof(s->inputbuf) - 1);
-    psock_init(&s->sout, s->inputbuf, sizeof(s->inputbuf) - 1);
-    s->state = STATE_WAITING;
-    s->timer = 0;
-    handle_connection(s);
-  } else if (s != NULL) {
-    if (uip_poll()) {
-      ++s->timer;
-      if (s->timer >= 20) {
-	uip_abort();
-      }
-    } else {
-      s->timer = 0;
-    }
-    handle_connection(s);
-  } else {
-    uip_abort();
-  }
+#warning "this is all very broken at the moment"
 }
 
 /* Initialize the web server

@@ -97,7 +97,7 @@ void sendto_interrupt(void *private)
  *
  * Description:
  *   If sendto() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
- *   socket, the parameters to and tolen are ignored (and the error EISCONN
+ *   socket, the parameters to and 'tolen' are ignored (and the error EISCONN
  *   may be returned when they are not NULL and 0), and the error ENOTCONN is
  *   returned when the socket was not actually connected.
  *
@@ -214,6 +214,10 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
   /* Perform the UDP sendto operation */
 
 #ifdef CONFIG_NET_UDP
+  /* Set the socket state to sending */
+
+  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
+
   /* Initialize the state structure.  This is done with interrupts
    * disabled because we don't want anything to happen until we
    * are ready.
@@ -244,6 +248,10 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
 
   sem_wait(&state.st_sem);
   sem_destroy(&state.st_sem);
+
+  /* Set the socket state to idle */
+
+  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
   return len;
 #else
   err = ENOSYS;

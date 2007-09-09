@@ -77,6 +77,7 @@ struct recvfrom_s
 void recvfrom_interrupt(void *private)
 {
   struct recvfrom_s *pstate = (struct recvfrom_s *)private;
+  struct uip_udp_conn *udp_conn;
   size_t recvlen;
 
   /* 'private' might be null in some race conditions (?) */
@@ -88,9 +89,9 @@ void recvfrom_interrupt(void *private)
       if (uip_newdata())
         {
           /* Get the length of the data to return */
-          if (uip_len > pstate-> rf_buflen)
+          if (uip_len > pstate->rf_buflen)
             {
-              recvlen = pstate-> rf_buflen;
+              recvlen = pstate->rf_buflen;
             }
           else
             {
@@ -103,15 +104,16 @@ void recvfrom_interrupt(void *private)
 
           /* Don't allow any further call backs. */
 
-          uip_conn->private  = NULL;
-          uip_conn->callback = NULL;
+          udp_conn           = (struct uip_udp_conn *)pstate->rf_sock->s_conn;
+          udp_conn->private  = NULL;
+          udp_conn->callback = NULL;
 
           /* Wake up the waiting thread, returning the number of bytes
            * actually read.
            */
 
           pstate->rf_buflen = recvlen;
-          sem_post(&pstate-> rf_sem);
+          sem_post(&pstate->rf_sem);
         }
 
       /* No data has been received -- this is some other event... probably a
@@ -131,20 +133,172 @@ void recvfrom_interrupt(void *private)
                 {
                   /* Don't allow any further call backs. */
 
-                  uip_conn->private  = NULL;
-                  uip_conn->callback = NULL;
+                  udp_conn           = (struct uip_udp_conn *)pstate->rf_sock->s_conn;
+                  udp_conn->private  = NULL;
+                  udp_conn->callback = NULL;
 
                   /* Wake up the waiting thread, returning the error -EAGAIN
                    * that signals the timeout event
                    */
 
                   pstate->rf_buflen = -EAGAIN;
-                  sem_post(&pstate-> rf_sem);
+                  sem_post(&pstate->rf_sem);
                  }
             }
         }
 #endif
     }
+}
+
+/****************************************************************************
+ * Function: udp_recvfrom
+ *
+ * Description:
+ *   Perform the recvfrom operation for a UDP SOCK_DGRAM
+ *
+ * Parameters:
+ *   psock    Pointer to the socket structure for the SOCK_DRAM socket
+ *   buf      Buffer to receive data
+ *   len      Length of buffer
+ *   infrom   INET ddress of source
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error,
+ *   -errno is returned (see recvfrom for list of errnos).
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_IPv6
+static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
+                            FAR const struct sockaddr_in6 *infrom )
+#else
+static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
+                            FAR const struct sockaddr_in *infrom )
+#endif
+{
+  struct uip_udp_conn *udp_conn;
+  struct recvfrom_s state;
+  irqstate_t save;
+  int err;
+  int ret;
+
+  /* Perform the UDP recvfrom() operation */
+
+  /* Initialize the state structure.  This is done with interrupts
+   * disabled because we don't want anything to happen until we
+   * are ready.
+   */
+
+  save = irqsave();
+  memset(&state, 0, sizeof(struct recvfrom_s));
+  (void)sem_init(&state. rf_sem, 0, 0); /* Doesn't really fail */
+  state.rf_sock   = psock;
+  state.rf_buflen = len;
+  state.rf_buffer = buf;
+
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+  /* Set up the start time for the timeout */
+
+  state.rf_starttime = g_system_timer;
+#endif
+
+  /* Setup the UDP socket */
+
+  err = uip_udpconnect(psock->s_conn, NULL);
+  if (err < 0)
+    {
+      irqrestore(save);
+      return err;
+    }
+
+  /* Set up the callback in the connection */
+
+  udp_conn           = (struct uip_udp_conn *)psock->s_conn;
+  udp_conn->private  = (void*)&state;
+  udp_conn->callback = recvfrom_interrupt;
+
+  /* Wait for either the receive to complete or for an error/timeout to occur.
+   * NOTES:  (1) sem_wait will also terminate if a signal is received, (2)
+   * interrupts are disabled!  They will be re-enabled while the task sleeps
+   * and automatically re-enabled when the task restarts.
+   */
+
+  ret = sem_wait(&state. rf_sem);
+
+  /* Make sure that no further interrupts are processed */
+
+  udp_conn->private  = NULL;
+  udp_conn->callback = NULL;
+  sem_destroy(&state. rf_sem);
+  irqrestore(save);
+
+  /* Check for a error/timeout detected by the interrupt handler.  Errors are
+   * signaled by negative errno values for the rcv length
+   */
+
+  if (state.rf_buflen < 0)
+    {
+      /* Return EGAIN on a timeout */
+
+      return state.rf_buflen;
+    }
+
+  /* If sem_wait failed, then we were probably reawakened by a signal. In
+   * this case, sem_wait will have set errno appropriately.
+   */
+
+  if (ret < 0)
+    {
+      return -*get_errno_ptr();
+    }
+
+#warning "Needs to return server address"
+  return state.rf_buflen;
+}
+#endif /* CONFIG_NET_UDP */
+
+/****************************************************************************
+ * Function: tcp_recvfrom
+ *
+ * Description:
+ *   Perform the recvfrom operation for a TCP/IP SOCK_STREAM
+ *
+ * Parameters:
+ *   psock    Pointer to the socket structure for the SOCK_DRAM socket
+ *   buf      Buffer to receive data
+ *   len      Length of buffer
+ *   infrom   INET ddress of source
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error,
+ *   -errno is returned (see recvfrom for list of errnos).
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
+                            FAR const struct sockaddr_in6 *infrom )
+#else
+static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
+                            FAR const struct sockaddr_in *infrom )
+#endif
+{
+  /* Verify that the SOCK_STREAM has been connected */
+
+  if (_SS_ISCONNECTED(psock->s_flags))
+    {
+      /* The SOCK_STREAM must be connect in order to recive */
+
+      return -ENOTCONN;
+    }
+
+#warning "TCP/IP recv not implemented"
+  return -ENOSYS;
 }
 
 /****************************************************************************
@@ -203,8 +357,8 @@ void recvfrom_interrupt(void *private)
  *
  ****************************************************************************/
 
-ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *from,
-                 socklen_t *fromlen)
+ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags, FAR struct sockaddr *from,
+                 FAR socklen_t *fromlen)
 {
   FAR struct socket *psock;
 #ifdef CONFIG_NET_IPv6
@@ -212,13 +366,16 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *
 #else
   FAR const struct sockaddr_in *infrom = (const struct sockaddr_in *)from;
 #endif
-#ifdef CONFIG_NET_UDP
-  struct uip_udp_conn *udp_conn;
-  struct recvfrom_s state;
-  irqstate_t save;
-#endif
+  ssize_t ret;
   int err;
-  int ret;
+
+  /* Verify that non-NULL pointers were passed */
+
+  if (!buf || !from || !fromlen)
+    {
+      err = EINVAL;
+      goto errout;
+    }
 
   /* Get the underlying socket structure */
   /* Verify that the sockfd corresponds to valid, allocated socket */
@@ -230,95 +387,52 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *
       goto errout;
     }
 
-  /* Perform the TCP/IP recv() operation */
+  /* Verify that a valid address has been provided */
 
-  if (psock->s_type == SOCK_STREAM)
-    {
-#warning "TCP/IP recv not implemented"
-      err = ENOSYS;
+#ifdef CONFIG_NET_IPv6
+  if (from->sa_family != AF_INET6 || *fromlen < sizeof(struct sockaddr_in6))
+#else
+  if (from->sa_family != AF_INET || *fromlen < sizeof(struct sockaddr_in))
+#endif
+  {
+      err = EBADF;
       goto errout;
-    }
+  }
 
-  /* Perform the UDP recvfrom() operation */
+  /* Set the socket state to receiving */
+
+  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_RECV);
+
+  /* Perform the TCP/IP or UDP recv() operation */
 
 #ifdef CONFIG_NET_UDP
-  /* Initialize the state structure.  This is done with interrupts
-   * disabled because we don't want anything to happen until we
-   * are ready.
-   */
-
-  save = irqsave();
-  memset(&state, 0, sizeof(struct recvfrom_s));
-  (void)sem_init(&state. rf_sem, 0, 0); /* Doesn't really fail */
-  state. rf_buflen = len;
-  state. rf_buffer = buf;
-
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-  /* Set up the start time for the timeout */
-
-  state.rf_starttime = g_system_timer;
+  if (psock->s_type == SOCK_STREAM)
+#endif
+    {
+      ret = tcp_recvfrom(psock, buf, len, infrom);
+    }
+#ifdef CONFIG_NET_UDP
+  else
+    {
+      ret = udp_recvfrom(psock, buf, len, infrom);
+    }
 #endif
 
-  /* Setup the UDP socket */
+  /* Set the socket state to idle */
 
-  ret = uip_udpconnect(psock->s_conn, NULL);
+  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
+
+  /* Handle returned errors */
+
   if (ret < 0)
     {
-      irqrestore(save);
       err = -ret;
       goto errout;
     }
 
-  /* Set up the callback in the connection */
+  /* Success return */
 
-  udp_conn = (struct uip_udp_conn *)psock->s_conn;
-  udp_conn->private  = (void*)&state;
-  udp_conn->callback = recvfrom_interrupt;
-
-  /* Wait for either the read to complete:  NOTES:  (1) sem_wait will also
-   * terminate if a signal is received, (2) interrupts are disabled!  They
-   * will be re-enabled while the task sleeps and automatically re-enabled
-   * when the task restarts.
-   */
-
-  ret = sem_wait(&state. rf_sem);
-
-  /* Make sure that no further interrupts are processed */
-
-  uip_conn->private = NULL;
-  uip_conn->callback = NULL;
-  sem_destroy(&state. rf_sem);
-  irqrestore(save);
-
-  /* Check for a timeout.  Errors are signaled by negative errno values
-   * for the rcv length
-   */
-
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-  if (state.rf_buflen < 0)
-    {
-      /* Return EGAIN on a timeout */
-
-      err = -state.rf_buflen;
-      goto errout;
-    }
-#endif
-
-  /* If sem_wait failed, then we were probably reawakened by a signal. In
-   * this case, sem_wait will have set errno appropriately.
-   */
-
-  if (ret < 0)
-    {
-      return ERROR;
-    }
-
-#warning "Needs to return server address"
-  return state.rf_buflen;
-
-#else
-  err = ENOSYS;
-#endif
+  return ret;
 
 errout:
   *get_errno_ptr() = err;

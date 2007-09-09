@@ -90,7 +90,7 @@
  *       sa_family field.
  *     EAGAIN
  *       No more free local ports or insufficient entries in the routing
- *       cache. For PF_INET.
+ *       cache.
  *     EALREADY
  *       The socket is non-blocking and a previous connection attempt has
  *       not yet been completed.
@@ -155,12 +155,28 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
     {
       case SOCK_STREAM:
         {
-          int ret = uip_tcpconnect(psock->s_conn, inaddr);
+          int ret;
+
+          /* Verify that the socket is not already connected */
+
+          if (_SS_ISCONNECTED(psock->s_flags))
+            {
+              err = -EISCONN;
+              goto errout;
+            }
+
+          /* Perform the uIP connection operation */
+
+          ret = uip_tcpconnect(psock->s_conn, inaddr);
           if (ret < 0)
             {
               err = -ret;
               goto errout;
             }
+
+          /* Mark the connection bound and connected */
+
+          psock->s_flags |= (_SF_BOUND|_SF_CONNECTED);
         }
         break;
 

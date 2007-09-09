@@ -30,14 +30,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdio.h>
+#include <string.h>
+#include <sys/socket.h>
+
 #include <net/uip/uip.h>
-#include <net/uip/psock.h>
 #include <net/uip/httpd.h>
 
 #include "httpd-cgi.h"
-
-#include <stdio.h>
-#include <string.h>
 
 #define CONFIG_HTTPDCGI_FILESTATS 1
 #undef CONFIG_HTTPDCGI_DCPSTATS
@@ -101,7 +101,7 @@ static const char *states[] =
 };
 #endif
 
-static void nullfunction(struct httpd_state *s, char *ptr)
+static void nullfunction(struct httpd_state *pstate, char *ptr)
 {
 }
 
@@ -120,66 +120,57 @@ httpd_cgifunction httpd_cgi(char *name)
 }
 
 #ifdef CONFIG_HTTPDCGI_FILESTATS
-static unsigned short generate_file_stats(void *arg)
+static void file_stats(struct httpd_state *pstate, char *ptr)
 {
-  char *f = (char *)arg;
-  return snprintf((char *)uip_appdata, UIP_APPDATA_SIZE, "%5u", httpd_fs_count(f));
-}
-
-static void file_stats(struct httpd_state *s, char *ptr)
-{
-  psock_generator_send(&s->sout, generate_file_stats, strchr(ptr, ' ') + 1);
+  char buffer[16];
+  char *pcount = strchr(ptr, ' ') + 1;
+  snprintf(buffer, 16, "%5u", httpd_fs_count(pcount));
+  (void)send(pstate->sockout, buffer, strlen(buffer), 0);
 }
 #endif
 
 #if CONFIG_HTTPDCGI_TCPSTATS
-static unsigned short generate_tcp_stats(void *arg)
+static void tcp_stats(struct httpd_state *pstate, char *ptr)
 {
   struct uip_conn *conn;
-  struct httpd_state *s = (struct httpd_state *)arg;
+  struct httpd_state *pstate = (struct httpd_state *)arg;
+  char buffer[256];
 
-  conn = &uip_conns[s->count];
-  return snprintf((char *)uip_appdata, UIP_APPDATA_SIZE,
-		 "<tr><td>%d</td><td>%u.%u.%u.%u:%u</td><td>%s</td><td>%u</td><td>%u</td><td>%c %c</td></tr>\r\n",
-		 htons(conn->lport),
-		 htons(conn->ripaddr[0]) >> 8,
-		 htons(conn->ripaddr[0]) & 0xff,
-		 htons(conn->ripaddr[1]) >> 8,
-		 htons(conn->ripaddr[1]) & 0xff,
-		 htons(conn->rport),
-		 states[conn->tcpstateflags & UIP_TS_MASK],
-		 conn->nrtx,
-		 conn->timer,
-		 (uip_outstanding(conn))? '*':' ',
-		 (uip_stopped(conn))? '!':' ');
-}
-
-static void tcp_stats(struct httpd_state *s, char *ptr)
-{
-  for(s->count = 0; s->count < UIP_CONNS; ++s->count)
+  for(pstate->count = 0; pstate->count < UIP_CONNS; ++pstate->count)
     {
-      if((uip_conns[s->count].tcpstateflags & UIP_TS_MASK) != UIP_CLOSED)
+      conn = &uip_conns[pstate->count];
+      if((conn->tcpstateflags & UIP_TS_MASK) != UIP_CLOSED)
         {
-          psock_generator_send(&s->sout, generate_tcp_stats, s);
+          snprintf(buffer, 25t,
+            "<tr><td>%d</td><td>%u.%u.%u.%u:%u</td><td>%s</td><td>%u</td><td>%u</td><td>%c %c</td></tr>\r\n",
+            htons(conn->lport),
+            htons(conn->ripaddr[0]) >> 8,
+            htons(conn->ripaddr[0]) & 0xff,
+            htons(conn->ripaddr[1]) >> 8,
+            htons(conn->ripaddr[1]) & 0xff,
+            htons(conn->rport),
+            states[conn->tcpstateflags & UIP_TS_MASK],
+            conn->nrtx,
+            conn->timer,
+            (uip_outstanding(conn))? '*':' ',
+            (uip_stopped(conn))? '!':' ');
+
+          (void)send(pstate->sockout, buffer, strlen(buffer), 0);
         }
     }
 }
 #endif
 
 #ifdef CONFIG_HTTPDCGI_NETSTATS
-static unsigned short generate_net_stats(void *arg)
-{
-  struct httpd_state *s = (struct httpd_state *)arg;
-  return snprintf((char*)uip_appdata, UIP_APPDATA_SIZE,
-		  "%5u\n", ((uip_stats_t *)&uip_stat)[s->count]);
-}
-
-static void net_stats(struct httpd_state *s, char *ptr)
+static void net_stats(struct httpd_state *pstate, char *ptr)
 {
 #if UIP_STATISTICS
-  for(s->count = 0; s->count < sizeof(uip_stat) / sizeof(uip_stats_t); ++s->count)
+  char buffer[16];
+
+  for(pstate->count = 0; pstate->count < sizeof(uip_stat) / sizeof(uip_stats_t); ++pstate->count)
     {
-      psock_generator_send(&s->sout, generate_net_stats, s);
+      snprintf(buffer, 16, "%5u\n", ((uip_stats_t *)&uip_stat)[pstate->count]);
+      send(pstate->sockout, buffer, strlen(buffer), 0);
     }
 #endif /* UIP_STATISTICS */
 }

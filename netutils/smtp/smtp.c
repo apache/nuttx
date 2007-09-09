@@ -47,13 +47,14 @@
  ****************************************************************************/
 
 #include <sys/types.h>
-#include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 #include <semaphore.h>
 #include <sys/socket.h>
 
 #include <net/uip/uip.h>
-#include <net/uip/psock.h>
 #include <net/uip/smtp.h>
 
 #include "smtp-strings.h"
@@ -77,7 +78,6 @@ struct smtp_state
   uint8   state;
   boolean connected;
   sem_t   sem;
-  struct psock psock;
   uip_ipaddr_t smtpserver;
   char   *localhostname;
   char   *to;
@@ -89,146 +89,155 @@ struct smtp_state
   int     sentlen;
   int     textlen;
   int     sendptr;
-  int     result;
   char    buffer[SMTP_INPUT_BUFFER_SIZE];
 };
 
-static volatile struct smtp_state *gpsmtp = 0;
-
-static void smtp_send_message(struct smtp_state *psmtp)
+static inline int smtp_send_message(int sockfd, struct smtp_state *psmtp)
 {
-  psock_readto(&psmtp->psock, ISO_nl);
+  if (recv(sockfd, psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, 0) < 0)
+    {
+      return ERROR;
+    }
 
   if (strncmp(psmtp->buffer, smtp_220, 3) != 0)
     {
-      PSOCK_CLOSE(&psmtp->psock);
-      psmtp->result = 2;
-      return;
+      return ERROR;
     }
 
-  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_helo);
-  PSOCK_SEND_STR(&psmtp->psock, psmtp->localhostname);
-  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnl);
+  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", smtp_helo, psmtp->localhostname);
+  if (send(sockfd, psmtp->buffer, strlen(psmtp->buffer), 0) < 0)
+    {
+      return ERROR;
+    }
 
-  psock_readto(&psmtp->psock, ISO_nl);
+  if (recv(sockfd, psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, 0) < 0)
+    {
+      return ERROR;
+    }
 
   if (psmtp->buffer[0] != ISO_2)
     {
-      PSOCK_CLOSE(&psmtp->psock);
-      psmtp->result = 3;
-      return;
+      return ERROR;
     }
 
-  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_mail_from);
-  PSOCK_SEND_STR(&psmtp->psock, psmtp->from);
-  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnl);
+  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", smtp_mail_from, psmtp->from);
+  if (send(sockfd, psmtp->buffer, strlen(psmtp->buffer), 0) < 0)
+    {
+      return ERROR;
+    }
 
-  psock_readto(&psmtp->psock, ISO_nl);
+  if (recv(sockfd, psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, 0) < 0)
+    {
+      return ERROR;
+    }
 
   if (psmtp->buffer[0] != ISO_2)
     {
-      PSOCK_CLOSE(&psmtp->psock);
-      psmtp->result = 3;
-      return;
+      return ERROR;
     }
 
-  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_rcpt_to);
-  PSOCK_SEND_STR(&psmtp->psock, psmtp->to);
-  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnl);
+  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", smtp_rcpt_to, psmtp->to);
+  if (send(sockfd, psmtp->buffer, strlen(psmtp->buffer), 0) < 0)
+    {
+      return ERROR;
+    }
 
-  psock_readto(&psmtp->psock, ISO_nl);
+  if (recv(sockfd, psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, 0) < 0)
+    {
+      return ERROR;
+    }
 
   if (psmtp->buffer[0] != ISO_2)
     {
-      PSOCK_CLOSE(&psmtp->psock);
-      psmtp->result = 5;
-      return;
+      return ERROR;
     }
 
   if (psmtp->cc != 0)
     {
-      PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_rcpt_to);
-      PSOCK_SEND_STR(&psmtp->psock, psmtp->cc);
-      PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnl);
+      snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", smtp_rcpt_to, psmtp->cc);
+      if (send(sockfd, psmtp->buffer, strlen(psmtp->buffer), 0) < 0)
+        {
+          return ERROR;
+        }
 
-      psock_readto(&psmtp->psock, ISO_nl);
+      if (recv(sockfd, psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, 0) < 0)
+        {
+          return ERROR;
+        }
 
       if (psmtp->buffer[0] != ISO_2)
         {
-          PSOCK_CLOSE(&psmtp->psock);
-          psmtp->result = 6;
-          return;
+          return ERROR;
         }
     }
 
-  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_data);
+  if (send(sockfd, smtp_data, strlen(smtp_data), 0) < 0)
+    {
+      return ERROR;
+    }
 
-  psock_readto(&psmtp->psock, ISO_nl);
+  if (recv(sockfd, psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, 0) < 0)
+    {
+      return ERROR;
+    }
 
   if (psmtp->buffer[0] != ISO_3)
     {
-      PSOCK_CLOSE(&psmtp->psock);
-      psmtp->result = 7;
-      return;
+      return ERROR;
     }
 
-  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_to);
-  PSOCK_SEND_STR(&psmtp->psock, psmtp->to);
-  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnl);
+  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", smtp_to, psmtp->to);
+  if (send(sockfd, psmtp->buffer, strlen(psmtp->buffer), 0) < 0)
+    {
+      return ERROR;
+    }
 
   if (psmtp->cc != 0)
     {
-      PSOCK_SEND_STR(&psmtp->psock, (char *)psmtp->cc);
-      PSOCK_SEND_STR(&psmtp->psock, psmtp->cc);
-      PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnl);
+      snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", smtp_to, psmtp->cc);
+      if (send(sockfd, psmtp->buffer, strlen(psmtp->buffer), 0) < 0)
+        {
+          return ERROR;
+        }
     }
 
-  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_from);
-  PSOCK_SEND_STR(&psmtp->psock, psmtp->from);
-  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnl);
+  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", smtp_from, psmtp->from);
+  if (send(sockfd, psmtp->buffer, strlen(psmtp->buffer), 0) < 0)
+    {
+      return ERROR;
+    }
 
-  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_subject);
-  PSOCK_SEND_STR(&psmtp->psock, psmtp->subject);
-  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnl);
+  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", smtp_subject, psmtp->subject);
+  if (send(sockfd, psmtp->buffer, strlen(psmtp->buffer), 0) < 0)
+    {
+      return ERROR;
+    }
 
-  psock_send(&psmtp->psock, psmtp->msg, psmtp->msglen);
+  if (send(sockfd, psmtp->msg, psmtp->msglen, 0) < 0)
+    {
+      return ERROR;
+    }
 
-  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_crnlperiodcrnl);
+  if (send(sockfd, smtp_crnlperiodcrnl, strlen(smtp_crnlperiodcrnl), 0) < 0)
+    {
+      return ERROR;
+    }
 
-  psock_readto(&psmtp->psock, ISO_nl);
+  if (recv(sockfd, psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, 0) < 0)
+    {
+      return ERROR;
+    }
+
   if (psmtp->buffer[0] != ISO_2)
     {
-      PSOCK_CLOSE(&psmtp->psock);
-      psmtp->result = 8;
-      return;
+      return ERROR;
     }
 
-  PSOCK_SEND_STR(&psmtp->psock, (char *)smtp_quit);
-  psmtp->result = 0;
-}
-
-/* This function is called by the UIP interrupt handling logic whenevent an
- * event of interest occurs.
- */
-
-void uip_interrupt_event(void)
-{
-#warning OBSOLETE -- needs to be redesigned
-  if (gpsmtp)
+  if (send(sockfd, smtp_quit, strlen(smtp_quit), 0) < 0)
     {
-      if (uip_closed())
-        {
-          gpsmtp->connected = FALSE;
-          return;
-        }
-
-      if (uip_aborted() || uip_timedout())
-        {
-          gpsmtp->connected = FALSE;
-        }
-
-      sem_post((sem_t*)&gpsmtp->sem);
+      return ERROR;
     }
+  return OK;
 }
 
 /* Specificy an SMTP server and hostname.
@@ -264,6 +273,7 @@ int smtp_send(void *handle, char *to, char *cc, char *from, char *subject, char 
   struct smtp_state *psmtp = (struct smtp_state *)handle;
   struct sockaddr_in server;
   int sockfd;
+  int ret;
 
   /* Setup */
 
@@ -274,7 +284,6 @@ int smtp_send(void *handle, char *to, char *cc, char *from, char *subject, char 
   psmtp->subject   = subject;
   psmtp->msg       = msg;
   psmtp->msglen    = msglen;
-  psmtp->result    = OK;
 
   /* Create a socket */
 
@@ -283,12 +292,6 @@ int smtp_send(void *handle, char *to, char *cc, char *from, char *subject, char 
     {
       return ERROR;
     }
-
-  /* Make this instance globally visible (we will get interrupts as
-   * soon as we connect
-   */
-
-  gpsmtp = psmtp;
 
   /* Connect to server.  First we have to set some fields in the
    * 'server' structure.  The system will assign me an arbitrary
@@ -301,27 +304,16 @@ int smtp_send(void *handle, char *to, char *cc, char *from, char *subject, char 
 
   if (connect(sockfd, (struct sockaddr *)&server, sizeof(struct sockaddr_in)) < 0)
     {
+      close(sockfd);
       return ERROR;
-  }
-
-  /* Initialize the psock structure inside the smtp state structure */
-
-  psock_init(&psmtp->psock, psmtp->buffer, SMTP_INPUT_BUFFER_SIZE);
-
-  /* And wait for the the socket to be connected */
-
-  sem_wait(&psmtp->sem);
-  gpsmtp           = 0;
-
-  /* Was an error reported by interrupt handler? */
-
-  if (psmtp->result == OK )
-    {
-      /* No... Send the message */
-      smtp_send_message(psmtp);
     }
 
-  return psmtp->result;
+  /* Send the message */
+
+  ret = smtp_send_message(sockfd, psmtp);
+
+  close(sockfd);
+  return ret;
 }
 
 void *smtp_open(void)

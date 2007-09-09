@@ -28,51 +28,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __HTTPD_H__
-#define __HTTPD_H__
+#ifndef _NET_UIP_HTTPD_H
+#define _NET_UIP_HTTPD_H
 
 #include <sys/types.h>
-#include <net/uip/psock.h>
 
-#define HTTPD_FS_STATISTICS 1
+extern void httpd_init(void);
+extern void httpd_listen(void);
 
-struct httpd_fs_file
-{
-  char *data;
-  int len;
-};
-
-struct httpd_state
-{
-  unsigned char timer;
-  struct psock sin, sout;
-  char inputbuf[50];
-  char filename[20];
-  char state;
-  struct httpd_fs_file file;
-  int len;
-  char *scriptptr;
-  int scriptlen;
-
-  unsigned short count;
-};
-
-#ifdef HTTPD_FS_STATISTICS
-#if HTTPD_FS_STATISTICS == 1
-extern uint16 httpd_fs_count(char *name);
-#endif /* HTTPD_FS_STATISTICS */
-#endif /* HTTPD_FS_STATISTICS */
-
-void httpd_init(void);
-void httpd_log(char *msg);
-void httpd_log_file(uint16 *requester, char *file);
-
-/* file must be allocated by caller and will be filled in
- * by the function.
- */
-
-int httpd_fs_open(const char *name, struct httpd_fs_file *file);
-void httpd_fs_init(void);
-
-
-#endif /* __HTTPD_H__ */
+#endif /* _NET_UIP_HTTPD_H */

@@ -1,8 +1,6 @@
-/* httpd-cgi.h
- * Web server script interface header file
- * Author: Adam Dunkels <adam@sics.se>
+/* httpd.h
  *
- * Copyright (c) 2001, Adam Dunkels.
+ * Copyright (c) 2001-2005, Adam Dunkels.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,39 +28,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __HTTPD_CGI_H__
-#define __HTTPD_CGI_H__
+#ifndef _NETUTILS_WEBSERVER_HTTPD_H
+#define _NETUTILS_WEBSERVER_HTTPD_H
 
-#include <net/uip/httpd.h>
+#include <sys/types.h>
 
-#include "httpd.h"
+#define HTTPD_FS_STATISTICS 1
+#define HTTPD_INBUFFER_SIZE 50
 
-typedef void (* httpd_cgifunction)(struct httpd_state *, char *);
-
-httpd_cgifunction httpd_cgi(char *name);
-
-struct httpd_cgi_call {
-  const char *name;
-  const httpd_cgifunction function;
+struct httpd_fs_file
+{
+  char *data;
+  int len;
 };
 
-/**
- * \brief      HTTPD CGI function declaration
- * \param name The C variable name of the function
- * \param str  The string name of the function, used in the script file
- * \param function A pointer to the function that implements it
- *
- *             This macro is used for declaring a HTTPD CGI
- *             function. This function is then added to the list of
- *             HTTPD CGI functions with the httpd_cgi_add() function.
- *
- * \hideinitializer
+struct httpd_state
+{
+  unsigned char timer;
+  int sockin;
+  int sockout;
+  char inputbuf[HTTPD_INBUFFER_SIZE];
+  char filename[20];
+  char state;
+  struct httpd_fs_file file;
+  int len;
+  char *scriptptr;
+  int scriptlen;
+
+  unsigned short count;
+};
+
+#ifdef HTTPD_FS_STATISTICS
+#if HTTPD_FS_STATISTICS == 1
+extern uint16 httpd_fs_count(char *name);
+#endif /* HTTPD_FS_STATISTICS */
+#endif /* HTTPD_FS_STATISTICS */
+
+/* file must be allocated by caller and will be filled in
+ * by the function.
  */
-#define HTTPD_CGI_CALL(name, str, function) \
-static void function(struct httpd_state *, char *); \
-static const struct httpd_cgi_call name = {str, function}
 
-void httpd_cgi_init(void);
-#endif /* __HTTPD_CGI_H__ */
+int httpd_fs_open(const char *name, struct httpd_fs_file *file);
+void httpd_fs_init(void);
 
-/** @} */
+#endif /* _NETUTILS_WEBSERVER_HTTPD_H */
