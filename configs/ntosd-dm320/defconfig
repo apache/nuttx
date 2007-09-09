@@ -268,7 +268,7 @@ CONFIG_PREALLOC_TIMERS=8
 # CONFIG_NET_LLH_LEN - The link level header length
 # CONFIG_NET_EXTERNAL_BUFFER - Incoming packet buffer (uip_buf) is defined externally
 # CONFIG_NET_FWCACHE_SIZE - number of packets to remember when looking for duplicates
-CONFIG_NET=y
+CONFIG_NET=n
 CONFIG_NET_IPv6=n
 CONFIG_NSOCKET_DESCRIPTORS=0
 CONFIG_NET_MAX_CONNECTIONS=40
