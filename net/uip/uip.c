@@ -595,8 +595,6 @@ static void uip_add_rcv_nxt(uint16 n)
 
 static void uip_udp_callback(void)
 {
-  uip_event_signal();
-
   /* Some sanity checking */
 
   if (uip_udp_conn && uip_udp_conn->callback)
@@ -609,8 +607,6 @@ static void uip_udp_callback(void)
 
 static void uip_tcp_callback(void)
 {
-  uip_event_signal();
-
   /* Some sanity checking */
 
   if (uip_conn && uip_conn->callback)

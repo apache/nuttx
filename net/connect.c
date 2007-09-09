@@ -182,8 +182,6 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 
 #ifdef CONFIG_NET_UDP
       case SOCK_DGRAM:
-#warning Put UDP connect logic here
-#if 0
         {
           int ret = uip_udpconnect(psock->s_conn, inaddr);
           if (ret < 0)
@@ -194,7 +192,7 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
         }
         break;
 #endif
-#endif
+
       default:
         err = EBADF;
         goto errout;

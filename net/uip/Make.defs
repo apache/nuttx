@@ -35,5 +35,5 @@
 
 UIP_ASRCS =
 UIP_CSRCS = uip-arp.c uip.c uip-fw.c uip-neighbor.c uip-split.c \
-            uip-tcpconn.c uip-udpconn.c uip-wait.c
+            uip-tcpconn.c uip-udpconn.c
 

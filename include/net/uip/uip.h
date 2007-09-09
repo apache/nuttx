@@ -893,6 +893,11 @@ extern int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in6 *
 extern int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr);
 #endif
 
+/* Enable/disable UDP callbacks on a connection */
+
+extern void uip_udpenable(struct uip_udp_conn *conn);
+extern void uip_udpdisable(struct uip_udp_conn *conn);
+
 /* Send a UDP datagram of length len on the current connection.
  *
  * This function can only be called in response to a UDP event (poll
@@ -1123,15 +1128,5 @@ extern int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *a
  */
 
 #define uip_ipaddr4(addr) (htons(((uint16 *)(addr))[1]) & 0xff)
-
-/* This function is called user code to set up the wait */
-
-extern int uip_event_wait(uint16 waitflags);
-
-/* This function is called from uip_interrupt() to wake up any
- * waiting threads/tasks.
- */
-
-extern void uip_event_signal(void);
 
 #endif /* __NET_UIP_UIP_H */

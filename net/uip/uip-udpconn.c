@@ -114,34 +114,26 @@ static inline void _uip_semtake(sem_t *sem)
  *
  * Description:
  *   Find the UDP connection that uses this local port number.  Called only
- *   from user, non-interrupt level logic.
+ *   from user user level code, but with interrupts disabled.
  *
  ****************************************************************************/
 
-struct uip_udp_conn *uip_find_conn( uint16 portno )
+static inline struct uip_udp_conn *uip_find_conn( uint16 portno )
 {
-  struct uip_udp_conn *conn;
   uint16 nlastport = htons(g_last_udp_port);
-  irqstate_t flags;
+  int i;
 
-  /* Now search each active connection structure.  This list is modifiable
-   * from interrupt level, we we must diable interrupts to access it safely.
-   */
+  /* Now search each connection structure.*/
 
-  flags = irqsave();
-  conn = (struct uip_udp_conn *)g_active_udp_connections.head;
-  while (conn)
+  for (i = 0; i < UIP_UDP_CONNS; i++)
     {
-      if (conn->lport == nlastport)
+      if (g_udp_connections[ i ].lport == nlastport)
         {
-          break;
+          return &g_udp_connections[ i ];
         }
-
-      conn = (struct uip_udp_conn *)conn->node.flink;
     }
 
-  irqrestore(flags);
-  return conn;
+  return NULL;
 }
 
 /****************************************************************************
@@ -198,7 +190,7 @@ struct uip_udp_conn *uip_udpalloc(void)
   conn = (struct uip_udp_conn *)dq_remfirst(&g_free_udp_connections);
   if (conn)
     {
-      /* Make sure that the connectin is marked as uninitialized */
+      /* Make sure that the connection is marked as uninitialized */
 
       conn->lport = 0;
     }
@@ -211,25 +203,13 @@ struct uip_udp_conn *uip_udpalloc(void)
  *
  * Description:
  *   Free a UDP connection structure that is no longer in use. This should be
- *   done by the implementation of close()
+ *   done by the implementation of close().  uip_udpdisable must have been
+ *   previously called.
  *
  ****************************************************************************/
 
 void uip_udpfree(struct uip_udp_conn *conn)
 {
-  irqstate_t flags;
-
-  /* The active list is accessed from the interrupt level and me must be
-   * certain that no interrupts occur while the active list is modified.
-   */
-
-  flags = irqsave();
-  if (conn->lport != 0)
-    {
-      dq_rem(&conn->node, &g_active_udp_connections);
-    }
-  irqrestore(flags);
-
   /* The free list is only accessed from user, non-interrupt level and
    * is protected by a semaphore (that behaves like a mutex).
    */
@@ -308,14 +288,25 @@ void uip_udppoll(unsigned int conn)
   uip_interrupt(UIP_UDP_TIMER);
 }
 
-/* This function sets up a new UDP connection. The function will
+/****************************************************************************
+ * Name: uip_udpconnect()
+ *
+ * Description:
+ * This function sets up a new UDP connection. The function will
  * automatically allocate an unused local port for the new
  * connection. However, another port can be chosen by using the
  * uip_udpbind() call, after the uip_udpconnect() function has been
  * called.
  *
+ * uip_udpenable() must be called before the connection is made active (i.e.,
+ * is eligible for callbacks.
+ *
  * addr The address of the remote host.
- */
+ *
+ * Assumptions:
+ *   This function is called user code.  Interrupts may be enabled.
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
 int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in6 *addr)
@@ -329,6 +320,7 @@ int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
    * number that is not being used by any other connection.
    */
 
+  flags = irqsave();
   do
     {
       /* Guess that the next available port number will be the one after
@@ -348,6 +340,7 @@ int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
   /* Initialize and return the connection structure, bind it to the port number */
 
   conn->lport = HTONS(g_last_udp_port);
+  irqrestore(flags);
 
   if (addr)
     {
@@ -356,21 +349,46 @@ int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
     }
   else
     {
-       conn->rport = 0;
-       uip_ipaddr_copy(&conn->ripaddr, &all_zeroes_addr);
-   }
+      conn->rport = 0;
+      uip_ipaddr_copy(&conn->ripaddr, &all_zeroes_addr);
+    }
   conn->ttl   = UIP_TTL;
+  return OK;
+}
 
-  /* Now add the connection structure to the active connectionlist. This list
+/****************************************************************************
+ * Name: uip_udpenable() uip_udpdisable.
+ *
+ * Description:
+ *   Enable/disable callbacks for the specified connection
+ *
+ * Assumptions:
+ *   This function is called user code.  Interrupts may be enabled.
+ *
+ ****************************************************************************/
+
+void uip_udpenable(struct uip_udp_conn *conn)
+{
+  /* Add the connection structure to the active connectionlist. This list
    * is modifiable from interrupt level, we we must diable interrupts to
    * access it safely.
    */
 
-  flags = irqsave();
+  irqstate_t flags = irqsave();
   dq_addlast(&conn->node, &g_active_udp_connections);
   irqrestore(flags);
+}
 
-  return OK;
+void uip_udpdisable(struct uip_udp_conn *conn)
+{
+  /* Remove the connection structure to the active connectionlist. This list
+   * is modifiable from interrupt level, we we must diable interrupts to
+   * access it safely.
+   */
+
+  irqstate_t flags = irqsave();
+  dq_rem(&conn->node, &g_active_udp_connections);
+  irqrestore(flags);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_UDP */

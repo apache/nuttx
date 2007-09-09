@@ -244,9 +244,26 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
   udp_conn = (struct uip_udp_conn *)psock->s_conn;
   udp_conn->private  = (void*)&state;
   udp_conn->callback = sendto_interrupt;
-  irqrestore(save);
+
+  /* Enable the UDP socket */
+
+  uip_udpenable(psock->s_conn);
+
+  /* Wait for either the receive to complete or for an error/timeout to occur.
+   * NOTES:  (1) sem_wait will also terminate if a signal is received, (2)
+   * interrupts are disabled!  They will be re-enabled while the task sleeps
+   * and automatically re-enabled when the task restarts.
+   */
 
   sem_wait(&state.st_sem);
+
+  /* Make sure that no further interrupts are processed */
+
+  uip_udpdisable(psock->s_conn);
+  udp_conn->private  = NULL;
+  udp_conn->callback = NULL;
+  irqrestore(save);
+
   sem_destroy(&state.st_sem);
 
   /* Set the socket state to idle */
