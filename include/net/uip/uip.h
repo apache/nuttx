@@ -83,7 +83,6 @@
                                  * new connection for it, or an active connection has been
                                  * successfully established. */
 #define UIP_TIMEDOUT   (1 << 7) /* The connection has been aborted due to too many retransmissions. */
-#define UIP_APPTIMEOUT (1 << 8) /* Application time limit has elapsed */
 
 /* The TCP states used in the uip_conn->tcpstateflags. */
 
@@ -496,14 +495,14 @@ extern struct uip_udp_conn *uip_udp_conn;
 
 extern struct uip_stats uip_stat;
 
-/* uint16 uip_flags:
+/* uint8 uip_flags:
  *
  * When the application is called, uip_flags will contain the flags
  * that are defined in this file. Please read below for more
  * infomation.
  */
 
-extern uint16 uip_flags;
+extern uint8 uip_flags;
 
 #if UIP_FIXEDADDR
 extern const uip_ipaddr_t uip_hostaddr, uip_netmask, uip_draddr;

@@ -175,7 +175,7 @@ uint16 uip_urglen, uip_surglen;
 uint16 uip_len, uip_slen;        /* The uip_len is either 8 or 16 bits, depending
                                   * on the maximum packet size. */
 
-uint16 uip_flags;                /* The uip_flags variable is used for communication
+uint8  uip_flags;                /* The uip_flags variable is used for communication
                                   * between the TCP/IP stack and the application
                                   * program. */
 struct uip_conn *uip_conn;       /* uip_conn always points to the current connection. */
