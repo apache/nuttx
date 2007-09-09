@@ -43,6 +43,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
+#include <nuttx/clock.h>
 
 #include "net-internal.h"
 

@@ -47,7 +47,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sched.h>
-#include <nuttx/os_external.h>
+#include <nuttx/init.h>
 #include "ostest.h"
 
 /************************************************************

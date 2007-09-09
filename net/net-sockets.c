@@ -38,13 +38,17 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <string.h>
 #include <semaphore.h>
 #include <assert.h>
 #include <sched.h>
 #include <errno.h>
+
+#include <net/uip/uip.h>
 #include <nuttx/net.h>
 #include <nuttx/kmalloc.h>
+
 #include "net-internal.h"
 
 /****************************************************************************
@@ -91,6 +95,11 @@ static void _net_semtake(FAR struct socketlist *list)
 
 void net_initialize(void)
 {
+  /* Initialize the uIP layer */
+
+  uip_init();
+
+  /* Initialize the socket lay -- nothing to do */
 }
 
 /* Allocate a list of files for a new task */

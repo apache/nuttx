@@ -45,7 +45,6 @@
 #include <sched.h>
 #include <debug.h>
 #include <nuttx/arch.h>
-#include <nuttx/os_external.h>
 #include "os_internal.h"
 #include "sig_internal.h"
 

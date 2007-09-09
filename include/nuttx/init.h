@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/net-dsec2timeval.c
+ * nuttx/init.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
+ * 3. Neither the name Gregory Nutt nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -33,48 +33,51 @@
  *
  ****************************************************************************/
 
+#ifndef __NUTTX_INIT_H
+#define __NUTTX_INIT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <errno.h>
-#include <nuttx/clock.h>
-
-#include "net-internal.h"
+#include <nuttx/compiler.h>
 
 /****************************************************************************
- * Global Functions
+ * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_dsec2timeval
- *
- * Description:
- *   Convert a decisecond timeout value to a struct timeval.  Needed by
- *   getsockopt() to report timeout values.
- *
- * Parameters:
- *   dsec The decisecond value to convert
- *   tv   The struct timeval to receive the converted value
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
+ * Global Data
  ****************************************************************************/
 
-void net_dsec2timeval(uint16 dsec, struct timeval *tv)
-{
-  uint16 remainder;
-  tv->tv_sec  = dsec / DSEC_PER_SEC;
-  remainder   = dsec - tv->tv_sec * DSEC_PER_SEC;
-  tv->tv_usec = remainder * USEC_PER_DSEC;
+/****************************************************************************
+ * Global Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/* These are functions that must be supplied by the application */
+
+EXTERN void   weak_function user_initialize(void);
+EXTERN int    user_start(int argc, char *argv[]);
+
+/* Functions contained in os_task.c *****************************************/
+
+EXTERN void   os_start(void); /* OS entry point called by boot logic */
+
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
 
-#endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+#endif /* __NUTTX_INIT_H */

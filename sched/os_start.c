@@ -44,8 +44,10 @@
 #include  <nuttx/arch.h>
 #include  <nuttx/compiler.h>
 #include  <nuttx/fs.h>
+#include  <nuttx/net.h>
 #include  <nuttx/lib.h>
-#include  <nuttx/os_external.h>
+#include  <nuttx/mm.h>
+#include  <nuttx/init.h>
 #include  "os_internal.h"
 #include  "sig_internal.h"
 #include  "wd_internal.h"
@@ -384,6 +386,17 @@ void os_start(void)
 #endif
     {
       fs_initialize();
+    }
+#endif
+
+  /* Initialize the network system */
+
+#ifdef CONFIG_NET
+#if 0
+  if (net_initialize != NULL)
+#endif
+    {
+      net_initialize();
     }
 #endif
 

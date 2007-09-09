@@ -43,7 +43,6 @@
 #include <queue.h>
 #include <sched.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/os_external.h>
 
 /************************************************************
  * Definitions

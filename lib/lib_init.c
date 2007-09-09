@@ -42,7 +42,7 @@
 #include <errno.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
-#include <nuttx/os_external.h>
+#include <nuttx/lib.h>
 #include "lib_internal.h"
 
 /************************************************************

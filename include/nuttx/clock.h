@@ -1,5 +1,5 @@
 /****************************************************************************
- * net-internal.h
+ * nuttx/clock.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,105 +33,89 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_INTERNAL_H
-#define __NET_INTERNAL_H
+#ifndef __NUTTX_CLOCK_H
+#define __NUTTX_CLOCK_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
-
-#include <time.h>
-#include <nuttx/net.h>
-
-#include "net-internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/* This macro converts a socket option value into a bit setting */
+/* Timing constants */
 
-#define _SO_BIT(o)       (1 << (o))
+#define NSEC_PER_SEC          1000000000
+#define USEC_PER_SEC             1000000
+#define MSEC_PER_SEC                1000
+#define DSEC_PER_SEC                  10
+#define NSEC_PER_DSEC          100000000
+#define USEC_PER_DSEC             100000
+#define MSEC_PER_DSEC                100
+#define NSEC_PER_MSEC            1000000
+#define USEC_PER_MSEC               1000
+#define NSEC_PER_USEC               1000
 
-/* These define bit positions for each socket option (see sys/socket.h) */
-
-#define _SO_DEBUG        _SO_BIT(SO_DEBUG)
-#define _SO_ACCEPTCONN   _SO_BIT(SO_ACCEPTCONN)
-#define _SO_BROADCAST    _SO_BIT(SO_BROADCAST)
-#define _SO_REUSEADDR    _SO_BIT(SO_REUSEADDR)
-#define _SO_KEEPALIVE    _SO_BIT(SO_KEEPALIVE)
-#define _SO_LINGER       _SO_BIT(SO_LINGER)
-#define _SO_OOBINLINE    _SO_BIT(SO_OOBINLINE)
-#define _SO_SNDBUF       _SO_BIT(SO_SNDBUF)
-#define _SO_RCVBUF       _SO_BIT(SO_RCVBUF)
-#define _SO_ERROR        _SO_BIT(SO_ERROR)
-#define _SO_TYPE         _SO_BIT(SO_TYPE)
-#define _SO_DONTROUTE    _SO_BIT(SO_DONTROUTE)
-#define _SO_RCVLOWAT     _SO_BIT(SO_RCVLOWAT)
-#define _SO_RCVTIMEO     _SO_BIT(SO_RCVTIMEO)
-#define _SO_SNDLOWAT     _SO_BIT(SO_SNDLOWAT)
-#define _SO_SNDTIMEO     _SO_BIT(SO_SNDTIMEO)
-
-/* This is the larget option value */
-
-#define _SO_MAXOPT       (15)
-
-/* Macros to set, test, clear options */
-
-#define _SO_SETOPT(s,o)  ((s) |= _SO_BIT(o))
-#define _SO_CLROPT(s,o)  ((s) &= ~_SO_BIT(o))
-#define _SO_GETOPT(s,o)  (((s) & _SO_BIT(o)) != 0)
-
-/* These are macros that can be used to determine if socket option code is
- * valid (in range) and supported by API.
+/* The interrupt interval of the system timer is given by MSEC_PER_TICK.
+ * This is the expected number of milliseconds between calls from the
+ * processor-specific logic to sched_process_timer().  The default value
+ * of MSEC_PER_TICK is 10 milliseconds (100KHz).  However, this default
+ * setting can be overridden by defining the interval in milliseconds as
+ * CONFIG_MSEC_PER_TICK in the board configuration file.
+ *
+ * The following calculations are only accurate when (1) there is no
+ * truncation involved and (2) the underlying system timer is an even
+ * multiple of milliseconds.  If (2) is not true, you will probably want
+ * to redefine all of the following.
  */
 
-#define _SO_GETONLYSET   (_SO_ACCEPTCONN|_SO_ERROR|_SO_TYPE)
-#define _SO_GETONLY(o)   ((_SO_BIT(o) & _SO_GETONLYSET) != 0)
-#define _SO_GETVALID(o)  (((unsigned int)(o)) <= _SO_MAXOPT)
-#define _SO_SETVALID(o)  ((((unsigned int)(o)) <= _SO_MAXOPT) && !_SO_GETONLY(o))
+#ifdef CONFIG_MSEC_PER_TICK
+# define MSEC_PER_TICK        (CONFIG_MSEC_PER_TICK)
+#else
+# define MSEC_PER_TICK        (10)
+#endif
+
+#define TICK_PER_SEC          (MSEC_PER_SEC / MSEC_PER_TICK)             /* Truncates! */
+#define NSEC_PER_TICK         (MSEC_PER_TICK * NSEC_PER_MSEC)            /* Exact */
+#define USEC_PER_TICK         (MSEC_PER_TICK * USEC_PER_MSEC)            /* Exact */
+
+#define NSEC2TICK(nsec)       (((nsec)+(NSEC_PER_TICK/2))/NSEC_PER_TICK) /* Rounds */
+#define USEC2TICK(usec)       (((usec)+(USEC_PER_TICK/2))/USEC_PER_TICK) /* Rounds */
+#define MSEC2TICK(msec)       (((msec)+(MSEC_PER_TICK/2))/MSEC_PER_TICK) /* Rounds */
+#define DSEC2TICK(dsec)       MSEC2TICK((dsec)*MSEC_PER_DSEC)
+#define SEC2TICK(sec)         MSEC2TICK((sec)*MSEC_PER_SEC)
 
 /****************************************************************************
- * Public Types
+ * Global Data
+ ****************************************************************************/
+
+/* Access to raw system clock ***********************************************/
+
+#ifndef CONFIG_DISABLE_CLOCK
+extern volatile uint32 g_system_timer;
+#endif
+
+/****************************************************************************
+ * Global Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Global Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Pulblic Function Prototypes
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
+#ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C" {
 #else
 #define EXTERN extern
 #endif
 
-/* net-sockets.c *************************************************************/
-
-EXTERN int  sockfd_allocate(void);
-EXTERN void sockfd_release(int sockfd);
-EXTERN FAR struct socket *sockfd_socket(int sockfd);
-
-/* sockopt support ***********************************************************/
-
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-EXTERN int net_timeo(uint32 start_time, socktimeo_t timeo);
-EXTERN socktimeo_t net_timeval2dsec(struct timeval *tv);
-EXTERN void net_dsec2timeval(uint16 dsec, struct timeval *tv);
-#endif
-
 #undef EXTERN
-#if defined(__cplusplus)
+#ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_NET */
-#endif /* __NET_INTERNAL_H */
+#endif /* __NUTTX_CLOCK_H */

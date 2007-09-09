@@ -42,6 +42,7 @@
 #include <sched.h>
 #include <debug.h>
 #include <nuttx/arch.h>
+#include <nuttx/mm.h>
 #include "os_internal.h"
 #include "up_internal.h"
 #include "up_mem.h"

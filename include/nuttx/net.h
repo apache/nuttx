@@ -45,7 +45,6 @@
 
 #include <semaphore.h>
 
-#include <nuttx/os_external.h>
 #include <net/uip/uip.h>
 #include <net/uip/psock.h>
 
@@ -126,6 +125,7 @@ extern "C" {
 
 /* net_sockets.c *************************************************************/
 
+EXTERN void weak_function net_initialize(void);
 EXTERN FAR struct socketlist *net_alloclist(void);
 EXTERN int net_addreflist(FAR struct socketlist *list);
 EXTERN int net_releaselist(FAR struct socketlist *list);

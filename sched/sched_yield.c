@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <nuttx/arch.h>
-#include <nuttx/os_external.h>
 #include "os_internal.h"
 
 /************************************************************

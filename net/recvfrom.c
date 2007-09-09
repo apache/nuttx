@@ -45,6 +45,7 @@
 #include <string.h>
 #include <errno.h>
 #include <arch/irq.h>
+#include <nuttx/clock.h>
 
 #include "net-internal.h"
 

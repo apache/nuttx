@@ -42,6 +42,7 @@
 #include <queue.h>
 #include <assert.h>
 #include <nuttx/arch.h>
+#include <nuttx/mm.h>
 #include "os_internal.h"
 
 /************************************************************

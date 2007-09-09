@@ -45,7 +45,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <nuttx/os_external.h>
 #include "ostest.h"
 
 /************************************************************

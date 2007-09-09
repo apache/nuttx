@@ -41,7 +41,7 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
 
 #include <sys/types.h>
-#include <nuttx/os_external.h>
+#include <nuttx/clock.h>
 #include "net-internal.h"
 
 /****************************************************************************

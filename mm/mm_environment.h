@@ -54,7 +54,7 @@
 # include <debug.h>
 # include <errno.h>
 # include <assert.h>
-# include <nuttx/os_external.h>
+# include <nuttx/mm.h>
 #else
 # include <sys/types.h>
 # include <string.h>

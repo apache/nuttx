@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <nuttx/os_external.h>
+#include <nuttx/clock.h>
 #include <nuttx/compiler.h>
 
 /********************************************************************************
