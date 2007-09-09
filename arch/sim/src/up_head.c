@@ -42,7 +42,7 @@
 #include <stdlib.h>
 #include <setjmp.h>
 #include <assert.h>
-#include <nuttx/os_external.h>
+#include <nuttx/init.h>
 #include <nuttx/arch.h>
 
 /************************************************************
