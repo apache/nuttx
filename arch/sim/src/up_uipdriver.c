@@ -106,7 +106,7 @@ void uipdriver_loop(void)
 {
   int i;
 
-  uip_len = tapdev_read((char*)uip_buf, UIP_BUFSIZE);
+  uip_len = tapdev_read((unsigned char*)uip_buf, UIP_BUFSIZE);
   if (uip_len > 0)
     {
       if (BUF->type == htons(UIP_ETHTYPE_IP))

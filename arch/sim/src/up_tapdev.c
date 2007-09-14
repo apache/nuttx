@@ -185,11 +185,12 @@ unsigned long up_getwalltime( void )
 void tapdev_init(void)
 {
   char buf[1024];
+  int ret;
 
   gtapdevfd = up_open(DEVTAP, O_RDWR, 0644);
-  if(gtapdevfd == -1)
+  if (gtapdevfd < 0)
     {
-      lib_rawprintf("tapdev: tapdev_init: open");
+      lib_rawprintf("TAPDEV: open failed: %d\n", -gtapdevfd );
       return;
     }
 
@@ -198,24 +199,31 @@ void tapdev_init(void)
     struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
     ifr.ifr_flags = IFF_TAP|IFF_NO_PI;
-    if (up_ioctl(gtapdevfd, TUNSETIFF, (unsigned long *) &ifr) < 0)
+    ret = up_ioctl(gtapdevfd, TUNSETIFF, (unsigned long *) &ifr);
+    if (ret < 0)
       {
-        lib_rawprintf(buf);
+        lib_rawprintf("TAPDEV: ioctl failed: %d\n", -ret );
         return;
       }
   }
 #endif /* Linux */
 
-  lib_rawprintf(buf, sizeof(buf), "ifconfig tap0 inet %d.%d.%d.%d",
-         UIP_DRIPADDR0, UIP_DRIPADDR1, UIP_DRIPADDR2, UIP_DRIPADDR3);
+  snprintf(buf, sizeof(buf), "ifconfig tap0 inet %d.%d.%d.%d\n",
+           UIP_DRIPADDR0, UIP_DRIPADDR1, UIP_DRIPADDR2, UIP_DRIPADDR3);
   system(buf);
 }
 
-unsigned int tapdev_read(char *buf, unsigned int buflen)
+unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
 {
   fd_set fdset;
   struct timeval tv;
   int ret;
+
+  /* We can't do anything if we failed to open the tap device */
+  if (gtapdevfd < 0)
+    {
+      return 0;
+    }
 
   tv.tv_sec = 0;
   tv.tv_usec = 1000;
@@ -230,18 +238,19 @@ unsigned int tapdev_read(char *buf, unsigned int buflen)
     }
 
   ret = up_read(gtapdevfd, buf, buflen);
-  if(ret == -1)
+  if (ret < 0)
     {
-      lib_rawprintf("tap_dev: tapdev_read: read");
+      lib_rawprintf("TAPDEV: read failed: %d\n", -ret);
+      return 0;
     }
 
 #ifdef TAPDEV_DEBUG
-  lib_rawprintf("tap_dev: tapdev_read: read %d bytes\n", ret);
+  lib_rawprintf("TAPDEV: read %d bytes\n", ret);
   {
     int i;
     for(i = 0; i < 20; i++)
       {
-        lib_rawprintf("%x ", buf[i]);
+        lib_rawprintf("%02x ", buf[i]);
       }
     lib_rawprintf("\n");
   }
@@ -265,9 +274,9 @@ void tapdev_send(char *buf, unsigned int buflen)
 #endif
 
   ret = up_write(gtapdevfd, buf, buflen);
-  if(ret == -1)
+  if (ret < 0)
     {
-      perror("tap_dev: tapdev_send: write");
+      lib_rawprintf("TAPDEV: write");
       exit(1);
     }
 }
