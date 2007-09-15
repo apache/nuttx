@@ -90,6 +90,7 @@ depend: .depend
 
 clean:
 	rm -f $(BIN) *.o *.rel *.asm *.lst *.sym *.adb *~
+	rm -f uip/*~
 	if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
 
 distclean: clean

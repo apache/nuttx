@@ -33,6 +33,8 @@
  * SUCH DAMAGE.
  */
 
+#include <nuttx/config.h>
+#include <debug.h>
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>
 
@@ -40,17 +42,16 @@
 
 #include <string.h> /* for memcpy() */
 
-/*
- * The list of registered network interfaces.
- */
+/* The list of registered network interfaces. */
+
 static struct uip_fw_netif *netifs = NULL;
 
-/*
- * A pointer to the default network interface.
- */
+/* A pointer to the default network interface. */
+
 static struct uip_fw_netif *defaultnetif = NULL;
 
-struct tcpip_hdr {
+struct tcpip_hdr
+{
   /* IP header. */
   uint8 vhl,
     tos;
@@ -101,23 +102,19 @@ struct icmpip_hdr {
 /* ICMP TIME-EXCEEDED. */
 #define ICMP_TE 11
 
-/*
- * Pointer to the TCP/IP headers of the packet in the uip_buf buffer.
- */
-#define BUF ((struct tcpip_hdr *)&uip_buf[UIP_LLH_LEN])
+/* Pointer to the TCP/IP headers of the packet in the d_buf buffer. */
+#define BUF ((struct tcpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
 
-/*
- * Pointer to the ICMP/IP headers of the packet in the uip_buf buffer.
- */
-#define ICMPBUF ((struct icmpip_hdr *)&uip_buf[UIP_LLH_LEN])
+/* Pointer to the ICMP/IP headers of the packet in the d_buf buffer. */
+#define ICMPBUF ((struct icmpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
 
-/*
- * Certain fields of an IP packet that are used for identifying
+/* Certain fields of an IP packet that are used for identifying
  * duplicate packets.
  */
-struct fwcache_entry {
-  uint16 timer;
 
+struct fwcache_entry
+{
+  uint16 timer;
   uint16 srcipaddr[2];
   uint16 destipaddr[2];
   uint16 ipid;
@@ -133,35 +130,25 @@ struct fwcache_entry {
 #endif
 };
 
-/*
- * The number of packets to remember when looking for duplicates.
- */
+/* The number of packets to remember when looking for duplicates. */
 #ifdef CONFIG_NET_FWCACHE_SIZE
 # define FWCACHE_SIZE CONFIG_NET_FWCACHE_SIZE
 #else
 # define FWCACHE_SIZE 2
 #endif
 
-
-/*
- * A cache of packet header fields which are used for
+/* A cache of packet header fields which are used for
  * identifying duplicate packets.
  */
+
 static struct fwcache_entry fwcache[FWCACHE_SIZE];
 
-/**
- * \internal
- * The time that a packet cache is active.
- */
+/* The time that a packet cache is active. */
 #define FW_TIME 20
 
-/*------------------------------------------------------------------------------*/
-/**
- * Initialize the uIP packet forwarding module.
- */
-/*------------------------------------------------------------------------------*/
-void
-uip_fw_init(void)
+/* Initialize the uIP packet forwarding module. */
+
+void uip_fw_init(void)
 {
   struct uip_fw_netif *t;
   defaultnetif = NULL;
@@ -171,42 +158,36 @@ uip_fw_init(void)
     t->next = NULL;
   }
 }
-/*------------------------------------------------------------------------------*/
-/**
- * \internal
- * Check if an IP address is within the network defined by an IP
+
+/* Check if an IP address is within the network defined by an IP
  * address and a netmask.
  *
- * \param ipaddr The IP address to be checked.
- * \param netipaddr The IP address of the network.
- * \param netmask The netmask of the network.
+ * ipaddr The IP address to be checked.
+ * netipaddr The IP address of the network.
+ * netmask The netmask of the network.
  *
- * \return Non-zero if IP address is in network, zero otherwise.
+ * Return: Non-zero if IP address is in network, zero otherwise.
  */
-/*------------------------------------------------------------------------------*/
-static unsigned char
-ipaddr_maskcmp(uint16 *ipaddr, uint16 *netipaddr, uint16 *netmask)
+
+static unsigned char ipaddr_maskcmp(uint16 *ipaddr, uint16 *netipaddr, uint16 *netmask)
 {
   return (ipaddr[0] & netmask [0]) == (netipaddr[0] & netmask[0]) &&
     (ipaddr[1] & netmask[1]) == (netipaddr[1] & netmask[1]);
 }
-/*------------------------------------------------------------------------------*/
-/**
- * \internal
- * Send out an ICMP TIME-EXCEEDED message.
+
+/* Send out an ICMP TIME-EXCEEDED message.
  *
- * This function replaces the packet in the uip_buf buffer with the
+ * This function replaces the packet in the d_buf buffer with the
  * ICMP packet.
  */
-/*------------------------------------------------------------------------------*/
-static void
-time_exceeded(void)
+
+static void time_exceeded(struct uip_driver_s *dev)
 {
   uint16 tmp16;
 
   /* We don't send out ICMP errors for ICMP messages. */
   if(ICMPBUF->proto == UIP_PROTO_ICMP) {
-    uip_len = 0;
+    dev->d_len = 0;
     return;
   }
   /* Copy fields from packet header into payload of this ICMP packet. */
@@ -235,9 +216,9 @@ time_exceeded(void)
 
   /* The size of the ICMP time exceeded packet is 36 + the size of the
      IP header (20) = 56. */
-  uip_len = 56;
+  dev->d_len = 56;
   ICMPBUF->len[0] = 0;
-  ICMPBUF->len[1] = uip_len;
+  ICMPBUF->len[1] = dev->d_len;
 
   /* Fill in the other fields in the IP header. */
   ICMPBUF->vhl = 0x45;
@@ -245,29 +226,24 @@ time_exceeded(void)
   ICMPBUF->ipoffset[0] = ICMPBUF->ipoffset[1] = 0;
   ICMPBUF->ttl  = UIP_TTL;
   ICMPBUF->proto = UIP_PROTO_ICMP;
-  
+
   /* Calculate IP checksum. */
   ICMPBUF->ipchksum = 0;
-  ICMPBUF->ipchksum = ~(uip_ipchksum());
-
-
+  ICMPBUF->ipchksum = ~(uip_ipchksum(dev));
 }
-/*------------------------------------------------------------------------------*/
-/**
- * \internal
- * Register a packet in the forwarding cache so that it won't be
+
+/* Register a packet in the forwarding cache so that it won't be
  * forwarded again.
  */
-/*------------------------------------------------------------------------------*/
-static void
-fwcache_register(void)
+
+static void fwcache_register(struct uip_driver_s *dev)
 {
   struct fwcache_entry *fw;
   int i, oldest;
 
   oldest = FW_TIME;
   fw = NULL;
-  
+
   /* Find the oldest entry in the cache. */
   for(i = 0; i < FWCACHE_SIZE; ++i) {
     if(fwcache[i].timer == 0) {
@@ -295,17 +271,13 @@ fwcache_register(void)
   fw->offset = BUF->ipoffset;
 #endif
 }
-/*------------------------------------------------------------------------------*/
-/**
- * \internal
- * Find a network interface for the IP packet in uip_buf.
- */
-/*------------------------------------------------------------------------------*/
-static struct uip_fw_netif *
-find_netif(void)
+
+/* Find a network interface for the IP packet in d_buf. */
+
+static struct uip_fw_netif *find_netif(struct uip_driver_s *dev)
 {
   struct uip_fw_netif *netif;
-  
+
   /* Walk through every network interface to check for a match. */
   for(netif = netifs; netif != NULL; netif = netif->next) {
     if(ipaddr_maskcmp(BUF->destipaddr, netif->ipaddr,
@@ -314,37 +286,35 @@ find_netif(void)
       return netif;
     }
   }
-  
+
   /* If no matching netif was found, we use default netif. */
   return defaultnetif;
 }
-/*------------------------------------------------------------------------------*/
-/**
- * Output an IP packet on the correct network interface.
+
+/* Output an IP packet on the correct network interface.
  *
- * The IP packet should be present in the uip_buf buffer and its
- * length in the global uip_len variable.
+ * The IP packet should be present in the d_buf buffer and its
+ * length in the d_len field.
  *
- * \retval UIP_FW_ZEROLEN Indicates that a zero-length packet
+ * Return: UIP_FW_ZEROLEN Indicates that a zero-length packet
  * transmission was attempted and that no packet was sent.
  *
- * \retval UIP_FW_NOROUTE No suitable network interface could be found
+ * Return: UIP_FW_NOROUTE No suitable network interface could be found
  * for the outbound packet, and the packet was not sent.
  *
- * \return The return value from the actual network interface output
+ * Return: The return value from the actual network interface output
  * function is passed unmodified as a return value.
  */
-/*------------------------------------------------------------------------------*/
-uint8
-uip_fw_output(void)
+
+uint8 uip_fw_output(struct uip_driver_s *dev)
 {
   struct uip_fw_netif *netif;
 
-  if(uip_len == 0) {
+  if(dev->d_len == 0) {
     return UIP_FW_ZEROLEN;
   }
 
-  fwcache_register();
+  fwcache_register(dev);
 
 #if UIP_BROADCAST
   /* Link local broadcasts go out on all interfaces. */
@@ -360,11 +330,9 @@ uip_fw_output(void)
     return UIP_FW_OK;
   }
 #endif /* UIP_BROADCAST */
-  
-  netif = find_netif();
-  /*  printf("uip_fw_output: netif %p ->output %p len %d\n", netif,
-	 netif->output,
-	 uip_len);*/
+
+  netif = find_netif(dev);
+  dbg("uip_fw_output: netif %p ->output %p len %d\n", netif, netif->output, dev->d_len);
 
   if(netif == NULL) {
     return UIP_FW_NOROUTE;
@@ -373,18 +341,14 @@ uip_fw_output(void)
      output function to send out the packet. */
   return netif->output();
 }
-/*------------------------------------------------------------------------------*/
-/**
- * Forward an IP packet in the uip_buf buffer.
+
+/* Forward an IP packet in the d_buf buffer.
  *
- *
- *
- * \return UIP_FW_FORWARDED if the packet was forwarded, UIP_FW_LOCAL if
+ * Return: UIP_FW_FORWARDED if the packet was forwarded, UIP_FW_LOCAL if
  * the packet should be processed locally.
  */
-/*------------------------------------------------------------------------------*/
-uint8
-uip_fw_forward(void)
+
+uint8 uip_fw_forward(struct uip_driver_s *dev)
 {
   struct fwcache_entry *fw;
 
@@ -430,19 +394,21 @@ uip_fw_forward(void)
   }
 
   /* If the TTL reaches zero we produce an ICMP time exceeded message
-     in the uip_buf buffer and forward that packet back to the sender
-     of the packet. */
+     in the d_buf buffer and forward that packet back to the sender
+     of the packet.
+   */
+
   if(BUF->ttl <= 1) {
     /* No time exceeded for broadcasts and multicasts! */
     if(BUF->destipaddr[0] == 0xffff && BUF->destipaddr[1] == 0xffff) {
       return UIP_FW_LOCAL;
     }
-    time_exceeded();
+    time_exceeded(dev);
   }
-  
+
   /* Decrement the TTL (time-to-live) value in the IP header */
   BUF->ttl = BUF->ttl - 1;
-  
+
   /* Update the IP checksum. */
   if(BUF->ipchksum >= HTONS(0xffff - 0x0100)) {
     BUF->ipchksum = BUF->ipchksum + HTONS(0x0100) + 1;
@@ -450,9 +416,9 @@ uip_fw_forward(void)
     BUF->ipchksum = BUF->ipchksum + HTONS(0x0100);
   }
 
-  if(uip_len > 0) {
-    uip_appdata = &uip_buf[UIP_LLH_LEN + UIP_TCPIP_HLEN];
-    uip_fw_output();
+  if(dev->d_len > 0) {
+    dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_TCPIP_HLEN];
+    uip_fw_output(dev);
   }
 
 #if UIP_BROADCAST
@@ -465,43 +431,36 @@ uip_fw_forward(void)
      other processing should be made. */
   return UIP_FW_FORWARDED;
 }
-/*------------------------------------------------------------------------------*/
-/**
- * Register a network interface with the forwarding module.
+
+/* Register a network interface with the forwarding module.
  *
- * \param netif A pointer to the network interface that is to be
+ * netif A pointer to the network interface that is to be
  * registered.
  */
-/*------------------------------------------------------------------------------*/
-void
-uip_fw_register(struct uip_fw_netif *netif)
+
+void uip_fw_register(struct uip_fw_netif *netif)
 {
   netif->next = netifs;
   netifs = netif;
 }
-/*------------------------------------------------------------------------------*/
-/**
- * Register a default network interface.
+
+/* Register a default network interface.
  *
  * All packets that don't go out on any of the other interfaces will
  * be routed to the default interface.
  *
- * \param netif A pointer to the network interface that is to be
+ * netif A pointer to the network interface that is to be
  * registered.
  */
-/*------------------------------------------------------------------------------*/
-void
-uip_fw_default(struct uip_fw_netif *netif)
+
+void uip_fw_default(struct uip_fw_netif *netif)
 {
   defaultnetif = netif;
 }
-/*------------------------------------------------------------------------------*/
-/**
- * Perform periodic processing.
- */
-/*------------------------------------------------------------------------------*/
-void
-uip_fw_periodic(void)
+
+/* Perform periodic processing. */
+
+void uip_fw_periodic(void)
 {
   struct fwcache_entry *fw;
   for(fw = fwcache; fw < &fwcache[FWCACHE_SIZE]; ++fw) {
@@ -510,4 +469,3 @@ uip_fw_periodic(void)
     }
   }
 }
-/*------------------------------------------------------------------------------*/

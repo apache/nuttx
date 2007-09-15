@@ -282,10 +282,10 @@ struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf)
  *
  ****************************************************************************/
 
-void uip_udppoll(unsigned int conn)
+void uip_udppoll(struct uip_driver_s *dev, unsigned int conn)
 {
   uip_udp_conn = &g_udp_connections[conn];
-  uip_interrupt(UIP_UDP_TIMER);
+  uip_interrupt(dev, UIP_UDP_TIMER);
 }
 
 /****************************************************************************

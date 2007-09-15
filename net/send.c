@@ -78,13 +78,14 @@ struct send_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: send_Interrupt
+ * Function: send_interrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
  *   send operation when polled by the uIP layer.
  *
  * Parameters:
+ *   dev      The sructure of the network driver that caused the interrupt
  *   private  An instance of struct send_s cast to void*
  *
  * Returned Value:
@@ -95,7 +96,7 @@ struct send_s
  *
  ****************************************************************************/
 
-static void send_interrupt(void *private)
+static void send_interrupt(struct uip_driver_s *dev, void *private)
 {
   struct send_s *pstate = (struct send_s *)private;
   struct uip_conn *conn;
@@ -108,11 +109,11 @@ static void send_interrupt(void *private)
     {
       if (pstate->snd_buflen > uip_mss())
         {
-          uip_send(pstate->snd_buffer, uip_mss());
+          uip_send(dev, pstate->snd_buffer, uip_mss());
         }
       else
         {
-          uip_send(pstate->snd_buffer, pstate->snd_buflen);
+          uip_send(dev, pstate->snd_buffer, pstate->snd_buflen);
         }
 
       pstate->snd_state = STATE_DATA_SENT;
@@ -146,9 +147,9 @@ static void send_interrupt(void *private)
 
           /* Don't allow any further call backs. */
 
-          conn           = (struct uip_conn *)pstate->snd_sock->s_conn;
-          conn->private  = NULL;
-          conn->callback = NULL;
+          conn               = (struct uip_conn *)pstate->snd_sock->s_conn;
+          conn->data_private = NULL;
+          conn->data_event   = NULL;
 
           /* Wake up the waiting thread, returning the number of bytes
            * actually sent.
@@ -156,6 +157,23 @@ static void send_interrupt(void *private)
 
           sem_post(&pstate->snd_sem);
         }
+    }
+
+ /* Check for a loss of connection */
+
+  else if ((uip_flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
+    {
+      /* Stop further callbacks */
+
+      uip_udp_conn->private = NULL;
+      uip_udp_conn->event   = NULL;
+
+      /* Report not connected */
+
+      pstate->snd_sent = -ENOTCONN;
+      /* Wake up the waiting thread */
+
+      sem_post(&pstate->snd_sem);
     }
 }
 
@@ -275,9 +293,9 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
     {
       /* Set up the callback in the connection */
 
-      conn           = (struct uip_conn *)psock->s_conn;
-      conn->private  = (void*)&state;
-      conn->callback = send_interrupt;
+      conn               = (struct uip_conn *)psock->s_conn;
+      conn->data_private = (void*)&state;
+      conn->data_event   = send_interrupt;
 
     /* Wait for the send to complete or an error to occur:  NOTES: (1)
      * sem_wait will also terminate if a signal is received, (2) interrupts
@@ -289,8 +307,8 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
 
     /* Make sure that no further interrupts are processed */
 
-    conn->private  = NULL;
-    conn->callback = NULL;
+    conn->data_private = NULL;
+    conn->data_event   = NULL;
   }
 
   sem_destroy(&state. snd_sem);

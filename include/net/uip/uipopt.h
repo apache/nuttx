@@ -129,7 +129,7 @@
  * uIP supports reassembly of fragmented IP packets. This features
  * requires an additonal amount of RAM to hold the reassembly buffer
  * and the reassembly code size is approximately 700 bytes.  The
- * reassembly buffer is of the same size as the uip_buf buffer
+ * reassembly buffer is of the same size as the d_buf buffer
  * (configured by UIP_BUFSIZE).
  *
  * Note: IP packet reassembly is not heavily tested.
@@ -234,7 +234,7 @@
 
 /* The size of the advertised receiver's window.
  *
- * Should be set low (i.e., to the size of the uip_buf buffer) is the
+ * Should be set low (i.e., to the size of the d_buf buffer) is the
  * application is slow to process incoming data, or high (32768 bytes)
  * if the application processes data quickly.
  */
@@ -328,7 +328,7 @@
 
 /* The link level header length.
  *
- * This is the offset into the uip_buf where the IP header can be
+ * This is the offset into the d_buf where the IP header can be
  * found. For Ethernet, this should be set to 14. For SLIP, this
  * should be set to 0.
  */

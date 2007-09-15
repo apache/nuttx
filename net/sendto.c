@@ -45,6 +45,7 @@
 #include <string.h>
 #include <errno.h>
 #include <arch/irq.h>
+#include <net/uip/uip-arch.h>
 
 #include "net-internal.h"
 
@@ -61,32 +62,64 @@ struct sendto_s
   sem_t       st_sem;        /* Semaphore signals sendto completion */
   uint16      st_buflen;     /* Length of send buffer (error if <0) */
   const char *st_buffer;     /* Pointer to send buffer */
+  int         st_sndlen;     /* Result of the send (length sent or negated errno) */
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-void sendto_interrupt(void *private)
+/****************************************************************************
+ * Function: sendto_interrupt
+ *
+ * Description:
+ *   This function is called from the interrupt level to perform the actual
+ *   send operation when polled by the uIP layer.
+ *
+ * Parameters:
+ *   dev      The sructure of the network driver that caused the interrupt
+ *   private  An instance of struct sendto_s cast to void*
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_UDP
+void sendto_interrupt(struct uip_driver_s *dev, void *private)
 {
   struct sendto_s *pstate = (struct sendto_s *)private;
   if (private)
     {
-      /* Copy the user data into appdata and send it */
+      /* Check if the connectin was rejected */
 
-      memcpy(uip_appdata, pstate->st_buffer, pstate->st_buflen);
-      uip_udp_send(pstate->st_buflen);
+      if ((uip_flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
+        {
+          pstate->st_sndlen = -ENOTCONN;
+        }
+      else
+        {
+          /* Copy the user data into d_appdata and send it */
 
-      /* Don't allow any furhter call backs. */
+          memcpy(dev->d_appdata, pstate->st_buffer, pstate->st_buflen);
+          uip_send(dev, dev->d_appdata, pstate->st_buflen);
+          pstate->st_sndlen = pstate->st_buflen;
+        }
 
-      uip_conn->private = NULL;
-      uip_conn->callback = NULL;
+      /* Don't allow any further call backs. */
+
+      uip_udp_conn->private = NULL;
+      uip_udp_conn->event   = NULL;
 
       /* Wake up the waiting thread */
 
       sem_post(&pstate->st_sem);
     }
 }
+#endif
 
 /****************************************************************************
  * Global Functions
@@ -242,8 +275,8 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
   /* Set up the callback in the connection */
 
   udp_conn = (struct uip_udp_conn *)psock->s_conn;
-  udp_conn->private  = (void*)&state;
-  udp_conn->callback = sendto_interrupt;
+  udp_conn->private = (void*)&state;
+  udp_conn->event   = sendto_interrupt;
 
   /* Enable the UDP socket */
 
@@ -260,8 +293,8 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
   /* Make sure that no further interrupts are processed */
 
   uip_udpdisable(psock->s_conn);
-  udp_conn->private  = NULL;
-  udp_conn->callback = NULL;
+  udp_conn->private = NULL;
+  udp_conn->event   = NULL;
   irqrestore(save);
 
   sem_destroy(&state.st_sem);
@@ -269,7 +302,18 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
   /* Set the socket state to idle */
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
-  return len;
+
+  /* Check for errors */
+
+  if (state.st_sndlen < 0)
+    {
+      err = -state.st_sndlen;
+      goto errout;
+    }
+
+  /* Sucess */
+
+  return state.st_sndlen;
 #else
   err = ENOSYS;
 #endif

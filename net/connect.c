@@ -47,7 +47,55 @@
 #include "net-internal.h"
 
 /****************************************************************************
- * Global Functions
+ * Private Functions
+ ****************************************************************************/
+/****************************************************************************
+ * Function: connection_event
+ *
+ * Description:
+ *   Some connection related event has occurred
+ *
+ * Parameters:
+ *   dev      The sructure of the network driver that caused the interrupt
+ *   private  An instance of struct recvfrom_s cast to void*
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+static void connection_event(void *private)
+{
+  FAR struct socket *psock = (FAR struct socket *)private;
+  if (psock)
+    {
+      /* UIP_CLOSE: The remote host has closed the connection
+       * UIP_ABORT: The remote host has aborted the connection
+       * UIP_TIMEDOUT: Connection aborted due to too many retransmissions.
+       */
+      if ((uip_flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
+        {
+          /* Indicate that the socet is no longer connected */
+
+          psock->s_flags &= ~_SF_CONNECTED;
+        }
+
+      /* UIP_CONNECTED: The socket is successfully connected */
+
+      else if ((uip_flags & UIP_CONNECTED) != 0)
+        {
+          /* Indicate that the socet is no longer connected */
+
+          psock->s_flags |= _SF_CONNECTED;
+        }
+    }
+}
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -128,6 +176,7 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
   FAR const struct sockaddr_in *inaddr = (const struct sockaddr_in *)addr;
 #endif
   int err;
+  int ret;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
@@ -155,7 +204,7 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
     {
       case SOCK_STREAM:
         {
-          int ret;
+          struct uip_conn *conn;
 
           /* Verify that the socket is not already connected */
 
@@ -165,25 +214,36 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
               goto errout;
             }
 
-          /* Perform the uIP connection operation */
+          /* Get the connection reference from the socket */
 
-          ret = uip_tcpconnect(psock->s_conn, inaddr);
-          if (ret < 0)
+          conn = psock->s_conn;
+          if (conn) /* Should alwasy be non-NULL */
             {
-              err = -ret;
-              goto errout;
+              /* Perform the uIP connection operation */
+
+              ret = uip_tcpconnect(psock->s_conn, inaddr);
+              if (ret < 0)
+                {
+                  err = -ret;
+                  goto errout;
+                }
+
+              /* Mark the connection bound and connected */
+
+              psock->s_flags |= (_SF_BOUND|_SF_CONNECTED);
+
+              /* Set up to receive callbacks on connection-related events */
+
+              conn->connection_private = (void*)psock;
+              conn->connection_event   = connection_event;
             }
-
-          /* Mark the connection bound and connected */
-
-          psock->s_flags |= (_SF_BOUND|_SF_CONNECTED);
         }
         break;
 
 #ifdef CONFIG_NET_UDP
       case SOCK_DGRAM:
         {
-          int ret = uip_udpconnect(psock->s_conn, inaddr);
+          ret = uip_udpconnect(psock->s_conn, inaddr);
           if (ret < 0)
             {
               err = -ret;

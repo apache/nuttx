@@ -46,6 +46,7 @@
 #include <errno.h>
 #include <arch/irq.h>
 #include <nuttx/clock.h>
+#include <net/uip/uip-arch.h>
 
 #include "net-internal.h"
 
@@ -78,7 +79,26 @@ struct recvfrom_s
  * Private Functions
  ****************************************************************************/
 
-static void recvfrom_interrupt(void *private)
+/****************************************************************************
+ * Function: recvfrom_interrupt
+ *
+ * Description:
+ *   This function is called from the interrupt level to perform the actual
+ *   receive operation via by the uIP layer.
+ *
+ * Parameters:
+ *   dev      The sructure of the network driver that caused the interrupt
+ *   private  An instance of struct recvfrom_s cast to void*
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
 {
   struct recvfrom_s *pstate = (struct recvfrom_s *)private;
   FAR struct socket *psock;
@@ -97,18 +117,18 @@ static void recvfrom_interrupt(void *private)
       if (uip_newdata())
         {
           /* Get the length of the data to return */
-          if (uip_len > pstate->rf_buflen)
+          if (dev->d_len > pstate->rf_buflen)
             {
               recvlen = pstate->rf_buflen;
             }
           else
             {
-            recvlen = uip_len;
+              recvlen = dev->d_len;
             }
 
           /* Copy the new appdata into the user buffer */
 
-          memcpy(pstate->rf_buffer, uip_appdata, recvlen);
+          memcpy(pstate->rf_buffer, dev->d_appdata, recvlen);
 
           /* Update the accumulated size of the data read */
 
@@ -127,9 +147,9 @@ static void recvfrom_interrupt(void *private)
 
               /* Don't allow any further UDP call backs. */
 
-              udp_conn           = (struct uip_udp_conn *)psock->s_conn;
-              udp_conn->private  = NULL;
-              udp_conn->callback = NULL;
+              udp_conn          = (struct uip_udp_conn *)psock->s_conn;
+              udp_conn->private = NULL;
+              udp_conn->event   = NULL;
 
               /* Wake up the waiting thread, returning the number of bytes
                * actually read.
@@ -149,9 +169,9 @@ static void recvfrom_interrupt(void *private)
                * Don't allow any further TCP call backs.
                */
 
-              conn           = (struct uip_conn *)psock->s_conn;
-              conn->private  = NULL;
-              conn->callback = NULL;
+              conn               = (struct uip_conn *)psock->s_conn;
+              conn->data_private = NULL;
+              conn->data_event   = NULL;
 
               /* Wake up the waiting thread, returning the number of bytes
                * actually read.
@@ -167,6 +187,36 @@ static void recvfrom_interrupt(void *private)
 #ifndef CONFIG_DISABLE_CLOCK
             pstate->rf_starttime = g_system_timer;
 #endif
+        }
+
+      /* Check for a loss of connection */
+
+      else if ((uip_flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
+        {
+          /* Stop further callbacks */
+
+#ifdef CONFIG_NET_UDP
+          if (psock->s_type == SOCK_DGRAM)
+            {
+              struct uip_udp_conn *udp_conn = (struct uip_udp_conn *)psock->s_conn;
+              udp_conn->private  = NULL;
+              udp_conn->event    = NULL;
+            }
+          else
+#endif
+            {
+              struct uip_conn *conn = (struct uip_conn *)psock->s_conn;
+              conn->data_private = NULL;
+              conn->data_event   = NULL;
+            }
+
+          /* Report not connected */
+
+          pstate->rf_result = -ENOTCONN;
+
+          /* Wake up the waiting thread */
+
+          sem_post(&pstate->rf_sem);
         }
 
       /* No data has been received -- this is some other event... probably a
@@ -221,9 +271,9 @@ static void recvfrom_interrupt(void *private)
 
                       /* Stop further callbacks */
 
-                      udp_conn           = (struct uip_udp_conn *)psock->s_conn;
-                      udp_conn->private  = NULL;
-                      udp_conn->callback = NULL;
+                      udp_conn          = (struct uip_udp_conn *)psock->s_conn;
+                      udp_conn->private = NULL;
+                      udp_conn->event   = NULL;
 
                       /* Report a timeout error */
 
@@ -234,9 +284,9 @@ static void recvfrom_interrupt(void *private)
                     {
                       struct uip_conn *conn;
 
-                      conn           = (struct uip_conn *)psock->s_conn;
-                      conn->private  = NULL;
-                      conn->callback = NULL;
+                      conn               = (struct uip_conn *)psock->s_conn;
+                      conn->data_private = NULL;
+                      conn->data_event   = NULL;
 
                       /* Report an error only if no data has been received */
 
@@ -329,7 +379,7 @@ static ssize_t recvfrom_result(int result, struct recvfrom_s *pstate)
 
   if (pstate->rf_result < 0)
     {
-      /* Return EGAIN on a timeout */
+      /* Return EGAIN on a timeout or ENOTCONN on loss of connection */
 
       return pstate->rf_result;
     }
@@ -401,9 +451,9 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Set up the callback in the connection */
 
-  udp_conn           = (struct uip_udp_conn *)psock->s_conn;
-  udp_conn->private  = (void*)&state;
-  udp_conn->callback = recvfrom_interrupt;
+  udp_conn          = (struct uip_udp_conn *)psock->s_conn;
+  udp_conn->private = (void*)&state;
+  udp_conn->event   = recvfrom_interrupt;
 
   /* Enable the UDP socket */
 
@@ -420,8 +470,8 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   /* Make sure that no further interrupts are processed */
 
   uip_udpdisable(psock->s_conn);
-  udp_conn->private  = NULL;
-  udp_conn->callback = NULL;
+  udp_conn->private = NULL;
+  udp_conn->event   = NULL;
   irqrestore(save);
 
 #warning "Needs to return server address"
@@ -482,9 +532,9 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Set up the callback in the connection */
 
-  conn           = (struct uip_conn *)psock->s_conn;
-  conn->private  = (void*)&state;
-  conn->callback = recvfrom_interrupt;
+  conn               = (struct uip_conn *)psock->s_conn;
+  conn->data_private = (void*)&state;
+  conn->data_event   = recvfrom_interrupt;
 
   /* Wait for either the receive to complete or for an error/timeout to occur.
    * NOTES:  (1) sem_wait will also terminate if a signal is received, (2)
@@ -496,8 +546,8 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Make sure that no further interrupts are processed */
 
-  conn->private  = NULL;
-  conn->callback = NULL;
+  conn->data_private = NULL;
+  conn->data_event   = NULL;
   irqrestore(save);
 
 #warning "Needs to return server address"

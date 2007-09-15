@@ -57,6 +57,8 @@
 #include <net/uip/resolv.h>
 
 #include "uiplib/uiplib.h"
+#include <net/uip/uip-arch.h>
+
 #include "webclient.h"
 
 #define WEBCLIENT_TIMEOUT 100
@@ -178,14 +180,14 @@ static char *copy_string(char *dest, const char *src, int len)
   return dest + len;
 }
 
-static void senddata(void)
+static void senddata(struct uip_driver_s *dev)
 {
   uint16 len;
   char *getrequest;
   char *cptr;
 
   if (s.getrequestleft > 0) {
-    cptr = getrequest = (char *)uip_appdata;
+    cptr = getrequest = (char *)dev->d_appdata;
 
     cptr = copy_string(cptr, http_get, sizeof(http_get) - 1);
     cptr = copy_string(cptr, s.file, strlen(s.file));
@@ -204,7 +206,7 @@ static void senddata(void)
     len = s.getrequestleft > uip_mss()?
       uip_mss():
       s.getrequestleft;
-    uip_send(&(getrequest[s.getrequestptr]), len);
+    uip_send(dev, &(getrequest[s.getrequestptr]), len);
   }
 }
 
@@ -221,15 +223,15 @@ static void acked(void)
   }
 }
 
-static uint16 parse_statusline(uint16 len)
+static uint16 parse_statusline(struct uip_driver_s *dev, uint16 len)
 {
   char *cptr;
 
   while(len > 0 && s.httpheaderlineptr < sizeof(s.httpheaderline))
     {
-      char *pappdata = (char*)uip_appdata;
+      char *pappdata = (char*)dev->d_appdata;
       s.httpheaderline[s.httpheaderlineptr] = *pappdata++;
-      uip_appdata = (void*)pappdata;
+      dev->d_appdata = (void*)pappdata;
       len--;
 
       if (s.httpheaderline[s.httpheaderlineptr] == ISO_nl)
@@ -301,16 +303,16 @@ static char casecmp(char *str1, const char *str2, char len)
   return 0;
 }
 
-static uint16 parse_headers(uint16 len)
+static uint16 parse_headers(struct uip_driver_s *dev, uint16 len)
 {
   char *cptr;
   static unsigned char i;
 
   while(len > 0 && s.httpheaderlineptr < sizeof(s.httpheaderline))
     {
-      char *pappdata = (char*)uip_appdata;
+      char *pappdata = (char*)dev->d_appdata;
       s.httpheaderline[s.httpheaderlineptr] = *pappdata++;
-      uip_appdata = (void*)pappdata;
+      dev->d_appdata = (void*)pappdata;
       len--;
 
       if (s.httpheaderline[s.httpheaderlineptr] == ISO_nl)
@@ -378,23 +380,23 @@ static uint16 parse_headers(uint16 len)
   return len;
 }
 
-static void newdata(void)
+static void newdata(struct uip_driver_s *dev)
 {
   uint16 len;
 
-  len = uip_datalen();
+  len = uip_datalen(dev);
 
   if (s.state == WEBCLIENT_STATE_STATUSLINE) {
-    len = parse_statusline(len);
+    len = parse_statusline(dev, len);
   }
 
   if (s.state == WEBCLIENT_STATE_HEADERS && len > 0) {
-    len = parse_headers(len);
+    len = parse_headers(dev, len);
   }
 
   if (len > 0 && s.state == WEBCLIENT_STATE_DATA &&
      s.httpflag != HTTPFLAG_MOVED) {
-    webclient_datahandler((char *)uip_appdata, len);
+    webclient_datahandler((char *)dev->d_appdata, len);
   }
 }
 
@@ -402,14 +404,14 @@ static void newdata(void)
  * event of interest occurs.
  */
 
-void uip_interrupt_event(void)
+void uip_interrupt_event(struct uip_driver_s *dev)
 {
 #warning OBSOLETE -- needs to be redesigned
   if (uip_connected())
     {
       s.timer = 0;
       s.state = WEBCLIENT_STATE_STATUSLINE;
-      senddata();
+      senddata(dev);
       webclient_connected();
       return;
     }
@@ -440,12 +442,12 @@ void uip_interrupt_event(void)
   if (uip_newdata())
     {
       s.timer = 0;
-      newdata();
+      newdata(dev);
     }
 
   if (uip_rexmit() || uip_newdata() || uip_acked())
     {
-      senddata();
+      senddata(dev);
     }
   else if (uip_poll())
     {

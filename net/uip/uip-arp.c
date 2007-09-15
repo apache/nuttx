@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <string.h>
+#include <net/uip/uip-arch.h>
 #include <net/uip/uip-arp.h>
 
 struct arp_hdr
@@ -94,36 +95,29 @@ static uint8 i, c;
 static uint8 arptime;
 static uint8 tmpage;
 
-#define BUF   ((struct arp_hdr *)&uip_buf[0])
-#define IPBUF ((struct ethip_hdr *)&uip_buf[0])
-/*-----------------------------------------------------------------------------------*/
-/**
- * Initialize the ARP module.
- *
- */
-/*-----------------------------------------------------------------------------------*/
-void
-uip_arp_init(void)
+#define BUF   ((struct arp_hdr *)&dev->d_buf[0])
+#define IPBUF ((struct ethip_hdr *)&dev->d_buf[0])
+
+/* Initialize the ARP module. */
+
+void uip_arp_init(void)
 {
   for(i = 0; i < UIP_ARPTAB_SIZE; ++i) {
     memset(arp_table[i].ipaddr, 0, 4);
   }
 }
-/*-----------------------------------------------------------------------------------*/
-/**
- * Periodic ARP processing function.
+
+/* Periodic ARP processing function.
  *
  * This function performs periodic timer processing in the ARP module
  * and should be called at regular intervals. The recommended interval
  * is 10 seconds between the calls.
- *
  */
-/*-----------------------------------------------------------------------------------*/
-void
-uip_arp_timer(void)
+
+void uip_arp_timer(void)
 {
   struct arp_entry *tabptr;
-  
+
   ++arptime;
   for(i = 0; i < UIP_ARPTAB_SIZE; ++i) {
     tabptr = &arp_table[i];
@@ -135,9 +129,7 @@ uip_arp_timer(void)
 
 }
 
-/*-----------------------------------------------------------------------------------*/
-static void
-uip_arp_update(uint16 *pipaddr, struct uip_eth_addr *ethaddr)
+static void uip_arp_update(uint16 *pipaddr, struct uip_eth_addr *ethaddr)
 {
   register struct arp_entry *tabptr;
   /* Walk through the ARP mapping table and try to find an entry to
@@ -154,7 +146,7 @@ uip_arp_update(uint16 *pipaddr, struct uip_eth_addr *ethaddr)
          the IP address in this ARP table entry. */
       if(pipaddr[0] == tabptr->ipaddr[0] &&
 	 pipaddr[1] == tabptr->ipaddr[1]) {
-	 
+
 	/* An old entry found, update this and return. */
 	memcpy(tabptr->ethaddr.addr, ethaddr->addr, 6);
 	tabptr->time = arptime;
@@ -198,9 +190,8 @@ uip_arp_update(uint16 *pipaddr, struct uip_eth_addr *ethaddr)
   memcpy(tabptr->ethaddr.addr, ethaddr->addr, 6);
   tabptr->time = arptime;
 }
-/*-----------------------------------------------------------------------------------*/
-/**
- * ARP processing for incoming IP packets
+
+/* ARP processing for incoming IP packets
  *
  * This function should be called by the device driver when an IP
  * packet has been received. The function will check if the address is
@@ -208,16 +199,15 @@ uip_arp_update(uint16 *pipaddr, struct uip_eth_addr *ethaddr)
  * refreshed. If no ARP cache entry was found, a new one is created.
  *
  * This function expects an IP packet with a prepended Ethernet header
- * in the uip_buf[] buffer, and the length of the packet in the global
- * variable uip_len.
+ * in the d_buf[] buffer, and the length of the packet in the field
+ * d_len.
  */
-/*-----------------------------------------------------------------------------------*/
+
 #if 0
-void
-uip_arp_ipin(void)
+void uip_arp_ipin(void)
 {
-  uip_len -= sizeof(struct uip_eth_hdr);
-	
+  dev->d_len -= sizeof(struct uip_eth_hdr);
+
   /* Only insert/update an entry if the source IP address of the
      incoming IP packet comes from a host on the local network. */
   if((IPBUF->srcipaddr[0] & uip_netmask[0]) !=
@@ -229,13 +219,12 @@ uip_arp_ipin(void)
     return;
   }
   uip_arp_update(IPBUF->srcipaddr, &(IPBUF->ethhdr.src));
-  
+
   return;
 }
 #endif /* 0 */
-/*-----------------------------------------------------------------------------------*/
-/**
- * ARP processing for incoming ARP packets.
+
+/* ARP processing for incoming ARP packets.
  *
  * This function should be called by the device driver when an ARP
  * packet has been received. The function will act differently
@@ -243,29 +232,27 @@ uip_arp_ipin(void)
  * that we previously sent out, the ARP cache will be filled in with
  * the values from the ARP reply. If the incoming ARP packet is an ARP
  * request for our IP address, an ARP reply packet is created and put
- * into the uip_buf[] buffer.
+ * into the d_buf[] buffer.
  *
- * When the function returns, the value of the global variable uip_len
+ * When the function returns, the value of the field d_len
  * indicates whether the device driver should send out a packet or
- * not. If uip_len is zero, no packet should be sent. If uip_len is
+ * not. If d_len is zero, no packet should be sent. If d_len is
  * non-zero, it contains the length of the outbound packet that is
- * present in the uip_buf[] buffer.
+ * present in the d_buf[] buffer.
  *
  * This function expects an ARP packet with a prepended Ethernet
- * header in the uip_buf[] buffer, and the length of the packet in the
- * global variable uip_len.
+ * header in the d_buf[] buffer, and the length of the packet in the
+ * global variable d_len.
  */
-/*-----------------------------------------------------------------------------------*/
-void
-uip_arp_arpin(void)
+
+void uip_arp_arpin(struct uip_driver_s *dev)
 {
-  
-  if(uip_len < sizeof(struct arp_hdr)) {
-    uip_len = 0;
+  if(dev->d_len < sizeof(struct arp_hdr)) {
+    dev->d_len = 0;
     return;
   }
-  uip_len = 0;
-  
+  dev->d_len = 0;
+
   switch(BUF->opcode) {
   case HTONS(ARP_REQUEST):
     /* ARP request. If it asked for our address, we send out a
@@ -275,7 +262,7 @@ uip_arp_arpin(void)
 	 table, since it is likely that we will do more communication
 	 with this host in the future. */
       uip_arp_update(BUF->sipaddr, &BUF->shwaddr);
-      
+
       /* The reply opcode is 2. */
       BUF->opcode = HTONS(2);
 
@@ -283,14 +270,14 @@ uip_arp_arpin(void)
       memcpy(BUF->shwaddr.addr, uip_ethaddr.addr, 6);
       memcpy(BUF->ethhdr.src.addr, uip_ethaddr.addr, 6);
       memcpy(BUF->ethhdr.dest.addr, BUF->dhwaddr.addr, 6);
-      
+
       BUF->dipaddr[0] = BUF->sipaddr[0];
       BUF->dipaddr[1] = BUF->sipaddr[1];
       BUF->sipaddr[0] = uip_hostaddr[0];
       BUF->sipaddr[1] = uip_hostaddr[1];
 
       BUF->ethhdr.type = HTONS(UIP_ETHTYPE_ARP);
-      uip_len = sizeof(struct arp_hdr);
+      dev->d_len = sizeof(struct arp_hdr);
     }
     break;
   case HTONS(ARP_REPLY):
@@ -304,9 +291,8 @@ uip_arp_arpin(void)
 
   return;
 }
-/*-----------------------------------------------------------------------------------*/
-/**
- * Prepend Ethernet header to an outbound IP packet and see if we need
+
+/* Prepend Ethernet header to an outbound IP packet and see if we need
  * to send out an ARP request.
  *
  * This function should be called before sending out an IP packet. The
@@ -319,7 +305,7 @@ uip_arp_arpin(void)
  * checks the ARP cache to see if an entry for the destination IP
  * address is found. If so, an Ethernet header is prepended and the
  * function returns. If no ARP cache entry is found for the
- * destination IP address, the packet in the uip_buf[] is replaced by
+ * destination IP address, the packet in the d_buf[] is replaced by
  * an ARP request packet for the IP address. The IP packet is dropped
  * and it is assumed that they higher level protocols (e.g., TCP)
  * eventually will retransmit the dropped packet.
@@ -327,16 +313,14 @@ uip_arp_arpin(void)
  * If the destination IP address is not on the local network, the IP
  * address of the default router is used instead.
  *
- * When the function returns, a packet is present in the uip_buf[]
- * buffer, and the length of the packet is in the global variable
- * uip_len.
+ * When the function returns, a packet is present in the d_buf[]
+ * buffer, and the length of the packet is in the field d_len.
  */
-/*-----------------------------------------------------------------------------------*/
-void
-uip_arp_out(void)
+
+void uip_arp_out(struct uip_driver_s *dev)
 {
   struct arp_entry *tabptr;
-  
+
   /* Find the destination IP address in the ARP table and construct
      the Ethernet header. If the destination IP addres isn't on the
      local network, we use the default router's IP address instead.
@@ -358,7 +342,7 @@ uip_arp_out(void)
       /* Else, we use the destination IP address. */
       uip_ipaddr_copy(ipaddr, IPBUF->destipaddr);
     }
-      
+
     for(i = 0; i < UIP_ARPTAB_SIZE; ++i) {
       tabptr = &arp_table[i];
       if(uip_ipaddr_cmp(ipaddr, tabptr->ipaddr)) {
@@ -374,7 +358,7 @@ uip_arp_out(void)
       memset(BUF->dhwaddr.addr, 0x00, 6);
       memcpy(BUF->ethhdr.src.addr, uip_ethaddr.addr, 6);
       memcpy(BUF->shwaddr.addr, uip_ethaddr.addr, 6);
-    
+
       uip_ipaddr_copy(BUF->dipaddr, ipaddr);
       uip_ipaddr_copy(BUF->sipaddr, uip_hostaddr);
       BUF->opcode = HTONS(ARP_REQUEST); /* ARP request. */
@@ -384,9 +368,9 @@ uip_arp_out(void)
       BUF->protolen = 4;
       BUF->ethhdr.type = HTONS(UIP_ETHTYPE_ARP);
 
-      uip_appdata = &uip_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN];
-    
-      uip_len = sizeof(struct arp_hdr);
+      dev->d_appdata = &dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN];
+
+      dev->d_len = sizeof(struct arp_hdr);
       return;
     }
 
@@ -394,12 +378,8 @@ uip_arp_out(void)
     memcpy(IPBUF->ethhdr.dest.addr, tabptr->ethaddr.addr, 6);
   }
   memcpy(IPBUF->ethhdr.src.addr, uip_ethaddr.addr, 6);
-  
+
   IPBUF->ethhdr.type = HTONS(UIP_ETHTYPE_IP);
 
-  uip_len += sizeof(struct uip_eth_hdr);
+  dev->d_len += sizeof(struct uip_eth_hdr);
 }
-/*-----------------------------------------------------------------------------------*/
-
-/** @} */
-/** @} */

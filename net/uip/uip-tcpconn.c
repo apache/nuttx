@@ -434,10 +434,10 @@ struct uip_conn *uip_tcplistener(struct uip_tcpip_hdr *buf)
  *
  ****************************************************************************/
 
-void uip_tcppoll(unsigned int conn)
+void uip_tcppoll(struct uip_driver_s *dev, unsigned int conn)
 {
   uip_conn = &g_tcp_connections[conn];
-  uip_interrupt(UIP_TIMER);
+  uip_interrupt(dev, UIP_TIMER);
 }
 
 /****************************************************************************

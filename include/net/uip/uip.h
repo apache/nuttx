@@ -84,6 +84,9 @@
                                  * successfully established. */
 #define UIP_TIMEDOUT   (1 << 7) /* The connection has been aborted due to too many retransmissions. */
 
+#define UIP_DATA_EVENTS (UIP_ACKDATA|UIP_NEWDATA|UIP_REXMIT|UIP_POLL)
+#define UIP_CONN_EVENTS (UIP_CLOSE|UIP_ABORT|UIP_CONNECTED|UIP_TIMEDOUT)
+
 /* The TCP states used in the uip_conn->tcpstateflags. */
 
 #define UIP_CLOSED      0 /* The connection is not in use and available */
@@ -100,15 +103,15 @@
 #define UIP_TS_MASK     15
 #define UIP_STOPPED     16
 
-/* The buffer size available for user data in the \ref uip_buf buffer.
+/* The buffer size available for user data in the d_buf buffer.
  *
  * This macro holds the available size for user data in the \ref
- * uip_buf buffer. The macro is intended to be used for checking
+ * d_buf buffer. The macro is intended to be used for checking
  * bounds of available user data.
  *
  * Example:
  *
- *   snprintf(uip_appdata, UIP_APPDATA_SIZE, "%u\n", i);
+ *   snprintf(dev->d_appdata, UIP_APPDATA_SIZE, "%u\n", i);
  */
 
 #define UIP_APPDATA_SIZE (UIP_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN)
@@ -156,6 +159,7 @@ typedef uip_ip4addr_t uip_ipaddr_t;
  * file pointers) for the connection.
  */
 
+struct uip_driver_s;    /* Forward reference */
 struct uip_conn
 {
   dq_entry_t node;        /* Implements a doubly linked list */
@@ -186,8 +190,10 @@ struct uip_conn
    * in the following:
    */
 
-  void *private;
-  void (*callback)(void *private);
+  void *data_private;
+  void (*data_event)(struct uip_driver_s *dev, void *private);
+  void *connection_private;
+  void (*connection_event)(void *private);
 };
 
 #ifdef CONFIG_NET_UDP
@@ -204,7 +210,7 @@ struct uip_udp_conn
   /* Defines the UDP callback */
 
   void *private;
-  void (*callback)(void *private);
+  void (*event)(struct uip_driver_s *dev, void *private);
 };
 #endif  /* CONFIG_NET_UDP */
 
@@ -232,6 +238,7 @@ struct uip_stats
     uip_stats_t protoerr; /* Number of packets dropped since they
                              were neither ICMP, UDP nor TCP. */
   } ip;                   /* IP statistics. */
+
   struct
   {
     uip_stats_t drop;     /* Number of dropped ICMP packets. */
@@ -239,7 +246,9 @@ struct uip_stats
     uip_stats_t sent;     /* Number of sent ICMP packets. */
     uip_stats_t typeerr;  /* Number of ICMP packets with a wrong type. */
   } icmp;                 /* ICMP statistics. */
+
   struct
+
   {
     uip_stats_t drop;     /* Number of dropped TCP segments. */
     uip_stats_t recv;     /* Number of recived TCP segments. */
@@ -253,6 +262,7 @@ struct uip_stats
     uip_stats_t synrst;   /* Number of SYNs for closed ports,
                              triggering a RST. */
   } tcp;                  /* TCP statistics. */
+
 #ifdef CONFIG_NET_UDP
   struct
   {
@@ -269,6 +279,7 @@ struct uip_stats
 struct uip_tcpip_hdr
 {
 #ifdef CONFIG_NET_IPv6
+
   /* IPv6 header. */
 
   uint8 vtc;
@@ -279,6 +290,7 @@ struct uip_tcpip_hdr
   uip_ip6addr_t srcipaddr, destipaddr;
 
 #else /* CONFIG_NET_IPv6 */
+
   /* IPv4 header. */
 
   uint8  vhl;
@@ -291,6 +303,7 @@ struct uip_tcpip_hdr
   uint16 ipchksum;
   uint16 srcipaddr[2];
   uint16 destipaddr[2];
+
 #endif /* CONFIG_NET_IPv6 */
 
   /* TCP header. */
@@ -312,6 +325,7 @@ struct uip_tcpip_hdr
 struct uip_icmpip_hdr
 {
 #ifdef CONFIG_NET_IPv6
+
   /* IPv6 header. */
 
   uint8  vtc;
@@ -324,6 +338,7 @@ struct uip_icmpip_hdr
   uip_ip6addr_t destipaddr;
 
 #else /* CONFIG_NET_IPv6 */
+
   /* IPv4 header. */
 
   uint8  vhl;
@@ -336,17 +351,29 @@ struct uip_icmpip_hdr
   uint16 ipchksum;
   uint16 srcipaddr[2];
   uint16 destipaddr[2];
+
 #endif /* CONFIG_NET_IPv6 */
 
   /* ICMP (echo) header. */
-  uint8 type, icode;
+
+  uint8  type;
+  uint8  icode;
   uint16 icmpchksum;
+
 #ifndef CONFIG_NET_IPv6
-  uint16 id, seqno;
+
+  uint16 id;
+  uint16 seqno;
+
 #else /* !CONFIG_NET_IPv6 */
-  uint8 flags, reserved1, reserved2, reserved3;
+
+  uint8 flags;
+  uint8 reserved1;
+  uint8 reserved2;
+  uint8 reserved3;
   uint8 icmp6data[16];
   uint8 options[1];
+
 #endif /* !CONFIG_NET_IPv6 */
 };
 
@@ -355,6 +382,7 @@ struct uip_icmpip_hdr
 struct uip_udpip_hdr
 {
 #ifdef CONFIG_NET_IPv6
+
   /* IPv6 header. */
 
   uint8 vtc;
@@ -364,8 +392,10 @@ struct uip_udpip_hdr
   uint8 proto, ttl;
   uip_ip6addr_t srcipaddr;
   uip_ip6addr_t destipaddr;
+
 #else /* CONFIG_NET_IPv6 */
-  /* IP header. */
+
+  /* IPv4 header. */
 
   uint8  vhl;
   uint8  tos;
@@ -377,6 +407,7 @@ struct uip_udpip_hdr
   uint16 ipchksum;
   uint16 srcipaddr[2];
   uint16 destipaddr[2];
+
 #endif /* CONFIG_NET_IPv6 */
 
   /* UDP header. */
@@ -398,42 +429,6 @@ struct uip_eth_addr
  * Public Data
  ****************************************************************************/
 
-/* The uIP packet buffer.
- *
- * The uip_buf array is used to hold incoming and outgoing
- * packets. The device driver should place incoming data into this
- * buffer. When sending data, the device driver should read the link
- * level headers and the TCP/IP headers from this buffer. The size of
- * the link level headers is configured by the UIP_LLH_LEN define.
- *
- * Note: The application data need not be placed in this buffer, so
- * the device driver must read it from the place pointed to by the
- * uip_appdata pointer as illustrated by the following example:
- *
- *    void
- *    devicedriver_send(void)
- *    {
- *       hwsend(&uip_buf[0], UIP_LLH_LEN);
- *       if(uip_len <= UIP_LLH_LEN + UIP_TCPIP_HLEN) {
- *         hwsend(&uip_buf[UIP_LLH_LEN], uip_len - UIP_LLH_LEN);
- *       } else {
- *         hwsend(&uip_buf[UIP_LLH_LEN], UIP_TCPIP_HLEN);
- *         hwsend(uip_appdata, uip_len - UIP_TCPIP_HLEN - UIP_LLH_LEN);
- *       }
- *   }
- */
-
-extern uint8 uip_buf[UIP_BUFSIZE+2];
-
-/* Pointer to the application data in the packet buffer.
- *
- * This pointer points to the application data when the application is
- * called. If the application wishes to send data, the application may
- * use this space to write the data into before calling uip_send().
- */
-
-extern void *uip_appdata;
-
 #if UIP_URGDATA > 0
 /* uint8 *uip_urgdata:
  *
@@ -448,23 +443,7 @@ extern void *uip_urgdata;
  *
  * uIP has a few global variables that are used in device drivers for
  * uIP.
- *
- * The length of the packet in the uip_buf buffer.
- *
- * The global variable uip_len holds the length of the packet in the
- * uip_buf buffer.
- *
- * When the network device driver calls the uIP input function,
- * uip_len should be set to the length of the packet in the uip_buf
- * buffer.
- *
- * When sending packets, the device driver should use the contents of
- * the uip_len variable to determine the length of the outgoing
- * packet.
- *
  */
-
-extern uint16 uip_len;
 
 #if UIP_URGDATA > 0
 extern uint16 uip_urglen, uip_surglen;
@@ -703,16 +682,16 @@ void uip_unlisten(uint16 port);
  * len The maximum amount of data bytes to be sent.
  */
 
-void uip_send(const void *data, int len);
+void uip_send(struct uip_driver_s *dev, const void *buf, int len);
 
 /* The length of any incoming data that is currently avaliable (if avaliable)
- * in the uip_appdata buffer.
+ * in the d_appdata buffer.
  *
  * The test function uip_data() must first be used to check if there
  * is any data available at all.
  */
 
-#define uip_datalen()       uip_len
+#define uip_datalen(dev)    ((dev)->d_len)
 
 /* The length of any out-of-band data (urgent data) that has arrived
  * on the connection.
@@ -778,8 +757,8 @@ void uip_send(const void *data, int len);
 /* Is new incoming data available?
  *
  * Will reduce to non-zero if there is new data for the application
- * present at the uip_appdata pointer. The size of the data is
- * avaliable through the uip_len variable.
+ * present at the d_appdata pointer. The size of the data is
+ * avaliable through the d_len element.
  */
 
 #define uip_newdata()   (uip_flags & UIP_NEWDATA)
@@ -896,17 +875,6 @@ extern int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *a
 
 extern void uip_udpenable(struct uip_udp_conn *conn);
 extern void uip_udpdisable(struct uip_udp_conn *conn);
-
-/* Send a UDP datagram of length len on the current connection.
- *
- * This function can only be called in response to a UDP event (poll
- * or newdata). The data must be present in the uip_buf buffer, at the
- * place pointed to by the uip_appdata pointer.
- *
- * len The length of the data in the uip_buf buffer.
- */
-
-#define uip_udp_send(len) uip_send((char *)uip_appdata, len)
 
 /* uIP convenience and converting functions.
  *

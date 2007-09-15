@@ -66,23 +66,22 @@
 #ifndef __UIP_SPLIT_H__
 #define __UIP_SPLIT_H__
 
-/**
- * Handle outgoing packets.
+/* Handle outgoing packets.
  *
- * This function inspects an outgoing packet in the uip_buf buffer and
+ * This function inspects an outgoing packet in the d_buf buffer and
  * sends it out using the uip_fw_output() function. If the packet is a
  * full-sized TCP segment it will be split into two segments and
  * transmitted separately. This function should be called instead of
  * the actual device driver output function, or the uip_fw_output()
  * function.
  *
- * The headers of the outgoing packet is assumed to be in the uip_buf
- * buffer and the payload is assumed to be wherever uip_appdata
+ * The headers of the outgoing packet is assumed to be in the d_buf
+ * buffer and the payload is assumed to be wherever d_appdata
  * points. The length of the outgoing packet is assumed to be in the
- * uip_len variable.
- *
+ * d_len field.
  */
-void uip_split_output(void);
+
+void uip_split_output(struct uip_driver_s *dev);
 
 #endif /* __UIP_SPLIT_H__ */
 

@@ -63,15 +63,95 @@
  * the macrose defined in this file.
  */
 
-#define UIP_DATA          1 /* Tells uIP that there is incoming data in the uip_buf buffer. The
-                             * length of the data is stored in the global variable uip_len. */
+#define UIP_DATA          1 /* Tells uIP that there is incoming data in the d_buf buffer. The
+                             * length of the data is stored in the field d_len. */
 #define UIP_TIMER         2 /* Tells uIP that the periodic timer has fired. */
 #define UIP_POLL_REQUEST  3 /* Tells uIP that a connection should be polled. */
 #define UIP_UDP_SEND_CONN 4 /* Tells uIP that a UDP datagram should be constructed in the
-                             * uip_buf buffer. */
- #ifdef CONFIG_NET_UDP
+                             * d_buf buffer. */
+#ifdef CONFIG_NET_UDP
 # define UIP_UDP_TIMER    5
 #endif  /* CONFIG_NET_UDP */
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* This structure collects information that is specific to a specific network
+ * interface driver.  If the hardware platform supports only a single instance
+ * of this structure.
+ */
+
+struct uip_driver_s
+{
+  /* The uIP packet buffer.
+   *
+   * The d_buf array is used to hold incoming and outgoing
+   * packets. The device driver should place incoming data into this
+   * buffer. When sending data, the device driver should read the link
+   * level headers and the TCP/IP headers from this buffer. The size of
+   * the link level headers is configured by the UIP_LLH_LEN define.
+   *
+   * Note: The application data need not be placed in this buffer, so
+   * the device driver must read it from the place pointed to by the
+   * d_appdata pointer as illustrated by the following example:
+   *
+   *    void
+   *    devicedriver_send(void)
+   *    {
+   *       hwsend(&dev->d_buf[0], UIP_LLH_LEN);
+   *       if(dev->d_len <= UIP_LLH_LEN + UIP_TCPIP_HLEN) {
+   *         hwsend(&dev->d_buf[UIP_LLH_LEN], dev->d_len - UIP_LLH_LEN);
+   *       } else {
+   *         hwsend(&dev->d_buf[UIP_LLH_LEN], UIP_TCPIP_HLEN);
+   *         hwsend(dev->d_appdata, dev->d_len - UIP_TCPIP_HLEN - UIP_LLH_LEN);
+   *       }
+   *   }
+   */
+
+  uint8 d_buf[UIP_BUFSIZE + 2];
+
+  /* d_appdata points to the location where application data can be read from
+   * or written into a packet.
+   */
+
+  uint8 *d_appdata;
+
+  /* This is a pointer into d_buf where a user application may append
+   * data to be sent.
+   */
+
+  uint8 *d_snddata;
+
+/* The length of the packet in the d_buf buffer.
+ *
+ * Holds the length of the packet in the d_buf buffer.
+ *
+ * When the network device driver calls the uIP input function,
+ * d_len should be set to the length of the packet in the d_buf
+ * buffer.
+ *
+ * When sending packets, the device driver should use the contents of
+ * the d_len variable to determine the length of the outgoing
+ * packet.
+ */
+
+  uint16 d_len;
+
+  /* When d_buf contains outgoing xmit data, xmtlen is nonzero and represents
+   * the amount of appllcation data after d_snddata
+   */
+
+  uint16 d_sndlen;
+};
+
+/****************************************************************************
+ * Public Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Pulblic Function Prototypes
+ ****************************************************************************/
 
 /* uIP device driver functions
  *
@@ -82,21 +162,21 @@
  *
  * This function should be called when the device driver has received
  * a packet from the network. The packet from the device driver must
- * be present in the uip_buf buffer, and the length of the packet
- * should be placed in the uip_len variable.
+ * be present in the d_buf buffer, and the length of the packet
+ * should be placed in the d_len field.
  *
  * When the function returns, there may be an outbound packet placed
- * in the uip_buf packet buffer. If so, the uip_len variable is set to
+ * in the d_buf packet buffer. If so, the d_len field is set to
  * the length of the packet. If no packet is to be sent out, the
- * uip_len variable is set to 0.
+ * d_len field is set to 0.
  *
  * The usual way of calling the function is presented by the source
  * code below.
  *
- *     uip_len = devicedriver_poll();
- *     if(uip_len > 0) {
+ *     dev->d_len = devicedriver_poll();
+ *     if(dev->d_len > 0) {
  *       uip_input();
- *       if(uip_len > 0) {
+ *       if(dev->d_len > 0) {
  *         devicedriver_send();
  *       }
  *     }
@@ -106,25 +186,25 @@
  * Ethernet, you will need to call the uIP ARP code before calling
  * this function:
  *
- *     #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
- *     uip_len = ethernet_devicedrver_poll();
- *     if(uip_len > 0) {
+ *     #define BUF ((struct uip_eth_hdr *)&dev->d_buf[0])
+ *     dev->d_len = ethernet_devicedrver_poll();
+ *     if(dev->d_len > 0) {
  *       if(BUF->type == HTONS(UIP_ETHTYPE_IP)) {
  *         uip_arp_ipin();
  *         uip_input();
- *         if(uip_len > 0) {
+ *         if(dev->d_len > 0) {
  *           uip_arp_out();
  *           ethernet_devicedriver_send();
  *         }
  *       } else if(BUF->type == HTONS(UIP_ETHTYPE_ARP)) {
  *         uip_arp_arpin();
- *         if(uip_len > 0) {
+ *         if(dev->d_len > 0) {
  *           ethernet_devicedriver_send();
  *         }
  *       }
  */
 
-#define uip_input() uip_interrupt(UIP_DATA)
+#define uip_input(dev) uip_interrupt(dev,UIP_DATA)
 
 /* Periodic processing for a connection identified by its number.
  *
@@ -134,8 +214,8 @@
  * connection, regardless of whether they are open of closed.
  *
  * When the function returns, it may have an outbound packet waiting
- * for service in the uIP packet buffer, and if so the uip_len
- * variable is set to a value larger than zero. The device driver
+ * for service in the uIP packet buffer, and if so the d_len field
+ * is set to a value larger than zero. The device driver
  * should be called to send out the packet.
  *
  * The ususal way of calling the function is through a for() loop like
@@ -143,8 +223,8 @@
  *
  *     for(i = 0; i < UIP_CONNS; ++i)
  *       {
- *         uip_tcppoll(i);
- *         if (uip_len > 0)
+ *         uip_tcppoll(dev,i);
+ *         if (dev->d_len > 0)
  *           {
  *             devicedriver_send();
  *           }
@@ -157,8 +237,8 @@
  *
  *     for(i = 0; i < UIP_CONNS; ++i)
  *       {
- *         uip_tcppoll(i);
- *         if (uip_len > 0)
+ *         uip_tcppoll(dev,i);
+ *         if (dev->d_len > 0)
  *           {
  *             uip_arp_out();
  *             ethernet_devicedriver_send();
@@ -168,7 +248,7 @@
  * conn The number of the connection which is to be periodically polled.
  */
 
-extern void uip_tcppoll(unsigned int conn);
+extern void uip_tcppoll(struct uip_driver_s *dev, unsigned int conn);
 
  #ifdef CONFIG_NET_UDP
 /* Periodic processing for a UDP connection identified by its number.
@@ -179,8 +259,8 @@ extern void uip_tcppoll(unsigned int conn);
  *
  *     for(i = 0; i < UIP_UDP_CONNS; i++)
  *       {
- *         uip_udppoll(i);
- *         if(uip_len > 0)
+ *         uip_udppoll(dev,i);
+ *         if(dev->d_len > 0)
  *           {
  *             devicedriver_send();
  *           }
@@ -191,8 +271,8 @@ extern void uip_tcppoll(unsigned int conn);
  *
  *     for(i = 0; i < UIP_UDP_CONNS; i++)
  *       {
- *         uip_udppoll(i);
- *         if(uip_len > 0)
+ *         uip_udppoll(dev,i);
+ *         if(dev->d_len > 0)
  *           {
  *             uip_arp_out();
  *             ethernet_devicedriver_send();
@@ -202,31 +282,17 @@ extern void uip_tcppoll(unsigned int conn);
  * conn The number of the UDP connection to be processed.
  */
 
-extern void uip_udppoll(unsigned int conn);
+extern void uip_udppoll(struct uip_driver_s *dev, unsigned int conn);
 
 #endif  /* CONFIG_NET_UDP */
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Pulblic Function Prototypes
- ****************************************************************************/
-
 /* Architecure support
- *
- * uip_interrupt(flag):
  *
  * The actual uIP function which does all the work.  Called from the
  * interrupt level by a device driver.
  */
 
-extern void uip_interrupt(uint8 flag);
+extern void uip_interrupt(struct uip_driver_s *dev, uint8 flag);
 
 /* By defining UIP_ARCH_CHKSUM, the architecture can replace the following
  * functions with hardware assisted solutions.
@@ -273,32 +339,32 @@ extern void uip_add32(uint8 *op32, uint16 op16);
 
 extern uint16 uip_chksum(uint16 *buf, uint16 len);
 
-/* Calculate the IP header checksum of the packet header in uip_buf.
+/* Calculate the IP header checksum of the packet header in d_buf.
  *
  * The IP header checksum is the Internet checksum of the 20 bytes of
  * the IP header.
  *
- * Return:  The IP header checksum of the IP header in the uip_buf
+ * Return:  The IP header checksum of the IP header in the d_buf
  * buffer.
  */
 
-extern uint16 uip_ipchksum(void);
+extern uint16 uip_ipchksum(struct uip_driver_s *dev);
 
-/* Calculate the TCP checksum of the packet in uip_buf and uip_appdata.
+/* Calculate the TCP checksum of the packet in d_buf and d_appdata.
  *
  * The TCP checksum is the Internet checksum of data contents of the
  * TCP segment, and a pseudo-header as defined in RFC793.
  *
- * Note: The uip_appdata pointer that points to the packet data may
+ * Note: The d_appdata pointer that points to the packet data may
  * point anywhere in memory, so it is not possible to simply calculate
- * the Internet checksum of the contents of the uip_buf buffer.
+ * the Internet checksum of the contents of the d_buf buffer.
  *
- * Return:  The TCP checksum of the TCP segment in uip_buf and pointed
- * to by uip_appdata.
+ * Return:  The TCP checksum of the TCP segment in d_buf and pointed
+ * to by d_appdata.
  */
 
-extern uint16 uip_tcpchksum(void);
+extern uint16 uip_tcpchksum(struct uip_driver_s *dev);
 
-extern uint16 uip_udpchksum(void);
+extern uint16 uip_udpchksum(struct uip_driver_s *dev);
 
 #endif /* __UIP_ARCH_H */
