@@ -229,8 +229,6 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NET_ARPTAB_SIZE - The size of the ARP table
 		CONFIG_NET_BROADCAST - Broadcast support
 		CONFIG_NET_LLH_LEN - The link level header length
-		CONFIG_NET_EXTERNAL_BUFFER - Incoming packet buffer (uip_buf)
-		  is defined externally
 		CONFIG_NET_FWCACHE_SIZE - number of packets to remember when
 		  looking for duplicates
 
