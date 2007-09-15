@@ -55,7 +55,7 @@
  * Private Definitions
  ****************************************************************************/
 
-#define BUF ((struct uip_eth_hdr *)&uip_buf[0])
+#define BUF ((struct uip_eth_hdr *)g_sim_dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -75,8 +75,9 @@ struct timer
  * Private Data
  ****************************************************************************/
 
-static struct timer periodic_timer;
-static struct timer arp_timer;
+static struct timer g_periodic_timer;
+static struct timer g_arp_timer;
+static struct uip_driver_s g_sim_dev;
 
 /****************************************************************************
  * Private Functions
@@ -106,82 +107,82 @@ void uipdriver_loop(void)
 {
   int i;
 
-  uip_len = tapdev_read((unsigned char*)uip_buf, UIP_BUFSIZE);
-  if (uip_len > 0)
+  g_sim_dev.d_len = tapdev_read((unsigned char*)g_sim_dev.d_buf, UIP_BUFSIZE);
+  if (g_sim_dev.d_len > 0)
     {
       if (BUF->type == htons(UIP_ETHTYPE_IP))
         {
           uip_arp_ipin();
-          uip_input();
+          uip_input(&g_sim_dev);
 
           /* If the above function invocation resulted in data that
            * should be sent out on the network, the global variable
-           * uip_len is set to a value > 0.
+           * d_len is set to a value > 0.
            */
 
-          if (uip_len > 0)
+          if (g_sim_dev.d_len > 0)
             {
-              uip_arp_out();
-              tapdev_send((char*)uip_buf, uip_len);
+              uip_arp_out(&g_sim_dev);
+              tapdev_send((char*)g_sim_dev.d_buf, g_sim_dev.d_len);
             }
         }
       else if (BUF->type == htons(UIP_ETHTYPE_ARP))
         {
-          uip_arp_arpin();
+          uip_arp_arpin(&g_sim_dev);
 
           /* If the above function invocation resulted in data that
            * should be sent out on the network, the global variable
-           * uip_len is set to a value > 0.
+           * d_len is set to a value > 0.
            */
 
-          if (uip_len > 0)
+          if (g_sim_dev.d_len > 0)
             {
-              tapdev_send((char*)uip_buf, uip_len);
+              tapdev_send((char*)g_sim_dev.d_buf, g_sim_dev.d_len);
             }
         }
     }
-  else if (timer_expired(&periodic_timer))
+  else if (timer_expired(&g_periodic_timer))
     {
-      timer_reset(&periodic_timer);
+      timer_reset(&g_periodic_timer);
       for(i = 0; i < UIP_CONNS; i++)
         {
-          uip_tcppoll(i);
+          uip_tcppoll(&g_sim_dev,i);
 
           /* If the above function invocation resulted in data that
            * should be sent out on the network, the global variable
-           * uip_len is set to a value > 0.
+           * d_len is set to a value > 0.
            */
 
-          if (uip_len > 0)
+          if (g_sim_dev.d_len > 0)
             {
-              uip_arp_out();
-              tapdev_send((char*)uip_buf, uip_len);
+              uip_arp_out(&g_sim_dev);
+              tapdev_send((char*)g_sim_dev.d_buf, g_sim_dev.d_len);
             }
         }
 
 #ifdef CONFIG_NET_UDP
       for(i = 0; i < UIP_UDP_CONNS; i++)
         {
-          uip_udppoll(i);
+          uip_udppoll(&g_sim_dev,i);
 
           /* If the above function invocation resulted in data that
            * should be sent out on the network, the global variable
-           * uip_len is set to a value > 0.
+           * d_len is set to a value > 0.
            */
 
-          if (uip_len > 0)
+          if (g_sim_dev.d_len > 0)
             {
-              uip_arp_out();
-              tapdev_send((char*)uip_buf, uip_len);
+              uip_arp_out(&g_sim_dev);
+              tapdev_send((char*)g_sim_dev.d_buf, g_sim_dev.d_len);
             }
         }
 #endif /* CONFIG_NET_UDP */
 
       /* Call the ARP timer function every 10 seconds. */
 
-      if (timer_expired(&arp_timer))
+      if (timer_expired(&g_arp_timer))
         {
-          timer_reset(&arp_timer);
+          timer_reset(&g_arp_timer);
           uip_arp_timer();
         }
     }
@@ -189,8 +190,8 @@ void uipdriver_loop(void)
 
 int uipdriver_init(void)
 {
-  timer_set(&periodic_timer, 500);
-  timer_set(&arp_timer, 10000 );
+  timer_set(&g_periodic_timer, 500);
+  timer_set(&g_arp_timer, 10000 );
 
   tapdev_init();
   uip_init();
