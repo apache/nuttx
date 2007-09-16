@@ -141,7 +141,7 @@
 
 /* Repressentation of an IP address. */
 
-typedef uint16 uip_ip4addr_t[2];
+typedef in_addr_t uip_ip4addr_t;
 typedef uint16 uip_ip6addr_t[8];
 
 #ifdef CONFIG_NET_IPv6
@@ -282,12 +282,13 @@ struct uip_tcpip_hdr
 
   /* IPv6 header. */
 
-  uint8 vtc;
-  uint8 tcflow;
+  uint8  vtc;
+  uint8  tcflow;
   uint16 flow;
-  uint8 len[2];
-  uint8 proto, ttl;
-  uip_ip6addr_t srcipaddr, destipaddr;
+  uint8  len[2];
+  uint8  proto, ttl;
+  uip_ip6addr_t srcipaddr;
+  uip_ip6addr_t destipaddr;
 
 #else /* CONFIG_NET_IPv6 */
 
@@ -301,8 +302,8 @@ struct uip_tcpip_hdr
   uint8  ttl;
   uint8  proto;
   uint16 ipchksum;
-  uint16 srcipaddr[2];
-  uint16 destipaddr[2];
+  in_addr_t srcipaddr;
+  in_addr_t destipaddr;
 
 #endif /* CONFIG_NET_IPv6 */
 
@@ -349,8 +350,8 @@ struct uip_icmpip_hdr
   uint8  ttl;
   uint8  proto;
   uint16 ipchksum;
-  uint16 srcipaddr[2];
-  uint16 destipaddr[2];
+  in_addr_t srcipaddr;
+  in_addr_t destipaddr;
 
 #endif /* CONFIG_NET_IPv6 */
 
@@ -405,8 +406,8 @@ struct uip_udpip_hdr
   uint8  ttl;
   uint8  proto;
   uint16 ipchksum;
-  uint16 srcipaddr[2];
-  uint16 destipaddr[2];
+  in_addr_t srcipaddr;
+  in_addr_t destipaddr;
 
 #endif /* CONFIG_NET_IPv6 */
 
@@ -483,88 +484,11 @@ extern struct uip_stats uip_stat;
 
 extern uint8 uip_flags;
 
-#if UIP_FIXEDADDR
-extern const uip_ipaddr_t uip_hostaddr, uip_netmask, uip_draddr;
-#else /* UIP_FIXEDADDR */
-extern uip_ipaddr_t uip_hostaddr, uip_netmask, uip_draddr;
-#endif /* UIP_FIXEDADDR */
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-/* uIP configuration functions
- *
- * The uIP configuration functions are used for setting run-time
- * parameters in uIP such as IP addresses.
- *
- * Set the IP address of this host.
- *
- * The IP address is represented as a 4-byte array where the first
- * octet of the IP address is put in the first member of the 4-byte
- * array.
- *
- * Example:
- *
- *    uip_ipaddr_t addr;
- *
- *    uip_ipaddr(&addr, 192,168,1,2);
- *    uip_sethostaddr(&addr);
- *
- * addr A pointer to an IP address of type uip_ipaddr_t;
- */
-
-#define uip_sethostaddr(addr) uip_ipaddr_copy(uip_hostaddr, (addr))
-
-/* Get the IP address of this host.
- *
- * The IP address is represented as a 4-byte array where the first
- * octet of the IP address is put in the first member of the 4-byte
- * array.
- *
- * Example:
- *
- *   uip_ipaddr_t hostaddr;
- *
- *   uip_gethostaddr(&hostaddr);
- *
- * addr A pointer to a uip_ipaddr_t variable that will be
- * filled in with the currently configured IP address.
- */
-
-#define uip_gethostaddr(addr) uip_ipaddr_copy((addr), uip_hostaddr)
-
-/* Set the default router's IP address.
- *
- * addr A pointer to a uip_ipaddr_t variable containing the IP
- * address of the default router.
- */
-
-#define uip_setdraddr(addr) uip_ipaddr_copy(uip_draddr, (addr))
-
-/* Set the netmask.
- *
- * addr A pointer to a uip_ipaddr_t variable containing the IP
- * address of the netmask.
- */
-
-#define uip_setnetmask(addr) uip_ipaddr_copy(uip_netmask, (addr))
-
-/* Get the default router's IP address.
- *
- * addr A pointer to a uip_ipaddr_t variable that will be
- * filled in with the IP address of the default router.
- */
-
-#define uip_getdraddr(addr) uip_ipaddr_copy((addr), uip_draddr)
-
-/* Get the netmask.
- *
- * addr A pointer to a uip_ipaddr_t variable that will be
- * filled in with the value of the netmask.
- */
-
-#define uip_getnetmask(addr) uip_ipaddr_copy((addr), uip_netmask)
+/* uIP configuration functions */
 
 /* uIP initialization functions
  *
@@ -906,8 +830,7 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
 
 #define uip_ipaddr(addr, addr0, addr1, addr2, addr3) \
   do { \
-    ((uint16 *)(addr))[0] = HTONS(((addr0) << 8) | (addr1)); \
-    ((uint16 *)(addr))[1] = HTONS(((addr2) << 8) | (addr3)); \
+    addr = HTONL((addr0) << 24 | (addr1) << 16 | (addr2) << 8 | (addr3)); \
   } while(0)
 
 /* Construct an IPv6 address from eight 16-bit words.
@@ -942,12 +865,12 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
  */
 
 #ifndef CONFIG_NET_IPv6
-#define uip_ipaddr_copy(dest, src) do { \
-                     ((uint16 *)dest)[0] = ((uint16 *)src)[0]; \
-                     ((uint16 *)dest)[1] = ((uint16 *)src)[1]; \
-                  } while(0)
+#define uip_ipaddr_copy(dest, src) \
+  do { \
+    (dest) = (in_addr_t)(src); \
+  } while(0)
 #else /* !CONFIG_NET_IPv6 */
-#define uip_ipaddr_copy(dest, src) memcpy(dest, src, sizeof(uip_ip6addr_t))
+#define uip_ipaddr_copy(dest, src) memcpy(&dest, &src, sizeof(uip_ip6addr_t))
 #endif /* !CONFIG_NET_IPv6 */
 
 /* Compare two IP addresses
@@ -972,8 +895,7 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
 #define uip_ipaddr_cmp(addr1, addr2) (memcmp(addr1, addr2, sizeof(uip_ip6addr_t)) == 0)
 #endif /* !CONFIG_NET_IPv6 */
 
-/**
- * Compare two IP addresses with netmasks
+/* Compare two IP addresses with netmasks
  *
  * Compares two IP addresses with netmasks. The masks are used to mask
  * out the bits that are to be compared.
@@ -995,14 +917,9 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
  */
 
 #define uip_ipaddr_maskcmp(addr1, addr2, mask) \
-                          (((((uint16 *)addr1)[0] & ((uint16 *)mask)[0]) == \
-                            (((uint16 *)addr2)[0] & ((uint16 *)mask)[0])) && \
-                           ((((uint16 *)addr1)[1] & ((uint16 *)mask)[1]) == \
-                            (((uint16 *)addr2)[1] & ((uint16 *)mask)[1])))
+  (((in_addr_t)addr1 & (in_addr_t)mask) == ((in_addr_t)addr2 & (in_addr_t)mask))
 
-
-/**
- * Mask out the network part of an IP address.
+/* Mask out the network part of an IP address.
  *
  * Masks out the network part of an IP address, given the address and
  * the netmask.
@@ -1023,10 +940,10 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
  * mask The netmask.
  */
 
-#define uip_ipaddr_mask(dest, src, mask) do { \
-                     ((uint16 *)dest)[0] = ((uint16 *)src)[0] & ((uint16 *)mask)[0]; \
-                     ((uint16 *)dest)[1] = ((uint16 *)src)[1] & ((uint16 *)mask)[1]; \
-                  } while(0)
+#define uip_ipaddr_mask(dest, src, mask) \
+  do { \
+    (in_addr_t)(dest) = (in_addr_t)(src) & (in_addr_t)(mask); \
+  } while(0)
 
 /* Pick the first octet of an IP address.
  *

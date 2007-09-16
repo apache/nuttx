@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/netdev-find.c
+ * netutils/uiplib/uip-gethostaddr.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -41,71 +41,53 @@
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <string.h>
 #include <errno.h>
-
-#include <net/uip/uip-arch.h>
-
-#include "net-internal.h"
-
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Priviate Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include <netinet/in.h>
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_find
+ * Name: uip_sethostaddr
  *
  * Description:
- *   Find a previously registered network device
+ *   Get the network driver IP address
  *
  * Parameters:
- *   ifname The interface name of the device of interest
+ *   ifname   The name of the interface to use
+ *   ipaddr   The address to set
  *
- * Returned Value:
- *  Pointer to driver on success; null on failure
- *
- * Assumptions:
- *  Called from normal user mode
+ * Return:
+ *   0 on sucess; -1 on failure
  *
  ****************************************************************************/
 
-FAR struct uip_driver_s *netdev_find(const char *ifname)
+#ifdef CONFIG_NET_IPv6
+int uip_gethostaddr(const char *ifname, struct in6_addr *addr)
+#else
+int uip_gethostaddr(const char *ifname, struct in_addr *addr)
+#endif
 {
-  struct uip_driver_s *dev;
-  if (ifname)
+  int ret = ERROR;
+  if (ifname && addr)
     {
-      netdev_semtake();
-      for (dev = g_netdevices; dev; dev = dev->flink)
+      int sockfd = socket(PF_INET, SOCK_DGRAM, 0);
+      if (sockfd >= 0)
         {
-          if (strcmp(ifname, dev->d_ifname) == 0)
+          struct ifreq req;
+          strncpy(req.ifr_name, ifname, IFNAMSIZ);
+          ret = ioctl(sockfd, SIOCSIFADDR, (unsigned long)&req);
+          if (!ret)
             {
-              netdev_semgive();
-              return dev;
+              memcpy(addr, &req.ifr_addr, sizeof(addr));
             }
         }
-      netdev_semgive();
     }
-  return NULL;
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

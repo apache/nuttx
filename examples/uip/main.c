@@ -72,6 +72,7 @@
 
 int user_start(int argc, char *argv[])
 {
+  struct in_addr addr;
   uip_ipaddr_t ipaddr;
 #if defined(CONFIG_EXAMPLE_UIP_DHCPC)
   uint16 mac[6] = {1, 2, 3, 4, 5, 6};
@@ -80,12 +81,13 @@ int user_start(int argc, char *argv[])
   void *handle;
 #endif
 
-  uip_ipaddr(ipaddr, 192, 168, 0, 2);
-  uip_sethostaddr(ipaddr);
+  addr.s_addr = htonl( 192 << 24 | 168 << 16 | 0 << 8 | 2 );
+  uip_sethostaddr("eth0", &addr);
+
   uip_ipaddr(ipaddr, 192, 168, 0, 1);
-  uip_setdraddr(ipaddr);
+  uip_setdraddr("eth0", &ipaddr);
   uip_ipaddr(ipaddr, 255, 255, 255, 0);
-  uip_setnetmask(ipaddr);
+  uip_setnetmask("eth0", &ipaddr);
 
 #if defined(CONFIG_EXAMPLE_UIP_WEBSERVER)
   httpd_init();
@@ -99,9 +101,9 @@ int user_start(int argc, char *argv[])
     {
         struct dhcpc_state ds;
         (void)dhcpc_request(handle, &ds);
-        uip_sethostaddr(ds.ipaddr);
-        uip_setnetmask(ds.netmask);
-        uip_setdraddr(ds.default_router);
+        uip_sethostaddr("eth0", &ds.ipaddr);
+        uip_setnetmask("eth0", &ds.netmask);
+        uip_setdraddr("eth0", &ds.default_router);
         resolv_conf(ds.dnsaddr);
         dhcpc_close(handle);
     }

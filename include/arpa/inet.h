@@ -63,8 +63,9 @@
 #else
 # define HTONS(ns) \
   (uint16)((((uint16) (ns)) << 8) | (((uint16) (ns)) >> 8))
-# define HTONL(nl) htonl(nl) \
-  (((uint32)HTONS((uint16)((hs) & 0xffff)) << 16) | (uint32)HTONS((uint16)((uint16)((hs) >> 16))))
+# define HTONL(nl) \
+  ((((nl) & 0xff) << 24) | (((nl) & 0xff00) << 8) | \
+   (((nl) & 0xff0000) >> 8) | (((nl) & 0xff000000) >> 24))
 #endif
 
 #define NTOHS(hs) HTONS(hs)

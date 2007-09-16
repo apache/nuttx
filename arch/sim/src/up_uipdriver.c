@@ -44,6 +44,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <nuttx/net.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>

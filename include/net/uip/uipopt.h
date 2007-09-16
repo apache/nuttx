@@ -69,26 +69,7 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* Static configuration options
- *
- * These configuration options can be used for setting the IP address
- * settings statically, but only if UIP_FIXEDADDR is set to 1. The
- * configuration options for a specific node includes IP address,
- * netmask and default router as well as the Ethernet address. The
- * netmask, default router and Ethernet address are appliciable only
- * if uIP should be run over Ethernet.
- *
- * All of these should be changed to suit your project.
- */
-
-/* Determines if uIP should use a fixed IP address or not.
- *
- * If uIP should use a fixed IP address, the settings are set in the
- * uipopt.h file. If not, the macros uip_sethostaddr(),
- * uip_setdraddr() and uip_setnetmask() should be used instead.
- */
-
-#define UIP_FIXEDADDR    0
+/* Static configuration options */
 
 /* Ping IP address asignment.
  *
@@ -96,8 +77,6 @@
  * option is set. If so, uIP will start with an empty IP address and
  * the destination IP address of the first incoming "ping" (ICMP echo)
  * packet will be used for setting the hosts IP address.
- *
- * Note: This works only if UIP_FIXEDADDR is 0.
  */
 
 #ifdef CONFIG_NET_PINGADDRCONF
@@ -105,15 +84,6 @@
 #else /* CONFIG_NET_PINGADDRCONF */
 #define UIP_PINGADDRCONF 0
 #endif /* CONFIG_NET_PINGADDRCONF */
-
-/* Specifies if the uIP ARP module should be compiled with a fixed
- * Ethernet MAC address or not.
- *
- * If this configuration option is 0, the macro uip_setethaddr() can
- * be used to specify the Ethernet address at run-time.
- */
-
-#define UIP_FIXEDETHADDR 0
 
 /* IP configuration options */
 

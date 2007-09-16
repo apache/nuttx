@@ -580,7 +580,7 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
 
   /* The sockaddr address is 32-bits in network order. */
 
-  uip_ipaddr_copy(&conn->ripaddr, addr->sin_addr.s_addr);
+  uip_ipaddr_copy(conn->ripaddr, addr->sin_addr.s_addr);
 
   /* And, finally, put the connection structure into the active
    * list. Because g_active_tcp_connections is accessed from user level and

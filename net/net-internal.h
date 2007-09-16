@@ -165,7 +165,13 @@ EXTERN void netdev_semtake(void);
 /* net-find.c ****************************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-FAR struct uip_driver_s *netdev_find(const char *ifname);
+EXTERN FAR struct uip_driver_s *netdev_find(const char *ifname);
+#endif
+
+/* net-count.c ***************************************************************/
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+EXTERN int netdev_count(void);
 #endif
 
 #undef EXTERN

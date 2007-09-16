@@ -37,8 +37,6 @@
 #include <sys/types.h>
 #include <net/uip/uip.h>
 
-extern struct uip_eth_addr uip_ethaddr;
-
 /* The Ethernet header */
 
 struct uip_eth_hdr
@@ -96,26 +94,5 @@ void uip_arp_out(struct uip_driver_s *dev);
  */
 
 void uip_arp_timer(void);
-
-/* Specifiy the Ethernet MAC address.
- *
- * The ARP code needs to know the MAC address of the Ethernet card in
- * order to be able to respond to ARP queries and to generate working
- * Ethernet headers.
- *
- * Note: This macro only specifies the Ethernet MAC address to the ARP
- * code. It cannot be used to change the MAC address of the Ethernet
- * card.
- *
- * eaddr A pointer to a struct uip_eth_addr containing the
- * Ethernet MAC address of the Ethernet card.
- */
-
-#define uip_setethaddr(eaddr) do {uip_ethaddr.addr[0] = eaddr.addr[0]; \
-                              uip_ethaddr.addr[1] = eaddr.addr[1];\
-                              uip_ethaddr.addr[2] = eaddr.addr[2];\
-                              uip_ethaddr.addr[3] = eaddr.addr[3];\
-                              uip_ethaddr.addr[4] = eaddr.addr[4];\
-                              uip_ethaddr.addr[5] = eaddr.addr[5];} while(0)
 
 #endif /* __UIP_ARP_H__ */

@@ -345,12 +345,12 @@ int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
   if (addr)
     {
       conn->rport = addr->sin_port;
-      uip_ipaddr_copy(&conn->ripaddr, &addr->sin_addr.s_addr);
+      uip_ipaddr_copy(conn->ripaddr, addr->sin_addr.s_addr);
     }
   else
     {
       conn->rport = 0;
-      uip_ipaddr_copy(&conn->ripaddr, &all_zeroes_addr);
+      uip_ipaddr_copy(conn->ripaddr, all_zeroes_addr);
     }
   conn->ttl   = UIP_TTL;
   return OK;

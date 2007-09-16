@@ -101,6 +101,16 @@ struct uip_driver_s
   char d_ifname[IFNAMSIZ];
 #endif
 
+  /* Device identitity */
+
+  struct uip_eth_addr d_mac;  /* Device MAC address */
+
+  /* Network identity */
+
+  uip_ipaddr_t d_ipaddr;  /* Host IP address assigned to the network interface */
+  uip_ipaddr_t d_draddr;  /* Default router IP address */
+  uip_ipaddr_t d_netmask; /* Network subnet mask */
+
   /* The d_buf array is used to hold incoming and outgoing
    * packets. The device driver should place incoming data into this
    * buffer. When sending data, the device driver should read the link

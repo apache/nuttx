@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/netdev-find.c
+ * net/netdev-count.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -73,39 +73,31 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_find
+ * Function: netdev_count
  *
  * Description:
- *   Find a previously registered network device
+ *   Return the number of network devices
  *
  * Parameters:
- *   ifname The interface name of the device of interest
+ *   None
  *
  * Returned Value:
- *  Pointer to driver on success; null on failure
+ *   The number of network devices
  *
  * Assumptions:
  *  Called from normal user mode
  *
  ****************************************************************************/
 
-FAR struct uip_driver_s *netdev_find(const char *ifname)
+int netdev_count(void)
 {
   struct uip_driver_s *dev;
-  if (ifname)
-    {
-      netdev_semtake();
-      for (dev = g_netdevices; dev; dev = dev->flink)
-        {
-          if (strcmp(ifname, dev->d_ifname) == 0)
-            {
-              netdev_semgive();
-              return dev;
-            }
-        }
-      netdev_semgive();
-    }
-  return NULL;
+  int ndev;
+
+  netdev_semtake();
+  for (dev = g_netdevices, ndev = 0; dev; dev = dev->flink, ndev++);
+  netdev_semgive();
+  return ndev;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

@@ -182,6 +182,8 @@ static uint8 *add_end(uint8 *optptr)
 
 static void create_msg(struct dhcpc_state_internal *pdhcpc, struct dhcp_msg *pmsg)
 {
+  struct in_addr addr;
+
   pmsg->op    = DHCP_REQUEST;
   pmsg->htype = DHCP_HTYPE_ETHERNET;
   pmsg->hlen  = pdhcpc->mac_len;
@@ -189,11 +191,13 @@ static void create_msg(struct dhcpc_state_internal *pdhcpc, struct dhcp_msg *pms
   memcpy(pmsg->xid, xid, sizeof(pmsg->xid));
   pmsg->secs  = 0;
   pmsg->flags = HTONS(BOOTP_BROADCAST); /*  Broadcast bit. */
-  /*  uip_ipaddr_copy(pmsg->ciaddr, uip_hostaddr);*/
-  memcpy(pmsg->ciaddr, uip_hostaddr, sizeof(pmsg->ciaddr));
+
+  uip_gethostaddr( "eth0", &addr);
+  memcpy(&pmsg->ciaddr, &addr.s_addr, sizeof(pmsg->ciaddr));
   memset(pmsg->yiaddr, 0, sizeof(pmsg->yiaddr));
   memset(pmsg->siaddr, 0, sizeof(pmsg->siaddr));
   memset(pmsg->giaddr, 0, sizeof(pmsg->giaddr));
+
   memcpy(pmsg->chaddr, pdhcpc->mac_addr, pdhcpc->mac_len);
   memset(&pmsg->chaddr[pdhcpc->mac_len], 0, sizeof(pmsg->chaddr) - pdhcpc->mac_len);
 #ifndef CONFIG_NET_DHCP_LIGHT

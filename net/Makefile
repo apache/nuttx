@@ -51,7 +51,7 @@ endif
 endif
 
 NETDEV_ASRCS	=
-NETDEV_CSRCS	= netdev-register.c netdev-ioctl.c netdev-find.c 
+NETDEV_CSRCS	= netdev-register.c netdev-ioctl.c netdev-find.c netdev-count.c 
 
 include uip/Make.defs
 endif

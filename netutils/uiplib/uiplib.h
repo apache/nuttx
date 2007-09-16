@@ -42,6 +42,8 @@
 #ifndef __UIPLIB_H__
 #define __UIPLIB_H__
 
+#include <netinet/in.h>
+
 /* Convert a textual representation of an IP address to a numerical representation.
  *
  * This function takes a textual representation of an IP address in
@@ -58,6 +60,13 @@
  * Return: Non-zero If the IP address was parsed.
  */
 
-unsigned char uiplib_ipaddrconv(char *addrstr, unsigned char *addr);
+extern unsigned char uiplib_ipaddrconv(char *addrstr, unsigned char *addr);
+
+/* Get and set IP addresses */
+
+extern int uip_gethostaddr(const char *ifname, struct in6_addr *addr);
+extern int uip_sethostaddr(const char *ifname, const struct in6_addr *addr);
+extern int uip_setdraddr(const char *ifname, const struct in6_addr *addr);
+extern int uip_setnetmask(const char *ifname, const struct in6_addr *addr);
 
 #endif /* __UIPLIB_H__ */
