@@ -39,24 +39,27 @@ CFLAGS		+= -I./uip
 MKDEP		= $(TOPDIR)/tools/mkdeps.sh
 
 ifeq ($(CONFIG_NET),y)
-STD_ASRCS	=
-STD_CSRCS	= socket.c bind.c connect.c send.c sendto.c recv.c recvfrom.c \
+SOCK_ASRCS	=
+SOCK_CSRCS	= socket.c bind.c connect.c send.c sendto.c recv.c recvfrom.c \
 		  net-sockets.c net-close.c
 
 ifeq ($(CONFIG_NET_SOCKOPTS),y)
-STD_CSRCS       += setsockopt.c getsockopt.c 
+SOCK_CSRCS      += setsockopt.c getsockopt.c 
 ifneq ($(CONFIG_DISABLE_CLOCK),y)
-STD_CSRCS	+= net-timeo.c net-dsec2timeval.c net-timeval2dsec.c
+SOCK_CSRCS	+= net-timeo.c net-dsec2timeval.c net-timeval2dsec.c
 endif
 endif
+
+NETDEV_ASRCS	=
+NETDEV_CSRCS	= netdev-register.c netdev-ioctl.c netdev-find.c 
 
 include uip/Make.defs
 endif
 
-ASRCS		= $(STD_ASRCS) $(UIP_ASRCS)
+ASRCS		= $(SOCK_ASRCS) $(NETDEV_ASRCS) $(UIP_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= $(STD_CSRCS) $(UIP_CSRCS)
+CSRCS		= $(SOCK_CSRCS) $(NETDEV_CSRCS) $(UIP_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_ioctl.c
+ * net/netdev-ioctl.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -34,39 +34,33 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <sched.h>
-#include <errno.h>
-#include <sys/ioctl.h>
-
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-# include <nuttx/net.h>
-#endif
 
-#include "fs_internal.h"
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <errno.h>
+#include <nuttx/net.h>
+
+#include "net-internal.h"
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ioctl
+ * Name: netdev_ioctl
  *
  * Description:
- *   Perform device specific operations.
+ *   Perform network device specific operations.
  *
  * Parameters:
- *   fd       Filt/socket descriptor of device
- *   req      The ioctl command
- *   arg      The argument of the ioctl cmd
+ *   fd       Socket descriptor of device
+ *   cmd      The ioctl command
+ *   req      The argument of the ioctl cmd
  *
  * Return:
  *   >=0 on success (positive non-zero values are cmd-specific)
@@ -86,69 +80,11 @@
  *
  ****************************************************************************/
 
-int ioctl(int fd, int req, unsigned long arg)
+int netdev_ioctl(int sockfd, int cmd, struct ifreq *req)
 {
-  int err;
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  FAR struct filelist *list;
-  int ret = OK;
-
-  /* Did we get a valid file descriptor? */
-
-  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
-#endif
-    {
-      /* Perform the socket ioctl */
-
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          return netdev_ioctl(fd, req, (struct ifreq*)arg);
-        }
-      else
-#endif
-        {
-          err = EBADF;
-          goto errout;
-        }
-    }
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  /* Get the thread-specific file list */
-
-  list = sched_getfiles();
-  if (!list)
-    {
-      err = EMFILE;
-      goto errout;
-    }
-
-  /* Were we give a valid file descriptor? */
-
-  if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
-    {
-      FAR struct file *this_file = &list->fl_files[fd];
-      struct inode *inode        = this_file->f_inode;
-
-      /* Is a driver registered? Does it support the ioctl method? */
-
-      if (inode && inode->u.i_ops && inode->u.i_ops->ioctl)
-        {
-          /* Yes, then let it perform the ioctl */
-
-          ret = (int)inode->u.i_ops->ioctl(this_file, req, arg);
-          if (ret < 0)
-            {
-              err = -ret;
-              goto errout;
-            }
-        }
-    }
-  return ret;
-#endif
-
-errout:
-  *get_errno_ptr() = err;
+#warning "Network ioctls not implemented"
+  *get_errno_ptr() = ENOSYS;
   return ERROR;
 }
 
+#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

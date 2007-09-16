@@ -124,6 +124,9 @@ extern "C" {
 #endif
 
 /* net_sockets.c *************************************************************/
+/* There interfaces are called only from OS scheduling and iniialization logic
+ * under sched/
+ */
 
 EXTERN void weak_function net_initialize(void);
 EXTERN FAR struct socketlist *net_alloclist(void);
@@ -131,8 +134,29 @@ EXTERN int net_addreflist(FAR struct socketlist *list);
 EXTERN int net_releaselist(FAR struct socketlist *list);
 
 /* net-close.c ***************************************************************/
+/* The standard close() operation redirects operations on socket descriptors
+ * to this function.
+ */
 
 EXTERN int net_close(int sockfd);
+
+/* net-ioctl.c ***************************************************************/
+/* The standard ioctl() operation redirects operations on socket descriptors
+ * to this function.
+ */
+
+struct ifreq; /* Forward reference -- see net/ioctls.h */
+EXTERN int netdev_ioctl(int sockfd, int cmd, struct ifreq *req);
+
+/* net-register.c ************************************************************/
+/* This function is called by network interface device drivers to inform the
+ * socket layer of their existence.  This registration is necesary to support
+ * ioctl() operations on network devices to, for example, set MAC and IP
+ * addresses
+ */
+
+struct uip_driver_s; /* Forward reference.  See net/uip/uip-arch.h */
+EXTERN int netdev_register(FAR struct uip_driver_s *dev);
 
 #undef EXTERN
 #ifdef __cplusplus

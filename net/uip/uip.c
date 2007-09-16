@@ -139,8 +139,10 @@ extern void uip_log(char *msg);
  ****************************************************************************/
 
 /* The IP address of this host. If it is defined to be fixed (by
-   setting UIP_FIXEDADDR to 1 in uipopt.h), the address is set
-   here. Otherwise, the address */
+ * setting UIP_FIXEDADDR to 1 in uipopt.h), the address is set
+ * here.
+ */
+
 #if UIP_FIXEDADDR > 0
 const uip_ipaddr_t uip_hostaddr =
   {HTONS((UIP_IPADDR0 << 8) | UIP_IPADDR1),
@@ -1625,7 +1627,7 @@ tcp_send_synack:
             {
               uip_urglen = 0;
 #else /* UIP_URGDATA > 0 */
-              dev->d_appdata = ((char *)dev->d_appdata) + ((BUF->urgp[0] << 8) | BUF->urgp[1]);
+              dev->d_appdata = ((uint8*)dev->d_appdata) + ((BUF->urgp[0] << 8) | BUF->urgp[1]);
               dev->d_len -= (BUF->urgp[0] << 8) | BUF->urgp[1];
 #endif /* UIP_URGDATA > 0 */
             }

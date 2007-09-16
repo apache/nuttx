@@ -122,6 +122,13 @@
  * Public Variables
  ****************************************************************************/
 
+/* List of registered ethernet device drivers */
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+extern struct uip_driver_s *g_netdevices;
+extern sem_t                g_netdev_sem;
+#endif
+
 /****************************************************************************
  * Pulblic Function Prototypes
  ****************************************************************************/
@@ -146,6 +153,19 @@ EXTERN FAR struct socket *sockfd_socket(int sockfd);
 EXTERN int net_timeo(uint32 start_time, socktimeo_t timeo);
 EXTERN socktimeo_t net_timeval2dsec(struct timeval *tv);
 EXTERN void net_dsec2timeval(uint16 dsec, struct timeval *tv);
+#endif
+
+/* net-register.c ************************************************************/
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+EXTERN void netdev_semtake(void);
+# define netdev_semgive() sem_post(&g_netdev_sem)
+#endif
+
+/* net-find.c ****************************************************************/
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+FAR struct uip_driver_s *netdev_find(const char *ifname);
 #endif
 
 #undef EXTERN

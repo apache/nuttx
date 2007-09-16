@@ -40,6 +40,16 @@
  * Included Files
  ************************************************************/
 
+/* Get NuttX configuration */
+
+#include <nuttx/config.h>
+
+/* Include network ioctls info */
+
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+# include <net/ioctls.h>
+#endif
+
 /************************************************************
  * Type Definitions
  ************************************************************/

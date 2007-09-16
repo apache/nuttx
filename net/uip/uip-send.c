@@ -41,6 +41,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <string.h>
+
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>
 

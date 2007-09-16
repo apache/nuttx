@@ -79,13 +79,15 @@
 
 int close(int fd)
 {
+  int err;
+#if CONFIG_NFILE_DESCRIPTORS > 0
   FAR struct filelist *list;
   FAR struct inode *inode;
-  int err;
 
   /* Did we get a valid file descriptor? */
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
+#endif
     {
       /* Close a socket descriptor */
 
@@ -101,6 +103,8 @@ int close(int fd)
           goto errout;
         }
     }
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Get the thread-specific file list */
 
   list = sched_getfiles();
@@ -154,6 +158,7 @@ int close(int fd)
   inode_release(inode);
 
   return OK;
+#endif
 
 errout:
   *get_errno_ptr() = err;

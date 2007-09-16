@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#ifdef CONFIG_NET
 
 #include <string.h>
 #include <semaphore.h>
@@ -71,6 +72,7 @@
  * Private Functions
  ****************************************************************************/
 
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
 static void _net_semtake(FAR struct socketlist *list)
 {
   /* Take the semaphore (perhaps waiting) */
@@ -85,10 +87,11 @@ static void _net_semtake(FAR struct socketlist *list)
     }
 }
 
-#define _net_semgive(list) sem_post(&list->sl_sem)
+# define _net_semgive(list) sem_post(&list->sl_sem)
+#endif
 
 /****************************************************************************
- * Pulblic Functions
+ * Public Functions
  ****************************************************************************/
 
 /* This is called from the initialization logic to configure the socket layer */
@@ -99,8 +102,14 @@ void net_initialize(void)
 
   uip_init();
 
-  /* Initialize the socket lay -- nothing to do */
+  /* Initialize the socket layer */
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+  sem_init(&g_netdev_sem, 0, 1);
+#endif
 }
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /* Allocate a list of files for a new task */
 
@@ -261,3 +270,6 @@ FAR struct socket *sockfd_socket(int sockfd)
     }
   return NULL;
 }
+
+#endif /* CONFIG_NSOCKET_DESCRIPTORS */
+#endif /* CONFIG_NET */

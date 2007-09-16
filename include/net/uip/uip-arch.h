@@ -42,7 +42,9 @@
 #ifndef __UIP_ARCH_H
 #define __UIP_ARCH_H
 
+#include <nuttx/config.h>
 #include <sys/types.h>
+#include <sys/ioctl.h>
 #include <net/uip/uip.h>
 
 /****************************************************************************
@@ -84,9 +86,22 @@
 
 struct uip_driver_s
 {
-  /* The uIP packet buffer.
-   *
-   * The d_buf array is used to hold incoming and outgoing
+  /* This link is used to maintain a single-linked list of ethernet drivers.
+   * Must be the first field in the structure due to blink type casting.
+   */
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+  FAR struct uip_driver_s *flink;
+
+  /* This is the name of network device assigned when netdev_register was called.
+   * This name is only used to support socket ioctl lookups by device name
+   * Examples: "eth0"
+   */
+
+  char d_ifname[IFNAMSIZ];
+#endif
+
+  /* The d_buf array is used to hold incoming and outgoing
    * packets. The device driver should place incoming data into this
    * buffer. When sending data, the device driver should read the link
    * level headers and the TCP/IP headers from this buffer. The size of
