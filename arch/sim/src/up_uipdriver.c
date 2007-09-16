@@ -190,10 +190,14 @@ void uipdriver_loop(void)
 
 int uipdriver_init(void)
 {
+  /* Internal initalization */
+
   timer_set(&g_periodic_timer, 500);
   timer_set(&g_arp_timer, 10000 );
-
   tapdev_init();
-  uip_init();
+
+  /* Register the device with the OS so that socket IOCTLs can be performed */
+
+  (void)netdev_register(&g_sim_dev);
   return OK;
 }
