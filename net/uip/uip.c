@@ -372,7 +372,9 @@ void uip_init(void)
 
   /* Initialize the UDP connection structures */
 
+#ifdef CONFIG_NET_UDP
   uip_udpinit();
+#endif
 
   /* IPv4 initialization. */
 }
@@ -561,6 +563,7 @@ static void uip_add_rcv_nxt(uint16 n)
   uip_conn->rcv_nxt[3] = uip_acc32[3];
 }
 
+#ifdef CONFIG_NET_UDP
 static void uip_udp_callback(struct uip_driver_s *dev)
 {
   /* Some sanity checking */
@@ -572,6 +575,7 @@ static void uip_udp_callback(struct uip_driver_s *dev)
       uip_udp_conn->event(dev, uip_udp_conn->private);
     }
 }
+#endif
 
 static void uip_tcp_callback(struct uip_driver_s *dev)
 {

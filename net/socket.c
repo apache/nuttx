@@ -88,9 +88,7 @@
 
 int socket(int domain, int type, int protocol)
 {
-#ifdef CONFIG_NET_UDP
   FAR struct socket *psock;
-#endif
   int sockfd;
   int err;
 

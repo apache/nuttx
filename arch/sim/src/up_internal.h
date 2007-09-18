@@ -118,7 +118,7 @@ extern void tapdev_send(char *buf, unsigned int buflen);
 
 /* up_uipdriver.c *********************************************************/
 
-#ifdef CONFIG_NET 
+#if defined(CONFIG_NET) && defined(linux)
 extern int uipdriver_init(void);
 extern void uipdriver_loop(void);
 #endif

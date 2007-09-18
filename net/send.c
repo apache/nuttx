@@ -165,12 +165,14 @@ static void send_interrupt(struct uip_driver_s *dev, void *private)
     {
       /* Stop further callbacks */
 
-      uip_udp_conn->private = NULL;
-      uip_udp_conn->event   = NULL;
+      conn               = (struct uip_conn *)pstate->snd_sock->s_conn;
+      conn->data_private = NULL;
+      conn->data_event   = NULL;
 
       /* Report not connected */
 
       pstate->snd_sent = -ENOTCONN;
+
       /* Wake up the waiting thread */
 
       sem_post(&pstate->snd_sem);

@@ -33,9 +33,9 @@
  *
  ************************************************************/
 
-#ifndef linux
+#if !defined(linux) && !defined(__CYGWIN__)
 # error "Sorry, this will only work with Linux"
-#endif
+#else
 
 /************************************************************
  * Included Files
@@ -138,3 +138,6 @@ int up_putc(int ch)
   (void)up_write(1, &b, 1);
   return ch;
 }
+
+#endif /* linux */
+
