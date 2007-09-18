@@ -38,9 +38,7 @@
  *
  ****************************************************************************/
 
-#ifndef linux
-# error "Sorry, this will only work with Linux"
-#endif
+#ifdef linux
 
 /****************************************************************************
  * Included Files
@@ -280,4 +278,7 @@ void tapdev_send(char *buf, unsigned int buflen)
       exit(1);
     }
 }
+
+#endif /* linux */
+
 

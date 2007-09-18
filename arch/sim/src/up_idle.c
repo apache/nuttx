@@ -83,7 +83,7 @@ void up_idle(void)
 
   /* Run the network if enabled */
 
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && defined(linux)
   uipdriver_loop();
 #endif
 }
