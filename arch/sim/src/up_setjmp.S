@@ -46,6 +46,12 @@
 /**************************************************************************
  * Private Definitions
  **************************************************************************/
+ 
+#ifdef __CYGWIN__
+# define SYMBOL(s) _##s
+#else
+# define SYMBOL(s) s
+#endif
 
 /**************************************************************************
  * Private Types
@@ -72,58 +78,65 @@
  **************************************************************************/
 
 	.text
-	.globl	up_setjmp
-	.type	up_setjmp, @function
-up_setjmp:
+	.globl	SYMBOL(up_setjmp)
+#ifndef __CYGWIN__
+	.type	SYMBOL(up_setjmp), @function
+#endif
+SYMBOL(up_setjmp):
 
 	/* %ebx, %esi, %edi, and %ebp must be preserved.
 	 * save %ebx, $esi, and %edi now... */
 
-        movl	4(%esp), %eax
-        movl	%ebx, (JB_EBX)(%eax)
-        movl	%esi, (JB_ESI)(%eax)
-        movl	%edi, (JB_EDI)(%eax)
+	movl	4(%esp), %eax
+	movl	%ebx, (JB_EBX)(%eax)
+	movl	%esi, (JB_ESI)(%eax)
+	movl	%edi, (JB_EDI)(%eax)
 
-        /* Save the value of SP as will be after we return */
+	/* Save the value of SP as will be after we return */
 
-        leal	4(%esp), %ecx
-        movl	%ecx, (JB_SP)(%eax)
+	leal	4(%esp), %ecx
+	movl	%ecx, (JB_SP)(%eax)
 
-        /* Save the return PC */
+	/* Save the return PC */
 
-        movl	0(%esp), %ecx
-        movl	%ecx, (JB_PC)(%eax)
+	movl	0(%esp), %ecx
+	movl	%ecx, (JB_PC)(%eax)
 
-        /* Save the framepointer */
+	/* Save the framepointer */
 
-        movl %ebp, (JB_EBP)(%eax)
+	movl %ebp, (JB_EBP)(%eax)
 
 	/* And return 0 */
 
 	xorl    %eax, %eax
-        ret
-	.size	up_setjmp, . - up_setjmp
+	ret
+#ifndef __CYGWIN__
+	.size	SYMBOL(up_setjmp), . - SYMBOL(up_setjmp)
+#endif
+	.globl	SYMBOL(up_longjmp)
+#ifndef __CYGWIN__
+	.type	SYMBOL(up_longjmp), @function
+#endif
+SYMBOL(up_longjmp):
+	movl	4(%esp), %ecx      /* U_pthread_jmpbuf in %ecx.  */
+	movl	8(%esp), %eax      /* Second argument is return value.  */
 
-	.globl	up_longjmp
-	.type	up_longjmp, @function
-up_longjmp:
-        movl	4(%esp), %ecx      /* U_pthread_jmpbuf in %ecx.  */
-        movl	8(%esp), %eax      /* Second argument is return value.  */
+	/* Save the return address now.  */
 
-        /* Save the return address now.  */
+	movl (JB_PC)(%ecx), %edx
 
-        movl (JB_PC)(%ecx), %edx
+	/* Restore registers.  */
 
-        /* Restore registers.  */
+	movl (JB_EBX)(%ecx), %ebx
+	movl (JB_ESI)(%ecx), %esi
+	movl (JB_EDI)(%ecx), %edi
+	movl (JB_EBP)(%ecx), %ebp
+	movl (JB_SP)(%ecx), %esp
 
-        movl (JB_EBX)(%ecx), %ebx
-        movl (JB_ESI)(%ecx), %esi
-        movl (JB_EDI)(%ecx), %edi
-        movl (JB_EBP)(%ecx), %ebp
-        movl (JB_SP)(%ecx), %esp
+	/* Jump to saved PC.  */
 
-        /* Jump to saved PC.  */
-
-        jmp *%edx
-	.size up_longjmp, . - up_longjmp
+	jmp *%edx
+#ifndef __CYGWIN__
+	.size SYMBOL(up_longjmp), . - SYMBOL(up_longjmp)
+#endif
 
