@@ -70,7 +70,24 @@
 # include <net/uip/webclient.h>
 #endif
 
-int user_start(int argc, char *argv[])
+/************************************************************
+ * user_initialize
+ ************************************************************/
+
+#ifndef CONFIG_HAVE_WEAKFUNCTIONS
+void user_initialize(void)
+{
+  /* Stub that must be provided only if the toolchain does
+   * not support weak functions.
+   */
+}
+#endif
+
+/************************************************************
+ * user_start
+ ************************************************************/
+
+ int user_start(int argc, char *argv[])
 {
   struct in_addr addr;
   uip_ipaddr_t ipaddr;
