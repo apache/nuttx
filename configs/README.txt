@@ -260,6 +260,9 @@ configs/sim
     This port does not support interrupts or a real timer (and hence no
     round robin scheduler)  Otherwise, it is complete.
 
+    NOTE: This target will not run on Cygwin probably for many reasons but
+    first off because it uses some of the same symbols as does cygwind.dll.
+
 configs/c5471evm
     This is a port to the Spectrum Digital C5471 evaluation board.  The
     C5471 is a dual core processor from TI with an ARM7TDMI general purpose
