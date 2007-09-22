@@ -34,4 +34,4 @@
 ############################################################################
 
 SMTP_ASRCS  =
-SMTP_CSRCS  = smtp.c smtp-strings.c
+SMTP_CSRCS  = smtp.c

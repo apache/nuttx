@@ -211,7 +211,10 @@ $(BIN):	context depend $(LINKLIBS)
 	$(MAKE) -C $(ARCH_SRC) TOPDIR=$(TOPDIR) LINKLIBS="$(LINKLIBS)" $(BIN)
 
 depend:
-	@for dir in $(MAKEDIRS) ; do \
+	echo "CLEANDIRS: $(CLEANDIRS)"
+	echo "MAKEDIRS:  $(MAKEDIRS)"
+	for dir in $(MAKEDIRS) ; do \
+		echo "-- DEPS in $$dir --" ; \
 		$(MAKE) -C $$dir TOPDIR=$(TOPDIR) depend ; \
 	done
 

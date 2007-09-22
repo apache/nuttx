@@ -57,7 +57,7 @@
 #include <net/uip/uip.h>
 #include <net/uip/smtp.h>
 
-#include "smtp-strings.h"
+#include "netutil-strings.h"
 
 #define SMTP_INPUT_BUFFER_SIZE 512
 

@@ -1,4 +1,4 @@
-############################################################
+############################################################################
 # Makefile
 #
 #   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -31,7 +31,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################
+############################################################################
 
 -include $(TOPDIR)/Make.defs
 
@@ -45,14 +45,15 @@ include smtp/Make.defs
 include telnetd/Make.defs
 include webclient/Make.defs
 include webserver/Make.defs
+include Make.str
 endif
 
 ASRCS		= $(UIPLIB_ASRCS) $(DHCPC_ASRCS) $(RESOLV_ASRCS) $(SMTP_ASRCS) \
-		  $(TELNETD_ASRCS) $(WEBCLIENT_ASRCS) $(WEBSERVER_ASRCS)
+		  $(TELNETD_ASRCS) $(WEBCLIENT_ASRCS) $(WEBSERVER_ASRCS) $(STRNG_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		= $(UIPLIB_CSRCS) $(DHCPC_CSRCS) $(RESOLV_CSRCS) $(SMTP_CSRCS) \
-		  $(TELNETD_CSRCS) $(WEBCLIENT_CSRCS) $(WEBSERVER_CSRCS)
+		  $(TELNETD_CSRCS) $(WEBCLIENT_CSRCS) $(WEBSERVER_CSRCS) $(STRNG_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
@@ -76,15 +77,24 @@ $(BIN): $(OBJS)
 			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
 	done ; )
 
+makestrings$(EXEEXT): uiplib/makestrings.c
+	gcc -O2 -Wall -o makestrings$(EXEEXT) uiplib/makestrings.c
+
+.strings: makestrings$(EXEEXT) uiplib/netutil-strings
+	./makestrings uiplib/netutil-strings
+
+Make.str: makestrings$(EXEEXT) uiplib/netutil-strings
+	./makestrings -s uiplib/netutil-strings >Make.str
+
 .depend: Makefile $(SRCS)
 ifeq ($(CONFIG_NET),y)
-	$(MKDEP) --dep-path uiplib --dep-path dhcpc --dep-path smtp --dep-path webclient \
+	$(MKDEP) --dep-path . --dep-path uiplib --dep-path dhcpc --dep-path smtp --dep-path webclient \
 		 --dep-path resolv --dep-path telnetd --dep-path webserver \
 	$(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 endif
 	touch $@
 
-depend: .depend
+depend: .strings Make.str .depend
 
 clean:
 	rm -f $(BIN) *.o *.rel *.asm *.lst *.sym *.adb *~
@@ -93,5 +103,7 @@ clean:
 
 distclean: clean
 	rm -f Make.dep .depend
+	rm -f $(STRNG_CSRCS) $(STRNG_ASRCS)
+	rm -f Make.str netutil-strings.h makestrings$(EXEEXT)
 
 -include Make.dep
