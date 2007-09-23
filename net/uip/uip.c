@@ -156,10 +156,6 @@ uint8 uip_flags;
 
 struct uip_conn *uip_conn;
 
-/* The uip_listenports list all currently listening ports. */
-
-uint16 uip_listenports[UIP_LISTENPORTS];
-
 #ifdef CONFIG_NET_UDP
 struct uip_udp_conn *uip_udp_conn;
 #endif   /* CONFIG_NET_UDP */
@@ -361,10 +357,9 @@ uint16 uip_udpchksum(struct uip_driver_s *dev)
 
 void uip_init(void)
 {
-  for (c = 0; c < UIP_LISTENPORTS; ++c)
-    {
-      uip_listenports[c] = 0;
-    }
+  /* Initialize the listening port structures */
+  
+  uip_listeninit();
 
   /* Initialize the TCP/IP connection structures */
 
@@ -377,30 +372,6 @@ void uip_init(void)
 #endif
 
   /* IPv4 initialization. */
-}
-
-void uip_unlisten(uint16 port)
-{
-  for (c = 0; c < UIP_LISTENPORTS; ++c)
-    {
-      if (uip_listenports[c] == port)
-        {
-          uip_listenports[c] = 0;
-          return;
-        }
-    }
-}
-
-void uip_listen(uint16 port)
-{
-  for (c = 0; c < UIP_LISTENPORTS; ++c)
-    {
-      if (uip_listenports[c] == 0)
-        {
-          uip_listenports[c] = port;
-          return;
-        }
-    }
 }
 
 /* IP fragment reassembly: not well-tested. */
@@ -1195,9 +1166,8 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 flag)
     tmp16 = BUF->destport;
 
     /* Next, check listening connections. */
-    for (c = 0; c < UIP_LISTENPORTS; ++c)
+    if (uip_islistener(tmp16))
       {
-        if (tmp16 == uip_listenports[c])
           goto found_listen;
       }
 
@@ -1267,14 +1237,32 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 flag)
 
 found_listen:
 
-    /* First allocate a new connection structure */
+    /* First allocate a new connection structure and see if there is any
+     * user application to accept it.
+     */
 
-    uip_connr = uip_tcplistener(BUF);
+    uip_connr = uip_tcpaccept(BUF);
+    if (uip_connr)
+      {
+        /* The connection structure was successfully allocated.  Now see
+         * there is an application waiting to accept the connection (or at
+         * least queue it it for acceptance).
+         */
+        if (uip_accept(uip_connr, tmp16) != OK)
+          {
+            /* No, then we have to give the connection back */
+            
+            uip_tcpfree(uip_connr);
+            uip_connr = NULL;
+          }
+      }
+      
     if (!uip_connr)
       {
-        /* All connections are used already, we drop packet and hope that
+        /* Either (1) all available connections are in use, or (2) there is no
+         * application in place to accept the connection.  We drop packet and hope that
          * the remote end will retransmit the packet at a time when we
-         * have more spare connections.
+         * have more spare connections or someone waiting to accept the connection.
          */
 
         UIP_STAT(++uip_stat.tcp.syndrop);

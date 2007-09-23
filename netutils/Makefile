@@ -72,38 +72,39 @@ $(COBJS): %$(OBJEXT): %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(BIN): $(OBJS)
-	( for obj in $(OBJS) ; do \
+	@( for obj in $(OBJS) ; do \
 		$(AR) $@ $${obj} || \
 			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
 	done ; )
 
 makestrings$(EXEEXT): uiplib/makestrings.c
-	gcc -O2 -Wall -o makestrings$(EXEEXT) uiplib/makestrings.c
+	@gcc -O2 -Wall $< -o $@
 
 .strings: makestrings$(EXEEXT) uiplib/netutil-strings
-	./makestrings uiplib/netutil-strings
+	@./makestrings uiplib/netutil-strings
+	@touch $@
 
 Make.str: makestrings$(EXEEXT) uiplib/netutil-strings
-	./makestrings -s uiplib/netutil-strings >Make.str
+	@./makestrings -s uiplib/netutil-strings >Make.str
 
 .depend: Makefile $(SRCS)
 ifeq ($(CONFIG_NET),y)
-	$(MKDEP) --dep-path . --dep-path uiplib --dep-path dhcpc --dep-path smtp --dep-path webclient \
+	@$(MKDEP) --dep-path . --dep-path uiplib --dep-path dhcpc --dep-path smtp --dep-path webclient \
 		 --dep-path resolv --dep-path telnetd --dep-path webserver \
 	$(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 endif
-	touch $@
+	@touch $@
 
 depend: .strings Make.str .depend
 
 clean:
-	rm -f $(BIN) *.o *.rel *.asm *.lst *.sym *.adb *~
-	rm -f uiplib/*~ dhcpc/*~ resolv/*~ smtp/*~ telnetd/*~ webclient/*~ webserver/*~
-	if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
+	@rm -f $(BIN) *.o *.rel *.asm *.lst *.sym *.adb *~
+	@rm -f uiplib/*~ dhcpc/*~ resolv/*~ smtp/*~ telnetd/*~ webclient/*~ webserver/*~
+	@if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
 
 distclean: clean
-	rm -f Make.dep .depend
-	rm -f $(STRNG_CSRCS) $(STRNG_ASRCS)
-	rm -f Make.str netutil-strings.h makestrings$(EXEEXT)
+	@rm -f Make.dep .depend
+	@rm -f $(STRNG_CSRCS) $(STRNG_ASRCS)
+	@rm -f Make.str netutil-strings.h makestrings$(EXEEXT)
 
 -include Make.dep

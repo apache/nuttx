@@ -159,32 +159,30 @@ typedef uip_ip4addr_t uip_ipaddr_t;
  * file pointers) for the connection.
  */
 
-struct uip_driver_s;    /* Forward reference */
+struct uip_driver_s;      /* Forward reference */
 struct uip_conn
 {
   dq_entry_t node;        /* Implements a doubly linked list */
   uip_ipaddr_t ripaddr;   /* The IP address of the remote host. */
   uint16 lport;           /* The local TCP port, in network byte order. */
-  uint16 rport;           /* The local remote TCP port, in network byte
-                         order. */
+  uint16 rport;           /* The local remote TCP port, in network byte order. */
   uint8 rcv_nxt[4];       /* The sequence number that we expect to
-                         receive next. */
-  uint8 snd_nxt[4];       /* The sequence number that was last sent by
-                         us. */
+                           * receive next. */
+  uint8 snd_nxt[4];       /* The sequence number that was last sent by us. */
   uint16 len;             /* Length of the data that was previously sent. */
   uint16 mss;             /* Current maximum segment size for the
-                         connection. */
+                           * connection. */
   uint16 initialmss;      /* Initial maximum segment size for the
-                         connection. */
+                           * connection. */
   uint8 sa;               /* Retransmission time-out calculation state
-                         variable. */
+                           * variable. */
   uint8 sv;               /* Retransmission time-out calculation state
-                         variable. */
+                           * variable. */
   uint8 rto;              /* Retransmission time-out. */
   uint8 tcpstateflags;    /* TCP state and flags. */
   uint8 timer;            /* The retransmission timer. */
   uint8 nrtx;             /* The number of retransmissions for the last
-                         segment sent. */
+                           * segment sent. */
 
   /* Higher level logic can retain application specific information
    * in the following:
@@ -192,6 +190,8 @@ struct uip_conn
 
   void *data_private;
   void (*data_event)(struct uip_driver_s *dev, void *private);
+  void *accept_private;
+  int (*accept)(void *private, struct uip_conn *conn);
   void *connection_private;
   void (*connection_event)(void *private);
 };
@@ -564,7 +564,7 @@ extern int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
  * port A 16-bit port number in network byte order.
  */
 
-void uip_listen(uint16 port);
+int uip_listen(uint16 port);
 
 /* Stop listening to the specified port.
  *
@@ -574,7 +574,7 @@ void uip_listen(uint16 port);
  * port A 16-bit port number in network byte order.
  */
 
-void uip_unlisten(uint16 port);
+int uip_unlisten(uint16 port);
 
 /* Check if a connection has outstanding (i.e., unacknowledged) data.
  *

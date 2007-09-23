@@ -44,6 +44,9 @@
  ****************************************************************************/
 
 #include <sys/types.h>
+#include <errno.h>
+#include <arch/irq.h>
+#include <net/uip/uip.h>
 
 /****************************************************************************
  * Public Macro Definitions
@@ -75,13 +78,20 @@ extern "C" {
 
 EXTERN void uip_tcpinit(void);
 EXTERN struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf);
-EXTERN struct uip_conn *uip_tcplistener(struct uip_tcpip_hdr *buf);
+EXTERN struct uip_conn *uip_tcplistener(uint16 portno);
+EXTERN struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf);
 EXTERN void uip_tcpnextsequence(void);
 
 /* Defined in uip_udpconn.c *************************************************/
 
 EXTERN void uip_udpinit(void);
 EXTERN struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf);
+
+/* Defined in uip_listen.c **************************************************/
+
+EXTERN void uip_listeninit(void);
+EXTERN boolean uip_islistener(uint16 port);
+EXTERN int uip_accept(struct uip_conn *conn, uint16 portno);
 
 #undef EXTERN
 #ifdef __cplusplus

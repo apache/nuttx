@@ -34,6 +34,6 @@
 #include <sys/types.h>
 
 extern void httpd_init(void);
-extern void httpd_listen(void);
+extern int httpd_listen(void);
 
 #endif /* _NET_UIP_HTTPD_H */

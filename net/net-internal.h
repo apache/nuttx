@@ -56,11 +56,12 @@
 
                                   /* Bits 0:2 : Socket state */
 #define _SF_IDLE            0x00  /* There is no socket activity */
-#define _SF_LISTEN          0x01  /* Socket is listening */
+#define _SF_ACCEPT          0x01  /* Socket is waiting to accept a connection */
 #define _SF_RECV            0x02  /* Waiting for recv action to complete */
 #define _SF_SEND            0x03  /* Waiting for send action to complete */
 #define _SF_MASK            0x03  /* Mask to isolate the above actions */
-                                  /* Bits 3:5 : unused */
+                                  /* Bits 3:4 : unused */
+#define _SF_LISTENING       0x20  /* Bit 5: SOCK_STREAM is listening */
 #define _SF_BOUND           0x40  /* Bit 6: SOCK_STREAM is bound to an address */
 #define _SF_CONNECTED       0x80  /* Bit 7: SOCK_STREAM is connected */
 
@@ -69,8 +70,9 @@
 #define _SS_SETSTATE(s,f)   (((s) & ~_SF_MASK) | (f))
 #define _SS_GETSTATE(s)     ((s) & _SF_MASK)
 #define _SS_ISBUSY(s)       (_SS_GETSTATE(s) != _SF_IDLE)
-#define _SS_ISCONNECTED(s)  (((s) & _SF_CONNECTED) != 0)
+#define _SS_ISLISTENING(s)  (((s) & _SF_LISTENING) != 0)
 #define _SS_ISBOUND(s)      (((s) & _SF_CONNECTED) != 0)
+#define _SS_ISCONNECTED(s)  (((s) & _SF_CONNECTED) != 0)
 
 /* This macro converts a socket option value into a bit setting */
 

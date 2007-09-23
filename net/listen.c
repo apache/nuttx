@@ -56,7 +56,7 @@
  * Description:
  *   To accept connections, a socket is first created with socket(), a
  *   willingness to accept incoming connections and a queue limit for incoming
- *   connections are specified with listen, and then the connections are
+ *   connections are specified with listen(), and then the connections are
  *   accepted with accept(). The listen() call applies only to sockets of
  *   type SOCK_STREAM or SOCK_SEQPACKET.
  *
@@ -87,7 +87,51 @@
 
 int listen(int sockfd, int backlog)
 {
-  *get_errno_ptr() = ENOSYS;
+  FAR struct socket *psock = sockfd_socket(sockfd);
+  struct uip_conn *conn;
+  int err;
+
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (!psock || psock->s_crefs <= 0)
+    {
+      /* It is not a valid socket description.  Distinguish between the cases
+       * where sockfd is a just valid and when it is a valid file descriptor used
+       * in the wrong context.
+       */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+      if ((unsigned int)sockfd < CONFIG_NFILE_DESCRIPTORS)
+        {
+          err = ENOTSOCK;
+        }
+      else
+#endif
+        {
+          err = EBADF;
+        }
+      goto errout;
+    }
+
+  /* Verify that the sockfd corresponds to a connected SOCK_STREAM */
+  
+  conn = (struct uip_conn *)psock->s_conn;
+  if (psock->s_type != SOCK_STREAM || !psock->s_conn || conn->lport <= 0)
+    {
+      err = EOPNOTSUPP;
+      goto errout;
+    }
+
+  /* Start listening to the bound port.  This enables callbacks when accept()
+   * is called; and someday should enable post() or select() logic.
+   */
+  
+	uip_listen(conn->lport);
+  psock->s_flags |= _SF_LISTENING;
+	return OK;
+
+errout:
+  *get_errno_ptr() = err;
   return ERROR;
 }
 

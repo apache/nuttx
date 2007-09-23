@@ -1,17 +1,24 @@
-/* httpd
+/****************************************************************************
+ * httpd
  * httpd Web server
- * Author: Adam Dunkels <adam@sics.se>
  *
- * The uIP web server is a very simplistic implementation of an HTTP
- * server. It can serve web pages and files from a read-only ROM
- * filesystem, and provides a very small scripting language.
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
- * Copyright (c) 2004, Adam Dunkels.
- * All rights reserved.
+ * This is a leverage of similar logic from uIP:
+ *
+ *   Author: Adam Dunkels <adam@sics.se>
+ *   Copyright (c) 2004, Adam Dunkels.
+ *   All rights reserved.
+ *
+ *   The uIP web server is a very simplistic implementation of an HTTP
+ *   server. It can serve web pages and files from a read-only ROM
+ *   filesystem, and provides a very small scripting language.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -32,10 +39,15 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <stdlib.h>
 #include <sys/socket.h>
+#include <string.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/httpd.h>
@@ -44,7 +56,9 @@
 #include "httpd-cgi.h"
 #include "netutil-strings.h"
 
-#include <string.h>
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
 
 #define STATE_WAITING 0
 #define STATE_OUTPUT  1
@@ -58,6 +72,10 @@
 #define ISO_colon   0x3a
 
 #define SEND_STR(psock, str) psock_send(psock, str, strlen(str))
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 static inline int send_file(struct httpd_state *pstate)
 {
@@ -256,16 +274,31 @@ static void handle_connection(struct httpd_state *pstate)
   }
 }
 
-void httpd_listen(void)
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+/****************************************************************************
+ * Name: httpd_listen
+ *
+ * Description:
+ *   This is the main processing thread for the webserver.  It never returns
+ *   unless an error occurs
+ *
+ ****************************************************************************/
+
+int httpd_listen(void)
 {
 #warning "this is all very broken at the moment"
 }
 
-/* Initialize the web server
+/****************************************************************************
+ * Name: httpd_init
  *
- * This function initializes the web server and should be
- * called at system boot-up.
- */
+ * Description:
+ * This function initializes the web server and should be called at system
+ * boot-up.
+ *
+ ****************************************************************************/
 
 void httpd_init(void)
 {

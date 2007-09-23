@@ -91,38 +91,6 @@ static uint8 g_tcp_sequence[4];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_find_conn()
- *
- * Description:
- *   Given a port number, find the socket bound to the port number.
- *   Primary use: to determine if a port number is available.
- *
- ****************************************************************************/
-
-static struct uip_conn *uip_find_conn(uint16 portno)
-{
-  struct uip_conn *conn;
-  int i;
-
-  /* Check if this port number is already in use, and if so try to find
-   * another one.
-   */
-
-  for (i = 0; i < UIP_CONNS; i++)
-    {
-      conn = &g_tcp_connections[i];
-      if (conn->tcpstateflags != UIP_CLOSED && conn->lport == htons(g_last_tcp_port))
-        {
-          /* The portnumber is in use */
-
-          return conn;
-        }
-    }
-
-  return NULL;
-}
-
-/****************************************************************************
  * Name: uip_selectport()
  *
  * Description:
@@ -164,7 +132,7 @@ static int uip_selectport(uint16 portno)
               g_last_tcp_port = 4096;
             }
         }
-      while (uip_find_conn(g_last_tcp_port));
+      while (uip_tcplistener(g_last_tcp_port));
     }
   else
     {
@@ -172,7 +140,7 @@ static int uip_selectport(uint16 portno)
        * connection is using this local port.
        */
 
-      if (uip_find_conn(portno))
+      if (uip_tcplistener(portno))
         {
           /* It is in use... return EADDRINUSE */
 
@@ -373,7 +341,39 @@ struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf)
 }
 
 /****************************************************************************
- * Name: uip_tcpactive()
+ * Name: uip_tcplistener()
+ *
+ * Description:
+ *   Given a local port number, find the TCP connection that listens on this
+ *   this port.
+ *
+ *   Primary uses: (1) to determine if a port number is available, (2) to
+ *   To idenfity the socket that will accept new connections on a local port.
+ *
+ ****************************************************************************/
+
+struct uip_conn *uip_tcplistener(uint16 portno)
+{
+  struct uip_conn *conn;
+  int i;
+
+  /* Check if this port number is in use by any active UIP TCP connection */
+ 
+  for (i = 0; i < UIP_CONNS; i++)
+    {
+      conn = &g_tcp_connections[i];
+      if (conn->tcpstateflags != UIP_CLOSED && conn->lport == htons(g_last_tcp_port))
+        {
+          /* The portnumber is in use, return the connection */
+
+          return conn;
+        }
+    }
+  return NULL;
+}
+
+/****************************************************************************
+ * Name: uip_tcpaccept()
  *
  * Description:
  *    Called when uip_interupt matches the incoming packet with a connection
@@ -385,7 +385,7 @@ struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf)
  *
  ****************************************************************************/
 
-struct uip_conn *uip_tcplistener(struct uip_tcpip_hdr *buf)
+struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf)
 {
   struct uip_conn *conn = uip_tcpalloc();
   if (conn)
