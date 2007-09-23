@@ -42,7 +42,7 @@
 
 #include "httpd.h"
 #include "httpd-cgi.h"
-#include "http-strings.h"
+#include "netutil-strings.h"
 
 #include <string.h>
 

@@ -43,6 +43,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
+#include <libgen.h>
 #include <errno.h>
 
 /****************************************************************************
@@ -203,16 +204,18 @@ FILE *open_outfile(const char *filename)
 }
 
 /****************************************************************************
- * Function: generate_sourcefile_list
+ * Function: generate_mkdefs
  ****************************************************************************/
  
-int generate_sourcefile_list(void)
+int generate_mkdefs(void)
 {
   int ret = 1;
   FILE *stream;
   
   if (( stream = open_stringfile()))
     {
+	  printf("STRNG_ASRCS =\n");
+	  printf("STRNG_CSRCS = ");
       ret = 0;
       while (fgets(g_line, 1024, stream) && !ret)
         {
@@ -239,14 +242,16 @@ int generate_sourcefiles(void)
   FILE *cstream;
   const char *pname;
   const char *pvalue;
+  char *filename;
   char buffer[512];
   int len;
   int ndx;
   int ret = 1;
-  
+
+  filename = strdup(g_stringfile);
   if (( instream = open_stringfile()))
     {
-      snprintf(buffer, 512, "%s.h", g_stringfile);
+      snprintf(buffer, 512, "%s.h", basename(filename));
       hstream = open_outfile(buffer);
       if (hstream)
         {
@@ -258,11 +263,12 @@ int generate_sourcefiles(void)
               ret = parse_stringfile_line(&pname, &pvalue);
               if (!ret)
                 {
+                  len = strlen(pvalue);
+
                   snprintf(buffer, 512, "%s.c", pname);
                   cstream = open_outfile(buffer);
                   if (cstream)
                     {
-                      len = strlen(pvalue);
                       fprintf(cstream, "const char %s[%d] = {", pname, len);
                       for (ndx = 0; ndx < len; ndx++)
                         {
@@ -272,7 +278,7 @@ int generate_sourcefiles(void)
                             }
                           fprintf(cstream, "0x%02x", pvalue[ndx]);
                         }
-                      fprintf(cstream, "}\n");
+                      fprintf(cstream, "};\n");
                       fclose(cstream);
                     }
                   fprintf(hstream, "extern const char %s[%d];\n", pname, len);
@@ -283,6 +289,7 @@ int generate_sourcefiles(void)
         }
       fclose(instream);
     }
+  free(filename);
   return ret;
 }
 
@@ -364,7 +371,7 @@ int main(int argc, char **argv, char **envp)
           ret = generate_sourcefiles();
           break;
         case SRCLIST:
-          ret = generate_sourcefile_list();
+          ret = generate_mkdefs();
           break;
     }
   return ret;

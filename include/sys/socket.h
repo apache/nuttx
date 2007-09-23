@@ -180,6 +180,9 @@ EXTERN int socket(int domain, int type, int protocol);
 EXTERN int bind(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen);
 EXTERN int connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen);
 
+EXTERN int listen(int sockfd, int backlog);
+EXTERN int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+
 EXTERN ssize_t send(int sockfd, FAR const void *buf, size_t len, int flags);
 EXTERN ssize_t sendto(int sockfd, FAR const void *buf, size_t len, int flags,
                       FAR const struct sockaddr *to, socklen_t tolen);

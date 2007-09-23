@@ -38,7 +38,7 @@
 #include <sys/types.h>
 #include <net/uip/uipopt.h>
 
-#include "webclient-strings.h"
+#include "netutil-strings.h"
 
 #define WEBCLIENT_CONF_MAX_URLLEN 100
 

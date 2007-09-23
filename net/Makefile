@@ -40,8 +40,8 @@ MKDEP		= $(TOPDIR)/tools/mkdeps.sh
 
 ifeq ($(CONFIG_NET),y)
 SOCK_ASRCS	=
-SOCK_CSRCS	= socket.c bind.c connect.c send.c sendto.c recv.c recvfrom.c \
-		  net-sockets.c net-close.c
+SOCK_CSRCS	= socket.c bind.c connect.c listen.c accept.c send.c sendto.c \
+		  recv.c recvfrom.c net-sockets.c net-close.c
 
 ifeq ($(CONFIG_NET_SOCKOPTS),y)
 SOCK_CSRCS      += setsockopt.c getsockopt.c 

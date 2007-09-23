@@ -34,4 +34,4 @@
 ############################################################################
 
 WEBSERVER_ASRCS =
-WEBSERVER_CSRCS = httpd.c http-strings.c httpd-fs.c httpd-cgi.c
+WEBSERVER_CSRCS = httpd.c httpd-fs.c httpd-cgi.c

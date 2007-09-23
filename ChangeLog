@@ -212,4 +212,5 @@
 	* Implemented receive timeouts via setsockopt(SO_RCVTIMEO).
 	* Provide support for multiple network devices
 	* Implement socket ioctl() calls to set addresses
+	* Added listen() and accept()
 

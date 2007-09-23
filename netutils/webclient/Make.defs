@@ -34,4 +34,4 @@
 ############################################################################
 
 WEBCLIENT_ASRCS =
-WEBCLIENT_CSRCS = webclient-strings.c webclient.c
+WEBCLIENT_CSRCS = webclient.c
