@@ -83,30 +83,29 @@ $(SPECOBJS): %$(OBJEXT): %.c
 	$(CC) -c $(HOSTCFLAGS) $< -o $@
 
 libarch$(LIBEXT): $(OBJS)
-	( for obj in $(OBJS) ; do \
+	@( for obj in $(OBJS) ; do \
 		$(AR) $@ $${obj} || \
 			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
 	done ; )
 
-nuttx: $(LINKOBJS)
+nuttx$(EXEEXT): $(LINKOBJS)
 	$(CC) $(LDFLAGS) $(LDPATHES) -o $(TOPDIR)/$@ $(LINKOBJS) \
 		-Wl,--start-group $(LDLIBS) -Wl,--end-group $(EXTRA_LIBS)
 	@$(NM) $(TOPDIR)/$@ | \
-	grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
-	sort > $(TOPDIR)/System.map
-
+		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
+		sort > $(TOPDIR)/System.map
 
 .depend: Makefile $(SRCS)
-	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	touch $@
+	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@touch $@
 
 depend: .depend
 
 clean:
-	rm -f libarch$(LIBEXT) *~
-	if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
+	@rm -f libarch$(LIBEXT) *~
+	@if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
 
 distclean: clean
-	rm -f Make.dep .depend
+	@rm -f Make.dep .depend
 
 -include Make.dep
