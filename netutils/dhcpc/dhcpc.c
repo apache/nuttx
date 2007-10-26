@@ -54,6 +54,7 @@
 
 #include <net/uip/uip.h>
 #include <net/uip/dhcpc.h>
+#include <net/uip/uip-lib.h>
 
 /****************************************************************************
  * Definitions
@@ -192,7 +193,7 @@ static void create_msg(struct dhcpc_state_internal *pdhcpc, struct dhcp_msg *pms
   pmsg->secs  = 0;
   pmsg->flags = HTONS(BOOTP_BROADCAST); /*  Broadcast bit. */
 
-  uip_gethostaddr( "eth0", &addr);
+  uip_gethostaddr("eth0", &addr);
   memcpy(&pmsg->ciaddr, &addr.s_addr, sizeof(pmsg->ciaddr));
   memset(pmsg->yiaddr, 0, sizeof(pmsg->yiaddr));
   memset(pmsg->siaddr, 0, sizeof(pmsg->siaddr));

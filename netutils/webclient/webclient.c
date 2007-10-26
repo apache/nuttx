@@ -56,8 +56,8 @@
 #include <net/uip/uip.h>
 #include <net/uip/resolv.h>
 
-#include "uiplib/uiplib.h"
 #include <net/uip/uip-arch.h>
+#include <net/uip/uip-lib.h>
 
 #include "webclient.h"
 

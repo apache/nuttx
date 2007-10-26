@@ -43,12 +43,14 @@
  * Included Files
  ****************************************************************************/
 
+#include <sys/ioctl.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/uip-arp.h>
+#include <net/uip/uip-lib.h>
 
 /* Here we include the header file for the application(s) we use in
  * our project as defined in the config/<board-name>/defconfig file
@@ -90,21 +92,44 @@ void user_initialize(void)
  int user_start(int argc, char *argv[])
 {
   struct in_addr addr;
-  uip_ipaddr_t ipaddr;
-#if defined(CONFIG_EXAMPLE_UIP_DHCPC)
-  uint16 mac[6] = {1, 2, 3, 4, 5, 6};
+#if defined(CONFIG_EXAMPLE_UIP_DHCPC) || defined(CONFIG_ARCH_SIM)
+  uint8 mac[IFHWADDRLEN];
 #endif
 #if defined(CONFIG_EXAMPLE_UIP_DHCPC) || defined(CONFIG_EXAMPLE_UIP_SMTP)
   void *handle;
 #endif
 
-  addr.s_addr = htonl( 192 << 24 | 168 << 16 | 0 << 8 | 2 );
+#if defined(CONFIG_ARCH_SIM)
+  /* Give the simulated dirver a MAC address */
+
+  mac[0] = 0x00;
+  mac[1] = 0xe0;
+  mac[2] = 0xb0;
+  mac[3] = 0x0b;
+  mac[4] = 0xba;
+  mac[5] = 0xbe;
+  uip_setmacaddr("eth0", mac);
+
+#elif defined(CONFIG_EXAMPLE_UIP_DHCPC)
+  /* Get the MAC address of the NIC */
+
+  uip_getmacaddr("eth0", mac);
+#endif
+
+  /* Set up our host address */
+
+  uip_ipaddr(addr.s_addr, 192, 168, 0, 128 );
   uip_sethostaddr("eth0", &addr);
 
-  uip_ipaddr(ipaddr, 192, 168, 0, 1);
-  uip_setdraddr("eth0", &ipaddr);
-  uip_ipaddr(ipaddr, 255, 255, 255, 0);
-  uip_setnetmask("eth0", &ipaddr);
+  /* Set up the default router address */
+
+  uip_ipaddr(addr.s_addr, 192, 168, 0, 1);
+  uip_setdraddr("eth0", &addr);
+
+  /* Setup the subnet mask */
+
+  uip_ipaddr(addr.s_addr, 255, 255, 255, 0);
+  uip_setnetmask("eth0", &addr);
 
 #if defined(CONFIG_EXAMPLE_UIP_WEBSERVER)
   httpd_init();
@@ -113,7 +138,7 @@ void user_initialize(void)
   telnetd_init();
 #elif defined(CONFIG_EXAMPLE_UIP_DHCPC)
   resolv_init();
-  handle = dhcpc_open(&mac, 6);
+  handle = dhcpc_open(&mac, IFHWADDRLEN);
   if (handle)
     {
         struct dhcpc_state ds;
@@ -125,11 +150,11 @@ void user_initialize(void)
         dhcpc_close(handle);
     }
 #elif defined(CONFIG_EXAMPLE_UIP_SMTP)
-  uip_ipaddr(ipaddr, 127, 0, 0, 1);
+  uip_ipaddr(addr.s_addr, 127, 0, 0, 1);
   handle = smtp_open();
   if (handle)
     {
-      smtp_configure("localhost", ipaddr);
+      smtp_configure("localhost", addr.s_addr);
       smtp_send("adam@sics.se", NULL, "uip-testing@example.com",
                 "Testing SMTP from uIP", "Test message sent by uIP\r\n");
       smtp_close(handle);
@@ -137,8 +162,8 @@ void user_initialize(void)
 #elif defined(CONFIG_EXAMPLE_UIP_WEBCLIENT)
   webclient_init();
   resolv_init();
-  uip_ipaddr(ipaddr, 195, 54, 122, 204);
-  resolv_conf(ipaddr);
+  uip_ipaddr(addr.s_addr, 195, 54, 122, 204);
+  resolv_conf(addr.s_addr);
   resolv_query("www.sics.se");
 #endif
 

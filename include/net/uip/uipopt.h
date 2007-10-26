@@ -271,19 +271,6 @@
 # define UIP_STATISTICS CONFIG_NET_STATISTICS
 #endif /* CONFIG_NET_STATISTICS */
 
-/* Determines if logging of certain events should be compiled in.
- *
- * This is useful mostly for debugging. The function uip_log()
- * must be implemented to suit the architecture of the project, if
- * logging is turned on.
- */
-
-#ifndef CONFIG_NET_LOGGING
-# define UIP_LOGGING     0
-#else /* CONFIG_NET_LOGGING */
-# define UIP_LOGGING     CONFIG_NET_LOGGING
-#endif /* CONFIG_NET_LOGGING */
-
 /* Broadcast support.
  *
  * This flag configures IP broadcast support. This is useful only
@@ -344,17 +331,5 @@
  */
 
 typedef uint16 uip_stats_t;
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/* Print out a uIP log message.
- *
- * This function must be implemented by the module that uses uIP, and
- * is called by uIP whenever a log message is generated.
- */
-
-void uip_log(char *msg);
 
 #endif /* __UIPOPT_H__ */

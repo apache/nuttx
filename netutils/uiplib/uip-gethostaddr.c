@@ -47,19 +47,25 @@
 #include <errno.h>
 #include <netinet/in.h>
 
+#include <net/uip/uip-lib.h>
+
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_sethostaddr
+ * Name: uip_gethostaddr
  *
  * Description:
  *   Get the network driver IP address
  *
  * Parameters:
  *   ifname   The name of the interface to use
- *   ipaddr   The address to set
+ *   ipaddr   The location to return the IP address
  *
  * Return:
  *   0 on sucess; -1 on failure
@@ -83,7 +89,12 @@ int uip_gethostaddr(const char *ifname, struct in_addr *addr)
           ret = ioctl(sockfd, SIOCSIFADDR, (unsigned long)&req);
           if (!ret)
             {
-              memcpy(addr, &req.ifr_addr, sizeof(addr));
+#ifdef CONFIG_NET_IPv6
+#error "req.ifr_addr.s_addr not big enough for IPv6 address"
+              memcpy(addr, &req.ifr_addr, sizeof(struct in6_addr));
+#else
+              memcpy(addr, &req.ifr_addr, sizeof(struct in_addr));
+#endif
             }
         }
     }

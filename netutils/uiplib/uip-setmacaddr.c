@@ -1,5 +1,5 @@
 /****************************************************************************
- * netutils/uiplib/uip-setdraddr.c
+ * netutils/uiplib/uip-setmacaddr.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -51,61 +51,58 @@
 #include <net/uip/uip-lib.h>
 
 /****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+# define AF_INETX AF_INET6
+#else
+# define AF_INETX AF_INET
+#endif
+
+/****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_setdraddr
+ * Name: uip_setmacaddr
  *
  * Description:
- *   Set the default router IP address
+ *   Set the network driver MAC address
  *
  * Parameters:
  *   ifname   The name of the interface to use
- *   ipaddr   The address to set
+ *   macaddr  MAC address to set, size must be IFHWADDRLEN
  *
  * Return:
  *   0 on sucess; -1 on failure
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
-int uip_setdraddr(const char *ifname, const struct in6_addr *addr)
-#else
-int uip_setdraddr(const char *ifname, const struct in_addr *addr)
-#endif
+int uip_setmacaddr(const char *ifname, const uint8 *macaddr)
 {
   int ret = ERROR;
-  if (ifname && addr)
+  if (ifname && macaddr)
     {
+      /* Get a socket (only so that we get access to the INET subsystem) */
+
       int sockfd = socket(PF_INET, SOCK_DGRAM, 0);
       if (sockfd >= 0)
         {
           struct ifreq req;
-#ifdef CONFIG_NET_IPv6
-          struct sockaddr_in6 *inaddr;
-#else
-          struct sockaddr_in  *inaddr;
-#endif
-          /* Add the device name to the request */
+
+          /* Put the driver name into the request */
 
           strncpy(req.ifr_name, ifname, IFNAMSIZ);
 
-          /* Add the INET address to the request */
+          /* Put the new MAC address into the request */
 
-#ifdef CONFIG_NET_IPv6
-#error "req.ifr_addr.s_addr not big enough for IPv6 address"
-          inaddr             = (struct sockaddr_in6 *)&req.ifr_addr;
-          inaddr->sin_family = AF_INET6;
-          inaddr->sin_port   = 0;
-          memcpy(&inaddr->sin6_addr, addr, sizeof(struct in6_addr));
-#else
-          inaddr             = (struct sockaddr_in *)&req.ifr_addr;
-          inaddr->sin_family = AF_INET;
-          inaddr->sin_port   = 0;
-          memcpy(&inaddr->sin_addr, addr, sizeof(struct in_addr));
-#endif
-          ret = ioctl(sockfd, SIOCSIFDSTADDR, (unsigned long)&req);
+          req.ifr_hwaddr.sa_family = AF_INETX;
+          memcpy(&req.ifr_hwaddr.sa_data, macaddr, IFHWADDRLEN);
+
+          /* Perforom the ioctl to set the MAC address */
+
+          ret = ioctl(sockfd, SIOCSIFHWADDR, (unsigned long)&req);
           close(sockfd);
         }
     }

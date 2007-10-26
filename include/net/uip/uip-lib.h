@@ -1,5 +1,5 @@
 /****************************************************************************
- * netutils/uiplib/uiplib.h
+ * net/uip/uiplib.h
  * Various uIP library functions.
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -42,6 +42,7 @@
 #ifndef __UIPLIB_H__
 #define __UIPLIB_H__
 
+#include <nuttx/config.h>
 #include <netinet/in.h>
 
 /* Convert a textual representation of an IP address to a numerical representation.
@@ -62,11 +63,21 @@
 
 extern unsigned char uiplib_ipaddrconv(char *addrstr, unsigned char *addr);
 
-/* Get and set IP addresses */
+/* Get and set IP/MAC addresses */
 
+extern int uip_setmacaddr(const char *ifname, const uint8 *macaddr);
+extern int uip_getmacaddr(const char *ifname, uint8 *macaddr);
+
+#ifdef CONFIG_NET_IPv6
 extern int uip_gethostaddr(const char *ifname, struct in6_addr *addr);
 extern int uip_sethostaddr(const char *ifname, const struct in6_addr *addr);
 extern int uip_setdraddr(const char *ifname, const struct in6_addr *addr);
 extern int uip_setnetmask(const char *ifname, const struct in6_addr *addr);
+#else
+extern int uip_gethostaddr(const char *ifname, struct in_addr *addr);
+extern int uip_sethostaddr(const char *ifname, const struct in_addr *addr);
+extern int uip_setdraddr(const char *ifname, const struct in_addr *addr);
+extern int uip_setnetmask(const char *ifname, const struct in_addr *addr);
+#endif
 
 #endif /* __UIPLIB_H__ */

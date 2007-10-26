@@ -43,9 +43,12 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 #include <string.h>
 #include <errno.h>
 #include <netinet/in.h>
+
+#include <net/uip/uip-lib.h>
 
 /****************************************************************************
  * Global Functions
@@ -72,18 +75,41 @@ int uip_sethostaddr(const char *ifname, const struct in6_addr *addr)
 int uip_sethostaddr(const char *ifname, const struct in_addr *addr)
 #endif
 {
+  int ret = ERROR;
   if (ifname && addr)
     {
       int sockfd = socket(PF_INET, SOCK_DGRAM, 0);
       if (sockfd >= 0)
         {
           struct ifreq req;
+#ifdef CONFIG_NET_IPv6
+          struct sockaddr_in6 *inaddr;
+#else
+          struct sockaddr_in  *inaddr;
+#endif
+          /* Add the device name to the request */
+
           strncpy(req.ifr_name, ifname, IFNAMSIZ);
-          memcpy(&req.ifr_addr, addr, sizeof(addr));
-          return ioctl(sockfd, SIOCSIFADDR, (unsigned long)&req);
+
+          /* Add the INET address to the request */
+
+#ifdef CONFIG_NET_IPv6
+#error "req.ifr_addr.s_addr not big enough for IPv6 address"
+          inaddr             = (struct sockaddr_in6 *)&req.ifr_addr;
+          inaddr->sin_family = AF_INET6;
+          inaddr->sin_port   = 0;
+          memcpy(&inaddr->sin6_addr, addr, sizeof(struct in6_addr));
+#else
+          inaddr             = (struct sockaddr_in *)&req.ifr_addr;
+          inaddr->sin_family = AF_INET;
+          inaddr->sin_port   = 0;
+          memcpy(&inaddr->sin_addr, addr, sizeof(struct in_addr));
+#endif
+          ret = ioctl(sockfd, SIOCSIFADDR, (unsigned long)&req);
+          close(sockfd);
         }
     }
-  return ERROR;
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

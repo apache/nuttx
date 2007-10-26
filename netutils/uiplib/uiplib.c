@@ -44,8 +44,7 @@
  ****************************************************************************/
 
 #include <net/uip/uip.h>
-
-#include "uiplib.h"
+#include <net/uip/uip-lib.h>
 
 unsigned char uiplib_ipaddrconv(char *addrstr, unsigned char *ipaddr)
 {

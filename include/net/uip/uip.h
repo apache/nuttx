@@ -889,10 +889,9 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
  */
 
 #ifndef CONFIG_NET_IPv6
-#define uip_ipaddr_cmp(addr1, addr2) (((uint16 *)addr1)[0] == ((uint16 *)addr2)[0] && \
-				      ((uint16 *)addr1)[1] == ((uint16 *)addr2)[1])
+# define uip_ipaddr_cmp(addr1, addr2) (addr1 == addr2)
 #else /* !CONFIG_NET_IPv6 */
-#define uip_ipaddr_cmp(addr1, addr2) (memcmp(addr1, addr2, sizeof(uip_ip6addr_t)) == 0)
+# define uip_ipaddr_cmp(addr1, addr2) (memcmp(&addr1, &addr2, sizeof(uip_ip6addr_t)) == 0)
 #endif /* !CONFIG_NET_IPv6 */
 
 /* Compare two IP addresses with netmasks
@@ -1012,5 +1011,13 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
  */
 
 #define uip_ipaddr4(addr) (htons(((uint16 *)(addr))[1]) & 0xff)
+
+/* Print out a uIP log message.
+ *
+ * This function must be implemented by the module that uses uIP, and
+ * is called by uIP whenever a log message is generated.
+ */
+
+extern void uip_log(char *msg);
 
 #endif /* __NET_UIP_UIP_H */

@@ -56,6 +56,12 @@
  * Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv6
+# define AF_INETX AF_INET6
+#else
+# define AF_INETX AF_INET
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -71,10 +77,15 @@
 static void _get_ipaddr(struct sockaddr *outaddr, uip_ipaddr_t *inaddr)
 {
 #ifdef CONFIG_NET_IPv6
+#error " big enough for IPv6 address"
   struct sockaddr_in6 *dest = (struct sockaddr_in6 *)outaddr;
-  memcpy(&dest->sin6_addr.in6_u, inaddr, IFHWADDRLEN);
+  dest->sin_family = AF_INET6;
+  dest->sin_port   = 0;
+  memcpy(dest->sin6_addr.in6_u.u6_addr8, inaddr, 16);
 #else
   struct sockaddr_in *dest = (struct sockaddr_in *)outaddr;
+  dest->sin_family = AF_INET;
+  dest->sin_port   = 0;
   dest->sin_addr.s_addr = *inaddr;
 #endif
 }
@@ -83,7 +94,7 @@ static void _set_ipaddr(uip_ipaddr_t *outaddr, struct sockaddr *inaddr)
 {
 #ifdef CONFIG_NET_IPv6
   struct sockaddr_in6 *src = (struct sockaddr_in6 *)inaddr;
-  memcpy(outaddr, &src->sin6_addr.in6_u, IFHWADDRLEN);
+  memcpy(outaddr, src->sin6_addr.in6_u.u6_addr8, 16);
 #else
   struct sockaddr_in *src = (struct sockaddr_in *)inaddr;
   *outaddr = src->sin_addr.s_addr;
@@ -187,10 +198,12 @@ int netdev_ioctl(int sockfd, int cmd, struct ifreq *req)
         break;
 
       case SIOCGIFHWADDR:  /* Get hardware address */
+        req->ifr_hwaddr.sa_family = AF_INETX;
         memcpy(req->ifr_hwaddr.sa_data, dev->d_mac.addr, IFHWADDRLEN);
         break;
 
       case SIOCSIFHWADDR:  /* Set hardware address */
+        req->ifr_hwaddr.sa_family = AF_INETX;
         memcpy(dev->d_mac.addr, req->ifr_hwaddr.sa_data, IFHWADDRLEN);
         break;
 

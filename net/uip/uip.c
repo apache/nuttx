@@ -87,13 +87,20 @@
 
 #include <string.h>
 
-#if UIP_LOGGING == 1
-#include <stdio.h>
+/* Check if logging of network events should be compiled in.
+ *
+ * This is useful mostly for debugging. The function uip_log()
+ * must be implemented to suit the architecture of the project, if
+ * logging is turned on.
+ */
+
+#ifdef CONFIG_NET_LOGGING
+# include <stdio.h>
 extern void uip_log(char *msg);
 # define UIP_LOG(m) uip_log(m)
 #else
 # define UIP_LOG(m)
-#endif /* UIP_LOGGING == 1 */
+#endif
 
 #include "uip-internal.h"
 
