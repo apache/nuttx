@@ -258,8 +258,7 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
         goto errout;
     }
 
-  err = ENOSYS;
-  /*return OK;*/
+  return OK;
 
 errout:
   *get_errno_ptr() = err;

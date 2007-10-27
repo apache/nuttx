@@ -406,7 +406,7 @@ static ssize_t recvfrom_result(int result, struct recvfrom_s *pstate)
  *   psock    Pointer to the socket structure for the SOCK_DRAM socket
  *   buf      Buffer to receive data
  *   len      Length of buffer
- *   infrom   INET ddress of source
+ *   infrom   INET ddress of source (may be NULL)
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
@@ -489,7 +489,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  *   psock    Pointer to the socket structure for the SOCK_DRAM socket
  *   buf      Buffer to receive data
  *   len      Length of buffer
- *   infrom   INET ddress of source
+ *   infrom   INET ddress of source (may be NULL)
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
@@ -575,7 +575,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  *   buf      Buffer to receive data
  *   len      Length of buffer
  *   flags    Receive flags
- *   from     Address of source
+ *   from     Address of source (may be NULL)
  *   fromlen  The length of the address structure
  *
  * Returned Value:
@@ -624,7 +624,7 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags, FAR struct so
 
   /* Verify that non-NULL pointers were passed */
 
-  if (!buf || !from || !fromlen)
+  if (!buf)
     {
       err = EINVAL;
       goto errout;
@@ -640,17 +640,20 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags, FAR struct so
       goto errout;
     }
 
-  /* Verify that a valid address has been provided */
+  /* If a 'from' address has been provided, verify that it is valid */
 
+  if (from)
+    {
 #ifdef CONFIG_NET_IPv6
-  if (from->sa_family != AF_INET6 || *fromlen < sizeof(struct sockaddr_in6))
+      if (from->sa_family != AF_INET6 || *fromlen < sizeof(struct sockaddr_in6))
 #else
-  if (from->sa_family != AF_INET || *fromlen < sizeof(struct sockaddr_in))
+      if (from->sa_family != AF_INET || *fromlen < sizeof(struct sockaddr_in))
 #endif
-  {
-      err = EBADF;
-      goto errout;
-  }
+        {
+          err = EBADF;
+          goto errout;
+        }
+    }
 
   /* Set the socket state to receiving */
 

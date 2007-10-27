@@ -57,8 +57,11 @@
  ****************************************************************************/
 
 extern void *smtp_open(void);
-extern void  smtp_configure(void *handle, char *localhostname, void *smtpserver);
-extern int   smtp_send(void *handle, char *to, char *cc, char *from, char *subject, char *msg, int msglen);
+extern void  smtp_configure(void *handle, const char *localhostname,
+                            const uip_ipaddr_t *paddr);
+extern int   smtp_send(void *handle, const char *to, const char *cc,
+                       const char *from, const char *subject,
+                       const char *msg, int msglen);
 extern void  smtp_close(void *handle);
 
 #endif /* __SMTP_H__ */

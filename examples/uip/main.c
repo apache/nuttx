@@ -45,6 +45,7 @@
 
 #include <sys/ioctl.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <time.h>
 
@@ -70,11 +71,29 @@
 # include <net/uip/resolv.h>
 #elif defined(CONFIG_EXAMPLE_UIP_WEBCLIENT)
 # include <net/uip/webclient.h>
+#else
+# error "No network application specified"
 #endif
 
-/************************************************************
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if defined(CONFIG_EXAMPLE_UIP_SMTP)
+static const char g_host_name[] = "localhost";
+static const char g_recipient[] = "spudmonkey@racsa.co.cr";
+static const char g_sender[]    = "nuttx-testing@example.com";
+static const char g_subject[]   = "Testing SMTP from NuttX";
+static const char g_msg_body[]  = "Test message sent by NuttX\r\n";
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * user_initialize
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_HAVE_WEAKFUNCTIONS
 void user_initialize(void)
@@ -85,11 +104,11 @@ void user_initialize(void)
 }
 #endif
 
-/************************************************************
+/****************************************************************************
  * user_start
- ************************************************************/
+ ****************************************************************************/
 
- int user_start(int argc, char *argv[])
+int user_start(int argc, char *argv[])
 {
   struct in_addr addr;
 #if defined(CONFIG_EXAMPLE_UIP_DHCPC) || defined(CONFIG_ARCH_SIM)
@@ -154,9 +173,9 @@ void user_initialize(void)
   handle = smtp_open();
   if (handle)
     {
-      smtp_configure("localhost", addr.s_addr);
-      smtp_send("adam@sics.se", NULL, "uip-testing@example.com",
-                "Testing SMTP from uIP", "Test message sent by uIP\r\n");
+      smtp_configure(handle, g_host_name, &addr.s_addr);
+      smtp_send(handle, g_recipient, NULL, g_sender, g_subject,
+                g_msg_body, strlen(g_msg_body));
       smtp_close(handle);
     }
 #elif defined(CONFIG_EXAMPLE_UIP_WEBCLIENT)
@@ -180,6 +199,7 @@ void uip_log(char *m)
   printf("uIP log message: %s\n", m);
 }
 
+#if defined(CONFIG_EXAMPLE_UIP_WEBCLIENT)
 void webclient_closed(void)
 {
   printf("Webclient: connection closed\n");
@@ -204,3 +224,4 @@ void webclient_datahandler(char *data, uint16 len)
 {
   printf("Webclient: got %d bytes of data.\n", len);
 }
+#endif

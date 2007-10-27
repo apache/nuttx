@@ -289,6 +289,7 @@ static void handle_connection(struct httpd_state *pstate)
 int httpd_listen(void)
 {
 #warning "this is all very broken at the moment"
+  return OK;
 }
 
 /****************************************************************************

@@ -75,21 +75,21 @@
 
 struct smtp_state
 {
-  uint8   state;
-  boolean connected;
-  sem_t   sem;
+  uint8        state;
+  boolean      connected;
+  sem_t        sem;
   uip_ipaddr_t smtpserver;
-  char   *localhostname;
-  char   *to;
-  char   *cc;
-  char   *from;
-  char   *subject;
-  char   *msg;
-  int     msglen;
-  int     sentlen;
-  int     textlen;
-  int     sendptr;
-  char    buffer[SMTP_INPUT_BUFFER_SIZE];
+  const char  *localhostname;
+  const char  *to;
+  const char  *cc;
+  const char  *from;
+  const char  *subject;
+  const char  *msg;
+  int          msglen;
+  int          sentlen;
+  int          textlen;
+  int          sendptr;
+  char         buffer[SMTP_INPUT_BUFFER_SIZE];
 };
 
 static inline int smtp_send_message(int sockfd, struct smtp_state *psmtp)
@@ -242,33 +242,35 @@ static inline int smtp_send_message(int sockfd, struct smtp_state *psmtp)
 
 /* Specificy an SMTP server and hostname.
  *
- * This function is used to configure the SMTP module with an SMTP
- * server and the hostname of the host.
+ * This function is used to configure the SMTP module with an SMTP server and
+ * the hostname of the host.
  *
- * lhostname The hostname of the uIP host.
+ *   lhostname - The hostname of the local, uIP host.
  *
- * server A pointer to a 4-byte array representing the IP
- * address of the SMTP server to be configured.
+ *   paddr     - A pointer to the IP address of the SMTP server to be
+ *               configured.
  */
 
-void smtp_configure(void *handle, char *lhostname, void *server)
+void smtp_configure(void *handle, const char *lhostname,
+                    const uip_ipaddr_t *paddr)
 {
   struct smtp_state *psmtp = (struct smtp_state *)handle;
   psmtp->localhostname = lhostname;
-  uip_ipaddr_copy(psmtp->smtpserver, server);
+  uip_ipaddr_copy(psmtp->smtpserver, paddr);
 }
 
 /* Send an e-mail.
  *
- * to The e-mail address of the receiver of the e-mail.
- * cc The e-mail address of the CC: receivers of the e-mail.
- * from The e-mail address of the sender of the e-mail.
- * subject The subject of the e-mail.
- * msg The actual e-mail message.
- * msglen The length of the e-mail message.
+ *   to      - The e-mail address of the receiver of the e-mail.
+ *   cc      - The e-mail address of the CC: receivers of the e-mail.
+ *   from    - The e-mail address of the sender of the e-mail.
+ *   subject - The subject of the e-mail.
+ *   msg     - The actual e-mail message.
+ *   msglen  - The length of the e-mail message.
  */
 
-int smtp_send(void *handle, char *to, char *cc, char *from, char *subject, char *msg, int msglen)
+int smtp_send(void *handle, const char *to, const char *cc, const char *from,
+              const char *subject, const char *msg, int msglen)
 {
   struct smtp_state *psmtp = (struct smtp_state *)handle;
   struct sockaddr_in server;
