@@ -85,6 +85,17 @@ extern int lib_rawprintf(const char *format, ...);
  * Private Types
  ****************************************************************************/
 
+/* Warning: This is very much Linux version specific! */
+
+struct sel_arg_struct
+{
+  unsigned long   n;
+  fd_set         *inp;
+  fd_set         *outp;
+  fd_set         *exp;
+  struct timeval *tvp;
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -156,18 +167,34 @@ static inline int up_ioctl(int fd, unsigned int cmd, unsigned long arg)
   return (int)result;
 }
 
-static inline int up_select(int n, fd_set *inp, fd_set *outp, fd_set *exp, struct timeval *tvp)
+static inline int up_select(struct sel_arg_struct *arg)
 {
   ssize_t result;
 
   __asm__ volatile ("int $0x80" \
                     : "=a" (result) \
-                    : "0" (SELECT),"b" ((long)(n)),"c" ((long)(inp)), \
-                      "d" ((long)(outp)),"S" ((long)(exp)), "D"((long)tvp) \
+                    : "0" (SELECT),"b" ((struct sel_arg_struct *)(arg))
                     : "memory");
 
   return (int)result;
 }
+
+#ifdef TAPDEV_DEBUG
+static inline void dump_ethhdr(const char *msg, unsigned char *buf, int buflen)
+{
+  lib_rawprintf("TAPDEV: %s %d bytes\n", msg, buflen);
+  lib_rawprintf("        %02x:%02x:%02x:%02x:%02x:%02x %02x:%02x:%02x:%02x:%02x:%02x %02x%02x\n",
+                buf[0], buf[1], buf[2], buf[3], buf[4],  buf[5],
+                buf[6], buf[7], buf[8], buf[9], buf[10], buf[11],
+#if UIP_BYTE_ORDER == UIP_LITTLE_ENDIAN
+                buf[12], buf[13]);
+#else
+                buf[13], buf[12]);
+#endif
+}
+#else
+#  define dump_ethhdr(m,b,l)
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -197,7 +224,7 @@ void tapdev_init(void)
     struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
     ifr.ifr_flags = IFF_TAP|IFF_NO_PI;
-    ret = up_ioctl(gtapdevfd, TUNSETIFF, (unsigned long *) &ifr);
+    ret = up_ioctl(gtapdevfd, TUNSETIFF, (unsigned long) &ifr);
     if (ret < 0)
       {
         lib_rawprintf("TAPDEV: ioctl failed: %d\n", -ret );
@@ -213,23 +240,33 @@ void tapdev_init(void)
 
 unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
 {
-  fd_set fdset;
-  struct timeval tv;
-  int ret;
+  struct sel_arg_struct arg;
+  fd_set                fdset;
+  struct timeval        tv;
+  int                   ret;
 
   /* We can't do anything if we failed to open the tap device */
+
   if (gtapdevfd < 0)
     {
       return 0;
     }
 
-  tv.tv_sec = 0;
+  /* Wait for data on the tap device (or a timeout) */
+
+  tv.tv_sec  = 0;
   tv.tv_usec = 1000;
 
   FD_ZERO(&fdset);
   FD_SET(gtapdevfd, &fdset);
 
-  ret = up_select(gtapdevfd + 1, &fdset, NULL, NULL, &tv);
+  arg.n    = gtapdevfd + 1;
+  arg.inp  = &fdset;
+  arg.outp = NULL;
+  arg.exp  = NULL;
+  arg.tvp  = &tv;
+
+  ret = up_select(&arg);
   if(ret == 0)
     {
       return 0;
@@ -242,22 +279,11 @@ unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
       return 0;
     }
 
-#ifdef TAPDEV_DEBUG
-  lib_rawprintf("TAPDEV: read %d bytes\n", ret);
-  {
-    int i;
-    for(i = 0; i < 20; i++)
-      {
-        lib_rawprintf("%02x ", buf[i]);
-      }
-    lib_rawprintf("\n");
-  }
-#endif
-
+  dump_ethhdr("read", buf, ret);
   return ret;
 }
 
-void tapdev_send(char *buf, unsigned int buflen)
+void tapdev_send(unsigned char *buf, unsigned int buflen)
 {
   int ret;
 #ifdef TAPDEV_DEBUG
@@ -274,9 +300,10 @@ void tapdev_send(char *buf, unsigned int buflen)
   ret = up_write(gtapdevfd, buf, buflen);
   if (ret < 0)
     {
-      lib_rawprintf("TAPDEV: write");
+      lib_rawprintf("TAPDEV: write failed: %d", -ret);
       exit(1);
     }
+  dump_ethhdr("write", buf, buflen);
 }
 
 #endif /* linux */
