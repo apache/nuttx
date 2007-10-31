@@ -121,7 +121,7 @@
 #define UIP_PROTO_UDP   17
 #define UIP_PROTO_ICMP6 58
 
-/* Header sizes. */
+/* Header sizes */
 
 #ifdef CONFIG_NET_IPv6
 # define UIP_IPH_LEN    40
@@ -302,8 +302,8 @@ struct uip_tcpip_hdr
   uint8  ttl;
   uint8  proto;
   uint16 ipchksum;
-  in_addr_t srcipaddr;
-  in_addr_t destipaddr;
+  uint16 srcipaddr[2];
+  uint16 destipaddr[2];
 
 #endif /* CONFIG_NET_IPv6 */
 
@@ -350,8 +350,8 @@ struct uip_icmpip_hdr
   uint8  ttl;
   uint8  proto;
   uint16 ipchksum;
-  in_addr_t srcipaddr;
-  in_addr_t destipaddr;
+  uint16 srcipaddr[2];
+  uint16 destipaddr[2];
 
 #endif /* CONFIG_NET_IPv6 */
 
@@ -406,8 +406,8 @@ struct uip_udpip_hdr
   uint8  ttl;
   uint8  proto;
   uint16 ipchksum;
-  in_addr_t srcipaddr;
-  in_addr_t destipaddr;
+  uint16 srcipaddr[2];
+  uint16 destipaddr[2];
 
 #endif /* CONFIG_NET_IPv6 */
 
@@ -833,20 +833,28 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
     addr = HTONL((addr0) << 24 | (addr1) << 16 | (addr2) << 8 | (addr3)); \
   } while(0)
 
+/* Convert an IPv4 address of the form uint16[2] to an in_addr_t */
+
+#ifdef CONFIG_ENDIAN_BIG
+#  define uip_ip4addr_conv(addr) (((in_addr_t)((uint16*)addr)[1] << 16) | (in_addr_t)((uint16*)addr)[0])
+#else
+#  define uip_ip4addr_conv(addr) (((in_addr_t)((uint16*)addr)[0] << 16) | (in_addr_t)((uint16*)addr)[1])
+#endif
+
 /* Construct an IPv6 address from eight 16-bit words.
  *
  * This function constructs an IPv6 address.
  */
 
 #define uip_ip6addr(addr, addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7) do { \
-                     ((uint16 *)(addr))[0] = HTONS((addr0)); \
-                     ((uint16 *)(addr))[1] = HTONS((addr1)); \
-                     ((uint16 *)(addr))[2] = HTONS((addr2)); \
-                     ((uint16 *)(addr))[3] = HTONS((addr3)); \
-                     ((uint16 *)(addr))[4] = HTONS((addr4)); \
-                     ((uint16 *)(addr))[5] = HTONS((addr5)); \
-                     ((uint16 *)(addr))[6] = HTONS((addr6)); \
-                     ((uint16 *)(addr))[7] = HTONS((addr7)); \
+                     ((uint16*)(addr))[0] = HTONS((addr0)); \
+                     ((uint16*)(addr))[1] = HTONS((addr1)); \
+                     ((uint16*)(addr))[2] = HTONS((addr2)); \
+                     ((uint16*)(addr))[3] = HTONS((addr3)); \
+                     ((uint16*)(addr))[4] = HTONS((addr4)); \
+                     ((uint16*)(addr))[5] = HTONS((addr5)); \
+                     ((uint16*)(addr))[6] = HTONS((addr6)); \
+                     ((uint16*)(addr))[7] = HTONS((addr7)); \
                   } while(0)
 
 /* Copy an IP address to another IP address.
@@ -865,12 +873,18 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
  */
 
 #ifndef CONFIG_NET_IPv6
-#define uip_ipaddr_copy(dest, src) \
-  do { \
-    (dest) = (in_addr_t)(src); \
-  } while(0)
+#  define uip_ipaddr_copy(dest, src) \
+   do { \
+     (dest) = (in_addr_t)(src); \
+   } while(0)
+#  define uiphdr_ipaddr_copy(dest, src) \
+   do { \
+     ((uint16*)(dest))[0] = ((uint16*)(src))[0]; \
+     ((uint16*)(dest))[1] = ((uint16*)(src))[1]; \
+   } while(0)
 #else /* !CONFIG_NET_IPv6 */
-#define uip_ipaddr_copy(dest, src) memcpy(&dest, &src, sizeof(uip_ip6addr_t))
+#  define uip_ipaddr_copy(dest, src)    memcpy(&dest, &src, sizeof(uip_ip6addr_t))
+#  define uiphdr_ipaddr_copy(dest, src) uip_ipaddr_copy(dest, src)
 #endif /* !CONFIG_NET_IPv6 */
 
 /* Compare two IP addresses
@@ -889,9 +903,11 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
  */
 
 #ifndef CONFIG_NET_IPv6
-# define uip_ipaddr_cmp(addr1, addr2) (addr1 == addr2)
+#  define uip_ipaddr_cmp(addr1, addr2)    (addr1 == addr2)
+#  define uiphdr_ipaddr_cmp(addr1, addr2) uip_ipaddr_cmp(uip_ip4addr_conv(addr1), uip_ip4addr_conv(addr2))
 #else /* !CONFIG_NET_IPv6 */
-# define uip_ipaddr_cmp(addr1, addr2) (memcmp(&addr1, &addr2, sizeof(uip_ip6addr_t)) == 0)
+#  define uip_ipaddr_cmp(addr1, addr2)    (memcmp(&addr1, &addr2, sizeof(uip_ip6addr_t)) == 0)
+#  define uiphdr_ipaddr_cmp(addr1, addr2) uip_ipaddr_cmp(addr, addr2)
 #endif /* !CONFIG_NET_IPv6 */
 
 /* Compare two IP addresses with netmasks
@@ -915,8 +931,11 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
  * mask The netmask.
  */
 
-#define uip_ipaddr_maskcmp(addr1, addr2, mask) \
-  (((in_addr_t)addr1 & (in_addr_t)mask) == ((in_addr_t)addr2 & (in_addr_t)mask))
+#ifndef CONFIG_NET_IPv6
+#  define uip_ipaddr_maskcmp(addr1, addr2, mask) \
+  ((uip_ip4addr_conv(addr1) & (in_addr_t)mask) == ((in_addr_t)addr2 & (in_addr_t)mask))
+#else /* !CONFIG_NET_IPv6 */
+#endif /* !CONFIG_NET_IPv6 */
 
 /* Mask out the network part of an IP address.
  *

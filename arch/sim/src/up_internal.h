@@ -113,7 +113,7 @@ extern char *up_deviceimage(void);
 extern unsigned long up_getwalltime( void );
 extern void tapdev_init(void);
 extern unsigned int tapdev_read(unsigned char *buf, unsigned int buflen);
-extern void tapdev_send(char *buf, unsigned int buflen);
+extern void tapdev_send(unsigned char *buf, unsigned int buflen);
 #endif
 
 /* up_uipdriver.c *********************************************************/

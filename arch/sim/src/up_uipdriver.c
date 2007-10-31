@@ -46,6 +46,8 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <string.h>
+#include <sched.h>
 #include <nuttx/net.h>
 
 #include <net/uip/uip.h>
@@ -102,6 +104,15 @@ void timer_reset(struct timer *t)
   t->start += t->interval;
 }
 
+#ifdef CONFIG_NET_PROMISCUOUS
+# define uipdriver_comparemac(a,b) (0)
+#else
+static inline int uip_comparemac(struct uip_eth_addr *paddr1, struct uip_eth_addr *paddr2)
+{
+  return memcmp(paddr1, paddr2, sizeof(struct uip_eth_addr));
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -110,40 +121,65 @@ void uipdriver_loop(void)
 {
   int i;
 
+  /* tapdev_read will return 0 on a timeout event and >0 on a data received event */
+
   g_sim_dev.d_len = tapdev_read((unsigned char*)g_sim_dev.d_buf, UIP_BUFSIZE);
+
+  /* Disable preemption through to the following so that it behaves a little more
+   * like an interrupt (otherwise, the following logic gets pre-empted an behaves
+   * oddly.
+   */
+
+  sched_lock();
   if (g_sim_dev.d_len > 0)
     {
-      if (BUF->type == htons(UIP_ETHTYPE_IP))
+      /* Data received event.  Check for valid Ethernet header with destination == our
+       * MAC address
+       */
+
+      if (g_sim_dev.d_len > UIP_LLH_LEN && uip_comparemac( &BUF->dest, &g_sim_dev.d_mac) == 0)
         {
-          uip_arp_ipin();
-          uip_input(&g_sim_dev);
+          /* We only accept IP packets of the configured type and ARP packets */
 
-          /* If the above function invocation resulted in data that
-           * should be sent out on the network, the global variable
-           * d_len is set to a value > 0.
-           */
-
-          if (g_sim_dev.d_len > 0)
+#ifdef CONFIG_NET_IPv6
+          if (BUF->type == htons(UIP_ETHTYPE_IP6))
+#else
+          if (BUF->type == htons(UIP_ETHTYPE_IP))
+#endif
             {
-              uip_arp_out(&g_sim_dev);
-              tapdev_send((char*)g_sim_dev.d_buf, g_sim_dev.d_len);
+              uip_arp_ipin();
+              uip_input(&g_sim_dev);
+
+             /* If the above function invocation resulted in data that
+              * should be sent out on the network, the global variable
+              * d_len is set to a value > 0.
+              */
+
+              if (g_sim_dev.d_len > 0)
+                {
+                  uip_arp_out(&g_sim_dev);
+                  tapdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
+                }
             }
-        }
-      else if (BUF->type == htons(UIP_ETHTYPE_ARP))
-        {
-          uip_arp_arpin(&g_sim_dev);
-
-          /* If the above function invocation resulted in data that
-           * should be sent out on the network, the global variable
-           * d_len is set to a value > 0.
-           */
-
-          if (g_sim_dev.d_len > 0)
+          else if (BUF->type == htons(UIP_ETHTYPE_ARP))
             {
-              tapdev_send((char*)g_sim_dev.d_buf, g_sim_dev.d_len);
+              uip_arp_arpin(&g_sim_dev);
+
+              /* If the above function invocation resulted in data that
+               * should be sent out on the network, the global variable
+               * d_len is set to a value > 0.
+               */
+
+              if (g_sim_dev.d_len > 0)
+                {
+                  tapdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
+                }
             }
         }
     }
+
+  /* Otherwise, it must be a timeout event */
+
   else if (timer_expired(&g_periodic_timer))
     {
       timer_reset(&g_periodic_timer);
@@ -159,7 +195,7 @@ void uipdriver_loop(void)
           if (g_sim_dev.d_len > 0)
             {
               uip_arp_out(&g_sim_dev);
-              tapdev_send((char*)g_sim_dev.d_buf, g_sim_dev.d_len);
+              tapdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
             }
         }
 
@@ -176,7 +212,7 @@ void uipdriver_loop(void)
           if (g_sim_dev.d_len > 0)
             {
               uip_arp_out(&g_sim_dev);
-              tapdev_send((char*)g_sim_dev.d_buf, g_sim_dev.d_len);
+              tapdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
             }
         }
 #endif /* CONFIG_NET_UDP */
@@ -189,6 +225,7 @@ void uipdriver_loop(void)
           uip_arp_timer();
         }
     }
+  sched_unlock();
 }
 
 int uipdriver_init(void)

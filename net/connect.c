@@ -217,7 +217,7 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
           /* Get the connection reference from the socket */
 
           conn = psock->s_conn;
-          if (conn) /* Should alwasy be non-NULL */
+          if (conn) /* Should always be non-NULL */
             {
               /* Perform the uIP connection operation */
 

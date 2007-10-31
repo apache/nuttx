@@ -516,7 +516,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   if (_SS_ISCONNECTED(psock->s_flags))
     {
-      /* The SOCK_STREAM must be connect in order to recive */
+      /* The SOCK_STREAM must be connected in order to receive */
 
       return -ENOTCONN;
     }

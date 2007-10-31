@@ -118,16 +118,15 @@ static inline void _uip_semtake(sem_t *sem)
  *
  ****************************************************************************/
 
-static inline struct uip_udp_conn *uip_find_conn( uint16 portno )
+static struct uip_udp_conn *uip_find_conn( uint16 portno )
 {
-  uint16 nlastport = htons(g_last_udp_port);
   int i;
 
   /* Now search each connection structure.*/
 
   for (i = 0; i < UIP_UDP_CONNS; i++)
     {
-      if (g_udp_connections[ i ].lport == nlastport)
+      if (g_udp_connections[ i ].lport == portno)
         {
           return &g_udp_connections[ i ];
         }
@@ -289,6 +288,35 @@ void uip_udppoll(struct uip_driver_s *dev, unsigned int conn)
 }
 
 /****************************************************************************
+ * Name: uip_udpbind()
+ *
+ * Description:
+ *   This function implements the UIP specific parts of the standard UDP
+ *   bind() operation.
+ *
+ * Assumptions:
+ *   This function is called from normal user level code.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in6 *addr)
+#else
+int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
+#endif
+{
+  int ret = -EADDRINUSE;
+  irqstate_t flags = irqsave();
+  if (!uip_find_conn(g_last_udp_port))
+    {
+      conn->lport = HTONS(g_last_udp_port);
+      ret = OK;
+    }
+  irqrestore(flags);
+  return ret;
+}
+
+/****************************************************************************
  * Name: uip_udpconnect()
  *
  * Description:
@@ -314,33 +342,39 @@ int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in6 *addr)
 int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
 #endif
 {
-  irqstate_t flags;
+  /* Has this structure already been bound to a local port? */
 
-  /* Find an unused local port number.  Loop until we find a valid listen port
-   * number that is not being used by any other connection.
-   */
-
-  flags = irqsave();
-  do
+  if (!conn->lport)
     {
-      /* Guess that the next available port number will be the one after
-       * the last port number assigned.
+      /* No..Find an unused local port number.  Loop until we find a valid
+       * listen port number that is not being used by any other connection.
        */
 
-      ++g_last_udp_port;
-
-      /* Make sure that the port number is within range */
-      if (g_last_udp_port >= 32000)
+      irqstate_t flags = irqsave();
+      do
         {
-          g_last_udp_port = 4096;
+          /* Guess that the next available port number will be the one after
+           * the last port number assigned.
+           */
+
+          ++g_last_udp_port;
+
+          /* Make sure that the port number is within range */
+
+          if (g_last_udp_port >= 32000)
+            {
+              g_last_udp_port = 4096;
+            }
         }
+      while (uip_find_conn(g_last_udp_port));
+
+      /* Initialize and return the connection structure, bind it to the
+       * port number
+       */
+
+      conn->lport = HTONS(g_last_udp_port);
+      irqrestore(flags);
     }
-  while (uip_find_conn(g_last_udp_port));
-
-  /* Initialize and return the connection structure, bind it to the port number */
-
-  conn->lport = HTONS(g_last_udp_port);
-  irqrestore(flags);
 
   if (addr)
     {
@@ -352,6 +386,7 @@ int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
       conn->rport = 0;
       uip_ipaddr_copy(conn->ripaddr, all_zeroes_addr);
     }
+
   conn->ttl   = UIP_TTL;
   return OK;
 }

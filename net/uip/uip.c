@@ -340,7 +340,7 @@ uint16 uip_ipchksum(struct uip_driver_s *dev)
   uint16 sum;
 
   sum = chksum(0, &dev->d_buf[UIP_LLH_LEN], UIP_IPH_LEN);
-  dbg("uip_ipchksum: sum 0x%04x\n", sum);
+  dbg("Checksum 0x%04x\n", sum);
   return (sum == 0) ? 0xffff : htons(sum);
 }
 #endif
@@ -420,8 +420,8 @@ static uint8 uip_reass(void)
    * fragment into the buffer.
    */
 
-  if (uip_addr_cmp(BUF->srcipaddr, FBUF->srcipaddr) && 
-      uip_addr_cmp(BUF->destipaddr == FBUF->destipaddr) &&
+  if (uiphdr_addr_cmp(BUF->srcipaddr, FBUF->srcipaddr) && 
+      uiphdr_addr_cmp(BUF->destipaddr == FBUF->destipaddr) &&
       BUF->ipid[0] == FBUF->ipid[0] && BUF->ipid[1] == FBUF->ipid[1])
     {
       len = (BUF->len[0] << 8) + BUF->len[1] - (BUF->vhl & 0x0f) * 4;
@@ -871,7 +871,7 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 flag)
 
         /* Check if the packet is destined for our IP address. */
 #ifndef CONFIG_NET_IPv6
-        if (!uip_ipaddr_cmp(BUF->destipaddr, dev->d_ipaddr))
+        if (!uip_ipaddr_cmp(uip_ip4addr_conv(BUF->destipaddr), dev->d_ipaddr))
           {
             UIP_STAT(++uip_stat.ip.drop);
             goto drop;
@@ -970,8 +970,8 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 flag)
 
     /* Swap IP addresses. */
 
-    uip_ipaddr_copy(BUF->destipaddr, BUF->srcipaddr);
-    uip_ipaddr_copy(BUF->srcipaddr, dev->d_ipaddr);
+    uiphdr_ipaddr_copy(BUF->destipaddr, BUF->srcipaddr);
+    uiphdr_ipaddr_copy(BUF->srcipaddr, &dev->d_ipaddr);
 
     UIP_STAT(++uip_stat.icmp.sent);
     goto send;
@@ -980,7 +980,7 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 flag)
 #else /* !CONFIG_NET_IPv6 */
 
     /* This is IPv6 ICMPv6 processing code. */
-    dbg("icmp6_input: length %d\n", dev->d_len);
+    dbg("ICMP6 input length %d\n", dev->d_len);
 
     if (BUF->proto != UIP_PROTO_ICMP6)
       {
@@ -1003,7 +1003,7 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 flag)
             if (ICMPBUF->options[0] == ICMP6_OPTION_SOURCE_LINK_ADDRESS)
               {
                 /* Save the sender's address in our neighbor list. */
-                uip_neighbor_add(ICMPBUF->srcipaddr, &(ICMPBUF->options[2]));
+                uiphdr_neighbor_add(ICMPBUF->srcipaddr, &(ICMPBUF->options[2]));
               }
 
             /* We should now send a neighbor advertisement back to where the
@@ -1013,8 +1013,8 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 flag)
 
             ICMPBUF->reserved1 = ICMPBUF->reserved2 = ICMPBUF->reserved3 = 0;
 
-            uip_ipaddr_copy(ICMPBUF->destipaddr, ICMPBUF->srcipaddr);
-            uip_ipaddr_copy(ICMPBUF->srcipaddr, dev->d_ipaddr);
+            uiphdr_ipaddr_copy(ICMPBUF->destipaddr, ICMPBUF->srcipaddr);
+            uiphdr_ipaddr_copy(ICMPBUF->srcipaddr, dev->d_ipaddr);
             ICMPBUF->options[0] = ICMP6_OPTION_TARGET_LINK_ADDRESS;
             ICMPBUF->options[1] = 1;  /* Options length, 1 = 8 bytes. */
             memcpy(&(ICMPBUF->options[2]), &dev->d_mac, IFHWADDRLEN);
@@ -1032,8 +1032,8 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 flag)
 
         ICMPBUF->type = ICMP6_ECHO_REPLY;
 
-        uip_ipaddr_copy(BUF->destipaddr, BUF->srcipaddr);
-        uip_ipaddr_copy(BUF->srcipaddr, dev->d_ipaddr);
+        uiphdr_ipaddr_copy(BUF->destipaddr, BUF->srcipaddr);
+        uiphdr_ipaddr_copy(BUF->srcipaddr, dev->d_ipaddr);
         ICMPBUF->icmpchksum = 0;
         ICMPBUF->icmpchksum = ~uip_icmp6chksum(dev);
 
@@ -1042,7 +1042,7 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 flag)
       }
     else
       {
-        dbg("Unknown icmp6 message type %d\n", ICMPBUF->type);
+        dbg("Unknown ICMP6 message: %d\n", ICMPBUF->type);
         UIP_STAT(++uip_stat.icmp.drop);
         UIP_STAT(++uip_stat.icmp.typeerr);
         UIP_LOG("icmp: unknown ICMP message.");
@@ -1118,8 +1118,8 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 flag)
     BUF->srcport  = uip_udp_conn->lport;
     BUF->destport = uip_udp_conn->rport;
 
-    uip_ipaddr_copy(BUF->srcipaddr, dev->d_ipaddr);
-    uip_ipaddr_copy(BUF->destipaddr, uip_udp_conn->ripaddr);
+    uiphdr_ipaddr_copy(BUF->srcipaddr, &dev->d_ipaddr);
+    uiphdr_ipaddr_copy(BUF->destipaddr, &uip_udp_conn->ripaddr);
 
     dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPTCPH_LEN];
 
@@ -1231,8 +1231,8 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 flag)
     BUF->destport = tmp16;
 
     /* Swap IP addresses. */
-    uip_ipaddr_copy(BUF->destipaddr, BUF->srcipaddr);
-    uip_ipaddr_copy(BUF->srcipaddr, dev->d_ipaddr);
+    uiphdr_ipaddr_copy(BUF->destipaddr, BUF->srcipaddr);
+    uiphdr_ipaddr_copy(BUF->srcipaddr, dev->d_ipaddr);
 
     /* And send out the RST packet! */
     goto tcp_send_noconn;
@@ -1850,8 +1850,8 @@ tcp_send_synack:
     BUF->srcport  = uip_connr->lport;
     BUF->destport = uip_connr->rport;
 
-    uip_ipaddr_copy(BUF->srcipaddr, dev->d_ipaddr);
-    uip_ipaddr_copy(BUF->destipaddr, uip_connr->ripaddr);
+    uiphdr_ipaddr_copy(BUF->srcipaddr, &dev->d_ipaddr);
+    uiphdr_ipaddr_copy(BUF->destipaddr, &uip_connr->ripaddr);
 
     if (uip_connr->tcpstateflags & UIP_STOPPED)
       {
@@ -1902,7 +1902,7 @@ tcp_send_synack:
     /* Calculate IP checksum. */
     BUF->ipchksum = 0;
     BUF->ipchksum = ~(uip_ipchksum(dev));
-    dbg("uip ip_send_nolen: chkecum 0x%04x\n", uip_ipchksum(dev));
+    dbg("ip_send_nolen checksum: 0x%04x\n", uip_ipchksum(dev));
 #endif /* CONFIG_NET_IPv6 */
 
     UIP_STAT(++uip_stat.tcp.sent);

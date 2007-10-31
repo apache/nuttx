@@ -74,8 +74,8 @@ struct ethip_hdr
   uint8  ttl;
   uint8  proto;
   uint16 ipchksum;
-  in_addr_t srcipaddr;
-  in_addr_t destipaddr;
+  uint16 srcipaddr[2];
+  uint16 destipaddr[2];
 };
 
 #define ARP_REQUEST 1
@@ -352,7 +352,7 @@ void uip_arp_out(struct uip_driver_s *dev)
 
   /* First check if destination is a local broadcast. */
 
-  if (uip_ipaddr_cmp(IPBUF->destipaddr, broadcast_ipaddr))
+  if (uiphdr_ipaddr_cmp(IPBUF->destipaddr, broadcast_ipaddr))
     {
       memcpy(IPBUF->ethhdr.dest.addr, broadcast_ethaddr.addr, IFHWADDRLEN);
     }

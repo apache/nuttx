@@ -57,7 +57,7 @@
  * our project as defined in the config/<board-name>/defconfig file
  */
 
-#define CONFIG_EXAMPLE_UIP_WEBSERVER 1 /* For now */
+#define CONFIG_EXAMPLE_UIP_DHCPC 1 /* For now */
 
 #if defined(CONFIG_EXAMPLE_UIP_SMTP)
 # include <net/uip/smtp.h>
@@ -135,6 +135,7 @@ int user_start(int argc, char *argv[])
   uip_getmacaddr("eth0", mac);
 #endif
 
+#if !defined(CONFIG_EXAMPLE_UIP_DHCPC)
   /* Set up our host address */
 
   uip_ipaddr(addr.s_addr, 192, 168, 0, 128 );
@@ -149,6 +150,7 @@ int user_start(int argc, char *argv[])
 
   uip_ipaddr(addr.s_addr, 255, 255, 255, 0);
   uip_setnetmask("eth0", &addr);
+#endif
 
 #if defined(CONFIG_EXAMPLE_UIP_WEBSERVER)
   httpd_init();
