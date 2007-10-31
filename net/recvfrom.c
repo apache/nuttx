@@ -64,13 +64,11 @@ struct recvfrom_s
 {
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
   FAR struct socket *rf_sock;       /* The parent socket structure */
+  uint32             rf_starttime;  /* rcv start time for determining timeout */
 #endif
   sem_t              rf_sem;        /* Semaphore signals recv completion */
   size_t             rf_buflen;     /* Length of receive buffer */
   char              *rf_buffer;     /* Pointer to receive buffer */
-#ifndef CONFIG_DISABLE_CLOCK
-  uint32             rf_starttime;  /* rcv start time for determining timeout */
-#endif
   size_t             rf_recvlen;    /* The received length */
   int                rf_result;     /* OK on success, otherwise a negated errno. */
 };
@@ -101,16 +99,20 @@ struct recvfrom_s
 static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
 {
   struct recvfrom_s *pstate = (struct recvfrom_s *)private;
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
   FAR struct socket *psock;
+#endif
   size_t recvlen;
 
   /* 'private' might be null in some race conditions (?) */
 
   if (pstate)
     {
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
       /* Get the socket reference from the private data */
 
       psock = pstate->rf_sock;
+#endif
 
       /* If new data is available, then complete the read action. */
 
@@ -184,7 +186,7 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
                * the TCP receive.
                */
 
-#ifndef CONFIG_DISABLE_CLOCK
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
             pstate->rf_starttime = g_system_timer;
 #endif
         }
@@ -223,7 +225,7 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
        * poll -- check for a timeout.
        */
 
-#ifndef CONFIG_DISABLE_CLOCK
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
       else
         {
           socktimeo_t timeo;
@@ -240,16 +242,12 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
             }
 
           /* No.. check for a timeout configured via setsockopts(SO_RCVTIMEO).
-           * If non... we well let the read hang forever.
+           * If none... we well let the read hang forever.
            */
 
           else
             {
-#ifdef CONFIG_NET_SOCKOPTS
               timeo = psock->s_rcvtimeo;
-#else
-              timeo = 0;
-#endif
             }
 
           /* Is there an effective timeout? */
@@ -337,13 +335,13 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf, size_t len,
 
   memset(pstate, 0, sizeof(struct recvfrom_s));
   (void)sem_init(&pstate->rf_sem, 0, 0); /* Doesn't really fail */
-  pstate->rf_sock   = psock;
   pstate->rf_buflen = len;
   pstate->rf_buffer = buf;
 
-#ifndef CONFIG_DISABLE_CLOCK
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
   /* Set up the start time for the timeout */
 
+  pstate->rf_sock      = psock;
   pstate->rf_starttime = g_system_timer;
 #endif
 }
@@ -542,7 +540,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    * and automatically re-enabled when the task restarts.
    */
 
-  ret = sem_wait(&state. rf_sem);
+  ret = sem_wait(&state.rf_sem);
 
   /* Make sure that no further interrupts are processed */
 

@@ -235,6 +235,7 @@ int uipdriver_init(void)
   timer_set(&g_periodic_timer, 500);
   timer_set(&g_arp_timer, 10000 );
   tapdev_init();
+  (void)tapdev_getmacaddr(g_sim_dev.d_mac.addr);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

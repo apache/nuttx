@@ -1,3 +1,4 @@
+
 /****************************************************************************
  * up_tapdev.c
  *
@@ -59,6 +60,7 @@
 
 #include <linux/if.h>
 #include <linux/if_tun.h>
+#include <linux/net.h>
 
 extern int lib_rawprintf(const char *format, ...);
 
@@ -70,16 +72,24 @@ extern int lib_rawprintf(const char *format, ...);
 
 #define DEVTAP          "/dev/net/tun"
 
-#define UIP_DRIPADDR0   192
-#define UIP_DRIPADDR1   168
-#define UIP_DRIPADDR2   0
-#define UIP_DRIPADDR3   1
+#ifndef CONFIG_EXAMPLE_UIP_DHCPC
+#  define UIP_IPADDR0   192
+#  define UIP_IPADDR1   168
+#  define UIP_IPADDR2   0
+#  define UIP_IPADDR3   128
+#else
+#  define UIP_IPADDR0   0
+#  define UIP_IPADDR1   0
+#  define UIP_IPADDR2   0
+#  define UIP_IPADDR3   0
+#endif
 
-#define READ   3
-#define WRITE  4
-#define OPEN   5
-#define IOCTL  54
-#define SELECT 82
+#define READ            3
+#define WRITE           4
+#define OPEN            5
+#define IOCTL           54
+#define SELECT          82
+#define SOCKETCALL      102
 
 /****************************************************************************
  * Private Types
@@ -129,6 +139,27 @@ static inline int up_open(const char *filename, int flags, int mode)
                     : "memory");
 
   return (int)result;
+}
+
+static inline int up_socketcall(int call, unsigned long *args)
+{
+  int result;
+
+  __asm__ volatile ("int $0x80" \
+                    : "=a" (result) \
+                    : "0" (SOCKETCALL), "b" (call), "c" ((int)args)	\
+                    : "memory");
+
+  return (int)result;
+}
+
+static inline int up_socket(int domain, int type, int protocol)
+{
+  unsigned long args[3];
+  args[0] = domain;
+  args[1] = type;
+  args[2] = protocol;
+  return up_socketcall(SYS_SOCKET, args);  
 }
 
 static inline int up_read(int fd, void* buf, size_t count)
@@ -209,8 +240,11 @@ unsigned long up_getwalltime( void )
 
 void tapdev_init(void)
 {
+  struct ifreq ifr;
   char buf[1024];
   int ret;
+
+  /* Open the tap device */
 
   gtapdevfd = up_open(DEVTAP, O_RDWR, 0644);
   if (gtapdevfd < 0)
@@ -219,23 +253,53 @@ void tapdev_init(void)
       return;
     }
 
-#ifdef linux
-  {
-    struct ifreq ifr;
-    memset(&ifr, 0, sizeof(ifr));
-    ifr.ifr_flags = IFF_TAP|IFF_NO_PI;
-    ret = up_ioctl(gtapdevfd, TUNSETIFF, (unsigned long) &ifr);
-    if (ret < 0)
-      {
-        lib_rawprintf("TAPDEV: ioctl failed: %d\n", -ret );
-        return;
-      }
-  }
-#endif /* Linux */
+  /* Configure the tap device */
+
+  memset(&ifr, 0, sizeof(ifr));
+  ifr.ifr_flags = IFF_TAP|IFF_NO_PI;
+  ret = up_ioctl(gtapdevfd, TUNSETIFF, (unsigned long) &ifr);
+  if (ret < 0)
+    {
+      lib_rawprintf("TAPDEV: ioctl failed: %d\n", -ret );
+      return;
+   }
+
+  /* Assign an IPv4 address to the tap device */
 
   snprintf(buf, sizeof(buf), "ifconfig tap0 inet %d.%d.%d.%d\n",
-           UIP_DRIPADDR0, UIP_DRIPADDR1, UIP_DRIPADDR2, UIP_DRIPADDR3);
+           UIP_IPADDR0, UIP_IPADDR1, UIP_IPADDR2, UIP_IPADDR3);
   system(buf);
+}
+
+int tapdev_getmacaddr(unsigned char *macaddr)
+{
+  int ret = -1;
+  if (macaddr)
+    {
+      /* Get a socket (only so that we get access to the INET subsystem) */
+
+      int sockfd = up_socket(PF_INET, SOCK_DGRAM, 0);
+      if (sockfd >= 0)
+        {
+          struct ifreq req;
+          memset (&req, 0, sizeof(struct ifreq));
+
+          /* Put the driver name into the request */
+
+          strncpy(req.ifr_name, "tap0", IFNAMSIZ);
+
+          /* Perform the ioctl to get the MAC address */
+
+          ret = up_ioctl(sockfd, SIOCGIFHWADDR, (unsigned long)&req);
+          if (!ret)
+            {
+              /* Return the MAC address */
+
+              memcpy(macaddr, &req.ifr_hwaddr.sa_data, IFHWADDRLEN);
+            }
+        }
+    }
+  return ret;
 }
 
 unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)

@@ -43,6 +43,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <sys/ioctl.h>
 #include <stdio.h>
 #include <string.h>
@@ -57,8 +58,6 @@
  * our project as defined in the config/<board-name>/defconfig file
  */
 
-#define CONFIG_EXAMPLE_UIP_DHCPC 1 /* For now */
-
 #if defined(CONFIG_EXAMPLE_UIP_SMTP)
 # include <net/uip/smtp.h>
 #elif defined(CONFIG_EXAMPLE_UIP_TELNETD)
@@ -66,10 +65,12 @@
 #elif defined(CONFIG_EXAMPLE_UIP_WEBSERVER)
 # include <net/uip/httpd.h>
 #elif defined(CONFIG_EXAMPLE_UIP_DHCPC)
+# include <net/uip/resolv.h>
 # include <net/uip/dhcpc.h>
 #elif defined(CONFIG_EXAMPLE_UIP_RESOLV)
 # include <net/uip/resolv.h>
 #elif defined(CONFIG_EXAMPLE_UIP_WEBCLIENT)
+# include <net/uip/resolv.h>
 # include <net/uip/webclient.h>
 #else
 # error "No network application specified"
@@ -110,17 +111,19 @@ void user_initialize(void)
 
 int user_start(int argc, char *argv[])
 {
+#if !defined(CONFIG_EXAMPLE_UIP_DHCPC)
   struct in_addr addr;
-#if defined(CONFIG_EXAMPLE_UIP_DHCPC) || defined(CONFIG_ARCH_SIM)
+#endif
+#if defined(CONFIG_EXAMPLE_UIP_DHCPC) || !defined(CONFIG_ARCH_SIM)
   uint8 mac[IFHWADDRLEN];
 #endif
 #if defined(CONFIG_EXAMPLE_UIP_DHCPC) || defined(CONFIG_EXAMPLE_UIP_SMTP)
   void *handle;
 #endif
 
-#if defined(CONFIG_ARCH_SIM)
-  /* Give the simulated dirver a MAC address */
+/* Most embedded network interfaces must have a software assigned MAC */
 
+#if !defined(CONFIG_ARCH_SIM)
   mac[0] = 0x00;
   mac[1] = 0xe0;
   mac[2] = 0xb0;
@@ -128,11 +131,6 @@ int user_start(int argc, char *argv[])
   mac[4] = 0xba;
   mac[5] = 0xbe;
   uip_setmacaddr("eth0", mac);
-
-#elif defined(CONFIG_EXAMPLE_UIP_DHCPC)
-  /* Get the MAC address of the NIC */
-
-  uip_getmacaddr("eth0", mac);
 #endif
 
 #if !defined(CONFIG_EXAMPLE_UIP_DHCPC)
@@ -158,8 +156,17 @@ int user_start(int argc, char *argv[])
 #elif defined(CONFIG_EXAMPLE_UIP_TELNETD)
   telnetd_init();
 #elif defined(CONFIG_EXAMPLE_UIP_DHCPC)
+  /* Get the MAC address of the NIC */
+
+  uip_getmacaddr("eth0", mac);
+
+  /* Set up the resolver and DHCPC modules */
+
   resolv_init();
   handle = dhcpc_open(&mac, IFHWADDRLEN);
+
+  /* Get an IP address */
+
   if (handle)
     {
         struct dhcpc_state ds;
@@ -167,7 +174,7 @@ int user_start(int argc, char *argv[])
         uip_sethostaddr("eth0", &ds.ipaddr);
         uip_setnetmask("eth0", &ds.netmask);
         uip_setdraddr("eth0", &ds.default_router);
-        resolv_conf(ds.dnsaddr);
+        resolv_conf(&ds.dnsaddr);
         dhcpc_close(handle);
     }
 #elif defined(CONFIG_EXAMPLE_UIP_SMTP)
@@ -184,7 +191,7 @@ int user_start(int argc, char *argv[])
   webclient_init();
   resolv_init();
   uip_ipaddr(addr.s_addr, 195, 54, 122, 204);
-  resolv_conf(addr.s_addr);
+  resolv_conf(&addr);
   resolv_query("www.sics.se");
 #endif
 

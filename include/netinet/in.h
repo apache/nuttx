@@ -48,22 +48,26 @@
 
 /* Values for protocol argument to socket() */
 
-#define IPPROTO_TCP      1
-#define IPPROTO_UDP      2
+#define IPPROTO_TCP           1
+#define IPPROTO_UDP           2
 
 /* Special values of in_addr_t */
 
-#define INADDR_ANY       ((in_addr_t)0x00000000) /* Address to accept any incoming messages */
-#define INADDR_BROADCAST ((in_addr_t)0xffffffff) /* Address to send to all hosts */
-#define INADDR_NONE      ((in_addr_t)0xffffffff) /* Address indicating an error return */
+#define INADDR_ANY            ((in_addr_t)0x00000000) /* Address to accept any incoming messages */
+#define INADDR_BROADCAST      ((in_addr_t)0xffffffff) /* Address to send to all hosts */
+#define INADDR_NONE           ((in_addr_t)0xffffffff) /* Address indicating an error return */
+#define INADDR_LOOPBACK       ((in_addr_t)0x7f000001) /* Inet 127.0.0.1.  */
 
-#define IN6ADDR_ANY_INIT {{{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}}
+/* Special initializer for in6_addr_t */
+
+#define IN6ADDR_ANY_INIT      {{{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}}
+#define IN6ADDR_LOOPBACK_INIT {{{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1}}}
 
 /* struct in6_addr union selectors */
 
-#define s6_addr          in6_u.u6_addr8
-#define s6_addr16        in6_u.u6_addr16
-#define s6_addr32        in6_u.u6_addr32
+#define s6_addr               in6_u.u6_addr8
+#define s6_addr16             in6_u.u6_addr16
+#define s6_addr32             in6_u.u6_addr32
 
 /****************************************************************************
  * Public Type Definitions

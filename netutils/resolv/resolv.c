@@ -130,8 +130,9 @@ struct dns_answer
   uint16 ttl[2];
   uint16 len;
 #ifdef CONFIG_NET_IPv6
+  struct in6_addr ipaddr;
 #else
-  uint16 ipaddr[2];
+  struct in_addr ipaddr;
 #endif
 };
 
@@ -144,8 +145,9 @@ struct namemap
   uint8 err;
   char name[32];
 #ifdef CONFIG_NET_IPv6
+  struct in6_addr ipaddr;
 #else
-  uint16 ipaddr[2];
+  struct in_addr ipaddr;
 #endif
 };
 
@@ -200,7 +202,7 @@ static int send_query(const char *name, struct sockaddr_in *addr)
   char *nptr;
   const char *nameptr;
   uint8 seqno = g_seqno++;
-  static unsigned char endquery[] = {0,0,1,0,1};
+  static unsigned char endquery[] = {0, 0, 1, 0, 1};
   char buffer[SEND_BUFFER_SIZE];
   int n;
 
@@ -234,7 +236,7 @@ static int send_query(const char *name, struct sockaddr_in *addr)
 /* Called when new UDP data arrives */
 
 #ifdef CONFIG_NET_IPv6
-#error "Not implemented
+#error "Not implemented"
 #else
 int recv_response(struct sockaddr_in *addr)
 #endif
@@ -314,14 +316,16 @@ int recv_response(struct sockaddr_in *addr)
       if (ans->type == HTONS(1) && ans->class == HTONS(1) && ans->len == HTONS(4))
         {
           dbg("IP address %d.%d.%d.%d\n",
-              htons(ans->ipaddr[0]) >> 8, htons(ans->ipaddr[0]) & 0xff,
-              htons(ans->ipaddr[1]) >> 8, htons(ans->ipaddr[1]) & 0xff);
+              (ans->ipaddr.s_addr >> 24 ) & 0xff,
+              (ans->ipaddr.s_addr >> 16 ) & 0xff,
+              (ans->ipaddr.s_addr >> 8  ) & 0xff,
+              (ans->ipaddr.s_addr       ) & 0xff);
 
            /* XXX: we should really check that this IP address is the one
            * we want.
            */
 
-          addr->sin_addr.s_addr = ((uint32)ans->ipaddr[0] << 16) | (uint32)ans->ipaddr[1];
+          addr->sin_addr.s_addr = ans->ipaddr.s_addr;
           return OK;
         }
       else
@@ -374,23 +378,33 @@ int resolv_query(const char *name, struct sockaddr_in *addr)
 /* Obtain the currently configured DNS server. */
 
 #ifdef CONFIG_NET_IPv6
-void resolv_getserver(struct sockaddr_in6 *dnsserver)
+void resolv_getserver(struct in6_addr *dnsserver)
 #else
-void resolv_getserver(struct sockaddr_in *dnsserver)
+void resolv_getserver(struct in_addr *dnsserver)
 #endif
 {
-  memcpy(dnsserver, &g_dnsserver, ADDRLEN);
+#ifdef CONFIG_NET_IPv6
+  memcpy(dnsserver, &g_dnsserver.sin6_addr, ADDRLEN);
+#else
+  dnsserver->s_addr = g_dnsserver.sin_addr.s_addr;
+#endif
 }
 
 /* Configure which DNS server to use for queries */
 
 #ifdef CONFIG_NET_IPv6
-void resolv_conf(const struct sockaddr_in6 *dnsserver)
+void resolv_conf(const struct in6_addr *dnsserver)
 #else
-void resolv_conf(const struct sockaddr_in *dnsserver)
+void resolv_conf(const struct in_addr *dnsserver)
 #endif
 {
-  memcpy(&g_dnsserver, dnsserver, ADDRLEN);
+  g_dnsserver.sin_family = AF_INET;
+  g_dnsserver.sin_port   = HTONS(53);
+#ifdef CONFIG_NET_IPv6
+  memcpy(&g_dnsserver.sin6_addr, dnsserver, ADDRLEN);
+#else
+  g_dnsserver.sin_addr.s_addr = dnsserver->s_addr;
+#endif
 }
 
 /* Initalize the resolver. */

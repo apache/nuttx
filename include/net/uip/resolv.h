@@ -49,12 +49,12 @@ extern "C" {
 EXTERN int resolv_init(void);
 
 #ifdef CONFIG_NET_IPv6
-EXTERN void resolv_conf(const struct sockaddr_in6 *dnsserver);
-EXTERN void resolv_getserver(const struct sockaddr_in6 *dnsserver);
+EXTERN void resolv_conf(const struct in6_addr *dnsserver);
+EXTERN void resolv_getserver(const struct in_addr *dnsserver);
 EXTERN int  resolv_query(const char *name, struct sockaddr_in6 *addr);
 #else
-EXTERN void resolv_conf(const struct sockaddr_in *dnsserver);
-EXTERN void resolv_getserver(struct sockaddr_in *dnsserver);
+EXTERN void resolv_conf(const struct in_addr *dnsserver);
+EXTERN void resolv_getserver(struct in_addr *dnsserver);
 EXTERN int  resolv_query(const char *name, struct sockaddr_in *addr);
 #endif
 

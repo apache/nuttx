@@ -836,9 +836,9 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
 /* Convert an IPv4 address of the form uint16[2] to an in_addr_t */
 
 #ifdef CONFIG_ENDIAN_BIG
-#  define uip_ip4addr_conv(addr) (((in_addr_t)((uint16*)addr)[1] << 16) | (in_addr_t)((uint16*)addr)[0])
-#else
 #  define uip_ip4addr_conv(addr) (((in_addr_t)((uint16*)addr)[0] << 16) | (in_addr_t)((uint16*)addr)[1])
+#else
+#  define uip_ip4addr_conv(addr) (((in_addr_t)((uint16*)addr)[1] << 16) | (in_addr_t)((uint16*)addr)[0])
 #endif
 
 /* Construct an IPv6 address from eight 16-bit words.
@@ -922,7 +922,7 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
  *   uip_ipaddr(&mask, 255,255,255,0);
  *   uip_ipaddr(&ipaddr1, 192,16,1,2);
  *   uip_ipaddr(&ipaddr2, 192,16,1,3);
- *   if(uip_ipaddr_maskcmp(&ipaddr1, &ipaddr2, &mask)) {
+ *   if(uip_ipaddr_maskcmp(ipaddr1, ipaddr2, &mask)) {
  *      printf("They are the same");
  *   }
  *
@@ -933,7 +933,7 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
 
 #ifndef CONFIG_NET_IPv6
 #  define uip_ipaddr_maskcmp(addr1, addr2, mask) \
-  ((uip_ip4addr_conv(addr1) & (in_addr_t)mask) == ((in_addr_t)addr2 & (in_addr_t)mask))
+  (((in_addr_t)(addr1) & (in_addr_t)(mask)) == ((in_addr_t)(addr2) & (in_addr_t)(mask)))
 #else /* !CONFIG_NET_IPv6 */
 #endif /* !CONFIG_NET_IPv6 */
 
@@ -962,74 +962,6 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
   do { \
     (in_addr_t)(dest) = (in_addr_t)(src) & (in_addr_t)(mask); \
   } while(0)
-
-/* Pick the first octet of an IP address.
- *
- * Picks out the first octet of an IP address.
- *
- * Example:
- *
- *   uip_ipaddr_t ipaddr;
- *   uint8 octet;
- *
- *   uip_ipaddr(&ipaddr, 1,2,3,4);
- *   octet = uip_ipaddr1(&ipaddr);
- *
- * In the example above, the variable "octet" will contain the value 1.
- */
-
-#define uip_ipaddr1(addr) (htons(((uint16 *)(addr))[0]) >> 8)
-
-/* Pick the second octet of an IP address.
- *
- * Picks out the second octet of an IP address.
- *
- * Example:
- *
- *   uip_ipaddr_t ipaddr;
- *   uint8 octet;
- *
- *   uip_ipaddr(&ipaddr, 1,2,3,4);
- *   octet = uip_ipaddr2(&ipaddr);
- *
- * In the example above, the variable "octet" will contain the value 2.
- */
-
-#define uip_ipaddr2(addr) (htons(((uint16 *)(addr))[0]) & 0xff)
-
-/* Pick the third octet of an IP address.
- *
- * Picks out the third octet of an IP address.
- *
- * Example:
- *
- *   uip_ipaddr_t ipaddr;
- *   uint8 octet;
- *
- *   uip_ipaddr(&ipaddr, 1,2,3,4);
- *   octet = uip_ipaddr3(&ipaddr);
- *
- * In the example above, the variable "octet" will contain the value 3.
- */
-
-#define uip_ipaddr3(addr) (htons(((uint16 *)(addr))[1]) >> 8)
-
-/* Pick the fourth octet of an IP address.
- *
- * Picks out the fourth octet of an IP address.
- *
- * Example:
- *
- *   uip_ipaddr_t ipaddr;
- *   uint8 octet;
- *
- *   uip_ipaddr(&ipaddr, 1,2,3,4);
- *   octet = uip_ipaddr4(&ipaddr);
- *
- * In the example above, the variable "octet" will contain the value 4.
- */
-
-#define uip_ipaddr4(addr) (htons(((uint16 *)(addr))[1]) & 0xff)
 
 /* Print out a uIP log message.
  *

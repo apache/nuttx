@@ -161,7 +161,7 @@ static uint8 *add_req_ipaddr(struct dhcpc_state *presult, uint8 *optptr)
 {
   *optptr++ = DHCP_OPTION_REQ_IPADDR;
   *optptr++ = 4;
-  memcpy(optptr, presult->ipaddr, 4);
+  memcpy(optptr, &presult->ipaddr.s_addr, 4);
   return optptr + 4;
 }
 
@@ -262,13 +262,13 @@ static uint8 parse_options(struct dhcpc_state *presult, uint8 *optptr, int len)
       switch(*optptr)
         {
           case DHCP_OPTION_SUBNET_MASK:
-            memcpy(presult->netmask, optptr + 2, 4);
+            memcpy(&presult->netmask.s_addr, optptr + 2, 4);
             break;
           case DHCP_OPTION_ROUTER:
-            memcpy(presult->default_router, optptr + 2, 4);
+            memcpy(&presult->default_router.s_addr, optptr + 2, 4);
             break;
           case DHCP_OPTION_DNS_SERVER:
-            memcpy(presult->dnsaddr, optptr + 2, 4);
+            memcpy(&presult->dnsaddr.s_addr, optptr + 2, 4);
             break;
           case DHCP_OPTION_MSG_TYPE:
             type = *(optptr + 2);
@@ -296,7 +296,7 @@ static uint8 parse_msg(struct dhcpc_state_internal *pdhcpc, int buflen, struct d
       memcmp(pbuffer->xid, xid, sizeof(xid)) == 0 &&
       memcmp(pbuffer->chaddr, pdhcpc->mac_addr, pdhcpc->mac_len) == 0)
     {
-      memcpy(presult->ipaddr, pbuffer->yiaddr, 4);
+      memcpy(&presult->ipaddr.s_addr, pbuffer->yiaddr, 4);
       return parse_options(presult, &pbuffer->options[4], buflen);
     }
   return 0;
@@ -440,17 +440,25 @@ int dhcpc_request(void *handle, struct dhcpc_state *presult)
   while(state != STATE_CONFIG_RECEIVED);
 
   dbg("Got IP address %d.%d.%d.%d\n",
-      uip_ipaddr1(presult->ipaddr), uip_ipaddr2(presult->ipaddr),
-      uip_ipaddr3(presult->ipaddr), uip_ipaddr4(presult->ipaddr));
+      (presult->ipaddr.s_addr >> 24 ) & 0xff,
+      (presult->ipaddr.s_addr >> 16 ) & 0xff,
+      (presult->ipaddr.s_addr >> 8  ) & 0xff,
+      (presult->ipaddr.s_addr       ) & 0xff);
   dbg("Got netmask %d.%d.%d.%d\n",
-      uip_ipaddr1(presult->netmask), uip_ipaddr2(presult->netmask),
-      uip_ipaddr3(presult->netmask), uip_ipaddr4(presult->netmask));
+      (presult->netmask.s_addr >> 24 ) & 0xff,
+      (presult->netmask.s_addr >> 16 ) & 0xff,
+      (presult->netmask.s_addr >> 8  ) & 0xff,
+      (presult->netmask.s_addr       ) & 0xff);
   dbg("Got DNS server %d.%d.%d.%d\n",
-      uip_ipaddr1(presult->dnsaddr), uip_ipaddr2(presult->dnsaddr),
-      uip_ipaddr3(presult->dnsaddr), uip_ipaddr4(presult->dnsaddr));
+      (presult->dnsaddr.s_addr >> 24 ) & 0xff,
+      (presult->dnsaddr.s_addr >> 16 ) & 0xff,
+      (presult->dnsaddr.s_addr >> 8  ) & 0xff,
+      (presult->dnsaddr.s_addr       ) & 0xff);
   dbg("Got default router %d.%d.%d.%d\n",
-      uip_ipaddr1(presult->default_router), uip_ipaddr2(presult->default_router),
-      uip_ipaddr3(presult->default_router), uip_ipaddr4(presult->default_router));
+      (presult->default_router.s_addr >> 24 ) & 0xff,
+      (presult->default_router.s_addr >> 16 ) & 0xff,
+      (presult->default_router.s_addr >> 8  ) & 0xff,
+      (presult->default_router.s_addr       ) & 0xff);
   dbg("Lease expires in %ld seconds\n",
       ntohs(presult->lease_time[0])*65536ul + ntohs(presult->lease_time[1]));
   return OK;

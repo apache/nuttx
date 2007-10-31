@@ -86,7 +86,7 @@ int uip_gethostaddr(const char *ifname, struct in_addr *addr)
         {
           struct ifreq req;
           strncpy(req.ifr_name, ifname, IFNAMSIZ);
-          ret = ioctl(sockfd, SIOCSIFADDR, (unsigned long)&req);
+          ret = ioctl(sockfd, SIOCGIFADDR, (unsigned long)&req);
           if (!ret)
             {
 #ifdef CONFIG_NET_IPv6
