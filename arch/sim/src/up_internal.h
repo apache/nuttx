@@ -112,6 +112,7 @@ extern char *up_deviceimage(void);
 #ifdef CONFIG_NET 
 extern unsigned long up_getwalltime( void );
 extern void tapdev_init(void);
+extern int tapdev_getmacaddr(unsigned char *macaddr);
 extern unsigned int tapdev_read(unsigned char *buf, unsigned int buflen);
 extern void tapdev_send(unsigned char *buf, unsigned int buflen);
 #endif
