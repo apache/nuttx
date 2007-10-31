@@ -68,4 +68,7 @@ ifeq ("${CONFIG_DEBUG}","y")
   LDFLAGS		+= -g
 endif
 
-
+HOSTCC			= gcc
+HOSTINCLUDES		= -I.
+HOSTCFLAGS		= -Wall -wstrict-prototypes -Wshadow -g -pipe
+HOSTLDFLAGS		=

@@ -62,4 +62,9 @@ OBJEXT			= .rel
 LIBEXT			= .lib
 EXEEXT			= .hex
 
+HOSTCC			= gcc
+HOSTINCLUDES		= -I.
+HOSTCFLAGS		= -Wall -wstrict-prototypes -Wshadow -g -pipe
+HOSTLDFLAGS		=
+
 
