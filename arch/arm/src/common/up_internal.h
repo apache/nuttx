@@ -157,6 +157,13 @@ extern void up_ledoff(int led);
 # define up_ledoff(led)
 #endif
 
+/* Defined in board/up_network.c */
+
+#ifdef CONFIG_NET
+extern up_netinitialize(void);
+#else
+# define up_netinitialize()
+#endif
 #endif /* __ASSEMBLY__ */
 
 #endif  /* __UP_INTERNAL_H */

@@ -100,5 +100,9 @@ void up_initialize(void)
   /* Initialize the serial device driver */
 
   up_serialinit();
+
+  /* Initialize the netwok */
+
+  up_netinitialize();
   up_ledon(LED_IRQSENABLED);
 }
