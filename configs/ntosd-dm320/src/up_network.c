@@ -41,10 +41,13 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_DM90x0)
 
 #include <sys/types.h>
-#include <arch/board.h>
+#include <arch/board/board.h>
 
+#include "up_arch.h"
 #include "up_internal.h"
-#include "chip/dm320_gio.h"
+
+#include "dm320_memorymap.h"
+#include "dm320_gio.h"
 
 extern void dm9x_initialize(void);
 
