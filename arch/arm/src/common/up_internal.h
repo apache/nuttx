@@ -100,7 +100,6 @@ extern uint32 g_heapbase;
 extern void up_boot(void);
 extern void up_copystate(uint32 *dest, uint32 *src);
 extern void up_dataabort(uint32 *regs);
-extern void up_delay(int milliseconds);
 extern void up_decodeirq(uint32 *regs);
 extern void up_doirq(int irq, uint32 *regs);
 extern void up_fullcontextrestore(uint32 *regs) __attribute__ ((noreturn));
@@ -160,7 +159,7 @@ extern void up_ledoff(int led);
 /* Defined in board/up_network.c */
 
 #ifdef CONFIG_NET
-extern up_netinitialize(void);
+extern void up_netinitialize(void);
 #else
 # define up_netinitialize()
 #endif

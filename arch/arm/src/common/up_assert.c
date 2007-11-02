@@ -38,11 +38,15 @@
  ************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <debug.h>
+
 #include <nuttx/irq.h>
+#include <nuttx/arch.h>
+
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
@@ -163,9 +167,9 @@ static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
           {
 #ifdef CONFIG_ARCH_LEDS
             up_ledon(LED_PANIC);
-            up_delay(250);
+            up_mdelay(250);
             up_ledoff(LED_PANIC);
-            up_delay(250);
+            up_mdelay(250);
 #endif
           }
     }
