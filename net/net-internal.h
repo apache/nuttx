@@ -176,6 +176,10 @@ EXTERN FAR struct uip_driver_s *netdev_find(const char *ifname);
 EXTERN int netdev_count(void);
 #endif
 
+/* net-arptimer.c ************************************************************/
+
+EXTERN void arptimer_init(void);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

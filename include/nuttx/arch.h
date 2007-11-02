@@ -1,4 +1,4 @@
-/************************************************************
+/****************************************************************************
  * arch.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -31,37 +31,37 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_H
 #define __ARCH_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <sched.h>
 #include <arch/arch.h>
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Variables
- ************************************************************/
+ ****************************************************************************/
 
 typedef void  (*sig_deliver_t)(_TCB *tcb);
 
-/************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -70,12 +70,12 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/************************************************************
+/****************************************************************************
  * These are standard interfaces that must be exported to the
  * scheduler from architecture-specific code.
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: up_initialize
  *
  * Description:
@@ -93,11 +93,11 @@ extern "C" {
  *   libraries have been initialized.  OS services and driver
  *   services are available.
  *
- ************************************************************/
+ ****************************************************************************/
 
 EXTERN void up_initialize(void);
 
-/************************************************************
+/****************************************************************************
  * Name: up_idle
  *
  * Description:
@@ -109,11 +109,11 @@ EXTERN void up_initialize(void);
  *   Processing in this state may be processor-specific. e.g.,
  *   this is where power management operations might be performed.
  *
- ************************************************************/
+ ****************************************************************************/
 
 EXTERN void up_idle(void);
 
-/************************************************************
+/****************************************************************************
  * Name: up_initial_state
  *
  * Description:
@@ -125,11 +125,11 @@ EXTERN void up_idle(void);
  *   and/or  stack so that execution will begin at tcb->start
  *   on the next context switch.
  *
- ************************************************************/
+ ****************************************************************************/
 
 EXTERN void up_initial_state(FAR _TCB *tcb);
 
-/************************************************************
+/****************************************************************************
  * Name: up_create_stack
  *
  * Description:
@@ -149,13 +149,13 @@ EXTERN void up_initial_state(FAR _TCB *tcb);
  *   stack_size:  The requested stack size.  At least this much
  *     must be allocated.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
 EXTERN STATUS up_create_stack(FAR _TCB *tcb, size_t stack_size);
 #endif
 
-/************************************************************
+/****************************************************************************
  * Name: up_use_stack
  *
  * Description:
@@ -174,26 +174,26 @@ EXTERN STATUS up_create_stack(FAR _TCB *tcb, size_t stack_size);
  *   tcb: The TCB of new task
  *   stack_size:  The allocated stack size.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
 EXTERN STATUS up_use_stack(FAR _TCB *tcb, FAR void *stack, size_t stack_size);
 #endif
 
-/************************************************************
+/****************************************************************************
  * Name: up_release_stack
  *
  * Description:
  *   A task has been stopped. Free all stack
  *   related resources retained int the defunct TCB.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
 EXTERN void up_release_stack(FAR _TCB *dtcb);
 #endif
 
-/************************************************************
+/****************************************************************************
  * Name: up_unblock_task
  *
  * Description:
@@ -211,11 +211,11 @@ EXTERN void up_release_stack(FAR _TCB *dtcb);
  *     the ready-to-run list and, if it is the highest priority
  *     ready to run taks, executed.
  *
- ************************************************************/
+ ****************************************************************************/
 
 EXTERN void up_unblock_task(FAR _TCB *tcb);
 
-/************************************************************
+/****************************************************************************
  * Name: up_block_task
  *
  * Description:
@@ -237,11 +237,11 @@ EXTERN void up_unblock_task(FAR _TCB *tcb);
  *   task_state: Specifies which waiting task list should be
  *     hold the blocked task TCB.
  *
- ************************************************************/
+ ****************************************************************************/
 
 EXTERN void up_block_task(FAR _TCB *tcb, tstate_t task_state);
 
-/************************************************************
+/****************************************************************************
  * Name: up_release_pending
  *
  * Description:
@@ -256,11 +256,11 @@ EXTERN void up_block_task(FAR _TCB *tcb, tstate_t task_state);
  *   logic when pre-emptioni is re-enabled.  Interrupts will
  *   always be disabled when this function is called.
  *
- ************************************************************/
+ ****************************************************************************/
 
 EXTERN void up_release_pending(void);
 
-/************************************************************
+/****************************************************************************
  * Name: up_reprioritize_rtr
  *
  * Description:
@@ -282,11 +282,11 @@ EXTERN void up_release_pending(void);
  *   tcb: The TCB of the task that has been reprioritized
  *   priority: The new task priority
  *
- ************************************************************/
+ ****************************************************************************/
 
 EXTERN void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority);
 
-/************************************************************
+/****************************************************************************
  * Name: _exit
  *
  * Description:
@@ -298,20 +298,20 @@ EXTERN void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority);
  *   implementation of this function should diable interrupts
  *   before performing scheduling operations.
  *
- ************************************************************/
+ ****************************************************************************/
 /* Prototype is in unistd.h */
 
-/************************************************************
+/****************************************************************************
  * Name: up_assert and up_assert_code
  *
  * Description:
  *   Assertions may be handled in an architecture-specific
  *   way.
  *
- ************************************************************/
+ ****************************************************************************/
 /* Prototype is in assert.h */
 
-/************************************************************
+/****************************************************************************
  * Name: up_schedule_sigaction
  *
  * Description:
@@ -342,13 +342,13 @@ EXTERN void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority);
  *       currently executing task -- just call the signal
  *       handler now.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_SIGNALS
 EXTERN void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver);
 #endif
 
-/************************************************************
+/****************************************************************************
  * Name: up_allocate_heap
  *
  * Description:
@@ -357,59 +357,59 @@ EXTERN void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver);
  *   are not defined, then this function will be called to
  *   dynamically set aside the heap region.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_HEAP_BASE
 EXTERN void up_allocate_heap(FAR void **heap_start, size_t *heap_size);
 #endif
 
-/************************************************************
+/****************************************************************************
  * Name: up_interrupt_context
  *
  * Description:
  *   Return TRUE is we are currently executing in
  *   the interrupt handler context.
  *
- ************************************************************/
+ ****************************************************************************/
 
 EXTERN boolean up_interrupt_context(void);
 
-/************************************************************
+/****************************************************************************
  * Name: up_disable_irq
  *
  * Description:
  *   Disable the IRQ specified by 'irq'
  *
- ************************************************************/
+ ****************************************************************************/
 
 EXTERN void up_disable_irq(int irq);
 
-/************************************************************
+/****************************************************************************
  * Name: up_enable_irq
  *
  * Description:
  *   Enable the IRQ specified by 'irq'
  *
- ************************************************************/
+ ****************************************************************************/
 
 EXTERN void up_enable_irq(int irq);
 
-/************************************************************
+/****************************************************************************
  * Name: up_disable_irq
  *
  * Description:
  *   Disable the IRQ specified by 'irq'
  *
- ************************************************************/
+ ****************************************************************************/
 
 EXTERN void up_disable_irq(int irq);
 
-/************************************************************
+/****************************************************************************
  * These are standard interfaces that are exported by the OS
  * for use by the architecture specific logic
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: sched_process_timer
  *
  * Description:
@@ -419,34 +419,46 @@ EXTERN void up_disable_irq(int irq);
  *   function periodically -- the calling interval must be
  *   MSEC_PER_TICK.
  *
- ************************************************************/
+ ****************************************************************************/
 
 EXTERN void sched_process_timer(void);
 
-/************************************************************
+/****************************************************************************
  * Name: irq_dispatch
  *
  * Description:
  *   This function must be called from the achitecture-
- *   specific logic in order to dispaly an interrupt to
+ *   specific logic in order to dispatch an interrupt to
  *   the appropriate, registered handling logic.
  *
- ***********************************************************/
+ ***************************************************************************/
 
 EXTERN void irq_dispatch(int irq, FAR void *context);
 
-/************************************************************
+/****************************************************************************
+ * Name: up_mdelay and up_udelay
+ *
+ * Description:
+ *   Some device drivers may require that the plaform-specific logic
+ *   provide these timing loops for short delays.
+ *
+ ***************************************************************************/
+
+EXTERN void up_mdelay(unsigned int milliseconds);
+EXTERN void up_udelay(unsigned int microseconds);
+
+/****************************************************************************
  * Debug interfaces exported by the architecture-specific
  * logic
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: up_putc
  *
  * Description:
  *   Output one character on the console
  *
- ************************************************************/
+ ****************************************************************************/
 
 # ifdef CONFIG_ARCH_LOWPUTC
 EXTERN int up_putc(int ch);

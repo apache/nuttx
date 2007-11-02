@@ -67,14 +67,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _get_ipaddr / _set_ipaddr
+ * Name: ioctl_getipaddr / ioctl_setipaddr
  *
  * Description:
  *   Copy IP addresses into and out of device structure
  *
  ****************************************************************************/
 
-static void _get_ipaddr(struct sockaddr *outaddr, uip_ipaddr_t *inaddr)
+static void ioctl_getipaddr(struct sockaddr *outaddr, uip_ipaddr_t *inaddr)
 {
 #ifdef CONFIG_NET_IPv6
 #error " big enough for IPv6 address"
@@ -90,7 +90,7 @@ static void _get_ipaddr(struct sockaddr *outaddr, uip_ipaddr_t *inaddr)
 #endif
 }
 
-static void _set_ipaddr(uip_ipaddr_t *outaddr, struct sockaddr *inaddr)
+static void ioctl_setipaddr(uip_ipaddr_t *outaddr, struct sockaddr *inaddr)
 {
 #ifdef CONFIG_NET_IPv6
   struct sockaddr_in6 *src = (struct sockaddr_in6 *)inaddr;
@@ -99,6 +99,22 @@ static void _set_ipaddr(uip_ipaddr_t *outaddr, struct sockaddr *inaddr)
   struct sockaddr_in *src = (struct sockaddr_in *)inaddr;
   *outaddr = src->sin_addr.s_addr;
 #endif
+}
+
+static void ioctl_ifup(FAR struct uip_driver_s *dev)
+{
+  if (dev->ifup)
+    {
+      dev->ifup(dev);
+    }
+}
+
+static void ioctl_ifdown(FAR struct uip_driver_s *dev)
+{
+  if (dev->ifdown)
+    {
+      dev->ifdown(dev);
+    }
 }
 
 /****************************************************************************
@@ -170,27 +186,29 @@ int netdev_ioctl(int sockfd, int cmd, struct ifreq *req)
   switch (cmd)
     {
       case SIOCGIFADDR:     /* Get IP address */
-        _get_ipaddr(&req->ifr_addr, &dev->d_ipaddr);
+        ioctl_getipaddr(&req->ifr_addr, &dev->d_ipaddr);
         break;
 
       case SIOCSIFADDR:     /* Set IP address */
-        _set_ipaddr(&dev->d_ipaddr, &req->ifr_addr);
+        ioctl_ifdown(dev);
+        ioctl_setipaddr(&dev->d_ipaddr, &req->ifr_addr);
+        ioctl_ifup(dev);
         break;
 
       case SIOCGIFDSTADDR:  /* Get P-to-P address */
-        _get_ipaddr(&req->ifr_dstaddr, &dev->d_draddr);
+        ioctl_getipaddr(&req->ifr_dstaddr, &dev->d_draddr);
         break;
 
       case SIOCSIFDSTADDR:  /* Set P-to-P address */
-        _set_ipaddr(&dev->d_draddr, &req->ifr_dstaddr);
+        ioctl_setipaddr(&dev->d_draddr, &req->ifr_dstaddr);
         break;
 
       case SIOCGIFNETMASK:  /* Get network mask */
-        _get_ipaddr(&req->ifr_addr, &dev->d_netmask);
+        ioctl_getipaddr(&req->ifr_addr, &dev->d_netmask);
         break;
 
       case SIOCSIFNETMASK:  /* Set network mask */
-        _set_ipaddr(&dev->d_netmask, &req->ifr_addr);
+        ioctl_setipaddr(&dev->d_netmask, &req->ifr_addr);
         break;
 
       case SIOCGIFMTU:  /* Get MTU size */

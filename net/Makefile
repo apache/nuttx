@@ -46,7 +46,7 @@ SOCK_CSRCS	= socket.c bind.c connect.c listen.c accept.c send.c sendto.c \
 ifeq ($(CONFIG_NET_SOCKOPTS),y)
 SOCK_CSRCS      += setsockopt.c getsockopt.c 
 ifneq ($(CONFIG_DISABLE_CLOCK),y)
-SOCK_CSRCS	+= net-timeo.c net-dsec2timeval.c net-timeval2dsec.c
+SOCK_CSRCS	+= net-timeo.c net-dsec2timeval.c net-timeval2dsec.c net-arptimer.c
 endif
 endif
 

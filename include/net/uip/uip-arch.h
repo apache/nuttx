@@ -168,6 +168,15 @@ struct uip_driver_s
    */
 
   uint16 d_sndlen;
+
+  /* Driver callbacks */
+
+  int (*ifup)(struct uip_driver_s *dev);
+  int (*ifdown)(struct uip_driver_s *dev);
+
+  /* Drivers may attached device-specific, private information */
+
+  void *d_private;
 };
 
 /****************************************************************************

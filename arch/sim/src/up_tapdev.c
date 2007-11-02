@@ -266,7 +266,7 @@ void tapdev_init(void)
 
   /* Assign an IPv4 address to the tap device */
 
-  snprintf(buf, sizeof(buf), "ifconfig tap0 inet %d.%d.%d.%d\n",
+  snprintf(buf, sizeof(buf), "/sbin/ifconfig tap0 inet %d.%d.%d.%d\n",
            UIP_IPADDR0, UIP_IPADDR1, UIP_IPADDR2, UIP_IPADDR3);
   system(buf);
 }

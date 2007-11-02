@@ -81,6 +81,7 @@
 #define GIO_KEY_SCAN3    4
 #define GIO_KEY_SCAN4    5
 #define GIO_MS_DETECT    5
+#define GIO_DM9000A_INT  6
 #define GIO_MMC_DETECT   8
 #define GIO_CFC_DETECT   9
 #define GIO_VIDEO_IN     10

@@ -81,7 +81,6 @@ struct timer
  ****************************************************************************/
 
 static struct timer g_periodic_timer;
-static struct timer g_arp_timer;
 static struct uip_driver_s g_sim_dev;
 
 /****************************************************************************
@@ -216,14 +215,6 @@ void uipdriver_loop(void)
             }
         }
 #endif /* CONFIG_NET_UDP */
-
-      /* Call the ARP timer function every 10 seconds. */
-
-      if (timer_expired(&g_arp_timer))
-        {
-          timer_reset(&g_arp_timer);
-          uip_arp_timer();
-        }
     }
   sched_unlock();
 }
@@ -233,7 +224,6 @@ int uipdriver_init(void)
   /* Internal initalization */
 
   timer_set(&g_periodic_timer, 500);
-  timer_set(&g_arp_timer, 10000 );
   tapdev_init();
   (void)tapdev_getmacaddr(g_sim_dev.d_mac.addr);
 

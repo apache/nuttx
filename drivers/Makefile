@@ -37,16 +37,22 @@
 
 MKDEP	= $(TOPDIR)/tools/mkdeps.sh
 
-ASRCS		= 
+ifeq ($(CONFIG_NET),y)
+include net/Make.defs
+endif
+
+ASRCS		= $(NET_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= dev_null.c serial.c
+CSRCS		= dev_null.c serial.c $(NET_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
 
 BIN		= libdrivers$(LIBEXT)
+
+VPATH		= net
 
 all:	$(BIN)
 
@@ -63,7 +69,11 @@ $(BIN):	$(OBJS)
 	done ; )
 
 .depend: Makefile $(SRCS)
+ifeq ($(CONFIG_NET),y)
+	$(MKDEP) --dep-path . --dep-path net $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+else
 	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+endif
 	touch $@
 
 depend: .depend

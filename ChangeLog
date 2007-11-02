@@ -213,4 +213,6 @@
 	* Provide support for multiple network devices
 	* Implement socket ioctl() calls to set addresses
 	* Added listen() and accept()
+	* Added DM90x0 ethernet driver
+	* ARP timer is now built into the network layer
 
