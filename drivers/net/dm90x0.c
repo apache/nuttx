@@ -46,12 +46,15 @@
 
 /* Force debug on for this file */
 
-#undef CONFIG_DEBUG
+#undef  CONFIG_DEBUG
 #define CONFIG_DEBUG 1
-#undef CONFIG_DEBUG_VERBOSE
+#undef  CONFIG_DEBUG_VERBOSE
 #define CONFIG_DEBUG_VERBOSE 1
 
-/* Only one hardware interface supported */
+/* Only one hardware interface supported at present (althought there are
+ * hooks throughout the design to that extending the support to multiple
+ * interfaces should not be that difficult)
+ */
 
 #undef  CONFIG_DM9X_NINTERFACES
 #define CONFIG_DM9X_NINTERFACES 1
@@ -830,6 +833,15 @@ static int dm9x_uiptxpoll(struct dm9x_driver_s *dm9x)
         {
           uip_arp_out(&dm9x->dev);
           dm9x_transmit(dm9x);
+
+          /* Check if there is room in the DM90x0 to hold another packet.  In 100M mode,
+           * that can be 2 packets, otherwise it is a single packet.
+          */
+
+          if (dm9x->ntxpending > 1 || !dm9x->b100M)
+            {
+              return;
+            }
         }
     }
 
@@ -847,6 +859,15 @@ static int dm9x_uiptxpoll(struct dm9x_driver_s *dm9x)
         {
           uip_arp_out(&dm9x->dev);
           dm9x_transmit(dm9x);
+
+          /* Check if there is room in the DM90x0 to hold another packet.  In 100M mode,
+           * that can be 2 packets, otherwise it is a single packet.
+          */
+
+          if (dm9x->ntxpending > 1 || !dm9x->b100M)
+            {
+              return;
+            }
         }
     }
 #endif /* CONFIG_NET_UDP */
@@ -1118,7 +1139,7 @@ static int dm9x_interrupt(int irq, FAR void *context)
 
               for (i = 0; i < 200; i++)
                 {
-                  up_udelay(1000);
+                  up_mdelay(1);
                 }
 
               /* Set the new network speed */
@@ -1133,7 +1154,7 @@ static int dm9x_interrupt(int irq, FAR void *context)
                 }
               break;
             }
-          up_udelay(1000);
+          up_mdelay(1);
         }
       dbg("delay: %d mS speed: %s\n", i, dm9x->b100M ? "100M" : "10M"); 
     }
@@ -1255,7 +1276,9 @@ static void dm9x_polltimer(int argc, uint32 arg, ...)
       putreg(DM9X_IMR, DM9X_IMRENABLE);
     }
 
-  /* Check if there is room in the TX FIFO to hold another packet */
+  /* Check if there is room in the DM90x0 to hold another packet.  In 100M mode,
+   * that can be 2 packets, otherwise it is a single packet.
+   */
 
   if (dm9x->ntxpending < 1 || (dm9x->b100M && dm9x->ntxpending < 2))
     {
@@ -1561,7 +1584,7 @@ static void dm9x_reset(struct dm9x_driver_s *dm9x)
             }
           break;
         }
-      up_udelay(1000);
+      up_mdelay(1);
     }
 
   /* Restore previous register address */

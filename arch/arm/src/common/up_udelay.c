@@ -1,5 +1,5 @@
 /****************************************************************************
- * board/up_network.c
+ * common/up_udelay.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,25 +38,25 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_DM90x0)
-
-#include <sys/types.h>
-#include <arch/board/board.h>
-
-#include "up_arch.h"
-#include "up_internal.h"
-
-#include "dm320_memorymap.h"
-#include "dm320_gio.h"
-
-extern void dm9x_initialize(void);
+#include <nuttx/arch.h>
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
+#define CONFIG_BOARD_LOOPSPERUSEC   ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
+#define CONFIG_BOARD_LOOPSPER10USEC ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
+
 /****************************************************************************
- * Private Data
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Variables
  ****************************************************************************/
 
 /****************************************************************************
@@ -68,28 +68,65 @@ extern void dm9x_initialize(void);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_netinitialize
+ * Name: up_udelay
+ *
+ * Description:
+ *   Delay inline for the requested number of microseconds.  NOTE:  Because
+ *   of all of the setup, several microseconds will be lost before the actual
+ *   timing looop begins.  Thus, the delay will always be a few microseconds
+ *   longer than requested.
+ *
+ *   *** NOT multi-tasking friendly ***
+ *
+ * ASSUMPTIONS:
+ *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
+ *
  ****************************************************************************/
 
-void up_netinitialize(void)
+void up_udelay(unsigned int microseconds)
 {
-  /* CS4 is used for DM9000A Ethernet.  Interrupt is provided via GIO6
-   * which must be configured to interrupt on the rising edge.  Bus
-   * width is 16-bits.
+  volatile int    i;
+  volatile int    j;
+  register uint32 loops;
+
+  /* The value of microseconds should be less than 1000.  If not, then we
+   * will perform millescond delays until it is.
    */
 
-  /* It is assumed that bootloader has already configured CS4.  Here,
-   * we will only make certain that the GIO is properly configured
+  while (microseconds > 1000)
+    {
+      for (j = 0; j < CONFIG_BOARD_LOOPSPERMSEC; j++)
+        {
+        }
+      microseconds -= 1000;
+    }
+
+  /* The numerator of the 'loops' below will overflow if CONFIG_BOARD_LOOPSPERMSEC
+   * is larger than (4*1024*1024*1024 - 500)/999 = 4,299,266.06
    */
 
-  GIO_INPUT(GIO_DM9000A_INT);
-  GIO_NONINVERTED(GIO_DM9000A_INT);
-  GIO_INTERRUPT(GIO_DM9000A_INT);
-  GIO_RISINGEDGE(GIO_DM9000A_INT);
+#if CONFIG_BOARD_LOOPSPERMSEC >= 4299266
+  while (microseconds > 500)
+    {
+      for (j = 0; j < ((CONFIG_BOARD_LOOPSPERMSEC+1)/2); j++)
+        {
+        }
+      microseconds -= 500;
+    }
+#endif
 
-  /* Then initialize the driver */
+  /* The overflow could still occur if CONFIG_BOARD_LOOPSPERMSEC is larger than
+   * (4*1024*1024*1024 - 500)/499 = 8,607,147.89
+   */
 
-  dm9x_initialize();
+#if CONFIG_BOARD_LOOPSPERMSEC >= 8607147
+# warning "Overflow in loops calculation is possible"
+#endif
+
+  /* Caculate the number of loops need to produce the required usec delay */
+
+  loops = (CONFIG_BOARD_LOOPSPERMSEC * microseconds + 500) / 1000;
+  for (j = 0; j < loops; j++)
+    {
+    }
 }
-
-#endif /* CONFIG_NET && CONFIG_NET_DM90x0 */

@@ -42,6 +42,7 @@
 
 #include <time.h>
 #include <wdog.h>
+#include <debug.h>
 
 #include <net/uip/uip-arp.h>
 

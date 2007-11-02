@@ -90,7 +90,7 @@
     if ((pin) < 16) { _reg = (reg0); _pin = (pin); } \
     else if ((pin) < 32) { _reg = (reg1); _pin = ((pin) - 16); } \
     else { _reg = (reg2); _pin = ((pin) - 32); } \
-    putreg16((getreg16(_reg) | (1 << _pin)), _reg)); \
+    putreg16((getreg16(_reg) | (1 << _pin)), _reg); \
   } while (0)
 
 #define _GIO_CLEAR_REG(pin, reg0, reg1, reg2) \
@@ -99,7 +99,7 @@
     if ((pin) < 16) { _reg = (reg0); _pin = (pin); } \
     else if ((pin) < 32) { _reg = (reg1); _pin = ((pin) - 16); } \
     else { _reg = (reg2); _pin = ((pin) - 32); } \
-    putreg16((getreg16(_reg) & ~(1 << _pin)), _reg)); \
+    putreg16((getreg16(_reg) & ~(1 << _pin)), _reg); \
   } while (0)
 
 /* Select GIO input or output */

@@ -1,5 +1,5 @@
 /************************************************************
- * c5471/c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471c5471_serial.c
+ * c5471/c5471_serial.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,16 +38,19 @@
  ************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial.h>
 #include <arch/serial.h>
+
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
@@ -381,9 +384,9 @@ static int up_setup(struct uart_dev_s *dev)
   /* Both the IrDA and MODEM UARTs support RESET and UART mode. */
 
   up_serialout(priv, UART_MDR_OFFS, MDR_RESET_MODE);
-  up_delay(5);
+  up_mdelay(5);
   up_serialout(priv, UART_MDR_OFFS, MDR_UART_MODE);
-  up_delay(5);
+  up_mdelay(5);
 
   priv->regs.ier = up_inserial(priv, UART_IER_OFFS);
   priv->regs.lcr = up_inserial(priv, UART_LCR_OFFS);
