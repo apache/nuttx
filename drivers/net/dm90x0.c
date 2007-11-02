@@ -267,9 +267,13 @@
 # define CONFIG_DM9X_MODE DM9X_MODE_AUTO
 #endif
 
-/* TX poll deley = 5 seconds. CLK_TCK is the number of clock ticks per second */
+// /* TX poll deley = 5 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define DM6X_WDDELAY (5*CLK_TCK)
+
+/* TX timeout = 1 minute */
+
+#define DM6X_TXTIMEOUT (60*CLK_TCK)
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
@@ -792,6 +796,10 @@ static int dm9x_transmit(struct dm9x_driver_s *dm9x)
   /* Re-enable DM90x0 interrupts */
 
   putreg(DM9X_IMR, DM9X_IMRENABLE);
+
+  /* Setup the TX timeout watchdog (perhaps restarting the timer) */
+
+  (void)wd_start(dm9x->txtimeout, DM6X_TXTIMEOUT, dm9x_txtimeout, 1, (uint32)dm9x);
   return OK;
 }
 
@@ -840,7 +848,7 @@ static int dm9x_uiptxpoll(struct dm9x_driver_s *dm9x)
 
           if (dm9x->ntxpending > 1 || !dm9x->b100M)
             {
-              return;
+              return OK;
             }
         }
     }
@@ -866,7 +874,7 @@ static int dm9x_uiptxpoll(struct dm9x_driver_s *dm9x)
 
           if (dm9x->ntxpending > 1 || !dm9x->b100M)
             {
-              return;
+              return OK;
             }
         }
     }
@@ -1079,6 +1087,13 @@ static void dm9x_txdone(struct dm9x_driver_s *dm9x)
         {
           dbg("ntxpending ERROR on TX2END\n");
         }
+    }
+
+  /* Cancel the TX timeout */
+
+  if (dm9x->ntxpending == 0)
+    {
+      wd_cancel(dm9x->txtimeout);
     }
 
   /* Then poll uIP for new XMIT data */
@@ -1547,7 +1562,8 @@ static void dm9x_bringup(struct dm9x_driver_s *dm9x)
  * Function: dm9x_reset
  *
  * Description:
- *   Stop, reset, re-initialize, and restart the DM90x0 chip and driver
+ *   Stop, reset, re-initialize, and restart the DM90x0 chip and driver.  At
+ *   present, the chip is only reset after a TX timeout.
  *
  * Parameters:
  *   dm9x  - Reference to the driver state structure
@@ -1563,6 +1579,11 @@ static void dm9x_reset(struct dm9x_driver_s *dm9x)
 {
   uint8 save;
   int i;
+
+  /* Cancel the TX poll timer and TX timeout timers */
+
+  wd_cancel(dm9x->txpoll);
+  wd_cancel(dm9x->txtimeout);
 
   /* Save previous register address */
 
@@ -1648,11 +1669,13 @@ int dm9x_initialize(void)
   /* Initialize the driver structure */
 
   memset(g_dm9x, 0, CONFIG_DM9X_NINTERFACES*sizeof(struct dm9x_driver_s));
+  g_dm9x[0].dev.ifup   = dm9x_ifup;
+  g_dm9x[0].dev.ifdown = dm9x_ifdown;
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  g_dm9x[0].txpoll    = wd_create();
-  g_dm9x[0].txtimeout = wd_create();
+  g_dm9x[0].txpoll     = wd_create();
+  g_dm9x[0].txtimeout  = wd_create();
 
   /* Read the MAC address */
 
