@@ -48,7 +48,7 @@ BOARD_DIR	= configs/$(CONFIG_ARCH_BOARD)
 #   (except for parts of FSDIRS).  We will exclude FSDIRS
 #   from the build if file descriptor support is disabled
 
-NONFSDIRS	= sched lib $(ARCH_SRC) mm examples/$(CONFIG_EXAMPLE)
+NONFSDIRS	= sched lib $(ARCH_SRC) mm examples/$(CONFIG_EXAMPLE) $(BOARD_DIR)/src
 FSDIRS		= fs drivers
 
 ifeq ($(CONFIG_NET),y)

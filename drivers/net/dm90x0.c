@@ -52,24 +52,9 @@
 #define CONFIG_DEBUG_VERBOSE 1
 
 /* Only one hardware interface supported */
+
 #undef  CONFIG_DM9X_NINTERFACES
 #define CONFIG_DM9X_NINTERFACES 1
-
-#warning "The following belong in the config file"
-#define CONFIG_DM9X_STATS 1
-
-/* CS4 is used for DM9000A Ethernet.  Interrupt is provided via GIO6
- * which must be configured to interrupt on the rising edge.  Bus
- * width is 16-bits.
- */
-
-#define CONFIG_DM9X_BASE 0x60000300
-#define CONFIG_DM9X_IRQ  27
-#undef  CONFIG_DM9X_BUSWIDTH8
-#define CONFIG_DM9X_BUSWIDTH16 1
-#undef  CONFIG_DM9X_BUSWIDTH32
-#undef  CONFIG_DM9X_CHECKSUM
-#undef  CONFIG_DM9X_ETRANS
 
 #include <time.h>
 #include <string.h>

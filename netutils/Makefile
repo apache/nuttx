@@ -105,6 +105,6 @@ clean:
 distclean: clean
 	@rm -f Make.dep .depend
 	@rm -f $(STRNG_CSRCS) $(STRNG_ASRCS)
-	@rm -f rm .strings make.str netutil-strings.h makestrings$(EXEEXT)
+	@rm -f rm .strings Make.str netutil-strings.h makestrings$(EXEEXT)
 
 -include Make.dep
