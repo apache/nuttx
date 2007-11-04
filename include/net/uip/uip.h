@@ -280,7 +280,7 @@ struct uip_tcpip_hdr
 {
 #ifdef CONFIG_NET_IPv6
 
-  /* IPv6 header. */
+  /* IPv6 Ip header. */
 
   uint8  vtc;
   uint8  tcflow;
@@ -292,18 +292,18 @@ struct uip_tcpip_hdr
 
 #else /* CONFIG_NET_IPv6 */
 
-  /* IPv4 header. */
+  /* IPv4 IP header. */
 
-  uint8  vhl;
-  uint8  tos;
-  uint8  len[2];
-  uint8  ipid[2];
-  uint8  ipoffset[2];
-  uint8  ttl;
-  uint8  proto;
-  uint16 ipchksum;
-  uint16 srcipaddr[2];
-  uint16 destipaddr[2];
+  uint8  vhl;           /*  8-bit Version (4) and header length (5 or 6) */
+  uint8  tos;           /*  8-bit Type of service (e.g., 6=TCP) */
+  uint8  len[2];        /* 16-bit Total length */
+  uint8  ipid[2];       /* 16-bit Identification */
+  uint8  ipoffset[2];   /* 16-bit IP flags + fragment offset */
+  uint8  ttl;           /*  8-bit Time to Live */
+  uint8  proto;         /*  8-bit Protocol */
+  uint16 ipchksum;      /* 16-bit Header checksum */
+  uint16 srcipaddr[2];  /* 32-bit Source IP address */
+  uint16 destipaddr[2]; /* 32-bit Destination IP address */
 
 #endif /* CONFIG_NET_IPv6 */
 
@@ -327,7 +327,7 @@ struct uip_icmpip_hdr
 {
 #ifdef CONFIG_NET_IPv6
 
-  /* IPv6 header. */
+  /* IPv6 IP header. */
 
   uint8  vtc;
   uint8  tcf;
@@ -340,18 +340,18 @@ struct uip_icmpip_hdr
 
 #else /* CONFIG_NET_IPv6 */
 
-  /* IPv4 header. */
+  /* IPv4 IP header. */
 
-  uint8  vhl;
-  uint8  tos;
-  uint8  len[2];
-  uint8  ipid[2];
-  uint8  ipoffset[2];
-  uint8  ttl;
-  uint8  proto;
-  uint16 ipchksum;
-  uint16 srcipaddr[2];
-  uint16 destipaddr[2];
+  uint8  vhl;           /*  8-bit Version (4) and header length (5 or 6) */
+  uint8  tos;           /*  8-bit Type of service (e.g., 6=TCP) */
+  uint8  len[2];        /* 16-bit Total length */
+  uint8  ipid[2];       /* 16-bit Identification */
+  uint8  ipoffset[2];   /* 16-bit IP flags + fragment offset */
+  uint8  ttl;           /*  8-bit Time to Live */
+  uint8  proto;         /*  8-bit Protocol */
+  uint16 ipchksum;      /* 16-bit Header checksum */
+  uint16 srcipaddr[2];  /* 32-bit Source IP address */
+  uint16 destipaddr[2]; /* 32-bit Destination IP address */
 
 #endif /* CONFIG_NET_IPv6 */
 
@@ -384,13 +384,14 @@ struct uip_udpip_hdr
 {
 #ifdef CONFIG_NET_IPv6
 
-  /* IPv6 header. */
+  /* IPv6 IP header. */
 
-  uint8 vtc;
+  uint8  vtc;
   uint8  tcf;
   uint16 flow;
-  uint8 len[2];
-  uint8 proto, ttl;
+  uint8  len[2];
+  uint8  proto;
+  uint8  ttl;
   uip_ip6addr_t srcipaddr;
   uip_ip6addr_t destipaddr;
 
@@ -398,16 +399,16 @@ struct uip_udpip_hdr
 
   /* IPv4 header. */
 
-  uint8  vhl;
-  uint8  tos;
-  uint8  len[2];
-  uint8  ipid[2];
-  uint8  ipoffset[2];
-  uint8  ttl;
-  uint8  proto;
-  uint16 ipchksum;
-  uint16 srcipaddr[2];
-  uint16 destipaddr[2];
+  uint8  vhl;           /*  8-bit Version (4) and header length (5 or 6) */
+  uint8  tos;           /*  8-bit Type of service (e.g., 6=TCP) */
+  uint8  len[2];        /* 16-bit Total length */
+  uint8  ipid[2];       /* 16-bit Identification */
+  uint8  ipoffset[2];   /* 16-bit IP flags + fragment offset */
+  uint8  ttl;           /*  8-bit Time to Live */
+  uint8  proto;         /*  8-bit Protocol */
+  uint16 ipchksum;      /* 16-bit Header checksum */
+  uint16 srcipaddr[2];  /* 32-bit Source IP address */
+  uint16 destipaddr[2]; /* 32-bit Destination IP address */
 
 #endif /* CONFIG_NET_IPv6 */
 

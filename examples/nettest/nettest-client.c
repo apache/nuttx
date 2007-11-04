@@ -84,7 +84,7 @@ void send_client(void)
 #if 0
   myaddr.sin_addr.s_addr = HTONL(INADDR_LOOPBACK);
 #else
-  myaddr.sin_addr.s_addr = HTONL(192 << 24 | 168 << 16 | 0 << 8 |106);
+  myaddr.sin_addr.s_addr = HTONL(CONFIG_EXAMPLE_NETTEST_CLIENTIP);
 #endif
 
   printf("client: Connecting...\n");

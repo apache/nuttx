@@ -72,6 +72,12 @@
 
 # define noreturn_function __attribute__ ((noreturn))
 
+/* The packed attribute informs GCC that the stucture elements
+ * are packed, ignoring other alignment rules.
+ */
+
+# define packed_struct __attribute__ ((packed))
+
 /* GCC does not support the reentrant attribute */
 
 # define reentrant_function
@@ -123,9 +129,10 @@
 # define weak_function
 # define weak_const_function
 
-/* SDCC does not support the noreturn attribute */
+/* SDCC does not support the noreturn or packed attributes */
 
 # define noreturn_function
+# define packed_struct
 
 /* The reentrant attribute informs SDCC that the function
  * must be reentrant.  In this case, SDCC will store input
@@ -192,6 +199,7 @@
 # define weak_function
 # define weak_const_function
 # define noreturn_function
+# define packed_struct
 # define reentrant_function
 
 # define FAR

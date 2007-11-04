@@ -457,6 +457,7 @@ static void putreg(int reg, uint8 value)
 
 static void read8(uint8 *ptr, int len)
 {
+  vdbg("Read %d bytes (8-bit mode)\n", len);
   for (; len > 0; len--)
     {
       *ptr++ = DM9X_DATA;
@@ -466,6 +467,7 @@ static void read8(uint8 *ptr, int len)
 static void read16(uint8 *ptr, int len)
 {
   register uint16 *ptr16 = (uint16*)ptr;
+  vdbg("Read %d bytes (16-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint16))
     {
       *ptr16++ = DM9X_DATA;
@@ -475,6 +477,7 @@ static void read16(uint8 *ptr, int len)
 static void read32(uint8 *ptr, int len)
 {
   register uint32 *ptr32 = (uint32*)ptr;
+  vdbg("Read %d bytes (32-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint32))
     {
       *ptr32++ = DM9X_DATA;
@@ -500,6 +503,7 @@ static void read32(uint8 *ptr, int len)
 
 static void discard8(int len)
 {
+  vdbg("Discard %d bytes (8-bit mode)\n", len);
   for (; len > 0; len--)
     {
       DM9X_DATA;
@@ -508,6 +512,7 @@ static void discard8(int len)
 
 static void discard16(int len)
 {
+  vdbg("Discard %d bytes (16-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint16))
     {
       DM9X_DATA;
@@ -516,6 +521,7 @@ static void discard16(int len)
 
 static void discard32(int len)
 {
+  vdbg("Discard %d bytes (32-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint32))
     {
       DM9X_DATA;
@@ -541,15 +547,18 @@ static void discard32(int len)
 
 static void write8(const uint8 *ptr, int len)
 {
+  vdbg("Write %d bytes (8-bit mode)\n", len);
   for (; len > 0; len--)
     {
-      DM9X_DATA =(*ptr++ & 0xff);
+      DM9X_DATA = (*ptr++ & 0xff);
     }
 }
 
 static void write16(const uint8 *ptr, int len)
 {
   register uint16 *ptr16 = (uint16*)ptr;
+  vdbg("Write %d bytes (16-bit mode)\n", len);
+
   for (; len > 0; len -= sizeof(uint16))
     {
        DM9X_DATA = *ptr16++;
@@ -559,6 +568,7 @@ static void write16(const uint8 *ptr, int len)
 static void write32(const uint8 *ptr, int len)
 {
   register uint32 *ptr32 = (uint32*)ptr;
+  vdbg("Write %d bytes (32-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint32))
     {
       DM9X_DATA = *ptr32++;
@@ -991,9 +1001,9 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
           /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv6
-          if (BUF->type == htons(UIP_ETHTYPE_IP6))
+          if (BUF->type == HTONS(UIP_ETHTYPE_IP6))
 #else
-          if (BUF->type == htons(UIP_ETHTYPE_IP))
+          if (BUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
             {
               uip_arp_ipin();
@@ -1684,7 +1694,7 @@ int dm9x_initialize(void)
       mptr[i] = getreg(j);
     }
 
-  lldbg("MAC: %0x:%0x:%0x:%0x:%0x:%0x",
+  lldbg("MAC: %0x:%0x:%0x:%0x:%0x:%0x\n",
         mptr[0], mptr[1], mptr[2], mptr[3], mptr[4], mptr[5]);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */

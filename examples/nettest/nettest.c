@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 #include <stdio.h>
+#include <debug.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/uip-lib.h>
@@ -80,17 +81,17 @@ int user_start(int argc, char *argv[])
 
   /* Set up our host address */
 
-  uip_ipaddr(addr.s_addr, 192, 168, 0, 128 );
+  addr.s_addr = HTONL(CONFIG_EXAMPLE_NETTEST_IPADDR);
   uip_sethostaddr("eth0", &addr);
 
   /* Set up the default router address */
 
-  uip_ipaddr(addr.s_addr, 192, 168, 0, 1);
+  addr.s_addr = HTONL(CONFIG_EXAMPLE_NETTEST_DRIPADDR);
   uip_setdraddr("eth0", &addr);
 
   /* Setup the subnet mask */
 
-  uip_ipaddr(addr.s_addr, 255, 255, 255, 0);
+  addr.s_addr = HTONL(CONFIG_EXAMPLE_NETTEST_NETMASK);
   uip_setnetmask("eth0", &addr);
 
 #ifdef CONFIG_NETTEST_SERVER

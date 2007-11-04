@@ -47,6 +47,7 @@
 #include <assert.h>
 #include <string.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <net/uip/uip-arch.h>
 
@@ -139,9 +140,15 @@ int netdev_register(FAR struct uip_driver_s *dev)
       dev->flink  = g_netdevices;
       g_netdevices = dev;
       netdev_semgive();
+
+      lldbg("Registered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",
+            dev->d_mac.addr[0], dev->d_mac.addr[1], dev->d_mac.addr[2],
+            dev->d_mac.addr[3], dev->d_mac.addr[4], dev->d_mac.addr[5],
+            dev->d_ifname);
+
       return OK;
     }
-  return ERROR;
+  return -EINVAL;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

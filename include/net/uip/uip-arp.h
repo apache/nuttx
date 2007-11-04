@@ -35,16 +35,23 @@
 #define __UIP_ARP_H__
 
 #include <sys/types.h>
+#include <nuttx/compiler.h>
 #include <net/uip/uip.h>
 
-/* The Ethernet header */
+/* The Ethernet header -- 14 bytes. The first two fields are type 'struct
+ * uip_eth_addr but are represented as a simple byte array here because
+ * some compilers refuse to pack 6 byte structures.
+ */
 
 struct uip_eth_hdr
 {
-  struct uip_eth_addr dest;
-  struct uip_eth_addr src;
-  uint16 type;
+  
+  uint8  dest[6]; /* Ethernet destination address (6 bytes) */
+  uint8  src[6];  /* Ethernet source address (6 bytes) */
+  uint16 type;    /* Type code (2 bytes) */
 };
+
+/* Recognized values of the type bytes in the Ethernet header */
 
 #define UIP_ETHTYPE_ARP 0x0806
 #define UIP_ETHTYPE_IP  0x0800

@@ -43,8 +43,11 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
+
 #include <string.h>
 #include <errno.h>
+#include <debug.h>
+
 #include <nuttx/net.h>
 
 #include <net/uip/uip-arch.h>
@@ -187,54 +190,95 @@ int netdev_ioctl(int sockfd, int cmd, struct ifreq *req)
     {
       case SIOCGIFADDR:     /* Get IP address */
         ioctl_getipaddr(&req->ifr_addr, &dev->d_ipaddr);
+        dbg("Dev: %s IP: %d.%d.%d.%d\n",
+            dev->d_ifname,
+            (dev->d_ipaddr >> 24) & 0xff, (dev->d_ipaddr >> 16) & 0xff,
+            (dev->d_ipaddr >>  8) & 0xff,  dev->d_ipaddr & 0xff);
         break;
 
       case SIOCSIFADDR:     /* Set IP address */
         ioctl_ifdown(dev);
         ioctl_setipaddr(&dev->d_ipaddr, &req->ifr_addr);
+        dbg("Dev: %s IP: %d.%d.%d.%d\n",
+            dev->d_ifname,
+            (dev->d_ipaddr >> 24) & 0xff, (dev->d_ipaddr >> 16) & 0xff,
+            (dev->d_ipaddr >>  8) & 0xff,  dev->d_ipaddr & 0xff);
         ioctl_ifup(dev);
         break;
 
       case SIOCGIFDSTADDR:  /* Get P-to-P address */
         ioctl_getipaddr(&req->ifr_dstaddr, &dev->d_draddr);
+        dbg("Dev: %s Default router: %d.%d.%d.%d\n",
+            dev->d_ifname,
+            (dev->d_draddr >> 24) & 0xff, (dev->d_draddr >> 16) & 0xff,
+            (dev->d_draddr >> 8) & 0xff,  dev->d_draddr & 0xff);
         break;
 
       case SIOCSIFDSTADDR:  /* Set P-to-P address */
         ioctl_setipaddr(&dev->d_draddr, &req->ifr_dstaddr);
+        dbg("Dev: %s Default router: %d.%d.%d.%d\n",
+            dev->d_ifname,
+            (dev->d_draddr >> 24) & 0xff, (dev->d_draddr >> 16) & 0xff,
+            (dev->d_draddr >>  8) & 0xff,  dev->d_draddr & 0xff);
         break;
 
       case SIOCGIFNETMASK:  /* Get network mask */
         ioctl_getipaddr(&req->ifr_addr, &dev->d_netmask);
+        dbg("Dev: %s Netmask: %d.%d.%d.%d\n",
+            dev->d_ifname,
+            (dev->d_netmask >> 24) & 0xff, (dev->d_netmask >> 16) & 0xff,
+            (dev->d_netmask >>  8) & 0xff,  dev->d_netmask & 0xff);
         break;
 
       case SIOCSIFNETMASK:  /* Set network mask */
         ioctl_setipaddr(&dev->d_netmask, &req->ifr_addr);
+        dbg("Dev: %s Netmask: %d.%d.%d.%d\n",
+            dev->d_ifname,
+            (dev->d_netmask >> 24) & 0xff, (dev->d_netmask >> 16) & 0xff,
+            (dev->d_netmask >>  8) & 0xff,  dev->d_netmask & 0xff);
         break;
 
       case SIOCGIFMTU:  /* Get MTU size */
         req->ifr_mtu = UIP_BUFSIZE;
+        dbg("Dev: %s MTU: %d\n", dev->d_ifname, UIP_BUFSIZE);
         break;
 
       case SIOCGIFHWADDR:  /* Get hardware address */
         req->ifr_hwaddr.sa_family = AF_INETX;
         memcpy(req->ifr_hwaddr.sa_data, dev->d_mac.addr, IFHWADDRLEN);
+        dbg("Dev: %s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+            dev->d_ifname,
+            dev->d_mac.addr[0], dev->d_mac.addr[1], dev->d_mac.addr[2],
+            dev->d_mac.addr[3], dev->d_mac.addr[4], dev->d_mac.addr[5]);
         break;
 
       case SIOCSIFHWADDR:  /* Set hardware address */
         req->ifr_hwaddr.sa_family = AF_INETX;
         memcpy(dev->d_mac.addr, req->ifr_hwaddr.sa_data, IFHWADDRLEN);
+        dbg("Dev: %s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+            dev->d_ifname,
+            dev->d_mac.addr[0], dev->d_mac.addr[1], dev->d_mac.addr[2],
+            dev->d_mac.addr[3], dev->d_mac.addr[4], dev->d_mac.addr[5]);
         break;
 
       case SIOCDIFADDR:  /* Delete IP address */
+        ioctl_ifdown(dev);
         memset(&dev->d_ipaddr, 0, sizeof(uip_ipaddr_t));
+        dbg("Dev: %s IP: %d.%d.%d.%d\n",
+            dev->d_ifname,
+            (dev->d_ipaddr >> 24) & 0xff, (dev->d_ipaddr >> 16) & 0xff,
+            (dev->d_ipaddr >>  8) & 0xff,  dev->d_ipaddr & 0xff);
         break;
 
       case SIOCGIFCOUNT:  /* Get number of devices */
         req->ifr_count = netdev_count();
-        break;
+        dbg("Dev: %s I/F count: %d\n", netdev_count());
+        err = ENOSYS;
+       break;
 
       case SIOCGIFBRDADDR:  /* Get broadcast IP address	*/
       case SIOCSIFBRDADDR:  /* Set broadcast IP address	*/
+        dbg("Dev: %s Broadcast: 255.255.255.255d\n", dev->d_ifname);
         err = ENOSYS;
         goto errout;
 
