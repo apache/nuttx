@@ -54,6 +54,7 @@ o Build system
 - Some names under arch are still incorrect.  These should be processor architecture
   names:  pjrc-8051 should be 805x
 - configs/pjrc-8051 should be configs/pjrc-87c52
+- Dependencies do not work correctly under configs/<board>/src (same as arch/<arch>/src/board).
 
 o Applications & Tests
 

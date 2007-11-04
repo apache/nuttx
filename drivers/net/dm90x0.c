@@ -267,7 +267,7 @@
 # define CONFIG_DM9X_MODE DM9X_MODE_AUTO
 #endif
 
-// /* TX poll deley = 5 seconds. CLK_TCK is the number of clock ticks per second */
+/* TX poll deley = 5 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define DM6X_WDDELAY (5*CLK_TCK)
 
@@ -434,8 +434,8 @@ static uint8 getreg(int reg)
 
 static void putreg(int reg, uint8 value)
 {
-  DM9X_INDEX   = reg;
-  DM9X_DATA = value & 0xff;
+  DM9X_INDEX = reg;
+  DM9X_DATA  = value & 0xff;
 }
 
 /****************************************************************************
@@ -677,8 +677,6 @@ static void dm9x_resetstatistics(struct dm9x_driver_s *dm9x)
   dm9x->nresets         = 0; /* Counts number of resets */
   dm9x->ntxtimeouts     = 0; /* Counts resets caused by TX timeouts */
 }
-#else
-# define dm9x_resetstatistics(dev)
 #endif
 
 /****************************************************************************
@@ -1647,7 +1645,7 @@ int dm9x_initialize(void)
 
   vid = (((uint16)getreg(DM9X_VIDH)) << 8) | (uint16)getreg(DM9X_VIDL);
   pid = (((uint16)getreg(DM9X_PIDH)) << 8) | (uint16)getreg(DM9X_PIDL);
-  dbg("I/O base: %08x VID: %04x PID: %04x\n", CONFIG_DM9X_BASE, vid, pid);
+  lldbg("I/O base: %08x VID: %04x PID: %04x\n", CONFIG_DM9X_BASE, vid, pid);
 
   /* Check if a DM90x0 chip is recognized at this I/O base */
 
@@ -1662,20 +1660,21 @@ int dm9x_initialize(void)
   if (irq_attach(CONFIG_DM9X_IRQ, dm9x_interrupt))
     {
       /* We could not attach the ISR to the ISR */
-      dbg("irq_attach() failed\n");
+      lldbg("irq_attach() failed\n");
       return -EAGAIN;
     }
 
   /* Initialize the driver structure */
 
   memset(g_dm9x, 0, CONFIG_DM9X_NINTERFACES*sizeof(struct dm9x_driver_s));
-  g_dm9x[0].dev.ifup   = dm9x_ifup;
-  g_dm9x[0].dev.ifdown = dm9x_ifdown;
+  g_dm9x[0].dev.ifup      = dm9x_ifup;     /* I/F down callback */
+  g_dm9x[0].dev.ifdown    = dm9x_ifdown;   /* I/F up (new IP address) callback */
+  g_dm9x[0].dev.d_private = (void*)g_dm9x; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  g_dm9x[0].txpoll     = wd_create();
-  g_dm9x[0].txtimeout  = wd_create();
+  g_dm9x[0].txpoll        = wd_create();   /* Create periodic poll timer */
+  g_dm9x[0].txtimeout     = wd_create();   /* Create TX timeout timer */
 
   /* Read the MAC address */
 
@@ -1685,10 +1684,13 @@ int dm9x_initialize(void)
       mptr[i] = getreg(j);
     }
 
-  dbg("MAC: %0x:%0x:%0x:%0x:%0x:%0x",
-      mptr[0], mptr[1], mptr[2], mptr[3], mptr[4], mptr[5]);
+  lldbg("MAC: %0x:%0x:%0x:%0x:%0x:%0x",
+        mptr[0], mptr[1], mptr[2], mptr[3], mptr[4], mptr[5]);
 
-  return 0;
+  /* Register the device with the OS so that socket IOCTLs can be performed */
+
+  (void)netdev_register(&g_dm9x[0].dev);
+  return OK;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_DM90x0 */
