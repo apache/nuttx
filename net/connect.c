@@ -42,7 +42,10 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <errno.h>
+#include <debug.h>
+
 #include <arch/irq.h>
 
 #include "net-internal.h"
@@ -186,6 +189,8 @@ static void tcp_connect_interrupt(struct uip_driver_s *dev, void *private)
 {
   struct tcp_connect_s *pstate = (struct tcp_connect_s *)private;
 
+  vdbg("Interrupt uip_flags=%02x\n", uip_flags);
+
   /* 'private' might be null in some race conditions (?) */
 
   if (pstate)
@@ -209,6 +214,7 @@ static void tcp_connect_interrupt(struct uip_driver_s *dev, void *private)
         {
           /* Indicate that remote host refused the connection */
 
+          vdbg("ECONNREFUSED\n");
           pstate->tc_result = -ECONNREFUSED;
         }
 
@@ -218,7 +224,8 @@ static void tcp_connect_interrupt(struct uip_driver_s *dev, void *private)
         {
           /* Indicate that the remote host is unreachable (or should this be timedout?) */
 
-          pstate->tc_result = -ECONNREFUSED;
+          vdbg("ETIMEDOUT\n");
+          pstate->tc_result = -ETIMEDOUT;
         }
 
       /* UIP_CONNECTED: The socket is successfully connected */
@@ -227,6 +234,7 @@ static void tcp_connect_interrupt(struct uip_driver_s *dev, void *private)
         {
           /* Indicate that the socket is no longer connected */
 
+          vdbg("Connected\n");
           pstate->tc_result = OK;
         }
 
@@ -461,6 +469,8 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
     {
       case SOCK_STREAM:
         {
+          dbg("TCP\n");
+
           /* Verify that the socket is not already connected */
 
           if (_SS_ISCONNECTED(psock->s_flags))
@@ -483,6 +493,8 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 #ifdef CONFIG_NET_UDP
       case SOCK_DGRAM:
         {
+          dbg("UDP\n");
+
           ret = uip_udpconnect(psock->s_conn, inaddr);
           if (ret < 0)
             {

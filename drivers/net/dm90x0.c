@@ -44,14 +44,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_DM90x0)
 
-/* Force debug on for this file */
-
-#undef  CONFIG_DEBUG
-#define CONFIG_DEBUG 1
-#undef  CONFIG_DEBUG_VERBOSE
-#define CONFIG_DEBUG_VERBOSE 1
-
-/* Only one hardware interface supported at present (althought there are
+/* Only one hardware interface supported at present (although there are
  * hooks throughout the design to that extending the support to multiple
  * interfaces should not be that difficult)
  */
@@ -382,7 +375,7 @@ static boolean dm9x_rxchecksumready(uint8);
 /* Common TX logic */
 
 static int  dm9x_transmit(struct dm9x_driver_s *dm9x);
-static int  dm9x_uiptxpoll(struct dm9x_driver_s *dm9x);
+static int  dm9x_uiptxpoll(struct uip_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -816,7 +809,7 @@ static int dm9x_transmit(struct dm9x_driver_s *dm9x)
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This may be called:
+ *   to send.  This is a callback from uip_poll().  uip_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the DM90x0 is reset
@@ -832,67 +825,40 @@ static int dm9x_transmit(struct dm9x_driver_s *dm9x)
  *
  ****************************************************************************/
 
-static int dm9x_uiptxpoll(struct dm9x_driver_s *dm9x)
+static int dm9x_uiptxpoll(struct uip_driver_s *dev)
 {
-  int i;
+  struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)dev->d_private;
 
-  for(i = 0; i < UIP_CONNS; i++)
+  /* If the polling resulted in data that should be sent out on the network,
+   * the field d_len is set to a value > 0.
+   */
+
+  if (dm9x->dev.d_len > 0)
     {
-      uip_tcppoll(&dm9x->dev, i);
+      uip_arp_out(&dm9x->dev);
+      dm9x_transmit(dm9x);
 
-      /* If the above function invocation resulted in data that
-       * should be sent out on the network, the global variable
-       * d_len is set to a value > 0.
+      /* Check if there is room in the DM90x0 to hold another packet.  In 100M mode,
+       * that can be 2 packets, otherwise it is a single packet.
        */
 
-      if (dm9x->dev.d_len > 0)
+      if (dm9x->ntxpending > 1 || !dm9x->b100M)
         {
-          uip_arp_out(&dm9x->dev);
-          dm9x_transmit(dm9x);
+          /* Returning a non-zero value will terminate the poll operation */
 
-          /* Check if there is room in the DM90x0 to hold another packet.  In 100M mode,
-           * that can be 2 packets, otherwise it is a single packet.
-          */
-
-          if (dm9x->ntxpending > 1 || !dm9x->b100M)
-            {
-              return OK;
-            }
+          return 1;
         }
     }
 
-#ifdef CONFIG_NET_UDP
-  for(i = 0; i < UIP_UDP_CONNS; i++)
-    {
-      uip_udppoll(&dm9x->dev,i);
+  /* If zero is returned, the polling will continue until all connections have
+   * been examined.
+   */
 
-      /* If the above function invocation resulted in data that
-       * should be sent out on the network, the global variable
-       * d_len is set to a value > 0.
-       */
-
-      if (dm9x->dev.d_len > 0)
-        {
-          uip_arp_out(&dm9x->dev);
-          dm9x_transmit(dm9x);
-
-          /* Check if there is room in the DM90x0 to hold another packet.  In 100M mode,
-           * that can be 2 packets, otherwise it is a single packet.
-          */
-
-          if (dm9x->ntxpending > 1 || !dm9x->b100M)
-            {
-              return OK;
-            }
-        }
-    }
-#endif /* CONFIG_NET_UDP */
-
-  return OK;
+  return 0;
 }
 
 /****************************************************************************
- * Function: dm9x_uiptxpoll
+ * Function: dm9x_receive
  *
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet
@@ -1106,7 +1072,7 @@ static void dm9x_txdone(struct dm9x_driver_s *dm9x)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)dm9x_uiptxpoll(dm9x);
+  (void)uip_poll(&dm9x->dev, dm9x_uiptxpoll, UIP_POLL);
 }
 
 /****************************************************************************
@@ -1263,7 +1229,7 @@ static void dm9x_txtimeout(int argc, uint32 arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)dm9x_uiptxpoll(dm9x);
+  (void)uip_poll(&dm9x->dev, dm9x_uiptxpoll, UIP_POLL);
 }
 
 /****************************************************************************
@@ -1307,7 +1273,7 @@ static void dm9x_polltimer(int argc, uint32 arg, ...)
     {
       /* If so, poll uIP for new XMIT data */
 
-      (void)dm9x_uiptxpoll(dm9x);
+      (void)uip_poll(&dm9x->dev, dm9x_uiptxpoll, UIP_TIMER);
     }
 
   /* Setup the watchdog poll timer again */

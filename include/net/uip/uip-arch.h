@@ -65,14 +65,12 @@
  * the macrose defined in this file.
  */
 
-#define UIP_DATA          1 /* Tells uIP that there is incoming data in the d_buf buffer. The
+#define UIP_DATA          1 /* There is incoming data in the d_buf buffer. The
                              * length of the data is stored in the field d_len. */
-#define UIP_TIMER         2 /* Tells uIP that the periodic timer has fired. */
-#define UIP_POLL_REQUEST  3 /* Tells uIP that a connection should be polled. */
-#define UIP_UDP_SEND_CONN 4 /* Tells uIP that a UDP datagram should be constructed in the
-                             * d_buf buffer. */
+#define UIP_TIMER         2 /* TCP periodic timer has fired */
+#define UIP_POLL_REQUEST  3 /* Poll TCP connection */
 #ifdef CONFIG_NET_UDP
-# define UIP_UDP_TIMER    5
+# define UIP_UDP_POLL     4 /* Poll UDP connection */
 #endif  /* CONFIG_NET_UDP */
 
 /****************************************************************************
@@ -228,97 +226,77 @@ struct uip_driver_s
  *         uip_input();
  *         if(dev->d_len > 0) {
  *           uip_arp_out();
- *           ethernet_devicedriver_send();
+ *           devicedriver_send();
  *         }
  *       } else if(BUF->type == HTONS(UIP_ETHTYPE_ARP)) {
  *         uip_arp_arpin();
  *         if(dev->d_len > 0) {
- *           ethernet_devicedriver_send();
+ *           devicedriver_send();
  *         }
  *       }
  */
 
 #define uip_input(dev) uip_interrupt(dev,UIP_DATA)
 
-/* Periodic processing for a connection identified by its number.
+/* Polling of connections.
  *
- * This function does the necessary periodic processing (timers,
- * polling) for a uIP TCP conneciton, and should be called when the
- * periodic uIP timer goes off. It should be called for every
- * connection, regardless of whether they are open of closed.
+ * This function will traverse each active uIP connection structure and
+ * perform uip_interrupt with the specified event.  After each polling each
+ * active uIP connection structure, this function will call the provided
+ * callback function if the poll resulted in new data to be send.  The poll
+ * will continue until all connections have been polled or until the user-
+ * suplied function returns a non-zero value (which is would do only if
+ * it cannot accept further write data).
  *
- * When the function returns, it may have an outbound packet waiting
- * for service in the uIP packet buffer, and if so the d_len field
- * is set to a value larger than zero. The device driver
- * should be called to send out the packet.
+ * This function should be called periodically with event == UIP_TIMER for
+ * periodic processing.  This function may also be called with UIP_POLL to
+ * perform necessary periodic processing of TCP connections.
  *
- * The ususal way of calling the function is through a for() loop like
- * this:
+ * This function is called from the CAN device driver and may be called from
+ * the timer interrupt/watchdog handle level.
  *
- *     for(i = 0; i < UIP_CONNS; ++i)
+ * When the callback function is called, there may be an outbound packet
+ * waiting for service in the uIP packet buffer, and if so the d_len field
+ * is set to a value larger than zero. The device driver should be called to
+ * send out the packet.
+ *
+ * Example:
+ *   int driver_callback(struct uip_driver_dev *dev)
+ *   {
+ *     if (dev->d_len > 0)
  *       {
- *         uip_tcppoll(dev,i);
- *         if (dev->d_len > 0)
- *           {
- *             devicedriver_send();
- *           }
+ *         devicedriver_send();
+ *         return 1; <-- Terminates polling if necessary
  *       }
+ *     return 0;
+ *   }
  *
- * Note: If you are writing a uIP device driver that needs ARP
- * (Address Resolution Protocol), e.g., when running uIP over
- * Ethernet, you will need to call the uip_arp_out() function before
- * calling the device driver:
+ *   ...
+ *   uip_poll(dev, driver_callback, UIP_TIMER);
  *
- *     for(i = 0; i < UIP_CONNS; ++i)
+ * Note: If you are writing a uIP device driver that needs ARP (Address
+ * Resolution Protocol), e.g., when running uIP over Ethernet, you will
+ * need to call the uip_arp_out() function in the callback function
+ * before sending the packet:
+ *
+ *   int driver_callback(struct uip_driver_dev *dev)
+ *   {
+ *     if (dev->d_len > 0)
  *       {
- *         uip_tcppoll(dev,i);
- *         if (dev->d_len > 0)
- *           {
- *             uip_arp_out();
- *             ethernet_devicedriver_send();
- *           }
+ *         uip_arp_out();
+ *         devicedriver_send();
+ *         return 1; <-- Terminates polling if necessary
  *       }
- *
- * conn The number of the connection which is to be periodically polled.
+ *     return 0;
+ *   }
  */
 
-extern void uip_tcppoll(struct uip_driver_s *dev, unsigned int conn);
+typedef int (*uip_poll_callback_t)(struct uip_driver_s *dev);
+extern int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback, int event);
 
- #ifdef CONFIG_NET_UDP
-/* Periodic processing for a UDP connection identified by its number.
- *
- * This function is essentially the same as uip_tcppoll(), but for
- * UDP connections. It is called in a similar fashion as the
- * uip_tcppoll() function:
- *
- *     for(i = 0; i < UIP_UDP_CONNS; i++)
- *       {
- *         uip_udppoll(dev,i);
- *         if(dev->d_len > 0)
- *           {
- *             devicedriver_send();
- *           }
- *        }
- *
- * Note: As for the uip_tcppoll() function, special care has to be
- * taken when using uIP together with ARP and Ethernet:
- *
- *     for(i = 0; i < UIP_UDP_CONNS; i++)
- *       {
- *         uip_udppoll(dev,i);
- *         if(dev->d_len > 0)
- *           {
- *             uip_arp_out();
- *             ethernet_devicedriver_send();
- *           }
- *       }
- *
- * conn The number of the UDP connection to be processed.
- */
+/* uip_poll helper functions */
 
-extern void uip_udppoll(struct uip_driver_s *dev, unsigned int conn);
-
-#endif  /* CONFIG_NET_UDP */
+#define uip_periodic(dev,cb) uip_poll(dev,db,UIP_TIMER);
 
 /* Architecure support
  *
@@ -326,7 +304,7 @@ extern void uip_udppoll(struct uip_driver_s *dev, unsigned int conn);
  * interrupt level by a device driver.
  */
 
-extern void uip_interrupt(struct uip_driver_s *dev, uint8 flag);
+extern void uip_interrupt(struct uip_driver_s *dev, uint8 event);
 
 /* By defining UIP_ARCH_CHKSUM, the architecture can replace the following
  * functions with hardware assisted solutions.

@@ -52,6 +52,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#ifdef CONFIG_NET
+
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
@@ -144,13 +147,13 @@ static void uip_arp_dump(struct arp_hdr *arp)
   vdbg("  Sender MAC: %02x:%02x:%02x:%02x:%02x:%02x IP: %d.%d.%d.%d\n",
        arp->ah_shwaddr[0], arp->ah_shwaddr[1], arp->ah_shwaddr[2],
        arp->ah_shwaddr[3], arp->ah_shwaddr[4], arp->ah_shwaddr[5],
-       arp->ah_sipaddr[0] >> 8, arp->ah_sipaddr[0] & 0xff,
-       arp->ah_sipaddr[1] >> 8, arp->ah_sipaddr[1] & 0xff);
+       arp->ah_sipaddr[0] & 0xff, arp->ah_sipaddr[0] >> 8,
+       arp->ah_sipaddr[1] & 0xff, arp->ah_sipaddr[1] >> 8);
   vdbg("  Dest MAC:   %02x:%02x:%02x:%02x:%02x:%02x IP: %d.%d.%d.%d\n",
        arp->ah_dhwaddr[0], arp->ah_dhwaddr[1], arp->ah_dhwaddr[2],
        arp->ah_dhwaddr[3], arp->ah_dhwaddr[4], arp->ah_dhwaddr[5],
-       arp->ah_dipaddr[0] >> 8, arp->ah_dipaddr[0] & 0xff,
-       arp->ah_dipaddr[1] >> 8, arp->ah_dipaddr[1] & 0xff);
+       arp->ah_dipaddr[0] & 0xff, arp->ah_dipaddr[0] >> 8,
+       arp->ah_dipaddr[1] & 0xff, arp->ah_dipaddr[1] >> 8);
 }
 #else
 # define uip_arp_dump(arp)
@@ -324,6 +327,7 @@ void uip_arp_ipin(void)
 void uip_arp_arpin(struct uip_driver_s *dev)
 {
   in_addr_t ipaddr;
+
   if (dev->d_len < (sizeof(struct arp_hdr) + UIP_LLH_LEN))
     {
       dev->d_len = 0;
@@ -357,8 +361,7 @@ void uip_arp_arpin(struct uip_driver_s *dev)
 
             ARPBUF->ah_dipaddr[0] = ARPBUF->ah_sipaddr[0];
             ARPBUF->ah_dipaddr[1] = ARPBUF->ah_sipaddr[1];
-            ARPBUF->ah_sipaddr[0] = dev->d_ipaddr >> 16;
-            ARPBUF->ah_sipaddr[1] = dev->d_ipaddr & 0xffff;
+            uiphdr_ipaddr_copy(ARPBUF->ah_sipaddr, &dev->d_ipaddr);
             uip_arp_dump(ARPBUF);
 
             ETHBUF->type = HTONS(UIP_ETHTYPE_ARP);
@@ -503,3 +506,4 @@ void uip_arp_out(struct uip_driver_s *dev)
   ETHBUF->type = HTONS(UIP_ETHTYPE_IP);
   dev->d_len  += UIP_LLH_LEN;
 }
+#endif /* CONFIG_NET */

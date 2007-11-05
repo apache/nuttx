@@ -93,7 +93,7 @@ void send_client(void)
       printf("client: connect failure: %d\n", errno);
       exit(1);
     }
-  printf("clilent: Connected\n");
+  printf("client: Connected\n");
 
   /* Initialize the buffer */
 

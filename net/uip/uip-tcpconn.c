@@ -50,6 +50,8 @@
 #include <sys/types.h>
 #include <string.h>
 #include <errno.h>
+#include <debug.h>
+
 #include <arch/irq.h>
 
 #include <net/uip/uipopt.h>
@@ -316,14 +318,26 @@ void uip_tcpfree(struct uip_conn *conn)
 
 struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf)
 {
-  struct uip_conn *conn = (struct uip_conn *)g_active_tcp_connections.head;
+  struct uip_conn *conn      = (struct uip_conn *)g_active_tcp_connections.head;
+  in_addr_t        srcipaddr = uip_ip4addr_conv(buf->srcipaddr);  
+
+  vdbg("BUF: destport: %04x srcport: %04x IP: %d.%d.%d.%d\n",
+       buf->destport, buf->srcport,
+       (srcipaddr >> 24) & 0xff, (srcipaddr >> 16) & 0xff,
+       (srcipaddr >>  8) & 0xff,  srcipaddr & 0xff);
+
   while (conn)
     {
       /* Find an open connection matching the tcp input */
 
+      vdbg("conn: lport: %04x rport: %04x IP: %d.%d.%d.%d\n",
+           conn->lport, conn->rport,
+           (conn->ripaddr >> 24) & 0xff, (conn->ripaddr >> 16) & 0xff,
+           (conn->ripaddr >>  8) & 0xff,  conn->ripaddr & 0xff);
+
       if (conn->tcpstateflags != UIP_CLOSED &&
-           buf->destport == conn->lport && buf->srcport == conn->rport &&
-           uip_ipaddr_cmp(buf->srcipaddr, conn->ripaddr))
+          buf->destport == conn->lport && buf->srcport == conn->rport &&
+          uip_ipaddr_cmp(srcipaddr, conn->ripaddr))
         {
           /* Matching connection found.. break out of the loop and return a
            * reference to it.
@@ -338,6 +352,30 @@ struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf)
     }
 
   return conn;
+}
+
+/****************************************************************************
+ * Name: uip_nexttcpconn()
+ *
+ * Description:
+ *   Traverse the list of active TCP connections
+ *
+ * Assumptions:
+ *   This function is called from UIP logic at interrupt level (or with
+ *   interrupts disabled).
+ *
+ ****************************************************************************/
+
+struct uip_conn *uip_nexttcpconn(struct uip_conn *conn)
+{
+  if (!conn)
+    {
+      return (struct uip_conn *)g_active_tcp_connections.head;
+    }
+  else
+    {
+      return (struct uip_conn *)conn->node.flink;
+    }
 }
 
 /****************************************************************************
@@ -415,29 +453,6 @@ struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf)
       conn->rcv_nxt[0] = buf->seqno[0];
   }
   return conn;
-}
-
-/****************************************************************************
- * Name: uip_tcppoll()
- *
- * Description:
- *   Periodic processing for a TCP connection identified by its number.
- *   This function does the necessary periodic processing (timers,
- *   polling) for a uIP TCP conneciton, and should be called by the UIP
- *   device driver when the periodic uIP timer goes off. It should be
- *   called for every connection, regardless of whether they are open of
- *   closed.
- *
- * Assumptions:
- *   This function is called from the CAN device driver may be called from
- *   the timer interrupt/watchdog handle level.
- *
- ****************************************************************************/
-
-void uip_tcppoll(struct uip_driver_s *dev, unsigned int conn)
-{
-  uip_conn = &g_tcp_connections[conn];
-  uip_interrupt(dev, UIP_TIMER);
 }
 
 /****************************************************************************

@@ -249,7 +249,7 @@ struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf)
           (conn->rport == 0 || buf->srcport == conn->rport) &&
             (uip_ipaddr_cmp(conn->ripaddr, all_zeroes_addr) ||
              uip_ipaddr_cmp(conn->ripaddr, all_ones_addr) ||
-             uip_ipaddr_cmp(buf->srcipaddr, conn->ripaddr)))
+             uiphdr_ipaddr_cmp(buf->srcipaddr, conn->ripaddr)))
         {
           /* Matching connection found.. return a reference to it */
 
@@ -265,26 +265,27 @@ struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf)
 }
 
 /****************************************************************************
- * Name: uip_udppoll()
+ * Name: uip_nextudpconn()
  *
  * Description:
- *   Periodic processing for a UDP connection identified by its number.
- *   This function does the necessary periodic processing (timers,
- *   polling) for a uIP TCP conneciton, and should be called by the UIP
- *   device driver when the periodic uIP timer goes off. It should be
- *   called for every connection, regardless of whether they are open of
- *   closed.
+ *   Traverse the list of allocated UDP connections
  *
  * Assumptions:
- *   This function is called from the CAN device driver may be called from
- *   the timer interrupt/watchdog handle level.
+ *   This function is called from UIP logic at interrupt level (or with
+ *   interrupts disabled).
  *
  ****************************************************************************/
 
-void uip_udppoll(struct uip_driver_s *dev, unsigned int conn)
+struct uip_udp_conn *uip_nextudpconn(struct uip_udp_conn *conn)
 {
-  uip_udp_conn = &g_udp_connections[conn];
-  uip_interrupt(dev, UIP_UDP_TIMER);
+  if (!conn)
+    {
+      return (struct uip_udp_conn *)g_active_udp_connections.head;
+    }
+  else
+    {
+      return (struct uip_udp_conn *)conn->node.flink;
+    }
 }
 
 /****************************************************************************
@@ -320,11 +321,11 @@ int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
  * Name: uip_udpconnect()
  *
  * Description:
- * This function sets up a new UDP connection. The function will
- * automatically allocate an unused local port for the new
- * connection. However, another port can be chosen by using the
- * uip_udpbind() call, after the uip_udpconnect() function has been
- * called.
+ *   This function sets up a new UDP connection. The function will
+ *   automatically allocate an unused local port for the new
+ *   connection. However, another port can be chosen by using the
+ *   uip_udpbind() call, after the uip_udpconnect() function has been
+ *   called.
  *
  * uip_udpenable() must be called before the connection is made active (i.e.,
  * is eligible for callbacks.

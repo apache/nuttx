@@ -78,6 +78,7 @@ extern "C" {
 
 EXTERN void uip_tcpinit(void);
 EXTERN struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf);
+EXTERN struct uip_conn *uip_nexttcpconn(struct uip_conn *conn);
 EXTERN struct uip_conn *uip_tcplistener(uint16 portno);
 EXTERN struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf);
 EXTERN void uip_tcpnextsequence(void);
@@ -86,6 +87,7 @@ EXTERN void uip_tcpnextsequence(void);
 
 EXTERN void uip_udpinit(void);
 EXTERN struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf);
+EXTERN struct uip_udp_conn *uip_nextudpconn(struct uip_udp_conn *conn);
 
 /* Defined in uip_listen.c **************************************************/
 

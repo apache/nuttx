@@ -306,7 +306,7 @@ void uip_interrupt_event(struct uip_driver_s *dev, void *private)
 {
 #warning OBSOLETE -- needs to be redesigned
   unsigned int i;
-  if (uip_connected())
+  if (uip_connected_event())
     {
       for (i = 0; i < TELNETD_CONF_NUMLINES; ++i)
       {
@@ -325,22 +325,23 @@ void uip_interrupt_event(struct uip_driver_s *dev, void *private)
     return;
   }
 
-  if (uip_closed() || uip_aborted() || uip_timedout())
+  if (uip_close_event() || uip_abort_event() || uip_timeout_event())
   {
     closed();
   }
 
-  if (uip_acked())
+  if (uip_ack_event())
   {
     acked();
   }
 
-  if (uip_newdata())
+  if (uip_newdata_event())
   {
     newdata(dev);
   }
 
-  if (uip_rexmit() || uip_newdata() || uip_acked() || uip_connected() || uip_poll())
+  if (uip_rexmit_event() || uip_newdata_event() || uip_ack_event() ||
+      uip_connected_event() || uip_poll_event())
   {
     senddata(dev);
   }

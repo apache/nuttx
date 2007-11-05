@@ -42,8 +42,11 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <string.h>
 #include <errno.h>
+#include <debug.h>
+
 #include <arch/irq.h>
 #include <nuttx/clock.h>
 #include <net/uip/uip-arch.h>
@@ -104,6 +107,8 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
 #endif
   size_t recvlen;
 
+  vdbg("Interrupt uip_flags: %02x\n", uip_flags);
+
   /* 'private' might be null in some race conditions (?) */
 
   if (pstate)
@@ -116,9 +121,10 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
 
       /* If new data is available, then complete the read action. */
 
-      if (uip_newdata())
+      if (uip_newdata_event())
         {
           /* Get the length of the data to return */
+
           if (dev->d_len > pstate->rf_buflen)
             {
               recvlen = pstate->rf_buflen;
@@ -131,6 +137,7 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
           /* Copy the new appdata into the user buffer */
 
           memcpy(pstate->rf_buffer, dev->d_appdata, recvlen);
+          vdbg("Received %d bytes (of %d)\n", recvlen, dev->d_len);
 
           /* Update the accumulated size of the data read */
 
@@ -139,13 +146,15 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
           pstate->rf_buflen  -= recvlen;
 
           /* Are we finished?  If this is a UDP socket or if the user
-         * buffer has been filled, then we are finished.
-         */
+           * buffer has been filled, then we are finished.
+           */
 
 #ifdef CONFIG_NET_UDP
           if (psock->s_type == SOCK_DGRAM)
             {
               struct uip_udp_conn *udp_conn;
+
+              vdbg("UDP complete\n");
 
               /* Don't allow any further UDP call backs. */
 
@@ -165,6 +174,8 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
             {
               struct uip_conn *conn;
 
+              vdbg("TCP complete\n");
+
               /* The TCP receive buffer is full.  Return now, perhaps truncating
                * the received data (need to fix that).
                *
@@ -183,8 +194,8 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
             }
 
             /* Reset the timeout.  We will want a short timeout to terminate
-               * the TCP receive.
-               */
+             * the TCP receive.
+             */
 
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
             pstate->rf_starttime = g_system_timer;
@@ -195,6 +206,8 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
 
       else if ((uip_flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
         {
+          vdbg("Receive error\n");
+
           /* Stop further callbacks */
 
 #ifdef CONFIG_NET_UDP
@@ -267,6 +280,8 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
                     {
                       struct uip_udp_conn *udp_conn;
 
+                      vdbg("UDP timeout\n");
+
                       /* Stop further callbacks */
 
                       udp_conn          = (struct uip_udp_conn *)psock->s_conn;
@@ -281,6 +296,8 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
 #endif
                     {
                       struct uip_conn *conn;
+
+                      vdbg("TCP timeout\n");
 
                       conn               = (struct uip_conn *)psock->s_conn;
                       conn->data_private = NULL;
@@ -463,7 +480,9 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    * and automatically re-enabled when the task restarts.
    */
 
+  vdbg("Receiving UDP ...\n");
   ret = sem_wait(&state. rf_sem);
+  vdbg("Received\n");
 
   /* Make sure that no further interrupts are processed */
 
@@ -540,7 +559,9 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    * and automatically re-enabled when the task restarts.
    */
 
+  vdbg("Receiving UDP ...\n");
   ret = sem_wait(&state.rf_sem);
+  vdbg("Received\n");
 
   /* Make sure that no further interrupts are processed */
 

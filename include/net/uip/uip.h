@@ -448,7 +448,7 @@ extern void *uip_urgdata;
  */
 
 #if UIP_URGDATA > 0
-extern uint16 uip_urglen, uip_surglen;
+extern uint16 uip_urglen; /* Length of (received) urgent data */
 #endif /* UIP_URGDATA > 0 */
 
 /* Pointer to the current TCP connection.
@@ -598,7 +598,7 @@ int uip_unlisten(uint16 port);
  *
  * Note: This function does not guarantee that the sent data will
  * arrive at the destination. If the data is lost in the network, the
- * application will be invoked with the uip_rexmit() event being
+ * application will be invoked with the uip_rexmit_event() event being
  * set. The application will then have to resend the data using this
  * function.
  *
@@ -686,7 +686,7 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * avaliable through the d_len element.
  */
 
-#define uip_newdata()   (uip_flags & UIP_NEWDATA)
+#define uip_newdata_event() (uip_flags & UIP_NEWDATA)
 
 /* Has previously sent data been acknowledged?
  *
@@ -695,17 +695,17 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * can send new data.
  */
 
-#define uip_acked()   (uip_flags & UIP_ACKDATA)
+#define uip_ack_event() (uip_flags & UIP_ACKDATA)
 
 /* Has the connection just been connected?
  *
- * Reduces to non-zero if the current connection has been connected to
+ * Reduces to non-zero if the current connenetutils/telnetd/telnetd.cction has been connected to
  * a remote host. This will happen both if the connection has been
  * actively opened (with uip_connect()) or passively opened (with
  * uip_listen()).
  */
 
-#define uip_connected() (uip_flags & UIP_CONNECTED)
+#define uip_connected_event() (uip_flags & UIP_CONNECTED)
 
 /* Has the connection been closed by the other end?
  *
@@ -713,7 +713,7 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * host. The application may then do the necessary clean-ups.
  */
 
-#define uip_closed()    (uip_flags & UIP_CLOSE)
+#define uip_close_event() (uip_flags & UIP_CLOSE)
 
 /* Has the connection been aborted by the other end?
  *
@@ -721,7 +721,7 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * remote host.
  */
 
-#define uip_aborted()    (uip_flags & UIP_ABORT)
+#define uip_abort_event() (uip_flags & UIP_ABORT)
 
 /* Has the connection timed out?
  *
@@ -729,7 +729,7 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * retransmissions.
  */
 
-#define uip_timedout()    (uip_flags & UIP_TIMEDOUT)
+#define uip_timeout_event() (uip_flags & UIP_TIMEDOUT)
 
 /* Do we need to retransmit previously data?
  *
@@ -739,7 +739,7 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * time, using the uip_send() function.
  */
 
-#define uip_rexmit()     (uip_flags & UIP_REXMIT)
+#define uip_rexmit_event() (uip_flags & UIP_REXMIT)
 
 /* Is the connection being polled by uIP?
  *
@@ -751,7 +751,7 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * wait for the remote host to send data.
  */
 
-#define uip_poll()       (uip_flags & UIP_POLL)
+#define uip_poll_event() (uip_flags & UIP_POLL)
 
 /* Get the initial maxium segment size (MSS) of the current
  * connection.
@@ -768,7 +768,7 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * uip_initialmss()).
  */
 
-#define uip_mss()        (uip_conn->mss)
+#define uip_mss() (uip_conn->mss)
 
 /* Bind a UDP connection to a local address */
 

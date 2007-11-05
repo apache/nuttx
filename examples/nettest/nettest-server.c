@@ -61,7 +61,10 @@ void recv_server(void)
   socklen_t addrlen;
   int nbytesread;
 #ifndef CONFIG_NETTEST_PERFORMANCE
+  int totalbytesread;
   int nbytessent;
+  int ch;
+  int i;
 #endif
   int optval;
 
@@ -130,19 +133,55 @@ void recv_server(void)
         }
     }
 #else
-  /* Receive and echo own message */
+  /* Receive canned message */
 
-  nbytesread = recv(acceptsd, buffer, 1024, 0);
-  if (nbytesread <= 0)
+  totalbytesread = 0;
+  while (totalbytesread < SENDSIZE)
     {
-      printf("server: recv failed: %d\n", errno);
+      printf("server: Reading...\n");
+      nbytesread = recv(acceptsd, &buffer[totalbytesread], 1024 - totalbytesread, 0);
+      if (nbytesread <= 0)
+        {
+          printf("server: recv failed: %d\n", errno);
+          close(listensd);
+          close(acceptsd);
+          exit(-1);
+        }
+
+      totalbytesread += nbytesread;
+      printf("server: Received %d of %d bytes\n", totalbytesread, SENDSIZE);
+    }
+
+  /* Verify the message */
+
+  if (totalbytesread != SENDSIZE)
+    {
+      printf("server: Received %d / Expected %d bytes\n", totalbytesread, SENDSIZE);
       close(listensd);
       close(acceptsd);
       exit(-1);
     }
-  printf("server: Received %d bytes\n", nbytesread);
 
-  nbytessent = send(acceptsd, buffer, nbytesread, 0);
+  ch = 0x20;
+  for (i = 0; i < SENDSIZE; i++ )
+    {
+      if (buffer[i] != ch)
+        {
+          printf("server: Byte %d is %02x / Expected %02x\n", i, buffer[i], ch);
+          close(listensd);
+          close(acceptsd);
+          exit(-1);
+        }
+
+      if (++ch > 0x7e)
+        {
+          ch = 0x20;
+        }
+    }
+
+  /* Then send the same data back to the client */
+
+  nbytessent = send(acceptsd, buffer, totalbytesread, 0);
   if (nbytessent <= 0)
     {
       printf("server: send failed: %d\n", errno);

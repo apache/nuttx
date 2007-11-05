@@ -211,7 +211,8 @@ defconfig -- This is a configuration file similar to the Linux
 	TCP/IP and UDP support via uIP
 		CONFIG_NET - Enable or disable all network features
 		CONFIG_NET_IPv6 - Build in support for IPv6
-		CONFIG_NSOCKET_DESCRIPTORS - Maximum number of socket descriptors per task/thread.
+		CONFIG_NSOCKET_DESCRIPTORS - Maximum number of socket descriptors
+                  per task/thread.
 		CONFIG_NET_MAX_CONNECTIONS - Maximum number of TCP connections (all tasks)
 		CONFIG_NET_MAX_LISTENPORTS - Maximum number of listening TCP ports (all tasks)
 		CONFIG_NET_SOCKOPTS - Enable or disable support for socket options

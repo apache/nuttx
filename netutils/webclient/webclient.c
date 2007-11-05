@@ -407,7 +407,7 @@ static void newdata(struct uip_driver_s *dev)
 void uip_interrupt_event(struct uip_driver_s *dev)
 {
 #warning OBSOLETE -- needs to be redesigned
-  if (uip_connected())
+  if (uip_connected_event())
     {
       s.timer = 0;
       s.state = WEBCLIENT_STATE_STATUSLINE;
@@ -423,33 +423,33 @@ void uip_interrupt_event(struct uip_driver_s *dev)
       return;
     }
 
-  if (uip_aborted())
+  if (uip_abort_event())
     {
       webclient_aborted();
     }
 
-  if (uip_timedout())
+  if (uip_timeout_event())
     {
       webclient_timedout();
     }
 
-  if (uip_acked())
+  if (uip_ack_event())
     {
       s.timer = 0;
       acked();
     }
 
-  if (uip_newdata())
+  if (uip_newdata_event())
     {
       s.timer = 0;
       newdata(dev);
     }
 
-  if (uip_rexmit() || uip_newdata() || uip_acked())
+  if (uip_rexmit_event() || uip_newdata_event() || uip_ack_event())
     {
       senddata(dev);
     }
-  else if (uip_poll())
+  else if (uip_poll_event())
     {
       ++s.timer;
       if (s.timer == WEBCLIENT_TIMEOUT)
@@ -460,7 +460,7 @@ void uip_interrupt_event(struct uip_driver_s *dev)
         }
     }
 
-  if (uip_closed())
+  if (uip_close_event())
     {
       if (s.httpflag != HTTPFLAG_MOVED)
         {
