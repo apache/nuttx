@@ -112,6 +112,25 @@ static inline int uip_comparemac(struct uip_eth_addr *paddr1, struct uip_eth_add
 }
 #endif
 
+static int sim_uiptxpoll(struct uip_driver_s *dev)
+{
+  /* If the polling resulted in data that should be sent out on the network,
+   * the field d_len is set to a value > 0.
+   */
+
+  if (g_sim_dev.d_len > 0)
+    {
+      uip_arp_out(&g_sim_dev);
+      tapdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
+    }
+
+  /* If zero is returned, the polling will continue until all connections have
+   * been examined.
+   */
+
+  return 0;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -182,39 +201,7 @@ void uipdriver_loop(void)
   else if (timer_expired(&g_periodic_timer))
     {
       timer_reset(&g_periodic_timer);
-      for(i = 0; i < UIP_CONNS; i++)
-        {
-          uip_tcppoll(&g_sim_dev,i);
-
-          /* If the above function invocation resulted in data that
-           * should be sent out on the network, the global variable
-           * d_len is set to a value > 0.
-           */
-
-          if (g_sim_dev.d_len > 0)
-            {
-              uip_arp_out(&g_sim_dev);
-              tapdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
-            }
-        }
-
-#ifdef CONFIG_NET_UDP
-      for(i = 0; i < UIP_UDP_CONNS; i++)
-        {
-          uip_udppoll(&g_sim_dev,i);
-
-          /* If the above function invocation resulted in data that
-           * should be sent out on the network, the global variable
-           * d_len is set to a value > 0.
-           */
-
-          if (g_sim_dev.d_len > 0)
-            {
-              uip_arp_out(&g_sim_dev);
-              tapdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
-            }
-        }
-#endif /* CONFIG_NET_UDP */
+      uip_poll(&g_sim_dev, sim_uiptxpoll, UIP_TIMER);
     }
   sched_unlock();
 }
