@@ -487,7 +487,7 @@ void uip_arp_out(struct uip_driver_s *dev)
           ETHBUF->type        = HTONS(UIP_ETHTYPE_ARP);
 
           dev->d_appdata      = &dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN];
-          dev->d_len          = sizeof(struct arp_hdr);
+          dev->d_len          = sizeof(struct arp_hdr) + UIP_LLH_LEN;
           return;
         }
 
@@ -495,9 +495,10 @@ void uip_arp_out(struct uip_driver_s *dev)
 
       memcpy(ETHBUF->dest, tabptr->at_ethaddr.addr, IFHWADDRLEN);
     }
+
+  /* Finish populating the ethernet header */
+
   memcpy(ETHBUF->src, dev->d_mac.addr, IFHWADDRLEN);
-
   ETHBUF->type = HTONS(UIP_ETHTYPE_IP);
-
-  dev->d_len += sizeof(struct uip_eth_hdr);
+  dev->d_len  += UIP_LLH_LEN;
 }
