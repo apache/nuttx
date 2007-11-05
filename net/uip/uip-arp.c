@@ -287,10 +287,10 @@ void uip_arp_timer(void)
 #if 0
 void uip_arp_ipin(void)
 {
-  dev->d_len -= sizeof(struct uip_eth_hdr);
-
   /* Only insert/update an entry if the source IP address of the
-     incoming IP packet comes from a host on the local network. */
+   * incoming IP packet comes from a host on the local network.
+   */
+
   if ((IPBUF->eh_srcipaddr & dev->d_netmask) != (dev->d_ipaddr & dev->d_netmask))
     {
       return;
@@ -324,7 +324,7 @@ void uip_arp_ipin(void)
 void uip_arp_arpin(struct uip_driver_s *dev)
 {
   in_addr_t ipaddr;
-  if (dev->d_len < sizeof(struct arp_hdr))
+  if (dev->d_len < (sizeof(struct arp_hdr) + UIP_LLH_LEN))
     {
       dev->d_len = 0;
       return;
@@ -359,9 +359,10 @@ void uip_arp_arpin(struct uip_driver_s *dev)
             ARPBUF->ah_dipaddr[1] = ARPBUF->ah_sipaddr[1];
             ARPBUF->ah_sipaddr[0] = dev->d_ipaddr >> 16;
             ARPBUF->ah_sipaddr[1] = dev->d_ipaddr & 0xffff;
+            uip_arp_dump(ARPBUF);
 
             ETHBUF->type = HTONS(UIP_ETHTYPE_ARP);
-            dev->d_len = sizeof(struct arp_hdr);
+            dev->d_len = sizeof(struct arp_hdr) + UIP_LLH_LEN;
           }
         break;
 
