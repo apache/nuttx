@@ -73,7 +73,7 @@ void send_client(void)
   sockfd = socket(PF_INET, SOCK_STREAM, 0);
   if (sockfd < 0)
     {
-      printf("client socket failure %d\n", errno);
+      message("client socket failure %d\n", errno);
       exit(1);
     }
 
@@ -87,13 +87,13 @@ void send_client(void)
   myaddr.sin_addr.s_addr = HTONL(CONFIG_EXAMPLE_NETTEST_CLIENTIP);
 #endif
 
-  printf("client: Connecting...\n");
+  message("client: Connecting...\n");
   if (connect( sockfd, (struct sockaddr*)&myaddr, sizeof(struct sockaddr_in)) < 0)
     {
-      printf("client: connect failure: %d\n", errno);
+      message("client: connect failure: %d\n", errno);
       exit(1);
     }
-  printf("client: Connected\n");
+  message("client: Connected\n");
 
   /* Initialize the buffer */
 
@@ -115,13 +115,13 @@ void send_client(void)
       nbytessent = send(sockfd, outbuf, 512, 0);
       if (nbytessent < 0)
         {
-          printf("client: send failed: %d\n", errno);
+          message("client: send failed: %d\n", errno);
           close(sockfd);
           exit(-1);
         }
       else if (nbytessent != 512)
         {
-          printf("client: Bad send length=%d: %d\n", nbytessent);
+          message("client: Bad send length=%d: %d\n", nbytessent);
           close(sockfd);
           exit(-1);
         }
@@ -129,42 +129,42 @@ void send_client(void)
 #else
   /* Then send and receive one message */
 
-  printf("client: Sending %d bytes\n", SENDSIZE);
+  message("client: Sending %d bytes\n", SENDSIZE);
   nbytessent = send(sockfd, outbuf, SENDSIZE, 0);
-  printf("client: Sent %d bytes\n", nbytessent);
+  message("client: Sent %d bytes\n", nbytessent);
 
   if (nbytessent < 0)
     {
-      printf("client: send failed: %d\n", errno);
+      message("client: send failed: %d\n", errno);
       close(sockfd);
       exit(-1);
     }
   else if (nbytessent != SENDSIZE)
     {
-      printf("client: Bad send length=%d: %d\n", nbytessent);
+      message("client: Bad send length=%d: %d\n", nbytessent);
       close(sockfd);
       exit(-1);
     }
 
-  printf("client: Receiving...\n");
+  message("client: Receiving...\n");
   nbytesrecvd = recv(sockfd, inbuf, SENDSIZE, 0);
-  printf("client: Received %d bytes\n", nbytesrecvd);
+  message("client: Received %d bytes\n", nbytesrecvd);
 
   if (nbytesrecvd < 0)
     {
-      printf("client: recv failed: %d\n", errno);
+      message("client: recv failed: %d\n", errno);
       close(sockfd);
       exit(-1);
     }
   else if (nbytesrecvd != SENDSIZE)
     {
-      printf("client: Bad recv length=%d: %d\n", nbytessent);
+      message("client: Bad recv length=%d: %d\n", nbytessent);
       close(sockfd);
       exit(-1);
     }
   else if (memcmp(inbuf, outbuf, SENDSIZE) != 0)
     {
-      printf("client: Received buffer does not match sent buffer\n");
+      message("client: Received buffer does not match sent buffer\n");
       close(sockfd);
       exit(-1);
     }

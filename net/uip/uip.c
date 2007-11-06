@@ -333,7 +333,6 @@ uint16 uip_ipchksum(struct uip_driver_s *dev)
   uint16 sum;
 
   sum = chksum(0, &dev->d_buf[UIP_LLH_LEN], UIP_IPH_LEN);
-  vdbg("Checksum 0x%04x\n", sum);
   return (sum == 0) ? 0xffff : htons(sum);
 }
 #endif
@@ -537,7 +536,7 @@ static void uip_add_rcv_nxt(uint16 n)
 #ifdef CONFIG_NET_UDP
 static void uip_udp_callback(struct uip_driver_s *dev)
 {
-  vdbg("UDP callback uip_flags: %02x\n", uip_flags);
+  vdbg("uip_flags: %02x\n", uip_flags);
 
   /* Some sanity checking */
 
@@ -552,7 +551,7 @@ static void uip_udp_callback(struct uip_driver_s *dev)
 
 static void uip_tcp_callback(struct uip_driver_s *dev)
 {
-  vdbg("TCP callback uip_flags: %02x\n", uip_flags);
+  vdbg("uip_flags: %02x\n", uip_flags);
 
   /* Some sanity checking */
 
@@ -588,6 +587,8 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
   int    len;
   int    i;
 
+  vdbg("event: %d\n", event);
+
   dev->d_snddata = dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
 
   /* Check if we were invoked because of a poll request for a
@@ -596,7 +597,6 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
 
   if (event == UIP_POLL_REQUEST)
     {
-      vdbg("event: UIP_POLL_REQUEST\n");
       if ((uip_connr->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED &&
            !uip_outstanding(uip_connr))
         {
@@ -650,92 +650,92 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
            * in which case we retransmit.
            */
 
-        if (uip_outstanding(uip_connr))
-          {
-            if (uip_connr->timer-- == 0)
-              {
-                if (uip_connr->nrtx == UIP_MAXRTX ||
-                    ((uip_connr->tcpstateflags == UIP_SYN_SENT ||
-                    uip_connr->tcpstateflags == UIP_SYN_RCVD) &&
-                    uip_connr->nrtx == UIP_MAXSYNRTX))
-                  {
-                    uip_connr->tcpstateflags = UIP_CLOSED;
-                    vdbg("TCP state: UIP_CLOSED\n");
+          if (uip_outstanding(uip_connr))
+            {
+              if (uip_connr->timer-- == 0)
+                {
+                  if (uip_connr->nrtx == UIP_MAXRTX ||
+                      ((uip_connr->tcpstateflags == UIP_SYN_SENT ||
+                      uip_connr->tcpstateflags == UIP_SYN_RCVD) &&
+                      uip_connr->nrtx == UIP_MAXSYNRTX))
+                    {
+                      uip_connr->tcpstateflags = UIP_CLOSED;
+                      vdbg("TCP state: UIP_CLOSED\n");
 
-                    /* We call uip_tcp_callback() with uip_flags set to
-                     * UIP_TIMEDOUT to inform the application that the
-                     * connection has timed out.
-                     */
-
-                    uip_flags = UIP_TIMEDOUT;
-                    uip_tcp_callback(dev);
-
-                    /* We also send a reset packet to the remote host. */
-
-                    BUF->flags = TCP_RST | TCP_ACK;
-                    goto tcp_send_nodata;
-                  }
-
-                /* Exponential backoff. */
-
-                uip_connr->timer = UIP_RTO << (uip_connr->nrtx > 4 ? 4: uip_connr->nrtx);
-                ++(uip_connr->nrtx);
-
-                /* Ok, so we need to retransmit. We do this differently
-                 * depending on which state we are in. In ESTABLISHED, we
-                 * call upon the application so that it may prepare the
-                 * data for the retransmit. In SYN_RCVD, we resend the
-                 * SYNACK that we sent earlier and in LAST_ACK we have to
-                 * retransmit our FINACK.
-                 */
-
-                UIP_STAT(++uip_stat.tcp.rexmit);
-                switch(uip_connr->tcpstateflags & UIP_TS_MASK)
-                  {
-                    case UIP_SYN_RCVD:
-                      /* In the SYN_RCVD state, we should retransmit our
-                       * SYNACK.
+                      /* We call uip_tcp_callback() with uip_flags set to
+                       * UIP_TIMEDOUT to inform the application that the
+                       * connection has timed out.
                        */
 
-                      goto tcp_send_synack;
-
-                    case UIP_SYN_SENT:
-                      /* In the SYN_SENT state, we retransmit out SYN. */
-
-                      BUF->flags = 0;
-                      goto tcp_send_syn;
-
-                    case UIP_ESTABLISHED:
-                      /* In the ESTABLISHED state, we call upon the application
-                      * to do the actual retransmit after which we jump into
-                       * the code for sending out the packet (the apprexmit
-                       * label).
-                       */
-
-                      uip_flags = UIP_REXMIT;
+                      uip_flags = UIP_TIMEDOUT;
                       uip_tcp_callback(dev);
-                      goto apprexmit;
 
-                    case UIP_FIN_WAIT_1:
-                    case UIP_CLOSING:
-                    case UIP_LAST_ACK:
-                      /* In all these states we should retransmit a FINACK. */
+                      /* We also send a reset packet to the remote host. */
 
-                      goto tcp_send_finack;
-                  }
-              }
-          }
-        else if ((uip_connr->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED)
-          {
-            /* If there was no need for a retransmission, we poll the
-            * application for new data.
-             */
+                      BUF->flags = TCP_RST | TCP_ACK;
+                      goto tcp_send_nodata;
+                    }
 
-            uip_flags = UIP_POLL;
-            uip_tcp_callback(dev);
-            goto appsend;
-          }
-      }
+                  /* Exponential backoff. */
+
+                  uip_connr->timer = UIP_RTO << (uip_connr->nrtx > 4 ? 4: uip_connr->nrtx);
+                  ++(uip_connr->nrtx);
+
+                  /* Ok, so we need to retransmit. We do this differently
+                   * depending on which state we are in. In ESTABLISHED, we
+                   * call upon the application so that it may prepare the
+                   * data for the retransmit. In SYN_RCVD, we resend the
+                   * SYNACK that we sent earlier and in LAST_ACK we have to
+                   * retransmit our FINACK.
+                   */
+
+                  UIP_STAT(++uip_stat.tcp.rexmit);
+                  switch(uip_connr->tcpstateflags & UIP_TS_MASK)
+                    {
+                      case UIP_SYN_RCVD:
+                        /* In the SYN_RCVD state, we should retransmit our
+                         * SYNACK.
+                         */
+
+                        goto tcp_send_synack;
+
+                      case UIP_SYN_SENT:
+                        /* In the SYN_SENT state, we retransmit out SYN. */
+
+                        BUF->flags = 0;
+                        goto tcp_send_syn;
+
+                      case UIP_ESTABLISHED:
+                        /* In the ESTABLISHED state, we call upon the application
+                         * to do the actual retransmit after which we jump into
+                         * the code for sending out the packet (the apprexmit
+                         * label).
+                         */
+
+                        uip_flags = UIP_REXMIT;
+                        uip_tcp_callback(dev);
+                        goto apprexmit;
+
+                      case UIP_FIN_WAIT_1:
+                      case UIP_CLOSING:
+                      case UIP_LAST_ACK:
+                        /* In all these states we should retransmit a FINACK. */
+
+                        goto tcp_send_finack;
+                    }
+                }
+            }
+          else if ((uip_connr->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED)
+            {
+              /* If there was no need for a retransmission, we poll the
+               * application for new data.
+               */
+
+              uip_flags = UIP_POLL;
+              uip_tcp_callback(dev);
+              goto appsend;
+            }
+        }
       goto drop;
     }
 
@@ -761,7 +761,6 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
 
   /* This is where the input processing starts. */
 
-  vdbg("event: %d\n", event);
   UIP_STAT(++uip_stat.ip.recv);
 
   /* Start of IP input header processing code. */
@@ -867,10 +866,7 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
        */
 
 #if UIP_BROADCAST
-      vdbg("UDP IP checksum 0x%04x\n", uip_ipchksum(dev));
-      if (BUF->proto == UIP_PROTO_UDP &&
-         uip_ipaddr_cmp(BUF->destipaddr, all_ones_addr)
-    /*&& uip_ipchksum(dev) == 0xffff*/)
+      if (BUF->proto == UIP_PROTO_UDP && uip_ipaddr_cmp(BUF->destipaddr, all_ones_addr)
         {
           goto udp_input;
         }
@@ -941,7 +937,6 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
 
 #if UIP_PINGADDRCONF
 icmp_input:
-  vdbg("icmp_input\n");
 #endif /* UIP_PINGADDRCONF */
   UIP_STAT(++uip_stat.icmp.recv);
 
@@ -991,8 +986,6 @@ icmp_input:
 #else /* !CONFIG_NET_IPv6 */
 
   /* This is IPv6 ICMPv6 processing code. */
-
-  vdbg("ICMP6 input length %d\n", dev->d_len);
 
   if (BUF->proto != UIP_PROTO_ICMP6)
     {
@@ -1060,7 +1053,6 @@ icmp_input:
     }
   else
     {
-      vdbg("Unknown ICMP6 message: %d\n", ICMPBUF->type);
       UIP_STAT(++uip_stat.icmp.drop);
       UIP_STAT(++uip_stat.icmp.typeerr);
       UIP_LOG("icmp: unknown ICMP message.");
@@ -1072,7 +1064,6 @@ icmp_input:
   /* UDP input processing. */
 
 udp_input:
-  vdbg("udp_input\n");
 
   /* UDP processing is really just a hack. We don't do anything to the
    * UDP/IP headers, but let the UDP application do all the hard
@@ -1106,7 +1097,6 @@ udp_input:
   goto drop;
 
 udp_found:
-  vdbg("udp_found\n");
 
   uip_conn       = NULL;
   uip_flags      = UIP_NEWDATA;
@@ -1115,7 +1105,7 @@ udp_found:
   uip_udp_callback(dev);
 
 udp_send:
-  vdbg("udp_send\n");
+
   if (dev->d_sndlen == 0)
     {
       goto drop;
@@ -1164,7 +1154,6 @@ udp_send:
   /* TCP input processing. */
 
 tcp_input:
-  vdbg("tcp_input\n");
 
   UIP_STAT(++uip_stat.tcp.recv);
 
@@ -1213,7 +1202,6 @@ tcp_input:
   UIP_STAT(++uip_stat.tcp.synrst);
 
 reset:
-  vdbg("reset\n");
 
   /* We do not send resets in response to resets. */
 
@@ -1283,7 +1271,6 @@ reset:
    */
 
 found_listen:
-  vdbg("found_listen\n");
 
   /* First allocate a new connection structure and see if there is any
    * user application to accept it.
@@ -1377,11 +1364,9 @@ found_listen:
   /* Our response will be a SYNACK. */
 
 tcp_send_synack:
-  vdbg("tcp_send_synack\n");
   BUF->flags = TCP_ACK;
 
 tcp_send_syn:
-  vdbg("tcp_send_syn\n");
   BUF->flags |= TCP_SYN;
 
   /* We send out the TCP Maximum Segment Size option with our SYNACK. */
@@ -1397,7 +1382,6 @@ tcp_send_syn:
   /* This label will be jumped to if we found an active connection. */
 
 found:
-  vdbg("found\n");
 
   uip_conn = uip_connr;
   uip_flags = 0;
@@ -1671,7 +1655,6 @@ found:
             vdbg("TCP state: UIP_LAST_ACK\n");
 
 tcp_send_finack:
-            vdbg("tcp_send_finack\n");
 
             BUF->flags = TCP_FIN | TCP_ACK;
             goto tcp_send_nodata;
@@ -1763,7 +1746,6 @@ tcp_send_finack:
             uip_tcp_callback(dev);
 
 appsend:
-           vdbg("appsend\n");
 
            if (uip_flags & UIP_ABORT)
               {
@@ -1836,7 +1818,6 @@ appsend:
               }
             uip_connr->nrtx = 0;
 apprexmit:
-            vdbg("apprexmit\n");
             dev->d_appdata = dev->d_snddata;
 
             /* If the application has data to be sent, or if the incoming
@@ -1972,19 +1953,16 @@ apprexmit:
    */
 
 tcp_send_ack:
-  vdbg("tcp_send_ack\n");
 
   BUF->flags = TCP_ACK;
 
 tcp_send_nodata:
-  vdbg("tcp_send_nodata\n");
 
   dev->d_len = UIP_IPTCPH_LEN;
   tcp_send_noopts:
   BUF->tcpoffset = (UIP_TCPH_LEN / 4) << 4;
 
 tcp_send:
-  vdbg("tcp_send\n");
 
   /* We're done with the input processing. We are now ready to send a
    * reply. Our job is to fill in all the fields of the TCP and IP
@@ -2025,7 +2003,6 @@ tcp_send:
     }
 
 tcp_send_noconn:
-  vdbg("tcp_send_noconn\n");
 
   BUF->ttl       = UIP_TTL;
 #ifdef CONFIG_NET_IPv6
@@ -2049,7 +2026,6 @@ tcp_send_noconn:
 
 #ifdef CONFIG_NET_UDP
 ip_send_nolen:
-  vdbg("ip_send_nolen\n");
 #endif   /* CONFIG_NET_UDP */
 
 #ifdef CONFIG_NET_IPv6
@@ -2069,13 +2045,12 @@ ip_send_nolen:
 
   BUF->ipchksum    = 0;
   BUF->ipchksum    = ~(uip_ipchksum(dev));
-  vdbg("checksum: 0x%04x\n", uip_ipchksum(dev));
 #endif /* CONFIG_NET_IPv6 */
 
   UIP_STAT(++uip_stat.tcp.sent);
 
 send:
-  vdbg("send: packet length %d (%d)\n",
+  vdbg("Sending packet length %d (%d)\n",
        dev->d_len, (BUF->len[0] << 8) | BUF->len[1]);
 
   UIP_STAT(++uip_stat.ip.sent);

@@ -169,8 +169,8 @@ struct uip_driver_s
 
   /* Driver callbacks */
 
-  int (*ifup)(struct uip_driver_s *dev);
-  int (*ifdown)(struct uip_driver_s *dev);
+  int (*d_ifup)(struct uip_driver_s *dev);
+  int (*d_ifdown)(struct uip_driver_s *dev);
 
   /* Drivers may attached device-specific, private information */
 

@@ -104,7 +104,7 @@ static void send_interrupt(struct uip_driver_s *dev, void *private)
   struct send_s *pstate = (struct send_s *)private;
   struct uip_conn *conn;
 
-  vdbg("Interrupt uip_flags: %02x state: %d\n", uip_flags, pstate->snd_state);
+  vdbg("uip_flags: %02x state: %d\n", uip_flags, pstate->snd_state);
 
   /* If the data has not been sent OR if it needs to be retransmitted,
    * then send it now.
@@ -122,7 +122,6 @@ static void send_interrupt(struct uip_driver_s *dev, void *private)
         }
 
       pstate->snd_state = STATE_DATA_SENT;
-      vdbg("state: STATE_DATA_SENT(%d)\n", STATE_DATA_SENT);
     }
 
   /* Check if all data has been sent and acknowledged */
@@ -142,12 +141,9 @@ static void send_interrupt(struct uip_driver_s *dev, void *private)
           /* Send again on the next poll */
 
           pstate->snd_state = STATE_POLLWAIT;
-          vdbg("state: STATE_POLLWAIT(%d)\n", STATE_POLLWAIT);
         }
       else
         {
-          vdbg("state: Data sent\n");
-
           /* All data has been sent */
 
           pstate->snd_sent   += pstate->snd_buflen;
@@ -172,8 +168,6 @@ static void send_interrupt(struct uip_driver_s *dev, void *private)
 
   else if ((uip_flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
     {
-      vdbg("state: TCP failure\n");
-
       /* Stop further callbacks */
 
       conn               = (struct uip_conn *)pstate->snd_sock->s_conn;
@@ -316,14 +310,12 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
      * automatically re-enabled when the task restarts.
      */
 
-    vdbg("Sending %d bytes...\n", len);
     ret = sem_wait(&state. snd_sem);
 
     /* Make sure that no further interrupts are processed */
 
     conn->data_private = NULL;
     conn->data_event   = NULL;
-    vdbg("Sent\n");
   }
 
   sem_destroy(&state. snd_sem);

@@ -323,7 +323,7 @@ uint8 uip_fw_output(struct uip_driver_s *dev)
 #endif /* UIP_BROADCAST */
 
   netif = find_netif (dev);
-  dbg("uip_fw_output: netif %p ->output %p len %d\n", netif, netif->output, dev->d_len);
+  dbg("netif: %p output: %p len: %d\n", netif, netif->output, dev->d_len);
 
   if (netif == NULL) {
     return UIP_FW_NOROUTE;

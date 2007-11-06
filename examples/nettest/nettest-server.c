@@ -73,7 +73,7 @@ void recv_server(void)
   listensd = socket(PF_INET, SOCK_STREAM, 0);
   if (listensd < 0)
     {
-      printf("server: socket failure: %d\n", errno);
+      message("server: socket failure: %d\n", errno);
       exit(1);
     }
 
@@ -82,7 +82,7 @@ void recv_server(void)
   optval = 1;
   if (setsockopt(listensd, SOL_SOCKET, SO_REUSEADDR, (void*)&optval, sizeof(int)) < 0)
     {
-      printf("server: setsockopt failure: %d\n", errno);
+      message("server: setsockopt failure: %d\n", errno);
       exit(1);
     }
 
@@ -94,7 +94,7 @@ void recv_server(void)
 
   if (bind(listensd, (struct sockaddr*)&myaddr, sizeof(struct sockaddr_in)) < 0)
     {
-      printf("server: bind failure: %d\n", errno);
+      message("server: bind failure: %d\n", errno);
       exit(1);
     }
 
@@ -102,21 +102,21 @@ void recv_server(void)
 
   if (listen(listensd, 5) < 0)
     {
-      printf("server: listen failure %d\n", errno);
+      message("server: listen failure %d\n", errno);
       exit(1);
     }
 
   /* Accept only one connection */
 
-  printf("server: Accepting connections on port %d\n", PORTNO);
+  message("server: Accepting connections on port %d\n", PORTNO);
   addrlen = sizeof(struct sockaddr_in);
   acceptsd = accept(listensd, (struct sockaddr*)&myaddr, &addrlen);
   if (acceptsd < 0)
     {
-      printf("server: accept failure: %d\n", errno);
+      message("server: accept failure: %d\n", errno);
       exit(1);
     }
-  printf("server: Connection accepted -- receiving\n");
+  message("server: Connection accepted -- receiving\n");
 
 #ifdef CONFIG_NETTEST_PERFORMANCE
   /* Then receive data forever */
@@ -126,7 +126,7 @@ void recv_server(void)
       nbytesread = recv(acceptsd, buffer, 1024, 0);
       if (nbytesread <= 0)
         {
-          printf("server: recv failed: %d\n", errno);
+          message("server: recv failed: %d\n", errno);
           close(listensd);
           close(acceptsd);
           exit(-1);
@@ -138,25 +138,25 @@ void recv_server(void)
   totalbytesread = 0;
   while (totalbytesread < SENDSIZE)
     {
-      printf("server: Reading...\n");
+      message("server: Reading...\n");
       nbytesread = recv(acceptsd, &buffer[totalbytesread], 1024 - totalbytesread, 0);
       if (nbytesread <= 0)
         {
-          printf("server: recv failed: %d\n", errno);
+          message("server: recv failed: %d\n", errno);
           close(listensd);
           close(acceptsd);
           exit(-1);
         }
 
       totalbytesread += nbytesread;
-      printf("server: Received %d of %d bytes\n", totalbytesread, SENDSIZE);
+      message("server: Received %d of %d bytes\n", totalbytesread, SENDSIZE);
     }
 
   /* Verify the message */
 
   if (totalbytesread != SENDSIZE)
     {
-      printf("server: Received %d / Expected %d bytes\n", totalbytesread, SENDSIZE);
+      message("server: Received %d / Expected %d bytes\n", totalbytesread, SENDSIZE);
       close(listensd);
       close(acceptsd);
       exit(-1);
@@ -167,7 +167,7 @@ void recv_server(void)
     {
       if (buffer[i] != ch)
         {
-          printf("server: Byte %d is %02x / Expected %02x\n", i, buffer[i], ch);
+          message("server: Byte %d is %02x / Expected %02x\n", i, buffer[i], ch);
           close(listensd);
           close(acceptsd);
           exit(-1);
@@ -184,12 +184,12 @@ void recv_server(void)
   nbytessent = send(acceptsd, buffer, totalbytesread, 0);
   if (nbytessent <= 0)
     {
-      printf("server: send failed: %d\n", errno);
+      message("server: send failed: %d\n", errno);
       close(listensd);
       close(acceptsd);
       exit(-1);
     }
-  printf("server: Sent %d bytes\n", nbytessent);
+  message("server: Sent %d bytes\n", nbytessent);
 
   close(listensd);
   close(acceptsd);

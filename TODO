@@ -44,7 +44,22 @@ o File system
 - Add chmod(), truncate().
 - FAT32: long file names
 
-o Console Output
+o Network
+- Did not implement send() and sendto() timeouts.  Option is setable via setsockopt,
+  but is not implemented.
+- netutils/webserver netutils/telnetd (and maybe others) are seriously broken.
+- Should implement SOCK_RAW
+- Performance Improvements (uIP is not very fast):
+
+  Add simple buffer management.  CONFIG_NET_BUFFERS
+  (1) On write, queue buffer for output get a new buffer for the socket (waiting if
+      nececcesary
+  (2) Copy buffer structure into uip_driver_structure when driver requests write
+      data
+
+  Add a txail callback into driver to eliminate send delays.  Since we want to
+  support multiple network devices, this means we will have to add some infrastructure
+  to map to device.
 
 o Documentation
 - Document fs/ & driver/ logic
@@ -61,6 +76,9 @@ o Applications & Tests
 o C5471
 
 o DM320
+- It seems that when a lot of debug statements are added, the system no
+  longer boots.  There could be some issue with the bootloader or with
+  the programming of the SDRAM MMU regions.
 
 o LPC214x
 - Finish bringup

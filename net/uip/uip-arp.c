@@ -137,23 +137,23 @@ static uint8 g_arptime;
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_VERBOSE
+#if defined(CONFIG_NET_DUMPARP) && defined(CONFIG_DEBUG)
 static void uip_arp_dump(struct arp_hdr *arp)
 {
-  vdbg("  HW type: %04x Protocol: %04x\n",
-       arp->ah_hwtype, arp->ah_protocol);\
-  vdbg("  HW len: %02x Proto len: %02x Operation: %04x\n",
-       arp->ah_hwlen, arp->ah_protolen, arp->ah_opcode);
-  vdbg("  Sender MAC: %02x:%02x:%02x:%02x:%02x:%02x IP: %d.%d.%d.%d\n",
-       arp->ah_shwaddr[0], arp->ah_shwaddr[1], arp->ah_shwaddr[2],
-       arp->ah_shwaddr[3], arp->ah_shwaddr[4], arp->ah_shwaddr[5],
-       arp->ah_sipaddr[0] & 0xff, arp->ah_sipaddr[0] >> 8,
-       arp->ah_sipaddr[1] & 0xff, arp->ah_sipaddr[1] >> 8);
-  vdbg("  Dest MAC:   %02x:%02x:%02x:%02x:%02x:%02x IP: %d.%d.%d.%d\n",
-       arp->ah_dhwaddr[0], arp->ah_dhwaddr[1], arp->ah_dhwaddr[2],
-       arp->ah_dhwaddr[3], arp->ah_dhwaddr[4], arp->ah_dhwaddr[5],
-       arp->ah_dipaddr[0] & 0xff, arp->ah_dipaddr[0] >> 8,
-       arp->ah_dipaddr[1] & 0xff, arp->ah_dipaddr[1] >> 8);
+  dbg("  HW type: %04x Protocol: %04x\n",
+      arp->ah_hwtype, arp->ah_protocol);\
+  dbg("  HW len: %02x Proto len: %02x Operation: %04x\n",
+      arp->ah_hwlen, arp->ah_protolen, arp->ah_opcode);
+  dbg("  Sender MAC: %02x:%02x:%02x:%02x:%02x:%02x IP: %d.%d.%d.%d\n",
+      arp->ah_shwaddr[0], arp->ah_shwaddr[1], arp->ah_shwaddr[2],
+      arp->ah_shwaddr[3], arp->ah_shwaddr[4], arp->ah_shwaddr[5],
+      arp->ah_sipaddr[0] & 0xff, arp->ah_sipaddr[0] >> 8,
+      arp->ah_sipaddr[1] & 0xff, arp->ah_sipaddr[1] >> 8);
+  dbg("  Dest MAC:   %02x:%02x:%02x:%02x:%02x:%02x IP: %d.%d.%d.%d\n",
+      arp->ah_dhwaddr[0], arp->ah_dhwaddr[1], arp->ah_dhwaddr[2],
+      arp->ah_dhwaddr[3], arp->ah_dhwaddr[4], arp->ah_dhwaddr[5],
+      arp->ah_dipaddr[0] & 0xff, arp->ah_dipaddr[0] >> 8,
+      arp->ah_dipaddr[1] & 0xff, arp->ah_dipaddr[1] >> 8);
 }
 #else
 # define uip_arp_dump(arp)
@@ -449,12 +449,6 @@ void uip_arp_out(struct uip_driver_s *dev)
           uip_ipaddr_copy(ipaddr, destipaddr);
         }
 
-      vdbg("Dest IP addr: %d.%d.%d.%d -> ARP IP addr: %d.%d.%d.%d\n", 
-            (destipaddr >> 24) & 0xff, (destipaddr >> 16) & 0xff,
-            (destipaddr >>  8) & 0xff,  destipaddr & 0xff,
-            (ipaddr     >> 24) & 0xff, (ipaddr     >> 16) & 0xff,
-            (ipaddr     >>  8) & 0xff,  ipaddr     & 0xff);
-
       /* Check if we already have this destination address in the ARP table */
 
       for (i = 0; i < UIP_ARPTAB_SIZE; ++i)
@@ -462,7 +456,6 @@ void uip_arp_out(struct uip_driver_s *dev)
           tabptr = &arp_table[i];
           if (uip_ipaddr_cmp(ipaddr, tabptr->at_ipaddr))
             {
-              vdbg("Dest IP found in ARP table\n");
               break;
             }
         }

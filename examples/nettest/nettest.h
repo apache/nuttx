@@ -40,15 +40,28 @@
  * Included Files
  ****************************************************************************/
 
+#ifdef CONFIG_NETTEST_HOST
+#else
+# include <debug.h>
+#endif
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 #ifdef CONFIG_NETTEST_HOST
-#  define HTONS(a) htons(a)
-#  define HTONL(a) htonl(a)
+   /* HTONS/L macros are unique to uIP */
+
+#  define HTONS(a)       htons(a)
+#  define HTONL(a)       htonl(a)
+#  define message(...)   printf(__VA_ARGS__)
 #else
-#  define errno   *get_errno_ptr()
+#  define errno         *get_errno_ptr()
+#  ifdef CONFIG_DEBUG
+#    define message(...) lib_lowprintf(__VA_ARGS__)
+#  else
+#    define message(...) printf(__VA_ARGS__)
+#  endif
 #endif
 
 #define PORTNO     5471

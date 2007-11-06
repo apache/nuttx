@@ -321,19 +321,9 @@ struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf)
   struct uip_conn *conn      = (struct uip_conn *)g_active_tcp_connections.head;
   in_addr_t        srcipaddr = uip_ip4addr_conv(buf->srcipaddr);  
 
-  vdbg("BUF: destport: %04x srcport: %04x IP: %d.%d.%d.%d\n",
-       buf->destport, buf->srcport,
-       (srcipaddr >> 24) & 0xff, (srcipaddr >> 16) & 0xff,
-       (srcipaddr >>  8) & 0xff,  srcipaddr & 0xff);
-
   while (conn)
     {
       /* Find an open connection matching the tcp input */
-
-      vdbg("conn: lport: %04x rport: %04x IP: %d.%d.%d.%d\n",
-           conn->lport, conn->rport,
-           (conn->ripaddr >> 24) & 0xff, (conn->ripaddr >> 16) & 0xff,
-           (conn->ripaddr >>  8) & 0xff,  conn->ripaddr & 0xff);
 
       if (conn->tcpstateflags != UIP_CLOSED &&
           buf->destport == conn->lport && buf->srcport == conn->rport &&

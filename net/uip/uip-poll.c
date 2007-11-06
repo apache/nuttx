@@ -125,7 +125,7 @@ int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback, int event)
   /* Traverse all of the active TCP connections and perform the poll action */
 
   conn = NULL;
-  while ((conn = uip_nexttcpconn(uip_conn)))
+  while ((conn = uip_nexttcpconn(conn)))
     {
       uip_conn = conn;
       uip_interrupt(dev, event);
@@ -141,7 +141,7 @@ int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback, int event)
   /* Traverse all of the allocated UDP connections and perform a poll action */
 
   udp_conn = NULL;
-  while ((udp_conn = uip_nextudpconn(uip_udp_conn)))
+  while ((udp_conn = uip_nextudpconn(udp_conn)))
     {
       uip_udp_conn = udp_conn;
       uip_interrupt(dev, UIP_UDP_POLL);

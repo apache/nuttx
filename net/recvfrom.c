@@ -107,7 +107,7 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
 #endif
   size_t recvlen;
 
-  vdbg("Interrupt uip_flags: %02x\n", uip_flags);
+  vdbg("uip_flags: %02x\n", uip_flags);
 
   /* 'private' might be null in some race conditions (?) */
 
@@ -154,7 +154,7 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
             {
               struct uip_udp_conn *udp_conn;
 
-              vdbg("UDP complete\n");
+              vdbg("UDP resume\n");
 
               /* Don't allow any further UDP call backs. */
 
@@ -174,7 +174,7 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
             {
               struct uip_conn *conn;
 
-              vdbg("TCP complete\n");
+              vdbg("TCP resume\n");
 
               /* The TCP receive buffer is full.  Return now, perhaps truncating
                * the received data (need to fix that).
@@ -206,7 +206,7 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
 
       else if ((uip_flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
         {
-          vdbg("Receive error\n");
+          vdbg("error\n");
 
           /* Stop further callbacks */
 
@@ -480,9 +480,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    * and automatically re-enabled when the task restarts.
    */
 
-  vdbg("Receiving UDP ...\n");
   ret = sem_wait(&state. rf_sem);
-  vdbg("Received\n");
 
   /* Make sure that no further interrupts are processed */
 
@@ -531,7 +529,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Verify that the SOCK_STREAM has been connected */
 
-  if (_SS_ISCONNECTED(psock->s_flags))
+  if (!_SS_ISCONNECTED(psock->s_flags))
     {
       /* The SOCK_STREAM must be connected in order to receive */
 
@@ -559,9 +557,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    * and automatically re-enabled when the task restarts.
    */
 
-  vdbg("Receiving UDP ...\n");
   ret = sem_wait(&state.rf_sem);
-  vdbg("Received\n");
 
   /* Make sure that no further interrupts are processed */
 
