@@ -591,11 +591,11 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
 
   dev->d_snddata = dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
 
-  /* Check if we were invoked because of a poll request for a
-   * particular connection.
+  /* Check if we were invoked because of a TX poll request for a
+   * particular TCP connection.
    */
 
-  if (event == UIP_POLL_REQUEST)
+  if (event == UIP_DRV_POLL)
     {
       if ((uip_connr->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED &&
            !uip_outstanding(uip_connr))
@@ -609,7 +609,7 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
 
   /* Check if we were invoked because of the perodic timer firing. */
 
-  else if (event == UIP_TIMER)
+  else if (event == UIP_DRV_TIMER)
     {
 #if UIP_REASSEMBLY
       if (uip_reasstmr != 0)
@@ -740,7 +740,7 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
     }
 
 #ifdef CONFIG_NET_UDP
-  else if (event == UIP_POLL)
+  else if (event == UIP_DRV_UDPPOLL)
     {
       if (uip_udp_conn->lport != 0)
         {
@@ -937,7 +937,7 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
 
 #if UIP_PINGADDRCONF
 icmp_input:
-#endif /* UIP_PINGADDRCONF */
+#endif
   UIP_STAT(++uip_stat.icmp.recv);
 
   /* ICMP echo (i.e., ping) processing. This is simple, we only change
@@ -1375,8 +1375,8 @@ tcp_send_syn:
   BUF->optdata[1] = TCP_OPT_MSS_LEN;
   BUF->optdata[2] = (UIP_TCP_MSS) / 256;
   BUF->optdata[3] = (UIP_TCP_MSS) & 255;
-  dev->d_len = UIP_IPTCPH_LEN + TCP_OPT_MSS_LEN;
-  BUF->tcpoffset = ((UIP_TCPH_LEN + TCP_OPT_MSS_LEN) / 4) << 4;
+  dev->d_len      = UIP_IPTCPH_LEN + TCP_OPT_MSS_LEN;
+  BUF->tcpoffset  = ((UIP_TCPH_LEN + TCP_OPT_MSS_LEN) / 4) << 4;
   goto tcp_send;
 
   /* This label will be jumped to if we found an active connection. */
@@ -1426,9 +1426,9 @@ found:
     {
       if ((dev->d_len > 0 || ((BUF->flags & (TCP_SYN | TCP_FIN)) != 0)) &&
           (BUF->seqno[0] != uip_connr->rcv_nxt[0] ||
-          BUF->seqno[1] != uip_connr->rcv_nxt[1] ||
-          BUF->seqno[2] != uip_connr->rcv_nxt[2] ||
-          BUF->seqno[3] != uip_connr->rcv_nxt[3]))
+           BUF->seqno[1] != uip_connr->rcv_nxt[1] ||
+           BUF->seqno[2] != uip_connr->rcv_nxt[2] ||
+           BUF->seqno[3] != uip_connr->rcv_nxt[3]))
         {
           goto tcp_send_ack;
         }
@@ -1959,7 +1959,9 @@ tcp_send_ack:
 tcp_send_nodata:
 
   dev->d_len = UIP_IPTCPH_LEN;
-  tcp_send_noopts:
+
+tcp_send_noopts:
+
   BUF->tcpoffset = (UIP_TCPH_LEN / 4) << 4;
 
 tcp_send:

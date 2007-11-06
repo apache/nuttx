@@ -1074,7 +1074,7 @@ static void dm9x_txdone(struct dm9x_driver_s *dm9x)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&dm9x->dm_dev, dm9x_uiptxpoll, UIP_POLL);
+  (void)uip_poll(&dm9x->dm_dev, dm9x_uiptxpoll, UIP_DRV_POLL);
 }
 
 /****************************************************************************
@@ -1231,7 +1231,7 @@ static void dm9x_txtimeout(int argc, uint32 arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&dm9x->dm_dev, dm9x_uiptxpoll, UIP_POLL);
+  (void)uip_poll(&dm9x->dm_dev, dm9x_uiptxpoll, UIP_DRV_POLL);
 }
 
 /****************************************************************************
@@ -1275,7 +1275,7 @@ static void dm9x_polltimer(int argc, uint32 arg, ...)
     {
       /* If so, poll uIP for new XMIT data */
 
-      (void)uip_poll(&dm9x->dm_dev, dm9x_uiptxpoll, UIP_TIMER);
+      (void)uip_poll(&dm9x->dm_dev, dm9x_uiptxpoll, UIP_DRV_TIMER);
     }
 
   /* Setup the watchdog poll timer again */

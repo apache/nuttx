@@ -44,8 +44,9 @@
  * Definitions
  ****************************************************************************/
 
-#define CONFIG_BOARD_LOOPSPERUSEC   ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
-#define CONFIG_BOARD_LOOPSPER10USEC ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
+#define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
+#define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
+#define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
 
 /****************************************************************************
  * Private Types
@@ -85,48 +86,43 @@
 
 void up_udelay(unsigned int microseconds)
 {
-  volatile int    i;
-  volatile int    j;
-  register uint32 loops;
+  volatile int i;
 
-  /* The value of microseconds should be less than 1000.  If not, then we
-   * will perform millescond delays until it is.
+  /* We'll do this a little at a time because we expect that the
+   * CONFIG_BOARD_LOOPSPERUSEC is very inaccurate during to truncation in
+   * the divisions of its calculation.  We'll use the largest values that
+   * we can in order to prevent significant error buildup in the loops.
    */
 
   while (microseconds > 1000)
     {
-      for (j = 0; j < CONFIG_BOARD_LOOPSPERMSEC; j++)
+      for (i = 0; i < CONFIG_BOARD_LOOPSPERMSEC; i++)
         {
         }
       microseconds -= 1000;
     }
 
-  /* The numerator of the 'loops' below will overflow if CONFIG_BOARD_LOOPSPERMSEC
-   * is larger than (4*1024*1024*1024 - 500)/999 = 4,299,266.06
-   */
-
-#if CONFIG_BOARD_LOOPSPERMSEC >= 4299266
-  while (microseconds > 500)
+  while (microseconds > 100)
     {
-      for (j = 0; j < ((CONFIG_BOARD_LOOPSPERMSEC+1)/2); j++)
+      for (i = 0; i < CONFIG_BOARD_LOOPSPER100USEC; i++)
         {
         }
-      microseconds -= 500;
+      microseconds -= 100;
     }
-#endif
 
-  /* The overflow could still occur if CONFIG_BOARD_LOOPSPERMSEC is larger than
-   * (4*1024*1024*1024 - 500)/499 = 8,607,147.89
-   */
-
-#if CONFIG_BOARD_LOOPSPERMSEC >= 8607147
-# warning "Overflow in loops calculation is possible"
-#endif
-
-  /* Caculate the number of loops need to produce the required usec delay */
-
-  loops = (CONFIG_BOARD_LOOPSPERMSEC * microseconds + 500) / 1000;
-  for (j = 0; j < loops; j++)
+  while (microseconds > 10)
     {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPER10USEC; i++)
+        {
+        }
+      microseconds -= 10;
+    }
+
+  while (microseconds > 0)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPERUSEC; i++)
+        {
+        }
+      microseconds--;
     }
 }

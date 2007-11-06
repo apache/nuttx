@@ -55,6 +55,9 @@
 void recv_server(void)
 {
   struct sockaddr_in myaddr;
+#ifdef NETTEST_HAVE_SOLINGER
+  struct linger ling;
+#endif
   char buffer[1024];
   int listensd;
   int acceptsd;
@@ -82,11 +85,11 @@ void recv_server(void)
   optval = 1;
   if (setsockopt(listensd, SOL_SOCKET, SO_REUSEADDR, (void*)&optval, sizeof(int)) < 0)
     {
-      message("server: setsockopt failure: %d\n", errno);
+      message("server: setsockopt SO_REUSEADDR failure: %d\n", errno);
       exit(1);
     }
 
-  /* Bind the TCP socket to a local address */
+  /* Bind the socket to a local address */
 
   myaddr.sin_family      = AF_INET;
   myaddr.sin_port        = HTONS(PORTNO);
@@ -117,6 +120,18 @@ void recv_server(void)
       exit(1);
     }
   message("server: Connection accepted -- receiving\n");
+
+  /* Configure to "linger" until all data is sent when the socket is closed */
+
+#ifdef NETTEST_HAVE_SOLINGER
+    ling.l_onoff  = 1;
+    ling.l_linger = 30;     /* timeout is seconds */
+    if (setsockopt(acceptsd, SOL_SOCKET, SO_LINGER, &ling, sizeof(struct linger)) < 0)
+      {
+      message("server: setsockopt SO_LINGER failure: %d\n", errno);
+      exit(1);
+    }
+#endif
 
 #ifdef CONFIG_NETTEST_PERFORMANCE
   /* Then receive data forever */
@@ -179,6 +194,17 @@ void recv_server(void)
         }
     }
 
+#ifdef CONFIG_NETTEST_HOST
+  /* At present, data received by the target before it is completed the
+   * the write opertion and started the read operation results in a failure
+   * (the data is not received, but it is ACKed).  This will have to be
+   * fixed.
+   */
+
+# warning "FIXME: This should not be necessary"
+  sleep(10);
+#endif
+
   /* Then send the same data back to the client */
 
   nbytessent = send(acceptsd, buffer, totalbytesread, 0);
@@ -190,6 +216,15 @@ void recv_server(void)
       exit(-1);
     }
   message("server: Sent %d bytes\n", nbytessent);
+
+  /* If this platform only does abortive disconnects, then wait a bit to get the
+   * client side a change to receive the data.
+   */
+
+#if 1 /* Do it for all platforms */
+  message("server: Wait before closing\n");
+  sleep(60);
+#endif
 
   close(listensd);
   close(acceptsd);

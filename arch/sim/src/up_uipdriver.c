@@ -201,7 +201,7 @@ void uipdriver_loop(void)
   else if (timer_expired(&g_periodic_timer))
     {
       timer_reset(&g_periodic_timer);
-      uip_poll(&g_sim_dev, sim_uiptxpoll, UIP_TIMER);
+      uip_poll(&g_sim_dev, sim_uiptxpoll, UIP_DRV_TIMER);
     }
   sched_unlock();
 }

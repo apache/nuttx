@@ -128,7 +128,7 @@ static void send_interrupt(struct uip_driver_s *dev, void *private)
 
   else if (pstate->snd_state == STATE_DATA_SENT && uip_ack_event())
     {
-      /* Yes.. the data has been sent AND acknowledge */
+      /* Yes.. the data has been sent AND acknowledged */
 
       if (pstate->snd_buflen > uip_mss())
         {

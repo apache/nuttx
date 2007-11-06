@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: September 8, 2007</p>
+      <p>Last Updated: November 6, 2007</p>
     </td>
   </tr>
 </table>
@@ -183,12 +183,27 @@
 </table>
 
 <p>
-   The 11th release of NuttX (nuttx-0.2.8) is available for download
+   The 12th release of NuttX (nuttx-0.3.0) is available for download
    from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
    website.
    The change log associated with the release is available <a href="#currentrelease">here</a>.
    Unreleased changes after this release are avalable in CVS.
    These unreleased changes are listed <a href="#pendingchanges">here</a>.
+</p>
+<p>
+   NuttX 30.3.0 includes the initial integration of a network subsystem and
+   a TCP/IP stack based on <a href="http://www.sics.se/~adam/uip/index.php/Main_Page">uIP</a>.
+   Also included is a device driver for the Davicom DM90x0 ethernet controller.
+</p>
+</p>
+  This integration is very preliminary.  Only a small portion of the
+  network functionality has been integrated and there are a number of
+  open issues.  The network subsystem is pre-alpha this point in time.
+  I expect that it will stabilize and mature over the next few releases.
+</p>
+<p>
+  The baseline functionality of NuttX continues to mature and remains at
+  post-beta (as long as the network is not used).
 </p>
 
 <table width ="100%">
@@ -251,14 +266,14 @@
     </p>
     <p>
       <b>STATUS:</b>
-        This port is in progress and should be available in the nuttx-0.2.7 release.
+        Initial coding of this port code complete but has not yet been verified.
     </p>
   </td>
 </tr>
 <tr>
   <td valign="top"><img src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <b>ARM9EJS</b>.
+    <b>ARM926EJS</b>.
   </td>
 </tr>
 <tr>
@@ -273,7 +288,7 @@
     </p>
     <p>
       <b>STATUS:</b>
-      This port is code complete but totally untested due to hardware issues with my OSD.
+        This port is complete and verified.
     </p>
    </td>
 </tr>
@@ -329,7 +344,7 @@ is available that be used to build a NuttX-compatible arm-elf toolchain.</blockq
 </table>
 
 <ul>
-<p><b>C5471 (Arm7)</b>
+<p><b>C5471 (ARM7)</b>
   The build for this ARM7 target that includes most of the OS features and
   a broad range of OS tests.  The size of this executable as given by the
   Linux <tt>size</tt> command is (3/9/07):
@@ -337,6 +352,14 @@ is available that be used to build a NuttX-compatible arm-elf toolchain.</blockq
 <pre>
    text    data     bss     dec     hex filename
   53272     428    3568   57268    dfb4 nuttx
+</pre>
+<p><b>DM320 (ARM9)</b>
+  This build for the ARM9 target includes a signficant subset of OS
+  features, ethernet driver and full TCP/IP stack (via uIP).
+</p>
+<pre>
+   text    data     bss     dec     hex filename
+  51368     296    6072   57736    e188 nuttx
 </pre>
 <p><b>87C52</b>
   A reduced functionality OS test for the 8052 target requires only
@@ -589,17 +612,7 @@ Other memory:
 	  __FILE__and __LINE__ (not tested)
 	* examples/ostest/barrier.c: Don't call usleep() when signals are
 	  disabled.
-</pre></ul>
 
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="currentrelease">ChangeLog for Current Release</a>
-  </td>
-  </tr>
-</table>
-
-<pre><ul>
 0.2.8 2007-07-02 Gregory Nutt <spudmonkey@racsa.co.cr>
 	* tools/Makefile.mkconfig: Under Cygwin, executable has a different name
 	* tools/mkdeps.sh & arch/arm/src/Makefile: Corrected a problem makeing dependencies
@@ -626,13 +639,13 @@ Other memory:
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="pendingchanges">Unreleased Changes</a>
+    <a name="currentrelease">ChangeLog for Current Release</a>
   </td>
   </tr>
 </table>
 
 <pre><ul>
-0.3.0 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.0 2007-11-06 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Imported uIP into the tree (see
 	   http://www.sics.se/~adam/uip/index.php/Main_Page)
@@ -648,6 +661,19 @@ Other memory:
 	* Added listen() and accept()
 	* Added DM90x0 ethernet driver
 	* ARP timer is now built into the network layer
+	* Basic client functionality verified: socket(), bind(), connect(), recv(), send().
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="pendingchanges">Unreleased Changes</a>
+  </td>
+  </tr>
+</table>
+
+<pre><ul>
+0.3.1 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 </pre></ul>
 
 <table width ="100%">

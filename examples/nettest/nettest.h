@@ -54,14 +54,34 @@
 
 #  define HTONS(a)       htons(a)
 #  define HTONL(a)       htonl(a)
+
+   /* Used printf for debug output */
+
 #  define message(...)   printf(__VA_ARGS__)
+
+   /* Have SO_LINGER */
+
+#  define NETTEST_HAVE_SOLINGER 1
+
 #else
+
+   /* Get errno using a pointer */
+
 #  define errno         *get_errno_ptr()
+
+   /* If debug is enabled, use the synchronous lib_lowprintf so that the
+    * program output does not get disassociated in the debug output.
+    */
+
 #  ifdef CONFIG_DEBUG
 #    define message(...) lib_lowprintf(__VA_ARGS__)
 #  else
 #    define message(...) printf(__VA_ARGS__)
 #  endif
+
+   /* At present, uIP does only abortive disconnects */
+
+#  undef NETTEST_HAVE_SOLINGER
 #endif
 
 #define PORTNO     5471

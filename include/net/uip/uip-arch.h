@@ -63,15 +63,25 @@
  * incoming data that should be processed, or because the periodic
  * timer has fired. These values are never used directly, but only in
  * the macrose defined in this file.
+ *
+ * UIP_DRV_RECEIVE - There is new incoming data from the driver in the d_buf
+ *                   field of the uip_driver_s structure.  The length of the
+ *                   new data is provided in the d_len field of the
+ *                   uip_driver_s structure.
+ * UIP_DRV_TIMER   - Called periodically from driver to service timeout-
+ *                   related activities to and to get timeout-related
+ *                   responses (e.g., reset)
+ * UIP_DRV_POLL    - Poll TCP for data to be transmitted
+ * UIP_DRV_UDPPOLL - Poll for UDP data to be transmitted.  This value is used
+ *                   internally by the uip_poll logic.
  */
 
-#define UIP_DATA          1 /* There is incoming data in the d_buf buffer. The
-                             * length of the data is stored in the field d_len. */
-#define UIP_TIMER         2 /* TCP periodic timer has fired */
-#define UIP_POLL_REQUEST  3 /* Poll TCP connection */
+#define UIP_DRV_RECEIVE   1
+#define UIP_DRV_TIMER     2
+#define UIP_DRV_POLL      3
 #ifdef CONFIG_NET_UDP
-# define UIP_UDP_POLL     4 /* Poll UDP connection */
-#endif  /* CONFIG_NET_UDP */
+# define UIP_DRV_UDPPOLL  4
+#endif
 
 /****************************************************************************
  * Public Types
@@ -236,7 +246,7 @@ struct uip_driver_s
  *       }
  */
 
-#define uip_input(dev) uip_interrupt(dev,UIP_DATA)
+#define uip_input(dev) uip_interrupt(dev, UIP_DRV_RECEIVE)
 
 /* Polling of connections.
  *
@@ -248,9 +258,9 @@ struct uip_driver_s
  * suplied function returns a non-zero value (which is would do only if
  * it cannot accept further write data).
  *
- * This function should be called periodically with event == UIP_TIMER for
- * periodic processing.  This function may also be called with UIP_POLL to
- * perform necessary periodic processing of TCP connections.
+ * This function should be called periodically with event == UIP_DRV_TIMER
+ * to perform TCP.  This function may also be called with UIP_DRV_POLL to
+ * obtain pending TX data.
  *
  * This function is called from the CAN device driver and may be called from
  * the timer interrupt/watchdog handle level.
@@ -272,7 +282,7 @@ struct uip_driver_s
  *   }
  *
  *   ...
- *   uip_poll(dev, driver_callback, UIP_TIMER);
+ *   uip_poll(dev, driver_callback, UIP_DRV_TIMER);
  *
  * Note: If you are writing a uIP device driver that needs ARP (Address
  * Resolution Protocol), e.g., when running uIP over Ethernet, you will
@@ -296,7 +306,7 @@ extern int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback, int 
 
 /* uip_poll helper functions */
 
-#define uip_periodic(dev,cb) uip_poll(dev,db,UIP_TIMER);
+#define uip_periodic(dev,cb) uip_poll(dev, db, UIP_DRV_TIMER);
 
 /* Architecure support
  *

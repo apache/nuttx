@@ -199,7 +199,7 @@
 	* examples/nsh/: Add cp, rm, rmdir, set, unset commands. echo will now print
 	  environment variables.
 
-0.3.0 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.0 2007-11-06 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Imported uIP into the tree (see
 	   http://www.sics.se/~adam/uip/index.php/Main_Page)
@@ -215,4 +215,7 @@
 	* Added listen() and accept()
 	* Added DM90x0 ethernet driver
 	* ARP timer is now built into the network layer
+	* Basic client functionality verified: socket(), bind(), connect(), recv(), send().
+
+0.3.1 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 

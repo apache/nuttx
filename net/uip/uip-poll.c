@@ -95,9 +95,9 @@ static inline void uip_udppoll(struct uip_driver_s *dev, unsigned int conn)
  *   suplied function returns a non-zero value (which is would do only if
  *   it cannot accept further write data).
  *
- *   This function should be called periodically with event == UIP_TIMER for
- *   periodic processing.  This function may also be called with UIP_POLL to
- *   perform necessary periodic processing of TCP connections.
+ *   This function should be called periodically with event == UIP_DRV_TIMER
+ *   to perform period TCP processing.  This function may also be called
+ *   with UIP_DRV_POLL obtain queue TX data.
  *
  *   When the callback function is called, there may be an outbound packet
  *   waiting for service in the uIP packet buffer, and if so the d_len field
@@ -144,7 +144,7 @@ int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback, int event)
   while ((udp_conn = uip_nextudpconn(udp_conn)))
     {
       uip_udp_conn = udp_conn;
-      uip_interrupt(dev, UIP_UDP_POLL);
+      uip_interrupt(dev, UIP_DRV_UDPPOLL);
       if (callback(dev))
         {
           irqrestore(flags);
