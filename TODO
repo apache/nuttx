@@ -49,7 +49,6 @@ o Network
   Add a txail callback into driver to eliminate send delays.  Since we want to
   support multiple network devices, this means we will have to add some infrastructure
   to map to device.
-- Break uip_interrupt() (in uip.c) into several functions.
 - uIP polling issues:
   (1) uIP expects a single driver to poll at a 500ms interval (dm90x0 currently
       polls a 5sec).

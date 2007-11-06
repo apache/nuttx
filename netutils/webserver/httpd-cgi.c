@@ -164,7 +164,7 @@ static void tcp_stats(struct httpd_state *pstate, char *ptr)
 #ifdef CONFIG_HTTPDCGI_NETSTATS
 static void net_stats(struct httpd_state *pstate, char *ptr)
 {
-#if UIP_STATISTICS
+#ifdef CONFIG_NET_STATISTICS
   char buffer[16];
 
   for(pstate->count = 0; pstate->count < sizeof(uip_stat) / sizeof(uip_stats_t); ++pstate->count)
@@ -172,6 +172,6 @@ static void net_stats(struct httpd_state *pstate, char *ptr)
       snprintf(buffer, 16, "%5u\n", ((uip_stats_t *)&uip_stat)[pstate->count]);
       send(pstate->sockout, buffer, strlen(buffer), 0);
     }
-#endif /* UIP_STATISTICS */
+#endif
 }
 #endif

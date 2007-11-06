@@ -215,7 +215,7 @@ struct uip_udp_conn
 #endif  /* CONFIG_NET_UDP */
 
 /* The structure holding the TCP/IP statistics that are gathered if
- * UIP_STATISTICS is set to 1.
+ * CONFIG_NET_STATISTICS is defined.
  */
 
 struct uip_stats
@@ -499,7 +499,7 @@ extern uint8 uip_flags;
  * TCP/IP stack.
  */
 
-void uip_init(void);
+void uip_initialize(void);
 
 /* This function may be used at boot time to set the initial ip_id.*/
 

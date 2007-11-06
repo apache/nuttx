@@ -259,7 +259,7 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
   struct send_s state;
   irqstate_t save;
   int err;
-  int ret;
+  int ret = OK;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 

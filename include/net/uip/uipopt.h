@@ -260,17 +260,6 @@
 # define UIP_BUFSIZE CONFIG_NET_BUFFER_SIZE
 #endif /* CONFIG_NET_BUFFER_SIZE */
 
-/* Determines if statistics support should be compiled in.
- *
- * The statistics is useful for debugging and to show the user.
- */
-
-#ifndef CONFIG_NET_STATISTICS
-# define UIP_STATISTICS  0
-#else /* CONFIG_NET_STATISTICS */
-# define UIP_STATISTICS CONFIG_NET_STATISTICS
-#endif /* CONFIG_NET_STATISTICS */
-
 /* Broadcast support.
  *
  * This flag configures IP broadcast support. This is useful only

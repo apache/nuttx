@@ -79,9 +79,6 @@
 #define UIP_DRV_RECEIVE   1
 #define UIP_DRV_TIMER     2
 #define UIP_DRV_POLL      3
-#ifdef CONFIG_NET_UDP
-# define UIP_DRV_UDPPOLL  4
-#endif
 
 /****************************************************************************
  * Public Types

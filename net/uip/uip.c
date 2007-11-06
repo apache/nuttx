@@ -89,21 +89,6 @@
 # include "uip-neighbor.h"
 #endif /* CONFIG_NET_IPv6 */
 
-/* Check if logging of network events should be compiled in.
- *
- * This is useful mostly for debugging. The function uip_log()
- * must be implemented to suit the architecture of the project, if
- * logging is turned on.
- */
-
-#ifdef CONFIG_NET_LOGGING
-# include <stdio.h>
-extern void uip_log(char *msg);
-# define UIP_LOG(m) uip_log(m)
-#else
-# define UIP_LOG(m)
-#endif
-
 #include "uip-internal.h"
 
 /****************************************************************************
@@ -142,7 +127,6 @@ extern void uip_log(char *msg);
 #define BUF     ((struct uip_tcpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
 #define FBUF    ((struct uip_tcpip_hdr *)&uip_reassbuf[0])
 #define ICMPBUF ((struct uip_icmpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
-#define UDPBUF  ((struct uip_udpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Public Variables
@@ -171,12 +155,16 @@ struct uip_udp_conn *uip_udp_conn;
 
 uint8 uip_acc32[4];
 
-#if UIP_STATISTICS == 1
+#ifdef CONFIG_NET_STATISTICS
 struct uip_stats uip_stat;
 # define UIP_STAT(s) s
 #else
 # define UIP_STAT(s)
-#endif /* UIP_STATISTICS == 1 */
+#endif
+
+/* Increasing number used for the IP ID field. */
+
+uint16 g_ipid;
 
 const uip_ipaddr_t all_ones_addr =
 #ifdef CONFIG_NET_IPv6
@@ -196,83 +184,9 @@ const uip_ipaddr_t all_zeroes_addr =
  * Private Variables
  ****************************************************************************/
 
-static uint16 g_ipid;    /* Increasing number used for the IP ID field. */
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-#if !UIP_ARCH_CHKSUM
-static uint16 chksum(uint16 sum, const uint8 *data, uint16 len)
-{
-  uint16 t;
-  const uint8 *dataptr;
-  const uint8 *last_byte;
-
-  dataptr = data;
-  last_byte = data + len - 1;
-
-  while(dataptr < last_byte)
-    {
-      /* At least two more bytes */
-
-      t = (dataptr[0] << 8) + dataptr[1];
-      sum += t;
-      if (sum < t)
-        {
-          sum++; /* carry */
-        }
-      dataptr += 2;
-    }
-
-  if (dataptr == last_byte)
-    {
-      t = (dataptr[0] << 8) + 0;
-      sum += t;
-      if (sum < t)
-        {
-          sum++; /* carry */
-        }
-    }
-
-  /* Return sum in host byte order. */
-
-  return sum;
-}
-
-static uint16 upper_layer_chksum(struct uip_driver_s *dev, uint8 proto)
-{
-  uint16 upper_layer_len;
-  uint16 sum;
-
-#ifdef CONFIG_NET_IPv6
-  upper_layer_len = (((uint16)(BUF->len[0]) << 8) + BUF->len[1]);
-#else /* CONFIG_NET_IPv6 */
-  upper_layer_len = (((uint16)(BUF->len[0]) << 8) + BUF->len[1]) - UIP_IPH_LEN;
-#endif /* CONFIG_NET_IPv6 */
-
-  /* First sum pseudoheader. */
-
-  /* IP protocol and length fields. This addition cannot carry. */
-  sum = upper_layer_len + proto;
-
-  /* Sum IP source and destination addresses. */
-  sum = chksum(sum, (uint8 *)&BUF->srcipaddr, 2 * sizeof(uip_ipaddr_t));
-
-  /* Sum TCP header and data. */
-  sum = chksum(sum, &dev->d_buf[UIP_IPH_LEN + UIP_LLH_LEN], upper_layer_len);
-
-  return (sum == 0) ? 0xffff : htons(sum);
-}
-
-#ifdef CONFIG_NET_IPv6
-static uint16 uip_icmp6chksum(struct uip_driver_s *dev)
-{
-  return upper_layer_chksum(dev, UIP_PROTO_ICMP6);
-}
-#endif /* CONFIG_NET_IPv6 */
-
-#endif /* UIP_ARCH_CHKSUM */
 
 /****************************************************************************
  * Public Functions
@@ -283,94 +197,6 @@ static uint16 uip_icmp6chksum(struct uip_driver_s *dev)
 void uip_setipid(uint16 id)
 {
   g_ipid = id;
-}
-
-/* Calculate the Internet checksum over a buffer. */
-
-#if !UIP_ARCH_ADD32
-void uip_add32(uint8 *op32, uint16 op16)
-{
-  uip_acc32[3] = op32[3] + (op16 & 0xff);
-  uip_acc32[2] = op32[2] + (op16 >> 8);
-  uip_acc32[1] = op32[1];
-  uip_acc32[0] = op32[0];
-
-  if (uip_acc32[2] < (op16 >> 8))
-    {
-      ++uip_acc32[1];
-      if (uip_acc32[1] == 0)
-        {
-          ++uip_acc32[0];
-        }
-    }
-
-  if (uip_acc32[3] < (op16 & 0xff))
-    {
-      ++uip_acc32[2];
-      if (uip_acc32[2] == 0)
-        {
-          ++uip_acc32[1];
-          if (uip_acc32[1] == 0)
-            {
-              ++uip_acc32[0];
-            }
-        }
-    }
-}
-#endif /* UIP_ARCH_ADD32 */
-
-#if !UIP_ARCH_CHKSUM
-uint16 uip_chksum(uint16 *data, uint16 len)
-{
-  return htons(chksum(0, (uint8 *)data, len));
-}
-
-/* Calculate the IP header checksum of the packet header in d_buf. */
-
-#ifndef UIP_ARCH_IPCHKSUM
-uint16 uip_ipchksum(struct uip_driver_s *dev)
-{
-  uint16 sum;
-
-  sum = chksum(0, &dev->d_buf[UIP_LLH_LEN], UIP_IPH_LEN);
-  return (sum == 0) ? 0xffff : htons(sum);
-}
-#endif
-
-/* Calculate the TCP checksum of the packet in d_buf and d_appdata. */
-
-uint16 uip_tcpchksum(struct uip_driver_s *dev)
-{
-  return upper_layer_chksum(dev, UIP_PROTO_TCP);
-}
-
-/* Calculate the UDP checksum of the packet in d_buf and d_appdata. */
-
-#ifdef CONFIG_NET_UDP_CHECKSUMS
-uint16 uip_udpchksum(struct uip_driver_s *dev)
-{
-  return upper_layer_chksum(dev, UIP_PROTO_UDP);
-}
-#endif /* UIP_UDP_CHECKSUMS */
-#endif /* UIP_ARCH_CHKSUM */
-
-void uip_init(void)
-{
-  /* Initialize the listening port structures */
-
-  uip_listeninit();
-
-  /* Initialize the TCP/IP connection structures */
-
-  uip_tcpinit();
-
-  /* Initialize the UDP connection structures */
-
-#ifdef CONFIG_NET_UDP
-  uip_udpinit();
-#endif
-
-  /* IPv4 initialization. */
 }
 
 /* IP fragment reassembly: not well-tested. */
@@ -532,22 +358,6 @@ static void uip_add_rcv_nxt(uint16 n)
   uip_conn->rcv_nxt[2] = uip_acc32[2];
   uip_conn->rcv_nxt[3] = uip_acc32[3];
 }
-
-#ifdef CONFIG_NET_UDP
-static void uip_udp_callback(struct uip_driver_s *dev)
-{
-  vdbg("uip_flags: %02x\n", uip_flags);
-
-  /* Some sanity checking */
-
-  if (uip_udp_conn && uip_udp_conn->event)
-    {
-      /* Perform the callback */
-
-      uip_udp_conn->event(dev, uip_udp_conn->private);
-    }
-}
-#endif
 
 static void uip_tcp_callback(struct uip_driver_s *dev)
 {
@@ -739,26 +549,6 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
       goto drop;
     }
 
-#ifdef CONFIG_NET_UDP
-  else if (event == UIP_DRV_UDPPOLL)
-    {
-      if (uip_udp_conn->lport != 0)
-        {
-          uip_conn       = NULL;
-          dev->d_snddata = dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
-          dev->d_len     = 0;
-          dev->d_sndlen  = 0;
-          uip_flags      = UIP_POLL;
-          uip_udp_callback(dev);
-          goto udp_send;
-        }
-      else
-        {
-          goto drop;
-        }
-    }
-#endif
-
   /* This is where the input processing starts. */
 
   UIP_STAT(++uip_stat.ip.recv);
@@ -774,7 +564,7 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
 
       UIP_STAT(++uip_stat.ip.drop);
       UIP_STAT(++uip_stat.ip.vhlerr);
-      UIP_LOG("ipv6: invalid version.");
+      uip_log("ipv6: invalid version.");
       goto drop;
     }
 #else /* CONFIG_NET_IPv6 */
@@ -786,7 +576,7 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
 
       UIP_STAT(++uip_stat.ip.drop);
       UIP_STAT(++uip_stat.ip.vhlerr);
-      UIP_LOG("ip: invalid version or header length.");
+      uip_log("ip: invalid version or header length.");
       goto drop;
     }
 #endif /* CONFIG_NET_IPv6 */
@@ -815,7 +605,7 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
     }
   else
     {
-      UIP_LOG("ip: packet shorter than reported in IP header.");
+      uip_log("ip: packet shorter than reported in IP header.");
       goto drop;
     }
 
@@ -833,7 +623,7 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
 #else /* UIP_REASSEMBLY */
       UIP_STAT(++uip_stat.ip.drop);
       UIP_STAT(++uip_stat.ip.fragerr);
-      UIP_LOG("ip: fragment dropped.");
+      uip_log("ip: fragment dropped.");
       goto drop;
 #endif /* UIP_REASSEMBLY */
     }
@@ -849,12 +639,12 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
 #if UIP_PINGADDRCONF && !CONFIG_NET_IPv6
       if (BUF->proto == UIP_PROTO_ICMP)
         {
-          UIP_LOG("ip: possible ping config packet received.");
+          uip_log("ip: possible ping config packet received.");
           goto icmp_input;
         }
       else
         {
-          UIP_LOG("ip: packet dropped since no address assigned.");
+          uip_log("ip: packet dropped since no address assigned.");
           goto drop;
         }
 #endif /* UIP_PINGADDRCONF */
@@ -903,7 +693,7 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
 
       UIP_STAT(++uip_stat.ip.drop);
       UIP_STAT(++uip_stat.ip.chkerr);
-      UIP_LOG("ip: bad checksum.");
+      uip_log("ip: bad checksum.");
       goto drop;
     }
 #endif /* CONFIG_NET_IPv6 */
@@ -918,9 +708,10 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
 #ifdef CONFIG_NET_UDP
   if (BUF->proto == UIP_PROTO_UDP)
     {
-      goto udp_input;
+      uip_udpinput(dev);
+      return;
     }
-#endif   /* CONFIG_NET_UDP */
+#endif
 
 #ifndef CONFIG_NET_IPv6
   /* ICMPv4 processing code follows. */
@@ -931,7 +722,7 @@ void uip_interrupt(struct uip_driver_s *dev, uint8 event)
 
       UIP_STAT(++uip_stat.ip.drop);
       UIP_STAT(++uip_stat.ip.protoerr);
-      UIP_LOG("ip: neither tcp nor icmp.");
+      uip_log("ip: neither tcp nor icmp.");
       goto drop;
     }
 
@@ -949,7 +740,7 @@ icmp_input:
     {
       UIP_STAT(++uip_stat.icmp.drop);
       UIP_STAT(++uip_stat.icmp.typeerr);
-      UIP_LOG("icmp: not icmp echo.");
+      uip_log("icmp: not icmp echo.");
       goto drop;
     }
 
@@ -993,7 +784,7 @@ icmp_input:
 
       UIP_STAT(++uip_stat.ip.drop);
       UIP_STAT(++uip_stat.ip.protoerr);
-      UIP_LOG("ip: neither tcp nor icmp6.");
+      uip_log("ip: neither tcp nor icmp6.");
       goto drop;
     }
 
@@ -1055,101 +846,10 @@ icmp_input:
     {
       UIP_STAT(++uip_stat.icmp.drop);
       UIP_STAT(++uip_stat.icmp.typeerr);
-      UIP_LOG("icmp: unknown ICMP message.");
+      uip_log("icmp: unknown ICMP message.");
       goto drop;
     }
 #endif /* !CONFIG_NET_IPv6 */
-
-#ifdef CONFIG_NET_UDP
-  /* UDP input processing. */
-
-udp_input:
-
-  /* UDP processing is really just a hack. We don't do anything to the
-   * UDP/IP headers, but let the UDP application do all the hard
-   * work. If the application sets d_sndlen, it has a packet to
-   * send.
-   */
-
-#ifdef CONFIG_NET_UDP_CHECKSUMS
-  dev->d_len    -= UIP_IPUDPH_LEN;
-  dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
-  if (UDPBUF->udpchksum != 0 && uip_udpchksum(dev) != 0xffff)
-    {
-      UIP_STAT(++uip_stat.udp.drop);
-      UIP_STAT(++uip_stat.udp.chkerr);
-      UIP_LOG("udp: bad checksum.");
-      goto drop;
-    }
-#else /* UIP_UDP_CHECKSUMS */
-  dev->d_len -= UIP_IPUDPH_LEN;
-#endif /* UIP_UDP_CHECKSUMS */
-
-  /* Demultiplex this UDP packet between the UDP "connections". */
-
-  uip_udp_conn = uip_udpactive(UDPBUF);
-  if (uip_udp_conn)
-    {
-      goto udp_found;
-    }
-
-  UIP_LOG("udp: no matching connection found");
-  goto drop;
-
-udp_found:
-
-  uip_conn       = NULL;
-  uip_flags      = UIP_NEWDATA;
-  dev->d_snddata = dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
-  dev->d_sndlen  = 0;
-  uip_udp_callback(dev);
-
-udp_send:
-
-  if (dev->d_sndlen == 0)
-    {
-      goto drop;
-    }
-  dev->d_len = dev->d_sndlen + UIP_IPUDPH_LEN;
-
-#ifdef CONFIG_NET_IPv6
-  /* For IPv6, the IP length field does not include the IPv6 IP header
-   * length.
-   */
-
-  BUF->len[0] = ((dev->d_len - UIP_IPH_LEN) >> 8);
-  BUF->len[1] = ((dev->d_len - UIP_IPH_LEN) & 0xff);
-#else /* CONFIG_NET_IPv6 */
-  BUF->len[0] = (dev->d_len >> 8);
-  BUF->len[1] = (dev->d_len & 0xff);
-#endif /* CONFIG_NET_IPv6 */
-
-  BUF->ttl = uip_udp_conn->ttl;
-  BUF->proto = UIP_PROTO_UDP;
-
-  UDPBUF->udplen = HTONS(dev->d_sndlen + UIP_UDPH_LEN);
-  UDPBUF->udpchksum = 0;
-
-  BUF->srcport  = uip_udp_conn->lport;
-  BUF->destport = uip_udp_conn->rport;
-
-  uiphdr_ipaddr_copy(BUF->srcipaddr, &dev->d_ipaddr);
-  uiphdr_ipaddr_copy(BUF->destipaddr, &uip_udp_conn->ripaddr);
-
-  dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPTCPH_LEN];
-
-#ifdef CONFIG_NET_UDP_CHECKSUMS
-  /* Calculate UDP checksum. */
-
-  UDPBUF->udpchksum = ~(uip_udpchksum(dev));
-  if (UDPBUF->udpchksum == 0)
-    {
-      UDPBUF->udpchksum = 0xffff;
-    }
-#endif /* UIP_UDP_CHECKSUMS */
-
-  goto ip_send_nolen;
-#endif   /* CONFIG_NET_UDP */
 
   /* TCP input processing. */
 
@@ -1165,7 +865,7 @@ tcp_input:
 
       UIP_STAT(++uip_stat.tcp.drop);
       UIP_STAT(++uip_stat.tcp.chkerr);
-      UIP_LOG("tcp: bad checksum.");
+      uip_log("tcp: bad checksum.");
       goto drop;
     }
 
@@ -1239,13 +939,13 @@ reset:
    * to propagate the carry to the other bytes as well.
    */
 
-  if (++BUF->ackno[3] == 0)
+  if (++(BUF->ackno[3]) == 0)
     {
-      if (++BUF->ackno[2] == 0)
+      if (++(BUF->ackno[2]) == 0)
         {
-          if (++BUF->ackno[1] == 0)
+          if (++(BUF->ackno[1]) == 0)
             {
-              ++BUF->ackno[0];
+              ++(BUF->ackno[0]);
             }
         }
     }
@@ -1302,7 +1002,7 @@ found_listen:
        */
 
       UIP_STAT(++uip_stat.tcp.syndrop);
-      UIP_LOG("tcp: found no unused connections.");
+      uip_log("tcp: found no unused connections.");
       goto drop;
     }
 
@@ -1396,7 +1096,7 @@ found:
     {
       uip_connr->tcpstateflags = UIP_CLOSED;
       vdbg("TCP state: UIP_CLOSED\n");
-      UIP_LOG("tcp: got reset, aborting connection.");
+      uip_log("tcp: got reset, aborting connection.");
 
       uip_flags = UIP_ABORT;
       uip_tcp_callback(dev);
@@ -2025,10 +1725,6 @@ tcp_send_noconn:
 
   BUF->tcpchksum = 0;
   BUF->tcpchksum = ~(uip_tcpchksum(dev));
-
-#ifdef CONFIG_NET_UDP
-ip_send_nolen:
-#endif   /* CONFIG_NET_UDP */
 
 #ifdef CONFIG_NET_IPv6
   BUF->vtc         = 0x60;

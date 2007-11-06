@@ -100,7 +100,7 @@ void net_initialize(void)
 {
   /* Initialize the uIP layer */
 
-  uip_init();
+  uip_initialize();
 
   /* Initialize the socket layer */
 

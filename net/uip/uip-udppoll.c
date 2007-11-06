@@ -1,18 +1,20 @@
 /****************************************************************************
- * net/uip/uip-internal.h
+ * net/uip/uip-udppoll.c
+ * Poll for the availability of UDP TX data
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
- * This logic was leveraged from uIP which also has a BSD-style license:
+ * Adapted for NuttX from logic in uIP which also has a BSD-like license:
  *
- *   Author Adam Dunkels <adam@dunkels.com>
- *   Copyright (c) 2001-2003, Adam Dunkels.
+ *   Original author Adam Dunkels <adam@dunkels.com>
+ *   Copyright () 2001-2003, Adam Dunkels.
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -36,106 +38,97 @@
  *
  ****************************************************************************/
 
-#ifndef __UIP_INTERNAL_H
-#define __UIP_INTERNAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && defined(CONFIG_NET_UDP)
 
 #include <sys/types.h>
-#include <errno.h>
-#include <arch/irq.h>
+#include <debug.h>
+
+#include <net/uip/uipopt.h>
 #include <net/uip/uip.h>
+#include <net/uip/uip-arch.h>
+
+#include "uip-internal.h"
 
 /****************************************************************************
- * Public Macro Definitions
+ * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Type Definitions
+ * Public Variables
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Private Variables
  ****************************************************************************/
-
-extern const uip_ipaddr_t all_ones_addr;
-extern const uip_ipaddr_t all_zeroes_addr;
-
-/* Increasing number used for the IP ID field. */
-
-extern uint16 g_ipid;
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-/* Defined in uip_tcpconn.c *************************************************/
+/****************************************************************************
+ * Name: uip_udppoll
+ *
+ * Description:
+ *   Poll a UDP "connection" structure for availability of TX data
+ *
+ * Parameters:
+ *   dev - The device driver structure to use in the send operation
+ *   conn - The UDP "connection" to poll for TX data
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   Called from the interrupt level or with interrupts disabled.
+ *
+ ****************************************************************************/
 
-EXTERN void uip_tcpinit(void);
-EXTERN struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf);
-EXTERN struct uip_conn *uip_nexttcpconn(struct uip_conn *conn);
-EXTERN struct uip_conn *uip_tcplistener(uint16 portno);
-EXTERN struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf);
-EXTERN void uip_tcpnextsequence(void);
+void uip_udppoll(struct uip_driver_s *dev, struct uip_udp_conn *conn)
+{
+  /* Verify that the UDP connection is valid */
 
-/* Defined in uip_listen.c **************************************************/
+  if (conn->lport != 0)
+    {
+      /* Setup for the application callback */
 
-EXTERN void uip_listeninit(void);
-EXTERN boolean uip_islistener(uint16 port);
-EXTERN int uip_accept(struct uip_conn *conn, uint16 portno);
+      uip_conn       = NULL;
+      uip_udp_conn   = conn;
 
-#ifdef CONFIG_NET_UDP
-/* Defined in uip_udpconn.c *************************************************/
+      dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
+      dev->d_snddata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
+      dev->d_len     = 0;
+      dev->d_sndlen  = 0;
 
-EXTERN void uip_udpinit(void);
-EXTERN struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf);
-EXTERN struct uip_udp_conn *uip_nextudpconn(struct uip_udp_conn *conn);
+      /* Perform the application callback */
 
-/* Defined in uip-udppool.c *************************************************/
+      uip_flags      = UIP_POLL;
+      uip_udpcallback(dev);
 
-EXTERN void uip_udppoll(struct uip_driver_s *dev, struct uip_udp_conn *conn);
+      /* If the application has data to send, setup the UDP/IP header */
 
-/* Defined in uip-udpsend.c *************************************************/
+      if (dev->d_sndlen > 0)
+        {
+          uip_udpsend(dev, conn);
+          uip_udp_conn = NULL;
+          uip_flags    = 0;
+          return;
+        }
+    }
 
-EXTERN void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn);
+  /* Make sure that d_len is zerp meaning that there is nothing to be sent */
 
-/* Defined in uip-udpinput.c ************************************************/
-
-EXTERN void uip_udpinput(struct uip_driver_s *dev);
-
-/* Defined in uip_uipcallback.c *********************************************/
-
-EXTERN void uip_udpcallback(struct uip_driver_s *dev);
-#endif /* CONFIG_NET_UDP */
-
-/* UIP logging **************************************************************/
-
-/* This function must be provided by the application if CONFIG_NET_LOGGING
- * is defined.
- */
-
-#ifdef CONFIG_NET_LOGGING
-EXTERN void uip_log(char *msg);
-#else
-# define uip_log(m)
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
+  dev->d_len   = 0;
+  uip_udp_conn = NULL;
+  uip_flags    = 0;
 }
-#endif
 
-#endif /* CONFIG_NET */
-#endif /* __UIP_INTERNAL_H */
+#endif /* CONFIG_NET && CONFIG_NET_UDP */
