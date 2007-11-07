@@ -115,7 +115,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
       uip_stat.tcp.drop++;
       uip_stat.tcp.chkerr++;
 #endif
-      uip_log("tcp: bad checksum.");
+      dbg("Bad TCP checksum\n");
       goto drop;
     }
 
@@ -179,7 +179,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
 #ifdef CONFIG_NET_STATISTICS
               uip_stat.tcp.syndrop++;
 #endif
-              uip_log("tcp: found no unused connections.");
+              dbg("No free TCP connections\n");
               goto drop;
             }
 
@@ -276,8 +276,7 @@ found:
   if (BUF->flags & TCP_RST)
     {
       uip_connr->tcpstateflags = UIP_CLOSED;
-      vdbg("TCP state: UIP_CLOSED\n");
-      uip_log("tcp: got reset, aborting connection.");
+      dbg("Recvd reset - TCP state: UIP_CLOSED\n");
 
       uip_flags = UIP_ABORT;
       uip_tcpcallback(dev);

@@ -109,7 +109,7 @@ void uip_udpinput(struct uip_driver_s *dev)
       uip_stat.udp.drop++;
       uip_stat.udp.chkerr++;
 #endif
-      uip_log("udp: bad checksum.");
+      dbg("Bad UDP checksum\n");
       dev->d_len = 0;
     }
   else
@@ -145,7 +145,7 @@ void uip_udpinput(struct uip_driver_s *dev)
         }
       else
         {
-          uip_log("udp: no matching connection found");
+          dbg("No listener on UDP port\n");
           dev->d_len = 0;
         }
     }

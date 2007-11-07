@@ -316,7 +316,7 @@ void uip_input(struct uip_driver_s *dev)
       uip_stat.ip.drop++;
       uip_stat.ip.vhlerr++;
 #endif
-      uip_log("ipv6: invalid version.");
+      dbg("Invalid IPv6 version: %d\n", BUF->vtc >> 4);
       goto drop;
     }
 #else /* CONFIG_NET_IPv6 */
@@ -330,7 +330,7 @@ void uip_input(struct uip_driver_s *dev)
       uip_stat.ip.drop++;
       uip_stat.ip.vhlerr++;
 #endif
-      uip_log("ip: invalid version or header length.");
+      dbg("Invalid IP version or header length: %02x\n", BUF->vhl);
       goto drop;
     }
 #endif /* CONFIG_NET_IPv6 */
@@ -359,7 +359,7 @@ void uip_input(struct uip_driver_s *dev)
     }
   else
     {
-      uip_log("ip: packet shorter than reported in IP header.");
+      dbg("IP packet shorter than length in IP header\n");
       goto drop;
     }
 
@@ -379,7 +379,7 @@ void uip_input(struct uip_driver_s *dev)
       uip_stat.ip.drop++;
       uip_stat.ip.fragerr++;
 #endif
-      uip_log("ip: fragment dropped.");
+      dbg("IP fragment dropped\n");
       goto drop;
 #endif /* UIP_REASSEMBLY */
     }
@@ -395,14 +395,14 @@ void uip_input(struct uip_driver_s *dev)
 #if UIP_PINGADDRCONF && !CONFIG_NET_IPv6
       if (BUF->proto == UIP_PROTO_ICMP)
         {
-          uip_log("ip: possible ping config packet received.");
+          dbg("Possible ping config packet received\n");
           uip_icmpinput(dev);
           goto done;
         }
       else
 #endif /* UIP_PINGADDRCONF */
         {
-          uip_log("ip: packet dropped since no address assigned.");
+          dbg("No IP address assigned\n");
           goto drop;
         }
     }
@@ -457,7 +457,7 @@ void uip_input(struct uip_driver_s *dev)
       uip_stat.ip.drop++;
       uip_stat.ip.chkerr++;
 #endif
-      uip_log("ip: bad checksum.");
+      dbg("Bad IP checksum\n");
       goto drop;
     }
 #endif /* CONFIG_NET_IPv6 */
@@ -494,7 +494,7 @@ void uip_input(struct uip_driver_s *dev)
         uip_stat.ip.protoerr++;
 #endif
 
-        uip_log("ip: Unrecognized IP protocol.");
+        dbg("Unrecognized IP protocol\n");
         goto drop;
     }
 

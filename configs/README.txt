@@ -218,7 +218,6 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NET_SOCKOPTS - Enable or disable support for socket options
 
 		CONFIG_NET_BUFFER_SIZE - uIP buffer size
-		CONFIG_NET_LOGGING - Logging on or off
 		CONFIG_NET_UDP - UDP support on or off
 		CONFIG_NET_UDP_CHECKSUMS - UDP checksums on or off
 		CONFIG_NET_UDP_CONNS - The maximum amount of concurrent UDP

@@ -110,7 +110,7 @@ void uip_icmpinput(struct uip_driver_s *dev)
 
   if (ICMPBUF->type != ICMP_ECHO)
     {
-      uip_log("icmp: not ICMP echo.");
+      dbg("Unknown ICMP cmd: %d\n", ICMPBUF->type);
       goto typeerr;
     }
 
@@ -213,7 +213,7 @@ typeerr:
     }
   else
     {
-      uip_log("icmp: unknown ICMP6 message.");
+      dbg("Unknown ICMP6 cmd: %d\n", ICMPBUF->type);
       goto typeerr;
     }
 

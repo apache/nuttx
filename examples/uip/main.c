@@ -208,15 +208,6 @@ int user_start(int argc, char *argv[])
   return 0;
 }
 
-void uip_log(char *m)
-{
-  /* Since uip_log is called from interrupt handling logic, it cannot use
-   * or other standard I/O.  This should work from an interrupt handler:
-   */
-
-  lib_rawprintf("uIP log message: %s\n", m);
-}
-
 #if defined(CONFIG_EXAMPLE_UIP_WEBCLIENT)
 void webclient_closed(void)
 {

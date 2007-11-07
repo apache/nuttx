@@ -960,12 +960,4 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
     (in_addr_t)(dest) = (in_addr_t)(src) & (in_addr_t)(mask); \
   } while(0)
 
-/* Print out a uIP log message.
- *
- * This function must be implemented by the module that uses uIP, and
- * is called by uIP whenever a log message is generated.
- */
-
-extern void uip_log(char *msg);
-
 #endif /* __NET_UIP_UIP_H */

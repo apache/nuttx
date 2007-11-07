@@ -192,18 +192,6 @@ EXTERN void uip_udpcallback(struct uip_driver_s *dev);
 
 EXTERN void uip_icmpinput(struct uip_driver_s *dev);
 
-/* UIP logging **************************************************************/
-
-/* This function must be provided by the application if CONFIG_NET_LOGGING
- * is defined.
- */
-
-#ifdef CONFIG_NET_LOGGING
-EXTERN void uip_log(char *msg);
-#else
-# define uip_log(m)
-#endif
-
 #undef EXTERN
 #ifdef __cplusplus
 }
