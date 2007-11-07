@@ -108,10 +108,11 @@
 #define UIP_REASSEMBLY 0
 
 /* The maximum time an IP fragment should wait in the reassembly
- * buffer before it is dropped.
+ * buffer before it is dropped.  Units are deci-seconds, the range
+ * of the timer is 8-bits.
  */
 
-#define UIP_REASS_MAXAGE 40
+#define UIP_REASS_MAXAGE (20*10) /* 20 seconds */
 
 /* UDP configuration options */
 
@@ -218,10 +219,10 @@
 /* How long a connection should stay in the TIME_WAIT state.
  *
  * This configiration option has no real implication, and it should be
- * left untouched.
+ * left untouched. Units: half second.
  */
 
-#define UIP_TIME_WAIT_TIMEOUT 120
+#define UIP_TIME_WAIT_TIMEOUT (60*2)
 
 /* ARP configuration options */
 

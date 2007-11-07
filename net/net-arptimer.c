@@ -87,8 +87,6 @@ static WDOG_ID g_arptimer;           /* ARP timer */
 
 static void arptimer_poll(int argc, uint32 arg, ...)
 {
-  dbg("ARP timer expiration\n");
-
   /* Call the ARP timer function every 10 seconds. */
 
   uip_arp_timer();

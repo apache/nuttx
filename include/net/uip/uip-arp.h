@@ -45,7 +45,6 @@
 
 struct uip_eth_hdr
 {
-  
   uint8  dest[6]; /* Ethernet destination address (6 bytes) */
   uint8  src[6];  /* Ethernet source address (6 bytes) */
   uint16 type;    /* Type code (2 bytes) */

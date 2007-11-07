@@ -105,6 +105,7 @@ void uip_udppoll(struct uip_driver_s *dev, struct uip_udp_conn *conn)
 
       dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
       dev->d_snddata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
+
       dev->d_len     = 0;
       dev->d_sndlen  = 0;
 

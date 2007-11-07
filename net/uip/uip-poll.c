@@ -59,6 +59,119 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Function: uip_polludpconnections
+ *
+ * Description:
+ *   Poll all UDP connections for available packets to send.
+ *
+ * Assumptions:
+ *   This function is called from the CAN device driver and may be called from
+ *   the timer interrupt/watchdog handle level.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_UDP
+static int uip_polludpconnections(struct uip_driver_s *dev,
+                                  uip_poll_callback_t callback)
+{
+  struct uip_udp_conn *udp_conn = NULL;
+  int                  bstop    = 0;
+
+  /* Traverse all of the allocated UDP connections and perform the poll action */
+
+  while (!bstop && (udp_conn = uip_nextudpconn(udp_conn)))
+    {
+      /* Perform the UDP TX poll */
+
+      uip_udp_conn = udp_conn;
+      uip_udppoll(dev, udp_conn);
+
+      /* Call back into the driver */
+
+      bstop = callback(dev);
+    }
+
+  uip_udp_conn = NULL;
+  return bstop;
+}
+#else
+# define uip_polludpconnections(dev,callback) (0)
+#endif /* CONFIG_NET_UDP */
+
+/****************************************************************************
+ * Function: uip_polltcpconnections
+ *
+ * Description:
+ *   Poll all UDP connections for available packets to send.
+ *
+ * Assumptions:
+ *   This function is called from the CAN device driver and may be called from
+ *   the timer interrupt/watchdog handle level.
+ *
+ ****************************************************************************/
+
+static inline int uip_polltcpconnections(struct uip_driver_s *dev,
+                                         uip_poll_callback_t callback)
+{
+  struct uip_conn *conn  = NULL;
+  int              bstop = 0;
+
+  /* Traverse all of the active TCP connections and perform the poll action */
+
+  while (!bstop && (conn = uip_nexttcpconn(conn)))
+    {
+      /* Perform the TCP TX poll */
+
+      uip_conn = conn;
+      uip_tcppoll(dev, conn);
+
+      /* Call back into the driver */
+
+      bstop = callback(dev);
+    }
+
+  uip_conn = NULL;
+  return bstop;
+}
+
+/****************************************************************************
+ * Function: uip_polltcptimer
+ *
+ * Description:
+ *   The TCP timer has expired.  Update TCP timing state in each active,
+ *   TCP connection.
+ *
+ * Assumptions:
+ *   This function is called from the CAN device driver and may be called from
+ *   the timer interrupt/watchdog handle level.
+ *
+ ****************************************************************************/
+
+static inline int uip_polltcptimer(struct uip_driver_s *dev,
+                                   uip_poll_callback_t callback, int hsec)
+{
+  struct uip_conn *conn  = NULL;
+  int              bstop = 0;
+
+  /* Traverse all of the active TCP connections and perform the poll action */
+
+  while (!bstop && (conn = uip_nexttcpconn(conn)))
+    {
+      /* Perform the TCP timer poll */
+
+      uip_conn = conn;
+      uip_tcptimer(dev, conn, hsec);
+
+      /* Call back into the driver */
+
+      bstop = callback(dev);
+    }
+
+  uip_conn = NULL;
+  return bstop;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -67,21 +180,18 @@
  *
  * Description:
  *   This function will traverse each active uIP connection structure and
- *   perform uip_interrupt with the specified event.  After each polling each
- *   active uIP connection structure, this function will call the provided
- *   callback function if the poll resulted in new data to be send.  The poll
- *   will continue until all connections have been polled or until the user-
- *   suplied function returns a non-zero value (which is would do only if
- *   it cannot accept further write data).
+ *   will perform TCP and UDP polling operations. uip_poll() may be called
+ *   asychronously with the network drvier can accept another outgoing packet.
  *
- *   This function should be called periodically with event == UIP_DRV_TIMER
- *   to perform period TCP processing.  This function may also be called
- *   with UIP_DRV_POLL obtain queue TX data.
+ *   This function will call the provided callback function for every active
+ *   connection. Polling will continue until all connections have been polled
+ *   or until the user-suplied function returns a non-zero value (which it
+ *   should do only if it cannot accept further write data).
  *
  *   When the callback function is called, there may be an outbound packet
  *   waiting for service in the uIP packet buffer, and if so the d_len field
- *   is set to a value larger than zero. The device driver should be called to
- *   send out the packet.
+ *   is set to a value larger than zero. The device driver should then send
+ *   out the packet.
  *
  * Assumptions:
  *   This function is called from the CAN device driver and may be called from
@@ -89,58 +199,71 @@
  *
  ****************************************************************************/
 
-int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback, int event)
+int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback)
 {
-  struct uip_conn *conn;
-#ifdef CONFIG_NET_UDP
-  struct uip_udp_conn *udp_conn;
-#endif
-  irqstate_t flags;
-
-  /* Interrupts must be disabled while traversing the active connection list */
-
-  flags = irqsave();
+  int bstop;
 
   /* Traverse all of the active TCP connections and perform the poll action */
 
-  conn = NULL;
-  while ((conn = uip_nexttcpconn(conn)))
+  bstop = uip_polltcpconnections(dev, callback);
+  if (!bstop)
     {
-      uip_conn = conn;
-      if (event == UIP_DRV_POLL)
-        {
-          uip_tcppoll(dev, conn);
-        }
-      else
-        {
-          uip_tcptimer(dev, conn);
-        }
+      /* Traverse all of the allocated UDP connections and perform the poll action */
 
-      if (callback(dev))
-        {
-          irqrestore(flags);
-          return 1;
-        }
-    }
-  uip_conn = NULL;
+      bstop = uip_polludpconnections(dev, callback);
+  }
 
-#ifdef CONFIG_NET_UDP
-  /* Traverse all of the allocated UDP connections and perform a poll action */
+  return bstop;
+}
 
-  udp_conn = NULL;
-  while ((udp_conn = uip_nextudpconn(udp_conn)))
+/****************************************************************************
+ * Function: uip_timer
+ *
+ * Description:
+ *   These function will traverse each active uIP connection structure and
+ *   perform TCP timer operations (and UDP polling operations). The CAN
+ *   driver MUST implement logic to periodically call uip_timer().
+ *
+ *   This function will call the provided callback function for every active
+ *   connection. Polling will continue until all connections have been polled
+ *   or until the user-suplied function returns a non-zero value (which it
+ *   should do only if it cannot accept further write data).
+ *
+ *   When the callback function is called, there may be an outbound packet
+ *   waiting for service in the uIP packet buffer, and if so the d_len field
+ *   is set to a value larger than zero. The device driver should then send
+ *   out the packet.
+ *
+ * Assumptions:
+ *   This function is called from the CAN device driver and may be called from
+ *   the timer interrupt/watchdog handle level.
+ *
+ ****************************************************************************/
+
+int uip_timer(struct uip_driver_s *dev, uip_poll_callback_t callback, int hsec)
+{
+  int bstop;
+
+  /* Increment the timer used by the IP reassembly logic */
+
+#if UIP_REASSEMBLY
+  if (uip_reasstmr != 0 && uip_reasstmr < UIP_REASS_MAXAGE)
     {
-      uip_udppoll(dev, udp_conn);
-      if (callback(dev))
-        {
-          irqrestore(flags);
-          return 1;
-        }
+      uip_reasstmr += hsec;
     }
-#endif /* CONFIG_NET_UDP */
+#endif /* UIP_REASSEMBLY */
 
-  irqrestore(flags);
-  return 0;
+  /* Traverse all of the active TCP connections and perform the timer action */
+
+  bstop = uip_polltcptimer(dev, callback, hsec);
+  if (!bstop)
+    {
+      /* Traverse all of the allocated UDP connections and perform the poll action */
+
+      bstop = uip_polludpconnections(dev, callback);
+    }
+
+  return bstop;
 }
 
 #endif /* CONFIG_NET */

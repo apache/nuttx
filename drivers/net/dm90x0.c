@@ -262,7 +262,8 @@
 
 /* TX poll deley = 5 seconds. CLK_TCK is the number of clock ticks per second */
 
-#define DM6X_WDDELAY (5*CLK_TCK)
+#define DM6X_WDDELAY   (5*CLK_TCK)
+#define DM6X_POLLHSEC  (5*2)
 
 /* TX timeout = 1 minute */
 
@@ -1074,7 +1075,7 @@ static void dm9x_txdone(struct dm9x_driver_s *dm9x)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&dm9x->dm_dev, dm9x_uiptxpoll, UIP_DRV_POLL);
+  (void)uip_poll(&dm9x->dm_dev, dm9x_uiptxpoll);
 }
 
 /****************************************************************************
@@ -1219,7 +1220,9 @@ static void dm9x_txtimeout(int argc, uint32 arg, ...)
 #endif
 
   dbg("  TX packet count:           %d\n", dm9x->dm_ntxpending); 
+#if defined(CONFIG_DM9X_STATS)
   dbg("  TX timeouts:               %d\n", dm9x->dm_ntxtimeouts); 
+#endif
   dbg("  TX read pointer address:   0x%02x:%02x\n",
       getreg(DM9X_TRPAH), getreg(DM9X_TRPAL));
   dbg("  Memory data write address: 0x%02x:%02x (DM9010)\n",
@@ -1231,7 +1234,7 @@ static void dm9x_txtimeout(int argc, uint32 arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&dm9x->dm_dev, dm9x_uiptxpoll, UIP_DRV_POLL);
+  (void)uip_poll(&dm9x->dm_dev, dm9x_uiptxpoll);
 }
 
 /****************************************************************************
@@ -1273,9 +1276,9 @@ static void dm9x_polltimer(int argc, uint32 arg, ...)
 
   if (dm9x->dm_ntxpending < 1 || (dm9x->dm_b100M && dm9x->dm_ntxpending < 2))
     {
-      /* If so, poll uIP for new XMIT data */
+      /* If so, update TCP timing states and poll uIP for new XMIT data */
 
-      (void)uip_poll(&dm9x->dm_dev, dm9x_uiptxpoll, UIP_DRV_TIMER);
+      (void)uip_timer(&dm9x->dm_dev, dm9x_uiptxpoll, DM6X_POLLHSEC);
     }
 
   /* Setup the watchdog poll timer again */
@@ -1565,7 +1568,9 @@ static void dm9x_reset(struct dm9x_driver_s *dm9x)
 
   save = (uint8)DM9X_INDEX;
 
+#if defined(CONFIG_DM9X_STATS)
   dm9x->dm_nresets++;
+#endif
   dm9x_bringup(dm9x);
 
   /* Wait up to 1 second for the link to be OK */

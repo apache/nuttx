@@ -166,22 +166,22 @@ struct uip_conn
   uip_ipaddr_t ripaddr;   /* The IP address of the remote host. */
   uint16 lport;           /* The local TCP port, in network byte order. */
   uint16 rport;           /* The local remote TCP port, in network byte order. */
-  uint8 rcv_nxt[4];       /* The sequence number that we expect to
+  uint8  rcv_nxt[4];      /* The sequence number that we expect to
                            * receive next. */
-  uint8 snd_nxt[4];       /* The sequence number that was last sent by us. */
+  uint8  snd_nxt[4];      /* The sequence number that was last sent by us. */
   uint16 len;             /* Length of the data that was previously sent. */
   uint16 mss;             /* Current maximum segment size for the
                            * connection. */
   uint16 initialmss;      /* Initial maximum segment size for the
                            * connection. */
-  uint8 sa;               /* Retransmission time-out calculation state
+  uint8  sa;              /* Retransmission time-out calculation state
                            * variable. */
-  uint8 sv;               /* Retransmission time-out calculation state
+  uint8  sv;              /* Retransmission time-out calculation state
                            * variable. */
-  uint8 rto;              /* Retransmission time-out. */
-  uint8 tcpstateflags;    /* TCP state and flags. */
-  uint8 timer;            /* The retransmission timer. */
-  uint8 nrtx;             /* The number of retransmissions for the last
+  uint8  rto;             /* Retransmission time-out. */
+  uint8  tcpstateflags;   /* TCP state and flags. */
+  uint8  timer;           /* The retransmission timer (units: half-seconds). */
+  uint8  nrtx;            /* The number of retransmissions for the last
                            * segment sent. */
 
   /* Higher level logic can retain application specific information

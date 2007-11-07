@@ -98,6 +98,8 @@ const uip_ipaddr_t all_zeroes_addr =
   {0x00000000};
 #endif
 
+/* Reassembly timer (units: deci-seconds) */
+
 #if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
 uint8 uip_reasstmr;
 #endif

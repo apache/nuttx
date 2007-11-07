@@ -81,8 +81,9 @@
  *   Handle a TCP timer expiration for the provided TCP connection
  *
  * Parameters:
- *   dev - The device driver structure to use in the send operation
- *   conn - The TCP "connection" to poll for TX data
+ *   dev     - The device driver structure to use in the send operation
+ *   conn    - The TCP "connection" to poll for TX data
+ *   hsed    - The polling interval in halves of a second
  *
  * Return:
  *   None
@@ -92,19 +93,10 @@
  *
  ****************************************************************************/
 
-void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn)
+void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec)
 {
   dev->d_snddata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
   dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
-
-  /* Increment the timer used by the reassembly logic */
-
-#if UIP_REASSEMBLY
-  if (uip_reasstmr != 0)
-    {
-      uip_reasstmr++;
-    }
-#endif /* UIP_REASSEMBLY */
 
   /* Increase the TCP sequence number */
 
@@ -112,7 +104,7 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn)
 
   /* Reset the length variables. */
 
-  dev->d_len  = 0;
+  dev->d_len    = 0;
   dev->d_sndlen = 0;
 
   /* Check if the connection is in a state in which we simply wait
@@ -123,8 +115,10 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn)
 
   if (conn->tcpstateflags == UIP_TIME_WAIT || conn->tcpstateflags == UIP_FIN_WAIT_2)
     {
-      (conn->timer)++;
-      if (conn->timer == UIP_TIME_WAIT_TIMEOUT)
+      /* Increment the connection timer */
+
+      (conn->timer) += hsec;
+      if (conn->timer >= UIP_TIME_WAIT_TIMEOUT)
         {
           conn->tcpstateflags = UIP_CLOSED;
           vdbg("TCP state: UIP_CLOSED\n");
@@ -132,15 +126,29 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn)
     }
   else if (conn->tcpstateflags != UIP_CLOSED)
     {
-      /* If the connection has outstanding data, we increase the
-       * connection's timer and see if it has reached the RTO value
-       * in which case we retransmit.
+      /* If the connection has outstanding data, we increase the connection's
+       * timer and see if it has reached the RTO value in which case we
+       * retransmit.
        */
 
       if (uip_outstanding(conn))
         {
-          if (conn->timer-- == 0)
+          /* The connection has outstanding data */
+
+          if (conn->timer > hsec)
             {
+              /* Will not yet decrement to zero */
+
+              conn->timer -= hsec;
+            }
+          else
+            {
+              /* Will decrement to zero */
+
+              conn->timer = 0;
+
+              /* Should we close the connection? */
+
               if (conn->nrtx == UIP_MAXRTX ||
                   ((conn->tcpstateflags == UIP_SYN_SENT ||
                     conn->tcpstateflags == UIP_SYN_RCVD) &&
@@ -166,7 +174,7 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn)
              /* Exponential backoff. */
 
               conn->timer = UIP_RTO << (conn->nrtx > 4 ? 4: conn->nrtx);
-              ++(conn->nrtx);
+              (conn->nrtx)++;
 
               /* Ok, so we need to retransmit. We do this differently
                * depending on which state we are in. In ESTABLISHED, we
@@ -216,6 +224,9 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn)
                 }
             }
         }
+
+      /* The connection does not have outstanding data */
+
       else if ((conn->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED)
         {
           /* If there was no need for a retransmission, we poll the

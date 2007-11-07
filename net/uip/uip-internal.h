@@ -101,6 +101,8 @@ extern const uip_ipaddr_t all_zeroes_addr;
 
 extern uint16 g_ipid;
 
+/* Reassembly timer (units: deci-seconds) */
+
 #if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
 extern uint8 uip_reasstmr;
 #endif
@@ -131,7 +133,7 @@ EXTERN void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn);
 
 /* Defined in uip-udptimer.c ************************************************/
 
-EXTERN void uip_udptimer(struct uip_driver_s *dev, struct uip_conn *conn);
+EXTERN void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec);
 
 /* Defined in uip_listen.c **************************************************/
 

@@ -57,21 +57,6 @@
  * Definitions
  ****************************************************************************/
 
-/* The following flags are passed as an argument to the uip_poll()
- * function. They are used to distinguish between the two cases where
- * uip_poll() is called. It can be called either because we have
- * incoming data that should be processed, or because the periodic
- * timer has fired.
- *
- * UIP_DRV_TIMER   - Called periodically from driver to service timeout-
- *                   related activities to and to get timeout-related
- *                   responses (e.g., reset)
- * UIP_DRV_POLL    - Poll TCP for data to be transmitted
- */
-
-#define UIP_DRV_TIMER     1
-#define UIP_DRV_POLL      2
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -237,27 +222,24 @@ struct uip_driver_s
 
 extern void uip_input(struct uip_driver_s *dev);
 
-/* Polling of connections.
+/* Polling of connections
  *
- * This function will traverse each active uIP connection structure and
- * perform uip_input with the specified event.  After each polling each
- * active uIP connection structure, this function will call the provided
- * callback function if the poll resulted in new data to be send.  The poll
- * will continue until all connections have been polled or until the user-
- * suplied function returns a non-zero value (which is would do only if
- * it cannot accept further write data).
+ * These functions will traverse each active uIP connection structure and
+ * perform appropriate operatios:  uip_timer() will perform TCP timer
+ * operations (and UDP polling operations); uip_poll() will perform TCP
+ * and UDP polling operations. The CAN driver MUST implement logic to
+ * periodically call uip_timer(); uip_poll() may be called asychronously
+ * from the network driver can accept another outgoing packet.
  *
- * This function should be called periodically with event == UIP_DRV_TIMER
- * to perform TCP.  This function may also be called with UIP_DRV_POLL to
- * obtain pending TX data.
- *
- * This function is called from the CAN device driver and may be called from
- * the timer interrupt/watchdog handle level.
+ * In both cases, these functions will call the provided callback function
+ * for every active connection. Polling will continue until all connections
+ * have been polled or until the user-suplied function returns a non-zero
+ * value (which it should do only if it cannot accept further write data).
  *
  * When the callback function is called, there may be an outbound packet
  * waiting for service in the uIP packet buffer, and if so the d_len field
- * is set to a value larger than zero. The device driver should be called to
- * send out the packet.
+ * is set to a value larger than zero. The device driver should then send
+ * out the packet.
  *
  * Example:
  *   int driver_callback(struct uip_driver_dev *dev)
@@ -271,7 +253,7 @@ extern void uip_input(struct uip_driver_s *dev);
  *   }
  *
  *   ...
- *   uip_poll(dev, driver_callback, UIP_DRV_TIMER);
+ *   uip_poll(dev, driver_callback);
  *
  * Note: If you are writing a uIP device driver that needs ARP (Address
  * Resolution Protocol), e.g., when running uIP over Ethernet, you will
@@ -291,11 +273,8 @@ extern void uip_input(struct uip_driver_s *dev);
  */
 
 typedef int (*uip_poll_callback_t)(struct uip_driver_s *dev);
-extern int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback, int event);
-
-/* uip_poll helper functions */
-
-#define uip_periodic(dev,cb) uip_poll(dev, db, UIP_DRV_TIMER);
+extern int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback);
+extern int uip_timer(struct uip_driver_s *dev, uip_poll_callback_t callback, int hsec);
 
 /* By defining UIP_ARCH_CHKSUM, the architecture can replace the following
  * functions with hardware assisted solutions.

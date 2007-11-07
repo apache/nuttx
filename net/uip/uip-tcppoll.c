@@ -106,6 +106,9 @@ void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn)
       dev->d_snddata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
       dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
 
+      dev->d_len     = 0;
+      dev->d_sndlen  = 0;
+
       /* Perfom the callback */
 
       uip_flags = UIP_POLL;

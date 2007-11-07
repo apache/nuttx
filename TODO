@@ -50,13 +50,11 @@ o Network
   support multiple network devices, this means we will have to add some infrastructure
   to map to device.
 - uIP polling issues:
-  (1) uIP expects a single driver to poll at a 500ms interval (dm90x0 currently
-      polls a 5sec).
-  (2) Current logic will not support multiple ethernet drivers.  Each driver should
+  (1) Current logic will not support multiple ethernet drivers.  Each driver should
       poll on TCP connections connect on the network supported by the driver; UDP
       polling should respond with TX data only if the UDP packet is intended for the
       the network supported by the driver.
-  (3) If there were multiple drivers, polling would occur at double the rate.
+  (2) If there were multiple drivers, polling would occur at double the rate.
 - TCP Bug:
   When TCP data is received with no read in place, it appears that uIP ACKs the data
   even though it was not taken accepted.  We must either (1) buffer incoming data, or
