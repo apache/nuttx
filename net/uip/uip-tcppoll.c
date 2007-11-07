@@ -1,6 +1,6 @@
 /****************************************************************************
- * net/uip/uip-udppoll.c
- * Poll for the availability of UDP TX data
+ * net/uip/uip-tcppoll.c
+ * Poll for the availability of TCP TX data
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -45,7 +45,12 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
+#include <sys/types.h>
+#include <debug.h>
+
+#include <net/uip/uipopt.h>
 #include <net/uip/uip.h>
+#include <net/uip/uip-arch.h>
 
 #include "uip-internal.h"
 
@@ -56,51 +61,6 @@
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
-
-#if UIP_URGDATA > 0
-void *uip_urgdata;           /* urgent data (out-of-band data), if present. */
-uint16 uip_urglen;           /* Length of (received) urgent data */
-#endif
-
-/* The uip_flags variable is used for communication between the TCP/IP
- * stack and the application program.
- */
-
-uint8 uip_flags;
-
-/* uip_conn always points to the current connection. */
-
-struct uip_conn *uip_conn;
-
-#ifdef CONFIG_NET_UDP
-struct uip_udp_conn *uip_udp_conn;
-#endif   /* CONFIG_NET_UDP */
-
-#ifdef CONFIG_NET_STATISTICS
-struct uip_stats uip_stat;
-#endif
-
-/* Increasing number used for the IP ID field. */
-
-uint16 g_ipid;
-
-const uip_ipaddr_t all_ones_addr =
-#ifdef CONFIG_NET_IPv6
-  {0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff};
-#else /* CONFIG_NET_IPv6 */
-  {0xffffffff};
-#endif /* CONFIG_NET_IPv6 */
-
-const uip_ipaddr_t all_zeroes_addr =
-#ifdef CONFIG_NET_IPv6
-  {0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000};
-#else
-  {0x00000000};
-#endif
-
-#if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
-uint8 uip_reasstmr;
-#endif
 
 /****************************************************************************
  * Private Variables
@@ -115,36 +75,52 @@ uint8 uip_reasstmr;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_initialize
+ * Name: uip_tcppoll
  *
  * Description:
- *   Perform initialization of the uIP layer
+ *   Poll a TCP connection structure for availability of TX data
  *
  * Parameters:
- *   None
+ *   dev - The device driver structure to use in the send operation
+ *   conn - The TCP "connection" to poll for TX data
  *
  * Return:
  *   None
  *
+ * Assumptions:
+ *   Called from the interrupt level or with interrupts disabled.
+ *
  ****************************************************************************/
 
-void uip_initialize(void)
+void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn)
 {
-  /* Initialize the listening port structures */
+  /* Verify that the connection is established and if the connection has
+   * oustanding (unacknowledged) sent data.
+   */
 
-  uip_listeninit();
+  if ((conn->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED &&
+      !uip_outstanding(conn))
+    {
+      /* Set up for the callback */
 
-  /* Initialize the TCP/IP connection structures */
+      dev->d_snddata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
+      dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
 
-  uip_tcpinit();
+      /* Perfom the callback */
 
-  /* Initialize the UDP connection structures */
+      uip_flags = UIP_POLL;
+      uip_tcpcallback(dev);
 
-#ifdef CONFIG_NET_UDP
-  uip_udpinit();
-#endif
+      /* Handle the callback response */
 
-  /* IPv4 initialization. */
+      uip_tcpappsend(dev, conn, uip_flags);
+    }
+  else
+    {
+      /* Nothing to do for this connection */
+
+      dev->d_len = 0;
+    }
 }
-#endif /* CONFIG_NET */
 
+#endif /* CONFIG_NET */

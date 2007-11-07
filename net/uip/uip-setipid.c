@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip-poll.c
+ * net/uip/uip-udpcallback.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -44,9 +44,7 @@
 #include <sys/types.h>
 #include <debug.h>
 
-#include <net/uip/uipopt.h>
 #include <net/uip/uip.h>
-#include <net/uip/uip-arch.h>
 
 #include "uip-internal.h"
 
@@ -63,84 +61,18 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_poll
+ * Function: uip_setipid
  *
  * Description:
- *   This function will traverse each active uIP connection structure and
- *   perform uip_interrupt with the specified event.  After each polling each
- *   active uIP connection structure, this function will call the provided
- *   callback function if the poll resulted in new data to be send.  The poll
- *   will continue until all connections have been polled or until the user-
- *   suplied function returns a non-zero value (which is would do only if
- *   it cannot accept further write data).
- *
- *   This function should be called periodically with event == UIP_DRV_TIMER
- *   to perform period TCP processing.  This function may also be called
- *   with UIP_DRV_POLL obtain queue TX data.
- *
- *   When the callback function is called, there may be an outbound packet
- *   waiting for service in the uIP packet buffer, and if so the d_len field
- *   is set to a value larger than zero. The device driver should be called to
- *   send out the packet.
+ *   This function may be used at boot time to set the initial ip_id.
  *
  * Assumptions:
- *   This function is called from the CAN device driver and may be called from
- *   the timer interrupt/watchdog handle level.
  *
  ****************************************************************************/
 
-int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback, int event)
+void uip_setipid(uint16 id)
 {
-  struct uip_conn *conn;
-#ifdef CONFIG_NET_UDP
-  struct uip_udp_conn *udp_conn;
-#endif
-  irqstate_t flags;
-
-  /* Interrupts must be disabled while traversing the active connection list */
-
-  flags = irqsave();
-
-  /* Traverse all of the active TCP connections and perform the poll action */
-
-  conn = NULL;
-  while ((conn = uip_nexttcpconn(conn)))
-    {
-      uip_conn = conn;
-      if (event == UIP_DRV_POLL)
-        {
-          uip_tcppoll(dev, conn);
-        }
-      else
-        {
-          uip_tcptimer(dev, conn);
-        }
-
-      if (callback(dev))
-        {
-          irqrestore(flags);
-          return 1;
-        }
-    }
-  uip_conn = NULL;
-
-#ifdef CONFIG_NET_UDP
-  /* Traverse all of the allocated UDP connections and perform a poll action */
-
-  udp_conn = NULL;
-  while ((udp_conn = uip_nextudpconn(udp_conn)))
-    {
-      uip_udppoll(dev, udp_conn);
-      if (callback(dev))
-        {
-          irqrestore(flags);
-          return 1;
-        }
-    }
-#endif /* CONFIG_NET_UDP */
-
-  irqrestore(flags);
-  return 0;
+  g_ipid = id;
 }
 
 #endif /* CONFIG_NET */

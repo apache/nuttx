@@ -116,12 +116,15 @@ static uint16 upper_layer_chksum(struct uip_driver_s *dev, uint8 proto)
   /* First sum pseudoheader. */
 
   /* IP protocol and length fields. This addition cannot carry. */
+
   sum = upper_layer_len + proto;
 
   /* Sum IP source and destination addresses. */
+
   sum = chksum(sum, (uint8 *)&BUF->srcipaddr, 2 * sizeof(uip_ipaddr_t));
 
   /* Sum TCP header and data. */
+
   sum = chksum(sum, &dev->d_buf[UIP_IPH_LEN + UIP_LLH_LEN], upper_layer_len);
 
   return (sum == 0) ? 0xffff : htons(sum);
@@ -143,35 +146,49 @@ static uint16 uip_icmp6chksum(struct uip_driver_s *dev)
 /* Calculate the Internet checksum over a buffer. */
 
 #if !UIP_ARCH_ADD32
-void uip_add32(uint8 *op32, uint16 op16)
+static void uip_carry32(uint8 *sum, uint16 op16)
 {
-  uip_acc32[3] = op32[3] + (op16 & 0xff);
-  uip_acc32[2] = op32[2] + (op16 >> 8);
-  uip_acc32[1] = op32[1];
-  uip_acc32[0] = op32[0];
-
-  if (uip_acc32[2] < (op16 >> 8))
+  if (sum[2] < (op16 >> 8))
     {
-      ++uip_acc32[1];
-      if (uip_acc32[1] == 0)
+      ++sum[1];
+      if (sum[1] == 0)
         {
-          ++uip_acc32[0];
+          ++sum[0];
         }
     }
 
-  if (uip_acc32[3] < (op16 & 0xff))
+  if (sum[3] < (op16 & 0xff))
     {
-      ++uip_acc32[2];
-      if (uip_acc32[2] == 0)
+      ++sum[2];
+      if (sum[2] == 0)
         {
-          ++uip_acc32[1];
-          if (uip_acc32[1] == 0)
+          ++sum[1];
+          if (sum[1] == 0)
             {
-              ++uip_acc32[0];
+              ++sum[0];
             }
         }
     }
 }
+
+void uip_add32(const uint8 *op32, uint16 op16, uint8 *sum)
+{
+  /* op32 and the sum are in network order (big-endian); op16 is host order. */
+
+  sum[3] = op32[3] + (op16 & 0xff);
+  sum[2] = op32[2] + (op16 >> 8);
+  sum[1] = op32[1];
+  sum[0] = op32[0];
+  uip_carry32(sum, op16);
+}
+
+void uip_incr32(uint8 *op32, uint16 op16)
+{
+  op32[3] += (op16 & 0xff);
+  op32[2] += (op16 >> 8);
+  uip_carry32(op32, op16);
+}
+
 #endif /* UIP_ARCH_ADD32 */
 
 #if !UIP_ARCH_CHKSUM

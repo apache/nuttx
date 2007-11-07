@@ -38,9 +38,21 @@ UIP_CSRCS =
 
 ifeq ($(CONFIG_NET),y)
 
-UIP_CSRCS += uip-initialize.c uip-arp.c uip.c uip-send.c uip-fw.c \
-             uip-neighbor.c uip-split.c uip-tcpconn.c uip-listen.c \
-             uip-poll.c uip-chksum.c
+# Common network source files
+
+UIP_CSRCS += uip-initialize.c uip-setipid.c uip-arp.c uip-input.c uip-send.c \
+             uip-fw.c uip-split.c uip-poll.c uip-chksum.c
+
+ifeq ($(CONFIG_NET_IPv6),y)
+UIP_CSRCS += uip-neighbor.c
+endif
+
+# TCP source files
+
+UIP_CSRCS += uip-tcpconn.c uip-tcppoll.c uip-tcptimer.c uip-tcpsend.c \
+             uip-tcpinput.c uip-tcpappsend.c uip-listen.c uip-tcpcallback.c
+
+# UDP source files
 
 ifeq ($(CONFIG_NET_UDP),y)
 
@@ -48,6 +60,11 @@ UIP_CSRCS += uip-udpconn.c uip-udppoll.c uip-udpsend.c uip-udpinput.c \
              uip-udpcallback.c
 
 endif
+
+#ICMP source files
+
+UIP_CSRCS += uip-icmpinput.c
+
 endif
 
 

@@ -1,6 +1,5 @@
 /****************************************************************************
  * net/uip/uip-udpsend.c
- * Poll for the availability of UDP TX data
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -115,8 +114,8 @@ void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn)
       UDPBUF->flow        = 0x00;
       UDPBUF->len[0]      = (dev->d_sndlen >> 8);
       UDPBUF->len[1]      = (dev->d_sndlen & 0xff);
-      UDPBUF->proto        = UIP_PROTO_UDP;
-      UDPBUF->ttl          = conn->ttl;
+      UDPBUF->nexthdr     = UIP_PROTO_UDP;
+      UDPBUF->hoplimit    = conn->ttl;
 
       uip_ipaddr_copy(UDPBUF->srcipaddr, &dev->d_ipaddr);
       uip_ipaddr_copy(UDPBUF->destipaddr, &conn->ripaddr);

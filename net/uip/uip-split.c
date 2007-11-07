@@ -102,18 +102,16 @@ void uip_split_output(struct uip_driver_s *dev)
     /*    dev->d_appdata += len1;*/
     memcpy(dev->d_appdata, dev->d_appdata + len1, len2);
 
-    uip_add32(BUF->seqno, len1);
-    BUF->seqno[0] = uip_acc32[0];
-    BUF->seqno[1] = uip_acc32[1];
-    BUF->seqno[2] = uip_acc32[2];
-    BUF->seqno[3] = uip_acc32[3];
+    uip_incr32(BUF->seqno, len1);
 
     /* Recalculate the TCP checksum. */
+
     BUF->tcpchksum = 0;
     BUF->tcpchksum = ~(uip_tcpchksum(dev));
 
 #ifndef CONFIG_NET_IPv6
     /* Recalculate the IP checksum. */
+
     BUF->ipchksum = 0;
     BUF->ipchksum = ~(uip_ipchksum(dev));
 #endif /* CONFIG_NET_IPv6 */

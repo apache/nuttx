@@ -222,55 +222,54 @@ struct uip_stats
 {
   struct
   {
-    uip_stats_t drop;     /* Number of dropped packets at the IP layer. */
-    uip_stats_t recv;     /* Number of received packets at the IP layer. */
-    uip_stats_t sent;     /* Number of sent packets at the IP layer. */
-    uip_stats_t vhlerr;   /* Number of packets dropped due to wrong
-                             IP version or header length. */
-    uip_stats_t hblenerr; /* Number of packets dropped due to wrong
-                             IP length, high byte. */
-    uip_stats_t lblenerr; /* Number of packets dropped due to wrong
-                             IP length, low byte. */
-    uip_stats_t fragerr;  /* Number of packets dropped since they
-                             were IP fragments. */
-    uip_stats_t chkerr;   /* Number of packets dropped due to IP
-                             checksum errors. */
-    uip_stats_t protoerr; /* Number of packets dropped since they
-                             were neither ICMP, UDP nor TCP. */
-  } ip;                   /* IP statistics. */
+    uip_stats_t drop;       /* Number of dropped packets at the IP layer. */
+    uip_stats_t recv;       /* Number of received packets at the IP layer. */
+    uip_stats_t sent;       /* Number of sent packets at the IP layer. */
+    uip_stats_t vhlerr;     /* Number of packets dropped due to wrong
+                               IP version or header length. */
+    uip_stats_t hblenerr;   /* Number of packets dropped due to wrong
+                               IP length, high byte. */
+    uip_stats_t lblenerr;   /* Number of packets dropped due to wrong
+                               IP length, low byte. */
+    uip_stats_t fragerr;    /* Number of packets dropped since they
+                               were IP fragments. */
+    uip_stats_t chkerr;     /* Number of packets dropped due to IP
+                               checksum errors. */
+    uip_stats_t protoerr;   /* Number of packets dropped since they
+                               were neither ICMP, UDP nor TCP. */
+  } ip;                     /* IP statistics. */
 
   struct
   {
-    uip_stats_t drop;     /* Number of dropped ICMP packets. */
-    uip_stats_t recv;     /* Number of received ICMP packets. */
-    uip_stats_t sent;     /* Number of sent ICMP packets. */
-    uip_stats_t typeerr;  /* Number of ICMP packets with a wrong type. */
-  } icmp;                 /* ICMP statistics. */
+    uip_stats_t drop;       /* Number of dropped ICMP packets. */
+    uip_stats_t recv;       /* Number of received ICMP packets. */
+    uip_stats_t sent;       /* Number of sent ICMP packets. */
+    uip_stats_t typeerr;    /* Number of ICMP packets with a wrong type. */
+  } icmp;                   /* ICMP statistics. */
 
   struct
 
   {
-    uip_stats_t drop;     /* Number of dropped TCP segments. */
-    uip_stats_t recv;     /* Number of recived TCP segments. */
-    uip_stats_t sent;     /* Number of sent TCP segments. */
-    uip_stats_t chkerr;   /* Number of TCP segments with a bad checksum. */
-    uip_stats_t ackerr;   /* Number of TCP segments with a bad ACK number. */
-    uip_stats_t rst;      /* Number of recevied TCP RST (reset) segments. */
-    uip_stats_t rexmit;   /* Number of retransmitted TCP segments. */
-    uip_stats_t syndrop;  /* Number of dropped SYNs due to too few
-                             connections was avaliable. */
-    uip_stats_t synrst;   /* Number of SYNs for closed ports,
-                             triggering a RST. */
-  } tcp;                  /* TCP statistics. */
+    uip_stats_t drop;       /* Number of dropped TCP segments. */
+    uip_stats_t recv;       /* Number of recived TCP segments. */
+    uip_stats_t sent;       /* Number of sent TCP segments. */
+    uip_stats_t chkerr;     /* Number of TCP segments with a bad checksum. */
+    uip_stats_t ackerr;     /* Number of TCP segments with a bad ACK number. */
+    uip_stats_t rst;        /* Number of recevied TCP RST (reset) segments. */
+    uip_stats_t rexmit;     /* Number of retransmitted TCP segments. */
+    uip_stats_t syndrop;    /* Number of dropped SYNs due to too few
+                               connections was avaliable. */
+    uip_stats_t synrst;     /* Number of SYNs for closed ports, triggering a RST. */
+  } tcp;                    /* TCP statistics. */
 
 #ifdef CONFIG_NET_UDP
   struct
   {
-    uip_stats_t drop;     /* Number of dropped UDP segments. */
-    uip_stats_t recv;     /* Number of recived UDP segments. */
-    uip_stats_t sent;     /* Number of sent UDP segments. */
-    uip_stats_t chkerr;   /* Number of UDP segments with a bad checksum. */
-  } udp;                  /* UDP statistics. */
+    uip_stats_t drop;       /* Number of dropped UDP segments. */
+    uip_stats_t recv;       /* Number of recived UDP segments. */
+    uip_stats_t sent;       /* Number of sent UDP segments. */
+    uip_stats_t chkerr;     /* Number of UDP segments with a bad checksum. */
+  } udp;                    /* UDP statistics. */
 #endif  /* CONFIG_NET_UDP */
 };
 
@@ -282,28 +281,29 @@ struct uip_tcpip_hdr
 
   /* IPv6 Ip header. */
 
-  uint8  vtc;
-  uint8  tcflow;
-  uint16 flow;
-  uint8  len[2];
-  uint8  proto, ttl;
-  uip_ip6addr_t srcipaddr;
-  uip_ip6addr_t destipaddr;
+  uint8  vtc;               /* Bits 0-3: version, bits 4-7: traffic class (MS) */
+  uint8  tcf;               /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */
+  uint16 flow;              /* 16-bit flow label (LS) */
+  uint8  len[2];            /* 16-bit Payload length */
+  uint8  proto;             /*  8-bit Next header (same as IPv4 protocol field) */
+  uint8  ttl;               /*  8-bit Hop limit (like IPv4 TTL field) */
+  uip_ip6addr_t srcipaddr;  /* 128-bit Source address */
+  uip_ip6addr_t destipaddr; /* 128-bit Destination address */
 
 #else /* CONFIG_NET_IPv6 */
 
   /* IPv4 IP header. */
 
-  uint8  vhl;           /*  8-bit Version (4) and header length (5 or 6) */
-  uint8  tos;           /*  8-bit Type of service (e.g., 6=TCP) */
-  uint8  len[2];        /* 16-bit Total length */
-  uint8  ipid[2];       /* 16-bit Identification */
-  uint8  ipoffset[2];   /* 16-bit IP flags + fragment offset */
-  uint8  ttl;           /*  8-bit Time to Live */
-  uint8  proto;         /*  8-bit Protocol */
-  uint16 ipchksum;      /* 16-bit Header checksum */
-  uint16 srcipaddr[2];  /* 32-bit Source IP address */
-  uint16 destipaddr[2]; /* 32-bit Destination IP address */
+  uint8  vhl;              /*  8-bit Version (4) and header length (5 or 6) */
+  uint8  tos;              /*  8-bit Type of service (e.g., 6=TCP) */
+  uint8  len[2];           /* 16-bit Total length */
+  uint8  ipid[2];          /* 16-bit Identification */
+  uint8  ipoffset[2];      /* 16-bit IP flags + fragment offset */
+  uint8  ttl;              /*  8-bit Time to Live */
+  uint8  proto;            /*  8-bit Protocol */
+  uint16 ipchksum;         /* 16-bit Header checksum */
+  uint16 srcipaddr[2];     /* 32-bit Source IP address */
+  uint16 destipaddr[2];    /* 32-bit Destination IP address */
 
 #endif /* CONFIG_NET_IPv6 */
 
@@ -327,31 +327,31 @@ struct uip_icmpip_hdr
 {
 #ifdef CONFIG_NET_IPv6
 
-  /* IPv6 IP header. */
+  /* IPv6 Ip header. */
 
-  uint8  vtc;
-  uint8  tcf;
-  uint16 flow;
-  uint8  len[2];
-  uint8  proto;
-  uint8  ttl;
-  uip_ip6addr_t srcipaddr;
-  uip_ip6addr_t destipaddr;
+  uint8  vtc;               /* Bits 0-3: version, bits 4-7: traffic class (MS) */
+  uint8  tcf;               /* Bits 0-3: traffic class (LS), bits 4-7: flow label (MS) */
+  uint16 flow;              /* 16-bit flow label (LS) */
+  uint8  len[2];            /* 16-bit Payload length */
+  uint8  proto;             /*  8-bit Next header (same as IPv4 protocol field) */
+  uint8  ttl;               /*  8-bit Hop limit (like IPv4 TTL field) */
+  uip_ip6addr_t srcipaddr;  /* 128-bit Source address */
+  uip_ip6addr_t destipaddr; /* 128-bit Destination address */
 
 #else /* CONFIG_NET_IPv6 */
 
   /* IPv4 IP header. */
 
-  uint8  vhl;           /*  8-bit Version (4) and header length (5 or 6) */
-  uint8  tos;           /*  8-bit Type of service (e.g., 6=TCP) */
-  uint8  len[2];        /* 16-bit Total length */
-  uint8  ipid[2];       /* 16-bit Identification */
-  uint8  ipoffset[2];   /* 16-bit IP flags + fragment offset */
-  uint8  ttl;           /*  8-bit Time to Live */
-  uint8  proto;         /*  8-bit Protocol */
-  uint16 ipchksum;      /* 16-bit Header checksum */
-  uint16 srcipaddr[2];  /* 32-bit Source IP address */
-  uint16 destipaddr[2]; /* 32-bit Destination IP address */
+  uint8  vhl;              /*  8-bit Version (4) and header length (5 or 6) */
+  uint8  tos;              /*  8-bit Type of service (e.g., 6=TCP) */
+  uint8  len[2];           /* 16-bit Total length */
+  uint8  ipid[2];          /* 16-bit Identification */
+  uint8  ipoffset[2];      /* 16-bit IP flags + fragment offset */
+  uint8  ttl;              /*  8-bit Time to Live */
+  uint8  proto;            /*  8-bit Protocol */
+  uint16 ipchksum;         /* 16-bit Header checksum */
+  uint16 srcipaddr[2];     /* 32-bit Source IP address */
+  uint16 destipaddr[2];    /* 32-bit Destination IP address */
 
 #endif /* CONFIG_NET_IPv6 */
 
@@ -384,31 +384,31 @@ struct uip_udpip_hdr
 {
 #ifdef CONFIG_NET_IPv6
 
-  /* IPv6 IP header. */
+  /* IPv6 Ip header. */
 
-  uint8  vtc;
-  uint8  tcf;
-  uint16 flow;
-  uint8  len[2];
-  uint8  proto;
-  uint8  ttl;
-  uip_ip6addr_t srcipaddr;
-  uip_ip6addr_t destipaddr;
+  uint8  vtc;               /* Bits 0-3: version, bits 4-7: traffic class (MS) */
+  uint8  tcf;               /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */
+  uint16 flow;              /* 16-bit flow label (LS) */
+  uint8  len[2];            /* 16-bit Payload length */
+  uint8  proto;             /*  8-bit Next header (same as IPv4 protocol field) */
+  uint8  ttl;               /*  8-bit Hop limit (like IPv4 TTL field) */
+  uip_ip6addr_t srcipaddr;  /* 128-bit Source address */
+  uip_ip6addr_t destipaddr; /* 128-bit Destination address */
 
 #else /* CONFIG_NET_IPv6 */
 
   /* IPv4 header. */
 
-  uint8  vhl;           /*  8-bit Version (4) and header length (5 or 6) */
-  uint8  tos;           /*  8-bit Type of service (e.g., 6=TCP) */
-  uint8  len[2];        /* 16-bit Total length */
-  uint8  ipid[2];       /* 16-bit Identification */
-  uint8  ipoffset[2];   /* 16-bit IP flags + fragment offset */
-  uint8  ttl;           /*  8-bit Time to Live */
-  uint8  proto;         /*  8-bit Protocol */
-  uint16 ipchksum;      /* 16-bit Header checksum */
-  uint16 srcipaddr[2];  /* 32-bit Source IP address */
-  uint16 destipaddr[2]; /* 32-bit Destination IP address */
+  uint8  vhl;              /*  8-bit Version (4) and header length (5 or 6) */
+  uint8  tos;              /*  8-bit Type of service (e.g., 6=TCP) */
+  uint8  len[2];           /* 16-bit Total length */
+  uint8  ipid[2];          /* 16-bit Identification */
+  uint8  ipoffset[2];      /* 16-bit IP flags + fragment offset */
+  uint8  ttl;              /*  8-bit Time to Live */
+  uint8  proto;            /*  8-bit Protocol */
+  uint16 ipchksum;         /* 16-bit Header checksum */
+  uint16 srcipaddr[2];     /* 32-bit Source IP address */
+  uint16 destipaddr[2];    /* 32-bit Destination IP address */
 
 #endif /* CONFIG_NET_IPv6 */
 
@@ -458,10 +458,6 @@ extern uint16 uip_urglen; /* Length of (received) urgent data */
  */
 
 extern struct uip_conn *uip_conn;
-
-/* 4-byte array used for the 32-bit sequence number calculations.*/
-
-extern uint8 uip_acc32[4];
 
 /* The current UDP connection. */
 

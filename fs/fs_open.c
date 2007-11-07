@@ -74,7 +74,9 @@ int open(const char *path, int oflags, ...)
   struct filelist  *list;
   FAR struct inode *inode;
   const char       *relpath = NULL;
+#ifdef CONFIG_FILE_MODE
   mode_t            mode = 0666;
+#endif
   int               ret;
   int               fd;
 

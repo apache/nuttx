@@ -57,28 +57,20 @@
  * Definitions
  ****************************************************************************/
 
-/* The following flags are passed as an argument to the uip_interrupt()
+/* The following flags are passed as an argument to the uip_poll()
  * function. They are used to distinguish between the two cases where
- * uip_interrupt() is called. It can be called either because we have
+ * uip_poll() is called. It can be called either because we have
  * incoming data that should be processed, or because the periodic
- * timer has fired. These values are never used directly, but only in
- * the macrose defined in this file.
+ * timer has fired.
  *
- * UIP_DRV_RECEIVE - There is new incoming data from the driver in the d_buf
- *                   field of the uip_driver_s structure.  The length of the
- *                   new data is provided in the d_len field of the
- *                   uip_driver_s structure.
  * UIP_DRV_TIMER   - Called periodically from driver to service timeout-
  *                   related activities to and to get timeout-related
  *                   responses (e.g., reset)
  * UIP_DRV_POLL    - Poll TCP for data to be transmitted
- * UIP_DRV_UDPPOLL - Poll for UDP data to be transmitted.  This value is used
- *                   internally by the uip_poll logic.
  */
 
-#define UIP_DRV_RECEIVE   1
-#define UIP_DRV_TIMER     2
-#define UIP_DRV_POLL      3
+#define UIP_DRV_TIMER     1
+#define UIP_DRV_POLL      2
 
 /****************************************************************************
  * Public Types
@@ -214,7 +206,7 @@ struct uip_driver_s
  *
  *     dev->d_len = devicedriver_poll();
  *     if(dev->d_len > 0) {
- *       uip_input();
+ *       uip_input(dev);
  *       if(dev->d_len > 0) {
  *         devicedriver_send();
  *       }
@@ -230,7 +222,7 @@ struct uip_driver_s
  *     if(dev->d_len > 0) {
  *       if(BUF->type == HTONS(UIP_ETHTYPE_IP)) {
  *         uip_arp_ipin();
- *         uip_input();
+ *         uip_input(dev);
  *         if(dev->d_len > 0) {
  *           uip_arp_out();
  *           devicedriver_send();
@@ -243,12 +235,12 @@ struct uip_driver_s
  *       }
  */
 
-#define uip_input(dev) uip_interrupt(dev, UIP_DRV_RECEIVE)
+extern void uip_input(struct uip_driver_s *dev);
 
 /* Polling of connections.
  *
  * This function will traverse each active uIP connection structure and
- * perform uip_interrupt with the specified event.  After each polling each
+ * perform uip_input with the specified event.  After each polling each
  * active uIP connection structure, this function will call the provided
  * callback function if the poll resulted in new data to be send.  The poll
  * will continue until all connections have been polled or until the user-
@@ -305,37 +297,29 @@ extern int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback, int 
 
 #define uip_periodic(dev,cb) uip_poll(dev, db, UIP_DRV_TIMER);
 
-/* Architecure support
- *
- * The actual uIP function which does all the work.  Called from the
- * interrupt level by a device driver.
- */
-
-extern void uip_interrupt(struct uip_driver_s *dev, uint8 event);
-
 /* By defining UIP_ARCH_CHKSUM, the architecture can replace the following
  * functions with hardware assisted solutions.
  */
 
 /* Carry out a 32-bit addition.
  *
- * Because not all architectures for which uIP is intended has native
- * 32-bit arithmetic, uIP uses an external C function for doing the
- * required 32-bit additions in the TCP protocol processing. This
- * function should add the two arguments and place the result in the
- * global variable uip_acc32.
+ * op32 - A pointer to a 4-byte array representing a 32-bit
+ *   integer in network byte order (big endian).  This value may not
+ *   be word aligned.
  *
- * Note: The 32-bit integer pointed to by the op32 parameter and the
- * result in the uip_acc32 variable are in network byte order (big
- * endian).
+ *   For uip_incr32, the value pointed to by op32 is modified in place
+ *   For uip_add32, the value pointed to by op32 is unmodified 
+*
+ * op16 - A 16-bit integer in host byte order.
  *
- * op32 A pointer to a 4-byte array representing a 32-bit
- * integer in network byte order (big endian).
+ * sum - The location to return the result (32-bit, network byte order,
+ *   possibly unaligned).
  *
- * op16 A 16-bit integer in host byte order.
+ *   uip_add32 only.
  */
 
-extern void uip_add32(uint8 *op32, uint16 op16);
+extern void uip_add32(const uint8 *op32, uint16 op16, uint8 *sum);
+extern void uip_incr32(uint8 *op32, uint16 op16);
 
 /* Calculate the Internet checksum over a buffer.
  *

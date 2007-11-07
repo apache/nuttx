@@ -55,6 +55,37 @@
  * Public Macro Definitions
  ****************************************************************************/
 
+/* TCP definitions */
+
+#define TCP_FIN 0x01
+#define TCP_SYN 0x02
+#define TCP_RST 0x04
+#define TCP_PSH 0x08
+#define TCP_ACK 0x10
+#define TCP_URG 0x20
+#define TCP_CTL 0x3f
+
+#define TCP_OPT_END     0   /* End of TCP options list */
+#define TCP_OPT_NOOP    1   /* "No-operation" TCP option */
+#define TCP_OPT_MSS     2   /* Maximum segment size TCP option */
+
+#define TCP_OPT_MSS_LEN 4   /* Length of TCP MSS option. */
+
+/* ICMP/ICMP6 definitions */
+
+#define ICMP_ECHO_REPLY 0
+#define ICMP_ECHO       8
+
+#define ICMP6_ECHO_REPLY             129
+#define ICMP6_ECHO                   128
+#define ICMP6_NEIGHBOR_SOLICITATION  135
+#define ICMP6_NEIGHBOR_ADVERTISEMENT 136
+
+#define ICMP6_FLAG_S (1 << 6)
+
+#define ICMP6_OPTION_SOURCE_LINK_ADDRESS 1
+#define ICMP6_OPTION_TARGET_LINK_ADDRESS 2
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -69,6 +100,10 @@ extern const uip_ipaddr_t all_zeroes_addr;
 /* Increasing number used for the IP ID field. */
 
 extern uint16 g_ipid;
+
+#if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
+extern uint8 uip_reasstmr;
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -90,11 +125,42 @@ EXTERN struct uip_conn *uip_tcplistener(uint16 portno);
 EXTERN struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf);
 EXTERN void uip_tcpnextsequence(void);
 
+/* Defined in uip-tcppoll.c *************************************************/
+
+EXTERN void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn);
+
+/* Defined in uip-udptimer.c ************************************************/
+
+EXTERN void uip_udptimer(struct uip_driver_s *dev, struct uip_conn *conn);
+
 /* Defined in uip_listen.c **************************************************/
 
 EXTERN void uip_listeninit(void);
 EXTERN boolean uip_islistener(uint16 port);
 EXTERN int uip_accept(struct uip_conn *conn, uint16 portno);
+
+/* Defined in uip-tcpsend.c *************************************************/
+
+EXTERN void uip_tcpsend(struct uip_driver_s *dev, struct uip_conn *conn,
+                        uint8 flags, uint16 len);
+EXTERN void uip_tcpreset(struct uip_driver_s *dev);
+EXTERN void uip_tcpack(struct uip_driver_s *dev, struct uip_conn *conn,
+                       uint8 ack);
+
+/* Defined in uip-tcpappsend.c **********************************************/
+
+EXTERN void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
+                           uint8 result);
+EXTERN void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn,
+                          uint8 result);
+
+/* Defined in uip-tcpinput.c ************************************************/
+
+EXTERN void uip_tcpinput(struct uip_driver_s *dev);
+
+/* Defined in uip_uipcallback.c *********************************************/
+
+EXTERN void uip_tcpcallback(struct uip_driver_s *dev);
 
 #ifdef CONFIG_NET_UDP
 /* Defined in uip_udpconn.c *************************************************/
@@ -103,7 +169,7 @@ EXTERN void uip_udpinit(void);
 EXTERN struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf);
 EXTERN struct uip_udp_conn *uip_nextudpconn(struct uip_udp_conn *conn);
 
-/* Defined in uip-udppool.c *************************************************/
+/* Defined in uip-udppoll.c *************************************************/
 
 EXTERN void uip_udppoll(struct uip_driver_s *dev, struct uip_udp_conn *conn);
 
@@ -119,6 +185,10 @@ EXTERN void uip_udpinput(struct uip_driver_s *dev);
 
 EXTERN void uip_udpcallback(struct uip_driver_s *dev);
 #endif /* CONFIG_NET_UDP */
+
+/* Defined in uip-icmpinput.c ***********************************************/
+
+EXTERN void uip_icmpinput(struct uip_driver_s *dev);
 
 /* UIP logging **************************************************************/
 
