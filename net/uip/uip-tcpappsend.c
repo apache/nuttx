@@ -98,6 +98,8 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn, uint8 resul
 {
   /* Handle the result based on the application response */
 
+  vdbg("result: %02x\n", result);
+
   if (result & UIP_ABORT)
     {
       dev->d_sndlen = 0;
@@ -193,6 +195,8 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn, uint8 resul
 
 void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn, uint8 result)
 {
+  vdbg("result: %02x\n", result);
+
   dev->d_appdata = dev->d_snddata;
 
   /* If the application has data to be sent, or if the incoming packet had

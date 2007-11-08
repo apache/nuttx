@@ -75,7 +75,7 @@
 
 uint8 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
 {
-  uint8 ret = 0;
+  uint8 ret = flags & (UIP_ACKDATA|UIP_NEWDATA);
 
   vdbg("flags: %02x\n", flags);
 
@@ -85,7 +85,7 @@ uint8 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint8 fla
     {
       /* Perform the callback */
 
-      ret = conn->data_event(dev, conn, flags);
+      ret |= conn->data_event(dev, conn, flags);
     }
 
   /* Check if there is a connection-related event and a connection

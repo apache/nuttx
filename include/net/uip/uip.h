@@ -185,7 +185,10 @@ struct uip_conn
   /* Higher level logic can retain application specific information
    * in the following:
    *
-   *   data_event() is called on all events.
+   *   data_event() is called on all events.  May return one of the following:
+   *      UIP_CLOSE - Gracefully close the current connection
+   *      UIP_ABORT - Abort (reset) the current connection on an error that
+   *                  prevents UIP_CLOSE from working.
    *   accept() is called when the TCP logic has created a connection
    *   connection_event() is called on any of the subset of connection-related events
    */
