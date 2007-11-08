@@ -95,9 +95,11 @@
 
 void uip_tcpinput(struct uip_driver_s *dev)
 {
-  register struct uip_conn *uip_connr = uip_conn;
+  struct uip_conn *conn = NULL;
   uint16 tmp16;
   uint8  opt;
+  uint8  flags;
+  uint8  result;
   int    len;
   int    i;
 
@@ -121,8 +123,8 @@ void uip_tcpinput(struct uip_driver_s *dev)
 
   /* Demultiplex this segment. First check any active connections. */
 
-  uip_connr = uip_tcpactive(BUF);
-  if (uip_connr)
+  conn = uip_tcpactive(BUF);
+  if (conn)
     {
       goto found;
     }
@@ -135,40 +137,40 @@ void uip_tcpinput(struct uip_driver_s *dev)
 
   if ((BUF->flags & TCP_CTL) == TCP_SYN)
     {
-        /* This is a SYN packet for a connection.  Find the connection
-         * listening on this port.
-         */
+      /* This is a SYN packet for a connection.  Find the connection
+       * listening on this port.
+       */
 
-        tmp16 = BUF->destport;
-        if (uip_islistener(tmp16))
-          {
-            /* We matched the incoming packet with a connection in LISTEN.
-             * We now need to create a new connection and send a SYNACK in
-             * response.
-             */
+      tmp16 = BUF->destport;
+      if (uip_islistener(tmp16))
+        {
+          /* We matched the incoming packet with a connection in LISTEN.
+           * We now need to create a new connection and send a SYNACK in
+           * response.
+           */
 
           /* First allocate a new connection structure and see if there is any
            * user application to accept it.
            */
 
-          uip_connr = uip_tcpaccept(BUF);
-          if (uip_connr)
+          conn = uip_tcpaccept(BUF);
+          if (conn)
             {
               /* The connection structure was successfully allocated.  Now see
                * there is an application waiting to accept the connection (or at
                * least queue it it for acceptance).
                */
 
-              if (uip_accept(uip_connr, tmp16) != OK)
+              if (uip_accept(conn, tmp16) != OK)
                 {
                   /* No, then we have to give the connection back */
 
-                  uip_tcpfree(uip_connr);
-                  uip_connr = NULL;
+                  uip_tcpfree(conn);
+                  conn = NULL;
                 }
             }
 
-          if (!uip_connr)
+          if (!conn)
             {
               /* Either (1) all available connections are in use, or (2) there is no
                * application in place to accept the connection.  We drop packet and hope that
@@ -183,8 +185,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
               goto drop;
             }
 
-          uip_incr32(uip_conn->rcv_nxt, 1);
-          uip_conn = uip_connr;
+          uip_incr32(conn->rcv_nxt, 1);
 
           /* Parse the TCP MSS option, if present. */
 
@@ -212,7 +213,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
 
                       tmp16 = ((uint16)dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 2 + i] << 8) |
                                (uint16)dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN + 3 + i];
-                      uip_connr->initialmss = uip_connr->mss =
+                      conn->initialmss = conn->mss =
                               tmp16 > UIP_TCP_MSS? UIP_TCP_MSS: tmp16;
 
                       /* And we are done processing options. */
@@ -240,8 +241,8 @@ void uip_tcpinput(struct uip_driver_s *dev)
 
           /* Our response will be a SYNACK. */
 
-          uip_tcpack(dev, uip_connr, TCP_ACK | TCP_SYN);
-          goto done;
+          uip_tcpack(dev, conn, TCP_ACK | TCP_SYN);
+          return;
         }
     }
 
@@ -260,12 +261,11 @@ void uip_tcpinput(struct uip_driver_s *dev)
   uip_stat.tcp.synrst++;
 #endif
   uip_tcpreset(dev);
-  goto done;
+  return;
 
 found:
 
-  uip_conn = uip_connr;
-  uip_flags = 0;
+  flags    = 0;
 
   /* We do a very naive form of TCP reset processing; we just accept
    * any RST and kill our connection. We should in fact check if the
@@ -275,11 +275,10 @@ found:
 
   if (BUF->flags & TCP_RST)
     {
-      uip_connr->tcpstateflags = UIP_CLOSED;
+      conn->tcpstateflags = UIP_CLOSED;
       dbg("Recvd reset - TCP state: UIP_CLOSED\n");
 
-      uip_flags = UIP_ABORT;
-      uip_tcpcallback(dev);
+      (void)uip_tcpcallback(dev, conn, UIP_ABORT);
       goto drop;
     }
 
@@ -301,17 +300,17 @@ found:
    * correct numbers in.
    */
 
-  if (!(((uip_connr->tcpstateflags & UIP_TS_MASK) == UIP_SYN_SENT) &&
+  if (!(((conn->tcpstateflags & UIP_TS_MASK) == UIP_SYN_SENT) &&
       ((BUF->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))))
     {
       if ((dev->d_len > 0 || ((BUF->flags & (TCP_SYN | TCP_FIN)) != 0)) &&
-          (BUF->seqno[0] != uip_connr->rcv_nxt[0] ||
-           BUF->seqno[1] != uip_connr->rcv_nxt[1] ||
-           BUF->seqno[2] != uip_connr->rcv_nxt[2] ||
-           BUF->seqno[3] != uip_connr->rcv_nxt[3]))
+          (BUF->seqno[0] != conn->rcv_nxt[0] ||
+           BUF->seqno[1] != conn->rcv_nxt[1] ||
+           BUF->seqno[2] != conn->rcv_nxt[2] ||
+           BUF->seqno[3] != conn->rcv_nxt[3]))
         {
-            uip_tcpsend(dev, uip_connr, TCP_ACK, UIP_IPTCPH_LEN);
-            goto done;
+            uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+            return;
         }
     }
 
@@ -321,61 +320,61 @@ found:
    * retransmission timer.
    */
 
-  if ((BUF->flags & TCP_ACK) && uip_outstanding(uip_connr))
+  if ((BUF->flags & TCP_ACK) && uip_outstanding(conn))
     {
       /* Temporary variables. */
 
       uint8 acc32[4];
-      uip_add32(uip_connr->snd_nxt, uip_connr->len, acc32);
+      uip_add32(conn->snd_nxt, conn->len, acc32);
 
       if (BUF->ackno[0] == acc32[0] && BUF->ackno[1] == acc32[1] &&
           BUF->ackno[2] == acc32[2] && BUF->ackno[3] == acc32[3])
         {
           /* Update sequence number. */
 
-          uip_connr->snd_nxt[0] = acc32[0];
-          uip_connr->snd_nxt[1] = acc32[1];
-          uip_connr->snd_nxt[2] = acc32[2];
-          uip_connr->snd_nxt[3] = acc32[3];
+          conn->snd_nxt[0] = acc32[0];
+          conn->snd_nxt[1] = acc32[1];
+          conn->snd_nxt[2] = acc32[2];
+          conn->snd_nxt[3] = acc32[3];
 
           /* Do RTT estimation, unless we have done retransmissions. */
 
-          if (uip_connr->nrtx == 0)
+          if (conn->nrtx == 0)
             {
               signed char m;
-              m = uip_connr->rto - uip_connr->timer;
+              m = conn->rto - conn->timer;
 
               /* This is taken directly from VJs original code in his paper */
 
-              m = m - (uip_connr->sa >> 3);
-              uip_connr->sa += m;
+              m = m - (conn->sa >> 3);
+              conn->sa += m;
               if (m < 0)
                 {
                   m = -m;
                 }
 
-              m = m - (uip_connr->sv >> 2);
-              uip_connr->sv += m;
-              uip_connr->rto = (uip_connr->sa >> 3) + uip_connr->sv;
+              m = m - (conn->sv >> 2);
+              conn->sv += m;
+              conn->rto = (conn->sa >> 3) + conn->sv;
             }
 
           /* Set the acknowledged flag. */
 
-          uip_flags = UIP_ACKDATA;
+          flags = UIP_ACKDATA;
 
           /* Reset the retransmission timer. */
 
-          uip_connr->timer = uip_connr->rto;
+          conn->timer = conn->rto;
 
           /* Reset length of outstanding data. */
 
-          uip_connr->len = 0;
+          conn->len = 0;
         }
     }
 
   /* Do different things depending on in what state the connection is. */
 
-  switch(uip_connr->tcpstateflags & UIP_TS_MASK)
+  switch (conn->tcpstateflags & UIP_TS_MASK)
     {
       /* CLOSED and LISTEN are not handled here. CLOSE_WAIT is not
        * implemented, since we force the application to close when the
@@ -390,24 +389,24 @@ found:
          * flag set. If so, we enter the ESTABLISHED state.
          */
 
-        if (uip_flags & UIP_ACKDATA)
+        if (flags & UIP_ACKDATA)
           {
-            uip_connr->tcpstateflags = UIP_ESTABLISHED;
-            uip_connr->len           = 0;
+            conn->tcpstateflags = UIP_ESTABLISHED;
+            conn->len           = 0;
             vdbg("TCP state: UIP_ESTABLISHED\n");
 
-            uip_flags                = UIP_CONNECTED;
+            flags               = UIP_CONNECTED;
 
             if (dev->d_len > 0)
               {
-                uip_flags           |= UIP_NEWDATA;
-                uip_incr32(uip_conn->rcv_nxt, dev->d_len);
+                flags          |= UIP_NEWDATA;
+                uip_incr32(conn->rcv_nxt, dev->d_len);
               }
 
-            dev->d_sndlen            = 0;
-            uip_tcpcallback(dev);
-            uip_tcpappsend(dev, uip_connr, uip_flags);
-            goto done;
+            dev->d_sndlen       = 0;
+            result              = uip_tcpcallback(dev, conn, flags);
+            uip_tcpappsend(dev, conn, result);
+            return;
           }
         goto drop;
 
@@ -418,8 +417,7 @@ found:
          * state.
          */
 
-        if ((uip_flags & UIP_ACKDATA) &&
-            (BUF->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))
+        if ((flags & UIP_ACKDATA) && (BUF->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))
           {
             /* Parse the TCP MSS option, if present. */
 
@@ -448,8 +446,8 @@ found:
                         tmp16 =
                           (dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 2 + i] << 8) |
                           dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 3 + i];
-                        uip_connr->initialmss =
-                          uip_connr->mss =
+                        conn->initialmss =
+                          conn->mss =
                           tmp16 > UIP_TCP_MSS? UIP_TCP_MSS: tmp16;
 
                         /* And we are done processing options. */
@@ -475,31 +473,29 @@ found:
                   }
               }
 
-            uip_connr->tcpstateflags = UIP_ESTABLISHED;
-            uip_connr->rcv_nxt[0]    = BUF->seqno[0];
-            uip_connr->rcv_nxt[1]    = BUF->seqno[1];
-            uip_connr->rcv_nxt[2]    = BUF->seqno[2];
-            uip_connr->rcv_nxt[3]    = BUF->seqno[3];
+            conn->tcpstateflags = UIP_ESTABLISHED;
+            conn->rcv_nxt[0]    = BUF->seqno[0];
+            conn->rcv_nxt[1]    = BUF->seqno[1];
+            conn->rcv_nxt[2]    = BUF->seqno[2];
+            conn->rcv_nxt[3]    = BUF->seqno[3];
             vdbg("TCP state: UIP_ESTABLISHED\n");
 
-            uip_incr32(uip_conn->rcv_nxt, 1);
-            uip_flags      = UIP_CONNECTED | UIP_NEWDATA;
-            uip_connr->len = 0;
-            dev->d_len     = 0;
-            dev->d_sndlen  = 0;
-            uip_tcpcallback(dev);
-            uip_tcpappsend(dev, uip_connr, uip_flags);
-            goto done;
+            uip_incr32(conn->rcv_nxt, 1);
+            conn->len           = 0;
+            dev->d_len          = 0;
+            dev->d_sndlen       = 0;
+            result = uip_tcpcallback(dev, conn, UIP_CONNECTED | UIP_NEWDATA);
+            uip_tcpappsend(dev, conn, result);
+            return;
           }
 
         /* Inform the application that the connection failed */
 
-        uip_flags = UIP_ABORT;
-        uip_tcpcallback(dev);
+        (void)uip_tcpcallback(dev, conn, UIP_ABORT);
 
         /* The connection is closed after we send the RST */
 
-        uip_conn->tcpstateflags = UIP_CLOSED;
+        conn->tcpstateflags = UIP_CLOSED;
         vdbg("TCP state: UIP_CLOSED\n");
 
         /* We do not send resets in response to resets. */
@@ -509,7 +505,7 @@ found:
             goto drop;
           }
         uip_tcpreset(dev);
-        goto done;
+        return;
 
       case UIP_ESTABLISHED:
         /* In the ESTABLISHED state, we call upon the application to feed
@@ -524,30 +520,30 @@ found:
          * sequence numbers will be screwed up.
          */
 
-        if (BUF->flags & TCP_FIN && !(uip_connr->tcpstateflags & UIP_STOPPED))
+        if (BUF->flags & TCP_FIN && !(conn->tcpstateflags & UIP_STOPPED))
           {
-            if (uip_outstanding(uip_connr))
+            if (uip_outstanding(conn))
               {
                 goto drop;
               }
 
-            uip_incr32(uip_conn->rcv_nxt, dev->d_len + 1);
-            uip_flags |= UIP_CLOSE;
+            uip_incr32(conn->rcv_nxt, dev->d_len + 1);
+            flags |= UIP_CLOSE;
 
             if (dev->d_len > 0)
               {
-                uip_flags |= UIP_NEWDATA;
+                flags |= UIP_NEWDATA;
               }
 
-            uip_tcpcallback(dev);
+            (void)uip_tcpcallback(dev, conn, flags);
 
-            uip_connr->tcpstateflags = UIP_LAST_ACK;
-            uip_connr->len = 1;
-            uip_connr->nrtx = 0;
+            conn->tcpstateflags = UIP_LAST_ACK;
+            conn->len           = 1;
+            conn->nrtx          = 0;
             vdbg("TCP state: UIP_LAST_ACK\n");
 
-            uip_tcpsend(dev, uip_connr, TCP_FIN | TCP_ACK, UIP_IPTCPH_LEN);
-            goto done;
+            uip_tcpsend(dev, conn, TCP_FIN | TCP_ACK, UIP_IPTCPH_LEN);
+            return;
           }
 
         /* Check the URG flag. If this is set, the segment carries urgent
@@ -563,7 +559,7 @@ found:
                 uip_urglen = dev->d_len;
               }
 
-            uip_incr32(uip_conn->rcv_nxt, uip_urglen);
+            uip_incr32(conn->rcv_nxt, uip_urglen);
             dev->d_len     -= uip_urglen;
             uip_urgdata     = dev->d_appdata;
             dev->d_appdata += uip_urglen;
@@ -586,10 +582,10 @@ found:
          * remote host.
          */
 
-        if (dev->d_len > 0 && !(uip_connr->tcpstateflags & UIP_STOPPED))
+        if (dev->d_len > 0 && !(conn->tcpstateflags & UIP_STOPPED))
           {
-            uip_flags |= UIP_NEWDATA;
-            uip_incr32(uip_conn->rcv_nxt, dev->d_len);
+            flags |= UIP_NEWDATA;
+            uip_incr32(conn->rcv_nxt, dev->d_len);
           }
 
         /* Check if the available buffer space advertised by the other end
@@ -606,11 +602,11 @@ found:
          */
 
         tmp16 = ((uint16)BUF->wnd[0] << 8) + (uint16)BUF->wnd[1];
-        if (tmp16 > uip_connr->initialmss || tmp16 == 0)
+        if (tmp16 > conn->initialmss || tmp16 == 0)
           {
-            tmp16 = uip_connr->initialmss;
+            tmp16 = conn->initialmss;
           }
-        uip_connr->mss = tmp16;
+        conn->mss = tmp16;
 
         /* If this packet constitutes an ACK for outstanding data (flagged
          * by the UIP_ACKDATA flag, we should call the application since it
@@ -630,12 +626,12 @@ found:
          * send, d_len must be set to 0.
          */
 
-        if (uip_flags & (UIP_NEWDATA | UIP_ACKDATA))
+        if (flags & (UIP_NEWDATA | UIP_ACKDATA))
           {
             dev->d_sndlen = 0;
-            uip_tcpcallback(dev);
-            uip_tcpappsend(dev, uip_connr, uip_flags);
-            goto done;
+            result        = uip_tcpcallback(dev, conn, flags);
+            uip_tcpappsend(dev, conn, result);
+            return;
           }
         goto drop;
 
@@ -644,13 +640,12 @@ found:
          * FIN. This is indicated by the UIP_ACKDATA flag.
          */
 
-        if (uip_flags & UIP_ACKDATA)
+        if (flags & UIP_ACKDATA)
           {
-            uip_connr->tcpstateflags = UIP_CLOSED;
+            conn->tcpstateflags = UIP_CLOSED;
             vdbg("TCP state: UIP_CLOSED\n");
 
-            uip_flags = UIP_CLOSE;
-            uip_tcpcallback(dev);
+            (void)uip_tcpcallback(dev, conn, UIP_CLOSE);
           }
         break;
 
@@ -662,90 +657,85 @@ found:
 
         if (dev->d_len > 0)
           {
-            uip_incr32(uip_conn->rcv_nxt, dev->d_len);
+            uip_incr32(conn->rcv_nxt, dev->d_len);
           }
         if (BUF->flags & TCP_FIN)
           {
-            if (uip_flags & UIP_ACKDATA)
+            if (flags & UIP_ACKDATA)
               {
-                uip_connr->tcpstateflags = UIP_TIME_WAIT;
-                uip_connr->timer = 0;
-                uip_connr->len = 0;
+                conn->tcpstateflags = UIP_TIME_WAIT;
+                conn->timer         = 0;
+                conn->len           = 0;
                 vdbg("TCP state: UIP_TIME_WAIT\n");
               }
             else
               {
-                uip_connr->tcpstateflags = UIP_CLOSING;
+                conn->tcpstateflags = UIP_CLOSING;
                 vdbg("TCP state: UIP_CLOSING\n");
               }
 
-            uip_incr32(uip_conn->rcv_nxt, 1);
-            uip_flags = UIP_CLOSE;
-            uip_tcpcallback(dev);
-            uip_tcpsend(dev, uip_connr, TCP_ACK, UIP_IPTCPH_LEN);
-            goto done;
+            uip_incr32(conn->rcv_nxt, 1);
+            (void)uip_tcpcallback(dev, conn, UIP_CLOSE);
+            uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+            return;
           }
-        else if (uip_flags & UIP_ACKDATA)
+        else if (flags & UIP_ACKDATA)
           {
-            uip_connr->tcpstateflags = UIP_FIN_WAIT_2;
-            uip_connr->len = 0;
+            conn->tcpstateflags = UIP_FIN_WAIT_2;
+            conn->len = 0;
             vdbg("TCP state: UIP_FIN_WAIT_2\n");
             goto drop;
           }
 
         if (dev->d_len > 0)
           {
-            uip_tcpsend(dev, uip_connr, TCP_ACK, UIP_IPTCPH_LEN);
-            goto done;
+            uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+            return;
           }
         goto drop;
 
       case UIP_FIN_WAIT_2:
         if (dev->d_len > 0)
           {
-            uip_incr32(uip_conn->rcv_nxt, dev->d_len);
+            uip_incr32(conn->rcv_nxt, dev->d_len);
           }
 
         if (BUF->flags & TCP_FIN)
           {
-            uip_connr->tcpstateflags = UIP_TIME_WAIT;
-            uip_connr->timer = 0;
+            conn->tcpstateflags = UIP_TIME_WAIT;
+            conn->timer         = 0;
             vdbg("TCP state: UIP_TIME_WAIT\n");
 
-            uip_incr32(uip_conn->rcv_nxt, 1);
-            uip_flags = UIP_CLOSE;
-            uip_tcpcallback(dev);
-            uip_tcpsend(dev, uip_connr, TCP_ACK, UIP_IPTCPH_LEN);
-            goto done;
+            uip_incr32(conn->rcv_nxt, 1);
+            (void)uip_tcpcallback(dev, conn, UIP_CLOSE);
+            uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+            return;
           }
 
         if (dev->d_len > 0)
           {
-            uip_tcpsend(dev, uip_connr, TCP_ACK, UIP_IPTCPH_LEN);
-            goto done;
+            uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+            return;
           }
         goto drop;
 
       case UIP_TIME_WAIT:
-        uip_tcpsend(dev, uip_connr, TCP_ACK, UIP_IPTCPH_LEN);
-        goto done;
+        uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+        return;
 
       case UIP_CLOSING:
-        if (uip_flags & UIP_ACKDATA)
+        if (flags & UIP_ACKDATA)
           {
-            uip_connr->tcpstateflags = UIP_TIME_WAIT;
-            uip_connr->timer = 0;
+            conn->tcpstateflags = UIP_TIME_WAIT;
+            conn->timer        = 0;
             vdbg("TCP state: UIP_TIME_WAIT\n");
           }
-    }
-  goto drop;
 
-done:
-  uip_flags = 0;
-  return;
+      default:
+        break;
+    }
 
 drop:
-  uip_flags  = 0;
   dev->d_len = 0;
 }
 

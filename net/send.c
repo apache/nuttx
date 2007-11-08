@@ -89,7 +89,8 @@ struct send_s
  *
  * Parameters:
  *   dev      The sructure of the network driver that caused the interrupt
- *   private  An instance of struct send_s cast to void*
+ *   conn     The connection structure associated with the socket
+ *   flags    Set of events describing why the callback was invoked
  *
  * Returned Value:
  *   None
@@ -99,22 +100,21 @@ struct send_s
  *
  ****************************************************************************/
 
-static void send_interrupt(struct uip_driver_s *dev, void *private)
+static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
 {
-  struct send_s *pstate = (struct send_s *)private;
-  struct uip_conn *conn;
+  struct send_s *pstate = (struct send_s *)conn->data_private;
 
-  vdbg("uip_flags: %02x state: %d\n", uip_flags, pstate->snd_state);
+  vdbg("flags: %02x state: %d\n", flags, pstate->snd_state);
 
   /* If the data has not been sent OR if it needs to be retransmitted,
    * then send it now.
    */
 
-  if (pstate->snd_state != STATE_DATA_SENT || uip_rexmit_event())
+  if (pstate->snd_state != STATE_DATA_SENT || uip_rexmit_event(flags))
     {
-      if (pstate->snd_buflen > uip_mss())
+      if (pstate->snd_buflen > uip_mss(conn))
         {
-          uip_send(dev, pstate->snd_buffer, uip_mss());
+          uip_send(dev, pstate->snd_buffer, uip_mss(conn));
         }
       else
         {
@@ -126,17 +126,17 @@ static void send_interrupt(struct uip_driver_s *dev, void *private)
 
   /* Check if all data has been sent and acknowledged */
 
-  else if (pstate->snd_state == STATE_DATA_SENT && uip_ack_event())
+  else if (pstate->snd_state == STATE_DATA_SENT && uip_ack_event(flags))
     {
       /* Yes.. the data has been sent AND acknowledged */
 
-      if (pstate->snd_buflen > uip_mss())
+      if (pstate->snd_buflen > uip_mss(conn))
         {
           /* Not all data has been sent */
 
-          pstate->snd_sent   += uip_mss();
-          pstate->snd_buflen -= uip_mss();
-          pstate->snd_buffer += uip_mss();
+          pstate->snd_sent   += uip_mss(conn);
+          pstate->snd_buflen -= uip_mss(conn);
+          pstate->snd_buffer += uip_mss(conn);
 
           /* Send again on the next poll */
 
@@ -152,7 +152,6 @@ static void send_interrupt(struct uip_driver_s *dev, void *private)
 
           /* Don't allow any further call backs. */
 
-          conn               = (struct uip_conn *)pstate->snd_sock->s_conn;
           conn->data_private = NULL;
           conn->data_event   = NULL;
 
@@ -166,11 +165,10 @@ static void send_interrupt(struct uip_driver_s *dev, void *private)
 
  /* Check for a loss of connection */
 
-  else if ((uip_flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
+  else if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
     {
       /* Stop further callbacks */
 
-      conn               = (struct uip_conn *)pstate->snd_sock->s_conn;
       conn->data_private = NULL;
       conn->data_event   = NULL;
 
@@ -182,6 +180,7 @@ static void send_interrupt(struct uip_driver_s *dev, void *private)
 
       sem_post(&pstate->snd_sem);
     }
+  return 0;
 }
 
 /****************************************************************************

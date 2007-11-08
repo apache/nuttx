@@ -73,33 +73,33 @@
  *
  ****************************************************************************/
 
-void uip_tcpcallback(struct uip_driver_s *dev)
+uint8 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
 {
-  vdbg("uip_flags: %02x\n", uip_flags);
+  uint8 ret = 0;
 
-  /* Some sanity checking */
+  vdbg("flags: %02x\n", flags);
 
-  if (uip_conn)
+  /* Check if there is a data callback */
+
+  if (conn->data_event)
     {
-      /* Check if there is a data callback */
+      /* Perform the callback */
 
-      if (uip_conn->data_event)
-      {
-        /* Perform the callback */
-
-        uip_conn->data_event(dev, uip_conn->data_private);
-      }
-
-      /* Check if there is a connection-related event and a connection
-       * callback.
-       */
-      if (((uip_flags & UIP_CONN_EVENTS) != 0) && uip_conn->connection_event)
-        {
-          /* Perform the callback */
-
-          uip_conn->connection_event(uip_conn->connection_private);
-        }
+      ret = conn->data_event(dev, conn, flags);
     }
+
+  /* Check if there is a connection-related event and a connection
+   * callback.
+   */
+
+  if (((flags & UIP_CONN_EVENTS) != 0) && conn->connection_event)
+    {
+      /* Perform the callback */
+
+      conn->connection_event(conn, flags);
+    }
+
+  return ret;
 }
 
 #endif /* CONFIG_NET */

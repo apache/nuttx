@@ -62,20 +62,6 @@ void *uip_urgdata;           /* urgent data (out-of-band data), if present. */
 uint16 uip_urglen;           /* Length of (received) urgent data */
 #endif
 
-/* The uip_flags variable is used for communication between the TCP/IP
- * stack and the application program.
- */
-
-uint8 uip_flags;
-
-/* uip_conn always points to the current connection. */
-
-struct uip_conn *uip_conn;
-
-#ifdef CONFIG_NET_UDP
-struct uip_udp_conn *uip_udp_conn;
-#endif   /* CONFIG_NET_UDP */
-
 #ifdef CONFIG_NET_STATISTICS
 struct uip_stats uip_stat;
 #endif

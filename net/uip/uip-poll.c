@@ -83,7 +83,6 @@ static int uip_polludpconnections(struct uip_driver_s *dev,
     {
       /* Perform the UDP TX poll */
 
-      uip_udp_conn = udp_conn;
       uip_udppoll(dev, udp_conn);
 
       /* Call back into the driver */
@@ -91,7 +90,6 @@ static int uip_polludpconnections(struct uip_driver_s *dev,
       bstop = callback(dev);
     }
 
-  uip_udp_conn = NULL;
   return bstop;
 }
 #else
@@ -122,7 +120,6 @@ static inline int uip_polltcpconnections(struct uip_driver_s *dev,
     {
       /* Perform the TCP TX poll */
 
-      uip_conn = conn;
       uip_tcppoll(dev, conn);
 
       /* Call back into the driver */
@@ -130,7 +127,6 @@ static inline int uip_polltcpconnections(struct uip_driver_s *dev,
       bstop = callback(dev);
     }
 
-  uip_conn = NULL;
   return bstop;
 }
 
@@ -159,7 +155,6 @@ static inline int uip_polltcptimer(struct uip_driver_s *dev,
     {
       /* Perform the TCP timer poll */
 
-      uip_conn = conn;
       uip_tcptimer(dev, conn, hsec);
 
       /* Call back into the driver */
@@ -167,7 +162,6 @@ static inline int uip_polltcptimer(struct uip_driver_s *dev,
       bstop = callback(dev);
     }
 
-  uip_conn = NULL;
   return bstop;
 }
 

@@ -79,6 +79,7 @@ struct sendto_s
  * Parameters:
  *   dev      The sructure of the network driver that caused the interrupt
  *   private  An instance of struct sendto_s cast to void*
+ *   flags    Set of events describing why the callback was invoked
  *
  * Returned Value:
  *   None
@@ -89,14 +90,14 @@ struct sendto_s
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-void sendto_interrupt(struct uip_driver_s *dev, void *private)
+void sendto_interrupt(struct uip_driver_s *dev, struct uip_udp_conn *conn, uint8 flags)
 {
-  struct sendto_s *pstate = (struct sendto_s *)private;
-  if (private)
+  struct sendto_s *pstate = (struct sendto_s *)conn->private;
+  if (pstate)
     {
       /* Check if the connectin was rejected */
 
-      if ((uip_flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
+      if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
         {
           pstate->st_sndlen = -ENOTCONN;
         }
@@ -111,8 +112,8 @@ void sendto_interrupt(struct uip_driver_s *dev, void *private)
 
       /* Don't allow any further call backs. */
 
-      uip_udp_conn->private = NULL;
-      uip_udp_conn->event   = NULL;
+      conn->private = NULL;
+      conn->event   = NULL;
 
       /* Wake up the waiting thread */
 

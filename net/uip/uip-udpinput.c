@@ -95,6 +95,8 @@
 
 void uip_udpinput(struct uip_driver_s *dev)
 {
+  struct uip_udp_conn *conn;
+
   /* UDP processing is really just a hack. We don't do anything to the UDP/IP
    * headers, but let the UDP application do all the hard work. If the
    * application sets d_sndlen, it has a packet to send.
@@ -117,12 +119,10 @@ void uip_udpinput(struct uip_driver_s *dev)
     {
       /* Demultiplex this UDP packet between the UDP "connections". */
 
-      uip_udp_conn = uip_udpactive(UDPBUF);
-      if (uip_udp_conn)
+      conn = uip_udpactive(UDPBUF);
+      if (conn)
         {
           /* Setup for the application callback */
-
-          uip_conn       = NULL;
 
           dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
           dev->d_snddata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
@@ -130,18 +130,14 @@ void uip_udpinput(struct uip_driver_s *dev)
 
           /* Perform the application callback */
 
-          uip_flags      = UIP_NEWDATA;
-          uip_udpcallback(dev);
-          uip_flags      = 0;
+          uip_udpcallback(dev, conn, UIP_NEWDATA);
 
           /* If the application has data to send, setup the UDP/IP header */
 
           if (dev->d_sndlen > 0)
             {
-              uip_udpsend(dev, uip_udp_conn);
+              uip_udpsend(dev, conn);
             }
-
-          uip_udp_conn = NULL;
         }
       else
         {

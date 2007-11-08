@@ -58,11 +58,9 @@
  * Definitions
  ****************************************************************************/
 
-/* The following flags may be set in the global variable uip_flags before
- * calling the application callback. The UIP_ACKDATA, UIP_NEWDATA, and
- * UIP_CLOSE flags may both be set at the same time, whereas the others are
- * mutualy exclusive. Note that these flags should *NOT* be accessed directly,
- * but only through the uIP functions/macros.
+/* The following flags may be set in the set of flags before calling the
+ * application callback. The UIP_ACKDATA, UIP_NEWDATA, and UIP_CLOSE flags
+ * may be set at the same time, whereas the others are mutualy exclusive.
  */
 
 #define UIP_ACKDATA    (1 << 0) /* Signifies that the outstanding data was acked and the
@@ -87,7 +85,7 @@
 #define UIP_DATA_EVENTS (UIP_ACKDATA|UIP_NEWDATA|UIP_REXMIT|UIP_POLL)
 #define UIP_CONN_EVENTS (UIP_CLOSE|UIP_ABORT|UIP_CONNECTED|UIP_TIMEDOUT)
 
-/* The TCP states used in the uip_conn->tcpstateflags. */
+/* The TCP states used in the struct uip_conn tcpstateflags field. */
 
 #define UIP_CLOSED      0 /* The connection is not in use and available */
 #define UIP_ALLOCATED   1 /* The connection is allocated, but not yet initialized */
@@ -186,14 +184,20 @@ struct uip_conn
 
   /* Higher level logic can retain application specific information
    * in the following:
+   *
+   *   data_event() is called on all events.
+   *   accept() is called when the TCP logic has created a connection
+   *   connection_event() is called on any of the subset of connection-related events
    */
 
   void *data_private;
-  void (*data_event)(struct uip_driver_s *dev, void *private);
+  uint8 (*data_event)(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags);
+
   void *accept_private;
-  int (*accept)(void *private, struct uip_conn *conn);
+  int (*accept)(struct uip_conn *listener, struct uip_conn *conn);
+
   void *connection_private;
-  void (*connection_event)(void *private);
+  void (*connection_event)(struct uip_conn *conn, uint8 flags);
 };
 
 #ifdef CONFIG_NET_UDP
@@ -210,7 +214,7 @@ struct uip_udp_conn
   /* Defines the UDP callback */
 
   void *private;
-  void (*event)(struct uip_driver_s *dev, void *private);
+  void (*event)(struct uip_driver_s *dev, struct uip_udp_conn *conn, uint8 flags);
 };
 #endif  /* CONFIG_NET_UDP */
 
@@ -451,14 +455,6 @@ extern void *uip_urgdata;
 extern uint16 uip_urglen; /* Length of (received) urgent data */
 #endif /* UIP_URGDATA > 0 */
 
-/* Pointer to the current TCP connection.
- *
- * The uip_conn pointer can be used to access the current TCP
- * connection.
- */
-
-extern struct uip_conn *uip_conn;
-
 /* The current UDP connection. */
 
 #ifdef CONFIG_NET_UDP
@@ -471,15 +467,6 @@ extern struct uip_udp_conn *uip_udp_conn;
  */
 
 extern struct uip_stats uip_stat;
-
-/* uint8 uip_flags:
- *
- * When the application is called, uip_flags will contain the flags
- * that are defined in this file. Please read below for more
- * infomation.
- */
-
-extern uint8 uip_flags;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -573,10 +560,7 @@ int uip_listen(uint16 port);
 
 int uip_unlisten(uint16 port);
 
-/* Check if a connection has outstanding (i.e., unacknowledged) data.
- *
- * conn A pointer to the uip_conn structure for the connection.
- */
+/* Check if a connection has outstanding (i.e., unacknowledged) data. */
 
 #define uip_outstanding(conn) ((conn)->len)
 
@@ -623,29 +607,13 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
 
 #define uip_urgdatalen()    uip_urglen
 
-/* Close the current connection.
- *
- * This function will close the current connection in a nice way.
- */
-
-#define uip_close()         (uip_flags = UIP_CLOSE)
-
-/* Abort the current connection.
- *
- * This function will abort (reset) the current connection, and is
- * usually used when an error has occured that prevents using the
- * uip_close() function.
- */
-
-#define uip_abort()         (uip_flags = UIP_ABORT)
-
 /* Tell the sending host to stop sending data.
  *
  * This function will close our receiver's window so that we stop
  * receiving data for the current connection.
  */
 
-#define uip_stop()          (uip_conn->tcpstateflags |= UIP_STOPPED)
+#define uip_stop(conn)          ((conn)->tcpstateflags |= UIP_STOPPED)
 
 /* Find out if the current connection has been previously stopped with
  * uip_stop().
@@ -660,29 +628,24 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * start receiving data for the current connection.
  */
 
-#define uip_restart()         do { uip_flags |= UIP_NEWDATA; \
-                                   uip_conn->tcpstateflags &= ~UIP_STOPPED; \
-                              } while(0)
+#define uip_restart(conn,f) \
+  do { \
+    (f) |= UIP_NEWDATA; \
+    (conn)->tcpstateflags &= ~UIP_STOPPED; \
+  } while(0)
 
 
 /* uIP tests that can be made to determine in what state the current
  * connection is, and what the application function should do.
  *
- * Is the current connection a UDP connection?
- *
- * This function checks whether the current connection is a UDP connection.
- */
-
-#define uip_udpconnection() (uip_conn == NULL)
-
-/* Is new incoming data available?
+ * Is new incoming data available?
  *
  * Will reduce to non-zero if there is new data for the application
  * present at the d_appdata pointer. The size of the data is
  * avaliable through the d_len element.
  */
 
-#define uip_newdata_event() (uip_flags & UIP_NEWDATA)
+#define uip_newdata_event(f) ((f) & UIP_NEWDATA)
 
 /* Has previously sent data been acknowledged?
  *
@@ -691,7 +654,7 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * can send new data.
  */
 
-#define uip_ack_event() (uip_flags & UIP_ACKDATA)
+#define uip_ack_event(f) ((f) & UIP_ACKDATA)
 
 /* Has the connection just been connected?
  *
@@ -701,7 +664,7 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * uip_listen()).
  */
 
-#define uip_connected_event() (uip_flags & UIP_CONNECTED)
+#define uip_connected_event(f) ((f) & UIP_CONNECTED)
 
 /* Has the connection been closed by the other end?
  *
@@ -709,7 +672,7 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * host. The application may then do the necessary clean-ups.
  */
 
-#define uip_close_event() (uip_flags & UIP_CLOSE)
+#define uip_close_event(f) ((f) & UIP_CLOSE)
 
 /* Has the connection been aborted by the other end?
  *
@@ -717,7 +680,7 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * remote host.
  */
 
-#define uip_abort_event() (uip_flags & UIP_ABORT)
+#define uip_abort_event(f) ((f) & UIP_ABORT)
 
 /* Has the connection timed out?
  *
@@ -725,7 +688,7 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * retransmissions.
  */
 
-#define uip_timeout_event() (uip_flags & UIP_TIMEDOUT)
+#define uip_timeout_event(f) ((f) & UIP_TIMEDOUT)
 
 /* Do we need to retransmit previously data?
  *
@@ -735,7 +698,7 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * time, using the uip_send() function.
  */
 
-#define uip_rexmit_event() (uip_flags & UIP_REXMIT)
+#define uip_rexmit_event(f) ((f) & UIP_REXMIT)
 
 /* Is the connection being polled by uIP?
  *
@@ -747,13 +710,13 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * wait for the remote host to send data.
  */
 
-#define uip_poll_event() (uip_flags & UIP_POLL)
+#define uip_poll_event(f) ((f) & UIP_POLL)
 
 /* Get the initial maxium segment size (MSS) of the current
  * connection.
  */
 
-#define uip_initialmss() (uip_conn->initialmss)
+#define uip_initialmss(conn) ((conn)->initialmss)
 
 /* Get the current maxium segment size that can be sent on the current
  * connection.
@@ -764,7 +727,7 @@ void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * uip_initialmss()).
  */
 
-#define uip_mss() (uip_conn->mss)
+#define uip_mss(conn) ((conn)->mss)
 
 /* Bind a UDP connection to a local address */
 

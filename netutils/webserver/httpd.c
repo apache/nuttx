@@ -95,7 +95,7 @@ static void next_scriptstate(struct httpd_state *pstate)
   pstate->scriptptr = p;
 }
 
-static void handle_script(struct httpd_state *pstate)
+static void handle_script(struct httpd_state *pstate, struct uip_conn *conn)
 {
   char *ptr;
 
@@ -122,8 +122,8 @@ static void handle_script(struct httpd_state *pstate)
       /* See if we find the start of script marker in the block of HTML
 	 to be sent. */
 
-      if (pstate->file.len > uip_mss()) {
-	pstate->len = uip_mss();
+      if (pstate->file.len > uip_mss(conn)) {
+	pstate->len = uip_mss(conn);
       } else {
 	pstate->len = pstate->file.len;
       }
@@ -136,8 +136,8 @@ static void handle_script(struct httpd_state *pstate)
       if (ptr != NULL &&
 	 ptr != pstate->file.data) {
 	pstate->len = (int)(ptr - pstate->file.data);
-	if (pstate->len >= uip_mss()) {
-	  pstate->len = uip_mss();
+	if (pstate->len >= uip_mss(conn)) {
+	  pstate->len = uip_mss(conn);
 	}
       }
       send_part_of_file(pstate);
@@ -186,7 +186,7 @@ static int send_headers(struct httpd_state *pstate, const char *statushdr)
   return ret;
 }
 
-static void handle_output(struct httpd_state *pstate)
+static void handle_output(struct httpd_state *pstate, struct uip_conn *conn)
 {
   char *ptr;
 
@@ -203,7 +203,7 @@ static void handle_output(struct httpd_state *pstate)
       ptr = strchr(pstate->filename, ISO_period);
       if (ptr != NULL && strncmp(ptr, http_shtml, 6) == 0)
         {
-          handle_script(pstate);
+          handle_script(pstate, conn);
         }
       else
         {
@@ -266,11 +266,11 @@ static int handle_input(struct httpd_state *pstate)
   return OK;
 }
 
-static void handle_connection(struct httpd_state *pstate)
+static void handle_connection(struct httpd_state *pstate, struct uip_conn *conn)
 {
   handle_input(pstate);
   if (pstate->state == STATE_OUTPUT) {
-    handle_output(pstate);
+    handle_output(pstate, conn);
   }
 }
 

@@ -61,7 +61,6 @@ struct accept_s
 #else
   FAR const struct sockaddr_in  *acpt_addr;       /* Return connection adress */
 #endif
-  FAR struct uip_conn           *acpt_listenconn; /* The listener connection */
   FAR struct uip_conn           *acpt_newconn;    /* The accepted connection */
   int                            acpt_result;     /* The result of the wait */
 };
@@ -80,11 +79,21 @@ struct accept_s
  * Description:
  *   Receive interrupt level callbacks when connections occur
  *
+ * Parameters:
+ *   listener The conection stucture of the listener
+ *   conn     The connection stucture that was just accepted
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
  ****************************************************************************/
 
-static int accept_interrupt(void *private, struct uip_conn *conn)
+static int accept_interrupt(struct uip_conn *listener, struct uip_conn *conn)
 {
-  struct accept_s *pstate = (struct accept_s *)private;
+  struct accept_s *pstate = (struct accept_s *)listener->accept_private;
   int ret = -EINVAL;
   if (pstate)
     {
@@ -92,16 +101,16 @@ static int accept_interrupt(void *private, struct uip_conn *conn)
 #warning "need to return the address of the connection"
 
       /* Save the connection structure */
-      
-      pstate->acpt_newconn = conn;
-      pstate->acpt_result  = OK;
+
+      pstate->acpt_newconn     = conn;
+      pstate->acpt_result      = OK;
       sem_post(&pstate->acpt_sem);
-      
+
       /* Stop any further callbacks */
 
-      pstate->acpt_listenconn->accept_private = NULL;
-      pstate->acpt_listenconn->accept         = NULL;
-      ret = OK;
+      listener->accept_private = NULL;
+      listener->accept         = NULL;
+      ret                      = OK;
   }
   return ret;
 }
@@ -275,7 +284,6 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 
   save                  = irqsave();
   state.acpt_addr       = inaddr;
-  state.acpt_listenconn = psock->s_conn;
   state.acpt_newconn    = NULL;
   state.acpt_result     = OK;
 

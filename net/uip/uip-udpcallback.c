@@ -73,17 +73,18 @@
  *
  ****************************************************************************/
 
-void uip_udpcallback(struct uip_driver_s *dev)
+void uip_udpcallback(struct uip_driver_s *dev, struct uip_udp_conn *conn,
+                     uint8 flags)
 {
-  vdbg("uip_flags: %02x\n", uip_flags);
+  vdbg("flags: %02x\n", flags);
 
   /* Some sanity checking */
 
-  if (uip_udp_conn && uip_udp_conn->event)
+  if (conn && conn->event)
     {
       /* Perform the callback */
 
-      uip_udp_conn->event(dev, uip_udp_conn->private);
+      conn->event(dev, conn, flags);
     }
 }
 

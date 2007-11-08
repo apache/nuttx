@@ -65,11 +65,12 @@ struct tcp_connect_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void connection_event(void *private);
+static void connection_event(struct uip_conn *conn, uint8 flags);
 static inline void tcp_setup_callbacks(struct uip_conn *conn, FAR struct socket *psock,
                                        FAR struct tcp_connect_s *pstate);
 static inline void tcp_teardown_callbacks(struct uip_conn *conn, int status);
-static void tcp_connect_interrupt(struct uip_driver_s *dev, void *private);
+static uint8 tcp_connect_interrupt(struct uip_driver_s *dev,
+                                   struct uip_conn *conn, uint8 flags);
 #ifdef CONFIG_NET_IPv6
 static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in6 *inaddr);
 #else
@@ -87,7 +88,8 @@ static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in
  *
  * Parameters:
  *   dev      The sructure of the network driver that caused the interrupt
- *   private  An instance of struct recvfrom_s cast to void*
+ *   conn     The connection structure associated with the socket
+ *   flags    Set of events describing why the callback was invoked
  *
  * Returned Value:
  *   None
@@ -97,19 +99,19 @@ static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in
  *
  ****************************************************************************/
 
-static void connection_event(void *private)
+static void connection_event(struct uip_conn *conn, uint8 flags)
 {
-  FAR struct socket *psock = (FAR struct socket *)private;
+  FAR struct socket *psock = (FAR struct socket *)conn->connection_private;
 
   if (psock)
     {
-      vdbg("uip_flags: %02x s_flags: %02x\n", uip_flags, psock->s_flags);
+      vdbg("flags: %02x s_flags: %02x\n", flags, psock->s_flags);
 
       /* UIP_CLOSE: The remote host has closed the connection
        * UIP_ABORT: The remote host has aborted the connection
        * UIP_TIMEDOUT: Connection aborted due to too many retransmissions.
        */
-      if ((uip_flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
+      if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
         {
           /* Indicate that the socket is no longer connected */
 
@@ -118,7 +120,7 @@ static void connection_event(void *private)
 
       /* UIP_CONNECTED: The socket is successfully connected */
 
-      else if ((uip_flags & UIP_CONNECTED) != 0)
+      else if ((flags & UIP_CONNECTED) != 0)
         {
           /* Indicate that the socket is now connected */
 
@@ -178,7 +180,8 @@ static inline void tcp_teardown_callbacks(struct uip_conn *conn, int status)
  *
  * Parameters:
  *   dev      The sructure of the network driver that caused the interrupt
- *   private  An instance of struct recvfrom_s cast to void*
+ *   conn     The connection structure associated with the socket
+ *   flags    Set of events describing why the callback was invoked
  *
  * Returned Value:
  *   None
@@ -188,11 +191,12 @@ static inline void tcp_teardown_callbacks(struct uip_conn *conn, int status)
  *
  ****************************************************************************/
 
-static void tcp_connect_interrupt(struct uip_driver_s *dev, void *private)
+static uint8 tcp_connect_interrupt(struct uip_driver_s *dev,
+                                   struct uip_conn *conn, uint8 flags)
 {
-  struct tcp_connect_s *pstate = (struct tcp_connect_s *)private;
+  struct tcp_connect_s *pstate = (struct tcp_connect_s *)conn->data_private;
 
-  vdbg("uip_flags: %02x\n", uip_flags);
+  vdbg("flags: %02x\n", flags);
 
   /* 'private' might be null in some race conditions (?) */
 
@@ -213,7 +217,7 @@ static void tcp_connect_interrupt(struct uip_driver_s *dev, void *private)
        * UIP_ABORT: The remote host has aborted the connection
        */
 
-      if ((uip_flags & (UIP_CLOSE|UIP_ABORT)) != 0)
+      if ((flags & (UIP_CLOSE|UIP_ABORT)) != 0)
         {
           /* Indicate that remote host refused the connection */
 
@@ -222,7 +226,7 @@ static void tcp_connect_interrupt(struct uip_driver_s *dev, void *private)
 
       /* UIP_TIMEDOUT: Connection aborted due to too many retransmissions. */
 
-      else if ((uip_flags & UIP_TIMEDOUT) != 0)
+      else if ((flags & UIP_TIMEDOUT) != 0)
         {
           /* Indicate that the remote host is unreachable (or should this be timedout?) */
 
@@ -231,7 +235,7 @@ static void tcp_connect_interrupt(struct uip_driver_s *dev, void *private)
 
       /* UIP_CONNECTED: The socket is successfully connected */
 
-      else if ((uip_flags & UIP_CONNECTED) != 0)
+      else if ((flags & UIP_CONNECTED) != 0)
         {
           /* Indicate that the socket is no longer connected */
 
@@ -242,7 +246,7 @@ static void tcp_connect_interrupt(struct uip_driver_s *dev, void *private)
 
       else
         {
-          return;
+          return 0;
         }
 
       vdbg("Resuming: %d\n", pstate->tc_result);
@@ -255,6 +259,7 @@ static void tcp_connect_interrupt(struct uip_driver_s *dev, void *private)
 
       sem_post(&pstate->tc_sem);
     }
+  return 0;
 }
 
 /****************************************************************************

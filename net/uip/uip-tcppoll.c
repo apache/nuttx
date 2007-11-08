@@ -94,6 +94,8 @@
 
 void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn)
 {
+  uint8 result;
+
   /* Verify that the connection is established and if the connection has
    * oustanding (unacknowledged) sent data.
    */
@@ -111,12 +113,11 @@ void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn)
 
       /* Perfom the callback */
 
-      uip_flags = UIP_POLL;
-      uip_tcpcallback(dev);
+      result = uip_tcpcallback(dev, conn, UIP_POLL);
 
       /* Handle the callback response */
 
-      uip_tcpappsend(dev, conn, uip_flags);
+      uip_tcpappsend(dev, conn, result);
     }
   else
     {

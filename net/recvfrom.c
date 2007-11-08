@@ -81,15 +81,14 @@ struct recvfrom_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: recvfrom_interrupt
+ * Function: recvfrom_newdata
  *
  * Description:
- *   This function is called from the interrupt level to perform the actual
- *   receive operation via by the uIP layer.
+ *   Copy the read data from the packet
  *
  * Parameters:
  *   dev      The sructure of the network driver that caused the interrupt
- *   private  An instance of struct recvfrom_s cast to void*
+ *   pstate   recvfrom state structure
  *
  * Returned Value:
  *   None
@@ -99,81 +98,140 @@ struct recvfrom_s
  *
  ****************************************************************************/
 
-static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
+static void recvfrom_newdata(struct uip_driver_s *dev, struct recvfrom_s *pstate)
 {
-  struct recvfrom_s *pstate = (struct recvfrom_s *)private;
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-  FAR struct socket *psock;
-#endif
   size_t recvlen;
 
-  vdbg("uip_flags: %02x\n", uip_flags);
+  /* Get the length of the data to return */
+
+  if (dev->d_len > pstate->rf_buflen)
+    {
+      recvlen = pstate->rf_buflen;
+    }
+  else
+    {
+      recvlen = dev->d_len;
+    }
+
+  /* Copy the new appdata into the user buffer */
+
+  memcpy(pstate->rf_buffer, dev->d_appdata, recvlen);
+  vdbg("Received %d bytes (of %d)\n", recvlen, dev->d_len);
+
+  /* Update the accumulated size of the data read */
+
+  pstate->rf_recvlen += recvlen;
+  pstate->rf_buffer  += recvlen;
+  pstate->rf_buflen  -= recvlen;
+}
+
+/****************************************************************************
+ * Function: recvfrom_timeout
+ *
+ * Description:
+ *   Check for recvfrom timeout.
+ *
+ * Parameters:
+ *   pstate   recvfrom state structure
+ *
+ * Returned Value:
+ *   TRUE:timeout FALSE:no timeout
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+static int recvfrom_timeout(struct recvfrom_s *pstate)
+{
+  FAR struct socket *psock = 0;
+  socktimeo_t        timeo = 0;
+
+  /* If this is a TCP socket that has already received some data,
+   * than we will always use a short timeout.
+   */
+
+  if (pstate->rf_recvlen > 0)
+    {
+      /* Use the short timeout */
+
+      timeo = TCP_TIMEO;
+    }
+
+  /* No.. check for a timeout configured via setsockopts(SO_RCVTIMEO).
+   * If none... we well let the read hang forever.
+   */
+
+  else
+    {
+      /* Get the socket reference from the private data */
+
+      psock = pstate->rf_sock;
+      if (psock)
+        {
+          timeo = psock->s_rcvtimeo;
+        }
+    }
+
+  /* Is there an effective timeout? */
+
+  if (timeo)
+    {
+      /* Yes.. Check if the timeout has elapsed */
+
+      return net_timeo(pstate->rf_starttime, timeo);
+    }
+
+  /* No timeout */
+
+  return FALSE;
+}
+#endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+
+/****************************************************************************
+ * Function: recvfrom_tcpinterrupt
+ *
+ * Description:
+ *   This function is called from the interrupt level to perform the actual
+ *   TCP receive operation via by the uIP layer.
+ *
+ * Parameters:
+ *   dev      The sructure of the network driver that caused the interrupt
+ *   conn     The connection structure associated with the socket
+ *   flags    Set of events describing why the callback was invoked
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+static uint8 recvfrom_tcpinterrupt(struct uip_driver_s *dev,
+                                   struct uip_conn *conn, uint8 flags)
+{
+  struct recvfrom_s *pstate = (struct recvfrom_s *)conn->data_private;
+
+  vdbg("flags: %02x\n", flags);
 
   /* 'private' might be null in some race conditions (?) */
 
   if (pstate)
     {
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-      /* Get the socket reference from the private data */
-
-      psock = pstate->rf_sock;
-#endif
-
       /* If new data is available, then complete the read action. */
 
-      if (uip_newdata_event())
+      if (uip_newdata_event(flags))
         {
-          /* Get the length of the data to return */
+          /* Copy the data from the packet */
 
-          if (dev->d_len > pstate->rf_buflen)
-            {
-              recvlen = pstate->rf_buflen;
-            }
-          else
-            {
-              recvlen = dev->d_len;
-            }
+          recvfrom_newdata(dev, pstate);
 
-          /* Copy the new appdata into the user buffer */
+          /* If the user buffer has been filled, then we are finished. */
 
-          memcpy(pstate->rf_buffer, dev->d_appdata, recvlen);
-          vdbg("Received %d bytes (of %d)\n", recvlen, dev->d_len);
-
-          /* Update the accumulated size of the data read */
-
-          pstate->rf_recvlen += recvlen;
-          pstate->rf_buffer  += recvlen;
-          pstate->rf_buflen  -= recvlen;
-
-          /* Are we finished?  If this is a UDP socket or if the user
-           * buffer has been filled, then we are finished.
-           */
-
-#ifdef CONFIG_NET_UDP
-          if (psock->s_type == SOCK_DGRAM)
-            {
-              struct uip_udp_conn *udp_conn;
-
-              vdbg("UDP resume\n");
-
-              /* Don't allow any further UDP call backs. */
-
-              udp_conn          = (struct uip_udp_conn *)psock->s_conn;
-              udp_conn->private = NULL;
-              udp_conn->event   = NULL;
-
-              /* Wake up the waiting thread, returning the number of bytes
-               * actually read.
-               */
-
-              sem_post(&pstate->rf_sem);
-            }
-          else
-#endif
           if (pstate->rf_buflen == 0)
             {
-              struct uip_conn *conn;
-
               vdbg("TCP resume\n");
 
               /* The TCP receive buffer is full.  Return now, perhaps truncating
@@ -182,7 +240,6 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
                * Don't allow any further TCP call backs.
                */
 
-              conn               = (struct uip_conn *)psock->s_conn;
               conn->data_private = NULL;
               conn->data_event   = NULL;
 
@@ -204,26 +261,14 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
 
       /* Check for a loss of connection */
 
-      else if ((uip_flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
+      else if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
         {
           vdbg("error\n");
 
           /* Stop further callbacks */
 
-#ifdef CONFIG_NET_UDP
-          if (psock->s_type == SOCK_DGRAM)
-            {
-              struct uip_udp_conn *udp_conn = (struct uip_udp_conn *)psock->s_conn;
-              udp_conn->private  = NULL;
-              udp_conn->event    = NULL;
-            }
-          else
-#endif
-            {
-              struct uip_conn *conn = (struct uip_conn *)psock->s_conn;
-              conn->data_private = NULL;
-              conn->data_event   = NULL;
-            }
+          conn->data_private = NULL;
+          conn->data_event   = NULL;
 
           /* Report not connected */
 
@@ -239,92 +284,140 @@ static void recvfrom_interrupt(struct uip_driver_s *dev, void *private)
        */
 
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-      else
+      else if (recvfrom_timeout(pstate))
         {
-          socktimeo_t timeo;
-
-          /* If this is a TCP socket that has already received some data,
-           * than we will always use a short timeout.
+          /* Yes.. the timeout has elapsed... do not allow any further
+           * callbacks
            */
 
-          if (pstate->rf_recvlen > 0)
-            {
-              /* Use the short timeout */
+          vdbg("TCP timeout\n");
 
-              timeo = TCP_TIMEO;
+          conn->data_private = NULL;
+          conn->data_event   = NULL;
+
+          /* Report an error only if no data has been received */
+
+          if (pstate->rf_recvlen == 0)
+            {
+              /* Report the timeout error */
+
+              pstate->rf_result = -EAGAIN;
             }
 
-          /* No.. check for a timeout configured via setsockopts(SO_RCVTIMEO).
-           * If none... we well let the read hang forever.
+          /* Wake up the waiting thread, returning either the error -EAGAIN
+           * that signals the timeout event or the data received up to
+           * the point tht the timeout occured (no error).
            */
 
-          else
-            {
-              timeo = psock->s_rcvtimeo;
-            }
+          sem_post(&pstate->rf_sem);
+        }
+#endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+    }
+  return 0;
+}
 
-          /* Is there an effective timeout? */
-
-          if (timeo)
-            {
-              /* Yes.. Check if the timeout has elapsed */
-
-              if (net_timeo(pstate->rf_starttime, timeo))
-                {
-                  /* Yes.. the timeout has elapsed... do not allow any further
-                   * callbacks
-                   */
+/****************************************************************************
+ * Function: recvfrom_udpinterrupt
+ *
+ * Description:
+ *   This function is called from the interrupt level to perform the actual
+ *   UDP receive operation via by the uIP layer.
+ *
+ * Parameters:
+ *   dev      The sructure of the network driver that caused the interrupt
+ *   conn     The connection structure associated with the socket
+ *   flags    Set of events describing why the callback was invoked
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-                  if (psock->s_type == SOCK_DGRAM)
-                    {
-                      struct uip_udp_conn *udp_conn;
+static void recvfrom_udpinterrupt(struct uip_driver_s *dev,
+                                  struct uip_udp_conn *conn, uint8 flags)
+{
+  struct recvfrom_s *pstate = (struct recvfrom_s *)conn->private;
 
-                      vdbg("UDP timeout\n");
+  vdbg("flags: %02x\n", flags);
 
-                      /* Stop further callbacks */
+  /* 'private' might be null in some race conditions (?) */
 
-                      udp_conn          = (struct uip_udp_conn *)psock->s_conn;
-                      udp_conn->private = NULL;
-                      udp_conn->event   = NULL;
+  if (pstate)
+    {
+      /* If new data is available, then complete the read action. */
 
-                      /* Report a timeout error */
+      if (uip_newdata_event(flags))
+        {
+          /* Copy the data from the packet */
 
-                      pstate->rf_result = -EAGAIN;
-                    }
-                  else
-#endif
-                    {
-                      struct uip_conn *conn;
+          recvfrom_newdata(dev, pstate);
 
-                      vdbg("TCP timeout\n");
+          /* We are finished. */
 
-                      conn               = (struct uip_conn *)psock->s_conn;
-                      conn->data_private = NULL;
-                      conn->data_event   = NULL;
+          vdbg("UDP resume\n");
 
-                      /* Report an error only if no data has been received */
+          /* Don't allow any further UDP call backs. */
 
-                      if (pstate->rf_recvlen == 0)
-                        {
-                          /* Report the timeout error */
+          conn->private = NULL;
+          conn->event   = NULL;
 
-                          pstate->rf_result = -EAGAIN;
-                        }
-                    }
+          /* Wake up the waiting thread, returning the number of bytes
+           * actually read.
+           */
 
-                  /* Wake up the waiting thread, returning either the error -EAGAIN
-                   * that signals the timeout event or the data received up to
-                   * the point tht the timeout occured (no error).
-                   */
-
-                  sem_post(&pstate->rf_sem);
-                }
-            }
+          sem_post(&pstate->rf_sem);
         }
-#endif
+
+      /* Check for a loss of connection */
+
+      else if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
+        {
+          vdbg("error\n");
+
+          /* Stop further callbacks */
+
+          conn->private  = NULL;
+          conn->event    = NULL;
+
+          /* Report not connected */
+
+          pstate->rf_result = -ENOTCONN;
+
+          /* Wake up the waiting thread */
+
+          sem_post(&pstate->rf_sem);
+        }
+
+      /* No data has been received -- this is some other event... probably a
+       * poll -- check for a timeout.
+       */
+
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+      else if (recvfrom_timeout(pstate))
+        {
+          /* Yes.. the timeout has elapsed... do not allow any further
+           * callbacks
+           */
+
+          vdbg("UDP timeout\n");
+
+          /* Stop further callbacks */
+
+          conn->private = NULL;
+          conn->event   = NULL;
+
+          /* Report a timeout error */
+
+          pstate->rf_result = -EAGAIN;
+        }
+#endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
     }
 }
+#endif
 
 /****************************************************************************
  * Function: recvfrom_init
@@ -468,7 +561,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   udp_conn          = (struct uip_udp_conn *)psock->s_conn;
   udp_conn->private = (void*)&state;
-  udp_conn->event   = recvfrom_interrupt;
+  udp_conn->event   = recvfrom_udpinterrupt;
 
   /* Enable the UDP socket */
 
@@ -549,7 +642,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   conn               = (struct uip_conn *)psock->s_conn;
   conn->data_private = (void*)&state;
-  conn->data_event   = recvfrom_interrupt;
+  conn->data_event   = recvfrom_tcpinterrupt;
 
   /* Wait for either the receive to complete or for an error/timeout to occur.
    * NOTES:  (1) sem_wait will also terminate if a signal is received, (2)

@@ -78,6 +78,8 @@
 #define ISO_cr       0x0d
 #define ISO_space    0x20
 
+static uint8 g_return; /* Kludge for now */
+
 
 static struct webclient_state s;
 
@@ -180,7 +182,7 @@ static char *copy_string(char *dest, const char *src, int len)
   return dest + len;
 }
 
-static void senddata(struct uip_driver_s *dev)
+static void senddata(struct uip_driver_s *dev, struct uip_conn *conn)
 {
   uint16 len;
   char *getrequest;
@@ -203,20 +205,20 @@ static void senddata(struct uip_driver_s *dev)
     cptr = copy_string(cptr, http_user_agent_fields,
 		       strlen(http_user_agent_fields));
 
-    len = s.getrequestleft > uip_mss()?
-      uip_mss():
+    len = s.getrequestleft > uip_mss(conn)?
+      uip_mss(conn):
       s.getrequestleft;
     uip_send(dev, &(getrequest[s.getrequestptr]), len);
   }
 }
 
-static void acked(void)
+static void acked(struct uip_conn *conn)
 {
   uint16 len;
 
   if (s.getrequestleft > 0) {
-    len = s.getrequestleft > uip_mss()?
-      uip_mss():
+    len = s.getrequestleft > uip_mss(conn)?
+      uip_mss(conn):
       s.getrequestleft;
     s.getrequestleft -= len;
     s.getrequestptr += len;
@@ -262,7 +264,7 @@ static uint16 parse_statusline(struct uip_driver_s *dev, uint16 len)
             }
           else
             {
-              uip_abort();
+              g_return = UIP_ABORT;
               webclient_aborted();
               return 0;
             }
@@ -404,63 +406,63 @@ static void newdata(struct uip_driver_s *dev)
  * event of interest occurs.
  */
 
-void uip_interrupt_event(struct uip_driver_s *dev)
+uint8 uip_interrupt_event(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
 {
 #warning OBSOLETE -- needs to be redesigned
-  if (uip_connected_event())
+  g_return = 0;
+
+  if (uip_connected_event(flags))
     {
       s.timer = 0;
       s.state = WEBCLIENT_STATE_STATUSLINE;
-      senddata(dev);
+      senddata(dev, conn);
       webclient_connected();
-      return;
+      return g_return;
     }
 
   if (s.state == WEBCLIENT_STATE_CLOSE)
     {
       webclient_closed();
-      uip_abort();
-      return;
+      return UIP_ABORT;
     }
 
-  if (uip_abort_event())
+  if (uip_abort_event(flags))
     {
       webclient_aborted();
     }
 
-  if (uip_timeout_event())
+  if (uip_timeout_event(flags))
     {
       webclient_timedout();
     }
 
-  if (uip_ack_event())
+  if (uip_ack_event(flags))
     {
       s.timer = 0;
-      acked();
+      acked(conn);
     }
 
-  if (uip_newdata_event())
+  if (uip_newdata_event(flags))
     {
       s.timer = 0;
       newdata(dev);
     }
 
-  if (uip_rexmit_event() || uip_newdata_event() || uip_ack_event())
+  if (uip_rexmit_event(flags) || uip_newdata_event(flags) || uip_ack_event(flags))
     {
-      senddata(dev);
+      senddata(dev, conn);
     }
-  else if (uip_poll_event())
+  else if (uip_poll_event(flags))
     {
       ++s.timer;
       if (s.timer == WEBCLIENT_TIMEOUT)
         {
           webclient_timedout();
-          uip_abort();
-          return;
+          return UIP_ABORT;
         }
     }
 
-  if (uip_close_event())
+  if (uip_close_event(flags))
     {
       if (s.httpflag != HTTPFLAG_MOVED)
         {
@@ -476,9 +478,10 @@ void uip_interrupt_event(struct uip_driver_s *dev)
 #endif
           if (resolv_query(s.host, &addr) < 0)
             {
-              return;
+              return g_return;
             }
           webclient_get(s.host, s.port, s.file);
         }
     }
+  return g_return;
 }

@@ -87,7 +87,7 @@ static struct uip_driver_s g_sim_dev;
  * Private Functions
  ****************************************************************************/
 
-static void timer_set( struct timer *t, unsigned int interval )
+static void timer_set(struct timer *t, unsigned int interval)
 {
   t->interval = interval;
   t->start    = up_getwalltime();
@@ -104,9 +104,9 @@ void timer_reset(struct timer *t)
 }
 
 #ifdef CONFIG_NET_PROMISCUOUS
-# define uipdriver_comparemac(a,b) (0)
+# define up_comparemac(a,b) (0)
 #else
-static inline int uip_comparemac(struct uip_eth_addr *paddr1, struct uip_eth_addr *paddr2)
+static inline int up_comparemac(struct uip_eth_addr *paddr1, struct uip_eth_addr *paddr2)
 {
   return memcmp(paddr1, paddr2, sizeof(struct uip_eth_addr));
 }
@@ -155,7 +155,7 @@ void uipdriver_loop(void)
        * MAC address
        */
 
-      if (g_sim_dev.d_len > UIP_LLH_LEN && uip_comparemac( &BUF->dest, &g_sim_dev.d_mac) == 0)
+      if (g_sim_dev.d_len > UIP_LLH_LEN && up_comparemac( &BUF->dest, &g_sim_dev.d_mac) == 0)
         {
           /* We only accept IP packets of the configured type and ARP packets */
 
@@ -201,7 +201,7 @@ void uipdriver_loop(void)
   else if (timer_expired(&g_periodic_timer))
     {
       timer_reset(&g_periodic_timer);
-      uip_poll(&g_sim_dev, sim_uiptxpoll, UIP_DRV_TIMER);
+      uip_poll(&g_sim_dev, sim_uiptxpoll, 1);
     }
   sched_unlock();
 }

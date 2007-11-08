@@ -100,9 +100,6 @@ void uip_udppoll(struct uip_driver_s *dev, struct uip_udp_conn *conn)
     {
       /* Setup for the application callback */
 
-      uip_conn       = NULL;
-      uip_udp_conn   = conn;
-
       dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
       dev->d_snddata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
 
@@ -111,16 +108,13 @@ void uip_udppoll(struct uip_driver_s *dev, struct uip_udp_conn *conn)
 
       /* Perform the application callback */
 
-      uip_flags      = UIP_POLL;
-      uip_udpcallback(dev);
+      uip_udpcallback(dev, conn, UIP_POLL);
 
       /* If the application has data to send, setup the UDP/IP header */
 
       if (dev->d_sndlen > 0)
         {
           uip_udpsend(dev, conn);
-          uip_udp_conn = NULL;
-          uip_flags    = 0;
           return;
         }
     }
@@ -128,8 +122,6 @@ void uip_udppoll(struct uip_driver_s *dev, struct uip_udp_conn *conn)
   /* Make sure that d_len is zerp meaning that there is nothing to be sent */
 
   dev->d_len   = 0;
-  uip_udp_conn = NULL;
-  uip_flags    = 0;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_UDP */

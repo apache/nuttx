@@ -95,6 +95,8 @@
 
 void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec)
 {
+  uint8 result;
+
   dev->d_snddata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
   dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
 
@@ -157,13 +159,12 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec)
                   conn->tcpstateflags = UIP_CLOSED;
                   vdbg("TCP state: UIP_CLOSED\n");
 
-                  /* We call uip_tcpcallback() with uip_flags set to
-                   * UIP_TIMEDOUT to inform the application that the
-                   * connection has timed out.
+                  /* We call uip_tcpcallback() with UIP_TIMEDOUT to
+                   * inform the application that the connection has
+                   * timed out.
                    */
 
-                  uip_flags = UIP_TIMEDOUT;
-                  uip_tcpcallback(dev);
+                  result = uip_tcpcallback(dev, conn, UIP_TIMEDOUT);
 
                   /* We also send a reset packet to the remote host. */
 
@@ -209,9 +210,8 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec)
                      * the code for sending out the packet.
                      */
 
-                    uip_flags = UIP_REXMIT;
-                    uip_tcpcallback(dev);
-                    uip_tcprexmit(dev, conn, uip_flags);
+                    result = uip_tcpcallback(dev, conn, UIP_REXMIT);
+                    uip_tcprexmit(dev, conn, result);
                     goto done;
 
                   case UIP_FIN_WAIT_1:
@@ -233,9 +233,8 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec)
            * application for new data.
            */
 
-          uip_flags = UIP_POLL;
-          uip_tcpcallback(dev);
-          uip_tcpappsend(dev, conn, uip_flags);
+          result = uip_tcpcallback(dev, conn, UIP_POLL);
+          uip_tcpappsend(dev, conn, result);
           goto done;
         }
     }
@@ -245,7 +244,6 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec)
   dev->d_len = 0;
 
 done:
-  uip_flags = 0;
   return;
 }
 

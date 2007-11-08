@@ -138,7 +138,7 @@ static void acked(void)
     }
 }
 
-static void senddata(struct uip_driver_s *dev)
+static void senddata(struct uip_driver_s *dev, struct uip_conn *conn)
 {
   char *bufptr, *lineptr;
   int buflen, linelen;
@@ -155,7 +155,7 @@ static void senddata(struct uip_driver_s *dev)
         {
           linelen = TELNETD_CONF_LINELEN;
         }
-      if (buflen + linelen < uip_mss())
+      if (buflen + linelen < uip_mss(conn))
         {
           memcpy(bufptr, lineptr, linelen);
           bufptr += linelen;
@@ -302,11 +302,12 @@ static void newdata(struct uip_driver_s *dev)
  * event of interest occurs.
  */
 
-void uip_interrupt_event(struct uip_driver_s *dev, void *private)
+uint8 uip_interrupt_event(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
 {
 #warning OBSOLETE -- needs to be redesigned
   unsigned int i;
-  if (uip_connected_event())
+
+  if (uip_connected_event(flags))
     {
       for (i = 0; i < TELNETD_CONF_NUMLINES; ++i)
       {
@@ -321,28 +322,28 @@ void uip_interrupt_event(struct uip_driver_s *dev, void *private)
   if (s.state == STATE_CLOSE)
   {
     s.state = STATE_NORMAL;
-    uip_close();
-    return;
+    return UIP_CLOSE;
   }
 
-  if (uip_close_event() || uip_abort_event() || uip_timeout_event())
+  if (uip_close_event(flags) || uip_abort_event(flags) || uip_timeout_event(flags))
   {
     closed();
   }
 
-  if (uip_ack_event())
+  if (uip_ack_event(flags))
   {
     acked();
   }
 
-  if (uip_newdata_event())
+  if (uip_newdata_event(flags))
   {
     newdata(dev);
   }
 
-  if (uip_rexmit_event() || uip_newdata_event() || uip_ack_event() ||
-      uip_connected_event() || uip_poll_event())
+  if (uip_rexmit_event(flags) || uip_newdata_event(flags) || uip_ack_event(flags) ||
+      uip_connected_event(flags) || uip_poll_event(flags))
   {
-    senddata(dev);
+    senddata(dev, conn);
   }
+  return 0;
 }

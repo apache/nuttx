@@ -187,7 +187,7 @@ int uip_accept(struct uip_conn *conn, uint16 portno)
 {
   struct uip_conn *listener;
   int ret = ERROR;
-  
+
   /* The interrupt logic has already allocated and initialized a TCP
    * connection -- now check if is an application in place to accept the
    * connection.
@@ -198,7 +198,7 @@ int uip_accept(struct uip_conn *conn, uint16 portno)
     {
       /* Yes.. accept the connection */
 
-      ret = listener->accept(listener->accept_private, conn);
+      ret = listener->accept(listener, conn);
     }
    return ret;
 }
