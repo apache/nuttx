@@ -75,6 +75,10 @@
 
 uint8 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
 {
+  /* Preserve the UIP_ACKDATA & UIP_NEWDATA in the response.  These are
+   * needed by uIP to handle ACKing and buffer state.
+   */
+
   uint8 ret = flags & (UIP_ACKDATA|UIP_NEWDATA);
 
   vdbg("flags: %02x\n", flags);
@@ -83,7 +87,11 @@ uint8 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint8 fla
 
   if (conn->data_event)
     {
-      /* Perform the callback */
+      /* Perform the callback.  Callback function may return on of:
+       *   UIP_CLOSE - Gracefully close the current connection
+       *   UIP_ABORT - Abort (reset) the current connection on an error that
+       *               prevents UIP_CLOSE from working.
+       */
 
       ret |= conn->data_event(dev, conn, flags);
     }
