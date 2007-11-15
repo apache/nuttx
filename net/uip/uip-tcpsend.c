@@ -316,7 +316,7 @@ void uip_tcpreset(struct uip_driver_s *dev)
   /* Swap IP addresses. */
 
   uiphdr_ipaddr_copy(BUF->destipaddr, BUF->srcipaddr);
-  uiphdr_ipaddr_copy(BUF->srcipaddr, dev->d_ipaddr);
+  uiphdr_ipaddr_copy(BUF->srcipaddr, &dev->d_ipaddr);
 
   /* And send out the RST packet */
 

@@ -75,11 +75,13 @@
 
 uint8 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
 {
-  /* Preserve the UIP_ACKDATA & UIP_NEWDATA in the response.  These are
-   * needed by uIP to handle ACKing and buffer state.
+  /* Preserve the UIP_ACKDATA, UIP_CLOSE, and UIP_ABORT in the response.
+   * These is needed by uIP to handle responses and buffer state.  The
+   * UIP_NEWDATA indication will trigger the ACK response, but must be
+   * explicitly set in the callback.
    */
 
-  uint8 ret = flags & (UIP_ACKDATA|UIP_NEWDATA);
+  uint8 ret = flags;
 
   vdbg("flags: %02x\n", flags);
 
@@ -87,13 +89,37 @@ uint8 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint8 fla
 
   if (conn->data_event)
     {
-      /* Perform the callback.  Callback function may return on of:
-       *   UIP_CLOSE - Gracefully close the current connection
-       *   UIP_ABORT - Abort (reset) the current connection on an error that
-       *               prevents UIP_CLOSE from working.
+      /* Perform the callback.  Callback function normally returns the input flags,
+       * however, the implemenation may set one of the following:
+       *
+       *   UIP_CLOSE   - Gracefully close the current connection
+       *   UIP_ABORT   - Abort (reset) the current connection on an error that
+       *                 prevents UIP_CLOSE from working.
+       *
+       * Or clear the following:
+       *
+       *   UIP_NEWDATA - May be cleared to suppress returning the ACK response.
+       *                 (dev->d_len should also be set to zero in this case).
        */
 
-      ret |= conn->data_event(dev, conn, flags);
+      ret = conn->data_event(dev, conn, flags);
+    }
+  else if ((flags & UIP_CONN_EVENTS) == 0)
+    {
+      /* There is no handler to receive new data in place and this is not a
+       * connection event (which may also include new data that must be ACKed).
+       * In this case, clear the UIP_NEWDATA bit so that no ACK will be sent
+       * and drop the packet.
+       */
+
+      dbg("No listener on connection\n");
+
+#ifdef CONFIG_NET_STATISTICS
+      uip_stat.tcp.drop++;
+#endif
+
+      ret       &= ~UIP_NEWDATA;
+      dev->d_len = 0;
     }
 
   /* Check if there is a connection-related event and a connection

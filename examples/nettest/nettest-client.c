@@ -158,7 +158,7 @@ void send_client(void)
     }
   else if (nbytesrecvd != SENDSIZE)
     {
-      message("client: Bad recv length=%d: %d\n", nbytessent);
+      message("client: Bad recv length=%d: %d\n", nbytesrecvd);
       close(sockfd);
       exit(-1);
     }

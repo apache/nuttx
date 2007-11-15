@@ -260,10 +260,10 @@
 # define CONFIG_DM9X_MODE DM9X_MODE_AUTO
 #endif
 
-/* TX poll deley = 5 seconds. CLK_TCK is the number of clock ticks per second */
+/* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
-#define DM6X_WDDELAY   (5*CLK_TCK)
-#define DM6X_POLLHSEC  (5*2)
+#define DM6X_WDDELAY   (1*CLK_TCK)
+#define DM6X_POLLHSEC  (1*2)
 
 /* TX timeout = 1 minute */
 

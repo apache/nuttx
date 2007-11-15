@@ -264,7 +264,7 @@ static uint16 parse_statusline(struct uip_driver_s *dev, uint16 len)
             }
           else
             {
-              g_return = UIP_ABORT;
+              g_return |= UIP_ABORT;
               webclient_aborted();
               return 0;
             }
@@ -409,7 +409,7 @@ static void newdata(struct uip_driver_s *dev)
 uint8 uip_interrupt_event(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
 {
 #warning OBSOLETE -- needs to be redesigned
-  g_return = 0;
+  g_return = flags;
 
   if (uip_connected_event(flags))
     {

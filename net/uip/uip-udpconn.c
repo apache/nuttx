@@ -249,7 +249,7 @@ struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf)
           (conn->rport == 0 || buf->srcport == conn->rport) &&
             (uip_ipaddr_cmp(conn->ripaddr, all_zeroes_addr) ||
              uip_ipaddr_cmp(conn->ripaddr, all_ones_addr) ||
-             uiphdr_ipaddr_cmp(buf->srcipaddr, conn->ripaddr)))
+             uiphdr_ipaddr_cmp(buf->srcipaddr, &conn->ripaddr)))
         {
           /* Matching connection found.. return a reference to it */
 

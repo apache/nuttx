@@ -43,6 +43,9 @@ o Network
       nececcesary
   (2) Copy buffer structure into uip_driver_structure when driver requests write
       data
+  (3) Extra read buffers will be necessary to buffer TCP data when there is no recv
+      in place to accept the data.  At present, received data is not ACKed, but is
+      eventually lost in this case.
 - Improve performance by stimulating the driver to accept new TX data before the
   next polling interval.
 
@@ -55,10 +58,6 @@ o Network
       polling should respond with TX data only if the UDP packet is intended for the
       the network supported by the driver.
   (2) If there were multiple drivers, polling would occur at double the rate.
-- TCP Bug:
-  When TCP data is received with no read in place, it appears that uIP ACKs the data
-  even though it was not taken accepted.  We must either (1) buffer incoming data, or
-  (2) not ACK it so that it will be re-sent.
 
 o USB
 - Implement USB device support

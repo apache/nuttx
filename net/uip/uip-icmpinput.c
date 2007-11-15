@@ -185,7 +185,7 @@ typeerr:
           ICMPBUF->reserved1 = ICMPBUF->reserved2 = ICMPBUF->reserved3 = 0;
 
           uiphdr_ipaddr_copy(ICMPBUF->destipaddr, ICMPBUF->srcipaddr);
-          uiphdr_ipaddr_copy(ICMPBUF->srcipaddr, dev->d_ipaddr);
+          uiphdr_ipaddr_copy(ICMPBUF->srcipaddr, &dev->d_ipaddr);
           ICMPBUF->options[0] = ICMP6_OPTION_TARGET_LINK_ADDRESS;
           ICMPBUF->options[1] = 1;  /* Options length, 1 = 8 bytes. */
           memcpy(&(ICMPBUF->options[2]), &dev->d_mac, IFHWADDRLEN);
@@ -207,7 +207,7 @@ typeerr:
       ICMPBUF->type = ICMP6_ECHO_REPLY;
 
       uiphdr_ipaddr_copy(ICMPBUF->destipaddr, ICMPBUF->srcipaddr);
-      uiphdr_ipaddr_copy(ICMPBUF->srcipaddr, dev->d_ipaddr);
+      uiphdr_ipaddr_copy(ICMPBUF->srcipaddr, &dev->d_ipaddr);
       ICMPBUF->icmpchksum = 0;
       ICMPBUF->icmpchksum = ~uip_icmp6chksum(dev);
     }

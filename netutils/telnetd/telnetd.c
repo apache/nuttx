@@ -345,5 +345,6 @@ uint8 uip_interrupt_event(struct uip_driver_s *dev, struct uip_conn *conn, uint8
   {
     senddata(dev, conn);
   }
-  return 0;
+
+  return flags;
 }

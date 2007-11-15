@@ -185,10 +185,18 @@ struct uip_conn
   /* Higher level logic can retain application specific information
    * in the following:
    *
-   *   data_event() is called on all events.  May return one of the following:
-   *      UIP_CLOSE - Gracefully close the current connection
-   *      UIP_ABORT - Abort (reset) the current connection on an error that
-   *                  prevents UIP_CLOSE from working.
+   *   data_event() is called on all events.  Normally, the input flags are
+   *      returned, however, the implemenation may set one of the following:
+   *
+   *        UIP_CLOSE   - Gracefully close the current connection
+   *        UIP_ABORT   - Abort (reset) the current connection on an error that
+   *                      prevents UIP_CLOSE from working.
+   *
+   *      Or clear the following:
+   *
+   *        UIP_NEWDATA - May be cleared to suppress returning the ACK response.
+   *                     (dev->d_len should also be set to zero in this case).
+   *
    *   accept() is called when the TCP logic has created a connection
    *   connection_event() is called on any of the subset of connection-related events
    */
@@ -255,18 +263,17 @@ struct uip_stats
   } icmp;                   /* ICMP statistics. */
 
   struct
-
   {
     uip_stats_t drop;       /* Number of dropped TCP segments. */
-    uip_stats_t recv;       /* Number of recived TCP segments. */
+    uip_stats_t recv;       /* Number of received TCP segments. */
     uip_stats_t sent;       /* Number of sent TCP segments. */
     uip_stats_t chkerr;     /* Number of TCP segments with a bad checksum. */
     uip_stats_t ackerr;     /* Number of TCP segments with a bad ACK number. */
     uip_stats_t rst;        /* Number of recevied TCP RST (reset) segments. */
     uip_stats_t rexmit;     /* Number of retransmitted TCP segments. */
     uip_stats_t syndrop;    /* Number of dropped SYNs due to too few
-                               connections was avaliable. */
-    uip_stats_t synrst;     /* Number of SYNs for closed ports, triggering a RST. */
+                               available connections. */
+    uip_stats_t synrst;     /* Number of SYNs for closed ports triggering a RST. */
   } tcp;                    /* TCP statistics. */
 
 #ifdef CONFIG_NET_UDP

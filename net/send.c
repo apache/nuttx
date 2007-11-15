@@ -180,7 +180,8 @@ static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn, uin
 
       sem_post(&pstate->snd_sem);
     }
-  return 0;
+
+  return flags;
 }
 
 /****************************************************************************

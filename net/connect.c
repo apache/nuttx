@@ -259,7 +259,8 @@ static uint8 tcp_connect_interrupt(struct uip_driver_s *dev,
 
       sem_post(&pstate->tc_sem);
     }
-  return 0;
+
+  return flags;
 }
 
 /****************************************************************************

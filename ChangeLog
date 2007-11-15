@@ -218,5 +218,11 @@
 	* Basic client functionality verified: socket(), bind(), connect(), recv(), send().
 
 0.3.1 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
 	* Separated net/uip/uip.c into several functions in several files.
+	* Corrected a TCP problem where packets were dropped because there was no
+	  recv() in place but the packet was being ACKed.  There are still TCP
+	  recv buffering issues, but this is part of a larger buffering issue.
+
+
 

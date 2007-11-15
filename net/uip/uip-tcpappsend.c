@@ -100,6 +100,8 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn, uint8 resul
 
   vdbg("result: %02x\n", result);
 
+  /* Check for connection aborted */
+
   if (result & UIP_ABORT)
     {
       dev->d_sndlen = 0;
@@ -108,6 +110,8 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn, uint8 resul
 
       uip_tcpsend(dev, conn, TCP_RST | TCP_ACK, UIP_IPTCPH_LEN);
     }
+
+  /* Check for connection closed */
 
   else if (result & UIP_CLOSE)
     {
@@ -120,51 +124,56 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn, uint8 resul
       uip_tcpsend(dev, conn, TCP_FIN | TCP_ACK, UIP_IPTCPH_LEN);
     }
 
-  /* If d_sndlen > 0, the application has data to be sent. */
+  /* None of the above */
 
-  else if (dev->d_sndlen > 0)
+  else
     {
-      /* If the connection has acknowledged data, the contents of
-       * the ->len variable should be discarded.
-       */
+      /* If d_sndlen > 0, the application has data to be sent. */
 
-      if (result & UIP_ACKDATA)
+      if (dev->d_sndlen > 0)
         {
-          conn->len = 0;
-        }
-
-      /* If the ->len variable is non-zero the connection has
-       * already data in transit and cannot send anymore right
-       * now.
-       */
-
-      if (conn->len == 0)
-        {
-          /* The application cannot send more than what is
-           * allowed by the mss (the minumum of the MSS and the
-           * available window).
+          /* If the connection has acknowledged data, the contents of
+           * the ->len variable should be discarded.
            */
 
-          if (dev->d_sndlen > conn->mss)
+          if (result & UIP_ACKDATA)
             {
-              dev->d_sndlen = conn->mss;
+              conn->len = 0;
             }
 
-          /* Remember how much data we send out now so that we
-           * know when everything has been acknowledged.
+          /* If the ->len variable is non-zero the connection has
+           * already data in transit and cannot send anymore right
+           * now.
            */
 
-          conn->len = dev->d_sndlen;
-        }
-      else
-        {
-          /* If the application already had unacknowledged data,
-           * we make sure that the application does not send
-           * (i.e., retransmit) out more than it previously sent
-           * out.
-           */
+          if (conn->len == 0)
+            {
+              /* The application cannot send more than what is
+               * allowed by the mss (the minumum of the MSS and the
+               * available window).
+               */
 
-          dev->d_sndlen = conn->len;
+              if (dev->d_sndlen > conn->mss)
+                {
+                  dev->d_sndlen = conn->mss;
+                }
+
+              /* Remember how much data we send out now so that we
+               * know when everything has been acknowledged.
+               */
+
+              conn->len = dev->d_sndlen;
+            }
+          else
+            {
+              /* If the application already had unacknowledged data,
+               * we make sure that the application does not send
+               * (i.e., retransmit) out more than it previously sent
+               * out.
+               */
+
+              dev->d_sndlen = conn->len;
+            }
         }
 
       /* Then handle the rest of the operation just as for the rexmit case */

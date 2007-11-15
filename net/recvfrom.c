@@ -123,6 +123,10 @@ static void recvfrom_newdata(struct uip_driver_s *dev, struct recvfrom_s *pstate
   pstate->rf_recvlen += recvlen;
   pstate->rf_buffer  += recvlen;
   pstate->rf_buflen  -= recvlen;
+
+  /* Indicate no data in the buffer */
+
+  dev->d_len = 0;
 }
 
 /****************************************************************************
@@ -313,7 +317,7 @@ static uint8 recvfrom_tcpinterrupt(struct uip_driver_s *dev,
         }
 #endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
     }
-  return 0;
+  return flags;
 }
 
 /****************************************************************************
