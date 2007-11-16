@@ -64,6 +64,7 @@ void send_client(void)
   int nbytessent;
 #ifndef CONFIG_EXAMPLE_NETTEST_PERFORMANCE
   int nbytesrecvd;
+  int totalbytesrecvd;
 #endif
   int ch;
   int i;
@@ -141,24 +142,31 @@ void send_client(void)
     }
   else if (nbytessent != SENDSIZE)
     {
-      message("client: Bad send length=%d: %d\n", nbytessent);
+      message("client: Bad send length: %d Expected: %d\n", nbytessent, SENDSIZE);
       close(sockfd);
       exit(-1);
     }
 
-  message("client: Receiving...\n");
-  nbytesrecvd = recv(sockfd, inbuf, SENDSIZE, 0);
-  message("client: Received %d bytes\n", nbytesrecvd);
+  totalbytesrecvd = 0;
+  do
+    {
+      message("client: Receiving...\n");
+      nbytesrecvd = recv(sockfd, &inbuf[totalbytesrecvd], SENDSIZE - totalbytesrecvd, 0);
 
-  if (nbytesrecvd < 0)
-    {
-      message("client: recv failed: %d\n", errno);
-      close(sockfd);
-      exit(-1);
+      if (nbytesrecvd < 0)
+        {
+          message("client: recv failed: %d\n", errno);
+          close(sockfd);
+          exit(-1);
+        }
+      totalbytesrecvd += nbytesrecvd;
+      message("client: Received %d of %d bytes\n", totalbytesrecvd, SENDSIZE);
     }
-  else if (nbytesrecvd != SENDSIZE)
+  while (totalbytesrecvd < SENDSIZE);
+
+  if (totalbytesrecvd != SENDSIZE)
     {
-      message("client: Bad recv length=%d: %d\n", nbytesrecvd);
+      message("client: Bad recv length: %d Expected: %d\n", totalbytesrecvd, SENDSIZE);
       close(sockfd);
       exit(-1);
     }
