@@ -115,6 +115,7 @@ uint8 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint8 fla
       dbg("No listener on connection\n");
 
 #ifdef CONFIG_NET_STATISTICS
+      uip_stat.tcp.syndrop++;
       uip_stat.tcp.drop++;
 #endif
 

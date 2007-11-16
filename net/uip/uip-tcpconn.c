@@ -105,7 +105,12 @@ static uint8 g_tcp_sequence[4];
  *     selected.
  *
  * Return:
- *   0 on success, -ERRNO on failure
+ *   0 on success, negated errno on failure:
+ *
+ *   EADDRINUSE
+ *     The given address is already in use.
+ *   EADDRNOTAVAIL
+ *     Cannot assign requested address (unlikely)
  *
  * Assumptions:
  *   Interrupts are disabled
@@ -117,7 +122,9 @@ static int uip_selectport(uint16 portno)
   if (portno == 0)
     {
       /* No local port assigned. Loop until we find a valid listen port number
-       * that is not being used by any other connection.
+       * that is not being used by any other connection. NOTE the following loop
+       * is assumed to terminate but could not if all 32000-4096+1 ports are
+       * in used (unlikely).
        */
 
       do
@@ -134,7 +141,7 @@ static int uip_selectport(uint16 portno)
               g_last_tcp_port = 4096;
             }
         }
-      while (uip_tcplistener(g_last_tcp_port));
+      while (uip_tcplistener(htons(g_last_tcp_port)));
     }
   else
     {
@@ -150,7 +157,7 @@ static int uip_selectport(uint16 portno)
         }
     }
 
-  /* Return the selecte or verified port number */
+  /* Return the selected or verified port number */
 
   return portno;
 }
@@ -372,8 +379,8 @@ struct uip_conn *uip_nexttcpconn(struct uip_conn *conn)
  * Name: uip_tcplistener()
  *
  * Description:
- *   Given a local port number, find the TCP connection that listens on this
- *   this port.
+ *   Given a local port number (in network byte order), find the TCP
+ *   connection that listens on this this port.
  *
  *   Primary uses: (1) to determine if a port number is available, (2) to
  *   To idenfity the socket that will accept new connections on a local port.
@@ -390,7 +397,7 @@ struct uip_conn *uip_tcplistener(uint16 portno)
   for (i = 0; i < UIP_CONNS; i++)
     {
       conn = &g_tcp_connections[i];
-      if (conn->tcpstateflags != UIP_CLOSED && conn->lport == htons(g_last_tcp_port))
+      if (conn->tcpstateflags != UIP_CLOSED && conn->lport == portno)
         {
           /* The portnumber is in use, return the connection */
 
@@ -420,27 +427,34 @@ struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf)
     {
       /* Fill in the necessary fields for the new connection. */
 
-      conn->rto   = conn->timer = UIP_RTO;
-      conn->sa    = 0;
-      conn->sv    = 4;
-      conn->nrtx  = 0;
-      conn->lport = buf->destport;
-      conn->rport = buf->srcport;
-      uip_ipaddr_copy(conn->ripaddr, buf->srcipaddr);
+      conn->rto           = UIP_RTO;
+      conn->timer         = UIP_RTO;
+      conn->sa            = 0;
+      conn->sv            = 4;
+      conn->nrtx          = 0;
+      conn->lport         = buf->destport;
+      conn->rport         = buf->srcport;
+      uip_ipaddr_copy(conn->ripaddr, uip_ip4addr_conv(buf->srcipaddr));
       conn->tcpstateflags = UIP_SYN_RCVD;
 
-      conn->snd_nxt[0] = g_tcp_sequence[0];
-      conn->snd_nxt[1] = g_tcp_sequence[1];
-      conn->snd_nxt[2] = g_tcp_sequence[2];
-      conn->snd_nxt[3] = g_tcp_sequence[3];
-      conn->len = 1;
+      conn->snd_nxt[0]    = g_tcp_sequence[0];
+      conn->snd_nxt[1]    = g_tcp_sequence[1];
+      conn->snd_nxt[2]    = g_tcp_sequence[2];
+      conn->snd_nxt[3]    = g_tcp_sequence[3];
+      conn->len           = 1;
 
       /* rcv_nxt should be the seqno from the incoming packet + 1. */
 
-      conn->rcv_nxt[3] = buf->seqno[3];
-      conn->rcv_nxt[2] = buf->seqno[2];
-      conn->rcv_nxt[1] = buf->seqno[1];
-      conn->rcv_nxt[0] = buf->seqno[0];
+      conn->rcv_nxt[3]    = buf->seqno[3];
+      conn->rcv_nxt[2]    = buf->seqno[2];
+      conn->rcv_nxt[1]    = buf->seqno[1];
+      conn->rcv_nxt[0]    = buf->seqno[0];
+
+      /* And, finally, put the connection structure into the active list.
+       * Interrupts should already be disabled in this context.
+       */
+
+      dq_addlast(&conn->node, &g_active_tcp_connections);
   }
   return conn;
 }
@@ -479,6 +493,9 @@ void uip_tcpnextsequence(void)
  *   This function implements the UIP specific parts of the standard TCP
  *   bind() operation.
  *
+ * Return:
+ *   0 on success or -EADDRINUSE on failure
+ *
  * Assumptions:
  *   This function is called from normal user level code.
  *
@@ -496,7 +513,7 @@ int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr)
   /* Verify or select a local port */
 
   flags = irqsave();
-  port = uip_selectport(ntohs(conn->lport));
+  port = uip_selectport(ntohs(addr->sin_port));
   irqrestore(flags);
 
   if (port < 0)
@@ -504,8 +521,19 @@ int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr)
       return port;
     }
 
-#warning "Need to implement bind logic"
-  return -ENOSYS;
+  /* Save the local address in the connection structure.  Note that the requested
+   * local IP address is saved but not used.  At present, only a single network
+   * interface is supported, the IP address is not of importance.
+   */
+
+  conn->lport = addr->sin_port;
+#ifdef CONFIG_NET_IPv6
+  uip_ipaddr_copy(conn->lipaddr, addr->sin6_addr.in6_u.u6_addr16);
+#else
+  uip_ipaddr_copy(conn->lipaddr, addr->sin_addr.s_addr);
+#endif
+
+  return OK;
 }
 
 /****************************************************************************

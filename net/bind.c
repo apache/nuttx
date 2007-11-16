@@ -128,7 +128,7 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
         break;
 #endif
       default:
-        err = -EBADF;
+        err = EBADF;
         goto errout;
     }
 

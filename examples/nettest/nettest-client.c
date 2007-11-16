@@ -57,12 +57,12 @@ void send_client(void)
 {
   struct sockaddr_in myaddr;
   char outbuf[SENDSIZE];
-#ifndef CONFIG_NETTEST_PERFORMANCE
+#ifndef CONFIG_EXAMPLE_NETTEST_PERFORMANCE
   char inbuf[SENDSIZE];
 #endif
   int sockfd;
   int nbytessent;
-#ifndef CONFIG_NETTEST_PERFORMANCE
+#ifndef CONFIG_EXAMPLE_NETTEST_PERFORMANCE
   int nbytesrecvd;
 #endif
   int ch;
@@ -107,7 +107,7 @@ void send_client(void)
         }
     }
 
-#ifdef CONFIG_NETTEST_PERFORMANCE
+#ifdef CONFIG_EXAMPLE_NETTEST_PERFORMANCE
   /* Then receive messages forever */
 
   for (;;)

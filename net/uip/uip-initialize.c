@@ -1,6 +1,5 @@
 /****************************************************************************
- * net/uip/uip-udppoll.c
- * Poll for the availability of UDP TX data
+ * net/uip/uip-initialize.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

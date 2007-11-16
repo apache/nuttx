@@ -65,27 +65,27 @@
 
 #define UIP_ACKDATA    (1 << 0) /* Signifies that the outstanding data was acked and the
                                  * application should send out new data instead of retransmitting
-                                 * the last data. */
-#define UIP_NEWDATA    (1 << 1) /* Flags the fact that the peer has sent us new data. */
+                                 * the last data */
+#define UIP_NEWDATA    (1 << 1) /* Flags the fact that the peer has sent us new data */
 #define UIP_REXMIT     (1 << 2) /* Tells the application to retransmit the data that was last
-                                 * sent. */
+                                 * sent */
 #define UIP_POLL       (1 << 3) /* Used for polling the application, to check if the application
-                                 * has data that it wants to send. */
+                                 * has data that it wants to send */
 #define UIP_CLOSE      (1 << 4) /* The remote host has closed the connection, thus the connection
                                  * has gone away. Or the application signals that it wants to
-                                 * close the connection. */
+                                 * close the connection */
 #define UIP_ABORT      (1 << 5) /* The remote host has aborted the connection, thus the connection
                                  * has gone away. Or the application signals that it wants to
-                                 * abort the connection. */
+                                 * abort the connection */
 #define UIP_CONNECTED  (1 << 6) /* We have got a connection from a remote host and have set up a
                                  * new connection for it, or an active connection has been
-                                 * successfully established. */
-#define UIP_TIMEDOUT   (1 << 7) /* The connection has been aborted due to too many retransmissions. */
+                                 * successfully established */
+#define UIP_TIMEDOUT   (1 << 7) /* The connection has been aborted due to too many retransmissions */
 
 #define UIP_DATA_EVENTS (UIP_ACKDATA|UIP_NEWDATA|UIP_REXMIT|UIP_POLL)
 #define UIP_CONN_EVENTS (UIP_CLOSE|UIP_ABORT|UIP_CONNECTED|UIP_TIMEDOUT)
 
-/* The TCP states used in the struct uip_conn tcpstateflags field. */
+/* The TCP states used in the struct uip_conn tcpstateflags field */
 
 #define UIP_CLOSED      0 /* The connection is not in use and available */
 #define UIP_ALLOCATED   1 /* The connection is allocated, but not yet initialized */
@@ -137,7 +137,7 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* Repressentation of an IP address. */
+/* Repressentation of an IP address */
 
 typedef in_addr_t uip_ip4addr_t;
 typedef uint16 uip_ip6addr_t[8];
@@ -161,26 +161,27 @@ struct uip_driver_s;      /* Forward reference */
 struct uip_conn
 {
   dq_entry_t node;        /* Implements a doubly linked list */
-  uip_ipaddr_t ripaddr;   /* The IP address of the remote host. */
-  uint16 lport;           /* The local TCP port, in network byte order. */
-  uint16 rport;           /* The local remote TCP port, in network byte order. */
+  uip_ipaddr_t lipaddr;   /* The local IP address */
+  uip_ipaddr_t ripaddr;   /* The IP address of the remote host */
+  uint16 lport;           /* The local TCP port, in network byte order */
+  uint16 rport;           /* The remoteTCP port, in network byte order */
   uint8  rcv_nxt[4];      /* The sequence number that we expect to
-                           * receive next. */
-  uint8  snd_nxt[4];      /* The sequence number that was last sent by us. */
-  uint16 len;             /* Length of the data that was previously sent. */
+                           * receive next */
+  uint8  snd_nxt[4];      /* The sequence number that was last sent by us */
+  uint16 len;             /* Length of the data that was previously sent */
   uint16 mss;             /* Current maximum segment size for the
-                           * connection. */
+                           * connection */
   uint16 initialmss;      /* Initial maximum segment size for the
-                           * connection. */
+                           * connection */
   uint8  sa;              /* Retransmission time-out calculation state
-                           * variable. */
+                           * variable */
   uint8  sv;              /* Retransmission time-out calculation state
-                           * variable. */
-  uint8  rto;             /* Retransmission time-out. */
-  uint8  tcpstateflags;   /* TCP state and flags. */
-  uint8  timer;           /* The retransmission timer (units: half-seconds). */
+                           * variable */
+  uint8  rto;             /* Retransmission time-out */
+  uint8  tcpstateflags;   /* TCP state and flags */
+  uint8  timer;           /* The retransmission timer (units: half-seconds) */
   uint8  nrtx;            /* The number of retransmissions for the last
-                           * segment sent. */
+                           * segment sent */
 
   /* Higher level logic can retain application specific information
    * in the following:
@@ -212,15 +213,15 @@ struct uip_conn
 };
 
 #ifdef CONFIG_NET_UDP
-/* Representation of a uIP UDP connection. */
+/* Representation of a uIP UDP connection */
 
 struct uip_udp_conn
 {
   dq_entry_t node;        /* Implements a doubly linked list */
-  uip_ipaddr_t ripaddr;   /* The IP address of the remote peer. */
-  uint16 lport;           /* The local port number in network byte order. */
-  uint16 rport;           /* The remote port number in network byte order. */
-  uint8  ttl;             /* Default time-to-live. */
+  uip_ipaddr_t ripaddr;   /* The IP address of the remote peer */
+  uint16 lport;           /* The local port number in network byte order */
+  uint16 rport;           /* The remote port number in network byte order */
+  uint8  ttl;             /* Default time-to-live */
 
   /* Defines the UDP callback */
 
@@ -237,63 +238,63 @@ struct uip_stats
 {
   struct
   {
-    uip_stats_t drop;       /* Number of dropped packets at the IP layer. */
-    uip_stats_t recv;       /* Number of received packets at the IP layer. */
-    uip_stats_t sent;       /* Number of sent packets at the IP layer. */
+    uip_stats_t drop;       /* Number of dropped packets at the IP layer */
+    uip_stats_t recv;       /* Number of received packets at the IP layer */
+    uip_stats_t sent;       /* Number of sent packets at the IP layer */
     uip_stats_t vhlerr;     /* Number of packets dropped due to wrong
-                               IP version or header length. */
+                               IP version or header length */
     uip_stats_t hblenerr;   /* Number of packets dropped due to wrong
-                               IP length, high byte. */
+                               IP length, high byte */
     uip_stats_t lblenerr;   /* Number of packets dropped due to wrong
-                               IP length, low byte. */
+                               IP length, low byte */
     uip_stats_t fragerr;    /* Number of packets dropped since they
-                               were IP fragments. */
+                               were IP fragments */
     uip_stats_t chkerr;     /* Number of packets dropped due to IP
-                               checksum errors. */
+                               checksum errors */
     uip_stats_t protoerr;   /* Number of packets dropped since they
-                               were neither ICMP, UDP nor TCP. */
-  } ip;                     /* IP statistics. */
+                               were neither ICMP, UDP nor TCP */
+  } ip;                     /* IP statistics */
 
   struct
   {
-    uip_stats_t drop;       /* Number of dropped ICMP packets. */
-    uip_stats_t recv;       /* Number of received ICMP packets. */
-    uip_stats_t sent;       /* Number of sent ICMP packets. */
-    uip_stats_t typeerr;    /* Number of ICMP packets with a wrong type. */
-  } icmp;                   /* ICMP statistics. */
+    uip_stats_t drop;       /* Number of dropped ICMP packets */
+    uip_stats_t recv;       /* Number of received ICMP packets */
+    uip_stats_t sent;       /* Number of sent ICMP packets */
+    uip_stats_t typeerr;    /* Number of ICMP packets with a wrong type */
+  } icmp;                   /* ICMP statistics */
 
   struct
   {
-    uip_stats_t drop;       /* Number of dropped TCP segments. */
-    uip_stats_t recv;       /* Number of received TCP segments. */
-    uip_stats_t sent;       /* Number of sent TCP segments. */
-    uip_stats_t chkerr;     /* Number of TCP segments with a bad checksum. */
-    uip_stats_t ackerr;     /* Number of TCP segments with a bad ACK number. */
-    uip_stats_t rst;        /* Number of recevied TCP RST (reset) segments. */
-    uip_stats_t rexmit;     /* Number of retransmitted TCP segments. */
+    uip_stats_t drop;       /* Number of dropped TCP segments */
+    uip_stats_t recv;       /* Number of received TCP segments */
+    uip_stats_t sent;       /* Number of sent TCP segments */
+    uip_stats_t chkerr;     /* Number of TCP segments with a bad checksum */
+    uip_stats_t ackerr;     /* Number of TCP segments with a bad ACK number */
+    uip_stats_t rst;        /* Number of recevied TCP RST (reset) segments */
+    uip_stats_t rexmit;     /* Number of retransmitted TCP segments */
     uip_stats_t syndrop;    /* Number of dropped SYNs due to too few
-                               available connections. */
-    uip_stats_t synrst;     /* Number of SYNs for closed ports triggering a RST. */
-  } tcp;                    /* TCP statistics. */
+                               available connections */
+    uip_stats_t synrst;     /* Number of SYNs for closed ports triggering a RST */
+  } tcp;                    /* TCP statistics */
 
 #ifdef CONFIG_NET_UDP
   struct
   {
-    uip_stats_t drop;       /* Number of dropped UDP segments. */
-    uip_stats_t recv;       /* Number of recived UDP segments. */
-    uip_stats_t sent;       /* Number of sent UDP segments. */
-    uip_stats_t chkerr;     /* Number of UDP segments with a bad checksum. */
-  } udp;                    /* UDP statistics. */
+    uip_stats_t drop;       /* Number of dropped UDP segments */
+    uip_stats_t recv;       /* Number of recived UDP segments */
+    uip_stats_t sent;       /* Number of sent UDP segments */
+    uip_stats_t chkerr;     /* Number of UDP segments with a bad checksum */
+  } udp;                    /* UDP statistics */
 #endif  /* CONFIG_NET_UDP */
 };
 
-/* The TCP and IP headers. */
+/* The TCP and IP headers */
 
 struct uip_tcpip_hdr
 {
 #ifdef CONFIG_NET_IPv6
 
-  /* IPv6 Ip header. */
+  /* IPv6 Ip header */
 
   uint8  vtc;               /* Bits 0-3: version, bits 4-7: traffic class (MS) */
   uint8  tcf;               /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */
@@ -306,7 +307,7 @@ struct uip_tcpip_hdr
 
 #else /* CONFIG_NET_IPv6 */
 
-  /* IPv4 IP header. */
+  /* IPv4 IP header */
 
   uint8  vhl;              /*  8-bit Version (4) and header length (5 or 6) */
   uint8  tos;              /*  8-bit Type of service (e.g., 6=TCP) */
@@ -321,7 +322,7 @@ struct uip_tcpip_hdr
 
 #endif /* CONFIG_NET_IPv6 */
 
-  /* TCP header. */
+  /* TCP header */
 
   uint16 srcport;
   uint16 destport;
@@ -335,13 +336,13 @@ struct uip_tcpip_hdr
   uint8  optdata[4];
 };
 
-/* The ICMP and IP headers. */
+/* The ICMP and IP headers */
 
 struct uip_icmpip_hdr
 {
 #ifdef CONFIG_NET_IPv6
 
-  /* IPv6 Ip header. */
+  /* IPv6 Ip header */
 
   uint8  vtc;               /* Bits 0-3: version, bits 4-7: traffic class (MS) */
   uint8  tcf;               /* Bits 0-3: traffic class (LS), bits 4-7: flow label (MS) */
@@ -354,7 +355,7 @@ struct uip_icmpip_hdr
 
 #else /* CONFIG_NET_IPv6 */
 
-  /* IPv4 IP header. */
+  /* IPv4 IP header */
 
   uint8  vhl;              /*  8-bit Version (4) and header length (5 or 6) */
   uint8  tos;              /*  8-bit Type of service (e.g., 6=TCP) */
@@ -369,7 +370,7 @@ struct uip_icmpip_hdr
 
 #endif /* CONFIG_NET_IPv6 */
 
-  /* ICMP (echo) header. */
+  /* ICMP (echo) header */
 
   uint8  type;
   uint8  icode;
@@ -392,13 +393,13 @@ struct uip_icmpip_hdr
 #endif /* !CONFIG_NET_IPv6 */
 };
 
-/* The UDP and IP headers. */
+/* The UDP and IP headers */
 
 struct uip_udpip_hdr
 {
 #ifdef CONFIG_NET_IPv6
 
-  /* IPv6 Ip header. */
+  /* IPv6 Ip header */
 
   uint8  vtc;               /* Bits 0-3: version, bits 4-7: traffic class (MS) */
   uint8  tcf;               /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */
@@ -411,7 +412,7 @@ struct uip_udpip_hdr
 
 #else /* CONFIG_NET_IPv6 */
 
-  /* IPv4 header. */
+  /* IPv4 header */
 
   uint8  vhl;              /*  8-bit Version (4) and header length (5 or 6) */
   uint8  tos;              /*  8-bit Type of service (e.g., 6=TCP) */
@@ -426,7 +427,7 @@ struct uip_udpip_hdr
 
 #endif /* CONFIG_NET_IPv6 */
 
-  /* UDP header. */
+  /* UDP header */
 
   uint16 srcport;
   uint16 destport;
@@ -434,7 +435,7 @@ struct uip_udpip_hdr
   uint16 udpchksum;
 };
 
-/* Representation of a 48-bit Ethernet address. */
+/* Representation of a 48-bit Ethernet address */
 
 struct uip_eth_addr
 {
@@ -465,7 +466,7 @@ extern void *uip_urgdata;
 extern uint16 uip_urglen; /* Length of (received) urgent data */
 #endif /* UIP_URGDATA > 0 */
 
-/* The current UDP connection. */
+/* The current UDP connection */
 
 #ifdef CONFIG_NET_UDP
 extern struct uip_udp_conn *uip_udp_conn;
@@ -570,7 +571,7 @@ int uip_listen(uint16 port);
 
 int uip_unlisten(uint16 port);
 
-/* Check if a connection has outstanding (i.e., unacknowledged) data. */
+/* Check if a connection has outstanding (i.e., unacknowledged) data */
 
 #define uip_outstanding(conn) ((conn)->len)
 

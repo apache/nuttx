@@ -1258,8 +1258,6 @@ static void dm9x_polltimer(int argc, uint32 arg, ...)
 {
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)arg;
 
-  dbg("Poll timer expiration\n");
-
   /* If the number of contiguous RX packets exceeds a threshold, reset the counter and
    * re-enable RX interrupts
    */

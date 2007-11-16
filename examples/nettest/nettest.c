@@ -94,7 +94,7 @@ int user_start(int argc, char *argv[])
   addr.s_addr = HTONL(CONFIG_EXAMPLE_NETTEST_NETMASK);
   uip_setnetmask("eth0", &addr);
 
-#ifdef CONFIG_NETTEST_SERVER
+#ifdef CONFIG_EXAMPLE_NETTEST_SERVER
   recv_server();
 #else
   send_client();

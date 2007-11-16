@@ -42,9 +42,12 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
+#include <debug.h>
+
 #include <arch/irq.h>
 
 #include "net-internal.h"
@@ -95,6 +98,7 @@ static int accept_interrupt(struct uip_conn *listener, struct uip_conn *conn)
 {
   struct accept_s *pstate = (struct accept_s *)listener->accept_private;
   int ret = -EINVAL;
+
   if (pstate)
     {
       /* Get the connection address */
@@ -112,6 +116,7 @@ static int accept_interrupt(struct uip_conn *listener, struct uip_conn *conn)
       listener->accept         = NULL;
       ret                      = OK;
   }
+
   return ret;
 }
 
@@ -265,12 +270,12 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
     }
 
   pnewsock = sockfd_socket(newfd);
-  if (newfd)
+  if (!pnewsock)
     {
       err = ENFILE;
       goto errout_with_socket;
     }
-    
+
   /* Set the socket state to accepting */
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_ACCEPT);
@@ -286,6 +291,7 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
   state.acpt_addr       = inaddr;
   state.acpt_newconn    = NULL;
   state.acpt_result     = OK;
+  sem_init(&state.acpt_sem, 0, 0);
 
   /* Set up the callback in the connection */
 
@@ -299,7 +305,7 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
    * automatically re-enabled when the task restarts.
    */
 
-  ret = sem_wait(&state. acpt_sem);
+  ret = sem_wait(&state.acpt_sem);
 
   /* Make sure that no further interrupts are processed */
 
@@ -333,10 +339,11 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
       goto errout_with_socket;
     }
 
-  /* Initialize the socket structure */
+  /* Initialize the socket structure and mark the socket as connected */
 
-  pnewsock->s_type = SOCK_STREAM;
-  pnewsock->s_conn = state.acpt_newconn;
+  pnewsock->s_type   = SOCK_STREAM;
+  pnewsock->s_conn   = state.acpt_newconn;
+  pnewsock->s_flags |= _SF_CONNECTED;
   return newfd;
 
 errout_with_socket:

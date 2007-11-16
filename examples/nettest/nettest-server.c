@@ -63,7 +63,7 @@ void recv_server(void)
   int acceptsd;
   socklen_t addrlen;
   int nbytesread;
-#ifndef CONFIG_NETTEST_PERFORMANCE
+#ifndef CONFIG_EXAMPLE_NETTEST_PERFORMANCE
   int totalbytesread;
   int nbytessent;
   int ch;
@@ -133,7 +133,7 @@ void recv_server(void)
     }
 #endif
 
-#ifdef CONFIG_NETTEST_PERFORMANCE
+#ifdef CONFIG_EXAMPLE_NETTEST_PERFORMANCE
   /* Then receive data forever */
 
   for (;;)
@@ -194,7 +194,7 @@ void recv_server(void)
         }
     }
 
-#ifdef CONFIG_NETTEST_HOST
+#ifdef CONFIG_EXAMPLE_NETTEST_HOST
   /* At present, data received by the target before it is completed the
    * the write opertion and started the read operation results in a failure
    * (the data is not received, but it is ACKed).  This will have to be
