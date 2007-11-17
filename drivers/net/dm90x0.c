@@ -298,7 +298,7 @@ struct dm9x_driver_s
   WDOG_ID dm_txpoll;           /* TX poll timer */
   WDOG_ID dm_txtimeout;        /* TX timeout timer */
   uint8   dm_ntxpending;       /* Count of packets pending transmission */
-  uint8   ncrxpackets;      /* Number of continuous rx packets  */
+  uint8   ncrxpackets;         /* Number of continuous rx packets  */
 
   /* Mode-dependent function to move data in 8/16/32 I/O modes */
 
@@ -763,46 +763,54 @@ static inline boolean dm9x_rxchecksumready(uint8 rxbyte)
 
 static int dm9x_transmit(struct dm9x_driver_s *dm9x)
 {
-  /* Increment count of packets transmitted */
+  /* Check if there is room in the DM90x0 to hold another packet.  In 100M mode,
+   * that can be 2 packets, otherwise it is a single packet.
+   */
 
-  dm9x->dm_ntxpending++;
+  if (dm9x->dm_ntxpending < 1 || (dm9x->dm_b100M && dm9x->dm_ntxpending < 2))
+    {
+      /* Increment count of packets transmitted */
+
+      dm9x->dm_ntxpending++;
 #if defined(CONFIG_DM9X_STATS)
-  dm9x->dm_ntxpackets++;
-  dm9x->dm_ntxbytes += dm9x->dm_dev.d_len;
+      dm9x->dm_ntxpackets++;
+      dm9x->dm_ntxbytes += dm9x->dm_dev.d_len;
 #endif
 
-  /* Disable all DM90x0 interrupts */
+      /* Disable all DM90x0 interrupts */
 
-  putreg(DM9X_IMR, DM9X_IMRDISABLE);
+      putreg(DM9X_IMR, DM9X_IMRDISABLE);
 
-  /* Set the TX length */
+      /* Set the TX length */
 
-  putreg(DM9X_TXPLL, (dm9x->dm_dev.d_len & 0xff));
-  putreg(DM9X_TXPLH, (dm9x->dm_dev.d_len >> 8) & 0xff);
+      putreg(DM9X_TXPLL, (dm9x->dm_dev.d_len & 0xff));
+      putreg(DM9X_TXPLH, (dm9x->dm_dev.d_len >> 8) & 0xff);
 
-  /* Move the data to be sent into TX SRAM */
+      /* Move the data to be sent into TX SRAM */
 
-  DM9X_INDEX = DM9X_MWCMD;
-  dm9x->dm_write(dm9x->dm_dev.d_buf, dm9x->dm_dev.d_len);
+      DM9X_INDEX = DM9X_MWCMD;
+      dm9x->dm_write(dm9x->dm_dev.d_buf, dm9x->dm_dev.d_len);
 
 #if !defined(CONFIG_DM9X_ETRANS)
-  /* Issue TX polling command */
+      /* Issue TX polling command */
 
-  putreg(DM9X_TXC, 0x1); /* Cleared after TX complete*/
+      putreg(DM9X_TXC, 0x1); /* Cleared after TX complete*/
 #endif
 
-  /* Clear count of back-to-back RX packet transfers */
+      /* Clear count of back-to-back RX packet transfers */
 
-  dm9x->ncrxpackets = 0;
+      dm9x->ncrxpackets = 0;
 
-  /* Re-enable DM90x0 interrupts */
+      /* Re-enable DM90x0 interrupts */
 
-  putreg(DM9X_IMR, DM9X_IMRENABLE);
+      putreg(DM9X_IMR, DM9X_IMRENABLE);
 
-  /* Setup the TX timeout watchdog (perhaps restarting the timer) */
+      /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(dm9x->dm_txtimeout, DM6X_TXTIMEOUT, dm9x_txtimeout, 1, (uint32)dm9x);
-  return OK;
+      (void)wd_start(dm9x->dm_txtimeout, DM6X_TXTIMEOUT, dm9x_txtimeout, 1, (uint32)dm9x);
+      return OK;
+    }
+  return -EBUSY;
 }
 
 /****************************************************************************
@@ -978,9 +986,8 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
               uip_arp_ipin();
               uip_input(&dm9x->dm_dev);
 
-             /* If the above function invocation resulted in data that
-              * should be sent out on the network, the global variable
-              * d_len is set to a value > 0.
+             /* If the above function invocation resulted in data that should be
+              * sent out on the network, the field  d_len will set to a value > 0.
               */
 
               if (dm9x->dm_dev.d_len > 0)
@@ -993,10 +1000,9 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
             {
               uip_arp_arpin(&dm9x->dm_dev);
 
-              /* If the above function invocation resulted in data that
-               * should be sent out on the network, the global variable
-               * d_len is set to a value > 0.
-               */
+             /* If the above function invocation resulted in data that should be
+              * sent out on the network, the field  d_len will set to a value > 0.
+              */
 
               if (dm9x->dm_dev.d_len > 0)
                 {
@@ -1525,8 +1531,8 @@ static void dm9x_bringup(struct dm9x_driver_s *dm9x)
 
   /* Initialize statistics */
 
-  dm9x->ncrxpackets = 0; /* Number of continuous RX packets  */
-  dm9x->dm_ntxpending  = 0; /* Number of pending TX packets */
+  dm9x->ncrxpackets   = 0; /* Number of continuous RX packets  */
+  dm9x->dm_ntxpending = 0; /* Number of pending TX packets */
   dm9x_resetstatistics(dm9x);
 
   /* Activate DM9000A/DM9010 */

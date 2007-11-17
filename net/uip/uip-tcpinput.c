@@ -276,7 +276,7 @@ found:
   if (BUF->flags & TCP_RST)
     {
       conn->tcpstateflags = UIP_CLOSED;
-      dbg("Recvd reset - TCP state: UIP_CLOSED\n");
+      dbg("RESET - TCP state: UIP_CLOSED\n");
 
       (void)uip_tcpcallback(dev, conn, UIP_ABORT);
       goto drop;
@@ -496,7 +496,7 @@ found:
         /* The connection is closed after we send the RST */
 
         conn->tcpstateflags = UIP_CLOSED;
-        vdbg("TCP state: UIP_CLOSED\n");
+        vdbg("Connection failed - TCP state: UIP_CLOSED\n");
 
         /* We do not send resets in response to resets. */
 
@@ -643,7 +643,7 @@ found:
         if (flags & UIP_ACKDATA)
           {
             conn->tcpstateflags = UIP_CLOSED;
-            vdbg("TCP state: UIP_CLOSED\n");
+            vdbg("UIP_LAST_ACK TCP state: UIP_CLOSED\n");
 
             (void)uip_tcpcallback(dev, conn, UIP_CLOSE);
           }

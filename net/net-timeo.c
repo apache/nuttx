@@ -41,7 +41,10 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
 
 #include <sys/types.h>
+#include <debug.h>
+
 #include <nuttx/clock.h>
+
 #include "net-internal.h"
 
 /****************************************************************************
@@ -70,6 +73,7 @@ int net_timeo(uint32 start_time, socktimeo_t timeo)
 {
   uint32 timeo_ticks =  DSEC2TICK(timeo);
   uint32 elapsed     =  g_system_timer - start_time;
+
   if (elapsed >= timeo_ticks)
     {
       return TRUE;
@@ -78,3 +82,4 @@ int net_timeo(uint32 start_time, socktimeo_t timeo)
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+

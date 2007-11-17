@@ -207,6 +207,7 @@ void recv_server(void)
 
   /* Then send the same data back to the client */
 
+  message("server: Sending %d bytes\n", totalbytesread);
   nbytessent = send(acceptsd, buffer, totalbytesread, 0);
   if (nbytessent <= 0)
     {
