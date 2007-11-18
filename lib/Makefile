@@ -1,5 +1,5 @@
 ############################################################################
-# Makefile
+# lib/Makefile
 #
 #   Copyright (C) 2007 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -45,10 +45,11 @@ ifneq ($(CONFIG_NFILE_STREAMS),0)
 MISC_SRCS	+= lib_streamsem.c
 endif
 
-STRING_SRCS	= lib_memset.c lib_memcpy.c lib_memcmp.c lib_memmove.c lib_strcpy.c \
-		  lib_strncpy.c lib_strcmp.c lib_strlen.c lib_strdup.c lib_strtol.c lib_strchr.c \
-		  lib_strrchr.c lib_strspn.c lib_strcspn.c lib_strtok.c lib_strtokr.c \
-		  lib_strerror.c
+STRING_SRCS	= lib_memset.c lib_memcpy.c lib_memcmp.c lib_memmove.c \
+		  lib_strcpy.c lib_strncpy.c lib_strcmp.c lib_strncmp.c \
+		  lib_strlen.c lib_strdup.c lib_strtol.c lib_strchr.c \
+		  lib_strrchr.c lib_strspn.c lib_strcspn.c lib_strtok.c \
+		  lib_strtokr.c lib_strerror.c
 
 CTYPE_SRCS	= 
 
