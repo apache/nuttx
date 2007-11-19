@@ -284,6 +284,9 @@ struct uip_conn *uip_tcpalloc(void)
 
 void uip_tcpfree(struct uip_conn *conn)
 {
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+  struct uip_readahead_s *readahead;
+#endif
   irqstate_t flags;
 
   /* Because g_free_tcp_connections is accessed from user level and interrupt
@@ -303,6 +306,15 @@ void uip_tcpfree(struct uip_conn *conn)
 
       dq_rem(&conn->node, &g_free_tcp_connections);
     }
+
+  /* Release any read-ahead buffers attached to the connection */
+
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+  while ((readahead = (struct uip_readahead_s *)sq_remfirst(&conn->readahead)) != NULL)
+    {
+      uip_tcpreadaheadrelease(readahead);
+    }
+#endif
 
   /* Mark the connection available and put it into the free list */
 
