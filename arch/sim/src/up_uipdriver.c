@@ -141,7 +141,7 @@ void uipdriver_loop(void)
 
   /* tapdev_read will return 0 on a timeout event and >0 on a data received event */
 
-  g_sim_dev.d_len = tapdev_read((unsigned char*)g_sim_dev.d_buf, UIP_BUFSIZE);
+  g_sim_dev.d_len = tapdev_read((unsigned char*)g_sim_dev.d_buf, CONFIG_NET_BUFSIZE);
 
   /* Disable preemption through to the following so that it behaves a little more
    * like an interrupt (otherwise, the following logic gets pre-empted an behaves
