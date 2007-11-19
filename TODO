@@ -31,21 +31,14 @@ o C++ Support
 o Network
 - Did not implement send() and sendto() timeouts.  Option is setable via setsockopt,
   but is not implemented.
-- netutils/webserver netutils/telnetd (and maybe others) are seriously broken.
+- netutils/telnetd (and maybe others) are seriously broken.
   Need to be re-written to use listen() and accept()
 - Should implement SOCK_RAW
-- listen() and accept() are untested.
 - accept() and recvfrom() need to return connection address
 - Performance Improvements (uIP is not very fast):
-- Improve performance by queing TX operations
-  Add simple buffer management.  CONFIG_NET_BUFFERS
-  (1) On write, queue buffer for output get a new buffer for the socket (waiting if
-      nececcesary
-  (2) Copy buffer structure into uip_driver_structure when driver requests write
-      data
-  (3) Extra read buffers will be necessary to buffer TCP data when there is no recv
-      in place to accept the data.  At present, received data is not ACKed, but is
-      eventually lost in this case.
+- Extra read buffers will be necessary to buffer TCP data when there is no recv
+  in place to accept the data.  At present, received data is not ACKed, but is
+  eventually lost in this case.
 - Improve performance by stimulating the driver to accept new TX data before the
   next polling interval.
 
@@ -57,7 +50,11 @@ o Network
       poll on TCP connections connect on the network supported by the driver; UDP
       polling should respond with TX data only if the UDP packet is intended for the
       the network supported by the driver.
-  (2) If there were multiple drivers, polling would occur at double the rate.
+  (2) If there were multiple drivers, polling would occur at double the rate.i
+  Fix by using bound IP address in TCP connection (lipaddr) and verifying that it
+  is in the subnet served by the driver.
+- uIP/Socket callback logic is not thread safe. This means that a socket cannot be
+  used concurrently by two threads.  Minimal fix:  Add mutex to support exclusion.
 
 o USB
 - Implement USB device support

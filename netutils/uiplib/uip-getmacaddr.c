@@ -75,7 +75,7 @@ int uip_getmacaddr(const char *ifname, uint8 *macaddr)
     {
       /* Get a socket (only so that we get access to the INET subsystem) */
 
-      int sockfd = socket(PF_INET, SOCK_DGRAM, 0);
+      int sockfd = socket(PF_INET, UIPLIB_SOCK_IOCTL, 0);
       if (sockfd >= 0)
         {
           struct ifreq req;

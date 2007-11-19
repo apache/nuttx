@@ -35,4 +35,4 @@
 
 UIPLIB_ASRCS =
 UIPLIB_CSRCS = uiplib.c uip-setmacaddr.c uip-getmacaddr.c uip-sethostaddr.c \
-	uip-gethostaddr.c uip-setdraddr.c uip-setnetmask.c
+	uip-gethostaddr.c uip-setdraddr.c uip-setnetmask.c uip-server.c

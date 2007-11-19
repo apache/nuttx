@@ -42,8 +42,32 @@
 #ifndef __UIPLIB_H__
 #define __UIPLIB_H__
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
+#include <sched.h>
 #include <netinet/in.h>
+
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
+/* SOCK_DGRAM is the preferred socket type to use when we just want a
+ * socket for performing drive ioctls.  However, we can't use SOCK_DRAM
+ * if UDP is disabled.
+ */
+
+#ifdef CONFIG_NET_UDP
+# define UIPLIB_SOCK_IOCTL SOCK_DGRAM
+#else
+# define UIPLIB_SOCK_IOCTL SOCK_STREAM
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /* Convert a textual representation of an IP address to a numerical representation.
  *
@@ -79,5 +103,9 @@ extern int uip_sethostaddr(const char *ifname, const struct in_addr *addr);
 extern int uip_setdraddr(const char *ifname, const struct in_addr *addr);
 extern int uip_setnetmask(const char *ifname, const struct in_addr *addr);
 #endif
+
+/* Generic server logic */
+
+extern void uip_server(uint16 portno, main_t handler, int stacksize);
 
 #endif /* __UIPLIB_H__ */

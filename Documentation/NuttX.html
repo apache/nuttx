@@ -355,7 +355,8 @@ is available that be used to build a NuttX-compatible arm-elf toolchain.</blockq
 </pre>
 <p><b>DM320 (ARM9)</b>
   This build for the ARM9 target includes a signficant subset of OS
-  features, ethernet driver and full TCP/IP stack (via uIP). (11/8/07)
+  features, ethernet driver and full TCP/IP, UDP and (minimal) ICMP
+  stacks (via uIP). (11/8/07)
 </p>
 <pre>
    text    data     bss     dec     hex filename
@@ -681,6 +682,7 @@ Other memory:
 	  recv buffering issues, but this is part of a larger buffering issue.
 	* Basic server functionality verified: listen(), accept()
 	* Fix DM90x0 driver problem that caused TX overruns
+	* Add strncmp()
 </pre></ul>
 
 <table width ="100%">

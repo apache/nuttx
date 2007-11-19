@@ -1357,7 +1357,9 @@ static int dm9x_ifup(struct uip_driver_s *dev)
   uint8 netstatus;
   int i;
 
-  dbg("Bringing the interface up\n" );
+  dbg("Bringing up: %d.%d.%d.%d\n",
+       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
 
   /* Initilize DM90x0 chip */
 

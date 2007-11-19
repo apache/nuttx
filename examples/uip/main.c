@@ -119,16 +119,16 @@ int user_start(int argc, char *argv[])
 #if !defined(CONFIG_EXAMPLE_UIP_DHCPC)
   struct in_addr addr;
 #endif
-#if defined(CONFIG_EXAMPLE_UIP_DHCPC) || !defined(CONFIG_ARCH_SIM)
+#if defined(CONFIG_EXAMPLE_UIP_DHCPC) || defined(CONFIG_EXAMPLE_UIP_NOMAC)
   uint8 mac[IFHWADDRLEN];
 #endif
 #if defined(CONFIG_EXAMPLE_UIP_DHCPC) || defined(CONFIG_EXAMPLE_UIP_SMTP)
   void *handle;
 #endif
 
-/* Most embedded network interfaces must have a software assigned MAC */
+/* Many embedded network interfaces must have a software assigned MAC */
 
-#if !defined(CONFIG_ARCH_SIM)
+#ifdef CONFIG_EXAMPLE_UIP_NOMAC
   mac[0] = 0x00;
   mac[1] = 0xe0;
   mac[2] = 0xb0;

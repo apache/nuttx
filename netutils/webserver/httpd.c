@@ -45,11 +45,17 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdlib.h>
+#include <nuttx/config.h>
+
 #include <sys/socket.h>
+
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <debug.h>
 
 #include <net/uip/uip.h>
+#include <net/uip/uip-lib.h>
 #include <net/uip/httpd.h>
 
 #include "httpd.h"
@@ -60,9 +66,6 @@
  * Definitions
  ****************************************************************************/
 
-#define STATE_WAITING 0
-#define STATE_OUTPUT  1
-
 #define ISO_nl      0x0a
 #define ISO_space   0x20
 #define ISO_bang    0x21
@@ -71,21 +74,50 @@
 #define ISO_slash   0x2f
 #define ISO_colon   0x3a
 
-#define SEND_STR(psock, str) psock_send(psock, str, strlen(str))
+#define CONFIG_NETUTILS_HTTPD_DUMPBUFFER 1
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static inline int send_file(struct httpd_state *pstate)
+#ifdef CONFIG_NETUTILS_HTTPD_DUMPBUFFER
+static void httpd_dumpbuffer(struct httpd_state *pstate, ssize_t nbytes)
 {
-  return send(pstate->sockout, pstate->file.data, pstate->file.len, 0);
-}
+#ifdef CONFIG_DEBUG
+  char line[128];
+  int ch;
+  int i;
+  int j;
 
-static inline int send_part_of_file(struct httpd_state *pstate)
-{
-  return send(pstate->sockout, pstate->file.data, pstate->len, 0);
+  for (i = 0; i < nbytes; i += 16)
+    {
+      sprintf(line, "%04x: ", i);
+      for ( j = 0; j < 16; j++)
+        {
+          if (i + j < nbytes)
+            {
+              sprintf(&line[strlen(line)], "%02x ", pstate->ht_buffer[i+j] );
+            }
+          else
+            {
+              strcpy(&line[strlen(line)], "   ");
+            }
+        }
+      for ( j = 0; j < 16; j++)
+        {
+          if (i + j < nbytes)
+            {
+              ch = pstate->ht_buffer[i+j];
+              sprintf(&line[strlen(line)], "%c", ch >= 0x20 && ch <= 0x7e ? ch : '.');
+            }
+        }
+      dbg("%s", line);
+    }
+#endif
 }
+#else
+# define httpd_dumpbuffer(pstate,nbytes)
+#endif
 
 static void next_scriptstate(struct httpd_state *pstate)
 {
@@ -95,35 +127,40 @@ static void next_scriptstate(struct httpd_state *pstate)
   pstate->scriptptr = p;
 }
 
-static void handle_script(struct httpd_state *pstate, struct uip_conn *conn)
+static void handle_script(struct httpd_state *pstate)
 {
   char *ptr;
 
   while(pstate->file.len > 0) {
 
-    /* Check if we should start executing a script. */
+    /* Check if we should start executing a script */
+
     if (*pstate->file.data == ISO_percent &&
        *(pstate->file.data + 1) == ISO_bang) {
       pstate->scriptptr = pstate->file.data + 3;
       pstate->scriptlen = pstate->file.len - 3;
-      if (*(pstate->scriptptr - 1) == ISO_colon) {
-	httpd_fs_open(pstate->scriptptr + 1, &pstate->file);
-	send_file(pstate);
-      } else {
-        httpd_cgi(pstate->scriptptr)(pstate, pstate->scriptptr);
-      }
+      if (*(pstate->scriptptr - 1) == ISO_colon)
+        {
+          httpd_fs_open(pstate->scriptptr + 1, &pstate->file);
+          send(pstate->sockfd, pstate->file.data, pstate->file.len, 0);
+        }
+      else
+        {
+          httpd_cgi(pstate->scriptptr)(pstate, pstate->scriptptr);
+        }
       next_scriptstate(pstate);
 
       /* The script is over, so we reset the pointers and continue
-	 sending the rest of the file. */
+	 sending the rest of the file */
       pstate->file.data = pstate->scriptptr;
       pstate->file.len = pstate->scriptlen;
+
     } else {
       /* See if we find the start of script marker in the block of HTML
-	 to be sent. */
+	 to be sent */
 
-      if (pstate->file.len > uip_mss(conn)) {
-	pstate->len = uip_mss(conn);
+      if (pstate->file.len > HTTPD_IOBUFFER_SIZE) {
+	pstate->len = HTTPD_IOBUFFER_SIZE;
       } else {
 	pstate->len = pstate->file.len;
       }
@@ -136,11 +173,11 @@ static void handle_script(struct httpd_state *pstate, struct uip_conn *conn)
       if (ptr != NULL &&
 	 ptr != pstate->file.data) {
 	pstate->len = (int)(ptr - pstate->file.data);
-	if (pstate->len >= uip_mss(conn)) {
-	  pstate->len = uip_mss(conn);
+	if (pstate->len >= HTTPD_IOBUFFER_SIZE) {
+	  pstate->len = HTTPD_IOBUFFER_SIZE;
 	}
       }
-      send_part_of_file(pstate);
+      send(pstate->sockfd, pstate->file.data, pstate->len, 0);
       pstate->file.data += pstate->len;
       pstate->file.len -= pstate->len;
     }
@@ -152,41 +189,41 @@ static int send_headers(struct httpd_state *pstate, const char *statushdr)
   char *ptr;
   int ret;
 
-  ret = send(pstate->sockout, statushdr, strlen(statushdr), 0);
+  ret = send(pstate->sockfd, statushdr, strlen(statushdr), 0);
 
   ptr = strrchr(pstate->filename, ISO_period);
   if (ptr == NULL)
     {
-      ret = send(pstate->sockout, http_content_type_binary, strlen(http_content_type_binary), 0);
+      ret = send(pstate->sockfd, http_content_type_binary, strlen(http_content_type_binary), 0);
     }
   else if (strncmp(http_html, ptr, 5) == 0 || strncmp(http_shtml, ptr, 6) == 0)
     {
-      ret = send(pstate->sockout, http_content_type_html, strlen(http_content_type_html), 0);
+      ret = send(pstate->sockfd, http_content_type_html, strlen(http_content_type_html), 0);
     }
   else if (strncmp(http_css, ptr, 4) == 0)
     {
-      ret = send(pstate->sockout, http_content_type_css, strlen(http_content_type_css), 0);
+      ret = send(pstate->sockfd, http_content_type_css, strlen(http_content_type_css), 0);
     }
   else if (strncmp(http_png, ptr, 4) == 0)
     {
-      ret = send(pstate->sockout, http_content_type_png, strlen(http_content_type_png), 0);
+      ret = send(pstate->sockfd, http_content_type_png, strlen(http_content_type_png), 0);
     }
   else if (strncmp(http_gif, ptr, 4) == 0)
     {
-      ret = send(pstate->sockout, http_content_type_gif, strlen(http_content_type_gif), 0);
+      ret = send(pstate->sockfd, http_content_type_gif, strlen(http_content_type_gif), 0);
     }
   else if (strncmp(http_jpg, ptr, 4) == 0)
     {
-      ret = send(pstate->sockout, http_content_type_jpg, strlen(http_content_type_jpg), 0);
+      ret = send(pstate->sockfd, http_content_type_jpg, strlen(http_content_type_jpg), 0);
     }
   else
     {
-      ret = send(pstate->sockout, http_content_type_plain, strlen(http_content_type_plain), 0);
+      ret = send(pstate->sockfd, http_content_type_plain, strlen(http_content_type_plain), 0);
     }
   return ret;
 }
 
-static void handle_output(struct httpd_state *pstate, struct uip_conn *conn)
+static void httpd_sendfile(struct httpd_state *pstate)
 {
   char *ptr;
 
@@ -195,7 +232,7 @@ static void handle_output(struct httpd_state *pstate, struct uip_conn *conn)
       httpd_fs_open(http_404_html, &pstate->file);
       strcpy(pstate->filename, http_404_html);
       send_headers(pstate, http_header_404);
-      send_file(pstate);
+      send(pstate->sockfd, pstate->file.data, pstate->file.len, 0);
     }
   else
     {
@@ -203,75 +240,102 @@ static void handle_output(struct httpd_state *pstate, struct uip_conn *conn)
       ptr = strchr(pstate->filename, ISO_period);
       if (ptr != NULL && strncmp(ptr, http_shtml, 6) == 0)
         {
-          handle_script(pstate, conn);
+          handle_script(pstate);
         }
       else
         {
-        send_file(pstate);
+          send(pstate->sockfd, pstate->file.data, pstate->file.len, 0);
         }
     }
 }
 
-static int handle_input(struct httpd_state *pstate)
+static inline int httpd_cmd(struct httpd_state *pstate)
 {
   ssize_t recvlen;
+  int i;
 
-  if (recv(pstate->sockin, pstate->inputbuf, HTTPD_INBUFFER_SIZE, 0) < 0)
-    {
-      return ERROR;
-    }
+  /* Get the next HTTP command.  We will handle only GET */
 
-  if (strncmp(pstate->inputbuf, http_get, 4) != 0)
-    {
-      return ERROR;
-  }
-
-  recvlen = recv(pstate->sockin, pstate->inputbuf, HTTPD_INBUFFER_SIZE, 0);
+  recvlen = recv(pstate->sockfd, pstate->ht_buffer, HTTPD_IOBUFFER_SIZE, 0);
   if (recvlen < 0)
     {
       return ERROR;
     }
+  httpd_dumpbuffer(pstate, recvlen);
 
-  if (pstate->inputbuf[0] != ISO_slash)
-  {
-    return ERROR;
-  }
+  /*  We will handle only GET */
 
-  if (pstate->inputbuf[1] == ISO_space)
+  if (strncmp(pstate->ht_buffer, http_get, 4) != 0)
+    {
+      return ERROR;
+    }
+
+  /* Get the name of the file to provide */
+
+  if (pstate->ht_buffer[4] != ISO_slash)
+    {
+      return ERROR;
+    }
+  else if (pstate->ht_buffer[5] == ISO_space)
     {
       strncpy(pstate->filename, http_index_html, sizeof(pstate->filename));
     }
   else
     {
-      pstate->inputbuf[recvlen - 1] = 0;
-      strncpy(pstate->filename, &pstate->inputbuf[0], sizeof(pstate->filename));
-    }
-
-  pstate->state = STATE_OUTPUT;
-
-  while(1)
-    {
-      recvlen = recv(pstate->sockin, pstate->inputbuf, HTTPD_INBUFFER_SIZE, 0);
-      if (recvlen < 0)
+      for (i = 5; i < sizeof(pstate->filename) + 5 && pstate->ht_buffer[5] != ISO_space; i++)
         {
-          return ERROR;
-        }
-
-      if (strncmp(pstate->inputbuf, http_referer, 8) == 0)
-        {
-          pstate->inputbuf[recvlen - 2] = 0;
+          pstate->filename[i] = pstate->ht_buffer[i+5];
         }
     }
 
+  /* Then send the file */
+
+  httpd_sendfile(pstate);
   return OK;
 }
 
-static void handle_connection(struct httpd_state *pstate, struct uip_conn *conn)
+/****************************************************************************
+ * Name: httpd_handler
+ *
+ * Description:
+ *   Each time a new connection to port 80 is made, a new thread is created
+ *   that begins at this entry point.  There should be exactly one argument
+ *   and it should be the socket descriptor (+1).
+ *
+ ****************************************************************************/
+
+static int httpd_handler(int argc, char *argv[])
 {
-  handle_input(pstate);
-  if (pstate->state == STATE_OUTPUT) {
-    handle_output(pstate, conn);
+  struct httpd_state *pstate = (struct httpd_state *)malloc(sizeof(struct httpd_state));
+  int                 sockfd = (int)argv[1] - 1;
+  int                 ret    = ERROR;
+
+  /* Verify that the state structure was successfully allocated */
+
+  if (pstate)
+    {
+      /* Loop processing each HTTP command */
+      do
+        {
+          /* Re-initialize the thread state structure */
+
+          memset(pstate, 0, sizeof(struct httpd_state));
+          pstate->sockfd = sockfd;
+
+          /* Then handle the next httpd command */
+
+          ret = httpd_cmd(pstate);
+        }
+      while (ret == OK);
+
+    /* End of command processing -- Clean up and exit */
+
+    free(pstate);
   }
+
+  /* Exit the task */
+
+  return 0;
 }
 
 /****************************************************************************
@@ -288,20 +352,24 @@ static void handle_connection(struct httpd_state *pstate, struct uip_conn *conn)
 
 int httpd_listen(void)
 {
-#warning "this is all very broken at the moment"
-  return OK;
+  /* Execute httpd_handler on each connection to port 80 */
+
+  uip_server(HTONS(80), httpd_handler, CONFIG_EXAMPLES_UIP_HTTPDSTACKSIZE);
+
+  /* uip_server only returns on errors */
+
+  return ERROR;
 }
 
 /****************************************************************************
  * Name: httpd_init
  *
  * Description:
- * This function initializes the web server and should be called at system
- * boot-up.
+ *   This function initializes the web server and should be called at system
+ *   boot-up.
  *
  ****************************************************************************/
 
 void httpd_init(void)
 {
-  uip_listen(HTONS(80));
 }

@@ -39,12 +39,14 @@ MKDEP		= $(TOPDIR)/tools/mkdeps.sh
 
 ifeq ($(CONFIG_NET),y)
 include uiplib/Make.defs
-include dhcpc/Make.defs
-include resolv/Make.defs
 include smtp/Make.defs
 include telnetd/Make.defs
 include webclient/Make.defs
 include webserver/Make.defs
+ifeq ($(CONFIG_NET_UDP),y)
+include dhcpc/Make.defs
+include resolv/Make.defs
+endif
 include Make.str
 endif
 

@@ -81,7 +81,7 @@ int uip_gethostaddr(const char *ifname, struct in_addr *addr)
   int ret = ERROR;
   if (ifname && addr)
     {
-      int sockfd = socket(PF_INET, SOCK_DGRAM, 0);
+      int sockfd = socket(PF_INET, UIPLIB_SOCK_IOCTL, 0);
       if (sockfd >= 0)
         {
           struct ifreq req;

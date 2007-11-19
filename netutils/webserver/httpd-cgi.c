@@ -125,7 +125,7 @@ static void file_stats(struct httpd_state *pstate, char *ptr)
   char buffer[16];
   char *pcount = strchr(ptr, ' ') + 1;
   snprintf(buffer, 16, "%5u", httpd_fs_count(pcount));
-  (void)send(pstate->sockout, buffer, strlen(buffer), 0);
+  (void)send(pstate->sockfd, buffer, strlen(buffer), 0);
 }
 #endif
 
