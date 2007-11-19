@@ -213,11 +213,14 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NET_IPv6 - Build in support for IPv6
 		CONFIG_NSOCKET_DESCRIPTORS - Maximum number of socket descriptors
                   per task/thread.
-		CONFIG_NET_MAX_CONNECTIONS - Maximum number of TCP connections (all tasks)
+		CONFIG_NET_TCP_CONNS - Maximum number of TCP connections (all tasks)
 		CONFIG_NET_MAX_LISTENPORTS - Maximum number of listening TCP ports (all tasks)
 		CONFIG_NET_SOCKOPTS - Enable or disable support for socket options
 
-		CONFIG_NET_BUFFER_SIZE - uIP buffer size
+		CONFIG_NET_BUFSIZE - uIP buffer size
+		CONFIG_NET_TCP_READAHEAD_BUFSIZE - Size of TCP read-ahead buffers
+		CONFIG_NET_NTCP_READAHEAD_BUFFERS - Number of TCP read-ahead buffers
+		  (may be zero)
 		CONFIG_NET_UDP - UDP support on or off
 		CONFIG_NET_UDP_CHECKSUMS - UDP checksums on or off
 		CONFIG_NET_UDP_CONNS - The maximum amount of concurrent UDP

@@ -129,7 +129,7 @@ static const struct uip_eth_addr broadcast_ethaddr =
   {{0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
 static const uint16 broadcast_ipaddr[2] = {0xffff, 0xffff};
 
-static struct arp_entry arp_table[UIP_ARPTAB_SIZE];
+static struct arp_entry arp_table[CONFIG_NET_ARPTAB_SIZE];
 static uint8 g_arptime;
 
 
@@ -170,7 +170,7 @@ static void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr)
    * inserted in the ARP table.
    */
 
-  for (i = 0; i < UIP_ARPTAB_SIZE; ++i)
+  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
     {
       tabptr = &arp_table[i];
 
@@ -198,7 +198,7 @@ static void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr)
 
   /* First, we try to find an unused entry in the ARP table. */
 
-  for (i = 0; i < UIP_ARPTAB_SIZE; ++i)
+  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
     {
       tabptr = &arp_table[i];
       if (tabptr->at_ipaddr == 0)
@@ -211,11 +211,11 @@ static void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr)
    * throw it away.
    */
 
-  if (i == UIP_ARPTAB_SIZE)
+  if (i == CONFIG_NET_ARPTAB_SIZE)
     {
       uint8 tmpage = 0;
       int   j      = 0;
-      for (i = 0; i < UIP_ARPTAB_SIZE; ++i)
+      for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
         {
           tabptr = &arp_table[i];
           if (g_arptime - tabptr->at_time > tmpage)
@@ -246,7 +246,7 @@ static void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr)
 void uip_arp_init(void)
 {
   int i;
-  for (i = 0; i < UIP_ARPTAB_SIZE; ++i)
+  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
     {
       memset(&arp_table[i].at_ipaddr, 0, sizeof(in_addr_t));
     }
@@ -265,7 +265,7 @@ void uip_arp_timer(void)
   int i;
 
   ++g_arptime;
-  for (i = 0; i < UIP_ARPTAB_SIZE; ++i)
+  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
     {
       tabptr = &arp_table[i];
       if (tabptr->at_ipaddr != 0 && g_arptime - tabptr->at_time >= UIP_ARP_MAXAGE)
@@ -451,7 +451,7 @@ void uip_arp_out(struct uip_driver_s *dev)
 
       /* Check if we already have this destination address in the ARP table */
 
-      for (i = 0; i < UIP_ARPTAB_SIZE; ++i)
+      for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
         {
           tabptr = &arp_table[i];
           if (uip_ipaddr_cmp(ipaddr, tabptr->at_ipaddr))
@@ -460,7 +460,7 @@ void uip_arp_out(struct uip_driver_s *dev)
             }
         }
 
-      if (i == UIP_ARPTAB_SIZE)
+      if (i == CONFIG_NET_ARPTAB_SIZE)
         {
           /* The destination address was not in our ARP table, so we
            * overwrite the IP packet with an ARP request.

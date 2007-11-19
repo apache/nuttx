@@ -119,12 +119,12 @@ void uip_icmpinput(struct uip_driver_s *dev)
    * ourself.
    */
 
-#if UIP_PINGADDRCONF
+#ifdef CONFIG_NET_PINGADDRCONF
   if (dev->d_ipaddr == 0)
     {
       dev->d_ipaddr = ICMPBUF->destipaddr;
     }
-#endif /* UIP_PINGADDRCONF */
+#endif
 
   ICMPBUF->type = ICMP_ECHO_REPLY;
 

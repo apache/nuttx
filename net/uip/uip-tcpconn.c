@@ -70,7 +70,7 @@
 
 /* The array containing all uIP TCP connections. */
 
-static struct uip_conn g_tcp_connections[UIP_CONNS];
+static struct uip_conn g_tcp_connections[CONFIG_NET_TCP_CONNS];
 
 /* A list of all free TCP connections */
 
@@ -186,7 +186,7 @@ void uip_tcpinit(void)
 
   /* Now initialize each connection structure */
 
-  for (i = 0; i < UIP_CONNS; i++)
+  for (i = 0; i < CONFIG_NET_TCP_CONNS; i++)
     {
       /* Mark the connection closed and move it to the free list */
 
@@ -394,7 +394,7 @@ struct uip_conn *uip_tcplistener(uint16 portno)
 
   /* Check if this port number is in use by any active UIP TCP connection */
  
-  for (i = 0; i < UIP_CONNS; i++)
+  for (i = 0; i < CONFIG_NET_TCP_CONNS; i++)
     {
       conn = &g_tcp_connections[i];
       if (conn->tcpstateflags != UIP_CLOSED && conn->lport == portno)
@@ -450,12 +450,18 @@ struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf)
       conn->rcv_nxt[1]    = buf->seqno[1];
       conn->rcv_nxt[0]    = buf->seqno[0];
 
+      /* Initialize the list of TCP read-ahead buffers */
+
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+      sq_init(&conn->readahead);
+#endif
+
       /* And, finally, put the connection structure into the active list.
        * Interrupts should already be disabled in this context.
        */
 
       dq_addlast(&conn->node, &g_active_tcp_connections);
-  }
+    }
   return conn;
 }
 
@@ -614,6 +620,12 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
   /* The sockaddr address is 32-bits in network order. */
 
   uip_ipaddr_copy(conn->ripaddr, addr->sin_addr.s_addr);
+
+  /* Initialize the list of TCP read-ahead buffers */
+
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+  sq_init(&conn->readahead);
+#endif
 
   /* And, finally, put the connection structure into the active
    * list. Because g_active_tcp_connections is accessed from user level and

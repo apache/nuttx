@@ -42,6 +42,7 @@
 #ifdef CONFIG_NET
 
 #include <sys/types.h>
+#include <string.h>
 #include <debug.h>
 
 #include <net/uip/uipopt.h>
@@ -57,6 +58,89 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Function: uip_dataevent
+ *
+ * Description:
+ *   This is the default data_event handler that is called when there is no
+ *   use data handler in place
+ *
+ * Assumptions:
+ *   This function is called at the interrupt level with interrupts disabled.
+ *
+ ****************************************************************************/
+
+static inline uint8
+uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
+{
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+  struct uip_readahead_s *readahead;
+  uint16 recvlen;
+#endif
+  uint8 ret = flags;
+
+  /* Is there new data?  With non-zero length?  (Certain connection events
+   * can have zero-length with UIP_NEWDATA set just to cause an ACK).
+   */
+
+  if (uip_newdata_event(flags) && dev->d_len > 0)
+    {
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+      /* Allocate a read-ahead buffer to hold the newly received data */
+
+      readahead = uip_tcpreadaheadalloc();
+      if (readahead)
+        {
+          /* Get the length of the data to buffer.  If the sizes of the
+           * read-ahead buffers are picked correct, they should always
+           * hold the full received packet.\
+           */
+
+          if (dev->d_len > CONFIG_NET_TCP_READAHEAD_BUFSIZE)
+            {
+              recvlen = CONFIG_NET_TCP_READAHEAD_BUFSIZE;
+            }
+          else
+            {
+              recvlen = dev->d_len;
+            }
+
+          /* Copy the new appdata into the read-ahead buffer */
+
+          memcpy(readahead->rh_buffer, dev->d_appdata, recvlen);
+          readahead->rh_nbytes = recvlen;
+          vdbg("Buffered %d bytes (of %d)\n", recvlen, dev->d_len);
+
+          /* Save the readahead buffer in the connection structure where
+           * it can be found with recv() is called.
+           */
+
+          sq_addlast(&readahead->rh_node, &conn->readahead);
+
+          /* Indicate that all of the data in the buffer has been consumed */
+
+          dev->d_len = 0;
+        }
+      else
+#endif
+        {
+          /* There is no handler to receive new data and there are no free
+           * read-ahead buffers to retain the data.  In this case, clear the
+           * UIP_NEWDATA bit so that no ACK will be sent and drop the packet.
+           */
+
+#ifdef CONFIG_NET_STATISTICS
+          uip_stat.tcp.syndrop++;
+          uip_stat.tcp.drop++;
+#endif
+          ret       &= ~UIP_NEWDATA;
+          dev->d_len = 0;
+        }
+    }
+
+  return ret;
+}
 
 /****************************************************************************
  * Public Functions
@@ -104,23 +188,12 @@ uint8 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint8 fla
 
       ret = conn->data_event(dev, conn, flags);
     }
-  else if ((flags & UIP_CONN_EVENTS) == 0)
+  else
     {
-      /* There is no handler to receive new data in place and this is not a
-       * connection event (which may also include new data that must be ACKed).
-       * In this case, clear the UIP_NEWDATA bit so that no ACK will be sent
-       * and drop the packet.
-       */
+      /* There is no handler to receive new data in place */
 
-      dbg("No listener on connection\n");
-
-#ifdef CONFIG_NET_STATISTICS
-      uip_stat.tcp.syndrop++;
-      uip_stat.tcp.drop++;
-#endif
-
-      ret       &= ~UIP_NEWDATA;
-      dev->d_len = 0;
+      vdbg("No listener on connection\n");
+      ret = uip_dataevent(dev, conn, flags);
     }
 
   /* Check if there is a connection-related event and a connection

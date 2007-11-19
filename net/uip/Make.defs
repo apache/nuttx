@@ -50,7 +50,8 @@ endif
 # TCP source files
 
 UIP_CSRCS += uip-tcpconn.c uip-tcppoll.c uip-tcptimer.c uip-tcpsend.c \
-             uip-tcpinput.c uip-tcpappsend.c uip-listen.c uip-tcpcallback.c
+             uip-tcpinput.c uip-tcpappsend.c uip-listen.c uip-tcpcallback.c \
+             uip-tcpreadahead.c
 
 # UDP source files
 

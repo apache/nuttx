@@ -215,7 +215,7 @@ int netdev_ioctl(int sockfd, int cmd, struct ifreq *req)
         break;
 
       case SIOCGIFMTU:  /* Get MTU size */
-        req->ifr_mtu = UIP_BUFSIZE;
+        req->ifr_mtu = CONFIG_NET_BUFSIZE;
         break;
 
       case SIOCGIFHWADDR:  /* Get hardware address */

@@ -958,7 +958,7 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
 
       /* Also check if the packet is a valid size for the uIP configuration */
 
-      else if (rx.desc.rx_len < UIP_LLH_LEN || rx.desc.rx_len > (UIP_BUFSIZE + 2))
+      else if (rx.desc.rx_len < UIP_LLH_LEN || rx.desc.rx_len > (CONFIG_NET_BUFSIZE + 2))
         {
 #if defined(CONFIG_DM9X_STATS)
           dm9x->dm_nrxlengtherrors++;

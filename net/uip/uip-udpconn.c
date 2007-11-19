@@ -66,7 +66,7 @@
 
 /* The array containing all uIP UDP connections. */
 
-struct uip_udp_conn g_udp_connections[UIP_UDP_CONNS];
+struct uip_udp_conn g_udp_connections[CONFIG_NET_UDP_CONNS];
 
 /* A list of all free UDP connections */
 
@@ -124,7 +124,7 @@ static struct uip_udp_conn *uip_find_conn( uint16 portno )
 
   /* Now search each connection structure.*/
 
-  for (i = 0; i < UIP_UDP_CONNS; i++)
+  for (i = 0; i < CONFIG_NET_UDP_CONNS; i++)
     {
       if (g_udp_connections[ i ].lport == portno)
         {
@@ -158,7 +158,7 @@ void uip_udpinit(void)
   dq_init(&g_active_udp_connections);
   sem_init(&g_free_sem, 0, 1);
 
-  for (i = 0; i < UIP_UDP_CONNS; i++)
+  for (i = 0; i < CONFIG_NET_UDP_CONNS; i++)
     {
       /* Mark the connection closed and move it to the free list */
 

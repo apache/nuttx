@@ -130,7 +130,7 @@ int task_create(const char *name, int priority,
 
   /* Associate file descriptors with the new task */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
   if (sched_setuptaskfiles(tcb) != OK)
     {
       sched_releasetcb(tcb);

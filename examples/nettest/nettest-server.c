@@ -194,17 +194,6 @@ void recv_server(void)
         }
     }
 
-#ifdef CONFIG_EXAMPLE_NETTEST_HOST
-  /* At present, data received by the target before it is completed the
-   * the write opertion and started the read operation results in a failure
-   * (the data is not received, but it is ACKed).  This will have to be
-   * fixed.
-   */
-
-# warning "FIXME: This should not be necessary"
-  sleep(10);
-#endif
-
   /* Then send the same data back to the client */
 
   message("server: Sending %d bytes\n", totalbytesread);

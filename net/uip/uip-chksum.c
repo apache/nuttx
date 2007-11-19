@@ -223,7 +223,7 @@ uint16 uip_udpchksum(struct uip_driver_s *dev)
 {
   return upper_layer_chksum(dev, UIP_PROTO_UDP);
 }
-#endif /* UIP_UDP_CHECKSUMS */
+#endif
 #endif /* UIP_ARCH_CHKSUM */
 
 #endif /* CONFIG_NET */

@@ -130,6 +130,93 @@ static void recvfrom_newdata(struct uip_driver_s *dev, struct recvfrom_s *pstate
 }
 
 /****************************************************************************
+ * Function: recvfrom_readahead
+ *
+ * Description:
+ *   Copy the read data from the packet
+ *
+ * Parameters:
+ *   dev      The sructure of the network driver that caused the interrupt
+ *   pstate   recvfrom state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+static inline void recvfrom_readahead(struct recvfrom_s *pstate)
+{
+  struct uip_conn        *conn = (struct uip_conn *)pstate->rf_sock->s_conn;
+  struct uip_readahead_s *readahead;
+  size_t                  recvlen;
+
+  /* Check there is any TCP data already buffered in a read-ahead
+   * buffer.
+   */
+
+  do
+    {
+      /* Get the read-ahead buffer at the head of the list (if any) */
+
+      readahead = (struct uip_readahead_s *)sq_remfirst(&conn->readahead);
+      if (readahead)
+        {
+          /* We have a new buffer... transfer that buffered data into
+           * the user buffer.
+           *
+           * First, get the length of the data to transfer.
+           */
+
+          if (readahead->rh_nbytes > pstate->rf_buflen)
+            {
+              recvlen = pstate->rf_buflen;
+            }
+          else
+            {
+              recvlen = readahead->rh_nbytes;
+            }
+
+          if (recvlen > 0)
+            {
+              /* Copy the read-ahead data into the user buffer */
+
+              memcpy(pstate->rf_buffer, readahead->rh_buffer, recvlen);
+              vdbg("Received %d bytes (of %d)\n", recvlen, readahead->rh_nbytes);
+
+              /* Update the accumulated size of the data read */
+
+              pstate->rf_recvlen += recvlen;
+              pstate->rf_buffer  += recvlen;
+              pstate->rf_buflen  -= recvlen;
+            }
+
+          /* If the read-ahead buffer is empty, then release it.  If not, then
+           * we will have to move the data down and return the buffer to the
+           * front of the list.
+           */
+
+          if (recvlen < readahead->rh_nbytes)
+            {
+              readahead->rh_nbytes -= recvlen;
+              memcpy(readahead->rh_buffer, &readahead->rh_buffer[recvlen],
+                     readahead->rh_nbytes);
+              sq_addfirst(&readahead->rh_node, &conn->readahead);
+            }
+          else
+            {
+              uip_tcpreadaheadrelease(readahead);
+            }
+        }
+    }
+  while (readahead && pstate->rf_buflen > 0);
+}
+#endif
+
+/****************************************************************************
  * Function: recvfrom_timeout
  *
  * Description:
@@ -449,8 +536,8 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf, size_t len,
 
   memset(pstate, 0, sizeof(struct recvfrom_s));
   (void)sem_init(&pstate->rf_sem, 0, 0); /* Doesn't really fail */
-  pstate->rf_buflen = len;
-  pstate->rf_buffer = buf;
+  pstate->rf_buflen    = len;
+  pstate->rf_buffer    = buf;
 
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
   /* Set up the start time for the timeout */
@@ -538,9 +625,9 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 #endif
 {
   struct uip_udp_conn *udp_conn;
-  struct recvfrom_s state;
-  irqstate_t save;
-  int ret;
+  struct recvfrom_s    state;
+  irqstate_t           save;
+  int                  ret;
 
   /* Perform the UDP recvfrom() operation */
 
@@ -619,10 +706,10 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                             FAR const struct sockaddr_in *infrom )
 #endif
 {
-  struct uip_conn *conn;
-  struct recvfrom_s state;
-  irqstate_t save;
-  int ret;
+  struct uip_conn        *conn;
+  struct recvfrom_s       state;
+  irqstate_t              save;
+  int                     ret;
 
   /* Verify that the SOCK_STREAM has been connected */
 
@@ -642,24 +729,38 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   save = irqsave();
   recvfrom_init(psock, buf, len, &state);
 
-  /* Set up the callback in the connection */
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
 
-  conn               = (struct uip_conn *)psock->s_conn;
-  conn->data_private = (void*)&state;
-  conn->data_event   = recvfrom_tcpinterrupt;
+  /* Handle any any TCP data already buffered in a read-ahead buffer. */
 
-  /* Wait for either the receive to complete or for an error/timeout to occur.
-   * NOTES:  (1) sem_wait will also terminate if a signal is received, (2)
-   * interrupts are disabled!  They will be re-enabled while the task sleeps
-   * and automatically re-enabled when the task restarts.
+  recvfrom_readahead(&state);
+
+  /* If there is space to receive anything more, then we will
+   * wait to receive the data.
    */
 
-  ret = sem_wait(&state.rf_sem);
+  if (state.rf_buflen > 0)
+#endif
+    {
+      /* Set up the callback in the connection */
 
-  /* Make sure that no further interrupts are processed */
+      conn               = (struct uip_conn *)psock->s_conn;
+      conn->data_private = (void*)&state;
+      conn->data_event   = recvfrom_tcpinterrupt;
 
-  conn->data_private = NULL;
-  conn->data_event   = NULL;
+      /* Wait for either the receive to complete or for an error/timeout to occur.
+       * NOTES:  (1) sem_wait will also terminate if a signal is received, (2)
+       * interrupts are disabled!  They will be re-enabled while the task sleeps
+       * and automatically re-enabled when the task restarts.
+       */
+
+      ret = sem_wait(&state.rf_sem);
+
+      /* Make sure that no further interrupts are processed */
+
+      conn->data_private = NULL;
+      conn->data_event   = NULL;
+    }
   irqrestore(save);
 
 #warning "Needs to return server address"

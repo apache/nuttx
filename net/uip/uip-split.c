@@ -42,85 +42,103 @@
 
 void uip_split_output(struct uip_driver_s *dev)
 {
-  uint16 tcplen, len1, len2;
+  uint16 tcplen;
+  uint16 len1;
+  uint16 len2;
 
   /* We only try to split maximum sized TCP segments. */
-  if(BUF->proto == UIP_PROTO_TCP &&
-     dev->d_len == UIP_BUFSIZE - UIP_LLH_LEN) {
 
-    tcplen = dev->d_len - UIP_TCPIP_HLEN;
-    /* Split the segment in two. If the original packet length was
-       odd, we make the second packet one byte larger. */
-    len1 = len2 = tcplen / 2;
-    if(len1 + len2 < tcplen) {
-      ++len2;
+  if (BUF->proto == UIP_PROTO_TCP &&
+      dev->d_len == CONFIG_NET_BUFSIZE - UIP_LLH_LEN)
+    {
+      tcplen = dev->d_len - UIP_TCPIP_HLEN;
+
+      /* Split the segment in two. If the original packet length was
+       * odd, we make the second packet one byte larger.
+       */
+
+      len1 = len2 = tcplen / 2;
+      if (len1 + len2 < tcplen)
+        {
+          ++len2;
+        }
+
+      /* Create the first packet. This is done by altering the length
+       * field of the IP header and updating the checksums.
+       */
+
+      dev->d_len = len1 + UIP_TCPIP_HLEN;
+#ifdef CONFIG_NET_IPv6
+      /* For IPv6, the IP length field does not include the IPv6 IP header
+       * length.
+       */
+      BUF->len[0] = ((dev->d_len - UIP_IPH_LEN) >> 8);
+      BUF->len[1] = ((dev->d_len - UIP_IPH_LEN) & 0xff);
+#else /* CONFIG_NET_IPv6 */
+      BUF->len[0] = dev->d_len >> 8;
+      BUF->len[1] = dev->d_len & 0xff;
+#endif /* CONFIG_NET_IPv6 */
+
+      /* Recalculate the TCP checksum. */
+
+      BUF->tcpchksum = 0;
+      BUF->tcpchksum = ~(uip_tcpchksum(dev));
+
+#ifndef CONFIG_NET_IPv6
+      /* Recalculate the IP checksum. */
+
+      BUF->ipchksum = 0;
+      BUF->ipchksum = ~(uip_ipchksum(dev));
+#endif /* CONFIG_NET_IPv6 */
+
+      /* Transmit the first packet. */
+      /*    uip_fw_output();*/
+      tcpip_output();
+
+      /* Now, create the second packet. To do this, it is not enough to
+       * just alter the length field, but we must also update the TCP
+       * sequence number and point the d_appdata to a new place in
+       * memory. This place is detemined by the length of the first
+       * packet (len1).
+       */
+
+      dev->d_len = len2 + UIP_TCPIP_HLEN;
+#ifdef CONFIG_NET_IPv6
+      /* For IPv6, the IP length field does not include the IPv6 IP header
+       * length.
+       */
+
+      BUF->len[0] = ((dev->d_len - UIP_IPH_LEN) >> 8);
+      BUF->len[1] = ((dev->d_len - UIP_IPH_LEN) & 0xff);
+#else /* CONFIG_NET_IPv6 */
+      BUF->len[0] = dev->d_len >> 8;
+      BUF->len[1] = dev->d_len & 0xff;
+#endif /* CONFIG_NET_IPv6 */
+
+      /*    dev->d_appdata += len1;*/
+      memcpy(dev->d_appdata, dev->d_appdata + len1, len2);
+
+      uip_incr32(BUF->seqno, len1);
+
+      /* Recalculate the TCP checksum. */
+
+      BUF->tcpchksum = 0;
+      BUF->tcpchksum = ~(uip_tcpchksum(dev));
+
+#ifndef CONFIG_NET_IPv6
+      /* Recalculate the IP checksum. */
+
+      BUF->ipchksum = 0;
+      BUF->ipchksum = ~(uip_ipchksum(dev));
+#endif /* CONFIG_NET_IPv6 */
+
+      /* Transmit the second packet. */
+      /*    uip_fw_output();*/
+      tcpip_output();
     }
-
-    /* Create the first packet. This is done by altering the length
-       field of the IP header and updating the checksums. */
-    dev->d_len = len1 + UIP_TCPIP_HLEN;
-#ifdef CONFIG_NET_IPv6
-    /* For IPv6, the IP length field does not include the IPv6 IP header
-       length. */
-    BUF->len[0] = ((dev->d_len - UIP_IPH_LEN) >> 8);
-    BUF->len[1] = ((dev->d_len - UIP_IPH_LEN) & 0xff);
-#else /* CONFIG_NET_IPv6 */
-    BUF->len[0] = dev->d_len >> 8;
-    BUF->len[1] = dev->d_len & 0xff;
-#endif /* CONFIG_NET_IPv6 */
-
-    /* Recalculate the TCP checksum. */
-    BUF->tcpchksum = 0;
-    BUF->tcpchksum = ~(uip_tcpchksum(dev));
-
-#ifndef CONFIG_NET_IPv6
-    /* Recalculate the IP checksum. */
-    BUF->ipchksum = 0;
-    BUF->ipchksum = ~(uip_ipchksum(dev));
-#endif /* CONFIG_NET_IPv6 */
-
-    /* Transmit the first packet. */
-    /*    uip_fw_output();*/
-    tcpip_output();
-
-    /* Now, create the second packet. To do this, it is not enough to
-       just alter the length field, but we must also update the TCP
-       sequence number and point the d_appdata to a new place in
-       memory. This place is detemined by the length of the first
-       packet (len1). */
-    dev->d_len = len2 + UIP_TCPIP_HLEN;
-#ifdef CONFIG_NET_IPv6
-    /* For IPv6, the IP length field does not include the IPv6 IP header
-       length. */
-    BUF->len[0] = ((dev->d_len - UIP_IPH_LEN) >> 8);
-    BUF->len[1] = ((dev->d_len - UIP_IPH_LEN) & 0xff);
-#else /* CONFIG_NET_IPv6 */
-    BUF->len[0] = dev->d_len >> 8;
-    BUF->len[1] = dev->d_len & 0xff;
-#endif /* CONFIG_NET_IPv6 */
-
-    /*    dev->d_appdata += len1;*/
-    memcpy(dev->d_appdata, dev->d_appdata + len1, len2);
-
-    uip_incr32(BUF->seqno, len1);
-
-    /* Recalculate the TCP checksum. */
-
-    BUF->tcpchksum = 0;
-    BUF->tcpchksum = ~(uip_tcpchksum(dev));
-
-#ifndef CONFIG_NET_IPv6
-    /* Recalculate the IP checksum. */
-
-    BUF->ipchksum = 0;
-    BUF->ipchksum = ~(uip_ipchksum(dev));
-#endif /* CONFIG_NET_IPv6 */
-
-    /* Transmit the second packet. */
-    /*    uip_fw_output();*/
-    tcpip_output();
-  } else {
-    /*    uip_fw_output();*/
-    tcpip_output();
-  }
+  else
+    {
+      /*    uip_fw_output();*/
+      tcpip_output();
+    }
 }

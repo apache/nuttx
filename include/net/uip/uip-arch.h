@@ -116,7 +116,7 @@ struct uip_driver_s
    *   }
    */
 
-  uint8 d_buf[UIP_BUFSIZE + 2];
+  uint8 d_buf[CONFIG_NET_BUFSIZE + 2];
 
   /* d_appdata points to the location where application data can be read from
    * or written into a packet.

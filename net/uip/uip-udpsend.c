@@ -160,7 +160,7 @@ void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn)
         }
 #else
       UDPBUF->udpchksum    = 0;
-#endif /* UIP_UDP_CHECKSUMS */
+#endif
 
       vdbg("Outgoing UDP packet length: %d (%d)\n",
            dev->d_len, (UDPBUF->len[0] << 8) | UDPBUF->len[1]);

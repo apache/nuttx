@@ -135,7 +135,10 @@ int socket(int domain, int type, int protocol)
       psock->s_type = type;
       psock->s_conn = NULL;
 
-      /* Allocate the appropriate connection structure */
+      /* Allocate the appropriate connection structure.  This reserves the
+       * the connection structure is is unallocated at this point.  It will
+       * not actually be initialized until the socket is connected.
+       */
 
       switch (type)
         {

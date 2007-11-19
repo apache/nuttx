@@ -125,6 +125,12 @@ void uip_initialize(void)
 
   uip_tcpinit();
 
+  /* Initialize the TCP/IP read-ahead buffering */
+
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+  uip_tcpreadaheadinit();
+#endif
+
   /* Initialize the UDP connection structures */
 
 #ifdef CONFIG_NET_UDP

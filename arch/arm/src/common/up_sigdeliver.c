@@ -76,6 +76,7 @@
 
 void up_sigdeliver(void)
 {
+#ifndef CONFIG_DISABLE_SIGNALS
   _TCB  *rtcb = (_TCB*)g_readytorun.head;
   uint32 regs[XCPTCONTEXT_REGS];
   sig_deliver_t sigdeliver;
@@ -132,4 +133,5 @@ void up_sigdeliver(void)
 
   up_ledoff(LED_SIGNAL);
   up_fullcontextrestore(regs);
+#endif
 }

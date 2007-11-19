@@ -103,15 +103,19 @@ struct icmpip_hdr
 };
 
 /* ICMP ECHO. */
+
 #define ICMP_ECHO 8
 
 /* ICMP TIME-EXCEEDED. */
+
 #define ICMP_TE 11
 
 /* Pointer to the TCP/IP headers of the packet in the d_buf buffer. */
+
 #define BUF ((struct tcpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
 
 /* Pointer to the ICMP/IP headers of the packet in the d_buf buffer. */
+
 #define ICMPBUF ((struct icmpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
 
 /* Certain fields of an IP packet that are used for identifying
@@ -158,11 +162,12 @@ void uip_fw_init(void)
 {
   struct uip_fw_netif *t;
   defaultnetif = NULL;
-  while(netifs != NULL) {
-    t = netifs;
-    netifs = netifs->next;
-    t->next = NULL;
-  }
+  while(netifs != NULL)
+    {
+      t       = netifs;
+      netifs  = netifs->next;
+      t->next = NULL;
+    }
 }
 
 /* Send out an ICMP TIME-EXCEEDED message.
@@ -176,18 +181,24 @@ static void time_exceeded(struct uip_driver_s *dev)
   in_addr_t tmp_addr;
 
   /* We don't send out ICMP errors for ICMP messages. */
-  if (ICMPBUF->proto == UIP_PROTO_ICMP) {
-    dev->d_len = 0;
-    return;
-  }
+
+  if (ICMPBUF->proto == UIP_PROTO_ICMP)
+    {
+      dev->d_len = 0;
+      return;
+    }
+
   /* Copy fields from packet header into payload of this ICMP packet. */
+
   memcpy(&(ICMPBUF->payload[0]), ICMPBUF, 28);
 
   /* Set the ICMP type and code. */
-  ICMPBUF->type = ICMP_TE;
+
+  ICMPBUF->type  = ICMP_TE;
   ICMPBUF->icode = 0;
 
   /* Calculate the ICMP checksum. */
+
   ICMPBUF->icmpchksum = 0;
   ICMPBUF->icmpchksum = ~uip_chksum((uint16 *)&(ICMPBUF->type), 36);
 
@@ -195,30 +206,34 @@ static void time_exceeded(struct uip_driver_s *dev)
    * original packet.
    */
 
-  tmp_addr = BUF->destipaddr;
+  tmp_addr        = BUF->destipaddr;
   BUF->destipaddr = BUF->srcipaddr;
-  BUF->srcipaddr = tmp_addr;
+  BUF->srcipaddr  = tmp_addr;
 
   /* Set our IP address as the source address. */
 
   BUF->srcipaddr = dev->d_ipaddr;
 
   /* The size of the ICMP time exceeded packet is 36 + the size of the
-     IP header (20) = 56. */
-  dev->d_len = 56;
+   * IP header (20) = 56.
+   */
+
+  dev->d_len      = 56;
   ICMPBUF->len[0] = 0;
   ICMPBUF->len[1] = dev->d_len;
 
   /* Fill in the other fields in the IP header. */
-  ICMPBUF->vhl = 0x45;
-  ICMPBUF->tos = 0;
+
+  ICMPBUF->vhl         = 0x45;
+  ICMPBUF->tos         = 0;
   ICMPBUF->ipoffset[0] = ICMPBUF->ipoffset[1] = 0;
-  ICMPBUF->ttl  = UIP_TTL;
-  ICMPBUF->proto = UIP_PROTO_ICMP;
+  ICMPBUF->ttl         = UIP_TTL;
+  ICMPBUF->proto       = UIP_PROTO_ICMP;
 
   /* Calculate IP checksum. */
-  ICMPBUF->ipchksum = 0;
-  ICMPBUF->ipchksum = ~(uip_ipchksum(dev));
+
+  ICMPBUF->ipchksum    = 0;
+  ICMPBUF->ipchksum    = ~(uip_ipchksum(dev));
 }
 
 /* Register a packet in the forwarding cache so that it won't be
@@ -231,31 +246,36 @@ static void fwcache_register(struct uip_driver_s *dev)
   int i, oldest;
 
   oldest = FW_TIME;
-  fw = NULL;
+  fw     = NULL;
 
   /* Find the oldest entry in the cache. */
-  for (i = 0; i < FWCACHE_SIZE; ++i) {
-    if (fwcache[i].timer == 0) {
-      fw = &fwcache[i];
-      break;
-    } else if (fwcache[i].timer <= oldest) {
-      fw = &fwcache[i];
-      oldest = fwcache[i].timer;
-    }
-  }
 
-  fw->timer = FW_TIME;
-  fw->ipid = BUF->ipid;
-  fw->srcipaddr = BUF->srcipaddr;
+  for (i = 0; i < FWCACHE_SIZE; ++i)
+    {
+      if (fwcache[i].timer == 0)
+        {
+          fw = &fwcache[i];
+          break;
+        }
+      else if (fwcache[i].timer <= oldest)
+        {
+          fw     = &fwcache[i];
+          oldest = fwcache[i].timer;
+        }
+    }
+
+  fw->timer      = FW_TIME;
+  fw->ipid       = BUF->ipid;
+  fw->srcipaddr  = BUF->srcipaddr;
   fw->destipaddr = BUF->destipaddr;
-  fw->proto = BUF->proto;
+  fw->proto      = BUF->proto;
 #if notdef
   fw->payload[0] = BUF->srcport;
   fw->payload[1] = BUF->destport;
 #endif
 #if UIP_REASSEMBLY > 0
-  fw->len = BUF->len;
-  fw->offset = BUF->ipoffset;
+  fw->len        = BUF->len;
+  fw->offset     = BUF->ipoffset;
 #endif
 }
 
@@ -301,35 +321,44 @@ uint8 uip_fw_output(struct uip_driver_s *dev)
 {
   struct uip_fw_netif *netif;
 
-  if (dev->d_len == 0) {
-    return UIP_FW_ZEROLEN;
-  }
+  if (dev->d_len == 0)
+    {
+      return UIP_FW_ZEROLEN;
+    }
 
   fwcache_register(dev);
 
-#if UIP_BROADCAST
+#ifdef CONFIG_NET_BROADCAST
   /* Link local broadcasts go out on all interfaces. */
+
   if (/*BUF->proto == UIP_PROTO_UDP &&*/
-     BUF->destipaddr[0] == 0xffff &&
-     BUF->destipaddr[1] == 0xffff) {
-    if (defaultnetif != NULL) {
-      defaultnetif->output();
+      BUF->destipaddr[0] == 0xffff &&
+      BUF->destipaddr[1] == 0xffff)
+    {
+      if (defaultnetif != NULL)
+        {
+          defaultnetif->output();
+        }
+      for (netif = netifs; netif != NULL; netif = netif->next)
+        {
+          netif->output();
+        }
+      return UIP_FW_OK;
     }
-    for (netif = netifs; netif != NULL; netif = netif->next) {
-      netif->output();
-    }
-    return UIP_FW_OK;
-  }
-#endif /* UIP_BROADCAST */
+#endif
 
   netif = find_netif (dev);
   dbg("netif: %p output: %p len: %d\n", netif, netif->output, dev->d_len);
 
-  if (netif == NULL) {
-    return UIP_FW_NOROUTE;
-  }
+  if (netif == NULL)
+    {
+      return UIP_FW_NOROUTE;
+    }
+
   /* If we now have found a suitable network interface, we call its
-     output function to send out the packet. */
+   * output function to send out the packet.
+   */
+
   return netif->output();
 }
 
@@ -353,39 +382,43 @@ uint8 uip_fw_forward(struct uip_driver_s *dev)
     }
 
   /* If we use ping IP address configuration, and our IP address is
-     not yet configured, we should intercept all ICMP echo packets. */
-#if UIP_PINGADDRCONF
+   * not yet configured, we should intercept all ICMP echo packets.
+   */
+
+#ifdef CONFIG_NET_PINGADDRCONF
   if (dev->d_ipaddr == 0 && BUF->proto == UIP_PROTO_ICMP && ICMPBUF->type == ICMP_ECHO)
     {
       return UIP_FW_LOCAL;
     }
-#endif /* UIP_PINGADDRCONF */
+#endif
 
   /* Check if the packet is in the forwarding cache already, and if so
      we drop it. */
 
-  for (fw = fwcache; fw < &fwcache[FWCACHE_SIZE]; ++fw) {
-    if (fw->timer != 0 &&
+  for (fw = fwcache; fw < &fwcache[FWCACHE_SIZE]; ++fw)
+    {
+      if (fw->timer      != 0 &&
 #if UIP_REASSEMBLY > 0
-       fw->len == BUF->len &&
-       fw->offset == BUF->ipoffset &&
+          fw->len        == BUF->len &&
+          fw->offset     == BUF->ipoffset &&
 #endif
-       fw->ipid == BUF->ipid &&
-       fw->srcipaddr == BUF->srcipaddr &&
-       fw->destipaddr == BUF->destipaddr &&
+          fw->ipid       == BUF->ipid &&
+          fw->srcipaddr  == BUF->srcipaddr &&
+          fw->destipaddr == BUF->destipaddr &&
 #if notdef
-       fw->payload[0] == BUF->srcport &&
-       fw->payload[1] == BUF->destport &&
+          fw->payload[0] == BUF->srcport &&
+          fw->payload[1] == BUF->destport &&
 #endif
-       fw->proto == BUF->proto) {
-      /* Drop packet. */
-      return UIP_FW_FORWARDED;
+          fw->proto      == BUF->proto)
+        {
+          /* Drop packet. */
+          return UIP_FW_FORWARDED;
+        }
     }
-  }
 
   /* If the TTL reaches zero we produce an ICMP time exceeded message
-     in the d_buf buffer and forward that packet back to the sender
-     of the packet.
+   * in the d_buf buffer and forward that packet back to the sender
+   * of the packet.
    */
 
   if (BUF->ttl <= 1)
@@ -400,28 +433,37 @@ uint8 uip_fw_forward(struct uip_driver_s *dev)
     }
 
   /* Decrement the TTL (time-to-live) value in the IP header */
+
   BUF->ttl = BUF->ttl - 1;
 
   /* Update the IP checksum. */
-  if (BUF->ipchksum >= HTONS(0xffff - 0x0100)) {
-    BUF->ipchksum = BUF->ipchksum + HTONS(0x0100) + 1;
-  } else {
-    BUF->ipchksum = BUF->ipchksum + HTONS(0x0100);
-  }
 
-  if (dev->d_len > 0) {
-    dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_TCPIP_HLEN];
-    uip_fw_output(dev);
-  }
+  if (BUF->ipchksum >= HTONS(0xffff - 0x0100))
+    {
+      BUF->ipchksum = BUF->ipchksum + HTONS(0x0100) + 1;
+    }
+  else
+    {
+      BUF->ipchksum = BUF->ipchksum + HTONS(0x0100);
+    }
 
-#if UIP_BROADCAST
-  if (BUF->destipaddr[0] == 0xffff && BUF->destipaddr[1] == 0xffff) {
-    return UIP_FW_LOCAL;
-  }
-#endif /* UIP_BROADCAST */
+  if (dev->d_len > 0)
+    {
+      dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_TCPIP_HLEN];
+      uip_fw_output(dev);
+    }
+
+#ifdef CONFIG_NET_BROADCAST
+  if (BUF->destipaddr[0] == 0xffff && BUF->destipaddr[1] == 0xffff)
+    {
+      return UIP_FW_LOCAL;
+    }
+#endif
 
   /* Return non-zero to indicate that the packet was forwarded and that no
-     other processing should be made. */
+   * other processing should be made.
+   */
+
   return UIP_FW_FORWARDED;
 }
 
@@ -434,7 +476,7 @@ uint8 uip_fw_forward(struct uip_driver_s *dev)
 void uip_fw_register(struct uip_fw_netif *netif)
 {
   netif->next = netifs;
-  netifs = netif;
+  netifs      = netif;
 }
 
 /* Register a default network interface.
@@ -456,9 +498,11 @@ void uip_fw_default(struct uip_fw_netif *netif)
 void uip_fw_periodic(void)
 {
   struct fwcache_entry *fw;
-  for (fw = fwcache; fw < &fwcache[FWCACHE_SIZE]; ++fw) {
-    if (fw->timer > 0) {
-      --fw->timer;
+  for (fw = fwcache; fw < &fwcache[FWCACHE_SIZE]; ++fw)
+    {
+      if (fw->timer > 0)
+        {
+          --fw->timer;
+        }
     }
-  }
 }

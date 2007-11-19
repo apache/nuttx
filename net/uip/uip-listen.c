@@ -57,7 +57,7 @@
 
 /* The uip_listenports list all currently listening ports. */
 
-static uint16 uip_listenports[UIP_LISTENPORTS];
+static uint16 uip_listenports[CONFIG_NET_MAX_LISTENPORTS];
 
 /****************************************************************************
  * Private Functions
@@ -82,7 +82,7 @@ static uint16 uip_listenports[UIP_LISTENPORTS];
 void uip_listeninit(void)
 {
   int ndx;
-  for (ndx = 0; ndx < UIP_LISTENPORTS; ndx++)
+  for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
     {
       uip_listenports[ndx] = 0;
     }
@@ -106,7 +106,7 @@ int uip_unlisten(uint16 port)
   int ret = -EINVAL;
 
   flags = irqsave();
-  for (ndx = 0; ndx < UIP_LISTENPORTS; ndx++)
+  for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
     {
       if (uip_listenports[ndx] == port)
         {
@@ -137,7 +137,7 @@ int uip_listen(uint16 port)
   int ret = -ENOBUFS;
 
   flags = irqsave();
-  for (ndx = 0; ndx < UIP_LISTENPORTS; ndx++)
+  for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
     {
       if (uip_listenports[ndx] == 0)
         {
@@ -164,7 +164,7 @@ int uip_listen(uint16 port)
 boolean uip_islistener(uint16 portno)
 {
   int ndx;
-  for (ndx = 0; ndx < UIP_LISTENPORTS; ndx++)
+  for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
     {
       if (uip_listenports[ndx] == portno)
         {

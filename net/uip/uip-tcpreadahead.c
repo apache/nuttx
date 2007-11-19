@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip-setipid.c
+ * net/uip/uip-tcpreadahead.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,10 +38,11 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#ifdef CONFIG_NET
+#include <net/uip/uipopt.h>
+#if defined(CONFIG_NET) && (CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0)
 
 #include <sys/types.h>
+#include <queue.h>
 #include <debug.h>
 
 #include <net/uip/uip.h>
@@ -52,6 +53,14 @@
  * Private Data
  ****************************************************************************/
 
+/* These are the pre-allocated read-ahead buffers */
+
+static struct uip_readahead_s g_buffers[CONFIG_NET_NTCP_READAHEAD_BUFFERS];
+
+/* This is the list of available read-ahead buffers */
+
+static sq_queue_t g_freebuffers;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -61,18 +70,63 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_setipid
+ * Function: uip_tcpreadaheadinit
  *
  * Description:
- *   This function may be used at boot time to set the initial ip_id.
+ *   Initialize the list of free read-ahead buffers
  *
  * Assumptions:
+ *   Called once early initialization.
  *
  ****************************************************************************/
 
-void uip_setipid(uint16 id)
+void uip_tcpreadaheadinit(void)
 {
-  g_ipid = id;
+  int i;
+
+  sq_init(&g_freebuffers);
+  for (i = 0; i < CONFIG_NET_NTCP_READAHEAD_BUFFERS; i++)
+    {
+      sq_addfirst(&g_buffers[i].rh_node, &g_freebuffers);
+    }
 }
 
-#endif /* CONFIG_NET */
+/****************************************************************************
+ * Function: uip_tcpreadaheadalloc
+ *
+ * Description:
+ *   Allocate a TCP read-ahead buffer by taking a pre-allocated buffer from
+ *   the free list.  This function is called from TCP logic when new,
+ *   incoming TCP data is received but there is no user logic recving the
+ *   the data.  Note: malloc() cannot be used because this function is
+ *   called from interrupt level.
+ *
+ * Assumptions:
+ *   Called from interrupt level with interrupts disabled.
+ *
+ ****************************************************************************/
+
+struct uip_readahead_s *uip_tcpreadaheadalloc(void)
+{
+  return (struct uip_readahead_s*)sq_remfirst(&g_freebuffers);
+}
+
+/****************************************************************************
+ * Function: uip_tcpreadaheadrelease
+ *
+ * Description:
+ *   Release a TCP read-ahead buffer by returning the buffer to the free list.
+ *   This function is called from user logic after it is consumed the buffered
+ *   data.
+ *
+ * Assumptions:
+ *   Called from user logic BUT with interrupts disabled.
+ *
+ ****************************************************************************/
+
+void uip_tcpreadaheadrelease(struct uip_readahead_s *buf)
+{
+  sq_addfirst(&buf->rh_node, &g_freebuffers);
+}
+
+#endif /* CONFIG_NET && CONFIG_NET_NTCP_READAHEAD_BUFFERS*/

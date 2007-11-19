@@ -194,6 +194,14 @@ EXTERN void uip_udpcallback(struct uip_driver_s *dev,
 
 EXTERN void uip_icmpinput(struct uip_driver_s *dev);
 
+/* Defined in uip-tcpreadahead.c ********************************************/
+
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+EXTERN void uip_tcpreadaheadinit(void);
+EXTERN struct uip_readahead_s *uip_tcpreadaheadalloc(void);
+EXTERN void uip_tcpreadaheadrelease(struct uip_readahead_s *buf);
+#endif /* CONFIG_NET_NTCP_READAHEAD_BUFFERS */
+
 #undef EXTERN
 #ifdef __cplusplus
 }

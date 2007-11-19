@@ -108,7 +108,7 @@
 /* IP fragment re-assembly */
 
 #define IP_MF                   0x20
-#define UIP_REASS_BUFSIZE       (UIP_BUFSIZE - UIP_LLH_LEN)
+#define UIP_REASS_BUFSIZE       (CONFIG_NET_BUFSIZE - UIP_LLH_LEN)
 #define UIP_REASS_FLAG_LASTFRAG 0x01
 
 /****************************************************************************
@@ -392,7 +392,7 @@ void uip_input(struct uip_driver_s *dev)
        * packets.
        */
 
-#if UIP_PINGADDRCONF && !CONFIG_NET_IPv6
+#if defined(CONFIG_NET_PINGADDRCONF) && !defined(CONFIG_NET_IPv6)
       if (BUF->proto == UIP_PROTO_ICMP)
         {
           dbg("Possible ping config packet received\n");
@@ -400,7 +400,7 @@ void uip_input(struct uip_driver_s *dev)
           goto done;
         }
       else
-#endif /* UIP_PINGADDRCONF */
+#endif
         {
           dbg("No IP address assigned\n");
           goto drop;
@@ -412,13 +412,13 @@ void uip_input(struct uip_driver_s *dev)
        * UDP packet, which may be destined to us.
        */
 
-#if UIP_BROADCAST
+#ifdef CONFIG_NET_BROADCAST
       if (BUF->proto == UIP_PROTO_UDP && uip_ipaddr_cmp(BUF->destipaddr, all_ones_addr)
         {
           uip_udpinput(dev);
           return;
         }
-#endif /* UIP_BROADCAST */
+#endif
 
       /* Check if the packet is destined for our IP address. */
 #ifndef CONFIG_NET_IPv6

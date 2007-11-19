@@ -41,8 +41,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include <stdio.h>
 #include <unistd.h>
-#include <sched.h>
+#include <pthread.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -75,15 +76,15 @@
  *
  ****************************************************************************/
 
-void uip_server(uint16 portno, main_t handler, int stacksize)
+void uip_server(uint16 portno, pthread_startroutine_t handler, int stacksize)
 {
   struct sockaddr_in myaddr;
 #ifdef CONFIG_NET_HAVE_SOLINGER
   struct linger ling;
 #endif
-  struct sched_param param;
+  pthread_t child;
+  pthread_attr_t attr;
   socklen_t addrlen;
-  const char *argv[2];
   int listensd;
   int acceptsd;
 #ifdef CONFIG_NET_HAVE_REUSEADDR
@@ -142,7 +143,7 @@ void uip_server(uint16 portno, main_t handler, int stacksize)
           dbg("accept failure: %d\n", errno);
           break;;
         }
-      dbg("Connection accepted -- spawning\n");
+      dbg("Connection accepted -- spawning sd=%d\n", acceptsd);
 
       /* Configure to "linger" until all data is sent when the socket is closed */
 
@@ -157,33 +158,25 @@ void uip_server(uint16 portno, main_t handler, int stacksize)
         }
 #endif
 
-      /* Spawn a thread to handle the connection.  The socket descriptor +1 is
-       * provided in as the single argument to the new thread. (The +1 is intended
-       * to handle the valid, zero file descriptor).
+      /* Create a thread to handle the connection.  The socket descriptor is
+       * provided in as the single argument to the new thread.
        */
 
-      if (sched_getparam(0, &param) < 0)
+      (void)pthread_attr_init(&attr);
+      (void)pthread_attr_setstacksize(&attr, stacksize);
+
+      if (pthread_create(&child, &attr, handler, (void*)acceptsd) != 0)
         {
           close(acceptsd);
-          dbg("sched_getparam failed: %d\n", errno);
-          break;;
+          dbg("create_create failed\n");
+          break;
         }
 
-      argv[0] = (char*)(acceptsd + 1);
-      argv[1] = NULL;
-
-      if (task_create("", param.sched_priority, stacksize, handler, argv) < 0)
-        {
-          close(acceptsd);
-          dbg("task_create failed: %d\n", errno);
-          break;;
-        }
-
-      /* We can close our copy of acceptsd now.  This file descriptor was dup'ed
-       * by task_create and we no longer need to retain the reference.
+      /* We don't care when/how the child thread exits so detach from it now
+       * in order to avoid memory leaks.
        */
 
-      close(acceptsd);
+      (void)pthread_detach(child);
     }
 
 errout_with_socket:

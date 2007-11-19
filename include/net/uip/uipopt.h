@@ -69,22 +69,6 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* Static configuration options */
-
-/* Ping IP address asignment.
- *
- * uIP uses a "ping" packets for setting its own IP address if this
- * option is set. If so, uIP will start with an empty IP address and
- * the destination IP address of the first incoming "ping" (ICMP echo)
- * packet will be used for setting the hosts IP address.
- */
-
-#ifdef CONFIG_NET_PINGADDRCONF
-#define UIP_PINGADDRCONF CONFIG_NET_PINGADDRCONF
-#else /* CONFIG_NET_PINGADDRCONF */
-#define UIP_PINGADDRCONF 0
-#endif /* CONFIG_NET_PINGADDRCONF */
-
 /* IP configuration options */
 
 /* The IP TTL (time to live) of IP packets sent by uIP.
@@ -92,7 +76,7 @@
  * This should normally not be changed.
  */
 
-#define UIP_TTL         64
+#define UIP_TTL 64
 
 /* Turn on support for IP packet reassembly.
  *
@@ -100,7 +84,7 @@
  * requires an additonal amount of RAM to hold the reassembly buffer
  * and the reassembly code size is approximately 700 bytes.  The
  * reassembly buffer is of the same size as the d_buf buffer
- * (configured by UIP_BUFSIZE).
+ * (configured by CONFIG_NET_BUFSIZE).
  *
  * Note: IP packet reassembly is not heavily tested.
  */
@@ -116,25 +100,11 @@
 
 /* UDP configuration options */
 
-/* Toggles if UDP checksums should be used or not.
- *
- * Note: Support for UDP checksums is currently not included in uIP,
- * so this option has no function.
- */
+/* The maximum amount of concurrent UDP connection, Default: 10 */
 
-#ifdef CONFIG_NET_UDP_CHECKSUMS
-# define UIP_UDP_CHECKSUMS CONFIG_NET_UDP_CHECKSUMS
-#else
-# define UIP_UDP_CHECKSUMS 0
+#ifndef CONFIG_NET_UDP_CONNS
+# define CONFIG_NET_UDP_CONNS 10
 #endif
-
-/* The maximum amount of concurrent UDP connections. */
-
-#ifdef CONFIG_NET_UDP_CONNS
-# define UIP_UDP_CONNS CONFIG_NET_UDP_CONNS
-#else /* CONFIG_NET_UDP_CONNS */
-# define UIP_UDP_CONNS    10
-#endif /* CONFIG_NET_UDP_CONNS */
 
 /* TCP configuration options */
 
@@ -145,11 +115,9 @@
  * connection requires approximatly 30 bytes of memory.
  */
 
-#ifndef CONFIG_NET_MAX_CONNECTIONS
-# define UIP_CONNS       10
-#else /* CONFIG_NET_MAX_CONNECTIONS */
-# define UIP_CONNS CONFIG_NET_MAX_CONNECTIONS
-#endif /* CONFIG_NET_MAX_CONNECTIONS */
+#ifndef CONFIG_NET_TCP_CONNS
+# define CONFIG_NET_TCP_CONNS 10
+#endif
 
 /* The maximum number of simultaneously listening TCP ports.
  *
@@ -157,10 +125,8 @@
  */
 
 #ifndef CONFIG_NET_MAX_LISTENPORTS
-# define UIP_LISTENPORTS 20
-#else /* CONFIG_NET_MAX_LISTENPORTS */
-# define UIP_LISTENPORTS CONFIG_NET_MAX_LISTENPORTS
-#endif /* CONFIG_NET_MAX_LISTENPORTS */
+# define CONFIG_NET_MAX_LISTENPORTS 20
+#endif
 
 /* Determines if support for TCP urgent data notification should be
  * compiled in.
@@ -169,14 +135,14 @@
  * very seldom would be required.
  */
 
-#define UIP_URGDATA      0
+#define UIP_URGDATA 0
 
 /* The initial retransmission timeout counted in timer pulses.
  *
  * This should not be changed.
  */
 
-#define UIP_RTO         3
+#define UIP_RTO 3
 
 /* The maximum number of times a segment should be retransmitted
  * before the connection should be aborted.
@@ -184,7 +150,7 @@
  * This should not be changed.
  */
 
-#define UIP_MAXRTX      8
+#define UIP_MAXRTX  8
 
 /* The maximum number of times a SYN segment should be retransmitted
  * before a connection request should be deemed to have been
@@ -193,15 +159,15 @@
  * This should not need to be changed.
  */
 
-#define UIP_MAXSYNRTX      5
+#define UIP_MAXSYNRTX 5
 
 /* The TCP maximum segment size.
  *
  * This is should not be to set to more than
- * UIP_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN.
+ * CONFIG_NET_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN.
  */
 
-#define UIP_TCP_MSS     (UIP_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN)
+#define UIP_TCP_MSS (CONFIG_NET_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN)
 
 /* The size of the advertised receiver's window.
  *
@@ -211,9 +177,7 @@
  */
 
 #ifndef CONFIG_NET_RECEIVE_WINDOW
-# define UIP_RECEIVE_WINDOW UIP_TCP_MSS
-#else
-# define UIP_RECEIVE_WINDOW CONFIG_NET_RECEIVE_WINDOW
+# define CONFIG_NET_RECEIVE_WINDOW UIP_TCP_MSS
 #endif
 
 /* How long a connection should stay in the TIME_WAIT state.
@@ -232,10 +196,8 @@
  * have many connections from the local network.
  */
 
-#ifdef CONFIG_NET_ARPTAB_SIZE
-# define UIP_ARPTAB_SIZE CONFIG_NET_ARPTAB_SIZE
-#else
-# define UIP_ARPTAB_SIZE 8
+#ifndef CONFIG_NET_ARPTAB_SIZE
+# define CONFIG_NET_ARPTAB_SIZE 8
 #endif
 
 /* The maxium age of ARP table entries measured in 10ths of seconds.
@@ -255,23 +217,21 @@
  * TCP throughput, larger size results in higher TCP throughput.
  */
 
-#ifndef CONFIG_NET_BUFFER_SIZE
-# define UIP_BUFSIZE     400
-#else /* CONFIG_NET_BUFFER_SIZE */
-# define UIP_BUFSIZE CONFIG_NET_BUFFER_SIZE
-#endif /* CONFIG_NET_BUFFER_SIZE */
+#ifndef CONFIG_NET_BUFSIZE
+# define CONFIG_NET_BUFSIZE 400
+#endif
 
-/* Broadcast support.
- *
- * This flag configures IP broadcast support. This is useful only
- * together with UDP.
- */
+/* Number of TCP read-ahead buffers (may be zero) */
 
-#ifndef CONFIG_NET_BROADCAST
-# define UIP_BROADCAST 0
-#else /* CONFIG_NET_BROADCAST */
-# define UIP_BROADCAST CONFIG_NET_BROADCAST
-#endif /* CONFIG_NET_BROADCAST */
+#ifndef CONFIG_NET_NTCP_READAHEAD_BUFFERS
+# define CONFIG_NET_NTCP_READAHEAD_BUFFERS 4
+#endif
+
+/* The size of the TCP read buffer size */
+
+#ifndef CONFIG_NET_TCP_READAHEAD_BUFSIZE
+# define CONFIG_NET_TCP_READAHEAD_BUFSIZE UIP_TCP_MSS
+#endif
 
 /* The link level header length.
  *
@@ -282,32 +242,8 @@
 
 #ifdef CONFIG_NET_LLH_LEN
 # define UIP_LLH_LEN CONFIG_NET_LLH_LEN
-#else /* CONFIG_NET_LLH_LEN */
-# define UIP_LLH_LEN     14
-#endif /* CONFIG_NET_LLH_LEN */
-
-/* CPU architecture configuration
- *
- * The CPU architecture configuration is where the endianess of the
- * CPU on which uIP is to be run is specified. Most CPUs today are
- * little endian, and the most notable exception are the Motorolas
- * which are big endian. The CONFIG_ENDIAN_BIG macro should be changed
- * if uIP is to be run on a big endian architecture.
- */
-
-/* The byte order of the CPU architecture on which uIP is to be run.
- *
- * This option can be either CONFIG_ENDIAN_BIG (Motorola byte order) or
- * default little endian byte order (Intel byte order).
- */
-
-#define UIP_BIG_ENDIAN     1234
-#define UIP_LITTLE_ENDIAN  3412
-
-#ifdef CONFIG_ENDIAN_BIG
-# define UIP_BYTE_ORDER     UIP_BIG_ENDIAN
 #else
-# define UIP_BYTE_ORDER     UIP_LITTLE_ENDIAN
+# define UIP_LLH_LEN 14
 #endif
 
 /****************************************************************************

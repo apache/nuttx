@@ -93,7 +93,7 @@
 
 void uip_send(struct uip_driver_s *dev, const void *buf, int len)
 {
-  if (dev && len > 0 && len < UIP_BUFSIZE)
+  if (dev && len > 0 && len < CONFIG_NET_BUFSIZE)
     {
       dev->d_sndlen = len;
       memcpy(dev->d_snddata, buf, len );

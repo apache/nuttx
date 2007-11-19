@@ -51,7 +51,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
+#include <pthread.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <net/uip/uip.h>
@@ -73,6 +76,8 @@
 #define ISO_period  0x2e
 #define ISO_slash   0x2f
 #define ISO_colon   0x3a
+
+#define errno *get_errno_ptr()
 
 #define CONFIG_NETUTILS_HTTPD_DUMPBUFFER 1
 
@@ -111,7 +116,7 @@ static void httpd_dumpbuffer(struct httpd_state *pstate, ssize_t nbytes)
               sprintf(&line[strlen(line)], "%c", ch >= 0x20 && ch <= 0x7e ? ch : '.');
             }
         }
-      dbg("%s", line);
+      dbg("%s\n", line);
     }
 #endif
 }
@@ -131,57 +136,69 @@ static void handle_script(struct httpd_state *pstate)
 {
   char *ptr;
 
-  while(pstate->file.len > 0) {
+  while(pstate->file.len > 0)
+    {
+      /* Check if we should start executing a script */
 
-    /* Check if we should start executing a script */
-
-    if (*pstate->file.data == ISO_percent &&
-       *(pstate->file.data + 1) == ISO_bang) {
-      pstate->scriptptr = pstate->file.data + 3;
-      pstate->scriptlen = pstate->file.len - 3;
-      if (*(pstate->scriptptr - 1) == ISO_colon)
+      if (*pstate->file.data == ISO_percent && *(pstate->file.data + 1) == ISO_bang)
         {
-          httpd_fs_open(pstate->scriptptr + 1, &pstate->file);
-          send(pstate->sockfd, pstate->file.data, pstate->file.len, 0);
+          pstate->scriptptr = pstate->file.data + 3;
+          pstate->scriptlen = pstate->file.len - 3;
+          if (*(pstate->scriptptr - 1) == ISO_colon)
+            {
+              httpd_fs_open(pstate->scriptptr + 1, &pstate->file);
+              send(pstate->sockfd, pstate->file.data, pstate->file.len, 0);
+            }
+          else
+            {
+              httpd_cgi(pstate->scriptptr)(pstate, pstate->scriptptr);
+            }
+          next_scriptstate(pstate);
+
+          /* The script is over, so we reset the pointers and continue
+           * sending the rest of the file
+           */
+
+          pstate->file.data = pstate->scriptptr;
+          pstate->file.len = pstate->scriptlen;
         }
       else
         {
-          httpd_cgi(pstate->scriptptr)(pstate, pstate->scriptptr);
+          /* See if we find the start of script marker in the block of HTML
+           * to be sent
+           */
+
+          if (pstate->file.len > HTTPD_IOBUFFER_SIZE)
+            {
+              pstate->len = HTTPD_IOBUFFER_SIZE;
+            }
+          else
+            {
+              pstate->len = pstate->file.len;
+            }
+
+          if (*pstate->file.data == ISO_percent)
+            {
+              ptr = strchr(pstate->file.data + 1, ISO_percent);
+            }
+          else
+            {
+              ptr = strchr(pstate->file.data, ISO_percent);
+            }
+
+          if (ptr != NULL && ptr != pstate->file.data)
+            {
+              pstate->len = (int)(ptr - pstate->file.data);
+              if (pstate->len >= HTTPD_IOBUFFER_SIZE)
+                {
+                  pstate->len = HTTPD_IOBUFFER_SIZE;
+                }
+            }
+          send(pstate->sockfd, pstate->file.data, pstate->len, 0);
+          pstate->file.data += pstate->len;
+          pstate->file.len -= pstate->len;
         }
-      next_scriptstate(pstate);
-
-      /* The script is over, so we reset the pointers and continue
-	 sending the rest of the file */
-      pstate->file.data = pstate->scriptptr;
-      pstate->file.len = pstate->scriptlen;
-
-    } else {
-      /* See if we find the start of script marker in the block of HTML
-	 to be sent */
-
-      if (pstate->file.len > HTTPD_IOBUFFER_SIZE) {
-	pstate->len = HTTPD_IOBUFFER_SIZE;
-      } else {
-	pstate->len = pstate->file.len;
-      }
-
-      if (*pstate->file.data == ISO_percent) {
-	ptr = strchr(pstate->file.data + 1, ISO_percent);
-      } else {
-	ptr = strchr(pstate->file.data, ISO_percent);
-      }
-      if (ptr != NULL &&
-	 ptr != pstate->file.data) {
-	pstate->len = (int)(ptr - pstate->file.data);
-	if (pstate->len >= HTTPD_IOBUFFER_SIZE) {
-	  pstate->len = HTTPD_IOBUFFER_SIZE;
-	}
-      }
-      send(pstate->sockfd, pstate->file.data, pstate->len, 0);
-      pstate->file.data += pstate->len;
-      pstate->file.len -= pstate->len;
     }
-  }
 }
 
 static int send_headers(struct httpd_state *pstate, const char *statushdr)
@@ -259,6 +276,7 @@ static inline int httpd_cmd(struct httpd_state *pstate)
   recvlen = recv(pstate->sockfd, pstate->ht_buffer, HTTPD_IOBUFFER_SIZE, 0);
   if (recvlen < 0)
     {
+      dbg("recv failed: %d\n", errno);
       return ERROR;
     }
   httpd_dumpbuffer(pstate, recvlen);
@@ -267,6 +285,7 @@ static inline int httpd_cmd(struct httpd_state *pstate)
 
   if (strncmp(pstate->ht_buffer, http_get, 4) != 0)
     {
+      dbg("Unsupported command\n");
       return ERROR;
     }
 
@@ -274,6 +293,7 @@ static inline int httpd_cmd(struct httpd_state *pstate)
 
   if (pstate->ht_buffer[4] != ISO_slash)
     {
+      dbg("Missing path\n");
       return ERROR;
     }
   else if (pstate->ht_buffer[5] == ISO_space)
@@ -304,11 +324,13 @@ static inline int httpd_cmd(struct httpd_state *pstate)
  *
  ****************************************************************************/
 
-static int httpd_handler(int argc, char *argv[])
+static void *httpd_handler(void *arg)
 {
   struct httpd_state *pstate = (struct httpd_state *)malloc(sizeof(struct httpd_state));
-  int                 sockfd = (int)argv[1] - 1;
+  int                 sockfd = (int)arg;
   int                 ret    = ERROR;
+
+  dbg("Started, sd=%d\n", sockfd);
 
   /* Verify that the state structure was successfully allocated */
 
@@ -335,7 +357,9 @@ static int httpd_handler(int argc, char *argv[])
 
   /* Exit the task */
 
-  return 0;
+  dbg("Exitting\n");
+  close(sockfd);
+  pthread_exit(NULL);
 }
 
 /****************************************************************************

@@ -136,7 +136,7 @@ static void tcp_stats(struct httpd_state *pstate, char *ptr)
   struct httpd_state *pstate = (struct httpd_state *)arg;
   char buffer[256];
 
-  for(pstate->count = 0; pstate->count < UIP_CONNS; ++pstate->count)
+  for(pstate->count = 0; pstate->count < CONFIG_NET_TCP_CONNS; ++pstate->count)
     {
       conn = &uip_conns[pstate->count];
       if((conn->tcpstateflags & UIP_TS_MASK) != UIP_CLOSED)

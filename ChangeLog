@@ -226,4 +226,5 @@
 	* Basic server functionality verified: listen(), accept()
 	* Fix DM90x0 driver problem that caused TX overruns
 	* Add strncmp()
+	* Added TCP/IP read-ahead buffer to minimize failed ACKs and packet loss.
 

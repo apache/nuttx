@@ -47,7 +47,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sched.h>
+#include <pthread.h>
 #include <netinet/in.h>
 
 /****************************************************************************
@@ -106,6 +106,6 @@ extern int uip_setnetmask(const char *ifname, const struct in_addr *addr);
 
 /* Generic server logic */
 
-extern void uip_server(uint16 portno, main_t handler, int stacksize);
+extern void uip_server(uint16 portno, pthread_startroutine_t handler, int stacksize);
 
 #endif /* __UIPLIB_H__ */

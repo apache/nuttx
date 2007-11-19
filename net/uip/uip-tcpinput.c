@@ -265,7 +265,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
 
 found:
 
-  flags    = 0;
+  flags = 0;
 
   /* We do a very naive form of TCP reset processing; we just accept
    * any RST and kill our connection. We should in fact check if the

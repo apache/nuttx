@@ -112,7 +112,7 @@
  *   snprintf(dev->d_appdata, UIP_APPDATA_SIZE, "%u\n", i);
  */
 
-#define UIP_APPDATA_SIZE (UIP_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN)
+#define UIP_APPDATA_SIZE (CONFIG_NET_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN)
 
 #define UIP_PROTO_ICMP  1
 #define UIP_PROTO_TCP   6
@@ -183,6 +183,12 @@ struct uip_conn
   uint8  nrtx;            /* The number of retransmissions for the last
                            * segment sent */
 
+  /* Read-ahead buffering */
+
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+  sq_queue_t readahead;
+#endif
+
   /* Higher level logic can retain application specific information
    * in the following:
    *
@@ -212,12 +218,27 @@ struct uip_conn
   void (*connection_event)(struct uip_conn *conn, uint8 flags);
 };
 
+/* The following structure is used to handle read-ahead buffering for TCP
+ * connection.  When incoming TCP data is received while no application is
+ * listening for the data, that data will be retained in these read-ahead
+ * buffers so that no data is lost.
+ */
+
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+struct uip_readahead_s
+{
+  sq_entry_t rh_node;      /* Supports a singly linked list */
+  uint16 rh_nbytes;        /* Number of bytes available in this buffer */
+  uint8  rh_buffer[CONFIG_NET_TCP_READAHEAD_BUFSIZE];
+};
+#endif
+
 #ifdef CONFIG_NET_UDP
 /* Representation of a uIP UDP connection */
 
 struct uip_udp_conn
 {
-  dq_entry_t node;        /* Implements a doubly linked list */
+  dq_entry_t node;        /* Supports a doubly linked list */
   uip_ipaddr_t ripaddr;   /* The IP address of the remote peer */
   uint16 lport;           /* The local port number in network byte order */
   uint16 rport;           /* The remote port number in network byte order */
@@ -493,11 +514,11 @@ extern struct uip_stats uip_stat;
  * TCP/IP stack.
  */
 
-void uip_initialize(void);
+extern void uip_initialize(void);
 
 /* This function may be used at boot time to set the initial ip_id.*/
 
-void uip_setipid(uint16 id);
+extern void uip_setipid(uint16 id);
 
 /* uIP application functions
  *
@@ -559,7 +580,7 @@ extern int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
  * port A 16-bit port number in network byte order.
  */
 
-int uip_listen(uint16 port);
+extern int uip_listen(uint16 port);
 
 /* Stop listening to the specified port.
  *
@@ -569,7 +590,7 @@ int uip_listen(uint16 port);
  * port A 16-bit port number in network byte order.
  */
 
-int uip_unlisten(uint16 port);
+extern int uip_unlisten(uint16 port);
 
 /* Check if a connection has outstanding (i.e., unacknowledged) data */
 
@@ -598,7 +619,14 @@ int uip_unlisten(uint16 port);
  * len The maximum amount of data bytes to be sent.
  */
 
-void uip_send(struct uip_driver_s *dev, const void *buf, int len);
+extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
+
+/* Access to TCP read-ahead buffers */
+
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+extern struct uip_readahead_s *uip_tcpreadaheadalloc(void);
+extern void uip_tcpreadaheadrelease(struct uip_readahead_s *buf);
+#endif /* CONFIG_NET_NTCP_READAHEAD_BUFFERS */
 
 /* The length of any incoming data that is currently avaliable (if avaliable)
  * in the d_appdata buffer.
