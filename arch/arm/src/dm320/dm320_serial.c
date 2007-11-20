@@ -38,19 +38,24 @@
  ************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial.h>
 #include <arch/serial.h>
+
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
 
 /************************************************************
  * Definitions
@@ -722,4 +727,60 @@ int up_putc(int ch)
   up_restoreuartint(priv, ier);
   return ch;
 }
+
+#else /* CONFIG_NFILE_DESCRIPTORS > 0 */
+
+/************************************************************
+ * Definitions
+ ************************************************************/
+
+#  ifdef CONFIG_UART1_SERIAL_CONSOLE
+#    define DM320_REGISTER_BASE DM320_UART1_REGISTER_BASE
+#  else
+#    define DM320_REGISTER_BASE DM320_UART0_REGISTER_BASE
+#  endif
+
+/************************************************************
+ * Private Functions
+ ************************************************************/
+
+static inline void up_waittxfifonotfull(void)
+{
+  int tmp;
+
+  for (tmp = 1000 ; tmp > 0 ; tmp--)
+    {
+
+      if ((getreg16(DM320_REGISTER_BASE + UART_SR) & UART_SR_TFTI) != 0)
+        {
+          break;
+        }
+    }
+}
+
+/************************************************************
+ * Public Functions
+ ************************************************************/
+
+int up_putc(int ch)
+{
+  up_waittxfifonotfull();
+  putreg16((uint16)ch, DM320_REGISTER_BASE + UART_DTRR);
+
+  /* Check for LF */
+
+  if (ch == '\n')
+    {
+      /* Add CR */
+
+      up_waittxfifonotfull();
+      putreg16((uint16)'\r', DM320_REGISTER_BASE + UART_DTRR);
+    }
+
+  up_waittxfifonotfull();
+  return ch;
+}
+
+#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
+
 
