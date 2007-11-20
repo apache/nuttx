@@ -1,11 +1,32 @@
 README
 ^^^^^^
 
-The configuration netconfig may be used instead of the
-default configuration (defconfig).  This configuration
-enables networking using the OSDs DM9000A ethernet
-interface.
+defconfig
+^^^^^^^^^
+The default configuration file, defconfig, performs a
+simple OS test using examples/ostest.  This can be
+configuration as follows:
 
-Disclaimer:  The NuttX network subsystem is a "work in
-progress" at this time and minimal network functionality
-should be expected.
+	cd tools
+	./configure.sh ntosd-dm320
+	cd -
+	. ./setenv.sh
+
+netconfig
+^^^^^^^^^
+The alternative configuration file, netconfig, may be used
+instead of the default configuration (defconfig). This
+configuration enables networking using the OSDs DM9000A
+Ethernet interface.  It uses examples/nettest to excercise
+the network.
+
+uipconfig
+^^^^^^^^^
+This configuration file demonstrates the tiny webserver
+at examples/uip.
+
+These alternative configurations can be selected by
+
+	(Seleted the default configuration as show above)
+	cp config/ntosd-dm320/uiponfig .config
+
