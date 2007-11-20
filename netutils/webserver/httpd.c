@@ -469,7 +469,7 @@ static void *httpd_handler(void *arg)
   if (pstate)
     {
       /* Loop processing each HTTP command */
-      do
+//    do
         {
           /* Re-initialize the thread state structure */
 
@@ -480,7 +480,7 @@ static void *httpd_handler(void *arg)
 
           ret = httpd_cmd(pstate);
         }
-      while (ret == OK);
+//    while (ret == OK);
 
       /* End of command processing -- Clean up and exit */
 

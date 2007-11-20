@@ -304,7 +304,7 @@ void uip_tcpfree(struct uip_conn *conn)
     {
       /* Remove the connection from the active list */
 
-      dq_rem(&conn->node, &g_free_tcp_connections);
+      dq_rem(&conn->node, &g_active_tcp_connections);
     }
 
   /* Release any read-ahead buffers attached to the connection */

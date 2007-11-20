@@ -54,8 +54,21 @@
  ****************************************************************************/
 
 #define HTTPD_FS_STATISTICS 1
-#define HTTPD_IOBUFFER_SIZE UIP_TCP_MSS
+
+/* For efficiency reasons, the size of the IO buffer should be a multiple
+ * of the TCP MSS value.  Also, the current design requires that the IO
+ * buffer be sufficiently large to contain the entire GET request.
+ */
+
+#define HTTPD_IOBUFFER_SIZE (3*UIP_TCP_MSS)
+
+/* this is the maximum size of a file path */
+
 #define HTTPD_MAX_FILENAME  20
+
+/* As threads are created to handle each request, a stack must be allocated
+ * for the thread.  Use a default if the user provided no stacksize.
+ */
 
 #ifndef CONFIG_EXAMPLES_UIP_HTTPDSTACKSIZE
 # define CONFIG_EXAMPLES_UIP_HTTPDSTACKSIZE 4096
