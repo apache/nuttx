@@ -583,34 +583,34 @@ static const unsigned char data_stats_shtml[] = {
 	0xa, 0};
 
 const struct httpd_fsdata_file file_processes_shtml[] =
-{{NULL, data_processes_shtml, data_processes_shtml + 17, sizeof(data_processes_shtml) - 17}};
+{{NULL, data_processes_shtml, data_processes_shtml + 17, sizeof(data_processes_shtml) - 18}};
 
 const struct httpd_fsdata_file file_404_html[] =
-{{file_processes_shtml, data_404_html, data_404_html + 10, sizeof(data_404_html) - 10}};
+{{file_processes_shtml, data_404_html, data_404_html + 10, sizeof(data_404_html) - 11}};
 
 const struct httpd_fsdata_file file_files_shtml[] =
-{{file_404_html, data_files_shtml, data_files_shtml + 13, sizeof(data_files_shtml) - 13}};
+{{file_404_html, data_files_shtml, data_files_shtml + 13, sizeof(data_files_shtml) - 14}};
 
 const struct httpd_fsdata_file file_footer_html[] =
-{{file_files_shtml, data_footer_html, data_footer_html + 13, sizeof(data_footer_html) - 13}};
+{{file_files_shtml, data_footer_html, data_footer_html + 13, sizeof(data_footer_html) - 14}};
 
 const struct httpd_fsdata_file file_header_html[] =
-{{file_footer_html, data_header_html, data_header_html + 13, sizeof(data_header_html) - 13}};
+{{file_footer_html, data_header_html, data_header_html + 13, sizeof(data_header_html) - 14}};
 
 const struct httpd_fsdata_file file_index_html[] =
-{{file_header_html, data_index_html, data_index_html + 12, sizeof(data_index_html) - 12}};
+{{file_header_html, data_index_html, data_index_html + 12, sizeof(data_index_html) - 13}};
 
 const struct httpd_fsdata_file file_style_css[] =
-{{file_index_html, data_style_css, data_style_css + 11, sizeof(data_style_css) - 11}};
+{{file_index_html, data_style_css, data_style_css + 11, sizeof(data_style_css) - 12}};
 
 const struct httpd_fsdata_file file_tcp_shtml[] =
-{{file_style_css, data_tcp_shtml, data_tcp_shtml + 11, sizeof(data_tcp_shtml) - 11}};
+{{file_style_css, data_tcp_shtml, data_tcp_shtml + 11, sizeof(data_tcp_shtml) - 12}};
 
 const struct httpd_fsdata_file file_fade_png[] =
-{{file_tcp_shtml, data_fade_png, data_fade_png + 10, sizeof(data_fade_png) - 10}};
+{{file_tcp_shtml, data_fade_png, data_fade_png + 10, sizeof(data_fade_png) - 11}};
 
 const struct httpd_fsdata_file file_stats_shtml[] =
-{{file_fade_png, data_stats_shtml, data_stats_shtml + 13, sizeof(data_stats_shtml) - 13}};
+{{file_fade_png, data_stats_shtml, data_stats_shtml + 13, sizeof(data_stats_shtml) - 14}};
 
 #define HTTPD_FS_ROOT file_stats_shtml
 

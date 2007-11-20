@@ -46,13 +46,16 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <net/uip/uip.h>
+#include <net/uip/uipopt.h>
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 #define HTTPD_FS_STATISTICS 1
-#define HTTPD_IOBUFFER_SIZE 512
+#define HTTPD_IOBUFFER_SIZE UIP_TCP_MSS
+#define HTTPD_MAX_FILENAME  20
 
 #ifndef CONFIG_EXAMPLES_UIP_HTTPDSTACKSIZE
 # define CONFIG_EXAMPLES_UIP_HTTPDSTACKSIZE 4096
@@ -70,15 +73,13 @@ struct httpd_fs_file
 
 struct httpd_state
 {
-  char ht_buffer[HTTPD_IOBUFFER_SIZE];
-  char filename[20];
-  struct httpd_fs_file file;
-  int sockfd;                         /* The socket descriptor from accept() */
-  int len;
-  char *scriptptr;
-  int scriptlen;
-
-  unsigned short count;
+  char   ht_buffer[HTTPD_IOBUFFER_SIZE];  /* recv()/send() buffer */
+  char   ht_filename[HTTPD_MAX_FILENAME]; /* filename from GET command */
+  struct httpd_fs_file ht_file;           /* Fake file data to send */
+  int    ht_sockfd;                       /* The socket descriptor from accept() */
+  char  *ht_scriptptr;
+  uint16 ht_scriptlen;
+  uint16 ht_sndlen;
 };
 
 /****************************************************************************

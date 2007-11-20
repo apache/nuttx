@@ -77,7 +77,9 @@
 
 int sched_setupidlefiles(FAR _TCB *tcb)
 {
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_DEV_CONSOLE)
   int fd;
+#endif
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
   /* Allocate file descriptors for the TCB */

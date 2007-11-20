@@ -77,6 +77,8 @@ static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
 {
   int i;
   dbg("  TCB=%p name=%s\n", tcb, tcb->argv[0]);
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
   if (tcb->filelist)
     {
       dbg("    filelist refcount=%d\n",
@@ -92,7 +94,9 @@ static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
             }
         }
     }
+#endif
 
+#if CONFIG_NFILE_STREAMS > 0
   if (tcb->streams)
     {
       dbg("    streamlist refcount=%d\n",
@@ -109,6 +113,7 @@ static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
             }
         }
     }
+#endif
 }
 #endif
 

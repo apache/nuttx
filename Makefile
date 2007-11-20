@@ -60,11 +60,17 @@ endif
 # MAKEDIRS are the directories in which we will build targets
 
 CLEANDIRS	= $(NONFSDIRS) $(FSDIRS)
+MAKEDIRS	= $(NONFSDIRS)
 
 ifeq ($(CONFIG_NFILE_DESCRIPTORS),0)
-MAKEDIRS	= $(NONFSDIRS)
+ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
+MAKEDIRS	+= fs
+endif
+ifeq ($(CONFIG_NET),y)
+MAKEDIRS	+= drivers
+endif
 else
-MAKEDIRS	= $(NONFSDIRS) $(FSDIRS)
+MAKEDIRS	+= $(FSDIRS)
 endif
 
 # LINKLIBS is the list of NuttX libraries that is passed to the
@@ -75,12 +81,19 @@ endif
 LINKLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEXT) \
 		  lib/liblib$(LIBEXT) examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT)
 
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-LINKLIBS	+= fs/libfs$(LIBEXT) drivers/libdrivers$(LIBEXT) 
-endif
-
 ifeq ($(CONFIG_NET),y)
 LINKLIBS	+= net/libnet$(LIBEXT) netutils/libnetutils$(LIBEXT) 
+endif
+
+ifeq ($(CONFIG_NFILE_DESCRIPTORS),0)
+ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
+LINKLIBS	+= fs/libfs$(LIBEXT)
+endif
+ifeq ($(CONFIG_NET),y)
+LINKLIBS	+= drivers/libdrivers$(LIBEXT)
+endif
+else
+LINKLIBS	+= fs/libfs$(LIBEXT) drivers/libdrivers$(LIBEXT)
 endif
 
 # This is the name of the final target

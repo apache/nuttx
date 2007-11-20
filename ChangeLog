@@ -230,3 +230,6 @@
 
 0.3.2 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* Add strcat() and strncat()
+	* Integrated uIP micro webserver
+

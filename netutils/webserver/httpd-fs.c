@@ -60,23 +60,23 @@ static uint16 count[HTTPD_FS_NUMFILES];
 
 static uint8 httpd_fs_strcmp(const char *str1, const char *str2)
 {
-  uint8 i;
+  int i;
+
   i = 0;
- loop:
+  for (;;)
+    {
+      if (str2[i] == 0 || str1[i] == '\r' || str1[i] == '\n')
+        {
+          return 0;
+        }
 
-  if(str2[i] == 0 ||
-     str1[i] == '\r' ||
-     str1[i] == '\n') {
-    return 0;
-  }
+      if (str1[i] != str2[i])
+        {
+          return 1;
+        }
 
-  if(str1[i] != str2[i]) {
-    return 1;
-  }
-
-
-  ++i;
-  goto loop;
+      i++;
+    }
 }
 
 int httpd_fs_open(const char *name, struct httpd_fs_file *file)
@@ -88,21 +88,21 @@ int httpd_fs_open(const char *name, struct httpd_fs_file *file)
 
   for(f = (struct httpd_fsdata_file_noconst *)HTTPD_FS_ROOT;
       f != NULL;
-      f = (struct httpd_fsdata_file_noconst *)f->next) {
-
-    if(httpd_fs_strcmp(name, f->name) == 0) {
-      file->data = f->data;
-      file->len = f->len;
+      f = (struct httpd_fsdata_file_noconst *)f->next)
+    {
+      if (httpd_fs_strcmp(name, f->name) == 0)
+        {
+          file->data = f->data;
+          file->len  = f->len;
 #if HTTPD_FS_STATISTICS
-      ++count[i];
+          ++count[i];
 #endif /* HTTPD_FS_STATISTICS */
-      return 1;
+          return 1;
+        }
+#if HTTPD_FS_STATISTICS
+      ++i;
+#endif /* HTTPD_FS_STATISTICS */
     }
-#if HTTPD_FS_STATISTICS
-    ++i;
-#endif /* HTTPD_FS_STATISTICS */
-
-  }
   return 0;
 }
 
@@ -110,9 +110,10 @@ void httpd_fs_init(void)
 {
 #if HTTPD_FS_STATISTICS
   uint16 i;
-  for(i = 0; i < HTTPD_FS_NUMFILES; i++) {
-    count[i] = 0;
-  }
+  for(i = 0; i < HTTPD_FS_NUMFILES; i++)
+    {
+      count[i] = 0;
+    }
 #endif /* HTTPD_FS_STATISTICS */
 }
 
@@ -125,13 +126,14 @@ uint16 httpd_fs_count(char *name)
   i = 0;
   for(f = (struct httpd_fsdata_file_noconst *)HTTPD_FS_ROOT;
       f != NULL;
-      f = (struct httpd_fsdata_file_noconst *)f->next) {
-
-    if(httpd_fs_strcmp(name, f->name) == 0) {
-      return count[i];
+      f = (struct httpd_fsdata_file_noconst *)f->next)
+    {
+      if (httpd_fs_strcmp(name, f->name) == 0)
+        {
+          return count[i];
+        }
+      ++i;
     }
-    ++i;
-  }
   return 0;
 }
 #endif /* HTTPD_FS_STATISTICS */

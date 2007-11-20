@@ -129,8 +129,13 @@ extern void up_vectorfiq(void);
 
 /* Defined in up_serial.c */
 
+#if CONFIG_NFILE_DESCRIPTORS > 0
 extern void up_earlyserialinit(void);
 extern void up_serialinit(void);
+#else
+# define up_earlyserialinit()
+# define up_serialinit()
+#endif
 
 /* Defined in up_watchdog.c */
 

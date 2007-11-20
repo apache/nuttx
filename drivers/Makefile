@@ -44,7 +44,11 @@ endif
 ASRCS		= $(NET_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= dev_null.c serial.c $(NET_CSRCS)
+CSRCS		=
+ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
+CSRCS		+= dev_null.c serial.c
+endif
+CSRCS		+= $(NET_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
