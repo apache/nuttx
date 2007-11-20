@@ -217,7 +217,7 @@
 	* ARP timer is now built into the network layer
 	* Basic client functionality verified: socket(), bind(), connect(), recv(), send().
 
-0.3.1 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.1 2007-11-19 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Separated net/uip/uip.c into several functions in several files.
 	* Corrected a TCP problem where packets were dropped because there was no
@@ -227,4 +227,6 @@
 	* Fix DM90x0 driver problem that caused TX overruns
 	* Add strncmp()
 	* Added TCP/IP read-ahead buffer to minimize failed ACKs and packet loss.
+
+0.3.2 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 

@@ -103,7 +103,7 @@
 
 /* The buffer size available for user data in the d_buf buffer.
  *
- * This macro holds the available size for user data in the \ref
+ * This macro holds the available size for user data in the
  * d_buf buffer. The macro is intended to be used for checking
  * bounds of available user data.
  *

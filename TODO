@@ -36,12 +36,8 @@ o Network
 - Should implement SOCK_RAW
 - accept() and recvfrom() need to return connection address
 - Performance Improvements (uIP is not very fast):
-- Extra read buffers will be necessary to buffer TCP data when there is no recv
-  in place to accept the data.  At present, received data is not ACKed, but is
-  eventually lost in this case.
 - Improve performance by stimulating the driver to accept new TX data before the
   next polling interval.
-
   Add a txail callback into driver to eliminate send delays.  Since we want to
   support multiple network devices, this means we will have to add some infrastructure
   to map to device.

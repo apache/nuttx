@@ -199,8 +199,8 @@ static void uip_tcpsendcommon(struct uip_driver_s *dev, struct uip_conn *conn)
     }
   else
     {
-      BUF->wnd[0] = ((CONFIG_NET_TCP_CONNS) >> 8);
-      BUF->wnd[1] = ((CONFIG_NET_TCP_CONNS) & 0xff);
+      BUF->wnd[0] = ((CONFIG_NET_RECEIVE_WINDOW) >> 8);
+      BUF->wnd[1] = ((CONFIG_NET_RECEIVE_WINDOW) & 0xff);
     }
 
   /* Finish the IP portion of the message, calculate checksums and send
