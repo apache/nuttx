@@ -104,8 +104,10 @@ struct lib_rawstream_s
 
 /* Defined in lib_streamsem.c */
 
+#if CONFIG_NFILE_STREAMS > 0
 extern void  stream_semtake(FAR struct streamlist *list);
 extern void  stream_semgive(FAR struct streamlist *list);
+#endif
 
 /* Defined in lib_memstream.c */
 
