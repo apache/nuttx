@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 8, 2007</p>
+      <p>Last Updated: November 19, 2007</p>
     </td>
   </tr>
 </table>
@@ -183,7 +183,7 @@
 </table>
 
 <p>
-   The 12th release of NuttX (nuttx-0.3.0) is available for download
+   The 13th release of NuttX (nuttx-0.3.0) is available for download
    from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
    website.
    The change log associated with the release is available <a href="#currentrelease">here</a>.
@@ -191,15 +191,19 @@
    These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-   NuttX 30.3.0 includes the initial integration of a network subsystem and
-   a TCP/IP stack based on <a href="http://www.sics.se/~adam/uip/index.php/Main_Page">uIP</a>.
-   Also included is a device driver for the Davicom DM90x0 ethernet controller.
+  NuttX 0.3.1 is the second release containing the integration of a network
+  subsystem and the uIP TCP/IP, UDP, and ICMP stacks based on
+  <a href="http://www.sics.se/~adam/uip/index.php/Main_Page">uIP</a>
+  into NuttX.
 </p>
-</p>
-  This integration is very preliminary.  Only a small portion of the
-  network functionality has been integrated and there are a number of
-  open issues.  The network subsystem is pre-alpha this point in time.
-  I expect that it will stabilize and mature over the next few releases.
+<p>
+  Many network-related problems have been fixed from version 0.3.0
+  and the implementation has matured significantly.
+  However, the level of network reliability is probably still at the
+  pre-alpha or early level.
+  It is sufficiently complete that you may begin to perform some network
+  integration and is exepcted to achieve beta level of reliability over
+  the next few releases.
 </p>
 <p>
   The baseline functionality of NuttX continues to mature and remains at
@@ -435,13 +439,13 @@ Other memory:
 </table>
 
 <ul><pre>
-0.1.0 2007-03-09  Gregory Nutt <spudmonkey@racsa.co.cr>
+0.1.0 2007-03-09  Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Initial Release
 	* Support for Linux user mode simulation and TI
 	  TMS320C5471 (Arm7) provided
 
-0.1.1 2007-03-14  Gregory Nutt <spudmonkey@racsa.co.cr>
+0.1.1 2007-03-14  Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Corrected an error in interrupt level context switching
 	  for C5471
@@ -469,7 +473,7 @@ Other memory:
 	  issue when SP enters indirect address space.
 	* Documentation updates
 
-0.1.2 2007-03-19  Gregory Nutt <spudmonkey@racsa.co.cr>
+0.1.2 2007-03-19  Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Add dirent.h, opendir(), readdir(), closedir(), etc.
 	* Add strerror()
@@ -494,7 +498,7 @@ Other memory:
 	  cause various problems
 	* Added a test for roundrobin scheduler.
 
-0.2.1 2007-03-22  Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.1 2007-03-22  Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Fix error in handing signed decimal in vsprintf().
 	* Major restructuring of header files to get closer to
@@ -506,7 +510,7 @@ Other memory:
 	* Some Documentation updates
 	* Added support for the Neuros OSD / DM320
 
-0.2.2 2007-03-26 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.2 2007-03-26 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* Created the configs/ directory; separated board configuration
 	  from processor architecture logic
 	* Add memory leak detection test to examples/ostest
@@ -526,7 +530,7 @@ Other memory:
 	* Added directories to hold board-specific header files
 	* Added directories to hold board-specific drivers
 
-0.2.3 2007-03-29 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.3 2007-03-29 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* mq_receive and mq_send now return errno's appropriately
 	* mq_receive and mq_send are now correctly awakened by signals.
@@ -548,7 +552,7 @@ Other memory:
 	  pthread_join.  In the failure condition, memory was being
 	  deallocated while still in use.
 
-0.2.4 2007-04-28 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.4 2007-04-28 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Verfied c5471 build under Cygwin on WinXP
 	* Makesystem changes to better support different SoCs.
@@ -558,7 +562,7 @@ Other memory:
 	  arch/c5471 and arch/dm320 are deprecated and will be removed
 	  when the new c5471 and dm320 logic is verified.
 
-0.2.5 2007-05-19 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.5 2007-05-19 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Corrected some build/configuration issues introduced with the
 	  last release.
@@ -575,7 +579,7 @@ Other memory:
 	* Added fsync()
 	* Added strspn() and strcspn()
 
-0.2.6 2007-05-26 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.6 2007-05-26 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Added unlink(), mkdir(), rmdir(), and rename()
 	* Fixed several serious FAT errors with oflags handling (&& instead of &)
@@ -585,7 +589,7 @@ Other memory:
 	* Fixed ARM compilation errors introduced in 0.2.5 (that is what I get
 	  for only testing on the simulation).
 
-0.2.7 2007-06-09 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.7 2007-06-09 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Added stat() to fs layer and to FAT
 	* Fixed reference counting errors associated with mounted filesystems
@@ -614,7 +618,7 @@ Other memory:
 	* examples/ostest/barrier.c: Don't call usleep() when signals are
 	  disabled.
 
-0.2.8 2007-07-02 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.8 2007-07-02 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* tools/Makefile.mkconfig: Under Cygwin, executable has a different name
 	* tools/mkdeps.sh & arch/arm/src/Makefile: Corrected a problem makeing dependencies
 	* tools/zipme.sh: Force directory name to be nuttx-xx.yy.zz
@@ -635,18 +639,8 @@ Other memory:
 	* lib/: Added strrchr, basename, dirname
 	* examples/nsh/: Add cp, rm, rmdir, set, unset commands. echo will now print
 	  environment variables.
-</pre></ul>
 
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="currentrelease">ChangeLog for Current Release</a>
-  </td>
-  </tr>
-</table>
-
-<pre><ul>
-0.3.0 2007-11-06 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.0 2007-11-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Imported uIP into the tree (see
 	   http://www.sics.se/~adam/uip/index.php/Main_Page)
@@ -668,13 +662,13 @@ Other memory:
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="pendingchanges">Unreleased Changes</a>
+    <a name="currentrelease">ChangeLog for Current Release</a>
   </td>
   </tr>
 </table>
 
 <pre><ul>
-0.3.1 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.1 2007-11-19 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Separated net/uip/uip.c into several functions in several files.
 	* Corrected a TCP problem where packets were dropped because there was no
@@ -684,6 +678,18 @@ Other memory:
 	* Fix DM90x0 driver problem that caused TX overruns
 	* Add strncmp()
 	* Added TCP/IP read-ahead buffer to minimize failed ACKs and packet loss.
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="pendingchanges">Unreleased Changes</a>
+  </td>
+  </tr>
+</table>
+
+<pre><ul>
+0.3.2 2007-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 </pre></ul>
 
 <table width ="100%">
