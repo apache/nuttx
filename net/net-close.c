@@ -79,12 +79,16 @@ int net_close(int sockfd)
       goto errout;
     }
 
-  /* Perform the close depending on the protocol type */
+  /* Perform uIP side of the close depending on the protocol type */
 
   switch (psock->s_type)
     {
       case SOCK_STREAM:
-        uip_tcpfree(psock->s_conn);
+        {
+          struct uip_conn *conn = psock->s_conn;
+          uip_unlisten(conn);
+          uip_tcpfree(conn);
+        }
         break;
 
 #ifdef CONFIG_NET_UDP
@@ -97,11 +101,9 @@ int net_close(int sockfd)
         goto errout;
     }
 
-  /* Save the protocol type */
+  /* Then release the socket structure containing the connection */
 
-  psock->s_type = 0;
-  psock->s_conn = NULL;
-
+  sockfd_release(sockfd);
   return OK;
 
 errout:

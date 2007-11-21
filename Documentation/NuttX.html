@@ -358,13 +358,23 @@ is available that be used to build a NuttX-compatible arm-elf toolchain.</blockq
   53272     428    3568   57268    dfb4 nuttx
 </pre>
 <p><b>DM320 (ARM9)</b>
-  This build for the ARM9 target includes a signficant subset of OS
-  features, ethernet driver and full TCP/IP, UDP and (minimal) ICMP
-  stacks (via uIP). (11/8/07)
+  This build for the ARM9 target includes a significant subset of OS
+  features, a filesystem, Ethernet driver, full TCP/IP, UDP and (minimal)
+  ICMP stacks (via uIP) and a small network test application: (11/8/07,
+  configuration netconfig, examples/nettest)
 </p>
 <pre>
    text    data     bss     dec     hex filename
   49472     296    3972   53740    d1ec nuttx
+</pre>
+<p>
+  Another build for the ARM9 target includes a minimal OS feature
+  set, Ethernet driver, full TCP/IP and (minimal) ICMP stacks, and
+  a small webserver: (11/20/07, configuration uipconfig, examples/uip)
+</p>
+<pre>
+   text    data     bss     dec     hex filename
+  52040      72    4148   56260    dbc4 nuttx
 </pre>
 <p><b>87C52</b>
   A reduced functionality OS test for the 8052 target requires only
@@ -694,6 +704,7 @@ Other memory:
 	* Add strcat() and strncat()
 	* Integrated uIP micro webserver
 	* Corrected a serious bug in TCP queue management
+	* Fix leak in socket close logic
 </pre></ul>
 
 <table width ="100%">

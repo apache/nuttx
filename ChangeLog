@@ -233,4 +233,5 @@
 	* Add strcat() and strncat()
 	* Integrated uIP micro webserver
 	* Corrected a serious bug in TCP queue management
+	* Fix leak in socket close logic
 

@@ -31,8 +31,9 @@ o C++ Support
 o Network
 - Did not implement send() and sendto() timeouts.  Option is setable via setsockopt,
   but is not implemented.
-- netutils/telnetd (and maybe others) are seriously broken.
+- uIP's netutils/telnetd (and maybe others) are seriously broken.
   Need to be re-written to use listen() and accept()
+- uIP's netutils/webserver does not work reliably
 - Should implement SOCK_RAW
 - accept() and recvfrom() need to return connection address
 - Performance Improvements (uIP is not very fast):

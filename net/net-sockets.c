@@ -45,6 +45,7 @@
 #include <assert.h>
 #include <sched.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <net/uip/uip.h>
 #include <nuttx/net.h>
