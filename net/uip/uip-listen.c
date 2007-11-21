@@ -57,7 +57,7 @@
 
 /* The uip_listenports list all currently listening ports. */
 
-static uint16 uip_listenports[CONFIG_NET_MAX_LISTENPORTS];
+static struct uip_conn *uip_listenports[CONFIG_NET_MAX_LISTENPORTS];
 
 /****************************************************************************
  * Private Functions
@@ -84,7 +84,7 @@ void uip_listeninit(void)
   int ndx;
   for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
     {
-      uip_listenports[ndx] = 0;
+      uip_listenports[ndx] = NULL;
     }
 }
 
@@ -92,14 +92,14 @@ void uip_listeninit(void)
  * Function: uip_unlisten
  *
  * Description:
- *   Stop listening on a port
+ *   Stop listening to the port bound to the specified TCP connection
  *
  * Assumptions:
  *   Called from normal user code.
  *
  ****************************************************************************/
 
-int uip_unlisten(uint16 port)
+int uip_unlisten(struct uip_conn *conn)
 {
   irqstate_t flags;
   int ndx;
@@ -108,13 +108,14 @@ int uip_unlisten(uint16 port)
   flags = irqsave();
   for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
     {
-      if (uip_listenports[ndx] == port)
+      if (uip_listenports[ndx] == conn)
         {
-          uip_listenports[ndx] = 0;
+          uip_listenports[ndx] = NULL;
           ret = OK;
           break;
         }
     }
+
   irqrestore(flags);
   return ret;
 }
@@ -123,29 +124,58 @@ int uip_unlisten(uint16 port)
  * Function: uip_listen
  *
  * Description:
- *   Start listening on a port
+ *   Start listening to the port bound to the specified TCP connection
  *
  * Assumptions:
  *   Called from normal user code.
  *
  ****************************************************************************/
 
-int uip_listen(uint16 port)
+int uip_listen(struct uip_conn *conn)
 {
   irqstate_t flags;
   int ndx;
-  int ret = -ENOBUFS;
+  int ret;
+
+  /* This must be done with interrupts disabled because the listener table
+   * is accessed from interrupt level as well.
+   */
 
   flags = irqsave();
-  for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
+
+  /* First, check if there is already a socket listening on this port */
+
+  if (uip_islistener(conn->lport))
     {
-      if (uip_listenports[ndx] == 0)
+      /* Yes, then we must refuse this request */
+
+      ret = -EADDRINUSE;
+    }
+  else
+    {
+      /* Otherwise, save a reference to the connection structure in the
+       * "listener" list.
+       */
+
+      ret = -ENOBUFS; /* Assume failure */
+
+      /* Search all slots until an available slot is found */
+
+      for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
         {
-          uip_listenports[ndx] = port;
-          ret = OK;
-          break;
+          /* Is the next slot available? */
+
+          if (!uip_listenports[ndx])
+            {
+              /* Yes.. we found it */
+
+              uip_listenports[ndx] = conn;
+              ret = OK;
+              break;
+            }
         }
     }
+
   irqrestore(flags);
   return ret;
 }
@@ -164,13 +194,26 @@ int uip_listen(uint16 port)
 boolean uip_islistener(uint16 portno)
 {
   int ndx;
+
+  /* Examine each connection structure in each slot of the listener list */
+
   for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
     {
-      if (uip_listenports[ndx] == portno)
+      /* Is this slot assigned?  If so, does the connection have the same
+       * local port number?
+       */
+
+      struct uip_conn *conn = uip_listenports[ndx];
+      if (conn && conn->lport == portno)
         {
+          /* Yes.. we found a listener on this port */
+
           return TRUE;
         }
     }
+
+  /* No listener for this port */
+
   return FALSE;
 }
 

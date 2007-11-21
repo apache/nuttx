@@ -46,4 +46,18 @@ examples/null
 ^^^^^^^^^^^^^
 
   This is the do nothing application.  It is only used for bringing
-  up new NuttX architectures
+  up new NuttX architectures.
+
+examples/uip
+^^^^^^^^^^^^
+
+  This is a port of uIP example application.  It includes
+  conditionally compiled logic to exercise the uIP webserver,
+  webclient, telnet, smtp, dncpc, and resolver.
+
+examples/netttest
+^^^^^^^^^^^^^^^^^
+
+  This is a simple network test for verifying client- and server-
+  functionality in a TCP/IP connection.
+

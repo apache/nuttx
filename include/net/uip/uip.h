@@ -572,25 +572,13 @@ extern int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in6 *addr
 extern int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr);
 #endif
 
-/* Start listening to the specified port.
- *
- * Note: Since this function expects the port number in network byte
- * order, a conversion using HTONS() or htons() is necessary.
- *
- * port A 16-bit port number in network byte order.
- */
+/* Start listening to the port bound to the specified TCP connection */
 
-extern int uip_listen(uint16 port);
+extern int uip_listen(struct uip_conn *conn);
 
-/* Stop listening to the specified port.
- *
- * Note: Since this function expects the port number in network byte
- * order, a conversion using HTONS() or htons() is necessary.
- *
- * port A 16-bit port number in network byte order.
- */
+/* Stop listening to the port bound to the specified TCP connection */
 
-extern int uip_unlisten(uint16 port);
+extern int uip_unlisten(struct uip_conn *conn);
 
 /* Check if a connection has outstanding (i.e., unacknowledged) data */
 

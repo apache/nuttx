@@ -126,9 +126,9 @@ int listen(int sockfd, int backlog)
    * is called; and someday should enable post() or select() logic.
    */
   
-	uip_listen(conn->lport);
+  uip_listen(conn);
   psock->s_flags |= _SF_LISTENING;
-	return OK;
+  return OK;
 
 errout:
   *get_errno_ptr() = err;
