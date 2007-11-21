@@ -432,10 +432,10 @@ static inline int httpd_cmd(struct httpd_state *pstate)
   else
     {
       for (i = 0;
-           i < (HTTPD_MAX_FILENAME-1) && pstate->ht_buffer[i+5] != ISO_space;
+           i < (HTTPD_MAX_FILENAME-1) && pstate->ht_buffer[i+4] != ISO_space;
            i++)
         {
-          pstate->ht_filename[i] = pstate->ht_buffer[i+5];
+          pstate->ht_filename[i] = pstate->ht_buffer[i+4];
         }
         pstate->ht_filename[i]='\0';
     }

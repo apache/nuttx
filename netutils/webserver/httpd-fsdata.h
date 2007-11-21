@@ -46,6 +46,10 @@
 #include <sys/types.h>
 #include <net/uip/uip.h>
 
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
 struct httpd_fsdata_file
 {
   const struct httpd_fsdata_file *next;
@@ -59,7 +63,8 @@ struct httpd_fsdata_file
 #endif /* HTTPD_FS_STATISTICS */
 };
 
-struct httpd_fsdata_file_noconst {
+struct httpd_fsdata_file_noconst
+{
   struct httpd_fsdata_file *next;
   char *name;
   char *data;
