@@ -1353,22 +1353,25 @@ The system can be re-made subsequently by just typing <code>make</code>.
     <code>CONFIG_NSOCKET_DESCRIPTORS</code>: Maximum number of socket descriptors per task/thread.
   </li>
   <li>
-    <code>CONFIG_NET_TCP_CONNS</code>: Maximum number of TCP connections (all tasks).
-  </li>
-  <li>
-    <code>CONFIG_NET_MAX_LISTENPORTS</code>: Maximum number of listening TCP ports (all tasks).
-  </li>
-  <li>
     <code>CONFIG_NET_SOCKOPTS</code>: Enable or disable support for socket options.
   </li>
   <li>
     <code>CONFIG_NET_BUFSIZE</code>: uIP buffer size
   </li>
   <li>
+    <code>CONFIG_NET_TCP</code>: TCP support on or off
+  </li>
+  <li>
+    <code>CONFIG_NET_TCP_CONNS</code>: Maximum number of TCP connections (all tasks).
+  </li>
+  <li>
     <code>CONFIG_NET_TCP_READAHEAD_BUFSIZE</code>: Size of TCP read-ahead buffers
   </li>
   <li>
     <code>CONFIG_NET_NTCP_READAHEAD_BUFFERS</code>: Number of TCP read-ahead buffers (may be zero)
+  </li>
+  <li>
+    <code>CONFIG_NET_MAX_LISTENPORTS</code>: Maximum number of listening TCP ports (all tasks).
   </li>
   <li>
     <code>CONFIG_NET_TCPURGDATA</code>: Determines if support for TCP urgent data
@@ -1385,10 +1388,13 @@ The system can be re-made subsequently by just typing <code>make</code>.
     <code>CONFIG_NET_UDP_CONNS</code>: The maximum amount of concurrent UDP connections
   </li>
   <li>
-    <code>CONFIG_NET_STATISTICS</code>: uIP statistics on or off
+    <code>CONFIG_NET_ICMP</code>: ICMP ping support on or off
   </li>
   <li>
     <code>CONFIG_NET_PINGADDRCONF</code>: Use "ping" packet for setting IP address
+  </li>
+  <li>
+    <code>CONFIG_NET_STATISTICS</code>: uIP statistics on or off
   </li>
   <li>
     <code>CONFIG_NET_RECEIVE_WINDOW</code>: The size of the advertised receiver's window
