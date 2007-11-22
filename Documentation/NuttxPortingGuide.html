@@ -1371,6 +1371,11 @@ The system can be re-made subsequently by just typing <code>make</code>.
     <code>CONFIG_NET_NTCP_READAHEAD_BUFFERS</code>: Number of TCP read-ahead buffers (may be zero)
   </li>
   <li>
+    <code>CONFIG_NET_TCPURGDATA</code>: Determines if support for TCP urgent data
+    notification should be compiled in. Urgent data (out-of-band data)
+    is a rarely used TCP feature that is very seldom would be required.
+  </li>
+  <li>
     <code>CONFIG_NET_UDP</code>: UDP support on or off
   </li>
   <li>
