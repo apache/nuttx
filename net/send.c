@@ -304,19 +304,23 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
       conn->data_private = (void*)&state;
       conn->data_event   = send_interrupt;
 
-    /* Wait for the send to complete or an error to occur:  NOTES: (1)
-     * sem_wait will also terminate if a signal is received, (2) interrupts
-     * are disabled!  They will be re-enabled while the task sleeps and
-     * automatically re-enabled when the task restarts.
-     */
+      /* Notify the device driver of the availaibilty of TX data */
 
-    ret = sem_wait(&state. snd_sem);
+      netdev_txnotify(&conn->ripaddr);
 
-    /* Make sure that no further interrupts are processed */
+      /* Wait for the send to complete or an error to occur:  NOTES: (1)
+       * sem_wait will also terminate if a signal is received, (2) interrupts
+       * are disabled!  They will be re-enabled while the task sleeps and
+       * automatically re-enabled when the task restarts.
+       */
 
-    conn->data_private = NULL;
-    conn->data_event   = NULL;
-  }
+      ret = sem_wait(&state. snd_sem);
+
+      /* Make sure that no further interrupts are processed */
+
+      conn->data_private = NULL;
+      conn->data_event   = NULL;
+    }
 
   sem_destroy(&state. snd_sem);
   irqrestore(save);

@@ -106,14 +106,17 @@ struct uip_driver_s
    *    void
    *    devicedriver_send(void)
    *    {
-   *       hwsend(&dev->d_buf[0], UIP_LLH_LEN);
-   *       if(dev->d_len <= UIP_LLH_LEN + UIP_TCPIP_HLEN) {
-   *         hwsend(&dev->d_buf[UIP_LLH_LEN], dev->d_len - UIP_LLH_LEN);
-   *       } else {
-   *         hwsend(&dev->d_buf[UIP_LLH_LEN], UIP_TCPIP_HLEN);
-   *         hwsend(dev->d_appdata, dev->d_len - UIP_TCPIP_HLEN - UIP_LLH_LEN);
-   *       }
-   *   }
+   *      hwsend(&dev->d_buf[0], UIP_LLH_LEN);
+   *      if(dev->d_len <= UIP_LLH_LEN + UIP_TCPIP_HLEN)
+   *        {
+   *          hwsend(&dev->d_buf[UIP_LLH_LEN], dev->d_len - UIP_LLH_LEN);
+   *        }
+   *      else
+   *        {
+   *          hwsend(&dev->d_buf[UIP_LLH_LEN], UIP_TCPIP_HLEN);
+   *          hwsend(dev->d_appdata, dev->d_len - UIP_TCPIP_HLEN - UIP_LLH_LEN);
+   *        }
+   *    }
    */
 
   uint8 d_buf[CONFIG_NET_BUFSIZE + 2];
@@ -129,6 +132,18 @@ struct uip_driver_s
    */
 
   uint8 *d_snddata;
+
+#ifdef CONFIG_NET_TCPURGDATA
+  /* This pointer points to any urgent TCP data that has been received. Only
+   * present if compiled with support for urgent data (CONFIG_NET_TCPURGDATA).
+   */
+
+  uint8 *d_urgdata;
+
+  /* Length of the (received) urgent data */
+
+  uint16 d_urglen;
+#endif
 
 /* The length of the packet in the d_buf buffer.
  *
@@ -155,6 +170,7 @@ struct uip_driver_s
 
   int (*d_ifup)(struct uip_driver_s *dev);
   int (*d_ifdown)(struct uip_driver_s *dev);
+  int (*d_txavail)(struct uip_driver_s *dev);
 
   /* Drivers may attached device-specific, private information */
 

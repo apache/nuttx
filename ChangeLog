@@ -234,4 +234,6 @@
 	* Integrated uIP micro webserver
 	* Corrected a serious bug in TCP queue management
 	* Fix leak in socket close logic
-
+	* Add TX notification to driver so that it can respond faster to
+	  the availability of TX data.
+	* Moved urgent data info into device structure.

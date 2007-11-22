@@ -547,32 +547,34 @@ found:
           }
 
         /* Check the URG flag. If this is set, the segment carries urgent
-           data that we must pass to the application. */
+         * data that we must pass to the application.
+         */
+
         if ((BUF->flags & TCP_URG) != 0)
           {
-#if UIP_URGDATA > 0
-            uip_urglen = (BUF->urgp[0] << 8) | BUF->urgp[1];
-            if (uip_urglen > dev->d_len)
+#ifdef CONFIG_NET_TCPURGDATA
+            dev->d_urglen = (BUF->urgp[0] << 8) | BUF->urgp[1];
+            if (dev->d_urglen > dev->d_len)
               {
                 /* There is more urgent data in the next segment to come. */
 
-                uip_urglen = dev->d_len;
+                dev->d_urglen = dev->d_len;
               }
 
-            uip_incr32(conn->rcv_nxt, uip_urglen);
-            dev->d_len     -= uip_urglen;
-            uip_urgdata     = dev->d_appdata;
-            dev->d_appdata += uip_urglen;
+            uip_incr32(conn->rcv_nxt, dev->d_urglen);
+            dev->d_len     -= dev->d_urglen;
+            dev->d_urgdata  = dev->d_appdata;
+            dev->d_appdata += dev->d_urglen;
           }
         else
           {
-            uip_urglen     = 0;
-#else /* UIP_URGDATA > 0 */
+            dev->d_urglen   = 0;
+#else /* CONFIG_NET_TCPURGDATA */
             dev->d_appdata =
               ((uint8*)dev->d_appdata) + ((BUF->urgp[0] << 8) | BUF->urgp[1]);
             dev->d_len    -=
               (BUF->urgp[0] << 8) | BUF->urgp[1];
-#endif /* UIP_URGDATA > 0 */
+#endif /* CONFIG_NET_TCPURGDATA */
           }
 
         /* If d_len > 0 we have TCP data in the packet, and we flag this

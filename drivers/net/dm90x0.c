@@ -393,6 +393,7 @@ static void dm9x_txtimeout(int argc, uint32 arg, ...);
 
 static int dm9x_ifup(struct uip_driver_s *dev);
 static int dm9x_ifdown(struct uip_driver_s *dev);
+static int dm9x_txavail(struct uip_driver_s *dev);
 
 /* Initialization functions */
 
@@ -825,7 +826,7 @@ static int dm9x_transmit(struct dm9x_driver_s *dm9x)
  *   3. During normal TX polling
  *
  * Parameters:
- *   dm9x  - Reference to the driver state structure
+ *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
  *   OK on success; a negated errno on failure
@@ -1448,6 +1449,46 @@ static int dm9x_ifdown(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: dm9x_txavail
+ *
+ * Description:
+ *   Driver callback invoked when new TX data is available.  This is a 
+ *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
+ *   latency.
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called in normal user mode
+ *
+ ****************************************************************************/
+
+static int dm9x_txavail(struct uip_driver_s *dev)
+{
+  struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)dev->d_private;
+  irqstate_t flags;
+
+  dbg("Polling\n");
+  flags = irqsave();
+
+  /* Check if there is room in the DM90x0 to hold another packet.  In 100M mode,
+   * that can be 2 packets, otherwise it is a single packet.
+   */
+
+  if (dm9x->dm_ntxpending < 1 || (dm9x->dm_b100M && dm9x->dm_ntxpending < 2))
+    {
+      /* If so, then poll uIP for new XMIT data */
+
+      (void)uip_poll(&dm9x->dm_dev, dm9x_uiptxpoll);
+    }
+  irqrestore(flags);
+}
+
+/****************************************************************************
  * Function: dm9x_bringup
  *
  * Description:
@@ -1659,6 +1700,7 @@ int dm9x_initialize(void)
   memset(g_dm9x, 0, CONFIG_DM9X_NINTERFACES*sizeof(struct dm9x_driver_s));
   g_dm9x[0].dm_dev.d_ifup    = dm9x_ifup;     /* I/F down callback */
   g_dm9x[0].dm_dev.d_ifdown  = dm9x_ifdown;   /* I/F up (new IP address) callback */
+  g_dm9x[0].dm_dev.d_txavail = dm9x_txavail;  /* New TX data callback */
   g_dm9x[0].dm_dev.d_private = (void*)g_dm9x; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */

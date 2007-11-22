@@ -385,7 +385,7 @@ void uip_input(struct uip_driver_s *dev)
     }
 #endif /* CONFIG_NET_IPv6 */
 
-  if (uip_ipaddr_cmp(dev->d_ipaddr, all_zeroes_addr))
+  if (uip_ipaddr_cmp(dev->d_ipaddr, g_allzeroaddr))
     {
       /* If we are configured to use ping IP address configuration and
        * hasn't been assigned an IP address yet, we accept all ICMP
@@ -413,7 +413,7 @@ void uip_input(struct uip_driver_s *dev)
        */
 
 #ifdef CONFIG_NET_BROADCAST
-      if (BUF->proto == UIP_PROTO_UDP && uip_ipaddr_cmp(BUF->destipaddr, all_ones_addr)
+      if (BUF->proto == UIP_PROTO_UDP && uip_ipaddr_cmp(BUF->destipaddr, g_alloneaddr)
         {
           uip_udpinput(dev);
           return;

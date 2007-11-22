@@ -221,6 +221,9 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NET_TCP_READAHEAD_BUFSIZE - Size of TCP read-ahead buffers
 		CONFIG_NET_NTCP_READAHEAD_BUFFERS - Number of TCP read-ahead buffers
 		  (may be zero)
+		CONFIG_NET_TCPURGDATA - Determines if support for TCP urgent data
+		  notification should be compiled in. Urgent data (out-of-band data)
+		  is a rarely used TCP feature that is very seldom would be required.
 		CONFIG_NET_UDP - UDP support on or off
 		CONFIG_NET_UDP_CHECKSUMS - UDP checksums on or off
 		CONFIG_NET_UDP_CONNS - The maximum amount of concurrent UDP

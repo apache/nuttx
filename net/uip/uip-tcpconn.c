@@ -545,10 +545,13 @@ int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr)
    */
 
   conn->lport = addr->sin_port;
+
+#if 0 /* Not used */
 #ifdef CONFIG_NET_IPv6
   uip_ipaddr_copy(conn->lipaddr, addr->sin6_addr.in6_u.u6_addr16);
 #else
   uip_ipaddr_copy(conn->lipaddr, addr->sin_addr.s_addr);
+#endif
 #endif
 
   return OK;

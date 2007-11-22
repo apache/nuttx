@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/netdev-find.c
+ * net/netdev-findbyname.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -73,10 +73,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_find
+ * Function: netdev_findbyname
  *
  * Description:
- *   Find a previously registered network device
+ *   Find a previously registered network device using its assigned
+ *   network interface name
  *
  * Parameters:
  *   ifname The interface name of the device of interest
@@ -89,7 +90,7 @@
  *
  ****************************************************************************/
 
-FAR struct uip_driver_s *netdev_find(const char *ifname)
+FAR struct uip_driver_s *netdev_findbyname(const char *ifname)
 {
   struct uip_driver_s *dev;
   if (ifname)

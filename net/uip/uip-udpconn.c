@@ -247,8 +247,8 @@ struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf)
 
       if (conn->lport != 0 && buf->destport == conn->lport &&
           (conn->rport == 0 || buf->srcport == conn->rport) &&
-            (uip_ipaddr_cmp(conn->ripaddr, all_zeroes_addr) ||
-             uip_ipaddr_cmp(conn->ripaddr, all_ones_addr) ||
+            (uip_ipaddr_cmp(conn->ripaddr, g_allzeroaddr) ||
+             uip_ipaddr_cmp(conn->ripaddr, g_alloneaddr) ||
              uiphdr_ipaddr_cmp(buf->srcipaddr, &conn->ripaddr)))
         {
           /* Matching connection found.. return a reference to it */
@@ -385,7 +385,7 @@ int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
   else
     {
       conn->rport = 0;
-      uip_ipaddr_copy(conn->ripaddr, all_zeroes_addr);
+      uip_ipaddr_copy(conn->ripaddr, g_allzeroaddr);
     }
 
   conn->ttl   = UIP_TTL;

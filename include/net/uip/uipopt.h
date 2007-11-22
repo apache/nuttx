@@ -128,15 +128,6 @@
 # define CONFIG_NET_MAX_LISTENPORTS 20
 #endif
 
-/* Determines if support for TCP urgent data notification should be
- * compiled in.
- *
- * Urgent data (out-of-band data) is a rarely used TCP feature that
- * very seldom would be required.
- */
-
-#define UIP_URGDATA 0
-
 /* The initial retransmission timeout counted in timer pulses.
  *
  * This should not be changed.

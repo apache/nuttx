@@ -283,6 +283,10 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
 
   uip_udpenable(psock->s_conn);
 
+  /* Notify the device driver of the availaibilty of TX data */
+
+  netdev_txnotify(&udp_conn->ripaddr);
+
   /* Wait for either the receive to complete or for an error/timeout to occur.
    * NOTES:  (1) sem_wait will also terminate if a signal is received, (2)
    * interrupts are disabled!  They will be re-enabled while the task sleeps

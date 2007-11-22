@@ -94,8 +94,8 @@
  * Public Data
  ****************************************************************************/
 
-extern const uip_ipaddr_t all_ones_addr;
-extern const uip_ipaddr_t all_zeroes_addr;
+extern const uip_ipaddr_t g_alloneaddr;
+extern const uip_ipaddr_t g_allzeroaddr;
 
 /* Increasing number used for the IP ID field. */
 

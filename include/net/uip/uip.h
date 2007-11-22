@@ -161,7 +161,9 @@ struct uip_driver_s;      /* Forward reference */
 struct uip_conn
 {
   dq_entry_t node;        /* Implements a doubly linked list */
+#if 0 /* Not used */
   uip_ipaddr_t lipaddr;   /* The local IP address */
+#endif
   uip_ipaddr_t ripaddr;   /* The IP address of the remote host */
   uint16 lport;           /* The local TCP port, in network byte order */
   uint16 rport;           /* The remoteTCP port, in network byte order */
@@ -467,26 +469,6 @@ struct uip_eth_addr
  * Public Data
  ****************************************************************************/
 
-#if UIP_URGDATA > 0
-/* uint8 *uip_urgdata:
- *
- * This pointer points to any urgent data that has been received. Only
- * present if compiled with support for urgent data (UIP_URGDATA).
- */
-extern void *uip_urgdata;
-#endif /* UIP_URGDATA > 0 */
-
-
-/* Variables used in uIP device drivers
- *
- * uIP has a few global variables that are used in device drivers for
- * uIP.
- */
-
-#if UIP_URGDATA > 0
-extern uint16 uip_urglen; /* Length of (received) urgent data */
-#endif /* UIP_URGDATA > 0 */
-
 /* The current UDP connection */
 
 #ifdef CONFIG_NET_UDP
@@ -503,8 +485,6 @@ extern struct uip_stats uip_stat;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/* uIP configuration functions */
 
 /* uIP initialization functions
  *
@@ -624,15 +604,6 @@ extern void uip_tcpreadaheadrelease(struct uip_readahead_s *buf);
  */
 
 #define uip_datalen(dev)    ((dev)->d_len)
-
-/* The length of any out-of-band data (urgent data) that has arrived
- * on the connection.
- *
- * Note: The configuration parameter UIP_URGDATA must be set for this
- * function to be enabled.
- */
-
-#define uip_urgdatalen()    uip_urglen
 
 /* Tell the sending host to stop sending data.
  *
@@ -909,9 +880,10 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
  *   uip_ipaddr(&mask, 255,255,255,0);
  *   uip_ipaddr(&ipaddr1, 192,16,1,2);
  *   uip_ipaddr(&ipaddr2, 192,16,1,3);
- *   if(uip_ipaddr_maskcmp(ipaddr1, ipaddr2, &mask)) {
- *      printf("They are the same");
- *   }
+ *   if(uip_ipaddr_maskcmp(ipaddr1, ipaddr2, &mask))
+ *     {
+ *       printf("They are the same");
+ *     }
  *
  * addr1 The first IP address.
  * addr2 The second IP address.
@@ -920,9 +892,12 @@ extern void uip_udpdisable(struct uip_udp_conn *conn);
 
 #ifndef CONFIG_NET_IPv6
 #  define uip_ipaddr_maskcmp(addr1, addr2, mask) \
-  (((in_addr_t)(addr1) & (in_addr_t)(mask)) == ((in_addr_t)(addr2) & (in_addr_t)(mask)))
-#else /* !CONFIG_NET_IPv6 */
-#endif /* !CONFIG_NET_IPv6 */
+  (((in_addr_t)(addr1) & (in_addr_t)(mask)) == \
+   ((in_addr_t)(addr2) & (in_addr_t)(mask)))
+#else
+extern boolean uip_ipaddr_maskcmp(uip_addr_t addr1, uip_addr_t addr2,
+                                  uip_addr_t mask);
+#endif
 
 /* Mask out the network part of an IP address.
  *

@@ -56,10 +56,7 @@
  * Public Variables
  ****************************************************************************/
 
-#if UIP_URGDATA > 0
-void *uip_urgdata;           /* urgent data (out-of-band data), if present. */
-uint16 uip_urglen;           /* Length of (received) urgent data */
-#endif
+/* IP/TCP/UDP/ICMP statistics for all network interfaces */
 
 #ifdef CONFIG_NET_STATISTICS
 struct uip_stats uip_stat;
@@ -69,16 +66,16 @@ struct uip_stats uip_stat;
 
 uint16 g_ipid;
 
-const uip_ipaddr_t all_ones_addr =
+const uip_ipaddr_t g_alloneaddr =
 #ifdef CONFIG_NET_IPv6
-  {0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff};
-#else /* CONFIG_NET_IPv6 */
+  {0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff};
+#else
   {0xffffffff};
-#endif /* CONFIG_NET_IPv6 */
+#endif
 
-const uip_ipaddr_t all_zeroes_addr =
+const uip_ipaddr_t g_allzeroaddr =
 #ifdef CONFIG_NET_IPv6
-  {0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000};
+  {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 #else
   {0x00000000};
 #endif

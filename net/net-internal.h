@@ -45,6 +45,7 @@
 
 #include <time.h>
 #include <nuttx/net.h>
+#include <net/uip/uip.h>
 
 #include "net-internal.h"
 
@@ -164,10 +165,22 @@ EXTERN void netdev_semtake(void);
 # define netdev_semgive() sem_post(&g_netdev_sem)
 #endif
 
-/* net-find.c ****************************************************************/
+/* net-findbyname.c **********************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-EXTERN FAR struct uip_driver_s *netdev_find(const char *ifname);
+EXTERN FAR struct uip_driver_s *netdev_findbyname(const char *ifname);
+#endif
+
+/* net-findbyaddr.c **********************************************************/
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+EXTERN FAR struct uip_driver_s *netdev_findbyaddr(uip_ipaddr_t *raddr);
+#endif
+
+/* net-txnotify.c ************************************************************/
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+EXTERN void netdev_txnotify(uip_ipaddr_t *raddr);
 #endif
 
 /* net-count.c ***************************************************************/

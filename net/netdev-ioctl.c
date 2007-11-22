@@ -177,7 +177,7 @@ int netdev_ioctl(int sockfd, int cmd, struct ifreq *req)
    * in the request data.
    */
 
-  dev = netdev_find(req->ifr_name);
+  dev = netdev_findbyname(req->ifr_name);
   if (!dev)
     {
       err = EINVAL;

@@ -33,15 +33,11 @@ o Network
   but is not implemented.
 - uIP's netutils/telnetd (and maybe others) are seriously broken.
   Need to be re-written to use listen() and accept()
-- uIP's netutils/webserver does not work reliably
+- uIP's netutils/webserver hangs
+- uIP's netutils/smtp, dpcpc, resolv, webclient -- untested
 - Should implement SOCK_RAW
 - accept() and recvfrom() need to return connection address
 - Performance Improvements (uIP is not very fast):
-- Improve performance by stimulating the driver to accept new TX data before the
-  next polling interval.
-  Add a txail callback into driver to eliminate send delays.  Since we want to
-  support multiple network devices, this means we will have to add some infrastructure
-  to map to device.
 - uIP polling issues:
   (1) Current logic will not support multiple ethernet drivers.  Each driver should
       poll on TCP connections connect on the network supported by the driver; UDP
