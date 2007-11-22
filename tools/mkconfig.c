@@ -257,9 +257,11 @@ int main(int argc, char **argv, char **envp)
   printf("# undef CONFIG_NSOCKET_DESCRIPTORS\n");
   printf("# define CONFIG_NSOCKET_DESCRIPTORS 0\n");
   printf("#endif\n\n");
-  printf("/* UDP support can only be provided on top of basic network support */\n\n");
+  printf("/* Protocol support can only be provided on top of basic network support */\n\n");
   printf("#ifndef CONFIG_NET\n");
+  printf("# undef CONFIG_NET_TCP\n");
   printf("# undef CONFIG_NET_UDP\n");
+  printf("# undef CONFIG_NET_ICMP\n");
   printf("#endif\n\n");
   printf("/* Verbose debug only makes sense if debug is enabled */\n\n");
   printf("#ifndef CONFIG_DEBUG\n");

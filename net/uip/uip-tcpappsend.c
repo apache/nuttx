@@ -42,7 +42,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
 #include <sys/types.h>
 #include <debug.h>
@@ -235,4 +235,4 @@ void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn, uint8 result
       dev->d_len = 0;
     }
 }
-#endif /* CONFIG_NET */
+#endif /* CONFIG_NET && CONFIG_NET_TCP */

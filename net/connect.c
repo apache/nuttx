@@ -54,17 +54,20 @@
  * Private Types
  ****************************************************************************/
 
+#ifdef CONFIG_NET_TCP
 struct tcp_connect_s
 {
   FAR struct uip_conn *tc_conn;       /* Reference to TCP connection structure */
   sem_t                tc_sem;        /* Semaphore signals recv completion */
   int                  tc_result;     /* OK on success, otherwise a negated errno. */
 };
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_NET_TCP
 static void connection_event(struct uip_conn *conn, uint8 flags);
 static inline void tcp_setup_callbacks(struct uip_conn *conn, FAR struct socket *psock,
                                        FAR struct tcp_connect_s *pstate);
@@ -76,6 +79,7 @@ static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in
 #else
 static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in *inaddr);
 #endif
+#endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
  * Private Functions
@@ -99,6 +103,7 @@ static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_TCP
 static void connection_event(struct uip_conn *conn, uint8 flags)
 {
   FAR struct socket *psock = (FAR struct socket *)conn->connection_private;
@@ -128,11 +133,13 @@ static void connection_event(struct uip_conn *conn, uint8 flags)
         }
     }
 }
+#endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
  * Function: tcp_setup_callbacks
  ****************************************************************************/
 
+#ifdef CONFIG_NET_TCP
 static inline void tcp_setup_callbacks(struct uip_conn *conn, FAR struct socket *psock,
                                        FAR struct tcp_connect_s *pstate)
 {
@@ -146,11 +153,13 @@ static inline void tcp_setup_callbacks(struct uip_conn *conn, FAR struct socket 
   conn->connection_private = (void*)psock;
   conn->connection_event   = connection_event;
 }
+#endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
  * Function: tcp_teardown_callbacks
  ****************************************************************************/
 
+#ifdef CONFIG_NET_TCP
 static inline void tcp_teardown_callbacks(struct uip_conn *conn, int status)
 {
   /* Make sure that no further interrupts are processed */
@@ -170,6 +179,7 @@ static inline void tcp_teardown_callbacks(struct uip_conn *conn, int status)
       conn->connection_event   = NULL;
     }
 }
+#endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
  * Function: tcp_connect_interrupt
@@ -191,6 +201,7 @@ static inline void tcp_teardown_callbacks(struct uip_conn *conn, int status)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_TCP
 static uint8 tcp_connect_interrupt(struct uip_driver_s *dev,
                                    struct uip_conn *conn, uint8 flags)
 {
@@ -262,6 +273,7 @@ static uint8 tcp_connect_interrupt(struct uip_driver_s *dev,
 
   return flags;
 }
+#endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
  * Function: tcp_connect
@@ -281,6 +293,7 @@ static uint8 tcp_connect_interrupt(struct uip_driver_s *dev,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_TCP
 #ifdef CONFIG_NET_IPv6
 static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in6 *inaddr)
 #else
@@ -367,6 +380,7 @@ static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in
     irqrestore(flags);
     return ret;
 }
+#endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
  * Public Functions
@@ -443,13 +457,17 @@ static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in
 int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
+
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
 #ifdef CONFIG_NET_IPv6
   FAR const struct sockaddr_in6 *inaddr = (const struct sockaddr_in6 *)addr;
 #else
   FAR const struct sockaddr_in *inaddr = (const struct sockaddr_in *)addr;
 #endif
-  int err;
   int ret;
+#endif
+
+  int err;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
@@ -475,6 +493,7 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 
   switch (psock->s_type)
     {
+#ifdef CONFIG_NET_TCP
       case SOCK_STREAM:
         {
           /* Verify that the socket is not already connected */
@@ -495,6 +514,7 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
             }
         }
         break;
+#endif
 
 #ifdef CONFIG_NET_UDP
       case SOCK_DGRAM:

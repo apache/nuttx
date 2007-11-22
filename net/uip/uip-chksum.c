@@ -54,7 +54,7 @@
  * Definitions
  ****************************************************************************/
 
-#define BUF ((struct uip_tcpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define BUF ((struct uip_ip_hdr *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Private Data

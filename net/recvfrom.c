@@ -63,6 +63,7 @@
  * Private Types
  ****************************************************************************/
 
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
 struct recvfrom_s
 {
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
@@ -75,6 +76,7 @@ struct recvfrom_s
   size_t             rf_recvlen;    /* The received length */
   int                rf_result;     /* OK on success, otherwise a negated errno. */
 };
+#endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
 
 /****************************************************************************
  * Private Functions
@@ -98,6 +100,7 @@ struct recvfrom_s
  *
  ****************************************************************************/
 
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
 static void recvfrom_newdata(struct uip_driver_s *dev, struct recvfrom_s *pstate)
 {
   size_t recvlen;
@@ -128,6 +131,7 @@ static void recvfrom_newdata(struct uip_driver_s *dev, struct recvfrom_s *pstate
 
   dev->d_len = 0;
 }
+#endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
 
 /****************************************************************************
  * Function: recvfrom_readahead
@@ -147,7 +151,7 @@ static void recvfrom_newdata(struct uip_driver_s *dev, struct recvfrom_s *pstate
  *
  ****************************************************************************/
 
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+#if defined(CONFIG_NET_TCP) && CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
 static inline void recvfrom_readahead(struct recvfrom_s *pstate)
 {
   struct uip_conn        *conn = (struct uip_conn *)pstate->rf_sock->s_conn;
@@ -214,7 +218,7 @@ static inline void recvfrom_readahead(struct recvfrom_s *pstate)
     }
   while (readahead && pstate->rf_buflen > 0);
 }
-#endif
+#endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
 
 /****************************************************************************
  * Function: recvfrom_timeout
@@ -233,6 +237,7 @@ static inline void recvfrom_readahead(struct recvfrom_s *pstate)
  *
  ****************************************************************************/
 
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
 static int recvfrom_timeout(struct recvfrom_s *pstate)
 {
@@ -279,6 +284,7 @@ static int recvfrom_timeout(struct recvfrom_s *pstate)
   return FALSE;
 }
 #endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+#endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
 
 /****************************************************************************
  * Function: recvfrom_tcpinterrupt
@@ -300,6 +306,7 @@ static int recvfrom_timeout(struct recvfrom_s *pstate)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_TCP
 static uint8 recvfrom_tcpinterrupt(struct uip_driver_s *dev,
                                    struct uip_conn *conn, uint8 flags)
 {
@@ -406,6 +413,7 @@ static uint8 recvfrom_tcpinterrupt(struct uip_driver_s *dev,
     }
   return flags;
 }
+#endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
  * Function: recvfrom_udpinterrupt
@@ -508,7 +516,7 @@ static void recvfrom_udpinterrupt(struct uip_driver_s *dev,
 #endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
     }
 }
-#endif
+#endif /* CONFIG_NET_UDP */
 
 /****************************************************************************
  * Function: recvfrom_init
@@ -529,6 +537,7 @@ static void recvfrom_udpinterrupt(struct uip_driver_s *dev,
  *
  ****************************************************************************/
 
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
 static void recvfrom_init(FAR struct socket *psock, FAR void *buf, size_t len,
                           struct recvfrom_s *pstate)
 {
@@ -546,6 +555,7 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf, size_t len,
   pstate->rf_starttime = g_system_timer;
 #endif
 }
+#endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
 
 /****************************************************************************
  * Function: recvfrom_result
@@ -564,6 +574,7 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf, size_t len,
  *
  ****************************************************************************/
 
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
 static ssize_t recvfrom_result(int result, struct recvfrom_s *pstate)
 {
   int save_errno = *get_errno_ptr(); /* In case something we do changes it */
@@ -594,6 +605,7 @@ static ssize_t recvfrom_result(int result, struct recvfrom_s *pstate)
 
   return pstate->rf_recvlen;
 }
+#endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
 
 /****************************************************************************
  * Function: udp_recvfrom
@@ -698,6 +710,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_TCP
 #ifdef CONFIG_NET_IPv6
 static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                             FAR const struct sockaddr_in6 *infrom )
@@ -766,6 +779,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 #warning "Needs to return server address"
   return recvfrom_result(ret, &state);
 }
+#endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
  * Global Functions
@@ -827,11 +841,15 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags, FAR struct so
                  FAR socklen_t *fromlen)
 {
   FAR struct socket *psock;
+
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
 #ifdef CONFIG_NET_IPv6
   FAR const struct sockaddr_in6 *infrom = (const struct sockaddr_in6 *)from;
 #else
   FAR const struct sockaddr_in *infrom = (const struct sockaddr_in *)from;
 #endif
+#endif
+
   ssize_t ret;
   int err;
 
@@ -874,17 +892,21 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags, FAR struct so
 
   /* Perform the TCP/IP or UDP recv() operation */
 
-#ifdef CONFIG_NET_UDP
+#if defined(CONFIG_NET_UDP) && defined(CONFIG_NET_TCP)
   if (psock->s_type == SOCK_STREAM)
-#endif
     {
       ret = tcp_recvfrom(psock, buf, len, infrom);
     }
-#ifdef CONFIG_NET_UDP
   else
     {
       ret = udp_recvfrom(psock, buf, len, infrom);
     }
+#elif defined(CONFIG_NET_TCP)
+  ret = tcp_recvfrom(psock, buf, len, infrom);
+#elif defined(CONFIG_NET_UDP)
+  ret = udp_recvfrom(psock, buf, len, infrom);
+#else
+  ret = -ENOSYS;
 #endif
 
   /* Set the socket state to idle */

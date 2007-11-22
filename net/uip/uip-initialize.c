@@ -116,6 +116,7 @@ void uip_initialize(void)
 {
   /* Initialize the listening port structures */
 
+#ifdef CONFIG_NET_TCP
   uip_listeninit();
 
   /* Initialize the TCP/IP connection structures */
@@ -127,14 +128,13 @@ void uip_initialize(void)
 #if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
   uip_tcpreadaheadinit();
 #endif
+#endif /* CONFIG_NET_TCP */
 
   /* Initialize the UDP connection structures */
 
 #ifdef CONFIG_NET_UDP
   uip_udpinit();
 #endif
-
-  /* IPv4 initialization. */
 }
 #endif /* CONFIG_NET */
 

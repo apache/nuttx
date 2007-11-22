@@ -43,7 +43,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
 #include <sys/types.h>
 #include <debug.h>
@@ -247,4 +247,4 @@ done:
   return;
 }
 
-#endif /* CONFIG_NET */
+#endif /* CONFIG_NET && CONFIG_NET_TCP */

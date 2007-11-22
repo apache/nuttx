@@ -83,6 +83,7 @@ int net_close(int sockfd)
 
   switch (psock->s_type)
     {
+#ifdef CONFIG_NET_TCP
       case SOCK_STREAM:
         {
           struct uip_conn *conn = psock->s_conn;
@@ -90,12 +91,14 @@ int net_close(int sockfd)
           uip_tcpfree(conn);
         }
         break;
+#endif
 
 #ifdef CONFIG_NET_UDP
       case SOCK_DGRAM:
         uip_udpfree(psock->s_conn);
         break;
 #endif
+
       default:
         err = -EBADF;
         goto errout;

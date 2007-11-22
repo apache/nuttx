@@ -102,8 +102,8 @@
 
 /* Macros. */
 
-#define BUF     ((struct uip_tcpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
-#define FBUF    ((struct uip_tcpip_hdr *)&uip_reassbuf[0])
+#define BUF     ((struct uip_ip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define FBUF    ((struct uip_ip_hdr *)&uip_reassbuf[0])
 
 /* IP fragment re-assembly */
 
@@ -294,9 +294,6 @@ nullreturn:
 
 void uip_input(struct uip_driver_s *dev)
 {
-  dev->d_snddata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
-  dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
-
   /* This is where the input processing starts. */
 
 #ifdef CONFIG_NET_STATISTICS
@@ -468,9 +465,11 @@ void uip_input(struct uip_driver_s *dev)
 
   switch (BUF->proto)
     {
+#ifdef CONFIG_NET_TCP
       case UIP_PROTO_TCP:   /* TCP input */
         uip_tcpinput(dev);
         break;
+#endif
 
 #ifdef CONFIG_NET_UDP
       case UIP_PROTO_UDP:   /* UDP input */
@@ -480,6 +479,7 @@ void uip_input(struct uip_driver_s *dev)
 
   /* Check for ICMP input */
 
+#ifdef CONFIG_NET_ICMP
 #ifndef CONFIG_NET_IPv6
       case UIP_PROTO_ICMP:  /* ICMP input */
 #else
@@ -487,6 +487,7 @@ void uip_input(struct uip_driver_s *dev)
 #endif
         uip_icmpinput(dev);
         break;
+#endif
 
       default:              /* Unrecognized/unsupported protocol */
 #ifdef CONFIG_NET_STATISTICS

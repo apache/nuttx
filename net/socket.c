@@ -43,6 +43,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
+#include <debug.h>
 
 #include "net-internal.h"
 
@@ -106,10 +107,12 @@ int socket(int domain, int type, int protocol)
 
   /* Only SOCK_STREAM and possible SOCK_DRAM are supported */
 
-#ifdef CONFIG_NET_UDP
+#if defined(CONFIG_NET_UDP) && defined(CONFIG_NET_TCP)
   if (protocol != 0 || (type != SOCK_STREAM && type != SOCK_DGRAM))
-#else
+#elif defined(CONFIG_NET_TCP)
   if (protocol != 0 || type != SOCK_STREAM)
+#elif defined(CONFIG_NET_UDP)
+  if (protocol != 0 || type != SOCK_DGRAM)
 #endif
     {
       err = EPROTONOSUPPORT;
@@ -128,43 +131,49 @@ int socket(int domain, int type, int protocol)
   /* Initialize the socket structure */
 
   psock = sockfd_socket(sockfd);
-  if (psock)
+  if (!psock)
     {
-      /* Save the protocol type */
+      err = ENOSYS; /* should not happen */
+      goto errout;
+    }
 
-      psock->s_type = type;
-      psock->s_conn = NULL;
+  /* Save the protocol type */
 
-      /* Allocate the appropriate connection structure.  This reserves the
-       * the connection structure is is unallocated at this point.  It will
-       * not actually be initialized until the socket is connected.
-       */
+  psock->s_type = type;
+  psock->s_conn = NULL;
 
-      switch (type)
-        {
-          case SOCK_STREAM:
-            psock->s_conn = uip_tcpalloc();
-            break;
+  /* Allocate the appropriate connection structure.  This reserves the
+   * the connection structure is is unallocated at this point.  It will
+   * not actually be initialized until the socket is connected.
+   */
+
+  switch (type)
+    {
+#ifdef CONFIG_NET_TCP
+      case SOCK_STREAM:
+        psock->s_conn = uip_tcpalloc();
+        break;
+#endif
 
 #ifdef CONFIG_NET_UDP
-          case SOCK_DGRAM:
-            psock->s_conn = uip_udpalloc();
-            break;
+      case SOCK_DGRAM:
+        psock->s_conn = uip_udpalloc();
+        break;
 #endif
-          default:
-            break;
-        }
 
-      /* Did we succesfully allocate some kind of connection structure? */
+      default:
+        break;
+    }
 
-      if (!psock->s_conn)
-        {
-          /* Failed to reserve a connection structure */
+  /* Did we succesfully allocate some kind of connection structure? */
 
-          sockfd_release(sockfd);
-          err = ENFILE;
-          goto errout;
-        }
+  if (!psock->s_conn)
+    {
+      /* Failed to reserve a connection structure */
+
+      sockfd_release(sockfd);
+      err = ENFILE;
+      goto errout;
     }
 
   return sockfd;

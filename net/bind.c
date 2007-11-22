@@ -85,11 +85,15 @@
 int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
+
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
 #ifdef CONFIG_NET_IPv6
   FAR const struct sockaddr_in6 *inaddr = (const struct sockaddr_in6 *)addr;
 #else
   FAR const struct sockaddr_in *inaddr = (const struct sockaddr_in *)addr;
 #endif
+#endif
+
   int err;
   int ret;
 
@@ -117,16 +121,19 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 
   switch (psock->s_type)
     {
+#ifdef CONFIG_NET_TCP
       case SOCK_STREAM:
         ret = uip_tcpbind(psock->s_conn, inaddr);
         psock->s_flags |= _SF_BOUND;
         break;
+#endif
 
 #ifdef CONFIG_NET_UDP
       case SOCK_DGRAM:
         ret = uip_udpbind(psock->s_conn, inaddr);
         break;
 #endif
+
       default:
         err = EBADF;
         goto errout;

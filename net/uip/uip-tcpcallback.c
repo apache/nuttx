@@ -39,7 +39,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
 #include <sys/types.h>
 #include <string.h>
@@ -210,4 +210,4 @@ uint8 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint8 fla
   return ret;
 }
 
-#endif /* CONFIG_NET */
+#endif /* CONFIG_NET && CONFIG_NET_TCP */

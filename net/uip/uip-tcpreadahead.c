@@ -39,7 +39,7 @@
  ****************************************************************************/
 
 #include <net/uip/uipopt.h>
-#if defined(CONFIG_NET) && (CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0)
+#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP) && (CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0)
 
 #include <sys/types.h>
 #include <queue.h>
@@ -129,4 +129,4 @@ void uip_tcpreadaheadrelease(struct uip_readahead_s *buf)
   sq_addfirst(&buf->rh_node, &g_freebuffers);
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_NTCP_READAHEAD_BUFFERS*/
+#endif /* CONFIG_NET && CONFIG_NET_TCP && CONFIG_NET_NTCP_READAHEAD_BUFFERS*/

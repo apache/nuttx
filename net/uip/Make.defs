@@ -38,10 +38,10 @@ UIP_CSRCS =
 
 ifeq ($(CONFIG_NET),y)
 
-# Common network source files
+# Common IP source files
 
 UIP_CSRCS += uip-initialize.c uip-setipid.c uip-arp.c uip-input.c uip-send.c \
-             uip-fw.c uip-split.c uip-poll.c uip-chksum.c
+             uip-poll.c uip-chksum.c
 
 ifeq ($(CONFIG_NET_IPv6),y)
 UIP_CSRCS += uip-neighbor.c
@@ -49,9 +49,18 @@ endif
 
 # TCP source files
 
+ifeq ($(CONFIG_NET_TCP),y)
+
 UIP_CSRCS += uip-tcpconn.c uip-tcppoll.c uip-tcptimer.c uip-tcpsend.c \
              uip-tcpinput.c uip-tcpappsend.c uip-listen.c uip-tcpcallback.c \
              uip-tcpreadahead.c
+
+# Follow can be used to add support for the "uipsplit uIP TCP throughput booster hack"
+# but are not currently used
+
+UIP_CSRCS += uip-fw.c uip-split.c
+
+endif
 
 # UDP source files
 
@@ -64,8 +73,11 @@ endif
 
 #ICMP source files
 
+ifeq ($(CONFIG_NET_ICMP),y)
+
 UIP_CSRCS += uip-icmpinput.c
 
+endif
 endif
 
 

@@ -29,6 +29,7 @@ o C++ Support
 - Need to call static constructors
 
 o Network
+- UDP is untested.
 - Did not implement send() and sendto() timeouts.  Option is setable via setsockopt,
   but is not implemented.
 - uIP's netutils/telnetd (and maybe others) are seriously broken.
@@ -38,6 +39,8 @@ o Network
 - Should implement SOCK_RAW
 - accept() and recvfrom() need to return connection address
 - Performance Improvements (uIP is not very fast):
+  Need to extend logic so that uIP can have more than on packet in flight and to
+  handle deferred acknowledgements.
 - uIP polling issues:
   (1) Current logic will not support multiple ethernet drivers.  Each driver should
       poll on TCP connections connect on the network supported by the driver; UDP

@@ -43,7 +43,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
 #include <sys/types.h>
 #include <debug.h>
@@ -102,6 +102,9 @@ void uip_tcpinput(struct uip_driver_s *dev)
   uint8  result;
   int    len;
   int    i;
+
+  dev->d_snddata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
+  dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
 
 #ifdef CONFIG_NET_STATISTICS
   uip_stat.tcp.recv++;
@@ -741,4 +744,4 @@ drop:
   dev->d_len = 0;
 }
 
-#endif /* CONFIG_NET */
+#endif /* CONFIG_NET  && CONFIG_NET_TCP */

@@ -108,6 +108,7 @@ static int uip_polludpconnections(struct uip_driver_s *dev,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_TCP
 static inline int uip_polltcpconnections(struct uip_driver_s *dev,
                                          uip_poll_callback_t callback)
 {
@@ -129,6 +130,9 @@ static inline int uip_polltcpconnections(struct uip_driver_s *dev,
 
   return bstop;
 }
+#else
+# define uip_polltcpconnections(dev, callback) (0)
+#endif
 
 /****************************************************************************
  * Function: uip_polltcptimer
@@ -143,6 +147,7 @@ static inline int uip_polltcpconnections(struct uip_driver_s *dev,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_TCP
 static inline int uip_polltcptimer(struct uip_driver_s *dev,
                                    uip_poll_callback_t callback, int hsec)
 {
@@ -164,6 +169,9 @@ static inline int uip_polltcptimer(struct uip_driver_s *dev,
 
   return bstop;
 }
+#else
+# define uip_polltcptimer(dev, callback, hsec) (0)
+#endif
 
 /****************************************************************************
  * Public Functions

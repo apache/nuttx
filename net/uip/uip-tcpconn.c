@@ -45,7 +45,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
 #include <sys/types.h>
 #include <string.h>
@@ -655,4 +655,4 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
   return OK;
 }
 
-#endif /* CONFIG_NET */
+#endif /* CONFIG_NET && CONFIG_NET_TCP */

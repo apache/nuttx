@@ -364,8 +364,8 @@ void uip_arp_arpin(struct uip_driver_s *dev)
             uiphdr_ipaddr_copy(ARPBUF->ah_sipaddr, &dev->d_ipaddr);
             uip_arp_dump(ARPBUF);
 
-            ETHBUF->type = HTONS(UIP_ETHTYPE_ARP);
-            dev->d_len = sizeof(struct arp_hdr) + UIP_LLH_LEN;
+            ETHBUF->type          = HTONS(UIP_ETHTYPE_ARP);
+            dev->d_len            = sizeof(struct arp_hdr) + UIP_LLH_LEN;
           }
         break;
 
@@ -482,8 +482,6 @@ void uip_arp_out(struct uip_driver_s *dev)
           uip_arp_dump(ARPBUF);
 
           ETHBUF->type        = HTONS(UIP_ETHTYPE_ARP);
-
-          dev->d_appdata      = &dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN];
           dev->d_len          = sizeof(struct arp_hdr) + UIP_LLH_LEN;
           return;
         }
