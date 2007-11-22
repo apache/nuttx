@@ -208,11 +208,18 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
   int err;
   int ret;
 
-  /* If to is NULL or tolen is zero, then this function is same as send */
+  /* If to is NULL or tolen is zero, then this function is same as send (for
+   * connected socket types)
+   */
 
   if (!to || !tolen)
     {
+#ifdef CONFIG_NET_TCP
       return send(sockfd, buf, len, flags);
+#else
+      err = EINVAL;
+      goto errout;
+#endif
     }
 
   /* Verify that a valid address has been provided */

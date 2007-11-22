@@ -1,5 +1,5 @@
 /****************************************************************************
- * examples/nettest/nettestn-client.c
+ * examples/nettest/nettest-client.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

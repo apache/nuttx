@@ -124,7 +124,7 @@ int write(int fd, const void *buf, unsigned int nbytes)
     {
       /* Write to a socket descriptor is equivalent to send with flags == 0 */
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#if defined(CONFIG_NET_TCP) && CONFIG_NSOCKET_DESCRIPTORS > 0
       if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
         {
           return send(fd, buf, nbytes, 0);
