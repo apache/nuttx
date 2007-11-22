@@ -47,7 +47,6 @@ ifeq ($(CONFIG_NET_UDP),y)
 include dhcpc/Make.defs
 include resolv/Make.defs
 endif
-include Make.str
 endif
 
 ASRCS		= $(UIPLIB_ASRCS) $(DHCPC_ASRCS) $(RESOLV_ASRCS) $(SMTP_ASRCS) \
@@ -79,16 +78,6 @@ $(BIN): $(OBJS)
 			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
 	done ; )
 
-makestrings$(EXEEXT): uiplib/makestrings.c
-	@gcc -O2 -Wall $< -o $@
-
-.strings: makestrings$(EXEEXT) uiplib/netutil-strings
-	@./makestrings uiplib/netutil-strings
-	@touch $@
-
-Make.str: makestrings$(EXEEXT) uiplib/netutil-strings
-	@./makestrings -s uiplib/netutil-strings >Make.str
-
 .depend: Makefile $(SRCS)
 ifeq ($(CONFIG_NET),y)
 	@$(MKDEP) --dep-path . --dep-path uiplib --dep-path dhcpc --dep-path smtp --dep-path webclient \
@@ -97,7 +86,7 @@ ifeq ($(CONFIG_NET),y)
 endif
 	@touch $@
 
-depend: .strings Make.str .depend
+depend: .depend
 
 clean:
 	@rm -f $(BIN) *.o *.rel *.asm *.lst *.sym *.adb *~
@@ -107,6 +96,5 @@ clean:
 distclean: clean
 	@rm -f Make.dep .depend
 	@rm -f $(STRNG_CSRCS) $(STRNG_ASRCS)
-	@rm -f rm .strings Make.str netutil-strings.h makestrings$(EXEEXT)
 
 -include Make.dep

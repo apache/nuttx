@@ -61,6 +61,10 @@
 
 #include "webclient.h"
 
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
 #define WEBCLIENT_TIMEOUT 100
 
 #define WEBCLIENT_STATE_STATUSLINE 0
@@ -78,102 +82,50 @@
 #define ISO_cr       0x0d
 #define ISO_space    0x20
 
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
 static uint8 g_return; /* Kludge for now */
-
-
 static struct webclient_state s;
 
-char *webclient_mimetype(void)
-{
-  return s.mimetype;
-}
+static const char g_http10[]          = "HTTP/1.0";
+static const char g_http11[]          = "HTTP/1.1";
+static const char g_httpcontenttype[] = "content-type: ";
+static const char g_httphost[]        = "host: ";
+static const char g_httplocation[]    = "location: ";
 
-char *webclient_filename(void)
-{
-  return s.file;
-}
+static const char g_httpget[]         = "GET ";
+static const char g_httphttp[]        = "http://";
 
-char *webclient_hostname(void)
-{
-  return s.host;
-}
+static const char g_httpuseragentfields[] =
+  "Connection: close\r\n"
+  "User-Agent: uIP/1.0 (; http://www.sics.se/~adam/uip/)\r\n\r\n";
 
-unsigned shortwebclient_port(void)
-{
-  return s.port;
-}
+static const char g_http200[]         = "200 ";
+static const char g_http301[]         = "301 ";
+static const char g_http302[]         = "302 ";
 
-void webclient_init(void)
-{
-}
+static const char g_httpcrnl[]        = "\r\n";
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 static void init_connection(void)
 {
   s.state = WEBCLIENT_STATE_STATUSLINE;
 
-  s.getrequestleft = sizeof(http_get) - 1 + 1 +
-    sizeof(http_10) - 1 +
-    sizeof(http_crnl) - 1 +
-    sizeof(http_host) - 1 +
-    sizeof(http_crnl) - 1 +
-    strlen(http_user_agent_fields) +
+  s.getrequestleft = strlen(g_httpget) - 1 + 1 +
+    strlen(g_http10) - 1 +
+    strlen(g_httpcrnl) - 1 +
+    strlen(g_httphost) - 1 +
+    strlen(g_httpcrnl) - 1 +
+    strlen(g_httpuseragentfields) +
     strlen(s.file) + strlen(s.host);
   s.getrequestptr = 0;
 
   s.httpheaderlineptr = 0;
-}
-
-void webclient_close(void)
-{
-  s.state = WEBCLIENT_STATE_CLOSE;
-}
-
-unsigned char webclient_get(const char *host, uint16 port, char *file)
-{
-  uip_ipaddr_t *ipaddr;
-  static uip_ipaddr_t addr;
-  struct sockaddr_in server;
-  int sockfd;
-
-  /* First check if the host is an IP address. */
-
-  ipaddr = &addr;
-  if (uiplib_ipaddrconv(host, (unsigned char *)addr) == 0)
-    {
-      if (resolv_query(host, &ipaddr) < 0)
-        {
-          return ERROR;
-        }
-  }
-
-  /* Create a socket */
-
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (sockfd < 0)
-    {
-      return ERROR;
-    }
-
-  /* Connect to server.  First we have to set some fields in the
-   * 'server' structure.  The system will assign me an arbitrary
-   * local port that is not in use.
-   */
-
-  server.sin_family = AF_INET;
-  memcpy(&server.sin_addr.s_addr, &host, sizeof(in_addr_t));
-  server.sin_port = htons(port);
-
-  if (connect(sockfd, (struct sockaddr *)&server, sizeof(struct sockaddr_in)) < 0)
-    {
-      return ERROR;
-  }
-
-  s.port = port;
-  strncpy(s.file, file, sizeof(s.file));
-  strncpy(s.host, host, sizeof(s.host));
-
-  init_connection();
-  return OK;
 }
 
 static char *copy_string(char *dest, const char *src, int len)
@@ -191,19 +143,19 @@ static void senddata(struct uip_driver_s *dev, struct uip_conn *conn)
   if (s.getrequestleft > 0) {
     cptr = getrequest = (char *)dev->d_appdata;
 
-    cptr = copy_string(cptr, http_get, sizeof(http_get) - 1);
+    cptr = copy_string(cptr, g_httpget, strlen(g_httpget) - 1);
     cptr = copy_string(cptr, s.file, strlen(s.file));
     *cptr++ = ISO_space;
-    cptr = copy_string(cptr, http_10, sizeof(http_10) - 1);
+    cptr = copy_string(cptr, g_http10, strlen(g_http10) - 1);
 
-    cptr = copy_string(cptr, http_crnl, sizeof(http_crnl) - 1);
+    cptr = copy_string(cptr, g_httpcrnl, strlen(g_httpcrnl) - 1);
 
-    cptr = copy_string(cptr, http_host, sizeof(http_host) - 1);
+    cptr = copy_string(cptr, g_httphost, strlen(g_httphost) - 1);
     cptr = copy_string(cptr, s.host, strlen(s.host));
-    cptr = copy_string(cptr, http_crnl, sizeof(http_crnl) - 1);
+    cptr = copy_string(cptr, g_httpcrnl, strlen(g_httpcrnl) - 1);
 
-    cptr = copy_string(cptr, http_user_agent_fields,
-		       strlen(http_user_agent_fields));
+    cptr = copy_string(cptr, g_httpuseragentfields,
+		       strlen(g_httpuseragentfields));
 
     len = s.getrequestleft > uip_mss(conn)?
       uip_mss(conn):
@@ -238,18 +190,18 @@ static uint16 parse_statusline(struct uip_driver_s *dev, uint16 len)
 
       if (s.httpheaderline[s.httpheaderlineptr] == ISO_nl)
         {
-          if ((strncmp(s.httpheaderline, http_10, sizeof(http_10) - 1) == 0) ||
-              (strncmp(s.httpheaderline, http_11, sizeof(http_11) - 1) == 0))
+          if ((strncmp(s.httpheaderline, g_http10, strlen(g_http10) - 1) == 0) ||
+              (strncmp(s.httpheaderline, g_http11, strlen(g_http11) - 1) == 0))
             {
               cptr = &(s.httpheaderline[9]);
               s.httpflag = HTTPFLAG_NONE;
-              if (strncmp(cptr, http_200, sizeof(http_200) - 1) == 0)
+              if (strncmp(cptr, g_http200, strlen(g_http200) - 1) == 0)
                 {
                   /* 200 OK */
                   s.httpflag = HTTPFLAG_OK;
                 }
-              else if (strncmp(cptr, http_301, sizeof(http_301) - 1) == 0 ||
-                       strncmp(cptr, http_302, sizeof(http_302) - 1) == 0)
+              else if (strncmp(cptr, g_http301, strlen(g_http301) - 1) == 0 ||
+                       strncmp(cptr, g_http302, strlen(g_http302) - 1) == 0)
                 {
                   /* 301 Moved permanently or 302 Found. Location: header line
                    * will contain thw new location.
@@ -337,7 +289,7 @@ static uint16 parse_headers(struct uip_driver_s *dev, uint16 len)
           s.httpheaderline[s.httpheaderlineptr - 1] = 0;
 
           /* Check for specific HTTP header fields. */
-          if (casecmp(s.httpheaderline, http_content_type, sizeof(http_content_type) - 1) == 0)
+          if (casecmp(s.httpheaderline, g_httpcontenttype, strlen(g_httpcontenttype) - 1) == 0)
             {
               /* Found Content-type field. */
               cptr = strchr(s.httpheaderline, ';');
@@ -345,13 +297,13 @@ static uint16 parse_headers(struct uip_driver_s *dev, uint16 len)
                 {
                   *cptr = 0;
                 }
-              strncpy(s.mimetype, s.httpheaderline + sizeof(http_content_type) - 1, sizeof(s.mimetype));
+              strncpy(s.mimetype, s.httpheaderline + strlen(g_httpcontenttype) - 1, sizeof(s.mimetype));
             }
-          else if (casecmp(s.httpheaderline, http_location, sizeof(http_location) - 1) == 0)
+          else if (casecmp(s.httpheaderline, g_httplocation, strlen(g_httplocation) - 1) == 0)
             {
-              cptr = s.httpheaderline + sizeof(http_location) - 1;
+              cptr = s.httpheaderline + strlen(g_httplocation) - 1;
 
-              if (strncmp(cptr, http_http, 7) == 0)
+              if (strncmp(cptr, g_httphttp, strlen(g_httphttp)) == 0)
                 {
                   cptr += 7;
                   for(i = 0; i < s.httpheaderlineptr - 7; ++i)
@@ -485,3 +437,85 @@ uint8 uip_interrupt_event(struct uip_driver_s *dev, struct uip_conn *conn, uint8
     }
   return g_return;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+void webclient_init(void)
+{
+}
+
+unsigned char webclient_get(const char *host, uint16 port, char *file)
+{
+  uip_ipaddr_t *ipaddr;
+  static uip_ipaddr_t addr;
+  struct sockaddr_in server;
+  int sockfd;
+
+  /* First check if the host is an IP address. */
+
+  ipaddr = &addr;
+  if (uiplib_ipaddrconv(host, (unsigned char *)addr) == 0)
+    {
+      if (resolv_query(host, &ipaddr) < 0)
+        {
+          return ERROR;
+        }
+  }
+
+  /* Create a socket */
+
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sockfd < 0)
+    {
+      return ERROR;
+    }
+
+  /* Connect to server.  First we have to set some fields in the
+   * 'server' structure.  The system will assign me an arbitrary
+   * local port that is not in use.
+   */
+
+  server.sin_family = AF_INET;
+  memcpy(&server.sin_addr.s_addr, &host, sizeof(in_addr_t));
+  server.sin_port = htons(port);
+
+  if (connect(sockfd, (struct sockaddr *)&server, sizeof(struct sockaddr_in)) < 0)
+    {
+      return ERROR;
+  }
+
+  s.port = port;
+  strncpy(s.file, file, sizeof(s.file));
+  strncpy(s.host, host, sizeof(s.host));
+
+  init_connection();
+  return OK;
+}
+
+void webclient_close(void)
+{
+  s.state = WEBCLIENT_STATE_CLOSE;
+}
+
+char *webclient_mimetype(void)
+{
+  return s.mimetype;
+}
+
+char *webclient_filename(void)
+{
+  return s.file;
+}
+
+char *webclient_hostname(void)
+{
+  return s.host;
+}
+
+unsigned shortwebclient_port(void)
+{
+  return s.port;
+}
+

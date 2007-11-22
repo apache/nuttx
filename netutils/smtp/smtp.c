@@ -57,7 +57,9 @@
 #include <net/uip/uip.h>
 #include <net/uip/smtp.h>
 
-#include "netutil-strings.h"
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
 
 #define SMTP_INPUT_BUFFER_SIZE 512
 
@@ -70,6 +72,10 @@
 #define ISO_3  0x33
 #define ISO_4  0x34
 #define ISO_5  0x35
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
 
 /* This structure represents the state of a single SMTP transaction */
 
@@ -92,6 +98,25 @@ struct smtp_state
   char         buffer[SMTP_INPUT_BUFFER_SIZE];
 };
 
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static const char g_smtp220[]            = "220";
+static const char g_smtpcrnlperiodcrnl[] = "\r\n.\r\n";
+static const char g_smtpdata[]           = "DATA\r\n";
+static const char g_smtpfrom[]           = "From: ";
+static const char g_smtphelo[]           = "HELO ";
+static const char g_smtpmailfrom[]       = "MAIL FROM: ";
+static const char g_smtpquit[]           = "QUIT\r\n";
+static const char g_smtprcptto[]         = "RCPT TO: ";
+static const char g_smtpsubject[]        = "Subject: ";
+static const char g_smtpto[]             = "To: ";
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
 static inline int smtp_send_message(int sockfd, struct smtp_state *psmtp)
 {
   if (recv(sockfd, psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, 0) < 0)
@@ -99,12 +124,12 @@ static inline int smtp_send_message(int sockfd, struct smtp_state *psmtp)
       return ERROR;
     }
 
-  if (strncmp(psmtp->buffer, smtp_220, 3) != 0)
+  if (strncmp(psmtp->buffer, g_smtp220, strlen(g_smtp220)) != 0)
     {
       return ERROR;
     }
 
-  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", smtp_helo, psmtp->localhostname);
+  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", g_smtphelo, psmtp->localhostname);
   if (send(sockfd, psmtp->buffer, strlen(psmtp->buffer), 0) < 0)
     {
       return ERROR;
@@ -120,7 +145,7 @@ static inline int smtp_send_message(int sockfd, struct smtp_state *psmtp)
       return ERROR;
     }
 
-  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", smtp_mail_from, psmtp->from);
+  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", g_smtpmailfrom, psmtp->from);
   if (send(sockfd, psmtp->buffer, strlen(psmtp->buffer), 0) < 0)
     {
       return ERROR;
@@ -136,7 +161,7 @@ static inline int smtp_send_message(int sockfd, struct smtp_state *psmtp)
       return ERROR;
     }
 
-  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", smtp_rcpt_to, psmtp->to);
+  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", g_smtprcptto, psmtp->to);
   if (send(sockfd, psmtp->buffer, strlen(psmtp->buffer), 0) < 0)
     {
       return ERROR;
@@ -154,7 +179,7 @@ static inline int smtp_send_message(int sockfd, struct smtp_state *psmtp)
 
   if (psmtp->cc != 0)
     {
-      snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", smtp_rcpt_to, psmtp->cc);
+      snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", g_smtprcptto, psmtp->cc);
       if (send(sockfd, psmtp->buffer, strlen(psmtp->buffer), 0) < 0)
         {
           return ERROR;
@@ -171,7 +196,7 @@ static inline int smtp_send_message(int sockfd, struct smtp_state *psmtp)
         }
     }
 
-  if (send(sockfd, smtp_data, strlen(smtp_data), 0) < 0)
+  if (send(sockfd, g_smtpdata, strlen(g_smtpdata), 0) < 0)
     {
       return ERROR;
     }
@@ -186,7 +211,7 @@ static inline int smtp_send_message(int sockfd, struct smtp_state *psmtp)
       return ERROR;
     }
 
-  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", smtp_to, psmtp->to);
+  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", g_smtpto, psmtp->to);
   if (send(sockfd, psmtp->buffer, strlen(psmtp->buffer), 0) < 0)
     {
       return ERROR;
@@ -194,20 +219,20 @@ static inline int smtp_send_message(int sockfd, struct smtp_state *psmtp)
 
   if (psmtp->cc != 0)
     {
-      snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", smtp_to, psmtp->cc);
+      snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", g_smtpto, psmtp->cc);
       if (send(sockfd, psmtp->buffer, strlen(psmtp->buffer), 0) < 0)
         {
           return ERROR;
         }
     }
 
-  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", smtp_from, psmtp->from);
+  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", g_smtpfrom, psmtp->from);
   if (send(sockfd, psmtp->buffer, strlen(psmtp->buffer), 0) < 0)
     {
       return ERROR;
     }
 
-  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", smtp_subject, psmtp->subject);
+  snprintf(psmtp->buffer, SMTP_INPUT_BUFFER_SIZE, "%s%s\r\n", g_smtpsubject, psmtp->subject);
   if (send(sockfd, psmtp->buffer, strlen(psmtp->buffer), 0) < 0)
     {
       return ERROR;
@@ -218,7 +243,7 @@ static inline int smtp_send_message(int sockfd, struct smtp_state *psmtp)
       return ERROR;
     }
 
-  if (send(sockfd, smtp_crnlperiodcrnl, strlen(smtp_crnlperiodcrnl), 0) < 0)
+  if (send(sockfd, g_smtpcrnlperiodcrnl, strlen(g_smtpcrnlperiodcrnl), 0) < 0)
     {
       return ERROR;
     }
@@ -233,12 +258,16 @@ static inline int smtp_send_message(int sockfd, struct smtp_state *psmtp)
       return ERROR;
     }
 
-  if (send(sockfd, smtp_quit, strlen(smtp_quit), 0) < 0)
+  if (send(sockfd, g_smtpquit, strlen(g_smtpquit), 0) < 0)
     {
       return ERROR;
     }
   return OK;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /* Specificy an SMTP server and hostname.
  *
