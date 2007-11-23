@@ -107,7 +107,7 @@ void send_client(void)
       message("client: %d. Sending %d bytes\n", offset, SENDSIZE);
       nbytes = sendto(sockfd, outbuf, SENDSIZE, 0,
                       (struct sockaddr*)&server, sizeof(struct sockaddr_in));
-      message("client: %d. Sent %d bytes\n", nbytes);
+      message("client: %d. Sent %d bytes\n", offset, nbytes);
 
       if (nbytes < 0)
         {

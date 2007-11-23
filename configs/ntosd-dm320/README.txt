@@ -14,11 +14,11 @@ configuration as follows:
 
 netconfig
 ^^^^^^^^^
-The alternative configuration file, netconfig, may be used
+This alternative configuration file, netconfig, may be used
 instead of the default configuration (defconfig). This
 configuration enables networking using the OSDs DM9000A
 Ethernet interface.  It uses examples/nettest to excercise
-the network.
+the TCP/IP network.
 
 uipconfig
 ^^^^^^^^^
@@ -29,4 +29,9 @@ These alternative configurations can be selected by
 
 	(Seleted the default configuration as show above)
 	cp config/ntosd-dm320/uiponfig .config
+
+udpconfig
+^^^^^^^^^
+This alternative configuration file, is similar to netconfig
+except that is use examples/upd to exercise UDP.
 

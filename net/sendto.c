@@ -95,18 +95,19 @@ void sendto_interrupt(struct uip_driver_s *dev, struct uip_udp_conn *conn, uint8
   struct sendto_s *pstate = (struct sendto_s *)conn->private;
   if (pstate)
     {
-      /* Check if the connectin was rejected */
+      /* Check if the connection was rejected */
 
       if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
         {
+          /* Yes.. then terminate with an error */
+
           pstate->st_sndlen = -ENOTCONN;
         }
       else
         {
-          /* Copy the user data into d_appdata and send it */
+          /* No.. Copy the user data into d_snddata and send it */
 
-          memcpy(dev->d_appdata, pstate->st_buffer, pstate->st_buflen);
-          uip_send(dev, dev->d_appdata, pstate->st_buflen);
+          uip_send(dev, pstate->st_buffer, pstate->st_buflen);
           pstate->st_sndlen = pstate->st_buflen;
         }
 
@@ -264,7 +265,7 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
    * are ready.
    */
 
-  save = irqsave();
+  save            = irqsave();
   memset(&state, 0, sizeof(struct sendto_s));
   sem_init(&state.st_sem, 0, 0);
   state.st_buflen = len;
@@ -282,7 +283,7 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
 
   /* Set up the callback in the connection */
 
-  udp_conn = (struct uip_udp_conn *)psock->s_conn;
+  udp_conn          = (struct uip_udp_conn *)psock->s_conn;
   udp_conn->private = (void*)&state;
   udp_conn->event   = sendto_interrupt;
 
@@ -290,7 +291,7 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
 
   uip_udpenable(psock->s_conn);
 
-  /* Notify the device driver of the availaibilty of TX data */
+  /* Notify the device driver of the availabilty of TX data */
 
   netdev_txnotify(&udp_conn->ripaddr);
 

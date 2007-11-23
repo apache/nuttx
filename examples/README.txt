@@ -61,3 +61,9 @@ examples/netttest
   This is a simple network test for verifying client- and server-
   functionality in a TCP/IP connection.
 
+examples/udp
+^^^^^^^^^^^^
+
+  This is a simple network test for verifying client- and server-
+  functionality over UDP.
+

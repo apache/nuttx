@@ -93,9 +93,13 @@
 
 void uip_send(struct uip_driver_s *dev, const void *buf, int len)
 {
+  /* Some sanity checks -- note that the actually available length in the 
+   * buffer is considerably less than CONFIG_NET_BUFSIZE.
+   */
+
   if (dev && len > 0 && len < CONFIG_NET_BUFSIZE)
     {
+      memcpy(dev->d_snddata, buf, len);
       dev->d_sndlen = len;
-      memcpy(dev->d_snddata, buf, len );
-    }
+   }
 }

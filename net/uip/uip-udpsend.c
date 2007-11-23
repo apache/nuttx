@@ -95,7 +95,7 @@
 
 void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn)
 {
-  if (dev->d_sndlen == 0)
+  if (dev->d_sndlen > 0)
     {
       /* The total lenth to send is the size of the application data plus
        * the IP and UDP headers (and, eventually, the ethernet header)
@@ -131,8 +131,8 @@ void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn)
       UDPBUF->ipid[1]     = g_ipid & 0xff;
       UDPBUF->ipoffset[0] = 0;
       UDPBUF->ipoffset[1] = 0;
-      UDPBUF->ttl          = conn->ttl;
-      UDPBUF->proto        = UIP_PROTO_UDP;
+      UDPBUF->ttl         = conn->ttl;
+      UDPBUF->proto       = UIP_PROTO_UDP;
 
       /* Calculate IP checksum. */
 
@@ -146,20 +146,21 @@ void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn)
 
       /* Initialize the UDP header */
 
-      UDPBUF->srcport      = conn->lport;
-      UDPBUF->destport     = conn->rport;
-      UDPBUF->udplen       = HTONS(dev->d_sndlen + UIP_UDPH_LEN);
+      UDPBUF->srcport     = conn->lport;
+      UDPBUF->destport    = conn->rport;
+      UDPBUF->udplen      = HTONS(dev->d_sndlen + UIP_UDPH_LEN);
 
 #ifdef CONFIG_NET_UDP_CHECKSUMS
       /* Calculate UDP checksum. */
 
-      UDPBUF->udpchksum = ~(uip_udpchksum(dev));
+      UDPBUF->udpchksum   = 0;
+      UDPBUF->udpchksum   = ~(uip_udpchksum(dev));
       if (UDPBUF->udpchksum == 0)
         {
           UDPBUF->udpchksum = 0xffff;
         }
 #else
-      UDPBUF->udpchksum    = 0;
+      UDPBUF->udpchksum   = 0;
 #endif
 
       vdbg("Outgoing UDP packet length: %d (%d)\n",
