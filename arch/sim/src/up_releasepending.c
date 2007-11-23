@@ -76,7 +76,7 @@ void up_release_pending(void)
 {
   _TCB *rtcb = (_TCB*)g_readytorun.head;
 
-  dbg("From TCB=%p\n", rtcb);
+  sdbg("From TCB=%p\n", rtcb);
 
   /* Merge the g_pendingtasks list into the g_readytorun task list */
 
@@ -96,7 +96,7 @@ void up_release_pending(void)
            */
 
           rtcb = (_TCB*)g_readytorun.head;
-          dbg("New Active Task TCB=%p\n", rtcb);
+          sdbg("New Active Task TCB=%p\n", rtcb);
 
           /* The way that we handle signals in the simulation is kind of
            * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
@@ -105,7 +105,7 @@ void up_release_pending(void)
 
           if (rtcb->xcp.sigdeliver)
             {
-              dbg("Delivering signals TCB=%p\n", rtcb);
+              sdbg("Delivering signals TCB=%p\n", rtcb);
               ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
               rtcb->xcp.sigdeliver = NULL;
             }

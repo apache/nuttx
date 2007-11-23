@@ -90,7 +90,7 @@ void up_unblock_task(_TCB *tcb)
     {
       _TCB *rtcb = (_TCB*)g_readytorun.head;
 
-      dbg("Unblocking TCB=%p\n", tcb);
+      sdbg("Unblocking TCB=%p\n", tcb);
 
      /* Remove the task from the blocked task list */
 
@@ -124,7 +124,7 @@ void up_unblock_task(_TCB *tcb)
               */
 
              rtcb = (_TCB*)g_readytorun.head;
-             dbg("New Active Task TCB=%p\n", rtcb);
+             sdbg("New Active Task TCB=%p\n", rtcb);
 
               /* The way that we handle signals in the simulation is kind of
                * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
@@ -133,7 +133,7 @@ void up_unblock_task(_TCB *tcb)
 
               if (rtcb->xcp.sigdeliver)
                 {
-                  dbg("Delivering signals TCB=%p\n", rtcb);
+                  sdbg("Delivering signals TCB=%p\n", rtcb);
                   ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
                   rtcb->xcp.sigdeliver = NULL;
                 }

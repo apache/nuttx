@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 #ifdef VFAT_STANDALONE
-# define dbg(format, arg...) printf(format, ##arg)
+# define sdbg(format, arg...) printf(format, ##arg)
 #endif
 
 /****************************************************************************
@@ -218,7 +218,7 @@ char *up_deviceimage(void)
     ret           = inflateInit(&strm);
     if (ret != Z_OK)
       {
-        dbg("inflateInit FAILED: ret=%d msg=\"%s\"\n", ret, strm.msg ? strm.msg : "No message" );
+        sdbg("inflateInit FAILED: ret=%d msg=\"%s\"\n", ret, strm.msg ? strm.msg : "No message" );
         return NULL;
       }
 
@@ -252,7 +252,7 @@ char *up_deviceimage(void)
             case Z_DATA_ERROR:
             case Z_MEM_ERROR:
             case Z_STREAM_ERROR:
-                dbg("inflate FAILED: ret=%d msg=\"%s\"\n", ret, strm.msg ? strm.msg : "No message" );
+                sdbg("inflate FAILED: ret=%d msg=\"%s\"\n", ret, strm.msg ? strm.msg : "No message" );
                 (void)inflateEnd(&strm);
                 free(pbuffer);
                 return NULL;

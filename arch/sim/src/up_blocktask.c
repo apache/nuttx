@@ -94,7 +94,7 @@ void up_block_task(_TCB *tcb, tstate_t task_state)
       _TCB *rtcb = (_TCB*)g_readytorun.head;
       boolean switch_needed;
 
-      dbg("Blocking TCB=%p\n", tcb);
+      sdbg("Blocking TCB=%p\n", tcb);
 
       /* Remove the tcb task from the ready-to-run list.  If we
        * are blocking the task at the head of the task list (the
@@ -134,7 +134,7 @@ void up_block_task(_TCB *tcb, tstate_t task_state)
                */
 
               rtcb = (_TCB*)g_readytorun.head;
-              dbg("New Active Task TCB=%p\n", rtcb);
+              sdbg("New Active Task TCB=%p\n", rtcb);
 
               /* The way that we handle signals in the simulation is kind of
                * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
@@ -143,7 +143,7 @@ void up_block_task(_TCB *tcb, tstate_t task_state)
 
               if (rtcb->xcp.sigdeliver)
                 {
-                  dbg("Delivering signals TCB=%p\n", rtcb);
+                  sdbg("Delivering signals TCB=%p\n", rtcb);
                   ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
                   rtcb->xcp.sigdeliver = NULL;
                 }
