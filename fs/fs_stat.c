@@ -126,7 +126,7 @@ int stat(const char *path, FAR struct stat *buf)
 {
   FAR struct inode *inode;
   const char       *relpath = NULL;
-  int               ret;
+  int               ret     = OK;
 
   /* Sanity checks */
 

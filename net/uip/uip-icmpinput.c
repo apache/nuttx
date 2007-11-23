@@ -110,7 +110,7 @@ void uip_icmpinput(struct uip_driver_s *dev)
 
   if (ICMPBUF->type != ICMP_ECHO)
     {
-      dbg("Unknown ICMP cmd: %d\n", ICMPBUF->type);
+      ndbg("Unknown ICMP cmd: %d\n", ICMPBUF->type);
       goto typeerr;
     }
 
@@ -142,8 +142,8 @@ void uip_icmpinput(struct uip_driver_s *dev)
   uiphdr_ipaddr_copy(ICMPBUF->destipaddr, ICMPBUF->srcipaddr);
   uiphdr_ipaddr_copy(ICMPBUF->srcipaddr, &dev->d_ipaddr);
 
-  vdbg("Outgoing ICMP packet length: %d (%d)\n",
-       dev->d_len, (ICMPBUF->len[0] << 8) | ICMPBUF->len[1]);
+  nvdbg("Outgoing ICMP packet length: %d (%d)\n",
+        dev->d_len, (ICMPBUF->len[0] << 8) | ICMPBUF->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
   uip_stat.icmp.sent++;
@@ -213,12 +213,12 @@ typeerr:
     }
   else
     {
-      dbg("Unknown ICMP6 cmd: %d\n", ICMPBUF->type);
+      ndbg("Unknown ICMP6 cmd: %d\n", ICMPBUF->type);
       goto typeerr;
     }
 
-  vdbg("Outgoing ICMP6 packet length: %d (%d)\n",
-       dev->d_len, (ICMPBUF->len[0] << 8) | ICMPBUF->len[1]);
+  nvdbg("Outgoing ICMP6 packet length: %d (%d)\n",
+        dev->d_len, (ICMPBUF->len[0] << 8) | ICMPBUF->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
   uip_stat.icmp.sent++;

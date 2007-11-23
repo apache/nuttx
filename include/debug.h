@@ -80,6 +80,38 @@
 # define vdbg(x...)
 #endif
 
+/* Subsystem specific debug */
+
+#ifdef CONFIG_DEBUG_MM
+# define mdbg(format, arg...)   dbg(format, ##arg)
+# define mlldbg(format, arg...) lldbg(format, ##arg)
+# define mvdbg(format, arg...)  vdbg(format, ##arg)
+#else
+# define mdbg(x...)
+# define mlldbg(x...)
+# define mvdbg(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_SCHED
+# define sdbg(format, arg...)   dbg(format, ##arg)
+# define slldbg(format, arg...) lldbg(format, ##arg)
+# define svdbg(format, arg...)  vdbg(format, ##arg)
+#else
+# define sdbg(x...)
+# define slldbg(x...)
+# define svdbg(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_NET
+# define ndbg(format, arg...)   dbg(format, ##arg)
+# define nlldbg(format, arg...) lldbg(format, ##arg)
+# define nvdbg(format, arg...)  vdbg(format, ##arg)
+#else
+# define ndbg(x...)
+# define nlldbg(x...)
+# define nvdbg(x...)
+#endif
+
 /************************************************************
  * Public Type Declarations
  ************************************************************/

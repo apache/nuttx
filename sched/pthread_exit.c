@@ -92,7 +92,7 @@ void pthread_exit(FAR void *exit_value)
   int error_code = (int)exit_value;
   int status;
 
-  dbg("exit_value=%p\n", exit_value);
+  sdbg("exit_value=%p\n", exit_value);
 
   /* Block any signal actions that would awaken us while were
    * are performing the JOIN handshake.

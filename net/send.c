@@ -104,7 +104,7 @@ static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn, uin
 {
   struct send_s *pstate = (struct send_s *)conn->data_private;
 
-  vdbg("flags: %02x state: %d\n", flags, pstate->snd_state);
+  nvdbg("flags: %02x state: %d\n", flags, pstate->snd_state);
 
   /* If the data has not been sent OR if it needs to be retransmitted,
    * then send it now.

@@ -107,10 +107,10 @@ extern void mm_addregion(FAR void *heapstart, size_t heapsize);
 
 # define CONFIG_DEBUG
 
-# undef dbg
-# define dbg(format, arg...) printf(format, ##arg)
-# undef vdg
-# define vdbg(format, arg...) printf(format, ##arg)
+# undef mdbg
+# define mdbg(format, arg...) printf(format, ##arg)
+# undef mvdg
+# define mvdbg(format, arg...) printf(format, ##arg)
 
 #else
 # define mm_errno (*get_errno_ptr())

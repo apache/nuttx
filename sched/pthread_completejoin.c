@@ -79,7 +79,7 @@ static boolean pthread_notifywaiters(FAR join_t *pjoin)
   int ntasks_waiting;
   int status;
 
-  dbg("pjoin=0x%p\n", pjoin);
+  sdbg("pjoin=0x%p\n", pjoin);
 
   /* Are any tasks waiting for our exit value? */
 
@@ -144,7 +144,7 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
 {
   FAR join_t *pjoin;
 
-  dbg("process_id=%d exit_value=%p\n", pid, exit_value);
+  sdbg("process_id=%d exit_value=%p\n", pid, exit_value);
 
   /* First, find thread's structure in the private data set. */
 
@@ -209,7 +209,7 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
 
 void pthread_destroyjoin(FAR join_t *pjoin)
 {
-  dbg("pjoin=0x%p\n", pjoin);
+  sdbg("pjoin=0x%p\n", pjoin);
 
   /* Remove the join info from the set of joins */
 

@@ -141,10 +141,10 @@ int netdev_register(FAR struct uip_driver_s *dev)
       g_netdevices = dev;
       netdev_semgive();
 
-      lldbg("Registered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",
-            dev->d_mac.addr[0], dev->d_mac.addr[1], dev->d_mac.addr[2],
-            dev->d_mac.addr[3], dev->d_mac.addr[4], dev->d_mac.addr[5],
-            dev->d_ifname);
+      nlldbg("Registered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",
+             dev->d_mac.addr[0], dev->d_mac.addr[1], dev->d_mac.addr[2],
+             dev->d_mac.addr[3], dev->d_mac.addr[4], dev->d_mac.addr[5],
+             dev->d_ifname);
 
       return OK;
     }

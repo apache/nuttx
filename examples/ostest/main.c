@@ -209,7 +209,7 @@ static void show_variable(const char *var_name, const char *exptd_value, boolean
     }
 }
 
-static show_environment(boolean var1_valid, boolean var2_valid, boolean var3_valid)
+static void show_environment(boolean var1_valid, boolean var2_valid, boolean var3_valid)
 {
   show_variable( g_var1_name, g_var1_value, var1_valid);
   show_variable( g_var2_name, g_var2_value, var2_valid);

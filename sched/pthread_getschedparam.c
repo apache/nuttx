@@ -108,7 +108,7 @@ int pthread_getschedparam(pthread_t thread, int *policy,
 {
   int ret;
 
-  dbg("Thread ID=%d policy=0x%p param=0x%p\n", thread, policy, param);
+  sdbg("Thread ID=%d policy=0x%p param=0x%p\n", thread, policy, param);
 
   if (!policy || !param)
     {
@@ -133,7 +133,7 @@ int pthread_getschedparam(pthread_t thread, int *policy,
         }
     }
 
-  dbg("Returning %d\n", ret);
+  sdbg("Returning %d\n", ret);
   return ret;
 }
 

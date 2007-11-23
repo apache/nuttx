@@ -89,7 +89,7 @@ int pthread_mutex_unlock(pthread_mutex_t *mutex)
 {
   int ret = OK;
 
-  dbg("mutex=0x%p\n", mutex);
+  sdbg("mutex=0x%p\n", mutex);
 
   if (!mutex)
     {
@@ -107,7 +107,7 @@ int pthread_mutex_unlock(pthread_mutex_t *mutex)
 
       if (mutex->pid != (int)getpid())
         {
-          dbg("Holder=%d returning EPERM\n", mutex->pid);
+          sdbg("Holder=%d returning EPERM\n", mutex->pid);
           ret = EPERM;
         }
       else
@@ -120,7 +120,7 @@ int pthread_mutex_unlock(pthread_mutex_t *mutex)
       sched_unlock();
     }
 
-  dbg("Returning %d\n", ret);
+  sdbg("Returning %d\n", ret);
   return ret;
 }
 

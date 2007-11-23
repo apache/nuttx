@@ -88,13 +88,13 @@ int clock_getres(clockid_t clock_id, struct timespec *res)
   uint32 time_res;
   int    ret = OK;
 
-  dbg("clock_id=%d\n", clock_id);
+  sdbg("clock_id=%d\n", clock_id);
 
   /* Only CLOCK_REALTIME is supported */
 
   if (clock_id != CLOCK_REALTIME)
     {
-      dbg("Returning ERROR\n");
+      sdbg("Returning ERROR\n");
       *get_errno_ptr() = EINVAL;
       ret = ERROR;
     }
@@ -109,9 +109,9 @@ int clock_getres(clockid_t clock_id, struct timespec *res)
       res->tv_sec  = 0;
       res->tv_nsec = time_res;
 
-      dbg("Returning res=(%d,%d) time_res=%d\n",
-          (int)res->tv_sec, (int)res->tv_nsec,
-          (int)time_res);
+      sdbg("Returning res=(%d,%d) time_res=%d\n",
+           (int)res->tv_sec, (int)res->tv_nsec,
+           (int)time_res);
     }
 
   return ret;

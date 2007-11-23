@@ -90,13 +90,13 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
   uint32 nsecs;
   int ret = OK;
 
-  dbg("clock_id=%d\n", clock_id);
+  sdbg("clock_id=%d\n", clock_id);
 
   /* Only CLOCK_REALTIME is supported */
 
   if (clock_id != CLOCK_REALTIME)
     {
-      dbg("Returning ERROR\n");
+      sdbg("Returning ERROR\n");
 
       *get_errno_ptr() = EINVAL;
       ret = ERROR;
@@ -109,17 +109,17 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 
       msecs = MSEC_PER_TICK * (g_system_timer - g_tickbias);
 
-      dbg("msecs = %d g_tickbias=%d\n",
-          (int)msecs, (int)g_tickbias);
+      sdbg("msecs = %d g_tickbias=%d\n",
+           (int)msecs, (int)g_tickbias);
 
       /* Get the elapsed time in seconds and nanoseconds. */
 
       secs  = msecs / MSEC_PER_SEC;
       nsecs = (msecs - (secs * MSEC_PER_SEC)) * NSEC_PER_MSEC;
 
-      dbg("secs = %d + %d nsecs = %d + %d\n",
-          (int)msecs, (int)g_basetime.tv_sec,
-          (int)nsecs, (int)g_basetime.tv_nsec);
+      sdbg("secs = %d + %d nsecs = %d + %d\n",
+           (int)msecs, (int)g_basetime.tv_sec,
+           (int)nsecs, (int)g_basetime.tv_nsec);
 
       /* Add the base time to this. */
 
@@ -140,8 +140,8 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
       tp->tv_sec  = (time_t)secs;
       tp->tv_nsec = (long)nsecs;
 
-      dbg("Returning tp=(%d,%d)\n",
-          (int)tp->tv_sec, (int)tp->tv_nsec);
+      sdbg("Returning tp=(%d,%d)\n",
+           (int)tp->tv_sec, (int)tp->tv_nsec);
     }
 
   return ret;

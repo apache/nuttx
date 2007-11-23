@@ -90,7 +90,7 @@ int pthread_detach(pthread_t thread)
   FAR join_t *pjoin;
   int ret;
 
-  dbg("Thread=%d\n", thread);
+  sdbg("Thread=%d\n", thread);
 
   /* Find the entry associated with this pthread. */
 
@@ -98,7 +98,7 @@ int pthread_detach(pthread_t thread)
   pjoin = pthread_findjoininfo((pid_t)thread);
   if (!pjoin)
     {
-      dbg("Could not find thread entry\n");
+      sdbg("Could not find thread entry\n");
       ret = EINVAL;
     }
   else
@@ -127,6 +127,6 @@ int pthread_detach(pthread_t thread)
     }
   (void)pthread_givesemaphore(&g_join_semaphore);
 
-  dbg("Returning %d\n", ret);
+  sdbg("Returning %d\n", ret);
   return ret;
 }

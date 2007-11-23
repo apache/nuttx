@@ -138,7 +138,7 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
   int             ret = OK;
   int             status;
 
-  dbg("cond=0x%p mutex=0x%p abstime=0x%p\n", cond, mutex, abstime);
+  sdbg("cond=0x%p mutex=0x%p abstime=0x%p\n", cond, mutex, abstime);
 
   /* Make sure that non-NULL references were provided. */
 
@@ -174,7 +174,7 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
         }
       else
         {
-          dbg("Give up mutex...\n");
+          sdbg("Give up mutex...\n");
 
           /* We must disable pre-emption and interrupts here so that
            * the time stays valid until the wait begins.   This adds
@@ -254,7 +254,7 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
 
                           if (*get_errno_ptr() == EINTR)
                             {
-                              dbg("Timedout!\n");
+                              sdbg("Timedout!\n");
                               ret = ETIMEDOUT;
                             }
                           else
@@ -274,7 +274,7 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
 
                   /* Reacquire the mutex (retaining the ret). */
 
-                  dbg("Re-locking...\n");
+                  sdbg("Re-locking...\n");
                   status = pthread_takesemaphore((sem_t*)&mutex->sem);
                   if (!status)
                     {
@@ -299,7 +299,7 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
         }
     }
 
-  dbg("Returning %d\n", ret);
+  sdbg("Returning %d\n", ret);
   return ret;
 }
 

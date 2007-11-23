@@ -139,7 +139,7 @@ static void uip_tcpsendcomplete(struct uip_driver_s *dev)
 
 #endif /* CONFIG_NET_IPv6 */
 
-  vdbg("Outgoing TCP packet length: %d (%d)\n",
+  nvdbg("Outgoing TCP packet length: %d (%d)\n",
        dev->d_len, (BUF->len[0] << 8) | BUF->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS

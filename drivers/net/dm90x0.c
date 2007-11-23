@@ -452,7 +452,7 @@ static void putreg(int reg, uint8 value)
 
 static void read8(uint8 *ptr, int len)
 {
-  vdbg("Read %d bytes (8-bit mode)\n", len);
+  nvdbg("Read %d bytes (8-bit mode)\n", len);
   for (; len > 0; len--)
     {
       *ptr++ = DM9X_DATA;
@@ -462,7 +462,7 @@ static void read8(uint8 *ptr, int len)
 static void read16(uint8 *ptr, int len)
 {
   register uint16 *ptr16 = (uint16*)ptr;
-  vdbg("Read %d bytes (16-bit mode)\n", len);
+  nvdbg("Read %d bytes (16-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint16))
     {
       *ptr16++ = DM9X_DATA;
@@ -472,7 +472,7 @@ static void read16(uint8 *ptr, int len)
 static void read32(uint8 *ptr, int len)
 {
   register uint32 *ptr32 = (uint32*)ptr;
-  vdbg("Read %d bytes (32-bit mode)\n", len);
+  nvdbg("Read %d bytes (32-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint32))
     {
       *ptr32++ = DM9X_DATA;
@@ -498,7 +498,7 @@ static void read32(uint8 *ptr, int len)
 
 static void discard8(int len)
 {
-  vdbg("Discard %d bytes (8-bit mode)\n", len);
+  nvdbg("Discard %d bytes (8-bit mode)\n", len);
   for (; len > 0; len--)
     {
       DM9X_DATA;
@@ -507,7 +507,7 @@ static void discard8(int len)
 
 static void discard16(int len)
 {
-  vdbg("Discard %d bytes (16-bit mode)\n", len);
+  nvdbg("Discard %d bytes (16-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint16))
     {
       DM9X_DATA;
@@ -516,7 +516,7 @@ static void discard16(int len)
 
 static void discard32(int len)
 {
-  vdbg("Discard %d bytes (32-bit mode)\n", len);
+  nvdbg("Discard %d bytes (32-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint32))
     {
       DM9X_DATA;
@@ -542,7 +542,7 @@ static void discard32(int len)
 
 static void write8(const uint8 *ptr, int len)
 {
-  vdbg("Write %d bytes (8-bit mode)\n", len);
+  nvdbg("Write %d bytes (8-bit mode)\n", len);
   for (; len > 0; len--)
     {
       DM9X_DATA = (*ptr++ & 0xff);
@@ -552,7 +552,7 @@ static void write8(const uint8 *ptr, int len)
 static void write16(const uint8 *ptr, int len)
 {
   register uint16 *ptr16 = (uint16*)ptr;
-  vdbg("Write %d bytes (16-bit mode)\n", len);
+  nvdbg("Write %d bytes (16-bit mode)\n", len);
 
   for (; len > 0; len -= sizeof(uint16))
     {
@@ -563,7 +563,7 @@ static void write16(const uint8 *ptr, int len)
 static void write32(const uint8 *ptr, int len)
 {
   register uint32 *ptr32 = (uint32*)ptr;
-  vdbg("Write %d bytes (32-bit mode)\n", len);
+  nvdbg("Write %d bytes (32-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint32))
     {
       DM9X_DATA = *ptr32++;
@@ -703,17 +703,17 @@ static void dm9x_resetstatistics(struct dm9x_driver_s *dm9x)
 #if defined(CONFIG_DM9X_STATS) && defined(CONFIG_DEBUG)
 static void dm9x_dumpstatistics(struct dm9x_driver_s *dm9x)
 {
-  dbg("TX packets:            %d\n", dm9x->dm_ntxpackets);
-  dbg("   bytes:              %d\n", dm9x->dm_ntxbytes);
-  dbg("   errors:             %d\n", dm9x->dm_ntxerrors);
-  dbg("RX packets:            %d\n", dm9x->dm_nrxpackets);
-  dbg("   bytes:              %d\n", dm9x->dm_nrxbytes);
-  dbg("   FIFO overflows:     %d\n", dm9x->dm_nrxfifoerrors);
-  dbg("   CRC errors:         %d\n", dm9x->dm_nrxcrcerrors);
-  dbg("   length errors:      %d\n", dm9x->dm_nrxlengtherrors);
-  dbg("Physical layer errors: %d\n", dm9x->dm_nphyserrors);
-  dbg("Resets:                %d\n", dm9x->dm_nresets);
-  dbg("TX timeout resets:     %d\n", dm9x->dm_ntxtimeouts);
+  ndbg("TX packets:            %d\n", dm9x->dm_ntxpackets);
+  ndbg("   bytes:              %d\n", dm9x->dm_ntxbytes);
+  ndbg("   errors:             %d\n", dm9x->dm_ntxerrors);
+  ndbg("RX packets:            %d\n", dm9x->dm_nrxpackets);
+  ndbg("   bytes:              %d\n", dm9x->dm_nrxbytes);
+  ndbg("   FIFO overflows:     %d\n", dm9x->dm_nrxfifoerrors);
+  ndbg("   CRC errors:         %d\n", dm9x->dm_nrxcrcerrors);
+  ndbg("   length errors:      %d\n", dm9x->dm_nrxlengtherrors);
+  ndbg("Physical layer errors: %d\n", dm9x->dm_nphyserrors);
+  ndbg("Resets:                %d\n", dm9x->dm_nresets);
+  ndbg("TX timeout resets:     %d\n", dm9x->dm_ntxtimeouts);
 }
 #endif
 
@@ -891,7 +891,7 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
   uint8   mdral;
   uint8   rxbyte;
 
-  vdbg("Packet received\n");
+  nvdbg("Packet received\n");
 
   do
     {
@@ -929,28 +929,28 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
           if (rx.desc.rx_status & 0x01) 
             {
               dm9x->dm_nrxfifoerrors++;
-              dbg("RX FIFO error: %d\n", dm9x->dm_nrxfifoerrors);
+              ndbg("RX FIFO error: %d\n", dm9x->dm_nrxfifoerrors);
             }
 
           if (rx.desc.rx_status & 0x02) 
             {
               dm9x->dm_nrxcrcerrors++;
-              dbg("RX CRC error: %d\n", dm9x->dm_nrxcrcerrors);
+              ndbg("RX CRC error: %d\n", dm9x->dm_nrxcrcerrors);
             }
 
           if (rx.desc.rx_status & 0x80) 
             {
               dm9x->dm_nrxlengtherrors++;
-              dbg("RX length error: %d\n", dm9x->dm_nrxlengtherrors);
+              ndbg("RX length error: %d\n", dm9x->dm_nrxlengtherrors);
             }
 
           if (rx.desc.rx_status & 0x08)
             {
               dm9x->dm_nphyserrors++;
-              dbg("Physical Layer error: %d\n", dm9x->dm_nphyserrors);
+              ndbg("Physical Layer error: %d\n", dm9x->dm_nphyserrors);
             }
 #else
-          dbg("Received packet with errors: %02x\n", rx.desc.rx_status);
+          ndbg("Received packet with errors: %02x\n", rx.desc.rx_status);
 #endif
           /* Drop this packet and continue to check the next packet */
 
@@ -963,7 +963,7 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
         {
 #if defined(CONFIG_DM9X_STATS)
           dm9x->dm_nrxlengtherrors++;
-          dbg("RX length error: %d\n", dm9x->dm_nrxlengtherrors);
+          ndbg("RX length error: %d\n", dm9x->dm_nrxlengtherrors);
 #endif
           /* Drop this packet and continue to check the next packet */
 
@@ -1019,7 +1019,7 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
       dm9x->ncrxpackets++;
     }
   while ((rxbyte & 0x01) == DM9X_PKTRDY && dm9x->ncrxpackets < DM9X_CRXTHRES);
-  vdbg("All RX packets processed\n");
+  nvdbg("All RX packets processed\n");
 }
 
 /****************************************************************************
@@ -1042,7 +1042,7 @@ static void dm9x_txdone(struct dm9x_driver_s *dm9x)
 {
   int  nsr;
 
-  vdbg("TX done\n");
+  nvdbg("TX done\n");
 
   /* Another packet has completed transmission.  Decrement the count of
    * of pending TX transmissions.
@@ -1057,7 +1057,7 @@ static void dm9x_txdone(struct dm9x_driver_s *dm9x)
         }
       else
         {
-          dbg("Bad TX count (TX1END)\n");
+          ndbg("Bad TX count (TX1END)\n");
         }
     }
 
@@ -1069,7 +1069,7 @@ static void dm9x_txdone(struct dm9x_driver_s *dm9x)
         }
       else
         {
-          dbg("Bad TX count (TX2END)\n");
+          ndbg("Bad TX count (TX2END)\n");
         }
     }
 
@@ -1121,7 +1121,7 @@ static int dm9x_interrupt(int irq, FAR void *context)
 
   isr = getreg(DM9X_ISR);
   putreg(DM9X_ISR, isr);
-  vdbg("Interrupt status: %02x\n", isr);
+  nvdbg("Interrupt status: %02x\n", isr);
 
   /* Check for link status change */
 
@@ -1155,7 +1155,7 @@ static int dm9x_interrupt(int irq, FAR void *context)
             }
           up_mdelay(1);
         }
-      dbg("delay: %dmS speed: %s\n", i, dm9x->dm_b100M ? "100M" : "10M"); 
+      ndbg("delay: %dmS speed: %s\n", i, dm9x->dm_b100M ? "100M" : "10M"); 
     }
 
  /* Check if we received an incoming packet */
@@ -1217,7 +1217,7 @@ static void dm9x_txtimeout(int argc, uint32 arg, ...)
 {
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)arg;
 
-  dbg("TX timeout\n");
+  ndbg("TX timeout\n");
 
   /* Increment statistics and dump debug info */
 
@@ -1226,14 +1226,14 @@ static void dm9x_txtimeout(int argc, uint32 arg, ...)
   dm9x->dm_ntxerrors++;
 #endif
 
-  dbg("  TX packet count:           %d\n", dm9x->dm_ntxpending); 
+  ndbg("  TX packet count:           %d\n", dm9x->dm_ntxpending); 
 #if defined(CONFIG_DM9X_STATS)
-  dbg("  TX timeouts:               %d\n", dm9x->dm_ntxtimeouts); 
+  ndbg("  TX timeouts:               %d\n", dm9x->dm_ntxtimeouts); 
 #endif
-  dbg("  TX read pointer address:   0x%02x:%02x\n",
-      getreg(DM9X_TRPAH), getreg(DM9X_TRPAL));
-  dbg("  Memory data write address: 0x%02x:%02x (DM9010)\n",
-      getreg(DM9X_MDWAH), getreg(DM9X_MDWAL));
+  ndbg("  TX read pointer address:   0x%02x:%02x\n",
+       getreg(DM9X_TRPAH), getreg(DM9X_TRPAL));
+  ndbg("  Memory data write address: 0x%02x:%02x (DM9010)\n",
+       getreg(DM9X_MDWAH), getreg(DM9X_MDWAL));
 
   /* Then reset the DM90x0 */
 
@@ -1358,7 +1358,7 @@ static int dm9x_ifup(struct uip_driver_s *dev)
   uint8 netstatus;
   int i;
 
-  dbg("Bringing up: %d.%d.%d.%d\n",
+  ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
 
@@ -1388,7 +1388,7 @@ static int dm9x_ifup(struct uip_driver_s *dev)
       up_mdelay(1);
     }
 
-  dbg("delay: %dmS speed: %s\n", i, dm9x->dm_b100M ? "100M" : "10M"); 
+  ndbg("delay: %dmS speed: %s\n", i, dm9x->dm_b100M ? "100M" : "10M"); 
 
   /* Set and activate a timer process */
 
@@ -1421,7 +1421,7 @@ static int dm9x_ifdown(struct uip_driver_s *dev)
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)dev->d_private;
   irqstate_t flags;
 
-  dbg("Stopping\n");
+  ndbg("Stopping\n");
 
   /* Disable the DM9X interrupt */
 
@@ -1472,7 +1472,7 @@ static int dm9x_txavail(struct uip_driver_s *dev)
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)dev->d_private;
   irqstate_t flags;
 
-  dbg("Polling\n");
+  ndbg("Polling\n");
   flags = irqsave();
 
   /* Check if there is room in the DM90x0 to hold another packet.  In 100M mode,
@@ -1486,6 +1486,7 @@ static int dm9x_txavail(struct uip_driver_s *dev)
       (void)uip_poll(&dm9x->dm_dev, dm9x_uiptxpoll);
     }
   irqrestore(flags);
+  return OK;
 }
 
 /****************************************************************************
@@ -1506,7 +1507,7 @@ static int dm9x_txavail(struct uip_driver_s *dev)
 
 static void dm9x_bringup(struct dm9x_driver_s *dm9x)
 {
-  dbg("Initializing\n");
+  ndbg("Initializing\n");
 
   /* Set the internal PHY power-on, GPIOs normal, and wait 2ms */
 
@@ -1675,13 +1676,13 @@ int dm9x_initialize(void)
 
   vid = (((uint16)getreg(DM9X_VIDH)) << 8) | (uint16)getreg(DM9X_VIDL);
   pid = (((uint16)getreg(DM9X_PIDH)) << 8) | (uint16)getreg(DM9X_PIDL);
-  lldbg("I/O base: %08x VID: %04x PID: %04x\n", CONFIG_DM9X_BASE, vid, pid);
+  nlldbg("I/O base: %08x VID: %04x PID: %04x\n", CONFIG_DM9X_BASE, vid, pid);
 
   /* Check if a DM90x0 chip is recognized at this I/O base */
 
   if (vid != DM9X_DAVICOMVID || (pid != DM9X_DM9000PID && pid != DM9X_DM9010PID))
     {
-      lldbg("DM90x0 vender/product ID not found at this base address\n");
+      nlldbg("DM90x0 vender/product ID not found at this base address\n");
       return -ENODEV;
     }
 
@@ -1691,7 +1692,7 @@ int dm9x_initialize(void)
     {
       /* We could not attach the ISR to the ISR */
 
-      lldbg("irq_attach() failed\n");
+      nlldbg("irq_attach() failed\n");
       return -EAGAIN;
     }
 
@@ -1716,8 +1717,8 @@ int dm9x_initialize(void)
       mptr[i] = getreg(j);
     }
 
-  lldbg("MAC: %0x:%0x:%0x:%0x:%0x:%0x\n",
-        mptr[0], mptr[1], mptr[2], mptr[3], mptr[4], mptr[5]);
+  nlldbg("MAC: %0x:%0x:%0x:%0x:%0x:%0x\n",
+         mptr[0], mptr[1], mptr[2], mptr[3], mptr[4], mptr[5]);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

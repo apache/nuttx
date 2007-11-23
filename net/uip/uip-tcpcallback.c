@@ -110,7 +110,7 @@ uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
 
           memcpy(readahead->rh_buffer, dev->d_appdata, recvlen);
           readahead->rh_nbytes = recvlen;
-          vdbg("Buffered %d bytes (of %d)\n", recvlen, dev->d_len);
+          nvdbg("Buffered %d bytes (of %d)\n", recvlen, dev->d_len);
 
           /* Save the readahead buffer in the connection structure where
            * it can be found with recv() is called.
@@ -167,7 +167,7 @@ uint8 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint8 fla
 
   uint8 ret = flags;
 
-  vdbg("flags: %02x\n", flags);
+  nvdbg("flags: %02x\n", flags);
 
   /* Check if there is a data callback */
 
@@ -192,7 +192,7 @@ uint8 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint8 fla
     {
       /* There is no handler to receive new data in place */
 
-      vdbg("No listener on connection\n");
+      nvdbg("No listener on connection\n");
       ret = uip_dataevent(dev, conn, flags);
     }
 

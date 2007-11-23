@@ -89,7 +89,7 @@ int pthread_attr_getschedpolicy(pthread_attr_t *attr, int *policy)
 {
   int ret;
 
-  dbg("attr=0x%p policy=0x%p\n", attr, policy);
+  sdbg("attr=0x%p policy=0x%p\n", attr, policy);
 
   if (!attr || !policy)
     {
@@ -101,6 +101,6 @@ int pthread_attr_getschedpolicy(pthread_attr_t *attr, int *policy)
       ret = OK;
     }
 
-  dbg("Returning %d\n", ret);
+  sdbg("Returning %d\n", ret);
   return ret;
 }

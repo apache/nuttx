@@ -92,7 +92,7 @@ int pthread_attr_setinheritsched(pthread_attr_t *attr,
 {
   int ret;
 
-  dbg("inheritsched=%d\n", inheritsched);
+  sdbg("inheritsched=%d\n", inheritsched);
 
   if (!attr ||
       (inheritsched != PTHREAD_INHERIT_SCHED &&
@@ -106,7 +106,7 @@ int pthread_attr_setinheritsched(pthread_attr_t *attr,
       ret = OK;
     }
 
-  dbg("Returning %d\n", ret);
+  sdbg("Returning %d\n", ret);
   return ret;
 }
 

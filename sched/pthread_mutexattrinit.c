@@ -87,7 +87,7 @@ int pthread_mutexattr_init(pthread_mutexattr_t *attr)
 {
   int ret = OK;
 
-  dbg("attr=0x%p\n", attr);
+  sdbg("attr=0x%p\n", attr);
 
   if (!attr)
     {
@@ -98,6 +98,6 @@ int pthread_mutexattr_init(pthread_mutexattr_t *attr)
       attr->pshared = 0;
     }
 
-  dbg("Returning %d\n", ret);
+  sdbg("Returning %d\n", ret);
   return ret;
 }

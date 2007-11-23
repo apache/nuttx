@@ -83,7 +83,7 @@ void recv_server(void)
 {
   struct sockaddr_in server;
   struct sockaddr_in client;
-  uint32 tmpaddr;
+  in_addr_t tmpaddr;
   unsigned char inbuf[1024];
   int sockfd;
   int nbytes;

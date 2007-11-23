@@ -67,7 +67,7 @@ int pthread_cond_destroy(pthread_cond_t *cond)
 {
   int ret = OK;
 
-  dbg("cond=0x%p\n", cond);
+  sdbg("cond=0x%p\n", cond);
 
   if (!cond)
     {
@@ -81,7 +81,7 @@ int pthread_cond_destroy(pthread_cond_t *cond)
       ret = EINVAL;
     }
 
-  dbg("Returning %d\n", ret);
+  sdbg("Returning %d\n", ret);
   return ret;
 }
 

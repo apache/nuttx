@@ -90,7 +90,7 @@ int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 {
   int ret;
 
-  dbg("cond=0x%p mutex=0x%p\n", cond, mutex);
+  sdbg("cond=0x%p mutex=0x%p\n", cond, mutex);
 
   /* Make sure that non-NULL references were provided. */
 
@@ -110,7 +110,7 @@ int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
     {
       /* Give up the mutex */
 
-      dbg("Give up mutex / take cond\n");
+      sdbg("Give up mutex / take cond\n");
 
       sched_lock();
       mutex->pid = 0;
@@ -123,7 +123,7 @@ int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 
       /* Reacquire the mutex */
 
-      dbg("Reacquire mutex...\n");
+      sdbg("Reacquire mutex...\n");
       ret |= pthread_takesemaphore((sem_t*)&mutex->sem);
       if (!ret)
         {
@@ -131,7 +131,7 @@ int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
         }
     }
 
-  dbg("Returning %d\n", ret);
+  sdbg("Returning %d\n", ret);
   return ret;
 }
 

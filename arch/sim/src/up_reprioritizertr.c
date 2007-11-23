@@ -97,7 +97,7 @@ void up_reprioritize_rtr(_TCB *tcb, ubyte priority)
       _TCB *rtcb = (_TCB*)g_readytorun.head;
       boolean switch_needed;
 
-      dbg("TCB=%p PRI=%d\n", tcb, priority);
+      sdbg("TCB=%p PRI=%d\n", tcb, priority);
 
       /* Remove the tcb task from the ready-to-run list.
        * sched_removereadytorun will return TRUE if we just
@@ -146,7 +146,7 @@ void up_reprioritize_rtr(_TCB *tcb, ubyte priority)
                */
 
               rtcb = (_TCB*)g_readytorun.head;
-              dbg("New Active Task TCB=%p\n", rtcb);
+              sdbg("New Active Task TCB=%p\n", rtcb);
 
               /* The way that we handle signals in the simulation is kind of
                * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
@@ -155,7 +155,7 @@ void up_reprioritize_rtr(_TCB *tcb, ubyte priority)
 
               if (rtcb->xcp.sigdeliver)
                 {
-                  dbg("Delivering signals TCB=%p\n", rtcb);
+                  sdbg("Delivering signals TCB=%p\n", rtcb);
                   ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
                   rtcb->xcp.sigdeliver = NULL;
                 }

@@ -177,7 +177,7 @@ struct tm *gmtime_r(const time_t *clock, struct tm *result)
   /* Get the seconds since the EPOCH */
 
   time = *clock;
-  dbg("clock=%d\n", (int)time);
+  sdbg("clock=%d\n", (int)time);
 
   /* Convert to days, hours, minutes, and seconds since the EPOCH */
 
@@ -192,15 +192,15 @@ struct tm *gmtime_r(const time_t *clock, struct tm *result)
 
   sec   = time;
 
-  dbg("hour=%d min=%d sec=%d\n",
-      (int)hour, (int)min, (int)sec);
+  sdbg("hour=%d min=%d sec=%d\n",
+       (int)hour, (int)min, (int)sec);
 
   /* Convert the days since the EPOCH to calendar day */
 
   clock_utc2calendar(jdn, &year, &month, &day);
 
-  dbg("jdn=%d year=%d month=%d day=%d\n",
-      (int)jdn, (int)year, (int)month, (int)day);
+  sdbg("jdn=%d year=%d month=%d day=%d\n",
+       (int)jdn, (int)year, (int)month, (int)day);
 
   /* Then return the struct tm contents */
 

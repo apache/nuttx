@@ -90,7 +90,7 @@ int statfs(const char *path, struct statfs *buf)
 {
   FAR struct inode *inode;
   const char       *relpath = NULL;
-  int               ret;
+  int               ret     = OK;
 
   /* Sanity checks */
 

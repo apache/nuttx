@@ -127,7 +127,7 @@ static void recvfrom_newdata(struct uip_driver_s *dev, struct recvfrom_s *pstate
   /* Copy the new appdata into the user buffer */
 
   memcpy(pstate->rf_buffer, dev->d_appdata, recvlen);
-  vdbg("Received %d bytes (of %d)\n", recvlen, dev->d_len);
+  nvdbg("Received %d bytes (of %d)\n", recvlen, dev->d_len);
 
   /* Update the accumulated size of the data read */
 
@@ -197,7 +197,7 @@ static inline void recvfrom_readahead(struct recvfrom_s *pstate)
               /* Copy the read-ahead data into the user buffer */
 
               memcpy(pstate->rf_buffer, readahead->rh_buffer, recvlen);
-              vdbg("Received %d bytes (of %d)\n", recvlen, readahead->rh_nbytes);
+              nvdbg("Received %d bytes (of %d)\n", recvlen, readahead->rh_nbytes);
 
               /* Update the accumulated size of the data read */
 
@@ -361,7 +361,7 @@ static uint8 recvfrom_tcpinterrupt(struct uip_driver_s *dev,
 {
   struct recvfrom_s *pstate = (struct recvfrom_s *)conn->data_private;
 
-  vdbg("flags: %02x\n", flags);
+  nvdbg("flags: %02x\n", flags);
 
   /* 'private' might be null in some race conditions (?) */
 
@@ -383,7 +383,7 @@ static uint8 recvfrom_tcpinterrupt(struct uip_driver_s *dev,
 
           if (pstate->rf_buflen == 0)
             {
-              vdbg("TCP resume\n");
+              nvdbg("TCP resume\n");
 
               /* The TCP receive buffer is full.  Return now, perhaps truncating
                * the received data (need to fix that).
@@ -414,7 +414,7 @@ static uint8 recvfrom_tcpinterrupt(struct uip_driver_s *dev,
 
       else if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
         {
-          vdbg("error\n");
+          nvdbg("error\n");
 
           /* Stop further callbacks */
 
@@ -441,7 +441,7 @@ static uint8 recvfrom_tcpinterrupt(struct uip_driver_s *dev,
            * callbacks
            */
 
-          vdbg("TCP timeout\n");
+          nvdbg("TCP timeout\n");
 
           conn->data_private = NULL;
           conn->data_event   = NULL;
@@ -535,7 +535,7 @@ static void recvfrom_udpinterrupt(struct uip_driver_s *dev,
 {
   struct recvfrom_s *pstate = (struct recvfrom_s *)conn->private;
 
-  vdbg("flags: %02x\n", flags);
+  nvdbg("flags: %02x\n", flags);
 
   /* 'private' might be null in some race conditions (?) */
 
@@ -551,7 +551,7 @@ static void recvfrom_udpinterrupt(struct uip_driver_s *dev,
 
           /* We are finished. */
 
-          vdbg("UDP done\n");
+          nvdbg("UDP done\n");
 
           /* Don't allow any further UDP call backs. */
 
@@ -573,7 +573,7 @@ static void recvfrom_udpinterrupt(struct uip_driver_s *dev,
 
       else if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
         {
-          vdbg("error\n");
+          nvdbg("error\n");
 
           /* Stop further callbacks */
 
@@ -600,7 +600,7 @@ static void recvfrom_udpinterrupt(struct uip_driver_s *dev,
            * callbacks
            */
 
-          vdbg("UDP timeout\n");
+          nvdbg("UDP timeout\n");
 
           /* Stop further callbacks */
 

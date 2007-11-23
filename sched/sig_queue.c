@@ -131,9 +131,9 @@ int sigqueue(int pid, int signo, void *sival_ptr)
 
   stcb = sched_gettcb(pid);
 #ifdef CONFIG_CAN_PASS_STRUCTS
-  dbg("TCB=0x%08x signo=%d value=%d\n", stcb, signo, value.sival_int);
+  sdbg("TCB=0x%08x signo=%d value=%d\n", stcb, signo, value.sival_int);
 #else
-  dbg("TCB=0x%08x signo=%d value=%p\n", stcb, signo, sival_ptr);
+  sdbg("TCB=0x%08x signo=%d value=%p\n", stcb, signo, sival_ptr);
 #endif
   if (pid == 0 || !stcb)
     {

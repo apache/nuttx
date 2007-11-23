@@ -112,7 +112,7 @@ int kill(pid_t pid, int signo)
   /* Get the TCB of the receiving task */
 
   stcb = sched_gettcb(pid);
-  dbg("TCB=0x%08x signo=%d\n", stcb, signo);
+  sdbg("TCB=0x%08x signo=%d\n", stcb, signo);
   if (!stcb)
     {
       *get_errno_ptr() = ESRCH;

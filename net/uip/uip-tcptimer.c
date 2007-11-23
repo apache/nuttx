@@ -123,7 +123,7 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec)
       if (conn->timer >= UIP_TIME_WAIT_TIMEOUT)
         {
           conn->tcpstateflags = UIP_CLOSED;
-          vdbg("TCP state: UIP_CLOSED\n");
+          nvdbg("TCP state: UIP_CLOSED\n");
         }
     }
   else if (conn->tcpstateflags != UIP_CLOSED)
@@ -157,7 +157,7 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec)
                     conn->nrtx == UIP_MAXSYNRTX))
                 {
                   conn->tcpstateflags = UIP_CLOSED;
-                  vdbg("TCP state: UIP_CLOSED\n");
+                  nvdbg("TCP state: UIP_CLOSED\n");
 
                   /* We call uip_tcpcallback() with UIP_TIMEDOUT to
                    * inform the application that the connection has

@@ -90,7 +90,7 @@ int pthread_mutex_lock(pthread_mutex_t *mutex)
   int mypid = (int)getpid();
   int ret = OK;
 
-  dbg("mutex=0x%p\n", mutex);
+  sdbg("mutex=0x%p\n", mutex);
 
   if (!mutex)
     {
@@ -108,7 +108,7 @@ int pthread_mutex_lock(pthread_mutex_t *mutex)
 
       if (mutex->pid == mypid)
         {
-          dbg("Returning EDEADLK\n");
+          sdbg("Returning EDEADLK\n");
           ret = EDEADLK;
         }
       else
@@ -129,7 +129,7 @@ int pthread_mutex_lock(pthread_mutex_t *mutex)
       sched_unlock();
     }
 
-  dbg("Returning %d\n", ret);
+  sdbg("Returning %d\n", ret);
   return ret;
 }
 

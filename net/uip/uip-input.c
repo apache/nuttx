@@ -313,7 +313,7 @@ void uip_input(struct uip_driver_s *dev)
       uip_stat.ip.drop++;
       uip_stat.ip.vhlerr++;
 #endif
-      dbg("Invalid IPv6 version: %d\n", BUF->vtc >> 4);
+      ndbg("Invalid IPv6 version: %d\n", BUF->vtc >> 4);
       goto drop;
     }
 #else /* CONFIG_NET_IPv6 */
@@ -327,7 +327,7 @@ void uip_input(struct uip_driver_s *dev)
       uip_stat.ip.drop++;
       uip_stat.ip.vhlerr++;
 #endif
-      dbg("Invalid IP version or header length: %02x\n", BUF->vhl);
+      ndbg("Invalid IP version or header length: %02x\n", BUF->vhl);
       goto drop;
     }
 #endif /* CONFIG_NET_IPv6 */
@@ -356,7 +356,7 @@ void uip_input(struct uip_driver_s *dev)
     }
   else
     {
-      dbg("IP packet shorter than length in IP header\n");
+      ndbg("IP packet shorter than length in IP header\n");
       goto drop;
     }
 
@@ -376,7 +376,7 @@ void uip_input(struct uip_driver_s *dev)
       uip_stat.ip.drop++;
       uip_stat.ip.fragerr++;
 #endif
-      dbg("IP fragment dropped\n");
+      ndbg("IP fragment dropped\n");
       goto drop;
 #endif /* UIP_REASSEMBLY */
     }
@@ -392,14 +392,14 @@ void uip_input(struct uip_driver_s *dev)
 #if defined(CONFIG_NET_PINGADDRCONF) && !defined(CONFIG_NET_IPv6)
       if (BUF->proto == UIP_PROTO_ICMP)
         {
-          dbg("Possible ping config packet received\n");
+          ndbg("Possible ping config packet received\n");
           uip_icmpinput(dev);
           goto done;
         }
       else
 #endif
         {
-          dbg("No IP address assigned\n");
+          ndbg("No IP address assigned\n");
           goto drop;
         }
     }
@@ -454,7 +454,7 @@ void uip_input(struct uip_driver_s *dev)
       uip_stat.ip.drop++;
       uip_stat.ip.chkerr++;
 #endif
-      dbg("Bad IP checksum\n");
+      ndbg("Bad IP checksum\n");
       goto drop;
     }
 #endif /* CONFIG_NET_IPv6 */
@@ -495,7 +495,7 @@ void uip_input(struct uip_driver_s *dev)
         uip_stat.ip.protoerr++;
 #endif
 
-        dbg("Unrecognized IP protocol\n");
+        ndbg("Unrecognized IP protocol\n");
         goto drop;
     }
 

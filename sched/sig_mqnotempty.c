@@ -98,9 +98,9 @@ int sig_mqnotempty (int pid, int signo, void *sival_ptr)
   stcb = sched_gettcb(pid);
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
-  dbg("TCB=%p signo=%d value=%d\n", stcb, signo, value.sival_int);
+  sdbg("TCB=%p signo=%d value=%d\n", stcb, signo, value.sival_int);
 #else
-  dbg("TCB=%p signo=%d sival_ptr=%p\n", stcb, signo, sival_ptr);
+  sdbg("TCB=%p signo=%d sival_ptr=%p\n", stcb, signo, sival_ptr);
 #endif
 
   /* Create the siginfo structure */

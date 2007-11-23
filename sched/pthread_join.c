@@ -99,7 +99,7 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
   FAR join_t *pjoin;
   int ret;
 
-  dbg("thread=%d\n", thread);
+  sdbg("thread=%d\n", thread);
 
   /* First make sure that this is not an attempt to join to
    * ourself.
@@ -132,7 +132,7 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
 
       FAR _TCB *tcb = sched_gettcb((pthread_t)thread);
 
-      dbg("Could not find thread data\n");
+      sdbg("Could not find thread data\n");
 
       /* Case (1) or (3) -- we can't tell which.  Assume (3) */
 
@@ -170,19 +170,19 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
 
       if (pjoin->terminated)
         {
-          dbg("Thread has terminated\n");
+          sdbg("Thread has terminated\n");
 
           /* Get the thread exit value from the terminated thread. */
 
           if (pexit_value)
             {
-              dbg("exit_value=0x%p\n", pjoin->exit_value);
+              sdbg("exit_value=0x%p\n", pjoin->exit_value);
               *pexit_value = pjoin->exit_value;
             }
         }
       else
         {
-          dbg("Thread is still running\n");
+          sdbg("Thread is still running\n");
 
           /* Relinquish the data set semaphore.  Since pre-emption is
            * disabled, we can be certain that no task has the
@@ -206,7 +206,7 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
           if (pexit_value)
             {
              *pexit_value = pjoin->exit_value;
-              dbg("exit_value=0x%p\n", pjoin->exit_value);
+              sdbg("exit_value=0x%p\n", pjoin->exit_value);
             }
 
           /* Post the thread's data semaphore so that the exitting thread
@@ -241,7 +241,7 @@ int pthread_join(pthread_t thread, pthread_addr_t *pexit_value)
       ret = OK;
     }
 
-  dbg("Returning %d\n", ret);
+  sdbg("Returning %d\n", ret);
   return ret;
 }
 

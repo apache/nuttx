@@ -89,7 +89,7 @@ int pthread_cond_broadcast(pthread_cond_t *cond)
   int ret = OK;
   int sval;
 
-  dbg("cond=0x%p\n", cond);
+  sdbg("cond=0x%p\n", cond);
 
   if (!cond)
     {
@@ -135,7 +135,7 @@ int pthread_cond_broadcast(pthread_cond_t *cond)
       sched_unlock();
     }
 
-  dbg("Returning %d\n", ret);
+  sdbg("Returning %d\n", ret);
   return ret;
 }
 

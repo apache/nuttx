@@ -67,7 +67,7 @@ int pthread_cond_init(pthread_cond_t *cond, pthread_condattr_t *attr)
 {
   int ret = OK;
 
-  dbg("cond=0x%p attr=0x%p\n", cond, attr);
+  sdbg("cond=0x%p attr=0x%p\n", cond, attr);
 
   if (!cond)
     {
@@ -83,7 +83,7 @@ int pthread_cond_init(pthread_cond_t *cond, pthread_condattr_t *attr)
       ret = EINVAL;
     }
 
-  dbg("Returning %d\n", ret);
+  sdbg("Returning %d\n", ret);
   return ret;
 }
 

@@ -74,7 +74,7 @@ void _exit(int status)
 {
   _TCB* tcb = (_TCB*)g_readytorun.head;
 
-  dbg("TCB=%p exitting\n", tcb);
+  sdbg("TCB=%p exitting\n", tcb);
 
   /* Remove the tcb task from the ready-to-run list.  We can
    * ignore the return value because we know that a context
@@ -113,7 +113,7 @@ void _exit(int status)
    */
 
   tcb = (_TCB*)g_readytorun.head;
-  dbg("New Active Task TCB=%p\n", tcb);
+  sdbg("New Active Task TCB=%p\n", tcb);
 
   /* The way that we handle signals in the simulation is kind of
    * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
@@ -122,7 +122,7 @@ void _exit(int status)
 
   if (tcb->xcp.sigdeliver)
     {
-      dbg("Delivering signals TCB=%p\n", tcb);
+      sdbg("Delivering signals TCB=%p\n", tcb);
       ((sig_deliver_t)tcb->xcp.sigdeliver)(tcb);
       tcb->xcp.sigdeliver = NULL;
     }

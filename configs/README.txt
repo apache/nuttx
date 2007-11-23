@@ -126,6 +126,12 @@ defconfig -- This is a configuration file similar to the Linux
 		  that will be used in the build
 		CONFIG_DEBUG - enables built-in debug options
 		CONFIG_DEBUG_VERBOSE - enables verbose debug output
+		CONFIG_DEBUG_SCHED - enable OS debug output (disabled by
+		  default)
+		CONFIG_DEBUG_MM - enable memory management debug output
+		  (disabld by default)
+		CONFIG_DEBUG_NET - enable network debug output (disabled
+		  by default)
 		CONFIG_HAVE_LOWPUTC - architecture supports low-level, boot
 		  time console output
 		CONFIG_MM_REGIONS - If the architecture includes multiple

@@ -76,7 +76,7 @@
 void uip_udpcallback(struct uip_driver_s *dev, struct uip_udp_conn *conn,
                      uint8 flags)
 {
-  vdbg("flags: %02x\n", flags);
+  nvdbg("flags: %02x\n", flags);
 
   /* Some sanity checking */
 
