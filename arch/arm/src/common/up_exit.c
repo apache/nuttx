@@ -75,7 +75,10 @@
 #if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
 static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
 {
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NFILE_STREAMS > 0
   int i;
+#endif
+
   dbg("  TCB=%p name=%s\n", tcb, tcb->argv[0]);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
