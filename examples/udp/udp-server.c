@@ -83,6 +83,7 @@ void recv_server(void)
 {
   struct sockaddr_in server;
   struct sockaddr_in client;
+  uint32 tmpaddr;
   unsigned char inbuf[1024];
   int sockfd;
   int nbytes;
@@ -128,7 +129,13 @@ void recv_server(void)
       addrlen = sizeof(struct sockaddr_in);
       nbytes = recvfrom(sockfd, inbuf, 1024, 0, 
                         (struct sockaddr*)&client, &addrlen);
-      message("server: %d. Recieved %d bytes\n", offset, nbytes);
+
+      tmpaddr = ntohl(client.sin_addr.s_addr);
+      message("server: %d. Received %d bytes from %d.%d.%d.%d:%d\n",
+              offset, nbytes, 
+              tmpaddr >> 24, (tmpaddr >> 16) & 0xff, 
+              (tmpaddr >> 8) & 0xff, tmpaddr & 0xff, 
+              ntohs(client.sin_port));
 
       if (nbytes < 0)
         {

@@ -1,5 +1,5 @@
 /****************************************************************************
- * uip-udpconn.c
+ * net/uip/uip-udpconn.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -52,6 +52,8 @@
 #include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
+
 #include <arch/irq.h>
 
 #include <net/uip/uipopt.h>
@@ -118,7 +120,7 @@ static inline void _uip_semtake(sem_t *sem)
  *
  ****************************************************************************/
 
-static struct uip_udp_conn *uip_find_conn( uint16 portno )
+static struct uip_udp_conn *uip_find_conn(uint16 portno)
 {
   int i;
 
@@ -234,6 +236,7 @@ void uip_udpfree(struct uip_udp_conn *conn)
 struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf)
 {
   struct uip_udp_conn *conn = (struct uip_udp_conn *)g_active_udp_connections.head;
+
   while (conn)
     {
       /* If the local UDP port is non-zero, the connection is considered
@@ -252,7 +255,6 @@ struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf)
              uiphdr_ipaddr_cmp(buf->srcipaddr, &conn->ripaddr)))
         {
           /* Matching connection found.. return a reference to it */
-
           break;
         }
 
@@ -261,7 +263,7 @@ struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf)
       conn = (struct uip_udp_conn *)conn->node.flink;
     }
 
-  return NULL;
+  return conn;
 }
 
 /****************************************************************************
@@ -307,13 +309,29 @@ int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
 #endif
 {
   int ret = -EADDRINUSE;
-  irqstate_t flags = irqsave();
-  if (!uip_find_conn(g_last_udp_port))
+  irqstate_t flags;
+
+  /* Never set lport to zero! */
+
+  if (addr->sin_port)
     {
-      conn->lport = HTONS(g_last_udp_port);
-      ret = OK;
+      /* Interrupts must be disabled while access the UDP connection list */
+
+      flags = irqsave();
+
+      /* Is any other UDP connection bound to this port? */
+
+      if (!uip_find_conn(addr->sin_port))
+        {
+          /* No.. then bind the socket to the port */
+
+          conn->lport = addr->sin_port;
+          ret = OK;
+        }
+
+      irqrestore(flags);
     }
-  irqrestore(flags);
+
   return ret;
 }
 
@@ -367,7 +385,7 @@ int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
               g_last_udp_port = 4096;
             }
         }
-      while (uip_find_conn(g_last_udp_port));
+      while (uip_find_conn(htons(g_last_udp_port)));
 
       /* Initialize and return the connection structure, bind it to the
        * port number
@@ -406,7 +424,7 @@ int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
 void uip_udpenable(struct uip_udp_conn *conn)
 {
   /* Add the connection structure to the active connectionlist. This list
-   * is modifiable from interrupt level, we we must diable interrupts to
+   * is modifiable from interrupt level, we we must disable interrupts to
    * access it safely.
    */
 
@@ -417,8 +435,8 @@ void uip_udpenable(struct uip_udp_conn *conn)
 
 void uip_udpdisable(struct uip_udp_conn *conn)
 {
-  /* Remove the connection structure to the active connectionlist. This list
-   * is modifiable from interrupt level, we we must diable interrupts to
+  /* Remove the connection structure from the active connectionlist. This list
+   * is modifiable from interrupt level, we we must disable interrupts to
    * access it safely.
    */
 

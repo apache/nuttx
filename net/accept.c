@@ -53,6 +53,10 @@
 #include "net-internal.h"
 
 /****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -75,6 +79,47 @@ struct accept_s
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Function: accept_tcpsender
+ *
+ * Description:
+ *   Getting the sender's address from the UDP packet
+ *
+ * Parameters:
+ *   conn   - The newly accepted TCP connection
+ *   pstate - the recvfrom state structure 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP
+static inline void accept_tcpsender(struct uip_conn *conn, struct accept_s *pstate)
+{
+ #ifdef CONFIG_NET_IPv6
+  FAR struct sockaddr_in6 *addr = pstate->acpt_addr;
+#else
+  FAR struct sockaddr_in *addr  = pstate->acpt_addr;
+#endif
+
+  if (addr)
+    {
+      addr->sin_family = AF_INET;
+      addr->sin_port   = conn->rport;
+
+#ifdef CONFIG_NET_IPv6
+      uip_ipaddr_copy(addr->sin_addr.s_addr, conn->ripaddr);
+#else
+      uip_ipaddr_copy(addr->sin_addr.s_addr, conn->ripaddr);
+#endif
+    }
+}
+#endif
 
 /****************************************************************************
  * Function: accept_interrupt
@@ -102,7 +147,8 @@ static int accept_interrupt(struct uip_conn *listener, struct uip_conn *conn)
   if (pstate)
     {
       /* Get the connection address */
-#warning "need to return the address of the connection"
+
+      accept_tcpsender(conn, pstate);
 
       /* Save the connection structure */
 

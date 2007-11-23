@@ -53,7 +53,10 @@ uint32 htonl(uint32 hl)
 #ifdef CONFIG_ENDIAN_BIG
   return hl;
 #else
-  return (uint32)htons((uint16)((hl) << 16)) | (uint32)htons((uint16)((hl) & 0xffff));
+  return (( (hl) >> 24) |
+          (((hl) >>  8) & 0x0000ff00) |
+          (((hl) <<  8) & 0x00ff0000) |
+	  ( (hl) << 24));
 #endif
 }
 

@@ -215,7 +215,7 @@
 	* Added listen() and accept()
 	* Added DM90x0 ethernet driver
 	* ARP timer is now built into the network layer
-	* Basic client functionality verified: socket(), bind(), connect(), recv(), send().
+	* Basic client functionality verified: TCP socket(), bind(), connect(), recv(), send().
 
 0.3.1 2007-11-19 Gregory Nutt <spudmonkey@racsa.co.cr>
 
@@ -223,12 +223,12 @@
 	* Corrected a TCP problem where packets were dropped because there was no
 	  recv() in place but the packet was being ACKed.  There are still TCP
 	  recv buffering issues, but this is part of a larger buffering issue.
-	* Basic server functionality verified: listen(), accept()
+	* Basic server functionality verified: TCP listen(), accept()
 	* Fix DM90x0 driver problem that caused TX overruns
 	* Add strncmp()
 	* Added TCP/IP read-ahead buffer to minimize failed ACKs and packet loss.
 
-0.3.2 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.2 2007-11-23 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Add strcat() and strncat()
 	* Integrated uIP micro webserver
@@ -239,4 +239,10 @@
 	* Moved urgent data info into device structure.
 	* TCP and ICMP protocols can now be disabled.
 	* Added UDP test in examples/udp
-	* Verified/debugged UDP send logic using examples/udp
+	* Verified/debugged UDP socket(), bind(), sendto() and recvfrom() logic
+	  using examples/udp
+	* recvfrom() and accept() now correctly return the remote address.
+	* Fixed computation error in ntohl().
+
+0.3.3 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
