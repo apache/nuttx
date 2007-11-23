@@ -38,7 +38,8 @@ o Network
 - Should implement SOCK_RAW
 - Performance Improvements (uIP is not very fast):
   Need to extend logic so that uIP can have more than on packet in flight and to
-  handle deferred acknowledgements.
+  handle deferred acknowledgements.  This is supposed to improve send performance by
+  an order of magnitude.
 - uIP polling issues:
   (1) Current logic will not support multiple ethernet drivers.  Each driver should
       poll on TCP connections connect on the network supported by the driver; UDP

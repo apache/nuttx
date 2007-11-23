@@ -370,25 +370,14 @@ extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  *
  * Construct an IP address from four bytes.
  *
- * This function constructs an IP address of the type that uIP handles
- * internally from four bytes. The function is handy for specifying IP
- * addresses to use with e.g. the uip_connect() function.
+ * This function constructs an IPv4 address in network byte order.
  *
- * Example:
- *
- *   uip_ipaddr_t ipaddr;
- *   struct uip_conn *c;
- *
- *   uip_ipaddr(&ipaddr, 192,168,1,2);
- *   c = uip_connect(&ipaddr, HTONS(80));
- *
- * addr A pointer to a uip_ipaddr_t variable that will be
- * filled in with the IP address.
- *
- * addr0 The first octet of the IP address.
- * addr1 The second octet of the IP address.
- * addr2 The third octet of the IP address.
- * addr3 The forth octet of the IP address.
+ *   addr  A pointer to a uip_ipaddr_t variable that will be
+ *         filled in with the IPv4 address.
+ *   addr0 The first octet of the IPv4 address.
+ *   addr1 The second octet of the IPv4 address.
+ *   addr2 The third octet of the IPv4 address.
+ *   addr3 The forth octet of the IPv4 address.
  */
 
 #define uip_ipaddr(addr, addr0, addr1, addr2, addr3) \
@@ -409,16 +398,17 @@ extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  * This function constructs an IPv6 address.
  */
 
-#define uip_ip6addr(addr, addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7) do { \
-                     ((uint16*)(addr))[0] = HTONS((addr0)); \
-                     ((uint16*)(addr))[1] = HTONS((addr1)); \
-                     ((uint16*)(addr))[2] = HTONS((addr2)); \
-                     ((uint16*)(addr))[3] = HTONS((addr3)); \
-                     ((uint16*)(addr))[4] = HTONS((addr4)); \
-                     ((uint16*)(addr))[5] = HTONS((addr5)); \
-                     ((uint16*)(addr))[6] = HTONS((addr6)); \
-                     ((uint16*)(addr))[7] = HTONS((addr7)); \
-                  } while(0)
+#define uip_ip6addr(addr, addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7) \
+  do { \
+    ((uint16*)(addr))[0] = HTONS((addr0)); \
+    ((uint16*)(addr))[1] = HTONS((addr1)); \
+    ((uint16*)(addr))[2] = HTONS((addr2)); \
+    ((uint16*)(addr))[3] = HTONS((addr3)); \
+    ((uint16*)(addr))[4] = HTONS((addr4)); \
+    ((uint16*)(addr))[5] = HTONS((addr5)); \
+    ((uint16*)(addr))[6] = HTONS((addr6)); \
+    ((uint16*)(addr))[7] = HTONS((addr7)); \
+  } while(0)
 
 /* Copy an IP address to another IP address.
  *

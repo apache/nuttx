@@ -55,11 +55,6 @@ UIP_CSRCS += uip-tcpconn.c uip-tcppoll.c uip-tcptimer.c uip-tcpsend.c \
              uip-tcpinput.c uip-tcpappsend.c uip-listen.c uip-tcpcallback.c \
              uip-tcpreadahead.c
 
-# Follow can be used to add support for the "uipsplit uIP TCP throughput booster hack"
-# but are not currently used
-
-UIP_CSRCS += uip-fw.c uip-split.c
-
 endif
 
 # UDP source files
