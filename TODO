@@ -49,6 +49,7 @@ o Network
   is in the subnet served by the driver.
 - uIP/Socket callback logic is not thread safe. This means that a socket cannot be
   used concurrently by two threads.  Minimal fix:  Add mutex to support exclusion.
+- IPv6 support is incomplete
 
 o USB
 - Implement USB device support

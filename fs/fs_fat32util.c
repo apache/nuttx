@@ -695,22 +695,22 @@ int fat_mount(struct fat_mountpt_s *fs, boolean writeable)
 
   /* We did it! */
 
-  dbg("FAT%d:\n", fs->fs_type == 0 ? 12 : fs->fs_type == 1  ? 16 : 32);
-  dbg("\tHW  sector size:     %d\n", fs->fs_hwsectorsize);
-  dbg("\t    sectors:         %d\n", fs->fs_hwnsectors);
-  dbg("\tFAT reserved:        %d\n", fs->fs_fatresvdseccount);
-  dbg("\t    sectors:         %d\n", fs->fs_fattotsec);
-  dbg("\t    start sector:    %d\n", fs->fs_fatbase);
-  dbg("\t    root sector:     %d\n", fs->fs_rootbase);
-  dbg("\t    root entries:    %d\n", fs->fs_rootentcnt);
-  dbg("\t    data sector:     %d\n", fs->fs_database);
-  dbg("\t    FSINFO sector:   %d\n", fs->fs_fsinfo);
-  dbg("\t    Num FATs:        %d\n", fs->fs_fatnumfats);
-  dbg("\t    FAT size:        %d\n", fs->fs_fatsize);
-  dbg("\t    sectors/cluster: %d\n", fs->fs_fatsecperclus);
-  dbg("\t    max clusters:    %d\n", fs->fs_nclusters);
-  dbg("\tFSI free count       %d\n", fs->fs_fsifreecount);
-  dbg("\t    next free        %d\n", fs->fs_fsinextfree);
+  fdbg("FAT%d:\n", fs->fs_type == 0 ? 12 : fs->fs_type == 1  ? 16 : 32);
+  fdbg("\tHW  sector size:     %d\n", fs->fs_hwsectorsize);
+  fdbg("\t    sectors:         %d\n", fs->fs_hwnsectors);
+  fdbg("\tFAT reserved:        %d\n", fs->fs_fatresvdseccount);
+  fdbg("\t    sectors:         %d\n", fs->fs_fattotsec);
+  fdbg("\t    start sector:    %d\n", fs->fs_fatbase);
+  fdbg("\t    root sector:     %d\n", fs->fs_rootbase);
+  fdbg("\t    root entries:    %d\n", fs->fs_rootentcnt);
+  fdbg("\t    data sector:     %d\n", fs->fs_database);
+  fdbg("\t    FSINFO sector:   %d\n", fs->fs_fsinfo);
+  fdbg("\t    Num FATs:        %d\n", fs->fs_fatnumfats);
+  fdbg("\t    FAT size:        %d\n", fs->fs_fatsize);
+  fdbg("\t    sectors/cluster: %d\n", fs->fs_fatsecperclus);
+  fdbg("\t    max clusters:    %d\n", fs->fs_nclusters);
+  fdbg("\tFSI free count       %d\n", fs->fs_fsifreecount);
+  fdbg("\t    next free        %d\n", fs->fs_fsinextfree);
 
   return OK;
 

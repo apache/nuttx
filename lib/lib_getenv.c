@@ -103,7 +103,7 @@ char *getenv(const char *name)
   const char *pend = &environment[size-1];
   const char *ptmp;
 
-  dbg("name=\"%s\"\n", name);
+  ldbg("name=\"%s\"\n", name);
 
   if (name)
     {
@@ -111,7 +111,7 @@ char *getenv(const char *name)
 
       while (penv < pend)
         {
-          vdbg("Compare to=\"%s\"\n", penv);
+          lvdbg("Compare to=\"%s\"\n", penv);
 
           /* The logic below basically implements a version of
            * strcmp where the strings may be terminated with = signs.
@@ -130,7 +130,7 @@ char *getenv(const char *name)
                     {
                       /* Yes.. return the pointer to the value. */
 
-                      dbg("Returning \"%s\"\n", penv+1);
+                      ldbg("Returning \"%s\"\n", penv+1);
                       return ((char*)penv+1);
                     }
                   else
@@ -165,6 +165,6 @@ char *getenv(const char *name)
 
   /* If we got here, then no matching string was found. */
 
-  dbg("Returning NULL\n");
+  ldbg("Returning NULL\n");
   return NULL;
 }

@@ -112,6 +112,26 @@
 # define nvdbg(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_FS
+# define fdbg(format, arg...)   dbg(format, ##arg)
+# define flldbg(format, arg...) lldbg(format, ##arg)
+# define fvdbg(format, arg...)  vdbg(format, ##arg)
+#else
+# define fdbg(x...)
+# define flldbg(x...)
+# define fvdbg(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_LIB
+# define ldbg(format, arg...)   dbg(format, ##arg)
+# define llldbg(format, arg...) lldbg(format, ##arg)
+# define lvdbg(format, arg...)  vdbg(format, ##arg)
+#else
+# define ldbg(x...)
+# define llldbg(x...)
+# define lvdbg(x...)
+#endif
+
 /************************************************************
  * Public Type Declarations
  ************************************************************/

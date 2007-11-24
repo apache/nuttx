@@ -121,7 +121,7 @@ int vsscanf(char *buf, const char *s, va_list ap)
   const char     *tc;
   char            tmp[MAXLN];
 
-  vdbg("vsscanf: buf=\"%s\" fmt=\"%s\"\n", buf, s);
+  lvdbg("vsscanf: buf=\"%s\" fmt=\"%s\"\n", buf, s);
 
   count = noassign = width = lflag = 0;
   while (*s && *buf)
@@ -135,13 +135,13 @@ int vsscanf(char *buf, const char *s, va_list ap)
 
       if (*s == '%')
         {
-          vdbg("vsscanf: Specifier found\n");
+          lvdbg("vsscanf: Specifier found\n");
 
           /* Check for qualifiers on the conversion specifier */
           s++;
           for (; *s; s++)
             {
-              vdbg("vsscanf: Processing %c\n", *s);
+              lvdbg("vsscanf: Processing %c\n", *s);
 
               if (strchr("dibouxcsefg%", *s))
                 break;
@@ -163,7 +163,7 @@ int vsscanf(char *buf, const char *s, va_list ap)
 
           if (*s == 's')
             {
-              vdbg("vsscanf: Performing string conversion\n");
+              lvdbg("vsscanf: Performing string conversion\n");
 
               while (isspace(*buf))
                 buf++;
@@ -184,7 +184,7 @@ int vsscanf(char *buf, const char *s, va_list ap)
 
           else if (*s == 'c')
             {
-              vdbg("vsscanf: Performing character conversion\n");
+              lvdbg("vsscanf: Performing character conversion\n");
 
               if (!width)
                 width = 1;
@@ -201,7 +201,7 @@ int vsscanf(char *buf, const char *s, va_list ap)
 
           else if (strchr("dobxu", *s))
             {
-              vdbg("vsscanf: Performing integer conversion\n");
+              lvdbg("vsscanf: Performing integer conversion\n");
 
               /* Skip over any white space before the integer string */
 
@@ -237,7 +237,7 @@ int vsscanf(char *buf, const char *s, va_list ap)
               strncpy(tmp, buf, width);
               tmp[width] = '\0';
 
-              vdbg("vsscanf: tmp[]=\"%s\"\n", tmp);
+              lvdbg("vsscanf: tmp[]=\"%s\"\n", tmp);
 
               /* Perform the integer conversion */
 
@@ -251,7 +251,7 @@ int vsscanf(char *buf, const char *s, va_list ap)
 #else
                   int tmpint = strtol(tmp, NULL, base);
 #endif
-                  vdbg("vsscanf: Return %d to 0x%p\n", tmpint, pint);
+                  lvdbg("vsscanf: Return %d to 0x%p\n", tmpint, pint);
                   *pint = tmpint;
                 }
             }
@@ -264,10 +264,10 @@ int vsscanf(char *buf, const char *s, va_list ap)
 # warning "No floating point conversions"
               void *pv = va_arg(ap, void*);
 
-              vdbg("vsscanf: Return 0.0 to %p\n", pv);
+              lvdbg("vsscanf: Return 0.0 to %p\n", pv);
               *((double_t*)pv) = 0.0;
 #else
-              vdbg("vsscanf: Performing floating point conversion\n");
+              lvdbg("vsscanf: Performing floating point conversion\n");
 
               /* Skip over any white space before the real string */
 
@@ -293,7 +293,7 @@ int vsscanf(char *buf, const char *s, va_list ap)
               tmp[width] = '\0';
               buf += width;
 
-              vdbg("vsscanf: tmp[]=\"%s\"\n", tmp);
+              lvdbg("vsscanf: tmp[]=\"%s\"\n", tmp);
 
               /* Perform the floating point conversion */
 
@@ -308,7 +308,7 @@ int vsscanf(char *buf, const char *s, va_list ap)
 #endif
                   void *pv = va_arg(ap, void*);
 
-                  vdbg("vsscanf: Return %f to %p\n", dvalue, pv);
+                  lvdbg("vsscanf: Return %f to %p\n", dvalue, pv);
 
                   /* But we have to check whether we need to return a
                    * float or a double.
