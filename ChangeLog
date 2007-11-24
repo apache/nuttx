@@ -248,3 +248,5 @@
 
 	* Removed unused uIP files
 	* sched/, mm/, net/ subystem debug can not be selectively enabled/disabled
+	* Correct socket close logic -- needs to disconnect TCP socket on close
+	* uIP webserver now seems to be fully functional

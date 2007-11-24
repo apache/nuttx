@@ -42,12 +42,144 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <errno.h>
+#include <debug.h>
+
+#include <arch/irq.h>
+#include <net/uip/uip-arch.h>
 
 #include "net-internal.h"
 
 /****************************************************************************
- * Global Functions
+ * Private Types
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP
+struct tcp_close_s
+{
+  FAR struct socket *cl_psock;      /* Reference to the TCP socket */
+  sem_t              cl_sem;        /* Semaphore signals disconnect completion */
+};
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function: netclose_disconnect
+ *
+ * Description:
+ *   Break any current TCP connection
+ *
+ * Parameters:
+ *   conn - uIP TCP connection structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called from normal user-level logic
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP
+static uint8 netclose_interrupt(struct uip_driver_s *dev,
+                                struct uip_conn *conn, uint8 flags)
+{
+  struct tcp_close_s *pstate = (struct tcp_close_s *)conn->data_private;
+
+  nvdbg("flags: %02x\n", flags);
+
+  if (pstate)
+    {
+      /* UIP_CLOSE: The remote host has closed the connection
+       * UIP_ABORT: The remote host has aborted the connection
+       */
+
+      if ((flags & (UIP_CLOSE|UIP_ABORT)) != 0)
+        {
+          /* The disconnection is complete */
+
+          conn->data_private = NULL;
+          conn->data_event   = NULL;
+          sem_post(&pstate->cl_sem);
+          nvdbg("Resuming\n");
+        }
+      else
+        {
+          /* Drop data received in this state and make sure that UIP_CLOSE
+           * is set in the response
+           */
+
+          dev->d_len = 0;
+          return (flags & ~UIP_NEWDATA) | UIP_CLOSE;
+        }
+    }
+
+  return flags;
+}
+#endif /* CONFIG_NET_TCP */
+
+/****************************************************************************
+ * Function: netclose_disconnect
+ *
+ * Description:
+ *   Break any current TCP connection
+ *
+ * Parameters:
+ *   conn - uIP TCP connection structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called from normal user-level logic
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP
+static inline void netclose_disconnect(FAR struct socket *psock)
+{
+  struct tcp_close_s state;
+  struct uip_conn *conn;
+  irqstate_t flags;
+
+  /* Interrupts are disabled here to avoid race conditions */
+
+  flags = irqsave();
+
+  /* Is the TCP socket in a connected state? */
+
+  if (_SS_ISCONNECTED(psock->s_flags))
+    {
+       /* Set up to receive TCP data events */
+
+       state.cl_psock     = psock;
+       sem_init(&state.cl_sem, 0, 0);
+
+       conn               = psock->s_conn;
+       conn->data_private = (void*)&state;
+       conn->data_event   = netclose_interrupt;
+
+       /* Wait for the disconnect event */
+
+       (void)sem_wait(&state.cl_sem);
+
+       /* We are now disconnected */
+
+       sem_destroy(&state.cl_sem);
+       conn->data_private = NULL;
+       conn->data_event   = NULL;
+    }
+
+  irqrestore(flags);
+}
+#endif
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -87,20 +219,21 @@ int net_close(int sockfd)
       case SOCK_STREAM:
         {
           struct uip_conn *conn = psock->s_conn;
-          uip_unlisten(conn);
-          uip_tcpfree(conn);
+          uip_unlisten(conn);          /* No longer accepting connections */
+          netclose_disconnect(psock);  /* Break any current connections */
+          uip_tcpfree(conn);           /* Free uIP resources */
         }
         break;
 #endif
 
 #ifdef CONFIG_NET_UDP
       case SOCK_DGRAM:
-        uip_udpfree(psock->s_conn);
+        uip_udpfree(psock->s_conn);    /* Free uIP resources */
         break;
 #endif
 
       default:
-        err = -EBADF;
+        err = EBADF;
         goto errout;
     }
 

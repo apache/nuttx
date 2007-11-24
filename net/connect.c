@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+#include <net/uip/uip-arch.h>
 
 #include "net-internal.h"
 
@@ -257,7 +258,10 @@ static uint8 tcp_connect_interrupt(struct uip_driver_s *dev,
 
       else
         {
-          return 0;
+          /* Drop data received in this state */
+
+          dev->d_len = 0;
+          return flags & ~UIP_NEWDATA;
         }
 
       nvdbg("Resuming: %d\n", pstate->tc_result);

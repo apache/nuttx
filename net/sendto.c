@@ -196,18 +196,18 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
                const struct sockaddr *to, socklen_t tolen)
 {
   FAR struct socket *psock;
+#ifdef CONFIG_NET_UDP
 #ifdef CONFIG_NET_IPv6
   FAR const struct sockaddr_in6 *into = (const struct sockaddr_in6 *)to;
 #else
   FAR const struct sockaddr_in *into = (const struct sockaddr_in *)to;
 #endif
-#ifdef CONFIG_NET_UDP
   struct uip_udp_conn *udp_conn;
   struct sendto_s state;
   irqstate_t save;
+  int ret;
 #endif
   int err;
-  int ret;
 
   /* If to is NULL or tolen is zero, then this function is same as send (for
    * connected socket types)
