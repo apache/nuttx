@@ -132,6 +132,10 @@ defconfig -- This is a configuration file similar to the Linux
 		  (disabld by default)
 		CONFIG_DEBUG_NET - enable network debug output (disabled
 		  by default)
+		CONFIG_DEBUG_FS - enable filesystem debug output (disabled
+		  by default)
+		CONFIG_DEBUG_LIB - enable C library debug output (disabled
+		  by default)
 		CONFIG_HAVE_LOWPUTC - architecture supports low-level, boot
 		  time console output
 		CONFIG_MM_REGIONS - If the architecture includes multiple
