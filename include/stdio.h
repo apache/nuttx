@@ -126,9 +126,10 @@ EXTERN int    sprintf(char *buf, const char *format, ...);
 EXTERN int    snprintf(char *buf, size_t size, const char *format, ...);
 
 EXTERN int    ungetc(int c, FILE *stream);
-EXTERN int    vprintf(const char *s, va_list ap);
-EXTERN int    vfprintf(FILE *stream, const char *s, va_list ap);
-EXTERN int    vsprintf(char *buf, const char *s, va_list ap);
+EXTERN int    vprintf(const char *format, va_list ap);
+EXTERN int    vfprintf(FILE *stream, const char *format, va_list ap);
+EXTERN int    vsprintf(char *buf, const char *format, va_list ap);
+EXTERN int    vsnprintf(char *buf, size_t size, const char *format, va_list ap);
 
 /* POSIX-like File System Interfaces */
 
