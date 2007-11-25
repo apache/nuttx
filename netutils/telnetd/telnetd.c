@@ -1,42 +1,66 @@
-/* netutils/telnetd/telnetd.c
+/****************************************************************************
+ * netutils/telnetd/telnetd.c
  *
- * Copyright (c) 2003, Adam Dunkels.
- * All rights reserved.
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * This is a leverage of similar logic from uIP:
+ *
+ *   Author: Adam Dunkels <adam@sics.se>
+ *   Copyright (c) 2003, Adam Dunkels.
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. The name of the author may not be used to endorse or promote
- *    products derived from this software without specific prior
- *    written permission.
+ * 3. Neither the name of the Institute nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
- * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/socket.h>
+
+#include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
+#include <pthread.h>
+#include <debug.h>
 
-#include <net/uip/uip.h>
-#include <net/uip/uip-arch.h>
+#include <net/uip/telnetd.h>
+#include <net/uip/uip-lib.h>
 
-#include "telnetd.h"
 #include "shell.h"
+
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
 
 #define ISO_nl       0x0a
 #define ISO_cr       0x0d
@@ -49,302 +73,417 @@
 #define STATE_DONT   5
 #define STATE_CLOSE  6
 
-static struct telnetd_state s;
-
 #define TELNET_IAC   255
 #define TELNET_WILL  251
 #define TELNET_WONT  252
 #define TELNET_DO    253
 #define TELNET_DONT  254
 
-void shell_quit(char *str)
-{
-  s.state = STATE_CLOSE;
-}
+/* Configurable settings */
 
-static void sendline(char *line)
-{
-  unsigned int i;
+#ifndef CONFIG_NETUTILS_IOBUFFER_SIZE
+# define CONFIG_NETUTILS_IOBUFFER_SIZE 512
+#endif
 
-  for (i = 0; i < TELNETD_CONF_NUMLINES; ++i)
+#ifndef CONFIG_NETUTILS_CMD_SIZE
+# define CONFIG_NETUTILS_CMD_SIZE 40
+#endif
+
+/* As threads are created to handle each request, a stack must be allocated
+ * for the thread.  Use a default if the user provided no stacksize.
+ */
+
+#ifndef CONFIG_NETUTILS_TELNETDSTACKSIZE
+# define CONFIG_NETUTILS_TELNETDSTACKSIZE 4096
+#endif
+
+/* Enabled dumping of all input/output buffers */
+
+#undef CONFIG_NETUTILS_TELNETD_DUMPBUFFER
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct telnetd_s
+{
+  int   tn_sockfd;
+  char  tn_iobuffer[CONFIG_NETUTILS_IOBUFFER_SIZE];
+  char  tn_cmd[CONFIG_NETUTILS_CMD_SIZE];
+  uint8 tn_bufndx;
+  uint8 tn_state;
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: telnetd_dumpbuffer
+ *
+ * Description:
+ *   Dump a buffer of data (debug only)
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETUTILS_TELNETD_DUMPBUFFER
+static void telnetd_dumpbuffer(const char *msg, const char *buffer, ssize_t nbytes)
+{
+#ifdef CONFIG_DEBUG
+  char line[128];
+  int ch;
+  int i;
+  int j;
+
+  dbg("%s:\n", msg);
+  for (i = 0; i < nbytes; i += 16)
     {
-      if (s.lines[i] == NULL)
+      sprintf(line, "%04x: ", i);
+
+      for ( j = 0; j < 16; j++)
         {
-          s.lines[i] = line;
-          break;
+          if (i + j < nbytes)
+            {
+              sprintf(&line[strlen(line)], "%02x ", buffer[i+j] );
+            }
+          else
+            {
+              strcpy(&line[strlen(line)], "   ");
+            }
         }
+
+      for ( j = 0; j < 16; j++)
+        {
+          if (i + j < nbytes)
+            {
+              ch = buffer[i+j];
+              sprintf(&line[strlen(line)], "%c", ch >= 0x20 && ch <= 0x7e ? ch : '.');
+            }
+        }
+      dbg("%s\n", line);
     }
-  if (i == TELNETD_CONF_NUMLINES)
-    {
-      free(line);
-    }
+#endif
 }
+#else
+# define telnetd_dumpbuffer(msg,buffer,nbytes)
+#endif
 
-void shell_prompt(char *str)
+/****************************************************************************
+ * Name: telnetd_putchar
+ *
+ * Description:
+ *   Add another parsed character to the TELNET command string
+ *
+ ****************************************************************************/
+
+static void telnetd_putchar(struct telnetd_s *pstate, uint8 ch)
 {
-  char *line;
-  line = (char*)malloc(TELNETD_CONF_LINELEN);
-  if (line != NULL)
-    {
-      strncpy(line, str, TELNETD_CONF_LINELEN);
-      sendline(line);
-    }
-}
+  /* Ignore carriage returns */
 
-void shell_output(char *str1, char *str2)
-{
-  unsigned len;
-  char *line;
-
-  line = (char*)malloc(TELNETD_CONF_LINELEN);
-  if (line != NULL)
-    {
-      len = strlen(str1);
-      strncpy(line, str1, TELNETD_CONF_LINELEN);
-      if (len < TELNETD_CONF_LINELEN)
-        {
-          strncpy(line + len, str2, TELNETD_CONF_LINELEN - len);
-        }
-      len = strlen(line);
-      if (len < TELNETD_CONF_LINELEN - 2)
-        {
-          line[len] = ISO_cr;
-          line[len+1] = ISO_nl;
-          line[len+2] = 0;
-        }
-      sendline(line);
-    }
-}
-
-void telnetd_init(void)
-{
-  uip_listen(HTONS(23));
-  shell_init();
-}
-
-static void acked(void)
-{
-  unsigned int i;
-
-  while(s.numsent > 0)
-    {
-      free(s.lines[0]);
-      for (i = 1; i < TELNETD_CONF_NUMLINES; ++i)
-        {
-          s.lines[i - 1] = s.lines[i];
-        }
-      s.lines[TELNETD_CONF_NUMLINES - 1] = NULL;
-      --s.numsent;
-    }
-}
-
-static void senddata(struct uip_driver_s *dev, struct uip_conn *conn)
-{
-  char *bufptr, *lineptr;
-  int buflen, linelen;
-
-  bufptr = (char*)dev->d_appdata;
-  buflen = 0;
-  for (s.numsent = 0;
-        s.numsent < TELNETD_CONF_NUMLINES && s.lines[s.numsent] != NULL;
-        ++s.numsent)
-    {
-      lineptr = s.lines[s.numsent];
-      linelen = strlen(lineptr);
-      if (linelen > TELNETD_CONF_LINELEN)
-        {
-          linelen = TELNETD_CONF_LINELEN;
-        }
-      if (buflen + linelen < uip_mss(conn))
-        {
-          memcpy(bufptr, lineptr, linelen);
-          bufptr += linelen;
-          buflen += linelen;
-        }
-      else
-        {
-          break;
-        }
-    }
-  uip_send(dev, dev->d_appdata, buflen);
-}
-
-static void closed(void)
-{
-  unsigned int i;
-
-  for (i = 0; i < TELNETD_CONF_NUMLINES; ++i)
-    {
-      if (s.lines[i] != NULL)
-        {
-          free(s.lines[i]);
-        }
-    }
-}
-
-static void get_char(uint8 c)
-{
-  if (c == ISO_cr)
+  if (ch == ISO_cr)
   {
     return;
   }
 
-  s.buf[(int)s.bufptr] = c;
-  if (s.buf[(int)s.bufptr] == ISO_nl || s.bufptr == sizeof(s.buf) - 1)
+  /* Add all other characters to the cmd buffer */
+
+  pstate->tn_cmd[pstate->tn_bufndx] = ch;
+
+  /* If a newline was added or if the buffer is full, then process it now */
+
+  if (ch == ISO_nl || pstate->tn_bufndx == (CONFIG_NETUTILS_CMD_SIZE - 1))
     {
-      if (s.bufptr > 0)
+      if (pstate->tn_bufndx > 0)
         {
-          s.buf[(int)s.bufptr] = 0;
+          pstate->tn_cmd[pstate->tn_bufndx] = '\0';
         }
-      shell_input(s.buf);
-      s.bufptr = 0;
+
+      telnetd_dumpbuffer("TELNET CMD", pstate->tn_cmd, strlen(pstate->tn_cmd));
+      shell_input(pstate, pstate->tn_cmd);
+      pstate->tn_bufndx = 0;
     }
   else
     {
-      ++s.bufptr;
+      pstate->tn_bufndx++;
+      vdbg("Add '%c', bufndx=%d\n", ch, pstate->tn_bufndx);
     }
 }
 
-static void sendopt(uint8 option, uint8 value)
+/****************************************************************************
+ * Name: telnetd_sendopt
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+static void telnetd_sendopt(struct telnetd_s *pstate, uint8 option, uint8 value)
 {
-  char *line;
-  line = (char*)malloc(TELNETD_CONF_LINELEN);
-  if (line != NULL)
+  uint8 optbuf[4];
+  optbuf[0] = TELNET_IAC;
+  optbuf[1] = option;
+  optbuf[2] = value;
+  optbuf[3] = 0;
+
+  telnetd_dumpbuffer("Send optbuf", optbuf, 4);
+  if (send(pstate->tn_sockfd, optbuf, 4, 0) < 0)
     {
-      line[0] = TELNET_IAC;
-      line[1] = option;
-      line[2] = value;
-      line[3] = 0;
-      sendline(line);
+      dbg("[%d] Failed to send TELNET_IAC\n", pstate->tn_sockfd);
     }
 }
 
-static void newdata(struct uip_driver_s *dev)
+/****************************************************************************
+ * Name: telnetd_receive
+ *
+ * Description:
+ *   Process a received TELENET buffer
+ *
+ ****************************************************************************/
+
+static int telnetd_receive(struct telnetd_s *pstate, size_t len)
 {
-  uint16 len;
-  uint8 c;
-  char *dataptr;
+  char *ptr = pstate->tn_iobuffer;
+  uint8 ch;
 
-  len = uip_datalen(dev);
-  dataptr = (char *)dev->d_appdata;
-
-  while(len > 0 && s.bufptr < sizeof(s.buf))\
+  while (len > 0)
     {
-      c = *dataptr;
-      ++dataptr;
-      --len;
-      switch(s.state)
+      ch = *ptr++;
+      len--;
+
+      vdbg("ch=%02x state=%d\n", ch, pstate->tn_state);
+      switch (pstate->tn_state)
         {
           case STATE_IAC:
-            if (c == TELNET_IAC)
+            if (ch == TELNET_IAC)
               {
-                get_char(c);
-                s.state = STATE_NORMAL;
+                telnetd_putchar(pstate, ch);
+                pstate->tn_state = STATE_NORMAL;
              }
             else
               {
-                switch (c)
+                switch (ch)
                   {
                     case TELNET_WILL:
-                      s.state = STATE_WILL;
+                      pstate->tn_state = STATE_WILL;
                       break;
+
                     case TELNET_WONT:
-                      s.state = STATE_WONT;
+                      pstate->tn_state = STATE_WONT;
                       break;
+
                     case TELNET_DO:
-                      s.state = STATE_DO;
+                      pstate->tn_state = STATE_DO;
                       break;
+
                     case TELNET_DONT:
-                      s.state = STATE_DONT;
+                      pstate->tn_state = STATE_DONT;
                       break;
+
                     default:
-                      s.state = STATE_NORMAL;
+                      pstate->tn_state = STATE_NORMAL;
                       break;
                   }
               }
             break;
+
           case STATE_WILL:
             /* Reply with a DONT */
-            sendopt(TELNET_DONT, c);
-            s.state = STATE_NORMAL;
+
+            telnetd_sendopt(pstate, TELNET_DONT, ch);
+            pstate->tn_state = STATE_NORMAL;
             break;
 
           case STATE_WONT:
             /* Reply with a DONT */
-            sendopt(TELNET_DONT, c);
-            s.state = STATE_NORMAL;
+
+            telnetd_sendopt(pstate, TELNET_DONT, ch);
+            pstate->tn_state = STATE_NORMAL;
             break;
+
           case STATE_DO:
             /* Reply with a WONT */
-            sendopt(TELNET_WONT, c);
-            s.state = STATE_NORMAL;
+
+            telnetd_sendopt(pstate, TELNET_WONT, ch);
+            pstate->tn_state = STATE_NORMAL;
             break;
+
           case STATE_DONT:
             /* Reply with a WONT */
-            sendopt(TELNET_WONT, c);
-            s.state = STATE_NORMAL;
+
+            telnetd_sendopt(pstate, TELNET_WONT, ch);
+            pstate->tn_state = STATE_NORMAL;
             break;
+
           case STATE_NORMAL:
-            if (c == TELNET_IAC)
+            if (ch == TELNET_IAC)
               {
-                s.state = STATE_IAC;
+                pstate->tn_state = STATE_IAC;
               }
             else
               {
-                get_char(c);
+                telnetd_putchar(pstate, ch);
               }
             break;
         }
     }
+  return OK;
 }
 
-/* This function is called by the UIP interrupt handling logic whenevent an
- * event of interest occurs.
- */
+/****************************************************************************
+ * Name: telnetd_handler
+ *
+ * Description:
+ *   Each time a new connection to port 23 is made, a new thread is created
+ *   that begins at this entry point.  There should be exactly one argument
+ *   and it should be the socket descriptor (+1).
+ *
+ ****************************************************************************/
 
-uint8 uip_interrupt_event(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
+static void *telnetd_handler(void *arg)
 {
-#warning OBSOLETE -- needs to be redesigned
-  unsigned int i;
+  struct telnetd_s *pstate = (struct telnetd_s *)malloc(sizeof(struct telnetd_s));
+  int               sockfd = (int)arg;
+  int               ret    = ERROR;
 
-  if (uip_connected_event(flags))
+  dbg("[%d] Started\n", sockfd);
+
+  /* Verify that the state structure was successfully allocated */
+
+  if (pstate)
     {
-      for (i = 0; i < TELNETD_CONF_NUMLINES; ++i)
-      {
-        s.lines[i] = NULL;
-      }
-      s.bufptr = 0;
-      s.state = STATE_NORMAL;
 
-      shell_start();
-  }
+      /* Initialize the thread state structure */
 
-  if (s.state == STATE_CLOSE)
-  {
-    s.state = STATE_NORMAL;
-    return UIP_CLOSE;
-  }
+      memset(pstate, 0, sizeof(struct telnetd_s));
+      pstate->tn_sockfd = sockfd;
+      pstate->tn_state  = STATE_NORMAL;
 
-  if (uip_close_event(flags) || uip_abort_event(flags) || uip_timeout_event(flags))
-  {
-    closed();
-  }
+      /* Start up the shell */
 
-  if (uip_ack_event(flags))
-  {
-    acked();
-  }
+      shell_init(pstate);
+      shell_start(pstate);
 
-  if (uip_newdata_event(flags))
-  {
-    newdata(dev);
-  }
+      /* Loop processing each TELNET command */
+      do
+        {
+          /* Read a buffer of data from the TELNET client */
 
-  if (uip_rexmit_event(flags) || uip_newdata_event(flags) || uip_ack_event(flags) ||
-      uip_connected_event(flags) || uip_poll_event(flags))
-  {
-    senddata(dev, conn);
-  }
+          ret = recv(pstate->tn_sockfd, pstate->tn_iobuffer, CONFIG_NETUTILS_IOBUFFER_SIZE, 0);
+          if (ret > 0)
+            {
 
-  return flags;
+              /* Process the received TELNET data */
+
+              telnetd_dumpbuffer("Received buffer", pstate->tn_iobuffer, ret);
+              ret = telnetd_receive(pstate, ret);
+            }
+        }
+      while (ret >= 0 && pstate->tn_state != STATE_CLOSE);
+      dbg("[%d] ret=%d tn_state=%d\n", sockfd, ret, pstate->tn_state);
+
+      /* End of command processing -- Clean up and exit */
+
+      free(pstate);
+    }
+
+  /* Exit the task */
+
+  dbg("[%d] Exitting\n", sockfd);
+  close(sockfd);
+  pthread_exit(NULL);
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: telnetd_init
+ *
+ * Description:
+ *   This is the main processing thread for telnetd.  It never returns
+ *   unless an error occurs
+ *
+ ****************************************************************************/
+
+void telnetd_init(void)
+{
+  /* Execute telnetd_handler on each connection to port 23 */
+
+  uip_server(HTONS(23), telnetd_handler, CONFIG_NETUTILS_TELNETDSTACKSIZE);
+}
+
+/****************************************************************************
+ * Name: shell_prompt
+ *
+ * Description:
+ *   Print a prompt to the shell window.
+ *
+ *   This function can be used by the shell back-end to print out a prompt
+ *   to the shell window.
+ *
+ ****************************************************************************/
+
+void shell_prompt(void *handle, char *str)
+{
+  struct telnetd_s *pstate = (struct telnetd_s *)handle;
+  int len = strlen(str);
+
+  strncpy(pstate->tn_iobuffer, str, len);
+  telnetd_dumpbuffer("Shell prompt", pstate->tn_iobuffer, len);
+  if (send(pstate->tn_sockfd, pstate->tn_iobuffer, len, 0) < 0)
+    {
+      dbg("[%d] Failed to send prompt\n", pstate->tn_sockfd);
+    }
+}
+
+/****************************************************************************
+ * Name: shell_output
+ *
+ * Description:
+ *   Print a string to the shell window.
+ *
+ *   This function is implemented by the shell GUI / telnet server and
+ *   can be called by the shell back-end to output a string in the
+ *   shell window. The string is automatically appended with a linebreak.
+ *
+ ****************************************************************************/
+
+void shell_output(void *handle, const char *fmt, ...)
+{
+  struct telnetd_s *pstate = (struct telnetd_s *)handle;
+  unsigned len;
+  va_list ap;
+
+  va_start(ap, fmt);
+  vsnprintf(pstate->tn_iobuffer, CONFIG_NETUTILS_IOBUFFER_SIZE, fmt, ap);
+  va_end(ap);
+
+  len = strlen(pstate->tn_iobuffer);
+  if (len < CONFIG_NETUTILS_IOBUFFER_SIZE - 2)
+    {
+      pstate->tn_iobuffer[len]   = ISO_cr;
+      pstate->tn_iobuffer[len+1] = ISO_nl;
+      pstate->tn_iobuffer[len+2] = '\0';
+    }
+
+  telnetd_dumpbuffer("Shell output", pstate->tn_iobuffer, len+2);
+  if (send(pstate->tn_sockfd, pstate->tn_iobuffer, len+2, 0) < 0)
+    {
+      dbg("[%d] Failed to send prompt\n", pstate->tn_sockfd);
+    }
+}
+
+/****************************************************************************
+ * Name: shell_quit
+ *
+ * Description:
+ *   Quit the shell
+ *
+ ****************************************************************************/
+
+void shell_quit(void *handle, char *str)
+{
+  struct telnetd_s *pstate = (struct telnetd_s *)handle;
+  pstate->tn_state = STATE_CLOSE;
+}
+

@@ -1,5 +1,5 @@
 /****************************************************************************
- * httpd
+ * netutils/webserver/httpd.c
  * httpd Web server
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -510,7 +510,7 @@ int httpd_listen(void)
 {
   /* Execute httpd_handler on each connection to port 80 */
 
-  uip_server(HTONS(80), httpd_handler, CONFIG_EXAMPLES_UIP_HTTPDSTACKSIZE);
+  uip_server(HTONS(80), httpd_handler, CONFIG_NETUTILS_HTTPDSTACKSIZE);
 
   /* uip_server only returns on errors */
 

@@ -52,14 +52,14 @@
  * be used to start listening for signals.
  */
 
-void shell_init(void);
+void shell_init(void *handle);
 
 /* Start the shell back-end.
  *
  * Called by the front-end when a new shell is started.
  */
 
-void shell_start(void);
+void shell_start(void *handle);
 
 /* Process a shell command.
  *
@@ -70,34 +70,28 @@ void shell_start(void);
  * command The command to be processed.
  */
 
-void shell_input(char *command);
+void shell_input(void *handle, char *command);
 
 /* Quit the shell. */
 
-void shell_quit(char *);
-
+void shell_quit(void *handle, char *);
 
 /* Print a string to the shell window.
  *
  * This function is implemented by the shell GUI / telnet server and
  * can be called by the shell back-end to output a string in the
  * shell window. The string is automatically appended with a linebreak.
- *
- * str1 The first half of the string to be output.
- * str2 The second half of the string to be output.
  */
 
-void shell_output(char *str1, char *str2);
+void shell_output(void *handle, const char *fmt, ...);
 
 /* Print a prompt to the shell window.
  *
  * This function can be used by the shell back-end to print out a
  * prompt to the shell window.
  *
- * prompt The prompt to be printed.
- *
  */
 
-void shell_prompt(char *prompt);
+void shell_prompt(void *handle, char *prompt);
 
 #endif /* __SHELL_H__ */

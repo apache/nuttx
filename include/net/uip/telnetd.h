@@ -1,5 +1,5 @@
 /****************************************************************************
- * netutils/telnetd/telnetd.c
+ * include/net/uip/telnetd.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -36,104 +36,35 @@
  * SUCH DAMAGE.
  ****************************************************************************/
 
+#ifndef __NET_UIP_TELNETD_H
+#define __NET_UIP_TELNETD_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <string.h>
-#include "shell.h"
-
 /****************************************************************************
- * Definitions
+ * Included Files
  ****************************************************************************/
 
-#define SHELL_PROMPT "uIP 1.0> "
-
 /****************************************************************************
- * Private Types
+ * Public Function Prototypes
  ****************************************************************************/
 
-struct ptentry_s
-{
-  char *commandstr;
-  void (* pfunc)(void *handle, char *str);
-};
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
 
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
+/* Start the telnet server -- does not return unless an error occurs */
 
-static void parse(void *handle, register char *str, struct ptentry_s *t);
-static void help(void *handle, char *str);
-static void unknown(void *handle, char *str);
+EXTERN void telnetd_init(void);
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static struct ptentry_s g_parsetab[] =
-{
-  {"stats", help},
-  {"conn",  help},
-  {"help",  help},
-  {"exit",  shell_quit},
-  {"?",     help},
-  {NULL,    unknown}
-};
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-static void parse(void *handle, char *str, struct ptentry_s *t)
-{
-  struct ptentry_s *p;
-
-  for (p = t; p->commandstr != NULL; ++p)
-    {
-      if (strncmp(p->commandstr, str, strlen(p->commandstr)) == 0)
-        {
-          break;
-        }
-    }
-
-  p->pfunc(handle, str);
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
 
-static void help(void *handle, char *str)
-{
-  shell_output(handle, "Available commands:");
-  shell_output(handle, "stats   - show network statistics");
-  shell_output(handle, "conn    - show TCP connections");
-  shell_output(handle, "help, ? - show help");
-  shell_output(handle, "exit    - exit shell");
-}
-
-static void unknown(void *handle, char *str)
-{
-  if (strlen(str) > 0)
-    {
-      shell_output(handle, "Unknown command: ", str);
-    }
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-void shell_init(void *handle)
-{
-}
-
-void shell_start(void *handle)
-{
-  shell_output(handle, "uIP command shell");
-  shell_output(handle, "Type '?' and return for help");
-  shell_prompt(handle, SHELL_PROMPT);
-}
-
-void shell_input(void *handle, char *cmd)
-{
-  parse(handle, cmd, g_parsetab);
-  shell_prompt(handle, SHELL_PROMPT);
-}
+#endif /* __NET_UIP_TELNETD_H */
