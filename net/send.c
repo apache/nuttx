@@ -110,7 +110,7 @@ static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn, uin
    * then send it now.
    */
 
-  if (pstate->snd_state != STATE_DATA_SENT || uip_rexmit_event(flags))
+  if (pstate->snd_state != STATE_DATA_SENT || (flags & UIP_REXMIT) != 0)
     {
       if (pstate->snd_buflen > uip_mss(conn))
         {
@@ -126,7 +126,7 @@ static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn, uin
 
   /* Check if all data has been sent and acknowledged */
 
-  else if (pstate->snd_state == STATE_DATA_SENT && uip_ack_event(flags))
+  else if (pstate->snd_state == STATE_DATA_SENT && (flags & UIP_ACKDATA) != 0)
     {
       /* Yes.. the data has been sent AND acknowledged */
 
@@ -152,6 +152,7 @@ static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn, uin
 
           /* Don't allow any further call backs. */
 
+          conn->data_flags   = 0;
           conn->data_private = NULL;
           conn->data_event   = NULL;
 
@@ -169,6 +170,7 @@ static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn, uin
     {
       /* Stop further callbacks */
 
+      conn->data_flags   = 0;
       conn->data_private = NULL;
       conn->data_event   = NULL;
 
@@ -301,6 +303,7 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
       /* Set up the callback in the connection */
 
       conn               = (struct uip_conn *)psock->s_conn;
+      conn->data_flags   = UIP_REXMIT|UIP_ACKDATA|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
       conn->data_private = (void*)&state;
       conn->data_event   = send_interrupt;
 
@@ -318,6 +321,7 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
 
       /* Make sure that no further interrupts are processed */
 
+      conn->data_flags   = 0;
       conn->data_private = NULL;
       conn->data_event   = NULL;
     }

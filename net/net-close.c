@@ -102,6 +102,7 @@ static uint8 netclose_interrupt(struct uip_driver_s *dev,
         {
           /* The disconnection is complete */
 
+          conn->data_flags   = 0;
           conn->data_private = NULL;
           conn->data_event   = NULL;
           sem_post(&pstate->cl_sem);
@@ -160,6 +161,7 @@ static inline void netclose_disconnect(FAR struct socket *psock)
        sem_init(&state.cl_sem, 0, 0);
 
        conn               = psock->s_conn;
+       conn->data_flags   = UIP_NEWDATA|UIP_CLOSE|UIP_ABORT;
        conn->data_private = (void*)&state;
        conn->data_event   = netclose_interrupt;
 
@@ -170,6 +172,7 @@ static inline void netclose_disconnect(FAR struct socket *psock)
        /* We are now disconnected */
 
        sem_destroy(&state.cl_sem);
+       conn->data_flags   = 0;
        conn->data_private = NULL;
        conn->data_event   = NULL;
     }

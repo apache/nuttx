@@ -1,5 +1,5 @@
 /****************************************************************************
- * dhcpc.c
+ * netutils/dhcpc/dhcpc.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -103,10 +103,10 @@
 struct dhcpc_state_internal
 {
   struct uip_udp_conn *conn;
-  const void            *mac_addr;
-  int                    mac_len;
-  int                    sockfd;
-  char                   buffer[256];
+  const void          *mac_addr;
+  int                  mac_len;
+  int                  sockfd;
+  char                 buffer[256];
 };
 
 struct dhcp_msg

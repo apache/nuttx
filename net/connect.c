@@ -146,6 +146,7 @@ static inline void tcp_setup_callbacks(struct uip_conn *conn, FAR struct socket 
 {
   /* Set up the callbacks in the connection */
 
+  conn->data_flags   = UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT|UIP_CONNECTED;
   conn->data_private = (void*)pstate;
   conn->data_event   = tcp_connect_interrupt;
 
@@ -165,6 +166,7 @@ static inline void tcp_teardown_callbacks(struct uip_conn *conn, int status)
 {
   /* Make sure that no further interrupts are processed */
 
+  conn->data_flags   = 0;
   conn->data_private = NULL;
   conn->data_event   = NULL;
 

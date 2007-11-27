@@ -84,7 +84,7 @@ uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
    * can have zero-length with UIP_NEWDATA set just to cause an ACK).
    */
 
-  if (uip_newdata_event(flags) && dev->d_len > 0)
+  if ((flags & UIP_NEWDATA) != 0 && dev->d_len > 0)
     {
 #if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
       /* Allocate a read-ahead buffer to hold the newly received data */
@@ -174,7 +174,7 @@ uint8 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint8 fla
   if (conn->data_event)
     {
       /* Perform the callback.  Callback function normally returns the input flags,
-       * however, the implemenation may set one of the following:
+       * however, the implementation may set one of the following:
        *
        *   UIP_CLOSE   - Gracefully close the current connection
        *   UIP_ABORT   - Abort (reset) the current connection on an error that
@@ -188,12 +188,17 @@ uint8 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint8 fla
 
       ret = conn->data_event(dev, conn, flags);
     }
-  else
+
+  /* If there is no data callback -OR- if the data callback does not handle the
+   * newdata event, then there is no handler in place to handle new incoming data.
+   */
+
+  if (!conn->data_event || (conn->data_flags & UIP_NEWDATA) == 0)
     {
-      /* There is no handler to receive new data in place */
+      /* In either case, we will take a default newdata action */
 
       nvdbg("No listener on connection\n");
-      ret = uip_dataevent(dev, conn, flags);
+      ret = uip_dataevent(dev, conn, ret);
     }
 
   /* Check if there is a connection-related event and a connection

@@ -266,9 +266,8 @@ extern void uip_setipid(uint16 id);
  *
  * Note: This function does not guarantee that the sent data will
  * arrive at the destination. If the data is lost in the network, the
- * application will be invoked with the uip_rexmit_event() event being
- * set. The application will then have to resend the data using this
- * function.
+ * application will be invoked with the UIP_REXMIT flag set.  The
+ * application will then have to resend the data using this function.
  *
  * data A pointer to the data which is to be sent.
  *
@@ -276,92 +275,6 @@ extern void uip_setipid(uint16 id);
  */
 
 extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
-
-/* The length of any incoming data that is currently avaliable (if avaliable)
- * in the d_appdata buffer.
- *
- * The test function uip_data() must first be used to check if there
- * is any data available at all.
- */
-
-#define uip_datalen(dev)    ((dev)->d_len)
-
-/* uIP tests that can be made to determine in what state the current
- * connection is, and what the application function should do.
- *
- * Is new incoming data available?
- *
- * Will reduce to non-zero if there is new data for the application
- * present at the d_appdata pointer. The size of the data is
- * avaliable through the d_len element.
- */
-
-#define uip_newdata_event(f) ((f) & UIP_NEWDATA)
-
-/* Has previously sent data been acknowledged?
- *
- * Will reduce to non-zero if the previously sent data has been
- * acknowledged by the remote host. This means that the application
- * can send new data.
- */
-
-#define uip_ack_event(f) ((f) & UIP_ACKDATA)
-
-/* Has the connection just been connected?
- *
- * Reduces to non-zero if the current connenetutils/telnetd/telnetd.cction has been connected to
- * a remote host. This will happen both if the connection has been
- * actively opened (with uip_connect()) or passively opened (with
- * uip_listen()).
- */
-
-#define uip_connected_event(f) ((f) & UIP_CONNECTED)
-
-/* Has the connection been closed by the other end?
- *
- * Is non-zero if the connection has been closed by the remote
- * host. The application may then do the necessary clean-ups.
- */
-
-#define uip_close_event(f) ((f) & UIP_CLOSE)
-
-/* Has the connection been aborted by the other end?
- *
- * Non-zero if the current connection has been aborted (reset) by the
- * remote host.
- */
-
-#define uip_abort_event(f) ((f) & UIP_ABORT)
-
-/* Has the connection timed out?
- *
- * Non-zero if the current connection has been aborted due to too many
- * retransmissions.
- */
-
-#define uip_timeout_event(f) ((f) & UIP_TIMEDOUT)
-
-/* Do we need to retransmit previously data?
- *
- * Reduces to non-zero if the previously sent data has been lost in
- * the network, and the application should retransmit it. The
- * application should send the exact same data as it did the last
- * time, using the uip_send() function.
- */
-
-#define uip_rexmit_event(f) ((f) & UIP_REXMIT)
-
-/* Is the connection being polled by uIP?
- *
- * Is non-zero if the reason the application is invoked is that the
- * current connection has been idle for a while and should be
- * polled.
- *
- * The polling event can be used for sending data without having to
- * wait for the remote host to send data.
- */
-
-#define uip_poll_event(f) ((f) & UIP_POLL)
 
 /* uIP convenience and converting functions.
  *

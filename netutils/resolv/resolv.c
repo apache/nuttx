@@ -1,4 +1,5 @@
-/* uip-resolv.c
+/****************************************************************************
+ * uip-resolv.c
  * DNS host name to IP address resolver.
  *
  * The uIP DNS resolver functions are used to lookup a hostname and

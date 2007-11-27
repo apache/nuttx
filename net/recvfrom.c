@@ -369,7 +369,7 @@ static uint8 recvfrom_tcpinterrupt(struct uip_driver_s *dev,
     {
       /* If new data is available, then complete the read action. */
 
-      if (uip_newdata_event(flags))
+      if ((flags & UIP_NEWDATA) != 0)
         {
           /* Copy the data from the packet */
 
@@ -391,6 +391,7 @@ static uint8 recvfrom_tcpinterrupt(struct uip_driver_s *dev,
                * Don't allow any further TCP call backs.
                */
 
+              conn->data_flags   = 0;
               conn->data_private = NULL;
               conn->data_event   = NULL;
 
@@ -418,6 +419,7 @@ static uint8 recvfrom_tcpinterrupt(struct uip_driver_s *dev,
 
           /* Stop further callbacks */
 
+          conn->data_flags   = 0;
           conn->data_private = NULL;
           conn->data_event   = NULL;
 
@@ -443,6 +445,7 @@ static uint8 recvfrom_tcpinterrupt(struct uip_driver_s *dev,
 
           nvdbg("TCP timeout\n");
 
+          conn->data_flags   = 0;
           conn->data_private = NULL;
           conn->data_event   = NULL;
 
@@ -543,7 +546,7 @@ static void recvfrom_udpinterrupt(struct uip_driver_s *dev,
     {
       /* If new data is available, then complete the read action. */
 
-      if (uip_newdata_event(flags))
+      if ((flags & UIP_NEWDATA) != 0)
         {
           /* Copy the data from the packet */
 
@@ -860,6 +863,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       /* Set up the callback in the connection */
 
       conn               = (struct uip_conn *)psock->s_conn;
+      conn->data_flags   = UIP_NEWDATA|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
       conn->data_private = (void*)&state;
       conn->data_event   = recvfrom_tcpinterrupt;
 
@@ -873,6 +877,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Make sure that no further interrupts are processed */
 
+      conn->data_flags   = 0;
       conn->data_private = NULL;
       conn->data_event   = NULL;
     }

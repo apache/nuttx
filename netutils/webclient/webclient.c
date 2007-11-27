@@ -338,7 +338,7 @@ static void newdata(struct uip_driver_s *dev)
 {
   uint16 len;
 
-  len = uip_datalen(dev);
+  len = dev->d_len;
 
   if (s.state == WEBCLIENT_STATE_STATUSLINE) {
     len = parse_statusline(dev, len);
@@ -363,7 +363,7 @@ uint8 uip_interrupt_event(struct uip_driver_s *dev, struct uip_conn *conn, uint8
 #warning OBSOLETE -- needs to be redesigned
   g_return = flags;
 
-  if (uip_connected_event(flags))
+  if ((flags & UIP_CONNECTED) != 0)
     {
       s.timer = 0;
       s.state = WEBCLIENT_STATE_STATUSLINE;
@@ -378,33 +378,33 @@ uint8 uip_interrupt_event(struct uip_driver_s *dev, struct uip_conn *conn, uint8
       return UIP_ABORT;
     }
 
-  if (uip_abort_event(flags))
+  if ((flags & UIP_ABORT) != 0)
     {
       webclient_aborted();
     }
 
-  if (uip_timeout_event(flags))
+  if ((flags & UIP_TIMEDOUT) != 0)
     {
       webclient_timedout();
     }
 
-  if (uip_ack_event(flags))
+  if ((flags & UIP_ACKDATA) != 0)
     {
       s.timer = 0;
       acked(conn);
     }
 
-  if (uip_newdata_event(flags))
+  if ((flags & UIP_NEWDATA) != 0)
     {
       s.timer = 0;
       newdata(dev);
     }
 
-  if (uip_rexmit_event(flags) || uip_newdata_event(flags) || uip_ack_event(flags))
+  if ((flags & UIP_REXMIT) != 0 || (flags & UIP_NEWDATA) != 0 || (flags & UIP_ACKDATA) != 0)
     {
       senddata(dev, conn);
     }
-  else if (uip_poll_event(flags))
+  else if ((flags & UIP_POLL) != 0)
     {
       ++s.timer;
       if (s.timer == WEBCLIENT_TIMEOUT)
@@ -414,7 +414,7 @@ uint8 uip_interrupt_event(struct uip_driver_s *dev, struct uip_conn *conn, uint8
         }
     }
 
-  if (uip_close_event(flags))
+  if ((flags & UIP_CLOSE) != 0)
     {
       if (s.httpflag != HTTPFLAG_MOVED)
         {

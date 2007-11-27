@@ -253,3 +253,4 @@
 	* fs/ and lib/ subystem debug can not be selectively enabled/disabled
 	* Added vsnprintf
 	* Integrated uIP telnetd
+	* Add missing logic to readahead buffer logic

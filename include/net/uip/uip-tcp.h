@@ -121,6 +121,9 @@ struct uip_conn
   uint8  timer;           /* The retransmission timer (units: half-seconds) */
   uint8  nrtx;            /* The number of retransmissions for the last
                            * segment sent */
+  uint8  data_flags;      /* Flags that will be handled by the data_event()
+                           * callback function (see data_event() discussion below).
+                           */
 
   /* Read-ahead buffering */
 
@@ -143,6 +146,10 @@ struct uip_conn
    *        UIP_NEWDATA - May be cleared to suppress returning the ACK response.
    *                     (dev->d_len should also be set to zero in this case).
    *
+   *
+   *      The provider of the data_event callback must also set data_flags.  This
+   *      will inform the uIP layer which flags are and are not handled by the
+   *      callback.
    *   accept() is called when the TCP logic has created a connection
    *   connection_event() is called on any of the subset of connection-related events
    */

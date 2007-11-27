@@ -59,21 +59,25 @@
  * our project as defined in the config/<board-name>/defconfig file
  */
 
+/* DHCPC may be used in conjunction with any other feature (or not) */
+
+#if defined(CONFIG_EXAMPLE_UIP_DHCPC)
+# include <net/uip/resolv.h>
+# include <net/uip/dhcpc.h>
+#endif
+
+/* Pick the netutils feature under test (which may be DHCPC) */
+
 #if defined(CONFIG_EXAMPLE_UIP_SMTP)
 # include <net/uip/smtp.h>
 #elif defined(CONFIG_EXAMPLE_UIP_TELNETD)
 # include <net/uip/telnetd.h>
 #elif defined(CONFIG_EXAMPLE_UIP_WEBSERVER)
 # include <net/uip/httpd.h>
-#elif defined(CONFIG_EXAMPLE_UIP_DHCPC)
-# include <net/uip/resolv.h>
-# include <net/uip/dhcpc.h>
-#elif defined(CONFIG_EXAMPLE_UIP_RESOLV)
-# include <net/uip/resolv.h>
 #elif defined(CONFIG_EXAMPLE_UIP_WEBCLIENT)
 # include <net/uip/resolv.h>
 # include <net/uip/webclient.h>
-#else
+#elif !defined(CONFIG_EXAMPLE_UIP_DHCPC)
 # error "No network application specified"
 #endif
 
@@ -155,19 +159,19 @@ int user_start(int argc, char *argv[])
   uip_setnetmask("eth0", &addr);
 #endif
 
-#if defined(CONFIG_EXAMPLE_UIP_WEBSERVER)
-  httpd_init();
-  httpd_listen();
-#elif defined(CONFIG_EXAMPLE_UIP_TELNETD)
-  telnetd_init();
-#elif defined(CONFIG_EXAMPLE_UIP_DHCPC)
+#if defined(CONFIG_EXAMPLE_UIP_DHCPC) || defined(CONFIG_EXAMPLE_UIP_WEBCLIENT)
+  /* Set up the resolver */
+
+  resolv_init();
+#endif
+
+#if defined(CONFIG_EXAMPLE_UIP_DHCPC)
   /* Get the MAC address of the NIC */
 
   uip_getmacaddr("eth0", mac);
 
-  /* Set up the resolver and DHCPC modules */
+  /* Set up the DHCPC modules */
 
-  resolv_init();
   handle = dhcpc_open(&mac, IFHWADDRLEN);
 
   /* Get an IP address */
@@ -182,6 +186,13 @@ int user_start(int argc, char *argv[])
         resolv_conf(&ds.dnsaddr);
         dhcpc_close(handle);
     }
+#endif
+
+#if defined(CONFIG_EXAMPLE_UIP_WEBSERVER)
+  httpd_init();
+  httpd_listen();
+#elif defined(CONFIG_EXAMPLE_UIP_TELNETD)
+  telnetd_init();
 #elif defined(CONFIG_EXAMPLE_UIP_SMTP)
   uip_ipaddr(addr.s_addr, 127, 0, 0, 1);
   handle = smtp_open();
@@ -194,10 +205,9 @@ int user_start(int argc, char *argv[])
     }
 #elif defined(CONFIG_EXAMPLE_UIP_WEBCLIENT)
   webclient_init();
-  resolv_init();
-  uip_ipaddr(addr.s_addr, 195, 54, 122, 204);
+  addr.s_addr = HTONL(CONFIG_EXAMPLE_UIP_DNSADDR);
   resolv_conf(&addr);
-  resolv_query("www.sics.se");
+  resolv_query(CONFIG_EXAMPLE_UIP_SERVERURL);
 #endif
 
   while(1)
