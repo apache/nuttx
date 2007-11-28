@@ -734,6 +734,9 @@ Other memory:
 	* Added vsnprintf
 	* Integrated uIP telnetd
 	* Add missing logic to readahead buffer logic
+	* examples/nettest uses larger buffers
+	* Improved ACK handling in send() to better hander deferred acknowledgements
+	  and polling intervals.  Greatly improves send performance.
 </pre></ul>
 
 <table width ="100%">
