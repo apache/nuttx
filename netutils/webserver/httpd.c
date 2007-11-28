@@ -78,8 +78,8 @@
 
 #define errno *get_errno_ptr()
 
-#define CONFIG_NETUTILS_HTTPD_DUMPBUFFER 1
-#undef  CONFIG_NETUTILS_HTTPD_DUMPPSTATE
+#undef CONFIG_NETUTILS_HTTPD_DUMPBUFFER
+#undef CONFIG_NETUTILS_HTTPD_DUMPPSTATE
 
 /****************************************************************************
  * Private Data

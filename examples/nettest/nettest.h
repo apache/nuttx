@@ -85,7 +85,7 @@
 #endif
 
 #define PORTNO     5471
-#define SENDSIZE   512
+#define SENDSIZE   4096
 
 /****************************************************************************
  * Public Function Prototypes

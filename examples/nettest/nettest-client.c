@@ -56,9 +56,9 @@
 void send_client(void)
 {
   struct sockaddr_in myaddr;
-  char outbuf[SENDSIZE];
+  char *outbuf;
 #ifndef CONFIG_EXAMPLE_NETTEST_PERFORMANCE
-  char inbuf[SENDSIZE];
+  char *inbuf;
 #endif
   int sockfd;
   int nbytessent;
@@ -69,13 +69,28 @@ void send_client(void)
   int ch;
   int i;
 
+  /* Allocate buffers */
+
+  outbuf = (char*)malloc(SENDSIZE);
+#ifndef CONFIG_EXAMPLE_NETTEST_PERFORMANCE
+  inbuf  = (char*)malloc(SENDSIZE);
+  if (!outbuf || !inbuf)
+#else
+  if (!outbuf)
+#endif
+    {
+      message("client: failed to allocate buffers\n");
+      exit(1);
+    }
+
+
   /* Create a new TCP socket */
 
   sockfd = socket(PF_INET, SOCK_STREAM, 0);
   if (sockfd < 0)
     {
       message("client socket failure %d\n", errno);
-      exit(1);
+      goto errout_with_buffers;
     }
 
   /* Connect the socket to the server */
@@ -92,7 +107,7 @@ void send_client(void)
   if (connect( sockfd, (struct sockaddr*)&myaddr, sizeof(struct sockaddr_in)) < 0)
     {
       message("client: connect failure: %d\n", errno);
-      exit(1);
+      goto errout_with_socket;
     }
   message("client: Connected\n");
 
@@ -117,14 +132,12 @@ void send_client(void)
       if (nbytessent < 0)
         {
           message("client: send failed: %d\n", errno);
-          close(sockfd);
-          exit(-1);
+          goto errout_with_socket;
         }
       else if (nbytessent != 512)
         {
           message("client: Bad send length=%d: %d\n", nbytessent);
-          close(sockfd);
-          exit(-1);
+          goto errout_with_socket;
         }
     }
 #else
@@ -137,14 +150,12 @@ void send_client(void)
   if (nbytessent < 0)
     {
       message("client: send failed: %d\n", errno);
-      close(sockfd);
-      exit(-1);
+      goto errout_with_socket;
     }
   else if (nbytessent != SENDSIZE)
     {
       message("client: Bad send length: %d Expected: %d\n", nbytessent, SENDSIZE);
-      close(sockfd);
-      exit(-1);
+      goto errout_with_socket;
     }
 
   totalbytesrecvd = 0;
@@ -156,8 +167,7 @@ void send_client(void)
       if (nbytesrecvd < 0)
         {
           message("client: recv failed: %d\n", errno);
-          close(sockfd);
-          exit(-1);
+          goto errout_with_socket;
         }
       totalbytesrecvd += nbytesrecvd;
       message("client: Received %d of %d bytes\n", totalbytesrecvd, SENDSIZE);
@@ -167,16 +177,29 @@ void send_client(void)
   if (totalbytesrecvd != SENDSIZE)
     {
       message("client: Bad recv length: %d Expected: %d\n", totalbytesrecvd, SENDSIZE);
-      close(sockfd);
-      exit(-1);
+      goto errout_with_socket;
     }
   else if (memcmp(inbuf, outbuf, SENDSIZE) != 0)
     {
       message("client: Received buffer does not match sent buffer\n");
-      close(sockfd);
-      exit(-1);
+      goto errout_with_socket;
     }
 
   close(sockfd);
+  free(outbuf);
+#ifndef CONFIG_EXAMPLE_NETTEST_PERFORMANCE
+  free(inbuf);
 #endif
+  return;
+#endif
+
+errout_with_socket:
+  close(sockfd);
+
+errout_with_buffers:
+  free(outbuf);
+#ifndef CONFIG_EXAMPLE_NETTEST_PERFORMANCE
+  free(inbuf);
+#endif
+  exit(1);
 }

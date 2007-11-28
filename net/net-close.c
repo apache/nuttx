@@ -165,6 +165,10 @@ static inline void netclose_disconnect(FAR struct socket *psock)
        conn->data_private = (void*)&state;
        conn->data_event   = netclose_interrupt;
 
+       /* Notify the device driver of the availaibilty of TX data */
+
+       netdev_txnotify(&conn->ripaddr);
+
        /* Wait for the disconnect event */
 
        (void)sem_wait(&state.cl_sem);

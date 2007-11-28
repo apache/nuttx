@@ -33,10 +33,6 @@ o Network
   but is not implemented.
 - uIP's netutils/smtp, dpcpc, resolv, webclient -- untested
 - Should implement SOCK_RAW
-- Performance Improvements (uIP is not very fast):
-  Need to extend logic so that uIP can have more than on packet in flight and to
-  handle deferred acknowledgements.  This is supposed to improve send performance by
-  an order of magnitude.
 - uIP polling issues:
   (1) Current logic will not support multiple ethernet drivers.  Each driver should
       poll on TCP connections connect on the network supported by the driver; UDP
@@ -78,8 +74,8 @@ o C5471
 
 o DM320
 - It seems that when a lot of debug statements are added, the system no
-  longer boots.  There could be some issue with the bootloader or with
-  the programming of the SDRAM MMU regions.
+  longer boots.  This has been diagnosed as a stack problem.. making the stack
+  bigger or removing arrays on the stack fixes the problem.
 
 o LPC214x
 - Finish bringup

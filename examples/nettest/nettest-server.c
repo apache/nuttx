@@ -58,7 +58,7 @@ void recv_server(void)
 #ifdef NETTEST_HAVE_SOLINGER
   struct linger ling;
 #endif
-  char buffer[1024];
+  char *buffer;
   int listensd;
   int acceptsd;
   socklen_t addrlen;
@@ -71,13 +71,23 @@ void recv_server(void)
 #endif
   int optval;
 
+  /* Allocate a BIG buffer */
+
+  buffer = (char*)malloc(2*SENDSIZE);
+  if (!buffer)
+    {
+      message("server: failed to allocate buffer\n");
+      exit(1);
+    }
+
+
   /* Create a new TCP socket */
 
   listensd = socket(PF_INET, SOCK_STREAM, 0);
   if (listensd < 0)
     {
       message("server: socket failure: %d\n", errno);
-      exit(1);
+      goto errout_with_buffer;
     }
 
   /* Set socket to reuse address */
@@ -86,7 +96,7 @@ void recv_server(void)
   if (setsockopt(listensd, SOL_SOCKET, SO_REUSEADDR, (void*)&optval, sizeof(int)) < 0)
     {
       message("server: setsockopt SO_REUSEADDR failure: %d\n", errno);
-      exit(1);
+      goto errout_with_listensd;
     }
 
   /* Bind the socket to a local address */
@@ -98,7 +108,7 @@ void recv_server(void)
   if (bind(listensd, (struct sockaddr*)&myaddr, sizeof(struct sockaddr_in)) < 0)
     {
       message("server: bind failure: %d\n", errno);
-      exit(1);
+      goto errout_with_listensd;
     }
 
   /* Listen for connections on the bound TCP socket */
@@ -106,7 +116,7 @@ void recv_server(void)
   if (listen(listensd, 5) < 0)
     {
       message("server: listen failure %d\n", errno);
-      exit(1);
+      goto errout_with_listensd;
     }
 
   /* Accept only one connection */
@@ -117,7 +127,7 @@ void recv_server(void)
   if (acceptsd < 0)
     {
       message("server: accept failure: %d\n", errno);
-      exit(1);
+      goto errout_with_listensd;
     }
   message("server: Connection accepted -- receiving\n");
 
@@ -129,7 +139,7 @@ void recv_server(void)
     if (setsockopt(acceptsd, SOL_SOCKET, SO_LINGER, &ling, sizeof(struct linger)) < 0)
       {
       message("server: setsockopt SO_LINGER failure: %d\n", errno);
-      exit(1);
+      goto errout_with_acceptsd;
     }
 #endif
 
@@ -138,13 +148,11 @@ void recv_server(void)
 
   for (;;)
     {
-      nbytesread = recv(acceptsd, buffer, 1024, 0);
+      nbytesread = recv(acceptsd, buffer, 2*SENDSIZE, 0);
       if (nbytesread <= 0)
         {
           message("server: recv failed: %d\n", errno);
-          close(listensd);
-          close(acceptsd);
-          exit(-1);
+          goto errout_with_acceptsd;
         }
     }
 #else
@@ -154,13 +162,11 @@ void recv_server(void)
   while (totalbytesread < SENDSIZE)
     {
       message("server: Reading...\n");
-      nbytesread = recv(acceptsd, &buffer[totalbytesread], 1024 - totalbytesread, 0);
+      nbytesread = recv(acceptsd, &buffer[totalbytesread], 2*SENDSIZE - totalbytesread, 0);
       if (nbytesread <= 0)
         {
           message("server: recv failed: %d\n", errno);
-          close(listensd);
-          close(acceptsd);
-          exit(-1);
+          goto errout_with_acceptsd;
         }
 
       totalbytesread += nbytesread;
@@ -172,9 +178,7 @@ void recv_server(void)
   if (totalbytesread != SENDSIZE)
     {
       message("server: Received %d / Expected %d bytes\n", totalbytesread, SENDSIZE);
-      close(listensd);
-      close(acceptsd);
-      exit(-1);
+      goto errout_with_acceptsd;
     }
 
   ch = 0x20;
@@ -183,9 +187,7 @@ void recv_server(void)
       if (buffer[i] != ch)
         {
           message("server: Byte %d is %02x / Expected %02x\n", i, buffer[i], ch);
-          close(listensd);
-          close(acceptsd);
-          exit(-1);
+          goto errout_with_acceptsd;
         }
 
       if (++ch > 0x7e)
@@ -201,9 +203,7 @@ void recv_server(void)
   if (nbytessent <= 0)
     {
       message("server: send failed: %d\n", errno);
-      close(listensd);
-      close(acceptsd);
-      exit(-1);
+      goto errout_with_acceptsd;
     }
   message("server: Sent %d bytes\n", nbytessent);
 
@@ -218,5 +218,17 @@ void recv_server(void)
 
   close(listensd);
   close(acceptsd);
+  free(buffer);
+  return;
 #endif
+
+errout_with_acceptsd:
+  close(acceptsd);
+
+errout_with_listensd:
+  close(listensd);
+
+errout_with_buffer:
+  free(buffer);
+  exit(1);
 }

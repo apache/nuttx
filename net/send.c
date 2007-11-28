@@ -48,6 +48,7 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+#include <net/uip/uip-arch.h>
 
 #include "net-internal.h"
 
@@ -55,8 +56,7 @@
  * Definitions
  ****************************************************************************/
 
-#define STATE_POLLWAIT   1
-#define STATE_DATA_SENT  2
+#define TCPBUF ((struct uip_tcpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Private Types
@@ -69,16 +69,65 @@
 struct send_s
 {
   FAR struct socket *snd_sock;    /* Points to the parent socket structure */
-  sem_t                snd_sem;     /* Used to wake up the waiting thread */
-  FAR const uint8     *snd_buffer;  /* Points to the buffer of data to send */
-  size_t               snd_buflen;  /* Number of bytes in the buffer to send */
-  ssize_t              snd_sent;    /* The number of bytes sent */
-  uint8                snd_state;   /* The state of the send operation. */
+  sem_t              snd_sem;     /* Used to wake up the waiting thread */
+  FAR const uint8   *snd_buffer;  /* Points to the buffer of data to send */
+  size_t             snd_buflen;  /* Number of bytes in the buffer to send */
+  ssize_t            snd_sent;    /* The number of bytes sent */
+  uint32             snd_isn;     /* Initial sequence number */
+  uint32             snd_acked;   /* The number of bytes acked */
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Function: send_getisn
+ *
+ * Description:
+ *   Get the next initial sequence number from the connection stucture
+ *
+ * Parameters:
+ *   conn     The connection structure associated with the socket
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+static uint32 send_getisn(struct uip_conn *conn)
+{
+   uint32 tmp;
+   memcpy(&tmp, conn->snd_nxt, 4);
+   return ntohl(tmp);
+}
+
+/****************************************************************************
+ * Function: send_getackno
+ *
+ * Description:
+ *   Extract the current acknowledgement sequence number from the incoming packet
+ *
+ * Parameters:
+ *   dev - The sructure of the network driver that caused the interrupt
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+static uint32 send_getackno(struct uip_driver_s *dev)
+{
+   uint32 tmp;
+   memcpy(&tmp, TCPBUF->ackno, 4);
+   return ntohl(tmp);
+}
 
 /****************************************************************************
  * Function: send_interrupt
@@ -106,51 +155,31 @@ static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn, uin
 
   nvdbg("flags: %02x state: %d\n", flags, pstate->snd_state);
 
-  /* If the data has not been sent OR if it needs to be retransmitted,
-   * then send it now.
+  /* If this packet contains an acknowledgement, then update the count of
+   * acknowldged bytes.
    */
 
-  if (pstate->snd_state != STATE_DATA_SENT || (flags & UIP_REXMIT) != 0)
+  if ((flags & UIP_ACKDATA) != 0)
     {
-      if (pstate->snd_buflen > uip_mss(conn))
+      /* The current acknowledgement number number is the (relative) offset of
+       * the of the next byte needed by the receiver.  The snd_isn is the offset
+       * of the first byte to send to the receiver.  The difference is the number
+       * of bytes to be acknowledged.
+       */
+
+      pstate->snd_acked = send_getackno(dev) - pstate->snd_isn;
+      nvdbg("ACK: acked=%d sent=%d buflen=%d\n",
+            pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
+
+      /* Have all of the bytes in the buffer been sent and ACKed? */
+
+      if ( pstate->snd_acked >= pstate->snd_buflen)
         {
-          uip_send(dev, pstate->snd_buffer, uip_mss(conn));
-        }
-      else
-        {
-          uip_send(dev, pstate->snd_buffer, pstate->snd_buflen);
-        }
-
-      pstate->snd_state = STATE_DATA_SENT;
-    }
-
-  /* Check if all data has been sent and acknowledged */
-
-  else if (pstate->snd_state == STATE_DATA_SENT && (flags & UIP_ACKDATA) != 0)
-    {
-      /* Yes.. the data has been sent AND acknowledged */
-
-      if (pstate->snd_buflen > uip_mss(conn))
-        {
-          /* Not all data has been sent */
-
-          pstate->snd_sent   += uip_mss(conn);
-          pstate->snd_buflen -= uip_mss(conn);
-          pstate->snd_buffer += uip_mss(conn);
-
-          /* Send again on the next poll */
-
-          pstate->snd_state = STATE_POLLWAIT;
-        }
-      else
-        {
-          /* All data has been sent */
-
-          pstate->snd_sent   += pstate->snd_buflen;
-          pstate->snd_buffer += pstate->snd_buflen;
-          pstate->snd_buflen  = 0;
-
-          /* Don't allow any further call backs. */
+          /* Yes.  Then pstate->snd_len should hold the number of bytes actually
+           * sent.
+           *
+           * Don't allow any further call backs.
+           */
 
           conn->data_flags   = 0;
           conn->data_private = NULL;
@@ -161,7 +190,19 @@ static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn, uin
            */
 
           sem_post(&pstate->snd_sem);
+          return flags;
         }
+    }
+
+  /* Check if we are being asked to retransmit data */
+
+  else if ((flags & UIP_REXMIT) != 0)
+    {
+      /* Yes.. in this case, reset the number of bytes that have been sent
+       * to the number of bytes that have been ACKed.
+       */
+
+      pstate->snd_sent = pstate->snd_acked;
     }
 
  /* Check for a loss of connection */
@@ -181,6 +222,32 @@ static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn, uin
       /* Wake up the waiting thread */
 
       sem_post(&pstate->snd_sem);
+    }
+
+  /* We get here if (1) not all of the data has been ACKed, (2) we have been
+   * asked to retransmit data, and (3) the connection is still healthy.
+   * We are now free to send more data to receiver.
+   */
+
+  if (pstate->snd_sent < pstate->snd_buflen)
+    {
+      /* Get the amount of data that we can send in the next packet */
+
+      uint32 sndlen = pstate->snd_buflen - pstate->snd_sent;
+      if (sndlen > uip_mss(conn))
+        {
+          sndlen = uip_mss(conn);
+        }
+
+      /* Then send that amount of data */
+
+      uip_send(dev, &pstate->snd_buffer[pstate->snd_sent], sndlen);
+
+      /* And update the amount of data sent (but not necessarily ACKed) */
+
+      pstate->snd_sent += sndlen;
+      nvdbg("SEND: acked=%d sent=%d buflen=%d\n",
+            pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
     }
 
   return flags;
@@ -293,16 +360,19 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
   save                = irqsave();
   memset(&state, 0, sizeof(struct send_s));
   (void)sem_init(&state. snd_sem, 0, 0); /* Doesn't really fail */
-  state.snd_sock      = psock;
-  state.snd_buflen    = len;
-  state.snd_buffer    = buf;
-  state.snd_state     = STATE_POLLWAIT;
+  state.snd_sock      = psock;             /* Socket descriptor to use */
+  state.snd_buflen    = len;               /* Number of bytes to send */
+  state.snd_buffer    = buf;               /* Buffer to send from */
 
   if (len > 0)
     {
-      /* Set up the callback in the connection */
+     /* Get the initial sequence number that will be used */
 
       conn               = (struct uip_conn *)psock->s_conn;
+      state.snd_isn      = send_getisn(conn); /* Initial sequence number */
+
+      /* Set up the callback in the connection */
+
       conn->data_flags   = UIP_REXMIT|UIP_ACKDATA|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
       conn->data_private = (void*)&state;
       conn->data_event   = send_interrupt;
