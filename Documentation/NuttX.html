@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 24, 2007</p>
+      <p>Last Updated: November 28, 2007</p>
     </td>
   </tr>
 </table>
@@ -183,7 +183,7 @@
 </table>
 
 <p>
-  The 14th release of NuttX (nuttx-0.3.2) is available for download
+  The 15th release of NuttX (nuttx-0.3.3) is available for download
   from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
   website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
@@ -191,32 +191,40 @@
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  NuttX 0.3.2 is the 3rd release containing the integration of a network
+  NuttX 0.3.3 is the 4th release containing the integration of a network
   subsystem and the uIP TCP/IP, UDP, and ICMP stacks based on
   <a href="http://www.sics.se/~adam/uip/index.php/Main_Page">uIP</a>
   into NuttX.
 </p>
 <p>
-  Many network-related problems have been fixed from version 0.3.1
+  Many network-related problems have been fixed from version 0.3.2
   and the implementation has matured significantly.
   Changes in this release include:
 </p>
 <ul>
-<li>TCP-related bug-fixes,</li>
+<li>TCP-related bug-fixes for disconnecting sockets,</li>
+<li>Correction of some TCP read-ahead logic,<li>
 <li>TCP performance improvements,</li>
 <li>Initial UDP integration, and</li>
-<li>Initial uIP micro webserver integration
+<li>IMisc. additions and cleanup (See the ChangeLog for a complete list of
+  changes).</li>
 </ul>
-</p>
-  See the ChangeLog for a complete list of changes.
-</p>
 <p>
-  The level of network reliability is a a strong alpha level is expected to
-  achieve beta level of reliability over the next few releases.
+  The level of network reliability is at an early beta release level.  The
+  baseline functionality of NuttX continues to mature and remains at
+  post-beta. Open network-related issues include only:
 </p>
+<ul>
+<li>Some minor unimplemented BSD socket functionality,</li>
+<li>Thread safety issues: the same socket cannot be used concurrently on
+  different threads, </li>
+<li>Pending design changes necessary to support multiple network interfaces, and </li>
+<li>IPv6 support is incomplete.</li>
+</ul>
 <p>
-  The baseline functionality of NuttX continues to mature and remains at
-  post-beta (as long as the network is not used).
+  This release has been verified only on the Neuros OSD (DM320 ARM9)
+  platform using the DM90x0 driver. Any feedback for improving the network
+  reliability/performance would be greatly appreciated.
 </p>
 
 <table width ="100%">
@@ -687,18 +695,8 @@ Other memory:
 	* Fix DM90x0 driver problem that caused TX overruns
 	* Add strncmp()
 	* Added TCP/IP read-ahead buffer to minimize failed ACKs and packet loss.
-</pre></ul>
 
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="currentrelease">ChangeLog for Current Release</a>
-  </td>
-  </tr>
-</table>
-
-<pre><ul>
-0.3.2 2007-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+0.3.2 2007-11-23 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Add strcat() and strncat()
 	* Integrated uIP micro webserver
@@ -718,13 +716,13 @@ Other memory:
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="pendingchanges">Unreleased Changes</a>
+    <a name="currentrelease">ChangeLog for Current Release</a>
   </td>
   </tr>
 </table>
 
 <pre><ul>
-0.3.3 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.3 2007-11-28 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Removed unused uIP files
 	* sched/, mm/, and net/ subystem debug can not be selectively enabled/disabled
@@ -737,6 +735,18 @@ Other memory:
 	* examples/nettest uses larger buffers
 	* Improved ACK handling in send() to better hander deferred acknowledgements
 	  and polling intervals.  Greatly improves send performance.
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="pendingchanges">Unreleased Changes</a>
+  </td>
+  </tr>
+</table>
+
+<pre><ul>
+0.3.4 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 </pre></ul>
 
 <table width ="100%">

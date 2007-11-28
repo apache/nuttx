@@ -244,7 +244,7 @@
 	* recvfrom() and accept() now correctly return the remote address.
 	* Fixed computation error in ntohl().
 
-0.3.3 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.3 2007-11-28 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Removed unused uIP files
 	* sched/, mm/, and net/ subystem debug can not be selectively enabled/disabled
@@ -258,3 +258,4 @@
 	* Improved ACK handling in send() to better hander deferred acknowledgements
 	  and polling intervals.  Greatly improves send performance.
 
+0.3.4 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
