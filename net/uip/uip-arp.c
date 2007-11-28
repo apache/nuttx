@@ -275,34 +275,6 @@ void uip_arp_timer(void)
     }
 }
 
-/* ARP processing for incoming IP packets
- *
- * This function should be called by the device driver when an IP
- * packet has been received. The function will check if the address is
- * in the ARP cache, and if so the ARP cache entry will be
- * refreshed. If no ARP cache entry was found, a new one is created.
- *
- * This function expects an IP packet with a prepended Ethernet header
- * in the d_buf[] buffer, and the length of the packet in the field
- * d_len.
- */
-
-#if 0
-void uip_arp_ipin(void)
-{
-  /* Only insert/update an entry if the source IP address of the
-   * incoming IP packet comes from a host on the local network.
-   */
-
-  if ((IPBUF->eh_srcipaddr & dev->d_netmask) != (dev->d_ipaddr & dev->d_netmask))
-    {
-      return;
-    }
-
-  uip_arp_update(IPBUF->eh_srcipaddr, ETHBUF->eh_ethhdr.src);
-}
-#endif /* 0 */
-
 /* ARP processing for incoming ARP packets.
  *
  * This function should be called by the device driver when an ARP
