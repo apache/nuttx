@@ -206,7 +206,6 @@ static int send_discover(struct dhcpc_state_s *pdhcpc)
   uint8 *pend;
   int len;
 
-dbg("Calling create_msg\n");
   create_msg(pdhcpc);
   pend = &pdhcpc->packet.options[4];
   pend = add_msg_type(pend, DHCPDISCOVER);
@@ -218,7 +217,6 @@ dbg("Calling create_msg\n");
   addr.sin_port        = HTONS(DHCPC_SERVER_PORT);
   addr.sin_addr.s_addr = INADDR_BROADCAST;
 
-dbg("Calling sendto, len=%d\n", len);
   return sendto(pdhcpc->sockfd, &pdhcpc->packet, len, 0,
                 (struct sockaddr*)&addr, sizeof(struct sockaddr_in));
 }
@@ -348,7 +346,6 @@ void *dhcpc_open(const void *macaddr, int maclen)
         }
     }
 
-  dbg("Return %p\n", pdhcpc);
   return (void*)pdhcpc;
 }
 
@@ -369,7 +366,6 @@ int dhcpc_request(void *handle, struct dhcpc_state *presult)
 
   /* Loop until we receive the offer */
 
-  dbg("Handle %p\n", handle);
   do
     {
       state = STATE_SENDING;
@@ -378,22 +374,18 @@ int dhcpc_request(void *handle, struct dhcpc_state *presult)
         {
           /* Send the command */
 
-          dbg("Send DHCPDISCOVER, @4=%08x\n", *(uint32*)4);
           if (send_discover(pdhcpc) < 0)
             {
               return ERROR;
             }
 
           /* Get the response */
-dbg("Sent DHCPDISCOVER\n");
+
           result = recv(pdhcpc->sockfd, &pdhcpc->packet, sizeof(struct dhcp_msg), 0);
-dbg("recv returned %d\n");
           if (result >= 0)
             {
-dbg("Calling parse_msg\n");
               if (parse_msg(pdhcpc, result, presult) == DHCPOFFER)
                 {
-                  dbg("Received DHCPOFFER\n");
                   state = STATE_OFFER_RECEIVED;
                 }
             }
@@ -410,7 +402,6 @@ dbg("Calling parse_msg\n");
         {
           /* Send the request */
 
-          dbg("Send DHCPREQUEST\n");
           if (send_request(pdhcpc, presult) < 0)
             {
               return ERROR;
@@ -423,7 +414,6 @@ dbg("Calling parse_msg\n");
             {
               if (parse_msg(pdhcpc, result, presult) == DHCPACK)
                 {
-                  dbg("Received ACK\n");
                   state = STATE_CONFIG_RECEIVED;
                 }
             }
