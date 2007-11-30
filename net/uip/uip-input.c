@@ -410,7 +410,7 @@ void uip_input(struct uip_driver_s *dev)
        */
 
 #ifdef CONFIG_NET_BROADCAST
-      if (BUF->proto == UIP_PROTO_UDP && uip_ipaddr_cmp(BUF->destipaddr, g_alloneaddr)
+      if (BUF->proto == UIP_PROTO_UDP && uip_ipaddr_cmp(BUF->destipaddr, g_alloneaddr))
         {
           uip_udpinput(dev);
           return;
