@@ -692,8 +692,8 @@ static inline int dhcpd_socket(void)
   int sockfd;
 #if defined(HAVE_SO_REUSEADDR) || defined(HAVE_SO_BROADCAST)
   int optval;
-#endif
   int ret;
+#endif
 
   /* Create a socket to listen for requests from DHCP clients */
 
@@ -815,6 +815,7 @@ static int dhcpd_sendpacket(int bbroadcast)
   struct sockaddr_in addr;
   in_addr_t ipaddr;
   int sockfd;
+  int len;
   int ret = ERROR;
 
   /* Determine which address to respond to (or if we need to broadcast the response) */
@@ -850,8 +851,10 @@ static int dhcpd_sendpacket(int bbroadcast)
       addr.sin_port        = HTONS(DHCP_CLIENT_PORT);
       addr.sin_addr.s_addr = ipaddr;
 
-      ret = sendto(sockfd,
-                   &g_state.ds_outpacket, sizeof(struct dhcpmsg_s), 0,
+      /* Send the minimum sized packet that includes the END option */
+
+      len = (g_state.ds_optend - (uint8*)&g_state.ds_outpacket) + 1;
+      ret = sendto(sockfd, &g_state.ds_outpacket, len, 0,
                    (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
       close(sockfd);
     }
@@ -1031,9 +1034,8 @@ static inline int dhcpd_request(void)
            * already offered to the client. 
            */
 
-          if (g_state.ds_optserverip == g_state.ds_serverip &&
-              g_state.ds_optreqip != 0 &&
-              g_state.ds_optreqip == ipaddr)
+          if (g_state.ds_optserverip == ntohl(g_state.ds_serverip) &&
+             (g_state.ds_optreqip != 0 || g_state.ds_optreqip == ipaddr))
             {
               response = DHCPACK;
             }
@@ -1277,6 +1279,12 @@ int dhcpd_run(void)
           dbg("No msg type\n");
           continue;
         }
+
+#ifdef CONFIG_NETUTILS_DHCPD_HOST
+      /* Get the poor little uC a change to get its recvfrom in place */
+
+      sleep(2);
+#endif
 
       /* Now process the incoming DHCP message by its message type */
 

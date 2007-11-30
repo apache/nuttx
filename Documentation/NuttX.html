@@ -748,7 +748,11 @@ Other memory:
 <pre><ul>
 0.3.4 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* Added netutils/dhcpd
+	* Added and partially verified DHCP server logic (netutils/dhcpd)
+	* Fix BROADCAST=y compilation problems
+	* Fix UDP recvfrom timeout bug
+	* Correct processing of input UDP broadcast packets.
+	* Verfied basic DHCP client functionality (netutils/dhcpc)
 </pre></ul>
 
 <table width ="100%">

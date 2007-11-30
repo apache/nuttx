@@ -1,5 +1,20 @@
 netutils
 ^^^^^^^^
 
-This directory contains most of the network applications contained under the uIP-1.0 apps directory.
-As the uIP apps/README says, these applications "are not all heavily tested."
+This directory contains most of the network applications contained
+under the uIP-1.0 apps directory.  As the uIP apps/README says,
+these applications "are not all heavily tested."  These uIP apps
+include:
+
+  dhcpc     - Dynamic Host Configuration Protocol (DHCP) client
+  resolv    - uIP DNS resolver
+  smtp      - Simple Mail Transfer Protocol (SMTP) client
+  telnetd   - TELNET server
+  webclient - HTTP web client
+  webserver - HTTP web server
+
+Additional applications that were not part of uIP (but which are
+highly influenced by uIP) include:
+
+  dhcpd - Dynamic Host Configuration Protocol (DHCP) server
+

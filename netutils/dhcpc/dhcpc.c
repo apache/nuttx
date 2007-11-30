@@ -183,18 +183,12 @@ static uint8 *add_end(uint8 *optptr)
 
 static void create_msg(struct dhcpc_state_s *pdhcpc)
 {
-  struct in_addr addr;
-
   memset(&pdhcpc->packet, 0, sizeof(struct dhcp_msg));
   pdhcpc->packet.op    = DHCP_REQUEST;
   pdhcpc->packet.htype = DHCP_HTYPE_ETHERNET;
   pdhcpc->packet.hlen  = pdhcpc->ds_maclen;
   memcpy(pdhcpc->packet.xid, xid, 4);
   pdhcpc->packet.flags = HTONS(BOOTP_BROADCAST); /*  Broadcast bit. */
-
-  uip_gethostaddr("eth0", &addr);
-  memcpy(&pdhcpc->packet.ciaddr, &addr.s_addr, 4);
-
   memcpy(pdhcpc->packet.chaddr, pdhcpc->ds_macaddr, pdhcpc->ds_maclen);
   memset(&pdhcpc->packet.chaddr[pdhcpc->ds_maclen], 0, 16 - pdhcpc->ds_maclen);
   memcpy(pdhcpc->packet.options, magic_cookie, sizeof(magic_cookie));
@@ -206,12 +200,19 @@ static int send_discover(struct dhcpc_state_s *pdhcpc)
   uint8 *pend;
   int len;
 
+  /* Create the basic message header */
+
   create_msg(pdhcpc);
+
+  /* Add the options */
+
   pend = &pdhcpc->packet.options[4];
   pend = add_msg_type(pend, DHCPDISCOVER);
   pend = add_req_options(pend);
   pend = add_end(pend);
   len  = pend - (uint8*)&pdhcpc->packet;
+
+  /* Send the request */
 
   addr.sin_family      = AF_INET;
   addr.sin_port        = HTONS(DHCPC_SERVER_PORT);
@@ -226,13 +227,21 @@ static int send_request(struct dhcpc_state_s *pdhcpc, struct dhcpc_state *presul
   uint8 *pend;
   int len;
 
+  /* Create the basic message header */
+
   create_msg(pdhcpc);
+  memcpy(pdhcpc->packet.ciaddr, &presult->ipaddr.s_addr, 4);
+
+  /* Add the options */
+
   pend = &pdhcpc->packet.options[4];
   pend = add_msg_type(pend, DHCPREQUEST);
   pend = add_server_id(presult, pend);
   pend = add_req_ipaddr(presult, pend);
   pend = add_end(pend);
   len  = pend - (uint8*)&pdhcpc->packet;
+
+  /* Send the request */
 
   addr.sin_family      = AF_INET;
   addr.sin_port        = HTONS(DHCPC_SERVER_PORT);
@@ -336,7 +345,7 @@ void *dhcpc_open(const void *macaddr, int maclen)
 
       /* Configure for read timeouts */
 
-      tv.tv_sec  = 30;
+      tv.tv_sec  = 10;
       tv.tv_usec = 0;
       if (setsockopt(pdhcpc->sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval)) < 0)
         {
@@ -361,8 +370,14 @@ void dhcpc_close(void *handle)
 int dhcpc_request(void *handle, struct dhcpc_state *presult)
 {
   struct dhcpc_state_s *pdhcpc = (struct dhcpc_state_s *)handle;
+  struct in_addr oldaddr;
   ssize_t result;
   int state;
+
+  /* Save the currently assigned IP address (should be zero) */
+
+  oldaddr.s_addr = 0;
+  uip_gethostaddr("eth0", &oldaddr);
 
   /* Loop until we receive the offer */
 
@@ -386,6 +401,7 @@ int dhcpc_request(void *handle, struct dhcpc_state *presult)
             {
               if (parse_msg(pdhcpc, result, presult) == DHCPOFFER)
                 {
+                  (void)uip_sethostaddr("eth0", &presult->ipaddr);
                   state = STATE_OFFER_RECEIVED;
                 }
             }
@@ -421,6 +437,7 @@ int dhcpc_request(void *handle, struct dhcpc_state *presult)
             {
               /* An error other than a timeout was received */
 
+              (void)uip_sethostaddr("eth0", &oldaddr);
               return ERROR;
             }
         }

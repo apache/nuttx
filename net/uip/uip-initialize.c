@@ -70,14 +70,14 @@ const uip_ipaddr_t g_alloneaddr =
 #ifdef CONFIG_NET_IPv6
   {0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff};
 #else
-  {0xffffffff};
+  0xffffffff;
 #endif
 
 const uip_ipaddr_t g_allzeroaddr =
 #ifdef CONFIG_NET_IPv6
   {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 #else
-  {0x00000000};
+  0x00000000;
 #endif
 
 /* Reassembly timer (units: deci-seconds) */

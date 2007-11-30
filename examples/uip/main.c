@@ -187,10 +187,19 @@ int user_start(int argc, char *argv[])
     {
         struct dhcpc_state ds;
         (void)dhcpc_request(handle, &ds);
-        uip_sethostaddr("eth0", &ds.ipaddr);
-        uip_setnetmask("eth0", &ds.netmask);
-        uip_setdraddr("eth0", &ds.default_router);
-        resolv_conf(&ds.dnsaddr);
+        uip_sethostaddr("eth1", &ds.ipaddr);
+        if (ds.netmask.s_addr != 0)
+          {
+            uip_setnetmask("eth0", &ds.netmask);
+          }
+        if (ds.default_router.s_addr != 0)
+          {
+            uip_setdraddr("eth0", &ds.default_router);
+          }
+        if (ds.dnsaddr.s_addr != 0)
+          {
+            resolv_conf(&ds.dnsaddr);
+          }
         dhcpc_close(handle);
     }
 #endif
