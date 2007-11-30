@@ -294,6 +294,7 @@ union rx_desc_u
 
 struct dm9x_driver_s
 {
+  boolean dm_bifup;            /* TRUE:ifup FALSE:ifdown */
   boolean dm_b100M;            /* TRUE:speed == 100M; FALSE:speed == 10M */
   WDOG_ID dm_txpoll;           /* TX poll timer */
   WDOG_ID dm_txtimeout;        /* TX timeout timer */
@@ -1396,6 +1397,7 @@ static int dm9x_ifup(struct uip_driver_s *dev)
 
   /* Enable the DM9X interrupt */
 
+  dm9x->dm_bifup = TRUE;
   up_enable_irq(CONFIG_DM9X_IRQ);
   return OK;
 }
@@ -1440,6 +1442,8 @@ static int dm9x_ifdown(struct uip_driver_s *dev)
   putreg(DM9X_IMR, DM9X_IMRDISABLE);  /* Disable all interrupts */
   putreg(DM9X_RXC, 0x00);             /* Disable RX */
   putreg(DM9X_ISR, DM9X_INT_ALL);     /* Clear interrupt status */
+
+  dm9x->dm_bifup = FALSE;
   irqrestore(flags);
 
   /* Dump statistics */
@@ -1475,15 +1479,21 @@ static int dm9x_txavail(struct uip_driver_s *dev)
   ndbg("Polling\n");
   flags = irqsave();
 
-  /* Check if there is room in the DM90x0 to hold another packet.  In 100M mode,
-   * that can be 2 packets, otherwise it is a single packet.
-   */
+  /* Ignore the notification if the interface is not yet up */
 
-  if (dm9x->dm_ntxpending < 1 || (dm9x->dm_b100M && dm9x->dm_ntxpending < 2))
+  if (dm9x->dm_bifup)
     {
-      /* If so, then poll uIP for new XMIT data */
 
-      (void)uip_poll(&dm9x->dm_dev, dm9x_uiptxpoll);
+      /* Check if there is room in the DM90x0 to hold another packet.  In 100M
+       * mode, that can be 2 packets, otherwise it is a single packet.
+       */
+
+      if (dm9x->dm_ntxpending < 1 || (dm9x->dm_b100M && dm9x->dm_ntxpending < 2))
+        {
+          /* If so, then poll uIP for new XMIT data */
+
+          (void)uip_poll(&dm9x->dm_dev, dm9x_uiptxpoll);
+        }
     }
   irqrestore(flags);
   return OK;

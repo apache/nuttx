@@ -259,3 +259,5 @@
 	  and polling intervals.  Greatly improves send performance.
 
 0.3.4 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* Added netutils/dhcpd

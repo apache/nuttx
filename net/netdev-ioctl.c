@@ -50,6 +50,7 @@
 
 #include <nuttx/net.h>
 
+#include <net/if.h>
 #include <net/uip/uip-arch.h>
 #include <net/uip/uip.h>
 

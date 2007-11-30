@@ -62,6 +62,7 @@
 #include <debug.h>
 
 #include <netinet/in.h>
+#include <net/if.h>
 #include <net/uip/uip-arch.h>
 #include <net/uip/uip-arp.h>
 

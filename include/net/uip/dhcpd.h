@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/dhcpc.n
+ * net/uipt/dhcpd.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -35,8 +35,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef __NET_UIP_DHCPC_H
-#define __NET_UIP_DHCPC_H
+#ifndef __NET_UIP_DHCPD_H
+#define __NET_UIP_DHCPD_H
 
 /****************************************************************************
  * Included Files
@@ -52,16 +52,6 @@
  * Public Types
  ****************************************************************************/
 
-struct dhcpc_state
-{
-  uint16 lease_time[2];
-  uint8  serverid[4];
-  struct in_addr ipaddr;
-  struct in_addr netmask;
-  struct in_addr dnsaddr;
-  struct in_addr default_router;
-};
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -73,13 +63,11 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN void *dhcpc_open(const void *mac_addr, int mac_len);
-EXTERN int   dhcpc_request(void *handle, struct dhcpc_state *presult);
-EXTERN void  dhcpc_close(void *handle);
+EXTERN int dhcpd_run(void);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __NET_UIP_DHCPC_H */
+#endif /* __NET_UIP_DHCPD_H */

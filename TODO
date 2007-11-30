@@ -70,14 +70,19 @@ o Build system
 
 o Applications & Tests
 
-o C5471
+o ARM
+- Add option to use a separate stack for interrupt handling.  At present,
+  each interrupt executes on top of the user stack allocation making each
+  user stack allocation larger than needed.
 
-o DM320
+o ARM/C5471
+
+o ARM/DM320
 - It seems that when a lot of debug statements are added, the system no
   longer boots.  This has been diagnosed as a stack problem.. making the stack
   bigger or removing arrays on the stack fixes the problem.
 
-o LPC214x
+o ARM/LPC214x
 - Finish bringup
 - Add MMC and USB support
 

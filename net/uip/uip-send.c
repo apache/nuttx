@@ -42,6 +42,7 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <debug.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>

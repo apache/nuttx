@@ -48,6 +48,7 @@
 #include <sys/types.h>
 #include <debug.h>
 
+#include <net/if.h>
 #include <net/uip/uipopt.h>
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>

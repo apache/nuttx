@@ -1,5 +1,5 @@
 /****************************************************************************
- * netutils/uiplib/uip-sethostaddr.c
+ * net/if.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
+ * 3. Neither the name Gregory Nutt nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -33,86 +33,53 @@
  *
  ****************************************************************************/
 
+#ifndef __NET_IF_H
+#define __NET_IF_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/ioctl.h>
-
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
-
-#include <netinet/in.h>
-#include <net/if.h>
-
-#include <net/uip/uip-lib.h>
 
 /****************************************************************************
- * Global Functions
+ * Definitions
  ****************************************************************************/
+
+/* Sizing parameters */
+
+#define IFNAMSIZ        6
+#define IFHWADDRLEN     6
 
 /****************************************************************************
- * Name: uip_sethostaddr
- *
- * Description:
- *   Set the network driver IP address
- *
- * Parameters:
- *   ifname   The name of the interface to use
- *   ipaddr   The address to set
- *
- * Return:
- *   0 on sucess; -1 on failure
- *
+ * Type Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
-int uip_sethostaddr(const char *ifname, const struct in6_addr *addr)
-#else
-int uip_sethostaddr(const char *ifname, const struct in_addr *addr)
-#endif
+struct ifreq
 {
-  int ret = ERROR;
-  if (ifname && addr)
-    {
-      int sockfd = socket(PF_INET, UIPLIB_SOCK_IOCTL, 0);
-      if (sockfd >= 0)
-        {
-          struct ifreq req;
-#ifdef CONFIG_NET_IPv6
-          struct sockaddr_in6 *inaddr;
-#else
-          struct sockaddr_in  *inaddr;
-#endif
-          /* Add the device name to the request */
+  char       ifr_name[IFNAMSIZ];      /* Network device name (e.g. "eth0") */
+  union
+  {
+    struct sockaddr ifru_addr;        /* IP Address */
+    struct sockaddr ifru_dstaddr;     /* P-to-P Address */
+    struct sockaddr ifru_broadaddr;   /* Broadcast address */
+    struct sockaddr ifru_netmask;     /* Netmask */
+    struct sockaddr ifru_hwaddr;      /* MAC address */
+    int     ifru_count;               /* Number of devices */
+    int     ifru_mtu;                 /* MTU size */
+  } ifr_ifru;
+};
 
-          strncpy(req.ifr_name, ifname, IFNAMSIZ);
+#define ifr_addr        ifr_ifru.ifru_addr      /* IP address */
+#define ifr_dstaddr     ifr_ifru.ifru_dstaddr   /* P-to-P Address */
+#define ifr_broadaddr   ifr_ifru.ifru_broadaddr /* Broadcast address */
+#define ifr_netmask     ifr_ifru.ifru_netmask   /* Interface net mask */
+#define ifr_hwaddr      ifr_ifru.ifru_hwaddr    /* MAC address */
+#define ifr_mtu         ifr_ifru.ifru_mtu       /* MTU */
+#define ifr_count       ifr_ifru.ifru_count     /* Number of devices */
 
-          /* Add the INET address to the request */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
-#error "req.ifr_addr.s_addr not big enough for IPv6 address"
-          inaddr             = (struct sockaddr_in6 *)&req.ifr_addr;
-          inaddr->sin_family = AF_INET6;
-          inaddr->sin_port   = 0;
-          memcpy(&inaddr->sin6_addr, addr, sizeof(struct in6_addr));
-#else
-          inaddr             = (struct sockaddr_in *)&req.ifr_addr;
-          inaddr->sin_family = AF_INET;
-          inaddr->sin_port   = 0;
-          memcpy(&inaddr->sin_addr, addr, sizeof(struct in_addr));
-#endif
-          ret = ioctl(sockfd, SIOCSIFADDR, (unsigned long)&req);
-          close(sockfd);
-        }
-    }
-  return ret;
-}
-
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */
+#endif /* __NET_IF_H */

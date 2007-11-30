@@ -47,16 +47,17 @@ include webserver/Make.defs
 endif
 ifeq ($(CONFIG_NET_UDP),y)
 include dhcpc/Make.defs
+include dhcpd/Make.defs
 include resolv/Make.defs
 endif
 endif
 
-ASRCS		= $(UIPLIB_ASRCS) $(DHCPC_ASRCS) $(RESOLV_ASRCS) $(SMTP_ASRCS) \
-		  $(TELNETD_ASRCS) $(WEBCLIENT_ASRCS) $(WEBSERVER_ASRCS) $(STRNG_ASRCS)
+ASRCS		= $(UIPLIB_ASRCS) $(DHCPC_ASRCS) $(DHCPD_ASRCS) $(RESOLV_ASRCS) \
+		  $(SMTP_ASRCS) $(TELNETD_ASRCS) $(WEBCLIENT_ASRCS) $(WEBSERVER_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= $(UIPLIB_CSRCS) $(DHCPC_CSRCS) $(RESOLV_CSRCS) $(SMTP_CSRCS) \
-		  $(TELNETD_CSRCS) $(WEBCLIENT_CSRCS) $(WEBSERVER_CSRCS) $(STRNG_CSRCS)
+CSRCS		= $(UIPLIB_CSRCS) $(DHCPC_CSRCS) $(DHCPD_CSRCS) $(RESOLV_CSRCS) \
+		  $(SMTP_CSRCS) $(TELNETD_CSRCS) $(WEBCLIENT_CSRCS) $(WEBSERVER_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
@@ -64,7 +65,7 @@ OBJS		= $(AOBJS) $(COBJS)
 
 BIN		= libnetutils$(LIBEXT)
 
-VPATH		= uiplib:dhcpc:resolv:smtp:telnetd:webclient:webserver
+VPATH		= uiplib:dhcpc:dhcpd:resolv:smtp:telnetd:webclient:webserver
 
 all:	$(BIN)
 
@@ -82,8 +83,9 @@ $(BIN): $(OBJS)
 
 .depend: Makefile $(SRCS)
 ifeq ($(CONFIG_NET),y)
-	@$(MKDEP) --dep-path . --dep-path uiplib --dep-path dhcpc --dep-path smtp --dep-path webclient \
-		 --dep-path resolv --dep-path telnetd --dep-path webserver \
+	@$(MKDEP) --dep-path . --dep-path uiplib --dep-path dhcpc --dep-path dhcpd \
+		  --dep-path smtp --dep-path webclient --dep-path resolv \
+		  --dep-path telnetd --dep-path webserver \
 	$(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 endif
 	@touch $@
@@ -92,11 +94,11 @@ depend: .depend
 
 clean:
 	@rm -f $(BIN) *.o *.rel *.asm *.lst *.sym *.adb *~
-	@rm -f uiplib/*~ dhcpc/*~ resolv/*~ smtp/*~ telnetd/*~ webclient/*~ webserver/*~
+	@rm -f uiplib/*~ dhcpc/*~ dhcpd/*~ resolv/*~ smtp/*~ telnetd/*~ webclient/*~ webserver/*~
 	@if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
+	@$(MAKE) -C dhcpd -f Makefile.host clean
 
 distclean: clean
 	@rm -f Make.dep .depend
-	@rm -f $(STRNG_CSRCS) $(STRNG_ASRCS)
 
 -include Make.dep

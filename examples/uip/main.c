@@ -51,6 +51,7 @@
 #include <time.h>
 #include <debug.h>
 
+#include <net/if.h>
 #include <net/uip/uip.h>
 #include <net/uip/uip-arp.h>
 #include <net/uip/uip-lib.h>
@@ -84,6 +85,12 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_DEBUG
+#  define message(...) lib_lowprintf(__VA_ARGS__)
+#else
+#  define message(...) printf(__VA_ARGS__)
+#endif
 
 /****************************************************************************
  * Private Data
@@ -120,9 +127,7 @@ void user_initialize(void)
 
 int user_start(int argc, char *argv[])
 {
-#if !defined(CONFIG_EXAMPLE_UIP_DHCPC)
   struct in_addr addr;
-#endif
 #if defined(CONFIG_EXAMPLE_UIP_DHCPC) || defined(CONFIG_EXAMPLE_UIP_NOMAC)
   uint8 mac[IFHWADDRLEN];
 #endif
@@ -142,10 +147,13 @@ int user_start(int argc, char *argv[])
   uip_setmacaddr("eth0", mac);
 #endif
 
-#if !defined(CONFIG_EXAMPLE_UIP_DHCPC)
   /* Set up our host address */
 
+#if !defined(CONFIG_EXAMPLE_UIP_DHCPC)
   addr.s_addr = HTONL(CONFIG_EXAMPLE_UIP_IPADDR);
+#else
+  addr.s_addr = 0;
+#endif
   uip_sethostaddr("eth0", &addr);
 
   /* Set up the default router address */
@@ -157,7 +165,6 @@ int user_start(int argc, char *argv[])
 
   addr.s_addr = HTONL(CONFIG_EXAMPLE_UIP_NETMASK);
   uip_setnetmask("eth0", &addr);
-#endif
 
 #if defined(CONFIG_EXAMPLE_UIP_DHCPC) || defined(CONFIG_EXAMPLE_UIP_WEBCLIENT)
   /* Set up the resolver */

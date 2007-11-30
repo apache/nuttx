@@ -44,6 +44,7 @@
 #include <sys/socket.h>
 #include <string.h>
 #include <errno.h>
+#include <debug.h>
 #include <arch/irq.h>
 #include <net/uip/uip-arch.h>
 
@@ -93,6 +94,8 @@ struct sendto_s
 void sendto_interrupt(struct uip_driver_s *dev, struct uip_udp_conn *conn, uint8 flags)
 {
   struct sendto_s *pstate = (struct sendto_s *)conn->private;
+
+  nvdbg("flags: %02x\n");
   if (pstate)
     {
       /* Check if the connection was rejected */

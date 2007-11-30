@@ -45,6 +45,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
+#include <net/if.h>
 #include <net/uip/uip.h>
 
 /****************************************************************************

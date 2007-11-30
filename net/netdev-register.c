@@ -49,6 +49,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <net/if.h>
 #include <net/uip/uip-arch.h>
 
 #include "net-internal.h"

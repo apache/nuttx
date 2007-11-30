@@ -43,9 +43,12 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <sys/ioctl.h>
+
 #include <sched.h>
 #include <errno.h>
-#include <sys/ioctl.h>
+
+#include <net/if.h>
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 # include <nuttx/net.h>
