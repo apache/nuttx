@@ -382,6 +382,31 @@ void uip_input(struct uip_driver_s *dev)
     }
 #endif /* CONFIG_NET_IPv6 */
 
+   /* If IP broadcast support is configured, we check for a broadcast
+    * UDP packet, which may be destined to us (even if there is no IP
+    * address yet assigned to the device as is the case when we are
+    * negotiating over DHCP for an address).
+    */
+
+#if defined(CONFIG_NET_BROADCAST) && defined(CONFIG_NET_UDP)
+  if (BUF->proto == UIP_PROTO_UDP &&
+#ifndef CONFIG_NET_IPv6
+      uip_ipaddr_cmp(uip_ip4addr_conv(BUF->destipaddr), g_alloneaddr))
+#else
+      uip_ipaddr_cmp(BUF->destipaddr, g_alloneaddr))
+#endif
+    {
+      uip_udpinput(dev);
+      return;
+    }
+
+  /* In most other cases, the device must be assigned a non-zero IP
+   * address.  Another exception is when CONFIG_NET_PINGADDRCONF is
+   * enabled...
+   */
+
+  else
+#endif
   if (uip_ipaddr_cmp(dev->d_ipaddr, g_allzeroaddr))
     {
       /* If we are configured to use ping IP address configuration and
@@ -403,20 +428,10 @@ void uip_input(struct uip_driver_s *dev)
           goto drop;
         }
     }
+
+  /* Check if the pack is destined for out IP address */
   else
     {
-      /* If IP broadcast support is configured, we check for a broadcast
-       * UDP packet, which may be destined to us.
-       */
-
-#ifdef CONFIG_NET_BROADCAST
-      if (BUF->proto == UIP_PROTO_UDP && uip_ipaddr_cmp(BUF->destipaddr, g_alloneaddr))
-        {
-          uip_udpinput(dev);
-          return;
-        }
-#endif
-
       /* Check if the packet is destined for our IP address. */
 #ifndef CONFIG_NET_IPv6
       if (!uip_ipaddr_cmp(uip_ip4addr_conv(BUF->destipaddr), dev->d_ipaddr))
