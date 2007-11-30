@@ -613,6 +613,10 @@ static void recvfrom_udpinterrupt(struct uip_driver_s *dev,
           /* Report a timeout error */
 
           pstate->rf_result = -EAGAIN;
+
+          /* Wake up the waiting thread */
+
+          sem_post(&pstate->rf_sem);
         }
 #endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
     }
