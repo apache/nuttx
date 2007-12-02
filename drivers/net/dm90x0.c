@@ -1337,7 +1337,7 @@ static inline void dm9x_phymode(struct dm9x_driver_s *dm9x)
 }
 
 /****************************************************************************
- * Function: dm9x_phymode
+ * Function: dm9x_ifup
  *
  * Description:
  *   NuttX Callback: Bring up the DM90x0 interface when an IP address is
@@ -1403,7 +1403,7 @@ static int dm9x_ifup(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: dm9x_phymode
+ * Function: dm9x_ifdown
  *
  * Description:
  *   NuttX Callback: Stop the interface.
