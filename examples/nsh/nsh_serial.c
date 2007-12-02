@@ -1,5 +1,5 @@
 /****************************************************************************
- * nsh_envcmds.c
+ * examples/nsh/nsh_serial.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -43,7 +43,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 
 #include "nsh.h"
 
@@ -51,9 +50,21 @@
  * Definitions
  ****************************************************************************/
 
+#define CONFIG_NSH_LINE_SIZE 80
+#undef  CONFIG_FULL_PATH
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+struct cmdmap_s
+{
+  const char *cmd;        /* Name of the command */
+  cmd_t       handler;    /* Function that handles the command */
+  ubyte       minargs;    /* Minimum number of arguments (including command) */
+  ubyte       maxargs;    /* Maximum number of arguments (including command) */
+  const char *usage;      /* Usage instructions for 'help' command */
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -62,6 +73,8 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static char line[CONFIG_NSH_LINE_SIZE];
 
 /****************************************************************************
  * Public Data
@@ -76,63 +89,41 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: cmd_echo
+ * Name: nsh_main
  ****************************************************************************/
 
-void cmd_echo(FAR void *handle, int argc, char **argv)
+int nsh_serialmain(void)
 {
-  int i;
+  printf("NuttShell (NSH)\n");
+  fflush(stdout);
 
-  /* echo each argument, separated by a space as it must have been on the
-   * command line
-   */
-
-  for (i = 1; i < argc; i++)
+  for (;;)
     {
-      /* Check for references to environment variables */
+      /* Display the prompt string */
 
-#ifndef CONFIG_DISABLE_ENVIRON
-      if (argv[i][0] == '$')
-        {
-          char *value = getenv(argv[i]+1);
-          if (value)
-            {
-              nsh_output(handle, "%s ", value);
-            }
-        }
-      else
-#endif
-        {
-          nsh_output(handle, "%s ", argv[i]);
-        }
+      fputs(g_nshprompt, stdout);
+      fflush(stdout);
+
+      /* Get the next line of input */
+
+      fgets(line, CONFIG_NSH_LINE_SIZE, stdin);
+
+      /* Parse process the command */
+
+      (void)nsh_parse(NULL, line);
+      fflush(stdout);
     }
-  nsh_output(handle, "\n");
 }
 
 /****************************************************************************
- * Name: cmd_set
+ * Name: cmd_exit
+ *
+ * Description:
+ *   Exit the shell task
+ *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_ENVIRON
-void cmd_set(FAR void *handle, int argc, char **argv)
+void cmd_exit(void *handle, int argc, char **argv)
 {
-  if (setenv(argv[1], argv[2], TRUE) < 0)
-    {
-      nsh_output(handle, g_fmtcmdfailed, argv[0], "setenv", strerror(errno));
-    }
+  exit(0);
 }
-#endif
-
-/****************************************************************************
- * Name: cmd_unset
- ****************************************************************************/
-
-#ifndef CONFIG_DISABLE_ENVIRON
-void cmd_unset(FAR void *handle, int argc, char **argv)
-{
-  if (unsetenv(argv[1]) < 0)
-    {
-      nsh_output(handle, g_fmtcmdfailed, argv[0], "unsetenv", strerror(errno));
-    }
-}
-#endif

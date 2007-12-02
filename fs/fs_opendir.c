@@ -219,10 +219,14 @@ FAR DIR *opendir(const char *path)
 
   /* Nasty goto's make error handling simpler */
 
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 errout_with_inode:
   inode_release(inode);
+#endif
+
 errout_with_direntry:
   free(dir);
+
 errout_with_semaphore:
   inode_semgive();
   *get_errno_ptr() = ret;

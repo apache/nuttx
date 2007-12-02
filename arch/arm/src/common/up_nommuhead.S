@@ -104,10 +104,13 @@ __start:
 	blt	1b
 
 #endif
+
+#if defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS >0
 	/* Perform early serial initialization */
 
 	mov	fp, #0
 	bl	up_earlyserialinit
+#endif
 
 #ifdef CONFIG_DEBUG
 	mov	r0, #'C'

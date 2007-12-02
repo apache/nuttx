@@ -41,10 +41,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#ifdef CONFIG_EXAMPLES_NSH_TELNET
+#else
+# include <stdio.h>
+#endif
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+#define NSH_MAX_ARGUMENTS     6
 
 #define errno (*get_errno_ptr())
 
@@ -52,12 +58,13 @@
  * Public Types
  ****************************************************************************/
 
-typedef void (*cmd_t)(int argc, char **argv);
+typedef void (*cmd_t)(FAR void *handle, int argc, char **argv);
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
+extern const char g_nshprompt[];
 extern const char g_fmtargrequired[];
 extern const char g_fmtarginvalid[];
 extern const char g_fmtcmdnotfound[];
@@ -71,30 +78,56 @@ extern const char g_fmtcmdoutofmemory[];
  * Public Function Prototypes
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-extern void cmd_cat(int argc, char **argv);
-extern void cmd_cp(int argc, char **argv);
+/* Message handler */
+
+extern int nsh_parse(FAR void *handle, char *cmdline);
+
+/* I/O interfaces */
+
+#ifdef CONFIG_EXAMPLES_NSH_TELNET
+
+extern int nsh_telnetmain(void);
+extern int nsh_telnetout(FAR void *handle, const char *fmt, ...);
+
+# define nsh_main()              nsh_telnetmain()
+# define nsh_output(handle, ...) nsh_telnetout(handle, __VA_ARGS__)
+
+#else
+
+extern int nsh_serialmain(void);
+
+# define nsh_main()              nsh_serialmain()
+# define nsh_output(handle, ...) printf(__VA_ARGS__)
+
 #endif
-extern void cmd_echo(int argc, char **argv);
-extern void cmd_exec(int argc, char **argv);
+
+/* Shell command handlers */
+
 #if CONFIG_NFILE_DESCRIPTORS > 0
-extern void cmd_ls(int argc, char **argv);
+extern void cmd_cat(FAR void *handle, int argc, char **argv);
+extern void cmd_cp(FAR void *handle, int argc, char **argv);
+#endif
+extern void cmd_echo(FAR void *handle, int argc, char **argv);
+extern void cmd_exec(FAR void *handle, int argc, char **argv);
+extern void cmd_exit(FAR void *handle, int argc, char **argv);
+#if CONFIG_NFILE_DESCRIPTORS > 0
+extern void cmd_ls(FAR void *handle, int argc, char **argv);
 #endif
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-extern void cmd_mkdir(int argc, char **argv);
-extern void cmd_mount(int argc, char **argv);
+extern void cmd_mkdir(FAR void *handle, int argc, char **argv);
+extern void cmd_mount(FAR void *handle, int argc, char **argv);
 #endif
-extern void cmd_ps(int argc, char **argv);
+extern void cmd_ps(FAR void *handle, int argc, char **argv);
 #ifndef CONFIG_DISABLE_ENVIRON
-extern void cmd_set(int argc, char **argv);
+extern void cmd_set(FAR void *handle, int argc, char **argv);
 #endif
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-extern void cmd_rm(int argc, char **argv);
-extern void cmd_rmdir(int argc, char **argv);
-extern void cmd_umount(int argc, char **argv);
+extern void cmd_rm(FAR void *handle, int argc, char **argv);
+extern void cmd_rmdir(FAR void *handle, int argc, char **argv);
+extern void cmd_umount(FAR void *handle, int argc, char **argv);
 #endif
 #ifndef CONFIG_DISABLE_ENVIRON
-extern void cmd_unset(int argc, char **argv);
+extern void cmd_unset(FAR void *handle, int argc, char **argv);
 #endif
 
 #endif /* __NSH_H */

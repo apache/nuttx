@@ -62,14 +62,14 @@
 
 struct accept_s
 {
-  sem_t                          acpt_sem;        /* Wait for interrupt event */
+  sem_t                    acpt_sem;        /* Wait for interrupt event */
 #ifdef CONFIG_NET_IPv6
-  FAR const struct sockaddr_in6 *acpt_addr;       /* Return connection adress */
+  FAR struct sockaddr_in6 *acpt_addr;       /* Return connection adress */
 #else
-  FAR const struct sockaddr_in  *acpt_addr;       /* Return connection adress */
+  FAR struct sockaddr_in  *acpt_addr;       /* Return connection adress */
 #endif
-  FAR struct uip_conn           *acpt_newconn;    /* The accepted connection */
-  int                            acpt_result;     /* The result of the wait */
+  FAR struct uip_conn     *acpt_newconn;    /* The accepted connection */
+  int                      acpt_result;     /* The result of the wait */
 };
 
 /****************************************************************************
@@ -242,9 +242,9 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
   FAR struct uip_conn *conn;
   struct accept_s state;
 #ifdef CONFIG_NET_IPv6
-  FAR const struct sockaddr_in6 *inaddr = (const struct sockaddr_in6 *)addr;
+  FAR struct sockaddr_in6 *inaddr = (const struct sockaddr_in6 *)addr;
 #else
-  FAR const struct sockaddr_in *inaddr = (const struct sockaddr_in *)addr;
+  FAR struct sockaddr_in *inaddr = (const struct sockaddr_in *)addr;
 #endif
   irqstate_t save;
   int newfd;

@@ -1,5 +1,5 @@
 /****************************************************************************
- * netutils/telnetd/telnetd.c
+ * examples/nsh/nsh_telnetd.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -53,10 +53,9 @@
 #include <pthread.h>
 #include <debug.h>
 
-#include <net/uip/telnetd.h>
 #include <net/uip/uip-lib.h>
 
-#include "shell.h"
+#include "nsh.h"
 
 /****************************************************************************
  * Definitions
@@ -81,25 +80,25 @@
 
 /* Configurable settings */
 
-#ifndef CONFIG_NETUTILS_IOBUFFER_SIZE
-# define CONFIG_NETUTILS_IOBUFFER_SIZE 512
+#ifndef CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE
+# define CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE 512
 #endif
 
-#ifndef CONFIG_NETUTILS_CMD_SIZE
-# define CONFIG_NETUTILS_CMD_SIZE 40
+#ifndef CONFIG_EXAMPLES_NSH_CMD_SIZE
+# define CONFIG_EXAMPLES_NSH_CMD_SIZE 40
 #endif
 
 /* As threads are created to handle each request, a stack must be allocated
  * for the thread.  Use a default if the user provided no stacksize.
  */
 
-#ifndef CONFIG_NETUTILS_TELNETDSTACKSIZE
-# define CONFIG_NETUTILS_TELNETDSTACKSIZE 4096
+#ifndef CONFIG_EXAMPLES_NSH_STACKSIZE
+# define CONFIG_EXAMPLES_NSH_STACKSIZE 4096
 #endif
 
 /* Enabled dumping of all input/output buffers */
 
-#undef CONFIG_NETUTILS_TELNETD_DUMPBUFFER
+#undef CONFIG_EXAMPLES_NSH_TELNETD_DUMPBUFFER
 
 /****************************************************************************
  * Private Types
@@ -108,8 +107,8 @@
 struct telnetd_s
 {
   int   tn_sockfd;
-  char  tn_iobuffer[CONFIG_NETUTILS_IOBUFFER_SIZE];
-  char  tn_cmd[CONFIG_NETUTILS_CMD_SIZE];
+  char  tn_iobuffer[CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE];
+  char  tn_cmd[CONFIG_EXAMPLES_NSH_CMD_SIZE];
   uint8 tn_bufndx;
   uint8 tn_state;
 };
@@ -119,15 +118,15 @@ struct telnetd_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: telnetd_dumpbuffer
+ * Name: nsh_dumpbuffer
  *
  * Description:
  *   Dump a buffer of data (debug only)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETUTILS_TELNETD_DUMPBUFFER
-static void telnetd_dumpbuffer(const char *msg, const char *buffer, ssize_t nbytes)
+#ifdef CONFIG_EXAMPLES_NSH_TELNETD_DUMPBUFFER
+static void nsh_dumpbuffer(const char *msg, const char *buffer, ssize_t nbytes)
 {
 #ifdef CONFIG_DEBUG
   char line[128];
@@ -165,18 +164,18 @@ static void telnetd_dumpbuffer(const char *msg, const char *buffer, ssize_t nbyt
 #endif
 }
 #else
-# define telnetd_dumpbuffer(msg,buffer,nbytes)
+# define nsh_dumpbuffer(msg,buffer,nbytes)
 #endif
 
 /****************************************************************************
- * Name: telnetd_putchar
+ * Name: nsh_putchar
  *
  * Description:
  *   Add another parsed character to the TELNET command string
  *
  ****************************************************************************/
 
-static void telnetd_putchar(struct telnetd_s *pstate, uint8 ch)
+static void nsh_putchar(struct telnetd_s *pstate, uint8 ch)
 {
   /* Ignore carriage returns */
 
@@ -191,15 +190,15 @@ static void telnetd_putchar(struct telnetd_s *pstate, uint8 ch)
 
   /* If a newline was added or if the buffer is full, then process it now */
 
-  if (ch == ISO_nl || pstate->tn_bufndx == (CONFIG_NETUTILS_CMD_SIZE - 1))
+  if (ch == ISO_nl || pstate->tn_bufndx == (CONFIG_EXAMPLES_NSH_CMD_SIZE - 1))
     {
       if (pstate->tn_bufndx > 0)
         {
           pstate->tn_cmd[pstate->tn_bufndx] = '\0';
         }
 
-      telnetd_dumpbuffer("TELNET CMD", pstate->tn_cmd, strlen(pstate->tn_cmd));
-      shell_input(pstate, pstate->tn_cmd);
+      nsh_dumpbuffer("TELNET CMD", pstate->tn_cmd, strlen(pstate->tn_cmd));
+      nsh_parse((void*)pstate, pstate->tn_cmd);
       pstate->tn_bufndx = 0;
     }
   else
@@ -210,13 +209,13 @@ static void telnetd_putchar(struct telnetd_s *pstate, uint8 ch)
 }
 
 /****************************************************************************
- * Name: telnetd_sendopt
+ * Name: nsh_sendopt
  *
  * Description:
  *
  ****************************************************************************/
 
-static void telnetd_sendopt(struct telnetd_s *pstate, uint8 option, uint8 value)
+static void nsh_sendopt(struct telnetd_s *pstate, uint8 option, uint8 value)
 {
   uint8 optbuf[4];
   optbuf[0] = TELNET_IAC;
@@ -224,7 +223,7 @@ static void telnetd_sendopt(struct telnetd_s *pstate, uint8 option, uint8 value)
   optbuf[2] = value;
   optbuf[3] = 0;
 
-  telnetd_dumpbuffer("Send optbuf", optbuf, 4);
+  nsh_dumpbuffer("Send optbuf", optbuf, 4);
   if (send(pstate->tn_sockfd, optbuf, 4, 0) < 0)
     {
       dbg("[%d] Failed to send TELNET_IAC\n", pstate->tn_sockfd);
@@ -232,14 +231,14 @@ static void telnetd_sendopt(struct telnetd_s *pstate, uint8 option, uint8 value)
 }
 
 /****************************************************************************
- * Name: telnetd_receive
+ * Name: nsh_receive
  *
  * Description:
  *   Process a received TELENET buffer
  *
  ****************************************************************************/
 
-static int telnetd_receive(struct telnetd_s *pstate, size_t len)
+static int nsh_receive(struct telnetd_s *pstate, size_t len)
 {
   char *ptr = pstate->tn_iobuffer;
   uint8 ch;
@@ -255,7 +254,7 @@ static int telnetd_receive(struct telnetd_s *pstate, size_t len)
           case STATE_IAC:
             if (ch == TELNET_IAC)
               {
-                telnetd_putchar(pstate, ch);
+                nsh_putchar(pstate, ch);
                 pstate->tn_state = STATE_NORMAL;
              }
             else
@@ -288,28 +287,28 @@ static int telnetd_receive(struct telnetd_s *pstate, size_t len)
           case STATE_WILL:
             /* Reply with a DONT */
 
-            telnetd_sendopt(pstate, TELNET_DONT, ch);
+            nsh_sendopt(pstate, TELNET_DONT, ch);
             pstate->tn_state = STATE_NORMAL;
             break;
 
           case STATE_WONT:
             /* Reply with a DONT */
 
-            telnetd_sendopt(pstate, TELNET_DONT, ch);
+            nsh_sendopt(pstate, TELNET_DONT, ch);
             pstate->tn_state = STATE_NORMAL;
             break;
 
           case STATE_DO:
             /* Reply with a WONT */
 
-            telnetd_sendopt(pstate, TELNET_WONT, ch);
+            nsh_sendopt(pstate, TELNET_WONT, ch);
             pstate->tn_state = STATE_NORMAL;
             break;
 
           case STATE_DONT:
             /* Reply with a WONT */
 
-            telnetd_sendopt(pstate, TELNET_WONT, ch);
+            nsh_sendopt(pstate, TELNET_WONT, ch);
             pstate->tn_state = STATE_NORMAL;
             break;
 
@@ -320,7 +319,7 @@ static int telnetd_receive(struct telnetd_s *pstate, size_t len)
               }
             else
               {
-                telnetd_putchar(pstate, ch);
+                nsh_putchar(pstate, ch);
               }
             break;
         }
@@ -329,7 +328,30 @@ static int telnetd_receive(struct telnetd_s *pstate, size_t len)
 }
 
 /****************************************************************************
- * Name: telnetd_handler
+ * Name: nsh_prompt
+ *
+ * Description:
+ *   Print a prompt to the shell window.
+ *
+ *   This function can be used by the shell back-end to print out a prompt
+ *   to the shell window.
+ *
+ ****************************************************************************/
+
+static void nsh_prompt(struct telnetd_s *pstate, const char *str)
+{
+  int len = strlen(str);
+
+  strncpy(pstate->tn_iobuffer, str, len);
+  nsh_dumpbuffer("Shell prompt", pstate->tn_iobuffer, len);
+  if (send(pstate->tn_sockfd, pstate->tn_iobuffer, len, 0) < 0)
+    {
+      dbg("[%d] Failed to send prompt\n", pstate->tn_sockfd);
+    }
+}
+
+/****************************************************************************
+ * Name: nsh_connection
  *
  * Description:
  *   Each time a new connection to port 23 is made, a new thread is created
@@ -338,7 +360,7 @@ static int telnetd_receive(struct telnetd_s *pstate, size_t len)
  *
  ****************************************************************************/
 
-static void *telnetd_handler(void *arg)
+static void *nsh_connection(void *arg)
 {
   struct telnetd_s *pstate = (struct telnetd_s *)malloc(sizeof(struct telnetd_s));
   int               sockfd = (int)arg;
@@ -350,31 +372,30 @@ static void *telnetd_handler(void *arg)
 
   if (pstate)
     {
-
       /* Initialize the thread state structure */
 
       memset(pstate, 0, sizeof(struct telnetd_s));
       pstate->tn_sockfd = sockfd;
       pstate->tn_state  = STATE_NORMAL;
 
-      /* Start up the shell */
-
-      shell_init(pstate);
-      shell_start(pstate);
-
       /* Loop processing each TELNET command */
+
       do
         {
+          /* Display the prompt string */
+
+          nsh_prompt(pstate, g_nshprompt);
+
           /* Read a buffer of data from the TELNET client */
 
-          ret = recv(pstate->tn_sockfd, pstate->tn_iobuffer, CONFIG_NETUTILS_IOBUFFER_SIZE, 0);
+          ret = recv(pstate->tn_sockfd, pstate->tn_iobuffer, CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE, 0);
           if (ret > 0)
             {
 
               /* Process the received TELNET data */
 
-              telnetd_dumpbuffer("Received buffer", pstate->tn_iobuffer, ret);
-              ret = telnetd_receive(pstate, ret);
+              nsh_dumpbuffer("Received buffer", pstate->tn_iobuffer, ret);
+              ret = nsh_receive(pstate, ret);
             }
         }
       while (ret >= 0 && pstate->tn_state != STATE_CLOSE);
@@ -397,7 +418,7 @@ static void *telnetd_handler(void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: telnetd_init
+ * Name: nsh_telnetmain
  *
  * Description:
  *   This is the main processing thread for telnetd.  It never returns
@@ -405,42 +426,93 @@ static void *telnetd_handler(void *arg)
  *
  ****************************************************************************/
 
-void telnetd_init(void)
+int nsh_telnetmain(void)
 {
-  /* Execute telnetd_handler on each connection to port 23 */
+ struct in_addr addr;
+#if defined(CONFIG_EXAMPLES_NSH_DHCPC) || defined(CONFIG_EXAMPLES_NSH_NOMAC)
+ uint8 mac[IFHWADDRLEN];
+#endif
 
-  uip_server(HTONS(23), telnetd_handler, CONFIG_NETUTILS_TELNETDSTACKSIZE);
-}
+/* Many embedded network interfaces must have a software assigned MAC */
 
-/****************************************************************************
- * Name: shell_prompt
- *
- * Description:
- *   Print a prompt to the shell window.
- *
- *   This function can be used by the shell back-end to print out a prompt
- *   to the shell window.
- *
- ****************************************************************************/
+#ifdef CONFIG_EXAMPLES_NSH_NOMAC
+  mac[0] = 0x00;
+  mac[1] = 0xe0;
+  mac[2] = 0xb0;
+  mac[3] = 0x0b;
+  mac[4] = 0xba;
+  mac[5] = 0xbe;
+  uip_setmacaddr("eth0", mac);
+#endif
 
-void shell_prompt(void *handle, char *str)
-{
-  struct telnetd_s *pstate = (struct telnetd_s *)handle;
-  int len = strlen(str);
+  /* Set up our host address */
 
-  strncpy(pstate->tn_iobuffer, str, len);
-  telnetd_dumpbuffer("Shell prompt", pstate->tn_iobuffer, len);
-  if (send(pstate->tn_sockfd, pstate->tn_iobuffer, len, 0) < 0)
+#if !defined(CONFIG_EXAMPLES_NSH_DHCPC)
+  addr.s_addr = HTONL(CONFIG_EXAMPLES_NSH_IPADDR);
+#else
+  addr.s_addr = 0;
+#endif
+  uip_sethostaddr("eth0", &addr);
+
+  /* Set up the default router address */
+
+  addr.s_addr = HTONL(CONFIG_EXAMPLES_NSH_DRIPADDR);
+  uip_setdraddr("eth0", &addr);
+
+  /* Setup the subnet mask */
+
+  addr.s_addr = HTONL(CONFIG_EXAMPLES_NSH_NETMASK);
+  uip_setnetmask("eth0", &addr);
+
+#if defined(CONFIG_EXAMPLES_NSH_DHCPC)
+  /* Set up the resolver */
+
+  resolv_init();
+#endif
+
+#if defined(CONFIG_EXAMPLES_NSH_DHCPC)
+  /* Get the MAC address of the NIC */
+
+  uip_getmacaddr("eth0", mac);
+
+  /* Set up the DHCPC modules */
+
+  handle = dhcpc_open(&mac, IFHWADDRLEN);
+
+  /* Get an IP address */
+
+  if (handle)
     {
-      dbg("[%d] Failed to send prompt\n", pstate->tn_sockfd);
+        struct dhcpc_state ds;
+        (void)dhcpc_request(handle, &ds);
+        uip_sethostaddr("eth1", &ds.ipaddr);
+        if (ds.netmask.s_addr != 0)
+          {
+            uip_setnetmask("eth0", &ds.netmask);
+          }
+        if (ds.default_router.s_addr != 0)
+          {
+            uip_setdraddr("eth0", &ds.default_router);
+          }
+        if (ds.dnsaddr.s_addr != 0)
+          {
+            resolv_conf(&ds.dnsaddr);
+          }
+        dhcpc_close(handle);
     }
+#endif
+
+  /* Execute nsh_connection on each connection to port 23 */
+
+  uip_server(HTONS(23), nsh_connection, CONFIG_EXAMPLES_NSH_STACKSIZE);
+  return OK;
 }
 
 /****************************************************************************
- * Name: shell_output
+ * Name: nsh_telnetout
  *
  * Description:
- *   Print a string to the shell window.
+ *   Print a string to the remote shell window.
  *
  *   This function is implemented by the shell GUI / telnet server and
  *   can be called by the shell back-end to output a string in the
@@ -448,40 +520,44 @@ void shell_prompt(void *handle, char *str)
  *
  ****************************************************************************/
 
-void shell_output(void *handle, const char *fmt, ...)
+int nsh_telnetout(FAR void *handle, const char *fmt, ...)
 {
   struct telnetd_s *pstate = (struct telnetd_s *)handle;
   unsigned len;
   va_list ap;
 
   va_start(ap, fmt);
-  vsnprintf(pstate->tn_iobuffer, CONFIG_NETUTILS_IOBUFFER_SIZE, fmt, ap);
+  vsnprintf(pstate->tn_iobuffer, CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE, fmt, ap);
   va_end(ap);
 
   len = strlen(pstate->tn_iobuffer);
-  if (len < CONFIG_NETUTILS_IOBUFFER_SIZE - 2)
+  if (len < (CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - 1) && pstate->tn_iobuffer[len-1] == '\n')
     {
-      pstate->tn_iobuffer[len]   = ISO_cr;
-      pstate->tn_iobuffer[len+1] = ISO_nl;
-      pstate->tn_iobuffer[len+2] = '\0';
+      pstate->tn_iobuffer[len-1] = ISO_cr;
+      pstate->tn_iobuffer[len]   = ISO_nl;
+      pstate->tn_iobuffer[len+1] = '\0';
+      len++;
     }
 
-  telnetd_dumpbuffer("Shell output", pstate->tn_iobuffer, len+2);
-  if (send(pstate->tn_sockfd, pstate->tn_iobuffer, len+2, 0) < 0)
+  nsh_dumpbuffer("Shell output", pstate->tn_iobuffer, len);
+  if (send(pstate->tn_sockfd, pstate->tn_iobuffer, len, 0) < 0)
     {
       dbg("[%d] Failed to send response\n", pstate->tn_sockfd);
+      return ERROR;
     }
+
+  return len;
 }
 
 /****************************************************************************
- * Name: shell_quit
+ * Name: cmd_exit
  *
  * Description:
- *   Quit the shell
+ *   Quit the shell instance
  *
  ****************************************************************************/
 
-void shell_quit(void *handle, char *str)
+void cmd_exit(void *handle, int argc, char **argv)
 {
   struct telnetd_s *pstate = (struct telnetd_s *)handle;
   pstate->tn_state = STATE_CLOSE;

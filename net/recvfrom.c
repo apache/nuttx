@@ -831,7 +831,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   struct uip_conn        *conn;
   struct recvfrom_s       state;
   irqstate_t              save;
-  int                     ret;
+  int                     ret = OK;
 
   /* Verify that the SOCK_STREAM has been connected */
 

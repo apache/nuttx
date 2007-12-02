@@ -51,7 +51,6 @@
 
 #define CONFIG_NSH_LINE_SIZE 80
 #undef  CONFIG_FULL_PATH
-#define NSH_MAX_ARGUMENTS     6
 
 /****************************************************************************
  * Private Types
@@ -70,14 +69,13 @@ struct cmdmap_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void cmd_help(int argc, char **argv);
-static void cmd_unrecognized(int argc, char **argv);
+static void cmd_help(FAR void *handle, int argc, char **argv);
+static void cmd_unrecognized(FAR void *handle, int argc, char **argv);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static char line[CONFIG_NSH_LINE_SIZE];
 static const char delim[] = " \t\n";
 
 static const struct cmdmap_s g_cmdmap[] =
@@ -92,6 +90,7 @@ static const struct cmdmap_s g_cmdmap[] =
   { "echo",   cmd_echo,   0, NSH_MAX_ARGUMENTS, "[<string> [<string>...]]" },
 #endif
   { "exec",   cmd_exec,   2, 3, "<hex-address>" },
+  { "exit",   cmd_exit,   1, 1, NULL },
   { "help",   cmd_help,   1, 1, NULL },
 #if CONFIG_NFILE_DESCRIPTORS > 0
   { "ls",     cmd_ls,     2, 5, "[-lRs] <dir-path>" },
@@ -119,6 +118,7 @@ static const struct cmdmap_s g_cmdmap[] =
  * Public Data
  ****************************************************************************/
 
+const char g_nshprompt[]         = "nsh> ";
 const char g_fmtargrequired[]    = "nsh: %s: missing required argument(s)\n";
 const char g_fmtarginvalid[]     = "nsh: %s: argument invalid\n";
 const char g_fmtcmdnotfound[]    = "nsh: %s: command not found\n";
@@ -136,20 +136,20 @@ const char g_fmtcmdoutofmemory[] = "nsh: %s: out of memory\n";
  * Name: cmd_help
  ****************************************************************************/
 
-static void cmd_help(int argc, char **argv)
+static void cmd_help(FAR void *handle, int argc, char **argv)
 {
   const struct cmdmap_s *ptr;
 
-  printf("NSH commands:\n");
+  nsh_output(handle, "NSH commands:\n");
   for (ptr = g_cmdmap; ptr->cmd; ptr++)
     {
       if (ptr->usage)
         {
-          printf("  %s %s\n", ptr->cmd, ptr->usage);
+          nsh_output(handle, "  %s %s\n", ptr->cmd, ptr->usage);
         }
       else
         {
-          printf("  %s\n", ptr->cmd);
+          nsh_output(handle, "  %s\n", ptr->cmd);
         }
     }
 }
@@ -158,9 +158,9 @@ static void cmd_help(int argc, char **argv)
  * Name: cmd_unrecognized
  ****************************************************************************/
 
-static void cmd_unrecognized(int argc, char **argv)
+static void cmd_unrecognized(FAR void *handle, int argc, char **argv)
 {
-  printf(g_fmtcmdnotfound, argv[0]);
+  nsh_output(handle, g_fmtcmdnotfound, argv[0]);
 }
 
 /****************************************************************************
@@ -182,94 +182,86 @@ void user_initialize(void)
 
 int user_start(int argc, char *argv[])
 {
-  printf("NuttShell (NSH)\n");
-  fflush(stdout);
+  return nsh_main();
+}
 
-  for (;;)
+/****************************************************************************
+ * Name: nsh_parse
+ ****************************************************************************/
+
+int nsh_parse(FAR void *handle, char *cmdline)
+{
+  const struct cmdmap_s *cmdmap;
+  char *argv[NSH_MAX_ARGUMENTS+1];
+  char *saveptr;
+  char *cmd;
+  int   argc;
+
+  /* Parse out the command at the beginning of the line */
+
+  cmd = strtok_r(cmdline, " \t\n", &saveptr);
+  if (cmd)
     {
-      const struct cmdmap_s *cmdmap;
-      char *saveptr;
-      char *cmd;
+      cmd_t handler = cmd_unrecognized;
 
-      /* Get the next line of input */
+      /* Parse all of the arguments following the command name */
 
-      fgets(line, CONFIG_NSH_LINE_SIZE, stdin);
 
-      /* Parse out the command at the beginning of the line */
-
-      cmd = strtok_r(line, " \t\n", &saveptr);
-      if (cmd)
+      argv[0] = cmd;
+      for (argc = 1; argc < NSH_MAX_ARGUMENTS+1; argc++)
         {
-          cmd_t handler = cmd_unrecognized;
-
-          /* Parse all of the arguments following the command name */
-
-          char *cmd_argv[NSH_MAX_ARGUMENTS+1];
-          int   cmd_argc;
-
-          cmd_argv[0] = cmd;
-          for (cmd_argc = 1; cmd_argc < NSH_MAX_ARGUMENTS+1; cmd_argc++)
+          argv[argc] = strtok_r( NULL, " \t\n", &saveptr);
+          if (!argv[argc])
             {
-              cmd_argv[cmd_argc] = strtok_r( NULL, " \t\n", &saveptr);
-              if ( !cmd_argv[cmd_argc] )
-                {
-                  break;
-                }
+              break;
             }
+        }
 
-          if (cmd_argc > NSH_MAX_ARGUMENTS)
+      if (argc > NSH_MAX_ARGUMENTS)
+        {
+          nsh_output(handle, g_fmttoomanyargs, cmd);
+        }
+
+      /* See if the command is one that we understand */
+
+      for (cmdmap = g_cmdmap; cmdmap->cmd; cmdmap++)
+        {
+          if (strcmp(cmdmap->cmd, cmd) == 0)
             {
-              printf(g_fmttoomanyargs, cmd);
-            }
-
-          /* See if the command is one that we understand */
-
-          for (cmdmap = g_cmdmap; cmdmap->cmd; cmdmap++)
-            {
-              if (strcmp(cmdmap->cmd, cmd) == 0)
-                {
-                  /* Check if a valid number of arguments was provided.  We
+              /* Check if a valid number of arguments was provided.  We
                * do this simple, imperfect checking here so that it does
                * not have to be performed in each command.
                */
 
-                  if (cmd_argc < cmdmap->minargs)
-                    {
-                      /* Fewer than the minimum number were provided */
+              if (argc < cmdmap->minargs)
+                {
+                  /* Fewer than the minimum number were provided */
 
-                      printf(g_fmtargrequired, cmd);
-                      handler = NULL;
-                      break;
-                    }
-                  else if (cmd_argc > cmdmap->maxargs)
-                    {
-                      /* More than the maximum number were provided */
+                  nsh_output(handle, g_fmtargrequired, cmd);
+                  return ERROR;
+                }
+              else if (argc > cmdmap->maxargs)
+                {
+                  /* More than the maximum number were provided */
 
-                      printf(g_fmttoomanyargs, cmd);
-                      handler = NULL;
-                      break;
-                    }
-                  else
-                    {
-                      /* A valid number of arguments were provided (this does
-                  * not mean they are right.
-                  */
+                  nsh_output(handle, g_fmttoomanyargs, cmd);
+                  return ERROR;
+                }
+              else
+                {
+                  /* A valid number of arguments were provided (this does
+                   * not mean they are right).
+                   */
 
-                      handler = cmdmap->handler;
-                      break;
-                    }
+                  handler = cmdmap->handler;
+                  break;
                 }
             }
-
-          /* If a error was detected above, handler will be nullified to
-         * prevent reporting multiple errors.
-         */
-
-          if (handler)
-            {
-              handler(cmd_argc, cmd_argv);
-            }
         }
-      fflush(stdout);
+
+      handler(handle, argc, argv);
+      return OK;
     }
+
+  return ERROR;
 }

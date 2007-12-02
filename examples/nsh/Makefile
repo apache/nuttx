@@ -1,5 +1,5 @@
-############################################################
-# Makefile
+############################################################################
+# examples/nsh/Makefile
 #
 #   Copyright (C) 2007 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -31,7 +31,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################
+############################################################################
 
 -include $(TOPDIR)/.config
 -include $(TOPDIR)/Make.defs
@@ -39,8 +39,15 @@
 MKDEP	= $(TOPDIR)/tools/mkdeps.sh
 
 ASRCS	= 
-AOBJS	= $(ASRCS:.S=$(OBJEXT))
 CSRCS	= nsh_main.c nsh_fscmds.c nsh_proccmds.c nsh_envcmds.c
+
+ifeq ($(CONFIG_EXAMPLES_NSH_TELNET),y)
+CSRCS	+= nsh_telnetd.c
+else
+CSRCS	+= nsh_serial.c
+endif
+
+AOBJS	= $(ASRCS:.S=$(OBJEXT))
 COBJS	= $(CSRCS:.c=$(OBJEXT))
 
 SRCS	= $(ASRCS) $(CSRCS)

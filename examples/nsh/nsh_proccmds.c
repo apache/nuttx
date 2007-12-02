@@ -97,27 +97,27 @@ static void ps_task(FAR _TCB *tcb, FAR void *arg)
 {
   boolean needcomma = FALSE;
   int i;
-  printf("%5d %3d %4s %7s%c%c %8s ",
-         tcb->pid, tcb->sched_priority,
-         tcb->flags & TCB_FLAG_ROUND_ROBIN ? "RR  " : "FIFO",
-         tcb->flags & TCB_FLAG_PTHREAD ? "PTHREAD" : "TASK   ",
-         tcb->flags & TCB_FLAG_NONCANCELABLE ? 'N' : ' ',
-         tcb->flags & TCB_FLAG_CANCEL_PENDING ? 'P' : ' ',
-         g_statenames[tcb->task_state]);
+  nsh_output(arg, "%5d %3d %4s %7s%c%c %8s ",
+             tcb->pid, tcb->sched_priority,
+             tcb->flags & TCB_FLAG_ROUND_ROBIN ? "RR  " : "FIFO",
+             tcb->flags & TCB_FLAG_PTHREAD ? "PTHREAD" : "TASK   ",
+             tcb->flags & TCB_FLAG_NONCANCELABLE ? 'N' : ' ',
+             tcb->flags & TCB_FLAG_CANCEL_PENDING ? 'P' : ' ',
+             g_statenames[tcb->task_state]);
 
-  printf("%s(", tcb->argv[0]);
+  nsh_output(arg, "%s(", tcb->argv[0]);
   for (i = 1; i < CONFIG_MAX_TASK_ARGS+1 && tcb->argv[i]; i++)
     {
       if (needcomma)
         {
-          printf(", %p", tcb->argv[i]);
+          nsh_output(arg, ", %p", tcb->argv[i]);
         }
       else
         {
-          printf("%p", tcb->argv[i]);
+          nsh_output(arg, "%p", tcb->argv[i]);
         }
      }
-  printf(")\n");
+  nsh_output(arg, ")\n");
 }
 
 /****************************************************************************
@@ -128,7 +128,7 @@ static void ps_task(FAR _TCB *tcb, FAR void *arg)
  * Name: cmd_exec
  ****************************************************************************/
 
-void cmd_exec(int argc, char **argv)
+void cmd_exec(FAR void *handle, int argc, char **argv)
 {
   char *endptr;
   long addr;
@@ -136,11 +136,11 @@ void cmd_exec(int argc, char **argv)
   addr = strtol(argv[1], &endptr, 0);
   if (!addr || endptr == argv[1] || *endptr != '\0')
     {
-       printf(g_fmtarginvalid, argv[0]);
+       nsh_output(handle, g_fmtarginvalid, argv[0]);
        return;
     }
 
-  printf("Calling %p\n", (exec_t)addr);
+  nsh_output(handle, "Calling %p\n", (exec_t)addr);
   ((exec_t)addr)();
 }
 
@@ -148,8 +148,8 @@ void cmd_exec(int argc, char **argv)
  * Name: cmd_ps
  ****************************************************************************/
 
-void cmd_ps(int argc, char **argv)
+void cmd_ps(FAR void *handle, int argc, char **argv)
 {
-  printf("PID   PRI SCHD TYPE   NP STATE    NAME\n");
-  sched_foreach(ps_task, NULL);
+  nsh_output(handle, "PID   PRI SCHD TYPE   NP STATE    NAME\n");
+  sched_foreach(ps_task, handle);
 }

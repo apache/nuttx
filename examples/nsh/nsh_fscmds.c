@@ -90,7 +90,7 @@
  * Private Types
  ****************************************************************************/
 
-typedef int (*direntry_handler_t)(const char *, struct dirent *, void *);
+typedef int (*direntry_handler_t)(FAR void *, const char *, struct dirent *, void *);
 
 /****************************************************************************
  * Private Function Prototypes
@@ -151,7 +151,8 @@ static char *getdirpath(const char *path, const char *file)
  * Name: foreach_direntry
  ****************************************************************************/
 
-static int foreach_direntry(const char *cmd, const char *dirpath,
+#if CONFIG_NFILE_DESCRIPTORS > 0
+static int foreach_direntry(FAR void *handle, const char *cmd, const char *dirpath,
                             direntry_handler_t handler, void *pvarg)
 {
   DIR *dirp;
@@ -171,7 +172,7 @@ static int foreach_direntry(const char *cmd, const char *dirpath,
     {
       /* Failed to open the directory */
 
-      printf(g_fmtnosuch, cmd, "directory", dirpath);
+      nsh_output(handle, g_fmtnosuch, cmd, "directory", dirpath);
       return ERROR;
     }
 
@@ -189,7 +190,7 @@ static int foreach_direntry(const char *cmd, const char *dirpath,
 
       /* Call the handler with this directory entry */
 
-      if (handler(dirpath, entryp, pvarg) <  0)
+      if (handler(handle, dirpath, entryp, pvarg) <  0)
         {
           /* The handler reported a problem */
 
@@ -201,13 +202,14 @@ static int foreach_direntry(const char *cmd, const char *dirpath,
   closedir(dirp);
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: ls_handler
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-static int ls_handler(const char *dirpath, struct dirent *entryp, void *pvarg)
+static int ls_handler(FAR void *handle, const char *dirpath, struct dirent *entryp, void *pvarg)
 {
   unsigned int lsflags = (unsigned int)pvarg;
   int ret;
@@ -225,7 +227,7 @@ static int ls_handler(const char *dirpath, struct dirent *entryp, void *pvarg)
       free(fullpath);
       if (ret != 0)
         {
-          printf(g_fmtcmdfailed, "ls", "stat", strerror(errno));
+          nsh_output(handle, g_fmtcmdfailed, "ls", "stat", strerror(errno));
           return OK;
         }
 
@@ -290,30 +292,30 @@ static int ls_handler(const char *dirpath, struct dirent *entryp, void *pvarg)
               details[9]='x';
             }
 
-          printf(" %s", details);
+          nsh_output(handle, " %s", details);
         }
 
       if ((lsflags & LSFLAGS_SIZE) != 0)
         {
-          printf("%8d", buf.st_size);
+          nsh_output(handle, "%8d", buf.st_size);
         }
     }
 
   /* then provide the filename that is common to normal and verbose output */
 
 #ifdef CONFIG_FULL_PATH
-  printf(" %s/%s", arg, entryp->d_name);
+  nsh_output(handle, " %s/%s", arg, entryp->d_name);
 #else
-  printf(" %s", entryp->d_name);
+  nsh_output(handle, " %s", entryp->d_name);
 #endif
 
   if (DIRENT_ISDIRECTORY(entryp->d_type))
     {
-      printf("/\n");
+      nsh_output(handle, "/\n");
     }
   else
     {
-      putchar('\n');
+      nsh_output(handle, "\n");
     }
   return OK;
 }
@@ -324,7 +326,7 @@ static int ls_handler(const char *dirpath, struct dirent *entryp, void *pvarg)
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-static int ls_recursive(const char *dirpath, struct dirent *entryp, void *pvarg)
+static int ls_recursive(FAR void *handle, const char *dirpath, struct dirent *entryp, void *pvarg)
 {
   /* Is this entry a directory? */
 
@@ -337,12 +339,12 @@ static int ls_recursive(const char *dirpath, struct dirent *entryp, void *pvarg)
 
       /* List the directory contents */
 
-      printf("%s:\n", newpath);
-      foreach_direntry("ls", newpath, ls_handler, pvarg);
+      nsh_output(handle, "%s:\n", newpath);
+      foreach_direntry(handle, "ls", newpath, ls_handler, pvarg);
 
       /* Then recurse to list each directory within the directory */
 
-      foreach_direntry("ls", newpath, ls_recursive, pvarg);
+      foreach_direntry(handle, "ls", newpath, ls_recursive, pvarg);
       free(newpath);
     }
   return OK;
@@ -358,7 +360,7 @@ static int ls_recursive(const char *dirpath, struct dirent *entryp, void *pvarg)
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_cat(int argc, char **argv)
+void cmd_cat(FAR void *handle, int argc, char **argv)
 {
   char buffer[1024];
 
@@ -367,7 +369,7 @@ void cmd_cat(int argc, char **argv)
   int fd = open(argv[1], O_RDONLY);
   if (fd < 0)
     {
-      printf(g_fmtcmdfailed, argv[0], "open", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "open", strerror(errno));
       return;
     }
 
@@ -385,7 +387,7 @@ void cmd_cat(int argc, char **argv)
 
           if (errno != EINTR)
             {
-              printf(g_fmtcmdfailed, argv[0], "read", strerror(errno));
+              nsh_output(handle, g_fmtcmdfailed, argv[0], "read", strerror(errno));
               break;
             }
         }
@@ -405,7 +407,7 @@ void cmd_cat(int argc, char **argv)
 
                   if (errno != EINTR)
                     {
-                      printf(g_fmtcmdfailed, argv[0], "write", strerror(errno));
+                      nsh_output(handle, g_fmtcmdfailed, argv[0], "write", strerror(errno));
                       break;
                     }
                 }
@@ -433,7 +435,7 @@ void cmd_cat(int argc, char **argv)
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_cp(int argc, char **argv)
+void cmd_cp(FAR void *handle, int argc, char **argv)
 {
   struct stat buf;
   char *fullpath = NULL;
@@ -448,7 +450,7 @@ void cmd_cp(int argc, char **argv)
   rdfd = open(argv[1], O_RDONLY);
   if (rdfd < 0)
     {
-      printf(g_fmtcmdfailed, argv[0], "open", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "open", strerror(errno));
       return;
     }
 
@@ -470,7 +472,7 @@ void cmd_cp(int argc, char **argv)
           fullpath = getdirpath(argv[2], basename(argv[1]) );
           if (!fullpath)
             {
-              printf(g_fmtcmdoutofmemory, argv[0]);
+              nsh_output(handle, g_fmtcmdoutofmemory, argv[0]);
               goto out_with_rdfd;
             }
 
@@ -490,7 +492,7 @@ void cmd_cp(int argc, char **argv)
   wrfd = open(wrpath, oflags, 0666);
   if (wrfd < 0)
     {
-      printf(g_fmtcmdfailed, argv[0], "open", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "open", strerror(errno));
       goto out_with_fullpath;
     }
 
@@ -514,7 +516,7 @@ void cmd_cp(int argc, char **argv)
             {
               /* Read error */
 
-              printf(g_fmtcmdfailed, argv[0], "read", strerror(errno));
+              nsh_output(handle, g_fmtcmdfailed, argv[0], "read", strerror(errno));
               goto out_with_wrfd;
             }
         }
@@ -531,7 +533,7 @@ void cmd_cp(int argc, char **argv)
             {
               /* Read error */
 
-              printf(g_fmtcmdfailed, argv[0], "write", strerror(errno));
+              nsh_output(handle, g_fmtcmdfailed, argv[0], "write", strerror(errno));
               goto out_with_wrfd;
             }
         }
@@ -557,7 +559,7 @@ out_with_rdfd:
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_ls(int argc, char **argv)
+void cmd_ls(FAR void *handle, int argc, char **argv)
 {
   unsigned int lsflags = 0;
   int ret;
@@ -583,7 +585,7 @@ void cmd_ls(int argc, char **argv)
 
           case '?':
           default:
-            printf(g_fmtarginvalid, argv[0]);
+            nsh_output(handle, g_fmtarginvalid, argv[0]);
             return;
         }
     }
@@ -592,24 +594,24 @@ void cmd_ls(int argc, char **argv)
 
   if (optind + 1 <  argc)
     {
-      printf(g_fmttoomanyargs, argv[0]);
+      nsh_output(handle, g_fmttoomanyargs, argv[0]);
       return;
     }
   else if (optind + 1 >  argc)
     {
-      printf(g_fmtargrequired, argv[0]);
+      nsh_output(handle, g_fmtargrequired, argv[0]);
       return;
     }
 
   /* List the directory contents */
 
-  printf("%s:\n", argv[optind]);
-  ret = foreach_direntry("ls", argv[optind], ls_handler, (void*)lsflags);
+  nsh_output(handle, "%s:\n", argv[optind]);
+  ret = foreach_direntry(handle, "ls", argv[optind], ls_handler, (void*)lsflags);
   if (ret == OK && (lsflags & LSFLAGS_RECURSIVE) != 0)
     {
       /* Then recurse to list each directory within the directory */
 
-      ret = foreach_direntry("ls", argv[optind], ls_recursive, (void*)lsflags);
+      ret = foreach_direntry(handle, "ls", argv[optind], ls_recursive, (void*)lsflags);
     }
 }
 #endif
@@ -619,12 +621,12 @@ void cmd_ls(int argc, char **argv)
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_mkdir(int argc, char **argv)
+void cmd_mkdir(FAR void *handle, int argc, char **argv)
 {
   int result = mkdir(argv[1], 0777);
   if ( result < 0)
     {
-      printf(g_fmtcmdfailed, argv[0], "mkdir", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "mkdir", strerror(errno));
     }
 }
 #endif
@@ -634,7 +636,7 @@ void cmd_mkdir(int argc, char **argv)
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_mount(int argc, char **argv)
+void cmd_mount(FAR void *handle, int argc, char **argv)
 {
   char *filesystem = 0;
   int result;
@@ -651,12 +653,12 @@ void cmd_mount(int argc, char **argv)
             break;
 
           case ':':
-            printf(g_fmtargrequired, argv[0]);
+            nsh_output(handle, g_fmtargrequired, argv[0]);
             return;
 
           case '?':
           default:
-            printf(g_fmtarginvalid, argv[0]);
+            nsh_output(handle, g_fmtarginvalid, argv[0]);
             return;
         }
     }
@@ -665,12 +667,12 @@ void cmd_mount(int argc, char **argv)
 
   if (optind + 2 <  argc)
     {
-      printf(g_fmttoomanyargs, argv[0]);
+      nsh_output(handle, g_fmttoomanyargs, argv[0]);
       return;
     }
   else if (optind + 2 >  argc)
     {
-      printf(g_fmtargrequired, argv[0]);
+      nsh_output(handle, g_fmtargrequired, argv[0]);
       return;
     }
 
@@ -678,7 +680,7 @@ void cmd_mount(int argc, char **argv)
   result = mount(argv[optind], argv[optind+1], filesystem, 0, NULL);
   if ( result < 0)
     {
-      printf(g_fmtcmdfailed, argv[0], "mount", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "mount", strerror(errno));
     }
 }
 #endif
@@ -688,11 +690,11 @@ void cmd_mount(int argc, char **argv)
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_rm(int argc, char **argv)
+void cmd_rm(FAR void *handle, int argc, char **argv)
 {
   if (unlink(argv[1]) < 0)
     {
-      printf(g_fmtcmdfailed, argv[0], "unlink", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "unlink", strerror(errno));
     }
 }
 #endif
@@ -702,11 +704,11 @@ void cmd_rm(int argc, char **argv)
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_rmdir(int argc, char **argv)
+void cmd_rmdir(FAR void *handle, int argc, char **argv)
 {
   if (rmdir(argv[1]) < 0)
     {
-      printf(g_fmtcmdfailed, argv[0], "rmdir", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "rmdir", strerror(errno));
     }
 }
 #endif
@@ -716,13 +718,13 @@ void cmd_rmdir(int argc, char **argv)
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_umount(int argc, char **argv)
+void cmd_umount(FAR void *handle, int argc, char **argv)
 {
   /* Perform the umount */
   int result = umount(argv[1]);
   if ( result < 0)
     {
-      printf(g_fmtcmdfailed, argv[0], "umount", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "umount", strerror(errno));
     }
 }
 #endif

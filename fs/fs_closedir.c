@@ -134,9 +134,11 @@ int closedir(FAR DIR *dirp)
   free(idir);
   return OK;
 
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 errout_with_inode:
   inode_release(inode);
   free(idir);
+#endif
 
 errout:
   *get_errno_ptr() = ret;
