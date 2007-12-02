@@ -29,10 +29,8 @@ o C++ Support
 - Need to call static constructors
 
 o Network
-- Did not implement send() and sendto() timeouts.  Option is setable via setsockopt,
-  but is not implemented.
-- uIP's netutils/smtp, dpcpc, resolv, webclient -- untested
-- Should implement SOCK_RAW
+- uIP's netutils/smtp, resolv, webclient -- untested
+- Should implement SOCK_RAW, SOCK_PACKET
 - uIP polling issues:
   (1) Current logic will not support multiple ethernet drivers.  Each driver should
       poll on TCP connections connect on the network supported by the driver; UDP
@@ -44,6 +42,7 @@ o Network
 - uIP/Socket callback logic is not thread safe. This means that a socket cannot be
   used concurrently by two threads.  Minimal fix:  Add mutex to support exclusion.
 - IPv6 support is incomplete
+- Incoming UDP broadcast should only be accepted if listening on INADDR_ANY(?)
 
 o USB
 - Implement USB device support

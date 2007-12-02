@@ -111,12 +111,7 @@ static inline void accept_tcpsender(struct uip_conn *conn, struct accept_s *psta
     {
       addr->sin_family = AF_INET;
       addr->sin_port   = conn->rport;
-
-#ifdef CONFIG_NET_IPv6
       uip_ipaddr_copy(addr->sin_addr.s_addr, conn->ripaddr);
-#else
-      uip_ipaddr_copy(addr->sin_addr.s_addr, conn->ripaddr);
-#endif
     }
 }
 #endif
@@ -400,4 +395,4 @@ errout:
   return ERROR;
 }
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS && CONFIG_NET_TCP*/
+#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS && CONFIG_NET_TCP */

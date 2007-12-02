@@ -75,6 +75,9 @@ struct send_s
   ssize_t            snd_sent;    /* The number of bytes sent */
   uint32             snd_isn;     /* Initial sequence number */
   uint32             snd_acked;   /* The number of bytes acked */
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+  uint32             snd_time;    /* last send time for determining timeout */
+#endif
 };
 
 /****************************************************************************
@@ -130,6 +133,46 @@ static uint32 send_getackno(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: send_timeout
+ *
+ * Description:
+ *   Check for send timeout.
+ *
+ * Parameters:
+ *   pstate   send state structure
+ *
+ * Returned Value:
+ *   TRUE:timeout FALSE:no timeout
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+static inline int send_timeout(struct send_s *pstate)
+{
+  FAR struct socket *psock = 0;
+
+  /* Check for a timeout configured via setsockopts(SO_SNDTIMEO).
+   * If none... we well let the send wait forever.
+   */
+
+  psock = pstate->snd_sock;
+  if (psock && psock->s_sndtimeo != 0)
+    {
+      /* Check if the configured timeout has elapsed */
+
+      return net_timeo(pstate->snd_time, psock->s_sndtimeo);
+    }
+
+  /* No timeout */
+
+  return FALSE;
+}
+#endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+
+/****************************************************************************
  * Function: send_interrupt
  *
  * Description:
@@ -149,7 +192,8 @@ static uint32 send_getackno(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
+static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn,
+                            uint8 flags)
 {
   struct send_s *pstate = (struct send_s *)conn->data_private;
 
@@ -161,10 +205,10 @@ static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn, uin
 
   if ((flags & UIP_ACKDATA) != 0)
     {
-      /* The current acknowledgement number number is the (relative) offset of
-       * the of the next byte needed by the receiver.  The snd_isn is the offset
-       * of the first byte to send to the receiver.  The difference is the number
-       * of bytes to be acknowledged.
+      /* The current acknowledgement number number is the (relative) offset
+       * of the of the next byte needed by the receiver.  The snd_isn is the
+       * offset of the first byte to send to the receiver.  The difference
+       * is the number of bytes to be acknowledged.
        */
 
       pstate->snd_acked = send_getackno(dev) - pstate->snd_isn;
@@ -175,23 +219,14 @@ static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn, uin
 
       if ( pstate->snd_acked >= pstate->snd_buflen)
         {
-          /* Yes.  Then pstate->snd_len should hold the number of bytes actually
-           * sent.
-           *
-           * Don't allow any further call backs.
-           */
-
-          conn->data_flags   = 0;
-          conn->data_private = NULL;
-          conn->data_event   = NULL;
-
-          /* Wake up the waiting thread, returning the number of bytes
+          /* Yes.  Then pstate->snd_len should hold the number of bytes
            * actually sent.
            */
 
-          sem_post(&pstate->snd_sem);
-          return flags;
+          goto end_wait;
         }
+
+      /* No.. fall through to send more data if necessary */
     }
 
   /* Check if we are being asked to retransmit data */
@@ -203,25 +238,19 @@ static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn, uin
        */
 
       pstate->snd_sent = pstate->snd_acked;
+
+      /* Fall through to re-send data from the last that was ACKed */
     }
 
  /* Check for a loss of connection */
 
   else if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
     {
-      /* Stop further callbacks */
-
-      conn->data_flags   = 0;
-      conn->data_private = NULL;
-      conn->data_event   = NULL;
-
       /* Report not connected */
 
+      nvdbg("Lost connection\n");
       pstate->snd_sent = -ENOTCONN;
-
-      /* Wake up the waiting thread */
-
-      sem_post(&pstate->snd_sem);
+      goto end_wait;
     }
 
   /* We get here if (1) not all of the data has been ACKed, (2) we have been
@@ -250,6 +279,35 @@ static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn, uin
             pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
     }
 
+  /* All data has been send and we are just waiting for ACK or re-tranmist
+   * indications to complete the send.  Check for a timeout.
+   */
+
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+  else if (send_timeout(pstate))
+    {
+      /* Yes.. report the timeout */
+
+      nvdbg("TCP timeout\n");
+      pstate->snd_sent = -EAGAIN;
+      goto end_wait;
+    }
+#endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+
+  /* Continue waiting */
+
+  return flags;
+
+end_wait:
+  /* Do not allow any further callbacks */
+
+  conn->data_flags   = 0;
+  conn->data_private = NULL;
+  conn->data_event   = NULL;
+
+  /* Wake up the waiting thread */
+
+  sem_post(&pstate->snd_sem);
   return flags;
 }
 
