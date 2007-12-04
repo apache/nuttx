@@ -1,5 +1,5 @@
 ############################################################
-# defconfig
+# configs/ntosd-dm320/defconfig
 #
 #   Copyright (C) 2007 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

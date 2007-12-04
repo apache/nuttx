@@ -1,5 +1,5 @@
 ############################################################
-# configs/ntosd-dm320/netconfig
+# configs/c5471evm/netconfig
 #
 #   Copyright (C) 2007 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -45,54 +45,56 @@
 # CONFIG_ARCH_BOARD - identifies the configs subdirectory and, hence,
 #   the board that supports the particular chip or SoC.
 # CONFIG_ARCH_BOARD_name - for use in C code
-# CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
 # CONFIG_BOARD_LOOPSPERMSEC - for delay loops
-# CONFIG_DRAM_SIZE - Describes the installed DRAM.
-# CONFIG_DRAM_START - The start address of DRAM (physical)
-# CONFIG_DRAM_VSTART - The startaddress of DRAM (virtual)
+# CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
+# CONFIG_ROM_VECTORS - unique to c5471
+# CONFIG_DRAM_END - the size of installed DRAM.
+#   Unique to c5471
+# CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to c5471.
 # CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 #
 CONFIG_ARCH=arm
 CONFIG_ARCH_ARM=y
-CONFIG_ARCH_CHIP=dm320
-CONFIG_ARCH_CHIP_DM320=y
-CONFIG_ARCH_BOARD=ntosd-dm320
-CONFIG_ARCH_BOARD_NTOSD_DM320=y
-CONFIG_BOARD_LOOPSPERMSEC=16945
-CONFIG_DRAM_SIZE=0x01000000
-CONFIG_DRAM_START=0x01000000
-CONFIG_DRAM_VSTART=0x00000000
-CONFIG_DRAM_NUTTXENTRY=0x01008000
-CONFIG_ARCH_STACKDUMP=n
+CONFIG_ARCH_CHIP=c5471
+CONFIG_ARCH_CHIP_C5471=y
+CONFIG_ARCH_BOARD=c5471evm
+CONFIG_ARCH_BOARD_C5471EVM=y
+CONFIG_BOARD_LOOPSPERMSEC=1250
+CONFIG_ROM_VECTORS=n
+CONFIG_DRAM_END=0x11000000
+CONFIG_ARCH_LEDS=y
+CONFIG_ARCH_STACKDUMP=y
 
 #
-# DM320 specific device driver settings
+# C5471 specific device driver settings
 #
-# CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
-#   console and ttys0 (default is the UART0).
-# CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
+# CONFIG_SERIAL_IRDA_CONSOLE - selects the IRDA UART for the
+#   console ant ttys0 (default is the modem UART).
+# CONFIG_UART_*_HWFLOWCONTROL - enables hardware flow control
+# CONFIG_UART_*_RXBUFSIZE - Characters are buffered as received.
 #   This specific the size of the receive buffer
-# CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
+# CONFIG_UART_*_TXBUFSIZE - Characters are buffered before
 #   being sent.  This specific the size of the transmit buffer
-# CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
-# CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
-# CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
-# CONFIG_UARTn_2STOP - Two stop bits
+# CONFIG_UART_*_BAUD - The configure BAUD of the UART.  Must be
+# CONFIG_UART_*_BITS - The number of bits.  Must be either 7 or 8.
+# CONFIG_UART_*_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+# CONFIG_UART_*_2STOP - Two stop bits
 #
-CONFIG_UART0_SERIAL_CONSOLE=y
-CONFIG_UART1_SERIAL_CONSOLE=n
-CONFIG_UART0_TXBUFSIZE=256
-CONFIG_UART1_TXBUFSIZE=256
-CONFIG_UART0_RXBUFSIZE=256
-CONFIG_UART1_RXBUFSIZE=256
-CONFIG_UART0_BAUD=115200
-CONFIG_UART1_BAUD=115200
-CONFIG_UART0_BITS=8
-CONFIG_UART1_BITS=8
-CONFIG_UART0_PARITY=0
-CONFIG_UART1_PARITY=0
-CONFIG_UART0_2STOP=0
-CONFIG_UART1_2STOP=0
+CONFIG_SERIAL_IRDA_CONSOLE=n
+CONFIG_UART_IRDA_HWFLOWCONTROL=n
+CONFIG_UART_MODEM_HWFLOWCONTROL=n
+CONFIG_UART_IRDA_RXBUFSIZE=256
+CONFIG_UART_MODEM_RXBUFSIZE=256
+CONFIG_UART_IRDA_TXBUFSIZE=256
+CONFIG_UART_MODEM_TXBUFSIZE=256
+CONFIG_UART_IRDA_BAUD=115200
+CONFIG_UART_MODEM_BAUD=115200
+CONFIG_UART_IRDA_BITS=8
+CONFIG_UART_MODEM_BITS=8
+CONFIG_UART_IRDA_PARITY=0
+CONFIG_UART_MODEM_PARITY=0
+CONFIG_UART_IRDA_2STOP=0
+CONFIG_UART_MODEM_2STOP=0
 
 #
 # General OS setup
@@ -196,7 +198,7 @@ CONFIG_ARCH_KFREE=n
 # CONFIG_RRLOAD_BINARY - make the rrload binary format used with
 #   BSPs from www.ridgerun.com
 #
-CONFIG_RRLOAD_BINARY=n
+CONFIG_RRLOAD_BINARY=y
 
 #
 # Sizes of configurable things (0 disables)
@@ -330,17 +332,14 @@ CONFIG_EXAMPLES_NSH_DRIPADDR=(10<<24|0<<16|0<<8|1)
 CONFIG_EXAMPLES_NSH_NETMASK=(255<<24|255<<16|255<<8|0)
 
 #
-# DM90x0 Driver Settings
-CONFIG_NET_DM90x0=y
-CONFIG_DM9X_NINTERFACES=1
-CONFIG_DM9X_STATS=n
-CONFIG_DM9X_BASE=0xd0000300
-CONFIG_DM9X_IRQ=27
-CONFIG_DM9X_BUSWIDTH8=n
-CONFIG_DM9X_BUSWIDTH16=y
-CONFIG_DM9X_BUSWIDTH32=n
-CONFIG_DM9X_CHECKSUM=n
-CONFIG_DM9X_ETRANS=n
+# C5471 Ethernet Driver settings
+CONFIG_C5471_NET_STATS=n
+ETHERNET_PHY_LU3X31T_T64=1
+ETHERNET_PHY_AC101L=2
+CONFIG_C5471_ETHERNET_PHY=ETHERNET_PHY_LU3X31T_T64
+CONFIG_NET_C5471_AUTONEGOTIATION=y
+CONFIG_NET_C5471_BASET100=n
+CONFIG_NET_C5471_BASET10=n
 
 #
 # Stack and heap information

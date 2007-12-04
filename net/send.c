@@ -197,7 +197,7 @@ static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn,
 {
   struct send_s *pstate = (struct send_s *)conn->data_private;
 
-  nvdbg("flags: %02x state: %d\n", flags, pstate->snd_state);
+  nvdbg("flags: %02x acked: %d sent: %d\n", flags, pstate->snd_acked, pstate->snd_sent);
 
   /* If this packet contains an acknowledgement, then update the count of
    * acknowldged bytes.
