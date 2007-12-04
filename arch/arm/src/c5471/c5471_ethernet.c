@@ -329,6 +329,7 @@ struct c5471_driver_s
   uint32 c_rxcrc;          /* CRC errors */
   uint32 c_rxunderrun;     /* Underrun errors */
   uint32 c_rxloc;          /* Loss of carrier */
+  uint32 c_rxdropped;      /* Packets dropped because of size */
 #endif
 
   /* This holds the information visible to uIP/NuttX */
@@ -513,7 +514,7 @@ static int c5471_mdrxbit (void)
     }
   else
     {
-      return 0;
+      return OK;
     }
 }
 
@@ -665,7 +666,7 @@ static int c5471_mdread (int adr, int reg)
 #if (CONFIG_C5471_ETHERNET_PHY == ETHERNET_PHY_LU3X31T_T64)
 static int c5471_phyinit (void)
 {
-  int phy_id;
+  int phyid;
   int status;
 
   /* Next, Setup GPIO pins to talk serially to the Lucent transeiver chip */
@@ -696,24 +697,25 @@ static int c5471_phyinit (void)
 
   /* Next, Read out the chip ID */
 
-  phy_id = (c5471_mdread(0, MD_PHY_MSB_REG) << 16) | c5471_mdread(0, MD_PHY_LSB_REG);
-  if (phy_id != LU3X31_T64_PHYID)
+  phyid = (c5471_mdread(0, MD_PHY_MSB_REG) << 16) | c5471_mdread(0, MD_PHY_LSB_REG);
+  if (phyid != LU3X31_T64_PHYID)
     {
-      return -1;
+      ndbg("Unrecognized PHY ID: %08x\n", phyid);
+      return ERROR;
     }
 
   /* Next, Set desired network rate, 10BaseT, 100BaseT, or auto. */
 
 #ifdef CONFIG_NET_C5471_AUTONEGOTIATION
-  ndbg("Setting PHY Transceiver for Autonegotiation. (per rrload Makefile).\n");
+  ndbg("Setting PHY Transceiver for Autonegotiation\n");
   c5471_mdwrite(0, MD_PHY_CONTROL_REG, MODE_AUTONEG);
 #endif 
 #ifdef CONFIG_NET_C5471_BASET100
-  ndbg("Setting PHY Transceiver for 100BaseT FullDuplex. (per rrload Makefile).\n");
+  ndbg("Setting PHY Transceiver for 100BaseT FullDuplex\n");
   c5471_mdwrite(0, MD_PHY_CONTROL_REG, MODE_100MBIT_FULLDUP);
 #endif 
 #ifdef CONFIG_NET_C5471_BASET10
-  ndbg("Setting PHY Transceiver for 10BaseT FullDuplex. (per rrload Makefile).\n");
+  ndbg("Setting PHY Transceiver for 10BaseT FullDuplex\n");
   c5471_mdwrite(0, MD_PHY_CONTROL_REG, MODE_10MBIT_FULLDUP);
 #endif 
 
@@ -725,15 +727,15 @@ static int c5471_phyinit (void)
 
 static int c5471_phyinit (void)
 {
-  int phy_id;
+  int phyid;
   int status;
 
   /* Next, Setup GPIO pins to talk serially to the Lucent transeiver chip */
 
-  putreg32((getreg32(GPIO_EN)|0x0000C000), GPIO_EN);   /* enable gpio bits 15,14 */
-  putreg32((getreg32(GPIO_CIO)&~0x00008000), GPIO_CIO); /* config gpio(15); out -> MDCLK */
-  putreg32((getreg32(GPIO_CIO)|0x00004000), GPIO_CIO);  /* config gpio(14); in <- MDIO */
-  putreg32((getreg32(GPIO_IO)&0x000F3FFF), GPIO_IO);   /* initial pin state; MDCLK = 0 */
+  putreg32((getreg32(GPIO_EN)  |  0x0000C000), GPIO_EN);   /* enable gpio bits 15,14 */
+  putreg32((getreg32(GPIO_CIO) & ~0x00008000), GPIO_CIO); /* config gpio(15); out -> MDCLK */
+  putreg32((getreg32(GPIO_CIO) |  0x00004000), GPIO_CIO);  /* config gpio(14); in <- MDIO */
+  putreg32((getreg32(GPIO_IO)  &  0x000F3FFF), GPIO_IO);   /* initial pin state; MDCLK = 0 */
 
   return 1;
 }
@@ -766,6 +768,8 @@ static inline void c5471_inctxcpu(struct c5471_driver_s *c5471)
     {
       c5471->c_txcpudesc += 2*sizeof(uint32);
     }
+
+  nvdbg("TX CPU desc: %08x\n", c5471->c_txcpudesc);
 }
 
 /****************************************************************************
@@ -787,6 +791,8 @@ static inline void c5471_incrxcpu(struct c5471_driver_s *c5471)
     {
       c5471->c_rxcpudesc += 2*sizeof(uint32);
     }
+
+  nvdbg("RX CPU desc: %08x\n", c5471->c_txcpudesc);
 }
 
 /****************************************************************************
@@ -822,6 +828,7 @@ static int c5471_transmit(struct c5471_driver_s *c5471)
   bfirstframe            = TRUE;
   c5471->c_lastdescstart = c5471->c_rxcpudesc;
 
+  nvdbg("Packet size: %d RX CPU desc: %08x\n", nbytes, c5471->c_rxcpudesc);
   while (nbytes)
     {
       /* Verify that the hardware is ready to send another packet */
@@ -847,7 +854,7 @@ static int c5471_transmit(struct c5471_driver_s *c5471)
 
       if (bfirstframe)
         {
-          putreg32((getreg32(c5471->c_rxcpudesc)|EIM_RXDESC_PADCRC), c5471->c_rxcpudesc);
+          putreg32((getreg32(c5471->c_rxcpudesc) | EIM_RXDESC_PADCRC), c5471->c_rxcpudesc);
         }
 
       if (nbytes >= EIM_PACKET_BYTES)
@@ -860,7 +867,6 @@ static int c5471_transmit(struct c5471_driver_s *c5471)
         }
 
       /* Submit ether frame bytes to the C5472 Ether Module packet memory space. */
-
       /* Get the number of 16-bit values to transfer by dividing by 2 with round up. */
 
       nshorts = (framelen + 1) >> 1;
@@ -877,6 +883,8 @@ static int c5471_transmit(struct c5471_driver_s *c5471)
 
       putreg32(((getreg32(c5471->c_rxcpudesc) & ~EIM_RXDESC_BYTEMASK) | framelen), c5471->c_rxcpudesc);
       nbytes -= framelen;
+      nvdbg("Wrote framelen: %d nbytes: %d nshorts: %d\n", framelen, nbytes, nshorts);
+
       if (0 == nbytes)
         {
           putreg32((getreg32(c5471->c_rxcpudesc) | EIM_RXDESC_LIF), c5471->c_rxcpudesc);
@@ -1026,36 +1034,43 @@ void c5471_rxstatus(int *numbytes)
       if ((rxstatus & EIM_TXDESC_RETRYERROR) != 0)
         {
           c5471->c_rxretries++;
+          nvdbg("c_rxretries: %d\n", c5471->c_rxretries);
         }
 
       if ((rxstatus & EIM_TXDESC_HEARTBEAT) != 0)
         {
           c5471->c_rxheartbeat++;
+          nvdbg("c_rxheartbeat: %d\n", c5471->c_rxheartbeat);
         }
 
       if ((rxstatus & EIM_TXDESC_LCOLLISON) != 0)
         {
           c5471->c_rxlcollision++;
+          nvdbg("c_rxlcollision: %d\n", c5471->c_rxlcollision);
         }
 
       if ((rxstatus & EIM_TXDESC_COLLISION) != 0)
         {
           c5471->c_rxcollision++;
+          nvdbg("c_rxcollision: %d\n", c5471->c_rxcollision);
         }
 
       if ((rxstatus & EIM_TXDESC_CRCERROR) != 0)
         {
           c5471->c_rxcrc++;
+          nvdbg("c_rxcrc: %d\n", c5471->c_rxcrc);
         }
 
       if ((rxstatus & EIM_TXDESC_UNDERRUN) != 0)
         {
           c5471->c_rxunderrun++;
+          nvdbg("c_rxunderrun: %d\n", c5471->c_rxunderrun);
         }
 
       if ((rxstatus & EIM_TXDESC_LOC) != 0)
         {
           c5471->c_rxloc++;
+          nvdbg("c_rxloc: %d\n", c5471->c_rxloc);
         }
     }
 }
@@ -1093,6 +1108,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
    * the EIM for additional packets that might be received later from the network.
    */
 
+  nvdbg("Reading TX CPU desc: %08x\n", c5471->c_txcpudesc);
   while (bmore)
     {
       /* Words #0 and #1 of descriptor */
@@ -1109,11 +1125,14 @@ static void c5471_receive(struct c5471_driver_s *c5471)
 
       /* Words #2 and #3 of descriptor */
 
-      packetmem = (uint16*)getreg32(c5471->c_txcpudesc+1);
+      packetmem = (uint16*)getreg32(c5471->c_txcpudesc + 1);
 
       /* Divide by 2 with round up to get the number of 16-bit words. */
 
       nshorts = (framelen + 1) >> 1;
+      nvdbg("Reading framelen: %d packetlen: %d nshorts: %d packetment: %p\n",
+             framelen, packetlen, nshorts, packetmem);
+
       for (i = 0 ; i < nshorts; i++, j++)
         {
           /* Check if the received packet will fit without the uIP packet buffer */
@@ -1153,6 +1172,11 @@ static void c5471_receive(struct c5471_driver_s *c5471)
 
   packetlen -= 4;
 
+#ifdef CONFIG_C5471_NET_STATS
+      /* Increment the count of received packets */
+
+      c5471->c_rxpackets++;
+#endif
 
   /* If we successfully transferred the data into the uIP buffer, then pass it on
    * to uIP for processing.
@@ -1205,6 +1229,16 @@ static void c5471_receive(struct c5471_driver_s *c5471)
             }
         }
     }
+#ifdef CONFIG_C5471_NET_STATS
+  else
+    {
+      /* Increment the count of dropped packets */
+
+      c5471->c_rxdropped++;
+    }
+#endif
+
+
 }
 
 /****************************************************************************
@@ -1262,36 +1296,43 @@ static inline void c5471_txstatus(void)
       if ((txstatus & EIM_RXDESC_MISS) != 0)
         {
           c5471->c_txmiss++;
+          nvdbg("c_txmiss: %d\n", c5471->c_txmiss);
         }
 
       if ((txstatus & EIM_RXDESC_VLAN) != 0)
         {
           c5471->c_txvlan++;
+          nvdbg("c_txvlan: %d\n", c5471->c_txvlan);
         }
 
       if ((txstatus & EIM_RXDESC_LFRAME) != 0)
         {
           c5471->c_txlframe++;
+          nvdbg("c_txlframe: %d\n", c5471->c_txlframe);
         }
 
       if ((txstatus & EIM_RXDESC_SFRAME) != 0)
         {
           c5471->c_txsframe++;
+          nvdbg("c_txsframe: %d\n", c5471->c_txsframe);
         }
 
       if ((txstatus & EIM_RXDESC_CRCERROR) != 0)
         {
           c5471->c_txcrc++;
+          nvdbg("c_txcrc: %d\n", c5471->c_txcrc);
         }
 
       if ((txstatus & EIM_RXDESC_OVERRUN) != 0)
         {
           c5471->c_txoverrun++;
+          nvdbg("c_txoverrun: %d\n", c5471->c_txoverrun);
         }
 
       if ((txstatus & EIM_RXDESC_OVERRUN) != 0)
         {
           c5471->c_txalign++;
+          nvdbg("c_txalign: %d\n", c5471->c_txalign);
         }
 }
 #endif
@@ -1370,11 +1411,7 @@ static int c5471_interrupt(int irq, FAR void *context)
        * documentation.
        */
 
- #ifdef CONFIG_C5471_NET_STATS
-      /* Increment the count of received packets */
-
-      c5471->c_rxpackets++;
-
+#ifdef CONFIG_C5471_NET_STATS
       /* Check for RX errors */
 
       c5471_rxstatus(c5471);
@@ -1431,6 +1468,7 @@ static void c5471_txtimeout(int argc, uint32 arg, ...)
 
 #ifdef CONFIG_C5471_NET_STATS
   c5471->c_txtimeouts++;
+  nvdbg("c_txtimeouts: %d\n", c5471->c_txtimeouts);
 #endif
 
   /* Then try to restart the hardware */
@@ -1563,6 +1601,8 @@ static int c5471_ifdown(struct uip_driver_s *dev)
   struct c5471_driver_s *c5471 = (struct c5471_driver_s *)dev->d_private;
   irqstate_t flags;
 
+  ndbg("Stopping\n");
+
   /* Disable the Ethernet interrupt */
 
   flags = irqsave();
@@ -1616,6 +1656,7 @@ static int c5471_txavail(struct uip_driver_s *dev)
   struct c5471_driver_s *c5471 = (struct c5471_driver_s *)dev->d_private;
   irqstate_t flags;
 
+  ndbg("Polling\n");
   flags = irqsave();
 
   /* Ignore the notification if the interface is not yet up */
@@ -1908,17 +1949,21 @@ static void c5471_reset(struct c5471_driver_s *c5471)
 static void c5471_macassign(struct c5471_driver_s *c5471)
 {
   struct uip_driver_s *dev = &c5471->c_dev;
+  uint8 *mptr = dev->d_mac.addr;
   register uint32 tmp;
+
+  ndbg("MAC: %0x:%0x:%0x:%0x:%0x:%0x\n",
+        mptr[0], mptr[1], mptr[2], mptr[3], mptr[4], mptr[5]);
 
   /* Set CPU port MAC address. S/W will only see incoming packets that match
    * this destination address.
    */
 
-  tmp = (((uint32)dev->d_mac.addr[0]) << 8) | ((uint32)dev->d_mac.addr[1]);
+  tmp = (((uint32)mptr[0]) << 8) | ((uint32)mptr[1]);
   putreg32(tmp, EIM_CPU_DAHI);
 
-  tmp = (((uint32)dev->d_mac.addr[2]) << 24) | (((uint32)dev->d_mac.addr[3]) << 16) |
-        (((uint32)dev->d_mac.addr[4]) <<  8) |  ((uint32)dev->d_mac.addr[5]);
+  tmp = (((uint32)mptr[2]) << 24) | (((uint32)mptr[3]) << 16) |
+        (((uint32)mptr[4]) <<  8) |  ((uint32)mptr[5]);
   putreg32(tmp, EIM_CPU_DALO);
 
 #if 0
