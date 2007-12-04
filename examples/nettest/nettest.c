@@ -41,6 +41,7 @@
 #include <stdio.h>
 #include <debug.h>
 
+#include <net/if.h>
 #include <net/uip/uip.h>
 #include <net/uip/uip-lib.h>
 
@@ -78,6 +79,21 @@ void user_initialize(void)
 int user_start(int argc, char *argv[])
 {
   struct in_addr addr;
+#if defined(CONFIG_EXAMPLE_NETTEST_NOMAC)
+  uint8 mac[IFHWADDRLEN];
+#endif
+
+/* Many embedded network interfaces must have a software assigned MAC */
+
+#ifdef CONFIG_EXAMPLE_NETTEST_NOMAC
+  mac[0] = 0x00;
+  mac[1] = 0xe0;
+  mac[2] = 0xb0;
+  mac[3] = 0x0b;
+  mac[4] = 0xba;
+  mac[5] = 0xbe;
+  uip_setmacaddr("eth0", mac);
+#endif
 
   /* Set up our host address */
 
