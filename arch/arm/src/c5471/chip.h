@@ -1,4 +1,4 @@
-/************************************************************
+/****************************************************************************
  * c5471/chip.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -31,20 +31,61 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __C5471_CHIP_H
 #define __C5471_CHIP_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/* UARTs ****************************************************/
+#define EIM_RAM_START          0xffd00000
+
+/* Ethernet Interface Module (EIM) ******************************************/
+
+#define EIM_CTRL               0xffff0000 /* ESM control register */
+#define EIM_STATUS             0xffff0004 /* ESM status register */
+#define EIM_CPU_TXBA           0xffff0008 /* CPU TX descriptors base address */
+#define EIM_CPU_RXBA           0xffff000c /* CPU RX descriptors base address */
+#define EIM_BUFSIZE            0xffff0010 /* Packet buffer size register */
+#define EIM_CPU_FILTER         0xffff0014 /* CPU filtering contol registers */
+#define EIM_CPU_DAHI           0xffff0018 /* CPU destination address (HI) */
+#define EIM_CPU_DALO           0xffff001c /* CPU destination address (LO) */
+#define EIM_MFVHI              0xffff0020 /* Multicast filter valid (HI) */
+#define EIM_MFVLO              0xffff0024 /* Multicast filter valid (LO) */
+#define EIM_MFMHI              0xffff0028 /* Multicast filter mask (HI) */
+#define EIM_MFMLO              0xffff002c /* Multicast filter mask (LO) */
+#define EIM_RXTH               0xffff0030 /* RX threshold register */
+#define EIM_CPU_RXREADY        0xffff0034 /* CPU RX ready register */
+#define EIM_INTEN              0xffff0038 /* ESM interrupt enable register */
+#define EIM_ENET0_TXDESC       0xffff0040 /* ENET0 TX Queue pointer */
+#define EIM_ENET0_RXDESC       0xffff0044 /* ENET0 RX Queue pointer */
+#define EIM_CPU_TXDESC         0xffff0050 /* CPU TX Queue pointer */
+#define EIM_CPU_RXDESC         0xffff0054 /* CPU RX Queue pointer */
+
+#define ENET0_MODE             0xffff0100 /* Mode register */
+#define ENET0_BOFFSEED         0xffff0104 /* Backoff seed register */
+#define ENET0_BCOUNT           0xffff0108 /* Backoff count register */
+#define ENET0_FLWPAUSE         0xffff010c /* TX flow pause count register */
+#define ENET0_FLWCONTROL       0xffff0110 /* Flow control register */
+#define ENET0_VTYPE            0xffff0114 /* VTYPE tag register */
+#define ENET0_SEISR            0xffff0118 /* System error int status register */
+#define ENET0_TXBUFRDY         0xffff011c /* TX descripter buffer ready */
+#define ENET0_TDBA             0xffff0120 /* TX descriptor base address */
+#define ENET0_RDBA             0xffff0124 /* RX descriptor base address */
+#define ENET0_PARHI            0xffff0128 /* Dest phys address match (HI) */
+#define ENET0_PARLO            0xffff012c /* Dest phys address match (LO) */
+#define ENET0_LARHI            0xffff0130 /* Log address hash filter (HI) */
+#define ENET0_LARLO            0xffff0134 /* Log address hash filter (LO) */
+#define ENET0_ADRMODE_EN       0xffff0138 /* Address mode enable register */
+#define ENET0_DRP              0xffff013c /* Desc ring poll interval count */
+
+/* UARTs ********************************************************************/
 
 #define UART_IRDA_BASE         0xffff0800
 #define UART_MODEM_BASE        0xffff1000
@@ -110,7 +151,7 @@
 #define UART_MODEM_RDPTR_UTX   0xffff1064 /* TX FIFO Read Pointer Register */
 #define UART_MODEM_WRPTR_UTX   0xffff1068 /* TX FIFO Write Pointer Register */
 
-/* UART Settings ********************************************/
+/* UART Settings ************************************************************/
 
 /* Miscellaneous UART settings. */
 
@@ -164,13 +205,13 @@
 #define MDR_AUTOBAUDING_MODE 0x00000002  /* Modem UART only */
 #define MDR_RESET_MODE       0x00000007  /* Both IrDA and Modem UARTs */
 
-/* SPI ******************************************************/
+/* SPI **********************************************************************/
 
 #define MAX_SPI 3
 
 #define SPI_REGISTER_BASE    0xffff2000
 
-/* GIO ******************************************************/
+/* GIO **********************************************************************/
 
 #define MAX_GIO (35)
 
@@ -211,7 +252,7 @@
 #define KBGPIO_EN            0xffff2914 /* Selects register for muxed
 					 * KBGPIOs */
 
-/* Timers ***************************************************/
+/* Timers *******************************************************************/
 
 #define C5471_TIMER0_CTRL    0xffff2a00
 #define C5471_TIMER0_CNT     0xffff2a04
@@ -241,8 +282,8 @@
 #define ILR_IRQ3_REG         0xffff2d28 /*  3-GPIO0         */
 #define ILR_IRQ4_REG         0xffff2d2c /*  4-Ethernet      */
 #define ILR_IRQ5_REG         0xffff2d30 /*  5-KBGPIO[7:0]   */
-#define ILR_IRQ6_REG         0xffff2d34 /*  6-Uart   serial */
-#define ILR_IRQ7_REG         0xffff2d38 /*  7-Uart   IRDA   */
+#define ILR_IRQ6_REG         0xffff2d34 /*  6-Uart serial   */
+#define ILR_IRQ7_REG         0xffff2d38 /*  7-Uart IRDA     */
 #define ILR_IRQ8_REG         0xffff2d3c /*  8-KBGPIO[15:8]  */
 #define ILR_IRQ9_REG         0xffff2d40 /*  9-GPIO3         */
 #define ILR_IRQ10_REG        0xffff2d44 /* 10-GPIO2         */
@@ -252,11 +293,22 @@
 #define ILR_IRQ14_REG        0xffff2d54 /* 14-GPIO[19:4]    */
 #define ILR_IRQ15_REG        0xffff2d58 /* 15-API           */
 
-/* I2C ******************************************************/
+/* CLKM *********************************************************************/
+
+#define CLKM                 0xffff2f00
+#define CLKM_CTL_RST         0xffff2f10
+#define CLKM_RESET           0xffff2f18
+
+#define CLKM_RESET_EIM          0x00000008
+#define CLKM_EIM_CLK_STOP       0x00000010
+#define CLKM_CTL_RST_LEAD_RESET 0x00000000
+#define CLKM_CTL_RST_EXT_RESET  0x00000002
+
+/* I2C **********************************************************************/
 
 #define MAX_I2C 1
 
-/* API ******************************************************/
+/* API **********************************************************************/
 
 #define DSPRAM_BASE          0xffe00000  /* DSPRAM base address */
 #define DSPRAM_END           0xffe03fff
@@ -308,12 +360,12 @@
 #define DSPMEM_ARM_TO_DSP(addr) \
   ((((__u32)(addr) - DSPMEM_ARM_START) >> 1) + DSPMEM_DSP_START)
 
-/************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 #endif  /* __C5471_CHIP_H */

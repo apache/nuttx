@@ -38,15 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_skeleton)
-
-/* CONFIG_skeleton_NINTERFACES determines the number of physical interfaces
- * that will be supported.
- */
-
-#ifndef CONFIG_skeleton_NINTERFACES
-# define CONFIG_skeleton_NINTERFACES 1
-#endif
+#if defined(CONFIG_NET) && defined(CONFIG_skeleton_NET)
 
 #include <time.h>
 #include <string.h>
@@ -65,6 +57,14 @@
  * Definitions
  ****************************************************************************/
 
+/* CONFIG_skeleton_NINTERFACES determines the number of physical interfaces
+ * that will be supported.
+ */
+
+#ifndef CONFIG_skeleton_NINTERFACES
+# define CONFIG_skeleton_NINTERFACES 1
+#endif
+
 /* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define skeleton_WDDELAY   (1*CLK_TCK)
@@ -82,8 +82,8 @@
  * Private Types
  ****************************************************************************/
 
-/* The skel_driver_s encapsulates all DM90x0 state information for a single
- * DM90x0 hardware interface
+/* The skel_driver_s encapsulates all state information for a single hardware
+ * interface
  */
 
 struct skel_driver_s
@@ -158,7 +158,7 @@ static int skel_transmit(struct skel_driver_s *skel)
 
   /* Disable Ethernet interrupts */
 
-  /* Send the packet: address=skel->sk_dev.d_buf, length=skel_dev.d_len */
+  /* Send the packet: address=skel->sk_dev.d_buf, length=skel->sk_dev.d_len */
 
   /* Restore Ethernet interrupts */
 
@@ -239,7 +239,7 @@ static void skel_receive(struct skel_driver_s *skel)
       /* Check if the packet is a valid size for the uIP buffer configuration */
 
       /* Copy the data data from the hardware to skel->sk_dev.d_buf.  Set
-       * amount of data in skel_dev.d_len
+       * amount of data in skel->sk_dev.d_len
        */
 
       /* We only accept IP packets of the configured type and ARP packets */
@@ -589,5 +589,5 @@ int skel_initialize(void)
   return OK;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_skeleton */
+#endif /* CONFIG_NET && CONFIG_skeleton_NET */
 
