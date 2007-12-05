@@ -47,6 +47,7 @@
 
 #include <sys/types.h>
 
+#include <stdio.h>
 #include <time.h>
 #include <string.h>
 #include <debug.h>
@@ -108,6 +109,11 @@
 # undef CONFIG_NET_C5471_BASET100
 # undef CONFIG_NET_C5471_BASET10
 #endif
+
+/* This should be disabled unless you are performing very low level debug */
+
+#undef CONFIG_C5471_NET_DUMPBUFFER
+//#define CONFIG_C5471_NET_DUMPBUFFER 1
 
 /* Timing values ************************************************************/
 /* TX poll deley = 1 seconds. CLK_TCK=number of clock ticks per second */
@@ -226,7 +232,7 @@
                                          /* Bits 3-5: reserved */
 #define EIM_INTEN_ENET0_ERR  0x00000004 /* Bit 2: ENET0 error interrupt */
 #define EIM_INTEN_ENET0_TX   0x00000002 /* Bit 1: ENET0 TX interrupt */
-#define EIM_INTEN_ENET0_RX   0x00000001 /* Bit 0" ENET0 RX interrupt */
+#define EIM_INTEN_ENET0_RX   0x00000001 /* Bit 0: ENET0 RX interrupt */
 
 /* ENET0_ADRMODE_EN bit settings */
 
@@ -394,6 +400,64 @@ static void c5471_macassign(struct c5471_driver_s *c5471);
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: c5471_dumpbuffer
+ *
+ * Description
+ *   Debug only
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_C5471_NET_DUMPBUFFER
+static void c5471_dumpbuffer(const char *buffer, ssize_t nbytes)
+{
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
+  char line[128];
+  int ch;
+  int i;
+  int j;
+
+  for (i = 0; i < nbytes; i += 16)
+    {
+      sprintf(line, "%04x: ", i);
+      for (j = 0; j < 16; j++)
+        {
+          if (i + j < nbytes)
+            {
+              sprintf(&line[strlen(line)], "%02x", buffer[i+j] );
+            }
+          else
+            {
+              strcpy(&line[strlen(line)], "  ");
+            }
+
+          if (j == 7 || j == 15)
+            {
+              strcpy(&line[strlen(line)], " ");
+           }
+        }
+
+      for ( j = 0; j < 16; j++)
+        {
+          if (i + j < nbytes)
+            {
+              ch = buffer[i+j];
+              sprintf(&line[strlen(line)], "%c", ch >= 0x20 && ch <= 0x7e ? ch : '.');
+            }
+
+          if (j == 7 || j == 15)
+            {
+              strcpy(&line[strlen(line)], " ");
+           }
+        }
+      ndbg("%s\n", line);
+    }
+#endif
+}
+#else
+# define c5471_dumpbuffer(buffer,nbytes)
+#endif
+
+/****************************************************************************
  * Name: c5471_mdtxbit
  *
  * Description
@@ -419,9 +483,12 @@ static void c5471_mdtxbit (int bit_state)
    * out the MDIO pin.
    */
 
-  /* config MDIO as output pin. */
+  /* Config MDIO as output pin. */
 
   putreg32((getreg32(GPIO_CIO) & ~GPIO_CIO_MDIO), GPIO_CIO);
+
+  /* Select the the bit output state */
+
   if (bit_state)
     {
       /* set MDIO state high. */
@@ -448,7 +515,7 @@ static void c5471_mdtxbit (int bit_state)
 
   /* release MDIO */
 
-  putreg32((getreg32(GPIO_CIO)|GPIO_CIO_MDIO), GPIO_CIO);
+  putreg32((getreg32(GPIO_CIO) | GPIO_CIO_MDIO), GPIO_CIO);
   nop();
   nop();
 
@@ -499,7 +566,7 @@ static int c5471_mdrxbit (void)
 
   /* MDCLK rising edge */
 
-  putreg32((getreg32(GPIO_IO)|GPIO_IO_MDCLK), GPIO_IO);
+  putreg32((getreg32(GPIO_IO) | GPIO_IO_MDCLK), GPIO_IO);
   nop();
   nop();
   nop();
@@ -536,7 +603,9 @@ static void c5471_mdwrite (int adr, int reg, int data)
   /* preamble: 11111111111111111111111111111111 */
 
   for (i = 0; i < 32; i++)
-    c5471_mdtxbit(1);
+    {
+      c5471_mdtxbit(1);
+    }
 
   /* start of frame: 01 */
 
@@ -564,7 +633,7 @@ static void c5471_mdwrite (int adr, int reg, int data)
       reg = reg << 1;
     }
 
-  /* turnaround time: ZZ */
+  /* Turnaround time: ZZ */
 
   c5471_mdtxbit(1);
   c5471_mdtxbit(0);
@@ -597,7 +666,9 @@ static int c5471_mdread (int adr, int reg)
   /* preamble: 11111111111111111111111111111111 */
 
   for (i = 0; i < 32; i++)
-    c5471_mdtxbit(1);
+    {
+      c5471_mdtxbit(1);
+    }
 
   /* start of frame: 01 */
 
@@ -792,7 +863,7 @@ static inline void c5471_incrxcpu(struct c5471_driver_s *c5471)
       c5471->c_rxcpudesc += 2*sizeof(uint32);
     }
 
-  nvdbg("RX CPU desc: %08x\n", c5471->c_txcpudesc);
+  nvdbg("RX CPU desc: %08x\n", c5471->c_rxcpudesc);
 }
 
 /****************************************************************************
@@ -829,6 +900,8 @@ static int c5471_transmit(struct c5471_driver_s *c5471)
   c5471->c_lastdescstart = c5471->c_rxcpudesc;
 
   nvdbg("Packet size: %d RX CPU desc: %08x\n", nbytes, c5471->c_rxcpudesc);
+  c5471_dumpbuffer(dev->d_buf, dev->d_len);
+
   while (nbytes)
     {
       /* Verify that the hardware is ready to send another packet */
@@ -1021,7 +1094,7 @@ void c5471_rxstatus(int *numbytes)
         {
           /* Loop back around to base of descriptor queue. */
 
-          desc = getreg32(EIM_CPU_RXBA) + EIM_RAM_START;
+          desc = getreg32(EIM_CPU_TXBA) + EIM_RAM_START;
         }
       else
         {
@@ -1120,24 +1193,28 @@ static void c5471_receive(struct c5471_driver_s *c5471)
           break;
         }
 
+      /* Get the size of the frame from words #0 and #1 of the descriptor
+       * and update the accumulated packet size
+       */
+
       framelen   = (getreg32(c5471->c_txcpudesc) & EIM_TXDESC_BYTEMASK);
       packetlen += framelen;
 
-      /* Words #2 and #3 of descriptor */
+      /* Check if the received packet will fit within the uIP packet buffer */
 
-      packetmem = (uint16*)getreg32(c5471->c_txcpudesc + 1);
-
-      /* Divide by 2 with round up to get the number of 16-bit words. */
-
-      nshorts = (framelen + 1) >> 1;
-      nvdbg("Reading framelen: %d packetlen: %d nshorts: %d packetment: %p\n",
-             framelen, packetlen, nshorts, packetmem);
-
-      for (i = 0 ; i < nshorts; i++, j++)
+      if (packetlen < (CONFIG_NET_BUFSIZE + 4))
         {
-          /* Check if the received packet will fit without the uIP packet buffer */
+          /* Get the packet memory from words #2 and #3 of descriptor */
 
-          if (packetlen < (CONFIG_NET_BUFSIZE - 4))
+	    packetmem = (uint16*)getreg32(c5471->c_txcpudesc + sizeof(uint32));
+
+          /* Divide by 2 with round up to get the number of 16-bit words. */
+
+          nshorts = (framelen + 1) >> 1;
+          nvdbg("Reading framelen: %d packetlen: %d nshorts: %d packetmen: %p\n",
+                 framelen, packetlen, nshorts, packetmem);
+
+          for (i = 0 ; i < nshorts; i++, j++)
             {
               /* Copy the data data from the hardware to c5471->c_dev.d_buf 16-bits at
                * a time.
@@ -1145,6 +1222,10 @@ static void c5471_receive(struct c5471_driver_s *c5471)
 
               ((uint16*)dev->d_buf)[j] = htons(packetmem[i]);
             }
+        }
+      else
+        {
+          nvdbg("Discarding framelen: %d packetlen\n", framelen, packetlen);
         }
 
       if (getreg32(c5471->c_txcpudesc) & EIM_TXDESC_LIF)
@@ -1173,20 +1254,22 @@ static void c5471_receive(struct c5471_driver_s *c5471)
   packetlen -= 4;
 
 #ifdef CONFIG_C5471_NET_STATS
-      /* Increment the count of received packets */
+  /* Increment the count of received packets */
 
-      c5471->c_rxpackets++;
+  c5471->c_rxpackets++;
 #endif
 
   /* If we successfully transferred the data into the uIP buffer, then pass it on
    * to uIP for processing.
    */
 
-  if (packetlen > 0 && packetlen < (CONFIG_NET_BUFSIZE / sizeof(uint16)))
+  if (packetlen > 0 && packetlen < CONFIG_NET_BUFSIZE)
     {
       /* Set amount of data in c5471->c_dev.d_len. */
 
       dev->d_len = packetlen;
+      nvdbg("Received packet, packetlen: %d type: %02x\n", packetlen, BUF->type);
+      c5471_dumpbuffer(dev->d_buf, dev->d_len);
 
       /* We only accept IP packets of the configured type and ARP packets */
 
@@ -1234,6 +1317,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
     {
       /* Increment the count of dropped packets */
 
+      ndbg("Too big! packetlen: %d\n", packetlen);
       c5471->c_rxdropped++;
     }
 #endif
@@ -1270,7 +1354,7 @@ static inline void c5471_txstatus(void)
     {
       for (;;)
         {
-          txstatus |= (getreg32(desc) & EIM_TXDESC_STATUSMASK);
+          txstatus |= (getreg32(desc) & EIM_RXDESC_STATUSMASK);
           if (desc == c5471->c_lastdescend)
             {
               break;
@@ -1748,13 +1832,15 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 
   /* TX ENET 0 */
 
-  putreg32((desc & 0x0000ffff), ENET0_TDBA); /* 16bit offset address */
+  ndbg("TX ENET0 desc: %08x pbuf: %08x\n", desc, pbuf);
+  putreg32((desc & 0x0000ffff), ENET0_TDBA); /* 16-bit offset address */
   for (i = NUM_DESC_TX-1; i >= 0; i--)
     {
       if (i == 0)
         val = EIM_TXDESC_WRAP_NEXT;
       else
         val = EIM_TXDESC_WRAP_FIRST;
+
       val |= EIM_TXDESC_OWN_HOST|EIM_TXDESC_INTRE|EIM_TXDESC_PADCRC|EIM_PACKET_BYTES;
 
       putreg32(val, desc);
@@ -1766,19 +1852,21 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
       putreg32(0, pbuf);;
       pbuf += EIM_PACKET_BYTES;
 
-      putreg32(0, pbuf);;
+      putreg32(0, pbuf);
       pbuf += sizeof(uint32); /* Ether Module's "Buffer Usage Word" */
     }
 
   /* RX ENET 0 */
 
-  putreg32((desc & 0x0000ffff), ENET0_RDBA); /* 16bit offset address */
+  ndbg("RX ENET0 desc: %08x pbuf: %08x\n", desc, pbuf);
+  putreg32((desc & 0x0000ffff), ENET0_RDBA); /* 16-bit offset address */
   for (i = NUM_DESC_RX-1; i >= 0; i--)
     {
       if (i == 0)
         val = EIM_RXDESC_WRAP_NEXT;
       else
         val = EIM_RXDESC_WRAP_FIRST;
+
       val |= EIM_RXDESC_OWN_ENET|EIM_RXDESC_INTRE|EIM_RXDESC_PADCRC|EIM_PACKET_BYTES;
 
       putreg32(val, desc);
@@ -1796,8 +1884,9 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 
   /* TX CPU */
 
+  ndbg("TX CPU desc: %08x pbuf: %08x\n", desc, pbuf);
   c5471->c_txcpudesc = desc;
-  putreg32((desc & 0x0000ffff), EIM_CPU_TXBA); /* 16bit offset address */
+  putreg32((desc & 0x0000ffff), EIM_CPU_TXBA); /* 16-bit offset address */
   for (i = NUM_DESC_TX-1; i >= 0; i--)
     {
       /* Set words 1+2 of the TXDESC */
@@ -1806,24 +1895,27 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
         val = EIM_TXDESC_WRAP_NEXT;
       else
         val = EIM_TXDESC_WRAP_FIRST;
+
       val |= EIM_TXDESC_OWN_HOST|EIM_TXDESC_INTRE|EIM_TXDESC_PADCRC|EIM_PACKET_BYTES;
+
       putreg32(val, desc);
       desc += sizeof(uint32);
 
       putreg32(pbuf, desc);
       desc += sizeof(uint32);
 
-      putreg(pbuf, 0);
+      putreg(0, pbuf);
       pbuf += EIM_PACKET_BYTES;
 
-      putreg(pbuf, 0);
+      putreg(0, pbuf);
       pbuf += sizeof(uint32); /* Ether Module's "Buffer Usage Word" */
   }
 
   /* RX CPU */
 
+  ndbg("RX CPU desc: %08x pbuf: %08x\n", desc, pbuf);
   c5471->c_rxcpudesc = desc;
-  putreg32((desc & 0x0000ffff), EIM_CPU_RXBA); /* 16bit offset address */
+  putreg32((desc & 0x0000ffff), EIM_CPU_RXBA); /* 16-bit offset address */
   for (i = NUM_DESC_RX-1; i >= 0; i--)
     {
       /* Set words 1+2 of the RXDESC */
@@ -1832,6 +1924,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
         val = EIM_RXDESC_WRAP_NEXT;
       else
         val = EIM_RXDESC_WRAP_FIRST;
+
       val |= EIM_RXDESC_OWN_ENET|EIM_RXDESC_INTRE|EIM_RXDESC_PADCRC|EIM_PACKET_BYTES;
 
       putreg32(val, desc);
@@ -1846,6 +1939,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
       putreg32(0, pbuf);;
       pbuf += sizeof(uint32); /* Ether Module's "Buffer Usage Word" */
   }
+  ndbg("END desc: %08x pbuf: %08x\n", desc, pbuf);
 
   /* Save the descriptor packet size */
 
@@ -1928,9 +2022,13 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 static void c5471_reset(struct c5471_driver_s *c5471)
 {
 #if (CONFIG_C5471_ETHERNET_PHY == ETHERNET_PHY_LU3X31T_T64)
+  ndbg("EIM reset\n");
   c5471_eimreset(c5471);
 #endif
+  ndbg("PHY init\n");
   c5471_phyinit();
+
+  ndbg("EIM config\n");
   c5471_eimconfig(c5471);
 }
 
