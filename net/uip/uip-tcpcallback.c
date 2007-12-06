@@ -60,6 +60,45 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Function: uip_readahead
+ *
+ * Description:
+ *   Copy as much received data as possible into the readahead buffer
+ *
+ * Assumptions:
+ *   This function is called at the interrupt level with interrupts disabled.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+static int uip_readahead(struct uip_readahead_s *readahead, uint8 *buf, int len)
+{
+  int available = CONFIG_NET_TCP_READAHEAD_BUFSIZE - readahead->rh_nbytes;
+  int recvlen   = 0;
+
+  if (len > 0 && available > 0)
+    {
+      /* Get the length of the data to buffer. */
+
+      if (len > available)
+        {
+          recvlen = available;
+        }
+      else
+        {
+          recvlen = len;
+        }
+
+      /* Copy the new appdata into the read-ahead buffer */
+
+      memcpy(&readahead->rh_buffer[readahead->rh_nbytes], buf, recvlen);
+      readahead->rh_nbytes += recvlen;
+    }
+  return recvlen;
+}
+#endif
+
+/****************************************************************************
  * Function: uip_dataevent
  *
  * Description:
@@ -74,10 +113,6 @@
 static inline uint8
 uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
 {
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
-  struct uip_readahead_s *readahead;
-  uint16 recvlen;
-#endif
   uint8 ret = flags;
 
   /* Is there new data?  With non-zero length?  (Certain connection events
@@ -87,39 +122,56 @@ uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
   if ((flags & UIP_NEWDATA) != 0 && dev->d_len > 0)
     {
 #if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
-      /* Allocate a read-ahead buffer to hold the newly received data */
+      struct uip_readahead_s *readahead1;
+      struct uip_readahead_s *readahead2 = NULL;
+      uint16 recvlen = 0;
+      uint8 *buf     = dev->d_appdata;
+      int    buflen  = dev->d_len;
 
-      readahead = uip_tcpreadaheadalloc();
-      if (readahead)
+      /* First, we need to determine if we have space to buffer the data.  This
+       * needs to be verified before we actually begin buffering the data. We
+       * will use any remaining space in the last allocated readahead buffer
+       * plus as much one additional buffer.  It is expected that the size of
+       * readahead buffers are tuned so that one full packet will always fit
+       * into one readahead buffer (for example if the buffer size is 420, then
+       * a readahead buffer of 366 will hold a full packet of TCP data).
+       */
+
+      readahead1 = (struct uip_readahead_s*)conn->readahead.tail;
+      if ((readahead1 &&
+          (CONFIG_NET_TCP_READAHEAD_BUFSIZE - readahead1->rh_nbytes) > buflen) ||
+          (readahead2 = uip_tcpreadaheadalloc()) != NULL)
         {
-          /* Get the length of the data to buffer.  If the sizes of the
-           * read-ahead buffers are picked correct, they should always
-           * hold the full received packet.\
+          /* We have buffer space.  Now try to append add as much data as possible
+           * to the last readahead buffer attached to this connection.
            */
 
-          if (dev->d_len > CONFIG_NET_TCP_READAHEAD_BUFSIZE)
+          if (readahead1)
             {
-              recvlen = CONFIG_NET_TCP_READAHEAD_BUFSIZE;
+              recvlen = uip_readahead(readahead1, buf, buflen);
+              if (recvlen > 0)
+                {
+                  buf    += recvlen;
+                  buflen -= recvlen;
+                }
             }
-          else
+
+          /* Do we need to buffer into the newly allocated buffer as well? */
+
+          if (readahead2)
             {
-              recvlen = dev->d_len;
+              (void)uip_readahead(readahead2, buf, buflen);
+
+              /* Save the readahead buffer in the connection structure where
+               * it can be found with recv() is called.
+               */
+
+              sq_addlast(&readahead2->rh_node, &conn->readahead);
             }
-
-          /* Copy the new appdata into the read-ahead buffer */
-
-          memcpy(readahead->rh_buffer, dev->d_appdata, recvlen);
-          readahead->rh_nbytes = recvlen;
-          nvdbg("Buffered %d bytes (of %d)\n", recvlen, dev->d_len);
-
-          /* Save the readahead buffer in the connection structure where
-           * it can be found with recv() is called.
-           */
-
-          sq_addlast(&readahead->rh_node, &conn->readahead);
 
           /* Indicate that all of the data in the buffer has been consumed */
 
+          nvdbg("Buffered %d bytes\n", dev->d_len);
           dev->d_len = 0;
         }
       else
