@@ -1486,7 +1486,7 @@ static int c5471_interrupt(int irq, FAR void *context)
   /* Handle interrupts according to status bit settings */
   /* Check if we received an incoming packet, if so, call c5471_receive() */
 
-  if (EIM_STATUS_CPU_TX & c5471->c_eimstatus)
+  if ((EIM_STATUS_CPU_TX & c5471->c_eimstatus) != 0)
     {
       /* An incoming packet has been received by the EIM from the network and
        * the interrupt associated with EIM's CPU TX queue has been asserted. It
@@ -1508,7 +1508,7 @@ static int c5471_interrupt(int irq, FAR void *context)
 
   /* Check is a packet transmission just completed.  If so, call c5471_txdone */
 
-  if (EIM_STATUS_CPU_RX & c5471->c_eimstatus)
+  if ((EIM_STATUS_CPU_RX & c5471->c_eimstatus) != 0)
     {
       /* An outgoing packet has been processed by the EIM and the interrupt
        * associated with EIM's CPU RX que has been asserted. It is the EIM's

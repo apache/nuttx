@@ -43,6 +43,8 @@ o Network
   used concurrently by two threads.  Minimal fix:  Add mutex to support exclusion.
 - IPv6 support is incomplete
 - Incoming UDP broadcast should only be accepted if listening on INADDR_ANY(?)
+- Should add some driver call to support throttling... when there is no listener
+  for new data, the driver should be throttled.
 
 o USB
 - Implement USB device support
@@ -76,7 +78,10 @@ o ARM
   user stack allocation larger than needed.
 
 o ARM/C5471
-- Needs an Ethernet driver
+- Ethernet driver has problems on receive side.  The cause of the problem seems
+  to be that the hardware waits for about 3 seconds before interrupting the driver.
+  By then, the sender has already retransmitted and things are out of sync.
+  Probable cause:  TX configuration problem. 
 
 o ARM/DM320
 - It seems that when a lot of debug statements are added, the system no
