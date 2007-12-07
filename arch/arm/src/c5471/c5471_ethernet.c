@@ -238,8 +238,8 @@
 
 #define ENET_ADR_PROMISCUOUS  0x00000008 /* Bit 3: Enable snoop address comparison */
 #define ENET_ADR_BROADCAST    0x00000004 /* Bit 2: Enable broadcast address comparison */
-#define ENET_ADDR_LCOMPARE    0x00000001 /* Bit 1: Enable logical address comparison */
-#define ENET_ADDR_PCOMPARE    0x00000001 /* Bit 0: Enable physical address  comparison */
+#define ENET_ADDR_LCOMPARE    0x00000002 /* Bit 1: Enable logical address comparison */
+#define ENET_ADDR_PCOMPARE    0x00000001 /* Bit 0: Enable physical address comparison */
 
 /* ENET0_MODE bit settings */
                                          /* Bits 16-31: reserved */
@@ -1206,7 +1206,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
         {
           /* Get the packet memory from words #2 and #3 of descriptor */
 
-	    packetmem = (uint16*)getreg32(c5471->c_txcpudesc + sizeof(uint32));
+          packetmem = (uint16*)getreg32(c5471->c_txcpudesc + sizeof(uint32));
 
           /* Divide by 2 with round up to get the number of 16-bit words. */
 
@@ -1321,8 +1321,6 @@ static void c5471_receive(struct c5471_driver_s *c5471)
       c5471->c_rxdropped++;
     }
 #endif
-
-
 }
 
 /****************************************************************************
@@ -1849,7 +1847,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
       putreg32(pbuf, desc);
       desc += sizeof(uint32);
 
-      putreg32(0, pbuf);;
+      putreg32(0, pbuf);
       pbuf += EIM_PACKET_BYTES;
 
       putreg32(0, pbuf);
@@ -1875,10 +1873,10 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
       putreg32(pbuf, desc);
       desc += sizeof(uint32);
 
-      putreg32(0, pbuf);;
+      putreg32(0, pbuf);
       pbuf += EIM_PACKET_BYTES;
 
-      putreg32(0, pbuf);;
+      putreg32(0, pbuf);
       pbuf += sizeof(uint32); /* Ether Module's "Buffer Usage Word" */
   }
 
@@ -1933,10 +1931,10 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
       putreg32(pbuf, desc);
       desc += sizeof(uint32);
 
-      putreg32(0, pbuf);;
+      putreg32(0, pbuf);
       pbuf += EIM_PACKET_BYTES;
 
-      putreg32(0, pbuf);;
+      putreg32(0, pbuf);
       pbuf += sizeof(uint32); /* Ether Module's "Buffer Usage Word" */
   }
   ndbg("END desc: %08x pbuf: %08x\n", desc, pbuf);
