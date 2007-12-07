@@ -373,7 +373,13 @@ static int  c5471_uiptxpoll(struct uip_driver_s *dev);
 
 /* Interrupt handling */
 
+#ifdef CONFIG_C5471_NET_STATS
+static void c5471_rxstatus(struct c5471_driver_s *c5471);
+#endif
 static void c5471_receive(struct c5471_driver_s *c5471);
+#ifdef CONFIG_C5471_NET_STATS
+static void c5471_txstatus(struct c5471_driver_s *c5471);
+#endif
 static void c5471_txdone(struct c5471_driver_s *c5471);
 static int  c5471_interrupt(int irq, FAR void *context);
 
@@ -1064,7 +1070,7 @@ static int c5471_uiptxpoll(struct uip_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_C5471_NET_STATS
-void c5471_rxstatus(int *numbytes)
+static void c5471_rxstatus(struct c5471_driver_s *c5471)
 {
   uint32 desc = c5471->c_txcpudesc;
   uint32 rxstatus;
@@ -1340,7 +1346,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
  ****************************************************************************/
 
 #ifdef CONFIG_C5471_NET_STATS
-static inline void c5471_txstatus(void)
+static void c5471_txstatus(struct c5471_driver_s *c5471)
 {
   uint32 desc = c5471->c_lastdescstart;
   uint32 txstatus;
@@ -1416,6 +1422,7 @@ static inline void c5471_txstatus(void)
           c5471->c_txalign++;
           nvdbg("c_txalign: %d\n", c5471->c_txalign);
         }
+    }
 }
 #endif
 
@@ -1437,12 +1444,6 @@ static inline void c5471_txstatus(void)
 
 static void c5471_txdone(struct c5471_driver_s *c5471)
 {
-#ifdef CONFIG_C5471_NET_STATS
-  /* Check for TX errors */
-
-  c5471_txstatus(c5471);
-#endif
-
   /* If no further xmits are pending, then cancel the TX timeout */
 
   wd_cancel(c5471->c_txtimeout);
@@ -1513,6 +1514,14 @@ static int c5471_interrupt(int irq, FAR void *context)
        * CPU RX queue that we put packets on to send them *out*. TWe use this
        * terminology to stay consistent with the Orion documentation.
        */
+
+#ifdef CONFIG_C5471_NET_STATS
+      /* Check for TX errors */
+
+      c5471_txstatus(c5471);
+#endif
+
+      /* Handle the transmission done event */
 
       c5471_txdone(c5471);
     }
