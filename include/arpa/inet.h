@@ -62,7 +62,7 @@
 # define HTONL(nl) (nl)
 #else
 # define HTONS(ns) \
-  (uint16)((((uint16) (ns)) << 8) | (((uint16) (ns)) >> 8))
+  (uint16)(((((uint16)(ns)) & 0xff) << 8) | ((((uint16)(ns)) >> 8) & 0xff))
 # define HTONL(nl) \
   ((((nl) & 0xff) << 24) | (((nl) & 0xff00) << 8) | \
    (((nl) & 0xff0000) >> 8) | (((nl) & 0xff000000) >> 24))

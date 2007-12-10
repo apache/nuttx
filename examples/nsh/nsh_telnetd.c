@@ -53,6 +53,7 @@
 #include <pthread.h>
 #include <debug.h>
 
+#include <net/if.h>
 #include <net/uip/uip-lib.h>
 
 #include "nsh.h"
@@ -100,17 +101,22 @@
 
 #undef CONFIG_EXAMPLES_NSH_TELNETD_DUMPBUFFER
 
+/* Sizing */
+
+#define NSH_MAX_LINELEN 80
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 struct telnetd_s
 {
-  int   tn_sockfd;
-  char  tn_iobuffer[CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE];
-  char  tn_cmd[CONFIG_EXAMPLES_NSH_CMD_SIZE];
-  uint8 tn_bufndx;
-  uint8 tn_state;
+  int    tn_sockfd;
+  uint16 tn_sndlen;
+  uint8  tn_bufndx;
+  uint8  tn_state;
+  char   tn_iobuffer[CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE];
+  char   tn_cmd[CONFIG_EXAMPLES_NSH_CMD_SIZE];
 };
 
 /****************************************************************************
@@ -231,6 +237,27 @@ static void nsh_sendopt(struct telnetd_s *pstate, uint8 option, uint8 value)
 }
 
 /****************************************************************************
+ * Name: nsh_flush
+ *
+ * Description:
+ *   Dump the buffered output info.
+ *
+ ****************************************************************************/
+
+static void nsh_flush(FAR struct telnetd_s *pstate)
+{
+  if (pstate->tn_sndlen > 0)
+    {
+      nsh_dumpbuffer("Shell output", pstate->tn_iobuffer, pstate->tn_sndlen);
+      if (send(pstate->tn_sockfd, pstate->tn_iobuffer, pstate->tn_sndlen, 0) < 0)
+        {
+          dbg("[%d] Failed to send response\n", pstate->tn_sockfd);
+        }
+    }
+  pstate->tn_sndlen = 0;
+}
+
+/****************************************************************************
  * Name: nsh_receive
  *
  * Description:
@@ -328,29 +355,6 @@ static int nsh_receive(struct telnetd_s *pstate, size_t len)
 }
 
 /****************************************************************************
- * Name: nsh_prompt
- *
- * Description:
- *   Print a prompt to the shell window.
- *
- *   This function can be used by the shell back-end to print out a prompt
- *   to the shell window.
- *
- ****************************************************************************/
-
-static void nsh_prompt(struct telnetd_s *pstate, const char *str)
-{
-  int len = strlen(str);
-
-  strncpy(pstate->tn_iobuffer, str, len);
-  nsh_dumpbuffer("Shell prompt", pstate->tn_iobuffer, len);
-  if (send(pstate->tn_sockfd, pstate->tn_iobuffer, len, 0) < 0)
-    {
-      dbg("[%d] Failed to send prompt\n", pstate->tn_sockfd);
-    }
-}
-
-/****************************************************************************
  * Name: nsh_connection
  *
  * Description:
@@ -378,13 +382,18 @@ static void *nsh_connection(void *arg)
       pstate->tn_sockfd = sockfd;
       pstate->tn_state  = STATE_NORMAL;
 
+      /* Output a greeting */
+
+      nsh_output(pstate, "NuttShell (NSH)\n");
+
       /* Loop processing each TELNET command */
 
       do
         {
           /* Display the prompt string */
 
-          nsh_prompt(pstate, g_nshprompt);
+          nsh_output(pstate, g_nshprompt);
+          nsh_flush(pstate);
 
           /* Read a buffer of data from the TELNET client */
 
@@ -523,27 +532,45 @@ int nsh_telnetmain(void)
 int nsh_telnetout(FAR void *handle, const char *fmt, ...)
 {
   struct telnetd_s *pstate = (struct telnetd_s *)handle;
-  unsigned len;
+  int nbytes = pstate->tn_sndlen;
+  int len;
   va_list ap;
 
+  /* Put the new info into the buffer.  Here we are counting on the fact that
+   * no output strings will exceed NSH_MAX_LINELEN!
+   */
+
   va_start(ap, fmt);
-  vsnprintf(pstate->tn_iobuffer, CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE, fmt, ap);
+  vsnprintf(&pstate->tn_iobuffer[nbytes],
+            (CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - 1) - nbytes, fmt, ap);
   va_end(ap);
 
-  len = strlen(pstate->tn_iobuffer);
-  if (len < (CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - 1) && pstate->tn_iobuffer[len-1] == '\n')
-    {
-      pstate->tn_iobuffer[len-1] = ISO_cr;
-      pstate->tn_iobuffer[len]   = ISO_nl;
-      pstate->tn_iobuffer[len+1] = '\0';
-      len++;
-    }
+  /* Get the size of the new string just added and the total size of
+   * buffered data
+   */
 
-  nsh_dumpbuffer("Shell output", pstate->tn_iobuffer, len);
-  if (send(pstate->tn_sockfd, pstate->tn_iobuffer, len, 0) < 0)
+  len     = strlen(&pstate->tn_iobuffer[nbytes]);
+  nbytes += len;
+
+  /* Expand any terminating \n to \r\n */
+
+  if (nbytes < (CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - 2) &&
+      pstate->tn_iobuffer[nbytes-1] == '\n')
     {
-      dbg("[%d] Failed to send response\n", pstate->tn_sockfd);
-      return ERROR;
+      pstate->tn_iobuffer[nbytes-1] = ISO_cr;
+      pstate->tn_iobuffer[nbytes]   = ISO_nl;
+      pstate->tn_iobuffer[nbytes+1] = '\0';
+      nbytes++;
+    }
+  pstate->tn_sndlen = nbytes;
+
+  /* Flush to the network if the buffer does not have room for one more
+   * maximum length string.
+   */
+
+  if (nbytes > CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - NSH_MAX_LINELEN)
+    {
+      nsh_flush(pstate);
     }
 
   return len;

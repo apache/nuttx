@@ -37,6 +37,44 @@ examples/nsh
       Size of a static I/O buffer used for file access (ignored if
       there is no filesystem).
 
+  * CONFIG_EXAMPLES_NSH_TELNET
+      By default, NSH is configured to use the serial console.
+      If CONFIG_EXAMPLES_NSH_TELNET is set to 'y', then a TELENET
+      server front-end is selected.  When this option is provided,
+      you must log into NuttX remotely using telnet in order to
+      access NSH.
+
+  If CONFIG_EXAMPLES_NSH_TELNET is selected, then there some other
+  configuration settings that apply:
+
+  * CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE
+      Determines the size of the I/O buffer to use for sending/
+      receiving TELNET commands/reponses
+
+  * CONFIG_EXAMPLES_NSH_CMD_SIZE
+      The size of one parsed NSH command
+
+  * CONFIG_EXAMPLES_NSH_STACKSIZE
+      The stack size to use when spawning new threads as new TELNET
+      connections are established.
+
+  * CONFIG_EXAMPLES_NSH_DHCPC
+      Obtain the the IP address via DHCP.
+
+  * CONFIG_EXAMPLES_NSH_IPADDR
+      If CONFIG_EXAMPLES_NSH_DHCPC is NOT set, then the static IP
+      address must be provided.
+
+  * CONFIG_EXAMPLES_NSH_DRIPADDR
+      Default router IP address
+
+  * CONFIG_EXAMPLES_NSH_NETMASK
+      Network mask
+
+  * CONFIG_EXAMPLES_NSH_NOMAC
+      Set if your ethernet hardware has no built-in MAC address.
+      If set, a bogus MAC will be assigned.
+
 examples/mount
 ^^^^^^^^^^^^^^
 

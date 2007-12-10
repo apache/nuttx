@@ -20,17 +20,12 @@ configuration enables networking using the c5471's built-in
 Ethernet interface.  It uses examples/nettest to excercise
 the TCP/IP network.
 
-uipconfig
+nshconfig
 ^^^^^^^^^
-This configuration file demonstrates the tiny webserver
-at examples/uip.
+This configuration file builds NSH (examples/nsh) using the
+TELNET server front end
 
-udpconfig
-^^^^^^^^^
-This alternative configuration file, is similar to netconfig
-except that is use examples/upd to exercise UDP.
-
-TThese alternative configurations can be selected by (using
+These alternative configurations can be selected by (using
 uipconfig as example):
 
 	(Seleted the default configuration as show above)
