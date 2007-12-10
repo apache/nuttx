@@ -25,6 +25,11 @@ nshconfig
 This configuration file builds NSH (examples/nsh) using the
 TELNET server front end
 
+dhcpconfig
+^^^^^^^^^^
+This configuration exercises the DHCP client of netutils/dhcpc
+using examples/uip.
+
 These alternative configurations can be selected by (using
 uipconfig as example):
 
