@@ -16,7 +16,7 @@
   </b></big>
   <p><small>by</small></p>
   <p>Gregory Nutt</p>
-  <p><small>Last Update: September 8, 2007</small></p>
+  <p><small>Last Update: December 10, 2007</small></p>
 </center>
 
 <center><h1>Table of Contents</h1></center>
@@ -88,6 +88,7 @@
     <li><a href="#irqdispatch">4.2.4 <code>irq_dispatch()</code></a></li>
   </ul>
 </ul>
+<li><a href="#NxFileSystem">5.0 NuttX File System</a></li>
 <li><a href="#apndxconfigs">Appendix A: NuttX Configuration Settings</a></li>
 
 <hr>
@@ -607,13 +608,8 @@
 <h2>2.6 <a name="DirStructFs">fs</a></h2>
 
 <p>
-  This directory contains the NuttX filesystem.
-  The NuttX filesystem is very simple; it does not involve any block drivers or
-  particular filesystem (like FAT or EXT2 etc.).
-  The NuttX filesystem simply supports a set a filesystem APIs
-  (<code>open()</code>, <code>close()</code>, <code>read()</code>, <code>write</code>, etc.)
-  and a registration mechanism that allows devices drivers to a associated with <i>nodes</i>
-  in a file-system-like name space.
+  This directory contains the NuttX file system.
+  This file system is described <a href="#NxFileSystem">below</a>.
 </p>
 
 <h2>2.7 <a name="DirStructInclude">include</a></h2>
@@ -1144,6 +1140,56 @@ The system can be re-made subsequently by just typing <code>make</code>.
   the appropriate, registered handling logic.
 </p>
 
+<h1><a name="NxFileSystem">5.0 NuttX File System</a></h1>
+
+<p><b>Overview</b>.
+  NuttX includes an optional, scalable file system.
+  This file-system may be omitted altogther; NuttX does not depend on the presence
+  of any file system.
+</p>
+
+<p><b>Pseudo Root File System</b>.
+  Or, a simple <i>in-memory</i>, <i>psuedo</i> file system can be enabled.
+  This simple file system can be enabled setting the CONFIG_NFILE_DESCRIPTORS
+  option to a non-zero value (see <a href="#apndxconfigs">Appendix A</a>).
+  This is an <i>in-memory</i> file system because it does not require any
+  storage medium or block driver support.
+  Rather, file system contents are generated on-the-fly as referenced via
+  standard file system operations (open, close, read, write, etc.).
+  In this sense, the file system is <i>psuedo</i> file system (in the
+  same sense that the Linux <code>/proc</code> file system is also
+  referred to as a psuedo file system).
+</p>
+
+<p>
+  Any user supplied data or logic can be accessed via the psuedo-file system.
+  Built in support is provided for character and block drivers in the
+  <code>/dev</code> psuedo file system directory.
+</p>
+
+<p><b>Mounted File Systems</b>
+  The simple in-memory file system can be extended my mounting block
+  devices that provide access to true file systems backed up via some
+  mass storage device.
+  NuttX supports the standard <code>mount()</code> command that allows
+  a block driver to be bound to a mountpoint within the psuedo file system
+  and to a a file system.
+  At present, NuttX supports only the VFAT file system.
+</p>
+
+<p><b>Comparison to Linux</b>
+  From a programming perspective, the NuttX file system appears very similar
+  to a Linux file system.
+  However, there is a fundamental difference:
+  The NuttX root file system is a psuedo file system and true file systems may be
+  mounted in the psuedo file system.
+  In the typical Linux installation by comparison, the Linux root file system
+  is a true file system and psuedo file systems may be mounted in the true,
+  root file system.
+  The approach selected by NuttX is intended to support greater scalability
+  from the very tiny platform to the moderate platform.
+</p>
+
 <h1><a name="apndxconfigs">Appendix A:  NuttX Configuration Settings</a></h1>
 
 <p>
@@ -1209,7 +1255,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
     <code>CONFIG_DEBUG_NET</code>: enable network debug output (disabled by default)
   </li>
   <li>
-    <code>CONFIG_DEBUG_FS</code>: enable filesystem debug output (disabled by default)
+    <code>CONFIG_DEBUG_FS</code>: enable file system debug output (disabled by default)
   </li>
   <li>
     <code>CONFIG_DEBUG_LIB</code>: enable C library debug output (disabled by default)

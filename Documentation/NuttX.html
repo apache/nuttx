@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 5, 2007</p>
+      <p>Last Updated: December 10, 2007</p>
     </td>
   </tr>
 </table>
@@ -390,7 +390,7 @@
 </table>
 
 <p>
-  The 15th release of NuttX (nuttx-0.3.3) is available for download
+  The 16th release of NuttX (nuttx-0.3.4) is available for download
   from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
   website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
@@ -398,40 +398,38 @@
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  NuttX 0.3.3 is the 4th release containing the integration of a network
+  NuttX 0.3.4 is the 5th release containing the integration of a network
   subsystem and the uIP TCP/IP, UDP, and ICMP stacks based on
   <a href="http://www.sics.se/~adam/uip/index.php/Main_Page">uIP</a>
   into NuttX.
 </p>
 <p>
-  Many network-related problems have been fixed from version 0.3.2
-  and the implementation has matured significantly.
-  Changes in this release include:
+  This release is primarily a bug-fix release.  New features include only:
 </p>
 <ul>
-<li>TCP-related bug-fixes for disconnecting sockets,</li>
-<li>Correction of some TCP read-ahead logic,<li>
-<li>TCP performance improvements,</li>
-<li>Initial UDP integration, and</li>
-<li>IMisc. additions and cleanup (See the ChangeLog for a complete list of
-  changes).</li>
+<li>TELNET front-end to NSH,</li>
+<li>DHCPC server functionality, and</li>
+<li>C5471 Ethernet driver.</li>
 </ul>
+
 <p>
-  The level of network reliability is at an early beta release level.  The
+  Numerous network related problems were fixed related to DHCPC, UDP
+  input processing, UDP broadcast, send timeouts, and bad compilation when
+  uIP is compiled at high levels of optimizatin.
+</p>
+
+<p>
+  The level of network reliability is at a strong beta release level.  The
   baseline functionality of NuttX continues to mature and remains at
-  post-beta. Open network-related issues include only:
+  post-beta or production level.
 </p>
-<ul>
-<li>Some minor unimplemented BSD socket functionality,</li>
-<li>Thread safety issues: the same socket cannot be used concurrently on
-  different threads, </li>
-<li>Pending design changes necessary to support multiple network interfaces, and </li>
-<li>IPv6 support is incomplete.</li>
-</ul>
+
 <p>
-  This release has been verified only on the Neuros OSD (DM320 ARM9)
-  platform using the DM90x0 driver. Any feedback for improving the network
-  reliability/performance would be greatly appreciated.
+  Parts of this release were verified only on the Neuros OSD (DM320 ARM9)
+  platform using the DM90x0 Ethernet driver and other parts on the Spectrum
+  Digital C5471 EVM using the C5471 Ethernet driver. Any feedback about bugs
+  or suggestions for mproving the network reliability/performance would be
+  greatly appreciated.
 </p>
 
 <table width ="100%">
@@ -918,17 +916,7 @@ Other memory:
 	  using examples/udp
 	* recvfrom() and accept() now correctly return the remote address.
 	* Fixed computation error in ntohl().
-</pre></ul>
 
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="currentrelease">ChangeLog for Current Release</a>
-  </td>
-  </tr>
-</table>
-
-<pre><ul>
 0.3.3 2007-11-28 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Removed unused uIP files
@@ -947,13 +935,13 @@ Other memory:
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="pendingchanges">Unreleased Changes</a>
+    <a name="currentrelease">ChangeLog for Current Release</a>
   </td>
   </tr>
 </table>
 
 <pre><ul>
-0.3.4 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.4 2007-12-10 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Added and partially verified DHCP server logic (netutils/dhcpd)
 	* Fix BROADCAST=y compilation problems
@@ -961,10 +949,22 @@ Other memory:
 	* Correct processing of input UDP broadcast packets.
 	* Verfied basic DHCP client functionality (netutils/dhcpc)
 	* Implemented send() timeout logic
-	* Add TELNETD front end to NSH (examples/nsh)
+	* Added and verifed a TELNETD front end to NSH (examples/nsh)
 	* Add a skeleton Ethernet device driver (drivers/net/skeleton.c)
 	* Added C5471 Ethernet device driver (arch/arm/src/c5471/c5471_ethernet.c)
-	* Improved utilization of read-ahead buffers
+	* Found and fixed several problems in uIP when compiled for ARM with optimization.
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="pendingchanges">Unreleased Changes</a>
+  </td>
+  </tr>
+</table>
+
+<pre><ul>
+0.3.5 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 </pre></ul>
 
 <table width ="100%">
