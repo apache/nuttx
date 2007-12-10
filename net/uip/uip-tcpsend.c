@@ -170,18 +170,10 @@ static void uip_tcpsendcomplete(struct uip_driver_s *dev)
 
 static void uip_tcpsendcommon(struct uip_driver_s *dev, struct uip_conn *conn)
 {
-  BUF->ackno[0] = conn->rcv_nxt[0];
-  BUF->ackno[1] = conn->rcv_nxt[1];
-  BUF->ackno[2] = conn->rcv_nxt[2];
-  BUF->ackno[3] = conn->rcv_nxt[3];
-
-  BUF->seqno[0] = conn->snd_nxt[0];
-  BUF->seqno[1] = conn->snd_nxt[1];
-  BUF->seqno[2] = conn->snd_nxt[2];
-  BUF->seqno[3] = conn->snd_nxt[3];
+  memcpy(BUF->ackno, conn->rcv_nxt, 4);
+  memcpy(BUF->seqno, conn->snd_nxt, 4);
 
   BUF->proto    = UIP_PROTO_TCP;
-
   BUF->srcport  = conn->lport;
   BUF->destport = conn->rport;
 

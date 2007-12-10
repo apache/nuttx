@@ -449,18 +449,12 @@ struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf)
       uip_ipaddr_copy(conn->ripaddr, uip_ip4addr_conv(buf->srcipaddr));
       conn->tcpstateflags = UIP_SYN_RCVD;
 
-      conn->snd_nxt[0]    = g_tcp_sequence[0];
-      conn->snd_nxt[1]    = g_tcp_sequence[1];
-      conn->snd_nxt[2]    = g_tcp_sequence[2];
-      conn->snd_nxt[3]    = g_tcp_sequence[3];
+      memcpy(conn->snd_nxt, g_tcp_sequence, 4);
       conn->len           = 1;
 
       /* rcv_nxt should be the seqno from the incoming packet + 1. */
 
-      conn->rcv_nxt[3]    = buf->seqno[3];
-      conn->rcv_nxt[2]    = buf->seqno[2];
-      conn->rcv_nxt[1]    = buf->seqno[1];
-      conn->rcv_nxt[0]    = buf->seqno[0];
+      memcpy(conn->rcv_nxt, buf->seqno, 4);
 
       /* Initialize the list of TCP read-ahead buffers */
 
@@ -612,14 +606,9 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
   /* Initialize and return the connection structure, bind it to the port number */
 
   conn->tcpstateflags = UIP_SYN_SENT;
-
-  conn->snd_nxt[0] = g_tcp_sequence[0];
-  conn->snd_nxt[1] = g_tcp_sequence[1];
-  conn->snd_nxt[2] = g_tcp_sequence[2];
-  conn->snd_nxt[3] = g_tcp_sequence[3];
+  memcpy(conn->snd_nxt, g_tcp_sequence, 4);
 
   conn->initialmss = conn->mss = UIP_TCP_MSS;
-
   conn->len        = 1;    /* TCP length of the SYN is one. */
   conn->nrtx       = 0;
   conn->timer      = 1;    /* Send the SYN next time around. */

@@ -292,7 +292,7 @@ found:
   len = (BUF->tcpoffset >> 4) << 2;
 
   /* d_len will contain the length of the actual TCP data. This is
-   * calculated by subtracing the length of the TCP header (in
+   * calculated by subtracting the length of the TCP header (in
    * len) and the length of the IP header (20 bytes).
    */
 
@@ -307,10 +307,7 @@ found:
       ((BUF->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))))
     {
       if ((dev->d_len > 0 || ((BUF->flags & (TCP_SYN | TCP_FIN)) != 0)) &&
-          (BUF->seqno[0] != conn->rcv_nxt[0] ||
-           BUF->seqno[1] != conn->rcv_nxt[1] ||
-           BUF->seqno[2] != conn->rcv_nxt[2] ||
-           BUF->seqno[3] != conn->rcv_nxt[3]))
+          memcmp(BUF->seqno, conn->rcv_nxt, 4) != 0)
         {
             uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
             return;
@@ -330,15 +327,11 @@ found:
       uint8 acc32[4];
       uip_add32(conn->snd_nxt, conn->len, acc32);
 
-      if (BUF->ackno[0] == acc32[0] && BUF->ackno[1] == acc32[1] &&
-          BUF->ackno[2] == acc32[2] && BUF->ackno[3] == acc32[3])
+      if (memcmp(BUF->ackno, acc32, 4) == 0)
         {
           /* Update sequence number. */
 
-          conn->snd_nxt[0] = acc32[0];
-          conn->snd_nxt[1] = acc32[1];
-          conn->snd_nxt[2] = acc32[2];
-          conn->snd_nxt[3] = acc32[3];
+          memcpy(conn->snd_nxt, acc32, 4);
 
           /* Do RTT estimation, unless we have done retransmissions. */
 
@@ -477,10 +470,7 @@ found:
               }
 
             conn->tcpstateflags = UIP_ESTABLISHED;
-            conn->rcv_nxt[0]    = BUF->seqno[0];
-            conn->rcv_nxt[1]    = BUF->seqno[1];
-            conn->rcv_nxt[2]    = BUF->seqno[2];
-            conn->rcv_nxt[3]    = BUF->seqno[3];
+            memcpy(conn->rcv_nxt, BUF->seqno, 4);
             nvdbg("TCP state: UIP_ESTABLISHED\n");
 
             uip_incr32(conn->rcv_nxt, 1);
