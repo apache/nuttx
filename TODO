@@ -62,7 +62,7 @@ o File system
 - FAT32: long file names
 
 o Documentation
-- Document fs/ & driver/ logic
+- Document driver/ logic
 - Document C-library APIs
 
 o Build system
@@ -72,7 +72,6 @@ o Build system
 - Dependencies do not work correctly under configs/<board>/src (same as arch/<arch>/src/board).
 
 o Applications & Tests
-- Verify TELNET frontend to nsh
 
 o ARM
 - Add option to use a separate stack for interrupt handling.  At present,
