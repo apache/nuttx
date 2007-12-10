@@ -21,7 +21,7 @@ User's Manual
 <p>
 Gregory Nutt
 <p>
-<small>Last Update: September 23, 2007</small>
+<small>Last Update: December 10, 2007</small>
 </center>
 
 <h1>1.0 <A NAME="Introduction">Introduction</a></h1>
@@ -54,7 +54,7 @@ Gregory Nutt
       <li>Paragraph 2.8 <a href="#Signals">Signal Interfaces</a></li>
       <li>Paragraph 2.9 <a href="#Pthread">Pthread Interfaces</a></li>
       <li>Paragraph 2.10 <a href="#Environ">Environment Variables</a></li>
-      <li>Paragraph 2.11 <a href="#FileSystem">Filesystem Interfaces</a></li>
+      <li>Paragraph 2.11 <a href="#FileSystem">File System Interfaces</a></li>
       <li>Paragraph 2.12 <a href="#Network">Network Interfaces</a></li>
     </ul>
   </li>
@@ -5687,11 +5687,58 @@ interface of the same name.
   Zero on success.
 </p>
 
-<h1><a name="FileSystem">2.11 Filesystem Interfaces</a></h1>
+<h1><a name="FileSystem">2.11 File System Interfaces</a></h1>
+
+<p><b>Overview</b>.
+  NuttX includes an optional, scalable file system.
+  This file-system may be omitted altogther; NuttX does not depend on the presence
+  of any file system.
+</p>
+
+<p><b>Pseudo Root File System</b>.
+  Or, a simple <i>in-memory</i>, <i>psuedo</i> file system can be enabled.
+  This simple file system can be enabled setting the CONFIG_NFILE_DESCRIPTORS
+  option to a non-zero value.
+  This is an <i>in-memory</i> file system because it does not require any
+  storage medium or block driver support.
+  Rather, file system contents are generated on-the-fly as referenced via
+  standard file system operations (open, close, read, write, etc.).
+  In this sense, the file system is <i>psuedo</i> file system (in the
+  same sense that the Linux <code>/proc</code> file system is also
+  referred to as a psuedo file system).
+</p>
+
 <p>
-  The NuttX filesystem is very simple; it does not involve any block drivers or
-  particular filesystem (like FAT or EXT2 etc.).
-  The NuttX filesystem simply supports a set a filesystem APIs
+  Any user supplied data or logic can be accessed via the psuedo-file system.
+  Built in support is provided for character and block drivers in the
+  <code>/dev</code> psuedo file system directory.
+</p>
+
+<p><b>Mounted File Systems</b>
+  The simple in-memory file system can be extended my mounting block
+  devices that provide access to true file systems backed up via some
+  mass storage device.
+  NuttX supports the standard <code>mount()</code> command that allows
+  a block driver to be bound to a mountpoint within the psuedo file system
+  and to a a file system.
+  At present, NuttX supports only the VFAT file system.
+</p>
+
+<p><b>Comparison to Linux</b>
+  From a programming perspective, the NuttX file system appears very similar
+  to a Linux file system.
+  However, there is a fundamental difference:
+  The NuttX root file system is a psuedo file system and true file systems may be
+  mounted in the psuedo file system.
+  In the typical Linux installation by comparison, the Linux root file system
+  is a true file system and psuedo file systems may be mounted in the true,
+  root file system.
+  The approach selected by NuttX is intended to support greater scalability
+  from the very tiny platform to the moderate platform.
+</p>
+
+<p><b>File System Interfaces</b>.
+  The NuttX file system simply supports a set of standard, file system APIs
   (<code>open()</code>, <code>close()</code>, <code>read()</code>, <code>write</code>, etc.)
   and a registration mechanism that allows devices drivers to a associated with <i>nodes</i>
   in a file-system-like name space.
@@ -6597,7 +6644,7 @@ notify a task when a message is available on a queue.
   <li><a href="#directoryoperations">Directory operations</a></li>
   <li><a href="#driveroperations">Driver operations</a></li>
   <li><a href="#exit">exit</a></li>
-  <li><a href="#FileSystem">Filesystem interfaces</a></li>
+  <li><a href="#FileSystem">File system interfaces</a></li>
   <li><a href="#getpid">getpid</a></li>
   <li><a href="#getsockopt">getsockopt</a></li>
   <li><a href="#gmtimer">gmtime_r</a></li>

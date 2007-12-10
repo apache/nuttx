@@ -69,15 +69,9 @@
 
 #  define errno         *get_errno_ptr()
 
-   /* If debug is enabled, use the synchronous lib_lowprintf so that the
-    * program output does not get disassociated in the debug output.
-    */
+   /* Used lib_rawprintf() so that there is not confusion from buffered IO */
 
-#  ifdef CONFIG_DEBUG
-#    define message(...) lib_lowprintf(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
+# define message(...) lib_rawprintf(__VA_ARGS__)
 
    /* At present, uIP does only abortive disconnects */
 

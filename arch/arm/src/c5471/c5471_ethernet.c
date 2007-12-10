@@ -1082,7 +1082,7 @@ static void c5471_rxstatus(struct c5471_driver_s *c5471)
     {
       if (EIM_TXDESC_OWN_HOST & getreg32(desc))
         {
-          /* The incoming packe queue is empty. */
+          /* The incoming packet queue is empty. */
 
           break;
         }
@@ -1274,7 +1274,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
       /* Set amount of data in c5471->c_dev.d_len. */
 
       dev->d_len = packetlen;
-      nvdbg("Received packet, packetlen: %d type: %02x\n", packetlen, BUF->type);
+      nvdbg("Received packet, packetlen: %d type: %02x\n", packetlen, ntohs(BUF->type));
       c5471_dumpbuffer(dev->d_buf, dev->d_len);
 
       /* We only accept IP packets of the configured type and ARP packets */
@@ -1286,7 +1286,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
 #endif
         {
           uip_arp_ipin();
-          uip_input(&c5471->c_dev);
+          uip_input(dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.
@@ -1294,16 +1294,16 @@ static void c5471_receive(struct c5471_driver_s *c5471)
            * access rights to submit another Ethernet frame.
            */
 
-          if (c5471->c_dev.d_len > 0 &&
+          if (dev->d_len > 0 &&
              (EIM_TXDESC_OWN_HOST & getreg32(c5471->c_rxcpudesc)) == 0)
             {
-              uip_arp_out(&c5471->c_dev);
+              uip_arp_out(dev);
               c5471_transmit(c5471);
             }
         }
-      else if (BUF->type == htons(UIP_ETHTYPE_ARP))
+      else if (BUF->type == HTONS(UIP_ETHTYPE_ARP))
         {
-          uip_arp_arpin(&c5471->c_dev);
+          uip_arp_arpin(dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.
@@ -1311,7 +1311,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
            * access rights to submit another Ethernet frame.
            */
 
-          if (c5471->c_dev.d_len > 0 &&
+          if (dev->d_len > 0 &&
              (EIM_TXDESC_OWN_HOST & getreg32(c5471->c_rxcpudesc)) == 0)
             {
               c5471_transmit(c5471);
