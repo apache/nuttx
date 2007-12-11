@@ -1,5 +1,5 @@
 /****************************************************************************
- * nsh.h
+ * examples/nsh/nsh_netcmds.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,104 +33,78 @@
  *
  ****************************************************************************/
 
-#ifndef __NSH_H
-#define __HSH_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_EXAMPLES_NSH_TELNET
-#else
-# include <stdio.h>
-#endif
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+
+#include <sys/types.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sched.h>
+
+#include <nuttx/net.h>
+#include <net/ethernet.h>
+#include <net/uip/uip.h>
+#include <net/uip/uip-arch.h>
+#include <netinet/ether.h>
+
+#include "nsh.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-#define NSH_MAX_ARGUMENTS     6
-
-#define errno (*get_errno_ptr())
-
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
 
-typedef void (*cmd_t)(FAR void *handle, int argc, char **argv);
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-extern const char g_nshprompt[];
-extern const char g_fmtargrequired[];
-extern const char g_fmtarginvalid[];
-extern const char g_fmtcmdnotfound[];
-extern const char g_fmtcmdnotimpl[];
-extern const char g_fmtnosuch[];
-extern const char g_fmttoomanyargs[];
-extern const char g_fmtcmdfailed[];
-extern const char g_fmtcmdoutofmemory[];
-
 /****************************************************************************
- * Public Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
-/* Message handler */
+/****************************************************************************
+ * Name: ifconfig_callback
+ ****************************************************************************/
 
-extern int nsh_parse(FAR void *handle, char *cmdline);
+int ifconfig_callback(FAR struct uip_driver_s *dev, void *arg)
+{
+  struct in_addr addr;
 
-/* I/O interfaces */
+  nsh_output(arg, "%s\tHWaddr %s\n", dev->d_ifname, ether_ntoa(&dev->d_mac));
+  addr.s_addr = dev->d_ipaddr;
+  nsh_output(arg, "\tIPaddr:%s ", inet_ntoa(addr));
+  addr.s_addr = dev->d_draddr;
+  nsh_output(arg, "DRaddr:%s ", inet_ntoa(addr));
+  addr.s_addr = dev->d_netmask;
+  nsh_output(arg, "Mask:%s\n", inet_ntoa(addr));
+}
 
-#ifdef CONFIG_EXAMPLES_NSH_TELNET
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-extern int nsh_telnetmain(void);
-extern int nsh_telnetout(FAR void *handle, const char *fmt, ...);
+/****************************************************************************
+ * Name: cmd_ifconfig
+ ****************************************************************************/
 
-# define nsh_main()              nsh_telnetmain()
-# define nsh_output(handle, ...) nsh_telnetout(handle, __VA_ARGS__)
+void cmd_ifconfig(FAR void *handle, int argc, char **argv)
+{
+  netdev_foreach(ifconfig_callback, handle);
+}
 
-#else
-
-extern int nsh_serialmain(void);
-
-# define nsh_main()              nsh_serialmain()
-# define nsh_output(handle, ...) printf(__VA_ARGS__)
-
-#endif
-
-/* Shell command handlers */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-extern void cmd_cat(FAR void *handle, int argc, char **argv);
-extern void cmd_cp(FAR void *handle, int argc, char **argv);
-#endif
-extern void cmd_echo(FAR void *handle, int argc, char **argv);
-extern void cmd_exec(FAR void *handle, int argc, char **argv);
-extern void cmd_exit(FAR void *handle, int argc, char **argv);
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-extern void cmd_ifconfig(FAR void *handle, int argc, char **argv);
-#endif
-#if CONFIG_NFILE_DESCRIPTORS > 0
-extern void cmd_ls(FAR void *handle, int argc, char **argv);
-#endif
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-extern void cmd_mkdir(FAR void *handle, int argc, char **argv);
-extern void cmd_mount(FAR void *handle, int argc, char **argv);
-#endif
-extern void cmd_ps(FAR void *handle, int argc, char **argv);
-#ifndef CONFIG_DISABLE_ENVIRON
-extern void cmd_set(FAR void *handle, int argc, char **argv);
-#endif
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-extern void cmd_rm(FAR void *handle, int argc, char **argv);
-extern void cmd_rmdir(FAR void *handle, int argc, char **argv);
-extern void cmd_umount(FAR void *handle, int argc, char **argv);
-#endif
-#ifndef CONFIG_DISABLE_ENVIRON
-extern void cmd_unset(FAR void *handle, int argc, char **argv);
-#endif
-
-#endif /* __NSH_H */
+#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

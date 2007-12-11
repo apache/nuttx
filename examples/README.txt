@@ -26,11 +26,31 @@ examples/ostest
 examples/nsh
 ^^^^^^^^^^^^
 
-  This directory containst the NuttShell (NSH).  This is a primitive
+  This directory containst the NuttShell (NSH).  This is a simple
   shell-like application.  With some additional development, NSH will
-  someday be a great NuttX application debugger.
+  someday be a great NuttX application debugger.  At present, NSH
+  supports the following commands:
 
-  The behavior of NSH can be modified with the following settings in
+  Command    Depends on Configuration
+  ---------- --------------------------
+  cat        CONFIG_NFILE_DESCRIPTORS > 0
+  cp         CONFIG_NFILE_DESCRIPTORS > 0
+  echo       --
+  exec       --
+  exit       --
+  help       --
+  ifconfig   CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS > 0
+  ls         CONFIG_NFILE_DESCRIPTORS > 0
+  mkdir      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
+  mount      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
+  ps         --
+  set        !CONFIG_DISABLE_ENVIRON
+  rm         !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
+  rmdir      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
+  umount     !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
+  unset      !CONFIG_DISABLE_ENVIRON
+
+  Other behavior of NSH can be modified with the following settings in
   the configs/<board-name>/defconfig file:
 
   * CONFIG_NSH_IOBUFFERSIZE
