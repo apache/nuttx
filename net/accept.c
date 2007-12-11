@@ -242,9 +242,9 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
   FAR struct uip_conn *conn;
   struct accept_s state;
 #ifdef CONFIG_NET_IPv6
-  FAR struct sockaddr_in6 *inaddr = (const struct sockaddr_in6 *)addr;
+  FAR struct sockaddr_in6 *inaddr = (struct sockaddr_in6 *)addr;
 #else
-  FAR struct sockaddr_in *inaddr = (const struct sockaddr_in *)addr;
+  FAR struct sockaddr_in *inaddr = (struct sockaddr_in *)addr;
 #endif
   irqstate_t save;
   int newfd;

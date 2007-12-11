@@ -45,6 +45,7 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
 #include <sys/types.h>
+#include <string.h>
 #include <debug.h>
 
 #include <net/uip/uipopt.h>
