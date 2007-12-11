@@ -71,7 +71,7 @@ MATH_SRCS	= lib_rint.c
 
 UNISTD_SRCS	= lib_getopt.c
 
-NET_SRCS	= lib_htons.c lib_htonl.c
+NET_SRCS	= lib_htons.c lib_htonl.c lib_inetntoa.c lib_etherntoa.c
 
 LIBGEN_SRCS	= lib_basename.c lib_dirname.c
 
