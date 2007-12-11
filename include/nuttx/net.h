@@ -112,6 +112,11 @@ struct socketlist
 
 typedef uint16 sockopt_t;
 
+/* Callback from netdev_foreach() */
+
+struct uip_driver_s; /* Forward reference.  See net/uip/uip-arch.h */
+typedef int (*netdev_callback_t)(FAR struct uip_driver_s *dev, void *arg);
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -148,15 +153,19 @@ EXTERN int net_close(int sockfd);
 struct ifreq; /* Forward reference -- see net/ioctls.h */
 EXTERN int netdev_ioctl(int sockfd, int cmd, struct ifreq *req);
 
-/* net-register.c ************************************************************/
+/* netdev-register.c *********************************************************/
 /* This function is called by network interface device drivers to inform the
  * socket layer of their existence.  This registration is necesary to support
  * ioctl() operations on network devices to, for example, set MAC and IP
  * addresses
  */
 
-struct uip_driver_s; /* Forward reference.  See net/uip/uip-arch.h */
 EXTERN int netdev_register(FAR struct uip_driver_s *dev);
+
+/* net-foreach.c ************************************************************/
+/* Enumerates all registered network devices */
+
+EXTERN int netdev_foreach(netdev_callback_t callback, void *arg);
 
 #undef EXTERN
 #ifdef __cplusplus

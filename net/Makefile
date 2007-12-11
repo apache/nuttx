@@ -1,5 +1,5 @@
 ############################################################################
-# Makefile
+# net/Makefile
 #
 #   Copyright (C) 2007 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -56,7 +56,8 @@ endif
 
 NETDEV_ASRCS	=
 NETDEV_CSRCS	= netdev-register.c netdev-ioctl.c netdev-txnotify.c \
-		  netdev-findbyname.c netdev-findbyaddr.c netdev-count.c 
+		  netdev-findbyname.c netdev-findbyaddr.c netdev-count.c \
+		  netdev-foreach.c
 
 include uip/Make.defs
 endif
