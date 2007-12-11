@@ -1106,7 +1106,7 @@ static void dm9x_txdone(struct dm9x_driver_s *dm9x)
 
 static int dm9x_interrupt(int irq, FAR void *context)
 {
-#if CONFIG_C5471_NET_NINTERFACES == 1
+#if CONFIG_DM9X_NINTERFACES == 1
   register struct dm9x_driver_s *dm9x = &g_dm9x[0];
 #else
 # error "Additional logic needed to support multiple interfaces"

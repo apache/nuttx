@@ -61,7 +61,7 @@
  * Private Definitions
  ****************************************************************************/
 
-#define BUF ((struct uip_eth_hdr *)g_sim_dev.d_buf)
+#define BUF ((struct ether_header*)g_sim_dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -107,9 +107,9 @@ void timer_reset(struct timer *t)
 #ifdef CONFIG_NET_PROMISCUOUS
 # define up_comparemac(a,b) (0)
 #else
-static inline int up_comparemac(struct ether_addr *paddr1, struct ether_addr *paddr2)
+static inline int up_comparemac(uint8 *paddr1, struct ether_addr *paddr2)
 {
-  return memcmp(paddr1, paddr2, sizeof(struct ether_addr));
+  return memcmp(paddr1, paddr2->ether_addr_octet, ETHER_ADDR_LEN);
 }
 #endif
 
@@ -156,14 +156,14 @@ void uipdriver_loop(void)
        * MAC address
        */
 
-      if (g_sim_dev.d_len > UIP_LLH_LEN && up_comparemac( &BUF->dest, &g_sim_dev.d_mac) == 0)
+      if (g_sim_dev.d_len > UIP_LLH_LEN && up_comparemac(BUF->ether_dhost, &g_sim_dev.d_mac) == 0)
         {
           /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv6
-          if (BUF->type == htons(UIP_ETHTYPE_IP6))
+          if (BUF->ether_type == htons(UIP_ETHTYPE_IP6))
 #else
-          if (BUF->type == htons(UIP_ETHTYPE_IP))
+          if (BUF->ether_type == htons(UIP_ETHTYPE_IP))
 #endif
             {
               uip_arp_ipin();
@@ -180,7 +180,7 @@ void uipdriver_loop(void)
                   tapdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
                 }
             }
-          else if (BUF->type == htons(UIP_ETHTYPE_ARP))
+          else if (BUF->ether_type == htons(UIP_ETHTYPE_ARP))
             {
               uip_arp_arpin(&g_sim_dev);
 
@@ -202,7 +202,7 @@ void uipdriver_loop(void)
   else if (timer_expired(&g_periodic_timer))
     {
       timer_reset(&g_periodic_timer);
-      uip_poll(&g_sim_dev, sim_uiptxpoll, 1);
+      uip_timer(&g_sim_dev, sim_uiptxpoll, 1);
     }
   sched_unlock();
 }

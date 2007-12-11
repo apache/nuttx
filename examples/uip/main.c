@@ -230,7 +230,9 @@ int user_start(int argc, char *argv[])
     {
       sleep(3);
       printf("main: Still running\n");
+#if CONFIG_NFILE_DESCRIPTORS > 0
       fflush(stdout);
+#endif
     }
   return 0;
 }

@@ -166,11 +166,12 @@ static void net_stats(struct httpd_state *pstate, char *ptr)
 {
 #ifdef CONFIG_NET_STATISTICS
   char buffer[16];
+  int i;
 
-  for(pstate->count = 0; pstate->count < sizeof(uip_stat) / sizeof(uip_stats_t); ++pstate->count)
+  for (i = 0; i < sizeof(uip_stat) / sizeof(uip_stats_t); i++)
     {
-      snprintf(buffer, 16, "%5u\n", ((uip_stats_t *)&uip_stat)[pstate->count]);
-      send(pstate->sockout, buffer, strlen(buffer), 0);
+      snprintf(buffer, 16, "%5u\n", ((uip_stats_t *)&uip_stat)[i]);
+      send(pstate->ht_sockfd, buffer, strlen(buffer), 0);
     }
 #endif
 }
