@@ -62,7 +62,7 @@
 #include <debug.h>
 
 #include <netinet/in.h>
-#include <net/if.h>
+#include <net/ethernet.h>
 #include <net/uip/uip-arch.h>
 #include <net/uip/uip-arp.h>
 
@@ -117,16 +117,16 @@ struct ethip_hdr
 
 struct arp_entry
 {
-  in_addr_t           at_ipaddr;
-  struct uip_eth_addr at_ethaddr;
-  uint8               at_time;
+  in_addr_t         at_ipaddr;
+  struct ether_addr at_ethaddr;
+  uint8             at_time;
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct uip_eth_addr broadcast_ethaddr =
+static const struct ether_addr broadcast_ethaddr =
   {{0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
 static const uint16 broadcast_ipaddr[2] = {0xffff, 0xffff};
 
@@ -186,7 +186,7 @@ static void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr)
           if (uip_ipaddr_cmp(ipaddr, tabptr->at_ipaddr))
             {
               /* An old entry found, update this and return. */
-              memcpy(tabptr->at_ethaddr.addr, ethaddr, IFHWADDRLEN);
+              memcpy(tabptr->at_ethaddr.ether_addr_octet, ethaddr, ETHER_ADDR_LEN);
               tabptr->at_time = g_arptime;
 
               return;
@@ -234,7 +234,7 @@ static void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr)
    */
 
   tabptr->at_ipaddr = ipaddr;
-  memcpy(tabptr->at_ethaddr.addr, ethaddr, IFHWADDRLEN);
+  memcpy(tabptr->at_ethaddr.ether_addr_octet, ethaddr, ETHER_ADDR_LEN);
   tabptr->at_time = g_arptime;
 }
 
@@ -327,10 +327,10 @@ void uip_arp_arpin(struct uip_driver_s *dev)
 
             ARPBUF->ah_opcode = HTONS(2);
 
-            memcpy(ARPBUF->ah_dhwaddr, ARPBUF->ah_shwaddr, IFHWADDRLEN);
-            memcpy(ARPBUF->ah_shwaddr, dev->d_mac.addr, IFHWADDRLEN);
-            memcpy(ETHBUF->src, dev->d_mac.addr, IFHWADDRLEN);
-            memcpy(ETHBUF->dest, ARPBUF->ah_dhwaddr, IFHWADDRLEN);
+            memcpy(ARPBUF->ah_dhwaddr, ARPBUF->ah_shwaddr, ETHER_ADDR_LEN);
+            memcpy(ARPBUF->ah_shwaddr, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+            memcpy(ETHBUF->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+            memcpy(ETHBUF->dest, ARPBUF->ah_dhwaddr, ETHER_ADDR_LEN);
 
             ARPBUF->ah_dipaddr[0] = ARPBUF->ah_sipaddr[0];
             ARPBUF->ah_dipaddr[1] = ARPBUF->ah_sipaddr[1];
@@ -399,7 +399,7 @@ void uip_arp_out(struct uip_driver_s *dev)
 
   if (uiphdr_ipaddr_cmp(IPBUF->eh_destipaddr, broadcast_ipaddr))
     {
-      memcpy(ETHBUF->dest, broadcast_ethaddr.addr, IFHWADDRLEN);
+      memcpy(ETHBUF->dest, broadcast_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
     }
   else
     {
@@ -439,10 +439,10 @@ void uip_arp_out(struct uip_driver_s *dev)
            * overwrite the IP packet with an ARP request.
            */
 
-          memset(ETHBUF->dest, 0xff, IFHWADDRLEN);
-          memset(ARPBUF->ah_dhwaddr, 0x00, IFHWADDRLEN);
-          memcpy(ETHBUF->src, dev->d_mac.addr, IFHWADDRLEN);
-          memcpy(ARPBUF->ah_shwaddr, dev->d_mac.addr, IFHWADDRLEN);
+          memset(ETHBUF->dest, 0xff, ETHER_ADDR_LEN);
+          memset(ARPBUF->ah_dhwaddr, 0x00, ETHER_ADDR_LEN);
+          memcpy(ETHBUF->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+          memcpy(ARPBUF->ah_shwaddr, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
 
           uiphdr_ipaddr_copy(ARPBUF->ah_dipaddr, &ipaddr);
           uiphdr_ipaddr_copy(ARPBUF->ah_sipaddr, &dev->d_ipaddr);
@@ -450,7 +450,7 @@ void uip_arp_out(struct uip_driver_s *dev)
           ARPBUF->ah_opcode   = HTONS(ARP_REQUEST);
           ARPBUF->ah_hwtype   = HTONS(ARP_HWTYPE_ETH);
           ARPBUF->ah_protocol = HTONS(UIP_ETHTYPE_IP);
-          ARPBUF->ah_hwlen    = IFHWADDRLEN;
+          ARPBUF->ah_hwlen    = ETHER_ADDR_LEN;
           ARPBUF->ah_protolen = 4;
           uip_arp_dump(ARPBUF);
 
@@ -461,12 +461,12 @@ void uip_arp_out(struct uip_driver_s *dev)
 
       /* Build an ethernet header. */
 
-      memcpy(ETHBUF->dest, tabptr->at_ethaddr.addr, IFHWADDRLEN);
+      memcpy(ETHBUF->dest, tabptr->at_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
     }
 
   /* Finish populating the ethernet header */
 
-  memcpy(ETHBUF->src, dev->d_mac.addr, IFHWADDRLEN);
+  memcpy(ETHBUF->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
   ETHBUF->type = HTONS(UIP_ETHTYPE_IP);
   dev->d_len  += UIP_LLH_LEN;
 }

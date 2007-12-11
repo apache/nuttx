@@ -36,10 +36,11 @@
 
 #include <sys/types.h>
 #include <nuttx/compiler.h>
+#include <net/ethernet.h>
 #include <net/uip/uip.h>
 
 /* The Ethernet header -- 14 bytes. The first two fields are type 'struct
- * uip_eth_addr but are represented as a simple byte array here because
+ * ether_addr but are represented as a simple byte array here because
  * some compilers refuse to pack 6 byte structures.
  */
 

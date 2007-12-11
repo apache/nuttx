@@ -50,6 +50,7 @@
 #include <debug.h>
 
 #include <net/if.h>
+#include <net/ethernet.h>
 #include <net/uip/uip-arch.h>
 
 #include "net-internal.h"
@@ -143,8 +144,9 @@ int netdev_register(FAR struct uip_driver_s *dev)
       netdev_semgive();
 
       nlldbg("Registered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",
-             dev->d_mac.addr[0], dev->d_mac.addr[1], dev->d_mac.addr[2],
-             dev->d_mac.addr[3], dev->d_mac.addr[4], dev->d_mac.addr[5],
+             dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
+             dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
+             dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5],
              dev->d_ifname);
 
       return OK;

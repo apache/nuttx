@@ -57,6 +57,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
+#include <net/ethernet.h>
 #include <net/uip/uip.h>
 #include <net/uip/uip-arp.h>
 #include <net/uip/uip-arch.h>
@@ -2054,7 +2055,7 @@ static void c5471_reset(struct c5471_driver_s *c5471)
 static void c5471_macassign(struct c5471_driver_s *c5471)
 {
   struct uip_driver_s *dev = &c5471->c_dev;
-  uint8 *mptr = dev->d_mac.addr;
+  uint8 *mptr = dev->d_mac.ether_addr_octet;
   register uint32 tmp;
 
   ndbg("MAC: %0x:%0x:%0x:%0x:%0x:%0x\n",

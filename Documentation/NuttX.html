@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 10, 2007</p>
+      <p>Last Updated: December 11, 2007</p>
     </td>
   </tr>
 </table>
@@ -471,7 +471,7 @@
   <td><br></td>
   <td>
     <p>
-      <b>TI TMS320C5471</b> (also called a <b>C5471</b> or <b>TMS320DM180</b>).
+      <b>TI TMS320C5471</b> (also called <b>C5471</b> or <b>TMS320DA180</b> or <b>DA180</a>).
       NuttX operates on the ARM7 of this dual core processor.
       This port uses the <a href="http://www.spectrumdigital.com/">Spectrum Digital</a>
       evaluation board with a GNU arm-elf toolchain*.
@@ -966,6 +966,11 @@ Other memory:
 
 <pre><ul>
 0.3.5 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* Added inet_ntoa() and ether_ntoa()
+	* Added netdev_foreach() to support traversal of registered network devices
+	* Added support for 'ifconfig' command to NSH (examples/nsh)
+	* Moved MAC and ethernet definitions to net/ethernet.h
 </pre></ul>
 
 <table width ="100%">

@@ -35,13 +35,14 @@
 #define __UIP_NEIGHBOR_H__
 
 #include <net/uip/uip.h>
+#include <net/ethernet.h>
 
 struct uip_neighbor_addr
 {
 #if UIP_NEIGHBOR_CONF_ADDRTYPE
   UIP_NEIGHBOR_CONF_ADDRTYPE addr;
 #else
-  struct uip_eth_addr addr;
+  struct ether_addr addr;
 #endif
 };
 

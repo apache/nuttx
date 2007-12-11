@@ -210,13 +210,6 @@ struct uip_stats
 };
 #endif /* CONFIG_NET_STATISTICS */
 
-/* Representation of a 48-bit Ethernet address */
-
-struct uip_eth_addr
-{
-  uint8 addr[6];
-};
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/

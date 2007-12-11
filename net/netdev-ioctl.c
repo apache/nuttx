@@ -51,6 +51,7 @@
 #include <nuttx/net.h>
 
 #include <net/if.h>
+#include <net/ethernet.h>
 #include <net/uip/uip-arch.h>
 #include <net/uip/uip.h>
 
@@ -221,12 +222,12 @@ int netdev_ioctl(int sockfd, int cmd, struct ifreq *req)
 
       case SIOCGIFHWADDR:  /* Get hardware address */
         req->ifr_hwaddr.sa_family = AF_INETX;
-        memcpy(req->ifr_hwaddr.sa_data, dev->d_mac.addr, IFHWADDRLEN);
+        memcpy(req->ifr_hwaddr.sa_data, dev->d_mac.ether_addr_octet, IFHWADDRLEN);
         break;
 
       case SIOCSIFHWADDR:  /* Set hardware address */
         req->ifr_hwaddr.sa_family = AF_INETX;
-        memcpy(dev->d_mac.addr, req->ifr_hwaddr.sa_data, IFHWADDRLEN);
+        memcpy(dev->d_mac.ether_addr_octet, req->ifr_hwaddr.sa_data, IFHWADDRLEN);
         break;
 
       case SIOCDIFADDR:  /* Delete IP address */

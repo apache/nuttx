@@ -283,10 +283,10 @@ configs/sim
 
 configs/c5471evm
     This is a port to the Spectrum Digital C5471 evaluation board.  The
-    C5471 is a dual core processor from TI with an ARM7TDMI general purpose
-    processor and a c54 SDP.  NuttX runs on the ARM core and is built with
-    with a GNU arm-elf toolchain*. This port is complete, verified, and
-    included in the NuttX release.
+    TMS320C5471 is a dual core processor from TI with an ARM7TDMI general
+    purpose processor and a c54 DSP.  It is also known as TMS320DA180 or just DA180. 
+    NuttX runs on the ARM core and is built with with a GNU arm-elf toolchain*.
+    This port is complete, verified, and included in the NuttX release.
 
 configs/mcu123-lpc214x
     This is a port to the mcu123.com lpc214x development board.

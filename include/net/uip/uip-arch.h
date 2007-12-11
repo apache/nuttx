@@ -53,6 +53,7 @@
  ****************************************************************************/
 
 #include <net/uip/uipopt.h>
+#include <net/ethernet.h>
 
 /****************************************************************************
  * Definitions
@@ -86,7 +87,7 @@ struct uip_driver_s
 
   /* Device identitity */
 
-  struct uip_eth_addr d_mac;  /* Device MAC address */
+  struct ether_addr d_mac;  /* Device MAC address */
 
   /* Network identity */
 

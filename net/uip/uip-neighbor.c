@@ -32,10 +32,10 @@
  * SUCH DAMAGE.
  */
 
-#include "uip-neighbor.h"
-
 #include <string.h>
 #include <debug.h>
+
+#include "uip-neighbor.h"
 
 #define MAX_TIME 128
 
@@ -82,8 +82,9 @@ void uip_neighbor_add(uip_ipaddr_t ipaddr, struct uip_neighbor_addr *addr)
   uint8 oldest_time;
 
   ndbg("Add neighbor: %02x:%02x:%02x:%02x:%02x:%02x\n",
-       addr->addr.addr[0], addr->addr.addr[1], addr->addr.addr[2],
-       addr->addr.addr[3], addr->addr.addr[4], addr->addr.addr[5]);
+       addr->addr.ether_addr_octet[0], addr->addr.ether_addr_octet[1],
+       addr->addr.ether_addr_octet[2], addr->addr.ether_addr_octet[3],
+       addr->addr.ether_addr_octet[4], addr->addr.ether_addr_octet[5]);
 
   /* Find the first unused entry or the oldest used entry. */
 
@@ -150,8 +151,9 @@ struct uip_neighbor_addr *uip_neighbor_lookup(uip_ipaddr_t ipaddr)
   if (e != NULL)
     {
       ndbg("Lookup neighbor: %02x:%02x:%02x:%02x:%02x:%02x\n",
-           e->addr.addr.addr[0], e->addr.addr.addr[1], e->addr.addr.addr[2],
-           e->addr.addr.addr[3], e->addr.addr.addr[4], e->addr.addr.addr[5]);
+           e->addr.addr.ether_addr_octet[0], e->addr.addr.ether_addr_octet[1],
+           e->addr.addr.ether_addr_octet[2], e->addr.addr.ether_addr_octet[3],
+           e->addr.addr.ether_addr_octet[4], e->addr.addr.ether_addr_octet[5]);
 
     return &e->addr;
   }

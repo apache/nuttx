@@ -50,6 +50,7 @@
 #include <sched.h>
 #include <nuttx/net.h>
 
+#include <net/ethernet.h>
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>
 #include <net/uip/uip-arp.h>
@@ -106,9 +107,9 @@ void timer_reset(struct timer *t)
 #ifdef CONFIG_NET_PROMISCUOUS
 # define up_comparemac(a,b) (0)
 #else
-static inline int up_comparemac(struct uip_eth_addr *paddr1, struct uip_eth_addr *paddr2)
+static inline int up_comparemac(struct ether_addr *paddr1, struct ether_addr *paddr2)
 {
-  return memcmp(paddr1, paddr2, sizeof(struct uip_eth_addr));
+  return memcmp(paddr1, paddr2, sizeof(struct ether_addr));
 }
 #endif
 
@@ -212,7 +213,7 @@ int uipdriver_init(void)
 
   timer_set(&g_periodic_timer, 500);
   tapdev_init();
-  (void)tapdev_getmacaddr(g_sim_dev.d_mac.addr);
+  (void)tapdev_getmacaddr(g_sim_dev.d_mac.ether_addr_octet);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

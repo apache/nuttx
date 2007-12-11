@@ -581,7 +581,7 @@ int skel_initialize(void)
   g_skel[0].sk_txpoll       = wd_create();   /* Create periodic poll timer */
   g_skel[0].sk_txtimeout    = wd_create();   /* Create TX timeout timer */
 
-  /* Read the MAC address from the hardware into g_skel[0].sk_dev.d_mac.addr */
+  /* Read the MAC address from the hardware into g_skel[0].sk_dev.d_mac.ether_addr_octet */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
