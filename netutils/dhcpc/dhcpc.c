@@ -125,6 +125,7 @@ struct dhcpc_state_s
   const void          *ds_macaddr;
   int                  ds_maclen;
   int                  sockfd;
+  struct in_addr       ipaddr;
   struct in_addr       serverid;
   struct dhcp_msg      packet;
 };
@@ -160,11 +161,11 @@ static uint8 *dhcpc_addserverid(struct in_addr *serverid, uint8 *optptr)
   return optptr + 4;
 }
 
-static uint8 *dhcpc_addreqipaddr(struct dhcpc_state *presult, uint8 *optptr)
+static uint8 *dhcpc_addreqipaddr(struct in_addr *ipaddr, uint8 *optptr)
 {
   *optptr++ = DHCP_OPTION_REQ_IPADDR;
   *optptr++ = 4;
-  memcpy(optptr, &presult->ipaddr.s_addr, 4);
+  memcpy(optptr, &ipaddr->s_addr, 4);
   return optptr + 4;
 }
 
@@ -223,16 +224,16 @@ static int dhcpc_sendmsg(struct dhcpc_state_s *pdhcpc,
         pend     = dhcpc_addreqoptions(pend);
         break;
 
-      /* Send REQUEST message to the server that send the OFFER */
+      /* Send REQUEST message to the server that sent the *first* OFFER */
 
       case DHCPREQUEST:
         pdhcpc->packet.flags = HTONS(BOOTP_BROADCAST); /*  Broadcast bit. */
-        memcpy(pdhcpc->packet.ciaddr, &presult->ipaddr.s_addr, 4);
+        memcpy(pdhcpc->packet.ciaddr, &pdhcpc->ipaddr.s_addr, 4);
         pend     = dhcpc_addserverid(&pdhcpc->serverid, pend);
-        pend     = dhcpc_addreqipaddr(presult, pend);
+        pend     = dhcpc_addreqipaddr(&pdhcpc->ipaddr, pend);
         break;
 
-      /* Send DECLINE message to the server that sent the OFFER */
+      /* Send DECLINE message to the server that sent the *last* OFFER */
 
       case DHCPDECLINE:
         memcpy(pdhcpc->packet.ciaddr, &presult->ipaddr.s_addr, 4);
@@ -451,7 +452,8 @@ int dhcpc_request(void *handle, struct dhcpc_state *presult)
                    */
 
                   dbg("Received OFFER from %08x\n", ntohl(presult->serverid.s_addr));
-		  pdhcpc->serverid.s_addr = presult->serverid.s_addr;
+                  pdhcpc->ipaddr.s_addr   = presult->ipaddr.s_addr;
+                  pdhcpc->serverid.s_addr = presult->serverid.s_addr;
 
                   /* Temporarily use the address offered by the server and break
                    * out of the loop.
