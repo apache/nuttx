@@ -1283,7 +1283,7 @@ int dhcpd_run(void)
 #ifdef CONFIG_NETUTILS_DHCPD_HOST
       /* Get the poor little uC a change to get its recvfrom in place */
 
-      sleep(2);
+      usleep(500*1000);
 #endif
 
       /* Now process the incoming DHCP message by its message type */
@@ -1298,7 +1298,7 @@ int dhcpd_run(void)
           case DHCPREQUEST:
             vdbg("DHCPREQUEST\n");
             dhcpd_request();
-           break;
+            break;
 
           case DHCPDECLINE:
             vdbg("DHCPDECLINE\n");

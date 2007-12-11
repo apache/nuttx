@@ -61,9 +61,8 @@
  ****************************************************************************/
 
 #define STATE_INITIAL           0
-#define STATE_SENDING           1
-#define STATE_OFFER_RECEIVED    2
-#define STATE_CONFIG_RECEIVED   3
+#define STATE_HAVE_OFFER        1
+#define STATE_HAVE_LEASE        2
 
 #define BOOTP_BROADCAST         0x8000
 
@@ -127,6 +126,7 @@ struct dhcpc_state_s
   const void          *ds_macaddr;
   int                  ds_maclen;
   int                  sockfd;
+  struct in_addr       serverid;
   struct dhcp_msg      packet;
 };
 
@@ -141,7 +141,11 @@ static const uint8 magic_cookie[4] = {99, 130, 83, 99};
  * Private Functions
  ****************************************************************************/
 
-static uint8 *add_msg_type(uint8 *optptr, uint8 type)
+/****************************************************************************
+ * Name: dhcpc_add<option>
+ ****************************************************************************/
+
+static uint8 *dhcpc_addmsgtype(uint8 *optptr, uint8 type)
 {
   *optptr++ = DHCP_OPTION_MSG_TYPE;
   *optptr++ = 1;
@@ -149,15 +153,15 @@ static uint8 *add_msg_type(uint8 *optptr, uint8 type)
   return optptr;
 }
 
-static uint8 *add_server_id(struct dhcpc_state *presult, uint8 *optptr)
+static uint8 *dhcpc_addserverid(struct in_addr *serverid, uint8 *optptr)
 {
   *optptr++ = DHCP_OPTION_SERVER_ID;
   *optptr++ = 4;
-  memcpy(optptr, presult->serverid, 4);
+  memcpy(optptr, &serverid->s_addr, 4);
   return optptr + 4;
 }
 
-static uint8 *add_req_ipaddr(struct dhcpc_state *presult, uint8 *optptr)
+static uint8 *dhcpc_addreqipaddr(struct dhcpc_state *presult, uint8 *optptr)
 {
   *optptr++ = DHCP_OPTION_REQ_IPADDR;
   *optptr++ = 4;
@@ -165,7 +169,7 @@ static uint8 *add_req_ipaddr(struct dhcpc_state *presult, uint8 *optptr)
   return optptr + 4;
 }
 
-static uint8 *add_req_options(uint8 *optptr)
+static uint8 *dhcpc_addreqoptions(uint8 *optptr)
 {
   *optptr++ = DHCP_OPTION_REQ_LIST;
   *optptr++ = 3;
@@ -175,83 +179,90 @@ static uint8 *add_req_options(uint8 *optptr)
   return optptr;
 }
 
-static uint8 *add_end(uint8 *optptr)
+static uint8 *dhcpc_addend(uint8 *optptr)
 {
   *optptr++ = DHCP_OPTION_END;
   return optptr;
 }
 
-static void create_msg(struct dhcpc_state_s *pdhcpc)
+/****************************************************************************
+ * Name: dhcpc_sendmsg
+ ****************************************************************************/
+
+static int dhcpc_sendmsg(struct dhcpc_state_s *pdhcpc,
+                         struct dhcpc_state *presult, int msgtype)
 {
+  struct sockaddr_in addr;
+  uint8 *pend;
+  in_addr_t serverid = INADDR_BROADCAST;
+  int len;
+
+  /* Create the common message header settings */
+
   memset(&pdhcpc->packet, 0, sizeof(struct dhcp_msg));
   pdhcpc->packet.op    = DHCP_REQUEST;
   pdhcpc->packet.htype = DHCP_HTYPE_ETHERNET;
   pdhcpc->packet.hlen  = pdhcpc->ds_maclen;
   memcpy(pdhcpc->packet.xid, xid, 4);
-  pdhcpc->packet.flags = HTONS(BOOTP_BROADCAST); /*  Broadcast bit. */
   memcpy(pdhcpc->packet.chaddr, pdhcpc->ds_macaddr, pdhcpc->ds_maclen);
   memset(&pdhcpc->packet.chaddr[pdhcpc->ds_maclen], 0, 16 - pdhcpc->ds_maclen);
   memcpy(pdhcpc->packet.options, magic_cookie, sizeof(magic_cookie));
-}
 
-static int send_discover(struct dhcpc_state_s *pdhcpc)
-{
-  struct sockaddr_in addr;
-  uint8 *pend;
-  int len;
-
-  /* Create the basic message header */
-
-  create_msg(pdhcpc);
-
-  /* Add the options */
+  /* Add the common header options */
 
   pend = &pdhcpc->packet.options[4];
-  pend = add_msg_type(pend, DHCPDISCOVER);
-  pend = add_req_options(pend);
-  pend = add_end(pend);
+  pend = dhcpc_addmsgtype(pend, msgtype);
+
+  /* Handle the message specific settings */
+
+  switch (msgtype)
+    {
+      /* Broadcast DISCOVER message to all servers */
+
+      case DHCPDISCOVER:
+        pdhcpc->packet.flags = HTONS(BOOTP_BROADCAST); /*  Broadcast bit. */
+        pend     = dhcpc_addreqoptions(pend);
+        break;
+
+      /* Send REQUEST message to the server that send the OFFER */
+
+      case DHCPREQUEST:
+        pdhcpc->packet.flags = HTONS(BOOTP_BROADCAST); /*  Broadcast bit. */
+        memcpy(pdhcpc->packet.ciaddr, &presult->ipaddr.s_addr, 4);
+        pend     = dhcpc_addserverid(&pdhcpc->serverid, pend);
+        pend     = dhcpc_addreqipaddr(presult, pend);
+        break;
+
+      /* Send DECLINE message to the server that sent the OFFER */
+
+      case DHCPDECLINE:
+        memcpy(pdhcpc->packet.ciaddr, &presult->ipaddr.s_addr, 4);
+        pend     = dhcpc_addserverid(&presult->serverid, pend);
+        serverid = presult->serverid.s_addr;
+        break;
+
+      default:
+        return ERROR;
+    }
+
+  pend = dhcpc_addend(pend);
   len  = pend - (uint8*)&pdhcpc->packet;
 
   /* Send the request */
 
   addr.sin_family      = AF_INET;
   addr.sin_port        = HTONS(DHCPC_SERVER_PORT);
-  addr.sin_addr.s_addr = INADDR_BROADCAST;
-
-  return sendto(pdhcpc->sockfd, &pdhcpc->packet, len, 0,
-                (struct sockaddr*)&addr, sizeof(struct sockaddr_in));
-}
-static int send_request(struct dhcpc_state_s *pdhcpc, struct dhcpc_state *presult)
-{
-  struct sockaddr_in addr;
-  uint8 *pend;
-  int len;
-
-  /* Create the basic message header */
-
-  create_msg(pdhcpc);
-  memcpy(pdhcpc->packet.ciaddr, &presult->ipaddr.s_addr, 4);
-
-  /* Add the options */
-
-  pend = &pdhcpc->packet.options[4];
-  pend = add_msg_type(pend, DHCPREQUEST);
-  pend = add_server_id(presult, pend);
-  pend = add_req_ipaddr(presult, pend);
-  pend = add_end(pend);
-  len  = pend - (uint8*)&pdhcpc->packet;
-
-  /* Send the request */
-
-  addr.sin_family      = AF_INET;
-  addr.sin_port        = HTONS(DHCPC_SERVER_PORT);
-  addr.sin_addr.s_addr = INADDR_BROADCAST;
+  addr.sin_addr.s_addr = serverid;
 
   return sendto(pdhcpc->sockfd, &pdhcpc->packet, len, 0,
                 (struct sockaddr*)&addr, sizeof(struct sockaddr_in));
 }
 
-static uint8 parse_options(struct dhcpc_state *presult, uint8 *optptr, int len)
+/****************************************************************************
+ * Name: dhcpc_parseoptions
+ ****************************************************************************/
+
+static uint8 dhcpc_parseoptions(struct dhcpc_state *presult, uint8 *optptr, int len)
 {
   uint8 *end = optptr + len;
   uint8 type = 0;
@@ -273,7 +284,7 @@ static uint8 parse_options(struct dhcpc_state *presult, uint8 *optptr, int len)
             type = *(optptr + 2);
             break;
           case DHCP_OPTION_SERVER_ID:
-            memcpy(presult->serverid, optptr + 2, 4);
+            memcpy(&presult->serverid.s_addr, optptr + 2, 4);
             break;
           case DHCP_OPTION_LEASE_TIME:
             memcpy(presult->lease_time, optptr + 2, 4);
@@ -287,15 +298,19 @@ static uint8 parse_options(struct dhcpc_state *presult, uint8 *optptr, int len)
   return type;
 }
 
-static uint8 parse_msg(struct dhcpc_state_s *pdhcpc, int buflen,
-                       struct dhcpc_state *presult)
+/****************************************************************************
+ * Name: dhcpc_parsemsg
+ ****************************************************************************/
+
+static uint8 dhcpc_parsemsg(struct dhcpc_state_s *pdhcpc, int buflen,
+                            struct dhcpc_state *presult)
 {
   if (pdhcpc->packet.op == DHCP_REPLY &&
       memcmp(pdhcpc->packet.xid, xid, sizeof(xid)) == 0 &&
       memcmp(pdhcpc->packet.chaddr, pdhcpc->ds_macaddr, pdhcpc->ds_maclen) == 0)
     {
       memcpy(&presult->ipaddr.s_addr, pdhcpc->packet.yiaddr, 4);
-      return parse_options(presult, &pdhcpc->packet.options[4], buflen);
+      return dhcpc_parseoptions(presult, &pdhcpc->packet.options[4], buflen);
     }
   return 0;
 }
@@ -304,11 +319,19 @@ static uint8 parse_msg(struct dhcpc_state_s *pdhcpc, int buflen,
  * Global Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: dhcpc_open
+ ****************************************************************************/
+
 void *dhcpc_open(const void *macaddr, int maclen)
 {
   struct dhcpc_state_s *pdhcpc;
   struct sockaddr_in addr;
   struct timeval tv;
+
+  dbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+      ((uint8*)macaddr)[0], ((uint8*)macaddr)[1], ((uint8*)macaddr)[2],
+      ((uint8*)macaddr)[3], ((uint8*)macaddr)[4], ((uint8*)macaddr)[5]);
 
   /* Allocate an internal DHCP structure */
 
@@ -358,6 +381,10 @@ void *dhcpc_open(const void *macaddr, int maclen)
   return (void*)pdhcpc;
 }
 
+/****************************************************************************
+ * Name: dhcpc_close
+ ****************************************************************************/
+
 void dhcpc_close(void *handle)
 {
   struct dchcpc_state_internal *pdhcpc = (struct dchcpc_state_internal *)handle;
@@ -367,72 +394,158 @@ void dhcpc_close(void *handle)
     }
 }
 
+/****************************************************************************
+ * Name: dhcpc_request
+ ****************************************************************************/
+
 int dhcpc_request(void *handle, struct dhcpc_state *presult)
 {
   struct dhcpc_state_s *pdhcpc = (struct dhcpc_state_s *)handle;
   struct in_addr oldaddr;
+  struct in_addr newaddr;
   ssize_t result;
-  int state;
+  uint8   msgtype;
+  int     retries;
+  int     state;
 
-  /* Save the currently assigned IP address (should be zero) */
+  /* Save the currently assigned IP address (should be INADDR_ANY) */
 
   oldaddr.s_addr = 0;
   uip_gethostaddr("eth0", &oldaddr);
 
-  /* Loop until we receive the offer */
+  /* Loop until we receive the lease (or an error occurs) */
 
   do
     {
-      state = STATE_SENDING;
+      /* Set the IP address to INADDR_ANY. */
 
+      newaddr.s_addr = INADDR_ANY;
+      (void)uip_sethostaddr("eth0", &newaddr);
+
+      /* Loop sending DISCOVER until we receive an OFFER from a DHCP
+       * server.  We will lock on to the first OFFER and decline any
+       * subsequent offers (which will happen if there are more than one
+       * DHCP servers on the network.
+       */
+
+      state = STATE_INITIAL;
       do
         {
-          /* Send the command */
+          /* Send the DISCOVER command */
 
-          if (send_discover(pdhcpc) < 0)
+          dbg("Broadcast DISCOVER\n");
+          if (dhcpc_sendmsg(pdhcpc, presult, DHCPDISCOVER) < 0)
             {
               return ERROR;
             }
 
-          /* Get the response */
+          /* Get the DHCPOFFER response */
 
           result = recv(pdhcpc->sockfd, &pdhcpc->packet, sizeof(struct dhcp_msg), 0);
           if (result >= 0)
             {
-              if (parse_msg(pdhcpc, result, presult) == DHCPOFFER)
+              msgtype = dhcpc_parsemsg(pdhcpc, result, presult);
+              if (msgtype == DHCPOFFER)
                 {
+                  /* Save the servid from the presult so that it is not clobbered
+                   * by a new OFFER.
+                   */
+
+                  dbg("Received OFFER from %08x\n", ntohl(presult->serverid.s_addr));
+		  pdhcpc->serverid.s_addr = presult->serverid.s_addr;
+
+                  /* Temporarily use the address offered by the server and break
+                   * out of the loop.
+                   */
+
                   (void)uip_sethostaddr("eth0", &presult->ipaddr);
-                  state = STATE_OFFER_RECEIVED;
+                  state = STATE_HAVE_OFFER;
                 }
             }
+
+          /* An error has occurred.  If this was a timeout error (meaning that
+           * nothing was received on this socket for a long period of time).
+           * Then loop and send the DISCOVER command again.
+           */
+
           else if (*get_errno_ptr() != EAGAIN)
             {
-              /* An error other than a timeout was received */
+              /* An error other than a timeout was received -- error out */
 
               return ERROR;
             }
         }
-      while (state != STATE_OFFER_RECEIVED);
+      while (state == STATE_INITIAL);
 
+
+      /* Loop sending the REQUEST up to three times (if there is no response) */
+
+      retries = 0;
       do
         {
-          /* Send the request */
+          /* Send the REQUEST message to obtain the lease that was offered to us. */
 
-          if (send_request(pdhcpc, presult) < 0)
+          dbg("Send REQUEST\n");
+          if (dhcpc_sendmsg(pdhcpc, presult, DHCPREQUEST) < 0)
             {
               return ERROR;
             }
+          retries++;
 
-          /* Get the response */
+          /* Get the ACK/NAK response to the REQUEST (or timeout) */
 
           result = recv(pdhcpc->sockfd, &pdhcpc->packet, sizeof(struct dhcp_msg), 0);
           if (result >= 0)
             {
-              if (parse_msg(pdhcpc, result, presult) == DHCPACK)
+              /* Parse the response */
+
+              msgtype = dhcpc_parsemsg(pdhcpc, result, presult);
+
+              /* The ACK response means that the server has accepted our request
+               * and we have the lease.
+               */
+
+              if (msgtype == DHCPACK)
                 {
-                  state = STATE_CONFIG_RECEIVED;
+                  dbg("Received ACK\n");
+                  state = STATE_HAVE_LEASE;
+                }
+
+              /* NAK means the the server has refused our request.  Break out of
+               * this loop with state == STATE_HAVE_OFFER and send DISCOVER again
+               */
+
+              else if (msgtype == DHCPNAK)
+                {
+                  dbg("Received NAK\n");
+                  break;
+                }
+
+              /* If we get any OFFERs from other servers, then decline them now
+               * and continue waiting for the ACK from the server that we
+               * requested from.
+               */
+
+              else if (msgtype == DHCPOFFER)
+                {
+                  dbg("Received another OFFER, send DECLINE\n");
+                  (void)dhcpc_sendmsg(pdhcpc, presult, DHCPDECLINE);
+                }
+
+              /* Otherwise, it is something that we do not recognize */
+
+              else
+                {
+                  dbg("Ignoring msgtype=%d\n", msgtype);
                 }
             }
+
+          /* An error has occurred.  If this was a timeout error (meaning
+           * that nothing was received on this socket for a long period of time).
+           * Then break out and send the DISCOVER command again (at most
+           * 3 times).
+           */
+
           else if (*get_errno_ptr() != EAGAIN)
             {
               /* An error other than a timeout was received */
@@ -441,9 +554,9 @@ int dhcpc_request(void *handle, struct dhcpc_state *presult)
               return ERROR;
             }
         }
-      while (state != STATE_CONFIG_RECEIVED);
+      while (state == STATE_HAVE_OFFER && retries < 3);
     }
-  while(state != STATE_CONFIG_RECEIVED);
+  while (state != STATE_HAVE_LEASE);
 
   dbg("Got IP address %d.%d.%d.%d\n",
       (presult->ipaddr.s_addr >> 24 ) & 0xff,

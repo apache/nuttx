@@ -55,7 +55,7 @@
 struct dhcpc_state
 {
   uint16 lease_time[2];
-  uint8  serverid[4];
+  struct in_addr serverid;
   struct in_addr ipaddr;
   struct in_addr netmask;
   struct in_addr dnsaddr;
