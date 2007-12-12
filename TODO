@@ -47,6 +47,8 @@ o Network
   for new data, the driver should be throttled.  Perhaps the driver should disable
   RX interrupts when throttled and re-anable on each poll time.  recvfrom would,
   of course, have to un-throttle.
+- Need to standardize collection of statistics from network drivers.  examples/nsh
+  ifconfig command should present statistics.
 
 o USB
 - Implement USB device support

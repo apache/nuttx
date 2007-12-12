@@ -191,7 +191,7 @@ struct uip_tcp_stats_s
   uip_stats_t sent;       /* Number of sent TCP segments */
   uip_stats_t chkerr;     /* Number of TCP segments with a bad checksum */
   uip_stats_t ackerr;     /* Number of TCP segments with a bad ACK number */
-  uip_stats_t rst;        /* Number of recevied TCP RST (reset) segments */
+  uip_stats_t rst;        /* Number of received TCP RST (reset) segments */
   uip_stats_t rexmit;     /* Number of retransmitted TCP segments */
   uip_stats_t syndrop;    /* Number of dropped SYNs due to too few
                              available connections */

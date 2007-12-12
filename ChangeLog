@@ -281,3 +281,4 @@
 	* Fixed errors in C5471 configuration files for examples/uip
 	* Modified DHCPC (netutils/dhcpc) so that it should work in environments where
 	  there are more than one DHCPD server.
+	* NSH ifconfig command now shows uIP status was well (examples/nsh)
