@@ -113,7 +113,18 @@ for dir in ${GARBAGEDIRS}; do
 	rm -rf ${NUTTX}/${dir}
 done
 
+# Make sure that all of the necessary soft links are in place
+
+cd ${NUTTX}/Documentation || \
+   { echo "Failed to cd to ${NUTTX}/Documentation" ; exit 1 ; }
+
+ln -sf ../TODO TODO.txt
+ln -sf ../ChangeLog ChangeLog.txt
+
 # Perform a full clean for the distribution
+
+cd ${PROJECTS} || \
+   { echo "Failed to cd to ${PROJECTS}" ; exit 1 ; }
 
 make -C ${NUTTX} distclean
 

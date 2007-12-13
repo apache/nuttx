@@ -1,111 +1,302 @@
-NuttX TODO List
-^^^^^^^^^^^^^^^
+NuttX TODO List (Last updated December 13, 2007)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-o Task/Scheduler
-- When a tasks exits, shouldn't all of its child pthreads also be terminated?
-- Should task_delete() cause atexit() function to be called?
-- Implement sys/mman.h and functions
-- Implement sys/wait.h and functions
-- Implement priority inheritance
-- Consider implementing wait, waitpid, waitid.  At present, a parent has
-  no information about child tasks.
-- Several APIs do not set errno.  Need to review all APIs.
+  (6)  Task/Scheduler (sched/)
+  (2)  Memory Managment (mm/)
+  (1)  Signals (sched/, arch/)
+  (1)  pthreads (sched/)
+  (1)  C++ Support
+  (10) Network (net/, netutils/)
+  (2)  USB (drivers/usbdev)
+  (2)  Libraries (lib/)
+  (2)  File system (fs/, drivers/)
+  (2)  Documentation (Documentation/)
+  (3)  Build system
+  (0)  Applications & Tests (examples/)
+  (1)  ARM (arch/arm/)
+  (0)  ARM/C5471 (arch/arm/src/c5471/)
+  (1)  ARM/DM320 (arch/arm/src/dm320/)
+  (2)  ARM/LPC214x (arch/arm/src/lpc214x/)
+  (3)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
 
-o Memory Managment
-- Add an option to free all memory allocated by a task when the task exits.
-  This is probably not be worth the overhead for a deeply embedded system.
-- Current logic adapts size_t for 16-bit address machines vs. 32-bit address
-  machines.  But a small memory option should also be provided so that
-  the small offset option can be used with 32-bit machines that have small
-  RAM memories (like the lpc2148)
 
-o Signals
-- 'Standard' signals and signal actions are not supported.
+o Task/Scheduler (sched/)
+  ^^^^^^^^^^^^^^^^^^^^^^^
 
-o pthreads
-- pthread_cancel():  Should implement cancellation points and pthread_testcancel()
+  Description: When a tasks exits, shouldn't all of its child pthreads also be
+               terminated?
+  Status:      Open
+  Priority:    Medium, required for good emulation of process/pthread model.
+
+  Description: atexit() supports registration of one function called on exit().
+               Should task_delete() also cause atexit() function to be called?
+  Status:      Open
+  Priority:    Low, task_delete() is non-standard and its behavior is
+               unspecified.
+
+  Description: Implement sys/mman.h and functions
+  Status:      Open
+  Priority:    Low
+
+  Description: Implement sys/wait.h and functions.  Consider implementing wait,
+               waitpid, waitid.  At present, a parent has no information about
+               child tasks.
+  Status:      Open
+  Priority:    Low
+
+  Description: Implement priority inheritance
+  Status:      Open
+  Priority:    Medium, this is a good feature for realtime systems.
+
+  Description: Several APIs do not set errno.  Need to review all APIs.
+  Status:      Open
+  Priority:    Medium, required for standard compliance (but makes the
+               code bigger)
+
+o Memory Managment (mm/)
+  ^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: Add an option to free all memory allocated by a task when the
+               task exits. This is probably not be worth the overhead for a
+               deeply embedded system.
+  Status:      Open
+  Priority:    Medium/Low, a good feature to prevent memory leaks but would
+               have negative impact on memory usage and code size.
+
+  Description: Current logic adapts size_t for 16-bit address machines vs.
+               32-bit address machines.  But a small memory option should also
+               be provided so that the small offset option can be used with
+               32-bit machines that have small RAM memories (like the lpc2148)
+  Status:      Open
+  Priority:    High, a good feature enhancement.
+
+o Signals (sched/, arch/)
+  ^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: 'Standard' signals and signal actions are not supported.
+               (e.g., SIGINT, SIGCHLD, SIGSEGV, etc).
+  Status:      Open
+  Priority:    Low, required by standards but not so critical for an
+               embedded system.
+
+o pthreads (sched/)
+  ^^^^^^^^^^^^^^^^^
+
+  Description: pthread_cancel():  Should implement cancellation points and
+               pthread_testcancel()
+  Status:      Open
+  Priority:    Low, probably not that useful
 
 o C++ Support
-- Need to call static constructors
+  ^^^^^^^^^^^
 
-o Network
-- uIP's netutils/smtp, resolv, webclient -- untested
-- Should implement SOCK_RAW, SOCK_PACKET
-- uIP polling issues:
-  (1) Current logic will not support multiple ethernet drivers.  Each driver should
-      poll on TCP connections connect on the network supported by the driver; UDP
-      polling should respond with TX data only if the UDP packet is intended for the
-      the network supported by the driver.
-  (2) If there were multiple drivers, polling would occur at double the rate.i
-  Fix by using bound IP address in TCP connection (lipaddr) and verifying that it
-  is in the subnet served by the driver.
-- uIP/Socket callback logic is not thread safe. This means that a socket cannot be
-  used concurrently by two threads.  Minimal fix:  Add mutex to support exclusion.
-- IPv6 support is incomplete
-- Incoming UDP broadcast should only be accepted if listening on INADDR_ANY(?)
-- Should add some driver call to support throttling... when there is no listener
-  for new data, the driver should be throttled.  Perhaps the driver should disable
-  RX interrupts when throttled and re-anable on each poll time.  recvfrom would,
-  of course, have to un-throttle.
-- Need to standardize collection of statistics from network drivers.  examples/nsh
-  ifconfig command should present statistics.
+  Description: Need to call static constructors
+  Status:      Open
+  Priority:    Low, depends on toolchain.  Call to gcc's built-in static
+               constructor logic will probably have to be performed by
+               user logic in user_start().
 
-o USB
-- Implement USB device support
-- Implement USB bulk device
+o Network (net/, netutils/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-o Libraries
-- sscanf() and lib_vsprintf() do not support floating point values.
-- The definition of environ in stdlib.h is bogus and will not work as it should.  This
-  is because the underlying representation of the environment is not an arry of pointers.
+  Description: Several of the netutils/ apps are untested.  These include
+               uIP's netutils/smtp, dhcpd, resolv, webclient.  Only minimal
+               testing of the others has been performed.
+  Status:      Open
+  Priority:    Medium, Important but not core NuttX functionality
 
-o File system
-- Add chmod(), truncate().
-- FAT32: long file names
+  Description: Should implement SOCK_RAW, SOCK_PACKET
+  Status:      Open
+  Priority:    Low
 
-o Documentation
-- Document driver/ logic
-- Document C-library APIs
+  Description: uIP polling issues / Multiple network interface support:
+               (1) Current logic will not support multiple ethernet drivers.
+                  Each driver should poll on TCP connections connect on the
+                  network supported by the driver; UDP polling should respond
+                  with TX data only if the UDP packet is intended for the
+                  the network supported by the driver.
+               (2) If there were multiple drivers, polling would occur at
+                  double the rate.  Fix by using bound IP address in TCP
+                  connection (lipaddr) and verifying that it is in the subnet
+                  served by the driver.
+  Status:      Open
+  Priority:    Medium, The feature is not important, but it is important
+               for NuttX to resolve the architectural issues.
+
+  Description: Sendoto() and multiple network interface support:
+               When polled, would have to assure that the destination IP
+               is on the subnet served by the polling driver.
+  Status:      Open
+  Priority:    Medium, The feature is not important, but it is important
+               for NuttX to resolve the architectural issues.
+
+  Description: uIP/Socket callback logic is not thread safe. This means that
+               a socket cannot be used concurrently by two threads.  Minimal
+               fix:  Add mutex to support exclusion for protection.
+  Status:      Open
+  Priority:    Low.  The currently socket design cannot be use concurrently
+               by threads with out a major redesign.  The feature is not
+               of great value since the use model for multi-thread sockets
+               is not common.  Adding mutex support would only mask the
+               underlying issue.
+
+  Description: IPv6 support is incomplete
+  Status:      Open
+  Priority:    Medium
+
+  Description: Incoming UDP broadcast should only be accepted if listening on
+               INADDR_ANY(?)
+  Status:      Open
+  Priority:    Low
+
+  Description: Read-ahead buffers capture incoming TCP data when no user
+               thread is recv-ing the data.  Should add some driver call to
+               support throttling; when there is no listener for new data, the
+               driver should be throttled.  Perhaps the driver should disable
+               RX interrupts when throttled and re-anable on each poll time.
+               recvfrom would, of course, have to un-throttle.
+  Status:      Open
+  Priority:    Medium
+
+  Description: Need to standardize collection of statistics from network
+               drivers.  examples/nsh ifconfig command should present
+               statistics.
+  Status:      Open
+  Priority:    Low
+
+  Description: Outgoing packets are dropped and overwritten by ARP packets
+               if the destination IP has not been mapped to a MAC.  Could
+               improve send() performance by explicitly performing ARP before
+               sending the packet.
+  Status:      Open
+  Priority:    Medium
+
+o USB (drivers/usbdev)
+  ^^^^^^^^^^^^^^^^^^^^
+
+  Description: Implement USB device support
+  Status:      Open
+  Priority:    High
+
+  Description: Implement USB bulk / serial device support
+  Status:      Open
+  Priority:    High
+
+o Libraries (lib/)
+  ^^^^^^^^^^^^^^^^
+
+  Description: sscanf() and lib_vsprintf() do not support floating point
+               values.
+  Status:      Open
+  Priority:    Low
+
+  Description: The definition of environ in stdlib.h is bogus and will not
+               work as it should.  This is because the underlying
+               representation of the environment is not an arry of pointers.
+  Status:      Open
+  Priority:    Mediam
+
+o File system (fs/, drivers/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: Add chmod(), truncate().
+  Status:      Open
+  Priority:    Low
+
+  Description: FAT32: long file names
+  Status:      Open
+  Priority:    Medium
+
+o Documentation (Documentation/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: Document driver/ logic
+  Status:      Open
+  Priority:    Low
+
+  Description: Document C-library APIs
+  Status:      Open
+  Priority:    Low
 
 o Build system
-- Some names under arch are still incorrect.  These should be processor architecture
-  names:  pjrc-8051 should be 805x
-- configs/pjrc-8051 should be configs/pjrc-87c52
-- Dependencies do not work correctly under configs/<board>/src (same as arch/<arch>/src/board).
+  ^^^^^^^^^^^^
 
-o Applications & Tests
+  Description: Some names under arch are still incorrect.  These should be
+               processor architecture names:  pjrc-8051 should be 805x
+  Status:      Open
+  Priority:    Low
 
-o ARM
-- Add option to use a separate stack for interrupt handling.  At present,
-  each interrupt executes on top of the user stack allocation making each
-  user stack allocation larger than needed.
+  Description: configs/pjrc-8051 should be configs/pjrc-87c52
+  Status:      Open
+  Priority:    Low
 
-o ARM/C5471
+  Description: Dependencies do not work correctly under configs/<board>/src
+               (same as arch/<arch>/src/board).
+  Status:      Open
+  Priority:    Medium
 
-o ARM/DM320
-- It seems that when a lot of debug statements are added, the system no
-  longer boots.  This has been diagnosed as a stack problem.. making the stack
-  bigger or removing arrays on the stack fixes the problem.
+o Applications & Tests (examples/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-o ARM/LPC214x
-- Finish bringup
-- Add MMC and USB support
+o ARM (arch/arm/)
+  ^^^^^^^^^^^^^^^
 
-o pjrc-8052 / MCS51
-- Current status:
-  - Basic OS task management seems OK
-  - Fails when interrupts enabled.  The stack pointer is around 0x6e
-    before the failure occurs.  It looks like some issue when the
-    stack pointer moves from the directly to indirectly addressable
-    region (0x80 boundary).
-  - Work on the 8052 is temporarily on hold
-- Use timer 0 as system timer.  Timer 2 is needed for second UART.
-  Logic is implemented, but there needs to be a system configuration
-  to change the ticks-per-second value to match the timer interrupt
-  rate
-- During build, there are several integer overflows reported:
-  gmtime_r.c aroud lines 184 and 185
-  clock_initialize.c at line 107
-  pthread_create.c at 330
-  sighand.c at 225 and 244
+  Description: Add option to use a separate stack for interrupt handling.  At
+               present, each interrupt executes on top of the user stack
+               allocation making each user stack allocation larger than needed.
+  Status:      Open
+  Priority:    Medim
+
+o ARM/C5471 (arch/arm/src/c5471/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+o ARM/DM320 (arch/arm/src/dm320/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: config/ntos-dm320: It seems that when a lot of debug statements
+               are added, the system no longer boots.  This is suspected to be
+               a stack problem: Making the stack bigger or removing arrays on
+               the stack seems to fix the problem (might also be the
+               bootloader overwriting memory)
+  Status:      Open
+  Priority:    Mediam
+
+o ARM/LPC214x (arch/arm/src/lpc214x/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: Finish bringup
+  Status:      Open
+  Priority:    High
+
+  Description: Add MMC and USB support
+  Status:      Open
+  Priority:    Mediam
+
+o pjrc-8052 / MCS51 (arch/pjrc-8051/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: Current status:
+               - Basic OS task management seems OK
+               - Fails when interrupts enabled.  The stack pointer is around
+                 0x6e before the failure occurs.  It looks like some issue
+                 when the stack pointer moves from the directly to indirectly
+                 addressable region (0x80 boundary).
+               - Work on the 8052 is temporarily on hold
+  Status:      Open
+  Priority:    Low, 8051 is a tough platform because of the tiny stack.
+
+  Description: Use timer 0 as system timer.  Timer 2 is needed for second UART.
+               Logic is implemented, but there needs to be a system
+               configuration to change the ticks-per-second value to match the
+               timer interrupt rate
+  Status:      Open
+  Priority:    Low
+
+  Description: During build, there are several integer overflows reported:
+               gmtime_r.c aroud lines 184 and 185
+               clock_initialize.c at line 107
+               pthread_create.c at 330
+               sighand.c at 225 and 244
+  Status:      Open
+  Priority:    Medium
 
