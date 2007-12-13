@@ -51,6 +51,10 @@
 </tr>
 <tr>
   <td><img src="favicon.ico"></td>
+  <td><a href="#TODO">Bugs, Issues, <i>Things-To-Do</i></a></td>
+</tr>
+<tr>
+  <td><img src="favicon.ico"></td>
   <td><a href="#documentation">Other Documentation</a></td>
 </tr>
 <tr>
@@ -642,11 +646,18 @@ Other memory:
   </tr>
 </table>
 
+<ul>
+<p>
+   The current NuttX Change Log is available in CVS <a href="http://nuttx.cvs.sourceforge.net/*checkout*/nuttx/nuttx/ChangeLog">here</a>.
+   ChangeLog snapshots associated with the current release are available below.
+</p>
+</ul>
+
 <center><table width ="80%">
 <tr>
   <td><img src="favicon.ico"></td>
    <td>
-      <a href="#olderreleases">Change Logs for Older Releases</a><br>
+      <a href="ChangeLog.txt">Change Logs for all releases</a><br>
    </td>
 </tr>
 <tr>
@@ -662,276 +673,6 @@ Other memory:
    </td>
 </tr>
 </table></center>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="olderreleases">Change Logs for Older Releases</a>
-  </td>
-  </tr>
-</table>
-
-<ul><pre>
-0.1.0 2007-03-09  Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Initial Release
-	* Support for Linux user mode simulation and TI
-	  TMS320C5471 (Arm7) provided
-
-0.1.1 2007-03-14  Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Corrected an error in interrupt level context switching
-	  for C5471
-	* Added fgets() and gets() logic; verified c5471 console read.
-	* Corrected error in reading from the C5471 serial port:
-          Improper use of semaphore can cause deadlock.
-	* Fixed an error in the memory cleanup:  The idle task
-	  cannot take sempahores (because it must always be ready
-	  to run).
-	* Tasks can now accept a configurable maximum number of
-	  input parameters (argc)
-	* _task_init() was divided into separate functions that
-	  require fewer parameters.  This was necessary to keep
-	  the stack usage down for the 8051/2 (which has only
-	  256 bytes of stack).
-	* Attempts to use C5471 console from interrupt handlers
-	  can cause errors. Added a special path for this case.
-	* Refuse calls to sem_wait and sem_trywait from interrupt
-	  handlers.  This was happening because interrupt handlers
-	  were calling printf-like functions.
-	* Added strtok() and strtok_r()
-	* Added a simple shell called nsh (see examples/nsh).
-	* Platform support for 8052 is complete but not stable
-	  when the timer interrupt is enabled.  Seems to be an
-	  issue when SP enters indirect address space.
-	* Documentation updates
-
-0.1.2 2007-03-19  Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Add dirent.h, opendir(), readdir(), closedir(), etc.
-	* Add strerror()
-	* Added 'ls' command to nsh
-	* Added C5471 watchdog driver
-	* Fixed another bug where free() is called from IDLE task.
-	  Can't do this; the caller must be able to wait for access
-	  to memory.
-	* Fixed bugs associated with debug output:
-          Cannot do dbg() in middle of context switch logic.
-	  because it may require use of semaphores and cause
-	  additional context switches. lldbg() is safe.
-	* Interrupt must be disabled throughout all context switches.
-	* Separated C5471 serial driver; a shareable part is
-	  in drivers/. ; the C5471 specific part is in arch/C5471.
-	  serial.h defines the interface.
-	* Fixed mq_receive() and mq_send() -- bad memcpy()
-	* Fixed C5471 signal deliver logic: use of dbg() and
-          other actions by use signal handler can alter errno.
-          need to protect errno during signal handling.
-	* Fixed uninitialized variable in filesystem that could
-	  cause various problems
-	* Added a test for roundrobin scheduler.
-
-0.2.1 2007-03-22  Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Fix error in handing signed decimal in vsprintf().
-	* Major restructuring of header files to get closer to
-	  POSIX compliance.
-	* Eliminate compilation warnings that that crept into
-	  recent check-ins
-	* Add kill()
-	* Added support for POSIX timers
-	* Some Documentation updates
-	* Added support for the Neuros OSD / DM320
-
-0.2.2 2007-03-26 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-	* Created the configs/ directory; separated board configuration
-	  from processor architecture logic
-	* Add memory leak detection test to examples/ostest
-	* Corrected memory leak in OS pthread join logic
-	* Corrected memory leaks in examples/ostest due to failures
-	  to join or detach from pthreads.
-	* Added pthread_once(), pthread_kill(), pthread_sigmask()
-	* Added pthread_barrierattr_*() APIs
-	* Added pthread_barrier_init(), pthread_barrier_destroy(), and
-	  pthread_barrier_wait();
-	* Added pthread barrier test
-	* Added protection so that errno cannot be modified from
-	  interrupt handling.
-	* sched_setparam(), sched_setscheduler() now correctly set
-	  errno; pthread_setscheduler() now returns the correct errno.
-	* Added pthread_setschedprio().
-	* Added directories to hold board-specific header files
-	* Added directories to hold board-specific drivers
-
-0.2.3 2007-03-29 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* mq_receive and mq_send now return errno's appropriately
-	* mq_receive and mq_send are now correctly awakened by signals.
-	* Fixed an unmatched sched_lock/unlock pair in task_delete().
-	* sched_lock must be called in _exit() because operation of
-	  task_delete() can cause pending tasks to be merged and a
-	  context switch to occur.
-	* Added mq_timedreceive() and mq_timedsend()
-	* signal mask is now inherited by both child tasks and threads.
-	* Improved sharebility of stdout among pthreads (only).  Nothing
-	  was broken, but by moving the mutual exclusion logic to a
-	  higher level, the printf output is more readable.
-	* Fixed a bug in file system cleanup:  A list was being deleted
-	  before the buffers contained in the list.
-	* Fixed a bug in the wait-for-message-queue-not-empty logic.
-	* Added a test of timed mqueue operations; detected and corrected
-	  some mqueue errors.
-	* Identified and corrected a race condition associated with
-	  pthread_join.  In the failure condition, memory was being
-	  deallocated while still in use.
-
-0.2.4 2007-04-28 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Verfied c5471 build under Cygwin on WinXP
-	* Makesystem changes to better support different SoCs.
-	* Made arch/c5471/include and arch/dm320/include identical in
-	  preparation for merging into arch/arm
-	* Logic from arch/c5471 and arch/dm320 combined into arch/arm.
-	  arch/c5471 and arch/dm320 are deprecated and will be removed
-	  when the new c5471 and dm320 logic is verified.
-
-0.2.5 2007-05-19 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Corrected some build/configuration issues introduced with the
-	  last release.
-	* Added support for the NXP 214x processor on the mcu123.com lpc214x
-	  development board (untested)
-	* Added support for block devices.
-	* Simulated target now exports a VFAT filesystem
-	* Begin support for VFAT filesystem (missing functionalit)
-	* Added mount() and umount()
-	* Fix bug in memcmp return value
-	* Fix errors in timeslice calculation (several places)
-	* Added missing irqrestore() in timer_deletall().
-	* close() was not closing the underlying device.
-	* Added fsync()
-	* Added strspn() and strcspn()
-
-0.2.6 2007-05-26 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Added unlink(), mkdir(), rmdir(), and rename()
-	* Fixed several serious FAT errors with oflags handling (&& instead of &)
-	* Added FAT support for unlink(), mkdir(), rmdir(), and rename
-	* Added FAT support for opendir(), closedir(), readdir(), seekdir(),
-	  telldir(), rewindir().
-	* Fixed ARM compilation errors introduced in 0.2.5 (that is what I get
-	  for only testing on the simulation).
-
-0.2.7 2007-06-09 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Added stat() to fs layer and to FAT
-	* Fixed reference counting errors associated with mounted filesystems
-	* Added fat_getattrib() and fat_setattrib()
-	* Added statfs() to fs layer and to FAT
-	* Correct file name extension in tools/zipme.sh
-	* Fix error in dependencies in 8051/2 Makefile
-	* sched/Makefile: Don't build sleep() or usleep() if signals are disabled
-	* sched/sched_setparam.c: Remove redundant disabling of interrupts
-	* sched/usleep.c: Fixed nsec calculation
-	* lib/lib_strcspn.c: Function incorrectly named strspn().
-	* examples/ostest/main.c:  Errors in SDCC version of a memcpy() call
-	* examples/ostest/sighand.c: Don't call fflush() if streams are disabled
-	* include/limits.h, include/time.h, sched/clock_internal.h: A support for
-	  using selectable system timer frequency.
-	* Fixed error in mountpoint related conditional compilation introduced
-	  in 0.2.5
-	* Restructured some Makefiles to better handle enabling and disabling
-	  NuttX features without having so much conditional compilation in the
-	  source files.
-	* tools/mkconfig.c: No longer depends on asprintf() and _GNU_SOURCE and
-	  so should now build in non-GNU, non-GLIBC environments.
-	* include/nuttx/compiler.h: Fix for using SDCC with the Z80.
-	* include/assert.h & arch/pjrc-8051/src/up_assert.c: SDCC does support
-	  __FILE__and __LINE__ (not tested)
-	* examples/ostest/barrier.c: Don't call usleep() when signals are
-	  disabled.
-
-0.2.8 2007-07-02 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-	* tools/Makefile.mkconfig: Under Cygwin, executable has a different name
-	* tools/mkdeps.sh & arch/arm/src/Makefile: Corrected a problem makeing dependencies
-	* tools/zipme.sh: Force directory name to be nuttx-xx.yy.zz
-	* fs/fs_opendir.c: Correct errors in semaphore usage that can cause deadlock.
-	* lib/lib_getopt.c: Added getopt() support
-	* examples/nsh/:  NSH now supports cat, mount, umount, and mkdir.  ls supports
-	  -l -s, and -R
-	* Added basic OS support to manage environment variables:  environment
-	  storage, cloning on task creation, sharing on pthread creation, destruction
-	  on thread/task exit.
-	* Add environment variables APIs:  environ, getenv, putenv, clearenv, setenv,
-	  unsetenv
-	* Correct an error in realloc() when the block is extended "down" in memory.
-	  In this case, the old memory contents need to be copied to the new location
-	  and an allocated bit was not being set.
-	* examples/ostest/: Added an environment variable test.
-	* examples/nsh/: Break into several files.
-	* lib/: Added strrchr, basename, dirname
-	* examples/nsh/: Add cp, rm, rmdir, set, unset commands. echo will now print
-	  environment variables.
-
-0.3.0 2007-11-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Imported uIP into the tree (see
-	   http://www.sics.se/~adam/uip/index.php/Main_Page)
-	* Adding socket(), bind(), connect()
-	* Added snprintf()
-	* Added send() and sendto(); integrate write() and close() with socket descriptors.
-        * Added recv() and recvfrom().
-	* Added getsockopt() and setsockopt()
-	* Documentation updated to address socket interfaces.
-	* Implemented receive timeouts via setsockopt(SO_RCVTIMEO).
-	* Provide support for multiple network devices
-	* Implement socket ioctl() calls to set addresses
-	* Added listen() and accept()
-	* Added DM90x0 ethernet driver
-	* ARP timer is now built into the network layer
-	* Basic client functionality verified: socket(), bind(), connect(), recv(), send().
-
-0.3.1 2007-11-19 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Separated net/uip/uip.c into several functions in several files.
-	* Corrected a TCP problem where packets were dropped because there was no
-	  recv() in place but the packet was being ACKed.  There are still TCP
-	  recv buffering issues, but this is part of a larger buffering issue.
-	* Basic server functionality verified: listen(), accept()
-	* Fix DM90x0 driver problem that caused TX overruns
-	* Add strncmp()
-	* Added TCP/IP read-ahead buffer to minimize failed ACKs and packet loss.
-
-0.3.2 2007-11-23 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Add strcat() and strncat()
-	* Integrated uIP micro webserver
-	* Corrected a serious bug in TCP queue management
-	* Fix leak in socket close logic
-	* Add TX notification to driver so that it can respond faster to
-	  the availability of TX data.
-	* Moved urgent data info into device structure.
-	* TCP and ICMP protocols can now be disabled.
-	* Added UDP test in examples/udp
-	* Verified/debugged UDP socket(), bind(), sendto() and recvfrom() logic
-	  using examples/udp
-	* recvfrom() and accept() now correctly return the remote address.
-	* Fixed computation error in ntohl().
-
-0.3.3 2007-11-28 Gregory Nutt <spudmonkey@racsa.co.cr>
-
-	* Removed unused uIP files
-	* sched/, mm/, and net/ subystem debug can not be selectively enabled/disabled
-	* Correct socket close logic -- needs to disconnect TCP socket on close
-	* uIP webserver now seems to be fully functional
-	* fs/ and lib/ subystem debug can not be selectively enabled/disabled
-	* Added vsnprintf
-	* Integrated uIP telnetd
-	* Add missing logic to readahead buffer logic
-	* examples/nettest uses larger buffers
-	* Improved ACK handling in send() to better hander deferred acknowledgements
-	  and polling intervals.  Greatly improves send performance.
-</pre></ul>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -981,6 +722,20 @@ Other memory:
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
+    <a name="TODO"><h1>Bugs, Issues, <i>Things-To-Do</i></h1></a>
+  </td>
+  </tr>
+</table>
+
+<ul>
+<p>
+   The current list of NuttX <i>Things-To-Do</i> in CVS <a href="http://nuttx.cvs.sourceforge.net/*checkout*/nuttx/nuttx/TODO">here</a>.
+   A snapshot of the <i>To-Do</i> list associated with the current release are available <a href="TODO.txt">here</a>.
+</p>
+</ul>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
     <a name="documentation"><h1>Other Documentation</h1></a>
   </td>
   </tr>
@@ -994,6 +749,14 @@ Other memory:
 <tr>
   <td><img src="favicon.ico"></td>
   <td><a href="NuttxPortingGuide.html">Porting Guide</a></td>
+</tr>
+<tr>
+  <td><img src="favicon.ico"></td>
+  <td><a href="ChangeLog.txt">Change Log</a></td>
+</tr>
+<tr>
+  <td><img src="favicon.ico"></td>
+  <td><a href="TODO.txt">To-Do List</a></td>
 </tr>
 </center></ul>
 
