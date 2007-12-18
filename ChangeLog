@@ -271,7 +271,7 @@
 	* Added C5471 Ethernet device driver (arch/arm/src/c5471/c5471_ethernet.c)
 	* Found and fixed several problems in uIP when compiled for ARM with optimization.
 
-0.3.5 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.5 2007-12-18 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Added inet_ntoa() and ether_ntoa()
 	* Added netdev_foreach() to support traversal of registered network devices
@@ -282,3 +282,5 @@
 	* Modified DHCPC (netutils/dhcpc) so that it should work in environments where
 	  there are more than one DHCPD server.
 	* NSH ifconfig command now shows uIP status was well (examples/nsh)
+
+0.3.6 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
