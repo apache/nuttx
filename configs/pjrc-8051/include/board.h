@@ -1,7 +1,7 @@
 /************************************************************
- * sched_getsockets.c
+ * board/board.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -33,45 +33,19 @@
  *
  ************************************************************/
 
+#ifndef __ARCH_BOARD_BOARD_H
+#define __ARCH_BOARD_BOARD_H
+
 /************************************************************
  * Included Files
  ************************************************************/
 
-#include <nuttx/config.h>
-
-#include <sched.h>
-#include "os_internal.h"
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-
 /************************************************************
- * Private Functions
+ * Definitions
  ************************************************************/
 
 /************************************************************
- * Public Functions
+ * Inline Functions
  ************************************************************/
 
-/************************************************************
- * Function:  sched_getsockets
- *
- * Description:
- *   Return a pointer to the socket list for this thread
- *
- * Parameters:
- *   None
- *
- * Return Value:
- *   A pointer to the errno.
- *
- * Assumptions:
- *
- ************************************************************/
-
-FAR struct socketlist *sched_getsockets(void)
-{
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
-  return rtcb->sockets;
-}
-
-#endif /* CONFIG_NSOCKET_DESCRIPTORS */
+#endif  /* __ARCH_BOARD_BOARD_H */

@@ -38,7 +38,6 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <stdio.h>
 #include <unistd.h>
@@ -50,6 +49,8 @@
 #include <nuttx/net.h>
 
 #include "os_internal.h"
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /************************************************************
  * Private Functions

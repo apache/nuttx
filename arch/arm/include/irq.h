@@ -134,7 +134,9 @@ struct xcptcontext
    * are pending signals to be processed.
    */
 
+#ifndef CONFIG_DISABLE_SIGNALS
   void *sigdeliver; /* Actual type is sig_deliver_t */
+#endif
 
   /* These are saved copies of LR and CPSR used during
    * signal processing.

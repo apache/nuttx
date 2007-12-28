@@ -38,12 +38,13 @@
  ************************************************************/
 
 #include <nuttx/config.h>
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <sched.h>
 #include <nuttx/fs.h>
 #include <nuttx/net.h>
 #include <nuttx/lib.h>
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /************************************************************
  * Private Functions

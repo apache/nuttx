@@ -148,14 +148,20 @@
  * external RAM.
  */
 
-#define FAR  __xdata
-#define NEAR __data
-#define CODE __code
-
-#if defined(SDCC_MODEL_SMALL)
-# define DSEG __data
+#if defined(__z80) || defined(__gbz80)
+#  define FAR
+#  define NEAR 
+#  define CODE
+#  define DSEG
 #else
-# define DSEG __xdata
+#  define FAR    __xdata
+#  define NEAR   __data
+#  define CODE   __code
+#  if defined(SDCC_MODEL_SMALL)
+#    define DSEG __data
+#  else
+#    define DSEG __xdata
+#  endif
 #endif
 
 /* Select small, 16-bit address model */
@@ -169,8 +175,8 @@
 /* The generic pointer and int are not the same size
  * (for some SDCC architectures)
  */
- 
-#if !defined(__z80) && defined(__gbz80)
+
+#if !defined(__z80) && !defined(__gbz80)
 # define CONFIG_PTR_IS_NOT_INT 1
 #endif
 
