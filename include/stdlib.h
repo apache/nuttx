@@ -105,8 +105,8 @@ EXTERN int       rand(void);
 
 #ifndef CONFIG_DISABLE_ENIVRON
 EXTERN FAR char **get_environ_ptr( void );
-EXTERN FAR char *getenv(const char *name);
-EXTERN int       putenv(char *string);
+EXTERN FAR char *getenv(FAR const char *name);
+EXTERN int       putenv(FAR char *string);
 EXTERN int       clearenv(void);
 EXTERN int       setenv(const char *name, const char *value, int overwrite);
 EXTERN int       unsetenv(const char *name);

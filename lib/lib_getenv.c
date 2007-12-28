@@ -96,7 +96,7 @@ static const char environment[] = "";
  *
  ************************************************************/
 
-char *getenv(const char *name)
+FAR char *getenv(FAR const char *name)
 {
   const char *penv = environment;
   int size = sizeof(environment);

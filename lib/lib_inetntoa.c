@@ -56,10 +56,21 @@
  *
  ****************************************************************************/
 
-char *inet_ntoa(struct in_addr in)
+#ifdef CONFIG_CAN_PASS_STRUCTS
+FAR char *inet_ntoa(struct in_addr in)
 {
   static char buffer[18];
   char *ptr = (char*)&in.s_addr;
   sprintf(buffer, "%d.%d.%d.%d", ptr[0], ptr[1], ptr[2], ptr[3]);
   return buffer;
 }
+#else
+FAR char *_inet_ntoa(in_addr_t in)
+{
+  static char buffer[18];
+  FAR char *ptr = (FAR char*)&in;
+  sprintf(buffer, "%d.%d.%d.%d", ptr[0], ptr[1], ptr[2], ptr[3]);
+  return buffer;
+}
+#endif
+

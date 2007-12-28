@@ -1,5 +1,5 @@
 /************************************************************
- * types.h
+ * sys/types.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

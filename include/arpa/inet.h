@@ -91,15 +91,28 @@ EXTERN uint16      htons (uint16 hs);
 
 /* Functions to manipulate address representations */
 
-EXTERN int         inet_aton(const char *cp, struct in_addr *inp);
-EXTERN in_addr_t   inet_addr(const char *cp);
-EXTERN in_addr_t   inet_network(const char *cp);
-EXTERN char       *inet_ntoa(struct in_addr in);
-EXTERN struct in_addr inet_makeaddr(in_addr_t net, in_addr_t host);
+EXTERN int         inet_aton(FAR const char *cp, FAR struct in_addr *inp);
+EXTERN in_addr_t   inet_addr(FAR const char *cp);
+EXTERN in_addr_t   inet_network(FAR const char *cp);
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+EXTERN FAR char   *inet_ntoa(struct in_addr in);
 EXTERN in_addr_t   inet_lnaof(struct in_addr in);
 EXTERN in_addr_t   inet_netof(struct in_addr in);
-EXTERN int         inet_pton(int af, const char *cp, void *buf);
-EXTERN const char *inet_ntop(int af, const void *cp, char *buf, socklen_t len);
+#else
+EXTERN FAR char   *_inet_ntoa(in_addr_t in);
+# define inet_ntoa(in) _inet_ntoa(in.s_addr);
+
+EXTERN in_addr_t   _inet_lnaof(in_addr_t in);
+# define inet_lnaof(in) _inet_lnaof(in.s_addr);
+
+EXTERN in_addr_t   _inet_netof(in_addr_t in);
+# define inet_netof(in) _inet_netof(in.s_addr);
+#endif
+EXTERN struct in_addr inet_makeaddr(in_addr_t net, in_addr_t host);
+
+EXTERN int         inet_pton(int af, FAR const char *cp, FAR void *buf);
+EXTERN const char *inet_ntop(int af, FAR const void *cp, FAR char *buf, socklen_t len);
 
 #undef EXTERN
 #ifdef __cplusplus

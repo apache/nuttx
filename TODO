@@ -18,7 +18,7 @@ NuttX TODO List (Last updated December 13, 2007)
   (1)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (3)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
-
+  (0)  z80 (arch/z80/)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^

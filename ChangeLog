@@ -284,3 +284,6 @@
 	* NSH ifconfig command now shows uIP status was well (examples/nsh)
 
 0.3.6 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* Changes for use with SDCC compiler
+
