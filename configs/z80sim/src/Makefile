@@ -36,11 +36,11 @@
 -include $(TOPDIR)/Make.defs
 
 MKDEP 		= $(TOPDIR)/tools/mkdeps.sh
-CFLAGS		+= -I$(TOPDIR)/sched
+CFLAGS		+= -I$(TOPDIR)/sched -I$(TOPDIR)/arch/z80/src/common -I$(TOPDIR)/arch/z80/src/z80
 
-ASRCS		= z80_lowputc$(ASMEXT) 
+ASRCS		= 
 AOBJS		= $(ASRCS:$(ASMEXT)=$(OBJEXT))
-CSRCS		= z80_decodeirq.c z80_irq.c z80_serial.c z80_timerisr.c
+CSRCS		= z80_decodeirq.c z80_irq.c z80_serial.c z80_timerisr.c z80_lowputc.c
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)

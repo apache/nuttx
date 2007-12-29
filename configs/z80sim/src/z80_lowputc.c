@@ -1,5 +1,5 @@
 /********************************************************************************
- * board/z80_decodeirq.c
+ * board/z80_lowputc.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,13 +38,12 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <sys/types.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <assert.h>
 #include <debug.h>
-
+#include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
 
@@ -68,34 +67,35 @@
  * Public Functions
  ********************************************************************************/
 
-FAR chipreg_t *up_decodeirq(FAR chipreg_t *regs)
+/********************************************************************************
+ * Name: up_lowputc
+ *
+ * Data sent to port 0xbe are echoed on stdout by the simulation
+ *
+ ********************************************************************************/
+
+void up_lowputc(char ch) __naked
 {
-#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  _asm
+	ld	a, #2(sp)
+	out	#0xbe, a
+	ret
+  _endasm;
+}
 
-  lib_lowprintf("Unexpected IRQ\n");
-  current_regs = regs;
-  PANIC(OSERR_ERREXCEPTION);
-  return NULL; /* Won't get here */
+/********************************************************************************
+ * Name: up_lowgetc
+ *
+ * Data from stdin can be received on port 0xbe in the simulation
+ *
+ ********************************************************************************/
 
-#else
-
-  /* Current regs non-zero indicates that we are processing an interrupt;
-   * current_regs is also used to manage interrupt level context switches.
-   */
-
-  current_regs = regs;
-
-  /* Deliver the IRQ -- the simulation supports only timer interrupts */
-
-  irq_dispatch(Z80_IRQ_SYSTIMER, regs);
-
-  /* If a context switch occurred, current_regs will hold the new context */
-
-  regs = current_regs;
-
-  /* Indicate that we are no long in an interrupt handler */
-
-  current_regs = NULL;
-  return regs;
-#endif
+char up_lowgetc(void) __naked
+{
+  _asm
+	in	#0xbe, a
+	ld	l, a
+	ld	h, #0
+	ret
+  _endasm;
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * z80/z80_serial.c
+ * board/z80_serial.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -41,7 +41,6 @@
 
 #include <sys/types.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -282,7 +281,7 @@ static boolean up_txfifoempty(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
