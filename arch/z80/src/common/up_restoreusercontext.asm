@@ -35,15 +35,15 @@
 
 	; Register save area layout
 
-	.globl	XCPT_I		; Saved I w/interrupt state in carry
-	.globl	XCPT_AF		; Saved AF register
-	.globl	XCPT_BC		; Saved BC register
-	.globl	XCPT_DE		; Saved DE register
-	.globl	XCPT_HL		; Saved HL register
-	.globl	XCPT_IX		; Saved IX register
-	.globl	XCPT_IY		; Saved IY register
-	.globl	XCPT_SP		; Offset to SP at time of interrupt
-	.globl	XCPT_PC		; Offset to PC at time of interrupt
+	.globl	XCPT_I		; Offset 0: Saved I w/interrupt state in carry
+	.globl	XCPT_BC		; Offset 1: Saved BC register
+	.globl	XCPT_DE		; Offset 2: Saved DE register
+	.globl	XCPT_IX		; Offset 3: Saved IX register
+	.globl	XCPT_IY		; Offset 4: Saved IY register
+	.globl	XCPT_SP		; Offset 5: Offset to SP at time of interrupt
+	.globl	XCPT_HL		; Offset 6: Saved HL register
+	.globl	XCPT_AF		; Offset 7: Saved AF register
+	.globl	XCPT_PC		; Offset 8: Offset to PC at time of interrupt
 
 ;**************************************************************************
 ; up_restoreusercontext
