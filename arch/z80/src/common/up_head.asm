@@ -42,15 +42,15 @@
 
 	; Register save area layout
 
-	XCPT_PC	==  0		; Offset to PC at time of interrupt
-	XCPT_AF	==  2		; Saved AF register
-	XCPT_HL	==  4		; Saved HL register
-	XCPT_SP	==  6		; Offset to SP at time of interrupt
-	XCPT_IY	==  8		; Saved IY register
-	XCPT_IX	== 10		; Saved IX register
-	XCPT_DE	== 12		; Saved DE register
-	XCPT_BC	== 14		; Saved BC register
-	XCPT_I 	== 16		; Saved I w/interrupt state in carry
+	XCPT_I 	==  0		; Offset 0: Saved I w/interrupt state in carry
+	XCPT_BC	==  2		; Offset 1: Saved BC register
+	XCPT_DE	==  4		; Offset 2: Saved DE register
+	XCPT_IX	==  6		; Offset 3: Saved IX register
+	XCPT_IY	==  8		; Offset 4: Saved IY register
+	XCPT_SP	== 10		; Offset 5: Offset to SP at time of interrupt
+	XCPT_HL	== 12		; Offset 6: Saved HL register
+	XCPT_AF	== 14		; Offset 7: Saved AF register
+	XCPT_PC	== 16		; Offset 8: Offset to PC at time of interrupt
 
 	; Default stack base (needs to be fixed)
 
@@ -99,7 +99,7 @@ forever:
 					; Offset 8: Return PC is already on the stack
 	push	af			; Offset 7: AF (retaining flags)
 	push	hl			; Offset 6: HL
-	ld	hl, #-(3*2)		;    HL is the value of the stack pointer before
+	ld	hl, #(3*2)		;    HL is the value of the stack pointer before
 	add	hl, sp			;    the interrupt occurred
 	push	hl			; Offset 5: Stack pointer
 	push	iy			; Offset 4: IY
@@ -111,11 +111,10 @@ forever:
 	push	af			; Offset 0: I with interrupt state in carry
 	di
 
-	 ; Call the interrupt decode logic
-					; SP points to the beggining of the reg structure
+	 ; Call the interrupt decode logic. SP points to the beggining of the reg structure
 	ld	hl, #0			; Argument is the beginning of the reg structure
-	add	hl, sp
-	push	hl
+	add	hl, sp			;
+	push	hl			;
 	call	_up_decodeirq		; Decode the IRQ
 
 	; Restore registers.  HL points to the beginning of the reg structure to restore

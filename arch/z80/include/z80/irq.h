@@ -60,15 +60,15 @@
  * in the TCB to many context switches.
  */
 
-#define XCPT_I               (0) /* Saved I w/interrupt state in carry */
-#define XCPT_AF              (1) /* Saved AF register */
-#define XCPT_BC              (2) /* Saved BC register */
-#define XCPT_DE              (3) /* Saved DE register */
-#define XCPT_HL              (4) /* Saved HL register */
-#define XCPT_IX              (5) /* Saved IX register */
-#define XCPT_IY              (6) /* Saved IY register */
-#define XCPT_SP              (7) /* Offset to SP at time of interrupt */
-#define XCPT_PC              (8) /* Offset to PC at time of interrupt */
+#define XCPT_I               (0) /* Offset 0: Saved I w/interrupt state in carry */
+#define XCPT_AF              (1) /* Offset 1: Saved AF register */
+#define XCPT_BC              (2) /* Offset 2: Saved BC register */
+#define XCPT_DE              (3) /* Offset 3: Saved DE register */
+#define XCPT_HL              (4) /* Offset 4: Saved HL register */
+#define XCPT_IX              (5) /* Offset 5: Saved IX register */
+#define XCPT_IY              (6) /* Offset 6: Saved IY register */
+#define XCPT_SP              (7) /* Offset 7: Offset to SP at time of interrupt */
+#define XCPT_PC              (8) /* Offset 8: Offset to PC at time of interrupt */
 
 #define XCPTCONTEXT_REGS     (9)
 #define XCPTCONTEXT_SIZE     (2 * XCPTCONTEXT_REGS)
