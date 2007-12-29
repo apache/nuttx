@@ -89,13 +89,25 @@ LIBGCC		= ${shell $(CC) -print-libgcc-file-name}
 # Supports dynamic sizing of HEAP
 
 HEAP_BASE	= ${shell \
-			if [ -e pass1.mem ]; then \
-				cat pass1.mem | grep "ROM/EPROM/FLASH" | \
-				sed -e "s/[ ][ ]*/ /g" | cut -d' ' -f4 ; \
-			else \
-				echo "(UP_HEAP1_END - 8192)" ; \
-			fi \
-		   }
+		if [ -e pass1.map ]; then \
+			list=`cat pass1.map | grep "SIZE" | sed -e "s/\t//g" | cut -d' ' -f2`; \
+			unset result; \
+			first=yes; \
+			for size in $${list}; do \
+				if [ "$${size}" != "0000" ]; then \
+					if [ -z "$$first" ]; then \
+						result="$${result} + 0x$${size}"; \
+					else \
+						result="(0x$${size}"; \
+						unset first; \
+					fi; \
+				fi; \
+			done; \
+			echo "$${result})"; \
+		else \
+			echo "(UP_HEAP1_END - 8192)"; \
+		fi; \
+		}
 
 ############################################################################
 # Targets
@@ -122,13 +134,9 @@ $(SDCCLIBDIR)/myz80.lib: $(SDCCLIBDIR)/$(SDCCLIB)
 
 # Create a header file that contains addressing information needed by the code
 
-pass1.mem:
-
-up_mem.h: pass1.mem
+up_mem.h:
 	@echo "#ifndef __ARCH_MEM_H" >up_mem.h
 	@echo "#define __ARCH_MEM_H" >>up_mem.h
-	@echo "" >>up_mem.h
-	@echo "#define UP_DEFAULT_HEAP_BASE $(DEF_HEAP_BASE)" >> up_mem.h
 	@echo "" >>up_mem.h
 	@echo "#define UP_STACK_END           $(CONFIG_DRAM_SIZE)" >> up_mem.h
 	@echo "#define UP_STACK_BASE          (UP_STACK_END - $(CONFIG_PROC_STACK_SIZE))" >> up_mem.h
@@ -137,9 +145,15 @@ up_mem.h: pass1.mem
 	@echo "" >>up_mem.h
 	@echo "#endif /* __ARCH_MEM_H */" >>up_mem.h
 
+asm_mem.h:
+	@echo "	UP_STACK_END	== ($(CONFIG_DRAM_SIZE) - 1)" >> asm_mem.h
+	@echo "	UP_STACK_BASE	== (UP_STACK_END - $(CONFIG_PROC_STACK_SIZE))" >> asm_mem.h
+	@echo "	UP_HEAP1_END	== (UP_STACK_END - $(CONFIG_PROC_STACK_SIZE) - 1)" >> asm_mem.h
+	@echo "	UP_HEAP1_BASE	== $(HEAP_BASE)" >> asm_mem.h
+
 # Combine all objects in this directory into a library
 
-libarch$(LIBEXT): up_mem.h $(OBJS)
+libarch$(LIBEXT): up_mem.h asm_mem.h $(OBJS)
 	@( for obj in $(OBJS) ; do \
 		$(AR) $@ $${obj} || \
 			{ echo "$(AR) $@ $${obj} FAILED!" ; exit 1 ; } ; \
@@ -152,7 +166,7 @@ board/libboard$(LIBEXT):
 
 # This target builds the final executable
 
-pass1.ihx: up_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboard$(LIBEXT)
+pass1.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboard$(LIBEXT)
 	@echo "-k $(BOARDDIR)" >pass1.lnk		# Path to board library
 	@echo "-k $(SDCCLIBDIR)" >>pass1.lnk		# Path to SDCC z80 library
 	@echo "-l libboard$(LIBEXT)" >>pass1.lnk	# Name of board library
@@ -160,18 +174,21 @@ pass1.ihx: up_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboard$(LIBEXT)
 		echo "-l $(TOPDIR)/$$LIB" >> pass1.lnk ;\
 	done
 	@echo "-l myz80.lib" >>pass1.lnk		# Name of SDCC z80 library
-#	@echo "-m pass1.map" >>pass1.lnk		# Generate a map file
-#	@echo "-j pass1.sym" >>pass1.lnk		# Generate a symbol file
+	@echo "-b START=0" >>pass1.lnk			# Start of START area
+	@echo "-b _CODE=256" >>pass1.lnk		# Start of _CODE area
 	@echo "-i" >>pass1.lnk				# Intel hex format
+	@echo "-m" >>pass1.lnk			# Generate a map file
+	@echo "-j" >>pass1.lnk			# Generate a symbol file
 	@echo "pass1.ihx" >>pass1.lnk			# Path to head object
 	@echo "$(HEAD_AOBJ)" >>pass1.lnk		# Path to head object
 	@echo "-e" >>pass1.lnk				# End of script
 	$(LD) -f pass1.lnk
-	@rm -f up_mem.h
-	@rm -f up_allocateheap$(OBJEXT) libarch$(LIBEXT)
+	@rm -f up_mem.h asm_mem.h
+	@rm -f up_allocateheap$(OBJEXT) $(HEAD_AOBJ) libarch$(LIBEXT)
 	@$(MAKE) TOPDIR=$(TOPDIR) libarch$(LIBEXT)
+	@$(MAKE) TOPDIR=$(TOPDIR) $(HEAD_AOBJ)
 
-nuttx.ihx: up_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ)
+nuttx.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboard$(LIBEXT)
 	@echo "-k $(BOARDDIR)" >nuttx.lnk		# Path to board library
 	@echo "-k $(SDCCLIBDIR)" >>nuttx.lnk		# Path to SDCC z80 library
 	@echo "-l libboard$(LIBEXT)" >>nuttx.lnk	# Name of board library
@@ -179,9 +196,11 @@ nuttx.ihx: up_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ)
 		echo "-l $(TOPDIR)/$$LIB" >> nuttx.lnk ;\
 	done
 	@echo "-l myz80.lib" >>nuttx.lnk		# Name of SDCC z80 library
-	@echo "-m nuttx.map" >>nuttx.lnk		# Generate a map file
-#	@echo "-j nuttx.sym" >>nuttx.lnk		# Generate a symbol file
+	@echo "-b START=0" >>nuttx.lnk			# Start of START area
+	@echo "-b _CODE=256" >>nuttx.lnk		# Start of _CODE area
 	@echo "-i" >>nuttx.lnk				# Intel hex format
+	@echo "-m" >>nuttx.lnk				# Generate a map file
+	@echo "-j" >>nuttx.lnk				# Generate a symbol file
 	@echo "nuttx.ihx" >>nuttx.lnk			# Path to head object
 	@echo "$(HEAD_AOBJ)" >>nuttx.lnk		# Path to head object
 	@echo "-e" >>nuttx.lnk				# End of script
@@ -194,11 +213,11 @@ nuttx$(EXEEXT): pass1.ihx nuttx.ihx
 
 # Build dependencies
 
-.depend: Makefile up_mem.h chip/Make.defs $(DEPSRCS)
+.depend: Makefile up_mem.h asm_mem.h chip/Make.defs $(DEPSRCS)
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR=$(TOPDIR) depend ; \
 	fi
-	$(MKDEP) --dep-path chip --dep-path common $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(MKDEP) --dep-path chip --dep-path common $(CC) -- $(CFLAGS) -- $(DEPSRCS) >Make.dep
 	@touch $@
 
 depend: .depend
@@ -207,8 +226,9 @@ clean:
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR=$(TOPDIR) clean ; \
 	fi
-	rm -f libarch$(LIBEXT) up_mem.h pass1.lnk nuttx.lnk
-	rm -f *.asm *.rel *.lst *.rst *.sym *.adb *.lnk *.map *.mem *.ihx *.hex *~
+	rm -f libarch$(LIBEXT) up_mem.h asm_mem.h pass1.* nuttx.*
+	rm -f *.asm *.rel *.lst *.rst *.sym *.adb *.lnk *.map *.mem *.ihx *.hex
+	rm -f core *~ .*.swp *.swp
 	if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
 
 distclean: clean

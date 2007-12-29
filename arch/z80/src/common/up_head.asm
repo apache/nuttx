@@ -54,7 +54,7 @@
 
 	; Default stack base (needs to be fixed)
 
-	STACK_BASE == 0xffff
+	.include	"asm_mem.h"
 
 ;**************************************************************************
 ; Global symbols used
@@ -67,12 +67,12 @@
 ; Reset entry point
 ;**************************************************************************
 
-	.area	TEXT	(ABS,OVR)
+	.area	START	(ABS)
 	.org	0x0000
 
 	.globl	_os_start
 	di				; Disable interrupts
-	ld	SP, #STACK_BASE	 	; Set stack pointer
+	ld	SP, #UP_STACK_END	; Set stack pointer
 	im	1			; Set interrupt mode 1
 	jp	_os_start		; jump to the OS entry point
 forever:

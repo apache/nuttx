@@ -62,7 +62,7 @@
 ; Name: up_saveusercontext
 ;*************************************************************************
 
-	.area	TEXT	(ABS,OVR)
+;	.area	_CODE	(ABS,OVR)
 _up_saveusercontext:
 	; Set up a stack frame
 
