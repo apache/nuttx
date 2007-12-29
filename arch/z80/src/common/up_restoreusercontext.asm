@@ -1,5 +1,5 @@
 ;**************************************************************************
-; arch/z80/src/common/up_restoreusercontext.asm
+; common/up_restoreusercontext.asm
 ;
 ;   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
 ;   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -35,23 +35,22 @@
 
 	; Register save area layout
 
-	XCPT_I	==  0		; Saved I w/interrupt state in carry
-	XCPT_AF	==  2		; Saved AF register
-	XCPT_BC	==  4		; Saved BC register
-	XCPT_DE	==  6		; Saved DE register
-	XCPT_HL	==  8		; Saved HL register
-	XCPT_IX	== 10		; Saved IX register
-	XCPT_IY	== 12		; Saved IY register
-	XCPT_SP	== 14		; Offset to SP at time of interrupt
-	XCPT_PC	== 16		; Offset to PC at time of interrupt
+	.globl	XCPT_I		; Saved I w/interrupt state in carry
+	.globl	XCPT_AF		; Saved AF register
+	.globl	XCPT_BC		; Saved BC register
+	.globl	XCPT_DE		; Saved DE register
+	.globl	XCPT_HL		; Saved HL register
+	.globl	XCPT_IX		; Saved IX register
+	.globl	XCPT_IY		; Saved IY register
+	.globl	XCPT_SP		; Offset to SP at time of interrupt
+	.globl	XCPT_PC		; Offset to PC at time of interrupt
 
 ;**************************************************************************
 ; up_restoreusercontext
 ;**************************************************************************
 
-	.org   0x0038			; Int mode 1
         .area   TEXT    (ABS,OVR)
-up_restoreusercontext:
+_up_restoreusercontext:
 	; On entry, stack contains return address (not used), then address
 	; of the register save structure
 
@@ -90,7 +89,7 @@ up_restoreusercontext:
 	; Restore interrupt state
 
 	ex	af, af'			; Recover interrupt state
-	jnc	noinrestore		; No carry, IFF2=0, means disabled
+	jr	nc, noinrestore		; No carry, IFF2=0, means disabled
 	ex	af, af'			; Restore AF (before enabling interrupts)
 	ei				; yes
 	ret

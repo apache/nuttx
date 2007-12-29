@@ -52,13 +52,16 @@
 	XCPT_BC	== 14		; Saved BC register
 	XCPT_I 	== 16		; Saved I w/interrupt state in carry
 
+	; Default stack base (needs to be fixed)
+
+	STACK_BASE == 0xffff
+
 ;**************************************************************************
 ; Global symbols used
 ;**************************************************************************
 
 	.globl	_os_start		; OS entry point
-	.globl	_idle_stack		; Top of allocated stack region
-	.globl	_up_irqdecode		; Interrupt decoding logic
+	.globl	_up_decodeirq		; Interrupt decoding logic
 
 ;**************************************************************************
 ; Reset entry point
@@ -68,10 +71,10 @@
 	.org	0x0000
 
 	.globl	_os_start
-	di				 ; Disable interrupts
-	ld	SP, #_idle_stack	 ; Set stack pointer
-	im	1			 ; Set interrupt mode 1
-	jp	_os_start		 ; jump to the OS entry point
+	di				; Disable interrupts
+	ld	SP, #STACK_BASE	 	; Set stack pointer
+	im	1			; Set interrupt mode 1
+	jp	_os_start		; jump to the OS entry point
 forever:
 	jp	forever
 
@@ -113,7 +116,7 @@ forever:
 	ld	hl, #0			; Argument is the beginning of the reg structure
 	add	hl, sp
 	push	hl
-	call	_up_irqdecode		; Decode the IRQ
+	call	_up_decodeirq		; Decode the IRQ
 
 	; Restore registers.  HL points to the beginning of the reg structure to restore
 

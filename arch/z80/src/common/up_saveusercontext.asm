@@ -1,5 +1,5 @@
 ;*************************************************************************
-; common/up_saveusercontext.S
+; common/up_saveusercontext.asm
 ;
 ;   Copyright (C) 2007 Gregory Nutt. All rights reserved.
 ;   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,15 +39,15 @@
 
 	; Register save area layout
 
-	XCPT_I		==  0	; Saved I w/interrupt state in carry
-	XCPT_AF		==  2	; Saved AF register
-	XCPT_BC		==  4	; Saved BC register
-	XCPT_DE		==  6	; Saved DE register
-	XCPT_HL		==  8	; Saved HL register
-	XCPT_IX		== 10	; Saved IX register
-	XCPT_IY		== 12	; Saved IY register
-	XCPT_SP		== 14	; Offset to SP at time of interrupt
-	XCPT_PC		== 16	; Offset to PC at time of interrupt
+	.globl	XCPT_I		; Saved I w/interrupt state in carry
+	.globl	XCPT_AF		; Saved AF register
+	.globl	XCPT_BC		; Saved BC register
+	.globl	XCPT_DE		; Saved DE register
+	.globl	XCPT_HL		; Saved HL register
+	.globl	XCPT_IX		; Saved IX register
+	.globl	XCPT_IY		; Saved IY register
+	.globl	XCPT_SP		; Offset to SP at time of interrupt
+	.globl	XCPT_PC		; Offset to PC at time of interrupt
 
 	; Stack frame
 
@@ -63,7 +63,7 @@
 ;*************************************************************************
 
 	.area	TEXT	(ABS,OVR)
-up_saveusercontext:
+_up_saveusercontext:
 	; Set up a stack frame
 
 	push	ix			; Save IX and IY
@@ -73,10 +73,10 @@ up_saveusercontext:
 
 	; Fetch the address of the save area
 
-	ld	l, FRAME_REGS(ix)	; HL = save area address
-	ld	h, FRAME_REGS+1(ix)	;
+	ld	e, FRAME_REGS(ix)	; HL = save area address
+	ld	d, FRAME_REGS+1(ix)	;
 	ld	iy, #0
-	add	iy, hl			; IY = save area address
+	add	iy, de			; IY = save area address
 
 	; Then save the registers
 
@@ -85,13 +85,13 @@ up_saveusercontext:
 	ld	a, i			; Get interrupt state
 	push	af
 	pop	hl
-	ld	(iy+XCPT_I), l		; Offset 0: I w/interrupt state in carry
-	ld	(iy+XCPT_I+1), h
+	ld	XCPT_I(iy), l		; Offset 0: I w/interrupt state in carry
+	ld	XCPT_I+1(iy), h
 
 	; Save BC at offset 1
 
-	ld	(iy+XCPT_BC), c		; Offset 1: BC
-	ld	(iy+XCPT_BC+1), b
+	ld	XCPT_BC(iy), c		; Offset 1: BC
+	ld	XCPT_BC+1(iy), b
 
 	; DE is not preserved (offset 2)
 
@@ -99,29 +99,29 @@ up_saveusercontext:
 
 	ld	l, FRAME_IX(ix)		; HL = Saved alue of IX
 	ld	h, FRAME_IX+1(ix)	;
-	ld	(iy+XCPT_IX), l		; Offset 3: IX
-	ld	(iy+XCPT_IX+1), h	;
+	ld	XCPT_IX(iy), l		; Offset 3: IX
+	ld	XCPT_IX+1(iy), h	;
 
 	; Save IY at offset 4
 
 	ld	l, FRAME_IY(ix)		; HL = Saved value of IY
 	ld	h, FRAME_IY+1(ix)	;
-	ld	(iy+XCPT_IY), l		; Offset 4: IY
-	ld	(iy+XCPT_IY+1), h
+	ld	XCPT_IY(iy), l		; Offset 4: IY
+	ld	XCPT_IY+1(iy), h
 
 	; Save that stack pointer as it would be upon return in offset 5
 
 	ld	hl, #SP_OFFSET		; Value of stack pointer on return
 	add	hl, sp
-	ld	(iy+XCPT_SP), l		; Offset 5 SP
-	ld	(iy+XCPT_SP+1), h
+	ld	XCPT_SP(iy), l		; Offset 5 SP
+	ld	XCPT_SP+1(iy), h
 
 	; HL is saved as the value 1 at offset 6
 
 	xor	a			; A = 0
-	ld	(iy+XCPT_HL+1), a	; Offset 2: HL on return (=1)
+	ld	XCPT_HL+1(iy), a	; Offset 2: HL on return (=1)
 	inc	a			; A = 1
-	ld	(iy+XCPT_HL), a		;
+	ld	XCPT_HL(iy), a		;
 
 	; AF is not preserved (offset 7)
 
@@ -129,8 +129,8 @@ up_saveusercontext:
 
 	ld	l, FRAME_RET(ix)	; HL = Saved return address
 	ld	h, FRAME_RET+1(ix)	;
-	ld	(iy+XCPT_PC), l		; Offset 8: PC
-	ld	(iy+XCPT_PC+1), h
+	ld	XCPT_PC(iy), l		; Offset 8: PC
+	ld	XCPT_PC+1(iy), h
 
 	; Return the value 0
 

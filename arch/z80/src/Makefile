@@ -44,13 +44,10 @@
 
 MKDEP 		= $(TOPDIR)/tools/mkdeps.sh
 
+# CFLAGS, CPPFLAGS, ASFLAGS, LDFLAGS are set in $(TOPDIR)/Make.defs
+
 CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(TOPDIR)/sched
-LDFLAGS		= $(ARCHSCRIPT)
-
-LDPATHES	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
-LDLIBS		= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
-
-CPPFLAGS	= $(ARCHINCLUDES) $(ARCHDEFINES) -D__ASSEMBLY__
+CPPFLAGS	+= -D__ASSEMBLY__
 
 ############################################################################
 # Files and directories
@@ -62,7 +59,7 @@ HEAD_AOBJ	= $(HEAD_ASRC:$(ASMEXT)=$(OBJEXT))
 # Assembly sources and objects
 
 ASRCS		= $(CHIP_ASRCS) $(CMN_ASRCS)
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
+AOBJS		= $(ASRCS:$(ASMEXT)=$(OBJEXT))
 
 # C sources and objects
 
@@ -74,18 +71,9 @@ COBJS		= $(CSRCS:.c=$(OBJEXT))
 SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
 
-# Sources and objects for the test target (plus HEAD_AOBJ
-
-TEST_AOBJS	= $(TEST_ASRCS:$(ASMEXT)=$(OBJEXT))
-TEST_COBJS	= $(TEST_CSRCS:.c=$(OBJEXT))
-
-TESTSRCS	= up_irqtest.c
-TESTOBJS	= $(TESTSRCS:.c=$(OBJEXT))
-TESTEXTRAOBJS	= up_savecontext$(OBJEXT) up_restorecontext$(OBJEXT)
-
 # Sources that can have dependencies (no .asm files)
 
-DEPSRCS		= $(SRCS)
+DEPSRCS		= $(CSRCS)
 
 # Directories
 
@@ -105,16 +93,7 @@ HEAP_BASE	= ${shell \
 				cat pass1.mem | grep "ROM/EPROM/FLASH" | \
 				sed -e "s/[ ][ ]*/ /g" | cut -d' ' -f4 ; \
 			else \
-				echo $(DEF_HEAP_BASE) ; \
-			fi \
-		   }
-
-STACK_BASE	= ${shell \
-			if [ -e pass1.mem ]; then \
-				cat pass1.mem | grep "Stack starts" | \
-				cut -d' ' -f4 ; \
-			else \
-				echo $(DEF_STACK_BASE) ; \
+				echo "(UP_HEAP1_END - 8192)" ; \
 			fi \
 		   }
 
@@ -123,11 +102,23 @@ STACK_BASE	= ${shell \
 
 all: $(HEAD_AOBJ) libarch$(LIBEXT)
 
-$(AOBJS) $(HEAD_AOBJ) $(TEST_AOBJS): %$(OBJEXT): %$(ASMEXT)
+$(AOBJS) $(HEAD_AOBJ): %$(OBJEXT): %$(ASMEXT)
 	$(AS) $(ASFLAGS) $@ $<
 
-$(COBJS) $(TEST_COBJS): %$(OBJEXT): %.c
+$(COBJS): %$(OBJEXT): %.c
 	$(CC) -c $(CFLAGS) $< -o $@
+
+# This is a kludge to work around some conflicting symbols in libsdcc.liXqueb
+
+$(SDCCLIBDIR)/myz80.lib: $(SDCCLIBDIR)/$(SDCCLIB)
+	@cat $(SDCCLIBDIR)/$(SDCCLIB) | \
+		grep -v calloc  | grep -v malloc  | grep -v realloc  | \
+		grep -v free    | grep -v vprintf | grep -v _strncpy | \
+		grep -v _strchr | grep -v _strlen | grep -v _strcmp  | \
+		grep -v _strcpy | grep -v _memcmp | grep -v _memcpy  | \
+		grep -v _memset | grep -v crt0 \
+		> myz80.lib
+	@sudo mv -f myz80.lib $(SDCCLIBDIR)/myz80.lib
 
 # Create a header file that contains addressing information needed by the code
 
@@ -137,18 +128,12 @@ up_mem.h: pass1.mem
 	@echo "#ifndef __ARCH_MEM_H" >up_mem.h
 	@echo "#define __ARCH_MEM_H" >>up_mem.h
 	@echo "" >>up_mem.h
-	@echo "#define UP_DEFAULT_STACK_BASE $(DEF_STACK_BASE)" >>up_mem.h
 	@echo "#define UP_DEFAULT_HEAP_BASE $(DEF_HEAP_BASE)" >> up_mem.h
 	@echo "" >>up_mem.h
-	@echo "#define UP_STACK_BASE         $(STACK_BASE)" >>up_mem.h
-	@echo "#if UP_STACK_BASE > UP_DEFAULT_STACK_BASE" >>up_mem.h
-	@echo "#  error \"Stack overlap:  $(DEF_STACK_BASE) < $(STACK_BASE)\""  >>up_mem.h
-	@echo "#elif UP_STACK_BASE < UP_DEFAULT_STACK_BASE" >>up_mem.h
-	@echo "#  warning \"Wasted stack: $(DEF_STACK_BASE) > $(STACK_BASE)\""  >>up_mem.h
-	@echo "#endif" >>up_mem.h
-	@echo "" >>up_mem.h
-	@echo "#define UP_HEAP_BASE          $(HEAP_BASE)" >> up_mem.h
-	@echo "#define UP_HEAP_END           $(CONFIG_DRAM_END)" >> up_mem.h
+	@echo "#define UP_STACK_END           $(CONFIG_DRAM_SIZE)" >> up_mem.h
+	@echo "#define UP_STACK_BASE          (UP_STACK_END - $(CONFIG_PROC_STACK_SIZE))" >> up_mem.h
+	@echo "#define UP_HEAP1_END           UP_STACK_BASE" >> up_mem.h
+	@echo "#define UP_HEAP1_BASE          $(HEAP_BASE)" >> up_mem.h
 	@echo "" >>up_mem.h
 	@echo "#endif /* __ARCH_MEM_H */" >>up_mem.h
 
@@ -167,30 +152,45 @@ board/libboard$(LIBEXT):
 
 # This target builds the final executable
 
-pass1.ihx: up_mem.h $(HEAD_AOBJ) board/libboard$(LIBEXT)
-	$(CC) $(LDFLAGS) -L$(BOARDDIR) $(SDCCPATH) $(HEAD_AOBJ) \
-		-llibboard$(LIBEXT) $(SDCCLIBS) -o $@
+pass1.ihx: up_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboard$(LIBEXT)
+	@echo "-k $(BOARDDIR)" >pass1.lnk		# Path to board library
+	@echo "-k $(SDCCLIBDIR)" >>pass1.lnk		# Path to SDCC z80 library
+	@echo "-l libboard$(LIBEXT)" >>pass1.lnk	# Name of board library
+	@for LIB in $(LINKLIBS); do \
+		echo "-l $(TOPDIR)/$$LIB" >> pass1.lnk ;\
+	done
+	@echo "-l myz80.lib" >>pass1.lnk		# Name of SDCC z80 library
+#	@echo "-m pass1.map" >>pass1.lnk		# Generate a map file
+#	@echo "-j pass1.sym" >>pass1.lnk		# Generate a symbol file
+	@echo "-i" >>pass1.lnk				# Intel hex format
+	@echo "pass1.ihx" >>pass1.lnk			# Path to head object
+	@echo "$(HEAD_AOBJ)" >>pass1.lnk		# Path to head object
+	@echo "-e" >>pass1.lnk				# End of script
+	$(LD) -f pass1.lnk
 	@rm -f up_mem.h
 	@rm -f up_allocateheap$(OBJEXT) libarch$(LIBEXT)
 	@$(MAKE) TOPDIR=$(TOPDIR) libarch$(LIBEXT)
 
-nuttx.ihx: up_mem.h $(HEAD_AOBJ)
-	$(CC) $(LDFLAGS) -L$(BOARDDIR) $(SDCCPATH) $(HEAD_AOBJ) \
-		-llibboard$(LIBEXT) $(SDCCLIBS) -o $@
+nuttx.ihx: up_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ)
+	@echo "-k $(BOARDDIR)" >nuttx.lnk		# Path to board library
+	@echo "-k $(SDCCLIBDIR)" >>nuttx.lnk		# Path to SDCC z80 library
+	@echo "-l libboard$(LIBEXT)" >>nuttx.lnk	# Name of board library
+	@for LIB in $(LINKLIBS); do \
+		echo "-l $(TOPDIR)/$$LIB" >> nuttx.lnk ;\
+	done
+	@echo "-l myz80.lib" >>nuttx.lnk		# Name of SDCC z80 library
+	@echo "-m nuttx.map" >>nuttx.lnk		# Generate a map file
+#	@echo "-j nuttx.sym" >>nuttx.lnk		# Generate a symbol file
+	@echo "-i" >>nuttx.lnk				# Intel hex format
+	@echo "nuttx.ihx" >>nuttx.lnk			# Path to head object
+	@echo "$(HEAD_AOBJ)" >>nuttx.lnk		# Path to head object
+	@echo "-e" >>nuttx.lnk				# End of script
+	$(LD) -f nuttx.lnk
 
 nuttx$(EXEEXT): pass1.ihx nuttx.ihx
 	@rm -f pass1.*
 	packihx nuttx.ihx > $(TOPDIR)/nuttx$(EXEEXT)
 	@cp -f nuttx.map $(TOPDIR)/.
-
-# This target builds a test program to verify interrupt context switching.  irqtest is
-# a PHONY target that just sets upt the up_irqtest build correctly
-
-up_irqtest.ihx: $(TEST_COBJS)
-	$(CC) $(LDFLAGS) -L. $(SDCCPATH) $(HEAD_AOBJ) $(TEST_COBJS) $(TESTEXTRAOBJS) $(SDCCLIBS) -o $@
-
-irqtest:
-	$(MAKE) TOPDIR=../../.. up_irqtest.ihx
 
 # Build dependencies
 
@@ -207,7 +207,7 @@ clean:
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR=$(TOPDIR) clean ; \
 	fi
-	rm -f libarch$(LIBEXT) up_mem.h
+	rm -f libarch$(LIBEXT) up_mem.h pass1.lnk nuttx.lnk
 	rm -f *.asm *.rel *.lst *.rst *.sym *.adb *.lnk *.map *.mem *.ihx *.hex *~
 	if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
 

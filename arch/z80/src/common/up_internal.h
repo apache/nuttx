@@ -110,6 +110,7 @@ extern int up_restoreusercontext(chipreg_t *regs);
 extern FAR chipreg_t *up_decodeirq(FAR chipreg_t *regs);
 extern void up_irqinitialize(void);
 extern int  up_timerisr(int irq, FAR chipreg_t *regs);
+extern void up_lowputc(char ch) __naked;
 
 /* Defined in up_doirq.c */
 
@@ -118,12 +119,6 @@ extern void up_doirq(int irq, FAR chipreg_t *regs);
 /* Define in up_sigdeliver */
 
 extern void up_sigdeliver(void);
-
-#ifdef CONFIG_DEBUG
-extern void up_lowputc(char ch);
-#else
-# define up_lowputc(ch)
-#endif
 
 /* Defined in up_allocateheap.c */
 
