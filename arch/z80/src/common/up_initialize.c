@@ -58,6 +58,17 @@
 #undef CONFIG_ARCH_CALIBRATION
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* This holds a references to the current interrupt level
+ * register storage structure.  If is non-NULL only during
+ * interrupt processing.
+ */
+
+uint16 *current_regs;
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 

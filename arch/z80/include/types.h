@@ -76,7 +76,7 @@ typedef unsigned long uint32;
  * irqsave()
  */
 
-typedef unsigned char irqstate_t;
+typedef uint16 irqstate_t;
 
 #endif /* __ASSEMBLY__ */
 

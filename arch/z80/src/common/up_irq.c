@@ -1,6 +1,5 @@
 /****************************************************************************
- * arch/z80/irq.h
- * arch/chip/irq.h
+ * common/up_irq.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,101 +33,72 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather,
- * only indirectly through nuttx/irq.h (via arch/irq.h)
- */
-
-#ifndef __ARCH_Z80_IRQ_H
-#define __ARCH_Z80_IRQ_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <sys/types.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
+
+#include "up_internal.h"
+
 /****************************************************************************
- * Definitions
+ * Private Definitions
  ****************************************************************************/
 
-/* Z80 Interrupts */
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-#define Z80_IRQ_SYSTIMER (1)
-#define NR_IRQS          (1)
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
-/* IRQ Stack Frame Format
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: irqsave
  *
- * This stack frame is created on each interrupt.  These registers are stored
- * in the TCB to many context switches.
- */
-
-#define XCPT_I               (0) /* Saved I w/interrupt state in carry */
-#define XCPT_AF              (1) /* Saved AF register */
-#define XCPT_BC              (2) /* Saved BC register */
-#define XCPT_DE              (3) /* Saved DE register */
-#define XCPT_HL              (4) /* Saved HL register */
-#define XCPT_IX              (5) /* Saved IX register */
-#define XCPT_IY              (6) /* Saved IY register */
-#define XCPT_SP              (7) /* Offset to SP at time of interrupt */
-#define XCPT_PC              (8) /* Offset to PC at time of interrupt */
-
-#define XCPTCONTEXT_REGS     (9)
-#define XCPTCONTEXT_SIZE     (2 * XCPTCONTEXT_REGS)
-
-/****************************************************************************
- * Public Types
+ * Description:
+ *   Disable all interrupts; return previous interrupt state
+ *
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-/* This is the the type of the register save array */
-
-typedef uint16 chipreg_t;
-
-/* This struct defines the way the registers are stored. */
-
-struct xcptcontext
+irqstate_t irqsave(void) __naked
 {
-  /* Register save area */
-
-  uint16 regs[XCPTCONTEXT_REGS];
-
-  /* The following function pointer is non-zero if there
-   * are pending signals to be processed.
-   */
-
-#ifndef CONFIG_DISABLE_SIGNALS
-  void *sigdeliver; /* Actual type is sig_deliver_t */
-#endif
-};
-#endif
-
-/****************************************************************************
- * Inline functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
-EXTERN irqstate_t irqsave(void) __naked;
-EXTERN void       irqrestore(irqstate_t flags) __naked;
-
-#undef EXTERN
-#ifdef __cplusplus
+  _asm
+	ld	a, i		; AF Carry bit holds interrupt state
+	di			; Interrupts are disabled
+	push	af		; Return AF in HL
+	pop	hl		;
+	ret			;
+  _endasm;
 }
-#endif
-#endif
 
-#endif /* __ARCH_Z80_IRQ_H */
+/****************************************************************************
+ * Name: irqrestore
+ *
+ * Description:
+ *   Restore previous interrupt state
+ *
+ ****************************************************************************/
 
+void irqrestore(irqstate_t flags) __naked
+{
+  _asm
+	pop	hl		; HL = return address
+	pop	af		; AF Carry bit hold interrupt state
+	jr	nc, statedisable
+	ei
+	ret
+statedisable:
+	di
+	ret
+  _endasm;
+}

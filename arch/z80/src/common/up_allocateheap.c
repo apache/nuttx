@@ -38,11 +38,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <debug.h>
 #include <nuttx/arch.h>
+#include <nuttx/mm.h>
+
 #include "up_arch.h"
 #include "up_internal.h"
+#include "up_mem.h"
 
 /****************************************************************************
  * Private Definitions
@@ -64,16 +68,31 @@
  * Name: up_allocate_heap
  *
  * Description:
- *   The heap may be statically allocated by
- *   defining CONFIG_HEAP_BASE and CONFIG_HEAP_SIZE.  If these
- *   are not defined, then this function will be called to
- *   dynamically set aside the heap region.
+ *   The heap may be statically allocated by defining CONFIG_HEAP_BASE and
+ *   CONFIG_HEAP_SIZE.  If these are not defined, then this function will be
+ *   called to dynamically set aside the heap region.
  *
  ****************************************************************************/
 
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
+  *heap_start = (FAR void*)UP_HEAP1_BASE;
+  *heap_size = UP_HEAP1_END - UP_HEAP1_BASE;
   up_ledon(LED_HEAPALLOCATE);
-  *heap_start = (void*)(CONFIG_DRAM_SIZE - CONFIG_HEAP_SIZE);
-  *heap_size  = CONFIG_HEAP_SIZE;
 }
+
+/****************************************************************************
+ * Name: up_addregions
+ *
+ * Description:
+ *   Memory may be added in non-contiguous chunks.  Additional chunks are
+ *   added by calling this function.
+ *
+ ****************************************************************************/
+
+#if CONFIG_MM_REGIONS > 1
+void up_addregion(void)
+{
+  mm_addregion((FAR void*)UP_HEAP2_BASE, UP_HEAP2_END - UP_HEAP2_BASE);
+}
+#endif
