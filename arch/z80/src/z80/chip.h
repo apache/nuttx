@@ -45,6 +45,15 @@
  * Definitions
  ************************************************************************************/
 
+/* Bits in the Z80 FLAGS register */
+
+#define Z80_C_FLAG      0x01       /* Bit 0: Carry flag */
+#define Z80_N_FLAG      0x02       /* Bit 1: Add/Subtract flag  */
+#define Z80_PV_FLAG     0x04       /* Bit 2: Parity/Overflow flag */
+#define Z80_H_FLAG      0x10       /* Bit 4: Half carry flag */
+#define Z80_Z_FLAG      0x40       /* Bit 5: Zero flag */
+#define Z80_S_FLAG      0x80       /* Bit 7: Sign flag */
+
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/

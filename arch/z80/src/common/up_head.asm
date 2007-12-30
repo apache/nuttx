@@ -111,15 +111,22 @@ forever:
 	push	af			; Offset 0: I with interrupt state in carry
 	di
 
-	 ; Call the interrupt decode logic. SP points to the beggining of the reg structure
+	; Call the interrupt decode logic. SP points to the beggining of the reg structure
+
 	ld	hl, #0			; Argument is the beginning of the reg structure
 	add	hl, sp			;
-	push	hl			;
+	push	hl			; Place argument at the top of thest
 	call	_up_decodeirq		; Decode the IRQ
+
+	; On return, HL points to the beginning of the reg structure to restore
+	; Note that (1) the argument pushed on the stack is not popped, and (2) the
+	; original stack pointer is lost.  In the normal case (no context switch),
+	; HL will contain the value of the SP before the argument was pushed.
+
+	ld	sp, hl			; Use the new stack pointer
 
 	; Restore registers.  HL points to the beginning of the reg structure to restore
 
-	ld	sp, hl			; Use the temp stack pointer
 	ex	af, af'			; Select alternate AF
 	pop	af			; Offset 0: AF' = I with interrupt state in carry
 	pop	bc			; Offset 1: BC

@@ -92,13 +92,14 @@ irqstate_t irqsave(void) __naked
 void irqrestore(irqstate_t flags) __naked
 {
   _asm
+	di			; Assume disabled
 	pop	hl		; HL = return address
 	pop	af		; AF Carry bit hold interrupt state
 	jr	nc, statedisable
 	ei
-	ret
 statedisable:
-	di
-	ret
+	push	af		; Restore stack
+	push	hl		;
+	ret			; and return
   _endasm;
 }
