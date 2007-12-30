@@ -51,8 +51,17 @@
 
 /* Z80 Interrupts */
 
-#define Z80_IRQ_SYSTIMER (0)
-#define NR_IRQS          (1)
+#define Z80_RST0         (0)
+#define Z80_RST1         (1)
+#define Z80_RST2         (2)
+#define Z80_RST3         (3)
+#define Z80_RST4         (4)
+#define Z80_RST5         (5)
+#define Z80_RST6         (6)
+#define Z80_RST7         (7)
+
+#define Z80_IRQ_SYSTIMER Z80_RST7
+#define NR_IRQS          (8)
 
 /* IRQ Stack Frame Format
  *

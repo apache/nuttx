@@ -107,7 +107,7 @@ extern int up_restoreusercontext(chipreg_t *regs);
 
 /* Supplied by board-specific logic */
 
-extern FAR chipreg_t *up_decodeirq(FAR chipreg_t *regs);
+extern FAR chipreg_t *up_decodeirq(uint8 rstno, FAR chipreg_t *regs);
 extern void up_irqinitialize(void);
 extern int  up_timerisr(int irq, FAR chipreg_t *regs);
 extern void up_lowputc(char ch) __naked;
