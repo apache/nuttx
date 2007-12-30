@@ -1,7 +1,7 @@
 /***********************************************************************
- * timedwait.c
+ * examples/ostest/timedwait.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -33,15 +33,38 @@
  *
  ***********************************************************************/
 
+/**************************************************************************
+ * Included Files
+ **************************************************************************/
+
 #include <stdio.h>
 #include <time.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <errno.h>
+
 #include "ostest.h"
+
+/**************************************************************************
+ * Private Definitions
+ **************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
+#  define FFLUSH() fflush(stdout)
+#else
+#  define FFLUSH()
+#endif
+
+/**************************************************************************
+ * Private Data
+ **************************************************************************/
 
 static pthread_mutex_t mutex;
 static pthread_cond_t  cond;
+
+/**************************************************************************
+ * Private Functions
+ **************************************************************************/
 
 static void *thread_waiter(void *parameter)
 {
@@ -98,6 +121,10 @@ static void *thread_waiter(void *parameter)
   pthread_exit((pthread_addr_t)0x12345678);
   return NULL;
 }
+
+/**************************************************************************
+ * Public Definitions
+ **************************************************************************/
 
 void timedwait_test(void)
 {
@@ -161,7 +188,7 @@ void timedwait_test(void)
     }
 
   printf("timedwait_test: Joining\n");
-  fflush(stdout);
+  FFLUSH();
   status = pthread_join(waiter, &result);
   if (status != 0)
     {

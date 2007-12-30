@@ -357,7 +357,7 @@ int pthread_create(pthread_t *thread, pthread_attr_t *attr,
    * passed by value
    */
 
-  (void)pthread_argsetup(ptcb, arg);
+  pthread_argsetup(ptcb, arg);
 
   /* Attach the join info to the TCB. */
 

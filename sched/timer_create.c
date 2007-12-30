@@ -1,7 +1,7 @@
 /********************************************************************************
- * timer_create.c
+ * sched/timer_create.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -204,7 +204,7 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp, FAR timer_t *timer
 #ifdef CONFIG_CAN_PASS_STRUCTS
       ret->pt_value           = evp->sigev_value;
 #else
-      ret->pt_value.sival_ptr = evp->sigev_value.sigval_ptr;
+      ret->pt_value.sival_ptr = evp->sigev_value.sival_ptr;
 #endif
     }
   else

@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * sys/types.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,39 +31,44 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __SYS_TYPES_H
 #define __SYS_TYPES_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/types.h>
 #include <nuttx/compiler.h>
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
 /* Values for type boolean */
 
 #define TRUE 1
 #define FALSE 0
 
-/* NULL is usually defined in stddef.h */
+/* NULL is usually defined in stddef.h (which includes this file) */
 
 #ifndef NULL
-#define NULL (void*)0L
+    /* SDCC is sensitive to NULL pointer type conversions */
+#  ifdef SDCC
+#    define NULL (0)
+#  else
+#    define NULL ((void*)0)
+#  endif
 #endif
 
 /* POSIX-like OS return values: */
 
 #if !defined(__cplusplus)
-#undef  ERROR
-#define ERROR -1
+#  undef  ERROR
+#  define ERROR -1
 #endif
 
 #undef  OK
@@ -86,9 +91,9 @@
 #define SCHED_PRIORITY_MIN       1
 #define SCHED_PRIORITY_IDLE      0
 
-/************************************************************
+/****************************************************************************
  * Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifndef CONFIG_HAVE_DOUBLE
@@ -132,8 +137,8 @@ typedef int (*main_t)(int argc, char *argv[]);
 
 #endif
 
-/************************************************************
+/****************************************************************************
  * Global Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 #endif /* __SYS_TYPES_H */

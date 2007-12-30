@@ -41,6 +41,7 @@
  ************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <stdarg.h>
 #include <sched.h>

@@ -293,10 +293,18 @@ o pjrc-8052 / MCS51 (arch/pjrc-8051/)
   Priority:    Low
 
   Description: During build, there are several integer overflows reported:
-               gmtime_r.c aroud lines 184 and 185
-               clock_initialize.c at line 107
-               pthread_create.c at 330
-               sighand.c at 225 and 244
+               sched/gmtime_r.c aroud lines 184 and 185
+               sched/clock_initialize.c at line 107
+               sched/pthread_create.c at 330
+               examples/ostest/barrier.c around lines 53 and 74
+               examples/ostest/sighand.c at 225 and 244
   Status:      Open
   Priority:    Medium
+
+o z80 (arch/z80)
+ ^^^^^^^^^^^^^^^
+
+  Has the same problems with interger overflow during compilation as described
+  for pjrc-8051
+
 

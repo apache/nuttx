@@ -104,7 +104,7 @@ static void inline timer_sigqueue(FAR struct posix_timer_s *timer)
 
        info.si_signo           = timer->pt_signo;
        info.si_code            = SI_TIMER;
-#ifndef CONFIG_CAN_PASS_STRUCTS
+#ifdef CONFIG_CAN_PASS_STRUCTS
        info.si_value           = timer->pt_value;
 #else
        info.si_value.sival_ptr = timer->pt_value.sival_ptr;

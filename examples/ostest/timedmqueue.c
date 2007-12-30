@@ -66,6 +66,12 @@
 #define TEST_SEND_NMSGS     (10)
 #define TEST_RECEIVE_NMSGS  (10)
 
+#if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
+#  define FFLUSH() fflush(stdout)
+#else
+#  define FFLUSH()
+#endif
+
 /**************************************************************************
  * Private Types
  **************************************************************************/
@@ -180,7 +186,7 @@ static void *sender_thread(void *arg)
     }
 
   printf("sender_thread: returning nerrors=%d\n", nerrors);
-  fflush(stdout);
+  FFLUSH();
   return (pthread_addr_t)nerrors;
 }
 
@@ -305,7 +311,7 @@ static void *receiver_thread(void *arg)
     }
 
   printf("receiver_thread: returning nerrors=%d\n", nerrors);
-  fflush(stdout);
+  FFLUSH();
   pthread_exit((pthread_addr_t)nerrors);
   return (pthread_addr_t)nerrors;
 }

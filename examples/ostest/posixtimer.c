@@ -1,7 +1,7 @@
 /***********************************************************************
  * posixtimer.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -33,6 +33,10 @@
  *
  ***********************************************************************/
 
+/**************************************************************************
+ * Included Files
+ **************************************************************************/
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -42,6 +46,10 @@
 #include <errno.h>
 #include "ostest.h"
 
+/**************************************************************************
+ * Private Definitions
+ **************************************************************************/
+
 #ifndef NULL
 # define NULL (void*)0
 #endif
@@ -49,8 +57,22 @@
 #define MY_TIMER_SIGNAL 17
 #define SIGVALUE_INT  42
 
+#if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
+#  define FFLUSH() fflush(stdout)
+#else
+#  define FFLUSH()
+#endif
+
+/**************************************************************************
+ * Private Data
+ **************************************************************************/
+
 static sem_t sem;
 static int g_nsigreceived = 0;
+
+/**************************************************************************
+ * Private Functions
+ **************************************************************************/
 
 static void timer_expiration(int signo, siginfo_t *info, void *ucontext)
 {
@@ -118,6 +140,10 @@ static void timer_expiration(int signo, siginfo_t *info, void *ucontext)
     }
 
 }
+
+/**************************************************************************
+ * Public Functions
+ **************************************************************************/
 
 void timer_test(void)
 {
@@ -200,7 +226,7 @@ void timer_test(void)
   for (i = 0; i < 5; i++)
     {
       printf("timer_test: Waiting on semaphore\n" );
-      fflush(stdout);
+      FFLUSH();
       status = sem_wait(&sem);
       if (status != 0)
         {
@@ -239,5 +265,5 @@ errorout:
   status = sigaction(MY_TIMER_SIGNAL, &act, &oact);
 
   printf("timer_test: done\n" );
-  fflush(stdout);
+  FFLUSH();
 }
