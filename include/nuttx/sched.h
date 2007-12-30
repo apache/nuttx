@@ -268,7 +268,7 @@ typedef struct _TCB _TCB;
 
 /* This is the callback type used by sched_foreach() */
 
-typedef void (sched_foreach_t)(FAR _TCB *tcb, FAR void *arg);
+typedef void (*sched_foreach_t)(FAR _TCB *tcb, FAR void *arg);
 
 #endif /* __ASSEMBLY__ */
 

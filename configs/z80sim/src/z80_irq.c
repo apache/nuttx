@@ -76,10 +76,21 @@ void up_irqinitialize(void)
 
   current_regs = NULL;
 
-  /* And finally, enable interrupts */
+  /* Attach the timer interrupt -- There is not special timer interrupt
+   * enable in the simulation so it must be enabled here before interrupts
+   * are enabled.
+   *
+   * NOTE:  Normally, there are seperate enables for "global" interrupts
+   * and specific device interrupts.  In such a "normal" case, the timer
+   * interrupt should be attached and enabled in the the function up_timerinit()
+   */
+
+  irq_attach(Z80_IRQ_SYSTIMER, (xcpt_t)up_timerisr);
+
+  /* And finally, enable interrupts (including the timer) */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  irqrestore(TRUE);
+  irqrestore(Z80_C_FLAG);
 #endif
 }
 
@@ -93,7 +104,7 @@ void up_irqinitialize(void)
 
 void up_disable_irq(int irq)
 {
-  irqrestore(FALSE);
+  irqrestore(0);
 }
 
 /****************************************************************************
