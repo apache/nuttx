@@ -77,8 +77,10 @@
 void up_lowputc(char ch) __naked
 {
   _asm
-	ld	a, #2(sp)
-	out	#0xbe, a
+	ld	hl, #2
+	add	hl, sp
+	ld	a, (hl)
+	out	(0xbe), a
 	ret
   _endasm;
 }
@@ -93,7 +95,7 @@ void up_lowputc(char ch) __naked
 char up_lowgetc(void) __naked
 {
   _asm
-	in	#0xbe, a
+	in	a, (0xbe)
 	ld	l, a
 	ld	h, #0
 	ret
