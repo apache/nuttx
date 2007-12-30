@@ -91,5 +91,6 @@ int up_timerisr(int irq, FAR chipreg_t *regs)
 
 void up_timerinit(void)
 {
+  /* The timer interrupt was attached in up_irqinitialize -- see comments there */
 }
 
