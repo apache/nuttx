@@ -49,7 +49,6 @@
 ; up_restoreusercontext
 ;**************************************************************************
 
-;        .area	_CODE	(ABS,OVR)
 _up_restoreusercontext:
 	; On entry, stack contains return address (not used), then address
 	; of the register save structure
@@ -79,9 +78,7 @@ _up_restoreusercontext:
 	pop	ix			; Offset 3: IX
 	pop	iy			; Offset 4: IY
 	exx				;   Use alternate BC/DE/HL
-	ld	hl, #-2			;   Offset of SP to account for ret addr on stack
-	pop	de			; Offset 5: HL' = Stack pointer after return
-	add	hl, de			;   HL = Stack pointer value before return
+	pop	hl			; Offset 5: HL' = Stack pointer after return
 	exx				;   Restore original BC/DE/HL
 	pop	hl			; Offset 6: HL
 	pop	af			; Offset 7: AF
@@ -89,7 +86,9 @@ _up_restoreusercontext:
 	; Restore the stack pointer
 
 	exx				; Use alternate BC/DE/HL
+	pop	de			; DE' = return address
 	ld	sp, hl			; Set SP = saved stack pointer value before return
+	push	de			; Save return address for ret instruction
 	exx				; Restore original BC/DE/HL
 
 	; Restore interrupt state
@@ -97,8 +96,8 @@ _up_restoreusercontext:
 	ex	af, af'			; Recover interrupt state
 	jr	nc, noinrestore		; No carry, IFF2=0, means disabled
 	ex	af, af'			; Restore AF (before enabling interrupts)
-	ei				; yes
-	ret
+	ei				; yes.. Enable interrupts
+	ret				; and return
 noinrestore:
 	ex	af, af'			; Restore AF
-	ret
+	ret				; Return with interrupts disabled
