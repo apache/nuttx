@@ -64,27 +64,33 @@ _up_restoreusercontext:
 	pop	hl		; BC = Address of save structure
 	ld	sp, hl		; SP points to top of storage area
 
-	; Disable interrupts while we muck with the alternative registers
+	; Disable interrupts while we muck with the alternative registers.  The
+	; Correct interrupt state will be restore below
+
+	di
 
 	; Restore registers.  HL points to the beginning of the reg structure to restore
 
 	ex	af, af'			; Select alternate AF
 	pop	af			; Offset 0: AF' = I with interrupt state in carry
+	ex	af, af'			;   Restore original AF
 	pop	bc			; Offset 1: BC
 	pop	de			; Offset 2: DE
 	pop	ix			; Offset 3: IX
 	pop	iy			; Offset 4: IY
 	exx				;   Use alternate BC/DE/HL
-	pop	hl			; Offset 5: HL' = Stack pointer at time of interrupt
-	exx
+	ld	hl, #-2			;   Offset of SP to account for ret addr on stack
+	pop	de			; Offset 5: HL' = Stack pointer after return
+	add	hl, de			;   HL = Stack pointer value before return
+	exx				;   Restore original BC/DE/HL
 	pop	hl			; Offset 6: HL
 	pop	af			; Offset 7: AF
 
 	; Restore the stack pointer
 
-	exx
-	ld	sp, hl
-	exx
+	exx				; Use alternate BC/DE/HL
+	ld	sp, hl			; Set SP = saved stack pointer value before return
+	exx				; Restore original BC/DE/HL
 
 	; Restore interrupt state
 
