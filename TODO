@@ -231,9 +231,9 @@ o Build system
   Priority:    Low
 
   Description: Dependencies do not work correctly under configs/<board>/src
-               (same as arch/<arch>/src/board) with SDCC.
+               (same as arch/<arch>/src/board).  Seems to be worse using SDCC.
   Status:      Open
-  Priority:    Medium
+  Priority:    Medium (maybe higher for z80 target)
 
 o Applications & Tests (examples/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
