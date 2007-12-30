@@ -68,7 +68,7 @@
  * Public Functions
  ********************************************************************************/
 
-FAR chipreg_t *up_decodeirq(FAR chipreg_t *regs)
+FAR chipreg_t *up_decodeirq(uint8 rstno, FAR chipreg_t *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
 
@@ -85,9 +85,12 @@ FAR chipreg_t *up_decodeirq(FAR chipreg_t *regs)
 
   current_regs = regs;
 
-  /* Deliver the IRQ -- the simulation supports only timer interrupts */
+  /* Deliver the IRQ -- the simulation supports only timer interrupts and
+   * the IRQ maps to the reset number (real hardware probably needs an
+   * additional level of interrupt decoding.
+   */
 
-  irq_dispatch(Z80_IRQ_SYSTIMER, regs);
+  irq_dispatch((int)rstno, regs);
 
   /* If a context switch occurred, current_regs will hold the new context */
 

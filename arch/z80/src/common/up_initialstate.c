@@ -43,6 +43,7 @@
 #include <string.h>
 #include <nuttx/arch.h>
 
+#include "chip/chip.h"
 #include "up_internal.h"
 #include "up_arch.h"
 
@@ -84,7 +85,7 @@ void up_initial_state(_TCB *tcb)
 
   memset(xcp, 0, sizeof(struct xcptcontext));
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[XCPT_I]  = 0x0001; /* Carry flag will enable interrupts */
+  xcp->regs[XCPT_I]  = Z80_C_FLAG; /* Carry flag will enable interrupts */
 #endif
   xcp->regs[XCPT_SP] = (uint16)tcb->adj_stack_ptr;
   xcp->regs[XCPT_PC] = (uint16)tcb->start;

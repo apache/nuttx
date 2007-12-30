@@ -70,16 +70,12 @@
 	.area	START	(ABS)
 	.org	0x0000
 
-	.globl	_os_start
 	di				; Disable interrupts
-	ld	SP, #UP_STACK_END	; Set stack pointer
 	im	1			; Set interrupt mode 1
-	jp	_os_start		; jump to the OS entry point
-forever:
-	jp	forever
+	jr	_up_reset		; And boot the system
 
 ;**************************************************************************
-; Interrupt handler
+; Other reset handlers
 ;
 ; Interrupt mode 1 behavior:
 ; 
@@ -92,12 +88,99 @@ forever:
 ;
 ;**************************************************************************
 
-	.org   0x0038			; Int mode 1
+	.org	0x0008			; RST 1
 
-	; Create a register frame.  SP points to top of frame + 2, pushes
-	; decrement the stack pointer.
+	; Save AF on the stack, set the interrupt number and jump to the
+	; common reset handling logic.
 					; Offset 8: Return PC is already on the stack
 	push	af			; Offset 7: AF (retaining flags)
+	ld	a, #1			; 1 = Z80_RST1
+	jr	_up_rstcommon		; Remaining RST handling is common
+
+	.org	0x0010			; RST 2
+
+	; Save AF on the stack, set the interrupt number and jump to the
+	; common reset handling logic.
+					; Offset 8: Return PC is already on the stack
+	push	af			; Offset 7: AF (retaining flags)
+	ld	a, #2			; 2 = Z80_RST2
+	jr	_up_rstcommon		; Remaining RST handling is common
+
+	.org	0x0018			; RST 3
+
+	; Save AF on the stack, set the interrupt number and jump to the
+	; common reset handling logic.
+					; Offset 8: Return PC is already on the stack
+	push	af			; Offset 7: AF (retaining flags)
+	ld	a, #3			; 1 = Z80_RST3
+	jr	_up_rstcommon		; Remaining RST handling is common
+
+	.org	0x0020			; RST 4
+
+	; Save AF on the stack, set the interrupt number and jump to the
+	; common reset handling logic.
+					; Offset 8: Return PC is already on the stack
+	push	af			; Offset 7: AF (retaining flags)
+	ld	a, #4			; 1 = Z80_RST4
+	jr	_up_rstcommon		; Remaining RST handling is common
+
+	.org	0x0028			; RST 5
+
+	; Save AF on the stack, set the interrupt number and jump to the
+	; common reset handling logic.
+					; Offset 8: Return PC is already on the stack
+	push	af			; Offset 7: AF (retaining flags)
+	ld	a, #5			; 1 = Z80_RST5
+	jr	_up_rstcommon		; Remaining RST handling is common
+
+	.org	0x0030			; RST 6
+
+	; Save AF on the stack, set the interrupt number and jump to the
+	; common reset handling logic.
+					; Offset 8: Return PC is already on the stack
+	push	af			; Offset 7: AF (retaining flags)
+	ld	a, #6			; 1 = Z80_RST6
+	jr	_up_rstcommon		; Remaining RST handling is common
+
+	.org   0x0038			; Int mode 1 / RST 7
+
+	; Save AF on the stack, set the interrupt number and jump to the
+	; common reset handling logic.
+					; Offset 8: Return PC is already on the stack
+	push	af			; Offset 7: AF (retaining flags)
+	ld	a, #7			; 7 = Z80_RST7
+	jr	_up_rstcommon		; Remaining RST handling is common
+
+;**************************************************************************
+; NMI interrupt handler
+;**************************************************************************
+
+	.org   0x0066
+	retn
+
+;**************************************************************************
+; System start logic
+;**************************************************************************
+
+_up_reset:
+	ld	SP, #UP_STACK_END	; Set stack pointer
+	jp	_os_start		; jump to the OS entry point
+forever:
+	jp	forever
+
+;**************************************************************************
+; Common Interrupt handler
+;**************************************************************************
+
+_up_rstcommon:
+	; Create a register frame.  SP points to top of frame + 4, pushes
+	; decrement the stack pointer.  Already have
+	;
+	;   Offset 8: Return PC is already on the stack
+	;   Offset 7: AF (retaining flags)
+	;
+	; IRQ number is in A
+
 	push	hl			; Offset 6: HL
 	ld	hl, #(3*2)		;    HL is the value of the stack pointer before
 	add	hl, sp			;    the interrupt occurred
@@ -107,21 +190,24 @@ forever:
 	push	de			; Offset 2: DE
 	push	bc			; Offset 1: BC
 
+	ld	b, a			;   Save the reset number in B
 	ld	a, i			;   Carry bit holds interrupt state
 	push	af			; Offset 0: I with interrupt state in carry
 	di
 
 	; Call the interrupt decode logic. SP points to the beggining of the reg structure
 
-	ld	hl, #0			; Argument is the beginning of the reg structure
+	ld	hl, #0			; Argument #2 is the beginning of the reg structure
 	add	hl, sp			;
-	push	hl			; Place argument at the top of thest
+	push	hl			; Place argument #2 at the top of stack
+	push	bc			; Argument #1 is the Reset number
+	inc	sp			; (make byte sized)
 	call	_up_decodeirq		; Decode the IRQ
 
 	; On return, HL points to the beginning of the reg structure to restore
-	; Note that (1) the argument pushed on the stack is not popped, and (2) the
+	; Note that (1) the arguments pushed on the stack are not popped, and (2) the
 	; original stack pointer is lost.  In the normal case (no context switch),
-	; HL will contain the value of the SP before the argument was pushed.
+	; HL will contain the value of the SP before the arguments wer pushed.
 
 	ld	sp, hl			; Use the new stack pointer
 
@@ -129,21 +215,24 @@ forever:
 
 	ex	af, af'			; Select alternate AF
 	pop	af			; Offset 0: AF' = I with interrupt state in carry
+	ex	af, af'			;   Restore original AF
 	pop	bc			; Offset 1: BC
 	pop	de			; Offset 2: DE
 	pop	ix			; Offset 3: IX
 	pop	iy			; Offset 4: IY
 	exx				;   Use alternate BC/DE/HL
-	pop	hl			; Offset 5: HL' = Stack pointer at time of interrupt
-	exx
+	ld	hl, #-2			;   Offset of SP to account for ret addr on stack
+	pop	de			; Offset 5: HL' = Stack pointer after return
+	add	hl, de			;   HL = Stack pointer value before return
+	exx				;   Restore original BC/DE/HL
 	pop	hl			; Offset 6: HL
 	pop	af			; Offset 7: AF
 
 	; Restore the stack pointer
 
-	exx
-	ld	sp, hl
-	exx
+	exx				; Use alternate BC/DE/HL
+	ld	sp, hl			; Set SP = saved stack pointer value before return
+	exx				; Restore original BC/DE/HL
 
 	; Restore interrupt state
 
@@ -156,11 +245,6 @@ nointenable:
 	ex	af, af'			; Restore AF
 	reti
 
-;**************************************************************************
-; NMI interrupt handler
-;**************************************************************************
 
-	.org   0x0066
-	retn
 
 
