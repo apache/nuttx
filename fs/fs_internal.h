@@ -178,10 +178,10 @@ extern "C" {
 
 EXTERN void inode_semtake(void);
 EXTERN void inode_semgive(void);
-EXTERN FAR struct inode *inode_search(const char **path,
+EXTERN FAR struct inode *inode_search(FAR const char **path,
                                       FAR struct inode **peer,
                                       FAR struct inode **parent,
-                                      const char **relpath);
+                                      FAR const char **relpath);
 EXTERN void inode_free(FAR struct inode *node);
 EXTERN const char *inode_nextname(const char *name);
 

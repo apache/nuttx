@@ -1,7 +1,7 @@
-/************************************************************
- * fs_inodefind.c
+/****************************************************************************
+ * fs/fs_inodefind.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
@@ -43,36 +43,36 @@
 #include <nuttx/fs.h>
 #include "fs_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: inode_find
  *
  * Description:
  *   This is called from the open() logic to get a reference
  *   to the inode associated with a path.
  *
- ************************************************************/
+ ****************************************************************************/
 
-FAR struct inode *inode_find(const char *path, const char **relpath)
+FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath)
 {
   FAR struct inode *node;
 
@@ -86,7 +86,7 @@ FAR struct inode *inode_find(const char *path, const char **relpath)
    */
 
   inode_semtake();
-  node = inode_search(&path, (FAR void*)NULL, (FAR void*)NULL, relpath);
+  node = inode_search(&path, (FAR struct inode**)NULL, (FAR struct inode**)NULL, relpath);
   if (node)
     {
       node->i_crefs++;

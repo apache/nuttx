@@ -56,7 +56,7 @@
 #undef  CONFIG_SUPPRESS_TIMER_INTS    /* No timer */
 #undef  CONFIG_SUPPRESS_SERIAL_INTS   /* Console will poll */
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
-#define CONFIG_DUMP_ON_EXIT         1 /* Dump task state on exit */
+#undef  CONFIG_DUMP_ON_EXIT           /* Dump task state on exit */
 
 /* Macros for portability */
 
@@ -112,6 +112,7 @@ extern FAR chipreg_t *up_decodeirq(uint8 rstno, FAR chipreg_t *regs);
 extern void up_irqinitialize(void);
 extern int  up_timerisr(int irq, FAR chipreg_t *regs);
 extern void up_lowputc(char ch) __naked;
+extern char up_lowgetc(void) __naked;
 
 /* Defined in up_doirq.c */
 

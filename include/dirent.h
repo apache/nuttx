@@ -99,8 +99,8 @@ extern "C" {
 
 /* POSIX-like File System Interfaces */
 
-EXTERN int        closedir(DIR *dirp);
-EXTERN FAR DIR   *opendir(const char *path);
+EXTERN int        closedir(FAR DIR *dirp);
+EXTERN FAR DIR   *opendir(FAR const char *path);
 EXTERN FAR struct dirent *readdir(FAR DIR *dirp);
 EXTERN int        readdir_r(FAR DIR *dirp, FAR struct dirent *entry,
                             FAR struct dirent **result);

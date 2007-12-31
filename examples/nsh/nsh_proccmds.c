@@ -1,7 +1,7 @@
 /****************************************************************************
- * nsh_proccmds.c
+ * examples/nsh/nsh_proccmds.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -97,6 +97,9 @@ static void ps_task(FAR _TCB *tcb, FAR void *arg)
 {
   boolean needcomma = FALSE;
   int i;
+
+  /* Show task status */
+
   nsh_output(arg, "%5d %3d %4s %7s%c%c %8s ",
              tcb->pid, tcb->sched_priority,
              tcb->flags & TCB_FLAG_ROUND_ROBIN ? "RR  " : "FIFO",
@@ -105,18 +108,25 @@ static void ps_task(FAR _TCB *tcb, FAR void *arg)
              tcb->flags & TCB_FLAG_CANCEL_PENDING ? 'P' : ' ',
              g_statenames[tcb->task_state]);
 
+  /* Show task name and arguments */
+
   nsh_output(arg, "%s(", tcb->argv[0]);
-  for (i = 1; i < CONFIG_MAX_TASK_ARGS+1 && tcb->argv[i]; i++)
+
+  /* Special case 1st argument (no comma) */
+
+  if (tcb->argv[1])
     {
-      if (needcomma)
-        {
-          nsh_output(arg, ", %p", tcb->argv[i]);
-        }
-      else
-        {
-          nsh_output(arg, "%p", tcb->argv[i]);
-        }
+     nsh_output(arg, "%p", tcb->argv[1]);
+    }
+
+  /* Then any additional arguments */
+
+#if CONFIG_MAX_TASK_ARGS > 2
+  for (i = 2; i <= CONFIG_MAX_TASK_ARGS && tcb->argv[i]; i++)
+    {
+      nsh_output(arg, ", %p", tcb->argv[i]);
      }
+#endif
   nsh_output(arg, ")\n");
 }
 

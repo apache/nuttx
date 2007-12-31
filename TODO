@@ -303,6 +303,7 @@ o pjrc-8052 / MCS51 (arch/pjrc-8051/)
                sched/pthread_create.c at 330
                examples/ostest/barrier.c around lines 53 and 74
                examples/ostest/sighand.c at 225 and 244
+               driver/serial.c in usleep calls around 347 and 354
   Status:      Open
   Priority:    Medium
 

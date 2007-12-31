@@ -1,7 +1,7 @@
-/************************************************************
- * fs_opendir.c
+/****************************************************************************
+ * fs/fs_opendir.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
@@ -46,15 +46,15 @@
 #include <nuttx/fs.h>
 #include "fs_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: opendir
  *
  * Description:
@@ -80,13 +80,13 @@
  *   ENOMEM  - Insufficient memory to complete the operation.
  *   ENOTDIR - 'path' is not a directory.
  *
- ************************************************************/
+ ****************************************************************************/
 
-FAR DIR *opendir(const char *path)
+FAR DIR *opendir(FAR const char *path)
 {
   FAR struct inode *inode = NULL;
   FAR struct internal_dir_s *dir;
-  const char *relpath;
+  FAR const char *relpath;
   boolean isroot = FALSE;
   int ret;
 
@@ -112,7 +112,7 @@ FAR DIR *opendir(const char *path)
 
       /* Find the node matching the path. */
 
-      inode = inode_search(&path, (FAR void*)NULL, (FAR void*)NULL, &relpath);
+      inode = inode_search(&path, (FAR struct inode**)NULL, (FAR struct inode**)NULL, &relpath);
     }
 
   /* Did we get an inode? */

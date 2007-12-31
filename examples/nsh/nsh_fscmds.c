@@ -1,7 +1,7 @@
 /****************************************************************************
- * nsh_fscmds.c
+ * examples/nsh/nsh_fscmds.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -45,7 +45,9 @@
 # include <fcntl.h>
 #endif
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-# include <sys/mount.h>
+# ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
+#   include <sys/mount.h>
+# endif
 #endif
 
 #include <stdio.h>
@@ -636,6 +638,7 @@ void cmd_mkdir(FAR void *handle, int argc, char **argv)
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+#ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
 void cmd_mount(FAR void *handle, int argc, char **argv)
 {
   char *filesystem = 0;
@@ -684,6 +687,7 @@ void cmd_mount(FAR void *handle, int argc, char **argv)
     }
 }
 #endif
+#endif
 
 /****************************************************************************
  * Name: cmd_rm
@@ -718,6 +722,7 @@ void cmd_rmdir(FAR void *handle, int argc, char **argv)
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+#ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
 void cmd_umount(FAR void *handle, int argc, char **argv)
 {
   /* Perform the umount */
@@ -727,4 +732,5 @@ void cmd_umount(FAR void *handle, int argc, char **argv)
       nsh_output(handle, g_fmtcmdfailed, argv[0], "umount", strerror(errno));
     }
 }
+#endif
 #endif

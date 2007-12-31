@@ -1,7 +1,7 @@
 /****************************************************************************
  * nsh_main.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -100,7 +100,9 @@ static const struct cmdmap_s g_cmdmap[] =
 #endif
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
   { "mkdir",    cmd_mkdir,  2, 2, "<path>" },
+#ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
   { "mount",    cmd_mount,  4, 5, "-t <fstype> <block-device> <dir-path>" },
+#endif
 #endif
   { "ps",       cmd_ps,     1, 1, NULL },
 #ifndef CONFIG_DISABLE_ENVIRON
@@ -109,7 +111,9 @@ static const struct cmdmap_s g_cmdmap[] =
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
   { "rm",       cmd_rm,     2, 2, "<file-path>" },
   { "rmdir",    cmd_rmdir,  2, 2, "<dir-path>" },
+# ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
   { "umount",   cmd_umount, 2, 2, "<dir-path>" },
+#endif
 #endif
 #ifndef CONFIG_DISABLE_ENVIRON
   { "unset",  cmd_unset,  2, 2, "<name>" },
