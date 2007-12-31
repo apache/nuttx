@@ -126,12 +126,8 @@ $(COBJS): %$(OBJEXT): %.c
 
 $(SDCCLIBDIR)/myz80.lib: $(SDCCLIBDIR)/$(SDCCLIB)
 	@cat $(SDCCLIBDIR)/$(SDCCLIB) | \
-		grep -v calloc   | grep -v malloc   | grep -v realloc  | \
-		grep -v free     | grep -v getenv   | grep -v vprintf  | \
-		grep -v sprintf  | grep -v _strncpy | grep -v _strchr  | \
-		grep -v _strlen  | grep -v _strcmp  | grep -v _strcpy  | \
-		grep -v _memcmp  | grep -v _memcpy  | grep -v _memset  | \
-		grep -v crt0 \
+		grep -v alloc | grep -v free | grep -v printf | \
+		grep -v _str  | grep -v _mem | grep -v crt0\.o \
 		> myz80.lib
 	@sudo mv -f myz80.lib $(SDCCLIBDIR)/myz80.lib
 
@@ -149,6 +145,13 @@ up_mem.h:
 	@echo "#endif /* __ARCH_MEM_H */" >>up_mem.h
 
 asm_mem.h:
+	@echo "	UP_COMPILER_OTHER	== 0" > asm_mem.h
+	@echo "	UP_COMPILER_SDCC	== 1" >> asm_mem.h
+ifeq ($(CC),sdcc)
+	@echo "	UP_COMPILER	== 1" >> asm_mem.h
+else
+	@echo "	UP_COMPILER	== 0" >> asm_mem.h
+endif
 	@echo "	UP_STACK_END	== ($(CONFIG_DRAM_SIZE) - 1)" >> asm_mem.h
 	@echo "	UP_STACK_BASE	== (UP_STACK_END - $(CONFIG_PROC_STACK_SIZE))" >> asm_mem.h
 	@echo "	UP_HEAP1_END	== (UP_STACK_END - $(CONFIG_PROC_STACK_SIZE) - 1)" >> asm_mem.h
@@ -170,7 +173,8 @@ board/libboard$(LIBEXT):
 # This target builds the final executable
 
 pass1.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboard$(LIBEXT)
-	@echo "-k $(BOARDDIR)" >pass1.lnk		# Path to board library
+	@echo "--" >pass1.lnk				# Non-interactive
+	@echo "-k $(BOARDDIR)" >>pass1.lnk		# Path to board library
 	@echo "-k $(SDCCLIBDIR)" >>pass1.lnk		# Path to SDCC z80 library
 	@echo "-l libboard$(LIBEXT)" >>pass1.lnk	# Name of board library
 	@for LIB in $(LINKLIBS); do \
@@ -180,8 +184,9 @@ pass1.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboar
 	@echo "-b START=0" >>pass1.lnk			# Start of START area
 	@echo "-b _CODE=256" >>pass1.lnk		# Start of _CODE area
 	@echo "-i" >>pass1.lnk				# Intel hex format
-	@echo "-m" >>pass1.lnk			# Generate a map file
-	@echo "-j" >>pass1.lnk			# Generate a symbol file
+	@echo "-x" >>pass1.lnk				# Hexadecimal
+	@echo "-m" >>pass1.lnk				# Generate a map file
+	@echo "-j" >>pass1.lnk				# Generate a symbol file
 	@echo "pass1.ihx" >>pass1.lnk			# Path to head object
 	@echo "$(HEAD_AOBJ)" >>pass1.lnk		# Path to head object
 	@echo "-e" >>pass1.lnk				# End of script
@@ -192,7 +197,8 @@ pass1.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboar
 	@$(MAKE) TOPDIR=$(TOPDIR) $(HEAD_AOBJ)
 
 nuttx.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboard$(LIBEXT)
-	@echo "-k $(BOARDDIR)" >nuttx.lnk		# Path to board library
+	@echo "--" >nuttx.lnk				# Non-interactive
+	@echo "-k $(BOARDDIR)" >>nuttx.lnk		# Path to board library
 	@echo "-k $(SDCCLIBDIR)" >>nuttx.lnk		# Path to SDCC z80 library
 	@echo "-l libboard$(LIBEXT)" >>nuttx.lnk	# Name of board library
 	@for LIB in $(LINKLIBS); do \
@@ -202,6 +208,7 @@ nuttx.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboar
 	@echo "-b START=0" >>nuttx.lnk			# Start of START area
 	@echo "-b _CODE=256" >>nuttx.lnk		# Start of _CODE area
 	@echo "-i" >>nuttx.lnk				# Intel hex format
+	@echo "-x" >>nuttx.lnk				# Hexadecimal
 	@echo "-m" >>nuttx.lnk				# Generate a map file
 	@echo "-j" >>nuttx.lnk				# Generate a symbol file
 	@echo "nuttx.ihx" >>nuttx.lnk			# Path to head object

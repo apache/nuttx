@@ -49,6 +49,7 @@
 ; up_restoreusercontext
 ;**************************************************************************
 
+	.area	_CODE
 _up_restoreusercontext:
 	; On entry, stack contains return address (not used), then address
 	; of the register save structure
