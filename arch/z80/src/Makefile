@@ -126,11 +126,12 @@ $(COBJS): %$(OBJEXT): %.c
 
 $(SDCCLIBDIR)/myz80.lib: $(SDCCLIBDIR)/$(SDCCLIB)
 	@cat $(SDCCLIBDIR)/$(SDCCLIB) | \
-		grep -v calloc  | grep -v malloc  | grep -v realloc  | \
-		grep -v free    | grep -v vprintf | grep -v _strncpy | \
-		grep -v _strchr | grep -v _strlen | grep -v _strcmp  | \
-		grep -v _strcpy | grep -v _memcmp | grep -v _memcpy  | \
-		grep -v _memset | grep -v crt0 \
+		grep -v calloc   | grep -v malloc   | grep -v realloc  | \
+		grep -v free     | grep -v getenv   | grep -v vprintf  | \
+		grep -v sprintf  | grep -v _strncpy | grep -v _strchr  | \
+		grep -v _strlen  | grep -v _strcmp  | grep -v _strcpy  | \
+		grep -v _memcmp  | grep -v _memcpy  | grep -v _memset  | \
+		grep -v crt0 \
 		> myz80.lib
 	@sudo mv -f myz80.lib $(SDCCLIBDIR)/myz80.lib
 

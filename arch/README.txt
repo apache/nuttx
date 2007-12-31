@@ -159,9 +159,14 @@ arch/m68322
 arch/pjrc-8051
     8051 Microcontroller.  This port is not quite ready for prime time.
 
+arch/z80
+    z80 Microcontroller.
+    STATUS: Functional with no known defects.  There are still several
+    OS features that have not yet been tested (e.g., networking).
+
 The following architecture directories are deprecated.  They have been
-replaced by the logic in arm/arm and will deleted when arch/arm is fully
-verified.
+replaced by the logic in arm/arm and will deleted at some point in the
+future.
 
 arch/c5471
     Replaced with arch/arm/include/c5471 and arch/arm/src/c5471

@@ -8,7 +8,7 @@ NuttX TODO List (Last updated December 13, 2007)
   (1)  C++ Support
   (10) Network (net/, netutils/)
   (2)  USB (drivers/usbdev)
-  (2)  Libraries (lib/)
+  (3)  Libraries (lib/)
   (2)  File system (fs/, drivers/)
   (2)  Documentation (Documentation/)
   (3)  Build system
@@ -194,7 +194,12 @@ o Libraries (lib/)
                work as it should.  This is because the underlying
                representation of the environment is not an arry of pointers.
   Status:      Open
-  Priority:    Mediam
+  Priority:    Medium
+
+  Description: There are two different copies of getenv():  One in
+               sched/env_getenv.c and one in lib/lib_getenv().  Keep one.
+  Status:      Open
+  Priority:    Low
 
 o File system (fs/, drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -57,7 +57,7 @@
  * Public Variables
  ****************************************************************************/
 
-typedef void  (*sig_deliver_t)(_TCB *tcb);
+typedef void (*sig_deliver_t)(FAR _TCB *tcb);
 
 /****************************************************************************
  * Public Function Prototypes

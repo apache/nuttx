@@ -106,6 +106,11 @@ struct xcptcontext
 
 #ifndef CONFIG_DISABLE_SIGNALS
   void *sigdeliver; /* Actual type is sig_deliver_t */
+
+  /* The following retains that state during signal execution */
+
+  uint16 saved_pc;	/* Saved return address */
+  uint16 saved_i;	/* Saved interrupt state */
 #endif
 };
 #endif

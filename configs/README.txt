@@ -313,6 +313,13 @@ configs/pjrc-8051
     8051 Microcontroller.  This port uses the PJRC 87C52 development system
     and the SDCC toolchain.   This port is not quite ready for prime time.
 
+configs/z80zim
+    z80 Microcontroller.  This port uses a Z80 instruction set simulator.
+    That simulator can be found in the NuttX CVS at
+    http://nuttx.cvs.sourceforge.net/nuttx/misc/sims/z80sim.
+    This port also the SDCC toolchain (http://sdcc.sourceforge.net/")
+    (verified with version 2.6.0).
+
 Other ports for the for the TI TMS320DM270, M683222 and for MIPS are in various
 states of progress
 
