@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * common/up_sigdeliver.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,39 +31,43 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sched.h>
 #include <debug.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+
 #include "os_internal.h"
 #include "up_internal.h"
-#include "up_arch.h"
 
-/************************************************************
+#ifndef CONFIG_DISABLE_SIGNALS
+
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: up_sigdeliver
  *
  * Description:
@@ -72,7 +76,7 @@
  *   with and forced to branch to this location with interrupts
  *   disabled.
  *
- ************************************************************/
+ ****************************************************************************/
 
 void up_sigdeliver(void)
 {
@@ -81,9 +85,9 @@ void up_sigdeliver(void)
   uint32 regs[XCPTCONTEXT_REGS];
   sig_deliver_t sigdeliver;
 
-  /* Save the errno.  This must be preserved throughout the
-   * signal handling so that the the user code final gets
-   * the correct errno value (probably EINTR).
+  /* Save the errno.  This must be preserved throughout the signal handling
+   * so that the the user code final gets the correct errno value (probably
+   * EINTR).
    */
 
   int saved_errno = rtcb->errno;
@@ -97,8 +101,8 @@ void up_sigdeliver(void)
   /* Save the real return state on the stack. */
 
   up_copystate(regs, rtcb->xcp.regs);
-  regs[REG_PC]   = rtcb->xcp.saved_pc;
-  regs[REG_CPSR] = rtcb->xcp.saved_cpsr;
+  regs[XCPT_PC] = rtcb->xcp.saved_pc;
+  regs[XCPT_I]  = rtcb->xcp.saved_i;
 
   /* Get a local copy of the sigdeliver function pointer.
    * we do this so that we can nullify the sigdeliver
@@ -112,7 +116,7 @@ void up_sigdeliver(void)
 
   /* Then restore the task interrupt state. */
 
-  irqrestore(regs[REG_CPSR]);
+  irqrestore(regs[XCPT_I]);
 
   /* Deliver the signals */
 
@@ -132,6 +136,8 @@ void up_sigdeliver(void)
    */
 
   up_ledoff(LED_SIGNAL);
-  up_fullcontextrestore(regs);
+  SIGNAL_RETURN(regs);
 #endif
 }
+
+#endif /* CONFIG_DISABLE_SIGNALS */

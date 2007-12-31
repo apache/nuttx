@@ -65,6 +65,7 @@
 #define SET_IRQCONTEXT(tcb)      up_copystate(current_regs, (tcb)->xcp.regs)
 #define SAVE_USERCONTEXT(tcb)    up_saveusercontext((tcb)->xcp.regs)
 #define RESTORE_USERCONTEXT(tcb) up_restoreusercontext((tcb)->xcp.regs)
+#define SIGNAL_RETURN(regs)      up_restoreusercontext(regs)
 
 /****************************************************************************
  * Public Types
