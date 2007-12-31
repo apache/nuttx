@@ -420,6 +420,10 @@
   <li><code>arch/pjrc-8051</code>:
     8051 Microcontroller.  This port is not quite ready for prime time.</li>
   </li>
+
+  <li><code>arch/z80</code>:
+    z80 Microcontroller.  This port has been verified using only a z80 instruction simulator.</li>
+  </li>
 </ul>
 
 <p>
@@ -584,7 +588,16 @@
 
   <li><code>configs/pjrc-8051</code>:
     8051 Microcontroller.  This port uses the PJRC 87C52 development system
-    and the SDCC toolchain.   This port is not quite ready for prime time.
+    and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain.
+    This port is not quite ready for prime time.
+  </li>
+
+  <li><code>configs/z80sim</code>:
+    z80 Microcontroller.  This port uses a Z80 instruction set simulator.
+    That simulator can be found in the NuttX CVS
+    <a href="http://nuttx.cvs.sourceforge.net/nuttx/misc/sims/z80sim/">here</a>.
+    This port also the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain
+    (verfied with version 2.6.0).
   </li>
 </ul>
 
