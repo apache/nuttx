@@ -114,9 +114,13 @@ static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
           struct file_struct *filep = &tcb->streams->sl_streams[i];
           if (filep->fs_filedes >= 0)
             {
+#if CONFIG_STDIO_BUFFER_SIZE > 0
               lldbg("      fd=%d nbytes=%d\n",
                     filep->fs_filedes,
                     filep->fs_bufpos - filep->fs_bufstart);
+#else
+              lldbg("      fd=%d\n", filep->fs_filedes);
+#endif
             }
         }
     }
