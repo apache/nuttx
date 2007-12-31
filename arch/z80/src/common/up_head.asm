@@ -67,7 +67,7 @@
 ; Reset entry point
 ;**************************************************************************
 
-	.area	START	(ABS)
+	.area	_HEADER	(ABS)
 	.org	0x0000
 
 	di				; Disable interrupts
@@ -162,17 +162,31 @@
 ; System start logic
 ;**************************************************************************
 
-_up_reset:
+_up_reset::
+	; Set up the stack pointer at the location determined the Makefile
+	; and stored in asm_mem.h
+
 	ld	SP, #UP_STACK_END	; Set stack pointer
-	jp	_os_start		; jump to the OS entry point
-forever:
-	jp	forever
+
+	; Performed initialization unique to the SDCC toolchain
+
+	call	gsinit			; Initialize the data section
+
+	; Then start NuttX
+
+	call	_os_start		; jump to the OS entry point
+
+	; NuttX will never return, but just in case...
+
+_up_halt::
+	halt				; We should never get here
+	jp	_up_halt
 
 ;**************************************************************************
 ; Common Interrupt handler
 ;**************************************************************************
 
-_up_rstcommon:
+_up_rstcommon::
 	; Create a register frame.  SP points to top of frame + 4, pushes
 	; decrement the stack pointer.  Already have
 	;
@@ -241,10 +255,29 @@ _up_rstcommon:
 	ex	af, af'			; Restore AF (before enabling interrupts)
 	ei				; yes
 	reti
-nointenable:
+nointenable::
 	ex	af, af'			; Restore AF
 	reti
 
+;**************************************************************************
+; Ordering of segments for the linker (SDCC only)
+;**************************************************************************
 
+	.area   _HOME
+	.area   _CODE
+	.area   _GSINIT
+	.area   _GSFINAL
 
+	.area   _DATA
+	.area   _BSS
+	.area   _HEAP
+
+;**************************************************************************
+; Global data initialization logic (SDCC only)
+;**************************************************************************
+
+	.area   _GSINIT
+gsinit::
+	.area   _GSFINAL
+	ret
 
