@@ -86,41 +86,52 @@ static boolean up_txfifoempty(struct uart_dev_s *dev);
 
 struct uart_ops_s g_uart_ops =
 {
-  .setup          = up_setup,
-  .shutdown       = up_shutdown,
-  .handler        = up_interrupt,
-  .ioctl          = up_ioctl,
-  .receive        = up_receive,
-  .rxint          = up_rxint,
-  .rxfifonotempty = up_rxfifonotempty,
-  .send           = up_send,
-  .txint          = up_txint,
-  .txfifonotfull  = up_txfifonotfull,
-  .txfifoempty    = up_txfifoempty,
+  up_setup,                 /* setup */
+  up_shutdown,              /* shutdown */
+  up_interrupt,             /* handler */
+  up_ioctl,                 /* ioctl */
+  up_receive,               /* receive */
+  up_rxint,                 /* rxint */
+  up_rxfifonotempty,        /* rxfifonotempty */
+  up_send,                  /* send */
+  up_txint,                 /* txint */
+  up_txfifonotfull,         /* txfifonotfull */
+  up_txfifoempty,           /* txfifoempty */
 };
 
 /* I/O buffers */
 
-static char g_uartrxbuffer[CONFIG_UART0_RXBUFSIZE];
-static char g_uarttxbuffer[CONFIG_UART0_TXBUFSIZE];
+static char g_uartrxbuffer[CONFIG_UART_RXBUFSIZE];
+static char g_uarttxbuffer[CONFIG_UART_TXBUFSIZE];
 
 /* This describes the state of the fake UART port. */
 
 static uart_dev_t g_uartport =
 {
-  .irq      = DM320_IRQ_UART0,
-  .recv     =
-  {
-    .size   = CONFIG_UART0_RXBUFSIZE,
-    .buffer = g_uart0rxbuffer,
+  0,                        /* open_count */
+  0,                        /* irq */
+  FALSE,                    /* xmitwaiting */
+  FALSE,                    /* recvwaiting */
+  TRUE,                     /* isconsole */
+  { 1 },                    /* closesem */
+  { 0 },                    /* xmitsem */
+  { 0 },                    /* recvsem */
+  {                         /* xmit */
+    { 1 },                  /*   sem */
+    0,                      /*   head */
+    0,                      /*   tail */
+    CONFIG_UART_TXBUFSIZE,  /*   size */
+    g_uarttxbuffer,         /*   buffer */
   },
-  .xmit     =
-  {
-    .size   = CONFIG_UART0_TXBUFSIZE,
-    .buffer = g_uart0txbuffer,
+  {                         /* recv */
+    { 1 },                  /*   sem */
+    0,                      /*   head */
+    0,                      /*   tail */
+    CONFIG_UART_RXBUFSIZE,  /*   size */
+    g_uartrxbuffer,         /*   buffer */
   },
-  .ops      = &g_uart_ops,
-  .priv     = NULL,
+  &g_uart_ops,              /* ops */
+  NULL,                     /* priv */
 };
 
 /****************************************************************************
@@ -326,6 +337,7 @@ void up_serialinit(void)
 int up_putc(int ch)
 {
   up_lowputc(ch);
+  return 0;
 }
 
 

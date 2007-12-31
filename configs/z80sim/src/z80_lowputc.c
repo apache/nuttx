@@ -38,12 +38,13 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <assert.h>
 #include <debug.h>
-#include "up_arch.h"
+
 #include "os_internal.h"
 #include "up_internal.h"
 
