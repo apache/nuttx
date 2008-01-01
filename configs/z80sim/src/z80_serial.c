@@ -288,7 +288,7 @@ static boolean up_txfifonotfull(struct uart_dev_s *dev)
 
 static boolean up_txfifoempty(struct uart_dev_s *dev)
 {
-  return FALSE;
+  return TRUE;
 }
 
 /****************************************************************************
