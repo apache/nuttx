@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * common/up_exit.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
@@ -49,19 +49,19 @@
 #include <nuttx/fs.h>
 #endif
 
-/************************************************************
+/****************************************************************************
  * Private Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Funtions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: _up_dumponexit
  *
  * Description:
@@ -70,7 +70,7 @@
  *   related reference counting but could be useful again
  *   sometime in the future.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
 static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
@@ -110,9 +110,13 @@ static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
           struct file_struct *filep = &tcb->streams->sl_streams[i];
           if (filep->fs_filedes >= 0)
             {
+#if CONFIG_STDIO_BUFFER_SIZE > 0
               dbg("      fd=%d nbytes=%d\n",
                   filep->fs_filedes,
                   filep->fs_bufpos - filep->fs_bufstart);
+#else
+              dbg("      fd=%d\n", filep->fs_filedes);
+#endif
             }
         }
     }
@@ -120,18 +124,18 @@ static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
 }
 #endif
 
-/************************************************************
- * Public Funtions
- ************************************************************/
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: _exit
  *
  * Description:
  *   This function causes the currently executing task to cease
  *   to exist.  This is a special case of task_delete().
  *
- ************************************************************/
+ ****************************************************************************/
 
 void _exit(int status)
 {

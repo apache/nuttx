@@ -18,7 +18,7 @@ NuttX TODO List (Last updated December 13, 2007)
   (1)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
-  (0)  z80 (arch/z80/)
+  (2)  z80 (arch/z80/)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -315,7 +315,19 @@ o pjrc-8052 / MCS51 (arch/pjrc-8051/)
 o z80 (arch/z80)
  ^^^^^^^^^^^^^^^
 
-  Has the same problems with interger overflow during compilation as described
-  for pjrc-8051
+  Description: The Has the same problems with interger overflow during compilation
+               as described for pjrc-8051.  At typical cause is code like
+               usleep(500*1000) which exceeds the range of a 16-bit integer
+  Status:      See pjrc-8051
+  Priority:    See pjrc-8051
+
+  Description: The simulated serial console (configs/z80sim/src/z80_serial.c +
+               driver/serial.c) does not work.  This is because there are
+               no interrupts in the simulation so there is never any serial
+               traffic.
+  Status:      Open
+  Priority:    Low -- the simulated console is not critical path and the designs
+               to solve the problem are complex.
+
 
 
