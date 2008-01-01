@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * common/up_internal.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,18 +31,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __UP_INTERNAL_H
 #define __UP_INTERNAL_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
 /* Bring-up debug configurations.  These are here (vs defconfig)
  * because these should only be controlled during low level
@@ -53,19 +53,19 @@
 #undef  CONFIG_SUPPRESS_TIMER_INTS    /* No timer */
 #undef  CONFIG_SUPPRESS_SERIAL_INTS   /* Console will poll */
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
-#define CONFIG_DUMP_ON_EXIT         1 /* Dump task state on exit */
+#undef  CONFIG_DUMP_ON_EXIT           /* Dump task state on exit */
 
-/************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 typedef void (*up_vector_t)(void);
 #endif
 
-/************************************************************
+/****************************************************************************
  * Public Variables
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 /* This holds a references to the current interrupt level
@@ -84,14 +84,14 @@ extern uint32 *current_regs;
 extern uint32 g_heapbase;
 #endif
 
-/************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************/
+ ****************************************************************************/
 
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
