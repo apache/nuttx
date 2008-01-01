@@ -1,7 +1,7 @@
-/************************************************************
- * lib_fopen.c
+/****************************************************************************
+ * lib/lib_fopen.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,15 +31,15 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Compilation Switches
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
@@ -51,9 +51,9 @@
 #include <errno.h>
 #include "lib_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
 static int lib_mode2oflags(const char *mode)
 {
@@ -124,9 +124,9 @@ static int lib_mode2oflags(const char *mode)
   return oflags;
 }
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
 FAR struct file_struct *lib_fdopen(int fd, const char *mode,
                                    FAR struct filelist *flist,
@@ -135,12 +135,13 @@ FAR struct file_struct *lib_fdopen(int fd, const char *mode,
   FAR struct inode *inode = flist->fl_files[fd].f_inode;
   FILE             *stream;
   int               oflags = lib_mode2oflags(mode);
+  int               err;
   int               i;
 
   if (fd < 0 || !flist || !slist)
     {
-      *get_errno_ptr() = EBADF;
-      return NULL;
+      err = EBADF;
+      goto errout;
     }
 
   /* Make sure that the inode supports the requested access.  In
@@ -151,7 +152,8 @@ FAR struct file_struct *lib_fdopen(int fd, const char *mode,
 
   if (inode_checkflags(inode, oflags) != OK)
     {
-      return NULL;
+      err = EACCES;
+      goto errout;
     }
 
   /* Find an unallocated FILE structure */
@@ -179,8 +181,8 @@ FAR struct file_struct *lib_fdopen(int fd, const char *mode,
           stream->fs_bufstart = malloc(CONFIG_STDIO_BUFFER_SIZE);
           if (!stream)
             {
-              *get_errno_ptr() = ENOMEM;
-              return NULL;
+              err = ENOMEM;
+              goto errout_with_sem;
             }
 
           /* Set up pointers */
@@ -189,7 +191,6 @@ FAR struct file_struct *lib_fdopen(int fd, const char *mode,
           stream->fs_bufpos  = stream->fs_bufstart;
           stream->fs_bufpos  = stream->fs_bufstart;
           stream->fs_bufread = stream->fs_bufstart;
-          stream_semgive(slist);
 #endif
           /* Save the file description and open flags.  Setting the
            * file descriptor locks this stream.
@@ -198,10 +199,16 @@ FAR struct file_struct *lib_fdopen(int fd, const char *mode,
           stream->fs_filedes = fd;
           stream->fs_oflags  = oflags;
 
+          stream_semgive(slist);
           return stream;
         }
     }
+
+errout_with_sem:
   stream_semgive(slist);
+
+errout:
+  *get_errno_ptr() = err;
   return NULL;
 }
 
