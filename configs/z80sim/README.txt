@@ -23,9 +23,11 @@ Configuring NuttX
 
 
   nshconfig
-    This configuration file builds NSH (examples/nsh).
+    This configuration file builds NSH (examples/nsh).  This
+    configuration is not functional due to issues with use of the
+    simulated serial driver (see the TODO list).
 
-    This alternative configurations can be selected by:
+    This alternative configuration can be selected by:
 
 	(Seleted the default configuration as show above)
 	cp config/z80sim/nshconfig .config
