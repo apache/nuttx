@@ -180,7 +180,9 @@ struct _TCB
   tstate_t task_state;                   /* Current state of the thread         */
   uint16   flags;                        /* Misc. general status flags          */
   sint16   lockcount;                    /* 0=preemptable (not-locked)          */
+#ifndef CONFIG_DISABLE_PTHREAD
   FAR void *joininfo;                    /* Detach-able info to support join    */
+#endif
 #if CONFIG_RR_INTERVAL > 0
   int      timeslice;                    /* RR timeslice interval remaining     */
 #endif
