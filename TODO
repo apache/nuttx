@@ -2,6 +2,7 @@ NuttX TODO List (Last updated December 13, 2007)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (6)  Task/Scheduler (sched/)
+  (1)  Dynamic loader (N/A)
   (2)  Memory Managment (mm/)
   (1)  Signals (sched/, arch/)
   (1)  pthreads (sched/)
@@ -52,6 +53,16 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Medium, required for standard compliance (but makes the
                code bigger)
+
+o Dynamic Loader
+  ^^^^^^^^^^^^^^
+
+  Description: At some point in the future, I intend to port the XFLAT
+               dynamic loader into NuttX (see http://xflat.sourceforge.net/).
+               That would allow NuttX to dynamically load and link
+               external code in a mounted filesystem.
+  Status:      Open
+  Priority:    Low, Nice feature and I might do it someday
 
 o Memory Managment (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^
