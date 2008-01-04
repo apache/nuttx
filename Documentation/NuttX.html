@@ -422,7 +422,6 @@
   Other architectures and the SDCC toolchain are also supported but not as
   well exercised.
 </p>
-
 <p>
   This release was verified only on the Spectrum Digital C5471 EVM using
   the C5471 Ethernet driver. Any feedback about bugsor suggestions for
@@ -467,10 +466,10 @@
   <td><br></td>
   <td>
     <p>
-      <b>TI TMS320C5471</b> (also called <b>C5471</b> or <b>TMS320DA180</b> or <b>DA180</a>).
+      <b>TI TMS320C5471</b> (also called <b>C5471</b> or <b>TMS320DA180</b> or <b>DA180</b>).
       NuttX operates on the ARM7 of this dual core processor.
       This port uses the <a href="http://www.spectrumdigital.com/">Spectrum Digital</a>
-      evaluation board with a GNU arm-elf toolchain*.
+      evaluation board with a GNU arm-elf toolchain* under Linux or Cygwin.
     </p>
     <p>
       <b>STATUS:</b>
@@ -485,7 +484,7 @@
       <b>NXP LPC214x</b>.
       Support is provided for the NXP LPC214x family of processors.  In particular,
       support is provided for the mcu123.com lpc214x evaluation board (LPC2148).
-      This port also used the GNU arm-eld toolchain*.
+      This port also used the GNU arm-eld toolchain* under Linux or Cygwin.
     </p>
     <p>
       <b>STATUS:</b>
@@ -507,7 +506,7 @@
       NuttX operates on the ARM9 of this dual core processor.
       This port uses the
       <a href="http://wiki.neurostechnology.com/index.php/Developer_Welcome">Neuros OSD</a>
-      with a GNU arm-elf toolchain*.
+      with a GNU arm-elf toolchain* under Linux or Cygwin.
     </p>
     <p>
       <b>STATUS:</b>
@@ -527,7 +526,7 @@
     <p>
       <b>PJRC 87C52 Development Board</b>.
       This port uses the <a href="http://www.pjrc.com/">PJRC</a> 87C52 development system
-      and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain.
+      and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain under Linux or Cygwin.
     </p>
     <p>
      <b>STATUS:</b>
@@ -551,7 +550,7 @@
     <p>
       <b>Z80 Instruction Set Simulator</b>.
       This port uses the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain
-      (verfied using version 2.6.0).
+      under Linux or Cygwin (verfied using version 2.6.0).
       This port has been verified using only a Z80 instruction simulator.
       That simulator can be found in the NuttX CVS
       <a href="http://nuttx.cvs.sourceforge.net/nuttx/misc/sims/z80sim/">here</a>.
@@ -580,7 +579,8 @@
 </table></center>
 
 <blockquote>* A highly modified <a href="http://buildroot.uclibc.org/">buildroot</a>
-is available that be used to build a NuttX-compatible arm-elf toolchain.</blockquote>
+is available that may be used to build a NuttX-compatible arm-elf toolchain under
+Linux or Cygwin.</blockquote>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">

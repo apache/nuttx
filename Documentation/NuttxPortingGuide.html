@@ -560,20 +560,20 @@
     This is a port to the Spectrum Digital C5471 evaluation board.  The
     C5471 is a dual core processor from TI with an ARM7TDMI general purpose
     processor and a c54 SDP.  NuttX runs on the ARM core and is built with
-    with a GNU arm-elf toolchain*. This port is complete, verified, and
-    included in the NuttX release.
+    with a GNU arm-elf toolchain* under Linux or Cygwin.
+    This port is complete, verified, and included in the NuttX release.
   </li>
 
   <li><code>configs/mcu123-lpc214x</code>:
     This port is for the NXP LPC2148 as provided on the mcu123.com
     lpc214x development board.
-    This OS is also built with the arm-elf toolchain*.
+    This OS is also built with the arm-elf toolchain* under Linux or Cygwin.
     STATUS: This port is in progress and should be available in the
     nuttx-0.2.5 release.
   </li>
 
   <li><code>configs/ntosd-dm320</code>:
-    This port uses the Neuros OSD with a GNU arm-elf toolchain*.
+    This port uses the Neuros OSD with a GNU arm-elf toolchain* under Linux or Cygwin.
     See <a href="http://wiki.neurostechnology.com/index.php/Developer_Welcome">Neuros Wiki</a>
     for futher information.
     NuttX operates on the ARM9EJS of this dual core processor.
@@ -588,7 +588,7 @@
 
   <li><code>configs/pjrc-8051</code>:
     8051 Microcontroller.  This port uses the PJRC 87C52 development system
-    and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain.
+    and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain under Linux or Cygwin.
     This port is not quite ready for prime time.
   </li>
 
@@ -597,13 +597,13 @@
     That simulator can be found in the NuttX CVS
     <a href="http://nuttx.cvs.sourceforge.net/nuttx/misc/sims/z80sim/">here</a>.
     This port also the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain
-    (verfied with version 2.6.0).
+    under Linux or Cygwin(verfied with version 2.6.0).
   </li>
 </ul>
 
 <p><small><blockquote>
   * A customized version of the <a href="http://www.buildroot.org">buildroot</a>
-  is available to build these toolchains.
+  is available to build these toolchains under Linux or Cygwin.
 </blockquote></small></p>
 
 <h2>2.4 <a name="DirStructDrivers">drivers</a></h2>
