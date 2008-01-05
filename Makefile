@@ -44,11 +44,16 @@ ARCH_SRC	= $(ARCH_DIR)/src
 ARCH_INC	= $(ARCH_DIR)/include
 BOARD_DIR	= configs/$(CONFIG_ARCH_BOARD)
 
+# Add-on directories.  These may or may not be in place in the
+# NuttX source tree (they must be specifically installed)
+
+PCODE_DIR	:= `if [ -r pcode/Makefile ]; then echo "pcode"; fi`
+
 # FSDIRS depend on file descriptor support; NONFSDIRS do not
 #   (except for parts of FSDIRS).  We will exclude FSDIRS
 #   from the build if file descriptor support is disabled
 
-NONFSDIRS	= sched lib $(ARCH_SRC) mm examples/$(CONFIG_EXAMPLE)
+NONFSDIRS	= sched lib $(ARCH_SRC) mm examples/$(CONFIG_EXAMPLE) $(PCODE_DIR)
 FSDIRS		= fs drivers
 
 ifeq ($(CONFIG_NET),y)
@@ -94,6 +99,10 @@ LINKLIBS	+= drivers/libdrivers$(LIBEXT)
 endif
 else
 LINKLIBS	+= fs/libfs$(LIBEXT) drivers/libdrivers$(LIBEXT)
+endif
+
+ifneq ($(PCODE_DIR),)
+LINKLIBS	+= pcode/libpcode$(LIBEXT)
 endif
 
 # This is the name of the final target
@@ -216,6 +225,9 @@ fs/libfs$(LIBEXT): context
 
 drivers/libdrivers$(LIBEXT): context
 	$(MAKE) -C drivers TOPDIR=$(TOPDIR) libdrivers$(LIBEXT)
+
+pcode/libpcode$(LIBEXT): context
+	$(MAKE) -C pcode TOPDIR=$(TOPDIR) libpcode$(LIBEXT)
 
 examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT): context
 	$(MAKE) -C examples/$(CONFIG_EXAMPLE) TOPDIR=$(TOPDIR) lib$(CONFIG_EXAMPLE)$(LIBEXT)
