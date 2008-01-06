@@ -66,6 +66,16 @@ CONFIG_ARCH_LEDS=y
 CONFIG_ARCH_STACKDUMP=y
 
 #
+# General build options
+#
+# CONFIG_RRLOAD_BINARY - make the rrload binary format used with
+#   BSPs from www.ridgerun.com
+# CONFIG_HAVE_LIBM - toolchain supports libm.a
+#
+CONFIG_RRLOAD_BINARY=y
+CONFIG_HAVE_LIBM=n
+
+#
 # C5471 specific device driver settings
 #
 # CONFIG_SERIAL_IRDA_CONSOLE - selects the IRDA UART for the
@@ -191,14 +201,6 @@ CONFIG_ARCH_BZERO=n
 CONFIG_ARCH_KMALLOC=n
 CONFIG_ARCH_KZMALLOC=n
 CONFIG_ARCH_KFREE=n
-
-#
-# General build options
-#
-# CONFIG_RRLOAD_BINARY - make the rrload binary format used with
-#   BSPs from www.ridgerun.com
-#
-CONFIG_RRLOAD_BINARY=y
 
 #
 # Sizes of configurable things (0 disables)
