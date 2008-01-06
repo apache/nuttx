@@ -1,12 +1,20 @@
-nuttx-0.3.5
+nuttx-0.3.6
 ^^^^^^^^^^^
 
-This is the 17th release of NuttX this release is primarily a bug-fix
-release and intended to synchronize with the current CVS contents.  See
-the ChangeLog for a detailed list of changes and fixes.
+This is the 18th release of NuttX.  This release contains on a few
+changes.  The primary purpose of this release is to synchronize with
+the release of the pascal-0.1.0 add-on package.
 
-This release were verified only on the Spectrum Digital C5471 EVM using
-the C5471 Ethernet driver. Any feedback about bugs or suggestions for
-improvement would be greatly appreciated.
+This release of NuttX includes the following changes:
 
-This tarball contains a complete CVS snapshot from December 18, 2007.
+* Fixes for use with SDCC compiler
+* Added a simulated z80 target (arch/z80)
+* Fix deadlock errors when using stdio but with no buffering
+* Add support for the add-on Pascal P-Code interpreter (pcode/)
+  (see the pascal-0.1.0 package)
+
+This release were verified only on the simulated Z80 and and host
+simulation targets.  As usual, any feedback about bugs or suggestions
+for improvement would be greatly appreciated.
+
+This tarball contains a complete CVS snapshot from January 6, 2007.

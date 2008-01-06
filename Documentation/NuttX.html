@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: January 1, 2008</p>
+      <p>Last Updated: January 6, 2008</p>
     </td>
   </tr>
 </table>
@@ -386,6 +386,30 @@
 </tr>
 </table></center>
 
+<p>
+  <b>NuttX Add-Ons</b>.
+  The following packages are available to extend the basic NuttX feature set:
+<p>
+<center><table width="90%">
+
+<tr>
+  <td valign="top" width="18"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Pascal Compiler with NuttX runtime P-Code interpreter add-on</b>
+  </td>
+</tr>
+
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>The Pascal add-on is available for download from the
+        <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
+        website.</li>
+    </p>
+</tr>
+</table></center>
+
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
@@ -395,7 +419,7 @@
 </table>
 
 <p>
-  The 17th release of NuttX (nuttx-0.3.5) is available for download
+  The 18th release of NuttX (nuttx-0.3.6) is available for download
   from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
   website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
@@ -403,29 +427,38 @@
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  NuttX 0.3.5 is the 6th release containing the integration of a network
+  NuttX 0.3.8 is the 7th release containing the integration of a network
   subsystem and the uIP TCP/IP, UDP, and ICMP stacks based on
   <a href="http://www.sics.se/~adam/uip/index.php/Main_Page">uIP</a>
   into NuttX.
 </p>
 <p>
-  This release is primarily a bug-fix release and intended to synchronize
-  with the current CVS contents.  See the <a href="#currentrelease">ChangeLog</a>
-  for a detailed list of changes and fixes.
+  This release contains on a few changes.
+  The primary purpose of this release is to synchronize with the release
+  of the pascal-0.1.0 add-on package.
+  This release of NuttX includes the following changes:
 </p>
+<ul>
+<li>Fixes for use with SDCC compiler, <li>
+<li>Added a simulated z80 target (arch/z80), <li>
+<li>Fix deadlock errors when using stdio but with no buffering, and</li>
+<li>Add support for the add-on Pascal P-Code interpreter (pcode/)
+  (see the pascal-0.1.0 package)</li>
+</ul>
 <p>
-  The level of network reliability is at a strong beta release level.  The
-  baseline functionality of NuttX continues to mature and remains at
-  post-beta or production level.
+  The Pascal add-on it integrated but has so far been tested very little;
+  it is certainly at an early, pre-alpha release leve.
+  The baseline functionality of NuttX (including recently added network)
+  functionality continues to mature and remains at post-beta or production level.
   Extensive testing has been done for the ARM architecture using the GCC
   compiler/toolchain.
   Other architectures and the SDCC toolchain are also supported but not as
   well exercised.
 </p>
 <p>
-  This release was verified only on the Spectrum Digital C5471 EVM using
-  the C5471 Ethernet driver. Any feedback about bugsor suggestions for
-  improvement would be greatly appreciated.
+  The current release were verified only on the simulated Z80 and and host
+  simulation targets.  As usual, any feedback about bugs or suggestions
+  for improvement would be greatly appreciated.
 </p>
 
 <table width ="100%">
@@ -699,17 +732,12 @@ Other memory:
 </table>
 
 <pre><ul>
-0.3.5 2007-12-18 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.6 2007-01-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* Added inet_ntoa() and ether_ntoa()
-	* Added netdev_foreach() to support traversal of registered network devices
-	* Added support for 'ifconfig' command to NSH (examples/nsh)
-	* Moved MAC and ethernet definitions to net/ethernet.h
-	* Fix sim and DM90x0 compilation errors introduced in 0.3.4
-	* Fixed errors in C5471 configuration files for examples/uip
-	* Modified DHCPC (netutils/dhcpc) so that it should work in environments where
-	  there are more than one DHCPD server.
-	* NSH ifconfig command now shows uIP status was well (examples/nsh)
+	* Changes for use with SDCC compiler
+	* Added a simulated z80 target
+	* Fix deadlock errors when using stdio but with no buffering
+	* Add support for Pascal P-Code interpreter
 </pre></ul>
 
 <table width ="100%">
@@ -721,12 +749,7 @@ Other memory:
 </table>
 
 <pre><ul>
-0.3.6 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
-
-	* Changes for use with SDCC compiler
-	* Added a simulated z80 target
-	* Fix deadlock errors when using stdio but with no buffering
-	* Add support for Pascal P-Code interpreter
+0.3.7 2007-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 </pre></ul>
 
 <table width ="100%">

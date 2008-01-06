@@ -283,11 +283,11 @@
 	  there are more than one DHCPD server.
 	* NSH ifconfig command now shows uIP status was well (examples/nsh)
 
-0.3.6 2007-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.6 2008-01-06 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Changes for use with SDCC compiler
 	* Added a simulated z80 target
 	* Fix deadlock errors when using stdio but with no buffering
 	* Add support for Pascal P-Code interpreter
 
-
+0.3.7 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
