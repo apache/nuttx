@@ -151,8 +151,10 @@ CONFIG_ARCH_KFREE=n
 #
 # CONFIG_RRLOAD_BINARY - make the rrload binary format used with
 #   BSPs from www.ridgerun.com
+# CONFIG_HAVE_LIBM - toolchain supports libm.a
 #
 CONFIG_RRLOAD_BINARY=n
+CONFIG_HAVE_LIBM=y
 
 #
 # Sizes of configurable things (0 disables)
