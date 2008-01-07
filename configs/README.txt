@@ -320,6 +320,11 @@ configs/pjrc-8051
     8051 Microcontroller.  This port uses the PJRC 87C52 development system
     and the SDCC toolchain.   This port is not quite ready for prime time.
 
+configs/z16f2800100zcog
+    z16f Microncontroller.  This port use the Zilog z16f2800100zcog
+    development kit and the Zilog ZDS-II Windows command line tools.  The
+    development envirnoment is Cygwin under WinXP.
+
 configs/z80zim
     z80 Microcontroller.  This port uses a Z80 instruction set simulator.
     That simulator can be found in the NuttX CVS at
