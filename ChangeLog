@@ -291,3 +291,6 @@
 	* Add support for Pascal P-Code interpreter
 
 0.3.7 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* Began adding support for the Zilog Z16F using the Zilog
+	  Z16F2800100ZCOG Development Kit.

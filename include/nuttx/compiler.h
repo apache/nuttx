@@ -1,7 +1,7 @@
-/************************************************************
- * compiler.h
+/****************************************************************************
+ * include/nuttx/compiler.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,20 +31,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __COMPILER_H
 #define __COMPILER_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/* GCC-specific definitions *********************************/
+/* GCC-specific definitions *************************************************/
 
 #ifdef __GNUC__
 
@@ -114,7 +114,7 @@
 
 # define CONFIG_CAN_PASS_STRUCTS 1
 
-/* SDCC-specific definitions ********************************/
+/* SDCC-specific definitions ************************************************/
 
 #elif defined(SDCC)
 
@@ -196,7 +196,69 @@
 
 # undef  CONFIG_CAN_PASS_STRUCTS
 
-/* Unknown compiler *****************************************/
+/* ZiLog-specific definitions ***********************************************/
+
+#elif defined(__ZILOG__)
+
+/* At present, only the ZiLog ZNeo compiler is recognized */
+
+#  ifndef __ZNEO__
+#    warning "Unrecognized ZiLog compiler"
+#  endif
+
+/* The ZiLog compiler does not support weak symbols */
+
+# undef  CONFIG_HAVE_WEAKFUNCTIONS
+# define weak_alias(name, aliasname)
+# define weak_function
+# define weak_const_function
+
+/* The ZiLog compiler does not support the noreturn or packed attributes */
+
+# define noreturn_function
+# define packed_struct
+
+/* The ZiLog compiler does not support the reentrant attribute */
+
+# define reentrant_function
+
+/* Addressing */
+
+# define FAR   _Far
+# define NEAR  _Near
+# define DSEG  _Far
+# define CODE  _Near
+
+/* Select the large, 32-bit addressing model */
+
+# undef  CONFIG_SMALL_MEMORY
+
+/* Long and int are the same size */
+
+# undef  CONFIG_LONG_IS_NOT_INT
+
+/* FAR pointers and int are the same size */
+
+# undef  CONFIG_PTR_IS_NOT_INT
+
+/* The ZiLog compiler does not support inline functions */
+
+# undef  CONFIG_HAVE_INLINE
+# define inline
+
+/* The Zilog compiler supports both types double and long long,
+ * but the size is 32-bits (same as long and single precision)
+ * so it is safer to say that they are not supported.
+ */
+
+# undef  CONFIG_HAVE_DOUBLE
+# undef  CONFIG_HAVE_LONG_LONG
+
+/* Structures and unions can be assigned and passed as values */
+
+# define CONFIG_CAN_PASS_STRUCTS 1
+
+/* Unknown compiler *********************************************************/
 
 #else
 
@@ -224,13 +286,13 @@
 
 #endif
 
-/************************************************************
+/****************************************************************************
  * Global Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

@@ -1,7 +1,7 @@
 #!/bin/sh
-# ntosd-dm320/setenv.sh
+# tools/mknulldeps.sh
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,16 +31,4 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-
-if [ "$(basename $0)" = "setenv.sh" ] ; then
-  echo "You must source this script, not run it!" 1>&2
-  exit 1
-fi
-
-if [ -z ${PATH_ORIG} ]; then export PATH_ORIG=${PATH}; fi
-
-WD=`pwd`
-export BUILDROOT_BIN=${WD}/../buildroot/build_arm_nofpu/staging_dir/bin
-export PATH=${BUILDROOT_BIN}:/sbin:/usr/sbin:${PATH_ORIG}
-
-echo "PATH : ${PATH}"
+echo "# The selected toolchain does not support dependency generation"

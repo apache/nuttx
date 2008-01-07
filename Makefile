@@ -33,7 +33,7 @@
 #
 ############################################################
 
-TOPDIR		= ${shell pwd}
+TOPDIR		:= ${shell pwd | sed -e 's/ /\\ /g'}
 -include ${TOPDIR}/.config
 -include ${TOPDIR}/Make.defs
 

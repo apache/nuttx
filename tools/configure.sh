@@ -35,7 +35,7 @@
 
 BOARD=$1
 WD=`pwd`
-TOPDIR=${WD}/..
+TOPDIR="${WD}/.."
 
 function show_usage ()
 {
@@ -49,7 +49,7 @@ if [ "${BOARD}X" = "X" ]; then
 fi
 
 BOARDDIR=${TOPDIR}/configs/${BOARD}
-if [ ! -d ${BOARDDIR} ]; then
+if [ ! -d "${BOARDDIR}" ]; then
   echo "Directory ${BOARDDIR} does not exist.  Options are:"
   echo ""
   echo `cd ${TOPDIR}/configs ; ls -1 | grep -v CVS | grep -v README.txt`
@@ -57,25 +57,26 @@ if [ ! -d ${BOARDDIR} ]; then
   show_usage
 fi
 
-if [ ! -r ${BOARDDIR}/Make.defs ]; then
+if [ ! -r "${BOARDDIR}/Make.defs" ]; then
   echo "File ${BOARDDIR}/Make.defs does not exist"
   exit 1
 fi
 
-if [ ! -r ${BOARDDIR}/setenv.sh ]; then
+if [ ! -r "${BOARDDIR}/setenv.sh" ]; then
   echo "File ${BOARDDIR}/setenv.sh does not exist"
   exit 1
 fi
 
-if [ ! -r ${BOARDDIR}/defconfig ]; then
+if [ ! -r "${BOARDDIR}/defconfig" ]; then
   echo "File ${BOARDDIR}/defconfig does not exist"
   exit 1
 fi
 
-cp -f ${BOARDDIR}/Make.defs ${TOPDIR}/. || \
+cp -f "${BOARDDIR}/Make.defs" "${TOPDIR}/." || \
   { echo "Failed to copy ${BOARDDIR}/Make.defs" ; exit 1 ; }
-cp -f ${BOARDDIR}/setenv.sh ${TOPDIR}/. || \
+cp -f "${BOARDDIR}/setenv.sh" "${TOPDIR}/." || \
   { echo "Failed to copy ${BOARDDIR}/setenv.sh" ; exit 1 ; }
-cp -f ${BOARDDIR}/defconfig ${TOPDIR}/.config || \
+chmod 755 "${TOPDIR}/setenv.sh"
+cp -f "${BOARDDIR}/defconfig" "${TOPDIR}/.config" || \
   { echo "Failed to copy ${BOARDDIR}/defconfig" ; exit 1 ; }
 

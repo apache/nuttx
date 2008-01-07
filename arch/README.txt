@@ -159,8 +159,12 @@ arch/m68322
 arch/pjrc-8051
     8051 Microcontroller.  This port is not quite ready for prime time.
 
+arch/z16
+    ZiLog z16f Microcontroller.
+    STATUS: A work in progress
+    
 arch/z80
-    z80 Microcontroller.
+    ZiLog z80 Microcontroller.
     STATUS: Functional with no known defects.  There are still several
     OS features that have not yet been tested (e.g., networking).
 
