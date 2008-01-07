@@ -414,15 +414,22 @@
   </li>
 
   <li><code>arch/m68322</code>
-    A work in progress.</li>
+    A work in progress.
   </li>
 
   <li><code>arch/pjrc-8051</code>:
-    8051 Microcontroller.  This port is not quite ready for prime time.</li>
+    8051 Microcontroller.  This port is not quite ready for prime time.
   </li>
 
-  <li><code>arch/z80</code>:
-    z80 Microcontroller.  This port has been verified using only a z80 instruction simulator.</li>
+  <li><code>arch/z16f</code>:
+    Zilog z16f Microcontroller.
+    This port uses the Zilog z16f2800100zcog Development Kit.
+    This is a work in progress.
+  </li>
+
+    <li><code>arch/z80</code>:
+    Zilog z80 Microcontroller.
+    This port has been verified using only a z80 instruction simulator.
   </li>
 </ul>
 
@@ -591,6 +598,12 @@
     and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain under Linux or Cygwin.
     This port is not quite ready for prime time.
   </li>
+
+  <li><code>configs/z16f2800100zcog</code>
+    z16f Microncontroller.
+    This port use the Zilog z16f2800100zcog development kit and the
+    Zilog ZDS-II Windows command line tools.
+    The development environment is Cygwin under WinXP.
 
   <li><code>configs/z80sim</code>:
     z80 Microcontroller.  This port uses a Z80 instruction set simulator.

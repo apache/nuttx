@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: January 6, 2008</p>
+      <p>Last Updated: January 8, 2008</p>
     </td>
   </tr>
 </table>
@@ -574,7 +574,28 @@
 <tr>
   <td valign="top"><img src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <b>Z80</b>
+    <b>Zilog Z16F</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>Zilog z16f Microncontroller</b>.
+      This port use the Zilog z16f2800100zcog development kit and the Zilog
+      ZDS-II Windows command line tools.
+      The development envirnoment is Cygwin under WinXP.
+    </p>
+    <p>
+      <b>STATUS:</b>
+      This is a work in progress.
+    </p>
+   </td>
+</tr>
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Zilog Z80</b>
   </td>
 </tr>
 <tr>
@@ -583,7 +604,7 @@
     <p>
       <b>Z80 Instruction Set Simulator</b>.
       This port uses the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain
-      under Linux or Cygwin (verfied using version 2.6.0).
+      under Linux or Cygwin (verified using version 2.6.0).
       This port has been verified using only a Z80 instruction simulator.
       That simulator can be found in the NuttX CVS
       <a href="http://nuttx.cvs.sourceforge.net/nuttx/misc/sims/z80sim/">here</a>.
@@ -750,6 +771,9 @@ Other memory:
 
 <pre><ul>
 0.3.7 2007-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+	* Began adding support for the Zilog Z16F using the Zilog
+	  Z16F2800100ZCOG Development Kit.
 </pre></ul>
 
 <table width ="100%">
@@ -809,7 +833,7 @@ Other memory:
   <li>TI is a tradename of Texas Instruments Incorporated.</li>
   <li>UNIX is a registered trademark of The Open Group.</li>
   <li>VxWorks is a registered trademark of Wind River Systems, Incorporated.</li>
-  <li>Z80 is a registered trademark of Zilog, Inc.</li>
+  <li>ZDS, ZNEO, Z16F, Z80, and Zilog are a registered trademark of Zilog, Inc.</li>
 </ul>
 <p>
   NOTE: NuttX is <i>not</i> licensed to use the POSIX trademark.  NuttX uses the POSIX
