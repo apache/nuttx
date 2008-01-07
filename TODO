@@ -11,6 +11,7 @@ NuttX TODO List (Last updated December 13, 2007)
   (2)  USB (drivers/usbdev)
   (3)  Libraries (lib/)
   (2)  File system (fs/, drivers/)
+  (1)  Pascal add-on (pcode/)
   (2)  Documentation (Documentation/)
   (3)  Build system
   (0)  Applications & Tests (examples/)
@@ -220,6 +221,14 @@ o File system (fs/, drivers/)
   Priority:    Low
 
   Description: FAT32: long file names
+  Status:      Open
+  Priority:    Medium
+
+o Pascal Add-On (pcode/)
+  ^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: Need a test to verify execution of P-Code from files.
+               Need APIs to verify execution of P-Code from memory buffer.
   Status:      Open
   Priority:    Medium
 
