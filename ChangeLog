@@ -290,9 +290,14 @@
 	* Fix deadlock errors when using stdio but with no buffering
 	* Add support for Pascal P-Code interpreter
 
+0.3.6.1 2008-01-07 Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* The initial 0.3.6 release including an error that prevented
+	  building successfully if the Pascal add-on was
+	  was not present.
+
 0.3.7 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Began adding support for the Zilog Z16F using the Zilog
 	  Z16F2800100ZCOG Development Kit.
-	* Fix Makefile error when Pascal P-Code interpreter is NOT installed (oops)
 	* Add support toolchains that do not support making of dependencies

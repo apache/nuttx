@@ -460,6 +460,13 @@
   simulation targets.  As usual, any feedback about bugs or suggestions
   for improvement would be greatly appreciated.
 </p>
+<p>
+  <b>NOTE</b>:
+  There was an error in the initial 0.3.6 release that prevented
+  a successful build <i>unless</i> the Pascal add-on was present.  The
+  tarball was patched to include the fix.  Make sure that you download
+  the nuttx-0.3.6.1.tar.gz version to avoid this problem.
+</p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -759,6 +766,12 @@ Other memory:
 	* Added a simulated z80 target
 	* Fix deadlock errors when using stdio but with no buffering
 	* Add support for Pascal P-Code interpreter
+
+0.3.6.1 2008-01-07 Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* The initial 0.3.6 release including an error that prevented
+	  building successfully if the Pascal add-on was
+	  was not present.
 </pre></ul>
 
 <table width ="100%">
@@ -774,7 +787,6 @@ Other memory:
 
 	* Began adding support for the Zilog Z16F using the Zilog
 	  Z16F2800100ZCOG Development Kit.
-	* Fix Makefile error when Pascal P-Code interpreter is NOT installed (oops)
 	* Add support toolchains that do not support making of dependencies
 </pre></ul>
 

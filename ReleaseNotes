@@ -18,3 +18,8 @@ simulation targets.  As usual, any feedback about bugs or suggestions
 for improvement would be greatly appreciated.
 
 This tarball contains a complete CVS snapshot from January 6, 2007.
+
+NOTE: There was an error in the initial 0.3.6 release that prevented
+a successful build unless the Pascal add-on was present.  The
+tarball was patched to include the fix.  Make sure that you download
+the nuttx-0.3.6.1.tar.gz version to avoid this problem.
