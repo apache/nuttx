@@ -69,15 +69,14 @@ LIBGCC		= ${shell $(CC) -print-libgcc-file-name}
 all: up_head.o libarch$(LIBEXT)
 
 $(AOBJS) $(LINKOBJS): %.o: %.S
-	$(CC) -c $(CFLAGS) -D__ASSEMBLY__ $< -o $@
+	$(call ASSEMBLE, $<, $@)
 
 $(COBJS): %.o: %.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(call COMPILE, $<, $@)
 
 libarch$(LIBEXT): $(OBJS)
 	@( for obj in $(OBJS) ; do \
-		$(AR) $@ $${obj} || \
-			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
+		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
 board/libboard$(LIBEXT):
@@ -114,7 +113,7 @@ clean:
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR=$(TOPDIR) clean ; \
 	fi
-	rm -f libarch$(LIBEXT) *.o *~
+	rm -f libarch$(LIBEXT) *.o *.obj *~
 
 distclean: clean
 	@if [ -e board/Makefile ]; then \

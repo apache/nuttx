@@ -108,13 +108,13 @@ STACK_BASE	= ${shell \
 all: up_head$(OBJEXT) libarch$(LIBEXT)
 
 $(ASRCS) $(LINKASRCS): %$(ASMEXT): %.S
-	$(CPP) -P $(CPPFLAGS) -D__ASSEMBLY__ $< -o $@
+	$(CPP) -P $(CPPFLAGS) $< -o $@
 
 $(AOBJS) $(LINKOBJS): $(ASRCS) $(LINKASRCS)
-	$(AS) $(ASFLAGS) $<
+	$(call ASSEMBLE, $<, $@)
 
 $(COBJS) $(TESTOBJS): %$(OBJEXT): %.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(call COMPILE, $<, $@)
 
 # Create a header file that contains addressing information needed by the code
 
@@ -147,8 +147,7 @@ up_mem.h: pass1.mem
 
 libarch$(LIBEXT): up_mem.h $(OBJS)
 	@( for obj in $(OBJS) ; do \
-		$(AR) $@ $${obj} || \
-			{ echo "$(AR) $@ $${obj} FAILED!" ; exit 1 ; } ; \
+		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
 # This is a kludge to work around some conflicting symbols in libsdcc.liXqueb
@@ -171,19 +170,21 @@ board/libboard$(LIBEXT):
 # This target builds the final executable
 
 pass1.ihx: up_mem.h $(SDCCLIBDIR)/libmysdcc.lib $(LINKOBJS) board/libboard$(LIBEXT)
-	$(CC) $(LDFLAGS) $(LDPATHES) -L$(BOARDDIR) $(SDCCPATH) $(LINKOBJS) \
+	@echo "LD:  $@"
+	@$(CC) $(LDFLAGS) $(LDPATHES) -L$(BOARDDIR) $(SDCCPATH) $(LINKOBJS) \
 		$(LDLIBS) -llibboard$(LIBEXT) $(SDCCLIBS) -o $@
 	@rm -f up_mem.h
 	@rm -f up_allocateheap$(OBJEXT) libarch$(LIBEXT)
 	@$(MAKE) TOPDIR=$(TOPDIR) libarch$(LIBEXT)
 
 nuttx.ihx: up_mem.h $(SDCCLIBDIR)/libmysdcc.lib $(LINKOBJS)
-	$(CC) $(LDFLAGS) $(LDPATHES) -L$(BOARDDIR) $(SDCCPATH) $(LINKOBJS) \
+	@echo "LD:  $@"
+	@$(CC) $(LDFLAGS) $(LDPATHES) -L$(BOARDDIR) $(SDCCPATH) $(LINKOBJS) \
 		$(LDLIBS) -llibboard$(LIBEXT) $(SDCCLIBS) -o $@
 
 nuttx$(EXEEXT): pass1.ihx nuttx.ihx
 	@rm -f pass1.*
-	packihx nuttx.ihx > $(TOPDIR)/nuttx$(EXEEXT)
+	@packihx nuttx.ihx > $(TOPDIR)/nuttx$(EXEEXT)
 	@cp -f nuttx.map $(TOPDIR)/.
 
 # This target builds a test program to verify interrupt context switching.  irqtest is

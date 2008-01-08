@@ -66,22 +66,22 @@ VPATH		= chip:common
 all: $(HEAD_OBJ) libarch$(LIBEXT)
 
 $(AOBJS) $(HEAD_AOBJ): %$(OBJEXT): %.S
-	$(CC) -c $(CFLAGS) -D__ASSEMBLY__ $< -o $@
+	$(call ASSEMBLE, $<, $@)
 
 $(COBJS): %$(OBJEXT): %.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(call COMPILE, $<, $@)
 
 libarch$(LIBEXT): $(OBJS)
 	@( for obj in $(OBJS) ; do \
-		$(AR) $@ $${obj} || \
-			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
+		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
 board/libboard$(LIBEXT):
 	$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT)
 
 nuttx: $(HEAD_AOBJ) board/libboard$(LIBEXT)
-	$(LD) --entry=__start $(LDFLAGS) $(LDPATHES) -L$(BOARDDIR) -o $(TOPDIR)/$@ $(HEAD_AOBJ) \
+	@echo "LD: nuttx"
+	@$(LD) --entry=__start $(LDFLAGS) $(LDPATHES) -L$(BOARDDIR) -o $(TOPDIR)/$@ $(HEAD_AOBJ) \
 		--start-group $(LDLIBS) -lboard --end-group $(EXTRA_LIBS) $(LIBGCC) 
 	@$(NM) $(TOPDIR)/$@ | \
 	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \

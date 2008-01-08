@@ -114,10 +114,10 @@ HEAP_BASE	= ${shell \
 all: $(HEAD_AOBJ) libarch$(LIBEXT)
 
 $(AOBJS) $(HEAD_AOBJ): %$(OBJEXT): %$(ASMEXT)
-	$(AS) $(ASFLAGS) $@ $<
+	$(call ASSEMBLE, $<, $@)
 
 $(COBJS): %$(OBJEXT): %.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(call COMPILE, $<, $@)
 
 # This is a kludge to work around some conflicting symbols in libsdcc.liXqueb
 
@@ -158,8 +158,7 @@ endif
 
 libarch$(LIBEXT): up_mem.h asm_mem.h $(OBJS)
 	@( for obj in $(OBJS) ; do \
-		$(AR) $@ $${obj} || \
-			{ echo "$(AR) $@ $${obj} FAILED!" ; exit 1 ; } ; \
+		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
 # This builds the libboard library in the board/ subdirectory 
@@ -170,6 +169,7 @@ board/libboard$(LIBEXT):
 # This target builds the final executable
 
 pass1.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboard$(LIBEXT)
+	@echo "LD: pass1.ihx"
 	@echo "--" >pass1.lnk				# Non-interactive
 	@echo "-k $(BOARDDIR)" >>pass1.lnk		# Path to board library
 	@echo "-k $(SDCCLIBDIR)" >>pass1.lnk		# Path to SDCC z80 library
@@ -187,13 +187,14 @@ pass1.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboar
 	@echo "pass1.ihx" >>pass1.lnk			# Path to head object
 	@echo "$(HEAD_AOBJ)" >>pass1.lnk		# Path to head object
 	@echo "-e" >>pass1.lnk				# End of script
-	$(LD) -f pass1.lnk
+	@$(LD) -f pass1.lnk
 	@rm -f up_mem.h asm_mem.h
 	@rm -f up_allocateheap$(OBJEXT) $(HEAD_AOBJ) libarch$(LIBEXT)
 	@$(MAKE) TOPDIR="$(TOPDIR)" libarch$(LIBEXT)
 	@$(MAKE) TOPDIR="$(TOPDIR)" $(HEAD_AOBJ)
 
 nuttx.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboard$(LIBEXT)
+	@echo "LD: nuttx.ihx"
 	@echo "--" >nuttx.lnk				# Non-interactive
 	@echo "-k $(BOARDDIR)" >>nuttx.lnk		# Path to board library
 	@echo "-k $(SDCCLIBDIR)" >>nuttx.lnk		# Path to SDCC z80 library
@@ -211,11 +212,11 @@ nuttx.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboar
 	@echo "nuttx.ihx" >>nuttx.lnk			# Path to head object
 	@echo "$(HEAD_AOBJ)" >>nuttx.lnk		# Path to head object
 	@echo "-e" >>nuttx.lnk				# End of script
-	$(LD) -f nuttx.lnk
+	@$(LD) -f nuttx.lnk
 
 nuttx$(EXEEXT): pass1.ihx nuttx.ihx
 	@rm -f pass1.*
-	packihx nuttx.ihx > $(TOPDIR)/nuttx$(EXEEXT)
+	@packihx nuttx.ihx > $(TOPDIR)/nuttx$(EXEEXT)
 	@cp -f nuttx.map $(TOPDIR)/.
 
 # Build dependencies

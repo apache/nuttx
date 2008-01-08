@@ -73,22 +73,22 @@ LDLIBS		= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
 all: up_head$(OBJEXT) libarch$(LIBEXT)
 
 $(AOBJS): %$(OBJEXT): %.S
-	$(CC) -c $(CFLAGS) -D__ASSEMBLY__ $< -o $@
+	$(call ASSEMBLE, $<, $@)
 
 $(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(call COMPILE, $<, $@)
 
 $(SPECOBJS): %$(OBJEXT): %.c
 	$(CC) -c $(HOSTCFLAGS) $< -o $@
 
 libarch$(LIBEXT): $(OBJS)
 	@( for obj in $(OBJS) ; do \
-		$(AR) $@ $${obj} || \
-			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
+		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
 nuttx$(EXEEXT): $(LINKOBJS)
-	$(CC) $(LDFLAGS) $(LDPATHES) -o $(TOPDIR)/$@ $(LINKOBJS) \
+	@echo "LD: nuttx$(EXEEXT)"
+	@$(CC) $(LDFLAGS) $(LDPATHES) -o $(TOPDIR)/$@ $(LINKOBJS) \
 		-Wl,--start-group $(LDLIBS) -Wl,--end-group $(EXTRA_LIBS)
 	@$(NM) $(TOPDIR)/$@ | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
