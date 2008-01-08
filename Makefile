@@ -47,7 +47,7 @@ BOARD_DIR	= configs/$(CONFIG_ARCH_BOARD)
 # Add-on directories.  These may or may not be in place in the
 # NuttX source tree (they must be specifically installed)
 
-PCODE_DIR	:= `if [ -r pcode/Makefile ]; then echo "pcode"; fi`
+PCODE_DIR	:= ${shell if [ -r pcode/Makefile ]; then echo "pcode"; fi}
 
 # FSDIRS depend on file descriptor support; NONFSDIRS do not
 #   (except for parts of FSDIRS).  We will exclude FSDIRS
