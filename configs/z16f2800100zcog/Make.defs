@@ -36,6 +36,7 @@
 include ${TOPDIR}/.config
 
 ZDSINSTALLDIR		= C:/Program\ Files/ZiLOG/ZDSII_ZNEO_4.10.2
+ZDSBINDIR			= $(ZDSINSTALLDIR)/bin
 ZDSLIBDIR			= $(ZDSINSTALLDIR)/lib/std
 ZDSINCDIR			= $(ZDSINSTALLDIR)/include
 
@@ -72,11 +73,11 @@ CFLAGS				= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 					  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES)
 
 CROSSDEV			=
-CC					= zneocc
-CPP					= zneoasm
-LD					= zneolink
-AS					= zneoasm
-AR					= zneolib
+CC					= $(ZDSBINDIR)/zneocc.exe
+CPP					= $(ZDSBINDIR)/zneoasm.exe
+LD					= $(ZDSBINDIR)/zneolink.exe
+AS					= $(ZDSBINDIR)/zneoasm.exe
+AR					= $(ZDSBINDIR)/zneolib.exe
 
 ASMEXT				= .asm
 OBJEXT				= .obj
