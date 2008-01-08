@@ -37,7 +37,7 @@ if [ "$(basename $0)" = "setenv.sh" ] ; then
   exit 1
 fi
 
-if [ -z ${PATH_ORIG} ]; then export PATH_ORIG=${PATH}; fi
+if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
 
 WD=`pwd`
 ZDSINSTALLDIR="C:/Program\ Files/ZiLOG/ZDSII_ZNEO_4.10.2"

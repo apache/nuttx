@@ -36,9 +36,9 @@
 -include $(TOPDIR)/Make.defs
 -include chip/Make.defs
 
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-USRINCLUDES	= -userinc:".;$(TOPDIR)/sched;$(ARCH_SRCDIR)/chip;$(ARCH_SRCDIR)/common"
+ARCHSRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+WARCHSRCDIR	= ${shell cygpath -w $(ARCHSRCDIR)}
+USRINCLUDES	= -usrinc:'.;$(WTOPDIR)\sched;$(WARCHSRCDIR)\chip;$(WARCHSRCDIR)\common'
 INCLUDES	= $(ARCHSTDINCLUDES) $(USRINCLUDES)
 CFLAGS		= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(INCLUDES) $(ARCHDEFINES)
 
