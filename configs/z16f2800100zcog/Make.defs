@@ -52,7 +52,7 @@ ARCHASMWARNINGS		= -warn
 ARCHASMDEFINES		= -define:_Z16F2811AL=1 -define:_Z16K_SERIES=1 -define:_Z16F_SERIES=1
 ARCHASMINCLUDES		= -include:$(ZDSINCDIR)/std;$(ZDSINCDIR)/zilog
 AFLAGS				= $(ARCHASMCPUFLAGS) $(ARCHASMINCLUDES) $(ARCHASMLIST) \
-					  $(ARCHASMWARN) $(ARCHASMOPTIMIZATION)
+					  $(ARCHASMWARNINGS) $(ARCHASMOPTIMIZATION)
 
 ifeq ("${CONFIG_DEBUG}","y")
   ARCHOPTIMIZATION	= -debug -NOregvar -reduceopt
@@ -61,14 +61,14 @@ else
 endif
 
 ARCHCPUFLAGS		= -chartype:S -model:L -NOmodsect -cpu:Z16F2811AL \
-					  -asmsw:" $(ARCHASMCPUFLAGS) $(ARCHASMINCLUDES) (ARCHASMWARN) $(ARCHASMOPTIMIZATION)"
+					  -asmsw:" $(ARCHASMCPUFLAGS) $(ARCHASMINCLUDES) $(ARCHASMWARNINGS) $(ARCHASMOPTIMIZATION)"
 ARCHLIST			= -NOgenprint -keeplst -NOlist -NOlistinc -NOkeepasm
 ARCHPICFLAGS		=
 ARCHWARNINGS		= -warn
 ARCHDEFINES			= -define:_Z16F2811AL -define:_Z16K_SERIES \
 					  -define:_Z16F_SERIES
 ARCHINCLUDES		= -stdinc:"$(ZDSINCDIR)/std;$(ZDSINCDIR)/zilog" \
-					  -userinc:".;$(TOPDIR)/include"
+					  -usrinc:".;$(TOPDIR)/include"
 CFLAGS				= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 					  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES)
 
@@ -77,7 +77,7 @@ CC					= $(ZDSBINDIR)/zneocc.exe
 CPP					= $(ZDSBINDIR)/zneoasm.exe
 LD					= $(ZDSBINDIR)/zneolink.exe
 AS					= $(ZDSBINDIR)/zneoasm.exe
-AR					= $(ZDSBINDIR)/zneolib.exe
+AR					= $(ZDSBINDIR)/czneolib.exe
 
 ASMEXT				= .asm
 OBJEXT				= .obj
