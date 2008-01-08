@@ -165,7 +165,7 @@ libarch$(LIBEXT): up_mem.h asm_mem.h $(OBJS)
 # This builds the libboard library in the board/ subdirectory 
 
 board/libboard$(LIBEXT):
-	$(MAKE) -C board TOPDIR=$(TOPDIR) libboard$(LIBEXT)
+	$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT)
 
 # This target builds the final executable
 
@@ -190,8 +190,8 @@ pass1.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboar
 	$(LD) -f pass1.lnk
 	@rm -f up_mem.h asm_mem.h
 	@rm -f up_allocateheap$(OBJEXT) $(HEAD_AOBJ) libarch$(LIBEXT)
-	@$(MAKE) TOPDIR=$(TOPDIR) libarch$(LIBEXT)
-	@$(MAKE) TOPDIR=$(TOPDIR) $(HEAD_AOBJ)
+	@$(MAKE) TOPDIR="$(TOPDIR)" libarch$(LIBEXT)
+	@$(MAKE) TOPDIR="$(TOPDIR)" $(HEAD_AOBJ)
 
 nuttx.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboard$(LIBEXT)
 	@echo "--" >nuttx.lnk				# Non-interactive
@@ -222,7 +222,7 @@ nuttx$(EXEEXT): pass1.ihx nuttx.ihx
 
 .depend: Makefile up_mem.h asm_mem.h chip/Make.defs $(DEPSRCS)
 	@if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR=$(TOPDIR) depend ; \
+		$(MAKE) -C board TOPDIR="$(TOPDIR)" depend ; \
 	fi
 	$(MKDEP) --dep-path chip --dep-path common $(CC) -- $(CFLAGS) -- $(DEPSRCS) >Make.dep
 	@touch $@
@@ -231,7 +231,7 @@ depend: .depend
 
 clean:
 	@if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR=$(TOPDIR) clean ; \
+		$(MAKE) -C board TOPDIR="$(TOPDIR)" clean ; \
 	fi
 	rm -f libarch$(LIBEXT) up_mem.h asm_mem.h pass1.* nuttx.*
 	rm -f *.asm *.rel *.lst *.rst *.sym *.adb *.lnk *.map *.mem *.ihx *.hex
@@ -240,7 +240,7 @@ clean:
 
 distclean: clean
 	@if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR=$(TOPDIR) distclean ; \
+		$(MAKE) -C board TOPDIR="$(TOPDIR)" distclean ; \
 	fi
 	rm -f Make.dep .depend
 

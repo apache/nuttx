@@ -113,7 +113,7 @@ all: $(BIN)
 
 # Build the mkconfig tool used to create include/nuttx/config.h
 tools/mkconfig:
-	$(MAKE) -C tools -f Makefile.mkconfig TOPDIR=$(TOPDIR)  mkconfig
+	$(MAKE) -C tools -f Makefile.mkconfig TOPDIR="$(TOPDIR)"  mkconfig
 
 # Create the include/nuttx/config.h file
 include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig
@@ -203,51 +203,51 @@ check_context:
 	fi
 
 sched/libsched$(LIBEXT): context
-	$(MAKE) -C sched TOPDIR=$(TOPDIR) libsched$(LIBEXT)
+	$(MAKE) -C sched TOPDIR="$(TOPDIR)" libsched$(LIBEXT)
 
 lib/liblib$(LIBEXT): context
-	$(MAKE) -C lib TOPDIR=$(TOPDIR) liblib$(LIBEXT)
+	$(MAKE) -C lib TOPDIR="$(TOPDIR)" liblib$(LIBEXT)
 
 $(ARCH_SRC)/libarch$(LIBEXT): context
-	$(MAKE) -C $(ARCH_SRC) TOPDIR=$(TOPDIR) libarch$(LIBEXT)
+	$(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libarch$(LIBEXT)
 
 mm/libmm$(LIBEXT): context
-	$(MAKE) -C mm TOPDIR=$(TOPDIR) libmm$(LIBEXT)
+	$(MAKE) -C mm TOPDIR="$(TOPDIR)" libmm$(LIBEXT)
 
 net/libnet$(LIBEXT): context
-	$(MAKE) -C net TOPDIR=$(TOPDIR) libnet$(LIBEXT)
+	$(MAKE) -C net TOPDIR="$(TOPDIR)" libnet$(LIBEXT)
 
 netutils/libnetutils$(LIBEXT): context
-	$(MAKE) -C netutils TOPDIR=$(TOPDIR) libnetutils$(LIBEXT)
+	$(MAKE) -C netutils TOPDIR="$(TOPDIR)" libnetutils$(LIBEXT)
 
 fs/libfs$(LIBEXT): context
-	$(MAKE) -C fs TOPDIR=$(TOPDIR) libfs$(LIBEXT)
+	$(MAKE) -C fs TOPDIR="$(TOPDIR)" libfs$(LIBEXT)
 
 drivers/libdrivers$(LIBEXT): context
-	$(MAKE) -C drivers TOPDIR=$(TOPDIR) libdrivers$(LIBEXT)
+	$(MAKE) -C drivers TOPDIR="$(TOPDIR)" libdrivers$(LIBEXT)
 
 pcode/libpcode$(LIBEXT): context
-	$(MAKE) -C pcode TOPDIR=$(TOPDIR) libpcode$(LIBEXT)
+	$(MAKE) -C pcode TOPDIR="$(TOPDIR)" libpcode$(LIBEXT)
 
 examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT): context
-	$(MAKE) -C examples/$(CONFIG_EXAMPLE) TOPDIR=$(TOPDIR) lib$(CONFIG_EXAMPLE)$(LIBEXT)
+	$(MAKE) -C examples/$(CONFIG_EXAMPLE) TOPDIR="$(TOPDIR)" lib$(CONFIG_EXAMPLE)$(LIBEXT)
 
 $(BIN):	context depend $(LINKLIBS)
-	$(MAKE) -C $(ARCH_SRC) TOPDIR=$(TOPDIR) LINKLIBS="$(LINKLIBS)" $(BIN)
+	$(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" LINKLIBS="$(LINKLIBS)" $(BIN)
 
 depend:
 	@for dir in $(MAKEDIRS) ; do \
-		$(MAKE) -C $$dir TOPDIR=$(TOPDIR) depend ; \
+		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" depend ; \
 	done
 
 subdir_clean:
 	@for dir in $(CLEANDIRS) ; do \
 		if [ -e $$dir/Makefile ]; then \
-			$(MAKE) -C $$dir TOPDIR=$(TOPDIR) clean ; \
+			$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" clean ; \
 		fi \
 	done
-	$(MAKE) -C tools -f Makefile.mkconfig TOPDIR=$(TOPDIR) clean
-	$(MAKE) -C mm -f Makefile.test TOPDIR=$(TOPDIR) clean
+	$(MAKE) -C tools -f Makefile.mkconfig TOPDIR="$(TOPDIR)" clean
+	$(MAKE) -C mm -f Makefile.test TOPDIR="$(TOPDIR)" clean
 
 clean: subdir_clean
 	rm -f $(BIN) $(BIN).* mm_test *.map *~
@@ -255,7 +255,7 @@ clean: subdir_clean
 subdir_distclean:
 	@for dir in $(CLEANDIRS) ; do \
 		if [ -e $$dir/Makefile ]; then \
-			$(MAKE) -C $$dir TOPDIR=$(TOPDIR) distclean ; \
+			$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" distclean ; \
 		fi \
 	done
 

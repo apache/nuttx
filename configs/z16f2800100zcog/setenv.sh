@@ -41,6 +41,6 @@ if [ -z ${PATH_ORIG} ]; then export PATH_ORIG=${PATH}; fi
 
 WD=`pwd`
 ZDSINSTALLDIR="C:/Program\ Files/ZiLOG/ZDSII_ZNEO_4.10.2"
-export PATH=${ZDSINSTALLDIR}/bin:/sbin:/usr/sbin:${PATH_ORIG}
+export PATH="${ZDSINSTALLDIR}/bin:/sbin:/usr/sbin:${PATH_ORIG}"
 
 echo "PATH : ${PATH}"
