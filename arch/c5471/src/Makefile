@@ -77,7 +77,7 @@ $(COBJS): %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 libarch$(LIBEXT): $(OBJS)
-	( for obj in $(OBJS) ; do \
+	@( for obj in $(OBJS) ; do \
 		$(AR) $@ $${obj} || \
 			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
 	done ; )
@@ -104,9 +104,9 @@ ifeq ($(CONFIG_RRLOAD_BINARY),y)
 endif
 
 .depend: Makefile $(SRCS)
-	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(MAKE) -C board TOPDIR=$(TOPDIR) depend
-	touch $@
+	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@$(MAKE) -C board TOPDIR=$(TOPDIR) depend
+	@touch $@
 
 depend: .depend
 

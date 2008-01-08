@@ -201,8 +201,8 @@ irqtest:
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR=$(TOPDIR) depend ; \
 	fi	
-	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	touch $@
+	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@touch $@
 
 depend: .depend
 
