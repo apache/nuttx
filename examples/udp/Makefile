@@ -78,7 +78,7 @@ $(TARG_COBJS): %$(OBJEXT): %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(TARG_BIN):	$(TARG_OBJS) $(HOST_BIN)
-	( for obj in $(TARG_OBJS) ; do \
+	@( for obj in $(TARG_OBJS) ; do \
 		$(AR) $@ $${obj} || \
 			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
 	done ; )
@@ -90,8 +90,8 @@ $(HOST_BIN):	$(HOST_OBJS)
 	$(HOSTCC) $(HOSTLDFLAGS) $(HOST_OBJS) -o $@
 
 .depend: Makefile $(TARG_SRCS)
-	$(MKDEP) $(CC) -- $(CFLAGS) -- $(TARG_SRCS) >Make.dep
-	touch $@
+	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(TARG_SRCS) >Make.dep
+	@touch $@
 
 depend: .depend
 

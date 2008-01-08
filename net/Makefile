@@ -82,16 +82,16 @@ $(COBJS): %$(OBJEXT): %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(BIN): $(OBJS)
-	( for obj in $(OBJS) ; do \
+	@( for obj in $(OBJS) ; do \
 		$(AR) $@ $${obj} || \
 			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
 	done ; )
 
 .depend: Makefile $(SRCS)
 ifeq ($(CONFIG_NET),y)
-	$(MKDEP) --dep-path . --dep-path uip $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@$(MKDEP) --dep-path . --dep-path uip $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 endif
-	touch $@
+	@touch $@
 
 depend: .depend
 

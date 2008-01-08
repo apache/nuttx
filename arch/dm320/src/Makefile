@@ -75,7 +75,7 @@ $(COBJS): %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 libarch$(LIBEXT): $(OBJS)
-	( for obj in $(OBJS) ; do \
+	@( for obj in $(OBJS) ; do \
 		$(AR) $@ $${obj} || \
 			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
 	done ; )
@@ -105,8 +105,8 @@ endif
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR=$(TOPDIR) depend ; \
 	if
-	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	touch $@
+	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@touch $@
 
 depend: .depend
 

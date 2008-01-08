@@ -57,14 +57,14 @@ $(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 libboard$(LIBEXT): $(OBJS)
-	( for obj in $(OBJS) ; do \
+	@( for obj in $(OBJS) ; do \
 		$(AR) $@ $${obj} || \
 			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
 	done ; )
 
 .depend: Makefile $(SRCS)
-	$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	touch $@
+	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@touch $@
 
 depend: .depend
 
