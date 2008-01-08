@@ -33,6 +33,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 ############################################################################
+set -x
 
 src=$1
 dest=$2
@@ -44,23 +45,25 @@ if [ -z "${src}" -o -z "${dest}" ]; then
 	exit 1
 fi
 
-# Check if something already exists at the destination path
+# Check if something already exists at the destination path replace it with
+# the new link (which might be different).  Note that we check for the
+# the link (-h) before we check for existence (-e) because a bad link will
+# report that it does not exist.
 
-if [ -e "${dest}" ]; then
+if [ -h "${dest}" ]; then
+	rm -f "${dest}"
+else
 
-	# Yes, is it a symbolic link?  If so, then remove it so that we can
-	# replace it with the new link (which might be different)
+	# If the path exists and is a directory that contains the "fake link"
+	# mark, then treat it like a soft link (i.e., remove the directory)
 
-	if [ -h "${dest}" ]; then
-		rm -f "${dest}"
+	if [ -d "${dest}" -a -f "${dest}/.fakelnk" ]; then
+		rm -rf "${dest}"
 	else
 
-		# If the path is a directory and contains the "fake link" mark, then
-		# treat it like a soft link (i.e., remove the directory)
+		# Does anything exist at the destination path?
 
-		if [ -d "${dest}" -a -f "${dest}/.fakelnk" ]; then
-			rm -rf "${dest}"
-		else
+		if [ -e "${dest}" ]; then
 
 			# It is something else (like a file) or directory that does
 			# not contain the "fake link" mark
@@ -73,7 +76,7 @@ fi
 
 # Verify that a directory exists at the source path
 
-if [ ! -d ${src} ]; then
+if [ ! -d "${src}" ]; then
 	echo "No directory at ${src}"
 	exit 1
 fi
