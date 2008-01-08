@@ -78,7 +78,7 @@ libarch$(LIBEXT): $(OBJS)
 	done ; )
 
 board/libboard$(LIBEXT):
-	$(MAKE) -C board TOPDIR=$(TOPDIR) libboard$(LIBEXT)
+	$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT)
 
 nuttx: $(HEAD_AOBJ) board/libboard$(LIBEXT)
 	$(LD) --entry=__start $(LDFLAGS) $(LDPATHES) -L$(BOARDDIR) -o $(TOPDIR)/$@ $(HEAD_AOBJ) \
@@ -86,23 +86,23 @@ nuttx: $(HEAD_AOBJ) board/libboard$(LIBEXT)
 
 .depend: Makefile chip/Make.defs $(SRCS)
 	@if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR=$(TOPDIR) depend ; \
+		$(MAKE) -C board TOPDIR="$(TOPDIR)" depend ; \
 	fi
-	$(MKDEP) --dep-path chip --dep-path common $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@$(MKDEP) --dep-path chip --dep-path common $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 
 depend: .depend
 
 clean:
 	@if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR=$(TOPDIR) clean ; \
+		$(MAKE) -C board TOPDIR="$(TOPDIR)" clean ; \
 	fi
 	@rm -f libarch$(LIBEXT) *~
 	@if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
 
 distclean: clean
 	@if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR=$(TOPDIR) distclean ; \
+		$(MAKE) -C board TOPDIR="$(TOPDIR)" distclean ; \
 	fi
 	@rm -f Make.dep .depend
 
