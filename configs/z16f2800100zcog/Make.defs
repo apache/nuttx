@@ -129,6 +129,11 @@ endef
 
 MKDEP			= $(TOPDIR)/tools/mknulldeps.sh
 
+# ZNeo-II cannot follow Cygwin soft links, so we will have to use directory copies
+
+DIRLINK			= $(TOPDIR)/tools/winlink.sh
+DIRUNLINK		= $(TOPDIR)/tools/unlink.sh
+
 # Linux/Cygwin host tool definitions
 
 HOSTCC			= gcc
