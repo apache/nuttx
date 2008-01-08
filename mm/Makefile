@@ -36,11 +36,11 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS	= 
-AOBJS	= $(ASRCS:.S=.o)
+AOBJS	= $(ASRCS:.S=$(OBJEXT))
 CSRCS	= mm_initialize.c mm_sem.c  mm_addfreechunk.c mm_size2ndx.c mm_shrinkchunk.c \
 	  mm_malloc.c mm_zalloc.c mm_calloc.c mm_realloc.c \
 	  mm_memalign.c mm_free.c mm_mallinfo.c
-COBJS	= $(CSRCS:.c=.o)
+COBJS	= $(CSRCS:.c=$(OBJEXT))
 
 SRCS	= $(ASRCS) $(CSRCS)
 OBJS	= $(AOBJS) $(COBJS)
@@ -49,16 +49,15 @@ BIN	= libmm$(LIBEXT)
 
 all:	$(BIN)
 
-$(AOBJS): %.o: %.S
-	$(CC) -c $(CFLAGS) $< -o $@
+$(AOBJS): %$(OBJEXT): %.S
+	$(call ASSEMBLE, $<, $@)
 
-$(COBJS): %.o: %.c
-	$(CC) -c $(CFLAGS) $< -o $@
+$(COBJS): %$(OBJEXT): %.c
+	$(call COMPILE, $<, $@)
 
 $(BIN):	$(OBJS)
 	@( for obj in $(OBJS) ; do \
-		$(AR) $@ $${obj} || \
-			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
+		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
 .depend: Makefile $(SRCS)
@@ -68,7 +67,8 @@ $(BIN):	$(OBJS)
 depend: .depend
 
 clean:
-	rm -f $(BIN) *.o *.asm *.lst *.sym *.adb *~
+	rm -f $(BIN) *.asm *.lst *.sym *.adb *~ .*.swp
+	if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
 
 distclean: clean
 	rm -f Make.dep .depend

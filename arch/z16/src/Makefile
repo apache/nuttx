@@ -37,7 +37,10 @@
 -include chip/Make.defs
 
 ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(TOPDIR)/sched
+ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+USRINCLUDES	= -userinc:".;$(TOPDIR)/sched;$(ARCH_SRCDIR)/chip;$(ARCH_SRCDIR)/common"
+INCLUDES	= $(ARCHSTDINCLUDES) $(USRINCLUDES)
+CFLAGS		= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(INCLUDES) $(ARCHDEFINES)
 
 HEAD_AOBJ	= $(HEAD_ASRC:.S=$(OBJEXT))
 
@@ -66,15 +69,14 @@ VPATH		= chip:common
 all: $(HEAD_OBJ) libarch$(LIBEXT)
 
 $(AOBJS) $(HEAD_AOBJ): %$(OBJEXT): %.S
-	$(CC) -c $(CFLAGS) -D__ASSEMBLY__ $< -o $@
+	$(call ASSEMBLE, $<, $@)
 
 $(COBJS): %$(OBJEXT): %.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(call COMPILE, $<, $@)
 
 libarch$(LIBEXT): $(OBJS)
 	@( for obj in $(OBJS) ; do \
-		$(AR) $@ $${obj} || \
-			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
+		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
 board/libboard$(LIBEXT):

@@ -59,15 +59,14 @@ VPATH		= net
 all:	$(BIN)
 
 $(AOBJS): %$(OBJEXT): %.S
-	$(CC) -c $(CFLAGS) -D__ASSEMBLY__ $< -o $@
+	$(call ASSEMBLE, $<, $@)
 
 $(COBJS): %$(OBJEXT): %.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(call COMPILE, $<, $@)
 
 $(BIN):	$(OBJS)
 	@( for obj in $(OBJS) ; do \
-		$(AR) $@ $${obj} || \
-			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
+		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
 .depend: Makefile $(SRCS)
@@ -81,7 +80,7 @@ endif
 depend: .depend
 
 clean:
-	rm -f $(BIN) *.o *.rel *.asm *.lst *.sym *.adb *~
+	rm -f $(BIN) *.o *.obj *.rel *.asm *.lst *.sym *.adb *~
 
 distclean: clean
 	rm -f Make.dep .depend

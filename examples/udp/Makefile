@@ -72,15 +72,14 @@ HOST_BIN	= host
 all:	$(TARG_BIN)
 
 $(TARG_AOBJS): %$(OBJEXT): %.S
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(call ASSEMBLE, $<, $@)
 
 $(TARG_COBJS): %$(OBJEXT): %.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(call COMPILE, $<, $@)
 
 $(TARG_BIN):	$(TARG_OBJS) $(HOST_BIN)
 	@( for obj in $(TARG_OBJS) ; do \
-		$(AR) $@ $${obj} || \
-			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
+		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
 $(HOST_OBJS): %.o: %.c
@@ -96,7 +95,7 @@ $(HOST_BIN):	$(HOST_OBJS)
 depend: .depend
 
 clean:
-	rm -f $(TARG_BIN) $(HOST_BIN) *.o *.rel *.asm *.lst *.sym *.adb *~
+	rm -f $(TARG_BIN) $(HOST_BIN) *.o *.obj *.rel *.asm *.lst *.sym *.adb *~
 
 distclean: clean
 	rm -f Make.dep .depend
