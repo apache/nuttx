@@ -37,6 +37,13 @@ TOPDIR		:= ${shell pwd | sed -e 's/ /\\ /g'}
 -include ${TOPDIR}/.config
 -include ${TOPDIR}/Make.defs
 
+# Default tools
+
+ifeq ($(DIRLINK),)
+DIRLINK		= $(TOPDIR)/tools/link.sh
+DIRUNLINK	= $(TOPDIR)/tools/unlink.sh
+endif
+
 # Process architecture and board-specific directories
 
 ARCH_DIR	= arch/$(CONFIG_ARCH)
@@ -121,79 +128,39 @@ include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig
 
 # link the arch/<arch-name>/include dir to include/arch
 include/arch: Make.defs
-	@if [ -h include/arch ]; then \
-		rm -f include/arch ; \
-	else \
-		if [ -e include/arch ]; then \
-			echo "include/arch exists but is not a symbolic link" ; \
-			exit 1 ; \
-		fi ; \
-	fi
-	@ln -s $(TOPDIR)/$(ARCH_DIR)/include include/arch
+	@$(DIRLINK) $(TOPDIR)/$(ARCH_DIR)/include include/arch
 
 # Link the configs/<board-name>/include dir to include/arch/board
-include/arch/board: Make.defs include/arch
-	@if [ -h include/arch/board ]; then \
-			rm -f include/arch/board ; \
-	else \
-		if [ -e include/arch/board ]; then \
-			echo "include/arch/board exists but is not a symbolic link" ; \
-			exit 1 ; \
-		fi ; \
-	fi
-	@ln -s $(TOPDIR)/$(BOARD_DIR)/include include/arch/board
+include/arch/board: include/arch Make.defs include/arch
+	@$(DIRLINK) $(TOPDIR)/$(BOARD_DIR)/include include/arch/board
 
 # Link the configs/<board-name>/src dir to arch/<arch-name>/src/board
 $(ARCH_SRC)/board: Make.defs
-	@if [ -h $(ARCH_SRC)/board ]; then \
-		rm -f $(ARCH_SRC)/board ; \
-	else \
-		if [ -e $(ARCH_SRC)/board ]; then \
-			echo "$(ARCH_SRC)/board exists but is not a symbolic link" ; \
-			exit 1 ; \
-		fi ; \
-	fi
-	@ln -s $(TOPDIR)/$(BOARD_DIR)/src $(ARCH_SRC)/board
+	@$(DIRLINK) $(TOPDIR)/$(BOARD_DIR)/src $(ARCH_SRC)/board
 
 # Link arch/<arch-name>/include/<chip-name> to arch/<arch-name>/include/chip
 $(ARCH_SRC)/chip: Make.defs
 ifneq ($(CONFIG_ARCH_CHIP),)
-	@if [ -h $(ARCH_SRC)/chip ]; then \
-		rm -f $(ARCH_SRC)/chip ; \
-	else \
-		if [ -e $(ARCH_SRC)/chip ]; then \
-			echo "$(ARCH_SRC)/chip exists but is not a symbolic link" ; \
-			exit 1 ; \
-		fi ; \
-	fi
-	@ln -s $(CONFIG_ARCH_CHIP) $(ARCH_SRC)/chip
+	@$(DIRLINK) $(CONFIG_ARCH_CHIP) $(ARCH_SRC)/chip
 endif
 
 # Link arch/<arch-name>/src/<chip-name> to arch/<arch-name>/src/chip
-$(ARCH_INC)/chip: Make.defs
+include/arch/chip: include/arch Make.defs
 ifneq ($(CONFIG_ARCH_CHIP),)
-	@if [ -e $(ARCH_INC)/chip ]; then \
-		if [ -h $(ARCH_INC)/chip ]; then \
-			rm -f $(ARCH_INC)/chip ; \
-		else \
-			echo "$(ARCH_INC)/chip exists but is not a symbolic link" ; \
-			exit 1 ; \
-		fi ; \
-	fi
-	@ln -s $(CONFIG_ARCH_CHIP) $(ARCH_INC)/chip
+	@$(DIRLINK) $(CONFIG_ARCH_CHIP) include/arch/chip
 endif
 
-dirlinks: include/arch include/arch/board $(ARCH_SRC)/board $(ARCH_SRC)/chip $(ARCH_INC)/chip
+dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(ARCH_SRC)/chip
 
 context: check_context include/nuttx/config.h dirlinks
 
 clean_context:
-	@rm -f include/nuttx/config.h include/arch
-	@if [ -h include/arch ]; then rm -f include/arch ; fi
-	@if [ -h $(ARCH_INC)/board ]; then rm -f $(ARCH_INC)/board ; fi
-	@if [ -h $(ARCH_SRC)/board ]; then rm -f $(ARCH_SRC)/board ; fi
-	@if [ -h $(ARCH_INC)/chip ]; then rm -f $(ARCH_INC)/chip ; fi
-	@if [ -h $(ARCH_SRC)/chip ]; then rm -f $(ARCH_SRC)/chip ; fi
+	@rm -f include/nuttx/config.h
+	@$(DIRUNLINK) include/arch/board
+	@$(DIRUNLINK) include/arch/chip
+	@$(DIRUNLINK) include/arch
+	@$(DIRUNLINK) $(ARCH_SRC)/board
+	@$(DIRUNLINK) $(ARCH_SRC)/chip
 
 check_context:
 	@if [ ! -e ${TOPDIR}/.config -o ! -e ${TOPDIR}/Make.defs ]; then \

@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: January 7, 2008</p>
+      <p>Last Updated: January 8, 2008</p>
     </td>
   </tr>
 </table>
@@ -27,39 +27,76 @@
 <table>
 <tr>
   <td><img src="favicon.ico"></td>
-  <td><a href="#overview">Overview</a></td>
+  <td>
+    <a href="#overview">Overview</a>.<br>
+    What is NuttX?
+  </td>
 </tr>
 <tr>
   <td><img src="favicon.ico"></td>
-  <td><a href="#downloads">Downloads</a></td>
+  <td>
+    <a href="#downloads">Downloads</a>.<br>
+    Where can I get NuttX?  What is the current development status?
+  </td>
 </tr>
 <tr>
   <td><img src="favicon.ico"></td>
-  <td><a href="#platforms">Supported Platforms</a></td>
+  <td>
+    <a href="#platforms">Supported Platforms</a>.<br>
+    What target platforms has NuttX been ported to?
+  </td>
 </tr>
 <tr>
   <td><img src="favicon.ico"></td>
-  <td><a href="#footprint">Memory Footprint</a></td>
+  <td>
+    <a href="#environments">Development Environments</a>.<br>
+    What kinds of host cross-development platforms can be used with NuttX?
+  </td>
 </tr>
 <tr>
   <td><img src="favicon.ico"></td>
-  <td><a href="#licensing">Licensing</a></td>
+  <td>
+    <a href="#footprint">Memory Footprint</a>.<br>
+    Just how big is it?  Do I have enough memory to use NuttX?
+  </td>
 </tr>
 <tr>
   <td><img src="favicon.ico"></td>
-  <td><a href="#history">Release History</a></td>
+  <td>
+    <a href="#licensing">Licensing</a>.<br>
+    Are there any licensing restrictions for the use of NuttX? (Almost none)
+    Will there be problems if I link my proprietary code with NuttX? (No)
+  </td>
 </tr>
 <tr>
   <td><img src="favicon.ico"></td>
-  <td><a href="#TODO">Bugs, Issues, <i>Things-To-Do</i></a></td>
+  <td>
+    <a href="#history">Release History</a><br>
+    What has changed in the last release of NuttX?
+    What unreleased changes are pending in CVS?
+  </td>
 </tr>
 <tr>
   <td><img src="favicon.ico"></td>
-  <td><a href="#documentation">Other Documentation</a></td>
+  <td>
+    <a href="#TODO">Bugs, Issues, <i>Things-To-Do</i></a>.<br>
+    Software is never finished nor ever tested well enough.
+    (Do you want to help devlop NuttX?  If so, send me an email).
+  </td>
 </tr>
 <tr>
   <td><img src="favicon.ico"></td>
-  <td><a href="#trademarks">Trademarks</a></td>
+  <td>
+    <a href="#documentation">Other Documentation</a>.<br>
+    What other NuttX documentation is available?
+  </td>
+</tr>
+<tr>
+  <td><img src="favicon.ico"></td>
+  <td>
+    <a href="#trademarks">Trademarks</a>.<br>
+    Some of the words used in this document belong to other people.
+  </td>
 </tr>
 </table>
 </td>
@@ -646,6 +683,159 @@ Linux or Cygwin.</blockquote>
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
+    <a name="environments"><h1>Development Environments</h1></a>
+  </td>
+  </tr>
+</table>
+
+<center><table width="90%">
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Linux + GNU make + GCC/binutils</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      The is the most natural development environment for NuttX.
+      Any version of the GCC/binutils toolchain may be used.
+      There is a  highly modified <a href="http://buildroot.uclibc.org/">buildroot</a>
+      available for download from the
+      <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">NuttX SourceForge</a>
+      page.
+      This download may be used to build a NuttX-compatible arm-elf toolchain under Linux or Cygwin.
+      Additional support for m68k, m68hc11, and m68hc12 is available in the
+      <a href="http://nuttx.cvs.sourceforge.net/nuttx/misc/buildroot/">NuttX CVS</a>.
+    </p>
+   </td>
+</tr>
+
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Linux + GNU make + SDCC</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      Also very usable is the Linux environment using the 
+      <a href="http://sdcc.sourceforge.net/">SDCC</a> compiler.
+      The SDCC compiler provides support for the 8051/2, z80, hc08, and other microcontrollers.
+      The SDCC-based logic is less well exercised and you will likely find some compilation
+      issues if you use parts of NuttX with SDCC that have not been well-tested.
+    </p>
+   </td>
+</tr>
+
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Cygwin + GNU make + GCC/binutils</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      This combination works well too.
+      It works just as well as the native Linux environment except
+      that compilation and build times are a little longer.
+      The custom NuttX buildroot referenced above may be build in
+      the Cygwin environment as well.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Cygwin + GNU make + SDCC</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+       I have never tried this combination, but it would probably work just fine.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Cygwin + GNU make + Windows Native Toolchain</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      This is a tougher environment.
+      In this case, the Windows native toolchain is unaware of the the
+      Cygwin <i>sandbox</i> and, instead, operates in the native Windows environment.
+      The primary difficulties with this are:
+    </p>
+    <ul>
+      <li>
+        <b>Pathes</b>.
+        Full pathes for the native toolchain must follow Windows standards.
+        For example, the path <code>/home/my\ name/nuttx/include</code> my have to be
+        converted to something like <code>'C:\cygwin\home\my name\nuttx\include'</code>
+        to be usable by the toolchain.
+      </li>
+      <p>
+        Fortunately, this conversion is done simply using the <code>cygpath</code> utility.
+      </p>
+      <li>
+        <b>Symbolic Links</b>
+        NuttX depends on symbolic links to install platform-specific directories in the build system.
+        On Linux, true symbolic links are used.
+        On Cygwin, emulated symbolic links are used.
+        Unfortunately, for native Windows applications that operate outside of the
+        Cygwin <i>sandbox</i>, these symbolic links cannot be used.
+      </li>
+      <p>
+        The NuttX make system works around this limitation by copying the platform
+        specific directories in place.
+        These copied directories make work a little more complex, but otherwise work well.
+      </p>
+    </ul>
+    <p>
+      At present, on the Zilog Z16F port uses a native Windows toolchain
+      (the Zilog ZDS-II toolchain).
+    </p.
+  </td>
+</tr>
+
+<tr>
+  <td valign="top"><img src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Others?</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      The primary environmental dependency of NuttX is GNU make.
+      If you have other platforms that support GNU make or make
+      utilities that are compatible with GNU make, then it is very
+      likely that NuttX would work in that environment as well.
+      If GNU make is not supported, then some significant modification
+      of the Make system would be required.
+    </p>
+  </td>
+</tr>
+</table></center>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
     <a name="footprint"><h1>Memory Footprint</h1></a>
   </td>
   </tr>
@@ -790,6 +980,7 @@ Other memory:
 	* Add support toolchains that do not support making of dependencies
 	* Fix Cygwin build with spaces in directory names
 	* Name make system changes to deal with non-GNU toolchains (i.e., Zilog)
+	* Add support for Windows native toolchains that cannot follow Cygwin soft links
 </pre></ul>
 
 <table width ="100%">

@@ -303,4 +303,5 @@
 	* Add support toolchains that do not support making of dependencies
 	* Fix Cygwin build with spaces in directory names
 	* Name make system changes to deal with non-GNU toolchains (i.e., Zilog)
+	* Add support for Windows native toolchains that cannot follow Cygwin soft links
 
