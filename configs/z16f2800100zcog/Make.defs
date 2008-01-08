@@ -47,12 +47,12 @@ else
 endif
 
 ARCHASMCPUFLAGS		= -cpu:Z16F2811AL -NOigcase
-ARCHASMLIST			= -NOlistmac -name -pagelen:56 -pagewidth:80 -quiet
+ARCHASMLIST		= -NOlistmac -name -pagelen:56 -pagewidth:80 -quiet
 ARCHASMWARNINGS		= -warn
-ARCHASMDEFINES		= -define:_Z16F2811AL=1 -define:_Z16K_SERIES=1 -define:_Z16F_SERIES=1
+ARCHASMDEFINES		= -define:_Z16F2811AL=1 -define:_Z16K_SERIES=1 -define:_Z16F_SERIES=1 \ 				  -define:__ASSEMBLY__
 ARCHASMINCLUDES		= -include:$(ZDSINCDIR)/std;$(ZDSINCDIR)/zilog
-AFLAGS				= $(ARCHASMCPUFLAGS) $(ARCHASMINCLUDES) $(ARCHASMLIST) \
-					  $(ARCHASMWARNINGS) $(ARCHASMOPTIMIZATION)
+AFLAGS			= $(ARCHASMCPUFLAGS) $(ARCHASMINCLUDES) $(ARCHASMLIST) \
+			  $(ARCHASMWARN) $(ARCHASMOPTIMIZATION)
 
 ifeq ("${CONFIG_DEBUG}","y")
   ARCHOPTIMIZATION	= -debug -NOregvar -reduceopt
@@ -61,32 +61,49 @@ else
 endif
 
 ARCHCPUFLAGS		= -chartype:S -model:L -NOmodsect -cpu:Z16F2811AL \
-					  -asmsw:" $(ARCHASMCPUFLAGS) $(ARCHASMINCLUDES) $(ARCHASMWARNINGS) $(ARCHASMOPTIMIZATION)"
-ARCHLIST			= -NOgenprint -keeplst -NOlist -NOlistinc -NOkeepasm
+			  -asmsw:" $(ARCHASMCPUFLAGS) $(ARCHASMINCLUDES) (ARCHASMWARN) $(ARCHASMOPTIMIZATION)"
+ARCHLIST		= -NOgenprint -keeplst -NOlist -NOlistinc -NOkeepasm
 ARCHPICFLAGS		=
 ARCHWARNINGS		= -warn
-ARCHDEFINES			= -define:_Z16F2811AL -define:_Z16K_SERIES \
-					  -define:_Z16F_SERIES
-ARCHINCLUDES		= -stdinc:"$(ZDSINCDIR)/std;$(ZDSINCDIR)/zilog" \
-					  -usrinc:".;$(TOPDIR)/include"
-CFLAGS				= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-					  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES)
+ARCHDEFINES		= -define:_Z16F2811AL -define:_Z16K_SERIES \
+			  -define:_Z16F_SERIES -define:
+ARCHSTDINCLUDES		= -stdinc:"$(TOPDIR)/include;$(ZDSINCDIR)/std;$(ZDSINCDIR)/zilog"
+ARCHUSRINCLUDES		= -userinc:"."
+ARCHINCLUDES		= $(ARCHSTDINCLUDES) $(ARCHUSRINCLUDES)
+CCFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
+			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES)
+ARFLAGS			= -quiet -warn
 
-CROSSDEV			=
-CC					= $(ZDSBINDIR)/zneocc.exe
-CPP					= $(ZDSBINDIR)/zneoasm.exe
-LD					= $(ZDSBINDIR)/zneolink.exe
-AS					= $(ZDSBINDIR)/zneoasm.exe
-AR					= $(ZDSBINDIR)/czneolib.exe
+CROSSDEV		=
+CC			= $(ZDSBINDIR)/zneocc.exe
+CPP			= $(ZDSBINDIR)/zneoasm.exe
+LD			= $(ZDSBINDIR)/zneolink.exe
+AS			= $(ZDSBINDIR)/zneoasm.exe
+AR			= $(ZDSBINDIR)/zneolib.exe
 
-ASMEXT				= .asm
-OBJEXT				= .obj
-LIBEXT				= .lib
-EXEEXT				= .hex
+ASMEXT			= .asm
+OBJEXT			= .obj
+LIBEXT			= .lib
+EXEEXT			= .hex
 
-HOSTCC				= gcc
-HOSTINCLUDES		= -I.
-HOSTCFLAGS			= -Wall -wstrict-prototypes -Wshadow -g -pipe
-HOSTLDFLAGS			=
+define COMPILE
+	@echo "CC: $1"
+	@$(CC) $(CFLAGS) $1
+endef
+
+define ASSEMBLE
+	@echo "AS: $1"
+	@$(AS) -c $(AFLAGS) $1
+endef
+
+define ARCHIVE
+	echo "AR: $2"; \
+	$(AR) $(ARFLAGS) $1=-+$2 || { echo "$(AR) $1=-+$2 FAILED!" ; exit 1 ; }
+endef
 
 MKDEP			= $(TOPDIR)/tools/mknulldeps.sh
+
+HOSTCC			= gcc
+HOSTINCLUDES		= -I.
+HOSTCFLAGS		= -Wall -wstrict-prototypes -Wshadow -g -pipe
+HOSTLDFLAGS		=

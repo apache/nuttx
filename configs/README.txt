@@ -81,6 +81,7 @@ Make.defs -- This makefile fragment provides architecture and
 
 	Tools: CC, LD, AR, NM, OBJCOPY, OBJDUMP
 	Tool options: CFLAGS, LDFLAGS
+	COMPILE, ASSEMBLE, ARCHIVE, and MKDEP macros
 
   When this makefile fragment runs, it will be passed TOPDIR which
   is the path to the root directory of the build.  This makefile

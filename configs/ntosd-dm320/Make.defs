@@ -59,6 +59,7 @@ OBJDUMP			= $(CROSSDEV)objdump
 
 CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) -pipe
+AFLAGS			= $(CFLAGS) -D__ASSEMBLY__
 
 OBJEXT			= .o
 LIBEXT			= .a
@@ -68,10 +69,25 @@ ifeq ("${CONFIG_DEBUG}","y")
   LDFLAGS		+= -g
 endif
 
+define COMPILE
+	@echo "CC: $1"
+	@$(CC) -c $(CFLAGS) $1 -o $2
+endef
+
+define ASSEMBLE
+	@echo "AS: $1"
+	@$(CC) -c $(AFLAGS) $1 -o $2
+endef
+
+define ARCHIVE
+	echo "AR: $2"; \
+	$(AR) $1 $2 || { echo "$(AR) $1 $2 FAILED!" ; exit 1 ; }
+endef
+
+MKDEP			= $(TOPDIR)/tools/mkdeps.sh
+
 HOSTCC			= gcc
 HOSTINCLUDES		= -I.
 HOSTCFLAGS		= -Wall -Wstrict-prototypes -Wshadow -g -pipe
 HOSTLDFLAGS		=
-
-MKDEP			= $(TOPDIR)/tools/mkdeps.sh
 

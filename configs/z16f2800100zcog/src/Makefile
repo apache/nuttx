@@ -35,7 +35,10 @@
 
 -include $(TOPDIR)/Make.defs
 
-CFLAGS		+= -I$(TOPDIR)/sched
+ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+USRINCLUDES	= -userinc:".;$(TOPDIR)/sched;$(ARCH_SRCDIR)/chip;$(ARCH_SRCDIR)/common"
+INCLUDES	= $(ARCHSTDINCLUDES) $(USRINCLUDES)
+CFLAGS		= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(INCLUDES) $(ARCHDEFINES)
 
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
@@ -45,21 +48,18 @@ COBJS		= $(CSRCS:.c=$(OBJEXT))
 SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
 
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common
 
 all: libboard$(LIBEXT)
 
 $(AOBJS): %$(OBJEXT): %.S
-	$(CC) -c $(CFLAGS) -D__ASSEMBLY__ $< -o $@
+	$(call ASSEMBLE, $<, $@)
 
 $(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(call COMPILE, $<, $@)
 
 libboard$(LIBEXT): $(OBJS)
 	@( for obj in $(OBJS) ; do \
-		$(AR) $@ $${obj} || \
-			{ echo "$(AR) $@ $obj FAILED!" ; exit 1 ; } ; \
+		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
 .depend: Makefile $(SRCS)
