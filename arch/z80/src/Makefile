@@ -41,9 +41,6 @@
 
 ############################################################################
 # Tools
-
-MKDEP 		= $(TOPDIR)/tools/mkdeps.sh
-
 # CFLAGS, CPPFLAGS, ASFLAGS, LDFLAGS are set in $(TOPDIR)/Make.defs
 
 CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(TOPDIR)/sched
