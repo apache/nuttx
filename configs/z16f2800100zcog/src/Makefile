@@ -1,5 +1,5 @@
 ############################################################################
-# board/Makefile
+# configs/z16f2800100zcog/Makefile
 #
 #   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -35,7 +35,6 @@
 
 -include $(TOPDIR)/Make.defs
 
-MKDEP 		= $(TOPDIR)/tools/mkdeps.sh
 CFLAGS		+= -I$(TOPDIR)/sched
 
 ASRCS		= 
