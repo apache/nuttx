@@ -141,13 +141,13 @@ $(ARCH_SRC)/board: Make.defs
 # Link arch/<arch-name>/include/<chip-name> to arch/<arch-name>/include/chip
 $(ARCH_SRC)/chip: Make.defs
 ifneq ($(CONFIG_ARCH_CHIP),)
-	@$(DIRLINK) $(CONFIG_ARCH_CHIP) $(ARCH_SRC)/chip
+	@$(DIRLINK) $(TOPDIR)/$(ARCH_SRC)/$(CONFIG_ARCH_CHIP) $(ARCH_SRC)/chip
 endif
 
 # Link arch/<arch-name>/src/<chip-name> to arch/<arch-name>/src/chip
 include/arch/chip: include/arch Make.defs
 ifneq ($(CONFIG_ARCH_CHIP),)
-	@$(DIRLINK) $(CONFIG_ARCH_CHIP) include/arch/chip
+	@$(DIRLINK) $(TOPDIR)/$(ARCH_INC)/$(CONFIG_ARCH_CHIP) include/arch/chip
 endif
 
 dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(ARCH_SRC)/chip
