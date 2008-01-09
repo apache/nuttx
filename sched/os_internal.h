@@ -74,7 +74,7 @@ enum os_crash_codes_e
   OSERR_EXITFROMINTERRUPT,    /* Interrupt code attempted to exit */
   OSERR_BADUNBLOCKSTATE,      /* Attempt to unblock from bad state */
   OSERR_BADBLOCKSTATE,        /* Attempt to block from bad state */
-  OSERR_BADREPRIORITIZESTATE, /* Attempt to reprioritize in bad state or priority */
+  OSERR_BADREPRIORITIZESTATE  /* Attempt to reprioritize in bad state or priority */
 };
 
 /* Special task IDS */

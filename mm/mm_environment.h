@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * mm_environment.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __MM_ENVIRONMENT_H
 #define __MM_ENVIRONMENT_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 /* The platform configuratioin file will not be included
  * when the memory manager is built for the host-based
@@ -61,9 +61,9 @@
 # include <assert.h>
 #endif
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
 /* Special definitions used when the memory mnager is built
  * for the host-based test harness.
@@ -74,6 +74,7 @@
 /* Fake NuttX dependencies */
 
 # define FAR                        /* Normally in compiler.h */
+# define CONFIG_CPP_HAVE_VARARGS 1  /* Normally in compiler.h */
 # define CONFIG_MM_REGIONS 2        /* Normally in config.h */
 # define CONFIG_CAN_PASS_STRUCTS 1  /* Normally in config.h */
 # undef  CONFIG_SMALL_MEMORY        /* Normally in config.h */
@@ -116,12 +117,12 @@ extern void mm_addregion(FAR void *heapstart, size_t heapsize);
 # define mm_errno (*get_errno_ptr())
 #endif
 
-/************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Pulblic Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 #endif /* __MM_ENVIRONMENT_H */

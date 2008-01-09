@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * mm_sem.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include "mm_environment.h"
 #include <unistd.h>
@@ -44,9 +44,9 @@
 #include <assert.h>
 #include "mm_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
 /* Define the following to enable semaphore state monitoring */
 //#define MONITOR_MM_SEMAPHORE 1
@@ -59,12 +59,16 @@
 #    define msemdbg printf
 #  endif
 #else
-# define msemdbg(x...)
+#  ifdef CONFIG_CPP_HAVE_VARARGS
+#    define msemdbg(x...)
+#  else
+#    define msemdbg (void)
+#  endif
 #endif
 
-/************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************/
+ ****************************************************************************/
 
 /* Mutually exclusive access to this data set is enforced with
  * the following (un-named) semaphore. */
@@ -73,17 +77,17 @@ static  sem_t g_mm_semaphore;
 static  pid_t g_holder;
 static  int   g_counts_held;
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: mm_seminitialize
  *
  * Description:
  *   Initialize the MM mutex
  *
- ************************************************************/
+ ****************************************************************************/
 
 void mm_seminitialize(void)
 {
@@ -97,7 +101,7 @@ void mm_seminitialize(void)
   g_counts_held = 0;
 }
 
-/************************************************************
+/****************************************************************************
  * Name: mm_trysemaphore
  *
  * Description:
@@ -107,7 +111,7 @@ void mm_seminitialize(void)
  *   impossible to wait on a semaphore (e.g., the idle process
  *   when it performs its background memory cleanup).
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef MM_TEST
 int mm_trysemaphore(void)
@@ -141,14 +145,14 @@ int mm_trysemaphore(void)
 }
 #endif
 
-/************************************************************
+/****************************************************************************
  * Name: mm_takesemaphore
  *
  * Description:
  *   Take the MM mutex.  This is the normal action before all
  *   memory management actions.
  *
- ************************************************************/
+ ****************************************************************************/
 
 void mm_takesemaphore(void)
 {
@@ -186,13 +190,13 @@ void mm_takesemaphore(void)
           g_holder, g_counts_held);
 }
 
-/************************************************************
+/****************************************************************************
  * Name: mm_givesemaphore
  *
  * Description:
  *   Release the MM mutex when it is not longer needed.
  *
- ************************************************************/
+ ****************************************************************************/
 
 void mm_givesemaphore(void)
 {
@@ -223,14 +227,14 @@ void mm_givesemaphore(void)
     }
 }
 
-/************************************************************
+/****************************************************************************
  * Name: mm_getsemaphore
  *
  * Description:
  *   Return the current value of the MM semaphore (for test
  *   purposes only)
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifdef MM_TEST
 int mm_getsemaphore(void)
