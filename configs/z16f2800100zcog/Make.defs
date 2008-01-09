@@ -37,10 +37,10 @@ include ${TOPDIR}/.config
 
 # These are the directories where the ZNeo-II toolchain is installed
 
-ZDSINSTALLDIR		= C:/Program\ Files/ZiLOG/ZDSII_ZNEO_4.10.2
-ZDSBINDIR		= $(ZDSINSTALLDIR)/bin
-ZDSSTDINCDIR		= $(ZDSINSTALLDIR)/include/std
-ZDSZILOGINCDIR		= $(ZDSINSTALLDIR)/include/zilog
+ZDSINSTALLDIR		:= C:/Program\ Files/ZiLOG/ZDSII_ZNEO_4.10.2
+ZDSBINDIR		:= $(ZDSINSTALLDIR)/bin
+ZDSSTDINCDIR		:= $(ZDSINSTALLDIR)/include/std
+ZDSZILOGINCDIR		:= $(ZDSINSTALLDIR)/include/zilog
 
 # These are the same directories but with the directory separator
 # character swapped as needed by the ZNeo-II compiler
@@ -48,6 +48,12 @@ ZDSZILOGINCDIR		= $(ZDSINSTALLDIR)/include/zilog
 WTOPDIR			:= ${shell cygpath -w $(TOPDIR)}
 WZDSSTDINCDIR		:= ${shell cygpath -w $(ZDSSTDINCDIR)}
 WZDSZILOGINCDIR		:= ${shell cygpath -w $(ZDSZILOGINCDIR)}
+
+# Escaped versions
+
+ETOPDIR			:= ${shell echo "$(WTOPDIR)" | sed -e "s/ /%20/g"}
+EZDSSTDINCDIR		:= ${shell echo "$(WZDSSTDINCDIR)" | sed -e "s/ /%20/g"}
+EZDSZILOGINCDIR		:= ${shell echo "$(WZDSZILOGINCDIR)" | sed -e "s/ /%20/g"}
 
 # Assembler definitions
 
@@ -61,7 +67,7 @@ ARCHASMCPUFLAGS		= -cpu:Z16F2811AL -NOigcase
 ARCHASMLIST		= -NOlistmac -name -pagelen:56 -pagewidth:80 -quiet
 ARCHASMWARNINGS		= -warn
 ARCHASMDEFINES		= -define:_Z16F2811AL=1 -define:_Z16K_SERIES=1 -define:_Z16F_SERIES=1 \ 				  -define:__ASSEMBLY__
-ARCHASMINCLUDES		= -include:'$(WTOPDIR)\include;$(WZDSSTDINCDIR);$(WZDSZILOGINCDIR)'
+ARCHASMINCLUDES		= -include:'$(ETOPDIR)\include;$(EZDSSTDINCDIR);$(EZDSZILOGINCDIR)'
 AFLAGS			= $(ARCHASMCPUFLAGS) $(ARCHASMINCLUDES) $(ARCHASMLIST) \
 			  $(ARCHASMWARNINGS) $(ARCHASMOPTIMIZATION)
 
@@ -121,8 +127,8 @@ define ASSEMBLE
 endef
 
 define ARCHIVE
-	@echo "AR: $2"; \
-	@$(AR) $(ARFLAGS) $1=-+$2 || { echo "$(AR) $1=-+$2 FAILED!" ; exit 1 ; }
+	echo "AR: $2"; \
+	$(AR) $(ARFLAGS) $1=-+$2 || { echo "$(AR) $1=-+$2 FAILED!" ; exit 1 ; }
 endef
 
 # This is the tool to use for dependencies (i.e., none)
