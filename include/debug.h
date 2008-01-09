@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * debug.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,30 +31,39 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __DEBUG_H
 #define __DEBUG_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
 /* Debug macros to runtime filter the opsys debug messages */
 
-#ifdef __GNUC__
+#ifdef CONFIG_HAVE_FUNCTIONNAME
 # define EXTRA_FMT "%s: "
 # define EXTRA_ARG ,__FUNCTION__
 #else
 # define EXTRA_FMT
 # define EXTRA_ARG
 #endif
+
+/* Debug macros will differ depending upon if the toolchain supports
+ * macros with a variable number of arguments or not.
+ */
+
+#ifdef CONFIG_CPP_HAVE_VARARGS
+
+/* Variable argument macros supported */
 
 #ifdef CONFIG_DEBUG
 # define dbg(format, arg...) \
@@ -74,11 +83,13 @@
 #  define vdbg(x...)
 # endif
 
-#else
+#else /* CONFIG_DEBUG */
+
 # define dbg(x...)
 # define lldbg(x...)
 # define vdbg(x...)
-#endif
+
+#endif /* CONFIG_DEBUG */
 
 /* Subsystem specific debug */
 
@@ -132,17 +143,88 @@
 # define lvdbg(x...)
 #endif
 
-/************************************************************
+#else /* CONFIG_CPP_HAVE_VARARGS */
+
+/* Variable argument macros NOT supported */
+
+#ifdef CONFIG_DEBUG
+# ifndef CONFIG_ARCH_LOWPUTC
+#  define lldbg (void)
+# endif
+# ifndef CONFIG_DEBUG_VERBOSE
+#  define vdbg (void)
+# endif
+#else
+# define dbg   (void)
+# define lldbg (void)
+# define vdbg  (void)
+#endif
+
+/* Subsystem specific debug */
+
+#ifdef CONFIG_DEBUG_MM
+# define mdbg   dbg
+# define mlldbg lldbg
+# define mvdbg  vdbg
+#else
+# define mdbg   (void)
+# define mlldbg (void)
+# define mvdbg  (void)
+#endif
+
+#ifdef CONFIG_DEBUG_SCHED
+# define sdbg   dbg
+# define slldbg lldbg
+# define svdbg  vdbg
+#else
+# define sdbg   (void)
+# define slldbg (void)
+# define svdbg  (void)
+#endif
+
+#ifdef CONFIG_DEBUG_NET
+# define ndbg   dbg
+# define nlldbg lldbg
+# define nvdbg  vdbg
+#else
+# define ndbg   (void)
+# define nlldbg (void)
+# define nvdbg  (void)
+#endif
+
+#ifdef CONFIG_DEBUG_FS
+# define fdbg   dbg
+# define flldbg lldbg
+# define fvdbg  vdbg
+#else
+# define fdbg   (void)
+# define flldbg (void)
+# define fvdbg  (void)
+#endif
+
+#ifdef CONFIG_DEBUG_LIB
+# define ldbg   dbg
+# define llldbg lldbg
+# define lvdbg  vdbg
+#else
+# define ldbg   (void)
+# define llldbg (void)
+# define lvdbg  (void)
+#endif
+
+#endif /* CONFIG_CPP_HAVE_VARARGS */
+
+/****************************************************************************
  * Public Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -152,11 +234,35 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+/* These low-level debug APIs are provided by the NuttX library.  If
+ * the cross-compiler's pre-processor supports a variable number of
+ * macro arguments, then the macros above will map all debug statements
+ * on or the other of the following.
+ */
+
 EXTERN int lib_rawprintf(const char *format, ...);
 
 #ifdef CONFIG_ARCH_LOWPUTC
 EXTERN int lib_lowprintf(const char *format, ...);
 #endif
+
+/* If the cross-compiler's pre-processor does not support variable
+ * length arguments, then these additional APIs will be built.
+ */
+
+#ifndef CONFIG_CPP_HAVE_VARARGS
+#ifdef CONFIG_DEBUG
+EXTERN int dbg(const char *format, ...);
+
+# ifdef CONFIG_ARCH_LOWPUTC
+EXTERN int lldbg(const char *format, ...);
+# endif
+
+# ifdef CONFIG_DEBUG_VERBOSE
+EXTERN int vdbg(const char *format, ...);
+#endif
+#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_CPP_HAVE_VARARGS */
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -51,9 +51,10 @@ STRING_SRCS	= lib_memset.c lib_memcpy.c lib_memcmp.c lib_memmove.c \
 
 CTYPE_SRCS	= 
 
-STDIO_SRCS	= lib_printf.c lib_rawprintf.c lib_lowprintf.c lib_sprintf.c lib_snprintf.c \
-		  lib_libsprintf.c lib_vsprintf.c lib_vsnprintf.c lib_libvsprintf.c \
-		  lib_memstream.c lib_lowstream.c lib_nullstream.c lib_sscanf.c
+STDIO_SRCS	= lib_printf.c lib_rawprintf.c lib_lowprintf.c lib_dbg.c \
+		  lib_sprintf.c lib_snprintf.c lib_libsprintf.c lib_vsprintf.c \
+		  lib_vsnprintf.c lib_libvsprintf.c lib_memstream.c \
+		  lib_lowstream.c lib_nullstream.c lib_sscanf.c
 
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 STDIO_SRCS	+= lib_rawstream.c

@@ -48,7 +48,17 @@
 
 #ifdef __GNUC__
 
-/* GCC supports weak symbols which can be used to reduce
+/* Pre-processor */
+
+# define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */
+
+/* Intriniscs */
+
+# define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
+
+/* Attributes
+ *
+ * GCC supports weak symbols which can be used to reduce
  * code size because unnecessary "weak" functions can be
  * excluded from the link.
  */
@@ -118,11 +128,23 @@
 
 #elif defined(SDCC)
 
-/* Disable warnings for unused function arguments */
+/* Pre-processor */
+
+# define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */
+
+/* Intriniscs */
+
+# define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
+
+/* Pragmas
+ *
+ * Disable warnings for unused function arguments */
 
 # pragma disable_warning 85
 
-/* SDCC does not support weak symbols */
+/* Attributes
+ *
+ * SDCC does not support weak symbols */
 
 # undef  CONFIG_HAVE_WEAKFUNCTIONS
 # define weak_alias(name, aliasname)
@@ -196,29 +218,40 @@
 
 # undef  CONFIG_CAN_PASS_STRUCTS
 
-/* ZiLog-specific definitions ***********************************************/
+/* Zilog-specific definitions ***********************************************/
 
 #elif defined(__ZILOG__)
 
-/* At present, only the ZiLog ZNeo compiler is recognized */
+/* At present, only the Zilog ZNeo compiler is recognized */
 
 #  ifndef __ZNEO__
-#    warning "Unrecognized ZiLog compiler"
+#    warning "Unrecognized Zilog compiler"
 #  endif
 
-/* The ZiLog compiler does not support weak symbols */
+/* Pre-processor */
+
+# undef CONFIG_CPP_HAVE_VARARGS /* No variable argument macros */
+
+/* Intriniscs */
+
+# define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
+
+/* Attributes
+ *
+ * The Zilog compiler does not support weak symbols
+ */
 
 # undef  CONFIG_HAVE_WEAKFUNCTIONS
 # define weak_alias(name, aliasname)
 # define weak_function
 # define weak_const_function
 
-/* The ZiLog compiler does not support the noreturn or packed attributes */
+/* The Zilog compiler does not support the noreturn or packed attributes */
 
 # define noreturn_function
 # define packed_struct
 
-/* The ZiLog compiler does not support the reentrant attribute */
+/* The Zilog compiler does not support the reentrant attribute */
 
 # define reentrant_function
 
@@ -241,7 +274,7 @@
 
 # undef  CONFIG_PTR_IS_NOT_INT
 
-/* The ZiLog compiler does not support inline functions */
+/* The Zilog compiler does not support inline functions */
 
 # undef  CONFIG_HAVE_INLINE
 # define inline
