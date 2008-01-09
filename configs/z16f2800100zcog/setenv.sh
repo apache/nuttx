@@ -31,16 +31,21 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-
+# Check how we were executed
+#
 if [ "$(basename $0)" = "setenv.sh" ] ; then
   echo "You must source this script, not run it!" 1>&2
   exit 1
 fi
 
-if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
-
-WD=`pwd`
-ZDSINSTALLDIR="C:/Program\ Files/ZiLOG/ZDSII_ZNEO_4.10.2"
-export PATH="${ZDSINSTALLDIR}/bin:/sbin:/usr/sbin:${PATH_ORIG}"
-
-echo "PATH : ${PATH}"
+#
+# The ZDS-II toolchain lies outside of the Cygwin "sandbox" and
+# attempts to set the PATH variable do not have the desired effect.
+# Instead, alias are provided for all of the ZDS-II command line tools.
+# Version 4.11.0 installed in the default location is assumed here.
+#
+ZDSBINDIR="C:/Program\ Files/ZiLOG/ZDSII_ZNEO_4.11.0/bin"
+alias zneoasm="${ZDSBINDIR}/zneoasm.exe"
+alias zneocc="${ZDSBINDIR}/zneocc.exe"
+alias zneolib="${ZDSBINDIR}/zneolib.exe"
+alias zneolink="${ZDSBINDIR}/zneolink.exe"
