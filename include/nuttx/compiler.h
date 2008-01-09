@@ -295,6 +295,8 @@
 
 #else
 
+# undef  CONFIG_CPP_HAVE_VARARGS
+# undef  CONFIG_HAVE_FUNCTIONNAME
 # undef  CONFIG_HAVE_WEAKFUNCTIONS
 # define weak_alias(name, aliasname)
 # define weak_function
