@@ -37,7 +37,7 @@ include ${TOPDIR}/.config
 
 # These are the directories where the ZNeo-II toolchain is installed
 
-ZDSINSTALLDIR		:= C:/Program\ Files/ZiLOG/ZDSII_ZNEO_4.10.2
+ZDSINSTALLDIR		:= C:/Program\ Files/ZiLOG/ZDSII_ZNEO_4.11.0
 ZDSBINDIR		:= $(ZDSINSTALLDIR)/bin
 ZDSSTDINCDIR		:= $(ZDSINSTALLDIR)/include/std
 ZDSZILOGINCDIR		:= $(ZDSINSTALLDIR)/include/zilog

@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * arch/types.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 /* This file should never be included directed but, rather,
  * only indirectly through sys/types.h
@@ -40,17 +40,17 @@
 #ifndef __ARCH_TYPES_H
 #define __ARCH_TYPES_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -64,8 +64,6 @@ typedef short sint16;
 typedef unsigned short uint16;
 typedef int sint32;
 typedef unsigned int uint32;
-typedef long long sint64;
-typedef unsigned long long uint64;
 
 /* This is the size of the interrupt state save returned by
  * irqsave()
@@ -75,8 +73,8 @@ typedef unsigned int irqstate_t;
 
 #endif /* __ASSEMBLY__ */
 
-/************************************************************
+/****************************************************************************
  * Global Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_TYPES_H */

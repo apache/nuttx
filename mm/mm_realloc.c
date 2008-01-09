@@ -248,7 +248,7 @@ FAR void *realloc(FAR void *oldmem, size_t size)
                newnode->preceding = prev->size | MM_ALLOC_BIT;
                next->preceding    = newnode->size | (next->preceding & MM_ALLOC_BIT);
 
-               /* Return the previous  free node to the nodelist (with the new size) */
+               /* Return the previous free node to the nodelist (with the new size) */
 
                mm_addfreechunk(prev);
 

@@ -82,7 +82,7 @@ libarch$(LIBEXT): $(OBJS)
 board/libboard$(LIBEXT):
 	$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT)
 
-nuttx: $(HEAD_AOBJ) board/libboard$(LIBEXT)
+nuttx$(EXEEXT): $(HEAD_AOBJ) board/libboard$(LIBEXT)
 	$(LD) --entry=__start $(LDFLAGS) $(LDPATHES) -L$(BOARDDIR) -o $(TOPDIR)/$@ $(HEAD_AOBJ) \
 		--start-group $(LDLIBS) -lboard --end-group $(EXTRA_LIBS) $(LIBGCC) 
 

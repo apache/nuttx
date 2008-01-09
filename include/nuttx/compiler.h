@@ -51,6 +51,7 @@
 /* Pre-processor */
 
 # define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */
+# define CONFIG_CPP_HAVE_WARNING 1 /* Supports #warning */
 
 /* Intriniscs */
 
@@ -131,6 +132,7 @@
 /* Pre-processor */
 
 # define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */
+# define CONFIG_CPP_HAVE_WARNING 1 /* Supports #warning */
 
 /* Intriniscs */
 
@@ -231,6 +233,7 @@
 /* Pre-processor */
 
 # undef CONFIG_CPP_HAVE_VARARGS /* No variable argument macros */
+# undef CONFIG_CPP_HAVE_WARNING /* Does not support #warning */
 
 /* Intriniscs */
 
@@ -296,6 +299,7 @@
 #else
 
 # undef  CONFIG_CPP_HAVE_VARARGS
+# undef  CONFIG_CPP_HAVE_WARNING
 # undef  CONFIG_HAVE_FUNCTIONNAME
 # undef  CONFIG_HAVE_WEAKFUNCTIONS
 # define weak_alias(name, aliasname)
