@@ -87,7 +87,7 @@ libarch$(LIBEXT): $(OBJS)
 	done ; )
 
 nuttx$(EXEEXT): $(LINKOBJS)
-	@echo "LD: nuttx$(EXEEXT)"
+	@echo "LD:  nuttx$(EXEEXT)"
 	@$(CC) $(LDFLAGS) $(LDPATHES) -o $(TOPDIR)/$@ $(LINKOBJS) \
 		-Wl,--start-group $(LDLIBS) -Wl,--end-group $(EXTRA_LIBS)
 	@$(NM) $(TOPDIR)/$@ | \
