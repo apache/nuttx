@@ -44,6 +44,7 @@
 # as a replacement for the 'ln' command.  This scrpt will simply copy the
 # directory into the expected positiion.
 #
+#set -x
 
 src=$1
 dest=$2
@@ -98,3 +99,4 @@ cp -a "${src}" "${dest}" || \
 	{ echo "Failed to create link: $dest" ; rm -rf ${dest} ; exit 1 ; }
 touch "${dest}/.fakelnk" || \
 	{ echo "Failed to touch ${dest}/.fakelnk" ; rm -rf ${dest} ; exit 1 ; }
+
