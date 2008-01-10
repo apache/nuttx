@@ -75,15 +75,12 @@ libarch$(LIBEXT): $(OBJS)
 board/libboard$(LIBEXT):
 	@$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT)
 
-wlinklibs:
-        $(foreach LIB, $(LINKLIBS), $(eval WLINKLIBS += ${shell cygpath -w $(LIB)}))
-
-nuttx.linkcmd: $(LINKCMDTEMPLATE) wlinklibs
+nuttx.linkcmd: $(LINKCMDTEMPLATE)
 	@cp -f $(LINKCMDTEMPLATE) nuttx.linkcmd
 	@echo "\"${shell cygpath -w $(TOPDIR)/nuttx}\"= \\" >>nuttx.linkcmd
 	@echo " ${shell cygpath -w $(ARCHSRCDIR)/$(HEAD_AOBJ)}, \\" >>nuttx.linkcmd
-	@( for lib in $(WLINKLIBS); do \
-		echo " $${lib}, \\" >>nuttx.linkcmd; \
+	@( for lib in $(LINKLIBS); do \
+		echo " `cygpath -w $(TOPDIR)/$${lib}`, \\" >>nuttx.linkcmd; \
 	done ; )
 	@echo " ${shell cygpath -w $(ARCHSRCDIR)/board/libboard$(LIBEXT)}"  >>nuttx.linkcmd
 
