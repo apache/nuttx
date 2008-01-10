@@ -1,7 +1,7 @@
-/************************************************************
- * sig_internal.h
+/****************************************************************************
+ * sched/sig_internal.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,26 +31,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __SIG_INTERNAL_H
 #define __SIG_INTERNAL_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/compiler.h>
 #include <queue.h>
 #include <sched.h>
 #include <nuttx/kmalloc.h>
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/* The following definition determines the number of signal
- * structures to allocate in a block
+/* The following definition determines the number of signal structures to
+ * allocate in a block
  */
 
 #define NUM_SIGNAL_ACTIONS      16
@@ -59,9 +59,9 @@
 #define NUM_SIGNALS_PENDING     16
 #define NUM_INT_SIGNALS_PENDING  8
 
-/************************************************************
+/****************************************************************************
  * Public Type Definitions
- ************************************************************/
+ ****************************************************************************/
 
 enum sigalloc_e
 {
@@ -113,47 +113,45 @@ struct sigq_s
 };
 typedef struct sigq_s sigq_t;
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/* The g_sigfreeaction data structure is a list of available
- * signal action structures.
+/* The g_sigfreeaction data structure is a list of available signal action
+ * structures.
  */
 
 extern sq_queue_t  g_sigfreeaction;
 
-/* The g_sigpendingaction data structure is a list of available
- * pending signal action structures.
+/* The g_sigpendingaction data structure is a list of available pending
+ * signal action structures.
  */
 
 extern sq_queue_t  g_sigpendingaction;
 
-/* The g_sigpendingirqaction is a list of available
- * pending signal actions that are reserved for use by
- * interrupt handlers.
+/* The g_sigpendingirqaction is a list of available pending signal actions
+ * that are reserved for use by interrupt handlers.
  */
 
 extern sq_queue_t  g_sigpendingirqaction;
 
-/* The g_sigpendingsignal data structure is a list of
- * available pending signal structures.
+/* The g_sigpendingsignal data structure is a list of available pending
+ * signal structures.
  */
 
 extern sq_queue_t  g_sigpendingsignal;
 
-/* The g_sigpendingirqsignal data structure is a list
- * of available pending signal structures that are reserved
- * for use by interrupt handlers.
+/* The g_sigpendingirqsignal data structure is a list of available pending
+ * signal structures that are reserved for use by interrupt handlers.
  */
 
 extern sq_queue_t  g_sigpendingirqsignal;
 
-/************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
-/* Internal signal-related interfaces ***********************/
+/* Internal signal-related interfaces ***************************************/
 
 /* sig_intialize.c */
 
@@ -176,8 +174,7 @@ extern void               sig_deliver(FAR _TCB *stcb);
 extern FAR sigactq_t     *sig_findaction(FAR _TCB *stcb, int signo);
 extern int                sig_lowest(sigset_t *set);
 #ifdef CONFIG_CAN_PASS_STRUCTS
-extern int                sig_mqnotempty(int tid, int signo,
-                                         const union sigval value);
+extern int                sig_mqnotempty(int tid, int signo, union sigval value);
 #else
 extern int                sig_mqnotempty(int tid, int signo,
                                          void *sival_ptr);

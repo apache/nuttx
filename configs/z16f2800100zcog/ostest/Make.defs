@@ -1,5 +1,5 @@
 ############################################################################
-# configs/z16f2800100zcog/Make.defs
+# configs/z16f2800100zcog/ostest/Make.defs
 #
 #   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -122,7 +122,7 @@ EXEEXT			= .hex
 
 define COMPILE
 	@echo "CC: $1"
-	@$(CC) $(CFLAGS) $1
+	@$(CC) $(CFLAGS) $1 1>/dev/null
 endef
 
 define ASSEMBLE

@@ -1,5 +1,5 @@
 /********************************************************************************
- * signal.h
+ * include/signal.h
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -190,7 +190,7 @@ EXTERN int sigwaitinfo(const sigset_t *set, struct siginfo *value);
 EXTERN int sigtimedwait(const sigset_t *set, struct siginfo *value,
                         const struct timespec *timeout);
 #ifdef CONFIG_CAN_PASS_STRUCTS
-EXTERN int sigqueue(int pid, int signo, const union sigval value);
+EXTERN int sigqueue(int pid, int signo, union sigval value);
 #else
 EXTERN int sigqueue(int pid, int signo, FAR void *sival_ptr);
 #endif
