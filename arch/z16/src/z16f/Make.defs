@@ -33,10 +33,10 @@
 #
 ############################################################################
 
-HEAD_ASRC	= 
+HEAD_SSRC	= z16f_head.S
 
-CMN_ASRCS	= 
+CMN_SSRCS	= 
 CMN_CSRCS	= 
 
-CHIP_ASRCS	= 
+CHIP_SSRCS	= 
 CHIP_CSRCS	= 

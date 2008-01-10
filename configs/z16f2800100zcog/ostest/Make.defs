@@ -92,6 +92,10 @@ ARCHINCLUDES		= $(ARCHSTDINCLUDES) $(ARCHUSRINCLUDES)
 CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES)
 
+CPPDEFINES              = -D_Z16F2811AL -D_Z16K_SERIES -D_Z16F_SERIES -D__ASSEMBLY__
+CPPINCLUDES             = -I$(TOPDIR)/include
+CPPFLAGS                = $(CPPDEFINES) $(CPPINCLUDES)
+
 # Librarian definitions
 
 ARFLAGS 		= -quiet -warn
@@ -104,7 +108,7 @@ LINKCMDTEMPLATE 	= $(TOPDIR)/configs/z16f2800100zcog/ostest/ostest.linkcmd
 
 CROSSDEV		=
 CC			= $(ZDSBINDIR)/zneocc.exe
-CPP			= $(ZDSBINDIR)/zneoasm.exe
+CPP			= gcc -E
 LD			= $(ZDSBINDIR)/zneolink.exe
 AS			= $(ZDSBINDIR)/zneoasm.exe
 AR			= $(ZDSBINDIR)/zneolib.exe
@@ -136,7 +140,7 @@ define ARCHIVE
 endef
 
 define CLEAN
-	@rm -f *.obj *.src *.lib *.hex
+	@rm -f *.obj *.src *.lib *.hex *.lst
 endef
 
 # This is the tool to use for dependencies (i.e., none)
