@@ -113,7 +113,8 @@ clean:
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR=$(TOPDIR) clean ; \
 	fi
-	rm -f libarch$(LIBEXT) *.o *.obj *~
+	@rm -f libarch$(LIBEXT) *~ .*.swp
+	$(call CLEAN)
 
 distclean: clean
 	@if [ -e board/Makefile ]; then \
