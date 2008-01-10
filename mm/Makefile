@@ -67,11 +67,11 @@ $(BIN):	$(OBJS)
 depend: .depend
 
 clean:
-	rm -f $(BIN) *.asm *.lst *.sym *.adb *~ .*.swp
-	if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
+	@rm -f $(BIN) *~ .*.swp
+	$(call CLEAN)
 
 distclean: clean
-	rm -f Make.dep .depend
+	@rm -f Make.dep .depend
 
 -include Make.dep
 

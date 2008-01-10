@@ -50,6 +50,8 @@ include resolv/Make.defs
 endif
 endif
 
+SUBDIRS		= uiplib dhcpc dhcpd resolv smtp telnetd webclient webserver
+
 ASRCS		= $(UIPLIB_ASRCS) $(DHCPC_ASRCS) $(DHCPD_ASRCS) $(RESOLV_ASRCS) \
 		  $(SMTP_ASRCS) $(TELNETD_ASRCS) $(WEBCLIENT_ASRCS) $(WEBSERVER_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
@@ -90,9 +92,11 @@ endif
 depend: .depend
 
 clean:
-	@rm -f $(BIN) *.o *.obj *.rel *.asm *.lst *.sym *.adb *~
-	@rm -f uiplib/*~ dhcpc/*~ dhcpd/*~ resolv/*~ smtp/*~ telnetd/*~ webclient/*~ webserver/*~
-	@if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
+	@rm -f $(BIN) *~ .*.swp
+	$(call CLEAN)
+	@( for dir in $(SUBDIRS); do \
+		rm $(dir)/*~ $(dir)/.*.swp; \
+	done ; )
 	@$(MAKE) -C dhcpd -f Makefile.host clean
 
 distclean: clean

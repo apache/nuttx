@@ -94,9 +94,9 @@ endif
 depend: .depend
 
 clean:
-	rm -f $(BIN) *.o *.obj *.rel *.asm *.lst *.sym *.adb *~
-	rm -f uip/*~
-	if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
+	@rm -f $(BIN) *~ .*.swp
+	@rm -f uip/*~ uip/.*.swp
+	$(call CLEAN)
 
 distclean: clean
 	rm -f Make.dep .depend
