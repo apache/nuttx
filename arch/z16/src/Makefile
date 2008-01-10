@@ -41,6 +41,8 @@ WARCHSRCDIR	= ${shell cygpath -w $(ARCHSRCDIR)}
 USRINCLUDES	= -usrinc:'.;$(WTOPDIR)\sched;$(WARCHSRCDIR)\chip;$(WARCHSRCDIR)\common'
 INCLUDES	= $(ARCHSTDINCLUDES) $(USRINCLUDES)
 CFLAGS		= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(INCLUDES) $(ARCHDEFINES)
+WLINKLIBS       =
+LDFLAGS	        = @${shell cypath -w $(ARCHSRCDIR)/nuttx.linkcmd}
 
 HEAD_AOBJ	= $(HEAD_ASRC:.S=$(OBJEXT))
 
@@ -53,16 +55,7 @@ COBJS		= $(CSRCS:.c=$(OBJEXT))
 SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
 
-LDFLAGS		= $(ARCHSCRIPT)
-EXTRA_LIBS	=
-
-LINKLIBS	=
-LDPATHES	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
-LDLIBS		= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
-
 BOARDDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src/board
-
-LIBGCC		= ${shell $(CC) -print-libgcc-file-name}
 
 VPATH		= chip:common
 
@@ -80,11 +73,23 @@ libarch$(LIBEXT): $(OBJS)
 	done ; )
 
 board/libboard$(LIBEXT):
-	$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT)
+	@$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT)
 
-nuttx$(EXEEXT): $(HEAD_AOBJ) board/libboard$(LIBEXT)
-	$(LD) --entry=__start $(LDFLAGS) $(LDPATHES) -L$(BOARDDIR) -o $(TOPDIR)/$@ $(HEAD_AOBJ) \
-		--start-group $(LDLIBS) -lboard --end-group $(EXTRA_LIBS) $(LIBGCC) 
+wlinklibs:
+        $(foreach LIB, $(LINKLIBS), $(eval WLINKLIBS += ${shell cygpath -w $(LIB)}))
+
+nuttx.linkcmd: $(LINKCMDTEMPLATE) wlinklibs
+	@cp -f $(LINKCMDTEMPLATE) nuttx.linkcmd
+	@echo "\"${shell cygpath -w $(TOPDIR)/nuttx}\"= \\" >>nuttx.linkcmd
+	@echo " ${shell cygpath -w $(ARCHSRCDIR)/$(HEAD_AOBJ)}, \\" >>nuttx.linkcmd
+	@( for lib in $(WLINKLIBS); do \
+		echo " $${lib}, \\" >>nuttx.linkcmd; \
+	done ; )
+	@echo " ${shell cygpath -w $(ARCHSRCDIR)/board/libboard$(LIBEXT)}"  >>nuttx.linkcmd
+
+nuttx$(EXEEXT): $(HEAD_AOBJ) board/libboard$(LIBEXT) nuttx.linkcmd
+        @echo "LD:  nuttx.hex"
+	@$(LD) $(LDFLAGS)
 
 .depend: Makefile chip/Make.defs $(SRCS)
 	@if [ -e board/Makefile ]; then \
@@ -99,7 +104,7 @@ clean:
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR="$(TOPDIR)" clean ; \
 	fi
-	@rm -f libarch$(LIBEXT) *~ .*.swp
+	@rm -f libarch$(LIBEXT) nuttx.linkcmd *~ .*.swp
 	$(call CLEAN)
 
 distclean: clean
