@@ -70,8 +70,8 @@ libboard$(LIBEXT): $(OBJS)
 depend: .depend
 
 clean:
-	rm -f libboard$(LIBEXT) *~
-	if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
+	@rm -f libboard$(LIBEXT) *~ .*.swp
+	$(call CLEAN)
 
 distclean: clean
 	rm -f Make.dep .depend

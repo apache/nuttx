@@ -131,6 +131,10 @@ define ARCHIVE
 	$(AR) $(ARFLAGS) $1=-+$2 || { echo "$(AR) $1=-+$2 FAILED!" ; exit 1 ; }
 endef
 
+define CLEAN
+	@rm -f *.obj *.src *.lib *.hex
+endef
+
 # This is the tool to use for dependencies (i.e., none)
 
 MKDEP			= $(TOPDIR)/tools/mknulldeps.sh
