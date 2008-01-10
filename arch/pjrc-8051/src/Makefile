@@ -211,9 +211,8 @@ clean:
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR=$(TOPDIR) clean ; \
 	fi
-	rm -f libarch$(LIBEXT) up_mem.h
-	rm -f *.asm *.rel *.lst *.rst *.sym *.adb *.lnk *.map *.mem *.ihx *.hex *~
-	if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
+	@rm -f libarch$(LIBEXT) up_mem.h *~ .*.swp
+	$(call CLEAN)
 
 distclean: clean
 	@if [ -e board/Makefile ]; then \

@@ -217,7 +217,7 @@ subdir_clean:
 	@$(MAKE) -C mm -f Makefile.test TOPDIR="$(TOPDIR)" clean
 
 clean: subdir_clean
-	rm -f $(BIN) $(BIN).* mm_test *.map *~
+	@rm -f $(BIN) $(BIN).* mm_test *.map *~
 
 subdir_distclean:
 	@for dir in $(CLEANDIRS) ; do \
@@ -227,6 +227,6 @@ subdir_distclean:
 	done
 
 distclean: clean subdir_distclean clean_context
-	rm -f Make.defs setenv.sh .config
+	@rm -f Make.defs setenv.sh .config
 
 

@@ -234,10 +234,8 @@ clean:
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR="$(TOPDIR)" clean ; \
 	fi
-	rm -f libarch$(LIBEXT) up_mem.h asm_mem.h pass1.* nuttx.*
-	rm -f *.asm *.rel *.lst *.rst *.sym *.adb *.lnk *.map *.mem *.ihx *.hex
-	rm -f core *~ .*.swp *.swp
-	if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
+	@rm -f libarch$(LIBEXT) up_mem.h asm_mem.h pass1.* nuttx.* *~ .*.swp
+	$(call CLEAN)
 
 distclean: clean
 	@if [ -e board/Makefile ]; then \

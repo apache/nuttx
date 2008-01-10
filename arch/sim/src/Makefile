@@ -101,8 +101,8 @@ nuttx$(EXEEXT): $(LINKOBJS)
 depend: .depend
 
 clean:
-	@rm -f libarch$(LIBEXT) *~
-	@if [ ! -z "$(OBJEXT)" ]; then rm -f *$(OBJEXT); fi
+	@rm -f libarch$(LIBEXT) *~ .*.swp
+	$(call CLEAN)
 
 distclean: clean
 	@rm -f Make.dep .depend

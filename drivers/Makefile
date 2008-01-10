@@ -80,9 +80,10 @@ endif
 depend: .depend
 
 clean:
-	rm -f $(BIN) *.o *.obj *.rel *.asm *.lst *.sym *.adb *~
+	@rm -f $(BIN) *~ .*.swp
+	$(call CLEAN)
 
 distclean: clean
-	rm -f Make.dep .depend
+	@rm -f Make.dep .depend
 
 -include Make.dep

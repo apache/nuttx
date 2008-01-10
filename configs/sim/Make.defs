@@ -83,6 +83,10 @@ define ARCHIVE
 	$(AR) $1 $2 || { echo "$(AR) $1 $2 FAILED!" ; exit 1 ; }
 endef
 
+define CLEAN
+	@rm -f *.o *.a
+endef
+
 MKDEP			= $(TOPDIR)/tools/mkdeps.sh
 
 HOSTCC			= gcc

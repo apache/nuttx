@@ -97,9 +97,10 @@ $(HOST_BIN):	$(HOST_OBJS)
 depend: .depend
 
 clean:
-	rm -f $(TARG_BIN) $(HOST_BIN) *.o *.obj *.rel *.asm *.lst *.sym *.adb *~
+	@rm -f $(TARG_BIN) $(HOST_BIN) *~ .*.swp
+	$(call CLEAN)
 
 distclean: clean
-	rm -f Make.dep .depend
+	@rm -f Make.dep .depend
 
 -include Make.dep
