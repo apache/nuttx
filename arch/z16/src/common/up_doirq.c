@@ -1,7 +1,7 @@
 /****************************************************************************
- * common/up_udelay.c
+ * common/up_doirq.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,28 +38,24 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
-
-#ifdef CONFIG_BOARD_LOOPSPERMSEC
+#include <assert.h>
+#include "up_arch.h"
+#include "os_internal.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-#define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
-#define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
-#define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
-
 /****************************************************************************
- * Private Types
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -70,63 +66,39 @@
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_udelay
- *
- * Description:
- *   Delay inline for the requested number of microseconds.  NOTE:  Because
- *   of all of the setup, several microseconds will be lost before the actual
- *   timing looop begins.  Thus, the delay will always be a few microseconds
- *   longer than requested.
- *
- *   *** NOT multi-tasking friendly ***
- *
- * ASSUMPTIONS:
- *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
- *
- ****************************************************************************/
-
-void up_udelay(unsigned int microseconds)
+void up_doirq(int irq, chipreg_t *regs)
 {
-  volatile int i;
-
-  /* We'll do this a little at a time because we expect that the
-   * CONFIG_BOARD_LOOPSPERUSEC is very inaccurate during to truncation in
-   * the divisions of its calculation.  We'll use the largest values that
-   * we can in order to prevent significant error buildup in the loops.
-   */
-
-  while (microseconds > 1000)
+  up_ledon(LED_INIRQ);
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  PANIC(OSERR_ERREXCEPTION);
+#else
+  if ((unsigned)irq < NR_IRQS)
     {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPERMSEC; i++)
-        {
-        }
-      microseconds -= 1000;
-    }
+       /* Current regs non-zero indicates that we are processing
+        * an interrupt; current_regs is also used to manage
+        * interrupt level context switches.
+        */
 
-  while (microseconds > 100)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPER100USEC; i++)
-        {
-        }
-      microseconds -= 100;
-    }
+       current_regs = regs;
 
-  while (microseconds > 10)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPER10USEC; i++)
-        {
-        }
-      microseconds -= 10;
-    }
+       /* Mask and acknowledge the interrupt */
 
-  while (microseconds > 0)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPERUSEC; i++)
-        {
-        }
-      microseconds--;
+       up_maskack_irq(irq);
+
+       /* Deliver the IRQ */
+
+       irq_dispatch(irq, regs);
+
+       /* Indicate that we are no long in an interrupt handler */
+
+       current_regs = NULL;
+
+       /* Unmask the last interrupt (global interrupts are still
+        * disabled.
+        */
+
+       up_enable_irq(irq);
     }
+  up_ledoff(LED_INIRQ);
+#endif
 }
-#endif /* CONFIG_BOARD_LOOPSPERMSEC */
-

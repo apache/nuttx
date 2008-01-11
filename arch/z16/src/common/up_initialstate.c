@@ -1,7 +1,7 @@
 /****************************************************************************
- * common/up_udelay.c
+ * common/up_initialstate.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,28 +38,21 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <string.h>
 #include <nuttx/arch.h>
 
-#ifdef CONFIG_BOARD_LOOPSPERMSEC
+#include "chip/chip.h"
+#include "up_internal.h"
+#include "up_arch.h"
 
 /****************************************************************************
- * Definitions
- ****************************************************************************/
-
-#define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
-#define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
-#define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
-
-/****************************************************************************
- * Private Types
+ * Private Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -71,62 +64,29 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_udelay
+ * Name: up_initial_state
  *
  * Description:
- *   Delay inline for the requested number of microseconds.  NOTE:  Because
- *   of all of the setup, several microseconds will be lost before the actual
- *   timing looop begins.  Thus, the delay will always be a few microseconds
- *   longer than requested.
+ *   A new thread is being started and a new TCB
+ *   has been created. This function is called to initialize
+ *   the processor specific portions of the new TCB.
  *
- *   *** NOT multi-tasking friendly ***
- *
- * ASSUMPTIONS:
- *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
+ *   This function must setup the intial architecture registers
+ *   and/or  stack so that execution will begin at tcb->start
+ *   on the next context switch.
  *
  ****************************************************************************/
 
-void up_udelay(unsigned int microseconds)
+void up_initial_state(_TCB *tcb)
 {
-  volatile int i;
+  struct xcptcontext *xcp = &tcb->xcp;
 
-  /* We'll do this a little at a time because we expect that the
-   * CONFIG_BOARD_LOOPSPERUSEC is very inaccurate during to truncation in
-   * the divisions of its calculation.  We'll use the largest values that
-   * we can in order to prevent significant error buildup in the loops.
-   */
+  /* Initialize the initial exception register context structure */
 
-  while (microseconds > 1000)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPERMSEC; i++)
-        {
-        }
-      microseconds -= 1000;
-    }
-
-  while (microseconds > 100)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPER100USEC; i++)
-        {
-        }
-      microseconds -= 100;
-    }
-
-  while (microseconds > 10)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPER10USEC; i++)
-        {
-        }
-      microseconds -= 10;
-    }
-
-  while (microseconds > 0)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPERUSEC; i++)
-        {
-        }
-      microseconds--;
-    }
+  memset(xcp, 0, sizeof(struct xcptcontext));
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
+  xcp->regs[XCPT_I]  = Z80_C_FLAG; /* Carry flag will enable interrupts */
+#endif
+  xcp->regs[XCPT_SP] = (chipreg_t)tcb->adj_stack_ptr;
+  xcp->regs[XCPT_PC] = (chipreg_t)tcb->start;
 }
-#endif /* CONFIG_BOARD_LOOPSPERMSEC */
-

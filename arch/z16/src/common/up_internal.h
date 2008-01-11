@@ -85,7 +85,7 @@ typedef void (*up_vector_t)(void);
  * interrupt processing.
  */
 
-extern uint32 *current_regs;
+extern chipreg_t *current_regs;
 #endif
 
 /****************************************************************************
@@ -96,14 +96,13 @@ extern uint32 *current_regs;
 
 /* Defined in files with the same name as the function */
 
-extern void up_copystate(FAR uint32 *dest, FAR uint32 *src);
-extern void up_decodeirq(FAR uint32 *regs);
-extern void up_doirq(int irq, FAR uint32 *regs);
-extern void up_fullcontextrestore(FAR uint32 *regs);
+extern void up_copystate(FAR chipreg_t *dest, FAR chipreg_t *src);
+extern void up_doirq(int irq, FAR chipreg_t *regs);
+extern void up_fullcontextrestore(FAR chipreg_t *regs);
 extern void up_irqinitialize(void);
-extern int  up_saveusercontext(FAR uint32 *regs);
+extern int  up_saveusercontext(FAR chipreg_t *regs);
 extern void up_sigdeliver(void);
-extern int  up_timerisr(int irq, FAR uint32 *regs);
+extern int  up_timerisr(int irq, FAR chipreg_t *regs);
 
 #if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
 extern void up_lowputc(char ch);
@@ -157,7 +156,7 @@ extern void up_netinitialize(void);
 
 /* Return the current value of the stack pointer (used in stack dump logic) */
 
-extern uint32 up_getsp(void);
+extern chipreg_t up_getsp(void);
 
 /* Dump stack and registers */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
- * common/up_udelay.c
+ * common/up_sigdeliver.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,28 +38,25 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <sched.h>
+#include <debug.h>
+
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
-#ifdef CONFIG_BOARD_LOOPSPERMSEC
+#include "os_internal.h"
+#include "up_internal.h"
+
+#ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-#define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
-#define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
-#define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
-
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -71,62 +68,76 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_udelay
+ * Name: up_sigdeliver
  *
  * Description:
- *   Delay inline for the requested number of microseconds.  NOTE:  Because
- *   of all of the setup, several microseconds will be lost before the actual
- *   timing looop begins.  Thus, the delay will always be a few microseconds
- *   longer than requested.
- *
- *   *** NOT multi-tasking friendly ***
- *
- * ASSUMPTIONS:
- *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
+ *   This is the a signal handling trampoline.  When a
+ *   signal action was posted.  The task context was mucked
+ *   with and forced to branch to this location with interrupts
+ *   disabled.
  *
  ****************************************************************************/
 
-void up_udelay(unsigned int microseconds)
+void up_sigdeliver(void)
 {
-  volatile int i;
+#ifndef CONFIG_DISABLE_SIGNALS
+  _TCB  *rtcb = (_TCB*)g_readytorun.head;
+  chipreg_t regs[XCPTCONTEXT_REGS];
+  sig_deliver_t sigdeliver;
 
-  /* We'll do this a little at a time because we expect that the
-   * CONFIG_BOARD_LOOPSPERUSEC is very inaccurate during to truncation in
-   * the divisions of its calculation.  We'll use the largest values that
-   * we can in order to prevent significant error buildup in the loops.
+  /* Save the errno.  This must be preserved throughout the signal handling
+   * so that the the user code final gets the correct errno value (probably
+   * EINTR).
    */
 
-  while (microseconds > 1000)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPERMSEC; i++)
-        {
-        }
-      microseconds -= 1000;
-    }
+  int saved_errno = rtcb->errno;
 
-  while (microseconds > 100)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPER100USEC; i++)
-        {
-        }
-      microseconds -= 100;
-    }
+  up_ledon(LED_SIGNAL);
 
-  while (microseconds > 10)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPER10USEC; i++)
-        {
-        }
-      microseconds -= 10;
-    }
+  dbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
+       rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
+  ASSERT(rtcb->xcp.sigdeliver != NULL);
 
-  while (microseconds > 0)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPERUSEC; i++)
-        {
-        }
-      microseconds--;
-    }
+  /* Save the real return state on the stack. */
+
+  up_copystate(regs, rtcb->xcp.regs);
+  regs[XCPT_PC] = rtcb->xcp.saved_pc;
+  regs[XCPT_I]  = rtcb->xcp.saved_i;
+
+  /* Get a local copy of the sigdeliver function pointer.
+   * we do this so that we can nullify the sigdeliver
+   * function point in the TCB and accept more signal
+   * deliveries while processing the current pending
+   * signals.
+   */
+
+  sigdeliver           = rtcb->xcp.sigdeliver;
+  rtcb->xcp.sigdeliver = NULL;
+
+  /* Then restore the task interrupt state. */
+
+  irqrestore(regs[XCPT_I]);
+
+  /* Deliver the signals */
+
+  sigdeliver(rtcb);
+
+  /* Output any debug messaged BEFORE restoring errno
+   * (because they may alter errno), then restore the
+   * original errno that is needed by the user logic
+   * (it is probably EINTR).
+   */
+
+  dbg("Resuming\n");
+  rtcb->errno = saved_errno;
+
+  /* Then restore the correct state for this thread of
+   * execution.
+   */
+
+  up_ledoff(LED_SIGNAL);
+  SIGNAL_RETURN(regs);
+#endif
 }
-#endif /* CONFIG_BOARD_LOOPSPERMSEC */
 
+#endif /* CONFIG_DISABLE_SIGNALS */

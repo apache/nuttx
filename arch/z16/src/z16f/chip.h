@@ -83,7 +83,35 @@
 # error "Z16F chip variant not specified"
 #endif
 
-/* Memory areas**********************************************************************
+/* Flash option settings at address 0x00000000 ************************************/
+
+#define Z16F_FLOPTION0          rom char _flash_option0 _At 0x0
+#define Z16F_FLOPTION1          rom char _flash_option1 _At 0x1
+#define Z16F_FLOPTION2          rom char _flash_option2 _At 0x2
+#define Z16F_FLOPTION3          rom char _flash_option3 _At 0x3
+
+#define Z16F_FLOPTION0_EXTRNRC  _HX8(00) /* Bits 6-7: OSC_SEL */
+#define Z16F_FLOPTION0_LOWFREQ  _HX8(40)
+#define Z16F_FLOPTION0_MEDFREQ  _HX8(80)
+#define Z16F_FLOPTION0_MAXPWR   _HX8(c0)
+#define Z16F_FLOPTION0_WDTRES   _HX8(20) /* Bit 5 */
+#define Z16F_FLOPTION0_WDTA0    _HX8(10) /* Bit 4 */
+#define Z16F_FLOPTION0_VBOA0    _HX8(08) /* Bit 3 */
+#define Z16F_FLOPTION0_DBGUART  _HX8(04) /* Bit 2 */
+#define Z16F_FLOPTION0_FWP      _HX8(02) /* Bit 1 */
+#define Z16F_FLOPTION0_RP       _HX8(01) /* Bit 0 */
+
+#define Z16F_FLOPTION1_RESVD    _HX8(f8) /* Bits 3-7: reserved */
+#define Z16F_FLOPTION1_MCEN     _HX8(04) /* Bit 2: Motor control pins enable */
+#define Z16F_FLOPTION1_OFFH     _HX8(02) /* High side OFF */
+#define Z16F_FLOPTION1_OFFL     _HX8(01) /* Low side OFF */
+
+#define Z16F_FLOPTION2_RESVD    _HX8(ff) /* Bits 0-7: reserved */
+
+#define Z16F_FLOPTION3_RESVD    _HX8(bf) /* Bits 0-5,7: reserved */
+#define Z16F_FLOPTION3_NORMAL   _HX8(40) /* Bit 6: 1:Normal 0:Low power mode */
+
+/* Memory areas *******************************************************************
  *
  * Internal non-volatile memory starts at address zero.  The size
  * of the internal non-volatile memory is chip-dependent.
@@ -116,6 +144,77 @@
 #define Z16F_EXTIO_SIZE         _HX32(00001800)
 #define Z16F_IIO_BASE           _HX32(ffffe000) /* Internal I/O memory and SFRs */
 #define Z16F_IIO_SIZE           _HX32(00001fff)
+
+/* Control Registers  ***************************************************************/
+
+#define Z16F_CNTRL_PCOV         _HX32(ffffe004) /* 32-bits: Program counter overflow */
+#define Z16F_CNTRL_SPOV         _HX32(ffffe00c) /* 32-bits: Stack pointer overflow */
+#define Z16F_CNTRL_FLAGS        _HX32(ffffe100) /*  8-bits: flags */
+#define Z16F_CNTRL_CPUCTL       _HX32(ffffe102) /*  8-bits: CPU control */
+
+/* Flag register bits ***************************************************************/
+
+#define Z16F_CNTRL_FLAGS_C      _HX8(80)        /* Bit 7: Carry flag */
+#define Z16F_CNTRL_FLAGS_Z      _HX8(40)        /* Bit 6: Zero flag */
+#define Z16F_CNTRL_FLAGS_S      _HX8(20)        /* Bit 5: Sign flag */
+#define Z16F_CNTRL_FLAGS_V      _HX8(10)        /* Bit 4: Overflow flag */
+#define Z16F_CNTRL_FLAGS_B      _HX8(08)        /* Bit 3: Blank flag */
+#define Z16F_CNTRL_FLAGS_F1     _HX8(04)        /* Bit 2: User flag 1 */
+#define Z16F_CNTRL_FLAGS_CIRQE  _HX8(02)        /* Bit 1: Chained interrupt enable */
+#define Z16F_CNTRL_FLAGS_IRQE   _HX8(01)        /* Bit 0: Master interrupt enable */
+
+/* CPU control register bits ********************************************************/
+
+                                                /* Bits 7-2: Reserved, must be zero */
+                                                /* Bits 1-0: DMA bandwidth control */
+#define Z16F_CNTRL_CPUCTL_BWALL _HX8(00)        /*   DMA can consume 100% bandwidth */
+#define Z16F_CNTRL_CPUCTL_BW11  _HX8(01)        /*   DMA can do 1 transaction per 1 cycle */
+#define Z16F_CNTRL_CPUCTL_BW12  _HX8(01)        /*   DMA can do 1 transaction per 2 cycles */
+#define Z16F_CNTRL_CPUCTL_BW13  _HX8(01)        /*   DMA can do 1 transaction per 3 cycles */
+
+/* Trace registers ******************************************************************/
+
+#define Z16F_TRACE_CTL          _HX32(ffffe013) /*  8-bit: Trace Control */
+#define Z16F_TRACE_ADDR         _HX32(ffffe014) /* 32-bit: Trace Address */
+
+/* Interrupt controller registers ***************************************************/
+
+#define Z16F_SYSEXCP            _HX32(ffffe020) /* 16-bit: System Exception Status */
+#define Z16F_SYSEXCPH           _HX32(ffffe020) /*  8-bit: System Exception Status High */
+#define Z16F_SYSEXCPL           _HX32(ffffe021) /*  8-bit: System Exception Status Low */
+#define Z16F_LASTIRQ            _HX32(ffffe023) /*  8-bit: Last IRQ Register */
+#define Z16F_IRQ0               _HX32(ffffe030) /*  8-bit: Interrupt Request 0 */
+#define Z16F_IRQ0_SET           _HX32(ffffe031) /*  8-bit: Interrupt Request 0 Set */
+#define Z16F_IRQ0_EN            _HX32(ffffe032) /* 16-bit: IRQ0 Enable */
+#define Z16F_IRQ0_ENH           _HX32(ffffe032) /*  8-bit: IRQ0 Enable High Bit */
+#define Z16F_IRQ0_ENL           _HX32(ffffe033) /*  8-bit: IRQ0 Enable Low Bit */
+#define Z16F_IRQ1               _HX32(ffffe034) /*  8-bit: Interrupt Request 1 */
+#define Z16F_IRQ1_SET           _HX32(ffffe035) /*  8-bit: Interrupt Request 1 Set */
+#define Z16F_IRQ1_EN            _HX32(ffffe036) /* 16-bit: IRQ1 Enable */
+#define Z16F_IRQ1_ENH           _HX32(ffffe036) /*  8-bit: IRQ1 Enable High Bit */
+#define Z16F_IRQ1_ENL           _HX32(ffffe037) /*  8-bit: IRQ1 Enable Low Bit */
+#define Z16F_IRQ2               _HX32(ffffe038) /*  8-bit: Interrupt Request 2 */
+#define Z16F_IRQ2_SET           _HX32(ffffe039) /*  8-bit  Interrupt Request 2 Set */
+#define Z16F_IRQ2_EN            _HX32(ffffe03a) /* 16-bit: IRQ2 Enable */
+#define Z16F_IRQ2_ENH           _HX32(ffffe03a) /*  8-bit: IRQ2 Enable High Bit */
+#define Z16F_IRQ2_ENL           _HX32(ffffe03c) /*  8-bit: IRQ2 Enable Low Bit */
+
+/* Oscillator control registers *****************************************************/
+
+#define Z16F_OSC_CTL            _HX32(ffffe0A0) /*  8-bit: Oscillator Control */
+#define Z16F_OSC_DIV            _HX32(ffffe0A1) /*  8-bit: Oscillator Divide */
+
+/* Oscillator control register bits *************************************************/
+
+#define Z16F_OSCCTL_INTEN       _HX8(80)        /* Bit 7: Internal oscillator enabled */
+#define Z16F_OSCCTL_XTLEN       _HX8(40)        /* Bit 6: Crystal oscillator enabled */
+#define Z16F_OSCCTL_WDTEN       _HX8(20)        /* Bit 5: Watchdog timer enabled */
+#define Z16F_OSCCTL_POFEN       _HX8(10)        /* Bit 4: Failure detection enabled */
+#define Z16F_OSCCTL_WDFEN       _HX8(08)        /* Bit 3: WD Failuare detection enabled*/
+#define Z16F_OSCCTL_FLPEN       _HX8(04)        /* Bit 2: Flash low power enabled */
+#define Z16F_OSCCTL_INT56       _HX8(00)        /* Bits 0-1=0: Intenal 5.6 MHz */
+#define Z16F_OSCCTL_EXTCLK      _HX8(02)        /* Bits 0-1=2: Extenal clock */
+#define Z16F_OSCCTL_WDT10KHZ    _HX8(03)        /* Bits 0-1=3: WD Timer 10 KHz*/
 
 /* GPIO Port A-K ********************************************************************/
 
@@ -249,32 +348,103 @@
 #define Z16F_UART1_BRH          _HX32(ffffe216) /*  8-bits: UART1 Baud Rate High Byte */
 #define Z16F_UART1_BRL          _HX32(ffffe217) /*  8-bits: UART1 Baud Rate Low Byte */
 
-/* Control Registers  ***************************************************************/
+/* Timer0/1/2 registers *************************************************************/
 
-#define Z16F_CNTRL_PCOV         _HX32(fffffe04) /* 32-bits: Program counter overflow */
-#define Z16F_CNTRL_SPOV         _HX32(fffffe0c) /* 32-bits: Stack pointer overflow */
-#define Z16F_CNTRL_FLAGS        _HX32(fffffe10) /*  8-bits: flags */
-#define Z16F_CNTRL_CPUCTL       _HX32(fffffe12) /*  8-bits: CPU control */
+#define Z16F_TIMER0_HL          _HX32(ffffe300) /* 16-bit: Timer 0 */
+#define Z16F_TIMER0_H           _HX32(ffffe300) /*  8-bit: Timer 0 High Byte */
+#define Z16F_TIMER0_L           _HX32(ffffe301) /*  8-bit: Timer 0 Low Byte */
+#define Z16F_TIMER0_R           _HX32(ffffe302) /* 16-bit: Timer 0 Reload */
+#define Z16F_TIMER0_RH          _HX32(ffffe302) /*  8-bit: Timer 0 Reload High Byte */
+#define Z16F_TIMER0_RL          _HX32(ffffe303) /*  8-bit: Timer 0 Reload Low Byte */
+#define Z16F_TIMER0_PWM         _HX32(ffffe304) /* 16-bit: Timer 0 PWM */
+#define Z16F_TIMER0_PWMH        _HX32(ffffe304) /*  8-bit: Timer 0 PWM High Byte */
+#define Z16F_TIMER0_PWML        _HX32(ffffe305) /*  8-bit: Timer 0 PWM Low Byte */
+#define Z16F_TIMER0_CTL         _HX32(ffffe306) /* 16-bit: Timer 0 Control */
+#define Z16F_TIMER0_CTL0        _HX32(ffffe306) /*  8-bit: Timer 0 Control 0 */
+#define Z16F_TIMER0_CTL1        _HX32(ffffe307) /*  8-bit: Timer 0 Control 1 */
 
-/* Flag register bits ***************************************************************/
+#define Z16F_TIMER1_HL          _HX32(ffffe310) /* 16-bit: Timer 1 */
+#define Z16F_TIMER1_H           _HX32(ffffe310) /*  8-bit: Timer 1 High Byte */
+#define Z16F_TIMER1_L           _HX32(ffffe311) /*  8-bit: Timer 1 Low Byte */
+#define Z16F_TIMER1_R           _HX32(ffffe312) /* 16-bit: Timer 1 Reload */
+#define Z16F_TIMER1_RH          _HX32(ffffe312) /*  8-bit: Timer 1 Reload High Byte */
+#define Z16F_TIMER1_RL          _HX32(ffffe313) /*  8-bit: Timer 1 Reload Low Byte */
+#define Z16F_TIMER1_PWM         _HX32(ffffe314) /* 16-bit: Timer 1 PWM */
+#define Z16F_TIMER1_PWMH        _HX32(ffffe314) /*  8-bit: Timer 1 PWM High Byte */
+#define Z16F_TIMER1_PWML        _HX32(ffffe315) /*  8-bit: Timer 1 PWM Low Byte */
+#define Z16F_TIMER1_CTL         _HX32(ffffe316) /* 16-bit: Timer 1 Control */
+#define Z16F_TIMER1_CTL0        _HX32(ffffe316) /*  8-bit: Timer 1 Control 0 */
+#define Z16F_TIMER1_CTL1        _HX32(ffffe317) /*  8-bit: Timer 1 Control 1 */
 
-#define Z16F_CNTRL_FLAGS_C      _HX8(80)        /* Bit 7: Carry flag */
-#define Z16F_CNTRL_FLAGS_Z      _HX8(40)        /* Bit 6: Zero flag */
-#define Z16F_CNTRL_FLAGS_S      _HX8(20)        /* Bit 5: Sign flag */
-#define Z16F_CNTRL_FLAGS_V      _HX8(10)        /* Bit 4: Overflow flag */
-#define Z16F_CNTRL_FLAGS_B      _HX8(08)        /* Bit 3: Blank flag */
-#define Z16F_CNTRL_FLAGS_F1     _HX8(04)        /* Bit 2: User flag 1 */
-#define Z16F_CNTRL_FLAGS_CIRQE  _HX8(02)        /* Bit 1: Chained interrupt enable */
-#define Z16F_CNTRL_FLAGS_IRQE   _HX8(01)        /* Bit 0: Master interrupt enable */
+#define Z16F_TIMER2_HL          _HX32(ffffe320) /* 16-bit: Timer 2 */
+#define Z16F_TIMER2_H           _HX32(ffffe320) /*  8-bit: Timer 2 High Byte */
+#define Z16F_TIMER2_L           _HX32(ffffe321) /*  8-bit: Timer 2 Low Byte */
+#define Z16F_TIMER2_R           _HX32(ffffe322) /* 16-bit: Timer 2 Reload */
+#define Z16F_TIMER2_RH          _HX32(ffffe322) /*  8-bit: Timer 2 Reload High Byte */
+#define Z16F_TIMER2_RL          _HX32(ffffe323) /*  8-bit: Timer 2 Reload Low Byte */
+#define Z16F_TIMER2_PWM         _HX32(ffffe324) /* 16-bit: Timer 2 PWM */
+#define Z16F_TIMER2_PWMH        _HX32(ffffe324) /*  8-bit: Timer 2 PWM High Byte */
+#define Z16F_TIMER2_PWML        _HX32(ffffe325) /*  8-bit: Timer 2 PWM Low Byte */
+#define Z16F_TIMER2_CTL         _HX32(ffffe326) /* 16-bit: Timer 2 Control */
+#define Z16F_TIMER2_CTL0        _HX32(ffffe326) /*  8-bit: Timer 2 Control 0 */
+#define Z16F_TIMER2_CTL1        _HX32(ffffe327) /*  8-bit: Timer 2 Control 1 */
 
-/* CPU control register bits ********************************************************/
+/* Common timer0/1/2 register bit definitions ***************************************/
 
-                                                /* Bits 7-2: Reserved, must be zero */
-                                                /* Bits 1-0: DMA bandwidth control */
-#define Z16F_CNTRL_CPUCTL_BWALL _HX8(00)        /*   DMA can consume 100% bandwidth */
-#define Z16F_CNTRL_CPUCTL_BW11  _HX8(01)        /*   DMA can do 1 transaction per 1 cycle */
-#define Z16F_CNTRL_CPUCTL_BW12  _HX8(01)        /*   DMA can do 1 transaction per 2 cycles */
-#define Z16F_CNTRL_CPUCTL_BW13  _HX8(01)        /*   DMA can do 1 transaction per 3 cycles */
+#define Z16F_TIMERCTL0_TMODE    _HX8(80)        /* Bit 7: Timer mode */
+                                                /* Bits 5-6: Timer configuration,
+                                                 * Interpretation depends on timer mode */
+#define Z16F_TIMERCTL0_RELOAD    _HX8(00)       /*   Interrupt occurs on reload or capture */
+#define Z16F_TIMERCTL0_DISABLED  _HX8(40)       /*   Disabled */
+#define Z16F_TIMERCTL0_INACTIVE  _HX8(40)       /*   Interrrupt occurs on inactive gate edge */
+#define Z16F_TIMERCTL0_CAPTURE   _HX8(40)       /*   Interrupt occurs on capture */
+#define Z16F_TIMERCTL0_RELOAD    _HX8(60)       /*   Interrupt occurs on reload */
+#define Z16F_TIMERCTL0_CASCADE   _HX8(10)       /* Bit 4: Timer is cascaded */
+                                                /* Bits 1-2: PW mode */
+#define Z16F_TIMERCTL0_NODELAY   _HZ8(00)       /*    No delay */
+#define Z16F_TIMERCTL0_DELAY2    _HZ8(01)       /*      2 cycle delay */
+#define Z16F_TIMERCTL0_DELAY2    _HZ8(02)       /*      4 cycle delay */
+#define Z16F_TIMERCTL0_DELAY2    _HZ8(03)       /*      8 cycle delay */
+#define Z16F_TIMERCTL0_DELAY2    _HZ8(04)       /*     16 cycle delay */
+#define Z16F_TIMERCTL0_DELAY2    _HZ8(05)       /*     32 cycle delay */
+#define Z16F_TIMERCTL0_DELAY2    _HZ8(06)       /*     64 cycle delay */
+#define Z16F_TIMERCTL0_DELAY2    _HZ8(07)       /*    128 cycle delay */
+
+#define Z16F_TIMERCTL1_TEN       _HX8(80)       /* Bit 7: Timer enable */
+#define Z16F_TIMERCTL1_TPOL      _HX8(40)       /* Bit 6: Input output polarity */
+                                                /* Bits 3-5: Timer prescale value */
+#define Z16F_TIMERSCTL1_DIV1     _HX8(00)       /*   Divide by   1 */
+#define Z16F_TIMERSCTL1_DIV2     _HX8(08)       /*   Divide by   2 */
+#define Z16F_TIMERSCTL1_DIV4     _HX8(10)       /*   Divide by   4 */
+#define Z16F_TIMERSCTL1_DIV8     _HX8(18)       /*   Divide by   8 */
+#define Z16F_TIMERSCTL1_DIV16    _HX8(20)       /*   Divide by  16 */
+#define Z16F_TIMERSCTL1_DIV32    _HX8(28)       /*   Divide by  32 */
+#define Z16F_TIMERSCTL1_DIV64    _HX8(30)       /*   Divide by  64 */
+#define Z16F_TIMERSCTL1_DIV128   _HX8(38)       /*   Divide by 128 */
+                                                /* Bits 0-2: Timer mode + CTL0 TMODE bit*/
+#define Z16F_TIMERSCTL1_ONESHOT  _HX8(00)       /*   One shot mode (CTL0 TMOD = 0) */
+#define Z16F_TIMERSCTL1_PWMDO    _HX8(00)       /*   One shot mode (CTL0 TMOD = 1) */
+#define Z16F_TIMERSCTL1_CONT     _HX8(01)       /*   Continuous mode (CTL0 TMOD = 0)*/
+#define Z16F_TIMERSCTL1_CAPRST   _HX8(01)       /*   Capture restart mode (CTL0 TMOD = 1)*/
+#define Z16F_TIMERSCTL1_COUNTER  _HX8(02)       /*   Counter mode (CTL0 TMOD = 0)*/
+#define Z16F_TIMERSCTL1_CMPCNTR  _HX8(02)       /*   Comparator counter mode (CTL0 TMOD = 1)*/
+#define Z16F_TIMERSCTL1_PWMSO    _HX8(03)       /*   PWM single output mode (CTL0 TMOD = 0)*/
+#define Z16F_TIMERSCTL1_TRIGOS   _HX8(03)       /*   Triggered one shot (CTL0 TMOD = 1)*/
+#define Z16F_TIMERSCTL1_CAPTURE  _HX8(04)       /*   Capture mode (CTL0 TMOD = 0)*/
+#define Z16F_TIMERSCTL1_COMPARE  _HX8(05)       /*   Compare mode (CTL0 TMOD = 0)*/
+#define Z16F_TIMERSCTL1_GATED    _HX8(06)       /*   Gated mode (CTL0 TMOD = 0)*/
+#define Z16F_TIMERSCTL1_CAPCMP   _HX8(07)       /*   Capture/Compare mode (CTL0 TMOD = 0)*/
+
+/* Register access macros ***********************************************************/
+
+#ifndef __ASSEMBLY__
+# define getreg8(a)           (*(ubyte volatile near*)((a) & 0xffff))
+# define putreg8(v,a)         (*(ubyte volatile near*)((a) & 0xffff) = (v))
+# define getreg16(a)          (*(uint16 volatile near*)((a) & 0xffff))
+# define putreg16(v,a)        (*(uint16 volatile near*)((a) & 0xffff) = (v))
+# define getreg32(a)          (*(uint32 volatile near*)((a) & 0xffff))
+# define putreg32(v,a)        (*(uint32 volatile near*)((a) & 0xffff) = (v))
+#endif /* __ASSEMBLY__ */
 
 /************************************************************************************
  * Public Function Prototypes
@@ -302,6 +472,6 @@ extern void z16f_lowuartinit(void);
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif /* __ASSEMBLY__ */
 
 #endif  /* __Z16F_CHIP_H */
