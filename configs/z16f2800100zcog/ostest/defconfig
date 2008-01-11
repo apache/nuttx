@@ -1,4 +1,4 @@
-############################################################
+############################################################################
 # configs/z16f2800100zcog/defconfig
 #
 #   Copyright (C) 2008 Gregory Nutt. All rights reserved.
@@ -31,7 +31,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################
+############################################################################
 #
 # Architecture selection
 #
@@ -64,13 +64,31 @@ CONFIG_DRAM_SIZE=65536
 #
 # Z16F specific device driver settings
 #
-# CONFIG_UART_RXBUFSIZE - Characters are buffered as received.
+# CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
+#   console and ttyS0 (default is the UART0). 
+# CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
 #   This specific the size of the receive buffer
-# CONFIG_UART_TXBUFSIZE - Characters are buffered before
+# CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
 #   being sent.  This specific the size of the transmit buffer
+# CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
+# CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
+# CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+# CONFIG_UARTn_2STOP - Two stop bits
 #
-CONFIG_UART_RXBUFSIZE=0
-CONFIG_UART_TXBUFSIZE=0
+CONFIG_UART0_SERIAL_CONSOLE=y
+CONFIG_UART1_SERIAL_CONSOLE=n
+CONFIG_UART0_TXBUFSIZE=256
+CONFIG_UART1_TXBUFSIZE=256
+CONFIG_UART0_RXBUFSIZE=256
+CONFIG_UART1_RXBUFSIZE=256
+CONFIG_UART0_BAUD=115200
+CONFIG_UART1_BAUD=115200
+CONFIG_UART0_BITS=8
+CONFIG_UART1_BITS=8
+CONFIG_UART0_PARITY=0
+CONFIG_UART1_PARITY=0
+CONFIG_UART0_2STOP=0
+CONFIG_UART1_2STOP=0
 
 #
 # General build options
@@ -94,6 +112,8 @@ CONFIG_HAVE_LIBM=n
 #   number of memory regions that the memory manager must
 #   handle and enables the API mm_addregion(start, end);
 # CONFIG_HAVE_LOWPUTC - architecture supports low-level, boot
+#   time console output
+# CONFIG_HAVE_GETPUTC - architecture supports low-level, boot
 #   time console output
 # CONFIG_TICKS_PER_MSEC - The default system timer is 100Hz
 #   or TICKS_PER_MSEC=10.  This setting may be defined to
@@ -119,6 +139,7 @@ CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_MM_REGIONS=1
 CONFIG_ARCH_LOWPUTC=y
+CONFIG_ARCH_LOWGETC=n
 CONFIG_RR_INTERVAL=0
 CONFIG_SCHED_INSTRUMENTATION=n
 CONFIG_TASK_NAME_SIZE=0

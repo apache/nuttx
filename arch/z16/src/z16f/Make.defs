@@ -38,5 +38,5 @@ HEAD_SSRC	= z16f_head.S
 CMN_SSRCS	= 
 CMN_CSRCS	= 
 
-CHIP_SSRCS	= 
+CHIP_SSRCS	= z16f_lowuart.S
 CHIP_CSRCS	= 
