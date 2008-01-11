@@ -38,12 +38,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sched.h>
 #include <debug.h>
+
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
-#include "up_arch.h"
+
+#include "chip/chip.h"
 #include "up_internal.h"
 
 /****************************************************************************

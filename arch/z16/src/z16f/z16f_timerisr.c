@@ -43,8 +43,8 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <chip/chip.h>
 
+#include "chip/chip.h"
 #include "clock_internal.h"
 #include "up_internal.h"
 

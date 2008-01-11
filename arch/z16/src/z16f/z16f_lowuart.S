@@ -39,7 +39,7 @@
  *************************************************************************/
 
 #include <nuttx/config.h>
-#include <chip/chip.h>
+#include "chip/chip.h"
 
 #if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
 
@@ -104,7 +104,7 @@ z16f_lowuartinit:
 	ld	r0, #%30
 	or.b	Z16F_GPIOA_AFL, r0	/* Z16F_GPIOA_AFL |= %30 */
 	clr.b	Z16F_UART0_CTL1 	/* Z16F_UART0_CTL1 = 0 */
-	ld	0, #%c0
+	ld	r0, #%c0
 	ld.b	Z16F_UART0_CTL0, r0	/* Z16F_UART0_CTL0 = %c0 */
 #else
 	ld.w	Z16F_UART1_BR, r0	/* Z16F_UART1_BR = BRG */

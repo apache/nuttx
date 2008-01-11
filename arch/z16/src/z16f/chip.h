@@ -403,12 +403,12 @@
                                                 /* Bits 1-2: PW mode */
 #define Z16F_TIMERCTL0_NODELAY   _HZ8(00)       /*    No delay */
 #define Z16F_TIMERCTL0_DELAY2    _HZ8(01)       /*      2 cycle delay */
-#define Z16F_TIMERCTL0_DELAY2    _HZ8(02)       /*      4 cycle delay */
-#define Z16F_TIMERCTL0_DELAY2    _HZ8(03)       /*      8 cycle delay */
-#define Z16F_TIMERCTL0_DELAY2    _HZ8(04)       /*     16 cycle delay */
-#define Z16F_TIMERCTL0_DELAY2    _HZ8(05)       /*     32 cycle delay */
-#define Z16F_TIMERCTL0_DELAY2    _HZ8(06)       /*     64 cycle delay */
-#define Z16F_TIMERCTL0_DELAY2    _HZ8(07)       /*    128 cycle delay */
+#define Z16F_TIMERCTL0_DELAY4    _HZ8(02)       /*      4 cycle delay */
+#define Z16F_TIMERCTL0_DELAY8    _HZ8(03)       /*      8 cycle delay */
+#define Z16F_TIMERCTL0_DELAY16   _HZ8(04)       /*     16 cycle delay */
+#define Z16F_TIMERCTL0_DELAY32   _HZ8(05)       /*     32 cycle delay */
+#define Z16F_TIMERCTL0_DELAY64   _HZ8(06)       /*     64 cycle delay */
+#define Z16F_TIMERCTL0_DELAY128  _HZ8(07)       /*    128 cycle delay */
 
 #define Z16F_TIMERCTL1_TEN       _HX8(80)       /* Bit 7: Timer enable */
 #define Z16F_TIMERCTL1_TPOL      _HX8(40)       /* Bit 6: Input output polarity */
