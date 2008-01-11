@@ -49,8 +49,37 @@
  * Definitions
  ****************************************************************************/
 
-#define Z80_IRQ_SYSTIMER  0
-#define NR_IRQS          (1)
+/* Interrupt Vectors */
+ 
+#define Z16F_IRQ_RESET    ( 0) /* Vector: 0x04 Reset */
+#define Z16F_IRQ_SYSEXC   ( 1) /* Vector: 0x08 Sysexec */
+#define Z16F_IRQ_TIMER2   ( 2) /* Vector: 0x10 Timer 2 */
+#define Z16F_IRQ_TIMER1   ( 3) /* Vector: 0x14 Timer 1 */
+#define Z16F_IRQ_TIMER0   ( 4) /* Vector: 0x18 Timer 0 */
+#define Z16F_IRQ_UART0RX  ( 5) /* Vector: 0x1C UART0 RX */
+#define Z16F_IRQ_UART0TX  ( 6) /* Vector: 0x20 UART0 TX */
+#define Z16F_IRQ_I2C      ( 7) /* Vector: 0x24 I2C */
+#define Z16F_IRQ_SPI      ( 8) /* Vector: 0x28 SPI */
+#define Z16F_IRQ_ADC      ( 9) /* Vector: 0x2C ADC */
+#define Z16F_IRQ_P7AD     (10) /* Vector: 0x30 P7AD */
+#define Z16F_IRQ_P6AD     (11) /* Vector: 0x34 P6AD */
+#define Z16F_IRQ_P5AD     (12) /* Vector: 0x38 P5AD */
+#define Z16F_IRQ_P4AD     (13) /* Vector: 0x3C P4AD */
+#define Z16F_IRQ_P3AD     (14) /* Vector: 0x40 P3AD */
+#define Z16F_IRQ_P2AD     (15) /* Vector: 0x44 P2AD */
+#define Z16F_IRQ_P1AD     (16) /* Vector: 0x48 P1AD */
+#define Z16F_IRQ_P0AD     (17) /* Vector: 0x4C P0AD */
+#define Z16F_IRQ_PWMTIMER (18) /* Vector: 0x50 PWM Timer */
+#define Z16F_IRQ_UART1RX  (19) /* Vector: 0x54 UART1 RX */
+#define Z16F_IRQ_UART1TX  (20) /* Vector: 0x58 UART1 TX */
+#define Z16F_IRQ_PWMFAULT (21) /* Vector: 0x5C PWM Fault */
+#define Z16F_IRQ_C3       (22) /* Vector: 0x60 C3 */
+#define Z16F_IRQ_C2       (23) /* Vector: 0x64 C2 */
+#define Z16F_IRQ_C1       (24) /* Vector: 0x68 C1 */
+#define Z16F_IRQ_C0       (25) /* Vector: 0x6C C0 */
+
+#define Z16F_IRQ_SYSTIMER  Z16F_IRQ_TIMER0
+#define NR_IRQS           (26)
 
 /* IRQ Stack Frame Format
  *
