@@ -119,7 +119,9 @@ STACK_TOP     equ %FFC000
 _reset:
 	ld sp, #STACK_TOP	/* Set Stack Pointer */
 
-	call _z16f_lowinit	/* call _z16f_lowinit */
+#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
+	call _z16f_lowinit	/* Initialize the UART for low-level debug */
+#endif
 	call _os_start          /* Start the operating system */
 _halted:                        /* _os_start() should not return */
         halt
