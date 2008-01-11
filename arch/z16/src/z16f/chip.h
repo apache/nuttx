@@ -41,6 +41,8 @@
  * Included Files
  ************************************************************************************/
 
+#include <nuttx/config.h>
+
 /************************************************************************************
  * Definitions
  ************************************************************************************/
@@ -106,7 +108,7 @@
  * on the size of the IRAM supported by the chip.
  */
  
-#define Z16F_IRAM_BASE         (HZ32(ffffc000) - Z16F_IRAM_SIZE)
+#define Z16F_IRAM_BASE          (_HX32(ffffc000) - Z16F_IRAM_SIZE)
 
 /* External memory mapped peripherals, internal I/O memory and SFRS */
 
@@ -284,6 +286,16 @@
 extern "C" {
 #else
 #define EXTERN extern
+#endif
+
+/* The following two routines are called from the low-level reset logic.  z16f_lowinit()
+ * must be provided by the board-specific logic; z16f_lowuartinit() is called only if
+ * debugging support for up_lowputc (or getc) is enabled.
+ */
+
+extern void z16f_lowinit(void);
+#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
+extern void z16f_lowuartinit(void);
 #endif
 
 #undef EXTERN

@@ -65,31 +65,31 @@
  **************************************************************************/
 
 	vector RESET=_reset
-	vector SYSEXC=_default_handler
-	vector TIMER2=_default_handler
-	vector TIMER1=_default_handler
-	vector TIMER0=_default_handler
-	vector UART0_RX=_default_handler
-	vector UART0_TX=_default_handler
-	vector I2C=_default_handler
-	vector SPI=_default_handler
-	vector ADC=_default_handler
-	vector P7AD=_default_handler
-	vector P6AD=_default_handler
-	vector P5AD=_default_handler
-	vector P4AD=_default_handler
-	vector P3AD=_default_handler
-	vector P2AD=_default_handler
-	vector P1AD=_default_handler
-	vector P0AD=_default_handler
-	vector PWM_TIMER=_default_handler
-	vector UART1_RX=_default_handler
-	vector UART1_TX=_default_handler
-	vector PWM_FAULT=_default_handler
-	vector C3=_default_handler
-	vector C2=_default_handler
-	vector C1=_default_handler
-	vector C0=_default_handler
+	vector SYSEXC=_sysexc_isr
+	vector TIMER2=_timer2_isr
+	vector TIMER1=_timer1_isr
+	vector TIMER0=_timer0_isr
+	vector UART0_RX=_uart0rx_isr
+	vector UART0_TX=_uart0tx_isr
+	vector I2C=_i2c_isr
+	vector SPI=_spi_isr
+	vector ADC=_adc_isr
+	vector P7AD=_p7ad_isr
+	vector P6AD=_p6ad_isr
+	vector P5AD=_p5ad_isr
+	vector P4AD=_p4ad_isr
+	vector P3AD=_p3ad_isr
+	vector P2AD=_p2ad_isr
+	vector P1AD=_p1ad_isr
+	vector P0AD=_p0ad_isr
+	vector PWM_TIMER=_pwmtimer_isr
+	vector UART1_RX=_uart1rx_isr
+	vector UART1_TX=_uart1tx_isr
+	vector PWM_FAULT=_pwmfault_isr
+	vector C3=_c3_isr
+	vector C2=_c3_isr
+	vector C1=_c2_isr
+	vector C0=_c0_isr
  
 /**************************************************************************
  * Equates
@@ -117,25 +117,50 @@ STACK_TOP     equ %FFC000
  **************************************************************************/
 
 _reset:
-	ld sp, #STACK_TOP	/* Set Stack Pointer */
-
+	ld	sp, #STACK_TOP		/* Set Stack Pointer */
+	call	_z16f_lowinit		/* Perform low-level hardware initialization */
 #if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
-	call _z16f_lowinit	/* Initialize the UART for low-level debug */
+	call	_z16f_lowuartinit	/* Initialize the UART for debugging */
 #endif
-	call _os_start          /* Start the operating system */
-_halted:                        /* _os_start() should not return */
-        halt
-        jp      _halted
+	call	_os_start		/* Start the operating system */
+_halted:				/* _os_start() should not return */
+	halt
+	jp	_halted
 
 /**************************************************************************
- * Name: _default_handler
+ * Name: Interrupt handlers
  *
  * Description:
- *   This is where interrupts will go if they have not yet been intialize
+ *   All interrupts will be vectored to the following locations.
  *
  **************************************************************************/
 
-_default_handler:
+_sysexc_isr:
+_timer2_isr:
+_timer1_isr:
+_timer0_isr:
+_uart0rx_isr:
+_uart0tx_isr:
+_i2c_isr:
+_spi_isr:
+_adc_isr:
+_p7ad_isr:
+_p6ad_isr:
+_p5ad_isr:
+_p4ad_isr:
+_p3ad_isr:
+_p2ad_isr:
+_p1ad_isr:
+_p0ad_isr:
+_pwmtimer_isr:
+_uart1rx_isr:
+_uart1tx_isr:
+_pwmfault_isr:
+_c3_isr:
+_c2_isr:
+_c1_isr:
+_c0_isr:
+_common_isr:
 	nop
 	iret
 

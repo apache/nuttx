@@ -109,7 +109,7 @@ clean:
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR="$(TOPDIR)" clean ; \
 	fi
-	@rm -f libarch$(LIBEXT) nuttx.linkcmd *~ .*.swp *.asm *.tmp
+	@rm -f libarch$(LIBEXT) nuttx.linkcmd *~ .*.swp *.asm *.tmp *.map
 	$(call CLEAN)
 
 distclean: clean

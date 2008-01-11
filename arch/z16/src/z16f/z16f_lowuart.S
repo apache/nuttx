@@ -47,7 +47,7 @@
  * External References / External Definitions
  *************************************************************************/
 
-	xdef	z16f_lowinit
+	xdef	z16f_lowuartinit
 	xref	_SYS_CLK_FREQ:EROM
 #ifdef CONFIG_ARCH_LOWPUTC
 	xdef	_z16f_xmitc
@@ -73,7 +73,7 @@
  *************************************************************************/
 
 /*************************************************************************
- * Name: z16f_lowinit
+ * Name: z16f_lowuartinit
  *
  * Description:
  *   Initialize UART0 or UART1
@@ -85,7 +85,7 @@
  *
  *************************************************************************/
 
-z16f_lowinit:
+z16f_lowuartinit:
 	pushmlo <r0,R3> 		/* Save registers */
 
 	ld	r3, #_SYS_CLK_FREQ
