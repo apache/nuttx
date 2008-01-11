@@ -44,7 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/mm.h>
 
-#include "up_arch.h"
+#include "chip/chip.h"
 #include "up_internal.h"
 #include "up_mem.h"
 

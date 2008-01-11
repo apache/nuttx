@@ -45,9 +45,37 @@
  **************************************************************************/
 
 	xref _z16f_lowinit:EROM
+#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
+	xref _z16f_lowuartinit:EROM
+#endif
 	xref _os_start:EROM
-	xdef _default_handler
 	xdef _reset
+	xdef _sysexc_isr
+	xdef _timer2_isr
+	xdef _timer1_isr
+	xdef _timer0_isr
+	xdef _uart0rx_isr
+	xdef _uart0tx_isr
+	xdef _i2c_isr
+	xdef _spi_isr
+	xdef _adc_isr
+	xdef _p7ad_isr
+	xdef _p6ad_isr
+	xdef _p5ad_isr
+	xdef _p4ad_isr
+	xdef _p3ad_isr
+	xdef _p2ad_isr
+	xdef _p1ad_isr
+	xdef _p0ad_isr
+	xdef _pwmtimer_isr
+	xdef _uart1rx_isr
+	xdef _uart1tx_isr
+	xdef _pwmfault_isr
+	xdef _c3_isr
+	xdef _c2_isr
+	xdef _c1_isr
+	xdef _c0_isr
+	xdef _common_isr
  
 /**************************************************************************
  * Flash Option Byte Setup
