@@ -1,7 +1,7 @@
 /****************************************************************************
- * common/up_udelay.c
+ * common/up_registerdump.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,28 +38,31 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <debug.h>
+
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
-#ifdef CONFIG_BOARD_LOOPSPERMSEC
+#include "os_internal.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-#define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
-#define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
-#define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
+/* Output debug info if stack dump is selected -- even if 
+ * debug is not selected.
+ */
+
+#ifdef CONFIG_ARCH_STACKDUMP
+# undef  lldbg
+# define lldbg lib_lowprintf
+#endif
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -67,66 +70,22 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Name: up_registerdump
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_udelay
- *
- * Description:
- *   Delay inline for the requested number of microseconds.  NOTE:  Because
- *   of all of the setup, several microseconds will be lost before the actual
- *   timing looop begins.  Thus, the delay will always be a few microseconds
- *   longer than requested.
- *
- *   *** NOT multi-tasking friendly ***
- *
- * ASSUMPTIONS:
- *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
- *
- ****************************************************************************/
-
-void up_udelay(unsigned int microseconds)
+#ifdef CONFIG_ARCH_STACKDUMP
+static void up_registerdump(void)
 {
-  volatile int i;
-
-  /* We'll do this a little at a time because we expect that the
-   * CONFIG_BOARD_LOOPSPERUSEC is very inaccurate during to truncation in
-   * the divisions of its calculation.  We'll use the largest values that
-   * we can in order to prevent significant error buildup in the loops.
-   */
-
-  while (microseconds > 1000)
+  if (current_regs)
     {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPERMSEC; i++)
-        {
-        }
-      microseconds -= 1000;
-    }
-
-  while (microseconds > 100)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPER100USEC; i++)
-        {
-        }
-      microseconds -= 100;
-    }
-
-  while (microseconds > 10)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPER10USEC; i++)
-        {
-        }
-      microseconds -= 10;
-    }
-
-  while (microseconds > 0)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPERUSEC; i++)
-        {
-        }
-      microseconds--;
+      lldbg("AF: %04x  I: %04x\n",
+            current_regs[XCPT_AF], current_regs[XCPT_I]);
+      lldbg("BC: %04x DE: %04x HL: %04x\n",
+            current_regs[XCPT_BC], current_regs[XCPT_DE], current_regs[XCPT_HL]);
+      lldbg("IX: %04x IY: %04x\n",
+            current_regs[XCPT_IX], current_regs[XCPT_IY]);
+      lldbg("SP: %04x PC: $04x\n"
+            current_regs[XCPT_SP], current_regs[XCPT_PC]);
     }
 }
-#endif /* CONFIG_BOARD_LOOPSPERMSEC */
-
+#endif

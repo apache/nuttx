@@ -1,7 +1,7 @@
 /****************************************************************************
- * common/up_udelay.c
+ * common/up_allocateheap.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,28 +38,22 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <debug.h>
 #include <nuttx/arch.h>
+#include <nuttx/mm.h>
 
-#ifdef CONFIG_BOARD_LOOPSPERMSEC
-
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-#define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
-#define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
-#define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
+#include "up_arch.h"
+#include "up_internal.h"
+#include "up_mem.h"
 
 /****************************************************************************
- * Private Types
+ * Private Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -71,62 +65,34 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_udelay
+ * Name: up_allocate_heap
  *
  * Description:
- *   Delay inline for the requested number of microseconds.  NOTE:  Because
- *   of all of the setup, several microseconds will be lost before the actual
- *   timing looop begins.  Thus, the delay will always be a few microseconds
- *   longer than requested.
- *
- *   *** NOT multi-tasking friendly ***
- *
- * ASSUMPTIONS:
- *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
+ *   The heap may be statically allocated by defining CONFIG_HEAP_BASE and
+ *   CONFIG_HEAP_SIZE.  If these are not defined, then this function will be
+ *   called to dynamically set aside the heap region.
  *
  ****************************************************************************/
 
-void up_udelay(unsigned int microseconds)
+void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
-  volatile int i;
-
-  /* We'll do this a little at a time because we expect that the
-   * CONFIG_BOARD_LOOPSPERUSEC is very inaccurate during to truncation in
-   * the divisions of its calculation.  We'll use the largest values that
-   * we can in order to prevent significant error buildup in the loops.
-   */
-
-  while (microseconds > 1000)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPERMSEC; i++)
-        {
-        }
-      microseconds -= 1000;
-    }
-
-  while (microseconds > 100)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPER100USEC; i++)
-        {
-        }
-      microseconds -= 100;
-    }
-
-  while (microseconds > 10)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPER10USEC; i++)
-        {
-        }
-      microseconds -= 10;
-    }
-
-  while (microseconds > 0)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPERUSEC; i++)
-        {
-        }
-      microseconds--;
-    }
+  *heap_start = (FAR void*)UP_HEAP1_BASE;
+  *heap_size = UP_HEAP1_END - UP_HEAP1_BASE;
+  up_ledon(LED_HEAPALLOCATE);
 }
-#endif /* CONFIG_BOARD_LOOPSPERMSEC */
 
+/****************************************************************************
+ * Name: up_addregions
+ *
+ * Description:
+ *   Memory may be added in non-contiguous chunks.  Additional chunks are
+ *   added by calling this function.
+ *
+ ****************************************************************************/
+
+#if CONFIG_MM_REGIONS > 1
+void up_addregion(void)
+{
+  mm_addregion((FAR void*)UP_HEAP2_BASE, UP_HEAP2_END - UP_HEAP2_BASE);
+}
+#endif

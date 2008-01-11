@@ -84,7 +84,7 @@ static inline void putreg16(uint16 val, unsigned int addr)
 
 /* Most DM320 registers are 16-bits wide */
 
-#define getreg(a)   getreg16(1)
+#define getreg(a)   getreg16(a)
 #define putreg(v,a) putreg16(v,a)
 
 #endif

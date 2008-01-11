@@ -1,7 +1,7 @@
 /****************************************************************************
- * common/up_udelay.c
+ * common/up_releasepending.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,28 +38,23 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <sched.h>
+#include <debug.h>
+
 #include <nuttx/arch.h>
+#include <chip/chip.h>
 
-#ifdef CONFIG_BOARD_LOOPSPERMSEC
-
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-#define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
-#define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
-#define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
+#include "os_internal.h"
+#include "up_internal.h"
 
 /****************************************************************************
- * Private Types
+ * Private Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -71,62 +66,72 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_udelay
+ * Name: up_release_pending
  *
  * Description:
- *   Delay inline for the requested number of microseconds.  NOTE:  Because
- *   of all of the setup, several microseconds will be lost before the actual
- *   timing looop begins.  Thus, the delay will always be a few microseconds
- *   longer than requested.
- *
- *   *** NOT multi-tasking friendly ***
- *
- * ASSUMPTIONS:
- *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
+ *   Release and ready-to-run tasks that have
+ *   collected in the pending task list.  This can call a
+ *   context switch if a new task is placed at the head of
+ *   the ready to run list.
  *
  ****************************************************************************/
 
-void up_udelay(unsigned int microseconds)
+void up_release_pending(void)
 {
-  volatile int i;
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
 
-  /* We'll do this a little at a time because we expect that the
-   * CONFIG_BOARD_LOOPSPERUSEC is very inaccurate during to truncation in
-   * the divisions of its calculation.  We'll use the largest values that
-   * we can in order to prevent significant error buildup in the loops.
-   */
+  lldbg("From TCB=%p\n", rtcb);
 
-  while (microseconds > 1000)
+  /* Merge the g_pendingtasks list into the g_readytorun task list */
+
+  /* sched_lock(); */
+  if (sched_mergepending())
     {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPERMSEC; i++)
-        {
-        }
-      microseconds -= 1000;
-    }
+      /* The currently active task has changed!  We will need to
+       * switch contexts.  First check if we are operating in
+       * interrupt context:
+       */
 
-  while (microseconds > 100)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPER100USEC; i++)
+      if (IN_INTERRUPT)
         {
-        }
-      microseconds -= 100;
-    }
+          /* Yes, then we have to do things differently.
+           * Just copy the current context into the OLD rtcb.
+           */
 
-  while (microseconds > 10)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPER10USEC; i++)
-        {
-        }
-      microseconds -= 10;
-    }
+           SAVE_IRQCONTEXT(rtcb);
 
-  while (microseconds > 0)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPERUSEC; i++)
-        {
+          /* Restore the exception context of the rtcb at the (new) head 
+           * of the g_readytorun task list.
+           */
+
+          rtcb = (FAR _TCB*)g_readytorun.head;
+          lldbg("New Active Task TCB=%p\n", rtcb);
+
+          /* Then setup so that the context will be performed on exit
+           * from the interrupt.
+           */
+
+          SET_IRQCONTEXT(rtcb);
         }
-      microseconds--;
+
+      /* Copy the exception context into the TCB of the task that
+       * was currently active. if SAVE_USERCONTEXT returns a non-zero
+       * value, then this is really the previously running task 
+       * restarting!
+       */
+
+      else if (!SAVE_USERCONTEXT(rtcb))
+        {
+          /* Restore the exception context of the rtcb at the (new) head 
+           * of the g_readytorun task list.
+           */
+
+          rtcb = (FAR _TCB*)g_readytorun.head;
+          lldbg("New Active Task TCB=%p\n", rtcb);
+
+          /* Then switch contexts */
+
+          RESTORE_USERCONTEXT(rtcb);
+        }
     }
 }
-#endif /* CONFIG_BOARD_LOOPSPERMSEC */
-

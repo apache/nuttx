@@ -1,7 +1,7 @@
-/************************************************************
- * common/up_releasestack.c
+/****************************************************************************
+ * common/up_interruptcontext.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,48 +31,38 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <sched.h>
-#include <debug.h>
 #include <nuttx/arch.h>
-#include "os_internal.h"
+#include <nuttx/irq.h>
 #include "up_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
- * Name: up_release_stack
+/****************************************************************************
+ * Name: up_interrupt_context
  *
- * Description:
- *   A task has been stopped. Free all stack
- *   related resources retained int the defunct TCB.
- *
- ************************************************************/
+ * Description: Return TRUE is we are currently executing in
+ * the interrupt handler context.
+ ****************************************************************************/
 
-void up_release_stack(_TCB *dtcb)
+boolean up_interrupt_context(void)
 {
-  if (dtcb->stack_alloc_ptr)
-    {
-      sched_free(dtcb->stack_alloc_ptr);
-      dtcb->stack_alloc_ptr = NULL;
-    }
-
-  dtcb->adj_stack_size = 0;
+   return current_regs != NULL;
 }

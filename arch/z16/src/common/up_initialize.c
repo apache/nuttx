@@ -1,7 +1,7 @@
 /****************************************************************************
- * common/up_udelay.c
+ * common/up_initialize.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,28 +38,42 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
 
-#ifdef CONFIG_BOARD_LOOPSPERMSEC
+#include <sys/types.h>
+#include <debug.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/fs.h>
+#include <nuttx/mm.h>
+#include <arch/board/board.h>
+
+#include "up_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-#define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
-#define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
-#define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
+/* Define to enable timing loop calibration */
+
+#undef CONFIG_ARCH_CALIBRATION
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* This holds a references to the current interrupt level
+ * register storage structure.  If is non-NULL only during
+ * interrupt processing.
+ */
+
+chipreg_t *current_regs;
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -67,66 +81,89 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_calibratedelay
+ *
+ * Description:
+ *   Delay loops are provided for short timing loops.  This function, if
+ *   enabled, will just wait for 100 seconds.  Using a stopwatch, you can
+ *   can then determine if the timing loops are properly calibrated.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_CALIBRATION) & defined(CONFIG_DEBUG)
+static void up_calibratedelay(void)
+{
+  int i;
+  lldbg("Beginning 100s delay\n");
+  for (i = 0; i < 100; i++)
+    {
+      up_mdelay(1000);
+    }
+  lldbg("End 100s delay\n");
+}
+#else
+# define up_calibratedelay()
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_udelay
+ * Name: up_initialize
  *
  * Description:
- *   Delay inline for the requested number of microseconds.  NOTE:  Because
- *   of all of the setup, several microseconds will be lost before the actual
- *   timing looop begins.  Thus, the delay will always be a few microseconds
- *   longer than requested.
+ *   up_initialize will be called once during OS initialization after the
+ *   basic OS services have been initialized.  The architecture specific
+ *   details of initializing the OS will be handled here.  Such things as
+ *   setting up interrupt service routines, starting the clock, and
+ *   registering device drivers are some of the things that are different
+ *   for each processor and hardware platform.
  *
- *   *** NOT multi-tasking friendly ***
- *
- * ASSUMPTIONS:
- *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
+ *   up_initialize is called after the OS initialized but before the user
+ *   initialization logic has been started and before the libraries have
+ *   been initialized.  OS services and driver services are available.
  *
  ****************************************************************************/
 
-void up_udelay(unsigned int microseconds)
+void up_initialize(void)
 {
-  volatile int i;
+  /* Initialize global variables */
 
-  /* We'll do this a little at a time because we expect that the
-   * CONFIG_BOARD_LOOPSPERUSEC is very inaccurate during to truncation in
-   * the divisions of its calculation.  We'll use the largest values that
-   * we can in order to prevent significant error buildup in the loops.
-   */
+  current_regs = NULL;
 
-  while (microseconds > 1000)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPERMSEC; i++)
-        {
-        }
-      microseconds -= 1000;
-    }
+  /* Calibrate the timing loop */
 
-  while (microseconds > 100)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPER100USEC; i++)
-        {
-        }
-      microseconds -= 100;
-    }
+  up_calibratedelay();
 
-  while (microseconds > 10)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPER10USEC; i++)
-        {
-        }
-      microseconds -= 10;
-    }
+  /* Add extra memory fragments to the memory manager */
 
-  while (microseconds > 0)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPERUSEC; i++)
-        {
-        }
-      microseconds--;
-    }
+#if CONFIG_MM_REGIONS > 1
+  up_addregion();
+#endif
+
+  /* Initialize the interrupt subsystem */
+
+  up_irqinitialize();
+
+  /* Initialize the system timer interrupt */
+
+#if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
+  up_timerinit();
+#endif
+
+  /* Register devices */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  devnull_register();   /* Standard /dev/null */
+#endif
+
+  /* Initialize the serial device driver */
+
+  up_serialinit();
+
+  /* Initialize the netwok */
+
+  up_netinitialize();
+  up_ledon(LED_IRQSENABLED);
 }
-#endif /* CONFIG_BOARD_LOOPSPERMSEC */
-

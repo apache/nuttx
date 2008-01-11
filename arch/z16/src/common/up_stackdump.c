@@ -1,7 +1,7 @@
 /****************************************************************************
- * common/up_udelay.c
+ * common/up_stackdump.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,28 +38,29 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
 
-#ifdef CONFIG_BOARD_LOOPSPERMSEC
+#include <sys/types.h>
+#include <debug.h>
+
+#include "up_arch.h"
+#include "os_internal.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-#define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
-#define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
-#define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
+/* Output debug info if stack dump is selected -- even if 
+ * debug is not selected.
+ */
+
+#ifdef CONFIG_ARCH_STACKDUMP
+# undef  lldbg
+# define lldbg lib_lowprintf
+#endif
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -67,66 +68,42 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Name: up_getsp
  ****************************************************************************/
+#warning TO BE PROVIDED
 
 /****************************************************************************
- * Name: up_udelay
- *
- * Description:
- *   Delay inline for the requested number of microseconds.  NOTE:  Because
- *   of all of the setup, several microseconds will be lost before the actual
- *   timing looop begins.  Thus, the delay will always be a few microseconds
- *   longer than requested.
- *
- *   *** NOT multi-tasking friendly ***
- *
- * ASSUMPTIONS:
- *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
- *
+ * Name: up_stackdump
  ****************************************************************************/
 
-void up_udelay(unsigned int microseconds)
+#ifdef CONFIG_ARCH_STACKDUMP
+static void up_stackdump(void)
 {
-  volatile int i;
+  _TCB *rtcb        = (_TCB*)g_readytorun.head;
+  chipreg_t sp         = up_getsp();
+  chipreg_t stack_base = (chipreg_t)rtcb->adj_stack_ptr;
+  chipreg_t stack_size = (chipreg_t)rtcb->adj_stack_size;
 
-  /* We'll do this a little at a time because we expect that the
-   * CONFIG_BOARD_LOOPSPERUSEC is very inaccurate during to truncation in
-   * the divisions of its calculation.  We'll use the largest values that
-   * we can in order to prevent significant error buildup in the loops.
-   */
+  lldbg("stack_base: %08x\n", stack_base);
+  lldbg("stack_size: %08x\n", stack_size);
+  lldbg("sp:         %08x\n", sp);
 
-  while (microseconds > 1000)
+  if (sp >= stack_base || sp < stack_base - stack_size)
     {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPERMSEC; i++)
-        {
-        }
-      microseconds -= 1000;
+      lldbg("ERROR: Stack pointer is not within allocated stack\n");
+      return;
     }
-
-  while (microseconds > 100)
+  else
     {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPER100USEC; i++)
-        {
-        }
-      microseconds -= 100;
-    }
+      chipreg_t stack = sp & ~0x0f;
 
-  while (microseconds > 10)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPER10USEC; i++)
+      for (stack = sp & ~0x0f; stack < stack_base; stack += 8*sizeof(chipreg_t))
         {
+          chipreg_t *ptr = (chipreg_t*)stack;
+          lldbg("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+                 stack, ptr[0], ptr[1], ptr[2], ptr[3],
+                 ptr[4], ptr[5], ptr[6], ptr[7]);
         }
-      microseconds -= 10;
-    }
-
-  while (microseconds > 0)
-    {
-      for (i = 0; i < CONFIG_BOARD_LOOPSPERUSEC; i++)
-        {
-        }
-      microseconds--;
     }
 }
-#endif /* CONFIG_BOARD_LOOPSPERMSEC */
-
+#endif
