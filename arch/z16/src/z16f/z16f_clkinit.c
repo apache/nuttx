@@ -39,6 +39,9 @@
  * Included Files
  ***************************************************************************/
 
+#include <sys/types.h>
+#include "chip/chip.h"
+
 /***************************************************************************
  * Definitions
  ***************************************************************************/
@@ -55,14 +58,16 @@ extern _Erom unsigned long SYS_CLK_FREQ;
 
 /* Setup FLASH options at address 0x00000000 */
 
+#if 0 /* Setup in z16f_head.S */
 Z16F_FLOPTION0 = (Z16F_FLOPTION0_MAXPWR|Z16F_FLOPTION0_WDTRES|\
                   Z16F_FLOPTION0_WDTA0|Z16F_FLOPTION0_VBOA0|\
-                  Z16F_FLOPTION0_DBGUART|Z16F_FLOPTION0_FWP|
+                  Z16F_FLOPTION0_DBGUART|Z16F_FLOPTION0_FWP|\
                   Z16F_FLOPTION0_RP);
 Z16F_FLOPTION1 = (Z16F_FLOPTION1_RESVD|Z16F_FLOPTION1_MCEN|\
                   Z16F_FLOPTION1_OFFH|Z16F_FLOPTION1_OFFL);
 Z16F_FLOPTION2 = Z16F_FLOPTION2_RESVD;
 Z16F_FLOPTION3 = (Z16F_FLOPTION3_RESVD|Z16F_FLOPTION3_NORMAL);
+#endif
 
 /***************************************************************************
  * Private Functions
