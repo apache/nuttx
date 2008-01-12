@@ -395,10 +395,10 @@
                                                 /* Bits 5-6: Timer configuration,
                                                  * Interpretation depends on timer mode */
 #define Z16F_TIMERCTL0_RELOAD    _HX8(00)       /*   Interrupt occurs on reload or capture */
-#define Z16F_TIMERCTL0_DISABLED  _HX8(40)       /*   Disabled */
-#define Z16F_TIMERCTL0_INACTIVE  _HX8(40)       /*   Interrrupt occurs on inactive gate edge */
-#define Z16F_TIMERCTL0_CAPTURE   _HX8(40)       /*   Interrupt occurs on capture */
-#define Z16F_TIMERCTL0_RELOAD    _HX8(60)       /*   Interrupt occurs on reload */
+#define Z16F_TIMERCTL0_IDISABLED _HX8(40)       /*   Disabled */
+#define Z16F_TIMERCTL0_IINACTIVE _HX8(40)       /*   Interrrupt occurs on inactive gate edge */
+#define Z16F_TIMERCTL0_ICAPTURE  _HX8(40)       /*   Interrupt occurs on capture */
+#define Z16F_TIMERCTL0_IRELOAD   _HX8(60)       /*   Interrupt occurs on reload */
 #define Z16F_TIMERCTL0_CASCADE   _HX8(10)       /* Bit 4: Timer is cascaded */
                                                 /* Bits 1-2: PW mode */
 #define Z16F_TIMERCTL0_NODELAY   _HZ8(00)       /*    No delay */

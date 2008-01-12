@@ -36,14 +36,21 @@
 -include $(TOPDIR)/Make.defs
 -include chip/Make.defs
 
+COMPILER	= ${shell basename $(CC)}
 ARCHSRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+ifeq ($(COMPILER),zneocc.exe)
 WARCHSRCDIR	= ${shell cygpath -w $(ARCHSRCDIR)}
 USRINCLUDES	= -usrinc:'.;$(WTOPDIR)\sched;$(WARCHSRCDIR);$(WARCHSRCDIR)\common'
+else
+WARCHSRCDIR	= $(ARCHSRCDIR)
+USRINCLUDES	= -I$(TOPDIR)/sched -I$(ARCHSRCDIR) -I$(ARCHSRCDIR)/common
+endif
 INCLUDES	= $(ARCHSTDINCLUDES) $(USRINCLUDES)
 CFLAGS		= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(INCLUDES) $(ARCHDEFINES)
 CPPFLAGS	+= -I$(ARCHSRCDIR)
-WLINKLIBS	=
+ifeq ($(COMPILER),zneocc.exe)
 LDFLAGS 	= @"${shell cygpath -w $(ARCHSRCDIR)/nuttx.linkcmd}"
+endif
 
 HEAD_ASRC	= $(HEAD_SSRC:.S=$(ASMEXT))
 HEAD_AOBJ	= $(HEAD_SSRC:.S=$(OBJEXT))
@@ -64,6 +71,7 @@ VPATH		= chip:common
 
 all: $(HEAD_OBJ) libarch$(LIBEXT)
 
+ifeq ($(COMPILER),zneocc.exe)
 $(ASRCS) $(HEAD_ASRC): %$(ASMEXT): %.S
 	@$(CPP) $(CPPFLAGS) $< -o $@.tmp
 	@cat $@.tmp | sed -e "s/^#/;/g" > $@
@@ -71,9 +79,17 @@ $(ASRCS) $(HEAD_ASRC): %$(ASMEXT): %.S
 
 $(AOBJS) $(HEAD_AOBJ): %$(OBJEXT): %$(ASMEXT)
 	$(call ASSEMBLE, $<, $@)
+else
+$(OBJS) $(HEAD_AOBJ): %$(OBJEXT): %.S
+	$(call ASSEMBLE, $<, $@)endif
+endif
 
 $(COBJS): %$(OBJEXT): %.c
+ifeq ($(COMPILER),zneocc.exe)
+	$(call COMPILE, `cygpath -w $<`, $@)
+else
 	$(call COMPILE, $<, $@)
+endif
 
 libarch$(LIBEXT): $(OBJS)
 	@( for obj in $(OBJS) ; do \
@@ -83,6 +99,7 @@ libarch$(LIBEXT): $(OBJS)
 board/libboard$(LIBEXT):
 	@$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT)
 
+ifeq ($(COMPILER),zneocc.exe)
 nuttx.linkcmd: $(LINKCMDTEMPLATE)
 	@cp -f $(LINKCMDTEMPLATE) nuttx.linkcmd
 	@echo "\"${shell cygpath -w $(TOPDIR)/nuttx}\"= \\" >>nuttx.linkcmd
@@ -91,6 +108,9 @@ nuttx.linkcmd: $(LINKCMDTEMPLATE)
 		echo " `cygpath -w $(TOPDIR)/$${lib}`, \\" >>nuttx.linkcmd; \
 	done ; )
 	@echo " ${shell cygpath -w $(ARCHSRCDIR)/board/libboard$(LIBEXT)}"  >>nuttx.linkcmd
+else
+nuttx.linkcmd:
+endif
 
 nuttx$(EXEEXT): $(HEAD_AOBJ) board/libboard$(LIBEXT) nuttx.linkcmd
 	@echo "LD:  nuttx.hex"
@@ -109,7 +129,10 @@ clean:
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR="$(TOPDIR)" clean ; \
 	fi
-	@rm -f libarch$(LIBEXT) nuttx.linkcmd *~ .*.swp *.asm *.tmp *.map
+	@rm -f libarch$(LIBEXT) *~ .*.swp
+ifeq ($(COMPILER),zneocc.exe)
+	@rm -f nuttx.linkcmd *.asm *.tmp *.map
+endif
 	$(call CLEAN)
 
 distclean: clean
