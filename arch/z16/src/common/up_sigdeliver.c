@@ -83,6 +83,7 @@ void up_sigdeliver(void)
 #ifndef CONFIG_DISABLE_SIGNALS
   _TCB  *rtcb = (_TCB*)g_readytorun.head;
   chipreg_t regs[XCPTCONTEXT_REGS];
+  uint32   *regs32 = (uint32*)regs;
   sig_deliver_t sigdeliver;
 
   /* Save the errno.  This must be preserved throughout the signal handling
@@ -101,8 +102,8 @@ void up_sigdeliver(void)
   /* Save the real return state on the stack. */
 
   up_copystate(regs, rtcb->xcp.regs);
-  regs[XCPT_PC] = rtcb->xcp.saved_pc;
-  regs[XCPT_I]  = rtcb->xcp.saved_i;
+  regs32[REG_PC/2] = rtcb->xcp.saved_pc;
+  regs[REG_FLAGS]  = rtcb->xcp.saved_i;
 
   /* Get a local copy of the sigdeliver function pointer.
    * we do this so that we can nullify the sigdeliver
@@ -116,7 +117,10 @@ void up_sigdeliver(void)
 
   /* Then restore the task interrupt state. */
 
-  irqrestore(regs[XCPT_I]);
+  if ((reg[REG_FLAGS] & (Z16F_CNTRL_FLAGS_IRQE << 8)) != 0)
+    {
+       EI();
+    }
 
   /* Deliver the signals */
 

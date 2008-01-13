@@ -69,7 +69,7 @@ typedef unsigned int uint32;
  * irqsave()
  */
 
-typedef unsigned int irqstate_t;
+typedef unsigned short irqstate_t;
 
 #endif /* __ASSEMBLY__ */
 

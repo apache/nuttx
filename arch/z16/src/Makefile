@@ -81,7 +81,7 @@ $(AOBJS) $(HEAD_AOBJ): %$(OBJEXT): %$(ASMEXT)
 	$(call ASSEMBLE, $<, $@)
 else
 $(OBJS) $(HEAD_AOBJ): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)endif
+	$(call ASSEMBLE, $<, $@)
 endif
 
 $(COBJS): %$(OBJEXT): %.c

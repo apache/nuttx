@@ -98,18 +98,30 @@
  * in the TCB to many context switches.
  */
 
-#define XCPT_I               (0) /* Offset 0: Saved I w/interrupt state in carry */
-#define XCPT_BC              (1) /* Offset 1: Saved BC register */
-#define XCPT_DE              (2) /* Offset 2: Saved DE register */
-#define XCPT_IX              (3) /* Offset 3: Saved IX register */
-#define XCPT_IY              (4) /* Offset 4: Saved IY register */
-#define XCPT_SP              (5) /* Offset 5: Offset to SP at time of interrupt */
-#define XCPT_HL              (6) /* Offset 6: Saved HL register */
-#define XCPT_AF              (7) /* Offset 7: Saved AF register */
-#define XCPT_PC              (8) /* Offset 8: Offset to PC at time of interrupt */
+#define REG_R0              ( 0) /* 32-bits: R0 */
+#define REG_R1              ( 2) /* 32-bits: R0 */
+#define REG_R2              ( 4) /* 32-bits: R0 */
+#define REG_R3              ( 6) /* 32-bits: R0 */
+#define REG_R4              ( 8) /* 32-bits: R0 */
+#define REG_R5              (10) /* 32-bits: R0 */
+#define REG_R6              (12) /* 32-bits: R0 */
+#define REG_R7              (14) /* 32-bits: R0 */
+#define REG_R8              (16) /* 32-bits: R0 */
+#define REG_R9              (18) /* 32-bits: R0 */
+#define REG_R10             (20) /* 32-bits: R0 */
+#define REG_R11             (22) /* 32-bits: R0 */
+#define REG_R12             (24) /* 32-bits: R0 */
+#define REG_R13             (26) /* 32-bits: R0 */
+#define REG_R14             (28) /* 32-bits: R0 */
+#define REG_R15             (30) /* 32-bits: R0 */
+#define REG_PC              (32) /* 32-bits: Return PC */
+#define REG_FLAGS           (34) /* 16-bits: Flags register (with 0x00 padding)
 
-#define XCPTCONTEXT_REGS     (9)
-#define XCPTCONTEXT_SIZE     (2 * XCPTCONTEXT_REGS)
+#define XCPTCONTEXT_REGS    (35)
+#define XCPTCONTEXT_SIZE    (2 * XCPTCONTEXT_REGS)
+
+#define REG_FP              REG_R14
+#define REG_SP              REG_R15
 
 /****************************************************************************
  * Public Types
@@ -138,10 +150,22 @@ struct xcptcontext
 
   /* The following retains that state during signal execution */
 
-  uint16 saved_pc;	/* Saved return address */
+  uint32 saved_pc;	/* Saved return address */
   uint16 saved_i;	/* Saved interrupt state */
 #endif
 };
+#endif
+
+/* The ZDS-II provides built-in operations to test & disable and to restore
+ * the interrupt state.
+ *
+ * irqstate_t irqsave(void);
+ * void irqrestore(irqstate_t flags);
+ */
+
+#ifdef __ZILOG__
+#  define irqsave()     TDI()
+#  define irqrestore(f) RI(f)
 #endif
 
 /****************************************************************************
@@ -164,8 +188,10 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+#ifndef __ZILOG__
 EXTERN irqstate_t irqsave(void);
 EXTERN void       irqrestore(irqstate_t flags);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
