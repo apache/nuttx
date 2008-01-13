@@ -141,21 +141,23 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
 
           else
             {
+              uint32 *current_pc      = (uint32*)&current_regs[REG_PC];
+
               /* Save the return address and interrupt state.
                * These will be restored by the signal trampoline after
                * the signals have been delivered.
                */
 
-              tcb->xcp.sigdeliver    = sigdeliver;
-              tcb->xcp.saved_pc      = current_regs[XCPT_PC];
-              tcb->xcp.saved_i       = current_regs[XCPT_I];
+              tcb->xcp.sigdeliver     = sigdeliver;
+              tcb->xcp.saved_pc       = *current_pc;
+              tcb->xcp.saved_i        = current_regs[REG_FLAGS];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
 
-              current_regs[XCPT_PC]  = (chipreg_t)up_sigdeliver;
-              current_regs[XCPT_I]   = 0;
+              *current_pc             = (uint32)up_sigdeliver;
+              current_regs[REG_FLAGS] = 0;
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
@@ -173,21 +175,23 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
 
       else
         {
+          uint32 *saved_pc        = (uint32*)&tcb->xcp.regs[REG_PC];
+
           /* Save the return lr and cpsr and one scratch register
            * These will be restored by the signal trampoline after
            * the signals have been delivered.
            */
 
-          tcb->xcp.sigdeliver    = sigdeliver;
-          tcb->xcp.saved_pc      = tcb->xcp.regs[XCPT_PC];
-          tcb->xcp.saved_i       = tcb->xcp.regs[XCPT_I];
+          tcb->xcp.sigdeliver      = sigdeliver;
+          tcb->xcp.saved_pc        = *saved_pc;
+          tcb->xcp.saved_i         = tcb->xcp.regs[REG_FLAGS];
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
            */
 
-          tcb->xcp.regs[XCPT_PC] = (chipreg_t)up_sigdeliver;
-          tcb->xcp.regs[XCPT_I]  = 0;
+          *saved_pc                = (uint32)up_sigdeliver;
+          tcb->xcp.regs[REG_FLAGS] = 0;
         }
 
       irqrestore(flags);

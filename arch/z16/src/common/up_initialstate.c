@@ -78,14 +78,14 @@
 
 void up_initial_state(_TCB *tcb)
 {
-  struct xcptcontext *xcp = &tcb->xcp;
+  uint32 *reg32           = (uint32*)tcb->xcp.regs;
 
   /* Initialize the initial exception register context structure */
 
-  memset(xcp, 0, sizeof(struct xcptcontext));
+  memset(&tcb->xcp, 0, sizeof(struct xcptcontext));
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[XCPT_I]  = Z80_C_FLAG; /* Carry flag will enable interrupts */
+  xcp->regs[REG_FLAGS]   = Z16F_CNTRL_FLAGS_IRQE << 8; /* IRQE flag will enable interrupts */
 #endif
-  xcp->regs[XCPT_SP] = (chipreg_t)tcb->adj_stack_ptr;
-  xcp->regs[XCPT_PC] = (chipreg_t)tcb->start;
+  reg32[REG_SP/2]        = (uint32)tcb->adj_stack_ptr;
+  reg32[REG_PC/2]        = (uint32)tcb->start;
 }

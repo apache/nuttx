@@ -125,12 +125,12 @@ EXEEXT			= .hex
 # object files into an archive
 
 define COMPILE
-	@echo "CC: $1"
-	@$(CC) $(CFLAGS) $1 1>/dev/null
+	@#echo "CC: $1"
+	@$(CC) $(CFLAGS) $1
 endef
 
 define ASSEMBLE
-	@echo "AS: $1"
+	@#echo "AS: $1"
 	@$(AS) -c $(AFLAGS) $1
 endef
 
