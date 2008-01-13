@@ -52,11 +52,16 @@ OBJS		= $(AOBJS) $(COBJS)
 
 all: libboard$(LIBEXT)
 
-$(AOBJS): %$(OBJEXT): %.S
+$(ASRCS) $(HEAD_ASRC): %$(ASMEXT): %.S
+	@$(CPP) $(CPPFLAGS) $< -o $@.tmp
+	@cat $@.tmp | sed -e "s/^#/;/g" > $@
+	@rm $@.tmp
+
+$(AOBJS): %$(OBJEXT): %$(ASMEXT)
 	$(call ASSEMBLE, $<, $@)
 
 $(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
+	$(call COMPILE, `cygpath -w $<`, $@)
 
 libboard$(LIBEXT): $(OBJS)
 	@( for obj in $(OBJS) ; do \
