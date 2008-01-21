@@ -115,7 +115,7 @@
 #define REG_R14             (28) /* 32-bits: R0 */
 #define REG_R15             (30) /* 32-bits: R0 */
 #define REG_PC              (32) /* 32-bits: Return PC */
-#define REG_FLAGS           (34) /* 16-bits: Flags register (with 0x00 padding)
+#define REG_FLAGS           (34) /* 16-bits: Flags register (with 0x00 padding) */
 
 #define XCPTCONTEXT_REGS    (35)
 #define XCPTCONTEXT_SIZE    (2 * XCPTCONTEXT_REGS)
