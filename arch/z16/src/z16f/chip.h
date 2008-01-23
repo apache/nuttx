@@ -438,12 +438,12 @@
 /* Register access macros ***********************************************************/
 
 #ifndef __ASSEMBLY__
-# define getreg8(a)           (*(ubyte volatile near*)((a) & 0xffff))
-# define putreg8(v,a)         (*(ubyte volatile near*)((a) & 0xffff) = (v))
-# define getreg16(a)          (*(uint16 volatile near*)((a) & 0xffff))
-# define putreg16(v,a)        (*(uint16 volatile near*)((a) & 0xffff) = (v))
-# define getreg32(a)          (*(uint32 volatile near*)((a) & 0xffff))
-# define putreg32(v,a)        (*(uint32 volatile near*)((a) & 0xffff) = (v))
+# define getreg8(a)           (*(ubyte volatile _Near*)((a) & 0xffff))
+# define putreg8(v,a)         (*(ubyte volatile _Near*)((a) & 0xffff) = (v))
+# define getreg16(a)          (*(uint16 volatile _Near*)((a) & 0xffff))
+# define putreg16(v,a)        (*(uint16 volatile _Near*)((a) & 0xffff) = (v))
+# define getreg32(a)          (*(uint32 volatile _Near*)((a) & 0xffff))
+# define putreg32(v,a)        (*(uint32 volatile _Near*)((a) & 0xffff) = (v))
 #endif /* __ASSEMBLY__ */
 
 /************************************************************************************

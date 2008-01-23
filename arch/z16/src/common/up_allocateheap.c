@@ -46,11 +46,24 @@
 
 #include "chip/chip.h"
 #include "up_internal.h"
-#include "up_mem.h"
 
 /****************************************************************************
  * Private Definitions
  ****************************************************************************/
+
+/* Use ZDS-II linker settings to get the unused external RAM and use this
+ * for the NuttX heap.
+ */
+
+#ifndef CONFIG_HEAP1_BASE
+  extern _Far unsigned long far_heaptop;
+  #define CONFIG_HEAP1_BASE ((unsigned long)&far_heaptop)
+#endif
+
+#ifndef CONFIG_HEAP1_END
+  extern _Far unsigned long far_heapbot;
+  #define CONFIG_HEAP1_END ((unsigned long)&far_heapbot)
+#endif
 
 /****************************************************************************
  * Private Data
@@ -76,8 +89,8 @@
 
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
-  *heap_start = (FAR void*)UP_HEAP1_BASE;
-  *heap_size = UP_HEAP1_END - UP_HEAP1_BASE;
+  *heap_start = (FAR void*)CONFIG_HEAP1_BASE;
+  *heap_size = CONFIG_HEAP1_END - CONFIG_HEAP1_BASE;
   up_ledon(LED_HEAPALLOCATE);
 }
 
@@ -93,6 +106,6 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void)
 {
-  mm_addregion((FAR void*)UP_HEAP2_BASE, UP_HEAP2_END - UP_HEAP2_BASE);
+  mm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_END - CONFIG_HEAP2_BASE);
 }
 #endif
