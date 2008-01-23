@@ -48,35 +48,49 @@
 #if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
 	xref _z16f_lowuartinit:EROM
 #endif
-	xref _os_start:EROM
-	xdef _reset
-	xdef _sysexc_isr
-	xdef _timer2_isr
-	xdef _timer1_isr
-	xdef _timer0_isr
-	xdef _uart0rx_isr
-	xdef _uart0tx_isr
-	xdef _i2c_isr
-	xdef _spi_isr
-	xdef _adc_isr
-	xdef _p7ad_isr
-	xdef _p6ad_isr
-	xdef _p5ad_isr
-	xdef _p4ad_isr
-	xdef _p3ad_isr
-	xdef _p2ad_isr
-	xdef _p1ad_isr
-	xdef _p0ad_isr
-	xdef _pwmtimer_isr
-	xdef _uart1rx_isr
-	xdef _uart1tx_isr
-	xdef _pwmfault_isr
-	xdef _c3_isr
-	xdef _c2_isr
-	xdef _c1_isr
-	xdef _c0_isr
-	xdef _common_isr
- 
+	xref	_os_start:EROM
+	xdef	_reset
+	xdef	_sysexc_isr
+	xdef	_timer2_isr
+	xdef	_timer1_isr
+	xdef	_timer0_isr
+	xdef	_uart0rx_isr
+	xdef	_uart0tx_isr
+	xdef	_i2c_isr
+	xdef	_spi_isr
+	xdef	_adc_isr
+	xdef	_p7ad_isr
+	xdef	_p6ad_isr
+	xdef	_p5ad_isr
+	xdef	_p4ad_isr
+	xdef	_p3ad_isr
+	xdef	_p2ad_isr
+	xdef	_p1ad_isr
+	xdef	_p0ad_isr
+	xdef	_pwmtimer_isr
+	xdef	_uart1rx_isr
+	xdef	_uart1tx_isr
+	xdef	_pwmfault_isr
+	xdef	_c3_isr
+	xdef	_c2_isr
+	xdef	_c1_isr
+	xdef	_c0_isr
+	xdef	_common_isr
+
+	xref	_low_nearbss:RAM
+	xref	_len_nearbss
+	xref	_low_farbss:ERAM
+	xref	_len_farbss:ERAM
+	xref	_low_neardata:RAM
+	xref	_len_neardata
+	xref	_low_near_romdata:EROM
+	xref	_low_fardata:ERAM
+	xref	_len_fardata:ERAM
+	xref	_low_far_romdata:EROM
+	xref	far_heapbot:ERAM
+	xref	_far_stack:ERAM
+	xref	_near_stack:RAM
+
 /**************************************************************************
  * Flash Option Byte Setup
  **************************************************************************/
@@ -123,8 +137,6 @@
  * Equates
  **************************************************************************/
 
-STACK_TOP     equ %FFC000
-
 /**************************************************************************
  * Data Allocation
  **************************************************************************/
@@ -145,11 +157,68 @@ STACK_TOP     equ %FFC000
  **************************************************************************/
 
 _reset:
-	ld	sp, #STACK_TOP		/* Set Stack Pointer */
-	call	_z16f_lowinit		/* Perform low-level hardware initialization */
+	/* Initialize the init/idle task stack */
+
+	ld	sp, #(_near_stack+1)	/* Set Stack Pointer to the top of internal RAM */
+	clr	fp
+
+	/* Perform VERY early UART initialization so that we can use it here */
+
 #if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
 	call	_z16f_lowuartinit	/* Initialize the UART for debugging */
 #endif
+	/* Initialize the hardware stack overflow register */
+
+#ifdef CONFIG_Z16F_INITSPOV
+	ld	r0, #(_near_stack_bot+1)
+	ld	spov, r0
+#endif
+	/* Clear BSS */
+
+	lea	r0, _low_nearbss
+	ld	r1, #_len_nearbss+1
+	jp	_reset2
+_reset1:
+	ld.b	(r0++), #0
+_reset2:
+	djnz	r1, _reset1
+
+	lea	r0, _low_farbss
+	ld	r1, #_len_farbss+1
+	jp	_reset4
+_reset3:
+	ld.b	(r0++), #0
+_reset4:
+	djnz	r1, _reset3
+
+	/* Copy ROM data into RAM */
+
+	lea	r0, _low_near_romdata
+	lea	r1, _low_neardata
+	ld	r2, #_len_neardata+1
+        jp      _reset6
+_reset5:
+        ld.b    r3, (r0++)
+	ld.b	(r1++), r3
+_reset6:
+        djnz    r2, _reset5
+
+       	lea	r0, _low_far_romdata
+	lea	r1, _low_fardata
+	ld	r2, #_len_fardata+1
+	jp	_reset8
+_reset7:
+	ld.b	r3, (r0++)
+	ld.b	(r1++), r3
+_reset8:
+	djnz	r2, _reset7
+
+	/* Perform low-level hardware initialization */
+
+	call	_z16f_lowinit		/* Perform low-level hardware initialization */
+
+	/* Start NuttX */
+
 	call	_os_start		/* Start the operating system */
 _halted:				/* _os_start() should not return */
 	halt

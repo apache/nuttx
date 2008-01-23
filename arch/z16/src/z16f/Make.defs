@@ -43,6 +43,6 @@ CMN_CSRCS	= up_allocateheap.c up_initialize.c up_schedulesigaction.c \
 		  up_unblocktask.c up_doirq.c up_releasepending.c up_usestack.c \
 		  up_exit.c up_releasestack.c up_idle.c up_reprioritizertr.c
 
-CHIP_SSRCS	= z16f_lowuart.S
+CHIP_SSRCS	= z16f_lowuart.S z16f_saveusercontext.S
 CHIP_CSRCS	= z16f_clkinit.c z16f_irq.c z16f_timerisr.c z16f_serial.c
 

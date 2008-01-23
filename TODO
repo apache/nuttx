@@ -21,6 +21,7 @@ NuttX TODO List (Last updated January 6, 2008)
   (2)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (2)  z80 (arch/z80/)
+  (1)  z16 (arch/z16/)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -350,4 +351,10 @@ o z80 (arch/z80)
                to solve the problem are complex.
 
 
+o z16 (arch/z16)
+^^^^^^^^^^^^^^^^
 
+  Description: ZDS-II Librarian complains that the source for the .obj file
+               is not in the library.
+  Status:      Open
+  Priority:    Low, thought to be cosmetic.

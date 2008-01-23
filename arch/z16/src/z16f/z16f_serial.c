@@ -51,7 +51,7 @@
 #include <nuttx/serial.h>
 #include <arch/serial.h>
 
-#include "up_arch.h"
+#include "chip/chip.h"
 #include "os_internal.h"
 #include "up_internal.h"
 

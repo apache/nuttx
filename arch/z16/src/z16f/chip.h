@@ -367,41 +367,41 @@
 
 /* UART0/1 Status 0 Register Bit Definitions ****************************************/
 
-#define Z16F_UARTSTAT0_RDA      _HX8(0x80)      /* Bit 7: Receive Data Available */
-#define Z16F_UARTSTAT0_PE       _HX8(0x40)      /* Bit 6: Parity Error */
-#define Z16F_UARTSTAT0_OE       _HX8(0x20)      /* Bit 5: Overrun Error */
-#define Z16F_UARTSTAT0_FE       _HX8(0x10)      /* Bit 4: Framing Error */
-#define Z16F_UARTSTAT0_BRKD     _HX8(0x08)      /* Bit 3: Break Detect */
-#define Z16F_UARTSTAT0_TDRE     _HX8(0x04)      /* Bit 2: Transmitter Data Register Empty */
-#define Z16F_UARTSTAT0_TXE      _HX8(0x02)      /* Bit 1: Transmitter Empty */
-#define Z16F_UARTSTAT0_CTS      _HX8(0x01)      /* Bit 0: Clear To Send */
+#define Z16F_UARTSTAT0_RDA      _HX8(80)        /* Bit 7: Receive Data Available */
+#define Z16F_UARTSTAT0_PE       _HX8(40)        /* Bit 6: Parity Error */
+#define Z16F_UARTSTAT0_OE       _HX8(20)        /* Bit 5: Overrun Error */
+#define Z16F_UARTSTAT0_FE       _HX8(10)        /* Bit 4: Framing Error */
+#define Z16F_UARTSTAT0_BRKD     _HX8(08)        /* Bit 3: Break Detect */
+#define Z16F_UARTSTAT0_TDRE     _HX8(04)        /* Bit 2: Transmitter Data Register Empty */
+#define Z16F_UARTSTAT0_TXE      _HX8(02)        /* Bit 1: Transmitter Empty */
+#define Z16F_UARTSTAT0_CTS      _HX8(01)        /* Bit 0: Clear To Send */
 
 /* UART0/1 Control 0/1 Register Bit Definitions *************************************/
 
-#define Z16F_UARTCTL0_TEN      _HX8(0x80)      /* Bit 7: Transmit Enable */
-#define Z16F_UARTCTL0_REN      _HX8(0x40)      /* Bit 6: Receive Enable */
-#define Z16F_UARTCTL0_CTSE     _HX8(0x20)      /* Bit 5: CTS Enable */
-#define Z16F_UARTCTL0_PEN      _HX8(0x10)      /* Bit 4: Parity Enable */
-#define Z16F_UARTCTL0_PSEL     _HX8(0x08)      /* Bit 3: Odd Parity Select */
-#define Z16F_UARTCTL0_SBRK     _HX8(0x04)      /* Bit 2: Send Break */
-#define Z16F_UARTCTL0_STOP     _HX8(0x02)      /* Bit 1: Stop Bit Select */
-#define Z16F_UARTCTL0_LBEN     _HX8(0x01)      /* Bit 0: Loopback Enable */
+#define Z16F_UARTCTL0_TEN      _HX8(80)        /* Bit 7: Transmit Enable */
+#define Z16F_UARTCTL0_REN      _HX8(40)        /* Bit 6: Receive Enable */
+#define Z16F_UARTCTL0_CTSE     _HX8(20)        /* Bit 5: CTS Enable */
+#define Z16F_UARTCTL0_PEN      _HX8(10)        /* Bit 4: Parity Enable */
+#define Z16F_UARTCTL0_PSEL     _HX8(08)        /* Bit 3: Odd Parity Select */
+#define Z16F_UARTCTL0_SBRK     _HX8(04)        /* Bit 2: Send Break */
+#define Z16F_UARTCTL0_STOP     _HX8(02)        /* Bit 1: Stop Bit Select */
+#define Z16F_UARTCTL0_LBEN     _HX8(01)        /* Bit 0: Loopback Enable */
 
-#define Z16F_UARTCTL1_MPMD1    _HX8(0x80)      /* Bit 7: Multiprocessor Mode (bit1) */
-#define Z16F_UARTCTL1_MPEN     _HX8(0x40)      /* Bit 6: Multiprocessor Enable */
-#define Z16F_UARTCTL1_MPMD0    _HX8(0x20)      /* Bit 5: Multiprocessor Mode (bit0) */
-#define Z16F_UARTCTL1_MPBT     _HX8(0x10)      /* Bit 4: Multiprocessor Bit Transmit */
-#define Z16F_UARTCTL1_DEPOL    _HX8(0x08)      /* Bit 3: Driver Enable Polarity */
-#define Z16F_UARTCTL1_BRGCTL   _HX8(0x04)      /* Bit 2: Baud Rate Generator Control */
-#define Z16F_UARTCTL1_RDAIRQ   _HX8(0x02)      /* Bit 1: Receive Data Interrupt Enable */
-#define Z16F_UARTCTL1_IREN     _HX8(0x01)      /* Bit 0: Infrared Encoder/Decoder Eanble */
+#define Z16F_UARTCTL1_MPMD1    _HX8(80)        /* Bit 7: Multiprocessor Mode (bit1) */
+#define Z16F_UARTCTL1_MPEN     _HX8(40)        /* Bit 6: Multiprocessor Enable */
+#define Z16F_UARTCTL1_MPMD0    _HX8(20)        /* Bit 5: Multiprocessor Mode (bit0) */
+#define Z16F_UARTCTL1_MPBT     _HX8(10)        /* Bit 4: Multiprocessor Bit Transmit */
+#define Z16F_UARTCTL1_DEPOL    _HX8(08)        /* Bit 3: Driver Enable Polarity */
+#define Z16F_UARTCTL1_BRGCTL   _HX8(04)        /* Bit 2: Baud Rate Generator Control */
+#define Z16F_UARTCTL1_RDAIRQ   _HX8(02)        /* Bit 1: Receive Data Interrupt Enable */
+#define Z16F_UARTCTL1_IREN     _HX8(01)        /* Bit 0: Infrared Encoder/Decoder Eanble */
 
 /* UART0/1 Mode Status/Select Register Bit Definitions ******************************/
 
-#define Z16F_UARTMDSEL_NORMAL   _HX8(0x00)      /* Bits 5-7=0: Multiprocessor and Normal Mode */
-#define Z16F_UARTMDSEL_FILTER   _HX8(0x20)      /* Bits 5-7=1: Noise Filter Control/Status */
-#define Z16F_UARTMDSEL_LINP     _HX8(0x40)      /* Bits 5-7=2: LIN protocol Contol/Status */
-#define Z16F_UARTMDSEL_HWREV    _HX8(0xe0)      /* Bits 5-7=7: LIN-UART Hardware Revision */
+#define Z16F_UARTMDSEL_NORMAL   _HX8(00)        /* Bits 5-7=0: Multiprocessor and Normal Mode */
+#define Z16F_UARTMDSEL_FILTER   _HX8(20)        /* Bits 5-7=1: Noise Filter Control/Status */
+#define Z16F_UARTMDSEL_LINP     _HX8(40)        /* Bits 5-7=2: LIN protocol Contol/Status */
+#define Z16F_UARTMDSEL_HWREV    _HX8(e0)        /* Bits 5-7=7: LIN-UART Hardware Revision */
                                                 /* Bits 0-4:   Mode dependent status */
 
 /* Timer0/1/2 registers *************************************************************/
