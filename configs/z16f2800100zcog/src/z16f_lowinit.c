@@ -39,6 +39,9 @@
  * Included Files
  ***************************************************************************/
 
+#include <nuttx/config.h>
+#include <sys/types.h>
+
 #include "chip/chip.h"
 
 /***************************************************************************
@@ -53,23 +56,23 @@ static void z16f_gpioinit(void)
 {
   /* Configure LEDs and Run/Stop switch port */
 
-  putreg(getreg(Z16F_GPIOA_DD) | 0x87, Z16F_GPIOA_DD);
-  putreg(getreg(Z16F_GPIOA_OUT) | 0x07, Z16F_GPIOA_OUT);
-  putreg(getreg(Z16F_GPIOA_DD) | 0xF8, Z16F_GPIOA_DD);
+  putreg8(getreg8(Z16F_GPIOA_DD) | 0x87, Z16F_GPIOA_DD);
+  putreg8(getreg8(Z16F_GPIOA_OUT) | 0x07, Z16F_GPIOA_OUT);
+  putreg8(getreg8(Z16F_GPIOA_DD) | 0xF8, Z16F_GPIOA_DD);
 
   /* Configure rate switch port */
 
-  putreg(getreg(Z16F_GPIOB_DD) | 0x20, Z16F_GPIOB_DD);
-  putreg(getreg(Z16F_GPIOB_AFL) | 0x20, Z16F_GPIOB_AFL);
+  putreg8(getreg8(Z16F_GPIOB_DD) | 0x20, Z16F_GPIOB_DD);
+  putreg8(getreg8(Z16F_GPIOB_AFL) | 0x20, Z16F_GPIOB_AFL);
 
 #if 0 /* Not yet */
-  ADC0MAX = 0x05;
-  ADC0CTL = 0xF5;
+  putreg8(0x05, Z16F_ADC0_MAX);
+  putreg8(0xf5, Z16F_ADC0_CTL);
 #endif
 
   /* Configure Direction switch port */
 
-  putreg(getreg() | 0x01, Z16F_GPIOC_DD);
+  putreg8(getreg8(Z16F_GPIOC_DD) | 0x01, Z16F_GPIOC_DD);
 }
 
 /***************************************************************************
