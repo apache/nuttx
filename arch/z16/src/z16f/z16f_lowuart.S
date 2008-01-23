@@ -61,10 +61,6 @@
  * Data Allocation
  *************************************************************************/
 
-/*************************************************************************
- * Data Allocation
- *************************************************************************/
-
 	define CODESEG, SPACE=EROM
 	segment CODESEG
 
@@ -147,7 +143,7 @@ _z16f_xmitc:
 	pushmlo <r0>				/* Save registers */
 
 _z16f_xmitc1:
-	ld	r0, #Z16F_UARTSTAT0_TDRE	/* TDRE=Transmitter Data Register Empty */
+	ld	r0, Z16F_UARTSTAT0_TDRE		/* TDRE=Transmitter Data Register Empty */
 #ifdef CONFIG_UART0_SERIAL_CONSOLE
 	tm.b	Z16F_UART0_STAT0, r0		/* r0 = Z16F_UART0_STAT0 */
 	jp	eq, _z16f_xmitc1 		/* While (!(Z16F_UART0_STAT0 & TDRE)) */
@@ -178,9 +174,9 @@ _z16f_xmitc1:
 #ifdef CONFIG_ARCH_LOWPUTC
 _up_lowputc:
 	pushmlo <r1,r5> 		/* Save registers */
-	ld	r0,r1
-	ext.ub	r5,r0
-	cp	r5,#10
+	ld	r0, r1
+	ext.ub	r5, r0
+	cp	r5, #10
 	jp	ne, _up_lowputc1	/* If (character == \n) */
 
 	ld	r1,#13
