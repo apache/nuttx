@@ -79,42 +79,55 @@
  *   Initialize UART0 or UART1
  *
  * Parameters:
- *   r1 = 0:UART0 1:UART1
- *   r2 = Frequency
- *   r3 = BAUD rate
+ *   None
  *
  *************************************************************************/
 
 z16f_lowuartinit:
-	pushmlo <r0,R3> 		/* Save registers */
+	pushmlo <r0, r3> 		/* Save registers */
 
-	ld	r3, #_SYS_CLK_FREQ
-	ld	r0, R3
-	sll	r0, #3
+	/* Calculate and set the baud rate generation register */
+
+
 #ifdef CONFIG_UART0_SERIAL_CONSOLE
-	sll	r0, #CONFIG_UART0_BAUD
+	ld	r3, #CONFIG_UART0_BAUD	/* r3 = baud */
 #else
-	sll	r0, #CONFIG_UART1_BAUD
+	ld	r3, #CONFIG_UART1_BAUD	/* r3 = baud */
 #endif
-	sll	R3, #4
-	udiv	r0, R3			/* BRG = (freq + baud * 8)/(baud * 16) */
+	ld	r0, r3			/* r0 = baud */
+	sll	r0, #3			/* r0 = baud * 8 */
+	add	r0, #_SYS_CLK_FREQ	/* r3 = freq + baud * 8*/
+	sll	r3, #4			/* r3 = baud * 16 */
+	udiv	r0, r3			/* BRG = (freq + baud * 8)/(baud * 16) */
 
 #ifdef CONFIG_UART0_SERIAL_CONSOLE
 	ld.w	Z16F_UART0_BR, r0	/* Z16F_UART0_BR = BRG */
+
+	/* Set the GPIO Alternate Function Register Lo (AFL) register */
+
 	ld	r0, #%30
 	or.b	Z16F_GPIOA_AFL, r0	/* Z16F_GPIOA_AFL |= %30 */
+
+	/* Enable UART receive (REN) and transmit (TEN) */
+
 	clr.b	Z16F_UART0_CTL1 	/* Z16F_UART0_CTL1 = 0 */
-	ld	r0, #%c0
+	ld	r0, #(Z16F_UARTCTL0_TEN|Z16F_UARTCTL0_REN)
 	ld.b	Z16F_UART0_CTL0, r0	/* Z16F_UART0_CTL0 = %c0 */
 #else
 	ld.w	Z16F_UART1_BR, r0	/* Z16F_UART1_BR = BRG */
+
+	/* Set the GPIO Alternate Function Register Lo (AFL) register */
+
 	ld	r0, #%30
 	or.b	Z16F_GPIOD_AFL, r0	/* Z16F_GPIOD_AFL |= %30 */
+
+	/* Enable UART receive (REN) and transmit (TEN) */
+
 	clr.b	Z16F_UART1_CTL1 	/* Z16F_UART1_CTL1 = 0 */
-	ld	r0, #%c0
+	ld	r0, #(Z16F_UARTCTL0_TEN|Z16F_UARTCTL0_REN)
 	ld.b	Z16F_UART1_CTL0, r0	/* Z16F_UART1_CTL0 = %c0 */
 #endif
-	popmlo	<r0, R3>		/* Restore registers */
+	popmlo	<r0, r3>		/* Restore registers */
 	ret				/* Return */
 
 
@@ -131,22 +144,21 @@ z16f_lowuartinit:
 
 #ifdef CONFIG_ARCH_LOWPUTC
 _z16f_xmitc:
-	pushmlo <r0>			/* Save registers */
+	pushmlo <r0>				/* Save registers */
 
 _z16f_xmitc1:
+	ld	r0, #Z16F_UARTSTAT0_TDRE	/* TDRE=Transmitter Data Register Empty */
 #ifdef CONFIG_UART0_SERIAL_CONSOLE
-	ld	r0,#4
-	tm.b	Z16F_UART0_STAT0,r0
-	jp	eq, _z16f_xmitc1 	/* While (!(Z16F_UART0_STAT0 & %4)) */
-	ld.b	Z16F_UART0_TXD,r1	/* Z16F_UART0_TXD = r1 (character) */
+	tm.b	Z16F_UART0_STAT0, r0		/* r0 = Z16F_UART0_STAT0 */
+	jp	eq, _z16f_xmitc1 		/* While (!(Z16F_UART0_STAT0 & TDRE)) */
+	ld.b	Z16F_UART0_TXD, r1		/* Z16F_UART0_TXD = r1 (character) */
 #else
-	ld	r0,#4
-	tm.b	Z16F_UART1_STAT0,r0
-	jp	eq, _z16f_xmitc1	/* While (!(Z16F_UART1_STAT0 & %4)) */
-	ld.b	Z16F_UART1_TXD,r1	/* Z16F_UART1_TXD = r1 (character) */
+	tm.b	Z16F_UART1_STAT0, r0		/* r0 = Z16F_UART0_STAT1 */
+	jp	eq, _z16f_xmitc1		/* While (!(Z16F_UART1_STAT0 & TDRE)) */
+	ld.b	Z16F_UART1_TXD, r1		/* Z16F_UART1_TXD = r1 (character) */
 #endif
-	popmlo	<r0>			/* Restore registers */
-	ret				/* Return */
+	popmlo	<r0>				/* Restore registers */
+	ret					/* Return */
 #endif
 
 /*************************************************************************
@@ -200,13 +212,13 @@ _up_lowputc1:
 #ifdef CONFIG_ARCH_LOWGETC
 _up_lowgetc:
 up_lowgetc1:
-	ld	r0, #%80
+	ld	r0, #Z16F_UARTSTAT0_RDA		/* RDA=Receive data available */
 #ifdef CONFIG_UART0_SERIAL_CONSOLE
-	tm.b	Z16F_UART0_STAT0,r0
-	jp	eq, _up_lowgetc1		/* While (!Z16F_UART0_STAT0 & %80)) */
+	tm.b	Z16F_UART0_STAT0, r0
+	jp	eq, _up_lowgetc1		/* While (!Z16F_UART0_STAT0 & RDA)) */
 	ld.ub	r0, Z16F_UART0_RXD		/* r0 = Z16F_UART0_RXD */
 #else
-	tm.b	Z16F_UART1_STAT0,r0		/* While (!Z16F_UART1_STAT0 & %80) */
+	tm.b	Z16F_UART1_STAT0,r0		/* While (!Z16F_UART1_STAT0 & RDA) */
 	jp	eq, _up_lowgetc1
 	ld.ub	r0, Z16F_UART1_RXD		/* r0 = Z16F_UART1_RXD */
 #endif
