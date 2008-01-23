@@ -188,6 +188,14 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+/* ZDS-II intrinsic functions (normally declared in zneo.h) */
+
+EXTERN intrinsic void EI(void);
+EXTERN intrinsic void DI(void);
+EXTERN intrinsic void RI(unsigned short);
+EXTERN intrinsic SET_VECTOR(int,void (* func) (void));
+EXTERN intrinsic unsigned short TDI(void);
+
 #ifndef __ZILOG__
 EXTERN irqstate_t irqsave(void);
 EXTERN void       irqrestore(irqstate_t flags);

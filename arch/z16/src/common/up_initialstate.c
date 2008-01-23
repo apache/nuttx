@@ -84,8 +84,8 @@ void up_initial_state(_TCB *tcb)
 
   memset(&tcb->xcp, 0, sizeof(struct xcptcontext));
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[REG_FLAGS]   = Z16F_CNTRL_FLAGS_IRQE << 8; /* IRQE flag will enable interrupts */
+  tcb->xcp.regs[REG_FLAGS] = (uint16)(Z16F_CNTRL_FLAGS_IRQE << 8); /* IRQE flag will enable interrupts */
 #endif
-  reg32[REG_SP/2]        = (uint32)tcb->adj_stack_ptr;
-  reg32[REG_PC/2]        = (uint32)tcb->start;
+  reg32[REG_SP/2]          = (uint32)tcb->adj_stack_ptr;
+  reg32[REG_PC/2]          = (uint32)tcb->start;
 }

@@ -101,7 +101,7 @@ void up_timerinit(void)
 
   /* Disable the timer and configure for divide by 1 and continuous mode. */
 
-  putreg16( Z16F_TIMERSCTL1_DIV1 | Z16F_TIMERSCTL1_CONT);
+  putreg8( Z16F_TIMERSCTL1_DIV1 | Z16F_TIMERSCTL1_CONT, Z16F_TIMER0_CTL1);
 
   /* Assign an intial timer value */
 
@@ -123,7 +123,7 @@ void up_timerinit(void)
 
   /* Enable the timer */
 
-  putreg8((getret8(Z16F_TIMER0_CTL1) |= Z16F_TIMERCTL1_TEN), Z16F_TIMER0_CTL1);
+  putreg8((getreg8(Z16F_TIMER0_CTL1) | Z16F_TIMERCTL1_TEN), Z16F_TIMER0_CTL1);
 
   /* Set the timer priority */
 

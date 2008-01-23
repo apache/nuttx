@@ -50,7 +50,6 @@
 #include "chip/chip.h"
 #include "os_internal.h"
 #include "up_internal.h"
-#include "up_mem.h"
 
 /****************************************************************************
  * Definitions
@@ -108,7 +107,7 @@ static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
  * Name: up_assert
  ****************************************************************************/
 
-void up_assert(const ubyte *filename, int lineno)
+void up_assert(void)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   _TCB *rtcb = (_TCB*)g_readytorun.head;
@@ -117,11 +116,9 @@ void up_assert(const ubyte *filename, int lineno)
   up_ledon(LED_ASSERTION);
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  lldbg("Assertion failed at file:%s line: %d task: %s\n",
-        filename, lineno, rtcb->name);
+  lldbg("Assertion failed in task: %s\n", rtcb->name);
 #else
-  lldbg("Assertion failed at file:%s line: %d\n",
-        filename, lineno);
+  lldbg("Assertion failed\n");
 #endif
 
   up_stackdump();
@@ -133,7 +130,7 @@ void up_assert(const ubyte *filename, int lineno)
  * Name: up_assert_code
  ****************************************************************************/
 
-void up_assert_code(const ubyte *filename, int lineno, int errorcode)
+void up_assert_code(int errorcode)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   _TCB *rtcb = (_TCB*)g_readytorun.head;
@@ -142,11 +139,9 @@ void up_assert_code(const ubyte *filename, int lineno, int errorcode)
   up_ledon(LED_ASSERTION);
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  lldbg("Assertion failed at file:%s line: %d task: %s error code: %d\n",
-        filename, lineno, rtcb->name, errorcode);
+  lldbg("Assertion failed in task: %s error code: %d\n", rtcb->name, errorcode);
 #else
-  lldbg("Assertion failed at file:%s line: %d error code: %d\n",
-        filename, lineno, errorcode);
+  lldbg("Assertion failed: %d error code: %d\n", errorcode);
 #endif
 
   up_stackdump();
