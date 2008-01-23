@@ -73,6 +73,11 @@ static void z16f_gpioinit(void)
   /* Configure Direction switch port */
 
   putreg8(getreg8(Z16F_GPIOC_DD) | 0x01, Z16F_GPIOC_DD);
+
+  /* Configure to use both UART0 and 1 */
+
+  putreg8(getreg8(Z16F_GPIOA_AFL) | 0x30, Z16F_GPIOA_AFL);
+  putreg8(getreg8(Z16F_GPIOD_AFL) | 0x30, Z16F_GPIOD_AFL);
 }
 
 /***************************************************************************

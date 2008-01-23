@@ -70,10 +70,9 @@ CONFIG_DRAM_SIZE=65536
 #   This specific the size of the receive buffer
 # CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
 #   being sent.  This specific the size of the transmit buffer
-# CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
-# CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
+# CONFIG_UARTn_BAUD - The configure BAUD of the UART.
 # CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
-# CONFIG_UARTn_2STOP - Two stop bits
+# CONFIG_UARTn_2STOP - 0=1 stop bit; 1=Two stop bits
 #
 CONFIG_UART0_SERIAL_CONSOLE=y
 CONFIG_UART1_SERIAL_CONSOLE=n
@@ -83,8 +82,6 @@ CONFIG_UART0_RXBUFSIZE=256
 CONFIG_UART1_RXBUFSIZE=256
 CONFIG_UART0_BAUD=115200
 CONFIG_UART1_BAUD=115200
-CONFIG_UART0_BITS=8
-CONFIG_UART1_BITS=8
 CONFIG_UART0_PARITY=0
 CONFIG_UART1_PARITY=0
 CONFIG_UART0_2STOP=0
