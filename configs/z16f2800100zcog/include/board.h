@@ -1,4 +1,4 @@
-/************************************************************
+/****************************************************************************
  * board/board.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
@@ -31,22 +31,41 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_BOARD_BOARD_H
 #define __ARCH_BOARD_BOARD_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/* LED pattern definitions
+ *
+ * The z16f2800100zcog board has four LEDs:
+ *
+ * - Green LED D1 which illuminates in the presence of Vcc
+ * - Red LED D2 connected to chip port PA0_T0IN
+ * - Yellow LED D3 connected to chip port PA1_T0OUT
+ * - Green LED D4 connected to chip port PA2_DE0
+ */
+
+#define LED_STARTED                 0
+#define LED_HEAPALLOCATE            1
+#define LED_IRQSENABLED             2
+#define LED_IDLE                    3
+#define LED_INIRQ                   4
+#define LED_ASSERTION               5
+#define LED_PANIC                   6
+
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
+
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
