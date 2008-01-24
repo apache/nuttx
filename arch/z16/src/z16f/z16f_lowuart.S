@@ -47,7 +47,7 @@
  * External References / External Definitions
  *************************************************************************/
 
-	xdef	z16f_lowuartinit
+	xdef	_z16f_lowuartinit
 	xref	_SYS_CLK_FREQ:EROM
 #ifdef CONFIG_ARCH_LOWPUTC
 	xdef	_z16f_xmitc
@@ -79,7 +79,7 @@
  *
  *************************************************************************/
 
-z16f_lowuartinit:
+_z16f_lowuartinit:
 	pushmlo <r0, r3> 		/* Save registers */
 
 	/* Calculate and set the baud rate generation register */

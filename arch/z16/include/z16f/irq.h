@@ -74,9 +74,9 @@
 #define Z16F_IRQ_P7AD     (16) /*   Vector: 0x30 IRQ1.7 Port A/D7, rising/falling edge */
 
 #define Z16F_IRQ_IRQ2     (17) /* First of 8 IRQs controlled by IRQ2 registers */
-#define Z16F_IRQ_C0       (17) /*   Vector: IRQ2.0 0x6C Port C0, both edges DMA3 */
-#define Z16F_IRQ_C1       (18) /*   Vector: IRQ2.1 0x68 Port C1, both edges DMA3 */
-#define Z16F_IRQ_C2       (19) /*   Vector: IRQ2.2 0x64 Port C2, both edges DMA3 */
+#define Z16F_IRQ_C0       (17) /*   Vector: IRQ2.0 0x6C Port C0, both edges DMA0 */
+#define Z16F_IRQ_C1       (18) /*   Vector: IRQ2.1 0x68 Port C1, both edges DMA1 */
+#define Z16F_IRQ_C2       (19) /*   Vector: IRQ2.2 0x64 Port C2, both edges DMA2 */
 #define Z16F_IRQ_C3       (20) /*   Vector: IRQ2.3 0x60 Port C3, both edges DMA3 */
 #define Z16F_IRQ_PWMFAULT (21) /*   Vector: IRQ2.4 0x5C PWM Fault */
 #define Z16F_IRQ_UART1TX  (22) /*   Vector: IRQ2.5 0x58 UART1 TX */
@@ -96,32 +96,68 @@
  *
  * This stack frame is created on each interrupt.  These registers are stored
  * in the TCB to many context switches.
+ *
+ * The following represent all of the "static" registers r8-r15.  These
+ * are registers that whose value must be retained across function calls.
+ * These registers must be saved bothby interrupt handling context switch
+ * switch logic and also by user-initiated context switches.
+ *
+ * Registers are saved in the order consistent with pushmho <r8-r15>,
+ * that is with r15 pushed first and r8 push last.  Since the z16f has
+ * a "push-down" stack, the registers will be "in order" in memory.
  */
 
-#define REG_R0              ( 0) /* 32-bits: R0 */
-#define REG_R1              ( 2) /* 32-bits: R0 */
-#define REG_R2              ( 4) /* 32-bits: R0 */
-#define REG_R3              ( 6) /* 32-bits: R0 */
-#define REG_R4              ( 8) /* 32-bits: R0 */
-#define REG_R5              (10) /* 32-bits: R0 */
-#define REG_R6              (12) /* 32-bits: R0 */
-#define REG_R7              (14) /* 32-bits: R0 */
-#define REG_R8              (16) /* 32-bits: R0 */
-#define REG_R9              (18) /* 32-bits: R0 */
-#define REG_R10             (20) /* 32-bits: R0 */
-#define REG_R11             (22) /* 32-bits: R0 */
-#define REG_R12             (24) /* 32-bits: R0 */
-#define REG_R13             (26) /* 32-bits: R0 */
-#define REG_R14             (28) /* 32-bits: R0 */
-#define REG_R15             (30) /* 32-bits: R0 */
+#define REG_R8              ( 0) /* 32-bits: R8 */
+#define REG_R9              ( 2) /* 32-bits: R9 */
+#define REG_R10             ( 4) /* 32-bits: R10 */
+#define REG_R11             ( 6) /* 32-bits: R11 */
+#define REG_R12             ( 8) /* 32-bits: R12 */
+#define REG_R13             (10) /* 32-bits: R13 */
+
+/* The frame pointer and the SP at the point of task resumption must
+ * always be saved.
+ */
+
+#define REG_R14             (12) /* 32-bits: R14 = fp */
+#define REG_FP              REG_R14
+#define REG_R15             (14) /* 32-bits: R15 = sp */
+#define REG_SP              REG_R15
+
+/* The following represent all of the "volatile" registers r0-r7.  These
+ * are registers that whose value need not be retained across function
+ * calls.  These registers must be saved by interrupt handling context
+ * switch logic but not by user-initiated context switches.
+ *
+ * Registers are saved in the order consistent with pushmlo <r0-r7>,
+ * that is with r7 pushed first and r0 push last.  Since the z16f has
+ * a "push-down" stack, the registers will be "in order" in memory.
+ */
+
+#define REG_R0              (16) /* 32-bits: R0 */
+#define REG_R1              (18) /* 32-bits: R1 */
+#define REG_R2              (20) /* 32-bits: R2 */
+#define REG_R3              (22) /* 32-bits: R3 */
+#define REG_R4              (24) /* 32-bits: R4 */
+#define REG_R5              (26) /* 32-bits: R5 */
+#define REG_R6              (28) /* 32-bits: R6 */
+#define REG_R7              (30) /* 32-bits: R7 */
+
+/* The following two offsets represent the state of the stack on entry
+ * into the interrupt handler:
+ *
+ * TOS[0] = PC[31:24]
+ * TOS[1] = PC[23:16]
+ * TOS[2] = PC[15:8]
+ * TOS[3] = PC[7:0]
+ * TOS[4] = 0
+ * TOS[5] = flags
+ */
+
 #define REG_PC              (32) /* 32-bits: Return PC */
 #define REG_FLAGS           (34) /* 16-bits: Flags register (with 0x00 padding) */
 
 #define XCPTCONTEXT_REGS    (35)
 #define XCPTCONTEXT_SIZE    (2 * XCPTCONTEXT_REGS)
-
-#define REG_FP              REG_R14
-#define REG_SP              REG_R15
 
 /****************************************************************************
  * Public Types

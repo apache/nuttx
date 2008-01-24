@@ -97,7 +97,7 @@ extern chipreg_t *current_regs;
 /* Defined in files with the same name as the function */
 
 extern void up_copystate(FAR chipreg_t *dest, FAR chipreg_t *src);
-extern void up_doirq(int irq, FAR chipreg_t *regs);
+extern FAR chipreg_t *up_doirq(int irq, FAR chipreg_t *regs);
 extern void up_restoreusercontext(FAR chipreg_t *regs);
 extern void up_irqinitialize(void);
 extern int  up_saveusercontext(FAR chipreg_t *regs);
