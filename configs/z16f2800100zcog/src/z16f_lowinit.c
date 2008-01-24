@@ -58,7 +58,7 @@ static void z16f_gpioinit(void)
 
   putreg8(getreg8(Z16F_GPIOA_DD) | 0x87, Z16F_GPIOA_DD);
   putreg8(getreg8(Z16F_GPIOA_OUT) | 0x07, Z16F_GPIOA_OUT);
-  putreg8(getreg8(Z16F_GPIOA_DD) | 0xF8, Z16F_GPIOA_DD);
+  putreg8(getreg8(Z16F_GPIOA_DD) & 0xF8, Z16F_GPIOA_DD);
 
   /* Configure rate switch port */
 
