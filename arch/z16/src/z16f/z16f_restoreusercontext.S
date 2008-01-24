@@ -1,5 +1,5 @@
 /*************************************************************************
- * arch/z16/src/z16f/z16f_saveusercontext.asm
+ * arch/z16/src/z16f/z16f_restoreusercontext.asm
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -45,7 +45,7 @@
  * External References / External Definitions
  *************************************************************************/
 
-	xdef	_up_saveusercontext
+	xdef	_up_restoreusercontext
 
 /*************************************************************************
  * Data Allocation
@@ -59,60 +59,47 @@
  *************************************************************************/
 
 /*************************************************************************
- * Name: up_saveusercontext
+ * Name: up_restoreusercontext
  *
  * Description:
- *   Save the current user context.
- *   r0-r7: These are caller saved registers and do not need to be stored
- *	    here
- *   r8-r13: There callee saved registers must be preserved
- *   r14:    Frame pointer
- *   r15:    Stack pointer (with return address on stack)
+ *   Restore the current user context.
  *
  * Parameters:
  *   r1: pointer to the register save array in the XCPT structure
  *
  *************************************************************************/
 
-_up_saveusercontext:
-	/* Save the flags (needed to restore the interrupt state) */
-	
-	ld	r3, Z16F_CNTRL_FLAGS	/* Fetch the flags register */
-	sll	r3, #8			/* Pad with zero */
-	ld.w	2*REG_FLAGS(r1), r3	/* Save 16-bit value */
+_up_restoreusercontext:
+	/* Disable interrupts throughout the following */
 
-	/* Save r8-R13 */
+	di
 
-	ld	2*REG_R8(r1), r8	/* Save r8 */
-	ld	2*REG_R9(r1), r9	/* Save r9 */
-	ld	2*REG_R10(r1), r10	/* Save r10 */
-	ld	2*REG_R11(r1), r11	/* Save r11 */
-	ld	2*REG_R12(r1), r12	/* Save r12 */
-	ld	2*REG_R13(r1), r13	/* Save r13 */
+	/* Set up the stack for return */
 
-	/* Save the stack pointer and the frame pointer */
+	ld	sp, 2*REG_SP(r1)			/* sp=Value of SP on return */
+	ld	r2, 2*REG_PC(r1)			/* r2=return address */
+	push	r1					/* Push the return address onto the stack */
 
-	ld	2*REG_FP(r1), fp	/* Save the frame pointer */
-	ld	2*REG_SP(r1), sp	/* Save the stack pointer */
+	/* Retore r8-r18 */
 
-	/* Save the return address at the top of the stack */
+	ld	sp, r1					/* sp=Value of SP at call to _up_doirq */
+	popmhi	<r8-r14>				/* Restore r8-r14 */
 
-	ld	r0, (sp)		/* Save the return address */
-	ld	2*REG_PC(r1), r0
+	/* Test if interrupts should be enabled upon return */
 
-	/* Set the return value so that if when the task is restarted
-	 * (via z16f_restoreusercontext() or via interrupt handling return),
-	 * the returned value will be 1
-	 */
+	ld.w	r2, 2*REG_FLAGS(r1)			/* r2=padded flags value */
+	tm	r2, #(Z16F_CNTRL_FLAGS_IRQE << 8)	/* Test (shifted) IRQE bit */
+	jp	z, _up_returndisabled			/* Jump if interrupts should remain disabled */
 
-	ld	r0, #1
-	ld	2*REG_R0(r1), r0
+	/* Return with interrupts enabled */
 
-	/* But always return 0 when returning from this function.  The
-	 * apparent return value tells the higher level logic whether the
-	 * user context was saved or restored (in the spirit of setjmp and longjmp)
-	 */
+	popmlo	<r0-r7>					/* Restore r0-r7 */
+	ei						/* Enable interrupts and return */
+	ret
 
-	clr	r0			/* Always returns 0 */
+	/* Return with interrupts disabled */
+
+_up_returndisabled:
+	popmlo	<r0-r7>					/* Restore r0-r7 */
 	ret
 	end

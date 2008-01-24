@@ -68,8 +68,19 @@
  * Public Functions
  ****************************************************************************/
 
-void up_doirq(int irq, chipreg_t *regs)
+/****************************************************************************
+ * Name: up_doirq
+ *
+ * Description:
+ *   Interface between low-level IRQ decode logic and the NuttX IRQ dispatch
+ *   logic.
+ *
+ ****************************************************************************/
+
+FAR chipreg_t *up_doirq(int irq, FAR chipreg_t *regs)
 {
+  chipreg_t *ret = regs;
+ 
   up_ledon(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC(OSERR_ERREXCEPTION);
@@ -93,6 +104,7 @@ void up_doirq(int irq, chipreg_t *regs)
 
        /* Indicate that we are no long in an interrupt handler */
 
+       ret          = current_regs;
        current_regs = NULL;
 
        /* Unmask the last interrupt (global interrupts are still
@@ -103,4 +115,5 @@ void up_doirq(int irq, chipreg_t *regs)
     }
   up_ledoff(LED_INIRQ);
 #endif
+  return ret;
 }
