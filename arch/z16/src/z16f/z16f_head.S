@@ -46,6 +46,9 @@
  **************************************************************************/
 
 	xref _z16f_lowinit:EROM
+#ifdef CONFIG_ARCH_LEDS
+	xref	_up_ledinit:EROM
+#endif
 #if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
 	xref _z16f_lowuartinit:EROM
 #endif
@@ -164,6 +167,11 @@ _reset:
 	ld	sp, #(_near_stack+1)	/* Set Stack Pointer to the top of internal RAM */
 	clr	fp
 
+	/* Initialize onboard LEDs */
+
+#ifdef CONFIG_ARCH_LEDS
+	bl	_up_ledinit
+#endif
 	/* Perform VERY early UART initialization so that we can use it here */
 
 #if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
