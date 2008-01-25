@@ -85,7 +85,7 @@ typedef void (*up_vector_t)(void);
  * interrupt processing.
  */
 
-extern chipreg_t *current_regs;
+extern FAR chipreg_t *current_regs;
 #endif
 
 /****************************************************************************

@@ -57,13 +57,13 @@
  */
 
 #ifndef CONFIG_HEAP1_BASE
-  extern _Far unsigned long far_heaptop;
-  #define CONFIG_HEAP1_BASE ((unsigned long)&far_heaptop)
+  extern _Far unsigned long far_heapbot;
+  #define CONFIG_HEAP1_BASE ((unsigned long)&far_heapbot)
 #endif
 
 #ifndef CONFIG_HEAP1_END
-  extern _Far unsigned long far_heapbot;
-  #define CONFIG_HEAP1_END ((unsigned long)&far_heapbot)
+  extern _Far unsigned long far_heaptop;
+  #define CONFIG_HEAP1_END ((unsigned long)&far_heaptop)
 #endif
 
 /****************************************************************************
