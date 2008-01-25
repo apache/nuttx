@@ -38,4 +38,4 @@ available:
 - ostest
     This builds the examples/ostest application for execution from RAM.
 
- 
+Check out any README.txt files in these <sub-directory>s. 
