@@ -42,6 +42,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/irq.h>
 
 /************************************************************************************
  * Definitions
@@ -198,6 +199,28 @@
 #define Z16F_IRQ2_EN            _HX32(ffffe03a) /* 16-bit: IRQ2 Enable */
 #define Z16F_IRQ2_ENH           _HX32(ffffe03a) /*  8-bit: IRQ2 Enable High Bit */
 #define Z16F_IRQ2_ENL           _HX32(ffffe03c) /*  8-bit: IRQ2 Enable Low Bit */
+
+/* System exception status register bit definitions *********************************/
+
+#define Z16F_SYSEXCPH_SPOVF     _HX8(80)        /* Bit 7: Stack pointer overflow */
+#define Z16F_SYSEXCPH_PCOVF     _HX8(40)        /* Bit 6: Program counter overflow */
+#define Z16F_SYSEXCPH_DIV0      _HX8(20)        /* Bit 5: Divide by zero */
+#define Z16F_SYSEXCPH_DIVOVF    _HX8(10)        /* Bit 4: Divide overflow */
+#define Z16F_SYSEXCPH_ILL       _HX8(08)        /* Bit 3: Illegal instruction */
+                                                /* Bits 0-2: Reserved */
+                                                /* Bits 3-7: Reserved */
+#define Z16F_SYSEXCPL_WDTOSC    _HX8(04)        /* Bit 2: WDT oscillator failure */
+#define Z16F_SYSEXCPL_PRIOSC    _HX8(02)        /* Bit 1: Primary oscillator failure */
+#define Z16F_SYSEXCPL_WDT       _HX8(01)        /* Bit 0: Watchdog timer interrupt */
+
+#define Z16F_SYSEXCP_SPOVF     (Z16F_SYSEXCPH_SPOVF << 8)
+#define Z16F_SYSEXCP_PCOVF     (Z16F_SYSEXCPH_PCOVF << 8)
+#define Z16F_SYSEXCP_DIV0      (Z16F_SYSEXCPH_DIV0 << 8)
+#define Z16F_SYSEXCP_DIVOVF    (Z16F_SYSEXCPH_DIVOVF << 8)
+#define Z16F_SYSEXCP_ILL       (Z16F_SYSEXCPH_ILL << 8)
+#define Z16F_SYSEXCP_WDTOSC    Z16F_SYSEXCPL_WDTOSC
+#define Z16F_SYSEXCP_PRIOSC    Z16F_SYSEXCPL_PRIOSC
+#define Z16F_SYSEXCP_WDT       Z16F_SYSEXCPL_WDT
 
 /* Oscillator control registers *****************************************************/
 
@@ -519,10 +542,18 @@ extern "C" {
  * debugging support for up_lowputc (or getc) is enabled.
  */
 
-extern void z16f_lowinit(void);
+EXTERN void z16f_lowinit(void);
 #if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
-extern void z16f_lowuartinit(void);
+EXTERN void z16f_lowuartinit(void);
 #endif
+
+/* This function handles Z16F system execeptions */
+
+EXTERN void z16f_sysexec(FAR chipreg_t *regs);
+
+/* Entry point to reset the processor */
+
+EXTERN void z16f_reset(void);
 
 #undef EXTERN
 #ifdef __cplusplus

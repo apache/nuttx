@@ -40,9 +40,11 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <assert.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <assert.h>
+#include <arch/board/board.h>
 
 #include "chip/chip.h"
 #include "os_internal.h"
@@ -79,7 +81,7 @@
 
 FAR chipreg_t *up_doirq(int irq, FAR chipreg_t *regs)
 {
-  chipreg_t *ret = regs;
+  FAR chipreg_t *ret = regs;
  
   up_ledon(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
