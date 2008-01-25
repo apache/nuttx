@@ -57,10 +57,11 @@
 #define LED_STARTED                 0
 #define LED_HEAPALLOCATE            1
 #define LED_IRQSENABLED             2
-#define LED_IDLE                    3
-#define LED_INIRQ                   4
-#define LED_ASSERTION               5
-#define LED_PANIC                   6
+#define LED_STACKCREATED            3
+#define LED_IDLE                    4
+#define LED_INIRQ                   5
+#define LED_ASSERTION               6
+#define LED_PANIC                   7
 
 /****************************************************************************
  * Public Functions
