@@ -47,6 +47,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <arch/board/board.h>
 #include "up_internal.h"
 
 /****************************************************************************
@@ -84,38 +85,10 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
-  ubyte paout = getreg8(Z16F_GPIOA_OUT) & 0xf8;
-  switch (led)
+  if ((unsigned)led <= 7)
     {
-      case LED_STARTED:
-        break;
-
-      case LED_HEAPALLOCATE:
-        paout |= 1;
-        break;
-
-      case LED_IRQSENABLED:
-        paout |= 2;
-        break;
-
-      case LED_IDLE:
-        paout |= 3;
-        break;
-
-      case LED_INIRQ:
-        paout |= 4;
-        break;
-
-      case LED_ASSERTION :
-        paout |= 5;
-        break;
-
-      case LED_PANIC:
-      default:
-        paout |= 6;
-        break;
+       putreg8(((getreg8(Z16F_GPIOA_OUT) & 0xf8) | led), Z16F_GPIOA_OUT);
     }
-  putreg8(paout, Z16F_GPIOA_OUT);
 }
 
 /****************************************************************************
@@ -124,32 +97,9 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-  switch (led)
+  if (led >= 1)
     {
-      case LED_STARTED:
-        break;
-
-      case LED_HEAPALLOCATE:
-        up_ledoff(LED_STARTED);
-        break;
-
-      case LED_IRQSENABLED:
-        up_ledoff(LED_IRQSENABLED);
-        break;
-
-      case LED_IDLE:
-        up_ledoff(LED_IRQSENABLED);
-        break;
-
-      case LED_INIRQ:
-      case LED_ASSERTION :
-        up_ledoff(LED_IDLE);
-        break;
-
-      case LED_PANIC:
-      default:
-        up_ledoff(LED_ASSERTION);
-        break;
+      up_ledon(led-1);
     }
 }
 #endif /* CONFIG_ARCH_LEDS */

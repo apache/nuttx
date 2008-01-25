@@ -45,42 +45,17 @@
  * External References / External Definitions
  **************************************************************************/
 
-	xref _z16f_lowinit:EROM
+	xref	_z16f_lowinit:EROM
 #ifdef CONFIG_ARCH_LEDS
 	xref	_up_ledinit:EROM
 #endif
 #if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
-	xref _z16f_lowuartinit:EROM
+	xref	_z16f_lowuartinit:EROM
 #endif
 	xref	_os_start:EROM
 	xref	_up_doirq:EROM
-	xdef	_reset
-	xdef	_sysexc_isr
-	xdef	_timer2_isr
-	xdef	_timer1_isr
-	xdef	_timer0_isr
-	xdef	_uart0rx_isr
-	xdef	_uart0tx_isr
-	xdef	_i2c_isr
-	xdef	_spi_isr
-	xdef	_adc_isr
-	xdef	_p7ad_isr
-	xdef	_p6ad_isr
-	xdef	_p5ad_isr
-	xdef	_p4ad_isr
-	xdef	_p3ad_isr
-	xdef	_p2ad_isr
-	xdef	_p1ad_isr
-	xdef	_p0ad_isr
-	xdef	_pwmtimer_isr
-	xdef	_uart1rx_isr
-	xdef	_uart1tx_isr
-	xdef	_pwmfault_isr
-	xdef	_c3_isr
-	xdef	_c2_isr
-	xdef	_c1_isr
-	xdef	_c0_isr
-	xdef	_common_isr
+	xref	_z16f_sysexec:EROM
+	xdef	_z16f_reset
 
 	xref	_low_nearbss:RAM
 	xref	_len_nearbss
@@ -111,7 +86,7 @@
  * vectors
  **************************************************************************/
 
-	vector RESET=_reset
+	vector RESET=_z16f_reset
 	vector SYSEXC=_sysexc_isr
 	vector TIMER2=_timer2_isr
 	vector TIMER1=_timer1_isr
@@ -154,14 +129,14 @@
 	segment CODESEG
 
 /**************************************************************************
- * Name: _reset
+ * Name: _z16f_reset
  *
  * Description:
  *   Reset entry point
  *
  **************************************************************************/
 
-_reset:
+_z16f_reset:
 	/* Initialize the init/idle task stack */
 
 	ld	sp, #(_near_stack+1)	/* Set Stack Pointer to the top of internal RAM */
@@ -170,7 +145,7 @@ _reset:
 	/* Initialize onboard LEDs */
 
 #ifdef CONFIG_ARCH_LEDS
-	bl	_up_ledinit
+	call	_up_ledinit
 #endif
 	/* Perform VERY early UART initialization so that we can use it here */
 
@@ -187,41 +162,41 @@ _reset:
 
 	lea	r0, _low_nearbss
 	ld	r1, #_len_nearbss+1
-	jp	_reset2
-_reset1:
+	jp	_z16f_reset2
+_z16f_reset1:
 	ld.b	(r0++), #0
-_reset2:
-	djnz	r1, _reset1
+_z16f_reset2:
+	djnz	r1, _z16f_reset1
 
 	lea	r0, _low_farbss
 	ld	r1, #_len_farbss+1
-	jp	_reset4
-_reset3:
+	jp	_z16f_reset4
+_z16f_reset3:
 	ld.b	(r0++), #0
-_reset4:
-	djnz	r1, _reset3
+_z16f_reset4:
+	djnz	r1, _z16f_reset3
 
 	/* Copy ROM data into RAM */
 
 	lea	r0, _low_near_romdata
 	lea	r1, _low_neardata
 	ld	r2, #_len_neardata+1
-        jp      _reset6
-_reset5:
+        jp      _z16f_reset6
+_z16f_reset5:
         ld.b    r3, (r0++)
 	ld.b	(r1++), r3
-_reset6:
-        djnz    r2, _reset5
+_z16f_reset6:
+        djnz    r2, _z16f_reset5
 
        	lea	r0, _low_far_romdata
 	lea	r1, _low_fardata
 	ld	r2, #_len_fardata+1
-	jp	_reset8
-_reset7:
+	jp	_z16f_reset8
+_z16f_reset7:
 	ld.b	r3, (r0++)
 	ld.b	(r1++), r3
-_reset8:
-	djnz	r2, _reset7
+_z16f_reset8:
+	djnz	r2, _z16f_reset7
 
 	/* Perform low-level hardware initialization */
 
@@ -230,9 +205,52 @@ _reset8:
 	/* Start NuttX */
 
 	call	_os_start		/* Start the operating system */
-_halted:				/* _os_start() should not return */
+_halt1:					/* _os_start() should not return */
 	halt
-	jp	_halted
+	jp	_halt1
+
+/**************************************************************************
+ * Name: _sysexec_isr
+ *
+ * Description:
+ *   System exception interrupt handler.  On entry, the stack looks like
+ *   this:
+ *
+ *   TOS[0] = PC[31:24]
+ *   TOS[1] = PC[23:16]
+ *   TOS[2] = PC[15:8]
+ *   TOS[3] = PC[7:0]
+ *   TOS[4] = 0
+ *   TOS[5] = flags
+ *
+ **************************************************************************/
+
+_sysexc_isr:
+	pushmlo	<r0-r7>		/* Save r0-r7 on the stack */
+	
+	/* Calculate the value of the SP BEFORE the interrupt occurred and
+	 * push that as the saved value of r15=sp
+	 */
+
+	ld	r1, #-6		/* return(4) + flags(1) + padding(1) */
+	add	r1, sp		/* r1 = Value of the SP before the interrupt */
+	push	r1		/* Push r1 in the spot for the saved SP */
+
+	/* Save all of the remaining registers */
+
+	pushmhi	<r8-r14>
+
+	/* SP now holds the address of the beginning of the save structure
+	 * on the stack.  Now handle the system exception with arg1(r1)=address
+	 * of the register save structure.
+	 */
+
+	ld	r1, sp
+	call	_z16f_sysexec	/* Handle in C logic */
+
+_halt2:				/* _z16f_sysexec() should not return */
+	halt
+	jp	_halt2
 
 /**************************************************************************
  * Name: Interrupt handlers
@@ -250,11 +268,6 @@ _halted:				/* _os_start() should not return */
  *
  **************************************************************************/
 
-_sysexc_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_SYSEXC	/* r1 = SYSEXEC IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
-	
 _timer2_isr:
 	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
 	ld	r1, #Z16F_IRQ_TIMER0	/* r1 = Timer 2 IRQ number */

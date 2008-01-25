@@ -50,7 +50,6 @@
 	xdef	_z16f_lowuartinit
 	xref	_SYS_CLK_FREQ:EROM
 #ifdef CONFIG_ARCH_LOWPUTC
-	xdef	_z16f_xmitc
 	xdef	_up_lowputc
 #endif
 #ifdef CONFIG_ARCH_LOWGETC

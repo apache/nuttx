@@ -47,7 +47,9 @@
 # CONFIG_ARCH_BOARD - identifies the configs subdirectory and, hence,
 #   the board that supports the particular chip or SoC.
 # CONFIG_ARCH_BOARD_name - for use in C code
+# CONFIG_BOARD_LOOPSPERMSEC - for delay loops
 # CONFIG_DRAM_SIZE - Describes the installed DRAM.
+# CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to z16f.
 #
 CONFIG_ARCH=z16
 CONFIG_ARCH_Z16=y
@@ -59,8 +61,9 @@ CONFIG_ARCH_CHIP_Z16F3211=n
 CONFIG_ARCH_CHIP_Z16F6411=n
 CONFIG_ARCH_BOARD=z16f2800100zcog
 CONFIG_ARCH_BOARD_Z16F2800100ZCOG=y
+CONFIG_BOARD_LOOPSPERMSEC=1250
 CONFIG_DRAM_SIZE=65536
-
+CONFIG_ARCH_LEDS=y
 #
 # Z16F specific device driver settings
 #

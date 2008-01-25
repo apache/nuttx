@@ -49,42 +49,40 @@
  * Definitions
  ****************************************************************************/
 
-/* Interrupt Vectors */
+/* Interrupt Vectors (excluding reset and sysexec which are handled differently) */
 
-#define Z16F_IRQ_SYSEXC   ( 0) /* Vector: 0x08 System Exceptions */
+#define Z16F_IRQ_IRQ0     ( 0) /* First of 8 IRQs controlled by IRQ0 registers */
+#define Z16F_IRQ_ADC      ( 0) /*   Vector: 0x2C IRQ0.0 ADC */
+#define Z16F_IRQ_SPI      ( 1) /*   Vector: 0x28 IRQ0.1 SPI */
+#define Z16F_IRQ_I2C      ( 2) /*   Vector: 0x24 IRQ0.2 I2C */
+#define Z16F_IRQ_UART0TX  ( 3) /*   Vector: 0x20 IRQ0.3 UART0 TX */
+#define Z16F_IRQ_UART0RX  ( 4) /*   Vector: 0x1C IRQ0.4 UART0 RX */
+#define Z16F_IRQ_TIMER0   ( 5) /*   Vector: 0x18 IRQ0.5 Timer 0 */
+#define Z16F_IRQ_TIMER1   ( 6) /*   Vector: 0x14 IRQ0.6 Timer 1 */
+#define Z16F_IRQ_TIMER2   ( 7) /*   Vector: 0x10 IRQ0.7 Timer 2 */
 
-#define Z16F_IRQ_IRQ0     ( 1) /* First of 8 IRQs controlled by IRQ0 registers */
-#define Z16F_IRQ_ADC      ( 1) /*   Vector: 0x2C IRQ0.0 ADC */
-#define Z16F_IRQ_SPI      ( 2) /*   Vector: 0x28 IRQ0.1 SPI */
-#define Z16F_IRQ_I2C      ( 3) /*   Vector: 0x24 IRQ0.2 I2C */
-#define Z16F_IRQ_UART0TX  ( 4) /*   Vector: 0x20 IRQ0.3 UART0 TX */
-#define Z16F_IRQ_UART0RX  ( 5) /*   Vector: 0x1C IRQ0.4 UART0 RX */
-#define Z16F_IRQ_TIMER0   ( 6) /*   Vector: 0x18 IRQ0.5 Timer 0 */
-#define Z16F_IRQ_TIMER1   ( 7) /*   Vector: 0x14 IRQ0.6 Timer 1 */
-#define Z16F_IRQ_TIMER2   ( 8) /*   Vector: 0x10 IRQ0.7 Timer 2 */
+#define Z16F_IRQ_IRQ1     ( 8) /* First of 8 IRQs controlled by IRQ1 registers */
+#define Z16F_IRQ_P0AD     ( 8) /*   Vector: 0x4C IRQ1.0 Port A/D0, rising/falling edge */
+#define Z16F_IRQ_P1AD     ( 9) /*   Vector: 0x48 IRQ1.1 Port A/D1, rising/falling edge */
+#define Z16F_IRQ_P2AD     (10) /*   Vector: 0x44 IRQ1.2 Port A/D2, rising/falling edge */
+#define Z16F_IRQ_P3AD     (11) /*   Vector: 0x40 IRQ1.3 Port A/D3, rising/falling edge */
+#define Z16F_IRQ_P4AD     (12) /*   Vector: 0x3C IRQ1.4 Port A/D4, rising/falling edge */
+#define Z16F_IRQ_P5AD     (13) /*   Vector: 0x38 IRQ1.5 Port A/D5, rising/falling edge */
+#define Z16F_IRQ_P6AD     (14) /*   Vector: 0x34 IRQ1.6 Port A/D6, rising/falling edge */
+#define Z16F_IRQ_P7AD     (15) /*   Vector: 0x30 IRQ1.7 Port A/D7, rising/falling edge */
 
-#define Z16F_IRQ_IRQ1     ( 9) /* First of 8 IRQs controlled by IRQ1 registers */
-#define Z16F_IRQ_P0AD     ( 9) /*   Vector: 0x4C IRQ1.0 Port A/D0, rising/falling edge */
-#define Z16F_IRQ_P1AD     (10) /*   Vector: 0x48 IRQ1.1 Port A/D1, rising/falling edge */
-#define Z16F_IRQ_P2AD     (11) /*   Vector: 0x44 IRQ1.2 Port A/D2, rising/falling edge */
-#define Z16F_IRQ_P3AD     (12) /*   Vector: 0x40 IRQ1.3 Port A/D3, rising/falling edge */
-#define Z16F_IRQ_P4AD     (13) /*   Vector: 0x3C IRQ1.4 Port A/D4, rising/falling edge */
-#define Z16F_IRQ_P5AD     (14) /*   Vector: 0x38 IRQ1.5 Port A/D5, rising/falling edge */
-#define Z16F_IRQ_P6AD     (15) /*   Vector: 0x34 IRQ1.6 Port A/D6, rising/falling edge */
-#define Z16F_IRQ_P7AD     (16) /*   Vector: 0x30 IRQ1.7 Port A/D7, rising/falling edge */
-
-#define Z16F_IRQ_IRQ2     (17) /* First of 8 IRQs controlled by IRQ2 registers */
-#define Z16F_IRQ_C0       (17) /*   Vector: IRQ2.0 0x6C Port C0, both edges DMA0 */
-#define Z16F_IRQ_C1       (18) /*   Vector: IRQ2.1 0x68 Port C1, both edges DMA1 */
-#define Z16F_IRQ_C2       (19) /*   Vector: IRQ2.2 0x64 Port C2, both edges DMA2 */
-#define Z16F_IRQ_C3       (20) /*   Vector: IRQ2.3 0x60 Port C3, both edges DMA3 */
-#define Z16F_IRQ_PWMFAULT (21) /*   Vector: IRQ2.4 0x5C PWM Fault */
-#define Z16F_IRQ_UART1TX  (22) /*   Vector: IRQ2.5 0x58 UART1 TX */
-#define Z16F_IRQ_UART1RX  (23) /*   Vector: IRQ2.6 0x54 UART1 RX */
-#define Z16F_IRQ_PWMTIMER (24) /*   Vector: IRQ2.7 0x50 PWM Timer */
+#define Z16F_IRQ_IRQ2     (16) /* First of 8 IRQs controlled by IRQ2 registers */
+#define Z16F_IRQ_C0       (16) /*   Vector: IRQ2.0 0x6C Port C0, both edges DMA0 */
+#define Z16F_IRQ_C1       (17) /*   Vector: IRQ2.1 0x68 Port C1, both edges DMA1 */
+#define Z16F_IRQ_C2       (18) /*   Vector: IRQ2.2 0x64 Port C2, both edges DMA2 */
+#define Z16F_IRQ_C3       (19) /*   Vector: IRQ2.3 0x60 Port C3, both edges DMA3 */
+#define Z16F_IRQ_PWMFAULT (20) /*   Vector: IRQ2.4 0x5C PWM Fault */
+#define Z16F_IRQ_UART1TX  (21) /*   Vector: IRQ2.5 0x58 UART1 TX */
+#define Z16F_IRQ_UART1RX  (22) /*   Vector: IRQ2.6 0x54 UART1 RX */
+#define Z16F_IRQ_PWMTIMER (23) /*   Vector: IRQ2.7 0x50 PWM Timer */
 
 #define Z16F_IRQ_SYSTIMER  Z16F_IRQ_TIMER0
-#define NR_IRQS           (25)
+#define NR_IRQS           (24)
 
 /* These macros will map an IRQ to a register bit position */
 

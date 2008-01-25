@@ -45,6 +45,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
+#include <arch/board/board.h>
 
 #include "chip/chip.h"
 #include "up_internal.h"
