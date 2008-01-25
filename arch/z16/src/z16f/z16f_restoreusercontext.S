@@ -88,7 +88,7 @@ _up_restoreusercontext:
 	/* Test if interrupts should be enabled upon return */
 
 	ld.w	r2, 2*REG_FLAGS(r1)			/* r2=padded flags value */
-	tm	r2, #(Z16F_CNTRL_FLAGS_IRQE << 8)	/* Test (shifted) IRQE bit */
+	tm	r2, #Z16F_CNTRL_FLAGS_IRQE		/* Test IRQE bit */
 	jp	z, _up_returndisabled			/* Jump if interrupts should remain disabled */
 
 	/* Return with interrupts enabled */

@@ -270,12 +270,12 @@ _halt2:				/* _z16f_sysexec() should not return */
 
 _timer2_isr:
 	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_TIMER0	/* r1 = Timer 2 IRQ number */
+	ld	r1, #Z16F_IRQ_TIMER2	/* r1 = Timer 2 IRQ number */
 	jp	_common_isr		/* Join common interrupt handling logic */
 
 _timer1_isr:
 	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_TIMER0	/* r1 = Timer 1 IRQ number */
+	ld	r1, #Z16F_IRQ_TIMER1	/* r1 = Timer 1 IRQ number */
 	jp	_common_isr		/* Join common interrupt handling logic */
 
 _timer0_isr:
@@ -397,7 +397,7 @@ _c0_isr:
  *
  *   On entry:
  *
- *   r0 = IRQ number
+ *   r1 = IRQ number
  *
  *   And the stack contains the following:
  *
@@ -409,8 +409,8 @@ _c0_isr:
  *   TOS[20-23] = r5
  *   TOS[24-27] = r6
  *   TOS[28-31] = r7
- *   TOS[32-33] = return PC
- *   TOS[34-35] = flags (with padding)
+ *   TOS[32-35] = return PC
+ *   TOS[36-37] = flags (with padding)
  *
  **************************************************************************/
 
@@ -419,9 +419,9 @@ _common_isr:
 	 * push that as the saved value of r15=sp
 	 */
 
-	ld	r1, #-36	/* See stack accounting above */
-	add	r1, sp		/* r1 = Value of the SP before the interrupt */
-	push	r1		/* Push r1 in the spot for the saved SP */
+	ld	r2, #(9*4+2)	/* See stack accounting above */
+	add	r2, sp		/* r1 = Value of the SP before the interrupt */
+	push	r2		/* Push r1 in the spot for the saved SP */
 
 	/* Save all of the remaining registers */
 
@@ -439,16 +439,34 @@ _common_isr:
 	 * to use to return from the interrupt in r0.  This may or may not be the
 	 * same value as sp.
 	 */
+	 
+	cp	r0, sp			/* Check if we are performing a context switch */
+	jp	nz, _common_switch	/* Jump if yes, else use faster return */
+	popmhi	<r8-r14>		/* Restore r8-r14 */
+	add	sp, #4			/* Skip over restore of r15=sp */
+	popmlo	<r0-r7>			/* Restore r0-r7 */
+	iret
 
+	/* We are not returning to the same thread that was interrupted.  In this case,
+	 * r0 is not in the stack but, instead, refers to a storage structure in the TCB
+	 */
+
+_common_switch:
 	ld	sp, 2*REG_SP(r0)	/* sp=Value of SP on return from interrupt */
 	ld.w	r1, 2*REG_FLAGS(r0)	/* r1=padded flags value */
 	push.w	r1			/* Push padded flags value onto the stack */
 	ld	r1, 2*REG_PC(r0)	/* r1=return address */
 	push	r1			/* Push the return address onto the stack */
+	ld	r7, 2*REG_R7(r0)	/* Recover saved r7 */
+	push	r7			/* And save on the stack so that we can use r7 */
+	ld	r7, sp			/* r7=saved sp */
 
-	ld	sp, r0			/* sp=Value of SP at call to _up_doirq */
+	ld	sp, r0			/* sp=Pointer to register save structure */
 	popmhi	<r8-r14>		/* Restore r8-r14 */
-	popmlo	<r0-r7>			/* Restore r0-r7 */
+	add	sp, #4			/* Skip over restore of r15=sp */
+	popmlo	<r0-r6>			/* Restore r0-r6 */
+	ld	sp, r7			/* Switch back to the correct stack */
+	pop	r7			/* Recover r7 from the stack */
 	iret				/* Return from interrupt */
 
 	end

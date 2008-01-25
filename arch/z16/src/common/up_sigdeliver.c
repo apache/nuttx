@@ -118,7 +118,7 @@ void up_sigdeliver(void)
 
   /* Then restore the task interrupt state. */
 
-  if ((reg[REG_FLAGS] & (Z16F_CNTRL_FLAGS_IRQE << 8)) != 0)
+  if ((reg[REG_FLAGS] & Z16F_CNTRL_FLAGS_IRQE) != 0)
     {
        EI();
     }

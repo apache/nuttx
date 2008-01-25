@@ -66,7 +66,7 @@
  * interrupt processing.
  */
 
-chipreg_t *current_regs;
+FAR chipreg_t *current_regs;
 
 /****************************************************************************
  * Private Types
