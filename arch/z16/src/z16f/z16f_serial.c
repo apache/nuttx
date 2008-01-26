@@ -649,30 +649,27 @@ int up_putc(int ch)
  ****************************************************************************/
 
 #ifdef CONFIG_UART1_SERIAL_CONSOLE
-#  define z16f_contrde() \
-   do { \
-     int tmp; \
-     for (tmp = 1000 ; tmp > 0 ; tmp--) \
-         if ((getreg8(Z16F_UART1_STAT0) & Z16F_UARTSTAT0_TDRE) != 0) \
-             break; \
-   } while (0)
+# define z16f_contrde() \
+  ((getreg8(Z16F_UART1_STAT0) & Z16F_UARTSTAT0_TDRE) != 0)
 # define z16f_contxd(ch) \
-  putreg8((ubyte)(ch), Z16F_UART1_STAT0)
+  putreg8((ubyte)(ch), Z16F_UART1_TXD)
 #else
-#  define z16f_contrde() \
-   do { \
-     int tmp; \
-     for (tmp = 1000 ; tmp > 0 ; tmp--) \
-         if ((getreg8(Z16F_UART0_STAT0) & Z16F_UARTSTAT0_TDRE) != 0) \
-             break; \
-   } while (0)
+# define z16f_contrde() \
+  ((getreg8(Z16F_UART0_STAT0) & Z16F_UARTSTAT0_TDRE) != 0)
 # define z16f_contxd(ch) \
-  putreg8((ubyte)(ch), Z16F_UART0_STAT0)
+  putreg8((ubyte)(ch), Z16F_UART0_TXD)
 #endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static void _up_putc(int ch)
+{
+  int tmp;
+  for (tmp = 1000 ; tmp > 0 && !z16f_contrde(); tmp--);
+  z16f_contxd(ch);
+}
 
 /****************************************************************************
  * Public Functions
@@ -680,8 +677,7 @@ int up_putc(int ch)
 
 int up_putc(int ch)
 {
-  z16f_contrde();
-  z16f_contxd(ch);
+  _up_putc(ch);
 
   /* Check for LF */
 
@@ -689,8 +685,7 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      z16f_contrde();
-      z16f_contxd('\r');
+      _up_putc('\r');
     }
 
   return ch;

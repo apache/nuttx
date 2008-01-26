@@ -86,7 +86,7 @@ int lldbg(const char *format, ...)
   va_end(ap);
   return ret;
 }
-# endif
+#endif
 
 #ifdef CONFIG_DEBUG_VERBOSE
 int vdbg(const char *format, ...)

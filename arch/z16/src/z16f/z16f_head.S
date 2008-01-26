@@ -149,7 +149,7 @@ _z16f_reset:
 #endif
 	/* Perform VERY early UART initialization so that we can use it here */
 
-#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
+#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC) || CONFIG_NFILE_DESCRIPTORS == 0
 	call	_z16f_lowuartinit	/* Initialize the UART for debugging */
 #endif
 	/* Initialize the hardware stack overflow register */
