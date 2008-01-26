@@ -95,7 +95,7 @@ _z16f_lowuartinit:
 	sll	r3, #4			/* r3 = baud * 16 */
 	udiv	r0, r3			/* BRG = (freq + baud * 8)/(baud * 16) */
 
-#ifdef CONFIG_UART0_SERIAL_CONSOLE
+#ifdef CONFIG_UART1_SERIAL_CONSOLE
 	ld.w	Z16F_UART1_BR, r0	/* Z16F_UART1_BR = BRG */
 
 	/* Set the GPIO Alternate Function Register Lo (AFL) register */
