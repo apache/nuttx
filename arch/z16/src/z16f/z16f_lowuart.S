@@ -41,7 +41,7 @@
 #include <nuttx/config.h>
 #include "chip/chip.h"
 
-#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
+#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC) || CONFIG_NFILE_DESCRIPTORS == 0
 
 /*************************************************************************
  * External References / External Definitions
@@ -96,19 +96,6 @@ _z16f_lowuartinit:
 	udiv	r0, r3			/* BRG = (freq + baud * 8)/(baud * 16) */
 
 #ifdef CONFIG_UART0_SERIAL_CONSOLE
-	ld.w	Z16F_UART0_BR, r0	/* Z16F_UART0_BR = BRG */
-
-	/* Set the GPIO Alternate Function Register Lo (AFL) register */
-
-	ld	r0, #%30
-	or.b	Z16F_GPIOA_AFL, r0	/* Z16F_GPIOA_AFL |= %30 */
-
-	/* Enable UART receive (REN) and transmit (TEN) */
-
-	clr.b	Z16F_UART0_CTL1 	/* Z16F_UART0_CTL1 = 0 */
-	ld	r0, #(Z16F_UARTCTL0_TEN|Z16F_UARTCTL0_REN)
-	ld.b	Z16F_UART0_CTL0, r0	/* Z16F_UART0_CTL0 = %c0 */
-#else
 	ld.w	Z16F_UART1_BR, r0	/* Z16F_UART1_BR = BRG */
 
 	/* Set the GPIO Alternate Function Register Lo (AFL) register */
@@ -121,6 +108,19 @@ _z16f_lowuartinit:
 	clr.b	Z16F_UART1_CTL1 	/* Z16F_UART1_CTL1 = 0 */
 	ld	r0, #(Z16F_UARTCTL0_TEN|Z16F_UARTCTL0_REN)
 	ld.b	Z16F_UART1_CTL0, r0	/* Z16F_UART1_CTL0 = %c0 */
+#else
+	ld.w	Z16F_UART0_BR, r0	/* Z16F_UART0_BR = BRG */
+
+	/* Set the GPIO Alternate Function Register Lo (AFL) register */
+
+	ld	r0, #%30
+	or.b	Z16F_GPIOA_AFL, r0	/* Z16F_GPIOA_AFL |= %30 */
+
+	/* Enable UART receive (REN) and transmit (TEN) */
+
+	clr.b	Z16F_UART0_CTL1 	/* Z16F_UART0_CTL1 = 0 */
+	ld	r0, #(Z16F_UARTCTL0_TEN|Z16F_UARTCTL0_REN)
+	ld.b	Z16F_UART0_CTL0, r0	/* Z16F_UART0_CTL0 = %c0 */
 #endif
 	popmlo	<r0, r3>		/* Restore registers */
 	ret				/* Return */
