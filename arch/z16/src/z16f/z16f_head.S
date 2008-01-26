@@ -45,6 +45,7 @@
  * External References / External Definitions
  **************************************************************************/
 
+	xref	_z16f_clkinit:EROM
 	xref	_z16f_lowinit:EROM
 #ifdef CONFIG_ARCH_LEDS
 	xref	_up_ledinit:EROM
@@ -141,6 +142,10 @@ _z16f_reset:
 
 	ld	sp, #(_near_stack+1)	/* Set Stack Pointer to the top of internal RAM */
 	clr	fp
+
+	/* Initialize clocking */
+
+	call	_z16f_clkinit
 
 	/* Initialize onboard LEDs */
 
