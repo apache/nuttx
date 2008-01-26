@@ -51,13 +51,15 @@
 
 #define uart_setup(dev)          dev->ops->setup(dev)
 #define uart_shutdown(dev)       dev->ops->shutdown(dev)
+#define uart_attach(dev)         dev->ops->attach(dev)
+#define uart_detach(dev)         dev->ops->detach(dev)
 #define uart_enabletxint(dev)    dev->ops->txint(dev, TRUE)
 #define uart_disabletxint(dev)   dev->ops->txint(dev, FALSE)
 #define uart_enablerxint(dev)    dev->ops->rxint(dev, TRUE)
 #define uart_disablerxint(dev)   dev->ops->rxint(dev, FALSE)
-#define uart_rxfifonotempty(dev) dev->ops->rxfifonotempty(dev)
-#define uart_txfifonotfull(dev)  dev->ops->txfifonotfull(dev)
-#define uart_txfifoempty(dev)    dev->ops->txfifoempty(dev)
+#define uart_rxavailable(dev)    dev->ops->rxavailable(dev)
+#define uart_txready(dev)        dev->ops->txready(dev)
+#define uart_txempty(dev)        dev->ops->txempty(dev)
 #define uart_send(dev,ch)        dev->ops->send(dev,ch)
 #define uart_receive(dev,s)      dev->ops->receive(dev,s)
 
@@ -88,23 +90,40 @@ struct uart_dev_s;
 struct uart_ops_s
 {
   /* Configure the UART baud, bits, parity, fifos, etc. This method is called
-   * the first time that the serial port is opened.
+   * the first time that the serial port is opened.  For the serial console,
+   * this will occur very early in initialization; for other serial ports this
+   * will occur when the port is first opened.  This setup does not include
+   * attaching or enabling interrupts.  That portion of the UART setup is
+   * performed when the attach() method is called.
    */
 
   int (*setup)(struct uart_dev_s *dev);
 
-  /* Disable the UART.  This method is called when the serial port is closed */
+  /* Disable the UART.  This method is called when the serial port is closed.
+   * This method reverses the operation the setup method.  NOTE that the serial
+   * console is never shutdown.
+   */
 
   void (*shutdown)(struct uart_dev_s *dev);
 
-  /* This is the UART interrupt handler.  It will be invoked when an interrupt
-   * received on the 'irq'  It should call uart_transmitchars or uart_receivechar
-   * to perform the appropriate data transfers.  The interrupt handling logic\
-   * must be able to map the 'irq' number into the approprite uart_dev_s
-   * structure in order to call these functions.
+  /* Configure the UART to operation in interrupt driven mode.  This method is
+   * called when the serial port is opened.  Normally, this is just after the
+   * the setup() method is called, however, the serial console may operate in
+   * a non-interrupt driven mode during the boot phase.
+   *
+   * RX and TX interrupts are not enabled when by the attach method (unless the
+   * hardware supports multiple levels of interrupt enabling).  The RX and TX
+   * interrupts are not enabled until the txint() and rxint() methods are called.
    */
 
-  int (*handler)(int irq, void *context);
+  int (*attach)(struct uart_dev_s *dev);
+
+  /* Detach UART interrupts.  This method is called when the serial port is
+   * closed normally just before the shutdown method is called.  The exception is
+   * the serial console which is never shutdown.
+   */
+
+  void (*detach)(struct uart_dev_s *dev);
 
   /* All ioctl calls will be routed through this method */
 
@@ -121,9 +140,9 @@ struct uart_ops_s
 
   void (*rxint)(struct uart_dev_s *dev, boolean enable);
 
-  /* Return TRUE if the receive fifo is not empty */
+  /* Return TRUE if the receive data is available */
 
-  boolean (*rxfifonotempty)(struct uart_dev_s *dev);
+  boolean (*rxavailable)(struct uart_dev_s *dev);
 
   /* This method will send one byte on the UART */
 
@@ -133,18 +152,19 @@ struct uart_ops_s
 
   void (*txint)(struct uart_dev_s *dev, boolean enable);
 
-  /* Return TRUE if the tranmsit fifo is not full.  This is used to
-   * determine if *send can be called.
+  /* Return TRUE if the tranmsit hardware is ready to send another byte.  This
+   * is used to determine if send() method can be called.
    */
 
-  boolean (*txfifonotfull)(struct uart_dev_s *dev);
+  boolean (*txready)(struct uart_dev_s *dev);
 
-  /* Return TRUE if the transmit fifo is empty.  This is used when the
-   * driver needs to make sure that all characters are "drained" from
-   * the TX fifo.
+  /* Return TRUE if all characters have been sent.  If for example, the UART
+   * hardware implements FIFOs, then this would mean the the transmit FIFO is
+   * empty.  This method is called when the driver needs to make sure that
+   * all characters are "drained" from the TX hardware.
    */
 
-  boolean (*txfifoempty)(struct uart_dev_s *dev);
+  boolean (*txempty)(struct uart_dev_s *dev);
 };
 
 /* This is the device structure used by the driver.  The caller of
@@ -161,8 +181,6 @@ struct uart_dev_s
 {
   int       open_count;			/* The number of times
 					* the device has been opened */
-  ubyte     irq;			/* IRQ associated with
-					 * this UART */
   boolean   xmitwaiting;		/* TRUE: User is waiting
 					 * for space in xmit.buffer */
   boolean   recvwaiting;		/* TRUE: User is waiting
@@ -225,7 +243,7 @@ EXTERN void uart_xmitchars(uart_dev_t *dev);
  *
  * Description:
  *   This function is called from the UART interrupt handler when an interrupt
- *   is received indicating that are bytes available in the receive fifo.  This
+ *   is received indicating that are bytes available to be received.  This
  *   function will add chars to head of receive buffer.  Driver read() logic will take
  *   characters from the tail of the buffer.
  *

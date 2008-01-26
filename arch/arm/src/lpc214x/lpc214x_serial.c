@@ -1,7 +1,7 @@
 /****************************************************************************
  * lpc214x/lpc214x_serial.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -82,15 +82,17 @@ struct up_dev_s
 
 static int     up_setup(struct uart_dev_s *dev);
 static void    up_shutdown(struct uart_dev_s *dev);
+static int     up_attach(struct uart_dev_s *dev);
+static void    up_detach(struct uart_dev_s *dev);
 static int     up_interrupt(int irq, void *context);
 static int     up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int     up_receive(struct uart_dev_s *dev, uint32 *status);
 static void    up_rxint(struct uart_dev_s *dev, boolean enable);
-static boolean up_rxfifonotempty(struct uart_dev_s *dev);
+static boolean up_rxavailable(struct uart_dev_s *dev);
 static void    up_send(struct uart_dev_s *dev, int ch);
 static void    up_txint(struct uart_dev_s *dev, boolean enable);
-static boolean up_txfifonotfull(struct uart_dev_s *dev);
-static boolean up_txfifoempty(struct uart_dev_s *dev);
+static boolean up_txready(struct uart_dev_s *dev);
+static boolean up_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Variables
@@ -100,15 +102,16 @@ struct uart_ops_s g_uart_ops =
 {
   .setup          = up_setup,
   .shutdown       = up_shutdown,
-  .handler        = up_interrupt,
+  .attach         = up_attach,
+  .detach         = up_detach,
   .ioctl          = up_ioctl,
   .receive        = up_receive,
   .rxint          = up_rxint,
-  .rxfifonotempty = up_rxfifonotempty,
+  .rxavailable    = up_rxavailable,
   .send           = up_send,
   .txint          = up_txint,
-  .txfifonotfull  = up_txfifonotfull,
-  .txfifoempty    = up_txfifoempty,
+  .txready        = up_txready,
+  .txempty    = up_txempty,
 };
 
 /* I/O buffers */
@@ -124,6 +127,7 @@ static struct up_dev_s g_uart0priv =
 {
   .uartbase       = LPC214X_UART0_BASE,
   .baud           = CONFIG_UART0_BAUD,
+  .irq            = LPC214X_UART0_IRQ,
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
   .stopbits2      = CONFIG_UART0_2STOP,
@@ -131,7 +135,6 @@ static struct up_dev_s g_uart0priv =
 
 static uart_dev_t g_uart0port =
 {
-  .irq      = LPC214X_UART0_IRQ,
   .recv     =
   {
     .size   = CONFIG_UART0_RXBUFSIZE,
@@ -152,6 +155,7 @@ static struct up_dev_s g_uart1priv =
 {
   .uartbase       = LPC214X_UART1_BASE,
   .baud           = CONFIG_UART1_BAUD,
+  .irq            = LPC214X_UART1_IRQ,
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
   .stopbits2      = CONFIG_UART1_2STOP,
@@ -159,7 +163,6 @@ static struct up_dev_s g_uart1priv =
 
 static uart_dev_t g_uart1port =
 {
-  .irq      = LPC214X_UART1_IRQ,
   .recv     =
   {
     .size   = CONFIG_UART1_RXBUFSIZE,
@@ -234,10 +237,10 @@ static inline void up_restoreuartint(struct up_dev_s *priv, ubyte ier)
 }
 
 /****************************************************************************
- * Name: up_waittxfifonotfull
+ * Name: up_waittxready
  ****************************************************************************/
 
-static inline void up_waittxfifonotfull(struct up_dev_s *priv)
+static inline void up_waittxready(struct up_dev_s *priv)
 {
   int tmp;
 
@@ -360,6 +363,57 @@ static void up_shutdown(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: up_attach
+ *
+ * Description:
+ *   Configure the UART to operation in interrupt driven mode.  This method is
+ *   called when the serial port is opened.  Normally, this is just after the
+ *   the setup() method is called, however, the serial console may operate in
+ *   a non-interrupt driven mode during the boot phase.
+ *
+ *   RX and TX interrupts are not enabled when by the attach method (unless the
+ *   hardware supports multiple levels of interrupt enabling).  The RX and TX
+ *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *
+ ****************************************************************************/
+
+static int up_attach(struct uart_dev_s *dev)
+{
+  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  int ret;
+
+  /* Attach and enable the IRQ */
+
+  ret = irq_attach(priv->irq, up_interrupt);
+  if (ret == OK)
+    {
+       /* Enable the interrupt (RX and TX interrupts are still disabled
+        * in the UART
+        */
+
+       up_enable_irq(priv->irq);
+    }
+  return ret;
+}
+
+/****************************************************************************
+ * Name: up_detach
+ *
+ * Description:
+ *   Detach UART interrupts.  This method is called when the serial port is
+ *   closed normally just before the shutdown method is called.  The exception is
+ *   the serial console which is never shutdown.
+ *
+ ****************************************************************************/
+
+static void up_detach(struct uart_dev_s *dev)
+{
+  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  up_disable_irq(priv->irq);
+  irq_detach(priv->irq);
+}
+
+/****************************************************************************
  * Name: up_interrupt
  *
  * Description:
@@ -379,11 +433,11 @@ static int up_interrupt(int irq, void *context)
   ubyte              status;
   int                passes;
 
-  if (g_uart1port.irq == irq)
+  if (g_uart1priv.irq == irq)
     {
       dev = &g_uart1port;
     }
-  else if (g_uart0port.irq == irq)
+  else if (g_uart0priv.irq == irq)
     {
       dev = &g_uart0port;
     }
@@ -548,14 +602,14 @@ static void up_rxint(struct uart_dev_s *dev, boolean enable)
 }
 
 /****************************************************************************
- * Name: up_rxfifonotempty
+ * Name: up_rxavailable
  *
  * Description:
  *   Return TRUE if the receive fifo is not empty
  *
  ****************************************************************************/
 
-static boolean up_rxfifonotempty(struct uart_dev_s *dev)
+static boolean up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   return ((up_serialin(priv, LPC214X_UART_LSR_OFFSET) & LPC214X_LSR_RDR) != 0);
@@ -600,28 +654,28 @@ static void up_txint(struct uart_dev_s *dev, boolean enable)
 }
 
 /****************************************************************************
- * Name: up_txfifonotfull
+ * Name: up_txready
  *
  * Description:
  *   Return TRUE if the tranmsit fifo is not full
  *
  ****************************************************************************/
 
-static boolean up_txfifonotfull(struct uart_dev_s *dev)
+static boolean up_txready(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   return ((up_serialin(priv, LPC214X_UART_LSR_OFFSET) & LPC214X_LSR_THRE) != 0);
 }
 
 /****************************************************************************
- * Name: up_txfifoempty
+ * Name: up_txempty
  *
  * Description:
  *   Return TRUE if the transmit fifo is empty
  *
  ****************************************************************************/
 
-static boolean up_txfifoempty(struct uart_dev_s *dev)
+static boolean up_txempty(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   return ((up_serialin(priv, LPC214X_UART_LSR_OFFSET) & LPC214X_LSR_THRE) != 0);
@@ -692,7 +746,7 @@ int up_putc(int ch)
   ubyte  ier;
 
   up_disableuartint(priv, &ier);
-  up_waittxfifonotfull(priv);
+  up_waittxready(priv);
   up_serialout(priv, LPC214X_UART_THR_OFFSET, (ubyte)ch);
 
   /* Check for LF */
@@ -701,11 +755,11 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_waittxfifonotfull(priv);
+      up_waittxready(priv);
       up_serialout(priv, LPC214X_UART_THR_OFFSET, '\r');
     }
 
-  up_waittxfifonotfull(priv);
+  up_waittxready(priv);
   up_restoreuartint(priv, ier);
   return ch;
 }

@@ -70,15 +70,16 @@
 
 static int     up_setup(struct uart_dev_s *dev);
 static void    up_shutdown(struct uart_dev_s *dev);
-static int     up_interrupt(int irq, void *context);
+static int     up_attach(struct uart_dev_s *dev);
+static void    up_detach(struct uart_dev_s *dev);
 static int     up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int     up_receive(struct uart_dev_s *dev, uint32 *status);
 static void    up_rxint(struct uart_dev_s *dev, boolean enable);
-static boolean up_rxfifonotempty(struct uart_dev_s *dev);
+static boolean up_rxavailable(struct uart_dev_s *dev);
 static void    up_send(struct uart_dev_s *dev, int ch);
 static void    up_txint(struct uart_dev_s *dev, boolean enable);
-static boolean up_txfifonotfull(struct uart_dev_s *dev);
-static boolean up_txfifoempty(struct uart_dev_s *dev);
+static boolean up_txready(struct uart_dev_s *dev);
+static boolean up_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Variables
@@ -88,15 +89,16 @@ struct uart_ops_s g_uart_ops =
 {
   up_setup,                 /* setup */
   up_shutdown,              /* shutdown */
-  up_interrupt,             /* handler */
+  up_attach,                /* attach */
+  up_detach,                /* detach */
   up_ioctl,                 /* ioctl */
   up_receive,               /* receive */
   up_rxint,                 /* rxint */
-  up_rxfifonotempty,        /* rxfifonotempty */
+  up_rxavailable,           /* rxavailable */
   up_send,                  /* send */
   up_txint,                 /* txint */
-  up_txfifonotfull,         /* txfifonotfull */
-  up_txfifoempty,           /* txfifoempty */
+  up_txready,               /* txready */
+  up_txempty,               /* txempty */
 };
 
 /* I/O buffers */
@@ -109,7 +111,6 @@ static char g_uarttxbuffer[CONFIG_UART_TXBUFSIZE];
 static uart_dev_t g_uartport =
 {
   0,                        /* open_count */
-  0,                        /* irq */
   FALSE,                    /* xmitwaiting */
   FALSE,                    /* recvwaiting */
   TRUE,                     /* isconsole */
@@ -167,21 +168,37 @@ static void up_shutdown(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: up_interrupt
+ * Name: up_attach
  *
  * Description:
- *   This is the UART interrupt handler.  It will be invoked
- *   when an interrupt received on the 'irq'  It should call
- *   uart_transmitchars or uart_receivechar to perform the
- *   appropriate data transfers.  The interrupt handling logic\
- *   must be able to map the 'irq' number into the approprite
- *   uart_dev_s structure in order to call these functions.
+ *   Configure the UART to operation in interrupt driven mode.  This method is
+ *   called when the serial port is opened.  Normally, this is just after the
+ *   the setup() method is called, however, the serial console may operate in
+ *   a non-interrupt driven mode during the boot phase.
+ *
+ *   RX and TX interrupts are not enabled when by the attach method (unless the
+ *   hardware supports multiple levels of interrupt enabling).  The RX and TX
+ *   interrupts are not enabled until the txint() and rxint() methods are called.
  *
  ****************************************************************************/
 
-static int up_interrupt(int irq, void *context)
+static int up_attach(struct uart_dev_s *dev)
 {
   return OK;
+}
+
+/****************************************************************************
+ * Name: up_detach
+ *
+ * Description:
+ *   Detach UART interrupts.  This method is called when the serial port is
+ *   closed normally just before the shutdown method is called.  The exception is
+ *   the serial console which is never shutdown.
+ *
+ ****************************************************************************/
+
+static void up_detach(struct uart_dev_s *dev)
+{
 }
 
 /****************************************************************************
@@ -228,14 +245,14 @@ static void up_rxint(struct uart_dev_s *dev, boolean enable)
 }
 
 /****************************************************************************
- * Name: up_rxfifonotempty
+ * Name: up_rxavailable
  *
  * Description:
  *   Return TRUE if the receive fifo is not empty
  *
  ****************************************************************************/
 
-static boolean up_rxfifonotempty(struct uart_dev_s *dev)
+static boolean up_rxavailable(struct uart_dev_s *dev)
 {
   return TRUE;
 }
@@ -266,27 +283,27 @@ static void up_txint(struct uart_dev_s *dev, boolean enable)
 }
 
 /****************************************************************************
- * Name: up_txfifonotfull
+ * Name: up_txready
  *
  * Description:
  *   Return TRUE if the tranmsit fifo is not full
  *
  ****************************************************************************/
 
-static boolean up_txfifonotfull(struct uart_dev_s *dev)
+static boolean up_txready(struct uart_dev_s *dev)
 {
   return TRUE;
 }
 
 /****************************************************************************
- * Name: up_txfifoempty
+ * Name: up_txempty
  *
  * Description:
  *   Return TRUE if the transmit fifo is empty
  *
  ****************************************************************************/
 
-static boolean up_txfifoempty(struct uart_dev_s *dev)
+static boolean up_txempty(struct uart_dev_s *dev)
 {
   return TRUE;
 }

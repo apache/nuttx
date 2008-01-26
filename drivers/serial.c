@@ -349,17 +349,19 @@ static int uart_close(struct file *filep)
 
   /* And wait for the TX fifo to drain */
 
-  while (!uart_txfifoempty(dev))
+  while (!uart_txempty(dev))
     {
       usleep(500*1000);
     }
 
   /* Free the IRQ and disable the UART */
 
-  flags = irqsave(); /* Disable interrupts */
-  up_disable_irq(dev->irq);
-  irq_detach(dev->irq);
-  uart_shutdown(dev);
+  flags = irqsave();       /* Disable interrupts */
+  uart_detach(dev);        /* Detach interrupts */
+  if (!dev->isconsole)     /* Check for the serial console UART */
+    {
+      uart_shutdown(dev);  /* Disable the UART */
+    }
   irqrestore(flags);
 
   uart_givesem(&dev->closesem);
@@ -380,9 +382,7 @@ static int uart_open(struct file *filep)
   uart_dev_t     *dev   = inode->i_private;
   int           ret   = OK;
 
-  /* If the port is the middle of closing, wait until the close
-   * is finished
-   */
+  /* If the port is the middle of closing, wait until the close is finished */
 
   uart_takesem(&dev->closesem);
 
@@ -392,22 +392,18 @@ static int uart_open(struct file *filep)
     {
       irqstate_t flags = irqsave();
 
-      /* If this is the console, then the UART has already
-       * been initialized.
-       */
+      /* If this is the console, then the UART has already been initialized. */
 
       if (!dev->isconsole)
         {
           uart_setup(dev);
         }
 
-      /* But, in any event, we do have to configure for
-       * interrupt driven mode of operation.
+      /* In any event, we do have to configure for interrupt driven mode of
+       * operation.  Attach the hardware IRQ(s)
        */
 
-      /* Attache and enabled the IRQ */
-
-      ret = irq_attach(dev->irq, dev->ops->handler);
+      ret = uart_attach(dev);
       if (ret == OK)
         {
           /* Mark the io buffers empty */
@@ -417,9 +413,8 @@ static int uart_open(struct file *filep)
           dev->recv.head = 0;
           dev->recv.tail = 0;
 
-          /* Finally, enable interrupts */
+          /* Finally, enable the RX interrupt */
 
-          up_enable_irq(dev->irq);
           uart_enablerxint(dev);
         }
       irqrestore(flags);
@@ -468,7 +463,7 @@ void uart_xmitchars(uart_dev_t *dev)
 {
   /* Send while we still have data & room in the fifo */
 
-  while (dev->xmit.head != dev->xmit.tail && uart_txfifonotfull(dev))
+  while (dev->xmit.head != dev->xmit.tail && uart_txready(dev))
     {
       uart_send(dev, dev->xmit.buffer[dev->xmit.tail]);
 
@@ -515,7 +510,7 @@ void uart_recvchars(uart_dev_t *dev)
       nexthead = 0;
     }
 
-  while (nexthead != dev->recv.tail && uart_rxfifonotempty(dev))
+  while (nexthead != dev->recv.tail && uart_rxavailable(dev))
     {
       dev->recv.buffer[dev->recv.head] = uart_receive(dev, &status);
 
