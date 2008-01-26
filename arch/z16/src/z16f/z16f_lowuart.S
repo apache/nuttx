@@ -79,15 +79,12 @@
  *************************************************************************/
 
 _z16f_lowuartinit:
-	pushmlo <r0, r3> 		/* Save registers */
-
 	/* Calculate and set the baud rate generation register */
 
-
-#ifdef CONFIG_UART0_SERIAL_CONSOLE
-	ld	r3, #CONFIG_UART0_BAUD	/* r3 = baud */
+#ifdef CONFIG_UART1_SERIAL_CONSOLE
+	ld	r3, #CONFIG_UART1_BAUD	/* r3 = Selected UART1 baud */
 #else
-	ld	r3, #CONFIG_UART1_BAUD	/* r3 = baud */
+	ld	r3, #CONFIG_UART0_BAUD	/* r3 = Selected UART0 (default) baud */
 #endif
 	ld	r0, r3			/* r0 = baud */
 	sll	r0, #3			/* r0 = baud * 8 */
@@ -122,39 +119,7 @@ _z16f_lowuartinit:
 	ld	r0, #(Z16F_UARTCTL0_TEN|Z16F_UARTCTL0_REN)
 	ld.b	Z16F_UART0_CTL0, r0	/* Z16F_UART0_CTL0 = %c0 */
 #endif
-	popmlo	<r0, r3>		/* Restore registers */
 	ret				/* Return */
-
-
-/*************************************************************************
- * Name: _z16f_xmitc
- *
- * Description:
- *   Send one character on the selected port
- *
- * Parmeters:
- *   r1 = character
- *
- *************************************************************************/
-
-#ifdef CONFIG_ARCH_LOWPUTC
-_z16f_xmitc:
-	pushmlo <r0>				/* Save registers */
-
-_z16f_xmitc1:
-	ld	r0, Z16F_UARTSTAT0_TDRE		/* TDRE=Transmitter Data Register Empty */
-#ifdef CONFIG_UART0_SERIAL_CONSOLE
-	tm.b	Z16F_UART0_STAT0, r0		/* r0 = Z16F_UART0_STAT0 */
-	jp	eq, _z16f_xmitc1 		/* While (!(Z16F_UART0_STAT0 & TDRE)) */
-	ld.b	Z16F_UART0_TXD, r1		/* Z16F_UART0_TXD = r1 (character) */
-#else
-	tm.b	Z16F_UART1_STAT0, r0		/* r0 = Z16F_UART0_STAT1 */
-	jp	eq, _z16f_xmitc1		/* While (!(Z16F_UART1_STAT0 & TDRE)) */
-	ld.b	Z16F_UART1_TXD, r1		/* Z16F_UART1_TXD = r1 (character) */
-#endif
-	popmlo	<r0>				/* Restore registers */
-	ret					/* Return */
-#endif
 
 /*************************************************************************
  * Name: _up_lowputc
@@ -165,30 +130,60 @@ _z16f_xmitc1:
  * Parmeters:
  *   r1 = character
  *
- * Return
- *   R0 = 0
+ * Return:
+ *   None
+ *
+ * Modifies r0 (and maybe r1)
  *
  *************************************************************************/
 
 #ifdef CONFIG_ARCH_LOWPUTC
 _up_lowputc:
-	pushmlo <r1,r5> 		/* Save registers */
-	ld	r0, r1
-	ext.ub	r5, r0
-	cp	r5, #10
-	jp	ne, _up_lowputc1	/* If (character == \n) */
+	/* Check if the character to output is a linefeed */
 
-	ld	r1,#13
-	call	_z16f_xmitc		/* Call _z16f_xmitc with \r */
+	ext.ub	r0, r1			/* r0=Character masked to 8-bits */ 
+	cp	r0, #10			/* Is it a linefeed ('\n') */
+	jp	ne, _z16f_xmitc		/* No? Jump to _z16f_xmitc with character in r1 */
 
-_up_lowputc1:
-	ld	r1, r0
-	call	_z16f_xmitc		/* Xall _z16f_xmitc with character */
+	/* Output a carriage return before the linefeed */
 
-	ld	r0, #0			/* return r0 = 0 */
-	popmlo	<r1,r5> 		/* Restore registers */
-	ret				/* Return */
+	ld	r1, #13			/* Output carriage reuturn ('\r') */
+	call	_z16f_xmitc		/* Call _z16f_xmitc with r1='\r' */
+	ld	r1, #10			/* Restore r1=linefeed to output */
+					/* Fall through to _z16f_xmitc with linefeed in r1 */
+
+/*************************************************************************
+ * Name: _z16f_xmitc
+ *
+ * Description:
+ *   Send one character on the selected port (really a part of up_lowputc)
+ *
+ * Parameters:
+ *   r1 = character
+ *
+ * Return:
+ *   None
+ *
+ * Modifies r0
+ *
+ *************************************************************************/
+
+#ifdef CONFIG_ARCH_LOWPUTC
+_z16f_xmitc:
+_z16f_xmitc1:
+	ld	r0, Z16F_UARTSTAT0_TDRE		/* TDRE=Transmitter Data Register Empty */
+#ifdef CONFIG_UART1_SERIAL_CONSOLE
+	tm.b	Z16F_UART1_STAT0, r0		/* r0 = Z16F_UART1_STAT0 */
+	jp	eq, _z16f_xmitc1 		/* While (!(Z16F_UART1_STAT0 & TDRE)) */
+	ld.b	Z16F_UART1_TXD, r1		/* Z16F_UART1_TXD = r1 (character) */
+#else
+	tm.b	Z16F_UART0_STAT0, r0		/* r0 = Z16F_UART0_STAT1 */
+	jp	eq, _z16f_xmitc1		/* While (!(Z16F_UART0_STAT0 & TDRE)) */
+	ld.b	Z16F_UART0_TXD, r1		/* Z16F_UART0_TXD = r1 (character) */
 #endif
+	ret					/* Return */
+
+#endif /* CONFIG_ARCH_LOWPUTC */
 
 /*************************************************************************
  * Name: _up_lowgetc
@@ -206,16 +201,16 @@ _up_lowputc1:
 
 #ifdef CONFIG_ARCH_LOWGETC
 _up_lowgetc:
-up_lowgetc1:
+_up_lowgetc1:
 	ld	r0, #Z16F_UARTSTAT0_RDA		/* RDA=Receive data available */
-#ifdef CONFIG_UART0_SERIAL_CONSOLE
-	tm.b	Z16F_UART0_STAT0, r0
-	jp	eq, _up_lowgetc1		/* While (!Z16F_UART0_STAT0 & RDA)) */
-	ld.ub	r0, Z16F_UART0_RXD		/* r0 = Z16F_UART0_RXD */
-#else
-	tm.b	Z16F_UART1_STAT0,r0		/* While (!Z16F_UART1_STAT0 & RDA) */
-	jp	eq, _up_lowgetc1
+#ifdef CONFIG_UART1_SERIAL_CONSOLE
+	tm.b	Z16F_UART1_STAT0, r0
+	jp	eq, _up_lowgetc1		/* While (!Z16F_UART1_STAT0 & RDA)) */
 	ld.ub	r0, Z16F_UART1_RXD		/* r0 = Z16F_UART1_RXD */
+#else
+	tm.b	Z16F_UART0_STAT0,r0		/* While (!Z16F_UART0_STAT0 & RDA) */
+	jp	eq, _up_lowgetc1
+	ld.ub	r0, Z16F_UART0_RXD		/* r0 = Z16F_UART0_RXD */
 #endif
 	cp	r0, #%0d			/* Test for '\r' */
 	jp	eq, _up_lowgetc2
@@ -231,3 +226,4 @@ _up_lowgetc3:					/* Return value in r0 */
 #endif /* CONFIG_ARCH_LOWPUTC || CONFIG_ARCH_LOWGETC */
 
 	end
+
