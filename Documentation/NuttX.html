@@ -976,12 +976,14 @@ Other memory:
 <pre><ul>
 0.3.7 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* Began adding support for the Zilog Z16F using the Zilog
-	  Z16F2800100ZCOG Development Kit.
+	* Added support for the Zilog Z16F using the Zilog Z16F2800100ZCOG
+	  Development Kit.
 	* Add support toolchains that do not support making of dependencies
 	* Fix Cygwin build with spaces in directory names
 	* Name make system changes to deal with non-GNU toolchains (i.e., Zilog)
 	* Add support for Windows native toolchains that cannot follow Cygwin soft links
+	* Modified serial driver interface to handle hardware with non-16550A-like
+	  interrupt architecture (like the Z16F)
 </pre></ul>
 
 <table width ="100%">
