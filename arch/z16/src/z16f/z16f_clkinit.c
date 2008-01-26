@@ -73,7 +73,7 @@ Z16F_FLOPTION3 = (Z16F_FLOPTION3_RESVD|Z16F_FLOPTION3_NORMAL);
  * Private Functions
  ***************************************************************************/
 
-#ifndef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
 /***************************************************************************
  *  System clock initialization--DEBUG. Code Using Frequency Input from
  *  ZDS IDE.
@@ -101,10 +101,10 @@ Z16F_FLOPTION3 = (Z16F_FLOPTION3_RESVD|Z16F_FLOPTION3_NORMAL);
 
 static void z16f_sysclkinit(void)
 {
-  /* _DEFSRC (SCKSEL Bits 1,0) is passed to program view the .linkcmd file */
-
   int count;
   int temp_oscdiv;
+
+  /* _DEFSRC (SCKSEL Bits 1,0) is passed to program view the .linkcmd file */
 
   if ((getreg8(Z16F_OSC_CTL) & 0x03) != _DEFSRC)
     {
@@ -120,19 +120,17 @@ static void z16f_sysclkinit(void)
 
           for (count = 0; count < 10000; count++);
 
-          /* Select 5.6 MHz clock */
+          /* Select 5.6 MHz clock (SCKSEL=0) */
 
           putreg8(0xe7, Z16F_OSC_CTL);
           putreg8(0x18, Z16F_OSC_CTL);
-          putreg8(0xa0 | _DEFSRC, Z16F_OSC_CTL);
+          putreg8(0xa0, Z16F_OSC_CTL);
         }
-
-      if (_DEFSRC == 1)
+      else if (_DEFSRC == 1)
         {
-          /* enable  (reserved) clock */
+          /* Enable (reserved) clock */
         }
-
-      if (_DEFSRC == 2 )
+      else if (_DEFSRC == 2 )
         {
           /* Enable external oscillator */
 
@@ -144,14 +142,13 @@ static void z16f_sysclkinit(void)
 
           for (count = 0; count < 10000; count++);
 
-          /* select external oscillator */
+          /* select external oscillator (SCKSEL=2) */
 
           putreg8(0xe7, Z16F_OSC_CTL);
           putreg8(0x18, Z16F_OSC_CTL);
-          putreg8(0xe0 | _DEFSRC, Z16F_OSC_CTL);
+          putreg8(0xe0 | 2, Z16F_OSC_CTL);
         }
-
-      if (_DEFSRC == 3)
+      else if (_DEFSRC == 3)
         {
           /* Enable watchdog timer clock */
 
@@ -163,11 +160,11 @@ static void z16f_sysclkinit(void)
 
           for (count = 0; count < 10000; count++);
 
-          /* Select watch dog timer clock */
+          /* Select watch dog timer clock (SKCSEL=3) */
 
           putreg8(0xe7, Z16F_OSC_CTL);
           putreg8(0x18, Z16F_OSC_CTL);
-          putreg8(0xb0 | _DEFSRC, Z16F_OSC_CTL);
+          putreg8(0xb0 | 3, Z16F_OSC_CTL);
         }
     }
 
@@ -178,7 +175,7 @@ static void z16f_sysclkinit(void)
   if (((_DEFSRC == 0) && (_DEFCLK < 3000000ul)) ||
       ((_DEFSRC == 2) && (_DEFCLK <= 10000000ul)))
     {
-      if ( _DEFSRC ==0 )
+      if ( _DEFSRC == 0 )
         {
             temp_oscdiv = ( 5526000ul / (_DEFCLK +1) );
             /* Example @ 32 KHz:  0xAC (172 decimal)*/
@@ -200,7 +197,7 @@ static void z16f_sysclkinit(void)
     for (count = 0; count < 10000; count++);
 }
 
-#else
+#else /* CONFIG_DEBUG */
 /***************************************************************************
  * System Clock Initialization Recommended for Release Code
  *
@@ -212,27 +209,30 @@ static void z16f_sysclkinit(void)
 
 static void z16f_sysclkinit(void)
 {
-    /*
-    *    _DEFSRC (SCKSEL Bits 1,0) is passed to program from Target Settings Dialog.
-    *    I.E.          extern _Erom unsigned long SYS_CLK_SRC;
-    */
-    int count;
+  int count;
 
-    if ((getreg8(Z16F_OSC_CTL) & 0x03) != _DEFSRC)
+  /*
+   *    _DEFSRC (SCKSEL Bits 1,0) is passed to program from Target Settings Dialog.
+   *    I.E.          extern _Erom unsigned long SYS_CLK_SRC;
+   */
+
+  if ((getreg8(Z16F_OSC_CTL) & 0x03) != _DEFSRC)
     {
-         /* enable external oscillator */
+       /* Enable external oscillator */
 
-         putreg8(0xe7, Z16F_OSC_CTL);
-         putreg8(0x18, Z16F_OSC_CTL);
-         putreg8(0xe0, Z16F_OSC_CTL);
+       putreg8(0xe7, Z16F_OSC_CTL);
+       putreg8(0x18, Z16F_OSC_CTL);
+       putreg8(0xe0, Z16F_OSC_CTL);
 
-         /* wait for oscillator to stabilize */
-         for (count = 0; count < 10000; count++);
+       /* Wait for oscillator to stabilize */
 
-         /* select external oscillator */
-         putreg8(0xe7, Z16F_OSC_CTL);
-         putreg8(0x18, Z16F_OSC_CTL);
-         putreg8(0xe0 | _DEFSRC, Z16F_OSC_CTL);
+       for (count = 0; count < 10000; count++);
+
+       /* Select external oscillator (SCLKSEL=2) */
+
+       putreg8(0xe7, Z16F_OSC_CTL);
+       putreg8(0x18, Z16F_OSC_CTL);
+       putreg8(0xe0 | 2, Z16F_OSC_CTL);
     }
 }
 #endif /* CONFIG_DEBUG */
@@ -240,9 +240,11 @@ static void z16f_sysclkinit(void)
 /***************************************************************************
  * Public Functions
  ***************************************************************************/
+
 /***************************************************************************
  * Name: z16f_clkinit
  ***************************************************************************/
+
 void z16f_clkinit(void)
 {
     z16f_sysclkinit();
