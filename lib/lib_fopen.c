@@ -135,7 +135,7 @@ FAR struct file_struct *lib_fdopen(int fd, const char *mode,
   FAR struct inode *inode = flist->fl_files[fd].f_inode;
   FILE             *stream;
   int               oflags = lib_mode2oflags(mode);
-  int               err;
+  int               err = OK;
   int               i;
 
   if (fd < 0 || !flist || !slist)
