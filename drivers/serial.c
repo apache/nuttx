@@ -379,7 +379,7 @@ static int uart_close(struct file *filep)
 static int uart_open(struct file *filep)
 {
   struct inode *inode = filep->f_inode;
-  uart_dev_t     *dev   = inode->i_private;
+  uart_dev_t   *dev   = inode->i_private;
   int           ret   = OK;
 
   /* If the port is the middle of closing, wait until the close is finished */

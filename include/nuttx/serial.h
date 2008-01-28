@@ -180,7 +180,7 @@ struct uart_ops_s
 struct uart_dev_s
 {
   int       open_count;			/* The number of times
-					* the device has been opened */
+					 * the device has been opened */
   boolean   xmitwaiting;		/* TRUE: User is waiting
 					 * for space in xmit.buffer */
   boolean   recvwaiting;		/* TRUE: User is waiting
@@ -194,8 +194,8 @@ struct uart_dev_s
 					 * for sapce in recv.buffer */
   struct uart_buffer_s xmit;		/* Describes transmit buffer */
   struct uart_buffer_s recv;		/* Describes receive buffer */
-  const struct uart_ops_s *ops;		/* Arch-specifics operations */
-  void     *priv;			/* Used by the arch-specific logic */
+  FAR const struct uart_ops_s *ops;	/* Arch-specific operations */
+  FAR void *priv;			/* Used by the arch-specific logic */
 };
 typedef struct uart_dev_s uart_dev_t;
 

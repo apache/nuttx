@@ -177,27 +177,33 @@ struct mountpt_operations
 };
 #endif /* CONFIG_DISABLE_MOUNTPOUNT */
 
+/* These are the various kinds of operations that can be associated with
+ * an inode.
+ */
+
+union inode_ops_u
+{
+  FAR const struct file_operations    *i_ops;  /* Driver operations for inode */
+#ifndef CONFIG_DISABLE_MOUNTPOUNT
+  FAR const struct block_operations   *i_bops; /* Block driver operations */
+  FAR const struct mountpt_operations *i_mops; /* Operations on a mountpoint */
+#endif
+};
+
 /* This structure represents one inode in the Nuttx psuedo-file system */
 
 struct inode
 {
-  FAR struct inode            *i_peer;       /* Pointer to same level inode */
-  FAR struct inode            *i_child;      /* Pointer to lower level inode */
-  sint16                       i_crefs;      /* References to inode */
-  uint16                       i_flags;      /* flags for inode */
-  union
-  {
-    const struct file_operations    *i_ops;  /* Driver operations for inode */
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
-    const struct block_operations   *i_bops; /* Block driver operations */
-    const struct mountpt_operations *i_mops; /* Operations on a mountpoint */
-#endif
-  } u;
+  FAR struct inode *i_peer;       /* Pointer to same level inode */
+  FAR struct inode *i_child;      /* Pointer to lower level inode */
+  sint16            i_crefs;      /* References to inode */
+  uint16            i_flags;      /* Flags for inode */
+  union inode_ops_u u;            /* Inode operations */
 #ifdef CONFIG_FILE_MODE
-  mode_t                       i_mode;       /* Access mode flags */
+  mode_t            i_mode;       /* Access mode flags */
 #endif
-  FAR void                    *i_private;    /* Per inode driver private data */
-  char                         i_name[1];    /* Name of inode (variable) */
+  FAR void         *i_private;    /* Per inode driver private data */
+  char              i_name[1];    /* Name of inode (variable) */
 };
 #define FSNODE_SIZE(n) (sizeof(struct inode) + (n))
 

@@ -50,14 +50,11 @@
 #ifdef CONFIG_ARCH_LEDS
 	xref	_up_ledinit:EROM
 #endif
-#if defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS > 0
-	xref	_up_earlyserialinit:EROM
-#endif
-#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
+#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC) || CONFIG_NFILE_DESCRIPTORS == 0
 	xref	_z16f_lowuartinit:EROM
 #endif
 #if defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS > 0
-	xref	up_earlyserialinit:EROM
+	xref	_up_earlyserialinit:EROM
 #endif
 	xref	_os_start:EROM
 	xref	_up_doirq:EROM
