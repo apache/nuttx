@@ -406,16 +406,18 @@ static int up_setup(struct uart_dev_s *dev)
 
   up_disablebreaks(priv);
 
-  priv->regs.fcr = (priv->regs.fcr & 0xffffffcf) | (val & 0x30);
+  /* Set the RX and TX trigger levels to the minimum */
+
+  priv->regs.fcr = (priv->regs.fcr & 0xffffffcf) | UART_FCR_FTL;
   up_serialout(priv, UART_RFCR_OFFS, priv->regs.fcr);
 
-  priv->regs.fcr = (priv->regs.fcr & 0xffffff3f) | (val & 0xc0);
+  priv->regs.fcr = (priv->regs.fcr & 0xffffff3f) | UART_FCR_FTL;
   up_serialout(priv, UART_RFCR_OFFS, priv->regs.fcr);
 
   up_setrate(priv, priv->baud);
 
   priv->regs.lcr &= 0xffffffe0;      /* clear original field, and... */
-  priv->regs.lcr |= (uint32)mode;    /* Set new bits in that field. */
+  priv->regs.lcr |= (uint32)cval;    /* Set new bits in that field. */
   up_serialout(priv, UART_LCR_OFFS, priv->regs.lcr);
 
 #ifdef CONFIG_UART_HWFLOWCONTROL

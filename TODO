@@ -16,8 +16,8 @@ NuttX TODO List (Last updated January 6, 2008)
   (3)  Build system
   (0)  Applications & Tests (examples/)
   (1)  ARM (arch/arm/)
-  (0)  ARM/C5471 (arch/arm/src/c5471/)
-  (1)  ARM/DM320 (arch/arm/src/dm320/)
+  (1)  ARM/C5471 (arch/arm/src/c5471/)
+  (2)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (2)  z80 (arch/z80/)
@@ -275,10 +275,15 @@ o ARM (arch/arm/)
                present, each interrupt executes on top of the user stack
                allocation making each user stack allocation larger than needed.
   Status:      Open
-  Priority:    Medim
+  Priority:    Medium
 
 o ARM/C5471 (arch/arm/src/c5471/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: UART re-configuration is untested and conditionally compiled out.
+  Status:      Open
+  Priority:    Medium.  ttyS1 is not configured, but not used; ttyS0 is configured
+               by the bootloader
 
 o ARM/DM320 (arch/arm/src/dm320/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -289,7 +294,12 @@ o ARM/DM320 (arch/arm/src/dm320/)
                the stack seems to fix the problem (might also be the
                bootloader overwriting memory)
   Status:      Open
-  Priority:    Mediam
+  Priority:    Medium
+
+  Description: UART re-configuration is untested and conditionally compiled out.
+  Status:      Open
+  Priority:    Medium.  ttyS1 is not configured, but not used; ttyS0 is configured
+               by the bootloader
 
 o ARM/LPC214x (arch/arm/src/lpc214x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
