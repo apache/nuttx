@@ -158,7 +158,7 @@ static uart_dev_t g_uart0port =
 #endif
   { 0 },                    /* closesem */
   { 0 },                    /* xmitsem */
-  { 0 ],                    /* recvsem */
+  { 0 },                    /* recvsem */
   {
     { 0 },                  /* xmit.sem */
     0,                      /* xmit.head */
@@ -203,7 +203,7 @@ static uart_dev_t g_uart1port =
 #endif
   { 0 },                    /* closesem */
   { 0 },                    /* xmitsem */
-  { 0 ],                    /* recvsem */
+  { 0 },                    /* recvsem */
   {
     { 0 },                  /* xmit.sem */
     0,                      /* xmit.head */
@@ -246,7 +246,7 @@ static ubyte z16f_disableuartirq(struct uart_dev_s *dev)
 {
   struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
   irqstate_t          flags = irqsave();
-  ubyte               state = priv->rxdisabed ? 0 : 1 | priv->txdisabled ? 0 : 2;
+  ubyte               state = priv->rxenabled ? 1 : 0 | priv->txenabled ? 2 : 0;
 
   z16f_txint(dev, FALSE);
   z16f_rxint(dev, FALSE);
@@ -268,20 +268,19 @@ static void z16f_restoreuartirq(struct uart_dev_s *dev, ubyte state)
   z16f_rxint(dev, (state & 1) ? TRUE : FALSE);
 
   irqrestore(flags);
-  return state;
 }
 
 /****************************************************************************
  * Name: z16f_waittx
  ****************************************************************************/
 
-static void z16f_waittx(struct z16f_uart_s *priv, void (*status)(struct z16f_uart_s *))
+static void z16f_waittx(struct uart_dev_s *dev, boolean (*status)(struct uart_dev_s *))
 {
   int tmp;
 
   for (tmp = 1000 ; tmp > 0 ; tmp--)
     {
-      if (status(priv) != 0)
+      if (status(dev))
         {
           break;
         }
@@ -374,7 +373,7 @@ static void z16f_shutdown(struct uart_dev_s *dev)
 
 static int z16f_attach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
   int ret;
 
   /* Attach the RX IRQ */
@@ -412,7 +411,7 @@ errout:
 
 static void z16f_detach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
   up_disable_irq(priv->rxirq);
   up_disable_irq(priv->txirq);
   irq_detach(priv->rxirq);
@@ -465,6 +464,7 @@ static int z16f_rxinterrupt(int irq, void *context)
 
       uart_recvchars(dev);
     }
+  return OK;
 }
 
 /****************************************************************************
@@ -506,6 +506,7 @@ static int z16f_txinterrupt(int irq, void *context)
 
       uart_xmitchars(dev);
     }
+  return OK;
 }
 
 /****************************************************************************
@@ -567,9 +568,8 @@ static void z16f_rxint(struct uart_dev_s *dev, boolean enable)
     {
       up_disable_irq(priv->rxirq);
     }
-#endif
 
-  priv->rxenable = enable;
+  priv->rxenabled = enable;
   irqrestore(flags);
 }
 
@@ -625,7 +625,7 @@ static void z16f_txint(struct uart_dev_s *dev, boolean enable)
       up_disable_irq(priv->txirq);
     }
 
-  priv->txenable = enable;
+  priv->txenabled = enable;
   irqrestore(flags);
 }
 
@@ -673,15 +673,15 @@ static boolean z16f_txempty(struct uart_dev_s *dev)
 
 void up_earlyserialinit(void)
 {
-  (void)z16f_disableuartirq(TTYS0_DEV);
-  (void)z16f_disableuartirq(TTYS1_DEV);
+  (void)z16f_disableuartirq(&TTYS0_DEV);
+  (void)z16f_disableuartirq(&TTYS1_DEV);
 
   CONSOLE_DEV.isconsole = TRUE;
   z16f_setup(&CONSOLE_DEV);
 }
 
 /****************************************************************************
- * Name: z16f_serialinit
+ * Name: up_serialinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
@@ -689,7 +689,7 @@ void up_earlyserialinit(void)
  *
  ****************************************************************************/
 
-void z16f_serialinit(void)
+void up_serialinit(void)
 {
   (void)uart_register("/dev/console", &CONSOLE_DEV);
   (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
@@ -722,21 +722,21 @@ int up_putc(int ch)
     {
       /* Add CR before LF */
 
-      z16f_waittx(priv, z16f_txready);
+      z16f_waittx(&CONSOLE_DEV, z16f_txready);
       putreg8('\r', priv->uartbase + Z16F_UART_TXD);
     }
 
   /* Output the character */
 
-  z16f_waittx(priv, z16f_txready);
+  z16f_waittx(&CONSOLE_DEV, z16f_txready);
   putreg8((ubyte)ch,  priv->uartbase + Z16F_UART_TXD);
 
   /* Now wait for all queue TX data to drain before restoring interrupts.  The
    * driver should receive one txdone interrupt which it may or may not ignore.
    */
 
-  z16f_waittx(priv, z16f_txempty);
-  z16f_restoreuartirq(priv, state);
+  z16f_waittx(&CONSOLE_DEV, z16f_txempty);
+  z16f_restoreuartirq(&CONSOLE_DEV, state);
   return ch;
 }
 
@@ -775,17 +775,18 @@ static void _up_putc(int ch)
 
 int up_putc(int ch)
 {
-  _up_putc(ch);
-
   /* Check for LF */
 
   if (ch == '\n')
     {
-      /* Add CR */
+      /* Output CR before LF */
 
       _up_putc('\r');
     }
 
+  /* Output character */
+
+  _up_putc(ch);
   return ch;
 }
 

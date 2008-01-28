@@ -180,7 +180,7 @@ struct xcptcontext
    */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-  void *sigdeliver; /* Actual type is sig_deliver_t */
+  CODE void *sigdeliver; /* Actual type is sig_deliver_t */
 
   /* The following retains that state during signal execution */
 
