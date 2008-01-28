@@ -286,7 +286,7 @@ static inline void up_enablebreaks(struct up_dev_s *priv, boolean enable)
 
 static int up_setup(struct uart_dev_s *dev)
 {
-#ifdef CONFIG_SUPPRESS_UART_CONFIG
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   uint16 brsr;
 

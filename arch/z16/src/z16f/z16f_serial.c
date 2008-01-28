@@ -298,7 +298,7 @@ static void z16f_waittx(struct uart_dev_s *dev, boolean (*status)(struct uart_de
 
 static int z16f_setup(struct uart_dev_s *dev)
 {
-#ifdef CONFIG_SUPPRESS_UART_CONFIG
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
   uint32 brg;
   ubyte ctl0;

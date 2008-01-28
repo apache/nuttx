@@ -352,7 +352,7 @@ static inline void up_setrate(struct up_dev_s *priv, unsigned int rate)
 
 static int up_setup(struct uart_dev_s *dev)
 {
-#ifdef CONFIG_SUPPRESS_UART_CONFIG
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct up_dev_s *priv = dev->priv;
   unsigned int cval;
 
