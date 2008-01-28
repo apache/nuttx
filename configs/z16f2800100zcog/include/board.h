@@ -61,6 +61,7 @@
 #define LED_IDLE                    4
 #define LED_INIRQ                   5
 #define LED_ASSERTION               6
+#define LED_SIGNAL                  6
 #define LED_PANIC                   7
 
 /****************************************************************************

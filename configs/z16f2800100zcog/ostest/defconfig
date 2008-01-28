@@ -1,5 +1,5 @@
 ############################################################################
-# configs/z16f2800100zcog/defconfig
+# configs/z16f2800100zcog/ostest/defconfig
 #
 #   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,10 +37,14 @@
 #
 # CONFIG_ARCH - identifies the arch subdirectory and, hence, the
 #   processor architecture.
-# CONFIG_ARCH_Z16 - Set if processor is Z16
-# CONFIG_ARCH_CHIP - Identifies the specific chip
-# CONFIG_ARCH_CHIP_Z16F - Set if this the Z16F
-# CONFIG_ARCH_CHIP_Z16F2810 - Identifies chip variant
+# CONFIG_ARCH_name - for use in C code.  This identifies the particular
+#   processor architecture (CONFIG_ARCH_Z16).
+# CONFIG_ARCH_CHIP - Identifies the specific chip or SoC that implements the
+#   architecture.
+# CONFIG_ARCH_CHIP_chip - for use in C code.  This identifies the
+#   particular chip or SoC that the architecture is implemented
+#   in (CONFIG_ARCH_CHIP_Z16F)
+# CONFIG_ARCH_CHIP_Z16F2810 - Identifies z16f chip variant
 # CONFIG_ARCH_CHIP_Z16F2811
 # CONFIG_ARCH_CHIP_Z16F3211
 # CONFIG_ARCH_CHIP_Z16F6411
@@ -114,7 +118,7 @@ CONFIG_HAVE_LIBM=n
 # CONFIG_HAVE_LOWPUTC - architecture supports low-level, boot
 #   time console output
 # CONFIG_HAVE_GETPUTC - architecture supports low-level, boot
-#   time console output
+#   time console input
 # CONFIG_TICKS_PER_MSEC - The default system timer is 100Hz
 #   or TICKS_PER_MSEC=10.  This setting may be defined to
 #   inform NuttX that the processor hardware is providing
@@ -138,16 +142,16 @@ CONFIG_EXAMPLE=ostest
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_MM_REGIONS=1
-CONFIG_ARCH_LOWPUTC=y
+CONFIG_ARCH_LOWPUTC=n
 CONFIG_ARCH_LOWGETC=n
 CONFIG_RR_INTERVAL=0
 CONFIG_SCHED_INSTRUMENTATION=n
 CONFIG_TASK_NAME_SIZE=0
-CONFIG_START_YEAR=2007
-CONFIG_START_MONTH=2
-CONFIG_START_DAY=21
+CONFIG_START_YEAR=2008
+CONFIG_START_MONTH=1
+CONFIG_START_DAY=28
 CONFIG_JULIAN_TIME=n
-CONFIG_DEV_CONSOLE=n
+CONFIG_DEV_CONSOLE=y
 
 #
 # The following can be used to disable categories of
@@ -164,13 +168,13 @@ CONFIG_DEV_CONSOLE=n
 # o pthread_condtimedwait() depends on signals to wake
 #   up waiting tasks.
 #
-CONFIG_DISABLE_CLOCK=y
-CONFIG_DISABLE_POSIX_TIMERS=y
-CONFIG_DISABLE_PTHREAD=y
-CONFIG_DISABLE_SIGNALS=y
-CONFIG_DISABLE_MQUEUE=y
-CONFIG_DISABLE_MOUNTPOINT=y
-CONFIG_DISABLE_ENVIRON=y
+CONFIG_DISABLE_CLOCK=n
+CONFIG_DISABLE_POSIX_TIMERS=n
+CONFIG_DISABLE_PTHREAD=n
+CONFIG_DISABLE_SIGNALS=n
+CONFIG_DISABLE_MQUEUE=n
+CONFIG_DISABLE_MOUNTPOINT=n
+CONFIG_DISABLE_ENVIRON=n
 
 #
 # Misc libc settings
@@ -203,7 +207,7 @@ CONFIG_ARCH_KFREE=n
 # Sizes of configurable things (0 disables)
 #
 # CONFIG_MAX_TASKS - The maximum number of simultaneously
-#   actived tasks.  This value must be a power of two.
+#   active tasks.  This value must be a power of two.
 # CONFIG_MAX_TASK_ARGS - This controls the maximum number of
 #   of parameters that a task may receive (i.e., maxmum value
 #   of 'argc')
@@ -234,19 +238,19 @@ CONFIG_ARCH_KFREE=n
 #   timer structures to minimize dynamic allocations.  Set to
 #   zero for all dynamic allocations.
 #
-CONFIG_MAX_TASKS=8
+CONFIG_MAX_TASKS=16
 CONFIG_MAX_TASK_ARGS=4
-CONFIG_NPTHREAD_KEYS=0
-CONFIG_NFILE_DESCRIPTORS=0
-CONFIG_NFILE_STREAMS=0
+CONFIG_NPTHREAD_KEYS=4
+CONFIG_NFILE_DESCRIPTORS=8
+CONFIG_NFILE_STREAMS=8
 CONFIG_NAME_MAX=32
-CONFIG_STDIO_BUFFER_SIZE=0
-CONFIG_NUNGET_CHARS=0
-CONFIG_PREALLOC_MQ_MSGS=0
-CONFIG_MQ_MAXMSGSIZE=0
+CONFIG_STDIO_BUFFER_SIZE=256
+CONFIG_NUNGET_CHARS=2
+CONFIG_PREALLOC_MQ_MSGS=4
+CONFIG_MQ_MAXMSGSIZE=32
 CONFIG_MAX_WDOGPARMS=2
 CONFIG_PREALLOC_WDOGS=4
-CONFIG_PREALLOC_TIMERS=0
+CONFIG_PREALLOC_TIMERS=4
 
 #
 # TCP/IP and UDP support via uIP
