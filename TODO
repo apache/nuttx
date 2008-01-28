@@ -184,6 +184,10 @@ o Network (net/, netutils/)
   Status:      Open
   Priority:    Medium
 
+  Description: Port PPP support from http://contiki.cvs.sourceforge.net/contiki/contiki-2.x/backyard/core/net/ppp/
+  Status:      Open
+  Priority:    Low
+
 o USB (drivers/usbdev)
   ^^^^^^^^^^^^^^^^^^^^
 
