@@ -21,7 +21,7 @@ NuttX TODO List (Last updated January 6, 2008)
   (2)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (2)  z80 (arch/z80/)
-  (2)  z16 (arch/z16/)
+  (1)  z16 (arch/z16/)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -363,13 +363,3 @@ o z16 (arch/z16)
   Status:      Open
   Priority:    Low, thought to be cosmetic.  I think this is a consequence of
                replacing vs. inserting the library.
-
-  Description: When printf is used, there are warnings like:
-
-               WARNING (255) Missing declaration of (s)printf helper function, variable, or field
-               Declaration of __print_out is missing
-
-               Need to suppress built-in printf logic to use NuttX printf logic.
-  Status:      Open
-  Priority:    Undetermined
-
