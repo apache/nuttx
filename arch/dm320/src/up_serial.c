@@ -287,13 +287,13 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Clear fifos */
 
-  up_serialout(priv, UART_DM320_RFCR, 0x8000);
-  up_serialout(priv, UART_DM320_TFCR, 0x8000);
+  up_serialout(priv, UART_RFCR, 0x8000);
+  up_serialout(priv, UART_TFCR, 0x8000);
 
   /* Set rx and tx triggers */
 
-  up_serialout(priv, UART_DM320_RFCR, UART_RFCR_RTL_1);
-  up_serialout(priv, UART_DM320_TFCR, UART_TFCR_TTL_16);
+  up_serialout(priv, UART_RFCR, UART_RFCR_RTL_1);
+  up_serialout(priv, UART_TFCR, UART_TFCR_TTL_16);
 
   /* Set up the MSR */
 
@@ -331,7 +331,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Set up the BRSR */
 
-  switch (dev->baud)
+  switch (priv->baud)
     {
       case 2400:
         brsr = UART_BAUD_2400;
@@ -375,7 +375,7 @@ static int up_setup(struct uart_dev_s *dev)
   /* Setup the new UART configuration */
 
   up_serialout(priv,UART_MSR, priv->msr);
-  up_serialout(priv, UART_DM320_BRSR, brsr);
+  up_serialout(priv, UART_BRSR, brsr);
   up_enablebreaks(priv, FALSE);
 #endif
   return OK;

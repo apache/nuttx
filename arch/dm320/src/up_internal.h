@@ -52,7 +52,7 @@
 #undef  CONFIG_SUPPRESS_INTERRUPTS    /* Do not enable interrupts */
 #undef  CONFIG_SUPPRESS_TIMER_INTS    /* No timer */
 #undef  CONFIG_SUPPRESS_SERIAL_INTS   /* Console will poll */
-#undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
+#define CONFIG_SUPPRESS_UART_CONFIG 1 /* Do not reconfig UART */
 #define CONFIG_DUMP_ON_EXIT         1 /* Dump task state on exit */
 
 /************************************************************
