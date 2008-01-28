@@ -168,7 +168,6 @@ _up_lowputc:
  *
  *************************************************************************/
 
-#ifdef CONFIG_ARCH_LOWPUTC
 _z16f_xmitc:
 _z16f_xmitc1:
 	ld	r0, Z16F_UARTSTAT0_TDRE		/* TDRE=Transmitter Data Register Empty */

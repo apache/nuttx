@@ -50,8 +50,14 @@
 #ifdef CONFIG_ARCH_LEDS
 	xref	_up_ledinit:EROM
 #endif
+#if defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS > 0
+	xref	_up_earlyserialinit:EROM
+#endif
 #if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
 	xref	_z16f_lowuartinit:EROM
+#endif
+#if defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS > 0
+	xref	up_earlyserialinit:EROM
 #endif
 	xref	_os_start:EROM
 	xref	_up_doirq:EROM
@@ -207,6 +213,11 @@ _z16f_reset8:
 
 	call	_z16f_lowinit		/* Perform low-level hardware initialization */
 
+#if defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS > 0
+	/* Perform early serial initialization */
+
+	call	_up_earlyserialinit
+#endif
 	/* Start NuttX */
 
 	call	_os_start		/* Start the operating system */

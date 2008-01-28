@@ -113,12 +113,12 @@ void up_sigdeliver(void)
    * signals.
    */
 
-  sigdeliver           = rtcb->xcp.sigdeliver;
+  sigdeliver           = (sig_deliver_t)rtcb->xcp.sigdeliver;
   rtcb->xcp.sigdeliver = NULL;
 
   /* Then restore the task interrupt state. */
 
-  if ((reg[REG_FLAGS] & Z16F_CNTRL_FLAGS_IRQE) != 0)
+  if ((regs[REG_FLAGS] & Z16F_CNTRL_FLAGS_IRQE) != 0)
     {
        EI();
     }
