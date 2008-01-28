@@ -94,7 +94,8 @@ static int     z16f_setup(struct uart_dev_s *dev);
 static void    z16f_shutdown(struct uart_dev_s *dev);
 static int     z16f_attach(struct uart_dev_s *dev);
 static void    z16f_detach(struct uart_dev_s *dev);
-static int     z16f_interrupt(int irq, void *context);
+static int     z16f_rxinterrupt(int irq, void *context);
+static int     z16f_txinterrupt(int irq, void *context);
 static int     z16f_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int     z16f_receive(struct uart_dev_s *dev, uint32 *status);
 static void    z16f_rxint(struct uart_dev_s *dev, boolean enable);
@@ -195,7 +196,7 @@ static uart_dev_t g_uart1port =
   0,                        /* open_count */
   FALSE,                    /* xmitwaiting */
   FALSE,                    /* recvwaiting */
-#ifdef CONFIG_UART0_SERIAL_CONSOLE
+#ifdef CONFIG_UART1_SERIAL_CONSOLE
   TRUE,                     /* isconsole */
 #else
   FALSE,                    /* isconsole */
@@ -238,44 +239,49 @@ static uart_dev_t g_uart1port =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: z16f_serialout
- ****************************************************************************/
-
-static void z16f_serialout(struct z16f_uart_s *priv, int offset, ubyte value)
-{
-  putreg8(value, priv->uartbase + offset);
-}
-
-/****************************************************************************
  * Name: z16f_disableuartirq
  ****************************************************************************/
 
-static ubyte z16f_disableuartirq(struct z16f_uart_s *priv)
+static ubyte z16f_disableuartirq(struct uart_dev_s *dev)
 {
-/* REVISIT */
-  return 0;
+  struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
+  irqstate_t          flags = irqsave();
+  ubyte               state = priv->rxdisabed ? 0 : 1 | priv->txdisabled ? 0 : 2;
+
+  z16f_txint(dev, FALSE);
+  z16f_rxint(dev, FALSE);
+
+  irqrestore(flags);
+  return state;
 }
 
 /****************************************************************************
  * Name: z16f_restoreuartirq
  ****************************************************************************/
 
-static void z16f_restoreuartirq(struct z16f_uart_s *priv, ubyte state)
+static void z16f_restoreuartirq(struct uart_dev_s *dev, ubyte state)
 {
-/* REVISIT */
+  struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
+  irqstate_t          flags = irqsave();
+
+  z16f_txint(dev, (state & 2) ? TRUE : FALSE);
+  z16f_rxint(dev, (state & 1) ? TRUE : FALSE);
+
+  irqrestore(flags);
+  return state;
 }
 
 /****************************************************************************
- * Name: z16f_waittrde
+ * Name: z16f_waittx
  ****************************************************************************/
 
-static void z16f_waittrde(struct z16f_uart_s *priv)
+static void z16f_waittx(struct z16f_uart_s *priv, void (*status)(struct z16f_uart_s *))
 {
   int tmp;
 
   for (tmp = 1000 ; tmp > 0 ; tmp--)
     {
-      if ((getreg8(priv->uartbase + Z16F_UART_STAT0) & Z16F_UARTSTAT0_TDRE) != 0)
+      if (status(priv) != 0)
         {
           break;
         }
@@ -298,7 +304,6 @@ static int z16f_setup(struct uart_dev_s *dev)
   uint32 brg;
   ubyte ctl0;
   ubyte ctl1;
-
 
   /* Calculate and set the baud rate generation register.
    * BRG = (freq + baud * 8)/(baud * 16)
@@ -349,7 +354,7 @@ static int z16f_setup(struct uart_dev_s *dev)
 static void z16f_shutdown(struct uart_dev_s *dev)
 {
   struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
-  (void)z16f_disableuartirq(priv);
+  (void)z16f_disableuartirq(dev);
 }
 
 /****************************************************************************
@@ -415,32 +420,25 @@ static void z16f_detach(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: z16f_interrupt
+ * Name: z16f_rxinterrupt
  *
  * Description:
- *   This is the UART interrupt handler.  It will be invoked
- *   when an interrupt received on the 'irq'  It should call
- *   uart_transmitchars or uart_receivechar to perform the
- *   appropriate data transfers.  The interrupt handling logic\
- *   must be able to map the 'irq' number into the approprite
- *   uart_dev_s structure in order to call these functions.
+ *   This is the UART interrupt handler.  It will be invoked when an RX
+ *   event occurs at the Z16F's LIN-UART.
  *
  ****************************************************************************/
 
-static int z16f_interrupt(int irq, void *context)
+static int z16f_rxinterrupt(int irq, void *context)
 {
   struct uart_dev_s  *dev = NULL;
   struct z16f_uart_s *priv;
   ubyte              status;
-  int                passes;
 
-/* REVISIT */
-
-  if (g_uart1priv.txirq == irq || g_uart1priv.rxirq == irq)
+  if (g_uart1priv.rxirq == irq)
     {
       dev = &g_uart1port;
     }
-  else if (g_uart0priv.txirq == irq || g_uart0priv.rxirq == irq)
+  else if (g_uart0priv.rxirq == irq)
     {
       dev = &g_uart0port;
     }
@@ -451,42 +449,62 @@ static int z16f_interrupt(int irq, void *context)
 
   priv = (struct z16f_uart_s*)dev->priv;
 
-  /* Loop while there is something to do */
+  /* Check the LIN-UART status 0 register to determine whether the source of
+   * the interrupt is error, break, or received data
+   */
 
-  for (;;)
+  status = getreg8(priv->uartbase + Z16F_UART_STAT0);
+
+  /* REVISIT error and break handling */
+
+  /* Check if received data is available  */
+
+  if (status & Z16F_UARTSTAT0_RDA)
     {
-      /* Get the current UART status  */
+      /* Handline an incoming, receive byte */
 
-      status = getreg8(priv->uartbase + Z16F_UART_STAT0);
-      if ((status & (Z16F_UARTSTAT0_RDA|Z16F_UARTSTAT0_TDRE)) == 0)
-        {
-           break;
-        }
-      else
-        {
-          /* Handline incoming, receive bytes */
+      uart_recvchars(dev);
+    }
+}
 
-          if (status & Z16F_UARTSTAT0_RDA)
-            {
-              uart_recvchars(dev);
-            }
+/****************************************************************************
+ * Name: z16f_txinterrupt
+ *
+ * Description:
+ *   This is the UART TX interrupt handler.  This interrupt handler will
+ *   be invoked when the X16F LIN UART transmit data register is empty.
+ *
+ ****************************************************************************/
 
-          /* Handle outgoing, transmit bytes */
+static int z16f_txinterrupt(int irq, void *context)
+{
+  struct uart_dev_s  *dev = NULL;
+  struct z16f_uart_s *priv;
+  ubyte              status;
 
-          if (status & Z16F_UARTSTAT0_TDRE)
-            {
-              uart_xmitchars(dev);
-            }
+  if (g_uart1priv.txirq == irq)
+    {
+      dev = &g_uart1port;
+    }
+  else if (g_uart0priv.txirq == irq)
+    {
+      dev = &g_uart0port;
+    }
+  else
+    {
+      PANIC(OSERR_INTERNAL);
+    }
 
-          /* Keep track of how many times we do this in case there
-           * is some hardware failure condition.
-           */
+  priv = (struct z16f_uart_s*)dev->priv;
 
-         if (++passes > 256)
-           {
-              break;
-           }
-        }
+  /* Verify that the transmit data register is empty */
+
+  status = getreg8(priv->uartbase + Z16F_UART_STAT0);
+  if (status & Z16F_UARTSTAT0_TDRE)
+    {
+      /* Handle outgoing, transmit bytes */
+
+      uart_xmitchars(dev);
     }
 }
 
@@ -536,9 +554,9 @@ static int z16f_receive(struct uart_dev_s *dev, uint32 *status)
 
 static void z16f_rxint(struct uart_dev_s *dev, boolean enable)
 {
-  struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
-/* REVISIT */
-#if 0
+  struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
+  irqstate_t          flags = irqsave();
+
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -550,6 +568,9 @@ static void z16f_rxint(struct uart_dev_s *dev, boolean enable)
       up_disable_irq(priv->rxirq);
     }
 #endif
+
+  priv->rxenable = enable;
+  irqrestore(flags);
 }
 
 /****************************************************************************
@@ -590,9 +611,9 @@ static void z16f_send(struct uart_dev_s *dev, int ch)
 
 static void z16f_txint(struct uart_dev_s *dev, boolean enable)
 {
-  struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
-/* REVISIT */
-#if 0
+  struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
+  irqstate_t          flags = irqsave();
+
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -603,7 +624,9 @@ static void z16f_txint(struct uart_dev_s *dev, boolean enable)
     {
       up_disable_irq(priv->txirq);
     }
-#endif
+
+  priv->txenable = enable;
+  irqrestore(flags);
 }
 
 /****************************************************************************
@@ -639,7 +662,7 @@ static boolean z16f_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: z16f_serialinit
+ * Name: up_earlyserialinit
  *
  * Description:
  *   Performs the low level UART initialization early in 
@@ -650,8 +673,8 @@ static boolean z16f_txempty(struct uart_dev_s *dev)
 
 void up_earlyserialinit(void)
 {
-  (void)z16f_disableuartirq(TTYS0_DEV.priv);
-  (void)z16f_disableuartirq(TTYS1_DEV.priv);
+  (void)z16f_disableuartirq(TTYS0_DEV);
+  (void)z16f_disableuartirq(TTYS1_DEV);
 
   CONSOLE_DEV.isconsole = TRUE;
   z16f_setup(&CONSOLE_DEV);
@@ -687,21 +710,32 @@ int up_putc(int ch)
   struct z16f_uart_s *priv = (struct z16f_uart_s*)CONSOLE_DEV.priv;
   ubyte  state;
 
-  state = z16f_disableuartirq(priv);
-  z16f_waittrde(priv);
-  z16f_serialout(priv, UART_DTRR, (uint16)ch);
+  /* Keep interrupts disabled so that we do not interfere with normal
+   * driver operation 
+   */
+
+  state = z16f_disableuartirq(&CONSOLE_DEV);
 
   /* Check for LF */
 
   if (ch == '\n')
     {
-      /* Add CR */
+      /* Add CR before LF */
 
-      z16f_waittrde(priv);
-      z16f_serialout(priv, UART_DTRR, '\r');
+      z16f_waittx(priv, z16f_txready);
+      putreg8('\r', priv->uartbase + Z16F_UART_TXD);
     }
 
-  z16f_waittrde(priv);
+  /* Output the character */
+
+  z16f_waittx(priv, z16f_txready);
+  putreg8((ubyte)ch,  priv->uartbase + Z16F_UART_TXD);
+
+  /* Now wait for all queue TX data to drain before restoring interrupts.  The
+   * driver should receive one txdone interrupt which it may or may not ignore.
+   */
+
+  z16f_waittx(priv, z16f_txempty);
   z16f_restoreuartirq(priv, state);
   return ch;
 }
@@ -756,5 +790,3 @@ int up_putc(int ch)
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
-
-
