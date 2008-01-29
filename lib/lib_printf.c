@@ -100,7 +100,7 @@ int printf(const char *fmt, ...)
 # ifdef CONFIG_CPP_HAVE_WARNING
 #   warning "printf has no data sink"
 # endif
-# ret = 0;
+  ret = 0;
 #endif
   va_end(ap);
 
