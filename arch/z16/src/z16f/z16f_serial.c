@@ -68,6 +68,10 @@
 extern _Erom unsigned long SYS_CLK_FREQ;
 #define _DEFCLK ((unsigned long)&SYS_CLK_FREQ)
 
+#define STATE_DISABLED   0
+#define STATE_RXENABLED  1
+#define STATE_TXENABLED  2
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -246,7 +250,8 @@ static ubyte z16f_disableuartirq(struct uart_dev_s *dev)
 {
   struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
   irqstate_t          flags = irqsave();
-  ubyte               state = priv->rxenabled ? 1 : 0 | priv->txenabled ? 2 : 0;
+  ubyte               state = priv->rxenabled ? STATE_RXENABLED : STATE_DISABLED | \
+                              priv->txenabled ? STATE_TXENABLED : STATE_DISABLED;
 
   z16f_txint(dev, FALSE);
   z16f_rxint(dev, FALSE);
@@ -264,27 +269,29 @@ static void z16f_restoreuartirq(struct uart_dev_s *dev, ubyte state)
   struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
   irqstate_t          flags = irqsave();
 
-  z16f_txint(dev, (state & 2) ? TRUE : FALSE);
-  z16f_rxint(dev, (state & 1) ? TRUE : FALSE);
+  z16f_txint(dev, (state & STATE_TXENABLED) ? TRUE : FALSE);
+  z16f_rxint(dev, (state & STATE_RXENABLED) ? TRUE : FALSE);
 
   irqrestore(flags);
 }
 
 /****************************************************************************
- * Name: z16f_waittx
+ * Name: z16f_consoleput
  ****************************************************************************/
 
-static void z16f_waittx(struct uart_dev_s *dev, boolean (*status)(struct uart_dev_s *))
+static void z16f_consoleput(ubyte ch)
 {
+  struct z16f_uart_s *priv = (struct z16f_uart_s*)CONSOLE_DEV.priv;
   int tmp;
 
   for (tmp = 1000 ; tmp > 0 ; tmp--)
     {
-      if (status(dev))
+      if (z16f_txready(&CONSOLE_DEV))
         {
           break;
         }
     }
+  putreg8(ch,  priv->uartbase + Z16F_UART_TXD);
 }
 
 /****************************************************************************
@@ -379,23 +386,16 @@ static int z16f_attach(struct uart_dev_s *dev)
   /* Attach the RX IRQ */
 
   ret = irq_attach(priv->rxirq, z16f_rxinterrupt);
-  if (ret != OK)
+  if (ret == OK)
     {
-       goto errout;
+      /* Attach the TX IRQ */
+
+      ret = irq_attach(priv->txirq, z16f_txinterrupt);
+      if (ret != OK)
+        {
+          irq_detach(priv->rxirq);
+        }
     }
-
-  /* Attach the TX IRQ */
-
-  ret = irq_attach(priv->txirq, z16f_txinterrupt);
-  if (ret != OK)
-    {
-       goto errout_with_rxirq;
-    }
-  return OK;
-
-errout_with_rxirq:
-  irq_detach(priv->rxirq);
-errout:
   return ret;
 }
 
@@ -598,7 +598,7 @@ static boolean z16f_rxavailable(struct uart_dev_s *dev)
 static void z16f_send(struct uart_dev_s *dev, int ch)
 {
   struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
-  putreg8(ch, priv->uartbase + Z16F_UART1_TXD);
+  putreg8(ch, priv->uartbase + Z16F_UART_TXD);
 }
 
 /****************************************************************************
@@ -707,7 +707,6 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
-  struct z16f_uart_s *priv = (struct z16f_uart_s*)CONSOLE_DEV.priv;
   ubyte  state;
 
   /* Keep interrupts disabled so that we do not interfere with normal
@@ -722,20 +721,18 @@ int up_putc(int ch)
     {
       /* Add CR before LF */
 
-      z16f_waittx(&CONSOLE_DEV, z16f_txready);
-      putreg8('\r', priv->uartbase + Z16F_UART_TXD);
+      z16f_consoleput('\r');
     }
 
   /* Output the character */
 
-  z16f_waittx(&CONSOLE_DEV, z16f_txready);
-  putreg8((ubyte)ch,  priv->uartbase + Z16F_UART_TXD);
+  z16f_consoleput((ubyte)ch);
 
-  /* Now wait for all queue TX data to drain before restoring interrupts.  The
-   * driver should receive one txdone interrupt which it may or may not ignore.
+  /* It is important to restore the TX interrupt while the send is pending.
+   * otherwise, TRDE interrupts can be lost since they do not pend after the
+   * TRDE false->true transition.
    */
 
-  z16f_waittx(&CONSOLE_DEV, z16f_txempty);
   z16f_restoreuartirq(&CONSOLE_DEV, state);
   return ch;
 }

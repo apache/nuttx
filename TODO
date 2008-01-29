@@ -21,7 +21,7 @@ NuttX TODO List (Last updated January 6, 2008)
   (2)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (2)  z80 (arch/z80/)
-  (1)  z16 (arch/z16/)
+  (2)  z16 (arch/z16/)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -373,3 +373,12 @@ o z16 (arch/z16)
   Status:      Open
   Priority:    Low, thought to be cosmetic.  I think this is a consequence of
                replacing vs. inserting the library.
+
+  Description: When the interrupt-driven serial driver is used, the system
+               hangs.  This is because of TX ready (TRDE) interrupts that
+               get lost while interrupts are disabled.  The existing
+               serial driver appears to be limited to hardware with a
+               latching, level-sensitive TX ready interrupt.
+  Status:      Open
+  Priority:    Medium. A polled, write-only serial driver is used in the
+               interim for system testing.
