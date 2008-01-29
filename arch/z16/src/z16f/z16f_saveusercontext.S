@@ -77,8 +77,7 @@
 _up_saveusercontext:
 	/* Save the flags (needed to restore the interrupt state) */
 	
-	ld	r3, Z16F_CNTRL_FLAGS	/* Fetch the flags register */
-	sll	r3, #8			/* Pad with zero */
+	ld.ub	r3, Z16F_CNTRL_FLAGS	/* Fetch the flags register (zero padded) */
 	ld.w	2*REG_FLAGS(r1), r3	/* Save 16-bit value */
 
 	/* Save r8-R13 */
@@ -93,7 +92,9 @@ _up_saveusercontext:
 	/* Save the stack pointer and the frame pointer */
 
 	ld	2*REG_FP(r1), fp	/* Save the frame pointer */
-	ld	2*REG_SP(r1), sp	/* Save the stack pointer */
+	ld	r0, #4			/* 4 bytes of return address on stack */
+	add	r0, sp			/* Value of stack pointer on return */
+	ld	2*REG_SP(r1), r0	/* Save the stack pointer value on return */
 
 	/* Save the return address at the top of the stack */
 

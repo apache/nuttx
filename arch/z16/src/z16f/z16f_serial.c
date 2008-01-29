@@ -140,8 +140,8 @@ static struct z16f_uart_s g_uart0priv =
   CONFIG_UART0_BAUD,        /* baud */
   FALSE,                    /* rxenabled */
   FALSE,                    /* txenabled */
-  Z16F_IRQ_UART0TX,         /* txirq */
   Z16F_IRQ_UART0RX,         /* rxirq */
+  Z16F_IRQ_UART0TX,         /* txirq */
   CONFIG_UART0_PARITY,      /* parity */
   CONFIG_UART0_2STOP        /* stopbits2 */
 };
@@ -185,8 +185,8 @@ static struct z16f_uart_s g_uart1priv =
   CONFIG_UART1_BAUD,        /* baud */
   FALSE,                    /* rxenabled */
   FALSE,                    /* txenabled */
-  Z16F_IRQ_UART1TX,         /* txirq */
   Z16F_IRQ_UART1RX,         /* rxirq */
+  Z16F_IRQ_UART1TX,         /* txirq */
   CONFIG_UART1_PARITY,      /* parity */
   CONFIG_UART1_2STOP        /* stopbits2 */
 };
