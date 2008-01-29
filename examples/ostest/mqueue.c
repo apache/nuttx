@@ -367,11 +367,11 @@ void mqueue_test(void)
 
   printf("mqueue_test: Killing receiver\n");
   pthread_kill(receiver, 9);
-#endif
 
   /* Wait a bit to see if the thread exits on its own */
 
   usleep(500*1000);
+#endif
 
   /* Then cancel the thread and see if it did */
 
