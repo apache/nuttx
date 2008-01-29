@@ -286,7 +286,7 @@ static inline void up_enablebreaks(struct up_dev_s *priv, boolean enable)
 
 static int up_setup(struct uart_dev_s *dev)
 {
-#ifdef CONFIG_SUPPRESS_LPC214X_UART_CONFIG
+#ifndef CONFIG_SUPPRESS_LPC214X_UART_CONFIG
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   uint16 baud;
   ubyte lcr;
@@ -302,11 +302,11 @@ static int up_setup(struct uart_dev_s *dev)
   /* Set up the IER */
 
   priv->ier = up_serialin(priv, LPC214X_UART_IER_OFFSET);
-  
+
   /* Set up the LCR */
-  
+
   lcr = 0;
-  
+
   if (priv->bits == 7)
     {
       lcr |= LPC214X_LCR_CHAR_7;
@@ -320,7 +320,7 @@ static int up_setup(struct uart_dev_s *dev)
     {
       lcr |= LPC214X_LCR_STOP_2;
     }
- 
+
   if (priv->parity == 1)
     {
       lcr |= LPC214X_LCR_PAR_ODD;
@@ -331,15 +331,15 @@ static int up_setup(struct uart_dev_s *dev)
     }
 
   /* Enter DLAB=1 */
-    
+
   up_serialout(priv, LPC214X_UART_LCR_OFFSET, (lcr | LPC214X_LCR_DLAB_ENABLE));
- 
+
   /* Set the BAUD divisor */
 
   baud = UART_BAUD(priv->baud);
   up_serialout(priv, LPC214X_UART_DLM_OFFSET, baud >> 8);
   up_serialout(priv, LPC214X_UART_DLL_OFFSET, baud & 0xff);
- 
+
   /* Clear DLAB */
 
  up_serialout(priv, LPC214X_UART_LCR_OFFSET, lcr);
