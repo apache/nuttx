@@ -132,18 +132,17 @@ EXTERN int   dup(int fd);
 EXTERN int   dup2(int fd1, int fd2);
 EXTERN int   fsync(int fd);
 EXTERN off_t lseek(int fd, off_t offset, int whence);
-EXTERN int   read(int fd, void *buf, unsigned int nbytes);
-EXTERN int   unlink(const char *path);
-EXTERN int   write(int fd, const void *buf, unsigned int nbytes);
+EXTERN int   read(int fd, FAR void *buf, unsigned int nbytes);
+EXTERN int   write(int fd, FAR const void *buf, unsigned int nbytes);
 
 /* File path operations */
 
-EXTERN int unlink(const char *pathname);
-EXTERN int rmdir(const char *pathname);
+EXTERN int unlink(FAR const char *pathname);
+EXTERN int rmdir(FAR const char *pathname);
 
 /* Other */
 
-EXTERN int getopt(int argc, char *const argv[], const char *optstring);
+EXTERN int getopt(int argc, FAR char *const argv[], FAR const char *optstring);
 
 #undef EXTERN
 #if defined(__cplusplus)

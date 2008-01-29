@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib_getopt.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -46,16 +46,16 @@
  * Global Variables
  ****************************************************************************/
 
-char *optarg;       /* Optional argument following option */
-int   optind = 1;   /* Index into argv */
-int   optopt = '?'; /* unrecognized option character */
+FAR char *optarg; /* Optional argument following option */
+int optind = 1;   /* Index into argv */
+int optopt = '?'; /* unrecognized option character */
 
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
 
-static char   *g_optptr       = NULL;
-static boolean g_binitialized = FALSE;
+static FAR char *g_optptr       = NULL;
+static boolean   g_binitialized = FALSE;
 
 /****************************************************************************
  * Global Functions
@@ -101,7 +101,7 @@ static boolean g_binitialized = FALSE;
  *
  ****************************************************************************/
 
-int getopt(int argc, char *const argv[], const char *optstring)
+int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
 {
   if (argv && optstring)
     {
