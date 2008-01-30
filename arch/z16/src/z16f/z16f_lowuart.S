@@ -40,8 +40,9 @@
 
 #include <nuttx/config.h>
 #include "chip/chip.h"
+#include "common/up_internal.h"
 
-#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC) || CONFIG_NFILE_DESCRIPTORS == 0
+#ifdef CONFIG_USE_LOWUARTINIT
 
 /*************************************************************************
  * External References / External Definitions
@@ -120,6 +121,7 @@ _z16f_lowuartinit:
 	ld.b	Z16F_UART0_CTL0, r0	/* Z16F_UART0_CTL0 = %c0 */
 #endif
 	ret				/* Return */
+#endif /* CONFIG_USE_LOWUARTINIT */
 
 /*************************************************************************
  * Name: _up_lowputc
@@ -221,8 +223,6 @@ _up_lowgetc2:
 _up_lowgetc3:					/* Return value in r0 */
 	ret					/* Return */
 #endif
-
-#endif /* CONFIG_ARCH_LOWPUTC || CONFIG_ARCH_LOWGETC */
 
 	end
 

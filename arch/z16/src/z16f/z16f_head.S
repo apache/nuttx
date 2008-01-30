@@ -40,6 +40,11 @@
 
 #include <nuttx/config.h>
 #include <arch/irq.h>
+#include "common/up_internal.h"
+
+/**************************************************************************
+ * Definitions
+ **************************************************************************/
 
 /**************************************************************************
  * External References / External Definitions
@@ -50,10 +55,9 @@
 #ifdef CONFIG_ARCH_LEDS
 	xref	_up_ledinit:EROM
 #endif
-#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC) || CONFIG_NFILE_DESCRIPTORS == 0
+#if defined(CONFIG_USE_LOWUARTINIT)
 	xref	_z16f_lowuartinit:EROM
-#endif
-#if defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS > 0
+#elif defined(CONFIG_USE_EARLYSERIALINIT)
 	xref	_up_earlyserialinit:EROM
 #endif
 	xref	_os_start:EROM
@@ -157,7 +161,7 @@ _z16f_reset:
 #endif
 	/* Perform VERY early UART initialization so that we can use it here */
 
-#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC) || CONFIG_NFILE_DESCRIPTORS == 0
+#ifdef CONFIG_USE_LOWUARTINIT
 	call	_z16f_lowuartinit	/* Initialize the UART for debugging */
 #endif
 	/* Initialize the hardware stack overflow register */
@@ -210,7 +214,7 @@ _z16f_reset8:
 
 	call	_z16f_lowinit		/* Perform low-level hardware initialization */
 
-#if defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS > 0
+#ifdef CONFIG_USE_EARLYSERIALINIT
 	/* Perform early serial initialization */
 
 	call	_up_earlyserialinit

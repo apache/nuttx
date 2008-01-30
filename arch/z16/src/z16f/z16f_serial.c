@@ -55,13 +55,11 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
+#ifdef CONFIG_USE_SERIALDRIVER
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-#define BASE_BAUD 115200
 
 /* System clock frequency value from ZDS target settings */
 
@@ -737,7 +735,7 @@ int up_putc(int ch)
   return ch;
 }
 
-#else /* CONFIG_NFILE_DESCRIPTORS > 0 */
+#else /* CONFIG_USE_SERIALDRIVER */
 
 /****************************************************************************
  * Definitions
@@ -756,10 +754,22 @@ int up_putc(int ch)
 #endif
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static void _up_putc(int ch)
+/****************************************************************************
+ * Name: z16f_putc
+ ****************************************************************************/
+
+static void z16f_putc(int ch)
 {
   int tmp;
   for (tmp = 1000 ; tmp > 0 && !z16f_contrde(); tmp--);
@@ -770,6 +780,10 @@ static void _up_putc(int ch)
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: up_putc
+ ****************************************************************************/
+
 int up_putc(int ch)
 {
   /* Check for LF */
@@ -778,13 +792,13 @@ int up_putc(int ch)
     {
       /* Output CR before LF */
 
-      _up_putc('\r');
+      z16f_putc('\r');
     }
 
   /* Output character */
 
-  _up_putc(ch);
+  z16f_putc(ch);
   return ch;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
+#endif /* CONFIG_USE_SERIALDRIVER */

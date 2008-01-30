@@ -58,6 +58,17 @@
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
 #undef  CONFIG_DUMP_ON_EXIT           /* Dump task state on exit */
 
+/* Determine which (if any) console driver to use */
+
+#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC) || \
+    CONFIG_NFILE_DESCRIPTORS == 0 || defined(CONFIG_DEV_LOWCONSOLE)
+# define CONFIG_USE_LOWCONSOLE 1
+# define CONFIG_USE_LOWUARTINIT 1
+#elif defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS > 0
+# define CONFIG_USE_SERIALDRIVER 1
+# define CONFIG_USE_EARLYSERIALINIT 1
+#endif
+ 
 /* Macros for portability */
 
 #define IN_INTERRUPT             (current_regs != NULL)
@@ -118,12 +129,13 @@ void up_addregion(void);
 
 /* Defined in up_serial.c */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
+#ifdef CONFIG_USE_SERIALDRIVER
 extern void up_earlyserialinit(void);
 extern void up_serialinit(void);
-#else
-# define up_earlyserialinit()
-# define up_serialinit()
+#endif
+
+#ifdef CONFIG_USE_LOWCONSOLE
+extern void lowconsole_init(void);
 #endif
 
 /* Defined in up_timerisr.c */
