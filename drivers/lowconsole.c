@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_initialize.c
+ * drivers/lowconsole.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,136 +40,85 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/fs.h>
-#include <nuttx/mm.h>
-#include <arch/board/board.h>
-
-#include "up_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/* Define to enable timing loop calibration */
-
-#undef CONFIG_ARCH_CALIBRATION
-
 /****************************************************************************
- * Public Data
+ * Private Function Prototypes
  ****************************************************************************/
 
-/* This holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during
- * interrupt processing.
- */
-
-FAR chipreg_t *current_regs;
+static ssize_t lowconsole_read(struct file *filep, char *buffer, size_t buflen);
+static ssize_t lowconsole_write(struct file *filep, const char *buffer, size_t buflen);
+static int     lowconsole_ioctl(struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
- * Private Types
+ * Private Variables
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+struct file_operations g_serialops =
+{
+  0,                /* open */
+  0,                /* close */
+  lowconsole_read,  /* read */
+  lowconsole_write, /* write */
+  0,                /* seek */
+  lowconsole_ioctl  /* ioctl */
+};
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_calibratedelay
- *
- * Description:
- *   Delay loops are provided for short timing loops.  This function, if
- *   enabled, will just wait for 100 seconds.  Using a stopwatch, you can
- *   can then determine if the timing loops are properly calibrated.
- *
+ * Name: lowconsole_ioctl
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_CALIBRATION) & defined(CONFIG_DEBUG)
-static void up_calibratedelay(void)
+static int lowconsole_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-  int i;
-  lldbg("Beginning 100s delay\n");
-  for (i = 0; i < 100; i++)
-    {
-      up_mdelay(1000);
-    }
-  lldbg("End 100s delay\n");
+  *get_errno_ptr() = ENOTTY;
+  return ERROR;
 }
-#else
-# define up_calibratedelay()
-#endif
+
+/****************************************************************************
+ * Name: lowconsole_read
+ ****************************************************************************/
+
+static ssize_t lowconsole_read(struct file *filep, char *buffer, size_t buflen)
+{
+  return 0;
+}
+
+/****************************************************************************
+ * Name: lowconsole_write
+ ****************************************************************************/
+
+static ssize_t lowconsole_write(struct file *filep, const char *buffer, size_t buflen)
+{
+  ssize_t ret = buflen;
+ 
+  for (; buflen; buflen--)
+    {
+      up_putc(*buffer++);
+    }
+  return ret;
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_initialize
- *
- * Description:
- *   up_initialize will be called once during OS initialization after the
- *   basic OS services have been initialized.  The architecture specific
- *   details of initializing the OS will be handled here.  Such things as
- *   setting up interrupt service routines, starting the clock, and
- *   registering device drivers are some of the things that are different
- *   for each processor and hardware platform.
- *
- *   up_initialize is called after the OS initialized but before the user
- *   initialization logic has been started and before the libraries have
- *   been initialized.  OS services and driver services are available.
- *
- ****************************************************************************/
+ * Name: lowconsole_init
+****************************************************************************/
 
-void up_initialize(void)
+void lowconsole_init(void)
 {
-  /* Initialize global variables */
-
-  current_regs = NULL;
-
-  /* Calibrate the timing loop */
-
-  up_calibratedelay();
-
-  /* Add extra memory fragments to the memory manager */
-
-#if CONFIG_MM_REGIONS > 1
-  up_addregion();
-#endif
-
-  /* Initialize the interrupt subsystem */
-
-  up_irqinitialize();
-
-  /* Initialize the system timer interrupt */
-
-#if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
-  up_timerinit();
-#endif
-
-  /* Register devices */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  devnull_register();   /* Standard /dev/null */
-#endif
-
-  /* Initialize the serial device driver */
-
-#ifdef CONFIG_USE_SERIALDRIVER
-  up_serialinit();
-#endif
-
-#ifdef CONFIG_USE_LOWCONSOLE
-  lowconsole_init();
-#endif
-
-  /* Initialize the netwok */
-
-  up_netinitialize();
-  up_ledon(LED_IRQSENABLED);
+  (void)register_driver("/dev/console", &g_serialops, 0666, NULL);
 }

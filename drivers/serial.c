@@ -344,14 +344,22 @@ static int uart_close(struct file *filep)
 
   while (dev->xmit.head != dev->xmit.tail)
     {
+#ifndef CONFIG_DISABLE_SIGNALS
       usleep(500*1000);
+#else
+      up_udelay(500*1000);
+#endif
     }
 
   /* And wait for the TX fifo to drain */
 
   while (!uart_txempty(dev))
     {
+#ifndef CONFIG_DISABLE_SIGNALS
       usleep(500*1000);
+#else
+      up_udelay(500*1000);
+#endif
     }
 
   /* Free the IRQ and disable the UART */

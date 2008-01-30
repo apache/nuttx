@@ -21,7 +21,7 @@ NuttX TODO List (Last updated January 6, 2008)
   (2)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (2)  z80 (arch/z80/)
-  (2)  z16 (arch/z16/)
+  (3)  z16 (arch/z16/)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -382,3 +382,7 @@ o z16 (arch/z16)
   Status:      Open
   Priority:    Medium. A polled, write-only serial driver is used in the
                interim for system testing.
+
+  Description: Signals are not functional
+  Status:      Open
+  Priority:    Medium

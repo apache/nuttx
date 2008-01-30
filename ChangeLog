@@ -306,3 +306,4 @@
 	* Add support for Windows native toolchains that cannot follow Cygwin soft links
 	* Modified serial driver interface to handle hardware with non-16550A-like
 	  interrupt architecture (like the Z16F)
+	* Added a "dumb" serial console driver to simply OS bringup
