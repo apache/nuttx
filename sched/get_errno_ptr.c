@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * get_errno_ptr.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sched.h>
@@ -45,17 +45,17 @@
 
 #undef get_errno_ptr
 
-/************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************/
+ ****************************************************************************/
 
 static int g_irqerrno;
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function:  get_errno_ptr
  *
  * Description:
@@ -69,36 +69,44 @@ static int g_irqerrno;
  *
  * Assumptions:
  *
- ************************************************************/
+ ****************************************************************************/
 
 FAR int *get_errno_ptr(void)
 {
-  /* Check if this function was called from an interrupt
-   * handler.  In that case, we have to do things a little
-   * differently.
+  /* Check if this function was called from an interrupt handler.  In that
+   * case, we have to do things a little differently to prevent the interrupt
+   * handler from modifying the tasks errno value.
    */
 
-  if (up_interrupt_context())
+  if (!up_interrupt_context())
     {
-      /* Yes, we were called from an interrupt handler.  Do
-       * not permit access to the errno in the TCB of the
-       * interrupt task.  Instead, use a separate errno just
-       * for interrupt handlers.  Of course, this would have
-       * to change if we ever wanted to support nested
-       * interrupts.
+      /* We were called from the normal tasking context.  Verify that the
+       * task at the head of the ready-to-run list is actually running.  It
+       * may not be running during very brief times during context switching
+       * logic (see, for example, task_deletecurrent.c).
        */
 
-      return &g_irqerrno;
-    }
-  else
-    {
-      /* We were called from the normal tasking context.  Return
-       * a reference to the thread-private errno in the TCB.
-       */
+      FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+      if (rtcb->task_state == TSTATE_TASK_RUNNING)
+        {
+          /* Yes.. the task is running normally.  Return a reference to the
+           * thread-private errno in the TCB of the running task.
+           */
 
-      FAR _TCB *ptcb = (FAR _TCB*)g_readytorun.head;
-      return &ptcb->errno;
+          return &rtcb->errno;
+        }
     }
+
+  /* We were called either from (1) an interrupt handler or (2) from normally
+   * code but in an unhealthy state.  In either event, do not permit access to
+   * the errno in the TCB of the task at the head of the ready-to-run list.
+   * Instead, use a separate errno just for interrupt handlers.  Of course, this
+   * would have to change if we ever wanted to support nested interrupts or if
+   * we really cared about the stability of the errno during those "unhealthy
+   * states."
+   */
+
+  return &g_irqerrno;
 }
 
 

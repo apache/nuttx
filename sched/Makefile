@@ -43,7 +43,7 @@ MISC_SRCS	= os_start.c get_errno_ptr.c \
 		  sched_setupidlefiles.c sched_setuptaskfiles.c sched_setuppthreadfiles.c \
 		  sched_releasefiles.c
 TSK_SRCS	= task_create.c task_init.c task_setup.c task_activate.c \
-		  task_start.c task_delete.c task_restart.c \
+		  task_start.c task_delete.c task_deletecurrent.c task_restart.c \
 		  exit.c abort.c atexit.c getpid.c  \
 		  sched_addreadytorun.c sched_removereadytorun.c sched_addprioritized.c \
 		  sched_mergepending.c sched_addblocked.c sched_removeblocked.c \

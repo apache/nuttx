@@ -306,4 +306,6 @@
 	* Add support for Windows native toolchains that cannot follow Cygwin soft links
 	* Modified serial driver interface to handle hardware with non-16550A-like
 	  interrupt architecture (like the Z16F)
-	* Added a "dumb" serial console driver to simply OS bringup
+	* Added a "dumb" serial console driver to simplify OS bringup
+	* Corrected a bug that caused the errno value of one task to be clobbered
+	  when a different task exits.  Effects all architectures.

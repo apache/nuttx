@@ -1,7 +1,7 @@
 /****************************************************************************
- * up_exit.c
+ * sched/task_deletecurrent.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,21 +37,33 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <sys/types.h>
-#include <sched.h>
-#include <debug.h>
-#include <8052.h>
-#include <nuttx/arch.h>
-#include "os_internal.h"
-#include "up_internal.h"
+#include  <nuttx/config.h>
+
+#include  <sys/types.h>
+#include  <sched.h>
+#include  "os_internal.h"
+#ifndef CONFIG_DISABLE_SIGNALS
+# include "sig_internal.h"
+#endif
 
 /****************************************************************************
- * Private Definitions
+ * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
+ * Private Type Declarations
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -63,41 +75,67 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _exit
+ * Name: task_delete
  *
  * Description:
- *   This function causes the currently executing task to cease
- *   to exist.  This is a special case of task_delete() where the task to
- *   be deleted is the currently executing task.  It is more complex because
- *   a context switch must be perform to the the next ready to run task.
+ *   This function causes the currently running task (i.e., the task at the
+ *   head of the ready-to-run list) to cease to exist.  This is a part of
+ *   the logic used to implement _exit().  The full implementation of _exit()
+ *   is architecture-dependent.  This function should never be called from
+ *   normal user code, but only from the architecture-specific implementation
+ *   of exit.
+ *
+ * Inputs:
+ *   None
+ *
+ * Return Value:
+ *   OK on success; or ERROR on failure
  *
  ****************************************************************************/
 
-void _exit(int status)
+STATUS task_deletecurrent(void)
 {
-  FAR _TCB* tcb;
+  FAR _TCB  *dtcb = (FAR _TCB*)g_readytorun.head;
+  FAR _TCB  *rtcb;
 
-  dbg("TCB=%p exitting\n", tcb);
-
-  /* Disable interrupts.  Interrupts will remain disabled until
-   * the new task is resumed below when the save IE is restored.
+  /* Remove the TCB of the current task from the ready-to-run list.  A context
+   * switch will definitely be necessary -- that must be done by the
+   * architecture-specific logic.
+   *
+   * sched_removereadytorun will mark the task at the head of the ready-to-run
+   * with state == TSTATE_TASK_RUNNING
    */
 
-  EA = 0;
+  (void)sched_removereadytorun(dtcb);
+  rtcb = (FAR _TCB*)g_readytorun.head;
 
-  /* Destroy the task at the head of the ready to run list. */
-
-  (void)task_deletecurrent();
-
-  /* Now, perform the context switch to the new ready-to-run task at the
-   * head of the list.
+  /* We are not in a bad state -- the head of the ready to run task list
+   * does not correspond to the thread that is running.  Disabling pre-
+   * emption on this TCB and marking the new ready-to-run task as not
+   * running (see, for example, get_errno_ptr()).
    */
 
-  tcb = (FAR _TCB*)g_readytorun.head;
-  dbg("New Active Task TCB=%p\n", tcb);
+  sched_lock();
+  rtcb->task_state = TSTATE_TASK_READYTORUN;
 
-  /* Then switch contexts */
+  /* Move the TCB to the specified blocked task list and delete it */
 
-  up_restorecontext(&tcb->xcp);
+  sched_addblocked(dtcb, TSTATE_TASK_INACTIVE);
+  task_delete(dtcb->pid);
+  rtcb->task_state = TSTATE_TASK_RUNNING;
+
+  /* If there are any pending tasks, then add them to the ready-to-run
+   * task list now
+   */
+
+  if (g_pendingtasks.head)
+    {
+      (void)sched_mergepending();
+    }
+
+  /* Now calling sched_unlock() should have no effect */
+
+  sched_unlock();
+  return OK;
 }
 

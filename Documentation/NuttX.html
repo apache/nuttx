@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: January 9, 2008</p>
+      <p>Last Updated: January 30, 2008</p>
     </td>
   </tr>
 </table>
@@ -984,7 +984,9 @@ Other memory:
 	* Add support for Windows native toolchains that cannot follow Cygwin soft links
 	* Modified serial driver interface to handle hardware with non-16550A-like
 	  interrupt architecture (like the Z16F)
-	* Added a &quot;dumb&quot; serial console driver to simply OS bringup
+	* Added a &quot;dumb&quot; serial console driver to simplify OS bringup
+	* Corrected a bug that caused the errno value of one task to be clobbered
+	  when a different task exits.  Effects all architectures.
 </pre></ul>
 
 <table width ="100%">

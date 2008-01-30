@@ -1,7 +1,7 @@
-/************************************************************
- * os_internal.h
+/****************************************************************************
+ * sched/os_internal.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,22 +31,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __OS_INTERNAL_H
 #define __OS_INTERNAL_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <queue.h>
 #include <sched.h>
 #include <nuttx/kmalloc.h>
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
 /* OS CRASH CODES */
 
@@ -110,9 +110,9 @@ enum os_crash_codes_e
 #define _SET_TCB_ERRNO(t,e) \
   { (t)->errno = (e); }
 
-/************************************************************
+/****************************************************************************
  * Public Type Definitions
- ************************************************************/
+ ****************************************************************************/
 
 /* This structure defines the format of the hash table that
  * is used to (1) determine if a task ID is unique, and (2)
@@ -138,11 +138,11 @@ struct tasklist_s
 };
 typedef struct tasklist_s tasklist_t;
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/* Declared in os_start.c ***********************************/
+/* Declared in os_start.c ***************************************************/
 
 /* The state of a task is indicated both by the task_state field
  * of the TCB and by a series of task lists.  All of these
@@ -234,15 +234,16 @@ extern pidhash_t g_pidhash[CONFIG_MAX_TASKS];
 
 extern const tasklist_t g_tasklisttable[NUM_TASK_STATES];
 
-/************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 extern void    task_start(void);
 extern STATUS  task_schedsetup(FAR _TCB *tcb, int priority,
                                start_t start, main_t main);
 extern STATUS  task_argsetup(FAR _TCB *tcb, const char *name,
                              const char *argv[]);
+extern STATUS  task_deletecurrent(void);
 
 extern boolean sched_addreadytorun(FAR _TCB *rtrtcb);
 extern boolean sched_removereadytorun(FAR _TCB *rtrtcb);

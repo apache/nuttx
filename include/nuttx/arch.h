@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch.h
+ * nuttx/arch.h
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -53,11 +53,11 @@
  * Public Types
  ****************************************************************************/
 
+typedef CODE void (*sig_deliver_t)(FAR _TCB *tcb);
+
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
-
-typedef CODE void (*sig_deliver_t)(FAR _TCB *tcb);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -291,12 +291,13 @@ EXTERN void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority);
  *
  * Description:
  *   This function causes the currently executing task to cease
- *   to exist.  This is a special case of task_delete().
+ *   to exist.  This is a special case of task_delete() where the task to
+ *   be deleted is the currently executing task.  It is more complex because
+ *   a context switch must be perform to the the next ready to run task.
  *
- *   Unlike other UP APIs, this function may be called
- *   directly from user programs in various states.  The
- *   implementation of this function should diable interrupts
- *   before performing scheduling operations.
+ *   Unlike other UP APIs, this function may be called directly from user
+ *   programs in various states.  The implementation of this function should
+ *   disable interrupts before performing scheduling operations.
  *
  ****************************************************************************/
 /* Prototype is in unistd.h */
@@ -448,8 +449,7 @@ EXTERN void up_mdelay(unsigned int milliseconds);
 EXTERN void up_udelay(unsigned int microseconds);
 
 /****************************************************************************
- * Debug interfaces exported by the architecture-specific
- * logic
+ * Debug interfaces exported by the architecture-specific logic
  ****************************************************************************/
 
 /****************************************************************************

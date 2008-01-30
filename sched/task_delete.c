@@ -1,7 +1,7 @@
-/************************************************************
- * task_delete.c
+/****************************************************************************
+ * sched/task_delete.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include  <nuttx/config.h>
 
@@ -46,41 +46,40 @@
 # include "sig_internal.h"
 #endif
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: task_delete
  *
  * Description:
- *   This function causes a specified task to cease to exist.
- *   Its  stack and TCB will be deallocated.  This function
- *   is the companion to task_create().
+ *   This function causes a specified task to cease to exist. Its  stack and
+ *   TCB will be deallocated.  This function is the companion to task_create().
  *
  * Inputs:
  *   pid - The task ID of the task to delete.  A pid of zero
@@ -89,10 +88,10 @@
  * Return Value:
  *   OK on success; or ERROR on failure
  *
- *   This function can fail if the provided pid does not
- *   correspond to a task (errno is not set)
+ *   This function can fail if the provided pid does not correspond to a
+ *   task (errno is not set)
  *
- ************************************************************/
+ ****************************************************************************/
 
 STATUS task_delete(pid_t pid)
 {
@@ -106,17 +105,15 @@ STATUS task_delete(pid_t pid)
    rtcb = (FAR _TCB*)g_readytorun.head;
    if (pid == 0 || pid == rtcb->pid)
      {
-       /* If it is, then what we really wanted to do was exit.
-        * Note that we don't bother to unlock the TCB since
-        * it will be going away.
+       /* If it is, then what we really wanted to do was exit. Note that we
+        * don't bother to unlock the TCB since it will be going away.
         */
 
        exit(EXIT_SUCCESS);
      }
 
-  /* Make sure the task does not become ready-to-run while
-   * we are futzing with its TCB by locking ourselves as the
-   * executing task.
+  /* Make sure the task does not become ready-to-run while we are futzing with
+   * its TCB by locking ourselves as the executing task.
    */
 
   sched_lock();
