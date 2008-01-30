@@ -347,7 +347,7 @@ static int uart_close(struct file *filep)
 #ifndef CONFIG_DISABLE_SIGNALS
       usleep(500*1000);
 #else
-      up_udelay(500*1000);
+      up_mdelay(500);
 #endif
     }
 
@@ -358,7 +358,7 @@ static int uart_close(struct file *filep)
 #ifndef CONFIG_DISABLE_SIGNALS
       usleep(500*1000);
 #else
-      up_udelay(500*1000);
+      up_mdelay(500);
 #endif
     }
 
