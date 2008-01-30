@@ -58,17 +58,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Funtions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: _up_dumponexit
  *
  * Description:
- *   Dump the state of all tasks whenever on task exits.  This
- *   is debug instrumentation that was added to check file-
- *   related reference counting but could be useful again
- *   sometime in the future.
+ *   Dump the state of all tasks whenever on task exits.  This is debug
+ *   instrumentation that was added to check file-related reference counting
+ *   but could be useful again sometime in the future.
  *
  ****************************************************************************/
 
@@ -133,13 +132,15 @@ static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
  *
  * Description:
  *   This function causes the currently executing task to cease
- *   to exist.  This is a special case of task_delete().
+ *   to exist.  This is a special case of task_delete() where the task to
+ *   be deleted is the currently executing task.  It is more complex because
+ *   a context switch must be perform to the the next ready to run task.
  *
  ****************************************************************************/
 
 void _exit(int status)
 {
-  _TCB* tcb = (_TCB*)g_readytorun.head;
+  _TCB* tcb;
 
   /* Disable interrupts.  They will be restored when the next
    * task is started.
@@ -150,41 +151,13 @@ void _exit(int status)
   lldbg("TCB=%p exitting\n", tcb);
 
 #if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
-  dbg("Other tasks:\n");
+  lldbg("Other tasks:\n");
   sched_foreach(_up_dumponexit, NULL);
 #endif
 
-  /* Remove the tcb task from the ready-to-run list.  We can
-   * ignore the return value because we know that a context
-   * switch is needed.
-   */
+  /* Destroy the task at the head of the ready to run list. */
 
-  (void)sched_removereadytorun(tcb);
-
-  /* We are not in a bad stack-- the head of the ready to run task list
-   * does not correspond to the thread that is running.  Disabling pre-
-   * emption on this TCB should be enough to keep things stable.
-   */
-
-  sched_lock();
-
-  /* Move the TCB to the specified blocked task list and delete it */
-
-  sched_addblocked(tcb, TSTATE_TASK_INACTIVE);
-  task_delete(tcb->pid);
-
-  /* If there are any pending tasks, then add them to the g_readytorun
-   * task list now
-   */
-
-  if (g_pendingtasks.head)
-    {
-      (void)sched_mergepending();
-    }
-
-  /* Now calling sched_unlock() should have no effect */
-
-  sched_unlock();
+  (void)task_deletecurrent();
 
   /* Now, perform the context switch to the new ready-to-run task at the
    * head of the list.

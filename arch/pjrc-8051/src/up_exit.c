@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * up_exit.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
@@ -46,34 +46,36 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Private Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
- * Private Funtions
- ************************************************************/
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
-/************************************************************
- * Public Funtions
- ************************************************************/
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: _exit
  *
  * Description:
  *   This function causes the currently executing task to cease
- *   to exist.  This is a special case of task_delete().
+ *   to exist.  This is a special case of task_delete() where the task to
+ *   be deleted is the currently executing task.  It is more complex because
+ *   a context switch must be perform to the the next ready to run task.
  *
- ************************************************************/
+ ****************************************************************************/
 
 void _exit(int status)
 {
-  FAR _TCB* tcb = (FAR _TCB*)g_readytorun.head;
+  FAR _TCB* tcb;
 
   dbg("TCB=%p exitting\n", tcb);
 
@@ -83,37 +85,9 @@ void _exit(int status)
 
   EA = 0;
 
-  /* Remove the tcb task from the ready-to-run list.  We can
-   * ignore the return value because we know that a context
-   * switch is needed.
-   */
+  /* Destroy the task at the head of the ready to run list. */
 
-  (void)sched_removereadytorun(tcb);
-
-  /* We are not in a bad stack-- the head of the ready to run task list
-   * does not correspond to the thread that is running.  Disabling pre-
-   * emption on this TCB should be enough to keep things stable.
-   */
-
-  sched_lock();
-
-  /* Move the TCB to the specified blocked task list and delete it */
-
-  sched_addblocked(tcb, TSTATE_TASK_INACTIVE);
-  task_delete(tcb->pid);
-
-  /* If there are any pending tasks, then add them to the g_readytorun
-   * task list now
-   */
-
-  if (g_pendingtasks.head)
-    {
-      (void)sched_mergepending();
-    }
-
-  /* Now calling sched_unlock() should have no effect */
-
-  sched_unlock();
+  (void)task_deletecurrent();
 
   /* Now, perform the context switch to the new ready-to-run task at the
    * head of the list.
