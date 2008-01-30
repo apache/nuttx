@@ -152,6 +152,7 @@ CONFIG_START_MONTH=1
 CONFIG_START_DAY=28
 CONFIG_JULIAN_TIME=n
 CONFIG_DEV_CONSOLE=y
+CONFIG_DEV_LOWCONSOLE=y
 
 #
 # The following can be used to disable categories of
