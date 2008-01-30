@@ -93,7 +93,7 @@ FAR chipreg_t *current_regs;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_CALIBRATION) & defined(CONFIG_DEBUG) && defined(CONFIG_ARCH_LOWPUTC)
+#if defined(CONFIG_ARCH_CALIBRATION) && defined(CONFIG_DEBUG) && defined(CONFIG_ARCH_LOWPUTC)
 static void up_calibratedelay(void)
 {
   int i;
