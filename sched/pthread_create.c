@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * pthread_create.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
@@ -52,17 +52,17 @@
 #include "env_internal.h"
 #include "pthread_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
 /* Default pthread attributes */
 
@@ -74,19 +74,19 @@ FAR pthread_attr_t g_default_pthread_attr =
   PTHREAD_EXPLICIT_SCHED,   /* inheritsched */
 };
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
 /* This is the name for name-less pthreads */
 
 static const char g_pthreadname[] = "<pthread>";
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: pthread_argsetup
  *
  * Description:
@@ -111,7 +111,7 @@ static const char g_pthreadname[] = "<pthread>";
  * Return Value:
  *  OK
  *
- ************************************************************/
+ ****************************************************************************/
 
 static void pthread_argsetup(FAR _TCB *tcb, pthread_addr_t arg)
 {
@@ -145,7 +145,7 @@ static void pthread_argsetup(FAR _TCB *tcb, pthread_addr_t arg)
     }
 }
 
-/************************************************************
+/****************************************************************************
  * Function:  pthread_addjoininfo
  *
  * Description:
@@ -160,7 +160,7 @@ static void pthread_argsetup(FAR _TCB *tcb, pthread_addr_t arg)
  * Assumptions:
  *   The caller has provided protection from re-entrancy.
  *
- ************************************************************/
+ ****************************************************************************/
 
 static void pthread_addjoininfo(FAR join_t *pjoin)
 {
@@ -176,7 +176,7 @@ static void pthread_addjoininfo(FAR join_t *pjoin)
   g_pthread_tail = pjoin;
 }
 
-/************************************************************
+/****************************************************************************
  * Name:  pthread_start
  *
  * Description:
@@ -186,7 +186,7 @@ static void pthread_addjoininfo(FAR join_t *pjoin)
  * Parameters:
  * None
  *
- ************************************************************/
+ ****************************************************************************/
 
 static void pthread_start(void)
 {
@@ -219,11 +219,11 @@ static void pthread_start(void)
   pthread_exit(exit_status);
 }
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name:  pthread_create
  *
  * Description:
@@ -235,11 +235,10 @@ static void pthread_start(void)
  *    attr
  *    start_routine
  *    arg
- ************************************************************/
+ ****************************************************************************/
 
-int pthread_create(pthread_t *thread, pthread_attr_t *attr,
-                   pthread_startroutine_t start_routine,
-                   pthread_addr_t arg)
+int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
+                   pthread_startroutine_t start_routine, pthread_addr_t arg)
 {
   FAR _TCB *ptcb;
   FAR join_t *pjoin;

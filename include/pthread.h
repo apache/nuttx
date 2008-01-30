@@ -1,7 +1,7 @@
 /********************************************************************************
  * pthread.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -128,7 +128,7 @@ typedef pthread_startroutine_t	pthread_func_t;
 struct pthread_addr_s
 {
   size_t stacksize;    /* Size of the stack allocated for the pthead */
-  short  priority;     /* Priority of the pthread */
+  sint16 priority;     /* Priority of the pthread */
   ubyte  policy;       /* Pthread scheduler policy */
   ubyte  inheritsched; /* Inherit parent prio/policy? */
 };
@@ -190,7 +190,7 @@ struct sched_param; /* Defined in sched.h */
  * the individual attributes used by a given implementation.
  */
 
-EXTERN int pthread_attr_init(pthread_attr_t *attr);
+EXTERN int pthread_attr_init(FAR pthread_attr_t *attr);
 
 /* An attributes object can be deleted when it is no longer needed. */
 
@@ -198,20 +198,20 @@ EXTERN int pthread_attr_destroy(pthread_attr_t *attr);
 
 /* Set or obtain the default scheduling algorithm */
 
-EXTERN int pthread_attr_setschedpolicy(pthread_attr_t *attr, int policy);
-EXTERN int pthread_attr_getschedpolicy(pthread_attr_t *attr, int *policy);
-EXTERN int pthread_attr_setschedparam(pthread_attr_t *attr,
-                                      const struct sched_param *param);
-EXTERN int pthread_attr_getschedparam(pthread_attr_t *attr,
-                                      struct sched_param *param);
-EXTERN int pthread_attr_setinheritsched(pthread_attr_t *attr, int inheritsched);
-EXTERN int pthread_attr_getinheritsched(const pthread_attr_t *attr,
-                                        int *inheritsched);
+EXTERN int pthread_attr_setschedpolicy(FAR pthread_attr_t *attr, int policy);
+EXTERN int pthread_attr_getschedpolicy(FAR pthread_attr_t *attr, int *policy);
+EXTERN int pthread_attr_setschedparam(FAR pthread_attr_t *attr,
+                                      FAR const struct sched_param *param);
+EXTERN int pthread_attr_getschedparam(FAR pthread_attr_t *attr,
+                                      FAR struct sched_param *param);
+EXTERN int pthread_attr_setinheritsched(FAR pthread_attr_t *attr, int inheritsched);
+EXTERN int pthread_attr_getinheritsched(FAR const pthread_attr_t *attr,
+                                        FAR int *inheritsched);
 
 /* Set or obtain the default stack size */
 
-EXTERN int pthread_attr_setstacksize(pthread_attr_t *attr, long stacksize);
-EXTERN int pthread_attr_getstacksize(pthread_attr_t *attr, long *stackaddr);
+EXTERN int pthread_attr_setstacksize(FAR pthread_attr_t *attr, long stacksize);
+EXTERN int pthread_attr_getstacksize(FAR pthread_attr_t *attr, long *stackaddr);
 
 /* To create a thread object and runnable thread, a routine must be specified
  * as the new thread's start routine.  An argument may be passed to this
@@ -220,7 +220,7 @@ EXTERN int pthread_attr_getstacksize(pthread_attr_t *attr, long *stackaddr);
  * about the kind of thread being created.
  */
 
-EXTERN int pthread_create(pthread_t *thread, pthread_attr_t *attr,
+EXTERN int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
                           pthread_startroutine_t startroutine,
                           pthread_addr_t arg);
 
@@ -236,14 +236,14 @@ EXTERN int pthread_detach(pthread_t thread);
 
 EXTERN void pthread_exit(pthread_addr_t value) noreturn_function;
 EXTERN int  pthread_cancel(pthread_t thread);
-EXTERN int  pthread_setcancelstate(int state, int *oldstate);
+EXTERN int  pthread_setcancelstate(int state, FAR int *oldstate);
 EXTERN void pthread_testcancel(void);
 
 /* A thread can await termination of another thread and retrieve the return
  * value of the thread.
  */
 
-EXTERN int pthread_join(pthread_t thread, pthread_addr_t *value);
+EXTERN int pthread_join(pthread_t thread, FAR pthread_addr_t *value);
 
 /* A thread may tell the scheduler that its processor can be made available. */
 
@@ -259,58 +259,58 @@ EXTERN void pthread_yield(void);
 
 /* Thread scheduling parameters */
 
-EXTERN int pthread_getschedparam(pthread_t thread, int *policy,
-                                 struct sched_param *param);
+EXTERN int pthread_getschedparam(pthread_t thread, FAR int *policy,
+                                 FAR struct sched_param *param);
 EXTERN int pthread_setschedparam(pthread_t thread, int policy,
-                                 const struct sched_param *param);
+                                 FAR const struct sched_param *param);
 EXTERN int pthread_setschedprio(pthread_t thread, int prio);
 
 /* Thread-specific Data Interfaces */
 
-EXTERN int pthread_key_create(pthread_key_t *key,
-			      FAR void (*destructor)(FAR void*));
+EXTERN int pthread_key_create(FAR pthread_key_t *key,
+			      CODE void (*destructor)(FAR void*));
 EXTERN int pthread_setspecific(pthread_key_t key, FAR void *value);
 EXTERN FAR void *pthread_getspecific(pthread_key_t key);
 EXTERN int pthread_key_delete(pthread_key_t key);
 
 /* Create, operate on, and destroy mutex attributes. */
 
-EXTERN int pthread_mutexattr_init(pthread_mutexattr_t *attr);
-EXTERN int pthread_mutexattr_destroy(pthread_mutexattr_t *attr);
-EXTERN int pthread_mutexattr_getpshared(pthread_mutexattr_t *attr, int *pshared);
-EXTERN int pthread_mutexattr_setpshared(pthread_mutexattr_t *attr, int pshared);
+EXTERN int pthread_mutexattr_init(FAR pthread_mutexattr_t *attr);
+EXTERN int pthread_mutexattr_destroy(FAR pthread_mutexattr_t *attr);
+EXTERN int pthread_mutexattr_getpshared(FAR pthread_mutexattr_t *attr, FAR int *pshared);
+EXTERN int pthread_mutexattr_setpshared(FAR pthread_mutexattr_t *attr, int pshared);
 
 /* The following routines create, delete, lock and unlock mutexes. */
 
-EXTERN int pthread_mutex_init(pthread_mutex_t *mutex, pthread_mutexattr_t *attr);
-EXTERN int pthread_mutex_destroy(pthread_mutex_t *mutex);
-EXTERN int pthread_mutex_lock(pthread_mutex_t *mutex);
-EXTERN int pthread_mutex_trylock(pthread_mutex_t *mutex);
-EXTERN int pthread_mutex_unlock(pthread_mutex_t *mutex);
+EXTERN int pthread_mutex_init(FAR pthread_mutex_t *mutex, FAR pthread_mutexattr_t *attr);
+EXTERN int pthread_mutex_destroy(FAR pthread_mutex_t *mutex);
+EXTERN int pthread_mutex_lock(FAR pthread_mutex_t *mutex);
+EXTERN int pthread_mutex_trylock(FAR pthread_mutex_t *mutex);
+EXTERN int pthread_mutex_unlock(FAR pthread_mutex_t *mutex);
 
 /* Operations on condition variables */
 
-EXTERN int pthread_condattr_init(pthread_condattr_t *attr);
-EXTERN int pthread_condattr_destroy(pthread_condattr_t *attr);
+EXTERN int pthread_condattr_init(FAR pthread_condattr_t *attr);
+EXTERN int pthread_condattr_destroy(FAR pthread_condattr_t *attr);
 
 /* A thread can create and delete condition variables. */
 
-EXTERN int pthread_cond_init(pthread_cond_t *cond, pthread_condattr_t *attr);
-EXTERN int pthread_cond_destroy(pthread_cond_t *cond);
+EXTERN int pthread_cond_init(FAR pthread_cond_t *cond, FAR pthread_condattr_t *attr);
+EXTERN int pthread_cond_destroy(FAR pthread_cond_t *cond);
 
 /* A thread can signal to and broadcast on a condition variable. */
 
-EXTERN int pthread_cond_broadcast(pthread_cond_t *cond);
-EXTERN int pthread_cond_signal(pthread_cond_t *cond);
+EXTERN int pthread_cond_broadcast(FAR pthread_cond_t *cond);
+EXTERN int pthread_cond_signal(FAR pthread_cond_t *cond);
 
 /* A thread can wait for a condition variable to be signalled or broadcast. */
 
-EXTERN int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex);
+EXTERN int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex);
 
 /* A thread can perform a timed wait on a condition variable. */
 
-EXTERN int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
-                                  const struct timespec *abstime);
+EXTERN int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
+                                  FAR const struct timespec *abstime);
 
 /* Barrier attributes */
 
