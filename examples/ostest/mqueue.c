@@ -182,10 +182,10 @@ static void *receiver_thread(void *arg)
 
   /* Set the flags for the open of the queue.
    * Make it a blocking open on the queue, meaning it will block if
-   * this process tries to* send to the queue and the queue is full.
+   * this task tries to read from the queue when the queue is empty
    *
    *   O_CREAT - the queue will get created if it does not already exist.
-   *   O_RDONLY - we are only planning to write to the queue.
+   *   O_RDONLY - we are only planning to read from the queue.
    *
    * Open the queue, and create it if the sending process hasn't
    * already created it.
