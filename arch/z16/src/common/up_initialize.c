@@ -53,7 +53,10 @@
  * Definitions
  ****************************************************************************/
 
-/* Define to enable timing loop calibration */
+/* Define to enable timing loop calibration.  CONFIG_DEBUG and
+ * CONFIG_ARCH_LOWPUTC must also be enabled in the .config file because
+ * the logic uses lldbg()
+ */
 
 #undef CONFIG_ARCH_CALIBRATION
 
@@ -90,7 +93,7 @@ FAR chipreg_t *current_regs;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_CALIBRATION) & defined(CONFIG_DEBUG)
+#if defined(CONFIG_ARCH_CALIBRATION) & defined(CONFIG_DEBUG) && defined(CONFIG_ARCH_LOWPUTC)
 static void up_calibratedelay(void)
 {
   int i;
