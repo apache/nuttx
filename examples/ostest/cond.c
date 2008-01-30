@@ -286,7 +286,8 @@ void cond_test(void)
   printf("cond_test: \tWaiter\tSignaler\n");
   printf("cond_test: Loops\t%d\t%d\n", waiter_nloops, signaler_nloops);
   printf("cond_test: Errors\t%d\t%d\n", waiter_nerrors, signaler_nerrors);
-  printf("cond_test: \n%d times, waiter did not have to wait for data\n", waiter_nloops - waiter_waits);
+  printf("cond_test:\n");
+  printf("cond_test: %d times, waiter did not have to wait for data\n", waiter_nloops - waiter_waits);
   printf("cond_test: %d times, data was already available when the signaler run\n", signaler_already);
   printf("cond_test: %d times, the waiter was in an unexpected state when the signaler ran\n", signaler_state);
 }
