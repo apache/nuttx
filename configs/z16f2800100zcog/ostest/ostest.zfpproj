@@ -228,6 +228,7 @@
 
 <!-- watch information -->
 <watch-elements>
+<watch-element expression="0x801d1a" />
 </watch-elements>
 
 <!-- breakpoint information -->
