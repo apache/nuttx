@@ -1,7 +1,7 @@
-/************************************************************
- * mq_rcvinternal.c
+/****************************************************************************
+ * sched/mq_rcvinternal.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <fcntl.h>          /* O_NONBLOCK */
@@ -49,31 +49,31 @@
 #include "os_internal.h"
 #include "mq_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: mq_verifyreceive
  *
  * Description:
@@ -97,7 +97,7 @@
  *
  * Assumptions:
  *
- ************************************************************/
+ ****************************************************************************/
 
 int mq_verifyreceive(mqd_t mqdes, void *msg, size_t msglen)
 {
@@ -124,7 +124,7 @@ int mq_verifyreceive(mqd_t mqdes, void *msg, size_t msglen)
   return OK;
 }
 
-/************************************************************
+/****************************************************************************
  * Function:  mq_waitreceive
  *
  * Description:
@@ -150,7 +150,7 @@ int mq_verifyreceive(mqd_t mqdes, void *msg, size_t msglen)
  * - For mq_timedreceive, setting of the timer and this wait
  *   must be atomic.
  *
- ************************************************************/
+ ****************************************************************************/
 
 FAR mqmsg_t *mq_waitreceive(mqd_t mqdes)
 {
@@ -166,13 +166,13 @@ FAR mqmsg_t *mq_waitreceive(mqd_t mqdes)
 
   while ((rcvmsg = (FAR mqmsg_t*)sq_remfirst(&msgq->msglist)) == NULL)
     {
-      /* Should we block until there the above condition has been
-       * satisfied?
+      /* The queue is empty!  Should we block until there the above condition
+       * has been satisfied?
        */
 
-      if (!(mqdes->oflags & O_NONBLOCK))
+      if ((mqdes->oflags & O_NONBLOCK) == 0)
         {
-          /* Block and try again */
+          /* Yes.. Block and try again */
 
           rtcb = (FAR _TCB*)g_readytorun.head;
           rtcb->msgwaitq = msgq;
@@ -214,7 +214,7 @@ FAR mqmsg_t *mq_waitreceive(mqd_t mqdes)
   return rcvmsg;
 }
 
-/************************************************************
+/****************************************************************************
  * Function:  mq_doreceive
  *
  * Description:
@@ -245,7 +245,7 @@ FAR mqmsg_t *mq_waitreceive(mqd_t mqdes)
  *   message queue
  * - Pre-emption should be disabled throughout this call.
  *
- ************************************************************/
+ ****************************************************************************/
 
 ssize_t mq_doreceive(mqd_t mqdes, mqmsg_t *mqmsg, void *ubuffer, int *prio)
 {
