@@ -21,7 +21,7 @@ NuttX TODO List (Last updated January 6, 2008)
   (2)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (2)  z80 (arch/z80/)
-  (3)  z16 (arch/z16/)
+  (4)  z16 (arch/z16/)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -385,5 +385,11 @@ o z16 (arch/z16)
 
   Description: The system delays do not appear to be correct with the
                examples/ostest/timedmqueue.c test.
+  Status:      Open
+  Priority:    Medium-High
+
+  Description: At present, the z16f port does not run properly when CONFIG_DEBUG
+               is disabled.  I have not determined the cause for this -- it
+               may be an issue with optimization?? Or clock setup??
   Status:      Open
   Priority:    Medium-High
