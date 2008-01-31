@@ -383,6 +383,7 @@ o z16 (arch/z16)
   Priority:    Medium. A polled, write-only serial driver is used in the
                interim for system testing.
 
-  Description: Signals are not functional
+  Description: The system delays do not appear to be correct with the
+               examples/ostest/timedmqueue.c test.
   Status:      Open
-  Priority:    Medium
+  Priority:    Medium-High

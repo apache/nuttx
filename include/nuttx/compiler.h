@@ -263,7 +263,7 @@
 # define FAR   _Far
 # define NEAR  _Near
 # define DSEG  _Far
-# define CODE  _Far
+# define CODE  _Erom
 
 /* Select the large, 32-bit addressing model */
 

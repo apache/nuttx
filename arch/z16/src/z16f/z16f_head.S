@@ -456,7 +456,7 @@ _common_isr:
 	 * to use to return from the interrupt in r0.  This may or may not be the
 	 * same value as sp.
 	 */
-	 
+
 	cp	r0, sp			/* Check if we are performing a context switch */
 	jp	nz, _common_switch	/* Jump if yes, else use faster return */
 	popmhi	<r8-r14>		/* Restore r8-r14 */

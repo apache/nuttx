@@ -1,5 +1,5 @@
 /**************************************************************************
- * mqueue.c
+ * examples/ostest/mqueue.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -380,7 +380,7 @@ void timedmqueue_test(void)
 
   /* Wait for the receiving thread to complete */
 
-  printf("timedmqueue_test: Waiting for sender to complete\n");
+  printf("timedmqueue_test: Waiting for receiver to complete\n");
   pthread_join(receiver, &result);
   if (result != (void*)0)
     {

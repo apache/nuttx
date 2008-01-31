@@ -71,42 +71,33 @@
 
 _up_restoreusercontext:
 	/* Disable interrupts while we are accessing the TCB's register
-	 * save structure
+	 * save structure.  The correct interrupt state will be retored by
+	 * the iret instruction below
 	 */
 
 	di
 
-	/* Set up the stack for return */
+	/* Set up the stack for return from 'interrupt' */
 
 	ld	sp, 2*REG_SP(r1)			/* sp=Value of SP on return */
+	ld.w	r2, 2*REG_FLAGS(r1)			/* r1=padded flags value */
+	push.w	r2					/* Push padded flags value onto the stack */
 	ld	r2, 2*REG_PC(r1)			/* r2=return address */
 	push	r2					/* Push the return address onto the stack */
 	ld	r7, 2*REG_R7(r1)			/* r7=saved value of r7 */
 	push	r7					/* Save this so that we can use r7 */
 	ld	r7, sp					/* r7=saved SP value */
 
-	/* Retore r8-r14 */
+	/* Restore registers and return from interrupt */
 
-	ld	sp, r1					/* sp=Points to register save structure */
+	ld	sp, r1					/* sp=Pointer to register save structure */
 	popmhi	<r8-r14>				/* Restore r8-r14 */
-	add	sp, #4					/* Skip over r15=sp */
+	add	sp, #4					/* Skip over restore of r15=sp */
+	popmlo	<r0-r6>					/* Restore r0-r6 */
+	ld	sp, r7					/* Switch to the correct stack for return */
+	pop	r7					/* Recover the saved value of r7 from the stack */
+	iret2						/* Return from interrupt */
 
-	/* Test if interrupts should be enabled upon return */
-
-	ld.w	r2, 2*REG_FLAGS(r1)			/* r2=padded flags value */
-	tm	r2, #Z16F_CNTRL_FLAGS_IRQE		/* Test IRQE bit (Z-bit == 0 if disabled) */
-	popmlo	<r0-r6>					/* Restore r0-r6 (retains Z-bit) */
-	ld	sp, r7					/* Recover the correct SP value (retains Z-bit) */
-	pop	r7					/* Get the saved value of r7 (retains Z-bit)*/
-	jp	z, _up_returndisabled			/* Jump if interrupts should remain disabled */
-
-	/* Return with interrupts enabled.  Note that at this point in the logic,
-	 * we are finished accessing the TCB.  Therefore, any interrupt level context
-	 * switches that may modify the TCB should be OK
-	 */
-
-	ei						/* Enable interrupts */
-
-_up_returndisabled:
-	ret
 	end
+
+

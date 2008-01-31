@@ -133,19 +133,19 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
               sigdeliver(tcb);
             }
 
-          /* CASE 2:  We are in an interrupt handler AND the
-           * interrupted task is the same as the one that
-           * must receive the signal, then we will have to modify
-           * the return state as well as the state in the TCB.
+          /* CASE 2:  We are in an interrupt handler AND the interrupted
+           * task is the same as the one that must receive the signal, then
+           * we will have to modify the return state as well as the state
+           * in the TCB.
            */
 
           else
             {
               FAR uint32 *current_pc  = (FAR uint32*)&current_regs[REG_PC];
 
-              /* Save the return address and interrupt state.
-               * These will be restored by the signal trampoline after
-               * the signals have been delivered.
+              /* Save the return address and interrupt state. These will be
+               * restored by the signal trampoline after the signals have
+               * been delivered.
                */
 
               tcb->xcp.sigdeliver     = sigdeliver;
@@ -159,23 +159,22 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
               *current_pc             = (uint32)up_sigdeliver;
               current_regs[REG_FLAGS] = 0;
 
-              /* And make sure that the saved context in the TCB
-               * is the same as the interrupt return context.
+              /* And make sure that the saved context in the TCB is the
+               * same as the interrupt return context.
                */
 
               up_copystate(tcb->xcp.regs, current_regs);
             }
         }
 
-      /* Otherwise, we are (1) signaling a task is not running
-       * from an interrupt handler or (2) we are not in an
-       * interrupt handler and the running task is signalling
-       * some non-running task.
+      /* Otherwise, we are (1) signaling a task is not running from an
+       * interrupt handler or (2) we are not in an interrupt handler
+       * and the running task is signalling some non-running task.
        */
 
       else
         {
-          uint32 *saved_pc        = (uint32*)&tcb->xcp.regs[REG_PC];
+          FAR uint32 *saved_pc     = (FAR uint32*)&tcb->xcp.regs[REG_PC];
 
           /* Save the return lr and cpsr and one scratch register
            * These will be restored by the signal trampoline after
