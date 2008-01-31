@@ -104,7 +104,7 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
 {
   /* Refuse to handle nested signal actions */
 
-  dbg("tcb=0x%p sigdeliver=0x%04x\n", tcb, (chipreg_t)sigdeliver);
+  dbg("tcb=0x%p sigdeliver=0x%06x\n", tcb, (uint32)sigdeliver);
 
   if (!tcb->xcp.sigdeliver)
     {
@@ -141,7 +141,7 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
 
           else
             {
-              uint32 *current_pc      = (uint32*)&current_regs[REG_PC];
+              FAR uint32 *current_pc  = (FAR uint32*)&current_regs[REG_PC];
 
               /* Save the return address and interrupt state.
                * These will be restored by the signal trampoline after
