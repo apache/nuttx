@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * sig_suspend.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <signal.h>
@@ -46,48 +46,46 @@
 #include "os_internal.h"
 #include "sig_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function: sigsuspend
  *
  * Description:
  *
- *   The sigsuspend() function replaces the signal mask of the
- *   process with the set of signals pointed to by the argument
- *   set and then suspends the process until delivery of a
- *   signal to the process.
+ *   The sigsuspend() function replaces the signal mask of the task with the
+ *   set of signals pointed to by the argument 'set' and then suspends the
+ *   process until delivery of a signal to the task.
  *
- *   If the effect of the set argument is to unblock a
- *   pending signal, then no wait is performed.
+ *   If the effect of the set argument is to unblock a pending signal, then
+ *   no wait is performed.
  *
- *   The original signal mask is restored when this function
- *   returns.
+ *   The original signal mask is restored when this function returns.
  *
- *   Waiting for an empty signal set stops a task without
- *   freeing any resources.
+ *   Waiting for an empty signal set stops a task without freeing any
+ *   resources.
  *
  * Parameters:
  *   set - signal mask to use while suspended.
@@ -100,16 +98,14 @@
  * POSIX Compatibility:
  *   int sigsuspend(const sigset_t *set);
  *
- *   POSIX states that sigsuspend() "suspends the process
- *   until delivery of a signal whose action is either to
- *   execute a signal-catching function or to terminate the
- *   process."  Only the deliver of a signal is required in
- *   the present implementation (even if the signal is
- *   ignored).
+ *   POSIX states that sigsuspend() "suspends the process until delivery of
+ *   a signal whose action is either to execute a signal-catching function
+ *   or to terminate the process."  Only the deliver of a signal is required
+ *   in the present implementation (even if the signal is ignored).
  *
- ************************************************************/
+ ****************************************************************************/
 
-int sigsuspend(const sigset_t *set)
+int sigsuspend(FAR const sigset_t *set)
 {
   FAR _TCB       *rtcb = (FAR _TCB*)g_readytorun.head;
   sigset_t        intersection;

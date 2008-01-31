@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * wdog.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,29 +31,29 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __WDOG_H
 #define __WDOG_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sched.h>
 
-/************************************************************
+/****************************************************************************
  * Compilations Switches
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
 /* The arguments are passed as uint32 values.  For systems
  * where the sizeof(pointer) < sizeof(uint32), the following
@@ -67,8 +67,8 @@
 
 union wdparm_u
 {
-  void   *pvarg;
-  uint32 *dwarg;
+  FAR void   *pvarg;
+  FAR uint32 *dwarg;
 };
 typedef union wdparm_u wdparm_t;
 
@@ -76,19 +76,19 @@ typedef union wdparm_u wdparm_t;
  * watchdog function expires.  Up to four parameters may be passed.
  */
 
-typedef void (*wdentry_t)(int argc, uint32 arg1, ...);
+typedef CODE void (*wdentry_t)(int argc, uint32 arg1, ...);
 
 /* Watchdog 'handle' */
 
 typedef FAR struct wdog_s *WDOG_ID;
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -110,4 +110,3 @@ EXTERN int     wd_gettime(WDOG_ID wdog);
 #endif
 
 #endif /* _WDOG_H_ */
-

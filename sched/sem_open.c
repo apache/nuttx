@@ -1,7 +1,7 @@
-/************************************************************
- * sem_open.c
+/****************************************************************************
+ * sched/sem_open.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <stdarg.h>
@@ -47,76 +47,73 @@
 #include <nuttx/kmalloc.h>
 #include "sem_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Compilation Switches
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function: sem_open
  *
  * Description:
- *   This function establishes a connection between named
- *   semaphores and a task.  Following a call to sem_open()
- *   with the semaphore name, the task may reference the
- *   semaphore associated with name using the address
- *   returned by this call.  The semaphore may be used in
- *   subsequent calls to sem_wait(), sem_trywait(), and
- *   sem_post().  The semaphore remains usable until the
- *   semaphore is closed by a successful call to sem_close().
+ *   This function establishes a connection between named semaphores and a
+ *   task.  Following a call to sem_open() with the semaphore name, the task
+ *   may reference the semaphore associated with name using the address
+ *   returned by this call.  The semaphore may be used in subsequent calls
+ *   to sem_wait(), sem_trywait(), and sem_post().  The semaphore remains
+ *   usable until the semaphore is closed by a successful call to sem_close().
  *
- *   If a task makes multiple calls to sem_open() with the
- *   same name, then the same semaphore address is returned
- *   (provided there have been no calls to sem_unlink()).
+ *   If a task makes multiple calls to sem_open() with the same name, then
+ *   the same semaphore address is returned (provided there have been no
+ *   calls to sem_unlink()).
  *
  * Parameters:
  *   name  - Semaphore name
- *   oflag - Semaphore creation options.  This may either
- *     or both of the following bit settings.
- *     oflag = 0:  Connect to the semaphore only if it
- *        already exists.
- *     oflag = O_CREAT:  Connect to the semaphore if it
- *        exists, otherwise create the semaphore.
+ *   oflag - Semaphore creation options.  This may either or both of the
+ *     following bit settings.
+ *     oflag = 0:  Connect to the semaphore only if it already exists.
+ *     oflag = O_CREAT:  Connect to the semaphore if it exists, otherwise
+ *        create the semaphore.
  *     oflag = O_CREAT|O_EXCL:  Create a new semaphore
  *        unless one of this name already exists.
- *   Optional parameters.  When the O_CREAT flag is specified,
- *     two optional parameters are expected:
+ *   Optional parameters.  When the O_CREAT flag is specified, two optional
+ *     parameters are expected:
  *     1. mode_t mode (ignored), and
- *     2. unsigned int value.  This initial value of the semaphore.
- *        valid initial values of the semaphore must be less than
- *         or equal to SEM_VALUE_MAX.
+ *     2. unsigned int value.  This initial value of the semaphore. Valid
+ *        initial values of the semaphore must be less than or equal to
+ *        SEM_VALUE_MAX.
  *
  * Return Value:
  *   A pointer to sem_t or -1 (ERROR) if unsuccessful.
  *
  * Assumptions:
  *
- ************************************************************/
+ ****************************************************************************/
 
-FAR sem_t *sem_open (const char *name, int oflag, ...)
+FAR sem_t *sem_open (FAR const char *name, int oflag, ...)
 {
   int          namelen;
   FAR nsem_t  *psem;

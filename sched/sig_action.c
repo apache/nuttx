@@ -1,7 +1,7 @@
-/************************************************************
- * sig_action.c
+/****************************************************************************
+ * sched/sig_action.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <signal.h>
@@ -44,38 +44,38 @@
 #include "os_internal.h"
 #include "sig_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
 #define COPY_SIGACTION(t,f) \
   { (t)->sa_sigaction = (f)->sa_sigaction; \
     (t)->sa_mask      = (f)->sa_mask; \
     (t)->sa_flags     = (f)->sa_flags; }
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function: sig_allocateaction
  *
  * Description:
  *   Allocate a new element for a sigaction queue
  *
- ************************************************************/
+ ****************************************************************************/
 
 static FAR sigactq_t *sig_allocateaction(void)
 {
@@ -105,49 +105,41 @@ static FAR sigactq_t *sig_allocateaction(void)
   return sigact;
 }
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function: sigaction
  *
  * Description:
- *   This function allows the calling process to examine
- *   and/or specify the action to be associated with a
- *   specific signal.
+ *   This function allows the calling process to examine and/or specify the
+ *   action to be associated with a specific signal.
  *
- *   The structure sigaction, used to describe an action to
- *   be taken, is defined to include the following members:
+ *   The structure sigaction, used to describe an action to be taken, is
+ *   defined to include the following members:
  *
- *   - sa_u.sa_handler:  Pointer to a signal-catching
- *       function
- *   - sa_u.sa_sigaction:  Alternative form of the
- *       signal-catching function
- *   - sa_mask: An additional set of signals to be blocked
- *       during execution of a signal catching function
- *   - sa_flags.  Special flags to affect the behavior of a
- *       signal.
+ *   - sa_u.sa_handler:  Pointer to a signal-catching function
+ *   - sa_u.sa_sigaction:  Alternative form of the signal-catching function
+ *   - sa_mask: An additional set of signals to be blocked during execution
+ *       of a signal catching function
+ *   - sa_flags.  Special flags to affect the behavior of a signal.
  *
- *   If the argument 'act' is not NULL, it points to a
- *   structure specifying the action to be associated with
- *   the specified signal.  If the argument 'oact' is not
- *   NULL, the action previously associated with the signal
- *   is stored in the location pointed to by the argument
- *   'oact.'
+ *   If the argument 'act' is not NULL, it points to a structure specifying
+ *   the action to be associated with the specified signal.  If the argument
+ *   'oact' is not NULL, the action previously associated with the signal
+ *   is stored in the location pointed to by the argument 'oact.'
  *
- *   When a signal is caught by a signal-catching function
- *   installed by sigaction() function, a new signal mask is 
- *   calculated and installed for the duration of the
- *   signal-catching function.  This mask is formed by taking
- *   the union of the current signal mask and the value of the
- *   sa_mask for the signal being delivered and then including
- *   the signal being delivered.  If and when the user's signal
- *   handler returns, the original signal mask is restored.
+ *   When a signal is caught by a signal-catching function installed by
+ *   sigaction() function, a new signal mask is calculated and installed for
+ *   the duration of the signal-catching function.  This mask is formed by
+ *   taking the union of the current signal mask and the value of the
+ *   sa_mask for the signal being delivered and then including the signal
+ *   being delivered.  If and when the user's signal handler returns, the
+ *   original signal mask is restored.
  *
- *   Once an action is installed for a specific signal, it
- *   remains installed until another action is explicitly
- *   requested by another call to sigaction().
+ *   Once an action is installed for a specific signal, it remains installed
+ *   until another action is explicitly requested by another call to sigaction().
  *
  * Parameters:
  *   sig - Signal of interest
@@ -166,18 +158,17 @@ static FAR sigactq_t *sig_allocateaction(void)
  * - All sa_flags in struct sigaction of act input are
  *   ignored (all treated like SA_SIGINFO).
  *
- ************************************************************/
+ ****************************************************************************/
 
-int sigaction(int signo, const struct sigaction *act,
-              struct sigaction *oact)
+int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *oact)
 {
   FAR _TCB      *rtcb = (FAR _TCB*)g_readytorun.head;
   FAR sigactq_t *sigact;
   int            ret = ERROR;  /* Assume failure */
 
-  /* Since sigactions can only be installed from the running
-   * thread of execution, no special precautions should be
-   * necessary. */
+  /* Since sigactions can only be installed from the running thread of
+   * execution, no special precautions should be necessary.
+   */
 
   /* Verify the signal */
 
@@ -262,13 +253,13 @@ int sigaction(int signo, const struct sigaction *act,
   return ret;
 }
 
-/************************************************************
+/****************************************************************************
  * Function:  sig_releaseaction
  *
  * Description:
  *   Deallocate a sigaction Q entry
  *
- ************************************************************/
+ ****************************************************************************/
 
 void sig_releaseaction(FAR sigactq_t *sigact)
 {

@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * unistd.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,21 +31,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __UNISTD_H
 #define __UNISTD_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <nuttx/compiler.h>
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
 /* The number of functions that may be registerd to be called
  * at program exit.
@@ -96,9 +96,9 @@
 
 #define fdatasync(f) fsync(f)
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -110,13 +110,13 @@ extern "C" {
 
 /* Used by getopt (obviously NOT thread safe!) */
 
-EXTERN char *optarg; /* Optional argument following option */
-EXTERN int   optind; /* Index into argv */
-EXTERN int   optopt; /* unrecognized option character */
+EXTERN FAR char *optarg; /* Optional argument following option */
+EXTERN int       optind; /* Index into argv */
+EXTERN int       optopt; /* unrecognized option character */
 
-/************************************************************
+/****************************************************************************
  * Global Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 /* Task Control Interfaces */
 

@@ -1,7 +1,7 @@
-/************************************************************
- * wd_start.c
+/****************************************************************************
+ * sched/wd_start.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <stdarg.h>
@@ -46,13 +46,13 @@
 #include "os_internal.h"
 #include "wd_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
 typedef void (*wdentry0_t)(int argc);
 #if CONFIG_MAX_WDOGPARMS > 0
@@ -70,23 +70,23 @@ typedef void (*wdentry4_t)(int argc, uint32 arg1, uint32 arg2,
                            uint32 arg3, uint32 arg4);
 #endif
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function:  wd_start
  *
  * Description:
@@ -107,9 +107,9 @@ typedef void (*wdentry4_t)(int argc, uint32 arg1, uint32 arg2,
  *   any effect.
  *
  * Parameters:
- *   wdog = watchdog ID
- *   delay = Delay count in clock ticks
- *   wdentry = function to call on timeout
+ *   wdog     = watchdog ID
+ *   delay    = Delay count in clock ticks
+ *   wdentry  = function to call on timeout
  *   parm1..4 = parameters to pass to wdentry
  *
  * Return Value:
@@ -119,15 +119,14 @@ typedef void (*wdentry4_t)(int argc, uint32 arg1, uint32 arg2,
  *   The watchdog routine runs in the context of the timer interrupt
  *   handler and is subject to all ISR restrictions.
  *
- ************************************************************/
+ ****************************************************************************/
 
-STATUS wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,
-                int argc, ...)
+STATUS wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
 {
   va_list    ap;
-  wdog_t    *curr;
-  wdog_t    *prev;
-  wdog_t    *next;
+  FAR wdog_t *curr;
+  FAR wdog_t *prev;
+  FAR wdog_t *next;
   sint32     now;
   irqstate_t saved_state;
   int        i;
@@ -154,8 +153,8 @@ STATUS wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,
 
   /* Save the data in the watchdog structure */
 
-  wdog->func    = wdentry;         /* Function to execute when delay expires */
-  wdog->argc    = argc;
+  wdog->func = wdentry;         /* Function to execute when delay expires */
+  wdog->argc = argc;
 
   va_start(ap, argc);
   for (i = 0; i < argc; i++)
@@ -226,7 +225,7 @@ STATUS wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,
 
           /* Insert the new watchdog in the list */
 
-          if (curr == (wdog_t*)g_wdactivelist.head)
+          if (curr == (FAR wdog_t*)g_wdactivelist.head)
             {
               sq_addfirst((FAR sq_entry_t*)wdog, &g_wdactivelist);
             }
@@ -268,14 +267,13 @@ STATUS wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,
   return OK;
 }
 
-/************************************************************
+/****************************************************************************
  * Function:  wd_timer
  *
  * Description:
- *   This function is called from the timer interrupt
- *   handler to determine if it is time to execute a watchdog
- *   function.  If so, the watchdog function will be executed
- *   in the context of the timer interrupt handler.
+ *   This function is called from the timer interrupt handler to determine
+ *   if it is time to execute a watchdog function.  If so, the watchdog
+ *   function will be executed in the context of the timer interrupt handler.
  *
  * Parameters:
  *   None
@@ -285,12 +283,12 @@ STATUS wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,
  *
  * Assumptions:
  *
- ************************************************************/
+ ****************************************************************************/
 
 void wd_timer(void)
 {
-  pid_t   pid;
-  wdog_t *wdog;
+  pid_t       pid;
+  FAR wdog_t *wdog;
 
   /* Check if there are any active watchdogs to process */
 
@@ -298,22 +296,22 @@ void wd_timer(void)
     {
       /* There are.  Decrement the lag counter */
 
-      --(((wdog_t*)g_wdactivelist.head)->lag);
+      --(((FAR wdog_t*)g_wdactivelist.head)->lag);
 
       /* Check if the watchdog at the head of the list is ready to run */
 
-      if (((wdog_t*)g_wdactivelist.head)->lag <= 0)
+      if (((FAR wdog_t*)g_wdactivelist.head)->lag <= 0)
         {
           /* Process the watchdog at the head of the list as well as any
            * other watchdogs that became ready to run at this time
            */
 
           while (g_wdactivelist.head &&
-                 ((wdog_t*)g_wdactivelist.head)->lag <= 0)
+                 ((FAR wdog_t*)g_wdactivelist.head)->lag <= 0)
             {
               /* Remove the watchdog from the head of the list */
 
-              wdog = (wdog_t*)sq_remfirst(&g_wdactivelist);
+              wdog = (FAR wdog_t*)sq_remfirst(&g_wdactivelist);
 
               /* If there is another watchdog behind this one, update its
                * its lag (this shouldn't be necessary).
@@ -321,7 +319,7 @@ void wd_timer(void)
 
               if (g_wdactivelist.head)
                 {
-                  ((wdog_t*)g_wdactivelist.head)->lag += wdog->lag;
+                  ((FAR wdog_t*)g_wdactivelist.head)->lag += wdog->lag;
                 }
 
               /* Indicate that the watchdog is no longer activer. */

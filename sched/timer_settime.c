@@ -1,7 +1,7 @@
 /********************************************************************************
- * timer_settime.c
+ * sched/timer_settime.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -140,7 +140,7 @@ static void inline timer_restart(FAR struct posix_timer_s *timer, uint32 itimer)
   if (timer->pt_delay)
     {
       timer->pt_last = timer->pt_delay;
-      (void)wd_start(timer->pt_wdog, timer->pt_delay, timer_timeout, 1, itimer);
+      (void)wd_start(timer->pt_wdog, timer->pt_delay, (wdentry_t)timer_timeout, 1, itimer);
     }
 }
 
@@ -164,7 +164,7 @@ static void inline timer_restart(FAR struct posix_timer_s *timer, uint32 itimer)
  *
  ********************************************************************************/
 
-static void timer_timeout(int argc, uint32 itimer, ...)
+static void timer_timeout(int argc, uint32 itimer)
 {
 #ifndef CONFIG_CAN_PASS_STRUCTS
   /* On many small machines, pointers are encoded and cannot be simply cast from
@@ -355,7 +355,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
   if (delay > 0)
     {
       timer->pt_last = delay;
-      ret = wd_start(timer->pt_wdog, timer->pt_delay, timer_timeout, 1, (uint32)timer);
+      ret = wd_start(timer->pt_wdog, timer->pt_delay, (wdentry_t)timer_timeout, 1, (uint32)timer);
     }
 
   irqrestore(state);

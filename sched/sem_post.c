@@ -1,7 +1,7 @@
-/************************************************************
- * sem_post.c
+/****************************************************************************
+ * sched/sem_post.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <limits.h>
@@ -45,52 +45,49 @@
 #include "os_internal.h"
 #include "sem_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Compilation Switches
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function:  sem_post
  *
  * Description:
- *   When a task has finished with a semaphore, it will call
- *   sem_post().  This function unlocks the semaphore
- *   referenced by sem by performing the semaphore unlock
- *   operation on that semaphore.
+ *   When a task has finished with a semaphore, it will call sem_post().
+ *   This function unlocks the semaphore referenced by sem by performing the
+ *   semaphore unlock operation on that semaphore.
  *
- *   If the semaphore value resulting from this operation
- *   is positive, then no tasks were blocked waiting for the
- *   semaphore to become unlocked; the semaphore is simply
- *   incremented.
+ *   If the semaphore value resulting from this operation is positive, then
+ *   no tasks were blocked waiting for the semaphore to become unlocked; the
+ *   semaphore is simply incremented.
  *
- *   If the value of the semaphore resulting from this
- *   operation is zero, then one of the tasks blocked
- *   waiting for the semaphore shall be allowed to return
- *   successfully from its call to sem_wait().
+ *   If the value of the semaphore resulting from this operation is zero,
+ *   then one of the tasks blocked waiting for the semaphore shall be
+ *   allowed to return successfully from its call to sem_wait().
  *
  * Parameters:
  *   sem - Semaphore descriptor
@@ -103,9 +100,9 @@
  *   It assumes the currently executing task is the one that
  *   is performing the unlock.
  *
- ************************************************************/
+ ****************************************************************************/
 
-int sem_post(sem_t *sem)
+int sem_post(FAR sem_t *sem)
 {
   FAR _TCB  *stcb;
   STATUS     ret = ERROR;
@@ -163,4 +160,3 @@ int sem_post(sem_t *sem)
 
   return ret;
 }
-

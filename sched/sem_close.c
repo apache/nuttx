@@ -1,7 +1,7 @@
-/************************************************************
- * sem_close.c
+/****************************************************************************
+ * sched/sem_close.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <errno.h>
@@ -44,48 +44,46 @@
 #include "os_internal.h"
 #include "sem_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Compilation Switches
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function:  sem_close
  *
  * Description:
- *   This function is called to indicate that the calling\
- *   task is finished with the specified named semaphore,
- *   sem.  The sem_close() deallocates any system resources
- *   allocated by the system for this named semaphore.
+ *   This function is called to indicate that the calling task is finished
+ *   with the specified named semaphore, 'sem'.  The sem_close() deallocates
+ *   any system resources allocated by the system for this named semaphore.
  *
- *   If the semaphore has not been removed with a call to
- *   sem_unlink(), then sem_close() has no effect on the
- *   named semaphore.  However, when the named semaphore has
- *   been fully unlinked, the semaphore will vanish when the
- *   last task closes it.
+ *   If the semaphore has not been removed with a call to sem_unlink(), then
+ *   sem_close() has no effect on the named semaphore.  However, when the
+ *   named semaphore has been fully unlinked, the semaphore will vanish when
+ *   the last task closes it.
  *
  * Parameters:
  *  sem - semaphore descriptor
@@ -94,12 +92,11 @@
  *  0 (OK), or -1 (ERROR) if unsuccessful.
  *
  * Assumptions:
- *   - Care must be taken to avoid risking the deletion of
- *     a semaphore that another calling task has already
- *     locked.
+ *   - Care must be taken to avoid risking the deletion of a semaphore that
+ *     another calling task has already locked.
  *   - sem_close must not be called for an un-named semaphore
  *
- ************************************************************/
+ ****************************************************************************/
 
 int sem_close(FAR sem_t *sem)
 {
@@ -142,4 +139,3 @@ int sem_close(FAR sem_t *sem)
 
   return ret;
 }
-

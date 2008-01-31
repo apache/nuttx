@@ -1,7 +1,7 @@
-/************************************************************
- * sem_init.c
+/****************************************************************************
+ * sched/sem_init.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,59 +31,57 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <limits.h>
 #include <semaphore.h>
 #include "sem_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Compilation Switches
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function: sem_init
  *
  * Description:
- *   This function initializes the UNAMED semaphore sem.
- *   Following a successful call to sem_init(), the
- *   semaophore may be used in subsequent calls to
- *   sem_wait(), sem_post(), and sem_trywait().  The
- *   semaphore remains usable until it is destroyed.
+ *   This function initializes the UNAMED semaphore sem. Following a
+ *   successful call to sem_init(), the semaophore may be used in subsequent
+ *   calls to sem_wait(), sem_post(), and sem_trywait().  The semaphore
+ *   remains usable until it is destroyed.
  *
- *   Only sem itself may be used for performing
- *   synchronization. The result of referring to copies of
- *   sem in calls to sem_wait(), sem_trywait(), sem_post(),
- *   and sem_destroy() is undefined.
+ *   Only sem itself may be used for performing synchronization. The result
+ *   of referring to copies of sem in calls to sem_wait(), sem_trywait(),
+ *   sem_post(), and sem_destroy() is undefined.
  *
  * Parameters:
  *   sem - Semaphore to be initialized
@@ -95,9 +93,9 @@
  *
  * Assumptions:
  *
- ************************************************************/
+ ****************************************************************************/
 
-int sem_init (sem_t *sem, int pshared, unsigned int value)
+int sem_init (FAR sem_t *sem, int pshared, unsigned int value)
 {
   int ret = ERROR;
 

@@ -1,7 +1,7 @@
-/************************************************************
- * sem_wait.c
+/****************************************************************************
+ * sched/sem_wait.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <semaphore.h>
@@ -45,59 +45,57 @@
 #include "os_internal.h"
 #include "sem_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Compilation Switches
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function:  sem_wait
  *
  * Description:
- *   This function attempts to lock the semaphore referenced
- *   by sem.  If the semaphore value is (<=) zero, then the
- *   calling task will not return until it successfully
- *   acquires the lock.
+ *   This function attempts to lock the semaphore referenced by 'sem'.  If
+ *   the semaphore value is (<=) zero, then the calling task will not return
+ *   until it successfully acquires the lock.
  *
  * Parameters:
  *   sem - Semaphore descriptor.
  *
  * Return Value:
  *   0 (OK), or -1 (ERROR) is unsuccessful
- *   If this function returns -1 (ERROR), then the cause
- *   of the failure will be reported in "errno" as:
+ *   If this function returns -1 (ERROR), then the cause of the failure will
+ *   be reported in 'errno' as:
  *   - EINVAL:  Invalid attempt to get the semaphore
- *   - EINTR:   The wait was interrupted by the receipt of
- *              a signal.
+ *   - EINTR:   The wait was interrupted by the receipt of a signal.
  *
  * Assumptions:
  *
- ************************************************************/
+ ****************************************************************************/
 
-int sem_wait(sem_t *sem)
+int sem_wait(FAR sem_t *sem)
 {
   FAR _TCB  *rtcb = (FAR _TCB*)g_readytorun.head;
   int        ret = ERROR;
@@ -105,7 +103,7 @@ int sem_wait(sem_t *sem)
 
   /* This API should not be called from interrupt handlers */
 
-  DEBUGASSERT(!up_interrupt_context())
+  DEBUGASSERT(up_interrupt_context() == FALSE)
 
   /* Assume any errors reported are due to invalid arguments. */
 
@@ -182,4 +180,3 @@ int sem_wait(sem_t *sem)
 
   return ret;
 }
-

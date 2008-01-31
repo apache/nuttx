@@ -1,7 +1,7 @@
-/************************************************************
- * semaphore.h
+/****************************************************************************
+ * include/semaphore.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __SEMAPHORE_H
 #define __SEMAPHORE_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <limits.h>
@@ -50,13 +50,13 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
 /* This is the generic semaphore structure. */
 
@@ -67,25 +67,25 @@ struct sem_s
 };
 typedef struct sem_s sem_t;
 
-/************************************************************
+/****************************************************************************
  * Public Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 /* Counting Semaphore Interfaces (based on POSIX APIs) */
 
-EXTERN int        sem_init(sem_t *sem, int pshared, unsigned int value);
-EXTERN int        sem_destroy(sem_t *sem);
-EXTERN FAR sem_t *sem_open(const char *name, int oflag, ...);
+EXTERN int        sem_init(FAR sem_t *sem, int pshared, unsigned int value);
+EXTERN int        sem_destroy(FAR sem_t *sem);
+EXTERN FAR sem_t *sem_open(FAR const char *name, int oflag, ...);
 EXTERN int        sem_close(FAR sem_t *sem);
-EXTERN int        sem_unlink(const char *name);
-EXTERN int        sem_wait(sem_t *sem);
-EXTERN int        sem_trywait(sem_t *sem);
-EXTERN int        sem_post(sem_t *sem);
-EXTERN int        sem_getvalue(sem_t *sem, int *sval);
+EXTERN int        sem_unlink(FAR const char *name);
+EXTERN int        sem_wait(FAR sem_t *sem);
+EXTERN int        sem_trywait(FAR sem_t *sem);
+EXTERN int        sem_post(FAR sem_t *sem);
+EXTERN int        sem_getvalue(FAR sem_t *sem, FAR int *sval);
 
 #undef EXTERN
 #ifdef __cplusplus
@@ -93,4 +93,3 @@ EXTERN int        sem_getvalue(sem_t *sem, int *sval);
 #endif
 
 #endif /* __SEMAPHORE_H */
-

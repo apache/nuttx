@@ -89,7 +89,7 @@
  *
  ****************************************************************************/
 
-static void pthread_condtimedout(int argc, uint32 pid, uint32 signo, ...)
+static void pthread_condtimedout(int argc, uint32 pid, uint32 signo)
 {
 #ifdef CONFIG_CAN_PASS_STRUCTS
   union sigval value;

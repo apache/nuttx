@@ -1,7 +1,7 @@
-/************************************************************
- * wd_create.c
+/****************************************************************************
+ * sched/wd_create.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <wdog.h>
@@ -43,55 +43,55 @@
 #include <nuttx/arch.h>
 #include "wd_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function:  wd_create
  *
  * Description:  
- *   The wd_create function will create a watchdog by
- *   allocating it from the free list.
+ *   The wd_create function will create a watchdog by allocating it from the
+ *   list of free watchdogs.
  *
  * Parameters:
  *   None
  *
  * Return Value:
- *   Pointer to watchdog (i.e., the watchdog ID), or NULL
- *   if insufficient watchdogs are available.
+ *   Pointer to watchdog (i.e., the watchdog ID), or NULL if insufficient
+ *   watchdogs are available.
  *
  * Assumptions:
  *
- ************************************************************/
+ ****************************************************************************/
 
 WDOG_ID wd_create (void)
 {
-  wdog_t    *wdog;
+  FAR wdog_t *wdog;
   irqstate_t saved_state;
 
   saved_state = irqsave();
-  wdog = (wdog_t*)sq_remfirst(&g_wdfreelist);
+  wdog = (FAR wdog_t*)sq_remfirst(&g_wdfreelist);
   irqrestore(saved_state);
 
   /* Indicate that the watchdog is not actively timing */

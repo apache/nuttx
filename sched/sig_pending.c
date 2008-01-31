@@ -1,7 +1,7 @@
-/************************************************************
- * sig_pending.c
+/****************************************************************************
+ * sched/sig_pending.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <signal.h>
@@ -43,37 +43,37 @@
 #include "os_internal.h"
 #include "sig_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function: sigpending
  *
  * Description:
- *   This function stores the returns the set of signals that
- *   are blocked for delivery and that are pending for the
- *   calling process in the space pointed to by set.
+ *   This function stores the returns the set of signals that are blocked
+ *   for delivery and that are pending for the calling process in the space
+ *   pointed to by set.
  * 
  * Parameters:
  *   set - The location to return the pending signal set.
@@ -83,9 +83,9 @@
  *
  * Assumptions:
  *
- ************************************************************/
+ ****************************************************************************/
 
-int sigpending(sigset_t *set)
+int sigpending(FAR sigset_t *set)
 {
   FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
   int       ret  = ERROR;
@@ -99,12 +99,13 @@ int sigpending(sigset_t *set)
   return ret;
 }
 
-/************************************************************
+/****************************************************************************
  * Function: sig_pendingset
  *
  * Description:
  *   Convert the list of pending signals into a signal set
- ************************************************************/
+ *
+ ****************************************************************************/
 
 sigset_t sig_pendingset(FAR _TCB *stcb)
 {
@@ -124,5 +125,3 @@ sigset_t sig_pendingset(FAR _TCB *stcb)
 
   return sigpendset;
 }
-
-

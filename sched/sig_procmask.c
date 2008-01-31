@@ -1,7 +1,7 @@
-/************************************************************
- * sig_procmask.c
+/****************************************************************************
+ * sched/sig_procmask.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -50,58 +50,55 @@
 #include "os_internal.h"
 #include "sig_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function: sigprocmask
  *
  * Description:
- *   This function allows the calling process to examine
- *   and/or change its signal mask.  If the set is not NULL,
- *   then it points to a set of signals to be used to change
- *   the currently blocked set.  The value of how indicates
- *   the manner in which the set is changed.
+ *   This function allows the calling process to examine and/or change its
+ *   signal mask.  If the 'set' is not NULL, then it points to a set of
+ *   signals to be used to change the currently blocked set.  The value of
+ *   'how' indicates the manner in which the set is changed.
  *
- *   If there any pending unblocked signals after the call
- *   to sigprocmask(), those signals will be delivered
- *   before sigprocmask() returns.
+ *   If there any pending unblocked signals after the call to sigprocmask(),
+ *   those signals will be delivered before sigprocmask() returns.
  *
- *   If sigprocmask() fails, the signal mask of the process
- *   is not changed by this function call.
+ *   If sigprocmask() fails, the signal mask of the process is not changed
+ *   by this function call.
  *
  * Parameters:
  *   how - How the signal mast will be changed:
- *         SIG_BLOCK   - The resulting set is the union of
- *                       the current set and the signal set
- *                       pointed to by set.
- *         SIG_UNBLOCK - The resulting set is the intersection
- *                       of the current set and the complement
- *                       of the signal set pointed to by _set.
- *         SIG_SETMASK - The resulting set is the signal set
- *                       pointed to by set.
- *   set - Location of the new signal mask
+ *         SIG_BLOCK   - The resulting set is the union of the current set
+ *                       and the signal set pointed to by 'set'.
+ *         SIG_UNBLOCK - The resulting set is the intersection of the current
+ *                       set and the complement of the signal set pointed to
+ *                       by 'set'.
+ *         SIG_SETMASK - The resulting set is the signal set pointed to by
+ *                       'set'.
+ *   set  - Location of the new signal mask
  *   oset - Location to store the old signal mask
  *
  * Return Value:
@@ -109,9 +106,9 @@
  *
  * Assumptions:
  *
- ************************************************************/
+ ****************************************************************************/
 
-int sigprocmask(int how, const sigset_t *set, sigset_t *oset)
+int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
 {
   FAR _TCB  *rtcb = (FAR _TCB*)g_readytorun.head;
   sigset_t   oldsigprocmask;

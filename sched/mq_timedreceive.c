@@ -1,7 +1,7 @@
 /****************************************************************************
- * mq_timedreceive.c
+ * sched/mq_timedreceive.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -86,7 +86,7 @@
  *
  ****************************************************************************/
 
-static void mq_rcvtimeout(int argc, uint32 pid, ...)
+static void mq_rcvtimeout(int argc, uint32 pid)
 {
   FAR _TCB *wtcb;
   irqstate_t saved_state;
@@ -192,7 +192,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, void *msg, size_t msglen,
   irqstate_t   saved_state;
   int          ret = ERROR;
 
-  DEBUGASSERT(!up_interrupt_context());
+  DEBUGASSERT(up_interrupt_context() == FALSE);
 
   /* Verify the input parameters and, in case of an error, set
    * errno appropriately.

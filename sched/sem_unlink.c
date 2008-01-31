@@ -1,7 +1,7 @@
-/************************************************************
- * sem_unlink.c
+/****************************************************************************
+ * sched/sem_unlink.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <semaphore.h>
@@ -44,46 +44,44 @@
 #include "os_internal.h"
 #include "sem_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Compilation Switches
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function:  sem_unlink
  *
  * Description:
- *   This function removes the semaphore named by the input
- *   parameter "name."  If the semaphore named by "name" is
- *   currently referenced by other processes, the sem_unlink()
- *   will have no effect on the state of the semaphore.  If
- *   one or more processes have the semaphore open when
- *   sem_unlink() is called, destruction of the semaphore
- *   will be postponed until all references to the semaphore
- *   have been destroyed by calls of sem_close().
+ *   This function removes the semaphore named by the input parameter 'name.'
+ *   If the semaphore named by 'name' is currently referenced by other task,
+ *   the sem_unlink() will have no effect on the state of the semaphore.  If
+ *   one or more processes have the semaphore open when sem_unlink() is
+ *   called, destruction of the semaphore will be postponed until all
+ *   references to the semaphore have been destroyed by calls of sem_close().
  *
  * Parameters:
  *   name - Semaphore name
@@ -93,9 +91,9 @@
  *
  * Assumptions:
  *
- ************************************************************/
+ ****************************************************************************/
 
-int sem_unlink(const char *name)
+int sem_unlink(FAR const char *name)
 {
   FAR nsem_t *psem;
   int         ret = ERROR;
@@ -139,4 +137,3 @@ int sem_unlink(const char *name)
 
   return ret;
 }
-

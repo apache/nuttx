@@ -1,7 +1,7 @@
-/************************************************************
- * sig_timedwait.c
+/****************************************************************************
+ * sched/sig_timedwait.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <string.h>
@@ -50,40 +50,40 @@
 #include "sig_internal.h"
 #include "clock_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functionss
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function: sig_timeout
  *
  * Description:
  *  A timeout elapsed while waiting for signals to be queued.
- ************************************************************/
+ *
+ ****************************************************************************/
 
-static void sig_timeout(int argc, uint32 itcb, ...)
+static void sig_timeout(int argc, uint32 itcb)
 {
-  /* On many small machines, pointers are encoded and cannot
-   * be simply cast from uint32 to _TCB*.  The following
-   * union works around this (see wdogparm_t).  This odd
-   * logic could be conditioned on CONFIG_CAN_CAST_POINTERS,
-   * but it is not too bad in any case.
+  /* On many small machines, pointers are encoded and cannot be simply cast
+   * from uint32 to _TCB*.  The following union works around this
+   * (see wdogparm_t).  This odd logic could be conditioned on
+   * CONFIG_CAN_CAST_POINTERS, but it is not too bad in any case.
    */
 
   union
@@ -105,37 +105,34 @@ static void sig_timeout(int argc, uint32 itcb, ...)
 
   if (u.wtcb->task_state == TSTATE_WAIT_SIG)
     {
-      u.wtcb->sigunbinfo.si_signo = ERROR;
-      u.wtcb->sigunbinfo.si_code = SI_TIMER;
+      u.wtcb->sigunbinfo.si_signo           = ERROR;
+      u.wtcb->sigunbinfo.si_code            = SI_TIMER;
       u.wtcb->sigunbinfo.si_value.sival_int = 0;
       up_unblock_task(u.wtcb);
     }
 }
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function: sigtimedwait
  *
  * Description:
- *   This function selects the pending signal set specified
- *   by the argument set.  If multiple signals are pending
- *   in set, it will remove and return the lowest numbered
- *   one.  If no signals in set are pending at the time of
- *   the call, the calling process will be suspended until
- *   one of the signals in set becomes pending, OR until
- *   the process is interrupted by an unblocked signal, OR
- *   until the time interval specified by timeout (if any),
- *   has expired. If timeout is NULL, then the timeout
- *   interval is forever.
+ *   This function selects the pending signal set specified by the argument
+ *   set.  If multiple signals are pending in set, it will remove and return
+ *   the lowest numbered one.  If no signals in set are pending at the time
+ *   of the call, the calling process will be suspended until one of the
+ *   signals in set becomes pending, OR until the process is interrupted by
+ *   an unblocked signal, OR until the time interval specified by timeout
+ *   (if any), has expired. If timeout is NULL, then the timeout interval
+ *   is forever.
  *
- *   If the info argument is non-NULL, the selected signal
- *   number is stored in the si_signo member and the cause
- *   of the signal is store in the si_code emember.  The
- *   content of si_value is only meaningful if the signal was
- *   generated by sigqueue().
+ *   If the info argument is non-NULL, the selected signal number is stored
+ *   in the si_signo member and the cause of the signal is store in the
+ *   si_code emember.  The content of si_value is only meaningful if the
+ *   signal was generated by sigqueue().
  *
  *   The following values for si_code are defined in signal.h:
  *     SI_USER    - Signal sent from kill, raise, or abort
@@ -151,15 +148,15 @@ static void sig_timeout(int argc, uint32 itcb, ...)
  *   timeout - The amount of time to wait
  *
  * Return Value:
- *   Signal number that cause the wait to be terminated, otherwise
- *   -1 (ERROR) is returned.
+ *   Signal number that cause the wait to be terminated, otherwise -1 (ERROR)
+ *   is returned.
  *
  * Assumptions:
  *
- ************************************************************/
+ ****************************************************************************/
 
-int sigtimedwait(const sigset_t *set, struct siginfo *info,
-                 const struct timespec *timeout)
+int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
+                 FAR const struct timespec *timeout)
 {
   FAR _TCB       *rtcb = (FAR _TCB*)g_readytorun.head;
   sigset_t        intersection;
@@ -242,12 +239,11 @@ int sigtimedwait(const sigset_t *set, struct siginfo *info,
                */
 
               wdparm_t wdparm;
-              wdparm.pvarg = (void*)rtcb;
+              wdparm.pvarg = (FAR void*)rtcb;
 
               /* Start the watchdog */
 
-              wd_start(wdog, waitticks, (wdentry_t)sig_timeout,
-                       1, wdparm.dwarg);
+              wd_start(wdog, waitticks, (wdentry_t)sig_timeout, 1, wdparm.dwarg);
 
               /* Now wait for either the signal or the watchdog */
 
@@ -290,4 +286,3 @@ int sigtimedwait(const sigset_t *set, struct siginfo *info,
 
    return ret;
 }
-

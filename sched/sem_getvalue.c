@@ -1,7 +1,7 @@
-/************************************************************
- * sem_getvalue.c
+/****************************************************************************
+ * sched/sem_getvalue.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,60 +31,58 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <semaphore.h>
 #include "sem_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Compilation Switches
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function:  sem_getvalue
  *
  * Description:
- *   This function updates the location referenced by sval
- *   argument to have the value of the semaphore referenced
- *   by sem without effecting the state of the semaphore.
- *   The updated value represents the actual semaphore value
- *   that occurred at some unspecified time during the call,
- *   but may not reflect the actual value of the semaphore
- *   when it is returned to the calling task.
+ *   This function updates the location referenced by 'sval' argument to
+ *   have the value of the semaphore referenced by 'sem' without effecting
+ *   the state of the semaphore.  The updated value represents the actual
+ *   semaphore value that occurred at some unspecified time during the call,
+ *   but may not reflect the actual value of the semaphore when it is
+ *   returned to the calling task.
  *
- *   If sem is locked, the value return by sem_getvalue()
- *   will either be zero or a negative number whose absolute
- *   value represents the number of tasks waiting for the
- *   semaphore.
+ *   If 'sem' is locked, the value return by sem_getvalue() will either be
+ *   zero or a negative number whose absolute value represents the number
+ *   of tasks waiting for the semaphore.
  *
  * Parameters:
  *   sem - Semaphore descriptor
@@ -95,9 +93,9 @@
  *
  * Assumptions:
  *
- ************************************************************/
+ ****************************************************************************/
 
-int sem_getvalue(sem_t *sem, int *sval)
+int sem_getvalue(FAR sem_t *sem, FAR int *sval)
 {
   int ret = ERROR;
 
@@ -109,4 +107,3 @@ int sem_getvalue(sem_t *sem, int *sval)
 
   return ret;
 }
-

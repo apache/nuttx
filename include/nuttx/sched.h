@@ -75,16 +75,14 @@
 
 /* General Task Management Types ************************************************/
 
-/* This is the type of the task_state field of the TCB.
- * NOTE: the order and content of this enumeration is
- * critical since there are some OS tables indexed by these
- * values.
+/* This is the type of the task_state field of the TCB. NOTE: the order and
+ * content of this enumeration is critical since there are some OS tables indexed
+ * by these values.  The range of values is assumed to fit into a ubyte in _TCB.
  */
 
 enum tstate_e
 {
-  TSTATE_TASK_INVALID    = 0, /* INVALID     - The TCB is is not in a valid state
-                               *               (Uninitialized or between context switches) */
+  TSTATE_TASK_INVALID    = 0, /* INVALID      - The TCB is uninitialized */
   TSTATE_TASK_PENDING    = 1, /* READY_TO_RUN - Pending preemption unlock */
   TSTATE_TASK_READYTORUN = 2, /* READY-TO-RUN - But not running */
   TSTATE_TASK_RUNNING    = 3, /* READY_TO_RUN - And running */
@@ -179,7 +177,7 @@ struct _TCB
   entry_t  entry;                        /* Entry Point into the thread         */
   exitfunc_t exitfunc;                   /* Called if exit is called.           */
   ubyte    sched_priority;               /* Current priority of the thread      */
-  tstate_t task_state;                   /* Current state of the thread         */
+  ubyte    task_state;                   /* Current state of the thread         */
   uint16   flags;                        /* Misc. general status flags          */
   sint16   lockcount;                    /* 0=preemptable (not-locked)          */
 #ifndef CONFIG_DISABLE_PTHREAD
