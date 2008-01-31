@@ -72,10 +72,9 @@
  * Name: up_sigdeliver
  *
  * Description:
- *   This is the a signal handling trampoline.  When a
- *   signal action was posted.  The task context was mucked
- *   with and forced to branch to this location with interrupts
- *   disabled.
+ *   This is the a signal handling trampoline.  When a signal action was
+ *   posted.  The task context was mucked with and forced to branch to this
+ *   location with interrupts disabled.
  *
  ****************************************************************************/
 
@@ -106,10 +105,9 @@ void up_sigdeliver(void)
   regs32[REG_PC/2] = rtcb->xcp.saved_pc;
   regs[REG_FLAGS]  = rtcb->xcp.saved_i;
 
-  /* Get a local copy of the sigdeliver function pointer.
-   * we do this so that we can nullify the sigdeliver
-   * function point in the TCB and accept more signal
-   * deliveries while processing the current pending
+  /* Get a local copy of the sigdeliver function pointer. We do this so
+   * that we can nullify the sigdeliver function point in the TCB and
+   * accept more signal deliveries while processing the current pending
    * signals.
    */
 
@@ -127,10 +125,9 @@ void up_sigdeliver(void)
 
   sigdeliver(rtcb);
 
-  /* Output any debug messaged BEFORE restoring errno
-   * (because they may alter errno), then restore the
-   * original errno that is needed by the user logic
-   * (it is probably EINTR).
+  /* Output any debug messaged BEFORE restoring errno (because they may
+   * alter errno), then restore the original errno that is needed by
+   * the user logic (it is probably EINTR).
    */
 
   dbg("Resuming\n");

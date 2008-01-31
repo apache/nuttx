@@ -73,7 +73,7 @@
 
 #define IN_INTERRUPT             (current_regs != NULL)
 #define SAVE_IRQCONTEXT(tcb)     up_copystate((tcb)->xcp.regs, current_regs)
-#define SET_IRQCONTEXT(tcb)      up_copystate(current_regs, (tcb)->xcp.regs)
+#define SET_IRQCONTEXT(tcb)      do { current_regs = (tcb)->xcp.regs; } while (0)
 #define SAVE_USERCONTEXT(tcb)    up_saveusercontext((tcb)->xcp.regs)
 #define RESTORE_USERCONTEXT(tcb) up_restoreusercontext((tcb)->xcp.regs)
 #define SIGNAL_RETURN(regs)      up_restoreusercontext(regs)
