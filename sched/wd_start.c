@@ -192,7 +192,7 @@ STATUS wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
   else
     {
       now = 0;
-      prev = curr = (wdog_t*)g_wdactivelist.head;
+      prev = curr = (FAR wdog_t*)g_wdactivelist.head;
 
       /* Advance to positive time */
 

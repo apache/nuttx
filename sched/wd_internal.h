@@ -63,12 +63,12 @@
 
 struct wdog_s
 {
-  struct wdog_s *next;       /* Support for singly linked lists. */
-  wdentry_t      func;       /* Function to execute when delay expires */
-  int            lag;        /* Timer associated with the delay */
-  boolean        active;     /* TRUE if the watchdog is actively timing */
-  ubyte          argc;       /* The number of parameters to pass */
-  uint32         parm[CONFIG_MAX_WDOGPARMS];
+  FAR struct wdog_s *next;       /* Support for singly linked lists. */
+  wdentry_t          func;       /* Function to execute when delay expires */
+  int                lag;        /* Timer associated with the delay */
+  boolean            active;     /* TRUE if the watchdog is actively timing */
+  ubyte              argc;       /* The number of parameters to pass */
+  uint32             parm[CONFIG_MAX_WDOGPARMS];
 };
 typedef struct wdog_s wdog_t;
 
@@ -118,4 +118,3 @@ EXTERN void weak_function wd_timer(void);
 #endif
 
 #endif /* __WD_INTERNAL_H */
-
