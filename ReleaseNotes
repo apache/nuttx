@@ -1,25 +1,29 @@
-nuttx-0.3.6
+nuttx-0.3.7
 ^^^^^^^^^^^
 
-This is the 18th release of NuttX.  This release contains on a few
-changes.  The primary purpose of this release is to synchronize with
-the release of the pascal-0.1.0 add-on package.
+This is the 19th release of NuttX.  This release includes the
+preliminary port of NuttX to the ZiLOG z16f 16-bit microcontroller.
+This port was verified using the ZiLOG z16f2800100zcog Development
+and the ZiLOG ZDS-II toolchain. See http://www.zilog.com for
+further information.
 
-This release of NuttX includes the following changes:
+I emphasize that this is a preliminary release of the z16f port and
+is only alpha or, perhaps, pre-alpha quality as of this writing.
+There are a list of known issues in the TODO file in the root of
+the NuttX directory.  The overall quality of NuttX (excluding the
+z16f port) continues to improve beyond the late beta level.
 
-* Fixes for use with SDCC compiler
-* Added a simulated z80 target (arch/z80)
-* Fix deadlock errors when using stdio but with no buffering
-* Add support for the add-on Pascal P-Code interpreter (pcode/)
-  (see the pascal-0.1.0 package)
+The z16f port required numerous changes to NuttX to handle:
 
-This release were verified only on the simulated Z80 and and host
-simulation targets.  As usual, any feedback about bugs or suggestions
-for improvement would be greatly appreciated.
+* NEAR and FAR addressing, and
+* Use of a Windows native toolchain in a Cygwin build environment.
 
-This tarball contains a complete CVS snapshot from January 6, 2007.
+In addition to the z16f port, at least one very critical bug was
+found and corrected in NuttX:  The thread-specific errno value of one
+task was being randomly trashed when a different thread exitted.
 
-NOTE: There was an error in the initial 0.3.6 release that prevented
-a successful build unless the Pascal add-on was present.  The
-tarball was patched to include the fix.  Make sure that you download
-the nuttx-0.3.6.1.tar.gz version to avoid this problem.
+This release were verified on the ZiLOG z16f2800100zcog, Neuros OSD
+(ARM9), and the simulation platforms.  As usual, any feedback about bugs
+or suggestions for improvement would be greatly appreciated.
+
+This tarball contains a complete CVS snapshot from January 31, 2008.
