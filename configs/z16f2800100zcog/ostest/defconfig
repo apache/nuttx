@@ -139,7 +139,7 @@ CONFIG_HAVE_LIBM=n
 #   provides /dev/console.  Enables stdout, stderr, stdin.
 #
 CONFIG_EXAMPLE=ostest
-CONFIG_DEBUG=n
+CONFIG_DEBUG=y
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_MM_REGIONS=1
 CONFIG_ARCH_LOWPUTC=n
