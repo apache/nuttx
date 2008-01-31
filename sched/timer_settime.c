@@ -65,7 +65,7 @@
 
 static void inline timer_sigqueue(FAR struct posix_timer_s *timer);
 static void inline timer_restart(FAR struct posix_timer_s *timer, uint32 itimer);
-static void timer_timeout(int argc, uint32 itimer, ...);
+static void timer_timeout(int argc, uint32 itimer);
 
 /********************************************************************************
  * Private Functions
