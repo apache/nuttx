@@ -125,3 +125,9 @@ examples/udp
   This is a simple network test for verifying client- and server-
   functionality over UDP.
 
+examples/pashello
+^^^^^^^^^^^^^^^^^
+
+  This is "Hello, World" implemented via the Pascal P-Code interpreter
+
+

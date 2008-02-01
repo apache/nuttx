@@ -310,4 +310,7 @@
 	* Corrected a bug that caused the errno value of one task to be clobbered
 	  when a different task exits.  Effects all architectures.
 
-0.3.7 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.8 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* Added a test case to verify the Pascal P-Code interpreter
+
