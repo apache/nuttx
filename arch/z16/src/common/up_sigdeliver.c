@@ -91,7 +91,7 @@ void up_sigdeliver(void)
    * EINTR).
    */
 
-  int saved_errno = rtcb->errno;
+  int saved_errno = rtcb->pterrno;
 
   up_ledon(LED_SIGNAL);
 
@@ -131,7 +131,7 @@ void up_sigdeliver(void)
    */
 
   dbg("Resuming\n");
-  rtcb->errno = saved_errno;
+  rtcb->pterrno = saved_errno;
 
   /* Then restore the correct state for this thread of
    * execution.

@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * common/up_sigdeliver.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
@@ -47,23 +47,23 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Funtions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: up_sigdeliver
  *
  * Description:
@@ -72,7 +72,7 @@
  *   with and forced to branch to this location with interrupts
  *   disabled.
  *
- ************************************************************/
+ ****************************************************************************/
 
 void up_sigdeliver(void)
 {
@@ -86,7 +86,7 @@ void up_sigdeliver(void)
    * the correct errno value (probably EINTR).
    */
 
-  int saved_errno = rtcb->errno;
+  int saved_errno = rtcb->pterrno;
 
   up_ledon(LED_SIGNAL);
 
@@ -125,7 +125,7 @@ void up_sigdeliver(void)
    */
 
   dbg("Resuming\n");
-  rtcb->errno = saved_errno;
+  rtcb->pterrno = saved_errno;
 
   /* Then restore the correct state for this thread of
    * execution.
