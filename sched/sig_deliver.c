@@ -1,7 +1,7 @@
-/************************************************************
- * sig_deliver.c
+/****************************************************************************
+ * sched/sig_deliver.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,13 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
+
+#include <nuttx/config.h>
 
 #include <sys/types.h>
 #include <signal.h>
@@ -43,35 +45,36 @@
 #include <sched.h>
 #include <debug.h>
 #include <nuttx/arch.h>
+
 #include "os_internal.h"
 #include "sem_internal.h"
 #include "sig_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function: sig_deliver
  *
  * Description:
@@ -79,7 +82,7 @@
  *   the signal receiving task.  It processes all queued
  *   signals then returns.
  *
- ************************************************************/
+ ****************************************************************************/
 
 void sig_deliver(FAR _TCB *stcb)
 {
@@ -99,7 +102,7 @@ void sig_deliver(FAR _TCB *stcb)
    * was reawakened by a signal must be retained.
    */
 
-  saved_errno = stcb->errno;
+  saved_errno = stcb->pterrno;
   for (sigq = (FAR sigq_t*)stcb->sigpendactionq.head; (sigq); sigq = next)
     {
       next = sigq->flink;
@@ -158,7 +161,7 @@ void sig_deliver(FAR _TCB *stcb)
       sig_releasependingsigaction(sigq);
    }
 
-  stcb->errno = saved_errno;
+  stcb->pterrno = saved_errno;
   sched_unlock();
 }
 

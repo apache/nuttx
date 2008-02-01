@@ -238,7 +238,7 @@ struct _TCB
 
   /* Library related fields *****************************************************/
 
-  int        errno;                      /* Current per-thread errno            */
+  int        pterrno;                    /* Current per-thread errno            */
 
   /* File system support ********************************************************/
 

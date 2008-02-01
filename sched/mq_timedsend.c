@@ -113,7 +113,7 @@ static void mq_sndtimeout(int argc, uint32 pid)
     {
       /* Mark the errno value for the thread. */
 
-      wtcb->errno = ETIMEDOUT;
+      wtcb->pterrno = ETIMEDOUT;
 
       /* Restart the the task. */
 

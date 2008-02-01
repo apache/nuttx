@@ -105,10 +105,10 @@ enum os_crash_codes_e
 /* A more efficient ways to access the errno */
 
 #define SET_ERRNO(e) \
-  { _TCB *rtcb = _TCB*)g_readytorun.head; rtcb->errno = (e); }
+  { _TCB *rtcb = _TCB*)g_readytorun.head; rtcb->pterrno = (e); }
 
 #define _SET_TCB_ERRNO(t,e) \
-  { (t)->errno = (e); }
+  { (t)->pterrno = (e); }
 
 /****************************************************************************
  * Public Type Definitions

@@ -1,5 +1,5 @@
 /****************************************************************************
- * get_errno_ptr.c
+ * sched/get_errno_ptr.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -44,6 +44,7 @@
 #include "os_internal.h"
 
 #undef get_errno_ptr
+#undef errno
 
 /****************************************************************************
  * Private Data
@@ -93,7 +94,7 @@ FAR int *get_errno_ptr(void)
            * thread-private errno in the TCB of the running task.
            */
 
-          return &rtcb->errno;
+          return &rtcb->pterrno;
         }
     }
 

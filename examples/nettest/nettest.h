@@ -65,10 +65,6 @@
 
 #else
 
-   /* Get errno using a pointer */
-
-#  define errno         *get_errno_ptr()
-
    /* Used lib_rawprintf() so that there is not confusion from buffered IO */
 
 # define message(...) lib_rawprintf(__VA_ARGS__)

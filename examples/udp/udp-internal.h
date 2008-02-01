@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/udp/udp-internal.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -62,10 +62,6 @@
    /* Have SO_LINGER */
 
 #else
-
-   /* Get errno using a pointer */
-
-#  define errno         *get_errno_ptr()
 
    /* If debug is enabled, use the synchronous lib_lowprintf so that the
     * program output does not get disassociated in the debug output.

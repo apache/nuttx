@@ -2,7 +2,7 @@
  * netutils/webserver/httpd.c
  * httpd Web server
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This is a leverage of similar logic from uIP:
@@ -75,8 +75,6 @@
 #define ISO_period  0x2e
 #define ISO_slash   0x2f
 #define ISO_colon   0x3a
-
-#define errno *get_errno_ptr()
 
 #undef CONFIG_NETUTILS_HTTPD_DUMPBUFFER
 #undef CONFIG_NETUTILS_HTTPD_DUMPPSTATE
