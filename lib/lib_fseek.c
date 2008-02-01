@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib/lib_fread.c
+ * lib/lib_fseek.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -42,6 +42,8 @@
  ****************************************************************************/
 
 #include <stdio.h>
+#include <unistd.h>
+
 #include "lib_internal.h"
 
 /****************************************************************************
@@ -77,25 +79,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: fwrite
+ * Name: fseek
  ****************************************************************************/
 
-size_t fread(void *ptr, size_t size, size_t n_items, FILE *stream)
+int fseek(FILE *stream, long int offset, int whence)
 {
-  size_t  full_size = n_items * (size_t)size;
-  ssize_t bytes_read;
-  size_t  items_read = 0;
+  /* Perform the fseek on the underlying file descriptor */
 
-  /* Write the data into the stream buffer */
-
-  bytes_read = lib_fread(ptr, full_size, stream);
-  if (bytes_read > 0)
-    {
-      /* Return the number of full items read */
-
-      items_read = bytes_read / size;
-    }
-  return items_read;
+  return lseek(stream->fs_filedes, offset, whence) >= 0 ? OK : ERROR;
 }
 
 

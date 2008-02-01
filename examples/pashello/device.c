@@ -93,6 +93,7 @@ static ssize_t hello_read(struct file *filp, char *buffer, size_t len)
           nread = hello_pex_len - offset;
         }
       memcpy(buffer, &hello_pex[offset], nread);
+      filep->f_pos += nread;
     }
   return nread;
 }
