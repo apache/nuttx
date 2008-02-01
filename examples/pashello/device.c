@@ -56,7 +56,6 @@
  ****************************************************************************/
 
 static ssize_t hello_read(struct file *, char *, size_t);
-static ssize_t hello_write(struct file *, const char *, size_t);
 
 /****************************************************************************
  * Private Data
@@ -76,10 +75,10 @@ static struct file_operations hello_fops =
  * Private Functions
  ****************************************************************************/
 
-static ssize_t hello_read(struct file *filp, char *buffer, size_t len)
+static ssize_t hello_read(struct file *filep, char *buffer, size_t len)
 {
-  off_t offset  = filp->f_pos;  /* Start read position */
-  ssize_t nread = 0;            /* Bytes read -- assume EOF */
+  off_t offset  = filep->f_pos;  /* Start read position */
+  ssize_t nread = 0;             /* Bytes read -- assume EOF */
 
   /* Make sure that the offset is within the .pex file */
 

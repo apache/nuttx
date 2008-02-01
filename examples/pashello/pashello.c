@@ -127,6 +127,7 @@ int user_start(int argc, FAR char *argv[])
       exit(1);
     }
   printf("user_start: /dev/hello Loaded\n");
+  printf("user_start: Interpreter started:\n");
 
   /* And start program execution */
 
@@ -134,6 +135,7 @@ int user_start(int argc, FAR char *argv[])
 
   /* Clean up resources used by the interpreter */
 
+  printf("user_start: Interpreter terminated");
   pexec_release(st);
   return 0;
 }

@@ -316,6 +316,7 @@
 	* Added /dev/zero
 	* 'errno' is now defined to be *get_errno_ptr() with no name conflicts
 	* Added lseek() and fseek()
+	* Integrated pascal test case on the simulation platform.  Needs pascal-0.1.1.
 
 
 
