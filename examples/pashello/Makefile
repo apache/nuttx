@@ -1,7 +1,7 @@
 ############################################################################
-# drivers/Makefile
+# examples/pashello/Makefile
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,28 +33,20 @@
 #
 ############################################################################
 
+-include $(TOPDIR)/.config
 -include $(TOPDIR)/Make.defs
 
-ifeq ($(CONFIG_NET),y)
-include net/Make.defs
-endif
+CFLAGS	+= -I$(TOPDIR)/pcode/include -I$(TOPDIR)/pcode/insn/include
 
-ASRCS		= $(NET_ASRCS)
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
+ASRCS	= 
+AOBJS	= $(ASRCS:.S=$(OBJEXT))
+CSRCS	= pashello.c device.c
+COBJS	= $(CSRCS:.c=$(OBJEXT))
 
-CSRCS		=
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-CSRCS		+= dev_null.c dev_zero.c serial.c lowconsole.c
-endif
-CSRCS		+= $(NET_CSRCS)
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+SRCS	= $(ASRCS) $(CSRCS)
+OBJS	= $(AOBJS) $(COBJS)
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
-
-BIN		= libdrivers$(LIBEXT)
-
-VPATH		= net
+BIN	= lib$(CONFIG_EXAMPLE)$(LIBEXT)
 
 all:	$(BIN)
 
@@ -70,11 +62,7 @@ $(BIN):	$(OBJS)
 	done ; )
 
 .depend: Makefile $(SRCS)
-ifeq ($(CONFIG_NET),y)
-	@$(MKDEP) --dep-path . --dep-path net $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-else
 	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-endif
 	@touch $@
 
 depend: .depend

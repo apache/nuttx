@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/dev_null.c
+ * examples/pashello/device.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,23 +48,26 @@
 #include <errno.h>
 #include <nuttx/fs.h>
 
+#include "hello.h"
+#include "pashello.h"
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t devnull_read(struct file *, char *, size_t);
-static ssize_t devnull_write(struct file *, const char *, size_t);
+static ssize_t hello_read(struct file *, char *, size_t);
+static ssize_t hello_write(struct file *, const char *, size_t);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct file_operations devnull_fops =
+static struct file_operations hello_fops =
 {
   0,             /* open */
   0,             /* close */
-  devnull_read,  /* read */
-  devnull_write, /* write */
+  hello_read,    /* read */
+  0,             /* write */
   0,             /* seek */
   0              /* ioctl */
 };
@@ -73,21 +76,32 @@ static struct file_operations devnull_fops =
  * Private Functions
  ****************************************************************************/
 
-static ssize_t devnull_read(struct file *filp, char *buffer, size_t len)
+static ssize_t hello_read(struct file *filp, char *buffer, size_t len)
 {
-  return 0; /* Return EOF */
-}
+  off_t offset  = filp->f_pos;  /* Start read position */
+  ssize_t nread = 0;            /* Bytes read -- assume EOF */
 
-static ssize_t devnull_write(struct file *filp, const char *buffer, size_t len)
-{
-  return len; /* Say that everything was written */
+  /* Make sure that the offset is within the .pex file */
+
+  if (offset < hello_pex_len)
+    {
+      /* Make sure the the read does not extend beyond the .pex file */
+
+      nread = len;
+      if (nread + offset > hello_pex_len)
+        {
+          nread = hello_pex_len - offset;
+        }
+      memcpy(buffer, &hello_pex[offset], nread);
+    }
+  return nread;
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-void devnull_register(void)
+void hello_register(void)
 {
-  (void)register_driver("/dev/null", &devnull_fops, 0666, NULL);
+  (void)register_driver("/dev/hello", &hello_fops, 0444, NULL);
 }

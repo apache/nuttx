@@ -313,4 +313,5 @@
 0.3.8 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Added a test case to verify the Pascal P-Code interpreter
+	* Added /dev/zero
 

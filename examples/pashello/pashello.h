@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/dev_null.c
+ * examples/pashello/pashello.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,61 +33,25 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Compilation Switches
- ****************************************************************************/
+#ifndef __EXAMPLES_PASHELLO_H
+#define __EXAMPLES_PASHELLO_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <sys/types.h>
-#include <string.h>
-#include <errno.h>
-#include <nuttx/fs.h>
-
 /****************************************************************************
- * Private Function Prototypes
+ * Definitions
  ****************************************************************************/
 
-static ssize_t devnull_read(struct file *, char *, size_t);
-static ssize_t devnull_write(struct file *, const char *, size_t);
+#define errno *get_errno_ptr()
 
 /****************************************************************************
- * Private Data
+ * Public Function Prototypes
  ****************************************************************************/
 
-static struct file_operations devnull_fops =
-{
-  0,             /* open */
-  0,             /* close */
-  devnull_read,  /* read */
-  devnull_write, /* write */
-  0,             /* seek */
-  0              /* ioctl */
-};
+/* Defined in device.c */
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+extern void hello_register(void);
 
-static ssize_t devnull_read(struct file *filp, char *buffer, size_t len)
-{
-  return 0; /* Return EOF */
-}
-
-static ssize_t devnull_write(struct file *filp, const char *buffer, size_t len)
-{
-  return len; /* Say that everything was written */
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-void devnull_register(void)
-{
-  (void)register_driver("/dev/null", &devnull_fops, 0666, NULL);
-}
+#endif /* __EXAMPLES_PASHELLO_H */

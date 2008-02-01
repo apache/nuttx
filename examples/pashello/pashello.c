@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/dev_null.c
+ * examples/pashello/pashello.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,60 +34,103 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdio.h>
+#include <debug.h>
 
-#include <sys/types.h>
-#include <string.h>
-#include <errno.h>
-#include <nuttx/fs.h>
+#include "pexec.h"
+#include "pedefs.h"
+#include "pashello.h"
 
 /****************************************************************************
- * Private Function Prototypes
+ * Definitions
  ****************************************************************************/
 
-static ssize_t devnull_read(struct file *, char *, size_t);
-static ssize_t devnull_write(struct file *, const char *, size_t);
+#ifndef CONFIG_PASHELLO_VARSTACKSIZE
+# define CONFIG_PASHELLO_VARSTACKSIZE 1024
+#endif
+
+#ifndef CONFIG_PASHELLO_STRSTACKSIZE
+# define CONFIG_PASHELLO_STRSTACKSIZE 128
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct file_operations devnull_fops =
-{
-  0,             /* open */
-  0,             /* close */
-  devnull_read,  /* read */
-  devnull_write, /* write */
-  0,             /* seek */
-  0              /* ioctl */
-};
-
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
-static ssize_t devnull_read(struct file *filp, char *buffer, size_t len)
-{
-  return 0; /* Return EOF */
-}
+/****************************************************************************
+ * Name: prun
+ *
+ * Description:
+ *   This function executes the P-Code program until a stopping condition
+ *   is encountered.
+ *
+ ****************************************************************************/
 
-static ssize_t devnull_write(struct file *filp, const char *buffer, size_t len)
+static void prun(FAR struct pexec_s *st)
 {
-  return len; /* Say that everything was written */
+  int errcode;
+
+  for (;;)
+    {
+      /* Execute the instruction; Check for exceptional conditions */
+
+      errcode = pexec(st);
+      if (errcode != eNOERROR) break;
+    }
+
+  if (errcode != eEXIT)
+    {
+      printf("Runtime error 0x%02x -- Execution Stopped\n", errcode);
+    }
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-void devnull_register(void)
+/****************************************************************************
+ * user_initialize
+ ****************************************************************************/
+
+void user_initialize(void)
 {
-  (void)register_driver("/dev/null", &devnull_fops, 0666, NULL);
+  /* Register the /dev/hello driver */
+
+  hello_register();
+}
+
+/****************************************************************************
+ * user_start
+ ****************************************************************************/
+
+int user_start(int argc, FAR char *argv[])
+{
+  FAR struct pexec_s *st;
+
+  /* Load the POFF file */
+
+  st = pload("/dev/hello", CONFIG_PASHELLO_VARSTACKSIZE, CONFIG_PASHELLO_STRSTACKSIZE);
+  if (!st)
+    {
+      fprintf(stderr, "user_start: ERROR: Could not load /dev/hello\n");
+      exit(1);
+    }
+  printf("user_start: /dev/hello Loaded\n");
+
+  /* And start program execution */
+
+  prun(st);
+
+  /* Clean up resources used by the interpreter */
+
+  pexec_release(st);
+  return 0;
 }
