@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/fs_ioctl.c
+ * drivers/dev_null.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,111 +44,51 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/ioctl.h>
-#include <sched.h>
+#include <string.h>
 #include <errno.h>
-
-#include <net/if.h>
-
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-# include <nuttx/net.h>
-#endif
-
-#include "fs_internal.h"
+#include <nuttx/fs.h>
 
 /****************************************************************************
- * Global Functions
+ * Private Function Prototypes
  ****************************************************************************/
+
+static ssize_t devzero_read(struct file *, char *, size_t);
+static ssize_t devzero_write(struct file *, const char *, size_t);
 
 /****************************************************************************
- * Name: ioctl
- *
- * Description:
- *   Perform device specific operations.
- *
- * Parameters:
- *   fd       File/socket descriptor of device
- *   req      The ioctl command
- *   arg      The argument of the ioctl cmd
- *
- * Return:
- *   >=0 on success (positive non-zero values are cmd-specific)
- *   -1 on failure withi errno set properly:
- *
- *   EBADF
- *     'fd' is not a valid descriptor.
- *   EFAULT
- *     'arg' references an inaccessible memory area.
- *   EINVAL
- *     'cmd' or 'arg' is not valid.
- *   ENOTTY
- *     'fd' is not associated with a character special device.
- *   ENOTTY
- *      The specified request does not apply to the kind of object that the
- *      descriptor 'fd' references.
- *
+ * Private Data
  ****************************************************************************/
 
-int ioctl(int fd, int req, unsigned long arg)
+static struct file_operations devzero_fops =
 {
-  int err;
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  FAR struct filelist *list;
-  FAR struct file     *this_file;
-  FAR struct inode    *inode;
-  int                  ret = OK;
+  0,             /* open */
+  0,             /* close */
+  devzero_read,  /* read */
+  devzero_write, /* write */
+  0,             /* seek */
+  0              /* ioctl */
+};
 
-  /* Did we get a valid file descriptor? */
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
-  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
-#endif
-    {
-      /* Perform the socket ioctl */
-
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          return netdev_ioctl(fd, req, (struct ifreq*)arg);
-        }
-      else
-#endif
-        {
-          err = EBADF;
-          goto errout;
-        }
-    }
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  /* Get the thread-specific file list */
-
-  list = sched_getfiles();
-  if (!list)
-    {
-      err = EMFILE;
-      goto errout;
-    }
-
-  /* Is a driver registered? Does it support the ioctl method? */
-
-  this_file = &list->fl_files[fd];
-  inode     = this_file->f_inode;
-
-  if (inode && inode->u.i_ops && inode->u.i_ops->ioctl)
-    {
-      /* Yes, then let it perform the ioctl */
-
-      ret = (int)inode->u.i_ops->ioctl(this_file, req, arg);
-      if (ret < 0)
-        {
-          err = -ret;
-          goto errout;
-        }
-    }
-  return ret;
-#endif
-
-errout:
-  *get_errno_ptr() = err;
-  return ERROR;
+static ssize_t devzero_read(struct file *filp, char *buffer, size_t len)
+{
+  return 0; /* Return EOF */
 }
 
+static ssize_t devzero_write(struct file *filp, const char *buffer, size_t len)
+{
+  memset(buffer, 0, len);
+  return len;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+void devzero_register(void)
+{
+  (void)register_driver("/dev/zero", &devzero_fops, 0666, NULL);
+}

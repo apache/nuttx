@@ -60,9 +60,9 @@ SRCS		= $(ASRCS) $(CSRCS) $(SPECSRCS)
 OBJS		= $(AOBJS) $(COBJS) $(SPECOBJS)
 
 LDFLAGS		= $(ARCHSCRIPT)
-EXTRA_LIBS	= -lc
+STDLIBS	= -lc
 ifeq ($(CONFIG_FS_FAT),y)
-EXTRA_LIBS	+= -lz
+STDLIBS	+= -lz
 endif
 
 LINKOBJS	= up_head$(OBJEXT)
@@ -89,7 +89,7 @@ libarch$(LIBEXT): $(OBJS)
 nuttx$(EXEEXT): $(LINKOBJS)
 	@echo "LD:  nuttx$(EXEEXT)"
 	@$(CC) $(LDFLAGS) $(LDPATHES) -o $(TOPDIR)/$@ $(LINKOBJS) \
-		-Wl,--start-group $(LDLIBS) -Wl,--end-group $(EXTRA_LIBS)
+		-Wl,--start-group $(LDLIBS) -Wl,--end-group $(STDLIBS) $(EXTRA_LIBS)
 	@$(NM) $(TOPDIR)/$@ | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 		sort > $(TOPDIR)/System.map

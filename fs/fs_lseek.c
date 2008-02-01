@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/fs_ioctl.c
+ * fs/fs_lseek.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,81 +44,70 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/ioctl.h>
+#include <unistd.h>
 #include <sched.h>
 #include <errno.h>
 
-#include <net/if.h>
-
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-# include <nuttx/net.h>
-#endif
-
 #include "fs_internal.h"
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ioctl
+ * Name: lseek
  *
  * Description:
- *   Perform device specific operations.
+ *   The lseek() function repositions the offset of the open file associated
+ *   with the file descriptor fildes to the argument 'offset' according to the
+ *   directive 'whence' as follows:
+ *
+ *   SEEK_SET
+ *      The offset is set to offset bytes.
+ *   SEEK_CUR
+ *      The offset is set to its current location plus offset bytes.
+ *   SEEK_END
+ *      The offset is set to the size of the file plus offset bytes.
+ *
+ *  The lseek() function allows the file offset to be set beyond the end of the
+ *  file (but this does not change the size of the file). If data is later written
+ *  at this point, subsequent reads of the data in the gap (a "hole") return null
+ *  bytes ('\0') until data is actually written into the gap.
  *
  * Parameters:
- *   fd       File/socket descriptor of device
- *   req      The ioctl command
- *   arg      The argument of the ioctl cmd
+ *   fd       File descriptor of device
+ *   offset   Defines the offset to position to
+ *   whence   Defines how to use offset
  *
  * Return:
- *   >=0 on success (positive non-zero values are cmd-specific)
- *   -1 on failure withi errno set properly:
+ *   The resulting offset on success.  -1 on failure withi errno set properly:
  *
- *   EBADF
- *     'fd' is not a valid descriptor.
- *   EFAULT
- *     'arg' references an inaccessible memory area.
- *   EINVAL
- *     'cmd' or 'arg' is not valid.
- *   ENOTTY
- *     'fd' is not associated with a character special device.
- *   ENOTTY
- *      The specified request does not apply to the kind of object that the
- *      descriptor 'fd' references.
+ *   EBADF      fildes is not an open file descriptor.
+ *   EINVAL     whence  is  not one of SEEK_SET, SEEK_CUR, SEEK_END; or the
+ *              resulting file offset would be negative, or beyond the end of a
+ *              seekable device.
+ *   EOVERFLOW  The resulting file offset cannot be represented in an off_t.
+ *   ESPIPE     fildes is associated with a pipe, socket, or FIFO.
  *
  ****************************************************************************/
 
-int ioctl(int fd, int req, unsigned long arg)
+off_t lseek(int fd, off_t offset, int whence)
 {
-  int err;
-#if CONFIG_NFILE_DESCRIPTORS > 0
   FAR struct filelist *list;
-  FAR struct file     *this_file;
+  FAR struct file     *filep;
   FAR struct inode    *inode;
-  int                  ret = OK;
+  int                  err;
 
   /* Did we get a valid file descriptor? */
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
-#endif
     {
-      /* Perform the socket ioctl */
-
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          return netdev_ioctl(fd, req, (struct ifreq*)arg);
-        }
-      else
-#endif
-        {
-          err = EBADF;
-          goto errout;
-        }
+      err = EBADF;
+      goto errout;
     }
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Get the thread-specific file list */
 
   list = sched_getfiles();
@@ -128,27 +117,63 @@ int ioctl(int fd, int req, unsigned long arg)
       goto errout;
     }
 
-  /* Is a driver registered? Does it support the ioctl method? */
+  /* Is a driver registered? */
 
-  this_file = &list->fl_files[fd];
-  inode     = this_file->f_inode;
+  filep = &list->fl_files[fd];
+  inode =  filep->f_inode;
 
-  if (inode && inode->u.i_ops && inode->u.i_ops->ioctl)
+  if (inode && inode->u.i_ops)
     {
-      /* Yes, then let it perform the ioctl */
+      /* Does it support the seek method */
 
-      ret = (int)inode->u.i_ops->ioctl(this_file, req, arg);
-      if (ret < 0)
+      if (inode->u.i_ops->seek)
         {
-          err = -ret;
-          goto errout;
+           /* Yes, then let it perform the seek */
+
+           err = (int)inode->u.i_ops->seek( filep, offset, whence);
+           if (err < 0)
+             {
+               err = -err;
+               goto errout;
+             }
+         }
+      else
+        {
+           /* No... there are a couple of default actions we can take */
+
+           switch (whence)
+             {
+               case SEEK_CUR:
+                 offset += filep->f_pos;
+
+               case SEEK_SET:
+                 if (offset >= 0)
+                   {
+                     filep->f_pos = offset; /* Might be beyond the end-of-file */
+                     break;
+                   }
+                 else
+                   {
+                     err = EINVAL;
+                     goto errout;
+                   }
+                  break;
+
+               case SEEK_END:
+                 err = ENOSYS;
+                 goto errout;
+
+               default:
+                 err = EINVAL;
+                 goto errout;
+             }
         }
     }
-  return ret;
-#endif
+  return filep->f_pos;
 
 errout:
   *get_errno_ptr() = err;
-  return ERROR;
+  return (off_t)ERROR;
 }
+#endif
 

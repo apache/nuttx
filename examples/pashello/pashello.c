@@ -100,12 +100,11 @@ static void prun(FAR struct pexec_s *st)
  * user_initialize
  ****************************************************************************/
 
+#ifndef CONFIG_HAVE_WEAKFUNCTIONS
 void user_initialize(void)
 {
-  /* Register the /dev/hello driver */
-
-  hello_register();
 }
+#endif
 
 /****************************************************************************
  * user_start
@@ -114,6 +113,10 @@ void user_initialize(void)
 int user_start(int argc, FAR char *argv[])
 {
   FAR struct pexec_s *st;
+
+  /* Register the /dev/hello driver */
+
+  hello_register();
 
   /* Load the POFF file */
 
