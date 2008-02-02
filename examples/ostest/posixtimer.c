@@ -1,5 +1,5 @@
 /***********************************************************************
- * posixtimer.c
+ * examples/ostest/posixtimer.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -201,7 +201,7 @@ void timer_test(void)
   status = timer_create(CLOCK_REALTIME, &notify, &timerid);
   if (status != OK)
     {
-      printf("timer_test: timer_create failed, errno=%d\n", get_errno_ptr());
+      printf("timer_test: timer_create failed, errno=%d\n", errno);
       goto errorout;
     }
 
@@ -217,7 +217,7 @@ void timer_test(void)
   status = timer_settime(timerid, 0, &timer, NULL);
   if (status != OK)
     {
-      printf("timer_test: timer_settime failed, errno=%d\n", get_errno_ptr());
+      printf("timer_test: timer_settime failed, errno=%d\n", errno);
       goto errorout;
     }
 
@@ -230,7 +230,7 @@ void timer_test(void)
       status = sem_wait(&sem);
       if (status != 0)
         {
-          int error = *get_errno_ptr();
+          int error = errno;
           if (error == EINTR)
             {
               printf("timer_test: sem_wait() successfully interrupted by signal\n" );
@@ -256,7 +256,7 @@ errorout:
   status = timer_delete(timerid);
   if (status != OK)
     {
-      printf("timer_test: timer_create failed, errno=%d\n", get_errno_ptr());
+      printf("timer_test: timer_create failed, errno=%d\n", errno);
     }
 
   /* Detach the signal handler */
