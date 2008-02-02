@@ -37,6 +37,12 @@ wish to build.  The following board-specific configurations are
 available:
 
 - ostest
-    This builds the examples/ostest application for execution from RAM.
+    This builds the examples/ostest application for execution from FLASH.
+    See examples/README.txt for information about ostest.
+
+- pashello
+
+    Configures to use examples/pashello for execution from FLASH
+    See examples/README.txt for information about pashello.
 
 Check out any README.txt files in these <sub-directory>s. 
