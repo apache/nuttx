@@ -389,7 +389,15 @@ o z16 (arch/z16)
   Priority:    Medium-High
 
   Description: At present, the z16f port does not run properly when CONFIG_DEBUG
-               is disabled.  I have not determined the cause for this -- it
-               may be an issue with optimization?? Or clock setup??
+               is disabled:  The obvious symptom is that there is no printf()
+               output.  I have isolated with problem to errors in optimization.
+               With -reduceopt on the command line, I can get the printf output.
+               However, there are still errors in the compiled code -- specifically
+               in sched/timer_create.c.
+               
+               I have submitted a bug report to ZiLOG for this (support incident
+               81400).  You can see the status of the bug report (and lots more
+               technical detail) here:
+               http://support.zilog.com/support/incident/incident_support.asp?iIncidentId=81400&iSiteId=1&chLanguageCode=ENG
   Status:      Open
   Priority:    Medium-High
