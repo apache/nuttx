@@ -69,8 +69,8 @@ struct file_operations
    */
 
   int     (*close)(FAR struct file *filp);
-  ssize_t (*read)(FAR struct file *filp, char *buffer, size_t buflen);
-  ssize_t (*write)(FAR struct file *filp, const char *buffer, size_t buflen);
+  ssize_t (*read)(FAR struct file *filp, FAR char *buffer, size_t buflen);
+  ssize_t (*write)(FAR struct file *filp, FAR const char *buffer, size_t buflen);
   off_t   (*seek)(FAR struct file *filp, off_t offset, int whence);
   int     (*ioctl)(FAR struct file *filp, int cmd, unsigned long arg);
 
@@ -100,11 +100,11 @@ struct block_operations
 {
   int     (*open)(FAR struct inode *inode);
   int     (*close)(FAR struct inode *inode);
-  ssize_t (*read)(FAR struct inode *inode, unsigned char *buffer,
+  ssize_t (*read)(FAR struct inode *inode, FAR unsigned char *buffer,
                   size_t start_sector, unsigned int nsectors);
-  ssize_t (*write)(FAR struct inode *inode, const unsigned char *buffer,
+  ssize_t (*write)(FAR struct inode *inode, FAR const unsigned char *buffer,
                    size_t start_sector, unsigned int nsectors);
-  int     (*geometry)(FAR struct inode *inode, struct geometry *geometry);
+  int     (*geometry)(FAR struct inode *inode, FAR struct geometry *geometry);
   int     (*ioctl)(FAR struct inode *inode, int cmd, unsigned long arg);
 };
 
@@ -126,7 +126,7 @@ struct mountpt_operations
    * information to manage privileges.
    */
 
-  int     (*open)(FAR struct file *filp, const char *relpath,
+  int     (*open)(FAR struct file *filp, FAR const char *relpath,
                   int oflags, mode_t mode);
 
   /* The following methods must be identical in signature and position because
@@ -135,8 +135,8 @@ struct mountpt_operations
    */
 
   int     (*close)(FAR struct file *filp);
-  ssize_t (*read)(FAR struct file *filp, char *buffer, size_t buflen);
-  ssize_t (*write)(FAR struct file *filp, const char *buffer, size_t buflen);
+  ssize_t (*read)(FAR struct file *filp, FAR char *buffer, size_t buflen);
+  ssize_t (*write)(FAR struct file *filp, FAR const char *buffer, size_t buflen);
   off_t   (*seek)(FAR struct file *filp, off_t offset, int whence);
   int     (*ioctl)(FAR struct file *filp, int cmd, unsigned long arg);
 
@@ -151,25 +151,25 @@ struct mountpt_operations
 
   /* Directory operations */
 
-  int     (*opendir)(struct inode *mountpt, const char *relpath, struct internal_dir_s *dir);
-  int     (*closedir)(struct inode *mountpt, struct internal_dir_s *dir);
-  int     (*readdir)(struct inode *mountpt, struct internal_dir_s *dir);
-  int     (*rewinddir)(struct inode *mountpt, struct internal_dir_s *dir);
+  int     (*opendir)(FAR struct inode *mountpt, FAR const char *relpath, FAR struct internal_dir_s *dir);
+  int     (*closedir)(FAR struct inode *mountpt, FAR struct internal_dir_s *dir);
+  int     (*readdir)(FAR struct inode *mountpt, FAR struct internal_dir_s *dir);
+  int     (*rewinddir)(FAR struct inode *mountpt, FAR struct internal_dir_s *dir);
 
   /* General volume-related mountpoint operations: */
 
-  int     (*bind)(FAR struct inode *blkdriver, const void *data, void **handle);
-  int     (*unbind)(void *handle, FAR struct inode **blkdriver);
+  int     (*bind)(FAR struct inode *blkdriver, FAR const void *data, FAR void **handle);
+  int     (*unbind)(FAR void *handle, FAR struct inode **blkdriver);
 
-  int     (*statfs)(struct inode *mountpt, struct statfs *buf);
+  int     (*statfs)(FAR struct inode *mountpt, FAR struct statfs *buf);
 
   /* Operations on pathes */
 
-  int     (*unlink)(struct inode *mountpt, const char *relpath);
-  int     (*mkdir)(struct inode *mountpt, const char *relpath, mode_t mode);
-  int     (*rmdir)(struct inode *mountpt, const char *relpath);
-  int     (*rename)(struct inode *mountpt, const char *oldrelpath, const char *newrelpath);
-  int     (*stat)(struct inode *mountpt, const char *relpath, struct stat *buf);
+  int     (*unlink)(FAR struct inode *mountpt, FAR const char *relpath);
+  int     (*mkdir)(FAR struct inode *mountpt, FAR const char *relpath, mode_t mode);
+  int     (*rmdir)(FAR struct inode *mountpt, FAR const char *relpath);
+  int     (*rename)(FAR struct inode *mountpt, FAR const char *oldrelpath, FAR const char *newrelpath);
+  int     (*stat)(FAR struct inode *mountpt, FAR const char *relpath, FAR struct stat *buf);
 
   /* NOTE:  More operations will be needed here to support:  disk usage stats
    * file stat(), file attributes, file truncation, etc.

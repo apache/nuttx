@@ -52,8 +52,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t devnull_read(struct file *, char *, size_t);
-static ssize_t devnull_write(struct file *, const char *, size_t);
+static ssize_t devnull_read(FAR struct file *, FAR char *, size_t);
+static ssize_t devnull_write(FAR struct file *, FAR const char *, size_t);
 
 /****************************************************************************
  * Private Data
@@ -73,12 +73,12 @@ static struct file_operations devnull_fops =
  * Private Functions
  ****************************************************************************/
 
-static ssize_t devnull_read(struct file *filp, char *buffer, size_t len)
+static ssize_t devnull_read(FAR struct file *filp, FAR char *buffer, size_t len)
 {
   return 0; /* Return EOF */
 }
 
-static ssize_t devnull_write(struct file *filp, const char *buffer, size_t len)
+static ssize_t devnull_write(FAR struct file *filp, FAR const char *buffer, size_t len)
 {
   return len; /* Say that everything was written */
 }

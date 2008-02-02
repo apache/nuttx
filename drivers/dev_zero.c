@@ -52,8 +52,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t devzero_read(struct file *, char *, size_t);
-static ssize_t devzero_write(struct file *, const char *, size_t);
+static ssize_t devzero_read(FAR struct file *, FAR char *, size_t);
+static ssize_t devzero_write(FAR struct file *, FAR const char *, size_t);
 
 /****************************************************************************
  * Private Data
@@ -73,14 +73,14 @@ static struct file_operations devzero_fops =
  * Private Functions
  ****************************************************************************/
 
-static ssize_t devzero_read(struct file *filp, char *buffer, size_t len)
-{
-  return 0; /* Return EOF */
-}
-
-static ssize_t devzero_write(struct file *filp, const char *buffer, size_t len)
+static ssize_t devzero_read(FAR struct file *filp, FAR char *buffer, size_t len)
 {
   memset(buffer, 0, len);
+  return len;
+}
+
+static ssize_t devzero_write(FAR struct file *filp, FAR const char *buffer, size_t len)
+{
   return len;
 }
 
