@@ -9,7 +9,7 @@ NuttX TODO List (Last updated January 6, 2008)
   (1)  C++ Support
   (11) Network (net/, netutils/)
   (2)  USB (drivers/usbdev)
-  (3)  Libraries (lib/)
+  (4)  Libraries (lib/)
   (2)  File system (fs/, drivers/)
   (1)  Pascal add-on (pcode/)
   (2)  Documentation (Documentation/)
@@ -217,6 +217,11 @@ o Libraries (lib/)
                sched/env_getenv.c and one in lib/lib_getenv().  Keep one.
   Status:      Open
   Priority:    Low
+
+  Description: lib/lib_fseek.c:  fseek() needs to flush buffered data before
+               moving the file pointer.
+  Status:      Open
+  Priority:    Medium
 
 o File system (fs/, drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
