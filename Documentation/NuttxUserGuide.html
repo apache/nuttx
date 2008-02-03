@@ -21,7 +21,7 @@ User's Manual
 <p>
 Gregory Nutt
 <p>
-<small>Last Update: December 10, 2007</small>
+<small>Last Update: Februrary 2, 2008</small>
 </center>
 
 <h1>1.0 <A NAME="Introduction">Introduction</a></h1>
@@ -62,9 +62,15 @@ Gregory Nutt
     <b>Section 3.0, <a href="#Data_Structures">OS Data Structures</a></b>:
     This section documents the data structures that are used at the NuttX
     interface.
+    <ul>
+      <li>Paragraph 3.1 <a href="#ScalarType">Scalar Types</a></li>
+      <li>Paragraph 3.2 <a href="#HiddenStructures">Hidden Interface Structures</a></li>
+      <li>Paragraph 3.3 <a href="#ErrnoAccess">Access to the <code>errno</code> Variable</a></li>
+      <li>Paragraph 3.4 <a href="#UserStructures">User Interface Structures</a></li>
+    </ul>
   </li>
   <li>
-    <a href="#index">Index</a>
+    <a href="#index"><b>Index</b></a>
   </li>
 </ul>
 
@@ -227,7 +233,7 @@ paragraphs.
 <li>
   Returns the non-zero task ID of the new task or
   ERROR if memory is insufficient or the task cannot be
-  created (errno is not set).
+  created (<a href="#ErrnoAccess"><code>errno</code></a> is not set).
 </LI>
 </ul>
 
@@ -296,7 +302,7 @@ VxWorks provides the following similar interface:
 <ul>
   <li><p>OK, or ERROR if the task cannot be initialized.</P>
   <p>This function can only failure is it is unable to assign
-    a new, unique task ID to the TCB (errno is not set).</P>
+    a new, unique task ID to the TCB (<a href="#ErrnoAccess"><code>errno</code></a> is not set).</P>
 </ul>
 <p>
 <b>Assumptions/Limitations:</b>
@@ -348,7 +354,7 @@ task_init argument).
 <p>
 <b>Returned Values:</b> 
 <ul>
-<li>OK, or ERROR if the task cannot be activated (errno is not set).
+<li>OK, or ERROR if the task cannot be activated (<a href="#ErrnoAccess"><code>errno</code></a> is not set).
 </ul>
 
 <p>
@@ -399,7 +405,7 @@ zero signifies the calling task.
 <b>Returned Values:</b> 
 <ul>
 <li>OK, or ERROR if the task cannot be deleted.
-This function can fail if the provided pid does not correspond to a task (errno is not set)
+This function can fail if the provided pid does not correspond to a task (<a href="#ErrnoAccess"><code>errno</code></a> is not set)
 </ul>
 
 <p>
@@ -613,7 +619,7 @@ Compatible with the POSIX interface of the same name.
 <p>
   <b>Returned Values:</b>
   On success, sched_setparam() returns 0 (OK).
-  On error, -1 (ERROR) is returned, and<code>errno</code>is set appropriately.
+  On error, -1 (ERROR) is returned, and <a href="#ErrnoAccess"><code>errno</code></a> is set appropriately.
 </p>
 <ul>
 
@@ -714,7 +720,7 @@ interface of the same name.
 <p>
   <b>Returned Values:</b> 
   On success, <i>sched_setscheduler()</i> returns OK (zero).  On
-  error, ERROR (-1) is returned, and<code>errno</code>is set appropriately:
+  error, ERROR (-1) is returned, and <a href="#ErrnoAccess"><code>errno</code></a> is set appropriately:
 </p>
 <ul>
   <li>EINVAL The scheduling policy is not one of the
@@ -762,7 +768,7 @@ policy.
   <li>
     On success, <i>sched_getscheduler()</i> returns the policy for
     the task (either SCHED_FIFO or SCHED_RR).
-    On error,  ERROR (-1) is returned, and<code>errno</code>is set appropriately:
+    On error,  ERROR (-1) is returned, and <a href="#ErrnoAccess"><code>errno</code></a> is set appropriately:
     <ul>
       <li>ESRCH  The task whose ID is pid could not be found.</li>
     </ul>
@@ -775,7 +781,7 @@ policy.
 interface of the same name.
 Differences from the full POSIX implementation include:
 <ul>
-<li>Does not report errors via <I>errno</I>.
+<li>Does not report errors via <a href="#ErrnoAccess"><code>errno</code></a>.
 </ul>
 
 <H3><a name="sched_yield">2.2.5 sched_yield</a></H3>
@@ -894,7 +900,7 @@ priority of the calling task is returned.
 <p>
   <b>Returned Values:</b> 
   On success, sched_rr_get_interval() returns OK (0).  On
-  error, ERROR (-1) is returned, and<code>errno</code>is set to:
+  error, ERROR (-1) is returned, and <a href="#ErrnoAccess"><code>errno</code></a> is set to:
 </p>
 <ul>
   <li>EFAULT Cannot copy to interval</LI>
@@ -1216,7 +1222,7 @@ interface of the same name.
 <p>
   <b>Returned Values:</b>
   On success, <code>mq_send()</code> returns 0 (<code>OK</code>);
-  on error, -1 (<code>ERROR</code>) is returned, with <code>errno</code> set
+  on error, -1 (<code>ERROR</code>) is returned, with <a href="#ErrnoAccess"><code>errno</code></a> set
   to indicate the error:
 </p>
 <ul>
@@ -1299,7 +1305,7 @@ interface of the same name.
 <p>
   <b>Returned Values:</b>
   On success, <code>mq_send()</code> returns 0 (<code>OK</code>);
-  on error, -1 (<code>ERROR</code>) is returned, with <code>errno</code> set
+  on error, -1 (<code>ERROR</code>) is returned, with <a href="#ErrnoAccess"><code>errno</code></a> set
   to indicate the error:
 </p>
 <ul>
@@ -1370,7 +1376,7 @@ interface of the same name.
 <p>
   <b>Returned Values:</b>.
   One success, the length of the selected message in bytes is returned.
-  On failure, -1 (<code>ERROR</code>) is returned and the <code>errno</code> is set appropriately:
+  On failure, -1 (<code>ERROR</code>) is returned and the <a href="#ErrnoAccess"><code>errno</code></a> is set appropriately:
 </p>
 <ul>
   <li>
@@ -1451,7 +1457,7 @@ interface of the same name.
 <p>
   <b>Returned Values:</b>.
   One success, the length of the selected message in bytes is returned.
-  On failure, -1 (<code>ERROR</code>) is returned and the <code>errno</code> is set appropriately:
+  On failure, -1 (<code>ERROR</code>) is returned and the <a href="#ErrnoAccess"><code>errno</code></a> is set appropriately:
 </p>
 <ul>
   <li>
@@ -1516,7 +1522,7 @@ registration.
 <li><I>mqdes</I>. Message queue descriptor
 <li><I>notification</I>. Real-time signal structure containing:
 <ul>
-<li><I>sigev_notify</I>. Should be osSIGEV_SIGNAL (but actually
+<li><I>sigev_notify</I>. Should be SIGEV_SIGNAL (but actually
 ignored)
 <li><I>sigev_signo</I>. The signo to use for the notification
 <li><I>sigev_value</I>. Value associated with the signal
@@ -1951,9 +1957,8 @@ the lock or the call is interrupted by a signal.
 </ul>
 <p>
 If <I>sem_wait</I> returns -1 (ERROR) then the cause of the failure
-will be indicated by the thread-specific <I>errno</I> value (a pointer
-to this value can be obtained using <I>get_errno_ptr()</I>).  The following
-lists the possible values for <I>errno</I>:
+will be indicated by the thread-specific <a href="#ErrnoAccess"><code>errno</code></a>.
+The following lists the possible values for <a href="#ErrnoAccess"><code>errno</code></a>:
 <p>
 <ul>
 <li><I>EINVAL</I>:  Indicates that the <I>sem</I> input parameter is
@@ -1992,9 +1997,8 @@ returns without blocking.
 <li>0 (OK) or -1 (ERROR) if unsuccessful
 </ul>
 If <I>sem_wait</I> returns -1 (ERROR) then the cause of the failure
-will be indicated by the thread-specific <I>errno</I> value (a pointer
-to this value can be obtained using <I>get_errno_ptr()</I>).  The following
-lists the possible values for <I>errno</I>:
+will be indicated by the thread-specific <a href="#ErrnoAccess"><code>errno</code></a>.
+The following lists the possible values for <a href="#ErrnoAccess"><code>errno</code></a>:
 <p>
 <ul>
 <li><I>EINVAL</I>:  Indicates that the <I>sem</I> input parameter is
@@ -2522,7 +2526,7 @@ VxWorks provides the following comparable interface:
   If the call succeeds, <code>timer_create()</code> will return 0 (<code>OK</code>) and update the
   location referenced by <code>timerid</code> to a <code>timer_t</code>, which can be passed to the
   other per-thread timer calls.  If an error occurs, the function will return
-  a value of -1 (<code>ERROR</code>) and set<code>errno</code>to indicate the error.
+  a value of -1 (<code>ERROR</code>) and set <a href="#ErrnoAccess"><code>errno</code></a> to indicate the error.
 </p>
 <ul>
   <li><code>EAGAIN</code>. The system lacks sufficient signal queuing resources to honor the
@@ -2570,7 +2574,8 @@ VxWorks provides the following comparable interface:
 </p>
 <p>
   If successful, the <I>timer_delete()</I> function will return zero (<I>OK</I>).
-  Otherwise, the function will return a value of -1 (ERROR) and set<code>errno</code>to indicate the error:
+  Otherwise, the function will return a value of -1 (ERROR) and set
+  <a href="#ErrnoAccess"><code>errno</code></a> to indicate the error:
 </p>
 <ul>
   <li><code>EINVAL</code>. The timer specified timerid is not valid.</li>
@@ -2647,7 +2652,8 @@ VxWorks provides the following comparable interface:
 </p>
 <p>
   If the timer_gettime() succeeds, a value of 0 (OK) will be returned.
-  If an error occurs, the value -1 (ERROR) will be returned, and<code>errno</code>set to indicate the error.
+  If an error occurs, the value -1 (ERROR) will be returned, and 
+  <a href="#ErrnoAccess"><code>errno</code></a> set to indicate the error.
 </p>
 <ul>
   <li><code>EINVAL</code>. The timerid argument does not correspond to an ID returned by timer_create() but not yet deleted by timer_delete().</li>
@@ -3065,12 +3071,12 @@ If sigprocmask() fails, the signal mask of the task is not changed.
 <ul>
 <li><I>how</I>. How the signal mast will be changed:
 <ul>
-<li><I>osSIG_BLOCK</I>. The resulting set is the union of the
+<li><I>SIG_BLOCK</I>. The resulting set is the union of the
 current set and the signal set pointed to by the <I>set</I> input parameter.
-<li><I>osSIG_UNBLOCK</I>. The resulting set is the intersection
+<li><I>SIG_UNBLOCK</I>. The resulting set is the intersection
 of the current set and the complement of the signal set pointed
 to by the <I>set</I> input parameter.
-<li><I>osSIG_SETMASK</I>. The resulting set is the signal set
+<li><I>SIG_SETMASK</I>. The resulting set is the signal set
 pointed to by the <I>set</I> input parameter.
 </ul>
 
@@ -3307,7 +3313,7 @@ is delivered more than once.&quot;
 <ul>
 <li>
   On  success (at least one signal was sent), zero (OK) is returned.
-  On error, -1 (ERROR) is returned, and<code>errno</code>is set appropriately.
+  On error, -1 (ERROR) is returned, and <a href="#ErrnoAccess"><code>errno</code></a> is set appropriately.
   <ul>
     <li><code>EGAIN</code>. The limit of signals which may be queued has been reached.</li>
     <li><code>EINVAL</code>. signo was invalid.</li>
@@ -5860,7 +5866,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
 </ul>
 <p>
   <b>Returned Values:</b>
-  0 on success; -1 on error with<code>errno</code>set appropriately:
+  0 on success; -1 on error with <a href="#ErrnoAccess"><code>errno</code></a> set appropriately:
 </p>
 <ul>
   <li><code>EACCES</code>.
@@ -5906,7 +5912,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
 </ul>
 <p>
   <b>Returned Values:</b>
-  0 on success; -1 on error with<code>errno</code>set appropriately:
+  0 on success; -1 on error with <a href="#ErrnoAccess"><code>errno</code></a> set appropriately:
 </p>
 <ul>
   <li><code>EACCES</code>
@@ -5961,7 +5967,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
 </ul>
 <p>
   <b>Returned Values:</b>
-  0 on success; -1 on error with<code>errno</code>set appropriately:
+  0 on success; -1 on error with <a href="#ErrnoAccess"><code>errno</code></a> set appropriately:
 </p>
   <li><code>EACCES</code> or </code>EPERM</code>:
     The user tried to connect to a broadcast address without having the
@@ -6028,7 +6034,8 @@ Those socket APIs are discussed in the following paragraphs.</p>
 </ul>
 <p>
   <b>Returned Values:</b>
-  On success, zero is returned. On error, -1 is returned, and errno is set appropriately.
+  On success, zero is returned. On error, -1 is returned, and
+  <a href="#ErrnoAccess"><code>errno</code></a> is set appropriately.
 </p>
 <ul>
   <li><code>EADDRINUSE</code>: Another socket is already listening on the same port.</li>
@@ -6177,7 +6184,8 @@ Those socket APIs are discussed in the following paragraphs.</p>
 </ul>
 <p>
   <b>Returned Values:</b>
-  On success, returns the number of characters sent.  On  error, -1 is returned, and<code>errno</code>is set appropriately:
+  On success, returns the number of characters sent.  On  error, -1 is returned,
+  and <a href="#ErrnoAccess"><code>errno</code></a> is set appropriately:
 </p>
 <ul>
   <li><code>EAGAIN</code> or <code>EWOULDBLOCK</code>.
@@ -6284,7 +6292,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
 <p>
   <b>Returned Values:</b>
   On success, returns the number of characters sent.
-  On error, -1 is returned, and errno is set appropriately:
+  On error, -1 is returned, and <a href="#ErrnoAccess"><code>errno</code></a> is set appropriately:
 </p>
 <ul>
     <li><code>EAGAIN</code>.
@@ -6348,7 +6356,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
 <p>
   <b>Returned Values:</b>
   On success, returns the number of characters sent.
-  On error, -1 is returned, and errno is set appropriately:
+  On error, -1 is returned, and <a href="#ErrnoAccess"><code>errno</code></a> is set appropriately:
 </p>
 <ul>
   <li><code>BADF</code>.
@@ -6411,7 +6419,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
 <p>
   <b>Returned Values:</b>
   On success, returns the number of characters sent.
-  On error, -1 is returned, and errno is set appropriately:
+  On error, -1 is returned, and <a href="#ErrnoAccess"><code>errno</code></a> is set appropriately:
 </p>
 <ul>
   <li><code>BADF</code>.
@@ -6428,8 +6436,8 @@ Those socket APIs are discussed in the following paragraphs.</p>
 </ul>
 
 <hr>
-<h1>3.0 <A NAME="Data_Structures">OS Data Structures</a></h1>
-<H2>3.1 Scalar types</H2>
+<h1>3.0 <A NAME="Data_Structures">OS Data Structures</A></h1>
+<H2>3.1 <A NAME="ScalarType">Scalar Types</A></H2>
 <p>
 Many of the types used to communicate with NuttX are simple
 scalar types. These types are used to provide architecture independence
@@ -6443,7 +6451,7 @@ interface include:
 <li>time_t
 </ul>
 
-<H2>3.2 Hidden Interface Structures</H2>
+<H2>3.2 <A NAME="HiddenStructures">Hidden Interface Structures</A></H2>
 <p>
 Several of the types used to interface with NuttX are
 structures that are intended to be hidden from the application.
@@ -6458,37 +6466,47 @@ OS resources. These hidden structures include:
 <li>pthread_key_t
 </ul>
 <p>
-In order to maintain portability, applications should not reference
-specific elements within these hidden structures. These hidden
-structures will not be described further in this user's manual.
+  In order to maintain portability, applications should not reference
+  specific elements within these hidden structures. These hidden
+  structures will not be described further in this user's manual.
+</p>
 <p>
 
-<H2>3.3. Access to the <I>errno</I> Variable</H2>
+<H2>3.3 <A NAME="ErrnoAccess">Access to the <code>errno</code> Variable</A></H2>
 <p>
-A pointer to the thread-specific <I>errno</I>. value is available through a
-function call:
+  A pointer to the thread-specific <code>errno</code> value is available through a
+  function call:
+</p>
 <p>
-<b>Function Prototype:</b>
+  <b>Function Prototype:</b>
 <p>
-<pre>    int *get_errno_ptr( void )</pre>
+<pre>    #include <errno.h>
+    #define errno *get_errno_ptr()
+    int *get_errno_ptr( void )</pre>
 <p>
-<b>Description</b>:  <I>osGetErrnorPtr()</I> returns a pointer to
-the thread-specific <I>errno</I> value.
+  <b>Description</b>:
+  <code>get_errno_ptr()</code> returns a pointer to the thread-specific <code>errno</code> value.
+  Note that the symbol <code>errno</code> is defined to be <code>get_errno_ptr()</code> so that the usual
+  access by referencing the symbol <code>errno</code> will work as expected.
+</p>
 <p>
-This differs somewhat from the use for<code>errno</code>in a multi-threaded process environment:
-Each pthread will have its own private copy of<code>errno</code>and the<code>errno</code>will not be shared
-between pthreads.
+  There is a unique, private <code>errno</code> value for each NuttX task.
+  However, the implementation of <code>errno</code> differs somewhat from the use of
+  <code>errno</code> in most multi-threaded process environments:
+  In NuttX, each pthread will also have its own private copy of <code>errno</code> and the
+  <code>errno</code> will not be shared between pthreads.
+  This is, perhaps, non-standard but promotes better thread independence.
 <p>
 <b>Input Parameters</b>:  None
 <p>
 <b>Returned Values</b>:
 <p>
 <ul>
-<li>A pointer to the thread-specific <I>errno</I> value.
+<li>A pointer to the thread-specific <code>errno</code> value.
 </ul>
 <p>
 
-<H2>3.4 User Interface Structures</H2>
+<H2>3.4 <A NAME="UserStructures">User Interface Structures</A></H2>
 <p>
 <H3>3.4.1 main_t</H3>
 <p>
