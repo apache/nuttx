@@ -36,7 +36,14 @@
 -include $(TOPDIR)/.config
 -include $(TOPDIR)/Make.defs
 
-CFLAGS	+= -I$(TOPDIR)/pcode/include -I$(TOPDIR)/pcode/insn/include
+COMPILER	= ${shell basename $(CC)}
+ifeq ($(COMPILER),zneocc.exe)
+USRINCLUDES     = -usrinc:'.;$(WTOPDIR)\pcode\include;$(WTOPDIR)\pcode\insn\include'
+else
+USRINCLUDES     = -I$(TOPDIR)/pcode/include -I$(TOPDIR)/pcode/insn/include
+endif
+INCLUDES        = $(ARCHSTDINCLUDES) $(USRINCLUDES)
+CFLAGS          = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(INCLUDES) $(ARCHDEFINES)
 
 ASRCS	= 
 AOBJS	= $(ASRCS:.S=$(OBJEXT))
