@@ -910,13 +910,13 @@ Other memory:
 <tr>
   <td><img src="favicon.ico"></td>
    <td>
-      <a href="ChangeLog.txt">Change Logs for all releases</a><br>
+      <a href="ChangeLog.txt">Change Logs for All NuttX Releases</a><br>
    </td>
 </tr>
 <tr>
   <td><img src="favicon.ico"></td>
    <td>
-      <a href="#currentrelease">ChangeLog for Current Release</a><br>
+      <a href="#currentrelease">ChangeLog for Current Releases</a><br>
    </td>
 </tr>
 <tr>
@@ -936,7 +936,7 @@ Other memory:
 </table>
 
 <pre><ul>
-0.3.7 2008-01-31 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-0.3.7 2008-01-31 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Added support for the Zilog Z16F using the Zilog Z16F2800100ZCOG
 	  Development Kit.
@@ -949,6 +949,14 @@ Other memory:
 	* Added a &quot;dumb&quot; serial console driver to simplify OS bringup
 	* Corrected a bug that caused the errno value of one task to be clobbered
 	  when a different task exits.  Effects all architectures.
+
+pascal-0.1.1 2008-02-01 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+	* Correct some errors in the NuttX installation logic
+
+buildroot-0.1.0 2007-03-09 &lt;spudmonkey@racsa.co.cr&gt
+
+	* Support for arm-elf toolchain
 </pre></ul>
 
 <table width ="100%">
@@ -960,13 +968,24 @@ Other memory:
 </table>
 
 <pre><ul>
-0.3.8 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-0.3.8 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Added a test case to verify the Pascal P-Code interpreter
 	* Added /dev/zero
 	* 'errno' is now defined to be *get_errno_ptr() with no name conflicts
 	* Added lseek() and fseek()
 	* Integrated pascal test case on the simulation platform.  Needs pascal-0.1.1.
+	* Integrated pascal test case on the z16f platform.  Needs pascal-0.1.2 (not
+	  yet released).
+
+pascal-0.1.2 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+	* Add logic to build and link with the ZDS-II toolchain
+	  use with the z16f.
+
+buildroot-0.1.1 2007-xx-xx &lt;spudmonkey@racsa.co.cr&gt
+
+	*  Support for m68k-elf and m68hc11 toolchain
 </pre></ul>
 
 <table width ="100%">
