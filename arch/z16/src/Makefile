@@ -103,11 +103,13 @@ ifeq ($(COMPILER),zneocc.exe)
 nuttx.linkcmd: $(LINKCMDTEMPLATE)
 	@cp -f $(LINKCMDTEMPLATE) nuttx.linkcmd
 	@echo "\"${shell cygpath -w $(TOPDIR)/nuttx}\"= \\" >>nuttx.linkcmd
-	@echo " ${shell cygpath -w $(ARCHSRCDIR)/$(HEAD_AOBJ)}, \\" >>nuttx.linkcmd
+	@echo "  \"${shell cygpath -w $(ARCHSRCDIR)/$(HEAD_AOBJ)}\", \\" >>nuttx.linkcmd
 	@( for lib in $(LINKLIBS); do \
-		echo " `cygpath -w $(TOPDIR)/$${lib}`, \\" >>nuttx.linkcmd; \
+		echo "  \"`cygpath -w $(TOPDIR)/$${lib}`\", \\" >>nuttx.linkcmd; \
 	done ; )
-	@echo " ${shell cygpath -w $(ARCHSRCDIR)/board/libboard$(LIBEXT)}"  >>nuttx.linkcmd
+	@echo "  \"${shell cygpath -w $(ARCHSRCDIR)/board/libboard$(LIBEXT)}\", \\"  >>nuttx.linkcmd
+	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/chelpld$(LIBEXT)}\", \\"  >>nuttx.linkcmd
+	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/fpld$(LIBEXT)}\""  >>nuttx.linkcmd
 else
 nuttx.linkcmd:
 endif
