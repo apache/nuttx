@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_libfwrite.c
+ * lib/lib_rdflush.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,11 +41,11 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>  /* for CONFIG_STDIO_BUFFER_SIZE */
+#include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <fcntl.h>
 #include <errno.h>
 
 #include "lib_internal.h"
@@ -83,99 +83,62 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_fwrite
+ * Name: lib_rdflush
+ *
+ * Description:
+ *   Flush read data from the I/O buffer and adjust the file pointer to
+ *   account for the unread data
+ *
  ****************************************************************************/
 
-ssize_t lib_fwrite(const void *ptr, size_t count, FILE *stream)
 #if CONFIG_STDIO_BUFFER_SIZE > 0
+int lib_rdflush(FILE *stream)
 {
-  const unsigned char *start = ptr;
-  const unsigned char *src   = ptr;
-  ssize_t ret = ERROR;
-  unsigned char *dest;
-
-  /* Make sure that writing to this stream is allowed */
-
-  if (!stream || (stream->fs_oflags & O_WROK) == 0)
+  if (!stream)
     {
       *get_errno_ptr() = EBADF;
-      goto errout;
+      return ERROR;
     }
 
   /* Get exclusive access to the stream */
 
   lib_take_semaphore(stream);
 
-  /* If the buffer is currently being used for read access, then
-   * discard all of the read-ahead data.  We do not support concurrent
-   * buffered read/write access.
+  /* If the buffer is currently being used for read access, then discard all
+   * of the read-ahead data.  We do not support concurrent buffered read/write
+   * access.
    */
 
-  if (lib_rdflush(stream) < 0)
+  if (stream->fs_bufread != stream->fs_bufstart)
     {
-      goto errout_with_semaphore;
-    }
-
-  /* Loop until all of the bytes have been buffered */
-
-  while (count > 0)
-    {
-      /* Determine the number of bytes left in the buffer */
-
-      size_t gulp_size = stream->fs_bufend - stream->fs_bufpos;
-
-      /* Will the user data fit into the amount of buffer space
-       * that we have left?
+      /* Now adjust the stream pointer to account for the read-ahead data that
+       * was not actually read by the user.
        */
 
-      if (gulp_size > count)
-        {
-          /* Yes, clip the gulp to the size of the user data */
-
-          gulp_size = count;
-        }
-
-      /* Adjust the number of bytes remaining to be transferred
-       * on the next pass through the loop (might be zero).
-       */
-
-      count -= gulp_size;
-
-      /* Transfer the data into the buffer */
-
-      for (dest = stream->fs_bufpos; gulp_size > 0; gulp_size--)
-        {
-          *dest++ = *src++;
-        }
-      stream->fs_bufpos = dest;
-
-      /* Is the buffer full? */
-
-      if (dest >= stream->fs_bufend)
-        {
-          /* Flush the buffered data to the IO stream */
-
-          int bytes_buffered = fflush_internal(stream, FALSE);
-          if (bytes_buffered < 0)
-            {
-              goto errout_with_semaphore;
-            }
-        }
-    }
-
-  /* Return the number of bytes written */
-
-  ret = src - start;
-
-errout_with_semaphore:
-  lib_give_semaphore(stream);
-
-errout:
-  return ret;
-}
+#if CONFIG_NUNGET_CHARS > 0
+      off_t rdoffset = stream->fs_bufread - stream->fs_bufpos + stream->fs_nungotten;
 #else
-{
-  return write(stream->fs_filedes, ptr, count);
+      off_t rdoffset = stream->fs_bufread - stream->fs_bufpos;
+#endif
+      /* Mark the buffer as empty (do this before calling fseek() because fseek()
+       * also calls this function).
+       */
+
+      stream->fs_bufpos = stream->fs_bufread = stream->fs_bufstart;
+#if CONFIG_NUNGET_CHARS > 0
+      stream->fs_nungotten = 0;
+#endif
+      /* Then seek to the position corresponding to the last data read by the user */
+
+      if (fseek(stream, -rdoffset, SEEK_CUR) < 0)
+        {
+          lib_give_semaphore(stream);
+          return ERROR;
+        }
+    }
+
+  lib_give_semaphore(stream);
+  return OK;
 }
 #endif /* CONFIG_STDIO_BUFFER_SIZE */
 

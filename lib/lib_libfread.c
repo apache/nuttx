@@ -1,7 +1,7 @@
-/************************************************************
- * lib_libfread.c
+/****************************************************************************
+ * lib/lib_libfread.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,15 +31,15 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Compilation Switches
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>  /* for CONFIG_STDIO_BUFFER_SIZE */
 #include <stdio.h>
@@ -49,41 +49,41 @@
 #include <errno.h>
 #include "lib_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Constant Data
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Constant Data
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * lib_fread
- ************************************************************/
+ ****************************************************************************/
 
 ssize_t lib_fread(void *ptr, size_t count, FILE *stream)
 {
@@ -92,7 +92,7 @@ ssize_t lib_fread(void *ptr, size_t count, FILE *stream)
 
   /* Make sure that reading from this stream is allowed */
 
-  if ((!stream) || ((stream->fs_oflags & O_RDOK) == 0))
+  if (!stream || (stream->fs_oflags & O_RDOK) == 0)
     {
       *get_errno_ptr() = EBADF;
       bytes_read = -1;
@@ -107,148 +107,158 @@ ssize_t lib_fread(void *ptr, size_t count, FILE *stream)
       /* First, re-read any previously ungotten characters */
 
       while ((stream->fs_nungotten > 0) && (count > 0))
-	{
-	  /* Decrement the count of ungotten bytes to get an index */
+        {
+          /* Decrement the count of ungotten bytes to get an index */
 
-	  stream->fs_nungotten--;
+          stream->fs_nungotten--;
 
-	  /* Return the last ungotten byte */
+          /* Return the last ungotten byte */
 
-	  *dest++ = stream->fs_ungotten[stream->fs_nungotten];
+          *dest++ = stream->fs_ungotten[stream->fs_nungotten];
 
-	  /* That's one less byte that we have to read */
+          /* That's one less byte that we have to read */
 
-	  count--;
-	}
+          count--;
+        }
 #endif
 
 #if CONFIG_STDIO_BUFFER_SIZE > 0
+      /* If the buffer is currently being used for write access, then
+       * flush all of the buffered write data.  We do not support concurrent
+       * buffered read/write access.
+       */
+
+      if (lib_wrflush(stream) != 0)
+        {
+          return ERROR;
+        }
+
       /* Now get any other needed chars from the buffer or the file. */
 
       while (count > 0)
-	{
-	  /* Is there readable data in the buffer? */
+        {
+          /* Is there readable data in the buffer? */
 
-	  while ((count > 0) && (stream->fs_bufpos < stream->fs_bufread))
-	    {
-	      /* Yes, copy a byte into the user buffer */
+          while ((count > 0) && (stream->fs_bufpos < stream->fs_bufread))
+            {
+              /* Yes, copy a byte into the user buffer */
 
-	      *dest++ = *stream->fs_bufpos++;
-	      count--;
-	    }
+              *dest++ = *stream->fs_bufpos++;
+              count--;
+            }
 
-	  /* The buffer is empty OR we have already supplied the number of
-	   * bytes requested in the read.  Check if we need to read
-	   * more from the file.
-	   */
+          /* The buffer is empty OR we have already supplied the number of
+           * bytes requested in the read.  Check if we need to read
+           * more from the file.
+           */
 
-	  if (count > 0)
-	    {
-	      size_t buffer_available;
+          if (count > 0)
+            {
+              size_t buffer_available;
 
-	      /* We need to read more data into the buffer from the file */
+              /* We need to read more data into the buffer from the file */
 
-	      /* Mark the buffer empty */
+              /* Mark the buffer empty */
 
-	      stream->fs_bufpos = stream->fs_bufread = stream->fs_bufstart;
+              stream->fs_bufpos = stream->fs_bufread = stream->fs_bufstart;
 
-	      /* How much space is available in the buffer? */
+              /* How much space is available in the buffer? */
 
-	      buffer_available = stream->fs_bufend - stream->fs_bufread;
+              buffer_available = stream->fs_bufend - stream->fs_bufread;
 
-	      /* Will the number of bytes that we need to read fit into
-	       * the buffer space that is available? If the read size is
-	       * larger than the buffer, then read some of the data
-	       * directly into the user's buffer.
-	       */
+              /* Will the number of bytes that we need to read fit into
+               * the buffer space that is available? If the read size is
+               * larger than the buffer, then read some of the data
+               * directly into the user's buffer.
+               */
 
-	      if (count > buffer_available)
-		{
-		  bytes_read = read(stream->fs_filedes, dest, count);
-		  if (bytes_read < 0)
-		    {
-		      /* An error occurred on the read */
+              if (count > buffer_available)
+                {
+                  bytes_read = read(stream->fs_filedes, dest, count);
+                  if (bytes_read < 0)
+                    {
+                      /* An error occurred on the read */
 
-		      goto err_out;
-		    }
-		  else if (bytes_read == 0)
-		    {
-		      /* We are at the end of the file */
+                      goto err_out;
+                    }
+                  else if (bytes_read == 0)
+                    {
+                      /* We are at the end of the file */
 
-		      goto short_read;
-		    }
-		  else
-		    {
-		      /* Some bytes were read. Adjust the dest pointer */
+                      goto short_read;
+                    }
+                  else
+                    {
+                      /* Some bytes were read. Adjust the dest pointer */
 
-		      dest  += bytes_read;
+                      dest  += bytes_read;
 
-		      /* Were all of the requested bytes read? */
+                      /* Were all of the requested bytes read? */
 
-		      if (bytes_read < count)
-			{
-			  /* No.  We must be at the end of file. */
+                      if (bytes_read < count)
+                        {
+                          /* No.  We must be at the end of file. */
 
-			  goto short_read;
-			}
-		      else
-			{
-			  /* Yes.  We are done. */
+                          goto short_read;
+                        }
+                      else
+                        {
+                          /* Yes.  We are done. */
 
-			  count = 0;
-			}
-		    }
-		}
-	      else
-		{
-		  /* The number of bytes required to satisfy the read
-		   * is less than or equal to the size of the buffer
-		   * space that we have left. Read as much as we can
-		   * into the buffer.
-		   */
+                          count = 0;
+                        }
+                    }
+                }
+              else
+                {
+                  /* The number of bytes required to satisfy the read
+                   * is less than or equal to the size of the buffer
+                   * space that we have left. Read as much as we can
+                   * into the buffer.
+                   */
 
-		  bytes_read = read(stream->fs_filedes, stream->fs_bufread, buffer_available);
-		  if (bytes_read < 0)
-		    {
-		      /* An error occurred on the read */
+                  bytes_read = read(stream->fs_filedes, stream->fs_bufread, buffer_available);
+                  if (bytes_read < 0)
+                    {
+                      /* An error occurred on the read */
 
-		      goto err_out;
-		    }
-		  else if (bytes_read == 0)
-		    {
-		      /* We are at the end of the file */
+                      goto err_out;
+                    }
+                  else if (bytes_read == 0)
+                    {
+                      /* We are at the end of the file */
 
-		      goto short_read;
-		    }
-		  else
-		    {
-		      /* Some bytes were read */
+                      goto short_read;
+                    }
+                  else
+                    {
+                      /* Some bytes were read */
 
-		      stream->fs_bufread += bytes_read;
-		    }
-		}
-	    }
-	}
+                      stream->fs_bufread += bytes_read;
+                    }
+                }
+            }
+        }
 #else
       /* Now get any other needed chars from the file. */
 
       while (count > 0)
-	{
-	  bytes_read = read(stream->fs_filedes, dest, count);
-	  if (bytes_read < 0)
-	    {
-	      goto err_out;
-	    }
-	  else if (bytes_read == 0)
-	    {
-	      break;
-	    }
-	  else
-	    {
-	      dest  += bytes_read;
-	      count -= bytes_read;
-	    }
-	}
+        {
+          bytes_read = read(stream->fs_filedes, dest, count);
+          if (bytes_read < 0)
+            {
+              goto err_out;
+            }
+          else if (bytes_read == 0)
+            {
+              break;
+            }
+          else
+            {
+              dest  += bytes_read;
+              count -= bytes_read;
+            }
+        }
 #endif
     short_read:
       bytes_read = dest - (unsigned char*)ptr;

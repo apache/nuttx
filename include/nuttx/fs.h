@@ -1,7 +1,7 @@
 /****************************************************************************
  * nutts/fs.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -231,11 +231,31 @@ struct filelist
 };
 #endif
 
-/* This defines the list of files used for standard C I/O
- * We can support the standard C APIs without or without buffering
+/* The following structure defines the list of files used for standard C I/O.
+ * Note that NuttX can support the standard C APIs without or without buffering
+ *
+ * When buffering us used, the following described the usage of the I/O buffer.
+ * The buffer can be used for reading or writing -- but not both at the same time.
+ * An fflush is implied between each change in directionof access.
+ *
+ * The field fs_bufread determines whether the buffer is being used for reading or
+ * for writing as fillows:
+ *
+ *              BUFFER
+ *     +----------------------+ <- fs_bufstart Points to the beginning of the buffer.
+ *     | WR: Buffered data    |                WR: Start of buffered write data.
+ *     | RD: Already read     |                RD: Start of already read data.
+ *     +----------------------+
+ *     | WR: Available buffer | <- fs_bufpos   Points to next byte:
+ *     | RD: Read-ahead data  |                WR: End+1 of buffered write data.
+ *     |                      |                RD: Points to next char to return
+ *     +----------------------+
+ *     | WR: Available        | <- fs_bufread  Top+1 of buffered read data
+ *     | RD: Available        |                WR: =bufstart buffer used for writing.
+ *     |                      |                RD: Pointer to last buffered read char+1
+ *     +----------------------+
+ *                              <- fs_bufend   Points to end end of the buffer+1
  */
-
-/* Buffered file I/O structure */
 
 #if CONFIG_NFILE_STREAMS > 0
 struct file_struct
@@ -332,7 +352,7 @@ EXTERN FAR struct file_struct *lib_fdopen(int fd,
 /* lib_fflush.c *************************************************************/
 
 #if CONFIG_NFILE_STREAMS > 0
-EXTERN void lib_flushall(FAR struct streamlist *list);
+EXTERN int lib_flushall(FAR struct streamlist *list);
 #endif
 
 /* drivers ******************************************************************/

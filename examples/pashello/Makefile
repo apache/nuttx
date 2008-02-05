@@ -39,10 +39,11 @@
 COMPILER	= ${shell basename $(CC)}
 ifeq ($(COMPILER),zneocc.exe)
 USRINCLUDES     = -usrinc:'.;$(WTOPDIR)\pcode\include;$(WTOPDIR)\pcode\insn\include'
+INCLUDES        = $(ARCHSTDINCLUDES) $(USRINCLUDES)
 else
 USRINCLUDES     = -I$(TOPDIR)/pcode/include -I$(TOPDIR)/pcode/insn/include
+INCLUDES        = $(ARCHINCLUDES) $(USRINCLUDES)
 endif
-INCLUDES        = $(ARCHSTDINCLUDES) $(USRINCLUDES)
 CFLAGS          = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(INCLUDES) $(ARCHDEFINES)
 
 ASRCS	= 

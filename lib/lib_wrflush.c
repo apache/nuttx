@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_libfwrite.c
+ * lib/lib_wrlush.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,10 +41,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>  /* for CONFIG_STDIO_BUFFER_SIZE */
+#include <nuttx/config.h>
 
-#include <stdio.h>
-#include <unistd.h>
+#include <sys/types.h>
 #include <fcntl.h>
 #include <errno.h>
 
@@ -83,99 +82,30 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_fwrite
+ * Name: lib_wrflush
+ *
+ * Description:
+ *   This is simply a version of fflush that does not report an error if
+ *   the file is not open for writing.
+ *
  ****************************************************************************/
 
-ssize_t lib_fwrite(const void *ptr, size_t count, FILE *stream)
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+/****************************************************************************
+ * Name: lib_wrflush
+ ****************************************************************************/
+
+int lib_wrflush(FILE *stream)
 {
-  const unsigned char *start = ptr;
-  const unsigned char *src   = ptr;
-  ssize_t ret = ERROR;
-  unsigned char *dest;
-
-  /* Make sure that writing to this stream is allowed */
-
-  if (!stream || (stream->fs_oflags & O_WROK) == 0)
-    {
-      *get_errno_ptr() = EBADF;
-      goto errout;
-    }
-
-  /* Get exclusive access to the stream */
-
-  lib_take_semaphore(stream);
-
-  /* If the buffer is currently being used for read access, then
-   * discard all of the read-ahead data.  We do not support concurrent
-   * buffered read/write access.
+#if CONFIG_STDIO_BUFFER_SIZE > 0
+  /* Verify that the stream is opened for writing... flush will return an
+   * error if it is called for a stream that is not opened for writing.
    */
 
-  if (lib_rdflush(stream) < 0)
+  if (stream && (stream->fs_oflags & O_WROK) != 0)
     {
-      goto errout_with_semaphore;
+      return fflush(stream);
     }
-
-  /* Loop until all of the bytes have been buffered */
-
-  while (count > 0)
-    {
-      /* Determine the number of bytes left in the buffer */
-
-      size_t gulp_size = stream->fs_bufend - stream->fs_bufpos;
-
-      /* Will the user data fit into the amount of buffer space
-       * that we have left?
-       */
-
-      if (gulp_size > count)
-        {
-          /* Yes, clip the gulp to the size of the user data */
-
-          gulp_size = count;
-        }
-
-      /* Adjust the number of bytes remaining to be transferred
-       * on the next pass through the loop (might be zero).
-       */
-
-      count -= gulp_size;
-
-      /* Transfer the data into the buffer */
-
-      for (dest = stream->fs_bufpos; gulp_size > 0; gulp_size--)
-        {
-          *dest++ = *src++;
-        }
-      stream->fs_bufpos = dest;
-
-      /* Is the buffer full? */
-
-      if (dest >= stream->fs_bufend)
-        {
-          /* Flush the buffered data to the IO stream */
-
-          int bytes_buffered = fflush_internal(stream, FALSE);
-          if (bytes_buffered < 0)
-            {
-              goto errout_with_semaphore;
-            }
-        }
-    }
-
-  /* Return the number of bytes written */
-
-  ret = src - start;
-
-errout_with_semaphore:
-  lib_give_semaphore(stream);
-
-errout:
-  return ret;
+#endif
+  return OK;
 }
-#else
-{
-  return write(stream->fs_filedes, ptr, count);
-}
-#endif /* CONFIG_STDIO_BUFFER_SIZE */
 

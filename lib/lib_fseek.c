@@ -41,8 +41,13 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <sys/types.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
 
 #include "lib_internal.h"
 
@@ -75,7 +80,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -84,6 +93,23 @@
 
 int fseek(FILE *stream, long int offset, int whence)
 {
+#if CONFIG_STDIO_BUFFER_SIZE > 0
+  /* Flush any valid read/write data in the buffer (also verifies stream) */
+
+  if (lib_rdflush(stream) < 0 || lib_wrflush(stream) < 0)
+    {
+      return ERROR;
+    }
+#else
+  /* Verify that we were provided with a stream */
+
+  if (!stream)
+    {
+      *get_errno_ptr() = EBADF;
+      return ERROR;
+    }
+#endif
+
   /* Perform the fseek on the underlying file descriptor */
 
   return lseek(stream->fs_filedes, offset, whence) >= 0 ? OK : ERROR;

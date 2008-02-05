@@ -160,6 +160,18 @@ extern ssize_t lib_fwrite(const void *ptr, size_t count, FILE *stream);
 
 extern ssize_t lib_fread(void *ptr, size_t count, FILE *stream);
 
+/* Defined in lib_fflush.c */
+
+extern ssize_t fflush_internal(FILE *stream, boolean bforce);
+
+/* Defined in lib_rdflush.c */
+
+extern int lib_rdflush(FILE *stream);
+
+/* Defined in lib_wrflush.c */
+
+int lib_wrflush(FILE *stream);
+
 /* Defined in lib_sem.c */
 
 #if CONFIG_STDIO_BUFFER_SIZE > 0

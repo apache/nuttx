@@ -319,6 +319,13 @@
 	* Integrated pascal test case on the simulation platform.  Needs pascal-0.1.1.
 	* Integrated pascal test case on the z16f platform.  Needs pascal-0.1.2 (not
 	  yet released).
+	* C Buffered I/O fixes:
+	 (1) Fix fflush() return value,
+	 (2) Add correct fflush behavior when the FILE argument is null.
+	 (3) Add logic to a correctly handle read/write access on the same FILE
+	 (4) fseek() flushes read/write data when before moving the file pointer
+	 (5) When read data is flushed, reposition the file pointer to account for
+	     buffered, but unreand data
 
 
 

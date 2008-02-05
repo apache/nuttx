@@ -61,8 +61,9 @@ STDIO_SRCS	+= lib_rawstream.c
 ifneq ($(CONFIG_NFILE_STREAMS),0)
 STDIO_SRCS	+= lib_fopen.c lib_fclose.c lib_fread.c lib_libfread.c lib_fseek.c \
 		   lib_fgetc.c lib_fgets.c lib_gets.c lib_fwrite.c lib_libfwrite.c \
-		   lib_fflush.c lib_fputc.c lib_puts.c lib_fputs.c lib_ungetc.c \
-		   lib_vprintf.c lib_fprintf.c lib_vfprintf.c lib_stdstream.c
+		   lib_fflush.c lib_rdflush.c lib_wrflush.c lib_fputc.c lib_puts.c \
+		   lib_fputs.c lib_ungetc.c lib_vprintf.c lib_fprintf.c lib_vfprintf.c \
+		   lib_stdstream.c
 endif
 endif
 
