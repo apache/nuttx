@@ -11,7 +11,7 @@ NuttX TODO List (Last updated January 6, 2008)
   (2)  USB (drivers/usbdev)
   (3)  Libraries (lib/)
   (2)  File system (fs/, drivers/)
-  (1)  Pascal add-on (pcode/)
+  (2)  Pascal add-on (pcode/)
   (2)  Documentation (Documentation/)
   (3)  Build system
   (0)  Applications & Tests (examples/)
@@ -21,7 +21,7 @@ NuttX TODO List (Last updated January 6, 2008)
   (2)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (2)  z80 (arch/z80/)
-  (4)  z16 (arch/z16/)
+  (5)  z16 (arch/z16/)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -232,8 +232,14 @@ o File system (fs/, drivers/)
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
 
-  Description: Need a test to verify execution of P-Code from files.
-               Need APIs to verify execution of P-Code from memory buffer.
+  Description: Need APIs to verify execution of P-Code from memory buffer.
+  Status:      Open
+  Priority:    Medium
+
+  Description: POFF file is generated in the native endian-ness of the
+               host machine (little-endian for x86 hosts).  They will
+               not run at present on big-endian targets.  Solution: the
+               POFF files must be independent of endian-ness.
   Status:      Open
   Priority:    Medium
 
@@ -401,3 +407,10 @@ o z16 (arch/z16)
                http://support.zilog.com/support/incident/incident_support.asp?iIncidentId=81400&iSiteId=1&chLanguageCode=ENG
   Status:      Open
   Priority:    Medium-High
+
+  Description: The Pascal add-on does not work with the Z16F port.  This is
+               because the Z16F is big-endian (see duplicate problem report under
+               "Pascal Add-On").
+  Status:      Open
+  Priority:    Medium
+
