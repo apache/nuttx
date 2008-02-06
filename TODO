@@ -11,7 +11,7 @@ NuttX TODO List (Last updated January 6, 2008)
   (2)  USB (drivers/usbdev)
   (3)  Libraries (lib/)
   (2)  File system (fs/, drivers/)
-  (2)  Pascal add-on (pcode/)
+  (1)  Pascal add-on (pcode/)
   (2)  Documentation (Documentation/)
   (3)  Build system
   (0)  Applications & Tests (examples/)
@@ -233,13 +233,6 @@ o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
 
   Description: Need APIs to verify execution of P-Code from memory buffer.
-  Status:      Open
-  Priority:    Medium
-
-  Description: POFF file is generated in the native endian-ness of the
-               host machine (little-endian for x86 hosts).  They will
-               not run at present on big-endian targets.  Solution: the
-               POFF files must be independent of endian-ness.
   Status:      Open
   Priority:    Medium
 

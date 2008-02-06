@@ -326,6 +326,7 @@
 	 (4) fseek() flushes read/write data when before moving the file pointer
 	 (5) When read data is flushed, reposition the file pointer to account for
 	     buffered, but unreand data
+	* Pascal P-Code files are now standardized to big-endian for portability
 
 
 
