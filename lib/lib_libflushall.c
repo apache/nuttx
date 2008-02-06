@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_wrflush.c
+ * lib/lib_libflushall.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,8 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include <nuttx/fs.h>
+
 #include "lib_internal.h"
 
 /****************************************************************************
@@ -82,39 +84,57 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_wrflush
+ * Name: lib_flushall
  *
  * Description:
- *   This is simply a version of fflush that does not report an error if
- *   the file is not open for writing.
+ *   Called either (1) by the OS when a task exits, or (2) from fflush()
+ *   when a NULL stream argument is provided.
  *
  ****************************************************************************/
 
-int lib_wrflush(FILE *stream)
+int lib_flushall(FAR struct streamlist *list)
 {
-  /* Verify that we were passed a valid (i.e., non-NULL) stream */
+  int lasterrno = OK;
+  int ret;
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
-  if (stream)
+  /* Make sure that there are streams associated with this thread */
+
+  if (list)
     {
-      /* Verify that the stream is opened for writing... lib_fflush will
-       * return an error if it is called for a stream that is not opened for
-       * writing.
-       */
+       int i;
 
-      if ((stream->fs_oflags & O_WROK) == 0 ||
-          lib_fflush(stream, TRUE) == 0)
-       {
-         /* Return success if there is no buffered write data -- i.e., that
-          * the stream is not opened for writing or, if it is, that all of
-          * the buffered write data was successfully flushed.
-          */
+       /* Process each stream in the thread's stream list */
 
-         return OK;
-       }
+       stream_semtake(list);
+       for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
+         {
+           FILE *stream = &list->sl_streams[i];
+
+           /* If the stream is open (i.e., assigned a non-negative file
+            * descriptor) and opened for writing, then flush all of the pending
+            * write data in the stream.
+            */
+
+           if (stream->fs_filedes >= 0 && (stream->fs_oflags & O_WROK) != 0)
+             {
+               /* Flush the writable FILE */
+
+               if (lib_fflush(stream, TRUE) != 0)
+                 {
+                   /* An error occurred during the flush AND/OR we were unable
+                    * to flush all of the buffered write data.  Return EOF on failure.
+                    */
+
+                   lasterrno = *get_errno_ptr();
+                   ret = ERROR;
+                 }
+             }
+         }
+       stream_semgive(list);
     }
-  return ERROR;
-#else
-  return stream ? OK : ERROR;
-#endif
+
+  /* If any flush failed, return that last failed flush */
+
+  *get_errno_ptr() = lasterrno;
+  return ret;
 }

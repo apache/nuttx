@@ -41,11 +41,10 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>  /* for CONFIG_STDIO_BUFFER_SIZE */
+#include <nuttx/config.h>
 
 #include <sys/types.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
 
@@ -82,165 +81,8 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: fflush_internal
- *
- * Description:
- *  The function fflush() forces a write of all user-space buffered data for
- *  the given output or update stream via the stream's underlying write
- *  function.  The open status of the stream is unaffected.
- *
- * Parmeters:
- *  stream - the stream to flush
- *  bforce - flush must be complete.
- *
- * Return:
- *  ERROR on failure, otherwise the number of bytes remaining in the buffer.
- *  If bforce is set, then only the values ERROR and 0 will be returned.
- *
- ****************************************************************************/
-
-ssize_t fflush_internal(FILE *stream, boolean bforce)
-{
-#if CONFIG_STDIO_BUFFER_SIZE > 0
-  const unsigned char *src;
-  size_t bytes_written;
-  size_t nbuffer;
-
-  /* Return EBADF if the file is not opened for writing */
-
-  if (stream->fs_filedes < 0 || (stream->fs_oflags & O_WROK) == 0)
-    {
-      *get_errno_ptr() = EBADF;
-      return ERROR;
-    }
-
-  /* Make sure that we have exclusive access to the stream */
-
-  lib_take_semaphore(stream);
-
-  /* Make sure tht the buffer holds valid data */
-
-  if (stream->fs_bufpos  != stream->fs_bufstart)
-    {
-       /* Make sure that the buffer holds buffered write data.  We do not
-        * support concurrent read/write buffer usage.
-        */
-
-       if (stream->fs_bufread != stream->fs_bufstart)
-        {
-          /* The buffer holds read data... just return zero */
-
-          return 0;
-        }
-
-      /* How many bytes of write data are used in the buffer now */
-
-      nbuffer = stream->fs_bufpos - stream->fs_bufstart;
-
-      /* Try to write that amount */
-
-      src = stream->fs_bufstart;
-      do
-        {
-          /* Perform the write */
-
-          bytes_written = write(stream->fs_filedes, src, nbuffer);
-          if (bytes_written < 0)
-            {
-              lib_give_semaphore(stream);
-              return ERROR;
-            }
-
-          /* Handle partial writes.  fflush() must either return with
-           * an error condition or with the data successfully flushed
-           * from the buffer.
-           */
-
-          src     += bytes_written;
-          nbuffer -= bytes_written;
-        }
-      while (bforce && nbuffer > 0);
-
-      /* Reset the buffer position to the beginning of the buffer */
-
-      stream->fs_bufpos = stream->fs_bufstart;
-
-      /* For the case of an incomplete write, nbuffer will be non-zero
-       * It will hold the number of bytes that were not written.
-       * Move the data down in the buffer to handle this (rare) case
-       */
-
-      while (nbuffer)
-       {
-         *stream->fs_bufpos++ = *src++;
-         --nbuffer;
-       }
-    }
-
-  /* Restore normal access to the stream and return the number of bytes
-   * remaining in the buffer.
-   */
-
-  lib_give_semaphore(stream);
-  return stream->fs_bufpos - stream->fs_bufstart;
-#else
-  /* Return no bytes remaining in the buffer */
-
-  return 0;
-#endif
-}
-
-/****************************************************************************
  * Global Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: lib_fflushall
- *
- * Description:
- *   Called either (1) by the OS when a task exits, or (2) from fflush()
- *   when a NULL stream argument is provided.
- *
- ****************************************************************************/
-
-int lib_flushall(FAR struct streamlist *list)
-{
-  int lasterrno = OK;
-  int ret;
-
-  /* Make sure that there are streams associated with this thread */
-
-  if (list)
-    {
-       int i;
-
-       /* Process each stream in the thread's stream list */
-
-       stream_semtake(list);
-       for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
-         {
-           /* If the stream is open (i.e., assigned a non-negative file
-            * descriptor), then flush all of the pending write data in the
-            * stream.
-            */
-
-           if (list->sl_streams[i].fs_filedes >= 0)
-             {
-               if (fflush_internal(&list->sl_streams[i], TRUE) != 0)
-                 {
-                   lasterrno = *get_errno_ptr();
-                   ret = ERROR;
-                 }
-             }
-         }
-       stream_semgive(list);
-    }
-
-  /* If any flush failed, return that last failed flush */
-
-  *get_errno_ptr() = lasterrno;
-  return ret;
-}
 
 /****************************************************************************
  * Name: fflush
@@ -259,12 +101,20 @@ int lib_flushall(FAR struct streamlist *list)
 
 int fflush(FILE *stream)
 {
+  /* Is the stream argument NULL? */
+
   if (!stream)
     {
+      /* Yes... then this is a request to flush all streams */
+
       return lib_flushall(sched_getstreams());
     }
-  else if (fflush_internal(stream, TRUE) != 0)
+  else if (lib_fflush(stream, TRUE) != 0)
     {
+      /* An error occurred during the flush AND/OR we were unable to flush all
+       * of the buffered write data.  Return EOF on failure.
+       */
+
       return EOF;
     }
   return OK;

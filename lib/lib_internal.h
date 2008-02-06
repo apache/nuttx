@@ -160,9 +160,9 @@ extern ssize_t lib_fwrite(const void *ptr, size_t count, FILE *stream);
 
 extern ssize_t lib_fread(void *ptr, size_t count, FILE *stream);
 
-/* Defined in lib_fflush.c */
+/* Defined in lib_libfflush.c */
 
-extern ssize_t fflush_internal(FILE *stream, boolean bforce);
+extern ssize_t lib_fflush(FILE *stream, boolean bforce);
 
 /* Defined in lib_rdflush.c */
 

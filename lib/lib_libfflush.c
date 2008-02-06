@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_wrflush.c
+ * lib/lib_libfflush.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,8 +44,11 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+
+#include <nuttx/fs.h>
 
 #include "lib_internal.h"
 
@@ -82,39 +85,111 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_wrflush
+ * Name: lib_fflush
  *
  * Description:
- *   This is simply a version of fflush that does not report an error if
- *   the file is not open for writing.
+ *  The function lib_fflush() forces a write of all user-space buffered data for
+ *  the given output or update stream via the stream's underlying write
+ *  function.  The open status of the stream is unaffected.
+ *
+ * Parmeters:
+ *  stream - the stream to flush
+ *  bforce - flush must be complete.
+ *
+ * Return:
+ *  ERROR on failure, otherwise the number of bytes remaining in the buffer.
+ *  If bforce is set, then only the values ERROR and 0 will be returned.
  *
  ****************************************************************************/
 
-int lib_wrflush(FILE *stream)
+ssize_t lib_fflush(FILE *stream, boolean bforce)
 {
-  /* Verify that we were passed a valid (i.e., non-NULL) stream */
-
 #if CONFIG_STDIO_BUFFER_SIZE > 0
-  if (stream)
+  const unsigned char *src;
+  size_t bytes_written;
+  size_t nbuffer;
+
+  /* Return EBADF if the file is not opened for writing */
+
+  if (stream->fs_filedes < 0 || (stream->fs_oflags & O_WROK) == 0)
     {
-      /* Verify that the stream is opened for writing... lib_fflush will
-       * return an error if it is called for a stream that is not opened for
-       * writing.
+      *get_errno_ptr() = EBADF;
+      return ERROR;
+    }
+
+  /* Make sure that we have exclusive access to the stream */
+
+  lib_take_semaphore(stream);
+
+  /* Make sure tht the buffer holds valid data */
+
+  if (stream->fs_bufpos  != stream->fs_bufstart)
+    {
+       /* Make sure that the buffer holds buffered write data.  We do not
+        * support concurrent read/write buffer usage.
+        */
+
+       if (stream->fs_bufread != stream->fs_bufstart)
+        {
+          /* The buffer holds read data... just return zero */
+
+          return 0;
+        }
+
+      /* How many bytes of write data are used in the buffer now */
+
+      nbuffer = stream->fs_bufpos - stream->fs_bufstart;
+
+      /* Try to write that amount */
+
+      src = stream->fs_bufstart;
+      do
+        {
+          /* Perform the write */
+
+          bytes_written = write(stream->fs_filedes, src, nbuffer);
+          if (bytes_written < 0)
+            {
+              lib_give_semaphore(stream);
+              return ERROR;
+            }
+
+          /* Handle partial writes.  fflush() must either return with
+           * an error condition or with the data successfully flushed
+           * from the buffer.
+           */
+
+          src     += bytes_written;
+          nbuffer -= bytes_written;
+        }
+      while (bforce && nbuffer > 0);
+
+      /* Reset the buffer position to the beginning of the buffer */
+
+      stream->fs_bufpos = stream->fs_bufstart;
+
+      /* For the case of an incomplete write, nbuffer will be non-zero
+       * It will hold the number of bytes that were not written.
+       * Move the data down in the buffer to handle this (rare) case
        */
 
-      if ((stream->fs_oflags & O_WROK) == 0 ||
-          lib_fflush(stream, TRUE) == 0)
+      while (nbuffer)
        {
-         /* Return success if there is no buffered write data -- i.e., that
-          * the stream is not opened for writing or, if it is, that all of
-          * the buffered write data was successfully flushed.
-          */
-
-         return OK;
+         *stream->fs_bufpos++ = *src++;
+         --nbuffer;
        }
     }
-  return ERROR;
+
+  /* Restore normal access to the stream and return the number of bytes
+   * remaining in the buffer.
+   */
+
+  lib_give_semaphore(stream);
+  return stream->fs_bufpos - stream->fs_bufstart;
 #else
-  return stream ? OK : ERROR;
+  /* Return no bytes remaining in the buffer */
+
+  return 0;
 #endif
 }
+

@@ -155,7 +155,7 @@ ssize_t lib_fwrite(const void *ptr, size_t count, FILE *stream)
         {
           /* Flush the buffered data to the IO stream */
 
-          int bytes_buffered = fflush_internal(stream, FALSE);
+          int bytes_buffered = lib_fflush(stream, FALSE);
           if (bytes_buffered < 0)
             {
               goto errout_with_semaphore;
