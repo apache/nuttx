@@ -977,14 +977,16 @@ nuttx-0.3.8 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* Integrated pascal test case on the simulation platform.  Needs pascal-0.1.1.
 	* Integrated pascal test case on the z16f platform.  Needs pascal-0.1.2 (not
 	  yet released).
-	* C Buffered I/O fixes:
-	 (1) Fix fflush() return value,
-	 (2) Add correct fflush behavior when the FILE argument is null.
-	 (3) Add logic to a correctly handle read/write access on the same FILE
-	 (4) fseek() flushes read/write data when before moving the file pointer
-	 (5) When read data is flushed, reposition the file pointer to account for
-	     buffered, but unreand data
+	* C buffered I/O fixes:
+	  - Fix fflush() return value,
+	  - Add correct fflush behavior when the FILE argument is null.
+	  - Add logic to a correctly handle read/write access on the same FILE
+	  - fseek() flushes read/write data when before moving the file pointer
+	  - When read data is flushed, reposition the file pointer to account for
+	    buffered, but unreand data
 	* Pascal P-Code files are now standardized to big-endian for portability
+	* Fix a build problem with z80 and SDCC 2.7.0 (format of a map file changed).
+	  (see bug 1887170)
 
 pascal-0.1.2 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
