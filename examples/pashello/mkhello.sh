@@ -130,7 +130,7 @@ function test_hello ()
 
 function make_include ()
 {
-	xxd -i hello.pex >hello.pas
+	xxd -i hello.pex >hello.h
 }
 
 sanity_check
