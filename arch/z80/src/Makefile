@@ -83,30 +83,9 @@ VPATH		= chip:common
 
 LIBGCC		= ${shell $(CC) -print-libgcc-file-name}
 
-# Supports dynamic sizing of HEAP.  This adds up the size of each memory area.
-# This does not account for the alignment of the _CODE area to 0x0100 (hence
-# the fudge factor 196 is added).
-
-HEAP_BASE	= ${shell \
-		if [ -e pass1.map ]; then \
-			list=`cat pass1.map | grep "SIZE" | sed -e "s/\t//g" | cut -d' ' -f2`; \
-			unset result; \
-			first=yes; \
-			for size in $${list}; do \
-				if [ "$${size}" != "0000" ]; then \
-					if [ -z "$$first" ]; then \
-						result="$${result} + 0x$${size}"; \
-					else \
-						result="(0x$${size}"; \
-						unset first; \
-					fi; \
-				fi; \
-			done; \
-			echo "$${result} + 196)"; \
-		else \
-			echo "(UP_HEAP1_END - 8192)"; \
-		fi; \
-		}
+# Supports dynamic sizing of HEAP.
+#
+HEAP_BASE	= ${shell ./mkhpbase.sh}
 
 ############################################################################
 # Targets
