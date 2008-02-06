@@ -236,6 +236,10 @@ o Pascal Add-On (pcode/)
   Status:      Open
   Priority:    Medium
 
+  Description: Pascal add-on does not build with the SDCC compiler.
+  Status:      Open
+  Priority:    Medium
+
 o Documentation (Documentation/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
