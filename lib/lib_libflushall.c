@@ -95,7 +95,7 @@
 int lib_flushall(FAR struct streamlist *list)
 {
   int lasterrno = OK;
-  int ret;
+  int ret = OK;
 
   /* Make sure that there are streams associated with this thread */
 
