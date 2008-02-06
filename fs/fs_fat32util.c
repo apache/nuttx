@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs_fat32util.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -19,7 +19,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -432,7 +432,7 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
 uint16 fat_getuint16(ubyte *ptr)
 {
-#ifdef CONFIG_ARCH_BIGENDIAN
+#ifdef CONFIG_ENDIAN_BIG
   /* The bytes always have to be swapped if the target is big-endian */
 
   return ((uint16)ptr[0] << 8) | ptr[1];
@@ -449,7 +449,7 @@ uint16 fat_getuint16(ubyte *ptr)
 
 uint32 fat_getuint32(ubyte *ptr)
 {
-#ifdef CONFIG_ARCH_BIGENDIAN
+#ifdef CONFIG_ENDIAN_BIG
   /* The bytes always have to be swapped if the target is big-endian */
 
   return ((uint32)fat_getuint16(&ptr[0]) << 16) | fat_getuint16(&ptr[2]);
@@ -467,7 +467,7 @@ uint32 fat_getuint32(ubyte *ptr)
 void fat_putuint16(ubyte *ptr, uint16 value16)
 {
   ubyte *val = (ubyte*)&value16;
-#ifdef CONFIG_ARCH_BIGENDIAN
+#ifdef CONFIG_ENDIAN_BIG
   /* The bytes always have to be swapped if the target is big-endian */
 
   ptr[0] = val[1];
@@ -487,7 +487,7 @@ void fat_putuint16(ubyte *ptr, uint16 value16)
 void fat_putuint32(ubyte *ptr, uint32 value32)
 {
   uint16 *val = (uint16*)&value32;
-#ifdef CONFIG_ARCH_BIGENDIAN
+#ifdef CONFIG_ENDIAN_BIG
   /* The bytes always have to be swapped if the target is big-endian */
 
   fat_putuint16(&ptr[0], val[2]);
