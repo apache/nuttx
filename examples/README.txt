@@ -26,7 +26,7 @@ examples/ostest
 examples/nsh
 ^^^^^^^^^^^^
 
-  This directory containst the NuttShell (NSH).  This is a simple
+  This directory contains the NuttShell (NSH).  This is a simple
   shell-like application.  With some additional development, NSH will
   someday be a great NuttX application debugger.  At present, NSH
   supports the following commands:

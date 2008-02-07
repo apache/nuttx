@@ -6,7 +6,7 @@ The instruction set emulator can be found in the NuttX CVS at
 http://nuttx.cvs.sourceforge.net/nuttx/misc/sims/z80sim
 
 The SDCC toolchain is available from http://sdcc.sourceforge.net/.  All
-testing has been performed using verison 2.6.0 of the SDDC toolchain.
+testing has been performed using version 2.6.0 of the SDCC toolchain.
 
 Configuring NuttX
 ^^^^^^^^^^^^^^^^^

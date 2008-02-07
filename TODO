@@ -234,9 +234,10 @@ o Pascal Add-On (pcode/)
 
   Description: Need APIs to verify execution of P-Code from memory buffer.
   Status:      Open
-  Priority:    Medium
+  Priority:    Low
 
-  Description: Pascal add-on does not build with the SDCC compiler.
+  Description: Loader and object format may be too large for some small
+               memory systems.  Consider ways to reduce memory footprint.
   Status:      Open
   Priority:    Medium
 

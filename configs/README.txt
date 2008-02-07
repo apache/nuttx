@@ -33,7 +33,8 @@ o Board specific files.  In order to be usable, the chip must be
 
   These board-specific configuration files can be found in the
   configs/<board-name>/ sub-directories and are discussed in this
-  README.
+  README.  Additional configuration information maybe available in
+  board-specific configs/<board-name>/README.txt files.
 
 The configs/ subdirectory contains configuration data for each board.  These
 board-specific configurations plus the architecture-specific configurations in
@@ -53,10 +54,15 @@ following characteristics:
 	|-- src/
 	|   |-- Makefile
 	|   `-- (board-specific source files)
-	|-- Make.defs
-	|-- defconfig
-	`-- setenv.sh
-
+        |-- <config1-dir>
+	|   |-- Make.defs
+	|   |-- defconfig
+	|   `-- setenv.sh
+        |-- <config2-dir>
+	|   |-- Make.defs
+	|   |-- defconfig
+	|   `-- setenv.sh
+	...
 Summary of Files
 ^^^^^^^^^^^^^^^^
 
@@ -74,6 +80,12 @@ src/Makefile -- This makefile will be invoked to build the board specific
   drivers.  It must support the following targets:  libext$(LIBEXT), clean,
   and distclean.
 
+A board may have various different configurations using these common source
+files.  Each board configuration is described by three files:  Make.defs,
+defconfig, and setenv.sh.  Typically, each set of configuration files is
+retained in a separate configuration sub-directory (<config1-dir>,
+<config2-dir>, .. in the above diagram).
+
 Make.defs -- This makefile fragment provides architecture and
   tool-specific build options.  It will be included by all other
   makefiles in the build (once it is installed).  This make fragment
@@ -90,7 +102,7 @@ Make.defs -- This makefile fragment provides architecture and
   different if CONFIG_DEBUG=y.
 
 defconfig -- This is a configuration file similar to the Linux
-  configuration file.  In contains varialble/value pairs like:
+  configuration file.  In contains variable/value pairs like:
 
 	CONFIG_VARIABLE=value
 
@@ -137,7 +149,7 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_DEBUG_SCHED - enable OS debug output (disabled by
 		  default)
 		CONFIG_DEBUG_MM - enable memory management debug output
-		  (disabld by default)
+		  (disabled by default)
 		CONFIG_DEBUG_NET - enable network debug output (disabled
 		  by default)
 		CONFIG_DEBUG_FS - enable filesystem debug output (disabled
@@ -160,7 +172,7 @@ defconfig -- This is a configuration file similar to the Linux
 		  be disabled by setting this value to zero.
 		CONFIG_SCHED_INSTRUMENTATION - enables instrumentation in 
 		  scheduler to monitor system performance
-		CONFIG_TASK_NAME_SIZE - Spcifies that maximum size of a
+		CONFIG_TASK_NAME_SIZE - Specifies that maximum size of a
 		  task name to save in the TCB.  Useful if scheduler
 		  instrumentation is selected.  Set to zero to disable.
 		CONFIG_START_YEAR, CONFIG_START_MONTH, CONFIG_START_DAY -
@@ -194,7 +206,7 @@ defconfig -- This is a configuration file similar to the Linux
 	Allow for architecture optimized implementations
 
 		The architecture can provide optimized versions of the
-		following to improve sysem performance
+		following to improve system performance
 
 		CONFIG_ARCH_MEMCPY, CONFIG_ARCH_MEMCMP, CONFIG_ARCH_MEMMOVE
 		CONFIG_ARCH_MEMSET, CONFIG_ARCH_STRCMP, CONFIG_ARCH_STRCPY
@@ -282,12 +294,12 @@ Supported Boards
 
 configs/sim
     A user-mode port of NuttX to the x86 Linux platform is available.
-    The purpose of this port is primarily to support OS feature developement.
+    The purpose of this port is primarily to support OS feature development.
     This port does not support interrupts or a real timer (and hence no
     round robin scheduler)  Otherwise, it is complete.
 
     NOTE: This target will not run on Cygwin probably for many reasons but
-    first off because it uses some of the same symbols as does cygwind.dll.
+    first off because it uses some of the same symbols as does cygwin.dll.
 
 configs/c5471evm
     This is a port to the Spectrum Digital C5471 evaluation board.  The
@@ -324,7 +336,7 @@ configs/pjrc-8051
 configs/z16f2800100zcog
     z16f Microncontroller.  This port use the Zilog z16f2800100zcog
     development kit and the Zilog ZDS-II Windows command line tools.  The
-    development envirnoment is Cygwin under WinXP.
+    development environment is Cygwin under WinXP.
 
 configs/z80zim
     z80 Microcontroller.  This port uses a Z80 instruction set simulator.
@@ -341,14 +353,15 @@ Configuring NuttX
 
 Configuring NuttX requires only copying
 
-  configs/<board-name>/Make.def to ${TOPDIR}/Make.defs
-  configs/<board-name>/setenv.sh to ${TOPDIR}/setenv.sh
-  configs/<board-name>/defconfig to ${TOPDIR}/.config
+  configs/<board-name>/<config-dir>/Make.def to ${TOPDIR}/Make.defs
+  configs/<board-name>/<config-dir>/setenv.sh to ${TOPDIR}/setenv.sh
+  configs/<board-name>/<config-dir>/defconfig to ${TOPDIR}/.config
 
-There is a script that automates these steps.  The following steps will
-accomplish the same configuration:
+tools/configure.sh
+  There is a script that automates these steps.  The following steps will
+  accomplish the same configuration:
 
   cd tools
-  ./configure.sh <board-name>
+  ./configure.sh <board-name>/<config-dir>
 
 
