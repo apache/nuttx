@@ -21,7 +21,7 @@ NuttX TODO List (Last updated January 6, 2008)
   (2)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (2)  z80 (arch/z80/)
-  (6)  z16 (arch/z16/)
+  (7)  z16 (arch/z16/)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -422,4 +422,10 @@ o z16 (arch/z16)
                This is submited as ZiLOG support incident 81459.
   Status:      Open
   Priority:    Medium
+
+  Description: Add support to maintain SPOV in context switching.  This
+               improvement will provide protection against stack overflow
+               and make a safer system solution.
+  Status:      Open
+  Priority:    Low
 
