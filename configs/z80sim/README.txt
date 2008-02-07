@@ -11,27 +11,41 @@ testing has been performed using verison 2.6.0 of the SDDC toolchain.
 Configuring NuttX
 ^^^^^^^^^^^^^^^^^
 
-  defconfig
-    The default configuration file, defconfig, performs a simple,
-    minimal OS test using examples/ostest.  This can be
-    configurated as follows:
+  ostest
+    This configuration performs a simple, minimal OS test using
+    examples/ostest.  This can be configurated as follows:
 
 	cd tools
-	./configure.sh z80sim
+	./configure.sh z80sim/ostest
 	cd -
 	. ./setenv.sh
 
 
-  nshconfig
+  nsh
     This configuration file builds NSH (examples/nsh).  This
     configuration is not functional due to issues with use of the
     simulated serial driver (see the TODO list).
 
-    This alternative configuration can be selected by:
+    This configuration can be selected by:
 
-	(Seleted the default configuration as show above)
-	cp config/z80sim/nshconfig .config
+	cd tools
+	./configure.sh z80sim/nsh
+	cd -
+	. ./setenv.sh
 
+ pashello
+    Configures to use examples/pashello for execution from FLASH
+    See examples/README.txt for information about pashello.
+
+    This configuration is not usable because the resulting binary
+    is too large for the z80 address space.
+
+    This configuration can be selected by:
+
+	cd tools
+	./configure.sh z80sim/pashello
+	cd -
+	. ./setenv.sh
 
 Building the SDCC toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

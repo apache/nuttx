@@ -54,8 +54,14 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
+/* Defined in drivers/dev_lowconsole.c */
 
+#ifdef CONFIG_USE_LOWCONSOLE
+extern void lowconsole_init(void);
+#endif
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+#if defined(CONFIG_DEV_CONSOLE) && !defined(CONFIG_DEV_LOWCONSOLE)
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -325,6 +331,7 @@ static boolean up_txempty(struct uart_dev_s *dev)
 void up_earlyserialinit(void)
 {
 }
+#endif /* CONFIG_DEV_CONSOLE && !CONFIG_DEV_LOWCONSOLE */
 
 /****************************************************************************
  * Name: up_serialinit
@@ -337,10 +344,14 @@ void up_earlyserialinit(void)
 
 void up_serialinit(void)
 {
+#if defined(CONFIG_DEV_LOWCONSOLE)
+  (void)lowconsole_init();
+#elif defiened(CONFIG_DEV_CONSOLE)
   (void)uart_register("/dev/console", &g_uartport);
   (void)uart_register("/dev/ttyS0", &g_uartport);
+#endif
 }
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
+#endif /* CONFIG_NFILE_DESCRIPTORS */
 
 /****************************************************************************
  * Name: up_putc
