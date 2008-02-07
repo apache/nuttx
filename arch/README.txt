@@ -125,7 +125,7 @@ Supported Architectures
 
 arch/sim
     A user-mode port of NuttX to the x86 Linux platform is available.
-    The purpose of this port is primarily to support OS feature developement.
+    The purpose of this port is primarily to support OS feature development.
     This port does not support interrupts or a real timer (and hence no
     round robin scheduler)  Otherwise, it is complete.
 
@@ -160,11 +160,12 @@ arch/pjrc-8051
     8051 Microcontroller.  This port is not quite ready for prime time.
 
 arch/z16
-    ZiLog z16f Microcontroller.
-    STATUS: A work in progress
-    
+    ZiLOG z16f Microcontroller.
+    STATUS: Released in nuttx-0.3.7.  Fully functional other than issues
+    addressed in ${TOPDIR}/TODO.
+
 arch/z80
-    ZiLog z80 Microcontroller.
+    ZiLOG z80 Microcontroller.
     STATUS: Functional with no known defects.  There are still several
     OS features that have not yet been tested (e.g., networking).
 
