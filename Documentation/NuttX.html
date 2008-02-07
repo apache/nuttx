@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: February 5, 2008</p>
+      <p>Last Updated: February 7, 2008</p>
     </td>
   </tr>
 </table>
@@ -974,9 +974,10 @@ nuttx-0.3.8 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* Added /dev/zero
 	* 'errno' is now defined to be *get_errno_ptr() with no name conflicts
 	* Added lseek() and fseek()
-	* Integrated pascal test case on the simulation platform.  Needs pascal-0.1.1.
-	* Integrated pascal test case on the z16f platform.  Needs pascal-0.1.2 (not
-	  yet released).
+	* Integrated Pascal interpreter test case on the simulation platform.  Needs
+          pascal-0.1.1.
+	* Add Pascal test case on the z16f platform.  Needs pascal-0.1.2 (does not
+          yet work due to some tool issues).
 	* C buffered I/O fixes:
 	  - Fix fflush() return value,
 	  - Add correct fflush behavior when the FILE argument is null.
@@ -985,8 +986,9 @@ nuttx-0.3.8 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  - When read data is flushed, reposition the file pointer to account for
 	    buffered, but unreand data
 	* Pascal P-Code files are now standardized to big-endian for portability
-	* Fix a build problem with z80 and SDCC 2.7.0 (format of a map file changed).
+	* Fix a build problem with z80 and SDCC 2.7.0 (format of a map file changed)
 	  (see bug 1887170)
+	* Pascal P-Code runtime now compiles with the SDCC toolchain.
 
 pascal-0.1.2 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

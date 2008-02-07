@@ -16,7 +16,7 @@
   </b></big>
   <p><small>by</small></p>
   <p>Gregory Nutt</p>
-  <p><small>Last Update: January 10, 2008</small></p>
+  <p><small>Last Update: February 7, 2008</small></p>
 </center>
 
 <center><h1>Table of Contents</h1></center>
@@ -36,7 +36,7 @@
     <li><a href="#summaryofconfigfiles">2.3.2 Summary of Files</a></li>
     <ul>
       <li><a href="#boardlogic">2.3.2.1 Board Specific Logic</a></li>
-      <li><a href="#boardconfigfiles">2.3.2.2 Board Specific Configuration Files</a></li>
+      <li><a href="#boardconfigsubdirs">2.3.2.2 Board Specific Configuration Sub-Directories</a></li>
     </ul>
     <li><a href="#supportedboards">2.3.3 Supported Boards</a></li>
   </ul>
@@ -90,13 +90,13 @@
 </ul>
 <li><a href="#NxFileSystem">5.0 NuttX File System</a></li>
 <li><a href="#apndxconfigs">Appendix A: NuttX Configuration Settings</a></li>
-
+<li><a href="#apndxtrademarks">Appendix B:  Trademarks</a></li>
 <hr>
 <h1>1.0 <a name="Introduction">Introduction</a></h1>
 
 <p><b>Overview</b>
   This document provides and overview of the NuttX build and configuration
-  logic and provides hints for the incorporation of new processor/board archectures
+  logic and provides hints for the incorporation of new processor/board architectures
   into the build.
 </p>
 <p>
@@ -132,7 +132,7 @@
 |   |       |  `-- <i>(chip-specific source files)</i>
 |   |       |--<i>&lt;other-chips&gt;</i>/
 |   |       `-- <i>(architecture-specific source files)</i>
-|   `-- <i>&lt;other-architectures&gt;</i>/
+|   `-- <i>&lt;other-architecture directories&gt;</i>/
 |-- <a href="#DirStructConfigs">configs</a>/
 |   |-- <i>&lt;board-name&gt;</i>/
 |   |   |-- include/
@@ -140,8 +140,10 @@
 |   |   |-- src/
 |   |   |   |-- Makefile
 |   |   |  `-- <i>(board-specific source files)</i>
-|   |   `-- <i>(board-specific configuration files)</i>
-|   `-- <i>&lt;other-boards&gt;</i>/
+|   |   |---<i>&lt;config1-dir&gt;</i>/
+|   |   |   `-- <i>(board-specific/configuration-specific files)</i>
+|   |   `---<i>(other board-specific configuration sub-directories)</i>/
+|   `-- <i>&lt;(other board directories)&gt;</i>/
 |-- <a href="#DirStructDrivers">drivers</a>/
 |   |-- Makefile
 |   `-- <i>(common driver source files)</i>
@@ -226,14 +228,14 @@
     </p>
   </li>
   <li>
-    <i>Board specific files</i>.
+    <i>Board specific configurations</i>.
     In order to be usable, the chip must be contained in a board environment.
     The board configuration defines additional properties of the board including such things as
     peripheral LEDs, external peripherals (such as network, USB, etc.).
     <p>
       These board-specific configuration files can be found in the
       <code>configs/</code><i>&lt;board-name&gt;</i><code>/</code> sub-directories and are discussed
-      in a a paragraph <a href="#configsdirectorystructure">below</a>.
+      in a paragraph <a href="#configsdirectorystructure">below</a>.
     </p>
   </li>
 </ul>
@@ -251,8 +253,8 @@
   This directory contains several sub-directories, each containing
   architecture-specific logic.
   The task of porting NuttX to a new processor consists of
-  add a new sudirectory under <code>arch/</code> containing logic specific
-  to the new architecuture.
+  add a new subdirectory under <code>arch/</code> containing logic specific
+  to the new architecture.
   The complete board port in is defined by the architecture-specific code in this
   directory (plus the board-specific configurations in the <code>config/</code>
   subdirectory).
@@ -468,15 +470,24 @@
   provide a subdirectory &lt;board-name&gt; under <code>configs/</code> with the following characteristics:
 </p>
 <ul><pre>
+	|-- Make.defs
+	|-- defconfig
+	`-- setenv.sh
 	<i>&lt;board-name&gt;</i>
 	|-- include/
 	|   `-- <i>(board-specific header files)</i>
 	|-- src/
 	|   |-- Makefile
 	|   `-- <i>(board-specific source files)</i>
-	|-- Make.defs
-	|-- defconfig
-	`-- setenv.sh
+        |-- <i>&lt;config1-dir&gt;</i>
+	|   |-- Make.defs
+	|   |-- defconfig
+	|   `-- setenv.sh
+        |-- <i>&lt;config2-dir&gt;</i>
+	|   |-- Make.defs
+	|   |-- defconfig
+	|   `-- setenv.sh
+	`-- <i>(other board-specific configuration sub-directories)</i>/
 </pre></ul>
 
 <h3><a name="summaryofconfigfiles">2.3.2 Summary of Files</a></h3>
@@ -502,10 +513,15 @@
     It must support the following targets:  <code>libext$(LIBEXT)</code>, <code>clean</code>, and <code>distclean</code>.
   </li>
 </ul>
-<h4><a name="boardconfigfiles">2.3.2.2 Board Specific Configuration Files</a></h4>
+<h4><a name="boardconfigsubdirs">2.3.2.2 Board Specific Configuration Sub-Directories</a></h4>
 <p>
   The <code>configs/</code><i>&lt;board-name&gt;</i><code>/</code> sub-directory holds all of the
   files that are necessary to configure Nuttx for the particular board.
+  A board may have various different configurations using the common source files.
+  Each board configuration is described by three files:  <code>Make.defs</code>, <code>defconfig</code>, and <code>setenv.sh</code>.
+  Typically, each set of configuration files is retained in a separate configuration sub-directory
+  (<i>&lt;config1-dir&gt;</i>, <i>&lt;config2-dir&gt;</i>, .. in the above diagram).
+
   The procedure for configuring NuttX is described <a href="#configuringnuttx">below</a>,
   This paragraph will describe the contents of these configuration files.
 </p>
@@ -530,7 +546,7 @@
   </li>
   <li>
     <code>defconfig</code>: This is a configuration file similar to the Linux
-    configuration file.  In contains varialble/value pairs like:
+    configuration file.  In contains variable/value pairs like:
     <ul>
       <li><code>CONFIG_VARIABLE</code>=value</li>
     </ul>
@@ -697,19 +713,20 @@
 <p>
   <b>Manual Configuration</b>.
   Configuring NuttX requires only copying the
-  <a href="#boardconfigfiles">board-specific configuration files</a> into the top level directory which appears in the make files as the make variable, <code>${TOPDIR}</code>.
+  <a href="#boardconfigsubdirs">board-specific configuration files</a> into the top level directory which appears in the make files as the make variable, <code>${TOPDIR}</code>.
   This could be done manually as follows:
 </p>
 <ul>
-  <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i></code>/Make.def</code> to <code>${TOPDIR}/Make.defs</code>,<li>
-  <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i></code>/setenv.sh</code> to <code>${TOPDIR}/setenv.sh</code>, and</li>
-  <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i></code>/defconfig</code> to <code>${TOPDIR}/.config</code></li>
+  <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/]Make.def</code> to <code>${TOPDIR}/Make.defs</code>,<li>
+  <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/]setenv.sh</code> to <code>${TOPDIR}/setenv.sh</code>, and</li>
+  <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/]defconfig</code> to <code>${TOPDIR}/.config</code></li>
 </ul>
 <p>
   Where <i>&lt;board-name&gt;</i> is the name of one of the sub-directories of the
   NuttX <a href="#DirStructConfigs"><code>configs/</code></a> directory.
   This sub-directory name corresponds to one of the supported boards
   identified <a href="#supportedboards">above</a>.
+  And &lt;config-dir&gt; is the optional, specific configuration directory for the board.
 </p>
 <p>
   <b>Automated Configuration</b>.
@@ -718,7 +735,7 @@
 </p>
 <ul><pre>
   cd tools
-  ./configure.sh <i>&lt;board-name&gt;</i>
+  ./configure.sh <i>&lt;board-name&gt;</i></i><code>[/</code><i>&lt;config-dir&gt;</i><code>]</code>
 </pre></ul>
 
 <p>
@@ -747,14 +764,14 @@ make
   That directory also holds:
 </p>
 <ul>
-  <li>The makefile fragment <a href="#boardconfigfiles"><code>.config</code></a> that describes the current configuration.</li>
-  <li>The makefile fragment <a href="#boardconfigfiles"><code>Make.defs</code></a> that provides customized build targers, and</li>
-  <li>The shell script <a href="#boardconfigfiles"><code>setenv.sh</code></a> that sets up the configuration environment for the build.</li>
+  <li>The makefile fragment <a href="#boardconfigsubdirs"><code>.config</code></a> that describes the current configuration.</li>
+  <li>The makefile fragment <a href="#boardconfigsubdirs"><code>Make.defs</code></a> that provides customized build targers, and</li>
+  <li>The shell script <a href="#boardconfigsubdirs"><code>setenv.sh</code></a> that sets up the configuration environment for the build.</li>
 </ul>
 <p>
-The <a href="#boardconfigfiles"><code>setenv.sh</code></a> contains Linux environmental settings that are needed for the build.
-The specific environmental definitions are unique for each board but should include, as a minimum, updates to the <code>PATH</code> variable to include the full path to the architecture-specific toolchain identified in <a href="#boardconfigfiles"><code>Make.defs</code></a>.
-The <a href="#boardconfigfiles"><code>setenv.sh</code></a> only needs to be source'ed at the beginning of a session.
+The <a href="#boardconfigsubdirs"><code>setenv.sh</code></a> contains Linux/Cygwin environmental settings that are needed for the build.
+The specific environmental definitions are unique for each board but should include, as a minimum, updates to the <code>PATH</code> variable to include the full path to the architecture-specific toolchain identified in <a href="#boardconfigsubdirs"><code>Make.defs</code></a>.
+The <a href="#boardconfigsubdirs"><code>setenv.sh</code></a> only needs to be source'ed at the beginning of a session.
 The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 <p>
@@ -1547,6 +1564,22 @@ The system can be re-made subsequently by just typing <code>make</code>.
     <code>CONFIG_HEAP_SIZE</code>: The size of the heap
   </li>
 </ul>
+
+<h1><a name="apndxtrademarks">Appendix B:  Trademarks</a></h1>
+
+  <li>ARM, ARM7 ARM7TDMI, ARM9, ARM926EJS are trademarks of Advanced RISC Machines, Limited.</li>
+  <li>Cygwin is a trademark of Red Hat, Incorporated.</li>
+  <li>Linux is a registered trademark of Linus Torvalds.</li>
+  <li>LPC2148 is a trademark of NXP Semiconductors.</li>
+  <li>TI is a tradename of Texas Instruments Incorporated.</li>
+  <li>UNIX is a registered trademark of The Open Group.</li>
+  <li>VxWorks is a registered trademark of Wind River Systems, Incorporated.</li>
+  <li>ZDS, ZNEO, Z16F, Z80, and Zilog are a registered trademark of Zilog, Inc.</li>
+
+<p>
+  NOTE: NuttX is <i>not</i> licensed to use the POSIX trademark.  NuttX uses the POSIX
+  standard as a development guideline only.
+</p>
 
 </body>
 </html>
