@@ -21,7 +21,7 @@ NuttX TODO List (Last updated January 6, 2008)
   (2)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (2)  z80 (arch/z80/)
-  (5)  z16 (arch/z16/)
+  (6)  z16 (arch/z16/)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -408,6 +408,18 @@ o z16 (arch/z16)
   Description: The Pascal add-on does not work with the Z16F port.  This is
                because the Z16F is big-endian (see duplicate problem report under
                "Pascal Add-On").
+  Status:      Open
+  Priority:    Medium
+
+  Description: The pascal add-on does not work with the z16f (that is
+               configuration z16f2800100zcog/pashello).  This appears to be
+               another ZDS-II error:  when executing the instruction
+               SYSIO 0, WRITESTR a large case statement is executed.  This
+               involves a call into the ZiLOG runtime library to __uwcase().
+               __uwcase is passed a pointer to a structure containing jump
+               information.  The cause of the failure appears to be that
+               the referenced switch data is bad.
+               This is submited as ZiLOG support incident 81459.
   Status:      Open
   Priority:    Medium
 
