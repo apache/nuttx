@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/board/board.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -56,9 +56,12 @@
 #define DM320_AXL_CLOCK  175500000
 #define DM320_AHB_CLOCK   87750000
 
-/*
- * configration for dm9000 network device
- */
+/* UART0/1 and TIMER0/1 are clocked by PLLIN=27MHz */
+
+#define CONFIG_DM320_UARTPPLIN 1
+
+/* Configration for dm9000 network device */
+
 #define DM9000_BASE      CONFIG_DM9000_BASE
 
 /* GIO keyboard (GIO 1-5) */
