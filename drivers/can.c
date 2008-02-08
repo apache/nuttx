@@ -106,6 +106,7 @@ static int can_open(FAR struct file *filep)
 {
   FAR struct inode     *inode = filep->f_inode;
   FAR struct can_dev_s *dev   = inode->i_private;
+  ubyte                 tmp;
   int                   ret   = OK;
 
   /* If the port is the middle of closing, wait until the close is finished */
@@ -121,29 +122,43 @@ static int can_open(FAR struct file *filep)
        * the device.
        */
 
-      if (++dev->cd_ocount == 1)
+      tmp = dev->cd_ocount + 1;
+      if (tmp == 0)
         {
-          irqstate_t flags = irqsave();
+          /* More than 255 opens; ubyte overflows to zero */
 
-          /* Configure hardware interrupts */
-
-          ret = dev_setup(dev);
-          if (ret == OK)
-            {
-              /* Mark the FIFOs empty */
-
-              dev->cd_xmit.cf_head = 0;
-              dev->cd_xmit.cf_tail = 0;
-              dev->cd_recv.cf_head = 0;
-              dev->cd_recv.cf_tail = 0;
-
-              /* Finally, Enable CAN interrupt */
-
-              dev_rxint(dev, TRUE);
-            }
-          irqrestore(flags);
+          ret = -EMFILE;
         }
+      else
+        {
+          /* Check if this is the first time that the driver has been opened. */
 
+          if (tmp == 1)
+            {
+              /* Yes.. perform one time hardware initialization. */
+
+              irqstate_t flags = irqsave();
+              ret = dev_setup(dev);
+              if (ret == OK)
+                {
+                  /* Mark the FIFOs empty */
+
+                  dev->cd_xmit.cf_head = 0;
+                  dev->cd_xmit.cf_tail = 0;
+                  dev->cd_recv.cf_head = 0;
+                  dev->cd_recv.cf_tail = 0;
+
+                  /* Finally, Enable the CAN RX interrupt */
+
+                  dev_rxint(dev, TRUE);
+
+                  /* Save the new open count on success */
+
+                  dev->cd_ocount = tmp;
+                }
+              irqrestore(flags);
+            }
+        }
       sem_post(&dev->cd_closesem);
     }
   return ret;

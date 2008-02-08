@@ -49,14 +49,22 @@
  * Definitions
  ************************************************************************************/
 
-/* Default configuration settings that may be overridden in the board configuration file */
+/* Default configuration settings that may be overridden in the board configuration.
+ * file.  The configured size is limited to 255 to fit into a ubyte.
+ */
 
-#ifndef CONFIG_CAN_FIFOSIZE
+#if !defined(CONFIG_CAN_FIFOSIZE)
 #  define CONFIG_CAN_FIFOSIZE 8
+#elif CONFIG_CAN_FIFOSIZE > 255
+#  undef  CONFIG_CAN_FIFOSIZE
+#  define CONFIG_CAN_FIFOSIZE 255
 #endif
 
-#ifndef CONFIG_CAN_NPENDINGRTR
+#if !defined(CONFIG_CAN_NPENDINGRTR)
 #  define CONFIG_CAN_NPENDINGRTR 4
+#elif CONFIG_CAN_NPENDINGRTR > 255
+#  undef  CONFIG_CAN_NPENDINGRTR
+#  define CONFIG_CAN_NPENDINGRTR 255
 #endif
 
 /* Convenience macros */
@@ -206,8 +214,8 @@ struct can_ops_s
 
 struct can_dev_s
 {
-  int                  cd_ocount;        /* The number of times the device has been opened */
-  int                  cd_npendrtr;      /* Number of pending RTR messages */
+  ubyte                cd_ocount;        /* The number of times the device has been opened */
+  ubyte                cd_npendrtr;      /* Number of pending RTR messages */
   sem_t                cd_closesem;      /* Locks out new opens while close is in progress */
   sem_t                cd_recvsem;       /* Used to wakeup user waiting for space in cd_recv.buffer */
   struct can_fifo_s    cd_xmit;          /* Describes transmit FIFO */
@@ -222,7 +230,7 @@ struct can_dev_s
 
 struct canioctl_rtr_s
 {
-  uint16                ci_id;           /* The ID to use in the RTR message */
+  uint16                ci_id;           /* The 11-bit ID to use in the RTR message */
   FAR struct can_msg_s *ci_msg;          /* The location to return the RTR response */
 };
 

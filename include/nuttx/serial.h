@@ -97,14 +97,14 @@ struct uart_ops_s
    * performed when the attach() method is called.
    */
 
-  int (*setup)(struct uart_dev_s *dev);
+  CODE int (*setup)(FAR struct uart_dev_s *dev);
 
   /* Disable the UART.  This method is called when the serial port is closed.
    * This method reverses the operation the setup method.  NOTE that the serial
    * console is never shutdown.
    */
 
-  void (*shutdown)(struct uart_dev_s *dev);
+  CODE void (*shutdown)(FAR struct uart_dev_s *dev);
 
   /* Configure the UART to operation in interrupt driven mode.  This method is
    * called when the serial port is opened.  Normally, this is just after the
@@ -116,47 +116,47 @@ struct uart_ops_s
    * interrupts are not enabled until the txint() and rxint() methods are called.
    */
 
-  int (*attach)(struct uart_dev_s *dev);
+  CODE int (*attach)(FAR struct uart_dev_s *dev);
 
   /* Detach UART interrupts.  This method is called when the serial port is
    * closed normally just before the shutdown method is called.  The exception is
    * the serial console which is never shutdown.
    */
 
-  void (*detach)(struct uart_dev_s *dev);
+  CODE void (*detach)(FAR struct uart_dev_s *dev);
 
   /* All ioctl calls will be routed through this method */
 
-  int (*ioctl)(struct file *filep, int cmd, unsigned long arg);
+  CODE int (*ioctl)(FAR struct file *filep, int cmd, unsigned long arg);
 
   /* Called (usually) from the interrupt level to receive one character from
    * the UART.  Error bits associated with the receipt are provided in the
    * the return 'status'.
    */
 
-  int (*receive)(struct uart_dev_s *dev, unsigned int *status);
+  CODE int (*receive)(FAR struct uart_dev_s *dev, unsigned int *status);
 
   /* Call to enable or disable RX interrupts */
 
-  void (*rxint)(struct uart_dev_s *dev, boolean enable);
+  CODE void (*rxint)(FAR struct uart_dev_s *dev, boolean enable);
 
   /* Return TRUE if the receive data is available */
 
-  boolean (*rxavailable)(struct uart_dev_s *dev);
+  CODE boolean (*rxavailable)(FAR struct uart_dev_s *dev);
 
   /* This method will send one byte on the UART */
 
-  void (*send)(struct uart_dev_s *dev, int ch);
+  CODE void (*send)(FAR struct uart_dev_s *dev, int ch);
 
   /* Call to enable or disable TX interrupts */
 
-  void (*txint)(struct uart_dev_s *dev, boolean enable);
+  CODE void (*txint)(FAR struct uart_dev_s *dev, boolean enable);
 
   /* Return TRUE if the tranmsit hardware is ready to send another byte.  This
    * is used to determine if send() method can be called.
    */
 
-  boolean (*txready)(struct uart_dev_s *dev);
+  CODE boolean (*txready)(FAR struct uart_dev_s *dev);
 
   /* Return TRUE if all characters have been sent.  If for example, the UART
    * hardware implements FIFOs, then this would mean the the transmit FIFO is
@@ -164,7 +164,7 @@ struct uart_ops_s
    * all characters are "drained" from the TX hardware.
    */
 
-  boolean (*txempty)(struct uart_dev_s *dev);
+  CODE boolean (*txempty)(FAR struct uart_dev_s *dev);
 };
 
 /* This is the device structure used by the driver.  The caller of
@@ -179,7 +179,7 @@ struct uart_ops_s
 
 struct uart_dev_s
 {
-  int       open_count;			/* The number of times
+  ubyte     open_count;			/* The number of times
 					 * the device has been opened */
   boolean   xmitwaiting;		/* TRUE: User is waiting
 					 * for space in xmit.buffer */
@@ -223,7 +223,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN int uart_register(const char *path, uart_dev_t *dev);
+EXTERN int uart_register(FAR const char *path, FAR uart_dev_t *dev);
 
 /************************************************************************************
  * Name: uart_xmitchars
@@ -236,7 +236,7 @@ EXTERN int uart_register(const char *path, uart_dev_t *dev);
  *
  ************************************************************************************/
 
-EXTERN void uart_xmitchars(uart_dev_t *dev);
+EXTERN void uart_xmitchars(FAR uart_dev_t *dev);
 
 /************************************************************************************
  * Name: uart_receivechars
@@ -249,7 +249,7 @@ EXTERN void uart_xmitchars(uart_dev_t *dev);
  *
  ************************************************************************************/
 
-EXTERN void uart_recvchars(uart_dev_t *dev);
+EXTERN void uart_recvchars(FAR uart_dev_t *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)

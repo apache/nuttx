@@ -67,11 +67,11 @@
  * Private Function Prototypes
  ************************************************************************************/
 
-static int     uart_open(struct file *filep);
-static int     uart_close(struct file *filep);
-static ssize_t uart_read(struct file *filep, char *buffer, size_t buflen);
-static ssize_t uart_write(struct file *filep, const char *buffer, size_t buflen);
-static int     uart_ioctl(struct file *filep, int cmd, unsigned long arg);
+static int     uart_open(FAR struct file *filep);
+static int     uart_close(FAR struct file *filep);
+static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
+static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
+static int     uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /************************************************************************************
  * Private Variables
@@ -95,7 +95,7 @@ struct file_operations g_serialops =
  * Name: uart_takesem
  ************************************************************************************/
 
-static void uart_takesem(sem_t *sem)
+static void uart_takesem(FAR sem_t *sem)
 {
   while (sem_wait(sem) != 0)
     {
@@ -111,7 +111,7 @@ static void uart_takesem(sem_t *sem)
  * Name: uart_givesem
  ************************************************************************************/
 
-static inline void uart_givesem(sem_t *sem)
+static inline void uart_givesem(FAR sem_t *sem)
 {
   (void)sem_post(sem);
 }
@@ -120,7 +120,7 @@ static inline void uart_givesem(sem_t *sem)
  * Name: uart_putxmitchar
  ************************************************************************************/
 
-static void uart_putxmitchar(uart_dev_t *dev, int ch)
+static void uart_putxmitchar(FAR uart_dev_t *dev, int ch)
 {
   int nexthead = dev->xmit.head + 1;
   if (nexthead >= dev->xmit.size)
@@ -159,7 +159,7 @@ static void uart_putxmitchar(uart_dev_t *dev, int ch)
  * Name: uart_irqwrite
  ************************************************************************************/
 
-static ssize_t uart_irqwrite(uart_dev_t *dev, const char *buffer, size_t buflen)
+static ssize_t uart_irqwrite(FAR uart_dev_t *dev, FAR const char *buffer, size_t buflen)
 {
   ssize_t ret = buflen;
 
@@ -185,11 +185,11 @@ static ssize_t uart_irqwrite(uart_dev_t *dev, const char *buffer, size_t buflen)
  * Name: uart_write
  ************************************************************************************/
 
-static ssize_t uart_write(struct file *filep, const char *buffer, size_t buflen)
+static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
 {
-  struct inode *inode    = filep->f_inode;
-  uart_dev_t   *dev      = inode->i_private;
-  ssize_t       ret      = buflen;
+  FAR struct inode *inode = filep->f_inode;
+  FAR uart_dev_t   *dev   = inode->i_private;
+  ssize_t           ret   = buflen;
 
   /* We may receive console writes through this path from
    * interrupt handlers and from debug output in the IDLE task!
@@ -251,11 +251,11 @@ static ssize_t uart_write(struct file *filep, const char *buffer, size_t buflen)
  * Name: uart_read
  ************************************************************************************/
 
-static ssize_t uart_read(struct file *filep, char *buffer, size_t buflen)
+static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 {
-  struct inode *inode = filep->f_inode;
-  uart_dev_t     *dev   = inode->i_private;
-  ssize_t       ret   = buflen;
+  FAR struct inode *inode = filep->f_inode;
+  FAR uart_dev_t   *dev   = inode->i_private;
+  ssize_t           ret   = buflen;
 
   /* Only one user can be accessing dev->recv.tail at once */
 
@@ -301,10 +301,10 @@ static ssize_t uart_read(struct file *filep, char *buffer, size_t buflen)
  * Name: uart_ioctl
  ************************************************************************************/
 
-static int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
+static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  struct inode *inode = filep->f_inode;
-  uart_dev_t   *dev   = inode->i_private;
+  FAR struct inode *inode = filep->f_inode;
+  FAR uart_dev_t   *dev   = inode->i_private;
 
   return dev->ops->ioctl(filep, cmd, arg);
 }
@@ -318,11 +318,11 @@ static int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ************************************************************************************/
 
-static int uart_close(struct file *filep)
+static int uart_close(FAR struct file *filep)
 {
-  struct inode *inode = filep->f_inode;
-  uart_dev_t   *dev   = inode->i_private;
-  irqstate_t    flags;
+  FAR struct inode *inode = filep->f_inode;
+  FAR uart_dev_t   *dev   = inode->i_private;
+  irqstate_t        flags;
 
   uart_takesem(&dev->closesem);
   if (dev->open_count > 1)
@@ -384,10 +384,11 @@ static int uart_close(struct file *filep)
  *
  ************************************************************************************/
 
-static int uart_open(struct file *filep)
+static int uart_open(FAR struct file *filep)
 {
   struct inode *inode = filep->f_inode;
   uart_dev_t   *dev   = inode->i_private;
+  ubyte         tmp;
   int           ret   = OK;
 
   /* If the port is the middle of closing, wait until the close is finished */
@@ -395,39 +396,59 @@ static int uart_open(struct file *filep)
   uart_takesem(&dev->closesem);
 
   /* Start up serial port */
+  /* Increment the count of references to the device. */
 
-  if (++dev->open_count == 1)
+  tmp = dev->open_count + 1;
+  if (tmp == 0)
     {
-      irqstate_t flags = irqsave();
+      /* More than 255 opens; ubyte overflows to zero */
 
-      /* If this is the console, then the UART has already been initialized. */
-
-      if (!dev->isconsole)
-        {
-          uart_setup(dev);
-        }
-
-      /* In any event, we do have to configure for interrupt driven mode of
-       * operation.  Attach the hardware IRQ(s)
-       */
-
-      ret = uart_attach(dev);
-      if (ret == OK)
-        {
-          /* Mark the io buffers empty */
-
-          dev->xmit.head = 0;
-          dev->xmit.tail = 0;
-          dev->recv.head = 0;
-          dev->recv.tail = 0;
-
-          /* Finally, enable the RX interrupt */
-
-          uart_enablerxint(dev);
-        }
-      irqrestore(flags);
+      ret = -EMFILE;
     }
+  else
+    {
+      /* Check if this is the first time that the driver has been opened. */
 
+      if (tmp == 1)
+        {
+          irqstate_t flags = irqsave();
+
+          /* If this is the console, then the UART has already been initialized. */
+
+          if (!dev->isconsole)
+            {
+             /* Perform one time hardware initialization */
+
+             uart_setup(dev);
+            }
+
+          /* In any event, we do have to configure for interrupt driven mode of
+           * operation.  Attach the hardware IRQ(s). Hmm.. should shutdown() the
+           * the device in the rare case that uart_attach() fails, tmp==1, and
+           * this is not the console.
+           */
+
+          ret = uart_attach(dev);
+          if (ret == OK)
+            {
+              /* Mark the io buffers empty */
+
+              dev->xmit.head = 0;
+              dev->xmit.tail = 0;
+              dev->recv.head = 0;
+              dev->recv.tail = 0;
+
+              /* Enable the RX interrupt */
+
+              uart_enablerxint(dev);
+
+              /* Save the new open count on success */
+
+              dev->open_count = tmp;
+            }
+          irqrestore(flags);
+        }
+    }
   uart_givesem(&dev->closesem);
   return ret;
 }
@@ -444,7 +465,7 @@ static int uart_open(struct file *filep)
  *
  ************************************************************************************/
 
-int uart_register(const char *path, uart_dev_t *dev)
+int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 {
   sem_init(&dev->xmit.sem, 0, 1);
   sem_init(&dev->recv.sem, 0, 1);
@@ -467,7 +488,7 @@ int uart_register(const char *path, uart_dev_t *dev)
  *
  ************************************************************************************/
 
-void uart_xmitchars(uart_dev_t *dev)
+void uart_xmitchars(FAR uart_dev_t *dev)
 {
   /* Send while we still have data & room in the fifo */
 
@@ -508,7 +529,7 @@ void uart_xmitchars(uart_dev_t *dev)
  *
  ************************************************************************************/
 
-void uart_recvchars(uart_dev_t *dev)
+void uart_recvchars(FAR uart_dev_t *dev)
 {
   unsigned int status;
   int nexthead = dev->recv.head + 1;

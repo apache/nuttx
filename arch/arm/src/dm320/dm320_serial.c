@@ -379,7 +379,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Setup the new UART configuration */
 
-  up_serialout(priv,UART_MSR, priv->msr);
+  up_serialout(priv, UART_MSR, priv->msr);
   up_serialout(priv, UART_BRSR, brsr);
   up_enablebreaks(priv, FALSE);
 #endif
