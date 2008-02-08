@@ -49,11 +49,11 @@
  * board bring-up and not part of normal platform configuration.
  */
 
-#undef  CONFIG_SUPPRESS_INTERRUPTS    /* Do not enable interrupts */
-#undef  CONFIG_SUPPRESS_TIMER_INTS    /* No timer */
-#undef  CONFIG_SUPPRESS_SERIAL_INTS   /* Console will poll */
-#define CONFIG_SUPPRESS_UART_CONFIG 1 /* Do not reconfig UART */
-#undef  CONFIG_DUMP_ON_EXIT           /* Dump task state on exit */
+#undef  CONFIG_SUPPRESS_INTERRUPTS    /* DEFINED: Do not enable interrupts */
+#undef  CONFIG_SUPPRESS_TIMER_INTS    /* DEFINED: No timer */
+#undef  CONFIG_SUPPRESS_SERIAL_INTS   /* DEFINED: Console will poll */
+#undef  CONFIG_SUPPRESS_UART_CONFIG   /* DEFINED: Do not reconfig UART */
+#undef  CONFIG_DUMP_ON_EXIT           /* DEFINED: Dump task state on exit */
 
 /****************************************************************************
  * Public Types

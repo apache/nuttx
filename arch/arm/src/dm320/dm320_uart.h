@@ -70,24 +70,28 @@
 #define UART_DTRR_DTR_MASK    0x00ff /* Data transmit/receive */
 
 /* UART BRSR register bit definitions */
-/* The UART clock is half of the ARM clock */
+/* The UART module is clocked by either the AHB clock or PLLIN / 16 */
 
-#define UART_CLK (DM320_ARM_CLOCK / 2)
+#ifdef CONFIG_DM320_UARTPPLIN
+#  define UART_REFCLK (27000000 / 16)
+#else
+#  define UART_REFCLK (DM320_AHB_CLOCK / 16)
+#endif
 
-/* And baud rate = UART_CLK / 16 / (VALUE+1) */
+/* And baud = UART_REFCLK / (brsr+1) */
 
-#define UART_BAUD_2400        ((uint16)(((UART_CLK / 16) / 2400  ) - 1))
-#define UART_BAUD_4800        ((uint16)(((UART_CLK / 16) / 4800  ) - 1))
-#define UART_BAUD_9600        ((uint16)(((UART_CLK / 16) / 9600  ) - 1))
-#define UART_BAUD_14400       ((uint16)(((UART_CLK / 16) / 14400 ) - 1))
-#define UART_BAUD_19200       ((uint16)(((UART_CLK / 16) / 19200 ) - 1))
-#define UART_BAUD_28800       ((uint16)(((UART_CLK / 16) / 28800 ) - 1))
-#define UART_BAUD_38400       ((uint16)(((UART_CLK / 16) / 38400 ) - 1))
-#define UART_BAUD_57600       ((uint16)(((UART_CLK / 16) / 57600 ) - 1))
-#define UART_BAUD_115200      ((uint16)(((UART_CLK / 16) / 115200) - 1))
-#define UART_BAUD_230400      ((uint16)(((UART_CLK / 16) / 230400) - 1))
-#define UART_BAUD_460800      ((uint16)(((UART_CLK / 16) / 460800) - 1))
-#define UART_BAUD_921600      ((uint16)(((UART_CLK / 16) / 921600) - 1))
+#define UART_BAUD_2400        ((uint16)((UART_REFCLK / 2400  ) - 1))
+#define UART_BAUD_4800        ((uint16)((UART_REFCLK / 4800  ) - 1))
+#define UART_BAUD_9600        ((uint16)((UART_REFCLK / 9600  ) - 1))
+#define UART_BAUD_14400       ((uint16)((UART_REFCLK / 14400 ) - 1))
+#define UART_BAUD_19200       ((uint16)((UART_REFCLK / 19200 ) - 1))
+#define UART_BAUD_28800       ((uint16)((UART_REFCLK / 28800 ) - 1))
+#define UART_BAUD_38400       ((uint16)((UART_REFCLK / 38400 ) - 1))
+#define UART_BAUD_57600       ((uint16)((UART_REFCLK / 57600 ) - 1))
+#define UART_BAUD_115200      ((uint16)((UART_REFCLK / 115200) - 1))
+#define UART_BAUD_230400      ((uint16)((UART_REFCLK / 230400) - 1))
+#define UART_BAUD_460800      ((uint16)((UART_REFCLK / 460800) - 1))
+#define UART_BAUD_921600      ((uint16)((UART_REFCLK / 921600) - 1))
 
 /* UART MSR register bit definitions */
 
