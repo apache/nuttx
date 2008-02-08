@@ -10,7 +10,7 @@ NuttX TODO List (Last updated January 6, 2008)
   (11) Network (net/, netutils/)
   (2)  USB (drivers/usbdev)
   (3)  Libraries (lib/)
-  (2)  File system (fs/, drivers/)
+  (3)  File system/Generic drivers (fs/, drivers/)
   (1)  Pascal add-on (pcode/)
   (2)  Documentation (Documentation/)
   (3)  Build system
@@ -218,14 +218,18 @@ o Libraries (lib/)
   Status:      Open
   Priority:    Low
 
-o File system (fs/, drivers/)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+o File system / Generic drivers (fs/, drivers/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Description: Add chmod(), truncate().
   Status:      Open
   Priority:    Low
 
   Description: FAT32: long file names
+  Status:      Open
+  Priority:    Medium
+
+  Desription:  The CAN driver is untested
   Status:      Open
   Priority:    Medium
 

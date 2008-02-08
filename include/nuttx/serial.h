@@ -171,7 +171,7 @@ struct uart_ops_s
  * uart_register() must allocate and initialize this structure.  The
  * calling logic need only set all fields to zero except:
  *
- *   'irq', 'isconsole', 'xmit.buffer', 'rcv.buffer', the elements
+ *   'isconsole', 'xmit.buffer', 'rcv.buffer', the elements
  *   of 'ops', and 'private'
  *
  * The common logic will initialize all semaphores.
