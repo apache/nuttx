@@ -72,6 +72,6 @@ clean:
 	$(call CLEAN)
 
 distclean: clean
-	rm -f Make.dep .depend
+	@rm -f Make.dep .depend
 
 -include Make.dep
