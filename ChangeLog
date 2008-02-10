@@ -310,7 +310,7 @@
 	* Corrected a bug that caused the errno value of one task to be clobbered
 	  when a different task exits.  Effects all architectures.
 
-0.3.8 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.8 2008-02-10 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Added a test case to verify the Pascal P-Code interpreter
 	* Added /dev/zero
@@ -333,3 +333,6 @@
 	* Pascal P-Code runtime now compiles with the SDCC toolchain.
 	* Added a generic CAN driver.  This driver is untested as of this writing.
 	* Corrected DM320 UART configuration problem
+
+0.3.9 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
