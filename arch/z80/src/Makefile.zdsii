@@ -93,9 +93,11 @@ nuttx.linkcmd: $(LINKCMDTEMPLATE)
 		echo "  \"`cygpath -w $(TOPDIR)/$${lib}`\", \\" >>nuttx.linkcmd; \
 	done ; )
 	@echo "  \"${shell cygpath -w $(ARCHSRCDIR)/board/libboard$(LIBEXT)}\", \\"  >>nuttx.linkcmd
-	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/chelpld$(LIBEXT)}\", \\"  >>nuttx.linkcmd
-	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/fpld$(LIBEXT)}\""  >>nuttx.linkcmd
-
+\	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/fpdumyLD$(LIBEXT)}\", \\"  >>nuttx.linkcmd
+	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/chelpD$(LIBEXT)}\", \\"  >>nuttx.linkcmd
+	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/csioLDD$(LIBEXT)}\", \\"  >>nuttx.linkcmd
+	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/zsldevinitdummy.lib$(LIBEXT)}\" \\"  >>nuttx.linkcmd
+ 
 nuttx$(EXEEXT): $(HEAD_AOBJ) board/libboard$(LIBEXT) nuttx.linkcmd
 	@echo "LD:  nuttx.hex"
 	@$(LD) $(LDFLAGS)

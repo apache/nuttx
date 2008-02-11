@@ -1,7 +1,8 @@
-/****************************************************************************
- * arch/types.h
+/************************************************************************************
+ * arch/z80/src/z80/chip.h
+ * arch/z80/src/chip/chip.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +15,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,31 +32,35 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
-* through sys/types.h
- */
+#ifndef __Z8_CHIP_H
+#define __Z8_CHIP_H
 
-#ifndef __ARCH_TYPES_H
-#define __ARCH_TYPES_H
-
-/****************************************************************************
+/************************************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************************************/
 
-#include <arch/chip/types.h>
-
-/****************************************************************************
+/************************************************************************************
  * Definitions
- ****************************************************************************/
+ ************************************************************************************/
 
-/****************************************************************************
- * Type Declarations
- ****************************************************************************/
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
 
-/****************************************************************************
- * Global Function Prototypes
- ****************************************************************************/
+#ifndef __ASSEMBLY__
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
 
-#endif /* __ARCH_TYPES_H */
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+#endif
+
+#endif  /* __Z8_CHIP_H */

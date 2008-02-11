@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z8/irq.h
+ * arch/z8/include/z8/irq.h
  * arch/chip/irq.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
@@ -82,6 +82,18 @@
 #define XCPTCONTEXT_REGS     (9)
 #define XCPTCONTEXT_SIZE     (2 * XCPTCONTEXT_REGS)
 
+/* The ZDS-II provides built-in operations to test & disable and to restore
+ * the interrupt state.
+ *
+ * irqstate_t irqsave(void);
+ * void irqrestore(irqstate_t flags);
+ */
+
+#ifdef __ZILOG__
+#  define irqsave()     TDI()
+#  define irqrestore(f) RI(f)
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -134,9 +146,6 @@ extern "C" {
 #else
 #define EXTERN extern
 #endif
-
-EXTERN irqstate_t irqsave(void) __naked;
-EXTERN void       irqrestore(irqstate_t flags) __naked;
 
 #undef EXTERN
 #ifdef __cplusplus
