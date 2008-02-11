@@ -226,7 +226,7 @@
 
 /* At present, only the Zilog ZNeo compiler is recognized */
 
-#  ifndef __ZNEO__
+#  if !defined(__ZNEO__) && !defined(__EZ8__)
 #    warning "Unrecognized Zilog compiler"
 #  endif
 
@@ -258,24 +258,33 @@
 
 # define reentrant_function
 
-/* Addressing */
+/* Addressing.
+ *
+ * Z16F ZNEO:  Far is 24-bits; near is 16-bits of address.
+ *             The supported model is (1) all code on ROM, and (2) all data
+ *             and stacks in external (far) RAM.
+ * Z8Encore!:  Far is 16-bits; near is 8-bits of address.
+ *             The supported model is (1) all code on ROM, and (2) all data
+ *             and stacks in internal (far) RAM.
+ */
 
-# define FAR   _Far
-# define NEAR  _Near
-# define DSEG  _Far
-# define CODE  _Erom
-
-/* Select the large, 32-bit addressing model */
-
-# undef  CONFIG_SMALL_MEMORY
-
-/* Long and int are the same size */
-
-# undef  CONFIG_LONG_IS_NOT_INT
-
-/* FAR pointers and int are the same size */
-
-# undef  CONFIG_PTR_IS_NOT_INT
+#  ifdef __ZNEO__
+#    define FAR   _Far
+#    define NEAR  _Near
+#    define DSEG  _Far
+#    define CODE  _Erom
+#    undef  CONFIG_SMALL_MEMORY      /* Select the large, 32-bit addressing model */
+#    undef  CONFIG_LONG_IS_NOT_INT   /* Long and int are the same size */
+#    undef  CONFIG_PTR_IS_NOT_INT    /* FAR pointers and int are the same size */
+#  else
+#    define FAR   far
+#    define NEAR  near
+#    define DSEG  far
+#    define CODE  rom
+#    define CONFIG_SMALL_MEMORY 1    /* Select small, 16-bit address model */
+#    define CONFIG_LONG_IS_NOT_INT 1 /* Long and int are not the same size */
+#    undef  CONFIG_PTR_IS_NOT_INT    /* FAR pointers and int are the same size */
+#  endif
 
 /* The Zilog compiler does not support inline functions */
 

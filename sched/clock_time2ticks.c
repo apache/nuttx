@@ -85,7 +85,7 @@
  *
  ********************************************************************************/
 
-int clock_time2ticks(const struct timespec *reltime, int *ticks)
+int clock_time2ticks(FAR const struct timespec *reltime, FAR int *ticks)
 {
   sint32 relusec;
 

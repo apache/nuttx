@@ -239,7 +239,7 @@ int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
     }
   else
     {
-      sint32 ticks;
+      int ticks;
 
       /* We are not in an interupt handler and the message queue is full.
        * set up a timed wait for the message queue to become non-full.

@@ -242,7 +242,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, void *msg, size_t msglen,
 
   if (mqdes->msgq->msglist.head == NULL)
     {
-      sint32 ticks;
+      int ticks;
 
       /* Convert the timespec to clock ticks.  We must have interrupts
        * disabled here so that this time stays valid until the wait begins.

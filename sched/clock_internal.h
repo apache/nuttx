@@ -1,7 +1,7 @@
 /********************************************************************************
  * clock_internal.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -79,9 +79,10 @@ extern void weak_function clock_initialize(void);
 extern void weak_function clock_timer(void);
 
 extern time_t clock_calendar2utc(int year, int month, int day);
-extern int    clock_abstime2ticks(clockid_t clockid, const struct timespec *abstime,
-                int *ticks);
-extern int    clock_time2ticks(const struct timespec *reltime, int *ticks);
-extern int    clock_ticks2time(int ticks, struct timespec *reltime);
+extern int    clock_abstime2ticks(clockid_t clockid,
+                                  FAR const struct timespec *abstime,
+                                  FAR int *ticks);
+extern int    clock_time2ticks(FAR const struct timespec *reltime, FAR int *ticks);
+extern int    clock_ticks2time(int ticks, FAR struct timespec *reltime);
 
 #endif /* __CLOCK_INTERNAL_H */

@@ -132,7 +132,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                            FAR const struct timespec *abstime)
 {
   WDOG_ID         wdog;
-  sint32          ticks;
+  int             ticks;
   int             mypid = (int)getpid();
   irqstate_t      int_state;
   int             ret = OK;

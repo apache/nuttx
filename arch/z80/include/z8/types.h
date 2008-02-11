@@ -1,7 +1,8 @@
 /****************************************************************************
- * arch/types.h
+ * arch/z80/include/z8/types.h
+ * include/arch/chip/types.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,17 +35,15 @@
  ****************************************************************************/
 
 /* This file should never be included directed but, rather, only indirectly
-* through sys/types.h
+ * through sys/types.h
  */
 
-#ifndef __ARCH_TYPES_H
-#define __ARCH_TYPES_H
+#ifndef __ARCH_CHIP_TYPES_H
+#define __ARCH_CHIP_TYPES_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
-#include <arch/chip/types.h>
 
 /****************************************************************************
  * Definitions
@@ -54,8 +53,41 @@
  * Type Declarations
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+
+/* These are the sizes of the types supported by the ZiLOG Z8Encore! compiler:
+ *
+ *   int    - 16-bits
+ *   short  - 16-bits
+ *   long   - 32-bits
+ *   char   - 8-bits
+ *   float  - 32-bits
+ *   double - 32-bits
+ *
+ * Pointers:
+ *
+ *   near pointer - 8-bits
+ *   far pointer - 16-bits
+ *   rom pointer - 16-bits
+ */
+
+typedef char sbyte;
+typedef unsigned char ubyte;
+typedef unsigned char uint8;
+typedef unsigned char boolean;
+typedef int sint16;
+typedef unsigned int uint16;
+typedef long sint32;
+typedef unsigned long uint32;
+
+/* This is the size of the interrupt state save returned by irqsave() */
+
+typedef uint16 irqstate_t;
+
+#endif /* __ASSEMBLY__ */
+
 /****************************************************************************
  * Global Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_TYPES_H */
+#endif /* __ARCH_CHIP_TYPES_H */

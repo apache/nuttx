@@ -41,9 +41,9 @@ ZDSINSTALLDIR		:= C:/Program\ Files/ZiLOG/ZDSII_Z8Encore!_4.10.1
 ZDSBINDIR		:= $(ZDSINSTALLDIR)/bin
 ZDSSTDINCDIR		:= $(ZDSINSTALLDIR)/include/std
 ZDSZILOGINCDIR		:= $(ZDSINSTALLDIR)/include/zilog
+ZDSF46XINCDIR		:= $(ZDSZILOGINCDIR)/Z8Encore_F642X
 ZDSSTDLIBDIR		:= $(ZDSINSTALLDIR)/lib/std
 ZDSZILOGLIBDIR		:= $(ZDSINSTALLDIR)/lib/zilog
-
 
 # These are the same directories but with the directory separator
 # character swapped as needed by the ZDS-II compiler
@@ -51,6 +51,7 @@ ZDSZILOGLIBDIR		:= $(ZDSINSTALLDIR)/lib/zilog
 WTOPDIR 		:= ${shell cygpath -w $(TOPDIR)}
 WZDSSTDINCDIR		:= ${shell cygpath -w $(ZDSSTDINCDIR)}
 WZDSZILOGINCDIR 	:= ${shell cygpath -w $(ZDSZILOGINCDIR)}
+WZDSF46XINCDIR		:= ${shell cygpath -w $(ZDSF46XINCDIR)}
 WZDSSTDLIBDIR		:= ${shell cygpath -w $(ZDSSTDLIBDIR)}
 WZDSZILOGLIBDIR 	:= ${shell cygpath -w $(ZDSZILOGLIBDIR)}
 
@@ -63,15 +64,15 @@ EZDSZILOGINCDIR 	:= ${shell echo "$(WZDSZILOGINCDIR)" | sed -e "s/ /%20/g"}
 # Assembler definitions
 
 ifeq ("${CONFIG_DEBUG}","y")
-  ARCHASMOPTIMIZATION	= -debug
+  ARCHASMOPTIMIZATION	= -debug -sdiopt
 else
-  ARCHASMOPTIMIZATION	= -nodebug
+  ARCHASMOPTIMIZATION	= -nodebug -sdiopt
 endif
 
-ARCHASMCPUFLAGS 	= -cpu:Z16F2811AL -NOigcase
-ARCHASMLIST		= -NOlistmac -name -pagelen:56 -pagewidth:80 -quiet
+ARCHASMCPUFLAGS 	= -cpu:Z8F6423 -NOigcase -NOrevaa
+ARCHASMLIST		= -list -NOlistmac -name -pagelen:56 -pagewidth:80 -quiet
 ARCHASMWARNINGS 	= -warn
-ARCHASMDEFINES		= -define:_Z16F2811AL=1 -define:_Z16K_SERIES=1 -define:_Z16F_SERIES=1 \ 				  -define:__ASSEMBLY__
+ARCHASMDEFINES		= -define:_Z8F6423=1 -define:_Z8ENCORE_64K_SERIES=1 -define:_Z8ENCORE_F642X=1 \ 				  -define:__ASSEMBLY__
 ARCHASMINCLUDES 	= -include:'$(ETOPDIR)\include;$(EZDSSTDINCDIR);$(EZDSZILOGINCDIR)'
 AFLAGS			= $(ARCHASMCPUFLAGS) $(ARCHASMINCLUDES) $(ARCHASMLIST) \
 			  $(ARCHASMWARNINGS) $(ARCHASMOPTIMIZATION)
@@ -84,20 +85,19 @@ else
   ARCHOPTIMIZATION	= -nodebug -regvar
 endif
 
-ARCHCPUFLAGS		= -chartype:S -model:L -NOmodsect -cpu:Z16F2811AL -NOgenprint \
+ARCHCPUFLAGS		= -chartype:S -model:L -const:RAM -NOoptlink -promote -cpu:Z8F6423 -NOgenprintf \
 			  -asmsw:" $(ARCHASMCPUFLAGS) $(ARCHASMINCLUDES) $(ARCHASMWARNINGS) $(ARCHASMOPTIMIZATION)"
-ARCHLIST		= -keeplst -NOlist -NOlistinc -NOkeepasm
+ARCHLIST		= -keeplst -NOlist -NOlistinc -keepasm
 ARCHPICFLAGS		=
 ARCHWARNINGS		= -warn
-ARCHDEFINES		= -define:_Z16F2811AL -define:_Z16K_SERIES \
-			  -define:_Z16F_SERIES
-ARCHSTDINCLUDES 	= -stdinc:'$(WTOPDIR)\include;$(WZDSSTDINCDIR);$(WZDSZILOGINCDIR)'
+ARCHDEFINES		= -define:_Z8ENCORE_F642X -define:_Z8F6423 -define:_Z8ENCORE_64K_SERIES
+ARCHSTDINCLUDES 	= -stdinc:'$(WTOPDIR)\include;$(WZDSSTDINCDIR);$(WZDSZILOGINCDIR);$(WZDSF46XINCDIR)'
 ARCHUSRINCLUDES 	= -usrinc:'.'
 ARCHINCLUDES		= $(ARCHSTDINCLUDES) $(ARCHUSRINCLUDES)
 CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHLIST) \
 			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES)
 
-CPPDEFINES              = -D_Z16F2811AL -D_Z16K_SERIES -D_Z16F_SERIES -D__ASSEMBLY__
+CPPDEFINES              = -D_Z8ENCORE_F642X -D_Z8F6423 -D_Z8ENCORE_64K_SERIES -D__ASSEMBLY__
 CPPINCLUDES             = -I$(TOPDIR)/include
 CPPFLAGS                = $(CPPDEFINES) $(CPPINCLUDES)
 
