@@ -1,5 +1,5 @@
 ;**************************************************************************
-; arch/z80/src/common/up_head.asm
+; arch/z80/src/z80/z80_head.asm
 ;
 ;   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
 ;   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
