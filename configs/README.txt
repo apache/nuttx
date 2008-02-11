@@ -338,6 +338,11 @@ configs/z16f2800100zcog
     development kit and the Zilog ZDS-II Windows command line tools.  The
     development environment is Cygwin under WinXP.
 
+configs/z8encore000zco
+    z8Encore! Microncontroller.  This port use the Zilog z8encore000zco
+    development kit, Z8F642 part, and the Zilog ZDS-II Windows command line
+    tools.  The development environment is Cygwin under WinXP.
+
 configs/z80zim
     z80 Microcontroller.  This port uses a Z80 instruction set simulator.
     That simulator can be found in the NuttX CVS at

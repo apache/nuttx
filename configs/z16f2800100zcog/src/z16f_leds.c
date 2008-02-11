@@ -1,5 +1,5 @@
 /****************************************************************************
- * up_leds.c
+ * configs/z16f2800100zcog/z16f_leds.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

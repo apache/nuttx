@@ -1,7 +1,7 @@
 ############################################################################
-# sdcc/src/z80/Make.defs
+# arch/z80/src/z80/Make.defs
 #
-#   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
 #    notice, this list of conditions and the following disclaimer in
 #    the documentation and/or other materials provided with the
 #    distribution.
-# 3. Neither the name Gregory Nutt nor the names of its contributors may be
+# 3. Neither the name NuttX nor the names of its contributors may be
 #    used to endorse or promote products derived from this software
 #    without specific prior written permission.
 #
@@ -33,9 +33,9 @@
 #
 ############################################################################
 
-HEAD_ASRC	= up_head.asm
+HEAD_ASRC	= z80_head.asm
 
-CMN_ASRCS	= up_saveusercontext.asm up_restoreusercontext.asm
+CMN_ASRCS	= 
 CMN_CSRCS	= up_initialize.c up_allocateheap.c up_initialstate.c \
 		  up_createstack.c up_releasestack.c up_interruptcontext.c \
 		  up_blocktask.c  up_unblocktask.c up_exit.c up_releasepending.c \
@@ -44,6 +44,6 @@ CMN_CSRCS	= up_initialize.c up_allocateheap.c up_initialstate.c \
 		  up_schedulesigaction.c up_sigdeliver.c \
 		  up_registerdump.c up_usestack.c
 
-CHIP_ASRCS	= 
+CHIP_ASRCS	= z80_saveusercontext.asm z80_restoreusercontext.asm
 CHIP_CSRCS	= 
 

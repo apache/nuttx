@@ -336,3 +336,6 @@
 
 0.3.9 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* Began adding support for the ZiLOG Z8Encore! microcontroller for the Z8Encore000ZCO
+	  development board and the Z8F642 part.
+
