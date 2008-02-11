@@ -35,7 +35,7 @@
 
 -FORMAT=OMF695,INTEL32
 -map -maxhexlen=64 -quiet -sort NAME=ascending -unresolved=fatal
--warnoverlap -NOxref -warn -debug -NOigcase
+-NOwarnoverlap -NOxref -warn -debug -NOigcase -quiet
 
 RANGE ROM    $000000 : $007FFF
 RANGE RAM    $FFB000 : $FFBFFF
@@ -43,50 +43,45 @@ RANGE IODATA $FFC000 : $FFFFFF
 RANGE EROM   $008000 : $01FFFF
 RANGE ERAM   $800000 : $87FFFF
 
-CHANGE NEAR_TEXT=NEAR_DATA
-CHANGE FAR_TEXT=FAR_DATA
+RANGE ROM $0 : $FFFF
+RANGE RDATA $20 : $FF
+RANGE EDATA $100 : $EFF
+RANGE PRAM FORBIDDEN
 
-ORDER FAR_BSS,  FAR_DATA
-ORDER NEAR_BSS, NEAR_DATA
-COPY  NEAR_DATA EROM
-COPY  FAR_DATA  EROM
+CHANGE TEXT=EDATA
+CHANGE TEXT=FAR_DATA
+change NEAR_TXT=NEAR_DATA
+change FAR_TXT=FAR_DATA
+ORDER FAR_BSS, FAR_DATA
+ORDER NEAR_BSS,NEAR_DATA
+COPY NEAR_DATA ROM
+COPY FAR_DATA ROM
 
-define _0_exit             = 0
-define _low_near_romdata   = copy base of NEAR_DATA
-define _low_neardata       = base of NEAR_DATA
-define _len_neardata       = length of NEAR_DATA
-define _low_far_romdata    = copy base of FAR_DATA
-define _low_fardata        = base of FAR_DATA
-define _len_fardata        = length of FAR_DATA
-define _low_nearbss        = base of NEAR_BSS
-define _len_nearbss        = length of NEAR_BSS
-define _low_farbss         = base of FAR_BSS
-define _len_farbss         = length of FAR_BSS
-define _near_heaptop       = highaddr of RAM
-define _far_heaptop        = highaddr of ERAM
-define _far_stack          = highaddr of ERAM
-define _near_stack         = highaddr of RAM
-define _near_heapbot       = top of RAM
-define _far_heapbot        = top of ERAM
+define _low_near_romdata = copy base of NEAR_DATA
+define _low_neardata = base of NEAR_DATA
+define _len_neardata = length of NEAR_DATA
+define _low_far_romdata = copy base of FAR_DATA
+define _low_fardata = base of FAR_DATA
+define _len_fardata = length of FAR_DATA
+define _low_nearbss = base of NEAR_BSS
+define _len_nearbss = length of NEAR_BSS
+define _low_farbss = base of FAR_BSS
+define _len_farbss = length of FAR_BSS
+define _far_heaptop = highaddr of EDATA
+define _far_stack = highaddr of EDATA
+define _near_stack = highaddr of RDATA
+define _far_heapbot = top of EDATA
+define _near_heaptop = highaddr of RDATA
+define _near_heapbot = top of RDATA
+define _low_pramseg = base of PRAMSEG
+define _len_pramseg = length of PRAMSEG
+define _low_pram_romdata = copy base of PRAMSEG
+define _READ_NVDS=$1000
+define _WRITE_NVDS=$10B3
+define _READ_NVDS_GET_STATUS=$1000
+define _WRITE_NVDS_GET_STATUS=$10B3
+/* Set frequency to 18432000 Hz */
+define __user_frequency = 18432000
 
-define _SYS_CLK_SRC        = 2
-define _SYS_CLK_FREQ       = 20000000
-
-define __EXTCT_INIT_PARAM  = $80
-define __EXTCS0_INIT_PARAM = $8012
-define __EXTCS1_INIT_PARAM = $8001
-define __EXTCS2_INIT_PARAM = $0000
-define __EXTCS3_INIT_PARAM = $0000
-define __EXTCS4_INIT_PARAM = $0000
-define __EXTCS5_INIT_PARAM = $0000
-
-define __PFAF_INIT_PARAM   = $ff
-define __PGAF_INIT_PARAM   = $ff
-define __PDAF_INIT_PARAM   = $ff00
-define __PAAF_INIT_PARAM   = $0000
-define __PCAF_INIT_PARAM   = $0000
-define __PHAF_INIT_PARAM   = $0300
-define __PKAF_INIT_PARAM   = $0f
-
-/* arch/z16/src/Makefile will append target, object and library paths below */
+/* arch/z80/src/Makefile.zdsii will append target, object and library paths below */
 

@@ -1,5 +1,5 @@
 ############################################################################
-# configs/z16f2800100zcog/Makefile
+# configs/z8encore000zco/Makefile
 #
 #   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -43,7 +43,7 @@ CFLAGS		= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(INCLUDES) $(ARCH
 
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
-CSRCS		= z16f_lowinit.c z16f_leds.c
+CSRCS		= z8_lowinit.c z8_leds.c
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
