@@ -46,7 +46,7 @@
 #endif
 
 #include <arch/board/board.h>
-#include "chip.h"
+#include "chip/chip.h"
 
 /************************************************************************************
  * Definitions

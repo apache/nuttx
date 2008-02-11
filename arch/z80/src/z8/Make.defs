@@ -36,9 +36,9 @@
 HEAD_ASRC	= z8_head.asm
 
 CMN_ASRCS	= 
-CMN_CSRCS	= up_initialize.c up_allocateheap.c up_initialstate.c \
-		  up_createstack.c up_releasestack.c up_interruptcontext.c \
-		  up_blocktask.c  up_unblocktask.c up_exit.c up_releasepending.c \
+CMN_CSRCS	= up_initialize.c up_allocateheap.c up_createstack.c \
+		  up_releasestack.c up_interruptcontext.c up_blocktask.c \
+		  up_unblocktask.c up_exit.c up_releasepending.c \
 		  up_reprioritizertr.c up_copystate.c up_irq.c up_idle.c \
 		  up_assert.c up_mdelay.c up_udelay.c \
 		  up_schedulesigaction.c up_sigdeliver.c \

@@ -59,9 +59,8 @@
 
 /* Attributes
  *
- * GCC supports weak symbols which can be used to reduce
- * code size because unnecessary "weak" functions can be
- * excluded from the link.
+ * GCC supports weak symbols which can be used to reduce code size because
+ * unnecessary "weak" functions can be excluded from the link.
  */
 
 # ifndef __CYGWIN__
@@ -77,21 +76,20 @@
 #  define weak_const_function
 #endif
 
-/* The noreturn attribute informs GCC that the function will
- * not return.
- */
+/* The noreturn attribute informs GCC that the function will not return. */
 
 # define noreturn_function __attribute__ ((noreturn))
 
-/* The packed attribute informs GCC that the stucture elements
- * are packed, ignoring other alignment rules.
+/* The packed attribute informs GCC that the stucture elements are packed,
+ * ignoring other alignment rules.
  */
 
 # define packed_struct __attribute__ ((packed))
 
-/* GCC does not support the reentrant attribute */
+/* GCC does not support the reentrant or naked attributes */
 
 # define reentrant_function
+# define naked_function
 
 /* GCC has does not use storage classes to qualify addressing */
 
@@ -157,6 +155,10 @@
 
 # define noreturn_function
 # define packed_struct
+
+/* SDCC does support "naked" function s*/
+
+# define naked_function __naked
 
 /* The reentrant attribute informs SDCC that the function
  * must be reentrant.  In this case, SDCC will store input
@@ -249,10 +251,11 @@
 # define weak_function
 # define weak_const_function
 
-/* The Zilog compiler does not support the noreturn or packed attributes */
+/* The Zilog compiler does not support the noreturn, packed, or naked attributes */
 
 # define noreturn_function
 # define packed_struct
+# define naked_function
 
 /* The Zilog compiler does not support the reentrant attribute */
 
@@ -317,6 +320,8 @@
 # define noreturn_function
 # define packed_struct
 # define reentrant_function
+# define naked_function
+
 
 # define FAR
 # define NEAR

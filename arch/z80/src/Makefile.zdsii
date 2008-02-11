@@ -77,12 +77,30 @@ $(AOBJS) $(HEAD_AOBJ): %$(OBJEXT): %$(ASMEXT)
 $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, `cygpath -w $<`, $@)
 
-libarch$(LIBEXT): $(OBJS)
+up_mem.h:
+	@echo "#ifndef __UP_MEM_H" >up_mem.h
+	@echo "#define __UP_MEM_H" >>up_mem.h
+	@echo "" >>up_mem.h
+	@echo "#include <nuttx/config.h>" >>up_mem.h
+	@echo "" >>up_mem.h
+	@echo "#ifndef CONFIG_HEAP1_BASE" >>up_mem.h
+	@echo "  extern far unsigned long far_heapbot;" >>up_mem.h
+	@echo "# define CONFIG_HEAP1_BASE ((unsigned long)&far_heapbot)" >>up_mem.h
+	@echo "#endif" >>up_mem.h
+	@echo "" >>up_mem.h
+	@echo "#ifndef CONFIG_HEAP1_END" >>up_mem.h
+	@echo "  extern far unsigned long far_heaptop;" >>up_mem.h
+	@echo "# define CONFIG_HEAP1_END ((unsigned long)&far_heaptop)" >>up_mem.h
+	@echo "#endif" >>up_mem.h
+	@echo "" >>up_mem.h
+	@echo "#endif /* __UP_MEM_H */" >>up_mem.h
+
+libarch$(LIBEXT): up_mem.h $(OBJS)
 	@( for obj in $(OBJS) ; do \
 		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
-board/libboard$(LIBEXT):
+board/libboard$(LIBEXT): up_mem.h
 	@$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT)
 
 nuttx.linkcmd: $(LINKCMDTEMPLATE)
@@ -98,11 +116,11 @@ nuttx.linkcmd: $(LINKCMDTEMPLATE)
 	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/csioLDD$(LIBEXT)}\", \\"  >>nuttx.linkcmd
 	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/zsldevinitdummy.lib$(LIBEXT)}\" \\"  >>nuttx.linkcmd
  
-nuttx$(EXEEXT): $(HEAD_AOBJ) board/libboard$(LIBEXT) nuttx.linkcmd
+nuttx$(EXEEXT): up_mem.h $(HEAD_AOBJ) board/libboard$(LIBEXT) nuttx.linkcmd
 	@echo "LD:  nuttx.hex"
 	@$(LD) $(LDFLAGS)
 
-.depend: Makefile chip/Make.defs $(DEPSRCS)
+.depend: Makefile up_mem.h chip/Make.defs $(DEPSRCS)
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR="$(TOPDIR)" depend ; \
 	fi
@@ -116,7 +134,7 @@ clean:
 		$(MAKE) -C board TOPDIR="$(TOPDIR)" clean ; \
 	fi
 	@rm -f libarch$(LIBEXT) *~ .*.swp
-	@rm -f nuttx.linkcmd *.asm *.tmp *.map
+	@rm -f nuttx.linkcmd up_mem.h *.asm *.tmp *.map
 	$(call CLEAN)
 
 distclean: clean

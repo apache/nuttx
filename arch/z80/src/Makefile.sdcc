@@ -104,15 +104,17 @@ $(SDCCLIBDIR)/myz80.lib: $(SDCCLIBDIR)/$(SDCCLIB)
 # Create a header file that contains addressing information needed by the code
 
 up_mem.h:
-	@echo "#ifndef __ARCH_MEM_H" >up_mem.h
-	@echo "#define __ARCH_MEM_H" >>up_mem.h
+	@echo "#ifndef __UP_MEM_H" >up_mem.h
+	@echo "#define __UP_MEM_H" >>up_mem.h
 	@echo "" >>up_mem.h
-	@echo "#define UP_STACK_END           $(CONFIG_DRAM_SIZE)" >> up_mem.h
-	@echo "#define UP_STACK_BASE          (UP_STACK_END - $(CONFIG_PROC_STACK_SIZE))" >> up_mem.h
-	@echo "#define UP_HEAP1_END           UP_STACK_BASE" >> up_mem.h
-	@echo "#define UP_HEAP1_BASE          $(HEAP_BASE)" >> up_mem.h
+	@echo "#include <nuttx/config.h>
 	@echo "" >>up_mem.h
-	@echo "#endif /* __ARCH_MEM_H */" >>up_mem.h
+	@echo "#define CONFIG_STACK_END   $(CONFIG_DRAM_SIZE)" >> up_mem.h
+	@echo "#define CONFIG_STACK_BASE  (CONFIG_STACK_END - $(CONFIG_PROC_STACK_SIZE))" >> up_mem.h
+	@echo "#define CONFIG_HEAP1_END   CONFIG_STACK_BASE" >> up_mem.h
+	@echo "#define CONFIG_HEAP1_BASE  $(HEAP_BASE)" >> up_mem.h
+	@echo "" >>up_mem.h
+	@echo "#endif /* __UP_MEM_H */" >>up_mem.h
 
 asm_mem.h:
 	@echo "	UP_COMPILER_OTHER	== 0" > asm_mem.h

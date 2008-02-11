@@ -46,8 +46,8 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <chip/chip.h>
 
+#include "chip/chip.h"
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"

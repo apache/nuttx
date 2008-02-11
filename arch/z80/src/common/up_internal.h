@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <arch/irq.h>
-#include <chip/chip.h>
+#include "chip/chip.h"
 
 /****************************************************************************
  * Definitions
@@ -111,8 +111,8 @@ extern int up_restoreusercontext(chipreg_t *regs);
 extern FAR chipreg_t *up_decodeirq(uint8 rstno, FAR chipreg_t *regs);
 extern void up_irqinitialize(void);
 extern int  up_timerisr(int irq, FAR chipreg_t *regs);
-extern void up_lowputc(char ch) __naked;
-extern char up_lowgetc(void) __naked;
+extern void up_lowputc(char ch) naked_function;
+extern char up_lowgetc(void) naked_function;
 
 /* Defined in up_doirq.c */
 
