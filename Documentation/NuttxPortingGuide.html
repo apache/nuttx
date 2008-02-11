@@ -16,7 +16,7 @@
   </b></big></h1>
   <p><small>by</small></p>
   <p>Gregory Nutt</p>
-  <p><small>Last Update: February 7, 2008</small></p>
+  <p><small>Last Update: February 11, 2008</small></p>
 </center>
 
 <center><h1>Table of Contents</h1></center>
@@ -384,7 +384,7 @@
     This directory holds common ARM architectures.  At present, this includes
     the following subdirectories:
     <ul>
-      <li><code>arch/arm/include</code> and <code>arch/arm/common</code>:
+      <li><code>arch/arm/include</code> and <code>arch/arm/src/common</code>:
           Common ARM logic.
       </li>
 
@@ -426,13 +426,34 @@
   <li><code>arch/z16f</code>:
     Zilog z16f Microcontroller.
     This port uses the Zilog z16f2800100zcog Development Kit.
-    This is a work in progress.
+    This port was released with nuttx-0.3.7.
   </li>
 
     <li><code>arch/z80</code>:
-    Zilog z80 Microcontroller.
-    This port has been verified using only a z80 instruction simulator.
-  </li>
+    This directory holds 8-bit ZiLOG architectures.  At present, this includes the
+    Zilog z80 and z8Encore! Microcontrollers.
+    <ul>
+      <li><code>arch/z80/include</code> and <code>arch/z80/src/common</code>:
+          Common logic.
+      </li>
+
+      <li><code>arch/z80/include/z80</code> and <code>arch/z80/src/z80</code>:
+        The Z80 port was released in nuttx-0.3.6 has been verified using only a
+        z80 instruction simulator.
+        The set simulator  can be found in the NuttX CVS at
+        http://nuttx.cvs.sourceforge.net/nuttx/misc/sims/z80sim.
+        This port also the SDCC toolchain (http://sdcc.sourceforge.net/")
+        (verified with version 2.6.0 and 2.7.0).
+      </li>
+
+      <li><code>arch/z80/include/z8</code> and <code>arch/z80/src/z8</code>:
+        The Z8Encore! port use the Zilog z8encore000zco
+        development kit, Z8F642 part, and the Zilog ZDS-II Windows command line
+        tools.  The development environment is Cygwin under WinXP.
+        This port is in progress and will be released in a future NuttX release.
+      </li>
+    </ul>
+    </li>
 </ul>
 
 <p>
@@ -621,6 +642,13 @@
     This port use the Zilog z16f2800100zcog development kit and the
     Zilog ZDS-II Windows command line tools.
     The development environment is Cygwin under WinXP.
+  </li>
+
+  <li><code>configs/z8encore000zco</code>
+    z8Encore! Microncontroller.  This port use the Zilog z8encore000zco
+    development kit, Z8F642 part, and the Zilog ZDS-II Windows command line
+    tools.  The development environment is Cygwin under WinXP.
+  </li>
 
   <li><code>configs/z80sim</code>:
     z80 Microcontroller.  This port uses a Z80 instruction set simulator.
