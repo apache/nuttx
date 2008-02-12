@@ -450,7 +450,8 @@ o z16 (arch/z16)
                default:
 
                This will make sure that uwcase is not called but ulcase is called."
-  Status:      Open
+  Status:      Open.  Due to licensing issues, I cannot include the modified
+               uwcase in the NuttX code base.
   Priority:    Medium
 
   Description: Add support to maintain SPOV in context switching.  This
