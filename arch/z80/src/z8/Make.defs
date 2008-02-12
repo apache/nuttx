@@ -33,17 +33,17 @@
 #
 ############################################################################
 
-HEAD_ASRC	= z8_head.asm
+HEAD_ASRC	= #z8_head.asm
 
 CMN_ASRCS	= 
 CMN_CSRCS	= up_initialize.c up_allocateheap.c up_createstack.c \
 		  up_releasestack.c up_interruptcontext.c up_blocktask.c \
 		  up_unblocktask.c up_exit.c up_releasepending.c \
-		  up_reprioritizertr.c up_copystate.c up_irq.c up_idle.c \
+		  up_reprioritizertr.c up_copystate.c up_idle.c \
 		  up_assert.c up_mdelay.c up_udelay.c \
 		  up_schedulesigaction.c up_sigdeliver.c \
 		  up_registerdump.c up_usestack.c
 
-CHIP_ASRCS	= z8_saveusercontext.asm z8_restoreusercontext.asm
-CHIP_CSRCS	= 
+CHIP_ASRCS	= #z8_saveusercontext.asm z8_restoreusercontext.asm
+CHIP_CSRCS	= #z8_initialstate.c z8_irq.c
 
