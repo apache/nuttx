@@ -83,7 +83,7 @@ define ARCHIVE
 endef
 
 define CLEAN
-	@rm -f *.asm *.rel *.lst *.rst *.sym *.adb *.lnk *.map *.mem *.ihx *.hex
+	@rm -f *.o *.asm *.rel *.lst *.rst *.sym *.adb *.lnk *.map *.mem *.ihx *.hex
 endef
 
 MKDEP			= $(TOPDIR)/tools/mkdeps.sh
