@@ -103,7 +103,7 @@ if [ -e ${MAPFILE} ]; then
 else
 	# pass1.map does not yet exist.  In this case, just output a valid, default heap size
 
-	echo "(UP_HEAP1_END - 8192)"
+	echo "(CONFIG_HEAP1_END - 8192)"
 fi
 
 
