@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_irq.c
+ * arch/z80/src/z80/z80_irq.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

@@ -20,8 +20,8 @@ NuttX TODO List (Last updated January 6, 2008)
   (1)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
-  (3)  z80/z8 (arch/z80/)
-  (7)  z16 (arch/z16/)
+  (4)  z80/z8 (arch/z80/)
+  (6)  z16 (arch/z16/)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -350,8 +350,8 @@ o pjrc-8052 / MCS51 (arch/pjrc-8051/)
   Status:      Open
   Priority:    Low -- only because there as so many other issues with 8051
 
-o z80 (arch/z80)
- ^^^^^^^^^^^^^^^
+o z80/z8 (arch/z80)
+ ^^^^^^^^^^^^^^^^^^
 
   Description: The SDCC version the same problems with interger overflow during
                compilation as described for pjrc-8051.  At typical cause is code like
@@ -372,6 +372,12 @@ o z80 (arch/z80)
   Status:      Open
   Priority:    Low, thought to be cosmetic.  I think this is a consequence of
                replacing vs. inserting the library.
+               
+  Description: The ZDS-II compiler (version 4.10.1) fails with an internal error
+               while compiler mm/mm_initialize.  This has been reported as
+               incident 81509.
+  Status:      Open
+  Priority:    High
 
 o z16 (arch/z16)
 ^^^^^^^^^^^^^^^^
@@ -407,14 +413,15 @@ o z16 (arch/z16)
                81400).  You can see the status of the bug report (and lots more
                technical detail) here:
                http://support.zilog.com/support/incident/incident_support.asp?iIncidentId=81400&iSiteId=1&chLanguageCode=ENG
+               
+               Summary of ZiLOG analysis: "This is a ZNEO compiler problem. ... [a] workaround
+               is to replace:
+                   if ( !timerid || (clockid != 0) )
+                By:
+                   if ((clockid != 0) || !timerid)"
+
   Status:      Open
   Priority:    Medium-High
-
-  Description: The Pascal add-on does not work with the Z16F port.  This is
-               because the Z16F is big-endian (see duplicate problem report under
-               "Pascal Add-On").
-  Status:      Open
-  Priority:    Medium
 
   Description: The pascal add-on does not work with the z16f (that is
                configuration z16f2800100zcog/pashello).  This appears to be
@@ -425,6 +432,24 @@ o z16 (arch/z16)
                information.  The cause of the failure appears to be that
                the referenced switch data is bad.
                This is submited as ZiLOG support incident 81459.
+
+               Summary of ZiLOG analysis: "This is a ZNEO run time library problem.
+               One workaround is to replace the line 58 in uwcase.asm
+
+               From:
+                      ADD       R9,#4             ; Skip handler
+               To:
+                      ADD       R9,#2             ; Skip handler
+
+               And add uwcase.asm to the project.
+
+               If the customer does not want to modify uwcase.asm then the other
+               workaround is to add a dummy case and make it same as default:
+
+               case 0x8000:
+               default:
+
+               This will make sure that uwcase is not called but ulcase is called."
   Status:      Open
   Priority:    Medium
 

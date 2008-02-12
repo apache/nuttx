@@ -56,6 +56,7 @@
 /* Intriniscs */
 
 # define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
+# define CONFIG_HAVE_FILENAME     1 /* Has __FILE__ */
 
 /* Attributes
  *
@@ -135,6 +136,7 @@
 /* Intriniscs */
 
 # define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
+# define CONFIG_HAVE_FILENAME     1 /* Has __FILE__ */
 
 /* Pragmas
  *
@@ -240,6 +242,7 @@
 /* Intriniscs */
 
 # define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
+# define CONFIG_HAVE_FILENAME     1 /* Has __FILE__ */
 
 /* Attributes
  *
@@ -313,6 +316,7 @@
 # undef  CONFIG_CPP_HAVE_VARARGS
 # undef  CONFIG_CPP_HAVE_WARNING
 # undef  CONFIG_HAVE_FUNCTIONNAME
+# undef  CONFIG_HAVE_FILENAME
 # undef  CONFIG_HAVE_WEAKFUNCTIONS
 # define weak_alias(name, aliasname)
 # define weak_function

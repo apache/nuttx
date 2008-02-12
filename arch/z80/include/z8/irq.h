@@ -89,11 +89,6 @@
  * void irqrestore(irqstate_t flags);
  */
 
-#ifdef __ZILOG__
-#  define irqsave()     TDI()
-#  define irqrestore(f) RI(f)
-#endif
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -117,7 +112,7 @@ struct xcptcontext
    */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-  void *sigdeliver; /* Actual type is sig_deliver_t */
+  CODE void *sigdeliver; /* Actual type is sig_deliver_t */
 
   /* The following retains that state during signal execution */
 
@@ -146,6 +141,9 @@ extern "C" {
 #else
 #define EXTERN extern
 #endif
+
+EXTERN irqstate_t irqsave(void);
+EXTERN void irqrestore(irqstate_t flags);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -85,12 +85,12 @@ up_mem.h:
 	@echo "" >>up_mem.h
 	@echo "#ifndef CONFIG_HEAP1_BASE" >>up_mem.h
 	@echo "  extern far unsigned long far_heapbot;" >>up_mem.h
-	@echo "# define CONFIG_HEAP1_BASE ((unsigned long)&far_heapbot)" >>up_mem.h
+	@echo "# define CONFIG_HEAP1_BASE ((uint16)&far_heapbot)" >>up_mem.h
 	@echo "#endif" >>up_mem.h
 	@echo "" >>up_mem.h
 	@echo "#ifndef CONFIG_HEAP1_END" >>up_mem.h
 	@echo "  extern far unsigned long far_heaptop;" >>up_mem.h
-	@echo "# define CONFIG_HEAP1_END ((unsigned long)&far_heaptop)" >>up_mem.h
+	@echo "# define CONFIG_HEAP1_END ((uint16)&far_heaptop)" >>up_mem.h
 	@echo "#endif" >>up_mem.h
 	@echo "" >>up_mem.h
 	@echo "#endif /* __UP_MEM_H */" >>up_mem.h

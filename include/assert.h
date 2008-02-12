@@ -41,6 +41,7 @@
  ************************************************************/
 
 #include <sys/types.h>
+#include <nuttx/compiler.h>
 
 /************************************************************
  * Definitions
@@ -53,7 +54,7 @@
 #undef ASSERTCODE
 #undef DEBUGASSERT
 
-#if defined(__GNUC__) || defined(SDCC)
+#ifdef CONFIG_HAVE_FILENAME
 
 #  define ASSERT(f) \
      { if (!(f)) up_assert((const ubyte *)__FILE__, (int)__LINE__); }
@@ -105,7 +106,7 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-#if defined(__GNUC__) || defined(SDCC)
+#ifdef CONFIG_HAVE_FILENAME
 EXTERN void   up_assert(const ubyte *filename, int linenum);
 EXTERN void   up_assert_code(const ubyte *filename, int linenum,
                              int error_code);

@@ -77,4 +77,3 @@ extern "C" {
 #endif
 
 #endif /* __ARCH_ARCH_H */
-

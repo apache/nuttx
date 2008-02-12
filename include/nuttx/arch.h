@@ -376,16 +376,6 @@ EXTERN void up_allocate_heap(FAR void **heap_start, size_t *heap_size);
 EXTERN boolean up_interrupt_context(void);
 
 /****************************************************************************
- * Name: up_disable_irq
- *
- * Description:
- *   Disable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-EXTERN void up_disable_irq(int irq);
-
-/****************************************************************************
  * Name: up_enable_irq
  *
  * Description:
