@@ -166,7 +166,7 @@ _up_reset::
 	; Set up the stack pointer at the location determined the Makefile
 	; and stored in asm_mem.h
 
-	ld	SP, #UP_STACK_END	; Set stack pointer
+	ld	SP, #CONFIG_STACK_END	; Set stack pointer
 
 	; Performed initialization unique to the SDCC toolchain
 

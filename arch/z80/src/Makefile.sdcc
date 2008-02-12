@@ -117,17 +117,17 @@ up_mem.h:
 	@echo "#endif /* __UP_MEM_H */" >>up_mem.h
 
 asm_mem.h:
-	@echo "	UP_COMPILER_OTHER	== 0" > asm_mem.h
-	@echo "	UP_COMPILER_SDCC	== 1" >> asm_mem.h
+	@echo "	CONFIG_COMPILER_OTHER	== 0" > asm_mem.h
+	@echo "	CONFIG_COMPILER_SDCC	== 1" >> asm_mem.h
 ifeq ($(CC),sdcc)
-	@echo "	UP_COMPILER	== 1" >> asm_mem.h
+	@echo "	CONFIG_COMPILER	== 1" >> asm_mem.h
 else
-	@echo "	UP_COMPILER	== 0" >> asm_mem.h
+	@echo "	CONFIG_COMPILER	== 0" >> asm_mem.h
 endif
-	@echo "	UP_STACK_END	== ($(CONFIG_DRAM_SIZE) - 1)" >> asm_mem.h
-	@echo "	UP_STACK_BASE	== (UP_STACK_END - $(CONFIG_PROC_STACK_SIZE))" >> asm_mem.h
-	@echo "	UP_HEAP1_END	== (UP_STACK_END - $(CONFIG_PROC_STACK_SIZE) - 1)" >> asm_mem.h
-	@echo "	UP_HEAP1_BASE	== $(HEAP_BASE)" >> asm_mem.h
+	@echo "	CONFIG_STACK_END	== ($(CONFIG_DRAM_SIZE) - 1)" >> asm_mem.h
+	@echo "	CONFIG_STACK_BASE	== (CONFIG_STACK_END - $(CONFIG_PROC_STACK_SIZE))" >> asm_mem.h
+	@echo "	CONFIG_HEAP1_END	== (CONFIG_STACK_END - $(CONFIG_PROC_STACK_SIZE) - 1)" >> asm_mem.h
+	@echo "	CONFIG_HEAP1_BASE	== $(HEAP_BASE)" >> asm_mem.h
 
 # Combine all objects in this directory into a library
 
