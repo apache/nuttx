@@ -107,7 +107,7 @@ up_mem.h:
 	@echo "#ifndef __UP_MEM_H" >up_mem.h
 	@echo "#define __UP_MEM_H" >>up_mem.h
 	@echo "" >>up_mem.h
-	@echo "#include <nuttx/config.h>
+	@echo "#include <nuttx/config.h>" >>up_mem.h
 	@echo "" >>up_mem.h
 	@echo "#define CONFIG_STACK_END   $(CONFIG_DRAM_SIZE)" >> up_mem.h
 	@echo "#define CONFIG_STACK_BASE  (CONFIG_STACK_END - $(CONFIG_PROC_STACK_SIZE))" >> up_mem.h
@@ -216,6 +216,6 @@ distclean: clean
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR="$(TOPDIR)" distclean ; \
 	fi
-	rm -f Make.dep .depend
+	@rm -f Make.dep .depend
 
 -include Make.dep
