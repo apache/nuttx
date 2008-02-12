@@ -46,11 +46,34 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "up_mem.h"
+
+/* For the SDCC toolchain, the arch/z80/src/Makefile will parse the map file
+ * to determin how much memory is available for the heap.  This parsed data
+ * is provided via the auto-generated file up_mem.h
+ */
+
+#ifdef SDCC
+#  include "up_mem.h"
+#endif
 
 /****************************************************************************
- * Private Definitions
+ * Definitions
  ****************************************************************************/
+
+/* For the ZiLOG ZDS-II toolchain(s), the heap will be set using linker-
+ * defined values.
+ */
+
+#ifdef __ZILOG__
+#  ifndef CONFIG_HEAP1_BASE
+     extern far unsigned long far_heapbot;
+#    define CONFIG_HEAP1_BASE ((uint16)&far_heapbot)
+#  endif
+#  ifndef CONFIG_HEAP1_END
+     extern far unsigned long far_heaptop;
+#    define CONFIG_HEAP1_END ((uint16)&far_heaptop)
+#  endif
+#endif
 
 /****************************************************************************
  * Private Data
