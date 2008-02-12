@@ -51,7 +51,6 @@
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
-#include "up_mem.h"
 
 /****************************************************************************
  * Definitions
