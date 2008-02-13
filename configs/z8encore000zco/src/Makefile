@@ -53,7 +53,7 @@ OBJS		= $(AOBJS) $(COBJS)
 all: libboard$(LIBEXT)
 
 $(ASRCS) $(HEAD_ASRC): %$(ASMEXT): %.S
-	@$(CPP) $(CPPFLAGS) $< -o $@.tmp
+	@$(CPP) $(CPPFLAGS) `cygpath -w $<` -o $@.tmp
 	@cat $@.tmp | sed -e "s/^#/;/g" > $@
 	@rm $@.tmp
 
