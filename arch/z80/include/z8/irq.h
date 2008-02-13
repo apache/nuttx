@@ -127,7 +127,7 @@
 #  define  Z8_UART0_RX_IRQ   5 /* Only if EZ8_UART0 defined */
 #  define  Z8_UART0_TX_IRQ   6 /* Only if EZ8_UART0 defined */
 #  define  Z8_I2C_IRQ        7 /* Only if EZ8_I2C defined */
-#  define  Z8_SPI_IRQ        8  /* Only if EZ8_SPI defined */
+#  define  Z8_SPI_IRQ        8 /* Only if EZ8_ESPI defined */
 #  define  Z8_ADC_IRQ        9 /* Only if EZ8_ADC_NEW defined */
 #  define  Z8_P7AD_IRQ      10
 #  define  Z8_P6AD_IRQ      11
@@ -164,14 +164,10 @@
 #  define  Z8_I2C_IRQ       10 /* Only if EZ8_I2C defined */
 #  define  Z8_C0_IRQ        12
 #  define  Z8_PB_IRQ        13
-#  define  Z8_P7A_IRQ       14
-#  define  Z8_P3A_IRQ       Z8_P7A_IRQ
-#  define  Z8_P6A_IRQ       15
-#  define  Z8_P2A_IRQ       Z8_P6A_IRQ
-#  define  Z8_P5A_IRQ       16
-#  define  Z8_P1A_IRQ       Z8_P5A_IRQ
-#  define  Z8_P4A_IRQ       17
-#  define  Z8_P0A_IRQ       Z8_P4A_IRQ
+#  define  Z8_P7AP3A_IRQ    14
+#  define  Z8_P6AP2A_IRQ    15
+#  define  Z8_P5AP1A_IRQ    16
+#  define  Z8_P4AP0A_IRQ    17
 #  define  Z8_POTRAP_IRQ    27
 #  define  Z8_WOTRAP_IRQ    28
 

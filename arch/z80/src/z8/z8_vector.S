@@ -40,7 +40,6 @@
 
 #include <nuttx/config.h>
 #include <ez8.inc>
-#include <configl.inc>
 #include <vect.inc>
 
 /**************************************************************************
@@ -218,8 +217,8 @@
 	xdef _z8_i2c_handler
 # endif
 	xdef _z8_c0_handler
-	xdef _z8_c0_handler
-	xdef _z8_p7p3a_handler
+	xdef _z8_pb_handler
+	xdef _z8_p7ap3a_handler
 	xdef _z8_p6ap2a_handler
 	xdef _z8_p5ap1a_handler
 	xdef _z8_p4ap0a_handler
@@ -227,7 +226,22 @@
 	xdef _z8_wotrap_handler
 #endif 
 
- /**************************************************************************
+/**************************************************************************
+ * Macros
+ **************************************************************************/
+
+ENTER :	MACRO	val
+	srp	#%f0			/* Load the interrupt register pointer */
+	ld	r0, #val		/* Pass the new value in r0
+	jr	_z8_common_handler	/* The rest of the handling is common */
+	ENDMAC	ENTER
+
+LEAVE :	MACRO
+	srp	#%e0			/* Restore the user register pointer */
+	iret				/* And return from interrupt */
+	ENDMAC	LEAVE
+
+/**************************************************************************
  * Code
  **************************************************************************/
 
@@ -398,8 +412,8 @@
 	vector I2C	= _z8_i2c_handler
 # endif
 	vector C0	= _z8_c0_handler
-	vector PB	= _z8_c0_handler
-	vector P7A	= _z8_p7p3a_handler
+	vector PB	= _z8_pb_handler
+	vector P7A	= _z8_p7ap3a_handler
 	vector P6A	= _z8_p6ap2a_handler
 	vector P5A	= _z8_p5ap1a_handler
 	vector P4A	= _z8_p4ap0a_handler
@@ -416,54 +430,87 @@
  *   for particular interrupts is required, then those interrupts should
  *   be picked off here and handled outside of the common logic.
  *
+ *   On entry to any of these handlers, the stack contains the following:
+ *
+ *         TOS before interrupt
+ *         PC[7:0]
+ *         PC[15:8]
+ *   SP -> Flags Register
+ *
  **************************************************************************/
 
 	define startup, space=rom
 	segment startup
 #if defined(ENCORE_VECTORS)
 _z8_wdt_handler:
+	ENTER(Z8_WDT_IRQ)
 _z8_trap_handler:
+	ENTER(Z8_TRAP_IRQ)
 # if defined(EZ8_TIMER3)
 _z8_timer2_handler:
+	ENTER(Z8_TIMER2_IRQ)
 # endif
 _z8_timer1_handler:
+	ENTER(Z8_TIMER1_IRQ)
 _z8_timer0_handler:
+	ENTER(Z8_TIMER0_IRQ)
 # if defined(EZ8_UART0)
 _z8_uart0rx_handler:
+	ENTER(Z8_UART0_RX_IRQ)
 _z8_uart0tx_handler:
+	ENTER(Z8_UART0_TX_IRQ)
 # endif
 # if defined(EZ8_I2C)
 _z8_i2c_handler:
+	ENTER(Z8_I2C_IRQ)
 # endif
 # if defined(EZ8_SPI)
 _z8_spi_handler:
+	ENTER(Z8_SPI_IRQ)
 # endif
 # if defined(EZ8_ADC)
 _z8_adc_handler:
+	ENTER(Z8_ADC_IRQ)
 # endif
 _z8_p7ad_handler:
+	ENTER(Z8_P7AD_IRQ)
 _z8_p6ad_handler:
- _z8_p5ad_handler:
+	ENTER(Z8_P6AD_IRQ)
+_z8_p5ad_handler:
+	ENTER(Z8_P5AD_IRQ)
 _z8_p4ad_handler:
+	ENTER(Z8_P4AD_IRQ)
 _z8_p3ad_handler:
+	ENTER(Z8_P3AD_IRQ)
 _z8_p2ad_handler:
+	ENTER(Z8_P2AD_IRQ)
 _z8_p1ad_handler:
+	ENTER(Z8_P1AD_IRQ)
 _z8_p0ad_handler:
+	ENTER(Z8_P0AD_IRQ)
 # if defined(EZ8_TIMER4)
 _z8_timer3_handler:
+	ENTER(Z8_TIMER3_IRQ)
 # endif
 # if defined(EZ8_UART1)
 _z8_uart1rx_handler:
+	ENTER(Z8_UART1_RX_IRQ)
 _z8_uart1tx_handler:
+	ENTER(Z8_UART1_TX_IRQ)
 # endif
 # if defined(EZ8_DMA)
 _z8_dma_handler:
+	ENTER(Z8_DMA_IRQ)
 # endif
 # if !defined(EZ8_PORT1)
 _z8_c3_handler:
+	ENTER(Z8_C3_IRQ)
 _z8_c2_handler:
+	ENTER(Z8_C2_IRQ)
 _z8_c1_handler:
+	ENTER(Z8_C1_IRQ)
 _z8_c0_handler:
+	ENTER(Z8_C0_IRQ)
 # endif
 
 /**************************************************************************/
@@ -471,129 +518,203 @@ _z8_c0_handler:
 #elif defined(ENCORE_XP_VECTORS)
 
 _z8_wdt_handler:
+	ENTER(Z8_WDT_IRQ)
 _z8_trap_handler:
+	ENTER(Z8_TRAP_IRQ)
 # if defined(EZ8_TIMER3)
 _z8_timer2_handler:
+	ENTER(Z8_TIMER2_IRQ)
 # endif
 _z8_timer1_handler:
+	ENTER(Z8_TIMER1_IRQ)
 _z8_timer0_handler:
+	ENTER(Z8_TIMER0_IRQ)
 # if defined(EZ8_UART0)
 _z8_uart0rx_handler:
+	ENTER(Z8_UART0_RX_IRQ)
 _z8_uart0tx_handler:
+	ENTER(Z8_UART0_TX_IRQ)
 # endif
 # if defined(EZ8_I2C)
 _z8_i2c_handler:
+	ENTER(Z8_I2C_IRQ)
 # endif
 # if defined(EZ8_SPI)
 _z8_spi_handler:
+	ENTER(Z8_SPI_IRQ)
 #   endif
 # if  defined(EZ8_ADC) || defined(EZ8_ADC_NEW)
 _z8_adc_handler:
+	ENTER(Z8_ADC_IRQ)
 # endif
 _z8_p7ad_handler:
+	ENTER(Z8_P7AD_IRQ)
 _z8_p6ad_handler:
+	ENTER(Z8_P6AD_IRQ)
  _z8_p5ad_handler:
+	ENTER(Z8_P5AD_IRQ)
 _z8_p4ad_handler:
+	ENTER(Z8_P4AD_IRQ)
 _z8_p3ad_handler:
+	ENTER(Z8_P3AD_IRQ)
 _z8_p2ad_handler:
+	ENTER(Z8_P2AD_IRQ)
 _z8_p1ad_handler:
+	ENTER(Z8_P1AD_IRQ)
 _z8_p0ad_handler:
+	ENTER(Z8_P0AD_IRQ)
 # if defined(EZ8_TIMER4)
 _z8_timer3_handler:
+	ENTER(Z8_TIMER3_IRQ)
 # endif
 # if defined(EZ8_UART1)
 _z8_uart1rx_handler:
+	ENTER(Z8_UART1_RX_IRQ)
 _z8_uart1tx_handler:
+	ENTER(Z8_UART1_TX_IRQ)
 # endif
 # if defined(EZ8_DMA)
 _z8_dma_handler:
+	ENTER(Z8_DMA_IRQ)
 # endif
 # if !defined(EZ8_PORT1)
 _z8_c3_handler:
+	ENTER(Z8_C3_IRQ)
 _z8_c2_handler:
+	ENTER(Z8_C2_IRQ)
 _z8_c1_handler:
+	ENTER(Z8_C1_IRQ)
 _z8_c0_handler:
+	ENTER(Z8_C0_IRQ)
 # endif
 _z8_potrap_handler:
+	ENTER(Z8_POTRAP_IRQ)
 _z8_wotrap_handler:
+	ENTER(Z8_WOTRAP_IRQ)
 
 /**************************************************************************/
 
 #elif defined(ENCORE_XP16K_VECTORS)
 
 _z8_wdt_handler:
+	ENTER(Z8_WDT_IRQ)
 _z8_trap_handler:
+	ENTER(Z8_TRAP_IRQ)
 # if defined(EZ8_TIMER3)
 _z8_timer2_handler:
+	ENTER(Z8_TIMER2_IRQ)
 # endif
 _z8_timer1_handler:
+	ENTER(Z8_TIMER1_IRQ)
 _z8_timer0_handler:
+	ENTER(Z8_TIMER0_IRQ)
 # if defined(EZ8_UART0)
 _z8_uart0rx_handler:
+	ENTER(Z8_UART0_RX_IRQ)
 _z8_uart0tx_handler:
+	ENTER(Z8_UART0_TX_IRQ)
 # endif
 # if defined(EZ8_I2C)
 _z8_i2c_handler:
+	ENTER(Z8_I2C_IRQ)
 # endif
 # if defined(EZ8_ESPI)
 _z8_spi_handler:
+	ENTER(Z8_SPI_IRQ)
 # endif
 # if  defined(EZ8_ADC_NEW)
 _z8_adc_handler:
+	ENTER(Z8_ADC_IRQ)
 # endif
 _z8_p7ad_handler:
+	ENTER(Z8_P7AD_IRQ)
 _z8_p6ad_handler:
- _z8_p5ad_handler:
+	ENTER(Z8_P6AD_IRQ)
+_z8_p5ad_handler:
+	ENTER(Z8_P5AD_IRQ)
 _z8_p4ad_handler:
+	ENTER(Z8_P4AD_IRQ)
 _z8_p3ad_handler:
+	ENTER(Z8_P3AD_IRQ)
 _z8_p2ad_handler:
+	ENTER(Z8_P2AD_IRQ)
 _z8_p1ad_handler:
+	ENTER(Z8_P1AD_IRQ)
 _z8_p0ad_handler:
+	ENTER(Z8_P0AD_IRQ)
 # if defined(EZ8_MCT)
 _z8_mct_handler:
+	ENTER(Z8_MCT_IRQ)
 # endif
 # if defined(EZ8_UART1)
 _z8_uart1rx_handler:
+	ENTER(Z8_UART1_RX_IRQ)
 _z8_uart1tx_handler:
+	ENTER(Z8_UART1_TX_IRQ)
 # endif
 _z8_c3_handler:
+	ENTER(Z8_C3_IRQ)
 _z8_c2_handler:
+	ENTER(Z8_C2_IRQ)
 _z8_c1_handler:
+	ENTER(Z8_C1_IRQ)
 _z8_c0_handler:
+	ENTER(Z8_C0_IRQ)
 _z8_potrap_handler:
+	ENTER(Z8_POTRAP_IRQ)
 _z8_wotrap_handler:
+	ENTER(Z8_WOTRAP_IRQ)
 
 /**************************************************************************/
 
 #elif defined(ENCORE_MC_VECTORS)
 
 _z8_wdt_handler:
+	ENTER(Z8_WDT_IRQ)
 _z8_trap_handler:
+	ENTER(Z8_TRAP_IRQ)
 _z8_pwmtimer_handler:
+	ENTER(Z8_PWMTIMER_IRQ)
 _z8_pwmfault_handler:
+	ENTER(Z8_PWMFAULT_IRQ)
 # if defined(EZ8_ADC_NEW)
 _z8_adc_handler:
+	ENTER(Z8_ADC_IRQ)
 # endif
 _z8_cmp_handler:
+	ENTER(Z8_CMP_IRQ)
 _z8_timer0_handler:
+	ENTER(Z8_TIMER0_IRQ)
 # if defined(EZ8_UART0
 _z8_uart0rx_handler:
+	ENTER(Z8_UART0_RX_IRQ)
 _z8_uart0tx_handler:
+	ENTER(Z8_UART0_TX_IRQ)
 # endif
 # if defined(EZ8_SPI)
 _z8_spi_handler:
+	ENTER(Z8_SPI_IRQ)
 # endif
 # if defined(EZ8_I2C)
 _z8_i2c_handler:
+	ENTER(Z8_I2C_IRQ)
 # endif
 _z8_c0_handler:
-_z8_c0_handler:
-_z8_p7p3a_handler:
+	ENTER(Z8_C0_IRQ)
+_z8_pb_handler:
+	ENTER(Z8_PB_IRQ)
+_z8_p7ap3a_handler:
+	ENTER(Z8_P7A_IRQ)
 _z8_p6ap2a_handler:
+	ENTER(Z8_P6AP2A_IRQ)
 _z8_p5ap1a_handler:
+	ENTER(Z8_P5AP1A_IRQ)
 _z8_p4ap0a_handler:
+	ENTER(Z8_P4AP0A_IRQ)
 _z8_potrap_handler:
+	ENTER(Z8_POTRAP_IRQ)
 _z8_wotrap_handler:
+	ENTER(Z8_WOTRAP_IRQ)
 #endif 
 
 /**************************************************************************
@@ -602,13 +723,29 @@ _z8_wotrap_handler:
  * Description:
  *   Common IRQ handling logic
  *
+ *   On entry, the stack contains the following:
+ *
+ *         TOS before interrupt
+ *         PC[7:0]
+ *         PC[15:8]
+ *         Flags Register
+ *   SP -> RP
+ *
+ *   R0 holds the IRQ number and the RP has been reset to %f0
+ *
  **************************************************************************/
 
 _z8_common_handler:
-	iret
+	LEAVE
 
 /**************************************************************************
  * Data
  **************************************************************************/
+
+	/* Set aside area for interrupt registers */
+
+	define interruptreg, space=rdata, org=%f0
+	segment interruptreg
+	ds  %10
 
 	end	_z8_common_handler
