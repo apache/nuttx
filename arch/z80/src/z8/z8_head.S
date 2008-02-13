@@ -41,12 +41,13 @@
 #include <nuttx/config.h>
 #include <ez8.inc>
 #include <configl.inc>
+#include <vect.inc>
 
 /**************************************************************************
  * Definitions
  **************************************************************************/
 
-/* Assuem the large model */
+/* Assume the large model */
 
 #if !defined(CONFIG_Z8_MODEL_LARGE) && !defined(CONFIG_Z8_MODEL_SMALL) 
 #  define CONFIG_Z8_MODEL_LARGE 1
@@ -100,10 +101,6 @@
  * Code
  **************************************************************************/
 
-	/* Vector table space allocation */
-
-	include "vect.inc"
- 
 	/* Reset vector */
 
 	vector	reset=_z8_reset
@@ -232,7 +229,7 @@ _z8_reset_halt:
 	jr	_z8_reset_halt
 
 /**************************************************************************
- * Code
+ * Data
  **************************************************************************/
 
 #ifdef CONFIG_Z8_MODEL_LARGE
