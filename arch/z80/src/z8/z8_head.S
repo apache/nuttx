@@ -242,7 +242,7 @@ __intrp	ds	1
 
 	/* Set aside area for working registers */
 
-	define workingreg, space=rdata, org=%E0
+	define workingreg, space=rdata, org=%e0
 	segment workingreg
 	ds  %10
 

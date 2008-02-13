@@ -45,6 +45,21 @@
  * Definitions
  ************************************************************************************/
 
+/* Memory Map
+ *
+ * 64Kb Program Memory (64K series)
+ *  C:0000 - C:0001 : Flash options
+ *  C:0002 - C:0037 : Vectors
+ *                  : ROM data
+ *                  : Code
+ *
+ * 4Kb Register File (64K series)
+ *  R:020 - R:0ff   : 224 byte RDATA
+ *  R:0e0 - R:0ef   :  16-byte working register area (RDATA)
+ *  E:100 - E:eff   : 3.5 Kbyte EDATA
+ *    f00 -   fff   : 256 byte control register area
+ */
+
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
