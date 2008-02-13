@@ -44,6 +44,6 @@ CMN_CSRCS	= up_initialize.c up_allocateheap.c up_createstack.c \
 		  up_schedulesigaction.c up_sigdeliver.c \
 		  up_registerdump.c up_usestack.c
 
-CHIP_SSRCS	= #z8_saveusercontext.S z8_restoreusercontext.S
+CHIP_SSRCS	= z8_vector.S #z8_saveusercontext.S z8_restoreusercontext.S
 CHIP_CSRCS	= #z8_initialstate.c z8_irq.c
 

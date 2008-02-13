@@ -45,23 +45,141 @@
  * Included Files
  ****************************************************************************/
 
+#include <ez8.h>
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/* Z80 Interrupts */
+/* ez8 Interrupt Numbers */
 
-#define Z80_RST0         (0)
-#define Z80_RST1         (1)
-#define Z80_RST2         (2)
-#define Z80_RST3         (3)
-#define Z80_RST4         (4)
-#define Z80_RST5         (5)
-#define Z80_RST6         (6)
-#define Z80_RST7         (7)
+#if defined(ENCORE_VECTORS)
 
-#define Z80_IRQ_SYSTIMER Z80_RST7
-#define NR_IRQS          (8)
+#  define  Z8_WDT_IRQ        0
+#  define  Z8_TRAP_IRQ       1
+#  define  Z8_TIMER2_IRQ     2 /* Only if EZ8_TIMER3 defined */
+#  define  Z8_TIMER1_IRQ     3
+#  define  Z8_TIMER0_IRQ     4
+#  define  Z8_UART0_RX_IRQ   5 /* Only if EZ8_UART0 defined */
+#  define  Z8_UART0_TX_IRQ   6 /* Only if EZ8_UART0 defined */
+#  define  Z8_I2C_IRQ        7 /* Only if EZ8_I2C defined */
+#  define  Z8_SPI_IRQ        8 /* Only if EZ8_SPI defined */
+#  define  Z8_ADC_IRQ        9 /* Only if EZ8_ADC defined */
+#  define  Z8_P7AD_IRQ      10
+#  define  Z8_P6AD_IRQ      11
+#  define  Z8_P5AD_IRQ      12
+#  define  Z8_P4AD_IRQ      13
+#  define  Z8_P3AD_IRQ      14
+#  define  Z8_P2AD_IRQ      15
+#  define  Z8_P1AD_IRQ      16
+#  define  Z8_P0AD_IRQ      17
+#  define  Z8_TIMER3_IRQ    18 /* Only if EZ8_TIMER4 defined */
+#  define  Z8_UART1_RX_IRQ  19 /* Only if EZ8_UART1 defined */
+#  define  Z8_UART1_TX_IRQ  20 /* Only if EZ8_UART1 defined */
+#  define  Z8_DMA_IRQ       21 /* Only if EZ8_DMA defined */
+#  define  Z8_C3_IRQ        22 /* Only if EZ8_PORT1 defined */
+#  define  Z8_C2_IRQ        23 /* Only if EZ8_PORT1 defined */
+#  define  Z8_C1_IRQ        24 /* Only if EZ8_PORT1 defined */
+#  define  Z8_C0_IRQ        25 /* Only if EZ8_PORT1 defined */
+
+#  define NR_IRQS          (26)
+
+#elif defined(ENCORE_XP_VECTORS)
+
+#  define  Z8_WDT_IRQ        0
+#  define  Z8_TRAP_IRQ       1
+#  define  Z8_TIMER2_IRQ     2 /* Only if EZ8_TIMER3 defined */
+#  define  Z8_TIMER1_IRQ     3
+#  define  Z8_TIMER0_IRQ     4
+#  define  Z8_UART0_RX_IRQ   5 /* Only if EZ8_UART0 defined */
+#  define  Z8_UART0_TX_IRQ   6 /* Only if EZ8_UART0 defined */
+#  define  Z8_I2C_IRQ        7 /* Only if EZ8_I2C defined */
+#  define  Z8_SPI_IRQ        8 /* Only if EZ8_SPI defined */
+#  define  Z8_ADC_IRQ        9 /* Only if EZ8_ADC or EZ8_ADC_NEW defined */
+#  define  Z8_P7AD_IRQ      10
+#  define  Z8_P6AD_IRQ      11
+#  define  Z8_P5AD_IRQ      12
+#  define  Z8_P4AD_IRQ      13
+#  define  Z8_P3AD_IRQ      14
+#  define  Z8_P2AD_IRQ      15
+#  define  Z8_P1AD_IRQ      16
+#  define  Z8_P0AD_IRQ      17
+#  define  Z8_TIMER3_IRQ    18 /* Only if EZ8_TIMER4 defined */
+#  define  Z8_UART1_RX_IRQ  19 /* Only if EZ8_UART1 defined */
+#  define  Z8_UART1_TX_IRQ  20 /* Only if EZ8_UART1 defined */
+#  define  Z8_DMA_IRQ       21 /* Only if EZ8_DMA defined */
+#  define  Z8_C3_IRQ        22 /* Only if EZ8_PORT1 defined */
+#  define  Z8_C2_IRQ        23 /* Only if EZ8_PORT1 defined */
+#  define  Z8_C1_IRQ        24 /* Only if EZ8_PORT1 defined */
+#  define  Z8_C0_IRQ        25 /* Only if EZ8_PORT1 defined */
+#  define  Z8_POTRAP_IRQ    27
+#  define  Z8_WOTRAP_IRQ    28
+
+#  define NR_IRQS          (29)
+
+#elif defined(ENCORE_XP16K_VECTORS)
+
+#  define  Z8_WDT_IRQ        0
+#  define  Z8_TRAP_IRQ       1
+#  define  Z8_TIMER2_IRQ     2 /* Only if EZ8_TIMER3 defined */
+#  define  Z8_TIMER1_IRQ     3
+#  define  Z8_TIMER0_IRQ     4
+#  define  Z8_UART0_RX_IRQ   5 /* Only if EZ8_UART0 defined */
+#  define  Z8_UART0_TX_IRQ   6 /* Only if EZ8_UART0 defined */
+#  define  Z8_I2C_IRQ        7 /* Only if EZ8_I2C defined */
+#  define  Z8_SPI_IRQ        8  /* Only if EZ8_SPI defined */
+#  define  Z8_ADC_IRQ        9 /* Only if EZ8_ADC_NEW defined */
+#  define  Z8_P7AD_IRQ      10
+#  define  Z8_P6AD_IRQ      11
+#  define  Z8_P5AD_IRQ      12
+#  define  Z8_P4AD_IRQ      13
+#  define  Z8_P3AD_IRQ      14
+#  define  Z8_P2AD_IRQ      15
+#  define  Z8_P1AD_IRQ      16
+#  define  Z8_P0AD_IRQ      17
+#  define  Z8_MCT_IRQ       19 /* Only if EZ8_MCT defined */
+#  define  Z8_UART1_RX_IRQ  20 /* Only if EZ8_UART1 defined */
+#  define  Z8_UART1_TX_IRQ  21 /* Only if EZ8_UART1 defined */
+#  define  Z8_C3_IRQ        22
+#  define  Z8_C2_IRQ        23
+#  define  Z8_C1_IRQ        24
+#  define  Z8_C0_IRQ        25
+#  define  Z8_POTRAP_IRQ    27
+#  define  Z8_WOTRAP_IRQ    28
+
+#  define NR_IRQS          (29)
+
+#elif defined(ENCORE_MC_VECTORS)
+
+#  define  Z8_WDT_IRQ        0
+#  define  Z8_TRAP_IRQ       1
+#  define  Z8_PWMTIMER_IRQ   2
+#  define  Z8_PWMFAULT_IRQ   3
+#  define  Z8_ADC_IRQ        4 /* Only if EZ8_ADC_NEW defined */
+#  define  Z8_CMP_IRQ        5
+#  define  Z8_TIMER0_IRQ     6
+#  define  Z8_UART0_RX_IRQ   7 /* Only if EZ8_UART0 defined */
+#  define  Z8_UART0_TX_IRQ   8 /* Only if EZ8_UART0 defined */
+#  define  Z8_SPI_IRQ        9 /* Only if EZ8_SPI defined */
+#  define  Z8_I2C_IRQ       10 /* Only if EZ8_I2C defined */
+#  define  Z8_C0_IRQ        12
+#  define  Z8_PB_IRQ        13
+#  define  Z8_P7A_IRQ       14
+#  define  Z8_P3A_IRQ       Z8_P7A_IRQ
+#  define  Z8_P6A_IRQ       15
+#  define  Z8_P2A_IRQ       Z8_P6A_IRQ
+#  define  Z8_P5A_IRQ       16
+#  define  Z8_P1A_IRQ       Z8_P5A_IRQ
+#  define  Z8_P4A_IRQ       17
+#  define  Z8_P0A_IRQ       Z8_P4A_IRQ
+#  define  Z8_POTRAP_IRQ    27
+#  define  Z8_WOTRAP_IRQ    28
+
+#  define NR_IRQS          (29)
+
+#endif 
+
+#define Z8_IRQ_SYSTIMER Z8_TIMER0_IRQ
 
 /* IRQ Stack Frame Format
  *
@@ -71,7 +189,6 @@
 
 #define XCPT_I               (0) /* Offset 0: Saved I w/interrupt state in carry */
 #define XCPT_BC              (1) /* Offset 1: Saved BC register */
-#define XCPT_DE              (2) /* Offset 2: Saved DE register */
 #define XCPT_IX              (3) /* Offset 3: Saved IX register */
 #define XCPT_IY              (4) /* Offset 4: Saved IY register */
 #define XCPT_SP              (5) /* Offset 5: Offset to SP at time of interrupt */
