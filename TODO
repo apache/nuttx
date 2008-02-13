@@ -376,6 +376,23 @@ o z80/z8 (arch/z80)
   Description: The ZDS-II compiler (version 4.10.1) fails with an internal error
                while compiler mm/mm_initialize.  This has been reported as
                incident 81509.
+
+               I have found the following workaround that I use to build for the
+               time being:
+
+               --- mm/mm_initialize.c.SAVE	2008-02-13 08:06:46.833857700 -0600
+               +++ mm/mm_initialize.c	2008-02-13 08:07:26.367608900 -0600
+               @@ -94,8 +94,11 @@
+               {
+                  int i;
+ 
+               +#if 0 /* DO NOT CHECK IN */
+                  CHECK_ALLOCNODE_SIZE;
+                  CHECK_FREENODE_SIZE;
+               +#endif
+ 
+               /* Set up global variables */
+ 
   Status:      Open
   Priority:    High
 
