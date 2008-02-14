@@ -39,6 +39,8 @@
  **************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/irq.h>
+
 #include <ez8.inc>
 #include <vect.inc>
 
@@ -53,24 +55,24 @@
 #if defined(ENCORE_VECTORS)
 	xdef _z8_wdt_handler
 	xdef _z8_trap_handler
-# if defined(EZ8_TIMER3)
+if EZ8_TIMER3=1
 	xdef _z8_timer2_handler
-# endif
+endif
 	xdef _z8_timer1_handler
 	xdef _z8_timer0_handler
-# if defined(EZ8_UART0)
+if EZ8_UART0=1
 	xdef _z8_uart0rx_handler
 	xdef _z8_uart0tx_handler
-# endif
-# if defined(EZ8_I2C)
+endif
+if EZ8_I2C=1
 	xdef _z8_i2c_handler
-# endif
-# if defined(EZ8_SPI)
+endif
+if EZ8_SPI=1
 	xdef _z8_spi_handler
-# endif
-# if defined(EZ8_ADC)
+endif
+if EZ8_ADC=1
 	xdef _z8_adc_handler
-# endif
+endif
 	xdef _z8_p7ad_handler
 	xdef _z8_p6ad_handler
  	xdef _z8_p5ad_handler
@@ -79,22 +81,22 @@
 	xdef _z8_p2ad_handler
 	xdef _z8_p1ad_handler
 	xdef _z8_p0ad_handler
-# if defined(EZ8_TIMER4)
+if EZ8_TIMER4=1
 	xdef _z8_timer3_handler
-# endif
-# if defined(EZ8_UART1)
+endif
+if EZ8_UART1=1
 	xdef _z8_uart1rx_handler
 	xdef _z8_uart1tx_handler
-# endif
-# if defined(EZ8_DMA)
+endif
+if EZ8_DMA=1
 	xdef _z8_dma_handler
-# endif
-# if !defined(EZ8_PORT1)
+endif
+if EZ8_PORT1=0
 	xdef _z8_c3_handler
 	xdef _z8_c2_handler
 	xdef _z8_c1_handler
 	xdef _z8_c0_handler
-# endif
+endif
 
 /**************************************************************************/
 
@@ -102,24 +104,24 @@
 
 	xdef _z8_wdt_handler
 	xdef _z8_trap_handler
-# if defined(EZ8_TIMER3)
+if EZ8_TIMER3=1
 	xdef _z8_timer2_handler
-# endif
+endif
 	xdef _z8_timer1_handler
 	xdef _z8_timer0_handler
-# if defined(EZ8_UART0)
+if EZ8_UART0=1
 	xdef _z8_uart0rx_handler
 	xdef _z8_uart0tx_handler
-# endif
-# if defined(EZ8_I2C)
+endif
+if EZ8_I2C=1
 	xdef _z8_i2c_handler
-# endif
-# if defined(EZ8_SPI)
+endif
+if EZ8_SPI=1
 	xdef _z8_spi_handler
-#   endif
-# if  defined(EZ8_ADC) || defined(EZ8_ADC_NEW)
+endif
+if (EZ8_ADC=1) || (EZ8_ADC_NEW=1)
 	xdef _z8_adc_handler
-# endif
+endif
 	xdef _z8_p7ad_handler
 	xdef _z8_p6ad_handler
  	xdef _z8_p5ad_handler
@@ -128,22 +130,22 @@
 	xdef _z8_p2ad_handler
 	xdef _z8_p1ad_handler
 	xdef _z8_p0ad_handler
-# if defined(EZ8_TIMER4)
+if EZ8_TIMER4=1
 	xdef _z8_timer3_handler
-# endif
-# if defined(EZ8_UART1)
+endif
+if EZ8_UART1=1
 	xdef _z8_uart1rx_handler
 	xdef _z8_uart1tx_handler
-# endif
-# if defined(EZ8_DMA)
+endif
+if EZ8_DMA=1
 	xdef _z8_dma_handler
-# endif
-# if !defined(EZ8_PORT1)
+endif
+if (EZ8_PORT1=0)
 	xdef _z8_c3_handler
 	xdef _z8_c2_handler
 	xdef _z8_c1_handler
 	xdef _z8_c0_handler
-# endif
+endif
 	xdef _z8_potrap_handler
 	xdef _z8_wotrap_handler
 
@@ -153,24 +155,24 @@
 
 	xdef _z8_wdt_handler
 	xdef _z8_trap_handler
-# if defined(EZ8_TIMER3)
+if EZ8_TIMER3=1
 	xdef _z8_timer2_handler
-# endif
+endif
 	xdef _z8_timer1_handler
 	xdef _z8_timer0_handler
-# if defined(EZ8_UART0)
+if EZ8_UART0=1
 	xdef _z8_uart0rx_handler
 	xdef _z8_uart0tx_handler
-# endif
-# if defined(EZ8_I2C)
+endif
+if EZ8_I2C=1
 	xdef _z8_i2c_handler
-# endif
-# if defined(EZ8_ESPI)
+endif
+if EZ8_ESPI=1
 	xdef _z8_spi_handler
-# endif
-# if  defined(EZ8_ADC_NEW)
+endif
+if EZ8_ADC_NEW=1
 	xdef _z8_adc_handler
-# endif
+endif
 	xdef _z8_p7ad_handler
 	xdef _z8_p6ad_handler
  	xdef _z8_p5ad_handler
@@ -179,13 +181,13 @@
 	xdef _z8_p2ad_handler
 	xdef _z8_p1ad_handler
 	xdef _z8_p0ad_handler
-# if defined(EZ8_MCT)
+if EZ8_MCT=1
 	xdef _z8_mct_handler
-# endif
-# if defined(EZ8_UART1)
+endif
+if EZ8_UART1=1
 	xdef _z8_uart1rx_handler
 	xdef _z8_uart1tx_handler
-# endif
+endif
 	xdef _z8_c3_handler
 	xdef _z8_c2_handler
 	xdef _z8_c1_handler
@@ -201,21 +203,21 @@
 	xdef _z8_trap_handler
 	xdef _z8_pwmtimer_handler
 	xdef _z8_pwmfault_handler
-# if defined(EZ8_ADC_NEW)
+if EZ8_ADC_NEW=1
 	xdef _z8_adc_handler
-# endif
+endif
 	xdef _z8_cmp_handler
 	xdef _z8_timer0_handler
-# if defined(EZ8_UART0
+if EZ8_UART0
 	xdef _z8_uart0rx_handler
 	xdef _z8_uart0tx_handler
-# endif
-# if defined(EZ8_SPI)
+endif
+if EZ8_SPI=1
 	xdef _z8_spi_handler
-# endif
-# if defined(EZ8_I2C)
+endif
+if EZ8_I2C=1
 	xdef _z8_i2c_handler
-# endif
+endif
 	xdef _z8_c0_handler
 	xdef _z8_pb_handler
 	xdef _z8_p7ap3a_handler
@@ -248,24 +250,24 @@ LEAVE :	MACRO
 #if defined(ENCORE_VECTORS)
 	vector WDT	= _z8_wdt_handler
 	vector TRAP	= _z8_trap_handler
-# if defined(EZ8_TIMER3)
+if EZ8_TIMER3=1
 	vector TIMER2	= _z8_timer2_handler
-# endif
+endif
 	vector TIMER1	= _z8_timer1_handler
 	vector TIMER0	= _z8_timer0_handler
-# if defined(EZ8_UART0)
+if EZ8_UART0=1
 	vector UART0_RX	= _z8_uart0rx_handler
 	vector UART0_TX	= _z8_uart0tx_handler
-# endif
-# if defined(EZ8_I2C)
+endif
+if EZ8_I2C=1
 	vector I2C	= _z8_i2c_handler
-# endif
-# if defined(EZ8_SPI)
+endif
+if EZ8_SPI=1
 	vector SPI	= _z8_spi_handler
-# endif
-# if defined(EZ8_ADC)
+endif
+if EZ8_ADC=1
 	vector ADC	= _z8_adc_handler
-# endif
+endif
 	vector P7AD	= _z8_p7ad_handler
 	vector P6AD	= _z8_p6ad_handler
  	vector P5AD	= _z8_p5ad_handler
@@ -274,22 +276,22 @@ LEAVE :	MACRO
 	vector P2AD	= _z8_p2ad_handler
 	vector P1AD	= _z8_p1ad_handler
 	vector P0AD	= _z8_p0ad_handler
-# if defined(EZ8_TIMER4)
+if EZ8_TIMER4=1
 	vector TIMER3	= _z8_timer3_handler
-# endif
-# if defined(EZ8_UART1)
+endif
+if EZ8_UART1=1
 	vector UART1_RX	= _z8_uart1rx_handler
 	vector UART1_TX	= _z8_uart1tx_handler
-# endif
-# if defined(EZ8_DMA)
+endif
+if EZ8_DMA=1
 	vector DMA	= _z8_dma_handler
-# endif
-# if !defined(EZ8_PORT1)
+endif
+if EZ8_PORT1=0
 	vector C3	= _z8_c3_handler
 	vector C2	= _z8_c2_handler
 	vector C1	= _z8_c1_handler
 	vector C0	= _z8_c0_handler
-# endif
+endif
 
 /**************************************************************************/
 
@@ -297,24 +299,24 @@ LEAVE :	MACRO
 
 	vector WDT	= _z8_wdt_handler
 	vector TRAP	= _z8_trap_handler
-# if defined(EZ8_TIMER3)
+if EZ8_TIMER3=1
 	vector TIMER2	= _z8_timer2_handler
-# endif
+endif
 	vector TIMER1	= _z8_timer1_handler
 	vector TIMER0	= _z8_timer0_handler
-# if defined(EZ8_UART0)
+if EZ8_UART0=1
 	vector UART0_RX	= _z8_uart0rx_handler
 	vector UART0_TX	= _z8_uart0tx_handler
-# endif
-# if defined(EZ8_I2C)
+endif
+if EZ8_I2C=1
 	vector I2C	= _z8_i2c_handler
-# endif
-# if defined(EZ8_SPI)
+endif
+if EZ8_SPI=1
 	vector SPI	= _z8_spi_handler
-#   endif
-# if  defined(EZ8_ADC) || defined(EZ8_ADC_NEW)
+endif
+if (EZ8_ADC=1) || (EZ8_ADC_NEW=1)
 	vector ADC	= _z8_adc_handler
-# endif
+endif
 	vector P7AD	= _z8_p7ad_handler
 	vector P6AD	= _z8_p6ad_handler
  	vector P5AD	= _z8_p5ad_handler
@@ -323,22 +325,22 @@ LEAVE :	MACRO
 	vector P2AD	= _z8_p2ad_handler
 	vector P1AD	= _z8_p1ad_handler
 	vector P0AD	= _z8_p0ad_handler
-# if defined(EZ8_TIMER4)
+if EZ8_TIMER4=1
 	vector TIMER3	= _z8_timer3_handler
-# endif
-# if defined(EZ8_UART1)
+endif
+if EZ8_UART1=1
 	vector UART1_RX	= _z8_uart1rx_handler
 	vector UART1_TX	= _z8_uart1tx_handler
-# endif
-# if defined(EZ8_DMA)
+endif
+if EZ8_DMA=1
 	vector DMA	= _z8_dma_handler
-# endif
-# if !defined(EZ8_PORT1)
+endif
+if EZ8_PORT1=0
 	vector C3	= _z8_c3_handler
 	vector C2	= _z8_c2_handler
 	vector C1	= _z8_c1_handler
 	vector C0	= _z8_c0_handler
-# endif
+endif
 	vector POTRAP	= _z8_potrap_handler
 	vector WOTRAP	= _z8_wotrap_handler
 
@@ -348,24 +350,24 @@ LEAVE :	MACRO
 
 	vector WDT	= _z8_wdt_handler
 	vector TRAP	= _z8_trap_handler
-# if defined(EZ8_TIMER3)
+if EZ8_TIMER3=1
 	vector TIMER2	= _z8_timer2_handler
-# endif
+endif
 	vector TIMER1	= _z8_timer1_handler
 	vector TIMER0	= _z8_timer0_handler
-# if defined(EZ8_UART0)
+if EZ8_UART0=1
 	vector UART0_RX	= _z8_uart0rx_handler
 	vector UART0_TX	= _z8_uart0tx_handler
-# endif
-# if defined(EZ8_I2C)
+endif
+if EZ8_I2C=1
 	vector I2C	= _z8_i2c_handler
-# endif
-# if defined(EZ8_ESPI)
+endif
+if EZ8_ESPI=1
 	vector SPI	= _z8_spi_handler
-# endif
-# if  defined(EZ8_ADC_NEW)
+endif
+if EZ8_ADC_NEW=1
 	vector ADC	= _z8_adc_handler
-# endif
+endif
 	vector P7AD	= _z8_p7ad_handler
 	vector P6AD	= _z8_p6ad_handler
  	vector P5AD	= _z8_p5ad_handler
@@ -374,13 +376,13 @@ LEAVE :	MACRO
 	vector P2AD	= _z8_p2ad_handler
 	vector P1AD	= _z8_p1ad_handler
 	vector P0AD	= _z8_p0ad_handler
-# if defined(EZ8_MCT)
+if EZ8_MCT=1
 	vector MCT	= _z8_mct_handler
-# endif
-# if defined(EZ8_UART1)
+endif
+if EZ8_UART1=1
 	vector UART1_RX	= _z8_uart1rx_handler
 	vector UART1_TX	= _z8_uart1tx_handler
-# endif
+endif
 	vector C3	= _z8_c3_handler
 	vector C2	= _z8_c2_handler
 	vector C1	= _z8_c1_handler
@@ -396,21 +398,21 @@ LEAVE :	MACRO
 	vector TRAP	= _z8_trap_handler
 	vector PWMTIMER	= _z8_pwmtimer_handler
 	vector PWMFAULT	= _z8_pwmfault_handler
-# if defined(EZ8_ADC_NEW)
+if EZ8_ADC_NEW=1
 	vector ADC	= _z8_adc_handler
-# endif
+endif
 	vector CMP	= _z8_cmp_handler
 	vector TIMER0	= _z8_timer0_handler
-# if defined(EZ8_UART0
+if EZ8_UART0
 	vector UART0_RX	= _z8_uart0rx_handler
 	vector UART0_TX	= _z8_uart0tx_handler
-# endif
-# if defined(EZ8_SPI)
+endif
+if EZ8_SPI=1
 	vector SPI	= _z8_spi_handler
-# endif
-# if defined(EZ8_I2C)
+endif
+if EZ8_I2C=1
 	vector I2C	= _z8_i2c_handler
-# endif
+endif
 	vector C0	= _z8_c0_handler
 	vector PB	= _z8_pb_handler
 	vector P7A	= _z8_p7ap3a_handler
@@ -446,32 +448,32 @@ _z8_wdt_handler:
 	ENTER(Z8_WDT_IRQ)
 _z8_trap_handler:
 	ENTER(Z8_TRAP_IRQ)
-# if defined(EZ8_TIMER3)
+if EZ8_TIMER3=1
 _z8_timer2_handler:
 	ENTER(Z8_TIMER2_IRQ)
-# endif
+endif
 _z8_timer1_handler:
 	ENTER(Z8_TIMER1_IRQ)
 _z8_timer0_handler:
 	ENTER(Z8_TIMER0_IRQ)
-# if defined(EZ8_UART0)
+if EZ8_UART0=1
 _z8_uart0rx_handler:
 	ENTER(Z8_UART0_RX_IRQ)
 _z8_uart0tx_handler:
 	ENTER(Z8_UART0_TX_IRQ)
-# endif
-# if defined(EZ8_I2C)
+endif
+if EZ8_I2C=1
 _z8_i2c_handler:
 	ENTER(Z8_I2C_IRQ)
-# endif
-# if defined(EZ8_SPI)
+endif
+if EZ8_SPI=1
 _z8_spi_handler:
 	ENTER(Z8_SPI_IRQ)
-# endif
-# if defined(EZ8_ADC)
+endif
+if EZ8_ADC=1
 _z8_adc_handler:
 	ENTER(Z8_ADC_IRQ)
-# endif
+endif
 _z8_p7ad_handler:
 	ENTER(Z8_P7AD_IRQ)
 _z8_p6ad_handler:
@@ -488,21 +490,21 @@ _z8_p1ad_handler:
 	ENTER(Z8_P1AD_IRQ)
 _z8_p0ad_handler:
 	ENTER(Z8_P0AD_IRQ)
-# if defined(EZ8_TIMER4)
+if EZ8_TIMER4=1
 _z8_timer3_handler:
 	ENTER(Z8_TIMER3_IRQ)
-# endif
-# if defined(EZ8_UART1)
+endif
+if EZ8_UART1=1
 _z8_uart1rx_handler:
 	ENTER(Z8_UART1_RX_IRQ)
 _z8_uart1tx_handler:
 	ENTER(Z8_UART1_TX_IRQ)
-# endif
-# if defined(EZ8_DMA)
+endif
+if EZ8_DMA=1
 _z8_dma_handler:
 	ENTER(Z8_DMA_IRQ)
-# endif
-# if !defined(EZ8_PORT1)
+endif
+if EZ8_PORT1=0
 _z8_c3_handler:
 	ENTER(Z8_C3_IRQ)
 _z8_c2_handler:
@@ -511,7 +513,7 @@ _z8_c1_handler:
 	ENTER(Z8_C1_IRQ)
 _z8_c0_handler:
 	ENTER(Z8_C0_IRQ)
-# endif
+endif
 
 /**************************************************************************/
 
@@ -521,37 +523,37 @@ _z8_wdt_handler:
 	ENTER(Z8_WDT_IRQ)
 _z8_trap_handler:
 	ENTER(Z8_TRAP_IRQ)
-# if defined(EZ8_TIMER3)
+if EZ8_TIMER3=1
 _z8_timer2_handler:
 	ENTER(Z8_TIMER2_IRQ)
-# endif
+endif
 _z8_timer1_handler:
 	ENTER(Z8_TIMER1_IRQ)
 _z8_timer0_handler:
 	ENTER(Z8_TIMER0_IRQ)
-# if defined(EZ8_UART0)
+if EZ8_UART0=1
 _z8_uart0rx_handler:
 	ENTER(Z8_UART0_RX_IRQ)
 _z8_uart0tx_handler:
 	ENTER(Z8_UART0_TX_IRQ)
-# endif
-# if defined(EZ8_I2C)
+endif
+if EZ8_I2C=1
 _z8_i2c_handler:
 	ENTER(Z8_I2C_IRQ)
-# endif
-# if defined(EZ8_SPI)
+endif
+if EZ8_SPI=1
 _z8_spi_handler:
 	ENTER(Z8_SPI_IRQ)
-#   endif
-# if  defined(EZ8_ADC) || defined(EZ8_ADC_NEW)
+endif
+if (EZ8_ADC=1) || (EZ8_ADC_NEW=1)
 _z8_adc_handler:
 	ENTER(Z8_ADC_IRQ)
-# endif
+endif
 _z8_p7ad_handler:
 	ENTER(Z8_P7AD_IRQ)
 _z8_p6ad_handler:
 	ENTER(Z8_P6AD_IRQ)
- _z8_p5ad_handler:
+_z8_p5ad_handler:
 	ENTER(Z8_P5AD_IRQ)
 _z8_p4ad_handler:
 	ENTER(Z8_P4AD_IRQ)
@@ -563,21 +565,21 @@ _z8_p1ad_handler:
 	ENTER(Z8_P1AD_IRQ)
 _z8_p0ad_handler:
 	ENTER(Z8_P0AD_IRQ)
-# if defined(EZ8_TIMER4)
+if EZ8_TIMER4=1
 _z8_timer3_handler:
 	ENTER(Z8_TIMER3_IRQ)
-# endif
-# if defined(EZ8_UART1)
+endif
+if EZ8_UART1=1
 _z8_uart1rx_handler:
 	ENTER(Z8_UART1_RX_IRQ)
 _z8_uart1tx_handler:
 	ENTER(Z8_UART1_TX_IRQ)
-# endif
-# if defined(EZ8_DMA)
+endif
+if EZ8_DMA=1
 _z8_dma_handler:
 	ENTER(Z8_DMA_IRQ)
-# endif
-# if !defined(EZ8_PORT1)
+endif
+if EZ8_PORT1=0
 _z8_c3_handler:
 	ENTER(Z8_C3_IRQ)
 _z8_c2_handler:
@@ -586,7 +588,7 @@ _z8_c1_handler:
 	ENTER(Z8_C1_IRQ)
 _z8_c0_handler:
 	ENTER(Z8_C0_IRQ)
-# endif
+endif
 _z8_potrap_handler:
 	ENTER(Z8_POTRAP_IRQ)
 _z8_wotrap_handler:
@@ -600,32 +602,32 @@ _z8_wdt_handler:
 	ENTER(Z8_WDT_IRQ)
 _z8_trap_handler:
 	ENTER(Z8_TRAP_IRQ)
-# if defined(EZ8_TIMER3)
+if EZ8_TIMER3=1
 _z8_timer2_handler:
 	ENTER(Z8_TIMER2_IRQ)
-# endif
+endif
 _z8_timer1_handler:
 	ENTER(Z8_TIMER1_IRQ)
 _z8_timer0_handler:
 	ENTER(Z8_TIMER0_IRQ)
-# if defined(EZ8_UART0)
+if EZ8_UART0=1
 _z8_uart0rx_handler:
 	ENTER(Z8_UART0_RX_IRQ)
 _z8_uart0tx_handler:
 	ENTER(Z8_UART0_TX_IRQ)
-# endif
-# if defined(EZ8_I2C)
+endif
+if EZ8_I2C=1
 _z8_i2c_handler:
 	ENTER(Z8_I2C_IRQ)
-# endif
-# if defined(EZ8_ESPI)
+endif
+if EZ8_ESPI=1
 _z8_spi_handler:
 	ENTER(Z8_SPI_IRQ)
-# endif
-# if  defined(EZ8_ADC_NEW)
+endif
+if EZ8_ADC_NEW=1
 _z8_adc_handler:
 	ENTER(Z8_ADC_IRQ)
-# endif
+endif
 _z8_p7ad_handler:
 	ENTER(Z8_P7AD_IRQ)
 _z8_p6ad_handler:
@@ -642,16 +644,16 @@ _z8_p1ad_handler:
 	ENTER(Z8_P1AD_IRQ)
 _z8_p0ad_handler:
 	ENTER(Z8_P0AD_IRQ)
-# if defined(EZ8_MCT)
+if EZ8_MCT=1
 _z8_mct_handler:
 	ENTER(Z8_MCT_IRQ)
-# endif
-# if defined(EZ8_UART1)
+endif
+if EZ8_UART1=1
 _z8_uart1rx_handler:
 	ENTER(Z8_UART1_RX_IRQ)
 _z8_uart1tx_handler:
 	ENTER(Z8_UART1_TX_IRQ)
-# endif
+endif
 _z8_c3_handler:
 	ENTER(Z8_C3_IRQ)
 _z8_c2_handler:
@@ -677,28 +679,28 @@ _z8_pwmtimer_handler:
 	ENTER(Z8_PWMTIMER_IRQ)
 _z8_pwmfault_handler:
 	ENTER(Z8_PWMFAULT_IRQ)
-# if defined(EZ8_ADC_NEW)
+if EZ8_ADC_NEW=1
 _z8_adc_handler:
 	ENTER(Z8_ADC_IRQ)
-# endif
+endif
 _z8_cmp_handler:
 	ENTER(Z8_CMP_IRQ)
 _z8_timer0_handler:
 	ENTER(Z8_TIMER0_IRQ)
-# if defined(EZ8_UART0
+if EZ8_UART0
 _z8_uart0rx_handler:
 	ENTER(Z8_UART0_RX_IRQ)
 _z8_uart0tx_handler:
 	ENTER(Z8_UART0_TX_IRQ)
-# endif
-# if defined(EZ8_SPI)
+endif
+if EZ8_SPI=1
 _z8_spi_handler:
 	ENTER(Z8_SPI_IRQ)
-# endif
-# if defined(EZ8_I2C)
+endif
+if EZ8_I2C=1
 _z8_i2c_handler:
 	ENTER(Z8_I2C_IRQ)
-# endif
+endif
 _z8_c0_handler:
 	ENTER(Z8_C0_IRQ)
 _z8_pb_handler:
