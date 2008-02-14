@@ -39,7 +39,7 @@ CFLAGS		+= -I$(TOPDIR)/sched -I$(TOPDIR)/arch/z80/src/common -I$(TOPDIR)/arch/z8
 
 ASRCS		= 
 AOBJS		= $(ASRCS:$(ASMEXT)=$(OBJEXT))
-CSRCS		= z80_decodeirq.c z80_irq.c z80_serial.c z80_timerisr.c z80_lowputc.c
+CSRCS		= z80_irq.c z80_serial.c z80_timerisr.c z80_lowputc.c
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)

@@ -72,10 +72,6 @@
 
 void up_irqinitialize(void)
 {
-  /* currents_regs is non-NULL only while processing an interrupt */
-
-  current_regs = NULL;
-
   /* Attach the timer interrupt -- There is not special timer interrupt
    * enable in the simulation so it must be enabled here before interrupts
    * are enabled.
