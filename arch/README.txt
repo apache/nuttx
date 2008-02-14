@@ -123,13 +123,13 @@ src/Makefile
 Supported Architectures
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-arch/sim
+arch/sim - Linux simulation
     A user-mode port of NuttX to the x86 Linux platform is available.
     The purpose of this port is primarily to support OS feature development.
     This port does not support interrupts or a real timer (and hence no
     round robin scheduler)  Otherwise, it is complete.
 
-arch/arm
+arch/arm - ARM-based micro-controllers
     This directory holds common ARM architectures.  At present, this includes
     the following subdirectories:
 
@@ -156,18 +156,36 @@ arch/m68322
     A work in progress.
     STATUS:  Stalled for the moment.
 
-arch/pjrc-8051
+arch/pjrc-8051 - 8051/52 microcontrollers
     8051 Microcontroller.  This port is not quite ready for prime time.
 
-arch/z16
-    ZiLOG z16f Microcontroller.
-    STATUS: Released in nuttx-0.3.7.  Fully functional other than issues
-    addressed in ${TOPDIR}/TODO.
+arch/z16 - ZiLOG 16-bit processors
+    This directory holds related, 16-bit architectures from ZiLOG.  At
+    present, this includes the following subdirectories:
 
-arch/z80
-    ZiLOG z80 Microcontroller.
-    STATUS: Functional with no known defects.  There are still several
-    OS features that have not yet been tested (e.g., networking).
+    arch/z16/include and arch/z16/common
+        Common microcontroller logic.
+
+    arch/z16/include/z16f and arch/z16/src/z16f
+        ZiLOG z16f Microcontroller.
+        STATUS: Released in nuttx-0.3.7.  Fully functional other than issues
+        addressed in ${TOPDIR}/TODO.
+
+arch/z80 - ZiLOG 8-bit microcontrollers
+    This directory holds related, 8-bit architectures from ZiLOG.  At
+    present, this includes the following subdirectories:
+
+    arch/z80/include and arch/z80/common
+        Common microcontroller logic.
+
+    arch/z80/include/z80 and arch/z80/src/z80
+        Classic ZiLOG z80 Microcontroller.
+        STATUS: Functional with no known defects.  There are still several
+         OS features that have not yet been tested (e.g., networking).
+
+    arch/z80/include/z8 and arch/z80/src/z8
+        ZiLOG Z8Encore! Microcontroller
+        This is a work in progress.
 
 The following architecture directories are deprecated.  They have been
 replaced by the logic in arm/arm and will deleted at some point in the

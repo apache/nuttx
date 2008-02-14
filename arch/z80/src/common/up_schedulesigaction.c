@@ -161,7 +161,7 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
         {
           /* Set up to vector to the trampoline with interrupts disabled. */
 
-          SIGNAL_SETUP(tcb, sigdeliver, tcb->xcp.regs)
+          SIGNAL_SETUP(tcb, sigdeliver, tcb->xcp.regs);
         }
 
       irqrestore(flags);
