@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/src/z80/z80_initialstate.c
+ * arch/z80/src/z8/z8_initialstate.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,8 +85,9 @@ void up_initial_state(_TCB *tcb)
 
   memset(xcp, 0, sizeof(struct xcptcontext));
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[XCPT_I]  = Z80_C_FLAG; /* Carry flag will enable interrupts */
+  xcp->regs[XCPT_IRQCTL]  = %0080; /* IRQE bit will enable interrupts */
 #endif
-  xcp->regs[XCPT_SP] = (chipreg_t)tcb->adj_stack_ptr;
-  xcp->regs[XCPT_PC] = (chipreg_t)tcb->start;
+  xcp->regs[XCPT_RPFLAGS] = %e000; /* RP=%e0 */
+  xcp->regs[XCPT_SP]      = (chipreg_t)tcb->adj_stack_ptr;
+  xcp->regs[XCPT_PC]      = (chipreg_t)tcb->start;
 }

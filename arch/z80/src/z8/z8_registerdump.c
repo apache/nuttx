@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/src/z80/z80_initialstate.c
+ * arch/z80/src/z8/z8_registerdump.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,16 +40,27 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <string.h>
+#include <debug.h>
+
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
-#include "chip/chip.h"
+#include "chip/switch.h"
+#include "os_internal.h"
 #include "up_internal.h"
-#include "up_arch.h"
 
 /****************************************************************************
- * Private Definitions
+ * Definitions
  ****************************************************************************/
+
+/* Output debug info if stack dump is selected -- even if 
+ * debug is not selected.
+ */
+
+#ifdef CONFIG_ARCH_STACKDUMP
+# undef  lldbg
+# define lldbg lib_lowprintf
+#endif
 
 /****************************************************************************
  * Private Data
@@ -60,33 +71,24 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Name: z80_registerdump
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_initial_state
- *
- * Description:
- *   A new thread is being started and a new TCB
- *   has been created. This function is called to initialize
- *   the processor specific portions of the new TCB.
- *
- *   This function must setup the intial architecture registers
- *   and/or  stack so that execution will begin at tcb->start
- *   on the next context switch.
- *
- ****************************************************************************/
-
-void up_initial_state(_TCB *tcb)
+#ifdef CONFIG_ARCH_STACKDUMP
+static void z8_registerdump(void)
 {
-  struct xcptcontext *xcp = &tcb->xcp;
-
-  /* Initialize the initial exception register context structure */
-
-  memset(xcp, 0, sizeof(struct xcptcontext));
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[XCPT_I]  = Z80_C_FLAG; /* Carry flag will enable interrupts */
-#endif
-  xcp->regs[XCPT_SP] = (chipreg_t)tcb->adj_stack_ptr;
-  xcp->regs[XCPT_PC] = (chipreg_t)tcb->start;
+  if (current_regs)
+    {
+      lldbg("REGS: %04x %04x %04x %04x %04x %04x %04x %04x\n",
+            current_regs[XCPT_RR0], current_regs[XCPT_RR2],
+            current_regs[XCPT_RR4], current_regs[XCPT_RR6],
+            current_regs[XCPT_RR8], current_regs[XCPT_RR10],
+            current_regs[XCPT_RR12], current_regs[XCPT_RR14]);
+      lldbg("SP: %04x PC: %04x IRQCTL: %02x RP: %02x FLAGS: %02x\n",
+            current_regs[XCPT_SP], current_regs[XCPT_PC],
+            current_regs[XCPT_IRQCTL] & 0xff,
+            current_regs[XCPT_RPFLAGS] >> 8,
+            current_regs[XCPT_RPFLAGS] & 0xff);
+    }
 }
+#endif
