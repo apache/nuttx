@@ -137,7 +137,7 @@ void up_assert(void)
 #endif
 
   up_stackdump();
-  up_registerdump();
+  REGISTER_DUMP();
  _up_assert(EXIT_FAILURE);
 }
 
@@ -174,6 +174,6 @@ void up_assert_code(int errorcode)
 #endif
 
   up_stackdump();
-  up_registerdump();
+  REGISTER_DUMP();
  _up_assert(errorcode);
 }

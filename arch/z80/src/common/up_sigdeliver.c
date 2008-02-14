@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_sigdeliver.c
+ * arch/z80/src/common/up_sigdeliver.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -46,6 +46,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
+#include "chip/switch.h"
 #include "os_internal.h"
 #include "up_internal.h"
 
@@ -100,7 +101,7 @@ void up_sigdeliver(void)
 
   /* Save the real return state on the stack. */
 
-  up_copystate(regs, rtcb->xcp.regs);
+  COPYSTATE(regs, rtcb->xcp.regs);
   regs[XCPT_PC] = rtcb->xcp.saved_pc;
   regs[XCPT_I]  = rtcb->xcp.saved_i;
 

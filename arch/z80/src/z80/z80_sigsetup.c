@@ -1,7 +1,7 @@
 /****************************************************************************
- * common/up_copystate.c
+ * arch/z80/src/z80/z80_sigsetup.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <arch/irq.h>
 
+#include "chip/switch.h"
 #include "os_internal.h"
 #include "up_internal.h"
 
@@ -62,17 +63,25 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_undefinedinsn
+ * Name: z80_copystate
  ****************************************************************************/
 
-/* Maybe a little faster than most memcpy's */
-
-void up_copystate(FAR chipreg_t *dest, FAR const chipreg_t *src)
+void z80_sigsetup(FAR _TCB *tcb, sig_deliver_t sigdeliver, FAR chipreg_t *regs)
 {
-  int i;
-  for (i = 0; i < XCPTCONTEXT_REGS; i++)
-    {
-      *dest++ = *src++;
-    }
+  /* Save the return address and interrupt state. These will be restored by
+   * the signal trampoline after the signals have been delivered (via
+   * SIGNAL_RETURN).
+   */
+
+  tcb->xcp.sigdeliver    = sigdeliver;
+  tcb->xcp.saved_pc      = regs[XCPT_PC];
+  tcb->xcp.saved_i       = regs[XCPT_I];
+
+  /* Then set up to vector to the trampoline with interrupts disabled */
+
+  regs[XCPT_PC]  = (uint16)up_sigdeliver;
+  regs[XCPT_I]   = 0;
 }
+
+
 

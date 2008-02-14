@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_reprioritizertr.c
+ * arch/z80/src/common/up_reprioritizertr.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -46,6 +46,7 @@
 #include <nuttx/arch.h>
 
 #include "chip/chip.h"
+#include "chip/switch.h"
 #include "os_internal.h"
 #include "up_internal.h"
 
@@ -140,7 +141,7 @@ void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority)
 
           /* Are we in an interrupt handler? */
 
-          if (IN_INTERRUPT)
+          if (IN_INTERRUPT())
             {
               /* Yes, then we have to do things differently.
                * Just copy the current context into the OLD rtcb.

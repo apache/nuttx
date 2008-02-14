@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_internal.h
+ * arch/z80/src/common/up_internal.h
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,14 +37,7 @@
 #define __UP_INTERNAL_H
 
 /****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <arch/irq.h>
-#include "chip/chip.h"
-
-/****************************************************************************
- * Definitions
+ * Conditional Compilation
  ****************************************************************************/
 
 /* Bring-up debug configurations.  These are here (vs defconfig)
@@ -58,69 +51,52 @@
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
 #undef  CONFIG_DUMP_ON_EXIT           /* Dump task state on exit */
 
-/* Macros for portability */
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
-#define IN_INTERRUPT             (current_regs != NULL)
-#define SAVE_IRQCONTEXT(tcb)     up_copystate((tcb)->xcp.regs, current_regs)
-#define SET_IRQCONTEXT(tcb)      up_copystate(current_regs, (tcb)->xcp.regs)
-#define SAVE_USERCONTEXT(tcb)    up_saveusercontext((tcb)->xcp.regs)
-#define RESTORE_USERCONTEXT(tcb) up_restoreusercontext((tcb)->xcp.regs)
-#define SIGNAL_RETURN(regs)      up_restoreusercontext(regs)
+#include <arch/irq.h>
+#include "chip/chip.h"
+#include "chip/switch.h"
+
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-typedef void (*up_vector_t)(void);
-#endif
-
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-/* This holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during
- * interrupt processing.
- */
-
-extern uint16 *current_regs;
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
 
-/* Defined in up_copystate.c */
+/* Supplied by chip- or board-specific logic */
 
-extern void up_copystate(FAR chipreg_t *dest, FAR const chipreg_t *src);
-
-/* Defined in up_saveusercontext.asm */
-
-extern int up_saveusercontext(chipreg_t *regs);
-
-/* Defined in up_restoreusercontext.asm */
-
-extern int up_restoreusercontext(chipreg_t *regs);
-
-/* Supplied by board-specific logic */
-
-extern FAR chipreg_t *up_decodeirq(uint8 rstno, FAR chipreg_t *regs);
-extern void up_irqinitialize(void);
-extern int  up_timerisr(int irq, FAR chipreg_t *regs);
-extern void up_lowputc(char ch) naked_function;
-extern char up_lowgetc(void) naked_function;
+EXTERN void up_irqinitialize(void);
+EXTERN int  up_timerisr(int irq, FAR chipreg_t *regs);
+EXTERN void up_lowputc(char ch) naked_function;
+EXTERN char up_lowgetc(void) naked_function;
 
 /* Defined in up_doirq.c */
 
-extern void up_doirq(int irq, FAR chipreg_t *regs);
+EXTERN FAR chipreg_t *up_doirq(ubyte irq, FAR chipreg_t *regs);
 
 /* Define in up_sigdeliver */
 
-extern void up_sigdeliver(void);
+EXTERN void up_sigdeliver(void);
 
 /* Defined in up_allocateheap.c */
 
@@ -131,8 +107,8 @@ void up_addregion(void);
 /* Defined in up_serial.c */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-extern void up_earlyserialinit(void);
-extern void up_serialinit(void);
+EXTERN void up_earlyserialinit(void);
+EXTERN void up_serialinit(void);
 #else
 # define up_earlyserialinit()
 # define up_serialinit()
@@ -140,14 +116,14 @@ extern void up_serialinit(void);
 
 /* Defined in up_timerisr.c */
 
-extern void up_timerinit(void);
+EXTERN void up_timerinit(void);
 
 /* Defined in board/up_leds.c */
 
 #ifdef CONFIG_ARCH_LEDS
-extern void up_ledinit(void);
-extern void up_ledon(int led);
-extern void up_ledoff(int led);
+EXTERN void up_ledinit(void);
+EXTERN void up_ledon(int led);
+EXTERN void up_ledoff(int led);
 #else
 # define up_ledinit()
 # define up_ledon(led)
@@ -157,25 +133,29 @@ extern void up_ledoff(int led);
 /* Defined in board/up_network.c */
 
 #ifdef CONFIG_NET
-extern void up_netinitialize(void);
+EXTERN void up_netinitialize(void);
 #else
 # define up_netinitialize()
 #endif
 
 /* Return the current value of the stack pointer (used in stack dump logic) */
 
-extern uint16 up_getsp(void);
+EXTERN uint16 up_getsp(void);
 
 /* Dump stack and registers */
 
 #ifdef CONFIG_ARCH_STACKDUMP
-extern void up_stackdump(void);
-extern void up_registerdump(void);
+EXTERN void up_stackdump(void);
+# define REGISTER_DUMP() _REGISTER_DUMP()
 #else
 # define up_stackdump()
-# define up_registerdump()
+# define REGISTER_DUMP()
 #endif
 
-#endif /* __ASSEMBLY__ */
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+#endif
 
 #endif  /* __UP_INTERNAL_H */

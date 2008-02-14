@@ -98,14 +98,14 @@ struct xcptcontext
 {
   /* Register save area */
 
-  uint16 regs[XCPTCONTEXT_REGS];
+  chipreg_t regs[XCPTCONTEXT_REGS];
 
   /* The following function pointer is non-zero if there
    * are pending signals to be processed.
    */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-  void *sigdeliver; /* Actual type is sig_deliver_t */
+  CODE void *sigdeliver; /* Actual type is sig_deliver_t */
 
   /* The following retains that state during signal execution */
 

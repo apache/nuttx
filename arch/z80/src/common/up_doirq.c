@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_doirq.c
+ * arch/z80/src/common/up_doirq.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,11 +38,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
 #include <assert.h>
 #include "up_arch.h"
+
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+
+#include "chip/switch.h"
 #include "os_internal.h"
 #include "up_internal.h"
 
@@ -66,39 +70,37 @@
  * Public Functions
  ****************************************************************************/
 
-void up_doirq(int irq, chipreg_t *regs)
+FAR chipreg_t *up_doirq(ubyte irq, FAR chipreg_t *regs)
 {
   up_ledon(LED_INIRQ);
+
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
+
+  lib_lowprintf("Unexpected IRQ\n");
+  IRQ_ENTER(regs);
   PANIC(OSERR_ERREXCEPTION);
+  return NULL; /* Won't get here */
+
 #else
-  if ((unsigned)irq < NR_IRQS)
+  if (irq < NR_IRQS)
     {
-       /* Current regs non-zero indicates that we are processing
-        * an interrupt; current_regs is also used to manage
-        * interrupt level context switches.
-        */
+       /* Indicate that we have enter IRQ processing logic */
 
-       current_regs = regs;
-
-       /* Mask and acknowledge the interrupt */
-
-       up_maskack_irq(irq);
+       IRQ_ENTER(irq, regs);
 
        /* Deliver the IRQ */
 
        irq_dispatch(irq, regs);
 
-       /* Indicate that we are no long in an interrupt handler */
+       /* If a context switch occurred, 'regs' will hold the new context */
 
-       current_regs = NULL;
+       regs = IRQ_STATE();
 
-       /* Unmask the last interrupt (global interrupts are still
-        * disabled.
-        */
+       /* Indicate that we are no long in interrupt processing logic */
 
-       up_enable_irq(irq);
+       IRQ_LEAVE(irq);
     }
   up_ledoff(LED_INIRQ);
+  return regs;
 #endif
 }

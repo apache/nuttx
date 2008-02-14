@@ -46,11 +46,11 @@
 	.globl	XCPT_PC		; Offset 8: Offset to PC at time of interrupt
 
 ;**************************************************************************
-; up_restoreusercontext
+; z80_restoreusercontext
 ;**************************************************************************
 
 	.area	_CODE
-_up_restoreusercontext:
+_z80_restoreusercontext:
 	; On entry, stack contains return address (not used), then address
 	; of the register save structure
 

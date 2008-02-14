@@ -61,7 +61,7 @@
 ;**************************************************************************
 
 	.globl	_os_start		; OS entry point
-	.globl	_up_decodeirq		; Interrupt decoding logic
+	.globl	_up_doirq		; Interrupt decoding logic
 
 ;**************************************************************************
 ; Reset entry point
@@ -216,7 +216,7 @@ _up_rstcommon::
 	push	hl			; Place argument #2 at the top of stack
 	push	bc			; Argument #1 is the Reset number
 	inc	sp			; (make byte sized)
-	call	_up_decodeirq		; Decode the IRQ
+	call	_up_doirq		; Decode the IRQ
 
 	; On return, HL points to the beginning of the reg structure to restore
 	; Note that (1) the arguments pushed on the stack are not popped, and (2) the
