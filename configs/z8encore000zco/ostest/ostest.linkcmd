@@ -37,12 +37,6 @@
 -map -maxhexlen=64 -quiet -sort NAME=ascending -unresolved=fatal
 -NOwarnoverlap -NOxref -warn -debug -NOigcase -quiet
 
-RANGE ROM    $000000 : $007FFF
-RANGE RAM    $FFB000 : $FFBFFF
-RANGE IODATA $FFC000 : $FFFFFF
-RANGE EROM   $008000 : $01FFFF
-RANGE ERAM   $800000 : $87FFFF
-
 RANGE ROM $0 : $FFFF
 RANGE RDATA $20 : $FF
 RANGE EDATA $100 : $EFF
