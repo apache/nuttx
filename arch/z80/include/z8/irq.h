@@ -55,19 +55,19 @@
  */
 
 #if defined(_Z8ENCORE_F642X) || defined(_Z8ENCORE_64K_SERIES)
-# define ENCORE_VECTORS
+# define ENCORE_VECTORS 1
 #endif
 
 #if defined(_Z8ENCORE_F640X) || defined(_Z8ENCORE_640_FAMILY)
-# define ENCORE_VECTORS
+# define ENCORE_VECTORS 1
 #endif
 
 #if defined(_Z8ENCORE_F08X) || defined(_Z8ENCORE_8K_SERIES)
-# define ENCORE_VECTORS
+# define ENCORE_VECTORS 1
 #endif
 
 #if defined(_Z8ENCORE_4K_SERIES)
-# define ENCORE_VECTORS
+# define ENCORE_VECTORS 1
 #endif
 
 /* ez8 Interrupt Numbers */
