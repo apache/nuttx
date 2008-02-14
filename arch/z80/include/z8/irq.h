@@ -196,30 +196,78 @@
 
 #define Z8_IRQ_SYSTIMER Z8_TIMER0_IRQ
 
-/* IRQ Stack Frame Format
+/* IRQ State Save Formatt
  *
- * This stack frame is created on each interrupt.  These registers are stored
- * in the TCB to many context switches.
+ * These indices describe how the ez8 context is save in the state save array
+ *
+ * Byte offsets:
  */
 
-#define XCPT_I               (0) /* Offset 0: Saved I w/interrupt state in carry */
-#define XCPT_BC              (1) /* Offset 1: Saved BC register */
-#define XCPT_IX              (3) /* Offset 3: Saved IX register */
-#define XCPT_IY              (4) /* Offset 4: Saved IY register */
-#define XCPT_SP              (5) /* Offset 5: Offset to SP at time of interrupt */
-#define XCPT_HL              (6) /* Offset 6: Saved HL register */
-#define XCPT_AF              (7) /* Offset 7: Saved AF register */
-#define XCPT_PC              (8) /* Offset 8: Offset to PC at time of interrupt */
+#define XCPT8_R0              (0) /* Offset 0-15:  R0-R15 */
+#define XCPT8_R1              (1)
+#define XCPT8_R2              (2)
+#define XCPT8_R3              (3)
+#define XCPT8_R4              (4)
+#define XCPT8_R5              (5)
+#define XCPT8_R6              (6)
+#define XCPT8_R7              (7)
+#define XCPT8_R8              (8)
+#define XCPT8_R9              (9)
+#define XCPT8_R10            (10)
+#define XCPT8_R11            (11)
+#define XCPT8_R12            (12)
+#define XCPT8_R13            (13)
+#define XCPT8_R14            (14)
+#define XCPT8_R15            (15)
+#define XCPT8_SPH            (16) /* Offset 16: SP[8:15] */
+#define XCPT8_SPL            (17) /* Offset 17: SP[0:7] */
+#define XCPT8_RP             (18) /* Offset 18: Register pointer */
+#define XCPT8_FLAGS          (19) /* Offset 19: FLAGS */
+#define XCPT8_PCH            (20) /* Offset 20: PC[8:15] */
+#define XCPT8_PCL            (21) /* Offset 21: PC[0:7] */
 
-#define XCPTCONTEXT_REGS     (9)
-#define XCPTCONTEXT_SIZE     (2 * XCPTCONTEXT_REGS)
+/* 16-bit "word" offsets */
 
-/* The ZDS-II provides built-in operations to test & disable and to restore
- * the interrupt state.
- *
- * irqstate_t irqsave(void);
- * void irqrestore(irqstate_t flags);
- */
+#define XCPT_RR0              (0) /* Indices 0-7:  RR0-RR14 */
+#define XCPT_RR2              (1)
+#define XCPT_RR4              (2)
+#define XCPT_RR6              (3)
+#define XCPT_RR8              (4)
+#define XCPT_RR10             (5)
+#define XCPT_RR12             (6)
+#define XCPT_R1R4             (7)
+#define XCPT_SP               (8) /* Index 8: SP[8:15] */
+#define XCPT_I                (9) /* Index 9: FLAGS */
+#define XCPT_PC              (10) /* Index 10: PC[8:15] */
+
+#define XCPTCONTEXT_REGS     (11)
+
+/* Byte offsets: */
+
+#define XCPT_R0_OFFS         (2*XCPT_RR0)      /* Offset 0-15:  R0-R15 */
+#define XCPT_R1_OFFS         (2*XCPT_RR0+1)
+#define XCPT_R2_OFFS         (2*XCPT_RR2)
+#define XCPT_R3_OFFS         (2*XCPT_RR2+1)
+#define XCPT_R4_OFFS         (2*XCPT_RR4)
+#define XCPT_R5_OFFS         (2*XCPT_RR4+1)
+#define XCPT_R6_OFFS         (2*XCPT_RR6)
+#define XCPT_R7_OFFS         (2*XCPT_RR6+1)
+#define XCPT_R8_OFFS         (2*XCPT_RR8)
+#define XCPT_R9_OFFS         (2*XCPT_RR8+1)
+#define XCPT_R10_OFFS        (2*XCPT_RR10)
+#define XCPT_R11_OFFS        (2*XCPT_RR10+1)
+#define XCPT_R12_OFFS        (2*XCPT_RR12)
+#define XCPT_R13_OFFS        (2*XCPT_RR12+1)
+#define XCPT_R14_OFFS        (2*XCPT_R1R4)
+#define XCPT_R15_OFFS        (2*XCPT_R1R4+1)
+#define XCPT_SPH_OFFS        (2*XCPT_SP)       /* Offset 16: SP[8:15] */
+#define XCPT_SPL_OFFS        (2*XCPT_SP+1)     /* Offset 17: SP[0:7] */
+#define XCPT_RP_OFFS         (2*XCPT_I)        /* Offset 18: Register pointer */
+#define XCPT_FLAGS_OFFS      (2*XCPT_I+1)      /* Offset 19: FLAGS */
+#define XCPT_PCH_OFFS        (2*XCPT_PC)       /* Offset 20: PC[8:15] */
+#define XCPT_PCL_OFFS        (2*XCPT_PC+1)     /* Offset 21: PC[0:7] */
+
+#define XCPTCONTEXT_SIZE     (2*XCPTCONTEXT_REGS)
 
 /****************************************************************************
  * Public Types
@@ -237,7 +285,7 @@ struct xcptcontext
 {
   /* Register save area */
 
-  uint16 regs[XCPTCONTEXT_REGS];
+  chipreg_t regs[XCPTCONTEXT_REGS];
 
   /* The following function pointer is non-zero if there
    * are pending signals to be processed.

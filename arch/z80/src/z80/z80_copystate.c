@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_registerdump.c
+ * arch/z80/src/z80/z80_copystate.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,26 +40,15 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <debug.h>
+#include <arch/irq.h>
 
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-
+#include "chip/switch.h"
 #include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-/* Output debug info if stack dump is selected -- even if 
- * debug is not selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  lldbg
-# define lldbg lib_lowprintf
-#endif
 
 /****************************************************************************
  * Private Data
@@ -70,22 +59,21 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_registerdump
+ * Public Functions
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_STACKDUMP
-static void up_registerdump(void)
+/****************************************************************************
+ * Name: z80_copystate
+ ****************************************************************************/
+
+/* Maybe a little faster than most memcpy's */
+
+void z80_copystate(FAR chipreg_t *dest, FAR const chipreg_t *src)
 {
-  if (current_regs)
+  int i;
+  for (i = 0; i < XCPTCONTEXT_REGS; i++)
     {
-      lldbg("AF: %04x  I: %04x\n",
-            current_regs[XCPT_AF], current_regs[XCPT_I]);
-      lldbg("BC: %04x DE: %04x HL: %04x\n",
-            current_regs[XCPT_BC], current_regs[XCPT_DE], current_regs[XCPT_HL]);
-      lldbg("IX: %04x IY: %04x\n",
-            current_regs[XCPT_IX], current_regs[XCPT_IY]);
-      lldbg("SP: %04x PC: $04x\n"
-            current_regs[XCPT_SP], current_regs[XCPT_PC]);
+      *dest++ = *src++;
     }
 }
-#endif
+

@@ -39,11 +39,10 @@ CMN_SSRCS	=
 CMN_CSRCS	= up_initialize.c up_allocateheap.c up_createstack.c \
 		  up_releasestack.c up_interruptcontext.c up_blocktask.c \
 		  up_unblocktask.c up_exit.c up_releasepending.c \
-		  up_reprioritizertr.c up_copystate.c up_idle.c \
-		  up_assert.c up_mdelay.c up_udelay.c \
-		  up_schedulesigaction.c up_sigdeliver.c \
-		  up_registerdump.c up_usestack.c
+		  up_reprioritizertr.c up_idle.c up_assert.c up_doirq.c \
+		  up_mdelay.c up_udelay.c up_schedulesigaction.c \
+		  up_sigdeliver.c up_usestack.c
 
 CHIP_SSRCS	= z8_vector.S #z8_saveusercontext.S z8_restoreusercontext.S
-CHIP_CSRCS	= #z8_initialstate.c z8_irq.c
+CHIP_CSRCS	= #z8_initialstate.c z8_irq.c z8_copystate.c z8_registerdump.c
 

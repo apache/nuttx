@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_schedulesigaction.c
+ * arch/z80/src/common/up_schedulesigaction.c
  *
  *   Copyright (C) 2007,2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -46,6 +46,7 @@
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 
+#include "chip/switch.h"
 #include "os_internal.h"
 #include "up_internal.h"
 
@@ -102,11 +103,11 @@
 
 void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
 {
-  /* Refuse to handle nested signal actions */
-
   dbg("tcb=0x%p sigdeliver=0x%04x\n", tcb, (uint16)sigdeliver);
 
-  if (!tcb->xcp.sigdeliver)
+  /* Refuse to handle nested signal actions */
+
+  if (!SIGNAL_DELIVERING(tcb))
     {
       irqstate_t flags;
 
@@ -114,80 +115,53 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
 
       flags = irqsave();
 
-      /* First, handle some special cases when the signal is
-       * being delivered to the currently executing task.
+      /* First, handle some special cases when the signal is being delivered
+       * to the currently executing task.
        */
-
-      dbg("rtcb=0x%p current_regs=0x%p\n", g_readytorun.head, current_regs);
 
       if (tcb == (FAR _TCB*)g_readytorun.head)
         {
-          /* CASE 1:  We are not in an interrupt handler and
-           * a task is signalling itself for some reason.
+          /* CASE 1:  We are not in an interrupt handler and a task is
+           * signalling itself for some reason.
            */
 
-          if (!current_regs)
+          if (!IN_INTERRUPT())
             {
               /* In this case just deliver the signal now. */
 
               sigdeliver(tcb);
             }
 
-          /* CASE 2:  We are in an interrupt handler AND the
-           * interrupted task is the same as the one that
-           * must receive the signal, then we will have to modify
-           * the return state as well as the state in the TCB.
+          /* CASE 2:  We are in an interrupt handler AND the interrupted task
+           * is the same as the one that must receive the signal, then we
+           * will have to modify the return state as well as the state in
+           * the TCB.
            */
 
           else
             {
-              /* Save the return address and interrupt state.
-               * These will be restored by the signal trampoline after
-               * the signals have been delivered.
-               */
+              /* Set up to vector to the trampoline with interrupts disabled. */
 
-              tcb->xcp.sigdeliver    = sigdeliver;
-              tcb->xcp.saved_pc      = current_regs[XCPT_PC];
-              tcb->xcp.saved_i       = current_regs[XCPT_I];
-
-              /* Then set up to vector to the trampoline with interrupts
-               * disabled
-               */
-
-              current_regs[XCPT_PC]  = (uint16)up_sigdeliver;
-              current_regs[XCPT_I]   = 0;
+              SIGNAL_SETUP(tcb, sigdeliver, IRQ_STATE());
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
                */
 
-              up_copystate(tcb->xcp.regs, current_regs);
+              SAVE_IRQCONTEXT(tcb);
             }
         }
 
-      /* Otherwise, we are (1) signaling a task is not running
-       * from an interrupt handler or (2) we are not in an
-       * interrupt handler and the running task is signalling
-       * some non-running task.
+      /* Otherwise, we are (1) signaling a task is not running from an interrupt
+       * handler or (2) we are not in an interrupt handler and the running task
+       * is signalling some non-running task.
        */
 
       else
         {
-          /* Save the return lr and cpsr and one scratch register
-           * These will be restored by the signal trampoline after
-           * the signals have been delivered.
-           */
+          /* Set up to vector to the trampoline with interrupts disabled. */
 
-          tcb->xcp.sigdeliver    = sigdeliver;
-          tcb->xcp.saved_pc      = tcb->xcp.regs[XCPT_PC];
-          tcb->xcp.saved_i       = tcb->xcp.regs[XCPT_I];
-
-          /* Then set up to vector to the trampoline with interrupts
-           * disabled
-           */
-
-          tcb->xcp.regs[XCPT_PC] = (uint16)up_sigdeliver;
-          tcb->xcp.regs[XCPT_I]  = 0;
+          SIGNAL_SETUP(tcb, sigdeliver, tcb->xcp.regs)
         }
 
       irqrestore(flags);

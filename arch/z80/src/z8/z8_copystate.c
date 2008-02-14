@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/src/common/up_initialize.c
+ * arch/z80/src/z8/z8_copystate.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,30 +40,14 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/fs.h>
-#include <nuttx/mm.h>
-#include <arch/board/board.h>
+#include <arch/irq.h>
 
 #include "chip/switch.h"
+#include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************
  * Definitions
- ****************************************************************************/
-
-/* Define to enable timing loop calibration */
-
-#undef CONFIG_ARCH_CALIBRATION
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -75,89 +59,21 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_calibratedelay
- *
- * Description:
- *   Delay loops are provided for short timing loops.  This function, if
- *   enabled, will just wait for 100 seconds.  Using a stopwatch, you can
- *   can then determine if the timing loops are properly calibrated.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_ARCH_CALIBRATION) & defined(CONFIG_DEBUG)
-static void up_calibratedelay(void)
-{
-  int i;
-  lldbg("Beginning 100s delay\n");
-  for (i = 0; i < 100; i++)
-    {
-      up_mdelay(1000);
-    }
-  lldbg("End 100s delay\n");
-}
-#else
-# define up_calibratedelay()
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_initialize
- *
- * Description:
- *   up_initialize will be called once during OS initialization after the
- *   basic OS services have been initialized.  The architecture specific
- *   details of initializing the OS will be handled here.  Such things as
- *   setting up interrupt service routines, starting the clock, and
- *   registering device drivers are some of the things that are different
- *   for each processor and hardware platform.
- *
- *   up_initialize is called after the OS initialized but before the user
- *   initialization logic has been started and before the libraries have
- *   been initialized.  OS services and driver services are available.
- *
+ * Name: z80_copystate
  ****************************************************************************/
 
-void up_initialize(void)
+/* Maybe a little faster than most memcpy's */
+
+void z8_copystate(FAR chipreg_t *dest, FAR const chipreg_t *src)
 {
-  /* Initialize global variables */
-
-  INIT_IRQCONTEXT();
-
-  /* Calibrate the timing loop */
-
-  up_calibratedelay();
-
-  /* Add extra memory fragments to the memory manager */
-
-#if CONFIG_MM_REGIONS > 1
-  up_addregion();
-#endif
-
-  /* Initialize the interrupt subsystem */
-
-  up_irqinitialize();
-
-  /* Initialize the system timer interrupt */
-
-#if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
-  up_timerinit();
-#endif
-
-  /* Register devices */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  devnull_register();   /* Standard /dev/null */
-#endif
-
-  /* Initialize the serial device driver */
-
-  up_serialinit();
-
-  /* Initialize the netwok */
-
-  up_netinitialize();
-  up_ledon(LED_IRQSENABLED);
+  int i;
+  for (i = 0; i < XCPTCONTEXT_REGS; i++)
+    {
+      *dest++ = *src++;
+    }
 }
+
