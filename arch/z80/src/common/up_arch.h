@@ -52,19 +52,4 @@
  * Definitions
  ************************************************************************************/
 
-/************************************************************************************
- * Inline Functions
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-# define getreg8(a)           (*(volatile ubyte *)(a))
-# define putreg8(v,a)         (*(volatile ubyte *)(a) = (v))
-# define getreg32(a)          (*(volatile uint32 *)(a))
-# define putreg32(v,a)        (*(volatile uint32 *)(a) = (v))
-# define getreg(a)   getreg16(1)
-# define putreg(v,a) putreg16(v,a)
-
-#endif
-
 #endif  /* __UP_ARCH_H */

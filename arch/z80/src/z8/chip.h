@@ -45,6 +45,14 @@
  * Definitions
  ************************************************************************************/
 
+/* Hexadecimal Representation *******************************************************/
+
+#ifdef __ASSEMBLY__
+# define _HX(h)   %##h
+#else
+# define _HX(w)   0x##h
+#endif
+
 /* Memory Map
  *
  * 64Kb Program Memory (64K series)
@@ -59,6 +67,28 @@
  *  E:100 - E:eff   : 3.5 Kbyte EDATA
  *    f00 -   fff   : 256 byte control register area
  */
+
+/* Special Function Registers *******************************************************
+ *
+ * Because of the many different ez80 configurations, we will rely on the
+ * ZDS-II header file, ez8.h, to provide the correct addresses for each register.
+ */
+
+/* Register access macros ***********************************************************
+ *
+ * The register access mechanism provided in ez8.h differs from the useful in other
+ * NuttX architectures.  The following NuttX common macros will at least make the
+ * access compatible at the source level (however, strict type check is lost).
+ */
+
+#ifndef __ASSEMBLY__
+# define getreg8(a)           (a)
+# define putreg8(v,a)         ((a) = (v))
+# define getreg16(a)          (a)
+# define putreg16(v,a)        ((a) = (v))
+# define getreg32(a)          (a)
+# define putreg32(v,a)        ((a) = (v))
+#endif /* __ASSEMBLY__ */
 
 /************************************************************************************
  * Public Function Prototypes

@@ -76,12 +76,12 @@ static void z8_sigsetup(FAR _TCB *tcb, sig_deliver_t sigdeliver, FAR chipreg_t *
 
   tcb->xcp.sigdeliver    = sigdeliver;
   tcb->xcp.saved_pc      = regs[XCPT_PC];
-  tcb->xcp.saved_i       = regs[XCPT_I];
+  tcb->xcp.saved_irqctl  = regs[XCPT_IRQCTL];
 
   /* Then set up to vector to the trampoline with interrupts disabled */
 
-  regs[XCPT_PC]  = (chipreg_t)up_sigdeliver;
-  regs[XCPT_I]   = 0;
+  regs[XCPT_PC]          = (chipreg_t)up_sigdeliver;
+  regs[XCPT_IRQCTL]      = 0;
 }
 
 /****************************************************************************
