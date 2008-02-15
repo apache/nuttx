@@ -52,50 +52,52 @@
  * External References / External Definitions
  **************************************************************************/
 
+	xref	_up_doirq:ROM
+
 #if defined(ENCORE_VECTORS)
-	xdef _z8_wdt_handler
-	xdef _z8_trap_handler
+	xdef	_z8_wdt_handler
+	xdef	_z8_trap_handler
 if EZ8_TIMER3=1
-	xdef _z8_timer2_handler
+	xdef	_z8_timer2_handler
 endif
-	xdef _z8_timer1_handler
-	xdef _z8_timer0_handler
+	xdef	_z8_timer1_handler
+	xdef	_z8_timer0_handler
 if EZ8_UART0=1
-	xdef _z8_uart0rx_handler
-	xdef _z8_uart0tx_handler
+	xdef	_z8_uart0rx_handler
+	xdef	_z8_uart0tx_handler
 endif
 if EZ8_I2C=1
-	xdef _z8_i2c_handler
+	xdef	_z8_i2c_handler
 endif
 if EZ8_SPI=1
-	xdef _z8_spi_handler
+	xdef	_z8_spi_handler
 endif
 if EZ8_ADC=1
-	xdef _z8_adc_handler
+	xdef	_z8_adc_handler
 endif
-	xdef _z8_p7ad_handler
-	xdef _z8_p6ad_handler
- 	xdef _z8_p5ad_handler
-	xdef _z8_p4ad_handler
-	xdef _z8_p3ad_handler
-	xdef _z8_p2ad_handler
-	xdef _z8_p1ad_handler
-	xdef _z8_p0ad_handler
+	xdef	_z8_p7ad_handler
+	xdef	_z8_p6ad_handler
+ 	xdef	_z8_p5ad_handler
+	xdef	_z8_p4ad_handler
+	xdef	_z8_p3ad_handler
+	xdef	_z8_p2ad_handler
+	xdef	_z8_p1ad_handler
+	xdef	_z8_p0ad_handler
 if EZ8_TIMER4=1
-	xdef _z8_timer3_handler
+	xdef	_z8_timer3_handler
 endif
 if EZ8_UART1=1
-	xdef _z8_uart1rx_handler
-	xdef _z8_uart1tx_handler
+	xdef	_z8_uart1rx_handler
+	xdef	_z8_uart1tx_handler
 endif
 if EZ8_DMA=1
-	xdef _z8_dma_handler
+	xdef	_z8_dma_handler
 endif
 if EZ8_PORT1=0
-	xdef _z8_c3_handler
-	xdef _z8_c2_handler
-	xdef _z8_c1_handler
-	xdef _z8_c0_handler
+	xdef	_z8_c3_handler
+	xdef	_z8_c2_handler
+	xdef	_z8_c1_handler
+	xdef	_z8_c0_handler
 endif
 
 /**************************************************************************/
@@ -233,13 +235,14 @@ endif
  **************************************************************************/
 
 ENTER :	MACRO	val
+	pushx	rp			/* Save the current RP value in the stack */
 	srp	#%f0			/* Load the interrupt register pointer */
 	ld	r0, #val		/* Pass the new value in r0
 	jr	_z8_common_handler	/* The rest of the handling is common */
 	ENDMAC	ENTER
 
 LEAVE :	MACRO
-	srp	#%e0			/* Restore the user register pointer */
+	popx	rp			/* Restore the user register pointer */
 	iret				/* And return from interrupt */
 	ENDMAC	LEAVE
 
@@ -738,6 +741,119 @@ _z8_wotrap_handler:
  **************************************************************************/
 
 _z8_common_handler:
+	/* Pass the address of the IRQ stack frame */
+
+	ldx	r2, sph			/* rr2 = stack pointer */
+	ldx	r3, spl
+	push	r3			/* Pass as a parameter */
+	push	r2
+
+	/* Pass the IRQ number */
+
+	push	r0
+	
+	/* Process the interrupt */
+
+	call	_up_doirq		/* Call the IRQ handler */
+
+	/* Release arguments from the stack */
+
+	pop	r4			/* Discard the IRQ argument */
+	pop	r2			/* Recover the stack pointer parameter */
+	pop	r3
+
+	/* If a interrupt level context switch occurred, then the
+	 * return value will be the same as the input value
+	 */
+
+	cp	r0, r2			/* Same as the return value? */
+	jr	nz, _z8_switch
+	cp	r1, r3
+	jr	z, _z8_noswitch
+
+	/* A context switch occurs.  Restore the use context.
+	 * rr0 = pointer to context structgure.
+	 */
+
+_z8_switch:
+
+	/* Destroy the interrupt return information on the stack */
+	
+	pop	r4			/* Destroy saved RP */
+	pop	r4			/* Destroy saved flags */
+	pop	r4			/* Destroy saved return address */
+	pop	r4
+
+	/* Copy all registers into the user register area. */
+
+	clr	r2			/* rr2 = destination address */
+	ldx	r3, XCPT_RP_OFFS(rr0)
+	ld	r4, r0			/* rr4 = source address */
+	ld	r5, r1
+	ld	r6, #16			/* r6 = number of bytes to copy */
+
+_z8_restore:
+	ldx	r7, @rr4
+	ldx	@rr2, r7
+	incw	rr2
+	incw	rr4
+	djnz	r6, _z8_restore
+
+	/* Set the new stack pointer */
+
+	ldx	r2, XCPT_SPH_OFFS(rr0)
+	ldx	r3, XCPT_SPL_OFFS(rr0)
+	ldx	sph, r2
+	ldx	spl, r3
+
+	/* Push the return address onto the stack */
+
+	ldx	r2, XCPT_PCH_OFFS(rr0)
+	ldx	r3, XCPT_PCL_OFFS(rr0)
+	push	r3
+	push	r2
+
+	/* Recover the flags and RP settings.. but don't restore them yet */
+
+	ldx	r3, XCPT_FLAGS_OFFS(rr0)
+	ldx	r4, XCPT_RP_OFFS(rr0)
+	
+	/* Determine whether interrupts must be enabled on return.  This
+	 * would be nicer to do below, but later we will need to preserve
+	 * the condition codes in the flags.
+	 */
+
+	ldx	r2, XCPT_IRQCTL_OFFS(rr0)
+	tm	r2, #%80
+	jr	nz, _z8_returnenabled
+
+	/* Restore the flag settings */
+
+	ldx	flags, r3
+
+	/* Restore the user register page and return with interrupts disabled.
+	 * Note that we cannot use the iret instruction because it unconditionally
+	 * re-enabled interrupts
+	 */
+
+	ldx	rp, r4				/* Does not effect flags */
+	ret					/* Does not effect flags */
+
+_z8_returnenabled:
+	/* Restore the flag settings */
+
+	ldx	flags, r1
+
+	/* Restore the user register page, re-enable interrupts and return.
+	 * Note that we cannot use the iret instruction because it unconditionally
+	 * re-enabled interrupts
+	 */
+
+	ldx	rp, r4				/* Does not effect flags */
+	ei					/* Does not effect flags */
+	ret					/* Does not effect flags */
+
+_z8_noswitch:
 	LEAVE
 
 /**************************************************************************

@@ -245,7 +245,7 @@
 
 /* Byte offsets: */
 
-#define XCPT_R0_OFFS         (2*XCPT_RR0)      /* Offset 0-15:  R0-R15 */
+#define XCPT_R0_OFFS         (2*XCPT_RR0)       /* Offset 0-15:  R0-R15 */
 #define XCPT_R1_OFFS         (2*XCPT_RR0+1)
 #define XCPT_R2_OFFS         (2*XCPT_RR2)
 #define XCPT_R3_OFFS         (2*XCPT_RR2+1)
@@ -261,14 +261,14 @@
 #define XCPT_R13_OFFS        (2*XCPT_RR12+1)
 #define XCPT_R14_OFFS        (2*XCPT_R1R4)
 #define XCPT_R15_OFFS        (2*XCPT_R1R4+1)
-#define XCPT_UNUSED_OFFS     (2*XCPT_IRQCTL)   /* Offset 16: Unused (zero) */
-#define XCPT_IRQCTL_OFFS     (2*XCPT_IRQCTL+1) /* offset 17: IRQCTL register */
-#define XCPT_SPH_OFFS        (2*XCPT_SP)       /* Offset 18: SP[8:15] */
-#define XCPT_SPL_OFFS        (2*XCPT_SP+1)     /* Offset 19: SP[0:7] */
-#define XCPT_RP_OFFS         (2*XCPT_I)        /* Offset 20: Register pointer */
-#define XCPT_FLAGS_OFFS      (2*XCPT_I+1)      /* Offset 21: FLAGS */
-#define XCPT_PCH_OFFS        (2*XCPT_PC)       /* Offset 22: PC[8:15] */
-#define XCPT_PCL_OFFS        (2*XCPT_PC+1)     /* Offset 23: PC[0:7] */
+#define XCPT_UNUSED_OFFS     (2*XCPT_IRQCTL)    /* Offset 16: Unused (zero) */
+#define XCPT_IRQCTL_OFFS     (2*XCPT_IRQCTL+1)  /* offset 17: IRQCTL register */
+#define XCPT_SPH_OFFS        (2*XCPT_SP)        /* Offset 18: SP[8:15] */
+#define XCPT_SPL_OFFS        (2*XCPT_SP+1)      /* Offset 19: SP[0:7] */
+#define XCPT_RP_OFFS         (2*XCPT_RPFLAGS)   /* Offset 20: Register pointer */
+#define XCPT_FLAGS_OFFS      (2*XCPT_RPFLAGS+1) /* Offset 21: FLAGS */
+#define XCPT_PCH_OFFS        (2*XCPT_PC)        /* Offset 22: PC[8:15] */
+#define XCPT_PCL_OFFS        (2*XCPT_PC+1)      /* Offset 23: PC[0:7] */
 
 #define XCPTCONTEXT_SIZE     (2*XCPTCONTEXT_REGS)
 

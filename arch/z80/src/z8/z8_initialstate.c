@@ -41,7 +41,9 @@
 
 #include <sys/types.h>
 #include <string.h>
+
 #include <nuttx/arch.h>
+#include <nuttx/sched.h>
 
 #include "chip/chip.h"
 #include "up_internal.h"
@@ -77,7 +79,7 @@
  *
  ****************************************************************************/
 
-void up_initial_state(_TCB *tcb)
+void up_initial_state(FAR _TCB *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
 
@@ -85,9 +87,9 @@ void up_initial_state(_TCB *tcb)
 
   memset(xcp, 0, sizeof(struct xcptcontext));
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[XCPT_IRQCTL]  = %0080; /* IRQE bit will enable interrupts */
+  xcp->regs[XCPT_IRQCTL]  = 0x0080; /* IRQE bit will enable interrupts */
 #endif
-  xcp->regs[XCPT_RPFLAGS] = %e000; /* RP=%e0 */
+  xcp->regs[XCPT_RPFLAGS] = 0xe000; /* RP=%e0 */
   xcp->regs[XCPT_SP]      = (chipreg_t)tcb->adj_stack_ptr;
   xcp->regs[XCPT_PC]      = (chipreg_t)tcb->start;
 }

@@ -101,23 +101,21 @@ _z8_restorecontext:
 	 * address
 	 */
 
-	ld	r1, #%e0		/* r1 = destination address */
+	clr	r0			/* rr0 = destination address */
+	ldx	r1, XCPT_RP_OFFS(rr6)
 	ld	r2, r6			/* rr2 = source address */
 	ld	r3, r7
 	ld	r4, #16			/* r4 = number of bytes to copy */
-	cp	r2, #0
-	jr	z, _z8_restore2
 
-_z8_restore1:
-	ldx	r0, @rr2
-	ld	@r1, r0
-	inc	r1
+_z8_restore:
+	ldx	r5, @rr2
+	ldx	@rr0, r5
+	incw	rr0
 	incw	rr2
-	djnz	r4, _z8_restore1
+	djnz	r4, _z8_restore
 
 	/* Set the new stack pointer */
 
-_z8_restore2:
 	ldx	r0, XCPT_SPH_OFFS(rr6)
 	ldx	r1, XCPT_SPL_OFFS(rr6)
 	ldx	sph, r0
@@ -130,9 +128,10 @@ _z8_restore2:
 	push	r1
 	push	r0
 
-	/* Recover the flags settings.. but don't restore the flags yet */
+	/* Recover the flags and RP settings.. but don't restore them yet */
 
-	ldx	r1, XCPT_FLAGS_OFFS(rr6)
+	ldx	r1, XCPT_FLAGS_OFFS(rr0)
+	ldx	r2, XCPT_RP_OFFS(rr0)
 
 	/* Determine whether interrupts must be enabled on return.  This
 	 * would be nicer to do below, but later we will need to preserve
@@ -149,7 +148,7 @@ _z8_restore2:
 
 	/* Restore the user register page and return with interrupts disabled */
 
-	srp	#%e0				/* Does not effect flags */
+	ldx	rp, r2				/* Does not effect flags */
 	ret					/* Does not effect flags */
 
 _z8_returnenabled:
@@ -159,7 +158,7 @@ _z8_returnenabled:
 
 	/* Restore the user register page, re-enable interrupts and return */
 
-	srp	#%e0				/* Does not effect flags */
+	ldx	rp, r2				/* Does not effect flags */
 	ei					/* Does not effect flags */
 	ret					/* Does not effect flags */
 
