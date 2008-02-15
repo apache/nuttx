@@ -300,7 +300,7 @@ struct xcptcontext
   /* The following retains that state during signal execution */
 
   uint16 saved_pc;	/* Saved return address */
-  uint16 saved_i;	/* Saved interrupt state */
+  uint16 saved_irqctl;	/* Saved interrupt state */
 #endif
 };
 #endif

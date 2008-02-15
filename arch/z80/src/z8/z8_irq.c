@@ -44,6 +44,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
+#include <ez8.h>
+
 #include "chip/switch.h"
 #include "up_internal.h"
 
@@ -81,6 +83,19 @@ struct z8_irqstate_s g_z8irqstate;
 
 irqstate_t irqsave(void)
 {
+  /* Bit 7 (IRQE) of the IRQCTL register determines if interrupts were
+   * enabled when this function was called.
+   */
+
+  register irqstate_t retval = getreg8(IRQCTL);
+
+  /* Disable interrupts */
+
+  DI();
+
+  /* Return the previous interrupt state */
+
+  return retval;
 }
 
 /****************************************************************************
@@ -93,4 +108,14 @@ irqstate_t irqsave(void)
 
 void irqrestore(irqstate_t flags)
 {
+  /* Bit 7 (IRQE) of the IRQCTL register determines if interrupts were
+   * enabled when irqsave() was called.
+   */
+
+  if ((flags & 0x80) != 0)
+    {
+      /* The IRQE bit was set, re-enable interrupts */
+
+      EI();
+    }
 }

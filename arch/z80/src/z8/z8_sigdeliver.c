@@ -65,6 +65,21 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: z8_copystate
+ ****************************************************************************/
+
+/* Maybe a little faster than most memcpy's */
+
+static void z8_copystate(FAR chipreg_t *dest, FAR const chipreg_t *src)
+{
+  int i;
+  for (i = 0; i < XCPTCONTEXT_REGS; i++)
+    {
+      *dest++ = *src++;
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -83,7 +98,7 @@ void up_sigdeliver(void)
 {
 #ifndef CONFIG_DISABLE_SIGNALS
   FAR _TCB  *rtcb = (_TCB*)g_readytorun.head;
-  chipret_t regs[XCPTCONTEXT_REGS];
+  chipreg_t regs[XCPTCONTEXT_REGS];
   sig_deliver_t sigdeliver;
 
   /* Save the errno.  This must be preserved throughout the signal handling
@@ -102,8 +117,8 @@ void up_sigdeliver(void)
   /* Save the real return state on the stack. */
 
   z8_copystate(regs, rtcb->xcp.regs);
-  regs[XCPT_PC] = rtcb->xcp.saved_pc;
-  regs[XCPT_I]  = rtcb->xcp.saved_i;
+  regs[XCPT_PC]     = rtcb->xcp.saved_pc;
+  regs[XCPT_IRQCTL] = rtcb->xcp.saved_irqctl;
 
   /* Get a local copy of the sigdeliver function pointer.  We do this so
    * that we can nullify the sigdeliver function point in the TCB and accept
@@ -115,7 +130,7 @@ void up_sigdeliver(void)
 
   /* Then restore the task interrupt state. */
 
-  irqrestore(regs[XCPT_I]);
+  irqrestore(regs[XCPT_IRQCTL]);
 
   /* Deliver the signals */
 
@@ -134,7 +149,7 @@ void up_sigdeliver(void)
    */
 
   up_ledoff(LED_SIGNAL);
-  z8_restoreusercontext(regs);
+  z8_restorecontext(regs);
 #endif
 }
 
