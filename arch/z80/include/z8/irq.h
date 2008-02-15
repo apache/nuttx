@@ -235,7 +235,7 @@
 #define XCPT_RR8              (4)
 #define XCPT_RR10             (5)
 #define XCPT_RR12             (6)
-#define XCPT_R1R4             (7)
+#define XCPT_RR14             (7)
 #define XCPT_IRQCTL           (8) /* Index  8: IRQCTL register */
 #define XCPT_SP               (9) /* Index  9: SP[8:15] */
 #define XCPT_RPFLAGS         (10) /* Index 10: RP (MS) and FLAGS (LS) */
@@ -259,8 +259,8 @@
 #define XCPT_R11_OFFS        (2*XCPT_RR10+1)
 #define XCPT_R12_OFFS        (2*XCPT_RR12)
 #define XCPT_R13_OFFS        (2*XCPT_RR12+1)
-#define XCPT_R14_OFFS        (2*XCPT_R1R4)
-#define XCPT_R15_OFFS        (2*XCPT_R1R4+1)
+#define XCPT_R14_OFFS        (2*XCPT_RR14)
+#define XCPT_R15_OFFS        (2*XCPT_RR14+1)
 #define XCPT_UNUSED_OFFS     (2*XCPT_IRQCTL)    /* Offset 16: Unused (zero) */
 #define XCPT_IRQCTL_OFFS     (2*XCPT_IRQCTL+1)  /* offset 17: IRQCTL register */
 #define XCPT_SPH_OFFS        (2*XCPT_SP)        /* Offset 18: SP[8:15] */

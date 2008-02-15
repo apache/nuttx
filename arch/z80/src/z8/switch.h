@@ -50,65 +50,154 @@
  * Definitions
  ************************************************************************************/
 
-/* Macros for portability */
+/* Z8_IRQSTATE_* definitions ********************************************************
+ * These are used in the state field of 'struct z8_irqstate_s' structure to define
+ * the current state of the interrupt handling.  These definition support "lazy"
+ * interrupt context saving. See comments below associated with s'truct z8_irqstate_s'.
+ */
+
+#define Z8_IRQSTATE_NONE  0 /* Not handling an interrupt */
+#define Z8_IRQSTATE_ENTRY 1 /* In interrupt, context has not been saved */
+#define Z8_IRQSTATE_SAVED 2 /* In interrupt, context has been saved */
+
+/* The information saved on interrupt entry can be retained in a array of two
+ * uint16 values.  These are
+ *
+ *   value[0] = RP (MS byte) and Flags (LS) byte
+ *   value[1] = PC
+ *
+ * The pointer to the save structure is a stack pointer at the time that up_doirq()
+ * was called:
+ *
+ *         PC[7:0]
+ *         PC[15:8]
+ *         Flags Register
+ *   SP -> RP
+ *
+ * The stack pointer on return from interrupt can be obtained by adding 4 to the
+ * pointer to the save structure.
+ */
+
+#define Z8_IRQSAVE_RPFLAGS    (0)                      /* Index 10: RP (MS) and FLAGS (LS) */
+#define Z8_IRQSAVE_PC         (1)                      /* Index 2: PC[8:15] */
+#define Z8_IRQSAVE_REGS       (2)                      /* Number 16-bit values saved */
+
+/* Byte offsets */
+
+#define Z8_IRQSAVE_RP_OFFS    (2*Z8_IRQSAVE_RPFLAGS)   /* Offset 0: RP */
+#define Z8_IRQSAVE_FLAGS_OFFS (2*Z8_IRQSAVE_RPFLAGS+1) /* Offset 1: FLAGS */
+#define Z8_IRQSAVE_PCH_OFFS   (2*Z8_IRQSAVE_PC)        /* Offset 2: PC[8:15] */
+#define Z8_IRQSAVE_PCL_OFFS   (2*Z8_IRQSAVE_PC+1)      /* Offset 3: PC[0:7] */
+#define Z8_IRQSAVE_SIZE       (2*Z8_IRQSAVE_REGS)      /* Number 8-bit values saved */
+
+/* Macros for portability ***********************************************************
+ *
+ * Common logic in arch/z80/src/common is customized for the z8 context switching
+ * logic via the following macros.
+ */
 
 /* Initialize the IRQ state */
 
-#define INIT_IRQCONTEXT()        current_regs = NULL
+#define INIT_IRQCONTEXT() \
+  do { \
+    g_z8irqstate.state = Z8_IRQSTATE_NONE; \
+  } while (0)
 
 /* IN_INTERRUPT returns TRUE if the system is current operating in the interrupt
  * context.  IN_INTERRUPT is the inline equivalent of up_interrupt_context().
  */
 
-#define IN_INTERRUPT()           (current_regs != NULL)
+#define IN_INTERRUPT() \
+  (g_z8irqstate.state != Z8_IRQSTATE_NONE)
 
 /* The following macro is used when the system enters interrupt handling logic */
 
-#define IRQ_ENTER(irq, regs)     current_regs = (regs)
+#define IRQ_ENTER(irq, regs) \
+  do { \
+    g_z8irqstate.state = Z8_IRQSTATE_ENTRY; \
+    g_z8irqstate.regs  = (regs); \
+  } while (0)
 
 /* The following macro is used when the system exits interrupt handling logic */
 
-#define IRQ_LEAVE(irq)           current_regs = NULL
+#define IRQ_LEAVE(irq) \
+  do { \
+    g_z8irqstate.state = Z8_IRQSTATE_NONE; \
+  } while (0)
 
 /* The following macro is used to sample the interrupt state (as a opaque handle) */
 
-#define IRQ_STATE()              (current_regs)
+#define IRQ_STATE() \
+  (g_z8irqstate.regs)
 
 /* Save the current IRQ context in the specified TCB */
 
-#define SAVE_IRQCONTEXT(tcb)     z8_copystate((tcb)->xcp.regs, current_regs)
+#define SAVE_IRQCONTEXT(tcb) \
+  z8_saveirqcontext((tcb)->xcp.regs)
 
 /* Set the current IRQ context to the state specified in the TCB */
 
-#define SET_IRQCONTEXT(tcb)      z8_copystate(current_regs, (tcb)->xcp.regs)
+#define SET_IRQCONTEXT(tcb) \
+  do { \
+    g_z8irqstate.state = Z8_IRQSTATE_SAVED; \
+    g_z8irqstate.regs  = (tcb)->xcp.regs; \
+  } while (0)
 
 /* Save the user context in the specified TCB.  User context saves can be simpler
  * because only those registers normally saved in a C called need be stored.
  */
 
-#define SAVE_USERCONTEXT(tcb)    z8_saveusercontext((tcb)->xcp.regs)
+#define SAVE_USERCONTEXT(tcb) \
+  z8_saveusercontext((tcb)->xcp.regs)
 
 /* Restore the full context -- either a simple user state save or the full,
  * IRQ state save.
  */
 
-#define RESTORE_USERCONTEXT(tcb) z8_restorecontext((tcb)->xcp.regs)
+#define RESTORE_USERCONTEXT(tcb) \
+  z8_restorecontext((tcb)->xcp.regs)
 
 /* Dump the current machine registers */
 
-#define _REGISTER_DUMP()         z8_registerdump()
+#define _REGISTER_DUMP() \
+  z8_registerdump()
+
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+/* In order to provide faster interrupt handling, the interrupt logic does "lazy"
+ * context saving as described below:
+ *
+ * (1) At the time of the interrupt, minimum information is saved and the register
+ *     pointer is changed so that the interrupt logic does not alter the state of
+ *     the interrupted task's registers.
+ * (2) If no context switch occurs during the interrupt processing, then the return
+ *     from interrupt is also simple.
+ * (3) If a context switch occurs during interrupt processing, then
+ *     (a) The full context of the interrupt task is saved, and
+ *     (b) A full context switch is performed when the interrupt exits (see
+ *         z8_vector.S).
+ *
+ * The following structure is used to manage this "lazy" context saving.
+ */
+
+#ifndef __ASSEMBLY__
+struct z8_irqstate_s
+{
+  ubyte      state; /* See Z8_IRQSTATE_* definitions above */
+  chipreg_t *regs;  /* Saved register information */
+};
+#endif
 
 /************************************************************************************
  * Public Variables
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
-/* This holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during
- * interrupt processing.
- */
+/* This structure holds information about the current interrupt processing state */
 
-extern chipreg_t *current_regs;
+extern struct z8_irqstate_s g_z8irqstate;
 #endif
 
 /************************************************************************************
@@ -123,17 +212,17 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Defined in z8_copystate.c */
-
-EXTERN void z8_copystate(FAR chipreg_t *dest, FAR const chipreg_t *src);
-
 /* Defined in z8_saveusercontext.asm */
 
 EXTERN int z8_saveusercontext(FAR chipreg_t *regs);
 
+/* Defined in z8_saveirqcontext.c */
+
+EXTERN void z8_saveirqcontext(FAR chipreg_t *regs);
+
 /* Defined in z8_restorecontext.asm */
 
-EXTERN int z8_restorecontext(FAR chipreg_t *regs);
+EXTERN void z8_restorecontext(FAR chipreg_t *regs);
 
 /* Defined in z8_sigsetup.c */
 

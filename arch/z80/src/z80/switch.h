@@ -50,7 +50,11 @@
  * Definitions
  ************************************************************************************/
 
-/* Macros for portability */
+/* Macros for portability ***********************************************************
+ *
+ * Common logic in arch/z80/src/common is customized for the z8 context switching
+ * logic via the following macros.
+ */
 
 /* Initialize the IRQ state */
 
@@ -133,7 +137,7 @@ EXTERN int z80_saveusercontext(FAR chipreg_t *regs);
 
 /* Defined in z80_restoreusercontext.asm */
 
-EXTERN int z80_restoreusercontext(FAR chipreg_t *regs);
+EXTERN void z80_restoreusercontext(FAR chipreg_t *regs);
 
 /* Defined in z80_sigsetup.c */
 
