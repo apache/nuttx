@@ -346,7 +346,7 @@ void up_serialinit(void)
 {
 #if defined(CONFIG_DEV_LOWCONSOLE)
   (void)lowconsole_init();
-#elif defiened(CONFIG_DEV_CONSOLE)
+#elif defined(CONFIG_DEV_CONSOLE)
   (void)uart_register("/dev/console", &g_uartport);
   (void)uart_register("/dev/ttyS0", &g_uartport);
 #endif
@@ -367,7 +367,4 @@ int up_putc(int ch)
   up_lowputc(ch);
   return 0;
 }
-
-
-
 

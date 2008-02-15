@@ -127,11 +127,11 @@ defconfig -- This is a configuration file similar to the Linux
                 CONFIG_ENDIAN_BIG - define if big endian (default is little
                    endian)
 
-	Some architectures require a description of the the RAM configuration:
+	Some architectures require a description of the RAM configuration:
 
 		CONFIG_DRAM_SIZE - Describes the installed DRAM.
 		CONFIG_DRAM_START - The start address of DRAM (physical)
-		CONFIG_DRAM_VSTART - The startaddress of DRAM (virtual)
+		CONFIG_DRAM_VSTART - The start address of DRAM (virtual)
 
 
 	General build options
@@ -305,12 +305,12 @@ configs/c5471evm
     This is a port to the Spectrum Digital C5471 evaluation board.  The
     TMS320C5471 is a dual core processor from TI with an ARM7TDMI general
     purpose processor and a c54 DSP.  It is also known as TMS320DA180 or just DA180. 
-    NuttX runs on the ARM core and is built with with a GNU arm-elf toolchain*.
+    NuttX runs on the ARM core and is built with a GNU arm-elf toolchain*.
     This port is complete, verified, and included in the NuttX release.
 
 configs/mcu123-lpc214x
     This is a port to the mcu123.com lpc214x development board.
-    This OS is also built with the the arm-elf toolchain*
+    This OS is also built with the arm-elf toolchain*
 
 configs/ntosd-dm320
     This port uses the Neuros OSD with a GNU arm-elf toolchain*:
@@ -327,27 +327,32 @@ configs/mcu123-lpc214x
 
 configs/m68322evb
     This is a work in progress for the venerable m68322evb board from
-    Motorola. This OS is also built with the the arm-elf toolchain*.
+    Motorola. This OS is also built with the arm-elf toolchain*.
 
 configs/pjrc-8051
     8051 Microcontroller.  This port uses the PJRC 87C52 development system
     and the SDCC toolchain.   This port is not quite ready for prime time.
 
+configs/xtrs
+    TRS80 Model 3.  This port uses a vintage computer based on the Z80.
+    An emulator for this computer is available to run TRS80 programs on a 
+    linux platform (http://www.tim-mann.org/xtrs.html).
+
 configs/z16f2800100zcog
-    z16f Microncontroller.  This port use the Zilog z16f2800100zcog
+    z16f Microcontroller.  This port use the Zilog z16f2800100zcog
     development kit and the Zilog ZDS-II Windows command line tools.  The
     development environment is Cygwin under WinXP.
 
 configs/z8encore000zco
-    z8Encore! Microncontroller.  This port use the Zilog z8encore000zco
+    z8Encore! Microcontroller.  This port use the Zilog z8encore000zco
     development kit, Z8F6403 part, and the Zilog ZDS-II Windows command line
     tools.  The development environment is Cygwin under WinXP.
 
-configs/z80zim
+configs/z80sim
     z80 Microcontroller.  This port uses a Z80 instruction set simulator.
     That simulator can be found in the NuttX CVS at
     http://nuttx.cvs.sourceforge.net/nuttx/misc/sims/z80sim.
-    This port also the SDCC toolchain (http://sdcc.sourceforge.net/")
+    This port also uses the SDCC toolchain (http://sdcc.sourceforge.net/")
     (verified with version 2.6.0).
 
 Other ports for the for the TI TMS320DM270, M683222 and for MIPS are in various
@@ -368,5 +373,3 @@ tools/configure.sh
 
   cd tools
   ./configure.sh <board-name>/<config-dir>
-
-
