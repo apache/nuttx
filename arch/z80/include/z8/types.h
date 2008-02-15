@@ -82,7 +82,7 @@ typedef unsigned long uint32;
 
 /* This is the size of the interrupt state save returned by irqsave() */
 
-typedef uint16 irqstate_t;
+typedef ubyte irqstate_t;
 
 #endif /* __ASSEMBLY__ */
 

@@ -70,25 +70,71 @@
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_STACKDUMP
+static inline void z8_dumpregs(FAR chipret_t *regs)
+{
+  lldbg("REGS: %04x %04x %04x %04x %04x %04x %04x %04x\n",
+         regs[XCPT_RR0], regs[XCPT_RR2], regs[XCPT_RR4], regs[XCPT_RR6],
+         regs[XCPT_RR8], regs[XCPT_RR10], regs[XCPT_RR12], regs[XCPT_RR14]);
+}
+
+static inline void z8_dumpstate(chipreg_t sp, chipreg_t pc, ubyte irqctl, chipreg_t rpflags)
+{
+  lldbg("SP: %04x PC: %04x IRQCTL: %02x RP: %02x FLAGS: %02x\n",
+        sp, pc, irqctl & 0xff, rpflags >> 8, rpflags & 0xff);
+}
+
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 /****************************************************************************
  * Name: z8_registerdump
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_STACKDUMP
-static void z8_registerdump(void)
+void z8_registerdump(void)
 {
-  if (current_regs)
+  FAR chipret_t *regs;
+  FAR chipret_t *state;
+  chipreg_t      sp;
+  uint16         rp;
+
+  switch (g_z8irqstate.state)
     {
-      lldbg("REGS: %04x %04x %04x %04x %04x %04x %04x %04x\n",
-            current_regs[XCPT_RR0], current_regs[XCPT_RR2],
-            current_regs[XCPT_RR4], current_regs[XCPT_RR6],
-            current_regs[XCPT_RR8], current_regs[XCPT_RR10],
-            current_regs[XCPT_RR12], current_regs[XCPT_RR14]);
-      lldbg("SP: %04x PC: %04x IRQCTL: %02x RP: %02x FLAGS: %02x\n",
-            current_regs[XCPT_SP], current_regs[XCPT_PC],
-            current_regs[XCPT_IRQCTL] & 0xff,
-            current_regs[XCPT_RPFLAGS] >> 8,
-            current_regs[XCPT_RPFLAGS] & 0xff);
+      case Z8_IRQSTATE_ENTRY:
+        /* Calculate the source address based on the saved RP value */
+
+        rp   = g_z8irqstate.regs[Z8_IRQSAVE_RPFLAGS] >> 8;
+        regs = (FAR uint16*)(rp & 0xf0);
+
+        /* Then dump the register values */
+
+        z8_dumpregs(regs);
+
+        /* Dump the saved machine state:
+         * The g_z8irqstate.regs pointer is the value of the stack pointer at
+         * the time that up_doirq() was called.  Therefore, we can calculate
+         * the correct value for the stack pointer on return from interrupt:
+         */
+
+        sp = ((chipreg_t)g_z8irqstate.regs) + Z8_IRQSAVE_SIZE;
+        z8_dumpstate(sp, g_z8irqstate.regs[Z8_IRQSAVE_PC], 0x80,
+                     g_z8irqstate.regs[Z8_IRQSAVE_RPFLAGS]);
+        break;
+
+      case Z8_IRQSTATE_SAVED:
+        regs = g_z8irqstate.regs;
+        z8_dumpregs(regs);
+        z8_dumpstate(regs[XCPT_SP], regs[XCPT_PC],
+                     regs[XCPT_IRQCTL], regs[XCPT_RPFLAGS];
+        break;
+
+      case Z8_IRQSTATE_NONE:
+      default:
+        break;
     }
 }
 #endif

@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/src/z80/z80_irq.c
+ * arch/z80/src/z8/z8_irq.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,11 +55,9 @@
  * Public Data
  ****************************************************************************/
 
-/* This holds a references to the current interrupt level register storage
-* structure.  If is non-NULL only during interrupt processing.
- */
+/* This structure holds information about the current interrupt processing state */
 
-chipreg_t *current_regs;
+struct z8_irqstate_s g_z8irqstate;
 
 /****************************************************************************
  * Private Data
@@ -81,15 +79,8 @@ chipreg_t *current_regs;
  *
  ****************************************************************************/
 
-irqstate_t irqsave(void) __naked
+irqstate_t irqsave(void)
 {
-  _asm
-	ld	a, i		; AF Carry bit holds interrupt state
-	di			; Interrupts are disabled
-	push	af		; Return AF in HL
-	pop	hl		;
-	ret			;
-  _endasm;
 }
 
 /****************************************************************************
@@ -100,17 +91,6 @@ irqstate_t irqsave(void) __naked
  *
  ****************************************************************************/
 
-void irqrestore(irqstate_t flags) __naked
+void irqrestore(irqstate_t flags)
 {
-  _asm
-	di			; Assume disabled
-	pop	hl		; HL = return address
-	pop	af		; AF Carry bit hold interrupt state
-	jr	nc, statedisable
-	ei
-statedisable:
-	push	af		; Restore stack
-	push	hl		;
-	ret			; and return
-  _endasm;
 }
