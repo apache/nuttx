@@ -43,7 +43,7 @@ CMN_CSRCS	= up_initialize.c up_allocateheap.c up_createstack.c \
 		  up_mdelay.c up_udelay.c up_usestack.c
 
 CHIP_ASRCS	= z80_saveusercontext.asm z80_restoreusercontext.asm
-CHIP_CSRCS	= z80_initialstate.c z80_irq.c z80_copystate.c \
+CHIP_CSRCS	= z80_initialstate.c z80_io.c z80_irq.c z80_copystate.c \
 		  z80_schedulesigaction.c z80_sigdeliver.c \
 		  z80_registerdump.c
 

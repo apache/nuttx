@@ -153,8 +153,16 @@ pass1.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboar
 		echo "-l $(TOPDIR)/$$LIB" >> pass1.lnk ;\
 	done
 	@echo "-l myz80.lib" >>pass1.lnk		# Name of SDCC z80 library
+ifneq ($(CONFIG_LINKER_START_AREA),)
+	@echo "-b START=$(CONFIG_LINKER_START_AREA)" >>pass1.lnk		# Start of START area
+else
 	@echo "-b START=0" >>pass1.lnk			# Start of START area
+endif
+ifneq ($(CONFIG_LINKER_CODE_AREA),)
+	@echo "-b _CODE=$(CONFIG_LINKER_CODE_AREA)" >>pass1.lnk		# Start of _CODE area
+else
 	@echo "-b _CODE=256" >>pass1.lnk		# Start of _CODE area
+endif
 	@echo "-i" >>pass1.lnk				# Intel hex format
 	@echo "-x" >>pass1.lnk				# Hexadecimal
 	@echo "-m" >>pass1.lnk				# Generate a map file
@@ -178,8 +186,16 @@ nuttx.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboar
 		echo "-l $(TOPDIR)/$$LIB" >> nuttx.lnk ;\
 	done
 	@echo "-l myz80.lib" >>nuttx.lnk		# Name of SDCC z80 library
+ifneq ($(CONFIG_LINKER_START_AREA),)
+	@echo "-b START=$(CONFIG_LINKER_START_AREA)" >>nuttx.lnk		# Start of START area
+else
 	@echo "-b START=0" >>nuttx.lnk			# Start of START area
+endif
+ifneq ($(CONFIG_LINKER_CODE_AREA),)
+	@echo "-b _CODE=$(CONFIG_LINKER_CODE_AREA)" >>nuttx.lnk		# Start of _CODE area
+else
 	@echo "-b _CODE=256" >>nuttx.lnk		# Start of _CODE area
+endif
 	@echo "-i" >>nuttx.lnk				# Intel hex format
 	@echo "-x" >>nuttx.lnk				# Hexadecimal
 	@echo "-m" >>nuttx.lnk				# Generate a map file

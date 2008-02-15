@@ -16,7 +16,7 @@
   </b></big></h1>
   <p><small>by</small></p>
   <p>Gregory Nutt</p>
-  <p><small>Last Update: February 11, 2008</small></p>
+  <p><small>Last Update: February 15, 2008</small></p>
 </center>
 
 <center><h1>Table of Contents</h1></center>
@@ -442,7 +442,7 @@
         z80 instruction simulator.
         The set simulator  can be found in the NuttX CVS at
         http://nuttx.cvs.sourceforge.net/nuttx/misc/sims/z80sim.
-        This port also the SDCC toolchain (http://sdcc.sourceforge.net/")
+        This port also uses the SDCC toolchain (http://sdcc.sourceforge.net/")
         (verified with version 2.6.0 and 2.7.0).
       </li>
 
@@ -590,7 +590,7 @@
 <h3><a name="supportedboards">2.3.3 Supported Boards</a></h3>
 <p>
   All of the specific boards supported by NuttX are identified below.
-  These the the specific <i>&lt;board-name&gt;</i>'s that may be used to configure NuttX
+  These are the specific <i>&lt;board-name&gt;</i>'s that may be used to configure NuttX
   as described <a href="#configuringnuttx">below</a>.
 </p>
 <ul>
@@ -637,15 +637,21 @@
     This port is not quite ready for prime time.
   </li>
 
+  <li><code>configs/xtrs</code>
+    TRS80 Model 3.  This port uses a vintage computer based on the Z80.
+    An emulator for this computer is available to run TRS80 programs on a 
+    linux platform (http://www.tim-mann.org/xtrs.html).
+  </li>
+
   <li><code>configs/z16f2800100zcog</code>
-    z16f Microncontroller.
+    z16f Microcontroller.
     This port use the Zilog z16f2800100zcog development kit and the
     Zilog ZDS-II Windows command line tools.
     The development environment is Cygwin under WinXP.
   </li>
 
   <li><code>configs/z8encore000zco</code>
-    z8Encore! Microncontroller.  This port use the Zilog z8encore000zco
+    z8Encore! Microcontroller.  This port use the Zilog z8encore000zco
     development kit, Z8F6403 part, and the Zilog ZDS-II Windows command line
     tools.  The development environment is Cygwin under WinXP.
   </li>
@@ -994,7 +1000,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 <p><b>Inputs:</b></p>
 <ul>
   <li><code>tcb</code>: Refers to a task in the ready-to-run list (normally
-    the task at the the head of the list).  It most be
+    the task at the head of the list).  It most be
     stopped, its context saved and moved into one of the
     waiting task lists.  It it was the task at the head
     of the ready-to-run list, then a context to the new
@@ -1293,7 +1299,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </ul>
 
 <p>
-  Some architectures require a description of the the RAM configuration:
+  Some architectures require a description of the RAM configuration:
 </p>
 <ul>
   <li><code>CONFIG_DRAM_SIZE</code>:
@@ -1301,7 +1307,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   <li><code>CONFIG_DRAM_START</code>:
     The start address of DRAM (physical)</li>
   <li><code>CONFIG_DRAM_VSTART</code>:
-    The startaddress of DRAM (virtual)</li>
+    The start address of DRAM (virtual)</li>
 </ul>
 
 <p>
