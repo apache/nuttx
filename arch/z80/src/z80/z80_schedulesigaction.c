@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/common/up_schedulesigaction.c
+ * arch/z80/src/z80/z80_schedulesigaction.c
  *
  *   Copyright (C) 2007,2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -65,6 +65,26 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: z80_sigsetup
+ ****************************************************************************/
+
+static void z80_sigsetup(FAR _TCB *tcb, sig_deliver_t sigdeliver, FAR chipreg_t *regs)
+{
+  /* Save the return address and interrupt state. These will be restored by
+   * the signal trampoline after the signals have been delivered.
+   */
+
+  tcb->xcp.sigdeliver    = sigdeliver;
+  tcb->xcp.saved_pc      = regs[XCPT_PC];
+  tcb->xcp.saved_i       = regs[XCPT_I];
+
+  /* Then set up to vector to the trampoline with interrupts disabled */
+
+  regs[XCPT_PC]  = (chipreg_t)up_sigdeliver;
+  regs[XCPT_I]   = 0;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -107,7 +127,7 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
 
   /* Refuse to handle nested signal actions */
 
-  if (!SIGNAL_DELIVERING(tcb))
+  if (tcb->xcp.sigdeliver == NULL)
     {
       irqstate_t flags;
 
@@ -142,7 +162,7 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
             {
               /* Set up to vector to the trampoline with interrupts disabled. */
 
-              SIGNAL_SETUP(tcb, sigdeliver, IRQ_STATE());
+              z80_sigsetup(tcb, sigdeliver, IRQ_STATE());
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
@@ -161,7 +181,7 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
         {
           /* Set up to vector to the trampoline with interrupts disabled. */
 
-          SIGNAL_SETUP(tcb, sigdeliver, tcb->xcp.regs);
+          z80_sigsetup(tcb, sigdeliver, tcb->xcp.regs);
         }
 
       irqrestore(flags);

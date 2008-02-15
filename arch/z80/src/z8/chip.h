@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/z80/src/z80/chip.h
+ * arch/z80/src/z8/chip.h
  * arch/z80/src/chip/chip.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.

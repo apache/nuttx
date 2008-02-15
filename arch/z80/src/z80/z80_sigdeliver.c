@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/src/z80/z80_sigsetup.c
+ * arch/z80/src/z80/z80_sigdeliver.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,11 +40,17 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <arch/irq.h>
+#include <sched.h>
+#include <debug.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
 
 #include "chip/switch.h"
 #include "os_internal.h"
 #include "up_internal.h"
+
+#ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
  * Definitions
@@ -63,25 +69,73 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: z80_copystate
+ * Name: up_sigdeliver
+ *
+ * Description:
+ *   This is the a signal handling trampoline.  When a
+ *   signal action was posted.  The task context was mucked
+ *   with and forced to branch to this location with interrupts
+ *   disabled.
+ *
  ****************************************************************************/
 
-void z80_sigsetup(FAR _TCB *tcb, sig_deliver_t sigdeliver, FAR chipreg_t *regs)
+void up_sigdeliver(void)
 {
-  /* Save the return address and interrupt state. These will be restored by
-   * the signal trampoline after the signals have been delivered (via
-   * SIGNAL_RETURN).
+#ifndef CONFIG_DISABLE_SIGNALS
+  FAR _TCB  *rtcb = (_TCB*)g_readytorun.head;
+  chipret_t regs[XCPTCONTEXT_REGS];
+  sig_deliver_t sigdeliver;
+
+  /* Save the errno.  This must be preserved throughout the signal handling
+   * so that the the user code final gets the correct errno value (probably
+   * EINTR).
    */
 
-  tcb->xcp.sigdeliver    = sigdeliver;
-  tcb->xcp.saved_pc      = regs[XCPT_PC];
-  tcb->xcp.saved_i       = regs[XCPT_I];
+  int saved_errno = rtcb->pterrno;
 
-  /* Then set up to vector to the trampoline with interrupts disabled */
+  up_ledon(LED_SIGNAL);
 
-  regs[XCPT_PC]  = (chipreg_t)up_sigdeliver;
-  regs[XCPT_I]   = 0;
+  dbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
+       rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
+  ASSERT(rtcb->xcp.sigdeliver != NULL);
+
+  /* Save the real return state on the stack. */
+
+  z80_copystate(regs, rtcb->xcp.regs);
+  regs[XCPT_PC] = rtcb->xcp.saved_pc;
+  regs[XCPT_I]  = rtcb->xcp.saved_i;
+
+  /* Get a local copy of the sigdeliver function pointer.  We do this so
+   * that we can nullify the sigdeliver function point in the TCB and accept
+   * more signal deliveries while processing the current pending signals.
+   */
+
+  sigdeliver           = rtcb->xcp.sigdeliver;
+  rtcb->xcp.sigdeliver = NULL;
+
+  /* Then restore the task interrupt state. */
+
+  irqrestore(regs[XCPT_I]);
+
+  /* Deliver the signals */
+
+  sigdeliver(rtcb);
+
+  /* Output any debug messaged BEFORE restoring errno (because they may alter
+   * errno), then restore the original errno that is needed by the user logic
+   * (it is probably EINTR).
+   */
+
+  dbg("Resuming\n");
+  rtcb->pterrno = saved_errno;
+
+  /* Then restore the correct state for this thread of
+   * execution.
+   */
+
+  up_ledoff(LED_SIGNAL);
+  z80_restoreusercontext(regs);
+#endif
 }
 
-
-
+#endif /* CONFIG_DISABLE_SIGNALS */

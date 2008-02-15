@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/src/common/up_sigdeliver.c
+ * arch/z80/src/z8/z8_sigdeliver.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,15 +101,13 @@ void up_sigdeliver(void)
 
   /* Save the real return state on the stack. */
 
-  COPYSTATE(regs, rtcb->xcp.regs);
+  z8_copystate(regs, rtcb->xcp.regs);
   regs[XCPT_PC] = rtcb->xcp.saved_pc;
   regs[XCPT_I]  = rtcb->xcp.saved_i;
 
-  /* Get a local copy of the sigdeliver function pointer.
-   * we do this so that we can nullify the sigdeliver
-   * function point in the TCB and accept more signal
-   * deliveries while processing the current pending
-   * signals.
+  /* Get a local copy of the sigdeliver function pointer.  We do this so
+   * that we can nullify the sigdeliver function point in the TCB and accept
+   * more signal deliveries while processing the current pending signals.
    */
 
   sigdeliver           = rtcb->xcp.sigdeliver;
@@ -123,9 +121,8 @@ void up_sigdeliver(void)
 
   sigdeliver(rtcb);
 
-  /* Output any debug messaged BEFORE restoring errno
-   * (because they may alter errno), then restore the
-   * original errno that is needed by the user logic
+  /* Output any debug messaged BEFORE restoring errno (because they may alter
+   * errno), then restore the original errno that is needed by the user logic
    * (it is probably EINTR).
    */
 
@@ -137,7 +134,7 @@ void up_sigdeliver(void)
    */
 
   up_ledoff(LED_SIGNAL);
-  SIGNAL_RETURN(regs);
+  z8_restoreusercontext(regs);
 #endif
 }
 
