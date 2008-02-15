@@ -74,17 +74,13 @@
 
 #define IRQ_STATE()              (current_regs)
 
-/* Copy a register state save structure to another location */
-
-#define COPYSTATE(r1,r2)         z80_copystate(r1,r2)
-
 /* Save the current IRQ context in the specified TCB */
 
-#define SAVE_IRQCONTEXT(tcb)     COPYSTATE((tcb)->xcp.regs, current_regs)
+#define SAVE_IRQCONTEXT(tcb)     z80_copystate((tcb)->xcp.regs, current_regs)
 
 /* Set the current IRQ context to the state specified in the TCB */
 
-#define SET_IRQCONTEXT(tcb)      COPYSTATE(current_regs, (tcb)->xcp.regs)
+#define SET_IRQCONTEXT(tcb)      z80_copystate(current_regs, (tcb)->xcp.regs)
 
 /* Save the user context in the specified TCB.  User context saves can be simpler
  * because only those registers normally saved in a C called need be stored.
@@ -97,18 +93,6 @@
  */
 
 #define RESTORE_USERCONTEXT(tcb) z80_restoreusercontext((tcb)->xcp.regs)
-
-/* Verify that we have a signal handler */
-
-#define SIGNAL_DELIVERING(tcb)   (tcb->xcp.sigdeliver != NULL)
-
-/* Setup the signal handler trampoline */
-
-#define SIGNAL_SETUP(tcb, sigdeliver, regs)  z80_sigsetup(tcb, sigdeliver, regs)
-
-/* Return from a signal handler using the provided register context */
-
-#define SIGNAL_RETURN(regs)      z80_restoreusercontext(regs)
 
 /* Dump the current machine registers */
 
