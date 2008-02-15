@@ -337,7 +337,7 @@
 0.3.9 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Began adding support for the ZiLOG Z8Encore! microcontroller for the Z8Encore000ZCO
-	  development board and the Z8F642 part.
+	  development board and the Z8F6403 part.
 	* Fix broken 'clean' target on z80sim configurations
 	* Re-structure arch/z80 to provide support for all ZiLOG 8-bit microcontrollers (ez8
 	  in particular for now).
