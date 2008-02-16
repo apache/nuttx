@@ -43,6 +43,7 @@
 
 #include <nuttx/config.h>
 #include <arch/irq.h>
+#include "common/up_internal.h"
 
 /************************************************************************************
  * Definitions
@@ -543,7 +544,7 @@ extern "C" {
  */
 
 EXTERN void z16f_lowinit(void);
-#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
+#if defined(CONFIG_Z16_LOWPUTC) || defined(CONFIG_Z16_LOWGETC)
 EXTERN void z16f_lowuartinit(void);
 #endif
 

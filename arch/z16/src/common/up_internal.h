@@ -57,16 +57,18 @@
 #undef  CONFIG_SUPPRESS_SERIAL_INTS   /* Console will poll */
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
 #undef  CONFIG_DUMP_ON_EXIT           /* Dump task state on exit */
+#undef  CONFIG_Z16_LOWPUTC            /* Support up_lowputc for debug */
+#undef  CONFIG_Z16_LOWGETC            /* support up_lowgetc for debug */
 
 /* Determine which (if any) console driver to use */
 
-#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC) || \
+#if defined(CONFIG_Z16_LOWPUTC) || defined(CONFIG_Z16_LOWGETC) || \
     CONFIG_NFILE_DESCRIPTORS == 0 || defined(CONFIG_DEV_LOWCONSOLE)
-# define CONFIG_USE_LOWCONSOLE 1
-# define CONFIG_USE_LOWUARTINIT 1
+#  define CONFIG_USE_LOWCONSOLE 1
+#  define CONFIG_USE_LOWUARTINIT 1
 #elif defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS > 0
-# define CONFIG_USE_SERIALDRIVER 1
-# define CONFIG_USE_EARLYSERIALINIT 1
+#  define CONFIG_USE_SERIALDRIVER 1
+#  define CONFIG_USE_EARLYSERIALINIT 1
 #endif
  
 /* Macros for portability */
@@ -115,7 +117,7 @@ extern int  up_saveusercontext(FAR chipreg_t *regs);
 extern void up_sigdeliver(void);
 extern int  up_timerisr(int irq, FAR chipreg_t *regs);
 
-#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_ARCH_LOWGETC)
+#if defined(CONFIG_Z16_LOWPUTC) || defined(CONFIG_Z16_LOWGETC)
 extern void up_lowputc(char ch);
 #else
 # define up_lowputc(ch)

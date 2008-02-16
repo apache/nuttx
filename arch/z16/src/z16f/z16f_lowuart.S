@@ -50,10 +50,10 @@
 
 	xdef	_z16f_lowuartinit
 	xref	_SYS_CLK_FREQ:EROM
-#ifdef CONFIG_ARCH_LOWPUTC
+#ifdef CONFIG_Z16_LOWPUTC
 	xdef	_up_lowputc
 #endif
-#ifdef CONFIG_ARCH_LOWGETC
+#ifdef CONFIG_Z16_LOWGETC
 	xdef	_up_lowgetc
 #endif
 
@@ -139,7 +139,7 @@ _z16f_lowuartinit:
  *
  *************************************************************************/
 
-#ifdef CONFIG_ARCH_LOWPUTC
+#ifdef CONFIG_Z16_LOWPUTC
 _up_lowputc:
 	/* Check if the character to output is a linefeed */
 
@@ -184,7 +184,7 @@ _z16f_xmitc1:
 #endif
 	ret					/* Return */
 
-#endif /* CONFIG_ARCH_LOWPUTC */
+#endif /* CONFIG_Z16_LOWPUTC */
 
 /*************************************************************************
  * Name: _up_lowgetc
@@ -200,7 +200,7 @@ _z16f_xmitc1:
  *
  *************************************************************************/
 
-#ifdef CONFIG_ARCH_LOWGETC
+#ifdef CONFIG_Z16_LOWGETC
 _up_lowgetc:
 _up_lowgetc1:
 	ld	r0, #Z16F_UARTSTAT0_RDA		/* RDA=Receive data available */
