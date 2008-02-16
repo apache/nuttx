@@ -207,15 +207,15 @@
 #ifdef ENCORE_VECTORS
 
 #  define Z8_IRQ0_MIN      Z8_TIMER2_IRQ
-#  define Z8_IRQ0_BIT(irq) (Z8_ADC_IRQ - (irq))
+#  define Z8_IRQ0_BIT(irq) (1 << (Z8_ADC_IRQ - (irq)))
 #  define Z8_IRQ0_MAX      Z8_ADC_IRQ
 
 #  define Z8_IRQ1_MIN      Z8_P7AD_IRQ
-#  define Z8_IRQ1_BIT(irq) (Z8_P0AD_IRQ - (irq))
+#  define Z8_IRQ1_BIT(irq) (1 << (Z8_P0AD_IRQ - (irq)))
 #  define Z8_IRQ1_MAX      Z8_P0AD_IRQ
 
 #  define Z8_IRQ2_MIN      Z8_TIMER3_IRQ
-#  define Z8_IRQ2_BIT(irq) (Z8_C0_IRQ - (irq))
+#  define Z8_IRQ2_BIT(irq) (1 << (Z8_C0_IRQ - (irq)))
 #  define Z8_IRQ2_MAX      Z8_C0_IRQ
 
 #else
