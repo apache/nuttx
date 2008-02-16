@@ -116,6 +116,7 @@
   do { \
     g_z8irqstate.state = Z8_IRQSTATE_ENTRY; \
     g_z8irqstate.regs  = (regs); \
+    up_maskask_irq(irq); \
   } while (0)
 
 /* The following macro is used when the system exits interrupt handling logic */
@@ -123,6 +124,7 @@
 #define IRQ_LEAVE(irq) \
   do { \
     g_z8irqstate.state = Z8_IRQSTATE_NONE; \
+    up_enable_irq(irq); \
   } while (0)
 
 /* The following macro is used to sample the interrupt state (as a opaque handle) */
