@@ -84,7 +84,7 @@ FAR chipreg_t *up_doirq(ubyte irq, FAR chipreg_t *regs)
 #else
   if (irq < NR_IRQS)
     {
-       /* Indicate that we have enter IRQ processing logic */
+       /* Indicate that we have entered IRQ processing logic */
 
        IRQ_ENTER(irq, regs);
 
@@ -104,3 +104,4 @@ FAR chipreg_t *up_doirq(ubyte irq, FAR chipreg_t *regs)
   return regs;
 #endif
 }
+
