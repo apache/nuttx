@@ -41,9 +41,9 @@
 
 #include <sys/types.h>
 #include <debug.h>
+#include <ez8.h>
 
 #include <nuttx/arch.h>
-#include <ez8.h>
 
 #include "chip/chip.h"
 #include "clock_internal.h"
@@ -52,11 +52,6 @@
 /***************************************************************************
  * Definitions
  ***************************************************************************/
-
-/* System clock frequency value from ZDS target settings */
-
-extern ROM uint32 __user_frequency;
-#define _DEFCLK ((uint32)&__user_frequency)
 
 /***************************************************************************
  * Private Types
@@ -69,6 +64,10 @@ extern ROM uint32 __user_frequency;
 /***************************************************************************
  * Public Functions
  ***************************************************************************/
+
+/* This function is normally prototyped int the ZiLOG header file sio.h */
+
+extern uint32 get_freq(void);
 
 /***************************************************************************
  * Function:  up_timerisr
@@ -98,6 +97,8 @@ int up_timerisr(int irq, uint32 *regs)
 
 void up_timerinit(void)
 {
+  uint32 reload;
+ 
   up_disable_irq(Z8_IRQ_SYSTIMER);
 
   /* Write to the timer control register to disable the timer, configure
@@ -105,13 +106,13 @@ void up_timerinit(void)
    * divide by 4.
    */
 
-  putreg8( Z8_TIMERSCTL_DIV4 | Z8_TIMERSCTL_CONT, Z8_TIMER0_CTL);
+  putreg8((Z8_TIMERCTL_DIV4|Z8_TIMERCTL_CONT), T0CTL);
 
   /* Write to the timer high and low byte registers to set a starting
    * count value (this effects only the first pass in continuous mode)
    */
 
-  putreg16(0x0001, Z8_TIMER0_HL);
+  putreg16(0x0001, T0);
 
   /* Write to the timer reload register to set the reload value.
    *
@@ -127,13 +128,14 @@ void up_timerinit(void)
    *   reload_value = system_clock_frequency / 400
    */
 
-  putreg16(((uint32)_DEFCLK / 400), Z8_TIMER0_R);
+   reload = get_freq() / 400;
+   putreg16((uint16)reload, T0R);
 
   /* Write to the timer control register to enable the timer and to
    * initiate counting
    */
 
-  putreg8((getreg8(Z8_TIMER0_CTL) | Z8_TIMERCTL_TEN), Z8_TIMER0_CTL);
+  putreg8((getreg8(T0CTL)|Z8_TIMERCTL_TEN), T0CTL);
 
   /* Set the timer priority */
 

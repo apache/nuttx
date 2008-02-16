@@ -204,7 +204,7 @@
  * WARNING: These have only been verified for the Z8F640X family!
  */
 
-#if defined(_Z8ENCORE_F640X) || defined(_Z8ENCORE_640_FAMILY)
+#ifdef ENCORE_VECTORS
 
 #  define Z8_IRQ0_MIN      Z8_TIMER2_IRQ
 #  define Z8_IRQ0_BIT(irq) (Z8_ADC_IRQ - (irq))
@@ -215,7 +215,7 @@
 #  define Z8_IRQ1_MAX      Z8_P0AD_IRQ
 
 #  define Z8_IRQ2_MIN      Z8_TIMER3_IRQ
-#  define Z8_IRQ3_BIT(irq) (Z8_C0_IRQ - (irq))
+#  define Z8_IRQ2_BIT(irq) (Z8_C0_IRQ - (irq))
 #  define Z8_IRQ2_MAX      Z8_C0_IRQ
 
 #else
