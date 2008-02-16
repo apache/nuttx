@@ -74,6 +74,29 @@ struct z8_irqstate_s g_z8irqstate;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_irqinitialize
+ ****************************************************************************/
+
+void up_irqinitialize(void)
+{
+  /* Clear and disable all interrupts.  Set all to priority 0. */
+
+  putreg8(0xff, Z8_IRQ0);
+  putreg8(0xff, Z8_IRQ1);
+  putreg8(0xff, Z8_IRQ2);
+
+  putreg16(0x0000, Z8_IRQ0_EN);
+  putreg16(0x0000, Z8_IRQ1_EN);
+  putreg16(0x0000, Z8_IRQ2_EN);
+
+  /* And finally, enable interrupts */
+
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
+  EI();
+#endif
+}
+
+/****************************************************************************
  * Name: irqsave
  *
  * Description:
@@ -117,5 +140,111 @@ void irqrestore(irqstate_t flags)
       /* The IRQE bit was set, re-enable interrupts */
 
       EI();
+    }
+}
+
+/****************************************************************************
+ * Name: up_disable_irq
+ *
+ * Description:
+ *   Disable the IRQ specified by 'irq'
+ *
+ ****************************************************************************/
+
+void up_disable_irq(int irq)
+{
+  /* System exceptions cannot be disabled */
+
+  if (irq >= Z8_IRQ0_MIN)
+    {
+      /* Disable the interrupt by clearing the corresponding bit in the
+       * appropriate IRQ enable high register.  The enable low
+       * register is assumed to be zero, resulting interrupt disabled.
+       */
+
+      if (irq < Z8_IRQ0_MAX)
+        {
+           putreg8((getreg8(Z8_IRQ0_ENH) & ~Z8_IRQ0_BIT(irq)), Z8_IRQ0_ENH);
+        }
+      else if (irq < Z8_IRQ1_MAX)
+        {
+           putreg8((getreg8(Z8_IRQ1_ENH) & ~Z8_IRQ1_BIT(irq)), Z8_IRQ1_ENH);
+        }
+      else if (irq < NR_IRQS)
+        {
+           putreg8((getreg8(Z8_IRQ2_ENH) & ~Z8_IRQ2_BIT(irq)), Z8_IRQ2_ENH);
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: up_enable_irq
+ *
+ * Description:
+ *   Enable the IRQ specified by 'irq'
+ *
+ ****************************************************************************/
+
+void up_enable_irq(int irq)
+{
+  /* System exceptions cannot be disabled */
+
+  if (irq >= Z8_IRQ0_MIN)
+    {
+      /* Enable the interrupt by setting the corresponding bit in the
+       * appropriate IRQ enable high register.  The enable low
+       * register is assumed to be zero, resulting in "nomimal" interrupt
+       * priority.
+       */
+
+      if (irq < Z8_IRQ0_MAX)
+        {
+           putreg8((getreg8(Z8_IRQ0_ENH) | Z8_IRQ0_BIT(irq)), Z8_IRQ0_ENH);
+        }
+      else if (irq < Z8_IRQ1_MAX)
+        {
+           putreg8((getreg8(Z8_IRQ1_ENH) | Z8_IRQ1_BIT(irq)), Z8_IRQ1_ENH);
+        }
+      else if (irq < NR_IRQS)
+        {
+           putreg8((getreg8(Z8_IRQ2_ENH) | Z8_IRQ2_BIT(irq)), Z8_IRQ2_ENH);
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: up_maskack_irq
+ *
+ * Description:
+ *   Mask the IRQ and acknowledge it
+ *
+ ****************************************************************************/
+
+void up_maskack_irq(int irq)
+{
+  /* System exceptions cannot be disabled or acknowledged */
+
+  if (irq >= Z8_IRQ0_MIN)
+    {
+      /* Disable the interrupt by clearing the corresponding bit in the
+       * appropriate IRQ enable register and acknowledge it by setting the
+       * corresponding bit in the IRQ status register.
+       */
+
+      if (irq < Z8_IRQ0_MAX)
+        {
+           putreg8((getreg8(Z8_IRQ0_ENH) & ~Z8_IRQ0_BIT(irq)), Z8_IRQ0_ENH);
+           putreg8(Z8_IRQ0_BIT(irq), Z8_IRQ0);
+        }
+      else if (irq < Z8_IRQ1_MAX)
+        {
+           putreg8((getreg8(Z8_IRQ1_ENH) & ~Z8_IRQ1_BIT(irq)), Z8_IRQ1_ENH);
+           putreg8(Z8_IRQ1_BIT(irq), Z8_IRQ2);
+        }
+      else if (irq < NR_IRQS)
+        {
+           putreg8((getreg8(Z8_IRQ2_ENH) & ~Z8_IRQ2_BIT(irq)), Z8_IRQ2_ENH);
+           putreg8(Z8_IRQ2_BIT(irq), Z8_IRQ2);
+        }
     }
 }
