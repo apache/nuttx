@@ -40,11 +40,10 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <ez8.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-
-#include <ez8.h>
 
 #include "chip/switch.h"
 #include "up_internal.h"
@@ -81,13 +80,13 @@ void up_irqinitialize(void)
 {
   /* Clear and disable all interrupts.  Set all to priority 0. */
 
-  putreg8(0xff, Z8_IRQ0);
-  putreg8(0xff, Z8_IRQ1);
-  putreg8(0xff, Z8_IRQ2);
+  putreg8(0xff, IRQ0);
+  putreg8(0xff, IRQ1);
+  putreg8(0xff, IRQ2);
 
-  putreg16(0x0000, Z8_IRQ0_EN);
-  putreg16(0x0000, Z8_IRQ1_EN);
-  putreg16(0x0000, Z8_IRQ2_EN);
+  putreg16(0x0000, IRQ0EN);
+  putreg16(0x0000, IRQ1EN);
+  putreg16(0x0000, IRQ2EN);
 
   /* And finally, enable interrupts */
 
@@ -164,15 +163,15 @@ void up_disable_irq(int irq)
 
       if (irq < Z8_IRQ0_MAX)
         {
-           putreg8((getreg8(Z8_IRQ0_ENH) & ~Z8_IRQ0_BIT(irq)), Z8_IRQ0_ENH);
+           putreg8((getreg8(IRQ0ENH) & ~Z8_IRQ0_BIT(irq)), IRQ0ENH);
         }
       else if (irq < Z8_IRQ1_MAX)
         {
-           putreg8((getreg8(Z8_IRQ1_ENH) & ~Z8_IRQ1_BIT(irq)), Z8_IRQ1_ENH);
+           putreg8((getreg8(IRQ1ENH) & ~Z8_IRQ1_BIT(irq)), IRQ1ENH);
         }
       else if (irq < NR_IRQS)
         {
-           putreg8((getreg8(Z8_IRQ2_ENH) & ~Z8_IRQ2_BIT(irq)), Z8_IRQ2_ENH);
+           putreg8((getreg8(IRQ2ENH) & ~Z8_IRQ2_BIT(irq)), IRQ2ENH);
         }
     }
 }
@@ -199,15 +198,15 @@ void up_enable_irq(int irq)
 
       if (irq < Z8_IRQ0_MAX)
         {
-           putreg8((getreg8(Z8_IRQ0_ENH) | Z8_IRQ0_BIT(irq)), Z8_IRQ0_ENH);
+           putreg8((getreg8(IRQ0ENH) | Z8_IRQ0_BIT(irq)), IRQ0ENH);
         }
       else if (irq < Z8_IRQ1_MAX)
         {
-           putreg8((getreg8(Z8_IRQ1_ENH) | Z8_IRQ1_BIT(irq)), Z8_IRQ1_ENH);
+           putreg8((getreg8(IRQ1ENH) | Z8_IRQ1_BIT(irq)), IRQ1ENH);
         }
       else if (irq < NR_IRQS)
         {
-           putreg8((getreg8(Z8_IRQ2_ENH) | Z8_IRQ2_BIT(irq)), Z8_IRQ2_ENH);
+           putreg8((getreg8(IRQ2ENH) | Z8_IRQ2_BIT(irq)), IRQ2ENH);
         }
     }
 }
@@ -233,18 +232,18 @@ void up_maskack_irq(int irq)
 
       if (irq < Z8_IRQ0_MAX)
         {
-           putreg8((getreg8(Z8_IRQ0_ENH) & ~Z8_IRQ0_BIT(irq)), Z8_IRQ0_ENH);
-           putreg8(Z8_IRQ0_BIT(irq), Z8_IRQ0);
+           putreg8((getreg8(IRQ0ENH) & ~Z8_IRQ0_BIT(irq)), IRQ0ENH);
+           putreg8(Z8_IRQ0_BIT(irq), IRQ0);
         }
       else if (irq < Z8_IRQ1_MAX)
         {
-           putreg8((getreg8(Z8_IRQ1_ENH) & ~Z8_IRQ1_BIT(irq)), Z8_IRQ1_ENH);
-           putreg8(Z8_IRQ1_BIT(irq), Z8_IRQ2);
+           putreg8((getreg8(IRQ1ENH) & ~Z8_IRQ1_BIT(irq)), IRQ1ENH);
+           putreg8(Z8_IRQ1_BIT(irq), IRQ2);
         }
       else if (irq < NR_IRQS)
         {
-           putreg8((getreg8(Z8_IRQ2_ENH) & ~Z8_IRQ2_BIT(irq)), Z8_IRQ2_ENH);
-           putreg8(Z8_IRQ2_BIT(irq), Z8_IRQ2);
+           putreg8((getreg8(IRQ2ENH) & ~Z8_IRQ2_BIT(irq)), IRQ2ENH);
+           putreg8(Z8_IRQ2_BIT(irq), IRQ2);
         }
     }
 }

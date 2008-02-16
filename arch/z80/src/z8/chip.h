@@ -50,7 +50,7 @@
 #ifdef __ASSEMBLY__
 # define _HX(h)   %##h
 #else
-# define _HX(w)   0x##h
+# define _HX(h)   0x##h
 #endif
 
 /* Memory Map
@@ -78,24 +78,24 @@
 
 /* Timer control register */
 
-#define Z8_TIMERCTL1_TEN      _HX(80) /* Bit 7: Timer enabled */
-#define Z8_TIMERCTL1_TPOL     _HX(40) /* Bit 6: Timer input/output polarity */
-#define Z8_TIMERSCTL_DIV1     _HX(00) /* Bits 3-5: Pre-scale divisor */
-#define Z8_TIMERSCTL_DIV2     _HX(08)
-#define Z8_TIMERSCTL_DIV4     _HX(10)
-#define Z8_TIMERSCTL_DIV8     _HX(18)
-#define Z8_TIMERSCTL_DIV16    _HX(20)
-#define Z8_TIMERSCTL_DIV32    _HX(28)
-#define Z8_TIMERSCTL_DIV64    _HX(30)
-#define Z8_TIMERSCTL_DIV128   _HX(38)
-#define Z8_TIMERSCTL_ONESHOT  _HX(00) /* Bits 0-2: Timer mode */
-#define Z8_TIMERSCTL_CONT     _HX(01)
-#define Z8_TIMERSCTL_COUNTER  _HX(02)
-#define Z8_TIMERSCTL_PWM      _HX(03)
-#define Z8_TIMERSCTL_CAPTURE  _HX(04)
-#define Z8_TIMERSCTL_COMPARE  _HX(05)
-#define Z8_TIMERSCTL_GATED    _HX(06)
-#define Z8_TIMERSCTL_CAPCMP   _HX(07)
+#define Z8_TIMERCTL_TEN      _HX(80) /* Bit 7: Timer enabled */
+#define Z8_TIMERCTL_TPOL     _HX(40) /* Bit 6: Timer input/output polarity */
+#define Z8_TIMERCTL_DIV1     _HX(00) /* Bits 3-5: Pre-scale divisor */
+#define Z8_TIMERCTL_DIV2     _HX(08)
+#define Z8_TIMERCTL_DIV4     _HX(10)
+#define Z8_TIMERCTL_DIV8     _HX(18)
+#define Z8_TIMERCTL_DIV16    _HX(20)
+#define Z8_TIMERCTL_DIV32    _HX(28)
+#define Z8_TIMERCTL_DIV64    _HX(30)
+#define Z8_TIMERCTL_DIV128   _HX(38)
+#define Z8_TIMERCTL_ONESHOT  _HX(00) /* Bits 0-2: Timer mode */
+#define Z8_TIMERCTL_CONT     _HX(01)
+#define Z8_TIMERCTL_COUNTER  _HX(02)
+#define Z8_TIMERCTL_PWM      _HX(03)
+#define Z8_TIMERCTL_CAPTURE  _HX(04)
+#define Z8_TIMERCTL_COMPARE  _HX(05)
+#define Z8_TIMERCTL_GATED    _HX(06)
+#define Z8_TIMERCTL_CAPCMP   _HX(07)
 
 /* Register access macros ***********************************************************
  *
@@ -106,11 +106,11 @@
 
 #ifndef __ASSEMBLY__
 # define getreg8(a)           (a)
-# define putreg8(v,a)         ((a) = (v))
+# define putreg8(v,a)         (a) = (v)
 # define getreg16(a)          (a)
-# define putreg16(v,a)        ((a) = (v))
+# define putreg16(v,a)        (a) = (v)
 # define getreg32(a)          (a)
-# define putreg32(v,a)        ((a) = (v))
+# define putreg32(v,a)        (a) = (v)
 #endif /* __ASSEMBLY__ */
 
 /************************************************************************************
