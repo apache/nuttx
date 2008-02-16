@@ -161,11 +161,11 @@ void up_disable_irq(int irq)
        * register is assumed to be zero, resulting interrupt disabled.
        */
 
-      if (irq < Z8_IRQ0_MAX)
+      if (irq <= Z8_IRQ0_MAX)
         {
            putreg8((getreg8(IRQ0ENH) & ~Z8_IRQ0_BIT(irq)), IRQ0ENH);
         }
-      else if (irq < Z8_IRQ1_MAX)
+      else if (irq <= Z8_IRQ1_MAX)
         {
            putreg8((getreg8(IRQ1ENH) & ~Z8_IRQ1_BIT(irq)), IRQ1ENH);
         }
@@ -196,11 +196,11 @@ void up_enable_irq(int irq)
        * priority.
        */
 
-      if (irq < Z8_IRQ0_MAX)
+      if (irq <= Z8_IRQ0_MAX)
         {
            putreg8((getreg8(IRQ0ENH) | Z8_IRQ0_BIT(irq)), IRQ0ENH);
         }
-      else if (irq < Z8_IRQ1_MAX)
+      else if (irq <= Z8_IRQ1_MAX)
         {
            putreg8((getreg8(IRQ1ENH) | Z8_IRQ1_BIT(irq)), IRQ1ENH);
         }
@@ -230,12 +230,12 @@ void up_maskack_irq(int irq)
        * corresponding bit in the IRQ status register.
        */
 
-      if (irq < Z8_IRQ0_MAX)
+      if (irq <= Z8_IRQ0_MAX)
         {
            putreg8((getreg8(IRQ0ENH) & ~Z8_IRQ0_BIT(irq)), IRQ0ENH);
            putreg8(Z8_IRQ0_BIT(irq), IRQ0);
         }
-      else if (irq < Z8_IRQ1_MAX)
+      else if (irq <= Z8_IRQ1_MAX)
         {
            putreg8((getreg8(IRQ1ENH) & ~Z8_IRQ1_BIT(irq)), IRQ1ENH);
            putreg8(Z8_IRQ1_BIT(irq), IRQ2);
