@@ -54,20 +54,22 @@
  * hence, cannot include ez8.h.  The logic is fragmentary at present.
  */
 
-#if defined(_Z8ENCORE_F642X) || defined(_Z8ENCORE_64K_SERIES)
-# define ENCORE_VECTORS 1
-#endif
+#ifndef ENCORE_VECTORS
+#  if defined(_Z8ENCORE_F642X) || defined(_Z8ENCORE_64K_SERIES)
+#    define ENCORE_VECTORS 1
+#  endif
 
-#if defined(_Z8ENCORE_F640X) || defined(_Z8ENCORE_640_FAMILY)
-# define ENCORE_VECTORS 1
-#endif
+#  if defined(_Z8ENCORE_F640X) || defined(_Z8ENCORE_640_FAMILY)
+#    define ENCORE_VECTORS 1
+#  endif
 
-#if defined(_Z8ENCORE_F08X) || defined(_Z8ENCORE_8K_SERIES)
-# define ENCORE_VECTORS 1
-#endif
+#  if defined(_Z8ENCORE_F08X) || defined(_Z8ENCORE_8K_SERIES)
+#    define ENCORE_VECTORS 1
+#  endif
 
-#if defined(_Z8ENCORE_4K_SERIES)
-# define ENCORE_VECTORS 1
+#  if defined(_Z8ENCORE_4K_SERIES)
+#    define ENCORE_VECTORS 1
+#  endif
 #endif
 
 /* ez8 Interrupt Numbers */
