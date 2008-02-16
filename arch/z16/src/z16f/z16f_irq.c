@@ -40,8 +40,10 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+
 #include <nuttx/irq.h>
 #include <arch/irq.h>
+#include <ez8.h>
 
 #include "chip/chip.h"
 #include "os_internal.h"
@@ -109,7 +111,8 @@ void up_disable_irq(int irq)
   if (irq >= Z16F_IRQ_IRQ0)
     {
       /* Disable the interrupt by clearing the corresponding bit in the
-       * appropriate IRQ enable register.
+       * appropriate IRQ enable high register.  The enable low
+       * register is assumed to be zero, resulting interrupt disabled.
        */
 
       if (irq < Z16F_IRQ_IRQ1)
@@ -142,7 +145,9 @@ void up_enable_irq(int irq)
   if (irq >= Z16F_IRQ_IRQ0)
     {
       /* Enable the interrupt by setting the corresponding bit in the
-       * appropriate IRQ enable register.
+       * appropriate IRQ enable register.  The enable low
+       * register is assumed to be zero, resulting in "nomimal" interrupt
+       * priority.
        */
 
       if (irq < Z16F_IRQ_IRQ1)

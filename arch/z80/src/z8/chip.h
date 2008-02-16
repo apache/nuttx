@@ -74,6 +74,29 @@
  * ZDS-II header file, ez8.h, to provide the correct addresses for each register.
  */
 
+/* Timer Register Bit Definitions ***************************************************/
+
+/* Timer control register */
+
+#define Z8_TIMERCTL1_TEN      _HX(80) /* Bit 7: Timer enabled */
+#define Z8_TIMERCTL1_TPOL     _HX(40) /* Bit 6: Timer input/output polarity */
+#define Z8_TIMERSCTL_DIV1     _HX(00) /* Bits 3-5: Pre-scale divisor */
+#define Z8_TIMERSCTL_DIV2     _HX(08)
+#define Z8_TIMERSCTL_DIV4     _HX(10)
+#define Z8_TIMERSCTL_DIV8     _HX(18)
+#define Z8_TIMERSCTL_DIV16    _HX(20)
+#define Z8_TIMERSCTL_DIV32    _HX(28)
+#define Z8_TIMERSCTL_DIV64    _HX(30)
+#define Z8_TIMERSCTL_DIV128   _HX(38)
+#define Z8_TIMERSCTL_ONESHOT  _HX(00) /* Bits 0-2: Timer mode */
+#define Z8_TIMERSCTL_CONT     _HX(01)
+#define Z8_TIMERSCTL_COUNTER  _HX(02)
+#define Z8_TIMERSCTL_PWM      _HX(03)
+#define Z8_TIMERSCTL_CAPTURE  _HX(04)
+#define Z8_TIMERSCTL_COMPARE  _HX(05)
+#define Z8_TIMERSCTL_GATED    _HX(06)
+#define Z8_TIMERSCTL_CAPCMP   _HX(07)
+
 /* Register access macros ***********************************************************
  *
  * The register access mechanism provided in ez8.h differs from the useful in other
