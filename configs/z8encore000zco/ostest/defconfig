@@ -43,24 +43,27 @@
 #   architecture.
 # CONFIG_ARCH_CHIP_chip - for use in C code.  This identifies the
 #   particular chip or SoC that the architecture is implemented
-#   in (CONFIG_ARCH_CHIP_Z16F)
-# CONFIG_ARCH_CHIP_Z16F2810 - Identifies z16f chip variant
-# CONFIG_ARCH_CHIP_Z16F2811
-# CONFIG_ARCH_CHIP_Z16F3211
-# CONFIG_ARCH_CHIP_Z16F6411
+#   in (CONFIG_ARCH_CHIP_Z8)
+# CONFIG_ARCH_CHIP_Z8F642X - Identifies z8 chip variant
+# CONFIG_ARCH_CHIP_Z8F6423
+# CONFIG_ARCH_CHIP_Z8F640X
+# CONFIG_ARCH_CHIP_Z8F6403
 # CONFIG_ARCH_BOARD - identifies the configs subdirectory and, hence,
 #   the board that supports the particular chip or SoC.
 # CONFIG_ARCH_BOARD_name - for use in C code
 # CONFIG_BOARD_LOOPSPERMSEC - for delay loops
 # CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
 # CONFIG_DRAM_SIZE - Describes the installed DRAM.
-# CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to z16f.
+# CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to z8 board architecture.
 #
 CONFIG_ARCH=z80
 CONFIG_ARCH_Z8=y
 CONFIG_ARCH_CHIP=z8
 CONFIG_ARCH_CHIP_Z8=y
-CONFIG_ARCH_CHIP_Z8F6403=y
+CONFIG_ARCH_CHIP_Z8F642X=y
+CONFIG_ARCH_CHIP_Z8F6423=y
+CONFIG_ARCH_CHIP_Z8F640X=n
+CONFIG_ARCH_CHIP_Z8F6403=n
 CONFIG_ARCH_BOARD=z8encore000zco
 CONFIG_ARCH_BOARD_Z8ENCORE000ZCO=y
 CONFIG_BOARD_LOOPSPERMSEC=1250

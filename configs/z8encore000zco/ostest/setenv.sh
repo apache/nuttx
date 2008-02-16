@@ -49,3 +49,4 @@ alias ez8asm="${ZDSBINDIR}/ez8asm.exe"
 alias ez8cc="${ZDSBINDIR}/ez8cc.exe"
 alias ez8lib="${ZDSBINDIR}/ez8lib.exe"
 alias ez8link="${ZDSBINDIR}/ez8link.exe"
+
