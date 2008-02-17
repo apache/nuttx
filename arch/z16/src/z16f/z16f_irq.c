@@ -43,7 +43,6 @@
 
 #include <nuttx/irq.h>
 #include <arch/irq.h>
-#include <ez8.h>
 
 #include "chip/chip.h"
 #include "os_internal.h"

@@ -239,7 +239,7 @@
 # undef CONFIG_CPP_HAVE_VARARGS /* No variable argument macros */
 # undef CONFIG_CPP_HAVE_WARNING /* Does not support #warning */
 
-/* Intriniscs */
+/* Intrinsics */
 
 # define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
 # define CONFIG_HAVE_FILENAME     1 /* Has __FILE__ */
