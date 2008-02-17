@@ -20,8 +20,8 @@ NuttX TODO List (Last updated February 13, 2008)
   (1)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
-  (4)  z80/z8 (arch/z80/)
-  (6)  z16 (arch/z16/)
+  (5)  z80/z8 (arch/z80/)
+  (7)  z16 (arch/z16/)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -229,7 +229,7 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Medium
 
-  Desription:  The CAN driver is untested
+  Description: The CAN driver is untested.  Add a test for the CAN driver.
   Status:      Open
   Priority:    Medium
 
@@ -372,7 +372,7 @@ o z80/z8 (arch/z80)
   Status:      Open
   Priority:    Low, thought to be cosmetic.  I think this is a consequence of
                replacing vs. inserting the library.
-               
+
   Description: The ZDS-II compiler (version 4.10.1) fails with an internal error
                while compiler mm/mm_initialize.  This has been reported as
                incident 81509.
@@ -385,16 +385,21 @@ o z80/z8 (arch/z80)
                @@ -94,8 +94,11 @@
                {
                   int i;
- 
+
                +#if 0 /* DO NOT CHECK IN */
                   CHECK_ALLOCNODE_SIZE;
                   CHECK_FREENODE_SIZE;
                +#endif
- 
+
                /* Set up global variables */
- 
+
   Status:      Open
   Priority:    High
+
+  Description: Add support for prioritized ez8 interrupts.  Currently logic supports
+               only nominal interrupt priority.
+  Status:      Open
+  Priority:    Low
 
 o z16 (arch/z16)
 ^^^^^^^^^^^^^^^^
@@ -425,12 +430,12 @@ o z16 (arch/z16)
                With -reduceopt on the command line, I can get the printf output.
                However, there are still errors in the compiled code -- specifically
                in sched/timer_create.c.
-               
+
                I have submitted a bug report to ZiLOG for this (support incident
                81400).  You can see the status of the bug report (and lots more
                technical detail) here:
                http://support.zilog.com/support/incident/incident_support.asp?iIncidentId=81400&iSiteId=1&chLanguageCode=ENG
-               
+
                Summary of ZiLOG analysis: "This is a ZNEO compiler problem. ... [a] workaround
                is to replace:
                    if ( !timerid || (clockid != 0) )
@@ -476,4 +481,10 @@ o z16 (arch/z16)
                and make a safer system solution.
   Status:      Open
   Priority:    Low
+
+  Description: Add support for prioritized interrupts.  Currently logic supports
+               only nominal interrupt priority.
+  Status:      Open
+  Priority:    Low
+
 
