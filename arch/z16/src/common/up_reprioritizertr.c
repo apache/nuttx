@@ -101,7 +101,7 @@ void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority)
       FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
       boolean switch_needed;
 
-      lldbg("TCB=%p PRI=%d\n", tcb, priority);
+      slldbg("TCB=%p PRI=%d\n", tcb, priority);
 
       /* Remove the tcb task from the ready-to-run list.
        * sched_removereadytorun will return TRUE if we just
@@ -153,7 +153,7 @@ void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority)
                */
 
               rtcb = (FAR _TCB*)g_readytorun.head;
-              lldbg("New Active Task TCB=%p\n", rtcb);
+              slldbg("New Active Task TCB=%p\n", rtcb);
 
               /* Then setup so that the context will be performed on exit
                * from the interrupt.
@@ -174,7 +174,7 @@ void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority)
                */
 
               rtcb = (FAR _TCB*)g_readytorun.head;
-              lldbg("New Active Task TCB=%p\n", rtcb);
+              slldbg("New Active Task TCB=%p\n", rtcb);
 
               /* Then switch contexts */
 
