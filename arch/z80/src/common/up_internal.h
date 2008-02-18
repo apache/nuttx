@@ -96,8 +96,10 @@ extern "C" {
 
 EXTERN void up_irqinitialize(void);
 EXTERN int  up_timerisr(int irq, FAR chipreg_t *regs);
-EXTERN void up_lowputc(char ch) naked_function;
-EXTERN char up_lowgetc(void) naked_function;
+
+#ifdef CONFIG_USE_LOWUARTINIT
+EXTERN void up_lowuartinit(void);
+#endif
 
 /* Defined in up_doirq.c */
 
@@ -122,6 +124,8 @@ EXTERN void up_serialinit(void);
 # define up_earlyserialinit()
 # define up_serialinit()
 #endif
+
+/* Defined in drivers/lowconsole.c */
 
 #ifdef CONFIG_DEV_LOWCONSOLE
 EXTERN void lowconsole_init(void);
