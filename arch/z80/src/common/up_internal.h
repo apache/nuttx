@@ -50,6 +50,8 @@
 #undef  CONFIG_SUPPRESS_SERIAL_INTS   /* Console will poll */
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
 #undef  CONFIG_DUMP_ON_EXIT           /* Dump task state on exit */
+#undef  CONFIG_Z80_LOWPUTC            /* Support up_lowputc for debug */
+#undef  CONFIG_Z80_LOWGETC            /* support up_lowgetc for debug */
 
 /****************************************************************************
  * Included Files
@@ -62,6 +64,17 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+ /* Determine which (if any) console driver to use */
+
+#if defined(CONFIG_Z80_LOWPUTC) || defined(CONFIG_Z80_LOWGETC) || \
+    CONFIG_NFILE_DESCRIPTORS == 0 || defined(CONFIG_DEV_LOWCONSOLE)
+#  define CONFIG_USE_LOWCONSOLE 1
+#  define CONFIG_USE_LOWUARTINIT 1
+#elif defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS > 0
+#  define CONFIG_USE_SERIALDRIVER 1
+#  define CONFIG_USE_EARLYSERIALINIT 1
+#endif
 
 /****************************************************************************
  * Public Types
@@ -106,12 +119,18 @@ void up_addregion(void);
 
 /* Defined in up_serial.c */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
+#ifdef CONFIG_USE_SERIALDRIVER
 EXTERN void up_earlyserialinit(void);
 EXTERN void up_serialinit(void);
 #else
 # define up_earlyserialinit()
 # define up_serialinit()
+#endif
+
+#ifdef CONFIG_USE_LOWCONSOLE
+EXTERN void lowconsole_init(void);
+#else
+# define lowconsole_init()
 #endif
 
 /* Defined in up_timerisr.c */

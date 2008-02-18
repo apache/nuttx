@@ -42,9 +42,11 @@
  ************************************************************************************/
 
 #include <sys/types.h>
-#include <nuttx/sched.h>
-#include <nuttx/arch.h>
-#include "up_internal.h"
+#ifndef __ASSEMBLY__
+#  include <nuttx/sched.h>
+#  include <nuttx/arch.h>
+#endif
+#include "common/up_internal.h"
 
 /************************************************************************************
  * Definitions
