@@ -54,12 +54,6 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
-/* Defined in drivers/dev_lowconsole.c */
-
-#ifdef CONFIG_USE_LOWCONSOLE
-extern void lowconsole_init(void);
-#endif
-
 #if CONFIG_NFILE_DESCRIPTORS > 0
 #if defined(CONFIG_DEV_CONSOLE) && !defined(CONFIG_DEV_LOWCONSOLE)
 /****************************************************************************
