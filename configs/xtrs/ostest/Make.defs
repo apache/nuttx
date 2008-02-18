@@ -65,7 +65,7 @@ SDCCLIB			= z80.lib
 ASMEXT			= .asm
 OBJEXT			= .o
 LIBEXT			= .lib
-EXEEXT			= .hex
+EXEEXT			= .CMD
 
 define COMPILE
 	@echo "CC: $1"
