@@ -110,8 +110,13 @@ CONFIG_LINKER_CODE_AREA=0x5300
 # CONFIG_JULIAN_TIME - Enables Julian time conversions
 # CONFIG_START_YEAR, CONFIG_START_MONTH, CONFIG_START_DAY -
 #   Used to initialize the internal time logic.
+# CONFIG_HAVE_LOWUARTINIT - Provides low-level UART initialization
+#   logic as up_lowuartinit (only needed if there is no
+#   serial driver).
 # CONFIG_DEV_CONSOLE - Set if architecture-specific logic
 #   provides /dev/console.  Enables stdout, stderr, stdin.
+# CONFIG_DEV_LOWCONSOLE - Use the simple, low-level serial console
+#   driver (minimul support)
 #
 CONFIG_EXAMPLE=pashello
 CONFIG_DEBUG=n
@@ -125,6 +130,7 @@ CONFIG_START_YEAR=2008
 CONFIG_START_MONTH=2
 CONFIG_START_DAY=21
 CONFIG_JULIAN_TIME=n
+CONFIG_HAVE_LOWUARTINIT=n
 CONFIG_DEV_CONSOLE=n
 CONFIG_DEV_LOWCONSOLE=n
 

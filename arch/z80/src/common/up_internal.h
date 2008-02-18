@@ -66,10 +66,17 @@
  /* Determine which (if any) console driver to use */
 
 #if CONFIG_NFILE_DESCRIPTORS == 0 || defined(CONFIG_DEV_LOWCONSOLE)
-#  define CONFIG_USE_LOWUARTINIT 1
+#  undef CONFIG_USE_SERIALDRIVER
+#  undef CONFIG_USE_EARLYSERIALINIT
+#  ifdef CONFIG_HAVE_LOWUARTINIT
+#    define CONFIG_USE_LOWUARTINIT 1
+#  else
+#    undef CONFIG_USE_LOWUARTINIT
+#  endif
 #elif defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS > 0
 #  define CONFIG_USE_SERIALDRIVER 1
 #  define CONFIG_USE_EARLYSERIALINIT 1
+#  undef CONFIG_USE_LOWUARTINIT
 #endif
 
 /****************************************************************************

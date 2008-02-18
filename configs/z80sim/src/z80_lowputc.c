@@ -69,13 +69,13 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Name: up_lowputc
+ * Name: z80_lowputc
  *
  * Data sent to port 0xbe are echoed on stdout by the simulation
  *
  ********************************************************************************/
 
-void up_lowputc(char ch) __naked
+void z80_lowputc(char ch) __naked
 {
   _asm
 	ld	hl, #2
@@ -87,13 +87,13 @@ void up_lowputc(char ch) __naked
 }
 
 /********************************************************************************
- * Name: up_lowgetc
+ * Name: z80_lowgetc
  *
  * Data from stdin can be received on port 0xbe in the simulation
  *
  ********************************************************************************/
 
-char up_lowgetc(void) __naked
+char z80_lowgetc(void) __naked
 {
   _asm
 	in	a, (0xbe)
