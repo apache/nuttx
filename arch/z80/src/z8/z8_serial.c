@@ -291,6 +291,48 @@ static void z8_consoleput(ubyte ch)
 }
 
 /****************************************************************************
+ * Name: z8_uartconfigure
+ *
+ * Description:
+ *   Configure hardware for UART functionality
+ *
+ ****************************************************************************/
+
+void z8_uartconfigure(void)
+{
+  uint16 brg;
+  ubyte  val;
+
+  /* Configure GPIO Port A pins 4 & 5 for alternate function */
+
+  putreg8(0x02, PAADDR);
+  val = getreg8(PACTL) | 0x30;    /* Set bits in alternate function register */
+  putreg8(val, PACTL);
+  putreg8(0x07, PAADDR);
+  val = getreg8(PACTL) & 0xcf;    /* Reset bits in alternate function set-1 register */
+  putreg8(val, PACTL);
+  putreg8(0x08, PAADDR);
+  val = getreg8(PACTL) & 0xcf;    /* Reset bits in alternate function set-2 register */
+  putreg8(val, PACTL);
+  putreg8(0x00, PAADDR);
+
+#ifdef EZ8_UART1
+  /* Configure GPIO Port D pins 4 & 5 for alternate function */
+  
+  putreg8(0x02, PAADDR);
+  val = getreg8(PDCTL) | 0x30;    /* Set bits in alternate function register */
+  putreg8(val, PDCTL);
+  putreg8(0x07, PDADDR);
+  val = getreg8(PDCTL) & 0xcf;    /* Reset bits in alternate function set-1 register */
+  putreg8(val, PDCTL);
+  putreg8(0x08, PDADDR);
+  val = getreg8(PDCTL) & 0xcf;    /* Reset bits in alternate function set-2 register */
+  putreg8(val, PDCTL);
+  putreg8(0x00, PDADDR);
+#endif
+}
+
+/****************************************************************************
  * Name: z8_setup
  *
  * Description:
@@ -303,6 +345,7 @@ static int z8_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
+  uint32 freq = get_freq();
   uint32 brg;
   ubyte ctl0;
   ubyte ctl1;
@@ -311,7 +354,7 @@ static int z8_setup(struct uart_dev_s *dev)
    * BRG = (freq + baud * 8)/(baud * 16)
    */
 
-  brg = (_DEFCLK + (priv->baud << 3))/(priv->baud << 4);
+  brg = (freq + (priv->baud << 3))/(priv->baud << 4);
   putreg16((uint16)brg, priv->uartbase + Z8_UART_BR);
 
   /* Configure STOP bits */
