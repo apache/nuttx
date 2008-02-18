@@ -23,9 +23,6 @@ ZDS-II Compiler Versions
  
    /* Set up global variables */
 
-  The 4.10.1 version of ZDS-11 is not compatible with the Z8F6403 chip
-  in the z8encore000zco development board.
-
 4.9.5
   This is the latest tool version listed on the ZiLOG site for the Z8F6403.
   However, it uses different compiler command line arguments.
