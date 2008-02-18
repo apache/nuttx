@@ -156,9 +156,7 @@ void up_initialize(void)
 
 #ifdef CONFIG_USE_SERIALDRIVER
   up_serialinit();
-#endif
-
-#ifdef CONFIG_USE_LOWCONSOLE
+#elif defined(CONFIG_DEV_LOWCONSOLE)
   lowconsole_init();
 #endif
 
