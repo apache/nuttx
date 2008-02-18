@@ -60,6 +60,9 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+EXTERN void z80_lowputc(char ch) __naked;
+EXTERN char z80_lowgetc(void) __naked;
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

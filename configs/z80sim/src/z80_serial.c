@@ -227,7 +227,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int up_receive(struct uart_dev_s *dev, uint32 *status)
 {
-  uint8 ch = up_lowgetc();
+  uint8 ch = z80_getputc();
   *status = 0;
   return ch;
 }
@@ -267,7 +267,7 @@ static boolean up_rxavailable(struct uart_dev_s *dev)
 
 static void up_send(struct uart_dev_s *dev, int ch)
 {
-  up_lowputc(ch);
+  z80_lowputc(ch);
 }
 
 /****************************************************************************
@@ -358,7 +358,7 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
-  up_lowputc(ch);
+  z80_lowputc(ch);
   return 0;
 }
 
