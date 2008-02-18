@@ -97,6 +97,73 @@
 #define Z8_TIMERCTL_GATED    _HX(06)
 #define Z8_TIMERCTL_CAPCMP   _HX(07)
 
+/* UART Register Offsets *************************************************************/
+
+#define Z8_UART_TXD          _HX(00)        /*  8-bits: UART Transmit Data */
+#define Z8_UART_RXD          _HX(00)        /*  8-bits: UART Receive Data */
+#define Z8_UART_STAT0        _HX(01)        /*  8-bits: UART Status 0 */
+#define Z8_UART_CTL          _HX(02)        /* 16-bits: UART Control */
+#define Z8_UART_CTL0         _HX(02)        /*  8-bits: UART Control 0 */
+#define Z8_UART_CTL1         _HX(03)        /*  8-bits: UART COntrol 1 */
+#if defined(_Z8FMC16) || defined(_Z8F1680)
+#  define Z8_UART_MDSTAT     _HX(04)        /*  8-bits: UART Mode Select & Status */
+#else
+#  define Z8_UART_STAT1      _HX(04)        /*  8-bits: UART Status 1 */
+#endif
+#define Z8_UART_ADDR         _HX(05)        /*  8-bits: UART Address Compare */
+#define Z8_UART_BR           _HX(06)        /* 16-bits: UART Baud Rate */
+#define Z8_UART_BRH          _HX(06)        /*  8-bits: UART Baud Rate High Byte */
+#define Z8_UART_BRL          _HX(07)        /*  8-bits: UART Baud Rate Low Byte */
+
+/* UART0/1 Base Register Addresses **************************************************/
+
+#ifdef EZ8_UART0
+#  define Z8_UART0_BASE       ((ubyte volatile far*)0xf40)
+#endif
+
+#ifdef EZ8_UART1
+#  define Z8_UART1_BASE       ((ubyte volatile far*)0xf48)
+#endif
+
+/* UART0/1 Status 0 Register Bit Definitions ****************************************/
+
+#define Z8_UARTSTAT0_RDA     _HX(80)        /* Bit 7: Receive Data Available */
+#define Z8_UARTSTAT0_PE      _HX(40)        /* Bit 6: Parity Error */
+#define Z8_UARTSTAT0_OE      _HX(20)        /* Bit 5: Overrun Error */
+#define Z8_UARTSTAT0_FE      _HX(10)        /* Bit 4: Framing Error */
+#define Z8_UARTSTAT0_BRKD    _HX(08)        /* Bit 3: Break Detect */
+#define Z8_UARTSTAT0_TDRE    _HX(04)        /* Bit 2: Transmitter Data Register Empty */
+#define Z8_UARTSTAT0_TXE     _HX(02)        /* Bit 1: Transmitter Empty */
+#define Z8_UARTSTAT0_CTS     _HX(01)        /* Bit 0: Clear To Send */
+
+/* UART0/1 Control 0/1 Register Bit Definitions *************************************/
+
+#define Z8_UARTCTL0_TEN      _HX(80)        /* Bit 7: Transmit Enable */
+#define Z8_UARTCTL0_REN      _HX(40)        /* Bit 6: Receive Enable */
+#define Z8_UARTCTL0_CTSE     _HX(20)        /* Bit 5: CTS Enable */
+#define Z8_UARTCTL0_PEN      _HX(10)        /* Bit 4: Parity Enable */
+#define Z8_UARTCTL0_PSEL     _HX(08)        /* Bit 3: Odd Parity Select */
+#define Z8_UARTCTL0_SBRK     _HX(04)        /* Bit 2: Send Break */
+#define Z8_UARTCTL0_STOP     _HX(02)        /* Bit 1: Stop Bit Select */
+#define Z8_UARTCTL0_LBEN     _HX(01)        /* Bit 0: Loopback Enable */
+
+#define Z8_UARTCTL1_MPMD1    _HX(80)        /* Bit 7: Multiprocessor Mode (bit1) */
+#define Z8_UARTCTL1_MPEN     _HX(40)        /* Bit 6: Multiprocessor Enable */
+#define Z8_UARTCTL1_MPMD0    _HX(20)        /* Bit 5: Multiprocessor Mode (bit0) */
+#define Z8_UARTCTL1_MPBT     _HX(10)        /* Bit 4: Multiprocessor Bit Transmit */
+#define Z8_UARTCTL1_DEPOL    _HX(08)        /* Bit 3: Driver Enable Polarity */
+#define Z8_UARTCTL1_BRGCTL   _HX(04)        /* Bit 2: Baud Rate Generator Control */
+#define Z8_UARTCTL1_RDAIRQ   _HX(02)        /* Bit 1: Receive Data Interrupt Enable */
+#define Z8_UARTCTL1_IREN     _HX(01)        /* Bit 0: Infrared Encoder/Decoder Eanble */
+
+/* UART0/1 Mode Status/Select Register Bit Definitions ******************************/
+
+#define Z8_UARTMDSEL_NORMAL  _HX(00)        /* Bits 5-7=0: Multiprocessor and Normal Mode */
+#define Z8_UARTMDSEL_FILTER   HX(20)        /* Bits 5-7=1: Noise Filter Control/Status */
+#define Z8_UARTMDSEL_LINP     HX(40)        /* Bits 5-7=2: LIN protocol Contol/Status */
+#define Z8_UARTMDSEL_HWREV    HX(e0)        /* Bits 5-7=7: LIN-UART Hardware Revision */
+                                            /* Bits 0-4:   Mode dependent status */
+
 /* Register access macros ***********************************************************
  *
  * The register access mechanism provided in ez8.h differs from the useful in other
