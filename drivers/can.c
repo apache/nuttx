@@ -52,6 +52,7 @@
 #include <debug.h>
 
 #include <nuttx/fs.h>
+#include <nuttx/arch.h>
 #include <nuttx/can.h>
 
 #include <arch/irq.h>
