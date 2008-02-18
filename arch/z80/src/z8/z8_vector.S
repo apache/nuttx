@@ -250,6 +250,12 @@ LEAVE :	MACRO
  * Code
  **************************************************************************/
 
+	segment CODE
+
+/**************************************************************************
+ * Interrupt Vectors
+ **************************************************************************/
+
 #if defined(ENCORE_VECTORS)
 	vector WDT	= _z8_wdt_handler
 	vector TRAP	= _z8_trap_handler
@@ -444,8 +450,6 @@ endif
  *
  **************************************************************************/
 
-	define startup, space=rom
-	segment startup
 #if defined(ENCORE_VECTORS)
 _z8_wdt_handler:
 	ENTER(Z8_WDT_IRQ)
