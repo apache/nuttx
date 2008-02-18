@@ -154,6 +154,10 @@ void up_initialize(void)
 
   /* Initialize the serial device driver */
 
+#ifdef CONFIG_USE_LOWUARTINIT
+  up_lowuartinit();
+#endif
+
 #ifdef CONFIG_USE_SERIALDRIVER
   up_serialinit();
 #elif defined(CONFIG_DEV_LOWCONSOLE)

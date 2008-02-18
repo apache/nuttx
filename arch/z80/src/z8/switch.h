@@ -118,7 +118,7 @@
   do { \
     g_z8irqstate.state = Z8_IRQSTATE_ENTRY; \
     g_z8irqstate.regs  = (regs); \
-    up_maskask_irq(irq); \
+    up_maskack_irq(irq); \
   } while (0)
 
 /* The following macro is used when the system exits interrupt handling logic */
@@ -215,6 +215,10 @@ extern "C" {
 #else
 #define EXTERN extern
 #endif
+
+/* Defined in z8_irq.c */
+
+EXTERN void up_maskack_irq(int irq);
 
 /* Defined in z8_saveusercontext.asm */
 
