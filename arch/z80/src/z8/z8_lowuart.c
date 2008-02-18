@@ -102,7 +102,7 @@ void up_lowuartinit(void)
   putreg8(0x00, PAADDR);
 
   putreg8(0x00, U0CTL1);          /* no multi-processor operation mode */
-  putreg8(0x00, U0CTL0);          /* Transmit enable, Receive enable, no Parity, 1 Stop bit */
+  putreg8(0xc0, U0CTL0);          /* Transmit enable, Receive enable, no Parity, 1 Stop bit */
 
 #elif defined(EZ8_UART1) && defined(CONFIG_UART1_SERIAL_CONSOLE)
   /* Set the baudrate */
@@ -124,7 +124,7 @@ void up_lowuartinit(void)
   putreg8(0x00, PDADDR);
 
   putreg8(0x00, U1CTL1);          /* no multi-processor operation mode */
-  putreg8(0x00, U1CTL0);          /* Transmit enable, Receive enable, no Parity, 1 Stop bit */
+  putreg8(0xc0, U1CTL0);          /* Transmit enable, Receive enable, no Parity, 1 Stop bit */
 #endif
 }
 #endif /* CONFIG_USE_LOWUARTINIT */
