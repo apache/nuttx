@@ -207,8 +207,13 @@ endif
 
 nuttx$(EXEEXT): pass1.ihx nuttx.ihx
 	@rm -f pass1.*
-	@packihx nuttx.ihx > $(TOPDIR)/nuttx$(EXEEXT)
 	@cp -f nuttx.map $(TOPDIR)/.
+ifeq ($(EXEEXT),.CMD)
+	sed s/:00000001FF/:00520001AD/ nuttx.ihx | \
+	hex2cmd > $(TOPDIR)/NUTTX.CMD
+else
+	@packihx nuttx.ihx > $(TOPDIR)/nuttx$(EXEEXT)
+endif
 
 # Build dependencies
 
