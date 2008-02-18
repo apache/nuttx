@@ -66,7 +66,6 @@
  /* Determine which (if any) console driver to use */
 
 #if CONFIG_NFILE_DESCRIPTORS == 0 || defined(CONFIG_DEV_LOWCONSOLE)
-#  define CONFIG_USE_LOWCONSOLE 1
 #  define CONFIG_USE_LOWUARTINIT 1
 #elif defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS > 0
 #  define CONFIG_USE_SERIALDRIVER 1
@@ -124,7 +123,7 @@ EXTERN void up_serialinit(void);
 # define up_serialinit()
 #endif
 
-#ifdef CONFIG_USE_LOWCONSOLE
+#ifdef CONFIG_DEV_LOWCONSOLE
 EXTERN void lowconsole_init(void);
 #else
 # define lowconsole_init()
