@@ -60,7 +60,7 @@ CONFIG_ARCH_BOARD_SIM=y
 #   regions of memory to allocate from, this specifies the
 #   number of memory regions that the memory manager must
 #   handle and enables the API mm_addregion(start, end);
-# CONFIG_HAVE_LOWPUTC - architecture supports low-level, boot
+# CONFIG_ARCH_LOWPUTC - architecture supports low-level, boot
 #   time console output
 # CONFIG_TICKS_PER_MSEC - The default system timer is 100Hz
 #   or TICKS_PER_MSEC=10.  This setting may be defined to
