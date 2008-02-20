@@ -95,7 +95,7 @@ clean:
 	@rm -f $(BIN) *~ .*.swp
 	$(call CLEAN)
 	@( for dir in $(SUBDIRS); do \
-		rm $(dir)/*~ $(dir)/.*.swp; \
+		rm -f $${dir}/*~ $${dir}/.*.swp; \
 	done ; )
 	@$(MAKE) -C dhcpd -f Makefile.host clean
 
