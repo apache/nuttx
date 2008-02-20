@@ -156,7 +156,7 @@ defconfig -- This is a configuration file similar to the Linux
 		  by default)
 		CONFIG_DEBUG_LIB - enable C library debug output (disabled
 		  by default)
-		CONFIG_HAVE_LOWPUTC - architecture supports low-level, boot
+		CONFIG_ARCH_LOWPUTC - architecture supports low-level, boot
 		  time console output
 		CONFIG_MM_REGIONS - If the architecture includes multiple
 		  regions of memory to allocate from, this specifies the

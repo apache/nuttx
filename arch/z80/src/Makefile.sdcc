@@ -128,6 +128,11 @@ endif
 	@echo "	CONFIG_STACK_BASE	== (CONFIG_STACK_END - $(CONFIG_PROC_STACK_SIZE))" >> asm_mem.h
 	@echo "	CONFIG_HEAP1_END	== (CONFIG_STACK_END - $(CONFIG_PROC_STACK_SIZE) - 1)" >> asm_mem.h
 	@echo "	CONFIG_HEAP1_BASE	== $(HEAP_BASE)" >> asm_mem.h
+ifeq ($(CONFIG_LINKER_ROM_AT_0000),y)
+	@echo "	CONFIG_LINKER_ROM_AT_0000	== 1" >> asm_mem.h
+else
+	@echo "	CONFIG_LINKER_ROM_AT_0000	== 0" >> asm_mem.h
+endif
 
 # Combine all objects in this directory into a library
 

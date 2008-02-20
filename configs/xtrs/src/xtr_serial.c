@@ -211,10 +211,10 @@ static void up_shutdown(struct uart_dev_s *dev)
  * Description:
  *   Configure the UART to operation in interrupt driven mode.  This method is
  *   called when the serial port is opened.  Normally, this is just after the
- *   the setup() method is called, however, the serial console may operate in
- *   a non-interrupt driven mode during the boot phase.
+ *   setup() method is called, however, the serial console may operate in a
+ *   non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
+ *   RX and TX interrupts are not enabled by the attach method (unless the
  *   hardware supports multiple levels of interrupt enabling).  The RX and TX
  *   interrupts are not enabled until the txint() and rxint() methods are called.
  *
@@ -271,7 +271,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
  * Description:
  *   Called (usually) from the interrupt level to receive one
  *   character from the UART.  Error bits associated with the
- *   receipt are provided in the the return 'status'.
+ *   receipt are provided in the return 'status'.
  *
  ****************************************************************************/
 

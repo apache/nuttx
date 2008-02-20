@@ -73,13 +73,15 @@ CONFIG_UART_TXBUFSIZE=256
 #
 # CONFIG_LINKER_START_AREA		- Start of START area
 # CONFIG_LINKER_CODE_AREA 		- Start of _CODE area
-#
+# CONFIG_LINKER_ROM_AT_0000		- Disable the initialization code
+#   starting at 0000
 
 CONFIG_RRLOAD_BINARY=n
 CONFIG_HAVE_LIBM=n
 
 CONFIG_LINKER_START_AREA=0x5200
 CONFIG_LINKER_CODE_AREA=0x5300
+CONFIG_LINKER_ROM_AT_0000=y
 
 #
 # General OS setup
@@ -92,7 +94,7 @@ CONFIG_LINKER_CODE_AREA=0x5300
 #   regions of memory to allocate from, this specifies the
 #   number of memory regions that the memory manager must
 #   handle and enables the API mm_addregion(start, end);
-# CONFIG_HAVE_LOWPUTC - architecture supports low-level, boot
+# CONFIG_ARCH_LOWPUTC - architecture supports low-level, boot
 #   time console output
 # CONFIG_TICKS_PER_MSEC - The default system timer is 100Hz
 #   or TICKS_PER_MSEC=10.  This setting may be defined to
