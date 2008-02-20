@@ -1,7 +1,7 @@
 ;**************************************************************************
-; arch/z80/src/z80/z80_head.asm
+; arch/z80/src/z80/z80_rom.asm
 ;
-;   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+;   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 ;   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 ;
 ; Redistribution and use in source and binary forms, with or without
@@ -64,15 +64,46 @@
 	.globl	_up_doirq		; Interrupt decoding logic
 
 ;**************************************************************************
-; Reset entry point
+; System start logic
 ;**************************************************************************
 
-	.area	_HEADER	(ABS)
-	.org	0x0000
+_up_reset:
+	; Set up the stack pointer at the location determined the Makefile
+	; and stored in asm_mem.h
 
-	di				; Disable interrupts
-	im	1			; Set interrupt mode 1
-	jr	_up_reset		; And boot the system
+	ld	SP, #CONFIG_STACK_END	; Set stack pointer
+
+	; Performed initialization unique to the SDCC toolchain
+
+	call	gsinit			; Initialize the data section
+
+	; Copy the reset vectors
+
+	ld	hl, #_up_rstvectors	; code for RAM
+	ld	de, #0x4000        	; move it here
+	ld	bc, #3*7		; 7 vectors / 3 bytes each
+	ldir
+
+	; Then start NuttX
+
+	call	_os_start		; jump to the OS entry point
+
+	; NuttX will never return, but just in case...
+
+_up_halt::
+	halt				; We should never get here
+	jp	_up_halt
+
+	; Data to copy to address 0x4000
+
+_up_rstvectors:
+	jp	_up_rst1		; 0x4000 : RST 1
+	jp	_up_rst2		; 0x4003 : RST 2
+	jp	_up_rst3		; 0x4006 : RST 3
+	jp	_up_rst4		; 0x4009 : RST 4
+	jp	_up_rst5		; 0x400c : RST 5
+	jp	_up_rst6		; 0x400f : RST 6
+	jp	_up_rst7		; 0x4012 : RST 7
 
 ;**************************************************************************
 ; Other reset handlers
@@ -88,8 +119,7 @@
 ;
 ;**************************************************************************
 
-	.org	0x0008			; RST 1
-
+_up_rst1:				; RST 1
 	; Save AF on the stack, set the interrupt number and jump to the
 	; common reset handling logic.
 					; Offset 8: Return PC is already on the stack
@@ -97,8 +127,7 @@
 	ld	a, #1			; 1 = Z80_RST1
 	jr	_up_rstcommon		; Remaining RST handling is common
 
-	.org	0x0010			; RST 2
-
+_up_rst2:				; RST 2
 	; Save AF on the stack, set the interrupt number and jump to the
 	; common reset handling logic.
 					; Offset 8: Return PC is already on the stack
@@ -106,8 +135,7 @@
 	ld	a, #2			; 2 = Z80_RST2
 	jr	_up_rstcommon		; Remaining RST handling is common
 
-	.org	0x0018			; RST 3
-
+_up_rst3:				; RST 3
 	; Save AF on the stack, set the interrupt number and jump to the
 	; common reset handling logic.
 					; Offset 8: Return PC is already on the stack
@@ -115,8 +143,7 @@
 	ld	a, #3			; 1 = Z80_RST3
 	jr	_up_rstcommon		; Remaining RST handling is common
 
-	.org	0x0020			; RST 4
-
+_up_rst4:				; RST 4
 	; Save AF on the stack, set the interrupt number and jump to the
 	; common reset handling logic.
 					; Offset 8: Return PC is already on the stack
@@ -124,8 +151,7 @@
 	ld	a, #4			; 1 = Z80_RST4
 	jr	_up_rstcommon		; Remaining RST handling is common
 
-	.org	0x0028			; RST 5
-
+_up_rst5:				; RST 5
 	; Save AF on the stack, set the interrupt number and jump to the
 	; common reset handling logic.
 					; Offset 8: Return PC is already on the stack
@@ -133,8 +159,7 @@
 	ld	a, #5			; 1 = Z80_RST5
 	jr	_up_rstcommon		; Remaining RST handling is common
 
-	.org	0x0030			; RST 6
-
+_up_rst6:				; RST 6
 	; Save AF on the stack, set the interrupt number and jump to the
 	; common reset handling logic.
 					; Offset 8: Return PC is already on the stack
@@ -142,8 +167,7 @@
 	ld	a, #6			; 1 = Z80_RST6
 	jr	_up_rstcommon		; Remaining RST handling is common
 
-	.org   0x0038			; Int mode 1 / RST 7
-
+_up_rst7:				; RST 7
 	; Save AF on the stack, set the interrupt number and jump to the
 	; common reset handling logic.
 					; Offset 8: Return PC is already on the stack
@@ -152,41 +176,10 @@
 	jr	_up_rstcommon		; Remaining RST handling is common
 
 ;**************************************************************************
-; NMI interrupt handler
-;**************************************************************************
-
-	.org   0x0066
-	retn
-
-;**************************************************************************
-; System start logic
-;**************************************************************************
-
-_up_reset:
-	; Set up the stack pointer at the location determined the Makefile
-	; and stored in asm_mem.h
-
-	ld	SP, #CONFIG_STACK_END	; Set stack pointer
-
-	; Performed initialization unique to the SDCC toolchain
-
-	call	gsinit			; Initialize the data section
-
-	; Then start NuttX
-
-	call	_os_start		; jump to the OS entry point
-
-	; NuttX will never return, but just in case...
-
-_up_halt::
-	halt				; We should never get here
-	jp	_up_halt
-
-;**************************************************************************
 ; Common Interrupt handler
 ;**************************************************************************
 
-_up_rstcommon::
+_up_rstcommon:
 	; Create a register frame.  SP points to top of frame + 4, pushes
 	; decrement the stack pointer.  Already have
 	;

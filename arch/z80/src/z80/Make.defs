@@ -33,7 +33,11 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_LINKER_ROM_AT_0000),y)
+HEAD_ASRC	= z80_rom.asm
+else
 HEAD_ASRC	= z80_head.asm
+endif
 
 CMN_ASRCS	= 
 CMN_CSRCS	= up_initialize.c up_allocateheap.c up_createstack.c \
