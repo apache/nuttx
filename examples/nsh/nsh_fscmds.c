@@ -229,7 +229,7 @@ static int ls_handler(FAR void *handle, const char *dirpath, struct dirent *entr
       free(fullpath);
       if (ret != 0)
         {
-          nsh_output(handle, g_fmtcmdfailed, "ls", "stat", strerror(errno));
+          nsh_output(handle, g_fmtcmdfailed, "ls", "stat", NSH_ERRNO);
           return OK;
         }
 
@@ -371,7 +371,7 @@ void cmd_cat(FAR void *handle, int argc, char **argv)
   int fd = open(argv[1], O_RDONLY);
   if (fd < 0)
     {
-      nsh_output(handle, g_fmtcmdfailed, argv[0], "open", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "open", NSH_ERRNO);
       return;
     }
 
@@ -389,7 +389,7 @@ void cmd_cat(FAR void *handle, int argc, char **argv)
 
           if (errno != EINTR)
             {
-              nsh_output(handle, g_fmtcmdfailed, argv[0], "read", strerror(errno));
+              nsh_output(handle, g_fmtcmdfailed, argv[0], "read", NSH_ERRNO);
               break;
             }
         }
@@ -409,7 +409,7 @@ void cmd_cat(FAR void *handle, int argc, char **argv)
 
                   if (errno != EINTR)
                     {
-                      nsh_output(handle, g_fmtcmdfailed, argv[0], "write", strerror(errno));
+                      nsh_output(handle, g_fmtcmdfailed, argv[0], "write", NSH_ERRNO);
                       break;
                     }
                 }
@@ -452,7 +452,7 @@ void cmd_cp(FAR void *handle, int argc, char **argv)
   rdfd = open(argv[1], O_RDONLY);
   if (rdfd < 0)
     {
-      nsh_output(handle, g_fmtcmdfailed, argv[0], "open", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "open", NSH_ERRNO);
       return;
     }
 
@@ -494,7 +494,7 @@ void cmd_cp(FAR void *handle, int argc, char **argv)
   wrfd = open(wrpath, oflags, 0666);
   if (wrfd < 0)
     {
-      nsh_output(handle, g_fmtcmdfailed, argv[0], "open", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "open", NSH_ERRNO);
       goto out_with_fullpath;
     }
 
@@ -518,7 +518,7 @@ void cmd_cp(FAR void *handle, int argc, char **argv)
             {
               /* Read error */
 
-              nsh_output(handle, g_fmtcmdfailed, argv[0], "read", strerror(errno));
+              nsh_output(handle, g_fmtcmdfailed, argv[0], "read", NSH_ERRNO);
               goto out_with_wrfd;
             }
         }
@@ -535,7 +535,7 @@ void cmd_cp(FAR void *handle, int argc, char **argv)
             {
               /* Read error */
 
-              nsh_output(handle, g_fmtcmdfailed, argv[0], "write", strerror(errno));
+              nsh_output(handle, g_fmtcmdfailed, argv[0], "write", NSH_ERRNO);
               goto out_with_wrfd;
             }
         }
@@ -628,7 +628,7 @@ void cmd_mkdir(FAR void *handle, int argc, char **argv)
   int result = mkdir(argv[1], 0777);
   if ( result < 0)
     {
-      nsh_output(handle, g_fmtcmdfailed, argv[0], "mkdir", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "mkdir", NSH_ERRNO);
     }
 }
 #endif
@@ -683,7 +683,7 @@ void cmd_mount(FAR void *handle, int argc, char **argv)
   result = mount(argv[optind], argv[optind+1], filesystem, 0, NULL);
   if ( result < 0)
     {
-      nsh_output(handle, g_fmtcmdfailed, argv[0], "mount", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "mount", NSH_ERRNO);
     }
 }
 #endif
@@ -698,7 +698,7 @@ void cmd_rm(FAR void *handle, int argc, char **argv)
 {
   if (unlink(argv[1]) < 0)
     {
-      nsh_output(handle, g_fmtcmdfailed, argv[0], "unlink", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "unlink", NSH_ERRNO);
     }
 }
 #endif
@@ -712,7 +712,7 @@ void cmd_rmdir(FAR void *handle, int argc, char **argv)
 {
   if (rmdir(argv[1]) < 0)
     {
-      nsh_output(handle, g_fmtcmdfailed, argv[0], "rmdir", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "rmdir", NSH_ERRNO);
     }
 }
 #endif
@@ -729,7 +729,7 @@ void cmd_umount(FAR void *handle, int argc, char **argv)
   int result = umount(argv[1]);
   if ( result < 0)
     {
-      nsh_output(handle, g_fmtcmdfailed, argv[0], "umount", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "umount", NSH_ERRNO);
     }
 }
 #endif

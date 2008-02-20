@@ -209,6 +209,7 @@ int ifconfig_callback(FAR struct uip_driver_s *dev, void *arg)
   nsh_output(arg, "DRaddr:%s ", inet_ntoa(addr));
   addr.s_addr = dev->d_netmask;
   nsh_output(arg, "Mask:%s\n\n", inet_ntoa(addr));
+  return OK;
 }
 
 /****************************************************************************

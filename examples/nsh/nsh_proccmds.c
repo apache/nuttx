@@ -95,7 +95,6 @@ static const char *g_statenames[] =
 
 static void ps_task(FAR _TCB *tcb, FAR void *arg)
 {
-  boolean needcomma = FALSE;
   int i;
 
   /* Show task status */

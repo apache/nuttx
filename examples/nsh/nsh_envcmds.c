@@ -1,7 +1,7 @@
 /****************************************************************************
  * nsh_envcmds.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -118,7 +118,7 @@ void cmd_set(FAR void *handle, int argc, char **argv)
 {
   if (setenv(argv[1], argv[2], TRUE) < 0)
     {
-      nsh_output(handle, g_fmtcmdfailed, argv[0], "setenv", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "setenv", NSH_ERRNO);
     }
 }
 #endif
@@ -132,7 +132,7 @@ void cmd_unset(FAR void *handle, int argc, char **argv)
 {
   if (unsetenv(argv[1]) < 0)
     {
-      nsh_output(handle, g_fmtcmdfailed, argv[0], "unsetenv", strerror(errno));
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "unsetenv", NSH_ERRNO);
     }
 }
 #endif

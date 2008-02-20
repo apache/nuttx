@@ -50,7 +50,19 @@
  * Definitions
  ****************************************************************************/
 
+/* This is the maximum number of arguments that will be accepted for a command */
+
 #define NSH_MAX_ARGUMENTS     6
+
+/* strerror() produces much nicer output but is, however, quite large and
+ * will only be used if CONFIG_NSH_STRERROR is defined.
+ */
+
+#ifdef CONFIG_NSH_STRERROR
+#  define NSH_ERRNO strerror(errno)
+#else
+#  define NSH_ERRNO errno
+#endif
 
 /****************************************************************************
  * Public Types
