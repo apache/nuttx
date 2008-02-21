@@ -57,6 +57,10 @@ examples/nsh
       Size of a static I/O buffer used for file access (ignored if
       there is no filesystem).
 
+  * CONFIG_NSH_STRERROR
+      strerror(errno) makes more readable output but strerror() is
+      very large and will not be used unless this setting is 'y'
+
   * CONFIG_EXAMPLES_NSH_TELNET
       By default, NSH is configured to use the serial console.
       If CONFIG_EXAMPLES_NSH_TELNET is set to 'y', then a TELENET
