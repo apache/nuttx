@@ -71,7 +71,7 @@ DEPSRCS		= $(CSRCS)
 ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 BOARDDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src/board
 
-VPATH		= chip:common
+VPATH		= chip:common:board
 
 # Libraries
 

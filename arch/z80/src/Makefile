@@ -38,6 +38,7 @@
 
 -include $(TOPDIR)/Make.defs
 -include chip/Make.defs
+-include board/Make.defs
 
 ############################################################################
 # Compiler-Dependent Make
