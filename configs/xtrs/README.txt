@@ -1,12 +1,37 @@
 xtrs README
 ^^^^^^^^^^^^^
 
-TRS80 Model 3.  This port uses a vintage computer based on the Z80.
+Current status
+^^^^^^^^^^^^^^
+
+The xtrs port is not operational yet; some work still needs to be done.
+
+Getting a TRS80 emulator and DOS disks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This port uses a vintage computer based on the Z80, the TRS80.
+There's a main page describing the different models of TRS80.
+See: http://www.trs-80.com
+
 An emulator for this computer is available to run TRS80 programs on a 
 linux platform (http://www.tim-mann.org/xtrs.html).
 
+Other emulators are available for other platforms. 
+See http://www.trs-80.com, click on the link Emulators.
+
+TRSDOS, LDOS and other softwares are available at:
+http://discover-net.net/~dmkeil/trs80/software/trs-dos.htm
+
+Or you can get TRSDOS 1.3 and 6.1 from this site; it's included with the emulator.
+http://discover-net.net/~dmkeil/trs80/model4.htm
+
 The SDCC toolchain is available from http://sdcc.sourceforge.net/.  All
-testing has been performed using version 2.6.0 of the SDCC toolchain.
+testing has been performed using version 2.7.0 of the SDCC toolchain.
+
+Loading an executable into xtrs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+At http://www.trs-80.com click on the link: Getting a Software Onto an Emulator.
 
 Configuring NuttX
 ^^^^^^^^^^^^^^^^^
