@@ -13,8 +13,8 @@ z80_head.asm
 	RST interrupts.
 
 z80_rom.asm
-	Some architectures may hae ROM located at address zero.  In this case, a
-	special version of the "head" logic must be used.  This specail "head"
+	Some architectures may have ROM located at address zero.  In this case, a
+	special version of the "head" logic must be used.  This special "head"
 	file is probably board-specific and, hence, belongs in the board-specific
 	configs/<board-name>/src directory.  This file may, however, be used as
 	a model for such a board-specific file.
