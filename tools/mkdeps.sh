@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # mkdeps.sh
 #
 #   Copyright (C) 2007 Gregory Nutt. All rights reserved.

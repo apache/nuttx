@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # configs/z8encore000zco/ostest/setenv.sh
 #
 #   Copyright (C) 2008 Gregory Nutt. All rights reserved.

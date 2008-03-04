@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # xtrs/setenv.sh
 #
 #   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
