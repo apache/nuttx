@@ -92,8 +92,7 @@
 	xref	_len_pramseg
 	xref	_low_pram_romdata
 #endif
-	xref	_far_stack
-	xref	_near_stack
+	xref	_far_stacktop
 	xdef	_z8_reset
 	xdef	__intrp
 
@@ -128,8 +127,8 @@ _z8_reset:
 
 	/* Initialize the stack pointer */
 
-	ldx     spl, #low(_far_stack+1)
-	ldx     sph, #high(_far_stack+1)
+	ldx     spl, #low(_far_stacktop+1)
+	ldx     sph, #high(_far_stacktop+1)
 
 	/* Clear internal register ram area (c_nearbss) */
 
@@ -165,16 +164,20 @@ _z8_reset3:
 	/* Copy ROM data into internal RAM */
 
 _z8_reset4:
+#ifdef CONFIG_Z8_COPYNEARDATA
 	ld	r0, #high(_low_near_romdata)
 	ld	r1, #low(_low_near_romdata)
 	ld	r3, #_len_neardata
 	ld	r4, #_low_neardata
-	or	r3, r3
+	cp	r3, #0
+	jr	z, _z8_reset6
 
 _z8_reset5:
 	ldci	@r4, @rr0
 	djnz    r3, _z8_reset5
 
+_z8_reset6:
+#endif
 	/* Copy ROM data into extended RAM */
 
 	ld	r0, #high(_low_fardata)
@@ -186,19 +189,19 @@ _z8_reset5:
 
 	ld	r6, r4
 	or	r6, r5
-	jr	z, _z8_reset7
+	jr	z, _z8_reset8
 
-_z8_reset6:
+_z8_reset7:
 	ldc	r6, @rr2
 	ldx     @rr0, r6
 	incw	rr0
 	incw	rr2
 	decw	rr4
-	jr	nz, _z8_reset6
+	jr	nz, _z8_reset7
 
 	/* Copy ROM copy of code into Program RAM */
 
-_z8_reset7:
+_z8_reset8:
 #ifdef CONFIG_Z8_COPYPRAM
 	ld	r0, #high(_low_pramseg)
 	ld	r1, #low(_low_pramseg)
@@ -209,17 +212,17 @@ _z8_reset7:
 
 	ld	r6, r4
 	or	r6, r5
-	jr	z, _z8_reset9
+	jr	z, _z8_reset10
 
-_z8_reset8:
+_z8_reset9:
 	ldc	r6, @rr2
 	ldc     @rr0, r6
 	incw	rr0
 	incw	rr2
 	decw	rr4
-	jr	nz, _z8_reset8
+	jr	nz, _z8_reset9
 
-_z8_reset9:
+_z8_reset10:
 #endif
 
 	/* Start NuttX */

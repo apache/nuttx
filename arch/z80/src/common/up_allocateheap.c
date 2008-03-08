@@ -61,7 +61,13 @@
  ****************************************************************************/
 
 /* For the ZiLOG ZDS-II toolchain(s), the heap will be set using linker-
- * defined values.
+ * defined values:
+ *
+ *   far_heapbot  : set to the offset to the first unused value in EDATA
+ *   far_stacktop : set to the highest address in EDATA
+ *
+ * The top of the heap is then determined by the amount of stack setaside
+ * in the NuttX configuration file
  */
 
 #ifdef __ZILOG__
@@ -70,8 +76,8 @@
 #    define CONFIG_HEAP1_BASE ((uint16)&far_heapbot)
 #  endif
 #  ifndef CONFIG_HEAP1_END
-     extern far unsigned long far_heaptop;
-#    define CONFIG_HEAP1_END ((uint16)&far_heaptop)
+     extern far unsigned long far_stacktop;
+#    define CONFIG_HEAP1_END (((uint16)&far_stacktop) - CONFIG_PROC_STACK_SIZE + 1)
 #  endif
 #endif
 
