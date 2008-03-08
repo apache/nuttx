@@ -237,7 +237,7 @@ endif
 ENTER :	MACRO	val
 	pushx	rp			/* Save the current RP value in the stack */
 	srp	#%f0			/* Load the interrupt register pointer */
-	ld	r0, #val		/* Pass the new value in r0
+	ld	r0, #val		/* Pass the new value in r0 */
 	jr	_z8_common_handler	/* The rest of the handling is common */
 	ENDMAC	ENTER
 
