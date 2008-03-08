@@ -343,6 +343,8 @@
 	  in particular for now).
 	* Add support for TRS80-Model 3 based on the xtrs emulation (http://www.tim-mann.org/xtrs.html)
 	  Per patch from Jacques Pelletier.
+	* In all shell scripts, change #!/bin/sh to #!/bin/bash to resolve problems in
+	  Ubuntu where /bin/sh is a link to dash.
 
 
 
