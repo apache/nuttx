@@ -96,7 +96,7 @@ FAR chipreg_t *up_doirq(ubyte irq, FAR chipreg_t *regs)
 
        regs = IRQ_STATE();
 
-       /* Indicate that we are no long in interrupt processing logic */
+       /* Indicate that we are no longer in interrupt processing logic */
 
        IRQ_LEAVE(irq);
     }

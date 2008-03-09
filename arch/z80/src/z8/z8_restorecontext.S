@@ -97,8 +97,7 @@ _z8_restorecontext:
 	ldx	r7, 3(rr0)
 
 	/* Copy all registers into the user register area.  NOTE: we
-	 * should use the saved RP value to determine the destination
-	 * address
+	 * use the saved RP value to determine the destination adress.
 	 */
 
 	clr	r0			/* rr0 = destination address */
@@ -130,8 +129,8 @@ _z8_restore:
 
 	/* Recover the flags and RP settings.. but don't restore them yet */
 
-	ldx	r1, XCPT_FLAGS_OFFS(rr0)
-	ldx	r2, XCPT_RP_OFFS(rr0)
+	ldx	r1, XCPT_FLAGS_OFFS(rr6)
+	ldx	r2, XCPT_RP_OFFS(rr6)
 
 	/* Determine whether interrupts must be enabled on return.  This
 	 * would be nicer to do below, but later we will need to preserve
