@@ -349,4 +349,4 @@
 
 0.3.10 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
-
+	* Add support for the ZiLOG EZ80Acclaim microcontrooler (EZ80F91 chip).

@@ -230,7 +230,7 @@
 
 /* At present, only the Zilog ZNeo compiler is recognized */
 
-#  if !defined(__ZNEO__) && !defined(__EZ8__)
+#  if !defined(__ZNEO__) && !defined(__EZ8__) && !defined(__EZ80__)
 #    warning "Unrecognized Zilog compiler"
 #  endif
 
@@ -272,24 +272,38 @@
  * Z8Encore!:  Far is 16-bits; near is 8-bits of address.
  *             The supported model is (1) all code on ROM, and (2) all data
  *             and stacks in internal (far) RAM.
+ * Z8Acclaim:  In Z80 mode, all pointers are 16-bits.  In ADL mode, all pointers
+ *             and 24 bits.
  */
 
-#  ifdef __ZNEO__
+#  if defined(__ZNEO__)
 #    define FAR   _Far
 #    define NEAR  _Near
 #    define DSEG  _Far
 #    define CODE  _Erom
-#    undef  CONFIG_SMALL_MEMORY      /* Select the large, 32-bit addressing model */
-#    undef  CONFIG_LONG_IS_NOT_INT   /* Long and int are the same size */
-#    undef  CONFIG_PTR_IS_NOT_INT    /* FAR pointers and int are the same size */
-#  else
+#    undef  CONFIG_SMALL_MEMORY       /* Select the large, 32-bit addressing model */
+#    undef  CONFIG_LONG_IS_NOT_INT    /* Long and int are the same size */
+#    undef  CONFIG_PTR_IS_NOT_INT     /* FAR pointers and int are the same size */
+#  elif defined(__EZ8__)
 #    define FAR   far
 #    define NEAR  near
 #    define DSEG  far
 #    define CODE  rom
-#    define CONFIG_SMALL_MEMORY 1    /* Select small, 16-bit address model */
-#    define CONFIG_LONG_IS_NOT_INT 1 /* Long and int are not the same size */
-#    undef  CONFIG_PTR_IS_NOT_INT    /* FAR pointers and int are the same size */
+#    define CONFIG_SMALL_MEMORY 1     /* Select small, 16-bit address model */
+#    define CONFIG_LONG_IS_NOT_INT 1  /* Long and int are not the same size */
+#    undef  CONFIG_PTR_IS_NOT_INT     /* FAR pointers and int are the same size */
+#  elif defined(__EZ80__)
+#    define FAR
+#    define NEAR
+#    define DSEG
+#    define CODE
+#    undef  CONFIG_SMALL_MEMORY       /* Select the large, 32-bit addressing model */
+#    define CONFIG_LONG_IS_NOT_INT 1  /* Long and int are not the same size */
+#    ifdef CONFIG_EZ80_Z80MODE
+#      define CONFIG_PTR_IS_NOT_INT 1 /* Pointers and int are not the same size */
+#    else
+#      undef  CONFIG_PTR_IS_NOT_INT   /* Pointers and int are the same size */
+#    endif
 #  endif
 
 /* The Zilog compiler does not support inline functions */
@@ -297,9 +311,10 @@
 # undef  CONFIG_HAVE_INLINE
 # define inline
 
-/* The Zilog compiler supports both types double and long long,
- * but the size is 32-bits (same as long and single precision)
- * so it is safer to say that they are not supported.
+/* Older Zilog compilers support both types double and long long, but the size
+ * is 32-bits (same as long and single precision) so it is safer to say that
+ * they are not supported.  Later versions are more ANSII compliant and
+ * simply do not support long long or double.
  */
 
 # undef  CONFIG_HAVE_DOUBLE
