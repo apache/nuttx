@@ -334,7 +334,7 @@
 	* Added a generic CAN driver.  This driver is untested as of this writing.
 	* Corrected DM320 UART configuration problem
 
-0.3.9 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.9 2008-03-09 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Began adding support for the ZiLOG Z8Encore! microcontroller for the Z8Encore000ZCO
 	  development board and the Z8F6403 part.
@@ -345,6 +345,8 @@
 	  Per patch from Jacques Pelletier.
 	* In all shell scripts, change #!/bin/sh to #!/bin/bash to resolve problems in
 	  Ubuntu where /bin/sh is a link to dash.
+	* Z8Encore! port verified on ZDS-II instruction set/chip simulator.
 
+0.3.10 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 

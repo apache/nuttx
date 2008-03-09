@@ -1,3 +1,424 @@
+nuttx-0.1.0
+^^^^^^^^^^^
+
+This is the initial.  This initial includes the complete NuttX RTOS
+with support for the Linux user mode simulation and the TI TMS320C5471
+(Arm7) processor.  Partial support for the 87C52 is included.
+
+This release has been verified on both the Linux user-mode and C5471
+platforms using the test program under examples/ostest.  Test results
+for the C5471 can be found in arch/c5471/doc/test-results.txt.
+
+This tarball contains a complete CVS snapshot from March 9,2007.
+
+nuttx-0.1.1
+^^^^^^^^^^^
+
+This is the second release of NuttX.  This release includes the following.
+See the ChangeLog for more detailed description of the changes.
+
+(1) General OS bugfixes (see the ChangeLog for details),
+(2) bugfixes for the TI TMS320C5471 (Arm7) platform (see
+    the ChangeLog)
+(3) Complete support for the 87C52. (However, the 87C52
+    release is not stable enough for general usage).
+(4) Added the beginning of a shell call NuttShell (nsh)
+
+This release has been verified on the Linux user-mode platform, the
+Spectrum Digital TMS320C5471 EVM, and the PJRC 87C52 development board
+using the test program under examples/ostest.
+
+STATUS: The development status remains as ALPHA until further testing
+is performed.
+
+This tarball contains a complete CVS snapshot from March 14, 2007.
+
+nuttx-0.1.2
+^^^^^^^^^^^
+
+This is the third release of NuttX.  This release is
+primarily a bugfix release with minimal new features.  See
+the ChangeLog for a more detailed description of the 
+changes.
+
+(1) Several important OS and ARM7 bugfixes,
+(2) opendir(), closedir(), readdir(), etc. added
+(3) Added C5471 watchdog timer.
+(4) Created a shareable, serial driver.
+(5) Added 'ls' command to NuttShell (nsh)
+(6) Added a test of the round robin scheduler
+
+This release has been verified on the Linux user-mode 
+platform, the  Spectrum Digital TMS320C5471 EVM using the
+test program under examples/ostest.
+
+This tarball contains a CVS snapshot from March 19, 2007.
+
+nuttx-0.2.1
+^^^^^^^^^^^
+
+This is the fourth relese of NuttX.  This release adds adds
+support for a new platform, restructures many header files,
+and adds a few new features:
+
+(1) Support for Neuros OSD / DM320
+(2) Restructuring of header files for better POSIX compliance
+(3) Added kill()
+(4) Added POSIX timers
+(5) bugfixes and documentation updates
+
+This release has been verified on the Linux user-mode 
+platform, the  Spectrum Digital TMS320C5471 EVM, and the 
+Neuros OSD  using the test program under examples/ostest.  Because
+of the stability of these tests, the project status
+has been upgraded to 'beta.'
+
+This tarball contains a complete CVS snapshot from March 22, 2007.
+
+nuttx-0.2.2
+^^^^^^^^^^^^
+
+This is the fifth release of NuttX.  There is no major new
+functionality in this release.  This release adds support
+for new pthread barrier APIs, changes the directory
+structure, to better handle different board configurations
+using the same processor architecture, and corrects a few
+defects.
+
+See the ChangeLog for a complete list of changes.
+
+This release has been verified on the Linux user-mode
+platform and the Neuros OSD using the test program under
+examples/ostest.  There are no known, critical defects but
+the project development status remains at 'beta' status
+pending further test and evaluation.
+
+This tarball contains a complete CVS snapshot from
+March 26, 2007.
+
+nuttx-0.2.3
+^^^^^^^^^^^^
+
+This is the sixth release of NuttX.  This release is
+primarily a bugfix release.  Numerous problems were fixed
+as detailedin the change log.  New functionality includes
+support for timed message queues.
+
+See the ChangeLog for a complete list of changes.
+
+This release has been verified on the Linux user-mode 
+platform and the Neuros OSD using the test program under
+examples/ostest. The results of the testing is available in
+the source tree under configs/ntosd-dm320/doc/test-results.
+There are no known, critical defects but the project
+development status remains at 'beta' status pending further
+test and evaluation.
+
+This tarball contains a complete CVS snapshot from March 29,
+2007.
+
+nuttx-0.2.4
+^^^^^^^^^^^^
+
+This is the 7th release of NuttX.  This release is only to roll out
+build changes to better support different SoC's that use the same
+processor architecture.  In particular, the two existing ARM architectures,
+c5471 and DM320 were combined into a single ARM directory.  This was done
+in preparation for an LPC2148 port that is currently in progress.  There
+is NO new functionality or significant bufixes in this release.
+
+See the ChangeLog for a complete list of changes.
+
+This release has been verified on the Linux user-mode platform
+and the Neuros OSD using the test program under examples/ostest.
+The results of the testing is available in the source tree under
+configs/ntosd-dm320/doc/test-results and under configs/sim/doc/test-results.
+There are no known, critical defects but the project development status
+remains at 'beta' status pending further test and evaluation.
+
+This tarball contains a complete CVS snapshot from April 28, 2007.
+
+nuttx-0.2.5
+^^^^^^^^^^^^
+
+This is the 8th release of NuttX.  This release includes:
+
+(1) Several bug fixes
+(2) Initial support for FAT filesystems.  Testing has not
+    been exhaustive and some functionality is missing
+   (mkdir, stat, unlink chmod, and rename functionality is 
+    not yet implemented).
+(3) Support for the NXP lpc2148 processor is included but
+    is untested as of this writing.  The current 
+    implementation includes only support for serial console
+    and timer interrupt.
+
+See the ChangeLog for a complete list of changes.
+
+This release has been verified only on the Linux user-mode
+platform.
+
+This tarball contains a complete CVS snapshot from May 19,
+2007.
+
+nuttx-0.2.6
+^^^^^^^^^^^
+
+This is the 9th release of NuttX.  This is primarily a
+bugfix release to correct a number of problems introduced
+with the 0.2.5 release. This release does include some FAT
+filesystem extensions including unlink(), mkdir(), rmdir(),
+rename(), opendir(), closedir(), readdir(), seekdir(),
+telldir(), rewindir().  There are some pending FAT changes
+that did not make it into this release including stat(),
+truncate(), and long file names.
+
+See the ChangeLog for a complete list of changes.
+
+This release has been verified only on the Linux user-mode
+platform.
+
+This tarball contains a complete CVS snapshot from May 26,
+2007.
+
+nuttx-0.2.7
+^^^^^^^^^^^
+
+This is the 10th release of NuttX.  This is primarily a bugfix releaseto correct a
+number of problems reported to me (thanks Didier!). This release does include the
+final changes complete the FAT filesystem logic including stat(), tatfs(), and non-
+standard APIs to manage FAT
+attributes.  At present,FAT long file names and file trunction() are still not
+supported.
+
+See the ChangeLog for a complete list of changes.
+
+This release has been verified only on the Linux user-mode platform.
+
+This tarball contains a complete CVS snapshot from June 9, 2007.
+
+nuttx-0.2.8
+^^^^^^^^^^^
+
+This is the 11th release of NuttX.  This release (1) corrects important bugs
+in opendir and realloc, (2) adds support for environment variables, (3) adds
+several new C library interfaces, and (4) extends several example programs.
+
+See the ChangeLog for a complete list of changes.
+
+This release has been verified only on the Linux user-mode platform.
+
+This tarball contains a complete CVS snapshot from July 2, 2007.
+
+nuttx-0.3.0
+^^^^^^^^^^^
+
+This is the 12th release of NuttX.  This release includes the initial
+integration of a network subsystem and the uIP TCP/IP stack into NuttX
+(see http://www.sics.se/~adam/uip/index.php/Main_Page).  Also included
+is a device driver for the Davicom DM90x0 ethernet controller.
+
+This integration is very preliminary.  Only a small portion of the
+network functionality has been integrated and there are a number of
+open issues (see the TODO file).  The network subsystem is pre-alpha
+at this point in time.  I expect that it will stabilize and mature
+over the next few releases.
+
+The baseline functionality of NuttX continues to mature and remains at
+post-beta (as long as the network is not used).
+
+See the ChangeLog for a complete list of changes.
+
+This release has been verified only on the Neuros OSD (DM320 ARM9)
+platform using the DM90x0 driver.
+
+This tarball contains a complete CVS snapshot from November 6, 2007.
+
+nuttx-0.3.1
+^^^^^^^^^^^
+
+This is the 13th release of NuttX and the second release containing
+the integration of a network subsystem and the uIP TCP/IP, UDP, and
+ICMP stacks into NuttX (see http://www.sics.se/~adam/uip/index.php/Main_Page).
+
+Many network-related problems have been fixed and the implementation
+has matured significantly.  However, the level of network reliability
+is probably still at the pre-alpha or early level.  It is sufficiently
+complete that you may begin to perform some network integration and
+is exepcted to achieve beta level of reliability over the next few
+releases.
+
+The baseline functionality of NuttX continues to mature and remains at
+post-beta (as long as the network is not used).
+
+See the ChangeLog for a complete list of changes.
+
+This release has been verified only on the Neuros OSD (DM320 ARM9)
+platform using the DM90x0 driver.
+
+This tarball contains a complete CVS snapshot from November 19, 2007.
+
+nuttx-0.3.2
+^^^^^^^^^^^
+
+This is the 14th release of NuttX and the 3rd release containing
+the integration of a network subsystem and the uIP TCP/IP, UDP, and
+ICMP stacks into NuttX (see http://www.sics.se/~adam/uip/index.php/Main_Page).
+
+Many network-related problems have been fixed and the implementation
+has matured significantly.  This release consists of:
+
+o TCP-related bug-fixes
+o TCP performance improvements
+o Initial UDP integration
+o Initial uIP micro webserver integration
+
+See the ChangeLog for a complete list of changes.
+
+The level of network reliability is at alpha level is expected to
+achieve beta level of reliability over the next few releases.
+
+The baseline functionality of NuttX continues to mature and remains at
+post-beta.
+
+This release has been verified only on the Neuros OSD (DM320 ARM9)
+platform using the DM90x0 driver.
+
+This tarball contains a complete CVS snapshot from November 23, 2007.
+
+nuttx-0.3.3
+^^^^^^^^^^^
+
+This is the 15th release of NuttX and the 4th release containing
+the integration of a network subsystem and the uIP TCP/IP, UDP, and
+ICMP stacks into NuttX (see http://www.sics.se/~adam/uip/index.php/Main_Page).
+
+Many network-related problems have been fixed and the implementation
+has matured significantly.  This release consists of:
+
+o TCP-related bug-fixes for disconnecting sockets
+o Correction of some TCP read-ahead logic
+o TCP performance improvements
+o Misc. additions and cleanup (See the ChangeLog for a complete list of
+  changes).
+
+The level of network reliability is at an early beta release level.  The
+baseline functionality of NuttX continues to mature and remains at
+post-beta. Open network-related issues include only:
+
+o Some minor unimplemented BSD socket functionality,
+o Thread safety issues: the same socket cannot be used concurrently on
+  different threads.
+o Pending design changes necessary to support multiple network interfaces.
+o IPv6 support is incomplete.
+
+This release has been verified only on the Neuros OSD (DM320 ARM9)
+platform using the DM90x0 driver. Any feedback for improving the network
+reliability/performance would be greatly appreciated.
+
+This tarball contains a complete CVS snapshot from November 28, 2007.
+
+nuttx-0.3.4
+^^^^^^^^^^^
+
+This is the 16th release of NuttX and the 5th release containing
+the integration of a network subsystem and the uIP TCP/IP, UDP, and
+ICMP stacks into NuttX (see http://www.sics.se/~adam/uip/index.php/Main_Page).
+
+This release is primarily a bug-fix release.  New features include
+only:
+
+o TELNET front-end to NSH,
+o DHCPC server functionality, and
+o C5471 Ethernet driver.
+
+Numerous network related problems were fixed related to DHCPC, UDP
+input processing, UDP broadcast, send timeouts, and bad compilation when
+uIP is compiled at high levels of optimization.
+
+The level of network reliability is at a strong beta release level.  The
+baseline functionality of NuttX continues to mature and remains at
+post-beta or production level.
+
+Parts of this release were verified only on the Neuros OSD (DM320 ARM9)
+platform using the DM90x0 Ethernet driver and other parts on the Spectrum
+Digital C5471 EVM using the C5471 Ethernet driver. Any feedback about bugs
+or suggestions for improving the network reliability/performance would be
+greatly appreciated.
+
+This tarball contains a complete CVS snapshot from December 10, 2007.
+
+nuttx-0.3.5
+^^^^^^^^^^^
+
+This is the 17th release of NuttX this release is primarily a bug-fix
+release and intended to synchronize with the current CVS contents.  See
+the ChangeLog for a detailed list of changes and fixes.
+
+This release were verified only on the Spectrum Digital C5471 EVM using
+the C5471 Ethernet driver. Any feedback about bugs or suggestions for
+improvement would be greatly appreciated.
+
+This tarball contains a complete CVS snapshot from December 18, 2007.
+
+nuttx-0.3.6
+^^^^^^^^^^^
+
+This is the 18th release of NuttX.  This release contains on a few
+changes.  The primary purpose of this release is to synchronize with
+the release of the pascal-0.1.0 add-on package.
+
+This release of NuttX includes the following changes:
+
+* Fixes for use with SDCC compiler
+* Added a simulated z80 target (arch/z80)
+* Fix deadlock errors when using stdio but with no buffering
+* Add support for the add-on Pascal P-Code interpreter (pcode/)
+  (see the pascal-0.1.0 package)
+
+This release were verified only on the simulated Z80 and and host
+simulation targets.  As usual, any feedback about bugs or suggestions
+for improvement would be greatly appreciated.
+
+This tarball contains a complete CVS snapshot from January 6, 2007.
+
+====
+
+There was an error in the initial 0.3.6 release that prevented
+a successful build unless the Pascal add-on was present.  The
+tarball was patched to include the fix.  Make sure that you download
+the nuttx-0.3.6.1.tar.gz version to avoid this problem.
+
+nuttx-0.3.7
+^^^^^^^^^^^
+
+This is the 19th release of NuttX.  This release includes the
+preliminary port of NuttX to the ZiLOG z16f 16-bit microcontroller.
+This port was verified using the ZiLOG z16f2800100zcog Development
+and the ZiLOG ZDS-II toolchain. See http://www.zilog.com for
+further information.
+
+I emphasize that this is a preliminary release of the z16f port and
+is only alpha or, perhaps, pre-alpha quality as of this writing.
+There are a list of known issues in the TODO file in the root of
+the NuttX directory.  The overall quality of NuttX (excluding the
+z16f port) continues to improve beyond the late beta level.
+
+The z16f port required numerous changes to NuttX to handle:
+
+* NEAR and FAR addressing, and
+* Use of a Windows native toolchain in a Cygwin build environment.
+
+In addition to the z16f port, at least one very critical bug was
+found and corrected in NuttX:  The thread-specific errno value of one
+task was being randomly trashed when a different thread exitted.
+
+This release were verified on the ZiLOG z16f2800100zcog, Neuros OSD
+(ARM9), and the simulation platforms.  As usual, any feedback about bugs
+or suggestions for improvement would be greatly appreciated.
+
+This tarball contains a complete CVS snapshot from January 31, 2008.
+
 nuttx-0.3.8
 ^^^^^^^^^^^
 
@@ -7,3 +428,16 @@ continues the integration of the ZiLOG Z18F and of the Pascal P-Code
 add-on.  This release is synchronized with the release of Pascal-0.1.2.
 
 This tarball contains a complete CVS snapshot from February 10, 2008.
+
+nuttx-0.3.9
+^^^^^^^^^^^
+
+This is the 21st release of NuttX.  This is a minor future enhancement
+release.  This release includes support for the ZiLOG Z8Encore! micro-
+controller.  Also included is the initial framework for support for
+the Z80, XTRS platform (http://www.tim-mann.org/xtrs.html).
+
+This released has been verified only on the ZiLOG ZDS-II Z8Encore!
+chip simulation.
+
+This tarball contains a complete CVS snapshot from March 9, 2008.
