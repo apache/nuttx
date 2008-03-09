@@ -20,7 +20,7 @@ NuttX TODO List (Last updated February 13, 2008)
   (1)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
-  (5)  z80/z8 (arch/z80/)
+  (6)  z80/z8 (arch/z80/)
   (7)  z16 (arch/z16/)
 
 o Task/Scheduler (sched/)
@@ -400,6 +400,11 @@ o z80/z8 (arch/z80)
                only nominal interrupt priority.
   Status:      Open
   Priority:    Low
+
+  Description: The z8Encore! port has only been verified on the ZDS-II instruction
+               set simulator.
+  Status:      Open
+  Priority:    Medium
 
 o z16 (arch/z16)
 ^^^^^^^^^^^^^^^^
