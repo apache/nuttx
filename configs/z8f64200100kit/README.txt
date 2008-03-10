@@ -30,22 +30,22 @@ ZDS-II Compiler Versions
 Other Versions
   If you use any version of ZDS-II other than 4.10.1 or if you install ZDS-II
   at any location other than the default location, you will have to modify
-  two files:  (1) configs/z8f4200100kit/*/setenv.sh and (2)
-  configs/z8f4200100kit/*/Make.defs.
+  two files:  (1) configs/z8f64200100kit/*/setenv.sh and (2)
+  configs/z8f64200100kit/*/Make.defs.
 
 Configuration Subdirectories
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - src/ and include/
-    These directories contain common logic for all z8f4200100kit
+    These directories contain common logic for all z8f64200100kit
     configurations.
 
-Variations on the basic z8f4200100kit configuration are maintained
+Variations on the basic z8f64200100kit configuration are maintained
 in subdirectories.  To configure any specific configuration, do the
 following steps:
 
    cd <nuttx-top-directory>/tools
-   ./configure.sh z8f4200100kit/<sub-directory>
+   ./configure.sh z8f64200100kit/<sub-directory>
    cd <nuttx-top-directgory>
    make
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z8f4200100kit/include/board.h
+ * arch/z8f64200100kit/include/board.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/z8f4200100kit/ostest/setenv.sh
+# configs/z8f64200100kit/ostest/setenv.sh
 #
 #   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
