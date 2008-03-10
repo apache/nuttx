@@ -1,5 +1,5 @@
 ############################################################################
-# configs/z8f4200100kit/ostest/Make.defs
+# configs/z8f64200100kit/ostest/Make.defs
 #
 #   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -133,7 +133,7 @@ ARFLAGS 		= -quiet -warn
 
 # Linker definitions
 
-LINKCMDTEMPLATE 	= $(TOPDIR)/configs/z8f4200100kit/ostest/ostest.linkcmd
+LINKCMDTEMPLATE 	= $(TOPDIR)/configs/z8f64200100kit/ostest/ostest.linkcmd
 
 # Tool names/pathes
 

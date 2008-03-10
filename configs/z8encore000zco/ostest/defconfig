@@ -38,7 +38,7 @@
 # CONFIG_ARCH - identifies the arch subdirectory and, hence, the
 #   processor architecture.
 # CONFIG_ARCH_name - for use in C code.  This identifies the particular
-#   processor architecture (CONFIG_ARCH_Z16).
+#   processor architecture (CONFIG_ARCH_Z8).
 # CONFIG_ARCH_CHIP - Identifies the specific chip or SoC that implements the
 #   architecture.
 # CONFIG_ARCH_CHIP_chip - for use in C code.  This identifies the
@@ -71,7 +71,7 @@ CONFIG_ENDIAN_BIG=y
 CONFIG_DRAM_SIZE=65536
 CONFIG_ARCH_LEDS=n
 #
-# Z16F specific device driver settings
+# eZ8 specific device driver settings
 #
 # CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
 #   console and ttyS0 (default is the UART0). 

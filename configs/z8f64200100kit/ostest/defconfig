@@ -1,5 +1,5 @@
 ############################################################################
-# configs/z8f4200100kit/ostest/defconfig
+# configs/z8f64200100kit/ostest/defconfig
 #
 #   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -64,8 +64,8 @@ CONFIG_ARCH_CHIP_Z8F640X=n
 CONFIG_ARCH_CHIP_Z8F6403=n
 CONFIG_ARCH_CHIP_Z8F642X=y
 CONFIG_ARCH_CHIP_Z8F6423=y
-CONFIG_ARCH_BOARD=z8f4200100kit
-CONFIG_ARCH_BOARD_Z8F4200100KIT=y
+CONFIG_ARCH_BOARD=z8f64200100kit
+CONFIG_ARCH_BOARD_Z8F64200100KIT=y
 CONFIG_BOARD_LOOPSPERMSEC=1250
 CONFIG_ENDIAN_BIG=y
 CONFIG_DRAM_SIZE=65536
