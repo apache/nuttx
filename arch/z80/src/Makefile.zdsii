@@ -101,10 +101,11 @@ ifeq ($(CONFIG_ARCH_CHIP_Z8F640X),y)
 	@echo "  \"${shell cygpath -w $(ZDSZILOGLIBDIR)/zsldevinitdummy$(LIBEXT)}\""  >>nuttx.linkcmd
 endif
 ifeq ($(CONFIG_ARCH_CHIP_Z8F642X),y)
-	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/fpdumyLD$(LIBEXT)}\", \\"  >>nuttx.linkcmd
 	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/chelpD$(LIBEXT)}\", \\"  >>nuttx.linkcmd
-	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/csioLDD$(LIBEXT)}\", \\"  >>nuttx.linkcmd
-	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/zsldevinitdummy.lib$(LIBEXT)}\" \\"  >>nuttx.linkcmd
+	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/crtLDD$(LIBEXT)}\", \\"  >>nuttx.linkcmd
+	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/fpdumyLD$(LIBEXT)}\", \\"  >>nuttx.linkcmd
+	@echo "  \"${shell cygpath -w $(ZDSZILOGLIBDIR)/csioLDD$(LIBEXT)}\", \\"  >>nuttx.linkcmd
+	@echo "  \"${shell cygpath -w $(ZDSZILOGLIBDIR)/zsldevinitdummy$(LIBEXT)}\""  >>nuttx.linkcmd
 endif
 
 nuttx$(EXEEXT): $(HEAD_AOBJ) board/libboard$(LIBEXT) nuttx.linkcmd
