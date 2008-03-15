@@ -107,6 +107,13 @@ ifeq ($(CONFIG_ARCH_CHIP_Z8F642X),y)
 	@echo "  \"${shell cygpath -w $(ZDSZILOGLIBDIR)/csioLDD$(LIBEXT)}\", \\"  >>nuttx.linkcmd
 	@echo "  \"${shell cygpath -w $(ZDSZILOGLIBDIR)/zsldevinitdummy$(LIBEXT)}\""  >>nuttx.linkcmd
 endif
+ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
+	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/chelp$(LIBEXT)}\", \\"  >>nuttx.linkcmd
+	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/crt$(LIBEXT)}\", \\"  >>nuttx.linkcmd
+	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/fplib$(LIBEXT)}\", \\"  >>nuttx.linkcmd
+	@echo "  \"${shell cygpath -w $(ZDSZILOGLIBDIR)/gpio$(LIBEXT)}\", \\"  >>nuttx.linkcmd
+	@echo "  \"${shell cygpath -w $(ZDSZILOGLIBDIR)/uartf91$(LIBEXT)}\""  >>nuttx.linkcmd
+endif
 
 nuttx$(EXEEXT): $(HEAD_AOBJ) board/libboard$(LIBEXT) nuttx.linkcmd
 	@echo "LD:  nuttx.hex"

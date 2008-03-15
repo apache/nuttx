@@ -351,3 +351,4 @@
 
 	* Add support for the ZiLOG EZ80Acclaim microcontrooler (EZ80F91 chip).
 	* Add configuration for the ZiLOG z8f64200100kit development kit, Z8F6423 part.
+	* Add configuration for the ZiLOG ez80f0910200kitg development kit, EZ80F091 part.
