@@ -16,7 +16,7 @@
   </b></big></h1>
   <p><small>by</small></p>
   <p>Gregory Nutt</p>
-  <p><small>Last Update: February 15, 2008</small></p>
+  <p><small>Last Update: March 15, 2008</small></p>
 </center>
 
 <center><h1>Table of Contents</h1></center>
@@ -431,7 +431,7 @@
 
     <li><code>arch/z80</code>:
     This directory holds 8-bit ZiLOG architectures.  At present, this includes the
-    Zilog z80 and z8Encore! Microcontrollers.
+    Zilog z80, ez80Acclaim! and z8Encore! Microcontrollers.
     <ul>
       <li><code>arch/z80/include</code> and <code>arch/z80/src/common</code>:
           Common logic.
@@ -446,11 +446,18 @@
         (verified with version 2.6.0 and 2.7.0).
       </li>
 
+      <li><code>arch/z80/include/ez80</code> and <code>arch/z80/src/ez80</code>:
+        The ez80Acclaim! port uses the ZiLOG ez80f0910200kitg development kit, eZ80F091 part,
+        with the Zilog ZDS-II Windows command line tools.
+        The development environment is Cygwin under WinXP.
+        This is a work in progress.  Verified ez80 support will be announced in a future NuttX release.
+      </li>
+
       <li><code>arch/z80/include/z8</code> and <code>arch/z80/src/z8</code>:
         The Z8Encore! port uses either the ZiLOG z8encore000zco development kit, Z8F6403 part,
         or the z8f64200100kit development kit, Z8F6423 part with the Zilog ZDS-II Windows command line
         tools.  The development environment is Cygwin under WinXP.
-        This port is in progress and will be released in a future NuttX release.
+        The initial release, verified only on the ZDS-II ez8 simulator, was released in nuttx-0.3.9.
       </li>
     </ul>
     </li>
@@ -648,6 +655,12 @@
     This port use the Zilog z16f2800100zcog development kit and the
     Zilog ZDS-II Windows command line tools.
     The development environment is Cygwin under WinXP.
+  </li>
+
+  <li><code>configs/ez80f0910200kitg</code>
+    ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200kitg
+    development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
+    tools.  The development environment is Cygwin under WinXP.
   </li>
 
   <li><code>configs/z8encore000zco</code>
