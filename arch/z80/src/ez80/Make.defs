@@ -33,7 +33,8 @@
 #
 ############################################################################
 
-HEAD_SSRC	= ez80_head.S
+HEAD_ASRC	= ez80_vectors.asm
+HEAD_SSRC	=
 
 CMN_SSRCS	= 
 CMN_CSRCS	= up_initialize.c up_allocateheap.c up_createstack.c \
@@ -42,8 +43,11 @@ CMN_CSRCS	= up_initialize.c up_allocateheap.c up_createstack.c \
 		  up_reprioritizertr.c up_idle.c up_assert.c up_doirq.c \
 		  up_mdelay.c up_udelay.c up_usestack.c
 
-CHIP_SSRCS	= ez80_vector.S ez80_saveusercontext.S ez80_restorecontext.S
+CHIP_ASRCS	= ez80_startup.asm ez80_saveusercontext.asm ez80_restorecontext.asm
+ifeq ($(_EZ80F91),y)
+CHIP_ASRCS	+= ez80f91_init.asm
+endif
+CHIP_SSRCS	= 
 CHIP_CSRCS	= ez80_initialstate.c ez80_irq.c ez80_saveirqcontext.c \
 		  ez80_schedulesigaction.c ez80_sigdeliver.c ez80_timerisr.c \
 		  ez80_lowuart.c ez80_serial.c ez80_registerdump.c
-

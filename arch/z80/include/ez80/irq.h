@@ -143,8 +143,9 @@
 #ifdef CONFIG_EZ80_Z80MODE
 /* Byte offsets */
 
-#  define XCPT_I16_OFFSET  (2*XCPT_I)    /* Offset 0: 16-bit interrupt vector register */
-#    define XCPT_I_OFFSET  (2*XCPT_I+1)  /* Offset 1: 8-bit interrupt vector register */
+#  define XCPT_I_OFFSET    (2*XCPT_I)    /* Offset 0: 16-bit interrupt vector register */
+#    define XCPT_IF_OFFSET (2*XCPT_I+0)  /* Offset 1: Saved flags. P set if interrupts enabled */
+#    define XCPT_IA_OFFSET (2*XCPT_I+1)  /* Offset 2: Saved lower 8-bits of interrupt vector register */
 #  define XCPT_BC_OFFSET   (2*XCPT_BC)   /* Offset 2: Saved 16-bit BC register */
 #    define XCPT_C_OFFSET  (2*XCPT_BC+0) /* Offset 2: Saved 8-bit C register */
 #    define XCPT_B_OFFSET  (2*XCPT_BC+1) /* Offset 3: Saved 8-bit D register */
@@ -165,8 +166,9 @@
 #else
 /* Byte offsets */
 
-#  define XCPT_I24_OFFSET  (3*XCPT_I)    /* Offset 0: Saved 24-bit interrupt vector register */
-#    define XCPT_I_OFFSET  (3*XCPT_I+2)  /* Offset 2: Saved 8-bit interrupt vector register */
+#  define XCPT_I_OFFSET  (3*XCPT_I)      /* Offset 0: Saved 24-bit interrupt vector register */
+#    define XCPT_IF_OFFSET (2*XCPT_I+1)  /* Offset 1: Saved flags. P set if interrupts enabled */
+#    define XCPT_IA_OFFSET (2*XCPT_I+2)  /* Offset 2: Saved lower 8-bits of interrupt vector register */
 #  define XCPT_BC_OFFSET   (3*XCPT_BC)   /* Offset 3: Saved 24-bit BC register */
 #    define XCPT_C_OFFSET  (3*XCPT_BC+1) /* Offset 4: Saved 8-bit C register */
 #    define XCPT_B_OFFSET  (3*XCPT_BC+2) /* Offset 5: Saved 8-bit D register */
