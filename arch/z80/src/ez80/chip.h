@@ -45,13 +45,14 @@
  * Definitions
  ************************************************************************************/
 
-/* Hexadecimal Representation *******************************************************/
+/* Bits in the Z80 FLAGS register ***************************************************/
 
-#ifdef __ASSEMBLY__
-# define _HX(h)   %##h
-#else
-# define _HX(h)   0x##h
-#endif
+#define EZ80_C_FLAG      0x01       /* Bit 0: Carry flag */
+#define EZ80_N_FLAG      0x02       /* Bit 1: Add/Subtract flag  */
+#define EZ80_PV_FLAG     0x04       /* Bit 2: Parity/Overflow flag */
+#define EZ80_H_FLAG      0x10       /* Bit 4: Half carry flag */
+#define EZ80_Z_FLAG      0x40       /* Bit 5: Zero flag */
+#define EZ80_S_FLAG      0x80       /* Bit 7: Sign flag */
 
 /* Memory Map */
 /* Special Function Registers *******************************************************
