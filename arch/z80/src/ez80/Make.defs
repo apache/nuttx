@@ -48,6 +48,6 @@ ifeq ($(_EZ80F91),y)
 CHIP_ASRCS	+= ez80f91_init.asm
 endif
 CHIP_SSRCS	= 
-CHIP_CSRCS	= ez80_initialstate.c ez80_irq.c ez80_saveirqcontext.c \
-		  ez80_schedulesigaction.c ez80_sigdeliver.c ez80_timerisr.c \
-		  ez80_lowuart.c ez80_serial.c ez80_registerdump.c
+CHIP_CSRCS	= ez80_initialstate.c ez80_irq.c ez80_schedulesigaction.c \
+		  ez80_sigdeliver.c ez80_timerisr.c  ez80_lowuart.c ez80_serial.c \
+		  ez80_registerdump.c
