@@ -80,14 +80,13 @@
 void up_initial_state(_TCB *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
-  chireg_t *regs = xcp->regs;
 
   /* Initialize the initial exception register context structure */
 
   memset(xcp, 0, sizeof(struct xcptcontext));
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  ((ubyte*)regs)[XCPT_IF_OFFSET]  = EZ80_PV_FLAG; /* Parity/Overflow flag will enable interrupts */
+  ((ubyte*)xcp->regs)[XCPT_IF_OFFSET]  = EZ80_PV_FLAG; /* Parity/Overflow flag will enable interrupts */
 #endif
-  regs[XCPT_SP] = (chipreg_t)tcb->adj_stack_ptr;
-  regs[XCPT_PC] = (chipreg_t)tcb->start;
+  xcp->regs[XCPT_SP] = (chipreg_t)tcb->adj_stack_ptr;
+  xcp->regs[XCPT_PC] = (chipreg_t)tcb->start;
 }
