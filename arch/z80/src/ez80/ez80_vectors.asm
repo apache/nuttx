@@ -40,10 +40,15 @@
 NVECTORS EQU 64		; max possible interrupt vectors
 
 ;**************************************************************************
-; Global symbols used
+; Global Symbols Imported
 ;**************************************************************************
 
 	xref	_ez80_startup
+
+;**************************************************************************
+; Global Symbols Exported
+;**************************************************************************
+
 	xdef	_ez80_reset
 	xdef	_ez80_initvectors
 	xdef	_ez80_handlers
