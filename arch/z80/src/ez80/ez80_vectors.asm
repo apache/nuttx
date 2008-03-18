@@ -44,6 +44,7 @@ NVECTORS EQU 64		; max possible interrupt vectors
 ;**************************************************************************
 
 	xref	_ez80_startup
+	xref	_up_doirq
 
 ;**************************************************************************
 ; Global Symbols Exported
@@ -77,7 +78,7 @@ irqhandler: macro vectno
 					; Offset 8: Return PC is already on the stack
 	push	af			; Offset 7: AF (retaining flags)
 	ld	a, #vectno		; A = vector number
-	jr	_ez80_rstcommon		; Remaining RST handling is common
+	jp	_ez80_rstcommon		; Remaining RST handling is common
 	endmac	irqhandler
 
 ; Save Interrupt State
@@ -136,7 +137,7 @@ _nmi:
 
 _ez80_handlers:
 	irqhandler	 0
-	handlersize equ . - _ez80handlers
+	handlersize equ $-_ez80handlers
 	irqhandler	 1
 	irqhandler	 2
 	irqhandler	 3
@@ -205,7 +206,7 @@ _ez80_handlers:
 ; Common Interrupt handler
 ;**************************************************************************
 
-_ez80_rstcommon::
+_ez80_rstcommon:
 	; Create a register frame.  SP points to top of frame + 4, pushes
 	; decrement the stack pointer.  Already have
 	;
@@ -274,7 +275,7 @@ _ez80_rstcommon::
 	ex	af, af'			; Restore AF (before enabling interrupts)
 	ei				; yes
 	reti
-nointenable::
+nointenable:
 	ex	af, af'			; Restore AF
 	reti
 
@@ -285,16 +286,18 @@ nointenable::
 _ez80_initvectors:
 	; Initialize the vector table
 
-	ld	hl, _vector_table
+	ld	iy, _ez80_vectable
+	ld	bc, 4
 	ld	b, NVECTORS
-	ld	iy, _ez80_handlers
+	ld	hl, _ez80_handlers
+	ld	de, handlersize
 	ld	a, 0
 $1:
 	ld	(iy), hl	; Store IRQ handler
 	ld	(iy+3), a	; Pad to 4 bytes
-	add	hl, handlersize	; Point to next handler
-	add	iy, 4		; Point to next entry in vector table
-	djnz	$2		; Loop until all vectors have been written
+	add	hl, de		; Point to next handler
+	add	iy, bc		; Point to next entry in vector table
+	djnz	$1		; Loop until all vectors have been written
 
 	; Select interrupt mode 2
 	

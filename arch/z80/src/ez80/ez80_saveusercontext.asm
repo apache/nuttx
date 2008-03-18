@@ -47,43 +47,58 @@
 ; Constants
 ;*************************************************************************
 
-	; Register save area layout
+	CONFIG_EZ80_Z80MODE equ 0
 
 	.if CONFIG_EZ80_Z80MODE
-	XCPT_I	EQU	2*0		; Offset 0: Saved I w/interrupt state in carry
-	XCPT_BC	EQU	2*1		; Offset 1: Saved BC register
-	XCPT_DE	EQU	2*2		; Offset 2: Saved DE register
-	XCPT_IX	EQU	2*3		; Offset 3: Saved IX register
-	XCPT_IY	EQU	2*4		; Offset 4: Saved IY register
-	XCPT_SP	EQU	2*5		; Offset 5: Offset to SP at time of interrupt
-	XCPT_HL	EQU	2*6		; Offset 6: Saved HL register
-	XCPT_AF	EQU	2*7		; Offset 7: Saved AF register
-	XCPT_PC	EQU	2*8		; Offset 8: Offset to PC at time of interrupt
-	.else
-	XCPT_I	EQU	3*0		; Offset 0: Saved I w/interrupt state in carry
-	XCPT_BC	EQU	3*1		; Offset 1: Saved BC register
-	XCPT_DE	EQU	3*2		; Offset 2: Saved DE register
-	XCPT_IX	EQU	3*3		; Offset 3: Saved IX register
-	XCPT_IY	EQU	3*4		; Offset 4: Saved IY register
-	XCPT_SP	EQU	3*5		; Offset 5: Offset to SP at time of interrupt
-	XCPT_HL	EQU	3*6		; Offset 6: Saved HL register
-	XCPT_AF	EQU	3*7		; Offset 7: Saved AF register
-	XCPT_PC	EQU	3*8		; Offset 8: Offset to PC at time of interrupt	.endif
+	; Register save area layout
+
+	XCPT_I		equ	2*0	; Offset 0: Saved I w/interrupt state in carry
+	XCPT_BC		equ	2*1	; Offset 1: Saved BC register
+	XCPT_DE		equ	2*2	; Offset 2: Saved DE register
+	XCPT_IX		equ	2*3	; Offset 3: Saved IX register
+	XCPT_IY		equ	2*4	; Offset 4: Saved IY register
+	XCPT_SP		equ	2*5	; Offset 5: Offset to SP at time of interrupt
+	XCPT_HL		equ	2*6	; Offset 6: Saved HL register
+	XCPT_AF		equ	2*7	; Offset 7: Saved AF register
+	XCPT_PC		equ	2*8	; Offset 8: Offset to PC at time of interrupt
 
 	; Stack frame
 
-	FRAME_IY	EQU  0	; Location of IY on the stack
-	FRAME_IX	EQU  2	; Location of IX on the stack
-	FRAME_RET	EQU  4	; Location of return address on the stack
-	FRAME_REGS	EQU  6	; Location of reg save area on stack
+	FRAME_IY	equ	2*0	; Location of IY on the stack
+	FRAME_IX	equ	2*1	; Location of IX on the stack
+	FRAME_RET	equ	2*2	; Location of return address on the stack
+	FRAME_REGS	equ	2*3	; Location of reg save area on stack
 
-	SP_OFFSET	EQU  6
+	SP_OFFSET	equ	2*3
+	.else
+	; Register save area layout
+
+	XCPT_I		equ	3*0	; Offset 0: Saved I w/interrupt state in carry
+	XCPT_BC		equ	3*1	; Offset 1: Saved BC register
+	XCPT_DE		equ	3*2	; Offset 2: Saved DE register
+	XCPT_IX		equ	3*3	; Offset 3: Saved IX register
+	XCPT_IY		equ	3*4	; Offset 4: Saved IY register
+	XCPT_SP		equ	3*5	; Offset 5: Offset to SP at time of interrupt
+	XCPT_HL		equ	3*6	; Offset 6: Saved HL register
+	XCPT_AF		equ	3*7	; Offset 7: Saved AF register
+	XCPT_PC		equ	3*8	; Offset 8: Offset to PC at time of interrupt	.endif
+
+	; Stack frame
+
+	FRAME_IY	equ	3*0	; Location of IY on the stack
+	FRAME_IX	equ	3*1	; Location of IX on the stack
+	FRAME_RET	equ	3*2	; Location of return address on the stack
+	FRAME_REGS	equ	3*3	; Location of reg save area on stack
+
+	SP_OFFSET	equ	3*3
+	.endif
 
 ;**************************************************************************
 ; Code
 ;**************************************************************************
 
 	segment	CODE
+	.assume ADL=1
 
 ;*************************************************************************
 ; Name: z80_saveusercontext
@@ -99,7 +114,7 @@ _ez80_saveusercontext:
 
 	; Fetch the address of the save area
 
-	ld	de, FRAME_REGS(ix)	; DE = save area address
+	ld	de, (ix + FRAME_REGS)	; DE = save area address
 	ld	iy, #0
 	add	iy, de			; IY = save area address
 
@@ -110,41 +125,41 @@ _ez80_saveusercontext:
 	ld	a, i			; Get interrupt state
 	push	af
 	pop	hl
-	ld	XCPT_I(iy), hl		; Index 0: I w/interrupt state in parity/overflow
+	ld	(iy + XCPT_I), hl	; Index 0: I w/interrupt state in parity/overflow
 
 	; Save BC at offset 1
 
-	ld	XCPT_BC(iy), bc		; Index 1: BC
+	ld	(iy + XCPT_BC), bc	; Index 1: BC
 
 	; DE is not preserved (Index 2)
 
 	; Save IX at offset 3
 
-	ld	hl, FRAME_IX(ix)	; HL = Saved alue of IX
-	ld	XCPT_IX(iy), hl		; Index 3: IX
+	ld	hl, (ix + FRAME_IX)	; HL = Saved alue of IX
+	ld	(iy + XCPT_IX), hl	; Index 3: IX
 
 	; Save IY at index 4
 
-	ld	hl, FRAME_IY(ix)	; HL = Saved value of IY
-	ld	XCPT_IY(iy), hl		; Index 4: IY
+	ld	hl, (ix + FRAME_IY)	; HL = Saved value of IY
+	ld	(iy + XCPT_IY), hl	; Index 4: IY
 
 	; Save that stack pointer as it would be upon return in offset 5
 
 	ld	hl, #SP_OFFSET		; Value of stack pointer on return
 	add	hl, sp
-	ld	XCPT_SP(iy), hl		; Index 5 SP
+	ld	(iy + XCPT_SP), hl	; Index 5 SP
 
 	; HL is saved as the value 1 at offset 6
 
 	ld	hl, #1
-	ld	XCPT_HL(iy), hl		; Index 2: HL on return (=1)
+	ld	(iy + XCPT_HL), hl	; Index 2: HL on return (=1)
 
 	; AF is not preserved (offset 7)
 
 	; Save the return address at index 8
 
-	ld	hl, FRAME_RET(ix)	; HL = Saved return address
-	ld	XCPT_PC(iy), hl		; Index 8: PC
+	ld	hl, (ix + FRAME_RET)	; HL = Saved return address
+	ld	(iy + XCPT_PC), hl	; Index 8: PC
 
 	; Return the value 0
 

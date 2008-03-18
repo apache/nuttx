@@ -1,5 +1,5 @@
 ;**************************************************************************
-; arch/z80/src/ez80/z80_restorcontext.asm
+; arch/z80/src/ez80/ez80_restorcontext.asm
 ;
 ;   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 ;   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -48,6 +48,7 @@
 ;**************************************************************************
 
 	segment	CODE
+	.assume ADL=1
 
 ;**************************************************************************
 ; ez80_restorecontext
@@ -98,7 +99,7 @@ _ez80_restorecontext:
 	; Restore interrupt state
 
 	ex	af, af'			; Recover interrupt state
-	jr	po, noinrestore		; No parity, IFF2=0, means disabled
+	jp	po, noinrestore		; No parity, IFF2=0, means disabled
 	ex	af, af'			; Restore AF (before enabling interrupts)
 	ei				; yes.. Enable interrupts
 	ret				; and return

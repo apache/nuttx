@@ -45,12 +45,17 @@ LDFLAGS 	= @"${shell cygpath -w $(ARCHSRCDIR)/nuttx.linkcmd}"
 
 ############################################################################
 # Files and directories
-HEAD_ASRC	= $(HEAD_SSRC:.S=$(ASMEXT))
+ifneq ($(HEAD_SSRC),)
+HEAD_GENSRC	= $(HEAD_SSRC:.S=$(ASMEXT))
 HEAD_AOBJ	= $(HEAD_SSRC:.S=$(OBJEXT))
+else
+HEAD_AOBJ	= $(HEAD_ASRC:$(ASMEXT)=$(OBJEXT))
+endif
 
 SSRCS		= $(CHIP_SSRCS) $(CMN_SSRCS)
-ASRCS		= $(SSRCS:.S=$(ASMEXT))
-AOBJS		= $(SSRCS:.S=$(OBJEXT))
+ASRCS		= $(CHIP_ASRCS) $(CMN_ASRCS)
+GENSRCS		= $(SSRCS:.S=$(ASMEXT))
+AOBJS		= $(SSRCS:.S=$(OBJEXT)) $(ASRCS:$(ASMEXT)=$(OBJEXT))
 
 CSRCS		= $(CHIP_CSRCS) $(CMN_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
@@ -66,13 +71,13 @@ VPATH		= chip:common
 # Targets
 all: $(HEAD_OBJ) libarch$(LIBEXT)
 
-$(ASRCS) $(HEAD_ASRC): %$(ASMEXT): %.S
+$(HEAD_GENSRC) $(GENSRCS) : %$(ASMEXT): %.S
 	@$(CPP) $(CPPFLAGS) $< -o $@.tmp
 	@cat $@.tmp | sed -e "s/^#/;/g" > $@
 	@rm $@.tmp
 
 $(AOBJS) $(HEAD_AOBJ): %$(OBJEXT): %$(ASMEXT)
-	$(call ASSEMBLE, $<, $@)
+	$(call ASSEMBLE, `cygpath -w $<`, $@)
 
 $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, `cygpath -w $<`, $@)
