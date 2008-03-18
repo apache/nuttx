@@ -68,6 +68,13 @@
 	xdef	_ez80_halt
 
 ;**************************************************************************
+; Code
+;**************************************************************************
+
+	segment	CODE
+	.assume ADL=1
+
+;**************************************************************************
 ; System reset start logic
 ;**************************************************************************
 
@@ -149,7 +156,7 @@ _ez80_codedone:
 	; NuttX will never return, but just in case...
 
 	call	__close_periphdevice
-_ez80_halt::
+_ez80_halt:
 	halt				; We should never get here
 	jp	_ez80_halt
 
