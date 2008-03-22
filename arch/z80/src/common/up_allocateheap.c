@@ -47,39 +47,26 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
+#ifdef SDCC
 /* For the SDCC toolchain, the arch/z80/src/Makefile will parse the map file
- * to determin how much memory is available for the heap.  This parsed data
+ * to determine how much memory is available for the heap.  This parsed data
  * is provided via the auto-generated file up_mem.h
  */
 
-#ifdef SDCC
 #  include "up_mem.h"
+
+#else
+/* For other toolchains, the architecture must provide a header file in the
+ * chip subdirectory to provide the heap parameters (if they are not defined
+ * in the configuration file )
+ */
+
+#  include "chip/up_mem.h"
 #endif
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-/* For the ZiLOG ZDS-II toolchain(s), the heap will be set using linker-
- * defined values:
- *
- *   far_heapbot  : set to the offset to the first unused value in EDATA
- *   far_stacktop : set to the highest address in EDATA
- *
- * The top of the heap is then determined by the amount of stack setaside
- * in the NuttX configuration file
- */
-
-#ifdef __ZILOG__
-#  ifndef CONFIG_HEAP1_BASE
-     extern far unsigned long far_heapbot;
-#    define CONFIG_HEAP1_BASE ((uint16)&far_heapbot)
-#  endif
-#  ifndef CONFIG_HEAP1_END
-     extern far unsigned long far_stacktop;
-#    define CONFIG_HEAP1_END (((uint16)&far_stacktop) - CONFIG_PROC_STACK_SIZE + 1)
-#  endif
-#endif
 
 /****************************************************************************
  * Private Data
