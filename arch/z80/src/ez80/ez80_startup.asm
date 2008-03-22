@@ -61,8 +61,6 @@
 	xref	__len_code
 	xref	__low_code
 	xref	__low_romcode
-	xref	__open_periphdevice
-	xref	__close_periphdevice
 	xref	_os_start
 	xdef	_ez80_startup
 	xdef	_ez80_halt
@@ -141,10 +139,6 @@ _ez80_datadone:
 	ldir				; Copy the code section
 _ez80_codedone:
 
-	; Initialize the peripheral devices
-
-	call __open_periphdevice
-
 	; Perform board-specific intialization
 
 	call	_up_lowinit
@@ -155,7 +149,6 @@ _ez80_codedone:
 
 	; NuttX will never return, but just in case...
 
-	call	__close_periphdevice
 _ez80_halt:
 	halt				; We should never get here
 	jp	_ez80_halt
