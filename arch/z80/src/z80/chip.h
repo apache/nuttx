@@ -60,10 +60,10 @@
 
 # define getreg8(a)           (*(volatile ubyte *)(a))
 # define putreg8(v,a)         (*(volatile ubyte *)(a) = (v))
+# define getreg16(a)          (*(volatile uint16 *)(a))
+# define putreg16(v,a)        (*(volatile uint16 *)(a) = (v))
 # define getreg32(a)          (*(volatile uint32 *)(a))
 # define putreg32(v,a)        (*(volatile uint32 *)(a) = (v))
-# define getreg(a)   getreg16(1)
-# define putreg(v,a) putreg16(v,a)
 
 #endif
 

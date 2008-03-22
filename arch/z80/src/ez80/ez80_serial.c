@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/z8/z8_serial.c
+ * arch/z80/src/ez08/ez80_serial.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -45,7 +45,6 @@
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
-#include <ez8.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -58,53 +57,48 @@
 
 #ifdef CONFIG_USE_SERIALDRIVER
 
-extern uint32 get_freq(void);
-
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/* System clock frequency value from ZDS target settings */
+#define BASE_BAUD     115200
 
-#define STATE_DISABLED   0
-#define STATE_RXENABLED  1
-#define STATE_TXENABLED  2
+/* The system clock frequency is defined in the linkcmd file */
+
+extern _Erom unsigned long SYS_CLK_FREQ;
+#define _DEFCLK ((unsigned long)&SYS_CLK_FREQ)
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct z8_uart_s
+struct ez80_dev_s
 {
-  ubyte volatile far* uartbase;		/* Base address of UART registers */
-  uint32              baud;		/* Configured baud */
-  boolean             rxenabled;	/* RX interrupt enabled */
-  boolean             txenabled;	/* TX interrupt enabled */
-  ubyte               rxirq;		/* RX IRQ associated with this UART */
-  ubyte               txirq;		/* RX IRQ associated with this UART */
-  ubyte               parity;		/* 0=none, 1=odd, 2=even */
-  boolean             stopbits2;	/* TRUE: Configure with 2 stop bits
-					 * (instead of 1) */
+  unsigned int         uartbase;	/* Base address of UART registers */
+  unsigned int         baud;		/* Configured baud */
+  ubyte                irq;		/* IRQ associated with this UART */
+  ubyte                parity;		/* 0=none, 1=odd, 2=even */
+  ubyte                bits;		/* Number of bits (7 or 8) */
+  boolean              stopbits2;	/* TRUE: Configure with 2 (vs 1) */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     z8_setup(FAR struct uart_dev_s *dev);
-static void    z8_shutdown(FAR struct uart_dev_s *dev);
-static int     z8_attach(FAR struct uart_dev_s *dev);
-static void    z8_detach(FAR struct uart_dev_s *dev);
-static int     z8_rxinterrupt(int irq, FAR void *context);
-static int     z8_txinterrupt(int irq, FAR void *context);
-static int     z8_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int     z8_receive(FAR struct uart_dev_s *dev, FAR uint32 *status);
-static void    z8_rxint(FAR struct uart_dev_s *dev, boolean enable);
-static boolean z8_rxavailable(FAR struct uart_dev_s *dev);
-static void    z8_send(FAR struct uart_dev_s *dev, int ch);
-static void    z8_txint(FAR struct uart_dev_s *dev, boolean enable);
-static boolean z8_txready(FAR struct uart_dev_s *dev);
-static boolean z8_txempty(FAR struct uart_dev_s *dev);
+static int     ez80_setup(struct uart_dev_s *dev);
+static void    ez80_shutdown(struct uart_dev_s *dev);
+static int     ez80_attach(struct uart_dev_s *dev);
+static void    ez80_detach(struct uart_dev_s *dev);
+static int     ez80_interrrupt(int irq, void *context);
+static int     ez80_ioctl(struct file *filep, int cmd, unsigned long arg);
+static int     ez80_receive(struct uart_dev_s *dev, unsigned int *status);
+static void    ez80_rxint(struct uart_dev_s *dev, boolean enable);
+static boolean ez80_rxavailable(struct uart_dev_s *dev);
+static void    ez80_send(struct uart_dev_s *dev, int ch);
+static void    ez80_txint(struct uart_dev_s *dev, boolean enable);
+static boolean ez80_txready(struct uart_dev_s *dev);
+static boolean ez80_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Variables
@@ -112,18 +106,18 @@ static boolean z8_txempty(FAR struct uart_dev_s *dev);
 
 struct uart_ops_s g_uart_ops =
 {
-  z8_setup,          /* setup */
-  z8_shutdown,       /* shutdown */
-  z8_attach,         /* attach */
-  z8_detach,         /* detach */
-  z8_ioctl,          /* ioctl */
-  z8_receive,        /* receive */
-  z8_rxint,          /* rxint */
-  z8_rxavailable,    /* rxavailable */
-  z8_send,           /* send */
-  z8_txint,          /* txint */
-  z8_txready,        /* txready */
-  z8_txempty         /* txempty */
+  ez80_setup,          /* setup */
+  ez80_shutdown,       /* shutdown */
+  ez80_attach,         /* attach */
+  ez80_detach,         /* detach */
+  ez80_ioctl,          /* ioctl */
+  ez80_receive,        /* receive */
+  ez80_rxint,          /* rxint */
+  ez80_rxavailable,    /* rxavailable */
+  ez80_send,           /* send */
+  ez80_txint,          /* txint */
+  ez80_txready,        /* txready */
+  ez80_txempty         /* txempty */
 };
 
 /* I/O buffers */
@@ -133,17 +127,15 @@ static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
 static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 
-/* This describes the state of the DM320 uart0 port. */
+/* This describes the state of the UART0 port. */
 
-static struct z8_uart_s g_uart0priv =
+static struct ez80_dev_s g_uart0priv =
 {
-  Z8_UART0_BASE,            /* uartbase */
+  EZ80_UART0_BASE,          /* uartbase */
   CONFIG_UART0_BAUD,        /* baud */
-  FALSE,                    /* rxenabled */
-  FALSE,                    /* txenabled */
-  Z8_UART0_RX_IRQ,          /* rxirq */
-  Z8_UART0_TX_IRQ,          /* txirq */
+  EZ80_UART0_IRQ,           /* irq */
   CONFIG_UART0_PARITY,      /* parity */
+  CONFIG_UART0_BITS,        /* bits */
   CONFIG_UART0_2STOP        /* stopbits2 */
 };
 
@@ -178,17 +170,15 @@ static uart_dev_t g_uart0port =
   &g_uart0priv,             /* priv */
 };
 
-/* This describes the state of the DM320 uart1 port. */
+/* This describes the state of the UART1 port. */
 
-static struct z8_uart_s g_uart1priv =
+static struct ez80_dev_s g_uart1priv =
 {
-  Z8_UART1_BASE,            /* uartbase */
+  EZ80_UART1_BASE,          /* uartbase */
   CONFIG_UART1_BAUD,        /* baud */
-  FALSE,                    /* rxenabled */
-  FALSE,                    /* txenabled */
-  Z8_UART1_RX_IRQ,          /* rxirq */
-  Z8_UART1_TX_IRQ,          /* txirq */
+  EZ80_UART1_IRQ,           /* irq */
   CONFIG_UART1_PARITY,      /* parity */
+  CONFIG_UART1_BITS,        /* bits */
   CONFIG_UART1_2STOP        /* stopbits2 */
 };
 
@@ -225,14 +215,14 @@ static uart_dev_t g_uart1port =
 
 /* Now, which one with be tty0/console and which tty1? */
 
-#ifdef CONFIG_UART1_SERIAL_CONSOLE
-# define CONSOLE_DEV     g_uart1port
-# define TTYS0_DEV       g_uart1port
-# define TTYS1_DEV       g_uart0port
-#else
+#ifdef CONFIG_UART0_SERIAL_CONSOLE
 # define CONSOLE_DEV     g_uart0port
 # define TTYS0_DEV       g_uart0port
 # define TTYS1_DEV       g_uart1port
+#else
+# define CONSOLE_DEV     g_uart1port
+# define TTYS0_DEV       g_uart1port
+# define TTYS1_DEV       g_uart0port
 #endif
 
 /****************************************************************************
@@ -240,190 +230,177 @@ static uart_dev_t g_uart1port =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: z8_putuart
+ * Name: ez80_serialin
  ****************************************************************************/
- 
-static inline void z8_putuart(FAR struct z8_uart_s *priv, ubyte value, ubyte offset)
+
+static inline ubyte ez80_serialin(struct ez80_dev_s *priv, uint32 offset)
 {
-  putreg8(value, *(priv->uartbase + offset));
+  return getreg8(priv->uartbase + offset);
 }
 
 /****************************************************************************
- * Name: z8_getuart
+ * Name: ez80_serialout
  ****************************************************************************/
- 
-static inline ubyte z8_getuart(FAR struct z8_uart_s *priv, ubyte offset)
+
+static inline void ez80_serialout(struct ez80_dev_s *priv, ubyte offset, ubyte value)
 {
-  return getreg8(*(priv->uartbase + offset));
+  putreg8(value, priv->uartbase + offset);
 }
 
 /****************************************************************************
- * Name: z8_disableuartirq
+ * Name: ez80_disableuartint
  ****************************************************************************/
 
-static ubyte z8_disableuartirq(FAR struct uart_dev_s *dev)
+static inline void ez80_disableuartint(struct ez80_dev_s *priv)
 {
-  struct z8_uart_s *priv  = (struct z8_uart_s*)dev->priv;
-  irqstate_t          flags = irqsave();
-  ubyte               state = priv->rxenabled ? STATE_RXENABLED : STATE_DISABLED | \
-                              priv->txenabled ? STATE_TXENABLED : STATE_DISABLED;
-
-  z8_txint(dev, FALSE);
-  z8_rxint(dev, FALSE);
-
-  irqrestore(flags);
-  return state;
+  ubyte ier = ez80_serialin(EZ80_UART_IER);
+  ier &= ~EZ80_UARTEIR_INTMASK;
+  ez80_serialout(priv, EZ80_UART_IER, ier);
 }
 
 /****************************************************************************
- * Name: z8_restoreuartirq
+ * Name: ez80_restoreuartint
  ****************************************************************************/
 
-static void z8_restoreuartirq(FAR struct uart_dev_s *dev, ubyte state)
+static inline void ez80_restoreuartint(struct ez80_dev_s *priv, ubyte bits)
 {
-  struct z8_uart_s *priv  = (struct z8_uart_s*)dev->priv;
-  irqstate_t          flags = irqsave();
-
-  z8_txint(dev, (state & STATE_TXENABLED) ? TRUE : FALSE);
-  z8_rxint(dev, (state & STATE_RXENABLED) ? TRUE : FALSE);
-
-  irqrestore(flags);
+  ubyte ier = ez80_serialin(EZ80_UART_IER);
+  ier |= bits & (EZ80_UARTEIR_TIE|EZ80_UARTEIR_RIE);
+  ez80_serialout(priv, EZ80_UART_IER, ier);
 }
 
 /****************************************************************************
- * Name: z8_consoleput
+ * Name: ez80_waittxready
  ****************************************************************************/
 
-static void z8_consoleput(ubyte ch)
+static inline void ez80_waittxready(struct ez80_dev_s *priv)
 {
-  struct z8_uart_s *priv = (struct z8_uart_s*)CONSOLE_DEV.priv;
   int tmp;
 
   for (tmp = 1000 ; tmp > 0 ; tmp--)
     {
-      if (z8_txready(&CONSOLE_DEV))
+      if ((ez80_serialin(priv, EZ80_UART_LSR) & EZ80_UARTLSR_THRE) != 0)
         {
           break;
         }
     }
-  z8_putuart(priv, ch,  Z8_UART_TXD);
 }
 
 /****************************************************************************
- * Name: z8_uartconfigure
- *
- * Description:
- *   Configure hardware for UART functionality
- *
+ * Name: ez80_setbaud
  ****************************************************************************/
 
-void z8_uartconfigure(void)
+static inline void ez80_setbaud(struct ez80_dev_s *priv, uint24 baud)
 {
-  uint16 brg;
-  ubyte  val;
+  uint24 brg_divisor;
+  ubyte lctl;
 
-  /* Configure GPIO Port A pins 4 & 5 for alternate function */
-
-  putreg8(0x02, PAADDR);
-  val = getreg8(PACTL) | 0x30;    /* Set bits in alternate function register */
-  putreg8(val, PACTL);
-  putreg8(0x07, PAADDR);
-  val = getreg8(PACTL) & 0xcf;    /* Reset bits in alternate function set-1 register */
-  putreg8(val, PACTL);
-  putreg8(0x08, PAADDR);
-  val = getreg8(PACTL) & 0xcf;    /* Reset bits in alternate function set-2 register */
-  putreg8(val, PACTL);
-  putreg8(0x00, PAADDR);
-
-#ifdef EZ8_UART1
-  /* Configure GPIO Port D pins 4 & 5 for alternate function */
-  
-  putreg8(0x02, PAADDR);
-  val = getreg8(PDCTL) | 0x30;    /* Set bits in alternate function register */
-  putreg8(val, PDCTL);
-  putreg8(0x07, PDADDR);
-  val = getreg8(PDCTL) & 0xcf;    /* Reset bits in alternate function set-1 register */
-  putreg8(val, PDCTL);
-  putreg8(0x08, PDADDR);
-  val = getreg8(PDCTL) & 0xcf;    /* Reset bits in alternate function set-2 register */
-  putreg8(val, PDCTL);
-  putreg8(0x00, PDADDR);
-#endif
-}
-
-/****************************************************************************
- * Name: z8_setup
- *
- * Description:
- *   Configure the UART baud, parity, etc. This method is called the first
- *   time that the serial port is opened.
- *
- ****************************************************************************/
-
-static int z8_setup(FAR struct uart_dev_s *dev)
-{
-#ifndef CONFIG_SUPPRESS_UART_CONFIG
-  struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
-  uint32 freq = get_freq();
-  uint16 brg;
-  ubyte ctl0;
-  ubyte ctl1;
-
-  /* Calculate and set the baud rate generation register.
-   * BRG = (freq + baud * 8)/(baud * 16)
+  /* The resulting BAUD and depends on the system clock frequency and the
+   * BRG divisor as follows:
+   *
+   * BAUD = SYSTEM_CLOCK_FREQUENCY / (16 * BRG_Divisor)
+   *
+   * Or
+   *
+   * BRG_Divisor = SYSTEM_CLOCK_FREQUENCY / 16 / BAUD
    */
 
-  brg = (freq + (priv->baud << 3))/(priv->baud << 4);
-  z8_putuart(priv, brg >> 8, Z8_UART_BRH);
-  z8_putuart(priv, brg & 0xff, Z8_UART_BRL);
+   brg_divisor = ( _DEFCLK + (bard << 3)) / ((baud << 4);
 
-  /* Configure STOP bits */
+   /* Set the DLAB bit to enable access to the BRG registers */
 
-  ctl0 = ctl1 = 0;
+   lctl = ez80_serialin(priv, EZ80_UART_LCTL);
+   lctl |= EZ80_UARTLCTL_DLAB;
+   ez80_serialout(priv, EZ80_UART_LCTL, lctl);
+
+   ez80_serialout(priv, EZ80_UART_BRGL, (ubyte)(brg_divisor & 0xff));
+   ez80_serialout(priv, EZ80_UART_BRGH, (ubyte)(brg_divisor >> 8));
+
+   lctl &= ~EZ80_UARTLCTL_DLAB;
+   ez80_serialout(priv, EZ80_UART_LCTL, lctl);
+}
+
+/****************************************************************************
+ * Name: ez80_setup
+ *
+ * Description:
+ *   Configure the UART baud, bits, parity, fifos, etc. This method is called
+ *   the first time that the serial port is opened.
+ *
+ ****************************************************************************/
+
+static int ez80_setup(struct uart_dev_s *dev)
+{
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
+  struct ez80_dev_s *priv = dev->priv;
+  ubyte reg;
+  ubyte cval;
+
+  if (priv->bits == 7)
+    {
+      cval = EZ80_UARTCHAR_7BITS;
+    }
+  else
+    {
+      cval = EZ80_UARTCHAR_8BITS;
+    }
+
   if (priv->stopbits2)
     {
-      ctl0 |= Z8_UARTCTL0_STOP;
+      cval |= EZ80_UARTLCTl_2STOP;
     }
 
-  /* Configure parity */
-
-  if (priv->parity == 1)
+  if (priv->parity == 1)   /* Odd parity */
     {
-      ctl0 |= (Z8_UARTCTL0_PEN|Z8_UARTCTL0_PSEL);
+      cval |= (EZ80_UARTLCTL_PEN);
     }
-  else if (priv->parity == 2)
+  else if (priv->parity == 2)  /* Even parity */
     {
-      ctl0 |= Z8_UARTCTL0_PEN;
+      cval |= (EZ80_UARTLCTL_PEN|EZ80_UARTLCTL_EPS);
     }
 
-  z8_putuart(priv, ctl0, Z8_UART_CTL0);
-  z8_putuart(priv, ctl1, Z8_UART_CTL1);
+  /* Set the baud rate */
 
-  /* Enable UART receive (REN) and transmit (TEN) */
+  ez80_disableuartint(priv, NULL);
+  ez80_setbaud(priv, priv->baud);
+  ez80_serial_out(priv, EZ80_UART_MCTL, 0)
 
-  ctl0 |= (Z8_UARTCTL0_TEN|Z8_UARTCTL0_REN);
-  z8_putuart(priv, ctl0, Z8_UART_CTL0);
+  /* Set the character properties */
+
+  reg = (ez80_serialin(priv, EZ80_UART_LCTL) & 0x3f) | cval;
+  ez80_serialout(priv, EZ80_UART_LCTL, reg);
+
+  /* Enable and flush the receive FIFO */
+
+  reg = EZ80_UARTFCTL_FIFOEN;
+  ez80_serialout(priv, EZ80_UART_FCTL, reg);
+  reg |= (EZ80_UARTFCTL_CLRTxF|EZ80_UARTFCTL_CLRRxF);
+  ez80_serialout(priv, EZ80_UART_FCTL, reg);
+
+  /* Set the receive trigger level to 4 */
+
+  reg |= EZ80_UARTTRIG_4;
+  ez80_serialout(priv, EZ80_UART_FCTL, reg);
 #endif
   return OK;
 }
 
 /****************************************************************************
- * Name: z8_shutdown
+ * Name: ez80_shutdown
  *
  * Description:
- *   Disable the UART.  This method is called when the serial
- *   port is closed
+ *   Disable the UART.  This method is called when the serial port is closed
  *
  ****************************************************************************/
 
-static void z8_shutdown(FAR struct uart_dev_s *dev)
+static void ez80_shutdown(struct uart_dev_s *dev)
 {
-  struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
-  (void)z8_disableuartirq(dev);
+  struct ez80_dev_s *priv = (struct ez80_dev_s*)CONSOLE_DEV.priv;
+  ez80_disableuartint(priv);
 }
 
 /****************************************************************************
- * Name: z8_attach
+ * Name: ez80_attach
  *
  * Description:
  *   Configure the UART to operation in interrupt driven mode.  This method is
@@ -437,29 +414,27 @@ static void z8_shutdown(FAR struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int z8_attach(FAR struct uart_dev_s *dev)
+static int ez80_attach(struct uart_dev_s *dev)
 {
-  struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
+  struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
   int ret;
 
-  /* Attach the RX IRQ */
+  /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->rxirq, z8_rxinterrupt);
+  ret = irq_attach(priv->irq, ez80_interrrupt);
   if (ret == OK)
     {
-      /* Attach the TX IRQ */
+       /* Enable the interrupt (RX and TX interrupts are still disabled
+        * in the UART
+        */
 
-      ret = irq_attach(priv->txirq, z8_txinterrupt);
-      if (ret != OK)
-        {
-          irq_detach(priv->rxirq);
-        }
+       up_enable_irq(priv->irq);
     }
   return ret;
 }
 
 /****************************************************************************
- * Name: z8_detach
+ * Name: ez80_detach
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
@@ -468,275 +443,228 @@ static int z8_attach(FAR struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void z8_detach(FAR struct uart_dev_s *dev)
+static void ez80_detach(struct uart_dev_s *dev)
 {
-  struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
-  up_disable_irq(priv->rxirq);
-  up_disable_irq(priv->txirq);
-  irq_detach(priv->rxirq);
-  irq_detach(priv->txirq);
+  struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
+  up_disable_irq(priv->irq);
+  irq_detach(priv->irq);
 }
 
 /****************************************************************************
- * Name: z8_rxinterrupt
+ * Name: ez80_interrrupt
  *
  * Description:
- *   This is the UART interrupt handler.  It will be invoked when an RX
- *   event occurs at the z8's LIN-UART.
+ *   This is the UART interrupt handler.  It will be invoked
+ *   when an interrupt received on the 'irq'  It should call
+ *   uart_transmitchars or uart_receivechar to perform the
+ *   appropriate data transfers.  The interrupt handling logic\
+ *   must be able to map the 'irq' number into the approprite
+ *   uart_dev_s structure in order to call these functions.
  *
  ****************************************************************************/
 
-static int z8_rxinterrupt(int irq, FAR void *context)
+static int ez80_interrrupt(int irq, void *context)
 {
-  struct uart_dev_s  *dev = NULL;
-  struct z8_uart_s *priv;
-  ubyte              status;
+  struct uart_dev_s *dev = NULL;
+  struct ez80_dev_s   *priv;
+  volatile uint32    cause;
 
-  if (g_uart1priv.rxirq == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else if (g_uart0priv.rxirq == irq)
+  if (g_uart0priv.irq == irq)
     {
       dev = &g_uart0port;
+    }
+  else if (g_uart1priv.irq == irq)
+    {
+      dev = &g_uart1port;
     }
   else
     {
       PANIC(OSERR_INTERNAL);
     }
+  priv = (struct ez80_dev_s*)dev->priv;
 
-  priv = (struct z8_uart_s*)dev->priv;
+  cause = ez80_serialin(priv, EZ80_UART_IIR) & EZ80_UARTIIR_CAUSEMASK;
 
-  /* Check the LIN-UART status 0 register to determine whether the source of
-   * the interrupt is error, break, or received data
-   */
-
-  status = z8_getuart(priv, Z8_UART_STAT0);
-
-  /* REVISIT error and break handling */
-
-  /* Check if received data is available  */
-
-  if (status & Z8_UARTSTAT0_RDA)
+  if (cause == (EZ80_UARTINSTS_CTO|EZ80_UARTIIR_INTBIT) ||
+      cause == (EZ80_UARTINSTS_RDR|EZ80_UARTIIR_INTBIT))
     {
-      /* Handline an incoming, receive byte */
+      /* Receive characters from the RX fifo */
 
       uart_recvchars(dev);
     }
-  return OK;
-}
-
-/****************************************************************************
- * Name: z8_txinterrupt
- *
- * Description:
- *   This is the UART TX interrupt handler.  This interrupt handler will
- *   be invoked when the X16F LIN UART transmit data register is empty.
- *
- ****************************************************************************/
-
-static int z8_txinterrupt(int irq, FAR void *context)
-{
-  struct uart_dev_s  *dev = NULL;
-  struct z8_uart_s *priv;
-  ubyte              status;
-
-  if (g_uart1priv.txirq == irq)
+  else if (cause == (EZ80_UARTINSTS_TC|EZ80_UARTIIR_INTBIT))
     {
-      dev = &g_uart1port;
-    }
-  else if (g_uart0priv.txirq == irq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-    {
-      PANIC(OSERR_INTERNAL);
-    }
-
-  priv = (struct z8_uart_s*)dev->priv;
-
-  /* Verify that the transmit data register is empty */
-
-  status = z8_getuart(priv, Z8_UART_STAT0);
-  if (status & Z8_UARTSTAT0_TDRE)
-    {
-      /* Handle outgoing, transmit bytes */
-
       uart_xmitchars(dev);
     }
+
   return OK;
 }
 
 /****************************************************************************
- * Name: z8_ioctl
+ * Name: ez80_ioctl
  *
  * Description:
  *   All ioctl calls will be routed through this method
  *
  ****************************************************************************/
 
-static int z8_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int ez80_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   *get_errno_ptr() = ENOTTY;
   return ERROR;
 }
 
 /****************************************************************************
- * Name: z8_receive
+ * Name: ez80_receive
  *
  * Description:
- *   Called (usually) from the interrupt level to receive one character from
- *   the UART.  Error bits associated with the receipt are provided in the
- *   return 'status'.
+ * Called (usually) from the interrupt level to receive one character from
+ * the UART.  Error bits associated with the receipt are provided in the
+ * the return 'status'.
  *
  ****************************************************************************/
 
-static int z8_receive(FAR struct uart_dev_s *dev, FAR uint32 *status)
+static int ez80_receive(struct uart_dev_s *dev, unsigned int *status)
 {
-  struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
-  ubyte  rxd;
-  ubyte  stat0;
+  struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
+  ubyte rbr = ez80_serialin(priv, EZ80_UART_RBR);
+  ubyte lsr = ez80_serialin(priv, EZ80_UART_LSR);
 
-  rxd     = z8_getuart(priv, Z8_UART_RXD);
-  stat0   = z8_getuart(priv, Z8_UART_STAT0);
-  *status = (uint32)rxd | (((uint32)stat0) << 8);
-  return rxd;
+  *status = (unsigned int)lsr;
+  return rbr;
 }
 
 /****************************************************************************
- * Name: z8_rxint
+ * Name: ez80_rxint
  *
  * Description:
  *   Call to enable or disable RX interrupts
  *
  ****************************************************************************/
 
-static void z8_rxint(FAR struct uart_dev_s *dev, boolean enable)
+static void ez80_rxint(struct uart_dev_s *dev, boolean enable)
 {
-  struct z8_uart_s *priv  = (struct z8_uart_s*)dev->priv;
-  irqstate_t          flags = irqsave();
-
+  struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
+  ubyte ier = ez80_serialin(priv, EZ80_UART_IER);
+  
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      up_enable_irq(priv->rxirq);
+      ier |= EZ80_UARTEIR_RIE;
+      ez80_serialout(priv, EZ80_UART_IER, ier);
 #endif
     }
   else
     {
-      up_disable_irq(priv->rxirq);
+      ier &= ~EZ80_UARTEIR_RIE;
+      ez80_serialout(priv, EZ80_UART_IER, ier);
     }
-
-  priv->rxenabled = enable;
-  irqrestore(flags);
 }
 
 /****************************************************************************
- * Name: z8_rxavailable
+ * Name: ez80_rxavailable
  *
  * Description:
  *   Return TRUE if the receive fifo is not empty
  *
  ****************************************************************************/
 
-static boolean z8_rxavailable(FAR struct uart_dev_s *dev)
+static boolean ez80_rxavailable(struct uart_dev_s *dev)
 {
-  struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
-  return ((z8_getuart(priv, Z8_UART_STAT0) & Z8_UARTSTAT0_RDA) != 0);
+  struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
+  return (ez80_serialin(priv, EZ80_UART_LSR) & EZ80_UARTLSR_DR) != 0;
 }
 
 /****************************************************************************
- * Name: z8_send
+ * Name: ez80_send
  *
  * Description:
  *   This method will send one byte on the UART
  *
  ****************************************************************************/
 
-static void z8_send(FAR struct uart_dev_s *dev, int ch)
+static void ez80_send(struct uart_dev_s *dev, int ch)
 {
-  struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
-  z8_putuart(priv, ch, Z8_UART_TXD);
+  struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
+  ez80_serialout(priv, EZ80_UART_THR, (ubyte)ch);
 }
 
 /****************************************************************************
- * Name: z8_txint
+ * Name: ez80_txint
  *
  * Description:
  *   Call to enable or disable TX interrupts
  *
  ****************************************************************************/
 
-static void z8_txint(FAR struct uart_dev_s *dev, boolean enable)
+static void ez80_txint(struct uart_dev_s *dev, boolean enable)
 {
-  struct z8_uart_s *priv  = (struct z8_uart_s*)dev->priv;
-  irqstate_t          flags = irqsave();
+  struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
+  ubyte ier = ez80_serialin(priv, EZ80_UART_IER);
 
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      up_enable_irq(priv->txirq);
+      ier |= EZ80_UARTEIR_TIE;
+      ez80_serialout(priv, EZ80_UART_IER, ier);
 #endif
     }
   else
     {
-      up_disable_irq(priv->txirq);
+      ier &= ~EZ80_UARTEIR_TIE;
+      ez80_serialout(priv, EZ80_UART_IER, ier);
     }
-
-  priv->txenabled = enable;
-  irqrestore(flags);
 }
 
 /****************************************************************************
- * Name: z8_txready
+ * Name: ez80_txready
  *
  * Description:
  *   Return TRUE if the tranmsit fifo is not full
  *
  ****************************************************************************/
 
-static boolean z8_txready(FAR struct uart_dev_s *dev)
+static boolean ez80_txready(struct uart_dev_s *dev)
 {
-  struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
-  return ((z8_getuart(priv, Z8_UART_STAT0) & Z8_UARTSTAT0_TDRE) != 0);
+  struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
+  return (ez80_serialin(priv, EZ80_UART_LSR) & EZ80_UARTLSR_THRE) != 0;
 }
 
 /****************************************************************************
- * Name: z8_txempty
+ * Name: ez80_txempty
  *
  * Description:
  *   Return TRUE if the transmit fifo is empty
  *
  ****************************************************************************/
 
-static boolean z8_txempty(FAR struct uart_dev_s *dev)
+static boolean ez80_txempty(struct uart_dev_s *dev)
 {
-  struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
-  return ((z8_getuart(priv, Z8_UART_STAT0) & Z8_UARTSTAT0_TXE) != 0);
+  struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
+  return (ez80_serialin(priv, EZ80_UART_LSR) & EZ80_UARTLSR_TEMT) != 0;
 }
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_earlyserialinit
+ * Name: up_serialinit
  *
  * Description:
  *   Performs the low level UART initialization early in 
  *   debug so that the serial console will be available
- *   during bootup.  This must be called before z8_serialinit.
+ *   during bootup.  This must be called before up_serialinit.
  *
  ****************************************************************************/
 
 void up_earlyserialinit(void)
 {
-  (void)z8_disableuartirq(&TTYS0_DEV);
-  (void)z8_disableuartirq(&TTYS1_DEV);
+  ez80_disableuartint(TTYS0_DEV.priv);
+  ez80_disableuartint(TTYS1_DEV.priv);
 
   CONSOLE_DEV.isconsole = TRUE;
-  z8_setup(&CONSOLE_DEV);
+  ez80_setup(&CONSOLE_DEV);
 }
 
 /****************************************************************************
@@ -766,33 +694,30 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
-  ubyte  state;
+  struct ez80_dev_s *priv = (struct ez80_dev_s*)CONSOLE_DEV.priv;
+  ubyte ier = ez80_serialin(priv, EZ80_UART_IER);
 
-  /* Keep interrupts disabled so that we do not interfere with normal
-   * driver operation 
-   */
-
-  state = z8_disableuartirq(&CONSOLE_DEV);
+  ez80_disableuartint(priv);
 
   /* Check for LF */
 
   if (ch == '\n')
     {
-      /* Add CR before LF */
+      /* Output CR before LF*/
 
-      z8_consoleput('\r');
+      ez80_waittxready(priv);
+      ez80_serialout(priv, EZ80_UART_THR, '\r');
     }
 
   /* Output the character */
 
-  z8_consoleput((ubyte)ch);
+  ez80_waittxready(priv);
+  ez80_serialout(priv, EZ80_UART_THR, (ubyte)ch);
 
-  /* It is important to restore the TX interrupt while the send is pending.
-   * otherwise, TRDE interrupts can be lost since they do not pend after the
-   * TRDE false->true transition.
-   */
-
-  z8_restoreuartirq(&CONSOLE_DEV, state);
+  /* Wait for the character to be sent before re-enabling interrupts */
+ 
+  ez80_waittxready(priv);
+  ez80_restoreuartint(priv, ier);
   return ch;
 }
 
@@ -803,16 +728,15 @@ int up_putc(int ch)
  ****************************************************************************/
 
 #ifdef CONFIG_UART1_SERIAL_CONSOLE
-# define z8_contrde() \
-  ((getreg8(*(Z8_UART1_BASE+Z8_UART_STAT0)) & Z8_UARTSTAT0_TDRE) != 0)
-# define z8_contxd(ch) \
-  putreg8((ubyte)(ch), *(Z8_UART1_BASE+Z8_UART_TXD))
+# define ez80_getreg(offs)     getreg8((EZ80_UART1_BASE+(offs)))
+# define ez80_putreg(val,offs) putreg8((val), (EZ80_UART1_BASE+(offs)))
 #else
-# define z8_contrde() \
-  ((getreg8(*(Z8_UART0_BASE+Z8_UART_STAT0)) & Z8_UARTSTAT0_TDRE) != 0)
-# define z8_contxd(ch) \
-  putreg8((ubyte)(ch), *(Z8_UART0_BASE+Z8_UART_TXD))
+# define ez80_getreg(offs)     getreg8((EZ80_UART0_BASE+(offs)))
+# define ez80_putreg(val,offs) putreg8((val), (EZ80_UART0_BASE+(offs)))
 #endif
+
+#define ez80_txready() ((ez80_getreg(EZ80_UART_LSR) & EZ80_UARTLSR_THRE) != 0)
+#define ez80_send(ch)  ez80_putreg(ch, EZ80_UART_THR)
 
 /****************************************************************************
  * Private Function Prototypes
@@ -827,14 +751,14 @@ int up_putc(int ch)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: z8_putc
+ * Name: ez80_putc
  ****************************************************************************/
 
-static void z8_putc(int ch)
+static void ez80_putc(int ch)
 {
   int tmp;
-  for (tmp = 1000 ; tmp > 0 && !z8_contrde(); tmp--);
-  z8_contxd(ch);
+  for (tmp = 1000 ; tmp > 0 && !ez80_txready(); tmp--);
+  ez80_send(ch);
 }
 
 /****************************************************************************
@@ -853,12 +777,12 @@ int up_putc(int ch)
     {
       /* Output CR before LF */
 
-      z8_putc('\r');
+      ez80_putc('\r');
     }
 
   /* Output character */
 
-  z8_putc(ch);
+  ez80_putc(ch);
   return ch;
 }
 
