@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/src/z80/z80_irq.c
+ * arch/z80/src/ez80/ez80_copystate.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,26 +40,15 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/irq.h>
+#include <arch/irq.h>
 
 #include "chip/switch.h"
+#include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************
- * Private Definitions
+ * Definitions
  ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* This holds a references to the current interrupt level register storage
- * structure.  If is non-NULL only during interrupt processing.
- */
-
-chipreg_t *current_regs;
 
 /****************************************************************************
  * Private Data
@@ -74,43 +63,17 @@ chipreg_t *current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: irqsave
- *
- * Description:
- *   Disable all interrupts; return previous interrupt state
- *
+ * Name: ez80_copystate
  ****************************************************************************/
 
-irqstate_t irqsave(void) __naked
+/* Maybe a little faster than most memcpy's */
+
+void ez80_copystate(chipreg_t *dest, const chipreg_t *src)
 {
-  _asm
-	ld	a, i		; AF Carry bit holds interrupt state
-	di			; Interrupts are disabled
-	push	af		; Return AF in HL
-	pop	hl		;
-	ret			;
-  _endasm;
+  int i;
+  for (i = 0; i < XCPTCONTEXT_REGS; i++)
+    {
+      *dest++ = *src++;
+    }
 }
 
-/****************************************************************************
- * Name: irqrestore
- *
- * Description:
- *   Restore previous interrupt state
- *
- ****************************************************************************/
-
-void irqrestore(irqstate_t flags) __naked
-{
-  _asm
-	di			; Assume disabled
-	pop	hl		; HL = return address
-	pop	af		; AF Carry bit hold interrupt state
-	jr	nc, statedisable
-	ei
-statedisable:
-	push	af		; Restore stack
-	push	hl		;
-	ret			; and return
-  _endasm;
-}
