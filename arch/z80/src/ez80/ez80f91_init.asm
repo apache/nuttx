@@ -77,7 +77,11 @@ PLL_ENABLE    EQU %01
 ; Global symbols used
 ;**************************************************************************
 
+; Exported symbols
 	xdef _ez80_init
+	xdef _ez80_initsysclk
+
+; Imported symbols
 	xref __CS0_LBR_INIT_PARAM
 	xref __CS0_UBR_INIT_PARAM
 	xref __CS0_CTL_INIT_PARAM

@@ -85,7 +85,7 @@ static void z80_registerdump(void)
             current_regs[XCPT_BC], current_regs[XCPT_DE], current_regs[XCPT_HL]);
       lldbg("IX: %04x IY: %04x\n",
             current_regs[XCPT_IX], current_regs[XCPT_IY]);
-      lldbg("SP: %04x PC: $04x\n"
+      lldbg("SP: %04x PC: %04x\n"
             current_regs[XCPT_SP], current_regs[XCPT_PC]);
     }
 }

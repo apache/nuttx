@@ -49,7 +49,7 @@
 	xref	_ez80_init
 	xref	_ez80_initvectors
 	xref	_ez80_initsysclk
-	xref	_up_lowinit
+	xref	_ez80_lowinit
 	xref	__low_bss	; Low address of bss segment
 	xref	__len_bss	; Length of bss segment
 
@@ -141,7 +141,7 @@ _ez80_codedone:
 
 	; Perform board-specific intialization
 
-	call	_up_lowinit
+	call	_ez80_lowinit
 
 	; Then start NuttX
 

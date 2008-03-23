@@ -54,6 +54,12 @@
  * Public Data
  ****************************************************************************/
 
+/* This holds a references to the current interrupt level register storage
+ * structure.  If is non-NULL only during interrupt processing.
+ */
+
+chipreg_t *current_regs;
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/

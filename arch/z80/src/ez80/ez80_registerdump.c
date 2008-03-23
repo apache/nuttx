@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/src/z80/z80_irq.c
+ * arch/z80/src/ez80/ez80_registerdump.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,26 +40,27 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <debug.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/arch.h>
 
 #include "chip/switch.h"
+#include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************
- * Private Definitions
+ * Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* This holds a references to the current interrupt level register storage
- * structure.  If is non-NULL only during interrupt processing.
+/* Output debug info if stack dump is selected -- even if 
+ * debug is not selected.
  */
 
-chipreg_t *current_regs;
+#ifdef CONFIG_ARCH_STACKDUMP
+# undef  lldbg
+# define lldbg lib_lowprintf
+#endif
 
 /****************************************************************************
  * Private Data
@@ -70,47 +71,32 @@ chipreg_t *current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Name: z80_registerdump
  ****************************************************************************/
 
-/****************************************************************************
- * Name: irqsave
- *
- * Description:
- *   Disable all interrupts; return previous interrupt state
- *
- ****************************************************************************/
-
-irqstate_t irqsave(void) __naked
+#ifdef CONFIG_ARCH_STACKDUMP
+static void ez80_registerdump(void)
 {
-  _asm
-	ld	a, i		; AF Carry bit holds interrupt state
-	di			; Interrupts are disabled
-	push	af		; Return AF in HL
-	pop	hl		;
-	ret			;
-  _endasm;
+  if (current_regs)
+    {
+      lldbg("AF: %02x|%02x I: %02x|%02x\n",
+            (ubyte*)current_regs)[XCPT_A_OFFSET],  (ubyte*)current_regs)[XCPT_F_OFFSET],
+            (ubyte*)current_regs)[XCPT_IA_OFFSET], (ubyte*)current_regs)[XCPT_IF_OFFSET]);
+#ifdef CONFIG_EZ80_Z80MODE
+      lldbg("BC: %04x DE: %04x HL: %04x\n",
+            current_regs[XCPT_BC], current_regs[XCPT_DE], current_regs[XCPT_HL]);
+      lldbg("IX: %04x IY: %04x\n",
+            current_regs[XCPT_IX], current_regs[XCPT_IY]);
+      lldbg("SP: %04x PC: %04x\n"
+            current_regs[XCPT_SP], current_regs[XCPT_PC]);
+#else
+      lldbg("BC: %06x DE: %06x HL: %06x\n",
+            current_regs[XCPT_BC], current_regs[XCPT_DE], current_regs[XCPT_HL]);
+      lldbg("IX: %06x IY: %06x\n",
+            current_regs[XCPT_IX], current_regs[XCPT_IY]);
+      lldbg("SP: %06x PC: %06x\n"
+            current_regs[XCPT_SP], current_regs[XCPT_PC]);
+#endif
+    }
 }
-
-/****************************************************************************
- * Name: irqrestore
- *
- * Description:
- *   Restore previous interrupt state
- *
- ****************************************************************************/
-
-void irqrestore(irqstate_t flags) __naked
-{
-  _asm
-	di			; Assume disabled
-	pop	hl		; HL = return address
-	pop	af		; AF Carry bit hold interrupt state
-	jr	nc, statedisable
-	ei
-statedisable:
-	push	af		; Restore stack
-	push	hl		;
-	ret			; and return
-  _endasm;
-}
+#endif
