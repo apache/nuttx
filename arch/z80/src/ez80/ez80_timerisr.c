@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <debug.h>
 
+#include <arch/io.h>
 #include <nuttx/arch.h>
 
 #include "chip/chip.h"
@@ -85,11 +86,11 @@ int up_timerisr(int irq, chipreg_t *regs)
   /* Read the appropropriate timer0 registr to clear the interrupt */
   
 #ifdef _EZ80F91
-  reg = getreg8(EZ80_TMR0_IIR);
+  reg = inp(EZ80_TMR0_IIR);
 #else
   /* _EZ80190, _EZ80L92, _EZ80F92, _EZ80F93 */
 
-  reg = getreg8(EZ80_TMR0_CTL);
+  reg = inp(EZ80_TMR0_CTL);
 #endif
 
    /* Process timer interrupt */
@@ -112,13 +113,13 @@ void up_timerinit(void)
   uint16 reload;
   ubyte  reg;
 
-  /* Disable timer0 interrupts */
-
-  up_disable_irq(EZ80_IRQ_SYSTIMER);
-
   /* Disable the timer */
   
-  putreg8(0x00, EZ80_TMR0_CTL);
+  outp(EZ80_TMR0_CTL, 0x00);
+
+  /* Attach system timer interrupts */
+
+  irq_attach(EZ80_IRQ_SYSTIMER, (xcpt_t)up_timerisr);
 
   /* Set up the timer reload value */
   /* Write to the timer reload register to set the reload value.
@@ -138,35 +139,30 @@ void up_timerinit(void)
    */
 
   reload = (uint16)(_DEFCLK / 1600);
-  putreg8((ubyte)(reload >> 8), EZ80_TMR0_RRH);
-  putreg8((ubyte)(reload), EZ80_TMR0_RRL);
+  outp(EZ80_TMR0_RRH, (ubyte)(reload >> 8));
+  outp(EZ80_TMR0_RRL, (ubyte)(reload));
 
   /* Clear any pending timer interrupts */
   
 #if defined(_EZ80F91)
-  reg = getreg8(EZ80_TMR0_IIR);
+  reg = inp(EZ80_TMR0_IIR);
 #elif defined(_EZ80L92) || defined(_EZ80F92) ||defined(_EZ80F93)
-  reg = getreg8(EZ80_TMR0_CTL);
+  reg = inp(EZ80_TMR0_CTL);
 #endif
 
   /* Configure and enable the timer */
 
 #if defined(_EZ80190)
-  putreg8(0x5f, EZ80_TMR0_CTL);
+  outp(EZ80_TMR0_CTL, 0x5f);
 #elif defined(_EZ80F91)
-  putreg8((EZ80_TMRCLKDIV_16|EZ80_TMRCTL_TIMCONT|EZ80_TMRCTL_RLD|EZ80_TMRCTL_TIMEN), EZ80_TMR0_CTL);
+  outp(EZ80_TMR0_CTL, (EZ80_TMRCLKDIV_16|EZ80_TMRCTL_TIMCONT|EZ80_TMRCTL_RLD|EZ80_TMRCTL_TIMEN));
 #elif defined(_EZ80L92) || defined(_EZ80F92) ||defined(_EZ80F93)
-  putreg8(0x57, EZ80_TMR0_CTL);
+  outp(EZ80_TMR0_CTL, 0x57);
 #endif
 
 /* Enable timer end-of-count interrupts */
 
 #if defined(_EZ80F91)
-  putreg8(EZ80_TMRIER_EOCEN, EZ80_TMR0_IER);
+  outp(EZ80_TMR0_IER, EZ80_TMRIER_EOCEN);
 #endif
-
-  /* Attach and enable the timer */
-
-  irq_attach(EZ80_IRQ_SYSTIMER, (xcpt_t)up_timerisr);
-  up_enable_irq(EZ80_IRQ_SYSTIMER);
 }
