@@ -251,19 +251,6 @@
 #define EZ80_UARTMSR_DDSR      0x02         /* Bit 1: Delta on DSR input */
 #define EZ80_UARTMSR_DCTS      0x01         /* Bit 0: Delta on CTS input */
 
-/* Register access macros ***********************************************************/
-
-#ifndef __ASSEMBLY__
-
-# define getreg8(a)           (*(volatile ubyte *)(a))
-# define putreg8(v,a)         (*(volatile ubyte *)(a) = (v))
-# define getreg16(a)          (*(volatile uint16 *)(a))
-# define putreg16(v,a)        (*(volatile uint16 *)(a) = (v))
-# define getreg32(a)          (*(volatile uint32 *)(a))
-# define putreg32(v,a)        (*(volatile uint32 *)(a) = (v))
-
-#endif
-
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/

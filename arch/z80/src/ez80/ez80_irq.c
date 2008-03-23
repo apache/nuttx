@@ -91,34 +91,35 @@ void up_irqinitialize(void)
  * Name: up_disable_irq
  *
  * Description:
- *   Disable the IRQ specified by 'irq'
+ *   On many architectures, there are three levels of interrupt enabling: (1)
+ *   at the global level, (2) at the level of the interrupt controller,
+ *   and (3) at the device level.  In order to receive interrupts, they
+ *   must be enabled at all three levels.
+ *
+ *   This function implements disabling of the device specified by 'irq'
+ *   at the interrupt controller level if supported by the architecture
+ *   (irqsave() supports the global level, the device level is hardware
+ *   specific).
  *
  ****************************************************************************/
 
 void up_disable_irq(int irq)
 {
+  /* There are no ez80 interrupt controller settings to disable IRQs */
 }
 
 /****************************************************************************
  * Name: up_enable_irq
  *
  * Description:
- *   Enable the IRQ specified by 'irq'
+ *   This function implements enabling of the device specified by 'irq'
+ *   at the interrupt controller level if supported by the architecture
+ *   (irqsave() supports the global level, the device level is hardware
+ *   specific).
  *
  ****************************************************************************/
 
 void up_enable_irq(int irq)
 {
-}
-
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
+  /* There are no ez80 interrupt controller settings to enable IRQs */
 }

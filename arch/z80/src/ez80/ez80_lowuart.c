@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <string.h>
 
+#include <arch/io.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 
@@ -59,9 +60,9 @@
 extern unsigned long SYS_CLK_FREQ;
 #define _DEFCLK ((unsigned long)&SYS_CLK_FREQ)
 
-#ifdef CONFIG_UART1_SERIAL_CONSOLE
-#  define ez80_getreg(offs)     getreg8((EZ80_UART1_BASE+(offs)))
-#  define ez80_putreg(val,offs) putreg8((val), (EZ80_UART1_BASE+(offs)))
+#ifdef CONFIG_UART0_SERIAL_CONSOLE
+#  define ez80_inp(offs)     inp((EZ80_UART0_BASE+(offs)))
+#  define ez80_outp(offs,val) outp((EZ80_UART0_BASE+(offs)), (val))
 #  define CONFIG_UART_BAUD      CONFIG_UART0_BAUD
 #  if CONFIG_UART0_BITS == 7
 #    define CONFIG_UART_BITS EZ80_UARTCHAR_7BITS
@@ -81,8 +82,8 @@ extern unsigned long SYS_CLK_FREQ;
 #    define CONFIG_UART_PARITY 0
 #  endif
 #else
-#  define ez80_getreg(offs)     getreg8((EZ80_UART0_BASE+(offs)))
-#  define ez80_putreg(val,offs) putreg8((val), (EZ80_UART0_BASE+(offs)))
+#  define ez80_inp(offs)     inp((EZ80_UART1_BASE+(offs)))
+#  define ez80_outp(offs.val) outp((EZ80_UART1_BASE+(offs)), (val))
 #  define CONFIG_UART_BAUD      CONFIG_UART1_BAUD
 #  if CONFIG_UART1_BITS == 7
 #    define CONFIG_UART_BITS EZ80_UARTCHAR_7BITS
@@ -131,15 +132,15 @@ static void ez80_setbaud(void)
 
    /* Set the DLAB bit to enable access to the BRG registers */
 
-   lctl = ez80_getreg(EZ80_UART_LCTL);
+   lctl = ez80_inp(EZ80_UART_LCTL);
    lctl |= EZ80_UARTLCTL_DLAB;
-   ez80_putreg(lctl, EZ80_UART_LCTL);
+   ez80_outp(EZ80_UART_LCTL, lctl);
 
-   ez80_putreg((ubyte)(brg_divisor & 0xff), EZ80_UART_BRGL);
-   ez80_putreg((ubyte)(brg_divisor >> 8), EZ80_UART_BRGH);
+   ez80_outp(EZ80_UART_BRGL, (ubyte)(brg_divisor & 0xff));
+   ez80_outp(EZ80_UART_BRGH, (ubyte)(brg_divisor >> 8));
 
    lctl &= ~EZ80_UARTLCTL_DLAB;
-   ez80_putreg(lctl, EZ80_UART_LCTL);
+   ez80_outp(EZ80_UART_LCTL, lctl);
 }
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
@@ -158,33 +159,33 @@ void up_lowuartinit(void)
 
   /* Disable interrupts from the UART */
 
-  reg = ez80_getreg(EZ80_UART_IER);
+  reg = ez80_inp(EZ80_UART_IER);
   reg &= ~EZ80_UARTEIR_INTMASK;
-  ez80_putreg(reg, EZ80_UART_IER);
+  ez80_outp(EZ80_UART_IER, reg);
 
   /* Set the baud rate */
 
   ez80_setbaud();
-  ez80_putreg(0, EZ80_UART_MCTL);
+  ez80_outp(EZ80_UART_MCTL, 0);
 
   /* Set the character properties */
 
-  reg = ez80_getreg(EZ80_UART_LCTL);
+  reg = ez80_inp(EZ80_UART_LCTL);
   reg &= ~EZ80_UARTLCTL_MASK;
   reg |= (CONFIG_UART_BITS | CONFIG_UART_2STOP | CONFIG_UART_PARITY);
-  ez80_putreg(reg, EZ80_UART_LCTL);
+  ez80_outp(EZ80_UART_LCTL, reg);
 
   /* Enable and flush the receive FIFO */
 
   reg = EZ80_UARTFCTL_FIFOEN;
-  ez80_putreg(reg, EZ80_UART_FCTL);
+  ez80_outp(EZ80_UART_FCTL, reg);
   reg |= (EZ80_UARTFCTL_CLRTxF|EZ80_UARTFCTL_CLRRxF);
-  ez80_putreg(reg, EZ80_UART_FCTL);
+  ez80_outp(EZ80_UART_FCTL, reg);
 
   /* Set the receive trigger level to 1 */
 
   reg |= EZ80_UARTTRIG_1;
-  ez80_putreg(reg, EZ80_UART_FCTL);
+  ez80_outp(EZ80_UART_FCTL, reg);
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 }
 #endif /* CONFIG_USE_LOWUARTINIT */

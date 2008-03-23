@@ -50,6 +50,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/serial.h>
 #include <arch/serial.h>
+#include <arch/io.h>
 
 #include "chip/chip.h"
 #include "os_internal.h"
@@ -72,7 +73,7 @@ extern unsigned long SYS_CLK_FREQ;
 
 struct ez80_dev_s
 {
-  unsigned int         uartbase;	/* Base address of UART registers */
+  uint16               uartbase;	/* Base address of UART registers */
   unsigned int         baud;		/* Configured baud */
   ubyte                irq;		/* IRQ associated with this UART */
   ubyte                parity;		/* 0=none, 1=odd, 2=even */
@@ -231,9 +232,9 @@ static uart_dev_t g_uart1port =
  * Name: ez80_serialin
  ****************************************************************************/
 
-static inline ubyte ez80_serialin(struct ez80_dev_s *priv, uint32 offset)
+static inline ubyte ez80_serialin(struct ez80_dev_s *priv, ubyte offset)
 {
-  return getreg8(priv->uartbase + offset);
+  return inp(priv->uartbase + offset);
 }
 
 /****************************************************************************
@@ -242,7 +243,7 @@ static inline ubyte ez80_serialin(struct ez80_dev_s *priv, uint32 offset)
 
 static inline void ez80_serialout(struct ez80_dev_s *priv, ubyte offset, ubyte value)
 {
-  putreg8(value, priv->uartbase + offset);
+  outp(priv->uartbase + offset, value);
 }
 
 /****************************************************************************
@@ -359,7 +360,7 @@ static int ez80_setup(struct uart_dev_s *dev)
 
   /* Set the baud rate */
 
-  ez80_disableuartint(priv, NULL);
+  ez80_disableuartint(priv);
   ez80_setbaud(priv, priv->baud);
   ez80_serialout(priv, EZ80_UART_MCTL, 0);
 
@@ -415,20 +416,10 @@ static void ez80_shutdown(struct uart_dev_s *dev)
 static int ez80_attach(struct uart_dev_s *dev)
 {
   struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
-  int ret;
 
-  /* Attach and enable the IRQ */
+  /* Attach the IRQ */
 
-  ret = irq_attach(priv->irq, ez80_interrrupt);
-  if (ret == OK)
-    {
-       /* Enable the interrupt (RX and TX interrupts are still disabled
-        * in the UART
-        */
-
-       up_enable_irq(priv->irq);
-    }
-  return ret;
+  return irq_attach(priv->irq, ez80_interrrupt);
 }
 
 /****************************************************************************
@@ -444,7 +435,7 @@ static int ez80_attach(struct uart_dev_s *dev)
 static void ez80_detach(struct uart_dev_s *dev)
 {
   struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
-  up_disable_irq(priv->irq);
+  ez80_disableuartint(priv);
   irq_detach(priv->irq);
 }
 
@@ -726,15 +717,15 @@ int up_putc(int ch)
  ****************************************************************************/
 
 #ifdef CONFIG_UART1_SERIAL_CONSOLE
-# define ez80_getreg(offs)     getreg8((EZ80_UART1_BASE+(offs)))
-# define ez80_putreg(val,offs) putreg8((val), (EZ80_UART1_BASE+(offs)))
+# define ez80_inp(offs)      inp((EZ80_UART1_BASE+(offs)))
+# define ez80_outp(offs,val) outp((EZ80_UART1_BASE+(offs)), (val))
 #else
-# define ez80_getreg(offs)     getreg8((EZ80_UART0_BASE+(offs)))
-# define ez80_putreg(val,offs) putreg8((val), (EZ80_UART0_BASE+(offs)))
+# define ez80_inp(offs)      inp((EZ80_UART0_BASE+(offs)))
+# define ez80_outp(offs,val) outp((EZ80_UART0_BASE+(offs)), (val))
 #endif
 
-#define ez80_txready() ((ez80_getreg(EZ80_UART_LSR) & EZ80_UARTLSR_THRE) != 0)
-#define ez80_send(ch)  ez80_putreg(ch, EZ80_UART_THR)
+#define ez80_txready() ((ez80_inp(EZ80_UART_LSR) & EZ80_UARTLSR_THRE) != 0)
+#define ez80_send(ch)  ez80_outp(EZ80_UART_THR, ch)
 
 /****************************************************************************
  * Private Function Prototypes

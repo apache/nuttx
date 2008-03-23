@@ -1,5 +1,6 @@
 /****************************************************************************
- * arch/z80/src/ez80/ez80_registerdump.c
+ * arch/z80/include/ez80/io.h
+ * arch/chip/io.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,71 +34,54 @@
  *
  ****************************************************************************/
 
+/* This file should never be included directed but, rather, only indirectly
+ * through arch/io.h
+ */
+
+#ifndef __ARCH_EZ80_IO_H
+#define __ARCH_EZ80_IO_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <sys/types.h>
-#include <debug.h>
-
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-
-#include "chip/switch.h"
-#include "os_internal.h"
-#include "up_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/* Output debug info if stack dump is selected -- even if 
- * debug is not selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  lldbg
-# define lldbg lib_lowprintf
-#endif
-
 /****************************************************************************
- * Private Data
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Inline functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: z80_registerdump
+ * Public Variables
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_STACKDUMP
-static void ez80_registerdump(void)
-{
-  if (current_regs)
-    {
-#ifdef CONFIG_EZ80_Z80MODE
-      lldbg("AF: %04x  I: %04x\n",
-            current_regs[XCPT_AF], current_regs[XCPT_I]);
-      lldbg("BC: %04x DE: %04x HL: %04x\n",
-            current_regs[XCPT_BC], current_regs[XCPT_DE], current_regs[XCPT_HL]);
-      lldbg("IX: %04x IY: %04x\n",
-            current_regs[XCPT_IX], current_regs[XCPT_IY]);
-      lldbg("SP: %04x PC: %04x\n"
-            current_regs[XCPT_SP], current_regs[XCPT_PC]);
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
 #else
-      lldbg("AF: %06x  I: %06x\n",
-            current_regs[XCPT_AF], current_regs[XCPT_I]);
-      lldbg("BC: %06x DE: %06x HL: %06x\n",
-            current_regs[XCPT_BC], current_regs[XCPT_DE], current_regs[XCPT_HL]);
-      lldbg("IX: %06x IY: %06x\n",
-            current_regs[XCPT_IX], current_regs[XCPT_IY]);
-      lldbg("SP: %06x PC: %06x\n"
-            current_regs[XCPT_SP], current_regs[XCPT_PC]);
+#define EXTERN extern
 #endif
-    }
+
+EXTERN void outp(uint16 p, ubyte c);
+EXTERN ubyte inp(uint16 p);
+
+#undef EXTERN
+#ifdef __cplusplus
 }
 #endif
+#endif
+
+#endif /* __ARCH_EZ80_IO_H */
