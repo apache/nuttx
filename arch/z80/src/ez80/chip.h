@@ -217,6 +217,8 @@
 #  define EZ80_UARTCHAR_7BITS  0x02         /*   10: 7 data bits */
 #  define EZ80_UARTCHAR_8BITS  0x03         /*   11: 8 data bits */
 
+#define EZ80_UARTLCTL_MASK     0x3f
+
 /* UART0/1 MCTL register bits *******************************************************/
                                             /* Bit 7: Reserved */
 #define EZ80_UARTMCTL_POLARITY 0x40         /* Bit 6: Invert polarity of RxD and TxD */

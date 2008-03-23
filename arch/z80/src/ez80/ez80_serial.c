@@ -61,8 +61,6 @@
  * Definitions
  ****************************************************************************/
 
-#define BASE_BAUD     115200
-
 /* The system clock frequency is defined in the linkcmd file */
 
 extern unsigned long SYS_CLK_FREQ;
@@ -253,7 +251,7 @@ static inline void ez80_serialout(struct ez80_dev_s *priv, ubyte offset, ubyte v
 
 static inline void ez80_disableuartint(struct ez80_dev_s *priv)
 {
-  ubyte ier = ez80_serialin(EZ80_UART_IER);
+  ubyte ier = ez80_serialin(priv, EZ80_UART_IER);
   ier &= ~EZ80_UARTEIR_INTMASK;
   ez80_serialout(priv, EZ80_UART_IER, ier);
 }
@@ -264,7 +262,7 @@ static inline void ez80_disableuartint(struct ez80_dev_s *priv)
 
 static inline void ez80_restoreuartint(struct ez80_dev_s *priv, ubyte bits)
 {
-  ubyte ier = ez80_serialin(EZ80_UART_IER);
+  ubyte ier = ez80_serialin(priv, EZ80_UART_IER);
   ier |= bits & (EZ80_UARTEIR_TIE|EZ80_UARTEIR_RIE);
   ez80_serialout(priv, EZ80_UART_IER, ier);
 }
@@ -305,7 +303,7 @@ static inline void ez80_setbaud(struct ez80_dev_s *priv, uint24 baud)
    * BRG_Divisor = SYSTEM_CLOCK_FREQUENCY / 16 / BAUD
    */
 
-   brg_divisor = ( _DEFCLK + (bard << 3)) / ((baud << 4);
+   brg_divisor = ( _DEFCLK + (baud << 3)) / (baud << 4);
 
    /* Set the DLAB bit to enable access to the BRG registers */
 
@@ -347,7 +345,7 @@ static int ez80_setup(struct uart_dev_s *dev)
 
   if (priv->stopbits2)
     {
-      cval |= EZ80_UARTLCTl_2STOP;
+      cval |= EZ80_UARTLCTL_2STOP;
     }
 
   if (priv->parity == 1)   /* Odd parity */
@@ -363,11 +361,11 @@ static int ez80_setup(struct uart_dev_s *dev)
 
   ez80_disableuartint(priv, NULL);
   ez80_setbaud(priv, priv->baud);
-  ez80_serial_out(priv, EZ80_UART_MCTL, 0)
+  ez80_serialout(priv, EZ80_UART_MCTL, 0);
 
   /* Set the character properties */
 
-  reg = (ez80_serialin(priv, EZ80_UART_LCTL) & 0x3f) | cval;
+  reg = (ez80_serialin(priv, EZ80_UART_LCTL) & ~EZ80_UARTLCTL_MASK) | cval;
   ez80_serialout(priv, EZ80_UART_LCTL, reg);
 
   /* Enable and flush the receive FIFO */
