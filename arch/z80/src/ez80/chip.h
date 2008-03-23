@@ -123,7 +123,7 @@
 #  define EZ80_TMRCLKDIV_256   0x18        /*   11: 256 */
 #define EZ80_TMRCTL_TIMCONT    0x04        /* Bit 2: Continusous mode */
 #define EZ80_TMRCTL_RLD        0x02        /* Bit 1: Force reload */
-#define EZ80_TMRCTL_TIMEN                  /* Bit 7: Programmable reload timer enabled */
+#define EZ80_TMRCTL_TIMEN      0x01        /* Bit 0: Programmable reload timer enabled */
 
 /* TMR0/1/2/3 IER Register Bit Definitions *******************************************/
                                            /* Bit 7: Reserved */

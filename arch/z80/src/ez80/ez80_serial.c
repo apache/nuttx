@@ -65,7 +65,7 @@
 
 /* The system clock frequency is defined in the linkcmd file */
 
-extern _Erom unsigned long SYS_CLK_FREQ;
+extern unsigned long SYS_CLK_FREQ;
 #define _DEFCLK ((unsigned long)&SYS_CLK_FREQ)
 
 /****************************************************************************
