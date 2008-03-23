@@ -81,20 +81,6 @@ irqhandler: macro vectno
 	jp	_ez80_rstcommon		; Remaining RST handling is common
 	endmac	irqhandler
 
-; Save Interrupt State
-irqsave: macro
-	ld	a, i			; sets parity bit to value of IEF2
-	push af
-	di				; disable interrupts while loading table 
-	endmac	irqsave
-
-; Restore Interrupt State
-irqrestore: macro
-	pop	af
-	jp	po, $+5			; parity bit is IEF2
-	ei
-	endmac	irqrestore
-
 ;**************************************************************************
 ; Reset entry points
 ;**************************************************************************
