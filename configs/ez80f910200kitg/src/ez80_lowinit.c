@@ -52,7 +52,7 @@
  * Private Functions
  ***************************************************************************/
 
-static void z8_gpioinit(void)
+static void ez80_gpioinit(void)
 {
 }
 
@@ -60,8 +60,8 @@ static void z8_gpioinit(void)
  * Public Functions
  ***************************************************************************/
 
-void z8_lowinit(void)
+void ez80_lowinit(void)
 {
-  z8_gpioinit();
+  ez80_gpioinit();
 }
 
