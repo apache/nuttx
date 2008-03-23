@@ -78,30 +78,13 @@ chipreg_t *current_regs;
 
 void up_irqinitialize(void)
 {
-}
+  current_regs = NULL;
+  
+  /* And finally, enable interrupts */
 
-/****************************************************************************
- * Name: irqsave
- *
- * Description:
- *   Disable all interrupts; return previous interrupt state
- *
- ****************************************************************************/
-
-irqstate_t irqsave(void)
-{
-}
-
-/****************************************************************************
- * Name: irqrestore
- *
- * Description:
- *   Restore previous interrupt state
- *
- ****************************************************************************/
-
-void irqrestore(irqstate_t flags)
-{
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
+  asm("ei");
+#endif
 }
 
 /****************************************************************************
