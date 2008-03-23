@@ -54,14 +54,98 @@
 #define EZ80_Z_FLAG            0x40        /* Bit 5: Zero flag */
 #define EZ80_S_FLAG            0x80        /* Bit 7: Sign flag */
 
-/* Memory Map */
-/* Special Function Registers *******************************************************
- */
+/* Timer Registers  *****************************************************************/
 
-/* Timer Register Bit Definitions ***************************************************/
+#define EZ80_TMR0_CTL          0x60        /* RW: Timer 0 control register */
+#define EZ80_TMR0_IER          0x61        /* RW: Timer 0 interrupt enable register */
+#define EZ80_TMR0_IIR          0x62        /* R : Timer 0 interrupt ID register */
+#define EZ80_TMR0_DRL          0x63        /* R : Timer 0 data register (low) */
+#define EZ80_TMR0_DRH          0x64        /* R : Timer 0 data register (high) */
+#define EZ80_TMR0_RRL          0x63        /*  W: Timer 0 reload register (low) */
+#define EZ80_TMR0_RRH          0x64        /*  W: Timer 0 reload register (high) */
+
+#define EZ80_TMR1_CTL          0x65        /* RW: Timer 1 control register */
+#define EZ80_TMR1_IER          0x66        /* RW: Timer 1 interrupt enable register */
+#define EZ80_TMR1_IIR          0x67        /* R : Timer 1 interrupt ID register */
+#define EZ80_TMR1_DRL          0x68        /* R : Timer 1 data register (low) */
+#define EZ80_TMR1_DRH          0x69        /* R : Timer 1 data register (high) */
+#define EZ80_TMR1_RRL          0x68        /*  W: Timer 1 reload register (low) */
+#define EZ80_TMR1_RRH          0x69        /*  W: Timer 1 reload register (high) */
+#define EZ80_TMR1_CAPCTL       0x6a        /* RW: Timer 1 input capture control register */
+#define EZ80_TMR1_CAPAL        0x6b        /* R : Timer 1 capture input value A (low) */
+#define EZ80_TMR1_CAPAH        0x6c        /* R : Timer 1 capture input value A (high) */
+#define EZ80_TMR1_CAPBL        0x6d        /* R : Timer 1 capture input value B (low) */
+#define EZ80_TMR1_CAPBH        0x6e
+
+#define EZ80_TMR2_CTL          0x6f        /* RW: Timer 2 control register */
+#define EZ80_TMR2_IER          0x70        /* RW: Timer 2 interrupt enable register */
+#define EZ80_TMR2_IIR          0x71        /* R : Timer 2 interrupt ID register */
+#define EZ80_TMR2_DRL          0x72        /* R : Timer 2 data register (low) */
+#define EZ80_TMR2_DRH          0x73        /* R : Timer 2 data register (high) */
+#define EZ80_TMR2_RRL          0x72        /*  W: Timer 2 reload register (low) */
+#define EZ80_TMR2_RRH          0x73        /*  W: Timer 2 reload register (high) */
+
+#define EZ80_TMR3_CTL          0x74        /* RW: Timer 3 control register */
+#define EZ80_TMR3_IER          0x75        /* RW: Timer 3 interrupt enable register */
+#define EZ80_TMR3_IIR          0x76        /* R : Timer 3 interrupt ID register */
+#define EZ80_TMR3_DRL          0x77        /* R : Timer 3 data register (low) */
+#define EZ80_TMR3_DRH          0x78        /* R : Timer 3 data register (high) */
+#define EZ80_TMR3_RRL          0x77        /*  W: Timer 3 reload register (low) */
+#define EZ80_TMR3_RRH          0x78        /*  W: Timer 3 reload register (high) */
+#define EZ80_TMR3_CAPCTL       0x7b        /* RW: Timer 3 input capture control register */
+#define EZ80_TMR3_CAPAL        0x7c        /* R : Timer 3 capture input value A (low) */
+#define EZ80_TMR3_CAPAH        0x7d        /* R : Timer 3 capture input value A (high) */
+#define EZ80_TMR3_CAPBL        0x7e        /* R : Timer 3 capture input value B (low) */
+#define EZ80_TMR3_CAPBH        0x7f        /* R : Timer 3 capture input value B (high) */
+#define EZ80_TMR3_OCCTL1       0x80        /* RW: Timer 3 output compare control register1 */
+#define EZ80_TMR3_OCCTL2       0x81        /* RW: Timer 3 output compare control register2 */
+#define EZ80_TMR3_OC0L         0x82        /* RW: Timer 3 output compare value 0 (low) */
+#define EZ80_TMR3_OC0H         0x83        /* RW: Timer 3 output compare value 0 (high) */
+#define EZ80_TMR3_OC1L         0x84        /* RW: Timer 3 output compare value 1 (low) */
+#define EZ80_TMR3_OC1H         0x85        /* RW: Timer 3 output compare value 1 (high) */
+#define EZ80_TMR3_OC2L         0x86        /* RW: Timer 3 output compare value 2 (low) */
+#define EZ80_TMR3_OC2H         0x87        /* RW: Timer 3 output compare value 2 (high) */
+#define EZ80_TMR3_OC3L         0x88        /* RW: Timer 3 output compare value 3 (low) */
+#define EZ80_TMR3_OC3H         0x89        /* RW: Timer 3 output compare value 3 (high) */
+
+/* TMR0/1/2/3 CTL Register Bit Definitions *******************************************/
+
+#define EZ80_TMRCTL_BRKSTOP    0x80        /* Bit 7: Stop timer for debug operation */
+#define EZ80_TMRCTL_CLKSEL     0x60        /* Bits 6-5: Timer source */
+#  define EZ80_TMRCLKSEL_SYSCLK 0x00       /*   00: System clock divided by prescaler */
+#  define EZ80_TMRCLKSEL_RTC   0x20        /*   01: Real time clock input */
+#  define EZ80_TMRCLKSEL_ECF   0x40        /*   10: Event count input, falling edge */
+#  define EZ80_TMRCLKSEL_ECR   0x60        /*   11: Event count input, rising edge */
+#define EZ80_TMRCTL_CLKDIV     0x18        /* Bits 3-4: Sysem clock divider */
+#  define EZ80_TMRCLKDIV_4     0x00        /*   00:   4 */
+#  define EZ80_TMRCLKDIV_16    0x08        /*   01:  16 */
+#  define EZ80_TMRCLKDIV_64    0x10        /*   10:  64 */
+#  define EZ80_TMRCLKDIV_256   0x18        /*   11: 256 */
+#define EZ80_TMRCTL_TIMCONT    0x04        /* Bit 2: Continusous mode */
+#define EZ80_TMRCTL_RLD        0x02        /* Bit 1: Force reload */
+#define EZ80_TMRCTL_TIMEN                  /* Bit 7: Programmable reload timer enabled */
+
+/* TMR0/1/2/3 IER Register Bit Definitions *******************************************/
+                                           /* Bit 7: Reserved */
+#define EZ80_TMRIER_OC3EN      0x40        /* Bit 6: TMR3 OC3 enabled */
+#define EZ80_TMRIER_OC2EN      0x20        /* Bit 5: TMR3 OC2 enabled */
+#define EZ80_TMRIER_OC1EN      0x10        /* Bit 4: TMR3 OC1 enabled */
+#define EZ80_TMRIER_OC0EN      0x08        /* Bit 3: TMR3 OC0 enabled */
+#define EZ80_TMRIER_ICBEN      0x04        /* Bit 2: TMR1/3 capture pin enabled */
+#define EZ80_TMRIER_ICAEN      0x02        /* Bit 1: TMR1/3 capture pin enabled */
+#define EZ80_TMRIER_EOCEN      0x01        /* Bit 0: End of count interrupt enabled */
+
+/* TMR0/1/2/3 IER Register Bit Definitions *******************************************/
+                                           /* Bit 7: Reserved */
+#define EZ80_TMRIIR_OC3        0x40        /* Bit 6: TMR3 OC3 */
+#define EZ80_TMRIIR_OC2        0x20        /* Bit 5: TMR3 OC2 */
+#define EZ80_TMRIIR_OC1        0x10        /* Bit 4: TMR3 OC1 */
+#define EZ80_TMRIIR_OC0        0x08        /* Bit 3: TMR3 OC0 */
+#define EZ80_TMRIIR_ICB        0x04        /* Bit 2: TMR1/3 capture pin */
+#define EZ80_TMRIIR_ICA        0x02        /* Bit 1: TMR1/3 capture pin */
+#define EZ80_TMRIIR_EOC        0x01        /* Bit 0: End of count interrupt */
 
 /* UART Register Offsets *************************************************************/
-
                                            /* DLAB=0: */
 #define EZ80_UART_THR          0x00        /*    W: UART Transmit holding register */
 #define EZ80_UART_RBR          0x00        /*   R : UART Receive buffer register */
@@ -134,7 +218,6 @@
 #  define EZ80_UARTCHAR_8BITS  0x03         /*   11: 8 data bits */
 
 /* UART0/1 MCTL register bits *******************************************************/
-
                                             /* Bit 7: Reserved */
 #define EZ80_UARTMCTL_POLARITY 0x40         /* Bit 6: Invert polarity of RxD and TxD */
 #define EZ80_UARTMCTL_MDM      0x20         /* Bit 5: Multi-drop mode enable */
