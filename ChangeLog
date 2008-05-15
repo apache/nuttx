@@ -347,8 +347,12 @@
 	  Ubuntu where /bin/sh is a link to dash.
 	* Z8Encore! port verified on ZDS-II instruction set/chip simulator.
 
-0.3.10 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.10 2008-05-15 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Add support for the ZiLOG EZ80Acclaim microcontrooler (EZ80F91 chip).
 	* Add configuration for the ZiLOG z8f64200100kit development kit, Z8F6423 part.
 	* Add configuration for the ZiLOG ez80f0910200kitg development kit, EZ80F091 part.
+	* Correct critical list handling errors in task shutdown logic: One in timer
+	  deletion logic (timer_delete.c) and one in stream logic (lib_init.c).
+
+0.3.11 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
