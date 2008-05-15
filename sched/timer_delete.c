@@ -86,7 +86,7 @@ static void timer_free(struct posix_timer_s *timer)
 #if CONFIG_PREALLOC_TIMERS > 0
   if ((timer->pt_flags & PT_FLAGS_PREALLOCATED) != 0)
     {
-      sq_addlast((FAR sq_entry_t*)&timer, (FAR sq_queue_t*)&g_freetimers);
+      sq_addlast((FAR sq_entry_t*)timer, (FAR sq_queue_t*)&g_freetimers);
       irqrestore(flags);
     }
   else

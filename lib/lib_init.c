@@ -184,7 +184,7 @@ void lib_releaselist(FAR struct streamlist *list)
                (void)sem_destroy(&list->sl_streams[i].fs_sem);
 
                /* Release the IO buffer */
-               if (&list->sl_streams[i].fs_bufstart)
+               if (list->sl_streams[i].fs_bufstart)
                  {
                    sched_free(list->sl_streams[i].fs_bufstart);
                  }
