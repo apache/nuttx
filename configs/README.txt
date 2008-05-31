@@ -180,6 +180,8 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_JULIAN_TIME - Enables Julian time conversions
 		CONFIG_DEV_CONSOLE - Set if architecture-specific logic
 		  provides /dev/console.  Enables stdout, stderr, stdin.
+		CONFIG_MUTEX_TYPES - Set to enabled support for recursive and
+		  errorcheck mutexes.  Enables pthread_mutexattr_settype().
 
 	The following can be used to disable categories of APIs supported
 	by the OS.  If the compiler supports weak functions, then it

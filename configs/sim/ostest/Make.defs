@@ -35,6 +35,8 @@
 
 include ${TOPDIR}/.config
 
+HOSTOS			= ${shell uname -o}
+ 
 ifneq ("${CONFIG_DEBUG}","y")
   ARCHOPTIMIZATION	= -g
 else
@@ -62,7 +64,12 @@ AFLAGS			= $(CFLAGS) -D__ASSEMBLY__
 
 OBJEXT			= .o
 LIBEXT			= .a
-EXEEXT			=
+
+ifeq ($(HOSTOS),Cygwin)
+  EXEEXT		= .exe
+else
+  EXEEXT		=
+endif
 
 ifeq ("${CONFIG_DEBUG}","y")
   LDFLAGS		+= -g
