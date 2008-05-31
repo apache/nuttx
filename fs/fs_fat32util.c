@@ -6,7 +6,8 @@
  *
  * References:
  *   Microsoft FAT documentation
- *   FAT implementation 'Copyright (C) 2007, ChaN, all right reserved.'
+ *   Some good ideas were leveraged from the FAT implementation:
+ *     'Copyright (C) 2007, ChaN, all right reserved.'
  *     which has an unrestricted license.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1340,7 +1341,7 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
    * been examined.
    */
 
-  if (ndx >= DIRSEC_NDIRS(fs))
+  if ((ndx & (DIRSEC_NDIRS(fs)-1)) == 0)
     {
       /* Yes, then we will have to read the next sector */
 
@@ -1352,7 +1353,7 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
 
       if (!dir->fd_currcluster)
         {
-          /* For FAT12/13, the boot record tells us number of 32-bit directories
+          /* For FAT12/16, the boot record tells us number of 32-bit directories
            * that are contained in the root directory.  This should correspond to
            * an even number of sectors.
            */
@@ -1381,7 +1382,7 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
            * has been examined.
            */
 
-          if (sector >= fs->fs_fatsecperclus)
+          if ((sector & (fs->fs_fatsecperclus-1)) == 0)
             {
               /* Get next cluster */
 

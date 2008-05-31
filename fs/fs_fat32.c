@@ -1,12 +1,13 @@
 /****************************************************************************
  * fs_fat32.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
  *   Microsoft FAT documentation
- *   FAT implementation 'Copyright (C) 2007, ChaN, all right reserved.'
+ *   Some good ideas were leveraged from the FAT implementation:
+ *     'Copyright (C) 2007, ChaN, all right reserved.'
  *     which has an unrestricted license.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -19,7 +20,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -262,7 +263,7 @@ static int fat_open(FAR struct file *filp, const char *relpath,
       /* Yes.. create the file */
 
       ret = fat_dircreate(fs, &dirinfo);
-      if ( ret < 0)
+      if (ret < 0)
         {
           goto errout_with_semaphore;
         }
@@ -312,7 +313,7 @@ static int fat_open(FAR struct file *filp, const char *relpath,
   /* File cluster/size info */
 
   ff->ff_startcluster     =
-      ((uint32)DIR_GETFSTCLUSTHI(dirinfo.fd_entry) << 16) |
+    ((uint32)DIR_GETFSTCLUSTHI(dirinfo.fd_entry) << 16) |
       DIR_GETFSTCLUSTLO(dirinfo.fd_entry);
 
   ff->ff_size             = DIR_GETFILESIZE(dirinfo.fd_entry);
@@ -344,10 +345,10 @@ static int fat_open(FAR struct file *filp, const char *relpath,
    * handling a lot simpler.
    */
 
- errout_with_struct:
+errout_with_struct:
   free(ff);
 
- errout_with_semaphore:
+errout_with_semaphore:
   fat_semgive(fs);
   return ret;
 }
@@ -444,7 +445,7 @@ static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
 
   if ((ff->ff_oflags & O_RDOK) == 0)
     {
-      ret= -EACCES;
+      ret = -EACCES;
       goto errout_with_semaphore;
     }
 
@@ -465,12 +466,14 @@ static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
    * error occurs.
    */
 
-  readsize = 0;
+  readsize   = 0;
+  readsector = ff->ff_currentsector;
   while (buflen > 0)
     {
       /* Get offset into the sector where we begin the read */
 
       int sectorindex = ff->ff_position & SEC_NDXMASK(fs);
+      bytesread = 0;
 
       /* Check if the current read stream happens to lie on a
        * sector boundary.
@@ -523,84 +526,86 @@ static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
               /* Setup to read the first sector from the new cluster */
 
               ff->ff_currentcluster   = cluster;
-              readsector              = fat_cluster2sector(fs, cluster);
               ff->ff_sectorsincluster = fs->fs_fatsecperclus;
+              readsector              = fat_cluster2sector(fs, cluster);
             }
+        }
 
-          /* Check if the user has provided a buffer large enough to
-           * hold one or more complete sectors.
+      /* Check if the user has provided a buffer large enough to
+       * hold one or more complete sectors.
+       */
+
+      nsectors = buflen / fs->fs_hwsectorsize;
+      if (nsectors > 0)
+        {
+          /* Read maximum contiguous sectors directly to the user's
+           * buffer without using our tiny read buffer.
+           *
+           * Limit the number of sectors that we read on this time
+           * through the loop to the remaining contiguous sectors
+           * in this cluster
            */
 
-          nsectors = buflen / fs->fs_hwsectorsize;
-          if (nsectors > 0)
+          if (nsectors > ff->ff_sectorsincluster)
             {
-              /* Read maximum contiguous sectors directly to the user's
-               * buffer without using our tiny read buffer.
-               *
-               * Limit the number of sectors that we read on this time
-               * through the loop to the remaining contiguous sectors
-               * in this cluster
-               */
-
-              if (nsectors > ff->ff_sectorsincluster)
-                {
-                  nsectors = ff->ff_sectorsincluster;
-                }
-
-              /* We are not sure of the state of the file buffer so
-               * the safest thing to do is just invalidate it
-               */
-
-              (void)fat_ffcacheinvalidate(fs, ff);
-
-              /* Read all of the sectors directory into user memory */
-
-              ret = fat_hwread(fs, userbuffer, readsector, nsectors);
-              if (ret < 0)
-                {
-                  goto errout_with_semaphore;
-                }
-
-              ff->ff_sectorsincluster -= nsectors - 1;
-              bytesread                = nsectors * fs->fs_hwsectorsize;
-            }
-          else
-            {
-              /* We are reading a partial sector.  First, read the whole sector
-               * into the file data buffer.  This is a caching buffer so if
-               * it is already there then all is well.
-               */
-
-              ret = fat_ffcacheread(fs, ff, readsector);
-              if (ret < 0)
-                {
-                  goto errout_with_semaphore;
-                }
-
-              /* Copy the partial sector into the user buffer */
-
-              bytesread = fs->fs_hwsectorsize - sectorindex;
-              if (bytesread > buflen)
-                {
-                  bytesread = buflen;
-                }
-
-              memcpy(userbuffer, &ff->ff_buffer[sectorindex], bytesread);
+              nsectors = ff->ff_sectorsincluster;
             }
 
-          /* Set up for the next sector read */
+          /* We are not sure of the state of the file buffer so
+           * the safest thing to do is just invalidate it
+           */
 
-          userbuffer      += bytesread;
-          ff->ff_position += bytesread;
-          readsize        += bytesread;
-          buflen          -= bytesread;
+          (void)fat_ffcacheinvalidate(fs, ff);
+
+          /* Read all of the sectors directory into user memory */
+
+          ret = fat_hwread(fs, userbuffer, readsector, nsectors);
+          if (ret < 0)
+            {
+              goto errout_with_semaphore;
+            }
+
+          ff->ff_sectorsincluster -= nsectors - 1;
+          ff->ff_currentsector     = readsector + nsectors - 1;
+          bytesread                = nsectors * fs->fs_hwsectorsize;
         }
+      else
+        {
+          /* We are reading a partial sector.  First, read the whole sector
+           * into the file data buffer.  This is a caching buffer so if
+           * it is already there then all is well.
+           */
+
+          ret = fat_ffcacheread(fs, ff, readsector);
+          if (ret < 0)
+            {
+              goto errout_with_semaphore;
+            }
+
+          /* Copy the partial sector into the user buffer */
+
+          bytesread = fs->fs_hwsectorsize - sectorindex;
+          if (bytesread > buflen)
+            {
+              bytesread = buflen;
+            }
+
+          memcpy(userbuffer, &ff->ff_buffer[sectorindex], bytesread);
+          ff->ff_currentsector = readsector;
+        }
+
+      /* Set up for the next sector read */
+
+      userbuffer      += bytesread;
+      ff->ff_position += bytesread;
+      readsize        += bytesread;
+      buflen          -= bytesread;
     }
 
   fat_semgive(fs);
   return readsize;
 
- errout_with_semaphore:
+errout_with_semaphore:
   fat_semgive(fs);
   return ret;
 }
@@ -648,7 +653,7 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
 
   if ((ff->ff_oflags & O_WROK) == 0)
     {
-      ret= -EACCES;
+      ret = -EACCES;
       goto errout_with_semaphore;
     }
 
@@ -665,6 +670,7 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
    */
 
   byteswritten = 0;
+  writesector = ff->ff_currentsector;
   while (buflen > 0)
     {
       /* Get offset into the sector where we begin the read */
@@ -744,8 +750,8 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
               /* Setup to write the first sector from the new cluster */
 
               ff->ff_currentcluster   = cluster;
-              writesector             = fat_cluster2sector(fs, cluster);
               ff->ff_sectorsincluster = fs->fs_fatsecperclus;
+              writesector             = fat_cluster2sector(fs, cluster);
             }
         }
 
@@ -792,6 +798,7 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
             }
 
           ff->ff_sectorsincluster -= nsectors - 1;
+          ff->ff_currentsector     = writesector + nsectors - 1;
           writesize                = nsectors * fs->fs_hwsectorsize;
           ff->ff_bflags           |= FFBUFF_MODIFIED;
         }
@@ -843,7 +850,7 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
   fat_semgive(fs);
   return byteswritten;
 
- errout_with_semaphore:
+errout_with_semaphore:
   fat_semgive(fs);
   return ret;
 }
@@ -1074,7 +1081,7 @@ static off_t fat_seek(FAR struct file *filp, off_t offset, int whence)
   fat_semgive(fs);
   return OK;
 
- errout_with_semaphore:
+errout_with_semaphore:
   fat_semgive(fs);
   return ret;
 }
@@ -1210,7 +1217,7 @@ static int fat_sync(FAR struct file *filp)
       ret          = fat_updatefsinfo(fs);
     }
 
- errout_with_semaphore:
+errout_with_semaphore:
   fat_semgive(fs);
   return ret;
 }
@@ -1257,12 +1264,14 @@ static int fat_opendir(struct inode *mountpt, const char *relpath, struct intern
 
   if (dirinfo.fd_entry == NULL)
     {
-      /* Handler the FAT12/16 root directory */
+      /* Handle the FAT12/16/32 root directory using the values setup by
+       * fat_finddirentry() above.
+       */
 
-      dir->u.fat.fd_startcluster = 0;
-      dir->u.fat.fd_currcluster  = 0;
-      dir->u.fat.fd_currsector   = fs->fs_rootbase;
-      dir->u.fat.fd_index        = 2;
+      dir->u.fat.fd_startcluster = dirinfo.dir.fd_startcluster;
+      dir->u.fat.fd_currcluster  = dirinfo.dir.fd_currcluster;
+      dir->u.fat.fd_currsector   = dirinfo.dir.fd_currsector;
+      dir->u.fat.fd_index        = dirinfo.dir.fd_index;
     }
 
   /* This is not the root directory.  Verify that it is some kind of directory */
@@ -1307,7 +1316,7 @@ static int fat_readdir(struct inode *mountpt, struct internal_dir_s *dir)
   ubyte                  *direntry;
   ubyte                   ch;
   ubyte                   attribute;
-  int                     ret;
+  int                     ret = OK;
 
   /* Sanity checks */
 
@@ -1332,7 +1341,7 @@ static int fat_readdir(struct inode *mountpt, struct internal_dir_s *dir)
   while (dir->u.fat.fd_currsector && dir->fd_dir.d_name[0] == '\0')
     {
       ret = fat_fscacheread(fs, dir->u.fat.fd_currsector);
-      if ( ret < 0)
+      if (ret < 0)
         {
           goto errout_with_semaphore;
         }
@@ -1380,7 +1389,8 @@ static int fat_readdir(struct inode *mountpt, struct internal_dir_s *dir)
 
       if (fat_nextdirentry(fs, &dir->u.fat) != OK)
         {
-          dir->u.fat.fd_currsector = 0;
+          ret = -ENOENT;
+          goto errout_with_semaphore;
         }
     }
 
@@ -1389,7 +1399,7 @@ static int fat_readdir(struct inode *mountpt, struct internal_dir_s *dir)
 
 errout_with_semaphore:
   fat_semgive(fs);
-  return ERROR;
+  return ret;
 }
 
 /****************************************************************************
@@ -1423,13 +1433,23 @@ static int fat_rewinddir(struct inode *mountpt, struct internal_dir_s *dir)
 
   /* Check if this is the root directory */
 
-  if (dir->u.fat.fd_startcluster == 0)
+  if (fs->fs_type != FSTYPE_FAT32 &&
+      dir->u.fat.fd_startcluster == 0)
     {
-      /* Handler the FAT12/16 root directory */
+      /* Handle the FAT12/16 root directory */
 
       dir->u.fat.fd_currcluster  = 0;
       dir->u.fat.fd_currsector   = fs->fs_rootbase;
-      dir->u.fat.fd_index        = 2;
+      dir->u.fat.fd_index        = 0;
+    }
+  else if (fs->fs_type == FSTYPE_FAT32 &&
+           dir->u.fat.fd_startcluster == fs->fs_rootbase)
+    {
+      /* Handle the FAT32 root directory */
+
+      dir->u.fat.fd_currcluster = dir->u.fat.fd_startcluster;
+      dir->u.fat.fd_currsector  = fat_cluster2sector(fs, fs->fs_rootbase);
+      dir->u.fat.fd_index       = 0;
     }
 
   /* This is not the root directory */
@@ -1473,7 +1493,7 @@ static int fat_bind(FAR struct inode *blkdriver, const void *data,
       return -ENODEV;
     }
 
-  if ( blkdriver->u.i_bops->open &&
+  if (blkdriver->u.i_bops->open &&
        blkdriver->u.i_bops->open(blkdriver) != OK)
     {
       return -ENODEV;
@@ -1482,7 +1502,7 @@ static int fat_bind(FAR struct inode *blkdriver, const void *data,
   /* Create an instance of the mountpt state structure */
 
   fs = (struct fat_mountpt_s *)zalloc(sizeof(struct fat_mountpt_s));
-  if ( !fs )
+  if (!fs)
     {
       return -ENOMEM;
     }
@@ -1500,7 +1520,7 @@ static int fat_bind(FAR struct inode *blkdriver, const void *data,
    */
 
   ret = fat_mount(fs, TRUE);
-  if ( ret != 0 )
+  if (ret != 0)
     {
       sem_destroy(&fs->fs_sem);
       free(fs);
@@ -1525,7 +1545,7 @@ static int fat_unbind(void *handle, FAR struct inode **blkdriver)
   struct fat_mountpt_s *fs = (struct fat_mountpt_s*)handle;
   int ret;
 
-  if ( !fs )
+  if (!fs)
     {
       return -EINVAL;
     }
@@ -1881,7 +1901,7 @@ static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
   fat_semgive(fs);
   return OK;
 
- errout_with_semaphore:
+errout_with_semaphore:
   fat_semgive(fs);
   return ret;
 }
@@ -2061,7 +2081,7 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
   fat_semgive(fs);
   return OK;
 
- errout_with_semaphore:
+errout_with_semaphore:
   fat_semgive(fs);
   return ret;
 }
@@ -2111,9 +2131,13 @@ static int fat_stat(struct inode *mountpt, const char *relpath, struct stat *buf
       goto errout_with_semaphore;
     }
 
-  if (! dirinfo.fd_entry)
+  memset(buf, 0, sizeof(struct stat));
+  if (!dirinfo.fd_entry)
     {
-      ret = -ENOENT;
+      /* It's directory name of mount point */
+
+      buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR|S_IWOTH|S_IWGRP|S_IWUSR;
+      ret = OK;
       goto errout_with_semaphore;
     }
 
@@ -2130,7 +2154,6 @@ static int fat_stat(struct inode *mountpt, const char *relpath, struct stat *buf
    * by everyone but may be writeable by no-one.
    */
 
-  memset(buf, 0, sizeof(struct stat));
   buf->st_mode = S_IROTH|S_IRGRP|S_IRUSR;
   if ((attribute & FATATTR_READONLY) == 0)
     {
@@ -2176,7 +2199,7 @@ static int fat_stat(struct inode *mountpt, const char *relpath, struct stat *buf
 
   ret = OK;
 
- errout_with_semaphore:
+errout_with_semaphore:
   fat_semgive(fs);
   return ret;
 }
