@@ -38,12 +38,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <stdlib.h>
 #include <dirent.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
+
 #include <nuttx/fs.h>
+
 #include "fs_internal.h"
 
 /****************************************************************************
@@ -152,13 +156,13 @@ FAR DIR *opendir(FAR const char *path)
    if (INODE_IS_MOUNTPT(inode))
      {
        /* Yes, then return the inode itself as the 'root' of
-         * the directory.  The actually directory is at relpath into the
-         * mounted filesystem.
-         */
+        * the directory.  The actually directory is at relpath into the
+        * mounted filesystem.
+        */
 
       /* The node is a file system mointpoint. Verify that the mountpoint
-         * supports the opendir() method
-         */
+       * supports the opendir() method
+       */
 
       if (!inode->u.i_mops || !inode->u.i_mops->opendir)
         {
@@ -167,8 +171,8 @@ FAR DIR *opendir(FAR const char *path)
         }
 
       /* Take reference to the mountpoint inode (fd_root).  Note that we do
-      * not use inode_addref() because we already hold the tree semaphore.
-      */
+       * not use inode_addref() because we already hold the tree semaphore.
+       */
 
       inode->i_crefs++;
 
@@ -177,8 +181,21 @@ FAR DIR *opendir(FAR const char *path)
       ret = inode->u.i_mops->opendir(inode, relpath, dir);
       if (ret < 0)
         {
+          /* We now need to back off our reference to the inode.  We can't
+           * call inode_release() to do that unless we release the tree
+           * semaphore.  The following should be safe because:  (1) after the
+           * reference count was incremented above it should be >1 so it should
+           * not decrement to zero, and (2) we hold the tree semaphore so no
+           * other thread should be able to change the reference count.
+           */
+
+          inode->i_crefs--;
+          DEBUGASSERT(inode->i_crefs > 0);
+
+          /* Negate the error value so that it can be used to set errno */
+
           ret = -ret;
-          goto errout_with_inode;
+          goto errout_with_direntry;
         }
     }
   else
@@ -200,10 +217,10 @@ FAR DIR *opendir(FAR const char *path)
         }
 
       /* It looks we have a valid psuedo-filesystem node.  Take two references
-      * on the inode -- one for the parent (fd_root) and one for the child (fd_next).
-      * Note that we do not call inode_addref because we are holding
-      * the tree semaphore and that would result in deadlock.
-      */
+       * on the inode -- one for the parent (fd_root) and one for the child (fd_next).
+       * Note that we do not call inode_addref because we are holding
+       * the tree semaphore and that would result in deadlock.
+       */
 
       inode->i_crefs += 2;
       dir->u.psuedo.fd_next = inode; /* This is the next node to use for readdir() */
@@ -218,11 +235,6 @@ FAR DIR *opendir(FAR const char *path)
   return ((DIR*)dir);
 
   /* Nasty goto's make error handling simpler */
-
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-errout_with_inode:
-  inode_release(inode);
-#endif
 
 errout_with_direntry:
   free(dir);
