@@ -21,7 +21,7 @@ User's Manual
 <p>
 Gregory Nutt
 <p>
-<small>Last Update: Februrary 2, 2008</small>
+<small>Last Update: May 31, 2008</small>
 </center>
 
 <h1>1.0 <A NAME="Introduction">Introduction</a></h1>
@@ -3434,32 +3434,34 @@ be sent.
   <li><a href="#pthreadmutexattrdestroy">2.9.27 pthread_mutexattr_destroy</a></li>
   <li><a href="#pthreadmutexattrgetpshared">2.9.28 pthread_mutexattr_getpshared</a></li>
   <li><a href="#pthreadmutexattrsetpshared">2.9.29 pthread_mutexattr_setpshared</a></li>
-  <li><a href="#pthreadmutexinit">2.9.30 pthread_mutex_init</a></li>
-  <li><a href="#pthreadmutexdestrory">2.9.31 pthread_mutex_destroy</a></li>
-  <li><a href="#pthreadmutexlock">2.9.32 pthread_mutex_lock</a></li>
-  <li><a href="#pthreadmutextrylock">2.9.33 pthread_mutex_trylock</a></li>
-  <li><a href="#pthreadmutexunlock">2.9.34 pthread_mutex_unlock</a></li>
-  <li><a href="#pthreadconaddrinit">2.9.35 pthread_condattr_init</a></li>
-  <li><a href="#pthreadocndattrdestroy">2.9.36 pthread_condattr_destroy</a></li>
-  <li><a href="#pthreadcondinit">2.9.37 pthread_cond_init</a></li>
-  <li><a href="#pthreadconddestroy">2.9.38 pthread_cond_destroy</a></li>
-  <li><a href="#pthreadcondbroadcast">2.9.39 pthread_cond_broadcast</a></li>
-  <li><a href="#pthreadcondsignal">2.9.40 pthread_cond_signal</a></li>
-  <li><a href="#pthreadcondwait">2.9.41 pthread_cond_wait</a></li>
-  <li><a href="#pthreadcondtimedwait">2.9.42 pthread_cond_timedwait</a></li>
-  <li><a href="#pthreadbarrierattrinit">2.9.43 pthread_barrierattr_init</a></li>
-  <li><a href="#pthreadbarrierattrdestroy">2.9.44 pthread_barrierattr_destroy</a></li>
-  <li><a href="#pthreadbarrierattrsetpshared">2.9.45 pthread_barrierattr_setpshared</a></li>
-  <li><a href="#pthreadbarrierattrgetpshared">2.9.46 pthread_barrierattr_getpshared</a></li>
-  <li><a href="#pthreadbarrierinit">2.9.47 pthread_barrier_init</a></li>
-  <li><a href="#pthreadbarrierdestroy">2.9.48 pthread_barrier_destroy</a></li>
-  <li><a href="#pthreadbarrierwait">2.9.49 pthread_barrier_wait</a></li>
-  <li><a href="#pthreadonce">2.9.50 pthread_once</a></li>
-  <li><a href="#pthreadkill">2.9.51 pthread_kill</a></li>
-  <li><a href="#pthreadsigmask">2.9.52 pthread_sigmask</a></li>
+  <li><a href="#pthreadmutexattrgettype">2.9.30 pthread_mutexattr_gettype</a></li>
+  <li><a href="#pthreadmutexattrsettype">2.9.31 pthread_mutexattr_settype</a></li>  
+  <li><a href="#pthreadmutexinit">2.9.32 pthread_mutex_init</a></li>
+  <li><a href="#pthreadmutexdestrory">2.9.33 pthread_mutex_destroy</a></li>
+  <li><a href="#pthreadmutexlock">2.9.34 pthread_mutex_lock</a></li>
+  <li><a href="#pthreadmutextrylock">2.9.35 pthread_mutex_trylock</a></li>
+  <li><a href="#pthreadmutexunlock">2.9.36 pthread_mutex_unlock</a></li>
+  <li><a href="#pthreadconaddrinit">2.9.37 pthread_condattr_init</a></li>
+  <li><a href="#pthreadocndattrdestroy">2.9.38 pthread_condattr_destroy</a></li>
+  <li><a href="#pthreadcondinit">2.9.39 pthread_cond_init</a></li>
+  <li><a href="#pthreadconddestroy">2.9.40 pthread_cond_destroy</a></li>
+  <li><a href="#pthreadcondbroadcast">2.9.41 pthread_cond_broadcast</a></li>
+  <li><a href="#pthreadcondsignal">2.9.42 pthread_cond_signal</a></li>
+  <li><a href="#pthreadcondwait">2.9.43 pthread_cond_wait</a></li>
+  <li><a href="#pthreadcondtimedwait">2.9.44 pthread_cond_timedwait</a></li>
+  <li><a href="#pthreadbarrierattrinit">2.9.45 pthread_barrierattr_init</a></li>
+  <li><a href="#pthreadbarrierattrdestroy">2.9.46 pthread_barrierattr_destroy</a></li>
+  <li><a href="#pthreadbarrierattrsetpshared">2.9.47 pthread_barrierattr_setpshared</a></li>
+  <li><a href="#pthreadbarrierattrgetpshared">2.9.48 pthread_barrierattr_getpshared</a></li>
+  <li><a href="#pthreadbarrierinit">2.9.49 pthread_barrier_init</a></li>
+  <li><a href="#pthreadbarrierdestroy">2.9.50 pthread_barrier_destroy</a></li>
+  <li><a href="#pthreadbarrierwait">2.9.51 pthread_barrier_wait</a></li>
+  <li><a href="#pthreadonce">2.9.52 pthread_once</a></li>
+  <li><a href="#pthreadkill">2.9.53 pthread_kill</a></li>
+  <li><a href="#pthreadsigmask">2.9.54 pthread_sigmask</a></li>
 </ul>
 <p>
-  No support for the ollowing pthread interfaces is provided by NuttX:
+  No support for the following pthread interfaces is provided by NuttX:
 </p>
 <ul>
   <li><code>pthread_atfork</code>. register fork handlers.</li>
@@ -3479,10 +3481,10 @@ be sent.
   <li><code>pthread_barrier_wait</code>. synchronize at a barrier.</li>
   <li><code>pthread_cleanup_pop</code>. establish cancellation handlers.</li>
   <li><code>pthread_cleanup_push</code>. establish cancellation handlers.</li>
-  <li><code>pthread_condattr_getclock</code>. get and set the clock selection condition variable attribute.</li>
-  <li><code>pthread_condattr_getpshared</code>. get and set the process-shared condition variable attributes.</li>
-  <li><code>pthread_condattr_setclock</code>. get and set the clock selection condition variable attribute.</li>
-  <li><code>pthread_condattr_setpshared</code>. get and set the process-shared condition variable attributes.</li>
+  <li><code>pthread_condattr_getclock</code>. set the clock selection condition variable attribute.</li>
+  <li><code>pthread_condattr_getpshared</code>. get the process-shared condition variable attribute.</li>
+  <li><code>pthread_condattr_setclock</code>. set the clock selection condition variable attribute.</li>
+  <li><code>pthread_condattr_setpshared</code>. set the process-shared condition variable attribute.</li>
   <li><code>pthread_getconcurrency</code>. get and set the level of concurrency.</li>
   <li><code>pthread_getcpuclockid</code>. access a thread CPU-time clock.</li>
   <li><code>pthread_mutex_getprioceiling</code>. get and set the priority ceiling of a mutex.</li>
@@ -3490,10 +3492,8 @@ be sent.
   <li><code>pthread_mutex_timedlock</code>. lock a mutex.</li>
   <li><code>pthread_mutexattr_getprioceiling</code>. get and set the prioceiling attribute of the mutex attributes object.</li>
   <li><code>pthread_mutexattr_getprotocol</code>. get and set the protocol attribute of the mutex attributes object.</li>
-  <li><code>pthread_mutexattr_gettype</code>. get and set the mutex type attribute.</li>
   <li><code>pthread_mutexattr_setprioceiling</code>. get and set the prioceiling attribute of the mutex attributes object.</li>
   <li><code>pthread_mutexattr_setprotocol</code>. get and set the protocol attribute of the mutex attributes object.</li>
-  <li><code>pthread_mutexattr_settype</code>. get and set the mutex type attribute.</li>
   <li><code>pthread_rwlock_destroy</code>. destroy and initialize a read-write lock object.</li>
   <li><code>pthread_rwlock_init</code>. destroy and initialize a read-write lock object.</li>
   <li><code>pthread_rwlock_rdlock</code>. lock a read-write lock object for reading.</li>
@@ -4627,7 +4627,93 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexinit">2.9.30 pthread_mutex_init</a></H3>
+<h3><a name="pthreadmutexattrgettype">2.9.30 pthread_mutexattr_gettype</a></h3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;pthread.h&gt;
+#ifdef CONFIG_MUTEX_TYPES
+    int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type);
+#endif
+</pre>
+<p>
+<b>Description:</b> Return the mutex type from the mutex attributes.
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>attr</code>. The mutex attributes to query</li>
+  <li><code>type</code>.  Location to return the mutex type.  See
+    <a href="#pthreadmutexattrsettype"><code>pthread_mutexattr_setttyp()</code></a>
+    for a description of possible mutex types that may be returned.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
+If successful, the <I>pthread_mutexattr_settype()</I> function will return
+zero (<I>OK</I>).  Otherwise, an error number will be
+returned to indicate the error:
+<p>
+<ul>
+  <li><code>EINVAL</code>. Parameters <code>attr</code> and/or <code>attr</code> are invalid.</li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+
+<h3><a name="pthreadmutexattrsettype">2.9.31 pthread_mutexattr_settype</a></h3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;pthread.h&gt;
+#ifdef CONFIG_MUTEX_TYPES
+    int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type);
+#endif
+</pre>
+<p>
+<b>Description:</b> Set the mutex type in the mutex attributes.
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>attr</code>. The mutex attributes in which to set the mutex type.</li>
+  <li><code>type</code>. The mutex type value to set.  The following values are supported:
+  <ul>
+    <li><code>PTHREAD_MUTEX_NORMAL</code>.  This type of mutex does not detect deadlock. A thread
+      attempting to relock this mutex without first unlocking it will deadlock.
+      Attempting to unlock a mutex locked by a different thread results in undefined
+      behavior. Attempting to unlock an unlocked mutex results in undefined behavior. </li>
+    <li><code>PTHREAD_MUTEX_ERRORCHECK</code>.  This type of mutex provides error checking.
+      A thread attempting to relock this mutex without first unlocking it will return with an error.
+      A thread attempting to unlock a mutex which another thread has locked will return with an error.
+      A thread attempting to unlock an unlocked mutex will return with an error.</li>
+    <li><code>PTHREAD_MUTEX_RECURSIVE</code>.  A thread attempting to relock this mutex without first
+      unlocking it will succeed in locking the mutex. The relocking deadlock which can occur with mutexes
+      of type PTHREAD_MUTEX_NORMAL cannot occur with this type of mutex. Multiple locks of this mutex
+      require the same number of unlocks to release the mutex before another thread can acquire the mutex.
+      A thread attempting to unlock a mutex which another thread has locked will return with an error.
+      A thread attempting to unlock an unlocked mutex will return with an error.</li>
+    <li><code>PTHREAD_MUTEX_DEFAULT</code>.  The default mutex type (PTHREAD_MUTEX_NORMAL).</li>
+  </ul>
+  In NuttX, PTHREAD_MUTEX_NORMAL is not implemented.  PTHREAD_MUTEX_ERRORCHECK is the <i>normal</i> behavior.</li>
+</ul>
+<p>
+<b>Returned Values:</b>
+<p>
+If successful, the <I>pthread_mutexattr_settype()</I> function will return
+zero (<I>OK</I>).  Otherwise, an error number will be
+returned to indicate the error:
+<p>
+<ul>
+  <li><code>EINVAL</code>. Parameters <code>attr</code> and/or <code>attr</code> are invalid.</li>
+</ul>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+
+<H3><a name="pthreadmutexinit">2.9.32 pthread_mutex_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -4659,7 +4745,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexdestrory">2.9.31 pthread_mutex_destroy</a></H3>
+<H3><a name="pthreadmutexdestrory">2.9.33 pthread_mutex_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -4690,7 +4776,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexlock">2.9.32 pthread_mutex_lock</a></H3>
+<H3><a name="pthreadmutexlock">2.9.34 pthread_mutex_lock</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -4721,7 +4807,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutextrylock">2.9.33 pthread_mutex_trylock</a></H3>
+<H3><a name="pthreadmutextrylock">2.9.35 pthread_mutex_trylock</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -4752,7 +4838,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexunlock">2.9.34 pthread_mutex_unlock</a></H3>
+<H3><a name="pthreadmutexunlock">2.9.36 pthread_mutex_unlock</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -4783,7 +4869,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadconaddrinit">2.9.35 pthread_condattr_init</a></H3>
+<H3><a name="pthreadconaddrinit">2.9.37 pthread_condattr_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -4814,7 +4900,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadocndattrdestroy">2.9.36 pthread_condattr_destroy</a></H3>
+<H3><a name="pthreadocndattrdestroy">2.9.38 pthread_condattr_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -4845,7 +4931,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondinit">2.9.37 pthread_cond_init</a></H3>
+<H3><a name="pthreadcondinit">2.9.39 pthread_cond_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -4876,7 +4962,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadconddestroy">2.9.38 pthread_cond_destroy</a></H3>
+<H3><a name="pthreadconddestroy">2.9.40 pthread_cond_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -4907,7 +4993,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondbroadcast">2.9.39 pthread_cond_broadcast</a></H3>
+<H3><a name="pthreadcondbroadcast">2.9.41 pthread_cond_broadcast</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -4938,7 +5024,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondsignal">2.9.40 pthread_cond_signal</a></H3>
+<H3><a name="pthreadcondsignal">2.9.42 pthread_cond_signal</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -4969,7 +5055,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondwait">2.9.41 pthread_cond_wait</a></H3>
+<H3><a name="pthreadcondwait">2.9.43 pthread_cond_wait</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -5000,7 +5086,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondtimedwait">2.9.42 pthread_cond_timedwait</a></H3>
+<H3><a name="pthreadcondtimedwait">2.9.44 pthread_cond_timedwait</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -5037,7 +5123,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrinit">2.9.43 pthread_barrierattr_init</a></h3>
+<h3><a name="pthreadbarrierattrinit">2.9.45 pthread_barrierattr_init</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -5070,7 +5156,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrdestroy">2.9.44 pthread_barrierattr_destroy</a></h3>
+<h3><a name="pthreadbarrierattrdestroy">2.9.46 pthread_barrierattr_destroy</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -5102,7 +5188,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrsetpshared">2.9.45 pthread_barrierattr_setpshared</a></h3>
+<h3><a name="pthreadbarrierattrsetpshared">2.9.47 pthread_barrierattr_setpshared</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -5140,7 +5226,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrgetpshared">2.9.46 pthread_barrierattr_getpshared</a></h3>
+<h3><a name="pthreadbarrierattrgetpshared">2.9.48 pthread_barrierattr_getpshared</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -5172,7 +5258,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierinit">2.9.47 pthread_barrier_init</a></h3>
+<h3><a name="pthreadbarrierinit">2.9.49 pthread_barrier_init</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -5242,7 +5328,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierdestroy">2.9.48 pthread_barrier_destroy</a></h3>
+<h3><a name="pthreadbarrierdestroy">2.9.50 pthread_barrier_destroy</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -5286,7 +5372,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierwait">2.9.49 pthread_barrier_wait</a></h3>
+<h3><a name="pthreadbarrierwait">2.9.51 pthread_barrier_wait</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -5346,7 +5432,7 @@ interface of the same name.
 </p>
 
 
-<h3><a name="pthreadonce">2.9.50 pthread_once</a></h3>
+<h3><a name="pthreadonce">2.9.52 pthread_once</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -5390,7 +5476,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadkill">2.9.51 pthread_kill</a></h3>
+<h3><a name="pthreadkill">2.9.53 pthread_kill</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -5452,7 +5538,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadsigmask">2.9.52 pthread_sigmask</a></h3>
+<h3><a name="pthreadsigmask">2.9.54 pthread_sigmask</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -6722,11 +6808,13 @@ notify a task when a message is available on a queue.
   <li><a href="#pthreadkill">pthread_kill</a></li>
   <li><a href="#pthreadmutexattrdestroy">pthread_mutexattr_destroy</a></li>
   <li><a href="#pthreadmutexattrgetpshared">pthread_mutexattr_getpshared</a></li>
+  <li><a href="#pthreadmutexattrgettype">pthread_mutexattr_gettype</a></li>
   <li><a href="#pthreadmutexattrinit">pthread_mutexattr_init</a></li>
   <li><a href="#pthreadmutexattrsetpshared">pthread_mutexattr_setpshared</a></li>
-  <li><a href="#pthreadmutexdestrory">pthread_mutex_destroy</a></li>
+  <li><a href="#pthreadmutexattrsettype">pthread_mutexattr_settype</a></li>
 </td>
 <td>
+  <li><a href="#pthreadmutexdestrory">pthread_mutex_destroy</a></li>
   <li><a href="#pthreadmutexinit">pthread_mutex_init</a></li>
   <li><a href="#pthreadmutexlock">pthread_mutex_lock</a></li>
   <li><a href="#pthreadmutextrylock">pthread_mutex_trylock</a></li>
