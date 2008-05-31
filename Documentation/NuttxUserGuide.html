@@ -4697,7 +4697,10 @@ returned to indicate the error:
       A thread attempting to unlock an unlocked mutex will return with an error.</li>
     <li><code>PTHREAD_MUTEX_DEFAULT</code>.  The default mutex type (PTHREAD_MUTEX_NORMAL).</li>
   </ul>
-  In NuttX, PTHREAD_MUTEX_NORMAL is not implemented.  PTHREAD_MUTEX_ERRORCHECK is the <i>normal</i> behavior.</li>
+  <p>
+    In NuttX, <code>PTHREAD_MUTEX_NORMAL</code> is not implemented.  Rather, the behavior described
+    for <code>PTHREAD_MUTEX_ERRORCHECK</code> is the <i>normal</i> behavior.
+  </p>
 </ul>
 <p>
 <b>Returned Values:</b>
@@ -4786,22 +4789,57 @@ interface of the same name.
 </pre>
 <p>
 <b>Description:</b>
+   The mutex object referenced by mutex is locked by calling <code>pthread_mutex_lock()</code>.
+   If the mutex is already locked, the calling thread blocks until the mutex
+   becomes available. This operation returns with the mutex object referenced
+   by mutex in the locked state with the calling thread as its owner.
+</p>
+<p>
+   If the mutex type is <code>PTHREAD_MUTEX_NORMAL</code>, deadlock detection is not provided.
+   Attempting to relock the mutex causes deadlock. If a thread attempts to unlock
+   a mutex that it has not locked or a mutex which is unlocked, undefined behavior
+   results.
+</p>
+<p>
+   In NuttX, <code>PTHREAD_MUTEX_NORMAL</code> is not implemented.  Rather, the behavior described
+   for <code>PTHREAD_MUTEX_ERRORCHECK</code> is the <i>normal</i> behavior.
+</p>
+<p>
+   If the mutex type is <code>PTHREAD_MUTEX_ERRORCHECK</code>, then error checking is provided.
+   If a thread attempts to relock a mutex that it has already locked, an error
+   will be returned. If a thread attempts to unlock a mutex that it has not
+   locked or a mutex which is unlocked, an error will be returned.
+</p>
+<p>
+   If the mutex type is <code>PTHREAD_MUTEX_RECURSIVE</code>, then the mutex maintains the concept
+   of a lock count. When a thread successfully acquires a mutex for the first time,
+   the lock count is set to one. Every time a thread relocks this mutex, the lock count
+   is incremented by one. Each time the thread unlocks the mutex, the lock count is
+   decremented by one. When the lock count reaches zero, the mutex becomes available
+   for other threads to acquire. If a thread attempts to unlock a mutex that it has
+   not locked or a mutex which is unlocked, an error will be returned.
+</p>
+<p>
+   If a signal is delivered to a thread waiting for a mutex, upon return from
+   the signal handler the thread resumes waiting for the mutex as if it was
+   not interrupted.
+</p>
 <p>
 <b>Input Parameters:</b>
 <p>
 <ul>
-  <li><code>To be provided</code>.</li>
+  <li><code>mutex</code>.  A reference to the mutex to be locked.</li>
 </ul>
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_mutex_lock()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
-returned to indicate the error:
+If successful, the <I>pthread_mutex_lock()</I> function will return zero (<I>OK</I>).
+Otherwise, an error number will be returned to indicate the error:
 <p>
 <ul>
   <li><code>To be provided</code>. </li>
 </ul>
+<p>Note that this function will never return the error EINTR.</p>
 <b>Assumptions/Limitations:</b>
 <p>
 <b>POSIX Compatibility:</b> Comparable to the POSIX
@@ -4817,22 +4855,31 @@ interface of the same name.
 </pre>
 <p>
 <b>Description:</b>
+   The function pthread_mutex_trylock() is identical to <a href="#pthreadmutexlock"><code>pthread_mutex_lock()</code></a>
+   except that if the mutex object referenced by mutex is currently locked
+   (by any thread, including the current thread), the call returns immediately
+   with the errno <code>EBUSY</code>.
+<p>
+   If a signal is delivered to a thread waiting for a mutex, upon return from
+   the signal handler the thread resumes waiting for the mutex as if it was
+   not interrupted.
+</p>
 <p>
 <b>Input Parameters:</b>
 <p>
 <ul>
-  <li><code>To be provided</code>.</li>
+  <li><code>mutex</code>.  A reference to the mutex to be locked.</li>
 </ul>
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_mutex_trylock()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
-returned to indicate the error:
+If successful, the <I>pthread_mutex_trylock()</I> function will return zero (<I>OK</I>).
+Otherwise, an error number will be returned to indicate the error:
 <p>
 <ul>
   <li><code>To be provided</code>. </li>
 </ul>
+<p>Note that this function will never return the error EINTR.</p>
 <b>Assumptions/Limitations:</b>
 <p>
 <b>POSIX Compatibility:</b> Comparable to the POSIX
@@ -4849,6 +4896,20 @@ interface of the same name.
 <p>
 <b>Description:</b>
 <p>
+   The <code>pthread_mutex_unlock()</code> function releases the mutex object referenced
+   by mutex. The manner in which a mutex is released is dependent upon the
+   mutex's type attribute. If there are threads blocked on the mutex object
+   referenced by mutex when <code>pthread_mutex_unlock()</code> is called, resulting in
+   the mutex becoming available, the scheduling policy is used to determine
+   which thread shall acquire the mutex. (In the case of <code>PTHREAD_MUTEX_RECURSIVE</code>
+   mutexes, the mutex becomes available when the count reaches zero and the
+   calling thread no longer has any locks on this mutex).
+</p>
+<p>
+   If a signal is delivered to a thread waiting for a mutex, upon return from
+   the signal handler the thread resumes waiting for the mutex as if it was
+   not interrupted.
+</p>
 <b>Input Parameters:</b>
 <p>
 <ul>
@@ -4864,6 +4925,7 @@ returned to indicate the error:
 <ul>
   <li><code>To be provided</code>. </li>
 </ul>
+<p>Note that this function will never return the error EINTR.</p>
 <b>Assumptions/Limitations:</b>
 <p>
 <b>POSIX Compatibility:</b> Comparable to the POSIX
