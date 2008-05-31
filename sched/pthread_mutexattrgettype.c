@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_mutexlock.c
+ * sched/pthread_mutexattrgettype.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,13 +37,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
-#include <unistd.h>
+#include <nuttx/config.h>
 #include <pthread.h>
-#include <sched.h>
 #include <errno.h>
-#include <debug.h>
+
 #include "pthread_internal.h"
+
+#ifdef CONFIG_MUTEX_TYPES
 
 /****************************************************************************
  * Definitions
@@ -62,7 +62,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -70,86 +70,31 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_mutex_lock
+ * Function: pthread_mutexattr_gettype
  *
  * Description:
- *   Lock a mutex.
+ *   Return the mutex type from the mutex attributes.
  *
  * Parameters:
- *   None
+ *   attr - The mutex attributes to query
+ *   type - Location to return the mutex type
  *
  * Return Value:
- *   None
+ *   0, if the mutex type was successfully return in 'type', or
+ *   EINVAL, if any NULL pointers provided.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
+int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type)
 {
-  int mypid = (int)getpid();
-  int ret = OK;
-
-  sdbg("mutex=0x%p\n", mutex);
-
-  if (!mutex)
+  if (attr && type)
     {
-      ret = EINVAL;
+      *type = attr->type;
+      return 0;
     }
-  else
-    {
-      /* Make sure the semaphore is stable while we make the following
-       * checks.  This all needs to be one atomic action.
-       */
-
-      sched_lock();
-
-      /* Does this task already hold the semaphore? */
-
-      if (mutex->pid == mypid)
-        {
-          /* Yes.. Is this a recursive mutex? */
-
-#ifdef CONFIG_MUTEX_TYPES
-          if (mutex->type == PTHREAD_MUTEX_RECURSIVE)
-            {
-	      /* Yes... just increment the number of locks held and return success */
-	      
-	      mutex->nlocks++;
-            }
-          else
-#endif
-            {
-	      /* No, then we would deadlock... return an error (default behavior
-	       * is like PTHREAD_MUTEX_ERRORCHECK)
-	       */
-
-              sdbg("Returning EDEADLK\n");
-              ret = EDEADLK;
-            }
-        }
-      else
-        {
-          /* Take the semaphore */
-
-          ret = pthread_takesemaphore((sem_t*)&mutex->sem);
-
-          /* If we succussfully obtained the semaphore, then indicate
-           * that we own it.
-           */
-
-          if (!ret)
-            {
-              mutex->pid    = mypid;
-#ifdef CONFIG_MUTEX_TYPES
-              mutex->nlocks = 1;
-#endif
-            }
-        }
-      sched_unlock();
-    }
-
-  sdbg("Returning %d\n", ret);
-  return ret;
+  return EINVAL;
 }
 
+#endif /* CONFIG_MUTEX_TYPES */

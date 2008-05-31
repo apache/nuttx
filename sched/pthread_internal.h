@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * pthread_internal.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,26 +31,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __PTHREAD_INTERNAL_H
 #define __PTHREAD_INTERNAL_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <pthread.h>
 #include <nuttx/compiler.h>
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
 /* The following defines an entry in the pthread logic's
  * local data set.  Note that this structure is used to
@@ -76,9 +76,9 @@ struct join_s
 };
 typedef struct join_s join_t;
 
-/************************************************************
+/****************************************************************************
  * Public Variables
- ************************************************************/
+ ****************************************************************************/
 
 /* This is the head of a private singly linked list.  It
  * is used to retain information about the spawned threads.
@@ -103,9 +103,9 @@ extern ubyte g_pthread_num_keys;
 
 extern FAR pthread_attr_t g_default_pthread_attr;
 
-/************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -121,6 +121,10 @@ EXTERN FAR join_t        *pthread_findjoininfo(pid_t pid);
 EXTERN int                pthread_givesemaphore(sem_t *sem);
 EXTERN FAR join_t        *pthread_removejoininfo(pid_t pid);
 EXTERN int                pthread_takesemaphore(sem_t *sem);
+
+#ifdef CONFIG_MUTEX_TYPES
+EXTERN int                pthread_mutexattr_verifytype(int type);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

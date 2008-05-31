@@ -85,8 +85,11 @@
 
 int pthread_mutex_init(FAR pthread_mutex_t *mutex, FAR pthread_mutexattr_t *attr)
 {
-  int ret = OK;
   int pshared = 0;
+#ifdef CONFIG_MUTEX_TYPES
+  ubyte type  = PTHREAD_MUTEX_DEFAULT;
+#endif
+  int ret     = OK;
   int status;
 
   sdbg("mutex=0x%p attr=0x%p\n", mutex, attr);
@@ -102,6 +105,9 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex, FAR pthread_mutexattr_t *attr
       if (attr)
         {
           pshared = attr->pshared;
+#ifdef CONFIG_MUTEX_TYPES
+          type    = attr->type;
+#endif
         }
 
       /* Indicate that the semaphore is not held by any thread. */
@@ -116,6 +122,13 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex, FAR pthread_mutexattr_t *attr
           ret = EINVAL;
         }
     }
+
+    /* Set up attributes unique to the mutex type */
+
+#ifdef CONFIG_MUTEX_TYPES
+    mutex->type   = type;
+    mutex->nlocks = 0;
+#endif
 
   sdbg("Returning %d\n", ret);
   return ret;

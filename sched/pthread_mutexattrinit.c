@@ -96,6 +96,9 @@ int pthread_mutexattr_init(FAR pthread_mutexattr_t *attr)
   else
     {
       attr->pshared = 0;
+#ifdef CONFIG_MUTEX_TYPES
+      attr->type    = PTHREAD_MUTEX_DEFAULT;
+#endif
     }
 
   sdbg("Returning %d\n", ret);

@@ -70,6 +70,36 @@
 #define PTHREAD_PROCESS_PRIVATE       0
 #define PTHREAD_PROCESS_SHARED        1
 
+/* Values for the mutext type attribute:
+ *
+ * PTHREAD_MUTEX_NORMAL: This type of mutex does not detect deadlock. A thread
+ *   attempting to relock this mutex without first unlocking it will deadlock.
+ *   Attempting to unlock a mutex locked by a different thread results in undefined
+ *   behavior. Attempting to unlock an unlocked mutex results in undefined behavior. 
+ * PTHREAD_MUTEX_ERRORCHECK
+ *   This type of mutex provides error checking. A thread attempting to relock this
+ *   mutex without first unlocking it will return with an error. A thread attempting
+ *   to unlock a mutex which another thread has locked will return with an error. A
+ *   thread attempting to unlock an unlocked mutex will return with an error.
+ * PTHREAD_MUTEX_RECURSIVE
+ *   A thread attempting to relock this mutex without first unlocking it will succeed
+ *   in locking the mutex. The relocking deadlock which can occur with mutexes of type
+ *   PTHREAD_MUTEX_NORMAL cannot occur with this type of mutex. Multiple locks of this
+ *   mutex require the same number of unlocks to release the mutex before another thread
+ *   can acquire the mutex. A thread attempting to unlock a mutex which another thread
+ *   has locked will return with an error. A thread attempting to unlock an unlocked
+ *   mutex will return with an error. 
+ * PTHREAD_MUTEX_DEFAULT
+ *  An implementation is allowed to map this mutex to one of the other mutex types.
+ */
+
+#ifdef CONFIG_MUTEX_TYPES
+#  define PTHREAD_MUTEX_NORMAL        0
+#  define PTHREAD_MUTEX_ERRORCHECK    1
+#  define PTHREAD_MUTEX_RECURSIVE     2
+#  define PTHREAD_MUTEX_DEFAULT       PTHREAD_MUTEX_NORMAL
+#endif
+
 /* Valid ranges for the pthread stacksize attribute */
 
 #define PTHREAD_STACK_MIN             CONFIG_PTHREAD_STACK_MIN
@@ -123,7 +153,7 @@ typedef FAR void       *pthread_addr_t;
 typedef pthread_addr_t  any_t;
 
 typedef pthread_addr_t (*pthread_startroutine_t)(pthread_addr_t);
-typedef pthread_startroutine_t	pthread_func_t;
+typedef pthread_startroutine_t  pthread_func_t;
 
 struct pthread_addr_s
 {
@@ -147,17 +177,29 @@ typedef struct pthread_cond_s pthread_cond_t;
 
 struct pthread_mutexattr_s
 {
-  int pshared;
+  ubyte pshared;  /* PTHREAD_PROCESS_PRIVATE or PTHREAD_PROCESS_SHARED */
+#ifdef CONFIG_MUTEX_TYPES
+  ubyte type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
+#endif
 };
 typedef struct pthread_mutexattr_s pthread_mutexattr_t;
 
 struct pthread_mutex_s
 {
-  int   pid;
-  sem_t sem;
+  int   pid;      /* ID of the holder of the mutex */
+  sem_t sem;      /* Semaphore underlying the implementation of the mutex */
+#ifdef CONFIG_MUTEX_TYPES
+  ubyte type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
+  int   nlocks;   /* The number of recursive locks held */
+#endif
 };
 typedef struct pthread_mutex_s pthread_mutex_t;
-#define PTHREAD_MUTEX_INITIALIZER {0, {1, 0xffff}}
+
+#ifdef CONFIG_MUTEX_TYPES
+#  define PTHREAD_MUTEX_INITIALIZER {0, {1, 0xffff}, PTHREAD_MUTEX_DEFAULT, 0}
+#else
+#  define PTHREAD_MUTEX_INITIALIZER {0, {1, 0xffff}}
+#endif
 
 struct pthread_barrierattr_s
 {
@@ -268,7 +310,7 @@ EXTERN int pthread_setschedprio(pthread_t thread, int prio);
 /* Thread-specific Data Interfaces */
 
 EXTERN int pthread_key_create(FAR pthread_key_t *key,
-			      CODE void (*destructor)(FAR void*));
+                              CODE void (*destructor)(FAR void*));
 EXTERN int pthread_setspecific(pthread_key_t key, FAR void *value);
 EXTERN FAR void *pthread_getspecific(pthread_key_t key);
 EXTERN int pthread_key_delete(pthread_key_t key);
@@ -279,6 +321,10 @@ EXTERN int pthread_mutexattr_init(FAR pthread_mutexattr_t *attr);
 EXTERN int pthread_mutexattr_destroy(FAR pthread_mutexattr_t *attr);
 EXTERN int pthread_mutexattr_getpshared(FAR pthread_mutexattr_t *attr, FAR int *pshared);
 EXTERN int pthread_mutexattr_setpshared(FAR pthread_mutexattr_t *attr, int pshared);
+#ifdef CONFIG_MUTEX_TYPES
+EXTERN int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type);
+EXTERN int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type);
+#endif
 
 /* The following routines create, delete, lock and unlock mutexes. */
 

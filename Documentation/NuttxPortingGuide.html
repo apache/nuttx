@@ -1408,6 +1408,9 @@ The system can be re-made subsequently by just typing <code>make</code>.
     <code>CONFIG_DEV_CONSOLE</code>: Set if architecture-specific logic
     provides /dev/console.  Enables stdout, stderr, stdin.
   </li>
+  <li>
+    <code>CONFIG_MUTEX_TYPES</code>: Set to enabled support for recursive and
+    errorcheck mutexes.  Enables <code>pthread_mutexattr_settype()</code>.
 </ul>
 
 <p>
