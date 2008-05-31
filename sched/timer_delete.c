@@ -72,7 +72,7 @@
  *
  ********************************************************************************/
 
-static void timer_free(struct posix_timer_s *timer)
+static inline void timer_free(struct posix_timer_s *timer)
 {
   irqstate_t flags;
 
@@ -137,10 +137,12 @@ int timer_delete(timer_t timerid)
       *get_errno_ptr() = EINVAL;
       return ERROR;
     }
-
-  /* Disarm the timer */
-
-  (void)wd_cancel(timer->pt_wdog);
+  
+  /* Free the underlying watchdog instance (the timer will be canceled by the
+   * watchdog logic before it is actually deleted)
+   */
+  
+  (void)wd_delete(timer->pt_wdog);
 
   /* Release the timer structure */
 

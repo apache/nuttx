@@ -56,12 +56,6 @@ o Task/Scheduler (sched/)
   Priority:    Medium, required for standard compliance (but makes the
                code bigger)
 
-  Description: Watchdog instance non-released by timer_delete()
-  Status:      Open
-  Priority:    High, if tasks use POSIX timers and delete them many
-               times, all of the pre-allocated watchdog timers get
-               lost.
-  
 o Dynamic Loader
   ^^^^^^^^^^^^^^
 
