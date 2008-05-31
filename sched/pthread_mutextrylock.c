@@ -74,13 +74,21 @@
  * Function:  pthread_mutex_trylock
  *
  * Description:
- *   Attempt to lock a mutex
+ *   The function pthread_mutex_trylock() is identical to pthread_mutex_lock()
+ *   except that if the mutex object referenced by mutex is currently locked
+ *   (by any thread, including the current thread), the call returns immediately
+ *   with the errno EBUSY.
+ *
+ *   If a signal is delivered to a thread waiting for a mutex, upon return from
+ *   the signal handler the thread resumes waiting for the mutex as if it was
+ *   not interrupted.
  *
  * Parameters:
- *   None
+ *   mutex - A reference to the mutex to be locked.
  *
  * Return Value:
- *   None
+ *   0 on success or an errno value on failure.  Note that the errno EINTR
+ *   is never returned by pthread_mutex_lock().
  *
  * Assumptions:
  *

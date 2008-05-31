@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * pthread_initialize.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,28 +31,28 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <semaphore.h>
 #include <errno.h>
 #include "pthread_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
 /* This is the head of a private singly linked list.  It
  * is used to retain information about the spawned threads.
@@ -73,19 +73,19 @@ sem_t g_join_semaphore;
 
 ubyte g_pthread_num_keys;
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function:  pthread_initialize
  *
  * Description:
@@ -100,7 +100,7 @@ ubyte g_pthread_num_keys;
  *
  * Assumptions:
  *
- ************************************************************/
+ ****************************************************************************/
 
 void pthread_initialize(void)
 {
@@ -117,7 +117,7 @@ void pthread_initialize(void)
   (void)sem_init(&g_join_semaphore, 0, 1);
 }
 
-/************************************************************
+/****************************************************************************
  * Function:  pthread_takesemaphore and pthread_givesemaphore
  *
  * Description:
@@ -127,11 +127,12 @@ void pthread_initialize(void)
  *   None
  *
  * Return Value:
- *   None
+ *   0 on success or an ERROR on failure with errno value set to EINVAL.
+ *   Note that the errno EINTR is never returned by this function.
  *
  * Assumptions:
  *
- ************************************************************/
+ ****************************************************************************/
 
 int pthread_takesemaphore(sem_t *sem)
 {
@@ -173,8 +174,9 @@ int pthread_givesemaphore(sem_t *sem)
       /* Give the semaphore */
 
       if (sem_post(sem) == OK)
-        return OK;
-
+        {
+          return OK;
+        }
       else
         {
           /* sem_post() reported an error */

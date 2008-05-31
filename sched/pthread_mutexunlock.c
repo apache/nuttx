@@ -75,6 +75,10 @@
  * Description:
  *   Unlock a mutex.
  *
+ *   If a signal is delivered to a thread waiting for a mutex, upon return from
+ *   the signal handler the thread resumes waiting for the mutex as if it was
+ *   not interrupted.
+ *
  * Parameters:
  *   None
  *
