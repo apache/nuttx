@@ -73,7 +73,14 @@
  * Function:  pthread_mutex_unlock
  *
  * Description:
- *   Unlock a mutex.
+ *   The pthread_mutex_unlock() function releases the mutex object referenced
+ *   by mutex. The manner in which a mutex is released is dependent upon the
+ *   mutex's type attribute. If there are threads blocked on the mutex object
+ *   referenced by mutex when pthread_mutex_unlock() is called, resulting in
+ *   the mutex becoming available, the scheduling policy is used to determine
+ *   which thread shall acquire the mutex. (In the case of PTHREAD_MUTEX_RECURSIVE
+ *   mutexes, the mutex becomes available when the count reaches zero and the
+ *   calling thread no longer has any locks on this mutex).
  *
  *   If a signal is delivered to a thread waiting for a mutex, upon return from
  *   the signal handler the thread resumes waiting for the mutex as if it was
