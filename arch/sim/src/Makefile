@@ -45,24 +45,27 @@ CSRCS		= up_initialize.c up_idle.c up_interruptcontext.c \
 		  up_releasepending.c up_reprioritizertr.c \
 		  up_exit.c up_schedulesigaction.c up_allocateheap.c \
 		  up_devconsole.c
+HOSTSRCS	= up_stdio.c
 ifeq ($(CONFIG_FS_FAT),y)
 CSRCS		+= up_blockdevice.c up_deviceimage.c
 endif
 ifeq ($(CONFIG_NET),y)
 CSRCS		+= up_uipdriver.c
-SPECSRCS	+= up_tapdev.c
+HOSTSRCS	+= up_tapdev.c
 endif
 
 COBJS		= $(CSRCS:.c=$(OBJEXT))
-SPECOBJS	= $(SPECSRCS:.c=$(OBJEXT))
 
-SRCS		= $(ASRCS) $(CSRCS) $(SPECSRCS)
-OBJS		= $(AOBJS) $(COBJS) $(SPECOBJS)
+NXOBJS		= $(AOBJS) $(COBJS)
+HOSTOBJS	= $(HOSTSRCS:.c=$(OBJEXT))
+
+SRCS		= $(ASRCS) $(CSRCS) $(HOSTSRCS)
+OBJS		= $(AOBJS) $(COBJS) $(HOSTOBJS)
 
 LDFLAGS		= $(ARCHSCRIPT)
-STDLIBS	= -lc
+STDLIBS		= -lc
 ifeq ($(CONFIG_FS_FAT),y)
-STDLIBS	+= -lz
+STDLIBS		+= -lz
 endif
 
 LINKOBJS	= up_head$(OBJEXT)
@@ -78,18 +81,35 @@ $(AOBJS): %$(OBJEXT): %.S
 $(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(SPECOBJS): %$(OBJEXT): %.c
+$(HOSTOBJS): %$(OBJEXT): %.c
 	$(CC) -c $(HOSTCFLAGS) $< -o $@
 
-libarch$(LIBEXT): $(OBJS)
-	@( for obj in $(OBJS) ; do \
+# The architecture-specific library
+libarch$(LIBEXT): $(NXOBJS)
+	@( for obj in $(NXOBJS) ; do \
 		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
-nuttx$(EXEEXT): $(LINKOBJS)
+# A partially linked object containing only NuttX code (no interface to host OS)
+# Change the names of most symbols that conflict with libc symbols.
+
+Linux-names.dat: nuttx-names.dat
+	@cp $^ $@
+
+Cygwin-names.dat: nuttx-names.dat
+	@cat $^ | sed -e "s/^/_/g" >$@
+
+nuttx.rel : $(HOSTOS)-names.dat $(LINKOBJS)
+	@echo "LD:  nuttx.rel"
+	@$(LD) -r $(LDFLAGS) $(LDPATHES) -o $@ $(LINKOBJS) --start-group $(LDLIBS) --end-group $(EXTRA_LIBS)
+	$(OBJCOPY) --redefine-syms=$(HOSTOS)-names.dat nuttx.rel
+
+# Generate the final NuttX binary by linking the host-specific objects with the NuttX
+# specific objects (with munged names)
+
+nuttx$(EXEEXT): nuttx.rel $(HOSTOBJS)
 	@echo "LD:  nuttx$(EXEEXT)"
-	@$(CC) $(LDFLAGS) $(LDPATHES) -o $(TOPDIR)/$@ $(LINKOBJS) \
-		-Wl,--start-group $(LDLIBS) -Wl,--end-group $(STDLIBS) $(EXTRA_LIBS)
+	@$(CC) $(LDFLAGS) $(LDPATHES) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(STDLIBS)
 	@$(NM) $(TOPDIR)/$@ | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 		sort > $(TOPDIR)/System.map
@@ -101,7 +121,8 @@ nuttx$(EXEEXT): $(LINKOBJS)
 depend: .depend
 
 clean:
-	@rm -f libarch$(LIBEXT) *~ .*.swp
+	@rm -f nuttx.rel libarch$(LIBEXT) *~ .*.swp
+	@rm -f nuttx.rel Linux-names.dat Cygwin-names.dat
 	$(call CLEAN)
 
 distclean: clean

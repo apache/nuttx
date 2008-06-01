@@ -107,6 +107,11 @@ extern void up_registerblockdevice(void);
 
 extern char *up_deviceimage(void);
 
+/* up_stdio.c *************************************************************/
+
+extern size_t up_hostread(void *buffer, size_t len);
+extern size_t up_hostwrite(const void *buffer, size_t len);
+
 /* up_tapdev.c ************************************************************/
 
 #ifdef CONFIG_NET 
