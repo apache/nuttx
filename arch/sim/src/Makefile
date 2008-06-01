@@ -82,7 +82,8 @@ $(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
 $(HOSTOBJS): %$(OBJEXT): %.c
-	$(CC) -c $(HOSTCFLAGS) $< -o $@
+	@echo "CC:  $<"
+	@$(CC) -c $(HOSTCFLAGS) $< -o $@
 
 # The architecture-specific library
 libarch$(LIBEXT): $(NXOBJS)
@@ -99,10 +100,10 @@ Linux-names.dat: nuttx-names.dat
 Cygwin-names.dat: nuttx-names.dat
 	@cat $^ | sed -e "s/^/_/g" >$@
 
-nuttx.rel : $(HOSTOS)-names.dat $(LINKOBJS)
+nuttx.rel : libarch$(LIBEXT) $(HOSTOS)-names.dat $(LINKOBJS)
 	@echo "LD:  nuttx.rel"
 	@$(LD) -r $(LDFLAGS) $(LDPATHES) -o $@ $(LINKOBJS) --start-group $(LDLIBS) --end-group $(EXTRA_LIBS)
-	$(OBJCOPY) --redefine-syms=$(HOSTOS)-names.dat nuttx.rel
+	@$(OBJCOPY) --redefine-syms=$(HOSTOS)-names.dat $@
 
 # Generate the final NuttX binary by linking the host-specific objects with the NuttX
 # specific objects (with munged names)
