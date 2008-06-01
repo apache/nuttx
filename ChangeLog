@@ -365,3 +365,4 @@
 	* Fix several FAT filesystem problems reported by kwonsk (Changes not yet
 	  verified).
 	* Host simulator no longer uses Linux system calls directly; Now works with Cygwin.
+	* Fix an error that occurs when a POSIX timer is deleted by the timer signal handler.

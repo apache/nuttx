@@ -1,7 +1,7 @@
 /********************************************************************************
  * timer_delete.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -137,16 +137,25 @@ int timer_delete(timer_t timerid)
       *get_errno_ptr() = EINVAL;
       return ERROR;
     }
-  
-  /* Free the underlying watchdog instance (the timer will be canceled by the
-   * watchdog logic before it is actually deleted)
-   */
-  
-  (void)wd_delete(timer->pt_wdog);
 
-  /* Release the timer structure */
+  /* If the watchdog structure is busy now, then just mark it for deletion later */
 
-  timer_free(timer);
+  if ((timer->pt_flags & PT_FLAGS_BUSY) != 0)
+    {
+      timer->pt_flags |= PT_FLAGS_DELETED;
+    }
+  else
+    {
+      /* Free the underlying watchdog instance (the timer will be canceled by the
+       * watchdog logic before it is actually deleted)
+       */
+  
+      (void)wd_delete(timer->pt_wdog);
+
+      /* Release the timer structure */
+
+      timer_free(timer);
+    }
   return OK;
 }
 

@@ -39,7 +39,9 @@
 
 #include <nuttx/config.h>
 #include <time.h>
+#include <string.h>
 #include <errno.h>
+
 #include "os_internal.h"
 #include "clock_internal.h"
 #include "sig_internal.h"
@@ -181,21 +183,47 @@ static void timer_timeout(int argc, uint32 itimer)
 
   /* Send the specified signal to the specified task. */
 
+  u.timer->pt_flags |= PT_FLAGS_BUSY;
   timer_sigqueue(u.timer);
+  u.timer->pt_flags &= ~PT_FLAGS_BUSY;
 
-  /* If this is a repetitive timer, the restart the watchdog */
+  /* Check if the signal handler attempted to delete the timer */
 
-  timer_restart(u.timer, itimer);
+  if ((u.timer->pt_flags & PT_FLAGS_DELETED) != 0)
+    {
+      /* Yes.. delete the timer now that we are no longer busy */
+
+      timer_delete(u.timer);
+    }
+  else
+    {
+      /* If this is a repetitive timer, the restart the watchdog */
+
+      timer_restart(u.timer, itimer);
+    }
 #else
   FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)itimer;
 
   /* Send the specified signal to the specified task. */
 
+  timer->pt_flags |= PT_FLAGS_BUSY;
   timer_sigqueue(timer);
+  timer->pt_flags &= ~PT_FLAGS_BUSY;
 
-  /* If this is a repetitive timer, the restart the watchdog */
+  /* Check if the signal handler attempted to delete the timer */
 
-  timer_restart(timer, itimer);
+  if ((timer->pt_flags & PT_FLAGS_DELETED) != 0)
+    {
+      /* Yes.. delete the timer now that we are no longer busy */
+
+      timer_delete(timer);
+    }
+  else
+    {
+      /* If this is a repetitive timer, the restart the watchdog */
+
+      timer_restart(timer, itimer);
+    }
 #endif
 }
 
