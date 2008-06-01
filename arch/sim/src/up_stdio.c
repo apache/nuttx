@@ -1,5 +1,5 @@
 /****************************************************************************
- * up_releasepending.c
+ * up_stdio.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,16 +37,14 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <sys/types.h>
-#include <sched.h>
-#include <debug.h>
-#include <nuttx/arch.h>
-#include "os_internal.h"
-#include "up_internal.h"
+#include <stdio.h>
 
 /****************************************************************************
- * Private Definitions
+ * Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -61,58 +59,24 @@
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_release_pending
- *
- * Description:
- *   Release and ready-to-run tasks that have
- *   collected in the pending task list.  This can call a
- *   context switch if a new task is placed at the head of
- *   the ready to run list.
- *
- ****************************************************************************/
-
-void up_release_pending(void)
+size_t up_hostread(void *buffer, size_t len)
 {
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
+  /* Just map to the host fread() */
 
-  sdbg("From TCB=%p\n", rtcb);
-
-  /* Merge the g_pendingtasks list into the g_readytorun task list */
-
-  /* sched_lock(); */
-  if (sched_mergepending())
-    {
-      /* The currently active task has changed! Copy the exception context
-       * into the TCB of the task that was currently active. if up_setjmp
-       * returns a non-zero value, then this is really the previously
-       * running task restarting!
-       */
-
-      if (!up_setjmp(rtcb->xcp.regs))
-        {
-          /* Restore the exception context of the rtcb at the (new) head 
-           * of the g_readytorun task list.
-           */
-
-          rtcb = (_TCB*)g_readytorun.head;
-          sdbg("New Active Task TCB=%p\n", rtcb);
-
-          /* The way that we handle signals in the simulation is kind of
-           * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
-           * driven environment.
-           */
-
-          if (rtcb->xcp.sigdeliver)
-            {
-              sdbg("Delivering signals TCB=%p\n", rtcb);
-              ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
-              rtcb->xcp.sigdeliver = NULL;
-            }
-
-           /* Then switch contexts */
-
-          up_longjmp(rtcb->xcp.regs, 1);
-        }
-    }
+  return fread(buffer, 1, len, stdout);
 }
+
+size_t up_hostwrite(const void *buffer, size_t len)
+{
+  /* Just map to the host fwrite() */
+
+  return fwrite(buffer, 1, len, stdout);
+}
+
+int up_putc(int ch)
+{
+  /* Just map to the host fputc routine */
+
+  return fputc(ch, stdout);
+}
+

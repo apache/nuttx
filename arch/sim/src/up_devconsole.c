@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * up_devconsole.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,43 +31,32 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-#if !defined(linux) && !defined(__CYGWIN__)
-# error "Sorry, this will only work with Linux"
-#else
-
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-
-#include <stdio.h>
-#include <errno.h>
-
 #include <nuttx/fs.h>
 
 #include "up_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-#define READ   3
-#define WRITE  4
-
-/************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 static ssize_t devconsole_read(struct file *, char *, size_t);
 static ssize_t devconsole_write(struct file *, const char *, size_t);
 
-/************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************/
+ ****************************************************************************/
 
 static struct file_operations devconsole_fops =
 {
@@ -75,69 +64,26 @@ static struct file_operations devconsole_fops =
   .write	= devconsole_write,
 };
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-static inline int up_read(int fd, void* buf, size_t count)
+
+ static ssize_t devconsole_read(struct file *filp, char *buffer, size_t len)
 {
-  uint32 result;
-
-  __asm__ volatile ("int $0x80" \
-                    : "=a" (result) \
-                    : "0" (READ), "b" ((uint32)(fd)), "c" ((uint32)(buf)), "d" ((uint32)(count)) \
-                    : "memory");
-
-  return (int)result;
-}
-
-static inline int up_write(int fd, const void* buf, size_t count)
-{
-  uint32 result;
-
-  __asm__ volatile ("int $0x80" \
-                    : "=a" (result) \
-                    : "0" (WRITE), "b" ((uint32)(fd)), "c" ((uint32)(buf)), "d" ((uint32)(count)) \
-                    : "memory");
-
-  return (int)result;
-}
-
-static inline int up_check_result(int result)
-{
-  if (result >= (uint32)(-(128 + 1)))
-    {
-      *get_errno_ptr() = -result;
-      result = ERROR;
-    }
-  return result;
-}
-
-static ssize_t devconsole_read(struct file *filp, char *buffer, size_t len)
-{
-  return up_check_result(up_read(1, buffer, len));
+  return up_hostread(buffer, len);
 }
 
 static ssize_t devconsole_write(struct file *filp, const char *buffer, size_t len)
 {
-  return up_check_result(up_write(1, buffer, len));
+  return up_hostwrite(buffer, len);
 }
 
-/************************************************************
- * Public Funtions
- ************************************************************/
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 void up_devconsole(void)
 {
   (void)register_driver("/dev/console", &devconsole_fops, 0666, NULL);
 }
-
-int up_putc(int ch)
-{
-  char b = ch;
-  (void)up_write(1, &b, 1);
-  return ch;
-}
-
-#endif /* linux */
-

@@ -2,7 +2,7 @@
 /****************************************************************************
  * up_tapdev.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on code from uIP which also has a BSD-like license:
@@ -84,13 +84,6 @@ extern int lib_rawprintf(const char *format, ...);
 #  define UIP_IPADDR3   0
 #endif
 
-#define READ            3
-#define WRITE           4
-#define OPEN            5
-#define IOCTL           54
-#define SELECT          82
-#define SOCKETCALL      102
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -122,93 +115,6 @@ static int gtapdevfd;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/* This is REALLY awkward.. we need to compile using the system header files,
- * but we can't use any of the libc calls because all of the symbols are
- * defined for NuttX (read, write, etc)!  So we do hand rolled syscalls
- * to get to the Linux functions.
- */
-
-static inline int up_open(const char *filename, int flags, int mode)
-{
-  int result;
-
-  __asm__ volatile ("int $0x80" \
-                    : "=a" (result) \
-                    : "0" (OPEN), "b" ((int)(filename)), "c" ((int)(flags)), "d" ((int)(mode)) \
-                    : "memory");
-
-  return (int)result;
-}
-
-static inline int up_socketcall(int call, unsigned long *args)
-{
-  int result;
-
-  __asm__ volatile ("int $0x80" \
-                    : "=a" (result) \
-                    : "0" (SOCKETCALL), "b" (call), "c" ((int)args)	\
-                    : "memory");
-
-  return (int)result;
-}
-
-static inline int up_socket(int domain, int type, int protocol)
-{
-  unsigned long args[3];
-  args[0] = domain;
-  args[1] = type;
-  args[2] = protocol;
-  return up_socketcall(SYS_SOCKET, args);  
-}
-
-static inline int up_read(int fd, void* buf, size_t count)
-{
-  ssize_t result;
-
-  __asm__ volatile ("int $0x80" \
-                    : "=a" (result) \
-                    : "0" (READ), "b" ((int)(fd)), "c" ((int)(buf)), "d" ((int)(count)) \
-                    : "memory");
-
-  return (int)result;
-}
-
-static inline int up_write(int fd, const void* buf, size_t count)
-{
-  ssize_t result;
-
-  __asm__ volatile ("int $0x80" \
-                    : "=a" (result) \
-                    : "0" (WRITE), "b" ((int)(fd)), "c" ((int)(buf)), "d" ((int)(count)) \
-                    : "memory");
-
-  return (int)result;
-}
-
-static inline int up_ioctl(int fd, unsigned int cmd, unsigned long arg)
-{
-  ssize_t result;
-
-  __asm__ volatile ("int $0x80" \
-                    : "=a" (result) \
-                    : "0" (IOCTL), "b" ((int)(fd)), "c" ((int)(cmd)), "d" ((long)(arg)) \
-                    : "memory");
-
-  return (int)result;
-}
-
-static inline int up_select(struct sel_arg_struct *arg)
-{
-  ssize_t result;
-
-  __asm__ volatile ("int $0x80" \
-                    : "=a" (result) \
-                    : "0" (SELECT),"b" ((struct sel_arg_struct *)(arg))
-                    : "memory");
-
-  return (int)result;
-}
 
 #ifdef TAPDEV_DEBUG
 static inline void dump_ethhdr(const char *msg, unsigned char *buf, int buflen)
@@ -246,7 +152,7 @@ void tapdev_init(void)
 
   /* Open the tap device */
 
-  gtapdevfd = up_open(DEVTAP, O_RDWR, 0644);
+  gtapdevfd = open(DEVTAP, O_RDWR, 0644);
   if (gtapdevfd < 0)
     {
       lib_rawprintf("TAPDEV: open failed: %d\n", -gtapdevfd );
@@ -257,7 +163,7 @@ void tapdev_init(void)
 
   memset(&ifr, 0, sizeof(ifr));
   ifr.ifr_flags = IFF_TAP|IFF_NO_PI;
-  ret = up_ioctl(gtapdevfd, TUNSETIFF, (unsigned long) &ifr);
+  ret = ioctl(gtapdevfd, TUNSETIFF, (unsigned long) &ifr);
   if (ret < 0)
     {
       lib_rawprintf("TAPDEV: ioctl failed: %d\n", -ret );
@@ -278,7 +184,7 @@ int tapdev_getmacaddr(unsigned char *macaddr)
     {
       /* Get a socket (only so that we get access to the INET subsystem) */
 
-      int sockfd = up_socket(PF_INET, SOCK_DGRAM, 0);
+      int sockfd = socket(PF_INET, SOCK_DGRAM, 0);
       if (sockfd >= 0)
         {
           struct ifreq req;
@@ -290,7 +196,7 @@ int tapdev_getmacaddr(unsigned char *macaddr)
 
           /* Perform the ioctl to get the MAC address */
 
-          ret = up_ioctl(sockfd, SIOCGIFHWADDR, (unsigned long)&req);
+          ret = ioctl(sockfd, SIOCGIFHWADDR, (unsigned long)&req);
           if (!ret)
             {
               /* Return the MAC address */
@@ -304,7 +210,6 @@ int tapdev_getmacaddr(unsigned char *macaddr)
 
 unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
 {
-  struct sel_arg_struct arg;
   fd_set                fdset;
   struct timeval        tv;
   int                   ret;
@@ -324,19 +229,13 @@ unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
   FD_ZERO(&fdset);
   FD_SET(gtapdevfd, &fdset);
 
-  arg.n    = gtapdevfd + 1;
-  arg.inp  = &fdset;
-  arg.outp = NULL;
-  arg.exp  = NULL;
-  arg.tvp  = &tv;
-
-  ret = up_select(&arg);
+  ret = select(gtapdevfd + 1, &fdset, NULL, NULL, &tv);
   if(ret == 0)
     {
       return 0;
     }
 
-  ret = up_read(gtapdevfd, buf, buflen);
+  ret = read(gtapdevfd, buf, buflen);
   if (ret < 0)
     {
       lib_rawprintf("TAPDEV: read failed: %d\n", -ret);
@@ -361,7 +260,7 @@ void tapdev_send(unsigned char *buf, unsigned int buflen)
     }
 #endif
 
-  ret = up_write(gtapdevfd, buf, buflen);
+  ret = write(gtapdevfd, buf, buflen);
   if (ret < 0)
     {
       lib_rawprintf("TAPDEV: write failed: %d", -ret);

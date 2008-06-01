@@ -358,9 +358,10 @@
 
 0.3.11 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* FEATURE: Add support for recursive mutexes.
-	* BUGFIX: Eliminate a memory leak -- contained watchdog instance was not
-	  being deleted with a POSIX timer was deleted reported by kwonsk.
-	* BUGFIX: Eliminate a deadlock condition in opendir() reported by kwonsk.
-	* BUGFIX: Fix several FAT filesystem problems reported by kwonsk (Changes
-	  not yet verified).
+	* Add support for recursive mutexes.
+	* Eliminate a memory leak -- contained watchdog instance was not being
+	  deleted with a POSIX timer was deleted reported by kwonsk.
+	* Eliminate a deadlock condition in opendir() reported by kwonsk.
+	* Fix several FAT filesystem problems reported by kwonsk (Changes not yet
+	  verified).
+	* Host simulator no longer uses Linux system calls directly; Now works with Cygwin.
