@@ -36,8 +36,8 @@
 include ${TOPDIR}/.config
 
 HOSTOS			= ${shell uname -o}
- 
-ifneq ("${CONFIG_DEBUG}","y")
+
+ifeq ($(CONFIG_DEBUG),y)
   ARCHOPTIMIZATION	= -g
 else
   ARCHOPTIMIZATION	= -O2
