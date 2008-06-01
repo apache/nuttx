@@ -114,6 +114,7 @@ nuttx$(EXEEXT): nuttx.rel $(HOSTOBJS)
 	@$(NM) $(TOPDIR)/$@ | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 		sort > $(TOPDIR)/System.map
+	@rm -f nuttx.rel
 
 .depend: Makefile $(SRCS)
 	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
