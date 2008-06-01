@@ -107,6 +107,9 @@ examples/mount
 ^^^^^^^^^^^^^^
 
   This contains a simple test of filesystem mountpoints.
+  
+  * CONFIG_EXAMPLES_MOUNT_DEVNAME
+      The name of the device to mount.  Default: "/dev/ram0"
 
 examples/null
 ^^^^^^^^^^^^^

@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * fs_registerblockdriver.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
@@ -43,58 +43,60 @@
 #include <nuttx/fs.h>
 #include "fs_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: register_driver
- ************************************************************/
+ ****************************************************************************/
 
 STATUS register_blockdriver(const char *path,
                             const struct block_operations *bops,
                             mode_t mode, void *private)
 {
   struct inode *node;
-  STATUS ret = ERROR;
+  STATUS ret = -ENOMEM;
 
-  /* Insert a dummy node -- we need to hold the inode semaphore
-   * to do this because we will have a momentarily bad structure.
+  /* Insert an inode for the device driver -- we need to hold the inode semaphore
+   * to prevent access to the tree while we this.  This is because we will have a
+   * momentarily bad true until we populate the inode with valid data.
    */
 
   inode_semtake();
   node = inode_reserve(path);
   if (node != NULL)
     {
-        /* We have it, now populate it with block driver specific
-         * information.
-         */
+      /* We have it, now populate it with block driver specific
+       * information.
+       */
 
-        INODE_SET_BLOCK(node);
+      INODE_SET_BLOCK(node);
 
-        node->u.i_bops  = bops;
+      node->u.i_bops  = bops;
 #ifdef CONFIG_FILE_MODE
-        node->i_mode    = mode;
+      node->i_mode    = mode;
 #endif
-        node->i_private = private;
-        ret             = OK;
+      node->i_private = private;
+      ret             = OK;
     }
+
   inode_semgive();
   return ret;
 }

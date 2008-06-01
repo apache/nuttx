@@ -45,6 +45,9 @@ AOBJS		= $(ASRCS:.S=$(OBJEXT))
 CSRCS		=
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 CSRCS		+= dev_null.c dev_zero.c serial.c lowconsole.c can.c
+ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
+CSRCS           += ramdisk.c
+endif
 endif
 CSRCS		+= $(NET_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))

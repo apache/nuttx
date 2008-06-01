@@ -356,7 +356,7 @@
 	  deletion logic (timer_delete.c) and one in stream logic (lib_init.c) reported
 	  by kwonsk.
 
-0.3.11 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.11 2008-06-01 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Add support for recursive mutexes.
 	* Eliminate a memory leak -- contained watchdog instance was not being
@@ -367,3 +367,6 @@
 	* Host simulator no longer uses Linux system calls directly; Now works with Cygwin.
 	* Fix an error that occurs when a POSIX timer is deleted by the timer signal handler.
 	* Add logic to allow the examples/ostest to be run repetitively as an endurance test.
+	* Add a ramdisk block driver
+
+0.3.12 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>

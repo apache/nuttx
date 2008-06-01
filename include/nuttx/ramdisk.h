@@ -1,7 +1,7 @@
 /****************************************************************************
- * up_blockdevice.c
+ * nuttx/ramdisk.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,55 +33,50 @@
  *
  ****************************************************************************/
 
+#ifndef __NUTTX_RAMDISK_H
+#define __NUTTX_RAMDISK_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <sys/types.h>
-#include <string.h>
-#include <errno.h>
-
-#include <nuttx/ramdisk.h>
-
-#include "up_internal.h"
 
 /****************************************************************************
- * Private Definitions
+ * Type Definitions
  ****************************************************************************/
 
-#define NSECTORS            2048
-#define LOGICAL_SECTOR_SIZE 512
 
 /****************************************************************************
- * Private Types
+ * Type Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_registerblockdevice
+/* Non-standard function to register a ramdisk
  *
- * Description: Register the FAT ramdisk
- *
- ****************************************************************************/
+ *   minor:         Selects suffix of device named /dev/ramN, N={1,2,3...}
+ *   nsectors:      Number of sectors on device
+ *   sectize:       The size of one sector
+ *   writeenabled:  TRUE: can write to ram disk
+ *   buffer:        RAM disk backup memory
+ */
 
-void up_registerblockdevice(void)
-{
-  rd_register(0, up_deviceimage(), NSECTORS, LOGICAL_SECTOR_SIZE, TRUE);
+EXTERN int rd_register(int minor, ubyte *buffer, uint32 nsectors,
+                       uint16 sectize, boolean writeenabled);
+
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* __NUTTX_RAMDISK_H */
