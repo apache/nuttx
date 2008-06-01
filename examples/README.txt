@@ -20,7 +20,11 @@ examples/ostest
   The behavior of the ostest can be modified with the following
   settings in the configs/<board-name>/defconfig file:
 
-  * CONFIG_OSTEST_STACKSIZE
+  * CONFIG_EXAMPLES_OSTEST_LOOPS
+      Used to control the number of executions of the test.  If
+      undefined, the test executes one time.  If defined to be
+      zero, the test runs forever.
+  * CONFIG_EXAMPLES_OSTEST_STACKSIZE
       Used to create the ostest task.  Default is 8192.
 
 examples/nsh

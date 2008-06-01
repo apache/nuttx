@@ -58,10 +58,19 @@
 #define NARGS        4
 
 /* The task_create task size can be specified in the defconfig file */
-#ifdef CONFIG_OSTEST_STACKSIZE
-# define STACKSIZE CONFIG_OSTEST_STACKSIZE
+
+#ifdef CONFIG_EXAMPLES_OSTEST_STACKSIZE
+# define STACKSIZE CONFIG_EXAMPLES_OSTEST_STACKSIZE
 #else
 # define STACKSIZE 8192
+#endif
+
+/* The number of times to execute the test can be specified in the defconfig
+ * file.
+ */
+
+#ifndef CONFIG_EXAMPLES_OSTEST_LOOPS
+# define CONFIG_EXAMPLES_OSTEST_LOOPS 1
 #endif
 
 /****************************************************************************
@@ -280,121 +289,129 @@ static int user_main(int argc, char *argv[])
   check_test_memory_usage();
 #endif
 
+  /* Top of test loop */
+  
+#if CONFIG_EXAMPLES_OSTEST_LOOPS > 1
+  for (i = 0; i < CONFIG_EXAMPLES_OSTEST_LOOPS; i++)
+#elif CONFIG_EXAMPLES_OSTEST_LOOPS == 0
+  for (;;)
+#endif
+    {
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  /* Checkout /dev/null */
+      /* Checkout /dev/null */
 
-  printf("\nuser_main: /dev/null test\n");
-  dev_null();
-  check_test_memory_usage();
+      printf("\nuser_main: /dev/null test\n");
+      dev_null();
+      check_test_memory_usage();
 #endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  /* Verify pthreads and pthread mutex */
+      /* Verify pthreads and pthread mutex */
 
-  printf("\nuser_main: mutex test\n");
-  mutex_test();
-  check_test_memory_usage();
+      printf("\nuser_main: mutex test\n");
+      mutex_test();
+      check_test_memory_usage();
 #endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  /* Verify pthread cancellation */
+      /* Verify pthread cancellation */
 
-  printf("\nuser_main: cancel test\n");
-  cancel_test();
-  check_test_memory_usage();
+      printf("\nuser_main: cancel test\n");
+      cancel_test();
+      check_test_memory_usage();
 #endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  /* Verify pthreads and semaphores */
+      /* Verify pthreads and semaphores */
 
-  printf("\nuser_main: semaphore test\n");
-  sem_test();
-  check_test_memory_usage();
+      printf("\nuser_main: semaphore test\n");
+      sem_test();
+      check_test_memory_usage();
 #endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  /* Verify pthreads and condition variables */
+    /* Verify pthreads and condition variables */
 
-  printf("\nuser_main: condition variable test\n");
-  cond_test();
-  check_test_memory_usage();
+      printf("\nuser_main: condition variable test\n");
+      cond_test();
+      check_test_memory_usage();
 #endif
 
 #if !defined(CONFIG_DISABLE_SIGNALS) && !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_DISABLE_CLOCK)
-  /* Verify pthreads and condition variable timed waits */
+      /* Verify pthreads and condition variable timed waits */
 
-  printf("\nuser_main: timed wait test\n");
-  timedwait_test();
-  check_test_memory_usage();
+      printf("\nuser_main: timed wait test\n");
+      timedwait_test();
+      check_test_memory_usage();
 #endif
 
 #if !defined(CONFIG_DISABLE_MQUEUE) && !defined(CONFIG_DISABLE_PTHREAD)
-  /* Verify pthreads and message queues */
+      /* Verify pthreads and message queues */
 
-  printf("\nuser_main: message queue test\n");
-  mqueue_test();
-  check_test_memory_usage();
+      printf("\nuser_main: message queue test\n");
+      mqueue_test();
+      check_test_memory_usage();
 #endif
 
 #if !defined(CONFIG_DISABLE_MQUEUE) && !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_DISABLE_CLOCK)
-  /* Verify pthreads and message queues */
+      /* Verify pthreads and message queues */
 
-  printf("\nuser_main: timed message queue test\n");
-  timedmqueue_test();
-  check_test_memory_usage();
+      printf("\nuser_main: timed message queue test\n");
+      timedmqueue_test();
+      check_test_memory_usage();
 #endif
 
 #ifndef CONFIG_DISABLE_SIGNALS
-  /* Verify signal handlers */
+      /* Verify signal handlers */
 
-  printf("\nuser_main: signal handler test\n");
-  sighand_test();
-  check_test_memory_usage();
+      printf("\nuser_main: signal handler test\n");
+      sighand_test();
+      check_test_memory_usage();
 #endif
 
 #if !defined(CONFIG_DISABLE_POSIX_TIMERS) && !defined(CONFIG_DISABLE_SIGNALS)
-  /* Verify posix timers */
+      /* Verify posix timers */
 
-  printf("\nuser_main: POSIX timer test\n");
-  timer_test();
-  check_test_memory_usage();
+      printf("\nuser_main: POSIX timer test\n");
+      timer_test();
+      check_test_memory_usage();
 #endif
 
 #if !defined(CONFIG_DISABLE_PTHREAD) && CONFIG_RR_INTERVAL > 0
-  /* Verify round robin scheduling */
+      /* Verify round robin scheduling */
 
-  printf("\nuser_main: round-robin scheduler test\n");
-  rr_test();
-  check_test_memory_usage();
+      printf("\nuser_main: round-robin scheduler test\n");
+      rr_test();
+      check_test_memory_usage();
 #endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  /* Verify pthread barriers */
+      /* Verify pthread barriers */
 
-  printf("\nuser_main: barrier test\n");
-  barrier_test();
-  check_test_memory_usage();
+      printf("\nuser_main: barrier test\n");
+      barrier_test();
+      check_test_memory_usage();
 #endif
 
-  /* Compare memory usage at time user_start started until
-   * user_main exits.  These should not be identical, but should
-   * be similar enough that we can detect any serious OS memory
-   * leaks.
-   */
+      /* Compare memory usage at time user_start started until
+       * user_main exits.  These should not be identical, but should
+       * be similar enough that we can detect any serious OS memory
+       * leaks.
+       */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-  usleep(500*1000);
+      usleep(500*1000);
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
-  g_mmafter = mallinfo();
+      g_mmafter = mallinfo();
 #else
-  (void)mallinfo(&g_mmafter);
+      (void)mallinfo(&g_mmafter);
 #endif
 
-  printf("\nFinal memory usage:\n");
-  show_memory_usage(&g_mmbefore, &g_mmafter);
+      printf("\nFinal memory usage:\n");
+      show_memory_usage(&g_mmbefore, &g_mmafter);
 #endif
-
+    }
   printf("user_main: Exitting\n");
   return 0;
 }
@@ -446,7 +463,7 @@ int user_start(int argc, char *argv[])
   stdio_test();
 
 #ifdef SDCC
-  /* I am not yet certain why SDCC does not like the initilizer.
+  /* I am not yet certain why SDCC does not like the following initilizers.
    * It involves some issues with 2- vs 3-byte pointer types.
    */
 

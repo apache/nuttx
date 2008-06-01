@@ -53,7 +53,7 @@ static void *barrier_func(void *parameter)
   usleep(500*1000);
 #endif
 
-  /* Take the semaphore */
+  /* Wait at the barrier until all threads are synchronized. */
 
   printf("barrier_func: Thread %d calling pthread_barrier_wait()\n",  id);
   status = pthread_barrier_wait(&barrier);
@@ -99,6 +99,7 @@ void barrier_test(void)
     {
       printf("barrier_test: pthread_barrierattr_init failed, status=%d\n",  status);
     }
+
   /* Create the barrier */
 
   status = pthread_barrierattr_init(&barrierattr);
