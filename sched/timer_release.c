@@ -1,7 +1,7 @@
 /********************************************************************************
- * timer_delete.c
+ * timer_release.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,11 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
-#include <time.h>
+
+#include <queue.h>
 #include <errno.h>
+
+#include <nuttx/kmalloc.h>
 
 #include "timer_internal.h"
 
@@ -62,40 +65,90 @@
  ********************************************************************************/
 
 /********************************************************************************
+ * Function:  timer_free
+ *
+ * Description:
+ *   Remove the timer from the allocated timer list and free it or return it to
+ *   the free list (depending on whether or not the timer is one of the
+ *   preallocated timers)
+ *
+ ********************************************************************************/
+
+static inline void timer_free(struct posix_timer_s *timer)
+{
+  irqstate_t flags;
+
+  /* Remove the timer from the allocated list */
+
+  flags = irqsave();
+  sq_rem((FAR sq_entry_t*)timer, (sq_queue_t*)&g_alloctimers);
+
+  /* Return it to the free list if it is one of the preallocated timers */
+
+#if CONFIG_PREALLOC_TIMERS > 0
+  if ((timer->pt_flags & PT_FLAGS_PREALLOCATED) != 0)
+    {
+      sq_addlast((FAR sq_entry_t*)timer, (FAR sq_queue_t*)&g_freetimers);
+      irqrestore(flags);
+    }
+  else
+#endif
+    {
+      /* Otherwise, return it to the heap */
+
+      irqrestore(flags);
+      sched_free(timer);
+    }
+}
+
+/********************************************************************************
  * Public Functions
  ********************************************************************************/
 
 /********************************************************************************
- * Function:  timer_delete
+ * Function:  timer_release
  *
  * Description:
- *   The timer_delete() function deletes the specified timer, timerid, previously
- *   created by the timer_create() function. If the timer is armed when
- *   timer_delete() is called, the timer will be automatically disarmed before
- *   removal. The disposition of pending signals for the deleted timer is unspecified.
+ *   timer_release implements the heart of timer_delete.  It is private to the
+ *   the OS internals and differs only in that return value of 1 means that the
+ *   timer was not actually deleted.
  *
  * Parameters:
- *   timerid - The per-thread timer, previously created by the call to
- *   timer_create(), to be deleted.
+ *   timer - The per-thread timer, previously created by the call to
+ *     timer_create(), to be deleted.
  *
  * Return Value:
- *   If the call succeeds, timer_create() will return 0 (OK).  Otherwise, the
- *   function will return a value of -1 (ERROR) and set errno to indicate the error.
+ *   If the call succeeds, timer_release() will return 0 (OK) or 1 (meaning that
+ *   the timer is still valid).  Otherwise, the function will return a negated errno:
  *
- *   EINVAL - The timer specified timerid is not valid.
- *
- * Assumptions:
+ *   -EINVAL - The timer specified timerid is not valid.
  *
  ********************************************************************************/
 
-int timer_delete(timer_t timerid)
+int timer_release(FAR struct posix_timer_s *timer)
 {
-  int ret = timer_release((FAR struct posix_timer_s *)timerid);
-  if (ret < 0)
+  /* Some sanity checks */
+
+  if (!timer)
     {
-       *get_errno_ptr() = -ret;
-       return ERROR;
+      return -EINVAL;
     }
+
+  if (timer->pt_crefs > 1)
+    {
+      timer->pt_crefs--;
+      return 1;
+    }
+
+  /* Free the underlying watchdog instance (the timer will be canceled by the
+   * watchdog logic before it is actually deleted)
+   */
+
+  (void)wd_delete(timer->pt_wdog);
+
+  /* Release the timer structure */
+
+  timer_free(timer);
   return OK;
 }
 

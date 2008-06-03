@@ -114,7 +114,7 @@ SEM_SRCS	= sem_initialize.c sem_init.c sem_destroy.c\
                   sem_waitirq.c sem_findnamed.c
 ifneq ($(CONFIG_DISABLE_POSIX_TIMERS),y)
 TIMER_SRCS	= timer_initialize.c timer_create.c timer_delete.c timer_getoverrun.c \
-		  timer_gettime.c timer_settime.c
+		  timer_gettime.c timer_settime.c timer_release.c
 endif
 IRQ_SRCS	= irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 
