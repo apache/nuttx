@@ -181,21 +181,19 @@ static void timer_timeout(int argc, uint32 itimer)
 
   u.itimer = itimer;
 
-  /* Send the specified signal to the specified task. */
+  /* Send the specified signal to the specified task.   Increment the reference
+   * count on the timer first so that will not be deleted until after the
+   * signal handler returns.
+   */
 
-  u.timer->pt_flags |= PT_FLAGS_BUSY;
+  u.timer->pt_crefs++;
   timer_sigqueue(u.timer);
-  u.timer->pt_flags &= ~PT_FLAGS_BUSY;
 
-  /* Check if the signal handler attempted to delete the timer */
+  /* Release the reference.  timer_release will return nonzero if the timer
+   * was not deleted.
+   */
 
-  if ((u.timer->pt_flags & PT_FLAGS_DELETED) != 0)
-    {
-      /* Yes.. delete the timer now that we are no longer busy */
-
-      timer_delete(u.timer);
-    }
-  else
+  if (timer_release(u.timer))
     {
       /* If this is a repetitive timer, the restart the watchdog */
 
@@ -204,21 +202,19 @@ static void timer_timeout(int argc, uint32 itimer)
 #else
   FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)itimer;
 
-  /* Send the specified signal to the specified task. */
+  /* Send the specified signal to the specified task.   Increment the reference
+   * count on the timer first so that will not be deleted until after the
+   * signal handler returns.
+   */
 
-  timer->pt_flags |= PT_FLAGS_BUSY;
+  timer->pt_crefs++;
   timer_sigqueue(timer);
-  timer->pt_flags &= ~PT_FLAGS_BUSY;
 
-  /* Check if the signal handler attempted to delete the timer */
+  /* Release the reference.  timer_release will return nonzero if the timer
+   * was not deleted.
+   */
 
-  if ((timer->pt_flags & PT_FLAGS_DELETED) != 0)
-    {
-      /* Yes.. delete the timer now that we are no longer busy */
-
-      timer_delete(timer);
-    }
-  else
+  if (timer_release(timer))
     {
       /* If this is a repetitive timer, the restart the watchdog */
 

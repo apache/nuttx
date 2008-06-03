@@ -41,6 +41,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
+#include <string.h>
 #include <wdog.h>
 #include <errno.h>
 #include "timer_internal.h"
@@ -203,6 +204,7 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp, FAR timer_t *timer
 
   /* Initialize the timer instance */
 
+  ret->pt_crefs = 1;
   ret->pt_owner = getpid();
   ret->pt_delay = 0;
   ret->pt_wdog  = wdog;

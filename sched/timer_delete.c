@@ -104,6 +104,53 @@ static inline void timer_free(struct posix_timer_s *timer)
  ********************************************************************************/
 
 /********************************************************************************
+ * Function:  timer_release
+ *
+ * Description:
+ *   timer_release implements the heart of timer_delete.  It is private to the
+ *   the OS internals and differs only in that return value of 1 means that the
+ *   timer was not actually deleted.
+ *
+ * Parameters:
+ *   timer - The per-thread timer, previously created by the call to
+ *     timer_create(), to be deleted.
+ *
+ * Return Value:
+ *   If the call succeeds, timer_release() will return 0 (OK) or 1 (meaning that
+ *   the timer is still valid).  Otherwise, the function will return a negated errno:
+ *
+ *   -EINVAL - The timer specified timerid is not valid.
+ *
+ ********************************************************************************/
+
+int timer_release(FAR struct posix_timer_s *timer)
+{
+  /* Some sanity checks */
+
+  if (!timer)
+    {
+      return -EINVAL;
+    }
+
+  if (timer->pt_crefs > 1)
+    {
+      timer->pt_crefs--;
+      return 1;
+    }
+
+  /* Free the underlying watchdog instance (the timer will be canceled by the
+   * watchdog logic before it is actually deleted)
+   */
+
+  (void)wd_delete(timer->pt_wdog);
+
+  /* Release the timer structure */
+
+  timer_free(timer);
+  return OK;
+}
+
+/********************************************************************************
  * Function:  timer_delete
  *
  * Description:
@@ -113,7 +160,7 @@ static inline void timer_free(struct posix_timer_s *timer)
  *   removal. The disposition of pending signals for the deleted timer is unspecified.
  *
  * Parameters:
- *   timerid - The pre-thread timer, previously created by the call to
+ *   timerid - The per-thread timer, previously created by the call to
  *   timer_create(), to be deleted.
  *
  * Return Value:
@@ -128,33 +175,11 @@ static inline void timer_free(struct posix_timer_s *timer)
 
 int timer_delete(timer_t timerid)
 {
-  FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)timerid;
-
-  /* Some sanity checks */
-
-  if (!timer)
+  int ret = timer_release((FAR struct posix_timer_s *)timerid);
+  if (ret < 0)
     {
-      *get_errno_ptr() = EINVAL;
-      return ERROR;
-    }
-
-  /* If the watchdog structure is busy now, then just mark it for deletion later */
-
-  if ((timer->pt_flags & PT_FLAGS_BUSY) != 0)
-    {
-      timer->pt_flags |= PT_FLAGS_DELETED;
-    }
-  else
-    {
-      /* Free the underlying watchdog instance (the timer will be canceled by the
-       * watchdog logic before it is actually deleted)
-       */
-  
-      (void)wd_delete(timer->pt_wdog);
-
-      /* Release the timer structure */
-
-      timer_free(timer);
+       *get_errno_ptr() = -ret;
+       return ERROR;
     }
   return OK;
 }

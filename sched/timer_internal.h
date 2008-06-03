@@ -50,11 +50,6 @@
  ********************************************************************************/
 
 #define PT_FLAGS_PREALLOCATED 0x01 /* Timer comes from a pool of preallocated timers */
-#define PT_FLAGS_BUSY         0x02 /* Timer cannot be deleted now */
-#define PT_FLAGS_DELETED      0x04 /* Busy timer marked for deletion */
-
-#define PT_FLAGS_STATIC       PT_FLAGS_PREALLOCATED
-#define PT_FLAGS_DYNAMIC      (~PT_FLAGS_STATIC)
 
 /********************************************************************************
  * Public Types
@@ -67,6 +62,7 @@ struct posix_timer_s
   FAR struct posix_timer_s *flink;
 
   ubyte           pt_flags;        /* See PT_FLAGS_* definitions */
+  ubyte           pt_crefs;        /* Reference count */
   ubyte           pt_signo;        /* Notification signal */
   pid_t           pt_owner;        /* Creator of timer */
   int             pt_delay;        /* If non-zero, used to reset repetitive timers */
@@ -98,5 +94,6 @@ extern volatile sq_queue_t g_alloctimers;
 
 extern void weak_function timer_initialize(void);
 extern void weak_function timer_deleteall(pid_t pid);
+extern int  timer_release(FAR struct posix_timer_s *timer);
 
 #endif /* __TIMER_INTERNAL_H */
