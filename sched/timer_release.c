@@ -134,6 +134,10 @@ int timer_release(FAR struct posix_timer_s *timer)
       return -EINVAL;
     }
 
+  /* Release one reference to timer.  Don't delete the timer until the count
+   * would decrement to zero.
+   */
+
   if (timer->pt_crefs > 1)
     {
       timer->pt_crefs--;
