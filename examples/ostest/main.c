@@ -313,6 +313,14 @@ static int user_main(int argc, char *argv[])
       check_test_memory_usage();
 #endif
 
+#if !defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_MUTEX_TYPES)
+      /* Verify recursive mutexes */
+
+      printf("\nuser_main: recursive mutex test\n");
+      recursive_mutex_test();
+      check_test_memory_usage();
+#endif
+
 #ifndef CONFIG_DISABLE_PTHREAD
       /* Verify pthread cancellation */
 
