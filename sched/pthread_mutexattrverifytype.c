@@ -89,7 +89,14 @@ int pthread_mutexattr_verifytype(int type)
 {
   /* The depends on the value assigments in pthread.h */
 
-  return (type >= PTHREAD_MUTEX_NORMAL && type <= PTHREAD_MUTEX_RECURSIVE);
+  if (type >= PTHREAD_MUTEX_NORMAL && type <= PTHREAD_MUTEX_RECURSIVE)
+    {
+      return OK;
+    }
+  else
+    {
+      return ERROR;
+    }
 }
 
 #endif /* CONFIG_MUTEX_TYPES */

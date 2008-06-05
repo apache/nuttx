@@ -92,7 +92,7 @@ int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type)
   if (attr && pthread_mutexattr_verifytype(type) == OK)
     {
       attr->type = type;
-      return 0;
+      return OK;
     }
   return EINVAL;
 }
