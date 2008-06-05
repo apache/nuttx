@@ -89,7 +89,7 @@
 
 int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type)
 {
-  if (attr && pthread_mutexattr_verifytype(type) == OK)
+  if (attr && type >= PTHREAD_MUTEX_NORMAL && type <= PTHREAD_MUTEX_RECURSIVE)
     {
       attr->type = type;
       return OK;

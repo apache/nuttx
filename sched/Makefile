@@ -106,7 +106,7 @@ ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 PTHREAD_SRCS	+= pthread_condtimedwait.c pthread_kill.c pthread_sigmask.c
 endif
 ifeq ($(CONFIG_MUTEX_TYPES),y)
-PTHREAD_SRCS	+= pthread_mutexattrsettype.c pthread_mutexattrgettype.c pthread_mutexattrverifytype.c
+PTHREAD_SRCS	+= pthread_mutexattrsettype.c pthread_mutexattrgettype.c
 endif
 SEM_SRCS	= sem_initialize.c sem_init.c sem_destroy.c\
 		  sem_open.c sem_close.c sem_unlink.c \
