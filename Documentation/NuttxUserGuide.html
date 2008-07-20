@@ -21,7 +21,7 @@ User's Manual
 <p>
 Gregory Nutt
 <p>
-<small>Last Update: May 31, 2008</small>
+<small>Last Update: July 20, 2008</small>
 </center>
 
 <h1>1.0 <A NAME="Introduction">Introduction</a></h1>
@@ -5964,6 +5964,7 @@ interface of the same name.
   int    fstat(int fd, FAR struct stat *buf);              /* Prototyped but not implemented */
   char  *getcwd(FAR char *buf, size_t size);               /* Prototyped but not implemented */
   int    mkdir(const char *path, mode_t mode);
+  int    mkfifo(const char *path, mode_t mode);
   int    rmdir(const char *path);
   int    stat(const char *path, FAR struct stat *buf);
   int    statfs(const char *path, FAR struct statfs *buf); /* Prototyped but not implemented */
