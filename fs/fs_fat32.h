@@ -56,8 +56,8 @@
  * refer to the interpretation under FAT32.
  */
 
-#define BS_JUMP             0 /*  3@0: Jump instruction to boot code (ignored) */
-#define BS_OEMNAME          3 /*  8@3: Usually "MSWIN4.1" */
+#define BS_JUMP             0 /*  3@0:  Jump instruction to boot code (ignored) */
+#define BS_OEMNAME          3 /*  8@3:  Usually "MSWIN4.1" */
 #define BS_BYTESPERSEC     11 /*  2@11: Bytes per sector: 512, 1024, 2048, 4096  */
 #define BS_SECPERCLUS      13 /*  1@13: Sectors per allocation unit: 2**n, n=0..7 */
 #define BS_RESVDSECCOUNT   14 /*  2@14: Reserved sector count: Usually 32 */
@@ -74,11 +74,14 @@
 /* The following fields are only valid for FAT12/16 */
 
 #define BS16_DRVNUM        36 /*  1@36: Drive number for MSDOS bootstrap */
-                              /*  1@37: Reserverd (zero) */
+                              /*  1@37: Reserved (zero) */
 #define BS16_BOOTSIG       38 /*  1@38: Extended boot signature: 0x29 if following valid */
 #define BS16_VOLID         39 /*  4@39: Volume serial number */
 #define BS16_VOLLAB        43 /* 11@43: Volume label */
 #define BS16_FILESYSTYPE   54 /*  8@54: "FAT12  ", "FAT16  ", or "FAT    " */
+
+#define BS16_BOOTCODE      62 /* Boot code may be placed in the remainder of the sector */
+#define BS16_BOOTCODESIZE 448
 
 /* The following fields are only valid for FAT32 */
 
@@ -95,6 +98,9 @@
 #define BS32_VOLID         67 /*  4@67: Volume serial number */
 #define BS32_VOLLAB        71 /* 11@71: Volume label */
 #define BS32_FILESYSTYPE   82 /*  8@82: "FAT12  ", "FAT16  ", or "FAT    " */
+
+#define BS32_BOOTCODE      90 /* Boot code may be placed in the remainder of the sector */
+#define BS32_BOOTCODESIZE 420
 
 /* If the sector is not an MBR, then it could have a partition table at
  * this offset.
@@ -123,6 +129,7 @@
 #define DIR_WRTDATE        24 /*  2@24: Date of last write */
 #define DIR_FSTCLUSTLO     26 /*  2@26: LS first cluster number */
 #define DIR_FILESIZE       28 /*  4@28: File size in bytes */
+#define DIR_SIZE           32
 
 /* First byte of the directory name has special meanings: */
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/fat.h
+ * include/nuttx/fat.h
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -75,9 +75,7 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Non-standard functions to get and set FAT fire/directgory
- * attributes
- */
+/* Non-standard functions to get and set FAT file/directory attributes */
 
 EXTERN int fat_getattrib(const char *path, fat_attrib_t *attrib);
 EXTERN int fat_setattrib(const char *path, fat_attrib_t setbits, fat_attrib_t clearbits);

@@ -374,3 +374,4 @@
 	* Improved solution to POSIX timer lifetime controls bug fixed in 0.3.11.
 	* Add test for recursive mutexes
 	* Correct bug in recursive mutex logic
+	* Add mkfifo()
