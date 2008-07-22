@@ -141,4 +141,9 @@ examples/pashello
 
   This is "Hello, World" implemented via the Pascal P-Code interpreter
 
+examples/pipe
+^^^^^^^^^^^^^
+
+A test of the mkfifo() and pipe() APIs.
+
 
