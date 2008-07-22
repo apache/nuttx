@@ -239,6 +239,8 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_PREALLOC_WDOGS - The number of pre-allocated watchdog
 		  structures.  The system manages a pool of preallocated
 		  watchdog structures to minimize dynamic allocations
+		CONFIG_DEV_FIFO_SIZE - Size, in bytes, of the buffer to allocated
+		  for FIFO support
 
 	TCP/IP and UDP support via uIP
 		CONFIG_NET - Enable or disable all network features
