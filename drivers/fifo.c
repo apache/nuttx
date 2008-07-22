@@ -49,6 +49,7 @@
 #include <string.h>
 #include <sched.h>
 #include <semaphore.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <assert.h>
 #include <nuttx/fs.h>
@@ -270,7 +271,7 @@ static ssize_t fifo_read(FAR struct file *filep, FAR char *buffer, size_t len)
   struct inode      *inode  = filep->f_inode;
   struct fifo_dev_s *dev    = inode->i_private;
   ssize_t            nread  = 0;
-  fifo_ndx_t         ret;
+  int                ret;
 
   /* Some sanity checking */
 #if CONFIG_DEBUG
@@ -291,7 +292,16 @@ static ssize_t fifo_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   while (dev->d_wrndx == dev->d_rdndx)
     {
-#warning "Support for O_NONBLOCK needed"
+      /* If O_NONBLOCK was set, then return EGAIN */
+
+      if (filep->f_oflags & O_NONBLOCK)
+        {
+          sem_post(&dev->d_bfsem);
+          return -EAGAIN;
+        }
+
+      /* Otherwise, wait for something to be written to the FIFO */
+
       dev->d_nreaders++;
       sched_lock();
       sem_post(&dev->d_bfsem);
@@ -408,17 +418,28 @@ static ssize_t fifo_write(FAR struct file *filep, FAR const char *buffer, size_t
                   sem_post(&dev->d_rdsem);
                 }
             }
+          last = nwritten;
+
+          /* If O_NONBLOCK was set, then return partial bytes written or EGAIN */
+
+          if (filep->f_oflags & O_NONBLOCK)
+            {
+              if (nwritten == 0)
+                {
+                  nwritten = -EAGAIN;
+                }
+              sem_post(&dev->d_bfsem);
+              return nwritten;
+            }
 
           /* There is more to be written.. wait for data to be removed from the FIFO */
 
-#warning "Support for O_NONBLOCK needed"
           dev->d_nwriters++;
           sched_lock();
           sem_post(&dev->d_bfsem);
           fifo_semtake(&dev->d_wrsem);
           sched_unlock();
           fifo_semtake(&dev->d_bfsem);
-          last = nwritten;
         }
     }
 }
