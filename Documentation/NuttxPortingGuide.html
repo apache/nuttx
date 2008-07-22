@@ -16,7 +16,7 @@
   </b></big></h1>
   <p><small>by</small></p>
   <p>Gregory Nutt</p>
-  <p><small>Last Update: March 15, 2008</small></p>
+  <p><small>Last Update: July 21, 2008</small></p>
 </center>
 
 <center><h1>Table of Contents</h1></center>
@@ -1508,6 +1508,10 @@ The system can be re-made subsequently by just typing <code>make</code>.
     <code>CONFIG_PREALLOC_WDOGS</code>: The number of pre-allocated watchdog
     structures.  The system manages a pool of preallocated
     watchdog structures to minimize dynamic allocations
+  </li>
+  <li>
+    <code>CONFIG_DEV_FIFO_SIZE</code>: Size, in bytes, of the buffer to allocated
+    for FIFO support (default is 1024).
   </li>
 </ul>
 

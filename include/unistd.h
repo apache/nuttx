@@ -143,6 +143,7 @@ EXTERN int rmdir(FAR const char *pathname);
 /* Other */
 
 EXTERN int getopt(int argc, FAR char *const argv[], FAR const char *optstring);
+EXTERN int pipe(int filedes[2]);
 
 #undef EXTERN
 #if defined(__cplusplus)

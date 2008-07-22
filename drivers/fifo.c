@@ -53,13 +53,14 @@
 #include <assert.h>
 #include <nuttx/fs.h>
 
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
 #ifndef CONFIG_DEV_FIFO_SIZE
 #  define CONFIG_DEV_FIFO_SIZE 1024
 #endif
+#if CONFIG_DEV_FIFO_SIZE > 0
+
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
 
 /* Maximum number of open's supported on FIFO */
 
@@ -269,12 +270,11 @@ static ssize_t fifo_read(FAR struct file *filep, FAR char *buffer, size_t len)
   struct inode      *inode  = filep->f_inode;
   struct fifo_dev_s *dev    = inode->i_private;
   ssize_t            nread  = 0;
-  ssize_t            nrqstd = len;
-  int                ret;
+  fifo_ndx_t         ret;
 
   /* Some sanity checking */
 #if CONFIG_DEBUG
-  if (dev)
+  if (!dev)
     {
       return -ENODEV;
     }
@@ -287,115 +287,45 @@ static ssize_t fifo_read(FAR struct file *filep, FAR char *buffer, size_t len)
       return ERROR;
     }
 
-  /* Loop until all of the bytes have been read */
+  /* If the fifo is empty, then wait for something to be written to it */
 
-  for (;;)
+  while (dev->d_wrndx == dev->d_rdndx)
     {
-      ssize_t nbytes;
-
-      /* Is there data available at the end of the buffer?  When the write
-       * index is smaller than the read index, then all of the data from the
-       * read index to the end of the buffer is available for reading.
-       */
-
-      if (dev->d_rdndx > dev->d_wrndx)
+#warning "Support for O_NONBLOCK needed"
+      dev->d_nreaders++;
+      sched_lock();
+      sem_post(&dev->d_bfsem);
+      ret = sem_wait(&dev->d_rdsem);
+      sched_unlock();
+      if (ret < 0  || sem_wait(&dev->d_bfsem) < 0) 
         {
-          /* Yes.. How many bytes are available at the end of the circular buffer */
-
-          nbytes = CONFIG_DEV_FIFO_SIZE - dev->d_rdndx;
-          if (nbytes > 0)
-            {
-              /* Read bytes from the end of the buffer.  Are there more than we
-               * need?
-               */
-
-              if (nbytes > nrqstd)
-                {
-                  nbytes = nrqstd;
-                }
-
-              /* Copy the correct number of bytes */
-
-              memcpy(&buffer[nread], &dev->d_buffer[dev->d_rdndx], nbytes);
-
-              /* Then update all indices and counts */
-
-              nread              += nbytes;
-              nrqstd             -= nbytes;
-              dev->d_rdndx += nbytes;
-              if (dev->d_rdndx >= CONFIG_DEV_FIFO_SIZE)
-                {
-                  dev->d_rdndx = 0;
-                }
-           }
-       }
-
-      /* We have read some or all of the data at the end of the buffer. Do we still need more? */
- 
-      if (nrqstd > 0)
-        {
-          /* Yes... then we now that we have consumed all of the bytes at the end of the
-           * buffer. How many bytes are available at the end of the circular buffer>
-           */
-
-          nbytes = dev->d_wrndx - dev->d_rdndx;
-          if (nbytes > 0)
-            {
-              /* Read bytes from the beginning of the buffer.  Are there more than we
-               * need?
-               */
-
-              if (nbytes > nrqstd)
-                {
-                  nbytes = nrqstd;
-                }
-
-              /* Copy the correct number of bytes */
-
-              memcpy(&buffer[nread], &dev->d_buffer[dev->d_rdndx], nbytes);
-
-              /* Then update all indices and counts */
-
-              nread              += nbytes;
-              nrqstd             -= nbytes;
-              dev->d_rdndx  += nbytes;
-            }
-        }
-
-      /* Was anything read? */
-
-      if (nread > 0)
-        {
-          /* Yes.. Notify the waiting writers that space is again available */
-
-          if (dev->d_nwriters > 0)
-            {
-              sem_post(&dev->d_wrsem);
-            }
-
-          /* Return the number of bytes read */
-
-          sem_post(&dev->d_bfsem);
-          return nread;
-        }
-      else
-        {
-          /* No.. wait for data to be added to the FIFO */
-
-          dev->d_nreaders++;
-          sched_lock();
-          sem_post(&dev->d_bfsem);
-          ret = sem_wait(&dev->d_rdsem);
-          sched_unlock();
-          fifo_semtake(&dev->d_bfsem);
-          dev->d_nreaders--;
-
-          if (ret != 0)
-            {
-              return ERROR;
-            }
+          return ERROR;
         }
     }
+
+  /* Then return whatever is available in the FIFO (which is at least one byte) */
+
+  nread = 0;
+  while (nread < len && dev->d_wrndx != dev->d_rdndx)
+    {
+      *buffer++ = dev->d_buffer[dev->d_rdndx];
+      if (++dev->d_rdndx >= CONFIG_DEV_FIFO_SIZE)
+        {
+          dev->d_rdndx = 0; 
+        }
+      nread++;
+    }
+
+  /* Notify any waiting writers that bytes have been removed from the buffer */
+
+  if (dev->d_nwriters > 0)
+    {
+      dev->d_nwriters--;
+      sem_post(&dev->d_wrsem);
+    }
+
+  sem_post(&dev->d_bfsem);
+  return nread;	    
 }
 
 /****************************************************************************
@@ -405,13 +335,13 @@ static ssize_t fifo_write(FAR struct file *filep, FAR const char *buffer, size_t
 {
   struct inode      *inode    = filep->f_inode;
   struct fifo_dev_s *dev      = inode->i_private;
-  const char        *src;
   ssize_t            nwritten = 0;
-  ssize_t            ntowrite = len;
- 
+  ssize_t            last;
+  int                nxtwrndx;
+
   /* Some sanity checking */
 #if CONFIG_DEBUG
-  if (dev)
+  if (!dev)
     {
       return -ENODEV;
     }
@@ -426,112 +356,70 @@ static ssize_t fifo_write(FAR struct file *filep, FAR const char *buffer, size_t
 
   /* Loop until all of the bytes have been written */
 
-  src = buffer;
+  last = 0;
   for (;;)
     {
-      ssize_t nbytes;
+      /* Calculate the write index AFTER the next byte is written */
 
-      /* Is there space available at the end of the buffer?  When the write
-       * index is greater than the read index, then all of the data from the
-       * write index to the end of the buffer is available for writing.
-       */
-
-      if (dev->d_wrndx >= dev->d_rdndx)
+      nxtwrndx = dev->d_wrndx + 1;
+      if (nxtwrndx >= CONFIG_DEV_FIFO_SIZE)
         {
-          /* How many bytes are available at the end of the circular buffer */
-
-          nbytes = CONFIG_DEV_FIFO_SIZE - dev->d_wrndx;
-          if (nbytes > 0)
-            {
-              /* Write bytes to the end of the buffer.  Is there more space than we
-               * need?
-               */
-
-              if (nbytes > ntowrite)
-                {
-                  nbytes = ntowrite;
-                }
-
-              /* Copy the correct number of bytes */
-
-              memcpy(&dev->d_buffer[dev->d_wrndx], &src[nwritten], nbytes);
-
-              /* Then update all indices and counts */
-
-              nwritten          += nbytes;
-              ntowrite          -= nbytes;
-              dev->d_wrndx += nbytes;
-              if (dev->d_wrndx >= CONFIG_DEV_FIFO_SIZE)
-                {
-                  dev->d_wrndx = 0;
-                }
-           }
-       }
-
-      /* Do we still need to write more data? */
- 
-      if (ntowrite > 0)
-        {
-          /* Yes... How many bytes are available at the end of the circular buffer */
-
-          nbytes =  dev->d_rdndx - dev->d_wrndx - 1;
-          if (nbytes > 0)
-            {
-              /* Write bytes to the beginning of the buffer.  Is there more space than we
-               * need?
-               */
-
-              if (nbytes > ntowrite)
-                {
-                  nbytes = ntowrite;
-                }
-
-              /* Copy the correct number of bytes */
-
-              memcpy(&dev->d_buffer[dev->d_wrndx], &src[nwritten], nbytes);
-
-              /* Then update all indices and counts */
-
-              nwritten          += nbytes;
-              ntowrite          -= nbytes;
-              dev->d_wrndx += nbytes;
-            }
+          nxtwrndx = 0;
         }
 
-        /* Was anything written? */
+      /* Would the next write overflow the circular buffer? */
 
-        if (nwritten > 0)
-          {
-            /* Yes.. Notify the waiting reades that more data is available */
+      if (nxtwrndx != dev->d_rdndx)
+        {
+          /* No... copy the byte */
 
-            if (dev->d_nreaders > 0)
-              {
-                sem_post(&dev->d_rdsem);
-              }
-          }
+          dev->d_buffer[dev->d_wrndx] = *buffer++;
+          dev->d_wrndx = nxtwrndx;
 
-        /* Was everything written? */
+          /* Is the write complete? */
 
-        if (ntowrite <= 0  )
-          {
- 	    /* Return the number of bytes written */
+          if (++nwritten >= len)
+            {
+              /* Yes.. Notify the waiting readers that more data is available */
 
-            sem_post(&dev->d_bfsem);
-            return len;
-          }
+              if (dev->d_nreaders > 0)
+                {
+                  dev->d_nreaders--;
+                  sem_post(&dev->d_rdsem);
+                }
 
-        /* There is more to be writtend.. wait for data to be removed from the FIFO */
+              /* Return the number of bytes written */
 
-        dev->d_nwriters++;
-        sched_lock();
-        sem_post(&dev->d_bfsem);
-        fifo_semtake(&dev->d_wrsem);
-        sched_unlock();
-        fifo_semtake(&dev->d_bfsem);
-        dev->d_nwriters--;
+              sem_post(&dev->d_bfsem);
+              return len;
+            }
+        }
+      else
+        {
+          /* There is not enough room for the next byte.  Was anything written in this pass? */
 
-        src = &src[nwritten];
-        nwritten = 0;
+          if (last < nwritten)
+            {
+              /* Yes.. Notify the waiting readers that more data is available */
+
+              if (dev->d_nreaders > 0)
+                {
+                  dev->d_nreaders--;
+                  sem_post(&dev->d_rdsem);
+                }
+            }
+
+          /* There is more to be written.. wait for data to be removed from the FIFO */
+
+#warning "Support for O_NONBLOCK needed"
+          dev->d_nwriters++;
+          sched_lock();
+          sem_post(&dev->d_bfsem);
+          fifo_semtake(&dev->d_wrsem);
+          sched_unlock();
+          fifo_semtake(&dev->d_bfsem);
+          last = nwritten;
+        }
     }
 }
 
@@ -551,8 +439,6 @@ static ssize_t fifo_write(FAR struct file *filep, FAR const char *buffer, size_t
  *   reading or writing, in the same way as an ordinary file.  NuttX FIFOs need
  *   not be open at both ends before input or output operations on it.
  *
- *   In NuttX pipes are built on top of FIFOs
- *
  * Inputs:
  *   pathname - The full path to the FIFO instance to attach to or to create
  *     (if not already created).
@@ -567,3 +453,4 @@ int mkfifo(FAR const char *pathname, mode_t mode)
 {
   return register_driver(pathname, &fifo_fops, mode, NULL);
 }
+#endif
