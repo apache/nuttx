@@ -221,9 +221,9 @@ int pipecommon_close(FAR struct file *filep)
 
   pipecommon_semtake(&dev->s.d_bfsem);
 
-  /* Check if the decremented reference count would be zero */
+  /* Check if the decremented reference count would be less than zero */
 
-  if (dev->s.d_refs > 1)
+  if (dev->s.d_refs > 0)
     {
        /* No.. then just decrement the reference count */
 

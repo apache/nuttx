@@ -10,7 +10,7 @@ NuttX TODO List (Last updated February 13, 2008)
   (11) Network (net/, netutils/)
   (2)  USB (drivers/usbdev)
   (3)  Libraries (lib/)
-  (3)  File system/Generic drivers (fs/, drivers/)
+  (4)  File system/Generic drivers (fs/, drivers/)
   (1)  Pascal add-on (pcode/)
   (2)  Documentation (Documentation/)
   (3)  Build system
@@ -230,6 +230,12 @@ o File system / Generic drivers (fs/, drivers/)
   Priority:    Medium
 
   Description: The CAN driver is untested.  Add a test for the CAN driver.
+  Status:      Open
+  Priority:    Medium
+
+  Description: There is no way to remove a FIFO or PIPE created in the
+               psuedo filesystem.  Once created, they persist indefinitely
+               and cannot be unlinked.
   Status:      Open
   Priority:    Medium
 
