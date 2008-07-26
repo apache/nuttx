@@ -376,4 +376,5 @@
 	* Correct bug in recursive mutex logic
 	* Add mkfifo()
 	* Add pipe() and test for both pipes and fifos
+	* Attempts to open a FIFO will now block until there is at least one writer
 

@@ -96,8 +96,12 @@ static struct file_operations fifo_fops =
  *   Once the FIFO has been created by mkfifo(), any thread can open it for
  *   reading or writing, in the same way as an ordinary file. However, it must
  *   have been opened from both reading and writing before input or output
- *   can be performed.  Unlike other mkfifo() implementations, this one will
- *   NOT block when the FIFO is opened on only one end.
+ *   can be performed.  This FIFO implementation will block all attempts to
+ *   open a FIFO read-only until at least one thread has opened the FIFO for
+ *   writing.
+ *
+ *   If all threads that write to the FIFO have closed, subsequent calls to
+ *   read() on the FIFO will return 0 (end-of-file).
  *
  * Inputs:
  *   pathname - The full path to the FIFO instance to attach to or to create

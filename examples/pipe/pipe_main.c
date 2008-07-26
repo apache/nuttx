@@ -127,7 +127,7 @@ static void *reader(pthread_addr_t pvarg)
       if (nbytes > NREAD_BYTES)
         {
           fprintf(stderr, "reader: Too many bytes read -- aborting: %d\n", nbytes);
-          return (void*)3;
+          return (void*)4;
         }
     }
   printf("reader: %d bytes read\n", nbytes);

@@ -139,6 +139,7 @@ int pipecommon_open(FAR struct file *filep)
 {
   struct inode      *inode = filep->f_inode;
   struct pipe_dev_s *dev   = inode->i_private;
+  int                sval;
  
   /* Some sanity checking */
 #if CONFIG_DEBUG
@@ -160,11 +161,37 @@ int pipecommon_open(FAR struct file *filep)
       if ((filep->f_oflags & O_WROK) != 0)
         {
           dev->s.d_nwriters++;
+
+          /* If this this is the first writer, then the read semaphore indicates the
+           * number of readers waiting for the first writer.  Wake them all up.
+           */
+          if (dev->s.d_nwriters == 1)
+            {
+              while (sem_getvalue(&dev->s.d_rdsem, &sval) == 0 && sval < 0)
+                {
+                  sem_post(&dev->s.d_rdsem);
+                }
+            }
         }
 
       /* If opened for read-only, then wait for at least one writer on the pipe */
 
+      sched_lock();
       (void)sem_post(&dev->s.d_bfsem);
+      if ((filep->f_oflags & O_RDWR) != O_RDONLY && dev->s.d_nwriters < 1)
+        {
+          /* NOTE: d_rdsem is normally used when the read logic waits for more
+           * data to be written.  But until the first writer has opened the
+           * pipe, the meaning is different: it is used prevent O_RDONLY open
+           * calls from returning until there is at least one writer on the pipe.
+           * This is required both by spec and also because it prevents
+           * subsequent read() calls from returning end-of-file because there is
+           * no writer on the pipe.
+           */
+
+          pipecommon_semtake(&dev->s.d_rdsem);
+        }
+      sched_unlock();
       return OK;
   }
   return ERROR;
