@@ -53,7 +53,7 @@
 
 #include "pipe-common.h"
 
-#if CONFIG_DEV_FIFO_SIZE > 0
+#if CONFIG_DEV_PIPE_SIZE > 0
 
 /****************************************************************************
  * Definitions
@@ -254,4 +254,4 @@ errout:
   return ERROR;
 }
 
-#endif /* CONFIG_DEV_FIFO_SIZE > 0 */
+#endif /* CONFIG_DEV_PIPE_SIZE > 0 */

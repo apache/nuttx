@@ -56,7 +56,7 @@
 
 #include "pipe-common.h"
 
-#if CONFIG_DEV_FIFO_SIZE > 0
+#if CONFIG_DEV_PIPE_SIZE > 0
 
 /****************************************************************************
  * Definitions
@@ -106,7 +106,7 @@ FAR struct pipe_dev_s *pipecommon_allocdev(void)
 {
  struct pipe_dev_s *dev;
 
-  /* Allocate a private structure to manage the FIFO */
+  /* Allocate a private structure to manage the pipe */
 
   dev = (struct pipe_dev_s *)malloc(sizeof(struct pipe_dev_s));
   if (dev)
@@ -162,6 +162,8 @@ int pipecommon_open(FAR struct file *filep)
           dev->s.d_nwriters++;
         }
 
+      /* If opened for read-only, then wait for at least one writer on the pipe */
+
       (void)sem_post(&dev->s.d_bfsem);
       return OK;
   }
@@ -175,6 +177,7 @@ int pipecommon_close(FAR struct file *filep)
 {
   struct inode      *inode = filep->f_inode;
   struct pipe_dev_s *dev   = inode->i_private;
+  int                sval;
 
   /* Some sanity checking */
 #if CONFIG_DEBUG
@@ -203,14 +206,16 @@ int pipecommon_close(FAR struct file *filep)
 
       if ((filep->f_oflags & O_WROK) != 0)
         {
-          /* If there are no longer any writers on the pipe, then notify any
-           * waiting readers that must return end-of-file.
+          /* If there are no longer any writers on the pipe, then notify all of the
+           * waiting readers that they must return end-of-file.
            */
 
-          if (--dev->s.d_nwriters <= 0 && dev->s.d_rdwaiters > 0)
+          if (--dev->s.d_nwriters <= 0)
             {
-              dev->s.d_rdwaiters--;
-              sem_post(&dev->s.d_rdsem);
+              while (sem_getvalue(&dev->s.d_rdsem, &sval) == 0 && sval < 0)
+                {
+                  sem_post(&dev->s.d_rdsem);
+                }
             }
         }
        sem_post(&dev->s.d_bfsem);
@@ -222,7 +227,7 @@ int pipecommon_close(FAR struct file *filep)
        inode->i_private = NULL;
        sem_post(&dev->s.d_bfsem);
 
-       /* Then free the fifo structure instance */
+       /* Then free the pipe structure instance */
 
        pipecommon_freedev(dev);
     }
@@ -237,6 +242,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
   struct inode      *inode  = filep->f_inode;
   struct pipe_dev_s *dev    = inode->i_private;
   ssize_t            nread  = 0;
+  int                sval;
   int                ret;
 
   /* Some sanity checking */
@@ -254,7 +260,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
       return ERROR;
     }
 
-  /* If the fifo is empty, then wait for something to be written to it */
+  /* If the pipe is empty, then wait for something to be written to it */
 
   while (dev->s.d_wrndx == dev->s.d_rdndx)
     {
@@ -274,9 +280,8 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
           return 0;
         }
 
-      /* Otherwise, wait for something to be written to the FIFO */
+      /* Otherwise, wait for something to be written to the pipe */
 
-      dev->s.d_rdwaiters++;
       sched_lock();
       sem_post(&dev->s.d_bfsem);
       ret = sem_wait(&dev->s.d_rdsem);
@@ -287,24 +292,23 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
         }
     }
 
-  /* Then return whatever is available in the FIFO (which is at least one byte) */
+  /* Then return whatever is available in the pipe (which is at least one byte) */
 
   nread = 0;
   while (nread < len && dev->s.d_wrndx != dev->s.d_rdndx)
     {
       *buffer++ = dev->d_buffer[dev->s.d_rdndx];
-      if (++dev->s.d_rdndx >= CONFIG_DEV_FIFO_SIZE)
+      if (++dev->s.d_rdndx >= CONFIG_DEV_PIPE_SIZE)
         {
           dev->s.d_rdndx = 0; 
         }
       nread++;
     }
 
-  /* Notify any waiting writers that bytes have been removed from the buffer */
+  /* Notify all waiting writers that bytes have been removed from the buffer */
 
-  if (dev->s.d_nwrwaiters > 0)
+  while (sem_getvalue(&dev->s.d_wrsem, &sval) == 0 && sval < 0)
     {
-      dev->s.d_nwrwaiters--;
       sem_post(&dev->s.d_wrsem);
     }
 
@@ -322,6 +326,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
   ssize_t            nwritten = 0;
   ssize_t            last;
   int                nxtwrndx;
+  int                sval;
 
   /* Some sanity checking */
 #if CONFIG_DEBUG
@@ -346,7 +351,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
       /* Calculate the write index AFTER the next byte is written */
 
       nxtwrndx = dev->s.d_wrndx + 1;
-      if (nxtwrndx >= CONFIG_DEV_FIFO_SIZE)
+      if (nxtwrndx >= CONFIG_DEV_PIPE_SIZE)
         {
           nxtwrndx = 0;
         }
@@ -364,11 +369,10 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
 
           if (++nwritten >= len)
             {
-              /* Yes.. Notify the waiting readers that more data is available */
+              /* Yes.. Notify all of the waiting readers that more data is available */
 
-              if (dev->s.d_rdwaiters > 0)
+              while (sem_getvalue(&dev->s.d_rdsem, &sval) == 0 && sval < 0)
                 {
-                  dev->s.d_rdwaiters--;
                   sem_post(&dev->s.d_rdsem);
                 }
 
@@ -384,11 +388,10 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
 
           if (last < nwritten)
             {
-              /* Yes.. Notify the waiting readers that more data is available */
+              /* Yes.. Notify all of the waiting readers that more data is available */
 
-              if (dev->s.d_rdwaiters > 0)
+              while (sem_getvalue(&dev->s.d_rdsem, &sval) == 0 && sval < 0)
                 {
-                  dev->s.d_rdwaiters--;
                   sem_post(&dev->s.d_rdsem);
                 }
             }
@@ -406,9 +409,8 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
               return nwritten;
             }
 
-          /* There is more to be written.. wait for data to be removed from the FIFO */
+          /* There is more to be written.. wait for data to be removed from the pipe */
 
-          dev->s.d_nwrwaiters++;
           sched_lock();
           sem_post(&dev->s.d_bfsem);
           pipecommon_semtake(&dev->s.d_wrsem);
@@ -418,4 +420,4 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
     }
 }
 
-#endif /* CONFIG_DEV_FIFO_SIZE > 0 */
+#endif /* CONFIG_DEV_PIPE_SIZE > 0 */

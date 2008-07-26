@@ -43,28 +43,28 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-#ifndef CONFIG_DEV_FIFO_SIZE
-#  define CONFIG_DEV_FIFO_SIZE 1024
+#ifndef CONFIG_DEV_PIPE_SIZE
+#  define CONFIG_DEV_PIPE_SIZE 1024
 #endif
-#if CONFIG_DEV_FIFO_SIZE > 0
+#if CONFIG_DEV_PIPE_SIZE > 0
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/* Maximum number of open's supported on FIFO */
+/* Maximum number of open's supported on pipe */
 
-#define CONFIG_DEV_FIFO_MAXUSER 255
+#define CONFIG_DEV_PIPE_MAXUSER 255
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* Make the FIFO index as small as possible for the configured FIFO size */
+/* Make the buffer index as small as possible for the configured pipe size */
  
-#if CONFIG_DEV_FIFO_SIZE > 65535
+#if CONFIG_DEV_PIPE_SIZE > 65535
 typedef uint32 pipe_ndx_t;  /* 32-bit index */
-#elif CONFIG_DEV_FIFO_SIZE > 255
+#elif CONFIG_DEV_PIPE_SIZE > 255
 typedef uint16 pipe_ndx_t;  /* 16-bit index */
 #else
 typedef ubyte pipe_ndx_t;   /*  8-bit index */
@@ -77,17 +77,15 @@ struct pipe_state_s
   sem_t      d_wrsem;       /* Full buffer - Writer waits for data read */
   pipe_ndx_t d_wrndx;       /* Index in d_buffer to save next byte written */
   pipe_ndx_t d_rdndx;       /* Index in d_buffer to return the next byte read */
-  ubyte      d_refs;        /* References counts on FIFO (limited to 255) */
-  ubyte      d_nwriters;    /* Number of open counts for write access */
-  ubyte      d_rdwaiters;   /* Number of readers waiting for write data to empty buffer */
-  ubyte      d_nwrwaiters;  /* Number of writers wiating for data read out of full buffer */
+  ubyte      d_refs;        /* References counts on pipe (limited to 255) */
+  ubyte      d_nwriters;    /* Number of reference counts for write access */
   ubyte      d_pipeno;      /* Pipe minor number */
 };
 
 struct pipe_dev_s
 {
   struct pipe_state_s s;
-  ubyte d_buffer[CONFIG_DEV_FIFO_SIZE];
+  ubyte d_buffer[CONFIG_DEV_PIPE_SIZE];
 };
 
 /****************************************************************************
@@ -113,5 +111,5 @@ EXTERN ssize_t pipecommon_write(FAR struct file *, FAR const char *, size_t);
 }
 #endif
 
-#endif /* CONFIG_DEV_FIFO_SIZE > 0 */
+#endif /* CONFIG_DEV_PIPE_SIZE > 0 */
 #endif /* __DRIVERS_PIPE_COMMON_H */
