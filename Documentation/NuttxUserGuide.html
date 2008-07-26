@@ -5843,6 +5843,8 @@ interface of the same name.
 
 <h1><a name="FileSystem">2.11 File System Interfaces</a></h1>
 
+<h2><a name="FileSystemOverview"2.11.1 >Overview</a></h2>
+
 <p><b>Overview</b>.
   NuttX includes an optional, scalable file system.
   This file-system may be omitted altogther; NuttX does not depend on the presence
@@ -5898,7 +5900,7 @@ interface of the same name.
   in a file-system-like name space.
 </p>
 
-<h2><a name="driveroperations">2.11.1 Driver Operations</a></h2>
+<h2><a name="driveroperations">2.11.2 Driver Operations</a></h2>
 <ul><pre>
   #include &lt;fcntl.h&gt;
   int open(const char *path, int oflag, ...);
@@ -5920,7 +5922,7 @@ interface of the same name.
   int    ioctl(int fd, int req, unsigned long arg);
 </pre></ul>
 
-<h2><a name="directoryoperations">2.11.2 Directory Operations</a></h2>
+<h2><a name="directoryoperations">2.11.3 Directory Operations</a></h2>
 <ul><pre>
   #include &lt;dirent.h&gt;
   int        closedir(DIR *dirp);
@@ -5932,7 +5934,7 @@ interface of the same name.
   int        telldir(FAR DIR *dirp);
 </pre></ul>
 
-<h2><a name="standardio">2.11.3 Standard I/O</a></h2>
+<h2><a name="standardio">2.11.4 Standard I/O</a></h2>
 <ul><pre>
   #include &lt;stdio.h&gt;
   int    fclose(FILE *stream);
@@ -5964,11 +5966,138 @@ interface of the same name.
   int    fstat(int fd, FAR struct stat *buf);              /* Prototyped but not implemented */
   char  *getcwd(FAR char *buf, size_t size);               /* Prototyped but not implemented */
   int    mkdir(const char *path, mode_t mode);
-  int    mkfifo(const char *path, mode_t mode);
   int    rmdir(const char *path);
   int    stat(const char *path, FAR struct stat *buf);
   int    statfs(const char *path, FAR struct statfs *buf); /* Prototyped but not implemented */
 </pre></ul>
+
+<h2><a name="PipesNFifos">2.11.4 Pipes and FIFOs</a></h2>
+
+<h3>2.11.4.1 <a name="pipe"><code>pipe</code></a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include <unistd.h>
+  int pipe(int filedes[2]);
+</pre>
+<p>
+  <b>Description:</b>
+  <ul>
+    <p>
+      <code>pipe()</code> creates a pair of file descriptors, pointing to a pipe inode, and
+      places them in the array pointed to by <code>filedes</code>.
+      <code>filedes[0]</code> is for reading, <code>filedes[1]</code> is for writing.
+    </p>
+  </ul>
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <ul>
+    <li><code>filedes[2]</code>.  The user provided array in which to catch the pipe file descriptors.</li>
+  </ul>
+</p>
+</p>
+<p>
+  <b>Returned Values:</b>
+  <ul>
+    <p>
+      0 is returned on success; otherwise, -1 is returned with <code>errno</code> set appropriately.
+    </p>
+  </ul>
+</p>
+
+<h3>2.11.4.2 <a name="mkfifo"><code>mkfifo</code></a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include <sys/stat.h>
+  int mkfifo(FAR const char *pathname, mode_t mode);
+</pre>
+<p>
+  <b>Description:</b>
+  <ul>
+    <p>
+      <code>mkfifo()</code> makes a FIFO device driver file with name <code>pathname</code>.
+      Unlike Linux, a NuttX FIFO is not a special file type but simply a device driver instance.
+      <code>mode</code> specifies the FIFO's permissions (but is ignored in the current implementation). 
+    </p>
+    <p>
+      Once the FIFO has been created by <code>mkfifo()</code>, any thread can open it for
+      reading or writing, in the same way as an ordinary file.
+      However, it must have been opened from both reading and writing before input or output can be performed.
+      This FIFO implementation will block all attempts to open a FIFO read-only until at least one thread has opened the FIFO for  writing.
+    </p>
+    <p>
+      If all threads that write to the FIFO have closed, subsequent calls to <code>read()</code> on the FIFO will return 0 (end-of-file).
+    </p>
+  </ul>
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <ul>
+    <li><code>pathname</code>.
+      The full path to the FIFO instance to attach to or to create (if not already created).
+    </li>
+    <li><code>mode<code>.
+      Ignored for now
+    </li>
+  </ul>
+</p>
+<p>
+  <b>Returned Values:</b>
+  <ul>
+    <p>
+      0 is returned on success; otherwise, -1 is returned with <code>errno</code> set appropriately.
+    </p>
+  </ul>
+</p>
+
+<h2><a name="setenv">2.10.4 <code>setenv</code></a></h2>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include <stdlib.h>
+  int setenv(const char *name, const char *value, int overwrite);
+</pre>
+<p>
+  <b>Description:</b>
+  <ul>
+    <p>
+      The <code>setenv()</code> function adds the variable <code>name</code> to the environment with the
+      specified <code>value</code> if the variable <code>name</code> does not exist. If the <code>name</code>
+      does exist in the environment, then its value is changed to <code>value</code> if <code>overwrite</code>
+      is non-zero; if <code>overwrite</code> is zero, then the value of <code>name</code> is unaltered.
+    </p>
+  </ul>
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <ul>
+    <li>
+      <code>name</code>
+      The name of the variable to change.
+    </li>
+    <li>
+      <code>value</code>
+      The new value of the variable.
+    </li>
+    <li>
+      <code>value</code>
+      Replace any existing value if non-zero.
+    </li>
+  </ul>
+</p>
+<p>
+  <b>Returned Values:</b>
+  <ul>
+    <p>
+      Zero on success.
+    </p>
+  </ul>
+</p>
 
 <h2>2.12 <a name="Network">Network Interfaces</a></h2>
 <p>NuttX includes a simple interface layer based on uIP (see <a href="http://www.sics.se/~adam/uip/index.php/Main_Page">http://www.sics.se</a>).
@@ -6811,7 +6940,8 @@ notify a task when a message is available on a queue.
   <li><a href="#directoryoperations">Directory operations</a></li>
   <li><a href="#driveroperations">Driver operations</a></li>
   <li><a href="#exit">exit</a></li>
-  <li><a href="#FileSystem">File system interfaces</a></li>
+  <li><a href="#FileSystem">File system, interfaces</a></li>
+  <li><a href="#FileSystemOverview">File system, overview</a></li>
   <li><a href="#getpid">getpid</a></li>
   <li><a href="#getsockopt">getsockopt</a></li>
   <li><a href="#gmtimer">gmtime_r</a></li>
@@ -6820,6 +6950,7 @@ notify a task when a message is available on a queue.
   <li><a href="#listen">listen</a></li>
   <li><a href="#localtimer">localtime_r</a></li>
   <li><a href="#Message_Queue">Named Message Queue Interfaces</a>
+  <li><a href="#mkfifo">mkfifo</a></li>
   <li><a href="#mktime">mktime</a></li>
   <li><a href="#mqclose">mq_close</a></li>
   <li><a href="#mqgetattr">mq_getattr</a></li>
@@ -6832,7 +6963,8 @@ notify a task when a message is available on a queue.
   <li><a href="#mqtimedsend">mq_timedsend</a></li>
   <li><a href="#mqunlink">mq_unlink</a></li>
   <li><a href="#Network">Network Interfaces</a></li>
-  <li><a href="#OS_Interfaces">OS Interfaces</a>
+  <li><a href="#OS_Interfaces">OS Interfaces</a></li>
+  <li><a href="#pipe">pipe</a></li>
   <li><a href="#Pthread">Pthread Interfaces</a>
   <li><a href="#pthreadattrdestroy">pthread_attr_destroy</a></li>
   <li><a href="#pthreadattrgetinheritsched">pthread_attr_getinheritsched</a></li>
@@ -6874,9 +7006,9 @@ notify a task when a message is available on a queue.
   <li><a href="#pthreadmutexattrgettype">pthread_mutexattr_gettype</a></li>
   <li><a href="#pthreadmutexattrinit">pthread_mutexattr_init</a></li>
   <li><a href="#pthreadmutexattrsetpshared">pthread_mutexattr_setpshared</a></li>
-  <li><a href="#pthreadmutexattrsettype">pthread_mutexattr_settype</a></li>
 </td>
 <td>
+  <li><a href="#pthreadmutexattrsettype">pthread_mutexattr_settype</a></li>
   <li><a href="#pthreadmutexdestrory">pthread_mutex_destroy</a></li>
   <li><a href="#pthreadmutexinit">pthread_mutex_init</a></li>
   <li><a href="#pthreadmutexlock">pthread_mutex_lock</a></li>
