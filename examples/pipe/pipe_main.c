@@ -102,9 +102,12 @@ static void *reader(pthread_addr_t pvarg)
         }
       else if (ret == 0)
         {
-#warning BUG: pipe should return zero when writer closes
-           fprintf(stderr, "reader: Received zero bytes\n");
-           return (void*)2;
+          if (nbytes < NREAD_BYTES)
+            {
+              fprintf(stderr, "reader: Too few bytes read -- aborting: %d\n", nbytes);
+              return (void*)2;
+            }
+          break;
         }
       for (ndx = 0; ndx < ret; ndx++)
         {
@@ -121,6 +124,11 @@ static void *reader(pthread_addr_t pvarg)
           value++;
         }
       nbytes += ret;
+      if (nbytes > NREAD_BYTES)
+        {
+          fprintf(stderr, "reader: Too many bytes read -- aborting: %d\n", nbytes);
+          return (void*)3;
+        }
     }
   printf("reader: %d bytes read\n", nbytes);
   return (void*)0;
@@ -252,8 +260,7 @@ void user_initialize(void)
 
 int user_start(int argc, char *argv[])
 {
-  int fdin;
-  int fdout;
+  int filedes[2];
   int ret;
 
   /* Test FIFO logic */
@@ -266,26 +273,33 @@ int user_start(int argc, char *argv[])
       return 1;
     }
 
-  fdin = open(CONFIG_EXAMPLES_FIFO_PATH, O_RDONLY);
-  if (fdin < 0)
+  /* Open open end of the FIFO for reading and the other end for writing.  NOTE:
+   * the following would not work on most FIFO implementations because the attempt
+   * to open just one end of the FIFO would block.  The NuttX FIFOs do not block.
+   */
+
+  filedes[1] = open(CONFIG_EXAMPLES_FIFO_PATH, O_WRONLY);
+  if (filedes[1] < 0)
+    {
+      fprintf(stderr, "user_start: Failed to open FIFO %s for writing, errno=%d\n",
+              CONFIG_EXAMPLES_FIFO_PATH, errno);
+      close(filedes[0]);
+      return 3;
+    }
+
+  filedes[0] = open(CONFIG_EXAMPLES_FIFO_PATH, O_RDONLY);
+  if (filedes[0] < 0)
     {
       fprintf(stderr, "user_start: Failed to open FIFO %s for reading, errno=%d\n",
               CONFIG_EXAMPLES_FIFO_PATH, errno);
       return 2;
     }
 
-  fdout = open(CONFIG_EXAMPLES_FIFO_PATH, O_WRONLY);
-  if (fdout < 0)
-    {
-      fprintf(stderr, "user_start: Failed to open FIFO %s for writing, errno=%d\n",
-              CONFIG_EXAMPLES_FIFO_PATH, errno);
-      close(fdin);
-      return 3;
-    }
+  /* Then perform the test using those file descriptors */
 
-  ret = perform_test(fdin, fdout);
-  close(fdin);
-  close(fdout);
+  ret = perform_test(filedes[0], filedes[1]);
+  close(filedes[0]);
+  close(filedes[1]);
   unlink(CONFIG_EXAMPLES_FIFO_PATH);
   if (ret != 0)
     {
@@ -297,7 +311,25 @@ int user_start(int argc, char *argv[])
   /* Test PIPE logic */
 
   printf("user_start: Performing pipe test\n");
-  /* Not yet implemented */
+  ret = pipe(filedes);
+  if (ret < 0)
+    {
+      fprintf(stderr, "user_start: pipe failed with errno=%d\n", errno);
+      return 1;
+    }
+
+  /* Then perform the test using those file descriptors */
+
+  ret = perform_test(filedes[0], filedes[1]);
+  close(filedes[0]);
+  close(filedes[1]);
+  unlink(CONFIG_EXAMPLES_FIFO_PATH);
+  if (ret != 0)
+    {
+      fprintf(stderr, "user_start: PIPE test FAILED\n");
+      return 4;
+    }
+  printf("user_start: PIPE test PASSED\n");
 
   fflush(stdout);
   return 0;

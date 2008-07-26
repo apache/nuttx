@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/fifo.c
+ * drivers/pipe-common.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,100 +33,85 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Compilation Switches
- ****************************************************************************/
+#ifndef __DRIVERS_PIPE_COMMON_H
+#define __DRIVERS_PIPE_COMMON_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <sys/types.h>
-#include <nuttx/fs.h>
-#include <errno.h>
 
-#include "pipe-common.h"
-
+#ifndef CONFIG_DEV_FIFO_SIZE
+#  define CONFIG_DEV_FIFO_SIZE 1024
+#endif
 #if CONFIG_DEV_FIFO_SIZE > 0
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+/* Maximum number of open's supported on FIFO */
+
+#define CONFIG_DEV_FIFO_MAXUSER 255
 
 /****************************************************************************
- * Private Function Prototypes
+ * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+/* Make the FIFO index as small as possible for the configured FIFO size */
+ 
+#if CONFIG_DEV_FIFO_SIZE > 65535
+typedef uint32 pipe_ndx_t;  /* 32-bit index */
+#elif CONFIG_DEV_FIFO_SIZE > 255
+typedef uint16 pipe_ndx_t;  /* 16-bit index */
+#else
+typedef ubyte pipe_ndx_t;   /*  8-bit index */
+#endif
 
-static struct file_operations fifo_fops =
+struct pipe_state_s
 {
-  pipecommon_open,  /* open */
-  pipecommon_close, /* close */
-  pipecommon_read,  /* read */
-  pipecommon_write, /* write */
-  0,                /* seek */
-  0                 /* ioctl */
+  sem_t      d_bfsem;       /* Used to serialize access to d_buffer and indices */
+  sem_t      d_rdsem;       /* Empty buffer - Reader waits for data write */
+  sem_t      d_wrsem;       /* Full buffer - Writer waits for data read */
+  pipe_ndx_t d_wrndx;       /* Index in d_buffer to save next byte written */
+  pipe_ndx_t d_rdndx;       /* Index in d_buffer to return the next byte read */
+  ubyte      d_refs;        /* References counts on FIFO (limited to 255) */
+  ubyte      d_nwriters;    /* Number of open counts for write access */
+  ubyte      d_rdwaiters;   /* Number of readers waiting for write data to empty buffer */
+  ubyte      d_nwrwaiters;  /* Number of writers wiating for data read out of full buffer */
+  ubyte      d_pipeno;      /* Pipe minor number */
+};
+
+struct pipe_dev_s
+{
+  struct pipe_state_s s;
+  ubyte d_buffer[CONFIG_DEV_FIFO_SIZE];
 };
 
 /****************************************************************************
- * Private Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+#ifdef __cplusplus
+#  define EXTERN extern "C"
+extern "C" {
+#else
+#  define EXTERN extern
+#endif
 
-/****************************************************************************
- * Name: mkfifo
- *
- * Description:
- *   mkfifo() makes a FIFO device driver file with name 'pathname.'  Unlike
- *   Linux, a NuttX FIFO is not a special file type but simply a device driver
- *   instance.  'mode' specifies the FIFO's permissions. 
- *
- *   Once the FIFO has been created by mkfifo(), any thread can open it for
- *   reading or writing, in the same way as an ordinary file. However, it must
- *   have been opened from both reading and writing before input or output
- *   can be performed.  Unlike other mkfifo() implementations, this one will
- *   NOT block when the FIFO is opened on only one end.
- *
- * Inputs:
- *   pathname - The full path to the FIFO instance to attach to or to create
- *     (if not already created).
- *   mode - Ignored for now
- *
- * Return:
- *   0 is returned on success; otherwise, -1 is returned with errno set
- *   appropriately.
- *
- ****************************************************************************/
-int mkfifo(FAR const char *pathname, mode_t mode)
-{
-  struct pipe_dev_s *dev;
-  int ret;
- 
-  /* Allocate and initialize a new device structure instance */
+EXTERN FAR struct pipe_dev_s *pipecommon_allocdev(void);
+EXTERN void    pipecommon_freedev(FAR struct pipe_dev_s *dev);
+EXTERN int     pipecommon_open(FAR struct file *filep);
+EXTERN int     pipecommon_close(FAR struct file *filep);
+EXTERN ssize_t pipecommon_read(FAR struct file *, FAR char *, size_t);
+EXTERN ssize_t pipecommon_write(FAR struct file *, FAR const char *, size_t);
 
-  dev = pipecommon_allocdev();
-  if (!dev)
-    {
-      return -ENOMEM;
-    }
-
-  ret = register_driver(pathname, &fifo_fops, mode, (void*)dev);
-  if (ret != 0)
-    {
-      pipecommon_freedev(dev);
-    }
-  return ret;
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
 #endif /* CONFIG_DEV_FIFO_SIZE > 0 */
+#endif /* __DRIVERS_PIPE_COMMON_H */

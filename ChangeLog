@@ -375,3 +375,5 @@
 	* Add test for recursive mutexes
 	* Correct bug in recursive mutex logic
 	* Add mkfifo()
+	* Add pipe() and test for both pipes and fifos
+
