@@ -124,7 +124,7 @@ FAR struct pipe_dev_s *pipecommon_allocdev(void)
 /****************************************************************************
  * Name: pipecommon_freedev
  ****************************************************************************/
-void pipecommon_freedev(FAR struct pipe_dev_s *dev)
+ void pipecommon_freedev(FAR struct pipe_dev_s *dev)
 {
    sem_destroy(&dev->s.d_bfsem);
    sem_destroy(&dev->s.d_rdsem);
@@ -178,7 +178,7 @@ int pipecommon_open(FAR struct file *filep)
 
       sched_lock();
       (void)sem_post(&dev->s.d_bfsem);
-      if ((filep->f_oflags & O_RDWR) != O_RDONLY && dev->s.d_nwriters < 1)
+      if ((filep->f_oflags & O_RDWR) == O_RDONLY && dev->s.d_nwriters < 1)
         {
           /* NOTE: d_rdsem is normally used when the read logic waits for more
            * data to be written.  But until the first writer has opened the
@@ -245,19 +245,9 @@ int pipecommon_close(FAR struct file *filep)
                 }
             }
         }
-       sem_post(&dev->s.d_bfsem);
     }
-  else
-    {
-       /* Then nothing else can be holding the semaphore, so it is save to */
 
-       inode->i_private = NULL;
-       sem_post(&dev->s.d_bfsem);
-
-       /* Then free the pipe structure instance */
-
-       pipecommon_freedev(dev);
-    }
+  sem_post(&dev->s.d_bfsem);
   return OK;
 }
 

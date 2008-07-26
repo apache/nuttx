@@ -377,4 +377,5 @@
 	* Add mkfifo()
 	* Add pipe() and test for both pipes and fifos
 	* Attempts to open a FIFO will now block until there is at least one writer
+	* Add test/Fixed errors in FIFO reader/writer interlocks
 
