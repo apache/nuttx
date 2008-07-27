@@ -133,7 +133,6 @@ static int pipe_close(FAR struct file *filep)
 {
   struct inode      *inode = filep->f_inode;
   struct pipe_dev_s *dev   = inode->i_private;
-  ubyte              pipeno;
   int                ret;
 
   /* Some sanity checking */
@@ -143,16 +142,15 @@ static int pipe_close(FAR struct file *filep)
        return -EBADF;
     }
 #endif
-  pipeno = dev->d_pipeno;
 
   /* Perform common close operations */
 
   ret =  pipecommon_close(filep);
-  if (ret == 0 && !inode->i_private)
+  if (ret == 0 && dev->d_refs == 0)
     {
-      /* Release the pipe */
+      /* Release the pipe when there are no further open references to it. */
 
-      pipe_free(pipeno);
+      pipe_free(dev->d_pipeno);
     }
   return ret;
 }

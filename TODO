@@ -10,7 +10,7 @@ NuttX TODO List (Last updated February 13, 2008)
   (11) Network (net/, netutils/)
   (2)  USB (drivers/usbdev)
   (3)  Libraries (lib/)
-  (4)  File system/Generic drivers (fs/, drivers/)
+  (5)  File system/Generic drivers (fs/, drivers/)
   (1)  Pascal add-on (pcode/)
   (2)  Documentation (Documentation/)
   (3)  Build system
@@ -221,7 +221,7 @@ o Libraries (lib/)
 o File system / Generic drivers (fs/, drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  Description: Add chmod(), truncate().
+  Description: Implement chmod(), truncate().
   Status:      Open
   Priority:    Low
 
@@ -235,9 +235,18 @@ o File system / Generic drivers (fs/, drivers/)
 
   Description: There is no way to remove a FIFO or PIPE created in the
                psuedo filesystem.  Once created, they persist indefinitely
-               and cannot be unlinked.
-  Status:      Open
+               and cannot be unlinked.  This is actually a more generic
+               issue:  unlink does not work for anything in the psuedo-
+               filesystem.
+  Status:      Open, but partially resolved: pipe buffer is at least freed
+               when there are not open references to the pipe/FIFO.
   Priority:    Medium
+
+  Desccripton: dup and dup2 need to call into driver.  Most drivers
+               will maintain internal open counts.  dup and dup2 logically
+               increase the open count but do not interact with the driver
+  Status:      Open
+  Priority:    Medium 
 
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
