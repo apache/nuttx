@@ -70,7 +70,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void    pipecommon_semtake(sem_t *sem);
+static void pipecommon_semtake(sem_t *sem);
 
 /****************************************************************************
  * Private Data
@@ -113,10 +113,10 @@ FAR struct pipe_dev_s *pipecommon_allocdev(void)
     {
       /* Initialize the private structure */
 
-      memset(&dev->s, 0, sizeof(struct pipe_state_s));
-      sem_init(&dev->s.d_bfsem, 0, 1);
-      sem_init(&dev->s.d_rdsem, 0, 0);
-      sem_init(&dev->s.d_wrsem, 0, 0);
+      memset(dev, 0, sizeof(struct pipe_dev_s));
+      sem_init(&dev->d_bfsem, 0, 1);
+      sem_init(&dev->d_rdsem, 0, 0);
+      sem_init(&dev->d_wrsem, 0, 0);
     }
   return dev;
 }
@@ -126,9 +126,9 @@ FAR struct pipe_dev_s *pipecommon_allocdev(void)
  ****************************************************************************/
  void pipecommon_freedev(FAR struct pipe_dev_s *dev)
 {
-   sem_destroy(&dev->s.d_bfsem);
-   sem_destroy(&dev->s.d_rdsem);
-   sem_destroy(&dev->s.d_wrsem);
+   sem_destroy(&dev->d_bfsem);
+   sem_destroy(&dev->d_rdsem);
+   sem_destroy(&dev->d_wrsem);
    free(dev);
 }
 
@@ -150,26 +150,38 @@ int pipecommon_open(FAR struct file *filep)
 #endif
   /* Make sure that we have exclusive access to the device structure */
 
-  if (sem_wait(&dev->s.d_bfsem) == 0)
+  if (sem_wait(&dev->d_bfsem) == 0)
     {
+      /* If this the first reference on the device, then allocate the buffer */
+
+      if (dev->d_refs == 0)
+        {
+          dev->d_buffer = (ubyte*)malloc(CONFIG_DEV_PIPE_SIZE);
+          if (!dev->d_buffer)
+            {
+              (void)sem_post(&dev->d_bfsem);
+              return -ENOMEM;
+            }
+        }
+
       /* Increment the reference count on the pipe instance */
 
-      dev->s.d_refs++;
+      dev->d_refs++;
 
       /* If opened for writing, increment the count of writers on on the pipe instance */
 
       if ((filep->f_oflags & O_WROK) != 0)
         {
-          dev->s.d_nwriters++;
+          dev->d_nwriters++;
 
           /* If this this is the first writer, then the read semaphore indicates the
            * number of readers waiting for the first writer.  Wake them all up.
            */
-          if (dev->s.d_nwriters == 1)
+          if (dev->d_nwriters == 1)
             {
-              while (sem_getvalue(&dev->s.d_rdsem, &sval) == 0 && sval < 0)
+              while (sem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
                 {
-                  sem_post(&dev->s.d_rdsem);
+                  sem_post(&dev->d_rdsem);
                 }
             }
         }
@@ -177,8 +189,8 @@ int pipecommon_open(FAR struct file *filep)
       /* If opened for read-only, then wait for at least one writer on the pipe */
 
       sched_lock();
-      (void)sem_post(&dev->s.d_bfsem);
-      if ((filep->f_oflags & O_RDWR) == O_RDONLY && dev->s.d_nwriters < 1)
+      (void)sem_post(&dev->d_bfsem);
+      if ((filep->f_oflags & O_RDWR) == O_RDONLY && dev->d_nwriters < 1)
         {
           /* NOTE: d_rdsem is normally used when the read logic waits for more
            * data to be written.  But until the first writer has opened the
@@ -189,7 +201,7 @@ int pipecommon_open(FAR struct file *filep)
            * no writer on the pipe.
            */
 
-          pipecommon_semtake(&dev->s.d_rdsem);
+          pipecommon_semtake(&dev->d_rdsem);
         }
       sched_unlock();
       return OK;
@@ -219,15 +231,15 @@ int pipecommon_close(FAR struct file *filep)
    * I've never seen anyone check that.
    */
 
-  pipecommon_semtake(&dev->s.d_bfsem);
+  pipecommon_semtake(&dev->d_bfsem);
 
-  /* Check if the decremented reference count would be less than zero */
+  /* Check if the decremented reference count would go to zero */
 
-  if (dev->s.d_refs > 0)
+  if (dev->d_refs > 1)
     {
        /* No.. then just decrement the reference count */
 
-       dev->s.d_refs--;
+       dev->d_refs--;
 
       /* If opened for writing, decrement the count of writers on on the pipe instance */
 
@@ -237,17 +249,31 @@ int pipecommon_close(FAR struct file *filep)
            * waiting readers that they must return end-of-file.
            */
 
-          if (--dev->s.d_nwriters <= 0)
+          if (--dev->d_nwriters <= 0)
             {
-              while (sem_getvalue(&dev->s.d_rdsem, &sval) == 0 && sval < 0)
+              while (sem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
                 {
-                  sem_post(&dev->s.d_rdsem);
+                  sem_post(&dev->d_rdsem);
                 }
             }
         }
     }
+  else
+    {
+      /* Yes... deallocate the buffer */
 
-  sem_post(&dev->s.d_bfsem);
+      free(dev->d_buffer);
+      dev->d_buffer = NULL;
+
+      /* And reset all counts and indices */
+ 
+      dev->d_wrndx    = 0;
+      dev->d_rdndx    = 0;
+      dev->d_refs     = 0;
+      dev->d_nwriters = 0;
+   }
+
+  sem_post(&dev->d_bfsem);
   return OK;
 }
 
@@ -272,38 +298,38 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Make sure that we have exclusive access to the device structure */
 
-  if (sem_wait(&dev->s.d_bfsem) < 0)
+  if (sem_wait(&dev->d_bfsem) < 0)
     {
       return ERROR;
     }
 
   /* If the pipe is empty, then wait for something to be written to it */
 
-  while (dev->s.d_wrndx == dev->s.d_rdndx)
+  while (dev->d_wrndx == dev->d_rdndx)
     {
       /* If O_NONBLOCK was set, then return EGAIN */
 
       if (filep->f_oflags & O_NONBLOCK)
         {
-          sem_post(&dev->s.d_bfsem);
+          sem_post(&dev->d_bfsem);
           return -EAGAIN;
         }
 
       /* If there are no writers on the pipe, then return end of file */
 
-      if (dev->s.d_nwriters <= 0)
+      if (dev->d_nwriters <= 0)
         {
-          sem_post(&dev->s.d_bfsem);
+          sem_post(&dev->d_bfsem);
           return 0;
         }
 
       /* Otherwise, wait for something to be written to the pipe */
 
       sched_lock();
-      sem_post(&dev->s.d_bfsem);
-      ret = sem_wait(&dev->s.d_rdsem);
+      sem_post(&dev->d_bfsem);
+      ret = sem_wait(&dev->d_rdsem);
       sched_unlock();
-      if (ret < 0  || sem_wait(&dev->s.d_bfsem) < 0) 
+      if (ret < 0  || sem_wait(&dev->d_bfsem) < 0) 
         {
           return ERROR;
         }
@@ -312,24 +338,24 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
   /* Then return whatever is available in the pipe (which is at least one byte) */
 
   nread = 0;
-  while (nread < len && dev->s.d_wrndx != dev->s.d_rdndx)
+  while (nread < len && dev->d_wrndx != dev->d_rdndx)
     {
-      *buffer++ = dev->d_buffer[dev->s.d_rdndx];
-      if (++dev->s.d_rdndx >= CONFIG_DEV_PIPE_SIZE)
+      *buffer++ = dev->d_buffer[dev->d_rdndx];
+      if (++dev->d_rdndx >= CONFIG_DEV_PIPE_SIZE)
         {
-          dev->s.d_rdndx = 0; 
+          dev->d_rdndx = 0; 
         }
       nread++;
     }
 
   /* Notify all waiting writers that bytes have been removed from the buffer */
 
-  while (sem_getvalue(&dev->s.d_wrsem, &sval) == 0 && sval < 0)
+  while (sem_getvalue(&dev->d_wrsem, &sval) == 0 && sval < 0)
     {
-      sem_post(&dev->s.d_wrsem);
+      sem_post(&dev->d_wrsem);
     }
 
-  sem_post(&dev->s.d_bfsem);
+  sem_post(&dev->d_bfsem);
   return nread;	    
 }
 
@@ -355,7 +381,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
 
   /* Make sure that we have exclusive access to the device structure */
 
-  if (sem_wait(&dev->s.d_bfsem) < 0)
+  if (sem_wait(&dev->d_bfsem) < 0)
     {
       return ERROR;
     }
@@ -367,7 +393,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
     {
       /* Calculate the write index AFTER the next byte is written */
 
-      nxtwrndx = dev->s.d_wrndx + 1;
+      nxtwrndx = dev->d_wrndx + 1;
       if (nxtwrndx >= CONFIG_DEV_PIPE_SIZE)
         {
           nxtwrndx = 0;
@@ -375,12 +401,12 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
 
       /* Would the next write overflow the circular buffer? */
 
-      if (nxtwrndx != dev->s.d_rdndx)
+      if (nxtwrndx != dev->d_rdndx)
         {
           /* No... copy the byte */
 
-          dev->d_buffer[dev->s.d_wrndx] = *buffer++;
-          dev->s.d_wrndx = nxtwrndx;
+          dev->d_buffer[dev->d_wrndx] = *buffer++;
+          dev->d_wrndx = nxtwrndx;
 
           /* Is the write complete? */
 
@@ -388,14 +414,14 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
             {
               /* Yes.. Notify all of the waiting readers that more data is available */
 
-              while (sem_getvalue(&dev->s.d_rdsem, &sval) == 0 && sval < 0)
+              while (sem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
                 {
-                  sem_post(&dev->s.d_rdsem);
+                  sem_post(&dev->d_rdsem);
                 }
 
               /* Return the number of bytes written */
 
-              sem_post(&dev->s.d_bfsem);
+              sem_post(&dev->d_bfsem);
               return len;
             }
         }
@@ -407,9 +433,9 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
             {
               /* Yes.. Notify all of the waiting readers that more data is available */
 
-              while (sem_getvalue(&dev->s.d_rdsem, &sval) == 0 && sval < 0)
+              while (sem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
                 {
-                  sem_post(&dev->s.d_rdsem);
+                  sem_post(&dev->d_rdsem);
                 }
             }
           last = nwritten;
@@ -422,17 +448,17 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
                 {
                   nwritten = -EAGAIN;
                 }
-              sem_post(&dev->s.d_bfsem);
+              sem_post(&dev->d_bfsem);
               return nwritten;
             }
 
           /* There is more to be written.. wait for data to be removed from the pipe */
 
           sched_lock();
-          sem_post(&dev->s.d_bfsem);
-          pipecommon_semtake(&dev->s.d_wrsem);
+          sem_post(&dev->d_bfsem);
+          pipecommon_semtake(&dev->d_wrsem);
           sched_unlock();
-          pipecommon_semtake(&dev->s.d_bfsem);
+          pipecommon_semtake(&dev->d_bfsem);
         }
     }
 }

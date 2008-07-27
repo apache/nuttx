@@ -484,6 +484,7 @@ int user_start(int argc, char *argv[])
       fprintf(stderr, "user_start: FIFO interlock test FAILED (%d)\n", ret);
       return 7;
     }
+  printf("user_start: PIPE interlock test PASSED\n");
 
   fflush(stdout);
   return 0;

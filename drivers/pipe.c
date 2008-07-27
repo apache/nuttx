@@ -85,8 +85,9 @@ static struct file_operations pipe_fops =
   0                  /* ioctl */
 };
 
-static sem_t  g_pipesem = { 1 };
-static uint32 g_pipeset = 0;
+static sem_t  g_pipesem     = { 1 };
+static uint32 g_pipeset     = 0;
+static uint32 g_pipecreated = 0;
 
 /****************************************************************************
  * Private Functions
@@ -98,20 +99,16 @@ static uint32 g_pipeset = 0;
 static inline int pipe_allocate(void)
 {
   int pipeno;
-  int ret = sem_wait(&g_pipesem);
-  if (ret >= 0)
+  int ret = -ENFILE;
+
+  for (pipeno = 0; pipeno < MAX_PIPES; pipeno++)
     {
-      ret = -ENFILE;
-      for (pipeno = 0; pipeno < MAX_PIPES; pipeno++)
+      if ((g_pipeset & (1 << pipeno)) == 0)
         {
-          if ((g_pipeset & (1 << pipeno)) == 0)
-            {
-              g_pipeset |= (1 << pipeno);
-              ret = pipeno;
-              break;
-            }
+          g_pipeset |= (1 << pipeno);
+          ret = pipeno;
+          break;
         }
-      (void)sem_post(&g_pipesem);
     }
   return ret;
 }
@@ -146,16 +143,15 @@ static int pipe_close(FAR struct file *filep)
        return -EBADF;
     }
 #endif
-  pipeno = dev->s.d_pipeno;
+  pipeno = dev->d_pipeno;
 
   /* Perform common close operations */
 
   ret =  pipecommon_close(filep);
   if (ret == 0 && !inode->i_private)
     {
-      char devname[16];
-      sprintf(devname, "/dev/pipe%d", pipeno);
-      unlink(devname);
+      /* Release the pipe */
+
       pipe_free(pipeno);
     }
   return ret;
@@ -190,39 +186,61 @@ int pipe(int filedes[2])
   int err;
   int ret;
 
+  /* Get exclusive access to the pipe allocation data */
+
+  ret = sem_wait(&g_pipesem);
+  if (ret < 0)
+    {
+      /* sem_wait() will have already set errno */
+
+      return ERROR;
+    }
+
   /* Allocate a minor number for the pipe device */
 
   pipeno = pipe_allocate();
   if (pipeno < 0)
     {
+      (void)sem_post(&g_pipesem);
       err = -pipeno;
       goto errout;
     }
-
-  /* Allocate and initialize a new device structure instance */
-
-  dev = pipecommon_allocdev();
-  if (!dev)
-    {
-      pipe_free(pipeno);
-      err = ENOMEM;
-      goto errout;
-    }
-  dev->s.d_pipeno = pipeno;
 
   /* Create a pathname to the pipe device */
 
   sprintf(devname, "/dev/pipe%d", pipeno);
 
-  /* Register the pipe device */
+  /* Check if the pipe device has already been created */
 
-  ret = register_driver(devname, &pipe_fops, 0666, (void*)dev);
-  if (ret != 0)
+  if ((g_pipecreated & (1 << pipeno)) == 0)
     {
-      err = -ret;
-      goto errout_with_dev;
-    }
+      /* No.. Allocate and initialize a new device structure instance */
 
+      dev = pipecommon_allocdev();
+      if (!dev)
+        {
+          (void)sem_post(&g_pipesem);
+          err = ENOMEM;
+          goto errout_with_pipe;
+        }
+      dev->d_pipeno = pipeno;
+
+      /* Register the pipe device */
+
+      ret = register_driver(devname, &pipe_fops, 0666, (void*)dev);
+      if (ret != 0)
+        {
+          (void)sem_post(&g_pipesem);
+          err = -ret;
+          goto errout_with_dev;
+        }
+
+      /* Remember that we created this device */
+
+       g_pipecreated |= (1 << pipeno);
+    }
+  (void)sem_post(&g_pipesem);
+ 
   /* Get a write file descriptor */
 
   filedes[1] = open(devname, O_WRONLY);
@@ -249,6 +267,8 @@ errout_with_driver:
   unregister_driver(devname);
 errout_with_dev:
   pipecommon_freedev(dev);
+errout_with_pipe:
+  pipe_free(pipeno);
 errout:
   errno = err;
   return ERROR;

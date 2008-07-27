@@ -70,7 +70,7 @@ typedef uint16 pipe_ndx_t;  /* 16-bit index */
 typedef ubyte pipe_ndx_t;   /*  8-bit index */
 #endif
 
-struct pipe_state_s
+struct pipe_dev_s
 {
   sem_t      d_bfsem;       /* Used to serialize access to d_buffer and indices */
   sem_t      d_rdsem;       /* Empty buffer - Reader waits for data write */
@@ -80,12 +80,7 @@ struct pipe_state_s
   ubyte      d_refs;        /* References counts on pipe (limited to 255) */
   ubyte      d_nwriters;    /* Number of reference counts for write access */
   ubyte      d_pipeno;      /* Pipe minor number */
-};
-
-struct pipe_dev_s
-{
-  struct pipe_state_s s;
-  ubyte d_buffer[CONFIG_DEV_PIPE_SIZE];
+  ubyte     *d_buffer;      /* Buffer alloated when device opend */
 };
 
 /****************************************************************************
