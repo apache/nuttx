@@ -38,7 +38,7 @@
 
 ASRCS	= 
 AOBJS	= $(ASRCS:.S=$(OBJEXT))
-CSRCS	= pipe_main.c
+CSRCS	= pipe_main.c transfer_test.c interlock_test.c
 COBJS	= $(CSRCS:.c=$(OBJEXT))
 
 SRCS	= $(ASRCS) $(CSRCS)

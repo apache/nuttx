@@ -1,5 +1,5 @@
 /****************************************************************************
- * examples/pipe/pipe_main.c
+ * examples/pipe/interlock_test.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -43,8 +43,8 @@
 #include <sys/types.h>
 
 #include <stdio.h>
-#include <unistd.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <errno.h>
 
 #include "pipe.h"
@@ -105,10 +105,14 @@ static void *null_writer(pthread_addr_t pvarg)
 }
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: interlock_test
  ****************************************************************************/
 
-static int interlock_test(void)
+int interlock_test(void)
 {
   pthread_t writerid;
   void *value;
@@ -208,107 +212,4 @@ errout_with_fifo:
   /* unlink(FIFO_PATH2); */
   printf("interlock_test: Returning %d\n", ret);
   return ret;
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: user_initialize
- ****************************************************************************/
-
-void user_initialize(void)
-{
-}
-
-/****************************************************************************
- * Name: user_start
- ****************************************************************************/
-
-int user_start(int argc, char *argv[])
-{
-  int filedes[2];
-  int ret;
-
-  /* Test FIFO logic */
-
-  printf("user_start: Performing FIFO test\n");
-  ret = mkfifo(FIFO_PATH1, 0666);
-  if (ret < 0)
-    {
-      fprintf(stderr, "user_start: mkfifo failed with errno=%d\n", errno);
-      return 1;
-    }
-
-  /* Open one end of the FIFO for reading and the other end for writing.  NOTE:
-   * the following might not work on most FIFO implementations because the attempt
-   * to open just one end of the FIFO for writing might block.  The NuttX FIFOs block
-   * only on open for read-only (see interlock_test()).
-   */
-
-  filedes[1] = open(FIFO_PATH1, O_WRONLY);
-  if (filedes[1] < 0)
-    {
-      fprintf(stderr, "user_start: Failed to open FIFO %s for writing, errno=%d\n",
-              FIFO_PATH1, errno);
-      return 2;
-    }
-
-  filedes[0] = open(FIFO_PATH1, O_RDONLY);
-  if (filedes[0] < 0)
-    {
-      fprintf(stderr, "user_start: Failed to open FIFO %s for reading, errno=%d\n",
-              FIFO_PATH1, errno);
-      close(filedes[1]);
-      return 3;
-    }
-
-  /* Then perform the test using those file descriptors */
-
-  ret = transfer_test(filedes[0], filedes[1]);
-  close(filedes[0]);
-  close(filedes[1]);
-  /* unlink(FIFO_PATH1); fails */
-  if (ret != 0)
-    {
-      fprintf(stderr, "user_start: FIFO test FAILED (%d)\n", ret);
-      return 4;
-    }
-  printf("user_start: FIFO test PASSED\n");
-
-  /* Test PIPE logic */
-
-  printf("user_start: Performing pipe test\n");
-  ret = pipe(filedes);
-  if (ret < 0)
-    {
-      fprintf(stderr, "user_start: pipe failed with errno=%d\n", errno);
-      return 5;
-    }
-
-  /* Then perform the test using those file descriptors */
-
-  ret = transfer_test(filedes[0], filedes[1]);
-  close(filedes[0]);
-  close(filedes[1]);
-  /* unlink(FIFO_PATH1); fails */
-  if (ret != 0)
-    {
-      fprintf(stderr, "user_start: PIPE test FAILED (%d)\n", ret);
-      return 6;
-    }
-  printf("user_start: PIPE test PASSED\n");
-
-  /* Then perform the FIFO interlock test */
-  ret = interlock_test();
-  if (ret != 0)
-    {
-      fprintf(stderr, "user_start: FIFO interlock test FAILED (%d)\n", ret);
-      return 7;
-    }
-  printf("user_start: PIPE interlock test PASSED\n");
-
-  fflush(stdout);
-  return 0;
 }
