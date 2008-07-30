@@ -378,4 +378,7 @@
 	* Add pipe() and test for both pipes and fifos
 	* Attempts to open a FIFO will now block until there is at least one writer
 	* Add test/Fixed errors in FIFO reader/writer interlocks
+	* Removed limitation: task_create() was only dup'ing 3 file descriptors (now
+	  dups all open file descriptors).
+	* Added a test for redirection of stdio through pipes
 

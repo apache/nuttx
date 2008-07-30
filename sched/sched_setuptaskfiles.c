@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched_setuptaskfiles.c
+ * sched/sched_setuptaskfiles.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -76,10 +76,10 @@
 
 int sched_setuptaskfiles(FAR _TCB *tcb)
 {
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_DEV_CONSOLE)
+#if CONFIG_NFILE_DESCRIPTORS > 0
   FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
   int i;
-#endif /* CONFIG_DEV_CONSOLE */
+#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
   int ret = OK;
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
@@ -104,15 +104,20 @@ int sched_setuptaskfiles(FAR _TCB *tcb)
     }
 #endif /* CONFIG_NSOCKET_DESCRIPTORS */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_DEV_CONSOLE)
+#if CONFIG_NFILE_DESCRIPTORS > 0
  /* Duplicate the first three file descriptors */
 
   if (rtcb->filelist)
     {
-      for (i = 0; i < 3; i++)
+      for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
         {
-          (void)files_dup(&rtcb->filelist->fl_files[i],
-                          &tcb->filelist->fl_files[i]);
+          /* Check if this file is opened */
+
+          if (rtcb->filelist->fl_files[i].f_inode)
+            {
+              (void)files_dup(&rtcb->filelist->fl_files[i],
+                              &tcb->filelist->fl_files[i]);
+            }
         }
     }
 
@@ -121,7 +126,7 @@ int sched_setuptaskfiles(FAR _TCB *tcb)
 
   ret = sched_setupstreams(tcb);
 #endif /* CONFIG_NFILE_STREAMS */
-#endif /* CONFIG_NFILE_DESCRIPTORS && CONFIG_DEV_CONSOLE */
+#endif /* CONFIG_NFILE_DESCRIPTORS */
   return ret;
 }
 
