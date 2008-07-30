@@ -51,6 +51,10 @@
 #define FIFO_PATH1 "/tmp/testfifo-1"
 #define FIFO_PATH2 "/tmp/testfifo-2"
 
+#ifndef CONFIG_EXAMPLES_PIPE_STACKSIZE
+#  define CONFIG_EXAMPLES_PIPE_STACKSIZE 1024
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -65,5 +69,6 @@
 
 extern int transfer_test(int fdin, int fdout);
 extern int interlock_test(void);
+extern int redirection_test(void);
 
 #endif /* __EXAMPLES_PIPE_PIPE_H */

@@ -97,7 +97,10 @@ static void *null_writer(pthread_addr_t pvarg)
   /* Then close the FIFO */
 
   printf("null_writer: Closing %s\n", FIFO_PATH2);
-  close(fd);
+  if (close(fd) != 0)
+    {
+      fprintf(stderr, "null_writer: close failed: %d\n", errno);
+    }
   sleep(5);
   
   printf("null_writer: Returning success\n");
@@ -177,7 +180,10 @@ int interlock_test(void)
   /* Close the file */
 
   printf("interlock_test: Closing %s\n", FIFO_PATH2);
-  close(fd);
+  if (close(fd) != 0)
+    {
+      fprintf(stderr, "interlock_test: close failed: %d\n", errno);
+    }
 
   /* Wait for null_writer thread to complete */
 
@@ -204,7 +210,10 @@ int interlock_test(void)
   return 0;
 
 errout_with_file:
-  close(fd);
+  if (close(fd) != 0)
+    {
+      fprintf(stderr, "interlock_test: close failed: %d\n", errno);
+    }
 errout_with_thread:
   pthread_detach(writerid);
   pthread_cancel(writerid);
