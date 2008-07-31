@@ -381,4 +381,8 @@
 	* Removed limitation: task_create() was only dup'ing 3 file descriptors (now
 	  dups all open file descriptors).
 	* Added a test for redirection of stdio through pipes
+	* Fixed error in dup and dup2: Must call open/close methods in fs/driver so that
+	  driver can correctly maintain open reference counts.
+	* Fixed in error in stdio flush logic.  Needed ssize_t vs size_t for error
+	  check.
 

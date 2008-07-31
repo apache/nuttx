@@ -106,7 +106,7 @@ ssize_t lib_fflush(FILE *stream, boolean bforce)
 {
 #if CONFIG_STDIO_BUFFER_SIZE > 0
   const unsigned char *src;
-  size_t bytes_written;
+  ssize_t bytes_written;
   size_t nbuffer;
 
   /* Return EBADF if the file is not opened for writing */

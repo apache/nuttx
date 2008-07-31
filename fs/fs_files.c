@@ -1,7 +1,7 @@
-/************************************************************
- * fs_files.c
+/****************************************************************************
+ * fs/s_files.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <string.h>
@@ -47,25 +47,25 @@
 #include <nuttx/kmalloc.h>
 #include "fs_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
 static void _files_semtake(FAR struct filelist *list)
 {
@@ -83,9 +83,9 @@ static void _files_semtake(FAR struct filelist *list)
 
 #define _files_semgive(list) sem_post(&list->fl_sem)
 
-/************************************************************
+/****************************************************************************
  * Pulblic Functions
- ************************************************************/
+ ****************************************************************************/
 
 /* This is called from the FS initialization logic to configure
  * the files.
@@ -191,42 +191,117 @@ int files_releaselist(FAR struct filelist *list)
 int files_dup(FAR struct file *filep1, FAR struct file *filep2)
 {
   FAR struct filelist *list;
+  FAR struct inode *inode;
+  int err;
+  int ret;
 
   if (!filep1 || !filep1->f_inode || !filep2)
     {
-      *get_errno_ptr() = EBADF;
-      return ERROR;
+      err = EBADF;
+      goto errout;
     }
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+  if (INODE_IS_MOUNTPT(filep1->f_inode))
+    {
+      err = ENOSYS; /* Not yet supported */
+      goto errout;
+    }
+#endif
 
   list = sched_getfiles();
   if (!list)
     {
-      *get_errno_ptr() = EMFILE;
-      return ERROR;
+      err = EMFILE;
+      goto errout;
     }
 
   _files_semtake(list);
 
   /* If there is already an inode contained in the new file structure,
-   * release it (effectively closing the file).
+   * close the file and release the inode.
    */
 
-  if (filep2->f_inode)
+  inode = filep2->f_inode;
+  if (inode)
     {
+      /* Close the file, driver, or mountpoint. */
+
+      if (inode->u.i_ops && inode->u.i_ops->close)
+        {
+          /* Perform the close operation */
+
+          ret = inode->u.i_ops->close(filep2);
+          if (ret < 0)
+            {
+              /* An error occurred while closing the driver */
+
+              goto errout_with_ret;
+            }
+        }
+
+      /* Release the inode */
+
       inode_release(filep2->f_inode);
     }
 
   /* Increment the reference count on the contained inode */
 
-  inode_addref(filep1->f_inode);
+  inode = filep1->f_inode;
+  inode_addref(inode);
 
   /* Then clone the file structure */
 
   filep2->f_oflags = filep1->f_oflags;
   filep2->f_pos    = filep1->f_pos;
-  filep2->f_inode  = filep1->f_inode;
+  filep2->f_inode  = inode;
+
+  /* Call the open method on the file, driver, mountpoint so that it
+   * can maintain the correct open counts.
+   */
+
+  if (inode->u.i_ops && inode->u.i_ops->open)
+    {
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+#if 0 /* Not implemented */
+      if (INODE_IS_MOUNTPT(inode))
+        {
+         /* Open a file on the mountpoint */
+
+          ret = inode->u.i_mops->open(filep2, ?, filep2->f_oflags, ?);
+        }
+      else
+#endif
+#endif
+        {
+          /* Open the psuedo file or device driver */
+
+          ret = inode->u.i_ops->open(filep2);
+        }
+
+      /* Handle open failures */
+
+      if (ret < 0)
+        {
+          goto errout_with_inode;
+        }
+    }
   _files_semgive(list);
   return OK;
+
+/* Handler various error conditions */
+
+errout_with_inode:
+  inode_release(filep2->f_inode);
+  filep2->f_oflags = 0;
+  filep2->f_pos    = 0;
+  filep2->f_inode  = NULL;
+errout_with_ret:
+  err              = -ret;
+  _files_semgive(list);
+errout:
+  errno            = err;
+  return ERROR;
 }
 
 /* Allocate a struct files instance and associate it with an
