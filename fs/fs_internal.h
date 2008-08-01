@@ -210,6 +210,7 @@ EXTERN void inode_release(FAR struct inode *inode);
 EXTERN void weak_function files_initialize(void);
 EXTERN int  files_allocate(FAR struct inode *inode, int oflags, off_t pos);
 EXTERN void files_release(int filedes);
+EXTERN int  files_close(struct file *filep);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -67,6 +67,9 @@
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: _files_semtake
+ ****************************************************************************/
 static void _files_semtake(FAR struct filelist *list)
 {
   /* Take the semaphore (perhaps waiting) */
@@ -81,22 +84,32 @@ static void _files_semtake(FAR struct filelist *list)
     }
 }
 
+/****************************************************************************
+ * Name: _files_semgive
+ ****************************************************************************/
 #define _files_semgive(list) sem_post(&list->fl_sem)
 
 /****************************************************************************
- * Pulblic Functions
+ * Public Functions
  ****************************************************************************/
 
-/* This is called from the FS initialization logic to configure
- * the files.
- */
-
+/****************************************************************************
+ * Name: files_initialize
+ *
+ * Description:
+ *   This is called from the FS initialization logic to configure the files.
+ *
+ ****************************************************************************/
 void files_initialize(void)
 {
 }
 
-/* Allocate a list of files for a new task */
-
+/****************************************************************************
+ * Name: files_alloclist
+ *
+ * Description: Allocate a list of files for a new task
+ *
+ ****************************************************************************/
 FAR struct filelist *files_alloclist(void)
 {
   FAR struct filelist *list;
@@ -114,8 +127,12 @@ FAR struct filelist *files_alloclist(void)
   return list;
 }
 
-/* Increase the reference count on a file list */
-
+/****************************************************************************
+ * Name: files_addreflist
+ *
+ * Description: Increase the reference count on a file list
+ *
+ ****************************************************************************/
 int files_addreflist(FAR struct filelist *list)
 {
   if (list)
@@ -135,8 +152,44 @@ int files_addreflist(FAR struct filelist *list)
   return OK;
 }
 
-/* Release a reference to the file list */
+/****************************************************************************
+ * Name: files_close
+ *
+ * Description: Close an inode (if open)
+ *
+ ****************************************************************************/
+int files_close(FAR struct file *filep)
+{
+  struct inode *inode = filep->f_inode;
+  int ret = OK;
 
+  /* Check if the struct file is open (i.e., assigned an inode) */
+
+  if (inode)
+    {
+      /* Close the file, driver, or mountpoint. */
+
+      if (inode->u.i_ops && inode->u.i_ops->close)
+        {
+          /* Perform the close operation */
+
+          ret = inode->u.i_ops->close(filep);
+        }
+
+        /* And release the inode */
+
+        inode_release(inode);
+        filep->f_inode = NULL;
+    }
+  return ret;
+}
+
+/****************************************************************************
+ * Name: files_releaselist
+ *
+ * Description: Release a reference to the file list
+ *
+ ****************************************************************************/
 int files_releaselist(FAR struct filelist *list)
 {
   int crefs;
@@ -168,26 +221,25 @@ int files_releaselist(FAR struct filelist *list)
 
             for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
               {
-                FAR struct inode *inode = list->fl_files[i].f_inode;
-                if (inode)
-                  {
-                    inode_release(inode);
-                  }
+                (void)files_close(&list->fl_files[i]);
               }
 
-             /* Destroy the semaphore and release the filelist */
+            /* Destroy the semaphore and release the filelist */
 
-             (void)sem_destroy(&list->fl_sem);
-             sched_free(list);
+            (void)sem_destroy(&list->fl_sem);
+            sched_free(list);
           }
     }
   return OK;
 }
 
-/* Assign an inode to a specific files structure.  this is the
- * heart of dup2.
- */
-
+/****************************************************************************
+ * Name: files_dup
+ *
+ * Description:
+ *   Assign an inode to a specific files structure.  This is the heart of dup2.
+ *
+ ****************************************************************************/
 int files_dup(FAR struct file *filep1, FAR struct file *filep2)
 {
   FAR struct filelist *list;
@@ -222,27 +274,12 @@ int files_dup(FAR struct file *filep1, FAR struct file *filep2)
    * close the file and release the inode.
    */
 
-  inode = filep2->f_inode;
-  if (inode)
+  ret = files_close(filep2);
+  if (ret < 0)
     {
-      /* Close the file, driver, or mountpoint. */
+      /* An error occurred while closing the driver */
 
-      if (inode->u.i_ops && inode->u.i_ops->close)
-        {
-          /* Perform the close operation */
-
-          ret = inode->u.i_ops->close(filep2);
-          if (ret < 0)
-            {
-              /* An error occurred while closing the driver */
-
-              goto errout_with_ret;
-            }
-        }
-
-      /* Release the inode */
-
-      inode_release(filep2->f_inode);
+      goto errout_with_ret;
     }
 
   /* Increment the reference count on the contained inode */
@@ -304,11 +341,14 @@ errout:
   return ERROR;
 }
 
-/* Allocate a struct files instance and associate it with an
- * inode instance.  Returns the file descriptor == index into
- * the files array.
- */
-
+/****************************************************************************
+ * Name: files_allocate
+ *
+ * Description:
+ *   Allocate a struct files instance and associate it with an inode instance. 
+ *   Returns the file descriptor == index into the files array.
+ *
+ ****************************************************************************/
 int files_allocate(FAR struct inode *inode, int oflags, off_t pos)
 {
   FAR struct filelist *list;
@@ -334,6 +374,9 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos)
   return ERROR;
 }
 
+/****************************************************************************
+ * Name: files_release
+ ****************************************************************************/
 void files_release(int filedes)
 {
   FAR struct filelist *list;

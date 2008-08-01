@@ -1032,6 +1032,7 @@ nuttx-0.3.12 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* Added a test for redirection of stdio through pipes
 	* Fixed error in dup and dup2: Must call open/close methods in fs/driver so that
 	  driver can correctly maintain open reference counts.
+	* Same issue on closing file descriptors in exit()
 	* Fixed in error in stdio flush logic.  Needed ssize_t vs size_t for error
 	  check.
 

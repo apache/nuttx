@@ -82,7 +82,7 @@ int close(int fd)
   int err;
 #if CONFIG_NFILE_DESCRIPTORS > 0
   FAR struct filelist *list;
-  FAR struct inode *inode;
+  int ret;
 
   /* Did we get a valid file descriptor? */
 
@@ -116,8 +116,7 @@ int close(int fd)
 
   /* If the file was properly opened, there should be an inode assigned */
 
-  inode = list->fl_files[fd].f_inode;
-  if (!inode)
+  if (!list->fl_files[fd].f_inode)
    {
      err = EBADF;
      goto errout;
@@ -133,30 +132,18 @@ int close(int fd)
    * vtable.
    */
 
-  if (inode->u.i_ops && inode->u.i_ops->close)
+  ret = files_close(&list->fl_files[fd]);
+  if (ret < 0)
     {
-      /* Perform the close operation (by the driver) */
+      /* An error occurred while closing the driver */
 
-      int ret = inode->u.i_ops->close(&list->fl_files[fd]);
-      if (ret < 0)
-        {
-          /* An error occurred while closing the driver */
-
-          err = -ret;
-          goto errout;
-        }
+      err = -ret;
+      goto errout;
     }
 
   /* Release the file descriptor */
 
   files_release(fd);
-
-  /* Decrement the reference count on the inode. This may remove the inode and
-   * eliminate the name from the namespace
-   */
-
-  inode_release(inode);
-
   return OK;
 #endif
 

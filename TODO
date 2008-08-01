@@ -242,12 +242,6 @@ o File system / Generic drivers (fs/, drivers/)
                when there are not open references to the pipe/FIFO.
   Priority:    Medium
 
-  Desccripton: dup and dup2 need to call into driver.  Most drivers
-               will maintain internal open counts.  dup and dup2 logically
-               increase the open count but do not interact with the driver
-  Status:      Open
-  Priority:    Medium 
-
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
 
