@@ -81,7 +81,6 @@ int close(int fd)
 {
   int err;
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  FAR struct filelist *list;
   int ret;
 
   /* Did we get a valid file descriptor? */
@@ -105,23 +104,6 @@ int close(int fd)
     }
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  /* Get the thread-specific file list */
-
-  list = sched_getfiles();
-  if (!list)
-    {
-      err = EMFILE;
-      goto errout;
-    }
-
-  /* If the file was properly opened, there should be an inode assigned */
-
-  if (!list->fl_files[fd].f_inode)
-   {
-     err = EBADF;
-     goto errout;
-   }
-
   /* Close the driver or mountpoint.  NOTES: (1) there is no
    * exclusion mechanism here , the driver or mountpoint must be
    * able to handle concurrent operations internally, (2) The driver

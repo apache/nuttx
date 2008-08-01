@@ -399,18 +399,29 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos)
 int files_close(int filedes)
 {
  FAR struct filelist *list;
- int ret = -EBADF;
+ int                  ret;
+
+   /* Get the thread-specific file list */
 
   list = sched_getfiles();
-  if (list)
+  if (!list)
     {
-      if (filedes >=0 && filedes < CONFIG_NFILE_DESCRIPTORS)
-        {
-          _files_semtake(list);
-          ret = _files_close(&list->fl_files[filedes]);
-          _files_semgive(list);
-        }
+      return -EMFILE;
     }
+
+  /* If the file was properly opened, there should be an inode assigned */
+
+  if (filedes < 0 || filedes >= CONFIG_NFILE_DESCRIPTORS || !list->fl_files[filedes].f_inode)
+   {
+     return -EBADF;
+   }
+
+   /* Perform the protected close operation */
+
+   _files_semtake(list);
+   ret = _files_close(&list->fl_files[filedes]);
+   _files_semgive(list);
+   return ret;
 }
 
 /****************************************************************************
