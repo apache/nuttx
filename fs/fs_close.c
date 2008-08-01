@@ -132,7 +132,7 @@ int close(int fd)
    * vtable.
    */
 
-  ret = files_close(&list->fl_files[fd]);
+  ret = files_close(fd);
   if (ret < 0)
     {
       /* An error occurred while closing the driver */
@@ -140,15 +140,12 @@ int close(int fd)
       err = -ret;
       goto errout;
     }
-
-  /* Release the file descriptor */
-
-  files_release(fd);
   return OK;
+
 #endif
 
 errout:
-  *get_errno_ptr() = err;
+  errno = err;
   return ERROR;
 }
 

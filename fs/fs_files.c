@@ -90,6 +90,47 @@ static void _files_semtake(FAR struct filelist *list)
 #define _files_semgive(list) sem_post(&list->fl_sem)
 
 /****************************************************************************
+ * Name: _files_close
+ *
+ * Description:
+ *   Close an inode (if open)
+ *
+ * Assumuptions:
+ *   Caller holds the list semaphore because the file descriptor will be freed.
+ *
+ ****************************************************************************/
+static int _files_close(FAR struct file *filep)
+{
+  struct inode *inode = filep->f_inode;
+  int ret = OK;
+
+  /* Check if the struct file is open (i.e., assigned an inode) */
+
+  if (inode)
+    {
+      /* Close the file, driver, or mountpoint. */
+
+      if (inode->u.i_ops && inode->u.i_ops->close)
+        {
+          /* Perform the close operation */
+
+          ret = inode->u.i_ops->close(filep);
+        }
+
+        /* And release the inode */
+
+        inode_release(inode);
+
+        /* Release the file descriptor */
+
+        filep->f_oflags  = 0;
+        filep->f_pos     = 0;
+        filep->f_inode = NULL;
+    }
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -153,38 +194,6 @@ int files_addreflist(FAR struct filelist *list)
 }
 
 /****************************************************************************
- * Name: files_close
- *
- * Description: Close an inode (if open)
- *
- ****************************************************************************/
-int files_close(FAR struct file *filep)
-{
-  struct inode *inode = filep->f_inode;
-  int ret = OK;
-
-  /* Check if the struct file is open (i.e., assigned an inode) */
-
-  if (inode)
-    {
-      /* Close the file, driver, or mountpoint. */
-
-      if (inode->u.i_ops && inode->u.i_ops->close)
-        {
-          /* Perform the close operation */
-
-          ret = inode->u.i_ops->close(filep);
-        }
-
-        /* And release the inode */
-
-        inode_release(inode);
-        filep->f_inode = NULL;
-    }
-  return ret;
-}
-
-/****************************************************************************
  * Name: files_releaselist
  *
  * Description: Release a reference to the file list
@@ -195,7 +204,7 @@ int files_releaselist(FAR struct filelist *list)
   int crefs;
   if (list)
     {
-       /* Decrement the reference count on the list.
+      /* Decrement the reference count on the list.
         * NOTE: that we disable interrupts to do this
         * (vs. taking the list semaphore).  We do this
         * because file cleanup operations often must be
@@ -217,11 +226,14 @@ int files_releaselist(FAR struct filelist *list)
           {
             int i;
 
-            /* close each file descriptor */
+            /* Close each file descriptor .. Normally, you would need
+             * take the list semaphore, but it is safe to ignore the
+             * semaphore in this context because there are not references
+             */
 
             for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
               {
-                (void)files_close(&list->fl_files[i]);
+                (void)_files_close(&list->fl_files[i]);
               }
 
             /* Destroy the semaphore and release the filelist */
@@ -274,7 +286,7 @@ int files_dup(FAR struct file *filep1, FAR struct file *filep2)
    * close the file and release the inode.
    */
 
-  ret = files_close(filep2);
+  ret = _files_close(filep2);
   if (ret < 0)
     {
       /* An error occurred while closing the driver */
@@ -375,7 +387,39 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos)
 }
 
 /****************************************************************************
+ * Name: _files_close
+ *
+ * Description:
+ *   Close an inode (if open)
+ *
+ * Assumuptions:
+ *   Caller holds the list semaphore because the file descriptor will be freed.
+ *
+ ****************************************************************************/
+int files_close(int filedes)
+{
+ FAR struct filelist *list;
+ int ret = -EBADF;
+
+  list = sched_getfiles();
+  if (list)
+    {
+      if (filedes >=0 && filedes < CONFIG_NFILE_DESCRIPTORS)
+        {
+          _files_semtake(list);
+          ret = _files_close(&list->fl_files[filedes]);
+          _files_semgive(list);
+        }
+    }
+}
+
+/****************************************************************************
  * Name: files_release
+ *
+ * Assumuptions:
+ *   Similar to files_close().  Called only from open() logic on error
+ *   conditions.
+ *
  ****************************************************************************/
 void files_release(int filedes)
 {
