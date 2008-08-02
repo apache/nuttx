@@ -265,7 +265,7 @@ static int fat_checkfsinfo(struct fat_mountpt_s *fs)
 
   if (FSI_GETLEADSIG(fs->fs_buffer) == 0x41615252  &&
       FSI_GETSTRUCTSIG(fs->fs_buffer) == 0x61417272 &&
-      FSI_GETTRAILSIG(fs->fs_buffer) == 0xaa550000)
+      FSI_GETTRAILSIG(fs->fs_buffer) == BOOT_SIGNATURE32)
     {
       fs->fs_fsinextfree  = FSI_GETFREECOUNT(fs->fs_buffer);
       fs->fs_fsifreecount = FSI_GETNXTFREE(fs->fs_buffer);
@@ -295,7 +295,7 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
    * match the reported hardware sector size.
    */
 
-  if (MBR_GETSIGNATURE(fs->fs_buffer) != 0xaa55 ||
+  if (MBR_GETSIGNATURE(fs->fs_buffer) != BOOT_SIGNATURE16 ||
       MBR_GETBYTESPERSEC(fs->fs_buffer) != fs->fs_hwsectorsize)
     {
       return -ENODEV;
@@ -2322,7 +2322,7 @@ int fat_updatefsinfo(struct fat_mountpt_s *fs)
           FSI_PUTSTRUCTSIG(fs->fs_buffer, 0x61417272);
           FSI_PUTFREECOUNT(fs->fs_buffer, fs->fs_fsifreecount);
           FSI_PUTNXTFREE(fs->fs_buffer, fs->fs_fsinextfree);
-          FSI_PUTTRAILSIG(fs->fs_buffer, 0xaa550000);
+          FSI_PUTTRAILSIG(fs->fs_buffer, BOOT_SIGNATURE32);
 
           /* Then flush this to disk */
 

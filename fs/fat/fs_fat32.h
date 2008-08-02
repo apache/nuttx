@@ -63,9 +63,9 @@
 #define BS_RESVDSECCOUNT   14 /*  2@14: Reserved sector count: Usually 32 */
 #define BS_NUMFATS         16 /*  1@16: Number of FAT data structures: always 2 */
 #define BS_ROOTENTCNT      17 /*  2@17: FAT12/16: Must be 0 for FAT32 */
-#define BS_TOTSEC16        19 /*  2@19: FAT12/16: Must be 0, see BS32_totsec32 */
+#define BS_TOTSEC16        19 /*  2@19: FAT12/16: Must be 0, see BS_TOTSEC32 */
 #define BS_MEDIA           21 /*  1@21: Media code: f0, f8, f9-fa, fc-ff */ 
-#define BS_FATSZ16         22 /*  2@22: FAT12/16: Must be 0, see BS32_fatsz32 */
+#define BS_FATSZ16         22 /*  2@22: FAT12/16: Must be 0, see BS_FATSZ32 */
 #define BS_SECPERTRK       24 /*  2@24: Sectors per track geometry value */
 #define BS_NUMHEADS        26 /*  2@26: Number of heads geometry value */
 #define BS_HIDSEC          28 /*  4@28: Count of hidden sectors preceding FAT */
@@ -111,6 +111,13 @@
 /* The magic bytes at the end of the MBR are common to FAT12/16/32 */
 
 #define BS_SIGNATURE      510 /*  2@510: Valid MBRs have 0x55aa here */
+
+#define BOOT_SIGNATURE16  0xaa55
+#define BOOT_SIGNATURE32  0xaa550000
+
+/* The extended boot signature (BS16/32_BOOTSIG) */
+
+#define EXTBOOT_SIGNATURE 0x29
 
 /****************************************************************************
  * Each FAT directory entry is 32-bytes long.  The following define offsets
@@ -212,7 +219,7 @@
 #define DIR_GETNTRES(p)           UBYTE_VAL(p,DIR_NTRES)
 #define DIR_GETCRTTIMETENTH(p)    UBYTE_VAL(p,DIR_CRTTIMETENTH)
 
-#define MBR_PUTSECPERCLUS(p,v)    UBYTE_PUT(p,BS_SECPERCLUS),v)
+#define MBR_PUTSECPERCLUS(p,v)    UBYTE_PUT(p,BS_SECPERCLUS,v)
 #define MBR_PUTNUMFATS(p,v)       UBYTE_PUT(p,BS_NUMFATS,v)
 #define MBR_PUTMEDIA(p,v)         UBYTE_PUT(p,BS_MEDIA,v)
 #define MBR_PUTDRVNUM16(p,v)      UBYTE_PUT(p,BS16_DRVNUM,v)
