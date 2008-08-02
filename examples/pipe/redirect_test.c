@@ -213,15 +213,15 @@ static int redirect_writer(int argc, char *argv[])
   nbytes += printf("We have come to dedicate a portion of that field, as a final resting place for those who here\n");
   nbytes += printf("gave their lives that that nation might live. It is altogether fitting and proper that we\n");
   nbytes += printf("should do this.\n");
-  nbytes += printf("\nBut, in a larger sense, we can not dedicate—we can not consecrate—we can not hallow—this ground.\n");
+  nbytes += printf("\nBut, in a larger sense, we can not dedicate - we can not consecrate - we can not hallow - this ground.\n");
   nbytes += printf("The brave men, living and dead, who struggled here, have consecrated it, far above our poor power\n");
   nbytes += printf("to add or detract. The world will little note, nor long remember what we say here, but it can\n");
   nbytes += printf("never forget what they did here. It is for us the living, rather, to be dedicated here to the\n");
   nbytes += printf("unfinished work which they who fought here have thus far so nobly advanced. It is rather for us to\n");
-  nbytes += printf("be here dedicated to the great task remaining before us—that from these honored dead we take\n");
-  nbytes += printf("increased devotion to that cause for which they gave the last full measure of devotion—that we\n");
-  nbytes += printf("here highly resolve that these dead shall not have died in vain—that this nation, under God,\n");
-  nbytes += printf("shall have a new birth of freedom—and that government of the people, by the people, for the\n");
+  nbytes += printf("be here dedicated to the great task remaining before us - that from these honored dead we take\n");
+  nbytes += printf("increased devotion to that cause for which they gave the last full measure of devotion - that we\n");
+  nbytes += printf("here highly resolve that these dead shall not have died in vain - that this nation, under God,\n");
+  nbytes += printf("shall have a new birth of freedom - and that government of the people, by the people, for the\n");
   nbytes += printf("people, shall not perish from the earth.\n\n");
   fflush(stdout);
 
@@ -318,6 +318,7 @@ int redirection_test(void)
   /* Wait for redirect_writer thread to complete */
 
   printf("redirection_test: Waiting...\n");
+  fflush(stdout);
   sem_wait(&g_rddone);
 
   printf("redirection_test: returning %d\n", ret);
