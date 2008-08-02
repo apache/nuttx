@@ -75,12 +75,13 @@ int close_blockdriver(FAR struct inode *inode)
   int ret = 0; /* Assume success */
 
   /* Sanity checks */
-
+#ifdef CONFIG_DEBUG
   if (!inode || !inode->u.i_bops)
     {
       ret = -EINVAL;
       goto errout;
     }
+#endif
 
   /* Verify that the inode is a block driver. */
 

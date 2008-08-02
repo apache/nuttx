@@ -177,7 +177,7 @@ extern int g_nregions;
 extern FAR struct mm_freenode_s g_nodelist[MM_NNODES];
 
 /************************************************************
- * Pulblic Function Prototypes
+ * Public Function Prototypes
  ************************************************************/
 
 /* Normally defined in malloc.h */

@@ -163,7 +163,7 @@ struct internal_dir_s
 extern FAR struct inode *root_inode;
 
 /****************************************************************************
- * Pulblic Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN

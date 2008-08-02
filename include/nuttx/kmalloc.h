@@ -1,7 +1,7 @@
-/************************************************************
- * kmalloc.h
+/****************************************************************************
+ * include/nuttx/kmalloc.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,25 +31,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __KMALLOC_H
 #define __KMALLOC_H
 
-/************************************************************
+/****************************************************************************
  * Included Functions
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-/************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
- * Pulblic Function Prototypes
- ************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 #undef KMALLOC_EXTERN
 #if defined(__cplusplus)
@@ -80,7 +80,7 @@ KMALLOC_EXTERN FAR void  *kzalloc(size_t);
 KMALLOC_EXTERN void   kfree(FAR void*);
 #endif
 
-/* Functions defined in os_list.c ***************************/
+/* Functions defined in os_list.c *******************************************/
 
 /* Handles memory freed from an interrupt handler */
 

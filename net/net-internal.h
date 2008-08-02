@@ -133,7 +133,7 @@ extern sem_t                g_netdev_sem;
 #endif
 
 /****************************************************************************
- * Pulblic Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN

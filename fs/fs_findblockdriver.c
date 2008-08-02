@@ -83,12 +83,13 @@ int find_blockdriver(FAR const char *pathname, int mountflags, FAR struct inode 
   int ret = 0; /* Assume success */
 
   /* Sanity checks */
-
+#ifdef CONFIG_DEBUG
   if (!pathname || !ppinode)
     {
       ret = -EINVAL;
       goto errout;
     }
+#endif
 
   /* Find the inode registered with this pathname */
 

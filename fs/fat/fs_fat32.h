@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs_fat32.h
+ * fs/fat/fs_fat32.h
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __FS_FAT_H
-#define __FS_FAT_H
+#ifndef __FS_FAT_FS_FAT32_H
+#define __FS_FAT_FS_FAT32_H
 
 /****************************************************************************
  * Included Files
@@ -93,7 +93,7 @@
 #define BS32_BKBOOTSEC     50 /*  2@50: Sector number of boot record. Usually 6  */
                               /* 12@52: Reserved (zero) */
 #define BS32_DRVNUM        64 /*  1@64: Drive number for MSDOS bootstrap */
-                              /*  1@65: Reserverd (zero) */
+                              /*  1@65: Reserved (zero) */
 #define BS32_BOOTSIG       66 /*  1@66: Extended boot signature: 0x29 if following valid */
 #define BS32_VOLID         67 /*  4@67: Volume serial number */
 #define BS32_VOLLAB        71 /* 11@71: Volume label */
@@ -497,7 +497,7 @@ struct fat_dirinfo_s
  ****************************************************************************/
 
 /****************************************************************************
- * Pulblic Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN
@@ -581,4 +581,4 @@ EXTERN int fat_nfreeclusters(struct fat_mountpt_s *fs, size_t *pfreeclusters);
 }
 #endif
 
-#endif /* __FS_FAT32_H */
+#endif /* __FS_FAT_FS_FAT32_H */

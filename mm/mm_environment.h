@@ -122,7 +122,7 @@ extern void mm_addregion(FAR void *heapstart, size_t heapsize);
  ****************************************************************************/
 
 /****************************************************************************
- * Pulblic Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #endif /* __MM_ENVIRONMENT_H */

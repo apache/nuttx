@@ -82,12 +82,14 @@ int open_blockdriver(FAR const char *pathname, int mountflags, FAR struct inode 
   int ret;
 
   /* Minimal sanity checks */
+#ifdef CONFIG_DEBUG
 
   if (!ppinode)
     {
       ret = -EINVAL;
       goto errout;
     }
+#endif
 
   /* Find the inode associated with this block driver name.  find_blockdriver
    * will perform all additional error checking.
