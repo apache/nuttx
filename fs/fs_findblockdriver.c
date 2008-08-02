@@ -1,14 +1,14 @@
 /****************************************************************************
- * fs/fs_telldir.c
+ * fs/fs_openblockdriver.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution and use in pathname and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
  *
- * 1. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of pathname code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -39,9 +39,11 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <dirent.h>
+#include <sys/mount.h>
+#include <debug.h>
 #include <errno.h>
 #include <nuttx/fs.h>
+
 #include "fs_internal.h"
 
 /****************************************************************************
@@ -53,37 +55,75 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: telldir
+ * Name: find_blockdriver
  *
  * Description:
- *   The telldir() function returns the current location
- *   associated with the directory stream dirp.
+ *   Return the inode of the block driver specified by 'pathname'
  *
  * Inputs:
- *   dirp -- An instance of type DIR created by a previous
- *     call to opendir();
+ *   pathname - the full path to the block driver to be located
+ *   mountflags - if MS_RDONLY is set, then driver must support write
+ *     operations (see include/sys/mount.h)
+ *   ppinode - address of the location to return the inode reference
  *
  * Return:
- *   On success, the telldir() function returns the current
- *   location in the directory stream.  On error, -1 is
- *   returned, and errno is set appropriately.
+ *   Returns zero on success or a negated errno on failure:
  *
- *   EBADF - Invalid directory stream descriptor dir
+ *   EINVAL  - pathname or pinode is NULL
+ *   ENOENT  - No block driver of this name is registered
+ *   ENOTBLK - The inode associated with the pathname is not a block driver
+ *   EACCESS - The MS_RDONLY option was not set but this driver does not
+ *     support write access
  *
  ****************************************************************************/
 
-off_t telldir(FAR DIR *dirp)
+int find_blockdriver(FAR const char *pathname, int mountflags, FAR struct inode **ppinode)
 {
-  struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
+  FAR struct inode *inode;
+  int ret = 0; /* Assume success */
 
-  if (!idir || !idir->fd_root)
+  /* Sanity checks */
+
+  if (!pathname || !ppinode)
     {
-      *get_errno_ptr() = EBADF;
-      return (off_t)-1;
+      ret = -EINVAL;
+      goto errout;
     }
 
-  /* Just return the current position */
+  /* Find the inode registered with this pathname */
 
-  return idir->fd_position;
+  inode = inode_find(pathname, NULL);
+  if (!inode)
+    {
+      fdbg("Failed to find %s\n", pathname);
+      ret = -ENOENT;
+      goto errout;
+    }
+
+  /* Verify that the inode is a block driver. */
+
+  if (!INODE_IS_BLOCK(inode))
+    { 
+      fdbg("%s is not a block driver\n", pathname);
+      ret = -ENOTBLK;
+      goto errout_with_inode;
+   }
+
+  /* Make sure that the inode supports the requested access */
+
+  if (!inode->u.i_bops || !inode->u.i_bops->read ||
+      (!inode->u.i_bops->write && (mountflags & MS_RDONLY) == 0))
+    {
+      fdbg("%s does not support requested access\n", pathname);
+      ret = -EACCES;
+      goto errout_with_inode;
+    }
+
+  *ppinode = inode;
+  return OK;
+
+errout_with_inode:
+  inode_release(inode);
+errout:
+  return ret;
 }
-

@@ -205,12 +205,26 @@ EXTERN void inode_addref(FAR struct inode *inode);
 
 EXTERN void inode_release(FAR struct inode *inode);
 
-/* fs_files.c ***************************************************************/
+/* fs_files.c ****************************************************************/
 
 EXTERN void weak_function files_initialize(void);
 EXTERN int  files_allocate(FAR struct inode *inode, int oflags, off_t pos);
 EXTERN int  files_close(int filedes);
 EXTERN void files_release(int filedes);
+
+/* fs_findblockdriver.c ******************************************************/
+
+EXTERN int find_blockdriver(FAR const char *pathname, int mountflags,
+                            FAR struct inode **ppinode);
+
+/* fs_openblockdriver.c ******************************************************/
+
+EXTERN int open_blockdriver(FAR const char *pathname, int mountflags,
+                            FAR struct inode **ppinode);
+
+/* fs_closeblockdriver.c *****************************************************/
+
+EXTERN int close_blockdriver(FAR struct inode *inode);
 
 #undef EXTERN
 #if defined(__cplusplus)

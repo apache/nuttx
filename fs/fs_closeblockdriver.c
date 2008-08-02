@@ -1,14 +1,14 @@
 /****************************************************************************
- * fs/fs_telldir.c
+ * fs/fs_closeblockdriver.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution and use in pathname and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
  *
- * 1. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of pathname code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -39,9 +39,10 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <dirent.h>
+#include <debug.h>
 #include <errno.h>
 #include <nuttx/fs.h>
+
 #include "fs_internal.h"
 
 /****************************************************************************
@@ -53,37 +54,56 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: telldir
+ * Name: close_blockdriver
  *
  * Description:
- *   The telldir() function returns the current location
- *   associated with the directory stream dirp.
+ *   Call the close method and release the inode
  *
  * Inputs:
- *   dirp -- An instance of type DIR created by a previous
- *     call to opendir();
+ *   inode - reference to the inode of a block driver opened by open_blockdriver
  *
  * Return:
- *   On success, the telldir() function returns the current
- *   location in the directory stream.  On error, -1 is
- *   returned, and errno is set appropriately.
+ *   Returns zero on success or a negated errno on failure:
  *
- *   EBADF - Invalid directory stream descriptor dir
+ *   EINVAL  - inode is NULL
+ *   ENOTBLK - The inode is not a block driver
  *
  ****************************************************************************/
 
-off_t telldir(FAR DIR *dirp)
+int close_blockdriver(FAR struct inode *inode)
 {
-  struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
+  int ret = 0; /* Assume success */
 
-  if (!idir || !idir->fd_root)
+  /* Sanity checks */
+
+  if (!inode || !inode->u.i_bops)
     {
-      *get_errno_ptr() = EBADF;
-      return (off_t)-1;
+      ret = -EINVAL;
+      goto errout;
     }
 
-  /* Just return the current position */
+  /* Verify that the inode is a block driver. */
 
-  return idir->fd_position;
+  if (!INODE_IS_BLOCK(inode))
+    { 
+      fdbg("%s is not a block driver\n", pathname);
+      ret = -ENOTBLK;
+      goto errout;
+   }
+
+  /* Close the block driver.  Not that no mutually exclusive access
+   * to the driver is enforced here.  That must be done in the driver
+   * if needed.
+   */
+
+  if (inode->u.i_bops->close)
+    {
+      ret = inode->u.i_bops->close(inode);
+    }
+
+  /* Then release the reference on the inode */
+
+  inode_release(inode);
+errout:
+  return ret;
 }
-

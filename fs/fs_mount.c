@@ -41,8 +41,10 @@
 #include <sys/types.h>
 #include <sys/mount.h>
 #include <string.h>
+#include <debug.h>
 #include <errno.h>
 #include <nuttx/fs.h>
+
 #include "fs_internal.h"
 
 /* At least one filesystem must be defined, or this file will not compile.
@@ -160,37 +162,23 @@ int mount(const char *source, const char *target,
     }
 
   /* Find the specified filesystem */
+
   mops = mount_findfs(filesystemtype);
   if (!mops)
     {
+      fdbg("Failed to find filsystem %s\n", filesystemtype);
       errcode = ENODEV;
       goto errout;
     }
 
-  /* Find the block driver */
+  /* Find the inode of the block driver indentified by 'source' */
 
-  blkdrvr_inode = inode_find(source, NULL);
-  if (!blkdrvr_inode)
+  status = find_blockdriver(source, mountflags, &blkdrvr_inode);
+  if (status < 0)
     {
-      errcode = ENOENT;
-      goto errout;
-    }
-
-  /* Verify that the inode is a block driver. */
-
-  if (!INODE_IS_BLOCK(blkdrvr_inode))
-    { 
-      errcode = ENOTBLK;
-      goto errout_with_blkdrvr;
-   }
-
-  /* Make sure that the inode supports the requested access */
-
-  if (!blkdrvr_inode->u.i_bops->read ||
-      (!blkdrvr_inode->u.i_bops->write && (mountflags & MS_RDONLY) == 0))
-    {
-      errcode = EACCES;
-      goto errout_with_blkdrvr;
+       fdbg("Failed to find block driver %s\n", source);
+       errcode = -status;
+       goto errout;
     }
 
   /* Insert a dummy node -- we need to hold the inode semaphore
@@ -205,6 +193,7 @@ int mount(const char *source, const char *target,
        * one is that the inode already exists.
        */
 
+      fdbg("Failed to reserve inode\n");
       errcode = EBUSY;
       goto errout_with_semaphore;
     }
@@ -218,6 +207,7 @@ int mount(const char *source, const char *target,
     {
       /* The filesystem does not support the bind operation ??? */
 
+      fdbg("Filesystem does not support bind\n");
       errcode = EINVAL;
       goto errout_with_mountpt;
     }
@@ -233,8 +223,9 @@ int mount(const char *source, const char *target,
   {
       /* The inode is unhappy with the blkdrvr for some reason */
 
+      fdbg("Bind method failed: %d\n", status);
       errcode = -status;
-      goto errout_with_blkdrvr2;
+      goto errout_with_blkdrvr;
   }
 
   /* We have it, now populate it with driver specific information. */
@@ -259,20 +250,15 @@ int mount(const char *source, const char *target,
 
   /* A lot of goto's!  But they make the error handling much simpler */
 
- errout_with_blkdrvr2:
+errout_with_blkdrvr:
   inode_release(blkdrvr_inode);
-
- errout_with_mountpt:
+errout_with_mountpt:
   inode_release(mountpt_inode);
-
- errout_with_semaphore:
+errout_with_semaphore:
   inode_semgive();
-
- errout_with_blkdrvr:
   inode_release(blkdrvr_inode);
-
- errout:
-  *get_errno_ptr() = errcode;
+errout:
+  errno = errcode;
   return ERROR;
 }
 
