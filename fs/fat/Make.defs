@@ -33,5 +33,7 @@
 #
 ############################################################################
 
-FAT_ASRCS =
-FAT_CSRCS =  fs_fat32.c fs_fat32attrib.c fs_fat32util.c
+ifeq ($(CONFIG_FS_FAT),y)
+ASRCS		+=
+CSRCS		+= fs_fat32.c fs_fat32attrib.c fs_fat32util.c
+endif

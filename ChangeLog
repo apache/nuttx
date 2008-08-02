@@ -386,4 +386,5 @@
 	* Same issue on closing file descriptors in exit()
 	* Fixed in error in stdio flush logic.  Needed ssize_t vs size_t for error
 	  check.
+	* Moved all FAT related files from fs to fs/fat
 

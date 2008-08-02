@@ -56,10 +56,7 @@ CSRCS		+= fs_registerblockdriver.c fs_unregisterblockdriver.c \
 		   fs_mount.c fs_umount.c \
 		   fs_fsync.c fs_unlink.c fs_rename.c \
 		   fs_mkdir.c fs_rmdir.c
-
-ifeq ($(CONFIG_FS_FAT),y)
-CSRCS		+= fs_fat32.c fs_fat32util.c fs_fat32attrib.c
-endif
+include fat/Make.defs
 endif
 endif
 
@@ -69,6 +66,9 @@ SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
 
 BIN		= libfs$(LIBEXT)
+
+SUBDIRS		= fat
+VPATH		= fat
 
 all:	$(BIN)
 
@@ -84,7 +84,7 @@ $(BIN):	$(OBJS)
 	done ; )
 
 .depend: Makefile $(SRCS)
-	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@$(MKDEP) --dep-path . --dep-path fat $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 
 depend: .depend
@@ -92,6 +92,9 @@ depend: .depend
 clean:
 	@rm -f $(BIN) *~ .*.swp
 	$(call CLEAN)
+	@( for dir in $(SUBDIRS); do \
+		rm -f $${dir}/*~ $${dir}/.*.swp; \
+	done ; )
 
 distclean: clean
 	@rm -f Make.dep .depend
