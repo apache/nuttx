@@ -42,5 +42,5 @@ CSRCS		+= fs_fat32.c fs_fat32attrib.c fs_fat32util.c
 # File required for mkfatfs utility function
 
 ASRCS		+=
-CSRCS		+= fs_initmbr.c
+CSRCS		+= fs_writefat.c
 endif

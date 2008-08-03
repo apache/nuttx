@@ -136,7 +136,8 @@
 #define DIR_WRTDATE        24 /*  2@24: Date of last write */
 #define DIR_FSTCLUSTLO     26 /*  2@26: LS first cluster number */
 #define DIR_FILESIZE       28 /*  4@28: File size in bytes */
-#define DIR_SIZE           32
+#define DIR_SIZE           32 /* The size of one directory entry */
+#define DIR_SHIFT           5 /* log2 of DIR_SIZE */
 
 /* First byte of the directory name has special meanings: */
 
@@ -178,13 +179,20 @@
  * These offset describe the FSINFO sector
  */
 
-#define FSI_LEADSIG         0 /*   4@0:   0x41615252 */
+#define FSI_LEADSIG         0 /*   4@0:   0x41615252  = "RRaA" */
                               /* 480@4:   Reserved (zero) */
-#define FSI_STRUCTSIG     484 /*   4@484: 0x61417272 */
+#define FSI_STRUCTSIG     484 /*   4@484: 0x61417272 = "rrAa" */
 #define FSI_FREECOUNT     488 /*   4@488: Last free cluster count on volume */
 #define FSI_NXTFREE       492 /*   4@492: Cluster number of 1st free cluster */
                               /*  12@496: Reserved (zero) */
 #define FSI_TRAILSIG      508 /*   4@508: 0xaa550000 */
+
+/****************************************************************************
+ * FAT values
+ */
+
+#define FAT_EOF      0x0ffffff8
+#define FAT_BAD      0x0ffffff7
 
 /****************************************************************************
  * Access to data in raw sector data */

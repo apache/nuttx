@@ -84,7 +84,6 @@
 
 struct fat_format_s
 {
-   boolean ff_bbcheck;         /* TRUE: check for bad blocks */
    ubyte   ff_nfats;           /* Number of FATs */
    ubyte   ff_fatsize;         /* FAT size: 0 (autoselect), 12, 16, or 32 */
    ubyte   ff_clustsize;       /* Number of sectors per cluster: 0 (autoselect) */
@@ -130,7 +129,7 @@ extern "C" {
  *     size in 'fmt', bad cluster size in 'fmt'
  *   ENOENT - 'pathname' does not refer to anything in the filesystem.
  *   ENOTBLK - 'pathname' does not refer to a block driver
- *   ENOSPC - block driver does not support geometry method
+ *   EACCESS - block driver does not support wrie or geometry methods
  *
  * Assumptions:
  *   - The caller must assure that the block driver is not mounted and not in

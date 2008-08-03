@@ -64,6 +64,25 @@
 
 #define FAT32_DEFAULT_ROOT_CLUSTER     2
 
+/* Macros to simplify direct block driver access */
+
+#define DEV_OPEN() \
+    var->fb_inode->u.i_bops->open ? \
+    var->fv_inode->u.i_bops->open(var->fv_inode) : \
+    0
+#define DEV_CLOSE() \
+    var->fb_inode->u.i_bops->close ? \
+    var->fv_inode->u.i_bops->close(var->fv_inode) : \
+    0
+#define DEV_READ(buf, sect, nsect) \
+    var->fv_inode->u.i_bops->read(var->fv_inode, buf, sect, nsect)
+#define DEV_WRITE(buf, sect, nsect) \
+    var->fv_inode->u.i_bops->write(var->fv_inode, buf, sect, nsect)
+#define DEV_GEOMETRY(geo) \
+    var->fv_inode->u.i_bops->geometry(var->fv_inode, &geo)
+#define DEV_IOCTL(cmd, arg) \
+    var->fv_inode->u.i_bops->ioctl(var->fv_inode, cmd, arg)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -76,17 +95,18 @@
 
 struct fat_var_s
 {
-   ubyte        fv_jump[3];         /* 3-byte boot jump instruction */
-   ubyte        fv_sectshift;       /* Log2 of fv_sectorsize */
-   uint16       fv_bootcodesize;    /* Size of array at fv_bootcode */
-   uint32       fv_createtime;      /* Creation time */
-   uint32       fv_sectorsize;      /* Size of one hardware sector */
-   uint32       fv_nsectors;        /* Number of sectors */
-   uint32       fv_fatlen;          /* Size of the FAT */
-   ubyte       *fv_rootdir;         /* Allocated root directory sector */
-   ubyte       *fv_mbr;             /* Allocated master boot record image */
-   ubyte       *fv_info;            /* FAT32 info sector */
-   const ubyte *fv_bootcode;        /* Points to boot code to put into MBR */
+   struct inode *fv_inode;          /* The block driver "handle" */
+   ubyte         fv_jump[3];        /* 3-byte boot jump instruction */
+   ubyte         fv_sectshift;      /* Log2 of fv_sectorsize */
+   ubyte         fv_nrootdirsects;  /* Number of root directory sectors */
+   uint16        fv_bootcodesize;   /* Size of array at fv_bootcode */
+   uint32        fv_createtime;     /* Creation time */
+   uint32        fv_sectorsize;     /* Size of one hardware sector */
+   uint32        fv_nsectors;       /* Number of sectors */
+   uint32        fv_nfatsects;      /* Number of sectors in each FAT */
+   uint32        fv_clustcount;     /* Number of clusters */
+   ubyte        *fv_sect;           /* Allocated working sector buffer */
+   const ubyte  *fv_bootcode;       /* Points to boot code to put into MBR */
 };
 
 /****************************************************************************
@@ -105,8 +125,22 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN void mkfatfs_initmbr(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var, ubyte *sect)
-;
+/****************************************************************************
+ * Name: mkfatfs_writefat
+ *
+ * Description:
+ *   Write the configured fat filesystem to the block device
+ *
+ * Input:
+ *    fmt  - User specified format parameters
+ *    var  - Other format parameters that are not user specifiable
+ *
+ * Return:
+ *    Zero on success; negated errno on failure
+ *
+ ****************************************************************************/
+EXTERN int mkfatfs_writefatfs(FAR struct fat_format_s *fmt,
+                              FAR struct fat_var_s *var);
 
 #undef EXTERN
 #if defined(__cplusplus)
