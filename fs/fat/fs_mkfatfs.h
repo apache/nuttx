@@ -126,14 +126,34 @@ extern "C" {
 #endif
 
 /****************************************************************************
+ * Name: mkfatfs_configfatfs
+ *
+ * Description:
+ *   Based on the geometry of the block device and upon the caller-selected
+ *   values, configure the FAT filesystem for the device.
+ *
+ * Input:
+ *    fmt  - Caller specified format parameters
+ *    var  - Holds disk geomtry data.  Also, the location to return FAT
+ *           configuration data
+ *
+ * Return:
+ *    Zero on success; negated errno on failure
+ *
+ ****************************************************************************/
+EXTERN int mkfatfs_configfatfs(FAR struct fat_format_s *fmt,
+                               FAR struct fat_var_s *var);
+
+/****************************************************************************
  * Name: mkfatfs_writefat
  *
  * Description:
  *   Write the configured fat filesystem to the block device
  *
  * Input:
- *    fmt  - User specified format parameters
- *    var  - Other format parameters that are not user specifiable
+ *    fmt  - Caller specified format parameters
+ *    var  - Other format parameters that are not caller specifiable. (Most
+ *           set by mkfatfs_configfatfs()).
  *
  * Return:
  *    Zero on success; negated errno on failure

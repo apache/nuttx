@@ -195,6 +195,31 @@
 #define FAT_BAD      0x0ffffff7
 
 /****************************************************************************
+ * Maximum cluster by FAT type.  This is the key value used to distinquish
+ * between FAT12, 16, and 32.
+ */
+
+/* FAT12: For M$, the calculation is ((1 << 12) - 19).  But we will follow the
+ * Linux tradition of allowing slightly more clusters for FAT12.
+ */
+
+#define FAT_MAXCLUST12 ((1 << 12) - 16)
+
+/* FAT16: For M$, the calculation is ((1 << 16) - 19). */
+  
+#define FAT_MINCLUST16 (FAT_MAXCLUST12 + 1)
+#define FAT_MAXCLUST16 ((1 << 16) - 16)
+
+/* FAT32: M$ reserves the MS 4 bits of a FAT32 FAT entry so only 18 bits are
+ * available.  For M$, the calculation is ((1 << 28) - 19).
+ */
+
+#define FAT_MINCLUST32  65524
+/* #define FAT_MINCLUST32  (FAT_MAXCLUST16 + 1) */
+#define FAT_MAXCLUST32  ((1 << 28) - 16)
+
+
+/****************************************************************************
  * Access to data in raw sector data */
 
 #define UBYTE_VAL(p,o)            (((ubyte*)(p))[o])

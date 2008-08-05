@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fat/fs_write.c
+ * fs/fat/fs_writefat.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -504,8 +504,9 @@ static inline int mkfatfs_writerootdir(FAR struct fat_format_s *fmt,
  *   Write the configured fat filesystem to the block device
  *
  * Input:
- *    fmt  - User specified format parameters
- *    var  - Other format parameters that are not user specifiable
+ *    fmt  - Caller specified format parameters
+ *    var  - Other format parameters that are not caller specifiable. (Most
+ *           set by mkfatfs_configfatfs()).
  *
  * Return:
  *    Zero on success; negated errno on failure
