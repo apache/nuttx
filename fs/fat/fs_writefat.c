@@ -105,13 +105,13 @@ static inline void mkfatfs_initmbr(FAR struct fat_format_s *fmt,
   /* 2@19: FAT12/16: Must be 0, see BS_TOTSEC32.
    * Handled with 4@32: Total count of sectors on the volume */
 
-  if (var->fv_nsectors >= 65536)
+  if (fmt->ff_nsectors >= 65536)
     {
-      MBR_PUTTOTSEC32(var->fv_sect, var->fv_nsectors);
+      MBR_PUTTOTSEC32(var->fv_sect, fmt->ff_nsectors);
     }
   else
     {
-      MBR_PUTTOTSEC16(var->fv_sect, (uint16)var->fv_nsectors);
+      MBR_PUTTOTSEC16(var->fv_sect, (uint16)fmt->ff_nsectors);
     }
 
   /* 1@21: Media code: f0, f8, f9-fa, fc-ff */ 

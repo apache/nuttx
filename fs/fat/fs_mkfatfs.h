@@ -103,7 +103,6 @@ struct fat_var_s
    uint16        fv_bootcodesize;   /* Size of array at fv_bootcode */
    uint32        fv_createtime;     /* Creation time */
    uint32        fv_sectorsize;     /* Size of one hardware sector */
-   uint32        fv_nsectors;       /* Number of sectors */
    uint32        fv_nfatsects;      /* Number of sectors in each FAT */
    uint32        fv_nclusters;      /* Number of clusters */
    ubyte        *fv_sect;           /* Allocated working sector buffer */

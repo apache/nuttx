@@ -64,6 +64,13 @@
 #define fatconfig16 fatconfig[NDX16]
 #define fatconfig32 fatconfig[NDX32]
 
+/* JMP rel8 and NOP opcodes */
+
+#define OPCODE_JMP_REL8    0xeb
+#define OPCODE_NOP         0x90
+
+#define BOOTCODE_MSGOFFSET 29
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -73,11 +80,33 @@ struct fat_config_s
   uint32 fc_navailsects;  /* The number of available sectors */
   uint32 fc_nfatsects;    /* The number of sectors in one FAT */
   uint32 fc_nclusters;    /* The number of clusters in the filesystem */
+  uint32 fc_rsvdseccount; /* The number of reserved sectors */
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* Reverse engineered, generic boot message logic for non-bootable disk.
+ * Message begins at offset 29; Sector relative offset must be poked into
+ * offset 3.
+ */
+ 
+static ubyte g_bootcodeblob[] =
+{
+  0x0e, 0x1f, 0xbe, 0x00, 0x7c, 0xac, 0x22, 0xc0, 0x74, 0x0b, 0x56,
+  0xb4, 0x0e, 0xbb, 0x07, 0x00, 0xcd, 0x10, 0x5e, 0xeb, 0xf0, 0x32,
+  0xe4, 0xcd, 0x16, 0xcd, 0x19, 0xeb, 0xfe, 0x54, 0x68, 0x69, 0x73,
+  0x20, 0x69, 0x73, 0x20, 0x6e, 0x6f, 0x74, 0x20, 0x61, 0x20, 0x62,
+  0x6f, 0x6f, 0x74, 0x61, 0x62, 0x6c, 0x65, 0x20, 0x64, 0x69, 0x73,
+  0x6b, 0x2e, 0x20, 0x20, 0x50, 0x6c, 0x65, 0x61, 0x73, 0x65, 0x20,
+  0x69, 0x6e, 0x73, 0x65, 0x72, 0x74, 0x20, 0x61, 0x20, 0x62, 0x6f,
+  0x6f, 0x74, 0x61, 0x62, 0x6c, 0x65, 0x20, 0x66, 0x6c, 0x6f, 0x70,
+  0x70, 0x79, 0x20, 0x61, 0x6e, 0x64, 0x0d, 0x0a, 0x70, 0x72, 0x65,
+  0x73, 0x73, 0x20, 0x61, 0x6e, 0x79, 0x20, 0x6b, 0x65, 0x79, 0x20,
+  0x74, 0x6f, 0x20, 0x74, 0x72, 0x79, 0x20, 0x61, 0x67, 0x61, 0x69,
+  0x6e, 0x20, 0x2e, 0x2e, 0x2e, 0x0d, 0x0a, 0x00
+};
 
 /****************************************************************************
  * Private Functions
@@ -307,27 +336,27 @@ mkfatfs_clustersearchlimits(FAR struct fat_format_s *fmt, FAR struct fat_var_s *
     {
       /* Pick a starting size based on the number of sectors on the device */
 
-      if (var->fv_nsectors < 2048)
+      if (fmt->ff_nsectors < 2048)
         {
           /* 2k sectors, start wit 1 sector/cluster. */
           fmt->ff_clustshift = 0;
         }
-      else if (var->fv_nsectors  < 4096)
+      else if (fmt->ff_nsectors  < 4096)
         {
           /* 4k sectors, start with 2 sector/cluster. */
           fmt->ff_clustshift = 1;
         }
-      else if (var->fv_nsectors  < 8192)
+      else if (fmt->ff_nsectors  < 8192)
         {
           /* 8k sectors, start with 4 sector/cluster. */
           fmt->ff_clustshift = 2;
         }
-      else if (var->fv_nsectors  < 16384)
+      else if (fmt->ff_nsectors  < 16384)
         {
           /* 16k sectors, start with 8 sector/cluster. */
           fmt->ff_clustshift = 3;
         }
-      else if (var->fv_nsectors  < 32768)
+      else if (fmt->ff_nsectors  < 32768)
         {
           /* 32k sectors, start with 16 sector/cluster. */
           fmt->ff_clustshift = 4;
@@ -560,6 +589,35 @@ mkfatfs_tryfat32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
 }
 
 /****************************************************************************
+ * Name:  mkfatfs_selectfat
+ *
+ * Description:
+ *   The cluster search has succeeded, select the specified FAT FS
+ *
+ * Input:
+ *   fattype - The FAT size selected
+ *   fmt     - Caller specified format parameters
+ *   var     - Format parameters that are not caller specifiable.
+ *
+ * Return:
+ *    None
+ *
+ ****************************************************************************/
+
+static inline void
+mkfatfs_selectfat(int fattype, FAR struct fat_format_s *fmt,
+                  FAR struct fat_var_s *var, FAR struct fat_config_s *config)
+{
+  /* Return the appropriate information about the selected file system. */
+
+  fdbg("Selected FAT%d\n", fattype);
+  var->fv_fattype      = fattype;
+  var->fv_nclusters    = config->fc_nclusters;
+  var->fv_nfatsects    = config->fc_nfatsects;
+  fmt->ff_rsvdseccount = config->fc_rsvdseccount;
+}
+
+/****************************************************************************
  * Name:  mkfatfs_clustersearch
  *
  * Description:
@@ -580,10 +638,33 @@ static inline int
 mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 {
   struct fat_config_s fatconfig[3];
-  uint32 nrootdirsects = 0;
   ubyte  mxclustshift;
 
   memset(fatconfig, 0, 3*sizeof(struct fat_config_s));
+
+  /* Select the reserved sector count for each FAT size */
+
+  if (fmt->ff_rsvdseccount)
+    {
+      fatconfig12.fc_rsvdseccount = fmt->ff_rsvdseccount;
+      fatconfig16.fc_rsvdseccount = fmt->ff_rsvdseccount;
+
+      if (fmt->ff_rsvdseccount < 2)
+        {
+          fvdbg("At least 2 reserved sectors needed by FAT32\n");
+          fatconfig32.fc_rsvdseccount = 2;
+        }
+      else
+        {
+          fatconfig32.fc_rsvdseccount = fmt->ff_rsvdseccount;
+        }
+    }
+  else
+    {
+      fatconfig12.fc_rsvdseccount = 1;
+      fatconfig16.fc_rsvdseccount = 1;
+      fatconfig32.fc_rsvdseccount = 32;
+    }
 
   /* Determine the number of sectors needed by the root directory.
    * This is a constant value, independent of cluster size for FAT12/16
@@ -592,10 +673,13 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
   if (var->fv_fattype != 32)
     {
       /* Calculate the number of sectors reqired to contain the selected
-       * number of root directory entries.
+       * number of root directory entries.  This value is save in the var
+       * structure but will be overwritten if FAT32 is selected.  FAT32 uses
+       * a cluster chain for the root directory, so the concept of the number
+       * of root directory entries does not apply to FAT32
        */
 
-      nrootdirsects =
+      var->fv_nrootdirsects =
         ((fmt->ff_rootdirentries << DIR_SHIFT) + var->fv_sectorsize - 1) >> var->fv_sectshift;
  
       /* The number of data sectors available (includes the fat itself)
@@ -605,7 +689,7 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 
       fatconfig12.fc_navailsects =
         fatconfig16.fc_navailsects =
-          var->fv_nsectors - nrootdirsects - fmt->ff_rsvdseccount;
+          fmt->ff_nsectors - var->fv_nrootdirsects - fatconfig12.fc_rsvdseccount;
    }
 
   /* Select an initial and terminal clustersize to use in the search (if these
@@ -620,9 +704,6 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
  
       /* Check if FAT12 has not been excluded */
 
-      fatconfig12.fc_nfatsects = 0;
-      fatconfig12.fc_nclusters = 0;
-\
       if (var->fv_fattype == 0 || var->fv_fattype == 12)
         {
           /* Try to configure a FAT12 filesystem with this cluster size */
@@ -639,9 +720,6 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 
       /* Check if FAT16 has not been excluded */
 
-      fatconfig16.fc_nfatsects = 0;
-      fatconfig16.fc_nclusters = 0;
-
       if (var->fv_fattype == 0 || var->fv_fattype == 16)
         {
           /* Try to configure a FAT16 filesystem with this cluster size */
@@ -656,10 +734,33 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
             }
         }
 
-      /* Check if FAT32 has not been excluded */
+      /* If either FAT12 or 16 was configured at this sector/cluster setting,
+       * then finish the configuration and break out now
+       */
 
-      fatconfig32.fc_nfatsects = 0;
-      fatconfig32.fc_nclusters = 0;
+      if (fatconfig12.fc_nclusters || fatconfig16.fc_nclusters)
+        {
+          if ((!var->fv_fattype && fatconfig16.fc_nclusters > fatconfig12.fc_nclusters) ||
+              (var ->fv_fattype == 16))
+            {
+              /* The caller has selected FAT16 -OR- no FAT type has been selected, but
+               * the FAT16 selection has more clusters. Select FAT16.
+               */
+
+              mkfatfs_selectfat(16, fmt, var, &fatconfig16);
+            }
+          else
+            {
+              /* The caller has selected FAT12 -OR- no FAT type has been selected, but
+               * the FAT12 selected has more clusters.  Selected FAT12
+               */
+
+              mkfatfs_selectfat(12, fmt, var, &fatconfig12);
+            }
+         return OK;
+        }
+
+      /* Check if FAT32 has not been excluded */
 
       if (var->fv_fattype == 0 || var->fv_fattype == 32)
         {
@@ -668,7 +769,7 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
            * because the size of the root directory cluster changes with cluster size.
            */
 
-          fatconfig32.fc_navailsects = var->fv_nsectors - (1 << fmt->ff_clustshift) - fmt->ff_rsvdseccount;
+          fatconfig32.fc_navailsects = fmt->ff_nsectors - (1 << fmt->ff_clustshift) - fatconfig32.fc_rsvdseccount;
 
           /* Try to configure a FAT32 filesystem with this cluster size */
 
@@ -680,57 +781,13 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
                   fatconfig32.fc_nclusters = 0;
                 }
             }
-        }
-
-      /* If any FAT was configured at this sector/cluster setting, then break out now */
- 
-      if (fatconfig12.fc_nclusters || fatconfig16.fc_nclusters)
-        {
-	  /* If both FAT12 and FAT16 ar possible, select the one with the largest
-	   * number of clusters (unless one has already been selected)
-	   */
-
-          if (!var->fv_fattype)
-            {
-               if (fatconfig16.fc_nclusters > fatconfig12.fc_nclusters)
-                 {
-                   var->fv_fattype = 16;
-                 }
-               else
-                 {
-                   var->fv_fattype = 12;
-                 }
-            }
-          fdbg("Selected FAT%d\n", var->fv_fattype);
-
-          /* Then return the appropriate inforamation about the selected
-           * file system.
-           */
-
-          if (var->fv_fattype == 12)
-            {
-              var->fv_nclusters = fatconfig12.fc_nclusters;
-              var->fv_nfatsects = fatconfig12.fc_nfatsects;
-            }
           else
             {
-              var->fv_nclusters = fatconfig16.fc_nclusters;
-              var->fv_nfatsects = fatconfig16.fc_nfatsects;
-            }
-          var->fv_nrootdirsects = nrootdirsects;
-          return OK;
-        }
-      else  if (fatconfig32.fc_nclusters)
-        {
-          /* Select FAT32 if we have not already done so */
+              /* Select FAT32 if we have not already done so */
 
-          var->fv_fattype = 32;
-          fdbg("Selected FAT%d\n", var->fv_fattype);
- 
-          var->fv_nclusters     = fatconfig32.fc_nclusters;
-          var->fv_nfatsects     = fatconfig32.fc_nfatsects;
-          var->fv_nrootdirsects = 1 << fmt->ff_clustshift;
-          return OK;
+              mkfatfs_selectfat(32, fmt, var, &fatconfig32);
+              return OK;
+            }
         }
 
       /* Otherwise, bump up the sectors/cluster for the next time around the loop. */
@@ -764,6 +821,122 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 int mkfatfs_configfatfs(FAR struct fat_format_s *fmt,
                         FAR struct fat_var_s *var)
 {
+  int ret;
+
+  /* Select the number of root directory entries (FAT12/16 only).  If FAT32 is selected,
+   * this value will be cleared later
+   */
+
+  if (!fmt->ff_rootdirentries)
+    {
+      /* The caller did not specify the number of root directory entries; use a default of 512. */
+
+      fmt->ff_rootdirentries = 512;
+    }
+
+  /* Search to determine the smallest (reasonable) cluster size.  A by-product
+   * of this search will be the selection of the FAT size (12/16/32) if the
+   * caller has not specified the FAT size
+   */
+
+  ret = mkfatfs_clustersearch(fmt, var);
+  if (ret < 0)
+    {
+       fdbg("Failed to set cluster size\n");
+       return ret;
+    }
+
+  /* Perform FAT specific initialization */
+
+  /* Set up boot jump assuming FAT 12/16 offset to bootcode */
+
+  var->fv_jump[0]      = OPCODE_JMP_REL8;
+  var->fv_jump[2]      = OPCODE_NOP;
+  var->fv_bootcode     = g_bootcodeblob;
+  var->fv_bootcodesize = sizeof(g_bootcodeblob);
+
+  if (var->fv_fattype != 32)
+    {
+      /* Set up additional, non-zero FAT12/16 fields */
+
+      /* Patch in the correct offset to the boot code */
+ 
+      var->fv_jump[1]   = BS16_BOOTCODE - 2;
+      g_bootcodeblob[3] = BS16_BOOTCODE + BOOTCODE_MSGOFFSET;
+    }
+  else
+    {
+      /* Patch in the correct offset to the boot code */
+
+      var->fv_jump[1]   = BS32_BOOTCODE - 2;
+      g_bootcodeblob[3] = BS32_BOOTCODE + BOOTCODE_MSGOFFSET;
+
+      /* The root directory is a cluster chain... its is initialize size is one cluster */
+  
+      var->fv_nrootdirsects = 1 << fmt->ff_clustshift;
+
+      /* The number of reported root directory entries should should be zero for
+       * FAT32 because the root directory is a cluster chain.
+       */
+
+      fmt->ff_rootdirentries = 0;
+
+      /* Verify the caller's backupboot selection */
+
+      if (fmt->ff_backupboot <= 1 || fmt->ff_backupboot >= fmt->ff_rsvdseccount)
+        {
+          fdbg("Invalid backup boot sector: %d\n", fmt->ff_backupboot)
+          fmt->ff_backupboot = 0;
+        }
+
+     /* Check if the caller has selected a location for the backup boot record */
+
+      if (!fmt->ff_backupboot)
+        {
+          /* There must be reserved sectors in order to have a backup boot sector */
+
+          if (fmt->ff_rsvdseccount > 0 && fmt->ff_rsvdseccount >= 2)
+            {
+              /* Sector 0 is the MBR; 1... ff_rsvdseccount are reserved.  Try the next
+               * the last reserved sector.
+               */
+
+              fmt->ff_backupboot = fmt->ff_rsvdseccount - 1;
+              if (fmt->ff_backupboot > 6)
+                {
+                  /* Limit the location to within the first 7 */
+
+                  fmt->ff_backupboot = 6;
+                }
+            }
+        }
+    }
+
+  /* Report the selected fat type */
+
+  fmt->ff_fattype = var->fv_fattype;
+
+  /* Describe the configured filesystem */
+
+#ifdef CONFIG_DEBUG
+  fdbg("Sector size:          %d bytes\n", var->fv_sectorsize);
+  fdbg("Number of sectors:    %d sectors\n", fmt->ff_nsectors);
+  fdbg("FAT size:             %d bits\n", var->fv_fattype);
+  fdbg("Number FATs:          %d\n", fmt->ff_fats);
+  fdbg("Sectors per cluster:  %d sectors\n", 1 << fmt->ff_clustshift);
+  fdbg("FS size:              %d sectors\n", var->fv_nfatsects);
+  fdbg("                      %d clusters\n", var->fv_nclusters);
+  if (var->fv_fattype != 32)
+    {
+       fdbg("Root directory slots: %d\n", fmt->ff_rootdirentries);
+    }
+  fdbg("Volume ID:            %08x\n", fmt->ff_volumeid);
+  fdbg("Volume Label:         \"%c%c%c%c%c%c%c%c%c%c%c\"\n",
+    fmt->ff_volumelabel[0], fmt->ff_volumelabel[1], fmt->ff_volumelabel[2], 
+    fmt->ff_volumelabel[3], fmt->ff_volumelabel[4], fmt->ff_volumelabel[5], 
+    fmt->ff_volumelabel[6], fmt->ff_volumelabel[7], fmt->ff_volumelabel[8], 
+    fmt->ff_volumelabel[9], fmt->ff_volumelabel[10]);
+#endif
   return OK;
 }
 

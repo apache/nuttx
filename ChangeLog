@@ -387,4 +387,6 @@
 	* Fixed in error in stdio flush logic.  Needed ssize_t vs size_t for error
 	  check.
 	* Moved all FAT related files from fs to fs/fat
+	* Implemented mkfatfs(), a non-standard API to create a FAT filesystem on a
+	  block device (not yet tested).
 

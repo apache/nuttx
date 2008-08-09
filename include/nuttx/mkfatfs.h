@@ -93,7 +93,7 @@ struct fat_format_s
    uint16  ff_rsvdseccount;    /* Reserved sectors */
    uint32  ff_hidsec;          /* Count of hidden sectors preceding fat */
    uint32  ff_volumeid;        /* FAT volume id */
-   uint32  ff_maxblocks;       /* Number of blocks from device to use: 0: Use all */
+   uint32  ff_nsectors;        /* Number of sectors from device to use: 0: Use all */
 };
 
 /****************************************************************************
