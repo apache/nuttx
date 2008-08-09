@@ -482,7 +482,7 @@ struct fat_mountpt_s
   size_t   fs_fsinfo;              /* MBR: Sector number of FSINFO sector */
   size_t   fs_currentsector;       /* The sector number buffered in fs_buffer */
   uint32   fs_nclusters;           /* Maximum number of data clusters */
-  uint32   fs_fatsize;             /* MBR: Count of sectors occupied by one fat */
+  uint32   fs_nfatsects;           /* MBR: Count of sectors occupied by one fat */
   uint32   fs_fattotsec;           /* MBR: Total count of sectors on the volume */
   uint32   fs_fsifreecount;        /* FSI: Last free cluster count on volume */
   uint32   fs_fsinextfree;         /* FSI: Cluster number of 1st free cluster */

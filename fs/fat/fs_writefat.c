@@ -133,7 +133,7 @@ static inline void mkfatfs_initmbr(FAR struct fat_format_s *fmt,
 
   /* Most of the rest of the sector depends on the FAT size */
 
-  if (fmt->ff_fatsize != 32)
+  if (fmt->ff_fattype != 32)
     {
       /* 2@22: FAT12/16: Must be 0, see BS32_FATSZ32 */
 
@@ -156,11 +156,11 @@ static inline void mkfatfs_initmbr(FAR struct fat_format_s *fmt,
 
       /* 8@54: "FAT12  ", "FAT16  ", or "FAT    " */
 
-      if (fmt->ff_fatsize == 12)
+      if (fmt->ff_fattype == 12)
         {
           memcpy(&var->fv_sect[BS16_FILESYSTYPE], "FAT12   ", 8);
         }
-      else /* if (fmt->ff_fatsize == 16) */
+      else /* if (fmt->ff_fattype == 16) */
         {
           memcpy(&var->fv_sect[BS16_FILESYSTYPE], "FAT16   ", 8);
         }
@@ -338,7 +338,7 @@ static inline int mkfatfs_writembr(FAR struct fat_format_s *fmt,
  
   /* Write FAT32-specific sectors */
 
-  if (ret >= 0 && fmt->ff_fatsize == 32)
+  if (ret >= 0 && fmt->ff_fattype == 32)
     {
       /* Write the backup master boot record */
 
@@ -405,7 +405,7 @@ static inline int mkfatfs_writefat(FAR struct fat_format_s *fmt,
            if (sectno == 0)
              {
                memset(var->fv_sect, 0, var->fv_sectorsize);
-               switch(fmt->ff_fatsize)
+               switch(fmt->ff_fattype)
                  {
                    case 12:
                      /* Mark the first two full FAT entries -- 24 bits, 3 bytes total */

@@ -284,7 +284,7 @@ static int fat_checkfsinfo(struct fat_mountpt_s *fs)
 static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 {
   uint32  ndatasectors;
-  uint32  fatsize;
+  uint32  ntotalfatsects;
   uint16  rootdirsectors = 0;
   boolean notfat32 = FALSE;
 
@@ -320,17 +320,17 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
   /* Determine the number of sectors in a FAT. */
 
-  fs->fs_fatsize = MBR_GETFATSZ16(fs->fs_buffer); /* Should be zero */
-  if (fs->fs_fatsize)
+  fs->fs_nfatsects = MBR_GETFATSZ16(fs->fs_buffer); /* Should be zero */
+  if (fs->fs_nfatsects)
     {
       notfat32 = TRUE; /* Must be zero for FAT32 */
     }
   else
     {
-      fs->fs_fatsize = MBR_GETFATSZ32(fs->fs_buffer);
+      fs->fs_nfatsects = MBR_GETFATSZ32(fs->fs_buffer);
     }
 
-  if (!fs->fs_fatsize || fs->fs_fatsize >= fs->fs_hwnsectors)
+  if (!fs->fs_nfatsects || fs->fs_nfatsects >= fs->fs_hwnsectors)
     {
       return -ENODEV;
     }
@@ -363,11 +363,11 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
   /* Get the number of FATs. This is probably two but could have other values */
 
   fs->fs_fatnumfats = MBR_GETNUMFATS(fs->fs_buffer);
-  fatsize = fs->fs_fatnumfats * fs->fs_fatsize;
+  ntotalfatsects = fs->fs_fatnumfats * fs->fs_nfatsects;
 
   /* Get the total number of data sectors */
 
-  ndatasectors = fs->fs_fattotsec - fs->fs_fatresvdseccount - fatsize - rootdirsectors;
+  ndatasectors = fs->fs_fattotsec - fs->fs_fatresvdseccount - ntotalfatsects - rootdirsectors;
   if (ndatasectors > fs->fs_hwnsectors)
     {
       return -ENODEV;
@@ -415,10 +415,10 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
     }
   else
     {
-      fs->fs_rootbase = fs->fs_fatbase + fatsize; 
+      fs->fs_rootbase = fs->fs_fatbase + ntotalfatsects; 
     }
 
-  fs->fs_database     = fs->fs_fatbase + fatsize + fs->fs_rootentcnt / DIRSEC_NDIRS(fs);
+  fs->fs_database     = fs->fs_fatbase + ntotalfatsects + fs->fs_rootentcnt / DIRSEC_NDIRS(fs);
   fs->fs_fsifreecount = 0xffffffff;
 
   return OK;
@@ -708,7 +708,7 @@ int fat_mount(struct fat_mountpt_s *fs, boolean writeable)
   fdbg("\t    data sector:     %d\n", fs->fs_database);
   fdbg("\t    FSINFO sector:   %d\n", fs->fs_fsinfo);
   fdbg("\t    Num FATs:        %d\n", fs->fs_fatnumfats);
-  fdbg("\t    FAT size:        %d\n", fs->fs_fatsize);
+  fdbg("\t    FAT sectors:     %d\n", fs->fs_nfatsects);
   fdbg("\t    sectors/cluster: %d\n", fs->fs_fatsecperclus);
   fdbg("\t    max clusters:    %d\n", fs->fs_nclusters);
   fdbg("\tFSI free count       %d\n", fs->fs_fsifreecount);
@@ -2115,14 +2115,14 @@ int fat_fscacheflush(struct fat_mountpt_s *fs)
 
       /* Does the sector lie in the FAT region? */
 
-      if (fs->fs_currentsector < fs->fs_fatbase + fs->fs_fatsize)
+      if (fs->fs_currentsector < fs->fs_fatbase + fs->fs_nfatsects)
       {
           /* Yes, then make the change in the FAT copy as well */
           int i;
 
           for (i = fs->fs_fatnumfats; i >= 2; i--)
           { 
-              fs->fs_currentsector += fs->fs_fatsize;
+              fs->fs_currentsector += fs->fs_nfatsects;
               ret = fat_hwwrite(fs, fs->fs_buffer, fs->fs_currentsector, 1);
               if (ret < 0)
               {

@@ -99,7 +99,7 @@ struct fat_var_s
    ubyte         fv_jump[3];        /* 3-byte boot jump instruction */
    ubyte         fv_sectshift;      /* Log2 of fv_sectorsize */
    ubyte         fv_nrootdirsects;  /* Number of root directory sectors */
-   ubyte         fv_fatsize;        /* FAT size: 0 (not determined), 12, 16, or 32 */
+   ubyte         fv_fattype;        /* FAT size: 0 (not determined), 12, 16, or 32 */
    uint16        fv_bootcodesize;   /* Size of array at fv_bootcode */
    uint32        fv_createtime;     /* Creation time */
    uint32        fv_sectorsize;     /* Size of one hardware sector */
