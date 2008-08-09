@@ -88,7 +88,7 @@ static inline void mkfatfs_initmbr(FAR struct fat_format_s *fmt,
 
   /* 1@13: Sectors per allocation unit: 2**n, n=0..7 */
 
-  MBR_PUTSECPERCLUS(var->fv_sect, fmt->ff_clustsize);
+  MBR_PUTSECPERCLUS(var->fv_sect, (1 << fmt->ff_clustshift));
 
   /* 2@14: Reserved sector count: Usually 32 */
 
@@ -250,7 +250,7 @@ static inline void mkfatfs_initfsinfo(FAR struct fat_format_s *fmt,
 
   /* 4@488: Last free cluster count on volume */
 
-  FSI_PUTFREECOUNT(var->fv_sect, var->fv_clustcount - 1);
+  FSI_PUTFREECOUNT(var->fv_sect, var->fv_nclusters - 1);
 
   /* 4@492: Cluster number of 1st free cluster */
 

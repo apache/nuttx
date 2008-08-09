@@ -99,12 +99,13 @@ struct fat_var_s
    ubyte         fv_jump[3];        /* 3-byte boot jump instruction */
    ubyte         fv_sectshift;      /* Log2 of fv_sectorsize */
    ubyte         fv_nrootdirsects;  /* Number of root directory sectors */
+   ubyte         fv_fatsize;        /* FAT size: 0 (not determined), 12, 16, or 32 */
    uint16        fv_bootcodesize;   /* Size of array at fv_bootcode */
    uint32        fv_createtime;     /* Creation time */
    uint32        fv_sectorsize;     /* Size of one hardware sector */
    uint32        fv_nsectors;       /* Number of sectors */
    uint32        fv_nfatsects;      /* Number of sectors in each FAT */
-   uint32        fv_clustcount;     /* Number of clusters */
+   uint32        fv_nclusters;      /* Number of clusters */
    ubyte        *fv_sect;           /* Allocated working sector buffer */
    const ubyte  *fv_bootcode;       /* Points to boot code to put into MBR */
 };

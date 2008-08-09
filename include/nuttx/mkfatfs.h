@@ -49,7 +49,7 @@
 
 #define MKFATFS_DEFAULT_BBCHECK      FALSE /* FALSE: No bad block check */
 #define MKFATFS_DEFAULT_NFATS        2     /* 2: Default number of FATs */
-#define MKFATFS_DEFAULT_FATSIZE      0     /* 0: Autoselect FAT size */
+#define MKFATFS_DEFAULT_FATSIZE      0xff  /* 0: Autoselect FAT size */
 #define MKFATFS_DEFAULT_CLUSTSIZE    0     /* 0: Autoselect cluster size */
 #define MKFATFS_DEFAULT_VOLUMELABEL  { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' }
 #define MKFATFS_DEFAULT_BKUPBOOT     0     /* 0: Determine sector number of the backup boot sector */
@@ -86,7 +86,7 @@ struct fat_format_s
 {
    ubyte   ff_nfats;           /* Number of FATs */
    ubyte   ff_fatsize;         /* FAT size: 0 (autoselect), 12, 16, or 32 */
-   ubyte   ff_clustsize;       /* Number of sectors per cluster: 0 (autoselect) */
+   ubyte   ff_clustshift;      /* Log2 of sectors per cluster: 0-5, 0xff (autoselect) */
    ubyte   ff_volumelabel[11]; /* Volume label */
    uint16  ff_backupboot;      /* Sector number of the backup boot sector (0=use default)*/
    uint16  ff_rootdirentries;  /* Number of root directory entries */
