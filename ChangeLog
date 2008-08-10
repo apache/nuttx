@@ -397,4 +397,5 @@
 	* Added mkfatfs, mkfifo, sleep, usleep and nice commands to NSH
 	* NSH will now execute commands in background
 	* sched_get_priority_max/min returned error on SCHED_RR
+	* Removed duplicate getenv() implementation in /lib
 

@@ -67,7 +67,7 @@ STDIO_SRCS	+= lib_fopen.c lib_fclose.c lib_fread.c lib_libfread.c lib_fseek.c \
 endif
 endif
 
-STDLIB_SRCS	= lib_getenv.c lib_rand.c
+STDLIB_SRCS	= lib_rand.c
 
 MATH_SRCS	= lib_rint.c
 

@@ -213,11 +213,6 @@ o Libraries (lib/)
   Status:      Open
   Priority:    Medium
 
-  Description: There are two different copies of getenv():  One in
-               sched/env_getenv.c and one in lib/lib_getenv().  Keep one.
-  Status:      Open
-  Priority:    Low
-
 o File system / Generic drivers (fs/, drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
