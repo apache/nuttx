@@ -21,7 +21,7 @@ User's Manual
 <p>
 Gregory Nutt
 <p>
-<small>Last Update: July 20, 2008</small>
+<small>Last Update: August 10, 2008</small>
 </center>
 
 <h1>1.0 <A NAME="Introduction">Introduction</a></h1>
@@ -5843,7 +5843,16 @@ interface of the same name.
 
 <h1><a name="FileSystem">2.11 File System Interfaces</a></h1>
 
-<h2><a name="FileSystemOverview"2.11.1 >Overview</a></h2>
+<ul>
+  <li><a href="#FileSystemOverview">2.11.1 NuttX File System Overview</a></li>
+  <li><a href="#driveroperations">2.11.2 Driver Operations</a></li>
+  <li><a href="#directoryoperations">2.11.3 Directory Operations</a></li>
+  <li><a href="#standardio">2.11.4 Standard I/O</a></li>
+  <li><a href="#PipesNFifos">2.11.5 Pipes and FIFOs</a></li>
+  <li><a href="#fatsupport">2.11.6 FAT File System Support</a></li>
+</ul>
+
+<h2><a name="FileSystemOverview">2.11.1 NuttX File System Overview</a></h2>
 
 <p><b>Overview</b>.
   NuttX includes an optional, scalable file system.
@@ -5971,9 +5980,9 @@ interface of the same name.
   int    statfs(const char *path, FAR struct statfs *buf); /* Prototyped but not implemented */
 </pre></ul>
 
-<h2><a name="PipesNFifos">2.11.4 Pipes and FIFOs</a></h2>
+<h2><a name="PipesNFifos">2.11.5 Pipes and FIFOs</a></h2>
 
-<h3>2.11.4.1 <a name="pipe"><code>pipe</code></a></h3>
+<h3>2.11.5.1 <a name="pipe"><code>pipe</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -6007,7 +6016,7 @@ interface of the same name.
   </ul>
 </p>
 
-<h3>2.11.4.2 <a name="mkfifo"><code>mkfifo</code></a></h3>
+<h3>2.11.5.2 <a name="mkfifo"><code>mkfifo</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -6054,22 +6063,25 @@ interface of the same name.
   </ul>
 </p>
 
-<h2><a name="setenv">2.10.4 <code>setenv</code></a></h2>
+<h2><a name="fatsupport">2.11.6 FAT File System Support</a></h2>
+<h3>2.11.5.1 <a name="mkfatfs"><code>mkfatfs</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
-<pre>
-  #include <stdlib.h>
-  int setenv(const char *name, const char *value, int overwrite);
-</pre>
+<ul><pre>
+#include <nutts/mkfatfs.h>
+int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt);
+</pre></ul>
 <p>
   <b>Description:</b>
   <ul>
     <p>
-      The <code>setenv()</code> function adds the variable <code>name</code> to the environment with the
-      specified <code>value</code> if the variable <code>name</code> does not exist. If the <code>name</code>
-      does exist in the environment, then its value is changed to <code>value</code> if <code>overwrite</code>
-      is non-zero; if <code>overwrite</code> is zero, then the value of <code>name</code> is unaltered.
+      The <code>mkfafs()</code> formats a FAT file system image on the block
+      device specified by <code>pathname</code>
+    </p>
+    <p>Assumptions: The caller must assure that the block driver is not mounted and not in
+      use when this function is called. 
+      The result of formatting a mounted device is indeterminate (but likely not good).
     </p>
   </ul>
 </p>
@@ -6077,16 +6089,30 @@ interface of the same name.
   <b>Input Parameters:</b>
   <ul>
     <li>
-      <code>name</code>
-      The name of the variable to change.
+      <code>pathname</code>
+      The full path to the registered block driver in the file system.
     </li>
     <li>
-      <code>value</code>
-      The new value of the variable.
-    </li>
-    <li>
-      <code>value</code>
-      Replace any existing value if non-zero.
+      <code>fmt</code>
+      A reference to an instance of a structure that provides caller-selectable
+      attributes of the created FAT file system.
+      <ul>
+<pre>
+struct fat_format_s
+{
+   ubyte   ff_nfats;           /* Number of FATs */
+   ubyte   ff_fattype;         /* FAT size: 0 (autoselect), 12, 16, or 32 */
+   ubyte   ff_clustshift;      /* Log2 of sectors per cluster: 0-5, 0xff (autoselect) */
+   ubyte   ff_volumelabel[11]; /* Volume label */
+   uint16  ff_backupboot;      /* Sector number of the backup boot sector (0=use default)*/
+   uint16  ff_rootdirentries;  /* Number of root directory entries */
+   uint16  ff_rsvdseccount;    /* Reserved sectors */
+   uint32  ff_hidsec;          /* Count of hidden sectors preceding fat */
+   uint32  ff_volumeid;        /* FAT volume id */
+   uint32  ff_nsectors;        /* Number of sectors from device to use: 0: Use all */
+};
+</pre>
+      </ul></li>
     </li>
   </ul>
 </p>
@@ -6094,7 +6120,23 @@ interface of the same name.
   <b>Returned Values:</b>
   <ul>
     <p>
-      Zero on success.
+      Zero (<code>OK</code>) on success;
+      -1 (<code>ERROR</code>) on failure with <code>errno</code> set appropriately:
+      <ul>
+        <li><code>EINVAL</code> -
+          NULL block driver string, bad number of FATS in <code>fmt</code>,
+          bad FAT size in <code>fmt</code>, bad cluster size in <code>fmt</code>
+        </li>
+        <li><code>ENOENT</code> - 
+          <code>pathname</code> does not refer to anything in the filesystem.
+        </li>
+        <li><code>ENOTBLK</code> -
+          <code>pathname</code> does not refer to a block driver
+        </li>
+        <li><code>EACCESS</code> -
+          block driver does not support write or geometry methods
+        </li>
+      </ul>
     </p>
   </ul>
 </p>
@@ -6928,7 +6970,7 @@ notify a task when a message is available on a queue.
 <h1><a name="index">Index</a></h1>
 <table width="100%">
 <tr>
-<td>
+<td valign="top">
   <li><a href="#accept">accept</a></li>
   <li><a href="#bind">bind</a></li>
   <li><a href="#clockgetres">clock_getres</a></li>
@@ -6940,6 +6982,7 @@ notify a task when a message is available on a queue.
   <li><a href="#directoryoperations">Directory operations</a></li>
   <li><a href="#driveroperations">Driver operations</a></li>
   <li><a href="#exit">exit</a></li>
+  <li><a href="#fatsupport">FAT File System Support</a></li>
   <li><a href="#FileSystem">File system, interfaces</a></li>
   <li><a href="#FileSystemOverview">File system, overview</a></li>
   <li><a href="#getpid">getpid</a></li>
@@ -6950,6 +6993,7 @@ notify a task when a message is available on a queue.
   <li><a href="#listen">listen</a></li>
   <li><a href="#localtimer">localtime_r</a></li>
   <li><a href="#Message_Queue">Named Message Queue Interfaces</a>
+  <li><a href="#mkfatfs">mkfatfs</a></li>
   <li><a href="#mkfifo">mkfifo</a></li>
   <li><a href="#mktime">mktime</a></li>
   <li><a href="#mqclose">mq_close</a></li>
@@ -7005,9 +7049,9 @@ notify a task when a message is available on a queue.
   <li><a href="#pthreadmutexattrgetpshared">pthread_mutexattr_getpshared</a></li>
   <li><a href="#pthreadmutexattrgettype">pthread_mutexattr_gettype</a></li>
   <li><a href="#pthreadmutexattrinit">pthread_mutexattr_init</a></li>
-  <li><a href="#pthreadmutexattrsetpshared">pthread_mutexattr_setpshared</a></li>
 </td>
-<td>
+<td valign="top">
+  <li><a href="#pthreadmutexattrsetpshared">pthread_mutexattr_setpshared</a></li>
   <li><a href="#pthreadmutexattrsettype">pthread_mutexattr_settype</a></li>
   <li><a href="#pthreadmutexdestrory">pthread_mutex_destroy</a></li>
   <li><a href="#pthreadmutexinit">pthread_mutex_init</a></li>
