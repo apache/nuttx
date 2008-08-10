@@ -104,7 +104,7 @@ static inline int mkfatfs_getgeometry(FAR struct fat_format_s *fmt,
       if (fmt->ff_nsectors > geometry.geo_nsectors)
         {
           fdbg("User maxblocks (%d) exceeds blocks on device (%d)\n",
-               mt->ff_maxblocks, geometry.geo_nsectors);
+               fmt->ff_nsectors, geometry.geo_nsectors);
           return -EINVAL;
         }
     }
@@ -197,7 +197,7 @@ int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt)
 
   if (fmt->ff_nfats < 1 || fmt->ff_nfats > 4)
     {
-      fdbg("Invalid number of fats: %d\n", fmt->ff_fats);
+      fdbg("Invalid number of fats: %d\n", fmt->ff_nfats);
       ret = -EINVAL;
       goto errout;
     }

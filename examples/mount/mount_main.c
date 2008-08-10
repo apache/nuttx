@@ -50,13 +50,11 @@
 #include <dirent.h>
 #include <errno.h>
 
+#include "mount.h"
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-#ifndef CONFIG_EXAMPLES_MOUNT_DEVNAME
-# define CONFIG_EXAMPLES_MOUNT_DEVNAME "/dev/ram0"
-#endif
 
 #define TEST_USE_STAT         1
 #define TEST_SHOW_DIRECTORIES 1
@@ -70,7 +68,6 @@
  * Private Data
  ****************************************************************************/
 
-static const char g_source[]         = CONFIG_EXAMPLES_MOUNT_DEVNAME;
 static const char g_mntdir[]         = "/mnt";
 static const char g_target[]         = "/mnt/fs";
 static const char g_filesystemtype[] = "vfat";
@@ -88,6 +85,12 @@ static const char g_testmsg[]        = "This is a write test";
 static int        g_nerrors          = 0;
 
 static char       g_namebuffer[256];
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+       const char g_source[]         = MOUNT_DEVNAME;
 
 /****************************************************************************
  * Private Functions
@@ -157,7 +160,7 @@ static void show_statfs(const char *path)
   else
     {
       printf("show_statfs: ERROR statfs(%s) failed with errno=%d\n",
-             path, *get_errno_ptr());
+             path, errno);
       g_nerrors++;
     }
 }
@@ -179,7 +182,8 @@ static void show_directories(const char *path, int indent)
   dirp = opendir(path);
   if ( !dirp )
     {
-      printf("show_directories: ERROR opendir(\"%s\") failed with errno=%d\n", path, *get_errno_ptr());
+      printf("show_directories: ERROR opendir(\"%s\") failed with errno=%d\n",
+             path, errno);
       g_nerrors++;
       return;
     }
@@ -228,10 +232,10 @@ static void fail_read_open(const char *path, int expectederror)
       g_nerrors++;
       close(fd);
     }
-  else if (*get_errno_ptr() != expectederror)
+  else if (errno != expectederror)
     {
       printf("fail_read_open: ERROR open(%s) failed with errno=%d (expected %d)\n",
-             path, *get_errno_ptr(), expectederror);
+             path, errno, expectederror);
       g_nerrors++;
     }
 }
@@ -254,7 +258,7 @@ static void read_test_file(const char *path)
   if (fd < 0)
     {
       printf("read_test_file: ERROR failed to open %s, errno=%d\n",
-             path, *get_errno_ptr());
+             path, errno);
       g_nerrors++;
     }
   else
@@ -264,7 +268,7 @@ static void read_test_file(const char *path)
       if (nbytes < 0)
         {
           printf("read_test_file: ERROR failed to read from %s, errno=%d\n",
-                 path, *get_errno_ptr());
+                 path, errno);
           g_nerrors++;
         }
       else
@@ -292,7 +296,7 @@ static void write_test_file(const char *path)
   if (fd < 0)
     {
       printf("write_test_file: ERROR failed to open %s for writing, errno=%d\n",
-             path, *get_errno_ptr());
+             path, errno);
       g_nerrors++;
     }
   else
@@ -301,7 +305,7 @@ static void write_test_file(const char *path)
       if (nbytes < 0)
         {
           printf("write_test_file: ERROR failed to write to %s, errno=%d\n",
-                 path, *get_errno_ptr());
+                 path, errno);
           g_nerrors++;
         }
       else
@@ -330,10 +334,10 @@ static void fail_mkdir(const char *path, int expectederror)
       printf("fail_mkdir: ERROR mkdir(%s) succeeded\n", path);
       g_nerrors++;
     }
-  else if (*get_errno_ptr() != expectederror)
+  else if (errno != expectederror)
     {
       printf("fail_mkdir: ERROR mkdir(%s) failed with errno=%d (expected %d)\n",
-             path, *get_errno_ptr(), expectederror);
+             path, errno, expectederror);
       g_nerrors++;
     }
 }
@@ -352,7 +356,7 @@ static void succeed_mkdir(const char *path)
   if (ret != 0)
     {
       printf("succeed_mkdir: ERROR mkdir(%s) failed with errno=%d\n",
-             path, *get_errno_ptr());
+             path, errno);
       g_nerrors++;
     }
 }
@@ -375,10 +379,10 @@ static void fail_rmdir(const char *path, int expectederror)
       printf("fail_rmdir: ERROR rmdir(%s) succeeded\n", path);
       g_nerrors++;
     }
-  else if (*get_errno_ptr() != expectederror)
+  else if (errno != expectederror)
     {
       printf("fail_rmdir: ERROR rmdir(%s) failed with errno=%d (expected %d)\n",
-             path, *get_errno_ptr(), expectederror);
+             path, errno, expectederror);
       g_nerrors++;
     }
 }
@@ -397,7 +401,7 @@ static void succeed_rmdir(const char *path)
   if (ret != 0)
     {
       printf("succeed_rmdir: ERROR rmdir(%s) failed with errno=%d\n",
-             path, *get_errno_ptr());
+             path, errno);
       g_nerrors++;
     }
 }
@@ -420,10 +424,10 @@ static void fail_unlink(const char *path, int expectederror)
       printf("fail_unlink: ERROR unlink(%s) succeeded\n", path);
       g_nerrors++;
     }
-  else if (*get_errno_ptr() != expectederror)
+  else if (errno != expectederror)
     {
       printf("fail_unlink: ERROR unlink(%s) failed with errno=%d (expected %d)\n",
-             path, *get_errno_ptr(), expectederror);
+             path, errno, expectederror);
       g_nerrors++;
     }
 }
@@ -444,7 +448,7 @@ static void succeed_unlink(const char *path)
   if (ret != 0)
     {
       printf("succeed_unlink: ERROR unlink(%s) failed with errno=%d\n",
-             path, *get_errno_ptr());
+             path, errno);
       g_nerrors++;
     }
 }
@@ -468,10 +472,10 @@ static void fail_rename(const char *oldpath, const char *newpath, int expecteder
              oldpath, newpath);
       g_nerrors++;
     }
-  else if (*get_errno_ptr() != expectederror)
+  else if (errno != expectederror)
     {
       printf("fail_rename: ERROR rename(%s->%s) failed with errno=%d (expected %d)\n",
-             oldpath, newpath, *get_errno_ptr(), expectederror);
+             oldpath, newpath, errno, expectederror);
       g_nerrors++;
     }
 }
@@ -490,7 +494,7 @@ static void succeed_rename(const char *oldpath, const char *newpath)
   if (ret != 0)
     {
       printf("succeed_rename: ERROR rename(%s->%s) failed with errno=%d\n",
-             oldpath, newpath, *get_errno_ptr());
+             oldpath, newpath, errno);
       g_nerrors++;
     }
 }
@@ -516,10 +520,10 @@ static void fail_stat(const char *path, int expectederror)
       show_stat(path, &buf);
       g_nerrors++;
     }
-  else if (*get_errno_ptr() != expectederror)
+  else if (errno != expectederror)
     {
       printf("fail_stat: ERROR stat(%s) failed with errno=%d (expected %d)\n",
-             path, *get_errno_ptr(), expectederror);
+             path, errno, expectederror);
       g_nerrors++;
     }
 }
@@ -543,7 +547,7 @@ static void succeed_stat(const char *path)
   if (ret != 0)
     {
       printf("succeed_stat: ERROR stat(%s) failed with errno=%d\n",
-             path, *get_errno_ptr());
+             path, errno);
       g_nerrors++;
     }
   else
@@ -575,6 +579,16 @@ void user_initialize(void)
 int user_start(int argc, char *argv[])
 {
   int  ret;
+
+#ifndef CONFIG_EXAMPLES_MOUNT_DEVNAME
+  /* Create a RAM disk for the test */
+
+  ret = create_ramdisk();
+  if (ret < 0)
+    {
+      printf("user_start: ERROR failed to create RAM disk\n");
+    }
+#endif
 
   /* Mount the test file system (see arch/sim/src/up_deviceimage.c */
 
@@ -722,7 +736,7 @@ int user_start(int argc, char *argv[])
       ret = umount(g_target);
       if (ret != 0)
         {
-          printf("user_start: ERROR umount() failed, errno %d\n", *get_errno_ptr());
+          printf("user_start: ERROR umount() failed, errno %d\n", errno);
           g_nerrors++;
         }
 

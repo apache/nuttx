@@ -1,14 +1,14 @@
 /****************************************************************************
- * fs/fs_closeblockdriver.c
+ * examples/mount/ramdisk.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
- * Redistribution and use in pathname and binary forms, with or without
+ * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
  *
- * 1. Redistributions of pathname code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -38,73 +38,101 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdlib.h>
+#include <string.h>
 #include <debug.h>
 #include <errno.h>
-#include <nuttx/fs.h>
 
-#include "fs_internal.h"
+#include <nuttx/ramdisk.h>
+#include <nuttx/mkfatfs.h>
+
+#include "mount.h"
+
+#ifndef CONFIG_EXAMPLES_MOUNT_DEVNAME
+
+/****************************************************************************
+ * Private Definitions
+ ****************************************************************************/
+
+#define BUFFER_SIZE (CONFIG_EXAMPLES_MOUNT_NSECTORS*CONFIG_EXAMPLES_MOUNT_SECTORSIZE)
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static struct fat_format_s g_fmt = FAT_FORMAT_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
+ 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: close_blockdriver
+ * Name: create_ramdisk
  *
  * Description:
- *   Call the close method and release the inode
+ *   Create a RAM disk of the specified size formatting with a FAT file
+ *   system
  *
- * Inputs:
- *   inode - reference to the inode of a block driver opened by open_blockdriver
+ * Input Parameters:
+ *   None
  *
  * Return:
- *   Returns zero on success or a negated errno on failure:
- *
- *   EINVAL  - inode is NULL
- *   ENOTBLK - The inode is not a block driver
+ *   Zero on success, a negated errno on failure.
  *
  ****************************************************************************/
 
-int close_blockdriver(FAR struct inode *inode)
+int create_ramdisk(void)
 {
-  int ret = 0; /* Assume success */
+  char *pbuffer;
+  int ret;
 
-  /* Sanity checks */
-#ifdef CONFIG_DEBUG
-  if (!inode || !inode->u.i_bops)
+  /* Allocate a buffer to hold the file system image. */
+
+  pbuffer = (char*)malloc(BUFFER_SIZE);
+  if (!pbuffer)
     {
-      ret = -EINVAL;
-      goto errout;
-    }
-#endif
-
-  /* Verify that the inode is a block driver. */
-
-  if (!INODE_IS_BLOCK(inode))
-    { 
-      fdbg("inode is not a block driver\n");
-      ret = -ENOTBLK;
-      goto errout;
-   }
-
-  /* Close the block driver.  Not that no mutually exclusive access
-   * to the driver is enforced here.  That must be done in the driver
-   * if needed.
-   */
-
-  if (inode->u.i_bops->close)
-    {
-      ret = inode->u.i_bops->close(inode);
+      dbg("Failed to allocate ramdisk of size %d\n", BUFFER_SIZE);
+      return -ENOMEM;
     }
 
-  /* Then release the reference on the inode */
+  /* Register a RAMDISK device to manage this RAM image */
 
-  inode_release(inode);
-errout:
-  return ret;
+  ret = rd_register(CONFIG_EXAMPLES_MOUNT_RAMDEVNO,
+                    pbuffer,
+                    CONFIG_EXAMPLES_MOUNT_NSECTORS,
+                    CONFIG_EXAMPLES_MOUNT_NSECTORS,
+                    TRUE);
+  if (ret < 0)
+    {
+      dbg("Failed to register ramdisk at %s\n", g_source);
+      free(pbuffer);
+      return ret;
+    }
+
+  /* Create a FAT filesystem on the ramdisk */
+
+  ret = mkfatfs(g_source, &g_fmt);
+  if (ret < 0)
+    {
+      dbg("Failed to create FAT filesystem on ramdisk at %s\n", g_source);
+      /* free(pbuffer); -- RAM disk is registered */
+      return ret;
+    }
+
+  return 0;
 }
+#endif /* !CONFIG_EXAMPLES_MOUNT_DEVNAME */

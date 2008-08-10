@@ -1,14 +1,14 @@
 /****************************************************************************
- * fs/fs_closeblockdriver.c
+ * examples/mount/mount.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
- * Redistribution and use in pathname and binary forms, with or without
+ * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
  *
- * 1. Redistributions of pathname code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -33,78 +33,60 @@
  *
  ****************************************************************************/
 
+#ifndef __EXAMPLES_MOUNT_MOUNT_H
+#define __EXAMPLES_MOUNT_MOUNT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <debug.h>
-#include <errno.h>
-#include <nuttx/fs.h>
-
-#include "fs_internal.h"
 
 /****************************************************************************
- * Private Functions
+ * Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+/* Configure the test */
 
-/****************************************************************************
- * Name: close_blockdriver
- *
- * Description:
- *   Call the close method and release the inode
- *
- * Inputs:
- *   inode - reference to the inode of a block driver opened by open_blockdriver
- *
- * Return:
- *   Returns zero on success or a negated errno on failure:
- *
- *   EINVAL  - inode is NULL
- *   ENOTBLK - The inode is not a block driver
- *
- ****************************************************************************/
-
-int close_blockdriver(FAR struct inode *inode)
-{
-  int ret = 0; /* Assume success */
-
-  /* Sanity checks */
-#ifdef CONFIG_DEBUG
-  if (!inode || !inode->u.i_bops)
-    {
-      ret = -EINVAL;
-      goto errout;
-    }
+#if defined(CONFIG_EXAMPLES_MOUNT_DEVNAME)
+#  undef  CONFIG_EXAMPLES_MOUNT_NSECTORS
+#  undef  CONFIG_EXAMPLES_MOUNT_SECTORSIZE
+#  undef  CONFIG_EXAMPLES_MOUNT_RAMDEVNO
+#  define MOUNT_DEVNAME CONFIG_EXAMPLES_MOUNT_DEVNAME
+#else
+#  if !defined(CONFIG_FS_FAT)
+#    error "CONFIG_FS_FAT required in this configuration"
+#  endif
+#  if !defined(CONFIG_EXAMPLES_MOUNT_SECTORSIZE)
+#    define CONFIG_EXAMPLES_MOUNT_SECTORSIZE 512
+#  endif
+#  if !defined(CONFIG_EXAMPLES_MOUNT_NSECTORS)
+#    define CONFIG_EXAMPLES_MOUNT_NSECTORS   2048
+#  endif
+#  if !defined(CONFIG_EXAMPLES_MOUNT_RAMDEVNO)
+#     define CONFIG_EXAMPLES_MOUNT_RAMDEVNO  0
+#  endif
+#  define MKMOUNT_DEVNAME(m) "/dev/ram" #m
+#  define MOUNT_DEVNAME      MKMOUNT_DEVNAME(CONFIG_EXAMPLES_MOUNT_RAMDEVNO)
 #endif
 
-  /* Verify that the inode is a block driver. */
 
-  if (!INODE_IS_BLOCK(inode))
-    { 
-      fdbg("inode is not a block driver\n");
-      ret = -ENOTBLK;
-      goto errout;
-   }
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
-  /* Close the block driver.  Not that no mutually exclusive access
-   * to the driver is enforced here.  That must be done in the driver
-   * if needed.
-   */
+/****************************************************************************
+ * Public Variables
+ ****************************************************************************/
 
-  if (inode->u.i_bops->close)
-    {
-      ret = inode->u.i_bops->close(inode);
-    }
+extern const char g_source[]; /* Mount 'source' path */
 
-  /* Then release the reference on the inode */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-  inode_release(inode);
-errout:
-  return ret;
-}
+#ifndef CONFIG_EXAMPLES_MOUNT_DEVNAME
+extern int create_ramdisk(void);
+#endif
+
+#endif /* __EXAMPLES_MOUNT_MOUNT_H */

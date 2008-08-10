@@ -47,7 +47,6 @@
  * Definitions
  ****************************************************************************/
 
-#define MKFATFS_DEFAULT_BBCHECK      FALSE /* FALSE: No bad block check */
 #define MKFATFS_DEFAULT_NFATS        2     /* 2: Default number of FATs */
 #define MKFATFS_DEFAULT_FATTYPE      0xff  /* 0: Autoselect FAT size */
 #define MKFATFS_DEFAULT_CLUSTSIZE    0     /* 0: Autoselect cluster size */
@@ -57,12 +56,11 @@
 #define MKFATFS_DEFAULT_RSVDSECCOUNT 0     /* 0: Autoselect number reserved sectors (usually 32) */
 #define MKFATFS_DEFAULT_HIDSEC       0     /* No hidden sectors */
 #define MKFATFS_DEFAULT_VOLUMEID     0     /* No volume ID */
-#define MKFATFS_DEFAULT_MAXBLOCKS    0     /* 0: Use all blocks on device */
+#define MKFATFS_DEFAULT_NSECTORS     0     /* 0: Use all sectors on device */
 
 #define FAT_FORMAT_INITIALIZER \
 { \
-  MKFATFS_DEFAULT_BBCHECK, \
-  MKFATFS_DEFAULT_NFAT, \
+  MKFATFS_DEFAULT_NFATS, \
   MKFATFS_DEFAULT_FATTYPE, \
   MKFATFS_DEFAULT_CLUSTSIZE, \
   MKFATFS_DEFAULT_VOLUMELABEL, \
@@ -71,7 +69,7 @@
   MKFATFS_DEFAULT_RSVDSECCOUNT, \
   MKFATFS_DEFAULT_HIDSEC, \
   MKFATFS_DEFAULT_VOLUMEID, \
-  MKFATFS_DEFAULT_MAXBLOCKS \
+  MKFATFS_DEFAULT_NSECTORS \
 }
 
 /****************************************************************************

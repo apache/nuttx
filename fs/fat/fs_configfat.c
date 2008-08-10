@@ -136,8 +136,13 @@ static inline uint32
 mkfatfs_nfatsect12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
                    uint32 navailsects)
 {
-   uint32 denom ;
+#ifdef CONFIG_HAVE_LONG_LONG
+   uint64 denom;
+   uint64 numer;
+#else
+   uint32 denom;
    uint32 numer;
+#endif
 
   /* For FAT12, the cluster number is held in a 12-bit number or 1.5 bytes per
    * cluster reference.  So each FAT sector will hold sectorsize/1.5 cluster
@@ -165,18 +170,24 @@ mkfatfs_nfatsect12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
    *   navailsects > 0x55555555 - 2 * clustersize
    */
 
+#ifndef CONFIG_HAVE_LONG_LONG
   if (navailsects <= (0x55555555 - (1 << (fmt->ff_clustshift + 1))))
     {
+#endif
+
       denom = (fmt->ff_nfats << 1) + fmt->ff_nfats
             + (var->fv_sectorsize << (fmt->ff_clustshift + 1));
       numer = (navailsects << 1) + navailsects
             + (1 << (fmt->ff_clustshift + 2)) + (1 << (fmt->ff_clustshift + 1));
-      return (numer + denom - 1) / denom;
+      return (uint32)((numer + denom - 1) / denom);
+
+#ifndef CONFIG_HAVE_LONG_LONG
     }
   else
     {
       return 0;
     }
+#endif
 }
 
 /****************************************************************************
@@ -202,8 +213,13 @@ static inline uint32
 mkfatfs_nfatsect16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
                    uint32 navailsects)
 {
+#ifdef CONFIG_HAVE_LONG_LONG
+   uint64 denom;
+   uint64 numer;
+#else
    uint32 denom;
    uint32 numer;
+#endif
 
   /* For FAT16, the cluster number is held in a 16-bit number or 2 bytes per
    * cluster reference.  So each FAT sector will hold sectorsize/2 cluster
@@ -237,7 +253,7 @@ mkfatfs_nfatsect16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
       denom = fmt->ff_nfats + (var->fv_sectorsize << (fmt->ff_clustshift - 1));
       numer = navailsects + (1 << (fmt->ff_clustshift + 1));
     }
-  return (numer + denom - 1) / denom;
+   return (uint32)((numer + denom - 1) / denom);
 }
 
 /****************************************************************************
@@ -263,8 +279,13 @@ static inline uint32
 mkfatfs_nfatsect32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
                    uint32 navailsects)
 {
+#ifdef CONFIG_HAVE_LONG_LONG
+   uint64 denom;
+   uint64 numer;
+#else
    uint32 denom;
    uint32 numer;
+#endif
 
   /* For FAT32, the cluster number is held in a 32-bit number or 4 bytes per
    * cluster reference.  So each FAT sector will hold sectorsize/4 cluster
@@ -283,7 +304,7 @@ mkfatfs_nfatsect32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
    *   nfatsects  = (navailsects + 3 * clustersize) / 
    *                (nfats + sectorsize * clustersize / 4)
    *
-   * Overflow in the calculation of the numerator could occur if:
+   * Overflow in the 32-bit calculation of the numerator could occur if:
    *
    *   navailsects > 0xffffffff - 3 * clustersize
    */
@@ -303,7 +324,7 @@ mkfatfs_nfatsect32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
       denom = fmt->ff_nfats + (var->fv_sectorsize << (fmt->ff_clustshift - 2));
       numer = navailsects + (1 << (fmt->ff_clustshift + 1)) + (1 << fmt->ff_clustshift);
     }
-   return (numer + denom - 1) / denom;
+   return (uint32)((numer + denom - 1) / denom);
 }
 
 /****************************************************************************
@@ -885,7 +906,7 @@ int mkfatfs_configfatfs(FAR struct fat_format_s *fmt,
 
       if (fmt->ff_backupboot <= 1 || fmt->ff_backupboot >= fmt->ff_rsvdseccount)
         {
-          fdbg("Invalid backup boot sector: %d\n", fmt->ff_backupboot)
+          fdbg("Invalid backup boot sector: %d\n", fmt->ff_backupboot);
           fmt->ff_backupboot = 0;
         }
 
@@ -922,7 +943,7 @@ int mkfatfs_configfatfs(FAR struct fat_format_s *fmt,
   fdbg("Sector size:          %d bytes\n", var->fv_sectorsize);
   fdbg("Number of sectors:    %d sectors\n", fmt->ff_nsectors);
   fdbg("FAT size:             %d bits\n", var->fv_fattype);
-  fdbg("Number FATs:          %d\n", fmt->ff_fats);
+  fdbg("Number FATs:          %d\n", fmt->ff_nfats);
   fdbg("Sectors per cluster:  %d sectors\n", 1 << fmt->ff_clustshift);
   fdbg("FS size:              %d sectors\n", var->fv_nfatsects);
   fdbg("                      %d clusters\n", var->fv_nclusters);
