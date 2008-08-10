@@ -394,6 +394,7 @@
 
 0.3.13 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* Added mkfatfs command to NSH
-	* Added mkfifo command to NSH
+	* Added mkfatfs, mkfifo, sleep, usleep and nice commands to NSH
+	* NSH will not execute commands in background
+	* sched_get_priority_max/min returned error on SCHED_RR
 

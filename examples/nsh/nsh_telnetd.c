@@ -79,32 +79,6 @@
 #define TELNET_DO    253
 #define TELNET_DONT  254
 
-/* Configurable settings */
-
-#ifndef CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE
-# define CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE 512
-#endif
-
-#ifndef CONFIG_EXAMPLES_NSH_CMD_SIZE
-# define CONFIG_EXAMPLES_NSH_CMD_SIZE 40
-#endif
-
-/* As threads are created to handle each request, a stack must be allocated
- * for the thread.  Use a default if the user provided no stacksize.
- */
-
-#ifndef CONFIG_EXAMPLES_NSH_STACKSIZE
-# define CONFIG_EXAMPLES_NSH_STACKSIZE 4096
-#endif
-
-/* Enabled dumping of all input/output buffers */
-
-#undef CONFIG_EXAMPLES_NSH_TELNETD_DUMPBUFFER
-
-/* Sizing */
-
-#define NSH_MAX_LINELEN 80
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/

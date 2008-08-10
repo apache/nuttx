@@ -41,7 +41,10 @@
 #include <sys/types.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <sched.h>
+#include <errno.h>
 
 #include "nsh.h"
 
@@ -115,13 +118,21 @@ static const struct cmdmap_s g_cmdmap[] =
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
   { "rm",       cmd_rm,       2, 2, "<file-path>" },
   { "rmdir",    cmd_rmdir,    2, 2, "<dir-path>" },
+#endif
+#ifndef CONFIG_DISABLE_SIGNALS
+  { "sleep",    cmd_sleep,    2, 2, "<sec>" },
+#endif /* CONFIG_DISABLE_SIGNALS */
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
 # ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
   { "umount",   cmd_umount,   2, 2, "<dir-path>" },
-#endif
+# endif
 #endif
 #ifndef CONFIG_DISABLE_ENVIRON
-  { "unset",  cmd_unset,      2, 2, "<name>" },
+  { "unset",    cmd_unset,    2, 2, "<name>" },
 #endif
+#ifndef CONFIG_DISABLE_SIGNALS
+  { "usleep",   cmd_usleep,   2, 2, "<usec>" },
+#endif /* CONFIG_DISABLE_SIGNALS */
   { NULL,     NULL,           1, 1, NULL }
 };
 
@@ -156,6 +167,7 @@ static void cmd_help(FAR void *handle, int argc, char **argv)
   const struct cmdmap_s *ptr;
 
   nsh_output(handle, "NSH commands:\n");
+  nsh_output(handle, "  nice [-d] <cmd> &\n");
   for (ptr = g_cmdmap; ptr->cmd; ptr++)
     {
       if (ptr->usage)
@@ -179,6 +191,89 @@ static void cmd_unrecognized(FAR void *handle, int argc, char **argv)
 }
 
 /****************************************************************************
+ * Name: nsh_execute
+ ****************************************************************************/
+
+static int nsh_execute(int argc, char *argv[])
+{
+   const struct cmdmap_s *cmdmap;
+   const char            *cmd;
+   void                  *handle;
+   cmd_t                  handler = cmd_unrecognized;
+
+   /* Parse all of the arguments following the command name.  The form
+    * of argv is:
+    *
+    * argv[0]:    Task name "nsh_execute"
+    * argv[1]:    This is string version of the handle needed to execute
+    *             the command (under telnetd).  It is a string because
+    *             binary values cannot be provided via char *argv[]
+    * argv[2]:    The command name.  This is argv[0] when the arguments
+    *             are, finally, received by the command handler
+    * argv[3]:    The beginning of argument (up to NSH_MAX_ARGUMENTS)
+    * argv[argc]: NULL terminating pointer
+    */
+
+   handle  = (void*)strtol(argv[1], NULL, 16);
+   cmd     = argv[2];
+   argc   -= 2;
+
+   /* See if the command is one that we understand */
+
+   for (cmdmap = g_cmdmap; cmdmap->cmd; cmdmap++)
+     {
+       if (strcmp(cmdmap->cmd, cmd) == 0)
+         {
+           /* Check if a valid number of arguments was provided.  We
+            * do this simple, imperfect checking here so that it does
+            * not have to be performed in each command.
+            */
+
+           if (argc < cmdmap->minargs)
+             {
+               /* Fewer than the minimum number were provided */
+
+               nsh_output(handle, g_fmtargrequired, cmd);
+               return ERROR;
+             }
+           else if (argc > cmdmap->maxargs)
+             {
+               /* More than the maximum number were provided */
+
+               nsh_output(handle, g_fmttoomanyargs, cmd);
+               return ERROR;
+             }
+           else
+             {
+               /* A valid number of arguments were provided (this does
+                * not mean they are right).
+                */
+
+               handler = cmdmap->handler;
+               break;
+             }
+         }
+     }
+
+   handler(handle, argc, &argv[2]);
+   return OK;
+}
+
+/****************************************************************************
+ * Name: nsh_setprio
+ ****************************************************************************/
+
+static inline void nsh_setprio(void)
+{
+  int max_priority = sched_get_priority_max(SCHED_RR);
+  int min_priority = sched_get_priority_min(SCHED_RR);
+  struct sched_param param;
+
+  param.sched_priority = (max_priority + min_priority) >> 1;
+  (void)sched_setscheduler(0, SCHED_RR, &param);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -197,6 +292,7 @@ void user_initialize(void)
 
 int user_start(int argc, char *argv[])
 {
+  nsh_setprio();
   return nsh_main();
 }
 
@@ -206,76 +302,170 @@ int user_start(int argc, char *argv[])
 
 int nsh_parse(FAR void *handle, char *cmdline)
 {
-  const struct cmdmap_s *cmdmap;
-  char *argv[NSH_MAX_ARGUMENTS+1];
-  char *saveptr;
-  char *cmd;
-  int   argc;
+  FAR char *argv[NSH_MAX_ARGUMENTS+4];
+  FAR char  strhandle[2*sizeof(FAR char*)+3];
+  FAR char *saveptr;
+  FAR char *cmd;
+  boolean   bg;
+  int       nice = 0;
+  int       argc;
+  int       ret;
+
+  memset(argv, 0, (NSH_MAX_ARGUMENTS+4)*sizeof(char*));
 
   /* Parse out the command at the beginning of the line */
 
   cmd = strtok_r(cmdline, " \t\n", &saveptr);
   if (cmd)
     {
-      cmd_t handler = cmd_unrecognized;
+      /* Check if the command is preceded by "nice" */
 
-      /* Parse all of the arguments following the command name */
-
-
-      argv[0] = cmd;
-      for (argc = 1; argc < NSH_MAX_ARGUMENTS+1; argc++)
+      if (strcmp(cmd, "nice") == 0)
         {
-          argv[argc] = strtok_r( NULL, " \t\n", &saveptr);
+          /* Nicenesses range from -20 (most favorable scheduling) to 19
+           * (least  favorable).  Default is 10.
+           */
+
+          nice = 10;
+
+          /* Get the cmd (or -d option of nice command) */
+
+          cmd = strtok_r(NULL, " \t\n", &saveptr);
+          if (cmd && strcmp(cmd, "-d") == 0)
+            {
+              FAR char *val = strtok_r(NULL, " \t\n", &saveptr);
+              if (val)
+                {
+                  char *endptr;
+                  nice = (int)strtol(val, &endptr, 0);
+                  if (nice > 19 || nice < -20 || endptr == val || *endptr != '\0')
+                    {
+                      nsh_output(handle, g_fmtarginvalid, "nice");
+                      return ERROR;
+                    }
+                  cmd = strtok_r(NULL, " \t\n", &saveptr);
+                }
+            }
+        }
+    }
+
+  /* Check if any command was provided */
+
+  if (cmd)
+    {
+      /* Parse all of the arguments following the command name.  The form
+       * of argv is:
+       *
+       * argv[0]:    Not really used.  It is just a place hold for where the
+       *             task name would be if the same command were executed
+       *             in the "background"
+       * argv[1]:    This is string version of the handle needed to execute
+       *             the command (under telnetd).  It is a string because
+       *             binary values cannot be provided via char *argv[]
+       * argv[2]:    The command name.  This is argv[0] when the arguments
+       *             are, finally, received by the command handler
+       * argv[3]:    The beginning of argument (up to NSH_MAX_ARGUMENTS)
+       * argv[argc]: NULL terminating pointer
+       */
+
+      sprintf(strhandle, "%p\n", handle);
+      argv[0] = "nsh_execute";
+      argv[1] = strhandle;
+      argv[2] = cmd;
+      for (argc = 3; argc < NSH_MAX_ARGUMENTS+4; argc++)
+        {
+          argv[argc] = strtok_r(NULL, " \t\n", &saveptr);
           if (!argv[argc])
             {
               break;
             }
         }
 
-      if (argc > NSH_MAX_ARGUMENTS)
+      /* Check if the command should run in background */
+
+      bg = FALSE;
+      if (strcmp(argv[argc-1], "&") == 0)
+        {
+          bg = TRUE;
+          argv[argc-1] = NULL;
+          argc--;
+        }
+
+      if (argc > NSH_MAX_ARGUMENTS+3)
         {
           nsh_output(handle, g_fmttoomanyargs, cmd);
         }
 
-      /* See if the command is one that we understand */
-
-      for (cmdmap = g_cmdmap; cmdmap->cmd; cmdmap++)
+      if (bg)
         {
-          if (strcmp(cmdmap->cmd, cmd) == 0)
+          struct sched_param param;
+          int priority;
+
+          /* Get the execution priority of this task */
+
+          ret = sched_getparam(0, &param);
+          if (ret != 0)
             {
-              /* Check if a valid number of arguments was provided.  We
-               * do this simple, imperfect checking here so that it does
-               * not have to be performed in each command.
-               */
+              nsh_output(handle, g_fmtcmdfailed, cmd, "sched_getparm", NSH_ERRNO);
+              return ERROR;
+            }
 
-              if (argc < cmdmap->minargs)
+          /* Determine the priority to execute the command */
+
+          priority = param.sched_priority;
+          if (nice != 0)
+            {
+              priority -= nice;
+              if (nice < 0)
                 {
-                  /* Fewer than the minimum number were provided */
-
-                  nsh_output(handle, g_fmtargrequired, cmd);
-                  return ERROR;
-                }
-              else if (argc > cmdmap->maxargs)
-                {
-                  /* More than the maximum number were provided */
-
-                  nsh_output(handle, g_fmttoomanyargs, cmd);
-                  return ERROR;
+                  int max_priority = sched_get_priority_max(SCHED_RR);
+                  if (priority > max_priority)
+                    {
+                      priority = max_priority;
+                    }
                 }
               else
                 {
-                  /* A valid number of arguments were provided (this does
-                   * not mean they are right).
-                   */
-
-                  handler = cmdmap->handler;
-                  break;
+                  int min_priority = sched_get_priority_min(SCHED_RR);
+                  if (priority < min_priority)
+                    {
+                      priority = min_priority;
+                    }
                 }
             }
+
+          /* Execute the command as a separate task at the appropriate priority */
+
+#ifndef CONFIG_CUSTOM_STACK
+          ret = task_create("nsh_execute", priority, CONFIG_EXAMPLES_NSH_STACKSIZE,
+                            nsh_execute, &argv[1]);
+#else
+          ret = task_create("nsh_execute", priority, nsh_execute, &argv[1]);
+#endif
+          if (ret < 0)
+            {
+              nsh_output(handle, g_fmtcmdfailed, cmd, "task_create", NSH_ERRNO);
+              return ERROR;
+            }
+#ifdef CONFIG_DEBUG
+          nsh_output(handle, "%s [%d:%d:%d]\n", cmd, ret, priority, param.sched_priority);
+#else
+          nsh_output(handle, "%s [%d]\n", cmd, ret);
+#endif
+        }
+      else
+        {
+          ret = nsh_execute(argc, argv);
         }
 
-      handler(handle, argc, argv);
-      return OK;
+      /* Return success if the command succeeded (or at least, starting of the
+       * command task succeeded).
+       */
+
+      if (ret == 0)
+        {
+          return OK;
+        }
     }
 
   return ERROR;

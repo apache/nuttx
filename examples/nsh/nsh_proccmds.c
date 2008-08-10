@@ -42,6 +42,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sched.h>
 
 #include "nsh.h"
@@ -162,3 +163,43 @@ void cmd_ps(FAR void *handle, int argc, char **argv)
   nsh_output(handle, "PID   PRI SCHD TYPE   NP STATE    NAME\n");
   sched_foreach(ps_task, handle);
 }
+
+/****************************************************************************
+ * Name: cmd_sleep
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_SIGNALS
+void cmd_sleep(FAR void *handle, int argc, char **argv)
+{
+  char *endptr;
+  long secs;
+
+  secs = strtol(argv[1], &endptr, 0);
+  if (!secs || endptr == argv[1] || *endptr != '\0')
+    {
+       nsh_output(handle, g_fmtarginvalid, argv[0]);
+       return;
+    }
+  sleep(secs);
+}
+#endif
+
+/****************************************************************************
+ * Name: cmd_usleep
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_SIGNALS
+void cmd_usleep(FAR void *handle, int argc, char **argv)
+{
+  char *endptr;
+  long usecs;
+
+  usecs = strtol(argv[1], &endptr, 0);
+  if (!usecs || endptr == argv[1] || *endptr != '\0')
+    {
+       nsh_output(handle, g_fmtarginvalid, argv[0]);
+       return;
+    }
+  usleep(usecs);
+}
+#endif

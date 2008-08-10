@@ -63,7 +63,7 @@ size_t up_hostread(void *buffer, size_t len)
 {
   /* Just map to the host fread() */
 
-  return fread(buffer, 1, len, stdout);
+  return fread(buffer, 1, len, stdin);
 }
 
 size_t up_hostwrite(const void *buffer, size_t len)

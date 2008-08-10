@@ -90,7 +90,7 @@
 
 int sched_get_priority_min(int policy)
 { 
-  if (policy != SCHED_FIFO)
+  if (policy != SCHED_FIFO && policy != SCHED_RR)
     {
       return ERROR;
     }
