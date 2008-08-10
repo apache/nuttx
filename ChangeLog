@@ -369,7 +369,7 @@
 	* Add logic to allow the examples/ostest to be run repetitively as an endurance test.
 	* Add a ramdisk block driver
 
-0.3.12 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.12 2008-08-10 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Improved solution to POSIX timer lifetime controls bug fixed in 0.3.11.
 	* Add test for recursive mutexes
@@ -392,3 +392,4 @@
 	* Added a test for mkfatfs() on a RAM disk in examples/mount and verified
 	  basic mkfatfs functionality for FAT12.
 
+0.3.13 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>

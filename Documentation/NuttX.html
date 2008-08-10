@@ -456,32 +456,30 @@
 </table>
 
 <p>
-  The 23rd release of NuttX (nuttx-0.3.11) is available for download
+  The 24th release of NuttX (nuttx-0.3.12) is available for download
   from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
   website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
-<p>
-  nuttx-0.3.11 is another important bugfix release.
-  This release fixes several bugs:
+  The nuttx-0.3.12 release includes some minor bugfixes as well as a few new features.
+  Bugs fixed include:
+  <ul>
+    <li>Corrected an error in recursive mutex implementation.</li>
+    <li>task_create() was only dup'in the first three file descriptors.</li>
+    <li>Fixed driver open reference counting errors in dup(), dup2(), and exit().</li>
+    <li>Fixed error handling logic in fflush().</li>
+  </ul>
 </p>
-<ul>
-  <li>Two POSIX timer bugs: a memory leak as well a fatal sequencing error.</li>
-  <li>Several FAT filesystem errors.</li>
-  <li>A deadlock that can occur in <code>opendir()</code></li>
-</ul>
 <p>
-  A few new features were also added:
+  New features were also added:
+  <ul>
+    <li>Pipes and pipe() API</li>
+    <li>FIFOs and mkfifo() API</li>
+    <li>mkfatfs() API can be used to format FAT file systems.</li>
+  </ul>
 </p>
-<ul>
-  <li>Support for recursive mutexes</li>
-  <li>Added a RAM disk block driver</li>
-  <li>The host simulator no longer uses direct Linux system calls and now also works on Cygwin.</li>
-  <li>The OS test was strengthen and now runs as an endurance test</li>
-</ul>
-
 <p>
   As usual, any feedback about bugs or suggestions for improvement would be greatly appreciated.
 </p>
@@ -981,18 +979,28 @@ Other memory:
 </table>
 
 <pre><ul>
-nuttx-0.3.11 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+0.3.12 2008-08-10 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* Add support for recursive mutexes.
-	* Eliminate a memory leak -- contained watchdog instance was not being
-	  deleted with a POSIX timer was deleted reported by kwonsk.
-	* Eliminate a deadlock condition in opendir() reported by kwonsk.
-	* Fix several FAT filesystem problems reported by kwonsk (Changes not yet
-	  verified).
-	* Host simulator no longer uses Linux system calls directly; Now works with Cygwin.
-	* Fix an error that occurs when a POSIX timer is deleted by the timer signal handler.
-	* Add logic to allow the examples/ostest to be run repetitively as an endurance test.
-	* Add a ramdisk block driver
+	* Improved solution to POSIX timer lifetime controls bug fixed in 0.3.11.
+	* Add test for recursive mutexes
+	* Correct bug in recursive mutex logic
+	* Add mkfifo()
+	* Add pipe() and test for both pipes and fifos
+	* Attempts to open a FIFO will now block until there is at least one writer
+	* Add test/Fixed errors in FIFO reader/writer interlocks
+	* Removed limitation: task_create() was only dup'ing 3 file descriptors (now
+	  dups all open file descriptors).
+	* Added a test for redirection of stdio through pipes
+	* Fixed error in dup and dup2: Must call open/close methods in fs/driver so that
+	  driver can correctly maintain open reference counts.
+	* Same issue on closing file descriptors in exit()
+	* Fixed in error in stdio flush logic.  Needed ssize_t vs size_t for error
+	  check.
+	* Moved all FAT related files from fs to fs/fat
+	* Implemented mkfatfs(), a non-standard API to create a FAT filesystem on a
+	  block device (not yet tested).
+	* Added a test for mkfatfs() on a RAM disk in examples/mount and verified
+	  basic mkfatfs functionality for FAT12.
 
 pascal-0.1.2 2008-02-10 Gregory Nutt <spudmonkey@racsa.co.cr>
 
@@ -1018,28 +1026,7 @@ buildroot-0.1.0 2007-03-09 &lt;spudmonkey@racsa.co.cr&gt
 </table>
 
 <pre><ul>
-nuttx-0.3.12 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Improved solution to POSIX timer lifetime controls bug fixed in 0.3.11.
-	* Add test for recursive mutexes
-	* Correct bug in recursive mutex logic
-	* Add mkfifo()
-	* Add pipe() and test for both pipes and fifos
-	* Attempts to open a FIFO will now block until there is at least one writer
-	* Add test/Fixed errors in FIFO reader/writer interlocks
-	* Removed limitation: task_create() was only dup'ing 3 file descriptors (now
-	  dups all open file descriptors).
-	* Added a test for redirection of stdio through pipes
-	* Fixed error in dup and dup2: Must call open/close methods in fs/driver so that
-	  driver can correctly maintain open reference counts.
-	* Same issue on closing file descriptors in exit()
-	* Fixed in error in stdio flush logic.  Needed ssize_t vs size_t for error
-	  check.
-	* Moved all FAT related files from fs to fs/fat
-	* Implemented mkfatfs(), a non-standard API to create a FAT filesystem on a
-	  block device (not yet tested).
-	* Added a test for mkfatfs() on a RAM disk in examples/mount and verified
-	  basic mkfatfs functionality for FAT12.
+nuttx-0.3.13 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-0.1.3 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
