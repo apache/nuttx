@@ -48,8 +48,8 @@
  ****************************************************************************/
 
 #define MKFATFS_DEFAULT_NFATS        2     /* 2: Default number of FATs */
-#define MKFATFS_DEFAULT_FATTYPE      0xff  /* 0: Autoselect FAT size */
-#define MKFATFS_DEFAULT_CLUSTSIZE    0     /* 0: Autoselect cluster size */
+#define MKFATFS_DEFAULT_FATTYPE      0     /* 0: Autoselect FAT size */
+#define MKFATFS_DEFAULT_CLUSTSHIFT   0xff  /* 0xff: Autoselect cluster size */
 #define MKFATFS_DEFAULT_VOLUMELABEL  { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' }
 #define MKFATFS_DEFAULT_BKUPBOOT     0     /* 0: Determine sector number of the backup boot sector */
 #define MKFATFS_DEFAULT_ROOTDIRENTS  0     /* 0: Autoselect number of root directory entries */
@@ -62,7 +62,7 @@
 { \
   MKFATFS_DEFAULT_NFATS, \
   MKFATFS_DEFAULT_FATTYPE, \
-  MKFATFS_DEFAULT_CLUSTSIZE, \
+  MKFATFS_DEFAULT_CLUSTSHIFT, \
   MKFATFS_DEFAULT_VOLUMELABEL, \
   MKFATFS_DEFAULT_BKUPBOOT, \
   MKFATFS_DEFAULT_ROOTDIRENTS, \
@@ -127,7 +127,7 @@ extern "C" {
  *     size in 'fmt', bad cluster size in 'fmt'
  *   ENOENT - 'pathname' does not refer to anything in the filesystem.
  *   ENOTBLK - 'pathname' does not refer to a block driver
- *   EACCESS - block driver does not support wrie or geometry methods
+ *   EACCESS - block driver does not support write or geometry methods
  *
  * Assumptions:
  *   - The caller must assure that the block driver is not mounted and not in

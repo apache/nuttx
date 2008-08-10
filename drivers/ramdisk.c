@@ -43,6 +43,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <debug.h>
 #include <errno.h>
 
 #include <nuttx/fs.h>
@@ -243,6 +244,7 @@ int rd_register(int minor, ubyte *buffer, uint32 nsectors, uint16 sectsize,
       ret = register_blockdriver(devname, &g_bops, 0, dev);
       if (ret < 0)
         {
+          fdbg("register_blockdriver failed: %d\n", -ret);
           free(dev);
         }
     }

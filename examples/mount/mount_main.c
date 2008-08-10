@@ -76,7 +76,9 @@ static const char g_testdir1[]       = "/mnt/fs/TestDir";
 static const char g_testdir2[]       = "/mnt/fs/NewDir1";
 static const char g_testdir3[]       = "/mnt/fs/NewDir2";
 static const char g_testdir4[]       = "/mnt/fs/NewDir3";
+#ifdef CONFIG_EXAMPLES_MOUNT_DEVNAME
 static const char g_testfile1[]      = "/mnt/fs/TestDir/TestFile.txt";
+#endif
 static const char g_testfile2[]      = "/mnt/fs/TestDir/WrTest1.txt";
 static const char g_testfile3[]      = "/mnt/fs/NewDir1/WrTest2.txt";
 static const char g_testfile4[]      = "/mnt/fs/NewDir3/Renamed.txt";
@@ -218,7 +220,7 @@ static void show_directories(const char *path, int indent)
 /****************************************************************************
  * Name: fail_read_open
  ****************************************************************************/
-
+#ifdef CONFIG_EXAMPLES_MOUNT_DEVNAME
 static void fail_read_open(const char *path, int expectederror)
 {
   int fd;
@@ -239,6 +241,7 @@ static void fail_read_open(const char *path, int expectederror)
       g_nerrors++;
     }
 }
+#endif
 
 /****************************************************************************
  * Name: read_test_file
@@ -587,6 +590,7 @@ int user_start(int argc, char *argv[])
   if (ret < 0)
     {
       printf("user_start: ERROR failed to create RAM disk\n");
+      return 1;
     }
 #endif
 
@@ -603,12 +607,21 @@ int user_start(int argc, char *argv[])
       show_statfs(g_mntdir);
       show_statfs(g_target);
 
+#ifdef CONFIG_EXAMPLES_MOUNT_DEVNAME
       /* Read a test file that is already on the test file system image */
 
       show_directories("", 0);
       succeed_stat(g_testfile1);
       show_statfs(g_testfile1);
       read_test_file(g_testfile1);
+#else
+      /* Create the test directory that would have been on the canned filesystem */
+
+      succeed_mkdir(g_testdir1);
+      show_directories("", 0);
+      succeed_stat(g_testdir1);
+      show_statfs(g_testdir1);
+#endif
 
       /* Write a test file into a pre-existing directory on the test file system */
 
@@ -623,8 +636,9 @@ int user_start(int argc, char *argv[])
       read_test_file(g_testfile2);
 
       /* Try rmdir() against a file on the directory.  It should fail with ENOTDIR */
-
+#ifdef CONFIG_EXAMPLES_MOUNT_DEVNAME
       fail_rmdir(g_testfile1, ENOTDIR);
+#endif
 
       /* Try rmdir() against the test directory.  It should fail with ENOTEMPTY */
 
@@ -635,15 +649,16 @@ int user_start(int argc, char *argv[])
       fail_unlink(g_testdir1, EISDIR);
 
       /* Try unlink() against the test file1.  It should succeed. */
-
+#ifdef CONFIG_EXAMPLES_MOUNT_DEVNAME
       succeed_unlink(g_testfile1);
       fail_stat(g_testfile1, ENOENT);
       show_directories("", 0);
+#endif
 
       /* Attempt to open testfile1 should fail with ENOENT */
-
+#ifdef CONFIG_EXAMPLES_MOUNT_DEVNAME
       fail_read_open(g_testfile1, ENOENT);
-
+#endif
       /* Try rmdir() against the test directory.  It should still fail with ENOTEMPTY */
 
       fail_rmdir(g_testdir1, ENOTEMPTY);

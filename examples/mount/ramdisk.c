@@ -40,9 +40,9 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <debug.h>
 #include <errno.h>
 
 #include <nuttx/ramdisk.h>
@@ -105,7 +105,8 @@ int create_ramdisk(void)
   pbuffer = (char*)malloc(BUFFER_SIZE);
   if (!pbuffer)
     {
-      dbg("Failed to allocate ramdisk of size %d\n", BUFFER_SIZE);
+      printf("create_ramdisk: Failed to allocate ramdisk of size %d\n",
+             BUFFER_SIZE);
       return -ENOMEM;
     }
 
@@ -114,11 +115,12 @@ int create_ramdisk(void)
   ret = rd_register(CONFIG_EXAMPLES_MOUNT_RAMDEVNO,
                     pbuffer,
                     CONFIG_EXAMPLES_MOUNT_NSECTORS,
-                    CONFIG_EXAMPLES_MOUNT_NSECTORS,
+                    CONFIG_EXAMPLES_MOUNT_SECTORSIZE,
                     TRUE);
   if (ret < 0)
     {
-      dbg("Failed to register ramdisk at %s\n", g_source);
+      printf("create_ramdisk: Failed to register ramdisk at %s: %d\n",
+             g_source, -ret);
       free(pbuffer);
       return ret;
     }
@@ -128,7 +130,8 @@ int create_ramdisk(void)
   ret = mkfatfs(g_source, &g_fmt);
   if (ret < 0)
     {
-      dbg("Failed to create FAT filesystem on ramdisk at %s\n", g_source);
+      printf("create_ramdisk: Failed to create FAT filesystem on ramdisk at %s\n",
+             g_source);
       /* free(pbuffer); -- RAM disk is registered */
       return ret;
     }

@@ -66,7 +66,8 @@
 #  if !defined(CONFIG_EXAMPLES_MOUNT_RAMDEVNO)
 #     define CONFIG_EXAMPLES_MOUNT_RAMDEVNO  0
 #  endif
-#  define MKMOUNT_DEVNAME(m) "/dev/ram" #m
+#  define STR_RAMDEVNO(m)    #m
+#  define MKMOUNT_DEVNAME(m) "/dev/ram" STR_RAMDEVNO(m)
 #  define MOUNT_DEVNAME      MKMOUNT_DEVNAME(CONFIG_EXAMPLES_MOUNT_RAMDEVNO)
 #endif
 

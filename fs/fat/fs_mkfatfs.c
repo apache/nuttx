@@ -209,13 +209,14 @@ int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt)
       ret = -EINVAL;
       goto errout;
     }
+#endif
   var.fv_fattype = fmt->ff_fattype;
 
   /* The valid range off ff_clustshift is {0,1,..7} corresponding to
    * cluster sizes of {1,2,..128} sectors.  The special value of 0xff
    * means that we should autoselect the cluster sizel.
    */
-
+#ifdef CONFIG_DEBUG
   if (fmt->ff_clustshift > 7 && fmt->ff_clustshift != 0xff)
     {
       fdbg("Invalid cluster shift value: %d\n", fmt->ff_clustshift);
