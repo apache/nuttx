@@ -651,6 +651,21 @@ void cmd_mkfatfs(FAR void *handle, int argc, char **argv)
 #endif
 
 /****************************************************************************
+ * Name: cmd_mkfifo
+ ****************************************************************************/
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+void cmd_mkfifo(FAR void *handle, int argc, char **argv)
+{
+  int result = mkfifo(argv[1], 0777);
+  if ( result < 0)
+    {
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "mkfifo", NSH_ERRNO);
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: cmd_mount
  ****************************************************************************/
 

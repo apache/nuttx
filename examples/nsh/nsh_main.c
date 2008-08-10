@@ -100,8 +100,11 @@ static const struct cmdmap_s g_cmdmap[] =
 #endif
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
   { "mkdir",    cmd_mkdir,    2, 2, "<path>" },
-#ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
+#ifdef CONFIG_FS_FAT
   { "mkfatfs",  cmd_mkfatfs,  2, 2, "<path>" },
+#endif
+  { "mkfifo",   cmd_mkfifo,   2, 2, "<path>" },
+#ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
   { "mount",    cmd_mount,    4, 5, "-t <fstype> <block-device> <dir-path>" },
 #endif
 #endif

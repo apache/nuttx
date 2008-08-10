@@ -114,38 +114,41 @@ extern int nsh_serialmain(void);
 /* Shell command handlers */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-extern void cmd_cat(FAR void *handle, int argc, char **argv);
-extern void cmd_cp(FAR void *handle, int argc, char **argv);
+  extern void cmd_cat(FAR void *handle, int argc, char **argv);
+  extern void cmd_cp(FAR void *handle, int argc, char **argv);
 #endif
 extern void cmd_echo(FAR void *handle, int argc, char **argv);
 extern void cmd_exec(FAR void *handle, int argc, char **argv);
 extern void cmd_exit(FAR void *handle, int argc, char **argv);
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-extern void cmd_ifconfig(FAR void *handle, int argc, char **argv);
+  extern void cmd_ifconfig(FAR void *handle, int argc, char **argv);
 #endif
 #if CONFIG_NFILE_DESCRIPTORS > 0
-extern void cmd_ls(FAR void *handle, int argc, char **argv);
+  extern void cmd_ls(FAR void *handle, int argc, char **argv);
 #endif
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-extern void cmd_mkdir(FAR void *handle, int argc, char **argv);
-#ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
-extern void cmd_mkfatfs(FAR void *handle, int argc, char **argv);
-extern void cmd_mount(FAR void *handle, int argc, char **argv);
-#endif
-#endif
+  extern void cmd_mkdir(FAR void *handle, int argc, char **argv);
+# ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
+    extern void cmd_mkfatfs(FAR void *handle, int argc, char **argv);
+# endif /* CONFIG_FS_FAT */
+  extern void cmd_mkfifo(FAR void *handle, int argc, char **argv);
+# ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
+    extern void cmd_mount(FAR void *handle, int argc, char **argv);
+# endif /* CONFIG_FS_FAT */
+#endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS */
 extern void cmd_ps(FAR void *handle, int argc, char **argv);
 #ifndef CONFIG_DISABLE_ENVIRON
-extern void cmd_set(FAR void *handle, int argc, char **argv);
+  extern void cmd_set(FAR void *handle, int argc, char **argv);
 #endif
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-extern void cmd_rm(FAR void *handle, int argc, char **argv);
-extern void cmd_rmdir(FAR void *handle, int argc, char **argv);
-#ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
-extern void cmd_umount(FAR void *handle, int argc, char **argv);
-#endif
-#endif
+  extern void cmd_rm(FAR void *handle, int argc, char **argv);
+  extern void cmd_rmdir(FAR void *handle, int argc, char **argv);
+# ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
+    extern void cmd_umount(FAR void *handle, int argc, char **argv);
+# endif /* CONFIG_FS_FAT */
+#endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS */
 #ifndef CONFIG_DISABLE_ENVIRON
-extern void cmd_unset(FAR void *handle, int argc, char **argv);
+  extern void cmd_unset(FAR void *handle, int argc, char **argv);
 #endif
 
 #endif /* __NSH_H */
