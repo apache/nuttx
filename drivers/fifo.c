@@ -47,7 +47,7 @@
 #include <nuttx/fs.h>
 #include <errno.h>
 
-#include "pipe-common.h"
+#include "pipe_common.h"
 
 #if CONFIG_DEV_PIPE_SIZE > 0
 

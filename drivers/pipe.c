@@ -51,7 +51,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include "pipe-common.h"
+#include "pipe_common.h"
 
 #if CONFIG_DEV_PIPE_SIZE > 0
 
@@ -178,7 +178,7 @@ static int pipe_close(FAR struct file *filep)
  ****************************************************************************/
 int pipe(int filedes[2])
 {
-  struct pipe_dev_s *dev;
+  struct pipe_dev_s *dev = NULL;
   char devname[16];
   int pipeno;
   int err;

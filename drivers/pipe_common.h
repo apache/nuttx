@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/pipe-common.h
+ * drivers/pipe_common.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

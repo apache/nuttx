@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/pipe-common.c
+ * drivers/pipe_common.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -54,7 +54,7 @@
 #include <assert.h>
 #include <nuttx/fs.h>
 
-#include "pipe-common.h"
+#include "pipe_common.h"
 
 #if CONFIG_DEV_PIPE_SIZE > 0
 
@@ -83,6 +83,7 @@ static void pipecommon_semtake(sem_t *sem);
 /****************************************************************************
  * Name: pipecommon_semtake
  ****************************************************************************/
+
 static void pipecommon_semtake(sem_t *sem)
 {
   while (sem_wait(sem) != 0)
@@ -102,6 +103,7 @@ static void pipecommon_semtake(sem_t *sem)
 /****************************************************************************
  * Name: pipecommon_allocdev
  ****************************************************************************/
+
 FAR struct pipe_dev_s *pipecommon_allocdev(void)
 {
  struct pipe_dev_s *dev;
@@ -124,7 +126,8 @@ FAR struct pipe_dev_s *pipecommon_allocdev(void)
 /****************************************************************************
  * Name: pipecommon_freedev
  ****************************************************************************/
- void pipecommon_freedev(FAR struct pipe_dev_s *dev)
+
+void pipecommon_freedev(FAR struct pipe_dev_s *dev)
 {
    sem_destroy(&dev->d_bfsem);
    sem_destroy(&dev->d_rdsem);
@@ -135,6 +138,7 @@ FAR struct pipe_dev_s *pipecommon_allocdev(void)
 /****************************************************************************
  * Name: pipecommon_open
  ****************************************************************************/
+
 int pipecommon_open(FAR struct file *filep)
 {
   struct inode      *inode = filep->f_inode;
@@ -212,6 +216,7 @@ int pipecommon_open(FAR struct file *filep)
 /****************************************************************************
  * Name: pipecommon_close
  ****************************************************************************/
+
 int pipecommon_close(FAR struct file *filep)
 {
   struct inode      *inode = filep->f_inode;
@@ -280,6 +285,7 @@ int pipecommon_close(FAR struct file *filep)
 /****************************************************************************
  * Name: pipecommon_read
  ****************************************************************************/
+
 ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
   struct inode      *inode  = filep->f_inode;
@@ -362,6 +368,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 /****************************************************************************
  * Name: pipecommon_write
  ****************************************************************************/
+
 ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t len)
 {
   struct inode      *inode    = filep->f_inode;
