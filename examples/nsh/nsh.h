@@ -129,6 +129,7 @@ extern void cmd_ls(FAR void *handle, int argc, char **argv);
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
 extern void cmd_mkdir(FAR void *handle, int argc, char **argv);
 #ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
+extern void cmd_mkfatfs(FAR void *handle, int argc, char **argv);
 extern void cmd_mount(FAR void *handle, int argc, char **argv);
 #endif
 #endif

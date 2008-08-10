@@ -81,44 +81,45 @@ static const char delim[] = " \t\n";
 static const struct cmdmap_s g_cmdmap[] =
 {
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  { "cat",      cmd_cat,    2, 2, "<path>" },
-  { "cp",       cmd_cp,     3, 3, "<source-path> <dest-path>" },
+  { "cat",      cmd_cat,      2, 2, "<path>" },
+  { "cp",       cmd_cp,       3, 3, "<source-path> <dest-path>" },
 #endif
 #ifndef CONFIG_DISABLE_ENVIRON
-  { "echo",     cmd_echo,   0, NSH_MAX_ARGUMENTS, "[<string|$name> [<string|$name>...]]" },
+  { "echo",     cmd_echo,     0, NSH_MAX_ARGUMENTS, "[<string|$name> [<string|$name>...]]" },
 #else
-  { "echo",     cmd_echo,   0, NSH_MAX_ARGUMENTS, "[<string> [<string>...]]" },
+  { "echo",     cmd_echo,     0, NSH_MAX_ARGUMENTS, "[<string> [<string>...]]" },
 #endif
-  { "exec",     cmd_exec,   2, 3, "<hex-address>" },
-  { "exit",     cmd_exit,   1, 1, NULL },
-  { "help",     cmd_help,   1, 1, NULL },
+  { "exec",     cmd_exec,     2, 3, "<hex-address>" },
+  { "exit",     cmd_exit,     1, 1, NULL },
+  { "help",     cmd_help,     1, 1, NULL },
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
   { "ifconfig", cmd_ifconfig, 1, 1, NULL },
 #endif
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  { "ls",       cmd_ls,     2, 5, "[-lRs] <dir-path>" },
+  { "ls",       cmd_ls,       2, 5, "[-lRs] <dir-path>" },
 #endif
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-  { "mkdir",    cmd_mkdir,  2, 2, "<path>" },
+  { "mkdir",    cmd_mkdir,    2, 2, "<path>" },
 #ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
-  { "mount",    cmd_mount,  4, 5, "-t <fstype> <block-device> <dir-path>" },
+  { "mkfatfs",  cmd_mkfatfs,  2, 2, "<path>" },
+  { "mount",    cmd_mount,    4, 5, "-t <fstype> <block-device> <dir-path>" },
 #endif
 #endif
-  { "ps",       cmd_ps,     1, 1, NULL },
+  { "ps",       cmd_ps,       1, 1, NULL },
 #ifndef CONFIG_DISABLE_ENVIRON
-  { "set",      cmd_set,    3, 3, "<name> <value>" },
+  { "set",      cmd_set,      3, 3, "<name> <value>" },
 #endif
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-  { "rm",       cmd_rm,     2, 2, "<file-path>" },
-  { "rmdir",    cmd_rmdir,  2, 2, "<dir-path>" },
+  { "rm",       cmd_rm,       2, 2, "<file-path>" },
+  { "rmdir",    cmd_rmdir,    2, 2, "<dir-path>" },
 # ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
-  { "umount",   cmd_umount, 2, 2, "<dir-path>" },
+  { "umount",   cmd_umount,   2, 2, "<dir-path>" },
 #endif
 #endif
 #ifndef CONFIG_DISABLE_ENVIRON
-  { "unset",  cmd_unset,  2, 2, "<name>" },
+  { "unset",  cmd_unset,      2, 2, "<name>" },
 #endif
-  { NULL,     NULL,       1, 1, NULL }
+  { NULL,     NULL,           1, 1, NULL }
 };
 
 /****************************************************************************

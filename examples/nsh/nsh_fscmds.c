@@ -43,11 +43,12 @@
 #if CONFIG_NFILE_DESCRIPTORS > 0
 # include <sys/stat.h>
 # include <fcntl.h>
+# if !defined(CONFIG_DISABLE_MOUNTPOINT)
+#   ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
+#     include <sys/mount.h>
+#     include <nuttx/mkfatfs.h>
+#   endif
 #endif
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-# ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
-#   include <sys/mount.h>
-# endif
 #endif
 
 #include <stdio.h>
@@ -629,6 +630,22 @@ void cmd_mkdir(FAR void *handle, int argc, char **argv)
   if ( result < 0)
     {
       nsh_output(handle, g_fmtcmdfailed, argv[0], "mkdir", NSH_ERRNO);
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: cmd_mkfatfs
+ ****************************************************************************/
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_FAT)
+void cmd_mkfatfs(FAR void *handle, int argc, char **argv)
+{
+  struct fat_format_s fmt = FAT_FORMAT_INITIALIZER;
+  int result = mkfatfs(argv[1], &fmt);
+  if ( result < 0)
+    {
+      nsh_output(handle, g_fmtcmdfailed, argv[0], "mkfatfs", NSH_ERRNO);
     }
 }
 #endif

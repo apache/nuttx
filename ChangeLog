@@ -393,3 +393,6 @@
 	  basic mkfatfs functionality for FAT12.
 
 0.3.13 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* Added mkfatfs command to NSH
+
