@@ -55,13 +55,19 @@
 #define NSH_MAX_ARGUMENTS 6
 
 /* strerror() produces much nicer output but is, however, quite large and
- * will only be used if CONFIG_NSH_STRERROR is defined.
+ * will only be used if CONFIG_EXAMPLES_NSH_STRERROR is defined.
  */
 
-#ifdef CONFIG_NSH_STRERROR
+#ifdef CONFIG_EXAMPLES_NSH_STRERROR
 #  define NSH_ERRNO strerror(errno)
 #else
 #  define NSH_ERRNO errno
+#endif
+
+/* Maximum size of one command line (telnet or serial) */
+
+#ifndef CONFIG_EXAMPLES_NSH_LINELEN
+#  define CONFIG_EXAMPLES_NSH_LINELEN 80
 #endif
 
 /* The following two settings are used only in the telnetd interface */
@@ -85,10 +91,7 @@
 /* Define to enable dumping of all input/output buffers */
 
 #undef CONFIG_EXAMPLES_NSH_TELNETD_DUMPBUFFER
-
-/* Sizing */
-
-#define NSH_MAX_LINELEN 80
+#undef CONFIG_EXAMPLES_NSH_FULLPATH
 
 /****************************************************************************
  * Public Types

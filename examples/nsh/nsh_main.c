@@ -52,9 +52,6 @@
  * Definitions
  ****************************************************************************/
 
-#define CONFIG_NSH_LINE_SIZE 80
-#undef  CONFIG_FULL_PATH
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -147,7 +144,7 @@ const char g_fmtcmdnotfound[]    = "nsh: %s: command not found\n";
 const char g_fmtcmdnotimpl[]     = "nsh: %s: command not implemented\n";
 const char g_fmtnosuch[]         = "nsh: %s: no such %s: %s\n";
 const char g_fmttoomanyargs[]    = "nsh: %s: too many arguments\n";
-#ifdef CONFIG_NSH_STRERROR
+#ifdef CONFIG_EXAMPLES_NSH_STRERROR
 const char g_fmtcmdfailed[]      = "nsh: %s: %s failed: %s\n";
 #else
 const char g_fmtcmdfailed[]      = "nsh: %s: %s failed: %d\n";

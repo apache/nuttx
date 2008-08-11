@@ -76,14 +76,14 @@
  */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-#  ifdef CONFIG_NSH_IOBUFFERSIZE
-#    if CONFIG_NSH_IOBUFFERSIZE > (PATH_MAX + 1)
-#      define IOBUFFERSIZE CONFIG_NSH_IOBUFFERSIZE
+#  ifdef CONFIG_EXAMPLES_NSH_FILEIOSIZE
+#    if CONFIG_EXAMPLES_NSH_FILEIOSIZE > (PATH_MAX + 1)
+#      define IOBUFFERSIZE CONFIG_EXAMPLES_NSH_FILEIOSIZE
 #    else
 #      define IOBUFFERSIZE (PATH_MAX + 1)
 #    endif
 #  else
-#    define IOBUFFERSIZE      1024
+#    define IOBUFFERSIZE 1024
 #  endif
 # else
 #    define IOBUFFERSIZE (PATH_MAX + 1)
@@ -102,6 +102,12 @@ typedef int (*direntry_handler_t)(FAR void *, const char *, struct dirent *, voi
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* Common buffer for file I/O.  Note the use of this common buffer precludes
+ * multiple copies of NSH running concurrently.  It should be allocated per
+ * NSH instance and retained in the "handle" as is done for the telnet
+ * connection.
+ */
 
 static char g_iobuffer[IOBUFFERSIZE];
 
@@ -163,7 +169,7 @@ static int foreach_direntry(FAR void *handle, const char *cmd, const char *dirpa
 
   /* Trim trailing '/' from directory names */
 
-#ifdef CONFIG_FULL_PATH
+#ifdef CONFIG_EXAMPLES_NSH_FULLPATH
   trim_dir(arg);
 #endif
 
@@ -306,7 +312,7 @@ static int ls_handler(FAR void *handle, const char *dirpath, struct dirent *entr
 
   /* then provide the filename that is common to normal and verbose output */
 
-#ifdef CONFIG_FULL_PATH
+#ifdef CONFIG_EXAMPLES_NSH_FULLPATH
   nsh_output(handle, " %s/%s", arg, entryp->d_name);
 #else
   nsh_output(handle, " %s", entryp->d_name);
@@ -365,7 +371,7 @@ static int ls_recursive(FAR void *handle, const char *dirpath, struct dirent *en
 #if CONFIG_NFILE_DESCRIPTORS > 0
 void cmd_cat(FAR void *handle, int argc, char **argv)
 {
-  char buffer[1024];
+  char buffer[IOBUFFERSIZE];
 
   /* Open the file for reading */
 
@@ -380,7 +386,7 @@ void cmd_cat(FAR void *handle, int argc, char **argv)
 
   for (;;)
     {
-      int nbytesread = read(fd, buffer, 1024);
+      int nbytesread = read(fd, buffer, IOBUFFERSIZE);
 
       /* Check for read errors */
 

@@ -57,13 +57,16 @@ examples/nsh
   Other behavior of NSH can be modified with the following settings in
   the configs/<board-name>/defconfig file:
 
-  * CONFIG_NSH_IOBUFFERSIZE
+  * CONFIG_EXAMPLES_NSH_FILEIOSIZE
       Size of a static I/O buffer used for file access (ignored if
       there is no filesystem).
 
-  * CONFIG_NSH_STRERROR
+  * CONFIG_EXAMPLES_NSH_STRERROR
       strerror(errno) makes more readable output but strerror() is
       very large and will not be used unless this setting is 'y'
+
+  * CONFIG_EXAMPLES_NSH_LINELEN
+      The maximum length of one command line.  Default: 80
 
   * CONFIG_EXAMPLES_NSH_TELNET
       By default, NSH is configured to use the serial console.

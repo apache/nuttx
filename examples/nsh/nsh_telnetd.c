@@ -511,7 +511,7 @@ int nsh_telnetout(FAR void *handle, const char *fmt, ...)
   va_list ap;
 
   /* Put the new info into the buffer.  Here we are counting on the fact that
-   * no output strings will exceed NSH_MAX_LINELEN!
+   * no output strings will exceed CONFIG_EXAMPLES_NSH_LINELEN!
    */
 
   va_start(ap, fmt);
@@ -542,7 +542,7 @@ int nsh_telnetout(FAR void *handle, const char *fmt, ...)
    * maximum length string.
    */
 
-  if (nbytes > CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - NSH_MAX_LINELEN)
+  if (nbytes > CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - CONFIG_EXAMPLES_NSH_LINELEN)
     {
       nsh_flush(pstate);
     }

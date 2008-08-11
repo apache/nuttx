@@ -50,9 +50,6 @@
  * Definitions
  ****************************************************************************/
 
-#define CONFIG_NSH_LINE_SIZE 80
-#undef  CONFIG_FULL_PATH
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -74,7 +71,7 @@ struct cmdmap_s
  * Private Data
  ****************************************************************************/
 
-static char line[CONFIG_NSH_LINE_SIZE];
+static char line[CONFIG_EXAMPLES_NSH_LINELEN];
 
 /****************************************************************************
  * Public Data
@@ -106,7 +103,7 @@ int nsh_serialmain(void)
 
       /* Get the next line of input */
 
-      fgets(line, CONFIG_NSH_LINE_SIZE, stdin);
+      fgets(line, CONFIG_EXAMPLES_NSH_LINELEN, stdin);
 
       /* Parse process the command */
 
