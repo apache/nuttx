@@ -71,7 +71,7 @@ struct cmdmap_s
  * Private Data
  ****************************************************************************/
 
-static char line[CONFIG_EXAMPLES_NSH_LINELEN];
+static char g_line[CONFIG_EXAMPLES_NSH_LINELEN];
 
 /****************************************************************************
  * Public Data
@@ -103,13 +103,27 @@ int nsh_serialmain(void)
 
       /* Get the next line of input */
 
-      fgets(line, CONFIG_EXAMPLES_NSH_LINELEN, stdin);
+      if (fgets(g_line, CONFIG_EXAMPLES_NSH_LINELEN, stdin))
+        {
+          /* Parse process the command */
 
-      /* Parse process the command */
-
-      (void)nsh_parse(NULL, line);
-      fflush(stdout);
+          (void)nsh_parse(NULL, g_line);
+          fflush(stdout);
+        }
     }
+}
+
+/****************************************************************************
+ * Name: nsh_linebuffer
+ *
+ * Description:
+ *   Return a reference to the current line buffer
+ *
+ ****************************************************************************/
+
+extern char *nsh_linebuffer(FAR void *handle)
+{
+  return g_line;
 }
 
 /****************************************************************************

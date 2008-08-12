@@ -742,7 +742,7 @@ void cmd_rm(FAR void *handle, int argc, char **argv)
 #endif
 
 /****************************************************************************
- * Name: cmd_rm
+ * Name: cmd_rmdir
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
@@ -751,6 +751,51 @@ void cmd_rmdir(FAR void *handle, int argc, char **argv)
   if (rmdir(argv[1]) < 0)
     {
       nsh_output(handle, g_fmtcmdfailed, argv[0], "rmdir", NSH_ERRNO);
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: cmd_sh
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
+void cmd_sh(FAR void *handle, int argc, char **argv)
+{
+  FILE *stream;
+  char *buffer;
+  char *pret;
+
+  /* Get a reference to the common input buffer */
+
+  buffer = nsh_linebuffer(handle);
+  if (buffer)
+    {
+      stream = fopen(argv[1], "r");
+      if (!stream)
+        {
+          nsh_output(handle, g_fmtcmdfailed, argv[0], "fopen", NSH_ERRNO);
+          return;
+        }
+
+      do
+        {
+          /* Get the next line of input from the file*/
+
+          fflush(stdout);
+          pret = fgets(buffer, CONFIG_EXAMPLES_NSH_LINELEN, stream);
+          if (pret)
+            {
+              /* Parse process the command.  NOTE:  this is recursive...
+               * we got to cmd_sh via a call to nsh_parse.  So some
+               * considerable amount of stack may be used.
+               */
+
+              (void)nsh_parse(handle, buffer);
+            }
+        }
+      while(pret);
+      fclose(stream);
     }
 }
 #endif

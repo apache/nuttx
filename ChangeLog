@@ -395,7 +395,11 @@
 0.3.13 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Added mkfatfs, mkfifo, sleep, usleep and nice commands to NSH
+	* Fixed problem with console input in Cygwin-based simulator; NSH now works
+	  with simulator.
 	* NSH will now execute commands in background
 	* sched_get_priority_max/min returned error on SCHED_RR
 	* Removed duplicate getenv() implementation in /lib
+	* Correct detection of End-of-File in fgets
+	* Implement sh and crude script handler in NSH
 

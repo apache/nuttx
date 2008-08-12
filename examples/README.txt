@@ -66,7 +66,8 @@ examples/nsh
       very large and will not be used unless this setting is 'y'
 
   * CONFIG_EXAMPLES_NSH_LINELEN
-      The maximum length of one command line.  Default: 80
+      The maximum length of one command line and of one output line.
+      Default: 80
 
   * CONFIG_EXAMPLES_NSH_TELNET
       By default, NSH is configured to use the serial console.
@@ -81,9 +82,6 @@ examples/nsh
   * CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE
       Determines the size of the I/O buffer to use for sending/
       receiving TELNET commands/reponses
-
-  * CONFIG_EXAMPLES_NSH_CMD_SIZE
-      The size of one parsed NSH command
 
   * CONFIG_EXAMPLES_NSH_STACKSIZE
       The stack size to use when spawning new threads as new TELNET

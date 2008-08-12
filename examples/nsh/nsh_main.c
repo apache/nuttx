@@ -116,6 +116,9 @@ static const struct cmdmap_s g_cmdmap[] =
   { "rm",       cmd_rm,       2, 2, "<file-path>" },
   { "rmdir",    cmd_rmdir,    2, 2, "<dir-path>" },
 #endif
+#if  CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
+  { "sh",       cmd_sh,       2, 2, "<script-path>" },
+# endif  /* CONFIG_NFILE_STREAMS */
 #ifndef CONFIG_DISABLE_SIGNALS
   { "sleep",    cmd_sleep,    2, 2, "<sec>" },
 #endif /* CONFIG_DISABLE_SIGNALS */

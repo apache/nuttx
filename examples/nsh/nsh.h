@@ -76,10 +76,6 @@
 # define CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE 512
 #endif
 
-#ifndef CONFIG_EXAMPLES_NSH_CMD_SIZE
-# define CONFIG_EXAMPLES_NSH_CMD_SIZE 40
-#endif
-
 /* As threads are created to handle each request, a stack must be allocated
  * for the thread.  Use a default if the user provided no stacksize.
  */
@@ -119,7 +115,7 @@ extern const char g_fmtcmdoutofmemory[];
 
 /* Message handler */
 
-extern int nsh_parse(FAR void *handle, char *cmdline);
+extern int   nsh_parse(FAR void *handle, char *cmdline);
 
 /* I/O interfaces */
 
@@ -139,6 +135,7 @@ extern int nsh_serialmain(void);
 # define nsh_output(handle, ...) printf(__VA_ARGS__)
 
 #endif
+extern char *nsh_linebuffer(FAR void *handle);
 
 /* Shell command handlers */
 
@@ -151,6 +148,9 @@ extern void cmd_ps(FAR void *handle, int argc, char **argv);
   extern void cmd_cat(FAR void *handle, int argc, char **argv);
   extern void cmd_cp(FAR void *handle, int argc, char **argv);
   extern void cmd_ls(FAR void *handle, int argc, char **argv);
+# if CONFIG_NFILE_STREAMS > 0
+  extern void cmd_sh(FAR void *handle, int argc, char **argv);
+# endif  /* CONFIG_NFILE_STREAMS */
 # ifndef CONFIG_DISABLE_MOUNTPOINT
     extern void cmd_mkdir(FAR void *handle, int argc, char **argv);
     extern void cmd_mkfifo(FAR void *handle, int argc, char **argv);

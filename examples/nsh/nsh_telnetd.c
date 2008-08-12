@@ -90,7 +90,7 @@ struct telnetd_s
   uint8  tn_bufndx;
   uint8  tn_state;
   char   tn_iobuffer[CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE];
-  char   tn_cmd[CONFIG_EXAMPLES_NSH_CMD_SIZE];
+  char   tn_cmd[CONFIG_EXAMPLES_NSH_LINELEN];
 };
 
 /****************************************************************************
@@ -170,7 +170,7 @@ static void nsh_putchar(struct telnetd_s *pstate, uint8 ch)
 
   /* If a newline was added or if the buffer is full, then process it now */
 
-  if (ch == ISO_nl || pstate->tn_bufndx == (CONFIG_EXAMPLES_NSH_CMD_SIZE - 1))
+  if (ch == ISO_nl || pstate->tn_bufndx == (CONFIG_EXAMPLES_NSH_LINELEN - 1))
     {
       if (pstate->tn_bufndx > 0)
         {
@@ -548,6 +548,20 @@ int nsh_telnetout(FAR void *handle, const char *fmt, ...)
     }
 
   return len;
+}
+
+/****************************************************************************
+ * Name: nsh_linebuffer
+ *
+ * Description:
+ *   Return a reference to the current line buffer
+ *
+ ****************************************************************************/
+
+extern char *nsh_linebuffer(FAR void *handle)
+{
+  struct telnetd_s *pstate = (struct telnetd_s *)handle;
+  return pstate->tn_cmd;
 }
 
 /****************************************************************************
