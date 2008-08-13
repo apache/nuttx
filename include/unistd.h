@@ -120,32 +120,32 @@ EXTERN int       optopt; /* unrecognized option character */
 
 /* Task Control Interfaces */
 
-EXTERN pid_t getpid(void);
-EXTERN void  _exit(int status) noreturn_function;
+EXTERN pid_t   getpid(void);
+EXTERN void    _exit(int status) noreturn_function;
 EXTERN unsigned int sleep(unsigned int seconds);
-EXTERN void  usleep(unsigned long usec);
+EXTERN void    usleep(unsigned long usec);
 
 /* File descriptor operations */
 
-EXTERN int   close(int fd);
-EXTERN int   dup(int fd);
-EXTERN int   dup2(int fd1, int fd2);
-EXTERN int   fsync(int fd);
-EXTERN off_t lseek(int fd, off_t offset, int whence);
-EXTERN int   read(int fd, FAR void *buf, unsigned int nbytes);
-EXTERN int   write(int fd, FAR const void *buf, unsigned int nbytes);
+EXTERN int     close(int fd);
+EXTERN int     dup(int fd);
+EXTERN int     dup2(int fd1, int fd2);
+EXTERN int     fsync(int fd);
+EXTERN off_t   lseek(int fd, off_t offset, int whence);
+EXTERN ssize_t read(int fd, FAR void *buf, size_t nbytes);
+EXTERN ssize_t write(int fd, FAR const void *buf, size_t nbytes);
 
 /* Special devices */
-EXTERN int   pipe(int filedes[2]);
+EXTERN int     pipe(int filedes[2]);
 
 /* File path operations */
 
-EXTERN int   unlink(FAR const char *pathname);
-EXTERN int   rmdir(FAR const char *pathname);
+EXTERN int     unlink(FAR const char *pathname);
+EXTERN int     rmdir(FAR const char *pathname);
 
 /* Other */
 
-EXTERN int   getopt(int argc, FAR char *const argv[], FAR const char *optstring);
+EXTERN int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
 
 #undef EXTERN
 #if defined(__cplusplus)

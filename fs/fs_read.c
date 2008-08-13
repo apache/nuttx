@@ -53,7 +53,7 @@
  * Global Functions
  ****************************************************************************/
 
-int read(int fd, FAR void *buf, unsigned int nbytes)
+ssize_t read(int fd, FAR void *buf, size_t nbytes)
 {
   FAR struct filelist *list;
   int ret = EBADF;

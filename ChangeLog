@@ -402,4 +402,6 @@
 	* Removed duplicate getenv() implementation in /lib
 	* Correct detection of End-of-File in fgets
 	* Implement sh and crude script handler in NSH
+	* Fix prototype of read() and write(). Need to use ssize_t and size_t, not
+	  int and unsigned int.
 
