@@ -5917,18 +5917,18 @@ interface of the same name.
 
 <ul><pre>
   #include &lt;unistd.h&gt;
-  int   close(int fd);
-  int   dup(int fildes);
-  int   dup2(int fildes1, int fildes2);
-  off_t lseek(int fd, off_t offset, int whence);
-  int   read(int fd, void *buf, unsigned int nbytes);
-  int   unlink(const char *path);
-  int   write(int fd, const void *buf, unsigned int nbytes);
+  int     close(int fd);
+  int     dup(int fildes);
+  int     dup2(int fildes1, int fildes2);
+  off_t   lseek(int fd, off_t offset, int whence);
+  ssize_t read(int fd, void *buf, size_t nbytes);
+  int     unlink(const char *path);
+  ssize_t write(int fd, const void *buf, size_t nbytes);
 </pre></ul>
 
 <ul><pre>
   #include &lt;sys/ioctl.h&gt;
-  int    ioctl(int fd, int req, unsigned long arg);
+  int     ioctl(int fd, int req, unsigned long arg);
 </pre></ul>
 
 <h2><a name="directoryoperations">2.11.3 Directory Operations</a></h2>
