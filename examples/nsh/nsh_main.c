@@ -256,6 +256,7 @@ static int nsh_execute(int argc, char *argv[])
      }
 
    handler(handle, argc, &argv[2]);
+   nsh_release(handle);
    return OK;
 }
 
@@ -361,16 +362,15 @@ int nsh_parse(FAR void *handle, char *cmdline)
        *             in the "background"
        * argv[1]:    This is string version of the handle needed to execute
        *             the command (under telnetd).  It is a string because
-       *             binary values cannot be provided via char *argv[]
+       *             binary values cannot be provided via char *argv[].  NOTE
+       *             that this value is filled in later.
        * argv[2]:    The command name.  This is argv[0] when the arguments
        *             are, finally, received by the command handler
        * argv[3]:    The beginning of argument (up to NSH_MAX_ARGUMENTS)
        * argv[argc]: NULL terminating pointer
        */
 
-      sprintf(strhandle, "%p\n", handle);
       argv[0] = "nsh_execute";
-      argv[1] = strhandle;
       argv[2] = cmd;
       for (argc = 3; argc < NSH_MAX_ARGUMENTS+4; argc++)
         {
@@ -400,8 +400,25 @@ int nsh_parse(FAR void *handle, char *cmdline)
         {
           struct sched_param param;
           int priority;
+          void *bkghandle;
 
-          /* Get the execution priority of this task */
+          /* Get a cloned copy of the handle with reference count=1.
+           * after the command has been processed, the nsh_release() call
+           * at the end of nsh_execute() will destroy the clone.
+           */
+
+          bkghandle = nsh_clone(handle);
+
+          /* Place a string copy of the cloned handle in the argument list */
+
+          sprintf(strhandle, "%p\n", bkghandle);
+          argv[1] = strhandle;
+
+         /* Handle redirection of output via a file descriptor */
+
+         /* (void)nsh_redirect(bkghandle); */
+
+         /* Get the execution priority of this task */
 
           ret = sched_getparam(0, &param);
           if (ret != 0)
@@ -455,17 +472,43 @@ int nsh_parse(FAR void *handle, char *cmdline)
         }
       else
         {
+          /* void *save; */
+
+          /* Increment the reference count on the handle.  This reference count will
+           * be decremented at the end of nsh_execute() and exists only for compatibility
+           * with the background command logic.
+           */
+
+          nsh_addref(handle);
+
+          /* Place a string copy of the original handle in the argument list */
+
+          sprintf(strhandle, "%p\n", handle);
+          argv[1] = strhandle;
+
+          /* Handle redirection of output via a file descriptor */
+          /* save = nsh_redirect(fd); */
+
+          /* Then execute the command in "foreground" -- i.e., while the user waits
+           * for the next prompt.
+           */
+
           ret = nsh_execute(argc, argv);
+          if (ret < 0)
+            {
+              return ERROR;
+            }
+
+          /* Restore the original output */
+
+          /* nsh_undirect(save); */
         }
 
       /* Return success if the command succeeded (or at least, starting of the
        * command task succeeded).
        */
 
-      if (ret == 0)
-        {
-          return OK;
-        }
+      return OK;
     }
 
   return ERROR;

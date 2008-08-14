@@ -401,7 +401,7 @@ static void *nsh_connection(void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_telnetmain
+ * Name: nsh_main
  *
  * Description:
  *   This is the main processing thread for telnetd.  It never returns
@@ -409,7 +409,7 @@ static void *nsh_connection(void *arg)
  *
  ****************************************************************************/
 
-int nsh_telnetmain(void)
+int nsh_main(void)
 {
  struct in_addr addr;
 #if defined(CONFIG_EXAMPLES_NSH_DHCPC) || defined(CONFIG_EXAMPLES_NSH_NOMAC)
@@ -492,7 +492,7 @@ int nsh_telnetmain(void)
 }
 
 /****************************************************************************
- * Name: nsh_telnetout
+ * Name: nsh_output
  *
  * Description:
  *   Print a string to the remote shell window.
@@ -503,7 +503,7 @@ int nsh_telnetmain(void)
  *
  ****************************************************************************/
 
-int nsh_telnetout(FAR void *handle, const char *fmt, ...)
+int nsh_output(FAR void *handle, const char *fmt, ...)
 {
   struct telnetd_s *pstate = (struct telnetd_s *)handle;
   int nbytes = pstate->tn_sndlen;
@@ -558,7 +558,7 @@ int nsh_telnetout(FAR void *handle, const char *fmt, ...)
  *
  ****************************************************************************/
 
-extern char *nsh_linebuffer(FAR void *handle)
+FAR char *nsh_linebuffer(FAR void *handle)
 {
   struct telnetd_s *pstate = (struct telnetd_s *)handle;
   return pstate->tn_cmd;

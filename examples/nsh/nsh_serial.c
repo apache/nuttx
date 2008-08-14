@@ -43,6 +43,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "nsh.h"
 
@@ -54,13 +55,10 @@
  * Private Types
  ****************************************************************************/
 
-struct cmdmap_s
+struct serial_s
 {
-  const char *cmd;        /* Name of the command */
-  cmd_t       handler;    /* Function that handles the command */
-  ubyte       minargs;    /* Minimum number of arguments (including command) */
-  ubyte       maxargs;    /* Maximum number of arguments (including command) */
-  const char *usage;      /* Usage instructions for 'help' command */
+  int         ss_refs;    /* Reference counts on the intance */
+  char        ss_line[CONFIG_EXAMPLES_NSH_LINELEN];
 };
 
 /****************************************************************************
@@ -71,8 +69,6 @@ struct cmdmap_s
  * Private Data
  ****************************************************************************/
 
-static char g_line[CONFIG_EXAMPLES_NSH_LINELEN];
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -82,6 +78,20 @@ static char g_line[CONFIG_EXAMPLES_NSH_LINELEN];
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nsh_allocstruct
+ ****************************************************************************/
+
+static inline FAR struct serial_s *nsh_allocstruct(void)
+{
+  struct serial_s *pstate = (struct serial_s *)malloc(sizeof(struct serial_s));
+  if (pstate)
+    {
+      pstate->ss_refs = 1;
+    }
+  return pstate;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -89,8 +99,10 @@ static char g_line[CONFIG_EXAMPLES_NSH_LINELEN];
  * Name: nsh_main
  ****************************************************************************/
 
-int nsh_serialmain(void)
+int nsh_main(void)
 {
+  FAR struct serial_s *pstate = nsh_allocstruct();
+
   printf("NuttShell (NSH)\n");
   fflush(stdout);
 
@@ -103,14 +115,34 @@ int nsh_serialmain(void)
 
       /* Get the next line of input */
 
-      if (fgets(g_line, CONFIG_EXAMPLES_NSH_LINELEN, stdin))
+      if (fgets(pstate->ss_line, CONFIG_EXAMPLES_NSH_LINELEN, stdin))
         {
           /* Parse process the command */
 
-          (void)nsh_parse(NULL, g_line);
+          (void)nsh_parse(pstate, pstate->ss_line);
           fflush(stdout);
         }
     }
+}
+
+/****************************************************************************
+ * Name: nsh_output
+ *
+ * Description:
+ *   Print a string to stdout.
+ *
+ ****************************************************************************/
+
+int nsh_output(FAR void *handle, const char *fmt, ...)
+{
+  va_list ap;
+  int     ret;
+ 
+  va_start(ap, fmt);
+  ret = vfprintf(stdout, fmt, ap);
+  va_end(ap);
+ 
+  return ret;
 }
 
 /****************************************************************************
@@ -121,9 +153,59 @@ int nsh_serialmain(void)
  *
  ****************************************************************************/
 
-extern char *nsh_linebuffer(FAR void *handle)
+FAR char *nsh_linebuffer(FAR void *handle)
 {
-  return g_line;
+  FAR struct serial_s *pstate = (FAR struct serial_s *)handle;
+  return pstate->ss_line;
+}
+
+/****************************************************************************
+ * Name: nsh_clone
+ *
+ * Description:
+ *   Make an independent copy of the handle
+ *
+ ****************************************************************************/
+
+FAR void *nsh_clone(FAR void *handle)
+{
+  return nsh_allocstruct();
+}
+
+/****************************************************************************
+ * Name: nsh_addref
+ *
+ * Description:
+ *   Increment the reference count on the handle.
+ *
+ ****************************************************************************/
+
+void nsh_addref(FAR void *handle)
+{
+  FAR struct serial_s *pstate = (FAR struct serial_s *)handle;
+  pstate->ss_refs++;
+}
+
+/****************************************************************************
+ * Name: nsh_release
+ *
+ * Description:
+ *   Decrement the reference count on the handle, releasing it when the count
+ *   decrements to zero.
+ *
+ ****************************************************************************/
+
+void nsh_release(FAR void *handle)
+{
+  FAR struct serial_s *pstate = (FAR struct serial_s *)handle;
+  if (pstate->ss_refs > 1)
+    {
+      pstate->ss_refs--;
+    }
+  else
+    {
+      free(handle);
+    }
 }
 
 /****************************************************************************

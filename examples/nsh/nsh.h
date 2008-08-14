@@ -115,27 +115,27 @@ extern const char g_fmtcmdoutofmemory[];
 
 /* Message handler */
 
-extern int   nsh_parse(FAR void *handle, char *cmdline);
+extern int nsh_parse(FAR void *handle, char *cmdline);
 
 /* I/O interfaces */
 
-#ifdef CONFIG_EXAMPLES_NSH_TELNET
+extern int nsh_main(void);
+extern int nsh_output(FAR void *handle, const char *fmt, ...);
+extern FAR char *nsh_linebuffer(FAR void *handle);
 
-extern int nsh_telnetmain(void);
-extern int nsh_telnetout(FAR void *handle, const char *fmt, ...);
-
-# define nsh_main()              nsh_telnetmain()
-# define nsh_output(handle, ...) nsh_telnetout(handle, __VA_ARGS__)
-
+#ifndef CONFIG_EXAMPLES_NSH_TELNET /* Not yet supported on telnetd interface */
+extern FAR void *nsh_clone(FAR void *handle);
+extern void  nsh_addref(FAR void *handle);
+extern void  nsh_release(FAR void *handle);
+extern void *nsh_redirect(int fd);
+extern void  nsh_restore(void *direct);
 #else
-
-extern int nsh_serialmain(void);
-
-# define nsh_main()              nsh_serialmain()
-# define nsh_output(handle, ...) printf(__VA_ARGS__)
-
+#  define nsh_clone(handle) (handle)
+#  define nsh_addref(handle)
+#  define nsh_release(handle);
+#  define nsh_redirect(fd) (NULL);
+#  define nsh_restore(direct)
 #endif
-extern char *nsh_linebuffer(FAR void *handle);
 
 /* Shell command handlers */
 
