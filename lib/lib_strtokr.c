@@ -120,32 +120,32 @@ char *strtok_r(char *str, const char *delim, char **saveptr)
        *pbegin && strchr(delim, *pbegin) != NULL;
        pbegin++);
 
-   /* If we are at the end of the string with nothing
-    * but delimiters found, then return NULL.
-    */
+  /* If we are at the end of the string with nothing
+   * but delimiters found, then return NULL.
+   */
 
-   if (!*pbegin)
-     {
-       return NULL;
-     }
+  if (!*pbegin)
+    {
+      return NULL;
+    }
 
-   /* Find the end of the token */
+  /* Find the end of the token */
 
   for (pend = pbegin + 1;
        *pend && strchr(delim, *pend) == NULL;
        pend++);
 
 
-   /* pend either points to the end of the string or to
-    * the first delimiter after the string.
-    */
+  /* pend either points to the end of the string or to
+   * the first delimiter after the string.
+   */
 
-   if (*pend)
-     {
-       /* Turn the delimiter into a null terminator */
+  if (*pend)
+    {
+      /* Turn the delimiter into a null terminator */
 
-       *pend++ = '\0';
-     }
+      *pend++ = '\0';
+    }
 
   /* Save the pointer where we left off and return the
    * beginning of the token.

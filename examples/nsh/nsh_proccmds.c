@@ -96,11 +96,12 @@ static const char *g_statenames[] =
 
 static void ps_task(FAR _TCB *tcb, FAR void *arg)
 {
+  struct nsh_vtbl_s *vtbl = (struct nsh_vtbl_s*)arg;
   int i;
 
   /* Show task status */
 
-  nsh_output(arg, "%5d %3d %4s %7s%c%c %8s ",
+  nsh_output(vtbl, "%5d %3d %4s %7s%c%c %8s ",
              tcb->pid, tcb->sched_priority,
              tcb->flags & TCB_FLAG_ROUND_ROBIN ? "RR  " : "FIFO",
              tcb->flags & TCB_FLAG_PTHREAD ? "PTHREAD" : "TASK   ",
@@ -110,13 +111,13 @@ static void ps_task(FAR _TCB *tcb, FAR void *arg)
 
   /* Show task name and arguments */
 
-  nsh_output(arg, "%s(", tcb->argv[0]);
+  nsh_output(vtbl, "%s(", tcb->argv[0]);
 
   /* Special case 1st argument (no comma) */
 
   if (tcb->argv[1])
     {
-     nsh_output(arg, "%p", tcb->argv[1]);
+     nsh_output(vtbl, "%p", tcb->argv[1]);
     }
 
   /* Then any additional arguments */
@@ -124,10 +125,10 @@ static void ps_task(FAR _TCB *tcb, FAR void *arg)
 #if CONFIG_MAX_TASK_ARGS > 2
   for (i = 2; i <= CONFIG_MAX_TASK_ARGS && tcb->argv[i]; i++)
     {
-      nsh_output(arg, ", %p", tcb->argv[i]);
+      nsh_output(vtbl, ", %p", tcb->argv[i]);
      }
 #endif
-  nsh_output(arg, ")\n");
+  nsh_output(vtbl, ")\n");
 }
 
 /****************************************************************************
@@ -138,7 +139,7 @@ static void ps_task(FAR _TCB *tcb, FAR void *arg)
  * Name: cmd_exec
  ****************************************************************************/
 
-void cmd_exec(FAR void *handle, int argc, char **argv)
+void cmd_exec(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char *endptr;
   long addr;
@@ -146,11 +147,11 @@ void cmd_exec(FAR void *handle, int argc, char **argv)
   addr = strtol(argv[1], &endptr, 0);
   if (!addr || endptr == argv[1] || *endptr != '\0')
     {
-       nsh_output(handle, g_fmtarginvalid, argv[0]);
+       nsh_output(vtbl, g_fmtarginvalid, argv[0]);
        return;
     }
 
-  nsh_output(handle, "Calling %p\n", (exec_t)addr);
+  nsh_output(vtbl, "Calling %p\n", (exec_t)addr);
   ((exec_t)addr)();
 }
 
@@ -158,10 +159,10 @@ void cmd_exec(FAR void *handle, int argc, char **argv)
  * Name: cmd_ps
  ****************************************************************************/
 
-void cmd_ps(FAR void *handle, int argc, char **argv)
+void cmd_ps(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-  nsh_output(handle, "PID   PRI SCHD TYPE   NP STATE    NAME\n");
-  sched_foreach(ps_task, handle);
+  nsh_output(vtbl, "PID   PRI SCHD TYPE   NP STATE    NAME\n");
+  sched_foreach(ps_task, vtbl);
 }
 
 /****************************************************************************
@@ -169,7 +170,7 @@ void cmd_ps(FAR void *handle, int argc, char **argv)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_SIGNALS
-void cmd_sleep(FAR void *handle, int argc, char **argv)
+void cmd_sleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char *endptr;
   long secs;
@@ -177,7 +178,7 @@ void cmd_sleep(FAR void *handle, int argc, char **argv)
   secs = strtol(argv[1], &endptr, 0);
   if (!secs || endptr == argv[1] || *endptr != '\0')
     {
-       nsh_output(handle, g_fmtarginvalid, argv[0]);
+       nsh_output(vtbl, g_fmtarginvalid, argv[0]);
        return;
     }
   sleep(secs);
@@ -189,7 +190,7 @@ void cmd_sleep(FAR void *handle, int argc, char **argv)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_SIGNALS
-void cmd_usleep(FAR void *handle, int argc, char **argv)
+void cmd_usleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char *endptr;
   long usecs;
@@ -197,7 +198,7 @@ void cmd_usleep(FAR void *handle, int argc, char **argv)
   usecs = strtol(argv[1], &endptr, 0);
   if (!usecs || endptr == argv[1] || *endptr != '\0')
     {
-       nsh_output(handle, g_fmtarginvalid, argv[0]);
+       nsh_output(vtbl, g_fmtarginvalid, argv[0]);
        return;
     }
   usleep(usecs);

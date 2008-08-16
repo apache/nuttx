@@ -404,4 +404,6 @@
 	* Implement sh and crude script handler in NSH
 	* Fix prototype of read() and write(). Need to use ssize_t and size_t, not
 	  int and unsigned int.
+	* Add support for redirection of command output in NSH
+	* NSH can now use both telnet and serial front ends together
 

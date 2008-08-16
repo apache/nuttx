@@ -46,13 +46,18 @@ examples/nsh
   ifconfig   CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS > 0
   ls         CONFIG_NFILE_DESCRIPTORS > 0
   mkdir      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
-  mount      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
+  mkfatfs    !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
+  mkfifo     !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
+  mount      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
   ps         --
   set        !CONFIG_DISABLE_ENVIRON
+  sleep      !CONFIG_DISABLE_SIGNALS
+  sh         CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
   rm         !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
   rmdir      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
-  umount     !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
+  umount     !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
   unset      !CONFIG_DISABLE_ENVIRON
+  usleep     !CONFIG_DISABLE_SIGNALS
 
   Other behavior of NSH can be modified with the following settings in
   the configs/<board-name>/defconfig file:
@@ -69,23 +74,28 @@ examples/nsh
       The maximum length of one command line and of one output line.
       Default: 80
 
+  * CONFIG_EXAMPLES_NSH_STACKSIZE
+      The stack size to use when spawning new threads or tasks.  Such
+      new threads are generated when a command is executed in background
+      or as new TELNET connections are established.
+
+  * CONFIG_EXAMPLES_NSH_CONSOLE
+      If CONFIG_EXAMPLES_NSH_CONSOLE is set to 'y', then a serial
+      console front-end is selected.
+
   * CONFIG_EXAMPLES_NSH_TELNET
-      By default, NSH is configured to use the serial console.
       If CONFIG_EXAMPLES_NSH_TELNET is set to 'y', then a TELENET
       server front-end is selected.  When this option is provided,
-      you must log into NuttX remotely using telnet in order to
+      you may log into NuttX remotely using telnet in order to
       access NSH.
 
-  If CONFIG_EXAMPLES_NSH_TELNET is selected, then there some other
-  configuration settings that apply:
+  One or both of CONFIG_EXAMPLES_NSH_CONSOLE and CONFIG_EXAMPLES_NSH_TELNET
+  must be defined.  If CONFIG_EXAMPLES_NSH_TELNET is selected, then there some
+  other configuration settings that apply:
 
   * CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE
       Determines the size of the I/O buffer to use for sending/
       receiving TELNET commands/reponses
-
-  * CONFIG_EXAMPLES_NSH_STACKSIZE
-      The stack size to use when spawning new threads as new TELNET
-      connections are established.
 
   * CONFIG_EXAMPLES_NSH_DHCPC
       Obtain the the IP address via DHCP.

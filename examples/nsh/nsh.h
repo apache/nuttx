@@ -41,14 +41,17 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_EXAMPLES_NSH_TELNET
-#else
+#ifdef CONFIG_EXAMPLES_NSH_CONSOLE
 # include <stdio.h>
 #endif
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+#if !defined(CONFIG_EXAMPLES_NSH_CONSOLE) && !defined(CONFIG_EXAMPLES_NSH_TELNET)
+#  error "No NSH front end defined"
+#endif
 
 /* This is the maximum number of arguments that will be accepted for a command */
 
@@ -89,11 +92,35 @@
 #undef CONFIG_EXAMPLES_NSH_TELNETD_DUMPBUFFER
 #undef CONFIG_EXAMPLES_NSH_FULLPATH
 
+#define nsh_clone(v)           (v)->clone(v)
+#define nsh_addref(v)          (v)->addref(v)
+#define nsh_release(v)         (v)->release(v)
+#define nsh_linebuffer(v)      (v)->linebuffer(v)
+#define nsh_redirect(v,f)      (v)->redirect(v,f)
+#define nsh_undirect(v,d)      (v)->undirect(v,d)
+
+#ifdef CONFIG_CPP_HAVE_VARARGS
+# define nsh_output(v, fmt...) (v)->output(v, ##fmt)
+#else
+# define nsh_output            vtbl->output
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-typedef void (*cmd_t)(FAR void *handle, int argc, char **argv);
+struct nsh_vtbl_s
+{
+  FAR struct nsh_vtbl_s *(*clone)(FAR struct nsh_vtbl_s *vtbl);
+  void (*addref)(FAR struct nsh_vtbl_s *vtbl);
+  void (*release)(FAR struct nsh_vtbl_s *vtbl);
+  int (*output)(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
+  FAR char *(*linebuffer)(FAR struct nsh_vtbl_s *vtbl);
+  FAR void *(*redirect)(FAR struct nsh_vtbl_s *vtbl, int fd);
+  void (*undirect)(FAR struct nsh_vtbl_s *vtbl, FAR void *direct);
+};
+
+typedef void (*cmd_t)(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 
 /****************************************************************************
  * Public Data
@@ -115,67 +142,57 @@ extern const char g_fmtcmdoutofmemory[];
 
 /* Message handler */
 
-extern int nsh_parse(FAR void *handle, char *cmdline);
+extern int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline);
 
 /* I/O interfaces */
 
-extern int nsh_main(void);
-extern int nsh_output(FAR void *handle, const char *fmt, ...);
-extern FAR char *nsh_linebuffer(FAR void *handle);
+#ifdef CONFIG_EXAMPLES_NSH_CONSOLE
+extern int nsh_consolemain(int argc, char *argv[]);
+#endif
 
-#ifndef CONFIG_EXAMPLES_NSH_TELNET /* Not yet supported on telnetd interface */
-extern FAR void *nsh_clone(FAR void *handle);
-extern void  nsh_addref(FAR void *handle);
-extern void  nsh_release(FAR void *handle);
-extern void *nsh_redirect(int fd);
-extern void  nsh_restore(void *direct);
-#else
-#  define nsh_clone(handle) (handle)
-#  define nsh_addref(handle)
-#  define nsh_release(handle);
-#  define nsh_redirect(fd) (NULL);
-#  define nsh_restore(direct)
+#ifdef CONFIG_EXAMPLES_NSH_TELNET
+extern int nsh_telnetmain(int argc, char *argv[]);
 #endif
 
 /* Shell command handlers */
 
-extern void cmd_echo(FAR void *handle, int argc, char **argv);
-extern void cmd_exec(FAR void *handle, int argc, char **argv);
-extern void cmd_exit(FAR void *handle, int argc, char **argv);
-extern void cmd_ps(FAR void *handle, int argc, char **argv);
+extern void cmd_echo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+extern void cmd_exec(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+extern void cmd_exit(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+extern void cmd_ps(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  extern void cmd_cat(FAR void *handle, int argc, char **argv);
-  extern void cmd_cp(FAR void *handle, int argc, char **argv);
-  extern void cmd_ls(FAR void *handle, int argc, char **argv);
+  extern void cmd_cat(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+  extern void cmd_cp(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+  extern void cmd_ls(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 # if CONFIG_NFILE_STREAMS > 0
-  extern void cmd_sh(FAR void *handle, int argc, char **argv);
+  extern void cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 # endif  /* CONFIG_NFILE_STREAMS */
 # ifndef CONFIG_DISABLE_MOUNTPOINT
-    extern void cmd_mkdir(FAR void *handle, int argc, char **argv);
-    extern void cmd_mkfifo(FAR void *handle, int argc, char **argv);
-    extern void cmd_rm(FAR void *handle, int argc, char **argv);
-    extern void cmd_rmdir(FAR void *handle, int argc, char **argv);
+    extern void cmd_mkdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+    extern void cmd_mkfifo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+    extern void cmd_rm(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+    extern void cmd_rmdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #   ifdef CONFIG_FS_FAT
-      extern void cmd_mkfatfs(FAR void *handle, int argc, char **argv);
-      extern void cmd_mount(FAR void *handle, int argc, char **argv);
-      extern void cmd_umount(FAR void *handle, int argc, char **argv);
+      extern void cmd_mkfatfs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+      extern void cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+      extern void cmd_umount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #   endif /* CONFIG_FS_FAT */
 # endif /* !CONFIG_DISABLE_MOUNTPOINT */
 #endif /* CONFIG_NFILE_DESCRIPTORS */
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-  extern void cmd_ifconfig(FAR void *handle, int argc, char **argv);
+  extern void cmd_ifconfig(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
 
 #ifndef CONFIG_DISABLE_ENVIRON
-  extern void cmd_set(FAR void *handle, int argc, char **argv);
-  extern void cmd_unset(FAR void *handle, int argc, char **argv);
+  extern void cmd_set(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+  extern void cmd_unset(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif /* CONFIG_DISABLE_ENVIRON */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-  extern void cmd_sleep(FAR void *handle, int argc, char **argv);
-  extern void cmd_usleep(FAR void *handle, int argc, char **argv);
+  extern void cmd_sleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+  extern void cmd_usleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif /* CONFIG_DISABLE_SIGNALS */
 
 #endif /* __NSH_H */

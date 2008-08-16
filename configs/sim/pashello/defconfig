@@ -1,5 +1,5 @@
 ############################################################################
-# sim/defconfig
+# configs/sim/defconfig
 #
 #   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -283,6 +283,7 @@ CONFIG_EXAMPLE_NETTEST_CLIENTIP=(192<<24|168<<16|0<<8|106)
 
 #
 # Settings for examples/nsh
+CONFIG_EXAMPLES_NSH_CONSOLE=y
 CONFIG_EXAMPLES_NSH_TELNET=n
 CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE=512
 CONFIG_EXAMPLES_NSH_CMD_SIZE=40

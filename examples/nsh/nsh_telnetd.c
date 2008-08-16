@@ -85,6 +85,7 @@
 
 struct telnetd_s
 {
+  struct nsh_vtbl_s vtbl;
   int    tn_sockfd;
   uint16 tn_sndlen;
   uint8  tn_bufndx;
@@ -92,6 +93,18 @@ struct telnetd_s
   char   tn_iobuffer[CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE];
   char   tn_cmd[CONFIG_EXAMPLES_NSH_LINELEN];
 };
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static FAR struct nsh_vtbl_s *nsh_telnetclone(FAR struct nsh_vtbl_s *vtbl);
+static void nsh_telnetaddref(FAR struct nsh_vtbl_s *vtbl);
+static void nsh_telnetrelease(FAR struct nsh_vtbl_s *vtbl);
+static int nsh_telnetoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
+static FAR char *nsh_telnetlinebuffer(FAR struct nsh_vtbl_s *vtbl);
+static FAR void *nsh_telnetredirect(FAR struct nsh_vtbl_s *vtbl, int fd);
+static void nsh_telnetundirect(FAR struct nsh_vtbl_s *vtbl, FAR void *direct);
 
 /****************************************************************************
  * Private Functions
@@ -148,6 +161,27 @@ static void nsh_dumpbuffer(const char *msg, const char *buffer, ssize_t nbytes)
 #endif
 
 /****************************************************************************
+ * Name: nsh_allocstruct
+ ****************************************************************************/
+
+static inline FAR struct telnetd_s *nsh_allocstruct(void)
+{
+  struct telnetd_s *pstate = (struct telnetd_s *)malloc(sizeof(struct telnetd_s));
+  if (pstate)
+    {
+      memset(pstate, 0, sizeof(struct telnetd_s));
+      pstate->vtbl.clone      = nsh_telnetclone;
+      pstate->vtbl.addref     = nsh_telnetaddref;
+      pstate->vtbl.release    = nsh_telnetrelease;
+      pstate->vtbl.output     = nsh_telnetoutput;
+      pstate->vtbl.linebuffer = nsh_telnetlinebuffer;
+      pstate->vtbl.redirect   = nsh_telnetredirect;
+      pstate->vtbl.undirect   = nsh_telnetundirect;
+    }
+  return pstate;
+}
+
+/****************************************************************************
  * Name: nsh_putchar
  *
  * Description:
@@ -178,7 +212,7 @@ static void nsh_putchar(struct telnetd_s *pstate, uint8 ch)
         }
 
       nsh_dumpbuffer("TELNET CMD", pstate->tn_cmd, strlen(pstate->tn_cmd));
-      nsh_parse((void*)pstate, pstate->tn_cmd);
+      nsh_parse(&pstate->vtbl, pstate->tn_cmd);
       pstate->tn_bufndx = 0;
     }
   else
@@ -340,7 +374,7 @@ static int nsh_receive(struct telnetd_s *pstate, size_t len)
 
 static void *nsh_connection(void *arg)
 {
-  struct telnetd_s *pstate = (struct telnetd_s *)malloc(sizeof(struct telnetd_s));
+  struct telnetd_s *pstate = nsh_allocstruct();
   int               sockfd = (int)arg;
   int               ret    = ERROR;
 
@@ -352,13 +386,12 @@ static void *nsh_connection(void *arg)
     {
       /* Initialize the thread state structure */
 
-      memset(pstate, 0, sizeof(struct telnetd_s));
       pstate->tn_sockfd = sockfd;
       pstate->tn_state  = STATE_NORMAL;
 
       /* Output a greeting */
 
-      nsh_output(pstate, "NuttShell (NSH)\n");
+      nsh_output(&pstate->vtbl, "NuttShell (NSH)\n");
 
       /* Loop processing each TELNET command */
 
@@ -366,7 +399,7 @@ static void *nsh_connection(void *arg)
         {
           /* Display the prompt string */
 
-          nsh_output(pstate, g_nshprompt);
+          nsh_output(&pstate->vtbl, g_nshprompt);
           nsh_flush(pstate);
 
           /* Read a buffer of data from the TELNET client */
@@ -397,6 +430,79 @@ static void *nsh_connection(void *arg)
 }
 
 /****************************************************************************
+ * Name: nsh_telnetoutput
+ *
+ * Description:
+ *   Print a string to the remote shell window.
+ *
+ *   This function is implemented by the shell GUI / telnet server and
+ *   can be called by the shell back-end to output a string in the
+ *   shell window. The string is automatically appended with a linebreak.
+ *
+ ****************************************************************************/
+
+static int nsh_telnetoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...)
+{
+  struct telnetd_s *pstate = (struct telnetd_s *)vtbl;
+  int nbytes = pstate->tn_sndlen;
+  int len;
+  va_list ap;
+
+  /* Put the new info into the buffer.  Here we are counting on the fact that
+   * no output strings will exceed CONFIG_EXAMPLES_NSH_LINELEN!
+   */
+
+  va_start(ap, fmt);
+  vsnprintf(&pstate->tn_iobuffer[nbytes],
+            (CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - 1) - nbytes, fmt, ap);
+  va_end(ap);
+
+  /* Get the size of the new string just added and the total size of
+   * buffered data
+   */
+
+  len     = strlen(&pstate->tn_iobuffer[nbytes]);
+  nbytes += len;
+
+  /* Expand any terminating \n to \r\n */
+
+  if (nbytes < (CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - 2) &&
+      pstate->tn_iobuffer[nbytes-1] == '\n')
+    {
+      pstate->tn_iobuffer[nbytes-1] = ISO_cr;
+      pstate->tn_iobuffer[nbytes]   = ISO_nl;
+      pstate->tn_iobuffer[nbytes+1] = '\0';
+      nbytes++;
+    }
+  pstate->tn_sndlen = nbytes;
+
+  /* Flush to the network if the buffer does not have room for one more
+   * maximum length string.
+   */
+
+  if (nbytes > CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - CONFIG_EXAMPLES_NSH_LINELEN)
+    {
+      nsh_flush(pstate);
+    }
+
+  return len;
+}
+
+/****************************************************************************
+ * Name: nsh_telnetlinebuffer
+ *
+ * Description:
+ *   Return a reference to the current line buffer
+ *
+ ****************************************************************************/
+
+static FAR char *nsh_telnetlinebuffer(FAR struct nsh_vtbl_s *vtbl)
+{
+  struct telnetd_s *pstate = (struct telnetd_s *)vtbl;
+  return pstate->tn_cmd;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -409,7 +515,7 @@ static void *nsh_connection(void *arg)
  *
  ****************************************************************************/
 
-int nsh_main(void)
+int nsh_telnetmain(int argc, char *argv[])
 {
  struct in_addr addr;
 #if defined(CONFIG_EXAMPLES_NSH_DHCPC) || defined(CONFIG_EXAMPLES_NSH_NOMAC)
@@ -492,79 +598,6 @@ int nsh_main(void)
 }
 
 /****************************************************************************
- * Name: nsh_output
- *
- * Description:
- *   Print a string to the remote shell window.
- *
- *   This function is implemented by the shell GUI / telnet server and
- *   can be called by the shell back-end to output a string in the
- *   shell window. The string is automatically appended with a linebreak.
- *
- ****************************************************************************/
-
-int nsh_output(FAR void *handle, const char *fmt, ...)
-{
-  struct telnetd_s *pstate = (struct telnetd_s *)handle;
-  int nbytes = pstate->tn_sndlen;
-  int len;
-  va_list ap;
-
-  /* Put the new info into the buffer.  Here we are counting on the fact that
-   * no output strings will exceed CONFIG_EXAMPLES_NSH_LINELEN!
-   */
-
-  va_start(ap, fmt);
-  vsnprintf(&pstate->tn_iobuffer[nbytes],
-            (CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - 1) - nbytes, fmt, ap);
-  va_end(ap);
-
-  /* Get the size of the new string just added and the total size of
-   * buffered data
-   */
-
-  len     = strlen(&pstate->tn_iobuffer[nbytes]);
-  nbytes += len;
-
-  /* Expand any terminating \n to \r\n */
-
-  if (nbytes < (CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - 2) &&
-      pstate->tn_iobuffer[nbytes-1] == '\n')
-    {
-      pstate->tn_iobuffer[nbytes-1] = ISO_cr;
-      pstate->tn_iobuffer[nbytes]   = ISO_nl;
-      pstate->tn_iobuffer[nbytes+1] = '\0';
-      nbytes++;
-    }
-  pstate->tn_sndlen = nbytes;
-
-  /* Flush to the network if the buffer does not have room for one more
-   * maximum length string.
-   */
-
-  if (nbytes > CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - CONFIG_EXAMPLES_NSH_LINELEN)
-    {
-      nsh_flush(pstate);
-    }
-
-  return len;
-}
-
-/****************************************************************************
- * Name: nsh_linebuffer
- *
- * Description:
- *   Return a reference to the current line buffer
- *
- ****************************************************************************/
-
-FAR char *nsh_linebuffer(FAR void *handle)
-{
-  struct telnetd_s *pstate = (struct telnetd_s *)handle;
-  return pstate->tn_cmd;
-}
-
-/****************************************************************************
  * Name: cmd_exit
  *
  * Description:
@@ -572,9 +605,9 @@ FAR char *nsh_linebuffer(FAR void *handle)
  *
  ****************************************************************************/
 
-void cmd_exit(void *handle, int argc, char **argv)
+void cmd_exit(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-  struct telnetd_s *pstate = (struct telnetd_s *)handle;
+  struct telnetd_s *pstate = (struct telnetd_s *)vtbl;
   pstate->tn_state = STATE_CLOSE;
 }
 

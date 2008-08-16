@@ -79,7 +79,7 @@
  * Name: cmd_echo
  ****************************************************************************/
 
-void cmd_echo(FAR void *handle, int argc, char **argv)
+void cmd_echo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   int i;
 
@@ -97,16 +97,16 @@ void cmd_echo(FAR void *handle, int argc, char **argv)
           char *value = getenv(argv[i]+1);
           if (value)
             {
-              nsh_output(handle, "%s ", value);
+              nsh_output(vtbl, "%s ", value);
             }
         }
       else
 #endif
         {
-          nsh_output(handle, "%s ", argv[i]);
+          nsh_output(vtbl, "%s ", argv[i]);
         }
     }
-  nsh_output(handle, "\n");
+  nsh_output(vtbl, "\n");
 }
 
 /****************************************************************************
@@ -114,11 +114,11 @@ void cmd_echo(FAR void *handle, int argc, char **argv)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_ENVIRON
-void cmd_set(FAR void *handle, int argc, char **argv)
+void cmd_set(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   if (setenv(argv[1], argv[2], TRUE) < 0)
     {
-      nsh_output(handle, g_fmtcmdfailed, argv[0], "setenv", NSH_ERRNO);
+      nsh_output(vtbl, g_fmtcmdfailed, argv[0], "setenv", NSH_ERRNO);
     }
 }
 #endif
@@ -128,11 +128,11 @@ void cmd_set(FAR void *handle, int argc, char **argv)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_ENVIRON
-void cmd_unset(FAR void *handle, int argc, char **argv)
+void cmd_unset(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   if (unsetenv(argv[1]) < 0)
     {
-      nsh_output(handle, g_fmtcmdfailed, argv[0], "unsetenv", NSH_ERRNO);
+      nsh_output(vtbl, g_fmtcmdfailed, argv[0], "unsetenv", NSH_ERRNO);
     }
 }
 #endif

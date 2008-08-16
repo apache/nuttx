@@ -45,10 +45,12 @@ CSRCS	+= nsh_netcmds.c
 endif
 endif
 
+ifeq ($(CONFIG_EXAMPLES_NSH_CONSOLE),y)
+CSRCS	+= nsh_serial.c
+endif
+
 ifeq ($(CONFIG_EXAMPLES_NSH_TELNET),y)
 CSRCS	+= nsh_telnetd.c
-else
-CSRCS	+= nsh_serial.c
 endif
 
 AOBJS	= $(ASRCS:.S=$(OBJEXT))
