@@ -58,11 +58,17 @@
 
 struct serial_s
 {
-  struct nsh_vtbl_s vtbl;
+  struct nsh_vtbl_s ss_vtbl;
   int    ss_refs;    /* Reference counts on the instance */
   int    ss_fd;      /* Re-direct file descriptor */
-  FILE  *ss_stream;  /* Redirect file descriptor */
+  FILE  *ss_stream;  /* Re-direct stream */
   char   ss_line[CONFIG_EXAMPLES_NSH_LINELEN];
+};
+
+struct serialsave_s
+{
+  int    ss_fd;      /* Re-direct file descriptor */
+  FILE  *ss_stream;  /* Re-direct stream */
 };
 
 /****************************************************************************
@@ -74,8 +80,9 @@ static void nsh_consoleaddref(FAR struct nsh_vtbl_s *vtbl);
 static void nsh_consolerelease(FAR struct nsh_vtbl_s *vtbl);
 static int nsh_consoleoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
 static FAR char *nsh_consolelinebuffer(FAR struct nsh_vtbl_s *vtbl);
-static FAR void *nsh_consoleredirect(FAR struct nsh_vtbl_s *vtbl, int fd);
-static void nsh_consoleundirect(FAR struct nsh_vtbl_s *vtbl, FAR void *direct);
+static void nsh_consoleredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *save);
+static void nsh_consoleundirect(FAR struct nsh_vtbl_s *vtbl, FAR ubyte *save);
+static void nsh_consoleexit(FAR struct nsh_vtbl_s *vtbl);
 
 /****************************************************************************
  * Private Data
@@ -98,17 +105,18 @@ static inline FAR struct serial_s *nsh_allocstruct(void)
   struct serial_s *pstate = (struct serial_s *)malloc(sizeof(struct serial_s));
   if (pstate)
     {
-      pstate->vtbl.clone      = nsh_consoleclone;
-      pstate->vtbl.addref     = nsh_consoleaddref;
-      pstate->vtbl.release    = nsh_consolerelease;
-      pstate->vtbl.output     = nsh_consoleoutput;
-      pstate->vtbl.linebuffer = nsh_consolelinebuffer;
-      pstate->vtbl.redirect   = nsh_consoleredirect;
-      pstate->vtbl.undirect   = nsh_consoleundirect;
+      pstate->ss_vtbl.clone      = nsh_consoleclone;
+      pstate->ss_vtbl.addref     = nsh_consoleaddref;
+      pstate->ss_vtbl.release    = nsh_consolerelease;
+      pstate->ss_vtbl.output     = nsh_consoleoutput;
+      pstate->ss_vtbl.linebuffer = nsh_consolelinebuffer;
+      pstate->ss_vtbl.redirect   = nsh_consoleredirect;
+      pstate->ss_vtbl.undirect   = nsh_consoleundirect;
+      pstate->ss_vtbl.exit       = nsh_consoleexit;
 
-      pstate->ss_refs         = 1;
-      pstate->ss_fd           = 1;
-      pstate->ss_stream       = stdout;
+      pstate->ss_refs            = 1;
+      pstate->ss_fd              = 1;
+      pstate->ss_stream          = stdout;
     }
   return pstate;
 }
@@ -221,7 +229,7 @@ static FAR struct nsh_vtbl_s *nsh_consoleclone(FAR struct nsh_vtbl_s *vtbl)
   FAR struct serial_s *pclone = nsh_allocstruct();
   pclone->ss_fd     = pstate->ss_fd;
   pclone->ss_stream = NULL;
-  return &pclone->vtbl;
+  return &pclone->ss_vtbl;
 }
 
 /****************************************************************************
@@ -269,18 +277,25 @@ static void nsh_consolerelease(FAR struct nsh_vtbl_s *vtbl)
  *
  ****************************************************************************/
 
-static FAR void *nsh_consoleredirect(FAR struct nsh_vtbl_s *vtbl, int fd)
+static void nsh_consoleredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *save)
 {
-  FAR struct serial_s *pstate = (FAR struct serial_s *)vtbl;
-  void *ret;
+  FAR struct serial_s     *pstate = (FAR struct serial_s *)vtbl;
+  FAR struct serialsave_s *ssave  = (FAR struct serialsave_s *)save;
 
   (void)nsh_openifnotopen(pstate);
-  ret = pstate->ss_stream;
   fflush(pstate->ss_stream);
+  if (ssave)
+    {
+      ssave->ss_fd     = pstate->ss_fd;
+      ssave->ss_stream = pstate->ss_stream;
+    }
+  else
+    {
+      fclose(pstate->ss_stream);
+    }
 
   pstate->ss_fd     = fd;
-  pstate->ss_stream = NULL;  
-  return ret;
+  pstate->ss_stream = NULL;
 }
 
 /****************************************************************************
@@ -291,12 +306,27 @@ static FAR void *nsh_consoleredirect(FAR struct nsh_vtbl_s *vtbl, int fd)
  *
  ****************************************************************************/
 
-static void nsh_consoleundirect(FAR struct nsh_vtbl_s *vtbl, FAR void *direct)
+static void nsh_consoleundirect(FAR struct nsh_vtbl_s *vtbl, FAR ubyte *save)
 {
   FAR struct serial_s *pstate = (FAR struct serial_s *)vtbl;
+  FAR struct serialsave_s *ssave  = (FAR struct serialsave_s *)save;
+
   nsh_closeifnotclosed(pstate);
-  pstate->ss_fd = -1;  
-  pstate->ss_stream = (FILE*)direct;  
+  pstate->ss_fd     = ssave->ss_fd;
+  pstate->ss_stream = ssave->ss_stream;
+}
+
+/****************************************************************************
+ * Name: nsh_consoleexit
+ *
+ * Description:
+ *   Exit the shell task
+ *
+ ****************************************************************************/
+
+static void nsh_consoleexit(FAR struct nsh_vtbl_s *vtbl)
+{
+  exit(0);
 }
 
 /****************************************************************************
@@ -327,21 +357,8 @@ int nsh_consolemain(int argc, char *argv[])
         {
           /* Parse process the command */
 
-          (void)nsh_parse(&pstate->vtbl, pstate->ss_line);
+          (void)nsh_parse(&pstate->ss_vtbl, pstate->ss_line);
           fflush(pstate->ss_stream);
         }
     }
-}
-
-/****************************************************************************
- * Name: cmd_exit
- *
- * Description:
- *   Exit the shell task
- *
- ****************************************************************************/
-
-void cmd_exit(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
-{
-  exit(0);
 }

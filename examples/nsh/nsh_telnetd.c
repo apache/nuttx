@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh_telnetd.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This is a leverage of similar logic from uIP:
@@ -51,6 +51,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <pthread.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <net/if.h>
@@ -83,15 +84,42 @@
  * Private Types
  ****************************************************************************/
 
+struct telnetio_s
+{
+  int    tio_sockfd;
+  uint16 tio_sndlen;
+  uint8  tio_bufndx;
+  uint8  tio_state;
+  char   tio_buffer[CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE];
+};
+
+struct redirect_s
+{
+  int    rd_fd;      /* Re-direct file descriptor */
+  FILE  *rd_stream;  /* Re-direct stream */
+};
+
+struct telnetsave_s
+{
+  boolean ts_redirected;
+  union
+    {
+      struct telnetio_s *tn;
+      struct redirect_s  rd;
+    } u;
+};
+
 struct telnetd_s
 {
-  struct nsh_vtbl_s vtbl;
-  int    tn_sockfd;
-  uint16 tn_sndlen;
-  uint8  tn_bufndx;
-  uint8  tn_state;
-  char   tn_iobuffer[CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE];
-  char   tn_cmd[CONFIG_EXAMPLES_NSH_LINELEN];
+  struct nsh_vtbl_s tn_vtbl;
+  boolean           tn_redirected;
+  int               tn_refs;    /* Reference counts on the instance */
+  union
+    {
+      struct telnetio_s *tn;
+      struct redirect_s  rd;
+    } u;
+  char tn_cmd[CONFIG_EXAMPLES_NSH_LINELEN];
 };
 
 /****************************************************************************
@@ -102,9 +130,11 @@ static FAR struct nsh_vtbl_s *nsh_telnetclone(FAR struct nsh_vtbl_s *vtbl);
 static void nsh_telnetaddref(FAR struct nsh_vtbl_s *vtbl);
 static void nsh_telnetrelease(FAR struct nsh_vtbl_s *vtbl);
 static int nsh_telnetoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
+static int nsh_redirectoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
 static FAR char *nsh_telnetlinebuffer(FAR struct nsh_vtbl_s *vtbl);
-static FAR void *nsh_telnetredirect(FAR struct nsh_vtbl_s *vtbl, int fd);
-static void nsh_telnetundirect(FAR struct nsh_vtbl_s *vtbl, FAR void *direct);
+static void nsh_telnetredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *save);
+static void nsh_telnetundirect(FAR struct nsh_vtbl_s *vtbl, FAR ubyte *save);
+static void nsh_telnetexit(FAR struct nsh_vtbl_s *vtbl);
 
 /****************************************************************************
  * Private Functions
@@ -164,21 +194,77 @@ static void nsh_dumpbuffer(const char *msg, const char *buffer, ssize_t nbytes)
  * Name: nsh_allocstruct
  ****************************************************************************/
 
-static inline FAR struct telnetd_s *nsh_allocstruct(void)
+static FAR struct telnetd_s *nsh_allocstruct(void)
 {
   struct telnetd_s *pstate = (struct telnetd_s *)malloc(sizeof(struct telnetd_s));
   if (pstate)
     {
       memset(pstate, 0, sizeof(struct telnetd_s));
-      pstate->vtbl.clone      = nsh_telnetclone;
-      pstate->vtbl.addref     = nsh_telnetaddref;
-      pstate->vtbl.release    = nsh_telnetrelease;
-      pstate->vtbl.output     = nsh_telnetoutput;
-      pstate->vtbl.linebuffer = nsh_telnetlinebuffer;
-      pstate->vtbl.redirect   = nsh_telnetredirect;
-      pstate->vtbl.undirect   = nsh_telnetundirect;
+      pstate->tn_vtbl.clone      = nsh_telnetclone;
+      pstate->tn_vtbl.addref     = nsh_telnetaddref;
+      pstate->tn_vtbl.release    = nsh_telnetrelease;
+      pstate->tn_vtbl.output     = nsh_telnetoutput;
+      pstate->tn_vtbl.linebuffer = nsh_telnetlinebuffer;
+      pstate->tn_vtbl.redirect   = nsh_telnetredirect;
+      pstate->tn_vtbl.undirect   = nsh_telnetundirect;
+      pstate->tn_vtbl.exit       = nsh_telnetexit;
+
+      pstate->tn_refs            = 1;
     }
   return pstate;
+}
+
+/****************************************************************************
+ * Name: nsh_openifnotopen
+ ****************************************************************************/
+
+static int nsh_openifnotopen(struct telnetd_s *pstate)
+{
+  struct redirect_s *rd = &pstate->u.rd;
+
+  /* The stream is open in a lazy fashion.  This is done because the file
+   * descriptor may be opened on a different task than the stream.
+   */
+
+  if (!rd->rd_stream)
+    {
+      rd->rd_stream = fdopen(rd->rd_fd, "w");
+      if (!rd->rd_stream)
+        {
+          return ERROR;
+        }
+    }
+  return 0;
+}
+
+/****************************************************************************
+ * Name: nsh_closeifnotclosed
+ ****************************************************************************/
+
+static void nsh_closeifnotclosed(struct telnetd_s *pstate)
+{
+  struct redirect_s *rd = &pstate->u.rd;
+
+  if (rd->rd_stream == stdout)
+    {
+      fflush(stdout);
+      rd->rd_fd = 1;
+    }
+  else
+    {
+      if (rd->rd_stream)
+        {
+          fflush(rd->rd_stream);
+          fclose(rd->rd_stream);
+        }
+      else if (rd->rd_fd >= 0 && rd->rd_fd != 1)
+        {
+          close(rd->rd_fd);
+        }
+
+      rd->rd_fd     = -1;
+      rd->rd_stream = NULL;
+    }
 }
 
 /****************************************************************************
@@ -191,6 +277,8 @@ static inline FAR struct telnetd_s *nsh_allocstruct(void)
 
 static void nsh_putchar(struct telnetd_s *pstate, uint8 ch)
 {
+  struct telnetio_s *tio = pstate->u.tn;
+
   /* Ignore carriage returns */
 
   if (ch == ISO_cr)
@@ -200,25 +288,25 @@ static void nsh_putchar(struct telnetd_s *pstate, uint8 ch)
 
   /* Add all other characters to the cmd buffer */
 
-  pstate->tn_cmd[pstate->tn_bufndx] = ch;
+  pstate->tn_cmd[tio->tio_bufndx] = ch;
 
   /* If a newline was added or if the buffer is full, then process it now */
 
-  if (ch == ISO_nl || pstate->tn_bufndx == (CONFIG_EXAMPLES_NSH_LINELEN - 1))
+  if (ch == ISO_nl || tio->tio_bufndx == (CONFIG_EXAMPLES_NSH_LINELEN - 1))
     {
-      if (pstate->tn_bufndx > 0)
+      if (tio->tio_bufndx > 0)
         {
-          pstate->tn_cmd[pstate->tn_bufndx] = '\0';
+          pstate->tn_cmd[tio->tio_bufndx] = '\0';
         }
 
       nsh_dumpbuffer("TELNET CMD", pstate->tn_cmd, strlen(pstate->tn_cmd));
-      nsh_parse(&pstate->vtbl, pstate->tn_cmd);
-      pstate->tn_bufndx = 0;
+      nsh_parse(&pstate->tn_vtbl, pstate->tn_cmd);
+      tio->tio_bufndx = 0;
     }
   else
     {
-      pstate->tn_bufndx++;
-      vdbg("Add '%c', bufndx=%d\n", ch, pstate->tn_bufndx);
+      tio->tio_bufndx++;
+      vdbg("Add '%c', bufndx=%d\n", ch, tio->tio_bufndx);
     }
 }
 
@@ -231,6 +319,7 @@ static void nsh_putchar(struct telnetd_s *pstate, uint8 ch)
 
 static void nsh_sendopt(struct telnetd_s *pstate, uint8 option, uint8 value)
 {
+  struct telnetio_s *tio = pstate->u.tn;
   uint8 optbuf[4];
   optbuf[0] = TELNET_IAC;
   optbuf[1] = option;
@@ -238,9 +327,9 @@ static void nsh_sendopt(struct telnetd_s *pstate, uint8 option, uint8 value)
   optbuf[3] = 0;
 
   nsh_dumpbuffer("Send optbuf", optbuf, 4);
-  if (send(pstate->tn_sockfd, optbuf, 4, 0) < 0)
+  if (send(tio->tio_sockfd, optbuf, 4, 0) < 0)
     {
-      dbg("[%d] Failed to send TELNET_IAC\n", pstate->tn_sockfd);
+      dbg("[%d] Failed to send TELNET_IAC\n", tio->tio_sockfd);
     }
 }
 
@@ -254,15 +343,17 @@ static void nsh_sendopt(struct telnetd_s *pstate, uint8 option, uint8 value)
 
 static void nsh_flush(FAR struct telnetd_s *pstate)
 {
-  if (pstate->tn_sndlen > 0)
+  struct telnetio_s *tio = pstate->u.tn;
+
+  if (tio->tio_sndlen > 0)
     {
-      nsh_dumpbuffer("Shell output", pstate->tn_iobuffer, pstate->tn_sndlen);
-      if (send(pstate->tn_sockfd, pstate->tn_iobuffer, pstate->tn_sndlen, 0) < 0)
+      nsh_dumpbuffer("Shell output", tio->tio_buffer, tio->tio_sndlen);
+      if (send(tio->tio_sockfd, tio->tio_buffer, tio->tio_sndlen, 0) < 0)
         {
-          dbg("[%d] Failed to send response\n", pstate->tn_sockfd);
+          dbg("[%d] Failed to send response\n", tio->tio_sockfd);
         }
     }
-  pstate->tn_sndlen = 0;
+  tio->tio_sndlen = 0;
 }
 
 /****************************************************************************
@@ -275,7 +366,8 @@ static void nsh_flush(FAR struct telnetd_s *pstate)
 
 static int nsh_receive(struct telnetd_s *pstate, size_t len)
 {
-  char *ptr = pstate->tn_iobuffer;
+  struct telnetio_s *tio = pstate->u.tn;
+  char              *ptr = tio->tio_buffer;
   uint8 ch;
 
   while (len > 0)
@@ -283,37 +375,37 @@ static int nsh_receive(struct telnetd_s *pstate, size_t len)
       ch = *ptr++;
       len--;
 
-      vdbg("ch=%02x state=%d\n", ch, pstate->tn_state);
-      switch (pstate->tn_state)
+      vdbg("ch=%02x state=%d\n", ch, tio->tio_state);
+      switch (tio->tio_state)
         {
           case STATE_IAC:
             if (ch == TELNET_IAC)
               {
                 nsh_putchar(pstate, ch);
-                pstate->tn_state = STATE_NORMAL;
+                tio->tio_state = STATE_NORMAL;
              }
             else
               {
                 switch (ch)
                   {
                     case TELNET_WILL:
-                      pstate->tn_state = STATE_WILL;
+                      tio->tio_state = STATE_WILL;
                       break;
 
                     case TELNET_WONT:
-                      pstate->tn_state = STATE_WONT;
+                      tio->tio_state = STATE_WONT;
                       break;
 
                     case TELNET_DO:
-                      pstate->tn_state = STATE_DO;
+                      tio->tio_state = STATE_DO;
                       break;
 
                     case TELNET_DONT:
-                      pstate->tn_state = STATE_DONT;
+                      tio->tio_state = STATE_DONT;
                       break;
 
                     default:
-                      pstate->tn_state = STATE_NORMAL;
+                      tio->tio_state = STATE_NORMAL;
                       break;
                   }
               }
@@ -323,34 +415,34 @@ static int nsh_receive(struct telnetd_s *pstate, size_t len)
             /* Reply with a DONT */
 
             nsh_sendopt(pstate, TELNET_DONT, ch);
-            pstate->tn_state = STATE_NORMAL;
+            tio->tio_state = STATE_NORMAL;
             break;
 
           case STATE_WONT:
             /* Reply with a DONT */
 
             nsh_sendopt(pstate, TELNET_DONT, ch);
-            pstate->tn_state = STATE_NORMAL;
+            tio->tio_state = STATE_NORMAL;
             break;
 
           case STATE_DO:
             /* Reply with a WONT */
 
             nsh_sendopt(pstate, TELNET_WONT, ch);
-            pstate->tn_state = STATE_NORMAL;
+            tio->tio_state = STATE_NORMAL;
             break;
 
           case STATE_DONT:
             /* Reply with a WONT */
 
             nsh_sendopt(pstate, TELNET_WONT, ch);
-            pstate->tn_state = STATE_NORMAL;
+            tio->tio_state = STATE_NORMAL;
             break;
 
           case STATE_NORMAL:
             if (ch == TELNET_IAC)
               {
-                pstate->tn_state = STATE_IAC;
+                tio->tio_state = STATE_IAC;
               }
             else
               {
@@ -374,24 +466,26 @@ static int nsh_receive(struct telnetd_s *pstate, size_t len)
 
 static void *nsh_connection(void *arg)
 {
-  struct telnetd_s *pstate = nsh_allocstruct();
-  int               sockfd = (int)arg;
-  int               ret    = ERROR;
+  struct telnetd_s  *pstate = nsh_allocstruct();
+  struct telnetio_s *tio    = (struct telnetio_s *)malloc(sizeof(struct telnetio_s));
+  int                sockfd = (int)arg;
+  int                ret    = ERROR;
 
   dbg("[%d] Started\n", sockfd);
 
   /* Verify that the state structure was successfully allocated */
 
-  if (pstate)
+  if (pstate && tio)
     {
       /* Initialize the thread state structure */
 
-      pstate->tn_sockfd = sockfd;
-      pstate->tn_state  = STATE_NORMAL;
+      tio->tio_sockfd = sockfd;
+      tio->tio_state  = STATE_NORMAL;
+      pstate->u.tn    = tio;
 
       /* Output a greeting */
 
-      nsh_output(&pstate->vtbl, "NuttShell (NSH)\n");
+      nsh_output(&pstate->tn_vtbl, "NuttShell (NSH)\n");
 
       /* Loop processing each TELNET command */
 
@@ -399,30 +493,38 @@ static void *nsh_connection(void *arg)
         {
           /* Display the prompt string */
 
-          nsh_output(&pstate->vtbl, g_nshprompt);
+          nsh_output(&pstate->tn_vtbl, g_nshprompt);
           nsh_flush(pstate);
 
           /* Read a buffer of data from the TELNET client */
 
-          ret = recv(pstate->tn_sockfd, pstate->tn_iobuffer, CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE, 0);
+          ret = recv(tio->tio_sockfd, tio->tio_buffer, CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE, 0);
           if (ret > 0)
             {
 
               /* Process the received TELNET data */
 
-              nsh_dumpbuffer("Received buffer", pstate->tn_iobuffer, ret);
+              nsh_dumpbuffer("Received buffer", pstate->u.tn.tio_buffer, ret);
               ret = nsh_receive(pstate, ret);
             }
         }
-      while (ret >= 0 && pstate->tn_state != STATE_CLOSE);
-      dbg("[%d] ret=%d tn_state=%d\n", sockfd, ret, pstate->tn_state);
+      while (ret >= 0 && tio->tio_state != STATE_CLOSE);
+      dbg("[%d] ret=%d tn.tio_state=%d\n", sockfd, ret, tio->tio_state);
 
       /* End of command processing -- Clean up and exit */
-
-      free(pstate);
     }
 
   /* Exit the task */
+
+  if (pstate)
+    {
+      free(pstate);
+    }
+
+  if (tio)
+    {
+      free(tio);
+    }
 
   dbg("[%d] Exitting\n", sockfd);
   close(sockfd);
@@ -443,17 +545,18 @@ static void *nsh_connection(void *arg)
 
 static int nsh_telnetoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...)
 {
-  struct telnetd_s *pstate = (struct telnetd_s *)vtbl;
-  int nbytes = pstate->tn_sndlen;
-  int len;
-  va_list ap;
+  struct telnetd_s  *pstate = (struct telnetd_s *)vtbl;
+  struct telnetio_s *tio    = pstate->u.tn;
+  int                nbytes = tio->tio_sndlen;
+  int                len;
+  va_list            ap;
 
   /* Put the new info into the buffer.  Here we are counting on the fact that
    * no output strings will exceed CONFIG_EXAMPLES_NSH_LINELEN!
    */
 
   va_start(ap, fmt);
-  vsnprintf(&pstate->tn_iobuffer[nbytes],
+  vsnprintf(&tio->tio_buffer[nbytes],
             (CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - 1) - nbytes, fmt, ap);
   va_end(ap);
 
@@ -461,20 +564,20 @@ static int nsh_telnetoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...)
    * buffered data
    */
 
-  len     = strlen(&pstate->tn_iobuffer[nbytes]);
+  len     = strlen(&tio->tio_buffer[nbytes]);
   nbytes += len;
 
   /* Expand any terminating \n to \r\n */
 
   if (nbytes < (CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - 2) &&
-      pstate->tn_iobuffer[nbytes-1] == '\n')
+      tio->tio_buffer[nbytes-1] == '\n')
     {
-      pstate->tn_iobuffer[nbytes-1] = ISO_cr;
-      pstate->tn_iobuffer[nbytes]   = ISO_nl;
-      pstate->tn_iobuffer[nbytes+1] = '\0';
+      tio->tio_buffer[nbytes-1] = ISO_cr;
+      tio->tio_buffer[nbytes]   = ISO_nl;
+      tio->tio_buffer[nbytes+1] = '\0';
       nbytes++;
     }
-  pstate->tn_sndlen = nbytes;
+  tio->tio_sndlen = nbytes;
 
   /* Flush to the network if the buffer does not have room for one more
    * maximum length string.
@@ -489,17 +592,176 @@ static int nsh_telnetoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...)
 }
 
 /****************************************************************************
+ * Name: nsh_redirectoutput
+ *
+ * Description:
+ *   Print a string to the currently selected stream.
+ *
+ ****************************************************************************/
+
+static int nsh_redirectoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...)
+{
+  FAR struct telnetd_s *pstate = (FAR struct telnetd_s *)vtbl;
+  va_list ap;
+  int     ret;
+
+  /* The stream is open in a lazy fashion.  This is done because the file
+   * descriptor may be opened on a different task than the stream.  The
+   * actual open will then occur with the first output from the new task.
+   */
+
+  if (nsh_openifnotopen(pstate) != 0)
+   {
+     return ERROR;
+   }
+ 
+  va_start(ap, fmt);
+  ret = vfprintf(pstate->u.rd.rd_stream, fmt, ap);
+  va_end(ap);
+ 
+  return ret;
+}
+
+/****************************************************************************
  * Name: nsh_telnetlinebuffer
  *
  * Description:
  *   Return a reference to the current line buffer
  *
- ****************************************************************************/
+* ****************************************************************************/
 
 static FAR char *nsh_telnetlinebuffer(FAR struct nsh_vtbl_s *vtbl)
 {
   struct telnetd_s *pstate = (struct telnetd_s *)vtbl;
   return pstate->tn_cmd;
+}
+
+/****************************************************************************
+ * Name: nsh_telnetclone
+ *
+ * Description:
+ *   Make an independent copy of the vtbl
+ *
+ ****************************************************************************/
+
+static FAR struct nsh_vtbl_s *nsh_telnetclone(FAR struct nsh_vtbl_s *vtbl)
+{
+  FAR struct telnetd_s *pstate = (FAR struct telnetd_s *)vtbl;
+  FAR struct telnetd_s *pclone = nsh_allocstruct();
+
+  pclone->tn_redirected  = TRUE;
+  pclone->tn_vtbl.output = nsh_redirectoutput;
+  pclone->u.rd.rd_fd     = pstate->u.rd.rd_fd;
+  pclone->u.rd.rd_stream = NULL;
+  return &pclone->tn_vtbl;
+}
+
+/****************************************************************************
+ * Name: nsh_telnetaddref
+ *
+ * Description:
+ *   Increment the reference count on the vtbl.
+ *
+ ****************************************************************************/
+
+static void nsh_telnetaddref(FAR struct nsh_vtbl_s *vtbl)
+{
+  FAR struct telnetd_s *pstate = (FAR struct telnetd_s *)vtbl;
+  pstate->tn_refs++;
+}
+
+/****************************************************************************
+ * Name: nsh_telnetrelease
+ *
+ * Description:
+ *   Decrement the reference count on the vtbl, releasing it when the count
+ *   decrements to zero.
+ *
+ ****************************************************************************/
+
+static void nsh_telnetrelease(FAR struct nsh_vtbl_s *vtbl)
+{
+  FAR struct telnetd_s *pstate = (FAR struct telnetd_s *)vtbl;
+  if (pstate->tn_refs > 1)
+    {
+      pstate->tn_refs--;
+    }
+  else
+    {
+      DEBUGASSERT(pstate->tn_redirected);
+      nsh_closeifnotclosed(pstate);
+      free(vtbl);
+    }
+}
+
+/****************************************************************************
+ * Name: nsh_telnetredirect
+ *
+ * Description:
+ *   Set up for redirected output
+ *
+ ****************************************************************************/
+
+static void nsh_telnetredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *save)
+{
+  FAR struct telnetd_s    *pstate = (FAR struct telnetd_s *)vtbl;
+  FAR struct telnetsave_s *ssave  = (FAR struct telnetsave_s *)save;
+
+  if (pstate->tn_redirected)
+    {
+       (void)nsh_openifnotopen(pstate);
+       fflush(pstate->u.rd.rd_stream);
+       if (!ssave)
+         {
+           fclose(pstate->u.rd.rd_stream);
+         }
+    }
+
+  if (ssave)
+    {
+      ssave->ts_redirected = pstate->tn_redirected;
+      memcpy(&ssave->u.rd, &pstate->u.rd, sizeof(struct redirect_s));
+    }
+
+  pstate->tn_redirected  = TRUE;
+  pstate->u.rd.rd_fd     = fd;
+  pstate->u.rd.rd_stream = NULL;  
+}
+
+/****************************************************************************
+ * Name: nsh_telnetredirect
+ *
+ * Description:
+ *   Set up for redirected output
+ *
+ ****************************************************************************/
+
+static void nsh_telnetundirect(FAR struct nsh_vtbl_s *vtbl, FAR ubyte *save)
+{
+  FAR struct telnetd_s *pstate = (FAR struct telnetd_s *)vtbl;
+  FAR struct telnetsave_s *ssave  = (FAR struct telnetsave_s *)save;
+
+  if (pstate->tn_redirected)
+    {
+      nsh_closeifnotclosed(pstate);
+    }
+
+  pstate->tn_redirected = ssave->ts_redirected;
+  memcpy(&pstate->u.rd, &ssave->u.rd, sizeof(struct redirect_s));
+}
+
+/****************************************************************************
+ * Name: nsh_telnetexit
+ *
+ * Description:
+ *   Quit the shell instance
+ *
+ ****************************************************************************/
+
+static void nsh_telnetexit(FAR struct nsh_vtbl_s *vtbl)
+{
+  struct telnetd_s *pstate = (struct telnetd_s *)vtbl;
+  pstate->u.tn->tio_state = STATE_CLOSE;
 }
 
 /****************************************************************************
@@ -596,18 +858,3 @@ int nsh_telnetmain(int argc, char *argv[])
   uip_server(HTONS(23), nsh_connection, CONFIG_EXAMPLES_NSH_STACKSIZE);
   return OK;
 }
-
-/****************************************************************************
- * Name: cmd_exit
- *
- * Description:
- *   Quit the shell instance
- *
- ****************************************************************************/
-
-void cmd_exit(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
-{
-  struct telnetd_s *pstate = (struct telnetd_s *)vtbl;
-  pstate->tn_state = STATE_CLOSE;
-}
-

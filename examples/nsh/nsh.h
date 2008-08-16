@@ -96,14 +96,17 @@
 #define nsh_addref(v)          (v)->addref(v)
 #define nsh_release(v)         (v)->release(v)
 #define nsh_linebuffer(v)      (v)->linebuffer(v)
-#define nsh_redirect(v,f)      (v)->redirect(v,f)
-#define nsh_undirect(v,d)      (v)->undirect(v,d)
+#define nsh_redirect(v,f,s)    (v)->redirect(v,f,s)
+#define nsh_undirect(v,s)      (v)->undirect(v,s)
+#define nsh_exit(v)            (v)->exit(v)
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 # define nsh_output(v, fmt...) (v)->output(v, ##fmt)
 #else
 # define nsh_output            vtbl->output
 #endif
+
+#define SAVE_SIZE (sizeof(int) + sizeof(FILE*) + sizeof(boolean))
 
 /****************************************************************************
  * Public Types
@@ -116,8 +119,9 @@ struct nsh_vtbl_s
   void (*release)(FAR struct nsh_vtbl_s *vtbl);
   int (*output)(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
   FAR char *(*linebuffer)(FAR struct nsh_vtbl_s *vtbl);
-  FAR void *(*redirect)(FAR struct nsh_vtbl_s *vtbl, int fd);
-  void (*undirect)(FAR struct nsh_vtbl_s *vtbl, FAR void *direct);
+  void (*redirect)(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *save);
+  void (*undirect)(FAR struct nsh_vtbl_s *vtbl, FAR ubyte *save);
+  void (*exit)(FAR struct nsh_vtbl_s *vtbl);
 };
 
 typedef void (*cmd_t)(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
@@ -158,7 +162,6 @@ extern int nsh_telnetmain(int argc, char *argv[]);
 
 extern void cmd_echo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 extern void cmd_exec(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-extern void cmd_exit(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 extern void cmd_ps(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0

@@ -73,6 +73,7 @@ struct cmdmap_s
  ****************************************************************************/
 
 static void cmd_help(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+static void cmd_exit(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 static void cmd_unrecognized(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 
 /****************************************************************************
@@ -194,6 +195,15 @@ static void cmd_help(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 static void cmd_unrecognized(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   nsh_output(vtbl, g_fmtcmdnotfound, argv[0]);
+}
+
+/****************************************************************************
+ * Name: cmd_exit
+ ****************************************************************************/
+
+static void cmd_exit(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+  nsh_exit(vtbl);
 }
 
 /****************************************************************************
@@ -596,7 +606,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
       if (redirect)
         {
-          (void)nsh_redirect(bkgvtbl, fd);
+          (void)nsh_redirect(bkgvtbl, fd, NULL);
         }
 
       /* Get the execution priority of this task */
@@ -659,7 +669,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
     }
   else
     {
-      void *save;
+      ubyte save[SAVE_SIZE];
 
       /* Increment the reference count on the vtbl.  This reference count will
        * be decremented at the end of nsh_execute() and exists only for compatibility
@@ -677,7 +687,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
       if (redirect)
         {
-          save = nsh_redirect(vtbl, fd);
+          nsh_redirect(vtbl, fd, save);
         }
 
       /* Then execute the command in "foreground" -- i.e., while the user waits
