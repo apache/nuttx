@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * lib_strtokr.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,25 +31,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <string.h>
 
-/************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************/
+ ****************************************************************************/
 
 static char *g_saveptr = NULL;
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: strtok_r
  *
  * Description:
@@ -90,7 +90,7 @@ static char *g_saveptr = NULL;
  *    strtok_r() returns a pointer to the next token, or NULL
  *    if there are no more tokens.
  *
- ************************************************************/
+ ****************************************************************************/
 
 char *strtok_r(char *str, const char *delim, char **saveptr)
 {
@@ -156,41 +156,4 @@ char *strtok_r(char *str, const char *delim, char **saveptr)
       *saveptr = pend;
     }
   return pbegin;
-}
-
-/************************************************************
- * Name: strtok
- *
- * Description:
- *    The  strtok()  function  parses  a string into a
- *    sequence of tokens.  On the first call to strtok() the
- *    string to be parsed should be specified in 'str'.  In
- *    each subsequent call that should parse the same string, 
- *    'str' should be NULL.
- *
- *    The 'delim' argument specifies a set of characters that
- *    delimit the tokens in the parsed string.  The caller
- *    may specify different strings in delim in successive
- *    calls that parse the same string.
- *
- *    Each call to strtok() returns a pointer to a null-
- *    terminated string containing the next token. This
- *    string  does not include the delimiting character.  If
- *    no more tokens are found, strtok() returns NULL.
- *
- *    A sequence of two or more contiguous delimiter
- *    characters in the parsed string is considered to be a
- *    single delimiter. Delimiter characters at the start or
- *    end of the string are ignored.  The tokens returned by
- *    strtok() are always non-empty strings.
- *
- * Return
- *    strtok() returns a pointer to the next token, or NULL
- *    if there are no more tokens.
- *
- ************************************************************/
-
-char *strtok(char *str, const char *delim)
-{
-  return strtok_r(str, delim, &g_saveptr);
 }
