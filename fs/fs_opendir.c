@@ -184,13 +184,13 @@ FAR DIR *opendir(FAR const char *path)
           /* We now need to back off our reference to the inode.  We can't
            * call inode_release() to do that unless we release the tree
            * semaphore.  The following should be safe because:  (1) after the
-           * reference count was incremented above it should be >1 so it should
-           * not decrement to zero, and (2) we hold the tree semaphore so no
+           * reference count was incremented above it should be >=1 so it should
+           * not decrement below zero, and (2) we hold the tree semaphore so no
            * other thread should be able to change the reference count.
            */
 
           inode->i_crefs--;
-          DEBUGASSERT(inode->i_crefs > 0);
+          DEBUGASSERT(inode->i_crefs >= 0);
 
           /* Negate the error value so that it can be used to set errno */
 
