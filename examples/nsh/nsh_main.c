@@ -287,6 +287,9 @@ char *nsh_argument(char **saveptr)
   char *pbegin = *saveptr;
   char *pend   = NULL;
   const char *term;
+#ifndef CONFIG_DISABLE_ENVIRON
+  boolean quoted = FALSE;
+#endif
 
   /* Find the beginning of the next token */
 
@@ -312,53 +315,78 @@ char *nsh_argument(char **saveptr)
       if (*(pbegin + 1) == '>')
         {
           *saveptr = pbegin + 2;
-	  return (char*)g_redirect2;
+	  pbegin = g_redirect2;
         }
       else
         {
           *saveptr = pbegin + 1;
-	  return (char*)g_redirect1;
+	  pbegin = g_redirect1;
         }
-    }
-
-  /* Does the token begin with '"'? */
-
-  else if (*pbegin == '"')
-    {
-      /* Yes.. then only another '"' can terminate the string */
-
-      pbegin++;
-      term = "\"";
     }
   else
     {
-      /* No, then any of the usual terminators will terminate the argument */
+      /* Does the token begin with '"'? */
 
-      term = g_delim;
+      if (*pbegin == '"')
+        {
+          /* Yes.. then only another '"' can terminate the string */
+
+          pbegin++;
+          term = "\"";
+#ifndef CONFIG_DISABLE_ENVIRON
+          quoted = TRUE;
+#endif
+        }
+      else
+        {
+          /* No, then any of the usual terminators will terminate the argument */
+
+          term = g_delim;
+        }
+
+      /* Find the end of the string */
+
+      for (pend = pbegin + 1;
+           *pend && strchr(term, *pend) == NULL;
+           pend++);
+
+      /* pend either points to the end of the string or to
+       * the first delimiter after the string.
+       */
+
+      if (*pend)
+        {
+          /* Turn the delimiter into a null terminator */
+
+          *pend++ = '\0';
+        }
+
+      /* Save the pointer where we left off */
+
+      *saveptr = pend;
     }
 
-  /* Find the end of the string */
+  /* Check for references to environment variables */
 
-  for (pend = pbegin + 1;
-       *pend && strchr(term, *pend) == NULL;
-       pend++);
-
-  /* pend either points to the end of the string or to
-   * the first delimiter after the string.
-   */
-
-  if (*pend)
+#ifndef CONFIG_DISABLE_ENVIRON
+  if (pbegin[0] == '$' && !quoted)
     {
-      /* Turn the delimiter into a null terminator */
+      /* Yes.. return the value of the environment variable with this name */
 
-      *pend++ = '\0';
+      char *value = getenv(pbegin+1);
+      if (value)
+        {
+          return value;
+        }
+      else
+        {
+          return "";
+        }
     }
+#endif
 
-  /* Save the pointer where we left off and return the
-   * beginning of the token.
-   */
+  /* Return the beginning of the token. */
 
-  *saveptr = pend;
   return pbegin;
 }
 

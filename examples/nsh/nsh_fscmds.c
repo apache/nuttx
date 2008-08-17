@@ -599,7 +599,7 @@ void cmd_ls(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
         }
     }
 
-  /* There are one required arguments after the options */
+  /* There is one required arguments after the options */
 
   if (optind + 1 <  argc)
     {

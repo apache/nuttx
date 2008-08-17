@@ -89,22 +89,7 @@ void cmd_echo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
   for (i = 1; i < argc; i++)
     {
-      /* Check for references to environment variables */
-
-#ifndef CONFIG_DISABLE_ENVIRON
-      if (argv[i][0] == '$')
-        {
-          char *value = getenv(argv[i]+1);
-          if (value)
-            {
-              nsh_output(vtbl, "%s ", value);
-            }
-        }
-      else
-#endif
-        {
-          nsh_output(vtbl, "%s ", argv[i]);
-        }
+      nsh_output(vtbl, "%s ", argv[i]);
     }
   nsh_output(vtbl, "\n");
 }
