@@ -318,13 +318,6 @@ static int fat_open(FAR struct file *filp, const char *relpath,
 
   ff->ff_size             = DIR_GETFILESIZE(dirinfo.fd_entry);
 
-  /* In write/append mode, we need to set the file pointer to the end of the file */
-
-  if ((oflags & (O_APPEND|O_WRONLY)) == (O_APPEND|O_WRONLY))
-    {
-        ff->ff_position   = ff->ff_size;
-    }
-
   /* Attach the private date to the struct file instance */
 
   filp->f_priv = ff;
@@ -339,6 +332,19 @@ static int fat_open(FAR struct file *filp, const char *relpath,
   fs->fs_head = ff->ff_next;
 
   fat_semgive(fs);
+ 
+  /* In write/append mode, we need to set the file pointer to the end of the file */
+
+  if ((oflags & (O_APPEND|O_WRONLY)) == (O_APPEND|O_WRONLY))
+    {
+      ssize_t offset = (ssize_t)fat_seek(filp, ff->ff_size, SEEK_SET);
+      if (offset < 0)
+        {
+          free(ff);
+          return (int)offset;
+        }
+    }
+
   return OK;
 
   /* Error exits -- goto's are nasty things, but they sure can make error
@@ -670,7 +676,7 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
    */
 
   byteswritten = 0;
-  writesector = ff->ff_currentsector;
+  writesector  = ff->ff_currentsector;
   while (buflen > 0)
     {
       /* Get offset into the sector where we begin the read */
@@ -727,11 +733,11 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
 
               else
                 {
-                    /* Extend the chain by adding a new cluster after
-                     * the last one
-                     */
+                  /* Extend the chain by adding a new cluster after
+                   * the last one
+                   */
 
-                    cluster = fat_extendchain(fs, ff->ff_currentcluster);
+                  cluster = fat_extendchain(fs, ff->ff_currentcluster);
                 }
 
               /* Verify the cluster number */
@@ -768,7 +774,7 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
        */
 
       nsectors = buflen / fs->fs_hwsectorsize;
-      if (nsectors > 0)
+      if (nsectors > 0 && sectorindex == 0)
         {
           /* Write maximum contiguous sectors directly from the user's
            * buffer without using our tiny read buffer.
@@ -804,12 +810,18 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
         }
       else
         {
-          /* We are write a partial sector.  We will first have to
-           * read the full sector in memory as part of a read-modify-write
-           * operation.
+          /* We are writing a partial sector -OR- the current sector
+           * has not yet been filled.
+           *
+           * We will first have to read the full sector in memory as
+           * part of a read-modify-write operation.  NOTE we don't
+           * have to read the data on a rare case: When we are extending
+           * the file (ff->ff_position == ff->ff_size) -AND- the new data
+           * happens to be aligned at the beginning of the sector
+           * (sectorindex == 0).
            */
 
-          if (ff->ff_position < ff->ff_size)
+          if (ff->ff_position < ff->ff_size || sectorindex != 0)
             {
               ff->ff_currentsector = writesector;
               ret = fat_ffcacheread(fs, ff, writesector);
@@ -997,7 +1009,7 @@ static off_t fat_seek(FAR struct file *filp, off_t offset, int whence)
                 }
                 else
                 {
-                    /* Other we can only follong the existing chain */
+                    /* Otherwise we can only follong the existing chain */
 
                     cluster = fat_getcluster(fs, cluster);
                 }

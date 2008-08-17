@@ -406,4 +406,10 @@
 	  int and unsigned int.
 	* Add support for redirection of command output in NSH
 	* NSH can now use both telnet and serial front ends together
+	* $variable can be used for any command value in NSH.
+	* Fixed an error in opendir() that could cause an assertion to fail
+	  inappropriately.
+	* Correct an error in the FAT that caused files opened for writing with
+	  O_APPEND to fail.  The file was not being properly positioned to the
+	  end of the file in that case.
 

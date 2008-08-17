@@ -10,7 +10,7 @@ NuttX TODO List (Last updated July 31, 2008)
   (11) Network (net/, netutils/)
   (2)  USB (drivers/usbdev)
   (3)  Libraries (lib/)
-  (5)  File system/Generic drivers (fs/, drivers/)
+  (4)  File system/Generic drivers (fs/, drivers/)
   (1)  Pascal add-on (pcode/)
   (2)  Documentation (Documentation/)
   (3)  Build system
