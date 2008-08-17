@@ -878,9 +878,9 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
 #ifndef CONFIG_CUSTOM_STACK
       ret = task_create("nsh_execute", priority, CONFIG_EXAMPLES_NSH_STACKSIZE,
-                        (main_t)nsh_execute, &argv[1]);
+                        nsh_execute, &argv[1]);
 #else
-      ret = task_create("nsh_execute", priority, (main_t)nsh_execute, &argv[1]);
+      ret = task_create("nsh_execute", priority, nsh_execute, &argv[1]);
 #endif
       if (ret < 0)
         {
