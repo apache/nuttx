@@ -321,7 +321,7 @@ char *nsh_argument(FAR struct nsh_vtbl_s *vtbl, char **saveptr)
       return NULL;
     }
 
-  /* Does the token begin with '>' */
+  /* Does the token begin with '>' -- redirection of output? */
 
   if (*pbegin == '>')
     {
@@ -330,17 +330,29 @@ char *nsh_argument(FAR struct nsh_vtbl_s *vtbl, char **saveptr)
       if (*(pbegin + 1) == '>')
         {
           *saveptr = pbegin + 2;
-	  pbegin = (char*)g_redirect2;
+          pbegin   = (char*)g_redirect2;
         }
       else
         {
           *saveptr = pbegin + 1;
-	  pbegin = (char*)g_redirect1;
+          pbegin   = (char*)g_redirect1;
         }
+    }
+
+  /* Does the token begin with '#' -- comment */
+
+  else if (*pbegin == '#')
+    {
+      /* Return NULL meaning that we are at the end of the line */
+
+      *saveptr = pbegin;
+      pbegin   = NULL;
     }
   else
     {
-      /* Does the token begin with '"'? */
+      /* Otherwise, we are going to have to parse to find the end of
+       * the token.  Does the token begin with '"'?
+       */
 
       if (*pbegin == '"')
         {
@@ -379,41 +391,41 @@ char *nsh_argument(FAR struct nsh_vtbl_s *vtbl, char **saveptr)
       /* Save the pointer where we left off */
 
       *saveptr = pend;
-    }
 
-  /* Check for references to environment variables */
+      /* Check for references to environment variables */
 
-  if (pbegin[0] == '$' && !quoted)
-    {
-      /* Check for built-in variables */
-
-      if (strcmp(pbegin, g_exitstatus) == 0)
+      if (pbegin[0] == '$' && !quoted)
         {
-          if (vtbl->np.np_fail)
-            {
-              return (char*)g_failure;
-            }
-          else
-            {
-              return (char*)g_success;
-            }
-        }
+          /* Check for built-in variables */
 
-      /* Not a built-in? Return the value of the environment variable with this name */
+          if (strcmp(pbegin, g_exitstatus) == 0)
+            {
+              if (vtbl->np.np_fail)
+                {
+                  return (char*)g_failure;
+                }
+              else
+                {
+                  return (char*)g_success;
+                }
+            }
+
+          /* Not a built-in? Return the value of the environment variable with this name */
 #ifndef CONFIG_DISABLE_ENVIRON
-      else
-        {
-          char *value = getenv(pbegin+1);
-          if (value)
-            {
-              return value;
-            }
           else
             {
-              return (char*)"";
+              char *value = getenv(pbegin+1);
+              if (value)
+                {
+                  return value;
+                }
+              else
+                {
+                  return (char*)"";
+                }
             }
-        }
 #endif
+        }
     }
 
   /* Return the beginning of the token. */

@@ -1028,19 +1028,19 @@ buildroot-0.1.0 2007-03-09 &lt;spudmonkey@racsa.co.cr&gt
 <pre><ul>
 nuttx-0.3.13 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* Added mkfatfs, mkfifo, sleep, usleep and nice commands to NSH
+	* NSH: Added mkfatfs, mkfifo, sleep, usleep and nice commands
 	* Fixed problem with console input in Cygwin-based simulator; NSH now works
 	  with simulator.
 	* NSH will now execute commands in background
 	* sched_get_priority_max/min returned error on SCHED_RR
 	* Removed duplicate getenv() implementation in /lib
 	* Correct detection of End-of-File in fgets
-	* Implement sh and crude script handler in NSH
+	* NSH: Implemented sh and crude script handler
 	* Fix prototype of read() and write(). Need to use ssize_t and size_t, not
 	  int and unsigned int.
-	* Add support for redirection of command output in NSH
+	* NSH now supports redirection of command output
 	* NSH can now use both telnet and serial front ends together
-	* $variable can be used for any command value in NSH.
+	* NSH: $variable can be used for any command value
 	* Fixed an error in opendir() that could cause an assertion to fail
 	  inappropriately.
 	* Correct an error in the FAT that caused files opened for writing with
@@ -1048,6 +1048,7 @@ nuttx-0.3.13 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  end of the file in that case.
 	* NSH now supports last exit status $?
 	* NSH now supports if-then[-else]-fi construct
+	* NSH now supports comments beginning with '#'
 
 pascal-0.1.3 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
