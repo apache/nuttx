@@ -72,9 +72,9 @@ struct cmdmap_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void cmd_help(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-static void cmd_exit(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-static void cmd_unrecognized(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+static int cmd_help(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+static int cmd_exit(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+static int cmd_unrecognized(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 
 /****************************************************************************
  * Private Data
@@ -83,6 +83,9 @@ static void cmd_unrecognized(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 static const char g_delim[]      = " \t\n";
 static const char g_redirect1[]  = ">";
 static const char g_redirect2[]  = ">>";
+static const char g_exitstatus[] = "$?";
+static const char g_success[]    = "0";
+static const char g_failure[]    = "1";
 
 static const struct cmdmap_s g_cmdmap[] =
 {
@@ -153,6 +156,7 @@ const char g_fmtcmdnotfound[]    = "nsh: %s: command not found\n";
 const char g_fmtcmdnotimpl[]     = "nsh: %s: command not implemented\n";
 const char g_fmtnosuch[]         = "nsh: %s: no such %s: %s\n";
 const char g_fmttoomanyargs[]    = "nsh: %s: too many arguments\n";
+const char g_fmtcontext[]        = "nsh: %s: not valid in this context\n";
 #ifdef CONFIG_EXAMPLES_NSH_STRERROR
 const char g_fmtcmdfailed[]      = "nsh: %s: %s failed: %s\n";
 #else
@@ -168,12 +172,19 @@ const char g_fmtcmdoutofmemory[] = "nsh: %s: out of memory\n";
  * Name: cmd_help
  ****************************************************************************/
 
-static void cmd_help(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+static int cmd_help(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   const struct cmdmap_s *ptr;
 
-  nsh_output(vtbl, "NSH command form:\n");
+  nsh_output(vtbl, "NSH command forms:\n");
   nsh_output(vtbl, "  [nice [-d <niceness>>]] <cmd> [[> <file>|>> <file>] &]\n");
+  nsh_output(vtbl, "OR\n");
+  nsh_output(vtbl, "  if <cmd>\n");
+  nsh_output(vtbl, "  then\n");
+  nsh_output(vtbl, "    [sequence of <cmd>]\n");
+  nsh_output(vtbl, "  else\n");
+  nsh_output(vtbl, "    [sequence of <cmd>]\n");
+  nsh_output(vtbl, "  fi\n");
   nsh_output(vtbl, "Where <cmd> is one of:\n");
   for (ptr = g_cmdmap; ptr->cmd; ptr++)
     {
@@ -186,24 +197,27 @@ static void cmd_help(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
           nsh_output(vtbl, "  %s\n", ptr->cmd);
         }
     }
+  return OK;
 }
 
 /****************************************************************************
  * Name: cmd_unrecognized
  ****************************************************************************/
 
-static void cmd_unrecognized(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+static int cmd_unrecognized(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   nsh_output(vtbl, g_fmtcmdnotfound, argv[0]);
+  return ERROR;
 }
 
 /****************************************************************************
  * Name: cmd_exit
  ****************************************************************************/
 
-static void cmd_exit(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+static int cmd_exit(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   nsh_exit(vtbl);
+  return OK;
 }
 
 /****************************************************************************
@@ -216,6 +230,7 @@ static int nsh_execute(int argc, char *argv[])
    const char            *cmd;
    struct nsh_vtbl_s     *vtbl;
    cmd_t                  handler = cmd_unrecognized;
+   int                    ret;
 
    /* Parse all of the arguments following the command name.  The form
     * of argv is:
@@ -273,16 +288,16 @@ static int nsh_execute(int argc, char *argv[])
          }
      }
 
-   handler(vtbl, argc, &argv[2]);
+   ret = handler(vtbl, argc, &argv[2]);
    nsh_release(vtbl);
-   return OK;
+   return ret;
 }
 
 /****************************************************************************
  * Name: nsh_argument
  ****************************************************************************/
 
-char *nsh_argument(char **saveptr)
+char *nsh_argument(FAR struct nsh_vtbl_s *vtbl, char **saveptr)
 {
   char *pbegin = *saveptr;
   char *pend   = NULL;
@@ -315,12 +330,12 @@ char *nsh_argument(char **saveptr)
       if (*(pbegin + 1) == '>')
         {
           *saveptr = pbegin + 2;
-	  pbegin = g_redirect2;
+	  pbegin = (char*)g_redirect2;
         }
       else
         {
           *saveptr = pbegin + 1;
-	  pbegin = g_redirect1;
+	  pbegin = (char*)g_redirect1;
         }
     }
   else
@@ -368,26 +383,225 @@ char *nsh_argument(char **saveptr)
 
   /* Check for references to environment variables */
 
-#ifndef CONFIG_DISABLE_ENVIRON
   if (pbegin[0] == '$' && !quoted)
     {
-      /* Yes.. return the value of the environment variable with this name */
+      /* Check for built-in variables */
 
-      char *value = getenv(pbegin+1);
-      if (value)
+      if (strcmp(pbegin, g_exitstatus) == 0)
         {
-          return value;
+          if (vtbl->np.np_fail)
+            {
+              return (char*)g_failure;
+            }
+          else
+            {
+              return (char*)g_success;
+            }
         }
+
+      /* Not a built-in? Return the value of the environment variable with this name */
+#ifndef CONFIG_DISABLE_ENVIRON
       else
         {
-          return "";
+          char *value = getenv(pbegin+1);
+          if (value)
+            {
+              return value;
+            }
+          else
+            {
+              return (char*)"";
+            }
         }
-    }
 #endif
+    }
 
   /* Return the beginning of the token. */
 
   return pbegin;
+}
+
+/****************************************************************************
+ * Name: nsh_ifthenelse
+ ****************************************************************************/
+
+static inline int nsh_ifthenelse(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, FAR char **saveptr)
+{
+  FAR char *cmd = *ppcmd;
+  if (cmd)
+    {
+      /* Check if the command is preceeded by "if" */
+
+      if (strcmp(cmd, "if") == 0)
+        {
+          /* Get the cmd following the if */
+
+          *ppcmd = nsh_argument(vtbl, saveptr);
+          if (!*ppcmd)
+            {
+              nsh_output(vtbl, g_fmtarginvalid, "if");
+              return ERROR;
+            }
+
+          /* Verify that "if" is valid in this context */
+
+          if (vtbl->np.np_state != NSH_PARSER_NORMAL)
+            {
+              nsh_output(vtbl, g_fmtcontext, "if");
+              return ERROR;
+            }
+          vtbl->np.np_state = NSH_PARSER_IF;
+        }
+      else if (strcmp(cmd, "then") == 0)
+        {
+          /* Get the cmd following the then -- there shouldn't be one */
+
+          *ppcmd = nsh_argument(vtbl, saveptr);
+          if (*ppcmd)
+            {
+              nsh_output(vtbl, g_fmtarginvalid, "then");
+              return ERROR;
+            }
+
+          /* Verify that "then" is valid in this context */
+
+          if (vtbl->np.np_state != NSH_PARSER_IF)
+            {
+              nsh_output(vtbl, g_fmtcontext, "then");
+              return ERROR;
+            }
+          vtbl->np.np_state = NSH_PARSER_THEN;
+        }
+      else if (strcmp(cmd, "else") == 0)
+        {
+          /* Get the cmd following the else -- there shouldn't be one */
+
+          *ppcmd = nsh_argument(vtbl, saveptr);
+          if (*ppcmd)
+            {
+              nsh_output(vtbl, g_fmtarginvalid, "else");
+              return ERROR;
+            }
+
+          /* Verify that "then" is valid in this context */
+
+          if (vtbl->np.np_state != NSH_PARSER_THEN)
+            {
+              nsh_output(vtbl, g_fmtcontext, "else");
+              return ERROR;
+            }
+          vtbl->np.np_state = NSH_PARSER_ELSE;
+        }
+      else if (strcmp(cmd, "fi") == 0)
+        {
+          /* Get the cmd following the fi -- there should be one */
+
+          *ppcmd = nsh_argument(vtbl, saveptr);
+          if (*ppcmd)
+            {
+              nsh_output(vtbl, g_fmtarginvalid, "fi");
+              return ERROR;
+            }
+
+          /* Verify that "fi" is valid in this context */
+
+          if (vtbl->np.np_state != NSH_PARSER_THEN && vtbl->np.np_state != NSH_PARSER_ELSE)
+            {
+              nsh_output(vtbl, g_fmtcontext, "fi");
+              return ERROR;
+            }
+          vtbl->np.np_state = NSH_PARSER_NORMAL;
+        }
+      else if (vtbl->np.np_state == NSH_PARSER_IF)
+        {
+          nsh_output(vtbl, g_fmtcontext, cmd);
+          return ERROR;
+        }
+    }
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nsh_cmdenabled
+ ****************************************************************************/
+
+static inline boolean nsh_cmdenabled(FAR struct nsh_vtbl_s *vtbl)
+{
+  switch (vtbl->np.np_state)
+    {
+      case NSH_PARSER_NORMAL :
+      case NSH_PARSER_IF:
+      default:
+        break;
+
+      case NSH_PARSER_THEN:
+        return !vtbl->np.np_ifcond;
+
+      case NSH_PARSER_ELSE:
+        return vtbl->np.np_ifcond;
+    }
+  return TRUE;
+}
+
+/****************************************************************************
+ * Name: nsh_saveresult
+ ****************************************************************************/
+
+static inline void nsh_saveresult(FAR struct nsh_vtbl_s *vtbl, boolean result)
+{
+  vtbl->np.np_fail = result;
+  if (vtbl->np.np_state == NSH_PARSER_IF)
+    {
+      vtbl->np.np_ifcond = result;
+    }
+}
+
+/****************************************************************************
+ * Name: nsh_nice
+ ****************************************************************************/
+
+static inline int nsh_nice(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, FAR char **saveptr)
+{
+  FAR char *cmd = *ppcmd;
+ 
+  vtbl->np.np_nice = 0;
+  if (cmd)
+    {
+      /* Check if the command is preceded by "nice" */
+
+      if (strcmp(cmd, "nice") == 0)
+        {
+          /* Nicenesses range from -20 (most favorable scheduling) to 19
+           * (least  favorable).  Default is 10.
+           */
+
+          vtbl->np.np_nice = 10;
+
+          /* Get the cmd (or -d option of nice command) */
+
+          cmd = nsh_argument(vtbl, saveptr);
+          if (cmd && strcmp(cmd, "-d") == 0)
+            {
+              FAR char *val = nsh_argument(vtbl, saveptr);
+              if (val)
+                {
+                  char *endptr;
+                  vtbl->np.np_nice = (int)strtol(val, &endptr, 0);
+                  if (vtbl->np.np_nice > 19 || vtbl->np.np_nice < -20 || endptr == val || *endptr != '\0')
+                    {
+                      nsh_output(vtbl, g_fmtarginvalid, "nice");
+                      return ERROR;
+                    }
+                  cmd = nsh_argument(vtbl, saveptr);
+                }
+            }
+
+          /* Return the real command name */
+
+          *ppcmd = cmd;
+        }
+    }
+  return OK;
 }
 
 /****************************************************************************
@@ -464,58 +678,48 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
   FAR char *saveptr;
   FAR char *cmd;
   FAR char *redirfile;
-  boolean   bg = FALSE;
-  boolean   redirect = FALSE;
   int       fd = -1;
-  int       nice = 0;
   int       oflags;
   int       argc;
   int       ret;
 
+  /* Initialize parser state */
+
   memset(argv, 0, (NSH_MAX_ARGUMENTS+4)*sizeof(char*));
+  vtbl->np.np_bg       = FALSE;
+  vtbl->np.np_redirect = FALSE;
 
   /* Parse out the command at the beginning of the line */
 
   saveptr = cmdline;
-  cmd = nsh_argument(&saveptr);
-  if (cmd)
+  cmd = nsh_argument(vtbl, &saveptr);
+
+  /* Handler if-then-else-fi */
+
+  if (nsh_ifthenelse(vtbl, &cmd, &saveptr) != 0)
     {
-      /* Check if the command is preceded by "nice" */
-
-      if (strcmp(cmd, "nice") == 0)
-        {
-          /* Nicenesses range from -20 (most favorable scheduling) to 19
-           * (least  favorable).  Default is 10.
-           */
-
-          nice = 10;
-
-          /* Get the cmd (or -d option of nice command) */
-
-          cmd = nsh_argument(&saveptr);
-          if (cmd && strcmp(cmd, "-d") == 0)
-            {
-              FAR char *val = nsh_argument(&saveptr);
-              if (val)
-                {
-                  char *endptr;
-                  nice = (int)strtol(val, &endptr, 0);
-                  if (nice > 19 || nice < -20 || endptr == val || *endptr != '\0')
-                    {
-                      nsh_output(vtbl, g_fmtarginvalid, "nice");
-                      return ERROR;
-                    }
-                  cmd = nsh_argument(&saveptr);
-                }
-            }
-        }
+      goto errout;
     }
 
-  /* Check if any command was provided */
+  /* Handle nice */
 
-  if (!cmd)
+  if (nsh_nice(vtbl, &cmd, &saveptr) != 0)
     {
-      return OK; /* Newline only is not an error */
+      goto errout;
+    }
+
+  /* Check if any command was provided -OR- if command processing is
+   * currently disabled.
+   */
+
+  if (!cmd || !nsh_cmdenabled(vtbl))
+    {
+      /* An empty line is not an error and an unprocessed command cannot
+       * generate an error, but neither should they change the last
+       * command status.
+       */
+
+      return OK;
     }
 
   /* Parse all of the arguments following the command name.  The form
@@ -543,7 +747,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
   argv[2] = cmd;
   for (argc = 3; argc < NSH_MAX_ARGUMENTS+6; argc++)
     {
-      argv[argc] = nsh_argument(&saveptr);
+      argv[argc] = nsh_argument(vtbl, &saveptr);
       if (!argv[argc])
         {
           break;
@@ -555,7 +759,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
   if (argc > 3 && strcmp(argv[argc-1], "&") == 0)
     {
-      bg = TRUE;
+      vtbl->np.np_bg = TRUE;
       argv[argc-1] = NULL;
       argc--;
     }
@@ -568,26 +772,26 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
       if (strcmp(argv[argc-2], g_redirect1) == 0)
         {
-          redirect  = TRUE;
-          oflags    = O_WRONLY|O_CREAT|O_TRUNC;
-          redirfile = argv[argc-1];
-          argc     -= 2;
+          vtbl->np.np_redirect = TRUE;
+          oflags               = O_WRONLY|O_CREAT|O_TRUNC;
+          redirfile            = argv[argc-1];
+          argc                -= 2;
         }
 
       /* Check for redirection by appending to an existing file */
 
       else if (strcmp(argv[argc-2], g_redirect2) == 0)
         {
-          redirect  = TRUE;
-          oflags    = O_WRONLY|O_CREAT|O_APPEND;
-          redirfile = argv[argc-1];
-          argc     -= 2;
+          vtbl->np.np_redirect = TRUE;
+          oflags               = O_WRONLY|O_CREAT|O_APPEND;
+          redirfile            = argv[argc-1];
+          argc                -= 2;
         }
     }
 
   /* Redirected output? */
 
-  if (redirect)
+  if (vtbl->np.np_redirect)
     {
       /* Open the redirection file.  This file will eventually
        * be closed by a call to either nsh_release (if the command
@@ -599,7 +803,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
       if (fd < 0)
         {
           nsh_output(vtbl, g_fmtcmdfailed, cmd, "open", NSH_ERRNO);
-          return ERROR;
+          goto errout;
         }
     }
 
@@ -612,7 +816,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
   /* Handle the case where the command is executed in background */
 
-  if (bg)
+  if (vtbl->np.np_bg)
     {
       struct sched_param param;
       int priority;
@@ -632,7 +836,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
       /* Handle redirection of output via a file descriptor */
 
-      if (redirect)
+      if (vtbl->np.np_redirect)
         {
           (void)nsh_redirect(bkgvtbl, fd, NULL);
         }
@@ -643,16 +847,16 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
       if (ret != 0)
         {
           nsh_output(vtbl, g_fmtcmdfailed, cmd, "sched_getparm", NSH_ERRNO);
-          goto errout;
+          goto errout_with_redirect;
         }
 
       /* Determine the priority to execute the command */
 
       priority = param.sched_priority;
-      if (nice != 0)
+      if (vtbl->np.np_nice != 0)
         {
-          priority -= nice;
-          if (nice < 0)
+          priority -= vtbl->np.np_nice;
+          if (vtbl->np.np_nice < 0)
             {
               int max_priority = sched_get_priority_max(SCHED_RR);
               if (priority > max_priority)
@@ -674,14 +878,14 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
 #ifndef CONFIG_CUSTOM_STACK
       ret = task_create("nsh_execute", priority, CONFIG_EXAMPLES_NSH_STACKSIZE,
-                        nsh_execute, &argv[1]);
+                        (main_t)nsh_execute, &argv[1]);
 #else
-      ret = task_create("nsh_execute", priority, nsh_execute, &argv[1]);
+      ret = task_create("nsh_execute", priority, (main_t)nsh_execute, &argv[1]);
 #endif
       if (ret < 0)
         {
           nsh_output(vtbl, g_fmtcmdfailed, cmd, "task_create", NSH_ERRNO);
-          goto errout;
+          goto errout_with_redirect;
         }
       nsh_output(vtbl, "%s [%d:%d:%d]\n", cmd, ret, priority, param.sched_priority);
 
@@ -690,7 +894,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
        * the file descriptor
        */
 
-      if (redirect)
+      if (vtbl->np.np_redirect)
         {
           (void)close(fd);
         }
@@ -713,7 +917,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
       /* Handle redirection of output via a file descriptor */
 
-      if (redirect)
+      if (vtbl->np.np_redirect)
         {
           nsh_redirect(vtbl, fd, save);
         }
@@ -728,14 +932,14 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
        * file descriptor.
        */
 
-      if (redirect)
+      if (vtbl->np.np_redirect)
         {
           nsh_undirect(vtbl, save);
         }
 
       if (ret < 0)
         {
-          return ERROR;
+          goto errout;
         }
     }
 
@@ -743,12 +947,15 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
    * command task succeeded).
    */
 
+  nsh_saveresult(vtbl, FALSE);
   return OK;
 
-errout:
-  if (redirect)
+errout_with_redirect:
+  if (vtbl->np.np_redirect)
     {
       close(fd);
     }
+errout:
+  nsh_saveresult(vtbl, TRUE);
   return ERROR;
 }

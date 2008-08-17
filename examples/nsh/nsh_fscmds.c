@@ -237,7 +237,7 @@ static int ls_handler(FAR struct nsh_vtbl_s *vtbl, const char *dirpath, struct d
       if (ret != 0)
         {
           nsh_output(vtbl, g_fmtcmdfailed, "ls", "stat", NSH_ERRNO);
-          return OK;
+          return ERROR;
         }
 
       if ((lsflags & LSFLAGS_LONG) != 0)
@@ -337,6 +337,7 @@ static int ls_handler(FAR struct nsh_vtbl_s *vtbl, const char *dirpath, struct d
 #if CONFIG_NFILE_DESCRIPTORS > 0
 static int ls_recursive(FAR struct nsh_vtbl_s *vtbl, const char *dirpath, struct dirent *entryp, void *pvarg)
 {
+  int ret = OK;
   /* Is this entry a directory? */
 
   if (DIRENT_ISDIRECTORY(entryp->d_type))
@@ -349,14 +350,16 @@ static int ls_recursive(FAR struct nsh_vtbl_s *vtbl, const char *dirpath, struct
       /* List the directory contents */
 
       nsh_output(vtbl, "%s:\n", newpath);
-      foreach_direntry(vtbl, "ls", newpath, ls_handler, pvarg);
+      ret = foreach_direntry(vtbl, "ls", newpath, ls_handler, pvarg);
+      if (ret == 0)
+        {
+          /* Then recurse to list each directory within the directory */
 
-      /* Then recurse to list each directory within the directory */
-
-      foreach_direntry(vtbl, "ls", newpath, ls_recursive, pvarg);
-      free(newpath);
+          ret = foreach_direntry(vtbl, "ls", newpath, ls_recursive, pvarg);
+          free(newpath);
+        }
     }
-  return OK;
+  return ret;
 }
 #endif
 
@@ -369,9 +372,10 @@ static int ls_recursive(FAR struct nsh_vtbl_s *vtbl, const char *dirpath, struct
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_cat(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+int cmd_cat(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char buffer[IOBUFFERSIZE];
+  int ret = ERROR;
 
   /* Open the file for reading */
 
@@ -379,7 +383,7 @@ void cmd_cat(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   if (fd < 0)
     {
       nsh_output(vtbl, g_fmtcmdfailed, argv[0], "open", NSH_ERRNO);
-      return;
+      return ERROR;
     }
 
   /* And just dump it byte for byte into stdout */
@@ -431,11 +435,13 @@ void cmd_cat(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
       else
         {
+          ret = OK;
           break;
         }
     }
 
   (void)close(fd);
+  return ret;
 }
 #endif
 
@@ -444,7 +450,7 @@ void cmd_cat(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_cp(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+int cmd_cp(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   struct stat buf;
   char *fullpath = NULL;
@@ -452,7 +458,7 @@ void cmd_cp(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   int oflags = O_WRONLY|O_CREAT|O_TRUNC;
   int rdfd;
   int wrfd;
-  int ret;
+  int ret = ERROR;
 
   /* Open the source file for reading */
 
@@ -460,7 +466,7 @@ void cmd_cp(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   if (rdfd < 0)
     {
       nsh_output(vtbl, g_fmtcmdfailed, argv[0], "open", NSH_ERRNO);
-      return;
+      return ERROR;
     }
 
   /* Check if the destination is a directory */
@@ -519,6 +525,7 @@ void cmd_cp(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
             {
               /* End of file */
 
+              ret = OK;
               goto out_with_wrfd;
             }
           else if (nbytesread < 0 && errno != EINTR)
@@ -560,6 +567,7 @@ out_with_fullpath:
 
 out_with_rdfd:
   close(rdfd);
+  return ret;
 }
 #endif
 
@@ -568,7 +576,7 @@ out_with_rdfd:
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_ls(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+int cmd_ls(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   unsigned int lsflags = 0;
   int ret;
@@ -595,7 +603,7 @@ void cmd_ls(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
           case '?':
           default:
             nsh_output(vtbl, g_fmtarginvalid, argv[0]);
-            return;
+            return ERROR;
         }
     }
 
@@ -604,12 +612,12 @@ void cmd_ls(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   if (optind + 1 <  argc)
     {
       nsh_output(vtbl, g_fmttoomanyargs, argv[0]);
-      return;
+      return ERROR;
     }
   else if (optind + 1 >  argc)
     {
       nsh_output(vtbl, g_fmtargrequired, argv[0]);
-      return;
+      return ERROR;
     }
 
   /* List the directory contents */
@@ -622,6 +630,7 @@ void cmd_ls(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
       ret = foreach_direntry(vtbl, "ls", argv[optind], ls_recursive, (void*)lsflags);
     }
+  return ret;
 }
 #endif
 
@@ -630,13 +639,14 @@ void cmd_ls(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_mkdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+int cmd_mkdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-  int result = mkdir(argv[1], 0777);
-  if ( result < 0)
+  int ret = mkdir(argv[1], 0777);
+  if (ret < 0)
     {
       nsh_output(vtbl, g_fmtcmdfailed, argv[0], "mkdir", NSH_ERRNO);
     }
+  return ret;
 }
 #endif
 
@@ -645,14 +655,15 @@ void cmd_mkdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_FAT)
-void cmd_mkfatfs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+int cmd_mkfatfs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   struct fat_format_s fmt = FAT_FORMAT_INITIALIZER;
-  int result = mkfatfs(argv[1], &fmt);
-  if ( result < 0)
+  int ret = mkfatfs(argv[1], &fmt);
+  if (ret < 0)
     {
       nsh_output(vtbl, g_fmtcmdfailed, argv[0], "mkfatfs", NSH_ERRNO);
     }
+  return ret;
 }
 #endif
 
@@ -661,13 +672,14 @@ void cmd_mkfatfs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_mkfifo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+int cmd_mkfifo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-  int result = mkfifo(argv[1], 0777);
-  if ( result < 0)
+  int ret = mkfifo(argv[1], 0777);
+  if (ret < 0)
     {
       nsh_output(vtbl, g_fmtcmdfailed, argv[0], "mkfifo", NSH_ERRNO);
     }
+  return ret;
 }
 #endif
 
@@ -677,7 +689,7 @@ void cmd_mkfifo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
 #ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
-void cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+int cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char *filesystem = 0;
   int result;
@@ -695,12 +707,12 @@ void cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
           case ':':
             nsh_output(vtbl, g_fmtargrequired, argv[0]);
-            return;
+            return ERROR;
 
           case '?':
           default:
             nsh_output(vtbl, g_fmtarginvalid, argv[0]);
-            return;
+            return ERROR;
         }
     }
 
@@ -709,12 +721,12 @@ void cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   if (optind + 2 <  argc)
     {
       nsh_output(vtbl, g_fmttoomanyargs, argv[0]);
-      return;
+      return ERROR;
     }
   else if (optind + 2 >  argc)
     {
       nsh_output(vtbl, g_fmtargrequired, argv[0]);
-      return;
+      return ERROR;
     }
 
   /* Perform the mount */
@@ -723,6 +735,7 @@ void cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     {
       nsh_output(vtbl, g_fmtcmdfailed, argv[0], "mount", NSH_ERRNO);
     }
+  return result;
 }
 #endif
 #endif
@@ -732,12 +745,14 @@ void cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_rm(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+int cmd_rm(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-  if (unlink(argv[1]) < 0)
+  int ret = unlink(argv[1]);
+  if (ret < 0)
     {
       nsh_output(vtbl, g_fmtcmdfailed, argv[0], "unlink", NSH_ERRNO);
     }
+  return ret;
 }
 #endif
 
@@ -746,12 +761,14 @@ void cmd_rm(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-void cmd_rmdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+int cmd_rmdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-  if (rmdir(argv[1]) < 0)
+  int ret = rmdir(argv[1]);
+  if (ret < 0)
     {
       nsh_output(vtbl, g_fmtcmdfailed, argv[0], "rmdir", NSH_ERRNO);
     }
+  return ret;
 }
 #endif
 
@@ -760,7 +777,7 @@ void cmd_rmdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
-void cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+int cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   FILE *stream;
   char *buffer;
@@ -775,7 +792,7 @@ void cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
       if (!stream)
         {
           nsh_output(vtbl, g_fmtcmdfailed, argv[0], "fopen", NSH_ERRNO);
-          return;
+          return ERROR;
         }
 
       do
@@ -797,6 +814,7 @@ void cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
       while(pret);
       fclose(stream);
     }
+  return OK;
 }
 #endif
 
@@ -806,14 +824,15 @@ void cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
 #ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
-void cmd_umount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+int cmd_umount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   /* Perform the umount */
   int result = umount(argv[1]);
-  if ( result < 0)
+  if (result < 0)
     {
       nsh_output(vtbl, g_fmtcmdfailed, argv[0], "umount", NSH_ERRNO);
     }
+  return result;
 }
 #endif
 #endif

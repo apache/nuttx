@@ -139,7 +139,7 @@ static void ps_task(FAR _TCB *tcb, FAR void *arg)
  * Name: cmd_exec
  ****************************************************************************/
 
-void cmd_exec(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+int cmd_exec(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char *endptr;
   long addr;
@@ -148,21 +148,23 @@ void cmd_exec(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   if (!addr || endptr == argv[1] || *endptr != '\0')
     {
        nsh_output(vtbl, g_fmtarginvalid, argv[0]);
-       return;
+       return ERROR;
     }
 
   nsh_output(vtbl, "Calling %p\n", (exec_t)addr);
   ((exec_t)addr)();
+  return OK;
 }
 
 /****************************************************************************
  * Name: cmd_ps
  ****************************************************************************/
 
-void cmd_ps(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+int cmd_ps(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   nsh_output(vtbl, "PID   PRI SCHD TYPE   NP STATE    NAME\n");
   sched_foreach(ps_task, vtbl);
+  return OK;
 }
 
 /****************************************************************************
@@ -170,7 +172,7 @@ void cmd_ps(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_SIGNALS
-void cmd_sleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+int cmd_sleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char *endptr;
   long secs;
@@ -179,9 +181,10 @@ void cmd_sleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   if (!secs || endptr == argv[1] || *endptr != '\0')
     {
        nsh_output(vtbl, g_fmtarginvalid, argv[0]);
-       return;
+       return ERROR;
     }
   sleep(secs);
+  return OK;
 }
 #endif
 
@@ -190,7 +193,7 @@ void cmd_sleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_SIGNALS
-void cmd_usleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+int cmd_usleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char *endptr;
   long usecs;
@@ -199,8 +202,9 @@ void cmd_usleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   if (!usecs || endptr == argv[1] || *endptr != '\0')
     {
        nsh_output(vtbl, g_fmtarginvalid, argv[0]);
-       return;
+       return ERROR;
     }
   usleep(usecs);
+  return OK;
 }
 #endif

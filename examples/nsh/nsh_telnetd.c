@@ -209,6 +209,8 @@ static FAR struct telnetd_s *nsh_allocstruct(void)
       pstate->tn_vtbl.undirect   = nsh_telnetundirect;
       pstate->tn_vtbl.exit       = nsh_telnetexit;
 
+      memset(&pstate->tn_vtbl.np, 0, sizeof(struct nsh_parser_s));
+
       pstate->tn_refs            = 1;
     }
   return pstate;

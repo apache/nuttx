@@ -114,6 +114,8 @@ static inline FAR struct serial_s *nsh_allocstruct(void)
       pstate->ss_vtbl.undirect   = nsh_consoleundirect;
       pstate->ss_vtbl.exit       = nsh_consoleexit;
 
+      memset(&pstate->ss_vtbl.np, 0, sizeof(struct nsh_parser_s));
+
       pstate->ss_refs            = 1;
       pstate->ss_fd              = 1;
       pstate->ss_stream          = stdout;

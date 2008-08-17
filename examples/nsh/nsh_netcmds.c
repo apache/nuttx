@@ -221,10 +221,11 @@ int ifconfig_callback(FAR struct uip_driver_s *dev, void *arg)
  * Name: cmd_ifconfig
  ****************************************************************************/
 
-void cmd_ifconfig(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+int cmd_ifconfig(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   netdev_foreach(ifconfig_callback, vtbl);
   uip_statistics(vtbl);
+  return OK;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

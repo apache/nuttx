@@ -112,8 +112,32 @@
  * Public Types
  ****************************************************************************/
 
+enum nsh_parser_e
+{
+   NSH_PARSER_NORMAL = 0,
+   NSH_PARSER_IF,
+   NSH_PARSER_THEN,
+   NSH_PARSER_ELSE
+};
+
+struct nsh_parser_s
+{
+  boolean   np_bg;       /* TRUE: The last command executed in background */
+  boolean   np_redirect; /* TRUE: Output from the last command was re-directed */
+  boolean   np_fail;     /* TRUE: The last command failed */
+  boolean   np_ifcond;   /* Value of command in 'if' statement */
+  ubyte     np_state;    /* Parser state (see enum nsh_parser_e) */
+  int       np_nice;     /* "nice" value applied to last background cmd */
+};
+
 struct nsh_vtbl_s
 {
+  /* This function pointers are "hooks" into the front end logic to
+   * handle things like output of command results, redirection, etc.
+   * -- all of which must be done in a way that is unique to the nature
+   * of the front end.
+   */
+   
   FAR struct nsh_vtbl_s *(*clone)(FAR struct nsh_vtbl_s *vtbl);
   void (*addref)(FAR struct nsh_vtbl_s *vtbl);
   void (*release)(FAR struct nsh_vtbl_s *vtbl);
@@ -122,9 +146,13 @@ struct nsh_vtbl_s
   void (*redirect)(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *save);
   void (*undirect)(FAR struct nsh_vtbl_s *vtbl, FAR ubyte *save);
   void (*exit)(FAR struct nsh_vtbl_s *vtbl);
+
+  /* Parser state data */
+
+  struct nsh_parser_s np;
 };
 
-typedef void (*cmd_t)(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+typedef int (*cmd_t)(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 
 /****************************************************************************
  * Public Data
@@ -137,6 +165,7 @@ extern const char g_fmtcmdnotfound[];
 extern const char g_fmtcmdnotimpl[];
 extern const char g_fmtnosuch[];
 extern const char g_fmttoomanyargs[];
+extern const char g_fmtcontext[];
 extern const char g_fmtcmdfailed[];
 extern const char g_fmtcmdoutofmemory[];
 
@@ -160,42 +189,42 @@ extern int nsh_telnetmain(int argc, char *argv[]);
 
 /* Shell command handlers */
 
-extern void cmd_echo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-extern void cmd_exec(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-extern void cmd_ps(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+extern int cmd_echo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+extern int cmd_exec(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+extern int cmd_ps(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  extern void cmd_cat(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-  extern void cmd_cp(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-  extern void cmd_ls(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+  extern int cmd_cat(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+  extern int cmd_cp(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+  extern int cmd_ls(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 # if CONFIG_NFILE_STREAMS > 0
-  extern void cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+  extern int cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 # endif  /* CONFIG_NFILE_STREAMS */
 # ifndef CONFIG_DISABLE_MOUNTPOINT
-    extern void cmd_mkdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-    extern void cmd_mkfifo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-    extern void cmd_rm(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-    extern void cmd_rmdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+    extern int cmd_mkdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+    extern int cmd_mkfifo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+    extern int cmd_rm(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+    extern int cmd_rmdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #   ifdef CONFIG_FS_FAT
-      extern void cmd_mkfatfs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-      extern void cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-      extern void cmd_umount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+      extern int cmd_mkfatfs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+      extern int cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+      extern int cmd_umount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #   endif /* CONFIG_FS_FAT */
 # endif /* !CONFIG_DISABLE_MOUNTPOINT */
 #endif /* CONFIG_NFILE_DESCRIPTORS */
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-  extern void cmd_ifconfig(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+  extern int cmd_ifconfig(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
 
 #ifndef CONFIG_DISABLE_ENVIRON
-  extern void cmd_set(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-  extern void cmd_unset(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+  extern int cmd_set(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+  extern int cmd_unset(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif /* CONFIG_DISABLE_ENVIRON */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-  extern void cmd_sleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-  extern void cmd_usleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+  extern int cmd_sleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+  extern int cmd_usleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif /* CONFIG_DISABLE_SIGNALS */
 
 #endif /* __NSH_H */
