@@ -782,18 +782,25 @@ int cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   FILE *stream;
   char *buffer;
   char *pret;
+  int ret = ERROR;
 
   /* Get a reference to the common input buffer */
 
   buffer = nsh_linebuffer(vtbl);
   if (buffer)
     {
+      /* Open the file containing the script */
+
       stream = fopen(argv[1], "r");
       if (!stream)
         {
           nsh_output(vtbl, g_fmtcmdfailed, argv[0], "fopen", NSH_ERRNO);
           return ERROR;
         }
+
+      /* Loop, processing each command line in the script file (or
+       * until an error occurs)
+       */
 
       do
         {
@@ -808,13 +815,13 @@ int cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
                * considerable amount of stack may be used.
                */
 
-              (void)nsh_parse(vtbl, buffer);
+              ret = nsh_parse(vtbl, buffer);
             }
         }
-      while(pret);
+      while (pret && ret == OK);
       fclose(stream);
     }
-  return OK;
+  return ret;
 }
 #endif
 

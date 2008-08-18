@@ -452,7 +452,7 @@ static inline int nsh_ifthenelse(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, 
           if (!*ppcmd)
             {
               nsh_output(vtbl, g_fmtarginvalid, "if");
-              return ERROR;
+              goto errout;
             }
 
           /* Verify that "if" is valid in this context */
@@ -460,7 +460,7 @@ static inline int nsh_ifthenelse(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, 
           if (vtbl->np.np_state != NSH_PARSER_NORMAL)
             {
               nsh_output(vtbl, g_fmtcontext, "if");
-              return ERROR;
+              goto errout;
             }
           vtbl->np.np_state = NSH_PARSER_IF;
         }
@@ -472,7 +472,7 @@ static inline int nsh_ifthenelse(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, 
           if (*ppcmd)
             {
               nsh_output(vtbl, g_fmtarginvalid, "then");
-              return ERROR;
+              goto errout;
             }
 
           /* Verify that "then" is valid in this context */
@@ -480,7 +480,7 @@ static inline int nsh_ifthenelse(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, 
           if (vtbl->np.np_state != NSH_PARSER_IF)
             {
               nsh_output(vtbl, g_fmtcontext, "then");
-              return ERROR;
+              goto errout;
             }
           vtbl->np.np_state = NSH_PARSER_THEN;
         }
@@ -492,7 +492,7 @@ static inline int nsh_ifthenelse(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, 
           if (*ppcmd)
             {
               nsh_output(vtbl, g_fmtarginvalid, "else");
-              return ERROR;
+              goto errout;
             }
 
           /* Verify that "then" is valid in this context */
@@ -500,7 +500,7 @@ static inline int nsh_ifthenelse(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, 
           if (vtbl->np.np_state != NSH_PARSER_THEN)
             {
               nsh_output(vtbl, g_fmtcontext, "else");
-              return ERROR;
+              goto errout;
             }
           vtbl->np.np_state = NSH_PARSER_ELSE;
         }
@@ -512,7 +512,7 @@ static inline int nsh_ifthenelse(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, 
           if (*ppcmd)
             {
               nsh_output(vtbl, g_fmtarginvalid, "fi");
-              return ERROR;
+              goto errout;
             }
 
           /* Verify that "fi" is valid in this context */
@@ -520,17 +520,21 @@ static inline int nsh_ifthenelse(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, 
           if (vtbl->np.np_state != NSH_PARSER_THEN && vtbl->np.np_state != NSH_PARSER_ELSE)
             {
               nsh_output(vtbl, g_fmtcontext, "fi");
-              return ERROR;
+              goto errout;
             }
           vtbl->np.np_state = NSH_PARSER_NORMAL;
         }
       else if (vtbl->np.np_state == NSH_PARSER_IF)
         {
           nsh_output(vtbl, g_fmtcontext, cmd);
-          return ERROR;
+          goto errout;
         }
     }
   return OK;
+
+errout:
+  vtbl->np.np_state = NSH_PARSER_NORMAL;
+  return ERROR;
 }
 
 /****************************************************************************
@@ -559,12 +563,19 @@ static inline boolean nsh_cmdenabled(FAR struct nsh_vtbl_s *vtbl)
  * Name: nsh_saveresult
  ****************************************************************************/
 
-static inline void nsh_saveresult(FAR struct nsh_vtbl_s *vtbl, boolean result)
+static inline int nsh_saveresult(FAR struct nsh_vtbl_s *vtbl, boolean result)
 {
   vtbl->np.np_fail = result;
   if (vtbl->np.np_state == NSH_PARSER_IF)
     {
+      vtbl->np.np_fail   = FALSE;
       vtbl->np.np_ifcond = result;
+      return OK;
+    }
+  else
+    {
+      vtbl->np.np_fail   = result;
+      return result ? ERROR : OK;
     }
 }
 
@@ -959,8 +970,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
    * command task succeeded).
    */
 
-  nsh_saveresult(vtbl, FALSE);
-  return OK;
+  return nsh_saveresult(vtbl, FALSE);
 
 errout_with_redirect:
   if (vtbl->np.np_redirect)
@@ -968,6 +978,5 @@ errout_with_redirect:
       close(fd);
     }
 errout:
-  nsh_saveresult(vtbl, TRUE);
-  return ERROR;
+  return nsh_saveresult(vtbl, TRUE);
 }
