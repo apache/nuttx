@@ -55,7 +55,11 @@
  * Private Types
  ****************************************************************************/
 
-typedef void (*exec_t)(void);
+/* The returned value should be zero for sucess or TRUE or non zero for
+ * failure or FALSE.
+ */
+
+typedef int (*exec_t)(void);
 
 /****************************************************************************
  * Private Function Prototypes
@@ -152,8 +156,7 @@ int cmd_exec(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     }
 
   nsh_output(vtbl, "Calling %p\n", (exec_t)addr);
-  ((exec_t)addr)();
-  return OK;
+  return ((exec_t)addr)();
 }
 
 /****************************************************************************
