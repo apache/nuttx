@@ -79,6 +79,10 @@ examples/nsh
       new threads are generated when a command is executed in background
       or as new TELNET connections are established.
 
+  * CONFIG_EXAMPLES_NSH_NESTDEPTH
+      The maximum number of nested if-then[-else]-fi sequences that
+      are permissable.  Default: 3
+
   * CONFIG_EXAMPLES_NSH_CONSOLE
       If CONFIG_EXAMPLES_NSH_CONSOLE is set to 'y', then a serial
       console front-end is selected.

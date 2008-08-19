@@ -87,6 +87,14 @@
 # define CONFIG_EXAMPLES_NSH_STACKSIZE 4096
 #endif
 
+/* The maximum number of nested if-then[-else]-fi sequences that
+ * are permissable.
+ */
+
+#ifndef CONFIG_EXAMPLES_NSH_NESTDEPTH
+# define CONFIG_EXAMPLES_NSH_NESTDEPTH 3
+#endif
+
 /* Define to enable dumping of all input/output buffers */
 
 #undef CONFIG_EXAMPLES_NSH_TELNETD_DUMPBUFFER
@@ -120,14 +128,27 @@ enum nsh_parser_e
    NSH_PARSER_ELSE
 };
 
+struct nsh_state_s
+{
+  ubyte     ns_ifcond   : 1; /* Value of command in 'if' statement */
+  ubyte     ns_disabled : 1; /* TRUE: Unconditionally disabled */
+  ubyte     ns_unused   : 4;
+  ubyte     ns_state    : 2; /* Parser state (see enum nsh_parser_e) */
+};
+
 struct nsh_parser_s
 {
   boolean   np_bg;       /* TRUE: The last command executed in background */
   boolean   np_redirect; /* TRUE: Output from the last command was re-directed */
   boolean   np_fail;     /* TRUE: The last command failed */
-  boolean   np_ifcond;   /* Value of command in 'if' statement */
-  ubyte     np_state;    /* Parser state (see enum nsh_parser_e) */
+  ubyte     np_ndx;      /* Current index into np_st[] */
   int       np_nice;     /* "nice" value applied to last background cmd */
+
+  /* This is a stack of parser state information.  It supports nested
+   * execution of commands that span multiple lines (like if-then-else-fi)
+   */
+
+  struct nsh_state_s np_st[CONFIG_EXAMPLES_NSH_NESTDEPTH];
 };
 
 struct nsh_vtbl_s
@@ -165,9 +186,11 @@ extern const char g_fmtcmdnotfound[];
 extern const char g_fmtcmdnotimpl[];
 extern const char g_fmtnosuch[];
 extern const char g_fmttoomanyargs[];
+extern const char g_fmtdeepnesting[];
 extern const char g_fmtcontext[];
 extern const char g_fmtcmdfailed[];
 extern const char g_fmtcmdoutofmemory[];
+extern const char g_fmtinternalerror[];
 
 /****************************************************************************
  * Public Function Prototypes
