@@ -182,6 +182,7 @@ typedef int (*cmd_t)(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 extern const char g_nshprompt[];
 extern const char g_fmtargrequired[];
 extern const char g_fmtarginvalid[];
+extern const char g_fmtargrange[];
 extern const char g_fmtcmdnotfound[];
 extern const char g_fmtcmdnotimpl[];
 extern const char g_fmtnosuch[];
@@ -214,6 +215,9 @@ extern int nsh_telnetmain(int argc, char *argv[]);
 
 extern int cmd_echo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 extern int cmd_exec(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+extern int cmd_mb(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+extern int cmd_mh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+extern int cmd_mw(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 extern int cmd_ps(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0

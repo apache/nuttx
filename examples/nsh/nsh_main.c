@@ -107,16 +107,21 @@ static const struct cmdmap_s g_cmdmap[] =
 #if CONFIG_NFILE_DESCRIPTORS > 0
   { "ls",       cmd_ls,       2, 5, "[-lRs] <dir-path>" },
 #endif
+  { "mb",       cmd_mb,       2, 3, "<hex-address>[=<hex-value>][ <hex-byte-count>]" },
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
   { "mkdir",    cmd_mkdir,    2, 2, "<path>" },
 #ifdef CONFIG_FS_FAT
   { "mkfatfs",  cmd_mkfatfs,  2, 2, "<path>" },
 #endif
   { "mkfifo",   cmd_mkfifo,   2, 2, "<path>" },
+#endif
+  { "mh",       cmd_mh,       2, 3, "<hex-address>[=<hex-value>][ <hex-byte-count>]" },
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
 #ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
   { "mount",    cmd_mount,    4, 5, "-t <fstype> <block-device> <dir-path>" },
 #endif
 #endif
+  { "mw",       cmd_mw,       2, 3, "<hex-address>[=<hex-value>][ <hex-byte-count>]" },
   { "ps",       cmd_ps,       1, 1, NULL },
 #ifndef CONFIG_DISABLE_ENVIRON
   { "set",      cmd_set,      3, 3, "<name> <value>" },
@@ -152,6 +157,7 @@ static const struct cmdmap_s g_cmdmap[] =
 const char g_nshprompt[]         = "nsh> ";
 const char g_fmtargrequired[]    = "nsh: %s: missing required argument(s)\n";
 const char g_fmtarginvalid[]     = "nsh: %s: argument invalid\n";
+const char g_fmtargrange[]       = "nsh: %s: value out of range\n";
 const char g_fmtcmdnotfound[]    = "nsh: %s: command not found\n";
 const char g_fmtcmdnotimpl[]     = "nsh: %s: command not implemented\n";
 const char g_fmtnosuch[]         = "nsh: %s: no such %s: %s\n";
