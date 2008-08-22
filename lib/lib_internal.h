@@ -1,7 +1,7 @@
-/************************************************************
- * lib_internal.h
+/****************************************************************************
+ * lib/lib_internal.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,22 +31,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __LIB_INTERNAL_H
 #define __LIB_INTERNAL_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <stdio.h>
 #include <semaphore.h>
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
+
+#ifndef CONFIG_LIB_HOMEDIR
+# define CONFIG_LIB_HOMEDIR "/"
+#endif
 
 #if CONFIG_STDIO_BUFFER_SIZE <= 0
 # define lib_sem_initialize(s)
@@ -56,9 +60,9 @@
 
 #define LIB_BUFLEN_UNKNOWN (0x7fffffff)
 
-/************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************/
+ ****************************************************************************/
 
 /* This is the generic for of a stream used by the library
  * to manage variable sized output.
@@ -94,13 +98,18 @@ struct lib_rawstream_s
   int                  fd;
 };
 
-/************************************************************
+/****************************************************************************
  * Public Variables
- ************************************************************/
+ ****************************************************************************/
+ 
+#if CONFIG_NFILE_DESCRIPTORS > 0
+extern char *g_cwd;            /* Defined in lib_chdir.c */
+extern char *g_prevcwd;        /* Defined in lib_chdir.c */
+#endif
 
-/************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 /* Defined in lib_streamsem.c */
 
@@ -183,5 +192,10 @@ extern void lib_give_semaphore(FAR struct file_struct *stream);
 /* Defined in lib_libgetbase.c */
 
 extern int lib_getbase(const char *nptr, const char **endptr);
+
+/* Defined in lib_cwdsem.c */
+
+extern void cwd_semtake(void);
+extern void cwd_semgive(void);
 
 #endif /* __LIB_INTERNAL_H */

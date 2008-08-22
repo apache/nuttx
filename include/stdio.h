@@ -134,9 +134,7 @@ EXTERN int    vsnprintf(char *buf, size_t size, const char *format, va_list ap);
 
 /* POSIX-like File System Interfaces */
 
-EXTERN int    chdir(const char *path);
 EXTERN FILE  *fdopen(int fd, const char *type);
-EXTERN char  *getcwd(FAR char *buf, size_t size);
 EXTERN int    statfs(const char *path, FAR struct statfs *buf);
 
 #undef EXTERN

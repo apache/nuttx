@@ -21,7 +21,7 @@ User's Manual
 <p>
 Gregory Nutt
 <p>
-<small>Last Update: August 10, 2008</small>
+<small>Last Update: August 22, 2008</small>
 </center>
 
 <h1>1.0 <A NAME="Introduction">Introduction</a></h1>
@@ -5942,6 +5942,11 @@ interface of the same name.
   void       seekdir(FAR DIR *dirp, int loc);
   int        telldir(FAR DIR *dirp);
 </pre></ul>
+<ul><pre>
+  #include &lt;unistd.h&gt;
+  int       chdir(FAR const char *path);
+  FAR char *getcwd(FAR char *buf, size_t size);
+</pre></ul>
 
 <h2><a name="standardio">2.11.4 Standard I/O</a></h2>
 <ul><pre>
@@ -5970,10 +5975,8 @@ interface of the same name.
   int    vfprintf(FILE *stream, const char *s, va_list ap);
   int    vsprintf(char *buf, const char *s, va_list ap);
 
-  int    chdir(const char *path);                          /* Prototyped but not implemented */
   FILE  *fdopen(int fd, const char *type);
   int    fstat(int fd, FAR struct stat *buf);              /* Prototyped but not implemented */
-  char  *getcwd(FAR char *buf, size_t size);               /* Prototyped but not implemented */
   int    mkdir(const char *path, mode_t mode);
   int    rmdir(const char *path);
   int    stat(const char *path, FAR struct stat *buf);

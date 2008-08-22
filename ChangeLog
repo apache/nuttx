@@ -417,4 +417,6 @@
 	* NSH now supports comments beginning with '#'
 	* NSH now supports commands to inspect and modify memory
 	* NSH cat command now supports multiple files on command line
+	* Add chdir() and getcwd()
+
 

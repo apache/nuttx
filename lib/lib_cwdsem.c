@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_strlen.c
+ * lib/lib_cwdsem.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,18 +38,49 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
-#include <string.h>
+#include <unistd.h>
+#include <assert.h>
+#include <semaphore.h>
+#include <errno.h>
 
 /****************************************************************************
- * Global Functions
+ * Private Variables
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_STRLEN
-size_t strlen(const char *s)
+#if CONFIG_NFILE_DESCRIPTORS > 0
+static sem_t g_cwdsem  = { 1 };
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: cwd_semtake
+ ****************************************************************************/
+
+void cwd_semtake(void)
 {
-  const char *sc;
-  for (sc = s; *sc != '\0'; ++sc);
-  return sc - s;
+  /* Take the semaphore (perhaps waiting) */
+
+  while (sem_wait(&g_cwdsem) != 0)
+    {
+      /* The only case that an error should occr here is if the wait was
+       * awakened by a signal.
+       */
+
+      ASSERT(errno == EINTR);
+    }
 }
-#endif
+/****************************************************************************
+ * Name: cwd_semgive
+ ****************************************************************************/
+
+void cwd_semgive(void)
+{
+  /* Give the semaphore */
+
+  (void)sem_post(&g_cwdsem);
+}
+#endif /* CONFIG_NFILE_DESCRIPTORS */

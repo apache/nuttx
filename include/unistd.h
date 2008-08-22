@@ -136,7 +136,13 @@ EXTERN ssize_t read(int fd, FAR void *buf, size_t nbytes);
 EXTERN ssize_t write(int fd, FAR const void *buf, size_t nbytes);
 
 /* Special devices */
+
 EXTERN int     pipe(int filedes[2]);
+
+/* Working directory operations */
+
+EXTERN int     chdir(FAR const char *path);
+EXTERN FAR char *getcwd(FAR char *buf, size_t size);
 
 /* File path operations */
 
