@@ -90,7 +90,7 @@ static const char g_failure[]    = "1";
 static const struct cmdmap_s g_cmdmap[] =
 {
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  { "cat",      cmd_cat,      2, 2, "<path>" },
+  { "cat",      cmd_cat,      2, NSH_MAX_ARGUMENTS, "<path> [<path> [<path> ...]]" },
   { "cp",       cmd_cp,       3, 3, "<source-path> <dest-path>" },
 #endif
 #ifndef CONFIG_DISABLE_ENVIRON
@@ -659,7 +659,8 @@ static inline int nsh_nice(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, FAR ch
                 {
                   char *endptr;
                   vtbl->np.np_nice = (int)strtol(val, &endptr, 0);
-                  if (vtbl->np.np_nice > 19 || vtbl->np.np_nice < -20 || endptr == val || *endptr != '\0')
+                  if (vtbl->np.np_nice > 19 || vtbl->np.np_nice < -20 ||
+                      endptr == val || *endptr != '\0')
                     {
                       nsh_output(vtbl, g_fmtarginvalid, "nice");
                       return ERROR;

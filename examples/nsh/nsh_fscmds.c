@@ -375,72 +375,82 @@ static int ls_recursive(FAR struct nsh_vtbl_s *vtbl, const char *dirpath, struct
 int cmd_cat(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char buffer[IOBUFFERSIZE];
-  int ret = ERROR;
+  int fd;
+  int i;
+  int ret = OK;
 
-  /* Open the file for reading */
+  /* Loop for each file name on the command line */
 
-  int fd = open(argv[1], O_RDONLY);
-  if (fd < 0)
+  for (i = 1; i < argc && ret == OK; i++)
     {
-      nsh_output(vtbl, g_fmtcmdfailed, argv[0], "open", NSH_ERRNO);
-      return ERROR;
-    }
+      /* Open the file for reading */
 
-  /* And just dump it byte for byte into stdout */
-
-  for (;;)
-    {
-      int nbytesread = read(fd, buffer, IOBUFFERSIZE);
-
-      /* Check for read errors */
-
-      if (nbytesread < 0)
+      fd = open(argv[1], O_RDONLY);
+      if (fd < 0)
         {
-          /* EINTR is not an error */
-
-          if (errno != EINTR)
-            {
-              nsh_output(vtbl, g_fmtcmdfailed, argv[0], "read", NSH_ERRNO);
-              break;
-            }
+          nsh_output(vtbl, g_fmtcmdfailed, argv[0], "open", NSH_ERRNO);
+          ret = ERROR;
         }
-
-      /* Check for data successfully read */
-
-      else if (nbytesread > 0)
+      else
         {
-          int nbyteswritten = 0;
+          /* And just dump it byte for byte into stdout */
 
-          while (nbyteswritten < nbytesread)
+          for (;;)
             {
-              int n = write(1, buffer, nbytesread);
-              if (n < 0)
+              int nbytesread = read(fd, buffer, IOBUFFERSIZE);
+
+              /* Check for read errors */
+
+              if (nbytesread < 0)
                 {
-                  /* EINTR is not an error */
+                 /* EINTR is not an error */
 
                   if (errno != EINTR)
                     {
-                      nsh_output(vtbl, g_fmtcmdfailed, argv[0], "write", NSH_ERRNO);
+                      nsh_output(vtbl, g_fmtcmdfailed, argv[0], "read", NSH_ERRNO);
+                      ret = ERROR;
                       break;
                     }
                 }
+
+              /* Check for data successfully read */
+
+              else if (nbytesread > 0)
+                {
+                  int nbyteswritten = 0;
+
+                  while (nbyteswritten < nbytesread)
+                    {
+                      int n = write(1, buffer, nbytesread);
+                      if (n < 0)
+                        {
+                          /* EINTR is not an error */
+
+                          if (errno != EINTR)
+                            {
+                              nsh_output(vtbl, g_fmtcmdfailed, argv[0], "write", NSH_ERRNO);
+                              ret = ERROR;
+                              break;
+                            }
+                        }
+                      else
+                        {
+                          nbyteswritten += n;
+                        }
+                    }
+                }
+
+              /* Otherwise, it is the end of file */
+
               else
                 {
-                  nbyteswritten += n;
+                  break;
                 }
             }
-        }
 
-      /* Otherwise, it is the end of file */
-
-      else
-        {
-          ret = OK;
-          break;
+          (void)close(fd);
         }
     }
-
-  (void)close(fd);
   return ret;
 }
 #endif
