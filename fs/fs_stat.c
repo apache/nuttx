@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs_stat.c
+ * fs/fs_stat.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -86,7 +86,7 @@ static inline int statpsuedo(FAR struct inode *inode, FAR struct stat *buf)
         }
       else
         {
-          /* What is it also has child inodes? */
+          /* What is it if it also has child inodes? */
 
           buf->st_mode |= S_IFCHR;
         }
@@ -100,6 +100,19 @@ static inline int statpsuedo(FAR struct inode *inode, FAR struct stat *buf)
       buf->st_mode |= S_IFDIR;
     }
 
+  return OK;
+}
+
+/****************************************************************************
+ * Name: statroot
+ ****************************************************************************/
+
+static inline int statroot(FAR struct stat *buf)
+{
+  /* There is no inode associated with the fake root directory */
+  
+  memset(buf, 0, sizeof(struct stat) );
+  buf->st_mode = S_IFDIR;
   return OK;
 }
 
@@ -140,6 +153,13 @@ int stat(const char *path, FAR struct stat *buf)
     {
       ret = ENOENT;
       goto errout;
+    }
+
+  /* Check for the fake root directory (which has no inode) */
+
+  if (strcmp(path, "/") == 0)
+    {
+      return statroot(buf);
     }
 
   /* Get an inode for this file */
