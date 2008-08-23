@@ -40,11 +40,14 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
 
 #include "lib_internal.h"
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
 
 /****************************************************************************
  * Definitions
@@ -90,50 +93,38 @@
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 FAR char *getcwd(FAR char *buf, size_t size)
 {
-    const char *ptr;
-    int err;
+  char *pwd;
 
-    /* Verify input parameters */
+  /* Verify input parameters */
 
-    if (!buf || !size)
-      {
-        err = EINVAL;
-        goto errout;
-      }
+  if (!buf || !size)
+    {
+      errno = EINVAL;
+      return NULL;
+    }
 
-    /* If no working directory is defined, then default to the home directory */
+  /* If no working directory is defined, then default to the home directory */
 
-    cwd_semtake();
-    if (g_cwd)
-      {
-        ptr = g_cwd;
-      }
-    else
-      {
-        ptr = CONFIG_LIB_HOMEDIR;
-      }
+  pwd = getenv("PWD");
+  if (!pwd)
+    {
+      pwd = CONFIG_LIB_HOMEDIR;
+    }
 
-    /* Verify that the cwd will fit into the user-provided buffer */
+  /* Verify that the cwd will fit into the user-provided buffer */
 
-    if (strlen(ptr) + 1 > size)
-      {
-        err = ERANGE;
-        goto errout_with_sem;
-      }
+  if (strlen(pwd) + 1 > size)
+    {
+      errno = ERANGE;
+      return NULL;
+    }
 
-   /* Copy the cwd to the user buffer */
+  /* Copy the cwd to the user buffer */
 
-   strcpy(buf, ptr);
-   cwd_semgive();
-   return buf;
-
-errout_with_sem:
-  cwd_semgive();
-errout:
-  errno = err;
-  return NULL;
+  strcpy(buf, pwd);
+  sched_unlock();
+  return buf;
 }
-#endif /* CONFIG_NFILE_DESCRIPTORS */
+#endif /* CONFIG_NFILE_DESCRIPTORS && !CONFIG_DISABLE_ENVIRON */

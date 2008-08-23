@@ -42,7 +42,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
+#include <libgen.h>
 #include <errno.h>
 
 #include "nsh.h"
@@ -63,6 +65,12 @@
  * Private Data
  ****************************************************************************/
 
+#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
+static const char g_pwd[]    = "PWD";
+static const char g_oldpwd[] = "OLDPWD";
+static const char g_home[]   = CONFIG_LIB_HOMEDIR;
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -72,8 +80,186 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nsh_getwd
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
+static inline FAR const char *nsh_getwd(const char *wd)
+{
+  const char *val;
+
+  /* If no working directory is defined, then default to the home directory */
+
+  val = getenv(wd);
+  if (!val)
+    {
+      val = g_home;
+    }
+  return val;
+}
+#endif
+
+/****************************************************************************
+ * Name: nsh_getdirpath
+ ****************************************************************************/
+
+static inline char *nsh_getdirpath(FAR struct nsh_vtbl_s *vtbl,
+                                   const char *dirpath, const char *relpath)
+{
+  char *alloc;
+  int len;
+
+  /* Handle the special case where the dirpath is simply  */
+
+  if (strcmp(dirpath, "/") == 0)
+    {
+      len   = strlen(relpath) + 2;
+      alloc = (char*)malloc(len);
+      if (alloc)
+        {
+          sprintf(alloc, "/%s", relpath);
+        }
+    }
+  else
+    {
+      len = strlen(dirpath) + strlen(relpath) + 2;
+      alloc = (char*)malloc(len);
+      if (alloc)
+        {
+          sprintf(alloc, "%s/%s", dirpath, relpath);
+        }
+    }
+
+  if (!alloc)
+    {
+      nsh_output(vtbl, g_fmtcmdoutofmemory, "nsh_getdirpath");
+    }
+  return alloc;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nsh_getwd
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
+FAR const char *nsh_getcwd(void)
+{
+  return nsh_getwd(g_pwd);
+}
+#endif
+/****************************************************************************
+ * Name: nsh_getfullpath
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
+char *nsh_getfullpath(FAR struct nsh_vtbl_s *vtbl, const char *relpath)
+{
+  const char *wd;
+
+  /* Handle some special cases */
+
+  if (!relpath || relpath[0] == '\0')
+    {
+      /* No relative path provided */
+
+      return strdup(g_home);
+    }
+  else if (relpath[0] == '/')
+    {
+      return strdup(relpath);
+    }
+
+  /* Get the path to the current working directory */
+   
+  wd = nsh_getcwd();
+
+  /* Fake the '.' directory */
+
+  if (strcmp(relpath, ".") == 0)
+    {
+      return strdup(wd);
+    }
+
+  /* Return the full path */
+
+  return nsh_getdirpath(vtbl, wd, relpath);
+}
+#endif
+
+/****************************************************************************
+ * Name: nsh_freefullpath
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
+void nsh_freefullpath(char *relpath)
+{
+  if (relpath)
+    {
+      free(relpath);
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: cmd_cd
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
+int cmd_cd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+  const char *path = argv[1];
+  char *alloc = NULL;
+  char *fullpath = NULL;
+  int ret = OK;
+
+  /* Check for special arguments */
+
+  if (argc < 2 || strcmp(path, "~") == 0)
+    {
+      path = g_home;
+    }
+  else if (strcmp(path, "-") == 0)
+    {
+      alloc = strdup(nsh_getwd(g_oldpwd));
+      path  = alloc;
+    }
+  else if (strcmp(path, "..") == 0)
+    {
+      alloc = strdup(nsh_getcwd());
+      path  = dirname(alloc);
+    }
+  else
+    {
+      fullpath = nsh_getfullpath(vtbl, path);
+      path     = fullpath;
+    }
+
+  /* Set the new workding directory */
+
+  if (chdir(path) != 0)
+    {
+      nsh_output(vtbl, g_fmtcmdfailed, argv[0], "chdir", NSH_ERRNO);
+      ret = ERROR;
+    }
+
+  /* Free any memory that was allocated */
+
+  if (alloc)
+    {
+      free(alloc);
+    }
+
+  if (fullpath)
+    {
+      nsh_freefullpath(fullpath);
+    }
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: cmd_echo
@@ -94,6 +280,18 @@ int cmd_echo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   nsh_output(vtbl, "\n");
   return OK;
 }
+
+/****************************************************************************
+ * Name: cmd_pwd
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
+int cmd_pwd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+  nsh_output(vtbl, "%s\n", nsh_getcwd());
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: cmd_set

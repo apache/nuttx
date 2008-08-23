@@ -38,6 +38,7 @@ examples/nsh
   Command    Depends on Configuration
   ---------- --------------------------
   cat        CONFIG_NFILE_DESCRIPTORS > 0
+  cd         !CONFIG_DISABLE_ENVIRON && CONFIG_NFILE_DESCRIPTORS > 0
   cp         CONFIG_NFILE_DESCRIPTORS > 0
   echo       --
   exec       --
@@ -51,6 +52,7 @@ examples/nsh
   mkfifo     !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
   mount      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
   ps         --
+  pwd        !CONFIG_DISABLE_ENVIRON && CONFIG_NFILE_DESCRIPTORS > 0
   set        !CONFIG_DISABLE_ENVIRON
   sleep      !CONFIG_DISABLE_SIGNALS
   sh         CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0

@@ -57,7 +57,7 @@ STDIO_SRCS	= lib_printf.c lib_rawprintf.c lib_lowprintf.c lib_dbg.c \
 		  lib_lowstream.c lib_nullstream.c lib_sscanf.c
 
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-STDIO_SRCS	+= lib_rawstream.c lib_chdir.c lib_getcwd.c lib_cwdsem.c
+STDIO_SRCS	+= lib_rawstream.c
 ifneq ($(CONFIG_NFILE_STREAMS),0)
 STDIO_SRCS	+= lib_fopen.c lib_fclose.c lib_fread.c lib_libfread.c lib_fseek.c \
 		   lib_fgetc.c lib_fgets.c lib_gets.c lib_fwrite.c lib_libfwrite.c \
@@ -72,6 +72,11 @@ STDLIB_SRCS	= lib_rand.c
 MATH_SRCS	= lib_rint.c
 
 UNISTD_SRCS	= lib_getopt.c
+ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
+ifneq ($(CONFIG_DISABLE_ENVIRON),y)
+UNISTD_SRCS	+=  lib_chdir.c lib_getcwd.c
+endif
+endif
 
 NET_SRCS	= lib_htons.c lib_htonl.c lib_inetntoa.c lib_etherntoa.c
 

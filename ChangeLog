@@ -420,5 +420,7 @@
 	* Add chdir() and getcwd()
 	* Fix error in getopt() when called with argc==1
 	* Fix error in stat() when used on the root directory
+	* NSH: Add cd and pwd commands and current working directory to all NSH
+	  commands that refer to paths.
 
 

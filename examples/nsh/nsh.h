@@ -100,6 +100,12 @@
 #undef CONFIG_EXAMPLES_NSH_TELNETD_DUMPBUFFER
 #undef CONFIG_EXAMPLES_NSH_FULLPATH
 
+/* Make sure that the home directory is defined */
+
+#ifndef CONFIG_LIB_HOMEDIR
+# define CONFIG_LIB_HOMEDIR "/"
+#endif
+
 #define nsh_clone(v)           (v)->clone(v)
 #define nsh_addref(v)          (v)->addref(v)
 #define nsh_release(v)         (v)->release(v)
@@ -115,6 +121,13 @@
 #endif
 
 #define SAVE_SIZE (sizeof(int) + sizeof(FILE*) + sizeof(boolean))
+
+/* Stubs used when working directory is not supported */
+
+#if CONFIG_NFILE_DESCRIPTORS <= 0 || defined(CONFIG_DISABLE_ENVIRON)
+#  define nsh_getfullpath(v,p) (p)
+#  define nsh_freefullpath(p)
+#endif
 
 /****************************************************************************
  * Public Types
@@ -211,6 +224,14 @@ extern int nsh_consolemain(int argc, char *argv[]);
 extern int nsh_telnetmain(int argc, char *argv[]);
 #endif
 
+/* Working directory support */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
+extern FAR const char *nsh_getcwd(void);
+extern char *nsh_getfullpath(FAR struct nsh_vtbl_s *vtbl, const char *relpath);
+extern void nsh_freefullpath(char *relpath);
+#endif
+
 /* Shell command handlers */
 
 extern int cmd_echo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
@@ -237,6 +258,10 @@ extern int cmd_ps(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
       extern int cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
       extern int cmd_umount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #   endif /* CONFIG_FS_FAT */
+# endif /* !CONFIG_DISABLE_MOUNTPOINT */
+# if !defined(CONFIG_DISABLE_ENVIRON)
+  extern int cmd_cd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+  extern int cmd_pwd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 # endif /* !CONFIG_DISABLE_MOUNTPOINT */
 #endif /* CONFIG_NFILE_DESCRIPTORS */
 

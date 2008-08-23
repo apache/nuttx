@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -47,13 +49,35 @@
 
 #include "lib_internal.h"
 
+#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
+
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-char *g_cwd     = NULL;
-char *g_prevcwd = NULL;
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: _trimdir
+ ****************************************************************************/
+
+#if 0
+static inline void _trimdir(char *path)
+{
+ /* Skip any trailing '/' characters (unless it is also the leading '/') */
+
+ int len = strlen(path) - 1;
+ while (len > 0 && path[len] == '/')
+   {
+      path[len] = '\0';
+      len--;
+   }
+}
+#else
+#  define _trimdir(p)
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -94,38 +118,64 @@ char *g_prevcwd = NULL;
 
 int chdir(FAR const char *path)
 {
-  char *duppath;
+  struct stat buf;
+  char *oldpwd;
+  char *alloc;
+  int err;
+  int ret;
 
   /* Verify the input parameters */
 
   if (!path)
     {
-      errno = ENOENT;
-      return ERROR;
+      err = ENOENT;
+      goto errout;
     }
 
   /* Verify that 'path' refers to a directory */
-  /* (To be provided) */
 
-  /* Make a persistent copy of 'path' */
+  ret = stat(path, &buf);
+  if (ret != 0)
+    {
+      err = ENOENT;
+      goto errout;
+    }
 
-  duppath = strdup(path);
+  /* Something exists here... is it a directory? */
 
-  /* Free any preceding cwd and set the previous to the cwd (this
-   * is to support 'cd -' in NSH
+  if (!S_ISDIR(buf.st_mode))
+    {
+      err = ENOTDIR;
+      goto errout;
+    }
+
+  /* Yes, it is a directory. Remove any trailing '/' characters from the path */
+
+  _trimdir(path);
+
+  /* Replace any preceding OLDPWD with the current PWD (this is to
+   * support 'cd -' in NSH)
    */
 
-  cwd_semtake();
-  if (g_prevcwd)
+  sched_lock();
+  oldpwd = getenv("PWD");
+  if (!oldpwd)
     {
-      free(g_prevcwd);
+      oldpwd = CONFIG_LIB_HOMEDIR;
     }
-  g_prevcwd = g_cwd;
 
-  /* Set the cwd to a persistent copy of the input 'path' */
+  alloc = strdup(oldpwd);  /* kludge needed because environment is realloc'ed */
+  setenv("OLDPWD", alloc, TRUE);
+  free(alloc);
 
-  g_cwd = duppath;
-  cwd_semgive();
+  /* Set the cwd to the input 'path' */
+
+  setenv("PWD", path, TRUE);
+  sched_unlock();
   return OK;
+
+errout:
+  errno = err;
+  return ERROR;
 }
-#endif /* CONFIG_NFILE_DESCRIPTORS */
+#endif /* CONFIG_NFILE_DESCRIPTORS && !CONFIG_DISABLE_ENVIRON */

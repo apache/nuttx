@@ -102,11 +102,6 @@ struct lib_rawstream_s
  * Public Variables
  ****************************************************************************/
  
-#if CONFIG_NFILE_DESCRIPTORS > 0
-extern char *g_cwd;            /* Defined in lib_chdir.c */
-extern char *g_prevcwd;        /* Defined in lib_chdir.c */
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -192,10 +187,5 @@ extern void lib_give_semaphore(FAR struct file_struct *stream);
 /* Defined in lib_libgetbase.c */
 
 extern int lib_getbase(const char *nptr, const char **endptr);
-
-/* Defined in lib_cwdsem.c */
-
-extern void cwd_semtake(void);
-extern void cwd_semgive(void);
 
 #endif /* __LIB_INTERNAL_H */

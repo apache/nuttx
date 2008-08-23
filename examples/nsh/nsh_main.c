@@ -91,6 +91,9 @@ static const struct cmdmap_s g_cmdmap[] =
 {
 #if CONFIG_NFILE_DESCRIPTORS > 0
   { "cat",      cmd_cat,      2, NSH_MAX_ARGUMENTS, "<path> [<path> [<path> ...]]" },
+#ifndef CONFIG_DISABLE_ENVIRON
+  { "cd",       cmd_cd,       1, 2, "[<dir-path>|-|~|..]" },
+#endif
   { "cp",       cmd_cp,       3, 3, "<source-path> <dest-path>" },
 #endif
 #ifndef CONFIG_DISABLE_ENVIRON
@@ -105,7 +108,7 @@ static const struct cmdmap_s g_cmdmap[] =
   { "ifconfig", cmd_ifconfig, 1, 1, NULL },
 #endif
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  { "ls",       cmd_ls,       2, 5, "[-lRs] <dir-path>" },
+  { "ls",       cmd_ls,       1, 5, "[-lRs] <dir-path>" },
 #endif
   { "mb",       cmd_mb,       2, 3, "<hex-address>[=<hex-value>][ <hex-byte-count>]" },
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
@@ -123,6 +126,9 @@ static const struct cmdmap_s g_cmdmap[] =
 #endif
   { "mw",       cmd_mw,       2, 3, "<hex-address>[=<hex-value>][ <hex-byte-count>]" },
   { "ps",       cmd_ps,       1, 1, NULL },
+#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
+  { "pwd",      cmd_pwd,      1, 1, NULL },
+#endif
 #ifndef CONFIG_DISABLE_ENVIRON
   { "set",      cmd_set,      3, 3, "<name> <value>" },
 #endif
@@ -132,7 +138,7 @@ static const struct cmdmap_s g_cmdmap[] =
 #endif
 #if  CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
   { "sh",       cmd_sh,       2, 2, "<script-path>" },
-# endif  /* CONFIG_NFILE_STREAMS */
+#endif  /* CONFIG_NFILE_DESCRIPTORS && CONFIG_NFILE_STREAMS */
 #ifndef CONFIG_DISABLE_SIGNALS
   { "sleep",    cmd_sleep,    2, 2, "<sec>" },
 #endif /* CONFIG_DISABLE_SIGNALS */
@@ -847,7 +853,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
         {
           vtbl->np.np_redirect = TRUE;
           oflags               = O_WRONLY|O_CREAT|O_TRUNC;
-          redirfile            = argv[argc-1];
+          redirfile            = nsh_getfullpath(vtbl, argv[argc-1]);
           argc                -= 2;
         }
 
@@ -857,7 +863,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
         {
           vtbl->np.np_redirect = TRUE;
           oflags               = O_WRONLY|O_CREAT|O_APPEND;
-          redirfile            = argv[argc-1];
+          redirfile            = nsh_getfullpath(vtbl, argv[argc-1]);
           argc                -= 2;
         }
     }
@@ -873,6 +879,9 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
        */
 
       fd = open(redirfile, oflags, 0666);
+      nsh_freefullpath(redirfile);
+      redirfile = NULL;
+
       if (fd < 0)
         {
           nsh_output(vtbl, g_fmtcmdfailed, cmd, "open", NSH_ERRNO);
