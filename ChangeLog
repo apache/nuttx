@@ -418,5 +418,7 @@
 	* NSH now supports commands to inspect and modify memory
 	* NSH cat command now supports multiple files on command line
 	* Add chdir() and getcwd()
+	* Fix error in getopt() when called with argc==1
+	* Fix error in stat() when used on the root directory
 
 
