@@ -103,7 +103,7 @@ static boolean   g_binitialized = FALSE;
 
 int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
 {
-  if (argv && optstring)
+  if (argv && optstring && argc > 1)
     {
       int noarg_ret = '?';
       char *optchar;
@@ -161,8 +161,8 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
             }
 
           /* We are starting at the beginning of argv[optind].  In this case, the
-               * first character must be '-'
-               */
+           * first character must be '-'
+           */
 
           g_optptr = argv[optind];
           if (*g_optptr != '-')
