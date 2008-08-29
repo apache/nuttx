@@ -277,3 +277,24 @@ int cmd_mw(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   return ret;
 }
 
+/****************************************************************************
+ * Name: cmd_mem
+ ****************************************************************************/
+
+int cmd_mem(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+  struct mallinfo mem;
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  mem = mallinfo();
+#else
+  (void)mallinfo(&mem);
+#endif
+
+  nsh_output(vtbl, "  arena:    %8x\n", mem.arena);
+  nsh_output(vtbl, "  ordblks:  %8d\n", mem.ordblks);
+  nsh_output(vtbl, "  mxordblk: %8x\n", mem.mxordblk);
+  nsh_output(vtbl, "  uordblks: %8x\n", mem.uordblks);
+  nsh_output(vtbl, "  fordblks: %8x\n", mem.fordblks);
+  return OK;
+}

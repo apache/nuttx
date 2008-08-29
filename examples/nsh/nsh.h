@@ -239,6 +239,7 @@ extern int cmd_exec(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 extern int cmd_mb(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 extern int cmd_mh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 extern int cmd_mw(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+extern int cmd_mem(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 extern int cmd_ps(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0

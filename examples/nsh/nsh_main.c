@@ -111,6 +111,7 @@ static const struct cmdmap_s g_cmdmap[] =
   { "ls",       cmd_ls,       1, 5, "[-lRs] <dir-path>" },
 #endif
   { "mb",       cmd_mb,       2, 3, "<hex-address>[=<hex-value>][ <hex-byte-count>]" },
+  { "mem",      cmd_mem,      1, 1, NULL },
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
   { "mkdir",    cmd_mkdir,    2, 2, "<path>" },
 #ifdef CONFIG_FS_FAT
