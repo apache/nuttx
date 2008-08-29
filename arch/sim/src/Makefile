@@ -94,8 +94,11 @@ libarch$(LIBEXT): $(NXOBJS)
 # A partially linked object containing only NuttX code (no interface to host OS)
 # Change the names of most symbols that conflict with libc symbols.
 
-Linux-names.dat: nuttx-names.dat
-	@cp $^ $@
+GNU:
+	@mkdir ./GNU
+
+GNU/Linux-names.dat: GNU nuttx-names.dat
+	@cp nuttx-names.dat $@
 
 Cygwin-names.dat: nuttx-names.dat
 	@cat $^ | sed -e "s/^/_/g" >$@

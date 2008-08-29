@@ -138,8 +138,6 @@ static int sim_uiptxpoll(struct uip_driver_s *dev)
 
 void uipdriver_loop(void)
 {
-  int i;
-
   /* tapdev_read will return 0 on a timeout event and >0 on a data received event */
 
   g_sim_dev.d_len = tapdev_read((unsigned char*)g_sim_dev.d_buf, CONFIG_NET_BUFSIZE);
