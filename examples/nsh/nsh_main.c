@@ -704,6 +704,7 @@ void user_initialize(void)
 int user_start(int argc, char *argv[])
 {
   int mid_priority;
+  int ret;
 
   /* Set the priority of this task to something in the middle so that 'nice'
    * can both raise and lower the priority.
