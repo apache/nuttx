@@ -1,7 +1,7 @@
 NuttX TODO List (Last updated July 31, 2008)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  (6)  Task/Scheduler (sched/)
+  (7)  Task/Scheduler (sched/)
   (1)  Dynamic loader (N/A)
   (2)  Memory Managment (mm/)
   (1)  Signals (sched/, arch/)
@@ -55,6 +55,11 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Medium, required for standard compliance (but makes the
                code bigger)
+
+  Description: socket descriptors are not cloned as are file descriptors
+               by task_create().
+  Status:      Open
+  Priority:    Medium-to-High
 
 o Dynamic Loader
   ^^^^^^^^^^^^^^
