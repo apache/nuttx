@@ -161,6 +161,7 @@ static const struct cmdmap_s g_cmdmap[] =
  * Public Data
  ****************************************************************************/
 
+const char g_nshgreeting[]       = "NuttShell (NSH)\n";
 const char g_nshprompt[]         = "nsh> ";
 const char g_fmtargrequired[]    = "nsh: %s: missing required argument(s)\n";
 const char g_fmtarginvalid[]     = "nsh: %s: argument invalid\n";

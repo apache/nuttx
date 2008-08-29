@@ -192,6 +192,7 @@ typedef int (*cmd_t)(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
  * Public Data
  ****************************************************************************/
 
+extern const char g_nshgreeting[];
 extern const char g_nshprompt[];
 extern const char g_fmtargrequired[];
 extern const char g_fmtarginvalid[];

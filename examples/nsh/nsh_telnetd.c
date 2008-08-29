@@ -296,11 +296,7 @@ static void nsh_putchar(struct telnetd_s *pstate, uint8 ch)
 
   if (ch == ISO_nl || tio->tio_bufndx == (CONFIG_EXAMPLES_NSH_LINELEN - 1))
     {
-      if (tio->tio_bufndx > 0)
-        {
-          pstate->tn_cmd[tio->tio_bufndx] = '\0';
-        }
-
+      pstate->tn_cmd[tio->tio_bufndx] = '\0';
       nsh_dumpbuffer("TELNET CMD", pstate->tn_cmd, strlen(pstate->tn_cmd));
       nsh_parse(&pstate->tn_vtbl, pstate->tn_cmd);
       tio->tio_bufndx = 0;
@@ -481,13 +477,14 @@ static void *nsh_connection(void *arg)
     {
       /* Initialize the thread state structure */
 
+      memset(tio, 0, sizeof(struct telnetio_s));
       tio->tio_sockfd = sockfd;
       tio->tio_state  = STATE_NORMAL;
       pstate->u.tn    = tio;
 
       /* Output a greeting */
 
-      nsh_output(&pstate->tn_vtbl, "NuttShell (NSH)\n");
+      nsh_output(&pstate->tn_vtbl, g_nshgreeting);
 
       /* Loop processing each TELNET command */
 

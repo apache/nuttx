@@ -425,5 +425,8 @@
 	* Fix errors and warnings introduced into Linux sim build because of recent
 	  Cygwin-based sim changes
 	* NSH: Add mem command to display heap usage
+	* Added telnet NSH configuration for Neuros OSD.
+	* Basic integration of concurrent telnet/serial NSH functional on Neuros
+	  OSD (some bugs on background commands).
 
 

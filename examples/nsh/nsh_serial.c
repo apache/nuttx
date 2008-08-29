@@ -343,7 +343,7 @@ int nsh_consolemain(int argc, char *argv[])
 {
   FAR struct serial_s *pstate = nsh_allocstruct();
 
-  printf("NuttShell (NSH)\n");
+  printf(g_nshgreeting);
   fflush(pstate->ss_stream);
 
   for (;;)
