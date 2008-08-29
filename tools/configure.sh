@@ -1,7 +1,7 @@
 #!/bin/bash
 # configure.sh
 #
-#   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
 #    notice, this list of conditions and the following disclaimer in
 #    the documentation and/or other materials provided with the
 #    distribution.
-# 3. Neither the name Gregory Nutt nor the names of its contributors may be
+# 3. Neither the name NuttX nor the names of its contributors may be
 #    used to endorse or promote products derived from this software
 #    without specific prior written permission.
 #
@@ -52,7 +52,12 @@ BOARDDIR=${TOPDIR}/configs/${BOARD}
 if [ ! -d "${BOARDDIR}" ]; then
   echo "Directory ${BOARDDIR} does not exist.  Options are:"
   echo ""
-  echo `cd ${TOPDIR}/configs ; ls -1 | grep -v CVS | grep -v README.txt`
+  echo "Select one of the following options for <board-name>:"
+  configlist=`find ${TOPDIR}/configs -name defconfig`
+  for defconfig in $configlist; do
+    config=`dirname $defconfig | sed -e "s,${TOPDIR}/configs/,,g"`
+    echo "  $config"
+  done
   echo ""
   show_usage
 fi

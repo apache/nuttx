@@ -422,5 +422,7 @@
 	* Fix error in stat() when used on the root directory
 	* NSH: Add cd and pwd commands and current working directory to all NSH
 	  commands that refer to paths.
+	* Fix errors and warnings introduced into Linux sim build because of recent
+	  Cygwin-related changes
 
 

@@ -703,7 +703,6 @@ void user_initialize(void)
 int user_start(int argc, char *argv[])
 {
   int mid_priority;
-  int ret;
 
   /* Set the priority of this task to something in the middle so that 'nice'
    * can both raise and lower the priority.
@@ -756,9 +755,9 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
   FAR char  strvtbl[2*sizeof(FAR char*)+3];
   FAR char *saveptr;
   FAR char *cmd;
-  FAR char *redirfile;
+  FAR char *redirfile = NULL;
   int       fd = -1;
-  int       oflags;
+  int       oflags = 0;
   int       argc;
   int       ret;
 

@@ -863,7 +863,7 @@ int cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 int cmd_rm(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char *fullpath = nsh_getfullpath(vtbl, argv[1]);
-  int ret;
+  int ret = ERROR;
 
   if (fullpath)
     {
@@ -886,7 +886,7 @@ int cmd_rm(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 int cmd_rmdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char *fullpath = nsh_getfullpath(vtbl, argv[1]);
-  int ret;
+  int ret = ERROR;
 
   if (fullpath)
     {
@@ -975,7 +975,7 @@ int cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 int cmd_umount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char *fullpath = nsh_getfullpath(vtbl, argv[1]);
-  int ret;
+  int ret = ERROR;
 
   if (fullpath)
     {
