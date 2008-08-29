@@ -127,10 +127,11 @@ depend: .depend
 
 clean:
 	@rm -f nuttx.rel libarch$(LIBEXT) *~ .*.swp
-	@rm -f nuttx.rel Linux-names.dat Cygwin-names.dat
+	@rm -f nuttx.rel GNU/Linux-names.dat Cygwin-names.dat
 	$(call CLEAN)
 
 distclean: clean
 	@rm -f Make.dep .depend
+	@rm -rf GNU
 
 -include Make.dep
