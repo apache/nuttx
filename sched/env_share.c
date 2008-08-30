@@ -98,7 +98,7 @@ int env_share(FAR _TCB *ptcb)
         {
           /* Yes.. increment the reference count on the environment */
 
-          envp++;
+          envp->ev_crefs++;
         }
 
       /* Then share the environment */

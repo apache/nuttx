@@ -427,6 +427,8 @@
 	* NSH: Add mem command to display heap usage
 	* Added telnet NSH configuration for Neuros OSD.
 	* Basic integration of concurrent telnet/serial NSH functional on Neuros
-	  OSD (some bugs on background commands).
+	  OSD.
+	* Fixed a critical bug that effects the way that environement variables are
+	  shared amongst pthreads.
 
 
