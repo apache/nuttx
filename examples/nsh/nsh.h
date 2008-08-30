@@ -49,6 +49,14 @@
  * Definitions
  ****************************************************************************/
 
+/* The telnetd interface requires pthread support */
+
+#ifdef CONFIG_DISABLE_PTHREAD
+#  undef CONFIG_EXAMPLES_NSH_TELNET
+#endif
+
+/* One front end must be defined */
+
 #if !defined(CONFIG_EXAMPLES_NSH_CONSOLE) && !defined(CONFIG_EXAMPLES_NSH_TELNET)
 #  error "No NSH front end defined"
 #endif
@@ -97,7 +105,7 @@
 
 /* Define to enable dumping of all input/output buffers */
 
-#undef CONFIG_EXAMPLES_NSH_TELNETD_DUMPBUFFER
+#define CONFIG_EXAMPLES_NSH_TELNETD_DUMPBUFFER 1
 #undef CONFIG_EXAMPLES_NSH_FULLPATH
 
 /* Make sure that the home directory is defined */
@@ -107,7 +115,6 @@
 #endif
 
 #define nsh_clone(v)           (v)->clone(v)
-#define nsh_addref(v)          (v)->addref(v)
 #define nsh_release(v)         (v)->release(v)
 #define nsh_linebuffer(v)      (v)->linebuffer(v)
 #define nsh_redirect(v,f,s)    (v)->redirect(v,f,s)
@@ -151,11 +158,15 @@ struct nsh_state_s
 
 struct nsh_parser_s
 {
+#ifndef CONFIG_DISABLE_PTHREAD
   boolean   np_bg;       /* TRUE: The last command executed in background */
+#endif
   boolean   np_redirect; /* TRUE: Output from the last command was re-directed */
   boolean   np_fail;     /* TRUE: The last command failed */
   ubyte     np_ndx;      /* Current index into np_st[] */
+#ifndef CONFIG_DISABLE_PTHREAD
   int       np_nice;     /* "nice" value applied to last background cmd */
+#endif
 
   /* This is a stack of parser state information.  It supports nested
    * execution of commands that span multiple lines (like if-then-else-fi)
@@ -171,10 +182,12 @@ struct nsh_vtbl_s
    * -- all of which must be done in a way that is unique to the nature
    * of the front end.
    */
-   
+
+#ifndef CONFIG_DISABLE_PTHREAD
   FAR struct nsh_vtbl_s *(*clone)(FAR struct nsh_vtbl_s *vtbl);
   void (*addref)(FAR struct nsh_vtbl_s *vtbl);
   void (*release)(FAR struct nsh_vtbl_s *vtbl);
+#endif
   int (*output)(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
   FAR char *(*linebuffer)(FAR struct nsh_vtbl_s *vtbl);
   void (*redirect)(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *save);

@@ -1,7 +1,7 @@
 /****************************************************************************
- * examples/nsh/nsh_serial.h
+ * examples/nsh/nsh_serial.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,6 @@
 struct serial_s
 {
   struct nsh_vtbl_s ss_vtbl;
-  int    ss_refs;    /* Reference counts on the instance */
   int    ss_fd;      /* Re-direct file descriptor */
   FILE  *ss_stream;  /* Re-direct stream */
   char   ss_line[CONFIG_EXAMPLES_NSH_LINELEN];
@@ -75,9 +74,10 @@ struct serialsave_s
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PTHREAD
 static FAR struct nsh_vtbl_s *nsh_consoleclone(FAR struct nsh_vtbl_s *vtbl);
-static void nsh_consoleaddref(FAR struct nsh_vtbl_s *vtbl);
 static void nsh_consolerelease(FAR struct nsh_vtbl_s *vtbl);
+#endif
 static int nsh_consoleoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
 static FAR char *nsh_consolelinebuffer(FAR struct nsh_vtbl_s *vtbl);
 static void nsh_consoleredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *save);
@@ -102,21 +102,19 @@ static void nsh_consoleexit(FAR struct nsh_vtbl_s *vtbl);
 
 static inline FAR struct serial_s *nsh_allocstruct(void)
 {
-  struct serial_s *pstate = (struct serial_s *)malloc(sizeof(struct serial_s));
+  struct serial_s *pstate = (struct serial_s *)zalloc(sizeof(struct serial_s));
   if (pstate)
     {
+#ifndef CONFIG_DISABLE_PTHREAD
       pstate->ss_vtbl.clone      = nsh_consoleclone;
-      pstate->ss_vtbl.addref     = nsh_consoleaddref;
       pstate->ss_vtbl.release    = nsh_consolerelease;
+#endif
       pstate->ss_vtbl.output     = nsh_consoleoutput;
       pstate->ss_vtbl.linebuffer = nsh_consolelinebuffer;
       pstate->ss_vtbl.redirect   = nsh_consoleredirect;
       pstate->ss_vtbl.undirect   = nsh_consoleundirect;
       pstate->ss_vtbl.exit       = nsh_consoleexit;
 
-      memset(&pstate->ss_vtbl.np, 0, sizeof(struct nsh_parser_s));
-
-      pstate->ss_refs            = 1;
       pstate->ss_fd              = 1;
       pstate->ss_stream          = stdout;
     }
@@ -225,51 +223,43 @@ static FAR char *nsh_consolelinebuffer(FAR struct nsh_vtbl_s *vtbl)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PTHREAD
 static FAR struct nsh_vtbl_s *nsh_consoleclone(FAR struct nsh_vtbl_s *vtbl)
 {
   FAR struct serial_s *pstate = (FAR struct serial_s *)vtbl;
   FAR struct serial_s *pclone = nsh_allocstruct();
-  pclone->ss_fd     = pstate->ss_fd;
-  pclone->ss_stream = NULL;
+
+  if (pclone->ss_fd == 1)
+    {
+      pclone->ss_fd     = 1;
+      pclone->ss_stream = stdout;
+    }
+  else
+    {
+      pclone->ss_fd     = pstate->ss_fd;
+      pclone->ss_stream = NULL;
+    }
   return &pclone->ss_vtbl;
 }
-
-/****************************************************************************
- * Name: nsh_consoleaddref
- *
- * Description:
- *   Increment the reference count on the vtbl.
- *
- ****************************************************************************/
-
-static void nsh_consoleaddref(FAR struct nsh_vtbl_s *vtbl)
-{
-  FAR struct serial_s *pstate = (FAR struct serial_s *)vtbl;
-  pstate->ss_refs++;
-}
+#endif
 
 /****************************************************************************
  * Name: nsh_consolerelease
  *
  * Description:
- *   Decrement the reference count on the vtbl, releasing it when the count
- *   decrements to zero.
+ *   Release the cloned instance
  *
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PTHREAD
 static void nsh_consolerelease(FAR struct nsh_vtbl_s *vtbl)
 {
   FAR struct serial_s *pstate = (FAR struct serial_s *)vtbl;
-  if (pstate->ss_refs > 1)
-    {
-      pstate->ss_refs--;
-    }
-  else
-    {
-      nsh_closeifnotclosed(pstate);
-      free(vtbl);
-    }
+
+  nsh_closeifnotclosed(pstate);
+  free(vtbl);
 }
+#endif
 
 /****************************************************************************
  * Name: nsh_consoleredirect

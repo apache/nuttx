@@ -1,5 +1,5 @@
 /****************************************************************************
- * nsh_main.c
+ * examples/nsh/nsh_main.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -48,12 +48,41 @@
 #include <sched.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <debug.h>
+
+#ifndef CONFIG_DISABLE_PTHREAD
+#  include <pthread.h>
+#endif
 
 #include "nsh.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+/* Argument list size
+ *
+ *   argv[0]:      The command name. 
+ *   argv[1]:      The beginning of argument (up to NSH_MAX_ARGUMENTS)
+ *   argv[argc-3]: Possibly '>' or '>>'
+ *   argv[argc-2]: Possibly <file>
+ *   argv[argc-1]: Possibly '&' (if pthreads are enabled)
+ *   argv[argc]:   NULL terminating pointer
+ *
+ * Maximum size is NSH_MAX_ARGUMENTS+5
+ */
+
+#ifndef CONFIG_DISABLE_PTHREAD
+#  define MAX_ARGV_ENTRIES (NSH_MAX_ARGUMENTS+5)
+#else
+#  define MAX_ARGV_ENTRIES (NSH_MAX_ARGUMENTS+4)
+#endif
+
+#if CONFIG_RR_INTERVAL > 0
+# define SCHED_NSH SCHED_RR
+#else
+# define SCHED_NSH SCHED_FIFO
+#endif
 
 /****************************************************************************
  * Private Types
@@ -67,6 +96,16 @@ struct cmdmap_s
   ubyte       maxargs;    /* Maximum number of arguments (including command) */
   const char *usage;      /* Usage instructions for 'help' command */
 };
+
+#ifndef CONFIG_DISABLE_PTHREAD
+struct cmdarg_s
+{
+  FAR struct nsh_vtbl_s *vtbl;      /* For front-end interaction */
+  int fd;                           /* FD for output redirection */
+  int argc;                         /* Number of arguments in argv */
+  FAR char *argv[MAX_ARGV_ENTRIES]; /* Argument list */
+};
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -193,7 +232,11 @@ static int cmd_help(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   const struct cmdmap_s *ptr;
 
   nsh_output(vtbl, "NSH command forms:\n");
-  nsh_output(vtbl, "  [nice [-d <niceness>>]] <cmd> [[> <file>|>> <file>] &]\n");
+#ifndef CONFIG_DISABLE_PTHREAD
+  nsh_output(vtbl, "  [nice [-d <niceness>>]] <cmd> [> <file>|>> <file>] [&]\n");
+#else
+  nsh_output(vtbl, "  <cmd> [> <file>|>> <file>]\n");
+#endif
   nsh_output(vtbl, "OR\n");
   nsh_output(vtbl, "  if <cmd>\n");
   nsh_output(vtbl, "  then\n");
@@ -240,32 +283,22 @@ static int cmd_exit(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  * Name: nsh_execute
  ****************************************************************************/
 
-static int nsh_execute(int argc, char *argv[])
+static int nsh_execute(FAR struct nsh_vtbl_s *vtbl, int argc, char *argv[])
 {
    const struct cmdmap_s *cmdmap;
    const char            *cmd;
-   struct nsh_vtbl_s     *vtbl;
    cmd_t                  handler = cmd_unrecognized;
    int                    ret;
 
-   /* Parse all of the arguments following the command name.  The form
-    * of argv is:
+   /* The form of argv is:
     *
-    * argv[0]:      Task name "nsh_execute"
-    * argv[1]:      This is string version of the vtbl needed to execute
-    *               the command (under telnetd).  It is a string because
-    *               binary values cannot be provided via char *argv[]
-    * argv[2]:      The command name.  This is argv[0] when the arguments
+    * argv[0]:      The command name.  This is argv[0] when the arguments
     *               are, finally, received by the command vtblr
-    * argv[3]:      The beginning of argument (up to NSH_MAX_ARGUMENTS)
+    * argv[1]:      The beginning of argument (up to NSH_MAX_ARGUMENTS)
     * argv[argc]:   NULL terminating pointer
-    *
-    * Maximum size is NSH_MAX_ARGUMENTS+4
     */
 
-   vtbl  = (struct nsh_vtbl_s*)strtol(argv[1], NULL, 16);
-   cmd     = argv[2];
-   argc   -= 2;
+   cmd = argv[0];
 
    /* See if the command is one that we understand */
 
@@ -304,9 +337,90 @@ static int nsh_execute(int argc, char *argv[])
          }
      }
 
-   ret = handler(vtbl, argc, &argv[2]);
-   nsh_release(vtbl);
+   ret = handler(vtbl, argc, argv);
    return ret;
+}
+
+/****************************************************************************
+ * Name: nsh_releaseargs
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_PTHREAD
+static void nsh_releaseargs(struct cmdarg_s *arg)
+{
+  FAR struct nsh_vtbl_s *vtbl = arg->vtbl;
+  int i;
+
+  /* If the output was redirected, then file descriptor should
+   * be closed.  The created task has its one, independent copy of
+   * the file descriptor
+   */
+
+  if (vtbl->np.np_redirect)
+    {
+      (void)close(arg->fd);
+    }
+
+  /* Released the cloned vtbl instance */
+
+  nsh_release(vtbl);
+
+  /* Release the cloned args */
+
+  for (i = 0; i < arg->argc; i++)
+    {
+      free(arg->argv[i]);
+    }
+  free(arg);
+}
+#endif
+
+/****************************************************************************
+ * Name: nsh_child
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_PTHREAD
+static pthread_addr_t nsh_child(pthread_addr_t arg)
+{
+  struct cmdarg_s *carg = (struct cmdarg_s *)arg;
+  int ret;
+
+  dbg("BG %s\n", carg->argv[0]);
+
+  /* Execute the specified command on the child thread */
+
+  ret = nsh_execute(carg->vtbl, carg->argc, carg->argv);
+
+  /* Released the cloned arguments */
+
+  dbg("BG %s complete\n", carg->argv[0]);
+  nsh_releaseargs(carg);
+  return (void*)ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: nsh_cloneargs
+ ****************************************************************************/
+
+static inline struct cmdarg_s *nsh_cloneargs(FAR struct nsh_vtbl_s *vtbl,
+                                             int fd, int argc, char *argv[])
+{
+  struct cmdarg_s *ret = (struct cmdarg_s *)zalloc(sizeof(struct cmdarg_s));
+  int i;
+
+  if (ret)
+    {
+      ret->vtbl = vtbl;
+      ret->fd   = fd;
+      ret->argc = argc;
+
+      for (i = 0; i < argc; i++)
+        {
+          ret->argv[i] = strdup(argv[i]);
+        }
+    }
+  return ret;
 }
 
 /****************************************************************************
@@ -518,7 +632,7 @@ static inline int nsh_ifthenelse(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, 
           if (np->np_ndx >= CONFIG_EXAMPLES_NSH_NESTDEPTH-1)
             {
               nsh_output(vtbl, g_fmtdeepnesting, "if");
-              goto errout;            
+              goto errout;
             }
 
           /* "Push" the old state and set the new state */
@@ -592,7 +706,7 @@ static inline int nsh_ifthenelse(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, 
           if (np->np_ndx < 1) /* Shouldn't happen */
             {
               nsh_output(vtbl, g_fmtinternalerror, "if");
-              goto errout;            
+              goto errout;
             }
 
           /* "Pop" the previous state */
@@ -640,10 +754,11 @@ static inline int nsh_saveresult(FAR struct nsh_vtbl_s *vtbl, boolean result)
  * Name: nsh_nice
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PTHREAD
 static inline int nsh_nice(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, FAR char **saveptr)
 {
   FAR char *cmd = *ppcmd;
- 
+
   vtbl->np.np_nice = 0;
   if (cmd)
     {
@@ -684,6 +799,7 @@ static inline int nsh_nice(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, FAR ch
     }
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -711,12 +827,12 @@ int user_start(int argc, char *argv[])
    * can both raise and lower the priority.
    */
 
-  mid_priority = (sched_get_priority_max(SCHED_RR) + sched_get_priority_min(SCHED_RR)) >> 1;
+  mid_priority = (sched_get_priority_max(SCHED_NSH) + sched_get_priority_min(SCHED_NSH)) >> 1;
     {
       struct sched_param param;
 
       param.sched_priority = mid_priority;
-      (void)sched_setscheduler(0, SCHED_RR, &param);
+      (void)sched_setscheduler(0, SCHED_NSH, &param);
     }
 
   /* If both the console and telnet are selected as front-ends, then run
@@ -754,8 +870,7 @@ int user_start(int argc, char *argv[])
 
 int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 {
-  FAR char *argv[NSH_MAX_ARGUMENTS+7];
-  FAR char  strvtbl[2*sizeof(FAR char*)+3];
+  FAR char *argv[MAX_ARGV_ENTRIES];
   FAR char *saveptr;
   FAR char *cmd;
   FAR char *redirfile = NULL;
@@ -766,7 +881,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
   /* Initialize parser state */
 
-  memset(argv, 0, (NSH_MAX_ARGUMENTS+4)*sizeof(char*));
+  memset(argv, 0, MAX_ARGV_ENTRIES*sizeof(FAR char *));
   vtbl->np.np_bg       = FALSE;
   vtbl->np.np_redirect = FALSE;
 
@@ -784,10 +899,12 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
   /* Handle nice */
 
+#ifndef CONFIG_DISABLE_PTHREAD
   if (nsh_nice(vtbl, &cmd, &saveptr) != 0)
     {
       goto errout;
     }
+#endif
 
   /* Check if any command was provided -OR- if command processing is
    * currently disabled.
@@ -806,27 +923,18 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
   /* Parse all of the arguments following the command name.  The form
    * of argv is:
    *
-   * argv[0]:      Not really used.  It is just a place hold for where the
-   *               task name would be if the same command were executed
-   *               in the "background"
-   * argv[1]:      This is string version of the vtbl needed to execute
-   *               the command (under telnetd).  It is a string because
-   *               binary values cannot be provided via char *argv[].  NOTE
-   *               that this value is filled in later.
-   * argv[2]:      The command name.  This is argv[0] when the arguments
-   *               are, finally, received by the command vtblr
-   * argv[3]:      The beginning of argument (up to NSH_MAX_ARGUMENTS)
-   * argv[argc-3]: Possibly '>' or '>>'
-   * argv[argc-2]: Possibly <file>
-   * argv[argc-1]: Possibly '&'
-   * argv[argc]:   NULL terminating pointer
+   *   argv[0]:      The command name. 
+   *   argv[1]:      The beginning of argument (up to NSH_MAX_ARGUMENTS)
+   *   argv[argc-3]: Possibly '>' or '>>'
+   *   argv[argc-2]: Possibly <file>
+   *   argv[argc-1]: Possibly '&'
+   *   argv[argc]:   NULL terminating pointer
    *
-   * Maximum size is NSH_MAX_ARGUMENTS+7
+   * Maximum size is NSH_MAX_ARGUMENTS+5
    */
 
-  argv[0] = "nsh_execute";
-  argv[2] = cmd;
-  for (argc = 3; argc < NSH_MAX_ARGUMENTS+6; argc++)
+  argv[0] = cmd;
+  for (argc = 1; argc < MAX_ARGV_ENTRIES-1; argc++)
     {
       argv[argc] = nsh_argument(vtbl, &saveptr);
       if (!argv[argc])
@@ -838,7 +946,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
   /* Check if the command should run in background */
 
-  if (argc > 3 && strcmp(argv[argc-1], "&") == 0)
+  if (argc > 1 && strcmp(argv[argc-1], "&") == 0)
     {
       vtbl->np.np_bg = TRUE;
       argv[argc-1] = NULL;
@@ -847,7 +955,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
   /* Check if the output was re-directed using > or >> */
 
-  if (argc > 5)
+  if (argc > 2)
     {
       /* Check for redirection to a new file */
 
@@ -893,30 +1001,41 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
   /* Check if the maximum number of arguments was exceeded */
 
-  if (argc > NSH_MAX_ARGUMENTS+3)
+  if (argc > NSH_MAX_ARGUMENTS)
     {
       nsh_output(vtbl, g_fmttoomanyargs, cmd);
     }
 
   /* Handle the case where the command is executed in background */
 
+#ifndef CONFIG_DISABLE_PTHREAD
   if (vtbl->np.np_bg)
     {
       struct sched_param param;
-      int priority;
       struct nsh_vtbl_s *bkgvtbl;
+      struct cmdarg_s *args;
+      pthread_attr_t attr;
+      pthread_t thread;
 
       /* Get a cloned copy of the vtbl with reference count=1.
        * after the command has been processed, the nsh_release() call
-       * at the end of nsh_execute() will destroy the clone.
+       * at the end of nsh_child() will destroy the clone.
        */
 
       bkgvtbl = nsh_clone(vtbl);
+      if (!bkgvtbl)
+        {
+          goto errout_with_redirect;
+        }
 
-      /* Place a string copy of the cloned vtbl in the argument list */
+      /* Create a container for the command arguments */
 
-      sprintf(strvtbl, "%p\n", bkgvtbl);
-      argv[1] = strvtbl;
+      args = nsh_cloneargs(bkgvtbl, fd, argc, argv);
+      if (!args)
+        {
+          nsh_release(bkgvtbl);
+          goto errout_with_redirect;
+        }
 
       /* Handle redirection of output via a file descriptor */
 
@@ -931,18 +1050,19 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
       if (ret != 0)
         {
           nsh_output(vtbl, g_fmtcmdfailed, cmd, "sched_getparm", NSH_ERRNO);
-          goto errout_with_redirect;
+          nsh_releaseargs(args);
+          nsh_release(bkgvtbl);
+          goto errout;
         }
 
       /* Determine the priority to execute the command */
 
-      priority = param.sched_priority;
       if (vtbl->np.np_nice != 0)
         {
-          priority -= vtbl->np.np_nice;
+          int priority = param.sched_priority - vtbl->np.np_nice;
           if (vtbl->np.np_nice < 0)
             {
-              int max_priority = sched_get_priority_max(SCHED_RR);
+              int max_priority = sched_get_priority_max(SCHED_NSH);
               if (priority > max_priority)
                 {
                   priority = max_priority;
@@ -950,54 +1070,37 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
             }
           else
             {
-              int min_priority = sched_get_priority_min(SCHED_RR);
+              int min_priority = sched_get_priority_min(SCHED_NSH);
               if (priority < min_priority)
                 {
                   priority = min_priority;
                 }
             }
+          param.sched_priority = priority;
         }
 
-      /* Execute the command as a separate task at the appropriate priority */
+      /* Set up the thread attributes */
 
-#ifndef CONFIG_CUSTOM_STACK
-      ret = task_create("nsh_execute", priority, CONFIG_EXAMPLES_NSH_STACKSIZE,
-                        nsh_execute, &argv[1]);
-#else
-      ret = task_create("nsh_execute", priority, nsh_execute, &argv[1]);
-#endif
-      if (ret < 0)
+      (void)pthread_attr_init(&attr);
+      (void)pthread_attr_setschedpolicy(&attr, SCHED_NSH);
+      (void)pthread_attr_setschedparam(&attr, &param);
+
+      /* Execute the command as a separate thread at the appropriate priority */
+
+      ret = pthread_create(&thread, &attr, nsh_child, (pthread_addr_t)args);
+      if (ret != 0)
         {
-          nsh_output(vtbl, g_fmtcmdfailed, cmd, "task_create", NSH_ERRNO);
-          goto errout_with_redirect;
+          nsh_output(vtbl, g_fmtcmdfailed, cmd, "pthread_create", ret);
+          nsh_releaseargs(args);
+          nsh_release(bkgvtbl);
+          goto errout;
         }
-      nsh_output(vtbl, "%s [%d:%d:%d]\n", cmd, ret, priority, param.sched_priority);
-
-      /* If the output was redirected, then file descriptor should
-       * be closed.  The created task has its one, independent copy of
-       * the file descriptor
-       */
-
-      if (vtbl->np.np_redirect)
-        {
-          (void)close(fd);
-        }
+      nsh_output(vtbl, "%s [%d:%d]\n", cmd, thread, param.sched_priority);
     }
   else
+#endif
     {
       ubyte save[SAVE_SIZE];
-
-      /* Increment the reference count on the vtbl.  This reference count will
-       * be decremented at the end of nsh_execute() and exists only for compatibility
-       * with the background command logic.
-       */
-
-      nsh_addref(vtbl);
-
-      /* Place a string copy of the original vtbl in the argument list */
-
-      sprintf(strvtbl, "%p\n", vtbl);
-      argv[1] = strvtbl;
 
       /* Handle redirection of output via a file descriptor */
 
@@ -1010,7 +1113,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
        * for the next prompt.
        */
 
-      ret = nsh_execute(argc, argv);
+      ret = nsh_execute(vtbl, argc, argv);
 
       /* Restore the original output.  Undirect will close the redirection
        * file descriptor.
