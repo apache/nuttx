@@ -403,6 +403,7 @@ static pthread_addr_t nsh_child(pthread_addr_t arg)
  * Name: nsh_cloneargs
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PTHREAD
 static inline struct cmdarg_s *nsh_cloneargs(FAR struct nsh_vtbl_s *vtbl,
                                              int fd, int argc, char *argv[])
 {
@@ -422,6 +423,7 @@ static inline struct cmdarg_s *nsh_cloneargs(FAR struct nsh_vtbl_s *vtbl,
     }
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: nsh_argument
@@ -821,7 +823,9 @@ void user_initialize(void)
 int user_start(int argc, char *argv[])
 {
   int mid_priority;
+#if defined(CONFIG_EXAMPLES_NSH_CONSOLE) && defined(CONFIG_EXAMPLES_NSH_TELNET)
   int ret;
+#endif
 
   /* Set the priority of this task to something in the middle so that 'nice'
    * can both raise and lower the priority.
@@ -882,7 +886,9 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
   /* Initialize parser state */
 
   memset(argv, 0, MAX_ARGV_ENTRIES*sizeof(FAR char *));
+#ifndef CONFIG_DISABLE_PTHREAD
   vtbl->np.np_bg       = FALSE;
+#endif
   vtbl->np.np_redirect = FALSE;
 
   /* Parse out the command at the beginning of the line */
@@ -946,12 +952,14 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
   /* Check if the command should run in background */
 
+#ifndef CONFIG_DISABLE_PTHREAD
   if (argc > 1 && strcmp(argv[argc-1], "&") == 0)
     {
       vtbl->np.np_bg = TRUE;
       argv[argc-1] = NULL;
       argc--;
     }
+#endif
 
   /* Check if the output was re-directed using > or >> */
 
@@ -1136,11 +1144,13 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
   return nsh_saveresult(vtbl, FALSE);
 
+#ifndef CONFIG_DISABLE_PTHREAD
 errout_with_redirect:
   if (vtbl->np.np_redirect)
     {
       close(fd);
     }
+#endif
 errout:
   return nsh_saveresult(vtbl, TRUE);
 }
