@@ -91,13 +91,10 @@
 struct telnetio_s
 {
   sem_t  tio_sem;
-  pid_t  tio_holder;
   int    tio_sockfd;
-  uint16 tio_sndlen;
   uint8  tio_bufndx;
   uint8  tio_state;
-  uint8  tio_semnest;
-  char   tio_buffer[CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE];
+  char   tio_inbuffer[CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE];
 };
 
 struct redirect_s
@@ -119,12 +116,14 @@ struct telnetsave_s
 struct telnetd_s
 {
   struct nsh_vtbl_s tn_vtbl;
+  uint16            tn_sndlen;
   boolean           tn_redirected;
   union
     {
       struct telnetio_s *tn;
       struct redirect_s  rd;
     } u;
+  char tn_outbuffer[CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE];
   char tn_cmd[CONFIG_EXAMPLES_NSH_LINELEN];
 };
 
@@ -132,6 +131,7 @@ struct telnetd_s
  * Private Function Prototypes
  ****************************************************************************/
 
+static void tio_semtake(struct telnetio_s *tio);
 static FAR struct nsh_vtbl_s *nsh_telnetclone(FAR struct nsh_vtbl_s *vtbl);
 static void nsh_telnetrelease(FAR struct nsh_vtbl_s *vtbl);
 static int nsh_telnetoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
@@ -151,33 +151,15 @@ static void nsh_telnetexit(FAR struct nsh_vtbl_s *vtbl);
 
 static void tio_semtake(struct telnetio_s *tio)
 {
-  pid_t my_pid = getpid();
+  /* Take the semaphore (perhaps waiting) */
 
-  /* Does this task already have the semaphore? */
-
-  if (tio->tio_holder == my_pid)
+  while (sem_wait(&tio->tio_sem) != 0)
     {
-      /* Yes, just increment the number of references that the task holds */
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
 
-      tio->tio_semnest++;
-    }
-  else
-    {
-      /* No, Take the semaphore (perhaps waiting) */
-
-      while (sem_wait(&tio->tio_sem) != 0)
-        {
-          /* The only case that an error should occur here is if the wait was
-           * awakened by a signal.
-           */
-
-          ASSERT(errno == EINTR);
-        }
-
-      /* Stake the claim and return */
-
-      tio->tio_holder  = my_pid;
-      tio->tio_semnest = 1;
+      ASSERT(errno == EINTR);
     }
 }
 
@@ -185,31 +167,7 @@ static void tio_semtake(struct telnetio_s *tio)
  * Name: tio_semgive
  ****************************************************************************/
 
-static void tio_semgive(struct telnetio_s *tio)
-{
-  pid_t my_pid = getpid();
-
-  /* I better be holding at least one count on the semaphore */
-
-  ASSERT(tio->tio_holder == my_pid);
-
-  /* Do I hold multiple references to the semphore */
-
-  if (tio->tio_semnest > 1)
-    {
-      /* Yes, just release one count and return */
-
-      tio->tio_semnest--;
-    }
-  else
-    {
-      /* Nope, this is the last reference I have */
-
-      tio->tio_holder = -1;
-      tio->tio_semnest = 0;
-      ASSERT(sem_post(&tio->tio_sem) == 0);
-    }
-}
+#define tio_semgive(tio) ASSERT(sem_post(&tio->tio_sem) == 0)
 
 /****************************************************************************
  * Name: nsh_dumpbuffer
@@ -393,10 +351,12 @@ static void nsh_sendopt(struct telnetd_s *pstate, uint8 option, uint8 value)
   optbuf[3] = 0;
 
   nsh_dumpbuffer("Send optbuf", optbuf, 4);
+  tio_semtake(tio); /* Only one call to send at a time */
   if (send(tio->tio_sockfd, optbuf, 4, 0) < 0)
     {
       dbg("[%d] Failed to send TELNET_IAC: %d\n", tio->tio_sockfd, errno);
     }
+  tio_semgive(tio);
 }
 
 /****************************************************************************
@@ -411,17 +371,17 @@ static void nsh_flush(FAR struct telnetd_s *pstate)
 {
   struct telnetio_s *tio = pstate->u.tn;
 
-  tio_semtake(tio);
-  if (tio->tio_sndlen > 0)
+  if (pstate->tn_sndlen > 0)
     {
-      nsh_dumpbuffer("Shell output", tio->tio_buffer, tio->tio_sndlen);
-      if (send(tio->tio_sockfd, tio->tio_buffer, tio->tio_sndlen, 0) < 0)
+      nsh_dumpbuffer("Shell output", pstate->tn_outbuffer, pstate->tn_sndlen);
+      tio_semtake(tio); /* Only one call to send at a time */
+      if (send(tio->tio_sockfd, pstate->tn_outbuffer, pstate->tn_sndlen, 0) < 0)
         {
           dbg("[%d] Failed to send response: %d\n", tio->tio_sockfd, errno);
         }
+      tio_semgive(tio);
     }
-  tio->tio_sndlen = 0;
-  tio_semgive(tio);
+  pstate->tn_sndlen = 0;
 }
 
 /****************************************************************************
@@ -435,10 +395,9 @@ static void nsh_flush(FAR struct telnetd_s *pstate)
 static int nsh_receive(struct telnetd_s *pstate, size_t len)
 {
   struct telnetio_s *tio = pstate->u.tn;
-  char              *ptr = tio->tio_buffer;
+  char              *ptr = tio->tio_inbuffer;
   uint8 ch;
 
-  tio_semtake(tio);
   while (len > 0)
     {
       ch = *ptr++;
@@ -520,7 +479,6 @@ static int nsh_receive(struct telnetd_s *pstate, size_t len)
             break;
         }
     }
-  tio_semgive(tio);
   return OK;
 }
 
@@ -569,13 +527,13 @@ static void *nsh_connection(void *arg)
 
           /* Read a buffer of data from the TELNET client */
 
-          ret = recv(tio->tio_sockfd, tio->tio_buffer, CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE, 0);
+          ret = recv(tio->tio_sockfd, tio->tio_inbuffer, CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE, 0);
           if (ret > 0)
             {
 
               /* Process the received TELNET data */
 
-              nsh_dumpbuffer("Received buffer", tio->tio_buffer, ret);
+              nsh_dumpbuffer("Received buffer", tio->tio_inbuffer, ret);
               ret = nsh_receive(pstate, ret);
             }
         }
@@ -618,19 +576,16 @@ static void *nsh_connection(void *arg)
 static int nsh_telnetoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...)
 {
   struct telnetd_s  *pstate = (struct telnetd_s *)vtbl;
-  struct telnetio_s *tio    = pstate->u.tn;
-  int                nbytes = tio->tio_sndlen;
+  int                nbytes = pstate->tn_sndlen;
   int                len;
   va_list            ap;
-
-  tio_semtake(tio);
 
   /* Put the new info into the buffer.  Here we are counting on the fact that
    * no output strings will exceed CONFIG_EXAMPLES_NSH_LINELEN!
    */
 
   va_start(ap, fmt);
-  vsnprintf(&tio->tio_buffer[nbytes],
+  vsnprintf(&pstate->tn_outbuffer[nbytes],
             (CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - 1) - nbytes, fmt, ap);
   va_end(ap);
 
@@ -638,26 +593,25 @@ static int nsh_telnetoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...)
    * buffered data
    */
 
-  len     = strlen(&tio->tio_buffer[nbytes]);
+  len     = strlen(&pstate->tn_outbuffer[nbytes]);
   nbytes += len;
 
   /* Expand any terminating \n to \r\n */
 
   if (nbytes < (CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - 2) &&
-      tio->tio_buffer[nbytes-1] == '\n')
+      pstate->tn_outbuffer[nbytes-1] == '\n')
     {
-      tio->tio_buffer[nbytes-1] = ISO_cr;
-      tio->tio_buffer[nbytes]   = ISO_nl;
-      tio->tio_buffer[nbytes+1] = '\0';
+      pstate->tn_outbuffer[nbytes-1] = ISO_cr;
+      pstate->tn_outbuffer[nbytes]   = ISO_nl;
+      pstate->tn_outbuffer[nbytes+1] = '\0';
       nbytes++;
     }
-  tio->tio_sndlen = nbytes;
+  pstate->tn_sndlen = nbytes;
 
   /* Flush to the network if the buffer does not have room for one more
    * maximum length string.
    */
 
-  tio_semgive(tio);
   if (nbytes > CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE - CONFIG_EXAMPLES_NSH_LINELEN)
     {
       nsh_flush(pstate);
