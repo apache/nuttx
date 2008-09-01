@@ -435,3 +435,9 @@
 	  writing to the socket.
 
 0.3.14 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+	* FAT FS now uses position variable in struct file.  This simplifies operations
+	  like ftell().
+	* fseek() needs to discard bytes buffered by ungetc().
+	* Corrected ftell() return value.
+	* Added fsetpos() and fgetpos().
+

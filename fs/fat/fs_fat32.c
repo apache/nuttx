@@ -74,15 +74,15 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     fat_open(FAR struct file *filp, const char *relpath,
+static int     fat_open(FAR struct file *filep, const char *relpath,
                         int oflags, mode_t mode);
-static int     fat_close(FAR struct file *filp);
-static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen);
-static ssize_t fat_write(FAR struct file *filp, const char *buffer,
+static int     fat_close(FAR struct file *filep);
+static ssize_t fat_read(FAR struct file *filep, char *buffer, size_t buflen);
+static ssize_t fat_write(FAR struct file *filep, const char *buffer,
                          size_t buflen);
-static off_t   fat_seek(FAR struct file *filp, off_t offset, int whence);
-static int     fat_ioctl(FAR struct file *filp, int cmd, unsigned long arg);
-static int     fat_sync(FAR struct file *filp);
+static off_t   fat_seek(FAR struct file *filep, off_t offset, int whence);
+static int     fat_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int     fat_sync(FAR struct file *filep);
 
 static int     fat_opendir(struct inode *mountpt, const char *relpath,
                            struct internal_dir_s *dir);
@@ -149,7 +149,7 @@ const struct mountpt_operations fat_operations =
  * Name: fat_open
  ****************************************************************************/
 
-static int fat_open(FAR struct file *filp, const char *relpath,
+static int fat_open(FAR struct file *filep, const char *relpath,
                     int oflags, mode_t mode)
 {
   struct fat_dirinfo_s  dirinfo;
@@ -160,13 +160,13 @@ static int fat_open(FAR struct file *filp, const char *relpath,
 
   /* Sanity checks */
 
-  DEBUGASSERT(filp->f_priv == NULL && filp->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv == NULL && filep->f_inode != NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
    * mountpoint private data from the inode structure
    */
 
-  inode = filp->f_inode;
+  inode = filep->f_inode;
   fs    = inode->i_private;
 
   DEBUGASSERT(fs != NULL);
@@ -320,7 +320,7 @@ static int fat_open(FAR struct file *filp, const char *relpath,
 
   /* Attach the private date to the struct file instance */
 
-  filp->f_priv = ff;
+  filep->f_priv = ff;
 
   /* Then insert the new instance into the mountpoint structure.
    * It needs to be there (1) to handle error conditions that effect
@@ -337,7 +337,7 @@ static int fat_open(FAR struct file *filp, const char *relpath,
 
   if ((oflags & (O_APPEND|O_WRONLY)) == (O_APPEND|O_WRONLY))
     {
-      ssize_t offset = (ssize_t)fat_seek(filp, ff->ff_size, SEEK_SET);
+      ssize_t offset = (ssize_t)fat_seek(filep, ff->ff_size, SEEK_SET);
       if (offset < 0)
         {
           free(ff);
@@ -363,7 +363,7 @@ errout_with_semaphore:
  * Name: fat_close
  ****************************************************************************/
 
-static int fat_close(FAR struct file *filp)
+static int fat_close(FAR struct file *filep)
 {
   struct inode         *inode;
   struct fat_mountpt_s *fs;
@@ -372,12 +372,12 @@ static int fat_close(FAR struct file *filp)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filp->f_priv != NULL && filp->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
   /* Recover our private data from the struct file instance */
 
-  ff    = filp->f_priv;
-  inode = filp->f_inode;
+  ff    = filep->f_priv;
+  inode = filep->f_inode;
   fs    = inode->i_private;
 
   DEBUGASSERT(fs != NULL);
@@ -388,7 +388,7 @@ static int fat_close(FAR struct file *filp)
 
   /* Synchronize the file buffers and disk content; update times */
 
-  ret = fat_sync(filp);
+  ret = fat_sync(filep);
 
   /* Then deallocate the memory structures created when the open method
    * was called.
@@ -404,7 +404,7 @@ static int fat_close(FAR struct file *filp)
   /* Then free the file structure itself. */
 
   free(ff);
-  filp->f_priv = NULL;
+  filep->f_priv = NULL;
   return ret;
 }
 
@@ -412,7 +412,7 @@ static int fat_close(FAR struct file *filp)
  * Name: fat_read
  ****************************************************************************/
 
-static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
+static ssize_t fat_read(FAR struct file *filep, char *buffer, size_t buflen)
 {
   struct inode         *inode;
   struct fat_mountpt_s *fs;
@@ -428,12 +428,12 @@ static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filp->f_priv != NULL && filp->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
   /* Recover our private data from the struct file instance */
 
-  ff    = filp->f_priv;
-  inode = filp->f_inode;
+  ff    = filep->f_priv;
+  inode = filep->f_inode;
   fs    = inode->i_private;
 
   DEBUGASSERT(fs != NULL);
@@ -457,7 +457,7 @@ static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
 
   /* Get the number of bytes left in the file */
 
-  bytesleft = ff->ff_size - ff->ff_position;
+  bytesleft = ff->ff_size - filep->f_pos;
 
   /* Truncate read count so that it does not exceed the number
    * of bytes left in the file.
@@ -478,7 +478,7 @@ static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
     {
       /* Get offset into the sector where we begin the read */
 
-      int sectorindex = ff->ff_position & SEC_NDXMASK(fs);
+      int sectorindex = filep->f_pos & SEC_NDXMASK(fs);
       bytesread = 0;
 
       /* Check if the current read stream happens to lie on a
@@ -505,7 +505,7 @@ static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
             {
               /* No.. Handle the case of the first sector of the file */
 
-              if (ff->ff_position == 0)
+              if (filep->f_pos == 0)
                 {
                   /* Get the first cluster of the file */
 
@@ -602,10 +602,10 @@ static ssize_t fat_read(FAR struct file *filp, char *buffer, size_t buflen)
 
       /* Set up for the next sector read */
 
-      userbuffer      += bytesread;
-      ff->ff_position += bytesread;
-      readsize        += bytesread;
-      buflen          -= bytesread;
+      userbuffer   += bytesread;
+      filep->f_pos += bytesread;
+      readsize     += bytesread;
+      buflen       -= bytesread;
     }
 
   fat_semgive(fs);
@@ -620,7 +620,7 @@ errout_with_semaphore:
  * Name: fat_write
  ****************************************************************************/
 
-static ssize_t fat_write(FAR struct file *filp, const char *buffer,
+static ssize_t fat_write(FAR struct file *filep, const char *buffer,
                          size_t buflen)
 {
   struct inode         *inode;
@@ -636,12 +636,12 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
 
   /* Sanity checks */
 
-  DEBUGASSERT(filp->f_priv != NULL && filp->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
   /* Recover our private data from the struct file instance */
 
-  ff    = filp->f_priv;
-  inode = filp->f_inode;
+  ff    = filep->f_priv;
+  inode = filep->f_inode;
   fs    = inode->i_private;
 
   DEBUGASSERT(fs != NULL);
@@ -681,7 +681,7 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
     {
       /* Get offset into the sector where we begin the read */
 
-      int sectorindex = ff->ff_position & SEC_NDXMASK(fs);
+      int sectorindex = filep->f_pos & SEC_NDXMASK(fs);
 
       /* Check if the current read stream happens to lie on a
        * sector boundary.
@@ -707,7 +707,7 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
             {
               /* No.. Handle the case of the first sector of the file */
 
-              if (ff->ff_position == 0)
+              if (filep->f_pos == 0)
                 {
                   /* Check the first cluster of the file.  Zero means that
                    * the file is empty -- perhaps the file was truncated or
@@ -816,12 +816,12 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
            * We will first have to read the full sector in memory as
            * part of a read-modify-write operation.  NOTE we don't
            * have to read the data on a rare case: When we are extending
-           * the file (ff->ff_position == ff->ff_size) -AND- the new data
+           * the file (filep->f_pos == ff->ff_size) -AND- the new data
            * happens to be aligned at the beginning of the sector
            * (sectorindex == 0).
            */
 
-          if (ff->ff_position < ff->ff_size || sectorindex != 0)
+          if (filep->f_pos < ff->ff_size || sectorindex != 0)
             {
               ff->ff_currentsector = writesector;
               ret = fat_ffcacheread(fs, ff, writesector);
@@ -846,17 +846,17 @@ static ssize_t fat_write(FAR struct file *filp, const char *buffer,
 
       /* Set up for the next write */
 
-      userbuffer += writesize;
-      ff->ff_position += writesize;
+      userbuffer   += writesize;
+      filep->f_pos += writesize;
       byteswritten += writesize;
-      buflen -= writesize;
+      buflen       -= writesize;
     }
 
   /* The transfer has completed without error.  Update the file size */
 
-  if (ff->ff_position > ff->ff_size)
+  if (filep->f_pos > ff->ff_size)
     {
-      ff->ff_size = ff->ff_position;
+      ff->ff_size = filep->f_pos;
     }
 
   fat_semgive(fs);
@@ -871,7 +871,7 @@ errout_with_semaphore:
  * Name: fat_seek
  ****************************************************************************/
 
-static off_t fat_seek(FAR struct file *filp, off_t offset, int whence)
+static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
 {
   struct inode         *inode;
   struct fat_mountpt_s *fs;
@@ -884,12 +884,12 @@ static off_t fat_seek(FAR struct file *filp, off_t offset, int whence)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filp->f_priv != NULL && filp->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
   /* Recover our private data from the struct file instance */
 
-  ff    = filp->f_priv;
-  inode = filp->f_inode;
+  ff    = filep->f_priv;
+  inode = filep->f_inode;
   fs    = inode->i_private;
 
   DEBUGASSERT(fs != NULL);
@@ -904,7 +904,7 @@ static off_t fat_seek(FAR struct file *filp, off_t offset, int whence)
       case SEEK_CUR: /* The offset is set to its current location plus
                       * offset bytes. */
 
-          position = offset + ff->ff_position;
+          position = offset + filep->f_pos;
           break;
 
       case SEEK_END: /* The offset is set to the size of the file plus
@@ -946,7 +946,7 @@ static off_t fat_seek(FAR struct file *filp, off_t offset, int whence)
 
   /* Set file position to the beginning of the file */
 
-  ff->ff_position         = 0;
+  filep->f_pos            = 0;
   ff->ff_sectorsincluster = 1;
 
   /* Move file position if necessary */
@@ -1044,8 +1044,8 @@ static off_t fat_seek(FAR struct file *filp, off_t offset, int whence)
 
                 /* Otherwise, update the position and continue looking */
 
-                ff->ff_position += clustersize;
-                position        -= clustersize;
+                filep->f_pos += clustersize;
+                position     -= clustersize;
             }
 
             /* We get here after we have found the sector containing
@@ -1078,15 +1078,15 @@ static off_t fat_seek(FAR struct file *filp, off_t offset, int whence)
 
             /* And save the new file position */
 
-            ff->ff_position += position;
+            filep->f_pos += position;
         }
     }
 
   /* If we extended the size of the file, then mark the file as modified. */
 
-  if ((ff->ff_oflags & O_WROK) != 0 &&  ff->ff_position > ff->ff_size)
+  if ((ff->ff_oflags & O_WROK) != 0 &&  filep->f_pos > ff->ff_size)
     {
-        ff->ff_size    = ff->ff_position;
+        ff->ff_size    = filep->f_pos;
         ff->ff_bflags |= FFBUFF_MODIFIED;
     }
 
@@ -1102,7 +1102,7 @@ errout_with_semaphore:
  * Name: fat_ioctl
  ****************************************************************************/
 
-static int fat_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
+static int fat_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   struct inode         *inode;
   struct fat_mountpt_s *fs;
@@ -1111,12 +1111,12 @@ static int fat_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filp->f_priv != NULL && filp->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
   /* Recover our private data from the struct file instance */
 
-  ff    = filp->f_priv;
-  inode = filp->f_inode;
+  ff    = filep->f_priv;
+  inode = filep->f_inode;
   fs    = inode->i_private;
 
   DEBUGASSERT(fs != NULL);
@@ -1145,7 +1145,7 @@ static int fat_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int fat_sync(FAR struct file *filp)
+static int fat_sync(FAR struct file *filep)
 {
   struct inode         *inode;
   struct fat_mountpt_s *fs;
@@ -1156,12 +1156,12 @@ static int fat_sync(FAR struct file *filp)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filp->f_priv != NULL && filp->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
   /* Recover our private data from the struct file instance */
 
-  ff    = filp->f_priv;
-  inode = filp->f_inode;
+  ff    = filep->f_priv;
+  inode = filep->f_inode;
   fs    = inode->i_private;
 
   DEBUGASSERT(fs != NULL);

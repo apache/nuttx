@@ -513,8 +513,7 @@ struct fat_file_s
   uint16   ff_dirindex;            /* Index into ff_dirsector to directory entry */
   uint32   ff_currentcluster;      /* Current cluster being accessed */
   size_t   ff_dirsector;           /* Sector containing the directory entry */
-  size_t   ff_position;            /* File position for read/write/seek in bytes */
-  size_t   ff_size;                /* Size of the file in bytes */
+  off_t    ff_size;                /* Size of the file in bytes */
   size_t   ff_startcluster;        /* Start cluster of file on media */
   size_t   ff_currentsector;       /* Current sector in the file buffer */
   ubyte   *ff_buffer;              /* File buffer (for partial sector accesses) */

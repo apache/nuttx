@@ -7,21 +7,22 @@ NuttX TODO List (Last updated July 31, 2008)
   (1)  Signals (sched/, arch/)
   (1)  pthreads (sched/)
   (1)  C++ Support
-  (10) Network (net/, netutils/)
+ (12)  Network (net/, netutils/)
   (2)  USB (drivers/usbdev)
   (3)  Libraries (lib/)
   (4)  File system/Generic drivers (fs/, drivers/)
   (1)  Pascal add-on (pcode/)
   (2)  Documentation (Documentation/)
   (3)  Build system
-  (0)  Applications & Tests (examples/)
+  (2)  NuttShell (NSH) (examples/nsh)
+  (1)  Other Applications & Tests (examples/)
   (1)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (1)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
-  (6)  z80/z8 (arch/z80/)
-  (7)  z16 (arch/z16/)
+  (7)  z80/z8 (arch/z80/)
+  (8)  z16 (arch/z16/)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -183,6 +184,23 @@ o Network (net/, netutils/)
   Status:      Open
   Priority:    Low
 
+  Description: At present, there cannot be two concurrent active TCP send
+               operations in progress.  This is because the uIP ACK logic will
+               support only one transfer at a time.  The solution is simple:
+               A mutex will be needed to make sure that each send that is
+               started is able to be the exclusive sender until all of the
+               data to be sent has been ACKed.
+  Status:      Open.  There is some temporary logic to examples/nsh that does
+               this same fix and that temporary logic should be removed when
+               send() is fixed.
+  Priority:    Medium-Low.  This is an important issue for applications that
+               send on the same TCP socket from multiple threads.
+
+  Description: Some application-level interface to the ICMP logic is needed
+               to support ping from the target.
+  Status:      Open
+  Priority:    Low
+
 o USB (drivers/usbdev)
   ^^^^^^^^^^^^^^^^^^^^
 
@@ -272,8 +290,27 @@ o Build system
   Status:      Open
   Priority:    Medium (maybe higher for z80 target)
 
-o Applications & Tests (examples/)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+o NuttShell (NSH) (examples/nsh)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: When the telnetd front end is received, each TCP packet
+               received causes a prompt (nsh >) to be presented.  The
+               prompt should only be presented when the user enters a
+               carriage return.
+  Status:      Open
+  Priority:    Low
+
+  Description: Here are some commands that would be good to have in NSH:
+               ping
+  Status:      Open
+  Priority:    Low
+
+o Other Applications & Tests (examples/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: The redirection test (part of examples/pipe) terminates
+               incorrectly on the Cywgin-based simulation platform (but works
+               fine on the Linux-based simulation platform).
 
 o ARM (arch/arm/)
   ^^^^^^^^^^^^^^^
@@ -405,6 +442,11 @@ o z80/z8 (arch/z80)
   Status:      Open
   Priority:    Medium
 
+  Description: Upgrade to the ZDS-II Z8Encore! 4.11.0 toolchain
+  Status:      Open
+  Priority:    Low
+
+
 o z16 (arch/z16)
 ^^^^^^^^^^^^^^^^
 
@@ -490,5 +532,10 @@ o z16 (arch/z16)
                only nominal interrupt priority.
   Status:      Open
   Priority:    Low
+
+  Description: Upgrade to the ZDS-II ZNEO 4.11.1 toolchain
+  Status:      Open
+  Priority:    Low
+
 
 

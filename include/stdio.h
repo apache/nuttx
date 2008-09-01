@@ -1,7 +1,7 @@
-/************************************************************
- * stdio.h
+/****************************************************************************
+ * include/stdio.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __STDIO_H
 #define __STDIO_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -50,13 +50,13 @@
 
 #include <nuttx/fs.h>
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/* File System Definitions **********************************/
+/* File System Definitions **************************************************/
 
-/* File system error values *********************************/
+/* File system error values *************************************************/
 
 #define EOF        (-1)
 
@@ -74,24 +74,23 @@
 #define putchar(c) fputc(c, stdout)
 #define getc(s)    fgetc(s)
 #define getchar()  fgetc(stdin)
-#define ftell(s)   fseek((s),0,SEEK_CUR)
 #define rewind(s)  ((void)fseek((s),0,SEEK_SET))
 
-/************************************************************
+/****************************************************************************
  * Public Type Definitions
- ************************************************************/
+ ****************************************************************************/
 
 /* Streams */
 
 typedef FAR struct file_struct FILE;
 
-/************************************************************
+/****************************************************************************
  * Public Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -108,16 +107,17 @@ EXTERN int    fflush(FILE *stream);
 EXTERN int    feof(FILE *stream);
 EXTERN int    ferror(FILE *stream);
 EXTERN int    fgetc(FILE *stream);
+EXTERN int    fgetpos(FILE *stream, fpos_t *pos);
 EXTERN char  *fgets(char *s, int n, FILE *stream);
 EXTERN FILE  *fopen(const char *path, const char *type);
 EXTERN int    fprintf(FILE *stream, const char *format, ...);
 EXTERN int    fputc(int c, FILE *stream);
 EXTERN int    fputs(const char *s, FILE *stream);
-EXTERN size_t fread(void *ptr, size_t size, size_t n_items,
-		    FILE *stream);
-EXTERN int    fseek(FILE *stream, long int offset, int whence);
-EXTERN size_t fwrite(const void *ptr, size_t size,
-		     size_t n_items, FILE *stream);
+EXTERN size_t fread(void *ptr, size_t size, size_t n_items, FILE *stream);
+EXTERN int    fseek(FAR FILE *stream, long int offset, int whence);
+EXTERN int    fsetpos(FILE *stream, fpos_t *pos);
+EXTERN long   ftell(FAR FILE *stream);
+EXTERN size_t fwrite(const void *ptr, size_t size, size_t n_items, FILE *stream);
 EXTERN char  *gets(char *s);
 
 EXTERN int    printf(const char *format, ...);

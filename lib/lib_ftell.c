@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_fseek.c
+ * lib/lib_ftell.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,33 +88,21 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: fseek
+ * Name: ftell
  *
  * Description:
- *   The fseek() function sets the file position indicator for the stream
- *   pointed to by stream. The new position, measured in bytes, is obtained
- *   by adding offset bytes to the position specified by whence. If whence is
- *   set to SEEK_SET, SEEK_CUR, or SEEK_END, the offset is relative to the
- *   start of the file, the current position indicator, or end-of-file,
- *   respectively. A successful call to the fseek() function clears the
- *   end-of-file indicator for the stream and undoes any effects of the ungetc(3)
- *   function on the same stream.
+ *   ftell() returns the current value of the file position indicator for the
+ *   stream pointed to by stream.
  *
  * Returned Value:
  *   Zero on succes; -1 on failure with errno set appropriately. 
  *
  ****************************************************************************/
 
-int fseek(FAR FILE *stream, long int offset, int whence)
+long ftell(FAR FILE *stream)
 {
- #if CONFIG_STDIO_BUFFER_SIZE > 0
-  /* Flush any valid read/write data in the buffer (also verifies stream) */
+  off_t position;
 
-  if (lib_rdflush(stream) < 0 || lib_wrflush(stream) < 0)
-    {
-      return ERROR;
-    }
-#else
   /* Verify that we were provided with a stream */
 
   if (!stream)
@@ -122,17 +110,20 @@ int fseek(FAR FILE *stream, long int offset, int whence)
       errno = EBADF;
       return ERROR;
     }
-#endif
 
-  /* On success or failure, discard any characters saved by ungetc() */
+  /* Perform the lseek to the current position.  This will not move the
+   * file pointer, but will return its current setting
+   */
 
-#if CONFIG_NUNGET_CHARS > 0
-  stream->fs_nungotten = 0;
-#endif
-
-  /* Perform the fseek on the underlying file descriptor */
-
-  return lseek(stream->fs_filedes, offset, whence) == (off_t)-1 ? ERROR : OK;
+  position = lseek(stream->fs_filedes, 0, SEEK_CUR);
+  if (position != (off_t)-1)
+    {
+      return (long)position;
+    }
+  else
+    {
+      return ERROR;
+    }
 }
 
 

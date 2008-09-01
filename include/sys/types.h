@@ -123,6 +123,7 @@ typedef sint32       off_t;
 typedef uint16       blksize_t;
 typedef uint32       blkcnt_t;
 #endif
+typedef off_t        fpos_t;
 typedef sint16       uid_t;
 typedef sint16       gid_t;
 typedef uint16       dev_t;

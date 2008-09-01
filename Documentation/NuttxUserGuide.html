@@ -21,7 +21,7 @@ User's Manual
 <p>
 Gregory Nutt
 <p>
-<small>Last Update: August 22, 2008</small>
+<small>Last Update: September 1, 2008</small>
 </center>
 
 <h1>1.0 <A NAME="Introduction">Introduction</a></h1>
@@ -5910,11 +5910,14 @@ interface of the same name.
 </p>
 
 <h2><a name="driveroperations">2.11.2 Driver Operations</a></h2>
+<a name="drvrfcntlops">
 <ul><pre>
   #include &lt;fcntl.h&gt;
   int open(const char *path, int oflag, ...);
 </pre></ul>
+</a>
 
+<a name="drvrunistdops">
 <ul><pre>
   #include &lt;unistd.h&gt;
   int     close(int fd);
@@ -5925,13 +5928,17 @@ interface of the same name.
   int     unlink(const char *path);
   ssize_t write(int fd, const void *buf, size_t nbytes);
 </pre></ul>
+</a>
 
+<a name="drvrioctlops">
 <ul><pre>
   #include &lt;sys/ioctl.h&gt;
   int     ioctl(int fd, int req, unsigned long arg);
 </pre></ul>
+</a>
 
 <h2><a name="directoryoperations">2.11.3 Directory Operations</a></h2>
+<a name="dirdirentops">
 <ul><pre>
   #include &lt;dirent.h&gt;
   int        closedir(DIR *dirp);
@@ -5942,11 +5949,15 @@ interface of the same name.
   void       seekdir(FAR DIR *dirp, int loc);
   int        telldir(FAR DIR *dirp);
 </pre></ul>
+</a>
+
+<a name="dirunistdops">
 <ul><pre>
   #include &lt;unistd.h&gt;
   int       chdir(FAR const char *path);
   FAR char *getcwd(FAR char *buf, size_t size);
 </pre></ul>
+</a>
 
 <h2><a name="standardio">2.11.4 Standard I/O</a></h2>
 <ul><pre>
@@ -5956,13 +5967,16 @@ interface of the same name.
   int    feof(FILE *stream);                               /* Prototyped but not implemented */
   int    ferror(FILE *stream);                             /* Prototyped but not implemented */
   int    fgetc(FILE *stream);
+  int    fgetpos(FILE *stream, fpos_t *pos);
   char  *fgets(char *s, int n, FILE *stream);
   FILE  *fopen(const char *path, const char *type);
   int    fprintf(FILE *stream, const char *format, ...);
   int    fputc(int c, FILE *stream);
   int    fputs(const char *s, FILE *stream);
   size_t fread(void *ptr, size_t size, size_t n_items, FILE *stream);
-  int    fseek(FILE *stream, long int offset, int whence); /* Prototyped but not implemented */
+  int    fseek(FILE *stream, long int offset, int whence);
+  int    fsetpos(FILE *stream, fpos_t *pos);
+  long   ftell(FILE *stream);
   size_t fwrite(const void *ptr, size_t size, size_t n_items, FILE *stream);
   char  *gets(char *s);
 
@@ -6973,29 +6987,57 @@ notify a task when a message is available on a queue.
 <h1><a name="index">Index</a></h1>
 <table width="100%">
 <tr>
-<td valign="top">
+<td valign="top" width="34%">
   <li><a href="#accept">accept</a></li>
   <li><a href="#bind">bind</a></li>
+  <li><a href="#dirunistdops">chdir</a></li>
   <li><a href="#clockgetres">clock_getres</a></li>
   <li><a href="#clockgettime">clock_gettime</a></li>
   <li><a href="#ClocksNTimers">Clocks</a></li>
   <li><a href="#clocksettime">clock_settime</a></li>
+  <li><a href="#drvrunistdops">close</a></li>
+  <li><a href="#dirdirentops">closedir</a></li>
   <li><a href="#connect">connect</a></li>
   <li><a href="#Data_Structures">Data structures</a></li>
   <li><a href="#directoryoperations">Directory operations</a></li>
   <li><a href="#driveroperations">Driver operations</a></li>
+  <li><a href="#drvrunistdops">dup</a></li>
+  <li><a href="#drvrunistdops">dup2</a></li>
   <li><a href="#exit">exit</a></li>
   <li><a href="#fatsupport">FAT File System Support</a></li>
+  <li><a href="#standardio">fclose</a></li>
+  <li><a href="#standardio">fdopen</a></li>
+  <li><a href="#standardio">feof</a></li>
+  <li><a href="#standardio">ferror</a></li>
   <li><a href="#FileSystem">File system, interfaces</a></li>
   <li><a href="#FileSystemOverview">File system, overview</a></li>
+  <li><a href="#standardio">fflush</a></li>
+  <li><a href="#standardio">fgetc</a></li>
+  <li><a href="#standardio">fgetpos</a></li>
+  <li><a href="#standardio">fgets</a></li>
+  <li><a href="#standardio">fopen</a></li>
+  <li><a href="#standardio">fprintf</a></li>
+  <li><a href="#standardio">fputc</a></li>
+  <li><a href="#standardio">fputs</a></li>
+  <li><a href="#standardio">fread</a></li>
+  <li><a href="#standardio">fseek</a></li>
+  <li><a href="#standardio">fsetpos</a></li>
+  <li><a href="#standardio">fstat(</a></li>
+  <li><a href="#standardio">ftell</a></li>
+  <li><a href="#standardio">fwrite</a></li>
+  <li><a href="#dirunistdops">getcwd</a></li>
   <li><a href="#getpid">getpid</a></li>
+  <li><a href="#standardio">gets</a></li>
   <li><a href="#getsockopt">getsockopt</a></li>
   <li><a href="#gmtimer">gmtime_r</a></li>
   <li><a href="#Introduction">Introduction</a>
+  <li><a href="#drvrioctlops">ioctl</a></li>
   <li><a href="#kill">kill</a></li>
   <li><a href="#listen">listen</a></li>
   <li><a href="#localtimer">localtime_r</a></li>
+  <li><a href="#drvrunistdops">lseek</a></li>
   <li><a href="#Message_Queue">Named Message Queue Interfaces</a>
+  <li><a href="#standardio">mkdir</a></li>
   <li><a href="#mkfatfs">mkfatfs</a></li>
   <li><a href="#mkfifo">mkfifo</a></li>
   <li><a href="#mktime">mktime</a></li>
@@ -7010,8 +7052,13 @@ notify a task when a message is available on a queue.
   <li><a href="#mqtimedsend">mq_timedsend</a></li>
   <li><a href="#mqunlink">mq_unlink</a></li>
   <li><a href="#Network">Network Interfaces</a></li>
+  <li><a href="#drvrfcntlops">open</a></li>
+  <li><a href="#dirdirentops">opendir</a></li>
   <li><a href="#OS_Interfaces">OS Interfaces</a></li>
   <li><a href="#pipe">pipe</a></li>
+</td>
+<td valign="top" width="33%">
+  <li><a href="#standardio">printf</a></li>
   <li><a href="#Pthread">Pthread Interfaces</a>
   <li><a href="#pthreadattrdestroy">pthread_attr_destroy</a></li>
   <li><a href="#pthreadattrgetinheritsched">pthread_attr_getinheritsched</a></li>
@@ -7052,8 +7099,6 @@ notify a task when a message is available on a queue.
   <li><a href="#pthreadmutexattrgetpshared">pthread_mutexattr_getpshared</a></li>
   <li><a href="#pthreadmutexattrgettype">pthread_mutexattr_gettype</a></li>
   <li><a href="#pthreadmutexattrinit">pthread_mutexattr_init</a></li>
-</td>
-<td valign="top">
   <li><a href="#pthreadmutexattrsetpshared">pthread_mutexattr_setpshared</a></li>
   <li><a href="#pthreadmutexattrsettype">pthread_mutexattr_settype</a></li>
   <li><a href="#pthreadmutexdestrory">pthread_mutex_destroy</a></li>
@@ -7070,10 +7115,19 @@ notify a task when a message is available on a queue.
   <li><a href="#pthreadsigmask">pthread_sigmask</a></li>
   <li><a href="#pthreadtestcancelstate">pthread_testcancelstate</a></li>
   <li><a href="#pthreadyield">pthread_yield</a></li>
+  <li><a href="#standardio">puts</a></li>
+  <li><a href="#drvrunistdops">read</a></li>
+  <li><a href="#dirdirentops">readdir</a></li>
+  <li><a href="#dirdirentops">readdir_r</a></li>
   <li><a href="#recv">recv</a></li>
   <li><a href="#recvfrom">recvfrom</a></li>
+  <li><a href="#standardio">rename</a></li>
+  <li><a href="#standardio">rmdir</a></li>
+  <li><a href="#dirdirentops">rewinddir</a></li>
   <li><a href="#schedgetparam">sched_getparam</a></li>
   <li><a href="#schedgetprioritymax">sched_get_priority_max</a></li>
+</td>
+<td valign="top">
   <li><a href="#schedgetprioritymin">sched_get_priority_min</a></li>
   <li><a href="#schedgetrrinterval">sched_get_rr_interval</a></li>
   <li><a href="#schedlockcount">sched_lockcount</a></li>
@@ -7093,6 +7147,7 @@ notify a task when a message is available on a queue.
   <li><a href="#semunlink">sem_unlink</a></li>
   <li><a href="#semwait">sem_wait</a></li>
   <li><a href="#setgetscheduler">sched_getscheduler</a></li>
+  <li><a href="#dirdirentops">seekdir</a></li>
   <li><a href="#send">send</a></li>
   <li><a href="#sendto">sendto</a></li>
   <li><a href="#setsockopt">setsockopt</a></li>
@@ -7110,7 +7165,10 @@ notify a task when a message is available on a queue.
   <li><a href="#sigtimedwait">sigtimedwait</a></li>
   <li><a href="#sigwaitinfo">sigwaitinfo</a></li>
   <li><a href="#socket">socket</a></li>
+  <li><a href="#standardio">sprintf</a></li>
   <li><a href="#standardio">Standard I/O</a></li>
+  <li><a href="#standardio">stat</a></li>
+  <li><a href="#standardio">statfs</a></li>
   <li><a href="#taskactivate">task_activate</a></li>
   <li><a href="#Task_Control">Task Control Interfaces</a>
   <li><a href="#taskcreate">task_create</a></li>
@@ -7119,18 +7177,25 @@ notify a task when a message is available on a queue.
   <li><a href="#taskrestart">task_restart</a></li>
   <li><a href="#Task_Schedule">Task Scheduling Interfaces</a>
   <li><a href="#Task_Switch">Task Switching Interfaces</a>
+  <li><a href="#dirdirentops">telldir</a></li>
   <li><a href="#timercreate">timer_create</a></li>
   <li><a href="#timerdelete">timer_delete</a></li>
   <li><a href="#timergetoverrun">timer_getoverrun</a></li>
   <li><a href="#timergettime">timer_gettime</a></li>
   <li><a href="#ClocksNTimers">Timers</a></li>
   <li><a href="#timersettime">timer_settime</a></li>
+  <li><a href="#standardio">ungetc</a></li>
+  <li><a href="#drvrunistdops">unlink</a></li>
+  <li><a href="#standardio">vfprintf</a></li>
+  <li><a href="#standardio">vprintf</a></li>
+  <li><a href="#standardio">vsprintf</a></li>
   <li><a href="#Watchdogs">Watchdog Timer Interfaces</a>
   <li><a href="#wdcancel">wd_cancel</a></li>
   <li><a href="#wdcreate">wd_create</a></li>
   <li><a href="#wddelete">wd_delete</a></li>
   <li><a href="#wdgettime">wd_gettime</a></li>
   <li><a href="#wdstart">wd_start</a></li>
+  <li><a href="#drvrunistdops">write</a></li>
 </td>
 </tr>
 </table>
