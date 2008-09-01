@@ -16,7 +16,7 @@
   </b></big></h1>
   <p><small>by</small></p>
   <p>Gregory Nutt</p>
-  <p><small>Last Update: July 21, 2008</small></p>
+  <p><small>Last Update: September 1, 2008</small></p>
 </center>
 
 <center><h1>Table of Contents</h1></center>
@@ -1526,6 +1526,10 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
   <li>
     <code>CONFIG_NSOCKET_DESCRIPTORS</code>: Maximum number of socket descriptors per task/thread.
+  </li>
+  <li>
+    <code>CONFIG_NET_NACTIVESOCKETS</code>:  Maximum number of concurrent socket  operations (recv, send, etc.).
+    Default: <code>CONFIG_NET_TCP_CONNS</code>+<code>CONFIG_NET_UDP_CONNS</code>.
   </li>
   <li>
     <code>CONFIG_NET_SOCKOPTS</code>: Enable or disable support for socket options.
