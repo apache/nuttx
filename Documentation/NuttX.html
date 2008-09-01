@@ -456,28 +456,44 @@
 </table>
 
 <p>
-  The 24th release of NuttX (nuttx-0.3.12) is available for download
+  The 2tth release of NuttX (nuttx-0.3.13) is available for download
   from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
   website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
-  The nuttx-0.3.12 release includes some minor bugfixes as well as a few new features.
+<p>
+  The nuttx-0.3.13 release includes some important bug fixes as well as a few new features.
   Bugs fixed include:
   <ul>
-    <li>Corrected an error in recursive mutex implementation.</li>
-    <li>task_create() was only dup'in the first three file descriptors.</li>
-    <li>Fixed driver open reference counting errors in dup(), dup2(), and exit().</li>
-    <li>Fixed error handling logic in fflush().</li>
+    <li>Fixed problems with Cygwin-based console input.  NSH now works with the Cygwin simulator.</li>
+    <li>sched_get_priority_max/min returned error on SCHED_RR.</li>
+    <li>Corrected detection of End-of-File in fgets().</li>
+    <li>Fixed an error in opendir() that could cause an assertion to fail inappropriately.</li>
+    <li>Corrected an error in the FAT that caused files opened for writing with O_APPEND to fail.</li>
+    <li>Fix error in getopt() when called with argc==1.</li>
+    <li>Fix error in stat() when used on the root directory.</li>
+    <li>Fixed a critical bug that effects the way that environment variables are shared amongst
+      pthreads.</li>
+    <li>uIP port now supports multi-threaded, concurrent socket access.  So, for example, one
+      thread can be reading from a socket while another is writing to the socket.</li>
   </ul>
 </p>
 <p>
   New features were also added:
   <ul>
-    <li>Pipes and pipe() API</li>
-    <li>FIFOs and mkfifo() API</li>
-    <li>mkfatfs() API can be used to format FAT file systems.</li>
+
+    <li>New OS APIs: chdir() and getcwd().</li>
+    <li>The Nuttx shell (NSH) has been extended in many ways:
+    <ul>
+      <li>New commands: mkfatfs, mkfifo, sleep, usleep, nice, sh, cd, and pwd commands
+      <li>New memory inspection commands and heap usage commands
+      <li>New capabilities: Execution of commands in background, execution of simple scripts,
+        redirection of command output, last command status ($?)
+      <li>Now supports if-then[-else]-fi construct
+      <li>and other features as noted in the ChangeLog.
+    </ul></li>
   </ul>
 </p>
 <p>
@@ -979,54 +995,7 @@ Other memory:
 </table>
 
 <pre><ul>
-0.3.12 2008-08-10 Gregory Nutt <spudmonkey@racsa.co.cr>
-
-	* Improved solution to POSIX timer lifetime controls bug fixed in 0.3.11.
-	* Add test for recursive mutexes
-	* Correct bug in recursive mutex logic
-	* Add mkfifo()
-	* Add pipe() and test for both pipes and fifos
-	* Attempts to open a FIFO will now block until there is at least one writer
-	* Add test/Fixed errors in FIFO reader/writer interlocks
-	* Removed limitation: task_create() was only dup'ing 3 file descriptors (now
-	  dups all open file descriptors).
-	* Added a test for redirection of stdio through pipes
-	* Fixed error in dup and dup2: Must call open/close methods in fs/driver so that
-	  driver can correctly maintain open reference counts.
-	* Same issue on closing file descriptors in exit()
-	* Fixed in error in stdio flush logic.  Needed ssize_t vs size_t for error
-	  check.
-	* Moved all FAT related files from fs to fs/fat
-	* Implemented mkfatfs(), a non-standard API to create a FAT filesystem on a
-	  block device (not yet tested).
-	* Added a test for mkfatfs() on a RAM disk in examples/mount and verified
-	  basic mkfatfs functionality for FAT12.
-
-pascal-0.1.2 2008-02-10 Gregory Nutt <spudmonkey@racsa.co.cr>
-
-	* Add logic to build and link with the ZDS-II toolchain
-	  use with the z16f.
-	* Make sure that POFF header structures are aligned
-	* Standardized POFF file format to big-endian
-	* Break up large switch statements to lower complexity
-	  and eliminate a compiler bug
-	* Changes so that runtime compiles with SDCC.
-
-buildroot-0.1.0 2007-03-09 &lt;spudmonkey@racsa.co.cr&gt
-
-	* Support for arm-elf toolchain
-</pre></ul>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="pendingchanges">Unreleased Changes</a>
-  </td>
-  </tr>
-</table>
-
-<pre><ul>
-nuttx-0.3.13 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-0.3.13 2008-09-01 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* NSH: Added mkfatfs, mkfifo, sleep, usleep and nice commands
 	* Fixed problem with console input in Cygwin-based simulator; NSH now works
@@ -1067,6 +1036,32 @@ nuttx-0.3.13 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* uIP port enhance to support multi-threaded, concurrent socket access.  So,
 	  for example, one thread can be reading from a socket while another is
 	  writing to the socket.
+
+pascal-0.1.2 2008-02-10 Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* Add logic to build and link with the ZDS-II toolchain
+	  use with the z16f.
+	* Make sure that POFF header structures are aligned
+	* Standardized POFF file format to big-endian
+	* Break up large switch statements to lower complexity
+	  and eliminate a compiler bug
+	* Changes so that runtime compiles with SDCC.
+
+buildroot-0.1.0 2007-03-09 &lt;spudmonkey@racsa.co.cr&gt
+
+	* Support for arm-elf toolchain
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="pendingchanges">Unreleased Changes</a>
+  </td>
+  </tr>
+</table>
+
+<pre><ul>
+nuttx-0.3.14 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-0.1.3 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
