@@ -52,6 +52,7 @@
 #include <net/uip/uip-arch.h>
 
 #include "net-internal.h"
+#include "uip/uip-internal.h"
 
 /****************************************************************************
  * Definitions
@@ -70,19 +71,20 @@
 struct recvfrom_s
 {
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-  FAR struct socket       *rf_sock;      /* The parent socket structure */
-  uint32                   rf_starttime; /* rcv start time for determining timeout */
+  FAR struct socket         *rf_sock;      /* The parent socket structure */
+  uint32                     rf_starttime; /* rcv start time for determining timeout */
 #endif
-  sem_t                    rf_sem;       /* Semaphore signals recv completion */
-  size_t                   rf_buflen;    /* Length of receive buffer */
-  char                    *rf_buffer;    /* Pointer to receive buffer */
+  FAR struct uip_callback_s *rf_cb;        /* Reference to callback instance */
+  sem_t                      rf_sem;       /* Semaphore signals recv completion */
+  size_t                     rf_buflen;    /* Length of receive buffer */
+  char                      *rf_buffer;    /* Pointer to receive buffer */
 #ifdef CONFIG_NET_IPv6
-  FAR struct sockaddr_in6 *rf_from;      /* Address of sender */
+  FAR struct sockaddr_in6   *rf_from;      /* Address of sender */
 #else
-  FAR struct sockaddr_in  *rf_from;      /* Address of sender */
+  FAR struct sockaddr_in    *rf_from;      /* Address of sender */
 #endif
-  size_t                   rf_recvlen;   /* The received length */
-  int                      rf_result;    /* OK:success, failure:negated errno */
+  size_t                     rf_recvlen;   /* The received length */
+  int                        rf_result;    /* OK:success, failure:negated errno */
 };
 #endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
 
@@ -356,12 +358,12 @@ static inline void recvfrom_tcpsender(struct uip_driver_s *dev, struct recvfrom_
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static uint8 recvfrom_tcpinterrupt(struct uip_driver_s *dev,
-                                   struct uip_conn *conn, uint8 flags)
+static uint16 recvfrom_tcpinterrupt(struct uip_driver_s *dev, void *conn,
+                                    void *pvprivate, uint16 flags)
 {
-  struct recvfrom_s *pstate = (struct recvfrom_s *)conn->data_private;
+  struct recvfrom_s *pstate = (struct recvfrom_s *)pvprivate;
 
-  nvdbg("flags: %02x\n", flags);
+  nvdbg("flags: %04x\n", flags);
 
   /* 'private' might be null in some race conditions (?) */
 
@@ -379,6 +381,12 @@ static uint8 recvfrom_tcpinterrupt(struct uip_driver_s *dev,
 
           recvfrom_tcpsender(dev, pstate);
 
+          /* Indicate that the data has been consumed and that an ACK
+           * should be sent.
+           */
+
+          flags = (flags & ~UIP_NEWDATA) | UIP_SNDACK;
+
           /* If the user buffer has been filled, then we are finished. */
 
           if (pstate->rf_buflen == 0)
@@ -391,9 +399,9 @@ static uint8 recvfrom_tcpinterrupt(struct uip_driver_s *dev,
                * Don't allow any further TCP call backs.
                */
 
-              conn->data_flags   = 0;
-              conn->data_private = NULL;
-              conn->data_event   = NULL;
+              pstate->rf_cb->flags   = 0;
+              pstate->rf_cb->private = NULL;
+              pstate->rf_cb->event   = NULL;
 
               /* Wake up the waiting thread, returning the number of bytes
                * actually read.
@@ -419,9 +427,9 @@ static uint8 recvfrom_tcpinterrupt(struct uip_driver_s *dev,
 
           /* Stop further callbacks */
 
-          conn->data_flags   = 0;
-          conn->data_private = NULL;
-          conn->data_event   = NULL;
+          pstate->rf_cb->flags   = 0;
+          pstate->rf_cb->private = NULL;
+          pstate->rf_cb->event   = NULL;
 
           /* Report not connected */
 
@@ -445,9 +453,9 @@ static uint8 recvfrom_tcpinterrupt(struct uip_driver_s *dev,
 
           nvdbg("TCP timeout\n");
 
-          conn->data_flags   = 0;
-          conn->data_private = NULL;
-          conn->data_event   = NULL;
+          pstate->rf_cb->flags   = 0;
+          pstate->rf_cb->private = NULL;
+          pstate->rf_cb->event   = NULL;
 
           /* Report an error only if no data has been received */
 
@@ -533,12 +541,13 @@ static inline void recvfrom_udpsender(struct uip_driver_s *dev, struct recvfrom_
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-static void recvfrom_udpinterrupt(struct uip_driver_s *dev,
-                                  struct uip_udp_conn *conn, uint8 flags)
+static uint16 recvfrom_udpinterrupt(struct uip_driver_s *dev, void *pvconn,
+                                    void *pvprivate, uint16 flags)
 {
-  struct recvfrom_s *pstate = (struct recvfrom_s *)conn->private;
+  struct uip_udp_conn *conn = (struct uip_udp_conn *)pvconn;
+  struct recvfrom_s *pstate = (struct recvfrom_s *)pvprivate;
 
-  nvdbg("flags: %02x\n", flags);
+  nvdbg("flags: %04x\n", flags);
 
   /* 'private' might be null in some race conditions (?) */
 
@@ -558,14 +567,19 @@ static void recvfrom_udpinterrupt(struct uip_driver_s *dev,
 
           /* Don't allow any further UDP call backs. */
 
-          conn->private = NULL;
-          conn->event   = NULL;
+          pstate->rf_cb->flags   = 0;
+          pstate->rf_cb->private = NULL;
+          pstate->rf_cb->event   = NULL;
 
           /* Save the sender's address in the caller's 'from' location */
 
           recvfrom_udpsender(dev, pstate);
 
-          /* Wake up the waiting thread, returning the number of bytes
+         /* Indicate that the data has been consumed */
+
+          flags &= ~UIP_NEWDATA;
+
+           /* Wake up the waiting thread, returning the number of bytes
            * actually read.
            */
 
@@ -580,8 +594,9 @@ static void recvfrom_udpinterrupt(struct uip_driver_s *dev,
 
           /* Stop further callbacks */
 
-          conn->private  = NULL;
-          conn->event    = NULL;
+          pstate->rf_cb->flags   = 0;
+          pstate->rf_cb->private = NULL;
+          pstate->rf_cb->event   = NULL;
 
           /* Report not connected */
 
@@ -607,8 +622,9 @@ static void recvfrom_udpinterrupt(struct uip_driver_s *dev,
 
           /* Stop further callbacks */
 
-          conn->private = NULL;
-          conn->event   = NULL;
+          pstate->rf_cb->flags   = 0;
+          pstate->rf_cb->private = NULL;
+          pstate->rf_cb->event   = NULL;
 
           /* Report a timeout error */
 
@@ -620,6 +636,7 @@ static void recvfrom_udpinterrupt(struct uip_driver_s *dev,
         }
 #endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
     }
+  return flags;
 }
 #endif /* CONFIG_NET_UDP */
 
@@ -773,29 +790,40 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Set up the callback in the connection */
 
-  udp_conn->private = (void*)&state;
-  udp_conn->event   = recvfrom_udpinterrupt;
+  state.rf_cb = uip_udpcallbackalloc(psock->s_conn);
+  if (state.rf_cb)
+    {
+      /* Set up the callback in the connection */
 
-  /* Enable the UDP socket */
+      state.rf_cb->flags   = UIP_NEWDATA|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
+      state.rf_cb->private = (void*)&state;
+      state.rf_cb->event   = recvfrom_udpinterrupt;
 
-  uip_udpenable(udp_conn);
+      /* Enable the UDP socket */
 
-  /* Wait for either the receive to complete or for an error/timeout to occur.
-   * NOTES:  (1) sem_wait will also terminate if a signal is received, (2)
-   * interrupts are disabled!  They will be re-enabled while the task sleeps
-   * and automatically re-enabled when the task restarts.
-   */
+      uip_udpenable(udp_conn);
 
-  ret = sem_wait(&state. rf_sem);
+      /* Wait for either the receive to complete or for an error/timeout to occur.
+       * NOTES:  (1) sem_wait will also terminate if a signal is received, (2)
+       * interrupts are disabled!  They will be re-enabled while the task sleeps
+       * and automatically re-enabled when the task restarts.
+       */
 
-  /* Make sure that no further interrupts are processed */
+      ret = sem_wait(&state. rf_sem);
 
-  uip_udpdisable(udp_conn);
-  udp_conn->private = NULL;
-  udp_conn->event   = NULL;
-  irqrestore(save);
+      /* Make sure that no further interrupts are processed */
 
-  return recvfrom_result(ret, &state);
+      uip_udpdisable(udp_conn);
+      uip_udpcallbackfree(psock->s_conn, state.rf_cb);
+      irqrestore(save);
+      ret = recvfrom_result(ret, &state);
+    }
+  else
+    {
+      ret = -EBUSY;
+    }
+
+  return ret;
 }
 #endif /* CONFIG_NET_UDP */
 
@@ -828,7 +856,6 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                             FAR struct sockaddr_in *infrom )
 #endif
 {
-  struct uip_conn        *conn;
   struct recvfrom_s       state;
   irqstate_t              save;
   int                     ret = OK;
@@ -864,30 +891,38 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   if (state.rf_buflen > 0)
 #endif
     {
+      struct uip_conn *conn = (struct uip_conn *)psock->s_conn;
+
       /* Set up the callback in the connection */
 
-      conn               = (struct uip_conn *)psock->s_conn;
-      conn->data_flags   = UIP_NEWDATA|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
-      conn->data_private = (void*)&state;
-      conn->data_event   = recvfrom_tcpinterrupt;
+      state.rf_cb = uip_tcpcallbackalloc(conn);
+      if (state.rf_cb)
+        {
+          state.rf_cb->flags   = UIP_NEWDATA|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
+          state.rf_cb->private = (void*)&state;
+          state.rf_cb->event   = recvfrom_tcpinterrupt;
 
-      /* Wait for either the receive to complete or for an error/timeout to occur.
-       * NOTES:  (1) sem_wait will also terminate if a signal is received, (2)
-       * interrupts are disabled!  They will be re-enabled while the task sleeps
-       * and automatically re-enabled when the task restarts.
-       */
+          /* Wait for either the receive to complete or for an error/timeout to occur.
+           * NOTES:  (1) sem_wait will also terminate if a signal is received, (2)
+           * interrupts are disabled!  They will be re-enabled while the task sleeps
+           * and automatically re-enabled when the task restarts.
+           */
 
-      ret = sem_wait(&state.rf_sem);
+          ret = sem_wait(&state.rf_sem);
 
-      /* Make sure that no further interrupts are processed */
+          /* Make sure that no further interrupts are processed */
 
-      conn->data_flags   = 0;
-      conn->data_private = NULL;
-      conn->data_event   = NULL;
+          uip_tcpcallbackfree(conn, state.rf_cb);
+          ret = recvfrom_result(ret, &state);
+        }
+      else
+        {
+          ret = -EBUSY;
+        }
     }
-  irqrestore(save);
 
-  return recvfrom_result(ret, &state);
+  irqrestore(save);
+  return ret;
 }
 #endif /* CONFIG_NET_TCP */
 

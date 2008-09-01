@@ -247,6 +247,8 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NET_IPv6 - Build in support for IPv6
 		CONFIG_NSOCKET_DESCRIPTORS - Maximum number of socket descriptors
                   per task/thread.
+		CONFIG_NET_NACTIVESOCKETS - Maximum number of concurrent socket
+		  operations (recv, send, etc.).  Default: CONFIG_NET_TCP_CONNS+CONFIG_NET_UDP_CONNS
 		CONFIG_NET_SOCKOPTS - Enable or disable support for socket options
 
 		CONFIG_NET_BUFSIZE - uIP buffer size

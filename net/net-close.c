@@ -50,6 +50,7 @@
 #include <net/uip/uip-arch.h>
 
 #include "net-internal.h"
+#include "uip/uip-internal.h"
 
 /****************************************************************************
  * Private Types
@@ -58,8 +59,9 @@
 #ifdef CONFIG_NET_TCP
 struct tcp_close_s
 {
-  FAR struct socket *cl_psock;      /* Reference to the TCP socket */
-  sem_t              cl_sem;        /* Semaphore signals disconnect completion */
+  FAR struct socket         *cl_psock; /* Reference to the TCP socket */
+  FAR struct uip_callback_s *cl_cb;    /* Reference to TCP callback instance */
+  sem_t                      cl_sem;   /* Semaphore signals disconnect completion */
 };
 #endif
 
@@ -85,12 +87,12 @@ struct tcp_close_s
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static uint8 netclose_interrupt(struct uip_driver_s *dev,
-                                struct uip_conn *conn, uint8 flags)
+static uint16 netclose_interrupt(struct uip_driver_s *dev, void *pvconn,
+                                 void *pvprivate, uint16 flags)
 {
-  struct tcp_close_s *pstate = (struct tcp_close_s *)conn->data_private;
+  struct tcp_close_s *pstate = (struct tcp_close_s *)pvprivate;
 
-  nvdbg("flags: %02x\n", flags);
+  nvdbg("flags: %04x\n", flags);
 
   if (pstate)
     {
@@ -102,9 +104,9 @@ static uint8 netclose_interrupt(struct uip_driver_s *dev,
         {
           /* The disconnection is complete */
 
-          conn->data_flags   = 0;
-          conn->data_private = NULL;
-          conn->data_event   = NULL;
+          pstate->cl_cb->flags   = 0;
+          pstate->cl_cb->private = NULL;
+          pstate->cl_cb->event   = NULL;
           sem_post(&pstate->cl_sem);
           nvdbg("Resuming\n");
         }
@@ -144,7 +146,6 @@ static uint8 netclose_interrupt(struct uip_driver_s *dev,
 static inline void netclose_disconnect(FAR struct socket *psock)
 {
   struct tcp_close_s state;
-  struct uip_conn *conn;
   irqstate_t flags;
 
   /* Interrupts are disabled here to avoid race conditions */
@@ -155,30 +156,33 @@ static inline void netclose_disconnect(FAR struct socket *psock)
 
   if (_SS_ISCONNECTED(psock->s_flags))
     {
-       /* Set up to receive TCP data events */
+       struct uip_conn *conn = (struct uip_conn*)psock->s_conn;
 
-       state.cl_psock     = psock;
-       sem_init(&state.cl_sem, 0, 0);
+       /* Set up to receive TCP data event callbacks */
 
-       conn               = psock->s_conn;
-       conn->data_flags   = UIP_NEWDATA|UIP_CLOSE|UIP_ABORT;
-       conn->data_private = (void*)&state;
-       conn->data_event   = netclose_interrupt;
+       state.cl_cb = uip_tcpcallbackalloc(conn);
+       if (state.cl_cb)
+         {
+           state.cl_psock       = psock;
+           sem_init(&state.cl_sem, 0, 0);
 
-       /* Notify the device driver of the availaibilty of TX data */
+           state.cl_cb->flags   = UIP_NEWDATA|UIP_POLL|UIP_CLOSE|UIP_ABORT;
+           state.cl_cb->private = (void*)&state;
+           state.cl_cb->event   = netclose_interrupt;
 
-       netdev_txnotify(&conn->ripaddr);
+           /* Notify the device driver of the availaibilty of TX data */
 
-       /* Wait for the disconnect event */
+           netdev_txnotify(&conn->ripaddr);
 
-       (void)sem_wait(&state.cl_sem);
+           /* Wait for the disconnect event */
 
-       /* We are now disconnected */
+           (void)sem_wait(&state.cl_sem);
 
-       sem_destroy(&state.cl_sem);
-       conn->data_flags   = 0;
-       conn->data_private = NULL;
-       conn->data_event   = NULL;
+           /* We are now disconnected */
+
+           sem_destroy(&state.cl_sem);
+           uip_tcpcallbackfree(conn, state.cl_cb);
+        }
     }
 
   irqrestore(flags);

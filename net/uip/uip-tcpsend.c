@@ -228,7 +228,7 @@ static void uip_tcpsendcommon(struct uip_driver_s *dev, struct uip_conn *conn)
  *
  ****************************************************************************/
 
-void uip_tcpsend(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags, uint16 len)
+void uip_tcpsend(struct uip_driver_s *dev, struct uip_conn *conn, uint16 flags, uint16 len)
 {
   BUF->flags     = flags;
   dev->d_len     = len;

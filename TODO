@@ -7,7 +7,7 @@ NuttX TODO List (Last updated July 31, 2008)
   (1)  Signals (sched/, arch/)
   (1)  pthreads (sched/)
   (1)  C++ Support
-  (11) Network (net/, netutils/)
+  (10) Network (net/, netutils/)
   (2)  USB (drivers/usbdev)
   (3)  Libraries (lib/)
   (4)  File system/Generic drivers (fs/, drivers/)
@@ -147,16 +147,6 @@ o Network (net/, netutils/)
   Status:      Open
   Priority:    Medium, The feature is not important, but it is important
                for NuttX to resolve the architectural issues.
-
-  Description: uIP/Socket callback logic is not thread safe. This means that
-               a socket cannot be used concurrently by two threads.  Minimal
-               fix:  Add mutex to support exclusion for protection.
-  Status:      Open
-  Priority:    Low.  The currently socket design cannot be use concurrently
-               by threads with out a major redesign.  The feature is not
-               of great value since the use model for multi-thread sockets
-               is not common.  Adding mutex support would only mask the
-               underlying issue.
 
   Description: IPv6 support is incomplete
   Status:      Open

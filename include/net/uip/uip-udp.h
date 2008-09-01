@@ -69,6 +69,7 @@
 /* Representation of a uIP UDP connection */
 
 struct uip_driver_s;      /* Forward reference */
+struct uip_callback_s;    /* Forward reference */
 struct uip_udp_conn
 {
   dq_entry_t node;        /* Supports a doubly linked list */
@@ -77,10 +78,9 @@ struct uip_udp_conn
   uint16 rport;           /* The remote port number in network byte order */
   uint8  ttl;             /* Default time-to-live */
 
-  /* Defines the UDP callback */
+  /* Defines the list of UDP callbacks */
 
-  void *private;
-  void (*event)(struct uip_driver_s *dev, struct uip_udp_conn *conn, uint8 flags);
+  struct uip_callback_s *list;
 };
 
 /* The UDP and IP headers */
@@ -158,6 +158,11 @@ struct uip_udp_stats_s
  */
 
 extern struct uip_udp_conn *uip_udpalloc(void);
+
+/* Allocate a new TCP data callback */
+
+#define uip_udpcallbackalloc(conn)   uip_callbackalloc(&conn->list)
+#define uip_udpcallbackfree(conn,cb) uip_callbackfree(cb, &conn->list)
 
 /* Free a connection structure that is no longer in use. This should
  * be done by the implementation of close()

@@ -95,6 +95,7 @@
  */
 
 struct uip_driver_s;      /* Forward reference */
+struct uip_callback_s;    /* Forward reference */
 struct uip_conn
 {
   dq_entry_t node;        /* Implements a doubly linked list */
@@ -121,9 +122,6 @@ struct uip_conn
   uint8  timer;           /* The retransmission timer (units: half-seconds) */
   uint8  nrtx;            /* The number of retransmissions for the last
                            * segment sent */
-  uint8  data_flags;      /* Flags that will be handled by the data_event()
-                           * callback function (see data_event() discussion below).
-                           */
 
   /* Read-ahead buffering */
 
@@ -131,37 +129,41 @@ struct uip_conn
   sq_queue_t readahead;
 #endif
 
-  /* Higher level logic can retain application specific information
-   * in the following:
+  /* Application callbacks:
    *
-   *   data_event() is called on all events.  Normally, the input flags are
-   *      returned, however, the implemenation may set one of the following:
+   * Data transfer events are retained in 'list'.  Event handlers in 'list'
+   * are called for events specified in the flags set within struct
+   * uip_callback_s
    *
-   *        UIP_CLOSE   - Gracefully close the current connection
-   *        UIP_ABORT   - Abort (reset) the current connection on an error that
-   *                      prevents UIP_CLOSE from working.
+   * When an callback is executed from 'list', the input flags are normally
+   * returned, however, the implementation may set one of the following:
    *
-   *      Or clear the following:
+   *   UIP_CLOSE   - Gracefully close the current connection
+   *   UIP_ABORT   - Abort (reset) the current connection on an error that
+   *                 prevents UIP_CLOSE from working.
    *
-   *        UIP_NEWDATA - May be cleared to suppress returning the ACK response.
-   *                     (dev->d_len should also be set to zero in this case).
+   * And/Or set/clear the following:
    *
-   *
-   *      The provider of the data_event callback must also set data_flags.  This
-   *      will inform the uIP layer which flags are and are not handled by the
-   *      callback.
-   *   accept() is called when the TCP logic has created a connection
-   *   connection_event() is called on any of the subset of connection-related events
+   *   UIP_NEWDATA - May be cleared to indicate that the data was consumed
+   *                 and that no further process of the new data should be
+   *                 attempted.
+   *   UIP_SNDACK  - If UIP_NEWDATA is cleared, then UIP_SNDACK may be set
+   *                 to indicate that an ACK should be included in the response.
+   *                 (In UIP_NEWDATA is cleared bu UIP_SNDACK is not set, then
+   *                 dev->d_len should also be cleared).
    */
 
-  void *data_private;
-  uint8 (*data_event)(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags);
+  struct uip_callback_s *list;
+
+  /* accept() is called when the TCP logic has created a connection */
 
   void *accept_private;
   int (*accept)(struct uip_conn *listener, struct uip_conn *conn);
 
+  /* connection_event() is called on any of the subset of connection-related events */
+
   void *connection_private;
-  void (*connection_event)(struct uip_conn *conn, uint8 flags);
+  void (*connection_event)(struct uip_conn *conn, uint16 flags);
 };
 
 /* The following structure is used to handle read-ahead buffering for TCP
@@ -266,6 +268,11 @@ struct uip_tcpip_hdr
  */
 
 extern struct uip_conn *uip_tcpalloc(void);
+
+/* Allocate a new TCP data callback */
+
+#define uip_tcpcallbackalloc(conn)   uip_callbackalloc(&conn->list)
+#define uip_tcpcallbackfree(conn,cb) uip_callbackfree(cb, &conn->list)
 
 /* Free a connection structure that is no longer in use. This should
  * be done by the implementation of close()

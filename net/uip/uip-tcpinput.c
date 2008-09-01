@@ -98,8 +98,8 @@ void uip_tcpinput(struct uip_driver_s *dev)
 {
   struct uip_conn *conn = NULL;
   uint16 tmp16;
+  uint16 flags;
   uint8  opt;
-  uint8  flags;
   uint8  result;
   int    len;
   int    i;

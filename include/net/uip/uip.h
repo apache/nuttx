@@ -5,7 +5,7 @@
  * are used by uIP programs as well as internal uIP structures and function
  * declarations.
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -55,6 +55,7 @@
 #include <arpa/inet.h>
 
 #include <net/uip/uipopt.h>
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -62,26 +63,52 @@
 /* The following flags may be set in the set of flags before calling the
  * application callback. The UIP_ACKDATA, UIP_NEWDATA, and UIP_CLOSE flags
  * may be set at the same time, whereas the others are mutualy exclusive.
+ *
+ *   UIP_ACKDATA   IN:  Signifies that the outstanding data was acked and
+ *                      the application should send out new data instead
+ *                      of retransmitting the last data
+ *                 OUT: Input state must be preserved on output.
+ *   UIP_NEWDATA   IN:  Set to indicate that the peer has sent us new data.
+ *                 OUT: Cleared (only) by the application logic to indicate
+ *                      that the new data was consumed, suppressing further
+ *                      attempts to process the new data.
+ *   UIP_SNDACK    IN:  Not used; always zero
+ *                 OUT: Set by the application if the new data was consumed
+ *                      and an ACK should be sent in the response.
+ *   UIP_REXMIT    IN:  Tells the application to retransmit the data that
+ *                      was last sent
+ *                 OUT: Not used
+ *   UIP_POLL      IN:  Used for polling the application.  This is provided
+ *                      periodically from the drivers to support (1) timed
+ *                      operations, and (2) to check if the application has
+*                       data that it wants to send
+ *                 OUT: Not used
+ *   UIP_CLOSE     IN:  The remote host has closed the connection, thus the
+ *                      connection has gone away.
+ *                 OUT: The application signals that it wants to close the
+ *                      connection
+ *   UIP_ABORT     IN:  The remote host has aborted the connection, thus the
+ *                      connection has gone away.
+ *                 OUT: The application signals that it wants to abort the
+ *                      connection
+ *   UIP_CONNECTED IN:  We have got a connection from a remote host and have
+ *                      set up a new connection for it, or an active connection
+ *                      has been successfully established
+ *                 OUT: Not used
+ *   UIP_TIMEDOUT  IN:  The connection has been aborted due to too many
+ *                      retransmissions
+ *                 OUT: Not used
  */
 
-#define UIP_ACKDATA    (1 << 0) /* Signifies that the outstanding data was acked and the
-                                 * application should send out new data instead of retransmitting
-                                 * the last data */
-#define UIP_NEWDATA    (1 << 1) /* Flags the fact that the peer has sent us new data */
-#define UIP_REXMIT     (1 << 2) /* Tells the application to retransmit the data that was last
-                                 * sent */
-#define UIP_POLL       (1 << 3) /* Used for polling the application, to check if the application
-                                 * has data that it wants to send */
-#define UIP_CLOSE      (1 << 4) /* The remote host has closed the connection, thus the connection
-                                 * has gone away. Or the application signals that it wants to
-                                 * close the connection */
-#define UIP_ABORT      (1 << 5) /* The remote host has aborted the connection, thus the connection
-                                 * has gone away. Or the application signals that it wants to
-                                 * abort the connection */
-#define UIP_CONNECTED  (1 << 6) /* We have got a connection from a remote host and have set up a
-                                 * new connection for it, or an active connection has been
-                                 * successfully established */
-#define UIP_TIMEDOUT   (1 << 7) /* The connection has been aborted due to too many retransmissions */
+#define UIP_ACKDATA    (1 << 0)
+#define UIP_NEWDATA    (1 << 1)
+#define UIP_SNDACK     (1 << 2)
+#define UIP_REXMIT     (1 << 3)
+#define UIP_POLL       (1 << 4)
+#define UIP_CLOSE      (1 << 5)
+#define UIP_ABORT      (1 << 6)
+#define UIP_CONNECTED  (1 << 7)
+#define UIP_TIMEDOUT   (1 << 8)
 
 #define UIP_DATA_EVENTS (UIP_ACKDATA|UIP_NEWDATA|UIP_REXMIT|UIP_POLL)
 #define UIP_CONN_EVENTS (UIP_CLOSE|UIP_ABORT|UIP_CONNECTED|UIP_TIMEDOUT)
@@ -116,7 +143,7 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* Repressentation of an IP address */
+/* Representation of an IP address */
 
 typedef in_addr_t uip_ip4addr_t;
 typedef uint16 uip_ip6addr_t[8];
@@ -160,6 +187,26 @@ struct uip_ip_hdr
   uint16 destipaddr[2];    /* 32-bit Destination IP address */
 
 #endif /* CONFIG_NET_IPv6 */
+};
+
+/* Describes a uIP callback
+ *
+ *   flink   - Supports a singly linked list
+ *   event   - Provides the address of the callback function entry point.
+ *             pvconn is a pointer to one of struct uip_conn or struct uip_udp_conn.
+ *   private - Holds a reference to application specific data that will
+ *             provided
+ *   flags   - Set by the application to inform the uIP layer which flags
+ *             are and are not handled by the callback.
+ */
+
+struct uip_driver_s;       /* Forward reference */
+struct uip_callback_s
+{
+  FAR struct uip_callback_s *flink;
+  uint16 (*event)(struct uip_driver_s *dev, void *pvconn, void *pvprivate, uint16 flags);
+  void *private;
+  uint16 flags;
 };
 
 /* Protocol-specific support */

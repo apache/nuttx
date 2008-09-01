@@ -94,11 +94,11 @@
  *
  ****************************************************************************/
 
-void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn, uint8 result)
+void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn, uint16 result)
 {
   /* Handle the result based on the application response */
 
-  nvdbg("result: %02x\n", result);
+  nvdbg("result: %04x\n", result);
 
   /* Check for connection aborted */
 
@@ -202,9 +202,9 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn, uint8 resul
  *
  ****************************************************************************/
 
-void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn, uint8 result)
+void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn, uint16 result)
 {
-  nvdbg("result: %02x\n", result);
+  nvdbg("result: %04x\n", result);
 
   dev->d_appdata = dev->d_snddata;
 
@@ -221,9 +221,9 @@ void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn, uint8 result
       uip_tcpsend(dev, conn, TCP_ACK | TCP_PSH, conn->len + UIP_TCPIP_HLEN);
     }
 
-  /* If there is no data to send, just send out a pure ACK if there is newdata. */
+  /* If there is no data to send, just send out a pure ACK if one is requested`. */
 
-  else if (result & UIP_NEWDATA)
+  else if (result & UIP_SNDACK)
     {
       uip_tcpsend(dev, conn, TCP_ACK, UIP_TCPIP_HLEN);
     }

@@ -102,24 +102,32 @@ static int uip_readahead(struct uip_readahead_s *readahead, uint8 *buf, int len)
  * Function: uip_dataevent
  *
  * Description:
- *   This is the default data_event handler that is called when there is no
- *   use data handler in place
+ *   This is the default data event handler that is called when there is no
+ *   user data handler in place
  *
  * Assumptions:
- *   This function is called at the interrupt level with interrupts disabled.
+ * - The called has checked that UIP_NEWDATA is set in flags and that is no
+ *   other handler available to process the incoming data.
+ * - This function is called at the interrupt level with interrupts disabled.
  *
  ****************************************************************************/
 
-static inline uint8
-uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
+static inline uint16
+uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint16 flags)
 {
-  uint8 ret = flags;
+  uint16 ret;
+
+  /* Assume that we will ACK the data.  The data will be ACKed if it is
+   * placed in the read-ahead buffer -OR- if it zero length
+   */
+
+  ret = (flags & ~UIP_NEWDATA) | UIP_SNDACK;
 
   /* Is there new data?  With non-zero length?  (Certain connection events
    * can have zero-length with UIP_NEWDATA set just to cause an ACK).
    */
 
-  if ((flags & UIP_NEWDATA) != 0 && dev->d_len > 0)
+  if (dev->d_len > 0)
     {
 #if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
       struct uip_readahead_s *readahead1;
@@ -127,7 +135,11 @@ uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
       uint16 recvlen = 0;
       uint8 *buf     = dev->d_appdata;
       int    buflen  = dev->d_len;
+#endif
 
+      nvdbg("No listener on connection\n");
+
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
       /* First, we need to determine if we have space to buffer the data.  This
        * needs to be verified before we actually begin buffering the data. We
        * will use any remaining space in the last allocated readahead buffer
@@ -169,28 +181,30 @@ uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
               sq_addlast(&readahead2->rh_node, &conn->readahead);
             }
 
-          /* Indicate that all of the data in the buffer has been consumed */
-
           nvdbg("Buffered %d bytes\n", dev->d_len);
-          dev->d_len = 0;
         }
       else
 #endif
         {
           /* There is no handler to receive new data and there are no free
-           * read-ahead buffers to retain the data.  In this case, clear the
-           * UIP_NEWDATA bit so that no ACK will be sent and drop the packet.
+           * read-ahead buffers to retain the data -- drop the packet.
            */
 
-#ifdef CONFIG_NET_STATISTICS
+         nvdbg("Dropped %d bytes\n", dev->d_len);
+
+ #ifdef CONFIG_NET_STATISTICS
           uip_stat.tcp.syndrop++;
           uip_stat.tcp.drop++;
 #endif
-          ret       &= ~UIP_NEWDATA;
-          dev->d_len = 0;
+          /* Clear the UIP_SNDACK bit so that no ACK will be sent */
+
+          ret &= ~UIP_SNDACK;
         }
     }
 
+  /* In any event, the new data has now been handled */
+
+  dev->d_len = 0;
   return ret;
 }
 
@@ -209,7 +223,7 @@ uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
  *
  ****************************************************************************/
 
-uint8 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
+uint16 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint16 flags)
 {
   /* Preserve the UIP_ACKDATA, UIP_CLOSE, and UIP_ABORT in the response.
    * These is needed by uIP to handle responses and buffer state.  The
@@ -217,39 +231,42 @@ uint8 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint8 fla
    * explicitly set in the callback.
    */
 
-  uint8 ret = flags;
+  uint16 ret = flags;
 
-  nvdbg("flags: %02x\n", flags);
+  nvdbg("flags: %04x\n", flags);
 
-  /* Check if there is a data callback */
+  /* Perform the data callback.  When a data callback is executed from 'list',
+   * the input flags are normally returned, however, the implementation
+   * may set one of the following:
+   *
+   *   UIP_CLOSE   - Gracefully close the current connection
+   *   UIP_ABORT   - Abort (reset) the current connection on an error that
+   *                 prevents UIP_CLOSE from working.
+   *
+   * And/Or set/clear the following:
+   *
+   *   UIP_NEWDATA - May be cleared to indicate that the data was consumed
+   *                 and that no further process of the new data should be
+   *                 attempted.
+   *   UIP_SNDACK  - If UIP_NEWDATA is cleared, then UIP_SNDACK may be set
+   *                 to indicate that an ACK should be included in the response.
+   *                 (In UIP_NEWDATA is cleared bu UIP_SNDACK is not set, then
+   *                 dev->d_len should also be cleared).
+   */
+ 
+  ret = uip_callbackexecute(dev, conn, flags, conn->list);
 
-  if (conn->data_event)
-    {
-      /* Perform the callback.  Callback function normally returns the input flags,
-       * however, the implementation may set one of the following:
-       *
-       *   UIP_CLOSE   - Gracefully close the current connection
-       *   UIP_ABORT   - Abort (reset) the current connection on an error that
-       *                 prevents UIP_CLOSE from working.
-       *
-       * Or clear the following:
-       *
-       *   UIP_NEWDATA - May be cleared to suppress returning the ACK response.
-       *                 (dev->d_len should also be set to zero in this case).
-       */
-
-      ret = conn->data_event(dev, conn, flags);
-    }
-
-  /* If there is no data callback -OR- if the data callback does not handle the
-   * newdata event, then there is no handler in place to handle new incoming data.
+  /* There may be no new data handler in place at them moment that the new
+   * incoming data is received.  If the new incoming data was not handled, then
+   * either (1) put the unhandled incoming data in the read-ahead buffer (if
+   * enabled) or (2) suppress the ACK to the data in the hope that it will
+   * be re-transmitted at a better time.
    */
 
-  if (!conn->data_event || (conn->data_flags & UIP_NEWDATA) == 0)
+  if ((ret & UIP_NEWDATA) != 0)
     {
-      /* In either case, we will take a default newdata action */
+      /* Data was not handled.. dispose of it appropriately */
 
-      nvdbg("No listener on connection\n");
       ret = uip_dataevent(dev, conn, ret);
     }
 

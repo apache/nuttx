@@ -118,6 +118,14 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+/* Defined in uip_callback.c ************************************************/
+
+EXTERN void uip_callbackinit(void);
+EXTERN FAR struct uip_callback_s *uip_callbackalloc(struct uip_callback_s **list);
+EXTERN void uip_callbackfree(FAR struct uip_callback_s *cb, struct uip_callback_s **list);
+EXTERN uint16 uip_callbackexecute(FAR struct uip_driver_s *dev, void *pvconn,
+                                  uint16 flags, FAR struct uip_callback_s *list);
+
 #ifdef CONFIG_NET_TCP
 /* Defined in uip_tcpconn.c *************************************************/
 
@@ -145,7 +153,7 @@ EXTERN int uip_accept(struct uip_conn *conn, uint16 portno);
 /* Defined in uip-tcpsend.c *************************************************/
 
 EXTERN void uip_tcpsend(struct uip_driver_s *dev, struct uip_conn *conn,
-                        uint8 flags, uint16 len);
+                        uint16 flags, uint16 len);
 EXTERN void uip_tcpreset(struct uip_driver_s *dev);
 EXTERN void uip_tcpack(struct uip_driver_s *dev, struct uip_conn *conn,
                        uint8 ack);
@@ -153,9 +161,9 @@ EXTERN void uip_tcpack(struct uip_driver_s *dev, struct uip_conn *conn,
 /* Defined in uip-tcpappsend.c **********************************************/
 
 EXTERN void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
-                           uint8 result);
+                           uint16 result);
 EXTERN void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn,
-                          uint8 result);
+                          uint16 result);
 
 /* Defined in uip-tcpinput.c ************************************************/
 
@@ -163,8 +171,8 @@ EXTERN void uip_tcpinput(struct uip_driver_s *dev);
 
 /* Defined in uip_tcpcallback.c *********************************************/
 
-EXTERN uint8 uip_tcpcallback(struct uip_driver_s *dev,
-                             struct uip_conn *conn, uint8 flags);
+EXTERN uint16 uip_tcpcallback(struct uip_driver_s *dev,
+                              struct uip_conn *conn, uint16 flags);
 
 /* Defined in uip-tcpreadahead.c ********************************************/
 
@@ -195,10 +203,10 @@ EXTERN void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn);
 
 EXTERN void uip_udpinput(struct uip_driver_s *dev);
 
-/* Defined in uip_uipcallback.c *********************************************/
+/* Defined in uip_udpcallback.c *********************************************/
 
 EXTERN void uip_udpcallback(struct uip_driver_s *dev,
-                            struct uip_udp_conn *conn, uint8 flags);
+                            struct uip_udp_conn *conn, uint16 flags);
 #endif /* CONFIG_NET_UDP */
 
 #ifdef CONFIG_NET_ICMP

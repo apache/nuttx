@@ -60,6 +60,7 @@
 
 struct sendto_s
 {
+  FAR struct uip_callback_s *snd_cb; /* Reference to callback instance */
   sem_t       st_sem;        /* Semaphore signals sendto completion */
   uint16      st_buflen;     /* Length of send buffer (error if <0) */
   const char *st_buffer;     /* Pointer to send buffer */
@@ -95,7 +96,7 @@ void sendto_interrupt(struct uip_driver_s *dev, struct uip_udp_conn *conn, uint8
 {
   struct sendto_s *pstate = (struct sendto_s *)conn->private;
 
-  nvdbg("flags: %02x\n");
+  nvdbg("flags: %04x\n", flags);
   if (pstate)
     {
       /* Check if the connection was rejected */
@@ -116,8 +117,9 @@ void sendto_interrupt(struct uip_driver_s *dev, struct uip_udp_conn *conn, uint8
 
       /* Don't allow any further call backs. */
 
-      conn->private = NULL;
-      conn->event   = NULL;
+      pstate->st_cb->flags   = 0;
+      pstate->st_cb->private = NULL;
+      pstate->st_cb->event   = NULL;
 
       /* Wake up the waiting thread */
 
@@ -205,7 +207,6 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
 #else
   FAR const struct sockaddr_in *into = (const struct sockaddr_in *)to;
 #endif
-  struct uip_udp_conn *udp_conn;
   struct sendto_s state;
   irqstate_t save;
   int ret;
@@ -286,9 +287,13 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
 
   /* Set up the callback in the connection */
 
-  udp_conn          = (struct uip_udp_conn *)psock->s_conn;
-  udp_conn->private = (void*)&state;
-  udp_conn->event   = sendto_interrupt;
+  state.st_cb = uip_udpcallbackalloc((struct uip_udp_conn *)psock->s_conn);
+  if (state.st_cb)
+    {
+      state.st_cb->flags   = UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
+      state.st_cb->flags   = 0;
+      state.st_cb->private = (void*)&state;
+      state.st_cb->event   = sendto_interrupt;
 
   /* Enable the UDP socket */
 
@@ -309,8 +314,8 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
   /* Make sure that no further interrupts are processed */
 
   uip_udpdisable(psock->s_conn);
-  udp_conn->private = NULL;
-  udp_conn->event   = NULL;
+  uip_udpcallbackfree(psock->s_conn, state.st_cb);
+    }
   irqrestore(save);
 
   sem_destroy(&state.st_sem);
@@ -335,7 +340,7 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
 #endif
 
 errout:
-  *get_errno_ptr() = err;
+  errno = err;
   return ERROR;
 }
 

@@ -51,6 +51,7 @@
 #include <net/uip/uip-arch.h>
 
 #include "net-internal.h"
+#include "uip/uip-internal.h"
 
 /****************************************************************************
  * Definitions
@@ -68,15 +69,16 @@
 
 struct send_s
 {
-  FAR struct socket *snd_sock;    /* Points to the parent socket structure */
-  sem_t              snd_sem;     /* Used to wake up the waiting thread */
-  FAR const uint8   *snd_buffer;  /* Points to the buffer of data to send */
-  size_t             snd_buflen;  /* Number of bytes in the buffer to send */
-  ssize_t            snd_sent;    /* The number of bytes sent */
-  uint32             snd_isn;     /* Initial sequence number */
-  uint32             snd_acked;   /* The number of bytes acked */
+  FAR struct socket         *snd_sock;    /* Points to the parent socket structure */
+  FAR struct uip_callback_s *snd_cb;      /* Reference to callback instance */
+  sem_t                      snd_sem;     /* Used to wake up the waiting thread */
+  FAR const uint8           *snd_buffer;  /* Points to the buffer of data to send */
+  size_t                     snd_buflen;  /* Number of bytes in the buffer to send */
+  ssize_t                    snd_sent;    /* The number of bytes sent */
+  uint32                     snd_isn;     /* Initial sequence number */
+  uint32                     snd_acked;   /* The number of bytes acked */
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-  uint32             snd_time;    /* last send time for determining timeout */
+  uint32                     snd_time;    /* last send time for determining timeout */
 #endif
 };
 
@@ -192,12 +194,13 @@ static inline int send_timeout(struct send_s *pstate)
  *
  ****************************************************************************/
 
-static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn,
-                            uint8 flags)
+static uint16 send_interrupt(struct uip_driver_s *dev, void *pvconn,
+                             void *pvprivate, uint16 flags)
 {
-  struct send_s *pstate = (struct send_s *)conn->data_private;
+  struct uip_conn *conn = (struct uip_conn*)pvconn;
+  struct send_s *pstate = (struct send_s *)pvprivate;
 
-  nvdbg("flags: %02x acked: %d sent: %d\n", flags, pstate->snd_acked, pstate->snd_sent);
+  nvdbg("flags: %04x acked: %d sent: %d\n", flags, pstate->snd_acked, pstate->snd_sent);
 
   /* If this packet contains an acknowledgement, then update the count of
    * acknowldged bytes.
@@ -301,9 +304,9 @@ static uint8 send_interrupt(struct uip_driver_s *dev, struct uip_conn *conn,
 end_wait:
   /* Do not allow any further callbacks */
 
-  conn->data_flags   = 0;
-  conn->data_private = NULL;
-  conn->data_event   = NULL;
+  pstate->snd_cb->flags   = 0;
+  pstate->snd_cb->private = NULL;
+  pstate->snd_cb->event   = NULL;
 
   /* Wake up the waiting thread */
 
@@ -382,7 +385,6 @@ end_wait:
 ssize_t send(int sockfd, const void *buf, size_t len, int flags)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
-  struct uip_conn *conn;
   struct send_s state;
   irqstate_t save;
   int err;
@@ -424,34 +426,39 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
 
   if (len > 0)
     {
-     /* Get the initial sequence number that will be used */
+      struct uip_conn *conn = (struct uip_conn*)psock->s_conn;
 
-      conn               = (struct uip_conn *)psock->s_conn;
-      state.snd_isn      = send_getisn(conn); /* Initial sequence number */
+      /* Allocate resources to receive a callback */
 
-      /* Set up the callback in the connection */
+      state.snd_cb = uip_tcpcallbackalloc(conn);
+      if (state.snd_cb)
+        {
+          /* Get the initial sequence number that will be used */
 
-      conn->data_flags   = UIP_REXMIT|UIP_ACKDATA|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
-      conn->data_private = (void*)&state;
-      conn->data_event   = send_interrupt;
+          state.snd_isn      = send_getisn(conn); /* Initial sequence number */
 
-      /* Notify the device driver of the availaibilty of TX data */
+          /* Set up the callback in the connection */
 
-      netdev_txnotify(&conn->ripaddr);
+          state.snd_cb->flags   = UIP_ACKDATA|UIP_REXMIT|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
+          state.snd_cb->private = (void*)&state;
+          state.snd_cb->event   = send_interrupt;
 
-      /* Wait for the send to complete or an error to occur:  NOTES: (1)
-       * sem_wait will also terminate if a signal is received, (2) interrupts
-       * are disabled!  They will be re-enabled while the task sleeps and
-       * automatically re-enabled when the task restarts.
-       */
+          /* Notify the device driver of the availaibilty of TX data */
 
-      ret = sem_wait(&state. snd_sem);
+          netdev_txnotify(&conn->ripaddr);
 
-      /* Make sure that no further interrupts are processed */
+          /* Wait for the send to complete or an error to occur:  NOTES: (1)
+           * sem_wait will also terminate if a signal is received, (2) interrupts
+           * are disabled!  They will be re-enabled while the task sleeps and
+           * automatically re-enabled when the task restarts.
+           */
 
-      conn->data_flags   = 0;
-      conn->data_private = NULL;
-      conn->data_event   = NULL;
+          ret = sem_wait(&state. snd_sem);
+
+          /* Make sure that no further interrupts are processed */
+
+          uip_tcpcallbackfree(conn, state.snd_cb);
+        }
     }
 
   sem_destroy(&state. snd_sem);

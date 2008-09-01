@@ -41,7 +41,7 @@ ifeq ($(CONFIG_NET),y)
 # Common IP source files
 
 UIP_CSRCS += uip-initialize.c uip-setipid.c uip-arp.c uip-input.c uip-send.c \
-             uip-poll.c uip-chksum.c
+             uip-poll.c uip-chksum.c uip-callback.c
 
 ifeq ($(CONFIG_NET_IPv6),y)
 UIP_CSRCS += uip-neighbor.c

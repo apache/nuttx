@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip-udpcallback.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  *
@@ -74,9 +74,9 @@
  ****************************************************************************/
 
 void uip_udpcallback(struct uip_driver_s *dev, struct uip_udp_conn *conn,
-                     uint8 flags)
+                     uint16 flags)
 {
-  nvdbg("flags: %02x\n", flags);
+  nvdbg("flags: %04x\n", flags);
 
   /* Some sanity checking */
 
@@ -84,7 +84,7 @@ void uip_udpcallback(struct uip_driver_s *dev, struct uip_udp_conn *conn,
     {
       /* Perform the callback */
 
-      conn->event(dev, conn, flags);
+      flags = uip_callbackexecute(dev, conn, flags, conn->list);
     }
 }
 

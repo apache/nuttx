@@ -103,7 +103,11 @@
 /* The maximum amount of concurrent UDP connection, Default: 10 */
 
 #ifndef CONFIG_NET_UDP_CONNS
-# define CONFIG_NET_UDP_CONNS 10
+# ifdef CONFIG_NET_UDP
+#  define CONFIG_NET_UDP_CONNS 10
+# else
+#  define CONFIG_NET_UDP_CONNS  0
+# endif
 #endif
 
 /* TCP configuration options */
@@ -116,7 +120,11 @@
  */
 
 #ifndef CONFIG_NET_TCP_CONNS
-# define CONFIG_NET_TCP_CONNS 10
+# ifdef CONFIG_NET_TCP
+#  define CONFIG_NET_TCP_CONNS 10
+# else
+#  define CONFIG_NET_TCP_CONNS  0
+# endif
 #endif
 
 /* The maximum number of simultaneously listening TCP ports.
@@ -126,6 +134,15 @@
 
 #ifndef CONFIG_NET_MAX_LISTENPORTS
 # define CONFIG_NET_MAX_LISTENPORTS 20
+#endif
+
+/* Define the maximum number of concurrently active UDP and TCP
+ * ports.  This number must be greater than the number of open
+ * sockets in order to support multi-threaded read/write operations.
+ */
+
+#ifndef CONFIG_NET_NACTIVESOCKETS
+# define CONFIG_NET_NACTIVESOCKETS (CONFIG_NET_TCP_CONNS + CONFIG_NET_UDP_CONNS)
 #endif
 
 /* The initial retransmission timeout counted in timer pulses.
