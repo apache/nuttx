@@ -189,7 +189,7 @@ static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
 
 void up_assert(const ubyte *filename, int lineno)
 {
-#if CONFIG_TASK_NAME_SIZE > 0
+#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG)
   _TCB *rtcb = (_TCB*)g_readytorun.head;
 #endif
 
@@ -211,7 +211,7 @@ void up_assert(const ubyte *filename, int lineno)
 
 void up_assert_code(const ubyte *filename, int lineno, int errorcode)
 {
-#if CONFIG_TASK_NAME_SIZE > 0
+#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG)
   _TCB *rtcb = (_TCB*)g_readytorun.head;
 #endif
 

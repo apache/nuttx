@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/sendto.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@
 #include <net/uip/uip-arch.h>
 
 #include "net-internal.h"
+#include "uip/uip-internal.h"
 
 /****************************************************************************
  * Definitions
@@ -60,7 +61,7 @@
 
 struct sendto_s
 {
-  FAR struct uip_callback_s *snd_cb; /* Reference to callback instance */
+  FAR struct uip_callback_s *st_cb; /* Reference to callback instance */
   sem_t       st_sem;        /* Semaphore signals sendto completion */
   uint16      st_buflen;     /* Length of send buffer (error if <0) */
   const char *st_buffer;     /* Pointer to send buffer */
@@ -79,12 +80,13 @@ struct sendto_s
  *   send operation when polled by the uIP layer.
  *
  * Parameters:
- *   dev      The sructure of the network driver that caused the interrupt
- *   private  An instance of struct sendto_s cast to void*
- *   flags    Set of events describing why the callback was invoked
+ *   dev        The sructure of the network driver that caused the interrupt
+ *   conn       An instance of the UDP connection structure cast to void *
+ *   pvprivate  An instance of struct sendto_s cast to void*
+ *   flags      Set of events describing why the callback was invoked
  *
  * Returned Value:
- *   None
+ *   Modified value of the input flags
  *
  * Assumptions:
  *   Running at the interrupt level
@@ -92,9 +94,9 @@ struct sendto_s
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-void sendto_interrupt(struct uip_driver_s *dev, struct uip_udp_conn *conn, uint8 flags)
+uint16 sendto_interrupt(struct uip_driver_s *dev, void *conn, void *pvprivate, uint16 flags)
 {
-  struct sendto_s *pstate = (struct sendto_s *)conn->private;
+  struct sendto_s *pstate = (struct sendto_s *)pvprivate;
 
   nvdbg("flags: %04x\n", flags);
   if (pstate)
@@ -107,9 +109,23 @@ void sendto_interrupt(struct uip_driver_s *dev, struct uip_udp_conn *conn, uint8
 
           pstate->st_sndlen = -ENOTCONN;
         }
+
+      /* Check if the outgoing packet is available (it may have been claimed
+       * by a sendto interrupt serving a different thread.
+       */
+
+      else if (dev->d_sndlen > 0)
+        {
+           /* Another thread has beat us sending data, wait for the next poll */
+
+           return flags;
+        }
+
+      /* It looks like we are good to send the data */
+
       else
         {
-          /* No.. Copy the user data into d_snddata and send it */
+          /* Copy the user data into d_snddata and send it */
 
           uip_send(dev, pstate->st_buffer, pstate->st_buflen);
           pstate->st_sndlen = pstate->st_buflen;
@@ -125,6 +141,8 @@ void sendto_interrupt(struct uip_driver_s *dev, struct uip_udp_conn *conn, uint8
 
       sem_post(&pstate->st_sem);
     }
+
+  return flags;
 }
 #endif
 
@@ -202,6 +220,7 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
 {
   FAR struct socket *psock;
 #ifdef CONFIG_NET_UDP
+  FAR struct uip_udp_conn *conn;
 #ifdef CONFIG_NET_IPv6
   FAR const struct sockaddr_in6 *into = (const struct sockaddr_in6 *)to;
 #else
@@ -277,7 +296,8 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
 
   /* Setup the UDP socket */
 
-  ret = uip_udpconnect(psock->s_conn, into);
+  conn = (struct uip_udp_conn *)psock->s_conn;
+  ret = uip_udpconnect(conn, into);
   if (ret < 0)
     {
       irqrestore(save);
@@ -287,34 +307,33 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
 
   /* Set up the callback in the connection */
 
-  state.st_cb = uip_udpcallbackalloc((struct uip_udp_conn *)psock->s_conn);
+  state.st_cb = uip_udpcallbackalloc(conn);
   if (state.st_cb)
     {
       state.st_cb->flags   = UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
-      state.st_cb->flags   = 0;
       state.st_cb->private = (void*)&state;
       state.st_cb->event   = sendto_interrupt;
 
-  /* Enable the UDP socket */
+      /* Enable the UDP socket */
 
-  uip_udpenable(psock->s_conn);
+      uip_udpenable(conn);
 
-  /* Notify the device driver of the availabilty of TX data */
+      /* Notify the device driver of the availabilty of TX data */
 
-  netdev_txnotify(&udp_conn->ripaddr);
+      netdev_txnotify(&conn->ripaddr);
 
-  /* Wait for either the receive to complete or for an error/timeout to occur.
-   * NOTES:  (1) sem_wait will also terminate if a signal is received, (2)
-   * interrupts are disabled!  They will be re-enabled while the task sleeps
-   * and automatically re-enabled when the task restarts.
-   */
+      /* Wait for either the receive to complete or for an error/timeout to occur.
+       * NOTES:  (1) sem_wait will also terminate if a signal is received, (2)
+       * interrupts are disabled!  They will be re-enabled while the task sleeps
+       * and automatically re-enabled when the task restarts.
+       */
 
-  sem_wait(&state.st_sem);
+      sem_wait(&state.st_sem);
 
-  /* Make sure that no further interrupts are processed */
+      /* Make sure that no further interrupts are processed */
 
-  uip_udpdisable(psock->s_conn);
-  uip_udpcallbackfree(psock->s_conn, state.st_cb);
+      uip_udpdisable(conn);
+      uip_udpcallbackfree(conn, state.st_cb);
     }
   irqrestore(save);
 

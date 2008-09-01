@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/recvfrom.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -544,7 +544,6 @@ static inline void recvfrom_udpsender(struct uip_driver_s *dev, struct recvfrom_
 static uint16 recvfrom_udpinterrupt(struct uip_driver_s *dev, void *pvconn,
                                     void *pvprivate, uint16 flags)
 {
-  struct uip_udp_conn *conn = (struct uip_udp_conn *)pvconn;
   struct recvfrom_s *pstate = (struct recvfrom_s *)pvprivate;
 
   nvdbg("flags: %04x\n", flags);
@@ -764,7 +763,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                             FAR struct sockaddr_in *infrom )
 #endif
 {
-  struct uip_udp_conn *udp_conn = (struct uip_udp_conn *)psock->s_conn;
+  struct uip_udp_conn *conn = (struct uip_udp_conn *)psock->s_conn;
   struct recvfrom_s    state;
   irqstate_t           save;
   int                  ret;
@@ -781,7 +780,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Setup the UDP remote connection */
 
-  ret = uip_udpconnect(udp_conn, infrom);
+  ret = uip_udpconnect(conn, infrom);
   if (ret < 0)
     {
       irqrestore(save);
@@ -790,7 +789,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Set up the callback in the connection */
 
-  state.rf_cb = uip_udpcallbackalloc(psock->s_conn);
+  state.rf_cb = uip_udpcallbackalloc(conn);
   if (state.rf_cb)
     {
       /* Set up the callback in the connection */
@@ -801,7 +800,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Enable the UDP socket */
 
-      uip_udpenable(udp_conn);
+      uip_udpenable(conn);
 
       /* Wait for either the receive to complete or for an error/timeout to occur.
        * NOTES:  (1) sem_wait will also terminate if a signal is received, (2)
@@ -813,8 +812,8 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Make sure that no further interrupts are processed */
 
-      uip_udpdisable(udp_conn);
-      uip_udpcallbackfree(psock->s_conn, state.rf_cb);
+      uip_udpdisable(conn);
+      uip_udpcallbackfree(conn, state.rf_cb);
       irqrestore(save);
       ret = recvfrom_result(ret, &state);
     }

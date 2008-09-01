@@ -80,7 +80,7 @@ void uip_udpcallback(struct uip_driver_s *dev, struct uip_udp_conn *conn,
 
   /* Some sanity checking */
 
-  if (conn && conn->event)
+  if (conn)
     {
       /* Perform the callback */
 

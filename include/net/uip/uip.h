@@ -66,7 +66,7 @@
  *
  *   UIP_ACKDATA   IN:  Signifies that the outstanding data was acked and
  *                      the application should send out new data instead
- *                      of retransmitting the last data
+ *                      of retransmitting the last data (TCP only)
  *                 OUT: Input state must be preserved on output.
  *   UIP_NEWDATA   IN:  Set to indicate that the peer has sent us new data.
  *                 OUT: Cleared (only) by the application logic to indicate
@@ -74,9 +74,9 @@
  *                      attempts to process the new data.
  *   UIP_SNDACK    IN:  Not used; always zero
  *                 OUT: Set by the application if the new data was consumed
- *                      and an ACK should be sent in the response.
+ *                      and an ACK should be sent in the response. (TCP only)
  *   UIP_REXMIT    IN:  Tells the application to retransmit the data that
- *                      was last sent
+ *                      was last sent. (TCP only)
  *                 OUT: Not used
  *   UIP_POLL      IN:  Used for polling the application.  This is provided
  *                      periodically from the drivers to support (1) timed
@@ -84,19 +84,19 @@
 *                       data that it wants to send
  *                 OUT: Not used
  *   UIP_CLOSE     IN:  The remote host has closed the connection, thus the
- *                      connection has gone away.
+ *                      connection has gone away. (TCP only)
  *                 OUT: The application signals that it wants to close the
- *                      connection
+ *                      connection. (TCP only)
  *   UIP_ABORT     IN:  The remote host has aborted the connection, thus the
- *                      connection has gone away.
+ *                      connection has gone away. (TCP only)
  *                 OUT: The application signals that it wants to abort the
- *                      connection
+ *                      connection. (TCP only)
  *   UIP_CONNECTED IN:  We have got a connection from a remote host and have
  *                      set up a new connection for it, or an active connection
- *                      has been successfully established
+ *                      has been successfully established. (TCP only)
  *                 OUT: Not used
  *   UIP_TIMEDOUT  IN:  The connection has been aborted due to too many
- *                      retransmissions
+ *                      retransmissions. (TCP only)
  *                 OUT: Not used
  */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/send.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -256,9 +256,23 @@ static uint16 send_interrupt(struct uip_driver_s *dev, void *pvconn,
       goto end_wait;
     }
 
+   /* Check if the outgoing packet is available (it may have been claimed
+    * by a sendto interrupt serving a different thread.
+    */
+
+#if 0 /* We can't really support multiple senders on the same TCP socket */
+   else if (dev->d_sndlen > 0)
+     {
+       /* Another thread has beat us sending data, wait for the next poll */
+
+         return flags;
+      }
+#endif
+
   /* We get here if (1) not all of the data has been ACKed, (2) we have been
-   * asked to retransmit data, and (3) the connection is still healthy.
-   * We are now free to send more data to receiver.
+   * asked to retransmit data, (3) the connection is still healthy, and (4)
+   * the outgoing packet is available for our use.  In this case, we are
+   * now free to send more data to receiver.
    */
 
   if (pstate->snd_sent < pstate->snd_buflen)
