@@ -45,8 +45,6 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include <errno.h>
 
 #include "lib_internal.h"
@@ -114,7 +112,7 @@ int fgetpos(FILE *stream, fpos_t *pos)
     }
 #endif
 
-  position = ftell(stream, (off_t)*pos, SEEK_SET);
+  position = ftell(stream);
   if (position == -1)
     {
       return ERROR;
