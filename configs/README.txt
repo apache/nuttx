@@ -265,7 +265,11 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NET_UDP_CHECKSUMS - UDP checksums on or off
 		CONFIG_NET_UDP_CONNS - The maximum amount of concurrent UDP
 		  connections
-		CONFIG_NET_ICMP - ICMP ping support on or off
+		CONFIG_NET_ICMP - Enable minimal ICMP support. Includes built-in support
+		  for sending replies to received ECHO (ping) requests.
+		CONFIG_NET_ICMP_PING - Provide interfaces to support application level
+		  support for sending ECHO (ping) requests and associating ECHO
+		  replies.
 		CONFIG_NET_PINGADDRCONF - Use "ping" packet for setting IP address
 		CONFIG_NET_STATISTICS - uIP statistics on or off
 		CONFIG_NET_RECEIVE_WINDOW - The size of the advertised receiver's

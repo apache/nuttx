@@ -241,7 +241,8 @@ CONFIG_PREALLOC_TIMERS=0
 # CONFIG_NET_UDP - UDP support on or off
 # CONFIG_NET_UDP_CHECKSUMS - UDP checksums on or off
 # CONFIG_NET_UDP_CONNS - The maximum amount of concurrent UDP connections
-# CONFIG_NET_ICMP - ICMP ping support on or off
+# CONFIG_NET_ICMP - ICMP ping response support on or off
+# CONFIG_NET_ICMP_PING - ICMP ping request support on or off
 # CONFIG_NET_PINGADDRCONF - Use "ping" packet for setting IP address
 # CONFIG_NET_STATISTICS - uIP statistics on or off
 # CONFIG_NET_RECEIVE_WINDOW - The size of the advertised receiver's window
@@ -261,6 +262,7 @@ CONFIG_NET_UDP=n
 CONFIG_NET_UDP_CHECKSUMS=y
 #CONFIG_NET_UDP_CONNS=10
 CONFIG_NET_ICMP=n
+CONFIG_NET_ICMP_PING=n
 #CONFIG_NET_PINGADDRCONF=0
 CONFIG_NET_STATISTICS=y
 #CONFIG_NET_RECEIVE_WINDOW=
