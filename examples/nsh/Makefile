@@ -53,6 +53,10 @@ ifeq ($(CONFIG_EXAMPLES_NSH_TELNET),y)
 CSRCS	+= nsh_telnetd.c
 endif
 
+ifneq ($(CONFIG_EXAMPLES_NSH_DISABLESCRIPT),y)
+CSRCS	+= nsh_test.c
+endif
+
 AOBJS	= $(ASRCS:.S=$(OBJEXT))
 COBJS	= $(CSRCS:.c=$(OBJEXT))
 

@@ -128,6 +128,9 @@ static const char g_failure[]    = "1";
 
 static const struct cmdmap_s g_cmdmap[] =
 {
+#ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
+  { "[",        cmd_lbracket, 4, NSH_MAX_ARGUMENTS, "<expression> ]" },
+#endif
 #if CONFIG_NFILE_DESCRIPTORS > 0
   { "cat",      cmd_cat,      2, NSH_MAX_ARGUMENTS, "<path> [<path> [<path> ...]]" },
 #ifndef CONFIG_DISABLE_ENVIRON
@@ -169,19 +172,22 @@ static const struct cmdmap_s g_cmdmap[] =
 #if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
   { "pwd",      cmd_pwd,      1, 1, NULL },
 #endif
-#ifndef CONFIG_DISABLE_ENVIRON
-  { "set",      cmd_set,      3, 3, "<name> <value>" },
-#endif
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
   { "rm",       cmd_rm,       2, 2, "<file-path>" },
   { "rmdir",    cmd_rmdir,    2, 2, "<dir-path>" },
 #endif
-#if  CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
+#ifndef CONFIG_DISABLE_ENVIRON
+  { "set",      cmd_set,      3, 3, "<name> <value>" },
+#endif
+#if  CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0 && !defined(CONFIG_EXAMPLES_NSH_DISABLESCRIPT)
   { "sh",       cmd_sh,       2, 2, "<script-path>" },
 #endif  /* CONFIG_NFILE_DESCRIPTORS && CONFIG_NFILE_STREAMS */
 #ifndef CONFIG_DISABLE_SIGNALS
   { "sleep",    cmd_sleep,    2, 2, "<sec>" },
 #endif /* CONFIG_DISABLE_SIGNALS */
+#ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
+  { "test",     cmd_test,     3, NSH_MAX_ARGUMENTS, "<expression>" },
+#endif
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
 # ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
   { "umount",   cmd_umount,   2, 2, "<dir-path>" },
@@ -202,11 +208,11 @@ static const struct cmdmap_s g_cmdmap[] =
 
 const char g_nshgreeting[]       = "NuttShell (NSH)\n";
 const char g_nshprompt[]         = "nsh> ";
+const char g_nshsyntax[]         = "nsh: %s: syntax error\n";
 const char g_fmtargrequired[]    = "nsh: %s: missing required argument(s)\n";
 const char g_fmtarginvalid[]     = "nsh: %s: argument invalid\n";
 const char g_fmtargrange[]       = "nsh: %s: value out of range\n";
 const char g_fmtcmdnotfound[]    = "nsh: %s: command not found\n";
-const char g_fmtcmdnotimpl[]     = "nsh: %s: command not implemented\n";
 const char g_fmtnosuch[]         = "nsh: %s: no such %s: %s\n";
 const char g_fmttoomanyargs[]    = "nsh: %s: too many arguments\n";
 const char g_fmtdeepnesting[]    = "nsh: %s: nesting too deep\n";
@@ -237,6 +243,7 @@ static int cmd_help(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 #else
   nsh_output(vtbl, "  <cmd> [> <file>|>> <file>]\n");
 #endif
+#ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
   nsh_output(vtbl, "OR\n");
   nsh_output(vtbl, "  if <cmd>\n");
   nsh_output(vtbl, "  then\n");
@@ -244,6 +251,7 @@ static int cmd_help(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   nsh_output(vtbl, "  else\n");
   nsh_output(vtbl, "    [sequence of <cmd>]\n");
   nsh_output(vtbl, "  fi\n");
+#endif
   nsh_output(vtbl, "Where <cmd> is one of:\n");
   for (ptr = g_cmdmap; ptr->cmd; ptr++)
     {
@@ -569,6 +577,7 @@ char *nsh_argument(FAR struct nsh_vtbl_s *vtbl, char **saveptr)
  * Name: nsh_cmdenabled
  ****************************************************************************/
 
+#ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
 static inline boolean nsh_cmdenabled(FAR struct nsh_vtbl_s *vtbl)
 {
   struct nsh_parser_s *np = &vtbl->np;
@@ -593,11 +602,13 @@ static inline boolean nsh_cmdenabled(FAR struct nsh_vtbl_s *vtbl)
     }
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: nsh_ifthenelse
  ****************************************************************************/
 
+#ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
 static inline int nsh_ifthenelse(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, FAR char **saveptr)
 {
   struct nsh_parser_s *np = &vtbl->np;
@@ -730,6 +741,7 @@ errout:
   np->np_st[0].ns_ifcond   = FALSE;
   return ERROR;
 }
+#endif
 
 /****************************************************************************
  * Name: nsh_saveresult
@@ -739,6 +751,7 @@ static inline int nsh_saveresult(FAR struct nsh_vtbl_s *vtbl, boolean result)
 {
   struct nsh_parser_s *np = &vtbl->np;
 
+#ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
   if (np->np_st[np->np_ndx].ns_state == NSH_PARSER_IF)
     {
       np->np_fail = FALSE;
@@ -746,6 +759,7 @@ static inline int nsh_saveresult(FAR struct nsh_vtbl_s *vtbl, boolean result)
       return OK;
     }
   else
+#endif
     {
       np->np_fail = result;
       return result ? ERROR : OK;
@@ -898,10 +912,12 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
   /* Handler if-then-else-fi */
 
+#ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
   if (nsh_ifthenelse(vtbl, &cmd, &saveptr) != 0)
     {
       goto errout;
     }
+#endif
 
   /* Handle nice */
 
@@ -916,7 +932,11 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
    * currently disabled.
    */
 
+#ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
   if (!cmd || !nsh_cmdenabled(vtbl))
+#else
+  if (!cmd)
+#endif
     {
       /* An empty line is not an error and an unprocessed command cannot
        * generate an error, but neither should they change the last

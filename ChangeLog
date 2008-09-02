@@ -440,4 +440,5 @@
 	* fseek() needs to discard bytes buffered by ungetc().
 	* Corrected ftell() return value.
 	* Added fsetpos() and fgetpos().
+	* NSH now supports 'test' and '[' commands
 

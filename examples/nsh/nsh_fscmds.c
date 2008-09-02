@@ -905,7 +905,7 @@ int cmd_rmdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  * Name: cmd_sh
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
+#if  CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0 && !defined(CONFIG_EXAMPLES_NSH_DISABLESCRIPT)
 int cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char *fullpath;

@@ -163,7 +163,9 @@ struct nsh_parser_s
 #endif
   boolean   np_redirect; /* TRUE: Output from the last command was re-directed */
   boolean   np_fail;     /* TRUE: The last command failed */
+#ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
   ubyte     np_ndx;      /* Current index into np_st[] */
+#endif
 #ifndef CONFIG_DISABLE_PTHREAD
   int       np_nice;     /* "nice" value applied to last background cmd */
 #endif
@@ -172,7 +174,9 @@ struct nsh_parser_s
    * execution of commands that span multiple lines (like if-then-else-fi)
    */
 
+#ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
   struct nsh_state_s np_st[CONFIG_EXAMPLES_NSH_NESTDEPTH];
+#endif
 };
 
 struct nsh_vtbl_s
@@ -207,11 +211,11 @@ typedef int (*cmd_t)(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 
 extern const char g_nshgreeting[];
 extern const char g_nshprompt[];
+extern const char g_nshsyntax[];
 extern const char g_fmtargrequired[];
 extern const char g_fmtarginvalid[];
 extern const char g_fmtargrange[];
 extern const char g_fmtcmdnotfound[];
-extern const char g_fmtcmdnotimpl[];
 extern const char g_fmtnosuch[];
 extern const char g_fmttoomanyargs[];
 extern const char g_fmtdeepnesting[];
@@ -256,13 +260,18 @@ extern int cmd_mw(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 extern int cmd_mem(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 extern int cmd_ps(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 
+#ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
+extern int cmd_test(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+extern int cmd_lbracket(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
 #if CONFIG_NFILE_DESCRIPTORS > 0
   extern int cmd_cat(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
   extern int cmd_cp(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
   extern int cmd_ls(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-# if CONFIG_NFILE_STREAMS > 0
+# if CONFIG_NFILE_STREAMS > 0 && !defined(CONFIG_EXAMPLES_NSH_DISABLESCRIPT)
   extern int cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-# endif  /* CONFIG_NFILE_STREAMS */
+# endif  /* CONFIG_NFILE_STREAMS && !CONFIG_EXAMPLES_NSH_DISABLESCRIPT */
 # ifndef CONFIG_DISABLE_MOUNTPOINT
     extern int cmd_mkdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
     extern int cmd_mkfifo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);

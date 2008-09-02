@@ -37,6 +37,7 @@ examples/nsh
 
   Command    Depends on Configuration
   ---------- --------------------------
+  [          !CONFIG_EXAMPLES_NSH_DISABLESCRIPT
   cat        CONFIG_NFILE_DESCRIPTORS > 0
   cd         !CONFIG_DISABLE_ENVIRON && CONFIG_NFILE_DESCRIPTORS > 0
   cp         CONFIG_NFILE_DESCRIPTORS > 0
@@ -54,14 +55,37 @@ examples/nsh
   mount      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
   ps         --
   pwd        !CONFIG_DISABLE_ENVIRON && CONFIG_NFILE_DESCRIPTORS > 0
-  set        !CONFIG_DISABLE_ENVIRON
-  sleep      !CONFIG_DISABLE_SIGNALS
-  sh         CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
   rm         !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
   rmdir      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
+  set        !CONFIG_DISABLE_ENVIRON
+  sh         CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0 && !CONFIG_EXAMPLES_NSH_DISABLESCRIPT
+  sleep      !CONFIG_DISABLE_SIGNALS
+  test       !CONFIG_EXAMPLES_NSH_DISABLESCRIPT
   umount     !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
   unset      !CONFIG_DISABLE_ENVIRON
   usleep     !CONFIG_DISABLE_SIGNALS
+
+  Test syntax:
+
+    expression = simple-expression | !expression |
+                 expression -o expression | expression -a expression
+
+    simple-expression = unary-expression | binary-expression
+
+    unary-expression = string-unary | file-unary
+
+    string-unary = -n string | -z string
+
+    file-unary = -b file | -c file | -d file | -e file | -f file |
+                 -r file | -s file | -w file
+
+    binary-expression = string-binary | numeric-binary
+
+    string-binary = string = string | string == string | string != string
+
+    numeric-binary = integer -eq integer | integer -ge integer |
+                     integer -gt integer | integer -le integer |
+                     integer -lt integer | integer -ne integer
 
   Other behavior of NSH can be modified with the following settings in
   the configs/<board-name>/defconfig file:
@@ -86,6 +110,12 @@ examples/nsh
   * CONFIG_EXAMPLES_NSH_NESTDEPTH
       The maximum number of nested if-then[-else]-fi sequences that
       are permissable.  Default: 3
+
+  * CONFIG_EXAMPLES_NSH_DISABLESCRIPT
+      This can be set to 'y' to suppress support for scripting.  This
+      setting disables the 'sh', 'test', and '[' commands and the
+      if-then[-else]-fi construct.  This would only be set on systems
+      where a minimal footprint is a necessity and scripting is not.
 
   * CONFIG_EXAMPLES_NSH_CONSOLE
       If CONFIG_EXAMPLES_NSH_CONSOLE is set to 'y', then a serial
