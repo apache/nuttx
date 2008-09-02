@@ -98,6 +98,12 @@
 
 #define UIP_REASS_MAXAGE (20*10) /* 20 seconds */
 
+/* ICMP configuration options */
+
+#if !defined(CONFIG_NET_ICMP) || defined(CONFIG_DISABLE_CLOCK)
+#  undef CONFIG_NET_ICMP_PING
+#endif
+
 /* UDP configuration options */
 
 /* The maximum amount of concurrent UDP connection, Default: 10 */

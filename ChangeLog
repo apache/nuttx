@@ -440,5 +440,11 @@
 	* fseek() needs to discard bytes buffered by ungetc().
 	* Corrected ftell() return value.
 	* Added fsetpos() and fgetpos().
-	* NSH now supports 'test' and '[' commands
+	* NSH: Now supports 'test' and '[' commands
+	* Correct error in send() timeout logic.
+	* Correct error in multi-threaded socket handling in send() and sendto().
+	  Outgoing data could overwrite incoming data.
+	* Add support to uIP for application access to ICMP protocol stacks; Add
+	  ping request logic.
+	* NSH: Add ping command
 

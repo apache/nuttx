@@ -59,6 +59,22 @@
  * Definitions
  ****************************************************************************/
 
+/* TCP definitions */
+
+#define TCP_FIN 0x01
+#define TCP_SYN 0x02
+#define TCP_RST 0x04
+#define TCP_PSH 0x08
+#define TCP_ACK 0x10
+#define TCP_URG 0x20
+#define TCP_CTL 0x3f
+
+#define TCP_OPT_END     0   /* End of TCP options list */
+#define TCP_OPT_NOOP    1   /* "No-operation" TCP option */
+#define TCP_OPT_MSS     2   /* Maximum segment size TCP option */
+
+#define TCP_OPT_MSS_LEN 4   /* Length of TCP MSS option. */
+
 /* The TCP states used in the struct uip_conn tcpstateflags field */
 
 #define UIP_CLOSED      0 /* The connection is not in use and available */

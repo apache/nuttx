@@ -98,6 +98,11 @@
  *   UIP_TIMEDOUT  IN:  The connection has been aborted due to too many
  *                      retransmissions. (TCP only)
  *                 OUT: Not used
+ *   UIP_ECHOREPLY IN:  An ICMP Echo Reply has been received.  Used to support
+ *                      ICMP ping from applications. (ICMP only)
+ *                 OUT: Cleared (only) by the application logic to indicate
+ *                      that the reply was processed, suppressing further
+ *                      attempts to process the reply.
  */
 
 #define UIP_ACKDATA    (1 << 0)
@@ -109,8 +114,8 @@
 #define UIP_ABORT      (1 << 6)
 #define UIP_CONNECTED  (1 << 7)
 #define UIP_TIMEDOUT   (1 << 8)
+#define UIP_ECHOREPLY  (1 << 9)
 
-#define UIP_DATA_EVENTS (UIP_ACKDATA|UIP_NEWDATA|UIP_REXMIT|UIP_POLL)
 #define UIP_CONN_EVENTS (UIP_CLOSE|UIP_ABORT|UIP_CONNECTED|UIP_TIMEDOUT)
 
 /* The buffer size available for user data in the d_buf buffer.

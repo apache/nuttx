@@ -2,7 +2,7 @@
  * net/uip/uip-icmp.h
  * Header file for the uIP ICMP stack.
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -53,6 +53,56 @@
  * Definitions
  ****************************************************************************/
 
+/* ICMP/ICMP6 definitions */
+
+/* ICMP/ICMP6 Message Types */
+
+#define ICMP_ECHO_REPLY              0    /* RFC 792 */
+#define ICMP_DEST_UNREACHABLE        3    /* RFC 792 */
+#define ICMP_SRC_QUENCH              4    /* RFC 792 */
+#define ICMP_REDIRECT                5    /* RFC 792 */
+#define ICMP_ALT_HOST_ADDRESS        6
+#define ICMP_ECHO_REQUEST            8    /* RFC 792 */
+#define ICMP_ROUTER_ADVERTISEMENT    9    /* RFC 1256 */
+#define ICMP_ROUTER_SOLICITATION     10   /* RFC 1256 */
+#define ICMP_TIME_EXCEEDED           11   /* RFC 792 */
+#define ICMP_PARAMETER_PROBLEM       12
+#define ICMP_TIMESTAMP_REQUEST       13
+#define ICMP_TIMESTAMP_REPLY         14
+#define ICMP_INFORMATION_REQUEST     15
+#define ICMP_INFORMATION_REPLY       16
+#define ICMP_ADDRESS_MASK_REQUEST    17
+#define ICMP_ADDRESS_MASK_REPLY      18
+#define ICMP_TRACEROUTE              30
+#define ICMP_CONVERSION_ERROR        31
+#define ICMP_MOBILE_HOST_REDIRECT    32
+#define ICMP_IPV6_WHEREAREYOU        33
+#define ICMP_IPV6_IAMHERE            34
+#define ICMP_MOBILE_REGIS_REQUEST    35
+#define ICMP_MOBILE_REGIS_REPLY      36
+#define ICMP_DOMAIN_NAME_REQUEST     37
+#define ICMP_DOMAIN_NAME_REPLY       38
+#define ICMP_SKIP_DISCOVERY_PROTO    39
+#define ICMP_PHOTURIS_SECURITY_FAIL  40
+#define ICMP_EXP_MOBILE_PROTO        41   /* RFC 4065 */
+
+/* ICMP6 Message Types */
+
+#define ICMP6_ECHO_REPLY             129
+#define ICMP6_ECHO_REQUEST           128
+#define ICMP6_NEIGHBOR_SOLICITATION  135
+#define ICMP6_NEIGHBOR_ADVERTISEMENT 136
+
+#define ICMP6_FLAG_S (1 << 6)
+
+#define ICMP6_OPTION_SOURCE_LINK_ADDRESS 1
+#define ICMP6_OPTION_TARGET_LINK_ADDRESS 2
+
+/* Header sizes */
+
+#define UIP_ICMPH_LEN   4                             /* Size of ICMP header */
+#define UIP_IPICMPH_LEN (UIP_ICMPH_LEN + UIP_IPH_LEN) /* Size of IP + ICMP header */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -91,18 +141,26 @@ struct uip_icmpip_hdr
 
 #endif /* CONFIG_NET_IPv6 */
 
-  /* ICMP (echo) header */
+  /* ICMP header */
 
-  uint8  type;
-  uint8  icode;
-  uint16 icmpchksum;
+  uint8  type;             /* Defines the format of the ICMP message */
+  uint8  icode;            /* Further qualifies the ICMP messsage */
+  uint16 icmpchksum;       /* Checksum of ICMP header and data */
+
+  /* Data following the ICMP header contains the data specific to the
+   * message type indicated by the Type and Code fields.
+   */
 
 #ifndef CONFIG_NET_IPv6
 
-  uint16 id;
-  uint16 seqno;
+  /* ICMP_ECHO_REQUEST and ICMP_ECHO_REPLY data */
+
+  uint16 id;               /* Used to match requests with replies */
+  uint16 seqno;            /* "  " "" "   " "      " "  " "     " */
 
 #else /* !CONFIG_NET_IPv6 */
+
+  /* ICMP6_ECHO_REQUEST and ICMP6_ECHO_REPLY data */
 
   uint8 flags;
   uint8 reserved1;
