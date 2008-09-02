@@ -48,6 +48,7 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+#include <nuttx/clock.h>
 #include <net/uip/uip-arch.h>
 
 #include "net-internal.h"
@@ -222,7 +223,7 @@ static uint16 send_interrupt(struct uip_driver_s *dev, void *pvconn,
 
       if ( pstate->snd_acked >= pstate->snd_buflen)
         {
-          /* Yes.  Then pstate->snd_len should hold the number of bytes
+          /* Yes.  Then pstate->snd_buflen should hold the number of bytes
            * actually sent.
            */
 
@@ -272,10 +273,12 @@ static uint16 send_interrupt(struct uip_driver_s *dev, void *pvconn,
   /* We get here if (1) not all of the data has been ACKed, (2) we have been
    * asked to retransmit data, (3) the connection is still healthy, and (4)
    * the outgoing packet is available for our use.  In this case, we are
-   * now free to send more data to receiver.
+   * now free to send more data to receiver -- UNLESS the buffer contains
+   * unprocessing incoming data.  In that event, we will have to wait for the
+   * next polling cycle.
    */
 
-  if (pstate->snd_sent < pstate->snd_buflen)
+  if ((flags & UIP_NEWDATA) == 0 && pstate->snd_sent < pstate->snd_buflen)
     {
       /* Get the amount of data that we can send in the next packet */
 
@@ -294,6 +297,12 @@ static uint16 send_interrupt(struct uip_driver_s *dev, void *pvconn,
       pstate->snd_sent += sndlen;
       nvdbg("SEND: acked=%d sent=%d buflen=%d\n",
             pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
+
+      /* Update the send time */
+
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+      pstate->snd_time = g_system_timer;
+#endif
     }
 
   /* All data has been send and we are just waiting for ACK or re-tranmist
@@ -449,8 +458,13 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
         {
           /* Get the initial sequence number that will be used */
 
-          state.snd_isn      = send_getisn(conn); /* Initial sequence number */
+          state.snd_isn         = send_getisn(conn); /* Initial sequence number */
 
+          /* Update the initial time for calculating timeouts */
+
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+          state.snd_time        = g_system_timer;
+#endif
           /* Set up the callback in the connection */
 
           state.snd_cb->flags   = UIP_ACKDATA|UIP_REXMIT|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
