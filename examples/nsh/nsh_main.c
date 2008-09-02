@@ -146,7 +146,7 @@ static const struct cmdmap_s g_cmdmap[] =
   { "exec",     cmd_exec,     2, 3, "<hex-address>" },
   { "exit",     cmd_exit,     1, 1, NULL },
   { "help",     cmd_help,     1, 1, NULL },
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
   { "ifconfig", cmd_ifconfig, 1, 1, NULL },
 #endif
 #if CONFIG_NFILE_DESCRIPTORS > 0
@@ -169,6 +169,10 @@ static const struct cmdmap_s g_cmdmap[] =
 #endif
   { "mw",       cmd_mw,       2, 3, "<hex-address>[=<hex-value>][ <hex-byte-count>]" },
   { "ps",       cmd_ps,       1, 1, NULL },
+#if defined(CONFIG_NET) && defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING) && \
+   !defined(CONFIG_DISABLE_CLOCK) && !defined(CONFIG_DISABLE_SIGNALS)
+  { "ping",     cmd_ping,     2, 6, "[-c <count>] [-i <interval>] <ip-address>" },
+#endif
 #if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
   { "pwd",      cmd_pwd,      1, 1, NULL },
 #endif

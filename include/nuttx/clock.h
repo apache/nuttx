@@ -1,7 +1,7 @@
 /****************************************************************************
- * nuttx/clock.h
+ * include/nuttx/clock.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -78,6 +78,7 @@
 # define MSEC_PER_TICK        (10)
 #endif
 
+#define TICK_PER_DSEC         (MSEC_PER_DSEC / MSEC_PER_TICK)            /* Truncates! */
 #define TICK_PER_SEC          (MSEC_PER_SEC / MSEC_PER_TICK)             /* Truncates! */
 #define NSEC_PER_TICK         (MSEC_PER_TICK * NSEC_PER_MSEC)            /* Exact */
 #define USEC_PER_TICK         (MSEC_PER_TICK * USEC_PER_MSEC)            /* Exact */
@@ -87,6 +88,13 @@
 #define MSEC2TICK(msec)       (((msec)+(MSEC_PER_TICK/2))/MSEC_PER_TICK) /* Rounds */
 #define DSEC2TICK(dsec)       MSEC2TICK((dsec)*MSEC_PER_DSEC)
 #define SEC2TICK(sec)         MSEC2TICK((sec)*MSEC_PER_SEC)
+
+#define TICK2NSEC(tick)       ((tick)*NSEC_PER_TICK)                     /* Exact */
+#define TICK2USEC(tick)       ((tick)*USEC_PER_TICK)                     /* Exact */
+#define TICK2MSEC(tick)       ((tick)*MSEC_PER_TICK)                     /* Exact */
+#define TICK2DSEC(tick)       (((tick)+(TICK_PER_DSEC/2))/TICK_PER_DSEC) /* Rounds */
+#define TICK2SEC(tick)        (((tick)+(TICK_PER_SEC/2))/TICK_PER_SEC)   /* Rounds */
+
 
 /****************************************************************************
  * Global Data

@@ -47,6 +47,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
 #include <pthread.h>
 #include <netinet/in.h>
 
@@ -85,7 +86,7 @@
  * Return: Non-zero If the IP address was parsed.
  */
 
-extern unsigned char uiplib_ipaddrconv(char *addrstr, unsigned char *addr);
+extern boolean uiplib_ipaddrconv(const char *addrstr, ubyte *addr);
 
 /* Get and set IP/MAC addresses */
 

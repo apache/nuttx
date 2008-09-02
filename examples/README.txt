@@ -45,7 +45,7 @@ examples/nsh
   exec       --
   exit       --
   help       --
-  ifconfig   CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS > 0
+  ifconfig   CONFIG_NET
   ls         CONFIG_NFILE_DESCRIPTORS > 0
   mb,mh,mw   ---
   mem        ---
@@ -53,6 +53,7 @@ examples/nsh
   mkfatfs    !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
   mkfifo     !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
   mount      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
+  ping       CONFIG_NET && CONFIG_NET_ICMP && CONFIG_NET_ICMP_PING  && !CONFIG_DISABLE_CLOCK && !CONFIG_DISABLE_SIGNALS
   ps         --
   pwd        !CONFIG_DISABLE_ENVIRON && CONFIG_NFILE_DESCRIPTORS > 0
   rm         !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0

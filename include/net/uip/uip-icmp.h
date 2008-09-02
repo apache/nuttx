@@ -194,4 +194,17 @@ struct uip_icmp_stats_s
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+EXTERN int uip_ping(uip_ipaddr_t addr, uint16 id, uint16 seqno, uint16 datalen, int dsecs);
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
 #endif /* __NET_UIP_UIP_ICMP_H */

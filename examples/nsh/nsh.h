@@ -296,8 +296,12 @@ extern int cmd_lbracket(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 # endif /* !CONFIG_DISABLE_MOUNTPOINT */
 #endif /* CONFIG_NFILE_DESCRIPTORS */
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#if defined(CONFIG_NET)
   extern int cmd_ifconfig(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING) && \
+   !defined(CONFIG_DISABLE_CLOCK) && !defined(CONFIG_DISABLE_SIGNALS)
+  extern int cmd_ping(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
 #endif
 
 #ifndef CONFIG_DISABLE_ENVIRON

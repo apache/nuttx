@@ -38,14 +38,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
 
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sched.h>
 
 #include <nuttx/net.h>
+#include <nuttx/clock.h>
 #include <net/ethernet.h>
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>
@@ -55,11 +57,18 @@
 #include <net/uip/uip.h>
 #endif
 
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING) && \
+   !defined(CONFIG_DISABLE_CLOCK) && !defined(CONFIG_DISABLE_SIGNALS)
+#include <net/uip/uip-lib.h>
+#endif
+
 #include "nsh.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+#define DEFAULT_PING_DATALEN 56
 
 /****************************************************************************
  * Private Types
@@ -73,6 +82,11 @@
  * Private Data
  ****************************************************************************/
 
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING) && \
+   !defined(CONFIG_DISABLE_CLOCK) && !defined(CONFIG_DISABLE_SIGNALS)
+static uint16 g_pingid = 0;
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -80,6 +94,21 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: ping_newid
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING) && \
+   !defined(CONFIG_DISABLE_CLOCK) && !defined(CONFIG_DISABLE_SIGNALS)
+static inline uint16 ping_newid(void)
+{
+  irqstate_t save = irqsave();
+  uint16 ret = ++g_pingid;
+  irqrestore(save);
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: uip_statistics
@@ -228,4 +257,121 @@ int cmd_ifconfig(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   return OK;
 }
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */
+/****************************************************************************
+ * Name: cmd_ping
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING) && \
+   !defined(CONFIG_DISABLE_CLOCK) && !defined(CONFIG_DISABLE_SIGNALS)
+int cmd_ping(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+  FAR const char *fmt = g_fmtarginvalid;
+  const char *staddr;
+  uip_ipaddr_t ipaddr;
+  uint32 start;
+  uint32 next;
+  uint32 dsec;
+  uint16 id;
+  int sec      = 1;
+  int count    = 10;
+  int option;
+  int seqno;
+  int replies  = 0;
+  int elapsed;
+  int i;
+
+  /* Get the ping options */
+
+  while ((option = getopt(argc, argv, ":c:i:")) != ERROR)
+    {
+      switch (option)
+        {
+          case 'c':
+            count = atoi(optarg);
+            if (count < 1 || count > 10000)
+              {
+                fmt = g_fmtargrange;
+                goto errout;
+              }
+            break;
+
+          case 'i':
+            sec = atoi(optarg);
+            if (sec < 1 || sec >= 4294)
+              {
+                fmt = g_fmtargrange;
+                goto errout;
+              }
+            break;
+
+          case ':':
+            fmt = g_fmtargrequired;
+
+          case '?':
+          default:
+            goto errout;
+        }
+    }
+
+  /* There should be exactly on parameter left on the command-line */
+
+  if (optind == argc-1)
+    {
+      staddr = argv[optind];
+      if (!uiplib_ipaddrconv(staddr, (FAR unsigned char*)&ipaddr))
+        {
+          goto errout;
+        }
+    }
+  else if (optind >= argc)
+    {
+      fmt = g_fmttoomanyargs;
+      goto errout;
+    }
+  else
+    {
+      fmt = g_fmtargrequired;
+      goto errout;
+    }
+
+  /* Convert the ping interval to microseconds  and deciseconds*/
+
+  dsec = 10 * sec;
+
+  /* Get the ID to use */
+
+  id = ping_newid();
+
+  /* Loop for the specified count */
+
+  nsh_output(vtbl, "PING %s %dbytes of data\n", staddr, DEFAULT_PING_DATALEN);
+  start = g_system_timer;
+  for (i = 0; i < count; i++)
+    {
+      next = g_system_timer;
+      seqno = uip_ping(ipaddr, id, i, DEFAULT_PING_DATALEN, dsec);
+      elapsed = TICK2MSEC(g_system_timer - next);
+      if (seqno >= 0)
+        {
+          nsh_output(vtbl, "%d bytes from %s: icmp_seq=%d time=%d ms\n",
+                     DEFAULT_PING_DATALEN, staddr, seqno, elapsed);
+          replies++;
+        }
+      elapsed = TICK2DSEC(g_system_timer - next);
+      if (elapsed < dsec)
+        {
+          usleep(100000*dsec);
+        }
+    }
+  elapsed = TICK2MSEC(g_system_timer - start);
+
+  nsh_output(vtbl, "%d packets transmitted, %d received, %d%% packet loss, time %dms\n",
+             count, replies, (100*replies + count/2)/count, elapsed);
+  return OK;
+
+errout:
+  nsh_output(vtbl, fmt, argv[0]);
+  return ERROR;
+}
+#endif /* CONFIG_NET_ICMP && CONFIG_NET_ICMP_PING */
+#endif /* CONFIG_NET */

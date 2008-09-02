@@ -55,6 +55,7 @@
  ****************************************************************************/
 
 #define BUF ((struct uip_ip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define ICMPBUF ((struct uip_icmpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Private Data
@@ -224,6 +225,16 @@ uint16 uip_udpchksum(struct uip_driver_s *dev)
   return upper_layer_chksum(dev, UIP_PROTO_UDP);
 }
 #endif
+
+/* Calculate the checksum of the ICMP message */
+
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
+uint16 uip_icmpchksum(struct uip_driver_s *dev)
+{
+  return uip_chksum((uint16*)&ICMPBUF->type, dev->d_sndlen);
+}
+#endif
+
 #endif /* UIP_ARCH_CHKSUM */
 
 #endif /* CONFIG_NET */

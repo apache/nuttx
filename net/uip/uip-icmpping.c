@@ -58,6 +58,7 @@
  ****************************************************************************/
 
 #define ICMPBUF ((struct uip_icmpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define ICMPDAT &dev->d_buf[UIP_LLH_LEN + sizeof(struct uip_icmpip_hdr)]
 
 /* Allocate a new ICMP data callback */
 
@@ -79,6 +80,7 @@ struct icmp_ping_s
   uip_ipaddr_t png_addr;    /* The peer to be ping'ed */
   uint16       png_id;      /* Used to match requests with replies */
   uint16       png_seqno;   /* IN: seqno to send; OUT: seqno recieved */
+  uint16       png_datlen;  /* The length of data to send in the ECHO request */
   boolean      png_sent;    /* TRUE... the PING request has been sent */
 };
 
@@ -211,13 +213,14 @@ static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
 #else
 # error "IPv6 ECHO Request not implemented"
 #endif
+              memset(ICMPDAT, 0, pstate->png_datlen);
 
               /* Send the ICMP echo request.  Note that d_sndlen is set to
                * the size of the ICMP payload and does not include the size
                * of the ICMP header.
                */
 
-              dev->d_sndlen= 4;
+              dev->d_sndlen= pstate->png_datlen + 4;
               uip_icmpsend(dev, &pstate->png_addr);
               pstate->png_sent = TRUE;
               return flags;
@@ -283,7 +286,7 @@ end_wait:
  *
  ****************************************************************************/
 
-int uip_ping(uip_ipaddr_t addr, uint16 id, uint16 seqno, int dsecs)
+int uip_ping(uip_ipaddr_t addr, uint16 id, uint16 seqno, uint16 datalen, int dsecs)
 {
   struct icmp_ping_s state;
   irqstate_t save;
@@ -296,6 +299,7 @@ int uip_ping(uip_ipaddr_t addr, uint16 id, uint16 seqno, int dsecs)
   state.png_addr   = addr;             /* Address of the peer to be ping'ed */
   state.png_id     = id;               /* The ID to use in the ECHO request */
   state.png_seqno  = seqno;            /* The seqno to use int the ECHO request */
+  state.png_datlen = datalen;          /* The length of data to send in the ECHO request */
   state.png_sent   = FALSE;            /* ECHO request not yet sent */
 
   save             = irqsave();
@@ -303,7 +307,7 @@ int uip_ping(uip_ipaddr_t addr, uint16 id, uint16 seqno, int dsecs)
 
   /* Set up the callback */
 
- state.png_cb = uip_icmpcallbackalloc();
+  state.png_cb = uip_icmpcallbackalloc();
   if (state.png_cb)
     {
       state.png_cb->flags   = UIP_POLL|UIP_ECHOREPLY;

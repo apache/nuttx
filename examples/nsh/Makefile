@@ -40,9 +40,7 @@ ASRCS	=
 CSRCS	= nsh_main.c nsh_fscmds.c nsh_proccmds.c nsh_envcmds.c nsh_dbgcmds.c
 
 ifeq ($(CONFIG_NET),y)
-ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
 CSRCS	+= nsh_netcmds.c
-endif
 endif
 
 ifeq ($(CONFIG_EXAMPLES_NSH_CONSOLE),y)

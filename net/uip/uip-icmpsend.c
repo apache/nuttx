@@ -98,6 +98,12 @@ void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr)
 
       dev->d_len = dev->d_sndlen + UIP_IPICMPH_LEN;
 
+      /* The total size of the data (for ICMP checksum calculation) includes
+       * the size of the ICMP header
+       */
+
+      dev->d_sndlen += UIP_ICMPH_LEN;
+
       /* Initialize the IP header.  Note that for IPv6, the IP length field
        * does not include the IPv6 IP header length.
        */
