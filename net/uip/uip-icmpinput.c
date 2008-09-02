@@ -2,7 +2,7 @@
  * net/uip/uip-icmpinput.c
  * Handling incoming ICMP/ICMP6 input
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -55,6 +55,8 @@
 
 #include "uip-internal.h"
 
+#ifdef CONFIG_NET_ICMP
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -68,6 +70,10 @@
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
+
+#ifdef CONFIG_NET_ICMP_PING
+struct uip_callback_s *g_echocallback = NULL;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -109,47 +115,64 @@ void uip_icmpinput(struct uip_driver_s *dev)
    * we return the packet.
    */
 
-  if (ICMPBUF->type != ICMP_ECHO)
+  if (ICMPBUF->type == ICMP_ECHO_REQUEST)
+    {
+      /* If we are configured to use ping IP address assignment, we use
+       * the destination IP address of this ping packet and assign it to
+       * ourself.
+       */
+
+#ifdef CONFIG_NET_PINGADDRCONF
+      if (dev->d_ipaddr == 0)
+        {
+          dev->d_ipaddr = ICMPBUF->destipaddr;
+        }
+#endif
+
+      ICMPBUF->type = ICMP_ECHO_REPLY;
+
+      if (ICMPBUF->icmpchksum >= HTONS(0xffff - (ICMP_ECHO_REPLY << 8)))
+        {
+          ICMPBUF->icmpchksum += HTONS(ICMP_ECHO_REPLY << 8) + 1;
+        }
+      else
+        {
+          ICMPBUF->icmpchksum += HTONS(ICMP_ECHO_REPLY << 8);
+        }
+
+      /* Swap IP addresses. */
+
+      uiphdr_ipaddr_copy(ICMPBUF->destipaddr, ICMPBUF->srcipaddr);
+      uiphdr_ipaddr_copy(ICMPBUF->srcipaddr, &dev->d_ipaddr);
+
+      nvdbg("Outgoing ICMP packet length: %d (%d)\n",
+            dev->d_len, (ICMPBUF->len[0] << 8) | ICMPBUF->len[1]);
+
+#ifdef CONFIG_NET_STATISTICS
+      uip_stat.icmp.sent++;
+      uip_stat.ip.sent++;
+#endif
+    }
+
+  /* If an ICMP echo reply is received then there should also be
+   * a thread waiting to received the echo response.
+   */
+
+#ifdef CONFIG_NET_ICMP_PING
+  else if (ICMPBUF->type == ICMP_ECHO_REPLY && g_echocallback)
+    {
+      (void)uip_callbackexecute(dev, ICMPBUF, UIP_ECHOREPLY, g_echocallback);
+    }
+#endif
+
+  /* Otherwise the ICMP input was not processed */
+
+  else
     {
       ndbg("Unknown ICMP cmd: %d\n", ICMPBUF->type);
       goto typeerr;
     }
 
-  /* If we are configured to use ping IP address assignment, we use
-   * the destination IP address of this ping packet and assign it to
-   * ourself.
-   */
-
-#ifdef CONFIG_NET_PINGADDRCONF
-  if (dev->d_ipaddr == 0)
-    {
-      dev->d_ipaddr = ICMPBUF->destipaddr;
-    }
-#endif
-
-  ICMPBUF->type = ICMP_ECHO_REPLY;
-
-  if (ICMPBUF->icmpchksum >= HTONS(0xffff - (ICMP_ECHO << 8)))
-    {
-      ICMPBUF->icmpchksum += HTONS(ICMP_ECHO << 8) + 1;
-    }
-  else
-    {
-      ICMPBUF->icmpchksum += HTONS(ICMP_ECHO << 8);
-    }
-
-  /* Swap IP addresses. */
-
-  uiphdr_ipaddr_copy(ICMPBUF->destipaddr, ICMPBUF->srcipaddr);
-  uiphdr_ipaddr_copy(ICMPBUF->srcipaddr, &dev->d_ipaddr);
-
-  nvdbg("Outgoing ICMP packet length: %d (%d)\n",
-        dev->d_len, (ICMPBUF->len[0] << 8) | ICMPBUF->len[1]);
-
-#ifdef CONFIG_NET_STATISTICS
-  uip_stat.icmp.sent++;
-  uip_stat.ip.sent++;
-#endif
   return;
 
 typeerr:
@@ -198,7 +221,7 @@ typeerr:
           goto drop;
         }
     }
-  else if (ICMPBUF->type == ICMP6_ECHO)
+  else if (ICMPBUF->type == ICMP6_ECHO_REQUEST)
     {
       /* ICMP echo (i.e., ping) processing. This is simple, we only
        * change the ICMP type from ECHO to ECHO_REPLY and update the
@@ -212,6 +235,18 @@ typeerr:
       ICMPBUF->icmpchksum = 0;
       ICMPBUF->icmpchksum = ~uip_icmp6chksum(dev);
     }
+
+  /* If an ICMP echo reply is received then there should also be
+   * a thread waiting to received the echo response.
+   */
+
+#ifdef CONFIG_NET_ICMP_PING
+  else if (ICMPBUF->type == ICMP6_ECHO_REPLY && g_echocallback)
+    {
+      (void)uip_callbackexecute(dev, ICMPBUF, UIP_ECHOREPLY, g_echocallback);
+    }
+#endif
+
   else
     {
       ndbg("Unknown ICMP6 cmd: %d\n", ICMPBUF->type);
@@ -241,4 +276,5 @@ drop:
 #endif /* !CONFIG_NET_IPv6 */
 }
 
+#endif /* CONFIG_NET_ICMP */
 #endif /* CONFIG_NET */

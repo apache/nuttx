@@ -94,7 +94,7 @@ struct sendto_s
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-uint16 sendto_interrupt(struct uip_driver_s *dev, void *conn, void *pvprivate, uint16 flags)
+static uint16 sendto_interrupt(struct uip_driver_s *dev, void *conn, void *pvprivate, uint16 flags)
 {
   struct sendto_s *pstate = (struct sendto_s *)pvprivate;
 
@@ -111,12 +111,16 @@ uint16 sendto_interrupt(struct uip_driver_s *dev, void *conn, void *pvprivate, u
         }
 
       /* Check if the outgoing packet is available (it may have been claimed
-       * by a sendto interrupt serving a different thread.
+       * by a sendto interrupt serving a different thread -OR- if the output
+       * buffer currently contains unprocessed incoming data.  In these cases
+       * we will just have to wait for the next polling cycle.
        */
 
-      else if (dev->d_sndlen > 0)
+      else if (dev->d_sndlen > 0 || (flags & UIP_NEWDATA) != 0)
         {
-           /* Another thread has beat us sending data, wait for the next poll */
+           /* Another thread has beat us sending data or the buffer is busy,
+            * wait for the next polling cycle
+            */
 
            return flags;
         }

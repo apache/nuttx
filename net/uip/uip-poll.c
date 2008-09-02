@@ -70,6 +70,31 @@
  *
  ****************************************************************************/
 
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
+static inline int uip_pollicmp(struct uip_driver_s *dev, uip_poll_callback_t callback)
+{
+  /* Perform the UDP TX poll */
+
+  uip_icmppoll(dev);
+
+  /* Call back into the driver */
+
+  return callback(dev);
+}
+#endif /* CONFIG_NET_UDP */
+
+/****************************************************************************
+ * Function: uip_polludpconnections
+ *
+ * Description:
+ *   Poll all UDP connections for available packets to send.
+ *
+ * Assumptions:
+ *   This function is called from the CAN device driver and may be called from
+ *   the timer interrupt/watchdog handle level.
+ *
+ ****************************************************************************/
+
 #ifdef CONFIG_NET_UDP
 static int uip_polludpconnections(struct uip_driver_s *dev,
                                   uip_poll_callback_t callback)
@@ -92,8 +117,6 @@ static int uip_polludpconnections(struct uip_driver_s *dev,
 
   return bstop;
 }
-#else
-# define uip_polludpconnections(dev,callback) (0)
 #endif /* CONFIG_NET_UDP */
 
 /****************************************************************************
@@ -210,9 +233,19 @@ int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback)
   bstop = uip_polltcpconnections(dev, callback);
   if (!bstop)
     {
+#ifdef CONFIG_NET_UDP
       /* Traverse all of the allocated UDP connections and perform the poll action */
 
       bstop = uip_polludpconnections(dev, callback);
+      if (!bstop)
+#endif
+        {
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
+          /* Traverse all of the tasks waiting to send an ICMP ECHO request */
+
+          bstop = uip_pollicmp(dev, callback);
+#endif
+        }
   }
 
   return bstop;
@@ -262,7 +295,17 @@ int uip_timer(struct uip_driver_s *dev, uip_poll_callback_t callback, int hsec)
     {
       /* Traverse all of the allocated UDP connections and perform the poll action */
 
+#ifdef CONFIG_NET_UDP
       bstop = uip_polludpconnections(dev, callback);
+      if (!bstop)
+#endif
+        {
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
+          /* Traverse all of the tasks waiting to send an ICMP ECHO request */
+
+          bstop = uip_pollicmp(dev, callback);
+#endif
+        }
     }
 
   return bstop;

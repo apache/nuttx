@@ -407,6 +407,7 @@ void uip_input(struct uip_driver_s *dev)
 
   else
 #endif
+#ifdef CONFIG_NET_ICMP
   if (uip_ipaddr_cmp(dev->d_ipaddr, g_allzeroaddr))
     {
       /* If we are configured to use ping IP address configuration and
@@ -431,6 +432,7 @@ void uip_input(struct uip_driver_s *dev)
 
   /* Check if the pack is destined for out IP address */
   else
+#endif
     {
       /* Check if the packet is destined for our IP address. */
 #ifndef CONFIG_NET_IPv6

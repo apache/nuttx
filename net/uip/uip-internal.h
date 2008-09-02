@@ -55,37 +55,6 @@
  * Public Macro Definitions
  ****************************************************************************/
 
-/* TCP definitions */
-
-#define TCP_FIN 0x01
-#define TCP_SYN 0x02
-#define TCP_RST 0x04
-#define TCP_PSH 0x08
-#define TCP_ACK 0x10
-#define TCP_URG 0x20
-#define TCP_CTL 0x3f
-
-#define TCP_OPT_END     0   /* End of TCP options list */
-#define TCP_OPT_NOOP    1   /* "No-operation" TCP option */
-#define TCP_OPT_MSS     2   /* Maximum segment size TCP option */
-
-#define TCP_OPT_MSS_LEN 4   /* Length of TCP MSS option. */
-
-/* ICMP/ICMP6 definitions */
-
-#define ICMP_ECHO_REPLY 0
-#define ICMP_ECHO       8
-
-#define ICMP6_ECHO_REPLY             129
-#define ICMP6_ECHO                   128
-#define ICMP6_NEIGHBOR_SOLICITATION  135
-#define ICMP6_NEIGHBOR_ADVERTISEMENT 136
-
-#define ICMP6_FLAG_S (1 << 6)
-
-#define ICMP6_OPTION_SOURCE_LINK_ADDRESS 1
-#define ICMP6_OPTION_TARGET_LINK_ADDRESS 2
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -105,6 +74,12 @@ extern uint16 g_ipid;
 
 #if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
 extern uint8 uip_reasstmr;
+#endif
+
+/* List of applications waiting for ICMP ECHO REPLY */
+
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
+extern struct uip_callback_s *g_echocallback;
 #endif
 
 /****************************************************************************
@@ -213,6 +188,17 @@ EXTERN void uip_udpcallback(struct uip_driver_s *dev,
 /* Defined in uip-icmpinput.c ***********************************************/
 
 EXTERN void uip_icmpinput(struct uip_driver_s *dev);
+
+#ifdef CONFIG_NET_ICMP_PING
+/* Defined in uip-icmpoll.c *************************************************/
+
+EXTERN void uip_icmppoll(struct uip_driver_s *dev);
+
+/* Defined in uip-icmsend.c *************************************************/
+
+EXTERN void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr);
+
+#endif /* CONFIG_NET_ICMP_PING */
 #endif /* CONFIG_NET_ICMP */
 
 #undef EXTERN

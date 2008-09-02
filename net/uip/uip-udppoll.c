@@ -2,7 +2,7 @@
  * net/uip/uip-udppoll.c
  * Poll for the availability of UDP TX data
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -119,7 +119,7 @@ void uip_udppoll(struct uip_driver_s *dev, struct uip_udp_conn *conn)
         }
     }
 
-  /* Make sure that d_len is zerp meaning that there is nothing to be sent */
+  /* Make sure that d_len is zero meaning that there is nothing to be sent */
 
   dev->d_len   = 0;
 }
