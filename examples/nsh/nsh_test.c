@@ -315,7 +315,6 @@ static inline int unaryexpression(FAR struct nsh_vtbl_s *vtbl, char **argv)
 static int expression(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   int value;
-  boolean valid;
   int i = 0;
 
   /* Check for unary operations on expressions */
@@ -368,11 +367,7 @@ static int expression(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
        if (strcmp(argv[i], "-a") == 0)
          {
-            if (!valid)
-              {
-                 goto errout_syntax;
-              }
-            else if (value != TEST_TRUE)
+            if (value != TEST_TRUE)
               {
                  return TEST_FALSE;
               }
@@ -387,11 +382,7 @@ static int expression(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
        else if (strcmp(argv[i], "-o") == 0)
          {
-           if (!valid)
-             {
-                goto errout_syntax;
-             }
-           else if (value == TEST_TRUE)
+           if (value == TEST_TRUE)
              {
                 return TEST_TRUE;
              }
