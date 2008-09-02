@@ -49,10 +49,13 @@
  * Definitions
  ****************************************************************************/
 
-/* The telnetd interface requires pthread support */
+/* The telnetd interface and background commands require pthread support */
 
 #ifdef CONFIG_DISABLE_PTHREAD
 #  undef CONFIG_EXAMPLES_NSH_TELNET
+#  ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
+#    define CONFIG_EXAMPLES_NSH_DISABLEBG 1
+#  endif
 #endif
 
 /* One front end must be defined */
@@ -114,6 +117,8 @@
 # define CONFIG_LIB_HOMEDIR "/"
 #endif
 
+/* Method access macros */
+
 #define nsh_clone(v)           (v)->clone(v)
 #define nsh_release(v)         (v)->release(v)
 #define nsh_linebuffer(v)      (v)->linebuffer(v)
@@ -126,6 +131,8 @@
 #else
 # define nsh_output            vtbl->output
 #endif
+
+/* Size of info to be saved in call to nsh_redirect */
 
 #define SAVE_SIZE (sizeof(int) + sizeof(FILE*) + sizeof(boolean))
 
@@ -158,7 +165,7 @@ struct nsh_state_s
 
 struct nsh_parser_s
 {
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
   boolean   np_bg;       /* TRUE: The last command executed in background */
 #endif
   boolean   np_redirect; /* TRUE: Output from the last command was re-directed */
@@ -166,7 +173,7 @@ struct nsh_parser_s
 #ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
   ubyte     np_ndx;      /* Current index into np_st[] */
 #endif
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
   int       np_nice;     /* "nice" value applied to last background cmd */
 #endif
 
@@ -187,7 +194,7 @@ struct nsh_vtbl_s
    * of the front end.
    */
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
   FAR struct nsh_vtbl_s *(*clone)(FAR struct nsh_vtbl_s *vtbl);
   void (*addref)(FAR struct nsh_vtbl_s *vtbl);
   void (*release)(FAR struct nsh_vtbl_s *vtbl);

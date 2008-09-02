@@ -117,6 +117,13 @@ examples/nsh
       if-then[-else]-fi construct.  This would only be set on systems
       where a minimal footprint is a necessity and scripting is not.
 
+  * CONFIG_EXAMPLES_NSH_DISABLEBG
+      This can be set to 'y' to suppress support for background
+      commands.  This setting disables the 'nice' command prefix and
+      the '&' command suffix.  This would only be set on systems
+      where a minimal footprint is a necessity and background command
+      execution is not.
+
   * CONFIG_EXAMPLES_NSH_CONSOLE
       If CONFIG_EXAMPLES_NSH_CONSOLE is set to 'y', then a serial
       console front-end is selected.

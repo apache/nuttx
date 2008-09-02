@@ -131,8 +131,10 @@ struct telnetd_s
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
 static void tio_semtake(struct telnetio_s *tio);
 static FAR struct nsh_vtbl_s *nsh_telnetclone(FAR struct nsh_vtbl_s *vtbl);
+#endif
 static void nsh_telnetrelease(FAR struct nsh_vtbl_s *vtbl);
 static int nsh_telnetoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
 static int nsh_redirectoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
@@ -228,8 +230,10 @@ static FAR struct telnetd_s *nsh_allocstruct(void)
   struct telnetd_s *pstate = (struct telnetd_s *)zalloc(sizeof(struct telnetd_s));
   if (pstate)
     {
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
       pstate->tn_vtbl.clone      = nsh_telnetclone;
       pstate->tn_vtbl.release    = nsh_telnetrelease;
+#endif
       pstate->tn_vtbl.output     = nsh_telnetoutput;
       pstate->tn_vtbl.linebuffer = nsh_telnetlinebuffer;
       pstate->tn_vtbl.redirect   = nsh_telnetredirect;
@@ -673,6 +677,7 @@ static FAR char *nsh_telnetlinebuffer(FAR struct nsh_vtbl_s *vtbl)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
 static FAR struct nsh_vtbl_s *nsh_telnetclone(FAR struct nsh_vtbl_s *vtbl)
 {
   FAR struct telnetd_s  *pstate = (FAR struct telnetd_s *)vtbl;
@@ -696,6 +701,7 @@ static FAR struct nsh_vtbl_s *nsh_telnetclone(FAR struct nsh_vtbl_s *vtbl)
     }
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: nsh_telnetrelease
@@ -705,6 +711,7 @@ static FAR struct nsh_vtbl_s *nsh_telnetclone(FAR struct nsh_vtbl_s *vtbl)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
 static void nsh_telnetrelease(FAR struct nsh_vtbl_s *vtbl)
 {
   FAR struct telnetd_s *pstate = (FAR struct telnetd_s *)vtbl;
@@ -719,6 +726,7 @@ static void nsh_telnetrelease(FAR struct nsh_vtbl_s *vtbl)
     }
   free(pstate);
 }
+#endif
 
 /****************************************************************************
  * Name: nsh_telnetredirect
@@ -755,7 +763,7 @@ static void nsh_telnetredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *s
 }
 
 /****************************************************************************
- * Name: nsh_telnetredirect
+ * Name: nsh_telnetundirect
  *
  * Description:
  *   Set up for redirected output

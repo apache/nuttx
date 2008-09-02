@@ -74,7 +74,7 @@ struct serialsave_s
  * Private Function Prototypes
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
 static FAR struct nsh_vtbl_s *nsh_consoleclone(FAR struct nsh_vtbl_s *vtbl);
 static void nsh_consolerelease(FAR struct nsh_vtbl_s *vtbl);
 #endif
@@ -105,7 +105,7 @@ static inline FAR struct serial_s *nsh_allocstruct(void)
   struct serial_s *pstate = (struct serial_s *)zalloc(sizeof(struct serial_s));
   if (pstate)
     {
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
       pstate->ss_vtbl.clone      = nsh_consoleclone;
       pstate->ss_vtbl.release    = nsh_consolerelease;
 #endif
@@ -223,7 +223,7 @@ static FAR char *nsh_consolelinebuffer(FAR struct nsh_vtbl_s *vtbl)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
 static FAR struct nsh_vtbl_s *nsh_consoleclone(FAR struct nsh_vtbl_s *vtbl)
 {
   FAR struct serial_s *pstate = (FAR struct serial_s *)vtbl;
@@ -251,7 +251,7 @@ static FAR struct nsh_vtbl_s *nsh_consoleclone(FAR struct nsh_vtbl_s *vtbl)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
 static void nsh_consolerelease(FAR struct nsh_vtbl_s *vtbl)
 {
   FAR struct serial_s *pstate = (FAR struct serial_s *)vtbl;
@@ -291,7 +291,7 @@ static void nsh_consoleredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *
 }
 
 /****************************************************************************
- * Name: nsh_consoleredirect
+ * Name: nsh_consoleundirect
  *
  * Description:
  *   Set up for redirected output

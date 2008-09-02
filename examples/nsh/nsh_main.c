@@ -50,7 +50,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
 #  include <pthread.h>
 #endif
 
@@ -72,7 +72,7 @@
  * Maximum size is NSH_MAX_ARGUMENTS+5
  */
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
 #  define MAX_ARGV_ENTRIES (NSH_MAX_ARGUMENTS+5)
 #else
 #  define MAX_ARGV_ENTRIES (NSH_MAX_ARGUMENTS+4)
@@ -97,7 +97,7 @@ struct cmdmap_s
   const char *usage;      /* Usage instructions for 'help' command */
 };
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
 struct cmdarg_s
 {
   FAR struct nsh_vtbl_s *vtbl;      /* For front-end interaction */
@@ -238,7 +238,7 @@ static int cmd_help(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   const struct cmdmap_s *ptr;
 
   nsh_output(vtbl, "NSH command forms:\n");
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
   nsh_output(vtbl, "  [nice [-d <niceness>>]] <cmd> [> <file>|>> <file>] [&]\n");
 #else
   nsh_output(vtbl, "  <cmd> [> <file>|>> <file>]\n");
@@ -353,7 +353,7 @@ static int nsh_execute(FAR struct nsh_vtbl_s *vtbl, int argc, char *argv[])
  * Name: nsh_releaseargs
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
 static void nsh_releaseargs(struct cmdarg_s *arg)
 {
   FAR struct nsh_vtbl_s *vtbl = arg->vtbl;
@@ -387,7 +387,7 @@ static void nsh_releaseargs(struct cmdarg_s *arg)
  * Name: nsh_child
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
 static pthread_addr_t nsh_child(pthread_addr_t arg)
 {
   struct cmdarg_s *carg = (struct cmdarg_s *)arg;
@@ -411,7 +411,7 @@ static pthread_addr_t nsh_child(pthread_addr_t arg)
  * Name: nsh_cloneargs
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
 static inline struct cmdarg_s *nsh_cloneargs(FAR struct nsh_vtbl_s *vtbl,
                                              int fd, int argc, char *argv[])
 {
@@ -770,7 +770,7 @@ static inline int nsh_saveresult(FAR struct nsh_vtbl_s *vtbl, boolean result)
  * Name: nsh_nice
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
 static inline int nsh_nice(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, FAR char **saveptr)
 {
   FAR char *cmd = *ppcmd;
@@ -900,7 +900,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
   /* Initialize parser state */
 
   memset(argv, 0, MAX_ARGV_ENTRIES*sizeof(FAR char *));
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
   vtbl->np.np_bg       = FALSE;
 #endif
   vtbl->np.np_redirect = FALSE;
@@ -921,7 +921,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
   /* Handle nice */
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
   if (nsh_nice(vtbl, &cmd, &saveptr) != 0)
     {
       goto errout;
@@ -972,7 +972,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
   /* Check if the command should run in background */
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
   if (argc > 1 && strcmp(argv[argc-1], "&") == 0)
     {
       vtbl->np.np_bg = TRUE;
@@ -1036,7 +1036,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
   /* Handle the case where the command is executed in background */
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
   if (vtbl->np.np_bg)
     {
       struct sched_param param;
@@ -1164,7 +1164,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
   return nsh_saveresult(vtbl, FALSE);
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
 errout_with_redirect:
   if (vtbl->np.np_redirect)
     {
