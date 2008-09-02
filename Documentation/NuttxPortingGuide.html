@@ -1567,7 +1567,12 @@ The system can be re-made subsequently by just typing <code>make</code>.
     <code>CONFIG_NET_UDP_CONNS</code>: The maximum amount of concurrent UDP connections
   </li>
   <li>
-    <code>CONFIG_NET_ICMP</code>: ICMP ping support on or off
+    <code>CONFIG_NET_ICMP</code>: Enable minimal ICMP support. Includes built-in support
+    for sending replies to received ECHO (ping) requests.
+  </li>
+  <li>
+    <code>CONFIG_NET_ICMP_PING</code>: Provide interfaces to support application level
+    support for sending ECHO (ping) requests and associating ECHO replies.
   </li>
   <li>
     <code>CONFIG_NET_PINGADDRCONF</code>: Use "ping" packet for setting IP address
