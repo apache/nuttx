@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 #define ICMPBUF ((struct uip_icmpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
-#define ICMPDAT &dev->d_buf[UIP_LLH_LEN + sizeof(struct uip_icmpip_hdr)]
+#define ICMPDAT (&dev->d_buf[UIP_LLH_LEN + sizeof(struct uip_icmpip_hdr)])
 
 /* Allocate a new ICMP data callback */
 
@@ -149,6 +149,7 @@ static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
 {
   struct icmp_ping_s *pstate = (struct icmp_ping_s *)pvprivate;
   int failcode = -ETIMEDOUT;
+  int i;
 
   nvdbg("flags: %04x\n", flags);
   if (pstate)
@@ -162,6 +163,7 @@ static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
            * that the destination address is not reachable.
            */
 
+          nvdbg("Not reachable\n");
           failcode = -ENETUNREACH;
         }
       else
@@ -175,8 +177,17 @@ static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
           if ((flags & UIP_ECHOREPLY) != 0 && conn != NULL)
             {
               struct uip_icmpip_hdr *icmp = (struct uip_icmpip_hdr *)conn;
+              ndbg("ECHO reply: id=%d seqno=%d\n", ntohs(icmp->id), ntohs(icmp->seqno));
+
               if (ntohs(icmp->id) == pstate->png_id)
                 {
+                  /* Consume the ECHOREPLY */
+
+                  flags &= ~UIP_ECHOREPLY;
+                  dev->d_len = 0;
+
+                  /* Return the result to the caller */
+
                   pstate->png_result = OK;
                   pstate->png_seqno  = ntohs(icmp->seqno);
                   goto end_wait;
@@ -213,13 +224,19 @@ static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
 #else
 # error "IPv6 ECHO Request not implemented"
 #endif
-              memset(ICMPDAT, 0, pstate->png_datlen);
+              /* Add some easily verifiable data */
+
+              for (i = 0; i < pstate->png_datlen; i++)
+                {
+                  ICMPDAT[i] = i;
+                }
 
               /* Send the ICMP echo request.  Note that d_sndlen is set to
                * the size of the ICMP payload and does not include the size
                * of the ICMP header.
                */
 
+              ndbg("Send ECHO request: seqno=%d\n", pstate->png_seqno);
               dev->d_sndlen= pstate->png_datlen + 4;
               uip_icmpsend(dev, &pstate->png_addr);
               pstate->png_sent = TRUE;
@@ -233,7 +250,7 @@ static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
         {
           /* Yes.. report the timeout */
 
-          nvdbg("Ping timeout\n");
+          ndbg("Ping timeout\n");
           pstate->png_result = failcode;
           goto end_wait;
         }
@@ -243,6 +260,8 @@ static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
   return flags;
 
 end_wait:
+  nvdbg("Resuming\n");
+
   /* Do not allow any further callbacks */
 
   pstate->png_cb->flags   = 0;
@@ -313,6 +332,11 @@ int uip_ping(uip_ipaddr_t addr, uint16 id, uint16 seqno, uint16 datalen, int dse
       state.png_cb->flags   = UIP_POLL|UIP_ECHOREPLY;
       state.png_cb->private = (void*)&state;
       state.png_cb->event   = ping_interrupt;
+      state.png_result      = -EINTR; /* Assume sem-wait interrupted by signal */
+
+      /* Notify the device driver of the availaibilty of TX data */
+
+      netdev_txnotify(&state.png_addr);
 
       /* Wait for either the full round trip transfer to complete or
        * for timeout to occur. (1) sem_wait will also terminate if a
@@ -321,7 +345,7 @@ int uip_ping(uip_ipaddr_t addr, uint16 id, uint16 seqno, uint16 datalen, int dse
        * re-enabled when the task restarts.
        */
 
-      state.png_result = -EINTR; /* Assume sem-waited interrupt by signal */
+      ndbg("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
       sem_wait(&state.png_sem);
 
       uip_icmpcallbackfree(state.png_cb);
@@ -334,10 +358,12 @@ int uip_ping(uip_ipaddr_t addr, uint16 id, uint16 seqno, uint16 datalen, int dse
 
   if (!state.png_result)
     {
+      ndbg("Return seqno=%d\n", state.png_seqno);
       return (int)state.png_seqno;
     }
   else
     {
+      ndbg("Return error=%d\n", -state.png_result);
       return state.png_result;
     }
 }

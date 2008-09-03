@@ -91,7 +91,13 @@
 #define UIP_TS_MASK     15
 #define UIP_STOPPED     16
 
-/* Header sizes */
+/* Flag bits in 16-bit flags+ipoffset IPv4 TCP header field */
+
+#define UIP_TCPFLAG_RESERVED  0x8000
+#define UIP_TCPFLAG_DONTFRAG  0x4000
+#define UIP_TCPFLAG_MOREFRAGS 0x2000
+
+/* TCP header sizes */
 
 #define UIP_TCPH_LEN    20    /* Size of TCP header */
 #define UIP_IPTCPH_LEN (UIP_TCPH_LEN + UIP_IPH_LEN)    /* Size of IP + TCP header */

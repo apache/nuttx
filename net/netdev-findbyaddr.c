@@ -105,7 +105,7 @@ static inline boolean netdev_maskcmp(uip_ipaddr_t *ipaddr, uip_ipaddr_t *raddr,
  *
  ****************************************************************************/
 
-FAR struct uip_driver_s *netdev_findbyaddr(uip_ipaddr_t *raddr)
+FAR struct uip_driver_s *netdev_findbyaddr(const uip_ipaddr_t *raddr)
 {
   struct uip_driver_s *dev;
 

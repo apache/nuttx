@@ -236,7 +236,7 @@ uint16 uip_callbackexecute(FAR struct uip_driver_s *dev, void *pvconn, uint16 fl
            * beginning of the list (which will be ignored on this pass)
            */
 
-          vdbg("Call event=%p with flags=%04x\n", list->event, flags);
+          nvdbg("Call event=%p with flags=%04x\n", list->event, flags);
           flags = list->event(dev, pvconn, list->private, flags);
         }
 

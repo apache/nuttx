@@ -270,14 +270,14 @@ int cmd_ping(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   uip_ipaddr_t ipaddr;
   uint32 start;
   uint32 next;
-  uint32 dsec;
+  uint32 dsec  = 10;
   uint16 id;
-  int sec      = 1;
   int count    = 10;
   int option;
   int seqno;
   int replies  = 0;
   int elapsed;
+  int tmp;
   int i;
 
   /* Get the ping options */
@@ -296,12 +296,13 @@ int cmd_ping(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
             break;
 
           case 'i':
-            sec = atoi(optarg);
-            if (sec < 1 || sec >= 4294)
+            tmp = atoi(optarg);
+            if (tmp < 1 || tmp >= 4294)
               {
                 fmt = g_fmtargrange;
                 goto errout;
               }
+            dsec = 10 * tmp;
             break;
 
           case ':':
@@ -334,39 +335,67 @@ int cmd_ping(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
       goto errout;
     }
 
-  /* Convert the ping interval to microseconds  and deciseconds*/
-
-  dsec = 10 * sec;
-
   /* Get the ID to use */
 
   id = ping_newid();
 
   /* Loop for the specified count */
 
-  nsh_output(vtbl, "PING %s %dbytes of data\n", staddr, DEFAULT_PING_DATALEN);
+  nsh_output(vtbl, "PING %s %d bytes of data\n", staddr, DEFAULT_PING_DATALEN);
   start = g_system_timer;
-  for (i = 0; i < count; i++)
+  for (i = 1; i <= count; i++)
     {
-      next = g_system_timer;
+      /* Send the ECHO request and wait for the response */
+
+      next  = g_system_timer;
       seqno = uip_ping(ipaddr, id, i, DEFAULT_PING_DATALEN, dsec);
-      elapsed = TICK2MSEC(g_system_timer - next);
-      if (seqno >= 0)
+
+      /* Was any response returned? We can tell if a non-negative sequence
+       * number was returned.
+       */
+
+      if (seqno >= 0 && seqno <= i)
         {
+          /* Get the elpased time from the time that the request was
+           * sent until the response was received.  If we got a response
+           * to an earlier request, then fudge the elpased time.
+           */
+
+          elapsed = TICK2MSEC(g_system_timer - next);
+          if (seqno < i)
+            {
+              elapsed += 100*dsec*(i - seqno);
+            }
+
+          /* Report the receipt of the reply */
+
           nsh_output(vtbl, "%d bytes from %s: icmp_seq=%d time=%d ms\n",
                      DEFAULT_PING_DATALEN, staddr, seqno, elapsed);
           replies++;
         }
+
+      /* Wait for the remainder of the interval.  If the last seqno<i,
+       * then this is a bad idea... we will probably lose the response
+       * to the current request!
+       */
+
       elapsed = TICK2DSEC(g_system_timer - next);
       if (elapsed < dsec)
         {
           usleep(100000*dsec);
         }
     }
+
+  /* Get the total elapsed time */
+
   elapsed = TICK2MSEC(g_system_timer - start);
 
-  nsh_output(vtbl, "%d packets transmitted, %d received, %d%% packet loss, time %dms\n",
-             count, replies, (100*replies + count/2)/count, elapsed);
+  /* Calculate the percentage of lost packets */
+
+  tmp = (100*(count - replies) + (count >> 1)) / count;
+
+  nsh_output(vtbl, "%d packets transmitted, %d received, %d%% packet loss, time %d ms\n",
+             count, replies, tmp, elapsed);
   return OK;
 
 errout:

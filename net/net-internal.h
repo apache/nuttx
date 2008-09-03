@@ -174,13 +174,13 @@ EXTERN FAR struct uip_driver_s *netdev_findbyname(const char *ifname);
 /* net-findbyaddr.c **********************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-EXTERN FAR struct uip_driver_s *netdev_findbyaddr(uip_ipaddr_t *raddr);
+EXTERN FAR struct uip_driver_s *netdev_findbyaddr(const uip_ipaddr_t *raddr);
 #endif
 
 /* net-txnotify.c ************************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-EXTERN void netdev_txnotify(uip_ipaddr_t *raddr);
+EXTERN void netdev_txnotify(const uip_ipaddr_t *raddr);
 #endif
 
 /* net-count.c ***************************************************************/

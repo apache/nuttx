@@ -323,10 +323,7 @@ void uip_arp_arpin(struct uip_driver_s *dev)
 
             uip_arp_update(ARPBUF->ah_sipaddr, ARPBUF->ah_shwaddr);
 
-            /* The reply opcode is 2. */
-
-            ARPBUF->ah_opcode = HTONS(2);
-
+            ARPBUF->ah_opcode = HTONS(ARP_REPLY);
             memcpy(ARPBUF->ah_dhwaddr, ARPBUF->ah_shwaddr, ETHER_ADDR_LEN);
             memcpy(ARPBUF->ah_shwaddr, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
             memcpy(ETHBUF->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);

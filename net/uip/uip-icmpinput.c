@@ -243,7 +243,23 @@ typeerr:
 #ifdef CONFIG_NET_ICMP_PING
   else if (ICMPBUF->type == ICMP6_ECHO_REPLY && g_echocallback)
     {
-      (void)uip_callbackexecute(dev, ICMPBUF, UIP_ECHOREPLY, g_echocallback);
+      uint16 flags = UIP_ECHOREPLY;
+
+      if (g_echocallback)
+        {
+          /* Dispatch the ECHO reply to the waiting thread */
+
+          flags = uip_callbackexecute(dev, ICMPBUF, flags, g_echocallback);
+        }
+
+      /* If the ECHO reply was not handled, then drop the packet */
+
+      if (flags == UIP_ECHOREPLY)
+        {
+          /* The ECHO reply was not handled */
+
+          goto drop;
+        }
     }
 #endif
 
