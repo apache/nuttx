@@ -447,4 +447,5 @@
 	* Add support to uIP for application access to ICMP protocol stacks; Add
 	  ping request logic.
 	* NSH: Add ping command
+	* Correct IP checksum calculation in ICMP and UDP message send logic.
 

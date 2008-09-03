@@ -92,7 +92,7 @@ void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr)
 {
   if (dev->d_sndlen > 0)
     {
-      /* The total lenth to send is the size of the application data plus
+      /* The total length to send is the size of the application data plus
        * the IP and ICMP headers (and, eventually, the ethernet header)
        */
 
@@ -130,18 +130,18 @@ void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr)
       ++g_ipid;
       ICMPBUF->ipid[0]     = g_ipid >> 8;
       ICMPBUF->ipid[1]     = g_ipid & 0xff;
-      ICMPBUF->ipoffset[0] = 0;
-      ICMPBUF->ipoffset[1] = 0;
+      ICMPBUF->ipoffset[0] = UIP_TCPFLAG_DONTFRAG >> 8;
+      ICMPBUF->ipoffset[1] = UIP_TCPFLAG_DONTFRAG & 0xff;
       ICMPBUF->ttl         = UIP_TTL;
       ICMPBUF->proto       = UIP_PROTO_ICMP;
+
+      uiphdr_ipaddr_copy(ICMPBUF->srcipaddr, &dev->d_ipaddr);
+      uiphdr_ipaddr_copy(ICMPBUF->destipaddr, destaddr);
 
       /* Calculate IP checksum. */
 
       ICMPBUF->ipchksum    = 0;
       ICMPBUF->ipchksum    = ~(uip_ipchksum(dev));
-
-      uiphdr_ipaddr_copy(ICMPBUF->srcipaddr, &dev->d_ipaddr);
-      uiphdr_ipaddr_copy(ICMPBUF->destipaddr, destaddr);
 
 #endif /* CONFIG_NET_IPv6 */
 

@@ -134,13 +134,13 @@ void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn)
       UDPBUF->ttl         = conn->ttl;
       UDPBUF->proto       = UIP_PROTO_UDP;
 
+      uiphdr_ipaddr_copy(UDPBUF->srcipaddr, &dev->d_ipaddr);
+      uiphdr_ipaddr_copy(UDPBUF->destipaddr, &conn->ripaddr);
+
       /* Calculate IP checksum. */
 
       UDPBUF->ipchksum    = 0;
       UDPBUF->ipchksum    = ~(uip_ipchksum(dev));
-
-      uiphdr_ipaddr_copy(UDPBUF->srcipaddr, &dev->d_ipaddr);
-      uiphdr_ipaddr_copy(UDPBUF->destipaddr, &conn->ripaddr);
 
 #endif /* CONFIG_NET_IPv6 */
 
