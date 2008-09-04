@@ -1,0 +1,1355 @@
+<html>
+<head>
+<title>NuttX</title>
+</head>
+<body background="backgd.gif">
+<hr><hr>
+<table width ="100%">
+  <tr align="center" bgcolor="#e4e4e4">
+    <td>
+      <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
+      <p>Last Updated: September 3, 2008</p>
+    </td>
+  </tr>
+</table>
+<hr><hr>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+  <h1>Table of Contents</h1>
+    </td>
+  </tr>
+</table>
+
+<center><table width ="80%">
+<tr>
+<td>
+<table>
+<tr>
+  <td><img src="favicon.ico"></td>
+  <td>
+    <a href="#overview">1.0 Overview</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#frontend">1.1 Console/NSH Front End</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdoverview">1.2 Command Overview</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#conditional">1.3 Conditional Command Execution</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#builtinvars">1.4 Built-In Variables</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#currentwd">1.5 Current Working Directory</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#environvars">1.6 Environment Variables</a>
+  </td>
+</tr>
+
+<tr>
+  <td><img src="favicon.ico"></td>
+  <td>
+    <a href="#commands">2.0 Commands</a>.
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdtest">2.1 Evaluate Expression (test)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdcat">2.2 Concatenate Files (cat)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdcd">2.3 Change Current Working Directory (cd)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdcp">2.4 Copy Files (cp)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdecho">2.5 Echo Strings and Variables (echo)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdexec">2.6 Execute User Code (exec)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdexit">2.7 Exit NSH (exit)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdhelp">2.8 Show Usage Command Usage (help)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdifconfig">2.9 Show Network Configuration (ifconfig)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdls">2.10 List Directory Contents (ls)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdmbhw">2.11 Access Memory (mb, mh, and mw)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdmem">2.12 Show Memory Manager Status (mem)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdps">2.13 Show Current Tasks and Threads (ps)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdmkdir">2.14 Create a Directory (mkdir)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdmkfatfs">2.15 Create a FAT Filesystem (mkfatfs)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdmkfifo">2.16 Create a FIFO (mkfifo)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdmount">2.17 Mount a File System (mount)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdping">2.18 Check Network Peer (ping)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdpwd">2.19 Show Current Working Directory (pwd)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdrm">2.20 Remove a File (rm)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdrmdir">2.21 Remove a Directory (rmdir)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdset">2.22 Set an Environment Variable (set)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdsh">2.23 Execute an NSH Script (sh)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdsleep">2.24 Wait for Seconds (sleep)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdunmount">2.25 Unmount a File System (umount)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdunset">2.26 Unset an Environment Variable (unset)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdusleep">2.27 Wait for Microseconds (usleep)</a>
+  </td>
+</tr>
+<tr>
+  <td><img src="favicon.ico"></td>
+  <td>
+    <a href="#configuration">3.0 Configuration Settings</a>
+</td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmddependencies">3.1 Command Dependencies on Configuration Settings</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#nshconfiguration">3.2  NSH-Specific Configuration Settings</a>
+  </td>
+</tr>
+</table>
+</td>
+</tr>
+</table></center>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="overview"><h1>1.0 Overview</h1></a>
+  </td>
+  </tr>
+</table>
+
+<p>
+  The <code>examples/nsh</code> sub-directory contains the NuttShell (NSH).
+  NSH is a simple shell application for NuttX.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="frontend"><h2>1.1 Console/NSH Front End</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p>
+  Using settings in the configuration file, NSH may be configured to
+  use either the serial stdin/out or a telnet connection as the console
+  or BOTH.  When NSH is started, you will see the following welcome on
+  either console:
+  <ul><pre>
+NuttShell (NSH)
+nsh&gt;
+</pre></ul>
+  <code>nsh&gt;</code> is the NSH prompt and indicates that you may enter a command
+   from the console.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdoverview"><h2>1.2 Command Overview</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p>
+  <b>Simple, Re-directed, and Background Commands</b>.
+  The NuttShell (NSH) is a simple shell application.
+  NSH supports the following commands forms:
+</p>
+<ul><table>
+  <tr>
+     <td>Simple command:</td>
+     <td><code>&lt;cmd&gt;</code></td>
+  </tr>
+  <tr>
+     <td>Command with re-directed output:</td>
+     <td><code>
+         &lt;cmd&gt; &gt; &lt;file&gt;<br>
+         &lt;cmd&gt; &gt;&gt; &lt;file&gt;
+     </code></td>
+  </tr>
+  <tr>
+     <td>Background command:</td>
+     <td><code>&lt;cmd&gt; &amp;</code></td>
+  </tr>
+  <tr>
+     <td>Re-directed background command:</td>
+     <td><code>
+       &lt;cmd&gt; &gt; &lt;file&gt; &amp;<br>
+       &lt;cmd&gt; &gt;&gt; &lt;file&gt; &amp;
+     </code></td>
+  </tr>
+</table></ul>
+<p>Where:</p>
+<ul><table>
+  <tr>
+    <td><code>&lt;cmd&gt;</code></td>
+    <td>
+      is any one of the simple commands listed later.
+    </td>
+  </tr>
+  <tr>
+    <td><code>&lt;file&gt;</code></td>
+    <td>
+      is the full or relative path to any writable object
+      in the filesystem name space (file or character driver).
+      Such objects will be referred to simply as files throughout
+      this document.
+    </td>
+  </tr>
+</table></ul>
+<p>
+  <b><big><code>nice</code></big>'d Background Commands</b>
+  NSH executes at the mid-priority (128).  Backgrounded commands can
+  be made to execute at higher or lower priorities using <code>nice</code>:
+</p>
+<ul><code>
+  [nice [-d &lt;niceness&gt;&gt;]] &lt;cmd&gt; [&gt; &lt;file&gt;|&gt;&gt; &lt;file&gt;] [&amp;]
+</code></ul>
+<p>
+  Where <code>&lt;niceness&gt;</code> is any value between -20 and 19 where lower
+  (more negative values) correspond to higher priorities.
+  The default niceness is 10.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="conditional"><h2>1.3 Conditional Command Execution</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p>
+  An <code>if-then[-else]-fi</code> construct is also supported in order to
+  support conditional execution of commands.  This works from the
+  command line but is primarily intended for use within NSH scripts
+  (see the <a href="#cmdsh"><code>sh</code></a> commnd).  The syntax is as follows:
+</p>
+<ul><pre>
+if &lt;cmd&gt;
+then
+  [sequence of &lt;cmd&gt;]
+else
+  [sequence of &lt;cmd&gt;]
+fi
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="builtinvars"><h2>1.4 Built-In Variables</h2></a>
+  </td>
+  </tr>
+</table>
+
+<ul><table>
+  <tr>
+    <td valign="top"><b><code>$?</code></b></td>
+    <td>
+      The result of the last simple command execution.
+      On backgrounded commands, this variable holds only the result of spawning the background command.
+    </td>
+  </tr>
+</table></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="currentwd"><h2>1.5 Current Working Directory</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p>
+  <b><code>cd</code> and <code>pwd</code></b>.
+  All path arguments to commands may be either an absolute path or a
+  path relative to the current working directory.  The current working
+  directory is set using the 'cd' command and can be queried either
+  by using the <a href="#cmdpwd"><code>pwd</code></a> command or by
+  using the <a href="#cmdecho"><code>echo</code></a> <a href="#environvars"><code>$PWD</code></a>
+  command.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="environvars"><h2>1.6 Environment Variables</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p>
+  <b>Environment Variables:</b>
+</p>
+<ul><table>
+  <tr>
+    <td><b><code>PWD</code></b></td><td>The current working directory</td>
+  </tr>
+  <tr>
+    <td><b><code>OLDPWD</code></b></td><td>The previous working directory</td>
+  </tr>
+</table></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="commands"><h1>2.0 Commands</h1></a>
+  </td>
+  </tr>
+</table>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdtest"><h2>2.1 Evaluate Expression (test)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+[ &lt;expression&gt; ]
+test &lt;expression&gt;
+</pre></ul>
+<p>
+   <b>Synopsis</b>.
+   These are two alternative forms of the same command.  They support
+   evaluation of a boolean expression which sets <a href="#builtinvars"><code>$?</code></a>.
+   This command is used most frequently as the conditional command following the
+   <code>if</code> in the <a href="#conditional"><code>if-then[-else]-fi</code></a> construct.
+</p>
+<p><b>Expression Syntax:</b></p>
+<ul>
+  <p>
+     expression = simple-expression | !expression | expression -o expression | expression -a expression
+  </p>
+  <p>
+     simple-expression = unary-expression | binary-expression
+  </p>
+  <p>
+     unary-expression = string-unary | file-unary
+  </p>
+  <p>
+     string-unary = -n string | -z string
+  </p>
+  <p>
+     file-unary = -b file | -c file | -d file | -e file | -f file | -r file | -s file | -w file
+  </p>
+  <p>
+     binary-expression = string-binary | numeric-binary
+  </p>
+  <p>
+     string-binary = string = string | string == string | string != string
+  </p>
+  <p>
+     numeric-binary = integer -eq integer | integer -ge integer | integer -gt integer | integer -le integer |
+                      integer -lt integer | integer -ne integer
+  </p>
+</ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdcat"><h2>2.2 Concatenate Files (cat)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+cat <code>&lt;path&gt;</code> [<code>&lt;path&gt;</code> [<code>&lt;path&gt;</code> ...]]
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  This command copies and concatentates all of the files at <code>&lt;path&gt;</code>
+  to the console (or to another file if the output is redirected).
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdcd"><h2>2.3 Change Current Working Directory (cd)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+cd [&lt;dir-path&gt;|-|~|..]
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Changes the current working directory (<code>PWD</code>).  Also sets the
+  previous working directory environment variable (<code>OLDPWD</code>).
+<p>
+<p><b>Forms:</b></p>
+<ul><table>
+  <tr>
+    <td><b><code>cd &lt;dir-path&gt;</code></b></td>
+    <td>sets the current working directory to <code>&lt;dir-path&gt;</code>.</td>
+  </tr>
+  <tr>
+    <td><b><code>cd -</code></b></td>
+    <td>sets the current working directory to the previous
+       working directory ($<a href="#environvars"><code>OLDPWD</code></a>).
+      Equivalent to <code><a href="#cmdcd">cd</a> $<a href="#environvars">OLDPWD</a></code>.</td>
+  </tr>
+  <tr>
+    <td><b><code>cd</code> or <b><code>cd ~</code></b></td>
+    <td>set the current working directory to the 'home'
+       directory.  The <i>home</i> directory can be configured by setting
+       <code>CONFIG_LIB_HOMEDIR</code> in the configuration file.  The default
+       <i>home</i> directory is <code>/</code>.</td>
+  </tr>
+  <tr>
+    <td><b><code>cd ..</code></td>
+    <td>sets the current working directory to the parent directory.</td>
+  </tr>
+</table></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdcp"><h2>2.4 Copy Files (cp)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+cp &lt;source-path&gt; &lt;dest-path&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Copy of the contents of the file at <code>&lt;source-path&lt;</code> to the location
+  in the filesystem indicated by <code>&lt;path-path&gt;</code>.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdecho"><h2>2.5 Echo Strings and Variables (echo)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+echo [&lt;string|$name&gt; [&lt;string|$name&gt;...]]
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Copy the sequence of strings and expanded environment variables to
+  console output (or to a file if the output is re-directed).
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdexec"><h2>2.6 Execute User Code (exec)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+exec &lt;hex-address&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Execute the user logic at address <code>&lt;hex-address&gt;</code>.  NSH will pause
+  until the execution unless the user logic is executed in background
+  via <code><a href="#cmdexec">exec</a> &lt;hex-address&gt; &amp;</code>.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdexit"><h2>2.7 Exit NSH (exit)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+exit
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Exit NSH.  Only useful for the serial front end if you have started some other tasks (perhaps
+  using the <code><a href="#cmdexec">exec</a></code> command) and you would like to have NSH out of the
+  way.  For the telnet front-end, <code>exit</code> terminates the telenet session.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdhelp"><h2>2.8 Show Usage Command Usage (help)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+help
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Presents summary information about each command to console.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdifconfig"><h2>2.9 Show Network Configuration (ifconfig)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+ifconfig
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Show the current configuration of the network, for example:
+</p>
+<ul><pre>
+nsh&gt; ifconfig
+eth0    HWaddr 00:18:11:80:10:06
+        IPaddr:10.0.0.2 DRaddr:10.0.0.1 Mask:255.255.255.0
+</pre></ul>
+<p>
+  if uIP statistics are enabled (<code>CONFIG_NET_STATISTICS</code>), then
+  this command will also show the detailed state of uIP.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdls"><h2>2.10 List Directory Contents (ls)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+ls [-lRs] &lt;dir-path&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Show the contents of the directory at <code>&lt;dir-path&gt;</code>.  NOTE:
+  <code>&lt;dir-path&gt;</code> must refer to a directory and no other filesystem
+  object.
+</p>
+<p><b>Options:</b></p>
+<ul><table>
+  <tr>
+    <td><b><code>-R</code></b></td>
+    <td>Show the constents of specified directory and all of its
+        sub-directories.</td>
+  </tr>
+  <tr>
+    <td><b><code>-s</code></b></td>
+    <td>Show the size of the files along with the filenames in the
+        listing</td>
+  </tr>
+  <tr>
+    <td><b><code>-l</code></b></td>
+    <td>Show size and mode information along with the filenames
+        in the listing.</td>
+  </tr>
+</table></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdmbhw"><h2>2.11 Access Memory (mb, mh, and mw)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+mb &lt;hex-address&gt;[=&lt;hex-value&gt;][ &lt;hex-byte-count&gt;]
+mh &lt;hex-address&gt;[=&lt;hex-value&gt;][ &lt;hex-byte-count&gt;]
+mw &lt;hex-address&gt;[=&lt;hex-value&gt;][ &lt;hex-byte-count&gt;]
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Access memory using byte size access (mb), 16-bit accesses (mh),
+  or 32-bit access (mw).  In each case,
+</p>
+<ul><table>
+  <tr>
+    <td><code>&lt;hex-address&gt;</code>.</td>
+    <td>Specifies the address to be accessed.  The current
+      value at that address will always be read and displayed.
+  </tr>
+  <tr>
+    <td><code>&lt;hex-address&gt;=&lt;hex-value&gt;</code>.</td>
+    <td>Read the value, then write <code>&lt;hex-value&gt;</code>
+      to the location.
+  </tr>
+  <tr>
+    <td><code>&lt;hex-byte-count&gt;</code>.</td>
+    <td>Perform the mb, mh, or mw operation on a total
+      of <code>&lt;hex-byte-count&gt;</code> bytes, increment the <code>&lt;hex-address&gt;</code> appropriately
+      after each access
+  </tr>
+</table></ul>
+<p><b>Example:</b><p>
+<ul><pre>
+nsh&gt; mh 0 16
+  0 = 0x0c1e
+  2 = 0x0100
+  4 = 0x0c1e
+  6 = 0x0110
+  8 = 0x0c1e
+  a = 0x0120
+  c = 0x0c1e
+  e = 0x0130
+  10 = 0x0c1e
+  12 = 0x0140
+  14 = 0x0c1e
+nsh&gt;
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdmem"><h2>2.12 Show Memory Manager Status (mem)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+mem
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Show the current state of the memory allocator.  For example,
+</p>
+<ul><pre>
+nsh&gt; mem
+  arena:      fe2560
+  ordblks:         1
+  mxordblk:   fdc3e0
+  uordblks:     6180
+  fordblks:   fdc3e0
+nsh&gt;
+</pre></ul>
+<p><b>Where:</b></p>
+<ul><table>
+  <tr>
+    <td><b><code>arena</code></b></td>
+    <td>This is the total size of memory allocated for use by malloc in bytes.</td>
+  </tr>
+  <tr>
+    <td><b><code>ordblks</code></b></td>
+    <td>This is the number of free (not in use) chunks.</td>
+  </tr>
+  <tr>
+    <td><b><code>mxordblk</code></b></td>
+    <td>Size of the largest free (not in use) chunk.</td>
+  </tr>
+  <tr>
+    <td><b><code>uordblks</code></b></td>
+    <td>This is the total size of memory occupied by chunks handed out by malloc.</td>
+  </tr>
+  <tr>
+    <td><b><code>fordblks</code></b></td>
+    <td>This is the total size of memory occupied by free (not in use) chunks.</td>
+  </tr>
+</table></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdps"><h2>2.13 Show Current Tasks and Threads (ps)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+ps
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Show the currently active threads and tasks.  For example,
+</p>
+<ul><pre>
+nsh&gt; ps
+PID   PRI SCHD TYPE   NP STATE    NAME
+    0   0 FIFO TASK      READY    Idle Task()
+    1 128 RR   TASK      RUNNING  init()
+    2 128 FIFO TASK      WAITSEM  nsh_telnetmain()
+    3 100 RR   PTHREAD   WAITSEM  &lt;pthread&gt;(21)
+nsh&gt;
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdmkdir"><h2>2.14 Create a Directory (mkdir)</h2></a>
+  </td>
+</tr>
+</table>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdmkfatfs"><h2>2.15 Create a FAT Filesystem (mkfatfs)</h2></a>
+  </td>
+</tr>
+</table>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdmkfifo"><h2>2.16 Create a FIFO (mkfifo)</h2></a>
+  </td>
+</tr>
+</table>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdmount"><h2>2.17 Mount a File System (mount)</h2></a>
+  </td>
+</tr>
+</table>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdping"><h2>2.18 Check Network Peer (ping)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+ping [-c &lt;count&gt;] [-i &lt;interval&gt;] &lt;ip-address&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Test the network communication with a remote peer.  Example,
+</p>
+<ul><pre>
+nsh&gt; 10.0.0.1
+PING 10.0.0.1 56 bytes of data
+56 bytes from 10.0.0.1: icmp_seq=1 time=0 ms
+56 bytes from 10.0.0.1: icmp_seq=2 time=0 ms
+56 bytes from 10.0.0.1: icmp_seq=3 time=0 ms
+56 bytes from 10.0.0.1: icmp_seq=4 time=0 ms
+56 bytes from 10.0.0.1: icmp_seq=5 time=0 ms
+56 bytes from 10.0.0.1: icmp_seq=6 time=0 ms
+56 bytes from 10.0.0.1: icmp_seq=7 time=0 ms
+56 bytes from 10.0.0.1: icmp_seq=8 time=0 ms
+56 bytes from 10.0.0.1: icmp_seq=9 time=0 ms
+56 bytes from 10.0.0.1: icmp_seq=10 time=0 ms
+10 packets transmitted, 10 received, 0% packet loss, time 10190 ms
+nsh&gt;
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdpwd"><h2>2.19 Show Current Working Directory (pwd)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+pwd
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Show the current working directory.
+</p>
+<ul><pre>
+nsh&gt; cd /dev
+nsh&gt; pwd
+/dev
+nsh&gt;
+</pre></ul>
+
+<p>Same as <code><a href="#cmdecho">echo</a> <a href="#environvars">$PWD</a></code>.</p>
+<ul><pre>
+nsh&gt; echo $PWD
+/dev
+nsh&gt;
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdrm"><h2>2.20 Remove a File (rm)</h2></a>
+  </td>
+</tr>
+</table>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdrmdir"><h2>2.21 Remove a Directory (rmdir)</h2></a>
+  </td>
+</tr>
+</table>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdset"><h2>2.22 Set an Environment Variable (set)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+set &lt;name&gt; &lt;value&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Set the environment variable <code>&lt;name&gt;</code> to the string <code>&lt;value&gt;</code>.
+  For example,
+</p>
+<ul><pre>
+nsh&gt; echo $foobar
+
+nsh&gt; set foobar foovalue
+nsh&gt; echo $foobar
+foovalue
+nsh&gt;
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdsh"><h2>2.23 Execute an NSH Script (sh)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+sh &lt;script-path&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Execute the sequence of NSH commands in the file referred
+  to by <code>&lt;script-path&gt;.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdsleep"><h2>2.24 Wait for Seconds (sleep)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+sleep &lt;sec&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Pause execution (sleep) for <code>&lt;sec&gt;</code> seconds.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdunmount"><h2>2.25 Unmount a File System (umount)</h2></a>
+  </td>
+</tr>
+</table>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdunset"><h2>2.26 Unset an Environment Variable (unset)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+unset &lt;name&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Remove the value associated with the environment variable
+  <code>&lt;name&gt;.  Example:
+</p>
+<ul><pre>
+nsh&gt; echo $foobar
+foovalue
+nsh&gt; unset foobar
+nsh&gt; echo $foobar
+
+nsh&gt;
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdusleep"><h2>2.27 Wait for Microseconds (usleep)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+usleep &lt;usec&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Pause execution (sleep) of <code>&lt;usec&gt;</code> microseconds.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="configuration"><h1>3.0 Configuration Settings</h1></a>
+  </td>
+  </tr>
+</table>
+
+<p>
+  The availability of the above commands depends upon features that
+  may or may not be enabled in the NuttX configuration file.  The 
+  following <a href="#cmddependencies">table</a> indicates the dependency of each command on NuttX
+  configuration settings.  General configuration settings are discussed
+  in the <a href="NuttxPortingGuide.html">NuttX Porting Guide.</a>
+  Configuration settings specific to NSH as discussed at the <a href="#nshconfiguration">bottom</a> of this document.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmddependencies"><h2>3.1 Command Dependencies on Configuration Settings</h2></a>
+  </td>
+  </tr>
+</table>
+
+<center><p>Table. Command Dependencies on Configuration Settings</p>
+<table width="100%">
+  <tr bgcolor="#e4e4e4">
+    <th align="left" width="25%">Command</th>
+    <th align="left">Depends on Configuration</th>
+  </tr>
+  <tr>
+    <td><b><code>[</code></b></td>
+    <td>!<code>CONFIG_EXAMPLES_NSH_DISABLESCRIPT</code></td>
+  </tr>
+  <tr>
+    <td><b><code>cat</code></b></td>
+    <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+  </tr>
+  <tr>
+    <td><b><code>cd</code></b></td>
+    <td>!<code>CONFIG_DISABLE_ENVIRON</code> && <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+  </tr>
+  <tr>
+    <td><b><code>cp</code></b></td>
+    <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+  </tr>
+  <tr>
+    <td><b><code>echo</code></b></td>
+    <td><br></td>
+  </tr>
+  <tr>
+    <td><b><code>exec</code></b></td>
+    <td><br></td>
+  </tr>
+  <tr>
+    <td><b><code>exit</code></b></td>
+    <td><br></td>
+  </tr>
+  <tr>
+    <td><b><code>help</code></b></td>
+    <td><br></td>
+  </tr>
+  <tr>
+    <td><b><code>ifconfig</code></b></td>
+    <td><code>CONFIG_NET</code></td>
+  </tr>
+  <tr>
+    <td><b><code>ls</code></b></td>
+    <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+  </tr>
+  <tr>
+    <td><b><code>mb,mh,mw</code></b></td>
+    <td><br></td>
+  </tr>
+  <tr>
+    <td><b><code>mem</code></b></td>
+    <td><br></td>
+  </tr>
+  <tr>
+    <td><b><code>mkdir</code></b></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> && <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+  </tr>
+  <tr>
+    <td><b><code>mkfatfs</code></b></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> && <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 && <code>CONFIG_FS_FAT</code></td>
+  </tr>
+  <tr>
+    <td><b><code>mkfifo</code></b></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> && <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+  </tr>
+  <tr>
+    <td><b><code>mount</code></b></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> && <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 && <code>CONFIG_FS_FAT</code></td>
+  </tr>
+  <tr>
+    <td><b><code>ping</code></b></td>
+    <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_ICMP &amp;&amp;</code> <code>CONFIG_NET_ICMP_PING</code>  &amp;&amp; !<code>CONFIG_DISABLE_CLOCK</code> &amp;&amp; !<code>CONFIG_DISABLE_SIGNALS</code></td>
+  </tr>
+  <tr>
+    <td><b><code>ps</code></b></td>
+    <td><br></td>
+  </tr>
+  <tr>
+    <td><b><code>pwd</code></b></td>
+    <td>!<code>CONFIG_DISABLE_ENVIRON</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+  </tr>
+  <tr>
+    <td><b><code>rm</code></b></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+  </tr>
+  <tr>
+    <td><b><code>rmdir</code></b></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+  </tr>
+  <tr>
+    <td><b><code>set</code></b></td>
+    <td>!<code>CONFIG_DISABLE_ENVIRON</code></td>
+  </tr>
+  <tr>
+    <td><b><code>sh</code></b></td>
+    <td><code>CONFIG_NFILE_DESCRIPTORS &gt; 0 &amp;&amp; <code>CONFIG_NFILE_STREAMS &gt; 0 &amp;&amp; !<code>CONFIG_EXAMPLES_NSH_DISABLESCRIPT</code></td>
+  </tr>
+  <tr>
+    <td><b><code>sleep</code></b></td>
+    <td>!<code>CONFIG_DISABLE_SIGNALS</code></td>
+  </tr>
+  <tr>
+    <td><b><code>test</code></b></td>
+    <td>!<code>CONFIG_EXAMPLES_NSH_DISABLESCRIPT</code></td>
+  </tr>
+  <tr>
+    <td><b><code>umount</code></b></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_FAT</code></td>
+  </tr>
+  <tr>
+    <td><b><code>unset</code></b></td>
+    <td>!<code>CONFIG_DISABLE_ENVIRON</code></td>
+  </tr>
+  <tr>
+    <td><b><code>usleep</code></b></td>
+    <td>!<code>CONFIG_DISABLE_SIGNALS</code></td>
+  </tr>
+</table></center>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="nshconfiguration"><h2>3.2  NSH-Specific Configuration Settings</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p>
+  The behavior of NSH can be modified with the following settings in
+  the <code>configs/&lt;board-name&gt;/defconfig</code> file:
+</p>
+
+<center><table width="100%">
+  <tr bgcolor="#e4e4e4">
+    <th align="left" width="25%">Configuration</th>
+    <th align="left">Description</th>
+  </tr>
+  <tr>
+    <td><br><code>CONFIG_EXAMPLES_NSH_FILEIOSIZE</code></b></td>
+    <td>
+      Size of a static I/O buffer used for file access (ignored if
+      there is no filesystem).
+    </td>
+  </tr>
+  <tr>
+    <td><br><code>CONFIG_EXAMPLES_NSH_STRERROR</code></b></td>
+    <td>
+      strerror(errno) makes more readable output but strerror() is
+      very large and will not be used unless this setting is <i>y</i>
+    </td>
+  </tr>
+  <tr>
+    <td><br><code>CONFIG_EXAMPLES_NSH_LINELEN</code></b></td>
+    <td>
+      The maximum length of one command line and of one output line.
+      Default: 80
+    </td>
+  </tr>
+  <tr>
+    <td><br><code>CONFIG_EXAMPLES_NSH_STACKSIZE</code></b></td>
+    <td>
+      The stack size to use when spawning new threads or tasks.  Such
+      new threads are generated when a command is executed in background
+      or as new TELNET connections are established.
+    </td>
+  </tr>
+  <tr>
+    <td><br><code>CONFIG_EXAMPLES_NSH_NESTDEPTH</code></b></td>
+    <td>
+      The maximum number of nested <a href="#conditional"><code>if-then[-else]-fi</code></a> sequences that
+      are permissable.  Default: 3
+    </td>
+  </tr>
+  <tr>
+    <td><br><code>CONFIG_EXAMPLES_NSH_DISABLESCRIPT</code></b></td>
+    <td>
+      This can be set to <i>y</i> to suppress support for scripting.  This
+      setting disables the <a href="#cmdsh"><code>sh</code></a>, <a href="#cmdtest"><code>test</code></a>, and <a href="#cmtest"><code>[</code></a> commands and the
+      <a href="#conditional"><code>if-then[-else]-fi</code></a> construct.  This would only be set on systems
+      where a minimal footprint is a necessity and scripting is not.
+    </td>
+  </tr>
+  <tr>
+    <td><br><code>CONFIG_EXAMPLES_NSH_DISABLEBG</code></b></td>
+    <td>
+      This can be set to <i>y</i> to suppress support for background
+      commands.  This setting disables the <a href="#cmdoverview"><code>nice</code></a> command prefix and
+      the <a href="#cmdoverview"><code>&amp;</code></a> command suffix.  This would only be set on systems
+      where a minimal footprint is a necessity and background command execution is not.
+    </td>
+  </tr>
+  <tr>
+    <td><br><code>CONFIG_EXAMPLES_NSH_CONSOLE</code></b></td>
+    <td>
+      If <code>CONFIG_EXAMPLES_NSH_CONSOLE</code>is set to <i>y</i>, then a serial
+      console front-end is selected.
+    </td>
+  </tr>
+  <tr>
+    <td><br><code>CONFIG_EXAMPLES_NSH_TELNET</code></b></td>
+    <td>
+      If <code>CONFIG_EXAMPLES_NSH_TELNET</code> is set to <i>y</i>, then a TELENET
+      server front-end is selected.  When this option is provided,
+      you may log into NuttX remotely using telnet in order to
+      access NSH.
+    </td>
+  </tr>
+</table>
+
+<p>
+  One or both of <code>CONFIG_EXAMPLES_NSH_CONSOLE</code> and <code>CONFIG_EXAMPLES_NSH_TELNET</code>
+  must be defined.  If <code>CONFIG_EXAMPLES_NSH_TELNET</code> is selected, then there some
+  other configuration settings that apply:
+</p>
+
+<center><table width="100%">
+  <tr bgcolor="#e4e4e4">
+    <th align="left" width="25%">Configuration</th>
+    <th align="left">Description</th>
+  </tr>
+    <td><br><code>CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE</code></b></td>
+    <td>
+      Determines the size of the I/O buffer to use for sending/
+      receiving TELNET commands/reponses
+    </td>
+  </tr>
+  <tr>
+    <td><br><code>CONFIG_EXAMPLES_NSH_DHCPC</code></b></td>
+    <td>
+      Obtain the the IP address via DHCP.
+    </td>
+  </tr>
+  <tr>
+    <td><br><code>CONFIG_EXAMPLES_NSH_IPADDR</code></b></td>
+    <td>
+      If <code>CONFIG_EXAMPLES_NSH_DHCPC</code> is NOT set, then the static IP
+      address must be provided.
+    </td>
+  </tr>
+  <tr>
+    <td><br><code>CONFIG_EXAMPLES_NSH_DRIPADDR</code></b></td>
+    <td>
+      Default router IP address
+    </td>
+  </tr>
+  <tr>
+    <td><br><code>CONFIG_EXAMPLES_NSH_NETMASK</code></b></td>
+    <td>
+      Network mask
+    </td>
+  </tr>
+  <tr>
+    <td><br><code>CONFIG_EXAMPLES_NSH_NOMAC</code></b></td>
+    <td>
+      Set if your ethernet hardware has no built-in MAC address.
+      If set, a bogus MAC will be assigned.
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>
+ 
