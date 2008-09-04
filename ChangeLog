@@ -448,5 +448,5 @@
 	  ping request logic.
 	* NSH: Add ping command
 	* Correct IP checksum calculation in ICMP and UDP message send logic.
-	* NSH: Created a more detailed README file for NSH.
+	* NSH: Created an HTML document and a more detailed README file describing NSH.
 

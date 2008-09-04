@@ -254,6 +254,11 @@
     <a href="#nshconfiguration">3.2  NSH-Specific Configuration Settings</a>
   </td>
 </tr>
+<tr>
+  <td><img src="favicon.ico"></td>
+  <td>
+    <a href="#index">Index</a>
+</td>
 </table>
 </td>
 </tr>
@@ -415,7 +420,7 @@ fi
   <b><code>cd</code> and <code>pwd</code></b>.
   All path arguments to commands may be either an absolute path or a
   path relative to the current working directory.  The current working
-  directory is set using the 'cd' command and can be queried either
+  directory is set using the <a href="#cmdcd"><code>cd</code></a> command and can be queried either
   by using the <a href="#cmdpwd"><code>pwd</code></a> command or by
   using the <a href="#cmdecho"><code>echo</code></a> <a href="#environvars"><code>$PWD</code></a>
   command.
@@ -849,6 +854,33 @@ nsh&gt;
 </tr>
 </table>
 
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+mkdir &lt;path&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Create the directory at <code>&lt;path&gt;</code>.
+  All components of of <code>&lt;path&gt;</code> except the final directory name must exist on a mounted file
+  system; the final directory must not.
+</p>
+<p>
+  <b>Limited to Mounted File Systems</b>.
+  Recall that NuttX uses a <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a> for its root file
+  system.
+  The <code>mkdir</code> command can only be used to create directories in volumes set up with the
+  <a href="#cmdmount"><code>mount</code></a> command; it cannot be used to create directories in the <i>pseudo</i> filesystem.
+</p>
+<p><b>Example:</b></p>
+<ul><pre>
+nsh> mkdir /mnt/fs/tmp
+nsh> ls -l /mnt/fs
+/mnt/fs:
+ drw-rw-rw-       0 TESTDIR/
+ drw-rw-rw-       0 TMP/
+nsh>
+</pre></ul>
+
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
@@ -856,6 +888,18 @@ nsh&gt;
   </td>
 </tr>
 </table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+mkfatfs &lt;path&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Format a fat file system on the block device specified by <code>&lt;path&gt;</code>.
+  NSH provides this command to access the <a href="mkfatfs"><code>mkfatfs()</code></a> NuttX API.
+  This block device must reside in the NuttX <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a> and
+  must have been created by some call to <code>register_blockdriver()</code> (see <code>include/nuttx/fs.h</code>).
+</p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -865,6 +909,36 @@ nsh&gt;
 </tr>
 </table>
 
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+mkfifo &lt;path&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Creates a FIFO character device anywhere in the pseudo file system, creating
+  whatever psuedo directories that may be needed to complete the <code>&lt;path&gt;</code>.
+  By convention, however, device drivers are place in the standard <code>/dev</code> directory.
+  After it is created, the FIFO device may be used as any other device driver.
+  NSH provides this command to access the <a href="NuttxUserGuide.html#mkfifo"><code>mkfifo()</code></a> NuttX API.
+</p>
+<p><b>Example</b></p>
+<ul><pre>
+nsh> ls -l /dev
+/dev:
+ crw-rw-rw-       0 console
+ crw-rw-rw-       0 null
+ brw-rw-rw-       0 ram0
+nsh> mkfifo /dev/fifo
+nsh> ls -l /dev
+ls -l /dev
+/dev:
+ crw-rw-rw-       0 console
+ crw-rw-rw-       0 fifo
+ crw-rw-rw-       0 null
+ brw-rw-rw-       0 ram0
+nsh>
+</pre></ul>
+
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
@@ -872,6 +946,65 @@ nsh&gt;
   </td>
 </tr>
 </table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+mount -t &lt;fstype&gt; &lt;block-device&gt; <code>&lt;dir-path&gt;</code>
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  The 'm  ount' command mounts a file system in the NuttX psuedo
+  filesystem.  'mount' performs a three way associating, binding:
+</p>
+<ol>
+  <li><b>File system.</b>
+    The '-t <code>&lt;fstype&gt;</code>' option identifies the type of
+    file system that has been formatted on the <code>&lt;block-device&gt;</code>.
+    As of this writing, <code>vfat</code> is the only supported value for <code>&lt;fstype&gt;</code>
+  </li>
+  <li><b>Block Device.</b>
+    The <code>&lt;block-device&gt;</code> argument is the full or relative
+    path to a block driver inode in the <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a>.
+    By convention, this is a name under the <code>/dev</code> sub-directory.
+    This <code>&lt;block-device&gt;</code>  must have been previously formatted with the same file system
+    type as specified by <code>&lt;fstype&gt;</code>
+  </li>
+  <li><b>Mount Point.</b>
+    The mount point, <code>&lt;dir-path&gt;</code>, is the location in the
+    <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a> where the mounted volume will appear.
+    This mount point can only reside in the NuttX <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a>.
+    By convention, this mount point is a subdirectory under <code>/mnt</code>.
+    The mount command will create whatever psuedo directories that may be needed to complete the
+    full path but the full path must not already exist.
+  </li>
+</ol>
+<p>
+  After the the volume has been mounted in the NuttX
+  <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a>,
+  it may be access in the same way as other objects in thefile system.
+</p>
+<p><b>Example</b></p>
+<ul><pre>
+nsh> ls -l /dev
+/dev:
+ crw-rw-rw-       0 console
+ crw-rw-rw-       0 null
+ brw-rw-rw-       0 ram0
+nsh> ls /mnt
+nsh: ls: no such directory: /mnt
+nsh> mount -t vfat /dev/ram0 /mnt/fs
+nsh> ls -l /mnt/fs/testdir
+/mnt/fs/testdir:
+ -rw-rw-rw-      15 TESTFILE.TXT
+nsh> echo "This is a test" >/mnt/fs/testdir/example.txt
+nsh> ls -l /mnt/fs/testdir
+/mnt/fs/testdir:
+-rw-rw-rw-      15 TESTFILE.TXT
+ -rw-rw-rw-      16 EXAMPLE.TXT
+nsh> cat /mnt/fs/testdir/example.txt
+This is a test
+nsh>
+</pre></ul>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -944,6 +1077,32 @@ nsh&gt;
 </tr>
 </table>
 
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+rm &lt;file-path&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Remove the specified <code>&lt;file-path&gt;</code> name from the mounted file system.
+  Recall that NuttX uses a <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a> for its root file
+  system.
+  The <code>rm</code> command can only be used to remove (unlink) files in volumes set up with the
+  <a href="#cmdmount"><code>mount</code></a> command;
+  it cannot be used to remove names in the <i>pseudo</i> filesystem.
+</p>
+<p><b>Example:</b></p>
+<ul><pre>
+nsh> ls /mnt/fs/testdir
+/mnt/fs/testdir:
+ TESTFILE.TXT
+ EXAMPLE.TXT
+nsh> rm /mnt/fs/testdir/example.txt
+nsh> ls /mnt/fs/testdir
+/mnt/fs/testdir:
+ TESTFILE.TXT
+nsh>
+</pre></ul>
+
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
@@ -951,6 +1110,33 @@ nsh&gt;
   </td>
 </tr>
 </table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+rmdir &lt;dir-path&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Remove the specified <code>&lt;dir-path&gt;</code> directory from the mounted file system.
+  Recall that NuttX uses a <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a> for its root file
+  system.
+  The <code>rmdir</code> command can only be used to remove directories from volumes set up with the
+  <a href="#cmdmount"><code>mount</code></a> command;
+  it cannot be used to remove directories from the <i>pseudo</i> filesystem.
+</p>
+<p><b>Example:</b></p>
+<ul><pre>
+nsh> mkdir /mnt/fs/tmp
+nsh> ls -l /mnt/fs
+/mnt/fs:
+ drw-rw-rw-       0 TESTDIR/
+ drw-rw-rw-       0 TMP/
+nsh> rmdir /mnt/fs/tmp
+nsh> ls -l /mnt/fs
+/mnt/fs:
+ drw-rw-rw-       0 TESTDIR/
+nsh>
+</pre></ul>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -1020,6 +1206,28 @@ sleep &lt;sec&gt;
   </td>
 </tr>
 </table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+umount &lt;dir-path&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Un-mount the file system at mount point <code>&lt;dir-path&gt;</code>.
+  The <code>umount</code> command can only be used to un-mount volumes previously mounted using
+  <a href="#cmdmount"><code>mount</code></a> command.
+</p>
+<p><b>Example:</b></p>
+<ul><pre>
+nsh> ls /mnt/fs
+/mnt/fs:
+ TESTDIR/
+nsh> umount /mnt/fs
+nsh> ls /mnt/fs
+/mnt/fs:
+nsh: ls: no such directory: /mnt/fs
+nsh>
+</pre></ul>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -1228,28 +1436,28 @@ usleep &lt;usec&gt;
     <th align="left">Description</th>
   </tr>
   <tr>
-    <td><br><code>CONFIG_EXAMPLES_NSH_FILEIOSIZE</code></b></td>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_FILEIOSIZE</code></b></td>
     <td>
       Size of a static I/O buffer used for file access (ignored if
       there is no filesystem).
     </td>
   </tr>
   <tr>
-    <td><br><code>CONFIG_EXAMPLES_NSH_STRERROR</code></b></td>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_STRERROR</code></b></td>
     <td>
       strerror(errno) makes more readable output but strerror() is
       very large and will not be used unless this setting is <i>y</i>
     </td>
   </tr>
   <tr>
-    <td><br><code>CONFIG_EXAMPLES_NSH_LINELEN</code></b></td>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_LINELEN</code></b></td>
     <td>
       The maximum length of one command line and of one output line.
       Default: 80
     </td>
   </tr>
   <tr>
-    <td><br><code>CONFIG_EXAMPLES_NSH_STACKSIZE</code></b></td>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_STACKSIZE</code></b></td>
     <td>
       The stack size to use when spawning new threads or tasks.  Such
       new threads are generated when a command is executed in background
@@ -1257,14 +1465,14 @@ usleep &lt;usec&gt;
     </td>
   </tr>
   <tr>
-    <td><br><code>CONFIG_EXAMPLES_NSH_NESTDEPTH</code></b></td>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_NESTDEPTH</code></b></td>
     <td>
       The maximum number of nested <a href="#conditional"><code>if-then[-else]-fi</code></a> sequences that
       are permissable.  Default: 3
     </td>
   </tr>
   <tr>
-    <td><br><code>CONFIG_EXAMPLES_NSH_DISABLESCRIPT</code></b></td>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_DISABLESCRIPT</code></b></td>
     <td>
       This can be set to <i>y</i> to suppress support for scripting.  This
       setting disables the <a href="#cmdsh"><code>sh</code></a>, <a href="#cmdtest"><code>test</code></a>, and <a href="#cmtest"><code>[</code></a> commands and the
@@ -1273,7 +1481,7 @@ usleep &lt;usec&gt;
     </td>
   </tr>
   <tr>
-    <td><br><code>CONFIG_EXAMPLES_NSH_DISABLEBG</code></b></td>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_DISABLEBG</code></b></td>
     <td>
       This can be set to <i>y</i> to suppress support for background
       commands.  This setting disables the <a href="#cmdoverview"><code>nice</code></a> command prefix and
@@ -1282,14 +1490,14 @@ usleep &lt;usec&gt;
     </td>
   </tr>
   <tr>
-    <td><br><code>CONFIG_EXAMPLES_NSH_CONSOLE</code></b></td>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_CONSOLE</code></b></td>
     <td>
       If <code>CONFIG_EXAMPLES_NSH_CONSOLE</code>is set to <i>y</i>, then a serial
       console front-end is selected.
     </td>
   </tr>
   <tr>
-    <td><br><code>CONFIG_EXAMPLES_NSH_TELNET</code></b></td>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_TELNET</code></b></td>
     <td>
       If <code>CONFIG_EXAMPLES_NSH_TELNET</code> is set to <i>y</i>, then a TELENET
       server front-end is selected.  When this option is provided,
@@ -1297,7 +1505,7 @@ usleep &lt;usec&gt;
       access NSH.
     </td>
   </tr>
-</table>
+</table></center>
 
 <p>
   One or both of <code>CONFIG_EXAMPLES_NSH_CONSOLE</code> and <code>CONFIG_EXAMPLES_NSH_TELNET</code>
@@ -1310,46 +1518,126 @@ usleep &lt;usec&gt;
     <th align="left" width="25%">Configuration</th>
     <th align="left">Description</th>
   </tr>
-    <td><br><code>CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE</code></b></td>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE</code></b></td>
     <td>
       Determines the size of the I/O buffer to use for sending/
       receiving TELNET commands/reponses
     </td>
   </tr>
   <tr>
-    <td><br><code>CONFIG_EXAMPLES_NSH_DHCPC</code></b></td>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_DHCPC</code></b></td>
     <td>
       Obtain the the IP address via DHCP.
     </td>
   </tr>
   <tr>
-    <td><br><code>CONFIG_EXAMPLES_NSH_IPADDR</code></b></td>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_IPADDR</code></b></td>
     <td>
       If <code>CONFIG_EXAMPLES_NSH_DHCPC</code> is NOT set, then the static IP
       address must be provided.
     </td>
   </tr>
   <tr>
-    <td><br><code>CONFIG_EXAMPLES_NSH_DRIPADDR</code></b></td>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_DRIPADDR</code></b></td>
     <td>
       Default router IP address
     </td>
   </tr>
   <tr>
-    <td><br><code>CONFIG_EXAMPLES_NSH_NETMASK</code></b></td>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_NETMASK</code></b></td>
     <td>
       Network mask
     </td>
   </tr>
   <tr>
-    <td><br><code>CONFIG_EXAMPLES_NSH_NOMAC</code></b></td>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_NOMAC</code></b></td>
     <td>
       Set if your ethernet hardware has no built-in MAC address.
       If set, a bogus MAC will be assigned.
     </td>
   </tr>
+</table></center>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="index"><h1>Index</h1></a>
+  </td>
+  </tr>
 </table>
+
+<table width="100%">
+<tr><td width="50%">
+<ul>
+  <li><a href="#builtinvars"><code>$?</code></a></li>
+  <li><a href="#cmdtest"><code>[</code></a></li>
+  <li><a href="#cmdoverview">Background commands</a></li>
+  <li><a href="#cmdoverview">Background command priority</a></li>
+  <li><a href="#builtinvars">Built-in variables</a></li>
+  <li><a href="#cmdcat"><code>cat</code></a></li>
+  <li><a href="#cmdcd"><code>cd</code></a></li>
+  <li><a href="#commands">Command summaries</a></li>
+  <li><a href="#conditional">Conditional command execution</a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_CONSOLE</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_DHCPC</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_DISABLEBG</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_DISABLESCRIPT</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_DRIPADDR</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_FILEIOSIZE</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_IPADDR</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_LINELEN</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_NESTDEPTH</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_NETMASK</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_NOMAC</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_STACKSIZE</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_STRERROR</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_TELNET</code></a></li>
+  <li><a href="#configuration">Configuration settings</a></li>
+  <li><a href="#cmddependencies">Configuration settings, command dependencies</a></li>
+  <li><a href="#nshconfiguration">Configuration settings, NSH-specific</a></li>
+  <li><a href="#cmdcp"><code>cp</code></a></li>
+  <li><a href="#currentwd">Current working directory</a></li>
+  <li><a href="#cmdecho"><code>echo</code></a></li>
+  <li><a href="#environvars">Environment Variables</a></li>
+  <li><a href="#cmdexec"><code>exec</code></a></li>
+  <li><a href="#cmdexit"><code>exit</code></a></li>
+</ul></td>
+<td></ul>
+  <li><a href="#frontend">Greeting</a></li>
+  <li><a href="#cmdhelp"><code>help</code></a></li>
+  <li><a href="#conditional"><code>if-then[-else]-fi</code></a></li>
+  <li><a href="#cmdifconfig"><code>ifconfig</code></a></li>
+  <li><a href="#cmdls">ls</code></a></li>
+  <li><a href="#cmdmbhw"><code>mb</code></a></li>
+  <li><a href="#cmdmbhw"><code>mh</code></a></li>
+  <li><a href="#cmdmbhw"><code>mw</code></a></li>
+  <li><a href="#cmdmem"><code>mem</code></a></li>
+  <li><a href="#cmdmkdir"><code>mkdir</code></a></li>
+  <li><a href="#cmdmkfatfs"><code>mkfatfs</code></a></li>
+  <li><a href="#cmdmkfifo"><code>mkfifo</code></a></li>
+  <li><a href="#cmdmount"><code>mount</code></a></li>
+  <li><a href="#cmdoverview"><code>nice</code></a></li>
+  <li><a href="#environvars"><code>OLDPWD</code></a></li>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#cmdping"><code>ping</code></a></li>
+  <li><a href="#frontend">Prompt</a></li>
+  <li><a href="#cmdps"><code>ps</code></a></li>
+  <li><a href="#cmdpwd"><code>pwd</code></a></li>
+  <li><a href="#environvars"><code>PWD</code></a></li>
+  <li><a href="#cmdoverview">Re-directed commands</a></li>
+  <li><a href="#cmdrm"><code>rm</code></a></li>
+  <li><a href="#cmdrmdir"><code>rmdir</code></a></li>
+  <li><a href="#cmdset"><code>set</code></a></li>
+  <li><a href="#cmdsh"><code>sh</code></a></li>
+  <li><a href="#cmdoverview">Simple commands</a></li>
+  <li><a href="#cmdsleep"><code>sleep</code></a></li>
+  <li><a href="#cmdtest"><code>test</code></a></li>
+  <li><a href="#cmdunmount"><code>umount</code></a></li>
+  <li><a href="#cmdunset"><code>unset</code></a></li>
+  <li><a href="#cmdusleep"><code>usleep</code></a></li>
+</ul></td>
+</tr></table>
 
 </body>
 </html>
- 

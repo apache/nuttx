@@ -98,8 +98,8 @@ Current Working Directory
 Simple Commands
 ^^^^^^^^^^^^^^^
 
-o  [ <expression> ]
-o  test <expression>
+o [ <expression> ]
+o test <expression>
 
    These are two alternative forms of the same command.  They support
    evaluation of a boolean expression which sets $?.  This command
@@ -129,7 +129,7 @@ o  test <expression>
                       integer -gt integer | integer -le integer |
                       integer -lt integer | integer -ne integer
 
-o  cat <path> [<path> [<path> ...]]
+o cat <path> [<path> [<path> ...]]
 
   This command copies and concatentates all of the files at <path>
   to the console (or to another file if the output is redirected).
@@ -256,6 +256,112 @@ o mem
       chunks handed out by malloc.
     fordblks - This is the total size of memory occupied by
       free (not in use) chunks.
+
+o mkdir <path>
+
+  Create the directory at <path>.  All components of of <path>
+  except the final directory name must exist on a mounted file
+  system; the final directory must not.
+
+  Recall that NuttX uses a pseudo filesystem for its root file system.
+  The mkdir command can only be used to create directories in volumes
+  set up with the mount command; it cannot be used to create directories
+  in the pseudo filesystem.
+
+  Example:
+  ^^^^^^^^
+
+    nsh> mkdir /mnt/fs/tmp
+    nsh> ls -l /mnt/fs
+    /mnt/fs:
+     drw-rw-rw-       0 TESTDIR/
+     drw-rw-rw-       0 TMP/
+    nsh>
+
+o mkfatfs <path>
+
+  Format a fat file system on the block device specified by path.
+  NSH provides this command to access the mkfatfs() NuttX API.
+  This block device must reside in the NuttX psuedo filesystem and
+  must have been created by some call to register_blockdriver() (see
+  include/nuttx/fs.h).
+
+o mkfifo <path>
+
+  Creates a FIFO character device anywhere in the pseudo file system,
+  creating whatever psuedo directories that may be needed to complete
+  the full path.  By convention, however, device drivers are place in
+  the standard /dev directory. After it is created, the FIFO device
+  may be used as any other device driver. NSH provides this command
+  to access the mkfifo() NuttX API.
+
+  Example:
+  ^^^^^^^^
+
+    nsh> ls -l /dev
+    /dev:
+     crw-rw-rw-       0 console
+     crw-rw-rw-       0 null
+     brw-rw-rw-       0 ram0
+    nsh> mkfifo /dev/fifo
+    nsh> ls -l /dev
+    ls -l /dev
+    /dev:
+     crw-rw-rw-       0 console
+     crw-rw-rw-       0 fifo
+     crw-rw-rw-       0 null
+     brw-rw-rw-       0 ram0
+    nsh>
+
+o mount -t <fstype> <block-device> <dir-path>
+
+  The 'mount' command mounts a file system in the NuttX psuedo
+  filesystem.  'mount' performs a three way associating, binding
+
+    File system.  The '-t <fstype>' option identifies the type of
+      file system that has been formatted on the <block-device>.  As
+      of this writing, vfat is the only supported value for <fstype>
+
+    Block Device.  The <block-device> argument is the full or relative
+      path to a block driver inode in the psuedo filesystem.  By convention,
+      this is a name under the /dev sub-directory.  This <block-device>
+      must have been previously formatted with the same file system
+      type as specified by <fstype>
+
+    Mount Point.  The mount point is the location in the psuedo file
+      system where the mounted volume will appear.  This mount point
+      can only reside in the NuttX psuedo filesystem.  By convention, this
+      mount point is a subdirectory under /mnt.  The mount command will
+      create whatever psuedo directories that may be needed to complete
+      the full path but the full path must not already exist.
+
+  After the the volume has been mounted in the NuttX psuedo file
+  system, it may be access in the same way as other objects in the
+  file system.
+
+  Example:
+  ^^^^^^^^
+
+    nsh> ls -l /dev
+    /dev:
+     crw-rw-rw-       0 console
+     crw-rw-rw-       0 null
+     brw-rw-rw-       0 ram0
+    nsh> ls /mnt
+    nsh: ls: no such directory: /mnt
+    nsh> mount -t vfat /dev/ram0 /mnt/fs
+    nsh> ls -l /mnt/fs/testdir
+    /mnt/fs/testdir:
+     -rw-rw-rw-      15 TESTFILE.TXT
+    nsh> echo "This is a test" >/mnt/fs/testdir/example.txt
+    nsh> ls -l /mnt/fs/testdir
+    /mnt/fs/testdir:
+    -rw-rw-rw-      15 TESTFILE.TXT
+     -rw-rw-rw-      16 EXAMPLE.TXT
+    nsh> cat /mnt/fs/testdir/example.txt
+    This is a test
+    nsh>
+
 o ps
 
   Show the currently active threads and tasks.  For example,
@@ -300,6 +406,50 @@ o pwd
 
     nsh> echo $PWD
     /dev
+    nsh>
+
+o rm <file-path>
+
+  Remove the specified <file-path> name from the mounted file system.
+  Recall that NuttX uses a pseudo filesystem for its root file system.
+  The rm command can only be used to remove (unlink) files in volumes
+  set up with the mount command; it cannot be used to remove names from
+  the pseudo filesystem.
+
+  Example:
+  ^^^^^^^^
+
+    nsh> ls /mnt/fs/testdir
+    /mnt/fs/testdir:
+     TESTFILE.TXT
+     EXAMPLE.TXT
+    nsh> rm /mnt/fs/testdir/example.txt
+    nsh> ls /mnt/fs/testdir
+    /mnt/fs/testdir:
+     TESTFILE.TXT
+    nsh>
+
+o rmdir <dir-path>
+
+  Remove the specified <dir-path> directory from the mounted file system.
+  Recall that NuttX uses a pseudo filesystem for its root file system. The
+  rmdir command can only be used to remove directories from volumes set up
+  with the mount command; it cannot be used to remove directories from the
+  pseudo filesystem. 
+
+  Example:
+  ^^^^^^^^
+
+    nsh> mkdir /mnt/fs/tmp
+    nsh> ls -l /mnt/fs
+    /mnt/fs:
+     drw-rw-rw-       0 TESTDIR/
+     drw-rw-rw-       0 TMP/
+    nsh> rmdir /mnt/fs/tmp
+    nsh> ls -l /mnt/fs
+    ls -l /mnt/fs
+    /mnt/fs:
+     drw-rw-rw-       0 TESTDIR/
     nsh>
 
 o set <name> <value>
