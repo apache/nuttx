@@ -116,6 +116,12 @@
 # endif
 #endif
 
+/* The UDP maximum packet size. This is should not be to set to more
+ * than CONFIG_NET_BUFSIZE - UIP_LLH_LEN - UIP_IPUDPH_LEN.
+ */
+
+#define UIP_UDP_MSS (CONFIG_NET_BUFSIZE - UIP_LLH_LEN - UIP_IPUDPH_LEN)
+
 /* TCP configuration options */
 
 /* The maximum number of simultaneously open TCP connections.
@@ -175,10 +181,8 @@
 
 #define UIP_MAXSYNRTX 5
 
-/* The TCP maximum segment size.
- *
- * This is should not be to set to more than
- * CONFIG_NET_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN.
+/* The TCP maximum segment size. This is should not be to set to more
+ * than CONFIG_NET_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN.
  */
 
 #define UIP_TCP_MSS (CONFIG_NET_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN)

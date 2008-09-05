@@ -449,4 +449,5 @@
 	* NSH: Add ping command
 	* Correct IP checksum calculation in ICMP and UDP message send logic.
 	* NSH: Created an HTML document and a more detailed README file describing NSH.
+	* Added basic TFTP client logic (netutils/tftpc).  Untested as of initial check-in.
 

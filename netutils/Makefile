@@ -47,17 +47,22 @@ ifeq ($(CONFIG_NET_UDP),y)
 include dhcpc/Make.defs
 include dhcpd/Make.defs
 include resolv/Make.defs
+ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
+include tftpc/Make.defs
+endif
 endif
 endif
 
-SUBDIRS		= uiplib dhcpc dhcpd resolv smtp telnetd webclient webserver
+SUBDIRS		= uiplib dhcpc dhcpd resolv smtp telnetd webclient webserver tftpc
 
 ASRCS		= $(UIPLIB_ASRCS) $(DHCPC_ASRCS) $(DHCPD_ASRCS) $(RESOLV_ASRCS) \
-		  $(SMTP_ASRCS) $(TELNETD_ASRCS) $(WEBCLIENT_ASRCS) $(WEBSERVER_ASRCS)
+		  $(SMTP_ASRCS) $(TELNETD_ASRCS) $(WEBCLIENT_ASRCS) $(WEBSERVER_ASRCS) \
+		  $(TFTPC_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		= $(UIPLIB_CSRCS) $(DHCPC_CSRCS) $(DHCPD_CSRCS) $(RESOLV_CSRCS) \
-		  $(SMTP_CSRCS) $(TELNETD_CSRCS) $(WEBCLIENT_CSRCS) $(WEBSERVER_CSRCS)
+		  $(SMTP_CSRCS) $(TELNETD_CSRCS) $(WEBCLIENT_CSRCS) $(WEBSERVER_CSRCS) \
+		  $(TFTPC_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
@@ -65,7 +70,7 @@ OBJS		= $(AOBJS) $(COBJS)
 
 BIN		= libnetutils$(LIBEXT)
 
-VPATH		= uiplib:dhcpc:dhcpd:resolv:smtp:telnetd:webclient:webserver
+VPATH		= uiplib:dhcpc:dhcpd:resolv:smtp:telnetd:webclient:webserver:tftpc
 
 all:	$(BIN)
 
@@ -84,7 +89,7 @@ $(BIN): $(OBJS)
 ifeq ($(CONFIG_NET),y)
 	@$(MKDEP) --dep-path . --dep-path uiplib --dep-path dhcpc --dep-path dhcpd \
 		  --dep-path smtp --dep-path webclient --dep-path resolv \
-		  --dep-path telnetd --dep-path webserver \
+		  --dep-path telnetd --dep-path webserver --dep-path tftpc \
 	$(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 endif
 	@touch $@

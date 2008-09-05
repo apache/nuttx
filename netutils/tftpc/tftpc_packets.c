@@ -70,7 +70,7 @@
  * Public Data
  ****************************************************************************/
 
-#if CONFIG_DEBUG
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
 const char g_tftpcallfailed[]     = "%s failed: %d\n";
 const char g_tftpcalltimedout[]   = "%s timed out\n";
 const char g_tftpnomemory[]       = "%s memory allocation failure\n";
@@ -217,7 +217,7 @@ int tftp_mkerrpacket(ubyte *buffer, uint16 errorcode, const char *errormsg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
 int tftp_parseerrpacket(const ubyte *buffer)
 {
   uint16 opcode       = (uint16)buffer[0] << 8 | (uint16)buffer[1];

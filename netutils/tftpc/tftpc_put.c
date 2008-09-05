@@ -269,7 +269,7 @@ static int tftp_rcvack(int sd, ubyte *packet, struct sockaddr_in *server,
                if (opcode != TFTP_ACK)
                  {
                    nvdbg("Bad opcode%d\n");
-#if CONFIG_DEBUG
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
                   if (opcode == TFTP_ERR)
                     {
                       (void)tftp_parseerrpacket(packet);
@@ -330,7 +330,6 @@ int tftpput(const char *local, const char *remote, in_addr_t addr, boolean binar
   int sd;                            /* Socket descriptor for socket I/O */
   int fd;                            /* File descriptor for file I/O */
   int result = ERROR;                /* Assume failure */
-  int tmp;                           /* For temporary usage */
   int ret;                           /* Generic return status */
 
 #if CONFIG_NETUTILS_TFTP_ACKPACKETS > 1
@@ -338,6 +337,7 @@ int tftpput(const char *local, const char *remote, in_addr_t addr, boolean binar
   int head;                          /* Head index into offsets[] */
   int tail;                          /* Tail index into offsets[] */
   int hblockno;                      /* Block number at the head of offsets[] */
+  int tmp;                           /* For temporary usage */
 #else
   off_t offset;                      /* Offset into source file */
   off_t next;                        /* Offset to the next block */

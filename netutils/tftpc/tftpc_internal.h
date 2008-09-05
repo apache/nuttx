@@ -142,7 +142,7 @@
  * Public Data
  ****************************************************************************/
 
-#if CONFIG_DEBUG
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
 extern const char g_tftpcallfailed[];
 extern const char g_tftpcalltimedout[];
 extern const char g_tftpnomemory[];
@@ -161,7 +161,7 @@ extern int tftp_sockinit(struct sockaddr_in *server, in_addr_t addr);
 extern int tftp_mkreqpacket(ubyte *buffer, int opcode, const char *path, boolean binary);
 extern int tftp_mkackpacket(ubyte *buffer, uint16 blockno);
 extern int tftp_mkerrpacket(ubyte *buffer, uint16 errorcode, const char *errormsg);
-#if CONFIG_DEBUG
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
 extern int tftp_parseerrpacket(const ubyte *packet);
 #endif
 
