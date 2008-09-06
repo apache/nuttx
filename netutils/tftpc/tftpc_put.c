@@ -402,7 +402,7 @@ int tftpput(const char *local, const char *remote, in_addr_t addr, boolean binar
 #if CONFIG_NETUTILS_TFTP_ACKPACKETS > 1
           /* Construct the next data packet */
 
-          packetlen = tftp_mkdatapacket(fd, offset[tail], packet, blockno);
+          packetlen = tftp_mkdatapacket(fd, offsets[tail], packet, blockno);
           if (packetlen < 0)
             {
               goto errout_with_sd;
@@ -474,7 +474,6 @@ int tftpput(const char *local, const char *remote, in_addr_t addr, boolean binar
 #if CONFIG_NETUTILS_TFTP_ACKPACKETS > 1
       if (blockno - hblockno >= CONFIG_NETUTILS_TFTP_ACKPACKETS || eof)
         {
-          uint16 rblockno;
           int ndx;
 
           /* Get the next ACK from the wire */

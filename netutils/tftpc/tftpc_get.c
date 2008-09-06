@@ -323,7 +323,7 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
    */
 
 #if CONFIG_NETUTILS_TFTP_ACKPACKETS > 1
-  if (ndatabytes < blockno != lastacked)
+  if (ndatabytes < TFTP_DATASIZE && blockno != lastacked)
     {
       len = tftp_mkackpacket(packet, blockno);
       ret = tftp_sendto(sd, packet, len, &server);

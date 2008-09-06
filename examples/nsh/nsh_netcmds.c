@@ -44,7 +44,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <sched.h>
+#include <libgen.h>
+#include <errno.h>
 
 #include <nuttx/net.h>
 #include <nuttx/clock.h>
@@ -54,12 +57,17 @@
 #include <netinet/ether.h>
 
 #ifdef CONFIG_NET_STATISTICS
-#include <net/uip/uip.h>
+#  include <net/uip/uip.h>
 #endif
 
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING) && \
    !defined(CONFIG_DISABLE_CLOCK) && !defined(CONFIG_DISABLE_SIGNALS)
-#include <net/uip/uip-lib.h>
+#  include <net/uip/uip-lib.h>
+#endif
+
+#if defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
+#  include <net/uip/uip-lib.h>
+#  include <net/uip/tftp.h>
 #endif
 
 #include "nsh.h"
@@ -73,6 +81,17 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+#if defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
+struct tftpc_args_s
+{
+  boolean     binary;    /* TRUE:binary ("octect") FALSE:text ("netascii") */
+  boolean     allocated; /* TRUE: destpath is allocated */
+  char       *destpath;  /* Path at destination */
+  const char *srcpath;   /* Path at src */
+  in_addr_t   ipaddr;    /* Host IP address */
+};
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -243,8 +262,157 @@ int ifconfig_callback(FAR struct uip_driver_s *dev, void *arg)
 }
 
 /****************************************************************************
+ * Name: tftpc_parseargs
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
+int tftpc_parseargs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv,
+                    struct tftpc_args_s *args)
+{
+  FAR const char *fmt = g_fmtarginvalid;
+  int option;
+
+  /* Get the ping options */
+
+  memset(args, 0, sizeof(struct tftpc_args_s));
+  while ((option = getopt(argc, argv, ":bnf:h:")) != ERROR)
+    {
+      switch (option)
+        {
+          case 'b':
+            args->binary = TRUE;
+            break;
+
+          case 'n':
+            args->binary = FALSE;
+            break;
+
+          case 'f':
+            args->destpath = optarg;
+            break;
+
+          case 'h':
+            if (!uiplib_ipaddrconv(optarg, (FAR unsigned char*)&args->ipaddr))
+              {
+                nsh_output(vtbl, g_fmtarginvalid, argv[0]);
+                goto errout;
+              }
+            break;
+
+          case ':':
+            fmt = g_fmtargrequired;
+
+          case '?':
+          default:
+            goto errout;
+        }
+    }
+
+  /* There should be exactly on parameter left on the command-line */
+
+  if (optind == argc-1)
+    {
+      args->srcpath = argv[optind];
+    }
+  else if (optind >= argc)
+    {
+      fmt = g_fmttoomanyargs;
+      goto errout;
+    }
+  else
+    {
+      fmt = g_fmtargrequired;
+      goto errout;
+    }
+
+  /* The HOST IP address is also required */
+
+  if (!args->ipaddr)
+    {
+      fmt = g_fmtargrequired;
+      goto errout;
+    }
+
+  /* If the destpath was not provided, then we have do a little work. */
+
+  if (!args->destpath)
+    {
+      char *tmp1;
+      char *tmp2;
+
+      /* Copy the srcpath... baseanme might modify it */
+
+      fmt = g_fmtcmdoutofmemory;
+      tmp1 = strdup(args->srcpath);
+      if (!tmp1)
+        {
+          goto errout;
+        }
+
+      /* Get the basename of the srcpath */
+
+      tmp2 = basename(tmp1);
+      if (!tmp2)
+        {
+          free(tmp1);
+          goto errout;
+        }
+
+      /* Use that basename as the destpath */
+
+      args->destpath  = strdup(tmp2);
+      free(tmp1);
+      if (!args->destpath)
+        {
+          goto errout;
+        }
+      args->allocated = TRUE;
+    }
+
+  return OK;
+
+errout:
+  nsh_output(vtbl, fmt, argv[0]);
+  return ERROR;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: cmd_get
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
+int cmd_get(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+  struct tftpc_args_s args;
+
+  /* Parse the input parameter list */
+
+  if (tftpc_parseargs(vtbl, argc, argv, &args) != OK)
+    {
+      return ERROR;
+    }
+
+  /* Then perform the TFTP get operation */
+
+  if (tftpget(args.srcpath, args.destpath, args.ipaddr, args.binary) != OK)
+    {
+      nsh_output(vtbl, g_fmtcmdfailed, argv[0], "tftpget", NSH_ERRNO);
+    }
+
+  /* Release any allocated memory */
+
+  if (args.allocated)
+    {
+      free(args.destpath);
+    }
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: cmd_ifconfig
@@ -403,4 +571,44 @@ errout:
   return ERROR;
 }
 #endif /* CONFIG_NET_ICMP && CONFIG_NET_ICMP_PING */
+
+/****************************************************************************
+ * Name: cmd_put
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
+int cmd_put(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+  struct tftpc_args_s args;
+  char *fullpath;
+
+  /* Parse the input parameter list */
+
+  if (tftpc_parseargs(vtbl, argc, argv, &args) != OK)
+    {
+      return ERROR;
+    }
+
+  /* Get the full path to the local file */
+
+  fullpath = nsh_getfullpath(vtbl, args.srcpath);
+
+  /* Then perform the TFTP put operation */
+
+  if (tftpput(fullpath, args.destpath, args.ipaddr, args.binary) != OK)
+    {
+      nsh_output(vtbl, g_fmtcmdfailed, argv[0], "tftpput", NSH_ERRNO);
+    }
+
+  /* Release any allocated memory */
+
+  if (args.allocated)
+    {
+      free(args.destpath);
+    }
+  free(fullpath);
+  return OK;
+}
+#endif
+
 #endif /* CONFIG_NET */

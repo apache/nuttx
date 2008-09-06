@@ -145,6 +145,9 @@ static const struct cmdmap_s g_cmdmap[] =
 #endif
   { "exec",     cmd_exec,     2, 3, "<hex-address>" },
   { "exit",     cmd_exit,     1, 1, NULL },
+#if defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
+  { "get",      cmd_get,      4, 7, "[-b|-n] [-f <local-path>] -h <ip-address> <remote-path>" },
+#endif
   { "help",     cmd_help,     1, 1, NULL },
 #ifdef CONFIG_NET
   { "ifconfig", cmd_ifconfig, 1, 1, NULL },
@@ -172,6 +175,9 @@ static const struct cmdmap_s g_cmdmap[] =
 #if defined(CONFIG_NET) && defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING) && \
    !defined(CONFIG_DISABLE_CLOCK) && !defined(CONFIG_DISABLE_SIGNALS)
   { "ping",     cmd_ping,     2, 6, "[-c <count>] [-i <interval>] <ip-address>" },
+#endif
+#if defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
+  { "put",      cmd_put,      4, 7, "[-b|-n] [-f <remote-path>] -h <ip-address> <local-path>" },
 #endif
 #if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
   { "pwd",      cmd_pwd,      1, 1, NULL },
@@ -1122,7 +1128,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
       ret = pthread_create(&thread, &attr, nsh_child, (pthread_addr_t)args);
       if (ret != 0)
         {
-          nsh_output(vtbl, g_fmtcmdfailed, cmd, "pthread_create", ret);
+          nsh_output(vtbl, g_fmtcmdfailed, cmd, "pthread_create", NSH_ERRNO_OF(ret));
           nsh_releaseargs(args);
           nsh_release(bkgvtbl);
           goto errout;

@@ -173,6 +173,18 @@ o exit
   using the 'exec' command') and you would like to have NSH out of the
   way.
 
+o get [-b|-n] [-f <local-path>] -h <ip-address> <remote-path>
+
+  Copy the file at <remote-address> from the host whose IP address is
+  identified by <ip-address>.  Other options:
+
+  -f <local-path>
+     The file will be saved relative to the current working directory
+      unless <local-path> is provided.
+  -b|-n
+      Selects either binary ("octect") or test ("netascii") transfer
+      mode.  Default: text.
+
 o help
 
   Presents summary information about each command to console.
@@ -393,6 +405,18 @@ o ping [-c <count>] [-i <interval>] <ip-address>
     10 packets transmitted, 10 received, 0% packet loss, time 10190 ms
     nsh>
 
+o put [-b|-n] [-f <remote-path>] -h <ip-address> <local-path>
+
+  Copy the file at <local-address> to the host whose IP address is
+  identified by <ip-address>.  Other options:
+
+  -f <remote-path>
+     The file will be saved with the same name on the host unless
+      unless <local-path> is provided.
+  -b|-n
+      Selects either binary ("octect") or test ("netascii") transfer
+      mode.  Default: text.
+
 o pwd
 
   Show the current working directory.
@@ -511,6 +535,7 @@ Command Dependencies on Configuration Settings
   echo       --
   exec       --
   exit       --
+  get        CONFIG_NET && CONFIG_NET_UDP && CONFIG_NFILE_DESCRIPTORS > 0
   help       --
   ifconfig   CONFIG_NET
   ls         CONFIG_NFILE_DESCRIPTORS > 0
@@ -522,6 +547,7 @@ Command Dependencies on Configuration Settings
   mount      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
   ping       CONFIG_NET && CONFIG_NET_ICMP && CONFIG_NET_ICMP_PING  && !CONFIG_DISABLE_CLOCK && !CONFIG_DISABLE_SIGNALS
   ps         --
+  put        CONFIG_NET && CONFIG_NET_UDP && CONFIG_NFILE_DESCRIPTORS > 0
   pwd        !CONFIG_DISABLE_ENVIRON && CONFIG_NFILE_DESCRIPTORS > 0
   rm         !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
   rmdir      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0

@@ -73,9 +73,11 @@
  */
 
 #ifdef CONFIG_EXAMPLES_NSH_STRERROR
-#  define NSH_ERRNO strerror(errno)
+#  define NSH_ERRNO         strerror(errno)
+#  define NSH_ERRNO_OF(err) strerror(err)
 #else
-#  define NSH_ERRNO errno
+#  define NSH_ERRNO         (errno)
+#  define NSH_ERRNO_OF(err) (err)
 #endif
 
 /* Maximum size of one command line (telnet or serial) */
@@ -298,6 +300,10 @@ extern int cmd_lbracket(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 
 #if defined(CONFIG_NET)
   extern int cmd_ifconfig(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#if defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
+  extern int cmd_get(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+  extern int cmd_put(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING) && \
    !defined(CONFIG_DISABLE_CLOCK) && !defined(CONFIG_DISABLE_SIGNALS)
   extern int cmd_ping(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
