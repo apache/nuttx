@@ -78,21 +78,21 @@ static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
   int i;
 #endif
 
-  dbg("  TCB=%p name=%s\n", tcb, tcb->argv[0]);
+  sdbg("  TCB=%p name=%s\n", tcb, tcb->argv[0]);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
   if (tcb->filelist)
     {
-      dbg("    filelist refcount=%d\n",
-          tcb->filelist->fl_crefs);
+      sdbg("    filelist refcount=%d\n",
+           tcb->filelist->fl_crefs);
 
       for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
         {
           struct inode *inode = tcb->filelist->fl_files[i].f_inode;
           if (inode)
             {
-              dbg("      fd=%d refcount=%d\n",
-                  i, inode->i_crefs);
+              sdbg("      fd=%d refcount=%d\n",
+                   i, inode->i_crefs);
             }
         }
     }
@@ -101,8 +101,8 @@ static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
 #if CONFIG_NFILE_STREAMS > 0
   if (tcb->streams)
     {
-      dbg("    streamlist refcount=%d\n",
-          tcb->streams->sl_crefs);
+      sdbg("    streamlist refcount=%d\n",
+           tcb->streams->sl_crefs);
 
       for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
         {
@@ -110,11 +110,11 @@ static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
           if (filep->fs_filedes >= 0)
             {
 #if CONFIG_STDIO_BUFFER_SIZE > 0
-              dbg("      fd=%d nbytes=%d\n",
-                  filep->fs_filedes,
+              sdbg("      fd=%d nbytes=%d\n",
+                   filep->fs_filedes,
                   filep->fs_bufpos - filep->fs_bufstart);
 #else
-              dbg("      fd=%d\n", filep->fs_filedes);
+              sdbg("      fd=%d\n", filep->fs_filedes);
 #endif
             }
         }
@@ -148,10 +148,10 @@ void _exit(int status)
 
   (void)irqsave();
 
-  lldbg("TCB=%p exitting\n", tcb);
+  slldbg("TCB=%p exitting\n", tcb);
 
 #if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
-  lldbg("Other tasks:\n");
+  slldbg("Other tasks:\n");
   sched_foreach(_up_dumponexit, NULL);
 #endif
 
@@ -164,7 +164,7 @@ void _exit(int status)
    */
 
   tcb = (_TCB*)g_readytorun.head;
-  lldbg("New Active Task TCB=%p\n", tcb);
+  slldbg("New Active Task TCB=%p\n", tcb);
 
   /* Then switch contexts */
 
