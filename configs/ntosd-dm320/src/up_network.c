@@ -80,8 +80,8 @@ void up_netinitialize(void)
    * width is 16-bits.
    */
 
-  lldbg("CS4CTRL1=%04x CS4CTRL2=%04x\n",
-        getreg16(DM320_EMIF_CS4CTRL1), getreg16(DM320_EMIF_CS4CTRL2));
+  nlldbg("CS4CTRL1=%04x CS4CTRL2=%04x\n",
+         getreg16(DM320_EMIF_CS4CTRL1), getreg16(DM320_EMIF_CS4CTRL2));
 
   /* It is assumed that bootloader has already configured CS4.  Here,
    * we will only make certain that the GIO is properly configured
@@ -92,9 +92,9 @@ void up_netinitialize(void)
   GIO_INTERRUPT(GIO_DM9000A_INT);
   GIO_RISINGEDGE(GIO_DM9000A_INT);
 
-  lldbg("GIO DIR0=%04x INV0=%04x IRQPORT=%04x IRQEDGE=%04x\n",
-        getreg16(DM320_GIO_DIR0), getreg16(DM320_GIO_INV0),
-        getreg16(DM320_GIO_IRQPORT), getreg16(DM320_GIO_IRQEDGE));
+  nlldbg("GIO DIR0=%04x INV0=%04x IRQPORT=%04x IRQEDGE=%04x\n",
+         getreg16(DM320_GIO_DIR0), getreg16(DM320_GIO_INV0),
+         getreg16(DM320_GIO_IRQPORT), getreg16(DM320_GIO_IRQEDGE));
 
   /* Then initialize the driver */
 

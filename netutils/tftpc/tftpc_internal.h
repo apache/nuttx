@@ -142,15 +142,6 @@
  * Public Data
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-extern const char g_tftpcallfailed[];
-extern const char g_tftpcalltimedout[];
-extern const char g_tftpnomemory[];
-extern const char g_tftptoomanyretries[];
-extern const char g_tftpaddress[];
-extern const char g_tftpport[];
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

@@ -114,7 +114,7 @@ static inline ssize_t tftp_read(int fd, ubyte *buf, size_t buflen)
 
       if (nbytesread < 0)
         {
-          ndbg(g_tftpcallfailed, "read", errno);
+          ndbg("read failed: %d\n", errno);
           return ERROR;
         }
 
@@ -175,7 +175,7 @@ int tftp_mkdatapacket(int fd, off_t offset, ubyte *packet, uint16 blockno)
   tmp = lseek(fd, offset, SEEK_SET);
   if (tmp == (off_t)-1)
     {
-      ndbg(g_tftpcallfailed, "lseek", errno);
+      ndbg("lseek failed: %d\n", errno);
       return ERROR;
     }
 
@@ -245,13 +245,13 @@ static int tftp_rcvack(int sd, ubyte *packet, struct sockaddr_in *server,
 
                if (server->sin_addr.s_addr != from.sin_addr.s_addr)
                  {
-                   nvdbg(g_tftpaddress, "recvfrom");
+                   nvdbg("Invalid address in DATA\n");
                    continue;
                  }
 
               if (*port != server->sin_port)
                 {
-                  nvdbg(g_tftpport, "recvfrom");
+                  nvdbg("Invalid port in DATA\n");
                   packetlen = tftp_mkerrpacket(packet, TFTP_ERR_UNKID, TFTP_ERRST_UNKID);
                   (void)tftp_sendto(sd, packet, packetlen, server);
                   continue;
@@ -348,7 +348,7 @@ int tftpput(const char *local, const char *remote, in_addr_t addr, boolean binar
   packet = (ubyte*)zalloc(TFTP_IOBUFSIZE);
   if (!packet)
     {
-      ndbg(g_tftpnomemory, "packet");
+      ndbg("packet memory allocation failure\n");
       errno = ENOMEM;
       goto errout;
     }
@@ -358,7 +358,7 @@ int tftpput(const char *local, const char *remote, in_addr_t addr, boolean binar
   fd = open(local, O_RDONLY);
   if (fd < 0)
     {
-      ndbg(g_tftpcallfailed, "open", errno);
+      ndbg("open failed: %d\n", errno);
       goto errout_with_packet;
     }
 
@@ -370,7 +370,7 @@ int tftpput(const char *local, const char *remote, in_addr_t addr, boolean binar
       goto errout_with_fd;
     }
 
-  /* Send the write request */
+  /* Send the write request using the well known port */
 
   packetlen = tftp_mkreqpacket(packet, TFTP_WRQ, remote, binary);
   ret = tftp_sendto(sd, packet, packetlen, &server);

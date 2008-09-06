@@ -107,12 +107,16 @@ int socket(int domain, int type, int protocol)
 
   /* Only SOCK_STREAM and possible SOCK_DRAM are supported */
 
-#if defined(CONFIG_NET_UDP) && defined(CONFIG_NET_TCP)
-  if (protocol != 0 || (type != SOCK_STREAM && type != SOCK_DGRAM))
+#if defined(CONFIG_NET_TCP) && defined(CONFIG_NET_UDP)
+  if ((type == SOCK_STREAM && protocol != 0 && protocol != IPPROTO_TCP) ||
+      (type == SOCK_DGRAM  && protocol != 0 && protocol != IPPROTO_UDP) ||
+      (type != SOCK_STREAM && type != SOCK_DGRAM))
 #elif defined(CONFIG_NET_TCP)
-  if (protocol != 0 || type != SOCK_STREAM)
+  if ((type == SOCK_STREAM && protocol != 0 && protocol != IPPROTO_TCP) ||
+      (type != SOCK_STREAM))
 #elif defined(CONFIG_NET_UDP)
-  if (protocol != 0 || type != SOCK_DGRAM)
+  if ((type == SOCK_DGRAM  && protocol != 0 && protocol != IPPROTO_UDP) ||
+      (type != SOCK_DGRAM))
 #endif
     {
       err = EPROTONOSUPPORT;

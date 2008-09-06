@@ -389,6 +389,7 @@ errout:
 int cmd_get(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   struct tftpc_args_s args;
+  char *fullpath;
 
   /* Parse the input parameter list */
 
@@ -397,9 +398,13 @@ int cmd_get(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
       return ERROR;
     }
 
+  /* Get the full path to the local file */
+
+  fullpath = nsh_getfullpath(vtbl, args.srcpath);
+
   /* Then perform the TFTP get operation */
 
-  if (tftpget(args.srcpath, args.destpath, args.ipaddr, args.binary) != OK)
+  if (tftpget(args.srcpath, fullpath, args.ipaddr, args.binary) != OK)
     {
       nsh_output(vtbl, g_fmtcmdfailed, argv[0], "tftpget", NSH_ERRNO);
     }
@@ -410,6 +415,7 @@ int cmd_get(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     {
       free(args.destpath);
     }
+  free(fullpath);
   return OK;
 }
 #endif

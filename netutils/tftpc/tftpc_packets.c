@@ -60,7 +60,7 @@
 
 #include "tftpc_internal.h"
 
-#if defined(CONFIG_NET) && defined(CONFIG_NET_UDP)
+#if defined(CONFIG_NET) && defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
 
 /****************************************************************************
  * Definitions
@@ -69,15 +69,6 @@
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-const char g_tftpcallfailed[]     = "%s failed: %d\n";
-const char g_tftpcalltimedout[]   = "%s timed out\n";
-const char g_tftpnomemory[]       = "%s memory allocation failure\n";
-const char g_tftptoomanyretries[] = "Retry limit exceeded\n";
-const char g_tftpaddress[]        = "%s invalid address\n";
-const char g_tftpport[]           = "%s invalid port\n";
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -114,29 +105,28 @@ int tftp_sockinit(struct sockaddr_in *server, in_addr_t addr)
   /* Create the UDP socket */
 
   sd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-  if (sd >= 0)
+  if (sd < 0)
     {
-      ndbg(g_tftpcallfailed, "socket", errno);
+      ndbg("socket failed: %d\n", errno);
+      return ERROR;
     }
-  else
+
+  /* Set the recvfrom timeout */
+
+  timeo.tv_sec  = CONFIG_NETUTILS_TFTP_TIMEOUT / 10;
+  timeo.tv_usec = (CONFIG_NETUTILS_TFTP_TIMEOUT % 10) * 100000;
+  ret = setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, &timeo, sizeof(struct timeval));
+  if (ret < 0)
     {
-      /* Set the recvfrom timeout */
-
-      timeo.tv_sec  = CONFIG_NETUTILS_TFTP_TIMEOUT / 10;
-      timeo.tv_usec = (CONFIG_NETUTILS_TFTP_TIMEOUT % 10) * 100000;
-      ret = setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, &timeo, sizeof(struct timeval));
-      if (ret < 0)
-        {
-          ndbg(g_tftpcallfailed, "setsockopt", errno);
-        }
-
-      /* Initialize the server address structure */
-
-      memset(server, 0, sizeof(struct sockaddr_in));
-      server->sin_family      = AF_INET;
-      server->sin_addr.s_addr = addr;
-      server->sin_port        = HTONS(CONFIG_NETUTILS_TFTP_PORT);
+      ndbg("setsockopt failed: %d\n", errno);
     }
+
+  /* Initialize the server address structure */
+
+  memset(server, 0, sizeof(struct sockaddr_in));
+  server->sin_family      = AF_INET;
+  server->sin_addr.s_addr = addr;
+  server->sin_port        = HTONS(CONFIG_NETUTILS_TFTP_PORT);
   return sd;
 }
 
@@ -265,7 +255,7 @@ ssize_t tftp_recvfrom(int sd, void *buf, size_t len, struct sockaddr_in *from)
 
           if (errno == EAGAIN)
             {
-              ndbg(g_tftpcalltimedout, "recvfrom");
+              ndbg("recvfrom timed out\n");
               return ERROR;
             }
 
@@ -273,7 +263,7 @@ ssize_t tftp_recvfrom(int sd, void *buf, size_t len, struct sockaddr_in *from)
 
           else if (errno != EINTR)
             {
-              ndbg(g_tftpcallfailed, "recvfrom", errno);
+              ndbg("recvfrom failed: %d\n", errno);
               return ERROR;
             }
         }
@@ -317,7 +307,7 @@ ssize_t tftp_sendto(int sd, const void *buf, size_t len, struct sockaddr_in *to)
 
           if (errno != EINTR)
             {
-              ndbg(g_tftpcallfailed, "sendto", errno);
+              ndbg("sendto failed: %d\n", errno);
               return ERROR;
             }
         }
@@ -331,4 +321,4 @@ ssize_t tftp_sendto(int sd, const void *buf, size_t len, struct sockaddr_in *to)
     }
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_UDP */
+#endif /* CONFIG_NET && CONFIG_NET_UDP && CONFIG_NFILE_DESCRIPTORS */

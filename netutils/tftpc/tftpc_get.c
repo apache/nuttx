@@ -95,7 +95,7 @@ static inline ssize_t tftp_write(int fd, const ubyte *buf, size_t len)
 
       if (nbyteswritten < 0)
         {
-          ndbg(g_tftpcallfailed, "write", errno);
+          ndbg("write failed: %d\n", errno);
           return ERROR;
         }
 
@@ -152,7 +152,6 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
   struct sockaddr_in from;    /* The address the last UDP message recv'd from */
   ubyte *packet;              /* Allocated memory to hold one packet */
   uint16 blockno = 0;         /* The current transfer block number */
-  uint16 port = 0;            /* This is the port number for the transfer */
   uint16 opcode;              /* Received opcode */
   uint16 rblockno;            /* Received block number */
   int len;                    /* Generic length */
@@ -174,7 +173,7 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
   packet = (ubyte*)zalloc(TFTP_IOBUFSIZE);
   if (!packet)
     {
-      ndbg(g_tftpnomemory, "packet");
+      ndbg("packet memory allocation failure\n");
       errno = ENOMEM;
       goto errout;
     }
@@ -184,7 +183,7 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
   fd = open(local, O_WRONLY|O_CREAT|O_TRUNC, 0666);
   if (fd < 0)
     {
-      ndbg(g_tftpcallfailed, "open", errno);
+      ndbg("open failed: %d\n", errno);
       goto errout_with_packet;
    }
 
@@ -196,7 +195,7 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
       goto errout_with_fd;
     }
 
-  /* Send the read request */
+  /* Send the read request using the well-known port number */
 
   len = tftp_mkreqpacket(packet, TFTP_RRQ, remote, binary);
   ret = tftp_sendto(sd, packet, len, &server);
@@ -204,6 +203,12 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
     {
       goto errout_with_sd;
     }
+
+  /* Subsequent recvfrom will use any port number until the correct
+   * port for the data transfer is established.
+   */
+
+  server.sin_port = 0;
 
   /* Then enter the transfer loop.  Loop until the entire file has
    * been received or until an error occurs.
@@ -233,28 +238,20 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
 
           if (nbytesrecvd >= 0)
             {
-              /* Replace the server port to the one in the response */
-
-              if (!port)
-                {
-                  port            = from.sin_port;
-                  server.sin_port = port;
-                }
-
               /* Verify the sender address and port number */
 
               if (server.sin_addr.s_addr != from.sin_addr.s_addr)
                 {
-                  nvdbg(g_tftpaddress, "recvfrom");
+                  nvdbg("Invalid address in DATA\n");
                   retry--;
                   continue;
                 }
 
-              if (port != from.sin_port)
+              if (server.sin_port && server.sin_port != from.sin_port)
                 {
-                  nvdbg(g_tftpport, "recvfrom");
+                  nvdbg("Invalid port in DATA\n");
                   len = tftp_mkerrpacket(packet, TFTP_ERR_UNKID, TFTP_ERRST_UNKID);
-                  ret = tftp_sendto(sd, packet, len, &server);
+                  ret = tftp_sendto(sd, packet, len, &from);
                   retry--;
                   continue;
                 }
@@ -269,12 +266,19 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
                   if (opcode > TFTP_MAXRFC1350)
                     {
                       len = tftp_mkerrpacket(packet, TFTP_ERR_ILLEGALOP, TFTP_ERRST_ILLEGALOP);
-                      ret = tftp_sendto(sd, packet, len, &server);
+                      ret = tftp_sendto(sd, packet, len, &from);
                     }
                   continue;
                 }
 
-              /* Break out of the loop when we receive a good data packet */
+              /* Replace the server port to the one in the good data response */
+
+              if (!server.sin_port)
+                {
+                  server.sin_port = from.sin_port;
+                }
+
+              /* Then break out of the loop */
 
               break;
             }
@@ -284,7 +288,7 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
 
       if (retry == TFTP_RETRIES)
         {
-          nvdbg(g_tftptoomanyretries);
+          nvdbg("Retry limit exceeded\n");
           goto errout_with_sd;
         }
 

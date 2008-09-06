@@ -1473,7 +1473,7 @@ usleep &lt;usec&gt;
   <tr>
     <td><b><code>get</code></b></td>
     <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_UDP</code> &amp;&amp;
-        <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_NET_BUFSIZE</code> &gt;= 558</td>
+        <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_NET_BUFSIZE</code> &gt;= 558<sup>1</sup></td>
   </tr>
   <tr>
     <td><b><code>help</code></b></td>
@@ -1528,7 +1528,7 @@ usleep &lt;usec&gt;
   <tr>
     <td><b><code>put</code></b></td>
     <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_UDP</code> &amp;&amp;
-    <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_NET_BUFSIZE</code> &gt;= 558</td>
+    <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_NET_BUFSIZE</code> &gt;= 558<sup>1</sup></td>
   </tr>
   <tr>
     <td><b><code>pwd</code></b></td>
@@ -1571,6 +1571,8 @@ usleep &lt;usec&gt;
     <td>!<code>CONFIG_DISABLE_SIGNALS</code></td>
   </tr>
 </table></center>
+
+<p><sup>1</sup><small>Because of hardware padding, the actual required packet size may be larger</small></p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
