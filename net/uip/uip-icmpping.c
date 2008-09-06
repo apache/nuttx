@@ -52,6 +52,7 @@
 #include <net/uip/uip-arch.h>
 
 #include "uip-internal.h"
+#include "../net-internal.h" /* Should not include this! */
 
 /****************************************************************************
  * Definitions

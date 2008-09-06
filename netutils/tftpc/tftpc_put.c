@@ -96,7 +96,7 @@ static inline int tftp_incrndx(int ndx)
 static inline ssize_t tftp_read(int fd, ubyte *buf, size_t buflen)
 {
   ssize_t nbytesread;
-  ssize_t totalread;
+  ssize_t totalread = 0;
 
   while (totalread < buflen)
     {

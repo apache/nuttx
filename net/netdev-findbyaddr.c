@@ -73,8 +73,9 @@
  * Function: netdev_maskcmp
  ****************************************************************************/
 
-static inline boolean netdev_maskcmp(uip_ipaddr_t *ipaddr, uip_ipaddr_t *raddr,
-                                     uip_ipaddr_t *netmask)
+static inline boolean netdev_maskcmp(const uip_ipaddr_t *ipaddr,
+                                     const uip_ipaddr_t *raddr,
+                                     const uip_ipaddr_t *netmask)
 {
 #ifndef CONFIG_NET_IPv6
   return (*ipaddr & *netmask) == (*raddr & *netmask);

@@ -262,7 +262,7 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
               /* Parse the incoming DATA packet */
 
               if (nbytesrecvd < TFTP_DATAHEADERSIZE ||
-                  tftp_parsedatapacket(packet, &opcode, &blockno) != OK ||
+                  tftp_parsedatapacket(packet, &opcode, &rblockno) != OK ||
                   blockno != rblockno)
                 {
                   nvdbg("Parse failure\n");
