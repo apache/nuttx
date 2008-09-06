@@ -142,6 +142,9 @@ int tftp_sockinit(struct sockaddr_in *server, in_addr_t addr)
  *     N bytes: mode
  *     1 byte:  0
  *
+ * Return
+ *  Then number of bytes in the request packet (never fails)
+ *
  ****************************************************************************/
 
 int tftp_mkreqpacket(ubyte *buffer, int opcode, const char *path, boolean binary)

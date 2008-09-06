@@ -203,7 +203,7 @@ int tftp_mkdatapacket(int fd, off_t offset, ubyte *packet, uint16 blockno)
  *   packet   - buffer to use for the tranfers
  *   server  - The address of the server
  *   port    - The port number of the server (0 if not yet known)
- *   blockno - The block number of the ACK
+ *   blockno - Location to return block number in the received ACK
  *
  * Returned Value:
  *   OK:success and blockno valid, ERROR:failure.
@@ -231,7 +231,20 @@ static int tftp_rcvack(int sd, ubyte *packet, struct sockaddr_in *server,
           /* Receive the next UDP packet from the server */
 
           nbytes = tftp_recvfrom(sd, packet, TFTP_IOBUFSIZE, &from);
-          if (nbytes >= TFTP_ACKHEADERSIZE)
+          if (nbytes < TFTP_ACKHEADERSIZE)
+            {
+              /* Failed to receive a good packet */
+
+              if (nbytes >= 0)
+                {
+                  ndbg("tftp_recvfrom short packet: %d bytes\n", nbytes);
+                }
+
+              /* Break out to bump up the retry count */
+
+              break;
+            }
+          else
             {
                /* Get the port being used by the server if that has not yet been established */
 
@@ -259,8 +272,8 @@ static int tftp_rcvack(int sd, ubyte *packet, struct sockaddr_in *server,
 
               /* Parse the error message */
 
-              opcode   = (uint16)packet[0] << 8 | (uint16)packet[1];
-              rblockno = (uint16)packet[2] << 8 | (uint16)packet[3];
+               opcode   = (uint16)packet[0] << 8 | (uint16)packet[1];
+               rblockno = (uint16)packet[2] << 8 | (uint16)packet[3];
 
               /* Verify that the message that we received is an ACK for the
                * expected block number.
@@ -298,7 +311,7 @@ static int tftp_rcvack(int sd, ubyte *packet, struct sockaddr_in *server,
 
   /* We have tried TFTP_RETRIES times */
 
-  ndbg("Timeout, No ACK for block %d\n", blockno);
+  ndbg("Timeout, Waiting for ACK\n");
   return ERROR; /* Will never get here */
 }
 
@@ -329,6 +342,7 @@ int tftpput(const char *local, const char *remote, in_addr_t addr, boolean binar
   int packetlen;                     /* The length of the data packet */
   int sd;                            /* Socket descriptor for socket I/O */
   int fd;                            /* File descriptor for file I/O */
+  int retry;                         /* Retry counter */
   int result = ERROR;                /* Assume failure */
   int ret;                           /* Generic return status */
 
@@ -370,18 +384,30 @@ int tftpput(const char *local, const char *remote, in_addr_t addr, boolean binar
       goto errout_with_fd;
     }
 
-  /* Send the write request using the well known port */
+  /* Send the write request using the well known port.  This may need
+   * to be done several times because (1) UDP is inherenly unreliable
+   * and packets may be lost normally, and (2) uIP has a nasty habit
+   * of droppying packets if there is nothing hit in the ARP table.
+   */
 
-  packetlen = tftp_mkreqpacket(packet, TFTP_WRQ, remote, binary);
-  ret = tftp_sendto(sd, packet, packetlen, &server);
-  if (ret != packetlen)
+  for (retry = 0; retry < TFTP_RETRIES; retry++)
     {
-      goto errout_with_sd;
+      packetlen = tftp_mkreqpacket(packet, TFTP_WRQ, remote, binary);
+      ret = tftp_sendto(sd, packet, packetlen, &server);
+      if (ret != packetlen)
+        {
+          goto errout_with_sd;
+        }
+
+      /* Receive the ACK for the write request */
+
+      if (tftp_rcvack(sd, packet, &server, &port, NULL) == 0)
+        {
+          break;
+        }
+
+      ndbg("Re-sending request\n");
     }
-
-  /* Receive the ACK for the write request */
-
-  (void)tftp_rcvack(sd, packet, &server, &port, NULL);
 
   /* Then loop sending the entire file to the server in chunks */
 
@@ -393,6 +419,7 @@ int tftpput(const char *local, const char *remote, in_addr_t addr, boolean binar
 #else
   offset     = 0;
   next       = 0;
+  retry      = 0;
 #endif
 
   for (;;)
@@ -544,7 +571,24 @@ int tftpput(const char *local, const char *remote, in_addr_t addr, boolean binar
 
                blockno++;
                offset = next;
+               retry  = 0;
+
+               /* Skip the retry test */
+
+               continue;
             }
+        }
+
+      /* We are going to loop and (probably) re-send the data packet and
+       * certainly try to receive the ACK packet.  Check the retry count
+       * so that we do not loop forever.
+       */
+
+      if (++retry > TFTP_RETRIES)
+        {
+          ndbg("Retry count exceeded\n");
+          errno = ETIMEDOUT;
+          goto errout_with_sd;
         }
 #endif
     }
