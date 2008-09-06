@@ -204,8 +204,9 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
       goto errout_with_sd;
     }
 
-  /* Subsequent recvfrom will use any port number until the correct
-   * port for the data transfer is established.
+  /* Subsequent sendto will use the port number selected by the TFTP
+   * server.  Setting the server port to zero indicates that we have
+   * not yet received the server port number.
    */
 
   server.sin_port = 0;
