@@ -453,4 +453,6 @@
 	* NSH: Add get and put commands to support TFTP get and put operations.
 	* NSH: Added a mkrd command that will create a RAMDISK that can be formatted
 	  and mounted.
+	* Corrected a critical bug that prevent recvfrom from receiving packets from
+	  any remote UDP port.
 

@@ -780,7 +780,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Setup the UDP remote connection */
 
-  ret = uip_udpconnect(conn, infrom);
+  ret = uip_udpconnect(conn, NULL);
   if (ret < 0)
     {
       irqrestore(save);
