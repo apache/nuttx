@@ -1415,7 +1415,8 @@ usleep &lt;usec&gt;
   </tr>
   <tr>
     <td><b><code>get</code></b></td>
-    <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_UDP</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+    <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_UDP</code> &amp;&amp;
+        <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_NET_BUFSIZE</code> &gt;= 558</td>
   </tr>
   <tr>
     <td><b><code>help</code></b></td>
@@ -1455,7 +1456,9 @@ usleep &lt;usec&gt;
   </tr>
   <tr>
     <td><b><code>ping</code></b></td>
-    <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_ICMP &amp;&amp;</code> <code>CONFIG_NET_ICMP_PING</code>  &amp;&amp; !<code>CONFIG_DISABLE_CLOCK</code> &amp;&amp; !<code>CONFIG_DISABLE_SIGNALS</code></td>
+    <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_ICMP</code> &amp;&amp;
+        <code>CONFIG_NET_ICMP_PING</code>  &amp;&amp; !<code>CONFIG_DISABLE_CLOCK</code> &amp;&amp;
+        !<code>CONFIG_DISABLE_SIGNALS</code></td>
   </tr>
   <tr>
     <td><b><code>ps</code></b></td>
@@ -1463,7 +1466,8 @@ usleep &lt;usec&gt;
   </tr>
   <tr>
     <td><b><code>put</code></b></td>
-    <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_UDP</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+    <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_UDP</code> &amp;&amp;
+    <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_NET_BUFSIZE</code> &gt;= 558</td>
   </tr>
   <tr>
     <td><b><code>pwd</code></b></td>
