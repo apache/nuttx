@@ -451,4 +451,6 @@
 	* NSH: Created an HTML document and a more detailed README file describing NSH.
 	* Added basic TFTP client logic (netutils/tftpc).  Untested as of initial check-in.
 	* NSH: Add get and put commands to support TFTP get and put operations.
+	* NSH: Added a mkrd command that will create a RAMDISK that can be formatted
+	  and mounted.
 

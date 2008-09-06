@@ -163,6 +163,7 @@ static const struct cmdmap_s g_cmdmap[] =
   { "mkfatfs",  cmd_mkfatfs,  2, 2, "<path>" },
 #endif
   { "mkfifo",   cmd_mkfifo,   2, 2, "<path>" },
+  { "mkrd",     cmd_mkrd,     2, 6, "[-m <minor>] [-s <sector-size>] <nsectors>" },
 #endif
   { "mh",       cmd_mh,       2, 3, "<hex-address>[=<hex-value>][ <hex-byte-count>]" },
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0

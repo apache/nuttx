@@ -325,6 +325,45 @@ o mkfifo <path>
      brw-rw-rw-       0 ram0
     nsh>
 
+o mkrd [-m <minor>] [-s <sector-size>] <nsectors>
+
+  Create a ramdisk consisting of <nsectors>, each of size
+  <sector-size> (or 512 bytes if <sector-size> is not specified.
+  The ramdisk will be registered as /dev/ram<n> (if <n> is not
+  specified, mkrd will attempt to register the ramdisk as
+  /dev/ram0.
+
+  Example:
+  ^^^^^^^^
+
+    nsh> ls /dev
+    /dev:
+     console
+     null
+     ttyS0
+     ttyS1
+    nsh> mkrd 1024
+    nsh> ls /dev
+    /dev:
+     console
+     null
+     ram0
+     ttyS0
+     ttyS1
+    nsh>
+
+  Once the ramdisk has been created, it may be formatted using
+  the mkfatfs command and mounted using the mount command.
+
+  Example:
+  ^^^^^^^^
+    nsh> mkrd 1024
+    nsh> mkfatfs /dev/ram0
+    nsh> mount -t vfat /dev/ram0 /tmp
+    nsh> ls /tmp
+    /tmp:
+    nsh>
+
 o mount -t <fstype> <block-device> <dir-path>
 
   The 'mount' command mounts a file system in the NuttX psuedo
@@ -543,7 +582,8 @@ Command Dependencies on Configuration Settings
   mem        ---
   mkdir      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
   mkfatfs    !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
-  mkfifo     !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
+  mkfifo     CONFIG_NFILE_DESCRIPTORS > 0
+  mkrd       !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
   mount      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
   ping       CONFIG_NET && CONFIG_NET_ICMP && CONFIG_NET_ICMP_PING  && !CONFIG_DISABLE_CLOCK && !CONFIG_DISABLE_SIGNALS
   ps         --

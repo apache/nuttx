@@ -284,6 +284,7 @@ extern int cmd_lbracket(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 # ifndef CONFIG_DISABLE_MOUNTPOINT
     extern int cmd_mkdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
     extern int cmd_mkfifo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+    extern int cmd_mkrd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
     extern int cmd_rm(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
     extern int cmd_rmdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #   ifdef CONFIG_FS_FAT

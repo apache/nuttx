@@ -39,7 +39,7 @@ examples/mount
 ^^^^^^^^^^^^^^
 
   This contains a simple test of filesystem mountpoints.
-  
+
   * CONFIG_EXAMPLES_MOUNT_DEVNAME
       The name of the user-provided block device to mount.
       If CONFIG_EXAMPLES_MOUNT_DEVNAME is not provided, then

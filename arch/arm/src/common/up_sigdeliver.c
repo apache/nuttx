@@ -90,8 +90,8 @@ void up_sigdeliver(void)
 
   up_ledon(LED_SIGNAL);
 
-  dbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-       rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
+  sdbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
+        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
   ASSERT(rtcb->xcp.sigdeliver != NULL);
 
   /* Save the real return state on the stack. */
@@ -124,7 +124,7 @@ void up_sigdeliver(void)
    * (it is probably EINTR).
    */
 
-  dbg("Resuming\n");
+  sdbg("Resuming\n");
   rtcb->pterrno = saved_errno;
 
   /* Then restore the correct state for this thread of

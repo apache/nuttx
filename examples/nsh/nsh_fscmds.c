@@ -48,6 +48,7 @@
 #     include <sys/mount.h>
 #     include <nuttx/mkfatfs.h>
 #   endif
+#   include <nuttx/ramdisk.h>
 #endif
 #endif
 
@@ -756,7 +757,7 @@ int cmd_mkfatfs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  * Name: cmd_mkfifo
  ****************************************************************************/
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+#if CONFIG_NFILE_DESCRIPTORS > 0
 int cmd_mkfifo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char *fullpath = nsh_getfullpath(vtbl, argv[1]);
@@ -772,6 +773,99 @@ int cmd_mkfifo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
       nsh_freefullpath(fullpath);
     }
   return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: cmd_mkrd
+ ****************************************************************************/
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+int cmd_mkrd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+  const char *fmt;
+  ubyte *buffer;
+  uint32 nsectors;
+  int sectsize = 512;
+  int minor = 0;
+  int ret;
+
+  /* Get the mount options */
+
+  int option;
+  while ((option = getopt(argc, argv, ":m:s:")) != ERROR)
+    {
+      switch (option)
+        {
+          case 'm':
+            minor = atoi(optarg);
+            if (minor < 0 || minor > 255)
+              {
+                fmt = g_fmtargrange;
+                goto errout_with_fmt;
+              }
+            break;
+
+          case 's':
+            sectsize = atoi(optarg);
+            if (minor < 0 || minor > 16384)
+              {
+                fmt = g_fmtargrange;
+                goto errout_with_fmt;
+              }
+            break;
+
+         case ':':
+            fmt = g_fmtargrequired;
+            goto errout_with_fmt;
+
+          case '?':
+          default:
+            fmt = g_fmtarginvalid;
+            goto errout_with_fmt;
+        }
+    }
+
+  /* There should be exactly on parameter left on the command-line */
+
+  if (optind == argc-1)
+    {
+      nsectors = (uint32)atoi(argv[optind]);
+    }
+  else if (optind >= argc)
+    {
+      fmt = g_fmttoomanyargs;
+      goto errout_with_fmt;
+    }
+  else
+    {
+      fmt = g_fmtargrequired;
+      goto errout_with_fmt;
+    }
+
+  /* Allocate the memory backing up the ramdisk */
+
+  buffer = (ubyte*)malloc(sectsize * nsectors);
+  if (!buffer)
+    {
+      fmt = g_fmtcmdoutofmemory;
+      goto errout_with_fmt;
+    }
+
+  /* Then register the ramdisk */
+
+  ret = rd_register(minor, buffer, nsectors, sectsize, TRUE);
+  if (ret < 0)
+    {
+      nsh_output(vtbl, g_fmtcmdfailed, argv[0], "rd_register", NSH_ERRNO_OF(-ret));
+      free(buffer);
+      return ERROR;
+    }
+  return ret;
+
+errout_with_fmt:
+  nsh_output(vtbl, fmt, argv[0]);
+  return ERROR;
 }
 #endif
 

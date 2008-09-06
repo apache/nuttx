@@ -179,73 +179,79 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdmount">2.18 Mount a File System (mount)</a>
+    <a href="#cmdmkrd">2.18 Create a RAMDISK (mkrd)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdping">2.19 Check Network Peer (ping)</a>
+    <a href="#cmdmount">2.19 Mount a File System (mount)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdput">2.20 Send File Via TFTP (put)</a>
+    <a href="#cmdping">2.20 Check Network Peer (ping)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdpwd">2.21 Show Current Working Directory (pwd)</a>
+    <a href="#cmdput">2.21 Send File Via TFTP (put)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdrm">2.22 Remove a File (rm)</a>
+    <a href="#cmdpwd">2.22 Show Current Working Directory (pwd)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdrmdir">2.23 Remove a Directory (rmdir)</a>
+    <a href="#cmdrm">2.23 Remove a File (rm)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdset">2.24 Set an Environment Variable (set)</a>
+    <a href="#cmdrmdir">2.24 Remove a Directory (rmdir)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdsh">2.25 Execute an NSH Script (sh)</a>
+    <a href="#cmdset">2.25 Set an Environment Variable (set)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdsleep">2.26 Wait for Seconds (sleep)</a>
+    <a href="#cmdsh">2.26 Execute an NSH Script (sh)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunmount">2.27 Unmount a File System (umount)</a>
+    <a href="#cmdsleep">2.27 Wait for Seconds (sleep)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunset">2.28 Unset an Environment Variable (unset)</a>
+    <a href="#cmdunmount">2.28 Unmount a File System (umount)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdusleep">2.29 Wait for Microseconds (usleep)</a>
+    <a href="#cmdunset">2.29 Unset an Environment Variable (unset)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdusleep">2.30 Wait for Microseconds (usleep)</a>
   </td>
 </tr>
 <tr>
@@ -989,7 +995,58 @@ nsh>
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdmount"><h2>2.18 Mount a File System (mount)</h2></a>
+    <a name="cmdmkrd"><h2>2.18 Create a RAMDISK (mkrd)</h2></a>
+  </td>
+</tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+mkrd [-m &lt;minor&gt;] [-s &lt;sector-size&gt;] &lt;nsectors&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Create a ramdisk consisting of <code>&lt;nsectors&gt;</code>, each of size
+  <code>&lt;sector-size&gt;</code> (or 512 bytes if <code>&lt;sector-size&gt;</code> is not specified.
+  The ramdisk will be registered as <code>/dev/ram&lt;n&gt;</code> (if <code>&lt;n&gt;</code> is not
+  specified, mkrd will attempt to register the ramdisk as <code>/dev/ram0</code>.
+</p>
+<p><b>Example</b></p>
+<ul><pre>
+nsh&gt; ls /dev
+/dev:
+ console
+ null
+ ttyS0
+ ttyS1
+nsh&gt; mkrd 1024
+nsh&gt; ls /dev
+/dev:
+ console
+ null
+ ram0
+ ttyS0
+ ttyS1
+nsh&gt;
+</pre></ul>
+<p>
+  Once the ramdisk has been created, it may be formatted using
+  the <code>mkfatfs</code> command and mounted using the <code>mount</code> command.
+</p>
+<p><b>Example</b></p>
+<ul><pre>
+nsh&gt; mkrd 1024
+nsh&gt; mkfatfs /dev/ram0
+nsh&gt; mount -t vfat /dev/ram0 /tmp
+nsh&gt; ls /tmp
+/tmp:
+nsh&gt;
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdmount"><h2>2.19 Mount a File System (mount)</h2></a>
   </td>
 </tr>
 </table>
@@ -1056,7 +1113,7 @@ nsh>
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdping"><h2>2.19 Check Network Peer (ping)</h2></a>
+    <a name="cmdping"><h2>2.20 Check Network Peer (ping)</h2></a>
   </td>
   </tr>
 </table>
@@ -1089,7 +1146,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdput"><h2>2.20 Send File Via TFTP (put)</h2></a>
+    <a name="cmdput"><h2>2.21 Send File Via TFTP (put)</h2></a>
   </td>
   </tr>
 </table>
@@ -1124,7 +1181,7 @@ put [-b|-n] [-f &lt;remote-path&gt;] -h &lt;ip-address&gt; &lt;local-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdpwd"><h2>2.21 Show Current Working Directory (pwd)</h2></a>
+    <a name="cmdpwd"><h2>2.22 Show Current Working Directory (pwd)</h2></a>
   </td>
   </tr>
 </table>
@@ -1154,7 +1211,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdrm"><h2>2.22 Remove a File (rm)</h2></a>
+    <a name="cmdrm"><h2>2.23 Remove a File (rm)</h2></a>
   </td>
 </tr>
 </table>
@@ -1188,7 +1245,7 @@ nsh>
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdrmdir"><h2>2.23 Remove a Directory (rmdir)</h2></a>
+    <a name="cmdrmdir"><h2>2.24 Remove a Directory (rmdir)</h2></a>
   </td>
 </tr>
 </table>
@@ -1223,7 +1280,7 @@ nsh>
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdset"><h2>2.24 Set an Environment Variable (set)</h2></a>
+    <a name="cmdset"><h2>2.25 Set an Environment Variable (set)</h2></a>
   </td>
   </tr>
 </table>
@@ -1249,7 +1306,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdsh"><h2>2.25 Execute an NSH Script (sh)</h2></a>
+    <a name="cmdsh"><h2>2.26 Execute an NSH Script (sh)</h2></a>
   </td>
   </tr>
 </table>
@@ -1267,7 +1324,7 @@ sh &lt;script-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdsleep"><h2>2.26 Wait for Seconds (sleep)</h2></a>
+    <a name="cmdsleep"><h2>2.27 Wait for Seconds (sleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -1284,7 +1341,7 @@ sleep &lt;sec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunmount"><h2>2.27 Unmount a File System (umount)</h2></a>
+    <a name="cmdunmount"><h2>2.28 Unmount a File System (umount)</h2></a>
   </td>
 </tr>
 </table>
@@ -1314,7 +1371,7 @@ nsh>
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunset"><h2>2.28 Unset an Environment Variable (unset)</h2></a>
+    <a name="cmdunset"><h2>2.29 Unset an Environment Variable (unset)</h2></a>
   </td>
   </tr>
 </table>
@@ -1340,7 +1397,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdusleep"><h2>2.29 Wait for Microseconds (usleep)</h2></a>
+    <a name="cmdusleep"><h2>2.30 Wait for Microseconds (usleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -1448,7 +1505,11 @@ usleep &lt;usec&gt;
   </tr>
   <tr>
     <td><b><code>mkfifo</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> && <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+    <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+  </tr>
+  <tr>
+    <td><b><code>mkrd</code></b></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> && <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 && <code>CONFIG_FS_FAT</code></td>
   </tr>
   <tr>
     <td><b><code>mount</code></b></td>
@@ -1711,6 +1772,7 @@ usleep &lt;usec&gt;
   <li><a href="#cmdmkdir"><code>mkdir</code></a></li>
   <li><a href="#cmdmkfatfs"><code>mkfatfs</code></a></li>
   <li><a href="#cmdmkfifo"><code>mkfifo</code></a></li>
+  <li><a href="#cmdmkrd"><code>mkrd</code></a></li>
   <li><a href="#cmdmount"><code>mount</code></a></li>
   <li><a href="#cmdoverview"><code>nice</code></a></li>
   <li><a href="#environvars"><code>OLDPWD</code></a></li>
