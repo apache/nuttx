@@ -210,7 +210,8 @@ static const struct cmdmap_s g_cmdmap[] =
 #ifndef CONFIG_DISABLE_SIGNALS
   { "usleep",   cmd_usleep,   2, 2, "<usec>" },
 #endif /* CONFIG_DISABLE_SIGNALS */
-  { NULL,     NULL,           1, 1, NULL }
+  { "xd",       cmd_xd,       3, 3, "<hex-address> <byte-count>" },
+  { NULL,       NULL,         1, 1, NULL }
 };
 
 /****************************************************************************

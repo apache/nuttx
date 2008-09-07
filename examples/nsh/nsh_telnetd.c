@@ -84,6 +84,12 @@
 #define TELNET_DO    253
 #define TELNET_DONT  254
 
+#ifdef CONFIG_EXAMPLES_NSH_TELNETD_DUMPBUFFER
+# define nsh_telnetdump(vtbl,msg,buf,nb) nsh_dumpbuffer(vtbl,msg,buf,nb)
+#else
+# define nsh_telnetdump(vtbl,msg,buf,nb)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -170,56 +176,6 @@ static void tio_semtake(struct telnetio_s *tio)
  ****************************************************************************/
 
 #define tio_semgive(tio) ASSERT(sem_post(&tio->tio_sem) == 0)
-
-/****************************************************************************
- * Name: nsh_dumpbuffer
- *
- * Description:
- *   Dump a buffer of data (debug only)
- *
- ****************************************************************************/
-
-#ifdef CONFIG_EXAMPLES_NSH_TELNETD_DUMPBUFFER
-static void nsh_dumpbuffer(const char *msg, const char *buffer, ssize_t nbytes)
-{
-#ifdef CONFIG_DEBUG
-  char line[128];
-  int ch;
-  int i;
-  int j;
-
-  dbg("%s:\n", msg);
-  for (i = 0; i < nbytes; i += 16)
-    {
-      sprintf(line, "%04x: ", i);
-
-      for ( j = 0; j < 16; j++)
-        {
-          if (i + j < nbytes)
-            {
-              sprintf(&line[strlen(line)], "%02x ", buffer[i+j] );
-            }
-          else
-            {
-              strcpy(&line[strlen(line)], "   ");
-            }
-        }
-
-      for ( j = 0; j < 16; j++)
-        {
-          if (i + j < nbytes)
-            {
-              ch = buffer[i+j];
-              sprintf(&line[strlen(line)], "%c", ch >= 0x20 && ch <= 0x7e ? ch : '.');
-            }
-        }
-      dbg("%s\n", line);
-    }
-#endif
-}
-#else
-# define nsh_dumpbuffer(msg,buffer,nbytes)
-#endif
 
 /****************************************************************************
  * Name: nsh_allocstruct
@@ -327,7 +283,8 @@ static void nsh_putchar(struct telnetd_s *pstate, uint8 ch)
   if (ch == ISO_nl || tio->tio_bufndx == (CONFIG_EXAMPLES_NSH_LINELEN - 1))
     {
       pstate->tn_cmd[tio->tio_bufndx] = '\0';
-      nsh_dumpbuffer("TELNET CMD", pstate->tn_cmd, strlen(pstate->tn_cmd));
+      nsh_telnetdump(&pstate->tn_vtbl, "TELNET CMD",
+                     pstate->tn_cmd, strlen(pstate->tn_cmd));
       nsh_parse(&pstate->tn_vtbl, pstate->tn_cmd);
       tio->tio_bufndx = 0;
     }
@@ -354,7 +311,7 @@ static void nsh_sendopt(struct telnetd_s *pstate, uint8 option, uint8 value)
   optbuf[2] = value;
   optbuf[3] = 0;
 
-  nsh_dumpbuffer("Send optbuf", optbuf, 4);
+  nsh_telnetdump(&pstate->tn_vtbl, "Send optbuf", optbuf, 4);
   tio_semtake(tio); /* Only one call to send at a time */
   if (send(tio->tio_sockfd, optbuf, 4, 0) < 0)
     {
@@ -377,7 +334,8 @@ static void nsh_flush(FAR struct telnetd_s *pstate)
 
   if (pstate->tn_sndlen > 0)
     {
-      nsh_dumpbuffer("Shell output", pstate->tn_outbuffer, pstate->tn_sndlen);
+      nsh_telnetdump(&pstate->tn_vtbl, "Shell output",
+                     pstate->tn_outbuffer, pstate->tn_sndlen);
       tio_semtake(tio); /* Only one call to send at a time */
       if (send(tio->tio_sockfd, pstate->tn_outbuffer, pstate->tn_sndlen, 0) < 0)
         {
@@ -531,13 +489,15 @@ static void *nsh_connection(void *arg)
 
           /* Read a buffer of data from the TELNET client */
 
-          ret = recv(tio->tio_sockfd, tio->tio_inbuffer, CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE, 0);
+          ret = recv(tio->tio_sockfd, tio->tio_inbuffer,
+                     CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE, 0);
           if (ret > 0)
             {
 
               /* Process the received TELNET data */
 
-              nsh_dumpbuffer("Received buffer", tio->tio_inbuffer, ret);
+              nsh_telnetdump(&pstate->tn_vtbl, "Received buffer",
+                             tio->tio_inbuffer, ret);
               ret = nsh_receive(pstate, ret);
             }
         }

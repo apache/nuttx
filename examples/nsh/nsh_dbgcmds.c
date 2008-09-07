@@ -298,3 +298,71 @@ int cmd_mem(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   nsh_output(vtbl, "  fordblks: %8x\n", mem.fordblks);
   return OK;
 }
+
+/****************************************************************************
+ * Name: nsh_dumpbuffer
+ ****************************************************************************/
+
+void nsh_dumpbuffer(FAR struct nsh_vtbl_s *vtbl, const char *msg,
+                    const char *buffer, ssize_t nbytes)
+{
+  char line[128];
+  int ch;
+  int i;
+  int j;
+
+  nsh_output(vtbl, "%s:\n", msg);
+  for (i = 0; i < nbytes; i += 16)
+    {
+      sprintf(line, "%04x: ", i);
+
+      for ( j = 0; j < 16; j++)
+        {
+          if (i + j < nbytes)
+            {
+              sprintf(&line[strlen(line)], "%02x ", buffer[i+j] );
+            }
+          else
+            {
+              strcpy(&line[strlen(line)], "   ");
+            }
+        }
+
+      for ( j = 0; j < 16; j++)
+        {
+          if (i + j < nbytes)
+            {
+              ch = buffer[i+j];
+              sprintf(&line[strlen(line)], "%c", ch >= 0x20 && ch <= 0x7e ? ch : '.');
+            }
+        }
+      nsh_output(vtbl, "%s\n", line);
+    }
+}
+
+/****************************************************************************
+ * Name: cmd_xd
+ ****************************************************************************/
+
+int cmd_xd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+  char  *addr;
+  char  *endptr;
+  int    nbytes;
+
+  addr = (char*)strtol(argv[1], &endptr, 16);
+  if (argv[0][0] == '\0' || *endptr != '\0')
+    {
+      return ERROR;
+    }
+
+  nbytes = (int)strtol(argv[2], &endptr, 0);
+  if (argv[0][0] == '\0' || *endptr != '\0' || nbytes < 0)
+    {
+      return ERROR;
+    }
+
+  nsh_dumpbuffer(vtbl, "Hex dump", addr, nbytes);
+  return OK;
+}
+

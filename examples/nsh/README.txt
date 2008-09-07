@@ -552,6 +552,21 @@ o usleep <usec>
 
   Pause execution (sleep) of <usec> microseconds.
 
+o xd <hex-address> <byte-count>
+
+  Dump <byte-count> bytes of data from address <hex-address>
+
+  Example:
+  ^^^^^^^^
+
+    nsh> xd 410e0 512
+    Hex dump:
+    0000: 00 00 00 00 9c 9d 03 00 00 00 00 01 11 01 10 06 ................
+    0010: 12 01 11 01 25 08 13 0b 03 08 1b 08 00 00 02 24 ....%..........$
+    ...
+    01f0: 08 3a 0b 3b 0b 49 13 00 00 04 13 01 01 13 03 08 .:.;.I..........
+    nsh>
+
 NSH Configuration Settings
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -598,6 +613,7 @@ Command Dependencies on Configuration Settings
   umount     !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
   unset      !CONFIG_DISABLE_ENVIRON
   usleep     !CONFIG_DISABLE_SIGNALS
+  xd         ---
 
 * NOTES:
   - Because of hardware padding, the actual required size may be larger.

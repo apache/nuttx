@@ -259,6 +259,11 @@ extern char *nsh_getfullpath(FAR struct nsh_vtbl_s *vtbl, const char *relpath);
 extern void nsh_freefullpath(char *relpath);
 #endif
 
+/* Debug */
+
+extern void nsh_dumpbuffer(FAR struct nsh_vtbl_s *vtbl, const char *msg,
+                           const char *buffer, ssize_t nbytes);
+
 /* Shell command handlers */
 
 extern int cmd_echo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
@@ -268,6 +273,7 @@ extern int cmd_mh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 extern int cmd_mw(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 extern int cmd_mem(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 extern int cmd_ps(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+extern int cmd_xd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 
 #ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
 extern int cmd_test(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);

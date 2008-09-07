@@ -60,6 +60,7 @@
 #include <limits.h>
 #include <libgen.h>
 #include <errno.h>
+#include <debug.h>
 
 #include "nsh.h"
 
@@ -851,6 +852,7 @@ int cmd_mkrd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
       fmt = g_fmtcmdoutofmemory;
       goto errout_with_fmt;
     }
+  dbg("RAMDISK at %p\n", buffer);
 
   /* Then register the ramdisk */
 

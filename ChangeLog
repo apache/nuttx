@@ -455,4 +455,5 @@
 	  and mounted.
 	* Corrected a critical bug that prevent recvfrom from receiving packets from
 	  any remote UDP port.
+	* NSH: Add hexadecimal dump command (xd)
 
