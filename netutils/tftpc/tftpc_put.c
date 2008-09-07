@@ -317,7 +317,7 @@ int tftpput(const char *local, const char *remote, in_addr_t addr, boolean binar
   struct sockaddr_in server;         /* The address of the TFTP server */
   ubyte *packet;                     /* Allocated memory to hold one packet */
   off_t offset;                      /* Offset into source file */
-  uint16 blockno = 0;                /* The current transfer block number */
+  uint16 blockno;                    /* The current transfer block number */
   uint16 rblockno;                   /* The ACK'ed block number */
   uint16 port = 0;                   /* This is the port number for the transfer */
   int packetlen;                     /* The length of the data packet */
@@ -360,7 +360,8 @@ int tftpput(const char *local, const char *remote, in_addr_t addr, boolean binar
    * of droppying packets if there is nothing hit in the ARP table.
    */
 
-  retry = 0;
+  blockno = 1;
+  retry   = 0;
   for (;;)
     {
       packetlen = tftp_mkreqpacket(packet, TFTP_WRQ, remote, binary);
