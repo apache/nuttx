@@ -34,10 +34,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -163,11 +159,6 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
   int result = ERROR;         /* Assume failure */
   int ret;                    /* Generic return status */
 
-#if CONFIG_NETUTILS_TFTP_ACKPACKETS > 1
-  uint16 lastacked = 0;       /* The last block number that was ACK'ed */
-  int ablockno;               /* Number of un-ACKed packets */
-#endif
-
   /* Allocate the buffer to used for socket/disk I/O */
 
   packet = (ubyte*)zalloc(TFTP_IOBUFSIZE);
@@ -215,9 +206,6 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
    * been received or until an error occurs.
    */
 
-#if CONFIG_NETUTILS_TFTP_ACKPACKETS > 1
-  ablockno = CONFIG_NETUTILS_TFTP_ACKPACKETS-1;
-#endif
   do
     {
       /* Increment the TFTP block number for the next transfer */
@@ -301,35 +289,8 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
           goto errout_with_sd;
         }
 
-      /* Send the acknowledgment if we have reach the configured block count */
+      /* Send the acknowledgment */
 
-#if CONFIG_NETUTILS_TFTP_ACKPACKETS > 1
-      ablockno++;
-      if (ablockno == CONFIG_NETUTILS_TFTP_ACKPACKETS)
-#endif
-        {
-          len = tftp_mkackpacket(packet, blockno);
-          ret = tftp_sendto(sd, packet, len, &server);
-          if (ret != len)
-            {
-              goto errout_with_sd;
-            }
-#if CONFIG_NETUTILS_TFTP_ACKPACKETS > 1
-          lastacked = blockno;
-#endif
-          nvdbg("ACK blockno %d\n", blockno);
-        }
-    }
-  while (ndatabytes >= TFTP_DATASIZE);
-
-  /* The final packet of the transfer will be a partial packet
-   *
-   * If the final packet(s) were not ACK'ed, then we will ACK them here
-   */
-
-#if CONFIG_NETUTILS_TFTP_ACKPACKETS > 1
-  if (ndatabytes < TFTP_DATASIZE && blockno != lastacked)
-    {
       len = tftp_mkackpacket(packet, blockno);
       ret = tftp_sendto(sd, packet, len, &server);
       if (ret != len)
@@ -338,7 +299,7 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
         }
       nvdbg("ACK blockno %d\n", blockno);
     }
-#endif
+  while (ndatabytes >= TFTP_DATASIZE);
 
   /* Return success */
 

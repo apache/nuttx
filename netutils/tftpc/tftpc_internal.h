@@ -54,18 +54,10 @@
  * then default values are assigned here.
  */
 
-/* Number of packets before ACK is returned */
-
-#ifndef CONFIG_NETUTILS_TFTP_ACKPACKETS
-#  define CONFIG_NETUTILS_TFTP_ACKPACKETS 1
-#endif
-
-#define TFTP_MAXACKPACKETS 16
-#if CONFIG_NETUTILS_TFTP_ACKPACKETS > TFTP_MAXACKPACKETS
-#  error "CONFIG_NETUTILS_TFTP_ACKPACKETS exceeds maximum"
-#endif
-
-/* The TFTP port number (usually 69) */
+/* The "well-known" server TFTP port number (usually 69).  This port number
+ * is only used for the initial server contact.  The server will negotiate
+ * a new transfer port number after the initial client request.
+ */
 
 #ifndef CONFIG_NETUTILS_TFTP_PORT
 #  define CONFIG_NETUTILS_TFTP_PORT 69
@@ -76,6 +68,8 @@
 #ifndef CONFIG_NETUTILS_TFTP_TIMEOUT
 #  define CONFIG_NETUTILS_TFTP_TIMEOUT 10 /* One second */
 #endif
+
+/* Sizes of TFTP messsage headers */
 
 #define TFTP_ACKHEADERSIZE  4
 #define TFTP_ERRHEADERSIZE  4
