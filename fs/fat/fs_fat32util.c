@@ -986,11 +986,11 @@ ssize_t fat_getcluster(struct fat_mountpt_s *fs, uint32 clusterno)
 /****************************************************************************
  * Name: fat_putcluster
  *
- * Desciption: Write a new cluster start sector into the FAT
+ * Desciption: Write a new cluster into the FAT
  *
  ****************************************************************************/
 
-int fat_putcluster(struct fat_mountpt_s *fs, uint32 clusterno, size_t startsector)
+int fat_putcluster(struct fat_mountpt_s *fs, uint32 clusterno, size_t nextcluster)
 {
   /* Verify that the cluster number is within range.  Zero erases the cluster. */
 
@@ -1021,21 +1021,26 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32 clusterno, size_t startsecto
               if (fat_fscacheread(fs, fatsector)< 0)
                 {
                   /* Read error */
+
                   break;
                 }
 
-              /* Output the LS byte first handling the 12-bit alignment within
+              /* Get the LS byte first handling the 12-bit alignment within
                * the 16-bits
                */
 
               fatindex = fatoffset & SEC_NDXMASK(fs);
               if ((clusterno & 1) != 0)
                 {
-                  value = (fs->fs_buffer[fatindex] & 0x0f) | startsector << 4;
+                  /* Save the LS four bits of the next cluster */
+
+                  value = (fs->fs_buffer[fatindex] & 0x0f) | nextcluster << 4;
                 }
               else
                 {
-                  value = (ubyte)startsector;
+                  /* Save the LS eight bits of the next cluster */
+
+                  value = (ubyte)nextcluster;
                 }
               fs->fs_buffer[fatindex] = value;
 
@@ -1069,11 +1074,15 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32 clusterno, size_t startsecto
 
               if ((clusterno & 1) != 0)
                 {
-                  value = (ubyte)(startsector >> 4);
+                  /* Save the MS eight bits of the next cluster */
+
+                  value = (ubyte)(nextcluster >> 4);
                 }
               else
                 {
-                  value = (fs->fs_buffer[fatindex] & 0xf0) | (startsector & 0x0f);
+                  /* Save the MS four bits of the next cluster */
+
+                  value = (fs->fs_buffer[fatindex] & 0xf0) | ((nextcluster >> 8) & 0x0f);
                 }
               fs->fs_buffer[fatindex] = value;
             }
@@ -1090,7 +1099,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32 clusterno, size_t startsecto
                   /* Read error */
                   break;
                 }
-              FAT_PUTFAT16(fs->fs_buffer, fatindex, startsector & 0xffff);
+              FAT_PUTFAT16(fs->fs_buffer, fatindex, nextcluster & 0xffff);
             }
           break;
 
@@ -1105,7 +1114,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32 clusterno, size_t startsecto
                   /* Read error */
                   break;
                 }
-              FAT_PUTFAT32(fs->fs_buffer, fatindex, startsector & 0x0fffffff);
+              FAT_PUTFAT32(fs->fs_buffer, fatindex, nextcluster & 0x0fffffff);
             }
           break;
 
@@ -1213,16 +1222,19 @@ sint32 fat_extendchain(struct fat_mountpt_s *fs, uint32 cluster)
       if (startsector < 0)
         {
           /* An error occurred, return the error value */
+
           return startsector;
         }
       else if (startsector < 2)
         {
+
           /* Oops.. this cluster does not exist. */
           return 0;
         }
       else if (startsector < fs->fs_nclusters)
         {
           /* It is already followed by next cluster */
+
           return startsector;
         }
 

@@ -579,7 +579,7 @@ static ssize_t fat_read(FAR struct file *filep, char *buffer, size_t buflen)
         {
           /* Find the next cluster in the FAT. */
 
-          cluster = fat_getcluster(fs, cluster);
+          cluster = fat_getcluster(fs, ff->ff_currentcluster);
           if (cluster < 2 || cluster >= fs->fs_nclusters)
             {
               ret = -EINVAL; /* Not the right error */

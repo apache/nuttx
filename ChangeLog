@@ -449,11 +449,14 @@
 	* NSH: Add ping command
 	* Correct IP checksum calculation in ICMP and UDP message send logic.
 	* NSH: Created an HTML document and a more detailed README file describing NSH.
-	* Added basic TFTP client logic (netutils/tftpc).  Untested as of initial check-in.
+	* Added basic TFTP client logic (netutils/tftpc).
 	* NSH: Add get and put commands to support TFTP get and put operations.
 	* NSH: Added a mkrd command that will create a RAMDISK that can be formatted
 	  and mounted.
 	* Corrected a critical bug that prevent recvfrom from receiving packets from
 	  any remote UDP port.
 	* NSH: Add hexadecimal dump command (xd)
+	* Fixed several critical bugs with regard to fat reading and writing and FAT12
+	  accesses.  Basically the FAT FS only worked with my tiny test files and test
+	  cases.  A lot of stronger FAT tested is needed!!
 
