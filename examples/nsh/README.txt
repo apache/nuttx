@@ -599,7 +599,10 @@ Command Dependencies on Configuration Settings
   unset      !CONFIG_DISABLE_ENVIRON
   usleep     !CONFIG_DISABLE_SIGNALS
 
-* NOTE: Because of hardware padding, the actual required size may be larger.
+* NOTES:
+  - Because of hardware padding, the actual required size may be larger.
+  - Special TFTP server start-up optionss will probably be required to permit
+    creation of file for the correct operation of the put command.
 
 NSH-Specific Configuration Settings
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

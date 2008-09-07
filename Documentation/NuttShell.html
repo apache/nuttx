@@ -1528,7 +1528,7 @@ usleep &lt;usec&gt;
   <tr>
     <td><b><code>put</code></b></td>
     <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_UDP</code> &amp;&amp;
-    <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_NET_BUFSIZE</code> &gt;= 558<sup>1</sup></td>
+    <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_NET_BUFSIZE</code> &gt;= 558<sup>1,2</sup></td>
   </tr>
   <tr>
     <td><b><code>pwd</code></b></td>
@@ -1572,7 +1572,11 @@ usleep &lt;usec&gt;
   </tr>
 </table></center>
 
-<p><sup>1</sup><small>Because of hardware padding, the actual required packet size may be larger</small></p>
+<p><sup>1</sup><small>
+  Because of hardware padding, the actual required packet size may be larger</small></p>
+<p><sup>2</sup><small>
+  Special TFTP server start-up optionss will probably be required to permit
+  creation of files for the correct operation of the <code>put</code> command.</small></p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
