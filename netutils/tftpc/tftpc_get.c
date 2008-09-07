@@ -97,6 +97,7 @@ static inline ssize_t tftp_write(int fd, const ubyte *buf, size_t len)
 
       /* Handle partial writes */
 
+      nvdbg("Wrote %d bytes to file\n", nbyteswritten);
       left -= nbyteswritten;
       buf  += nbyteswritten;
     }
@@ -186,22 +187,6 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
       goto errout_with_fd;
     }
 
-  /* Send the read request using the well-known port number */
-
-  len = tftp_mkreqpacket(packet, TFTP_RRQ, remote, binary);
-  ret = tftp_sendto(sd, packet, len, &server);
-  if (ret != len)
-    {
-      goto errout_with_sd;
-    }
-
-  /* Subsequent sendto will use the port number selected by the TFTP
-   * server.  Setting the server port to zero indicates that we have
-   * not yet received the server port number.
-   */
-
-  server.sin_port = 0;
-
   /* Then enter the transfer loop.  Loop until the entire file has
    * been received or until an error occurs.
    */
@@ -219,6 +204,29 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
 
       for (retry = 0; retry < TFTP_RETRIES; retry++)
         {
+          /* Send the read request using the well-known port number before
+           * receiving the first block.  Each retry of the first block will
+           * re-send the request.
+           */
+
+          if (blockno == 1)
+            {
+              len             = tftp_mkreqpacket(packet, TFTP_RRQ, remote, binary);
+              server.sin_port = HTONS(CONFIG_NETUTILS_TFTP_PORT);
+              ret             = tftp_sendto(sd, packet, len, &server);
+              if (ret != len)
+                {
+                  goto errout_with_sd;
+                }
+
+              /* Subsequent sendto will use the port number selected by the TFTP
+               * server in the DATA packet.  Setting the server port to zero
+               * here indicates that we have not yet received the server port number.
+               */
+
+              server.sin_port = 0;
+            }
+
           /* Get the next packet from the server */
 
           nbytesrecvd = tftp_recvfrom(sd, packet, TFTP_IOBUFSIZE, &from);
@@ -284,6 +292,7 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
       /* Write the received data chunk to the file */
 
       ndatabytes = nbytesrecvd - TFTP_DATAHEADERSIZE;
+      tftp_dumpbuffer("Recvd DATA", packet + TFTP_DATAHEADERSIZE, ndatabytes);
       if (tftp_write(fd, packet + TFTP_DATAHEADERSIZE, ndatabytes) < 0)
         {
           goto errout_with_sd;

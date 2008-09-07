@@ -289,7 +289,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
       ret = -ENOMEM;
       goto errout_with_semaphore;
     }
-  
+
   /* Create a file buffer to support partial sector accesses */
 
   ff->ff_buffer = (ubyte*)malloc(fs->fs_hwsectorsize);
@@ -316,6 +316,8 @@ static int fat_open(FAR struct file *filep, const char *relpath,
     ((uint32)DIR_GETFSTCLUSTHI(dirinfo.fd_entry) << 16) |
       DIR_GETFSTCLUSTLO(dirinfo.fd_entry);
 
+  ff->ff_currentcluster   = ff->ff_startcluster;
+  ff->ff_sectorsincluster = fs->fs_fatsecperclus;
   ff->ff_size             = DIR_GETFILESIZE(dirinfo.fd_entry);
 
   /* Attach the private date to the struct file instance */
@@ -417,13 +419,13 @@ static ssize_t fat_read(FAR struct file *filep, char *buffer, size_t buflen)
   struct inode         *inode;
   struct fat_mountpt_s *fs;
   struct fat_file_s    *ff;
-  uint32                cluster;
   unsigned int          bytesread;
   unsigned int          readsize;
   unsigned int          nsectors;
-  size_t                readsector;
   size_t                bytesleft;
+  sint32                cluster;
   ubyte                 *userbuffer = (ubyte*)buffer;
+  int                   sectorindex;
   int                   ret;
 
   /* Sanity checks */
@@ -468,81 +470,38 @@ static ssize_t fat_read(FAR struct file *filep, char *buffer, size_t buflen)
       buflen = bytesleft;
   }
 
-  /* Loop until either (1) all data has been transferred, or (2) an
-   * error occurs.
-   */
+  /* Get the first sector to read from. */
 
-  readsize   = 0;
-  readsector = ff->ff_currentsector;
-  while (buflen > 0)
+  if (!ff->ff_currentsector)
     {
-      /* Get offset into the sector where we begin the read */
-
-      int sectorindex = filep->f_pos & SEC_NDXMASK(fs);
-      bytesread = 0;
-
-      /* Check if the current read stream happens to lie on a
-       * sector boundary.
+      /* The current sector can be determined from the current cluster
+       * and the file offset.
        */
 
-      if (sectorindex == 0)
-        {
-          /* Try to read another contiguous sector from the cluster */
+      ff->ff_currentsector = fat_cluster2sector(fs, ff->ff_currentcluster)
+                           + (SEC_NSECTORS(fs, filep->f_pos) & CLUS_NDXMASK(fs));
+      fdbg("Start with sector: %d\n", ff->ff_currentsector);
+    }
 
-          ff->ff_sectorsincluster--;
+  /* Loop until either (1) all data has been transferred, or (2) an
+   * error occurs.  We assume we start with the current sector
+  * (ff_currentsector) which may be uninitialized.
+   */
 
-          /* Are there unread sectors remaining in the cluster? */
+  readsize    = 0;
+  sectorindex = filep->f_pos & SEC_NDXMASK(fs);
 
-          if (ff->ff_sectorsincluster > 0)
-            {
-              /* Yes.. There are more sectors in this cluster to be read
-               * just increment the current sector number and read.
-               */
-
-              readsector = ff->ff_currentsector + 1;
-            }
-          else
-            {
-              /* No.. Handle the case of the first sector of the file */
-
-              if (filep->f_pos == 0)
-                {
-                  /* Get the first cluster of the file */
-
-                  cluster = ff->ff_startcluster;
-                }
-
-              /* But in the general case, we have to find the next cluster
-               * in the FAT.
-               */
-
-              else
-                {
-                  cluster = fat_getcluster(fs, ff->ff_currentcluster);
-                }
-
-              /* Verify the cluster number */
-
-              if (cluster < 2 || cluster >= fs->fs_nclusters)
-                {
-                  ret = -EINVAL; /* Not the right error */
-                  goto errout_with_semaphore;
-                }
-
-              /* Setup to read the first sector from the new cluster */
-
-              ff->ff_currentcluster   = cluster;
-              ff->ff_sectorsincluster = fs->fs_fatsecperclus;
-              readsector              = fat_cluster2sector(fs, cluster);
-            }
-        }
+  while (buflen > 0)
+    {
+      bytesread  = 0;
 
       /* Check if the user has provided a buffer large enough to
-       * hold one or more complete sectors.
+       * hold one or more complete sectors -AND- the read is
+       * aligned to a sector boundary.
        */
 
       nsectors = buflen / fs->fs_hwsectorsize;
-      if (nsectors > 0)
+      if (nsectors > 0 && sectorindex == 0)
         {
           /* Read maximum contiguous sectors directly to the user's
            * buffer without using our tiny read buffer.
@@ -563,16 +522,16 @@ static ssize_t fat_read(FAR struct file *filep, char *buffer, size_t buflen)
 
           (void)fat_ffcacheinvalidate(fs, ff);
 
-          /* Read all of the sectors directory into user memory */
+          /* Read all of the sectors directly into user memory */
 
-          ret = fat_hwread(fs, userbuffer, readsector, nsectors);
+          ret = fat_hwread(fs, userbuffer, ff->ff_currentsector, nsectors);
           if (ret < 0)
             {
               goto errout_with_semaphore;
             }
 
-          ff->ff_sectorsincluster -= nsectors - 1;
-          ff->ff_currentsector     = readsector + nsectors - 1;
+          ff->ff_sectorsincluster -= nsectors;
+          ff->ff_currentsector    += nsectors;
           bytesread                = nsectors * fs->fs_hwsectorsize;
         }
       else
@@ -582,7 +541,7 @@ static ssize_t fat_read(FAR struct file *filep, char *buffer, size_t buflen)
            * it is already there then all is well.
            */
 
-          ret = fat_ffcacheread(fs, ff, readsector);
+          ret = fat_ffcacheread(fs, ff, ff->ff_currentsector);
           if (ret < 0)
             {
               goto errout_with_semaphore;
@@ -595,9 +554,13 @@ static ssize_t fat_read(FAR struct file *filep, char *buffer, size_t buflen)
             {
               bytesread = buflen;
             }
+          else
+            {
+              ff->ff_sectorsincluster--;
+              ff->ff_currentsector++;
+            }
 
           memcpy(userbuffer, &ff->ff_buffer[sectorindex], bytesread);
-          ff->ff_currentsector = readsector;
         }
 
       /* Set up for the next sector read */
@@ -606,6 +569,29 @@ static ssize_t fat_read(FAR struct file *filep, char *buffer, size_t buflen)
       filep->f_pos += bytesread;
       readsize     += bytesread;
       buflen       -= bytesread;
+      sectorindex   = filep->f_pos & SEC_NDXMASK(fs);
+
+      /* Check if the current read stream has incremented to the next
+       * cluster boundary
+       */
+
+      if (ff->ff_sectorsincluster < 1)
+        {
+          /* Find the next cluster in the FAT. */
+
+          cluster = fat_getcluster(fs, cluster);
+          if (cluster < 2 || cluster >= fs->fs_nclusters)
+            {
+              ret = -EINVAL; /* Not the right error */
+              goto errout_with_semaphore;
+            }
+
+          /* Setup to read the first sector from the new cluster */
+
+          ff->ff_currentcluster   = cluster;
+          ff->ff_currentsector    = fat_cluster2sector(fs, cluster);
+          ff->ff_sectorsincluster = fs->fs_fatsecperclus;
+        }
     }
 
   fat_semgive(fs);
@@ -627,11 +613,11 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
   struct fat_mountpt_s *fs;
   struct fat_file_s    *ff;
   sint32                cluster;
-  size_t                writesector;
   unsigned int          byteswritten;
   unsigned int          writesize;
   unsigned int          nsectors;
   ubyte                *userbuffer = (ubyte*)buffer;
+  int                   sectorindex;
   int                   ret;
 
   /* Sanity checks */
@@ -671,96 +657,39 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
       goto errout_with_semaphore;
     }
 
+  /* Get the first sector to write to. */
+
+  if (!ff->ff_currentsector)
+    {
+      /* Has the starting cluster been defined? */
+
+      if (ff->ff_startcluster == 0)
+        {
+          /* No.. we have to create a new cluster chain */
+
+          ff->ff_startcluster     = fat_createchain(fs);
+          ff->ff_currentcluster   = ff->ff_startcluster;
+          ff->ff_sectorsincluster = fs->fs_fatsecperclus;
+        }
+
+      /* The current sector can then be determined from the currentcluster
+       * and the file offset.
+       */
+
+      ff->ff_currentsector = fat_cluster2sector(fs, ff->ff_currentcluster)
+                           + (SEC_NSECTORS(fs, filep->f_pos) & CLUS_NDXMASK(fs));
+    }
+
   /* Loop until either (1) all data has been transferred, or (2) an
-   * error occurs.
+   * error occurs.  We assume we start with the current sector in
+   * cache (ff_currentsector)
    */
 
   byteswritten = 0;
-  writesector  = ff->ff_currentsector;
+  sectorindex = filep->f_pos & SEC_NDXMASK(fs);
+
   while (buflen > 0)
     {
-      /* Get offset into the sector where we begin the read */
-
-      int sectorindex = filep->f_pos & SEC_NDXMASK(fs);
-
-      /* Check if the current read stream happens to lie on a
-       * sector boundary.
-       */
-
-      if (sectorindex == 0)
-        {
-          /* Decrement the number of sectors left in this cluster */
-
-          ff->ff_sectorsincluster--;
-
-          /* Are there unwritten sectors remaining in this cluster */
-
-          if (ff->ff_sectorsincluster > 0)
-            {
-              /* Yes.. There are more sectors in this cluster to be written.
-               * just increment the current sector number and write.
-               */
-
-              writesector = ff->ff_currentsector + 1;
-            }
-          else
-            {
-              /* No.. Handle the case of the first sector of the file */
-
-              if (filep->f_pos == 0)
-                {
-                  /* Check the first cluster of the file.  Zero means that
-                   * the file is empty -- perhaps the file was truncated or
-                   * created when it was opened
-                   */
-
-                  if (ff->ff_startcluster == 0)
-                    {
-                      /* In this case, we have to create a new cluster chain */
-
-                      ff->ff_startcluster = fat_createchain(fs);
-                    }
-
-                  /* Start writing at the first cluster of the file */
-
-                  cluster = ff->ff_startcluster;
-                }
-
-              /* But in the general case, we have to extend the current
-               * cluster by one (unless lseek was used to move the file
-               * position back from the end of the file)
-               */
-
-              else
-                {
-                  /* Extend the chain by adding a new cluster after
-                   * the last one
-                   */
-
-                  cluster = fat_extendchain(fs, ff->ff_currentcluster);
-                }
-
-              /* Verify the cluster number */
-
-              if (cluster < 0)
-                {
-                  ret = cluster;
-                  goto errout_with_semaphore;
-                }
-              else if (cluster < 2 || cluster >= fs->fs_nclusters)
-                {
-                  ret = -ENOSPC;
-                  goto errout_with_semaphore;
-                }
-
-              /* Setup to write the first sector from the new cluster */
-
-              ff->ff_currentcluster   = cluster;
-              ff->ff_sectorsincluster = fs->fs_fatsecperclus;
-              writesector             = fat_cluster2sector(fs, cluster);
-            }
-        }
-
       /* Check if there is unwritten data in the file buffer */
 
       ret = fat_ffcacheflush(fs, ff);
@@ -795,16 +724,16 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
 
           (void)fat_ffcacheinvalidate(fs, ff);
 
-          /* Write all of the sectors directory from user memory */
+          /* Write all of the sectors directly from user memory */
 
-          ret = fat_hwwrite(fs, userbuffer, writesector, nsectors);
+          ret = fat_hwwrite(fs, userbuffer, ff->ff_currentsector, nsectors);
           if (ret < 0)
             {
               goto errout_with_semaphore;
             }
 
-          ff->ff_sectorsincluster -= nsectors - 1;
-          ff->ff_currentsector     = writesector + nsectors - 1;
+          ff->ff_sectorsincluster -= nsectors;
+          ff->ff_currentsector    += nsectors;
           writesize                = nsectors * fs->fs_hwsectorsize;
           ff->ff_bflags           |= FFBUFF_MODIFIED;
         }
@@ -823,8 +752,7 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
 
           if (filep->f_pos < ff->ff_size || sectorindex != 0)
             {
-              ff->ff_currentsector = writesector;
-              ret = fat_ffcacheread(fs, ff, writesector);
+              ret = fat_ffcacheread(fs, ff, ff->ff_currentsector);
               if (ret < 0)
                 {
                   goto errout_with_semaphore;
@@ -838,9 +766,13 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
             {
               writesize = buflen;
             }
+          else
+            {
+              ff->ff_sectorsincluster--;
+              ff->ff_currentsector++;
+            }
 
           memcpy(&ff->ff_buffer[sectorindex], userbuffer, writesize);
-          ff->ff_currentsector = writesector;
           ff->ff_bflags |= (FFBUFF_DIRTY|FFBUFF_VALID|FFBUFF_MODIFIED);
         }
 
@@ -850,7 +782,40 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
       filep->f_pos += writesize;
       byteswritten += writesize;
       buflen       -= writesize;
-    }
+      sectorindex   = filep->f_pos & SEC_NDXMASK(fs);
+
+      /* Check if the current read stream has incremented to the next
+       * cluster boundary
+       */
+
+      if (ff->ff_sectorsincluster < 1)
+        {
+          /* Extend the current cluster by one (unless lseek was used to
+           * move the file position back from the end of the file)
+           */
+
+          cluster = fat_extendchain(fs, ff->ff_currentcluster);
+
+          /* Verify the cluster number */
+
+          if (cluster < 0)
+            {
+              ret = cluster;
+              goto errout_with_semaphore;
+            }
+          else if (cluster < 2 || cluster >= fs->fs_nclusters)
+            {
+              ret = -ENOSPC;
+              goto errout_with_semaphore;
+            }
+
+          /* Setup to write the first sector from the new cluster */
+
+          ff->ff_currentcluster   = cluster;
+          ff->ff_sectorsincluster = fs->fs_fatsecperclus;
+          ff->ff_currentsector    = fat_cluster2sector(fs, cluster);
+        }
+   }
 
   /* The transfer has completed without error.  Update the file size */
 

@@ -858,7 +858,7 @@ ssize_t fat_cluster2sector(struct fat_mountpt_s *fs,  uint32 cluster )
 /****************************************************************************
  * Name: fat_getcluster
  *
- * Desciption: Get the cluster start sector into the FAT.
+ * Desciption: Get the next cluster start from the FAT.
  *
  * Return:  <0: error, 0:cluster unassigned, >=0: start sector of cluster
  *
@@ -880,7 +880,7 @@ ssize_t fat_getcluster(struct fat_mountpt_s *fs, uint32 clusterno)
             {
               size_t       fatsector;
               unsigned int fatoffset;
-              unsigned int startsector;
+              unsigned int cluster;
               unsigned int fatindex;
 
               /* FAT12 is more complex because it has 12-bits (1.5 bytes)
@@ -895,13 +895,14 @@ ssize_t fat_getcluster(struct fat_mountpt_s *fs, uint32 clusterno)
               if (fat_fscacheread(fs, fatsector) < 0)
                 {
                   /* Read error */
+
                   break;
                 }
 
               /* Get the first, LS byte of the cluster from the FAT */
 
-              fatindex    = fatoffset & SEC_NDXMASK(fs);
-              startsector = fs->fs_buffer[fatindex];
+              fatindex = fatoffset & SEC_NDXMASK(fs);
+              cluster  = fs->fs_buffer[fatindex];
 
               /* With FAT12, the second byte of the cluster number may lie in
                * a different sector than the first byte.
@@ -916,6 +917,7 @@ ssize_t fat_getcluster(struct fat_mountpt_s *fs, uint32 clusterno)
                   if (fat_fscacheread(fs, fatsector) < 0)
                     {
                       /* Read error */
+
                       break;
                     }
                 }
@@ -925,21 +927,23 @@ ssize_t fat_getcluster(struct fat_mountpt_s *fs, uint32 clusterno)
                * on the fact that the byte stream is little-endian.
                */
 
-              startsector |= (unsigned int)fs->fs_buffer[fatindex] << 8;
+              cluster |= (unsigned int)fs->fs_buffer[fatindex] << 8;
 
               /* Now, pick out the correct 12 bit cluster start sector value */
 
               if ((clusterno & 1) != 0)
                 {
                   /* Odd.. take the MS 12-bits */
-                  startsector >>= 4;
+
+                  cluster >>= 4;
                 }
               else
                 {
                   /* Even.. take the LS 12-bits */
-                  startsector &= 0x0fff;
+
+                  cluster &= 0x0fff;
                 }
-              return startsector;
+              return cluster;
             }
 
           case FSTYPE_FAT16 :
@@ -967,7 +971,7 @@ ssize_t fat_getcluster(struct fat_mountpt_s *fs, uint32 clusterno)
                   /* Read error */
                   break;
                 }
-              return FAT_GETFAT16(fs->fs_buffer, fatindex) & 0x0fffffff;
+              return FAT_GETFAT32(fs->fs_buffer, fatindex) & 0x0fffffff;
             }
           default:
               break;
@@ -2198,20 +2202,21 @@ int fat_ffcacheflush(struct fat_mountpt_s *fs, struct fat_file_s *ff)
    * contents of ff_buffer.
    */
 
-  if (ff->ff_bflags && (FFBUFF_DIRTY|FFBUFF_VALID) == (FFBUFF_DIRTY|FFBUFF_VALID))
-  {
+  if (ff->ff_cachesector &&
+      ff->ff_bflags && (FFBUFF_DIRTY|FFBUFF_VALID) == (FFBUFF_DIRTY|FFBUFF_VALID))
+    {
       /* Write the dirty sector */
 
-      ret = fat_hwwrite(fs, ff->ff_buffer, ff->ff_currentsector, 1);
+      ret = fat_hwwrite(fs, ff->ff_buffer, ff->ff_cachesector, 1);
       if (ret < 0)
-      {
+        {
           return ret;
-      }
+        }
 
-      /* No longer dirty */
+      /* No longer dirty, but still valid */
 
       ff->ff_bflags &= ~FFBUFF_DIRTY;
-  }
+    }
 
   return OK;
 }
@@ -2228,12 +2233,12 @@ int fat_ffcacheread(struct fat_mountpt_s *fs, struct fat_file_s *ff, size_t sect
 {
   int ret;
 
-  /* ff->ff_currentsector holds the current sector that is buffered in
+  /* ff->ff_cachesector holds the current sector that is buffered in
    * ff->ff_buffer. If the requested sector is the same as this sector, then
    * we do nothing. Otherwise, we will have to read the new sector.
    */
 
-  if (ff->ff_currentsector != sector || (ff->ff_bflags & FFBUFF_VALID) == 0)
+  if (ff->ff_cachesector != sector || (ff->ff_bflags & FFBUFF_VALID) == 0)
       {
         /* We will need to read the new sector.  First, flush the cached
          * sector if it is dirty.
@@ -2255,7 +2260,7 @@ int fat_ffcacheread(struct fat_mountpt_s *fs, struct fat_file_s *ff, size_t sect
 
         /* Update the cached sector number */
 
-        ff->ff_currentsector = sector;
+        ff->ff_cachesector = sector;
         ff->ff_bflags |= FFBUFF_VALID;
     }
     return OK;

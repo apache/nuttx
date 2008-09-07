@@ -69,6 +69,10 @@
 #  define CONFIG_NETUTILS_TFTP_TIMEOUT 10 /* One second */
 #endif
 
+/* Dump received buffers */
+
+#undef CONFIG_NETUTILS_TFTP_DUMPBUFFERS
+
 /* Sizes of TFTP messsage headers */
 
 #define TFTP_ACKHEADERSIZE  4
@@ -152,5 +156,11 @@ extern int tftp_parseerrpacket(const ubyte *packet);
 
 extern ssize_t tftp_recvfrom(int sd, void *buf, size_t len, struct sockaddr_in *from);
 extern ssize_t tftp_sendto(int sd, const void *buf, size_t len, struct sockaddr_in *to);
+
+#ifdef CONFIG_NETUTILS_TFTP_DUMPBUFFERS
+extern void tftp_dumpbuffer(const char *msg, ubyte *buffer, int nbytes);
+#else
+# define tftp_dumpbuffer(msg, buffer, nbytes)
+#endif
 
 #endif /* __NETUTILS_TFTP_TFTPC_INTERNAL_H */

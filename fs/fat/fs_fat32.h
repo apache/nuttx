@@ -162,6 +162,8 @@
 #define SEC_NDXMASK(f)      ((f)->fs_hwsectorsize - 1)
 #define SEC_NSECTORS(f,n)   ((n) / (f)->fs_hwsectorsize)
 
+#define CLUS_NDXMASK(f)     ((f)->fs_fatsecperclus -1)
+
 /****************************************************************************
  * File system types */
 
@@ -515,7 +517,8 @@ struct fat_file_s
   size_t   ff_dirsector;           /* Sector containing the directory entry */
   off_t    ff_size;                /* Size of the file in bytes */
   size_t   ff_startcluster;        /* Start cluster of file on media */
-  size_t   ff_currentsector;       /* Current sector in the file buffer */
+  size_t   ff_currentsector;       /* Current sector being operated on */
+  size_t   ff_cachesector;         /* Current sector in the file buffer */
   ubyte   *ff_buffer;              /* File buffer (for partial sector accesses) */
 };
 
@@ -578,7 +581,7 @@ EXTERN int    fat_hwwrite(struct fat_mountpt_s *fs, ubyte *buffer,
 
 /* Cluster / cluster chain access helpers */
 
-EXTERN ssize_t fat_cluster2sector(struct fat_mountpt_s *fs,  uint32 cluster );
+EXTERN ssize_t fat_cluster2sector(struct fat_mountpt_s *fs,  uint32 cluster);
 EXTERN ssize_t fat_getcluster(struct fat_mountpt_s *fs, uint32 clusterno);
 EXTERN int    fat_putcluster(struct fat_mountpt_s *fs, uint32 clusterno,
                              size_t startsector);

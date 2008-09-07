@@ -852,6 +852,10 @@ int cmd_mkrd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
       fmt = g_fmtcmdoutofmemory;
       goto errout_with_fmt;
     }
+
+#ifdef CONFIG_DEBUG_VERBOSE
+  memset(buffer, 0, sectsize * nsectors);
+#endif
   dbg("RAMDISK at %p\n", buffer);
 
   /* Then register the ramdisk */
