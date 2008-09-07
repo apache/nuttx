@@ -255,6 +255,12 @@
   </td>
 </tr>
 <tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdxd">2.31 Hexadecimal Dump (xd)</a>
+  </td>
+</tr>
+<tr>
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
   <td>
     <a href="#configuration">3.0 Configuration Settings</a>
@@ -1414,6 +1420,33 @@ usleep &lt;usec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
+    <a name="cmdxd"><h2>2.31 Hexadecimal dump (xd)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+xd &lt;hex-address&gt; &lt;byte-count&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Dump <code>&lt;byte-count&gt;</code> bytes of data from address <code>&lt;hex-address&gt;</code>.
+</p>
+<p><b>Example:</b></p>
+<ul><pre>
+nsh> xd 410e0 512
+Hex dump:
+0000: 00 00 00 00 9c 9d 03 00 00 00 00 01 11 01 10 06 ................
+0010: 12 01 11 01 25 08 13 0b 03 08 1b 08 00 00 02 24 ....%..........$
+...
+01f0: 08 3a 0b 3b 0b 49 13 00 00 04 13 01 01 13 03 08 .:.;.I..........
+nsh>
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
     <a name="configuration"><h1>3.0 Configuration Settings</h1></a>
   </td>
   </tr>
@@ -1800,6 +1833,7 @@ usleep &lt;usec&gt;
   <li><a href="#cmdunmount"><code>umount</code></a></li>
   <li><a href="#cmdunset"><code>unset</code></a></li>
   <li><a href="#cmdusleep"><code>usleep</code></a></li>
+  <li><a href="#cmdxd"><code>xd</code></a></li>
 </ul></td>
 </tr></table>
 
