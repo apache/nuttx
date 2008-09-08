@@ -162,7 +162,7 @@
 #define SEC_NDXMASK(f)      ((f)->fs_hwsectorsize - 1)
 #define SEC_NSECTORS(f,n)   ((n) / (f)->fs_hwsectorsize)
 
-#define CLUS_NDXMASK(f)     ((f)->fs_fatsecperclus -1)
+#define CLUS_NDXMASK(f)     ((f)->fs_fatsecperclus - 1)
 
 /****************************************************************************
  * File system types */
@@ -615,8 +615,9 @@ EXTERN int    fat_ffcacheinvalidate(struct fat_mountpt_s *fs, struct fat_file_s 
 
 /* FSINFO sector support */
 
-EXTERN int fat_updatefsinfo(struct fat_mountpt_s *fs);
-EXTERN int fat_nfreeclusters(struct fat_mountpt_s *fs, size_t *pfreeclusters);
+EXTERN int    fat_updatefsinfo(struct fat_mountpt_s *fs);
+EXTERN int    fat_nfreeclusters(struct fat_mountpt_s *fs, size_t *pfreeclusters);
+EXTERN int    fat_currentsector(struct fat_mountpt_s *fs, struct fat_file_s *ff, off_t position);
 
 #undef EXTERN
 #if defined(__cplusplus)

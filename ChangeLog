@@ -459,4 +459,6 @@
 	* Fixed several critical bugs with regard to fat reading and writing and FAT12
 	  accesses.  Basically the FAT FS only worked with my tiny test files and test
 	  cases.  A lot of stronger FAT tested is needed!!
+	* Fixed another FAT bug in implementation of FAT lseek; this prohibit correct
+	  random access to large files.
 

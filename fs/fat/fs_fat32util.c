@@ -44,6 +44,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <stdlib.h>
 #include <string.h>
@@ -2303,7 +2304,8 @@ int fat_ffcacheinvalidate(struct fat_mountpt_s *fs, struct fat_file_s *ff)
 
         /* Then discard the current cache contents */
 
-        ff->ff_bflags &= ~FFBUFF_VALID;
+        ff->ff_bflags     &= ~FFBUFF_VALID;
+        ff->ff_cachesector = 0;
     }
     return OK;
 }
@@ -2460,4 +2462,48 @@ int fat_nfreeclusters(struct fat_mountpt_s *fs, size_t *pfreeclusters)
     *pfreeclusters = nfreeclusters;
     return OK;
 }
+
+/****************************************************************************
+ * Name: fat_nfreeclusters
+ *
+ * Desciption:
+ *   Given the file position, set the correct current sector to access.
+ *
+ ****************************************************************************/
+
+int fat_currentsector(struct fat_mountpt_s *fs, struct fat_file_s *ff,
+                      off_t position)
+{
+  int sectoroffset;
+
+  if (position <= ff->ff_size )
+    {
+      /* sectoroffset is the sector number offset into the current cluster */
+
+      sectoroffset = SEC_NSECTORS(fs, position) & CLUS_NDXMASK(fs);
+
+      /* The current cluster is the the first sector of the cluster plus
+       * the sector offset
+        */
+
+      ff->ff_currentsector = fat_cluster2sector(fs, ff->ff_currentcluster)
+                           + sectoroffset;
+
+      /* The remainder is the number of sectors left in the cluster to be
+       * read/written
+       */
+
+      ff->ff_sectorsincluster = fs->fs_fatsecperclus - sectoroffset;
+
+      fvdbg("position=%d currentsector=%d sectorsincluster=%d\n",
+            position, ff->ff_currentsector, ff->ff_sectorsincluster);
+
+      return OK;
+    }
+
+  /* The position does not lie within the file */
+
+  return -ENOSPC;
+}
+
 

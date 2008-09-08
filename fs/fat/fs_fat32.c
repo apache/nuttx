@@ -44,6 +44,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/statfs.h>
@@ -478,9 +479,11 @@ static ssize_t fat_read(FAR struct file *filep, char *buffer, size_t buflen)
        * and the file offset.
        */
 
-      ff->ff_currentsector = fat_cluster2sector(fs, ff->ff_currentcluster)
-                           + (SEC_NSECTORS(fs, filep->f_pos) & CLUS_NDXMASK(fs));
-      fdbg("Start with sector: %d\n", ff->ff_currentsector);
+      ret = fat_currentsector(fs, ff, filep->f_pos);
+      if (ret < 0)
+        {
+           return ret;
+        }
     }
 
   /* Loop until either (1) all data has been transferred, or (2) an
@@ -676,8 +679,11 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
        * and the file offset.
        */
 
-      ff->ff_currentsector = fat_cluster2sector(fs, ff->ff_currentcluster)
-                           + (SEC_NSECTORS(fs, filep->f_pos) & CLUS_NDXMASK(fs));
+      ret = fat_currentsector(fs, ff, filep->f_pos);
+      if (ret < 0)
+        {
+           return ret;
+        }
     }
 
   /* Loop until either (1) all data has been transferred, or (2) an
@@ -773,7 +779,9 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
             }
 
           memcpy(&ff->ff_buffer[sectorindex], userbuffer, writesize);
-          ff->ff_bflags |= (FFBUFF_DIRTY|FFBUFF_VALID|FFBUFF_MODIFIED);
+
+          ff->ff_bflags     |= (FFBUFF_DIRTY|FFBUFF_VALID|FFBUFF_MODIFIED);
+          ff->ff_cachesector = ff->ff_currentsector;
         }
 
       /* Set up for the next write */
@@ -844,7 +852,6 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
   sint32                cluster;
   ssize_t               position;
   unsigned int          clustersize;
-  unsigned int          sectoroffset;
   int                   ret;
 
   /* Sanity checks */
@@ -906,6 +913,7 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
   if (position > ff->ff_size && (ff->ff_oflags & O_WROK) == 0)
     {
         /* Otherwise, the position is limited to the file size */
+
         position = ff->ff_size;
     }
 
@@ -948,7 +956,7 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
                  */
 
                 ff->ff_currentcluster = cluster;
-                if (position <= clustersize)
+                if (position < clustersize)
                 {
                     break;
                 }
@@ -1015,16 +1023,17 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
 
             /* We get here after we have found the sector containing
              * the requested position.
+             *
+             * Save the new file position
              */
 
-            sectoroffset = (position - 1) / fs->fs_hwsectorsize;
+            filep->f_pos += position;
 
-            /* And get the current sector from the cluster and
-             * the sectoroffset into the cluster.
+            /* Then get the current sector from the cluster and the offset
+             * into the cluster from the position
              */
 
-            ff->ff_currentsector =
-                fat_cluster2sector(fs, cluster) + sectoroffset;
+            (void)fat_currentsector(fs, ff, filep->f_pos);
 
             /* Load the sector corresponding to the position */
 
@@ -1037,13 +1046,6 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
                 }
             }
 
-            /* Save the number of sectors left in the cluster */
-
-            ff->ff_sectorsincluster = fs->fs_fatsecperclus - sectoroffset;
-
-            /* And save the new file position */
-
-            filep->f_pos += position;
         }
     }
 
@@ -1141,6 +1143,7 @@ static int fat_sync(FAR struct file *filep)
     }
 
   /* Check if the has been modified in any way */
+
   if ((ff->ff_bflags & FFBUFF_MODIFIED) != 0)
     {
       /* Flush any unwritten data in the file buffer */
