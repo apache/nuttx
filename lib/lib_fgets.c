@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib_fgets.c
+ * lib/lib_fgets.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -121,9 +121,9 @@ static inline void _lib_consoleputc(int ch)
  ****************************************************************************/
 
 #ifdef CONFIG_FGETS_ECHO
-static inline void _lib_consoleputs(const char *s)
+static inline void _lib_consoleputs(const char *str)
 {
-  (void)write(1, s, strlen(s));
+  (void)write(1, str, strlen(str));
 }
 #endif
 
@@ -135,9 +135,9 @@ static inline void _lib_consoleputs(const char *s)
  * Name: fgets
  *
  * Description:
- *   fgets() reads in at most one less than 'n' characters
+ *   fgets() reads in at most one less than 'buflen' characters
  *   from stream and stores them into the buffer pointed to
- *   by 's'. Reading stops after an EOF or a newline.  If a
+ *   by 'buf'. Reading stops after an EOF or a newline.  If a
  *   newline is read, it is stored into the buffer.  A null
  *   terminator is stored after the last character in the
  *   buffer.
@@ -151,7 +151,7 @@ static inline void _lib_consoleputs(const char *s)
  *
  **************************************************************************/
 
-char *fgets(FAR char *s, int n, FILE *stream)
+char *fgets(FAR char *buf, int buflen, FILE *stream)
 {
 #ifdef CONFIG_FGETS_ECHO
   boolean console;
@@ -161,15 +161,15 @@ char *fgets(FAR char *s, int n, FILE *stream)
 
   /* Sanity checks */
 
-  if (!stream || !s || n < 1 || stream->fs_filedes < 0)
+  if (!stream || !buf || buflen < 1 || stream->fs_filedes < 0)
     {
       return NULL;
     }
 
-  if (n < 2)
+  if (buflen < 2)
     {
-      *s = '\0';
-      return s;
+      *buf = '\0';
+      return buf;
     }
 
   /* Check if the stream is stdin */
@@ -270,8 +270,8 @@ char *fgets(FAR char *s, int n, FILE *stream)
            * with the null terminator.
            */
 
-          s[nch++] = '\n';
-          s[nch]   = '\0';
+          buf[nch++] = '\n';
+          buf[nch]   = '\0';
 
 #ifdef CONFIG_FGETS_ECHO
           if (console)
@@ -281,7 +281,7 @@ char *fgets(FAR char *s, int n, FILE *stream)
               _lib_consoleputc('\n');
             }
 #endif
-          return s;
+          return buf;
         }
 
       /* Check for end-of-file */
@@ -300,8 +300,8 @@ char *fgets(FAR char *s, int n, FILE *stream)
             {
               /* Terminate the line */
 
-              s[nch]   = '\0';
-              return s;\
+              buf[nch]   = '\0';
+              return buf;
             }
         }
 
@@ -311,7 +311,7 @@ char *fgets(FAR char *s, int n, FILE *stream)
 
       else if (isprint(ch))
         {
-          s[nch++] = ch;
+          buf[nch++] = ch;
 
 #ifdef CONFIG_FGETS_ECHO
           if (console)
@@ -326,10 +326,10 @@ char *fgets(FAR char *s, int n, FILE *stream)
            * we have to end the line now.
            */
 
-          if (nch + 1 >= n)
+          if (nch + 1 >= buflen)
             {
-              s[nch] = '\0';
-              return s;
+              buf[nch] = '\0';
+              return buf;
             }
         }
     }
