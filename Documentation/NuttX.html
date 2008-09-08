@@ -487,7 +487,7 @@
 </table>
 
 <p>
-  The 25th release of NuttX (nuttx-0.3.13) is available for download
+  The 26th release of NuttX (nuttx-0.3.14) is available for download
   from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
   website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
@@ -495,36 +495,47 @@
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  The nuttx-0.3.13 release includes some important bug fixes as well as a few new features.
-  Bugs fixed include:
+  The nuttx-0.3.14 release includes some important bug fixes as well as a few new features.
+  Critical bugs fixed include:
   <ul>
-    <li>Fixed problems with Cygwin-based console input.  NSH now works with the Cygwin simulator.</li>
-    <li>sched_get_priority_max/min returned error on SCHED_RR.</li>
-    <li>Corrected detection of End-of-File in fgets().</li>
-    <li>Fixed an error in opendir() that could cause an assertion to fail inappropriately.</li>
-    <li>Corrected an error in the FAT that caused files opened for writing with O_APPEND to fail.</li>
-    <li>Fix error in getopt() when called with argc==1.</li>
-    <li>Fix error in stat() when used on the root directory.</li>
-    <li>Fixed a critical bug that effects the way that environment variables are shared amongst
-      pthreads.</li>
-    <li>uIP port now supports multi-threaded, concurrent socket access.  So, for example, one
-      thread can be reading from a socket while another is writing to the socket.</li>
+    <li>FAT FS:
+      <ul>
+        <li>Fixed several critical bugs with regard to fat reading and writing and FAT12
+          accesses.  Basically the FAT FS only worked with my tiny test files and test
+          cases.  A lot of stronger FAT tested is still needed!!</li>
+        <li>Fixed another FAT bug in implementation of FAT lseek; this prohibit correct
+          random access to large files.</li>
+      </ul>
+    </li>
+    <li>Network:
+      <ul>
+        <li>Corrected a critical bug that may prevent <code>recvfrom()</code> from receiving
+          packets from most remote UDP port numbers.</li>
+        <li>Corrected an error in multi-threaded socket handling in <code>send()</code> and
+         <code>sendto()</code>. Outgoing data could overwrite incoming data.</li>
+        <li>Corrected IP checksum calculation in ICMP and UDP message send logic.
+        <li>Corrected an error in <code>send()</code> timeout logic.</li>
+      </ul>
+    </li>
   </ul>
 </p>
 <p>
   New features were also added:
   <ul>
-
-    <li>New OS APIs: chdir() and getcwd().</li>
-    <li>The Nuttx shell (NSH) has been extended in many ways:
-    <ul>
-      <li>New commands: mkfatfs, mkfifo, sleep, usleep, nice, sh, cd, and pwd commands
-      <li>New memory inspection commands and heap usage commands
-      <li>New capabilities: Execution of commands in background, execution of simple scripts,
-        redirection of command output, last command status ($?)
-      <li>Now supports if-then[-else]-fi construct
-      <li>and other features as noted in the ChangeLog.
-    </ul></li>
+    <li>Network:
+      <ul>
+        <li>Added support for application access to ICMP protocol stacks; Added
+          ping request logic (<code>net/uip</code>).
+        <li>Added basic TFTP client logic (<code>netutils/tftpc</code>).
+      </ul>
+    </li>
+    <li>NuttShell (NSH):
+      <ul>
+        <li>New commands: <code>test</code>, <code>[</code>, <code>ping</code>,
+        <code>mkrd,</code> <code>xd</code>, andTFTP <code>get</code> and <code>put</code> commands.
+        (See the new NuttShell User Guide for additional information).
+      </ul>
+    </li>
   </ul>
 </p>
 <p>
@@ -1026,73 +1037,7 @@ Other memory:
 </table>
 
 <pre><ul>
-nuttx-0.3.13 2008-09-01 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* NSH: Added mkfatfs, mkfifo, sleep, usleep and nice commands
-	* Fixed problem with console input in Cygwin-based simulator; NSH now works
-	  with simulator.
-	* NSH will now execute commands in background
-	* sched_get_priority_max/min returned error on SCHED_RR
-	* Removed duplicate getenv() implementation in /lib
-	* Correct detection of End-of-File in fgets
-	* NSH: Implemented sh and crude script handler
-	* Fix prototype of read() and write(). Need to use ssize_t and size_t, not
-	  int and unsigned int.
-	* NSH now supports redirection of command output
-	* NSH can now use both telnet and serial front ends together
-	* NSH: $variable can be used for any command value
-	* Fixed an error in opendir() that could cause an assertion to fail
-	  inappropriately.
-	* Correct an error in the FAT that caused files opened for writing with
-	  O_APPEND to fail.  The file was not being properly positioned to the
-	  end of the file in that case.
-	* NSH now supports last exit status $?
-	* NSH now supports if-then[-else]-fi construct
-	* NSH now supports comments beginning with '#'
-	* NSH now supports commands to inspect and modify memory
-	* NSH cat command now supports multiple files on command line
-	* Add chdir() and getcwd()
-	* Fix error in getopt() when called with argc==1
-	* Fix error in stat() when used on the root directory
-	* NSH: Add cd and pwd commands and current working directory to all NSH
-	  commands that refer to paths.
-	* Fix errors and warnings introduced into Linux sim build because of recent
-	  Cygwin-based sim changes
-	* NSH: Add mem command to display heap usage
-	* Added telnet NSH configuration for Neuros OSD.
-	* Basic integration of concurrent telnet/serial NSH functional on Neuros
-	  OSD.
-	* Fixed a critical bug that effects the way that environment variables are
-	  shared amongst pthreads.
-	* uIP port enhance to support multi-threaded, concurrent socket access.  So,
-	  for example, one thread can be reading from a socket while another is
-	  writing to the socket.
-
-pascal-0.1.2 2008-02-10 Gregory Nutt <spudmonkey@racsa.co.cr>
-
-	* Add logic to build and link with the ZDS-II toolchain
-	  use with the z16f.
-	* Make sure that POFF header structures are aligned
-	* Standardized POFF file format to big-endian
-	* Break up large switch statements to lower complexity
-	  and eliminate a compiler bug
-	* Changes so that runtime compiles with SDCC.
-
-buildroot-0.1.0 2007-03-09 &lt;spudmonkey@racsa.co.cr&gt
-
-	* Support for arm-elf toolchain
-</pre></ul>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="pendingchanges">Unreleased Changes</a>
-  </td>
-  </tr>
-</table>
-
-<pre><ul>
-nuttx-0.3.14 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-0.3.14 2008-09-08 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* FAT FS now uses position variable in struct file.  This simplifies operations
 	  like ftell().
 	* fseek() needs to discard bytes buffered by ungetc().
@@ -1119,6 +1064,32 @@ nuttx-0.3.14 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  cases.  A lot of stronger FAT tested is needed!!
 	* Fixed another FAT bug in implementation of FAT lseek; this prohibit correct
 	  random access to large files.
+
+pascal-0.1.2 2008-02-10 Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* Add logic to build and link with the ZDS-II toolchain
+	  use with the z16f.
+	* Make sure that POFF header structures are aligned
+	* Standardized POFF file format to big-endian
+	* Break up large switch statements to lower complexity
+	  and eliminate a compiler bug
+	* Changes so that runtime compiles with SDCC.
+
+buildroot-0.1.0 2007-03-09 &lt;spudmonkey@racsa.co.cr&gt
+
+	* Support for arm-elf toolchain
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="pendingchanges">Unreleased Changes</a>
+  </td>
+  </tr>
+</table>
+
+<pre><ul>
+nuttx-0.3.15 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-0.1.3 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
