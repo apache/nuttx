@@ -1,5 +1,5 @@
 ############################################################################
-# sim/nettest/defconfig
+# configs/sim/nettest/defconfig
 #
 #   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -208,7 +208,9 @@ CONFIG_PREALLOC_TIMERS=8
 # FAT filesystem configuration
 # CONFIG_FS_FAT - Enable FAT filesystem support
 # CONFIG_FAT_SECTORSIZE - Max supported sector size
+# CONFIG_FS_ROMFS - Enable ROMFS filesystem support
 CONFIG_FS_FAT=y
+CONFIG_FS_ROMFS=n
 
 #
 # TCP/IP and UDP support via uIP
