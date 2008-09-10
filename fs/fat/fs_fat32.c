@@ -1299,11 +1299,11 @@ errout_with_semaphore:
 static int fat_readdir(struct inode *mountpt, struct internal_dir_s *dir)
 {
   struct fat_mountpt_s *fs;
-  unsigned int            dirindex;
-  ubyte                  *direntry;
-  ubyte                   ch;
-  ubyte                   attribute;
-  int                     ret = OK;
+  unsigned int          dirindex;
+  ubyte                *direntry;
+  ubyte                 ch;
+  ubyte                 attribute;
+  int                   ret = OK;
 
   /* Sanity checks */
 
@@ -1628,7 +1628,7 @@ static int fat_statfs(struct inode *mountpt, struct statfs *buf)
   /* Everything else follows in units of clusters */
 
   buf->f_blocks  = fs->fs_nclusters;                        /* Total data blocks in the file system */
-  ret = fat_nfreeclusters(fs, &buf->f_bfree);               /* Free blocks in the file system */
+  buf->f_bfree   = fat_nfreeclusters(fs, &buf->f_bfree);    /* Free blocks in the file system */
   buf->f_bavail  = buf->f_bfree;                            /* Free blocks avail to non-superuser */
   buf->f_namelen = (8+1+3);                                 /* Maximum length of filenames */
 
