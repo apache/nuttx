@@ -400,9 +400,9 @@ static int fat_close(FAR struct file *filep)
    */
 
   if (ff->ff_buffer)
-  {
+    {
       free(ff->ff_buffer);
-  }
+    }
 
   /* Then free the file structure itself. */
 
@@ -467,9 +467,9 @@ static ssize_t fat_read(FAR struct file *filep, char *buffer, size_t buflen)
    */
 
   if (buflen > bytesleft)
-  {
+    {
       buflen = bytesleft;
-  }
+    }
 
   /* Get the first sector to read from. */
 
@@ -555,10 +555,14 @@ static ssize_t fat_read(FAR struct file *filep, char *buffer, size_t buflen)
           bytesread = fs->fs_hwsectorsize - sectorindex;
           if (bytesread > buflen)
             {
+              /* We will not read to the end of the buffer */
+
               bytesread = buflen;
             }
           else
             {
+              /* We will read to the end of the buffer (or beyond) */
+
               ff->ff_sectorsincluster--;
               ff->ff_currentsector++;
             }
@@ -770,10 +774,14 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
           writesize = fs->fs_hwsectorsize - sectorindex;
           if (writesize > buflen)
             {
+             /* We will not write to the end of the buffer */
+
               writesize = buflen;
             }
           else
             {
+             /* We will write to the end of the buffer (or beyond) */
+
               ff->ff_sectorsincluster--;
               ff->ff_currentsector++;
             }
@@ -868,7 +876,7 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Map the offset according to the whence option */
   switch (whence)
-  {
+    {
       case SEEK_SET: /* The offset is set to offset bytes. */
           position = offset;
           break;
@@ -887,7 +895,7 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
 
       default:
           return -EINVAL;
-  }
+    }
 
   /* Make sure that the mount is still healthy */
 
@@ -895,16 +903,16 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
   ret = fat_checkmount(fs);
   if (ret != OK)
     {
-        goto errout_with_semaphore;
+      goto errout_with_semaphore;
     }
 
   /* Check if there is unwritten data in the file buffer */
 
   ret = fat_ffcacheflush(fs, ff);
   if (ret < 0)
-  {
+    {
       goto errout_with_semaphore;
-  }
+    }
 
   /* Attempts to set the position beyound the end of file will
    * work if the file is open for write access.
@@ -943,23 +951,23 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
         }
 
         if (cluster)
-        {
+          {
             /* If the file has a cluster chain, follow it to the
              * requested position.
              */
 
             clustersize = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
             for (;;)
-            {
+              {
                 /* Skip over clusters prior to the one containing
                  * the requested position.
                  */
 
                 ff->ff_currentcluster = cluster;
                 if (position < clustersize)
-                {
+                  {
                     break;
-                }
+                  }
 
                 /* Extend the cluster chain if write in enabled.  NOTE:
                  * this is not consistent with the lseek description:
@@ -972,54 +980,54 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
                  */
 
                 if ((ff->ff_oflags & O_WROK) != 0)
-                {
+                  {
                     /* Extend the cluster chain (fat_extendchain
                      * will follow the existing chain or add new
                      * clusters as needed.
                      */
 
                     cluster = fat_extendchain(fs, cluster);
-                }
+                  }
                 else
-                {
+                  {
                     /* Otherwise we can only follong the existing chain */
 
                     cluster = fat_getcluster(fs, cluster);
-                }
+                  }
 
                 if (cluster < 0)
-                {
+                  {
                     /* An error occurred getting the cluster */
 
                     ret = cluster;
                     goto errout_with_semaphore;
-                }
+                  }
 
                 /* Zero means that there is no further clusters available
                  * in the chain.
                  */
 
                 if (cluster == 0)
-                {
+                  {
                     /* At the position to the current locaiton and
                      * break out.
                      */
 
                     position = clustersize;
                     break;
-                }
+                  }
 
                 if (cluster >= fs->fs_nclusters)
-                {
+                  {
                     ret = -ENOSPC;
                     goto errout_with_semaphore;
-                }
+                  }
 
                 /* Otherwise, update the position and continue looking */
 
                 filep->f_pos += clustersize;
                 position     -= clustersize;
-            }
+              }
 
             /* We get here after we have found the sector containing
              * the requested position.
@@ -1038,15 +1046,14 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
             /* Load the sector corresponding to the position */
 
             if ((position & SEC_NDXMASK(fs)) != 0)
-            {
+              {
                 ret = fat_ffcacheread(fs, ff, ff->ff_currentsector);
                 if (ret < 0)
-                {
+                  {
                     goto errout_with_semaphore;
-                }
-            }
-
-        }
+                  }
+              }
+         }
     }
 
   /* If we extended the size of the file, then mark the file as modified. */

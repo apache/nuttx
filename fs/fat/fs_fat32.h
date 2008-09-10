@@ -530,7 +530,7 @@ struct fat_dirinfo_s
 #ifdef CONFIG_FAT_LCNAMES
   ubyte    fd_ntflags;             /* NTRes lower case flags */
 #endif
-  struct fs_fatdir_s dir;        /* Used with opendir, readdir, etc. */
+  struct fs_fatdir_s dir;          /* Used with opendir, readdir, etc. */
   ubyte   *fd_entry;               /* A pointer to the raw 32-byte entry */
 };
 
