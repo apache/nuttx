@@ -40,6 +40,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <sys/types.h>
 
 /****************************************************************************
@@ -62,7 +63,7 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Non-standard function to register a ramdisk
+/* Non-standard function to register a ramdisk or a romdisk
  *
  *   minor:         Selects suffix of device named /dev/ramN, N={1,2,3...}
  *   nsectors:      Number of sectors on device
@@ -71,8 +72,14 @@ extern "C" {
  *   buffer:        RAM disk backup memory
  */
 
-EXTERN int rd_register(int minor, ubyte *buffer, uint32 nsectors,
-                       uint16 sectize, boolean writeenabled);
+#ifdef CONFIG_FS_WRITABLE
+EXTERN int ramdisk_register(int minor, ubyte *buffer, uint32 nsectors,
+                            uint16 sectize, boolean writeenabled);
+#define romdisk_register(m,b,n,s) ramdisk_register(m,b,n,s,0)
+#else
+EXTERN int romdisk_register(int minor, ubyte *buffer, uint32 nsectors,
+                            uint16 sectize);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

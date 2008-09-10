@@ -463,3 +463,4 @@
 	  random access to large files.
 
 0.3.15 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+	* Add support for ROMFS filesystem (initial checkin untested)

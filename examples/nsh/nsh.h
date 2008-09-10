@@ -288,15 +288,19 @@ extern int cmd_lbracket(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
   extern int cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 # endif  /* CONFIG_NFILE_STREAMS && !CONFIG_EXAMPLES_NSH_DISABLESCRIPT */
 # ifndef CONFIG_DISABLE_MOUNTPOINT
-    extern int cmd_mkdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
     extern int cmd_mkfifo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-    extern int cmd_mkrd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-    extern int cmd_rm(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-    extern int cmd_rmdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-#   ifdef CONFIG_FS_FAT
-      extern int cmd_mkfatfs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#   ifdef CONFIG_FS_READABLE
       extern int cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
       extern int cmd_umount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#     ifdef CONFIG_FS_WRITABLE
+        extern int cmd_mkdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+        extern int cmd_mkrd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+        extern int cmd_rm(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+        extern int cmd_rmdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#     endif /* CONFIG_FS_WRITABLE */
+#   endif /* CONFIG_FS_READABLE */
+#   ifdef CONFIG_FS_FAT
+      extern int cmd_mkfatfs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #   endif /* CONFIG_FS_FAT */
 # endif /* !CONFIG_DISABLE_MOUNTPOINT */
 # if !defined(CONFIG_DISABLE_ENVIRON)

@@ -59,10 +59,14 @@
 
 struct rd_struct_s
 {
-  uint32  rd_nsectors;     /* Number of sectors on device */
-  uint16  rd_sectsize;     /* The size of one sector */
-  boolean rd_writeenabled; /* TRUE: can write to ram disk */
-  ubyte  *rd_buffer;       /* RAM disk backup memory */
+  uint32       rd_nsectors;     /* Number of sectors on device */
+  uint16       rd_sectsize;     /* The size of one sector */
+#ifdef CONFIG_FS_WRITABLE
+  boolean      rd_writeenabled; /* TRUE: can write to ram disk */
+  ubyte       *rd_buffer;       /* RAM disk backup memory */
+#else
+  const ubyte *rd_buffer;       /* ROM disk backup memory */
+#endif
 };
 
 /****************************************************************************
@@ -73,8 +77,10 @@ static int     rd_open(FAR struct inode *inode);
 static int     rd_close(FAR struct inode *inode);
 static ssize_t rd_read(FAR struct inode *inode, unsigned char *buffer,
                        size_t start_sector, unsigned int nsectors);
+#ifdef CONFIG_FS_WRITABLE
 static ssize_t rd_write(FAR struct inode *inode, const unsigned char *buffer,
                         size_t start_sector, unsigned int nsectors);
+#endif
 static int     rd_geometry(FAR struct inode *inode, struct geometry *geometry);
 
 /****************************************************************************
@@ -86,7 +92,11 @@ static const struct block_operations g_bops =
   rd_open,     /* open     */
   rd_close,    /* close    */
   rd_read,     /* read     */
+#ifdef CONFIG_FS_WRITABLE
   rd_write,    /* write    */
+#else
+  NULL,        /* write    */
+#endif
   rd_geometry, /* geometry */
   NULL         /* ioctl    */
 };
@@ -153,6 +163,7 @@ static ssize_t rd_read(FAR struct inode *inode, unsigned char *buffer,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_FS_WRITABLE
 static ssize_t rd_write(FAR struct inode *inode, const unsigned char *buffer,
                         size_t start_sector, unsigned int nsectors)
 {
@@ -160,18 +171,25 @@ static ssize_t rd_write(FAR struct inode *inode, const unsigned char *buffer,
   if (inode)
     {
       dev = (struct rd_struct_s *)inode->i_private;
-      if (dev &&
-          start_sector < dev->rd_nsectors &&
-          start_sector + nsectors <= dev->rd_nsectors)
+      if (dev)
         {
-          memcpy(&dev->rd_buffer[start_sector * dev->rd_sectsize],
-                 buffer,
-                 nsectors * dev->rd_sectsize);
-          return nsectors;
+          if (!dev->rd_writeenabled)
+            {
+              return -EACCES;
+            }
+          else if (start_sector < dev->rd_nsectors &&
+                   start_sector + nsectors <= dev->rd_nsectors)
+            {
+              memcpy(&dev->rd_buffer[start_sector * dev->rd_sectsize],
+                     buffer,
+                     nsectors * dev->rd_sectsize);
+              return nsectors;
+            }
         }
     }
   return -EINVAL;
 }
+#endif
 
 /****************************************************************************
  * Name: rd_geometry
@@ -188,7 +206,11 @@ static int rd_geometry(FAR struct inode *inode, struct geometry *geometry)
       dev = (struct rd_struct_s *)inode->i_private;
       geometry->geo_available     = TRUE;
       geometry->geo_mediachanged  = FALSE;
+#ifdef CONFIG_FS_WRITABLE
       geometry->geo_writeenabled  = dev->rd_writeenabled;
+#else
+      geometry->geo_writeenabled  = FALSE;
+#endif
       geometry->geo_nsectors      = dev->rd_nsectors;
       geometry->geo_sectorsize    = dev->rd_sectsize;
       return OK;
@@ -201,14 +223,18 @@ static int rd_geometry(FAR struct inode *inode, struct geometry *geometry)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rd_register
+ * Name: ramdisk_register
  *
  * Description: Register the a ramdisk
 
  ****************************************************************************/
 
-int rd_register(int minor, ubyte *buffer, uint32 nsectors, uint16 sectsize,
-                boolean writeenabled)
+#ifdef CONFIG_FS_WRITABLE
+int ramdisk_register(int minor, ubyte *buffer, uint32 nsectors, uint16 sectsize,
+                     boolean writeenabled)
+#else
+int romdisk_register(int minor, ubyte *buffer, uint32 nsectors, uint16 sectsize)
+#endif
 {
   struct rd_struct_s *dev;
   char devname[16];
@@ -232,7 +258,9 @@ int rd_register(int minor, ubyte *buffer, uint32 nsectors, uint16 sectsize,
 
       dev->rd_nsectors     = nsectors;     /* Number of sectors on device */
       dev->rd_sectsize     = sectsize;     /* The size of one sector */
+#ifdef CONFIG_FS_WRITABLE
       dev->rd_writeenabled = writeenabled; /* TRUE: can write to ram disk */
+#endif
       dev->rd_buffer       = buffer;       /* RAM disk backup memory */
 
       /* Create a ramdisk device name */

@@ -53,7 +53,7 @@
  * every configured filesystem.
  */
 
-#ifdef CONFIG_FS_FAT
+#ifdef CONFIG_FS_READABLE
 
 /****************************************************************************
  * Definitions
@@ -76,11 +76,17 @@ struct fsmap_t
 #ifdef CONFIG_FS_FAT
 extern const struct mountpt_operations fat_operations;
 #endif
+#ifdef CONFIG_FS_ROMFS
+extern const struct mountpt_operations romfs_operations;
+#endif
 
 static const struct fsmap_t g_fsmap[] =
 {
 #ifdef CONFIG_FS_FAT
     { "vfat", &fat_operations },
+#endif
+#ifdef CONFIG_FS_ROMFS
+    { "romfs", &romfs_operations },
 #endif
     { NULL,   NULL },
 };

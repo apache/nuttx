@@ -112,7 +112,7 @@ int create_ramdisk(void)
 
   /* Register a RAMDISK device to manage this RAM image */
 
-  ret = rd_register(CONFIG_EXAMPLES_MOUNT_RAMDEVNO,
+  ret = ramdisk_register(CONFIG_EXAMPLES_MOUNT_RAMDEVNO,
                     pbuffer,
                     CONFIG_EXAMPLES_MOUNT_NSECTORS,
                     CONFIG_EXAMPLES_MOUNT_SECTORSIZE,

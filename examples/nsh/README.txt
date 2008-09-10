@@ -589,36 +589,42 @@ Command Dependencies on Configuration Settings
   echo       --
   exec       --
   exit       --
-  get        CONFIG_NET && CONFIG_NET_UDP && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NET_BUFSIZE >= 558*
+  get        CONFIG_NET && CONFIG_NET_UDP && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NET_BUFSIZE >= 558  (see note 1)
   help       --
   ifconfig   CONFIG_NET
   ls         CONFIG_NFILE_DESCRIPTORS > 0
   mb,mh,mw   ---
   mem        ---
-  mkdir      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
+  mkdir      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_WRITABLE (see note 4)
   mkfatfs    !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
   mkfifo     CONFIG_NFILE_DESCRIPTORS > 0
-  mkrd       !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
-  mount      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
+  mkrd       !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_WRITABLE (see note 4)
+  mount      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_READABLE (see note 3)
   ping       CONFIG_NET && CONFIG_NET_ICMP && CONFIG_NET_ICMP_PING  && !CONFIG_DISABLE_CLOCK && !CONFIG_DISABLE_SIGNALS
   ps         --
-  put        CONFIG_NET && CONFIG_NET_UDP && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NET_BUFSIZE >= 558*
+  put        CONFIG_NET && CONFIG_NET_UDP && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NET_BUFSIZE >= 558 (see note 1,2)
   pwd        !CONFIG_DISABLE_ENVIRON && CONFIG_NFILE_DESCRIPTORS > 0
-  rm         !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
-  rmdir      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
+  rm         !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_WRITABLE (see note 4)
+  rmdir      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_WRITABLE (see note 4)
   set        !CONFIG_DISABLE_ENVIRON
   sh         CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0 && !CONFIG_EXAMPLES_NSH_DISABLESCRIPT
   sleep      !CONFIG_DISABLE_SIGNALS
   test       !CONFIG_EXAMPLES_NSH_DISABLESCRIPT
-  umount     !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
+  umount     !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_READABLE
   unset      !CONFIG_DISABLE_ENVIRON
   usleep     !CONFIG_DISABLE_SIGNALS
   xd         ---
 
 * NOTES:
-  - Because of hardware padding, the actual required size may be larger.
-  - Special TFTP server start-up optionss will probably be required to permit
-    creation of file for the correct operation of the put command.
+  1. Because of hardware padding, the actual required for put and get
+     operations size may be larger.
+  2. Special TFTP server start-up optionss will probably be required to permit
+     creation of file for the correct operation of the put command.
+  3. CONFIG_FS_READABLE is not a user configuration but is set automatically
+     if any readable filesystem is selected.  At present, this is either CONFIG_FS_FAT
+     and CONFIG_FS_ROMFS.
+  4. CONFIG_FS_WRITABLE is not a user configuration but is set automatically
+     if any writable filesystem is selected.  At present, this is only CONFIG_FS_FAT.
 
 NSH-Specific Configuration Settings
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: September 5, 2008</p>
+      <p>Last Updated: September 10, 2008</p>
     </td>
   </tr>
 </table>
@@ -1485,7 +1485,7 @@ nsh>
   </tr>
   <tr>
     <td><b><code>cd</code></b></td>
-    <td>!<code>CONFIG_DISABLE_ENVIRON</code> && <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+    <td>!<code>CONFIG_DISABLE_ENVIRON</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
   </tr>
   <tr>
     <td><b><code>cp</code></b></td>
@@ -1530,11 +1530,11 @@ nsh>
   </tr>
   <tr>
     <td><b><code>mkdir</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> && <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code><sup>4</sup></td>
   </tr>
   <tr>
     <td><b><code>mkfatfs</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> && <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 && <code>CONFIG_FS_FAT</code></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_FAT</code></td>
   </tr>
   <tr>
     <td><b><code>mkfifo</code></b></td>
@@ -1542,11 +1542,11 @@ nsh>
   </tr>
   <tr>
     <td><b><code>mkrd</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> && <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 && <code>CONFIG_FS_FAT</code></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code><sup>4</sup></td>
   </tr>
   <tr>
     <td><b><code>mount</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> && <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 && <code>CONFIG_FS_FAT</code></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_READABLE</code><sup>3</sup></td>
   </tr>
   <tr>
     <td><b><code>ping</code></b></td>
@@ -1569,11 +1569,11 @@ nsh>
   </tr>
   <tr>
     <td><b><code>rm</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code><sup>4</sup></td>
   </tr>
   <tr>
     <td><b><code>rmdir</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code><sup>4</sup></td>
   </tr>
   <tr>
     <td><b><code>set</code></b></td>
@@ -1593,7 +1593,7 @@ nsh>
   </tr>
   <tr>
     <td><b><code>umount</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_FAT</code></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_READABLE</code><sup>3</sup></td>
   </tr>
   <tr>
     <td><b><code>unset</code></b></td>
@@ -1606,10 +1606,18 @@ nsh>
 </table></center>
 
 <p><sup>1</sup><small>
-  Because of hardware padding, the actual required packet size may be larger</small></p>
-<p><sup>2</sup><small>
+  Because of hardware padding, the actual required packet size may be larger</small><br>
+  <sup>2</sup><small>
   Special TFTP server start-up optionss will probably be required to permit
-  creation of files for the correct operation of the <code>put</code> command.</small></p>
+  creation of files for the correct operation of the <code>put</code> command.</small><br>
+  <sup>3</sup><small>
+  <code>CONFIG_FS_READABLE</code> is not a user configuration but is set automatically
+  if any readable filesystem is selected.  At present, this is either <code>CONFIG_FS_FAT</code>
+  or <code>CONFIG_FS_ROMFS</code>.</small><br>
+  <sup>4</sup><small>
+  <code>CONFIG_FS_WRITABLE</code> is not a user configuration but is set automatically
+  if any writable filesystem is selected.  At present, this is only <code>CONFIG_FS_FAT</code>.</small><br>
+</p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">

@@ -44,11 +44,13 @@
 # include <sys/stat.h>
 # include <fcntl.h>
 # if !defined(CONFIG_DISABLE_MOUNTPOINT)
-#   ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
+#   ifdef CONFIG_FS_READABLE /* Need at least one filesytem in configuration */
 #     include <sys/mount.h>
+#     include <nuttx/ramdisk.h>
+#   endif
+#   ifdef CONFIG_FS_FAT
 #     include <nuttx/mkfatfs.h>
 #   endif
-#   include <nuttx/ramdisk.h>
 #endif
 #endif
 
@@ -711,7 +713,7 @@ int cmd_ls(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  * Name: cmd_mkdir
  ****************************************************************************/
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_WRITABLE)
 int cmd_mkdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char *fullpath = nsh_getfullpath(vtbl, argv[1]);
@@ -781,7 +783,7 @@ int cmd_mkfifo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  * Name: cmd_mkrd
  ****************************************************************************/
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_WRITABLE)
 int cmd_mkrd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   const char *fmt;
@@ -860,10 +862,10 @@ int cmd_mkrd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
   /* Then register the ramdisk */
 
-  ret = rd_register(minor, buffer, nsectors, sectsize, TRUE);
+  ret = ramdisk_register(minor, buffer, nsectors, sectsize, TRUE);
   if (ret < 0)
     {
-      nsh_output(vtbl, g_fmtcmdfailed, argv[0], "rd_register", NSH_ERRNO_OF(-ret));
+      nsh_output(vtbl, g_fmtcmdfailed, argv[0], "ramdisk_register", NSH_ERRNO_OF(-ret));
       free(buffer);
       return ERROR;
     }
@@ -879,8 +881,7 @@ errout_with_fmt:
  * Name: cmd_mount
  ****************************************************************************/
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-#ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_READABLE)
 int cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char *source;
@@ -953,13 +954,12 @@ int cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   return ret;
 }
 #endif
-#endif
 
 /****************************************************************************
  * Name: cmd_rm
  ****************************************************************************/
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_WRITABLE)
 int cmd_rm(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char *fullpath = nsh_getfullpath(vtbl, argv[1]);
@@ -982,7 +982,7 @@ int cmd_rm(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  * Name: cmd_rmdir
  ****************************************************************************/
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_WRITABLE)
 int cmd_rmdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char *fullpath = nsh_getfullpath(vtbl, argv[1]);
@@ -1070,8 +1070,7 @@ int cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  * Name: cmd_umount
  ****************************************************************************/
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-#ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_READABLE)
 int cmd_umount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   char *fullpath = nsh_getfullpath(vtbl, argv[1]);
@@ -1090,5 +1089,4 @@ int cmd_umount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     }
   return ret;
 }
-#endif
 #endif

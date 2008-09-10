@@ -94,19 +94,34 @@ struct fs_psuedodir_s
   struct inode *fd_next;             /* The inode for the next call to readdir() */
 };
 
-#if defined(CONFIG_FS_FAT) && !defined(CONFIG_DISABLE_MOUNTPOINT)
-/* For fat, we need to retun the start cluster, current cluster, current
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+#ifdef CONFIG_FS_FAT
+/* For fat, we need to return the start cluster, current cluster, current
  * sector and current directory index.
  */
 
 struct fs_fatdir_s
 {
-  uint32       fd_startcluster;        /* Start cluster number of the directory*/
-  uint32       fd_currcluster;         /* Current cluster number being read*/
-  size_t       fd_currsector;          /* Current sector being read*/
+  uint32       fd_startcluster;        /* Start cluster number of the directory */
+  uint32       fd_currcluster;         /* Current cluster number being read */
+  size_t       fd_currsector;          /* Current sector being read */
   unsigned int fd_index;               /* Current index of the directory entry to read */
 };
-#endif
+#endif /* CONFIG_FS_FAT */
+
+#ifdef CONFIG_FS_ROMFS
+/* For ROMFS, we need to return the offset to the current and start positions
+ * of the directory entry being read
+ */
+
+struct fs_romfsdir_s
+{
+  uint32       fr_diroffset;           /* Offset to the directory entry */
+  uint32       fr_firstoffset;         /* Offset to the first entry */
+  uint32       fr_curroffset;          /* Current offset into the directory contents */
+};
+#endif /* CONFIG_FS_ROMFS */
+#endif /* CONFIG_DISABLE_MOUNTPOINT */
 
 struct internal_dir_s
 {
@@ -147,6 +162,9 @@ struct internal_dir_s
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 #ifdef CONFIG_FS_FAT
       struct fs_fatdir_s    fat;
+#endif
+#ifdef CONFIG_FS_ROMFS
+      struct fs_romfsdir_s  romfs;
 #endif
 #endif
    } u;

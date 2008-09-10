@@ -157,19 +157,21 @@ static const struct cmdmap_s g_cmdmap[] =
 #endif
   { "mb",       cmd_mb,       2, 3, "<hex-address>[=<hex-value>][ <hex-byte-count>]" },
   { "mem",      cmd_mem,      1, 1, NULL },
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_WRITABLE)
   { "mkdir",    cmd_mkdir,    2, 2, "<path>" },
-#ifdef CONFIG_FS_FAT
+#endif
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_FAT)
   { "mkfatfs",  cmd_mkfatfs,  2, 2, "<path>" },
 #endif
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
   { "mkfifo",   cmd_mkfifo,   2, 2, "<path>" },
+#endif
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_WRITABLE)
   { "mkrd",     cmd_mkrd,     2, 6, "[-m <minor>] [-s <sector-size>] <nsectors>" },
 #endif
   { "mh",       cmd_mh,       2, 3, "<hex-address>[=<hex-value>][ <hex-byte-count>]" },
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-#ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_READABLE)
   { "mount",    cmd_mount,    4, 5, "-t <fstype> <block-device> <dir-path>" },
-#endif
 #endif
   { "mw",       cmd_mw,       2, 3, "<hex-address>[=<hex-value>][ <hex-byte-count>]" },
   { "ps",       cmd_ps,       1, 1, NULL },
@@ -183,7 +185,7 @@ static const struct cmdmap_s g_cmdmap[] =
 #if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
   { "pwd",      cmd_pwd,      1, 1, NULL },
 #endif
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_WRITABLE)
   { "rm",       cmd_rm,       2, 2, "<file-path>" },
   { "rmdir",    cmd_rmdir,    2, 2, "<dir-path>" },
 #endif
@@ -199,10 +201,8 @@ static const struct cmdmap_s g_cmdmap[] =
 #ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
   { "test",     cmd_test,     3, NSH_MAX_ARGUMENTS, "<expression>" },
 #endif
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
-# ifdef CONFIG_FS_FAT /* Need at least one filesytem in configuration */
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_READABLE)
   { "umount",   cmd_umount,   2, 2, "<dir-path>" },
-# endif
 #endif
 #ifndef CONFIG_DISABLE_ENVIRON
   { "unset",    cmd_unset,    2, 2, "<name>" },

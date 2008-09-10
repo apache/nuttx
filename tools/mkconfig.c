@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * mkconfig.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,7 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,8 +45,16 @@
 #include <unistd.h>
 #include <errno.h>
 
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
 #define DEFCONFIG ".config"
 #define LINESIZE  ( PATH_MAX > 256 ? PATH_MAX : 256 )
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 static char line[LINESIZE+1];
 
@@ -167,6 +179,10 @@ static void show_usage(const char *progname)
   exit(1);
 }
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 int main(int argc, char **argv, char **envp)
 {
   char *filepath;
@@ -245,6 +261,16 @@ int main(int argc, char **argv, char **envp)
   printf("/* If mountpoint support in not included, then no filesystem can be supported */\n\n");
   printf("#ifdef CONFIG_DISABLE_MOUNTPOINT\n");
   printf("# undef CONFIG_FS_FAT\n");
+  printf("# undef CONFIG_FS_ROMFS\n");
+  printf("#endif\n\n");
+  printf("/* Check if any readable and writable filesystem is supported */\n\n");
+  printf("#undef CONFIG_FS_READABLE\n");
+  printf("#undef CONFIG_FS_WRITABLE\n");
+  printf("#if defined(CONFIG_FS_FAT) || defined(CONFIG_FS_ROMFS)\n");
+  printf("# define CONFIG_FS_READABLE 1\n");
+  printf("#endif\n\n");
+  printf("#if defined(CONFIG_FS_FAT)\n");
+  printf("# define CONFIG_FS_WRITABLE 1\n");
   printf("#endif\n\n");
   printf("/* There can be no network support with no socket descriptors */\n\n");
   printf("#if CONFIG_NSOCKET_DESCRIPTORS <= 0\n");

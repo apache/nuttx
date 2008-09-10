@@ -49,6 +49,9 @@
 /* Configure the test */
 
 #if defined(CONFIG_EXAMPLES_MOUNT_DEVNAME)
+#  if !defined(CONFIG_FS_WRITABLE)
+#    error "Writable filesystem required in this configuration"
+#  endif
 #  undef  CONFIG_EXAMPLES_MOUNT_NSECTORS
 #  undef  CONFIG_EXAMPLES_MOUNT_SECTORSIZE
 #  undef  CONFIG_EXAMPLES_MOUNT_RAMDEVNO
