@@ -83,5 +83,5 @@
 
 void up_registerblockdevice(void)
 {
-  rd_register(0, (ubyte*)up_deviceimage(), NSECTORS, LOGICAL_SECTOR_SIZE, TRUE);
+  ramdisk_register(0, (ubyte*)up_deviceimage(), NSECTORS, LOGICAL_SECTOR_SIZE, TRUE);
 }
