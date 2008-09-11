@@ -9,7 +9,8 @@ examples/nsh
   - Conditional Command Execution
   - Built-In Variables
   - Current Working Directory
-    Environment Variables:
+    Environment Variables
+  - NSH Start-Up Script
   - Simple Commands
   - NSH Configuration Settings
     Command Dependencies on Configuration Settings
@@ -94,6 +95,99 @@ Current Working Directory
     PWD    - The current working directory
     OLDPWD - The previous working directory
 
+NSH Start-Up Script
+^^^^^^^^^^^^^^^^^^^
+
+NSH supports options to provide a start up script for NSH.  In general
+this capability is enabled with CONFIG_EXAMPLES_NSH_ROMFSETC, but has
+several other related configuration options as described in the final
+section of this README.  This capability also depends on:
+
+  - CONFIG_DISABLE_MOUNTPOINT not set
+  - CONFIG_NFILE_DESCRIPTORS < 4
+  - CONFIG_FS_ROMFS
+
+Default Start-Up Behavior
+-------------------------
+
+The implementation that is provided is intended to provide great flexibility
+for the use of Start-Up files.  This paragraph will discuss the general
+behavior when all of the configuration options are set to the default
+values.
+
+In this default case, enabling CONFIG_EXAMPLES_NSH_ROMFSETC will cause
+NSH to behave as follows at NSH startup time:
+
+- NSH will create a read-only RAM disk (a ROM disk), containing a tiny
+  ROMFS filesystem containing the following:
+
+    |--init.d/
+         `-- rcS
+
+   Where rcS is the NSH start-up script
+
+- NSH will then mount the ROMFS filesystem at /etc, resulting in:
+
+   |--dev/
+   |   `-- ram0
+   `--etc/
+       `--init.d/
+           `-- rcS
+
+- By default, the contents of rcS script are:
+
+    # Create a RAMDISK and mount it at XXXRDMOUNTPOUNTXXX
+
+    mkrd -m 1 -s 512 1024
+    mkfatfs /dev/ram1
+    mount -t vfat /dev/ram1 /tmp
+
+- NSH will execute the script at /etc/init.d/rcS at start-up (before the
+  first NSH prompt.  After execution of the script, the root FS will look
+  like:
+
+   |--dev/
+   |   |-- ram0
+   |   `-- ram1
+   |--etc/
+   |   `--init.d/
+   |       `-- rcS
+   `--tmp/
+
+Modifying the ROMFS Image
+-------------------------
+
+The contents of the /etc directory are retained in the file
+examples/nsh/nsh_romfsimg.h.  In order to modify the start-up
+behavior, there are three things to study:
+
+1. Configuration Options.
+   The additional CONFIG_EXAMPLES_NSH_ROMFSETC configuration options
+   discussed in the final section of this README.
+
+2. mkromfsimg.sh Script.
+   The script examples/nsh/mkromfsimg.sh creates nsh_romfsimg.h.
+   It is not automatically executed.  If you want to change the
+   configuration settings associated with creating and mounting
+   the /tmp directory, then it will be necessary to re-generate
+   this header file using the mkromfsimg.sh script.
+
+   The behavior of this script depends upon three things:
+
+   - The configuration settings then installed configuration.
+   - The genromfs tool (available from http://romfs.sourceforge.net).
+   - The file examples/nsh/rcS.template.
+
+3. rcS.template.
+   The file examples/nsh/rcS.template contains the general form
+   of the rcS file; configurated values are plugged into this
+   template file to produce the final rcS file.
+
+All of the startup-behavior is contained in rcS.template.  The
+role of mkromfsimg.sh is to (1) apply the specific configuration
+settings to rcS.template to create the final rcS, and (2) to
+generate the header file nsh_romfsimg.h containg the ROMFS
+file system image.
 
 Simple Commands
 ^^^^^^^^^^^^^^^

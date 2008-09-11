@@ -465,3 +465,5 @@
 0.3.15 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 	* Added support for ROMFS filesystem.
 	* Added a simple test the ROMFS filesystem (examples/romfs)
+	* NSH: Use ROMFS to provide an option for a start-up script at /etc/init.d/rcS
+
