@@ -58,6 +58,22 @@ examples/mount
       when CONFIG_EXAMPLES_MOUNT_DEVNAME is not defined.  The
       default is zero (meaning that "/dev/ram0" will be used).
 
+examples/romfs
+^^^^^^^^^^^^^^
+
+  This example exercises the romfs filesystem.  Configuration options
+  include:
+
+  * CONFIG_EXAMPLES_ROMFS_RAMDEVNO
+      The minor device number to use for the ROM disk.  The default is
+      1 (meaning /dev/ram1)
+
+  * CONFIG_EXAMPLES_ROMFS_SECTORSIZE
+      The ROM disk sector size to use.  Default is 64.
+
+  * CONFIG_EXAMPLES_ROMFS_MOUNTPOINT
+      The location to mount the ROM disk.  Deafault: "/usr/local/share"
+
 examples/null
 ^^^^^^^^^^^^^
 

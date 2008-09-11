@@ -654,7 +654,7 @@ static int romfs_readdir(struct inode *mountpt, struct internal_dir_s *dir)
           dir->fd_dir.d_type = DTYPE_DIRECTORY;
           break;
         }
-      else if (IS_DIRECTORY(next))
+      else if (IS_FILE(next))
         {
           dir->fd_dir.d_type = DTYPE_FILE;
           break;
@@ -919,10 +919,6 @@ static int romfs_stat(struct inode *mountpt, const char *relpath, struct stat *b
 {
   struct romfs_mountpt_s *rm;
   struct romfs_dirinfo_s  dirinfo;
-  uint16                date;
-  uint16                date2;
-  uint16                time;
-  ubyte                 attribute;
   int                   ret;
 
   /* Sanity checks */

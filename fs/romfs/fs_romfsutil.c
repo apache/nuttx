@@ -247,7 +247,7 @@ static inline int romfs_searchdir(struct romfs_mountpt_s *rm,
 
       /* No match... select the offset to the next entry */
 
-      offset += next;
+      offset = next;
     }
    while (next != 0)
 
@@ -543,8 +543,15 @@ int romfs_finddirentry(struct romfs_mountpt_s *rm, struct romfs_dirinfo_s *dirin
   dirinfo->rd_dir.fr_diroffset   = 0;
   dirinfo->rd_dir.fr_firstoffset = rm->rm_rootoffset;
   dirinfo->rd_dir.fr_curroffset  = rm->rm_rootoffset;
-  dirinfo->rd_next               = 0;
+  dirinfo->rd_next               = RFNEXT_DIRECTORY;
   dirinfo->rd_size               = 0;
+
+  /* The root directory is a special case */
+
+  if (!path || path[0] == '\0')
+    {
+      return OK;
+    }
 
   /* Then loop for each directory/file component in the full path */
 
@@ -689,7 +696,7 @@ int romfs_parsedirentry(struct romfs_mountpt_s *rm, uint32 offset, uint32 *poffs
            */
 
           *poffset = offset;
-          *pnext   = (save & RFNEXT_OFFSETMASK) | (next & RFNEXT_MODEMASK);
+          *pnext   = (save & RFNEXT_OFFSETMASK) | (next & RFNEXT_ALLMODEMASK);
           *pinfo   = info;
           *psize   = size;
           return OK;

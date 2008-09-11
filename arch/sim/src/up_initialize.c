@@ -95,7 +95,9 @@ void up_initialize(void)
 
   devnull_register();       /* Standard /dev/null */
   up_devconsole();          /* Our private /dev/console */
+#if defined(CONFIG_FS_FAT) && !defined(CONFIG_DISABLE_MOUNTPOINT)
   up_registerblockdevice(); /* Our FAT ramdisk at /dev/ram0 */
+#endif
 #if defined(CONFIG_NET) && defined(linux)
   uipdriver_init();         /* Our "real" netwok driver */
 #endif

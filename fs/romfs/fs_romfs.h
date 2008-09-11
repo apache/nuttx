@@ -77,7 +77,8 @@
  * values specified in  */
 
 #define RFNEXT_MODEMASK    7    /* Bits 0-2: Mode; bit 3: Executable */
-#define RFNEXT_OFFSETMASK  (~7) /* Bits n-3: Offset to next entry */
+#define RFNEXT_ALLMODEMASK 15   /* Bits 0-3: All mode bits */
+#define RFNEXT_OFFSETMASK (~15) /* Bits n-3: Offset to next entry */
 
 #define RFNEXT_HARDLINK    0    /* rf_info = Link destination file header */
 #define RFNEXT_DIRECTORY   1    /* rf_info = First file's header */
