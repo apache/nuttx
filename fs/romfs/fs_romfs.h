@@ -153,8 +153,7 @@ struct romfs_file_s
 {
   struct romfs_file_s *rf_next;     /* Retained in a singly linked list */
   boolean  rf_open;                 /* TRUE: The file is (still) open */
-  uint32   rf_diroffset;            /* Offset to the parent directory entry */
-  uint32   rf_startoffset;          /* Offset to the start of the file */
+  uint32   rf_startoffset;          /* Offset to the start of the file data */
   uint32   rf_size;                 /* Size of the file in bytes */
   uint32   rf_cachesector;          /* Current sector in the rf_buffer */
   ubyte   *rf_buffer;               /* File sector buffer */
@@ -213,6 +212,7 @@ EXTERN int  romfs_parsedirentry(struct romfs_mountpt_s *rm,
                                 uint32 *pinfo, uint32 *psize);
 EXTERN int  romfs_parsefilename(struct romfs_mountpt_s *rm, uint32 offset,
                                 char *pname);
+EXTERN uint32 romfs_datastart(struct romfs_mountpt_s *rm, uint32 offset);
 
 #undef EXTERN
 #if defined(__cplusplus)

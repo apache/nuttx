@@ -45,6 +45,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include "fs_romfs.h"
@@ -165,7 +166,6 @@ static inline int romfs_checkentry(struct romfs_mountpt_s *rm, uint32 offset,
 
           if (IS_DIRECTORY(next))
             {
-              dirinfo->rd_dir.fr_diroffset   = linkoffset;
               dirinfo->rd_dir.fr_firstoffset = info;
               dirinfo->rd_dir.fr_curroffset  = info;
               dirinfo->rd_size               = 0;
@@ -205,11 +205,12 @@ static inline int romfs_searchdir(struct romfs_mountpt_s *rm,
   int    ret;
 
   /* Then loop through the current directory until the directory
-   * with the matching name is found.
+   * with the matching name is found.  Or until all of the entries
+   * the directory have been examined.
    */
 
   offset = dirinfo->rd_dir.fr_firstoffset;
-  for (;;)
+  do
     {
       /* Convert the offset into sector + index */
 
@@ -249,7 +250,7 @@ static inline int romfs_searchdir(struct romfs_mountpt_s *rm,
 
       offset = next;
     }
-   while (next != 0)
+   while (next != 0);
 
    /* There is nothing in this directoy with that name */
 
@@ -540,7 +541,6 @@ int romfs_finddirentry(struct romfs_mountpt_s *rm, struct romfs_dirinfo_s *dirin
 
   /* Start with the first element after the root directory */
 
-  dirinfo->rd_dir.fr_diroffset   = 0;
   dirinfo->rd_dir.fr_firstoffset = rm->rm_rootoffset;
   dirinfo->rd_dir.fr_curroffset  = rm->rm_rootoffset;
   dirinfo->rd_next               = RFNEXT_DIRECTORY;
@@ -780,3 +780,52 @@ int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32 offset, char *pname)
   pname[namelen] = '\0';
   return OK;
 }
+
+/****************************************************************************
+ * Name: romfs_datastart
+ *
+ * Desciption:
+ *   Given the offset to a file header, return the offset to the start of
+ *   the file data
+ *
+ ****************************************************************************/
+
+uint32 romfs_datastart(struct romfs_mountpt_s *rm, uint32 offset)
+{
+  uint32 sector;
+  uint16 ndx;
+  int ret;
+
+  /* Loop until the header size of obtained. */
+
+  offset += ROMFS_FHDR_NAME;
+  for (;;)
+    {
+      /* Convert the offset into sector + index */
+
+      sector = SEC_NSECTORS(rm, offset);
+      ndx    = offset & SEC_NDXMASK(rm);
+
+      /* Get the offset to the next chunk */
+
+      offset += 16;
+      DEBUGASSERT(offset < rm->rm_volsize);
+
+      /* Read the sector into memory */
+
+      ret = romfs_devcacheread(rm, sector);
+      DEBUGASSERT(ret >= 0);
+
+      /* Is the name terminated in this 16-byte block */
+
+      if (rm->rm_buffer[ndx + 15] == '\0')
+        {
+          /* Yes.. then the data starts after this chunk */
+
+          return offset;
+        }
+    }
+
+  return ERROR; /* Won't get here */
+}
+

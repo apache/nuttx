@@ -116,8 +116,7 @@ struct fs_fatdir_s
 
 struct fs_romfsdir_s
 {
-  uint32       fr_diroffset;           /* Offset to the directory entry */
-  uint32       fr_firstoffset;         /* Offset to the first entry */
+  uint32       fr_firstoffset;         /* Offset to the first entry in the directory */
   uint32       fr_curroffset;          /* Current offset into the directory contents */
 };
 #endif /* CONFIG_FS_ROMFS */

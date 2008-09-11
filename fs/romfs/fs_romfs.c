@@ -223,8 +223,7 @@ static int romfs_open(FAR struct file *filep, const char *relpath,
   /* Initialize the file private data (only need to initialize non-zero elements) */
 
   rf->rf_open        = TRUE;
-  rf->rf_diroffset   = dirinfo.rd_dir.fr_diroffset;
-  rf->rf_startoffset = dirinfo.rd_dir.fr_curroffset;
+  rf->rf_startoffset = romfs_datastart(rm, dirinfo.rd_dir.fr_curroffset);
   rf->rf_size        = dirinfo.rd_size;
   rf->rf_cachesector = (uint32)-1;
 
@@ -314,6 +313,7 @@ static ssize_t romfs_read(FAR struct file *filep, char *buffer, size_t buflen)
   unsigned int            bytesread;
   unsigned int            readsize;
   unsigned int            nsectors;
+  uint32                  offset;
   size_t                  bytesleft;
   off_t                   sector;
   ubyte                  *userbuffer = (ubyte*)buffer;
@@ -354,11 +354,6 @@ static ssize_t romfs_read(FAR struct file *filep, char *buffer, size_t buflen)
       buflen = bytesleft;
     }
 
-  /* Get the first sector and index to read from. */
-
-  sector    = SEC_NSECTORS(rm, filep->f_pos);
-  sectorndx = filep->f_pos & SEC_NDXMASK(rm);
-
   /* Loop until either (1) all data has been transferred, or (2) an
    * error occurs.
    */
@@ -366,6 +361,11 @@ static ssize_t romfs_read(FAR struct file *filep, char *buffer, size_t buflen)
   readsize = 0;
   while (buflen > 0)
     {
+      /* Get the first sector and index to read from. */
+
+      offset     = rf->rf_startoffset + filep->f_pos;
+      sector     = SEC_NSECTORS(rm, offset);
+      sectorndx  = offset & SEC_NDXMASK(rm);
       bytesread  = 0;
 
       /* Check if the user has provided a buffer large enough to
@@ -429,7 +429,6 @@ static ssize_t romfs_read(FAR struct file *filep, char *buffer, size_t buflen)
       filep->f_pos += bytesread;
       readsize     += bytesread;
       buflen       -= bytesread;
-      sectorndx     = filep->f_pos & SEC_NDXMASK(rm);
     }
 
   romfs_semgive(rm);
