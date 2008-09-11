@@ -333,8 +333,18 @@ int nsh_consolemain(int argc, char *argv[])
 {
   FAR struct serial_s *pstate = nsh_allocstruct();
 
+  /* Present a greeting */
+
   printf(g_nshgreeting);
   fflush(pstate->ss_stream);
+
+  /* Execute the startup script */
+
+#ifdef CONFIG_EXAMPLES_NSH_ROMFSETC
+  (void)nsh_script(&pstate->ss_vtbl, "init", NSH_INITPATH);
+#endif
+
+  /* Then enter the command line parsing loop */
 
   for (;;)
     {

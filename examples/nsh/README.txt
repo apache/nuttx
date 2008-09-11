@@ -634,7 +634,7 @@ NSH-Specific Configuration Settings
 
   * CONFIG_EXAMPLES_NSH_FILEIOSIZE
       Size of a static I/O buffer used for file access (ignored if
-      there is no filesystem).
+      there is no filesystem). Default is 1024.
 
   * CONFIG_EXAMPLES_NSH_STRERROR
       strerror(errno) makes more readable output but strerror() is
@@ -665,6 +665,11 @@ NSH-Specific Configuration Settings
       the '&' command suffix.  This would only be set on systems
       where a minimal footprint is a necessity and background command
       execution is not.
+
+  * CONFIG_EXAMPLES_NSH_ROMFSETC
+      Mount a ROMFS filesystem at /etc and provide a startup script
+      at /etc/init.d/rcS.  The default startup script will mount
+      a FAT FS RAMDISK at /tmp but the logic is easily extensible.
 
   * CONFIG_EXAMPLES_NSH_CONSOLE
       If CONFIG_EXAMPLES_NSH_CONSOLE is set to 'y', then a serial
@@ -701,3 +706,46 @@ NSH-Specific Configuration Settings
       Set if your ethernet hardware has no built-in MAC address.
       If set, a bogus MAC will be assigned.
 
+  If CONFIG_EXAMPLES_NSH_ROMFSETC is selected, then the following additional
+  configuration setting apply:
+
+  * CONFIG_EXAMPLES_NSH_ROMFSMOUNTPT
+      The default mountpoint for the ROMFS volume is /etc, but that
+      can be changed with this setting.  This must be a absolute path
+      beginning with '/'.
+
+  * CONFIG_EXAMPLES_NSH_INITSCRIPT
+      This is the relative path to the startup script within the mountpoint.
+      The default is init.d/rcS.  This is a relative path and must not
+      start with '/'.
+
+  * CONFIG_EXAMPLES_NSH_ROMFSDEVNO
+      This is the minor number of the ROMFS block device.  The default is 
+      '0' corresponding to /dev/ram0.
+
+  * CONFIG_EXAMPLES_NSH_ROMFSSECTSIZE
+      This is the sector size to use with the ROMFS volume.  Since the
+      default volume is very small, this defaults to 64 but should be
+      increased if the ROMFS volume were to be become large.  Any value
+      selected must be a power of 2.
+
+  When the default rcS file used when CONFIG_EXAMPLES_NSH_ROMFSETC is
+  selected, it will mount a FAT FS under /tmp.  The following selections
+  describe that FAT FS.
+
+  * CONFIG_EXAMPLES_NSH_FATDEVNO
+      This is the minor number of the FAT FS block device.  The default is 
+      '1' corresponding to /dev/ram1.
+
+  * CONFIG_EXAMPLES_NSH_FATSECTSIZE
+      This is the sector size use with the FAT FS. Default is 512.
+
+  * CONFIG_EXAMPLES_NSH_FATNSECTORS
+      This is the number of sectors to use with the FAT FS.  Defalt is
+      1024.  The amount of memory used by the FAT FS will be
+      CONFIG_EXAMPLES_NSH_FATSECTSIZE * CONFIG_EXAMPLES_NSH_FATNSECTORS
+      bytes.
+
+  * CONFIG_EXAMPLES_NSH_FATMOUNTPT
+      This is the location where the FAT FS will be mounted.  Default
+      is /tmp.

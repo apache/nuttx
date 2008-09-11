@@ -478,6 +478,12 @@ static void *nsh_connection(void *arg)
 
       nsh_output(&pstate->tn_vtbl, g_nshgreeting);
 
+      /* Execute the startup script */
+
+#if defined(CONFIG_EXAMPLES_NSH_ROMFSETC) && !defined(CONFIG_EXAMPLES_NSH_CONSOLE)
+     (void)nsh_script(&pstate->tn_vtbl, "init", NSH_INITPATH);
+#endif
+
       /* Loop processing each TELNET command */
 
       do

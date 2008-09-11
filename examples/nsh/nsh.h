@@ -64,6 +64,49 @@
 #  error "No NSH front end defined"
 #endif
 
+/* Verify support for ROMFS /etc directory support options */
+
+#ifdef CONFIG_EXAMPLES_NSH_ROMFSETC
+#  ifdef CONFIG_DISABLE_MOUNTPOINT
+#    error "Mountpoint support is disabled"
+#    undef CONFIG_EXAMPLES_NSH_ROMFSETC
+#  endif
+#  if CONFIG_NFILE_DESCRIPTORS < 4
+#    error "Not enough file descriptors"
+#    undef CONFIG_EXAMPLES_NSH_ROMFSETC
+#  endif
+#  ifndef CONFIG_FS_ROMFS
+#    error "ROMFS support not enabled"
+#    undef CONFIG_EXAMPLES_NSH_ROMFSETC
+#  endif
+#  ifndef CONFIG_EXAMPLES_NSH_ROMFSMOUNTPT
+#    define CONFIG_EXAMPLES_NSH_ROMFSMOUNTPT "/etc"
+#  endif
+#  ifdef CONFIG_EXAMPLES_NSH_INIT
+#    ifndef CONFIG_EXAMPLES_NSH_INITSCRIPT
+#      define CONFIG_EXAMPLES_NSH_INITSCRIPT "init.d/rcS"
+#    endif
+#  endif
+#  undef NSH_INITPATH
+#  define NSH_INITPATH CONFIG_EXAMPLES_NSH_ROMFSMOUNTPT "/" CONFIG_EXAMPLES_NSH_INITSCRIPT
+#  ifndef CONFIG_EXAMPLES_NSH_ROMFSDEVNO
+#    define CONFIG_EXAMPLES_NSH_ROMFSDEVNO 0
+#  endif
+#  ifndef CONFIG_EXAMPLES_NSH_ROMFSSECTSIZE
+#    define CONFIG_EXAMPLES_NSH_ROMFSSECTSIZE 64
+#  endif
+#  define NSECTORS(b)        (((b)+CONFIG_EXAMPLES_NSH_ROMFSSECTSIZE-1)/CONFIG_EXAMPLES_NSH_ROMFSSECTSIZE)
+#  define STR_RAMDEVNO(m)    #m
+#  define MKMOUNT_DEVNAME(m) "/dev/ram" STR_RAMDEVNO(m)
+#  define MOUNT_DEVNAME      MKMOUNT_DEVNAME(CONFIG_EXAMPLES_NSH_ROMFSDEVNO)
+#else
+#  undef CONFIG_EXAMPLES_NSH_ROMFSMOUNTPT
+#  undef CONFIG_EXAMPLES_NSH_INIT
+#  undef CONFIG_EXAMPLES_NSH_INITSCRIPT
+#  undef CONFIG_EXAMPLES_NSH_ROMFSDEVNO
+#  undef CONFIG_EXAMPLES_NSH_ROMFSSECTSIZE
+#endif
+
 /* This is the maximum number of arguments that will be accepted for a command */
 
 #define NSH_MAX_ARGUMENTS 6
@@ -236,6 +279,15 @@ extern const char g_fmtinternalerror[];
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/* Initialization */
+
+#ifdef CONFIG_EXAMPLES_NSH_ROMFSETC
+extern int nsh_romfsetc(void);
+#endif
+#if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0 && !defined(CONFIG_EXAMPLES_NSH_DISABLESCRIPT)
+extern int nsh_script(FAR struct nsh_vtbl_s *vtbl, const char *cmd, const char *path);
+#endif
 
 /* Message handler */
 

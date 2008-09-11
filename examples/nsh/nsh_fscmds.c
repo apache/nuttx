@@ -218,6 +218,17 @@ static int foreach_direntry(FAR struct nsh_vtbl_s *vtbl, const char *cmd, const 
 #endif
 
 /****************************************************************************
+ * Name: ls_specialdir
+ ****************************************************************************/
+
+static inline int ls_specialdir(const char *dir)
+{
+  /* '.' and '..' directories are not listed like normal directories */
+
+  return (strcmp(dir, ".")  == 0 || strcmp(dir, "..") == 0);
+}
+
+/****************************************************************************
  * Name: ls_handler
  ****************************************************************************/
 
@@ -322,7 +333,7 @@ static int ls_handler(FAR struct nsh_vtbl_s *vtbl, const char *dirpath, struct d
   nsh_output(vtbl, " %s", entryp->d_name);
 #endif
 
-  if (DIRENT_ISDIRECTORY(entryp->d_type))
+  if (DIRENT_ISDIRECTORY(entryp->d_type) && !ls_specialdir(entryp->d_name))
     {
       nsh_output(vtbl, "/\n");
     }
@@ -339,12 +350,14 @@ static int ls_handler(FAR struct nsh_vtbl_s *vtbl, const char *dirpath, struct d
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-static int ls_recursive(FAR struct nsh_vtbl_s *vtbl, const char *dirpath, struct dirent *entryp, void *pvarg)
+static int ls_recursive(FAR struct nsh_vtbl_s *vtbl, const char *dirpath,
+                        struct dirent *entryp, void *pvarg)
 {
   int ret = OK;
-  /* Is this entry a directory? */
 
-  if (DIRENT_ISDIRECTORY(entryp->d_type))
+  /* Is this entry a directory (and not one of the special directories, . and ..)? */
+
+  if (DIRENT_ISDIRECTORY(entryp->d_type) && !ls_specialdir(entryp->d_name))
     {
       /* Yes.. */
 
@@ -354,6 +367,9 @@ static int ls_recursive(FAR struct nsh_vtbl_s *vtbl, const char *dirpath, struct
       /* List the directory contents */
 
       nsh_output(vtbl, "%s:\n", newpath);
+
+      /* Traverse the directory  */
+
       ret = foreach_direntry(vtbl, "ls", newpath, ls_handler, pvarg);
       if (ret == 0)
         {
@@ -1002,11 +1018,11 @@ int cmd_rmdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 #endif
 
 /****************************************************************************
- * Name: cmd_sh
+ * Name: nsh_script
  ****************************************************************************/
 
 #if  CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0 && !defined(CONFIG_EXAMPLES_NSH_DISABLESCRIPT)
-int cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+int nsh_script(FAR struct nsh_vtbl_s *vtbl, const char *cmd, const char *path)
 {
   char *fullpath;
   FILE *stream;
@@ -1016,7 +1032,7 @@ int cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
   /* The path to the script may be relative to the current working directory */
 
-  fullpath = nsh_getfullpath(vtbl, argv[1]);
+  fullpath = nsh_getfullpath(vtbl, path);
   if (!fullpath)
     {
       return ERROR;
@@ -1032,7 +1048,7 @@ int cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
       stream = fopen(fullpath, "r");
       if (!stream)
         {
-          nsh_output(vtbl, g_fmtcmdfailed, argv[0], "fopen", NSH_ERRNO);
+          nsh_output(vtbl, g_fmtcmdfailed, cmd, "fopen", NSH_ERRNO);
           nsh_freefullpath(fullpath);
           return ERROR;
         }
@@ -1063,6 +1079,17 @@ int cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
   nsh_freefullpath(fullpath);
   return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: cmd_sh
+ ****************************************************************************/
+
+#if  CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0 && !defined(CONFIG_EXAMPLES_NSH_DISABLESCRIPT)
+int cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+  return nsh_script(vtbl, argv[0], argv[1]);
 }
 #endif
 

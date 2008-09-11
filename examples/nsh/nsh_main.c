@@ -218,7 +218,7 @@ static const struct cmdmap_s g_cmdmap[] =
  * Public Data
  ****************************************************************************/
 
-const char g_nshgreeting[]       = "NuttShell (NSH)\n";
+const char g_nshgreeting[]       = "\nNuttShell (NSH)\n";
 const char g_nshprompt[]         = "nsh> ";
 const char g_nshsyntax[]         = "nsh: %s: syntax error\n";
 const char g_fmtargrequired[]    = "nsh: %s: missing required argument(s)\n";
@@ -851,6 +851,12 @@ int user_start(int argc, char *argv[])
   int mid_priority;
 #if defined(CONFIG_EXAMPLES_NSH_CONSOLE) && defined(CONFIG_EXAMPLES_NSH_TELNET)
   int ret;
+#endif
+
+  /* Mount the /etc filesystem */
+
+#ifdef CONFIG_EXAMPLES_NSH_ROMFSETC
+  (void)nsh_romfsetc();
 #endif
 
   /* Set the priority of this task to something in the middle so that 'nice'
