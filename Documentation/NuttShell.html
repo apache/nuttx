@@ -67,6 +67,12 @@
     <a href="#environvars">1.6 Environment Variables</a>
   </td>
 </tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#startupscript">1.7 NSH Start-Up Script</a>
+  </td>
+</tr>
 
 <tr>
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
@@ -469,6 +475,129 @@ fi
     <td><b><code>OLDPWD</code></b></td><td>The previous working directory</td>
   </tr>
 </table></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="startupscript"><h2>1.7 NSH Start-Up Scrip</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p>
+  <b>NSH Start-Up Script</b>.
+  NSH supports options to provide a start up script for NSH.  In general
+  this capability is enabled with <code>CONFIG_EXAMPLES_NSH_ROMFSETC</code>, but has
+  several other related configuration options as described with the
+  <a href="#nshconfiguration">NSH-specific configuration settings</a>.
+  This capability also depends on:
+  <ul>
+    <li><code>CONFIG_DISABLE_MOUNTPOINT</code> not set
+    <li><code>CONFIG_NFILE_DESCRIPTORS</code> &lt; 4
+    <li><code>CONFIG_FS_ROMFS</code> enabled
+  </ul>
+</p>
+
+<p>
+  <b>Default Start-Up Behavior</b>.
+  The implementation that is provided is intended to provide great flexibility
+  for the use of Start-Up files.  This paragraph will discuss the general
+  behavior when all of the configuration options are set to the default
+  values.
+</p>
+<p>
+  In this default case, enabling <code>CONFIG_EXAMPLES_NSH_ROMFSETC</code> will cause
+  NSH to behave as follows at NSH startup time:
+  <ul>
+    <li>
+      NSH will create a read-only RAM disk (a ROM disk), containing a tiny
+      ROMFS filesystem containing the following:
+<ul><pre>
+`--init.d/
+     `-- rcS
+</pre></ul>
+      Where rcS is the NSH start-up script.
+    </li>
+    <li>
+      NSH will then mount the ROMFS filesystem at <code>/etc</code>, resulting in:
+<ul><pre>
+|--dev/
+|   `-- ram0
+`--etc/
+    `--init.d/
+        `-- rcS
+</pre></ul>
+    </li>
+    <li>
+      By default, the contents of rcS script are:
+<ul><pre>
+# Create a RAMDISK and mount it at XXXRDMOUNTPOUNTXXX
+
+mkrd -m 1 -s 512 1024
+mkfatfs /dev/ram1
+mount -t vfat /dev/ram1 /tmp
+</pre></ul>
+    </li>
+    <li>
+      NSH will execute the script at <code>/etc/init.d/rcS</code> at start-up (before the
+      first NSH prompt.  After execution of the script, the root FS will look
+      like:
+<ul><pre>
+|--dev/
+|   |-- ram0
+|   `-- ram1
+|--etc/
+|   `--init.d/
+|       `-- rcS
+`--tmp/
+</pre></ul>
+    </li>
+  </ul>
+</p>
+<p>
+  <b>Modifying the ROMFS Image</b>.
+  The contents of the <code>/etc</code> directory are retained in the file
+  <code>examples/nsh/nsh_romfsimg.h</code>.  In order to modify the start-up
+  behavior, there are three things to study:
+  <ol>
+    <li>
+      <b>Configuration Options.</b>
+      The additional <code>CONFIG_EXAMPLES_NSH_ROMFSETC</code> configuration options
+      discussed with the other <a href="#nshconfiguration">NSH-specific configuration settings</a>.
+    </li>
+    <li>
+      <p>
+        <b><code>mkromfsimg.sh</code> Script</b>.
+        The script <code>examples/nsh/mkromfsimg.sh</code> creates <code>nsh_romfsimg.h</code>.
+        It is not automatically executed.  If you want to change the
+        configuration settings associated with creating and mounting
+        the <code>/tmp</code> directory, then it will be necessary to re-generate
+        this header file using the <code>mkromfsimg.sh</code> script.
+      </p>
+      <p>
+        The behavior of this script depends upon three things:
+        <ul>
+          <li>The configuration settings then installed configuration.
+          <li>The <code>genromfs<code> tool (available from <a href="http://romfs.sourceforge.net">http://romfs.sourceforge.net</a>).
+          <li>The file <code>examples/nsh/rcS.template</code>.
+        </ul>
+      </p>
+    </li>
+    <li>
+      <b><code>rcS.template</code></b>.
+      The file <code>examples/nsh/rcS.template</code> contains the general form
+      of the <code>rcS</code> file; configurated values are plugged into this
+      template file to produce the final <code>rcS</code> file.
+    </li>
+  </ol>
+</p>
+<p>
+  All of the startup-behavior is contained in <code>rcS.template</code>.  The
+  role of <code>mkromfsimg.sh</code> is to (1) apply the specific configuration
+  settings to <code>rcS.template</code> to create the final <code>rcS</code>, and (2) to
+  generate the header file <code>nsh_romfsimg.h</code> containg the ROMFS
+  file system image.
+</p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -1641,7 +1770,7 @@ nsh>
     <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_FILEIOSIZE</code></b></td>
     <td>
       Size of a static I/O buffer used for file access (ignored if
-      there is no filesystem).
+      there is no filesystem). Default is 1024.
     </td>
   </tr>
   <tr>
@@ -1692,6 +1821,15 @@ nsh>
     </td>
   </tr>
   <tr>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_ROMFSETC</code></b></td>
+    <td>
+      Mount a ROMFS filesystem at <code>/etc</code> and provide a startup script
+      at <code>/etc/init.d/rcS</code>.  The default startup script will mount
+      a FAT FS RAMDISK at <code>/tmp</code> but the logic is
+      <a href="#startupscript">easily extensible</a>.
+    </td>
+  </tr>
+  <tr>
     <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_CONSOLE</code></b></td>
     <td>
       If <code>CONFIG_EXAMPLES_NSH_CONSOLE</code>is set to <i>y</i>, then a serial
@@ -1720,6 +1858,7 @@ nsh>
     <th align="left" width="25%">Configuration</th>
     <th align="left">Description</th>
   </tr>
+  <tr>
     <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE</code></b></td>
     <td>
       Determines the size of the I/O buffer to use for sending/
@@ -1760,6 +1899,76 @@ nsh>
   </tr>
 </table></center>
 
+<p>
+  If <code>CONFIG_EXAMPLES_NSH_ROMFSETC</code> is selected, then the following additional
+  configuration setting apply:
+</p>
+
+<center><table width="100%">
+  <tr bgcolor="#e4e4e4">
+    <th align="left" width="25%">Configuration</th>
+    <th align="left">Description</th>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_ROMFSMOUNTPT</code></b></td>
+    <td>
+      The default mountpoint for the ROMFS volume is <code>&quot;/etc&quot;</code>, but that
+      can be changed with this setting.  This must be a absolute path
+      beginning with '<code>/</code>' and enclosed in quotes.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_INITSCRIPT</code></b></td>
+    <td>
+      This is the relative path to the startup script within the mountpoint.
+      The default is <code>&quot;init.d/rcS&quot;</code>.  This is a relative path and must not
+      start with '<code>/</code>' but must be enclosed in quotes.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_ROMFSDEVNO</code></b></td>
+    <td>
+      This is the minor number of the ROMFS block device.  The default is
+      '<code>0</code>' corresponding to <code>/dev/ram0</code>.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_ROMFSSECTSIZE</code></b></td>
+    <td>
+      This is the sector size to use with the ROMFS volume.  Since the
+      default volume is very small, this defaults to 64 but should be
+      increased if the ROMFS volume were to be become large.  Any value
+      selected must be a power of 2.
+    </td>
+  </tr>
+</table></center>
+
+<p>
+  When the default <code>rcS</code> file used when <code>CONFIG_EXAMPLES_NSH_ROMFSETC</code> is
+  selected, it will mount a FAT FS under <code>/tmp</code>.  The following selections
+  describe that FAT FS.
+</p>
+
+<center><table width="100%">
+  <tr bgcolor="#e4e4e4">
+    <th align="left" width="25%">Configuration</th>
+    <th align="left">Description</th>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_FATDEVNO</code></b></td>
+    <td>
+      This is the minor number of the FAT FS block device.  The default is
+      '<code>1</code>' corresponding to <code>/dev/ram1</code>.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_FATSECTSIZE</code></b></td>
+    <td>
+      This is the sector size use with the FAT FS. Default is 512.
+    </td>
+  </tr>
+</table></center>
+
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
@@ -1785,13 +1994,22 @@ nsh>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_DISABLEBG</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_DISABLESCRIPT</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_DRIPADDR</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_FATDEVNO</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_FATMOUNTPT</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_FATNSECTORS</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_FATSECTSIZE</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_FILEIOSIZE</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_INITSCRIPT</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_IPADDR</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_LINELEN</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_NESTDEPTH</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_NETMASK</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_NOMAC</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_ROMFSDEVNO</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_ROMFSETC</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_ROMFSMOUNTPT</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_ROMFSSECTSIZE</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_STACKSIZE</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_STRERROR</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_TELNET</code></a></li>
@@ -1802,11 +2020,12 @@ nsh>
   <li><a href="#currentwd">Current working directory</a></li>
   <li><a href="#cmdecho"><code>echo</code></a></li>
   <li><a href="#environvars">Environment Variables</a></li>
+  <li><a href="#startupscript"><code>/etc/init.d/rcS</code></a>
+</ul></td>
+<td></ul>
   <li><a href="#cmdexec"><code>exec</code></a></li>
   <li><a href="#cmdexit"><code>exit</code></a></li>
   <li><a href="#cmdget"><code>get</code></a></li>
-</ul></td>
-<td></ul>
   <li><a href="#frontend">Greeting</a></li>
   <li><a href="#cmdhelp"><code>help</code></a></li>
   <li><a href="#conditional"><code>if-then[-else]-fi</code></a></li>
@@ -1837,6 +2056,7 @@ nsh>
   <li><a href="#cmdsh"><code>sh</code></a></li>
   <li><a href="#cmdoverview">Simple commands</a></li>
   <li><a href="#cmdsleep"><code>sleep</code></a></li>
+  <li><a href="#startupscript">start-up script</a>
   <li><a href="#cmdtest"><code>test</code></a></li>
   <li><a href="#cmdunmount"><code>umount</code></a></li>
   <li><a href="#cmdunset"><code>unset</code></a></li>
