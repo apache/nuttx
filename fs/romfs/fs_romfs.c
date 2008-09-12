@@ -372,7 +372,7 @@ static ssize_t romfs_read(FAR struct file *filep, char *buffer, size_t buflen)
        * aligned to a sector boundary.
        */
 
-      nsectors = buflen / rm->rm_hwsectorsize;
+      nsectors = SEC_NSECTORS(rm, buflen);
       if (nsectors > 0 && sectorndx == 0)
         {
           /* Read maximum contiguous sectors directly to the user's
