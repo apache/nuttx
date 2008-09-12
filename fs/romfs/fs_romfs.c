@@ -211,13 +211,23 @@ static int romfs_open(FAR struct file *filep, const char *relpath,
       goto errout_with_semaphore;
     }
 
-  /* Initialize the file private data (only need to initialize non-zero elements) */
+  /* Initialize the file private data (only need to initialize
+   * non-zero elements)
+   */
 
   rf->rf_open        = TRUE;
-  rf->rf_startoffset = romfs_datastart(rm, dirinfo.rd_dir.fr_curroffset);
   rf->rf_size        = dirinfo.rd_size;
 
-  /* Confiure a buffering to support access to this file */
+  /* Get the start of the file data */
+
+  ret = romfs_datastart(rm, dirinfo.rd_dir.fr_curroffset,
+                        &rf->rf_startoffset);
+  if (ret < 0)
+    {
+      goto errout_with_semaphore;
+    }
+
+  /* Configure buffering to support access to this file */
 
   ret = romfs_fileconfigure(rm, rf);
   if (ret < 0)

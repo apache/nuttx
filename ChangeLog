@@ -472,5 +472,6 @@
 	  ioctl command in the ROMFS filesystem.  This is a requirement for eXecute
 	  In Place (XIP) support.
 	* Add mmap() API with restricted capability (only for XIP support)
+	* Extend ROMFS test at /examples/romfs to verify mmap() and XIP support.
 
 

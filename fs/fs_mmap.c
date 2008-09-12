@@ -57,21 +57,21 @@
  * Description:
  *   NuttX operates in a flat open address space.  Therefore, it generally
  *   does not require mmap() functionality.  There is one one exception:
- *   mmap is the API that is used to support direct access to random
+ *   mmap() is the API that is used to support direct access to random
  *   access media under the following very restrictive conditions:
  *
  *   1. The filesystem supports the FIOC_MMAP ioctl command.  Any file system
  *      that maps files contiguously on the media should support this ioctl.
- *      (vs. file system that scatter files over the media in non-contigous
+ *      (vs. file system that scatter files over the media in non-contiguous
  *      sectors).  As of this writing, ROMFS is the only file system that
  *      meets this requirement.
- *   2. The underly block driver supports the BIOC_XIPBASE ioctl command.
+ *   2. The underly block driver supports the BIOC_XIPBASE ioctl command
  *      that maps the underlying media to a randomly accessible address. At
- *      present, on the RAM/ROM disk driver does this.
+ *      present, only the RAM/ROM disk driver does this.
  *
  * Parameters:
  *   start   A hint at where to map the memory -- ignored.  The address
- *           of the underlying media is fixed and cannot be re-mapped with
+ *           of the underlying media is fixed and cannot be re-mapped withou
  *           MMU support.
  *   length  The length of the mapping -- ignored.  The entire underlying
  *           media is always accessible.
@@ -94,7 +94,7 @@
  *           MAP_NORESERVE  - Ignored
  *           MAP_POPULATE   - Ignored
  *           MAP_NONBLOCK   - Ignored
- *   fd      file descriptor of backing file -- required.
+ *   fd      file descriptor of the backing file -- required.
  *   offset  The offset into the file to map
  *
  * Return:

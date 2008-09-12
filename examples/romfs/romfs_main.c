@@ -59,10 +59,13 @@
 #include <sys/types.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
+#include <fcntl.h>
 #include <dirent.h>
 #include <errno.h>
 
@@ -105,6 +108,8 @@
 #define MKMOUNT_DEVNAME(m) "/dev/ram" STR_RAMDEVNO(m)
 #define MOUNT_DEVNAME      MKMOUNT_DEVNAME(CONFIG_EXAMPLES_ROMFS_RAMDEVNO)
 
+#define SCRATCHBUFFER_SIZE 1024
+
 /* Test directory stuff */
 
 #define WRITABLE_MODE      (S_IWOTH|S_IWGRP|S_IWUSR)
@@ -137,10 +142,10 @@ struct node_s
  * Private Data
  ****************************************************************************/
 
-static const char g_afilecontent[]       = "This is a file";
-static const char g_anotherfilecontent[] = "This is another file";
-static const char g_yafilecontent[]      = "This is yet another file";
-static const char g_subdirfilecontent[]  = "File in subdirectory";
+static const char g_afilecontent[]       = "This is a file\n";
+static const char g_anotherfilecontent[] = "This is another file\n";
+static const char g_yafilecontent[]      = "This is yet another file\n";
+static const char g_subdirfilecontent[]  = "File in subdirectory\n";
 
 #define g_hfilecontent g_subdirfilecontent
 
@@ -156,7 +161,7 @@ static struct node_s g_subdirfile;
 
 static int g_nerrors = 0;
 
-static char g_pathbuffer[1024];
+static char g_scratchbuffer[SCRATCHBUFFER_SIZE];
 
 /****************************************************************************
  * Private Functions
@@ -181,7 +186,7 @@ static void connectem(void)
   g_afile.found                = FALSE;
   g_afile.name                 = "afile.txt";
   g_afile.mode                 = FILE_MODE;
-  g_afile.size                 = strlen(g_afilecontent)+1;
+  g_afile.size                 = strlen(g_afilecontent);
   g_afile.u.filecontent        = g_afilecontent;
 
   g_hfile.peer                 = NULL;
@@ -189,7 +194,7 @@ static void connectem(void)
   g_hfile.found                = FALSE;
   g_hfile.name                 = "hfile";
   g_hfile.mode                 = FILE_MODE;
-  g_hfile.size                 = strlen(g_hfilecontent)+1;
+  g_hfile.size                 = strlen(g_hfilecontent);
   g_hfile.u.filecontent        = g_hfilecontent;
 
   g_anotherfile.peer           = &g_yafile;
@@ -197,7 +202,7 @@ static void connectem(void)
   g_anotherfile.found          = FALSE;
   g_anotherfile.name           = "anotherfile.txt";
   g_anotherfile.mode           = FILE_MODE;
-  g_anotherfile.size           = strlen(g_anotherfilecontent)+1;
+  g_anotherfile.size           = strlen(g_anotherfilecontent);
   g_anotherfile.u.filecontent  = g_anotherfilecontent;
 
   g_yafile.peer                = &g_subdir;
@@ -205,7 +210,7 @@ static void connectem(void)
   g_yafile.found               = FALSE;
   g_yafile.name                = "yafile.txt";
   g_yafile.mode                = FILE_MODE;
-  g_yafile.size                = strlen(g_yafilecontent)+1;
+  g_yafile.size                = strlen(g_yafilecontent);
   g_yafile.u.filecontent       = g_yafilecontent;
 
   g_subdir.peer                = NULL;
@@ -221,7 +226,7 @@ static void connectem(void)
   g_subdirfile.found           = FALSE;
   g_subdirfile.name            = "subdirfile.txt";
   g_subdirfile.mode            = FILE_MODE;
-  g_subdirfile.size            = strlen(g_subdirfilecontent)+1;
+  g_subdirfile.size            = strlen(g_subdirfilecontent);
   g_subdirfile.u.filecontent   = g_subdirfilecontent;
 }
 
@@ -273,6 +278,79 @@ static void checkattributes(const char *path, mode_t mode, size_t size)
 }
 
 /****************************************************************************
+ * Name: checkfile
+ ****************************************************************************/
+
+static void checkfile(const char *path, struct node_s *node)
+{
+  ssize_t nbytesread;
+  char *filedata;
+  int fd;
+
+  /* Open the file */
+
+  fd = open(path, O_RDONLY);
+  if (fd < 0)
+    {
+      printf("  -- ERROR: Failed to open %s: %d\n", path, errno);
+      g_nerrors++;
+      return;
+    }
+
+  /* Read and verify the file contents */
+
+  nbytesread = read(fd, g_scratchbuffer, SCRATCHBUFFER_SIZE);
+  if (nbytesread < 0)
+    {
+      printf("  -- ERROR: Failed to read from %s: %d\n", path, errno);
+      g_nerrors++;
+    }
+  else if (nbytesread != node->size)
+    {
+      printf("  -- ERROR: Read %d bytes, expected %d\n", nbytesread, node->size);
+      g_nerrors++;
+    }
+  else if (memcmp(g_scratchbuffer, node->u.filecontent, node->size) != 0)
+    {
+      g_scratchbuffer[nbytesread] = '\0';
+      printf("  -- ERROR: File content read does not match expectation:\n");
+      printf("  --        Read:     [%s]\n", g_scratchbuffer);
+      printf("  --        Expected: [%s]\n", node->u.filecontent);
+      g_nerrors++;
+    }
+
+  /* Memory map and verify the file contents */
+
+  filedata = (char*)mmap(NULL, node->size, PROT_READ, MAP_SHARED|MAP_FILE, fd, 0);
+  if (!filedata || filedata == (char*)MAP_FAILED)
+    {
+      printf("  -- ERROR: mmap of %s failed: %d\n", path, errno);
+      g_nerrors++;
+    }
+  else
+    {
+      if (memcmp(filedata, node->u.filecontent, node->size) != 0)
+        {
+          memcpy(g_scratchbuffer, filedata, node->size);
+          g_scratchbuffer[node->size] = '\0';
+          printf("  -- ERROR: Mapped file content read does not match expectation:\n");
+          printf("  --        Memory:   [%s]\n", filedata);
+          printf("  --        Expected: [%s]\n", node->u.filecontent);
+          g_nerrors++;
+        }
+      munmap(filedata, node->size);
+    }
+
+  /* Close the file */
+
+  if (close(fd) != OK)
+    {
+      printf("  -- ERROR: Failed to close %s: %d\n", path, errno);
+      g_nerrors++;
+    }
+}
+
+/****************************************************************************
  * Name: readdirectories
  ****************************************************************************/
 
@@ -310,8 +388,8 @@ static void readdirectories(const char *path, struct node_s *entry)
 
       /* Get the full path to the entry */
 
-      sprintf(g_pathbuffer, "%s/%s", path, direntry->d_name);
-      fullpath = strdup(g_pathbuffer);
+      sprintf(g_scratchbuffer, "%s/%s", path, direntry->d_name);
+      fullpath = strdup(g_scratchbuffer);
 
       if (DIRENT_ISDIRECTORY(direntry->d_type))
         {
@@ -339,6 +417,7 @@ static void readdirectories(const char *path, struct node_s *entry)
           else
             {
               checkattributes(fullpath, node->mode, node->size);
+              checkfile(fullpath, node);
             }
         }
       free(fullpath);

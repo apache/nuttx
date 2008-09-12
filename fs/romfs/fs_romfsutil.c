@@ -914,13 +914,45 @@ int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32 offset, char *pname)
  *
  ****************************************************************************/
 
-uint32 romfs_datastart(struct romfs_mountpt_s *rm, uint32 offset)
+int romfs_datastart(struct romfs_mountpt_s *rm, uint32 offset, uint32 *start)
 {
   uint32 sector;
+  uint32 next;
+  uint32 info;
   uint16 ndx;
   int ret;
 
-  /* Loop until the header size of obtained. */
+  /* Loop while we traverse any hardlinks */
+
+  for (;;)
+    {
+      /* Convert the offset into sector + index */
+
+      sector = SEC_NSECTORS(rm, offset);
+      ndx    = offset & SEC_NDXMASK(rm);
+
+      /* Read the sector into memory */
+
+      ret = romfs_devcacheread(rm, sector);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Check if this is a hard link */
+
+      next = romfs_devread32(rm, ndx + ROMFS_FHDR_NEXT);
+      if ((next & RFNEXT_MODEMASK) != RFNEXT_HARDLINK)
+        {
+          break;
+        }
+
+      /* Follow the hard-link */
+
+      offset = romfs_devread32(rm, ndx + ROMFS_FHDR_INFO);
+    }
+
+  /* Loop until the header size is obtained. */
 
   offset += ROMFS_FHDR_NAME;
   for (;;)
@@ -930,26 +962,33 @@ uint32 romfs_datastart(struct romfs_mountpt_s *rm, uint32 offset)
       sector = SEC_NSECTORS(rm, offset);
       ndx    = offset & SEC_NDXMASK(rm);
 
-      /* Get the offset to the next chunk */
-
-      offset += 16;
-      DEBUGASSERT(offset < rm->rm_volsize);
-
       /* Read the sector into memory */
 
       ret = romfs_devcacheread(rm, sector);
-      DEBUGASSERT(ret >= 0);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Get the offset to the next chunk */
+
+      offset += 16;
+      if (offset >= rm->rm_volsize)
+        {
+          return -EIO;
+        }
 
       /* Is the name terminated in this 16-byte block */
 
       if (rm->rm_buffer[ndx + 15] == '\0')
         {
-          /* Yes.. then the data starts after this chunk */
+          /* Yes.. then the data starts at the next chunk */
 
-          return offset;
+          *start = offset;
+          return OK;
         }
     }
 
-  return ERROR; /* Won't get here */
+  return -EINVAL; /* Won't get here */
 }
 
