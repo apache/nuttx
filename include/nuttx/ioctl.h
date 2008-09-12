@@ -52,6 +52,7 @@
  * defined below:
  */
 
+#define _FIOCBASE       (0x8700) /* File system ioctl commands */
 #define _BIOCBASE       (0x8800) /* Block driver ioctl commands */
 #define _SIOCBASE       (0x8900) /* Socket ioctl commandss */
 
@@ -63,14 +64,25 @@
 
 #define _IOC(type,nr)   ((type)|(nr))
 
+/* NuttX file system ioctl definitions */
+
+#define _FIOCVALID(c)   (_IOC_TYPE(c)==_FIOCBASE)
+#define _FIOC(nr)       _IOC(_FIOCBASE,nr)
+
+#define FIOC_MMAP       _FIOC(0x0001)  /* IN:  None
+                                        * OUT: If media is directly acccesible,
+                                        *      return (void*) base address
+                                        *      of file */
+
 /* NuttX block driver ioctl definitions */
 
 #define _BIOCVALID(c)   (_IOC_TYPE(c)==_BIOCBASE)
-#define _BIOC(nr)       _IOC(_SIOCBASE,nr)
+#define _BIOC(nr)       _IOC(_BIOCBASE,nr)
 
-#define _BIOC_XIPBASE _BIOC(0x0001)  /* IN:  None
-                                      * OUT: If underlying is random acccesible,
-                                      *      return (void*) base address */
+#define BIOC_XIPBASE    _BIOC(0x0001)  /* IN:  None
+                                        * OUT: If media is directly acccesible,
+                                        *      return (void*) base address
+                                        *      of device memory */
 
 /****************************************************************************
  * Public Type Definitions

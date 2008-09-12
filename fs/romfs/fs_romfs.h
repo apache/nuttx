@@ -141,7 +141,8 @@ struct romfs_mountpt_s
   uint32   rm_hwnsectors;           /* HW: The number of sectors reported by the hardware */
   uint32   rm_volsize;              /* Size of the ROMFS volume */
   uint32   rm_cachesector;          /* Current sector in the rm_buffer */
-  ubyte   *rm_buffer;               /* Device sector buffer */
+  ubyte   *rm_xipbase;              /* Base address of directly accessible media */
+  ubyte   *rm_buffer;               /* Device sector buffer, allocated if rm_xipbase==0 */
 };
 
 /* This structure represents on open file under the mountpoint.  An instance
@@ -156,7 +157,7 @@ struct romfs_file_s
   uint32   rf_startoffset;          /* Offset to the start of the file data */
   uint32   rf_size;                 /* Size of the file in bytes */
   uint32   rf_cachesector;          /* Current sector in the rf_buffer */
-  ubyte   *rf_buffer;               /* File sector buffer */
+  ubyte   *rf_buffer;               /* File sector buffer, allocated if rm_xipbase==0 */
 };
 
 /* This structure is used internally for describing the result of
@@ -201,8 +202,10 @@ EXTERN int  romfs_hwread(struct romfs_mountpt_s *rm, ubyte *buffer,
 EXTERN int  romfs_devcacheread(struct romfs_mountpt_s *rm, uint32 sector);
 EXTERN int  romfs_filecacheread(struct romfs_mountpt_s *rm,
                                 struct romfs_file_s *rf, uint32 sector);
-EXTERN int  romfs_getgeometry(struct romfs_mountpt_s *rm);
-EXTERN int  romfs_mount(struct romfs_mountpt_s *rm);
+EXTERN int  romfs_hwconfigure(struct romfs_mountpt_s *rm);
+EXTERN int  romfs_fsconfigure(struct romfs_mountpt_s *rm);
+EXTERN int  romfs_fileconfigure(struct romfs_mountpt_s *rm,
+                                struct romfs_file_s *rf);
 EXTERN int  romfs_checkmount(struct romfs_mountpt_s *rm);
 EXTERN int  romfs_finddirentry(struct romfs_mountpt_s *rm,
                                struct romfs_dirinfo_s *dirinfo,

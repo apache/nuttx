@@ -466,4 +466,10 @@
 	* Added support for ROMFS filesystem.
 	* Added a simple test the ROMFS filesystem (examples/romfs)
 	* NSH: Use ROMFS to provide an option for a start-up script at /etc/init.d/rcS
+	* Add definition of BIOC_XIPBASE ioctl and implement in RAM disk block driver.
+	  This is a low level requirement for eXecute In Place (XIP) support.
+	* Add a FIOC_MMAP to perform memory mapping of a file and implemented the
+	  ioctl command in the ROMFS filesystem.  This is a requirement for eXecute
+	  In Place (XIP) support.
+
 

@@ -42,11 +42,14 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
+
+#include <nuttx/ioctl.h>
 
 #include "fs_romfs.h"
 
@@ -298,14 +301,28 @@ void romfs_semgive(struct romfs_mountpt_s *rm)
 int romfs_hwread(struct romfs_mountpt_s *rm, ubyte *buffer, uint32 sector,
                  unsigned int nsectors)
 {
-  struct inode *inode;;
-  ssize_t nsectorsread;
   int ret = -ENODEV;
 
-  if (rm && rm->rm_blkdriver)
+  /* Check the access mode */
+
+  if (rm->rm_xipbase)
     {
-      inode = rm->rm_blkdriver;
-      if (inode && inode->u.i_bops && inode->u.i_bops->read)
+      /* In XIP mode, we just copy the requested data */
+
+      memcpy(buffer,
+             rm->rm_xipbase + sector*rm->rm_hwsectorsize,
+             nsectors*rm->rm_hwsectorsize);
+      ret = OK;
+    }
+  else
+    {
+      /* In non-XIP mode, we have to read the data from the device */
+
+      struct inode *inode = rm->rm_blkdriver;
+      ssize_t nsectorsread;
+
+      DEBUGASSERT(inode);
+      if (inode->u.i_bops && inode->u.i_bops->read)
         {
           nsectorsread =
             inode->u.i_bops->read(inode, buffer, sector, nsectors);
@@ -335,24 +352,39 @@ int romfs_devcacheread(struct romfs_mountpt_s *rm, uint32 sector)
 {
   int ret;
 
-  /* rm->rm_cachesector holds the current sector that is buffered in
-   * rm->tm_buffer. If the requested sector is the same as this sector, then
-   * we do nothing. Otherwise, we will have to read the new sector.
+  /* rm->rm_cachesector holds the current sector that is buffer in or referenced
+   * by rm->tm_buffer. If the requested sector is the same as this sector,
+   * then we do nothing.
    */
 
   if (rm->rm_cachesector != sector)
-      {
-        ret = romfs_hwread(rm, rm->rm_buffer, sector, 1);
-        if (ret < 0)
-          {
-            return ret;
-          }
+    {
+      /* Check the access mode */
 
-        /* Update the cached sector number */
+      if (rm->rm_xipbase)
+        {
+          /* In XIP mode, rf_buffer is just an offset pointer into the device
+           * address space.
+           */
 
-        rm->rm_cachesector = sector;
+          rm->rm_buffer = rm->rm_xipbase + sector*rm->rm_hwsectorsize;
+        }
+      else
+        {
+          /* In non-XIP mode, we will have to read the new sector.*/
+
+          ret = romfs_hwread(rm, rm->rm_buffer, sector, 1);
+          if (ret < 0)
+            {
+               return ret;
+            }
+        }
+
+      /* Update the cached sector number */
+
+      rm->rm_cachesector = sector;
     }
-    return OK;
+  return OK;
 }
 
 /****************************************************************************
@@ -367,35 +399,53 @@ int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf, uin
 {
   int ret;
 
-  /* rf->rf_cachesector holds the current sector that is buffered in
-   * rf->rf_buffer. If the requested sector is the same as this sector, then
-   * we do nothing. Otherwise, we will have to read the new sector.
+  /* rf->rf_cachesector holds the current sector that is buffer in or referenced
+   * by rf->rf_buffer. If the requested sector is the same as this sector,
+   * then we do nothing.
    */
 
   if (rf->rf_cachesector != sector)
-      {
-        ret = romfs_hwread(rm, rf->rf_buffer, sector, 1);
-        if (ret < 0)
-          {
-            return ret;
-          }
+    {
+      /* Check the access mode */
 
-        /* Update the cached sector number */
+      if (rm->rm_xipbase)
+        {
+          /* In XIP mode, rf_buffer is just an offset pointer into the device
+           * address space.
+           */
 
-        rf->rf_cachesector = sector;
+          rf->rf_buffer = rm->rm_xipbase + sector*rm->rm_hwsectorsize;
+        }
+      else
+        {
+          /* In non-XIP mode, we will have to read the new sector.*/
+
+          ret = romfs_hwread(rm, rf->rf_buffer, sector, 1);
+          if (ret < 0)
+            {
+              return ret;
+            }
+        }
+
+      /* Update the cached sector number */
+
+      rf->rf_cachesector = sector;
     }
-    return OK;
+  return OK;
 }
 
 /****************************************************************************
- * Name: romfs_getgeometry
+ * Name: romfs_hwconfigure
  *
  * Desciption:
- *   Get the geometry of the device (part of the mount operation)
+ *   This function is called as part of the ROMFS mount operation   It
+ *   configures the ROMFS filestem for use on this block driver.  This includes
+ *   the accounting for the geometry of the device, setting up any XIP modes
+ *   of operation, and/or allocating any cache buffers.
  *
  ****************************************************************************/
 
-int romfs_getgeometry(struct romfs_mountpt_s *rm)
+int romfs_hwconfigure(struct romfs_mountpt_s *rm)
 {
   struct inode *inode = rm->rm_blkdriver;
   struct geometry geo;
@@ -403,10 +453,12 @@ int romfs_getgeometry(struct romfs_mountpt_s *rm)
 
   /* Get the underlying device geometry */
 
+#ifdef CONFIG_DEBUG
   if (!inode || !inode->u.i_bops || !inode->u.i_bops->geometry)
     {
       return -ENODEV;
     }
+#endif
 
   ret = inode->u.i_bops->geometry(inode, &geo);
   if (ret != OK)
@@ -423,18 +475,50 @@ int romfs_getgeometry(struct romfs_mountpt_s *rm)
 
   rm->rm_hwsectorsize = geo.geo_sectorsize;
   rm->rm_hwnsectors   = geo.geo_nsectors;
+
+  /* Determine if block driver supports the XIP mode of operation */
+
+  rm->rm_cachesector  = (uint32)-1;
+
+  if (inode->u.i_bops->ioctl)
+    {
+      ret = inode->u.i_bops->ioctl(inode, BIOC_XIPBASE,
+                                   (unsigned long)&rm->rm_xipbase);
+      if (ret == OK && rm->rm_xipbase)
+        {
+          /* Yes.. Then we will directly access the media (vs.
+           * copying into an allocated sector buffer.
+           */
+
+          rm->rm_buffer      = rm->rm_xipbase;
+          rm->rm_cachesector = 0;
+          return OK;
+        }
+    }
+
+  /* Allocate the device cache buffer for normal sector accesses */
+
+  rm->rm_buffer = (ubyte*)malloc(rm->rm_hwsectorsize);
+  if (!rm->rm_buffer)
+    {
+      return -ENOMEM;
+    }
+
   return OK;
 }
 
 /****************************************************************************
- * Name: romfs_mount
+ * Name: romfs_fsconfigure
  *
  * Desciption:
- *   Setup ROMFS on the block driver
+ *   This function is called as part of the ROMFS mount operation   It
+ *   sets up the mount structure to include configuration information contained
+ *   in the ROMFS header.  This is the place where we actually determine if
+ *   the media contains a ROMFS filesystem.
  *
  ****************************************************************************/
 
-int romfs_mount(struct romfs_mountpt_s *rm)
+int romfs_fsconfigure(struct romfs_mountpt_s *rm)
 {
   const char *name;
   int ret;
@@ -472,6 +556,46 @@ int romfs_mount(struct romfs_mountpt_s *rm)
 }
 
 /****************************************************************************
+ * Name: romfs_ffileconfigure
+ *
+ * Desciption:
+ *   This function is called as part of the ROMFS file open operation   It
+ *   sets up the file structure to handle buffer appropriately, depending
+ *   upon XIP mode or not.
+ *
+ ****************************************************************************/
+
+int romfs_fileconfigure(struct romfs_mountpt_s *rm, struct romfs_file_s *rf)
+{
+  /* Check if XIP access mode is supported.  If so, then we do not need
+   * to allocate anything.
+   */
+
+  if (rm->rm_xipbase)
+    {
+      /* We'll put a valid address in rf_buffer just in case. */
+
+      rf->rf_cachesector = 0;
+      rf->rf_buffer      = rm->rm_xipbase  + rf->rf_startoffset;
+    }
+  else
+    {
+      /* Nothing in the cache buffer */
+
+      rf->rf_cachesector = (uint32)-1;
+
+      /* Create a file buffer to support partial sector accesses */
+
+      rf->rf_buffer = (ubyte*)malloc(rm->rm_hwsectorsize);
+      if (!rf->rf_buffer)
+        {
+          return -ENOMEM;
+        }
+    }
+  return OK;
+}
+
+/****************************************************************************
  * Name: romfs_checkmount
  *
  * Desciption: Check if the mountpoint is still valid.
@@ -482,29 +606,29 @@ int romfs_mount(struct romfs_mountpt_s *rm)
 
 int romfs_checkmount(struct romfs_mountpt_s *rm)
 {
+  struct romfs_file_s *file;
+  struct inode *inode;
+  struct geometry geo;
+  int ret;
+
   /* If the fs_mounted flag is FALSE, then we have already handled the loss
    * of the mount.
    */
 
-  if (rm && rm->rm_mounted)
+  DEBUGASSERT(rm && rm->rm_blkdriver);
+  if (rm->rm_mounted)
     {
-      struct romfs_file_s *file;
-
       /* We still think the mount is healthy.  Check an see if this is
        * still the case
        */
 
-      if (rm->rm_blkdriver)
+      inode = rm->rm_blkdriver;
+      if (inode->u.i_bops && inode->u.i_bops->geometry)
         {
-          struct inode *inode = rm->rm_blkdriver;
-          if (inode && inode->u.i_bops && inode->u.i_bops->geometry)
+          ret = inode->u.i_bops->geometry(inode, &geo);
+          if (ret == OK && geo.geo_available && !geo.geo_mediachanged)
             {
-              struct geometry geo;
-              int errcode = inode->u.i_bops->geometry(inode, &geo);
-              if (errcode == OK && geo.geo_available && !geo.geo_mediachanged)
-                {
-                  return OK;
-                }
+              return OK;
             }
         }
 

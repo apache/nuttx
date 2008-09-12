@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/ioctl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -82,6 +83,7 @@ static ssize_t rd_write(FAR struct inode *inode, const unsigned char *buffer,
                         size_t start_sector, unsigned int nsectors);
 #endif
 static int     rd_geometry(FAR struct inode *inode, struct geometry *geometry);
+static int     rd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -98,7 +100,7 @@ static const struct block_operations g_bops =
   NULL,        /* write    */
 #endif
   rd_geometry, /* geometry */
-  NULL         /* ioctl    */
+  rd_ioctl     /* ioctl    */
 };
 
 /****************************************************************************
@@ -140,18 +142,16 @@ static ssize_t rd_read(FAR struct inode *inode, unsigned char *buffer,
                        size_t start_sector, unsigned int nsectors)
 {
   struct rd_struct_s *dev;
-  if (inode)
+
+  DEBUGASSERT(inode && inode->i_private);
+  dev = (struct rd_struct_s *)inode->i_private;
+  if (start_sector < dev->rd_nsectors &&
+      start_sector + nsectors <= dev->rd_nsectors)
     {
-      dev = (struct rd_struct_s *)inode->i_private;
-      if (dev &&
-          start_sector < dev->rd_nsectors &&
-          start_sector + nsectors <= dev->rd_nsectors)
-        {
-          memcpy(buffer,
-                 &dev->rd_buffer[start_sector * dev->rd_sectsize],
-                 nsectors * dev->rd_sectsize);
-          return nsectors;
-        }
+      memcpy(buffer,
+             &dev->rd_buffer[start_sector * dev->rd_sectsize],
+             nsectors * dev->rd_sectsize);
+      return nsectors;
     }
   return -EINVAL;
 }
@@ -168,26 +168,22 @@ static ssize_t rd_write(FAR struct inode *inode, const unsigned char *buffer,
                         size_t start_sector, unsigned int nsectors)
 {
   struct rd_struct_s *dev;
-  if (inode)
+
+  DEBUGASSERT(inode && inode->i_private);
+  dev = (struct rd_struct_s *)inode->i_private;
+  if (!dev->rd_writeenabled)
     {
-      dev = (struct rd_struct_s *)inode->i_private;
-      if (dev)
-        {
-          if (!dev->rd_writeenabled)
-            {
-              return -EACCES;
-            }
-          else if (start_sector < dev->rd_nsectors &&
-                   start_sector + nsectors <= dev->rd_nsectors)
-            {
-              memcpy(&dev->rd_buffer[start_sector * dev->rd_sectsize],
-                     buffer,
-                     nsectors * dev->rd_sectsize);
-              return nsectors;
-            }
-        }
+      return -EACCES;
     }
-  return -EINVAL;
+  else if (start_sector < dev->rd_nsectors &&
+           start_sector + nsectors <= dev->rd_nsectors)
+    {
+      memcpy(&dev->rd_buffer[start_sector * dev->rd_sectsize],
+             buffer,
+             nsectors * dev->rd_sectsize);
+      return nsectors;
+    }
+  return -EFBIG;
 }
 #endif
 
@@ -201,7 +197,9 @@ static ssize_t rd_write(FAR struct inode *inode, const unsigned char *buffer,
 static int rd_geometry(FAR struct inode *inode, struct geometry *geometry)
 {
   struct rd_struct_s *dev;
-  if (inode && geometry)
+
+  DEBUGASSERT(inode);
+  if (geometry)
     {
       dev = (struct rd_struct_s *)inode->i_private;
       geometry->geo_available     = TRUE;
@@ -216,6 +214,31 @@ static int rd_geometry(FAR struct inode *inode, struct geometry *geometry)
       return OK;
     }
   return -EINVAL;
+}
+
+/****************************************************************************
+ * Name: rd_geometry
+ *
+ * Description: Return device geometry
+ *
+ ****************************************************************************/
+
+static int rd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
+{
+  struct rd_struct_s *dev ;
+  void **ppv = (void**)arg;
+
+  /* Only one ioctl command is supported */
+
+  DEBUGASSERT(inode && inode->i_private);
+  if (cmd == BIOC_XIPBASE && ppv)
+    {
+       dev  = (struct rd_struct_s *)inode->i_private;
+       *ppv = (void*)dev->rd_buffer;
+       return OK;
+    }
+
+  return -ENOTTY;
 }
 
 /****************************************************************************

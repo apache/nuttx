@@ -55,6 +55,7 @@
 #include <debug.h>
 
 #include <nuttx/fs.h>
+#include <nuttx/ioctl.h>
 
 #include "fs_romfs.h"
 
@@ -71,6 +72,7 @@ static int     romfs_open(FAR struct file *filep, const char *relpath,
 static int     romfs_close(FAR struct file *filep);
 static ssize_t romfs_read(FAR struct file *filep, char *buffer, size_t buflen);
 static off_t   romfs_seek(FAR struct file *filep, off_t offset, int whence);
+static int     romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 static int     romfs_opendir(struct inode *mountpt, const char *relpath,
                            struct internal_dir_s *dir);
@@ -104,7 +106,7 @@ const struct mountpt_operations romfs_operations =
   romfs_read,      /* read */
   NULL,            /* write */
   romfs_seek,      /* seek */
-  NULL,            /* ioctl */
+  romfs_ioctl,     /* ioctl */
   NULL,            /* sync */
 
   romfs_opendir,   /* opendir */
@@ -135,7 +137,6 @@ static int romfs_open(FAR struct file *filep, const char *relpath,
                     int oflags, mode_t mode)
 {
   struct romfs_dirinfo_s  dirinfo;
-  struct inode           *inode;
   struct romfs_mountpt_s *rm;
   struct romfs_file_s    *rf;
   int                     ret;
@@ -144,12 +145,11 @@ static int romfs_open(FAR struct file *filep, const char *relpath,
 
   DEBUGASSERT(filep->f_priv == NULL && filep->f_inode != NULL);
 
-  /* Get the mountpoint inode reference from the file structure and the
-   * mountpoint private data from the inode structure
+  /* mountpoint private data from the inode reference from the file
+   * structure
    */
 
-  inode = filep->f_inode;
-  rm    = (struct romfs_mountpt_s*)inode->i_private;
+  rm = (struct romfs_mountpt_s*)filep->f_inode->i_private;
 
   DEBUGASSERT(rm != NULL);
 
@@ -211,21 +211,19 @@ static int romfs_open(FAR struct file *filep, const char *relpath,
       goto errout_with_semaphore;
     }
 
-  /* Create a file buffer to support partial sector accesses */
-
-  rf->rf_buffer = (ubyte*)malloc(rm->rm_hwsectorsize);
-  if (!rf->rf_buffer)
-    {
-      ret = -ENOMEM;
-      goto errout_with_struct;
-    }
-
   /* Initialize the file private data (only need to initialize non-zero elements) */
 
   rf->rf_open        = TRUE;
   rf->rf_startoffset = romfs_datastart(rm, dirinfo.rd_dir.fr_curroffset);
   rf->rf_size        = dirinfo.rd_size;
-  rf->rf_cachesector = (uint32)-1;
+
+  /* Confiure a buffering to support access to this file */
+
+  ret = romfs_fileconfigure(rm, rf);
+  if (ret < 0)
+    {
+      goto errout_with_semaphore;
+    }
 
   /* Attach the private date to the struct file instance */
 
@@ -243,12 +241,7 @@ static int romfs_open(FAR struct file *filep, const char *relpath,
   romfs_semgive(rm);
   return OK;
 
-  /* Error exits -- goto's are nasty things, but they sure can make error
-   * handling a lot simpler.
-   */
-
-errout_with_struct:
-  free(rf);
+  /* Error exits */
 
 errout_with_semaphore:
   romfs_semgive(rm);
@@ -261,7 +254,6 @@ errout_with_semaphore:
 
 static int romfs_close(FAR struct file *filep)
 {
-  struct inode           *inode;
   struct romfs_mountpt_s *rm;
   struct romfs_file_s    *rf;
   int                     ret = OK;
@@ -273,8 +265,7 @@ static int romfs_close(FAR struct file *filep)
   /* Recover our private data from the struct file instance */
 
   rf    = filep->f_priv;
-  inode = filep->f_inode;
-  rm    = inode->i_private;
+  rm    = filep->f_inode->i_private;
 
   DEBUGASSERT(rm != NULL);
 
@@ -289,7 +280,7 @@ static int romfs_close(FAR struct file *filep)
    * accesses.
    */
 
-  if (rf->rf_buffer)
+  if (!rm->rm_xipbase && rf->rf_buffer)
     {
       free(rf->rf_buffer);
     }
@@ -307,7 +298,6 @@ static int romfs_close(FAR struct file *filep)
 
 static ssize_t romfs_read(FAR struct file *filep, char *buffer, size_t buflen)
 {
-  struct inode           *inode;
   struct romfs_mountpt_s *rm;
   struct romfs_file_s    *rf;
   unsigned int            bytesread;
@@ -327,8 +317,7 @@ static ssize_t romfs_read(FAR struct file *filep, char *buffer, size_t buflen)
   /* Recover our private data from the struct file instance */
 
   rf    = filep->f_priv;
-  inode = filep->f_inode;
-  rm    = inode->i_private;
+  rm    = filep->f_inode->i_private;
 
   DEBUGASSERT(rm != NULL);
 
@@ -445,7 +434,6 @@ errout_with_semaphore:
 
 static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
 {
-  struct inode           *inode;
   struct romfs_mountpt_s *rm;
   struct romfs_file_s    *rf;
   ssize_t                 position;
@@ -458,12 +446,12 @@ static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
   /* Recover our private data from the struct file instance */
 
   rf    = filep->f_priv;
-  inode = filep->f_inode;
-  rm    = inode->i_private;
+  rm    = filep->f_inode->i_private;
 
   DEBUGASSERT(rm != NULL);
 
   /* Map the offset according to the whence option */
+
   switch (whence)
     {
     case SEEK_SET: /* The offset is set to offset bytes. */
@@ -517,9 +505,46 @@ errout_with_semaphore:
 }
 
 /****************************************************************************
+ * Name: romfs_ioctl
+ ****************************************************************************/
+
+static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+{
+  struct romfs_mountpt_s *rm;
+  struct romfs_file_s    *rf;
+  void **ppv = (void**)arg;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+
+  /* Recover our private data from the struct file instance */
+
+  rf    = filep->f_priv;
+  rm    = filep->f_inode->i_private;
+
+  DEBUGASSERT(rm != NULL);
+
+  /* Only one ioctl command is supported */
+
+  if (cmd == FIOC_MMAP && rm->rm_xipbase && ppv)
+    {
+      /* Return the address on the media corresponding to the start of
+       * the file.
+       */
+
+      *ppv = (void*)(rm->rm_xipbase + rf->rf_startoffset);
+      return OK;
+    }
+
+  return -ENOTTY;
+}
+
+/****************************************************************************
  * Name: romfs_opendir
  *
- * Description: Open a directory for read access
+ * Description:
+ *   Open a directory for read access
  *
  ****************************************************************************/
 
@@ -743,41 +768,37 @@ static int romfs_bind(FAR struct inode *blkdriver, const void *data,
 
   sem_init(&rm->rm_sem, 0, 0);     /* Initialize the semaphore that controls access */
   rm->rm_blkdriver   = blkdriver;  /* Save the block driver reference */
-  rm->rm_cachesector = (uint32)-1; /* No sector in the cache */
 
-  /* Get the hardware configuration */
+  /* Get the hardware configuration and setup buffering appropriately */
 
-  ret = romfs_getgeometry(rm);
+  ret = romfs_hwconfigure(rm);
   if (ret < 0)
     {
       goto errout_with_sem;
     }
 
-  /* Allocate the device cache buffer */
+  /* Then complete the mount by getting the ROMFS configuratrion from
+   * the ROMF header
+   */
 
-  rm->rm_buffer = (ubyte*)malloc(rm->rm_hwsectorsize);
-  if (!rm->rm_buffer)
-    {
-      ret = -ENOMEM;
-      goto errout_with_sem;
-    }
-
-  /* Then complete the mount */
-
-  ret = romfs_mount(rm);
+  ret = romfs_fsconfigure(rm);
   if (ret < 0)
     {
       goto errout_with_buffer;
     }
 
-  /* Mounted */
+  /* Mounted! */
 
   *handle = (void*)rm;
   romfs_semgive(rm);
   return OK;
 
 errout_with_buffer:
-  free(rm->rm_buffer);
+  if (!rm->rm_xipbase)
+    {
+      free(rm->rm_buffer);
+    }
+
 errout_with_sem:
   sem_destroy(&rm->rm_sem);
   free(rm);
@@ -841,7 +862,7 @@ static int romfs_unbind(void *handle, FAR struct inode **blkdriver)
 
       /* Release the mountpoint private data */
 
-      if (rm->rm_buffer)
+      if (!rm->rm_xipbase && rm->rm_buffer)
         {
           free(rm->rm_buffer);
         }

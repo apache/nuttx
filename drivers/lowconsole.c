@@ -82,8 +82,7 @@ struct file_operations g_serialops =
 
 static int lowconsole_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-  *get_errno_ptr() = ENOTTY;
-  return ERROR;
+  return -ENOTTY;
 }
 
 /****************************************************************************
