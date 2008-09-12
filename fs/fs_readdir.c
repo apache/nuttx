@@ -1,7 +1,7 @@
-/************************************************************
- * fs_readdir.c
+/****************************************************************************
+ * fs/fs_readdir.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
@@ -45,13 +45,13 @@
 #include <nuttx/fs.h>
 #include "fs_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: readpsuedodir
- ************************************************************/
+ ****************************************************************************/
 
 static inline int readpsuedodir(struct internal_dir_s *idir)
 {
@@ -129,11 +129,11 @@ static inline int readpsuedodir(struct internal_dir_s *idir)
   return OK;
 }
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: readdir
  *
  * Description:
@@ -153,7 +153,7 @@ static inline int readpsuedodir(struct internal_dir_s *idir)
  *
  *   EBADF   - Invalid directory stream descriptor dir
  *
- ************************************************************/
+ ****************************************************************************/
 
 FAR struct dirent *readdir(DIR *dirp)
 {
