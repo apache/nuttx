@@ -189,6 +189,59 @@ static inline int romfs_checkentry(struct romfs_mountpt_s *rm, uint32 offset,
 }
 
 /****************************************************************************
+ * Name: romfs_devcacheread
+ *
+ * Desciption:
+ *   Read the specified sector for specified offset into the sector cache.
+ *   Return the index into the sector corresponding to the offset
+ *
+ ****************************************************************************/
+
+sint16 romfs_devcacheread(struct romfs_mountpt_s *rm, uint32 offset)
+{
+  uint32 sector;
+  int ret;
+
+  /* rm->rm_cachesector holds the current sector that is buffer in or referenced
+   * by rm->tm_buffer. If the requested sector is the same as this sector,
+   * then we do nothing.
+   */
+
+  sector = SEC_NSECTORS(rm, offset);
+  if (rm->rm_cachesector != sector)
+    {
+      /* Check the access mode */
+
+      if (rm->rm_xipbase)
+        {
+          /* In XIP mode, rf_buffer is just an offset pointer into the device
+           * address space.
+           */
+
+          rm->rm_buffer = rm->rm_xipbase + SEC_ALIGN(rm, offset);
+        }
+      else
+        {
+          /* In non-XIP mode, we will have to read the new sector.*/
+
+          ret = romfs_hwread(rm, rm->rm_buffer, sector, 1);
+          if (ret < 0)
+            {
+               return (sint16)ret;
+            }
+        }
+
+      /* Update the cached sector number */
+
+      rm->rm_cachesector = sector;
+    }
+
+  /* Return the offset */
+
+  return offset & SEC_NDXMASK(rm);
+}
+
+/****************************************************************************
  * Name: romfs_followhardlinks
  *
  * Desciption:
@@ -201,27 +254,20 @@ static inline int romfs_checkentry(struct romfs_mountpt_s *rm, uint32 offset,
 static int romfs_followhardlinks(struct romfs_mountpt_s *rm, uint32 offset,
                                  uint32 *poffset)
 {
-  uint32 sector;
   uint32 next;
-  uint16 ndx;
-  int ret;
+  sint16 ndx;
   int i;
 
   /* Loop while we are redirected by hardlinks */
 
   for (i = 0; i < ROMF_MAX_LINKS; i++)
     {
-      /* Convert the offset into sector + index */
+      /* Read the sector containing the offset into memory */
 
-      sector = SEC_NSECTORS(rm, offset);
-      ndx    = offset & SEC_NDXMASK(rm);
-
-      /* Read the sector into memory */
-
-      ret = romfs_devcacheread(rm, sector);
-      if (ret < 0)
+      ndx = romfs_devcacheread(rm, offset);
+      if (ndx < 0)
         {
-          return ret;
+          return ndx;
         }
 
       /* Check if this is a hard link */
@@ -255,9 +301,8 @@ static inline int romfs_searchdir(struct romfs_mountpt_s *rm,
                                   struct romfs_dirinfo_s *dirinfo)
 {
   uint32 offset;
-  uint32 sector;
   uint32 next;
-  uint16 ndx;
+  sint16 ndx;
   int    ret;
 
   /* Then loop through the current directory until the directory
@@ -268,20 +313,15 @@ static inline int romfs_searchdir(struct romfs_mountpt_s *rm,
   offset = dirinfo->rd_dir.fr_firstoffset;
   do
     {
-      /* Convert the offset into sector + index */
-
-      sector = SEC_NSECTORS(rm, offset);
-      ndx    = offset & SEC_NDXMASK(rm);
-
       /* Read the sector into memory (do this before calling
        * romfs_checkentry() so we won't have to read the sector
        * twice in the event that the offset refers to a hardlink).
        */
 
-      ret = romfs_devcacheread(rm, sector);
-      if (ret < 0)
+      ndx = romfs_devcacheread(rm, offset);
+      if (ndx < 0)
         {
-          return ret;
+          return ndx;
         }
 
       /* Because everything is chunked and aligned to 16-bit boundaries,
@@ -394,53 +434,6 @@ int romfs_hwread(struct romfs_mountpt_s *rm, ubyte *buffer, uint32 sector,
 }
 
 /****************************************************************************
- * Name: romfs_devcacheread
- *
- * Desciption:
- *   Read the specified sector into the sector cache
- *
- ****************************************************************************/
-
-int romfs_devcacheread(struct romfs_mountpt_s *rm, uint32 sector)
-{
-  int ret;
-
-  /* rm->rm_cachesector holds the current sector that is buffer in or referenced
-   * by rm->tm_buffer. If the requested sector is the same as this sector,
-   * then we do nothing.
-   */
-
-  if (rm->rm_cachesector != sector)
-    {
-      /* Check the access mode */
-
-      if (rm->rm_xipbase)
-        {
-          /* In XIP mode, rf_buffer is just an offset pointer into the device
-           * address space.
-           */
-
-          rm->rm_buffer = rm->rm_xipbase + sector*rm->rm_hwsectorsize;
-        }
-      else
-        {
-          /* In non-XIP mode, we will have to read the new sector.*/
-
-          ret = romfs_hwread(rm, rm->rm_buffer, sector, 1);
-          if (ret < 0)
-            {
-               return ret;
-            }
-        }
-
-      /* Update the cached sector number */
-
-      rm->rm_cachesector = sector;
-    }
-  return OK;
-}
-
-/****************************************************************************
  * Name: romfs_filecacheread
  *
  * Desciption:
@@ -467,7 +460,7 @@ int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf, uin
            * address space.
            */
 
-          rf->rf_buffer = rm->rm_xipbase + sector*rm->rm_hwsectorsize;
+          rf->rf_buffer = rm->rm_xipbase + sector * rm->rm_hwsectorsize;
         }
       else
         {
@@ -484,6 +477,7 @@ int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf, uin
 
       rf->rf_cachesector = sector;
     }
+
   return OK;
 }
 
@@ -574,16 +568,16 @@ int romfs_hwconfigure(struct romfs_mountpt_s *rm)
 int romfs_fsconfigure(struct romfs_mountpt_s *rm)
 {
   const char *name;
-  int ret;
+  sint16 ndx;
 
   /* Then get information about the ROMFS filesystem on the devices managed
    * by this block driver.  Read sector zero which contains the volume header.
    */
 
-  ret = romfs_devcacheread(rm, 0);
-  if (ret != 0)
+  ndx = romfs_devcacheread(rm, 0);
+  if (ndx < 0)
     {
-      return ret;
+      return ndx;
     }
 
   /* Verify the magic number at that identifies this as a ROMFS filesystem */
@@ -810,23 +804,17 @@ int romfs_finddirentry(struct romfs_mountpt_s *rm, struct romfs_dirinfo_s *dirin
 int romfs_parsedirentry(struct romfs_mountpt_s *rm, uint32 offset, uint32 *poffset,
                         uint32 *pnext, uint32 *pinfo, uint32 *psize)
 {
-  uint32 sector;
   uint32 save;
   uint32 next;
-  uint16 ndx;
+  sint16 ndx;
   int ret;
-
-  /* Convert the offset into sector + index */
-
-  sector = SEC_NSECTORS(rm, offset);
-  ndx    = offset & SEC_NDXMASK(rm);
 
   /* Read the sector into memory */
 
-  ret = romfs_devcacheread(rm, sector);
-  if (ret < 0)
+  ndx = romfs_devcacheread(rm, offset);
+  if (ndx < 0)
     {
-      return ret;
+      return ndx;
     }
 
   /* Yes.. Save the first 'next' value.  That has the offset needed to
@@ -866,12 +854,10 @@ int romfs_parsedirentry(struct romfs_mountpt_s *rm, uint32 offset, uint32 *poffs
 
 int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32 offset, char *pname)
 {
-  uint32 sector;
-  uint16 ndx;
-  uint16 namelen;
-  uint16 chunklen;
+  sint16  ndx;
+  uint16  namelen;
+  uint16  chunklen;
   boolean done;
-  int ret;
 
   /* Loop until the whole name is obtained or until NAME_MAX characters
    * of the name have been parsed.
@@ -880,17 +866,12 @@ int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32 offset, char *pname)
   offset += ROMFS_FHDR_NAME;
   for (namelen = 0, done = FALSE; namelen < NAME_MAX && !done;)
     {
-      /* Convert the offset into sector + index */
-
-      sector = SEC_NSECTORS(rm, offset);
-      ndx    = offset & SEC_NDXMASK(rm);
-
       /* Read the sector into memory */
 
-      ret    = romfs_devcacheread(rm, sector);
-      if (ret < 0)
+      ndx = romfs_devcacheread(rm, offset);
+      if (ndx < 0)
         {
-          return ret;
+          return ndx;
         }
 
       /* Is the name terminated in this 16-byte block */
@@ -940,8 +921,7 @@ int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32 offset, char *pname)
 
 int romfs_datastart(struct romfs_mountpt_s *rm, uint32 offset, uint32 *start)
 {
-  uint32 sector;
-  uint16 ndx;
+  sint16 ndx;
   int ret;
 
   /* Traverse hardlinks as necesssary to get to the real file header */
@@ -957,17 +937,12 @@ int romfs_datastart(struct romfs_mountpt_s *rm, uint32 offset, uint32 *start)
   offset += ROMFS_FHDR_NAME;
   for (;;)
     {
-      /* Convert the offset into sector + index */
-
-      sector = SEC_NSECTORS(rm, offset);
-      ndx    = offset & SEC_NDXMASK(rm);
-
       /* Read the sector into memory */
 
-      ret = romfs_devcacheread(rm, sector);
-      if (ret < 0)
+      ndx = romfs_devcacheread(rm, offset);
+      if (ndx < 0)
         {
-          return ret;
+          return ndx;
         }
 
       /* Get the offset to the next chunk */

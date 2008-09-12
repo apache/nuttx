@@ -112,6 +112,7 @@
 
 #define SEC_NDXMASK(r)       ((r)->rm_hwsectorsize - 1)
 #define SEC_NSECTORS(r,o)    ((o) / (r)->rm_hwsectorsize)
+#define SEC_ALIGN(r,o)       ((o) & ~SEC_NDXMASK(r))
 
 /* Maximum numbr of links that will be followed before we decide that there
  * is a problem.
@@ -199,7 +200,6 @@ EXTERN void romfs_semtake(struct romfs_mountpt_s *rm);
 EXTERN void romfs_semgive(struct romfs_mountpt_s *rm);
 EXTERN int  romfs_hwread(struct romfs_mountpt_s *rm, ubyte *buffer,
                   uint32 sector, unsigned int nsectors);
-EXTERN int  romfs_devcacheread(struct romfs_mountpt_s *rm, uint32 sector);
 EXTERN int  romfs_filecacheread(struct romfs_mountpt_s *rm,
                   struct romfs_file_s *rf, uint32 sector);
 EXTERN int  romfs_hwconfigure(struct romfs_mountpt_s *rm);
