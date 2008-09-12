@@ -512,7 +512,7 @@ static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   struct romfs_mountpt_s *rm;
   struct romfs_file_s    *rf;
-  void **ppv = (void**)arg;
+  FAR void **ppv = (FAR void**)arg;
 
   /* Sanity checks */
 

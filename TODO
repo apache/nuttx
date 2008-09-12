@@ -10,7 +10,7 @@ NuttX TODO List (Last updated July 31, 2008)
  (12)  Network (net/, netutils/)
   (2)  USB (drivers/usbdev)
   (3)  Libraries (lib/)
-  (4)  File system/Generic drivers (fs/, drivers/)
+  (5)  File system/Generic drivers (fs/, drivers/)
   (1)  Pascal add-on (pcode/)
   (2)  Documentation (Documentation/)
   (3)  Build system
@@ -249,6 +249,12 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open, but partially resolved: pipe buffer is at least freed
                when there are not open references to the pipe/FIFO.
   Priority:    Medium
+
+  Description: The ROMFS file system does not verify checksums on either
+               volume header on on the individual files.
+  Status:      Open
+  Priority:    Low.  I have mixed feelings about if NuttX should pay a
+               performance penalty for better data integrity.
 
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
