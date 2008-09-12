@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/sys/mount.h
+ * include/nuttx/ioctl.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,22 +33,44 @@
  *
  ****************************************************************************/
 
-#ifndef __SYS_MOUNT_H
-#define __SYS_MOUNT_H
+#ifndef __NUTTX_IOCTL_H
+#define __NUTTX_IOCTL_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <sys/types.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
-/* Mount flags */
+/* Each NuttX ioctl commands are uint16's consisting of an 8-bit type
+ * identifier and an 8-bit command number.  All comman type identifiers are
+ * defined below:
+ */
 
-#define MS_RDONLY 1 /* Mount file system read-only */
+#define _BIOCBASE       (0x8800) /* Block driver ioctl commands */
+#define _SIOCBASE       (0x8900) /* Socket ioctl commandss */
+
+/* Macros used to manage ioctl commands */
+
+#define _IOC_MASK       (0x00ff)
+#define _IOC_TYPE(cmd)  ((cmd)&~_IOC_MASK)
+#define _IOC_NR(cmd)    ((cmd)&_IOC_MASK)
+
+#define _IOC(type,nr)   ((type)|(nr))
+
+/* NuttX block driver ioctl definitions */
+
+#define _BIOCVALID(c)   (_IOC_TYPE(c)==_BIOCBASE)
+#define _BIOC(nr)       _IOC(_SIOCBASE,nr)
+
+#define _BIOC_XIPBASE _BIOC(0x0001)  /* IN:  None
+                                      * OUT: If underlying is random acccesible,
+                                      *      return (void*) base address */
 
 /****************************************************************************
  * Public Type Definitions
@@ -57,22 +79,17 @@
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-#undef EXTERN
-#if defined(__cplusplus)
+
+#ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C" {
 #else
 #define EXTERN extern
 #endif
 
-EXTERN int mount(const char *source, const char *target,
-                 const char *filesystemtype, unsigned long mountflags,
-                 const void *data);
-EXTERN int umount(const char *target);
-
 #undef EXTERN
-#if defined(__cplusplus)
+#ifdef __cplusplus
 }
 #endif
 
-#endif /* __SYS_MOUNT_H */
+#endif /* __NUTTX_IOCTL_H */

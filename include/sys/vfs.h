@@ -1,7 +1,7 @@
-/************************************************************
- * sys/vfs.h
+/****************************************************************************
+ * include/sys/vfs.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __SYS_VFS_H
 #define __SYS_VFS_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 /* sys/vfs.h is just an alternative location for the
  * information in sys/statfs.h.
@@ -46,12 +46,16 @@
 
 #include <sys/statfs.h>
 
-/************************************************************
- * Type Definitions
- ************************************************************/
+/****************************************************************************
+ * Pre-Processor Definitions
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 #endif /* __SYS_VFS_H */

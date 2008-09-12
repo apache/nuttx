@@ -1,7 +1,7 @@
-/************************************************************
- * ioctl.h
+/****************************************************************************
+ * include/sys/ioctl.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,18 +31,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __SYS_IOCTL_H
 #define __SYS_IOCTL_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
-/* Get NuttX configuration */
+/* Get NuttX configuration and NuttX-specific IOCTL definitions */
 
 #include <nuttx/config.h>
+#include <nuttx/ioctl.h>
 
 /* Include network ioctls info */
 
@@ -50,13 +51,17 @@
 # include <net/ioctls.h>
 #endif
 
-/************************************************************
- * Type Definitions
- ************************************************************/
+/****************************************************************************
+ * Pre-Processor Definitions
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
+ * Type Definitions
+ ****************************************************************************/
+
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)

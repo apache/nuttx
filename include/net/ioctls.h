@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/ioctls.h
+ * include/net/ioctls.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,32 +40,33 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/ioctl.h> /* _SIOCBASE, etc. */
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 /* These are ioctl commands to use with a socket FD.  At present, commnads
- * are accepted onloy to set/get IP addresses, broadcast address, network
+ * are accepted only to set/get IP addresses, broadcast address, network
  * masks, and hardware address, and a few others
  */
 
-#define _SIOCBASE       (0x8900)
-#define _SIOCMASK       (0x00ff)
-#define _SIOCVALID(c)   (((c) & ~_SIOCMASK) == _SIOCBASE)
+#define _SIOCVALID(c)   (_IOC_TYPE(c)==_SIOCBASE)
+#define _SIOC(nr)       _IOC(_SIOCBASE,nr)
 
-#define SIOCGIFADDR     (_SIOCBASE|0x0001)  /* Get IP address */
-#define SIOCSIFADDR     (_SIOCBASE|0x0002)  /* Set IP address */
-#define SIOCGIFDSTADDR  (_SIOCBASE|0x0003)  /* Get P-to-P address */
-#define SIOCSIFDSTADDR  (_SIOCBASE|0x0004)  /* Set P-to-P address */
-#define SIOCGIFBRDADDR  (_SIOCBASE|0x0005)  /* Get broadcast IP address	*/
-#define SIOCSIFBRDADDR  (_SIOCBASE|0x0006)  /* Set broadcast IP address	*/
-#define SIOCGIFNETMASK  (_SIOCBASE|0x0007)  /* Get network mask */
-#define SIOCSIFNETMASK  (_SIOCBASE|0x0008)  /* Set network mask */
-#define SIOCGIFMTU      (_SIOCBASE|0x0009)  /* Get MTU size */
-#define SIOCGIFHWADDR   (_SIOCBASE|0x000a)  /* Get hardware address */
-#define SIOCSIFHWADDR   (_SIOCBASE|0x000b)  /* Set hardware address */
-#define SIOCDIFADDR     (_SIOCBASE|0x000c)  /* Delete IP address */
-#define SIOCGIFCOUNT    (_SIOCBASE|0x000d)  /* Get number of devices */
+#define SIOCGIFADDR     _SIOC(0x0001)  /* Get IP address */
+#define SIOCSIFADDR     _SIOC(0x0002)  /* Set IP address */
+#define SIOCGIFDSTADDR  _SIOC(0x0003)  /* Get P-to-P address */
+#define SIOCSIFDSTADDR  _SIOC(0x0004)  /* Set P-to-P address */
+#define SIOCGIFBRDADDR  _SIOC(0x0005)  /* Get broadcast IP address */
+#define SIOCSIFBRDADDR  _SIOC(0x0006)  /* Set broadcast IP address */
+#define SIOCGIFNETMASK  _SIOC(0x0007)  /* Get network mask */
+#define SIOCSIFNETMASK  _SIOC(0x0008)  /* Set network mask */
+#define SIOCGIFMTU      _SIOC(0x0009)  /* Get MTU size */
+#define SIOCGIFHWADDR   _SIOC(0x000a)  /* Get hardware address */
+#define SIOCSIFHWADDR   _SIOC(0x000b)  /* Set hardware address */
+#define SIOCDIFADDR     _SIOC(0x000c)  /* Delete IP address */
+#define SIOCGIFCOUNT    _SIOC(0x000d)  /* Get number of devices */
 
 /****************************************************************************
  * Type Definitions
