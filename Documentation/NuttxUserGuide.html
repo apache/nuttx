@@ -6,31 +6,39 @@
 </head>
 
 <body background="backgd.gif">
-<hr>
-<hr>
-<center><h1><i>Under Construction</i></h1></center>
-<hr>
-<hr>
-<center><BIG><b>
-NuttX Operating System
-<p>
-User's Manual
-</b></BIG>
-<p>
-<small>by</small>
-<p>
-Gregory Nutt
-<p>
-<small>Last Update: September 1, 2008</small>
-</center>
+<hr><hr>
+<table width ="100%">
+  <tr align="center" bgcolor="#e4e4e4">
+    <td>
+      <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
+      <p><small>by</small></p>
+      <p>Gregory Nutt<p>
+      <p>Last Updated: September 10, 2008</p>
+    </td>
+  </tr>
+</table>
+<hr><hr>
 
-<h1>1.0 <A NAME="Introduction">Introduction</a></h1>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="Introduction"><h1>1.0 Introduction</h1></a>
+  </td>
+  </tr>
+</table>
 
 <p>
   This manual provides general usage information for the NuttX RTOS from the
     perspective of the firmware developer.
 
-<h2>1.1 <a name="overview">Document Overview</a></h2>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="overview"><h2>1.1 Document Overview</h2></a>
+  </td>
+  </tr>
+</table>
+
 <p>
   This user's manual is divided into three sections plus a index:
 </p>
@@ -74,7 +82,14 @@ Gregory Nutt
   </li>
 </ul>
 
-<h2>1.2 <a name="scope">Intended Audience and Scope</a></h2>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="scope"><h2>1.2 Intended Audience and Scope</h2></a>
+  </td>
+  </tr>
+</table>
+
 <p>
   The intended audience for this document are firmware developers who are implementing applications on NuttX.
   Specifically, this documented is limited to addressing only NuttX RTOS APIs that are available to the application developer.
@@ -86,9 +101,14 @@ Gregory Nutt
   That information can also be found in the <a href="NuttxPortingGuide.html#configandbuild">NuttX Porting Guide</a>.
 </p>
 
-<hr>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="OS_Interfaces"><h1>2.0 OS Interfaces</h1></a>
+  </td>
+  </tr>
+</table>
 
-<h1>2.0 <A NAME="OS_Interfaces">OS Interfaces</a></h1>
 <p>
   This section describes each C-callable interface to the NuttX
   Operating System. The description of each interface is presented
@@ -120,9 +140,15 @@ NOTE: In order to achieve an independent name space for the NuttX
 interface functions, differences in function names and types are
 to be expected and will not be identified as differences in these
 paragraphs.
-<hr>
+</p>
 
-<H2>2.1 <A NAME="Task_Control">Task Control Interfaces</a></H2>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="Task_Control"><h2>2.1 Task Control Interfaces</h2></a>
+  </td>
+  </tr>
+</table>
 
 <p>
   <b>Tasks</b>.
@@ -554,8 +580,15 @@ level.
 <p>
 <b>POSIX Compatibility:</b>
 Compatible with the POSIX interface of the same name.
+</p>
 
-<H2>2.2 <A NAME="Task_Schedule">Task Scheduling Interfaces</a></H2>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="Task_Schedule"><h2>2.2 Task Scheduling Interfaces</h2></a>
+  </td>
+  </tr>
+</table>
 
 <p>
   By default, NuttX performs strict priority scheduling: Tasks of higher
@@ -916,7 +949,13 @@ priority of the calling task is returned.
   interface of the same name.
 </P>
 
-<H2>2.3 <A NAME="Task_Switch">Task Switching Interfaces</a></H2>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="Task_Switch"><h2>2.3 Task Switching Interfaces</h2></a>
+  </td>
+  </tr>
+</table>
 
 <ul>
   <li><a href="#schedlock">2.3.1 sched_lock</a></li>
@@ -1015,9 +1054,15 @@ on this thread of execution.
 <b>Assumptions/Limitations:</b> 
 <p>
 <b>  POSIX  Compatibility:</b> None.
-<hr>
+</p>
 
-<H2>2.4 <A NAME="Message_Queue">Named Message Queue Interfaces</a></H2>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="Message_Queue"><h2>2.4 Named Message Queue Interfaces</h2></a>
+  </td>
+  </tr>
+</table>
 
 <p>
   NuttX supports POSIX named message queues for intertask communication.
@@ -1626,8 +1671,15 @@ attributes include:
 <p>
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
+</p>
 
-<H2>2.5 <A NAME="Semaphores">Counting Semaphore Interfaces</a></H2>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="Semaphores"><h2>2.5 Counting Semaphore Interfaces</h2></a>
+  </td>
+  </tr>
+</table>
 
 <p>
   <b>Semaphores</b>.  Semaphores are the basis for
@@ -2094,10 +2146,15 @@ number of tasks waiting for the semaphore.
 <p>
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
+</p>
 
-<hr>
-
-<H2>2.6 <A NAME="Watchdogs">Watchdog Timer Interfaces</a></H2>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="Watchdogs"><h2>2.6 Watchdog Timer Interfaces</h2></a>
+  </td>
+  </tr>
+</table>
 
 <p>
   NuttX provides a general watchdog timer facility.
@@ -2313,9 +2370,14 @@ VxWorks provides the following comparable interface:
   means either that wdog is not valid or that the wdog has already expired.
 </p>
 
-<hr>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="ClocksNTimers"><h2>2.7 Clocks and Timers</h2></a>
+  </td>
+  </tr>
+</table>
 
-<H2><A NAME="ClocksNTimers">2.7 Clocks and Timers</a></H2>
 <ul>
   <li><a href="#clocksettime">2.7.1 clock_settime</a></li>
   <li><a href="#clockgettime">2.7.2 clock_gettime</a></li>
@@ -2774,10 +2836,15 @@ VxWorks provides the following comparable interface:
 <p>
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
+</p>
 
-<hr>
-
-<H2>2.8 <A NAME="Signals">Signal Interfaces</a></H2>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="Signals"><h2>2.8 Signal Interfaces</h2></a>
+  </td>
+  </tr>
+</table>
 
 <p>
   NuttX provides signal interfaces for tasks. Signals are used to
@@ -3393,7 +3460,14 @@ be sent.
   <li>Sending of signals to 'process groups' is not supported in NuttX.</li>
 </ul>
 
-<H2>2.9 <A NAME="Pthread">Pthread Interfaces</a></H2>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="Pthread"><h2>2.9 Pthread Interfaces</h2></a>
+  </td>
+  </tr>
+</table>
+
 <p>
   NuttX does not support <i>processes</i> in the way that, say, Linux does.
   NuttX only supports simple threads or tasks running within the same address space.
@@ -5656,7 +5730,14 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h1><a name="Environ">2.10 Environment Variables</a></h1>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="Environ"><h2>2.10 Environment Variables</h2></a>
+  </td>
+  </tr>
+</table>
+
 <p><b>Overview</b>.
   NuttX supports environment variables that can be used to control the behavior of programs.
   In the spirit of NuttX the environment variable behavior attempts to emulate the behavior of
@@ -5695,12 +5776,12 @@ interface of the same name.
   in the board configuration file.
 </p>
 
-<h2><a name="getenv">2.10.1 <code>getenv</code></a></h2>
+<h3><a name="getenv">2.10.1 <code>getenv</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <stdlib.h>
+  #include &lt;stdlib.h&gt;
   FAR char *getenv(const char *name);
 </pre>
 <p>
@@ -5723,12 +5804,12 @@ interface of the same name.
    The value of the valiable (read-only) or NULL on failure.
 </p>
 
-<h2><a name="putenv">2.10.2 <code>putenv</code></a></h2>
+<h3><a name="putenv">2.10.2 <code>putenv</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <stdlib.h>
+  #include &lt;stdlib.h&gt;
   int putenv(char *string);
 </pre>
 <p>
@@ -5754,12 +5835,12 @@ interface of the same name.
   Zero on sucess.
 </p>
 
-<h2><a name="clearenv">2.10.3 <code>clearenv</code></a></h2>
+<h3><a name="clearenv">2.10.3 <code>clearenv</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <stdlib.h>
+  #include &lt;stdlib.h&gt;
   int clearenv(void);
 </pre>
 <p>
@@ -5776,12 +5857,12 @@ interface of the same name.
   Zero on success.
 </p>
 
-<h2><a name="setenv">2.10.4 <code>setenv</code></a></h2>
+<h3><a name="setenv">2.10.4 <code>setenv</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <stdlib.h>
+  #include &lt;stdlib.h&gt;
   int setenv(const char *name, const char *value, int overwrite);
 </pre>
 <p>
@@ -5814,12 +5895,12 @@ interface of the same name.
   Zero on success.
 </p>
 
-<h2><a name="unsetenv">2.10.5 <code>unsetenv</code></a></h2>
+<h3><a name="unsetenv">2.10.5 <code>unsetenv</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <stdlib.h>
+  #include &lt;stdlib.h&gt;
   int unsetenv(const char *name);
 </pre>
 <p>
@@ -5841,7 +5922,13 @@ interface of the same name.
   Zero on success.
 </p>
 
-<h1><a name="FileSystem">2.11 File System Interfaces</a></h1>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="FileSystem"><h2>2.11 File System Interfaces</h2></a>
+  </td>
+  </tr>
+</table>
 
 <ul>
   <li><a href="#FileSystemOverview">2.11.1 NuttX File System Overview</a></li>
@@ -5850,9 +5937,10 @@ interface of the same name.
   <li><a href="#standardio">2.11.4 Standard I/O</a></li>
   <li><a href="#PipesNFifos">2.11.5 Pipes and FIFOs</a></li>
   <li><a href="#fatsupport">2.11.6 FAT File System Support</a></li>
+  <li><a href="#mmapxip">2.11.7 <code>mmap()</code> and eXecute In Place (XIP)</a></li>
 </ul>
 
-<h2><a name="FileSystemOverview">2.11.1 NuttX File System Overview</a></h2>
+<h3><a name="FileSystemOverview">2.11.1 NuttX File System Overview</a></h3>
 
 <p><b>Overview</b>.
   NuttX includes an optional, scalable file system.
@@ -5909,7 +5997,7 @@ interface of the same name.
   in a file-system-like name space.
 </p>
 
-<h2><a name="driveroperations">2.11.2 Driver Operations</a></h2>
+<h3><a name="driveroperations">2.11.2 Driver Operations</a></h3>
 <a name="drvrfcntlops">
 <ul><pre>
   #include &lt;fcntl.h&gt;
@@ -5937,7 +6025,7 @@ interface of the same name.
 </pre></ul>
 </a>
 
-<h2><a name="directoryoperations">2.11.3 Directory Operations</a></h2>
+<h3><a name="directoryoperations">2.11.3 Directory Operations</a></h3>
 <a name="dirdirentops">
 <ul><pre>
   #include &lt;dirent.h&gt;
@@ -5959,7 +6047,7 @@ interface of the same name.
 </pre></ul>
 </a>
 
-<h2><a name="standardio">2.11.4 Standard I/O</a></h2>
+<h3><a name="standardio">2.11.4 Standard I/O</a></h3>
 <ul><pre>
   #include &lt;stdio.h&gt;
   int    fclose(FILE *stream);
@@ -5997,14 +6085,14 @@ interface of the same name.
   int    statfs(const char *path, FAR struct statfs *buf); /* Prototyped but not implemented */
 </pre></ul>
 
-<h2><a name="PipesNFifos">2.11.5 Pipes and FIFOs</a></h2>
+<h3><a name="PipesNFifos">2.11.5 Pipes and FIFOs</a></h3>
 
 <h3>2.11.5.1 <a name="pipe"><code>pipe</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <unistd.h>
+  #include &lt;unistd.h&gt;
   int pipe(int filedes[2]);
 </pre>
 <p>
@@ -6038,7 +6126,7 @@ interface of the same name.
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <sys/stat.h>
+  #include &lt;sys/stat.h&gt;
   int mkfifo(FAR const char *pathname, mode_t mode);
 </pre>
 <p>
@@ -6080,13 +6168,13 @@ interface of the same name.
   </ul>
 </p>
 
-<h2><a name="fatsupport">2.11.6 FAT File System Support</a></h2>
-<h3>2.11.5.1 <a name="mkfatfs"><code>mkfatfs</code></a></h3>
+<h3><a name="fatsupport">2.11.6 FAT File System Support</a></h3>
+<h3>2.11.6.1 <a name="mkfatfs"><code>mkfatfs</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
 <ul><pre>
-#include <nutts/mkfatfs.h>
+#include &lt;nuttx/mkfatfs.h&gt;
 int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt);
 </pre></ul>
 <p>
@@ -6158,7 +6246,164 @@ struct fat_format_s
   </ul>
 </p>
 
-<h2>2.12 <a name="Network">Network Interfaces</a></h2>
+<h3><a name="mmapxip">2.11.7 <code>mmap()</code> and eXecute In Place (XIP)</a></h3>
+<p>
+  NuttX operates in a flat open address space.
+  Therefore, it generally does not require <code>mmap()</code> functionality.
+  There is one one exception:
+  <code>mmap()</code> is the API that is used to support direct access to random
+  access media under the following very restrictive conditions:
+  <ol>
+    <li>
+      The filesystem supports the <code>FIOC_MMAP</code> ioctl command.
+      Any file system that maps files contiguously on the media should support this
+      <code>ioctl</code> command.
+      By comparison, most file system scatter files over the media in non-contiguous
+      sectors.  As of this writing, ROMFS is the only file system that meets this requirement.
+    </li>
+    <li>
+      The underly block driver supports the <code>BIOC_XIPBASE</code> <code>ioctl</code> command
+      that maps the underlying media to a randomly accessible address.
+       At present, only the RAM/ROM disk driver does this.
+    </li>
+  </ol>
+</p>
+
+<h3><a name="mmap">2.11.7.1 <code>mmap</code></a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<ul><pre>
+#include &lt;sys/mman.h&gt;
+int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt);
+FAR void *mmap(FAR void *start, size_t length, int prot, int flags, int fd, off_t offset)
+</pre></ul>
+<p>
+  <b>Description:</b>
+  <ul>
+    Provides minimal <code>mmap()</code> as needed to support eXecute In Place (XIP)
+    operation (as described above).
+  </ul>
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <ul>
+    <li>
+      <code>start</code>
+        A hint at where to map the memory -- ignored.
+        The address of the underlying media is fixed and cannot be re-mapped without MMU support.
+    </li>
+    <li>
+      <code>length</code>
+        The length of the mapping -- ignored.
+        The entire underlying media is always accessible.
+    </li>
+    <li>
+      <code>prot</code>
+       See the <code>PROT_*</code> definitions in <code>sys/mman.h</code>.
+       <ul>
+         <li>
+           <code>PROT_NONE</code> - Will cause an error.
+         </li>
+         <li>
+           <code>PROT_READ</code> - <code>PROT_WRITE</code> and <code>PROT_EXEC</code> also assumed.
+         </li>
+         <li>
+           <code>PROT_WRITE</code> - <code>PROT_READ</code> and <code>PROT_EXEC</code> also assumed.
+         </li>
+         <li>
+           <code>PROT_EXEC</code> - <code>PROT_READ</code> and <code>PROT_WRITE</code> also assumed.
+         </li>
+       </ul>
+    </li>
+    <li>
+      <code>flags</code>
+      See the <code>MAP_*</code> definitions in <code>sys/mman.h</code>.
+       <ul>
+         <li>
+           <code>MAP_SHARED</code> - Required
+         </li>
+         <li>
+           <code>MAP_PRIVATE</code> - Will cause an error
+         </li>
+         <li>
+           <code>MAP_FIXED</code> - Will cause an error
+         </li>
+         <li>
+           <code>MAP_FILE</code> - Ignored
+         </li>
+         <li>
+           <code>MAP_ANONYMOUS</code> - Will cause an error
+         </li>
+         <li>
+           <code>MAP_ANON</code> - Will cause an error
+         </li>
+         <li>
+           <code>MAP_GROWSDOWN</code> - Ignored
+         </li>
+         <li>
+           <code>MAP_DENYWRITE</code> - Will cause an error
+         </li>
+         <li>
+           <code>MAP_EXECUTABLE</code> - Ignored
+         </li>
+         <li>
+           <code>MAP_LOCKED</code> - Ignored
+         </li>
+         <li>
+           <code>MAP_NORESERVE</code> - Ignored
+         </li>
+         <li>
+           <code>MAP_POPULATE</code> - Ignored
+         </li>
+         <li>
+           <code>AP_NONBLOCK</code> - Ignored
+         </li>
+       </ul>
+    </li>
+    <li>
+      <code>fd</code>
+      file descriptor of the backing file -- required.
+    </li>
+    <li>
+      <code>offset</code>
+      The offset into the file to map.
+    </li>
+  </ul>
+</p>
+<p>
+  <b>Returned Values:</b>
+  <ul>
+    <p>
+      On success, <code>mmap()</code> returns a pointer to the mapped area.
+      On error, the value <code>MAP_FAILED</code> is returned, and <code>errno</code> is set appropriately.
+      <ul>
+        <li><code>ENOSYS</code> -
+          Returned if any of the unsupported <code>mmap()</code> features are attempted.
+        </li>
+        <li><code>EBADF</code> - 
+          <code>fd</code> is not a valid file descriptor.
+        </li>
+        <li><code>EINVAL</code> -
+          Length is 0. flags contained neither <code>MAP_PRIVATE</code> or <code>MAP_SHARED</code>, or
+          contained both of these values.
+        </li>
+        <li><code>ENODEV</code> -
+          The underlying filesystem of the specified file does not support memory mapping.
+        </li>
+      </ul>
+    </p>
+  </ul>
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="Network"><h2>2.12 Network Interfaces</h2></a>
+  </td>
+  </tr>
+</table>
+
 <p>NuttX includes a simple interface layer based on uIP (see <a href="http://www.sics.se/~adam/uip/index.php/Main_Page">http://www.sics.se</a>).
 NuttX supports subset of a standard socket interface to uIP.
 These network feature can be enabled by settings in the architecture
@@ -6185,7 +6430,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <sys/socket.h>
+  #include &lt;sys/socket.h&gt;
   int socket(int domain, int type, int protocol);
 </pre>
 <p>
@@ -6227,7 +6472,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <sys/socket.h>
+  #include &lt;sys/socket.h&gt;
   int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 </pre>
 <p>
@@ -6269,7 +6514,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <sys/socket.h>
+  #include &lt;sys/socket.h&gt;
   int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 </pre>
 <p>
@@ -6348,7 +6593,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <sys/socket.h>
+  #include &lt;sys/socket.h&gt;
   int listen(int sockfd, int backlog);
 </pre>
 <p>
@@ -6386,7 +6631,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <sys/socket.h>
+  #include &lt;sys/socket.h&gt;
   int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 </pre>
 <p>
@@ -6464,7 +6709,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <sys/socket.h>
+  #include &lt;sys/socket.h&gt;
   ssize_t send(int sockfd, const void *buf, size_t len, int flags);
 </pre>
 <p>
@@ -6496,7 +6741,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <sys/socket.h>
+  #include &lt;sys/socket.h&gt;
   ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
                  const struct sockaddr *to, socklen_t tolen);
 </pre>
@@ -6569,7 +6814,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <sys/socket.h>
+  #include &lt;sys/socket.h&gt;
   ssize_t recv(int sockfd, void *buf, size_t len, int flags);
 </pre>
 <p>
@@ -6600,7 +6845,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <sys/socket.h>
+  #include &lt;sys/socket.h&gt;
   ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
                    struct sockaddr *from, socklen_t *fromlen);
 </pre>
@@ -6662,7 +6907,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <sys/socket.h>
+  #include &lt;sys/socket.h&gt;
   int setsockopt(int sockfd, int level, int option,
                  const void *value, socklen_t value_len);
 </pre>
@@ -6678,7 +6923,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
   options at the socket level, specify the level argument as SOL_SOCKET.
 </p>
 <p>
-  See <sys/socket.h> a complete list of values for the <code>option</code> argument.
+  See <code>sys/socket.h</code> for a complete list of values for the <code>option</code> argument.
 </p>
 <p>
   <b>Input Parameters:</b>
@@ -6722,7 +6967,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
   <b>Function Prototype:</b>
 </p>
 <pre>
-  #include <sys/socket.h>
+  #include &lt;sys/socket.h&gt;
   int getsockopt(int sockfd, int level, int option,
                  void *value, socklen_t *value_len);
 </pre>
@@ -6741,7 +6986,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
   SOL_SOCKET.
 </p>
 <p>
-  See <sys/socket.h> a complete list of values for the <code>option</code> argument.
+  See <code>sys/socket.h</code>for a complete list of values for the <code>option</code> argument.
 </p>
 <p>
   <b>Input Parameters:</b>
@@ -6772,9 +7017,22 @@ Those socket APIs are discussed in the following paragraphs.</p>
     Insufficient resources are available in the system to complete the call.</li>
 </ul>
 
-<hr>
-<h1>3.0 <A NAME="Data_Structures">OS Data Structures</A></h1>
-<H2>3.1 <A NAME="ScalarType">Scalar Types</A></H2>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="Data_Structures"><h1>3.0 OS Data Structures</h1></a>
+  </td>
+  </tr>
+</table>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="ScalarType"><h2>3.1 Scalar Types</h2></a>
+  </td>
+  </tr>
+</table>
+
 <p>
 Many of the types used to communicate with NuttX are simple
 scalar types. These types are used to provide architecture independence
@@ -6788,7 +7046,14 @@ interface include:
 <li>time_t
 </ul>
 
-<H2>3.2 <A NAME="HiddenStructures">Hidden Interface Structures</A></H2>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="HiddenStructures"><h2>3.2 Hidden Interface Structures</h2></a>
+  </td>
+  </tr>
+</table>
+
 <p>
 Several of the types used to interface with NuttX are
 structures that are intended to be hidden from the application.
@@ -6807,9 +7072,15 @@ OS resources. These hidden structures include:
   specific elements within these hidden structures. These hidden
   structures will not be described further in this user's manual.
 </p>
-<p>
 
-<H2>3.3 <A NAME="ErrnoAccess">Access to the <code>errno</code> Variable</A></H2>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="ErrnoAccess"><h2>3.3 Access to the <code>errno</code> Variable</h2></a>
+  </td>
+  </tr>
+</table>
+
 <p>
   A pointer to the thread-specific <code>errno</code> value is available through a
   function call:
@@ -6817,7 +7088,7 @@ OS resources. These hidden structures include:
 <p>
   <b>Function Prototype:</b>
 <p>
-<pre>    #include <errno.h>
+<pre>    #include &lt;errno.h&gt;
     #define errno *get_errno_ptr()
     int *get_errno_ptr( void )</pre>
 <p>
@@ -6841,10 +7112,16 @@ OS resources. These hidden structures include:
 <ul>
 <li>A pointer to the thread-specific <code>errno</code> value.
 </ul>
-<p>
+</p>
 
-<H2>3.4 <A NAME="UserStructures">User Interface Structures</A></H2>
-<p>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="UserStructures"><h2>3.4 User Interface Structures</h2></a>
+  </td>
+  </tr>
+</table>
+
 <H3>3.4.1 main_t</H3>
 <p>
 main_t defines the type of a task entry point. main_t is declared
@@ -6984,12 +7261,20 @@ notify a task when a message is available on a queue.
   have to do some redesign.
 </p>
 
-<h1><a name="index">Index</a></h1>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="index"><h1>Index</h1></a>
+  </td>
+  </tr>
+</table>
+
 <table width="100%">
 <tr>
 <td valign="top" width="34%">
   <li><a href="#accept">accept</a></li>
   <li><a href="#bind">bind</a></li>
+  <li><a href="#mmapxip">BIOC_XIPBASE</a></li>
   <li><a href="#dirunistdops">chdir</a></li>
   <li><a href="#clockgetres">clock_getres</a></li>
   <li><a href="#clockgettime">clock_gettime</a></li>
@@ -7003,6 +7288,7 @@ notify a task when a message is available on a queue.
   <li><a href="#driveroperations">Driver operations</a></li>
   <li><a href="#drvrunistdops">dup</a></li>
   <li><a href="#drvrunistdops">dup2</a></li>
+  <li><a href="#mmapxip">eXecute In Place (XIP)</a></li>
   <li><a href="#exit">exit</a></li>
   <li><a href="#fatsupport">FAT File System Support</a></li>
   <li><a href="#standardio">fclose</a></li>
@@ -7015,6 +7301,7 @@ notify a task when a message is available on a queue.
   <li><a href="#standardio">fgetc</a></li>
   <li><a href="#standardio">fgetpos</a></li>
   <li><a href="#standardio">fgets</a></li>
+  <li><a href="#mmapxip">FIOC_MMAP</a></li>
   <li><a href="#standardio">fopen</a></li>
   <li><a href="#standardio">fprintf</a></li>
   <li><a href="#standardio">fputc</a></li>
@@ -7051,13 +7338,14 @@ notify a task when a message is available on a queue.
   <li><a href="#mqtimedreceive">mq_timedreceive</a></li>
   <li><a href="#mqtimedsend">mq_timedsend</a></li>
   <li><a href="#mqunlink">mq_unlink</a></li>
+  <li><a href="#mmap">mmap</a></li>
   <li><a href="#Network">Network Interfaces</a></li>
   <li><a href="#drvrfcntlops">open</a></li>
   <li><a href="#dirdirentops">opendir</a></li>
   <li><a href="#OS_Interfaces">OS Interfaces</a></li>
-  <li><a href="#pipe">pipe</a></li>
 </td>
 <td valign="top" width="33%">
+  <li><a href="#pipe">pipe</a></li>
   <li><a href="#standardio">printf</a></li>
   <li><a href="#Pthread">Pthread Interfaces</a>
   <li><a href="#pthreadattrdestroy">pthread_attr_destroy</a></li>
@@ -7116,6 +7404,7 @@ notify a task when a message is available on a queue.
   <li><a href="#pthreadtestcancelstate">pthread_testcancelstate</a></li>
   <li><a href="#pthreadyield">pthread_yield</a></li>
   <li><a href="#standardio">puts</a></li>
+  <li><a href="#mmapxip">RAM disk driver</a></li>
   <li><a href="#drvrunistdops">read</a></li>
   <li><a href="#dirdirentops">readdir</a></li>
   <li><a href="#dirdirentops">readdir_r</a></li>
@@ -7124,10 +7413,12 @@ notify a task when a message is available on a queue.
   <li><a href="#standardio">rename</a></li>
   <li><a href="#standardio">rmdir</a></li>
   <li><a href="#dirdirentops">rewinddir</a></li>
+  <li><a href="#mmapxip">ROM disk driver</a></li>
+  <li><a href="#mmapxip">ROMFS</a></li>
   <li><a href="#schedgetparam">sched_getparam</a></li>
-  <li><a href="#schedgetprioritymax">sched_get_priority_max</a></li>
 </td>
 <td valign="top">
+  <li><a href="#schedgetprioritymax">sched_get_priority_max</a></li>
   <li><a href="#schedgetprioritymin">sched_get_priority_min</a></li>
   <li><a href="#schedgetrrinterval">sched_get_rr_interval</a></li>
   <li><a href="#schedlockcount">sched_lockcount</a></li>
@@ -7196,6 +7487,7 @@ notify a task when a message is available on a queue.
   <li><a href="#wdgettime">wd_gettime</a></li>
   <li><a href="#wdstart">wd_start</a></li>
   <li><a href="#drvrunistdops">write</a></li>
+  <li><a href="#mmapxip">XIP</a></li>
 </td>
 </tr>
 </table>
