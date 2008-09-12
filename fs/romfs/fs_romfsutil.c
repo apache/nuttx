@@ -189,6 +189,59 @@ static inline int romfs_checkentry(struct romfs_mountpt_s *rm, uint32 offset,
 }
 
 /****************************************************************************
+ * Name: romfs_followhardlinks
+ *
+ * Desciption:
+ *   Given the offset to a file header, check if the file is a hardlink.
+ *   If so, traverse the hard links until the terminal, non-linked header
+ *   so found and return that offset.
+ *
+ ****************************************************************************/
+
+static int romfs_followhardlinks(struct romfs_mountpt_s *rm, uint32 offset,
+                                 uint32 *poffset)
+{
+  uint32 sector;
+  uint32 next;
+  uint16 ndx;
+  int ret;
+  int i;
+
+  /* Loop while we are redirected by hardlinks */
+
+  for (i = 0; i < ROMF_MAX_LINKS; i++)
+    {
+      /* Convert the offset into sector + index */
+
+      sector = SEC_NSECTORS(rm, offset);
+      ndx    = offset & SEC_NDXMASK(rm);
+
+      /* Read the sector into memory */
+
+      ret = romfs_devcacheread(rm, sector);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Check if this is a hard link */
+
+      next = romfs_devread32(rm, ndx + ROMFS_FHDR_NEXT);
+      if (!IS_HARDLINK(next))
+        {
+          *poffset = offset;
+          return OK;
+        }
+
+      /* Follow the hard-link */
+
+      offset = romfs_devread32(rm, ndx + ROMFS_FHDR_INFO);
+    }
+
+  return -ELOOP;
+}
+
+/****************************************************************************
  * Name: romfs_searchdir
  *
  * Desciption:
@@ -760,76 +813,47 @@ int romfs_parsedirentry(struct romfs_mountpt_s *rm, uint32 offset, uint32 *poffs
   uint32 sector;
   uint32 save;
   uint32 next;
-  uint32 info;
-  uint32 size;
   uint16 ndx;
   int ret;
-  int i;
 
-  /* Loop while we are redirected by hardlinks */
+  /* Convert the offset into sector + index */
 
-  for (i = 0; i < ROMF_MAX_LINKS; i++)
+  sector = SEC_NSECTORS(rm, offset);
+  ndx    = offset & SEC_NDXMASK(rm);
+
+  /* Read the sector into memory */
+
+  ret = romfs_devcacheread(rm, sector);
+  if (ret < 0)
     {
-      /* Convert the offset into sector + index */
-
-      sector = SEC_NSECTORS(rm, offset);
-      ndx    = offset & SEC_NDXMASK(rm);
-
-      /* Read the sector into memory */
-
-      ret    = romfs_devcacheread(rm, sector);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      /* Because everything is chunked and aligned to 16-bit boundaries,
-       * we know that most the basic node info fits into the sector.  The
-       * associated name may not, however.
-       */
-
-      next = romfs_devread32(rm, ndx + ROMFS_FHDR_NEXT);
-      info = romfs_devread32(rm, ndx + ROMFS_FHDR_INFO);
-      size = romfs_devread32(rm, ndx + ROMFS_FHDR_SIZE);
-
-      /* Is this the first offset we have tried? */
-
-      if (i == 0)
-        {
-          /* Yes.. Save the first 'next' value.  That has the offset needed to
-           * traverse the parent directory.
-           */
-
-          save = next;
-      }
-
-      /* Is this a hardlink? */
-
-      if (IS_HARDLINK(next))
-        {
-          /* Yes.. then the info field is the offset to the actual entry
-           * that we are interested in.
-           */
-
-          offset = info;
-        }
-      else
-        {
-          /* No... then break returning the directory information.
-           * Retaining the original offset
-           */
-
-          *poffset = offset;
-          *pnext   = (save & RFNEXT_OFFSETMASK) | (next & RFNEXT_ALLMODEMASK);
-          *pinfo   = info;
-          *psize   = size;
-          return OK;
-        }
+      return ret;
     }
 
-  /* Too many hard links -- probably an infinite loop */
+  /* Yes.. Save the first 'next' value.  That has the offset needed to
+   * traverse the parent directory.  But we may need to change the type
+   * after we follow the hard links.
+   */
 
-  return -ELOOP;
+  save = romfs_devread32(rm, ndx + ROMFS_FHDR_NEXT);
+
+  /* Traverse hardlinks as necesssary to get to the real file header */
+
+  ret = romfs_followhardlinks(rm, offset, poffset);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Because everything is chunked and aligned to 16-bit boundaries,
+   * we know that most the basic node info fits into the sector.  The
+   * associated name may not, however.
+   */
+
+   next  = romfs_devread32(rm, ndx + ROMFS_FHDR_NEXT);
+  *pnext = (save & RFNEXT_OFFSETMASK) | (next & RFNEXT_ALLMODEMASK);
+  *pinfo = romfs_devread32(rm, ndx + ROMFS_FHDR_INFO);
+  *psize = romfs_devread32(rm, ndx + ROMFS_FHDR_SIZE);
+  return OK;
 }
 
 /****************************************************************************
@@ -917,39 +941,15 @@ int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32 offset, char *pname)
 int romfs_datastart(struct romfs_mountpt_s *rm, uint32 offset, uint32 *start)
 {
   uint32 sector;
-  uint32 next;
-  uint32 info;
   uint16 ndx;
   int ret;
 
-  /* Loop while we traverse any hardlinks */
+  /* Traverse hardlinks as necesssary to get to the real file header */
 
-  for (;;)
+  ret = romfs_followhardlinks(rm, offset, &offset);
+  if (ret < 0)
     {
-      /* Convert the offset into sector + index */
-
-      sector = SEC_NSECTORS(rm, offset);
-      ndx    = offset & SEC_NDXMASK(rm);
-
-      /* Read the sector into memory */
-
-      ret = romfs_devcacheread(rm, sector);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      /* Check if this is a hard link */
-
-      next = romfs_devread32(rm, ndx + ROMFS_FHDR_NEXT);
-      if ((next & RFNEXT_MODEMASK) != RFNEXT_HARDLINK)
-        {
-          break;
-        }
-
-      /* Follow the hard-link */
-
-      offset = romfs_devread32(rm, ndx + ROMFS_FHDR_INFO);
+      return ret;
     }
 
   /* Loop until the header size is obtained. */
