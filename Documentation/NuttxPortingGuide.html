@@ -1334,7 +1334,11 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 <ul>
   <li><code>CONFIG_RRLOAD_BINARY</code>:
-    Make the rrload binary format used with BSPs from <a href="www.ridgerun.com">ridgerun.com</a>.</li>
+    Make the rrload binary format used with BSPs from <a href="www.ridgerun.com">ridgerun.com</a>
+     using the <code>tools/mkimage.sh</code> script.</li>
+   <li><code>CONFIG_INTELHEX_BINARY</code>:
+    Make the Intel HEX binary format used with many different loaders using the GNU objcopy program
+    Should not be selected if you are not using the GNU toolchain.</li>
   <li><code>CONFIG_HAVE_LIBM</code>:
     Toolchain supports libm.a</li>
 </ul>

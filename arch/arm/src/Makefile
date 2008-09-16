@@ -91,12 +91,6 @@ nuttx: $(HEAD_AOBJ) board/libboard$(LIBEXT)
 		$(OBJCOPY) --adjust-section-vma=.vector=0x$$vflashstart $(TOPDIR)/$@ $(TOPDIR)/$@.flashimage; \
 		mv $(TOPDIR)/$@.flashimage $(TOPDIR)/$@; \
 	fi
-ifeq ($(CONFIG_RRLOAD_BINARY),y)
-	@$(TOPDIR)/tools/mkimage.sh --Prefix $(CROSSDEV) $(TOPDIR)/$@ $(TOPDIR)/$@.rr
-	@if [ -w /tftpboot ] ; then \
-		cp -f $(TOPDIR)/$@.rr /tftpboot/$@.rr.${CONFIG_ARCH}; \
-	fi
-endif
 
 .depend: Makefile chip/Make.defs $(SRCS)
 	@if [ -e board/Makefile ]; then \

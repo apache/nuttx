@@ -473,5 +473,6 @@
 	  In Place (XIP) support.
 	* Add mmap() API with restricted capability (only for XIP support)
 	* Extend ROMFS test at /examples/romfs to verify mmap() and XIP support.
+	* Add support for Intel Hex format output using objcopy
 
 

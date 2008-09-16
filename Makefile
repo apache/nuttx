@@ -201,6 +201,18 @@ examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT): context
 
 $(BIN):	context depend $(LINKLIBS)
 	@$(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" LINKLIBS="$(LINKLIBS)" $(BIN)
+	@if [ -w /tftpboot ] ; then \
+		cp -f $(TOPDIR)/$@ /tftpboot/$@.${CONFIG_ARCH}; \
+	fi
+ifeq ($(CONFIG_RRLOAD_BINARY),y)
+	@$(TOPDIR)/tools/mkimage.sh --Prefix $(CROSSDEV) $(TOPDIR)/$@ $(TOPDIR)/$@.rr
+	@if [ -w /tftpboot ] ; then \
+		cp -f $(TOPDIR)/$@.rr /tftpboot/$@.rr.${CONFIG_ARCH}; \
+	fi
+endif
+ifeq ($(CONFIG_INTELHEX_BINARY),y)
+	@$(OBJCOPY) -O ihex $(TOPDIR)/$@ $(TOPDIR)/$@.ihx
+endif
 
 depend:
 	@for dir in $(MAKEDIRS) ; do \

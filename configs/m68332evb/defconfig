@@ -89,10 +89,14 @@ CONFIG_UART1_2STOP=0
 # General build options
 #
 # CONFIG_RRLOAD_BINARY - make the rrload binary format used with
-#   BSPs from www.ridgerun.com
+#   BSPs from www.ridgerun.com using the tools/mkimage.sh script
+# CONFIG_INTELHEX_BINARY - make the Intel HEX binary format
+#   used with many different loaders using the GNU objcopy program
+#   Should not be selected if you are not using the GNU toolchain.
 # CONFIG_HAVE_LIBM - toolchain supports libm.a
 #
 CONFIG_RRLOAD_BINARY=n
+CONFIG_INTELHEX_BINARY=n
 CONFIG_HAVE_LIBM=n
 
 #
