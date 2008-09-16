@@ -137,7 +137,10 @@ defconfig -- This is a configuration file similar to the Linux
 	General build options
 
 		CONFIG_RRLOAD_BINARY - make the rrload binary format used with
-		  BSPs from www.ridgerun.com
+		  BSPs from www.ridgerun.com using the tools/mkimage.sh script.
+		CONFIG_INTELHEX_BINARY - make the Intel HEX binary format
+		  used with many different loaders using the GNU objcopy program
+		  Should not be selected if you are not using the GNU toolchain.
 		CONFIG_HAVE_LIBM - toolchain supports libm.a
 
 	General OS setup
