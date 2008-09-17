@@ -16,7 +16,7 @@
   </b></big></h1>
   <p><small>by</small></p>
   <p>Gregory Nutt</p>
-  <p><small>Last Update: September 1, 2008</small></p>
+  <p><small>Last Update: September 17, 2008</small></p>
 </center>
 
 <center><h1>Table of Contents</h1></center>
@@ -1338,8 +1338,11 @@ The system can be re-made subsequently by just typing <code>make</code>.
      using the <code>tools/mkimage.sh</code> script.</li>
    <li><code>CONFIG_INTELHEX_BINARY</code>:
     Make the Intel HEX binary format used with many different loaders using the GNU objcopy program
-    Should not be selected if you are not using the GNU toolchain.</li>
-  <li><code>CONFIG_HAVE_LIBM</code>:
+    This option hould not be selected if you are not using the GNU toolchain.</li>
+   <li><code>CONFIG_RAW_BINARY</code>:
+    mmke a raw binary format file used with many different loaders using the GNU objcopy program.
+    This option  should not be selected if you are not using the GNU toolchain.</li>
+   <li><code>CONFIG_HAVE_LIBM</code>:
     Toolchain supports libm.a</li>
 </ul>
 

@@ -474,5 +474,8 @@
 	* Add mmap() API with restricted capability (only for XIP support)
 	* Extend ROMFS test at /examples/romfs to verify mmap() and XIP support.
 	* Add support for Intel Hex format output using objcopy
+	* Complete the basic port of the NXP LPC2148 on the mcu123.com board.
+	  The basic port includes successful booting, serial console and succesfully
+	  passing the examples/ostest.
 
 

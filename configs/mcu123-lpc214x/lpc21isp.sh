@@ -41,12 +41,11 @@ lpc21isp=../lpc2148/lpc21isp/lpc21isp
 
 # lpc21ips options
 
-#options="-debug -control -verify"
-options="-control -verify"
+options="-bin -control -verify"
 
-# The path to the NuttX Intel Hex format binary
+# The path to the NuttX raw binary format binary
 
-hxfile=nuttx.ihx
+hxfile=nuttx.bin
 
 # The TTY to use for the download
 

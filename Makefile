@@ -213,6 +213,9 @@ endif
 ifeq ($(CONFIG_INTELHEX_BINARY),y)
 	@$(OBJCOPY) -O ihex $(TOPDIR)/$@ $(TOPDIR)/$@.ihx
 endif
+ifeq ($(CONFIG_RAW_BINARY),y)
+	@$(OBJCOPY) -O binary $(TOPDIR)/$@ $(TOPDIR)/$@.bin
+endif
 
 depend:
 	@for dir in $(MAKEDIRS) ; do \
