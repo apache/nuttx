@@ -153,10 +153,14 @@ CONFIG_ARCH_KFREE=n
 # CONFIG_INTELHEX_BINARY - make the Intel HEX binary format
 #   used with many different loaders using the GNU objcopy program
 #   Should not be selected if you are not using the GNU toolchain.
+# CONFIG_RAW_BINARY - make a raw binary format file used with many
+#   different loaders using the GNU objcopy program.  This option
+#   should not be selected if you are not using the GNU toolchain.
 # CONFIG_HAVE_LIBM - toolchain supports libm.a
 #
 CONFIG_RRLOAD_BINARY=n
 CONFIG_INTELHEX_BINARY=n
+CONFIG_RAW_BINARY=n
 CONFIG_HAVE_LIBM=y
 
 #
