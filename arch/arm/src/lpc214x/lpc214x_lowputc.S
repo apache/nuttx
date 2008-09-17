@@ -1,5 +1,5 @@
 /**************************************************************************
- * lpc214x/lpc214X_lowputc.S
+ * arch/arm/src/lpc214x/lpc214X_lowputc.S
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

@@ -1,7 +1,7 @@
-/************************************************************
- * board/board.h
+/****************************************************************************
+ * configs/mcu123-lpc214x/include/board.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,24 +31,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_BOARD_BOARD_H
 #define __ARCH_BOARD_BOARD_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 # include <sys/types.h>
 #endif
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************/
+/* Clocking *****************************************************************/
 
 #define LPC214X_FOSC      12000000
 #define LPC214X_PLL_M     5
@@ -68,10 +68,19 @@
 #define LPC214X_PLL_FEED1 0xaa
 #define LPC214X_PLL_FEED2 0x55
 
-/* LED definitions ******************************************/
+/* LED definitions **********************************************************/
 
-/************************************************************
+#define LED_STARTED       0
+#define LED_HEAPALLOCATE  1
+#define LED_IRQSENABLED   2
+#define LED_STACKCREATED  3
+#define LED_INIRQ         4
+#define LED_SIGNAL        5
+#define LED_ASSERTION     6
+#define LED_PANIC         7
+
+/****************************************************************************
  * Inline Functions
- ************************************************************/
+ ****************************************************************************/
 
 #endif  /* __ARCH_BOARD_BOARD_H */

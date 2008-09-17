@@ -1,7 +1,8 @@
-##############################################################################
-# lpc214x/Make.defs
+#!/bin/sh
+#############################################################################
+# configs/mcu123-lpc214x/lpc21isp.sh
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,20 +32,35 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-##############################################################################
+#############################################################################
+#set -x
 
-HEAD_ASRC	= lpc214x_head.S
+# The path to the built lpc21isp binary
 
-CMN_ASRCS	= up_saveusercontext.S up_fullcontextrestore.S up_vectors.S
-CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
-		  up_createstack.c up_dataabort.c up_mdelay.c up_udelay.c \
-		  up_exit.c up_idle.c up_initialize.c up_initialstate.c \
-		  up_interruptcontext.c up_prefetchabort.c up_releasepending.c \
-		  up_releasestack.c up_reprioritizertr.c up_schedulesigaction.c \
-		  up_sigdeliver.c up_syscall.c up_unblocktask.c \
-		  up_undefinedinsn.c up_usestack.c
+lpc21isp=../lpc2148/lpc21isp/lpc21isp
 
-CHIP_ASRCS	= lpc214x_lowputc.S
-CHIP_CSRCS	= lpc214x_decodeirq.c lpc214x_irq.c lpc214x_timerisr.c \
-		  lpc214x_serial.c
-	
+# lpc21ips options
+
+#options="-debug -control -verify"
+options="-control -verify"
+
+# The path to the NuttX Intel Hex format binary
+
+hxfile=nuttx.ihx
+
+# The TTY to use for the download
+
+tty=/dev/ttyS0
+
+# The BAUD rate supported by the lpc214x board
+
+baud=38400
+
+# The LPC214X crystal frequency in KHz
+
+osckhz=12000
+
+# Do it!
+
+sudo $lpc21isp $options $hxfile $tty $baud $osckhz
+
