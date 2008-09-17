@@ -38,14 +38,19 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sched.h>
 #include <debug.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+
 #include "os_internal.h"
 #include "up_internal.h"
 #include "up_arch.h"
+
+#ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
  * Definitions
@@ -135,3 +140,6 @@ void up_sigdeliver(void)
   up_fullcontextrestore(regs);
 #endif
 }
+
+#endif /* !CONFIG_DISABLE_SIGNALS */
+

@@ -99,6 +99,8 @@
 #endif
 
 #define LPC214X_LCR_VALUE (LPC214X_LCR_CHAR | LPC214X_LCR_PAR | LPC214X_LCR_STOP)
+#define LPC214X_FCR_VALUE (LPC214X_FCR_FIFO_TRIG8 | LPC214X_FCR_TX_FIFO_RESET |\
+                           LPC214X_FCR_RX_FIFO_RESET | LPC214X_FCR_FIFO_ENABLE)
 
 /**************************************************************************
  * Private Types
@@ -174,7 +176,7 @@ up_lowsetup:
 
 	/* Configure parity, data bits, stop bits and set DLAB=1 */
 
-	ldr	r0, =LPC214X_UART0_BASE
+	ldr	r0, =LPC214X_UART_BASE
 	mov	r1, #(LPC214X_LCR_VALUE | LPC214X_LCR_DLAB_ENABLE)
 	strb	r1, [r0, #LPC214X_UART_LCR_OFFSET]
 
@@ -190,6 +192,11 @@ up_lowsetup:
 	
 	mov	r1, #LPC214X_LCR_VALUE
 	strb	r1, [r0, #LPC214X_UART_LCR_OFFSET]
+
+	/* Configure the FIFOs */
+
+	mov	r1, #LPC214X_FCR_VALUE 
+	strb	r1, [r0, #LPC214X_UART_FCR_OFFSET]
 
 	/* And return */
 

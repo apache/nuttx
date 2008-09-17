@@ -67,7 +67,9 @@
 
 /* This type arry maps 4 bits into the bit number of the lowest bit that it set */
 
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
 static uint8 g_nibblemap[16] = { 0, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0 };
+#endif
 
 /********************************************************************************
  * Private Functions

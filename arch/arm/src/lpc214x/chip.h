@@ -256,7 +256,19 @@
 
 #define LPC214X_PLL_CFG_MSEL            (0x1f << 0) /* PLL Multiplier */
 #define LPC214X_PLL_CFG_PSEL            (0x03 << 5) /* PLL Divider */
+
+/* PLL Status Register Bit Settings */
+
+#define LPC214X_PLL_STAT_MSEL           (0x1f << 0) /* PLL Multiplier Readback */
+#define LPC214X_PLL_STAT_PSEL           (0x03 << 5) /* PLL Divider Readback */
+#define LPC214X_PLL_STAT_PLLE           (1 << 8)    /* PLL Enable Readback */
+#define LPC214X_PLL_STAT_PLLC           (1 << 9)    /* PLL Connect Readback */
 #define LPC214X_PLL_STAT_PLOCK          (1 << 10)   /* PLL Lock Status */
+
+/* PLL Feed Register values */
+
+#define LPC214X_PLL_FEED1               0xaa
+#define LPC214X_PLL_FEED2               0x55
 
 /* Power Control register offsets */
 

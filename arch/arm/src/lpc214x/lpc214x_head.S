@@ -38,6 +38,8 @@
  *****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include "chip.h"
 #include "up_internal.h"
 #include "up_arch.h"
 
@@ -90,6 +92,12 @@
 
 #ifndef CONFIG_PLLCFG_VALUE /* Can be selected from config file */
 #  define CONFIG_PLLCFG_VALUE 0x00000024
+#endif
+
+/* PLL Control register */
+
+#ifndef CONFIG_PLLCON_VALUE /* Can be selected from config file */
+#  define CONFIG_PLLCON_VALUE LPC214X_PLL_CON_PLLE
 #endif
 
 /* Memory Accelerator Module (MAM) initialization values
@@ -265,32 +273,32 @@
 /* Configure the PLL */
 
 	.macro	configpll, base, val1, val2, val3
-#ifdef LPC214X_PLL_SETUP
+#ifdef CONFIG_PLL_SETUP
 	ldr	\base, =LPC214X_PLL_BASE
-	mov	\val1, #0xaa
-	mov	\val2, #0x55
+	mov	\val1, #LPC214X_PLL_FEED1
+	mov	\val2, #LPC214X_PLL_FEED2
 
 	/* Configure and Enable PLL */
 
 	mov	\val3, #CONFIG_PLLCFG_VALUE
-	str	\val3, [\base, #LPC214X_PLLCFG_OFFSET] 
-	mov	\val3, #LPC214X_PLLCON_PLLE
-	str	\val3, [\base, #LPC214X_PLLCON_OFFSET]
-	str	\val1, [\base, #LPC214X_PLLFEED_OFFSET]
-	str	\val2, [\base, #LPC214X_PLLFEED_OFFSET]
+	str	\val3, [\base, #LPC214X_PLL_CFG_OFFSET]
+	mov	\val3, #CONFIG_PLLCON_VALUE
+	str	\val3, [\base, #LPC214X_PLL_CON_OFFSET]
+	str	\val1, [\base, #LPC214X_PLL_FEED_OFFSET]
+	str	\val2, [\base, #LPC214X_PLL_FEED_OFFSET]
 
 	/* Wait until PLL Locked */
 1:
-	ldr	\val3, [\base, #LPC214X_PLLSTAT_OFFSET]
-	ands	\val3, \val3, #LPC214X_PLLSTAT_PLOCK
+	ldr	\val3, [\base, #LPC214X_PLL_STAT_OFFSET]
+	ands	\val3, \val3, #LPC214X_PLL_STAT_PLOCK
 	beq	1b
 
 	/* Switch to PLL Clock */
 
-	mov	\val3, #(LPC214X_PLLCON_PLLE | LPC214X_PLLCON_PLLC)
-	str	\val3, [\base, #LPC214X_PLLCON__OFFSET]
-	str	\val1, [\base, #LPC214X_PLLFEED_OFFSET]
-	str	\val2, [\base, #LPC214X_PLLFEED_OFFSET]
+	mov	\val3, #(LPC214X_PLL_CON_PLLE | LPC214X_PLL_CON_PLLC)
+	str	\val3, [\base, #LPC214X_PLL_CON_OFFSET]
+	str	\val1, [\base, #LPC214X_PLL_FEED_OFFSET]
+	str	\val2, [\base, #LPC214X_PLL_FEED_OFFSET]
 #endif
 	.endm
 
