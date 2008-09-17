@@ -1,7 +1,7 @@
-/********************************************************************
- * lpc214x/lpc214x_head.S
+/*****************************************************************************
+ * arch/arm/src/lpc214x/lpc214x_head.S
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,19 +31,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************/
+ *****************************************************************************/
 
-/********************************************************************
+/*****************************************************************************
  * Included Files
- ********************************************************************/
+ *****************************************************************************/
 
 #include <nuttx/config.h>
 #include "up_internal.h"
 #include "up_arch.h"
 
-/********************************************************************
+/*****************************************************************************
  * Definitions
- ********************************************************************/
+ *****************************************************************************/
 
 /* This file holds the NuttX start logic that runs when the LPC2148
  * is reset.  This logic must be located at address 0x0000:0000 in
@@ -199,9 +199,9 @@
 #  define CONFIG_PINSEL2_VALUE 0x0e6149e4
 #endif
 
-/********************************************************************
+/*****************************************************************************
  * Macros
- ********************************************************************/
+ *****************************************************************************/
 
 /* Print a character on the UART to show boot status. This macro will
  * modify r0, r1, r2 and r14
@@ -332,13 +332,13 @@
 #endif
 	.endm
 
-/********************************************************************
+/*****************************************************************************
  * Text
- ********************************************************************/
+ *****************************************************************************/
 
 	.text
 
-/********************************************************************
+/*****************************************************************************
  * Name: _vector_table
  *
  * Description:
@@ -347,7 +347,7 @@
  *   the vector table is the reset vector and this is the code that
  *   will execute whn the processor is reset.
  *
- ********************************************************************/
+ *****************************************************************************/
 
 	.globl	_vector_table
 	.type	_vector_table, %function
@@ -357,7 +357,7 @@ _vector_table:
 	ldr	pc, .Lswihandler		/* 0x08: Software interrupt */
 	ldr	pc, .Lprefetchaborthandler	/* 0x0c: Prefetch abort */
 	ldr	pc, .Ldataaborthandler		/* 0x10: Data abort */
-	ldr	pc, .Laddrexcptnhandler		/* 0x14: Address exception */
+	.long	0				/* 0x14: Vector checksum */
 	ldr	pc, .Lirqhandler		/* 0x18: IRQ */
 	ldr	pc, .Lfiqhandler		/* 0x1c: FIQ */
 
@@ -366,7 +366,6 @@ _vector_table:
 	.globl	up_vectorswi
 	.globl	up_vectorprefetch
 	.globl	up_vectordata
-	.globl	up_vectoraddrexcptn
 	.globl	up_vectorirq
 	.globl	up_vectorfiq
 
@@ -380,15 +379,13 @@ _vector_table:
 	.long	up_vectorprefetch
 .Ldataaborthandler:
 	.long	up_vectordata
-.Laddrexcptnhandler:
-	.long	up_vectoraddrexcptn
 .Lirqhandler:
 	.long	up_vectorirq
 .Lfiqhandler:
 	.long	up_vectorfiq
 	.size	_vector_table, . - _vector_table
 
-/********************************************************************
+/*****************************************************************************
  * Name: __start
  *
  * Description:
@@ -396,7 +393,7 @@ _vector_table:
  *   the processor is reset.  It initializes hardware and then gives
  *   control to NuttX.
  *
- ********************************************************************/
+ *****************************************************************************/
 
 	.global __start
 	.type	__start, #function

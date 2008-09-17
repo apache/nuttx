@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/lpc214x/lpc214x_vic.h
+ * arch/arm/src/common/up_vectoraddrexceptn.S
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,38 +33,51 @@
  *
  ************************************************************************************/
 
-#ifndef __LPC214X_VIC_H
-#define __LPC214X_VIC_H
-
 /************************************************************************************
  * Included Files
  ************************************************************************************/
+
+#include <nuttx/config.h>
+#include <nuttx/irq.h>
+#include "up_arch.h"
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
-/* All VIC registers are 32-bits wide */
-
-#define vic_getreg(o)   getreg32(LPC214X_VIC_BASE+(o))
-#define vic_putreg(v,o) putreg32((v),LPC214X_VIC_BASE+(o))
-
-/* Vector Control Register bit definitions */
-
-#define LPC214X_VECTCNTL_IRQMASK  (0x0000001f)
-#define LPC214X_VECTCNTL_IRQSHIFT (0)
-#define LPC214X_VECTCNTL_ENABLE   (1 << 5)
-
 /************************************************************************************
- * Public Types
+ * Global Data
  ************************************************************************************/
 
 /************************************************************************************
- * Inline Functions
+ * Assembly Macros
  ************************************************************************************/
 
 /************************************************************************************
- * Public Function Prototypes
+ * Private Functions
  ************************************************************************************/
 
-#endif  /* __LPC214X_VIC_H */
+	.text
+
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+
+	.text
+
+/************************************************************************************
+ *  Name: up_vectoraddrexcption
+ *
+ * Description:
+ *   Shouldn't happen.  This exception handler is in a separate file from other
+ *   vector handlers because some processors (e.g., lpc2148) do not support the
+ *   the Address Exception vector.
+ *
+ ************************************************************************************/
+
+	.globl	up_vectoraddrexcptn
+	.type	up_vectoraddrexcptn, %function
+up_vectoraddrexcptn:
+	b	up_vectoraddrexcptn
+	.size	up_vectoaddrexcptn, . - up_vectoraddrexcptn
+	.end
