@@ -37,7 +37,10 @@ OUTPUT_ARCH(arm)
 ENTRY(_stext)
 SECTIONS
 {
-	/* The OS entry point is here (default MEMMAP mode assumed) */
+	/* The lpc2148 has 512Kb of non-volatile memory beginning at address
+	 * 0x00000000.  The OS entry point is via the reset vector at address
+	 * 0x00000000 (default MEMMAP mode assumed)
+	 */
 
 	. = 0x00000000;
 	.text : {
@@ -51,10 +54,16 @@ SECTIONS
 		*(.got)			/* Global offset table		*/
 		_etext = ABSOLUTE(.);
 	}
+	_eronly = ABSOLUTE(.);		/* This is where the .data section
+					 * is relocated for execution out
+					 * FLASH */
 
-	_eronly = ABSOLUTE(.);		/* See below                    */
-	. = ALIGN(4096);
+	/* The lpc2148 has 32Kb of on-chip static RAM beginning at address
+	 * 0x40000000.  The .data section will be relocated from _eronly
+	 * to _sdata at boot time.
+	 */
 
+	. = 0x40000000;
 	.data : {
 		_sdata = ABSOLUTE(.);
 		*(.data)
