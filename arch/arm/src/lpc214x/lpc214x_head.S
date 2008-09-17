@@ -415,7 +415,7 @@ __start:
 	/* Configure VPBDIV */
 
 	configvpbdiv	r0, r1
-	
+
 	/* Configure the PLL */
 
 	configpll	r0, r1, r2, r3
@@ -471,12 +471,9 @@ __start:
 	mov	fp, #0
 	bl	up_earlyserialinit
 
-#ifdef CONFIG_DEBUG
-	mov	r0, #'C'
-	bl	up_putc
-	mov	r0, #'\n'
-	bl	up_putc
-#endif
+	showprogress 'C'
+	showprogress '\n'
+
 	/* Initialize onboard LEDs */
 
 #ifdef CONFIG_ARCH_LEDS
