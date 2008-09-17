@@ -72,15 +72,20 @@ CONFIG_UART_TXBUFSIZE=256
 # CONFIG_INTELHEX_BINARY - make the Intel HEX binary format
 #   used with many different loaders using the GNU objcopy program
 #   Should not be selected if you are not using the GNU toolchain.
+# CONFIG_RAW_BINARY - make a raw binary format file used with many
+#   different loaders using the GNU objcopy program.  This option
+#   should not be selected if you are not using the GNU toolchain.
 # CONFIG_HAVE_LIBM - toolchain supports libm.a
+#
 #
 # CONFIG_LINKER_START_AREA		- Start of START area
 # CONFIG_LINKER_CODE_AREA 		- Start of _CODE area
 # CONFIG_LINKER_ROM_AT_0000		- Disable the initialization code
 #   starting at 0000
-
+#
 CONFIG_RRLOAD_BINARY=n
 CONFIG_INTELHEX_BINARY=n
+CONFIG_RAW_BINARY=n
 CONFIG_HAVE_LIBM=n
 
 CONFIG_LINKER_START_AREA=0x5200
