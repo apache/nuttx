@@ -78,7 +78,7 @@
 
 /* FIFO Control Register (FCR) bit definitions */
 
-#define LPC214X_FCR_FIFO_ENABLE    (1 << 0)    /* FIFO wnable */
+#define LPC214X_FCR_FIFO_ENABLE    (1 << 0)    /* FIFO enable */
 #define LPC214X_FCR_RX_FIFO_RESET  (1 << 1)    /* Reset receive FIFO */
 #define LPC214X_FCR_TX_FIFO_RESET  (1 << 2)    /* Reset transmit FIFO */
 #define LPC214X_FCR_FIFO_TRIG1     (0 << 6)    /* Trigger @1 character in FIFO */

@@ -57,17 +57,6 @@
 
 #define LPC214X_PCLKFREQ  (LPC214X_FOSC/4) /* PCLK must be FOSC/4 */
 
-#define LPC214X_PSEL0     5
-#define LPC214X_PSEL1     6
-
-#define LPC214X_PLLE      0
-#define LPC214X_PLLC      1
-
-#define LPC214X_PLOCK     10
-
-#define LPC214X_PLL_FEED1 0xaa
-#define LPC214X_PLL_FEED2 0x55
-
 /* LED definitions **********************************************************/
 
 #define LED_STARTED       0
