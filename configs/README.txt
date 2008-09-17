@@ -141,6 +141,9 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_INTELHEX_BINARY - make the Intel HEX binary format
 		  used with many different loaders using the GNU objcopy program
 		  Should not be selected if you are not using the GNU toolchain.
+		CONFIG_RAW_BINARY - make a raw binary format file used with many
+		  different loaders using the GNU objcopy program.  This option
+		  should not be selected if you are not using the GNU toolchain.
 		CONFIG_HAVE_LIBM - toolchain supports libm.a
 
 	General OS setup
@@ -335,8 +338,8 @@ configs/ntosd-dm320
 configs/mcu123-lpc214x
     This port is for the NXP LPC2148 as provided on the mcu123.com
     lpc214x development board.
-    STATUS: This port is in progress and should be available in the
-    nuttx-0.2.5 release.
+    STATUS: A basic port that boots and supports a serial console
+    is in place.
 
 configs/m68322evb
     This is a work in progress for the venerable m68322evb board from
