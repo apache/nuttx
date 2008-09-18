@@ -55,6 +55,16 @@
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* DEFINED: Do not reconfig UART */
 #undef  CONFIG_DUMP_ON_EXIT           /* DEFINED: Dump task state on exit */
 
+/* Determine which (if any) console driver to use */
+
+#if CONFIG_NFILE_DESCRIPTORS == 0 || defined(CONFIG_DEV_LOWCONSOLE)
+#  undef CONFIG_USE_SERIALDRIVER
+#  undef CONFIG_USE_EARLYSERIALINIT
+#elif defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS > 0
+#  define CONFIG_USE_SERIALDRIVER 1
+#  define CONFIG_USE_EARLYSERIALINIT 1
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -88,7 +98,6 @@ extern uint32 g_heapbase;
  * Inline Functions
  ****************************************************************************/
 
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -110,12 +119,7 @@ extern void up_sigdeliver(void);
 extern void up_syscall(uint32 *regs);
 extern int  up_timerisr(int irq, uint32 *regs);
 extern void up_undefinedinsn(uint32 *regs);
-
-#ifdef CONFIG_DEBUG
 extern void up_lowputc(char ch);
-#else
-# define up_lowputc(ch)
-#endif
 
 /* Defined in up_vectors.S */
 
@@ -135,6 +139,14 @@ extern void up_serialinit(void);
 #else
 # define up_earlyserialinit()
 # define up_serialinit()
+#endif
+
+/* Defined in drivers/lowconsole.c */
+
+#ifdef CONFIG_DEV_LOWCONSOLE
+extern void lowconsole_init(void);
+#else
+# define lowconsole_init()
 #endif
 
 /* Defined in up_watchdog.c */

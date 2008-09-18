@@ -63,7 +63,7 @@
  * Definitions
  ****************************************************************************/
 
- /* Determine which (if any) console driver to use */
+/* Determine which (if any) console driver to use */
 
 #if CONFIG_NFILE_DESCRIPTORS == 0 || defined(CONFIG_DEV_LOWCONSOLE)
 #  undef CONFIG_USE_SERIALDRIVER

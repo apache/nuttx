@@ -105,10 +105,10 @@ __start:
 
 #endif
 
-#if defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS >0
 	/* Perform early serial initialization */
 
 	mov	fp, #0
+#ifdef CONFIG_USE_EARLYSERIALINIT
 	bl	up_earlyserialinit
 #endif
 

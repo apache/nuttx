@@ -55,7 +55,7 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
+#ifdef CONFIG_USE_SERIALDRIVER
 
 /****************************************************************************
  * Definitions
@@ -780,7 +780,7 @@ int up_putc(int ch)
   return ch;
 }
 
-#else /* CONFIG_NFILE_DESCRIPTORS > 0 */
+#else /* CONFIG_USE_SERIALDRIVER */
 
 /****************************************************************************
  * Definitions
@@ -833,6 +833,6 @@ int up_putc(int ch)
   return ch;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
+#endif /* CONFIG_USE_SERIALDRIVER */
 
 
