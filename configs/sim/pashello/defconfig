@@ -80,6 +80,8 @@ CONFIG_ARCH_BOARD_SIM=y
 #   Used to initialize the internal time logic.
 # CONFIG_DEV_CONSOLE - Set if architecture-specific logic
 #   provides /dev/console.  Enables stdout, stderr, stdin.
+# CONFIG_DEV_LOWCONSOLE - Use the simple, low-level serial console
+#   driver (minimul support)
 #
 CONFIG_EXAMPLE=pashello
 CONFIG_DEBUG=n
@@ -94,6 +96,7 @@ CONFIG_START_MONTH=2
 CONFIG_START_DAY=27
 CONFIG_JULIAN_TIME=n
 CONFIG_DEV_CONSOLE=y
+CONFIG_DEV_LOWCONSOLE=n
 
 #
 # The following can be used to disable categories of
