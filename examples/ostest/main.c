@@ -34,10 +34,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -48,6 +44,7 @@
 #include <string.h>
 #include <sched.h>
 #include <nuttx/init.h>
+
 #include "ostest.h"
 
 /****************************************************************************
@@ -56,22 +53,6 @@
 
 #define PRIORITY   100
 #define NARGS        4
-
-/* The task_create task size can be specified in the defconfig file */
-
-#ifdef CONFIG_EXAMPLES_OSTEST_STACKSIZE
-# define STACKSIZE CONFIG_EXAMPLES_OSTEST_STACKSIZE
-#else
-# define STACKSIZE 8192
-#endif
-
-/* The number of times to execute the test can be specified in the defconfig
- * file.
- */
-
-#ifndef CONFIG_EXAMPLES_OSTEST_LOOPS
-# define CONFIG_EXAMPLES_OSTEST_LOOPS 1
-#endif
 
 /****************************************************************************
  * Private Data

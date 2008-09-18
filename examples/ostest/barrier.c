@@ -1,7 +1,7 @@
-/***********************************************************************
- * barrier.c
+/****************************************************************************
+ * examples/ostest/barrier.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,17 +31,36 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ***********************************************************************/
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
+
 #include "ostest.h"
 
-#define NBARRIER_THREADS 8
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 static pthread_barrier_t barrier;
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: barrier_func
+ ****************************************************************************/
 
 static void *barrier_func(void *parameter)
 {
@@ -55,19 +74,25 @@ static void *barrier_func(void *parameter)
 
   /* Wait at the barrier until all threads are synchronized. */
 
-  printf("barrier_func: Thread %d calling pthread_barrier_wait()\n",  id);
+  printf("barrier_func: Thread %d calling pthread_barrier_wait()\n",
+         id);
   status = pthread_barrier_wait(&barrier);
   if (status == 0)
     {
-      printf("barrier_func: Thread %d, back with status=0 (I am not special)\n",  id, status);
+      printf("barrier_func: Thread %d, back with "
+             "status=0 (I am not special)\n",
+             id, status);
     }
   else if (status == PTHREAD_BARRIER_SERIAL_THREAD)
     {
-      printf("barrier_func: Thread %d, back with status=PTHREAD_BARRIER_SERIAL_THREAD (I AM SPECIAL)\n",  id, status);
+      printf("barrier_func: Thread %d, back with "
+             "status=PTHREAD_BARRIER_SERIAL_THREAD (I AM SPECIAL)\n",
+             id, status);
     }
   else
     {
-      printf("barrier_func: ERROR thread %d could not get semaphore value\n",  id);
+      printf("barrier_func: ERROR thread %d could not get semaphore value\n",
+             id);
     }
 
 #ifndef CONFIG_DISABLE_SIGNALS
@@ -77,9 +102,17 @@ static void *barrier_func(void *parameter)
   return NULL;
 }
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: barrier_test
+ ****************************************************************************/
+
 void barrier_test(void)
 {
-  pthread_t barrier_thread[NBARRIER_THREADS];
+  pthread_t barrier_thread[CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS];
   pthread_addr_t result;
   pthread_attr_t attr;
   pthread_barrierattr_t barrierattr;
@@ -91,33 +124,39 @@ void barrier_test(void)
   status = pthread_barrierattr_init(&barrierattr);
   if (status != OK)
     {
-      printf("barrier_test: pthread_barrierattr_init failed, status=%d\n",  status);
+      printf("barrier_test: pthread_barrierattr_init failed, status=%d\n",
+             status);
     }
 
-  status = pthread_barrier_init(&barrier, &barrierattr, NBARRIER_THREADS);
+  status = pthread_barrier_init(&barrier, &barrierattr,
+                                CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS);
   if (status != OK)
     {
-      printf("barrier_test: pthread_barrierattr_init failed, status=%d\n",  status);
+      printf("barrier_test: pthread_barrierattr_init failed, status=%d\n",
+             status);
     }
 
   /* Create the barrier */
 
   status = pthread_barrierattr_init(&barrierattr);
 
-  /* Start NBARRIER_THREADS thread instances */
+  /* Start CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS thread instances */
 
   status = pthread_attr_init(&attr);
   if (status != OK)
     {
-      printf("barrier_test: pthread_attr_init failed, status=%d\n",  status);
+      printf("barrier_test: pthread_attr_init failed, status=%d\n",
+              status);
     }
 
-  for (i = 0; i < NBARRIER_THREADS; i++)
+  for (i = 0; i < CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS; i++)
     {
-      status = pthread_create(&barrier_thread[i], &attr, barrier_func, (pthread_addr_t)i);
+      status = pthread_create(&barrier_thread[i], &attr, barrier_func,
+                              (pthread_addr_t)i);
       if (status != 0)
         {
-          printf("barrier_test: Error in thread %d create, status=%d\n",  i, status);
+          printf("barrier_test: Error in thread %d create, status=%d\n",
+                 i, status);
         }
       else
         {
@@ -127,16 +166,18 @@ void barrier_test(void)
 
   /* Wait for all thread instances to complete */
 
-  for (i = 0; i < NBARRIER_THREADS; i++)
+  for (i = 0; i < CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS; i++)
     {
       status = pthread_join(barrier_thread[i], &result);
       if (status != 0)
         {
-          printf("barrier_test: Error in thread %d join, status=%d\n",  i, status);
+          printf("barrier_test: Error in thread %d join, status=%d\n",
+                 i, status);
         }
       else
         {
-          printf("barrier_test: Thread %d completed with result=%p\n", i, result);
+          printf("barrier_test: Thread %d completed with result=%p\n",
+                 i, result);
         }
     }
 
@@ -145,12 +186,14 @@ void barrier_test(void)
   status = pthread_barrier_destroy(&barrier);
   if (status != OK)
     {
-      printf("barrier_test: pthread_barrier_destroy failed, status=%d\n",  status);
+      printf("barrier_test: pthread_barrier_destroy failed, status=%d\n",
+             status);
     }
 
   status = pthread_barrierattr_destroy(&barrierattr);
   if (status != OK)
     {
-      printf("barrier_test: pthread_barrierattr_destroy failed, status=%d\n",  status);
+      printf("barrier_test: pthread_barrierattr_destroy failed, status=%d\n",
+             status);
     }
 }

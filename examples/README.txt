@@ -26,6 +26,10 @@ examples/ostest
       zero, the test runs forever.
   * CONFIG_EXAMPLES_OSTEST_STACKSIZE
       Used to create the ostest task.  Default is 8192.
+  * CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS
+      Specifies the number of threads to create in the barrier
+      test.  The default is 8 but a smaller number may be needed on
+      systems without sufficient memory to start so many threads.
 
 examples/nsh
 ^^^^^^^^^^^^

@@ -37,16 +37,39 @@
 #define __OSTEST_H
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
+
+#include <nuttx/config.h>
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+/* The task_create task size can be specified in the defconfig file */
+
+#ifdef CONFIG_EXAMPLES_OSTEST_STACKSIZE
+#  define STACKSIZE CONFIG_EXAMPLES_OSTEST_STACKSIZE
+#else
+#  define STACKSIZE 8192
+#endif
+
+/* The number of times to execute the test can be specified in the defconfig
+ * file.
+ */
+
+#ifndef CONFIG_EXAMPLES_OSTEST_LOOPS
+#  define CONFIG_EXAMPLES_OSTEST_LOOPS 1
+#endif
+
+/* This is the number of threads that are created in the barrier test.
+ * A smaller number should be selected on systems without sufficient memory
+ * to start so many threads.
+ */
+
+#ifndef CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS
+#  define CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS 8
+#endif
 
 /****************************************************************************
  * Public Types
