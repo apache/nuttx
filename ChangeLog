@@ -477,5 +477,6 @@
 	* Complete the basic port of the NXP LPC2148 on the mcu123.com board.
 	  The basic port includes successful booting, serial console and succesfully
 	  passing the examples/ostest.
+	* ARM architectures now support drivers/lowconsole.c
 
 

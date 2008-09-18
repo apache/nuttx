@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory NuttX nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -47,7 +47,10 @@
  * Definitions
  ********************************************************************************/
 
-/* This number may need to be tuned for different processor speeds */
+/* This number may need to be tuned for different processor speeds.  Since these
+ * arrays must be large to very correct SCHED_RR behavior, this test may require
+ * too much memory on many targets.
+ */
 
 /* #define CONFIG_NINTEGERS 32768 Takes forever on 60Mhz ARM7 */
 

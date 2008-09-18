@@ -53,11 +53,13 @@
  * Definitions
  ************************************************************************************/
 
-#ifdef CONFIG_HAVE_LOWPUTC
-# define uart_putc(ch) up_lowputc(ch);
-#else
-# define uart_putc(ch) up_putc(ch);
+/* The architecture must provide up_putc for this driver */
+
+#ifndef CONFIG_ARCH_LOWPUTC
+#  error "Architecture must provide up_putc() for this driver"
 #endif
+
+#define uart_putc(ch) up_putc(ch)
 
 /************************************************************************************
  * Private Types

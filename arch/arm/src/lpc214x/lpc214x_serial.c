@@ -1,5 +1,5 @@
 /****************************************************************************
- * lpc214x/lpc214x_serial.c
+ * arch/arm/src/lpc214x/lpc214x_serial.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -55,11 +55,13 @@
 
 #include "lpc214x_uart.h"
 
+#ifdef CONFIG_USE_SERIALDRIVER
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-#define BASE_BAUD 115200
+#define BASE_BAUD 38400
 
 /****************************************************************************
  * Private Types
@@ -458,9 +460,9 @@ static int up_interrupt(int irq, void *context)
        */
 
        status  = up_serialin(priv, LPC214X_UART_IIR_OFFSET);
-      
+
       /* The NO INTERRUPT should be zero */
-      
+
       if (status  !=  LPC214X_IIR_NO_INT)
         {
           /* Handline incoming, receive bytes (with or without timeout) */
@@ -478,20 +480,20 @@ static int up_interrupt(int irq, void *context)
             }
 
           /* Just clear modem status interrupts */
-        
+
           else if (status == LPC214X_IIR_MS_INT)
            {
              /* Read the modem status regisgter (MSR) to clear */
-            
+
              (void)up_serialin(priv, LPC214X_UART_MSR_OFFSET);
            }
 
           /* Just clear any line status interrupts */
-        
+
           else if (status == LPC214X_IIR_RLS_INT)
             {
               /* Read the line status register (LSR) to clear */
-            
+
               (void)up_serialin(priv, LPC214X_UART_LSR_OFFSET);
             }
         }
@@ -698,19 +700,19 @@ static boolean up_txempty(struct uart_dev_s *dev)
 void up_earlyserialinit(void)
 {
   /* Enable UART0 and 1 */
-  
+
   uint32 pinsel = getreg32(LPC214X_PINSEL0);
   pinsel &= ~(LPC214X_UART0_PINMASK|LPC214X_UART1_PINMASK);
   pinsel |= (LPC214X_UART0_PINSEL|LPC214X_UART1_PINSEL);
   putreg32(pinsel, LPC214X_PINSEL0);
 
   /* Disable both UARTS */
-  
+
   up_disableuartint(TTYS0_DEV.priv, NULL);
   up_disableuartint(TTYS1_DEV.priv, NULL);
 
   /* Configuration whichever on is the console */
-  
+
   CONSOLE_DEV.isconsole = TRUE;
   up_setup(&CONSOLE_DEV);
 }
@@ -735,8 +737,7 @@ void up_serialinit(void)
  * Name: up_putc
  *
  * Description:
- *   Provide priority, low-level access to support OS debug
- *   writes
+ *   Provide priority, low-level access to support OS debug  writes
  *
  ****************************************************************************/
 
@@ -764,3 +765,29 @@ int up_putc(int ch)
   return ch;
 }
 
+#else /* CONFIG_USE_SERIALDRIVER */
+
+/****************************************************************************
+ * Name: up_putc
+ *
+ * Description:
+ *   Provide priority, low-level access to support OS debug writes
+ *
+ ****************************************************************************/
+
+int up_putc(int ch)
+{
+  /* Check for LF */
+
+  if (ch == '\n')
+    {
+      /* Add CR */
+
+      up_lowputc('\r');
+    }
+
+  up_lowputc(ch);
+  return ch;
+}
+
+#endif /* CONFIG_USE_SERIALDRIVER */

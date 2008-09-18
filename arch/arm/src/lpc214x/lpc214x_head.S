@@ -477,7 +477,9 @@ __start:
 	/* Perform early serial initialization */
 
 	mov	fp, #0
+#ifdef CONFIG_USE_EARLYSERIALINIT
 	bl	up_earlyserialinit
+#endif
 
 	showprogress 'C'
 	showprogress '\n'

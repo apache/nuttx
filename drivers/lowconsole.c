@@ -50,6 +50,12 @@
  * Definitions
  ****************************************************************************/
 
+/* The architecture must provide up_putc for this driver */
+
+#ifndef CONFIG_ARCH_LOWPUTC
+#  error "Architecture must provide up_putc() for this driver"
+#endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/

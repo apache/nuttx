@@ -1,5 +1,5 @@
 ############################################################################
-# configs/mcu123-lpc214x/defconfig
+# configs/mcu123-lpc214x/ostest/defconfig
 #
 #   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,7 +33,7 @@
 #
 ############################################################################
 #
-# architecture selection
+# Architecture selection
 #
 # CONFIG_ARCH - identifies the arch subdirectory and, hence, the
 #   processor architecture.
@@ -158,13 +158,15 @@ CONFIG_HAVE_LIBM=n
 # CONFIG_JULIAN_TIME - Enables Julian time conversions
 # CONFIG_DEV_CONSOLE - Set if architecture-specific logic
 #   provides /dev/console.  Enables stdout, stderr, stdin.
+# CONFIG_DEV_LOWCONSOLE - Use the simple, low-level serial console
+#   driver (minimul support)
 #
 CONFIG_EXAMPLE=ostest
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_MM_REGIONS=1
 CONFIG_ARCH_LOWPUTC=y
-CONFIG_RR_INTERVAL=200
+CONFIG_RR_INTERVAL=0
 CONFIG_SCHED_INSTRUMENTATION=n
 CONFIG_TASK_NAME_SIZE=0
 CONFIG_START_YEAR=2008
@@ -172,6 +174,7 @@ CONFIG_START_MONTH=9
 CONFIG_START_DAY=17
 CONFIG_JULIAN_TIME=n
 CONFIG_DEV_CONSOLE=y
+CONFIG_DEV_LOWCONSOLE=y
 
 #
 # The following can be used to disable categories of
@@ -264,12 +267,12 @@ CONFIG_NPTHREAD_KEYS=4
 CONFIG_NFILE_DESCRIPTORS=8
 CONFIG_NFILE_STREAMS=8
 CONFIG_NAME_MAX=32
-CONFIG_STDIO_BUFFER_SIZE=512
+CONFIG_STDIO_BUFFER_SIZE=256
 CONFIG_NUNGET_CHARS=2
-CONFIG_PREALLOC_MQ_MSGS=8
+CONFIG_PREALLOC_MQ_MSGS=4
 CONFIG_MQ_MAXMSGSIZE=32
-CONFIG_MAX_WDOGPARMS=4
-CONFIG_PREALLOC_WDOGS=8
+CONFIG_MAX_WDOGPARMS=2
+CONFIG_PREALLOC_WDOGS=4
 CONFIG_PREALLOC_TIMERS=4
 
 #
@@ -325,6 +328,11 @@ CONFIG_NET_DHCP_LIGHT=n
 CONFIG_NET_RESOLV_ENTRIES=4
 
 #
+# Settings for examples/ostest
+CONFIG_EXAMPLES_OSTEST_LOOPS=1
+CONFIG_EXAMPLES_OSTEST_STACKSIZE=512
+
+#
 # Settings for examples/nsh
 CONFIG_EXAMPLES_NSH_CONSOLE=y
 CONFIG_EXAMPLES_NSH_TELNET=n
@@ -354,8 +362,8 @@ CONFIG_EXAMPLES_NSH_NETMASK=(255<<24|255<<16|255<<8|0)
 CONFIG_BOOT_FROM_FLASH=y
 CONFIG_CUSTOM_STACK=n
 CONFIG_STACK_POINTER=
-CONFIG_PROC_STACK_SIZE=1024
+CONFIG_PROC_STACK_SIZE=512
 CONFIG_PTHREAD_STACK_MIN=256
-CONFIG_PTHREAD_STACK_DEFAULT=1024
+CONFIG_PTHREAD_STACK_DEFAULT=512
 CONFIG_HEAP_BASE=
 CONFIG_HEAP_SIZE=
