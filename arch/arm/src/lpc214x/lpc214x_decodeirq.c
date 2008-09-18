@@ -127,9 +127,9 @@ static void lpc214x_decodeirq( uint32 *regs)
    * times through the loop.
    */
 
-  for (nibble = pending & 0xff, irq_base = 0;
-       pending && irq < NR_IRQS;
-       pending >>= 4, nibble = pending & 0xff, irq_base += 4)
+  for (nibble = pending & 0x0f, irq_base = 0;
+       pending && irq_base < NR_IRQS;
+       pending >>= 4, nibble = pending & 0x0f, irq_base += 4)
     {
       if (nibble)
         {
