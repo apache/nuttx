@@ -81,7 +81,7 @@
  * following will be used by the system.
  */
 
-#define LPC214X_SYSTEMER_VEC  0 /* System timer */
+#define LPC214X_SYSTIMER_VEC  0 /* System timer */
 
 /****************************************************************************
  * Public Types

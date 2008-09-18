@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <debug.h>
 #include <nuttx/irq.h>
 
 #include "up_arch.h"
@@ -156,7 +157,7 @@ void up_enable_irq(int irq)
        */
 
       uint32 val = vic_getreg(LPC214X_VIC_INTENABLE_OFFSET);
-      vic_putreg(val | (1 << irq), LPC214X_VIC_INTENCLEAR_OFFSET);
+      vic_putreg(val | (1 << irq), LPC214X_VIC_INTENABLE_OFFSET);
       irqrestore(flags);
     }
 }
