@@ -105,7 +105,7 @@ int sched_setuptaskfiles(FAR _TCB *tcb)
 #endif /* CONFIG_NSOCKET_DESCRIPTORS */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
- /* Duplicate the first three file descriptors */
+ /* Duplicate the file descriptors */
 
   if (rtcb->filelist)
     {
