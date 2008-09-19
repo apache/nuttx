@@ -544,6 +544,7 @@ char *nsh_argument(FAR struct nsh_vtbl_s *vtbl, char **saveptr)
 
       *saveptr = pend;
 
+#ifndef CONFIG_DISABLE_ENVIRON
       /* Check for references to environment variables */
 
       if (pbegin[0] == '$' && !quoted)
@@ -563,7 +564,7 @@ char *nsh_argument(FAR struct nsh_vtbl_s *vtbl, char **saveptr)
             }
 
           /* Not a built-in? Return the value of the environment variable with this name */
-#ifndef CONFIG_DISABLE_ENVIRON
+
           else
             {
               char *value = getenv(pbegin+1);
@@ -576,8 +577,8 @@ char *nsh_argument(FAR struct nsh_vtbl_s *vtbl, char **saveptr)
                   return (char*)"";
                 }
             }
-#endif
         }
+#endif
     }
 
   /* Return the beginning of the token. */

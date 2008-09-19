@@ -184,7 +184,7 @@
 /* Stubs used when working directory is not supported */
 
 #if CONFIG_NFILE_DESCRIPTORS <= 0 || defined(CONFIG_DISABLE_ENVIRON)
-#  define nsh_getfullpath(v,p) (p)
+#  define nsh_getfullpath(v,p) ((char*)(p))
 #  define nsh_freefullpath(p)
 #endif
 
