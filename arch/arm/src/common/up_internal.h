@@ -121,6 +121,7 @@ extern int  up_timerisr(int irq, uint32 *regs);
 extern void up_undefinedinsn(uint32 *regs);
 extern void up_lowputc(char ch);
 extern void up_puts(const char *str);
+extern void up_lowputs(const char *str);
 
 /* Defined in up_vectors.S */
 
