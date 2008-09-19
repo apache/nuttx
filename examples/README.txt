@@ -84,6 +84,13 @@ examples/null
   This is the do nothing application.  It is only used for bringing
   up new NuttX architectures.
 
+examples/hello
+^^^^^^^^^^^^^^
+
+  This is the mandatory, "Hello, World!!" example.  It is little more
+  than examples/null with a single printf statement.  Again useful only
+  for bringing up new NuttX architectures.
+
 examples/uip
 ^^^^^^^^^^^^
 
