@@ -181,14 +181,16 @@ static uart_dev_t g_uart1port =
 
 /* Now, which one with be tty0/console and which tty1? */
 
-#ifdef CONFIG_SERIAL_IRDA_CONSOLE
-# define CONSOLE_DEV     g_uart1port
-# define TTYS0_DEV       g_uart1port
-# define TTYS1_DEV       g_uart0port
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#  define CONSOLE_DEV     g_uart0port
+#  define TTYS0_DEV       g_uart0port
+#  define TTYS1_DEV       g_uart1port
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#  define CONSOLE_DEV     g_uart1port
+#  define TTYS0_DEV       g_uart1port
+#  define TTYS1_DEV       g_uart0port
 #else
-# define CONSOLE_DEV     g_uart0port
-# define TTYS0_DEV       g_uart0port
-# define TTYS1_DEV       g_uart1port
+#  error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
 #endif
 
 /****************************************************************************
@@ -295,11 +297,13 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Clear fifos */
 
-  up_serialout(priv, LPC214X_UART_FCR_OFFSET, (LPC214X_FCR_RX_FIFO_RESET|LPC214X_FCR_TX_FIFO_RESET));
- 
+  up_serialout(priv, LPC214X_UART_FCR_OFFSET,
+               (LPC214X_FCR_RX_FIFO_RESET|LPC214X_FCR_TX_FIFO_RESET));
+
   /* Set trigger */
 
-  up_serialout(priv, LPC214X_UART_FCR_OFFSET, (LPC214X_FCR_FIFO_ENABLE|LPC214X_FCR_FIFO_TRIG14));
+  up_serialout(priv, LPC214X_UART_FCR_OFFSET,
+               (LPC214X_FCR_FIFO_ENABLE|LPC214X_FCR_FIFO_TRIG14));
 
   /* Set up the IER */
 
@@ -334,7 +338,8 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Enter DLAB=1 */
 
-  up_serialout(priv, LPC214X_UART_LCR_OFFSET, (lcr | LPC214X_LCR_DLAB_ENABLE));
+  up_serialout(priv, LPC214X_UART_LCR_OFFSET,
+               (lcr | LPC214X_LCR_DLAB_ENABLE));
 
   /* Set the BAUD divisor */
 
@@ -344,7 +349,13 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Clear DLAB */
 
- up_serialout(priv, LPC214X_UART_LCR_OFFSET, lcr);
+  up_serialout(priv, LPC214X_UART_LCR_OFFSET, lcr);
+
+  /* Configure the FIFOs */
+
+  up_serialout(priv, LPC214X_UART_FCR_OFFSET,
+               (LPC214X_FCR_FIFO_TRIG8|LPC214X_FCR_TX_FIFO_RESET|\
+                LPC214X_FCR_RX_FIFO_RESET|LPC214X_FCR_FIFO_ENABLE));
 #endif
   return OK;
 }
@@ -459,42 +470,70 @@ static int up_interrupt(int irq, void *context)
        * termination conditions
        */
 
-       status  = up_serialin(priv, LPC214X_UART_IIR_OFFSET);
+       status = up_serialin(priv, LPC214X_UART_IIR_OFFSET);
 
-      /* The NO INTERRUPT should be zero */
+      /* The NO INTERRUPT should be zero if there are pending
+       * interrupts
+       */
 
-      if (status  !=  LPC214X_IIR_NO_INT)
+      if ((status & LPC214X_IIR_NO_INT) != 0)
         {
-          /* Handline incoming, receive bytes (with or without timeout) */
+          /* Break out of the loop when there is no longer a
+           * pending interrupt
+           */
 
-          if (status == LPC214X_IIR_RDA_INT || status == LPC214X_IIR_CTI_INT)
+          break;
+        }
+
+      /* Handle the interrupt by its interrupt ID field */
+
+      switch (status & LPC214X_IIR_MASK)
+        {
+          /* Handle incoming, receive bytes (with or without timeout) */
+
+          case LPC214X_IIR_RDA_INT:
+          case LPC214X_IIR_CTI_INT:
             {
               uart_recvchars(dev);
+              break;
             }
 
           /* Handle outgoing, transmit bytes */
 
-          else if (status == LPC214X_IIR_THRE_INT)
+          case LPC214X_IIR_THRE_INT:
             {
               uart_xmitchars(dev);
+              break;
             }
 
-          /* Just clear modem status interrupts */
+          /* Just clear modem status interrupts (UART1 only) */
 
-          else if (status == LPC214X_IIR_MS_INT)
-           {
-             /* Read the modem status regisgter (MSR) to clear */
+          case LPC214X_IIR_MS_INT:
+            {
+              /* Read the modem status register (MSR) to clear */
 
-             (void)up_serialin(priv, LPC214X_UART_MSR_OFFSET);
-           }
+              status = up_serialin(priv, LPC214X_UART_MSR_OFFSET);
+              vdbg("MSR: %02x\n", status);
+              break;
+            }
 
           /* Just clear any line status interrupts */
 
-          else if (status == LPC214X_IIR_RLS_INT)
+          case LPC214X_IIR_RLS_INT:
             {
               /* Read the line status register (LSR) to clear */
 
-              (void)up_serialin(priv, LPC214X_UART_LSR_OFFSET);
+              status = up_serialin(priv, LPC214X_UART_LSR_OFFSET);
+              vdbg("LSR: %02x\n", status);
+              break;
+            }
+
+          /* There should be no other values */
+
+          default:
+            {
+              dbg("Unexpected IIR: %02x\n", status);
+              break;
             }
         }
     }
@@ -711,7 +750,7 @@ void up_earlyserialinit(void)
   up_disableuartint(TTYS0_DEV.priv, NULL);
   up_disableuartint(TTYS1_DEV.priv, NULL);
 
-  /* Configuration whichever on is the console */
+  /* Configuration whichever one is the console */
 
   CONSOLE_DEV.isconsole = TRUE;
   up_setup(&CONSOLE_DEV);
