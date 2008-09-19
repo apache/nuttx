@@ -69,7 +69,7 @@
 /* Interrupt ID Register(IIR) bit definitions */
 
 #define LPC214X_IIR_NO_INT         (1 << 0)    /* No interrupts pending  */
-#define LPC214X_IIR_MS_INT         (0 << 1)    /* MODEM Status */
+#define LPC214X_IIR_MS_INT         (0 << 1)    /* MODEM Status (UART1 only) */
 #define LPC214X_IIR_THRE_INT       (1 << 1)    /* Transmit Holding Register Empty */
 #define LPC214X_IIR_RDA_INT        (2 << 1)    /* Receive Data Available */
 #define LPC214X_IIR_RLS_INT        (3 << 1)    /* Receive Line Status */
