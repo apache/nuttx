@@ -41,14 +41,10 @@ CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
 		  up_exit.c up_idle.c up_initialize.c up_initialstate.c \
 		  up_interruptcontext.c up_prefetchabort.c up_releasepending.c \
 		  up_releasestack.c up_reprioritizertr.c up_syscall.c up_unblocktask.c \
-		  up_undefinedinsn.c up_usestack.c
+		  up_undefinedinsn.c up_usestack.c up_lowputs.c
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CMN_CSRCS	+= up_schedulesigaction.c up_sigdeliver.c
-endif
-
-ifeq ($(CONFIG_DEBUG),y)
-CMN_CSRCS	+= up_puts.c
 endif
 
 CHIP_ASRCS	= lpc214x_lowputc.S
