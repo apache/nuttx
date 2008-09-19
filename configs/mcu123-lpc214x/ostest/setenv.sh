@@ -1,5 +1,5 @@
 #!/bin/bash
-# mcu123-lpc2148/setenv.sh
+# configs/mcu123-lpc2148/ostest/setenv.sh
 #
 #   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

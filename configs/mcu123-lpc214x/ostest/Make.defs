@@ -1,5 +1,5 @@
 ##############################################################################
-# configs/mcu123-lpc214x/Make.defs
+# configs/mcu123-lpc214x/ostest/Make.defs
 #
 #   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
