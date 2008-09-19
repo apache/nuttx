@@ -203,7 +203,7 @@ static uart_dev_t g_uart1port =
 
 static inline ubyte up_serialin(struct up_dev_s *priv, int offset)
 {
-  return getreg16(priv->uartbase + offset);
+  return getreg8(priv->uartbase + offset);
 }
 
 /****************************************************************************
@@ -212,7 +212,7 @@ static inline ubyte up_serialin(struct up_dev_s *priv, int offset)
 
 static inline void up_serialout(struct up_dev_s *priv, int offset, ubyte value)
 {
-  putreg16(value, priv->uartbase + offset);
+  putreg8(value, priv->uartbase + offset);
 }
 
 /****************************************************************************
@@ -464,7 +464,7 @@ static int up_interrupt(int irq, void *context)
    * until we have been looping for a long time.
    */
 
-  for( passes = 0; passes < 256; passes++)
+  for (passes = 0; passes < 256; passes++)
     {
       /* Get the current UART status and check for loop
        * termination conditions
@@ -613,8 +613,8 @@ static int up_receive(struct uart_dev_s *dev, uint32 *status)
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   ubyte rbr;
 
+  *status = up_serialin(priv, LPC214X_UART_LSR_OFFSET);
   rbr     = up_serialin(priv, LPC214X_UART_RBR_OFFSET);
-  *status = up_serialin(priv, LPC214X_UART_RBR_OFFSET);
   return rbr;
 }
 
