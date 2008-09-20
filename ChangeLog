@@ -462,7 +462,7 @@
 	* Fixed another FAT bug in implementation of FAT lseek; this prohibit correct
 	  random access to large files.
 
-0.3.15 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.15 2008-09-20 Gregory Nutt <spudmonkey@racsa.co.cr>
 	* Added support for ROMFS filesystem.
 	* Added a simple test the ROMFS filesystem (examples/romfs)
 	* NSH: Use ROMFS to provide an option for a start-up script at /etc/init.d/rcS
@@ -474,9 +474,11 @@
 	* Add mmap() API with restricted capability (only for XIP support)
 	* Extend ROMFS test at /examples/romfs to verify mmap() and XIP support.
 	* Add support for Intel Hex format output using objcopy
-	* Complete the basic port of the NXP LPC2148 on the mcu123.com board.
-	  The basic port includes successful booting, serial console and succesfully
-	  passing the examples/ostest.
+	* Completed the basic port of the NXP LPC2148 on the mcu123.com board.
+	  The basic port includes successful booting, timer interrupts, serial console,
+	  succesfully passing the examples/ostest, and a NuttShell (NSH) configuration.
 	* ARM architectures now support drivers/lowconsole.c
+
+0.3.16 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 
