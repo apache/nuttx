@@ -61,8 +61,6 @@
  * Definitions
  ****************************************************************************/
 
-#define BASE_BAUD 38400
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -356,6 +354,15 @@ static int up_setup(struct uart_dev_s *dev)
   up_serialout(priv, LPC214X_UART_FCR_OFFSET,
                (LPC214X_FCR_FIFO_TRIG8|LPC214X_FCR_TX_FIFO_RESET|\
                 LPC214X_FCR_RX_FIFO_RESET|LPC214X_FCR_FIFO_ENABLE));
+
+  /* The NuttX serial driver waits for the first THRE interrrupt before
+   * sending serial data... However, it appears that the lpc214x hardware
+   * does not generate that interrupt until a transition from not-empty
+   * to empty.  So, the current kludge here is to send one NULL at
+   * startup to kick things off.
+   */
+
+  up_serialout(priv, LPC214X_UART_THR_OFFSET, '\0');
 #endif
   return OK;
 }
