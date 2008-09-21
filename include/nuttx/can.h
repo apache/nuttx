@@ -254,7 +254,7 @@ extern "C" {
  * Name: can_register
  *
  * Description:
- *   Register serial console and serial ports.
+ *   Register a CAN driver.
  *
  ************************************************************************************/
 
