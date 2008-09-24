@@ -94,7 +94,7 @@ void uart_xmitchars(FAR uart_dev_t *dev)
       if (dev->xmitwaiting)
         {
           dev->xmitwaiting = FALSE;
-          uart_givesem(&dev->xmitsem);
+          (void)sem_post(&dev->xmitsem);
         }
     }
 
@@ -142,7 +142,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
       if (dev->recvwaiting)
         {
           dev->recvwaiting = FALSE;
-          uart_givesem(&dev->recvsem);
+          (void)sem_post(&dev->recvsem);
         }
     }
 }

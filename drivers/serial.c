@@ -113,10 +113,7 @@ static void uart_takesem(FAR sem_t *sem)
  * Name: uart_givesem
  ************************************************************************************/
 
-static inline void uart_givesem(FAR sem_t *sem)
-{
-  (void)sem_post(sem);
-}
+#define uart_givesem(sem) (void)sem_post(sem)
 
 /************************************************************************************
  * Name: uart_putxmitchar
