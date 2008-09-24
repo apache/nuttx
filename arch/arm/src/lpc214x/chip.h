@@ -73,6 +73,7 @@
 #define LPC214X_SPI1_BASE               0xe0030000  /* Serial Peripheral Interface 1 (SPI1) base */
 #define LPC214X_AD0_BASE                0xe0034000  /* Analog to Digital Converter 0 base address*/
 #define LPC214X_AD1_BASE                0xe0060000  /* Analog to Digital Converter 1 base address */
+#define LPC214X_USB_BASE                0xe0090000  /* USB base address */
 
 #define LPC214X_SCB_BASE                0xe01fc000  /* System Control Block (SBC) base address */
 #define   LPC214X_MAM_BASE              0xe01fc000  /* Memory Accelerator Module (MAM) base address */
