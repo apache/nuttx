@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/dm320/chip.h
+ * dm320/dm320_uart.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,27 +33,31 @@
  *
  ************************************************************************************/
 
-#ifndef __DM320_CHIP_H
-#define __DM320_CHIP_H
+#ifndef __ARCH_ARM_SRC_DM320_DM320_AHB_H
+#define __ARCH_ARM_SRC_DM320_DM320_AHB_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
-#include "dm320_memorymap.h"
-#include "dm320_ahb.h"
-#include "dm320_uart.h"
-#include "dm320_timer.h"
-#include "dm320_intc.h"
-#include "dm320_gio.h"
-#include "dm320_usb.h"
+#ifndef __ASSEMBLY__
+# include <sys/types.h>
+#endif
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
+/* AHB Bus Controller (AHBBUSC) Registers *******************************************/
+
+#define DM320_AHB_SDRAMSA    (DM320_AHB_VADDR+0x0f00) /* SDRAM start address */
+#define DM320_AHB_SDRAMEA    (DM320_AHB_VADDR+0x0f04) /* SDRAM end address */
+#define DM320_AHB_BUSCONTROL (DM320_AHB_VADDR+0x0f08) /* Bus endianess control */
+#define DM320_AHB_RSV1       (DM320_AHB_VADDR+0x0f0c) /* Reserved */
+#define DM320_AHB_USBCTL     (DM320_AHB_VADDR+0x0f10) /* USB control register (ES1.1) */
+
 /************************************************************************************
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __DM320_CHIP_H */
+#endif  /* __ARCH_ARM_SRC_DM320_DM320_AHB_H */
