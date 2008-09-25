@@ -1,7 +1,7 @@
 /************************************************************************
  * queue.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -48,9 +48,16 @@
 
 #define sq_init(q) do { (q)->head = NULL; (q)->tail = NULL; } while (0)
 #define dq_init(q) do { (q)->head = NULL; (q)->tail = NULL; } while (0)
+
 #define sq_next(p) ((p)->flink)
 #define dq_next(p) ((p)->flink)
 #define dq_prev(p) ((p)->prev)
+
+#define sq_empty(q) ((q)->head == NULL)
+#define dq_empty(q) ((q)->head == NULL)
+
+#define sq_peek(q)  ((q)->head)
+#define dq_peek(q)  ((q)->head)
 
 /************************************************************************
  * Global Type Declarations
