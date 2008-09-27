@@ -47,7 +47,12 @@
  * Definitions
  *******************************************************************************/
 
-/* USB Register definitions */
+/* USB RAM  ********************************************************************/
+
+#define LPC214X_USBDEV_RAMBASE       (0x7fd00000)
+#define LPC214X_USBDEV_RAMSIZE       (8*1024)
+
+/* USB register address definitions ********************************************/
 
 #define LPC214X_USBDEV_PLLCON        (0xe01fc0a0)
 #define LPC214X_USBDEV_PLLCFG        (0xe01fc0a4)
@@ -60,6 +65,13 @@
 #define LPC214X_USBDEV_DEVINTEN      (0xe0090004)
 #define LPC214X_USBDEV_DEVINTCLR     (0xe0090008)
 #define LPC214X_USBDEV_DEVINTSET     (0xe009000c)
+#define LPC214X_USBDEV_CMDCODE       (0xe0090010)
+#define LPC214X_USBDEV_CMDDATA       (0xe0090014)
+#define LPC214X_USBDEV_RXDATA        (0xe0090018)
+#define LPC214X_USBDEV_TXDATA        (0xe009001c)
+#define LPC214X_USBDEV_RXPLEN        (0xe0090020)
+#define LPC214X_USBDEV_TXPLEN        (0xe0090024)
+#define LPC214X_USBDEV_CTRL          (0xe0090028)
 #define LPC214X_USBDEV_DEVINTPRI     (0xe009002c)
 #define LPC214X_USBDEV_EPINTST       (0xe0090030)
 #define LPC214X_USBDEV_EPINTEN       (0xe0090034)
@@ -69,22 +81,17 @@
 #define LPC214X_USBDEV_REEP          (0xe0090044)
 #define LPC214X_USBDEV_EPIND         (0xe0090048)
 #define LPC214X_USBDEV_MAXPSIZE      (0xe009004c)
-#define LPC214X_USBDEV_RXDATA        (0xe0090018)
-#define LPC214X_USBDEV_RXPLEN        (0xe0090020)
-#define LPC214X_USBDEV_TXDATA        (0xe009001c)
-#define LPC214X_USBDEV_TXPLEN        (0xe0090024)
-#define LPC214X_USBDEV_CTRL          (0xe0090028)
-#define LPC214X_USBDEV_CMDCODE       (0xe0090010)
-#define LPC214X_USBDEV_CMDDATA       (0xe0090014)
 #define LPC214X_USBDEV_DMARST        (0xe0090050)
 #define LPC214X_USBDEV_DMARCLR       (0xe0090054)
 #define LPC214X_USBDEV_DMARSET       (0xe0090058)
+
 #define LPC214X_USBDEV_UDCAH         (0xe0090080)
-#define LPC214X_USBDEV_EpDMASt       (0xe0090084)
+#define LPC214X_USBDEV_EPDMAST       (0xe0090084)
 #define LPC214X_USBDEV_EPDMAEN       (0xe0090088)
 #define LPC214X_USBDEV_EPDMADIS      (0xe009008c)
 #define LPC214X_USBDEV_DMAINTST      (0xe0090090)
 #define LPC214X_USBDEV_DMAINTEN      (0xe0090094)
+
 #define LPC214X_USBDEV_EOTINTST      (0xe00900a0)
 #define LPC214X_USBDEV_EOTINTCLR     (0xe00900a4)
 #define LPC214X_USBDEV_EOTINTSET     (0xe00900a8)
@@ -94,6 +101,8 @@
 #define LPC214X_USBDEV_SYSERRINTST   (0xe00900b8)
 #define LPC214X_USBDEV_SYSERRINTCLR  (0xe00900bc)
 #define LPC214X_USBDEV_SYSERRINTSET  (0xe00900c0)
+
+/* USB register bit definitions ************************************************/
 
 /* INTST bit definitions */
 
@@ -157,7 +166,27 @@
 #define USBDEV_DMAINST_SE            (0x00000004)
 #define USBDEV_DMAINST_MASK          (0x00000007)
 
-/* Endpoints */
+/* Device Status Bits */
+
+#define USBDEV_DEVSTATUS_CONNECT     (0x00000001) /* Bit 0: Connected */
+#define USBDEV_DEVSTATUS_CONNCHG     (0x00000002) /* Bit 1: Connect change */
+#define USBDEV_DEVSTATUS_SUSPEND     (0x00000004) /* Bit 2: Suspend */
+#define USBDEV_DEVSTATUS_SUSPCHG     (0x00000008) /* Bit 3: Suspend change */
+#define USBDEV_DEVSTATUS_RESET       (0x00000002) /* Bit 4: Bus reset bit */
+
+#define USBDEV_EPSTALL               (0x00000001)
+#define USBDEV_EPSTALLSTATUS         (0x00000002)
+#define USBDEV_EPSETUPPACKET         (0x00000004)
+#define USBDEV_EPPOSSTATUS           (0x00000010)
+#define USBDEV_EPCONDSTALL           (0x00000080)
+
+/* USB Control register bit definitions */
+
+#define LPC214X_USBCTRL_RDEN         (0x00000001)
+#define LPC214X_USBCTRL_WREN         (0x00000002)
+#define LPC214X_USBCTRL_EPMASK       (0x0000003c)
+
+/* Endpoints *******************************************************************/
 
 #define LPC214X_EP0_OUT                0
 #define LPC214X_EP0_IN                 1
@@ -195,11 +224,7 @@
 #define LPC214X_EP15_IN               31
 #define LPC214X_NUMEPS                32
 
-/* Mapping to more traditional endpoint numbers */
-
-#define LPC214X_EP_LOG2PHYOUT(ep)    ((ep)&0x0f)<<1))
-#define LPC214X_EP_LOG2PHYIN(ep)     (LPC214X_EP_OUT(ep) + 1)
-#define LPC214X_EP_LOG2PHY(ep)       ((((ep)&0x0f)<<1)|(((ep)&0x80)>>7))
+/* Commands ********************************************************************/
 
 /* USB Command Code Register -- Command phase values */
 
@@ -227,26 +252,64 @@
 #define CMD_USB_EP_CLRBUFFER         (0x00f2)
 #define CMD_USB_EP_VALIDATEBUFFER    (0x00fa)
 
-/* Device Status Bits */
+/* Command Data ****************************************************************/
 
-#define USBDEV_DEVSTATUS_CONNECT     (0x00000001) /* Bit 0: Connected */
-#define USBDEV_DEVSTATUS_CONNCHG     (0x00000002) /* Bit 1: Connect change */
-#define USBDEV_DEVSTATUS_SUSPEND     (0x00000004) /* Bit 2: Suspend */
-#define USBDEV_DEVSTATUS_SUSPCHG     (0x00000008) /* Bit 3: Suspend change */
-#define USBDEV_DEVSTATUS_RESET       (0x00000002) /* Bit 4: Bus reset bit */
+/* DEV SETADDRESS command bits */
 
-#define USBDEV_EPSTALL               (0x00000001)
-#define USBDEV_EPSTALLSTATUS         (0x00000002)
-#define USBDEV_EPSETUPPACKET         (0x00000004)
-#define USBDEV_EPPOSSTATUS           (0x00000010)
-#define USBDEV_EPCONDSTALL           (0x00000080)
+#define CMD_USB_SETADDRESS_DEVEN     (0x80)
 
-/* USB Control register bit definitions */
+/* Command Responses ***********************************************************/
 
-#define LPC214X_USBCTRL_RDEN         (0x00000001)
-#define LPC214X_USBCTRL_WREN         (0x00000002)
+/* EP CLRBUFFER response */
 
-#define USBDEV_PACKETOVERWRITTEN      (0x00000001)
+#define CMD_USB_CLRBUFFER_PO         (0x00000001)
+
+/* DMA *************************************************************************/
+
+/* The DMA descriptor */
+
+#define USB_DMADESC_NEXTDDPTR        0 /* Offset 0: Next USB descriptor in RAM */
+#define USB_DMADESC_CONFIG           1 /* Offset 1: DMA configuration info. */
+#define USB_DMADESC_STARTADDR        2 /* Offset 2: DMA start address */
+#define USB_DMADESC_STATUS           3 /* Offset 3: DMA status info (read only) */
+#define USB_DMADESC_ISOCSIZEADDR     4 /* Offset 4: Isoc. packet size address */
+
+/* Bit settings for offset 1 */
+
+#define USB_DMADESC_MODENORMAL       (0x00000000) /* Bits 0-1=00: Mode normal */
+#define USB_DMADESC_MODEATLE         (0x00000001) /* Bits 0-1=01: ATLE normal */
+#define USB_DMADESC_NEXTDDVALID      (0x00000004) /* Bit 2=1: next descriptor valid */
+#define USB_DMADESC_ISCOEP           (0x00000010) /* Bit 4=1: isoc endpoint */
+#define USB_DMADESC_PKTSIZEMASK      (0x0000ffe0) /* Bits 5-15: packet size */
+#define USB_DMADESC_PKTSIZESHIFT     (5)          /* Bits 5-15: packet size */
+#define USB_DMADESC_BUFLENMASK       (0xffff0000) /* Bits 16-31: buffer length */
+#define USB_DMADESC_BULENSHIFT       (16)         /* Bits 16-31: buffer length */
+
+/* Bit settings for offset 3 (all must be initialized to zero) */
+
+#define USB_DMADESC_STATUSMASK       (0x0000001e) /* Bits 1-4: DMA status */
+#define USB_DMADESC_NOTSERVICED      (0x00000000)
+#define USB_DMADESC_BEINGSERVICED    (0x00000002)
+#define USB_DMADESC_NORMALCOMPLETION (0x00000004)
+#define USB_DMADESC_DATAUNDERRUN     (0x00000006)
+#define USB_DMADESC_DATAOVERRUN      (0x00000010)
+#define USB_DMADESC_SYSTEMERROR      (0x00000012)
+#define USB_DMADESC_PKTVALID         (0x00000020) /* Bit 5=1: Packet valid */
+#define USB_DMADESC_LSBEXTRACTED     (0x00000040) /* Bit 6=1: LS byte extracted */
+#define USB_DMADESC_MSBEXTRACTED     (0x00000080) /* Bit 7=1: MS byte extracted */
+#define USB_DMADESC_MSGLENPOSMASK    (0x00003f00) /* Bits 8-13: Message length position */
+#define USB_DMADESC_MSGLENPOSSHIFT   (8)          /* Bits 8-13: Message length position */
+#define USB_DMADESC_DMACOUNTMASK     (0xffff0000) /* Bits 16-31: DMA count */
+#define USB_DMADESC_DMACOUNTSHIFT    (16)         /* Bits 16-31:  DMA count */
+
+/* DMA packet size format */
+
+#define USB_DMAPKTSIZE_PKTLENMASK    (0x0000ffff) /* Bits 0-15: Packet length */
+#define USB_DMAPKTSIZE_PKTLENSHIFT   (0)          /* Bits 0-15: Packet length */
+#define USB_DMAPKTSIZE_PKTVALID      (0x00010000) /* Bit 16=1: Packet valid */
+#define USB_DMAPKTSIZE_FRAMENOMASK   (0xfffe0000) /* Bit 17-31: Frame number */
+#define USB_DMAPKTSIZE_FRAMENOSHIFT  (17)         /* Bit 17-31: Frame number */
+
 
 /*******************************************************************************
  * Private Types
