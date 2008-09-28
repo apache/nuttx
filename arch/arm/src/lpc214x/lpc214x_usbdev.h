@@ -47,6 +47,15 @@
  * Definitions
  *******************************************************************************/
 
+/* PINSEL1 bit definitions for UART0/1:
+ *
+ * P0.23 = 01 to enable VBus sense (bits 14-15)
+ * P0.31 = 10 to enable CONNECT (bits 30-31)
+ */
+
+#define LPC214X_USBDEV_PINSEL        (0x80004000)  /* PINSEL1 value for USB */
+#define LPC214X_USBDEV_PINMASK       (0xc000c000)  /* PINSEL1 mask for USB */
+
 /* USB RAM  ********************************************************************/
 
 #define LPC214X_USBDEV_RAMBASE       (0x7fd00000)
@@ -259,6 +268,16 @@
 #define CMD_USB_SETADDRESS_DEVEN     (0x80)
 
 /* Command Responses ***********************************************************/
+
+/* EP Select response */
+
+#define CMD_USB_EPSELECT_FE          (0x01) /* Bit 0=1: IN empty or OUT full */
+#define CMD_USB_EPSELECT_ST          (0x02) /* Bit 1=1: Endpoint is stalled */
+#define CMD_USB_EPSELECT_STP         (0x04) /* Bit 2=1: Last packet was setup */
+#define CMD_USB_EPSELECT_PO          (0x05) /* Bit 3=1: Previous packet was overwritten */
+#define CMD_USB_EPSELECT_EPN         (0x10) /* Bit 4=1: NAK sent */
+#define CMD_USB_EPSELECT_B1FULL      (0x20) /* Bit 5=1: Buffer 1 full */
+#define CMD_USB_EPSELECT_B2FULL      (0x40) /* Bit 6=1: Buffer 2 full */
 
 /* EP CLRBUFFER response */
 
