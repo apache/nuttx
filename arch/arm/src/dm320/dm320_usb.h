@@ -223,6 +223,7 @@
 
 /* TXFIFO2 register bit settings **************************************************/
 
+#define USB_TXFIF02_SZMASK     (0xe0)
 #define USB_TXFIFO2_SZ_8       (0x00)
 #define USB_TXFIFO2_SZ_16      (0x20)
 #define USB_TXFIFO2_SZ_32      (0x40)

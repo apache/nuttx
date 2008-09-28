@@ -123,6 +123,16 @@
 # define nvdbg(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_USB
+# define udbg(format, arg...)   dbg(format, ##arg)
+# define ulldbg(format, arg...) lldbg(format, ##arg)
+# define uvdbg(format, arg...)  vdbg(format, ##arg)
+#else
+# define udbg(x...)
+# define ulldbg(x...)
+# define uvdbg(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_FS
 # define fdbg(format, arg...)   dbg(format, ##arg)
 # define flldbg(format, arg...) lldbg(format, ##arg)
@@ -190,6 +200,16 @@
 # define ndbg   (void)
 # define nlldbg (void)
 # define nvdbg  (void)
+#endif
+
+#ifdef CONFIG_DEBUG_USB
+# define udbg   dbg
+# define ulldbg lldbg
+# define uvdbg  vdbg
+#else
+# define udbg   (void)
+# define ulldbg (void)
+# define uvdbg  (void)
 #endif
 
 #ifdef CONFIG_DEBUG_FS
