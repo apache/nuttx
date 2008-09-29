@@ -823,6 +823,8 @@ static void lpc214x_cancelrequests(struct lpc214x_ep_s *privep)
 {
   while (!sq_empty(&privep->reqlist))
     {
+      usbtrace(TRACE_COMPLETE(privep->epphy),
+               ((struct lpc214x_req_s *)sq_peek(&privep->reqlist))->req.xfrd);
       lpc214x_reqcomplete(privep, -ESHUTDOWN);
     }
 }
@@ -1103,6 +1105,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
           result = -EPROTO;
         }
 
+      usbtrace(TRACE_COMPLETE(ep0->epphy), privreq->req.xfrd);
       lpc214x_reqcomplete(ep0, result);
     }
 
@@ -2011,7 +2014,6 @@ static int lpc214x_epdisable(FAR struct usbdev_ep_s *ep)
   reg &= ~mask;
   putreg32(reg, LPC214X_USBDEV_EPINTEN);
 
-  uvdbg("Disabled ep\n");
   irqrestore(flags);
   return OK;
 }
@@ -2179,6 +2181,7 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
         {
           /* Nothing to transfer -- exit success, zero-bytes transferred */
 
+          usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
           lpc214x_reqcomplete(privep, OK);
           goto success_notransfer;
         }
@@ -2209,6 +2212,7 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 
   if (ret >= 0)
     {
+      usbtrace(TRACE_REQQUEUED(privep->epphy), privreq->req.len);
       sq_addlast(&privreq->sqe, &privep->reqlist);
     }
 
@@ -2528,7 +2532,7 @@ void up_usbinitialize(void)
 
   usbtrace(TRACE_DEVINIT, 0);
 
-  /* Initialize the device state structure softwate EP priority */
+  /* Initialize the device state structure */
 
   memset(priv, 0, sizeof(struct lpc214x_usbdev_s));
   priv->usbdev.ops = &g_devops;
@@ -2632,12 +2636,13 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
   int ret;
 
   usbtrace(TRACE_DEVREGISTER, 0);
+
 #ifdef CONFIG_DEBUG
   if (!driver || !driver->ops.bind || !driver->ops.unbind ||
       !driver->ops.disconnect || !driver->ops.setup)
     {
-     usbtrace(TRACE_ERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
-     return -EINVAL;
+      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
+      return -EINVAL;
     }
 
   if (g_usbdev.driver)
