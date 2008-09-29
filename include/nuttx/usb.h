@@ -200,7 +200,7 @@ struct usb_ctrlreq_s
 
 /* Generic descriptor */
 
-struct usb_devdesc_s
+struct usb_desc_s
 {
   ubyte len;               /* Descriptor length */
   ubyte type;              /* Descriptor type */

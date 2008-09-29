@@ -132,30 +132,31 @@
 
 /* Invoked when the driver is bound to a USB device driver */
 
-#define CLASS_BIND(dev) (dev)->ops->bind(dev)
+#define CLASS_BIND(drvr,dev) (drvr)->ops.bind(dev)
 
 /* Invoked when the driver is unbound from a USB device driver */
 
-#define CLASS_UNBIND(dev) (dev)->ops->unbind(dev)
+#define CLASS_UNBIND(drvr,dev) (drvr)->ops.unbind(dev)
 
 /* Invoked after all transfers have been stopped, when the host is disconnected. */
 
-#define CLASS_DISCONNECT(dev) (dev)->ops->disconnect(dev)
+#define CLASS_DISCONNECT(drvr.dev) (drvr)->ops->disconnect(dev)
 
 /* Invoked for ep0 control requests */
 
-#define CLASS_SETUP(dev,req) (dev)->ops->setup(dev, req)
+#define CLASS_SETUP(drvr,dev,req) (drvr)->ops.setup(dev, req)
 
 /* Invoked on USB suspend. */
 
-#define CLASS_SUSPEND(dev) (dev)->ops->suspend ? (dev)->ops->suspend(dev) : (void)
+#define CLASS_SUSPEND(drvr,dev) (drvr)->ops.suspend ? (drvr)->ops->suspend(dev) : (void)
 
 /* Invoked on USB resume */
 
-#define CLASS_RESUME(dev) (dev)->ops->resume ? (dev)->ops->resume(dev) : (void)
+#define CLASS_RESUME(drvr,dev) (drvr)->ops.resume ? (drvr)->ops->resume(dev) : (void)
 
 /* Device speeds */
 
+#define USB_SPEED_UNKNOWN     0 /* Transfer rate not yet set */
 #define USB_SPEED_LOW         1 /* USB 1.1 */
 #define USB_SPEED_FULL        2 /* USB 1.1 */
 #define USB_SPEED_HIGH        3 /* USB 2.0 */
@@ -173,8 +174,9 @@ struct usbdev_ep_s;
 struct usbdev_req_s
 {
   char   *buf;     /* Call: Buffer used for data; Return: Unchanged */
-  uint16  len;     /* Call: Length of data in buf; Return: bytes transferred */
-  sint16  result;  /* Call: zero; Return: result of transfer
+  uint16  len;     /* Call: Total length of data in buf; Return: Unchanged */
+  uint16  xfrd;    /* Call: zero; Return: Bytes transferred so far */
+  sint16  result;  /* Call: zero; Return: Result of transfer (O or -errno) */
 
   /* Callback when the transfer completes */
 
