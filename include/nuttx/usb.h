@@ -52,12 +52,12 @@
 #define MSBYTE(u16)                             ((u16) >> 8)     /* Get MS byte from uint16 */
 #define LSBYTE(u16)                             ((u16) & 0xff)   /* Get LS byte from uint16 */
 
-#define GETUINT16(p)                            (((uint16)p[1] << 8)|(uint16)p[1]);
+#define GETUINT16(p)                            (((uint16)p[1] << 8)|(uint16)p[1])
 
 /* USB directions (in endpoint addresses) */
 
-#define USB_DIR_OUT                              0x00 /* To the device */
-#define USB_DIR_IN                               0x80 /* To the host */
+#define USB_DIR_OUT                             (0x00) /* To the device */
+#define USB_DIR_IN                              (0x80) /* To the host */
 
 #define USB_EPNO(addr)                          ((addr)&0x7f)
 #define USB_EPOUT(addr)                         ((addr)|USB_DIR_OUT)
@@ -65,39 +65,44 @@
 
 /* Standard requests */
 
-#define USB_REQ_GETSTATUS                        0x00
-#define USB_REQ_CLEARFEATURE                     0x01
-#define USB_REQ_SETFEATURE                       0x03
-#define USB_REQ_SETADDRESS                       0x05
-#define USB_REQ_GETDESCRIPTOR                    0x06
-#define USB_REQ_SETDESCRIPTOR                    0x07
-#define USB_REQ_GETCONFIGURATION                 0x08
-#define USB_REQ_SETCONFIGURATION                 0x09
-#define USB_REQ_GETINTERFACE                     0x0a
-#define USB_REQ_SETINTERFACE                     0x0b
-#define USB_REQ_SYNCHFRAME                       0x0c
+#define USB_REQ_GETSTATUS                       (0x00)
+#define USB_REQ_CLEARFEATURE                    (0x01)
+#define USB_REQ_SETFEATURE                      (0x03)
+#define USB_REQ_SETADDRESS                      (0x05)
+#define USB_REQ_GETDESCRIPTOR                   (0x06)
+#define USB_REQ_SETDESCRIPTOR                   (0x07)
+#define USB_REQ_GETCONFIGURATION                (0x08)
+#define USB_REQ_SETCONFIGURATION                (0x09)
+#define USB_REQ_GETINTERFACE                    (0x0a)
+#define USB_REQ_SETINTERFACE                    (0x0b)
+#define USB_REQ_SYNCHFRAME                      (0x0c)
 
-#define USB_REQ_SETENCRYPTION                    0x0d /* Wireless USB */
-#define USB_REQ_GETENCRYPTION                    0x0e
-#define USB_REQ_SETHANDSHAKE                     0x0f
-#define USB_REQ_GETHANDSHAKE                     0x10
-#define USB_REQ_SETCONNECTION                    0x11
-#define USB_REQ_SETSECURITYDATA                  0x12
-#define USB_REQ_GETSECURITYDATA                  0x13
-#define USB_REQ_SETWUSBDATA                      0x14
-#define USB_REQ_LOOPBACKDATAWRITE                0x15
-#define USB_REQ_LOOPBACKDATAREAD                 0x16
-#define USB_REQ_SETINTERFACEDS                   0x17
+#define USB_REQ_SETENCRYPTION                   (0x0d) /* Wireless USB */
+#define USB_REQ_GETENCRYPTION                   (0x0e)
+#define USB_REQ_SETHANDSHAKE                    (0x0f)
+#define USB_REQ_GETHANDSHAKE                    (0x10)
+#define USB_REQ_SETCONNECTION                   (0x11)
+#define USB_REQ_SETSECURITYDATA                 (0x12)
+#define USB_REQ_GETSECURITYDATA                 (0x13)
+#define USB_REQ_SETWUSBDATA                     (0x14)
+#define USB_REQ_LOOPBACKDATAWRITE               (0x15)
+#define USB_REQ_LOOPBACKDATAREAD                (0x16)
+#define USB_REQ_SETINTERFACEDS                  (0x17)
 
 /* Request type encoding */
 
-#define USB_REQ_RECIPIENT_MASK                   0x1f
-#define USB_REQ_RECIPIENT_DEVICE                 0x00
-#define USB_REQ_RECIPIENT_INTERFACE              0x01
-#define USB_REQ_RECIPIENT_ENDPOINT               0x02
-#define USB_REQ_RECIPIENT_OTHER                  0x03
-#define USB_REQ_TYPE_MASK                        0x60
-#define USB_REQ_DIR_IN                           0x80
+#define USB_REQ_TYPE_MASK                       (0x60)
+#define USB_REQ_TYPE_STANDARD                   (0x00)
+#define USB_REQ_TYPE_CLASS                      (0x20)
+#define USB_REQ_TYPE_VENDOR                     (0x40)
+
+#define USB_REQ_RECIPIENT_MASK                  (0x1f)
+#define USB_REQ_RECIPIENT_DEVICE                (0x00)
+#define USB_REQ_RECIPIENT_INTERFACE             (0x01)
+#define USB_REQ_RECIPIENT_ENDPOINT              (0x02)
+#define USB_REQ_RECIPIENT_OTHER                 (0x03)
+#define USB_REQ_TYPE_MASK                       (0x60)
+#define USB_REQ_DIR_IN                          (0x80)
 
 /* USB feature values */
 
@@ -120,68 +125,68 @@
 
 /* Descriptor types */
 
-#define USB_DESC_TYPE_DEVICE                     0x01
-#define USB_DESC_TYPE_CONFIG                     0x02
-#define USB_DESC_TYPE_STRING                     0x03
-#define USB_DESC_TYPE_INTERFACE                  0x04
-#define USB_DESC_TYPE_ENDPOINT                   0x05
-#define USB_DESC_TYPE_DEVICEQUALIFIER            0x06
-#define USB_DESC_TYPE_OTHERSPEEDCONFIG           0x07
-#define USB_DESC_TYPE_INTERFACEPOWER             0x08
-#define USB_DESC_TYPE_OTG                        0x09
-#define USB_DESC_TYPE_DEBUG                      0x0a
-#define USB_DESC_TYPE_INTERFACEASSOCIATION       0x0b
-#define USB_DESC_TYPE_SECURITY                   0x0c
-#define USB_DESC_TYPE_KEY                        0x0d
-#define USB_DESC_TYPE_ENCRYPTION_TYPE            0x0e
-#define USB_DESC_TYPE_BOS                        0x0f
-#define USB_DESC_TYPE_DEVICECAPABILITY           0x10
-#define USB_DESC_TYPE_WIRELESS_ENDPOINTCOMP      0x11
-#define USB_DESC_TYPE_CSDEVICE                   0x21
-#define USB_DESC_TYPE_CSCONFIG                   0x22
-#define USB_DESC_TYPE_CSSTRING                   0x23
-#define USB_DESC_TYPE_CSINTERFACE                0x24
-#define USB_DESC_TYPE_CSENDPOINT                 0x25
+#define USB_DESC_TYPE_DEVICE                    (0x01)
+#define USB_DESC_TYPE_CONFIG                    (0x02)
+#define USB_DESC_TYPE_STRING                    (0x03)
+#define USB_DESC_TYPE_INTERFACE                 (0x04)
+#define USB_DESC_TYPE_ENDPOINT                  (0x05)
+#define USB_DESC_TYPE_DEVICEQUALIFIER           (0x06)
+#define USB_DESC_TYPE_OTHERSPEEDCONFIG          (0x07)
+#define USB_DESC_TYPE_INTERFACEPOWER            (0x08)
+#define USB_DESC_TYPE_OTG                       (0x09)
+#define USB_DESC_TYPE_DEBUG                     (0x0a)
+#define USB_DESC_TYPE_INTERFACEASSOCIATION      (0x0b)
+#define USB_DESC_TYPE_SECURITY                  (0x0c)
+#define USB_DESC_TYPE_KEY                       (0x0d)
+#define USB_DESC_TYPE_ENCRYPTION_TYPE           (0x0e)
+#define USB_DESC_TYPE_BOS                       (0x0f)
+#define USB_DESC_TYPE_DEVICECAPABILITY          (0x10)
+#define USB_DESC_TYPE_WIRELESS_ENDPOINTCOMP     (0x11)
+#define USB_DESC_TYPE_CSDEVICE                  (0x21)
+#define USB_DESC_TYPE_CSCONFIG                  (0x22)
+#define USB_DESC_TYPE_CSSTRING                  (0x23)
+#define USB_DESC_TYPE_CSINTERFACE               (0x24)
+#define USB_DESC_TYPE_CSENDPOINT                (0x25)
 
 /* Device and interface descriptor class codes */
 
-#define USB_CLASS_PER_INTERFACE                  0x00
-#define USB_CLASS_AUDIO                          0x01
-#define USB_CLASS_COMM                           0x02
-#define USB_CLASS_HID                            0x03
-#define USB_CLASS_PHYSICAL                       0x05
-#define USB_CLASS_STILL_IMAGE                    0x06
-#define USB_CLASS_PRINTER                        0x07
-#define USB_CLASS_MASS_STORAGE                   0x08
-#define USB_CLASS_HUB                            0x09
-#define USB_CLASS_CDC_DATA                       0x0a
-#define USB_CLASS_CSCID                          0x0b
-#define USB_CLASS_CONTENT_SEC                    0x0d
-#define USB_CLASS_VIDEO                          0x0e
-#define USB_CLASS_WIRELESS_CONTROLLER            0xe0
-#define USB_CLASS_APP_SPEC                       0xfe
-#define USB_CLASS_VENDOR_SPEC                    0xff
+#define USB_CLASS_PER_INTERFACE                 (0x00)
+#define USB_CLASS_AUDIO                         (0x01)
+#define USB_CLASS_COMM                          (0x02)
+#define USB_CLASS_HID                           (0x03)
+#define USB_CLASS_PHYSICAL                      (0x05)
+#define USB_CLASS_STILL_IMAGE                   (0x06)
+#define USB_CLASS_PRINTER                       (0x07)
+#define USB_CLASS_MASS_STORAGE                  (0x08)
+#define USB_CLASS_HUB                           (0x09)
+#define USB_CLASS_CDC_DATA                      (0x0a)
+#define USB_CLASS_CSCID                         (0x0b)
+#define USB_CLASS_CONTENT_SEC                   (0x0d)
+#define USB_CLASS_VIDEO                         (0x0e)
+#define USB_CLASS_WIRELESS_CONTROLLER           (0xe0)
+#define USB_CLASS_APP_SPEC                      (0xfe)
+#define USB_CLASS_VENDOR_SPEC                   (0xff)
 
 /* Values for configuration descriptor attributes */
 
-#define USB_CONFIG_ATTR_ONE                     (1 << 7) /* Must be one */
-#define USB_CONFIG_ATTR_SELFPOWER               (1 << 6) /* Self-powered */
-#define USB_CONFIG_ATTR_WAKEUP                  (1 << 5) /* Remote wakeup */
-#define USB_CONFIG_ATTR_BATTERY                 (1 << 4) /* Battery powered */
+#define USB_CONFIG_ATTR_BATTERY                 (0x10) /* Battery powered */
+#define USB_CONFIG_ATTR_WAKEUP                  (0x20) /* Remote wakeup */
+#define USB_CONFIG_ATTR_SELFPOWER               (0x40) /* Self-powered */
+#define USB_CONFIG_ATTR_ONE                     (0x80) /* Must be one */
 
 /* Endpoint descriptor address */
 
-#define USB_EP_ADDR_NUMBER_MASK                  0x0f
-#define USB_EP_ADDR_DIR_MASK                     0x80
+#define USB_EP_ADDR_NUMBER_MASK                 (0x0f)
+#define USB_EP_ADDR_DIR_MASK                    (0x80)
 
 /* Endpoint descriptor attributes */
 
-#define USB_EP_ATTR_XFERTYPE_MASK                0x03
-#define USB_EP_ATTR_XFER_CONTROL                 0x00
-#define USB_EP_ATTR_XFER_ISOC                    0x01
-#define USB_EP_ATTR_XFER_BULK                    0x02
-#define USB_EP_ATTR_XFER_INT                     0x03
-#define USB_EP_ATTR_MAX_ADJUSTABLE               0x80
+#define USB_EP_ATTR_XFERTYPE_MASK               (0x03)
+#define USB_EP_ATTR_XFER_CONTROL                (0x00)
+#define USB_EP_ATTR_XFER_ISOC                   (0x01)
+#define USB_EP_ATTR_XFER_BULK                   (0x02)
+#define USB_EP_ATTR_XFER_INT                    (0x03)
+#define USB_EP_ATTR_MAX_ADJUSTABLE              (0x80)
 
 /************************************************************************************
  * Public Types

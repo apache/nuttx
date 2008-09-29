@@ -132,7 +132,7 @@
 
 /* Invoked when the driver is bound to a USB device driver */
 
-#define CLASS_BIND(drvr,dev) (drvr)->ops.bind(dev)
+#define CLASS_BIND(drvr,dev) (drvr)->ops.bind(dev, drvr)
 
 /* Invoked when the driver is unbound from a USB device driver */
 
@@ -140,7 +140,7 @@
 
 /* Invoked after all transfers have been stopped, when the host is disconnected. */
 
-#define CLASS_DISCONNECT(drvr.dev) (drvr)->ops->disconnect(dev)
+#define CLASS_DISCONNECT(drvr,dev) (drvr)->ops->disconnect(dev)
 
 /* Invoked for ep0 control requests */
 
@@ -261,7 +261,7 @@ struct usbdev_s
 
 struct usbdevclass_driverops_s
 {
-  int  (*bind)(FAR struct usbdev_s *dev, void *private);
+  int  (*bind)(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_s *driver);
   void (*unbind)(FAR struct usbdev_s *dev);
   int  (*setup)(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *req);
   void (*disconnect)(FAR struct usbdev_s *dev);

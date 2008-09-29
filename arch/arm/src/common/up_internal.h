@@ -182,6 +182,15 @@ extern void up_netinitialize(void);
 #else
 # define up_netinitialize()
 #endif
+
+
+#ifdef CONFIG_USBDEV
+extern void up_usbinitialize(void);
+extern void up_usbuninitialize(void);
+#else
+# define up_netinitialize()
+#endif
+
 #endif /* __ASSEMBLY__ */
 
 #endif  /* __UP_INTERNAL_H */
