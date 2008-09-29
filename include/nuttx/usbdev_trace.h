@@ -48,62 +48,74 @@
  ****************************************************************************/
 
 #define TRACE_EVENT(id,num)      ((uint16)(id)|(num))
-#define TRACE_CLASS(event)       ((event)&0xff00)
+#define TRACE_CLASS_ID(event)       ((event)&0xff00)
 #define TRACE_INSTANCE(event)    ((event)0x00ff)
+
+/* Event class IDs */
+
+#define TRACE_INIT_ID            (0x0000) /* Initialization events */
+#define TRACE_EP_ID              (0x0100) /* Endpoint API calls */
+#define TRACE_DEV_ID             (0x0200) /* USB device API calls */
+#define TRACE_CLASS_ID           (0x0300) /* USB class driver API calls */
+#define TRACE_INTENTRY_ID        (0x0400) /* Interrupt handler entry */
+#define TRACE_INTDECODE_ID       (0x0500) /* Decoded interrupt event */
+#define TRACE_INTEXIT_ID         (0x0600) /* Interrupt handler exit */
+#define TRACE_REQQUEUED_ID       (0x0700) /* Request queued */
+#define TRACE_READ_ID            (0x0800) /* Read (OUT) action */
+#define TRACE_WRITE_ID           (0x0900) /* Write (IN) action */
+#define TRACE_COMPLETE_ID        (0x0a00) /* Request completed */
+#define TRACE_ERROR_ID           (0x0b00) /* Error event */
 
 /* Initialization events */
 
-#define TRACE_INIT               (0x0000)
-#define TRACE_DEVINIT            TRACE_EVENT(TRACE_INIT, 0x0001)
-#define TRACE_DEVUNINIT          TRACE_EVENT(TRACE_INIT, 0x0002)
-#define TRACE_DEVREGISTER        TRACE_EVENT(TRACE_INIT, 0x0003)
-#define TRACE_DEVUNREGISTER      TRACE_EVENT(TRACE_INIT, 0x0004)
+#define TRACE_DEVINIT            TRACE_EVENT(TRACE_INIT_ID, 0x0001)
+#define TRACE_DEVUNINIT          TRACE_EVENT(TRACE_INIT_ID, 0x0002)
+#define TRACE_DEVREGISTER        TRACE_EVENT(TRACE_INIT_ID, 0x0003)
+#define TRACE_DEVUNREGISTER      TRACE_EVENT(TRACE_INIT_ID, 0x0004)
 
 /* API calls (see usbdev.h) */
 
-#define TRACE_EP                 (0x0100)
-#define TRACE_EPCONFIGURE        TRACE_EVENT(TRACE_EP, 0x0001)
-#define TRACE_EPDISABLE          TRACE_EVENT(TRACE_EP, 0x0002)
-#define TRACE_EPALLOCREQ         TRACE_EVENT(TRACE_EP, 0x0003)
-#define TRACE_EPFREEREQ          TRACE_EVENT(TRACE_EP, 0x0004)
-#define TRACE_EPALLOCBUFFER      TRACE_EVENT(TRACE_EP, 0x0005)
-#define TRACE_EPFREEBUFFER       TRACE_EVENT(TRACE_EP, 0x0006)
-#define TRACE_EPSUBMIT           TRACE_EVENT(TRACE_EP, 0x0007)
-#define TRACE_EPCANCEL           TRACE_EVENT(TRACE_EP, 0x0008)
-#define TRACE_EPSTALL            TRACE_EVENT(TRACE_EP, 0x0009)
-#define TRACE_EPRESUME           TRACE_EVENT(TRACE_EP, 0x000a)
+#define TRACE_EPCONFIGURE        TRACE_EVENT(TRACE_EP_ID, 0x0001)
+#define TRACE_EPDISABLE          TRACE_EVENT(TRACE_EP_ID, 0x0002)
+#define TRACE_EPALLOCREQ         TRACE_EVENT(TRACE_EP_ID, 0x0003)
+#define TRACE_EPFREEREQ          TRACE_EVENT(TRACE_EP_ID, 0x0004)
+#define TRACE_EPALLOCBUFFER      TRACE_EVENT(TRACE_EP_ID, 0x0005)
+#define TRACE_EPFREEBUFFER       TRACE_EVENT(TRACE_EP_ID, 0x0006)
+#define TRACE_EPSUBMIT           TRACE_EVENT(TRACE_EP_ID, 0x0007)
+#define TRACE_EPCANCEL           TRACE_EVENT(TRACE_EP_ID, 0x0008)
+#define TRACE_EPSTALL            TRACE_EVENT(TRACE_EP_ID, 0x0009)
+#define TRACE_EPRESUME           TRACE_EVENT(TRACE_EP_ID, 0x000a)
 
-#define TRACE_DEV                (0x0200)
-#define TRACE_DEVALLOCEP         TRACE_EVENT(TRACE_DEV, 0x0001)
-#define TRACE_DEVFREEEP          TRACE_EVENT(TRACE_DEV, 0x0002)
-#define TRACE_DEVGETFRAME        TRACE_EVENT(TRACE_DEV, 0x0003)
-#define TRACE_DEVWAKEUP          TRACE_EVENT(TRACE_DEV, 0x0004)
-#define TRACE_DEVSELFPOWERED     TRACE_EVENT(TRACE_DEV, 0x0005)
-#define TRACE_DEVPULLUP          TRACE_EVENT(TRACE_DEV, 0x0006)
+#define TRACE_DEVALLOCEP         TRACE_EVENT(TRACE_DEV_ID, 0x0001)
+#define TRACE_DEVFREEEP          TRACE_EVENT(TRACE_DEV_ID, 0x0002)
+#define TRACE_DEVGETFRAME        TRACE_EVENT(TRACE_DEV_ID, 0x0003)
+#define TRACE_DEVWAKEUP          TRACE_EVENT(TRACE_DEV_ID, 0x0004)
+#define TRACE_DEVSELFPOWERED     TRACE_EVENT(TRACE_DEV_ID, 0x0005)
+#define TRACE_DEVPULLUP          TRACE_EVENT(TRACE_DEV_ID, 0x0006)
 
-#define TRACE_CLASS              (0x0300)
-#define TRACE_CLASSBIN           TRACE_EVENT(TRACE_CLASS, 0x0001)
-#define TRACE_CLASSUNBIND        TRACE_EVENT(TRACE_CLASS, 0x0001)
-#define TRACE_CLASSDISCONNECT    TRACE_EVENT(TRACE_CLASS, 0x0001)
-#define TRACE_CLASSSETUP         TRACE_EVENT(TRACE_CLASS, 0x0001)
-#define TRACE_CLASSSUSPEND       TRACE_EVENT(TRACE_CLASS, 0x0001)
-#define TRACE_CLASSRESUME        TRACE_EVENT(TRACE_CLASS, 0x0001)
+#define TRACE_CLASSBIN           TRACE_EVENT(TRACE_CLASS_ID, 0x0001)
+#define TRACE_CLASSUNBIND        TRACE_EVENT(TRACE_CLASS_ID, 0x0001)
+#define TRACE_CLASSDISCONNECT    TRACE_EVENT(TRACE_CLASS_ID, 0x0001)
+#define TRACE_CLASSSETUP         TRACE_EVENT(TRACE_CLASS_ID, 0x0001)
+#define TRACE_CLASSSUSPEND       TRACE_EVENT(TRACE_CLASS_ID, 0x0001)
+#define TRACE_CLASSRESUME        TRACE_EVENT(TRACE_CLASS_ID, 0x0001)
 
 /* Interrupt events -- id is hardware specific */
 
-#define TRACE_INTENTRY(id)       TRACE_EVENT(0x0400, id)
-#define TRACE_INTDECODE(id)      TRACE_EVENT(0x0500, id)
-#define TRACE_INTEXIT(id)        TRACE_EVENT(0x0600, id)
+#define TRACE_INTENTRY(id)       TRACE_EVENT(TRACE_INTENTRY_ID, id)
+#define TRACE_INTDECODE(id)      TRACE_EVENT(TRACE_INTDECODE_ID, id)
+#define TRACE_INTEXIT(id)        TRACE_EVENT(TRACE_INTEXIT_ID, id)
 
 /* Data Transfer */
 
-#define TRACE_READ(ep)           TRACE_EVENT(0x0700, ep)
-#define TRACE_WRITE(ep)          TRACE_EVENT(0x0800, ep)
-#define TRACE_COMPLETE(ep)       TRACE_EVENT(0x0900, ep)
+#define TRACE_REQQUEUED(ep)      TRACE_EVENT(TRACE_REQQUEUED_ID, ep)
+#define TRACE_READ(ep)           TRACE_EVENT(TRACE_READ_ID, ep)
+#define TRACE_WRITE(ep)          TRACE_EVENT(TRACE_WRITE_ID, ep)
+#define TRACE_COMPLETE(ep)       TRACE_EVENT(TRACE_COMPLETE_ID, ep)
 
 /* Error events -- id is specific to the driver */
 
-#define TRACE_ERROR(id)          TRACE_EVENT(0x0700, id)
+#define TRACE_ERROR(id)          TRACE_EVENT(TRACE_ERROR_ID, id)
 
 /****************************************************************************
  * Public Types
