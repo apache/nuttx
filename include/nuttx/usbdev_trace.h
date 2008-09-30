@@ -151,10 +151,14 @@ extern "C" {
  * Description:
  *  Enable/disable tracing
  *
+ * Assumptions:
+ * - Initial state is enabled
+ * - May be called from an interrupt handler
+ *
  *******************************************************************************/
 
 #ifdef CONFIG_USBDEV_TRACE
-EXTERN void usbtrace_enable(boolen enable);
+EXTERN void usbtrace_enable(boolean enable);
 #else
 #  define usbtrace_enable(enable)
 #endif
@@ -164,6 +168,9 @@ EXTERN void usbtrace_enable(boolen enable);
  *
  * Description:
  *  Record a USB event (tracing must be enabled)
+ *
+ * Assumptions:
+ *   May be called from an interrupt handler
  *
  *******************************************************************************/
 
@@ -177,12 +184,15 @@ EXTERN void usbtrace(uint16 event, uint16 value);
  * Name: usbtrace_enumerate
  *
  * Description:
- *   Enumerate all buffer trace data (tracing must be disabled)
+ *   Enumerate all buffer trace data (will temporarily disable tracing)
+ *
+ * Assumptions:
+ *   NEVER called from an interrupt handler
  *
  *******************************************************************************/
 
 #ifdef CONFIG_USBDEV_TRACE
-EXTERN int usbtrace_enumerate(tracecallback_t *callback, void *arg);
+EXTERN int usbtrace_enumerate(trace_callback_t callback, void *arg);
 #else
 #  define usbtrace_enumerate(event)
 #endif
