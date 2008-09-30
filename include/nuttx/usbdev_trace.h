@@ -64,7 +64,8 @@
 #define TRACE_READ_ID            (0x0800) /* Read (OUT) action */
 #define TRACE_WRITE_ID           (0x0900) /* Write (IN) action */
 #define TRACE_COMPLETE_ID        (0x0a00) /* Request completed */
-#define TRACE_ERROR_ID           (0x0b00) /* Error event */
+#define TRACE_DEVERROR_ID        (0x0b00) /* USB controller driver error event */
+#define TRACE_CLSERROR_ID        (0x0c00) /* USB class driver error event */
 
 /* Initialization events */
 
@@ -93,14 +94,17 @@
 #define TRACE_DEVSELFPOWERED     TRACE_EVENT(TRACE_DEV_ID, 0x0005)
 #define TRACE_DEVPULLUP          TRACE_EVENT(TRACE_DEV_ID, 0x0006)
 
-#define TRACE_CLASSBIN           TRACE_EVENT(TRACE_CLASS_ID, 0x0001)
-#define TRACE_CLASSUNBIND        TRACE_EVENT(TRACE_CLASS_ID, 0x0001)
-#define TRACE_CLASSDISCONNECT    TRACE_EVENT(TRACE_CLASS_ID, 0x0001)
-#define TRACE_CLASSSETUP         TRACE_EVENT(TRACE_CLASS_ID, 0x0001)
-#define TRACE_CLASSSUSPEND       TRACE_EVENT(TRACE_CLASS_ID, 0x0001)
-#define TRACE_CLASSRESUME        TRACE_EVENT(TRACE_CLASS_ID, 0x0001)
+#define TRACE_CLASSBIND          TRACE_EVENT(TRACE_CLASS_ID, 0x0001)
+#define TRACE_CLASSUNBIND        TRACE_EVENT(TRACE_CLASS_ID, 0x0002)
+#define TRACE_CLASSDISCONNECT    TRACE_EVENT(TRACE_CLASS_ID, 0x0003)
+#define TRACE_CLASSSETUP         TRACE_EVENT(TRACE_CLASS_ID, 0x0004)
+#define TRACE_CLASSSUSPEND       TRACE_EVENT(TRACE_CLASS_ID, 0x0005)
+#define TRACE_CLASSRESUME        TRACE_EVENT(TRACE_CLASS_ID, 0x0006)
 
-/* Interrupt events -- id is hardware specific */
+/* USB device controller interrupt events.  The 'id' is specific to the driver.
+ * Particular values for 'id' are unique for a given implementation of a
+ * controller driver
+ */
 
 #define TRACE_INTENTRY(id)       TRACE_EVENT(TRACE_INTENTRY_ID, id)
 #define TRACE_INTDECODE(id)      TRACE_EVENT(TRACE_INTDECODE_ID, id)
@@ -113,9 +117,43 @@
 #define TRACE_WRITE(ep)          TRACE_EVENT(TRACE_WRITE_ID, ep)
 #define TRACE_COMPLETE(ep)       TRACE_EVENT(TRACE_COMPLETE_ID, ep)
 
-/* Error events -- id is specific to the driver */
+/* USB device controller error events.  The 'id' is specific to the driver.
+ * Particular values for 'id' are unique for a given implementation of a
+ * controller driver
+ */
 
-#define TRACE_ERROR(id)          TRACE_EVENT(TRACE_ERROR_ID, id)
+#define TRACE_DEVERROR(id)       TRACE_EVENT(TRACE_CLSERROR_ID, id)
+
+/* USB class driver error events.  The 'id' is specific to the class driver,
+ * but common to all driver controller instances.
+ */
+
+#define TRACE_CLSERROR(id)       TRACE_EVENT(TRACE_CLSERROR_ID, id)
+
+/* Values of the class error ID used by the USB serial driver */
+
+#define USBSER_TRACEERR_ALLOCCTRLREQ      0x0001
+#define USBSER_TRACEERR_ALREADYCLOSED     0x0002
+#define USBSER_TRACEERR_CONSOLEREGISTER   0x0003
+#define USBSER_TRACEERR_DEVREGISTER       0x0004
+#define USBSER_TRACEERR_EPRESPQ           0x0005
+#define USBSER_TRACEERR_GETUNKNOWNDESC    0x0006
+#define USBSER_TRACEERR_INALLOCEPFAIL     0x0007
+#define USBSER_TRACEERR_INCONFIGEPFAIL    0x0008
+#define USBSER_TRACEERR_INVALIDARG        0x0009
+#define USBSER_TRACEERR_OUTALLOCEPFAIL    0x000a
+#define USBSER_TRACEERR_OUTCONFIGEPFAIL   0x000b
+#define USBSER_TRACEERR_RDALLOCREQ        0x000c
+#define USBSER_TRACEERR_RDSHUTDOWN        0x000d
+#define USBSER_TRACEERR_RDSUBMIT          0x000e
+#define USBSER_TRACEERR_RDUNEXPECTED      0x000f
+#define USBSER_TRACEERR_REQRESULT         0x0010
+#define USBSER_TRACEERR_SETUPNOTCONNECTED 0x0011
+#define USBSER_TRACEERR_SUBMITFAIL        0x0012
+#define USBSER_TRACEERR_UARTREGISTER      0x0013
+#define USBSER_TRACEERR_WRALLOCREQ        0x0014
+#define USBSER_TRACEERR_WRSHUTDOWN        0x0015
+#define USBSER_TRACEERR_WRUNEXPECTED      0x0016
 
 /****************************************************************************
  * Public Types
@@ -177,7 +215,7 @@ EXTERN void usbtrace_enable(boolean enable);
 #ifdef CONFIG_USBDEV_TRACE
 EXTERN void usbtrace(uint16 event, uint16 value);
 #else
-#  define usbtrace(event)
+#  define usbtrace(event, value)
 #endif
 
 /*******************************************************************************

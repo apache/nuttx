@@ -4,6 +4,12 @@
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
+ * NOTE:  This interface was inspired by the Linux gadget interface by
+ * David Brownell. That work was very helpful in determining a usable
+ * partitioning of functionality between standard class drivers and various
+ * implementations of USB controller drivers.  This work, however, does
+ * not derive directly from that work and is licensed differently.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -316,6 +322,16 @@ EXTERN int usbdev_register(FAR struct usbdevclass_driver_s *driver);
  ************************************************************************************/
 
 EXTERN int usbdev_unregister(FAR struct usbdevclass_driver_s *driver);
+
+/****************************************************************************
+ * Name: usbdev_serialinit
+ *
+ * Description:
+ *   Register USB serial port (and USB serial console if so configured).
+ *
+ ****************************************************************************/
+
+EXTERN int usbdev_serialinitialize(int minor);
 
 #undef EXTERN
 #if defined(__cplusplus)
