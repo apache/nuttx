@@ -1,7 +1,7 @@
-/************************************************************
- * common/up_createstack.c
+/****************************************************************************
+ * arch/arm/src/common/up_createstack.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,34 +31,37 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sched.h>
 #include <debug.h>
+
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
+
 #include "up_arch.h"
 #include "up_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: up_create_stack
  *
  * Description:
@@ -77,7 +80,7 @@
  *   tcb: The TCB of new task
  *   stack_size:  The requested stack size.  At least this much
  *     must be allocated.
- ************************************************************/
+ ****************************************************************************/
 
 STATUS up_create_stack(_TCB *tcb, size_t stack_size)
 {

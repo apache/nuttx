@@ -1,7 +1,7 @@
 /************************************************************************************
- * common/arm.h
+ * arch/arm/src/common/arm.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARM_H
-#define __ARM_H
+#ifndef __ARCH_ARM_SRC_COMMON_ARM_H
+#define __ARCH_ARM_SRC_COMMON_ARM_H
 
 /************************************************************************************
  * Included Files
@@ -249,6 +249,6 @@
 
 #ifndef __ASSEMBLY__
 
-#endif
+#endif /* __ASSEMBLY__ */
 
-#endif  /* __ARM_H */
+#endif  /* __ARCH_ARM_SRC_COMMON_ARM_H */
