@@ -53,39 +53,39 @@
  * the 'desc' structure after returning
  */
 
-#define EP_CONFIGURE(ep,desc) ep->ops->configure(ep,desc)
+#define EP_CONFIGURE(ep,desc)      (ep)->ops->configure(ep,desc)
 
 /* The endpoint will no longer be used */
 
-#define EP_DISABLE(ep) ep->ops->disable(ep)
+#define EP_DISABLE(ep)             (ep)->ops->disable(ep)
 
 /* Allocate/free I/O requests */
 
-#define EP_ALLOCREQ(ep,nytes) ep->ops->allocreq(ep)
-#define EP_FREEREQ(ep,buff)   ep->ops->freereq(ep,req)
+#define EP_ALLOCREQ(ep)            (ep)->ops->allocreq(ep)
+#define EP_FREEREQ(ep,req)         (ep)->ops->freereq(ep,req)
 
 /* Allocate/free an I/O buffer */
 
 #ifdef CONFIG_ARCH_USBDEV_DMA
-#  define EP_ALLOCBUFFER(ep,nytes) ep->ops->alloc(ep,nbytes)
-#  define EP_FREEBUFFER(ep,buff)   ep->ops->free(ep,buf)
+#  define EP_ALLOCBUFFER(ep,nb)    (ep)->ops->alloc(ep,nb)
+#  define EP_FREEBUFFER(ep,buff)   (ep)->ops->free(ep,buf)
 #else
-#  define EP_ALLOCBUFFER(ep,nytes) malloc(nbytes)
-#  define EP_FREEBUFFER(ep,buff)   free(buf)
+#  define EP_ALLOCBUFFER(ep,nb)    malloc(nb)
+#  define EP_FREEBUFFER(ep,buf)    free(buf)
 #endif
 
 /* Submit an I/O request to the endpoint */
 
-#define EP_SUBMIT(ep,req) ep->ops->submit(ep,req)
+#define EP_SUBMIT(ep,req)          (ep)->ops->submit(ep,req)
 
 /* Cancel an I/O request previously sent to an endpoint */
 
-#define EP_CANCEL(ep,req) ep->ops->cancel(ep,req)
+#define EP_CANCEL(ep,req)          (ep)->ops->cancel(ep,req)
 
 /* Stall or resume an endpoint */
 
-#define EP_STALL(ep) ep->ops->stall(ep,FALSE)
-#define EP_RESUME(ep) ep->ops->stall(ep,TRUE)
+#define EP_STALL(ep)               (ep)->ops->stall(ep,FALSE)
+#define EP_RESUME(ep)              (ep)->ops->stall(ep,TRUE)
 
 /* USB Device Driver Helpers ********************************************************/
 
@@ -98,45 +98,45 @@
  *            USB_EP_ATTR_XFER_INT}
  */
 
-#define DEV_ALLOCEP(dev,epno,in,type) dev->ops->allocep(dev, epphy, in, type)
+#define DEV_ALLOCEP(dev,ep,in,type) (dev)->ops->allocep(dev,ep,in,type)
 
 /* Release an endpoint */
 
-#define DEV_FREEP(dev,epno,in) dev->ops->allocep(dev, ep)
+#define DEV_FREEEP(dev,ep)         (dev)->ops->freeep(dev,ep)
 
 /* Returns the current frame number */
 
-#define DEV_GETFRAME(dev) dev->ops->getframe(dev)
+#define DEV_GETFRAME(dev)          (dev)->ops->getframe(dev)
 
 /* Tries to wake up the host connected to this device */
 
-#define DEV_WAKEUP(dev) dev->ops->wakeup(dev)
+#define DEV_WAKEUP(dev)            (dev)->ops->wakeup(dev)
 
 /* Sets the device selfpowered feature */
 
-#define DEV_SETSELFPOWERED(dev) dev->ops->selfpowered(dev, TRUE)
+#define DEV_SETSELFPOWERED(dev)    (dev)->ops->selfpowered(dev,TRUE)
 
 /* Clears the device selfpowered feature */
 
-#define DEV_CLRSELFPOWERED(dev) dev->ops->selfpowered(dev, FALSE)
+#define DEV_CLRSELFPOWERED(dev)    (dev)->ops->selfpowered(dev, FALSE)
 
 /* Software-controlled connect to USB host */
 
-#define DEV_CONNECT(dev) dev->ops->pullup ? dev->ops->pullup(dev, TRUE) : -EOPNOTSUPP
+#define DEV_CONNECT(dev)           (dev)->ops->pullup ? (dev)->ops->pullup(dev,TRUE) : -EOPNOTSUPP
 
 /* Software-controlled disconnect from USB host */
 
-#define DEV_DISCONNECT(dev) dev->ops->pullup ? dev->ops->pullup(dev, FALSE) : -EOPNOTSUPP
+#define DEV_DISCONNECT(dev)        (dev)->ops->pullup ? (dev)->ops->pullup(dev,FALSE) : -EOPNOTSUPP
 
 /* USB Class Driver Helpsers ********************************************************/
 
 /* Invoked when the driver is bound to a USB device driver */
 
-#define CLASS_BIND(drvr,dev) (drvr)->ops.bind(dev, drvr)
+#define CLASS_BIND(drvr,dev)      (drvr)->ops->bind(dev, drvr)
 
 /* Invoked when the driver is unbound from a USB device driver */
 
-#define CLASS_UNBIND(drvr,dev) (drvr)->ops.unbind(dev)
+#define CLASS_UNBIND(drvr,dev)    (drvr)->ops->unbind(dev)
 
 /* Invoked after all transfers have been stopped, when the host is disconnected. */
 
@@ -144,23 +144,23 @@
 
 /* Invoked for ep0 control requests */
 
-#define CLASS_SETUP(drvr,dev,req) (drvr)->ops.setup(dev, req)
+#define CLASS_SETUP(drvr,dev,ctrl) (drvr)->ops->setup(dev, ctrl)
 
 /* Invoked on USB suspend. */
 
-#define CLASS_SUSPEND(drvr,dev) (drvr)->ops.suspend ? (drvr)->ops->suspend(dev) : (void)
+#define CLASS_SUSPEND(drvr,dev)   (drvr)->ops->suspend ? (drvr)->ops->suspend(dev) : (void)
 
 /* Invoked on USB resume */
 
-#define CLASS_RESUME(drvr,dev) (drvr)->ops.resume ? (drvr)->ops->resume(dev) : (void)
+#define CLASS_RESUME(drvr,dev)    (drvr)->ops->resume ? (drvr)->ops->resume(dev) : (void)
 
 /* Device speeds */
 
-#define USB_SPEED_UNKNOWN     0 /* Transfer rate not yet set */
-#define USB_SPEED_LOW         1 /* USB 1.1 */
-#define USB_SPEED_FULL        2 /* USB 1.1 */
-#define USB_SPEED_HIGH        3 /* USB 2.0 */
-#define USB_SPEED_VARIABLE    4 /* Wireless USB 2.5 */
+#define USB_SPEED_UNKNOWN         0 /* Transfer rate not yet set */
+#define USB_SPEED_LOW             1 /* USB 1.1 */
+#define USB_SPEED_FULL            2 /* USB 1.1 */
+#define USB_SPEED_HIGH            3 /* USB 2.0 */
+#define USB_SPEED_VARIABLE        4 /* Wireless USB 2.5 */
 
 /************************************************************************************
  * Public Types
@@ -263,7 +263,7 @@ struct usbdevclass_driverops_s
 {
   int  (*bind)(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_s *driver);
   void (*unbind)(FAR struct usbdev_s *dev);
-  int  (*setup)(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *req);
+  int  (*setup)(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *ctrl);
   void (*disconnect)(FAR struct usbdev_s *dev);
   void (*suspend)(FAR struct usbdev_s *dev);
   void (*resume)(FAR struct usbdev_s *dev);
@@ -271,7 +271,7 @@ struct usbdevclass_driverops_s
 
 struct usbdevclass_driver_s
 {
-  const struct usbdevclass_driverops_s ops;
+  const struct usbdevclass_driverops_s *ops;
   ubyte speed;                    /* Highest speed that the driver handles */
 };
 
