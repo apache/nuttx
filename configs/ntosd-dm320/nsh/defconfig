@@ -321,6 +321,82 @@ CONFIG_NET_DHCP_LIGHT=n
 CONFIG_NET_RESOLV_ENTRIES=4
 
 #
+# USB Device Configuration
+#
+# CONFIG_USBDEV
+#   Enables USB device support
+# CONFIG_USBDEV_ISOCHRONOUS
+#   Build in extra support for isochronous endpoints
+# CONFIG_USBDEV_DUALSPEED
+#   Hardware handles high and full speed operation (USB 2.0)
+# CONFIG_USBDEV_SELFPOWERED
+#   Will cause USB features to indicate that the device is
+#   self-powered
+# CONFIG_USBDEV_MAXPOWER
+#   Maximum power consumption in mA
+# CONFIG_USBDEV_TRACE
+#   Enables USB tracing for debug
+# CONFIG_USBDEV_TRACE_NRECORDS
+#   Number of trace entries to remember
+CONFIG_USBDEV=n
+CONFIG_USBDEV_ISOCHRONOUS=n
+CONFIG_USBDEV_DUALSPEED=n
+CONFIG_USBDEV_SELFPOWERED=y
+CONFIG_USBDEV_MAXPOWER=100
+CONFIG_USBDEV_TRACE=n
+CONFIG_USBDEV_TRACE_NRECORDS=128
+
+#
+# DM320 USB Configuration
+#
+# CONFIG_DM320_GIO_USBATTACH
+#   GIO that detects USB attach/detach events
+# CONFIG_DM320_GIO_USBDPPULLUP
+#   GIO 
+# CONFIG_DMA320_USBDEV_DMA
+#   Enable DM320-specific DMA support
+CONFIG_DM320_GIO_USBATTACH=6
+CONFIG_DM320_GIO_USBDPPULLUP=17
+CONFIG_DM320_VENDORID=0xd320
+CONFIG_DM320_PRODUCTID=0x3211
+CONFIG_DM320_USBDEV_DMA=n
+
+#
+# USB Serial Device Configuration
+#
+# CONFIG_USBSERIAL_EPOUT
+# CONFIG_USBSERIAL_EPIN
+# CONFIG_USBSERIAL_NWRREQS
+#   The number of write requests that can be in flight
+# CONFIG_USBSERIAL_NRDREQS
+#   The number of read requests that can be in flight
+# CONFIG_USBSERIAL_RXBUFSIZE
+#   Size of the serial receive buffer
+# CONFIG_USBSERIAL_TXBUFSIZE
+#   Size of the serial transmit buffer
+# CONFIG_USBSER_VENDORID
+#   The vendor ID code
+# CONFIG_USBSER_PRODUCTID
+#   The product ID code
+CONFIG_USBSERIAL_EPOUT=1
+CONFIG_USBSERIAL_EPIN=2
+CONFIG_USBSERIAL_NWRREQS=4
+CONFIG_USBSERIAL_NRDREQS=4
+CONFIG_USBSER_VENDORID=0x0525
+CONFIG_USBSER_PRODUCTID=0xa4a6
+CONFIG_USBSERIAL_RXBUFSIZE=512
+CONFIG_USBSERIAL_TXBUFSIZE=512
+
+#
+# USB Device Zero Configuration
+# CONFIG_USBSER_VENDORID
+#   The vendor ID code
+# CONFIG_USBSER_PRODUCTID
+#   The product ID code
+CONFIG_USBZERO_VENDORID=0x0525
+CONFIG_USBZERO_PRODUCTID=0xa4a0
+
+#
 # Settings for examples/uip
 CONFIG_EXAMPLE_UIP_IPADDR=(10<<24|0<<16|0<<8|2)
 CONFIG_EXAMPLE_UIP_DRIPADDR=(10<<24|0<<16|0<<8|1)
