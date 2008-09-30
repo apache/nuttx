@@ -82,6 +82,12 @@
 #  define USB_FAST_INT 0
 #endif
 
+/* Extremely detailed register debug that you would normally never want
+ * enabled.
+ */
+
+#undef CONFIG_LPC214X_USBDEV_REGDEBUG
+
 /* Enable reading SOF from interrupt handler vs. simply reading on demand.  Probably
  * a bad idea... Unless there is some issue with sampling the SOF from hardware
  * asynchronously.
@@ -114,7 +120,7 @@
 
 #ifndef CONFIG_USBDEV_TRACE
 #  undef usbtrace
-#  define usbtrace(a,b) udbg("%04x:%04x\n", a, b)
+#  define usbtrace(a,b) ulldbg("%04x:%04x\n", a, b)
 #endif
 
 /* Trace error codes */
@@ -337,6 +343,16 @@ struct lpc214x_usbdev_s
  * Private Function Prototypes
  *******************************************************************************/
 
+/* Register operations */
+
+#if defined(CONFIG_LPC214X_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+static uint32 lpc214x_getreg(uint32 addr);
+static void lpc214x_putreg(uint32 val, uint32 addr);
+#else
+# define lpc214x_getreg(addr)     getreg32(addr)
+# define lpc214x_putreg(val,addr) putreg32(val,addr)
+#endif
+
 /* Command operations */
 
 static uint32 lpc214x_usbcmd(uint16 cmd, ubyte data);
@@ -447,6 +463,39 @@ static const struct usbdev_ops_s g_devops =
  *******************************************************************************/
 
 /*******************************************************************************
+ * Name: lpc214x_getreg
+ *
+ * Description:
+ *   Get the contents of an LPC214x register
+ *
+ *******************************************************************************/
+
+#if defined(CONFIG_LPC214X_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+static uint32 lpc214x_getreg(uint32 addr)
+{
+  uint32 val = getreg32(addr);
+  lldbg("%04x->%04x\n", addr, val);
+  return val;
+}
+#endif
+
+/*******************************************************************************
+ * Name: lpc214x_putreg
+ *
+ * Description:
+ *   Set the contents of an LPC214x register to a value
+ *
+ *******************************************************************************/
+
+#if defined(CONFIG_LPC214X_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+static void lpc214x_putreg(uint32 val, uint32 addr)
+{
+  lldbg("%04x<-%04x\n", addr, val);
+  putreg32(val, addr);
+}
+#endif
+
+/*******************************************************************************
  * Name: lpc214x_usbcmd
  *
  * Description:
@@ -462,19 +511,19 @@ static uint32 lpc214x_usbcmd(uint16 cmd, ubyte data)
   /* Disable interrupt and clear CDFULL and CCEMPTY interrupt status */
 
   flags = irqsave();
-  putreg32(USBDEV_DEVINT_CDFULL|USBDEV_DEVINT_CCEMTY, LPC214X_USBDEV_DEVINTCLR);
+  lpc214x_putreg(USBDEV_DEVINT_CDFULL|USBDEV_DEVINT_CCEMTY, LPC214X_USBDEV_DEVINTCLR);
 
   /* Load commonad in USB engine */
 
-  putreg32(((cmd & 0xff) << 16) + CMD_USB_CMDWR, LPC214X_USBDEV_CMDCODE);
+  lpc214x_putreg(((cmd & 0xff) << 16) + CMD_USB_CMDWR, LPC214X_USBDEV_CMDCODE);
 
   /* Wait until command is accepted */
 
-  while ((getreg32(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_CCEMTY) == 0);
+  while ((lpc214x_getreg(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_CCEMTY) == 0);
 
   /* Clear command register empty (CCEMPTY) interrupt */
 
-  putreg32(USBDEV_DEVINT_CCEMTY, LPC214X_USBDEV_DEVINTCLR);
+  lpc214x_putreg(USBDEV_DEVINT_CCEMTY, LPC214X_USBDEV_DEVINTCLR);
 
   /* determinate next phase of the command */
 
@@ -484,28 +533,28 @@ static uint32 lpc214x_usbcmd(uint16 cmd, ubyte data)
     case CMD_USB_DEV_CONFIG:
     case CMD_USB_DEV_SETMODE:
     case CMD_USB_DEV_SETSTATUS:
-      putreg32((data << 16) + CMD_USB_DATAWR, LPC214X_USBDEV_CMDCODE);
-      while ((getreg32(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_CCEMTY) == 0);
+      lpc214x_putreg((data << 16) + CMD_USB_DATAWR, LPC214X_USBDEV_CMDCODE);
+      while ((lpc214x_getreg(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_CCEMTY) == 0);
       break;
 
     case CMD_USB_DEV_READFRAMENO:
     case CMD_USB_DEV_READTESTREG:
-      putreg32((cmd << 16) + CMD_USB_DATARD, LPC214X_USBDEV_CMDCODE);
-      while ((getreg32(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_CDFULL) == 0);
-      putreg32(USBDEV_DEVINT_CDFULL, LPC214X_USBDEV_DEVINTCLR);
-      tmp = getreg32(LPC214X_USBDEV_CMDDATA);
-      putreg32((cmd << 16) + CMD_USB_DATARD, LPC214X_USBDEV_CMDCODE);
-      while ((getreg32(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_CDFULL) == 0);
-      tmp |= getreg32(LPC214X_USBDEV_CMDDATA) << 8;
+      lpc214x_putreg((cmd << 16) + CMD_USB_DATARD, LPC214X_USBDEV_CMDCODE);
+      while ((lpc214x_getreg(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_CDFULL) == 0);
+      lpc214x_putreg(USBDEV_DEVINT_CDFULL, LPC214X_USBDEV_DEVINTCLR);
+      tmp = lpc214x_getreg(LPC214X_USBDEV_CMDDATA);
+      lpc214x_putreg((cmd << 16) + CMD_USB_DATARD, LPC214X_USBDEV_CMDCODE);
+      while ((lpc214x_getreg(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_CDFULL) == 0);
+      tmp |= lpc214x_getreg(LPC214X_USBDEV_CMDDATA) << 8;
       break;
 
     case CMD_USB_DEV_GETSTATUS:
     case CMD_USB_DEV_GETERRORCODE:
     case CMD_USB_DEV_READERRORSTATUS:
     case CMD_USB_EP_CLRBUFFER:
-      putreg32((cmd << 16) + CMD_USB_DATARD, LPC214X_USBDEV_CMDCODE);
-      while ((getreg32(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_CDFULL) == 0);
-      tmp = getreg32(LPC214X_USBDEV_CMDDATA);
+      lpc214x_putreg((cmd << 16) + CMD_USB_DATARD, LPC214X_USBDEV_CMDCODE);
+      while ((lpc214x_getreg(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_CDFULL) == 0);
+      tmp = lpc214x_getreg(LPC214X_USBDEV_CMDDATA);
       break;
 
     default:
@@ -513,14 +562,14 @@ static uint32 lpc214x_usbcmd(uint16 cmd, ubyte data)
         {
         case CMD_USB_EP_SELECT:
         case CMD_USB_EP_SELECTCLEAR:
-          putreg32((cmd << 16) + CMD_USB_DATARD, LPC214X_USBDEV_CMDCODE);
-          while ((getreg32(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_CDFULL) == 0);
-          tmp = getreg32(LPC214X_USBDEV_CMDDATA);
+          lpc214x_putreg((cmd << 16) + CMD_USB_DATARD, LPC214X_USBDEV_CMDCODE);
+          while ((lpc214x_getreg(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_CDFULL) == 0);
+          tmp = lpc214x_getreg(LPC214X_USBDEV_CMDDATA);
           break;
 
         case CMD_USB_EP_SETSTATUS:
-          putreg32((data << 16) + CMD_USB_DATAWR, LPC214X_USBDEV_CMDCODE);
-          while ((getreg32(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_CCEMTY) == 0);
+          lpc214x_putreg((data << 16) + CMD_USB_DATAWR, LPC214X_USBDEV_CMDCODE);
+          while ((lpc214x_getreg(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_CCEMTY) == 0);
           break;
         }
       break;
@@ -544,8 +593,8 @@ static void lpc214x_epwrite(ubyte epphy, const ubyte *data, uint32 nbytes)
 {
   /* Set the write enable bit for this physical EP address */
 
-  putreg32(((epphy << 1) & LPC214X_USBCTRL_EPMASK) | LPC214X_USBCTRL_WREN,
-           LPC214X_USBDEV_CTRL);
+  lpc214x_putreg(((epphy << 1) & LPC214X_USBCTRL_EPMASK) | LPC214X_USBCTRL_WREN,
+                 LPC214X_USBDEV_CTRL);
 
   /* Set the transmit packet length (nbytes must be less than 2048) */
 
@@ -559,20 +608,20 @@ static void lpc214x_epwrite(ubyte epphy, const ubyte *data, uint32 nbytes)
 
       if (nbytes)
         {
-          putreg32(*data++, LPC214X_USBDEV_TXDATA);
+          lpc214x_putreg(*data++, LPC214X_USBDEV_TXDATA);
         }
       else
         {
           /* Zero length packet */
 
-          putreg32(0, LPC214X_USBDEV_TXDATA);
+          lpc214x_putreg(0, LPC214X_USBDEV_TXDATA);
         }
     }
-  while ((getreg32(LPC214X_USBDEV_CTRL) & LPC214X_USBCTRL_WREN) != 0);
+  while ((lpc214x_getreg(LPC214X_USBDEV_CTRL) & LPC214X_USBCTRL_WREN) != 0);
 
   /* Done */
 
-  putreg32(0, LPC214X_USBDEV_CTRL);
+  lpc214x_putreg(0, LPC214X_USBDEV_CTRL);
   (void)lpc214x_usbcmd(CMD_USB_EP_SELECT | epphy, 0);
   (void)lpc214x_usbcmd(CMD_USB_EP_VALIDATEBUFFER, 0);
 }
@@ -593,22 +642,22 @@ static int lpc214x_epread(ubyte epphy, ubyte *data, uint32 nbytes)
 
   /* Set the read enable bit for this physical EP address */
 
-  putreg32(((epphy << 1) & LPC214X_USBCTRL_EPMASK) | LPC214X_USBCTRL_RDEN,
-           LPC214X_USBDEV_CTRL);
+  lpc214x_putreg(((epphy << 1) & LPC214X_USBCTRL_EPMASK) | LPC214X_USBCTRL_RDEN,
+                 LPC214X_USBDEV_CTRL);
 
   /* Wait for packet buffer ready for reading */
 
-  while ((getreg32(LPC214X_USBDEV_RXPLEN) & USBDEV_RXPLEN_PKTRDY) == 0);
+  while ((lpc214x_getreg(LPC214X_USBDEV_RXPLEN) & USBDEV_RXPLEN_PKTRDY) == 0);
 
   /* Get the about of data to be read */
 
-  pktlen = getreg32(LPC214X_USBDEV_RXPLEN) & USBDEV_RXPLEN_PKTLENGTH;
+  pktlen = lpc214x_getreg(LPC214X_USBDEV_RXPLEN) & USBDEV_RXPLEN_PKTLENGTH;
 
   /* Read data from input buffer while read data is valid (DV) */
 
-  while ((getreg32(LPC214X_USBDEV_RXPLEN) & USBDEV_RXPLEN_DV) != 0)
+  while ((lpc214x_getreg(LPC214X_USBDEV_RXPLEN) & USBDEV_RXPLEN_DV) != 0)
     {
-      value = getreg32(LPC214X_USBDEV_RXDATA);
+      value = lpc214x_getreg(LPC214X_USBDEV_RXDATA);
       if (data)
         {
           *data++ = value;
@@ -617,7 +666,7 @@ static int lpc214x_epread(ubyte epphy, ubyte *data, uint32 nbytes)
 
   /* Done */
 
-  putreg32(0, LPC214X_USBDEV_CTRL);
+  lpc214x_putreg(0, LPC214X_USBDEV_CTRL);
   (void)lpc214x_usbcmd(CMD_USB_EP_SELECT | epphy, 0);
   result = lpc214x_usbcmd(CMD_USB_EP_CLRBUFFER, 0);
 
@@ -857,26 +906,26 @@ static void lpc214x_eprealize(struct lpc214x_ep_s *privep, boolean prio, uint32 
 
   /* Clear realize interrupt bit */
 
-  putreg32(USBDEV_DEVINT_EPRLZED, LPC214X_USBDEV_DEVINTCLR);
+  lpc214x_putreg(USBDEV_DEVINT_EPRLZED, LPC214X_USBDEV_DEVINTCLR);
 
   /* Realize the endpoint */
 
-  reg  = getreg32(LPC214X_USBDEV_REEP);
+  reg  = lpc214x_getreg(LPC214X_USBDEV_REEP);
   reg |= (1 << privep->epphy);
-  putreg32(reg, LPC214X_USBDEV_REEP);
+  lpc214x_putreg(reg, LPC214X_USBDEV_REEP);
 
   /* Set endpoint maximum packet size */
 
-  putreg(privep->epphy, LPC214X_USBDEV_EPIND);
-  putreg(packetsize, LPC214X_USBDEV_MAXPSIZE);
+  lpc214x_putreg(privep->epphy, LPC214X_USBDEV_EPIND);
+  lpc214x_putreg(packetsize, LPC214X_USBDEV_MAXPSIZE);
 
   /* Wait for Realize complete */
 
-  while ((getreg32(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_EPRLZED) == 0);
+  while ((lpc214x_getreg(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_EPRLZED) == 0);
 
   /* Clear realize interrupt bit */
 
-  putreg32(USBDEV_DEVINT_EPRLZED,LPC214X_USBDEV_DEVINTCLR);
+  lpc214x_putreg(USBDEV_DEVINT_EPRLZED,LPC214X_USBDEV_DEVINTCLR);
 }
 
 /*******************************************************************************
@@ -891,15 +940,15 @@ static ubyte lpc214x_epclrinterrupt(ubyte epphy)
 {
   /* Clear the endpoint interrupt */
 
-  putreg32(1 << epphy, LPC214X_USBDEV_EPINTCLR);
+  lpc214x_putreg(1 << epphy, LPC214X_USBDEV_EPINTCLR);
 
   /* Wait for data in the command data register */
 
-  while ((getreg32(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_CDFULL) == 0);
+  while ((lpc214x_getreg(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_CDFULL) == 0);
 
   /* Return the value of the command data register */
 
-  return getreg32(LPC214X_USBDEV_CMDDATA);
+  return lpc214x_getreg(LPC214X_USBDEV_CMDDATA);
 }
 
 /*******************************************************************************
@@ -921,9 +970,9 @@ static inline void lpc214x_ep0configure(struct lpc214x_usbdev_s *priv)
 
   /* Enable EP0 interrupts (not DMA) */
 
-  inten = getreg32(LPC214X_USBDEV_EPINTEN);
+  inten = lpc214x_getreg(LPC214X_USBDEV_EPINTEN);
   inten |= 3; /* EP0 Rx and Tx */
-  putreg32(inten, LPC214X_USBDEV_EPINTEN);
+  lpc214x_putreg(inten, LPC214X_USBDEV_EPINTEN);
 }
 
 /*******************************************************************************
@@ -940,11 +989,11 @@ static inline void lpc214x_dmareset(uint32 enable)
 
   /* Disable All DMA interrupts */
 
-  putreg32(0, LPC214X_USBDEV_DMAINTEN);
+  lpc214x_putreg(0, LPC214X_USBDEV_DMAINTEN);
 
   /* DMA Disable */
 
-  putreg32(0xffffffff, LPC214X_USBDEV_EPDMADIS);
+  lpc214x_putreg(0xffffffff, LPC214X_USBDEV_EPDMADIS);
 
   /* DMA Request clear */
 
@@ -971,7 +1020,7 @@ static inline void lpc214x_dmareset(uint32 enable)
 
   /* Set USB UDCA Head register */
 
-  putreg32((uint32)USB_UDCA, LPC214X_USBDEV_UDCAH);
+  lpc214x_putreg((uint32)USB_UDCA, LPC214X_USBDEV_UDCAH);
 
   /* Invalidate all DMA descriptors */
 
@@ -982,7 +1031,7 @@ static inline void lpc214x_dmareset(uint32 enable)
 
   /* Enable DMA interrupts */
 
-  putreg32(enable, LPC214X_USBDEV_DMAINTEN);
+  lpc214x_putreg(enable, LPC214X_USBDEV_DMAINTEN);
 }
 #endif
 
@@ -998,16 +1047,16 @@ static void lpc214x_usbreset(struct lpc214x_usbdev_s *priv)
 {
   /* Disable all endpoint interrupts */
 
-  putreg32(0, LPC214X_USBDEV_EPINTEN);
+  lpc214x_putreg(0, LPC214X_USBDEV_EPINTEN);
 
   /* Frame is Hp interrupt */
 
-  putreg32(1, LPC214X_USBDEV_DEVINTPRI);
+  lpc214x_putreg(1, LPC214X_USBDEV_DEVINTPRI);
 
   /* Clear all pending interrupts */
 
-  putreg32(0xffffffff, LPC214X_USBDEV_EPINTCLR);
-  putreg32(0xffffffff, LPC214X_USBDEV_DEVINTCLR);
+  lpc214x_putreg(0xffffffff, LPC214X_USBDEV_EPINTCLR);
+  lpc214x_putreg(0xffffffff, LPC214X_USBDEV_DEVINTCLR);
 
   /* Periperhal address is needed */
 
@@ -1032,8 +1081,8 @@ static void lpc214x_usbreset(struct lpc214x_usbdev_s *priv)
 
   /* Enable Device interrupts */
 
-  putreg32(USB_SLOW_INT|USB_DEVSTATUS_INT|USB_FAST_INT|USB_FRAME_INT|USB_ERROR_INT,
-           LPC214X_USBDEV_DEVINTEN);
+  lpc214x_putreg(USB_SLOW_INT|USB_DEVSTATUS_INT|USB_FAST_INT|USB_FRAME_INT|USB_ERROR_INT,
+                 LPC214X_USBDEV_DEVINTEN);
 }
 
 /*******************************************************************************
@@ -1477,12 +1526,12 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
   /* Read the device interrupt status register */
 
-  devintstatus = getreg32(LPC214X_USBDEV_DEVINTST);
+  devintstatus = lpc214x_getreg(LPC214X_USBDEV_DEVINTST);
 
 #ifdef CONFIG_LPC214X_USBDEV_DMA
   /* Check for low priority and high priority (non-DMA) interrupts */
 
-  if ((getreg(LPC214X_USBDEV_INTST) & (USBDEV_INTST_REQLP|USBDEV_INTST_REQHP)) != 0)
+  if ((lpc214x_getreg(LPC214X_USBDEV_INTST) & (USBDEV_INTST_REQLP|USBDEV_INTST_REQHP)) != 0)
     {
 #endif
 #ifdef CONFIG_LPC214X_USBDEV_EPFAST_INTERRUPT
@@ -1492,7 +1541,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
         {
           /* Clear Fast EP interrupt */
 
-         putreg32(USBDEV_DEVINT_EPFAST, LPC214X_USBDEV_DEVINTCLR);
+         lpc214x_putreg(USBDEV_DEVINT_EPFAST, LPC214X_USBDEV_DEVINTCLR);
          usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EPFAST), 0);
 
          /* Do what? */
@@ -1509,7 +1558,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
           /* Clear the error interrupt */
 
-          putreg32(USBDEV_DEVINT_EPRINT, LPC214X_USBDEV_DEVINTCLR);
+          lpc214x_putreg(USBDEV_DEVINT_EPRINT, LPC214X_USBDEV_DEVINTCLR);
 
           /* And show what error occurred */
 
@@ -1525,7 +1574,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
         {
           /* Clear the frame interrupt */
 
-          putreg32(USBDEV_DEVINT_FRAME, LPC214X_USBDEV_DEVINTCLR);
+          lpc214x_putreg(USBDEV_DEVINT_FRAME, LPC214X_USBDEV_DEVINTCLR);
           usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_FRAME), 0);
 
           /* Then read the start of frame value */
@@ -1540,7 +1589,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
         {
           /* Clear Device status interrupt */
 
-          putreg32(USBDEV_DEVINT_DEVSTAT, LPC214X_USBDEV_DEVINTCLR);
+          lpc214x_putreg(USBDEV_DEVINT_DEVSTAT, LPC214X_USBDEV_DEVINTCLR);
 
           /* Get device status */
 
@@ -1601,14 +1650,14 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
         {
           /* Clear Slow EP interrupt */
 
-          putreg32(USBDEV_DEVINT_EPSLOW, LPC214X_USBDEV_DEVINTCLR);
+          lpc214x_putreg(USBDEV_DEVINT_EPSLOW, LPC214X_USBDEV_DEVINTCLR);
           usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EPSLOW), 0);
 
           do
             {
               /* Read the endpoint interrupt status register */
 
-              epintstatus = getreg32(LPC214X_USBDEV_EPINTST);
+              epintstatus = lpc214x_getreg(LPC214X_USBDEV_EPINTST);
 
               /* Loop twice:  Process software high priority interrupts
                * on the first pass and low priority interrupts on the
@@ -1727,7 +1776,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
   /* Check for DMA interrupts */
 
-  if ((getreg(LPC214X_USBDEV_INTST) & USBDEV_INTST_REQDMA) != 0)
+  if ((lpc214x_getreg(LPC214X_USBDEV_INTST) & USBDEV_INTST_REQDMA) != 0)
     {
       /* First Software High priority and then low priority */
 
@@ -1736,26 +1785,26 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
       /* Collect the DMA interrupt sources */
 
       dmaintstatus = 0;
-      tmp = getreg32(LPC214X_USBDEV_EOTINTST);
-      if (getreg32(LPC214X_USBDEV_DMAINTEN) & 1)
+      tmp = lpc214x_getreg(LPC214X_USBDEV_EOTINTST);
+      if (lpc214x_getreg(LPC214X_USBDEV_DMAINTEN) & 1)
         {
           dmaintstatus |= tmp;
         }
-      putreg32(tmp, LPC214X_USBDEV_EOTINTCLR);
+      lpc214x_putreg(tmp, LPC214X_USBDEV_EOTINTCLR);
 
-      tmp = getreg32(LPC214X_USBDEV_NDDRINTST);
-      if (getreg32(LPC214X_USBDEV_DMAINTEN) & 2)
+      tmp = lpc214x_getreg(LPC214X_USBDEV_NDDRINTST);
+      if (lpc214x_getreg(LPC214X_USBDEV_DMAINTEN) & 2)
         {
           dmaintstatus |= tmp;
         }
-      putreg32(tmp, LPC214X_USBDEV_NDDRINTCLR);
+      lpc214x_putreg(tmp, LPC214X_USBDEV_NDDRINTCLR);
 
-      tmp = getreg32(LPC214X_USBDEV_SYSERRINTST);
-      if (getreg32(LPC214X_USBDEV_DMAINTEN) & 4)
+      tmp = lpc214x_getreg(LPC214X_USBDEV_SYSERRINTST);
+      if (lpc214x_getreg(LPC214X_USBDEV_DMAINTEN) & 4)
         {
           dmaintstatus |= tmp;
         }
-      putreg32(tmp, LPC214X_USBDEV_SYSERRINTCLR);
+      lpc214x_putreg(tmp, LPC214X_USBDEV_SYSERRINTCLR);
 
       /* Loop twice:  Process software high priority interrupts on the
        * first pass and low priority interrupts on the second.
@@ -1894,7 +1943,7 @@ static void lpc214x_dmarestart(ubyte epphy, uint32 descndx)
 
   /* Enable DMA transfer on the endpoint */
 
-  putreg32(1 << epph, LPC214X_USBDEV_EPDMAEN);
+  lpc214x_putreg(1 << epph, LPC214X_USBDEV_EPDMAEN);
 
   /* Check the state of IN/OUT EP buffer */
 
@@ -1962,13 +2011,13 @@ static int lpc214x_epconfigure(FAR struct usbdev_ep_s *ep,
 #ifdef CONFIG_LPC214X_USBDEV_DMA
   /* Enable DMA Ep interrupt (WO) */
 
-   putreg32(1 << epphy, LPC214X_USBDEV_EPDMAEN);
+   lpc214x_putreg(1 << epphy, LPC214X_USBDEV_EPDMAEN);
 #else
   /* Enable Ep interrupt (R/W) */
 
-   inten = getreg32(LPC214X_USBDEV_EPINTEN);
+   inten = lpc214x_getreg(LPC214X_USBDEV_EPINTEN);
    inten |= (1 << epphy);
-   putreg32(inten, LPC214X_USBDEV_EPINTEN);
+   lpc214x_putreg(inten, LPC214X_USBDEV_EPINTEN);
 #endif
    return OK;
 }
@@ -2004,15 +2053,15 @@ static int lpc214x_epdisable(FAR struct usbdev_ep_s *ep)
 
   /* Disable endpoint and interrupt */
 
-  reg  = getreg32(LPC214X_USBDEV_REEP);
+  reg  = lpc214x_getreg(LPC214X_USBDEV_REEP);
   reg &= ~mask;
-  putreg32(reg, LPC214X_USBDEV_REEP);
+  lpc214x_putreg(reg, LPC214X_USBDEV_REEP);
 
-  putreg32(mask, LPC214X_USBDEV_EPDMADIS);
+  lpc214x_putreg(mask, LPC214X_USBDEV_EPDMADIS);
 
-  reg  = getreg32(LPC214X_USBDEV_EPINTEN);
+  reg  = lpc214x_getreg(LPC214X_USBDEV_EPINTEN);
   reg &= ~mask;
-  putreg32(reg, LPC214X_USBDEV_EPINTEN);
+  lpc214x_putreg(reg, LPC214X_USBDEV_EPINTEN);
 
   irqrestore(flags);
   return OK;
@@ -2540,15 +2589,15 @@ void up_usbinitialize(void)
 
   /* Turn on USB power and clocking */
 
-  reg = getreg32(LPC214X_PCON_PCONP);
+  reg = lpc214x_getreg(LPC214X_PCON_PCONP);
   reg |= LPC214X_PCONP_PCUSB;
-  putreg32(reg, LPC214X_PCON_PCONP);
+  lpc214x_putreg(reg, LPC214X_PCON_PCONP);
 
   /* Enable Vbus sense and Connect */
 
-  reg = getreg32(LPC214X_PINSEL1);
+  reg = lpc214x_getreg(LPC214X_PINSEL1);
   reg = (reg & LPC214X_USBDEV_PINMASK) | LPC214X_USBDEV_PINSEL;
-  putreg32(reg, LPC214X_PINSEL1);
+  lpc214x_putreg(reg, LPC214X_PINSEL1);
 
   /* Attach USB controller  interrupt handler */
 
@@ -2615,9 +2664,9 @@ void up_usbuninitialize(void)
 
   /* Turn off USB power and clocking */
 
-  reg = getreg32(LPC214X_PCON_PCONP);
+  reg = lpc214x_getreg(LPC214X_PCON_PCONP);
   reg &= ~LPC214X_PCONP_PCUSB;
-  putreg32(reg, LPC214X_PCON_PCONP);
+  lpc214x_putreg(reg, LPC214X_PCON_PCONP);
   irqrestore(flags);
 }
 
