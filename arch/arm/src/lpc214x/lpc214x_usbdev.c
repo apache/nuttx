@@ -2585,10 +2585,10 @@ errout:
 }
 
 /*******************************************************************************
- * Name: up_usbunintialize
+ * Name: up_usbuninitialize
  *******************************************************************************/
 
-int up_usbunintialize(void)
+void up_usbuninitialize(void)
 {
   struct lpc214x_usbdev_s *priv = &g_usbdev;
   uint32 reg;
@@ -2619,7 +2619,6 @@ int up_usbunintialize(void)
   reg &= ~LPC214X_PCONP_PCUSB;
   putreg32(reg, LPC214X_PCON_PCONP);
   irqrestore(flags);
-  return OK;
 }
 
 /*******************************************************************************
