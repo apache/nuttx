@@ -707,7 +707,7 @@ static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
   privreq = (struct lpc214x_req_s *)sq_peek(&privep->reqlist);
   if (!privreq)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_NULLREQUEST), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NULLREQUEST), 0);
       return OK;
     }
 
@@ -776,7 +776,7 @@ static int lpc214x_rdrequest(struct lpc214x_ep_s *privep)
   privreq = (struct lpc214x_req_s *)sq_peek(&privep->reqlist);
   if (!privreq)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_NULLREQUEST), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NULLREQUEST), 0);
       return OK;
     }
 
@@ -791,7 +791,7 @@ static int lpc214x_rdrequest(struct lpc214x_ep_s *privep)
       nbytesread = lpc214x_epread(privep->epphy, buf, privep->ep.maxpacket);
       if (nbytesread < 0)
         {
-          usbtrace(TRACE_ERROR(LPC214X_TRACEERR_EPREAD), nbytesread);
+          usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_EPREAD), nbytesread);
           return ERROR;
         }
 
@@ -1320,7 +1320,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
 
   if (priv->stalled)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_STALLED), priv->ep0state);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_STALLED), priv->ep0state);
       lpc214x_epstall(&ep0->ep, FALSE);
       lpc214x_epstall(&ep0->ep, FALSE);
     }
@@ -1383,7 +1383,7 @@ static inline void lpc214x_ep0dataoutinterrupt(struct lpc214x_usbdev_s *priv)
 
   if (priv->stalled)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_STALLED), priv->ep0state);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_STALLED), priv->ep0state);
       ep0 = &priv->eplist[LPC214X_EP0_OUT];
       lpc214x_epstall(&ep0->ep, FALSE);
       lpc214x_epstall(&ep0->ep, FALSE);
@@ -1443,7 +1443,7 @@ static inline void lpc214x_ep0dataininterrupt(struct lpc214x_usbdev_s *priv)
 
   if (priv->stalled)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_STALLED), priv->ep0state);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_STALLED), priv->ep0state);
       ep0 = &priv->eplist[LPC214X_EP0_IN];
       lpc214x_epstall(&ep0->ep, FALSE);
       lpc214x_epstall(&ep0->ep, FALSE);
@@ -1806,7 +1806,7 @@ static int lpc214x_dmasetup(struct lpc214x_usbdev_s *priv, ubyte epphy,
 #ifdef CONFIG_DEBUG
   if (!priv || epphy < 2)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
       return -EINVAL;
     }
 #endif
@@ -1817,7 +1817,7 @@ static int lpc214x_dmasetup(struct lpc214x_usbdev_s *priv, ubyte epphy,
 
   if (!dmadesc)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_NODMADESC), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NODMADESC), 0);
       return -EBUSY;
     }
 
@@ -1825,7 +1825,7 @@ static int lpc214x_dmasetup(struct lpc214x_usbdev_s *priv, ubyte epphy,
 
   if ((dmadesc->status & USB_DMADESC_STATUSMASK) == USB_DMADESC_BEINGSERVICED)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_DMABUSY), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_DMABUSY), 0);
       return -EBUSY; /* Shouldn't happen */
     }
 
@@ -1991,7 +1991,7 @@ static int lpc214x_epdisable(FAR struct usbdev_ep_s *ep)
 #ifdef CONFIG_DEBUG
   if (!ep)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
       return -EINVAL;
     }
 #endif
@@ -2033,7 +2033,7 @@ static FAR struct usbdev_req_s *lpc214x_epallocreq(FAR struct usbdev_ep_s *ep)
 #ifdef CONFIG_DEBUG
   if (!ep)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
       return NULL;
     }
 #endif
@@ -2042,7 +2042,7 @@ static FAR struct usbdev_req_s *lpc214x_epallocreq(FAR struct usbdev_ep_s *ep)
   privreq = (FAR struct lpc214x_req_s *)malloc(sizeof(struct lpc214x_req_s));
   if (!privreq)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_ALLOCFAIL), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_ALLOCFAIL), 0);
       return NULL;
     }
 
@@ -2065,7 +2065,7 @@ static void lpc214x_epfreereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_
 #ifdef CONFIG_DEBUG
   if (!ep || !req)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
       return;
     }
 #endif
@@ -2145,7 +2145,7 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 #ifdef CONFIG_DEBUG
   if (!req || !req->callback || !req->buf || !ep)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
       return -EINVAL;
     }
 #endif
@@ -2154,7 +2154,7 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 
   if (!priv->driver || priv->usbdev.speed == USB_SPEED_UNKNOWN)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_NOTCONFIGURED), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NOTCONFIGURED), 0);
       return -ESHUTDOWN;
     }
 
@@ -2166,7 +2166,7 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
   flags = irqsave();
   if (req->len == 0 && (privep->in || privep->epphy == 3))
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_NULLPACKET), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NULLPACKET), 0);
       sq_addlast(&privreq->sqe, &privep->reqlist);
       goto success_notransfer;
     }
@@ -2202,7 +2202,7 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
         }
       else
         {
-          usbtrace(TRACE_ERROR(LPC214X_TRACEERR_BADREQUEST), 0);
+          usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADREQUEST), 0);
           ret = ERROR;
           goto errout;
         }
@@ -2239,7 +2239,7 @@ static int lpc214x_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 #ifdef CONFIG_DEBUG
   if (!ep || !req)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
       return -EINVAL;
     }
 #endif
@@ -2303,7 +2303,7 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte e
     {
       if (epphy >= LPC214X_NLOGENDPOINTS)
         {
-         usbtrace(TRACE_ERROR(LPC214X_TRACEERR_BADEPNO), 0);
+         usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADEPNO), 0);
          return NULL;
         }
 
@@ -2339,7 +2339,7 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte e
 
     case USB_EP_ATTR_XFER_CONTROL: /* Control endpoint -- not a valid choice */
     default:
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_BADEPTYPE), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADEPTYPE), 0);
       return NULL;
     }
 
@@ -2375,7 +2375,7 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte e
       irqrestore(flags);
     }
 
-  usbtrace(TRACE_ERROR(LPC214X_TRACEERR_NOEP), 0);
+  usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NOEP), 0);
   return NULL;
 }
 
@@ -2473,7 +2473,7 @@ static int lpc214x_selfpowered(struct usbdev_s *dev, boolean selfpowered)
 #ifdef CONFIG_DEBUG
   if (!dev)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
       return -ENODEV;
     }
 #endif
@@ -2554,7 +2554,7 @@ void up_usbinitialize(void)
 
   if (irq_attach(LPC214X_USB_IRQ, lpc214x_usbinterrupt) != 0)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_IRQREGISTRATION), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_IRQREGISTRATION), 0);
       goto errout;
     }
 
@@ -2597,7 +2597,7 @@ void up_usbuninitialize(void)
   usbtrace(TRACE_DEVUNINIT, 0);
   if (priv->driver)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_DRIVERREGISTERED), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_DRIVERREGISTERED), 0);
       usbdev_unregister(priv->driver);
     }
 
@@ -2640,13 +2640,13 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
   if (!driver || !driver->ops->bind || !driver->ops->unbind ||
       !driver->ops->disconnect || !driver->ops->setup)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
       return -EINVAL;
     }
 
   if (g_usbdev.driver)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_DRIVER), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_DRIVER), 0);
       return -EBUSY;
     }
 #endif
@@ -2660,7 +2660,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
   ret = CLASS_BIND(driver, &g_usbdev.usbdev);
   if (ret)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_BINDFAILED), (uint16)-ret);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BINDFAILED), (uint16)-ret);
       g_usbdev.driver = NULL;
     }
   return ret;
@@ -2683,7 +2683,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 #ifdef CONFIG_DEBUG
   if (driver != g_usbdev.driver)
     {
-      usbtrace(TRACE_ERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
       return -EINVAL;
     }
 #endif
