@@ -39,7 +39,10 @@
 
 #include <nuttx/config.h>
 
+#include <arch/board/board.h>
 #include "chip.h"
+#include "lpc214x_pll.h"
+#include "lpc214x_apb.h"
 #include "up_internal.h"
 #include "up_arch.h"
 
@@ -82,33 +85,77 @@
 
 /* Phase Locked Loop (PLL) initialization values
  *
- * BIT 0:4 MSEL: PLL Multiplier "M" Value
+ * Bit 0:4 MSEL: PLL Multiplier "M" Value
  *               CCLK = M * Fosc
- * BIT 5:6 PSEL: PLL Divider "P" Value 
+ * Bit 5:6 PSEL: PLL Divider "P" Value 
  *               Fcco = CCLK * 2 * P
  *               156MHz <= Fcco <= 320MHz
  */
 
+/* PLL0 provides CCLK and must always be configured */
 
-#ifndef CONFIG_PLLCFG_VALUE /* Can be selected from config file */
-#  define CONFIG_PLLCFG_VALUE 0x00000024
+#ifndef CONFIG_PLLCFG_VALUE /* board.h values can be supeceded config file */
+#  ifdef LPC214X_PLL_M
+#    define CONFIG_PLLCFG_MSEL (LPC214X_PLL_M-1)
+#  else
+#    warning "PLL_M not specified"
+#    define CONFIG_PLLCFG_MSEL (5-1)
+#  endif
+#  ifdef LPC214X_PLL_P
+#    if LPC214X_PLL_P == 1
+#      define CONFIG_PLLCFG_PSEL LPC214X_PLL_CFG_PSEL1
+#    elif LPC214X_PLL_P == 2
+#      define CONFIG_PLLCFG_PSEL LPC214X_PLL_CFG_PSEL2
+#    elif LPC214X_PLL_P == 4
+#      define CONFIG_PLLCFG_PSEL LPC214X_PLL_CFG_PSEL4
+#    elif LPC214X_PLL_P == 8
+#      define CONFIG_PLLCFG_PSEL LPC214X_PLL_CFG_PSEL8
+#    else
+#      error "Unrecognized value for PLL_P"
+#    endif
+#  else
+#    warning "PLL_P not specified"
+#    define CONFIG_PLLCFG_PSEL LPC214X_PLL_CFG_PSEL2
+#  endif
+#  define CONFIG_PLLCFG_VALUE (CONFIG_PLLCFG_PSEL|CONFIG_PLLCFG_MSEL)
 #endif
 
-/* PLL Control register */
+/* If  USB is enabled, PLL1 must be configured for 48MHz to provide USB clocking */
 
-#ifndef CONFIG_PLLCON_VALUE /* Can be selected from config file */
-#  define CONFIG_PLLCON_VALUE LPC214X_PLL_CON_PLLE
+#ifdef CONFIG_USBDEV
+#  ifndef CONFIG_USBPLLCFG_VALUE /* board.h values can be supeceded config file */
+#    ifdef LPC214X_USBPLL_M
+#      define LPC214X_USBPLLCFG_MSEL (LPC214X_USBPLL_M-1)
+#    else
+#      warning "PLL_M not specified"
+#      define LPC214X_USBPLLCFG_MSEL 0x00000004
+#    endif
+#    ifdef LPC214X_USBPLL_P
+#      if LPC214X_USBPLL_P == 1
+#        define LPC214X_USBPLLCFG_PSEL 0x00000000
+#      elif LPC214X_USBPLL_P == 2
+#        define LPC214X_USBPLLCFG_PSEL 0x00000020
+#      elif LPC214X_USBPLL_P == 4
+#        define LPC214X_USBPLLCFG_PSEL 0x00000040
+#      elif LPC214X_USBPLL_P == 8
+#        define LPC214X_USBPLLCFG_PSEL 0x00000060
+#      else
+#        error "Unrecognized value for PLL_P"
+#      endif
+#    endif
+#    define CONFIG_USBPLLCFG_VALUE (LPC214X_USBPLLCFG_PSEL|LPC214X_USBPLLCFG_MSEL)
+#  endif
 #endif
 
 /* Memory Accelerator Module (MAM) initialization values
  *
  * MAM Control Register
- *   BIT 0:1 Mode
+ *   Bit 0:1 Mode
  *           0 = Disabled
  *           1 = Partially Enabled
  *           2 = Fully Enabled
  * MAM Timing Register
- *   BIT 0:2 Fetch Cycles
+ *   Bit 0:2 Fetch Cycles
  *           0 = Reserved
  *           1 = 1
  *           2 = 2
@@ -127,32 +174,40 @@
 #  define CONFIG_MAMTIM_VALUE 0x00000004
 #endif
 
-/* VPBDIV initialization values
+/* APBDIV initialization values
  *
- * BITS 0:1 VPB Peripheral Bus Clock Rate
- *          0 = VPB Clock = CPU Clock / 4
- *          1 = VPB Clock = CPU Clock
- *          2 = VPB Clock = CPU Clock / 2
- * BITS 4:5 XCLKDIV: XCLK Pin
- *          0 = XCLK Pin = CPU Clock / 4
- *          1 = XCLK Pin = CPU Clock
- *          2 = XCLK Pin = CPU Clock / 2
+ * Bits 0:1 APB Peripheral Bus Clock Rate
+ *          0 = APB Clock = CPU Clock / 4
+ *          1 = APB Clock = CPU Clock
+ *          2 = APB Clock = CPU Clock / 2
  */
 
-#ifndef CONFIG_VPBDIV_VALUE /* Can be selected from config file */
-#  define CONFIG_VPBDIV_VALUE 0x00000001
+#ifndef CONFIG_APBDIV_VALUE /* Can be selected from config file */
+#  ifdef LPC214X_APB_DIV
+#    if LPC214X_APB_DIV == 1
+#       define CONFIG_APBDIV_VALUE LPC214X_APBDIV_DIV1
+#    elif LPC214X_APB_DIV == 2
+#       define CONFIG_APBDIV_VALUE LPC214X_APBDIV_DIV2
+#    elif LPC214X_APB_DIV == 4
+#       define CONFIG_APBDIV_VALUE LPC214X_APBDIV_DIV4
+#    else
+#       error "Unrecognized value for APBDIV"
+#    endif
+#  else
+#    define CONFIG_APBDIV_VALUE LPC214X_APBDIV_DIV1
+#  endif
 #endif
 
 /* External Memory Controller (EMC) initialization values
  *
  * Bank Configuration n (BCFG0..3)
- *    BIT 0:3   IDCY: Idle Cycles (0-15)
- *    BIT 5:9   WST1: Wait States 1 (0-31)
- *    BIT 11:15 WST2: Wait States 2 (0-31)
- *    BIT 10    RBLE: Read Byte Lane Enable
- *    BIT 26    WP: Write Protect
- *    BIT 27    BM: Burst ROM
- *    BIT 28:29 MW: Memory Width  (0=8-bit 1=16-bit 2=32-bit 3=Reserved)
+ *    Bit 0:3   IDCY: Idle Cycles (0-15)
+ *    Bit 5:9   WST1: Wait States 1 (0-31)
+ *    Bit 11:15 WST2: Wait States 2 (0-31)
+ *    Bit 10    RBLE: Read Byte Lane Enable
+ *    Bit 26    WP: Write Protect
+ *    Bit 27    BM: Burst ROM
+ *    Bit 28:29 MW: Memory Width  (0=8-bit 1=16-bit 2=32-bit 3=Reserved)
  */
 
 #ifndef CONFIG_BCFG0_VALUE /* Can be selected from config file */
@@ -189,17 +244,23 @@
 
 #ifndef CONFIG_PINSEL1_VALUE /* Can be selected from the config file */
 #  ifdef CONFIG_ADC_SETUP
-#    define CONFIG_PINSEL1_VALUE 0x01000000; /* Enable DAC */
+#    define CONFIG_PINSEL1_ADC    0x01000000 /* Enable DAC */
 #  else
-#    define CONFIG_PINSEL1_VALUE 0x00000000; /* Reset value */
+#    define CONFIG_PINSEL1_ADC    0x00000000 /* Reset value */
 #  endif
+#  ifdef CONFIG_USBDEV
+#    define CONFIG_PINSEL1_USBDEV 0x80004000 /* Enable Vbus and Connect LED */
+#  else
+#    define CONFIG_PINSEL1_USBDEV 0x00000000 /* Reset value */
+#  endif
+#  define CONFIG_PINSEL1_VALUE (CONFIG_PINSEL1_ADC|CONFIG_PINSEL1_USBDEV)
 #endif
 
 /* External Memory Pins definitions
- * BIT 0:1  Reserved
- * BIT 2    GPIO/DEBUG
- * BIT 3    GPIO/TRACE
- * BIT 31:4 Reserved
+ * Bit 0:1  Reserved
+ * Bit 2    GPIO/DEBUG
+ * Bit 3    GPIO/TRACE
+ * Bit 31:4 Reserved
  * CS0..3, OE, WE, BLS0..3,  D0..31, A2..23, JTAG Pins
  */
 
@@ -260,13 +321,13 @@
 #endif
 	.endm
 
-/* Configure VPBDIV */
+/* Configure APBDIV */
 
-	.macro	configvpbdiv, base, val
-#ifdef CONFIG_VPBDIV_SETUP
-	ldr	\base, =LPC214X_VPBDIV
-	ldr	\val, =CONFIG_VPBDIV_VALUE
-	str	\val, [\base]
+	.macro	configapbdiv, base, val
+#ifdef CONFIG_APBDIV_SETUP
+	ldr	\base, =LPC214X_APBDIV
+	ldr	\val, =CONFIG_APBDIV_VALUE
+	strb	\val, [\base]
 #endif
 	.endm
 
@@ -274,7 +335,7 @@
 
 	.macro	configpll, base, val1, val2, val3
 #ifdef CONFIG_PLL_SETUP
-	ldr	\base, =LPC214X_PLL_BASE
+	ldr	\base, =LPC214X_PLL0_BASE
 	mov	\val1, #LPC214X_PLL_FEED1
 	mov	\val2, #LPC214X_PLL_FEED2
 
@@ -282,7 +343,7 @@
 
 	mov	\val3, #CONFIG_PLLCFG_VALUE
 	str	\val3, [\base, #LPC214X_PLL_CFG_OFFSET]
-	mov	\val3, #CONFIG_PLLCON_VALUE
+	mov	\val3, #LPC214X_PLL_CON_PLLE
 	str	\val3, [\base, #LPC214X_PLL_CON_OFFSET]
 	str	\val1, [\base, #LPC214X_PLL_FEED_OFFSET]
 	str	\val2, [\base, #LPC214X_PLL_FEED_OFFSET]
@@ -301,6 +362,37 @@
 	str	\val2, [\base, #LPC214X_PLL_FEED_OFFSET]
 #endif
 	.endm
+
+	.macro	configusbpll, base, val1, val2, val3
+#ifdef CONFIG_USBDEV
+	ldr	\base, =LPC214X_PLL1_BASE
+	mov	\val1, #LPC214X_PLL_FEED1
+	mov	\val2, #LPC214X_PLL_FEED2
+
+	/* Configure and Enable PLL */
+
+	mov	\val3, #CONFIG_USBPLLCFG_VALUE
+	str	\val3, [\base, #LPC214X_PLL_CFG_OFFSET]
+	mov	\val3, #LPC214X_PLL_CON_PLLE
+	str	\val3, [\base, #LPC214X_PLL_CON_OFFSET]
+	str	\val1, [\base, #LPC214X_PLL_FEED_OFFSET]
+	str	\val2, [\base, #LPC214X_PLL_FEED_OFFSET]
+
+	/* Wait until PLL Locked */
+1:
+	ldr	\val3, [\base, #LPC214X_PLL_STAT_OFFSET]
+	ands	\val3, \val3, #LPC214X_PLL_STAT_PLOCK
+	beq	1b
+
+	/* Switch to PLL Clock */
+
+	mov	\val3, #(LPC214X_PLL_CON_PLLE | LPC214X_PLL_CON_PLLC)
+	str	\val3, [\base, #LPC214X_PLL_CON_OFFSET]
+	str	\val1, [\base, #LPC214X_PLL_FEED_OFFSET]
+	str	\val2, [\base, #LPC214X_PLL_FEED_OFFSET]
+#endif
+	.endm
+
 
 /* Configure the Memory Accelerator Module (MAM) */
 
@@ -420,13 +512,14 @@ __start:
 
 	configemc	r0, r1
 
-	/* Configure VPBDIV */
+	/* Configure APBDIV */
 
-	configvpbdiv	r0, r1
+	configapbdiv	r0, r1
 
-	/* Configure the PLL */
+	/* Configure the PLL(s) */
 
 	configpll	r0, r1, r2, r3
+	configusbpll	r0, r1, r2, r3
 
 	/* Configure the Memory Accelerator Module (MAM) */
 

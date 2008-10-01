@@ -177,12 +177,6 @@
 
 /* Device Status Bits */
 
-#define USBDEV_DEVSTATUS_CONNECT     (0x00000001) /* Bit 0: Connected */
-#define USBDEV_DEVSTATUS_CONNCHG     (0x00000002) /* Bit 1: Connect change */
-#define USBDEV_DEVSTATUS_SUSPEND     (0x00000004) /* Bit 2: Suspend */
-#define USBDEV_DEVSTATUS_SUSPCHG     (0x00000008) /* Bit 3: Suspend change */
-#define USBDEV_DEVSTATUS_RESET       (0x00000002) /* Bit 4: Bus reset bit */
-
 #define USBDEV_EPSTALL               (0x00000001)
 #define USBDEV_EPSTALLSTATUS         (0x00000002)
 #define USBDEV_EPSETUPPACKET         (0x00000004)
@@ -269,15 +263,23 @@
 
 /* Command Responses ***********************************************************/
 
+/* Device Status Bits (8-bits) */
+
+#define USBDEV_DEVSTATUS_CONNECT     (0x01)       /* Bit 0: Connected */
+#define USBDEV_DEVSTATUS_CONNCHG     (0x02)       /* Bit 1: Connect change */
+#define USBDEV_DEVSTATUS_SUSPEND     (0x04)       /* Bit 2: Suspend */
+#define USBDEV_DEVSTATUS_SUSPCHG     (0x08)       /* Bit 3: Suspend change */
+#define USBDEV_DEVSTATUS_RESET       (0x10)       /* Bit 4: Bus reset bit */
+
 /* EP Select response */
 
-#define CMD_USB_EPSELECT_FE          (0x01) /* Bit 0=1: IN empty or OUT full */
-#define CMD_USB_EPSELECT_ST          (0x02) /* Bit 1=1: Endpoint is stalled */
-#define CMD_USB_EPSELECT_STP         (0x04) /* Bit 2=1: Last packet was setup */
-#define CMD_USB_EPSELECT_PO          (0x05) /* Bit 3=1: Previous packet was overwritten */
-#define CMD_USB_EPSELECT_EPN         (0x10) /* Bit 4=1: NAK sent */
-#define CMD_USB_EPSELECT_B1FULL      (0x20) /* Bit 5=1: Buffer 1 full */
-#define CMD_USB_EPSELECT_B2FULL      (0x40) /* Bit 6=1: Buffer 2 full */
+#define CMD_USB_EPSELECT_FE          (0x01)       /* Bit 0=1: IN empty or OUT full */
+#define CMD_USB_EPSELECT_ST          (0x02)       /* Bit 1=1: Endpoint is stalled */
+#define CMD_USB_EPSELECT_STP         (0x04)       /* Bit 2=1: Last packet was setup */
+#define CMD_USB_EPSELECT_PO          (0x05)       /* Bit 3=1: Previous packet was overwritten */
+#define CMD_USB_EPSELECT_EPN         (0x10)       /* Bit 4=1: NAK sent */
+#define CMD_USB_EPSELECT_B1FULL      (0x20)       /* Bit 5=1: Buffer 1 full */
+#define CMD_USB_EPSELECT_B2FULL      (0x40)       /* Bit 6=1: Buffer 2 full */
 
 /* EP CLRBUFFER response */
 

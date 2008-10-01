@@ -47,9 +47,9 @@
  * Preprocessor definitions
  ****************************************************************************/
 
-#define TRACE_EVENT(id,num)      ((uint16)(id)|(num))
-#define TRACE_CLASS_ID(event)       ((event)&0xff00)
-#define TRACE_INSTANCE(event)    ((event)0x00ff)
+#define TRACE_EVENT(id,data)     ((uint16)(id)|(data))
+#define TRACE_ID(event)          ((event)&0xff00)
+#define TRACE_DATA(event)        ((event)0x00ff)
 
 /* Event class IDs */
 
