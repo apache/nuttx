@@ -50,12 +50,20 @@
 
 /* Clocking *****************************************************************/
 
-#define LPC214X_FOSC      12000000
-#define LPC214X_PLL_M     5
-#define LPC214X_MSEL      (PLL_M-1)
-#define LPC214X_PLL_P     2
+/* Oscillator frequency */
 
-#define LPC214X_PCLKFREQ  (LPC214X_FOSC/4) /* PCLK must be FOSC/4 */
+#define LPC214X_FOSC      12000000
+
+/* PLL0 settings CCLK = PLL_M * FOSC PCLK = CCLK/APBDIV */
+
+#define LPC214X_PLL_M     5
+#define LPC214X_PLL_P     2
+#define LPC214X_APB_DIV   1
+
+/* USB Pll settings -- 48 MHz needed.  FUSB = PLL_M FOSC */
+
+#define LPC214X_USBPLL_M  4
+#define LPC214X_USBPLL_P  2
 
 /* LED definitions **********************************************************/
 
