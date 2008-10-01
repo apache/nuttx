@@ -80,7 +80,7 @@
 #define   LPC214X_MEMMAP                0xe01fc040  /* Memory Mapping Control */
 #define   LPC214X_PLL_BASE              0xe01fc080  /* Phase Locked Loop (PLL) base address */
 #define   LPC214X_PCON_BASE             0xe01fc0c0  /* Power Control (PCON) base address */
-#define   LPC214X_VPBDIV                0xe01fc100  /* VPBDIV Address */
+#define   LPC214X_APBDIV                0xe01fc100  /* APBDIV Address */
 #define   LPC214X_EXT_BASE              0xe01fc140  /* External Interrupt base address */       
 
 #define LPC214X_EMC_BASE                0xffe00000  /* External Memory Controller (EMC) base address */
@@ -247,29 +247,6 @@
 #define LPC214X_PLL_CFG_OFFSET          0x04   /* PLL Configuration Offset */
 #define LPC214X_PLL_STAT_OFFSET         0x08   /* PLL Status Offset */
 #define LPC214X_PLL_FEED_OFFSET         0x0c   /* PLL Feed Offset */
-
-/* PLL Control Register Bit Settings */
-
-#define LPC214X_PLL_CON_PLLE            (1 << 0) /* PLL Enable */
-#define LPC214X_PLL_CON_PLLC            (1 << 1) /* PLL Connect */
-
-/* PLL Configuration Register Bit Settings */
-
-#define LPC214X_PLL_CFG_MSEL            (0x1f << 0) /* PLL Multiplier */
-#define LPC214X_PLL_CFG_PSEL            (0x03 << 5) /* PLL Divider */
-
-/* PLL Status Register Bit Settings */
-
-#define LPC214X_PLL_STAT_MSEL           (0x1f << 0) /* PLL Multiplier Readback */
-#define LPC214X_PLL_STAT_PSEL           (0x03 << 5) /* PLL Divider Readback */
-#define LPC214X_PLL_STAT_PLLE           (1 << 8)    /* PLL Enable Readback */
-#define LPC214X_PLL_STAT_PLLC           (1 << 9)    /* PLL Connect Readback */
-#define LPC214X_PLL_STAT_PLOCK          (1 << 10)   /* PLL Lock Status */
-
-/* PLL Feed Register values */
-
-#define LPC214X_PLL_FEED1               0xaa
-#define LPC214X_PLL_FEED2               0x55
 
 /* Power Control register offsets */
 

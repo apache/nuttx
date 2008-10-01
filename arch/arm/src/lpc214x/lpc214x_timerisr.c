@@ -54,7 +54,12 @@
  * Definitions
  ****************************************************************************/
 
-#define PCLKFREQ (LPC214X_FOSC/4) /* PCLK must be FOSC/4 */
+/* The timers count at the rate of PCLK which is determined by PLL_M and
+ * and APBDIV:
+ */
+
+#define LPC214X_CCLKFREQ  (LPC214X_FOSC*LPC214X_PLL_M)
+#define LPC214X_PCLKFREQ  (LPC214X_CCLKFREQ/LPC214X_APBDIV)
 
 #define tmr_getreg8(o)    getreg8(LPC214X_TMR0_BASE+(o))
 #define tmr_getreg16(o)   getreg16(LPC214X_TMR0_BASE+(o))
