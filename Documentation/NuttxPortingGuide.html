@@ -16,7 +16,7 @@
   </b></big></h1>
   <p><small>by</small></p>
   <p>Gregory Nutt</p>
-  <p><small>Last Update: September 17, 2008</small></p>
+  <p><small>Last Update: October 1, 2008</small></p>
 </center>
 
 <center><h1>Table of Contents</h1></center>
@@ -1624,6 +1624,31 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
   <li>
     <code>CONFIG_NET_RESOLV_ENTRIES</code>: Number of resolver entries
+  </li>
+</ul>
+
+<h2>USB device controller driver</h2>
+<ul>
+  <li>
+    <code>CONFIG_USBDEV</code>: Enables USB device support
+  </li>
+  <li>
+    <code>CONFIG_USBDEV_ISOCHRONOUS</code>: Build in extra support for isochronous endpoints
+  </li>
+  <li>
+    <code>CONFIG_USBDEV_DUALSPEED</code>: Hardware handles high and full speed operation (USB 2.0)
+  </li>
+  <li>
+    <code>CONFIG_USBDEV_SELFPOWERED</code>: Will cause USB features to indicate that the device is self-powered
+  </li>
+  <li>
+    <code>CONFIG_USBDEV_MAXPOWER</code>: Maximum power consumption in mA
+  </li>
+  <li>
+    <code>CONFIG_USBDEV_TRACE</code>: Enables USB tracing for debug
+  </li>
+  <li>
+    <code>CONFIG_USBDEV_TRACE_NRECORDS</code>: Number of trace entries to remember
   </li>
 </ul>
 
