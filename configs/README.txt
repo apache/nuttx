@@ -290,6 +290,18 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NET_DHCP_LIGHT - Reduces size of DHCP
 		CONFIG_NET_RESOLV_ENTRIES - Number of resolver entries
 
+	USB device controller driver
+		CONFIG_USBDEV - Enables USB device support
+		CONFIG_USBDEV_ISOCHRONOUS - Build in extra support for isochronous
+		  endpoints
+		CONFIG_USBDEV_DUALSPEED -Hardware handles high and full speed
+		  operation (USB 2.0)
+		CONFIG_USBDEV_SELFPOWERED - Will cause USB features to indicate
+		  that the device is self-powered
+		CONFIG_USBDEV_MAXPOWER - Maximum power consumption in mA
+		CONFIG_USBDEV_TRACE - Enables USB tracing for debug
+		CONFIG_USBDEV_TRACE_NRECORDS - Number of trace entries to remember
+
 	Stack and heap information
 
 		CONFIG_BOOT_FROM_FLASH - Some configurations support XIP
