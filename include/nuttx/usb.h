@@ -201,6 +201,7 @@ struct usb_ctrlreq_s
   ubyte index[2];
   ubyte len[2];
 };
+#define USB_SIZEOF_CTRLREQ 8
 
 /* Generic descriptor */
 
@@ -229,6 +230,7 @@ struct usb_devdesc_s
   ubyte serno;             /* Serial number */
   ubyte nconfigs;          /* Number of configurations */
 };
+#define USB_SIZEOF_DEVDESC 18
 
 /* Configuration descriptor */
 
@@ -243,6 +245,20 @@ struct usb_cfgdesc_s
   ubyte attr;              /* Attributes */
   ubyte mxpower;           /* Max power (mA/2) */
 };
+#define USB_SIZEOF_CFGDESC 9
+
+struct usb_otherspeedconfigdesc_s
+{
+  ubyte  len;               /* Descriptor length */
+  ubyte  type;              /* Descriptor type */
+  ubyte  totallen[2];       /* Total length */
+  ubyte  ninterfaces;       /* Number of interfaces */
+  ubyte  cfgvalue;          /* Configuration value */
+  ubyte  icfg;              /* Configuration */
+  ubyte  attr;              /* Attributes */
+  ubyte  mxpower;           /* Max power (mA/2) */
+};
+#define USB_SIZEOF_OTHERSPEEDCONFIGDESC 9
 
 /* String descriptor */
 
@@ -267,6 +283,7 @@ struct usb_ifdesc_s
   ubyte protocol;          /* Interface protocol */
   ubyte iif;               /* iInterface */
 };
+#define USB_SIZEOF_IFDESC 9
 
 /* Endpoint descriptor */
 
@@ -279,6 +296,7 @@ struct usb_epdesc_s
   ubyte  mxpacketsize[2];   /* Maximum packet size */
   ubyte  interval;          /* Interval */
 };
+#define USB_SIZEOF_EPDESC 7
 
 struct usb_audioepdesc_s
 {
@@ -286,6 +304,7 @@ struct usb_audioepdesc_s
   ubyte  refresh;
   ubyte  synchaddr;
 };
+#define USB_SIZEOF_AUDIOEPDESC 9
 
 /* Device qualifier descriptor */
 
@@ -301,6 +320,7 @@ struct usb_qualdesc_s
   ubyte  nconfigs;          /* Number of configurations */
   ubyte  reserved;
 };
+#define USB_SIZEOF_QUALDESC 10
 
 /************************************************************************************
  * Private Data
