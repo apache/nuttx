@@ -127,23 +127,33 @@
 /* Trace error codes */
 
 #define LPC214X_TRACEERR_ALLOCFAIL        0x0001
-#define LPC214X_TRACEERR_BADEPNO          0x0002
-#define LPC214X_TRACEERR_BADEPTYPE        0x0003
-#define LPC214X_TRACEERR_BADREQUEST       0x0004
-#define LPC214X_TRACEERR_BINDFAILED       0x0005
-#define LPC214X_TRACEERR_DMABUSY          0x0006
-#define LPC214X_TRACEERR_DRIVER           0x0007
-#define LPC214X_TRACEERR_DRIVERREGISTERED 0x0008
-#define LPC214X_TRACEERR_EPREAD           0x0009
-#define LPC214X_TRACEERR_INVALIDCMD       0x000a
-#define LPC214X_TRACEERR_INVALIDPARMS     0x000b
-#define LPC214X_TRACEERR_IRQREGISTRATION  0x000c
-#define LPC214X_TRACEERR_NODMADESC        0x000d
-#define LPC214X_TRACEERR_NOEP             0x000e
-#define LPC214X_TRACEERR_NOTCONFIGURED    0x000f
-#define LPC214X_TRACEERR_NULLPACKET       0x0010
-#define LPC214X_TRACEERR_NULLREQUEST      0x0011
-#define LPC214X_TRACEERR_STALLED          0x0012
+#define LPC214X_TRACEERR_BADCLEARFEATURE  0x0002
+#define LPC214X_TRACEERR_BADDEVGETSTATUS  0x0003
+#define LPC214X_TRACEERR_BADEPNO          0x0004
+#define LPC214X_TRACEERR_BADEPGETSTATUS   0x0005
+#define LPC214X_TRACEERR_BADEPTYPE        0x0006
+#define LPC214X_TRACEERR_BADGETCONFIG     0x0007
+#define LPC214X_TRACEERR_BADGETSETDESC    0x0008
+#define LPC214X_TRACEERR_BADGETSTATUS     0x0009
+#define LPC214X_TRACEERR_BADREQUEST       0x000a
+#define LPC214X_TRACEERR_BADSETADDRESS    0x000b
+#define LPC214X_TRACEERR_BADSETCONFIG     0x000c
+#define LPC214X_TRACEERR_BADSETFEATURE    0x000d
+#define LPC214X_TRACEERR_BINDFAILED       0x000e
+#define LPC214X_TRACEERR_DMABUSY          0x000f
+#define LPC214X_TRACEERR_DRIVER           0x0010
+#define LPC214X_TRACEERR_DRIVERREGISTERED 0x0011
+#define LPC214X_TRACEERR_EPREAD           0x0012
+#define LPC214X_TRACEERR_INVALIDCMD       0x0013
+#define LPC214X_TRACEERR_INVALIDCTRLREQ   0x0014
+#define LPC214X_TRACEERR_INVALIDPARMS     0x0015
+#define LPC214X_TRACEERR_IRQREGISTRATION  0x0016
+#define LPC214X_TRACEERR_NODMADESC        0x0017
+#define LPC214X_TRACEERR_NOEP             0x0018
+#define LPC214X_TRACEERR_NOTCONFIGURED    0x0019
+#define LPC214X_TRACEERR_NULLPACKET       0x001a
+#define LPC214X_TRACEERR_NULLREQUEST      0x001b
+#define LPC214X_TRACEERR_STALLED          0x001c
 
 /* Trace interrupt codes */
 
@@ -167,10 +177,16 @@
 #define LPC214X_TRACEINTID_EPRINT         0x0012
 #define LPC214X_TRACEINTID_EPSLOW         0x0013
 #define LPC214X_TRACEINTID_FRAME          0x0014
-#define LPC214X_TRACEINTID_IFGETSTATUS    0x0015
-#define LPC214X_TRACEINTID_SETADDRESS     0x0017
-#define LPC214X_TRACEINTID_SETFEATURE     0x0018
-#define LPC214X_TRACEINTID_SUSPENDCHG     0x0019
+#define LPC214X_TRACEINTID_GETCONFIG      0x0015
+#define LPC214X_TRACEINTID_GETSETDESC     0x0016
+#define LPC214X_TRACEINTID_GETSETIF       0x0017
+#define LPC214X_TRACEINTID_GETSTATUS      0x0018
+#define LPC214X_TRACEINTID_IFGETSTATUS    0x0019
+#define LPC214X_TRACEINTID_SETADDRESS     0x001a
+#define LPC214X_TRACEINTID_SETCONFIG      0x001b
+#define LPC214X_TRACEINTID_SETFEATURE     0x001c
+#define LPC214X_TRACEINTID_SUSPENDCHG     0x001d
+#define LPC214X_TRACEINTID_SYNCHFRAME     0x001e
 
 /* Hardware interface **********************************************************/
 
@@ -645,6 +661,11 @@ static uint32 lpc214x_usbcmd(uint16 cmd, ubyte data)
       }
       break;
 
+      /* No data transfer */
+
+    case CMD_USB_EP_VALIDATEBUFFER:
+      break;
+
     default:
       switch (cmd & 0x1e0)
         {
@@ -693,6 +714,9 @@ static uint32 lpc214x_usbcmd(uint16 cmd, ubyte data)
 
 static void lpc214x_epwrite(ubyte epphy, const ubyte *data, uint32 nbytes)
 {
+  uint32 value;
+  boolean aligned = (((uint32)data & 3) == 0);
+
   /* Set the write enable bit for this physical EP address */
 
   lpc214x_putreg(((epphy << 1) & LPC214X_USBCTRL_EPMASK) | LPC214X_USBCTRL_WREN,
@@ -700,7 +724,7 @@ static void lpc214x_epwrite(ubyte epphy, const ubyte *data, uint32 nbytes)
 
   /* Set the transmit packet length (nbytes must be less than 2048) */
 
-  putreg32(nbytes, LPC214X_USBDEV_TXPLEN);
+  lpc214x_putreg(nbytes, LPC214X_USBDEV_TXPLEN);
 
   /* Transfer the packet data */
 
@@ -710,7 +734,18 @@ static void lpc214x_epwrite(ubyte epphy, const ubyte *data, uint32 nbytes)
 
       if (nbytes)
         {
-          lpc214x_putreg(*data++, LPC214X_USBDEV_TXDATA);
+          if (aligned)
+            {
+              value = *(uint32*)data;
+            }
+          else
+            {
+              value =  (uint32)data[0]        | ((uint32)data[1] << 8) |
+                      ((uint32)data[2] << 16) | ((uint32)data[3] << 24);
+            }
+
+          lpc214x_putreg(value, LPC214X_USBDEV_TXDATA);
+          data += 4;
         }
       else
         {
@@ -741,6 +776,24 @@ static int lpc214x_epread(ubyte epphy, ubyte *data, uint32 nbytes)
   uint32 pktlen;
   uint32 result;
   uint32 value;
+  ubyte  aligned = 0;
+
+  /* If data is NULL, then we are being asked to read but discard the data.
+   * For most cases, the resulting buffer will be aligned and we will be
+   * able to do faster 32-bit transfers.
+   */
+
+  if (data)
+    {
+       if (((uint32)data & 3) == 0)
+        {
+          aligned = 1;
+        }
+       else
+        {
+          aligned = 2;
+        }
+    }
 
   /* Set the read enable bit for this physical EP address */
 
@@ -751,7 +804,7 @@ static int lpc214x_epread(ubyte epphy, ubyte *data, uint32 nbytes)
 
   while ((lpc214x_getreg(LPC214X_USBDEV_RXPLEN) & USBDEV_RXPLEN_PKTRDY) == 0);
 
-  /* Get the about of data to be read */
+  /* Get the number of bytes of data to be read */
 
   pktlen = lpc214x_getreg(LPC214X_USBDEV_RXPLEN) & USBDEV_RXPLEN_PKTLENGTH;
 
@@ -760,9 +813,17 @@ static int lpc214x_epread(ubyte epphy, ubyte *data, uint32 nbytes)
   while ((lpc214x_getreg(LPC214X_USBDEV_RXPLEN) & USBDEV_RXPLEN_DV) != 0)
     {
       value = lpc214x_getreg(LPC214X_USBDEV_RXDATA);
-      if (data)
+      if (aligned == 1)
         {
-          *data++ = value;
+          *(uint32*)data = value;
+          data += 4;
+        }
+      else if (aligned == 2)
+        {
+          *data++ = (ubyte)value;
+          *data++ = (ubyte)(value >> 8);
+          *data++ = (ubyte)(value >> 16);
+          *data++ = (ubyte)(value >> 24);
         }
     }
 
@@ -1273,6 +1334,10 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
       return;
     }
 
+  uvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+        ctrl.req, ctrl.type,
+        GETUINT16(ctrl.value), GETUINT16(ctrl.index), GETUINT16(ctrl.len));
+
   /* Dispatch any non-standard requests */
 
   if ((ctrl.type & USB_REQ_TYPE_MASK) != USB_REQ_TYPE_STANDARD)
@@ -1289,8 +1354,13 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
     {
     case USB_REQ_GETSTATUS:
       {
-        /* Length must be 2, from device, and value == 0 */
+        /* type:  device-to-host; recipient = device, interface, endpoint
+         * value: 0
+         * index: zero interface endpoint
+         * len:   2; data = status
+         */
 
+        usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_GETSTATUS), 0);
         if (!priv->paddrset || GETUINT16(ctrl.len) != 2 ||
             (ctrl.type & USB_REQ_DIR_IN) == 0 || GETUINT16(ctrl.value) != 0)
           {
@@ -1320,6 +1390,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
                     }
                   else
                     {
+                      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADEPGETSTATUS), 0);
                       priv->stalled = 1;
                     }
                 }
@@ -1342,6 +1413,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
                     }
                   else
                     {
+                      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADDEVGETSTATUS), 0);
                       priv->stalled = 1;
                     }
                 }
@@ -1359,6 +1431,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
 
               default:
                 {
+                  usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADGETSTATUS), 0);
                   priv->stalled = 1;
                 }
                 break;
@@ -1369,12 +1442,18 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
 
     case USB_REQ_CLEARFEATURE:
       {
+        /* type:  host-to-device; recipient = device, interface or endpoint
+         * value: feature selector
+         * index: zero interface endpoint;
+         * len:   zero, data = none
+         */
+
         usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_CLEARFEATURE), 0);
-        if (ctrl.type != USB_REQ_RECIPIENT_ENDPOINT)
+        if ((ctrl.type & USB_REQ_RECIPIENT_MASK) != USB_REQ_RECIPIENT_ENDPOINT)
           {
             lpc214x_dispatchrequest(priv, &ctrl);
           }
-        else if (priv->paddrset && GETUINT16(ctrl.value) == USB_ENDPOINT_HALT &&
+        else if (priv->paddrset && GETUINT16(ctrl.value) == USB_FEATURE_ENDPOINTHALT &&
                  GETUINT16(ctrl.index) < LPC214X_NLOGENDPOINTS && GETUINT16(ctrl.len) == 0)
           {
             ubyte epphys = LPC214X_EP_LOG2PHY(GETUINT16(ctrl.index));
@@ -1384,24 +1463,31 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
           }
         else
           {
-              priv->stalled = 1;
+            usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADCLEARFEATURE), 0);
+            priv->stalled = 1;
           }
       }
       break;
 
     case USB_REQ_SETFEATURE:
       {
+        /* type:  host-to-device; recipient = device, interface, endpoint
+         * value: feature selector
+         * index: zero interface endpoint;
+         * len:   0; data = none
+         */
+
         usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_SETFEATURE), 0);
-        if (ctrl.type == USB_REQ_RECIPIENT_DEVICE &&
+        if (((ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE) &&
             GETUINT16(ctrl.value) == USB_FEATURE_TESTMODE)
           {
             uvdbg("test mode: %d\n", GETUINT16(ctrl.index));
           }
-        else if (ctrl.type != USB_REQ_RECIPIENT_ENDPOINT)
+        else if ((ctrl.type & USB_REQ_RECIPIENT_MASK) != USB_REQ_RECIPIENT_ENDPOINT)
           {
            lpc214x_dispatchrequest(priv, &ctrl);
           }
-        else if (priv->paddrset && GETUINT16(ctrl.value) == USB_ENDPOINT_HALT &&
+        else if (priv->paddrset && GETUINT16(ctrl.value) == USB_FEATURE_ENDPOINTHALT &&
                  GETUINT16(ctrl.index) < LPC214X_NLOGENDPOINTS && GETUINT16(ctrl.len) == 0)
           {
             ubyte epphys = LPC214X_EP_LOG2PHY(GETUINT16(ctrl.index));
@@ -1411,17 +1497,24 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
           }
         else
           {
-             priv->stalled = 1;
+            usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADSETFEATURE), 0);
+            priv->stalled = 1;
           }
       }
       break;
 
     case USB_REQ_SETADDRESS:
       {
+        /* type:  host-to-device; recipient = device
+         * value: device address
+         * index: 0
+         * len:   0; data = none
+         */
+
         usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_SETADDRESS), 0);
-        if ((ctrl.type == USB_REQ_RECIPIENT_DEVICE) &&
-            (GETUINT16(ctrl.index)  == 0) && (GETUINT16(ctrl.len) == 0) &&
-            (GETUINT16(ctrl.value) < 128))
+        if ((ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE &&
+            GETUINT16(ctrl.index)  == 0 && GETUINT16(ctrl.len) == 0 &&
+            GETUINT16(ctrl.value) < 128)
           {
             lpc214x_epwrite(LPC214X_EP0_IN, NULL, 0);
             priv->eplist[LPC214X_EP0_OUT].eplog = ctrl.value[0];
@@ -1430,41 +1523,115 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
           }
         else
           {
+            usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADSETADDRESS), 0);
             priv->stalled = 1;
           }
       }
       break;
 
     case USB_REQ_GETDESCRIPTOR:
+      /* type:  device-to-host; recipient = device
+       * value: descriptor type and index
+       * index: 0 or language ID;
+       * len:   descriptor len; data = descriptor
+       */
     case USB_REQ_SETDESCRIPTOR:
-    case USB_REQ_GETCONFIGURATION:
+      /* type:  host-to-device; recipient = device
+       * value: descriptor type and index
+       * index: 0 or language ID;
+       * len:   descriptor len; data = descriptor
+       */
       {
-        if (priv->paddrset && (GETUINT16(ctrl.value) == 0) &&
-            (GETUINT16(ctrl.index) == 0) && (GETUINT16(ctrl.len) == 1))
+        usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_GETSETDESC), 0);
+        if ((ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE)
           {
             lpc214x_dispatchrequest(priv, &ctrl);
           }
         else
           {
+            usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADGETSETDESC), 0);
             priv->stalled = 1;
           }
       }
       break;
 
+    case USB_REQ_GETCONFIGURATION:
+      /* type:  device-to-host; recipient = device
+       * value: 0;
+       * index: 0;
+       * len:   1; data = configuration value
+       */
+      {
+        usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_GETCONFIG), 0);
+        if (priv->paddrset && (ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE &&
+            GETUINT16(ctrl.value) == 0 && GETUINT16(ctrl.index) == 0 &&
+            GETUINT16(ctrl.len) == 1)
+          {
+            lpc214x_dispatchrequest(priv, &ctrl);
+          }
+        else
+          {
+            usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADGETCONFIG), 0);
+            priv->stalled = 1;
+          }
+      }
+      break;
 
     case USB_REQ_SETCONFIGURATION:
-    case USB_REQ_GETINTERFACE:
-    case USB_REQ_SETINTERFACE:
+      /* type:  host-to-device; recipient = device
+       * value: configuration value
+       * index: 0;
+       * len:   0; data = none
+       */
       {
-       lpc214x_dispatchrequest(priv, &ctrl);
+        usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_SETCONFIG), 0);
+        if ((ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE &&
+            GETUINT16(ctrl.index) == 0 && GETUINT16(ctrl.len) == 0)
+          {
+            lpc214x_dispatchrequest(priv, &ctrl);
+          }
+        else
+          {
+            usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADSETCONFIG), 0);
+            priv->stalled = 1;
+          }
+      }
+      break;
+
+    case USB_REQ_GETINTERFACE:
+      /* type:  device-to-host; recipient = interface
+       * value: 0
+       * index: interface;
+       * len:   1; data = alt interface
+       */
+    case USB_REQ_SETINTERFACE:
+      /* type:  host-to-device; recipient = interface
+       * value: alternate setting
+       * index: interface;
+       * len:   0; data = none
+       */
+      {
+        usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_GETSETIF), 0);
+        lpc214x_dispatchrequest(priv, &ctrl);
       }
       break;
 
     case USB_REQ_SYNCHFRAME:
+      /* type:  device-to-host; recipient = endpoint
+       * value: 0
+       * index: endpoint;
+       * len:   2; data = frame number
+       */
+      {
+        usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_SYNCHFRAME), 0);
+      }
       break;
 
     default:
-      priv->stalled = 1;
+      {
+        usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDCTRLREQ), 0);
+        priv->stalled = 1;
+      }
       break;
     }
 

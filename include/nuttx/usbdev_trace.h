@@ -122,7 +122,7 @@
  * controller driver
  */
 
-#define TRACE_DEVERROR(id)       TRACE_EVENT(TRACE_CLSERROR_ID, id)
+#define TRACE_DEVERROR(id)       TRACE_EVENT(TRACE_DEVERROR_ID, id)
 
 /* USB class driver error events.  The 'id' is specific to the class driver,
  * but common to all driver controller instances.

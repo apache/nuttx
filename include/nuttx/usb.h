@@ -52,7 +52,7 @@
 #define MSBYTE(u16)                             ((u16) >> 8)     /* Get MS byte from uint16 */
 #define LSBYTE(u16)                             ((u16) & 0xff)   /* Get LS byte from uint16 */
 
-#define GETUINT16(p)                            (((uint16)p[1] << 8)|(uint16)p[1])
+#define GETUINT16(p)                            (((uint16)p[1]<<8)|(uint16)p[0])
 
 /* USB directions (in endpoint addresses) */
 
@@ -63,7 +63,22 @@
 #define USB_EPOUT(addr)                         ((addr)|USB_DIR_OUT)
 #define USB_EPIN(addr)                          ((addr)|USB_DIR_IN)
 
-/* Standard requests */
+/* Control Setup Packet.  Byte 0=Request */
+
+#define USB_REQ_DIR_IN                          (0x80) /* Bit 7=1: IN */
+
+#define USB_REQ_TYPE_MASK                       (0x60) /* Bits 5:6: Request type */
+#define USB_REQ_TYPE_STANDARD                   (0x00)
+#define USB_REQ_TYPE_CLASS                      (0x20)
+#define USB_REQ_TYPE_VENDOR                     (0x40)
+
+#define USB_REQ_RECIPIENT_MASK                  (0x1f) /* Bits 0:4: Recipient */
+#define USB_REQ_RECIPIENT_DEVICE                (0x00)
+#define USB_REQ_RECIPIENT_INTERFACE             (0x01)
+#define USB_REQ_RECIPIENT_ENDPOINT              (0x02)
+#define USB_REQ_RECIPIENT_OTHER                 (0x03)
+
+/* Control Setup Packet.  Byte 1=Standard Request Codes */
 
 #define USB_REQ_GETSTATUS                       (0x00)
 #define USB_REQ_CLEARFEATURE                    (0x01)
@@ -89,23 +104,9 @@
 #define USB_REQ_LOOPBACKDATAREAD                (0x16)
 #define USB_REQ_SETINTERFACEDS                  (0x17)
 
-/* Request type encoding */
-
-#define USB_REQ_TYPE_MASK                       (0x60)
-#define USB_REQ_TYPE_STANDARD                   (0x00)
-#define USB_REQ_TYPE_CLASS                      (0x20)
-#define USB_REQ_TYPE_VENDOR                     (0x40)
-
-#define USB_REQ_RECIPIENT_MASK                  (0x1f)
-#define USB_REQ_RECIPIENT_DEVICE                (0x00)
-#define USB_REQ_RECIPIENT_INTERFACE             (0x01)
-#define USB_REQ_RECIPIENT_ENDPOINT              (0x02)
-#define USB_REQ_RECIPIENT_OTHER                 (0x03)
-#define USB_REQ_TYPE_MASK                       (0x60)
-#define USB_REQ_DIR_IN                          (0x80)
-
 /* USB feature values */
 
+#define USB_FEATURE_ENDPOINTHALT                 0
 #define USB_FEATURE_SELFPOWERED                  0
 #define USB_FEATURE_REMOTEWAKEUP                 1
 #define USB_FEATURE_TESTMODE                     2
@@ -115,8 +116,6 @@
 #define USB_FEATURE_AHNPSUPPORT                  4
 #define USB_FEATURE_AALTHNPSUPPORT               5
 #define USB_FEATURE_DEBUGMODE                    6
-
-#define USB_ENDPOINT_HALT                        0
 
 /* Generic descriptor header offsets */
 
