@@ -49,7 +49,7 @@
 
 #define TRACE_EVENT(id,data)     ((uint16)(id)|(data))
 #define TRACE_ID(event)          ((event)&0xff00)
-#define TRACE_DATA(event)        ((event)0x00ff)
+#define TRACE_DATA(event)        ((event)&0x00ff)
 
 /* Event class IDs */
 
@@ -60,12 +60,15 @@
 #define TRACE_INTENTRY_ID        (0x0400) /* Interrupt handler entry */
 #define TRACE_INTDECODE_ID       (0x0500) /* Decoded interrupt event */
 #define TRACE_INTEXIT_ID         (0x0600) /* Interrupt handler exit */
-#define TRACE_REQQUEUED_ID       (0x0700) /* Request queued */
-#define TRACE_READ_ID            (0x0800) /* Read (OUT) action */
-#define TRACE_WRITE_ID           (0x0900) /* Write (IN) action */
-#define TRACE_COMPLETE_ID        (0x0a00) /* Request completed */
-#define TRACE_DEVERROR_ID        (0x0b00) /* USB controller driver error event */
-#define TRACE_CLSERROR_ID        (0x0c00) /* USB class driver error event */
+#define TRACE_OUTREQQUEUED_ID    (0x0700) /* Request queued for OUT endpoint */
+#define TRACE_INREQQUEUED_ID     (0x0800) /* Request queued for IN endpoint */
+#define TRACE_READ_ID            (0x0900) /* Read (OUT) action */
+#define TRACE_WRITE_ID           (0x0a00) /* Write (IN) action */
+#define TRACE_COMPLETE_ID        (0x0b00) /* Request completed */
+#define TRACE_DEVERROR_ID        (0x0c00) /* USB controller driver error event */
+#define TRACE_CLSERROR_ID        (0x0d00) /* USB class driver error event */
+
+#define TRACE_NIDS               14
 
 /* Initialization events */
 
@@ -112,7 +115,8 @@
 
 /* Data Transfer */
 
-#define TRACE_REQQUEUED(ep)      TRACE_EVENT(TRACE_REQQUEUED_ID, ep)
+#define TRACE_OUTREQQUEUED(ep)   TRACE_EVENT(TRACE_OUTREQQUEUED_ID, ep)
+#define TRACE_INREQQUEUED(ep)    TRACE_EVENT(TRACE_INREQQUEUED_ID, ep)
 #define TRACE_READ(ep)           TRACE_EVENT(TRACE_READ_ID, ep)
 #define TRACE_WRITE(ep)          TRACE_EVENT(TRACE_WRITE_ID, ep)
 #define TRACE_COMPLETE(ep)       TRACE_EVENT(TRACE_COMPLETE_ID, ep)
@@ -212,7 +216,7 @@ EXTERN void usbtrace_enable(boolean enable);
  *
  *******************************************************************************/
 
-#ifdef CONFIG_USBDEV_TRACE
+#if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
 EXTERN void usbtrace(uint16 event, uint16 value);
 #else
 #  define usbtrace(event, value)
@@ -231,7 +235,6 @@ EXTERN void usbtrace(uint16 event, uint16 value);
 
 #ifdef CONFIG_USBDEV_TRACE
 EXTERN int usbtrace_enumerate(trace_callback_t callback, void *arg);
-#else
 #  define usbtrace_enumerate(event)
 #endif
 

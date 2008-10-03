@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <arch/irq.h>
 #include <nuttx/usbdev_trace.h>
@@ -199,6 +200,176 @@ int usbtrace_enumerate(trace_callback_t callback, void *arg)
     }
 
   return ret;
+}
+
+#else
+
+/*******************************************************************************
+ * Name: usbtrace
+ *
+ * Description:
+ *  Map trace to simple debug output
+ *
+ *******************************************************************************/
+
+void usbtrace(uint16 event, uint16 value)
+{
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB)
+  irqstate_t flags;
+  flags = irqsave();
+  switch (event)
+    {
+    case TRACE_DEVINIT:
+      lldbg("USB controller initialization: %04x\n", value);
+      break;
+
+    case TRACE_DEVUNINIT:
+      lldbg("USB controller un-initialization: %04x\n", value);
+      break;
+
+    case TRACE_DEVREGISTER:
+      lldbg("usbdev_register(): %04x\n", value);
+      break;
+
+    case TRACE_DEVUNREGISTER:
+      lldbg("usbdev_unregister(): %04x\n", value);
+      break;
+
+    case TRACE_EPCONFIGURE:
+      lldbg("Endpoint configure(): %04x\n", value);
+      break;
+
+    case TRACE_EPALLOCREQ:
+      lldbg("Endpoint allocreq(): %04x\n", value);
+      break;
+
+    case TRACE_EPFREEREQ:
+      lldbg("Endpoint freereq(): %04x\n", value);
+      break;
+
+    case TRACE_EPALLOCBUFFER:
+      lldbg("Endpoint allocbuffer(): %04x\n", value);
+      break;
+
+    case TRACE_EPFREEBUFFER:
+      lldbg("Endpoint freebuffer(): %04x\n", value);
+      break;
+
+    case TRACE_EPSUBMIT:
+      lldbg("Endpoint submit(): %04x\n", value);
+      break;
+
+    case TRACE_EPCANCEL:
+      lldbg("Endpoint cancel(): %04x\n", value);
+      break;
+
+    case TRACE_EPSTALL:
+      lldbg("Endpoint stall(TRUE): %04x\n", value);
+      break;
+
+    case TRACE_EPRESUME:
+      lldbg("Endpoint stall(FALSE): %04x\n", value);
+      break;
+
+    case TRACE_DEVALLOCEP:
+      lldbg("Device allocep(): %04x\n", value);
+      break;
+
+    case TRACE_DEVFREEEP:
+      lldbg("Device freeep(): %04x\n", value);
+      break;
+
+    case TRACE_DEVGETFRAME:
+      lldbg("Device getframe(): %04x\n", value);
+      break;
+
+    case TRACE_DEVWAKEUP:
+      lldbg("Device wakeup(): %04x\n", value);
+      break;
+
+    case TRACE_DEVSELFPOWERED:
+      lldbg("Device selfpowered(): %04x\n", value);
+      break;
+
+    case TRACE_DEVPULLUP:
+      lldbg("Device pullup(): %04x\n", value);
+      break;
+
+    case TRACE_CLASSBIND:
+      lldbg("Class bind(): %04x\n", value);
+      break;
+
+    case TRACE_CLASSUNBIND:
+      lldbg("Class unbind(): %04x\n", value);
+      break;
+
+    case TRACE_CLASSDISCONNECT:
+      lldbg("Class disconnect(): %04x\n", value);
+      break;
+
+    case TRACE_CLASSSETUP:
+      lldbg("Class setup(): %04x\n", value);
+      break;
+
+    case TRACE_CLASSSUSPEND:
+      lldbg("Class suspend(): %04x\n", value);
+      break;
+
+    case TRACE_CLASSRESUME:
+      lldbg("Class resume(): %04x\n", value);
+      break;
+
+    default:
+      switch (TRACE_ID(event))
+        {
+        case TRACE_INTENTRY_ID:        /* Interrupt handler entry */
+          lldbg("Interrrupt %d entry: %04x\n", TRACE_DATA(event), value);
+          break;
+
+        case TRACE_INTDECODE_ID:       /* Decoded interrupt event */
+          lldbg("Interrrupt decode %d: %04x\n", TRACE_DATA(event), value);
+          break;
+
+        case TRACE_INTEXIT_ID:         /* Interrupt handler exit */
+          lldbg("Interrrupt %d exit: %04x\n", TRACE_DATA(event), value);
+          break;
+
+        case TRACE_OUTREQQUEUED_ID:    /* Request queued for OUT endpoint */
+          lldbg("EP%d OUT request queued: %04x\n", TRACE_DATA(event), value);
+          break;
+
+        case TRACE_INREQQUEUED_ID:     /* Request queued for IN endpoint */
+          lldbg("EP%d IN request queued: %04x\n", TRACE_DATA(event), value);
+          break;
+
+        case TRACE_READ_ID:            /* Read (OUT) action */
+          lldbg("EP%d OUT read: %04x\n", TRACE_DATA(event), value);
+          break;
+
+        case TRACE_WRITE_ID:           /* Write (IN) action */
+          lldbg("EP%d IN write: %04x\n", TRACE_DATA(event), value);
+          break;
+
+        case TRACE_COMPLETE_ID:        /* Request completed */
+          lldbg("EP%d request complete: %04x\n", TRACE_DATA(event), value);
+          break;
+
+        case TRACE_DEVERROR_ID:        /* USB controller driver error event */
+          lldbg("Controller error: %02x:%04x\n", TRACE_DATA(event), value);
+          break;
+
+        case TRACE_CLSERROR_ID:        /* USB class driver error event */
+          lldbg("Class error: %02x:%04x\n", TRACE_DATA(event), value);
+          break;
+
+        default:
+          lldbg("Unrecognized event: %02x:%02x:%04x\n",
+                TRACE_ID(event), TRACE_DATA(event), value);
+          break;
+        }
+    }
+  irqrestore(flags);
+#endif /* CONFIG_DEBUG && CONFIG_DEBUG_USB */
 }
 
 #endif /* CONFIG_USBDEV_TRACE */
