@@ -1432,14 +1432,14 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
 
   /* Read EP0 data */
 
-  ret = lpc214x_epread(LPC214X_EP0_OUT, (ubyte*)&ctrl, sizeof(struct usb_ctrlreq_s));
+  ret = lpc214x_epread(LPC214X_EP0_OUT, (ubyte*)&ctrl, USB_SIZEOF_CTRLREQ);
   if (ret <= 0)
     {
       return;
     }
 
   uvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
-        ctrl.req, ctrl.type,
+        ctrl.type, ctrl.req,
         GETUINT16(ctrl.value), GETUINT16(ctrl.index), GETUINT16(ctrl.len));
 
   /* Dispatch any non-standard requests */
@@ -2936,7 +2936,7 @@ void up_usbinitialize(void)
 
   usbtrace(TRACE_DEVINIT, 0);
 
-  /* Disable USB inerrupts */
+  /* Disable USB interrupts */
 
   lpc214x_putreg(0, LPC214X_USBDEV_INTST);
 
@@ -2988,7 +2988,7 @@ void up_usbinitialize(void)
   reg |= LPC214X_PCONP_PCUSB;
   lpc214x_putreg(reg, LPC214X_PCON_PCONP);
 
-  /* Attach USB controller  interrupt handler */
+  /* Attach USB controller interrupt handler */
 
   if (irq_attach(LPC214X_USB_IRQ, lpc214x_usbinterrupt) != 0)
     {
@@ -2996,10 +2996,12 @@ void up_usbinitialize(void)
       goto errout;
     }
 
-  /* Enable USB inerrupts */
+  /* Enable USB inerrupts at the controller -- but do not disable
+   * the ARM interrupt until the device is bound to the class
+   * driver
+   */
 
   lpc214x_putreg(USBDEV_INTST_ENUSBINTS, LPC214X_USBDEV_INTST);
-  up_enable_irq(LPC214X_USB_IRQ);
 
   /* Disconnect device */
 
@@ -3103,6 +3105,12 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BINDFAILED), (uint16)-ret);
       g_usbdev.driver = NULL;
     }
+  else
+    {
+      /* Enable USB controller interrupts */
+
+      up_enable_irq(LPC214X_USB_IRQ);
+    }
   return ret;
 }
 
@@ -3131,6 +3139,10 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   /* Unbind the class driver */
 
   CLASS_UNBIND(driver, &g_usbdev.usbdev);
+
+  /* Disable USB controller interrupts */
+
+  up_disable_irq(LPC214X_USB_IRQ);
 
   /* Unhook the driver */
 
