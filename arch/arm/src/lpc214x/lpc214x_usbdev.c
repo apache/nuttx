@@ -43,7 +43,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <queue.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
@@ -119,11 +118,6 @@
 
 /* Debug ***********************************************************************/
 
-#ifndef CONFIG_USBDEV_TRACE
-#  undef usbtrace
-#  define usbtrace(a,b) ulldbg("%04x:%04x\n", a, b)
-#endif
-
 /* Trace error codes */
 
 #define LPC214X_TRACEERR_ALLOCFAIL        0x0001
@@ -182,11 +176,12 @@
 #define LPC214X_TRACEINTID_GETSETIF       0x0017
 #define LPC214X_TRACEINTID_GETSTATUS      0x0018
 #define LPC214X_TRACEINTID_IFGETSTATUS    0x0019
-#define LPC214X_TRACEINTID_SETADDRESS     0x001a
-#define LPC214X_TRACEINTID_SETCONFIG      0x001b
-#define LPC214X_TRACEINTID_SETFEATURE     0x001c
-#define LPC214X_TRACEINTID_SUSPENDCHG     0x001d
-#define LPC214X_TRACEINTID_SYNCHFRAME     0x001e
+#define LPC214X_TRACEERR_REQABORTED       0x001a
+#define LPC214X_TRACEINTID_SETADDRESS     0x001b
+#define LPC214X_TRACEINTID_SETCONFIG      0x001c
+#define LPC214X_TRACEINTID_SETFEATURE     0x001d
+#define LPC214X_TRACEINTID_SUSPENDCHG     0x001e
+#define LPC214X_TRACEINTID_SYNCHFRAME     0x001f
 
 /* Hardware interface **********************************************************/
 
@@ -272,6 +267,11 @@
 #define LPC214X_EP0SHORTWRSENT       (4)           /* Short data write complete */
 #define LPC214X_EP0SETADDRESS        (5)           /* Set address received */
 
+/* Request queue operations ****************************************************/
+
+#define lpc214x_rqempty(ep)          ((ep)->head == NULL)
+#define lpc214x_rqpeek(ep)           ((ep)->head)
+
 /*******************************************************************************
  * Private Types
  *******************************************************************************/
@@ -281,7 +281,7 @@
 struct lpc214x_req_s
 {
   struct usbdev_req_s    req;           /* Standard USB request */
-  sq_entry_t             sqe;           /* Supports a singly linked list */
+  struct lpc214x_req_s  *flink;         /* Supports a singly linked list */
 };
 
 /* This is the internal representation of an endpoint */
@@ -298,7 +298,8 @@ struct lpc214x_ep_s
   /* LPC214X-specific fields */
 
   struct lpc214x_usbdev_s *dev;          /* Reference to private driver data */
-  sq_queue_t              reqlist;       /* Request list for this endpoint */
+  struct lpc214x_req_s    *head;         /* Request list for this endpoint */
+  struct lpc214x_req_s    *tail;
   ubyte                   eplog;         /* Logical EP address from descriptor */
   ubyte                   epphy;         /* Physical EP address */
   ubyte                   stalled:1;     /* Endpoint is halted */
@@ -367,7 +368,7 @@ struct lpc214x_usbdev_s
  * Private Function Prototypes
  *******************************************************************************/
 
-/* Register operations */
+/* Register operations ********************************************************/
 
 #if defined(CONFIG_LPC214X_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
 static uint32 lpc214x_getreg(uint32 addr);
@@ -377,22 +378,31 @@ static void lpc214x_putreg(uint32 val, uint32 addr);
 # define lpc214x_putreg(val,addr) putreg32(val,addr)
 #endif
 
-/* Command operations */
+/* Command operations **********************************************************/
 
 static uint32 lpc214x_usbcmd(uint16 cmd, ubyte data);
 
-/* Low level data transfers and request operations */
+/* Request queue operations ****************************************************/
+
+static FAR struct lpc214x_req_s *lpc214x_rqdequeue(FAR struct lpc214x_ep_s *privep);
+static void lpc214x_rqenqueue(FAR struct lpc214x_ep_s *privep,
+              FAR struct lpc214x_req_s *req);
+
+/* Low level data transfers and request operations *****************************/
 
 static void lpc214x_epwrite(ubyte epphy, const ubyte *data, uint32 nbytes);
 static int  lpc214x_epread(ubyte epphy, ubyte *data, uint32 nbytes);
+static inline void lpc214x_abortrequest(struct lpc214x_ep_s *privep,
+              struct lpc214x_req_s *privreq, sint16 result);
 static void lpc214x_reqcomplete(struct lpc214x_ep_s *privep, sint16 result);
 static int  lpc214x_wrrequest(struct lpc214x_ep_s *privep);
 static int  lpc214x_rdrequest(struct lpc214x_ep_s *privep);
 static void lpc214x_cancelrequests(struct lpc214x_ep_s *privep);
 
-/* Interrupt handling */
+/* Interrupt handling **********************************************************/
 
-static void lpc214x_eprealize(struct lpc214x_ep_s *privep, boolean prio, uint32 packetsize);
+static void lpc214x_eprealize(struct lpc214x_ep_s *privep, boolean prio,
+              uint32 packetsize);
 static ubyte lpc214x_epclrinterrupt(ubyte epphy);
 static inline void lpc214x_ep0configure(struct lpc214x_usbdev_s *priv);
 #ifdef CONFIG_LPC214X_USBDEV_DMA
@@ -414,7 +424,7 @@ static void lpc214x_dmarestart(ubyte epphy, uint32 descndx);
 static void lpc214x_dmadisable(ubyte epphy);
 #endif /* CONFIG_LPC214X_USBDEV_DMA */
 
-/* Endpoint operations */
+/* Endpoint operations *********************************************************/
 
 static int  lpc214x_epconfigure(FAR struct usbdev_ep_s *ep,
               const struct usb_epdesc_s *desc);
@@ -433,7 +443,7 @@ static int  lpc214x_epcancel(FAR struct usbdev_ep_s *ep,
               struct usbdev_req_s *req);
 static int  lpc214x_epstall(FAR struct usbdev_ep_s *ep, boolean resume);
 
-/* USB device controller operations */
+/* USB device controller operations ********************************************/
 
 static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev,
               ubyte epno, boolean in, ubyte eptype);
@@ -705,6 +715,56 @@ static uint32 lpc214x_usbcmd(uint16 cmd, ubyte data)
 }
 
 /*******************************************************************************
+ * Name: lpc214x_rqdequeue
+ *
+ * Description:
+ *   Remove a request from an endpoint request queue
+ *
+ *******************************************************************************/
+
+static FAR struct lpc214x_req_s *lpc214x_rqdequeue(FAR struct lpc214x_ep_s *privep)
+{
+  FAR struct lpc214x_req_s *ret = privep->head;
+
+  if (ret)
+    {
+      privep->head = ret->flink;
+      if (!privep->head)
+        {
+          privep->tail = NULL;
+        }
+
+      ret->flink = NULL;
+    }
+
+  return ret;
+}
+
+/*******************************************************************************
+ * Name: lpc214x_rqenqueue
+ *
+ * Description:
+ *   Add a request from an endpoint request queue
+ *
+ *******************************************************************************/
+
+static void lpc214x_rqenqueue(FAR struct lpc214x_ep_s *privep,
+                              FAR struct lpc214x_req_s *req)
+{
+  req->flink = NULL;
+  if (!privep->head)
+    {
+      privep->head = req;
+      privep->tail = req;
+    }
+  else
+    {
+      privep->tail->flink = req;
+      privep->tail        = req;
+    }
+}
+
+/*******************************************************************************
  * Name: lpc214x_epwrite
  *
  * Description:
@@ -848,10 +908,33 @@ static int lpc214x_epread(ubyte epphy, ubyte *data, uint32 nbytes)
 }
 
 /*******************************************************************************
+ * Name: lpc214x_abortrequest
+ *
+ * Description:
+ *   Discard a request
+ *
+ *******************************************************************************/
+
+static inline void lpc214x_abortrequest(struct lpc214x_ep_s *privep,
+                                        struct lpc214x_req_s *privreq,
+                                        sint16 result)
+{
+  usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_REQABORTED), (uint16)privep->epphy);
+
+  /* Save the result in the request structure */
+
+  privreq->req.result = result;
+
+  /* Callback to the request completion handler */
+
+  privreq->req.callback(&privep->ep, &privreq->req);
+}
+
+/*******************************************************************************
  * Name: lpc214x_reqcomplete
  *
  * Description:
- *   Handle termination of a request.
+ *   Handle termination of the request at the head of the endpoint request queue.
  *
  *******************************************************************************/
 
@@ -864,7 +947,7 @@ static void lpc214x_reqcomplete(struct lpc214x_ep_s *privep, sint16 result)
   /* Remove the complete request at the head of the endpoint request list */
 
   flags = irqsave();
-  privreq = (struct lpc214x_req_s *)sq_remfirst(&privep->reqlist);
+  privreq = lpc214x_rqdequeue(privep);
   irqrestore(flags);
 
   if (privreq)
@@ -873,12 +956,9 @@ static void lpc214x_reqcomplete(struct lpc214x_ep_s *privep, sint16 result)
        * in the callback.
        */
 
-      if (privep->epphy == 0)
+      if (privep->epphy == LPC214X_EP0_IN)
         {
-          if (privep->dev->stalled)
-            {
-              privep->stalled = 1;
-            }
+          privep->stalled = privep->dev->stalled;
         }
 
       /* Save the result in the request structure */
@@ -887,7 +967,7 @@ static void lpc214x_reqcomplete(struct lpc214x_ep_s *privep, sint16 result)
 
       /* Callback to the request completion handler */
 
-      privreq->sqe.flink = NULL;
+      privreq->flink = NULL;
       privreq->req.callback(&privep->ep, &privreq->req);
 
       /* Restore the stalled indication */
@@ -916,22 +996,38 @@ static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
 
   /* Check the request from the head of the endpoint request queue */
 
-  privreq = (struct lpc214x_req_s *)sq_peek(&privep->reqlist);
+  privreq = lpc214x_rqpeek(privep);
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NULLREQUEST), 0);
       return OK;
     }
 
-  bytesleft = privreq->req.len;
+  /* Ignore any attempt to send a zero length packet */
+
+  if (privreq->req.len == 0)
+    {
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NULLPACKET), 0);
+      lpc214x_reqcomplete(privep, OK);
+      return OK;
+    }
+
+  /* Otherwise send the data in the packet (in the DMA on case, we
+   * may be resuming transfer already in progress.
+   */
+
   for (;;)
     {
+      /* Get the number of bytes left to be sent in the packet */
+
+      bytesleft = privreq->req.len - privreq->req.xfrd;
+
       /* Send the next packet if (1) there are more bytes to be sent, or
-       * (2) the last packet was exactly maxpacketsize.
+       * (2) the last packet sent was exactly maxpacketsize (bytesleft == 0)
        */
 
       usbtrace(TRACE_WRITE(privep->epphy), privreq->req.xfrd);
-      if (privreq->req.len >= privreq->req.xfrd)
+      if (bytesleft >= 0)
         {
           /* Try to send maxpacketsize -- unless we don't have that many
            * bytes to send.
@@ -951,14 +1047,13 @@ static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
           /* Update for the next time through the loop */
 
           privreq->req.xfrd += nbytes;
-          bytesleft          = privreq->req.len - privreq->req.xfrd;
         }
 
-      /* If all of the bytes were sent (and the last packet was not full)
-       * then we are finished with the transfer)
+      /* If all of the bytes were sent (including any final null packet)
+       * then we are finished with the transfer
        */
 
-      if (privreq->req.len < privreq->req.xfrd)
+      if (bytesleft <= 0)
         {
           usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
           lpc214x_reqcomplete(privep, OK);
@@ -985,10 +1080,19 @@ static int lpc214x_rdrequest(struct lpc214x_ep_s *privep)
 
   /* Check the request from the head of the endpoint request queue */
 
-  privreq = (struct lpc214x_req_s *)sq_peek(&privep->reqlist);
+  privreq = lpc214x_rqpeek(privep);
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NULLREQUEST), 0);
+      return OK;
+    }
+
+  /* Ignore any attempt to receive a zero length packet */
+
+  if (privreq->req.len == 0)
+    {
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NULLPACKET), 0);
+      lpc214x_reqcomplete(privep, OK);
       return OK;
     }
 
@@ -1033,10 +1137,10 @@ static int lpc214x_rdrequest(struct lpc214x_ep_s *privep)
 
 static void lpc214x_cancelrequests(struct lpc214x_ep_s *privep)
 {
-  while (!sq_empty(&privep->reqlist))
+  while (!lpc214x_rqempty(privep))
     {
       usbtrace(TRACE_COMPLETE(privep->epphy),
-               ((struct lpc214x_req_s *)sq_peek(&privep->reqlist))->req.xfrd);
+               (lpc214x_rqpeek(privep))->req.xfrd);
       lpc214x_reqcomplete(privep, -ESHUTDOWN);
     }
 }
@@ -1292,7 +1396,7 @@ static void lpc214x_dispatchrequest(struct lpc214x_usbdev_s *priv,
 static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
 {
   struct lpc214x_ep_s *ep0 = &priv->eplist[LPC214X_EP0_OUT];
-  struct lpc214x_req_s *privreq = (struct lpc214x_req_s *)sq_peek(&ep0->reqlist);
+  struct lpc214x_req_s *privreq = lpc214x_rqpeek(ep0);
   struct usb_ctrlreq_s ctrl;
   uint16 index;
   ubyte  epphy;
@@ -1309,7 +1413,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
 
   /* Terminate any pending requests */
 
-  while (!sq_empty(&ep0->reqlist))
+  while (!lpc214x_rqempty(ep0))
     {
       sint16 result = OK;
       if (privreq->req.xfrd != privreq->req.len)
@@ -1686,7 +1790,7 @@ static inline void lpc214x_ep0dataoutinterrupt(struct lpc214x_usbdev_s *priv)
     case LPC214X_EP0IDLE:
       {
         ep0 = &priv->eplist[LPC214X_EP0_OUT];
-        if (!sq_empty(&ep0->reqlist))
+        if (!lpc214x_rqempty(ep0))
           {
             lpc214x_wrrequest(ep0);
           }
@@ -2010,7 +2114,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
                               /* Write host data from the current write request */
 
-                              if (!sq_empty(&privep->reqlist))
+                              if (!lpc214x_rqempty(privep))
                                 {
                                   lpc214x_wrrequest(privep);
                                 }
@@ -2023,7 +2127,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
                               /* Read host data into the current read request */
 
-                             if (!sq_empty(&privep->reqlist))
+                             if (!lpc214x_rqempty(privep))
                                  {
                                   lpc214x_rdrequest(privep);
                                 }
@@ -2475,66 +2579,52 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
       return -ESHUTDOWN;
     }
 
+  /* Handle the request from the class driver */
+
   req->result = -EINPROGRESS;
-  req->xfrd = 0;
+  req->xfrd   = 0;
+  flags       = irqsave();
 
-  /* Check for NULL packet */
+  /* If we are not stalled, then drop all requests on the floor */
 
-  flags = irqsave();
-  if (req->len == 0 && (LPC214X_EPPHYIN(privep->epphy)))
+  if (privep->stalled)
     {
-      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NULLPACKET), 0);
-      sq_addlast(&privreq->sqe, &privep->reqlist);
-      goto success_notransfer;
+      lpc214x_abortrequest(privep, privreq, -EBUSY);
+      ret = -EBUSY;
     }
 
-  /* Has everything been sent? Or are we stalled? */
+  /* Handle IN (device-to-host) requests */
 
-  if (!sq_empty(&privep->reqlist) && !privep->stalled)
+  else if (LPC214X_EPPHYIN(privep->epphy))
     {
-      /* Handle zero-length transfers on EP0 */
+      /* Add the new request to the request queue for the endpoint */
 
-      if (privep->epphy == 0 && req->len == 0)
-        {
-          /* Nothing to transfer -- exit success, zero-bytes transferred */
-
-          usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
-          lpc214x_reqcomplete(privep, OK);
-          goto success_notransfer;
-        }
-
-      /* Handle IN requests */
-
-      if (LPC214X_EPPHYIN(privep->epphy))
-        {
-          ret = lpc214x_wrrequest(privep);
-        }
-
-      /* Handle pending OUT requests */
-
-      else if (priv->rxpending)
-        {
-          ret = lpc214x_rdrequest(privep);
-          priv->rxpending = 0;
-        }
-      else
-        {
-          usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADREQUEST), 0);
-          ret = ERROR;
-          goto errout;
-        }
+      lpc214x_rqenqueue(privep, privreq);
+      usbtrace(TRACE_INREQQUEUED(privep->epphy), privreq->req.len);
+      ret = lpc214x_wrrequest(privep);
     }
 
-  /* Add to endpoint's request queue */
+  /* Handle OUT (host-to-device) requests -- but only if one is expected*/
 
-  if (ret >= 0)
+  else if (priv->rxpending)
     {
-      usbtrace(TRACE_REQQUEUED(privep->epphy), privreq->req.len);
-      sq_addlast(&privreq->sqe, &privep->reqlist);
+      /* Add the new request to the request queue for the endpoint */
+
+      lpc214x_rqenqueue(privep, privreq);
+      usbtrace(TRACE_OUTREQQUEUED(privep->epphy), privreq->req.len);
+      ret = lpc214x_rdrequest(privep);
+      priv->rxpending = 0;
     }
 
-success_notransfer:
-errout:
+  /* Unexpected or illformed request */
+
+  else
+    {
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADREQUEST), 0);
+      lpc214x_abortrequest(privep, privreq, -EBUSY);
+      ret = -EINVAL;
+    }
+
   irqrestore(flags);
   return ret;
 }
