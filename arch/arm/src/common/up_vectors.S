@@ -1,5 +1,5 @@
 /************************************************************************************
- * arm/src/common/up_vectors.S
+ * arch/arm/src/common/up_vectors.S
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
