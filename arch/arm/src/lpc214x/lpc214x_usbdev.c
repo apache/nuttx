@@ -304,6 +304,7 @@ struct lpc214x_ep_s
   ubyte                   epphy;         /* Physical EP address */
   ubyte                   stalled:1;     /* Endpoint is halted */
   ubyte                   halted:1;      /* Endpoint feature halted */
+  ubyte                   txnullpkt:1;   /* Null packet needed at end of transfer */
 };
 
 /* This represents a DMA descriptor */
@@ -1027,16 +1028,21 @@ static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
        */
 
       usbtrace(TRACE_WRITE(privep->epphy), privreq->req.xfrd);
-      if (bytesleft >= 0)
+      if (bytesleft >  0 || privep->txnullpkt)
         {
           /* Try to send maxpacketsize -- unless we don't have that many
            * bytes to send.
            */
 
-          nbytes = privep->ep.maxpacket;
-          if (nbytes > bytesleft)
+          if (bytesleft > privep->ep.maxpacket)
+            {
+              nbytes = privep->ep.maxpacket;
+              privep->txnullpkt = 0;
+            }
+          else
             {
               nbytes = bytesleft;
+              privep->txnullpkt = (bytesleft == privep->ep.maxpacket);
             }
 
           /* Send the largest number of bytes that we can in this packet */
@@ -1053,9 +1059,10 @@ static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
        * then we are finished with the transfer
        */
 
-      if (bytesleft <= 0)
+      if (bytesleft <= 0 || !privep->txnullpkt)
         {
           usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
+          privep->txnullpkt = 0;
           lpc214x_reqcomplete(privep, OK);
           return OK;
         }
@@ -1375,11 +1382,6 @@ static void lpc214x_dispatchrequest(struct lpc214x_usbdev_s *priv,
           /* Stall on failure */
 
           priv->stalled = 1;
-        }
-      else
-        {
-          lpc214x_epwrite(LPC214X_EP0_IN, NULL, 0);
-          priv->ep0state = LPC214X_EP0SHORTWRITE;
         }
     }
 }
@@ -2610,6 +2612,7 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
     {
       /* Add the new request to the request queue for the endpoint */
 
+      privep->txnullpkt = 0;
       lpc214x_rqenqueue(privep, privreq);
       usbtrace(TRACE_OUTREQQUEUED(privep->epphy), privreq->req.len);
       ret = lpc214x_rdrequest(privep);
