@@ -137,17 +137,20 @@
 #define LPC214X_TRACEERR_DMABUSY          0x000f
 #define LPC214X_TRACEERR_DRIVER           0x0010
 #define LPC214X_TRACEERR_DRIVERREGISTERED 0x0011
-#define LPC214X_TRACEERR_EPREAD           0x0012
-#define LPC214X_TRACEERR_INVALIDCMD       0x0013
-#define LPC214X_TRACEERR_INVALIDCTRLREQ   0x0014
-#define LPC214X_TRACEERR_INVALIDPARMS     0x0015
-#define LPC214X_TRACEERR_IRQREGISTRATION  0x0016
-#define LPC214X_TRACEERR_NODMADESC        0x0017
-#define LPC214X_TRACEERR_NOEP             0x0018
-#define LPC214X_TRACEERR_NOTCONFIGURED    0x0019
-#define LPC214X_TRACEERR_NULLPACKET       0x001a
-#define LPC214X_TRACEERR_NULLREQUEST      0x001b
-#define LPC214X_TRACEERR_STALLED          0x001c
+#define LPC214X_TRACEERR_EP0INSTALLED     0x0012
+#define LPC214X_TRACEERR_EP0OUTSTALLED    0x0013
+#define LPC214X_TRACEERR_EP0SETUPSTALLED  0x0014
+#define LPC214X_TRACEERR_EPINNULLPACKET   0x0015
+#define LPC214X_TRACEERR_EPOUTNULLPACKET  0x0016
+#define LPC214X_TRACEERR_EPREAD           0x0017
+#define LPC214X_TRACEERR_INVALIDCMD       0x0018
+#define LPC214X_TRACEERR_INVALIDCTRLREQ   0x0019
+#define LPC214X_TRACEERR_INVALIDPARMS     0x001a
+#define LPC214X_TRACEERR_IRQREGISTRATION  0x001b
+#define LPC214X_TRACEERR_NODMADESC        0x001c
+#define LPC214X_TRACEERR_NOEP             0x001d
+#define LPC214X_TRACEERR_NOTCONFIGURED    0x001e
+#define LPC214X_TRACEERR_REQABORTED       0x001f
 
 /* Trace interrupt codes */
 
@@ -167,21 +170,22 @@
 #define LPC214X_TRACEINTID_EPFAST         0x000e
 #define LPC214X_TRACEINTID_EPGETSTATUS    0x000f
 #define LPC214X_TRACEINTID_EPIN           0x0010
-#define LPC214X_TRACEINTID_EPOUT          0x0011
-#define LPC214X_TRACEINTID_EPRINT         0x0012
-#define LPC214X_TRACEINTID_EPSLOW         0x0013
-#define LPC214X_TRACEINTID_FRAME          0x0014
-#define LPC214X_TRACEINTID_GETCONFIG      0x0015
-#define LPC214X_TRACEINTID_GETSETDESC     0x0016
-#define LPC214X_TRACEINTID_GETSETIF       0x0017
-#define LPC214X_TRACEINTID_GETSTATUS      0x0018
-#define LPC214X_TRACEINTID_IFGETSTATUS    0x0019
-#define LPC214X_TRACEERR_REQABORTED       0x001a
-#define LPC214X_TRACEINTID_SETADDRESS     0x001b
-#define LPC214X_TRACEINTID_SETCONFIG      0x001c
-#define LPC214X_TRACEINTID_SETFEATURE     0x001d
-#define LPC214X_TRACEINTID_SUSPENDCHG     0x001e
-#define LPC214X_TRACEINTID_SYNCHFRAME     0x001f
+#define LPC214X_TRACEINTID_EPINQEMPTY     0x0011
+#define LPC214X_TRACEINTID_EPOUT          0x0012
+#define LPC214X_TRACEINTID_EPOUTQEMPTY    0x0013
+#define LPC214X_TRACEINTID_EPRINT         0x0014
+#define LPC214X_TRACEINTID_EPSLOW         0x0015
+#define LPC214X_TRACEINTID_FRAME          0x0016
+#define LPC214X_TRACEINTID_GETCONFIG      0x0017
+#define LPC214X_TRACEINTID_GETSETDESC     0x0018
+#define LPC214X_TRACEINTID_GETSETIF       0x0019
+#define LPC214X_TRACEINTID_GETSTATUS      0x001a
+#define LPC214X_TRACEINTID_IFGETSTATUS    0x001b
+#define LPC214X_TRACEINTID_SETADDRESS     0x001c
+#define LPC214X_TRACEINTID_SETCONFIG      0x001d
+#define LPC214X_TRACEINTID_SETFEATURE     0x001e
+#define LPC214X_TRACEINTID_SUSPENDCHG     0x001f
+#define LPC214X_TRACEINTID_SYNCHFRAME     0x0020
 
 /* Hardware interface **********************************************************/
 
@@ -258,14 +262,18 @@
 #define LPC214X_INTRMAXPACKET        (64)          /* Interrupt endpoint max packet (1 to 64) */
 #define LPC214X_ISOCMAXPACKET        (512)         /* Acutally 1..1023 */
 
-/* EP0 status */
-
-#define LPC214X_EP0IDLE              (0)           /* Nothing in progress */
+/* EP0 status.  EP0 transfers occur in a number of different contexts.  A
+ * simple state machine is required to handle the various transfer complete
+ * interrupt responses.  The following values are the various states:
+ */
+                                                   /*** INTERRUPT CAUSE ***/
+#define LPC214X_EP0REQUEST           (0)           /* Normal request handling */
 #define LPC214X_EP0STATUSIN          (1)           /* Status sent */
 #define LPC214X_EP0STATUSOUT         (2)           /* Status received */
 #define LPC214X_EP0SHORTWRITE        (3)           /* Short data sent with no request */
 #define LPC214X_EP0SHORTWRSENT       (4)           /* Short data write complete */
 #define LPC214X_EP0SETADDRESS        (5)           /* Set address received */
+#define LPC214X_EP0WRITEREQUEST      (6)           /* EP0 write request sent */
 
 /* Request queue operations ****************************************************/
 
@@ -300,7 +308,6 @@ struct lpc214x_ep_s
   struct lpc214x_usbdev_s *dev;          /* Reference to private driver data */
   struct lpc214x_req_s    *head;         /* Request list for this endpoint */
   struct lpc214x_req_s    *tail;
-  ubyte                   eplog;         /* Logical EP address from descriptor */
   ubyte                   epphy;         /* Physical EP address */
   ubyte                   stalled:1;     /* Endpoint is halted */
   ubyte                   halted:1;      /* Endpoint feature halted */
@@ -342,6 +349,7 @@ struct lpc214x_usbdev_s
 
   ubyte                   devstatus;     /* Last response to device status command */
   ubyte                   ep0state;      /* State of certain EP0 operations */
+  ubyte                   paddr;         /* Address assigned by SETADDRESS */
   ubyte                   stalled:1;     /* 1: Protocol stalled */
   ubyte                   selfpowered:1; /* 1: Device is self powered */
   ubyte                   paddrset:1;    /* 1: Peripheral addr has been set */
@@ -614,7 +622,7 @@ static uint32 lpc214x_usbcmd(uint16 cmd, ubyte data)
 
   switch (cmd)
     {
-      /* Write operations */
+      /* Write operations (1 byte of data) */
 
     case CMD_USB_DEV_SETADDRESS:
     case CMD_USB_DEV_CONFIG:
@@ -702,6 +710,7 @@ static uint32 lpc214x_usbcmd(uint16 cmd, ubyte data)
             while ((lpc214x_getreg(LPC214X_USBDEV_DEVINTST) & USBDEV_DEVINT_CCEMTY) == 0);
           }
           break;
+
         default:
           usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDCMD), 0);
           break;
@@ -983,9 +992,6 @@ static void lpc214x_reqcomplete(struct lpc214x_ep_s *privep, sint16 result)
  * Description:
  *   Send from the next queued write request
  *
- * Returned Value:
- *  0:not finished; 1:completed; <0:error
- *
  *******************************************************************************/
 
 static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
@@ -1000,15 +1006,18 @@ static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
   privreq = lpc214x_rqpeek(privep);
   if (!privreq)
     {
-      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NULLREQUEST), 0);
+      usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EPINQEMPTY), 0);
       return OK;
     }
+
+  uvdbg("len=%d xfrd=%d nullpkt=%d\n",
+        privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
 
   /* Ignore any attempt to send a zero length packet */
 
   if (privreq->req.len == 0)
     {
-      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NULLPACKET), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_EPINNULLPACKET), 0);
       lpc214x_reqcomplete(privep, OK);
       return OK;
     }
@@ -1016,7 +1025,7 @@ static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
   /* Otherwise send the data in the packet (in the DMA on case, we
    * may be resuming transfer already in progress.
    */
-
+#warning REVISIT... Unless the EP supports double buffering, only one packet may be sent
   for (;;)
     {
       /* Get the number of bytes left to be sent in the packet */
@@ -1090,19 +1099,23 @@ static int lpc214x_rdrequest(struct lpc214x_ep_s *privep)
   privreq = lpc214x_rqpeek(privep);
   if (!privreq)
     {
-      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NULLREQUEST), 0);
+      usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EPOUTQEMPTY), 0);
       return OK;
     }
+
+  uvdbg("len=%d xfrd=%d nullpkt=%d\n",
+        privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
 
   /* Ignore any attempt to receive a zero length packet */
 
   if (privreq->req.len == 0)
     {
-      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NULLPACKET), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_EPOUTNULLPACKET), 0);
       lpc214x_reqcomplete(privep, OK);
       return OK;
     }
 
+#warning REVISIT... Unless the EP supports double buffering, only one packet may be received
   usbtrace(TRACE_READ(privep->epphy), privreq->req.xfrd);
   for (;;)
     {
@@ -1391,7 +1404,7 @@ static void lpc214x_dispatchrequest(struct lpc214x_usbdev_s *priv,
  *
  * Description:
  *   USB Ctrl EP Setup Event. This is logically part of the USB interrupt
- *   handler.
+ *   handler.  This event occurs when a setup packet is receive on EP0 OUT.
  *
  *******************************************************************************/
 
@@ -1617,15 +1630,23 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
          * len:   0; data = none
          */
 
-        usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_SETADDRESS), 0);
+        usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_SETADDRESS), GETUINT16(ctrl.value));
         if ((ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE &&
             GETUINT16(ctrl.index)  == 0 && GETUINT16(ctrl.len) == 0 &&
             GETUINT16(ctrl.value) < 128)
           {
+            /* Save the address.  We cannot actually change to the next address until
+             * the completion of the status phase.
+             */
+            priv->paddr = ctrl.value[0];
+
+            /* Send a NULL packet. The status phase completes when the null packet has
+             * been sent successfully.
+             */
+
             lpc214x_epwrite(LPC214X_EP0_IN, NULL, 0);
-            priv->eplist[LPC214X_EP0_OUT].eplog = ctrl.value[0];
-            priv->eplist[LPC214X_EP0_IN].eplog  = ctrl.value[0];
             priv->ep0state = LPC214X_EP0SETADDRESS;
+
           }
         else
           {
@@ -1743,7 +1764,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
 
   if (priv->stalled)
     {
-      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_STALLED), priv->ep0state);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_EP0SETUPSTALLED), priv->ep0state);
       lpc214x_epstall(&ep0->ep, FALSE);
       lpc214x_epstall(&ep0->ep, FALSE);
     }
@@ -1754,7 +1775,8 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
  *
  * Description:
  *   USB Ctrl EP Data OUT Event. This is logically part of the USB interrupt
- *   handler.
+ *   handler.  Each non-isochronous OUT endpoint gives an interrupt when they
+ *   receive a packet without error.
  *
  *******************************************************************************/
 
@@ -1763,7 +1785,7 @@ static inline void lpc214x_ep0dataoutinterrupt(struct lpc214x_usbdev_s *priv)
   struct lpc214x_ep_s *ep0;
   uint32 pktlen;
 
-  /* Copy new setup packet int setup buffer */
+  /* Copy new setup packet into setup buffer */
 
   switch (priv->ep0state)
     {
@@ -1780,7 +1802,7 @@ static inline void lpc214x_ep0dataoutinterrupt(struct lpc214x_usbdev_s *priv)
 
     case LPC214X_EP0SHORTWRSENT:
       {
-        priv->ep0state = LPC214X_EP0IDLE;
+        priv->ep0state = LPC214X_EP0REQUEST;
         pktlen = lpc214x_epread(LPC214X_EP0_OUT, NULL, CONFIG_USBDEV_EP0_MAXSIZE);
         if (LPC214X_READOVERRUN(pktlen))
           {
@@ -1789,13 +1811,11 @@ static inline void lpc214x_ep0dataoutinterrupt(struct lpc214x_usbdev_s *priv)
       }
       break;
 
-    case LPC214X_EP0IDLE:
+    case LPC214X_EP0REQUEST:
       {
-        ep0 = &priv->eplist[LPC214X_EP0_OUT];
-        if (!lpc214x_rqempty(ep0))
-          {
-            lpc214x_wrrequest(ep0);
-          }
+        /* Process the next request action (if any) */
+
+        lpc214x_rdrequest(&priv->eplist[LPC214X_EP0_OUT]);
       }
       break;
 
@@ -1806,7 +1826,7 @@ static inline void lpc214x_ep0dataoutinterrupt(struct lpc214x_usbdev_s *priv)
 
   if (priv->stalled)
     {
-      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_STALLED), priv->ep0state);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_EP0OUTSTALLED), priv->ep0state);
       ep0 = &priv->eplist[LPC214X_EP0_OUT];
       lpc214x_epstall(&ep0->ep, FALSE);
       lpc214x_epstall(&ep0->ep, FALSE);
@@ -1819,7 +1839,9 @@ static inline void lpc214x_ep0dataoutinterrupt(struct lpc214x_usbdev_s *priv)
  *
  * Description:
  *   USB Ctrl EP Data IN Event. This is logically part of the USB interrupt
- *   handler.
+ *   handler.  All non-isochronous IN endpoints give this interrupt when a
+ *   packet is successfully transmitted (OR a NAK handshake is sent on the bus
+ *   provided that the interrupt on NAK feature is enabled).
  *
  *******************************************************************************/
 
@@ -1831,7 +1853,7 @@ static inline void lpc214x_ep0dataininterrupt(struct lpc214x_usbdev_s *priv)
     {
     case LPC214X_EP0STATUSOUT:
     case LPC214X_EP0STATUSIN:
-      priv->ep0state = LPC214X_EP0IDLE;
+      priv->ep0state = LPC214X_EP0REQUEST;
       break;
 
     case LPC214X_EP0SHORTWRITE:
@@ -1842,20 +1864,33 @@ static inline void lpc214x_ep0dataininterrupt(struct lpc214x_usbdev_s *priv)
       {
         usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_SETADDRESS), 0);
 
-        /* Set EP0 logical address */
+        /* This complete the  status phase and we can not set the device address
+         * Note that if we send the SETADDRESS command twice, that will force the
+         * address change.  Otherwise, the hardware will automatically have the
+         * address at the end of the status phase.
+         */
 
-        ubyte eplog = priv->eplist[LPC214X_EP0_OUT].eplog;
-        lpc214x_usbcmd(CMD_USB_DEV_SETADDRESS, CMD_USB_SETADDRESS_DEVEN | eplog);
-        lpc214x_usbcmd(CMD_USB_DEV_SETADDRESS, CMD_USB_SETADDRESS_DEVEN | eplog);
+        lpc214x_usbcmd(CMD_USB_DEV_SETADDRESS, CMD_USB_SETADDRESS_DEVEN | priv->paddr);
+        lpc214x_usbcmd(CMD_USB_DEV_SETADDRESS, CMD_USB_SETADDRESS_DEVEN | priv->paddr);
 
-        /* Not yet fully configured */
+        /* This completes the default phase, and begins the address phase
+         * (still not fully configured)
+         */
 
         lpc214x_usbcmd(CMD_USB_DEV_CONFIG, 0);
-        if (eplog)
+        if (priv->paddr)
           {
             priv->paddrset = 1;
-            priv->ep0state = LPC214X_EP0IDLE;
+            priv->ep0state = LPC214X_EP0REQUEST;
           }
+      }
+      break;
+
+    case LPC214X_EP0REQUEST:
+      {
+        /* Process the next request action (if any) */
+
+        lpc214x_wrrequest(&priv->eplist[LPC214X_EP0_IN]);
       }
       break;
 
@@ -1866,7 +1901,7 @@ static inline void lpc214x_ep0dataininterrupt(struct lpc214x_usbdev_s *priv)
 
   if (priv->stalled)
     {
-      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_STALLED), priv->ep0state);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_EP0INSTALLED), priv->ep0state);
       ep0 = &priv->eplist[LPC214X_EP0_IN];
       lpc214x_epstall(&ep0->ep, FALSE);
       lpc214x_epstall(&ep0->ep, FALSE);
@@ -2114,12 +2149,9 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
                                   lpc214x_usbcmd(CMD_USB_DEV_CONFIG, 1);
                                 }
 
-                              /* Write host data from the current write request */
+                              /* Write host data from the current write request (if any) */
 
-                              if (!lpc214x_rqempty(privep))
-                                {
-                                  lpc214x_wrrequest(privep);
-                                }
+                              lpc214x_wrrequest(privep);
                            }
                           else
                             {
@@ -2587,7 +2619,7 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
   req->xfrd   = 0;
   flags       = irqsave();
 
-  /* If we are not stalled, then drop all requests on the floor */
+  /* If we are stalled, then drop all requests on the floor */
 
   if (privep->stalled)
     {
@@ -3012,8 +3044,8 @@ void up_usbinitialize(void)
 
   /* Enable EP0 for OUT (host-to-device) */
 
-  lpc214x_usbcmd(CMD_USB_DEV_SETADDRESS, CMD_USB_SETADDRESS_DEVEN|LPC214X_EP0_OUT);
-  lpc214x_usbcmd(CMD_USB_DEV_SETADDRESS, CMD_USB_SETADDRESS_DEVEN|LPC214X_EP0_OUT);
+  lpc214x_usbcmd(CMD_USB_DEV_SETADDRESS, CMD_USB_SETADDRESS_DEVEN|0);
+  lpc214x_usbcmd(CMD_USB_DEV_SETADDRESS, CMD_USB_SETADDRESS_DEVEN|0);
 
   /* Reset/Re-initialize the USB hardware */
 
