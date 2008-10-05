@@ -120,72 +120,73 @@
 
 /* Trace error codes */
 
-#define LPC214X_TRACEERR_ALLOCFAIL        0x0001
-#define LPC214X_TRACEERR_BADCLEARFEATURE  0x0002
-#define LPC214X_TRACEERR_BADDEVGETSTATUS  0x0003
-#define LPC214X_TRACEERR_BADEPNO          0x0004
-#define LPC214X_TRACEERR_BADEPGETSTATUS   0x0005
-#define LPC214X_TRACEERR_BADEPTYPE        0x0006
-#define LPC214X_TRACEERR_BADGETCONFIG     0x0007
-#define LPC214X_TRACEERR_BADGETSETDESC    0x0008
-#define LPC214X_TRACEERR_BADGETSTATUS     0x0009
-#define LPC214X_TRACEERR_BADREQUEST       0x000a
-#define LPC214X_TRACEERR_BADSETADDRESS    0x000b
-#define LPC214X_TRACEERR_BADSETCONFIG     0x000c
-#define LPC214X_TRACEERR_BADSETFEATURE    0x000d
-#define LPC214X_TRACEERR_BINDFAILED       0x000e
-#define LPC214X_TRACEERR_DMABUSY          0x000f
-#define LPC214X_TRACEERR_DRIVER           0x0010
-#define LPC214X_TRACEERR_DRIVERREGISTERED 0x0011
-#define LPC214X_TRACEERR_EP0INSTALLED     0x0012
-#define LPC214X_TRACEERR_EP0OUTSTALLED    0x0013
-#define LPC214X_TRACEERR_EP0SETUPSTALLED  0x0014
-#define LPC214X_TRACEERR_EPINNULLPACKET   0x0015
-#define LPC214X_TRACEERR_EPOUTNULLPACKET  0x0016
-#define LPC214X_TRACEERR_EPREAD           0x0017
-#define LPC214X_TRACEERR_INVALIDCMD       0x0018
-#define LPC214X_TRACEERR_INVALIDCTRLREQ   0x0019
-#define LPC214X_TRACEERR_INVALIDPARMS     0x001a
-#define LPC214X_TRACEERR_IRQREGISTRATION  0x001b
-#define LPC214X_TRACEERR_NODMADESC        0x001c
-#define LPC214X_TRACEERR_NOEP             0x001d
-#define LPC214X_TRACEERR_NOTCONFIGURED    0x001e
-#define LPC214X_TRACEERR_REQABORTED       0x001f
+#define LPC214X_TRACEERR_ALLOCFAIL            0x0001
+#define LPC214X_TRACEERR_BADCLEARFEATURE      0x0002
+#define LPC214X_TRACEERR_BADDEVGETSTATUS      0x0003
+#define LPC214X_TRACEERR_BADEPNO              0x0004
+#define LPC214X_TRACEERR_BADEPGETSTATUS       0x0005
+#define LPC214X_TRACEERR_BADEPTYPE            0x0006
+#define LPC214X_TRACEERR_BADGETCONFIG         0x0007
+#define LPC214X_TRACEERR_BADGETSETDESC        0x0008
+#define LPC214X_TRACEERR_BADGETSTATUS         0x0009
+#define LPC214X_TRACEERR_BADREQUEST           0x000a
+#define LPC214X_TRACEERR_BADSETADDRESS        0x000b
+#define LPC214X_TRACEERR_BADSETCONFIG         0x000c
+#define LPC214X_TRACEERR_BADSETFEATURE        0x000d
+#define LPC214X_TRACEERR_BINDFAILED           0x000e
+#define LPC214X_TRACEERR_DMABUSY              0x000f
+#define LPC214X_TRACEERR_DRIVER               0x0010
+#define LPC214X_TRACEERR_DRIVERREGISTERED     0x0011
+#define LPC214X_TRACEERR_EP0INSTALLED         0x0012
+#define LPC214X_TRACEERR_EP0OUTSTALLED        0x0013
+#define LPC214X_TRACEERR_EP0SETUPSTALLED      0x0014
+#define LPC214X_TRACEERR_EPINNULLPACKET       0x0015
+#define LPC214X_TRACEERR_EPOUTNULLPACKET      0x0016
+#define LPC214X_TRACEERR_EPREAD               0x0017
+#define LPC214X_TRACEERR_INVALIDCMD           0x0018
+#define LPC214X_TRACEERR_INVALIDCTRLREQ       0x0019
+#define LPC214X_TRACEERR_INVALIDPARMS         0x001a
+#define LPC214X_TRACEERR_IRQREGISTRATION      0x001b
+#define LPC214X_TRACEERR_NODMADESC            0x001c
+#define LPC214X_TRACEERR_NOEP                 0x001d
+#define LPC214X_TRACEERR_NOTCONFIGURED        0x001e
+#define LPC214X_TRACEERR_REQABORTED           0x001f
 
 /* Trace interrupt codes */
 
-#define LPC214X_TRACEINTID_USB            0x0001
-#define LPC214X_TRACEINTID_CLEARFEATURE   0x0002
-#define LPC214X_TRACEINTID_CONNECTCHG     0x0003
-#define LPC214X_TRACEINTID_CONNECTED      0x0004
-#define LPC214X_TRACEINTID_DEVGETSTATUS   0x0005
-#define LPC214X_TRACEINTID_DEVRESET       0x0006
-#define LPC214X_TRACEINTID_DEVSTAT        0x0007
-#define LPC214X_TRACEINTID_DISCONNECTED   0x0008
-#define LPC214X_TRACEINTID_DISPATCH       0x0009
-#define LPC214X_TRACEINTID_EP0IN          0x000a
-#define LPC214X_TRACEINTID_EP0OUT         0x000b
-#define LPC214X_TRACEINTID_EP0SETUP       0x000c
-#define LPC214X_TRACEINTID_EPDMA          0x000d
-#define LPC214X_TRACEINTID_EPFAST         0x000e
-#define LPC214X_TRACEINTID_EPGETSTATUS    0x000f
-#define LPC214X_TRACEINTID_EPIN           0x0010
-#define LPC214X_TRACEINTID_EPINQEMPTY     0x0011
-#define LPC214X_TRACEINTID_EPOUT          0x0012
-#define LPC214X_TRACEINTID_EPOUTQEMPTY    0x0013
-#define LPC214X_TRACEINTID_EPRINT         0x0014
-#define LPC214X_TRACEINTID_EPSLOW         0x0015
-#define LPC214X_TRACEINTID_FRAME          0x0016
-#define LPC214X_TRACEINTID_GETCONFIG      0x0017
-#define LPC214X_TRACEINTID_GETSETDESC     0x0018
-#define LPC214X_TRACEINTID_GETSETIF       0x0019
-#define LPC214X_TRACEINTID_GETSTATUS      0x001a
-#define LPC214X_TRACEINTID_IFGETSTATUS    0x001b
-#define LPC214X_TRACEINTID_SETADDRESS     0x001c
-#define LPC214X_TRACEINTID_SETCONFIG      0x001d
-#define LPC214X_TRACEINTID_SETFEATURE     0x001e
-#define LPC214X_TRACEINTID_SUSPENDCHG     0x001f
-#define LPC214X_TRACEINTID_SYNCHFRAME     0x0020
+#define LPC214X_TRACEINTID_USB                0x0001
+#define LPC214X_TRACEINTID_CLEARFEATURE       0x0002
+#define LPC214X_TRACEINTID_CONNECTCHG         0x0003
+#define LPC214X_TRACEINTID_CONNECTED          0x0004
+#define LPC214X_TRACEINTID_DEVGETSTATUS       0x0005
+#define LPC214X_TRACEINTID_DEVRESET           0x0006
+#define LPC214X_TRACEINTID_DEVSTAT            0x0007
+#define LPC214X_TRACEINTID_DISCONNECTED       0x0008
+#define LPC214X_TRACEINTID_DISPATCH           0x0009
+#define LPC214X_TRACEINTID_EP0IN              0x000a
+#define LPC214X_TRACEINTID_EP0OUT             0x000b
+#define LPC214X_TRACEINTID_EP0SETUP           0x000c
+#define LPC214X_TRACEINTID_EPDMA              0x000d
+#define LPC214X_TRACEINTID_EPFAST             0x000e
+#define LPC214X_TRACEINTID_EPGETSTATUS        0x000f
+#define LPC214X_TRACEINTID_EPIN               0x0010
+#define LPC214X_TRACEINTID_EPINQEMPTY         0x0011
+#define LPC214X_TRACEINTID_EP0INSETADDRESS    0x0012
+#define LPC214X_TRACEINTID_EPOUT              0x0013
+#define LPC214X_TRACEINTID_EPOUTQEMPTY        0x0014
+#define LPC214X_TRACEINTID_EP0SETUPSETADDRESS 0x0015
+#define LPC214X_TRACEINTID_EPRINT             0x0016
+#define LPC214X_TRACEINTID_EPSLOW             0x0017
+#define LPC214X_TRACEINTID_FRAME              0x0018
+#define LPC214X_TRACEINTID_GETCONFIG          0x0019
+#define LPC214X_TRACEINTID_GETSETDESC         0x001a
+#define LPC214X_TRACEINTID_GETSETIF           0x001b
+#define LPC214X_TRACEINTID_GETSTATUS          0x001c
+#define LPC214X_TRACEINTID_IFGETSTATUS        0x001d
+#define LPC214X_TRACEINTID_SETCONFIG          0x001e
+#define LPC214X_TRACEINTID_SETFEATURE         0x001f
+#define LPC214X_TRACEINTID_SUSPENDCHG         0x0020
+#define LPC214X_TRACEINTID_SYNCHFRAME         0x0021
 
 /* Hardware interface **********************************************************/
 
@@ -1630,7 +1631,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
          * len:   0; data = none
          */
 
-        usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_SETADDRESS), GETUINT16(ctrl.value));
+        usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EP0SETUPSETADDRESS), GETUINT16(ctrl.value));
         if ((ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE &&
             GETUINT16(ctrl.index)  == 0 && GETUINT16(ctrl.len) == 0 &&
             GETUINT16(ctrl.value) < 128)
@@ -1638,7 +1639,15 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
             /* Save the address.  We cannot actually change to the next address until
              * the completion of the status phase.
              */
+
             priv->paddr = ctrl.value[0];
+
+            /* Note that if we send the SETADDRESS command twice, that will force the
+             * address change.  Otherwise, the hardware will automatically set the
+             * address at the end of the status phase.
+             */
+
+            lpc214x_usbcmd(CMD_USB_DEV_SETADDRESS, CMD_USB_SETADDRESS_DEVEN | priv->paddr);
 
             /* Send a NULL packet. The status phase completes when the null packet has
              * been sent successfully.
@@ -1646,7 +1655,6 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
 
             lpc214x_epwrite(LPC214X_EP0_IN, NULL, 0);
             priv->ep0state = LPC214X_EP0SETADDRESS;
-
           }
         else
           {
@@ -1862,21 +1870,11 @@ static inline void lpc214x_ep0dataininterrupt(struct lpc214x_usbdev_s *priv)
 
     case LPC214X_EP0SETADDRESS:
       {
-        usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_SETADDRESS), 0);
-
-        /* This complete the  status phase and we can not set the device address
-         * Note that if we send the SETADDRESS command twice, that will force the
-         * address change.  Otherwise, the hardware will automatically have the
-         * address at the end of the status phase.
+        /* If the address was set to a non-zero value, then thiscompletes the
+         * default phase, and begins the address phase (still not fully configured)
          */
 
-        lpc214x_usbcmd(CMD_USB_DEV_SETADDRESS, CMD_USB_SETADDRESS_DEVEN | priv->paddr);
-        lpc214x_usbcmd(CMD_USB_DEV_SETADDRESS, CMD_USB_SETADDRESS_DEVEN | priv->paddr);
-
-        /* This completes the default phase, and begins the address phase
-         * (still not fully configured)
-         */
-
+        usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EP0INSETADDRESS), (uint16)priv->paddr);
         lpc214x_usbcmd(CMD_USB_DEV_CONFIG, 0);
         if (priv->paddr)
           {
@@ -2009,7 +2007,8 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
           if (DEVSTATUS_CONNCHG(g_usbdev.devstatus))
             {
-              usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_CONNECTCHG), 0);
+              usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_CONNECTCHG),
+                       (uint16)g_usbdev.devstatus);
               if (DEVSTATUS_CONNECT(g_usbdev.devstatus))
                 {
                    /* Host is connected */
@@ -2018,7 +2017,8 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
                      {
                        /* We have a transition from unattached to attached */
 
-                       usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_CONNECTED), 0);
+                       usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_CONNECTED),
+                                (uint16)g_usbdev.devstatus);
                        priv->usbdev.speed = USB_SPEED_UNKNOWN;
                        lpc214x_usbcmd(CMD_USB_DEV_CONFIG, 0);
                        priv->attached     = 1;
@@ -2029,7 +2029,8 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
                else if (priv->attached)
                  {
-                   usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_DISCONNECTED), 0);
+                   usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_DISCONNECTED),
+                            (uint16)g_usbdev.devstatus);
                    priv->usbdev.speed = USB_SPEED_UNKNOWN;
                    lpc214x_usbcmd(CMD_USB_DEV_CONFIG, 0);
                    priv->attached = 0;
@@ -2041,14 +2042,16 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
           if (DEVSTATUS_SUSPCHG(g_usbdev.devstatus))
             {
-              usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_SUSPENDCHG), 0);
+              usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_SUSPENDCHG),
+                       (uint16)g_usbdev.devstatus);
             }
 
           /* Device reset */
 
           if (DEVSTATUS_RESET(g_usbdev.devstatus))
             {
-              usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_DEVRESET), 0);
+              usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_DEVRESET),
+                       (uint16)g_usbdev.devstatus);
               lpc214x_usbreset(priv);
             }
         }
@@ -2609,7 +2612,7 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 
   if (!priv->driver || priv->usbdev.speed == USB_SPEED_UNKNOWN)
     {
-      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NOTCONFIGURED), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
       return -ESHUTDOWN;
     }
 
@@ -2655,7 +2658,7 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 
   else
     {
-      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADREQUEST), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADREQUEST), (uint16)privep->epphy);
       lpc214x_abortrequest(privep, privreq, -EBUSY);
       ret = -EINVAL;
     }
@@ -2737,7 +2740,7 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte e
   irqstate_t flags;
   int epndx = 0;
 
-  usbtrace(TRACE_DEVALLOCEP, 0);
+  usbtrace(TRACE_DEVALLOCEP, (uint16)epphy);
 
   /* epphy=0 means that any endpoint will do */
 
@@ -2745,7 +2748,7 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte e
     {
       if (epphy >= LPC214X_NLOGENDPOINTS)
         {
-         usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADEPNO), 0);
+         usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADEPNO), (uint16)epphy);
          return NULL;
         }
 
@@ -2781,7 +2784,7 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte e
 
     case USB_EP_ATTR_XFER_CONTROL: /* Control endpoint -- not a valid choice */
     default:
-      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADEPTYPE), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADEPTYPE), (uint16)eptype);
       return NULL;
     }
 
@@ -2817,7 +2820,7 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte e
       irqrestore(flags);
     }
 
-  usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NOEP), 0);
+  usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NOEP), (uint16)epphy);
   return NULL;
 }
 
@@ -3027,7 +3030,8 @@ void up_usbinitialize(void)
 
   if (irq_attach(LPC214X_USB_IRQ, lpc214x_usbinterrupt) != 0)
     {
-      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_IRQREGISTRATION), 0);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_IRQREGISTRATION),
+               (uint16)LPC214X_USB_IRQ);
       goto errout;
     }
 
