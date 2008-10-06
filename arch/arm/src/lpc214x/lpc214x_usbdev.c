@@ -1014,11 +1014,21 @@ static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
   uvdbg("len=%d xfrd=%d nullpkt=%d\n",
         privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
 
-  /* Ignore any attempt to send a zero length packet */
+  /* Ignore any attempt to send a zero length packet on anything but EP0IN */
 
   if (privreq->req.len == 0)
     {
-      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_EPINNULLPACKET), 0);
+      if (privep->epphy == LPC214X_EP0_IN)
+        {
+          lpc214x_epwrite(LPC214X_EP0_IN, NULL, 0);
+        }
+      else
+        {
+          usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_EPINNULLPACKET), 0);
+        }
+
+      /* In any event, the request is complete */
+
       lpc214x_reqcomplete(privep, OK);
       return OK;
     }
@@ -1390,6 +1400,8 @@ static void lpc214x_dispatchrequest(struct lpc214x_usbdev_s *priv,
   usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_DISPATCH), 0);
   if (priv && priv->driver)
     {
+      /* Forward to the control request to the class driver implementation */
+
       ret = CLASS_SETUP(priv->driver, &priv->usbdev, ctrl);
       if (ret < 0)
         {
@@ -1414,7 +1426,9 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
   struct lpc214x_ep_s *ep0 = &priv->eplist[LPC214X_EP0_OUT];
   struct lpc214x_req_s *privreq = lpc214x_rqpeek(ep0);
   struct usb_ctrlreq_s ctrl;
+  uint16 value;
   uint16 index;
+  uint16 len;
   ubyte  epphy;
   ubyte  response[2];
   int    ret;
@@ -1454,9 +1468,14 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
       return;
     }
 
+  /* And extract the little-endian 16-bit values to host order */
+
+  value = GETUINT16(ctrl.value);
+  index = GETUINT16(ctrl.index);
+  len   = GETUINT16(ctrl.len);
+
   uvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
-        ctrl.type, ctrl.req,
-        GETUINT16(ctrl.value), GETUINT16(ctrl.index), GETUINT16(ctrl.len));
+        ctrl.type, ctrl.req, value, index, len);
 
   /* Dispatch any non-standard requests */
 
@@ -1481,8 +1500,8 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
          */
 
         usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_GETSTATUS), 0);
-        if (!priv->paddrset || GETUINT16(ctrl.len) != 2 ||
-            (ctrl.type & USB_REQ_DIR_IN) == 0 || GETUINT16(ctrl.value) != 0)
+        if (!priv->paddrset || len != 2 ||
+            (ctrl.type & USB_REQ_DIR_IN) == 0 || value != 0)
           {
             priv->stalled = 1;
           }
@@ -1493,7 +1512,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
               case USB_REQ_RECIPIENT_ENDPOINT:
                 {
                   usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EPGETSTATUS), 0);
-                  epphy = USB_EPNO(GETUINT16(ctrl.index)) << 1;
+                  epphy = USB_EPNO(index) << 1;
                   if (epphy < LPC214X_NPHYSENDPOINTS)
                     {
                        if ((lpc214x_usbcmd(CMD_USB_EP_SELECT|epphy, 0) & CMD_USB_EPSELECT_ST) != 0)
@@ -1518,7 +1537,6 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
 
               case USB_REQ_RECIPIENT_DEVICE:
                 {
-                  index = GETUINT16(ctrl.index);
                   if (index == 0)
                     {
                       usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_DEVGETSTATUS), 0);
@@ -1573,10 +1591,10 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
           {
             lpc214x_dispatchrequest(priv, &ctrl);
           }
-        else if (priv->paddrset && GETUINT16(ctrl.value) == USB_FEATURE_ENDPOINTHALT &&
-                 GETUINT16(ctrl.index) < LPC214X_NLOGENDPOINTS && GETUINT16(ctrl.len) == 0)
+        else if (priv->paddrset != 0 && value == USB_FEATURE_ENDPOINTHALT &&
+                 index < LPC214X_NLOGENDPOINTS && len == 0)
           {
-            ubyte epphys = LPC214X_EP_LOG2PHY(GETUINT16(ctrl.index));
+            ubyte epphys = LPC214X_EP_LOG2PHY(index);
             priv->eplist[epphys].halted = 0;
             lpc214x_epwrite(LPC214X_EP0_IN, NULL, 0);
             priv->ep0state = LPC214X_EP0STATUSIN;
@@ -1599,18 +1617,18 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
 
         usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_SETFEATURE), 0);
         if (((ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE) &&
-            GETUINT16(ctrl.value) == USB_FEATURE_TESTMODE)
+            value == USB_FEATURE_TESTMODE)
           {
-            uvdbg("test mode: %d\n", GETUINT16(ctrl.index));
+            uvdbg("test mode: %d\n", index);
           }
         else if ((ctrl.type & USB_REQ_RECIPIENT_MASK) != USB_REQ_RECIPIENT_ENDPOINT)
           {
            lpc214x_dispatchrequest(priv, &ctrl);
           }
-        else if (priv->paddrset && GETUINT16(ctrl.value) == USB_FEATURE_ENDPOINTHALT &&
-                 GETUINT16(ctrl.index) < LPC214X_NLOGENDPOINTS && GETUINT16(ctrl.len) == 0)
+        else if (priv->paddrset != 0 && value == USB_FEATURE_ENDPOINTHALT &&
+                 index < LPC214X_NLOGENDPOINTS && len == 0)
           {
-            ubyte epphys = LPC214X_EP_LOG2PHY(GETUINT16(ctrl.index));
+            ubyte epphys = LPC214X_EP_LOG2PHY(index);
             priv->eplist[epphys].halted = 1;
             lpc214x_epwrite(LPC214X_EP0_IN, NULL, 0);
             priv->ep0state = LPC214X_EP0STATUSIN;
@@ -1631,10 +1649,9 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
          * len:   0; data = none
          */
 
-        usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EP0SETUPSETADDRESS), GETUINT16(ctrl.value));
+        usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EP0SETUPSETADDRESS), value);
         if ((ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE &&
-            GETUINT16(ctrl.index)  == 0 && GETUINT16(ctrl.len) == 0 &&
-            GETUINT16(ctrl.value) < 128)
+            index  == 0 && len == 0 && value < 128)
           {
             /* Save the address.  We cannot actually change to the next address until
              * the completion of the status phase.
@@ -1699,8 +1716,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
       {
         usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_GETCONFIG), 0);
         if (priv->paddrset && (ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE &&
-            GETUINT16(ctrl.value) == 0 && GETUINT16(ctrl.index) == 0 &&
-            GETUINT16(ctrl.len) == 1)
+            value == 0 && index == 0 && len == 1)
           {
             lpc214x_dispatchrequest(priv, &ctrl);
           }
@@ -1721,7 +1737,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
       {
         usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_SETCONFIG), 0);
         if ((ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE &&
-            GETUINT16(ctrl.index) == 0 && GETUINT16(ctrl.len) == 0)
+            index == 0 && len == 0)
           {
             lpc214x_dispatchrequest(priv, &ctrl);
           }
