@@ -485,6 +485,9 @@
 	* Add an option to set aside a separate stack for interrupt handling (ARM only).
 	  This is useful when memory is constrained, there are multiple tasks, and
 	  the interrupt stack requirement is high (as when USB is enabled).
+	* Basic LPC214x USB device side driver basically functional (but probably still buggy)
+	* Initial USB serial class device side driver check in (not well tested at initial checkin)
+	* Add LPC214x USB serial configuration; Add examples/usbserial test (still a work in progress)
 
 
 
