@@ -124,8 +124,8 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
 		   hence, the board that supports the particular chip or SoC.
 		CONFIG_ARCH_BOARD_name - For use in C code
-                CONFIG_ENDIAN_BIG - define if big endian (default is little
-                   endian)
+		CONFIG_ENDIAN_BIG - define if big endian (default is little
+		   endian)
 
 	Some architectures require a description of the RAM configuration:
 

@@ -51,6 +51,10 @@
 # CONFIG_DRAM_END - the size of installed DRAM.
 #   Unique to c5471
 # CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to c5471.
+# CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
+#   stack. If defined, this symbol is the size of the interrupt
+#   stack in bytes.  If not defined, the user task stacks will be
+#   used during interrupt handling.
 # CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 #
 CONFIG_ARCH=arm
@@ -63,6 +67,7 @@ CONFIG_BOARD_LOOPSPERMSEC=1250
 CONFIG_ROM_VECTORS=n
 CONFIG_DRAM_END=0x11000000
 CONFIG_ARCH_LEDS=y
+CONFIG_ARCH_INTERRUPTSTACK=0
 CONFIG_ARCH_STACKDUMP=y
 
 #
