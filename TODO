@@ -16,7 +16,7 @@ NuttX TODO List (Last updated July 31, 2008)
   (3)  Build system
   (2)  NuttShell (NSH) (examples/nsh)
   (1)  Other Applications & Tests (examples/)
-  (1)  ARM (arch/arm/)
+  (0)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (1)  ARM/DM320 (arch/arm/src/dm320/)
   (1)  ARM/LPC214x (arch/arm/src/lpc214x/)
@@ -320,12 +320,6 @@ o Other Applications & Tests (examples/)
 
 o ARM (arch/arm/)
   ^^^^^^^^^^^^^^^
-
-  Description: Add option to use a separate stack for interrupt handling.  At
-               present, each interrupt executes on top of the user stack
-               allocation making each user stack allocation larger than needed.
-  Status:      Open
-  Priority:    Medium
 
 o ARM/C5471 (arch/arm/src/c5471/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

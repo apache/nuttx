@@ -128,7 +128,15 @@ up_vectorirq:
 
 	mov	fp, #0			/* Init frame pointer */
 	mov	r0, sp			/* Get r0=xcp */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+	ldr	sp, .Lirqstackbase	/* SP = interrupt stack base */
+	str	r0, [sp]		/* Save the user stack pointer */
 	bl	up_decodeirq		/* Call the handler */
+	ldr	sp, [sp]		/* Restore the user stack pointer */
+#else
+	bl	up_decodeirq		/* Call the handler */
+#endif
 
 	/* Restore the CPSR, SVC modr registers and return */
 .Lnoirqset:
@@ -138,8 +146,11 @@ up_vectorirq:
 
 .Lirqtmp:
 	.word	g_irqtmp
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+.Lirqstackbase:
+	.word	up_stackbase
+#endif
 	.size	up_vectorirq, . - up_vectorirq
-
 	.align	5
 
 /************************************************************************************
@@ -404,4 +415,25 @@ up_vectorfiq:
 	subs	pc, lr, #4
 	.size	up_vectofiq, . - up_vectorfiq
 
-	.align	5
+/************************************************************************************
+ *  Name: up_interruptstack/g_userstack
+ *
+ * Description:
+ *   Shouldn't happen
+ *
+ ************************************************************************************/
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+	.bss
+	.align	4
+	.globl	g_userstack
+	.type	g_userstack, object
+up_interruptstack:
+	.skip	((CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4)
+g_userstack:
+up_stackbase:
+	.skip	4
+	.size	g_userstack, 4
+	.size	up_interruptstack, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
+#endif
+	.end

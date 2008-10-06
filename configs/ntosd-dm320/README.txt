@@ -1,6 +1,83 @@
 README
 ^^^^^^
 
+ARM/DM320-specific Configuration Options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+	CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
+	   be set to:
+
+	   CONFIG_ARCH=arm
+
+	CONFIG_ARCH_name - For use in C code:
+
+	   CONFIG_ARCH_ARM=y
+
+	CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
+
+	   CONFIG_ARCH_CHIP=c5471
+
+	CONFIG_ARCH_CHIP_name - For use in C code
+
+	   CONFIG_ARCH_CHIP_C5471
+
+	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+	   hence, the board that supports the particular chip or SoC.
+
+	   CONFIG_ARCH_BOARD=c5471evm (for the Spectrum Digital C5471 EVM)
+
+	CONFIG_ARCH_BOARD_name - For use in C code
+
+	   CONFIG_ARCH_BOARD_C5471EVM (for the Spectrum Digital C5471 EVM)
+
+	CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
+	   of delay loops
+
+	CONFIG_ENDIAN_BIG - define if big endian (default is little
+	   endian)
+
+	CONFIG_DRAM_SIZE - Describes the installed DRAM.
+
+	CONFIG_DRAM_START - The start address of installed DRAM
+
+	CONFIG_DRAM_VSTART - The startaddress of DRAM (virtual)
+
+	CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
+	   have LEDs
+
+	CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
+	   stack. If defined, this symbol is the size of the interrupt
+	   stack in bytes.  If not defined, the user task stacks will be
+	  used during interrupt handling.
+
+	CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
+
+  DM320 specific device driver settings
+
+	CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
+	   console and ttys0 (default is the UART0).
+	CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
+	   This specific the size of the receive buffer
+	CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
+	   being sent.  This specific the size of the transmit buffer
+	CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
+	CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
+	CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+	CONFIG_UARTn_2STOP - Two stop bits
+
+  DM320 USB Configuration
+
+	CONFIG_DM320_GIO_USBATTACH
+	   GIO that detects USB attach/detach events
+	CONFIG_DM320_GIO_USBDPPULLUP
+	   GIO 
+	CONFIG_DMA320_USBDEV_DMA
+	   Enable DM320-specific DMA support
+	CONFIG_DM320_GIO_USBATTACH=6
+
+Configurations
+^^^^^^^^^^^^^^
+
 Each Neuros OSD configuration is maintained in a sudirectory and
 can be selected as follow:
 
