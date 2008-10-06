@@ -8,7 +8,7 @@ NuttX TODO List (Last updated July 31, 2008)
   (1)  pthreads (sched/)
   (1)  C++ Support
  (12)  Network (net/, netutils/)
-  (2)  USB (drivers/usbdev)
+  (1)  USB (drivers/usbdev)
   (3)  Libraries (lib/)
   (5)  File system/Generic drivers (fs/, drivers/)
   (1)  Pascal add-on (pcode/)
@@ -204,11 +204,7 @@ o Network (net/, netutils/)
 o USB (drivers/usbdev)
   ^^^^^^^^^^^^^^^^^^^^
 
-  Description: Implement USB device support
-  Status:      Open
-  Priority:    High
-
-  Description: Implement USB bulk / serial device support
+  Description: Implement USB bulk
   Status:      Open
   Priority:    High
 
