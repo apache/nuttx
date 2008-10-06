@@ -65,6 +65,12 @@
 #  define CONFIG_USE_EARLYSERIALINIT 1
 #endif
 
+/* Check if an interrupt stack size is configured */
+
+#ifndef CONFIG_ARCH_INTERRUPTSTACK
+# define CONFIG_ARCH_INTERRUPTSTACK 0
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -92,6 +98,12 @@ extern uint32 *current_regs;
  */
 
 extern uint32 g_heapbase;
+
+/* Address of the saved user stack pointer */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+extern uint32 g_userstack;
+#endif
 #endif
 
 /****************************************************************************

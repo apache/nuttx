@@ -94,49 +94,36 @@ static inline uint32 up_getsp(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_STACKDUMP
-static void up_stackdump(void)
+static void up_stackdump(uint32 sp, uint32 stack_base)
 {
-  _TCB *rtcb        = (_TCB*)g_readytorun.head;
-  uint32 sp         = up_getsp();
-  uint32 stack_base;
-  uint32 stack_size;
+  uint32 stack ;
 
-  if (rtcb->pid == 0)
+  for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
     {
-      stack_base = g_heapbase - 4;
-      stack_size = CONFIG_PROC_STACK_SIZE;
+      uint32 *ptr = (uint32*)stack;
+      lldbg("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+             stack, ptr[0], ptr[1], ptr[2], ptr[3],
+             ptr[4], ptr[5], ptr[6], ptr[7]);
     }
-  else
-    {
-      stack_base = (uint32)rtcb->adj_stack_ptr;
-      stack_size = (uint32)rtcb->adj_stack_size;
-    }
+}
+#else
+# define up_stackdump()
+#endif
 
-  lldbg("stack_base: %08x\n", stack_base);
-  lldbg("stack_size: %08x\n", stack_size);
-  lldbg("sp:         %08x\n", sp);
+/****************************************************************************
+ * Name: up_registerdump
+ ****************************************************************************/
 
-  if (sp >= stack_base || sp < stack_base - stack_size)
-    {
-      lldbg("ERROR: Stack pointer is not within allocated stack\n");
-      return;
-    }
-  else
-    {
-      uint32 stack = sp & ~0x1f;
-
-      for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
-        {
-          uint32 *ptr = (uint32*)stack;
-          lldbg("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-                 stack, ptr[0], ptr[1], ptr[2], ptr[3],
-                 ptr[4], ptr[5], ptr[6], ptr[7]);
-        }
-    }
+#ifdef CONFIG_ARCH_STACKDUMP
+static inline void up_registerdump(void)
+{
+  /* Are user registers available from interrupt processing? */
 
   if (current_regs)
     {
       int regs;
+
+      /* Yes.. dump the interrupt registers */
 
       for (regs = REG_R0; regs <= REG_R15; regs += 8)
         {
@@ -149,7 +136,101 @@ static void up_stackdump(void)
     }
 }
 #else
-# define up_stackdump()
+# define up_registerdump()
+#endif
+
+/****************************************************************************
+ * Name: up_dumpstate
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_STACKDUMP
+static void up_dumpstate(void)
+{
+  _TCB *rtcb        = (_TCB*)g_readytorun.head;
+  uint32 sp         = up_getsp();
+  uint32 ustackbase;
+  uint32 ustacksize;
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+  uint32 istackbase;
+  uint32 istacksize;
+#endif
+
+  /* Get the limits on the user stack memory */
+
+  if (rtcb->pid == 0)
+    {
+      ustackbase = g_heapbase - 4;
+      ustacksize = CONFIG_PROC_STACK_SIZE;
+    }
+  else
+    {
+      ustackbase = (uint32)rtcb->adj_stack_ptr;
+      ustacksize = (uint32)rtcb->adj_stack_size;
+    }
+
+  /* Get the limits on the interrupt stack memory */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+  istackbase = (uint32)&g_userstack;
+  istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4;
+
+  /* Show interrupt stack info */
+
+  lldbg("sp:     %08x\n", sp);
+  lldbg("IRQ stack:\n");
+  lldbg("  base: %08x\n", istackbase);
+  lldbg("  size: %08x\n", istacksize);
+
+  /* Does the current stack pointer lie within the interrupt
+   * stack?
+   */
+
+  if (sp <= istackbase && sp < istackbase - istacksize)
+    {
+      /* Yes.. dump the interrupt stack */
+
+      up_stackdump(sp, istackbase);
+
+      /* Extract the user stack pointer which should lie
+       * at the base of the interrupt stack.
+       */
+
+      sp = g_userstack;
+      lldbg("sp:     %08x\n", sp);
+    }
+
+  /* Show user stack info */
+
+  lldbg("User stack:\n");
+  lldbg("  base: %08x\n", ustackbase);
+  lldbg("  size: %08x\n", ustacksize);
+#else
+  lldbg("sp:         %08x\n", sp);
+  lldbg("stack base: %08x\n", ustackbase);
+  lldbg("stack size: %08x\n", ustacksize);
+#endif
+
+  /* Dump the user stack if the stack pointer lies within the allocated user
+   * stack memory.
+   */
+
+  if (sp >= ustackbase || sp < ustackbase - ustacksize)
+    {
+#if !defined(CONFIG_ARCH_INTERRUPTSTACK) || CONFIG_ARCH_INTERRUPTSTACK < 4
+      lldbg("ERROR: Stack pointer is not within allocated stack\n");
+#endif
+    }
+  else
+    {
+      up_stackdump(sp, ustackbase);
+    }
+
+  /* Then dump the registers (if available) */
+
+  up_registerdump();
+}
+#else
+# define up_dumpstate()
 #endif
 
 /****************************************************************************
@@ -201,7 +282,7 @@ void up_assert(const ubyte *filename, int lineno)
   lldbg("Assertion failed at file:%s line: %d\n",
         filename, lineno);
 #endif
-  up_stackdump();
+  up_dumpstate();
   _up_assert(EXIT_FAILURE);
 }
 
@@ -223,6 +304,6 @@ void up_assert_code(const ubyte *filename, int lineno, int errorcode)
   lldbg("Assertion failed at file:%s line: %d error code: %d\n",
         filename, lineno, errorcode);
 #endif
-  up_stackdump();
+  up_dumpstate();
   _up_assert(errorcode);
 }
