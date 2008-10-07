@@ -403,51 +403,61 @@ static int uart_open(FAR struct file *filep)
       /* More than 255 opens; ubyte overflows to zero */
 
       ret = -EMFILE;
+      goto errout_with_sem;
     }
-  else
+
+  /* Check if this is the first time that the driver has been opened. */
+
+  if (tmp == 1)
     {
-      /* Check if this is the first time that the driver has been opened. */
+      irqstate_t flags = irqsave();
 
-      if (tmp == 1)
+      /* If this is the console, then the UART has already been initialized. */
+
+      if (!dev->isconsole)
         {
-          irqstate_t flags = irqsave();
+          /* Perform one time hardware initialization */
 
-          /* If this is the console, then the UART has already been initialized. */
-
-          if (!dev->isconsole)
+          ret = uart_setup(dev);
+          if (ret < 0)
             {
-             /* Perform one time hardware initialization */
-
-             uart_setup(dev);
+              goto errout_with_irqsdisabled;
             }
-
-          /* In any event, we do have to configure for interrupt driven mode of
-           * operation.  Attach the hardware IRQ(s). Hmm.. should shutdown() the
-           * the device in the rare case that uart_attach() fails, tmp==1, and
-           * this is not the console.
-           */
-
-          ret = uart_attach(dev);
-          if (ret == OK)
-            {
-              /* Mark the io buffers empty */
-
-              dev->xmit.head = 0;
-              dev->xmit.tail = 0;
-              dev->recv.head = 0;
-              dev->recv.tail = 0;
-
-              /* Enable the RX interrupt */
-
-              uart_enablerxint(dev);
-
-              /* Save the new open count on success */
-
-              dev->open_count = tmp;
-            }
-          irqrestore(flags);
         }
+
+      /* In any event, we do have to configure for interrupt driven mode of
+       * operation.  Attach the hardware IRQ(s). Hmm.. should shutdown() the
+       * the device in the rare case that uart_attach() fails, tmp==1, and
+       * this is not the console.
+       */
+
+      ret = uart_attach(dev);
+      if (ret < 0)
+        {
+           uart_shutdown(dev);
+           goto errout_with_irqsdisabled;
+        }
+
+      /* Mark the io buffers empty */
+
+      dev->xmit.head = 0;
+      dev->xmit.tail = 0;
+      dev->recv.head = 0;
+      dev->recv.tail = 0;
+
+      /* Enable the RX interrupt */
+
+      uart_enablerxint(dev);
+
+      /* Save the new open count on success */
+
+      dev->open_count = tmp;
+
+errout_with_irqsdisabled:
+      irqrestore(flags);
     }
+
+errout_with_sem:
   uart_givesem(&dev->closesem);
   return ret;
 }
