@@ -322,6 +322,10 @@ void usbtrace(uint16 event, uint16 value)
     default:
       switch (TRACE_ID(event))
         {
+        case TRACE_CLASSAPI_ID:        /* Other class driver system API calls */
+          lldbg("Class API call %d: %04x\n", TRACE_DATA(event), value);
+          break;
+
         case TRACE_INTENTRY_ID:        /* Interrupt handler entry */
           lldbg("Interrrupt %d entry: %04x\n", TRACE_DATA(event), value);
           break;
