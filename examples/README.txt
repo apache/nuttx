@@ -123,3 +123,9 @@ examples/pipe
  * CONFIG_EXAMPLES_PIPE_STACKSIZE
      Sets the size of the stack to use when creating the child tasks.
      The default size is 1024.
+
+examples/usbserial
+^^^^^^^^^^^^^^^^^^
+
+  This is another implementation of "Hello, World" but this one uses
+  a USB serial driver.
