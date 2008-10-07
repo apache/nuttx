@@ -1072,6 +1072,7 @@ buildroot-0.1.0 2007-03-09 &lt;spudmonkey@racsa.co.cr&gt
 nuttx-0.3.16 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* Added header files defining a common USB device controller architecture
 	* Added USB device side driver for the LPC214x (untested at initial checkin)
+	* Correct the frequency of system timer interrupts (off by 20x in nuttx-0.3.15)
 	* Add an option to set aside a separate stack for interrupt handling (ARM only).
 	  This is useful when memory is constrained, there are multiple tasks, and
 	  the interrupt stack requirement is high (as when USB is enabled).
