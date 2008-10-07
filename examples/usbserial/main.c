@@ -46,6 +46,20 @@
  * Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_CPP_HAVE_VARARGS
+#  ifdef CONFIG_DEBUG
+#    define message(...) lib_lowprintf(__VA_ARGS__)
+#  else
+#    define message(...) printf(__VA_ARGS__)
+#  endif
+#else
+#  ifdef CONFIG_DEBUG
+#    define message lib_lowprintf
+#  else
+#    define message printf
+#  endif
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -78,26 +92,72 @@ int user_start(int argc, char *argv[])
 
   /* Initialize the USB serial driver */
 
+  message("user_start: Registering USB serial driver\n");
   ret = usbdev_serialinitialize(0);
   if (ret < 0)
     {
-      printf("ERROR: Failed to create the USB serial device: %d\n", -ret);
+      message("user_start: ERROR: Failed to create the USB serial device: %d\n", -ret);
       return 1;
     }
+  message("user_start: Successfully registered the serial driver\n");
 
   /* Open the USB serial device for output */
 
-  stream = fopen("/dev/ttyUSB0", "w");
-  if (!stream)
+  do
     {
-      printf("ERROR: Failed to open /dev/ttyUSB0: %d\n", errno);
-      return 2;
+      message("user_start: Opening USB serial driver\n");
+      stream = fopen("/dev/ttyUSB0", "w");
+      if (!stream)
+        {
+          int errcode = errno;
+          message("user_start: ERROR: Failed to open /dev/ttyUSB0: %d\n", errcode);
+
+          /* ENOTCONN means that the USB device is not yet connected */
+
+          if (errcode = ENOTCONN)
+            {
+              message("user_start:        Not connected. Wait and try again.\n");
+              sleep(5);
+            }
+          else
+            {
+              /* Give up on other errors */
+
+              message("user_start:        Aborting\n");
+              return 2;
+            }
+        }
+    }
+  while (!stream);
+  message("user_start: Successfully opened the serial driver\n");
+
+  /* Then say hello -- forever */
+
+  for (;;)
+    {
+      message("user_start: Saying hello\n");
+      ret = fprintf(stream, "Hello, World!!\n");
+      if (ret < 0)
+        {
+          message("user_start: ERROR: fprintf failed: %d\n", errno);
+          fclose(stream);
+          return 3;
+        }
+
+      ret = fflush(stream);
+      if (ret < 0)
+        {
+          message("user_start: ERROR: fflush failed: %d\n", errno);
+          fclose(stream);
+          return 4;
+        }
+
+      message("user_start: Waiting\n");
+      sleep(5);
     }
 
-  /* Then say hello */
+  /* Won't get here, but if we did this what we would have to do */
 
-  fprintf(stream, "Hello, World!!\n");
-  fflush(stream);
   fclose(stream);
   return 0;
 }
