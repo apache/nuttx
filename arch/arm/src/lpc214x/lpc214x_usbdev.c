@@ -129,28 +129,27 @@
 #define LPC214X_TRACEERR_BADGETCONFIG         0x0007
 #define LPC214X_TRACEERR_BADGETSETDESC        0x0008
 #define LPC214X_TRACEERR_BADGETSTATUS         0x0009
-#define LPC214X_TRACEERR_BADREQUEST           0x000a
-#define LPC214X_TRACEERR_BADSETADDRESS        0x000b
-#define LPC214X_TRACEERR_BADSETCONFIG         0x000c
-#define LPC214X_TRACEERR_BADSETFEATURE        0x000d
-#define LPC214X_TRACEERR_BINDFAILED           0x000e
-#define LPC214X_TRACEERR_DMABUSY              0x000f
-#define LPC214X_TRACEERR_DRIVER               0x0010
-#define LPC214X_TRACEERR_DRIVERREGISTERED     0x0011
-#define LPC214X_TRACEERR_EP0INSTALLED         0x0012
-#define LPC214X_TRACEERR_EP0OUTSTALLED        0x0013
-#define LPC214X_TRACEERR_EP0SETUPSTALLED      0x0014
-#define LPC214X_TRACEERR_EPINNULLPACKET       0x0015
-#define LPC214X_TRACEERR_EPOUTNULLPACKET      0x0016
-#define LPC214X_TRACEERR_EPREAD               0x0017
-#define LPC214X_TRACEERR_INVALIDCMD           0x0018
-#define LPC214X_TRACEERR_INVALIDCTRLREQ       0x0019
-#define LPC214X_TRACEERR_INVALIDPARMS         0x001a
-#define LPC214X_TRACEERR_IRQREGISTRATION      0x001b
-#define LPC214X_TRACEERR_NODMADESC            0x001c
-#define LPC214X_TRACEERR_NOEP                 0x001d
-#define LPC214X_TRACEERR_NOTCONFIGURED        0x001e
-#define LPC214X_TRACEERR_REQABORTED           0x001f
+#define LPC214X_TRACEERR_BADSETADDRESS        0x000a
+#define LPC214X_TRACEERR_BADSETCONFIG         0x000b
+#define LPC214X_TRACEERR_BADSETFEATURE        0x000c
+#define LPC214X_TRACEERR_BINDFAILED           0x000d
+#define LPC214X_TRACEERR_DMABUSY              0x000e
+#define LPC214X_TRACEERR_DRIVER               0x000f
+#define LPC214X_TRACEERR_DRIVERREGISTERED     0x0010
+#define LPC214X_TRACEERR_EP0INSTALLED         0x0011
+#define LPC214X_TRACEERR_EP0OUTSTALLED        0x0012
+#define LPC214X_TRACEERR_EP0SETUPSTALLED      0x0013
+#define LPC214X_TRACEERR_EPINNULLPACKET       0x0014
+#define LPC214X_TRACEERR_EPOUTNULLPACKET      0x0015
+#define LPC214X_TRACEERR_EPREAD               0x0016
+#define LPC214X_TRACEERR_INVALIDCMD           0x0017
+#define LPC214X_TRACEERR_INVALIDCTRLREQ       0x0018
+#define LPC214X_TRACEERR_INVALIDPARMS         0x0019
+#define LPC214X_TRACEERR_IRQREGISTRATION      0x001a
+#define LPC214X_TRACEERR_NODMADESC            0x001b
+#define LPC214X_TRACEERR_NOEP                 0x001c
+#define LPC214X_TRACEERR_NOTCONFIGURED        0x001d
+#define LPC214X_TRACEERR_REQABORTED           0x001e
 
 /* Trace interrupt codes */
 
@@ -356,9 +355,8 @@ struct lpc214x_usbdev_s
   ubyte                   paddrset:1;    /* 1: Peripheral addr has been set */
   ubyte                   attached:1;    /* 1: Host attached */
   ubyte                   rxpending:1;   /* 1: RX pending */
-  uint32                  epavail;       /* Available endpoints */
   uint32                  softprio;      /* Bitset of high priority interrupts */
-  uint32                  wravail;       /* Bitset of available endpoints */
+  uint32                  epavail;       /* Bitset of available endpoints */
 #ifdef CONFIG_LPC214X_USBDEV_FRAME_INTERRUPT
   uint32                  sof;           /* Last start-of-frame */
 #endif
@@ -2186,7 +2184,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
                                 }
                               else
                                 {
-                                  uvdbg("Pending interrupt\n");
+                                  uvdbg("Pending data on OUT endpoint\n");
                                   priv->rxpending = 1;
                                 }
                             }
@@ -2650,33 +2648,30 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 
   else if (LPC214X_EPPHYIN(privep->epphy))
     {
-      /* Add the new request to the request queue for the endpoint */
+      /* Add the new request to the request queue for the IN endpoint */
 
       lpc214x_rqenqueue(privep, privreq);
       usbtrace(TRACE_INREQQUEUED(privep->epphy), privreq->req.len);
       ret = lpc214x_wrrequest(privep);
     }
 
-  /* Handle OUT (host-to-device) requests -- but only if one is expected*/
+  /* Handle OUT (host-to-device) requests */
 
-  else if (priv->rxpending)
+  else
     {
-      /* Add the new request to the request queue for the endpoint */
+      /* Add the new request to the request queue for the OUT endpoint */
 
       privep->txnullpkt = 0;
       lpc214x_rqenqueue(privep, privreq);
       usbtrace(TRACE_OUTREQQUEUED(privep->epphy), privreq->req.len);
-      ret = lpc214x_rdrequest(privep);
-      priv->rxpending = 0;
-    }
 
-  /* Unexpected or illformed request */
+      /* This there a incoming data pending the availability of a request? */
 
-  else
-    {
-      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADREQUEST), (uint16)privep->epphy);
-      lpc214x_abortrequest(privep, privreq, -EBUSY);
-      ret = -EINVAL;
+      if (priv->rxpending)
+        {
+          ret = lpc214x_rdrequest(privep);
+          priv->rxpending = 0;
+        }
     }
 
   irqrestore(flags);
@@ -2795,7 +2790,7 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte e
       break;
 
     case USB_EP_ATTR_XFER_ISOC: /* Isochronous endpoint */
-      epset &= LPC214X_EPBULKSET;
+      epset &= LPC214X_EPISOCSET;
       break;
 
     case USB_EP_ATTR_XFER_CONTROL: /* Control endpoint -- not a valid choice */
@@ -2819,11 +2814,11 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte e
           for (epndx = 2; epndx < LPC214X_NPHYSENDPOINTS; epndx++)
             {
               uint32 bit = 1 << epndx;
-              if ((epset & bit) == 0)
+              if ((epset & bit) != 0)
                 {
                   /* Mark the endpoint no longer available */
 
-                  priv->wravail &= ~bit;
+                  priv->epavail &= ~bit;
                   irqrestore(flags);
 
                   /* And return the pointer to the standard endpoint structure */
@@ -2861,7 +2856,7 @@ static void lpc214x_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep)
       /* Mark the endpoint as available */
 
       flags = irqsave();
-      priv->wravail &= ~(1 << privep->epphy);
+      priv->epavail |= (1 << privep->epphy);
       irqrestore(flags);
     }
 }
@@ -2999,7 +2994,7 @@ void up_usbinitialize(void)
   memset(priv, 0, sizeof(struct lpc214x_usbdev_s));
   priv->usbdev.ops = &g_devops;
   priv->usbdev.ep0 = &priv->eplist[LPC214X_EP0_IN].ep;
-  priv->wravail    = LPC214X_EPALLSET;
+  priv->epavail    = LPC214X_EPALLSET;
 
   /* Initialize the endpoint list */
 

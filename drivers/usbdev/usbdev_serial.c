@@ -196,6 +196,21 @@
 #  define max(a,b) ((a)>(b)?(a):(b))
 #endif
 
+/* Trace values *************************************************************/
+
+#define USBSER_CLASSAPI_SETUP       TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_SETUP)
+#define USBSER_CLASSAPI_SHUTDOWN    TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_SHUTDOWN)
+#define USBSER_CLASSAPI_ATTACH      TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_ATTACH)
+#define USBSER_CLASSAPI_DETACH      TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_DETACH)
+#define USBSER_CLASSAPI_IOCTL       TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_IOCTL)
+#define USBSER_CLASSAPI_RECEIVE     TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_RECEIVE)
+#define USBSER_CLASSAPI_RXINT       TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_RXINT)
+#define USBSER_CLASSAPI_RXAVAILABLE TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_RXAVAILABLE)
+#define USBSER_CLASSAPI_SEND        TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_SEND)
+#define USBSER_CLASSAPI_TXINT       TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_TXINT)
+#define USBSER_CLASSAPI_TXREADY     TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_TXREADY)
+#define USBSER_CLASSAPI_TXEMPTY     TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_TXEMPTY)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -940,14 +955,16 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
 #if CONFIG_DEBUG
   if (priv == NULL)
     {
-      return -ENODEV;
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
+      return -EIO;
     }
 #endif
 
   if (config == priv->config)
     {
-      /* Already configured */
+      /* Already configured -- Do nothing */
 
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALREADYCONFIGURED), 0);
       return 0;
     }
 
@@ -957,15 +974,17 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
 
   /* Was this a request to simply discard the current configuration? */
 
-  if (config != USBSER_CONFIGIDNONE)
+  if (config == USBSER_CONFIGIDNONE)
     {
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_CONFIGNONE), 0);
       return 0;
     }
 
-  /* The only configuration that we accept is ourt BULK configuration */
+  /* We only accept one configuration */
 
   if (config != USBSER_CONFIGID)
     {
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_CONFIGIDBAD), 0);
       return -EINVAL;
     }
 
@@ -974,7 +993,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
   priv->epintin = DEV_ALLOCEP(dev, 0, TRUE, USB_EP_ATTR_XFER_INT);
   if (!priv->epintin)
     {
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INALLOCEPFAIL), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPINTINALLOCFAIL), 0);
       ret = -ENODEV;
       goto errout;
     }
@@ -982,7 +1001,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
   ret = EP_CONFIGURE(priv->epintin, &g_epintindesc);
   if (ret < 0)
     {
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INCONFIGEPFAIL), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPINTINCONFIGFAIL), 0);
       goto errout;
     }
 
@@ -993,7 +1012,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
   priv->epbulkin = DEV_ALLOCEP(dev, 0, TRUE, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkin)
     {
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INALLOCEPFAIL), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKINALLOCFAIL), 0);
       ret = -ENODEV;
       goto errout;
     }
@@ -1015,7 +1034,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
 #endif
   if (ret < 0)
     {
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INCONFIGEPFAIL), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKINCONFIGFAIL), 0);
       goto errout;
     }
 
@@ -1026,7 +1045,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
   priv->epbulkout = DEV_ALLOCEP(dev, 0, FALSE, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkout)
     {
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_OUTALLOCEPFAIL), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKOUTALLOCFAIL), 0);
       ret = -ENODEV;
       goto errout;
     }
@@ -1039,7 +1058,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
 #endif
   if (ret < 0)
     {
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_OUTCONFIGEPFAIL), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKOUTCONFIGFAIL), 0);
       goto errout;
     }
 
@@ -1308,7 +1327,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
   if (!dev || !dev->ep0 || !ctrl)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
-      return -EINVAL;
+      return -EIO;
      }
 #endif
   usbtrace(TRACE_CLASSSETUP, ctrl->req);
@@ -1593,18 +1612,21 @@ static int usbser_setup(FAR struct uart_dev_s *dev)
 {
   struct usbser_dev_s *priv = (FAR struct usbser_dev_s*)dev->priv;
 
+  usbtrace(USBSER_CLASSAPI_SETUP, 0);
+
 #if CONFIG_DEBUG
   if (!priv)
     {
-       return -EIO;
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
+      return -EIO;
     }
+#endif
 
   if (priv->config == USBSER_CONFIGIDNONE)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_SETUPNOTCONNECTED), 0);
-      return -ENODEV;
+      return -ENOTCONN;
     }
-#endif
 
   priv->open = TRUE;
   return OK;
@@ -1627,6 +1649,8 @@ static void usbser_shutdown(FAR struct uart_dev_s *dev)
   struct usbser_dev_s *priv = (FAR struct usbser_dev_s*)dev->priv;
   irqstate_t flags;
 
+  usbtrace(USBSER_CLASSAPI_SHUTDOWN, 0);
+
 #if CONFIG_DEBUG
   if (!priv)
     {
@@ -1641,7 +1665,8 @@ static void usbser_shutdown(FAR struct uart_dev_s *dev)
   if (!priv->open)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALREADYCLOSED), 0);
-      goto errout;
+      irqrestore(flags);
+      return;
     }
 #endif
 
@@ -1649,8 +1674,6 @@ static void usbser_shutdown(FAR struct uart_dev_s *dev)
 
   usbclass_resetconfig(priv);
   priv->open = FALSE;
-
-errout:
   irqrestore(flags);
 }
 
@@ -1664,6 +1687,7 @@ errout:
 
 static int usbser_attach(FAR struct uart_dev_s *dev)
 {
+  usbtrace(USBSER_CLASSAPI_ATTACH, 0);
   return OK;
 }
 
@@ -1677,6 +1701,7 @@ static int usbser_attach(FAR struct uart_dev_s *dev)
 
 static void usbser_detach(FAR struct uart_dev_s *dev)
 {
+  usbtrace(USBSER_CLASSAPI_DETACH, 0);
 }
 
 /****************************************************************************
@@ -1700,9 +1725,12 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, boolean enable)
 {
   struct usbser_dev_s *priv = (FAR struct usbser_dev_s*)dev->priv;
 
+  usbtrace(USBSER_CLASSAPI_RXINT, (uint16)enable);
+
 #if CONFIG_DEBUG
   if (!priv)
     {
+       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
        return;
     }
 #endif
@@ -1739,9 +1767,12 @@ static void usbser_txint(FAR struct uart_dev_s *dev, boolean enable)
 {
   struct usbser_dev_s *priv = (FAR struct usbser_dev_s*)dev->priv;
 
+  usbtrace(USBSER_CLASSAPI_TXINT, (uint16)enable);
+
 #if CONFIG_DEBUG
   if (!priv)
     {
+       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
        return;
     }
 #endif
@@ -1776,10 +1807,13 @@ static boolean usbser_txempty(FAR struct uart_dev_s *dev)
 {
   struct usbser_dev_s *priv = (FAR struct usbser_dev_s*)dev->priv;
 
+  usbtrace(USBSER_CLASSAPI_TXEMPTY, 0);
+
 #if CONFIG_DEBUG
   if (!priv)
     {
-       return TRUE;
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
+      return TRUE;
     }
 #endif
 
@@ -1815,6 +1849,7 @@ int usbdev_serialinitialize(int minor)
   alloc = (FAR struct usbser_alloc_s*)malloc(sizeof(struct usbser_alloc_s));
   if (!alloc)
     {
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALLOCDEVSTRUCT), 0);
       return -ENOMEM;
     }
 
@@ -1845,6 +1880,7 @@ int usbdev_serialinitialize(int minor)
   priv->serdev.xmit.size   = CONFIG_USBSER_RXBUFSIZE;
   priv->serdev.xmit.buffer = priv->rxbuffer;
   priv->serdev.ops         = &g_uartops;
+  priv->serdev.priv        = priv;
 
   /* Initialize the USB class driver structure */
 
