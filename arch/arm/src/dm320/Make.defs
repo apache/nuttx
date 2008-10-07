@@ -49,3 +49,6 @@ CHIP_ASRCS	= dm320_lowputc.S dm320_restart.S
 CHIP_CSRCS	= dm320_allocateheap.c dm320_boot.c dm320_decodeirq.c \
 		  dm320_irq.c dm320_serial.c dm320_timerisr.c
 
+ifeq ($(CONFIG_USBDEV),y)
+CHIP_CSRCS	+= dm320_usbdev.c
+endif

@@ -235,6 +235,10 @@
 #define USB_TXFIFO2_SINGLE_BUF (0x00)
 #define USB_TXFIFO2_DOUBLE_BUF (0x10)
 
+/* RXFIFO2 register bit settings **************************************************/
+
+#define USB_RXFIF02_DPB        (0x10)
+
 /* USBDMA control register bit settings ********************************************/
 
 #define USBDMA_CNTL_DMAEN      (0x01)

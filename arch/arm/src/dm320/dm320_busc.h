@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/dm320/chip.h
+ * dm320/dm320_busc.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,29 +33,30 @@
  *
  ************************************************************************************/
 
-#ifndef __DM320_CHIP_H
-#define __DM320_CHIP_H
+#ifndef __ARCH_ARM_SRC_DM320_DM320_BUSC_H
+#define __ARCH_ARM_SRC_DM320_DM320_BUSC_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
-#include "dm320_memorymap.h"
-#include "dm320_clkc.h"
-#include "dm320_ahb.h"
-#include "dm320_busc.h"
-#include "dm320_uart.h"
-#include "dm320_timer.h"
-#include "dm320_intc.h"
-#include "dm320_gio.h"
-#include "dm320_usb.h"
+#ifndef __ASSEMBLY__
+# include <sys/types.h>
+#endif
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
+/* Bus Controller Register Map (BUSC) ***********************************************/
+
+#define DM320_BUSC_ECR     (DM320_BUSC_REGISTER_BASE+0x0000) /* Endian Conversion Register */
+#define DM320_BUSC_EBYTER  (DM320_BUSC_REGISTER_BASE+0x0002) /* Endian Byte Reverse Register */
+#define DM320_BUSC_EBITR   (DM320_BUSC_REGISTER_BASE+0x0004) /* Endian Bit Reverse Register */
+#define DM320_BUSC_REVR    (DM320_BUSC_REGISTER_BASE+0x0006) /* Device Revision Register */
+
 /************************************************************************************
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __DM320_CHIP_H */
+#endif  /* __ARCH_ARM_SRC_DM320_DM320_BUSC_H */
