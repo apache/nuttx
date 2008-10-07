@@ -44,7 +44,7 @@ endif
 ifeq ($(CONFIG_USBDEV),y)
 include usbdev/Make.defs
 ROOTDEPPATH	= --dep-path .
-NETDEPPATH	= --dep-path usbdev
+USBDEVDEPPATH	= --dep-path usbdev
 endif
 
 ASRCS		= $(NET_ASRCS) $(USBDEV_ASRCS)
