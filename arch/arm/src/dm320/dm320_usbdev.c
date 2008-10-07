@@ -99,25 +99,24 @@
 
 #define DM320_TRACEERR_ALLOCFAIL         0x0001
 #define DM320_TRACEERR_ATTACHIRQREG      0x0002
-#define DM320_TRACEERR_BADREQUEST        0x0003
-#define DM320_TRACEERR_BINDFAILED        0x0004
-#define DM320_TRACEERR_COREIRQREG        0x0005
-#define DM320_TRACEERR_DRIVER            0x0006
-#define DM320_TRACEERR_DRIVERREGISTERED  0x0007
-#define DM320_TRACEERR_EPREAD            0x0008
-#define DM320_TRACEERR_EWRITE            0x0009
-#define DM320_TRACEERR_INVALIDPARMS      0x000a
-#define DM320_TRACEERR_NOEP              0x000b
-#define DM320_TRACEERR_NOTCONFIGURED     0x000c
-#define DM320_TRACEERR_NULLPACKET        0x000d
-#define DM320_TRACEERR_NULLREQUEST       0x000e
-#define DM320_TRACEERR_STALLEDCLRFEATURE 0x000f
-#define DM320_TRACEERR_STALLEDISPATCH    0x0010
-#define DM320_TRACEERR_STALLEDGETST      0x0011
-#define DM320_TRACEERR_STALLEDGETSTEP    0x0012
-#define DM320_TRACEERR_STALLEDGETSTRECIP 0x0013
-#define DM320_TRACEERR_STALLEDREQUEST    0x0014
-#define DM320_TRACEERR_STALLEDSETFEATURE 0x0015
+#define DM320_TRACEERR_BINDFAILED        0x0003
+#define DM320_TRACEERR_COREIRQREG        0x0004
+#define DM320_TRACEERR_DRIVER            0x0005
+#define DM320_TRACEERR_DRIVERREGISTERED  0x0006
+#define DM320_TRACEERR_EPREAD            0x0007
+#define DM320_TRACEERR_EWRITE            0x0008
+#define DM320_TRACEERR_INVALIDPARMS      0x0009
+#define DM320_TRACEERR_NOEP              0x000a
+#define DM320_TRACEERR_NOTCONFIGURED     0x000b
+#define DM320_TRACEERR_NULLPACKET        0x000c
+#define DM320_TRACEERR_NULLREQUEST       0x000d
+#define DM320_TRACEERR_STALLEDCLRFEATURE 0x000e
+#define DM320_TRACEERR_STALLEDISPATCH    0x000f
+#define DM320_TRACEERR_STALLEDGETST      0x0010
+#define DM320_TRACEERR_STALLEDGETSTEP    0x0011
+#define DM320_TRACEERR_STALLEDGETSTRECIP 0x0012
+#define DM320_TRACEERR_STALLEDREQUEST    0x0013
+#define DM320_TRACEERR_STALLEDSETFEATURE 0x0014
 
 /* Trace interrupt codes */
 
@@ -291,6 +290,8 @@ static void dm320_rqenqueue(FAR struct dm320_ep_s *privep, FAR struct dm320_req_
 static int  dm320_ep0write(ubyte *buf, uint16 nbytes);
 static int  dm320_epwrite(ubyte epphy, ubyte *buf, uint16 nbytes);
 static int  dm320_epread(ubyte epphy, ubyte *buf, uint16 nbytes);
+static inline void dm320_abortrequest(struct dm320_ep_s *privep,
+              struct dm320_req_s *privreq, sint16 result)
 static void dm320_reqcomplete(struct dm320_ep_s *privep, sint16 result);
 static int  dm320_wrrequest(struct dm320_ep_s *privep);
 static int  dm320_rdrequest(struct dm320_ep_s *privep);
@@ -846,6 +847,29 @@ static int dm320_epread(ubyte epphy, ubyte *buf, uint16 nbytes)
 
   dm320_putreg8(dm320_getreg8(DM320_USB_PERRXCSR1) & ~(USB_PERRXCSR1_RXPKTRDY), DM320_USB_PERRXCSR1);
   return ret;
+}
+
+/*******************************************************************************
+ * Name: dm320_abortrequest
+ *
+ * Description:
+ *   Discard a request
+ *
+ *******************************************************************************/
+
+static inline void dm320_abortrequest(struct dm320_ep_s *privep,
+                                        struct dm320_req_s *privreq,
+                                        sint16 result)
+{
+  usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_REQABORTED), (uint16)privep->epphy);
+
+  /* Save the result in the request structure */
+
+  privreq->req.result = result;
+
+  /* Callback to the request completion handler */
+
+  privreq->req.callback(&privep->ep, &privreq->req);
 }
 
 /*******************************************************************************
@@ -1543,6 +1567,7 @@ static int dm320_ctlrinterrupt(int irq, FAR void *context)
               }
             else
               {
+                uvdbg("Pending data on OUT endpoint\n");
                 priv->rxpending = 1;
               }
           }
@@ -1992,68 +2017,66 @@ static int dm320_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
     }
 
   req->result = -EINPROGRESS;
-  req->xfrd = 0;
+  req->xfrd   = 0;
+  flags       = irqsave();
 
   /* Check for NULL packet */
 
-  flags = irqsave();
   if (req->len == 0 && (privep->in || privep->epphy == 3))
     {
       usbtrace(TRACE_DEVERROR(DM320_TRACEERR_NULLPACKET), 0);
       dm320_putreg8(dm320_getreg8(DM320_USB_PERTXCSR1) | USB_TXCSR1_TXPKTRDY, DM320_USB_PERTXCSR1);
-      privep->txnullpkt = 0;
-      dm320_rqenqueue(privep, privreq);
-      goto success_notransfer;
+      dm320_abortcomplete(privep, OK);
     }
 
-  /* Has everything been sent? Or are we stalled? */
+  /* If we are stalled, then drop all requests on the floor */
 
-  if (dm320_rqempty(privep) && !privep->stalled)
+  else if (privep->stalled)
     {
-      /* Handle zero-length transfers on EP0 */
+      lpc214x_abortrequest(privep, privreq, -EBUSY);
+      ret = -EBUSY;
+    }
 
-      if (privep->epphy == 0 && req->len == 0)
-        {
-          /* Nothing to transfer -- exit success, with zero bytes transferred */
+  /* Handle zero-length transfers on EP0 */
 
-          usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
-          dm320_reqcomplete(privep, OK);
-          goto success_notransfer;
-        }
+  else if (privep->epphy == 0 && req->len == 0)
+    {
+      /* Nothing to transfer -- exit success, with zero bytes transferred */
 
-      /* Handle IN requests */
+      usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
+      dm320_abortcomplete(privep, OK);
+    }
 
-      if ((privep->in) || privep->epphy == 3)
-        {
-          ret = dm320_wrrequest(privep);
-        }
+  /* Handle IN (device-to-host) requests */
 
-      /* Handle pending OUT requests */
+  else if ((privep->in) || privep->epphy == 3)
+    {
+      /* Add the new request to the request queue for the IN endpoint */
 
-      else if (priv->rxpending)
+      dm320_rqenqueue(privep, privreq);
+      usbtrace(TRACE_INREQQUEUED(privep->epphy), privreq->req.len);
+      ret = dm320_wrrequest(privep);
+    }
+
+  /* Handle OUT (host-to-device) requests */
+
+  else
+    {
+      /* Add the new request to the request queue for the OUT endpoint */
+
+      privep->txnullpkt = 0;
+      dm320_rqenqueue(privep, privreq);
+      usbtrace(TRACE_OUTREQQUEUED(privep->epphy), privreq->req.len);
+
+      /* This there a incoming data pending the availability of a request? */
+
+      if (priv->rxpending)
         {
           ret = dm320_rdrequest(privep);
           priv->rxpending = 0;
         }
-      else
-        {
-          usbtrace(TRACE_DEVERROR(DM320_TRACEERR_BADREQUEST), 0);
-          ret = ERROR;
-          goto errout;
-        }
     }
 
-  /* Add to endpoint's request queue */
-
-  if (ret >= 0)
-    {
-      usbtrace((privep->in) ? TRACE_INREQQUEUED(privep->epphy) : TRACE_OUTREQQUEUED(privep->epphy),
-                privreq->req.len);
-      dm320_rqenqueue(privep, privreq);
-    }
-
-success_notransfer:
-errout:
   irqrestore(flags);
   return ret;
 }

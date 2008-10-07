@@ -45,6 +45,7 @@
 
 #include <arch/irq.h>
 #include <nuttx/usbdev_trace.h>
+#undef usbtrace
 
 #ifdef CONFIG_USBDEV_TRACE
 

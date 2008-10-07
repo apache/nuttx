@@ -562,11 +562,12 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
    * to be sent).
    */
 
-  while (priv->reqlist.head)
+  while (sq_peek(&priv->reqlist))
     {
       /* Peek at the request in the container at the head of the list */
 
-      req = (struct usbdev_req_s *)priv->reqlist.head;
+      reqcontainer = (struct usbser_req_s *)sq_peek(&priv->reqlist);
+      req          = reqcontainer->req;
 
       /* Fill the packet with serial TX data */
 
