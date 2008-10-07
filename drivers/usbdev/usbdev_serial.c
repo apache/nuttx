@@ -4,7 +4,7 @@
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
- * This a work-alike clone Prolific PL2303
+ * This logic emulates the Prolific PL2303 serial/USB converter
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -274,9 +274,9 @@ static void    usbclass_freereq(FAR struct usbdev_ep_s *ep,
 /* Configuration ***********************************************************/
 
 static int     usbclass_mkstrdesc(ubyte id, struct usb_strdesc_s *strdesc);
-static void    usbclass_mkepdesc(ubyte addr, ubyte attr,  uint16 mxpacket,
-                                 struct usb_epdesc_s *desc);
 #ifdef CONFIG_USBDEV_DUALSPEED
+static void    usbclass_mkepbulkdesc(const struct up_epdesc *indesc,
+                 uint16 mxpacket, struct usb_epdesc_s *outdesc)
 static sint16  usbclass_mkcfgdesc(ubyte *buf, ubyte speed);
 #else
 static sint16  usbclass_mkcfgdesc(ubyte *buf);
@@ -358,12 +358,12 @@ static const struct usb_devdesc_s g_devdesc =
   0,                                            /* subclass */
   0,                                            /* protocol */
   CONFIG_USBSER_EP0MAXPACKET,                   /* maxpacketsize */
-  {LSBYTE(CONFIG_USBSER_VENDORID),              /* vendor */
-   MSBYTE(CONFIG_USBSER_VENDORID)},
-  {LSBYTE(CONFIG_USBSER_PRODUCTID),             /* product */
-   MSBYTE(CONFIG_USBSER_PRODUCTID)},
-  {LSBYTE(USBSER_VERSIONNO),                    /* device */
-   MSBYTE(USBSER_VERSIONNO)},
+  { LSBYTE(CONFIG_USBSER_VENDORID),             /* vendor */
+    MSBYTE(CONFIG_USBSER_VENDORID) },
+  { LSBYTE(CONFIG_USBSER_PRODUCTID),            /* product */
+    MSBYTE(CONFIG_USBSER_PRODUCTID) },
+  { LSBYTE(USBSER_VERSIONNO),                   /* device */
+    MSBYTE(USBSER_VERSIONNO) },
   USBSER_MANUFACTURERSTRID,                     /* imfgr */
   USBSER_PRODUCTSTRID,                          /* iproduct */
   USBSER_SERIALSTRID,                           /* serno */
@@ -393,6 +393,37 @@ static const struct usb_ifdesc_s g_ifdesc =
   0,                                            /* subclass */
   0,                                            /* protocol */
   USBSER_CONFIGSTRID                            /* iif */
+};
+
+static const struct usb_epdesc_s g_epintindesc =
+{
+  USB_SIZEOF_EPDESC,                            /* len */
+  USB_DESC_TYPE_ENDPOINT,                       /* type */
+  USBSER_EPINTIN_ADDR,                          /* addr */
+  USBSER_EPINTIN_ATTR,                          /* attr */
+  { LSBYTE(USBSER_EPINTIN_MXPACKET),            /* maxpacket */
+    MSBYTE(USBSER_EPINTIN_MXPACKET) },
+  1                                             /* interval */
+};
+
+static const struct usb_epdesc_s g_epbulkoutdesc =
+{
+  USB_SIZEOF_EPDESC,                            /* len */
+  USB_DESC_TYPE_ENDPOINT,                       /* type */
+  USBSER_EPOUTBULK_ADDR,                        /* addr */
+  USBSER_EPOUTBULK_ATTR,                        /* attr */
+  { LSBYTE(64), MSBYTE(64) },                   /* maxpacket -- might change to 512*/
+  0                                             /* interval */
+};
+
+static const struct usb_epdesc_s g_epbulkindesc =
+{
+  USB_SIZEOF_EPDESC,                            /* len */
+  USB_DESC_TYPE_ENDPOINT,                       /* type */
+  USBSER_EPINBULK_ADDR,                         /* addr */
+  USBSER_EPINBULK_ATTR,                         /* attr */
+  { LSBYTE(64), MSBYTE(64) },                   /* maxpacket -- might change to 512*/
+  0                                             /* interval */
 };
 
 #ifdef CONFIG_USBDEV_DUALSPEED
@@ -719,26 +750,28 @@ static int usbclass_mkstrdesc(ubyte id, struct usb_strdesc_s *strdesc)
 }
 
 /****************************************************************************
- * Name: usbclass_mkepdesc
+ * Name: usbclass_mkepbulkdesc
  *
  * Description:
  *   Construct the endpoint descriptor
  *
  ****************************************************************************/
 
-static void usbclass_mkepdesc(ubyte addr, ubyte attr, uint16 mxpacket,
-                              struct usb_epdesc_s *desc)
+#ifdef CONFIG_USBDEV_DUALSPEED
+static inline void usbclass_mkepbulkdesc(const struct up_epdesc *indesc,
+                                         uint16 mxpacket,
+                                         struct usb_epdesc_s *outdesc)
 {
-  /* Format the endpoint descriptor */
+  /* Copy the canned descriptor */
 
-  desc->len             = USB_SIZEOF_EPDESC;
-  desc->type            = USB_DESC_TYPE_ENDPOINT;
-  desc->addr            = addr;
-  desc->attr            = attr;
-  desc->mxpacketsize[0] = LSBYTE(mxpacket);
-  desc->mxpacketsize[1] = MSBYTE(mxpacket);
-  desc->interval        = 0;
+  memcpy(outdesc, indesc, USB_SIZEOF_EPDESC);
+
+  /* Then add the correct max packet size */
+
+  outdesc->mxpacketsize[0] = LSBYTE(mxpacket);
+  outdesc->mxpacketsize[1] = MSBYTE(mxpacket);
 }
+#endif
 
 /****************************************************************************
  * Name: usbclass_mkcfgdesc
@@ -757,8 +790,8 @@ static sint16  usbclass_mkcfgdesc(ubyte *buf)
   struct usb_cfgdesc_s *cfgdesc = (struct usb_cfgdesc_s*)buf;
 #ifdef CONFIG_USBDEV_DUALSPEED
   boolean highspeed = (speed == USB_SPEED_HIGH);
-#endif
   uint16 bulkmxpacket;
+#endif
   uint16 totallen;
 
   /* This is the total length of the configuration (not necessarily the
@@ -790,25 +823,27 @@ static sint16  usbclass_mkcfgdesc(ubyte *buf)
     }
 #endif
 
+  memcpy(buf, &g_epintindesc, USB_SIZEOF_EPDESC);
+  buf += USB_SIZEOF_EPDESC;
+
 #ifdef CONFIG_USBDEV_DUALSPEED
   if (hispeed)
     {
       bulkmxpacket = 512;
     }
   else
-#endif
     {
       bulkmxpacket = 64;
     }
 
-  usbclass_mkepdesc(USBSER_EPINTIN_ADDR, USBSER_EPINTIN_ATTR,
-                    USBSER_EPINTIN_MXPACKET, (struct usb_epdesc_s*)buf);
+  usbclass_mkepbulkdesc(&g_epbulkoutdesc, bulkmxpacket, (struct usb_epdesc_s*)buf);
   buf += USB_SIZEOF_EPDESC;
-  usbclass_mkepdesc(USBSER_EPOUTBULK_ADDR, USBSER_EPOUTBULK_ATTR,
-                    bulkmxpacket, (struct usb_epdesc_s*)buf);
+  usbclass_mkepbulkdesc(&g_epbulkindesc, bulkmxpacket, (struct usb_epdesc_s*)buf);
+#else
+  memcpy(buf, &g_epbulkoutdesc, USB_SIZEOF_EPDESC);
   buf += USB_SIZEOF_EPDESC;
-  usbclass_mkepdesc(USBSER_EPINBULK_ADDR, USBSER_EPINBULK_ATTR,
-                    bulkmxpacket, (struct usb_epdesc_s*)buf);
+  memcpy(buf, &g_epbulkindesc, USB_SIZEOF_EPDESC);
+#endif
 
   /* Finally, fill in the total size of the configuration descriptor */
 
@@ -894,9 +929,11 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
   struct usbdev_s *dev = priv->usbdev;
   struct usbdev_req_s *req;
   struct usbser_req_s *reqcontainer;
+#ifdef CONFIG_USBDEV_DUALSPEED
   struct usb_epdesc_s epdesc;
-  irqstate_t flags;
   uint16 bulkmxpacket;
+#endif
+  irqstate_t flags;
   int i;
   int ret = 0;
 
@@ -942,10 +979,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
       goto errout;
     }
 
-  usbclass_mkepdesc(USBSER_EPINTIN_ADDR, USBSER_EPINTIN_ATTR,
-                    USBSER_EPINTIN_MXPACKET, &epdesc);
-
-  ret = EP_CONFIGURE(priv->epintin, &epdesc);
+  ret = EP_CONFIGURE(priv->epintin, &g_epintindesc);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INCONFIGEPFAIL), 0);
@@ -970,15 +1004,15 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
       bulkmxpacket = 512;
     }
   else
-#endif
     {
       bulkmxpacket = 64;
     }
 
-  usbclass_mkepdesc(USBSER_EPINBULK_ADDR, USBSER_EPINBULK_ATTR,
-                    bulkmxpacket, &epdesc);
-
+  usbclass_mkepbulkdesc(&g_epbulkindesc, bulkmxpacket, &epdesc);
   ret = EP_CONFIGURE(priv->epbulkin, &epdesc);
+#else
+  ret = EP_CONFIGURE(priv->epbulkin, &g_epbulkindesc);
+#endif
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INCONFIGEPFAIL), 0);
@@ -997,10 +1031,12 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
       goto errout;
     }
 
-  usbclass_mkepdesc(USBSER_EPOUTBULK_ADDR, USBSER_EPOUTBULK_ATTR,
-                    bulkmxpacket, &epdesc);
-
+#ifdef CONFIG_USBDEV_DUALSPEED
+  usbclass_mkepbulkdesc(&g_epbulkoutdesc, bulkmxpacket, &epdesc);
   ret = EP_CONFIGURE(priv->epbulkout, &epdesc);
+#else
+  ret = EP_CONFIGURE(priv->epbulkout, &g_epbulkoutdesc);
+#endif
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_OUTCONFIGEPFAIL), 0);
