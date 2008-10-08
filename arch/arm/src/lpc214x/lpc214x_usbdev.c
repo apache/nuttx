@@ -241,12 +241,6 @@
 #define LPC214X_EPPHYIN(epphy)       (((epphy)&1)!=0)
 #define LPC214X_EPPHYOUT(epphy)      (((epphy)&1)==0)
 
-/* Mapping to more traditional endpoint numbers */
-
-#define LPC214X_EP_LOG2PHYOUT(ep)    ((ep)&0x0f)<<1))
-#define LPC214X_EP_LOG2PHYIN(ep)     (LPC214X_EP_OUT(ep)|0x01)
-#define LPC214X_EP_LOG2PHY(ep)       ((((ep)&0x0f)<<1)|(((ep)&0x80)>>7))
-
 /* Each endpoint has somewhat different characteristics */
 
 #define LPC214X_EPALLSET             (0xffffffff)  /* All endpoints */
@@ -310,6 +304,7 @@ struct lpc214x_ep_s
   struct lpc214x_req_s    *head;         /* Request list for this endpoint */
   struct lpc214x_req_s    *tail;
   ubyte                   epphy;         /* Physical EP address */
+  ubyte                   eplog;         /* Configured logical EP address */
   ubyte                   stalled:1;     /* Endpoint is halted */
   ubyte                   halted:1;      /* Endpoint feature halted */
   ubyte                   txnullpkt:1;   /* Null packet needed at end of transfer */
@@ -410,6 +405,8 @@ static void lpc214x_cancelrequests(struct lpc214x_ep_s *privep);
 
 /* Interrupt handling **********************************************************/
 
+static struct lpc214x_ep_s *lpc214x_epfindbyaddr(struct lpc214x_usbdev_s *priv,
+              uint16 eplog);
 static void lpc214x_eprealize(struct lpc214x_ep_s *privep, boolean prio,
               uint32 packetsize);
 static ubyte lpc214x_epclrinterrupt(ubyte epphy);
@@ -1176,6 +1173,49 @@ static void lpc214x_cancelrequests(struct lpc214x_ep_s *privep)
 }
 
 /*******************************************************************************
+ * Name: lpc214x_epfindbyaddr
+ *
+ * Description:
+ *   Find the physical endpoint structure corresponding to a logic endpoint
+ *   address
+ *
+ *******************************************************************************/
+
+static struct lpc214x_ep_s *lpc214x_epfindbyaddr(struct lpc214x_usbdev_s *priv,
+              uint16 eplog)
+{
+  struct lpc214x_ep_s *privep;
+  int i;
+
+  /* Endpoint zero is a special case */
+
+  if (USB_EPNO(eplog) == 0)
+    {
+      return &priv->eplist[0];
+    }
+
+  /* Handle the remaining */
+
+  for (i = 1; i < LPC214X_NPHYSENDPOINTS; i++)
+    {
+      privep = &priv->eplist[i];
+
+      /* Same logical endpoint number? (includes direction bit) */
+
+      if (eplog == privep->eplog)
+        {
+          /* Return endpoint found */
+
+          return privep;
+        }
+    }
+
+  /* Return endpoint not found */
+
+  return NULL;
+}
+
+/*******************************************************************************
  * Name: lpc214x_eprealize
  *
  * Description:
@@ -1424,12 +1464,12 @@ static void lpc214x_dispatchrequest(struct lpc214x_usbdev_s *priv,
 static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
 {
   struct lpc214x_ep_s *ep0 = &priv->eplist[LPC214X_EP0_OUT];
+  struct lpc214x_ep_s *privep;
   struct lpc214x_req_s *privreq = lpc214x_rqpeek(ep0);
   struct usb_ctrlreq_s ctrl;
   uint16 value;
   uint16 index;
   uint16 len;
-  ubyte  epphy;
   ubyte  response[2];
   int    ret;
 
@@ -1512,10 +1552,15 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
               case USB_REQ_RECIPIENT_ENDPOINT:
                 {
                   usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EPGETSTATUS), 0);
-                  epphy = USB_EPNO(index) << 1;
-                  if (epphy < LPC214X_NPHYSENDPOINTS)
+                  privep = lpc214x_epfindbyaddr(priv, index);
+                  if (!privep)
                     {
-                       if ((lpc214x_usbcmd(CMD_USB_EP_SELECT|epphy, 0) & CMD_USB_EPSELECT_ST) != 0)
+                      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADEPGETSTATUS), 0);
+                      priv->stalled = 1;
+                    }
+                  else
+                    {
+                       if ((lpc214x_usbcmd(CMD_USB_EP_SELECT|privep->epphy, 0) & CMD_USB_EPSELECT_ST) != 0)
                          {
                            response[0] = 1; /* Stalled */
                          }
@@ -1526,11 +1571,6 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
                       response[1] = 0;
                       lpc214x_epwrite(LPC214X_EP0_IN, response, 2);
                       priv->ep0state = LPC214X_EP0SHORTWRITE;
-                    }
-                  else
-                    {
-                      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADEPGETSTATUS), 0);
-                      priv->stalled = 1;
                     }
                 }
                 break;
@@ -1591,11 +1631,10 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
           {
             lpc214x_dispatchrequest(priv, &ctrl);
           }
-        else if (priv->paddrset != 0 && value == USB_FEATURE_ENDPOINTHALT &&
-                 index < LPC214X_NLOGENDPOINTS && len == 0)
+        else if (priv->paddrset != 0 && value == USB_FEATURE_ENDPOINTHALT && len == 0 &&
+                 (privep = lpc214x_epfindbyaddr(priv, index)) != NULL)
           {
-            ubyte epphys = LPC214X_EP_LOG2PHY(index);
-            priv->eplist[epphys].halted = 0;
+            privep->halted = 0;
             lpc214x_epwrite(LPC214X_EP0_IN, NULL, 0);
             priv->ep0state = LPC214X_EP0STATUSIN;
           }
@@ -1625,11 +1664,10 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
           {
            lpc214x_dispatchrequest(priv, &ctrl);
           }
-        else if (priv->paddrset != 0 && value == USB_FEATURE_ENDPOINTHALT &&
-                 index < LPC214X_NLOGENDPOINTS && len == 0)
+        else if (priv->paddrset != 0 && value == USB_FEATURE_ENDPOINTHALT && len == 0 &&
+                 (privep = lpc214x_epfindbyaddr(priv, index)) != NULL)
           {
-            ubyte epphys = LPC214X_EP_LOG2PHY(index);
-            priv->eplist[epphys].halted = 1;
+            privep->halted = 1;
             lpc214x_epwrite(LPC214X_EP0_IN, NULL, 0);
             priv->ep0state = LPC214X_EP0STATUSIN;
           }
@@ -2416,13 +2454,12 @@ static int lpc214x_epconfigure(FAR struct usbdev_ep_s *ep,
 {
   FAR struct lpc214x_ep_s *privep = (FAR struct lpc214x_ep_s *)ep;
   uint32 inten;
-  int eplog;
-  int epphy;
 
   usbtrace(TRACE_EPCONFIGURE, privep->epphy);
 
-  eplog = desc->addr;
-  epphy = LPC214X_EP_LOG2PHY(eplog);
+  /* Save the logical EP number (so that we can map logical to physical later) */
+
+  privep->eplog = desc->addr;
 
   /* Realize the endpoint */
 
@@ -2430,18 +2467,18 @@ static int lpc214x_epconfigure(FAR struct usbdev_ep_s *ep,
 
   /* Enable and reset EP -- twice */
 
-  lpc214x_usbcmd(CMD_USB_EP_SETSTATUS | epphy, 0);
-  lpc214x_usbcmd(CMD_USB_EP_SETSTATUS | epphy, 0);
+  lpc214x_usbcmd(CMD_USB_EP_SETSTATUS | privep->epphy, 0);
+  lpc214x_usbcmd(CMD_USB_EP_SETSTATUS | privep->epphy, 0);
 
 #ifdef CONFIG_LPC214X_USBDEV_DMA
   /* Enable DMA Ep interrupt (WO) */
 
-   lpc214x_putreg(1 << epphy, LPC214X_USBDEV_EPDMAEN);
+   lpc214x_putreg(1 << privep->epphy, LPC214X_USBDEV_EPDMAEN);
 #else
   /* Enable Ep interrupt (R/W) */
 
    inten = lpc214x_getreg(LPC214X_USBDEV_EPINTEN);
-   inten |= (1 << epphy);
+   inten |= (1 << privep->epphy);
    lpc214x_putreg(inten, LPC214X_USBDEV_EPINTEN);
 #endif
    return OK;
