@@ -219,31 +219,34 @@
 
 struct usbser_req_s
 {
-  struct usbser_req_s *flink; /* Implements a singly linked list */
-  struct usbdev_req_s *req;
+  FAR struct usbser_req_s *flink;     /* Implements a singly linked list */
+  FAR struct usbdev_req_s *req;       /* The contained request */
 };
 
 /* This structure describes the internal state of the driver */
 
 struct usbser_dev_s
 {
-  struct uart_dev_s    serdev;    /* Serial device structure */
-  struct usbdev_s     *usbdev;    /* usbdev driver pointer */
-  ubyte                config;    /* Configuration number */
-  ubyte                nwralloc;  /* Number of write requests allocated */
-  ubyte                nwrq;      /* Number of queue write requests */
-  boolean              open;      /* TRUE: Driver has been opened */
-  boolean              wravail;   /* TRUE: write data is buffered */
-  ubyte                linest[7]; /* Fake line status */
-  struct usbdev_ep_s  *epintin;   /* Address of Interrupt IN endpoint */
-  struct usbdev_ep_s  *epbulkin;  /* Address of Bulk IN endpoint */
-  struct usbdev_ep_s  *epbulkout; /* Address of Bulk OUT endpoint */
-  struct usbdev_req_s *ctrlreq;   /* Control request */
-  struct sq_queue_s    reqlist;   /* List of write request containers */
+  FAR struct uart_dev_s    serdev;    /* Serial device structure */
+  FAR struct usbdev_s     *usbdev;    /* usbdev driver pointer */
+  ubyte                    config;    /* Configuration number */
+  ubyte                    nwrq;      /* Number of queue write requests (in reqlist)*/
+  ubyte                    nrdq;      /* Number of queue read requests (in epbulkout) */
+  boolean                  open;      /* TRUE: Driver has been opened */
+  ubyte                    linest[7]; /* Fake line status */
+  FAR struct usbdev_ep_s  *epintin;   /* Address of Interrupt IN endpoint */
+  FAR struct usbdev_ep_s  *epbulkin;  /* Address of Bulk IN endpoint */
+  FAR struct usbdev_ep_s  *epbulkout; /* Address of Bulk OUT endpoint */
+  FAR struct usbdev_req_s *ctrlreq;   /* Control request */
+  struct sq_queue_s        reqlist;   /* List of write request containers */
 
-  /* Pre-allocated write requests (linked in reqlist) */
+  /* Pre-allocated write request containers.  The write requests will
+   * be linked in a free list (reqlist), and used to send requests to
+   * EPBULKIN; Read requests will be queued in the EBULKOUT.
+   */
 
   struct usbser_req_s wrreqs[CONFIG_USBSER_NWRREQS];
+  struct usbser_req_s rdreqs[CONFIG_USBSER_NWRREQS];
 
   /* Serial I/O buffers */
 
@@ -256,7 +259,7 @@ struct usbser_dev_s
 struct usbser_driver_s
 {
   struct usbdevclass_driver_s drvr;
-  struct usbser_dev_s        *dev;
+  FAR struct usbser_dev_s     *dev;
 };
 
 /* This is what is allocated */
@@ -284,7 +287,7 @@ static int     usbclass_recvpacket(FAR struct usbser_dev_s *priv,
 static struct usbdev_req_s *usbclass_allocreq(FAR struct usbdev_ep_s *ep,
                  uint16 len);
 static void    usbclass_freereq(FAR struct usbdev_ep_s *ep,
-                 struct usbdev_req_s *req);
+                 FAR struct usbdev_req_s *req);
 
 /* Configuration ***********************************************************/
 
@@ -303,11 +306,11 @@ static int     usbclass_setconfig(FAR struct usbser_dev_s *priv,
 /* Completion event handlers ***********************************************/
 
 static void    usbclass_setupcomplete(FAR struct usbdev_ep_s *ep,
-                 struct usbdev_req_s *req);
+                 FAR struct usbdev_req_s *req);
 static void    usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
-                 struct usbdev_req_s *req);
+                 FAR struct usbdev_req_s *req);
 static void    usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
-                 struct usbdev_req_s *req);
+                 FAR struct usbdev_req_s *req);
 
 /* USB class device ********************************************************/
 
@@ -478,8 +481,8 @@ static const struct usb_qualdesc_s g_qualdesc =
 
 static uint16 usbclass_fillpacket(FAR struct usbser_dev_s *priv, char *packet, uint16 size)
 {
-  uart_dev_t *serdev = &priv->serdev;
-  struct uart_buffer_s *xmit = &serdev->xmit;
+  FAR uart_dev_t *serdev = &priv->serdev;
+  FAR struct uart_buffer_s *xmit = &serdev->xmit;
   irqstate_t flags;
   uint16 nbytes = 0;
 
@@ -516,7 +519,6 @@ static uint16 usbclass_fillpacket(FAR struct usbser_dev_s *priv, char *packet, u
 
   if (xmit->head == xmit->tail)
     {
-      priv->wravail = FALSE;
       uart_disabletxint(serdev);
     }
 
@@ -537,9 +539,9 @@ static uint16 usbclass_fillpacket(FAR struct usbser_dev_s *priv, char *packet, u
 
 static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
 {
-  struct usbdev_ep_s *ep;
-  struct usbdev_req_s *req;
-  struct usbser_req_s *reqcontainer;
+  FAR struct usbdev_ep_s *ep;
+  FAR struct usbdev_req_s *req;
+  FAR struct usbser_req_s *reqcontainer;
   irqstate_t flags;
   int len;
   int ret = OK;
@@ -547,6 +549,7 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
 #ifdef CONFIG_DEBUG
   if (priv == NULL)
     {
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return -ENODEV;
     }
 #endif
@@ -562,7 +565,11 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
    * to be sent).
    */
 
-  while (sq_peek(&priv->reqlist))
+  uvdbg("head=%d tail=%d nwrq=%d empty=%d\n",
+        priv->serdev.xmit.head, priv->serdev.xmit.tail,
+        priv->nwrq, sq_empty(&priv->reqlist));
+
+  while (!sq_empty(&priv->reqlist))
     {
       /* Peek at the request in the container at the head of the list */
 
@@ -574,6 +581,11 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
       len = usbclass_fillpacket(priv, req->buf, ep->maxpacket);
       if (len > 0)
         {
+          /* Remove the empty contained from the request list */
+
+          (void)sq_remfirst(&priv->reqlist);
+          priv->nwrq--;
+
           /* Then submit the request to the endpoint */
 
           req->len     = len;
@@ -584,11 +596,6 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
               usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_SUBMITFAIL), (uint16)-ret);
               break;
             }
-
-          /* Remove the empty contained from the request list */
-
-          reqcontainer = (struct usbser_req_s *)sq_remfirst(&priv->reqlist);
-          priv->nwrq--;
         }
       else
         {
@@ -612,8 +619,8 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
 
 static int usbclass_recvpacket(FAR struct usbser_dev_s *priv, char *packet, uint16 size)
 {
-  uart_dev_t *serdev = &priv->serdev;
-  struct uart_buffer_s *recv = &serdev->recv;
+  FAR uart_dev_t *serdev = &priv->serdev;
+  FAR struct uart_buffer_s *recv = &serdev->recv;
   uint16 nexthead;
 
   /* Get the next head index */
@@ -665,7 +672,7 @@ static int usbclass_recvpacket(FAR struct usbser_dev_s *priv, char *packet, uint
 
 static struct usbdev_req_s *usbclass_allocreq(FAR struct usbdev_ep_s *ep, uint16 len)
 {
-  struct usbdev_req_s *req;
+  FAR struct usbdev_req_s *req;
 
   req = EP_ALLOCREQ(ep);
   if (req != NULL)
@@ -774,9 +781,9 @@ static int usbclass_mkstrdesc(ubyte id, struct usb_strdesc_s *strdesc)
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-static inline void usbclass_mkepbulkdesc(const struct up_epdesc *indesc,
+static inline void usbclass_mkepbulkdesc(const FAR struct up_epdesc *indesc,
                                          uint16 mxpacket,
-                                         struct usb_epdesc_s *outdesc)
+                                         FAR struct usb_epdesc_s *outdesc)
 {
   /* Copy the canned descriptor */
 
@@ -803,7 +810,7 @@ static sint16  usbclass_mkcfgdesc(ubyte *buf, ubyte speed)
 static sint16  usbclass_mkcfgdesc(ubyte *buf)
 #endif
 {
-  struct usb_cfgdesc_s *cfgdesc = (struct usb_cfgdesc_s*)buf;
+  FAR struct usb_cfgdesc_s *cfgdesc = (struct usb_cfgdesc_s*)buf;
 #ifdef CONFIG_USBDEV_DUALSPEED
   boolean highspeed = (speed == USB_SPEED_HIGH);
   uint16 bulkmxpacket;
@@ -878,56 +885,21 @@ static sint16  usbclass_mkcfgdesc(ubyte *buf)
 
 static void usbclass_resetconfig(FAR struct usbser_dev_s *priv)
 {
-  FAR struct usbdev_s *dev = priv->usbdev;
-  struct usbser_req_s *reqcontainer;
-  irqstate_t flags;
-
   /* Are we configured? */
 
   if (priv->config != USBSER_CONFIGIDNONE)
     {
+      /* Yes.. but not anymore */
+
       priv->config = USBSER_CONFIGIDNONE;
 
-      /* Free write requests that are not in use */
-
-      flags = irqsave();
-      while (!sq_empty(&priv->reqlist))
-        {
-          reqcontainer = (struct usbser_req_s *)sq_remfirst(&priv->reqlist);
-          if (reqcontainer->req != NULL)
-            {
-              usbclass_freereq(priv->epbulkin, reqcontainer->req);
-
-              priv->nwralloc--; /* Number of write requests allocated */
-              priv->nwrq--;     /* Number of write requests queued */
-            }
-        }
-      irqrestore(flags);
-
-      /* Disable and free endpoints.  This should force completion of all pending
+      /* Disable endpoints.  This should force completion of all pending
        * transfers.
        */
 
-      if (priv->epintin)
-        {
-          EP_DISABLE(priv->epintin);
-          DEV_FREEEP(dev, priv->epintin);
-          priv->epintin = NULL;
-        }
-
-      if (priv->epbulkin)
-        {
-          EP_DISABLE(priv->epbulkin);
-          DEV_FREEEP(dev, priv->epbulkin);
-          priv->epbulkin = NULL;
-        }
-
-      if (priv->epbulkout)
-        {
-          EP_DISABLE(priv->epbulkout);
-          DEV_FREEEP(dev, priv->epbulkout);
-          priv->epbulkout = NULL;
-        }
+      EP_DISABLE(priv->epintin);
+      EP_DISABLE(priv->epbulkin);
+      EP_DISABLE(priv->epbulkout);
     }
 }
 
@@ -942,14 +914,11 @@ static void usbclass_resetconfig(FAR struct usbser_dev_s *priv)
 
 static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
 {
-  struct usbdev_s *dev = priv->usbdev;
-  struct usbdev_req_s *req;
-  struct usbser_req_s *reqcontainer;
+  FAR struct usbdev_req_s *req;
 #ifdef CONFIG_USBDEV_DUALSPEED
   struct usb_epdesc_s epdesc;
   uint16 bulkmxpacket;
 #endif
-  irqstate_t flags;
   int i;
   int ret = 0;
 
@@ -991,32 +960,15 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
 
   /* Configure the IN interrupt endpoint */
 
-  priv->epintin = DEV_ALLOCEP(dev, 0, TRUE, USB_EP_ATTR_XFER_INT);
-  if (!priv->epintin)
-    {
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPINTINALLOCFAIL), 0);
-      ret = -ENODEV;
-      goto errout;
-    }
-
   ret = EP_CONFIGURE(priv->epintin, &g_epintindesc);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPINTINCONFIGFAIL), 0);
       goto errout;
     }
-
   priv->epintin->private = priv;
 
   /* Configure the IN bulk endpoint */
-
-  priv->epbulkin = DEV_ALLOCEP(dev, 0, TRUE, USB_EP_ATTR_XFER_BULK);
-  if (!priv->epbulkin)
-    {
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKINALLOCFAIL), 0);
-      ret = -ENODEV;
-      goto errout;
-    }
 
 #ifdef CONFIG_USBDEV_DUALSPEED
   if (dev->speed == USB_SPEED_HIGH)
@@ -1043,14 +995,6 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
 
   /* Configure the OUT bulk endpoint */
 
-  priv->epbulkout = DEV_ALLOCEP(dev, 0, FALSE, USB_EP_ATTR_XFER_BULK);
-  if (!priv->epbulkout)
-    {
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKOUTALLOCFAIL), 0);
-      ret = -ENODEV;
-      goto errout;
-    }
-
 #ifdef CONFIG_USBDEV_DUALSPEED
   usbclass_mkepbulkdesc(&g_epbulkoutdesc, bulkmxpacket, &epdesc);
   ret = EP_CONFIGURE(priv->epbulkout, &epdesc);
@@ -1065,49 +1009,20 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
 
   priv->epbulkout->private = priv;
 
-  /* Allocate and queue read requests */
+  /* Queue read requests in the bulk OUT endpoint */
 
-  for (i = 0; i < CONFIG_USBSER_NRDREQS && ret == 0; i++)
+  DEBUGASSERT(priv->nrdq == 0);
+  for (i = 0; i < CONFIG_USBSER_NRDREQS; i++)
     {
-      req = usbclass_allocreq(priv->epbulkout, priv->epbulkout->maxpacket);
-      if (ret == 0)
+      req           = priv->rdreqs[i].req;
+      req->callback = usbclass_rdcomplete;
+      ret           = EP_SUBMIT(priv->epbulkout, req);
+      if (ret != OK)
         {
-          req->callback = usbclass_rdcomplete;
-          ret           = EP_SUBMIT(priv->epbulkout, req);
-          if (ret != OK)
-            {
-              usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSUBMIT), (uint16)-ret);
-            }
+          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSUBMIT), (uint16)-ret);
+          goto errout;
         }
-      else
-        {
-          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDALLOCREQ), (uint16)-ret);
-          usbclass_resetconfig(priv);
-          return -ENOMEM;
-        }
-    }
-
-  /* Allocate write request containers and put in a free list */
-
-  for (i = 0; i < CONFIG_USBSER_NWRREQS; i++)
-    {
-      reqcontainer      = &priv->wrreqs[i];
-      reqcontainer->req = usbclass_allocreq(priv->epbulkin, priv->epbulkin->maxpacket);
-      if (reqcontainer->req == NULL)
-        {
-          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRALLOCREQ), (uint16)-ret);
-          usbclass_resetconfig(priv);
-          return -ENOMEM;
-        }
-      reqcontainer->req->private  = reqcontainer;
-      reqcontainer->req->callback = usbclass_wrcomplete;
-
-      flags = irqsave();
-      sq_addlast((sq_entry_t*)reqcontainer, &priv->reqlist);
-
-      priv->nwralloc++; /* Count of write requests allocated */
-      priv->nwrq++;     /* Count of write requests available */
-      irqrestore(flags);
+      priv->nrdq++;
     }
 
   priv->config = config;
@@ -1144,35 +1059,49 @@ static void usbclass_setupcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req
 
 static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
-  struct usbser_dev_s *priv = (FAR struct usbser_dev_s*)ep->private;
+  FAR struct usbser_dev_s *priv;
   int ret;
 
-  if (priv != NULL)
+  /* Sanity check */
+
+#ifdef CONFIG_DEBUG
+  if (!ep || !ep->private || !req)
     {
-      switch (req->result)
-        {
-        case 0: /* Normal completion */
-          usbclass_recvpacket(priv, req->buf, req->xfrd);
-          break;
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
+      return;
+     }
+#endif
 
-        case -ESHUTDOWN: /* Disconnection */
-          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSHUTDOWN), 0);
-          usbclass_freereq(ep, req);
-          return;
+  /* Extract references to private data */
 
-        default:
-          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDUNEXPECTED), (uint16)-req->result);
-          break;
-        };
+  priv = (FAR struct usbser_dev_s*)ep->private;
 
-      /* Requeue the read request */
+  /* Process the received data unless this is some unusual condition */
 
-      req->len = ep->maxpacket;
-      ret      = EP_SUBMIT(ep, req);
-      if (ret != OK)
-        {
-          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSUBMIT), (uint16)-req->result);
-        }
+  switch (req->result)
+    {
+    case 0: /* Normal completion */
+      usbtrace(TRACE_CLASSRDCOMPLETE, priv->nrdq);
+      usbclass_recvpacket(priv, req->buf, req->xfrd);
+      break;
+
+    case -ESHUTDOWN: /* Disconnection */
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSHUTDOWN), 0);
+      priv->nrdq--;
+      return;
+
+    default: /* Some other error occurred */
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDUNEXPECTED), (uint16)-req->result);
+      break;
+    };
+
+  /* Requeue the read request */
+
+  req->len = ep->maxpacket;
+  ret      = EP_SUBMIT(ep, req);
+  if (ret != OK)
+    {
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSUBMIT), (uint16)-req->result);
     }
 }
 
@@ -1187,41 +1116,50 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s 
 
 static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
-  struct usbser_dev_s *priv = (FAR struct usbser_dev_s *)ep->private;
-  struct usbser_req_s *reqcontainer = req->private;
+  FAR struct usbser_dev_s *priv;
+  FAR struct usbser_req_s *reqcontainer;
   irqstate_t flags;
 
-  if (priv != NULL)
+  /* Sanity check */
+
+#ifdef CONFIG_DEBUG
+  if (!ep || !ep->private || !req || !req->private)
     {
-      switch (req->result)
-        {
-        case 0: /* Normal completion */
-          break;
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
+      return;
+     }
+#endif
 
-        case -ESHUTDOWN: /* Disconnection */
-          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRSHUTDOWN), 0);
-          usbclass_freereq(ep, req);
-          priv->nwralloc--; /* Number of write requests allocated */
-          return;
+  /* Extract references to our private data */
 
-        default:
-          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRUNEXPECTED), (uint16)-req->result);
-          break;
-        }
+  priv         = (FAR struct usbser_dev_s *)ep->private;
+  reqcontainer = (FAR struct usbser_req_s *)req->private;
 
-      /* Put write request back into the free list */
+  /* Return the write request to the free list */
 
-      if (reqcontainer == NULL)
-        {
-          flags = irqsave();
-          sq_addlast((sq_entry_t*)reqcontainer, &priv->reqlist);
-          priv->nwrq++;
-          irqrestore(flags);
+  flags = irqsave();
+  sq_addlast((sq_entry_t*)reqcontainer, &priv->reqlist);
+  priv->nwrq++;
+  irqrestore(flags);
 
-          /* And send another packet if: TX output is enabled */
+  /* Send the next packet unless this was some unusual termination
+   * condition
+   */
 
-          usbclass_sndpacket(priv);
-        }
+  switch (req->result)
+    {
+    case OK: /* Normal completion */
+      usbtrace(TRACE_CLASSWRCOMPLETE, priv->nwrq);
+      usbclass_sndpacket(priv);
+      break;
+
+    case -ESHUTDOWN: /* Disconnection */
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRSHUTDOWN), priv->nwrq);
+      break;
+
+    default: /* Some other error occurred */
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRUNEXPECTED), (uint16)-req->result);
+      break;
     }
 }
 
@@ -1239,9 +1177,18 @@ static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s 
 
 static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_s *driver)
 {
-  struct usbser_dev_s *priv = ((struct usbser_driver_s*)driver)->dev;
+  FAR struct usbser_dev_s *priv = ((struct usbser_driver_s*)driver)->dev;
+  FAR struct usbser_req_s *reqcontainer;
+  irqstate_t flags;
+  int ret;
+  int i;
 
   usbtrace(TRACE_CLASSBIND, 0);
+
+  /* Bind the structures */
+
+  priv->usbdev      = dev;
+  dev->ep0->private = priv;
 
   /* Preallocate control request */
 
@@ -1249,16 +1196,94 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
   if (priv->ctrlreq == NULL)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALLOCCTRLREQ), 0);
-      usbclass_unbind(dev);
-      return -ENOMEM;
+      ret = -ENOMEM;
+      goto errout;
     }
   priv->ctrlreq->callback = usbclass_setupcomplete;
 
-  /* Bind the structures */
+  /* Pre-allocate all endpoints... the endpoints will not be functional
+   * until the SET CONFIGURATION request is processed in usbclass_setconfig.
+   * This is done here because there may be calls to malloc and the SET
+   * CONFIGURATION processing probably occurrs within interrupt handling
+   * logic where malloc calls will fail.
+   */
 
-  priv->usbdev      = dev;
-  dev->ep0->private = priv;
+  /* Pre-allocate the IN interrupt endpoint */
+
+  priv->epintin = DEV_ALLOCEP(dev, 0, TRUE, USB_EP_ATTR_XFER_INT);
+  if (!priv->epintin)
+    {
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPINTINALLOCFAIL), 0);
+      ret = -ENODEV;
+      goto errout;
+    }
+  priv->epintin->private = priv;
+
+  /* Pre-allocate the IN bulk endpoint */
+
+  priv->epbulkin = DEV_ALLOCEP(dev, 0, TRUE, USB_EP_ATTR_XFER_BULK);
+  if (!priv->epbulkin)
+    {
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKINALLOCFAIL), 0);
+      ret = -ENODEV;
+      goto errout;
+    }
+  priv->epbulkin->private = priv;
+
+  /* Pre-allocate the OUT bulk endpoint */
+
+  priv->epbulkout = DEV_ALLOCEP(dev, 0, FALSE, USB_EP_ATTR_XFER_BULK);
+  if (!priv->epbulkout)
+    {
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKOUTALLOCFAIL), 0);
+      ret = -ENODEV;
+      goto errout;
+    }
+  priv->epbulkout->private = priv;
+
+  /* Pre-allocate read requests */
+
+  for (i = 0; i < CONFIG_USBSER_NRDREQS; i++)
+    {
+      reqcontainer      = &priv->rdreqs[i];
+      reqcontainer->req = usbclass_allocreq(priv->epbulkout, priv->epbulkout->maxpacket);
+      if (reqcontainer->req == NULL)
+        {
+          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDALLOCREQ), (uint16)-ret);
+          ret = -ENOMEM;
+          goto errout;
+        }
+      reqcontainer->req->private  = reqcontainer;
+      reqcontainer->req->callback = usbclass_rdcomplete;
+    }
+
+  /* Pre-allocate write request containers and put in a free list */
+
+  for (i = 0; i < CONFIG_USBSER_NWRREQS; i++)
+    {
+      reqcontainer      = &priv->wrreqs[i];
+      reqcontainer->req = usbclass_allocreq(priv->epbulkin, priv->epbulkin->maxpacket);
+      if (reqcontainer->req == NULL)
+        {
+          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRALLOCREQ), (uint16)-ret);
+          ret = -ENOMEM;
+          goto errout;
+        }
+      reqcontainer->req->private  = reqcontainer;
+      reqcontainer->req->callback = usbclass_wrcomplete;
+
+      flags = irqsave();
+      sq_addlast((sq_entry_t*)reqcontainer, &priv->reqlist);
+      priv->nwrq++;     /* Count of write requests available */
+      irqrestore(flags);
+    }
+
   return OK;
+
+errout:
+  usbclass_unbind(dev);
+  return ret;
+
 }
 
 /****************************************************************************
@@ -1271,7 +1296,10 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
 
 static void usbclass_unbind(FAR struct usbdev_s *dev)
 {
-  struct usbser_dev_s *priv;
+  FAR struct usbser_dev_s *priv;
+  FAR struct usbser_req_s *reqcontainer;
+  irqstate_t flags;
+  int i;
 
   usbtrace(TRACE_CLASSUNBIND, 0);
 
@@ -1282,6 +1310,9 @@ static void usbclass_unbind(FAR struct usbdev_s *dev)
       return;
      }
 #endif
+
+  /* Extract reference to private data */
+
   priv = (FAR struct usbser_dev_s *)dev->ep0->private;
 
 #ifdef CONFIG_DEBUG
@@ -1292,18 +1323,93 @@ static void usbclass_unbind(FAR struct usbdev_s *dev)
     }
 #endif
 
+  /* Make sure that we are not already unbound */
+
   if (priv != NULL)
     {
+     /* Make sure that the endpoints have been unconfigured.  If
+      * we were terminated gracefully, then the configuration should
+      * already have been reset.  If not, then calling usbclass_resetconfig
+      * should cause the endpoints to immediately terminate all
+      * transfers and return the requests to us (with result == -ESHUTDOWN)
+      */
+
+       usbclass_resetconfig(priv);
+       up_mdelay(50);
+
+      if (priv->ctrlreq != NULL)
+        {
+          usbclass_freereq(dev->ep0, priv->ctrlreq);
+        }
+      dev->ep0->private = priv;
+
+      /* Free int interrupt IN endpoint */
+
+      if (priv->epintin)
+        {
+          DEV_FREEEP(dev, priv->epintin);
+          priv->epintin = NULL;
+        }
+
+      if (priv->epbulkin)
+        {
+          DEV_FREEEP(dev, priv->epbulkin);
+          priv->epbulkin = NULL;
+        }
+
+      /* Free the pre-allocated control request */
+
       if (priv->ctrlreq != NULL)
         {
           usbclass_freereq(dev->ep0, priv->ctrlreq);
         }
 
-      /* Clear out all data in the circular buffer */
+      /* Free pre-allocated read requests (which should all have
+       * been returned to the free list at this time -- we don't check)
+       */
 
-      priv->serdev.xmit.head = 0;
-      priv->serdev.xmit.tail = 0;
+      DEBUGASSERT(priv->nrdq == 0);
+      for (i = 0; i < CONFIG_USBSER_NRDREQS; i++)
+        {
+          reqcontainer = &priv->rdreqs[i];
+          if (reqcontainer->req)
+            {
+              usbclass_freereq(priv->epbulkout, reqcontainer->req);
+              reqcontainer->req = NULL;
+            }
+        }
+
+      /* Free the bulk OUT endpoint */
+
+      if (priv->epbulkout)
+        {
+          DEV_FREEEP(dev, priv->epbulkout);
+          priv->epbulkout = NULL;
+        }
+
+      /* Free write requests that are not in use (which should be all
+       * of them
+       */
+
+      flags = irqsave();
+      DEBUGASSERT(priv->nwrq == CONFIG_USBSER_NWRREQS);
+      while (!sq_empty(&priv->reqlist))
+        {
+          reqcontainer = (struct usbser_req_s *)sq_remfirst(&priv->reqlist);
+          if (reqcontainer->req != NULL)
+            {
+              usbclass_freereq(priv->epbulkin, reqcontainer->req);
+              priv->nwrq--;     /* Number of write requests queued */
+            }
+        }
+      DEBUGASSERT(priv->nwrq == 0);
+      irqrestore(flags);
     }
+
+  /* Clear out all data in the circular buffer */
+
+  priv->serdev.xmit.head = 0;
+  priv->serdev.xmit.tail = 0;
 }
 
 /****************************************************************************
@@ -1317,8 +1423,8 @@ static void usbclass_unbind(FAR struct usbdev_s *dev)
 
 static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *ctrl)
 {
-  struct usbser_dev_s *priv;
-  struct usbdev_req_s *ctrlreq;
+  FAR struct usbser_dev_s *priv;
+  FAR struct usbdev_req_s *ctrlreq;
   uint16 value;
   uint16 index;
   uint16 len;
@@ -1331,6 +1437,9 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
       return -EIO;
      }
 #endif
+
+  /* Extract reference to private data */
+
   usbtrace(TRACE_CLASSSETUP, ctrl->req);
   priv = (FAR struct usbser_dev_s *)dev->ep0->private;
 
@@ -1565,7 +1674,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
 
 static void usbclass_disconnect(FAR struct usbdev_s *dev)
 {
-  struct usbser_dev_s *priv;
+  FAR struct usbser_dev_s *priv;
   irqstate_t flags;
 
   usbtrace(TRACE_CLASSDISCONNECT, 0);
@@ -1577,6 +1686,9 @@ static void usbclass_disconnect(FAR struct usbdev_s *dev)
       return;
      }
 #endif
+
+  /* Extract reference to private data */
+
   priv = (FAR struct usbser_dev_s *)dev->ep0->private;
 
 #ifdef CONFIG_DEBUG
@@ -1586,6 +1698,8 @@ static void usbclass_disconnect(FAR struct usbdev_s *dev)
       return;
     }
 #endif
+
+  /* Reset the configuration */
 
   flags = irqsave();
   usbclass_resetconfig(priv);
@@ -1611,23 +1725,33 @@ static void usbclass_disconnect(FAR struct usbdev_s *dev)
 
 static int usbser_setup(FAR struct uart_dev_s *dev)
 {
-  struct usbser_dev_s *priv = (FAR struct usbser_dev_s*)dev->priv;
+  FAR struct usbser_dev_s *priv;
 
   usbtrace(USBSER_CLASSAPI_SETUP, 0);
 
+  /* Sanity check */
+
 #if CONFIG_DEBUG
-  if (!priv)
+  if (!dev || !dev->priv)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return -EIO;
     }
 #endif
 
+  /* Extract reference to private data */
+
+  priv = (FAR struct usbser_dev_s*)dev->priv;
+
+  /* Check if we have been configured */
+
   if (priv->config == USBSER_CONFIGIDNONE)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_SETUPNOTCONNECTED), 0);
       return -ENOTCONN;
     }
+
+  /* Mark the device as opened */
 
   priv->open = TRUE;
   return OK;
@@ -1647,19 +1771,24 @@ static int usbser_setup(FAR struct uart_dev_s *dev)
 
 static void usbser_shutdown(FAR struct uart_dev_s *dev)
 {
-  struct usbser_dev_s *priv = (FAR struct usbser_dev_s*)dev->priv;
+  FAR struct usbser_dev_s *priv;
   irqstate_t flags;
 
   usbtrace(USBSER_CLASSAPI_SHUTDOWN, 0);
 
+  /* Sanity check */
+
 #if CONFIG_DEBUG
-  if (!priv)
+  if (!dev || !dev->priv)
     {
        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
        return;
     }
 #endif
 
+  /* Extract reference to private data */
+
+  priv  = (FAR struct usbser_dev_s*)dev->priv;
   flags = irqsave();
 
 #if CONFIG_DEBUG
@@ -1724,17 +1853,23 @@ static void usbser_detach(FAR struct uart_dev_s *dev)
 
 static void usbser_rxint(FAR struct uart_dev_s *dev, boolean enable)
 {
-  struct usbser_dev_s *priv = (FAR struct usbser_dev_s*)dev->priv;
+  FAR struct usbser_dev_s *priv;
 
   usbtrace(USBSER_CLASSAPI_RXINT, (uint16)enable);
 
+  /* Sanity check */
+
 #if CONFIG_DEBUG
-  if (!priv)
+  if (!dev || !dev->priv)
     {
        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
        return;
     }
 #endif
+
+  /* Extract reference to private data */
+
+  priv = (FAR struct usbser_dev_s*)dev->priv;
 
   /* I think we can simulate this behavior by stalling and/or resuming the
    * OUT endpoint.
@@ -1766,25 +1901,30 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, boolean enable)
 
 static void usbser_txint(FAR struct uart_dev_s *dev, boolean enable)
 {
-  struct usbser_dev_s *priv = (FAR struct usbser_dev_s*)dev->priv;
+  FAR struct usbser_dev_s *priv;
 
   usbtrace(USBSER_CLASSAPI_TXINT, (uint16)enable);
 
+  /* Sanity checks */
+
 #if CONFIG_DEBUG
-  if (!priv)
+  if (!dev || !dev->priv)
     {
        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
        return;
     }
 #endif
 
-  /* Save the TX enable/disable state */
+ /* Extract references to private data */
 
-  priv->wravail = enable;
+  priv = (FAR struct usbser_dev_s*)dev->priv;
 
   /* If the new state is enabled and if there is data in the XMIT buffer,
    * send the next packet now.
    */
+
+  uvdbg("enable=%d head=%d tail=%d\n",
+        enable, priv->serdev.xmit.head, priv->serdev.xmit.tail);
 
   if (enable && priv->serdev.xmit.head != priv->serdev.xmit.tail)
     {
@@ -1806,7 +1946,7 @@ static void usbser_txint(FAR struct uart_dev_s *dev, boolean enable)
 
 static boolean usbser_txempty(FAR struct uart_dev_s *dev)
 {
-  struct usbser_dev_s *priv = (FAR struct usbser_dev_s*)dev->priv;
+  FAR struct usbser_dev_s *priv = (FAR struct usbser_dev_s*)dev->priv;
 
   usbtrace(USBSER_CLASSAPI_TXEMPTY, 0);
 
@@ -1822,7 +1962,7 @@ static boolean usbser_txempty(FAR struct uart_dev_s *dev)
    * reqlist, then there is no longer any TX data in flight.
    */
 
-  return priv->nwrq >= priv->nwralloc;
+  return priv->nwrq >= CONFIG_USBSER_NWRREQS;
 }
 
 /****************************************************************************
@@ -1878,8 +2018,8 @@ int usbdev_serialinitialize(int minor)
 
   priv->serdev.recv.size   = CONFIG_USBSER_RXBUFSIZE;
   priv->serdev.recv.buffer = priv->rxbuffer;
-  priv->serdev.xmit.size   = CONFIG_USBSER_RXBUFSIZE;
-  priv->serdev.xmit.buffer = priv->rxbuffer;
+  priv->serdev.xmit.size   = CONFIG_USBSER_TXBUFSIZE;
+  priv->serdev.xmit.buffer = priv->txbuffer;
   priv->serdev.ops         = &g_uartops;
   priv->serdev.priv        = priv;
 
