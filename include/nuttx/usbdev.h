@@ -65,12 +65,12 @@
 
 #define EP_DISABLE(ep)             (ep)->ops->disable(ep)
 
-/* Allocate/free I/O requests */
+/* Allocate/free I/O requests.  Should not be called from interrupt processing! */
 
 #define EP_ALLOCREQ(ep)            (ep)->ops->allocreq(ep)
 #define EP_FREEREQ(ep,req)         (ep)->ops->freereq(ep,req)
 
-/* Allocate/free an I/O buffer */
+/* Allocate/free an I/O buffer.  Should not be called from interrupt processing! */
 
 #ifdef CONFIG_ARCH_USBDEV_DMA
 #  define EP_ALLOCBUFFER(ep,nb)    (ep)->ops->alloc(ep,nb)
@@ -135,8 +135,9 @@
 #define DEV_DISCONNECT(dev)        (dev)->ops->pullup ? (dev)->ops->pullup(dev,FALSE) : -EOPNOTSUPP
 
 /* USB Class Driver Helpsers ********************************************************/
+/* All may be called from interupt handling logic except bind() and unbind() */
 
-/* Invoked when the driver is bound to a USB device driver */
+/* Invoked when the driver is bound to a USB device driver. */
 
 #define CLASS_BIND(drvr,dev)      (drvr)->ops->bind(dev, drvr)
 
