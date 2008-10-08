@@ -133,23 +133,24 @@
 #define LPC214X_TRACEERR_BADSETCONFIG         0x000b
 #define LPC214X_TRACEERR_BADSETFEATURE        0x000c
 #define LPC214X_TRACEERR_BINDFAILED           0x000d
-#define LPC214X_TRACEERR_DMABUSY              0x000e
-#define LPC214X_TRACEERR_DRIVER               0x000f
-#define LPC214X_TRACEERR_DRIVERREGISTERED     0x0010
-#define LPC214X_TRACEERR_EP0INSTALLED         0x0011
-#define LPC214X_TRACEERR_EP0OUTSTALLED        0x0012
-#define LPC214X_TRACEERR_EP0SETUPSTALLED      0x0013
-#define LPC214X_TRACEERR_EPINNULLPACKET       0x0014
-#define LPC214X_TRACEERR_EPOUTNULLPACKET      0x0015
-#define LPC214X_TRACEERR_EPREAD               0x0016
-#define LPC214X_TRACEERR_INVALIDCMD           0x0017
-#define LPC214X_TRACEERR_INVALIDCTRLREQ       0x0018
-#define LPC214X_TRACEERR_INVALIDPARMS         0x0019
-#define LPC214X_TRACEERR_IRQREGISTRATION      0x001a
-#define LPC214X_TRACEERR_NODMADESC            0x001b
-#define LPC214X_TRACEERR_NOEP                 0x001c
-#define LPC214X_TRACEERR_NOTCONFIGURED        0x001d
-#define LPC214X_TRACEERR_REQABORTED           0x001e
+#define LPC214X_TRACEERR_DISPATCHSTALL        0x000e
+#define LPC214X_TRACEERR_DMABUSY              0x000f
+#define LPC214X_TRACEERR_DRIVER               0x0010
+#define LPC214X_TRACEERR_DRIVERREGISTERED     0x0011
+#define LPC214X_TRACEERR_EP0INSTALLED         0x0012
+#define LPC214X_TRACEERR_EP0OUTSTALLED        0x0013
+#define LPC214X_TRACEERR_EP0SETUPSTALLED      0x0014
+#define LPC214X_TRACEERR_EPINNULLPACKET       0x0015
+#define LPC214X_TRACEERR_EPOUTNULLPACKET      0x0016
+#define LPC214X_TRACEERR_EPREAD               0x0017
+#define LPC214X_TRACEERR_INVALIDCMD           0x0018
+#define LPC214X_TRACEERR_INVALIDCTRLREQ       0x0019
+#define LPC214X_TRACEERR_INVALIDPARMS         0x001a
+#define LPC214X_TRACEERR_IRQREGISTRATION      0x001b
+#define LPC214X_TRACEERR_NODMADESC            0x001c
+#define LPC214X_TRACEERR_NOEP                 0x001d
+#define LPC214X_TRACEERR_NOTCONFIGURED        0x001e
+#define LPC214X_TRACEERR_REQABORTED           0x001f
 
 /* Trace interrupt codes */
 
@@ -1405,6 +1406,7 @@ static void lpc214x_dispatchrequest(struct lpc214x_usbdev_s *priv,
         {
           /* Stall on failure */
 
+          usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_DISPATCHSTALL), 0);
           priv->stalled = 1;
         }
     }
@@ -2618,9 +2620,11 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
+      uvdbg("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif
+
   usbtrace(TRACE_EPSUBMIT, privep->epphy);
   priv = privep->dev;
 
