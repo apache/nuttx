@@ -320,6 +320,14 @@ void usbtrace(uint16 event, uint16 value)
       lldbg("Class resume(): %04x\n", value);
       break;
 
+    case TRACE_CLASSRDCOMPLETE:
+      lldbg("Class RD request complete: %04x\n", value);
+      break;
+
+    case TRACE_CLASSWRCOMPLETE:
+      lldbg("Class WR request complete: %04x\n", value);
+      break;
+
     default:
       switch (TRACE_ID(event))
         {
@@ -369,7 +377,7 @@ void usbtrace(uint16 event, uint16 value)
 
         default:
           lldbg("Unrecognized event: %02x:%02x:%04x\n",
-                TRACE_ID(event), TRACE_DATA(event), value);
+                TRACE_ID(event) >> 8, TRACE_DATA(event), value);
           break;
         }
     }

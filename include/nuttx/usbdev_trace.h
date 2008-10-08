@@ -109,6 +109,9 @@
 #define TRACE_CLASSSUSPEND       TRACE_EVENT(TRACE_CLASS_ID, 0x0005)
 #define TRACE_CLASSRESUME        TRACE_EVENT(TRACE_CLASS_ID, 0x0006)
 
+#define TRACE_CLASSRDCOMPLETE    TRACE_EVENT(TRACE_CLASS_ID, 0x0007)
+#define TRACE_CLASSWRCOMPLETE    TRACE_EVENT(TRACE_CLASS_ID, 0x0008)
+
 #define TRACE_CLASSAPI(id)       TRACE_EVENT(TRACE_CLASSAPI_ID, id)
 
 /* USB device controller interrupt events.  The 'id' is specific to the driver.
@@ -120,7 +123,7 @@
 #define TRACE_INTDECODE(id)      TRACE_EVENT(TRACE_INTDECODE_ID, id)
 #define TRACE_INTEXIT(id)        TRACE_EVENT(TRACE_INTEXIT_ID, id)
 
-/* Data Transfer */
+/* Controller data transfer */
 
 #define TRACE_OUTREQQUEUED(ep)   TRACE_EVENT(TRACE_OUTREQQUEUED_ID, ep)
 #define TRACE_INREQQUEUED(ep)    TRACE_EVENT(TRACE_INREQQUEUED_ID, ep)
