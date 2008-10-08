@@ -158,33 +158,33 @@
 
 /* Vender specific control requests */
 
-#define PL2303_CONTROL_TYPE            0x20
-#define PL2303_SETLINEREQUEST          0x20 /* OUT, Recipient interface */
-#define PL2303_GETLINEREQUEST          0x21 /* IN, Recipient interface */
-#define PL2303_SETCONTROLREQUEST       0x22 /* OUT, Recipient interface */
-#define PL2303_BREAKREQUEST            0x23 /* OUT, Recipient interface */
+#define PL2303_CONTROL_TYPE        (0x20)
+#define PL2303_SETLINEREQUEST      (0x20) /* OUT, Recipient interface */
+#define PL2303_GETLINEREQUEST      (0x21) /* IN, Recipient interface */
+#define PL2303_SETCONTROLREQUEST   (0x22) /* OUT, Recipient interface */
+#define PL2303_BREAKREQUEST        (0x23) /* OUT, Recipient interface */
 
 /* Vendor read/write */
 
-#define PL2303_RWREQUEST_TYPE          0x40
-#define PL2303_RWREQUEST               0x01 /* IN/OUT, Recipient device */
+#define PL2303_RWREQUEST_TYPE      (0x40)
+#define PL2303_RWREQUEST           (0x01) /* IN/OUT, Recipient device */
 
 /* Values *********************************************************************/
 
 /* String language */
 
-#define USBSER_STR_LANGUAGE        0x0409 /* en-us */
+#define USBSER_STR_LANGUAGE        (0x0409) /* en-us */
 
 /* Descriptor strings */
 
-#define USBSER_MANUFACTURERSTRID    1
-#define USBSER_PRODUCTSTRID         2
-#define USBSER_SERIALSTRID          3
-#define USBSER_CONFIGSTRID          4
+#define USBSER_MANUFACTURERSTRID   (1)
+#define USBSER_PRODUCTSTRID        (2)
+#define USBSER_SERIALSTRID         (3)
+#define USBSER_CONFIGSTRID         (4)
 
 /* Buffer big enough for any of our descriptors */
 
-#define USBSER_MXDESCLEN           256
+#define USBSER_MXDESCLEN           (256)
 
 /* min/max macros */
 
