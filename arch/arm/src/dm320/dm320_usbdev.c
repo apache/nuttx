@@ -1086,6 +1086,11 @@ static void dm320_cancelrequests(struct dm320_ep_s *privep)
 
 /*******************************************************************************
  * Name: dm320_epfindbyaddr
+ *
+ * Description:
+ *   Find the physical endpoint structure corresponding to a logic endpoint
+ *   address
+ *
  *******************************************************************************/
 
 static struct dm320_ep_s *dm320_epfindbyaddr(struct dm320_usbdev_s *priv,
