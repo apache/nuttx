@@ -969,7 +969,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
 
   /* Configure the IN interrupt endpoint */
 
-  ret = EP_CONFIGURE(priv->epintin, &g_epintindesc);
+  ret = EP_CONFIGURE(priv->epintin, &g_epintindesc, FALSE);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPINTINCONFIGFAIL), 0);
@@ -990,9 +990,9 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
     }
 
   usbclass_mkepbulkdesc(&g_epbulkindesc, bulkmxpacket, &epdesc);
-  ret = EP_CONFIGURE(priv->epbulkin, &epdesc);
+  ret = EP_CONFIGURE(priv->epbulkin, &epdesc, FALSE);
 #else
-  ret = EP_CONFIGURE(priv->epbulkin, &g_epbulkindesc);
+  ret = EP_CONFIGURE(priv->epbulkin, &g_epbulkindesc, FALSE);
 #endif
   if (ret < 0)
     {
@@ -1006,9 +1006,9 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
 
 #ifdef CONFIG_USBDEV_DUALSPEED
   usbclass_mkepbulkdesc(&g_epbulkoutdesc, bulkmxpacket, &epdesc);
-  ret = EP_CONFIGURE(priv->epbulkout, &epdesc);
+  ret = EP_CONFIGURE(priv->epbulkout, &epdesc, TRUE);
 #else
-  ret = EP_CONFIGURE(priv->epbulkout, &g_epbulkoutdesc);
+  ret = EP_CONFIGURE(priv->epbulkout, &g_epbulkoutdesc, TRUE);
 #endif
   if (ret < 0)
     {

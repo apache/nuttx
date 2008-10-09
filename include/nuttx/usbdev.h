@@ -56,10 +56,15 @@
 /* Endpoint helpers *****************************************************************/
 
 /* Configure endpoint, making it usable.  The class driver may deallocate or re-use
- * the 'desc' structure after returning
+ * the 'desc' structure after returning:
+ *
+ * ep   - the struct usbdev_ep_s instance obtained from allocep()
+ * desc - A struct usb_epdesc_s instance describing the endpoint
+ * last - TRUE if this this last endpoint to be configured.  Some hardware needs
+ *        to take special action when all of the endpoints have been configured.
  */
 
-#define EP_CONFIGURE(ep,desc)      (ep)->ops->configure(ep,desc)
+#define EP_CONFIGURE(ep,desc,last) (ep)->ops->configure(ep,desc,last)
 
 /* The endpoint will no longer be used */
 
@@ -97,8 +102,9 @@
 
 /* Allocate an endpoint:
  *
- *   epphy  - 7-bit physical endpoint number (without diretion bit).  Zero means
- *            that any endpoint matching the other requirements will suffice.
+ *   ep     - 7-bit logical endpoint number (direction bit ignored).  Zero means
+ *            that any endpoint matching the other requirements will suffice.  The
+ *            assigned endpoint can be found in the eplog field.
  *   in     - TRUE: IN (device-to-host) endpoint requested
  *   eptype - Endpoint type.  One of {USB_EP_ATTR_XFER_ISOC, USB_EP_ATTR_XFER_BULK,
  *            USB_EP_ATTR_XFER_INT}
@@ -197,7 +203,7 @@ struct usbdev_epops_s
 {
   /* Configure/enable and disable endpoint */
 
-  int (*configure)(FAR struct usbdev_ep_s *ep, FAR const struct usb_epdesc_s *desc);
+  int (*configure)(FAR struct usbdev_ep_s *ep, FAR const struct usb_epdesc_s *desc, boolean last);
   int (*disable)(FAR struct usbdev_ep_s *ep);
 
   /* Allocate and free I/O requests */
@@ -227,6 +233,7 @@ struct usbdev_epops_s
 struct usbdev_ep_s
 {
   const struct usbdev_epops_s *ops; /* Endpoint operations */
+  ubyte  eplog;                     /* Logical endpoint address */
   uint16 maxpacket;                 /* Maximum packet size for this endpoint */
   void  *private;                   /* For use by class driver */
 };
