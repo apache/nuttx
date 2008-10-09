@@ -52,14 +52,14 @@
 ssize_t read(int fd, FAR void *buf, size_t nbytes)
 {
   FAR struct filelist *list;
-  int ret = EBADF;
+  int ret = -EBADF;
 
   /* Get the thread-specific file list */
 
   list = sched_getfiles();
   if (!list)
     {
-      *get_errno_ptr() = EMFILE;
+      errno = EMFILE;
       return ERROR;
     }
 
@@ -90,6 +90,17 @@ ssize_t read(int fd, FAR void *buf, size_t nbytes)
             }
         }
     }
+
+  /* If an error occurred, set errno and return -1 (ERROR) */
+
+  if (ret < 0)
+    {
+      errno = -ret;
+      return ERROR;
+    }
+
+  /* Otherwise, return the number of bytes read */
+
   return ret;
 }
 

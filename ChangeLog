@@ -492,6 +492,7 @@
 	* Added USB device side driver for the DM320 (untested at initial checkin)
 	* Fixed an error in a previous (post 0.3.15) check-in that broke the LPC214x system timer.
 	* Fixed serial drive bugs related to (1) open counts and (2) recognizing O_NONBLOCK on read.
+	* Fixed an error in read(); it was not setting the errno on errors returned from the driver.
 
 
 
