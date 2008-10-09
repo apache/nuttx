@@ -38,12 +38,15 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <string.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <debug.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs.h>
@@ -254,7 +257,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 {
   FAR struct inode *inode = filep->f_inode;
   FAR uart_dev_t   *dev   = inode->i_private;
-  ssize_t           ret   = buflen;
+  ssize_t           recvd = 0;
 
   /* Only one user can be accessing dev->recv.tail at once */
 
@@ -266,22 +269,50 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
    */
 
   uart_disablerxint(dev);
-  while (buflen)
+  while (recvd < buflen)
     {
+      /* Check if there is more data to return in the circular buffer */
+
       if (dev->recv.head != dev->recv.tail)
         {
           *buffer++ = dev->recv.buffer[dev->recv.tail];
-          buflen--;
+          recvd++;
 
           if (++(dev->recv.tail) >= dev->recv.size)
             {
               dev->recv.tail = 0;
             }
         }
+
+      /* No... then we would have to wait to get receive more data.
+       * If the user has specified the O_NONBLOCK option, then do not
+       * return what we have.
+       */
+
+      else if (filep->f_oflags & O_NONBLOCK)
+        {
+          /* If nothing was transferred, then return the -EAGAIN
+           * error (not zero which means end of file).
+           */
+
+          if (recvd < 1)
+            {
+              recvd = -EAGAIN;
+            }
+
+          /* Break out of the loop and return the number of bytes
+           * received up to the wait condition.
+           */
+
+          break;
+        }
+
+      /* Otherwise we are going to wait */
+
       else
         {
           /* Wait for some characters to be sent from the buffer
-           * with the TX interrupt disabled.
+           * with the TX interrupt re-enabled.
            */
 
           dev->recvwaiting = TRUE;
@@ -293,7 +324,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 
   uart_enablerxint(dev);
   uart_givesem(&dev->recv.sem);
-  return ret;
+  return recvd;
 }
 
 /************************************************************************************
@@ -421,7 +452,8 @@ static int uart_open(FAR struct file *filep)
           ret = uart_setup(dev);
           if (ret < 0)
             {
-              goto errout_with_irqsdisabled;
+              irqrestore(flags);
+              goto errout_with_sem;
             }
         }
 
@@ -435,7 +467,8 @@ static int uart_open(FAR struct file *filep)
       if (ret < 0)
         {
            uart_shutdown(dev);
-           goto errout_with_irqsdisabled;
+           irqrestore(flags);
+           goto errout_with_sem;
         }
 
       /* Mark the io buffers empty */
@@ -448,14 +481,12 @@ static int uart_open(FAR struct file *filep)
       /* Enable the RX interrupt */
 
       uart_enablerxint(dev);
-
-      /* Save the new open count on success */
-
-      dev->open_count = tmp;
-
-errout_with_irqsdisabled:
       irqrestore(flags);
     }
+
+  /* Save the new open count on success */
+
+  dev->open_count = tmp;
 
 errout_with_sem:
   uart_givesem(&dev->closesem);
