@@ -98,9 +98,13 @@
 #  define CONFIG_USBSER_EPBULKIN 3
 #endif
 
+/* Packet and request buffer sizes */
+
 #ifndef CONFIG_USBSER_EP0MAXPACKET
 #  define CONFIG_USBSER_EP0MAXPACKET 64
 #endif
+
+#undef CONFIG_USBSER_BULKREQLEN
 
 /* Vendor and product IDs and strings */
 
@@ -289,11 +293,11 @@ struct usbser_alloc_s
 
 /* Transfer helpers *********************************************************/
 
-static uint16  usbclass_fillpacket(FAR struct usbser_dev_s *priv,
-                 char *packet, uint16 size);
+static uint16  usbclass_fillrequest(FAR struct usbser_dev_s *priv,
+                 char *reqbuf, uint16 reqlen);
 static int     usbclass_sndpacket(FAR struct usbser_dev_s *priv);
 static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
-                 char *packet, uint16 size);
+                 char *reqbuf, uint16 reqlen);
 
 /* Request helpers *********************************************************/
 
@@ -477,10 +481,10 @@ static const struct usb_qualdesc_s g_qualdesc =
  ****************************************************************************/
 
 /************************************************************************************
- * Name: usbclass_fillpacket
+ * Name: usbclass_fillrequest
  *
  * Description:
- *   If there is data to send, a packet is built in the given buffer.  Called either
+ *   If there is data to send it is copied to the given buffer.  Called either
  *   to initiate the first write operation, or from the completion interrupt handler
  *   service consecutive write operations.
  *
@@ -492,7 +496,7 @@ static const struct usb_qualdesc_s g_qualdesc =
  *
  ************************************************************************************/
 
-static uint16 usbclass_fillpacket(FAR struct usbser_dev_s *priv, char *packet, uint16 size)
+static uint16 usbclass_fillrequest(FAR struct usbser_dev_s *priv, char *reqbuf, uint16 reqlen)
 {
   FAR uart_dev_t *serdev = &priv->serdev;
   FAR struct uart_buffer_s *xmit = &serdev->xmit;
@@ -503,11 +507,11 @@ static uint16 usbclass_fillpacket(FAR struct usbser_dev_s *priv, char *packet, u
 
   flags = irqsave();
 
-  /* Transfer bytes while we have bytes available and there is room in the packet */
+  /* Transfer bytes while we have bytes available and there is room in the request */
 
-  while (xmit->head != xmit->tail && nbytes < size)
+  while (xmit->head != xmit->tail && nbytes < reqlen)
     {
-      *packet++ = xmit->buffer[xmit->tail];
+      *reqbuf++ = xmit->buffer[xmit->tail];
       nbytes++;
 
       /* Increment the tail pointer */
@@ -543,8 +547,8 @@ static uint16 usbclass_fillpacket(FAR struct usbser_dev_s *priv, char *packet, u
  * Name: usbclass_sndpacket
  *
  * Description:
- *   This function obtains write requests, transfers the TX data into the packet,
- *   and submits the packets to the USB controller.  This continues untils either
+ *   This function obtains write requests, transfers the TX data into the request,
+ *   and submits the requests to the USB controller.  This continues untils either
  *   (1) there are no further packets available, or (2) thre is not further data
  *   to send.
  *
@@ -573,8 +577,8 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
 
   ep = priv->epbulkin;
 
-  /* Loop until either (1) we run out or write requests, or (2) usbclass_fillpacket()
-   * is unable to fill the packet with data (i.e., untilthere is no more data
+  /* Loop until either (1) we run out or write requests, or (2) usbclass_fillrequest()
+   * is unable to fill the request with data (i.e., untilthere is no more data
    * to be sent).
    */
 
@@ -589,9 +593,9 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
       reqcontainer = (struct usbser_req_s *)sq_peek(&priv->reqlist);
       req          = reqcontainer->req;
 
-      /* Fill the packet with serial TX data */
+      /* Fill the request with serial TX data */
 
-      len = usbclass_fillpacket(priv, req->buf, ep->maxpacket);
+      len = usbclass_fillrequest(priv, req->buf, req->len);
       if (len > 0)
         {
           /* Remove the empty contained from the request list */
@@ -634,7 +638,7 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
  ************************************************************************************/
 
 static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
-                                      char *packet, uint16 size)
+                                      char *reqbuf, uint16 reqlen)
 {
   FAR uart_dev_t *serdev = &priv->serdev;
   FAR struct uart_buffer_s *recv = &serdev->recv;
@@ -662,7 +666,7 @@ static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
    * then we have overrun the serial driver and data will be lost.
    */
 
-  while (nexthead != recv->tail && size > 0)
+  while (nexthead != recv->tail && reqlen > 0)
     {
       /* Pre-increment the head index and check for wrap around.  We need to do this
        * so that we can determine if the circular buffer will overrun BEFORE we
@@ -677,12 +681,12 @@ static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
 
       /* Copy one byte to the head of the circular RX buffer */
 
-      recv->buffer[currhead] = *packet++;
+      recv->buffer[currhead] = *reqbuf++;
 
       /* Update counts and indices */
 
       currhead = nexthead;
-      size--;
+      reqlen--;
 
       /* Wake up the serial driver if it is waiting for incoming data. If we
        * are running in an interrupt handler, then the serial driver will
@@ -714,7 +718,7 @@ static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
 
   /* Return an error if the entire packet could not be transferred */
 
-  if (size > 0)
+  if (reqlen > 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RXOVERRUN), 0);
       return -ENOSPC;
@@ -1244,6 +1248,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
   FAR struct usbser_dev_s *priv = ((struct usbser_driver_s*)driver)->dev;
   FAR struct usbser_req_s *reqcontainer;
   irqstate_t flags;
+  uint16 reqlen;
   int ret;
   int i;
 
@@ -1307,10 +1312,16 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
 
   /* Pre-allocate read requests */
 
+#ifdef CONFIG_USBSER_BULKREQLEN
+  reqlen = max(CONFIG_USBSER_BULKREQLEN, priv->epbulkout->maxpacket);
+#else
+  reqlen =priv->epbulkout->maxpacket;
+#endif
+
   for (i = 0; i < CONFIG_USBSER_NRDREQS; i++)
     {
       reqcontainer      = &priv->rdreqs[i];
-      reqcontainer->req = usbclass_allocreq(priv->epbulkout, priv->epbulkout->maxpacket);
+      reqcontainer->req = usbclass_allocreq(priv->epbulkout, reqlen);
       if (reqcontainer->req == NULL)
         {
           usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDALLOCREQ), (uint16)-ret);
@@ -1323,10 +1334,16 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
 
   /* Pre-allocate write request containers and put in a free list */
 
+#ifdef CONFIG_USBSER_BULKREQLEN
+  reqlen = max(CONFIG_USBSER_BULKREQLEN, priv->epbulkin->maxpacket);
+#else
+  reqlen = priv->epbulkin->maxpacket;
+#endif
+
   for (i = 0; i < CONFIG_USBSER_NWRREQS; i++)
     {
       reqcontainer      = &priv->wrreqs[i];
-      reqcontainer->req = usbclass_allocreq(priv->epbulkin, priv->epbulkin->maxpacket);
+      reqcontainer->req = usbclass_allocreq(priv->epbulkin, reqlen);
       if (reqcontainer->req == NULL)
         {
           usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRALLOCREQ), (uint16)-ret);
