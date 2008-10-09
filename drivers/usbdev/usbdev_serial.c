@@ -238,11 +238,15 @@ struct usbser_dev_s
 {
   FAR struct uart_dev_s    serdev;    /* Serial device structure */
   FAR struct usbdev_s     *usbdev;    /* usbdev driver pointer */
-  ubyte                    config;    /* Configuration number */
-  ubyte                    nwrq;      /* Number of queue write requests (in reqlist)*/
-  ubyte                    nrdq;      /* Number of queue read requests (in epbulkout) */
-  boolean                  open;      /* TRUE: Driver has been opened */
-  ubyte                    linest[7]; /* Fake line status */
+
+  ubyte config;                       /* Configuration number */
+  ubyte nwrq;                         /* Number of queue write requests (in reqlist)*/
+  ubyte nrdq;                         /* Number of queue read requests (in epbulkout) */
+  ubyte open      : 1;                /* 1: Driver has been opened */
+  ubyte rxenabled : 1;                /* 1: UART RX "interrupts" enabled */
+  ubyte linest[7];                    /* Fake line status */
+  sint16 rxhead;                      /* Working head; used when rx int disabled */
+
   FAR struct usbdev_ep_s  *epintin;   /* Address of Interrupt IN endpoint */
   FAR struct usbdev_ep_s  *epbulkin;  /* Address of Bulk IN endpoint */
   FAR struct usbdev_ep_s  *epbulkout; /* Address of Bulk OUT endpoint */
@@ -288,7 +292,7 @@ struct usbser_alloc_s
 static uint16  usbclass_fillpacket(FAR struct usbser_dev_s *priv,
                  char *packet, uint16 size);
 static int     usbclass_sndpacket(FAR struct usbser_dev_s *priv);
-static int     usbclass_recvpacket(FAR struct usbser_dev_s *priv,
+static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
                  char *packet, uint16 size);
 
 /* Request helpers *********************************************************/
@@ -314,11 +318,11 @@ static int     usbclass_setconfig(FAR struct usbser_dev_s *priv,
 
 /* Completion event handlers ***********************************************/
 
-static void    usbclass_setupcomplete(FAR struct usbdev_ep_s *ep,
+static void    usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep,
                  FAR struct usbdev_req_s *req);
-static void    usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
+static void    usbclass_epbulkoutcomplete(FAR struct usbdev_ep_s *ep,
                  FAR struct usbdev_req_s *req);
-static void    usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
+static void    usbclass_epbulkincomplete(FAR struct usbdev_ep_s *ep,
                  FAR struct usbdev_req_s *req);
 
 /* USB class device ********************************************************/
@@ -624,20 +628,33 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
  *   interrupt level (with interrupts disabled).  This function handles the USB packet
  *   and provides the received data to the uart RX buffer.
  *
+ * Assumptions:
+ *   Called from the USB interrupt handler with interrupts disabled.
+ *
  ************************************************************************************/
 
-static int usbclass_recvpacket(FAR struct usbser_dev_s *priv, char *packet, uint16 size)
+static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
+                                      char *packet, uint16 size)
 {
   FAR uart_dev_t *serdev = &priv->serdev;
   FAR struct uart_buffer_s *recv = &serdev->recv;
+  uint16 currhead;
   uint16 nexthead;
 
-  /* Get the next head index */
+  /* Get the next head index. During the time that RX interrupts are disabled, the
+   * the serial driver will be extracting data from the circular buffer and modifying
+   * recv.tail.  During this time, we should avoid modifying recv.head; Instead we will
+   * use a shadow copy of the index.  When interrupts are restored, the real recv.head
+   * will be updated with this indes.
+   */
 
-  nexthead = recv->head + 1;
-  if (nexthead >= recv->size)
+  if (priv->rxenabled)
     {
-      nexthead = 0;
+      currhead = recv->head;
+    }
+  else
+    {
+      currhead = priv->rxhead;
     }
 
   /* Then copy data into the RX buffer until either: (1) all of the data has been
@@ -647,26 +664,60 @@ static int usbclass_recvpacket(FAR struct usbser_dev_s *priv, char *packet, uint
 
   while (nexthead != recv->tail && size > 0)
     {
+      /* Pre-increment the head index and check for wrap around.  We need to do this
+       * so that we can determine if the circular buffer will overrun BEFORE we
+       * overrun the buffer!
+       */
+
+      nexthead = currhead + 1;
+      if (nexthead >= recv->size)
+        {
+          nexthead = 0;
+        }
+
       /* Copy one byte to the head of the circular RX buffer */
 
-      recv->buffer[recv->head] = *packet++;
+      recv->buffer[currhead] = *packet++;
 
       /* Update counts and indices */
 
-      recv->head = nexthead;
+      currhead = nexthead;
       size--;
-      if (++nexthead >= recv->size)
-        {
-           nexthead = 0;
-        }
 
-      /* Wake up the serial driver if it is waiting for incoming data */
+      /* Wake up the serial driver if it is waiting for incoming data. If we
+       * are running in an interrupt handler, then the serial driver will
+       * not run until the interrupt handler returns.  But we will exercise
+       * care in the following just in case the serial driver does run.
+       */
 
-      if (serdev->recvwaiting)
+      if (priv->rxenabled && serdev->recvwaiting)
         {
+          recv->head          = currhead;
           serdev->recvwaiting = FALSE;
           sem_post(&serdev->recvsem);
+          currhead            = recv->head;
         }
+    }
+
+  /* Write back the head pointer using the shadow index if RX "interrupts"
+   * are disabled.
+   */
+
+  if (priv->rxenabled)
+    {
+      recv->head = currhead;
+    }
+  else
+    {
+      priv->rxhead = currhead;
+    }
+
+  /* Return an error if the entire packet could not be transferred */
+
+  if (size > 0)
+    {
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RXOVERRUN), 0);
+      return -ENOSPC;
     }
   return OK;
 }
@@ -1024,7 +1075,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
   for (i = 0; i < CONFIG_USBSER_NRDREQS; i++)
     {
       req           = priv->rdreqs[i].req;
-      req->callback = usbclass_rdcomplete;
+      req->callback = usbclass_epbulkoutcomplete;
       ret           = EP_SUBMIT(priv->epbulkout, req);
       if (ret != OK)
         {
@@ -1043,14 +1094,14 @@ errout:
 }
 
 /****************************************************************************
- * Name: usbclass_setupcomplete
+ * Name: usbclass_ep0incomplete
  *
  * Description:
  *   Handle completion of EP0 control operations
  *
  ****************************************************************************/
 
-static void usbclass_setupcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
+static void usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
   if (req->result || req->xfrd != req->len)
     {
@@ -1059,16 +1110,17 @@ static void usbclass_setupcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req
 }
 
 /****************************************************************************
- * Name: usbclass_rdcomplete
+ * Name: usbclass_epbulkoutcomplete
  *
  * Description:
- *   Handle completion of read request
- *
+ *   Handle completion of read request on the bulk OUT endpoint.  This
+ *   is handled like the receipt of serial data on the "UART"
  ****************************************************************************/
 
-static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
+static void usbclass_epbulkoutcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
   FAR struct usbser_dev_s *priv;
+  irqstate_t flags;
   int ret;
 
   /* Sanity check */
@@ -1087,6 +1139,7 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s 
 
   /* Process the received data unless this is some unusual condition */
 
+  flags = irqsave();
   switch (req->result)
     {
     case 0: /* Normal completion */
@@ -1097,6 +1150,7 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s 
     case -ESHUTDOWN: /* Disconnection */
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSHUTDOWN), 0);
       priv->nrdq--;
+      irqrestore(flags);
       return;
 
     default: /* Some other error occurred */
@@ -1112,10 +1166,11 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s 
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSUBMIT), (uint16)-req->result);
     }
+  irqrestore(flags);
 }
 
 /****************************************************************************
- * Name: usbclass_wrcomplete
+ * Name: usbclass_epbulkincomplete
  *
  * Description:
  *   Handle completion of write request.  This function probably executes
@@ -1123,7 +1178,7 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s 
  *
  ****************************************************************************/
 
-static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
+static void usbclass_epbulkincomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
   FAR struct usbser_dev_s *priv;
   FAR struct usbser_req_s *reqcontainer;
@@ -1208,7 +1263,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
       ret = -ENOMEM;
       goto errout;
     }
-  priv->ctrlreq->callback = usbclass_setupcomplete;
+  priv->ctrlreq->callback = usbclass_ep0incomplete;
 
   /* Pre-allocate all endpoints... the endpoints will not be functional
    * until the SET CONFIGURATION request is processed in usbclass_setconfig.
@@ -1263,7 +1318,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
           goto errout;
         }
       reqcontainer->req->private  = reqcontainer;
-      reqcontainer->req->callback = usbclass_rdcomplete;
+      reqcontainer->req->callback = usbclass_epbulkoutcomplete;
     }
 
   /* Pre-allocate write request containers and put in a free list */
@@ -1279,7 +1334,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
           goto errout;
         }
       reqcontainer->req->private  = reqcontainer;
-      reqcontainer->req->callback = usbclass_wrcomplete;
+      reqcontainer->req->callback = usbclass_epbulkincomplete;
 
       flags = irqsave();
       sq_addlast((sq_entry_t*)reqcontainer, &priv->reqlist);
@@ -1664,7 +1719,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
         {
           usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPRESPQ), (uint16)-ret);
           ctrlreq->result = OK;
-          usbclass_setupcomplete(dev->ep0, ctrlreq);
+          usbclass_ep0incomplete(dev->ep0, ctrlreq);
         }
     }
 
@@ -1762,7 +1817,7 @@ static int usbser_setup(FAR struct uart_dev_s *dev)
 
   /* Mark the device as opened */
 
-  priv->open = TRUE;
+  priv->open = 1;
   return OK;
 }
 
@@ -1812,7 +1867,7 @@ static void usbser_shutdown(FAR struct uart_dev_s *dev)
   /* Make sure that we are disconnected from the host */
 
   usbclass_resetconfig(priv);
-  priv->open = FALSE;
+  priv->open = 0;
   irqrestore(flags);
 }
 
@@ -1863,6 +1918,8 @@ static void usbser_detach(FAR struct uart_dev_s *dev)
 static void usbser_rxint(FAR struct uart_dev_s *dev, boolean enable)
 {
   FAR struct usbser_dev_s *priv;
+  FAR uart_dev_t *serdev;
+  irqstate_t flags;
 
   usbtrace(USBSER_CLASSAPI_RXINT, (uint16)enable);
 
@@ -1878,20 +1935,69 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, boolean enable)
 
   /* Extract reference to private data */
 
-  priv = (FAR struct usbser_dev_s*)dev->priv;
+  priv   = (FAR struct usbser_dev_s*)dev->priv;
+  serdev = &priv->serdev;
 
-  /* I think we can simulate this behavior by stalling and/or resuming the
-   * OUT endpoint.
+  /* We need exclusive access to the RX buffer and private structure
+   * in the following.
    */
 
+  flags = irqsave();
   if (enable)
     {
-      EP_RESUME(priv->epbulkout);
+       /* RX "interrupts" are enabled.  Is this a transition from disabled
+        * to enabled state?
+        */
+
+       if (!priv->rxenabled)
+         {
+           /* Yes.  During the time that RX interrupts are disabled, the
+            * the serial driver will be extracting data from the circular
+            * buffer and modifying recv.tail.  During this time, we
+            * should avoid modifying recv.head; When interrupts are restored,
+            * we can update the head pointer for all of the data that we
+            * put into cicular buffer while "interrupts" were disabled.
+            */
+
+          if (priv->rxhead != serdev->recv.head)
+            {
+              serdev->recv.head = priv->rxhead;
+
+              /* Is the serial driver waiting for more data? */
+
+              if (serdev->recvwaiting)
+                {
+                  /* Yes... signal the availability of new data */
+
+                  sem_post(&serdev->recvsem);
+                  serdev->recvwaiting = FALSE;
+                }
+            }
+
+          /* RX "interrupts are no longer disabled */
+
+          priv->rxenabled = 1;
+        }
     }
-  else
+
+  /* RX "interrupts" are disabled.  Is this a transition from enabled
+   * to disabled state?
+   */
+
+  else if (priv->rxenabled)
     {
-      EP_STALL(priv->epbulkout);
+      /* Yes.  During the time that RX interrupts are disabled, the
+       * the serial driver will be extracting data from the circular
+       * buffer and modifying recv.tail.  During this time, we
+       * should avoid modifying recv.head; When interrupts are disabled,
+       * we use a shadow index and continue adding data to the circular
+       * buffer.
+       */
+
+      priv->rxhead    = serdev->recv.head;
+      priv->rxenabled = 0;
     }
+  irqrestore(flags);
 }
 
 /****************************************************************************
