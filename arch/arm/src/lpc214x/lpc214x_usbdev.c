@@ -241,6 +241,9 @@
 #define LPC214X_EPPHYIN(epphy)       (((epphy)&1)!=0)
 #define LPC214X_EPPHYOUT(epphy)      (((epphy)&1)==0)
 
+#define LPC214X_EPPHYIN2LOG(epphy)   (((ubyte)(epphy)>>1)|USB_DIR_IN)
+#define LPC214X_EPPHYOUT2LOG(epphy)  (((ubyte)(epphy)>>1)|USB_DIR_OUT)
+
 /* Each endpoint has somewhat different characteristics */
 
 #define LPC214X_EPALLSET             (0xffffffff)  /* All endpoints */
@@ -304,7 +307,6 @@ struct lpc214x_ep_s
   struct lpc214x_req_s    *head;         /* Request list for this endpoint */
   struct lpc214x_req_s    *tail;
   ubyte                   epphy;         /* Physical EP address */
-  ubyte                   eplog;         /* Configured logical EP address */
   ubyte                   stalled:1;     /* Endpoint is halted */
   ubyte                   halted:1;      /* Endpoint feature halted */
   ubyte                   txnullpkt:1;   /* Null packet needed at end of transfer */
@@ -433,7 +435,7 @@ static void lpc214x_dmadisable(ubyte epphy);
 /* Endpoint operations *********************************************************/
 
 static int  lpc214x_epconfigure(FAR struct usbdev_ep_s *ep,
-              const struct usb_epdesc_s *desc);
+              const struct usb_epdesc_s *desc, boolean last);
 static int  lpc214x_epdisable(FAR struct usbdev_ep_s *ep);
 static FAR struct usbdev_req_s *lpc214x_epallocreq(FAR struct usbdev_ep_s *ep);
 static void lpc214x_epfreereq(FAR struct usbdev_ep_s *ep,
@@ -1202,7 +1204,7 @@ static struct lpc214x_ep_s *lpc214x_epfindbyaddr(struct lpc214x_usbdev_s *priv,
 
       /* Same logical endpoint number? (includes direction bit) */
 
-      if (eplog == privep->eplog)
+      if (eplog == privep->ep.eplog)
         {
           /* Return endpoint found */
 
@@ -2447,19 +2449,24 @@ static void lpc214x_dmadisable(ubyte epphy)
  * Description:
  *   Configure endpoint, making it usable
  *
+ * Input Parameters:
+ *   ep   - the struct usbdev_ep_s instance obtained from allocep()
+ *   desc - A struct usb_epdesc_s instance describing the endpoint
+ *   last - TRUE if this this last endpoint to be configured.  Some hardware
+ *          needs to take special action when all of the endpoints have been
+ *          configured.
+ *
  *******************************************************************************/
 
 static int lpc214x_epconfigure(FAR struct usbdev_ep_s *ep,
-                               FAR const struct usb_epdesc_s *desc)
+                               FAR const struct usb_epdesc_s *desc,
+                               boolean last)
 {
   FAR struct lpc214x_ep_s *privep = (FAR struct lpc214x_ep_s *)ep;
   uint32 inten;
 
   usbtrace(TRACE_EPCONFIGURE, privep->epphy);
-
-  /* Save the logical EP number (so that we can map logical to physical later) */
-
-  privep->eplog = desc->addr;
+  DEBUGASSERT(desc->addr == ep->eplog);
 
   /* Realize the endpoint */
 
@@ -2477,10 +2484,19 @@ static int lpc214x_epconfigure(FAR struct usbdev_ep_s *ep,
 #else
   /* Enable Ep interrupt (R/W) */
 
-   inten = lpc214x_getreg(LPC214X_USBDEV_EPINTEN);
-   inten |= (1 << privep->epphy);
-   lpc214x_putreg(inten, LPC214X_USBDEV_EPINTEN);
+  inten = lpc214x_getreg(LPC214X_USBDEV_EPINTEN);
+  inten |= (1 << privep->epphy);
+  lpc214x_putreg(inten, LPC214X_USBDEV_EPINTEN);
 #endif
+
+  /* If all of the endpoints have been configured, then tell the USB controller
+   * to enabled normal activity on all realized endpoints.
+   */
+
+  if (last)
+    {
+      lpc214x_usbcmd(CMD_USB_DEV_CONFIG, 1);
+    }
    return OK;
 }
 
@@ -2776,35 +2792,52 @@ static int lpc214x_epstall(FAR struct usbdev_ep_s *ep, boolean resume)
  *   Allocate an endpoint matching the parameters.
  *
  * Input Parameters:
- *   epphy  - 7-bit physical endpoint number (without direction bit).  Zero means
- *            that any endpoint matching the other requirements will suffice.
+ *   eplog  - 7-bit logical endpoint number (direction bit ignored).  Zero means
+ *            that any endpoint matching the other requirements will suffice.  The
+ *            assigned endpoint can be found in the eplog field.
  *   in     - TRUE: IN (device-to-host) endpoint requested
  *   eptype - Endpoint type.  One of {USB_EP_ATTR_XFER_ISOC, USB_EP_ATTR_XFER_BULK,
  *            USB_EP_ATTR_XFER_INT}
  *
  *******************************************************************************/
 
-static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte epphy,
+static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte eplog,
                                                boolean in, ubyte eptype)
 {
   FAR struct lpc214x_usbdev_s *priv = (FAR struct lpc214x_usbdev_s *)dev;
-  uint32 epset = LPC214X_EPALLSET;
+  uint32 epset = LPC214X_EPALLSET & ~LPC214X_EPCTRLSET;
   irqstate_t flags;
   int epndx = 0;
 
-  usbtrace(TRACE_DEVALLOCEP, (uint16)epphy);
+  usbtrace(TRACE_DEVALLOCEP, (uint16)eplog);
 
-  /* epphy=0 means that any endpoint will do */
+  /* Ignore any direction bits in the logical address */
 
-  if (epphy > 0)
+  eplog = USB_EPNO(eplog);
+
+  /* A logical address of 0 means that any endpoint will do */
+
+  if (eplog > 0)
     {
-      if (epphy >= LPC214X_NLOGENDPOINTS)
+      /* Otherwise, we will return the endpoint structure only for the requested
+       * 'logical' endpoint.  All of the other checks will still be performed.
+       *
+       * First, verify that the logical endpoint is in the range supported by
+       * by the hardware.
+       */
+
+      if (eplog >= LPC214X_NLOGENDPOINTS)
         {
-         usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADEPNO), (uint16)epphy);
-         return NULL;
+          usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADEPNO), (uint16)eplog);
+          return NULL;
         }
 
-      epset &= 3 << epphy;
+      /* Convert the logical address to a physical OUT endpoint address and
+       * remove all of the candidate endpoints from the bitset except for the
+       * the IN/OUT pair for this logical address.
+       */
+
+      epset &= 3 << (eplog << 1);
     }
 
   /* Get the subset matching the requested direction */
@@ -2857,9 +2890,9 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte e
               uint32 bit = 1 << epndx;
               if ((epset & bit) != 0)
                 {
-                  /* Mark the endpoint no longer available */
+                  /* Mark the IN/OUT endpoint no longer available */
 
-                  priv->epavail &= ~bit;
+                  priv->epavail &= ~(3 << (bit & ~1));
                   irqrestore(flags);
 
                   /* And return the pointer to the standard endpoint structure */
@@ -2872,7 +2905,7 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte e
       irqrestore(flags);
     }
 
-  usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NOEP), (uint16)epphy);
+  usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NOEP), (uint16)eplog);
   return NULL;
 }
 
@@ -3050,7 +3083,20 @@ void up_usbinitialize(void)
        */
       priv->eplist[i].ep.ops       = &g_epops;
       priv->eplist[i].dev          = priv;
+
+      /* The index, i, is the physical endpoint address;  Map this
+       * to a logical endpoint address usable by the class driver.
+       */
+
       priv->eplist[i].epphy        = i;
+      if (LPC214X_EPPHYIN(i))
+        {
+          priv->eplist[i].ep.eplog = LPC214X_EPPHYIN2LOG(i);
+        }
+      else
+        {
+          priv->eplist[i].ep.eplog = LPC214X_EPPHYOUT2LOG(i);
+        }
 
       /* The maximum packet size may depend on the type of endpoint */
 
