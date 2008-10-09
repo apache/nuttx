@@ -240,6 +240,10 @@ void usbtrace(uint16 event, uint16 value)
       lldbg("Endpoint configure(): %04x\n", value);
       break;
 
+    case TRACE_EPDISABLE:
+      lldbg("Endpoint disable(): %04x\n", value);
+      break;
+
     case TRACE_EPALLOCREQ:
       lldbg("Endpoint allocreq(): %04x\n", value);
       break;
