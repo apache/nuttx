@@ -61,7 +61,8 @@
 
 static const char *g_ttydev = DEFAULT_TTYDEV;
 static char g_buffer[BUFFER_SIZE];
-static const char g_outmsg[] =
+static const char g_shortmsg[] = "Sure... You betcha!!\n";
+static const char g_longmsg[] =
   "I am proud to come to this city as the guest of your distinguished Mayor, "
   "who has symbolized throughout the world the fighting spirit of West Berlin. "
   "And I am proud to visit the Federal Republic with your distinguished Chancellor "
@@ -135,6 +136,7 @@ static void show_usage(const char *progname, int exitcode)
 int main(int argc, char **argv, char **envp)
 {
   ssize_t nbytes;
+  int count;
   int fd;
 
   /* Handle input parameters */
@@ -168,6 +170,7 @@ int main(int argc, char **argv, char **envp)
 
   /* Wait for hello... */
 
+  count = 0;
   for (;;)
     {
       printf("main: Reading from the serial driver\n");
@@ -183,8 +186,19 @@ int main(int argc, char **argv, char **envp)
       g_buffer[nbytes] = '\0';
       printf("main: Received %d bytes:\n", nbytes);
       printf("      \"%s\"\n", g_buffer);
-      printf("main: Sending %d bytes..\n", sizeof(g_outmsg));
-      nbytes = write(fd, g_outmsg, sizeof(g_outmsg));
+      count++;
+
+      if (count < 5)
+        {
+          printf("main: Sending %d bytes..\n", sizeof(g_shortmsg));
+          nbytes = write(fd, g_longmsg, sizeof(g_shortmsg));
+        }
+      else
+        {
+          printf("main: Sending %d bytes..\n", sizeof(g_longmsg));
+          nbytes = write(fd, g_longmsg, sizeof(g_longmsg));
+        }
+
       if (nbytes < 0)
         {
           printf("main: ERROR: Failed to write to %s: %s\n", g_ttydev, strerror(errno));
