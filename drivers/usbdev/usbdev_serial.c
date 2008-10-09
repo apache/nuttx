@@ -1164,7 +1164,12 @@ static void usbclass_epbulkoutcomplete(FAR struct usbdev_ep_s *ep, struct usbdev
 
   /* Requeue the read request */
 
+#ifdef CONFIG_USBSER_BULKREQLEN
+  req->len = max(CONFIG_USBSER_BULKREQLEN, ep->maxpacket);
+#else
   req->len = ep->maxpacket;
+#endif
+
   ret      = EP_SUBMIT(ep, req);
   if (ret != OK)
     {
