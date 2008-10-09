@@ -38,8 +38,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdio.h>
+#include <unistd.h>
 #include <errno.h>
+#include <debug.h>
+
 #include <nuttx/usbdev.h>
 
 /****************************************************************************
@@ -114,11 +118,14 @@ int user_start(int argc, char *argv[])
 
           /* ENOTCONN means that the USB device is not yet connected */
 
-          if (errcode = ENOTCONN)
+#if 0 /* BUG: May report the wrong error */
+          if (errcode == ENOTCONN)
+#endif
             {
               message("user_start:        Not connected. Wait and try again.\n");
               sleep(5);
             }
+#if 0 /* BUG: May report the wrong error */
           else
             {
               /* Give up on other errors */
@@ -126,6 +133,7 @@ int user_start(int argc, char *argv[])
               message("user_start:        Aborting\n");
               return 2;
             }
+#endif
         }
     }
   while (!stream);
