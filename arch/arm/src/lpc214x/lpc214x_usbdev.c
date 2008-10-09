@@ -307,8 +307,9 @@ struct lpc214x_ep_s
   struct lpc214x_req_s    *head;         /* Request list for this endpoint */
   struct lpc214x_req_s    *tail;
   ubyte                   epphy;         /* Physical EP address */
-  ubyte                   stalled:1;     /* Endpoint is halted */
-  ubyte                   halted:1;      /* Endpoint feature halted */
+  ubyte                   stalled:1;     /* 1: Endpoint is stalled */
+  ubyte                   halted:1;      /* 1: Endpoint feature halted */
+  ubyte                   txbusy:1;      /* 1: TX endpoint FIFO full */
   ubyte                   txnullpkt:1;   /* Null packet needed at end of transfer */
 };
 
@@ -1034,59 +1035,62 @@ static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
   /* Otherwise send the data in the packet (in the DMA on case, we
    * may be resuming transfer already in progress.
    */
-#warning REVISIT... Unless the EP supports double buffering, only one packet may be sent
-  for (;;)
+#warning REVISIT... If the EP supports double buffering, then we can do better
+
+  /* Get the number of bytes left to be sent in the packet */
+
+  bytesleft = privreq->req.len - privreq->req.xfrd;
+
+  /* Send the next packet if (1) there are more bytes to be sent, or
+   * (2) the last packet sent was exactly maxpacketsize (bytesleft == 0)
+   */
+
+  usbtrace(TRACE_WRITE(privep->epphy), privreq->req.xfrd);
+  if (bytesleft >  0 || privep->txnullpkt)
     {
-      /* Get the number of bytes left to be sent in the packet */
-
-      bytesleft = privreq->req.len - privreq->req.xfrd;
-
-      /* Send the next packet if (1) there are more bytes to be sent, or
-       * (2) the last packet sent was exactly maxpacketsize (bytesleft == 0)
+      /* Indicate that there is data in the TX FIFO.  This will be cleared
+       * when the EPIN interrupt is received
        */
 
-      usbtrace(TRACE_WRITE(privep->epphy), privreq->req.xfrd);
-      if (bytesleft >  0 || privep->txnullpkt)
-        {
-          /* Try to send maxpacketsize -- unless we don't have that many
-           * bytes to send.
-           */
+      privep->txbusy = 1;
 
-          if (bytesleft > privep->ep.maxpacket)
-            {
-              nbytes = privep->ep.maxpacket;
-              privep->txnullpkt = 0;
-            }
-          else
-            {
-              nbytes = bytesleft;
-              privep->txnullpkt = (bytesleft == privep->ep.maxpacket);
-            }
-
-          /* Send the largest number of bytes that we can in this packet */
-
-          buf = privreq->req.buf + privreq->req.xfrd;
-          lpc214x_epwrite(privep->epphy, buf, nbytes);
-
-          /* Update for the next time through the loop */
-
-          privreq->req.xfrd += nbytes;
-        }
-
-      /* If all of the bytes were sent (including any final null packet)
-       * then we are finished with the transfer
+      /* Try to send maxpacketsize -- unless we don't have that many
+       * bytes to send.
        */
 
-      if (bytesleft <= 0 || !privep->txnullpkt)
+      if (bytesleft > privep->ep.maxpacket)
         {
-          usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
+          nbytes = privep->ep.maxpacket;
           privep->txnullpkt = 0;
-          lpc214x_reqcomplete(privep, OK);
-          return OK;
         }
+      else
+        {
+          nbytes = bytesleft;
+          privep->txnullpkt = (bytesleft == privep->ep.maxpacket);
+        }
+
+      /* Send the largest number of bytes that we can in this packet */
+
+      buf = privreq->req.buf + privreq->req.xfrd;
+      lpc214x_epwrite(privep->epphy, buf, nbytes);
+
+      /* Update for the next time through the loop */
+
+      privreq->req.xfrd += nbytes;
     }
 
-  return OK; /* Won't get here */
+  /* If all of the bytes were sent (including any final null packet)
+   * then we are finished with the transfer
+   */
+
+  if (bytesleft <= 0 || !privep->txnullpkt)
+    {
+      usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
+      privep->txnullpkt = 0;
+      lpc214x_reqcomplete(privep, OK);
+    }
+
+  return OK;
 }
 
 /*******************************************************************************
@@ -1944,7 +1948,9 @@ static inline void lpc214x_ep0dataininterrupt(struct lpc214x_usbdev_s *priv)
       {
         /* Process the next request action (if any) */
 
-        lpc214x_wrrequest(&priv->eplist[LPC214X_EP0_IN]);
+        ep0 = &priv->eplist[LPC214X_EP0_IN];
+        ep0->txbusy = 0;
+        lpc214x_wrrequest(ep0);
       }
       break;
 
@@ -2210,6 +2216,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
                               /* Write host data from the current write request (if any) */
 
+                              privep->txbusy = 0;
                               lpc214x_wrrequest(privep);
                            }
                           else
@@ -2709,7 +2716,13 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 
       lpc214x_rqenqueue(privep, privreq);
       usbtrace(TRACE_INREQQUEUED(privep->epphy), privreq->req.len);
-      ret = lpc214x_wrrequest(privep);
+
+      /* If the IN endpoint FIFO is available, then transfer the data now */
+
+      if (privep->txbusy == 0)
+        {
+          ret = lpc214x_wrrequest(privep);
+        }
     }
 
   /* Handle OUT (host-to-device) requests */
