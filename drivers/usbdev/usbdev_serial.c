@@ -83,12 +83,19 @@
 
 /* Logical endpoint numbers / max packet sizes */
 
-#ifndef CONFIG_USBSER_EPIN
-#  define CONFIG_USBSER_EPIN 2
+#ifndef CONFIG_USBSER_EPINTIN
+#  warning "EPINTIN not defined in the configuration"
+#  define CONFIG_USBSER_EPINTIN 1
 #endif
 
-#ifndef CONFIG_USBSER_EPOUT
-#  define CONFIG_USBSER_EPOUT 1
+#ifndef CONFIG_USBSER_EPBULKOUT
+#  warning "EPBULKOUT not defined in the configuration"
+#  define CONFIG_USBSER_EPBULKOUT 2
+#endif
+
+#ifndef CONFIG_USBSER_EPBULKIN
+#  warning "EPBULKIN not defined in the configuration"
+#  define CONFIG_USBSER_EPBULKIN 3
 #endif
 
 #ifndef CONFIG_USBSER_EP0MAXPACKET
@@ -148,12 +155,14 @@
 
 /* Endpoint configuration */
 
-#define USBSER_EPINTIN_ADDR        (USB_DIR_IN|1)
+#define USBSER_EPINTIN_ADDR        (USB_DIR_IN|CONFIG_USBSER_EPINTIN)
 #define USBSER_EPINTIN_ATTR        (USB_EP_ATTR_XFER_INT)
 #define USBSER_EPINTIN_MXPACKET    (10)
-#define USBSER_EPOUTBULK_ADDR      (2)
+
+#define USBSER_EPOUTBULK_ADDR      (CONFIG_USBSER_EPBULKOUT)
 #define USBSER_EPOUTBULK_ATTR      (USB_EP_ATTR_XFER_BULK)
-#define USBSER_EPINBULK_ADDR       (USB_DIR_IN|3)
+
+#define USBSER_EPINBULK_ADDR       (USB_DIR_IN|CONFIG_USBSER_EPBULKIN)
 #define USBSER_EPINBULK_ATTR       (USB_EP_ATTR_XFER_BULK)
 
 /* Vender specific control requests */
@@ -1210,7 +1219,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
 
   /* Pre-allocate the IN interrupt endpoint */
 
-  priv->epintin = DEV_ALLOCEP(dev, 0, TRUE, USB_EP_ATTR_XFER_INT);
+  priv->epintin = DEV_ALLOCEP(dev, USBSER_EPINTIN_ADDR, TRUE, USB_EP_ATTR_XFER_INT);
   if (!priv->epintin)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPINTINALLOCFAIL), 0);
@@ -1221,7 +1230,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
 
   /* Pre-allocate the IN bulk endpoint */
 
-  priv->epbulkin = DEV_ALLOCEP(dev, 0, TRUE, USB_EP_ATTR_XFER_BULK);
+  priv->epbulkin = DEV_ALLOCEP(dev, USBSER_EPINBULK_ADDR, TRUE, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkin)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKINALLOCFAIL), 0);
@@ -1232,7 +1241,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
 
   /* Pre-allocate the OUT bulk endpoint */
 
-  priv->epbulkout = DEV_ALLOCEP(dev, 0, FALSE, USB_EP_ATTR_XFER_BULK);
+  priv->epbulkout = DEV_ALLOCEP(dev, USBSER_EPOUTBULK_ADDR, FALSE, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkout)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKOUTALLOCFAIL), 0);

@@ -302,6 +302,25 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_USBDEV_TRACE - Enables USB tracing for debug
 		CONFIG_USBDEV_TRACE_NRECORDS - Number of trace entries to remember
 
+	USB serial device class driver
+		CONFIG_USBSER_EPINTIN
+		  The logical 7-bit address of a hardware endpoint that supports
+		  interrupt IN operation
+		CONFIG_USBSER_EPBULKOUT
+		  The logical 7-bit address of a hardware endpoint that supports
+		  bulk OUT operation
+		CONFIG_USBSER_EPBULKIN
+		  The logical 7-bit address of a hardware endpoint that supports
+		  bulk IN operation
+		CONFIG_USBSER_NWRREQS and CONFIG_USBSER_NRDREQS
+		  The number of write/read requests that can be in flight
+		CONFIG_USBSER_VENDORID and CONFIG_USBSER_VENDORSTR
+		  The vendor ID code/string
+		CONFIG_USBSER_PRODUCTID and CONFIG_USBSER_PRODUCTSTR
+		  The product ID code/string
+		CONFIG_USBSER_RXBUFSIZE and CONFIG_USBSER_TXBUFSIZE
+		  Size of the serial receive/transmit buffers
+
 	Stack and heap information
 
 		CONFIG_BOOT_FROM_FLASH - Some configurations support XIP

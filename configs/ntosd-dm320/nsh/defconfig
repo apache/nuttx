@@ -369,8 +369,15 @@ CONFIG_DM320_USBDEV_DMA=n
 #
 # USB Serial Device Configuration
 #
-# CONFIG_USBSER_EPOUT and CONFIG_USBSER_EPIN
-#   Logical endoint addresses
+# CONFIG_USBSER_EPINTIN
+#   The logical 7-bit address of a hardware endpoint that supports
+#   interrupt IN operation
+# CONFIG_USBSER_EPBULKOUT
+#   The logical 7-bit address of a hardware endpoint that supports
+#   bulk OUT operation
+# CONFIG_USBSER_EPBULKIN
+#   The logical 7-bit address of a hardware endpoint that supports
+#   bulk IN operation
 # CONFIG_USBSER_NWRREQS and CONFIG_USBSER_NRDREQS
 #   The number of write/read requests that can be in flight
 # CONFIG_USBSER_VENDORID and CONFIG_USBSER_VENDORSTR
@@ -379,8 +386,9 @@ CONFIG_DM320_USBDEV_DMA=n
 #   The product ID code/string
 # CONFIG_USBSER_RXBUFSIZE and CONFIG_USBSER_TXBUFSIZE
 #   Size of the serial receive/transmit buffers
-CONFIG_USBSER_EPOUT=1
-CONFIG_USBSER_EPIN=2
+CONFIG_USBSER_EPINTIN=3
+CONFIG_USBSER_EPBULKOUT=2
+CONFIG_USBSER_EPBULKIN=1
 CONFIG_USBSER_NWRREQS=4
 CONFIG_USBSER_NRDREQS=4
 CONFIG_USBSER_VENDORID=0x067b

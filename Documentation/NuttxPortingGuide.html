@@ -16,7 +16,7 @@
   </b></big></h1>
   <p><small>by</small></p>
   <p>Gregory Nutt</p>
-  <p><small>Last Update: October 1, 2008</small></p>
+  <p><small>Last Update: October 9, 2008</small></p>
 </center>
 
 <center><h1>Table of Contents</h1></center>
@@ -1627,7 +1627,8 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
 </ul>
 
-<h2>USB device controller driver</h2>
+<h2>USB Device-Side Support</h2>
+<h3>USB Device Controller Driver</h3>
 <ul>
   <li>
     <code>CONFIG_USBDEV</code>: Enables USB device support
@@ -1649,6 +1650,31 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
   <li>
     <code>CONFIG_USBDEV_TRACE_NRECORDS</code>: Number of trace entries to remember
+  </li>
+</ul>
+
+<h3>USB Serial Device Class Driver</h3>
+<ul>
+  <li>
+    <code>CONFIG_USBSER_EPINTIN</code>: The logical 7-bit address of a hardware endpoint that supports interrupt IN operation
+  </li>
+  <li>
+    <code>CONFIG_USBSER_EPBULKOUT</code>: The logical 7-bit address of a hardware endpoint that supports bulk OUT operation
+  </li>
+  <li>
+    <code>CONFIG_USBSER_EPBULKIN</code>: The logical 7-bit address of a hardware endpoint that supports bulk IN operation
+  </li>
+  <li>
+    <code>CONFIG_USBSER_NWRREQS</code> and <code>CONFIG_USBSER_NRDREQS</code>: The number of write/read requests that can be in flight
+  </li>
+  <li>
+    <code>CONFIG_USBSER_VENDORID</code> and <code>CONFIG_USBSER_VENDORSTR</code>: The vendor ID code/string
+  </li>
+  <li>
+    <code>CONFIG_USBSER_PRODUCTID</code> and <code>CONFIG_USBSER_PRODUCTSTR</code>: The product ID code/string
+  </li>
+  <li>
+    <code>CONFIG_USBSER_RXBUFSIZE</code> and <code>CONFIG_USBSER_TXBUFSIZE</code>: Size of the serial receive/transmit buffers
   </li>
 </ul>
 
