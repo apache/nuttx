@@ -351,6 +351,11 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
   Status:      Open
   Priority:    Low
 
+  Description: USB Serial Driver reports wrong error when opened before the
+               USB is connected (reports EBADF instead of ENOTCONN)
+  Status:      Open
+  Priority:    Low
+
 o pjrc-8052 / MCS51 (arch/pjrc-8051/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
