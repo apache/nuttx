@@ -110,13 +110,14 @@
 #define DM320_TRACEERR_NOTCONFIGURED     0x000b
 #define DM320_TRACEERR_NULLPACKET        0x000c
 #define DM320_TRACEERR_NULLREQUEST       0x000d
-#define DM320_TRACEERR_STALLEDCLRFEATURE 0x000e
-#define DM320_TRACEERR_STALLEDISPATCH    0x000f
-#define DM320_TRACEERR_STALLEDGETST      0x0010
-#define DM320_TRACEERR_STALLEDGETSTEP    0x0011
-#define DM320_TRACEERR_STALLEDGETSTRECIP 0x0012
-#define DM320_TRACEERR_STALLEDREQUEST    0x0013
-#define DM320_TRACEERR_STALLEDSETFEATURE 0x0014
+#define DM320_TRACEERR_REQABORTED        0x000e
+#define DM320_TRACEERR_STALLEDCLRFEATURE 0x000f
+#define DM320_TRACEERR_STALLEDISPATCH    0x0010
+#define DM320_TRACEERR_STALLEDGETST      0x0011
+#define DM320_TRACEERR_STALLEDGETSTEP    0x0012
+#define DM320_TRACEERR_STALLEDGETSTRECIP 0x0013
+#define DM320_TRACEERR_STALLEDREQUEST    0x0014
+#define DM320_TRACEERR_STALLEDSETFEATURE 0x0015
 
 /* Trace interrupt codes */
 
@@ -208,7 +209,6 @@ struct dm320_ep_s
   struct dm320_req_s    *head;          /* Request list for this endpoint */
   struct dm320_req_s    *tail;
   ubyte                  epphy;         /* Physical EP address/index */
-  ubyte                  eplog;         /* Logical, configured EP address */
   ubyte                  stalled:1;     /* Endpoint is halted */
   ubyte                  in:1;          /* Endpoint is IN only */
   ubyte                  halted:1;      /* Endpoint feature halted */
@@ -291,7 +291,7 @@ static int  dm320_ep0write(ubyte *buf, uint16 nbytes);
 static int  dm320_epwrite(ubyte epphy, ubyte *buf, uint16 nbytes);
 static int  dm320_epread(ubyte epphy, ubyte *buf, uint16 nbytes);
 static inline void dm320_abortrequest(struct dm320_ep_s *privep,
-              struct dm320_req_s *privreq, sint16 result)
+              struct dm320_req_s *privreq, sint16 result);
 static void dm320_reqcomplete(struct dm320_ep_s *privep, sint16 result);
 static int  dm320_wrrequest(struct dm320_ep_s *privep);
 static int  dm320_rdrequest(struct dm320_ep_s *privep);
@@ -317,7 +317,7 @@ static void dm320_ctrlinitialize(struct dm320_usbdev_s *priv);
 /* Endpoint methods */
 
 static int  dm320_epconfigure(FAR struct usbdev_ep_s *ep,
-              const struct usb_epdesc_s *desc);
+              const struct usb_epdesc_s *desc, boolean last);
 static int  dm320_epdisable(FAR struct usbdev_ep_s *ep);
 static FAR struct usbdev_req_s *dm320_epallocreq(FAR struct usbdev_ep_s *ep);
 static void dm320_epfreereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req);
@@ -861,7 +861,7 @@ static inline void dm320_abortrequest(struct dm320_ep_s *privep,
                                         struct dm320_req_s *privreq,
                                         sint16 result)
 {
-  usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_REQABORTED), (uint16)privep->epphy);
+  usbtrace(TRACE_DEVERROR(DM320_TRACEERR_REQABORTED), (uint16)privep->epphy);
 
   /* Save the result in the request structure */
 
@@ -1114,7 +1114,7 @@ static struct dm320_ep_s *dm320_epfindbyaddr(struct dm320_usbdev_s *priv,
 
       /* Same logical endpoint number? (includes direction bit) */
 
-      if (eplog == privep->eplog)
+      if (eplog == privep->ep.eplog)
         {
           /* Return endpoint found */
 
@@ -1857,16 +1857,25 @@ static void dm320_ctrlinitialize(FAR struct dm320_usbdev_s *priv)
  * Description:
  *   Configure endpoint, making it usable
  *
+ * Input Parameters:
+ *   ep   - the struct usbdev_ep_s instance obtained from allocep()
+ *   desc - A struct usb_epdesc_s instance describing the endpoint
+ *   last - TRUE if this this last endpoint to be configured.  Some hardware
+ *          needs to take special action when all of the endpoints have been
+ *          configured.
+ *
  *******************************************************************************/
 
-static int dm320_epconfigure(FAR struct usbdev_ep_s *ep, FAR const struct usb_epdesc_s *desc)
+static int dm320_epconfigure(FAR struct usbdev_ep_s *ep,
+                             FAR const struct usb_epdesc_s *desc,
+                             boolean last)
 {
-  struct dm320_ep_s *privep = (struct dm320_ep_s *)ep;
+  FAR struct dm320_ep_s *privep = (FAR struct dm320_ep_s *)ep;
 
   /* Retain what we need from the descriptor */
 
   usbtrace(TRACE_EPCONFIGURE, privep->epphy);
-  privep->eplog = desc->addr;
+  DEBUGASSERT(desc->addr == ep->eplog);
   return OK;
 }
 
@@ -2031,14 +2040,14 @@ static int dm320_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
     {
       usbtrace(TRACE_DEVERROR(DM320_TRACEERR_NULLPACKET), 0);
       dm320_putreg8(dm320_getreg8(DM320_USB_PERTXCSR1) | USB_TXCSR1_TXPKTRDY, DM320_USB_PERTXCSR1);
-      dm320_abortcomplete(privep, OK);
+      dm320_abortrequest(privep, req, OK);
     }
 
   /* If we are stalled, then drop all requests on the floor */
 
   else if (privep->stalled)
     {
-      lpc214x_abortrequest(privep, privreq, -EBUSY);
+      dm320_abortrequest(privep, privreq, -EBUSY);
       ret = -EBUSY;
     }
 
@@ -2049,7 +2058,7 @@ static int dm320_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
       /* Nothing to transfer -- exit success, with zero bytes transferred */
 
       usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
-      dm320_abortcomplete(privep, OK);
+      dm320_abortrequest(privep, req, OK);
     }
 
   /* Handle IN (device-to-host) requests */
@@ -2127,15 +2136,16 @@ static int dm320_epcancel(struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
  *   Allocate an endpoint matching the parameters
  *
  * Input Parameters:
- *   epphy  - 7-bit physical endpoint number (without diretion bit).  Zero means
- *            that any endpoint matching the other requirements will suffice.
+ *   eplog  - 7-bit logical endpoint number (direction bit ignored).  Zero means
+ *            that any endpoint matching the other requirements will suffice.  The
+ *            assigned endpoint can be found in the eplog field.
  *   in     - TRUE: IN (device-to-host) endpoint requested
  *   eptype - Endpoint type.  One of {USB_EP_ATTR_XFER_ISOC, USB_EP_ATTR_XFER_BULK,
  *            USB_EP_ATTR_XFER_INT}
  *
  *******************************************************************************/
 
-static FAR struct usbdev_ep_s *dm320_allocep(FAR struct usbdev_s *dev, ubyte epphy,
+static FAR struct usbdev_ep_s *dm320_allocep(FAR struct usbdev_s *dev, ubyte eplog,
                                              boolean in, ubyte eptype)
 {
   FAR struct dm320_usbdev_s *priv = (FAR struct dm320_usbdev_s *)dev;
@@ -2143,13 +2153,17 @@ static FAR struct usbdev_ep_s *dm320_allocep(FAR struct usbdev_s *dev, ubyte epp
 
   usbtrace(TRACE_DEVALLOCEP, 0);
 
+  /* Ignore any direction bits in the logical address */
+
+  eplog = USB_EPNO(eplog);
+
   /* Check all endpoints (except EP0) */
 
   for (ndx = 1; ndx < DM320_NENDPOINTS; ndx++)
     {
       /* Does this match the endpoint number (if one was provided?) */
 
-      if (epphy != 0 && epphy != priv->eplist[ndx].epphy)
+      if (eplog != 0 && eplog != USB_EPNO(priv->eplist[ndx].ep.eplog))
         {
           continue;
         }
@@ -2387,11 +2401,17 @@ void up_usbinitialize(void)
     {
       /* Set up the standard stuff */
 
-      privep         = &priv->eplist[i];
+      privep           = &priv->eplist[i];
       memset(privep, 0, sizeof(struct dm320_ep_s));
-      privep->ep.ops = &g_epops;
-      privep->dev    = priv;
-      privep->epphy  = i;
+      privep->ep.ops   = &g_epops;
+      privep->dev      = priv;
+
+      /* The index, i, is the physical endpoint address;  Map this
+       * to a logical endpoint address usable by the class driver.
+       */
+
+      privep->epphy    = i;
+      privep->ep.eplog = g_epinfo[i].addr;
 
       /* Setup the endpoint-specific stuff */
 
