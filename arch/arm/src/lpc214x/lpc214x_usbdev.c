@@ -1149,7 +1149,7 @@ static int lpc214x_rdrequest(struct lpc214x_ep_s *privep)
        */
 
       privreq->req.xfrd += nbytesread;
-      if (privreq->req.len < privreq->req.xfrd || nbytesread < privep->ep.maxpacket)
+      if (privreq->req.xfrd >= privreq->req.len || nbytesread < privep->ep.maxpacket)
         {
           usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
           lpc214x_reqcomplete(privep, OK);
