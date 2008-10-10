@@ -324,9 +324,9 @@ static int     usbclass_setconfig(FAR struct usbser_dev_s *priv,
 
 static void    usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep,
                  FAR struct usbdev_req_s *req);
-static void    usbclass_epbulkoutcomplete(FAR struct usbdev_ep_s *ep,
+static void    usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
                  FAR struct usbdev_req_s *req);
-static void    usbclass_epbulkincomplete(FAR struct usbdev_ep_s *ep,
+static void    usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
                  FAR struct usbdev_req_s *req);
 
 /* USB class device ********************************************************/
@@ -1079,7 +1079,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
   for (i = 0; i < CONFIG_USBSER_NRDREQS; i++)
     {
       req           = priv->rdreqs[i].req;
-      req->callback = usbclass_epbulkoutcomplete;
+      req->callback = usbclass_rdcomplete;
       ret           = EP_SUBMIT(priv->epbulkout, req);
       if (ret != OK)
         {
@@ -1114,14 +1114,15 @@ static void usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req
 }
 
 /****************************************************************************
- * Name: usbclass_epbulkoutcomplete
+ * Name: usbclass_rdcomplete
  *
  * Description:
  *   Handle completion of read request on the bulk OUT endpoint.  This
  *   is handled like the receipt of serial data on the "UART"
+ *
  ****************************************************************************/
 
-static void usbclass_epbulkoutcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
+static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
   FAR struct usbser_dev_s *priv;
   irqstate_t flags;
@@ -1179,7 +1180,7 @@ static void usbclass_epbulkoutcomplete(FAR struct usbdev_ep_s *ep, struct usbdev
 }
 
 /****************************************************************************
- * Name: usbclass_epbulkincomplete
+ * Name: usbclass_wrcomplete
  *
  * Description:
  *   Handle completion of write request.  This function probably executes
@@ -1187,7 +1188,7 @@ static void usbclass_epbulkoutcomplete(FAR struct usbdev_ep_s *ep, struct usbdev
  *
  ****************************************************************************/
 
-static void usbclass_epbulkincomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
+static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
   FAR struct usbser_dev_s *priv;
   FAR struct usbser_req_s *reqcontainer;
@@ -1334,7 +1335,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
           goto errout;
         }
       reqcontainer->req->private  = reqcontainer;
-      reqcontainer->req->callback = usbclass_epbulkoutcomplete;
+      reqcontainer->req->callback = usbclass_rdcomplete;
     }
 
   /* Pre-allocate write request containers and put in a free list */
@@ -1356,7 +1357,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
           goto errout;
         }
       reqcontainer->req->private  = reqcontainer;
-      reqcontainer->req->callback = usbclass_epbulkincomplete;
+      reqcontainer->req->callback = usbclass_wrcomplete;
 
       flags = irqsave();
       sq_addlast((sq_entry_t*)reqcontainer, &priv->reqlist);
