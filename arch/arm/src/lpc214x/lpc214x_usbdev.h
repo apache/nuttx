@@ -185,9 +185,9 @@
 
 /* USB Control register bit definitions */
 
-#define LPC214X_USBCTRL_RDEN         (0x00000001)
-#define LPC214X_USBCTRL_WREN         (0x00000002)
-#define LPC214X_USBCTRL_EPMASK       (0x0000003c)
+#define LPC214X_USBCTRL_RDEN         (0x00000001) /* Bit 0=1: Read is enabled */
+#define LPC214X_USBCTRL_WREN         (0x00000002) /* Bit 0=1: Write is enabled */
+#define LPC214X_USBCTRL_EPMASK       (0x0000003c) /* Bits 2:5: Logical endpoint 0-15 */
 
 /* Endpoints *******************************************************************/
 

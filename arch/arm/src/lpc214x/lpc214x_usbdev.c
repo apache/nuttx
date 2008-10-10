@@ -787,7 +787,9 @@ static void lpc214x_epwrite(ubyte epphy, const ubyte *data, uint32 nbytes)
   uint32 value;
   boolean aligned = (((uint32)data & 3) == 0);
 
-  /* Set the write enable bit for this physical EP address */
+  /* Set the write enable bit for this physical EP address. Bits 2-5 are
+   * the logical endpoint number (0-15)
+   */
 
   lpc214x_putreg(((epphy << 1) & LPC214X_USBCTRL_EPMASK) | LPC214X_USBCTRL_WREN,
                  LPC214X_USBDEV_CTRL);
@@ -865,7 +867,9 @@ static int lpc214x_epread(ubyte epphy, ubyte *data, uint32 nbytes)
         }
     }
 
-  /* Set the read enable bit for this physical EP address */
+  /* Set the read enable bit for this physical EP address.  Bits 2-5 are
+   * the logical endpoint number (0-15).
+   */
 
   lpc214x_putreg(((epphy << 1) & LPC214X_USBCTRL_EPMASK) | LPC214X_USBCTRL_RDEN,
                  LPC214X_USBDEV_CTRL);
