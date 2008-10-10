@@ -45,12 +45,26 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <termios.h>
 #include <fcntl.h>
 #include <errno.h>
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+#if defined(CONFIG_EXAMPLES_USBSERIAL_INONLY) && defined(CONFIG_EXAMPLES_USBSERIAL_OUTONLY)
+#  error "Cannot define both CONFIG_EXAMPLES_USBSERIAL_INONLY and _OUTONLY"
+#endif
+#if defined(CONFIG_EXAMPLES_USBSERIAL_ONLYSMALL) && defined(CONFIG_EXAMPLES_USBSERIAL_ONLYBIG)
+#  error "Cannot define both CONFIG_EXAMPLES_USBSERIAL_ONLYSMALL and _ONLYBIG"
+#endif
+
+#if !defined(CONFIG_EXAMPLES_USBSERIAL_ONLYBIG) && !defined(CONFIG_EXAMPLES_USBSERIAL_ONLYSMALL)
+#  ifndef CONFIG_EXAMPLES_USBSERIAL_INONLY
+#    define COUNTER_NEEDED 1
+#  endif
+#endif
 
 #define DEFAULT_TTYDEV "/dev/ttyUSB0"
 #define BUFFER_SIZE    1024
@@ -60,8 +74,12 @@
  ****************************************************************************/
 
 static const char *g_ttydev = DEFAULT_TTYDEV;
-static char g_buffer[BUFFER_SIZE];
+
+#ifndef CONFIG_EXAMPLES_USBSERIAL_ONLYBIG
 static const char g_shortmsg[] = "Sure... You betcha!!\n";
+#endif
+
+#ifndef CONFIG_EXAMPLES_USBSERIAL_ONLYSMALL
 static const char g_longmsg[] =
   "I am proud to come to this city as the guest of your distinguished Mayor, "
   "who has symbolized throughout the world the fighting spirit of West Berlin. "
@@ -114,6 +132,11 @@ static const char g_longmsg[] =
   "All free men, wherever they may live, are citizens of Berlin, and, therefore, "
   "as a free man, I take pride in the words \"Ich bin ein Berliner.\"\n"
   "President John F. Kennedy - June 26, 1963\n";
+#endif
+
+#ifndef CONFIG_EXAMPLES_USBSERIAL_OUTONLY
+static char g_iobuffer[BUFFER_SIZE];
+#endif
 
 /****************************************************************************
  * show_usage
@@ -135,9 +158,15 @@ static void show_usage(const char *progname, int exitcode)
 
 int main(int argc, char **argv, char **envp)
 {
+  struct termios tty;
+#ifndef CONFIG_EXAMPLES_USBSERIAL_INONLY
   ssize_t nbytes;
-  int count;
+#endif
+#ifdef COUNTER_NEEDED
+  int count = 0;
+#endif
   int fd;
+  int ret;
 
   /* Handle input parameters */
 
@@ -168,14 +197,40 @@ int main(int argc, char **argv, char **envp)
   while (fd < 0);
   printf("main: Successfully opened the serial driver\n");
 
-  /* Wait for hello... */
+  /* Configure the serial port in raw mode (at least turn off echo) */
 
-  count = 0;
+  ret = tcgetattr(fd, &tty);
+  if (ret < 0)
+    {
+      printf("main: ERROR: Failed to get termios for %s: %s\n", g_ttydev, strerror(errno));
+      close(fd);
+      return 1;
+    }
+
+  tty.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL|IXON);
+  tty.c_oflag &= ~OPOST;
+  tty.c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
+  tty.c_cflag &= ~(CSIZE|PARENB);
+  tty.c_cflag |= CS8;
+
+  ret = tcsetattr(fd, TCSANOW, &tty);
+  if (ret < 0)
+    {
+      printf("main: ERROR: Failed to set termios for %s: %s\n", g_ttydev, strerror(errno));
+      close(fd);
+      return 1;
+    }
+
+  /* Wait for and/or send messages -- forever */
+
   for (;;)
     {
+      /* Test IN messages (device-to-host) */
+
+#ifndef CONFIG_EXAMPLES_USBSERIAL_OUTONLY
       printf("main: Reading from the serial driver\n");
       printf("main: ... (Control-C to terminate) ...\n");
-      nbytes = read(fd, g_buffer, BUFFER_SIZE-1);
+      nbytes = read(fd, g_iobuffer, BUFFER_SIZE-1);
       if (nbytes < 0)
         {
           printf("main: ERROR: Failed to read from %s: %s\n", g_ttydev, strerror(errno));
@@ -183,21 +238,39 @@ int main(int argc, char **argv, char **envp)
           return 2;
         }
 
-      g_buffer[nbytes] = '\0';
+      g_iobuffer[nbytes] = '\0';
       printf("main: Received %d bytes:\n", nbytes);
-      printf("      \"%s\"\n", g_buffer);
-      count++;
+      printf("      \"%s\"\n", g_iobuffer);
+#else
+      printf("main: Waiting...\n");
+      sleep(5);
+#endif /* CONFIG_EXAMPLES_USBSERIAL_OUTONLY */
 
+      /* Test OUT messages (host-to-device) */
+
+#ifndef CONFIG_EXAMPLES_USBSERIAL_INONLY
+#if !defined(CONFIG_EXAMPLES_USBSERIAL_ONLYSMALL) && !defined(CONFIG_EXAMPLES_USBSERIAL_ONLYBIG)
+      count++;
       if (count < 5)
         {
           printf("main: Sending %d bytes..\n", sizeof(g_shortmsg));
-          nbytes = write(fd, g_longmsg, sizeof(g_shortmsg));
+          nbytes = write(fd, g_shortmsg, sizeof(g_shortmsg));
         }
       else
         {
           printf("main: Sending %d bytes..\n", sizeof(g_longmsg));
           nbytes = write(fd, g_longmsg, sizeof(g_longmsg));
+          count = 0;
         }
+#elif !defined(CONFIG_EXAMPLES_USBSERIAL_ONLYSMALL)
+      printf("main: Sending %d bytes..\n", sizeof(g_longmsg));
+      nbytes = write(fd, g_longmsg, sizeof(g_longmsg));
+#else /* !defined(CONFIG_EXAMPLES_USBSERIAL_ONLYBIG) */
+      printf("main: Sending %d bytes..\n", sizeof(g_shortmsg));
+      nbytes = write(fd, g_shortmsg, sizeof(g_shortmsg));
+#endif
+
+      /* Test if write was successful */
 
       if (nbytes < 0)
         {
@@ -206,6 +279,7 @@ int main(int argc, char **argv, char **envp)
           return 2;
         }
       printf("main: %d bytes sent\n", nbytes);
+#endif /* CONFIG_EXAMPLES_USBSERIAL_INONLY */
     }
 
   /* Won't get here, but if we did this what we would have to do */

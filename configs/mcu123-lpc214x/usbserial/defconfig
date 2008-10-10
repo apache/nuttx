@@ -486,6 +486,22 @@ CONFIG_EXAMPLES_NSH_FATNSECTORS=1024
 CONFIG_EXAMPLES_NSH_FATMOUNTPT=/tmp
 
 #
+# Settings for examples/usbserial
+#
+# CONFIG_EXAMPLES_USBSERIAL_INONLY
+#    Only verify IN (device-to-host) data transfers.  Default: both
+# CONFIG_EXAMPLES_USBSERIAL_OUTONLY
+#    Only verify OUT (host-to-device) data transfers.  Default: both
+# CONFIG_EXAMPLES_USBSERIAL_ONLYSMALL
+#    Send only small, single packet messages.  Default: Send large and small.
+# CONFIG_EXAMPLES_USBSERIAL_ONLYBIG
+#    Send only large, multi-packet messages.  Default: Send large and small.
+CONFIG_EXAMPLES_USBSERIAL_INONLY=n
+CONFIG_EXAMPLES_USBSERIAL_OUTONLY=n
+CONFIG_EXAMPLES_USBSERIAL_ONLYSMALL=n
+CONFIG_EXAMPLES_USBSERIAL_ONLYBIG=n
+
+#
 # Stack and heap information
 #
 # CONFIG_BOOT_FROM_FLASH - Some configurations support XIP

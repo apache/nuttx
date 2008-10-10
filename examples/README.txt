@@ -128,4 +128,16 @@ examples/usbserial
 ^^^^^^^^^^^^^^^^^^
 
   This is another implementation of "Hello, World" but this one uses
-  a USB serial driver.
+  a USB serial driver.  Configuration options can be used to simply
+  the test. These options include:
+
+  CONFIG_EXAMPLES_USBSERIAL_INONLY
+     Only verify IN (device-to-host) data transfers.  Default: both
+  CONFIG_EXAMPLES_USBSERIAL_OUTONLY
+     Only verify OUT (host-to-device) data transfers.  Default: both
+  CONFIG_EXAMPLES_USBSERIAL_ONLYSMALL
+     Send only small, single packet messages.  Default: Send large and small.
+  CONFIG_EXAMPLES_USBSERIAL_ONLYBIG
+     Send only large, multi-packet messages.  Default: Send large and small.
+
+

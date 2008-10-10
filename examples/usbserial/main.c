@@ -43,6 +43,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <debug.h>
@@ -52,6 +53,19 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+#if defined(CONFIG_EXAMPLES_USBSERIAL_INONLY) && defined(CONFIG_EXAMPLES_USBSERIAL_OUTONLY)
+#  error "Cannot define both CONFIG_EXAMPLES_USBSERIAL_INONLY and _OUTONLY"
+#endif
+#if defined(CONFIG_EXAMPLES_USBSERIAL_ONLYSMALL) && defined(CONFIG_EXAMPLES_USBSERIAL_ONLYBIG)
+#  error "Cannot define both CONFIG_EXAMPLES_USBSERIAL_ONLYSMALL and _ONLYBIG"
+#endif
+
+#if !defined(CONFIG_EXAMPLES_USBSERIAL_ONLYBIG) && !defined(CONFIG_EXAMPLES_USBSERIAL_ONLYSMALL)
+#  ifndef CONFIG_EXAMPLES_USBSERIAL_OUTONLY
+#    define COUNTER_NEEDED 1
+#  endif
+#endif
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef CONFIG_DEBUG
@@ -73,7 +87,11 @@
  * Private Data
  ****************************************************************************/
 
+#ifndef CONFIG_EXAMPLES_USBSERIAL_ONLYBIG
 static const char g_shortmsg[] = "Hello, World!!\n";
+#endif
+
+#ifndef CONFIG_EXAMPLES_USBSERIAL_ONLYSMALL
 static const char g_longmsg[] =
   "The Spanish Armada a Speech by Queen Elizabeth I of England\n"
   "Addressed to the English army at Tilbury Fort - 1588\n"
@@ -100,7 +118,11 @@ static const char g_longmsg[] =
   "your obedience to my general, by your concord in the camp, and by your "
   "valour in the field, we shall shortly have a famous victory over the enemies "
   "of my God, of my kingdom, and of my people.\n";
+#endif
+
+#ifndef CONFIG_EXAMPLES_USBSERIAL_INONLY
 static char g_iobuffer[IOBUFFER_SIZE];
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -125,12 +147,20 @@ void user_initialize(void)
 
 int user_start(int argc, char *argv[])
 {
+#ifndef CONFIG_EXAMPLES_USBSERIAL_INONLY
   int infd;
+#endif
+#ifndef CONFIG_EXAMPLES_USBSERIAL_OUTONLY
   int outfd;
-  int count;
+#endif
+#ifdef COUNTER_NEEDED
+  int count = 0;
+#endif
   ssize_t nbytes;
+#ifndef CONFIG_EXAMPLES_USBSERIAL_INONLY
+  int i, j, k;
+#endif
   int ret;
-  int i;
 
   /* Initialize the USB serial driver */
 
@@ -145,6 +175,7 @@ int user_start(int argc, char *argv[])
 
   /* Open the USB serial device for writing (blocking) */
 
+#ifndef CONFIG_EXAMPLES_USBSERIAL_OUTONLY
   do
     {
       message("user_start: Opening USB serial driver\n");
@@ -171,9 +202,12 @@ int user_start(int argc, char *argv[])
         }
     }
   while (outfd < 0);
+#endif
 
   /* Open the USB serial device for reading (non-blocking) */
 
+#ifndef CONFIG_EXAMPLES_USBSERIAL_INONLY
+#ifndef CONFIG_EXAMPLES_USBSERIAL_OUTONLY
   infd = open("/dev/ttyUSB0", O_RDONLY|O_NONBLOCK);
   if (infd < 0)
     {
@@ -181,14 +215,46 @@ int user_start(int argc, char *argv[])
       close(outfd);
       return 3;
     }
+#else
+  do
+    {
+      infd = open("/dev/ttyUSB0", O_RDONLY|O_NONBLOCK);
+      if (infd < 0)
+        {
+          int errcode = errno;
+          message("user_start: ERROR: Failed to open /dev/ttyUSB0 for reading: %d\n", errno);
+
+          /* ENOTCONN means that the USB device is not yet connected */
+
+          if (errcode == ENOTCONN)
+            {
+              message("user_start:        Not connected. Wait and try again.\n");
+              sleep(5);
+            }
+          else
+            {
+              /* Give up on other errors */
+
+              message("user_start:        Aborting\n");
+              return 3;
+            }
+        }
+    }
+  while (infd < 0);
+#endif
+#endif
 
   message("user_start: Successfully opened the serial driver\n");
 
-  /* Then say hello -- forever */
+  /* Send messages and get responses -- forever */
 
-  count = 0;
   for (;;)
     {
+
+     /* Test IN (device-to-host) messages */
+
+#ifndef CONFIG_EXAMPLES_USBSERIAL_OUTONLY
+#if !defined(CONFIG_EXAMPLES_USBSERIAL_ONLYBIG) && !defined(CONFIG_EXAMPLES_USBSERIAL_ONLYSMALL)
       if (count < 8)
         {
           message("user_start: Saying hello\n");
@@ -201,20 +267,37 @@ int user_start(int argc, char *argv[])
           nbytes = write(outfd, g_longmsg, sizeof(g_longmsg));
           count = 0;
         }
+#elif !defined(CONFIG_EXAMPLES_USBSERIAL_ONLYSMALL)
+      message("user_start: Reciting QEI's speech of 1588\n");
+      nbytes = write(outfd, g_longmsg, sizeof(g_longmsg));
+#else /* !defined(CONFIG_EXAMPLES_USBSERIAL_ONLYBIG) */
+      message("user_start: Saying hello\n");
+      nbytes = write(outfd, g_shortmsg, sizeof(g_shortmsg));
+#endif
+
+      /* Test if the write was successful */
 
       if (nbytes < 0)
         {
           message("user_start: ERROR: write failed: %d\n", errno);
+#ifndef CONFIG_EXAMPLES_USBSERIAL_INONLY
           close(infd);
+#endif
           close(outfd);
           return 4;
         }
+      message("user_start:%d bytes sent\n", nbytes);
+#endif /* CONFIG_EXAMPLES_USBSERIAL_OUTONLY */
 
+      /* Test OUT (host-to-device) messages */
+
+#ifndef CONFIG_EXAMPLES_USBSERIAL_INONLY
       /* Poll for incoming messages */
 
-      message("user_start: Waiting\n");
+      message("user_start: Polling for OUT messages\n");
       for (i = 0; i < 5; i++)
         {
+          memset(g_iobuffer, 'X', IOBUFFER_SIZE);
           nbytes = read(infd, g_iobuffer, IOBUFFER_SIZE);
           if (nbytes < 0)
             {
@@ -223,7 +306,9 @@ int user_start(int argc, char *argv[])
                 {
                   message("user_start: ERROR: read failed: %d\n", errno);
                   close(infd);
+#ifndef CONFIG_EXAMPLES_USBSERIAL_OUTONLY
                   close(outfd);
+#endif
                   return 6;
                 }
             }
@@ -232,18 +317,67 @@ int user_start(int argc, char *argv[])
               message("user_start: Received %d bytes:\n", nbytes);
               if (nbytes > 0)
                 {
-                  message("user_start: ");
-                  (void)fwrite(g_iobuffer, 1, nbytes, stdout);
+                  for (j = 0; j < nbytes; j += 16)
+                    {
+                      message("user_start: %03x: ", j);
+                      for (k = 0; k < 16; k++)
+                        {
+                          if (k == 8)
+                            {
+                              message(" ");
+                            }
+                          if (j+k < nbytes)
+                            {
+                              message("%02x", g_iobuffer[j+k]);
+                            }
+                          else
+                            {
+                              message("  ");
+                            }
+                        }
+                      message(" ");
+                      for (k = 0; k < 16; k++)
+                        {
+                          if (k == 8)
+                            {
+                              message(" ");
+                            }
+                          if (j+k < nbytes)
+                            {
+                              if (g_iobuffer[j+k] >= 0x20 && g_iobuffer[j+k] < 0x7f)
+                                {
+                                  message("%c", g_iobuffer[j+k]);
+                                }
+                              else
+                                {
+                                  message(".");
+                                }
+                            }
+                           else
+                            {
+                              message(" ");
+                            }
+                        }
+                      message("\n");
+                    }
                 }
             }
           sleep(1);
         }
+#else /* CONFIG_EXAMPLES_USBSERIAL_INONLY */
+      message("user_start: Waiting\n");
+      sleep(5);
+#endif /* CONFIG_EXAMPLES_USBSERIAL_INONLY */
     }
 
   /* Won't get here, but if we did this what we would have to do */
 
+#ifndef CONFIG_EXAMPLES_USBSERIAL_INONLY
   close(infd);
+#endif
+#ifndef CONFIG_EXAMPLES_USBSERIAL_OUTONLY
   close(outfd);
+#endif
   return 0;
 }
 
