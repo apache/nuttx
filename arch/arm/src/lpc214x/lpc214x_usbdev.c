@@ -1132,7 +1132,6 @@ static int lpc214x_rdrequest(struct lpc214x_ep_s *privep)
       return OK;
     }
 
-#warning REVISIT... Unless the EP supports double buffering, only one packet may be received
   usbtrace(TRACE_READ(privep->epphy), privreq->req.xfrd);
   for (;;)
     {
