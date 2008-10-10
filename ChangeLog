@@ -479,20 +479,24 @@
 	  succesfully passing the examples/ostest, and a NuttShell (NSH) configuration.
 	* ARM architectures now support drivers/lowconsole.c
 
-0.3.16 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.16 2008-10-10 Gregory Nutt <spudmonkey@racsa.co.cr>
 	* Added header files defining a common USB device controller architecture
-	* Added USB device side driver for the LPC214x (untested at initial checkin)
-	* Correct the frequency of system timer interrupts (off by 20x in nuttx-0.3.15)
+	* Added USB device side driver for the LPC214x
+	* Correct the frequency of system timer interrupts in the NXP LPC214x port
+	  (off by 20x in nuttx-0.3.15)
 	* Add an option to set aside a separate stack for interrupt handling (ARM only).
 	  This is useful when memory is constrained, there are multiple tasks, and
 	  the interrupt stack requirement is high (as when USB is enabled).
-	* Basic LPC214x USB device side driver basically functional (but probably still buggy)
-	* Initial USB serial class device side driver check in (not well tested at initial checkin)
-	* Add LPC214x USB serial configuration; Add examples/usbserial test (still a work in progress)
-	* Added USB device side driver for the DM320 (untested at initial checkin)
-	* Fixed an error in a previous (post 0.3.15) check-in that broke the LPC214x system timer.
-	* Fixed serial drive bugs related to (1) open counts and (2) recognizing O_NONBLOCK on read.
-	* Fixed an error in read(); it was not setting the errno on errors returned from the driver.
+	* Added USB serial class device side driver (emulates Prolific PL2303
+	  serial-to-USB adaptor)
+	* Add LPC214x USB serial configuration; Add examples/usbserial test
+	* Added USB device side driver for the DM320 (untested at initial release)
+	* Fixed an error in a previous (post 0.3.15) check-in that broke the LPC214x
+	  system timer.
+	* Fixed serial driver bugs related to (1) open counts and (2) recognizing
+	  O_NONBLOCK on read.
+	* Fixed an error in read(); it was not setting the errno on errors returned
+	  from the driver.
 
-
+0.3.17 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 

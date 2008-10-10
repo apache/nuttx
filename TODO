@@ -336,6 +336,10 @@ o ARM/DM320 (arch/arm/src/dm320/)
   Status:      Open
   Priority:    Medium
 
+  Description: A USB device controller driver was added but has never been tested.
+  Status:      Open
+  Priority:    Medium
+
 o ARM/LPC214x (arch/arm/src/lpc214x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
