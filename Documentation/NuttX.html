@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: October 9, 2008</p>
+      <p>Last Updated: October 10, 2008</p>
     </td>
   </tr>
 </table>
@@ -443,6 +443,38 @@
       <li>Networking utilities (DHCP, SMTP, TELNET, TFTP, HTTP)</li>
     </p>
 </tr>
+
+<tr>
+  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>USB Device Support</b>
+  </td>
+</tr>
+
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li><i>Gadget</i>-like architecture for USB device controller drivers and device-dependent USB class drivers.</li>
+    </p>
+</tr>
+
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>USB device controller drivers available for the NXP LPC214x and TI DM320.</li>
+    </p>
+</tr>
+
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>Device-dependent USB class drivers available for USB serial.</li>
+    </p>
+</tr>
+
 </table></center>
 
 <p>
@@ -493,38 +525,63 @@
   </tr>
 </table>
 
-<p>
-  The 27th release of NuttX (nuttx-0.3.15) is available for download
+<p><b>nuttx-0.3.16</b>.
+  The 28th release of NuttX (nuttx-0.3.16) is available for download
   from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
   website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
+<p><b>USB Support</b>.
+  The nuttx-0.3.16 release includes the first support for USB in NuttX.
+  A set of USB APIs were added to support USB device controller drivers and bindings to USB device class drivers.
+  The form of the interface was inspired by the Linux Gadget APIs.
+</p>
 <p>
-  The nuttx-0.3.15 release includes some new features:
+  At present USB device controller drivers are included for:
   <ul>
-    <li>ROMFS
-      <ul>
-        <li>
-          Adds support for the ROMFS filesystem
-        </li>
-        <li>R
-          ROMFS supports <code>mmap()</code> to provide eXecute In Place (XIP) capability
-        </li>
-        <li>
-          The NuttShell (NSH) can be configured to use ROMFS to provide a tiny read-only
-          filesystem with a startup script in <code>/etc</code>.
-        </li>
-      </ul></li>
-    <li>NXP LPC2148
-      <ul>
-        <li>
-          The basic port of the NXP LPC2148 on the mcu123.com board was completed.
-          That basic port includes successful booting, timer interrupts, serial console,
-          succesfully passing the OS test, and a NuttShell (NSH) configuration.
-        </li>
-      </ul></li>
+    <li>
+      The NXP LPC214x.  This driver has been verified and is an early alpha stage in quality.
+    </li>
+    <li>
+      TI DM320.  Coding for this driver is complete but it is completely untested as of this release.
+    </li>
+  </ul>
+</p>
+<p>
+  A controller-independent class driver is also included for:
+  <ul>
+    <li>
+      USB serial class device driver (emulates the Prolific PL2303 serial-to-USB adaptor).
+      This drver has only been verified with the Linux host PL2303 driver.
+    </li>
+  </ul>
+</p>
+<p><b>Other New Features</b>.
+  Other new features include:
+  <ul>
+    <li>
+      Add an option to set aside a separate stack for interrupt handling (ARM only).
+      This is useful when memory is constrained, there are multiple tasks, and
+      the interrupt stack requirement is high (as when USB is enabled).
+    </li>
+  </ul>
+</p>
+<p><b>Bugs Fixed</b>.
+  A few bugs were also fixed:
+  <ul>
+    <li>
+      Fixed the frequency of system timer interrupts in the NXP LPC214x port
+      (off by 20x in nuttx-0.3.15)
+    </li>
+    <li>
+      Fixed serial driver bugs related to (1) open counts and (2) recognizing
+      O_NONBLOCK on read.
+    <li>
+      Fixed an error in read(); it was not setting the <code>errno</code> on errors returned
+      from the driver.
+    </li>
   </ul>
 </p>
 <p>
@@ -592,7 +649,7 @@
     <p>
       <b>STATUS:</b>
         The basic port includes successful booting, timer interrupts, serial console,
-        succesfully passing the OS test, and a NuttShell (NSH) configuration.
+        USB driver, succesfully passing the OS test, and a NuttShell (NSH) configuration.
         Additional driver development is underway.
     </p>
   </td>
@@ -615,7 +672,9 @@
     </p>
     <p>
       <b>STATUS:</b>
-        This port is complete and verified.
+        The basic port (timer interrupts, serial ports, etc.) is complete.
+        All implemented features have been verified with the exception of the USB device-side
+        driver; that implementation is complete but completely untested.
     </p>
    </td>
 </tr>
@@ -1028,24 +1087,26 @@ Other memory:
 </table>
 
 <pre><ul>
-nuttx-0.3.15 2008-09-20 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-	* Added support for ROMFS filesystem.
-	* Added a simple test the ROMFS filesystem (examples/romfs)
-	* NSH: Use ROMFS to provide an option for a start-up script at /etc/init.d/rcS
-	* Add definition of BIOC_XIPBASE ioctl and implement in RAM disk block driver.
-	  This is a low level requirement for eXecute In Place (XIP) support.
-	* Add a FIOC_MMAP to perform memory mapping of a file and implemented the
-	  ioctl command in the ROMFS filesystem.  This is a requirement for eXecute
-	  In Place (XIP) support.
-	* Add mmap() API with restricted capability (only for XIP support)
-	* Extend ROMFS test at /examples/romfs to verify mmap() and XIP support.
-	* Add support for Intel Hex format output using objcopy
-	* Completed the basic port of the NXP LPC2148 on the mcu123.com board.
-	  The basic port includes successful booting, timer interrupts, serial console,
-	  succesfully passing the examples/ostest, and a NuttShell (NSH) configuration.
-	* ARM architectures now support drivers/lowconsole.c
+nuttx-0.3.16 2008-10-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+	* Added header files defining a common USB device controller architecture
+	* Added USB device side driver for the LPC214x
+	* Correct the frequency of system timer interrupts in the NXP LPC214x port
+	  (off by 20x in nuttx-0.3.15)
+	* Add an option to set aside a separate stack for interrupt handling (ARM only).
+	  This is useful when memory is constrained, there are multiple tasks, and
+	  the interrupt stack requirement is high (as when USB is enabled).
+	* Added USB serial class device side driver (emulates Prolific PL2303
+	  serial-to-USB adaptor)
+	* Add LPC214x USB serial configuration; Add examples/usbserial test
+	* Added USB device side driver for the DM320 (untested at initial release)
+	* Fixed an error in a previous (post 0.3.15) check-in that broke the LPC214x
+	  system timer.
+	* Fixed serial driver bugs related to (1) open counts and (2) recognizing
+	  O_NONBLOCK on read.
+	* Fixed an error in read(); it was not setting the errno on errors returned
+	  from the driver.
 
-pascal-0.1.2 2008-02-10 Gregory Nutt <spudmonkey@racsa.co.cr>
+pascal-0.1.2 2008-02-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Add logic to build and link with the ZDS-II toolchain
 	  use with the z16f.
@@ -1069,20 +1130,7 @@ buildroot-0.1.0 2007-03-09 &lt;spudmonkey@racsa.co.cr&gt
 </table>
 
 <pre><ul>
-nuttx-0.3.16 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-	* Added header files defining a common USB device controller architecture
-	* Added USB device side driver for the LPC214x (untested at initial checkin)
-	* Correct the frequency of system timer interrupts (off by 20x in nuttx-0.3.15)
-	* Add an option to set aside a separate stack for interrupt handling (ARM only).
-	  This is useful when memory is constrained, there are multiple tasks, and
-	  the interrupt stack requirement is high (as when USB is enabled).
-	* Basic LPC214x USB device side driver basically functional (but probably still buggy)
-	* Initial USB serial class device side driver check in (not well tested at initial checkin)
-	* Add LPC214x USB serial configuration; Add examples/usbserial test (still a work in progress)
-	* Added USB device side driver for the DM320 (untested at initial checkin)
-	* Fixed an error in a previous (post 0.3.15) check-in that broke the LPC214x system timer.
-	* Fixed serial drive bugs related to (1) open counts and (2) recognizing O_NONBLOCK on read.
-	* Fixed an error in read(); it was not setting the errno on errors returned from the driver.
+nuttx-0.3.17 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-0.1.3 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
