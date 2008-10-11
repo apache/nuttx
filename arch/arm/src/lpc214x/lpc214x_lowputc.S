@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 #include "up_internal.h"
 #include "up_arch.h"
+#include "lpc214x_pinsel.h"
 #include "lpc214x_uart.h"
 
 /**************************************************************************
