@@ -351,7 +351,8 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
   Status:      Open
   Priority:    Low
 
-  Description: USB DMA not fully implemented
+  Description: USB DMA not fully implemented. Partial logic is in place but it is
+               fragmentary and bogus.
   Status:      Open
   Priority:    Low
 
