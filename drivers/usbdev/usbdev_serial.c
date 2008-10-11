@@ -140,11 +140,17 @@
 #  define SELFPOWERED (0)
 #endif
 
-#ifndef  CONFIG_USBDEV_REMOTEWAKEUP
+#ifndef CONFIG_USBDEV_REMOTEWAKEUP
 #  define REMOTEWAKEUP USB_CONFIG_ATTR_WAKEUP
 #else
 #  define REMOTEWAKEUP (0)
 #endif
+
+#ifndef CONFIG_USBDEV_MAXPOWER
+#  define CONFIG_USBDEV_MAXPOWER 100
+#endif
+
+/* Descriptors ****************************************************************/
 
 /* These settings are not modifiable via the NuttX configuration */
 
@@ -169,21 +175,6 @@
 #define USBSER_EPINBULK_ADDR       (USB_DIR_IN|CONFIG_USBSER_EPBULKIN)
 #define USBSER_EPINBULK_ATTR       (USB_EP_ATTR_XFER_BULK)
 
-/* Vender specific control requests */
-
-#define PL2303_CONTROL_TYPE        (0x20)
-#define PL2303_SETLINEREQUEST      (0x20) /* OUT, Recipient interface */
-#define PL2303_GETLINEREQUEST      (0x21) /* IN, Recipient interface */
-#define PL2303_SETCONTROLREQUEST   (0x22) /* OUT, Recipient interface */
-#define PL2303_BREAKREQUEST        (0x23) /* OUT, Recipient interface */
-
-/* Vendor read/write */
-
-#define PL2303_RWREQUEST_TYPE      (0x40)
-#define PL2303_RWREQUEST           (0x01) /* IN/OUT, Recipient device */
-
-/* Values *********************************************************************/
-
 /* String language */
 
 #define USBSER_STR_LANGUAGE        (0x0409) /* en-us */
@@ -197,7 +188,22 @@
 
 /* Buffer big enough for any of our descriptors */
 
-#define USBSER_MXDESCLEN           (256)
+#define USBSER_MXDESCLEN           (64)
+
+/* Vender specific control requests *******************************************/
+
+#define PL2303_CONTROL_TYPE        (0x20)
+#define PL2303_SETLINEREQUEST      (0x20) /* OUT, Recipient interface */
+#define PL2303_GETLINEREQUEST      (0x21) /* IN, Recipient interface */
+#define PL2303_SETCONTROLREQUEST   (0x22) /* OUT, Recipient interface */
+#define PL2303_BREAKREQUEST        (0x23) /* OUT, Recipient interface */
+
+/* Vendor read/write */
+
+#define PL2303_RWREQUEST_TYPE      (0x40)
+#define PL2303_RWREQUEST           (0x01) /* IN/OUT, Recipient device */
+
+/* Misc Macros ****************************************************************/
 
 /* min/max macros */
 
@@ -382,7 +388,7 @@ static const struct uart_ops_s g_uartops =
   usbser_txempty        /* txempty */
 };
 
-/* USB descriptor templates these will be copied and modified */
+/* USB descriptor templates these will be copied and modified **************/
 
 static const struct usb_devdesc_s g_devdesc =
 {
