@@ -326,11 +326,6 @@ struct usb_qualdesc_s
  * Public Data
  ************************************************************************************/
 
-extern const struct usb_devdesc_s UsbStandardDeviceDescriptorStr;
-extern const ubyte UsbStandardConfigurationDescriptor[];
-extern const ubyte UsbLanguagesStr[];
-extern const ubyte *const *const UsbString[];
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
