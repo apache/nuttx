@@ -53,11 +53,13 @@
 #define LSBYTE(u16)                             ((u16) & 0xff)   /* Get LS byte from uint16 */
 
 #define GETUINT16(p)                            (((uint16)p[1]<<8)|(uint16)p[0])
+#define GETUINT32(p)                            (((uint32)p[3]<<24)|((uint32)p[2]<<16)|\
+                                                 ((uint32)p[1]<<8)|(uint32)p[0])
 
 /* USB directions (in endpoint addresses) */
 
-#define USB_DIR_OUT                             (0x00) /* To the device */
-#define USB_DIR_IN                              (0x80) /* To the host */
+#define USB_DIR_OUT                             (0x00) /* host-to-device */
+#define USB_DIR_IN                              (0x80) /* device-to-host */
 
 #define USB_EPNO(addr)                          ((addr)&0x7f)
 #define USB_EPOUT(addr)                         ((addr)|USB_DIR_OUT)
