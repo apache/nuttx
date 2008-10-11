@@ -64,7 +64,7 @@
 #define uart_receive(dev,s)      dev->ops->receive(dev,s)
 
 /************************************************************************************
- * Private Types
+ * Public Types
  ************************************************************************************/
 
 /* This structure defines one serial I/O buffer.  The serial infrastructure will
