@@ -53,6 +53,7 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
+#include "lpc214x_pinsel.h"
 #include "lpc214x_uart.h"
 
 #ifdef CONFIG_USE_SERIALDRIVER

@@ -43,6 +43,7 @@
 #include "chip.h"
 #include "lpc214x_pll.h"
 #include "lpc214x_apb.h"
+#include "lpc214x_pinsel.h"
 #include "up_internal.h"
 #include "up_arch.h"
 

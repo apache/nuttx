@@ -181,23 +181,25 @@
 #define LPC214X_AD_ADDR7_OFFSET         0x2c   /* A/D Chanel 0 Data Register */
 #define LPC214X_AD_ADSTAT_OFFSET        0x30   /* A/D Status Register */
 
-/* Pin function select registers (these are normally referenced as offsets) */
+/* SPI0 register offsets */
 
-#define LPC214X_PINSEL0                 (LPC214X_PINSEL_BASE + LPC214X_PINSEL0_OFFSET)
-#define LPC214X_PINSEL1                 (LPC214X_PINSEL_BASE + LPC214X_PINSEL1_OFFSET)
-#define LPC214X_PINSEL2                 (LPC214X_PINSEL_BASE + LPC214X_PINSEL2_OFFSET)
+#define LPC214X_SPI0_CR_OFFSET          0x00   /* Control Register 0 */
+#define LPC214X_SPI0_SR_OFFSET          0x04   /* Control Register 1 */
+#define LPC214X_SPI0_DR_OFFSET          0x08   /* Data Register */
+#define LPC214X_SPI0_CCR_OFFSET         0x0c   /* Status Register */
+#define LPC214X_SPI0_INT_OFFSET         0x1c   /* Clock Pre-Scale Regisrer */
 
-/* SPI register offsets */
+/* SPI1 register offsets */
 
-#define LPC214X_SPI_CR0_OFFSET          0x00   /* Control Register 0 */
-#define LPC214X_SPI_CR1_OFFSET          0x04   /* Control Register 1 */
-#define LPC214X_SPI_DR_OFFSET           0x08   /* Data Register */
-#define LPC214X_SPI_SR_OFFSET           0x0c   /* Status Register */
-#define LPC214X_SPI_CPSR_OFFSET         0x10   /* Clock Pre-Scale Regisrer */
-#define LPC214X_SPI_IMSC_OFFSET         0x14   /* Interrupt Mask Set and Clear Register */
-#define LPC214X_SPI_RIS_OFFSET          0x18   /* Raw Interrupt Status Register */
-#define LPC214X_SPI_MIS_OFFSET          0x1c   /* Masked Interrupt Status Register */
-#define LPC214X_SPI_ICR_OFFSET          0x20   /* Interrupt Clear Register */
+#define LPC214X_SPI1_CR0_OFFSET         0x00   /* Control Register 0 */
+#define LPC214X_SPI1_CR1_OFFSET         0x04   /* Control Register 1 */
+#define LPC214X_SPI1_DR_OFFSET          0x08   /* Data Register */
+#define LPC214X_SPI1_SR_OFFSET          0x0c   /* Status Register */
+#define LPC214X_SPI1_CPSR_OFFSET        0x10   /* Clock Pre-Scale Regisrer */
+#define LPC214X_SPI1_IMSC_OFFSET        0x14   /* Interrupt Mask Set and Clear Register */
+#define LPC214X_SPI1_RIS_OFFSET         0x18   /* Raw Interrupt Status Register */
+#define LPC214X_SPI1_MIS_OFFSET         0x1c   /* Masked Interrupt Status Register */
+#define LPC214X_SPI1_ICR_OFFSET         0x20   /* Interrupt Clear Register */
 
 /* RTC register offsets */
 
