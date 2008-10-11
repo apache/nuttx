@@ -1,10 +1,8 @@
 /****************************************************************************
- * drivers/usbdev/sp.c
+ * drivers/usbdev/spi.h
  *
  *   Copyright(C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
- *
- * This logic emulates the Prolific PL2303 serial/USB converter
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -49,6 +47,121 @@
  * Definitions
  ****************************************************************************/
 
+/* Access macros */
+
+/****************************************************************************
+ * Name:SPI_SELECT
+ *
+ * Description:
+ *   Enable/disable the SPI chip select
+ *
+ * Input Parameters:
+ *   select: TRUE: chip selected, FALSE: chip de-selected
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define SPI_SELECT(s,b) ((s)->select(b))
+
+/****************************************************************************
+ * Name: SPI_SETFREQUENCY
+ *
+ * Description:
+ *   Set the SPI frequency.
+ *
+ * Input Parameters:
+ *   frequency: The SPI frequency requested
+ *
+ * Returned Value:
+ *   Returns the actual frequency selected
+ *
+ ****************************************************************************/
+
+#define SPI_SETFREQUENCY(s,f) ((s)->setfrequency(f))
+
+/****************************************************************************
+ * Name: SPI_STATUS
+ *
+ * Description:
+ *   Get SPI/MMC status
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Returns a bitset of status values (see SPI_STATUS_* defines
+ *
+ ****************************************************************************/
+
+#define SPI_STATUS(s) ((s)->status())
+
+/****************************************************************************
+ * Name: SPI_SNDBYTE
+ *
+ * Description:
+ *   Send one byte on SPI
+ *
+ * Input Parameters:
+ *   ch - the byte to send
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define SPI_SNDBYTE(s,ch) ((s)->sndbyte(ch))
+
+/****************************************************************************
+ * Name: SPI_WAITREADY
+ *
+ * Description:
+ *   Wait for SPI to be ready
+ *
+ * Input Parameters: None
+ *
+ * Returned Value:
+ *   OK if no error occured; a negated errno otherwise.
+ *
+ ****************************************************************************/
+
+#define SPI_WAITREADY(s) ((s)->waitready())
+
+/****************************************************************************
+ * Name: SPI_SNDBLOCK
+ *
+ * Description:
+ *   Send a block of data on SPI
+ *
+ * Input Parameters:
+ *   data - A pointer to the buffer of data to be sent
+ *   datlen - the length of data to send from the buffer
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define SPI_SNDBLOCK(s,d,l) ((s)->sndblock(d,l))
+
+/****************************************************************************
+ * Name: SPI_RECVBLOCK
+ *
+ * Description:
+ *   Revice a block of data from SPI
+ *
+ * Input Parameters:
+ *   data - A pointer to the buffer in which to recieve data
+ *   datlen - the length of data that can be received in the buffer
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define SPI_RECVBLOCK(s,d,l) ((s)->recvblock(d,l))
+
 /* SPI status bits -- Some dedicated for SPI MMC support and may have not
  * relationship to SPI other than needed by the SPI MMC interface
  */
@@ -63,12 +176,12 @@
 struct spi_ops_s
 {
   void   (*select)(boolean select);
-  uint32 (*setclockfrequency)(uint32 frequency);
+  uint32 (*setfrequency)(uint32 frequency);
   ubyte  (*status)(void);
-  ubyte  (*sndbyte)(ubyte ch);
-  ubyte  (*waitready)(void);
-  void   (*sndblock)(ubyte *data, int datlen);
-  void   (*recvblock)(ubyte *data, int datlen);
+  void   (*sndbyte)(ubyte ch);
+  int    (*waitready)(void);
+  void   (*sndblock)(FAR const ubyte *data, int datlen);
+  void   (*recvblock)(FAR ubyte *data, int datlen);
 };
 
 /****************************************************************************
@@ -83,17 +196,21 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN void up_spinitialize(int port);
-
 /****************************************************************************
- * Name: up_spigetvtable
+ * Name: up_spiinitialize
  *
  * Description:
- *   Return the vtable for the selected SPI port
+ *   Initialize the selected SPI port
+ *
+ * Input Parameter:
+ *   Port number (for hardware that has mutiple SPI interfaces)
+ *
+ * Returned Value:
+ *   Valid vtable pointer on succcess; a NULL on failure
  *
  ****************************************************************************/
 
-EXTERN FAR const struct spi_ops_s *up_spigetvtable(int port);
+EXTERN FAR const struct spi_ops_s *up_spiinitialize(int port);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -88,12 +88,12 @@
  ****************************************************************************/
 
 static void   spi_select(boolean select);
-static uint32 spi_setclockfrequency(uint32 frequency);
+static uint32 spi_setfrequency(uint32 frequency);
 static ubyte  spi_status(void);
-static ubyte  spi_sndbyte(ubyte c);
-static ubyte  spi_waitready(void);
-static void   spi_sndblock(ubyte *data, int datlen);
-static void   spi_recvblock(ubyte *data, int datlen);
+static void   spi_sndbyte(ubyte ch);
+static int    spi_waitready(void);
+static void   spi_sndblock(FAR const ubyte *data, int datlen);
+static void   spi_recvblock(FAR ubyte *data, int datlen);
 
 /****************************************************************************
  * Private Data
@@ -102,7 +102,7 @@ static void   spi_recvblock(ubyte *data, int datlen);
 static const struct spi_ops_s g_spiops =
 {
   .select            = spi_select,
-  .setclockfrequency = spi_setclockfrequency,
+  .setfrequency      = spi_setfrequency,
   .status            = spi_status,
   .sndbyte           = spi_sndbyte,
   .waitready         = spi_waitready,
@@ -122,7 +122,13 @@ static const struct spi_ops_s g_spiops =
  * Name: spi_select
  *
  * Description:
- *   MMC chip-select control
+ *   Enable/disable the SPI chip select
+ *
+ * Input Parameters:
+ *   select: TRUE: chip selected, FALSE: chip de-selected
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
@@ -161,26 +167,20 @@ void spi_select(boolean select)
 }
 
 /****************************************************************************
- * Name: spi_status
+ * Name: spi_setfrequency
+ *
  * Description:
- *   Return MMC present + write protect status
+ *   Set the SPI frequency.
+ *
+ * Input Parameters:
+ *   frequency: The SPI frequency requested
+ *
+ * Returned Value:
+ *   Returns the actual frequency selected
  *
  ****************************************************************************/
 
-ubyte spi_status(void)
-{
-  return SPI_STATUS_PRESENT;
-}
-
-/****************************************************************************
- * Name: spi_setclockfrequency
- *
- * Description:
- *   Set SPI clock frequency
- *
- ****************************************************************************/
-
-uint32 spi_setclockfrequency(uint32 frequency)
+uint32 spi_setfrequency(uint32 frequency)
 {
   uint32 divisor = LPC214X_PCLKFREQ / frequency;
 
@@ -199,14 +199,43 @@ uint32 spi_setclockfrequency(uint32 frequency)
 }
 
 /****************************************************************************
- * Name: spi_sndbyte
+ * Name: spi_status
  *
  * Description:
- *   Transfer one byte to the SPI
+ *   Get SPI/MMC status
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Returns a bitset of status values (see SPI_STATUS_* defines
  *
  ****************************************************************************/
 
-ubyte spi_sndbyte(ubyte c)
+ubyte spi_status(void)
+{
+  /* I don't think there is anyway to determine these things on the mcu123.com
+   * board.
+   */
+
+  return SPI_STATUS_PRESENT;
+}
+
+/****************************************************************************
+ * Name: spi_sndbyte
+ *
+ * Description:
+ *   Send one byte on SPI
+ *
+ * Input Parameters:
+ *   ch - the byte to send
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void spi_sndbyte(ubyte ch)
 {
   /* Wait while the TX FIFO is full */
 
@@ -214,22 +243,31 @@ ubyte spi_sndbyte(ubyte c)
 
   /* Send the byte */
 
-  putreg16(c, LPC214X_SPI1_DR);
+  putreg16(ch, LPC214X_SPI1_DR);
 
   /* Wait for the RX FIFO not empty */
 
   while (!(getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_RNE));
 
-  /* Return the value from the RX FIFO */
+  /* Get the value from the RX FIFO */
 
-  return (ubyte)getreg16(LPC214X_SPI1_DR);
+  (void)getreg16(LPC214X_SPI1_DR);
 }
 
 /****************************************************************************
  * Name: spi_waitready
+ *
+ * Description:
+ *   Wait for SPI to be ready
+ *
+ * Input Parameters: None
+ *
+ * Returned Value:
+ *   OK if no error occured; a negated errno otherwise.
+ *
  ****************************************************************************/
 
-ubyte spi_waitready(void)
+int spi_waitready(void)
 {
   ubyte ret;
 
@@ -249,18 +287,25 @@ ubyte spi_waitready(void)
     }
   while (ret != 0xff);
 
-  return ret;
+  return OK;
 }
 
 /*************************************************************************
  * Name: spi_sndblock
  *
  * Description:
- *   Read a block of bytes from SPI
+ *   Send a block of data on SPI
  *
- *************************************************************************/
+ * Input Parameters:
+ *   data - A pointer to the buffer of data to be sent
+ *   datlen - the length of data to send from the buffer
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
-void spi_sndblock(ubyte *data, int datlen)
+void spi_sndblock(FAR const ubyte *data, int datlen)
 {
   /* Loop while thre are bytes remaining to be sent */
 
@@ -293,11 +338,18 @@ void spi_sndblock(ubyte *data, int datlen)
  * Name: spi_recvblock
  *
  * Description:
- *   Receive a block of bytes from SPI
+ *   Revice a block of data from SPI
  *
- *************************************************************************/
+ * Input Parameters:
+ *   data - A pointer to the buffer in which to recieve data
+ *   datlen - the length of data that can be received in the buffer
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
-static void spi_recvblock(ubyte *data, int datlen)
+static void spi_recvblock(FAR ubyte *data, int datlen)
 {
   uint32 fifobytes = 0;
 
@@ -339,13 +391,28 @@ static void spi_recvblock(ubyte *data, int datlen)
  * Description:
  *   Initialize the selected SPI port
  *
+ * Input Parameter:
+ *   Port number (for hardware that has mutiple SPI interfaces)
+ *
+ * Returned Value:
+ *   Valid vtable pointer on succcess; NULL on failure
+ *
  ****************************************************************************/
 
-void up_spiinitialize(int port)
+FAR const struct spi_ops_s *up_spiinitialize(int port)
 {
   uint32 regval32;
   ubyte regval8;
   int i;
+
+  /* Only the SPI1 interface is supported */
+
+#ifdef CONFIG_DEBUG
+  if (port != 1)
+    {
+      return NULL;
+    }
+#endif
 
   /* Configure multiplexed pins as connected on the mcu123.com board:
    *
@@ -386,7 +453,7 @@ void up_spiinitialize(int port)
 
   /* Set the initial clock frequency for indentification mode < 400kHz */
 
-  spi_setclockfrequency(400000);
+  spi_setfrequency(400000);
 
   /* Enable the SPI */
 
@@ -397,18 +464,6 @@ void up_spiinitialize(int port)
     {
       (void)getreg16(LPC214X_SPI1_DR);
     }
-}
 
-/****************************************************************************
- * Name: up_spigetvtable
- *
- * Description:
- *   Return the vtable for the selected SPI port
- *
- ****************************************************************************/
-
-FAR const struct spi_ops_s *up_spigetvtable(int port)
-{
   return &g_spiops;
 }
-
