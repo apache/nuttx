@@ -628,4 +628,26 @@ a Linux host.  Please report any errors to me.
 
 This tarball contains a complete CVS snapshot from Octobor 10, 2008.
 
+UPDATE
+^^^^^^
+This release does not build for the ARM target when USB is disabled.  Here is the fix:
+
+Index: arch/arm/src/common/up_internal.h
+===================================================================
+RCS file: /cvsroot/nuttx/nuttx/arch/arm/src/common/up_internal.h,v
+retrieving revision 1.13
+diff -u -r1.13 up_internal.h
+--- arch/arm/src/common/up_internal.h   6 Oct 2008 16:20:52 -0000       1.13
++++ arch/arm/src/common/up_internal.h   13 Oct 2008 20:48:21 -0000
+@@ -200,7 +200,8 @@
+ extern void up_usbinitialize(void);
+ extern void up_usbuninitialize(void);
+ #else
+-# define up_netinitialize()
++# define up_usbinitialize()
++# define up_usbuninitialize()
+ #endif
+
+ #endif /* __ASSEMBLY__ */
+
 
