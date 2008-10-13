@@ -499,6 +499,7 @@
 	  from the driver.
 
 0.3.17 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+	* Incorporate patch "[2164503] nuttx-0.3.16 does not build for ARM with USB disabled"
 	* Reduced the amount of memory reserved for USB serial control requests.  It
 	  was unnecessarily large.
 	* Add LPC214x SPI1 driver to interface with MMC on mcu123.com board.
