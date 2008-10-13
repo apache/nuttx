@@ -200,6 +200,7 @@ extern void up_netinitialize(void);
 extern void up_usbinitialize(void);
 extern void up_usbuninitialize(void);
 #else
+# define up_usbinitialize()
 # define up_netinitialize()
 #endif
 
