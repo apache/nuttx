@@ -64,15 +64,17 @@
 #define LPC214X_UART0_BASE              0xe000c000  /* UART0 base address */
 #define LPC214X_UART1_BASE              0xe0010000  /* UART1 base address */
 #define LPC214X_PWM_BASE                0xe0014000  /* Pulse width modulator (PWM) base address */
-#define LPC214X_I2C_BASE                0xe001C000  /* I2C base address */
+#define LPC214X_I2C0_BASE               0xe001c000  /* I2C0 base address */
 #define LPC214X_SPI0_BASE               0xe0020000  /* Serial Peripheral Interface 0 (SPI0) base */
 #define LPC214X_RTC_BASE                0xe0024000  /* Real Time Clock (RTC) base address */
 #define LPC214X_GPIO0_BASE              0xe0028000  /* General Purpose I/O (GPIO) 0 base address */
 #define LPC214X_GPIO1_BASE              0xe0028010  /* General Purpose I/O (GPIO) 0 base address */
 #define LPC214X_PINSEL_BASE             0xe002c000  /* Pin function select registers */
-#define LPC214X_SPI1_BASE               0xe0030000  /* Serial Peripheral Interface 1 (SPI1) base */
 #define LPC214X_AD0_BASE                0xe0034000  /* Analog to Digital Converter 0 base address*/
+#define LPC214X_I2C1_BASE               0xe005c000  /* I2C1 base address */
 #define LPC214X_AD1_BASE                0xe0060000  /* Analog to Digital Converter 1 base address */
+#define LPC214X_SPI1_BASE               0xe0068000  /* Serial Peripheral Interface 1 (SPI1) base */
+#define LPC214X_DAC_BASE                0xe0090000  /* DAC base address */
 #define LPC214X_USB_BASE                0xe0090000  /* USB base address */
 
 #define LPC214X_SCB_BASE                0xe01fc000  /* System Control Block (SBC) base address */
