@@ -201,7 +201,7 @@ extern void up_usbinitialize(void);
 extern void up_usbuninitialize(void);
 #else
 # define up_usbinitialize()
-# define up_netinitialize()
+# define up_usbuninitialize()
 #endif
 
 #endif /* __ASSEMBLY__ */
