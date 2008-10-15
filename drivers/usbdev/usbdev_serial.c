@@ -604,7 +604,7 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
       len = usbclass_fillrequest(priv, req->buf, req->len);
       if (len > 0)
         {
-          /* Remove the empty contained from the request list */
+          /* Remove the empty container from the request list */
 
           (void)sq_remfirst(&priv->reqlist);
           priv->nwrq--;
