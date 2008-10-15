@@ -50,10 +50,10 @@
 /* Access macros */
 
 /****************************************************************************
- * Name:SPI_SELECT
+ * Name: SPI_SELECT
  *
  * Description:
- *   Enable/disable the SPI chip select
+ *   Enable/disable the SPI chip select. Required.
  *
  * Input Parameters:
  *   select: TRUE: chip selected, FALSE: chip de-selected
@@ -63,13 +63,13 @@
  *
  ****************************************************************************/
 
-#define SPI_SELECT(s,b) ((s)->select(b))
+#define SPI_SELECT(d,b) ((d)->ops->select(d,b))
 
 /****************************************************************************
  * Name: SPI_SETFREQUENCY
  *
  * Description:
- *   Set the SPI frequency.
+ *   Set the SPI frequency. Required.
  *
  * Input Parameters:
  *   frequency: The SPI frequency requested
@@ -79,13 +79,13 @@
  *
  ****************************************************************************/
 
-#define SPI_SETFREQUENCY(s,f) ((s)->setfrequency(f))
+#define SPI_SETFREQUENCY(d,f) ((d)->ops->setfrequency(d,f))
 
 /****************************************************************************
  * Name: SPI_STATUS
  *
  * Description:
- *   Get SPI/MMC status
+ *   Get SPI/MMC status.  Optional.
  *
  * Input Parameters:
  *   None
@@ -95,13 +95,21 @@
  *
  ****************************************************************************/
 
-#define SPI_STATUS(s) ((s)->status())
+#define SPI_STATUS(d) \
+  ((d)->ops->status ? (d)->ops->status(d) : SPI_STATUS_PRESENT)
+
+/* SPI status bits -- Some dedicated for SPI MMC/SD support and may have no
+ * relationship to SPI other than needed by the SPI MMC/SD interface
+ */
+
+#define SPI_STATUS_PRESENT     0x01 /* Bit 0=1: MMC/SD card present */
+#define SPI_STATUS_WRPROTECTED 0x02 /* Bit 1=1: MMC/SD card write protected */
 
 /****************************************************************************
  * Name: SPI_SNDBYTE
  *
  * Description:
- *   Send one byte on SPI
+ *   Send one byte on SPI. Required.
  *
  * Input Parameters:
  *   ch - the byte to send
@@ -111,77 +119,92 @@
  *
  ****************************************************************************/
 
-#define SPI_SNDBYTE(s,ch) ((s)->sndbyte(ch))
-
-/****************************************************************************
- * Name: SPI_WAITREADY
- *
- * Description:
- *   Wait for SPI to be ready
- *
- * Input Parameters: None
- *
- * Returned Value:
- *   OK if no error occured; a negated errno otherwise.
- *
- ****************************************************************************/
-
-#define SPI_WAITREADY(s) ((s)->waitready())
+#define SPI_SNDBYTE(d,ch) ((d)->ops->sndbyte(d,ch))
 
 /****************************************************************************
  * Name: SPI_SNDBLOCK
  *
  * Description:
- *   Send a block of data on SPI
+ *   Send a block of data on SPI. Required.
  *
  * Input Parameters:
- *   data - A pointer to the buffer of data to be sent
- *   datlen - the length of data to send from the buffer
+ *   buffer - A pointer to the buffer of data to be sent
+ *   buflen - the length of data to send from the buffer
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-#define SPI_SNDBLOCK(s,d,l) ((s)->sndblock(d,l))
+#define SPI_SNDBLOCK(d,b,l) ((d)->ops->sndblock(d,b,l))
 
 /****************************************************************************
  * Name: SPI_RECVBLOCK
  *
  * Description:
- *   Revice a block of data from SPI
+ *   Revice a block of data from SPI. Required.
  *
  * Input Parameters:
- *   data - A pointer to the buffer in which to recieve data
- *   datlen - the length of data that can be received in the buffer
+ *   buffer - A pointer to the buffer in which to recieve data
+ *   buflen - the length of data that can be received in the buffer
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-#define SPI_RECVBLOCK(s,d,l) ((s)->recvblock(d,l))
+#define SPI_RECVBLOCK(d,b,l) ((d)->ops->recvblock(d,b,l))
 
-/* SPI status bits -- Some dedicated for SPI MMC support and may have not
- * relationship to SPI other than needed by the SPI MMC interface
- */
+/****************************************************************************
+ * Name: SPI_REGISTERCALLBACK
+ *
+ * Description:
+ *   Register a callback that that will be invoked on any media status
+ *   change (i.e, anything that would be reported differently by SPI_STATUS).
+ *   Optional
+ *
+ * Input Parameters:
+ *   callback - The funtion to call on the media change
+ *   arg - A caller provided value to return with the callback
+ *
+ * Returned Value:
+ *   0 on success; negated errno on failure.
+ *
+ ****************************************************************************/
 
-#define SPI_STATUS_PRESENT     0x01 /* MMC card present */
-#define SPI_STATUS_WRPROTECTED 0x02 /* MMC card write protected */
+#define SPI_REGISTERCALLBACK(d,c,a) \
+  ((d)->ops->registercallback ? (d)->ops->registercallback(d,c,a) : -ENOSYS)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
+/* The type of the media change callback function */
+
+typedef void (*mediachange_t)(void *arg);
+
+/* The SPI vtable */
+
+struct spi_dev_s;
 struct spi_ops_s
 {
-  void   (*select)(boolean select);
-  uint32 (*setfrequency)(uint32 frequency);
-  ubyte  (*status)(void);
-  void   (*sndbyte)(ubyte ch);
-  int    (*waitready)(void);
-  void   (*sndblock)(FAR const ubyte *data, int datlen);
-  void   (*recvblock)(FAR ubyte *data, int datlen);
+  void   (*select)(FAR struct spi_dev_s *dev, boolean selected);
+  uint32 (*setfrequency)(FAR struct spi_dev_s *dev, uint32 frequency);
+  ubyte  (*status)(FAR struct spi_dev_s *dev);
+  ubyte  (*sndbyte)(FAR struct spi_dev_s *dev, ubyte ch);
+  void   (*sndblock)(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen);
+  void   (*recvblock)(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t buflen);
+  int    (*registercallback)(FAR struct spi_dev_s *dev, mediachange_t callback, void *arg);
+};
+
+/* SPI private data.  This structure only defines the initial fields of the
+ * structure visible to the SPI client.  The specific implementation may 
+ * add additional, device specific fields
+ */
+
+struct spi_dev_s
+{
+  struct spi_ops_s *ops;
 };
 
 /****************************************************************************
@@ -206,11 +229,11 @@ extern "C" {
  *   Port number (for hardware that has mutiple SPI interfaces)
  *
  * Returned Value:
- *   Valid vtable pointer on succcess; a NULL on failure
+ *   Valid SPI device structre reference on succcess; a NULL on failure
  *
  ****************************************************************************/
 
-EXTERN FAR const struct spi_ops_s *up_spiinitialize(int port);
+EXTERN FAR struct spi_dev_s *up_spiinitialize(int port);
 
 #undef EXTERN
 #if defined(__cplusplus)

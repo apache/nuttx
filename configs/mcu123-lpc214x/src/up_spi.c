@@ -87,13 +87,12 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void   spi_select(boolean select);
-static uint32 spi_setfrequency(uint32 frequency);
-static ubyte  spi_status(void);
-static void   spi_sndbyte(ubyte ch);
-static int    spi_waitready(void);
-static void   spi_sndblock(FAR const ubyte *data, int datlen);
-static void   spi_recvblock(FAR ubyte *data, int datlen);
+static void   spi_select(FAR struct spi_dev_s *dev, boolean selected);
+static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
+static ubyte  spi_status(FAR struct spi_dev_s *dev);
+static ubyte  spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch);
+static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen);
+static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t buflen);
 
 /****************************************************************************
  * Private Data
@@ -105,10 +104,11 @@ static const struct spi_ops_s g_spiops =
   .setfrequency      = spi_setfrequency,
   .status            = spi_status,
   .sndbyte           = spi_sndbyte,
-  .waitready         = spi_waitready,
   .sndblock          = spi_sndblock,
   .recvblock         = spi_recvblock,
 };
+
+static struct spi_dev_s g_spidev = { &g_spiops };
 
 /****************************************************************************
  * Public Data
@@ -125,18 +125,18 @@ static const struct spi_ops_s g_spiops =
  *   Enable/disable the SPI chip select
  *
  * Input Parameters:
- *   select: TRUE: chip selected, FALSE: chip de-selected
+ *   selected: TRUE: chip selected, FALSE: chip de-selected
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void spi_select(boolean select)
+void spi_select(FAR struct spi_dev_s *dev, boolean selected)
 {
   uint32 bit = 1 << 20;
 
-  if (select)
+  if (selected)
     {
       /* Enable chip select (low enables) */
 
@@ -180,7 +180,7 @@ void spi_select(boolean select)
  *
  ****************************************************************************/
 
-uint32 spi_setfrequency(uint32 frequency)
+uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
 {
   uint32 divisor = LPC214X_PCLKFREQ / frequency;
 
@@ -212,7 +212,7 @@ uint32 spi_setfrequency(uint32 frequency)
  *
  ****************************************************************************/
 
-ubyte spi_status(void)
+ubyte spi_status(FAR struct spi_dev_s *dev)
 {
   /* I don't think there is anyway to determine these things on the mcu123.com
    * board.
@@ -231,17 +231,17 @@ ubyte spi_status(void)
  *   ch - the byte to send
  *
  * Returned Value:
- *   None
+ *   response
  *
  ****************************************************************************/
 
-void spi_sndbyte(ubyte ch)
+ubyte spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch)
 {
   /* Wait while the TX FIFO is full */
 
   while (!(getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_TNF));
 
-  /* Send the byte */
+  /* Write the byte to the TX FIFO */
 
   putreg16(ch, LPC214X_SPI1_DR);
 
@@ -249,45 +249,9 @@ void spi_sndbyte(ubyte ch)
 
   while (!(getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_RNE));
 
-  /* Get the value from the RX FIFO */
+  /* Get the value from the RX FIFO and return it */
 
-  (void)getreg16(LPC214X_SPI1_DR);
-}
-
-/****************************************************************************
- * Name: spi_waitready
- *
- * Description:
- *   Wait for SPI to be ready
- *
- * Input Parameters: None
- *
- * Returned Value:
- *   OK if no error occured; a negated errno otherwise.
- *
- ****************************************************************************/
-
-int spi_waitready(void)
-{
-  ubyte ret;
-
-  do
-    {
-      /* Write 0xff to the data register */
-
-      putreg16(0xff, LPC214X_SPI1_DR);
-
-      /* Wait until the controller reports RX FIFO not empty */
-
-      while (!(getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_RNE));
-
-      /* Check by reading back the from the RX FIFO */
-
-      ret = (ubyte)getreg16(LPC214X_SPI1_DR);
-    }
-  while (ret != 0xff);
-
-  return OK;
+  return (ubyte)getreg16(LPC214X_SPI1_DR);
 }
 
 /*************************************************************************
@@ -297,39 +261,42 @@ int spi_waitready(void)
  *   Send a block of data on SPI
  *
  * Input Parameters:
- *   data - A pointer to the buffer of data to be sent
- *   datlen - the length of data to send from the buffer
+ *   buffer - A pointer to the buffer of data to be sent
+ *   buflen - the length of data to send from the buffer
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void spi_sndblock(FAR const ubyte *data, int datlen)
+void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen)
 {
   /* Loop while thre are bytes remaining to be sent */
 
-  while (datlen > 0)
+  while (buflen > 0)
     {
       /* While the TX FIFO is not full and there are bytes left to send */
 
-      while ((getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_TNF) && datlen)
+      while ((getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_TNF) && buflen)
         {
           /* Send the data */
 
-          putreg16((uint16)*data, LPC214X_SPI1_DR);
-          data++;
-          datlen--;
+          putreg16((uint16)*buffer, LPC214X_SPI1_DR);
+          buffer++;
+          buflen--;
         }
     }
 
-  /* Then read from the FIFO while the RX FIFO is not empty or the TX FIFO
-   * is not empty.
+  /* Then read from the RX FIFO while the RX FIFO is not empty or the TX FIFO
+   * is not empty.  We should get the same number of bytes in response as were
+   * sent.
    */
 
   while ((getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_RNE) ||
         !(getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_TFE))
     {
+      /* Read and discard */
+
       (void)getreg16(LPC214X_SPI1_DR);
     }
 }
@@ -341,21 +308,21 @@ void spi_sndblock(FAR const ubyte *data, int datlen)
  *   Revice a block of data from SPI
  *
  * Input Parameters:
- *   data - A pointer to the buffer in which to recieve data
- *   datlen - the length of data that can be received in the buffer
+ *   buffer - A pointer to the buffer in which to recieve data
+ *   buflen - the length of data that can be received in the buffer
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_recvblock(FAR ubyte *data, int datlen)
+static void spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t buflen)
 {
   uint32 fifobytes = 0;
 
-  /* While there is remaining to be sent (and no error has occurred */
+  /* While there is remaining to be sent (and no synchronization error has occurred) */
 
-  while (datlen || fifobytes)
+  while (buflen || fifobytes)
     {
       /* Fill the transmit FIFO with 0xff...
        * Write 0xff to the data register while (1) the TX FIFO is
@@ -364,19 +331,19 @@ static void spi_recvblock(FAR ubyte *data, int datlen)
        */
 
       while ((getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_TNF) &&
-             (fifobytes < LPC214X_SPI1_FIFOSZ) && datlen)
+             (fifobytes < LPC214X_SPI1_FIFOSZ) && buflen)
         {
           putreg16(0xff, LPC214X_SPI1_DR);
-          --datlen;
-          ++fifobytes;
+          buflen--;
+          fifobytes++;
         }
 
-      /* Now, read the RX data from the FIFO while the RX FIFO is not empty */
+      /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
 
       while (getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_RNE)
         {
-          *data++ = (ubyte)getreg16(LPC214X_SPI1_DR);
-          --fifobytes;
+          *buffer++ = (ubyte)getreg16(LPC214X_SPI1_DR);
+          fifobytes--;
         }
     }
 }
@@ -395,11 +362,11 @@ static void spi_recvblock(FAR ubyte *data, int datlen)
  *   Port number (for hardware that has mutiple SPI interfaces)
  *
  * Returned Value:
- *   Valid vtable pointer on succcess; NULL on failure
+ *   Valid SPI device structre reference on succcess; a NULL on failure
  *
  ****************************************************************************/
 
-FAR const struct spi_ops_s *up_spiinitialize(int port)
+FAR struct spi_dev_s *up_spiinitialize(int port)
 {
   uint32 regval32;
   ubyte regval8;
@@ -453,7 +420,7 @@ FAR const struct spi_ops_s *up_spiinitialize(int port)
 
   /* Set the initial clock frequency for indentification mode < 400kHz */
 
-  spi_setfrequency(400000);
+  spi_setfrequency(NULL, 400000);
 
   /* Enable the SPI */
 
@@ -465,5 +432,5 @@ FAR const struct spi_ops_s *up_spiinitialize(int port)
       (void)getreg16(LPC214X_SPI1_DR);
     }
 
-  return &g_spiops;
+  return &g_spidev;
 }

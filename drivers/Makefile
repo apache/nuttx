@@ -47,7 +47,13 @@ ROOTDEPPATH	= --dep-path .
 USBDEVDEPPATH	= --dep-path usbdev
 endif
 
-ASRCS		= $(NET_ASRCS) $(USBDEV_ASRCS)
+ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
+include mmcsd/Make.defs
+ROOTDEPPATH	= --dep-path .
+MMCSDDEPPATH	= --dep-path mmcsd
+endif
+
+ASRCS		= $(NET_ASRCS) $(USBDEV_ASRCS) $(MMCSD_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		=
@@ -58,7 +64,7 @@ ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 CSRCS           += ramdisk.c
 endif
 endif
-CSRCS		+= $(NET_CSRCS) $(USBDEV_CSRCS)
+CSRCS		+= $(NET_CSRCS) $(USBDEV_CSRCS) $(MMCSD_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
@@ -66,7 +72,7 @@ OBJS		= $(AOBJS) $(COBJS)
 
 BIN		= libdrivers$(LIBEXT)
 
-VPATH		= net:usbdev
+VPATH		= net:usbdev:mmcsd
 
 all:	$(BIN)
 
@@ -82,7 +88,8 @@ $(BIN):	$(OBJS)
 	done ; )
 
 .depend: Makefile $(SRCS)
-	@$(MKDEP) $(ROOTDEPPATH) $(NETDEPPATH) $(USBDEVDEPPATH) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@$(MKDEP) $(ROOTDEPPATH) $(NETDEPPATH) $(USBDEVDEPPATH) $(MMCSDDEPPATH) \
+	  $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 
 depend: .depend
