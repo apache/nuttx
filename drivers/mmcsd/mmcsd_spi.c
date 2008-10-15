@@ -1040,10 +1040,9 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
 
   mmcsd_semtake(&slot->sem);
   ret = mmcsd_getcsd(slot, csd);
-  mmcsd_semgive(&slot->sem);
-
   if (ret < 0)
     {
+      mmcsd_semgive(&slot->sem);
       fdbg("mmcsd_getcsd returned %d\n", ret);
       return ret;
     }
@@ -1067,11 +1066,19 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
   geometry->geo_nsectors   = slot->nsectors;
   geometry->geo_sectorsize = slot->sectorsize;
 
+  /* After reporting mediachanged, clear the indication so that it is not
+   * reported again.
+   */
+
+  slot->state &= ~MMCSD_SLOTSTATUS_MEDIACHGD;
+  mmcsd_semgive(&slot->sem);
+
   fvdbg("geo_available:     %d\n", geometry->geo_available);
   fvdbg("geo_mediachanged:  %d\n", geometry->geo_mediachanged);
   fvdbg("geo_writeenabled:  %d\n", geometry->geo_writeenabled);
   fvdbg("geo_nsectors:      %d\n", geometry->geo_nsectors);
   fvdbg("geo_sectorsize:    %d\n", geometry->geo_sectorsize);
+
   return OK;
 }
 
