@@ -66,6 +66,7 @@
 #include <nuttx/spi.h>
 
 #include <arch/board/board.h>
+#include <nuttx/arch.h>
 #include <nuttx/spi.h>
 
 #include "up_internal.h"
@@ -271,6 +272,8 @@ ubyte spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch)
 
 void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen)
 {
+  ubyte sr;
+
   /* Loop while thre are bytes remaining to be sent */
 
   while (buflen > 0)
@@ -287,18 +290,32 @@ void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buf
         }
     }
 
-  /* Then read from the RX FIFO while the RX FIFO is not empty or the TX FIFO
-   * is not empty.  We should get the same number of bytes in response as were
-   * sent.
-   */
+  /* Then discard all card responses until the TX FIFO is emptied. */
 
-  while ((getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_RNE) ||
-        !(getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_TFE))
+  do
     {
-      /* Read and discard */
+      /* Is there anything in the RX fifo? */
 
-      (void)getreg16(LPC214X_SPI1_DR);
+      sr = getreg8(LPC214X_SPI1_SR);
+      if ((sr & LPC214X_SPI1SR_RNE) != 0)
+        {
+          /* Yes.. Read and discard */
+
+          (void)getreg16(LPC214X_SPI1_DR);
+        }
+
+      /* There is a race condition where TFE may go FALSE just before
+       * RNE goes true.  The nasty little delay in the following solves
+       * that (it could probably be tuned to improve performance).
+       */
+
+      else if ((sr & LPC214X_SPI1SR_TFE) == 0)
+        {
+          up_udelay(200);
+          sr = getreg8(LPC214X_SPI1_SR);
+        }
     }
+  while ((sr & LPC214X_SPI1SR_RNE) != 0 || (sr & LPC214X_SPI1SR_TFE) == 0);
 }
 
 /****************************************************************************
