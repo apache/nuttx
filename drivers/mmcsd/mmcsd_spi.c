@@ -339,70 +339,70 @@ static void mmcsd_dmpcsd(FAR struct mmcsd_slot_s *slot, ubyte *csd)
       sd2 ? SD20_CSD_TRANSPEED_TIMEVALUE(csd) : MMCSD_CSD_TRANSPEED_TIMEVALUE(csd));
   fvdbg("    RATE_UNIT:             0x%02x\n",
       sd2 ? SD20_CSD_TRANSPEED_TRANSFERRATEUNIT(csd) : MMCSD_CSD_TRANSPEED_TRANSFERRATEUNIT(csd));
-  fvdbg("  CCC                   : 0x%03x\n",
+  fvdbg("  CCC:                     0x%03x\n",
       sd2 ? SD20_CSD_CCC(csd) : MMCSD_CSD_CCC(csd));
-  fvdbg("  READ_BL_LEN           : %d\n",
+  fvdbg("  READ_BL_LEN:             %d\n",
       sd2 ? SD20_CSD_READBLLEN(csd) : MMCSD_CSD_READBLLEN(csd));
-  fvdbg("  READ_BL_PARTIAL       : %d\n",
+  fvdbg("  READ_BL_PARTIAL:         %d\n",
       sd2 ? SD20_CSD_READBLPARTIAL(csd) : MMCSD_CSD_READBLPARTIAL(csd));
-  fvdbg("  WRITE_BLK_MISALIGN    : %d\n",
+  fvdbg("  WRITE_BLK_MISALIGN:      %d\n",
       sd2 ? SD20_CSD_WRITEBLKMISALIGN(csd) : MMCSD_CSD_WRITEBLKMISALIGN(csd));
-  fvdbg("  READ_BLK_MISALIGN     : %d\n",
+  fvdbg("  READ_BLK_MISALIGN:       %d\n",
       sd2 ? SD20_CSD_READBLKMISALIGN(csd) : MMCSD_CSD_READBLKMISALIGN(csd));
-  fvdbg("  DSR_IMP               : %d\n",
+  fvdbg("  DSR_IMP:                 %d\n",
       sd2 ? SD20_CSD_DSRIMP(csd) : MMCSD_CSD_DSRIMP(csd));
-  fvdbg("  C_SIZE                : %d\n",
+  fvdbg("  C_SIZE:                  %d\n",
       sd2 ? SD20_CSD_CSIZE(csd) : MMCSD_CSD_CSIZE(csd));
-  fvdbg("  VDD_R_CURR_MIN        : %d\n",
+  fvdbg("  VDD_R_CURR_MIN:          %d\n",
       sd2 ? SD20_CSD_VDDRCURRMIN(csd) : MMCSD_CSD_VDDRCURRMIN(csd));
-  fvdbg("  VDD_R_CURR_MAX        : %d\n",
+  fvdbg("  VDD_R_CURR_MAX:          %d\n",
       sd2 ? SD20_CSD_VDDRCURRMAX(csd) : MMCSD_CSD_VDDRCURRMAX(csd));
-  fvdbg("  VDD_W_CURR_MIN        : %d\n",
+  fvdbg("  VDD_W_CURR_MIN:          %d\n",
       sd2 ? SD20_CSD_VDDWCURRMIN(csd) : MMCSD_CSD_VDDWCURRMIN(csd));
-  fvdbg("  VDD_W_CURR_MAX        : %d\n",
+  fvdbg("  VDD_W_CURR_MAX:          %d\n",
       sd2 ? SD20_CSD_VDDWCURRMAX(csd) : MMCSD_CSD_VDDWCURRMAX(csd));
-  fvdbg("  C_SIZE_MULT           : %d\n",
+  fvdbg("  C_SIZE_MULT:             %d\n",
       sd2 ? SD20_CSD_CSIZEMULT(csd) : MMCSD_CSD_CSIZEMULT(csd));
   if (mmc)
     {
-      fvdbg("  MMC SECTOR_SIZE       : %d\n", MMC_CSD_SECTORSIZE(csd));
-      fvdbg("  MMC ER_GRP_SIZE       : %d\n", MMC_CSD_ERGRPSIZE(csd));
-      fvdbg("  MMC WP_GRP_SIZE       : %d\n",  MMC_CSD_WPGRPSIZE(csd));
-      fvdbg("  MMC DFLT_ECC          : %d\n",  MMC_CSD_DFLTECC(csd));
+      fvdbg("  MMC SECTOR_SIZE:        %d\n", MMC_CSD_SECTORSIZE(csd));
+      fvdbg("  MMC ER_GRP_SIZE:        %d\n", MMC_CSD_ERGRPSIZE(csd));
+      fvdbg("  MMC WP_GRP_SIZE:        %d\n",  MMC_CSD_WPGRPSIZE(csd));
+      fvdbg("  MMC DFLT_ECC:           %d\n",  MMC_CSD_DFLTECC(csd));
     }
   else
     {
-      fvdbg("  SD ER_BLK_EN          : %d\n",
+      fvdbg("  SD ER_BLK_EN:            %d\n",
           sd2 ? SD20_CSD_SDERBLKEN(csd) : SD_CSD_SDERBLKEN(csd));
-      fvdbg("  SD SECTOR_SIZE        : %d\n",
+      fvdbg("  SD SECTOR_SIZE:          %d\n",
           sd2 ? SD20_CSD_SECTORSIZE(csd) : SD_CSD_SECTORSIZE(csd));
-      fvdbg("  SD WP_GRP_SIZE        : %d\n",
+      fvdbg("  SD WP_GRP_SIZE:          %d\n",
           sd2 ? SD_CSD_WPGRPSIZE(csd) : SD_CSD_WPGRPSIZE(csd));
     }
-  fvdbg("  WP_GRP_EN             : %d\n",
+  fvdbg("  WP_GRP_EN:               %d\n",
       sd2 ? SD20_WPGRPEN(csd) : MMCSD_WPGRPEN(csd));
-  fvdbg("  R2W_FACTOR            : %d\n",
+  fvdbg("  R2W_FACTOR:              %d\n",
       sd2 ? SD20_CSD_R2WFACTOR(csd) : MMCSD_CSD_R2WFACTOR(csd));
-  fvdbg("  WRITE_BL_LEN          : %d\n",
+  fvdbg("  WRITE_BL_LEN:            %d\n",
       sd2 ? SD20_CSD_WRITEBLLEN(csd) : MMCSD_CSD_WRITEBLLEN(csd));
-  fvdbg("  WRITE_BL_PARTIAL      : %d\n",
+  fvdbg("  WRITE_BL_PARTIAL:        %d\n",
       sd2 ? SD20_CSD_WRITEBLPARTIAL(csd) : MMCSD_CSD_WRITEBLPARTIAL(csd));
-  fvdbg("  FILE_FORMAT_GROUP     : %d\n",
+  fvdbg("  FILE_FORMAT_GROUP:       %d\n",
       sd2 ? SD20_CSD_FILEFORMATGRP(csd) : MMCSD_CSD_FILEFORMATGRP(csd));
-  fvdbg("  COPY                  : %d\n",
+  fvdbg("  COPY:                    %d\n",
       sd2 ? SD20_CSD_COPY(csd) : MMCSD_CSD_COPY(csd));
-  fvdbg("  PERM_WRITE_PROTECT    : %d\n",
+  fvdbg("  PERM_WRITE_PROTECT:      %d\n",
       sd2 ? SD20_CSD_PERMWRITEPROTECT(csd) : MMCSD_CSD_PERMWRITEPROTECT(csd));
-  fvdbg("  TMP_WRITE_PROTECT     : %d\n",
+  fvdbg("  TMP_WRITE_PROTECT:       %d\n",
       sd2 ?SD20_CSD_TMPWRITEPROTECT(csd) : MMCSD_CSD_TMPWRITEPROTECT(csd));
-  fvdbg("  FILE_FORMAT           : %d\n",
+  fvdbg("  FILE_FORMAT:             %d\n",
       sd2 ? SD20_CSD_FILEFORMAT(csd) : MMCSD_CSD_FILEFORMAT(csd));
   if (mmc)
     {
-      fvdbg("  MMC ECC               : %d\n",
+      fvdbg("  MMC ECC:                 %d\n",
           sd2 ? MMC_CSD_ECC(csd) : MMC_CSD_ECC(csd));
     }
-  fvdbg("  CRC                   : %02x\n",
+  fvdbg("  CRC:                     %02x\n",
       sd2 ? SD20_CSD_CRC(csd) : MMCSD_CSD_CRC(csd));
 }
 #endif
@@ -442,7 +442,7 @@ static int mmcsd_waitready(FAR struct mmcsd_slot_s *slot)
 
   /* Wait until the card is no longer busy */
 
-  for (i = slot->twrite; i; i--)
+  for (i = 0; i < slot->twrite; i++)
     {
       response = SPI_SNDBYTE(spi, 0xff);
       if (response == 0xff)
@@ -512,7 +512,7 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
 
   /* Get the response to the command */
 
-  for (i = 9; i && response == 0xff; i--)
+  for (i = 0; i < 9 && response == 0xff; i++)
     {
       response = SPI_SNDBYTE(spi, 0xff);
     }
@@ -531,7 +531,7 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
     case MMCSD_CMDRESP_R1B:
       {
         uint32 busy;
-        for (busy = 0, i = slot->twrite; i && busy != 0xff; i--)
+        for (i = 0; i < slot->twrite && busy != 0xff; i++)
           {
             busy = SPI_SNDBYTE(spi, 0xff);
           }
@@ -668,7 +668,7 @@ static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, ubyte *csd)
     }
 
   fvdbg("Sector size:       %d\n", slot->sectorsize);
-  fvdbg("Number of sectors: %d\n", slot->sectorsize);
+  fvdbg("Number of sectors: %d\n", slot->nsectors);
 }
 
 /****************************************************************************
@@ -721,27 +721,27 @@ static int mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, ubyte *buffer,
   /* Send the CMD9 or CMD10 */
 
   result = mmcsd_sendcmd(slot, cmd, 0);
-  if (result == MMCSD_SPIR1_OK)
+  if (result != MMCSD_SPIR1_OK)
     {
-      fdbg("mmcsd_sendcmd returned %02x\n", result);
+      fdbg("CMD9/10 failed: R1=%02x\n", result);
       goto errout_with_eio;
     }
 
   /* Try up to 8 times to find the start of block (or until an error occurs) */
 
-  for (i = 8; i > 0; i--)
+  for (i = 0; i < 8; i++)
     {
       response = SPI_SNDBYTE(spi, 0xff);
       fvdbg("%d. SPI sndbyte returned %02x\n", i, response);
 
-      /* If a read operation fails and the car cannot provide the requested
+      /* If a read operation fails and the card cannot provide the requested
        * data, it will send a data error token instead.  The 4 least
        * significant bits are the same as those in the R2 response.
        */
 
-      if ((response & MMCSD_SPIDET_UPPER) == 0)
+      if (response != 0 && (response & MMCSD_SPIDET_UPPER) == 0)
         {
-          fdbg("Data transfer error: %02x\n", response);
+          fdbg("%d. Data transfer error: %02x\n", i, response);
           goto errout_with_eio;
         }
       else if (response == MMCSD_SPIDT_STARTBLKSNGL)
@@ -781,6 +781,8 @@ static int mmcsd_open(FAR struct inode *inode)
   FAR struct mmcsd_slot_s *slot;
   FAR struct spi_dev_s *spi;
   int ret;
+
+  fvdbg("Entry\n");
 
 #ifdef CONFIG_DEBUG
   if (!inode || !inode->i_private)
@@ -825,6 +827,7 @@ static int mmcsd_open(FAR struct inode *inode)
 
 static int mmcsd_close(FAR struct inode *inode)
 {
+  fvdbg("Entry\n");
   return OK;
 }
 
@@ -836,15 +839,16 @@ static int mmcsd_close(FAR struct inode *inode)
  ****************************************************************************/
 
 static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
-                       size_t start_sector, unsigned int nsectors)
+                          size_t start_sector, unsigned int nsectors)
 {
   FAR struct mmcsd_slot_s *slot;
   FAR struct spi_dev_s *spi;
   size_t nbytes;
   off_t  offset;
   ubyte response;
-  int ret;
   int i;
+
+  fvdbg("start_sector=%d nsectors=%d\n", start_sector, nsectors);
 
 #ifdef CONFIG_DEBUG
   if (!buffer)
@@ -892,6 +896,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
   nbytes = nsectors * slot->sectorsize;
   offset = start_sector * slot->sectorsize;
+  fvdbg("nbytes=%d offset=%d\n", nbytes, offset);
 
   /* Select the slave and synchronize */
 
@@ -899,55 +904,59 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   SPI_SELECT(spi, FALSE);
   (void)SPI_SNDBYTE(spi, 0xff);
 
-  /* Send CMD17: Reads a block of the size selected by the SET_BLOCKLEN command */
+  /* Send CMD17: Reads a block of the size selected by the SET_BLOCKLEN
+   * command and verify that good R1 status is returned
+   */
 
   response = mmcsd_sendcmd(slot, &g_cmd17, offset);
-  if (response == MMCSD_SPIR1_OK)
+  if (response != MMCSD_SPIR1_OK)
     {
-      /* Loop only for the computed timeout */
+      fdbg("CMD17 failed: R1=%02x\n", response);
+      goto errout_with_eio;
+    }
 
-      for (i = slot->taccess; i; --i)
+  /* Loop only for the computed timeout */
+
+  for (i = 0; i < slot->taccess; i++)
+    {
+      /* Synchronize */
+
+      response = SPI_SNDBYTE(spi, 0xff);
+      fvdbg("(%d) SPI sndbyte returned %02x\n", i, response);
+
+      /* If a read operation fails and the card cannot provide the requested
+       * data, it will send a data error token instead.  The 4 least
+       * significant bits are the same as those in the R2 response.
+       */
+
+      if (response != 0 && (response & MMCSD_SPIDET_UPPER) == 0)
         {
-          /* Synchronize */
+          fdbg("(%d) Data transfer error: %02x\n", i, response);
+          goto errout_with_eio;
+        }
+      else if (response == MMCSD_SPIDT_STARTBLKSNGL)
+        {
+          /* Receive the block of data */
 
-          response = SPI_SNDBYTE(spi, 0xff);
+          SPI_RECVBLOCK(spi, buffer, nbytes);
 
-          /* If a read operation fails and the car cannot provide the requested
-           * data, it will send a data error token instead.  The 4 least
-           * significant bits are the same as those in the R2 response.
-           */
+          /* Receive and ignore the two CRC bytes */
 
-          if ((response & MMCSD_SPIDET_UPPER) == 0)
-            {
-              fdbg("Data transfer error: %02x\n", response);
-              goto errout_with_eio;
-            }
-          else if (ret == MMCSD_SPIDT_STARTBLKSNGL)
-            {
-              /* Receive the block of data */
+          (void)SPI_SNDBYTE(spi, 0xff);
+          (void)SPI_SNDBYTE(spi, 0xff);
 
-              SPI_RECVBLOCK(spi, buffer, nbytes);
+          /* On success, return the number of sectors transfer */
 
-              /* Receive and ignore the two CRC bytes */
-
-              (void)SPI_SNDBYTE(spi, 0xff);
-              (void)SPI_SNDBYTE(spi, 0xff);
-
-              /* On success, return the number of sectors transfer */
-
-              SPI_SELECT(spi, FALSE);
-              mmcsd_semgive(&slot->sem);
-              return nsectors;
-            }
+          SPI_SELECT(spi, FALSE);
+          mmcsd_semgive(&slot->sem);
+          return nsectors;
         }
     }
 
 errout_with_eio:
-  ret = -EIO;
-
   SPI_SELECT(spi, FALSE);
   mmcsd_semgive(&slot->sem);
-  return ret;
+  return -EIO;
 }
 
 /****************************************************************************
@@ -968,7 +977,8 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
   off_t  offset;
   ubyte response;
   int ret;
-  int i;
+
+  fvdbg("start_sector=%d nsectors=%d\n", start_sector, nsectors);
 
 #ifdef CONFIG_DEBUG
   if (!buffer)
@@ -1023,7 +1033,8 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
   /* Convert sector and nsectors to nbytes and byte offset */
 
   nbytes = nsectors * slot->sectorsize;
-  offset = sector * slot->sectorsize;
+  offset = start_sector * slot->sectorsize;
+  fvdbg("nbytes=%d offset=%d\n", nbytes, offset);
 
   /* Select the slave and synchronize */
 
@@ -1034,8 +1045,9 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
   /* Send CMD24 (WRITE_BLOCK) and verify that good R1 status is returned */
 
   response = mmcsd_sendcmd(slot, &g_cmd24, offset);
-  if (response == MMCSD_SPIR1_OK)
+  if (response != MMCSD_SPIR1_OK)
     {
+      fdbg("CMD24 failed: R1=%02x\n", response);
       SPI_SELECT(spi, FALSE);
       ret = -EIO;
       goto errout_with_sem;
@@ -1070,7 +1082,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
 
   /* Wait until the card is no longer busy */
 
-  ret = mmcsd_waitready(FAR struct spi_dev_s *spi)
+  ret = mmcsd_waitready(slot);
   SPI_SELECT(spi, FALSE);
   mmcsd_semgive(&slot->sem);
 
@@ -1163,6 +1175,12 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
 #endif
   geometry->geo_nsectors   = slot->nsectors;
   geometry->geo_sectorsize = slot->sectorsize;
+
+  fvdbg("geo_available:     %d\n", geometry->geo_available);
+  fvdbg("geo_mediachanged:  %d\n", geometry->geo_mediachanged);
+  fvdbg("geo_writeenabled:  %d\n", geometry->geo_writeenabled);
+  fvdbg("geo_nsectors:      %d\n", geometry->geo_nsectors);
+  fvdbg("geo_sectorsize:    %d\n", geometry->geo_sectorsize);
   return OK;
 }
 
@@ -1438,7 +1456,7 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
   int ret;
 
 #ifdef CONFIG_DEBUG
-  if ((unsigned)slotno >= CONFIG_MMCSD_NSLOTS || minor < 0 || minor > 255 || !spi)
+  if ((unsigned)slotno >= CONFIG_MMCSD_NSLOTS || (unsigned)minor > 255 || !spi)
     {
       fdbg("Invalid arguments\n");
       return -EINVAL;

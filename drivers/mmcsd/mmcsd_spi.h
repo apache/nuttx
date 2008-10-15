@@ -94,11 +94,11 @@
 
 /* Data error token */
 
-#define MMCSD_SPIDET_UPPER         0xf0   /* The upper four bits are zero */
-#define MMCSD_SPIDET_ERROR         0x01   /* Error */
-#define MMCSD_SPIDET_CCERROR       0x02   /* CC error */
-#define MMCSD_SPIDET_CARDECCFAIL   0x04   /* Card ECC failed */
-#define MMCSD_SPIDET_OUTOFRANGE    0x08   /* Out of range */
+#define MMCSD_SPIDET_UPPER        0xf0   /* The upper four bits are zero */
+#define MMCSD_SPIDET_ERROR        0x01   /* Error */
+#define MMCSD_SPIDET_CCERROR      0x02   /* CC error */
+#define MMCSD_SPIDET_CARDECCFAIL  0x04   /* Card ECC failed */
+#define MMCSD_SPIDET_OUTOFRANGE   0x08   /* Out of range */
 
 /****************************************************************************
  * Public Types
