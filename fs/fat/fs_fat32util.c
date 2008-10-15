@@ -649,22 +649,19 @@ int fat_mount(struct fat_mountpt_s *fs, boolean writeable)
        * partition, however.  Assume it is a partition and get the offset
        * into the partition table.  This table is at offset MBR_TABLE and is
        * indexed by 16x the partition number.  Here we support only
-       * parition 0.
-       */
-
-      ubyte *partition = &fs->fs_buffer[MBR_TABLE + 0];
-
-      /* Check if the partition exists and, if so, get the bootsector for that
+       * partition 0.
+       *
+       * Check if the partition exists and, if so, get the bootsector for that
        * partition and see if we can find the boot record there.
        */
  
-      if (partition[4])
+      if (PART1_GETTYPE(fs->fs_buffer) != 0)
         {
           /* There appears to be a partition, get the sector number of the
            * partition (LBA)
            */
 
-          fs->fs_fatbase = MBR_GETPARTSECTOR(&partition[8]);
+          fs->fs_fatbase = PART1_GETSTARTSECTOR(fs->fs_buffer);
 
           /* Read the new candidate boot sector */
 

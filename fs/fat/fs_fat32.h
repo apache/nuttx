@@ -120,6 +120,29 @@
 #define EXTBOOT_SIGNATURE 0x29
 
 /****************************************************************************
+ * These offsets describes the partition table.
+ */
+                              /* 446@0: Generally unused and zero; but may
+                               * include IDM Boot Manager menu entry at 8@394 */
+#define PART_ENTRY1       446 /* 16@446: Partition table, first entry */
+#define PART_ENTRY2       462 /* 16@462: Partition table, second entry */
+                              /* 32@478: Unused, should be zero */
+#define PART_SIGNATURE        /* 2@510: Valid partitions have 0x55aa here */
+
+/****************************************************************************
+ * These offsets describes one partition table entry.  NOTE that ent entries
+ * are aligned to 16-bit offsets so that the STARTSECTOR and SIZE values are
+ * not properly aligned.
+ */
+
+#define PART_BOOTINDICATOR  0  /* 1@0:  Boot indicator (0x80: active;0x00:otherwise) */
+#define PART_STARTCHS       1  /* 3@1:  Starting Cylinder/Head/Sector values */
+#define PART_TYPE           4  /* 1@4:  Partition type description */
+#define PART_ENDCHS         5  /* 3@5:  Ending Cylinder/Head/Sector values */
+#define PART_STARTSECTOR    8  /* 4@8:  Starting sector */
+#define PART_SIZE          12  /* 4@12: Partition size (in sectors) */
+
+/****************************************************************************
  * Each FAT directory entry is 32-bytes long.  The following define offsets
  * relative to the beginning of a directory entry.
  */
@@ -208,7 +231,7 @@
 #define FAT_MAXCLUST12 ((1 << 12) - 16)
 
 /* FAT16: For M$, the calculation is ((1 << 16) - 19). */
-  
+
 #define FAT_MINCLUST16 (FAT_MAXCLUST12 + 1)
 #define FAT_MAXCLUST16 ((1 << 16) - 16)
 
@@ -250,6 +273,9 @@
 #define MBR_GETBOOTSIG16(p)       UBYTE_VAL(p,BS16_BOOTSIG)
 #define MBR_GETBOOTSIG32(p)       UBYTE_VAL(p,BS32_BOOTSIG)
 
+#define PART1_GETTYPE(p)          UBYTE_VAL(p,PART_ENTRY1+PART_TYPE)
+#define PART2_GETTYPE(p)          UBYTE_VAL(p,PART_ENTRY2+PART_TYPE)
+
 #define DIR_GETATTRIBUTES(p)      UBYTE_VAL(p,DIR_ATTRIBUTES)
 #define DIR_GETNTRES(p)           UBYTE_VAL(p,DIR_NTRES)
 #define DIR_GETCRTTIMETENTH(p)    UBYTE_VAL(p,DIR_CRTTIMETENTH)
@@ -261,6 +287,9 @@
 #define MBR_PUTDRVNUM32(p,v)      UBYTE_PUT(p,BS32_DRVNUM,v)
 #define MBR_PUTBOOTSIG16(p,v)     UBYTE_PUT(p,BS16_BOOTSIG,v)
 #define MBR_PUTBOOTSIG32(p,v)     UBYTE_PUT(p,BS32_BOOTSIG,v)
+
+#define PART1_PUTTYPE(p,v)        UBYTE_PUT(p,PART_ENTRY1+PART_TYPE,v)
+#define PART2_PUTTYPE(p,v)        UBYTE_PUT(p,PART_ENTRY2+PART_TYPE,v)
 
 #define DIR_PUTATTRIBUTES(p,v)    UBYTE_PUT(p,DIR_ATTRIBUTES,v)
 #define DIR_PUTNTRES(p,v)         UBYTE_PUT(p,DIR_NTRES,v)
@@ -279,11 +308,21 @@
 #define MBR_GETVOLID16(p)          fat_getuint32(UBYTE_PTR(p,BS16_VOLID))
 #define MBR_GETVOLID32(p)          fat_getuint32(UBYTE_PTR(p,BS32_VOLID))
 
+#define PART1_GETSTARTSECTOR(p)    fat_getuint32(UBYTE_PTR(p,PART_ENTRY1+PART_STARTSECTOR))
+#define PART1_GETSIZE(p)           fat_getuint32(UBYTE_PTR(p,PART_ENTRY1+PART_SIZE))
+#define PART2_GETSTARTSECTOR(p)    fat_getuint32(UBYTE_PTR(p,PART_ENTRY2+PART_STARTSECTOR))
+#define PART2_GETSIZE(p)           fat_getuint32(UBYTE_PTR(p,PART_ENTRY2+PART_SIZE))
+
 #define MBR_PUTBYTESPERSEC(p,v)    fat_putuint16(UBYTE_PTR(p,BS_BYTESPERSEC),v)
 #define MBR_PUTROOTENTCNT(p,v)     fat_putuint16(UBYTE_PTR(p,BS_ROOTENTCNT),v)
 #define MBR_PUTTOTSEC16(p,v)       fat_putuint16(UBYTE_PTR(p,BS_TOTSEC16),v)
 #define MBR_PUTVOLID16(p,v)        fat_putuint32(UBYTE_PTR(p,BS16_VOLID),v)
 #define MBR_PUTVOLID32(p,v)        fat_putuint32(UBYTE_PTR(p,BS32_VOLID),v)
+
+#define PART1_PUTSTARTSECTOR(p,v) fat_putuint32(UBYTE_PTR(p,PART_ENTRY1+PART_STARTSECTOR,v))
+#define PART1_PUTSIZE(p,v)        fat_putuint32(UBYTE_PTR(p,PART_ENTRY1+PART_SIZE,v))
+#define PART2_PUTSTARTSECTOR(p,v) fat_putuint32(UBYTE_PTR(p,PART_ENTRY2+PART_STARTSECTOR,v))
+#define PART2_PUTSIZE(p,v)        fat_putuint32(UBYTE_PTR(p,PART_ENTRY2+PART_SIZE,v))
 
 /* But for multi-byte values, the endian-ness of the target vs. the little
  * endian order of the byte stream or alignment of the data within the byte
@@ -309,8 +348,6 @@
 # define MBR_GETFSINFO(p)          fat_getuint16(UBYTE_PTR(p,BS32_FSINFO))
 # define MBR_GETBKBOOTSEC(p)       fat_getuint16(UBYTE_PTR(p,BS32_BKBOOTSEC))
 # define MBR_GETSIGNATURE(p)       fat_getuint16(UBYTE_PTR(p,BS_SIGNATURE))
-
-# define MBR_GETPARTSECTOR(s)      fat_getuint32(s)
 
 # define FSI_GETLEADSIG(p)         fat_getuint32(UBYTE_PTR(p,FSI_LEADSIG))
 # define FSI_GETSTRUCTSIG(p)       fat_getuint32(UBYTE_PTR(p,FSI_STRUCTSIG))
@@ -393,8 +430,6 @@
 # define MBR_GETFSINFO(p)          UINT16_VAL(p,BS32_FSINFO)
 # define MBR_GETBKBOOTSEC(p)       UINT16_VAL(p,BS32_BKBOOTSEC)
 # define MBR_GETSIGNATURE(p)       UINT16_VAL(p,BS_SIGNATURE)
-
-# define MBR_GETPARTSECTOR(s)      (*((uint32*)(s)))
 
 # define FSI_GETLEADSIG(p)         UINT32_VAL(p,FSI_LEADSIG)
 # define FSI_GETSTRUCTSIG(p)       UINT32_VAL(p,FSI_STRUCTSIG)
