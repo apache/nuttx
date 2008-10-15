@@ -284,9 +284,20 @@ extern const char g_fmtinternalerror[];
 
 #ifdef CONFIG_EXAMPLES_NSH_ROMFSETC
 extern int nsh_romfsetc(void);
+#else
+#  define nsh_romfsetc() (-ENOSYS)
 #endif
+
 #if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0 && !defined(CONFIG_EXAMPLES_NSH_DISABLESCRIPT)
 extern int nsh_script(FAR struct nsh_vtbl_s *vtbl, const char *cmd, const char *path);
+#endif
+
+/* Architecture-specific initialization */
+
+#ifdef CONFIG_EXAMPLES_NSH_ARCHINIT
+extern int nsh_archinitialize(void);
+#else
+#  define nsh_archinitialize() (-ENOSYS)
 #endif
 
 /* Message handler */

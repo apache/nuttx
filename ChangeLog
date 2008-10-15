@@ -504,4 +504,5 @@
 	  was unnecessarily large.
 	* Added LPC214x SPI1 driver to interface with MMC on mcu123.com board.
 	* Added a simple SPI-based MMC/SD block driver
+	* NSH: Add LPC214x-specific support to NSH; NSH now mounts any SD cards in the slot.
 

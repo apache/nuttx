@@ -282,6 +282,14 @@ CONFIG_PREALLOC_WDOGS=4
 CONFIG_PREALLOC_TIMERS=4
 
 #
+# FAT filesystem configuration
+# CONFIG_FS_FAT - Enable FAT filesystem support
+# CONFIG_FAT_SECTORSIZE - Max supported sector size
+# CONFIG_FS_ROMFS - Enable ROMFS filesystem support
+CONFIG_FS_FAT=n
+CONFIG_FS_ROMFS=n
+
+#
 # TCP/IP and UDP support via uIP
 # CONFIG_NET - Enable or disable all network features
 # CONFIG_NET_IPv6 - Build in support for IPv6
@@ -484,6 +492,12 @@ CONFIG_EXAMPLES_NSH_FATDEVNO=1
 CONFIG_EXAMPLES_NSH_FATSECTSIZE=512
 CONFIG_EXAMPLES_NSH_FATNSECTORS=1024
 CONFIG_EXAMPLES_NSH_FATMOUNTPT=/tmp
+
+#
+# Architecture-specific NSH options
+CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO=1
+CONFIG_EXAMPLES_NSH_MMCSDSLOTNO=0
+CONFIG_EXAMPLES_NSH_MMCSDMINOR=0
 
 #
 # Settings for examples/usbserial

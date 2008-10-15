@@ -856,9 +856,11 @@ int user_start(int argc, char *argv[])
 
   /* Mount the /etc filesystem */
 
-#ifdef CONFIG_EXAMPLES_NSH_ROMFSETC
   (void)nsh_romfsetc();
-#endif
+
+  /* Perform architecture-specific initialization (if available) */
+
+  (void)nsh_archinitialize();
 
   /* Set the priority of this task to something in the middle so that 'nice'
    * can both raise and lower the priority.

@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: September 10, 2008</p>
+      <p>Last Updated: October 15, 2008</p>
     </td>
   </tr>
 </table>
@@ -1818,6 +1818,16 @@ nsh>
       commands.  This setting disables the <a href="#cmdoverview"><code>nice</code></a> command prefix and
       the <a href="#cmdoverview"><code>&amp;</code></a> command suffix.  This would only be set on systems
       where a minimal footprint is a necessity and background command execution is not.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_MMCSDMINOR</code></b></td>
+    <td>
+      If the architecture supports an MMC/SD slot and if the NSH
+      architecture specific logic is present, this option will provide
+      the MMC/SD minor number, i.e., the MMC/SD block driver will
+      be registered as <code>/dev/mmcsd</code><i>N</i> where <i>N</i> is the minor number.
+      Default is zero.
     </td>
   </tr>
   <tr>

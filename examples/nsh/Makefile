@@ -59,6 +59,11 @@ ifneq ($(CONFIG_EXAMPLES_NSH_DISABLESCRIPT),y)
 CSRCS	+= nsh_test.c
 endif
 
+ifeq ($(CONFIG_ARCH_CHIP),lpc214x)
+CSRCS	+= nsh_lpc214x.c
+CFLAGS	+= -DCONFIG_EXAMPLES_NSH_ARCHINIT=1
+endif
+
 AOBJS	= $(ASRCS:.S=$(OBJEXT))
 COBJS	= $(CSRCS:.c=$(OBJEXT))
 

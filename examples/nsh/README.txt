@@ -760,6 +760,13 @@ NSH-Specific Configuration Settings
       where a minimal footprint is a necessity and background command
       execution is not.
 
+  * CONFIG_EXAMPLES_NSH_MMCSDMINOR
+      If the architecture supports an MMC/SD slot and if the NSH
+      architecture specific logic is present, this option will provide
+      the MMC/SD minor number, i.e., the MMC/SD block driver will
+      be registered as /dev/mmcsdN where N is the minor number.
+      Default is zero.
+
   * CONFIG_EXAMPLES_NSH_ROMFSETC
       Mount a ROMFS filesystem at /etc and provide a startup script
       at /etc/init.d/rcS.  The default startup script will mount
