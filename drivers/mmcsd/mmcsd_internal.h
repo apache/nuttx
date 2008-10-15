@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/mmcsd/mmcsd_spi.h
+ * drivers/mmcsd/mmcsd_internal.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_MMCSD_MMCSD_SPI_H
-#define __DRIVERS_MMCSD_MMCSD_SPI_H
+#ifndef __DRIVERS_MMCSD_MMCSD_INTERNAL_H
+#define __DRIVERS_MMCSD_MMCSD_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -47,58 +47,19 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-/* SPI *******************************************************************/
-/* SPI 8-bit R1 response */
+/* Enable excessive debug options */
 
-#define MMCSD_SPIR1_OK            0x00 /* No error bits set */
-#define MMCSD_SPIR1_IDLESTATE     0x01 /* Idle state */
-#define MMCSD_SPIR1_ERASERESET    0x02 /* Erase reset */
-#define MMCSD_SPIR1_ILLEGALCMD    0x04 /* Illegal command */
-#define MMCSD_SPIR1_CRCERROR      0x08 /* Com CRC error */
-#define MMCSD_SPIR1_ERASEERROR    0x10 /* Erase sequence error */
-#define MMCSD_SPIR1_ADDRERROR     0x20 /* Address error */
-#define MMCSD_SPIR1_PARAMERROR    0x40 /* Parameter error */
+#undef CONFIG_MMCSD_DUMPALL /* MUST BE DEFINED MANUALLY */
 
-/* SPI 8-bit R2 response */
+#if !defined(CONFIG_DEBUG_VERBOSE) || !defined(CONFIG_DEBUG_FS)
+#  undef CONFIG_MMCSD_DUMPALL
+#endif
 
-#define MMCSD_SPIR2_CARDLOCKED    0x0001 /* Card is locked */
-#define MMCSD_SPIR2_WPERASESKIP   0x0002 /* WP erase skip */
-#define MMCSD_SPIR2_LOCKFAIL      0x0002 /* Lock/unlock cmd failed */
-#define MMCSD_SPIR2_ERROR         0x0004 /* Error */
-#define MMCSD_SPIR2_CCERROR       0x0008 /* CC error */
-#define MMCSD_SPIR2_CARDECCFAIL   0x0010 /* Card ECC failed */
-#define MMCSD_SPIR2_WPVIOLATION   0x0020 /* WP violoation */
-#define MMCSD_SPIR2_ERASEPARAM    0x0040 /* Erase parameter */
-#define MMCSD_SPIR2_OUTOFRANGE    0x0080 /* Out of range */
-#define MMCSD_SPIR2_CSDOVERWRITE  0x0080 /* CSD overwrite */
-#define MMCSD_SPIR2_IDLESTATE     0x0100 /* In idle state */
-#define MMCSD_SPIR2_ERASERESET    0x0200 /* Erase reset */
-#define MMCSD_SPIR2_ILLEGALCMD    0x0400 /* Illegal command */
-#define MMCSD_SPIR2_CRCERROR      0x0800 /* Com CRC error */
-#define MMCSD_SPIR2_ERASEERROR    0x1000 /* Erase sequence error */
-#define MMCSD_SPIR2_ADDRERROR     0x2000 /* Address error */
-#define MMCSD_SPIR2_PARAMERROR    0x4000 /* Parameter error */
+/* Card type */
 
-/* Data Response */
-
-#define MMCSD_SPIDR_MASK          0x1f   /* Mask for valid data response bits */
-#define MMCSD_SPIDR_ACCEPTED      0x05   /* Data accepted */
-#define MMCSD_SPIDR_CRCERROR      0x0b   /* Data rejected due to CRC error */
-#define MMCSD_SPIDR_WRERROR       0x0d   /* Data rejected due to write error */
-
-/* Data Tokens */
-
-#define MMCSD_SPIDT_STARTBLKSNGL  0xfe   /* First byte of block, single block */
-#define MMCSD_SPIDT_STARTBLKMULTI 0xfc   /* First byte of block, multi-block */
-#define MMCSD_SPIDT_STOPTRANS     0xfd   /* Stop transmission */
-
-/* Data error token */
-
-#define MMCSD_SPIDET_UPPER        0xf0   /* The upper four bits are zero */
-#define MMCSD_SPIDET_ERROR        0x01   /* Error */
-#define MMCSD_SPIDET_CCERROR      0x02   /* CC error */
-#define MMCSD_SPIDET_CARDECCFAIL  0x04   /* Card ECC failed */
-#define MMCSD_SPIDET_OUTOFRANGE   0x08   /* Out of range */
+#define MMCSD_CARDTYPE_UNKNOWN       0
+#define MMCSD_CARDTYPE_MMC           1
+#define MMCSD_CARDTYPE_SD            2
 
 /****************************************************************************
  * Public Types
@@ -116,8 +77,20 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+#ifdef CONFIG_MMCSD_DUMPALL
+EXTERN void mmcsd_dumpbuffer(FAR const ubyte *buffer, unsigned int buflen);
+#else
+#  define mmcsd_dumpbuffer(b,l)
+#endif
+
+#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+EXTERN void mmcsd_dmpcsd(FAR const ubyte *csd, ubyte cardtype);
+#else
+#  define mmcsd_dmpcsd(csd,cadtype)
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __DRIVERS_MMCSD_MMCSD_SPI_H */
+#endif /* __DRIVERS_MMCSD_MMCSD_INTERNAL_H */

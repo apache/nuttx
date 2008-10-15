@@ -37,6 +37,6 @@ MMCSD_ASRCS  =
 MMCSD_CSRCS  =
 
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
-MMCSD_CSRCS  += mmcsd_spi.c
+MMCSD_CSRCS  += mmcsd_spi.c mmcsd_debug.c
 endif
 

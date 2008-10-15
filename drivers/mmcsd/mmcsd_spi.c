@@ -53,6 +53,7 @@
 
 #include "mmcsd_spi.h"
 #include "mmcsd_csd.h"
+#include "mmcsd_internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -80,12 +81,6 @@
 #define MMCSD_SLOTSTATUS_NODISK      0x02 /* No card in the slot */
 #define MMCSD_SLOTSTATUS_WRPROTECT   0x04 /* Card is write protected */
 #define MMCSD_SLOTSTATUS_MEDIACHGD   0x08 /* Media changed in slot */
-
-/* Card type */
-
-#define MMCSD_CARDTYPE_UNKNOWN       0
-#define MMCSD_CARDTYPE_MMC           1
-#define MMCSD_CARDTYPE_SD            2
 
 /* Values in the MMC/SD command table ***************************************/
 /* These define the expected arguments of the MMC/SD command */
@@ -140,13 +135,7 @@ struct mmcsd_cmdinfo_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Debug ********************************************************************/
-
-#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
-static void mmcsd_dmpcsd(FAR struct mmcsd_slot_s *slot, ubyte *csd);
-#else
-#  define mmcsd_dmpcsd(slot, csd)
-#endif
+/* Misc *********************************************************************/
 
 static void   mmcsd_semtake(sem_t *sem);
 
@@ -305,108 +294,6 @@ static const struct mmcsd_cmdinfo_s g_acmd41 = {0x69, MMCSD_CMDARG_NONE,    MMCS
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: mmcsd_dmpcsd
- *
- * Description:
- *   Dump the contents of the CSD
- *
- ****************************************************************************/
-
-#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
-static void mmcsd_dmpcsd(FAR struct mmcsd_slot_s *slot, ubyte *csd)
-{
-  boolean mmc = (slot->type == MMCSD_CARDTYPE_MMC);
-  boolean sd2 = (MMCSD_CSD_CSDSTRUCT(csd) == 1);
-
-  fvdbg("CSD\n");
-  fvdbg("  CSD_STRUCTURE:           1.%d\n",   MMCSD_CSD_CSDSTRUCT(csd));
-  if (mmc)
-    {
-      fvdbg("  MMC SPEC_VERS:           %d\n", MMC_CSD_SPECVERS(csd));
-    }
-  fvdbg("  TAAC:\n",
-      sd2 ? SD20_CSD_TAC_TIMEVALUE(csd) : MMCSD_CSD_TAAC_TIMEVALUE(csd));
-  fvdbg("    TIME_VALUE:            0x%02x\n",
-      sd2 ? SD20_CSD_TAC_TIMEVALUE(csd) : MMCSD_CSD_TAAC_TIMEVALUE(csd));
-  fvdbg("    TIME_UNIT:             0x%02x\n",
-      sd2 ? SD20_CSD_TAC_TIMEUNIT(csd) : MMCSD_CSD_TAAC_TIMEUNIT(csd));
-  fvdbg("  NSAC:                    0x%02x\n",
-      sd2 ? SD20_CSD_NSAC(csd) : MMCSD_CSD_NSAC(csd));
-  fvdbg("  TRAN_SPEED:\n");
-  fvdbg("    TIME_VALUE:            0x%02x\n",
-      sd2 ? SD20_CSD_TRANSPEED_TIMEVALUE(csd) : MMCSD_CSD_TRANSPEED_TIMEVALUE(csd));
-  fvdbg("    RATE_UNIT:             0x%02x\n",
-      sd2 ? SD20_CSD_TRANSPEED_TRANSFERRATEUNIT(csd) : MMCSD_CSD_TRANSPEED_TRANSFERRATEUNIT(csd));
-  fvdbg("  CCC:                     0x%03x\n",
-      sd2 ? SD20_CSD_CCC(csd) : MMCSD_CSD_CCC(csd));
-  fvdbg("  READ_BL_LEN:             %d\n",
-      sd2 ? SD20_CSD_READBLLEN(csd) : MMCSD_CSD_READBLLEN(csd));
-  fvdbg("  READ_BL_PARTIAL:         %d\n",
-      sd2 ? SD20_CSD_READBLPARTIAL(csd) : MMCSD_CSD_READBLPARTIAL(csd));
-  fvdbg("  WRITE_BLK_MISALIGN:      %d\n",
-      sd2 ? SD20_CSD_WRITEBLKMISALIGN(csd) : MMCSD_CSD_WRITEBLKMISALIGN(csd));
-  fvdbg("  READ_BLK_MISALIGN:       %d\n",
-      sd2 ? SD20_CSD_READBLKMISALIGN(csd) : MMCSD_CSD_READBLKMISALIGN(csd));
-  fvdbg("  DSR_IMP:                 %d\n",
-      sd2 ? SD20_CSD_DSRIMP(csd) : MMCSD_CSD_DSRIMP(csd));
-  fvdbg("  C_SIZE:                  %d\n",
-      sd2 ? SD20_CSD_CSIZE(csd) : MMCSD_CSD_CSIZE(csd));
-  fvdbg("  VDD_R_CURR_MIN:          %d\n",
-      sd2 ? SD20_CSD_VDDRCURRMIN(csd) : MMCSD_CSD_VDDRCURRMIN(csd));
-  fvdbg("  VDD_R_CURR_MAX:          %d\n",
-      sd2 ? SD20_CSD_VDDRCURRMAX(csd) : MMCSD_CSD_VDDRCURRMAX(csd));
-  fvdbg("  VDD_W_CURR_MIN:          %d\n",
-      sd2 ? SD20_CSD_VDDWCURRMIN(csd) : MMCSD_CSD_VDDWCURRMIN(csd));
-  fvdbg("  VDD_W_CURR_MAX:          %d\n",
-      sd2 ? SD20_CSD_VDDWCURRMAX(csd) : MMCSD_CSD_VDDWCURRMAX(csd));
-  fvdbg("  C_SIZE_MULT:             %d\n",
-      sd2 ? SD20_CSD_CSIZEMULT(csd) : MMCSD_CSD_CSIZEMULT(csd));
-  if (mmc)
-    {
-      fvdbg("  MMC SECTOR_SIZE:        %d\n", MMC_CSD_SECTORSIZE(csd));
-      fvdbg("  MMC ER_GRP_SIZE:        %d\n", MMC_CSD_ERGRPSIZE(csd));
-      fvdbg("  MMC WP_GRP_SIZE:        %d\n",  MMC_CSD_WPGRPSIZE(csd));
-      fvdbg("  MMC DFLT_ECC:           %d\n",  MMC_CSD_DFLTECC(csd));
-    }
-  else
-    {
-      fvdbg("  SD ER_BLK_EN:            %d\n",
-          sd2 ? SD20_CSD_SDERBLKEN(csd) : SD_CSD_SDERBLKEN(csd));
-      fvdbg("  SD SECTOR_SIZE:          %d\n",
-          sd2 ? SD20_CSD_SECTORSIZE(csd) : SD_CSD_SECTORSIZE(csd));
-      fvdbg("  SD WP_GRP_SIZE:          %d\n",
-          sd2 ? SD_CSD_WPGRPSIZE(csd) : SD_CSD_WPGRPSIZE(csd));
-    }
-  fvdbg("  WP_GRP_EN:               %d\n",
-      sd2 ? SD20_WPGRPEN(csd) : MMCSD_WPGRPEN(csd));
-  fvdbg("  R2W_FACTOR:              %d\n",
-      sd2 ? SD20_CSD_R2WFACTOR(csd) : MMCSD_CSD_R2WFACTOR(csd));
-  fvdbg("  WRITE_BL_LEN:            %d\n",
-      sd2 ? SD20_CSD_WRITEBLLEN(csd) : MMCSD_CSD_WRITEBLLEN(csd));
-  fvdbg("  WRITE_BL_PARTIAL:        %d\n",
-      sd2 ? SD20_CSD_WRITEBLPARTIAL(csd) : MMCSD_CSD_WRITEBLPARTIAL(csd));
-  fvdbg("  FILE_FORMAT_GROUP:       %d\n",
-      sd2 ? SD20_CSD_FILEFORMATGRP(csd) : MMCSD_CSD_FILEFORMATGRP(csd));
-  fvdbg("  COPY:                    %d\n",
-      sd2 ? SD20_CSD_COPY(csd) : MMCSD_CSD_COPY(csd));
-  fvdbg("  PERM_WRITE_PROTECT:      %d\n",
-      sd2 ? SD20_CSD_PERMWRITEPROTECT(csd) : MMCSD_CSD_PERMWRITEPROTECT(csd));
-  fvdbg("  TMP_WRITE_PROTECT:       %d\n",
-      sd2 ?SD20_CSD_TMPWRITEPROTECT(csd) : MMCSD_CSD_TMPWRITEPROTECT(csd));
-  fvdbg("  FILE_FORMAT:             %d\n",
-      sd2 ? SD20_CSD_FILEFORMAT(csd) : MMCSD_CSD_FILEFORMAT(csd));
-  if (mmc)
-    {
-      fvdbg("  MMC ECC:                 %d\n",
-          sd2 ? MMC_CSD_ECC(csd) : MMC_CSD_ECC(csd));
-    }
-  fvdbg("  CRC:                     %02x\n",
-      sd2 ? SD20_CSD_CRC(csd) : MMCSD_CSD_CRC(csd));
-}
-#endif
-
 
 /****************************************************************************
  * Name: mmcsd_semtake
@@ -949,6 +836,9 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
           SPI_SELECT(spi, FALSE);
           mmcsd_semgive(&slot->sem);
+
+          fvdbg("(%d) Read %d bytes:\n", i, nbytes);
+          mmcsd_dumpbuffer(buffer, nbytes);
           return nsectors;
         }
     }
@@ -1034,7 +924,8 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
 
   nbytes = nsectors * slot->sectorsize;
   offset = start_sector * slot->sectorsize;
-  fvdbg("nbytes=%d offset=%d\n", nbytes, offset);
+  fvdbg("Writing %d bytes to offset %d:\n", nbytes, offset);
+  mmcsd_dumpbuffer(buffer, nbytes);
 
   /* Select the slave and synchronize */
 
@@ -1352,7 +1243,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
     {
       fdbg("Found SD card\n");
     }
-  mmcsd_dmpcsd(slot, csd);
+  mmcsd_dmpcsd(csd, slot->type);
 #endif
 
   /* CSD data and set block size */
