@@ -257,9 +257,9 @@ struct usbser_dev_s
   ubyte linest[7];                    /* Fake line status */
   sint16 rxhead;                      /* Working head; used when rx int disabled */
 
-  FAR struct usbdev_ep_s  *epintin;   /* Address of Interrupt IN endpoint */
-  FAR struct usbdev_ep_s  *epbulkin;  /* Address of Bulk IN endpoint */
-  FAR struct usbdev_ep_s  *epbulkout; /* Address of Bulk OUT endpoint */
+  FAR struct usbdev_ep_s  *epintin;   /* Interrupt IN endpoint structure */
+  FAR struct usbdev_ep_s  *epbulkin;  /* Bulk IN endpoint structure */
+  FAR struct usbdev_ep_s  *epbulkout; /* Bulk OUT endpoint structure */
   FAR struct usbdev_req_s *ctrlreq;   /* Control request */
   struct sq_queue_s        reqlist;   /* List of write request containers */
 
@@ -667,6 +667,17 @@ static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
       currhead = priv->rxhead;
     }
 
+  /* Pre-calculate the head index and check for wrap around.  We need to do this
+   * so that we can determine if the circular buffer will overrun BEFORE we
+   * overrun the buffer!
+   */
+
+  nexthead = currhead + 1;
+  if (nexthead >= recv->size)
+    {
+      nexthead = 0;
+    }
+
   /* Then copy data into the RX buffer until either: (1) all of the data has been
    * copied, or (2) the RX buffer is full.  NOTE:  If the RX buffer becomes full,
    * then we have overrun the serial driver and data will be lost.
@@ -674,17 +685,6 @@ static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
 
   while (nexthead != recv->tail && reqlen > 0)
     {
-      /* Pre-increment the head index and check for wrap around.  We need to do this
-       * so that we can determine if the circular buffer will overrun BEFORE we
-       * overrun the buffer!
-       */
-
-      nexthead = currhead + 1;
-      if (nexthead >= recv->size)
-        {
-          nexthead = 0;
-        }
-
       /* Copy one byte to the head of the circular RX buffer */
 
       recv->buffer[currhead] = *reqbuf++;
@@ -706,6 +706,14 @@ static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
           serdev->recvwaiting = FALSE;
           sem_post(&serdev->recvsem);
           currhead            = recv->head;
+        }
+
+      /* Increment the head index and check for wrap around */
+
+      nexthead = currhead + 1;
+      if (nexthead >= recv->size)
+        {
+          nexthead = 0;
         }
     }
 
@@ -766,7 +774,8 @@ static struct usbdev_req_s *usbclass_allocreq(FAR struct usbdev_ep_s *ep, uint16
  *
  ****************************************************************************/
 
-static void usbclass_freereq(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
+static void usbclass_freereq(FAR struct usbdev_ep_s *ep,
+                             FAR struct usbdev_req_s *req)
 {
   if (ep != NULL && req != NULL)
     {
@@ -905,7 +914,7 @@ static sint16  usbclass_mkcfgdesc(ubyte *buf)
   memcpy(buf, &g_ifdesc, USB_SIZEOF_IFDESC);
   buf += USB_SIZEOF_IFDESC;
 
-  /* Make the two endpoint configurations.  First, check for switches
+  /* Make the three endpoint configurations.  First, check for switches
    * between high and full speed
    */
 
@@ -1111,7 +1120,8 @@ errout:
  *
  ****************************************************************************/
 
-static void usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
+static void usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep,
+                                   FAR struct usbdev_req_s *req)
 {
   if (req->result || req->xfrd != req->len)
     {
@@ -1128,7 +1138,8 @@ static void usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req
  *
  ****************************************************************************/
 
-static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
+static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
+                                FAR struct usbdev_req_s *req)
 {
   FAR struct usbser_dev_s *priv;
   irqstate_t flags;
@@ -1194,7 +1205,8 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s 
  *
  ****************************************************************************/
 
-static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
+static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
+                                FAR struct usbdev_req_s *req)
 {
   FAR struct usbser_dev_s *priv;
   FAR struct usbser_req_s *reqcontainer;
@@ -1371,12 +1383,16 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
       irqrestore(flags);
     }
 
+  /* Report if we are selfpowered */
+
+#ifdef CONFIG_USBDEV_SELFPOWERED
+  DEV_SETSELFPOWERED(dev);
+#endif
   return OK;
 
 errout:
   usbclass_unbind(dev);
   return ret;
-
 }
 
 /****************************************************************************
@@ -1556,6 +1572,10 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
 
   switch (ctrl->type & USB_REQ_TYPE_MASK)
     {
+     /***********************************************************************
+      * Standard Requests
+      ***********************************************************************/
+
     case USB_REQ_TYPE_STANDARD:
       {
         switch (ctrl->req)
@@ -1589,7 +1609,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
                 case USB_DESC_TYPE_CONFIG:
                   {
 #ifdef CONFIG_USBDEV_DUALSPEED
-                    ret = usbclass_mkcfgdesc(ctrlreq->buf, dev->speed, len);
+                    ret = usbclass_mkcfgdesc(ctrlreq->buf, dev->speed);
 #else
                     ret = usbclass_mkcfgdesc(ctrlreq->buf);
 #endif
@@ -1673,6 +1693,10 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
       }
       break;
 
+     /***********************************************************************
+      * PL2303 Vendor-Specific Requests
+      ***********************************************************************/
+
     case PL2303_CONTROL_TYPE:
       {
         if ((ctrl->type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_INTERFACE)
@@ -1738,7 +1762,9 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
       break;
     }
 
-  /* Respond with data transfer before status phase? */
+  /* Respond to the setup command if data was returned.  On an error return
+   * value (ret < 0), the USB driver will stall.
+   */
 
   if (ret >= 0)
     {
