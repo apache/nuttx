@@ -1339,7 +1339,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
 #ifdef CONFIG_USBSER_BULKREQLEN
   reqlen = max(CONFIG_USBSER_BULKREQLEN, priv->epbulkout->maxpacket);
 #else
-  reqlen =priv->epbulkout->maxpacket;
+  reqlen = priv->epbulkout->maxpacket;
 #endif
 
   for (i = 0; i < CONFIG_USBSER_NRDREQS; i++)
@@ -1436,29 +1436,25 @@ static void usbclass_unbind(FAR struct usbdev_s *dev)
 
   if (priv != NULL)
     {
-     /* Make sure that the endpoints have been unconfigured.  If
-      * we were terminated gracefully, then the configuration should
-      * already have been reset.  If not, then calling usbclass_resetconfig
-      * should cause the endpoints to immediately terminate all
-      * transfers and return the requests to us (with result == -ESHUTDOWN)
-      */
+      /* Make sure that the endpoints have been unconfigured.  If
+       * we were terminated gracefully, then the configuration should
+       * already have been reset.  If not, then calling usbclass_resetconfig
+       * should cause the endpoints to immediately terminate all
+       * transfers and return the requests to us (with result == -ESHUTDOWN)
+       */
 
-       usbclass_resetconfig(priv);
-       up_mdelay(50);
+      usbclass_resetconfig(priv);
+      up_mdelay(50);
 
-      if (priv->ctrlreq != NULL)
-        {
-          usbclass_freereq(dev->ep0, priv->ctrlreq);
-        }
-      dev->ep0->private = priv;
-
-      /* Free int interrupt IN endpoint */
+      /* Free the interrupt IN endpoint */
 
       if (priv->epintin)
         {
           DEV_FREEEP(dev, priv->epintin);
           priv->epintin = NULL;
         }
+
+      /* Free the bulk IN endpoint */
 
       if (priv->epbulkin)
         {
@@ -1471,6 +1467,7 @@ static void usbclass_unbind(FAR struct usbdev_s *dev)
       if (priv->ctrlreq != NULL)
         {
           usbclass_freereq(dev->ep0, priv->ctrlreq);
+          priv->ctrlreg = NULL;
         }
 
       /* Free pre-allocated read requests (which should all have
