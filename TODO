@@ -229,7 +229,7 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Low
 
-  Description: FAT32: long file names
+  Description: FAT: long file names
   Status:      Open
   Priority:    Medium
 
@@ -251,6 +251,11 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Low.  I have mixed feelings about if NuttX should pay a
                performance penalty for better data integrity.
+
+  Description: FAT: FAT32 is untested -- because I don't have any large
+               enough devices yet to support a FAT32 FS.
+  Status:      Open
+  Priority:    Medium
 
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
