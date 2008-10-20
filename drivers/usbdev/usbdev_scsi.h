@@ -4,6 +4,16 @@
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
+ * References:
+ *   "SCSI Primary Commands - 3 (SPC-3),"  American National Standard
+ *   for Information Technology, May 4, 2005
+ *
+ *   "SCSI Primary Commands - 4 (SPC-4),"  American National Standard
+ *   for Information Technology, July 19, 2008
+ *
+ *   "SCSI Block Commands -2 (SBC-2)," American National Standard
+ *   for Information Technology, November 13, 2004
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -61,7 +71,7 @@
 #define SCSI_CMD_INQUIRY                         0x12
 #define SCSI_CMD_MODESELECT6                     0x15
 #define SCSI_CMD_RESERVE6                        0x16
-#define SCSI_CMD_RELEASE                         0x17
+#define SCSI_CMD_RELEASE6                        0x17
 #define SCSI_CMD_COPY                            0x18
 #define SCSI_CMD_MODESENSE6                      0x1a
 #define SCSI_CMD_STARTSTOPUNIT                   0x1b
@@ -69,48 +79,78 @@
 #define SCSI_CMD_SENDDIAGNOSTIC                  0x1d
 #define SCSI_CMD_PREVENTMEDIAREMOVAL             0x1e
 #define SCSI_CMD_READFORMATCAPACITIES            0x23
-#define SCSI_CMD_READCAPACITY                    0x25
+#define SCSI_CMD_READCAPACITY10                  0x25
 #define SCSI_CMD_READ10                          0x28
 #define SCSI_CMD_WRITE10                         0x2a
 #define SCSI_CMD_SEEK10                          0x2b
 #define SCSI_CMD_WRITEANDVERIFY                  0x2e
-#define SCSI_CMD_VERIFY                          0x2f
+#define SCSI_CMD_VERIFY10                        0x2f
 #define SCSI_CMD_SEARCHDATAHIGH                  0x30
 #define SCSI_CMD_SEARCHDATAEQUAL                 0x31
 #define SCSI_CMD_SEARCHDATALOW                   0x32
 #define SCSI_CMD_SETLIMITS10                     0x33
-#define SCSI_CMD_PREFETCH                        0x34
-#define SCSI_CMD_SYNCHCACHE                      0x35
+#define SCSI_CMD_PREFETCH10                      0x34
+#define SCSI_CMD_SYNCHCACHE10                    0x35
 #define SCSI_CMD_LOCKCACHE                       0x36
-#define SCSI_CMD_READDEFECTDATA                  0x37
+#define SCSI_CMD_READDEFECTDATA10                0x37
 #define SCSI_CMD_COMPARE                         0x39
 #define SCSI_CMD_COPYANDVERIFY                   0x3a
 #define SCSI_CMD_WRITEBUFFER                     0x3b
 #define SCSI_CMD_READBUFFER                      0x3c
-#define SCSI_CMD_READLONG                        0x3d
-#define SCSI_CMD_WRITELONG                       0x3f
+#define SCSI_CMD_READLONG10                      0x3e
+#define SCSI_CMD_WRITELONG10                     0x3f
 #define SCSI_CMD_CHANGEDEFINITION                0x40
-#define SCSI_CMD_WRITESAME                       0x41
-#define SCSI_CMD_LOGSELECT                       0x4C
-#define SCSI_CMD_LOGSENSE                        0x4D
-#define SCSI_CMD_XDWRITE                         0x50
-#define SCSI_CMD_XPWRITE                         0x51
-#define SCSI_CMD_XDREAD                          0x52
+#define SCSI_CMD_WRITESAME10                     0x41
+#define SCSI_CMD_LOGSELECT                       0x4c
+#define SCSI_CMD_LOGSENSE                        0x4d
+#define SCSI_CMD_XDWRITE10                       0x50
+#define SCSI_CMD_XPWRITE10                       0x51
+#define SCSI_CMD_XDREAD10                        0x52
 #define SCSI_CMD_MODESELECT10                    0x55
 #define SCSI_CMD_RESERVE10                       0x56
 #define SCSI_CMD_RELEASE10                       0x57
 #define SCSI_CMD_MODESENSE10                     0x5a
 #define SCSI_CMD_PERSISTENTRESERVEIN             0x5e
 #define SCSI_CMD_PERSISTENTRESERVEOUT            0x5f
+#define SCSI_CMD_32                              0x7f
 #define SCSI_CMD_XDWRITEEXTENDED                 0x80
+#define SCSI_CMD_REBUILD                         0x82
 #define SCSI_CMD_REGENERATE                      0x82
+#define SCSI_CMD_EXTENDEDCOPY                    0x83
+#define SCSI_CMD_COPYRESULTS                     0x84
+#define SCSI_CMD_ACCESSCONTROLIN                 0x86
+#define SCSI_CMD_ACCESSCONTROLOUT                0x87
+#define SCSI_CMD_READ16                          0x88
+#define SCSI_CMD_WRITE16                         0x8a
+#define SCSI_CMD_READATTRIBUTE                   0x8c
+#define SCSI_CMD_WRITEATTRIBUTE                  0x8d
+#define SCSI_CMD_WRITEANDVERIFY16                0x8e
+#define SCSI_CMD_PREFETCH16                      0x90
+#define SCSI_CMD_SYNCHCACHE16                    0x91
+#define SCSI_CMD_LOCKUNLOCKACACHE                0x92
+#define SCSI_CMD_WRITESAME16                     0x93
+#define SCSI_CMD_READCAPACITY16                  0x9e
+#define SCSI_CMD_READLONG16                      0x9e
+#define SCSI_CMD_WRITELONG106                    0x9f
 #define SCSI_CMD_REPORTLUNS                      0xa0
+#define SCSI_CMD_MAINTENANCEIN                   0xa3
+#define SCSI_CMD_MAINTENANCEOUT                  0xa4
 #define SCSI_CMD_MOVEMEDIUM                      0xa5
+#define SCSI_CMD_MOVEMEDIUMATTACHED              0xa7
 #define SCSI_CMD_READ12                          0xa8
 #define SCSI_CMD_WRITE12                         0xaa
+#define SCSI_CMD_READMEDIASERIALNUMBER           0xab
+#define SCSI_CMD_WRITEANDVERIFY12                0xae
+#define SCSI_CMD_VERIFY12                        0xaf
 #define SCSI_CMD_SETLIMITS12                     0xb3
 #define SCSI_CMD_READELEMENTSTATUS               0xb4
 #define SCSI_CMD_READDEFECTDATA12                0xb7
+#define SCSI_CMD_REDUNDANCYGROUPIN               0xba
+#define SCSI_CMD_REDUNDANCYGROUPOUT              0xbb
+#define SCSI_CMD_SPAREIN                         0xbc
+#define SCSI_CMD_SPAREOUT                        0xbd
+#define SCSI_CMD_VOLUMESETIN                     0xbe
+#define SCSI_CMD_VOLUMESETOUT                    0xbf
 
 /* Common SCSI KCQ values (sense Key/additional sense Code/ASC Qualifier) ***
  *
@@ -356,26 +396,430 @@
 
 /* Other KCQ values: */
 
-#defome SCSO_KCQOTHER_MISCOMPARE                 0x0e1d00  /* Miscompare - during verify byte check operation */
+#define SCSO_KCQOTHER_MISCOMPARE                 0x0e1d00  /* Miscompare - during verify byte check operation */
 
 /* SSCSI Status Codes *******************************************************/
 
-#define SCSCI_STATUS_OK                          0x00  /* OK */
-#define SCSCI_STATUS_CHECKCONDITION              0x02  /* Check condition */
-#define SCSCI_STATUS_CONDITIONMET                0x04  /* Condition met */
-#define SCSCI_STATUS_BUSY                        0x08  /* Busy */
-#define SCSCI_STATUS_INTERMEDIATE                0x10  /* Intermediate */
-#define SCSCI_STATUS_DATAOVERUNDERRUN            0x12  /* Data Under/Over Run? */
-#define SCSCI_STATUS_INTERMEDIATECONDITIONMET    0x14  /* Intermediate - Condition met */
-#define SCSCI_STATUS_RESERVATIONCONFLICT         0x18  /* Reservation conflict */
-#define SCSCI_STATUS_COMMANDTERMINATED           0x22  /* Command terminated */
-#define SCSCI_STATUS_QUEUEFULL                   0x28  /* Queue (task set) full */
-#define SCSCI_STATUS_ACAACTIVE                   0x30  /* ACA active */
-#define SCSCI_STATUS_TASKABORTED                 0x40  /* Task aborted */
+#define SCSI_STATUS_OK                           0x00  /* OK */
+#define SCSI_STATUS_CHECKCONDITION               0x02  /* Check condition */
+#define SCSI_STATUS_CONDITIONMET                 0x04  /* Condition met */
+#define SCSI_STATUS_BUSY                         0x08  /* Busy */
+#define SCSI_STATUS_INTERMEDIATE                 0x10  /* Intermediate */
+#define SCSI_STATUS_DATAOVERUNDERRUN             0x12  /* Data Under/Over Run? */
+#define SCSI_STATUS_INTERMEDIATECONDITIONMET     0x14  /* Intermediate - Condition met */
+#define SCSI_STATUS_RESERVATIONCONFLICT          0x18  /* Reservation conflict */
+#define SCSI_STATUS_COMMANDTERMINATED            0x22  /* Command terminated */
+#define SCSI_STATUS_QUEUEFULL                    0x28  /* Queue (task set) full */
+#define SCSI_STATUS_ACAACTIVE                    0x30  /* ACA active */
+#define SCSI_STATUS_TASKABORTED                  0x40  /* Task aborted */
+
+/* Definitions for selected SCSI commands ***********************************/
+
+/* Inquiry */
+
+#define SCSICMD_INQUIRYFLAGS_EVPD                0x01  /* Bit 0: EVPD */
+                                                       /* Bits 5-7: Peripheral Qualifier */
+#define SCSIRESP_INQUIRYPQ_CONNECTED             0x00  /*   000: Device is connected */
+#define SCSIRESP_INQUIRYPQ_NOTCONNECTED          0x20  /*   001: Device is NOT connected */
+#define SCSIRESP_INQUIRYPQ_NOTCAPABLE            0x60  /*   011: LUN not supported */
+                                                       /* Bits 0-4: Peripheral Device */
+#define SCSIRESP_INQUIRYPD_DIRECTACCESS          0x00  /*   Direct-access block device */
+#define SCSIRESP_INQUIRYPD_SEQUENTIALACCESS      0x01  /*   Sequential-access block device */
+#define SCSIRESP_INQUIRYPD_PRINTER               0x02  /*   Printer device */
+#define SCSIRESP_INQUIRYPD_PROCESSOR             0x03  /*   Processor device */
+#define SCSIRESP_INQUIRYPD_WRONCE                0x04  /*   Write once device */
+#define SCSIRESP_INQUIRYPD_CDDVD                 0x05  /*   CD/DVD device */
+#define SCSIRESP_INQUIRYPD_SCANNER               0x06  /*   Scanner device (obsolete) */
+#define SCSIRESP_INQUIRYPD_OPTICAL               0x07  /*   Optical memory device */
+#define SCSIRESP_INQUIRYPD_MEDIUMCHANGER         0x08  /*   Medium changer device (Jukebox) */
+#define SCSIRESP_INQUIRYPD_COMMUNICATIONS        0x09  /*   Communications device (obsolete) */
+#define SCSIRESP_INQUIRYPD_STORAGEARRAY          0x0c  /*   Storage array controller device */
+#define SCSIRESP_INQUIRYPD_ENCLOSURESERVICES     0x0d  /*   Enclosure services device */
+#define SCSIRESP_INQUIRYPD_RBC                   0x0e  /*   Simplified direct-access device */
+#define SCSIRESP_INQUIRYPD_OCRW                  0x0f  /*   Optical reader/writer device */
+#define SCSIRESP_INQUIRYPD_BCC                   0x10  /*   Bridge controller commands */
+#define SCSIRESP_INQUIRYPD_OSD                   0x11  /*   Object-based storage device */
+#define SCSIRESP_INQUIRYPD_ADC                   0x12  /*   Automation/drive interface */
+#define SCSIRESP_INQUIRYPD_WKLU                  0x1e  /*   Well-known logical unit */
+#define SCSIRESP_INQUIRYPD_UNKNOWN               0x1f  /*   Direct-access block device */
+
+#define SCSIRESP_INQUIRYFLAGS1_RMB               0x80  /* Bit 7: RMB */
+#define SCSIRESP_INQUIRYFLAGS2_NORMACA           0x20  /* Bit 5: NormACA */
+#define SCSIRESP_INQUIRYFLAGS2_HISUP             0x10  /* Bit 4: HiSup */
+#define SCSIRESP_INQUIRYFLAGS2_FMTMASK           0x0f  /* Bits 0-3: Response data format */
+
+#define SCSIRESP_INQUIRYFLAGS3_SCCS              0x80  /* Bit 8: SCCS */
+#define SCSIRESP_INQUIRYFLAGS3_ACC               0x40  /* Bit 7: ACC */
+#define SCSIRESP_INQUIRYFLAGS3_TPGSMASK          0x30  /* Bits 4-5: TPGS
+#define SCSIRESP_INQUIRYFLAGS3_3PC               0x08  /* Bit 3: 3PC */
+#define SCSIRESP_INQUIRYFLAGS3_PROTECT           0x01  /* Bit 0: Protect */
+
+#define SCSIRESP_INQUIRYFLAGS4_BQUE              0x80  /* Bit 7: BQue */
+#define SCSIRESP_INQUIRYFLAGS4_ENCSERV           0x40  /* Bit 6: EncServ */
+#define SCSIRESP_INQUIRYFLAGS4_VS                0x20  /* Bit 5: VS */
+#define SCSIRESP_INQUIRYFLAGS4_MULTIP            0x10  /* Bit 4: MultIP */
+#define SCSIRESP_INQUIRYFLAGS4_MCHNGR            0x08  /* Bit 3: MChngr */
+#define SCSIRESP_INQUIRYFLAGS4_ADDR16            0x01  /* Bit 0: Addr16 */
+
+#define SCSIRESP_INQUIRYFLAGS5_WBUS16            0x20  /* Bit 5: WBus16 */
+#define SCSIRESP_INQUIRYFLAGS5_SYNC              0x10  /* Bit 4: SYNC */
+#define SCSIRESP_INQUIRYFLAGS5_LINKED            0x08  /* Bit 3: LINKED */
+#define SCSIRESP_INQUIRYFLAGS5_CMDQUEUE          0x02  /* Bit 1: CmdQue */
+#define SCSIRESP_INQUIRYFLAGS5_VS                0x01  /* Bit 0: VS */
+
+#define SCSIRESP_INQUIRYFLAGS6_CLOCKINGMASK      0xc0  /* Bits 2-3: Clocking */
+#define SCSIRESP_INQUIRYFLAGS6_QAS               0x02  /* Bit 1: QAS */
+#define SCSIRESP_INQUIRYFLAGS6_IUS               0x01  /* Bit 0: IUS */
+
+/* Sense data */
+/* Sense data response codes */
+
+#define SCSIRESP_SENSEDATA_CURRENTFIXED          0x70 /* Byte 1 is always the response code */
+#define SCSIRESP_SENSEDATA_DEFERREDFIXED         0x71
+#define SCSIRESP_SENSEDATA_CURRENTDESC           0x72
+#define SCSIRESP_SENSEDATA_DEFERREDDESC          0x73
+
+#define SCSIRESP_SENSEDATA_RESPVALID             0x80
+
+/* Fixed sense data flags */
+
+#define SCSIRESP_SENSEDATA_FILEMARK              0x80 /* Bit 7: FileMark */
+#define SCSIRESP_SENSEDATA_EOM                   0x40 /* Bit 6: EOM */
+#define SCSIRESP_SENSEDATA_ILI                   0x20 /* Bit 5: ILI */
+#define SCSIRESP_SENSEDATA_SENSEKEYMASK          0x0f /* Bits 0-3: Sense key */
+#define SCSIRESP_SENSEDATA_NOSENSE               0x00 /*   Nothing to be reported */
+#define SCSIRESP_SENSEDATA_RECOVEREDERROR        0x01 /*   Successful after recovery action */
+#define SCSIRESP_SENSEDATA_NOTREADY              0x02 /*   Logical unit is not accessible */
+#define SCSIRESP_SENSEDATA_MEDIUMERROR           0x03 /*   Error posssibly caused by flaw in medium */
+#define SCSIRESP_SENSEDATA_HARDWAREERROR         0x04 /*   Non-recoverable hardware error */
+#define SCSIRESP_SENSEDATA_ILLEGALREQUEST        0x05 /*   Error in recived request */
+#define SCSIRESP_SENSEDATA_UNITATTENTION         0x06 /*   Unit attention condition */
+#define SCSIRESP_SENSEDATA_DATAPROTECT           0x07 /*   Action failed, medium protected */
+#define SCSIRESP_SENSEDATA_BLANKCHECK            0x08 /*   Encountered blank media */
+#define SCSIRESP_SENSEDATA_VENDORSPECIFIC        0x09 /*   Vendor specific condition */
+#define SCSIRESP_SENSEDATA_ABORTEDCOMMAND        0x0b /*   Command was aborted */
+
+#define SCSIRESP_SENSEDATA_KEYVALID              0x80 /* Sense-specific data valid */
+
+/* Mode Select 6 */
+
+#define SCSICMD_MODESELECT6_PF                   0x10 /* Bit 4: PF */
+#define SCSICMD_MODESELECT6_SP                   0x01 /* Bit 0: SP */
+
+/* Mode Sense 6 */
+
+#define SCSICMD_MODESENSE6_DBD                   0x08 /* Bit 3: PF */
+
+#define SCSICMD_MODESENSE_PCMASK                 0xc0 /* Bits 6-7: Page control (PC) */
+#define SCSICMD_MODESENSE_PCCURRENT              0x00 /*   Current values */
+#define SCSICMD_MODESENSE_PCCHANGEABLE           0x40 /*   Changeable values */
+#define SCSICMD_MODESENSE_PCDEFAULT              0x80 /*   Default values */
+#define SCSICMD_MODESENSE_PCSAVED                0xc0 /*   Saved values */
+#define SCSICMD_MODESENSE_PGCODEMASK             0x3f /* Bits 0-5: Page code */
+
+#define SCSICMD_MODESENSE6_PCDEFAULT             0x80 /*   Default values */
+
+#define SCSIRESP_MODESENSE_PGCCODE_VENDOR        0x00 /* Vendor-specific */
+#define SCSIRESP_MODESENSE_PGCCODE_RWERROR       0x01 /* Read/Write error recovery mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_RECONNECT     0x02 /* Disconnect-reconnect mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_FORMATDEV     0x03 /* Format device mode page (obsolete) */
+#define SCSIRESP_MODESENSE_PGCCODE_RIGID         0x04 /* Rigid disk geometry mode page (obsolete) */
+#define SCSIRESP_MODESENSE_PGCCODE_FLEXIBLE      0x05 /* Flexible disk geometry mode page (obsolete) */
+#define SCSIRESP_MODESENSE_PGCCODE_VERIFY        0x07 /* Verify error recovery mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_CACHING       0x08 /* Caching mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_CONTROL       0x0a /* Control mode page (0x0a/0x00) */
+#define SCSIRESP_MODESENSE_PGCCODE_CONTROLEXT    0x0a /* Control extension mode page (0x0a/0x01) */
+#define SCSIRESP_MODESENSE_PGCCODE_MEDIUMTYPES   0x0b /* Medum types supported mode page (obsolete) */
+#define SCSIRESP_MODESENSE_PGCCODE_NP            0x0c /* Notch and partition mode page (obsolete) */
+#define SCSIRESP_MODESENSE_PGCCODE_XOR           0x10 /* XOR control mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_ES            0x14 /* Enclosure services mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_PSLUN         0x18 /* Protocol-specific LUN mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_PSPORT        0x19 /* Protocol-specific port mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_POWER         0x1a /* Power condition mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_IE            0x1c /* Informational exceptions control mode page (0x1c/0x00) */
+#define SCSIRESP_MODESENSE_PGCCODE_BC            0x1c /* Background control mode page (0x1c/0x01) */
+#define SCSIRESP_MODESENSE_PGCCODE_RETURNALL     0x3f /* Return all mode pages */
+
+#define SCSIRESP_MODEPARMHDR_DAPARM_WP           0x80 /* Bit 7: WP (Direct-access block devices only) */
+#define SCSIRESP_MODEPARMHDR_DAPARM_DBPFUA       0x10 /* Bit 4: DBOFUA (Direct-access block devices only) */
+
+#define SCSIRESP_PAGEFMT_PS                      0x80 /* Bit 7: PS */
+#define SCSIRESP_PAGEFMT_SPF                     0x40 /* Bit 6: SPF */
+#define SCSIRESP_PAGEFMT_PGCODEMASK              0x3f /* Bits 0-5: Page code */
+
+/* Read 6 */
+
+#define SCSICMD_READ6_MSLBAMASK                  0x1f
+
+/* Write 6 */
+
+#define SCSICMD_WRITE6_MSLBAMASK                 0x1f
+
+/* Mode Select 10 */
+
+#define SCSICMD_MODESELECT10_PF                  0x10 /* Bit 4: PF */
+#define SCSICMD_MODESELECT10_SP                  0x01 /* Bit 0: SP */
+
+/* Mode Sense 10 */
+
+#define SCSICMD_MODESENSE10_LLBAA                0x10 /* Bit 4: LLBAA */
+#define SCSICMD_MODESENSE10_DBD                  0x08 /* Bit 3: PF */
+
+/* Read 10 */
+
+#define SCSICMD_READ10FLAGS_RDPROTECTMASK        0xe0
+#define SCSICMD_READ10FLAGS_DPO                  0x10
+#define SCSICMD_READ10FLAGS_FUA                  0x08
+#define SCSICMD_READ10FLAGS_FUANV                0x02
+
+/* Write 10 */
+
+#define SCSICMD_WRITE10FLAGS_WRPROTECTMASK       0xe0
+#define SCSICMD_WRITE10FLAGS_DPO                 0x10
+#define SCSICMD_WRITE10FLAGS_FUA                 0x08
+#define SCSICMD_WRITE10FLAGS_FUANV               0x02
+
+/* Read 12 */
+
+#define SCSICMD_READ12FLAGS_RDPROTECTMASK        0xe0
+#define SCSICMD_READ13FLAGS_DPO                  0x10
+#define SCSICMD_READ14FLAGS_FUA                  0x08
+#define SCSICMD_READ15FLAGS_FUANV                0x02
+
+/* Write 12 */
+
+#define SCSICMD_WRITE12FLAGS_WRPROTECTMASK       0xe0
+#define SCSICMD_WRITE12FLAGS_DPO                 0x10
+#define SCSICMD_WRITE12FLAGS_FUA                 0x08
+#define SCSICMD_WRITE12FLAGS_FUANV               0x02
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* Format structures for selected SCSI primary commands */
+
+struct scsicmd_requestsense_s
+{
+  ubyte opcode;        /* 0: 0x12 */
+  ubyte flags;         /* 1: See SCSICMD_REQUESTSENSE_FLAGS_* */
+  ubyte reserved[2];   /* 2-3: Reserved */
+  ubyte len;           /* 4: Allocation length */
+  ubyte control;       /* 5: Control */
+};
+#define SCSICMD_REQUESTSENSE_SIZEOF 6
+
+struct scsiresp_fixedsensedata_s
+{
+  ubyte code;          /* 0: Response code See  SCSIRESP_SENSEDATA_*FIXED defns */
+  ubyte obsolete;      /* 1: */
+  ubyte flags;         /* 2: See SCSIRESP_SENSEDATA_* definitions */
+  ubyte info[4];       /* 3-6: Information */
+  ubyte len;           /* 7: Additional length */
+  ubyte cmdinfo[4];    /* 8-11: Command-specific information */
+  ubyte code2;         /* 12: Additional sense code */
+  ubyte qual2;         /* 13: Additional sense code qualifier */
+  ubyte fru;           /* 14: Field replacement unit code */
+  ubyte key[3];        /* 15-17: Sense key specific */
+                       /* 18-: Additional bytes may follow */
+};
+#define SCSIRESP_FIXEDSENSEDATA_SIZEOF 18 /* Minimum size */
+
+struct scscicmd_inquiry_s
+{
+  ubyte opcode;        /* 0: 0x12 */
+  ubyte flags;         /* 1: See SCSICMD_INQUIRY_FLAGS_* */
+  ubyte pagecode;      /* 2: Page code */
+  ubyte len[2];        /* 3-4: Allocation length */
+  ubyte control;       /* 5: Control */
+};
+#define SCSICMD_INQUIRY_SIZEOF 6
+
+struct scsiresp_inquiry_s
+{
+  /* Mandatory */
+
+  ubyte qualtype       /* 0: Bits 5-7: Peripheral qualifier; Bits 0-4: Peripheral device type */
+  ubyte flags1;        /* 1: See SCSIRESP_INQUIRY_FLAGS1_* */
+  ubyre version;       /* 2: Version */
+  ubyte flags2;        /* 3: See SCSIRESP_INQUIRY_FLAGS2_* */
+  ubyte len;           /* 4: Additional length */
+  ubyte flags3;        /* 5: See SCSIRESP_INQUIRY_FLAGS3_* */
+  ubyte flags4;        /* 6: See SCSIRESP_INQUIRY_FLAGS4_* */
+  ubyte flags5;        /* 7: See SCSIRESP_INQUIRY_FLAGS5_* */
+  ubyte vendorid[8];   /* 8-15: T10 Vendor Identification */
+  ubyte productid[16]; /* 16-31: Product Identification */
+  ubyte revision[4];   /* 32-35: Product Revision Level */
+
+  /* Optional */
+
+  ubyte vendor[20];    /* 36-55: Vendor specific */
+  ubyte flags6;        /* 56: See SCSIRESP_INQUIRY_FLAGS6_* */
+  ubyte reserved1;     /* 57: Reserved */
+  ubyte version1[2];   /* 58-59: Version Descriptor 1 */
+  ubyte version2[2];   /* 60-61: Version Descriptor 2 */
+  ubyte version3[2];   /* 62-63: Version Descriptor 3 */
+  ubyte version4[2];   /* 64-65: Version Descriptor 4 */
+  ubyte version5[2];   /* 66-67: Version Descriptor 5 */
+  ubyte version6[2];   /* 68-69: Version Descriptor 6 */
+  ubyte version7[2];   /* 70-71: Version Descriptor 7 */
+  ubyte version8[2];   /* 72-73: Version Descriptor 8 */
+  ubyte reserved2[22]; /* 74-95: Reserved */
+                       /* 96-: Vendor-specific parameters may follow */
+}
+#define SCSIRESP_INQUIRY_SIZEOF 36 /* Minimum size */
+
+struct scsicmd_modeselect6_s
+{
+  ubyte opcode;        /* 0x15 */
+  ubyte flags;         /* 1: See SCSICMD_MODESELECT6_FLAGS_* */
+  ubyte reserved[2];   /* 2-3: Reserved */
+  ubyte plen;          /* 4: Parameter list length */
+  ubyte control;       /* 5: Control */
+};
+#define SCSICMD_MODESELECT6_SIZEOF 6
+
+struct scsicmd_modesense6_s
+{
+  ubyte opcode;        /* 0x1a */
+  ubyte flags;         /* 1: See SCSICMD_MODESENSE6_FLAGS_* */
+  ubyte pcpgcode;      /* 2: Bits 6-7: PC, bits 0-5: page code */
+  ubyte subpgcode;     /* 3: subpage code */
+  ubyte len;           /* 4: Allocation length */
+  ubyte control;       /* 5: Control */
+};
+#define SCSICMD_MODESENSE6_SIZEOF 6
+
+struct scsiresp_modeparameterhdr6_s
+{
+  ubyte mdlen;         /* 0: Mode data length */
+  ubyte type;          /* 1: Medium type */
+  ubyte param;         /* 2: Device-specific parameter */
+  ubyte bdlen;         /* 3: Block descriptor length */
+};
+#define SCSIREP_MODEPARAMETERHDR6_SIZEOF 4
+
+struct scsiresp_blockdesc_s
+{
+  ubyte density;       /* 0: density code */
+  ubyte nblocks[3];    /* 1-3: Number of blocks */
+  ubyte reserved;      /* 4: reserved */
+  ubyte blklen[3];     /* 5-7: Block len */
+};
+#define SCSIREP_BLOCKDESC_SIZEOF 8
+
+struct scsiresp_pageformat_s
+{
+  ubyte pgcode;       /* 0: See SCSIRESP_PAGEFMT_* definitions */
+  ubyte pglen;        /* 1: Page length (n-1) */
+  ubyte parms[1];     /* 2-n: Mode parameters */
+};
+
+struct scsiresp_subpageformat_s
+{
+  ubyte pgcode;       /* 0: See SCSIRESP_PAGEFMT_* definitions */
+  ubyte subpgcode;    /* 1: sub-page code */
+  ubyte pglen[2];     /* 2-3: Page length (n-3) */
+  ubyte parms[1];     /* 4-n: Mode parameters */
+};
+
+/* Format structures for selected SCSI block commands */
+
+struct scsicmd_read6_s
+{
+  ubyte opcode;        /* 0x08 */
+  ubyte mslba;         /* Bits 5-7: reserved; Bits 0-6: MS Logical Block Address (LBA) */
+  ubyte lslba[2];      /* LS Logical Block Address (LBA) */
+  ubyte xferlen;       /* Transfer length */
+  ubyte control;       /* Control */
+};
+#define SCSICMD_READ6_SIZEOF 6
+
+struct scsicmd_write6_s
+{
+  ubyte opcode;        /* 0x0a */
+  ubyte mslba;         /* Bits 5-7: reserved; Bits 0-6: MS Logical Block Address (LBA) */
+  ubyte lslba[2];      /* LS Logical Block Address (LBA) */
+  ubyte xferlen;       /* Transfer length */
+  ubyte control;       /* Control */
+};
+#define SCSICMD_WRITE6_SIZEOF 6
+
+struct scsicmd_read10_s
+{
+  ubyte opcode;        /* 0x28 */
+  ubyte flags;         /* See SCSICMD_READ10FLAGS_* */
+  ubyte lba[4];        /* Logical Block Address (LBA) */
+  ubyte groupno;       /* Bits 5-7: reserved; Bits 0-6: group number */
+  ubyte xfrlen[2];     /* Transfer length */
+  ubyte control;       /* Control */
+};
+#define SCSICMD_READ10_SIZEOF 10
+
+struct scsicmd_write10_s
+{
+  ubyte opcode;        /* 0: 0x2a */
+  ubyte flags;         /* 1: See SCSICMD_WRITE10FLAGS_* */
+  ubyte lba[4];        /* 2-5: Logical Block Address (LBA) */
+  ubyte groupno;       /* 6: Bits 5-7: reserved; Bits 0-6: group number */
+  ubyte xfrlen[2];     /* 7-8: Transfer length */
+  ubyte control;       /* 9: Control */
+};
+#define SCSICMD_WRITE10_SIZEOF 10
+
+struct scsicmd_modeselect10_s
+{
+  ubyte opcode;        /* 0: 0x55 */
+  ubyte flags;         /* 1: See SCSICMD_MODESELECT10_FLAGS_* */
+  ubyte reserved[5];   /* 2-6: Reserved */
+  ubyte plen[2];       /* 7-8: Parameter list length */
+  ubyte control;       /* 9: Control */
+};
+#define SCSICMD_MODESELECT10_SIZEOF 10
+
+struct scsiresp_modeparameterhdr10_s
+{
+  ubyte mdlen[2];      /* 0-1: Mode data length */
+  ubyte type;          /* 2: Medium type */
+  ubyte param;         /* 3: Device-specific parameter */
+  ubyte reserved[2];   /* 4-5: reserved */
+  ubyte bdlen[2];      /* 6-7: Block descriptor length */
+};
+#define SCSIREP_MODEPARAMETERHDR10_SIZEOF 8
+
+struct scsicmd_modesense10_s
+{
+  ubyte opcode;        /* O: 0x5a */
+  ubyte flags;         /* 1: See SCSICMD_MODESENSE10_FLAGS_* */
+  ubyte pcpgcode;      /* 2: Bits 6-7: PC, bits 0-5: page code */
+  ubyte subpgcode;     /* 3: subpage code */
+  ubyte reserved[3];   /* 4-6: reserved */
+  ubyte len[2];        /* 7-8: Allocation length */
+  ubyte control;       /* 9: Control */
+};
+#define SCSICMD_MODESENSE10_SIZEOF 10
+
+struct scsicmd_read12_s
+{
+  ubyte opcode;        /* 0xa8 */
+  ubyte flags;         /* See SCSICMD_READ12FLAGS_* */
+  ubyte lba[4];        /* Logical Block Address (LBA) */
+  ubyte xfrlen[4];     /* Transfer length */
+  ubyte groupno;       /* Bit 7: restricted; Bits 5-6: reserved; Bits 0-6: group number */
+  ubyte control;       /* Control */
+};
+#define SCSICMD_READ12_SIZEOF 12
+
+struct scsicmd_write12_s
+{
+  ubyte opcode;        /* 0xaa */
+  ubyte flags;         /* See SCSICMD_WRITE12FLAGS_* */
+  ubyte lba[4];        /* Logical Block Address (LBA) */
+  ubyte xfrlen[4];     /* Transfer length */
+  ubyte groupno;       /* Bit 7: restricted; Bits 5-6: reserved; Bits 0-6: group number */
+  ubyte control;      /* Control */
+};
+#define SCSICMD_WRITE12_SIZEOF 12
 
 /****************************************************************************
  * Public Functions
