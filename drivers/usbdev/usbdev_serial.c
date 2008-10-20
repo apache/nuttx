@@ -1467,7 +1467,7 @@ static void usbclass_unbind(FAR struct usbdev_s *dev)
       if (priv->ctrlreq != NULL)
         {
           usbclass_freereq(dev->ep0, priv->ctrlreq);
-          priv->ctrlreg = NULL;
+          priv->ctrlreq = NULL;
         }
 
       /* Free pre-allocated read requests (which should all have
