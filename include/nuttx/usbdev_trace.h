@@ -62,16 +62,17 @@
 #define TRACE_DEV_ID             (0x0200) /* USB device API calls */
 #define TRACE_CLASS_ID           (0x0300) /* USB class driver API calls */
 #define TRACE_CLASSAPI_ID        (0x0400) /* Other class driver system API calls */
-#define TRACE_INTENTRY_ID        (0x0500) /* Interrupt handler entry */
-#define TRACE_INTDECODE_ID       (0x0600) /* Decoded interrupt event */
-#define TRACE_INTEXIT_ID         (0x0700) /* Interrupt handler exit */
-#define TRACE_OUTREQQUEUED_ID    (0x0800) /* Request queued for OUT endpoint */
-#define TRACE_INREQQUEUED_ID     (0x0900) /* Request queued for IN endpoint */
-#define TRACE_READ_ID            (0x0a00) /* Read (OUT) action */
-#define TRACE_WRITE_ID           (0x0b00) /* Write (IN) action */
-#define TRACE_COMPLETE_ID        (0x0c00) /* Request completed */
-#define TRACE_DEVERROR_ID        (0x0d00) /* USB controller driver error event */
-#define TRACE_CLSERROR_ID        (0x0e00) /* USB class driver error event */
+#define TRACE_CLASSSTATE_ID      (0x0500) /* Track class driver state changes */
+#define TRACE_INTENTRY_ID        (0x0600) /* Interrupt handler entry */
+#define TRACE_INTDECODE_ID       (0x0700) /* Decoded interrupt event */
+#define TRACE_INTEXIT_ID         (0x0800) /* Interrupt handler exit */
+#define TRACE_OUTREQQUEUED_ID    (0x0900) /* Request queued for OUT endpoint */
+#define TRACE_INREQQUEUED_ID     (0x0a00) /* Request queued for IN endpoint */
+#define TRACE_READ_ID            (0x0b00) /* Read (OUT) action */
+#define TRACE_WRITE_ID           (0x0c00) /* Write (IN) action */
+#define TRACE_COMPLETE_ID        (0x0d00) /* Request completed */
+#define TRACE_DEVERROR_ID        (0x0e00) /* USB controller driver error event */
+#define TRACE_CLSERROR_ID        (0x0f00) /* USB class driver error event */
 
 #define TRACE_NIDS               15
 
@@ -113,6 +114,8 @@
 #define TRACE_CLASSWRCOMPLETE    TRACE_EVENT(TRACE_CLASS_ID, 0x0008)
 
 #define TRACE_CLASSAPI(id)       TRACE_EVENT(TRACE_CLASSAPI_ID, id)
+
+#define TRACE_CLASSSTATE(id)     TRACE_EVENT(TRACE_CLASSSTATE_ID, id)
 
 /* USB device controller interrupt events.  The 'id' is specific to the driver.
  * Particular values for 'id' are unique for a given implementation of a

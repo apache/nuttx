@@ -339,6 +339,9 @@ void usbtrace(uint16 event, uint16 value)
           lldbg("Class API call %d: %04x\n", TRACE_DATA(event), value);
           break;
 
+        case TRACE_CLASSSTATE_ID:      /* Track class driver state changes */
+          lldbg("Class state %d: %04x\n", TRACE_DATA(event), value);
+
         case TRACE_INTENTRY_ID:        /* Interrupt handler entry */
           lldbg("Interrrupt %d entry: %04x\n", TRACE_DATA(event), value);
           break;
