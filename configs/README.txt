@@ -321,6 +321,26 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_USBSER_RXBUFSIZE and CONFIG_USBSER_TXBUFSIZE
 		  Size of the serial receive/transmit buffers
 
+	USB Storage Device Configuration
+
+		CONFIG_USBSTRG_EP0MAXPACKET
+		  Max packet size for endpoint 0
+		CONFIG_USBSTRGEPBULKOUT and CONFIG_USBSTRG_EPBULKIN
+		  The logical 7-bit address of a hardware endpoints that support
+		  bulk OUT and IN operations
+		CONFIG_USBSTRG_NWRREQS and CONFIG_USBSTRG_NRDREQS
+		  The number of write/read requests that can be in flight
+		CONFIG_USBSTRG_BULKINREQLEN and CONFIG_USBSTRG_BULKOUTREQLEN
+		  The size of the buffer in each write/read request.  This
+		  value needs to be at least as large as the endpoint
+		  maxpacket and ideally as large as a block device sector.
+		CONFIG_USBSTRG_VENDORID and CONFIG_USBSTRG_VENDORSTR
+		  The vendor ID code/string
+		CONFIG_USBSTRG_PRODUCTID and CONFIG_USBSTRG_PRODUCTSTR
+		  The product ID code/string
+		CONFIG_USBSTRG_REMOVABLE
+		  Select if the media is removable
+
 	Stack and heap information
 
 		CONFIG_BOOT_FROM_FLASH - Some configurations support XIP
