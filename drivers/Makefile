@@ -48,12 +48,10 @@ USBDEVDEPPATH	= --dep-path usbdev
 CFLAGS		+= -I$(TOPDIR)/drivers/usbdev
 endif
 
-ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 include mmcsd/Make.defs
 ROOTDEPPATH	= --dep-path .
 MMCSDDEPPATH	= --dep-path mmcsd
 CFLAGS		+= -I$(TOPDIR)/drivers/mmcsd
-endif
 
 ASRCS		= $(NET_ASRCS) $(USBDEV_ASRCS) $(MMCSD_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
