@@ -518,27 +518,38 @@
 #define SCSICMD_MODESENSE_PGCODEMASK             0x3f /* Bits 0-5: Page code */
 
 #define SCSICMD_MODESENSE6_PCDEFAULT             0x80 /*   Default values */
-
-#define SCSIRESP_MODESENSE_PGCCODE_VENDOR        0x00 /* Vendor-specific */
-#define SCSIRESP_MODESENSE_PGCCODE_RWERROR       0x01 /* Read/Write error recovery mode page */
-#define SCSIRESP_MODESENSE_PGCCODE_RECONNECT     0x02 /* Disconnect-reconnect mode page */
-#define SCSIRESP_MODESENSE_PGCCODE_FORMATDEV     0x03 /* Format device mode page (obsolete) */
-#define SCSIRESP_MODESENSE_PGCCODE_RIGID         0x04 /* Rigid disk geometry mode page (obsolete) */
-#define SCSIRESP_MODESENSE_PGCCODE_FLEXIBLE      0x05 /* Flexible disk geometry mode page (obsolete) */
-#define SCSIRESP_MODESENSE_PGCCODE_VERIFY        0x07 /* Verify error recovery mode page */
-#define SCSIRESP_MODESENSE_PGCCODE_CACHING       0x08 /* Caching mode page */
-#define SCSIRESP_MODESENSE_PGCCODE_CONTROL       0x0a /* Control mode page (0x0a/0x00) */
-#define SCSIRESP_MODESENSE_PGCCODE_CONTROLEXT    0x0a /* Control extension mode page (0x0a/0x01) */
-#define SCSIRESP_MODESENSE_PGCCODE_MEDIUMTYPES   0x0b /* Medum types supported mode page (obsolete) */
-#define SCSIRESP_MODESENSE_PGCCODE_NP            0x0c /* Notch and partition mode page (obsolete) */
-#define SCSIRESP_MODESENSE_PGCCODE_XOR           0x10 /* XOR control mode page */
-#define SCSIRESP_MODESENSE_PGCCODE_ES            0x14 /* Enclosure services mode page */
-#define SCSIRESP_MODESENSE_PGCCODE_PSLUN         0x18 /* Protocol-specific LUN mode page */
-#define SCSIRESP_MODESENSE_PGCCODE_PSPORT        0x19 /* Protocol-specific port mode page */
-#define SCSIRESP_MODESENSE_PGCCODE_POWER         0x1a /* Power condition mode page */
-#define SCSIRESP_MODESENSE_PGCCODE_IE            0x1c /* Informational exceptions control mode page (0x1c/0x00) */
-#define SCSIRESP_MODESENSE_PGCCODE_BC            0x1c /* Background control mode page (0x1c/0x01) */
-#define SCSIRESP_MODESENSE_PGCCODE_RETURNALL     0x3f /* Return all mode pages */
+                                                      /* Direct-access device page codes */
+#define SCSIRESP_MODESENSE_PGCCODE_VENDOR        0x00 /*   Vendor-specific */
+#define SCSIRESP_MODESENSE_PGCCODE_RWERROR       0x01 /*   Read/Write error recovery mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_RECONNECT     0x02 /*   Disconnect-reconnect mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_FORMATDEV     0x03 /*   Format device mode page (obsolete) */
+#define SCSIRESP_MODESENSE_PGCCODE_RIGID         0x04 /*   Rigid disk geometry mode page (obsolete) */
+#define SCSIRESP_MODESENSE_PGCCODE_FLEXIBLE      0x05 /*   Flexible disk geometry mode page (obsolete) */
+#define SCSIRESP_MODESENSE_PGCCODE_VERIFY        0x07 /*   Verify error recovery mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_CACHING       0x08 /*   Caching mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_CONTROL       0x0a /*   Control mode page (0x0a/0x00) */
+#define SCSIRESP_MODESENSE_PGCCODE_CONTROLEXT    0x0a /*   Control extension mode page (0x0a/0x01) */
+#define SCSIRESP_MODESENSE_PGCCODE_MEDIUMTYPES   0x0b /*   Medum types supported mode page (obsolete) */
+#define SCSIRESP_MODESENSE_PGCCODE_NP            0x0c /*   Notch and partition mode page (obsolete) */
+#define SCSIRESP_MODESENSE_PGCCODE_XOR           0x10 /*   XOR control mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_ES            0x14 /*   Enclosure services mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_PSLUN         0x18 /*   Protocol-specific LUN mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_PSPORT        0x19 /*   Protocol-specific port mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_POWER         0x1a /*   Power condition mode page */
+#define SCSIRESP_MODESENSE_PGCCODE_IE            0x1c /*   Informational exceptions control mode page (0x1c/0x00) */
+#define SCSIRESP_MODESENSE_PGCCODE_BC            0x1c /*   Background control mode page (0x1c/0x01) */
+#define SCSIRESP_MODESENSE_PGCCODE_RETURNALL     0x3f /*   Return all mode pages */
+                                                      /* Direct-access caching mode page */
+#define SCSIRESP_CACHINGMODEPG_PS                0x80 /*   Byte 0, Bit 7: PS */
+#define SCSIRESP_CACHINGMODEPG_SPF               0x60 /*   Byte 0, Bit 6: SPF */
+#define SCSIRESP_CACHINGMODEPG_IC                0x80 /*   Byte 2, Bit 7: IC */
+#define SCSIRESP_CACHINGMODEPG_ABPF              0x40 /*   Byte 2, Bit 6: ABPF */
+#define SCSIRESP_CACHINGMODEPG_CAP               0x20 /*   Byte 2, Bit 5: CAP */
+#define SCSIRESP_CACHINGMODEPG_DISC              0x10 /*   Byte 2, Bit 4: DISC */
+#define SCSIRESP_CACHINGMODEPG_SIZE              0x08 /*   Byte 2, Bit 3: SIZE */
+#define SCSIRESP_CACHINGMODEPG_WCE               0x04 /*   Byte 2, Bit 2: Write cache enable (WCE) */
+#define SCSIRESP_CACHINGMODEPG_MF                0x02 /*   Byte 2, Bit 1: MF */
+#define SCSIRESP_CACHINGMODEPG_RCD               0x01 /*   Byte 2, Bit 0: Read cache disable (RCD) */
 
 #define SCSIRESP_MODEPARMHDR_DAPARM_WP           0x80 /* Bit 7: WP (Direct-access block devices only) */
 #define SCSIRESP_MODEPARMHDR_DAPARM_DBPFUA       0x10 /* Bit 4: DBOFUA (Direct-access block devices only) */
@@ -546,6 +557,11 @@
 #define SCSIRESP_PAGEFMT_PS                      0x80 /* Bit 7: PS */
 #define SCSIRESP_PAGEFMT_SPF                     0x40 /* Bit 6: SPF */
 #define SCSIRESP_PAGEFMT_PGCODEMASK              0x3f /* Bits 0-5: Page code */
+
+/* Prevent / Allow Medium Removal */
+
+#define SCSICMD_PREVENTMEDIUMREMOVAL_TRANSPORT   0x01 /* Removal prohibited from data transport */
+#define SCSICMD_PREVENTMEDIUMREMOVAL_MCHANGER    0x02 /* Removal prohibited from medium changer */
 
 /* Read 6 */
 
@@ -568,30 +584,42 @@
 /* Read 10 */
 
 #define SCSICMD_READ10FLAGS_RDPROTECTMASK        0xe0
-#define SCSICMD_READ10FLAGS_DPO                  0x10
+#define SCSICMD_READ10FLAGS_DPO                  0x10 /* Disable Page Out */
 #define SCSICMD_READ10FLAGS_FUA                  0x08
 #define SCSICMD_READ10FLAGS_FUANV                0x02
 
 /* Write 10 */
 
 #define SCSICMD_WRITE10FLAGS_WRPROTECTMASK       0xe0
-#define SCSICMD_WRITE10FLAGS_DPO                 0x10
+#define SCSICMD_WRITE10FLAGS_DPO                 0x10 /* Disable Page Out */
 #define SCSICMD_WRITE10FLAGS_FUA                 0x08
 #define SCSICMD_WRITE10FLAGS_FUANV               0x02
+
+/* Verify 10 */
+
+#define SCSICMD_VERIFY10_VRPROTECTMASK           0xe0 /* Byte 1: Bits 5-7: VRPROTECT */
+#define SCSICMD_VERIFY10_DPO                     0x10 /* Byte 1: Bit 4: Disable Page Out (DPO) */
+#define SCSICMD_VERIFY10_BYTCHK                  0x02 /* Byte 1: Bit 2: BytChk */
 
 /* Read 12 */
 
 #define SCSICMD_READ12FLAGS_RDPROTECTMASK        0xe0
-#define SCSICMD_READ13FLAGS_DPO                  0x10
+#define SCSICMD_READ13FLAGS_DPO                  0x10 /* Disable Page Out */
 #define SCSICMD_READ14FLAGS_FUA                  0x08
 #define SCSICMD_READ15FLAGS_FUANV                0x02
 
 /* Write 12 */
 
 #define SCSICMD_WRITE12FLAGS_WRPROTECTMASK       0xe0
-#define SCSICMD_WRITE12FLAGS_DPO                 0x10
+#define SCSICMD_WRITE12FLAGS_DPO                 0x10 /* Disable Page Out */
 #define SCSICMD_WRITE12FLAGS_FUA                 0x08
 #define SCSICMD_WRITE12FLAGS_FUANV               0x02
+
+/* Verify 12 */
+
+#define SCSICMD_VERIFY12_VRPROTECTMASK           0xe0 /* Byte 1: Bits 5-7: VRPROTECT */
+#define SCSICMD_VERIFY12_DPO                     0x10 /* Byte 1: Bit 4: Disable Page Out (DPO) */
+#define SCSICMD_VERIFY12_BYTCHK                  0x02 /* Byte 1: Bit 2: BytChk */
 
 /****************************************************************************
  * Public Types
@@ -723,27 +751,82 @@ struct scsiresp_subpageformat_s
   ubyte parms[1];     /* 4-n: Mode parameters */
 };
 
+struct scsiresp_cachingmodepage_s
+{
+  ubyte pgcode;      /* 0: Bit 7: PS; Bit 6: SPF, Bits 0-5: page code == 8 */
+  ubyte len;         /* 1: Page length (18) */
+  ubyte flags1;      /* 2: See SCSIRESP_CACHINGMODEPG_* definitions */
+  ubyte priority;    /* 3: Bits 4-7: Demand read retention priority; Bits 0-3: Write retention priority */
+  ubyte dpflen[2];   /* 4-5: Disable prefetch transfer length */
+  ubyte minpf[2];    /* 6-7: Minimum pre-fetch */
+  ubyte maxpf[2];    /* 8-9: Maximum pre-fetch */
+  ubyte maxpfc[2];   /* 10-11: Maximum pref-fetch ceiling */
+  ubyte flags2;      /* 12: See SCSIRESP_CACHINGMODEPG_* definitions */
+  ubyte nsegments;   /* 13: Number of cache segments */
+  ubyte segsize[2];  /* 14-15: Cache segment size */
+  ubyte reserved;    /* 16: Reserved */
+  ubyte obsolete[3]; /* 17-19: Obsolete */
+};
+
 /* Format structures for selected SCSI block commands */
 
 struct scsicmd_read6_s
 {
-  ubyte opcode;        /* 0x08 */
-  ubyte mslba;         /* Bits 5-7: reserved; Bits 0-6: MS Logical Block Address (LBA) */
-  ubyte lslba[2];      /* LS Logical Block Address (LBA) */
-  ubyte xferlen;       /* Transfer length */
-  ubyte control;       /* Control */
+  ubyte opcode;        /* 0: 0x08 */
+  ubyte mslba;         /* 1: Bits 5-7: reserved; Bits 0-6: MS Logical Block Address (LBA) */
+  ubyte lslba[2];      /* 2-3: LS Logical Block Address (LBA) */
+  ubyte xferlen;       /* 4: Transfer length */
+  ubyte control;       /* 5: Control */
 };
 #define SCSICMD_READ6_SIZEOF 6
 
 struct scsicmd_write6_s
 {
-  ubyte opcode;        /* 0x0a */
-  ubyte mslba;         /* Bits 5-7: reserved; Bits 0-6: MS Logical Block Address (LBA) */
-  ubyte lslba[2];      /* LS Logical Block Address (LBA) */
-  ubyte xferlen;       /* Transfer length */
-  ubyte control;       /* Control */
+  ubyte opcode;        /* 0: 0x0a */
+  ubyte mslba;         /* 1: Bits 5-7: reserved; Bits 0-6: MS Logical Block Address (LBA) */
+  ubyte lslba[2];      /* 2-3: LS Logical Block Address (LBA) */
+  ubyte xferlen;       /* 4: Transfer length */
+  ubyte control;       /* 5: Control */
 };
 #define SCSICMD_WRITE6_SIZEOF 6
+
+struct scsicmd_startstopunit_s
+{
+  ubyte opcode;        /* 0: 0x1b */
+  ubyte immed;         /* 1: Bits 2-7: Reserved, Bit 0: Immed */
+  ubyte reserved;      /* 2: reserved */
+  ubyte pcm;           /* 3: Bits 4-7: Reserved, Bits 0-3: Power condition modifier */
+  ubyte pc;            /* 4: Bits 4-7: Power condition, Bit 2: NO_FLUSH, Bit 1: LOEJ, Bit 0: START */
+  ubyte control;       /* 5: Control */
+};
+#define SCSICMD_STARTSTOPUNIT_SIZEOF 6
+
+struct scsicmd_preventmediumremoval_s
+{
+  ubyte opcode;        /* 0: 0x1e */
+  ubyte reserved[3]:   /* 1-3: Reserved */
+  ubyte prevent;       /* 4: Bits 2-7: Reserved, Bits 0:1: prevent */
+  ubyte control;       /* 5: Control */
+};
+#define SCSICMD_PREVENTMEDIUMREMOVAL_SIZEOF 6
+
+struct scsicmd_readcapacity10_s
+{
+  ubyte opcode;        /* 0: 0x25 */
+  ubyte reserved;      /* 1: Bits 1-7: Reserved, Bit 0: Obsolete */
+  ubyte lba[4];        /* 2-5: Logical block address (LBA) */
+  ubyte reserved[2;    /* 6-7: Reserved */
+  ubyte pmi;           /* 8: Bits 1-7 Reserved; Bit 0: PMI */
+  ubyte control;       /* 9: Control */
+};
+#define SCSICMD_READCAPACITY10_SIZEOF 10
+
+struct scsiresp_readcapacity10_s
+{
+  ubyte lba[4];        /* 0-3: Returned logical block address (LBA) */
+  ubyte blklen[4];     /* 4-7: Logical block length (in bytes) */
+};
+#define SCSIRESP_READCAPACITY10_SIZEOF 8
 
 struct scsicmd_read10_s
 {
@@ -766,6 +849,28 @@ struct scsicmd_write10_s
   ubyte control;       /* 9: Control */
 };
 #define SCSICMD_WRITE10_SIZEOF 10
+
+struct scsicmd_verify10_s
+{
+  ubyte opcode;        /* 0: 0x2f */
+  ubyte flags;         /* 1: See SCSICMD_VERIFY10_* definitions */
+  ubyte lba[4];        /* 2-5: Logical block address (LBA) */
+  ubyte groupno;       /* 6: Bit 7: restricted; Bits 5-6: Reserved, Bits 0-4: Group number */
+  ubyte len[2];        /* 7-8: Verification length (in blocks) */
+  ubyte control;       /* 9: Control */
+};
+#define SCSICMD_VERIFY10_SIZEOF 10
+
+struct scsicmd_synchronizecache10_s
+{
+  ubyte opcode;        /* 0: 0x35 */
+  ubyte flags;         /* 1: See SCSICMD_SYNCHRONIZECACHE10_* definitions */
+  ubyte lba[4];        /* 2-5: Logical block address (LBA) */
+  ubyte groupno;       /* 6: Bit 7: restricted; Bits 5-6: Reserved, Bits 0-4: Group number */
+  ubyte len[2];        /* 7-8: Number of logical blocks */
+  ubyte control;       /* 9: Control */
+};
+#define SCSICMD_SYNCHRONIZECACHE10_SIZEOF 10
 
 struct scsicmd_modeselect10_s
 {
@@ -799,6 +904,17 @@ struct scsicmd_modesense10_s
 };
 #define SCSICMD_MODESENSE10_SIZEOF 10
 
+struct scsicmd_readcapacity16_s
+{
+  ubyte opcode;        /* 0: 0x9e */
+  ubyte action;        /* 1: Bits 5-7: Reserved, Bits 0-4: Service action */
+  ubyte lba[8];        /* 2-9: Logical block address (LBA) */
+  ubyte len[4];        /* 10-13: Allocation length */
+  ubyte reserved;      /* 14: Reserved */
+  ubyte control;       /* 15: Control */
+};
+#define SCSICMD_READCAPACITY16_SIZEOF 16
+
 struct scsicmd_read12_s
 {
   ubyte opcode;        /* 0xa8 */
@@ -820,6 +936,17 @@ struct scsicmd_write12_s
   ubyte control;      /* Control */
 };
 #define SCSICMD_WRITE12_SIZEOF 12
+
+struct scsicmd_verify12_s
+{
+  ubyte opcode;        /* 0: 0xaf */
+  ubyte flags;         /* 1: See SCSICMD_VERIFY12_* definitions */
+  ubyte lba[4];        /* 2-5: Logical block address (LBA) */
+  ubyte len[4];        /* 6-9: Verification length */
+  ubyte groupno;       /* 10: Bit 7: restricted; Bits 5-6: Reserved, Bits 0-4: Group number */
+  ubyte control;       /* 11: Control */
+};
+#define SCSICMD_VERIFY12_SIZEOF 12
 
 /****************************************************************************
  * Public Functions
