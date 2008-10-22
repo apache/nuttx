@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/usbdev/usbdev_scsi.h
+ * include/nuttx/scsi.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -43,8 +43,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_USBDV_USBDEV_SCSI_H
-#define __DRIVERS_USBDV_USBDEV_SCSI_H
+#ifndef __INCLUDE_NUTTX_SCSI_H
+#define __INCLUDE_NUTTX_SCSI_H
 
 /****************************************************************************
  * Included Files
@@ -450,7 +450,7 @@
 
 #define SCSIRESP_INQUIRYFLAGS3_SCCS              0x80  /* Bit 8: SCCS */
 #define SCSIRESP_INQUIRYFLAGS3_ACC               0x40  /* Bit 7: ACC */
-#define SCSIRESP_INQUIRYFLAGS3_TPGSMASK          0x30  /* Bits 4-5: TPGS
+#define SCSIRESP_INQUIRYFLAGS3_TPGSMASK          0x30  /* Bits 4-5: TPGS */
 #define SCSIRESP_INQUIRYFLAGS3_3PC               0x08  /* Bit 3: 3PC */
 #define SCSIRESP_INQUIRYFLAGS3_PROTECT           0x01  /* Bit 0: Protect */
 
@@ -604,9 +604,9 @@
 /* Read 12 */
 
 #define SCSICMD_READ12FLAGS_RDPROTECTMASK        0xe0
-#define SCSICMD_READ13FLAGS_DPO                  0x10 /* Disable Page Out */
-#define SCSICMD_READ14FLAGS_FUA                  0x08
-#define SCSICMD_READ15FLAGS_FUANV                0x02
+#define SCSICMD_READ12FLAGS_DPO                  0x10 /* Disable Page Out */
+#define SCSICMD_READ12FLAGS_FUA                  0x08
+#define SCSICMD_READ12FLAGS_FUANV                0x02
 
 /* Write 12 */
 
@@ -667,9 +667,9 @@ struct scsiresp_inquiry_s
 {
   /* Mandatory */
 
-  ubyte qualtype       /* 0: Bits 5-7: Peripheral qualifier; Bits 0-4: Peripheral device type */
+  ubyte qualtype;      /* 0: Bits 5-7: Peripheral qualifier; Bits 0-4: Peripheral device type */
   ubyte flags1;        /* 1: See SCSIRESP_INQUIRY_FLAGS1_* */
-  ubyre version;       /* 2: Version */
+  ubyte version;       /* 2: Version */
   ubyte flags2;        /* 3: See SCSIRESP_INQUIRY_FLAGS2_* */
   ubyte len;           /* 4: Additional length */
   ubyte flags3;        /* 5: See SCSIRESP_INQUIRY_FLAGS3_* */
@@ -694,7 +694,7 @@ struct scsiresp_inquiry_s
   ubyte version8[2];   /* 72-73: Version Descriptor 8 */
   ubyte reserved2[22]; /* 74-95: Reserved */
                        /* 96-: Vendor-specific parameters may follow */
-}
+};
 #define SCSIRESP_INQUIRY_SIZEOF 36 /* Minimum size */
 
 struct scsicmd_modeselect6_s
@@ -775,7 +775,7 @@ struct scsicmd_read6_s
   ubyte opcode;        /* 0: 0x08 */
   ubyte mslba;         /* 1: Bits 5-7: reserved; Bits 0-6: MS Logical Block Address (LBA) */
   ubyte lslba[2];      /* 2-3: LS Logical Block Address (LBA) */
-  ubyte xferlen;       /* 4: Transfer length */
+  ubyte xfrlen;        /* 4: Transfer length */
   ubyte control;       /* 5: Control */
 };
 #define SCSICMD_READ6_SIZEOF 6
@@ -785,7 +785,7 @@ struct scsicmd_write6_s
   ubyte opcode;        /* 0: 0x0a */
   ubyte mslba;         /* 1: Bits 5-7: reserved; Bits 0-6: MS Logical Block Address (LBA) */
   ubyte lslba[2];      /* 2-3: LS Logical Block Address (LBA) */
-  ubyte xferlen;       /* 4: Transfer length */
+  ubyte xfrlen;        /* 4: Transfer length */
   ubyte control;       /* 5: Control */
 };
 #define SCSICMD_WRITE6_SIZEOF 6
@@ -804,7 +804,7 @@ struct scsicmd_startstopunit_s
 struct scsicmd_preventmediumremoval_s
 {
   ubyte opcode;        /* 0: 0x1e */
-  ubyte reserved[3]:   /* 1-3: Reserved */
+  ubyte reserved[3];   /* 1-3: Reserved */
   ubyte prevent;       /* 4: Bits 2-7: Reserved, Bits 0:1: prevent */
   ubyte control;       /* 5: Control */
 };
@@ -813,9 +813,9 @@ struct scsicmd_preventmediumremoval_s
 struct scsicmd_readcapacity10_s
 {
   ubyte opcode;        /* 0: 0x25 */
-  ubyte reserved;      /* 1: Bits 1-7: Reserved, Bit 0: Obsolete */
+  ubyte reserved1;     /* 1: Bits 1-7: Reserved, Bit 0: Obsolete */
   ubyte lba[4];        /* 2-5: Logical block address (LBA) */
-  ubyte reserved[2;    /* 6-7: Reserved */
+  ubyte reserved2[2];  /* 6-7: Reserved */
   ubyte pmi;           /* 8: Bits 1-7 Reserved; Bit 0: PMI */
   ubyte control;       /* 9: Control */
 };
@@ -933,7 +933,7 @@ struct scsicmd_write12_s
   ubyte lba[4];        /* Logical Block Address (LBA) */
   ubyte xfrlen[4];     /* Transfer length */
   ubyte groupno;       /* Bit 7: restricted; Bits 5-6: reserved; Bits 0-6: group number */
-  ubyte control;      /* Control */
+  ubyte control;       /* Control */
 };
 #define SCSICMD_WRITE12_SIZEOF 12
 
@@ -964,4 +964,5 @@ extern "C" {
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __DRIVERS_USBDV_USBDEV_SCSI_H */
+
+#endif /* __INCLUDE_NUTTX_SCSI_H */

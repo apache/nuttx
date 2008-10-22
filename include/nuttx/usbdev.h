@@ -341,6 +341,103 @@ EXTERN int usbdev_unregister(FAR struct usbdevclass_driver_s *driver);
 
 EXTERN int usbdev_serialinitialize(int minor);
 
+/****************************************************************************
+ * Name: usbstrg_configure
+ *
+ * Description:
+ *   One-time initialization of the USB storage driver.  The initialization
+ *   sequence is as follows:
+ *
+ *   1. Call usbstrg_configure to perform one-time initialization specifying
+ *      the number of luns.
+ *   2. Call usbstrg_bindlun to configure each supported LUN
+ *   3. Call usbstrg_exportluns when all LUNs are configured
+ *
+ * Input Parameters:
+ *   nluns  - the number of LUNs that will be registered
+ *   handle - Location to return a handle that is used in other API calls.
+ *
+ * Returned Value:
+ *   0 on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+EXTERN int usbstrg_configure(unsigned int nluns, void **handle);
+
+/****************************************************************************
+ * Name: usbstrg_bindlun
+ *
+ * Description:
+ *   Bind the block driver specified by drvrpath to a USB storage LUN.
+ *
+ * Input Parameters:
+ *   handle      - The handle returned by a previous call to usbstrg_configure().
+ *   drvrpath    - the full path to the block driver
+ *   startsector - A sector offset into the block driver to the start of the
+ *                 partition on drvrpath (0 if no partitions)
+ *   nsectors    - The number of sectors in the partition (if 0, all sectors
+ *                 to the end of the media will be exported).
+ *   lunno       - the LUN to bind to
+ *
+ * Returned Value:
+ *  0 on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+EXTERN int usbstrg_bindlun(FAR void *handle, FAR const char *drvrpath,
+                           unsigned int lunno, off_t startsector, size_t nsectors,
+                            boolean readonly);
+
+/****************************************************************************
+ * Name: usbstrg_unbindlun
+ *
+ * Description:
+ *   Un-bind the block driver for the specified LUN
+ *
+ * Input Parameters:
+ *   handle - The handle returned by a previous call to usbstrg_configure().
+ *   lun    - the LUN to unbind from
+ *
+ * Returned Value:
+ *  0 on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+EXTERN int usbstrg_unbindlun(FAR void *handle, unsigned int lunno);
+
+/****************************************************************************
+ * Name: usbstrg_exportluns
+ *
+ * Description:
+ *   After all of the LUNs have been bound, this function may be called
+ *   in order to export those LUNs in the USB storage device.
+ *
+ * Input Parameters:
+ *   handle - The handle returned by a previous call to usbstrg_configure().
+ *
+ * Returned Value:
+ *   0 on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+EXTERN int usbstrg_exportluns(FAR void *handle);
+
+/****************************************************************************
+ * Name: usbstrg_uninitialize
+ *
+ * Description:
+ *   Un-initialize the USB storage class driver
+ *
+ * Input Parameters:
+ *   handle - The handle returned by a previous call to usbstrg_configure().
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+EXTERN void usbstrg_uninitialize(FAR void *handle);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
