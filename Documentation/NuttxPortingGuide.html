@@ -1535,6 +1535,16 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
 </ul>
 
+<h2>SPI-based MMC/SD driver<h2>
+<ul>
+  <li>
+    <code>CONFIG_MMCSD_NSLOTS</code>: Number of MMC/SD slots supported by the driver. Default is one.
+  </li>
+  <li>
+    <code>CONFIG_MMCSD_READONLY</code>: Provide read-only access.  Default is Read/Write
+  </li>
+</ul>
+
 <h2>Network Support</h2>
 <h3>TCP/IP and UDP support via uIP</h2>
 <ul>
@@ -1656,6 +1666,9 @@ The system can be re-made subsequently by just typing <code>make</code>.
 <h3>USB Serial Device Class Driver</h3>
 <ul>
   <li>
+    <code>CONFIG_USBSER</code>: Enable compilation of the USB serial driver
+  </li>
+  <li>
     <code>CONFIG_USBSER_EPINTIN</code>: The logical 7-bit address of a hardware endpoint that supports interrupt IN operation
   </li>
   <li>
@@ -1680,6 +1693,10 @@ The system can be re-made subsequently by just typing <code>make</code>.
 
 <h3>USB Storage Device Configuration</h3>
 <ul>
+  <li>
+    <code>CONFIG_USBSTRG</code>:
+    Enable compilation of the USB storage driver
+  </li>
   <li>
     <code>CONFIG_USBSTRG_EP0MAXPACKET</code>:
     Max packet size for endpoint 0
