@@ -629,7 +629,7 @@
 
 struct scsicmd_requestsense_s
 {
-  ubyte opcode;        /* 0: 0x12 */
+  ubyte opcode;        /* 0: 0x03 */
   ubyte flags;         /* 1: See SCSICMD_REQUESTSENSE_FLAGS_* */
   ubyte reserved[2];   /* 2-3: Reserved */
   ubyte len;           /* 4: Allocation length */
