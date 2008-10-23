@@ -336,6 +336,15 @@ EXTERN FAR struct filelist *files_alloclist(void);
 EXTERN int files_addreflist(FAR struct filelist *list);
 EXTERN int files_releaselist(FAR struct filelist *list);
 EXTERN int files_dup(FAR struct file *filep1, FAR struct file *filep2);
+
+/* fs_openblockdriver.c ******************************************************/
+
+EXTERN int open_blockdriver(FAR const char *pathname, int mountflags,
+                            FAR struct inode **ppinode);
+
+/* fs_closeblockdriver.c *****************************************************/
+
+EXTERN int close_blockdriver(FAR struct inode *inode);
 #endif
 
 /* lib_fopen.c **************************************************************/

@@ -234,15 +234,6 @@ EXTERN void files_release(int filedes);
 EXTERN int find_blockdriver(FAR const char *pathname, int mountflags,
                             FAR struct inode **ppinode);
 
-/* fs_openblockdriver.c ******************************************************/
-
-EXTERN int open_blockdriver(FAR const char *pathname, int mountflags,
-                            FAR struct inode **ppinode);
-
-/* fs_closeblockdriver.c *****************************************************/
-
-EXTERN int close_blockdriver(FAR struct inode *inode);
-
 #undef EXTERN
 #if defined(__cplusplus)
 }
