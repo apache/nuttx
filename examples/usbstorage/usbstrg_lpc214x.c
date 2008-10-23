@@ -66,7 +66,6 @@
 #else
    /* Add configuration for new LPC214x boards here */
 #  error "Unrecognized LPC214x board"
-#  undef CONFIG_EXAMPLES_USBSTRG_HAVEUSBDEV
 #endif
 
 /****************************************************************************
