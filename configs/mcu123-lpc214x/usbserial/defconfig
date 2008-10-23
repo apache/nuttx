@@ -282,12 +282,23 @@ CONFIG_PREALLOC_WDOGS=4
 CONFIG_PREALLOC_TIMERS=4
 
 #
-# FAT filesystem configuration
+# Filesystem configuration
+#
 # CONFIG_FS_FAT - Enable FAT filesystem support
 # CONFIG_FAT_SECTORSIZE - Max supported sector size
 # CONFIG_FS_ROMFS - Enable ROMFS filesystem support
 CONFIG_FS_FAT=n
 CONFIG_FS_ROMFS=n
+
+#
+# SPI-based MMC/SD driver
+#
+# CONFIG_MMCSD_NSLOTS
+#   Number of MMC/SD slots supported by the driver
+# CONFIG_MMCSD_READONLY
+#   Provide read-only access (default is read/write)
+CONFIG_MMCSD_NSLOTS=1
+CONFIG_MMCSD_READONLY=n
 
 #
 # TCP/IP and UDP support via uIP
@@ -394,6 +405,8 @@ CONFIG_LPC214X_USBDEV_DMAINTMASK=0
 #
 # USB Serial Device Configuration
 #
+# CONFIG_USBSER
+#   Enable compilation of the USB serial driver
 # CONFIG_USBSER_EPINTIN
 #   The logical 7-bit address of a hardware endpoint that supports
 #   interrupt IN operation
@@ -411,6 +424,7 @@ CONFIG_LPC214X_USBDEV_DMAINTMASK=0
 #   The product ID code/string
 # CONFIG_USBSER_RXBUFSIZE and CONFIG_USBSER_TXBUFSIZE
 #   Size of the serial receive/transmit buffers
+CONFIG_USBSER=y
 CONFIG_USBSER_EPINTIN=1
 CONFIG_USBSER_EPBULKOUT=2
 CONFIG_USBSER_EPBULKIN=5
@@ -426,6 +440,8 @@ CONFIG_USBSER_TXBUFSIZE=512
 #
 # USB Storage Device Configuration
 #
+# CONFIG_USBSTRG
+#   Enable compilation of the USB storage driver
 # CONFIG_USBSTRG_EP0MAXPACKET
 #   Max packet size for endpoint 0
 # CONFIG_USBSTRG_EPBULKOUT and CONFIG_USBSTRG_EPBULKIN
@@ -443,6 +459,7 @@ CONFIG_USBSER_TXBUFSIZE=512
 #   The product ID code/string
 # CONFIG_USBSTRG_REMOVABLE
 #   Select if the media is removable
+CONFIG_USBSTRG=n
 CONFIG_USBSTRG_EP0MAXPACKET=64
 CONFIG_USBSTRG_EPBULKOUT=2
 CONFIG_USBSTRG_EPBULKIN=5

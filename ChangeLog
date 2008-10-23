@@ -508,4 +508,5 @@
 	* FAT: Fix access to unaligned 32-bit values in partion table (start sector & size)
 	* Fixed a problem with a un-initialized variable in the USB serial driver.
 	* Added USB storage NXP LPC214x configuration
+	* Added a test for USB storage under examples/usbstorage
 

@@ -361,6 +361,8 @@ CONFIG_DM320_USBDEV_DMA=n
 #
 # USB Serial Device Configuration
 #
+# CONFIG_USBSER
+#   Enable compilation of the USB serial driver
 # CONFIG_USBSER_EPINTIN
 #   The logical 7-bit address of a hardware endpoint that supports
 #   interrupt IN operation
@@ -378,6 +380,7 @@ CONFIG_DM320_USBDEV_DMA=n
 #   The product ID code/string
 # CONFIG_USBSER_RXBUFSIZE and CONFIG_USBSER_TXBUFSIZE
 #   Size of the serial receive/transmit buffers
+CONFIG_USBSER=n
 CONFIG_USBSER_EPINTIN=3
 CONFIG_USBSER_EPBULKOUT=2
 CONFIG_USBSER_EPBULKIN=1
@@ -393,6 +396,8 @@ CONFIG_USBSER_TXBUFSIZE=512
 #
 # USB Storage Device Configuration
 #
+# CONFIG_USBSTRG
+#   Enable compilation of the USB storage driver
 # CONFIG_USBSTRG_EP0MAXPACKET
 #   Max packet size for endpoint 0
 # CONFIG_USBSTRG_EPBULKOUT and CONFIG_USBSTRG_EPBULKIN
@@ -410,6 +415,7 @@ CONFIG_USBSER_TXBUFSIZE=512
 #   The product ID code/string
 # CONFIG_USBSTRG_REMOVABLE
 #   Select if the media is removable
+CONFIG_USBSTRG=n
 CONFIG_USBSTRG_EP0MAXPACKET=64
 CONFIG_USBSTRG_EPBULKOUT=2
 CONFIG_USBSTRG_EPBULKIN=1
