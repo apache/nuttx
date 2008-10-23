@@ -248,6 +248,17 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_DEV_PIPE_SIZE - Size, in bytes, of the buffer to allocated
 		  for pipe and FIFO support
 
+	Filesystem configuration
+		CONFIG_FS_FAT - Enable FAT filesystem support
+		CONFIG_FAT_SECTORSIZE - Max supported sector size
+		CONFIG_FS_ROMFS - Enable ROMFS filesystem support
+
+	SPI-based MMC/SD driver
+		CONFIG_MMCSD_NSLOTS - Number of MMC/SD slots supported by the
+		  driver. Default is one.
+		CONFIG_MMCSD_READONLY -  Provide read-only access.  Default is
+		  Read/Write
+
 	TCP/IP and UDP support via uIP
 		CONFIG_NET - Enable or disable all network features
 		CONFIG_NET_IPv6 - Build in support for IPv6
@@ -303,6 +314,8 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_USBDEV_TRACE_NRECORDS - Number of trace entries to remember
 
 	USB serial device class driver
+		CONFIG_USBSER
+		  Enable compilation of the USB serial driver
 		CONFIG_USBSER_EPINTIN
 		  The logical 7-bit address of a hardware endpoint that supports
 		  interrupt IN operation
@@ -322,7 +335,8 @@ defconfig -- This is a configuration file similar to the Linux
 		  Size of the serial receive/transmit buffers
 
 	USB Storage Device Configuration
-
+		CONFIG_USBSTRG
+		  Enable compilation of the USB storage driver
 		CONFIG_USBSTRG_EP0MAXPACKET
 		  Max packet size for endpoint 0
 		CONFIG_USBSTRGEPBULKOUT and CONFIG_USBSTRG_EPBULKIN
