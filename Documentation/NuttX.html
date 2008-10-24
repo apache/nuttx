@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: October 23, 2008</p>
+      <p>Last Updated: October 24, 2008</p>
     </td>
   </tr>
 </table>
@@ -356,7 +356,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>Network, serial, CAN, driver architecture.</li>
+      <li>Network, USB (device), serial, CAN, driver architecture.</li>
     </p>
 </tr>
 
@@ -374,7 +374,6 @@
       <li>Mount-able volumes.  Bind mountpoint, filesystem, and block device driver.</li>
     </p>
 </tr>
-
 <tr>
   <td><br></td>
   <td>
@@ -382,7 +381,6 @@
       <li>FAT12/16/32 filesystem support.</li>
     </p>
 </tr>
-
 <tr>
   <td><br></td>
   <td>
@@ -390,13 +388,13 @@
       <li>ROMFS filesystem support.</li>
     </p>
 </tr>
+
 <tr>
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
     <b>C Library</b>
   </td>
 </tr>
-
 <tr>
   <td><br></td>
   <td>
@@ -411,7 +409,6 @@
     <b>Networking</b>
   </td>
 </tr>
-
 <tr>
   <td><br></td>
   <td>
@@ -419,7 +416,6 @@
       <li>TCP/IP, UDP, ICMP stacks.</li>
     </p>
 </tr>
-
 <tr>
   <td><br></td>
   <td>
@@ -427,7 +423,6 @@
       <li>Small footprint (based on uIP).</li>
     </p>
 </tr>
-
 <tr>
   <td><br></td>
   <td>
@@ -435,7 +430,6 @@
       <li>BSD compatible socket layer.</li>
     </p>
 </tr>
-
 <tr>
   <td><br></td>
   <td>
@@ -450,7 +444,6 @@
     <b>USB Device Support</b>
   </td>
 </tr>
-
 <tr>
   <td><br></td>
   <td>
@@ -458,7 +451,6 @@
       <li><i>Gadget</i>-like architecture for USB device controller drivers and device-dependent USB class drivers.</li>
     </p>
 </tr>
-
 <tr>
   <td><br></td>
   <td>
@@ -466,12 +458,18 @@
       <li>USB device controller drivers available for the NXP LPC214x and TI DM320.</li>
     </p>
 </tr>
-
 <tr>
   <td><br></td>
   <td>
     <p>
       <li>Device-dependent USB class drivers available for USB serial.</li>
+    </p>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>Bult-in USB trace functionality for USB debug.</li>
     </p>
 </tr>
 
@@ -1141,6 +1139,9 @@ nuttx-0.3.17 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* Fixed a problem with a un-initialized variable in the USB serial driver.
 	* Added USB storage NXP LPC214x configuration
 	* Added a test for USB storage under examples/usbstorage
+	* Fixed a bug in the LPC214x USB driver: It was not properly clearing a HALTed
+	  endpoints (other than EP) on receipt of CLEAR FEATURES request.
+	* Added USB storage class device side driver (BBB)
 
 pascal-0.1.3 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
