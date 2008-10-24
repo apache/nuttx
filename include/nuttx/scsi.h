@@ -632,10 +632,11 @@ struct scsicmd_requestsense_s
   ubyte opcode;        /* 0: 0x03 */
   ubyte flags;         /* 1: See SCSICMD_REQUESTSENSE_FLAGS_* */
   ubyte reserved[2];   /* 2-3: Reserved */
-  ubyte len;           /* 4: Allocation length */
+  ubyte alloclen;      /* 4: Allocation length */
   ubyte control;       /* 5: Control */
 };
 #define SCSICMD_REQUESTSENSE_SIZEOF 6
+#define SCSICMD_REQUESTSENSE_MSSIZEOF 12 /* MS-Windows REQUEST SENSE with cbw->cdblen == 12 */
 
 struct scsiresp_fixedsensedata_s
 {
@@ -658,7 +659,7 @@ struct scscicmd_inquiry_s
   ubyte opcode;        /* 0: 0x12 */
   ubyte flags;         /* 1: See SCSICMD_INQUIRY_FLAGS_* */
   ubyte pagecode;      /* 2: Page code */
-  ubyte len[2];        /* 3-4: Allocation length */
+  ubyte alloclen[2];   /* 3-4: Allocation length */
   ubyte control;       /* 5: Control */
 };
 #define SCSICMD_INQUIRY_SIZEOF 6
@@ -713,7 +714,7 @@ struct scsicmd_modesense6_s
   ubyte flags;         /* 1: See SCSICMD_MODESENSE6_FLAGS_* */
   ubyte pcpgcode;      /* 2: Bits 6-7: PC, bits 0-5: page code */
   ubyte subpgcode;     /* 3: subpage code */
-  ubyte len;           /* 4: Allocation length */
+  ubyte alloclen;      /* 4: Allocation length */
   ubyte control;       /* 5: Control */
 };
 #define SCSICMD_MODESENSE6_SIZEOF 6
@@ -775,7 +776,7 @@ struct scsicmd_read6_s
   ubyte opcode;        /* 0: 0x08 */
   ubyte mslba;         /* 1: Bits 5-7: reserved; Bits 0-6: MS Logical Block Address (LBA) */
   ubyte lslba[2];      /* 2-3: LS Logical Block Address (LBA) */
-  ubyte xfrlen;        /* 4: Transfer length */
+  ubyte xfrlen;        /* 4: Transfer length (in contiguous logical blocks)*/
   ubyte control;       /* 5: Control */
 };
 #define SCSICMD_READ6_SIZEOF 6
@@ -785,7 +786,7 @@ struct scsicmd_write6_s
   ubyte opcode;        /* 0: 0x0a */
   ubyte mslba;         /* 1: Bits 5-7: reserved; Bits 0-6: MS Logical Block Address (LBA) */
   ubyte lslba[2];      /* 2-3: LS Logical Block Address (LBA) */
-  ubyte xfrlen;        /* 4: Transfer length */
+  ubyte xfrlen;        /* 4: Transfer length (in contiguous logical blocks) */
   ubyte control;       /* 5: Control */
 };
 #define SCSICMD_WRITE6_SIZEOF 6
@@ -830,12 +831,12 @@ struct scsiresp_readcapacity10_s
 
 struct scsicmd_read10_s
 {
-  ubyte opcode;        /* 0x28 */
-  ubyte flags;         /* See SCSICMD_READ10FLAGS_* */
-  ubyte lba[4];        /* Logical Block Address (LBA) */
-  ubyte groupno;       /* Bits 5-7: reserved; Bits 0-6: group number */
-  ubyte xfrlen[2];     /* Transfer length */
-  ubyte control;       /* Control */
+  ubyte opcode;        /* 0: 0x28 */
+  ubyte flags;         /* 1: See SCSICMD_READ10FLAGS_* */
+  ubyte lba[4];        /* 2-5: Logical Block Address (LBA) */
+  ubyte groupno;       /* 6: Bits 5-7: reserved; Bits 0-6: group number */
+  ubyte xfrlen[2];     /* 7-8: Transfer length (in contiguous logical blocks) */
+  ubyte control;       /* 9: Control */
 };
 #define SCSICMD_READ10_SIZEOF 10
 
@@ -845,7 +846,7 @@ struct scsicmd_write10_s
   ubyte flags;         /* 1: See SCSICMD_WRITE10FLAGS_* */
   ubyte lba[4];        /* 2-5: Logical Block Address (LBA) */
   ubyte groupno;       /* 6: Bits 5-7: reserved; Bits 0-6: group number */
-  ubyte xfrlen[2];     /* 7-8: Transfer length */
+  ubyte xfrlen[2];     /* 7-8: Transfer length (in contiguous logical blocks) */
   ubyte control;       /* 9: Control */
 };
 #define SCSICMD_WRITE10_SIZEOF 10
@@ -877,7 +878,7 @@ struct scsicmd_modeselect10_s
   ubyte opcode;        /* 0: 0x55 */
   ubyte flags;         /* 1: See SCSICMD_MODESELECT10_FLAGS_* */
   ubyte reserved[5];   /* 2-6: Reserved */
-  ubyte plen[2];       /* 7-8: Parameter list length */
+  ubyte parmlen[2];    /* 7-8: Parameter list length */
   ubyte control;       /* 9: Control */
 };
 #define SCSICMD_MODESELECT10_SIZEOF 10
@@ -899,7 +900,7 @@ struct scsicmd_modesense10_s
   ubyte pcpgcode;      /* 2: Bits 6-7: PC, bits 0-5: page code */
   ubyte subpgcode;     /* 3: subpage code */
   ubyte reserved[3];   /* 4-6: reserved */
-  ubyte len[2];        /* 7-8: Allocation length */
+  ubyte alloclen[2];   /* 7-8: Allocation length */
   ubyte control;       /* 9: Control */
 };
 #define SCSICMD_MODESENSE10_SIZEOF 10
@@ -917,23 +918,23 @@ struct scsicmd_readcapacity16_s
 
 struct scsicmd_read12_s
 {
-  ubyte opcode;        /* 0xa8 */
-  ubyte flags;         /* See SCSICMD_READ12FLAGS_* */
-  ubyte lba[4];        /* Logical Block Address (LBA) */
-  ubyte xfrlen[4];     /* Transfer length */
-  ubyte groupno;       /* Bit 7: restricted; Bits 5-6: reserved; Bits 0-6: group number */
-  ubyte control;       /* Control */
+  ubyte opcode;        /* 0: 0xa8 */
+  ubyte flags;         /* 1: See SCSICMD_READ12FLAGS_* */
+  ubyte lba[4];        /* 2-5: Logical Block Address (LBA) */
+  ubyte xfrlen[4];     /* 6-9: Transfer length (in contiguous logical blocks) */
+  ubyte groupno;       /* 10: Bit 7: restricted; Bits 5-6: reserved; Bits 0-6: group number */
+  ubyte control;       /* 11: Control */
 };
 #define SCSICMD_READ12_SIZEOF 12
 
 struct scsicmd_write12_s
 {
-  ubyte opcode;        /* 0xaa */
-  ubyte flags;         /* See SCSICMD_WRITE12FLAGS_* */
-  ubyte lba[4];        /* Logical Block Address (LBA) */
-  ubyte xfrlen[4];     /* Transfer length */
-  ubyte groupno;       /* Bit 7: restricted; Bits 5-6: reserved; Bits 0-6: group number */
-  ubyte control;       /* Control */
+  ubyte opcode;        /* 0: 0xaa */
+  ubyte flags;         /* 1: See SCSICMD_WRITE12FLAGS_* */
+  ubyte lba[4];        /* 2-5: Logical Block Address (LBA) */
+  ubyte xfrlen[4];     /* 6-9: Transfer length (in contiguous logical blocks) */
+  ubyte groupno;       /* 10: Bit 7: restricted; Bits 5-6: reserved; Bits 0-6: group number */
+  ubyte control;       /* 11: Control */
 };
 #define SCSICMD_WRITE12_SIZEOF 12
 
