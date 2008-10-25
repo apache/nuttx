@@ -512,5 +512,9 @@
 	* Fixed a bug in the LPC214x USB driver: It was not properly clearing a HALTed
 	  endpoints (other than EP) on receipt of CLEAR FEATURES request.
 	* Added USB storage class device side driver (BBB)
+	* Fixed a bug in the LPC214x USB driver: It was not properly handling request buffers
+	  larger then the endpoint's max packet (DM320 driver also fixed, untested)
+	* Added logic to the USB device interface:  A bit is needed to force the driver to
+	  to terminate an IN transfer with a short packet (zero-length if necessary).
 
 
