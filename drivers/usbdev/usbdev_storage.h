@@ -380,8 +380,6 @@ struct usbstrg_dev_s
 
   ubyte            nluns:4;           /* Number of LUNs */
   ubyte            config;            /* Configuration number */
-  ubyte            nwrq;              /* Number of queue write requests (in wrreqlist)*/
-  ubyte            nrdq;              /* Number of queue read requests (in epbulkout) */
 
   /* Endpoints */
 
@@ -389,7 +387,7 @@ struct usbstrg_dev_s
   FAR struct usbdev_ep_s  *epbulkout; /* Bulk OUT endpoint structure */
   FAR struct usbdev_req_s *ctrlreq;   /* Control request (for ep0 setup responses) */
 
-  /* SCSI commands */
+  /* SCSI command processing */
 
   struct usbstrg_lun_s    *lun;       /* Currently selected LUN */
   struct usbstrg_lun_s    *luntab;    /* Allocated table of all LUNs */
