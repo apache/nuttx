@@ -613,6 +613,7 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
 
           req->len     = len;
           req->private = reqcontainer;
+          req->flags   = USBDEV_REQFLAGS_NULLPKT;
           ret          = EP_SUBMIT(ep, req);
           if (ret != OK)
             {
@@ -1765,8 +1766,9 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
 
   if (ret >= 0)
     {
-      ctrlreq->len = min(len, ret);
-      ret          = EP_SUBMIT(dev->ep0, ctrlreq);
+      ctrlreq->len   = min(len, ret);
+      ctrlreq->flags = USBDEV_REQFLAGS_NULLPKT;
+      ret            = EP_SUBMIT(dev->ep0, ctrlreq);
       if (ret < 0)
         {
           usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPRESPQ), (uint16)-ret);

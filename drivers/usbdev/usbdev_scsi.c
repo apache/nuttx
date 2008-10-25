@@ -1998,8 +1998,9 @@ static int usbstrg_cmdreadstate(FAR struct usbstrg_dev_s *priv)
           req->len      = priv->nreqbytes;
           req->private  = privreq;
           req->callback = usbstrg_wrcomplete;
+          req->flags    = 0;
 
-          ret          = EP_SUBMIT(priv->epbulkin, req);
+          ret           = EP_SUBMIT(priv->epbulkin, req);
           if (ret != OK)
             {
               usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_CMDREADSUBMIT), (uint16)-ret);
@@ -2227,6 +2228,8 @@ static int usbstrg_cmdfinishstate(FAR struct usbstrg_dev_s *priv)
           req->len      = priv->nreqbytes;
           req->callback = usbstrg_wrcomplete;
           req->private  = privreq;
+          req->flags    = USBDEV_REQFLAGS_NULLPKT;
+
           ret           = EP_SUBMIT(priv->epbulkin, privreq->req);
           if (ret < 0)
             {
@@ -2367,10 +2370,12 @@ static int usbstrg_cmdstatusstate(FAR struct usbstrg_dev_s *priv)
 
   usbstrg_dumpdata("SCSCI CSW", (ubyte*)csw, USBSTRG_CSW_SIZEOF);
 
-  req->len          = USBSTRG_CSW_SIZEOF;
-  req->callback     = usbstrg_wrcomplete;
-  req->private      = privreq;
-  ret               = EP_SUBMIT(priv->epbulkin, req);
+  req->len       = USBSTRG_CSW_SIZEOF;
+  req->callback  = usbstrg_wrcomplete;
+  req->private   = privreq;
+  req->flags     = USBDEV_REQFLAGS_NULLPKT;
+
+  ret            = EP_SUBMIT(priv->epbulkin, req);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_SNDSTATUSSUBMIT), (uint16)-ret);

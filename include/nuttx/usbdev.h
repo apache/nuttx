@@ -175,6 +175,10 @@
 #define USB_SPEED_HIGH            3 /* USB 2.0 */
 #define USB_SPEED_VARIABLE        4 /* Wireless USB 2.5 */
 
+/* Request flags */
+
+#define USBDEV_REQFLAGS_NULLPKT   0 /* Terminate w/short packet; null packet if necessary */
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -187,6 +191,7 @@ struct usbdev_ep_s;
 struct usbdev_req_s
 {
   char   *buf;     /* Call: Buffer used for data; Return: Unchanged */
+  ubyte   flags;   /* See USBDEV_REQFLAGS_* definitions */
   uint16  len;     /* Call: Total length of data in buf; Return: Unchanged */
   uint16  xfrd;    /* Call: zero; Return: Bytes transferred so far */
   sint16  result;  /* Call: zero; Return: Result of transfer (O or -errno) */

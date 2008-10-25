@@ -584,7 +584,6 @@ static int usbstrg_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_
 
       flags = irqsave();
       sq_addlast((sq_entry_t*)reqcontainer, &priv->wrreqlist);
-      priv->nwrq++;     /* Count of write requests available */
       irqrestore(flags);
     }
 
@@ -677,7 +676,6 @@ static void usbstrg_unbind(FAR struct usbdev_s *dev)
        * been returned to the free list at this time -- we don't check)
        */
 
-      DEBUGASSERT(priv->nrdq == 0);
       for (i = 0; i < CONFIG_USBSTRG_NRDREQS; i++)
         {
           reqcontainer = &priv->rdreqs[i];
@@ -701,17 +699,14 @@ static void usbstrg_unbind(FAR struct usbdev_s *dev)
        */
 
       flags = irqsave();
-      DEBUGASSERT(priv->nwrq == CONFIG_USBSTRG_NWRREQS);
       while (!sq_empty(&priv->wrreqlist))
         {
           reqcontainer = (struct usbstrg_req_s *)sq_remfirst(&priv->wrreqlist);
           if (reqcontainer->req != NULL)
             {
               usbstrg_freereq(priv->epbulkin, reqcontainer->req);
-              priv->nwrq--;     /* Number of write requests queued */
             }
         }
-      DEBUGASSERT(priv->nwrq == 0);
       irqrestore(flags);
     }
 }
@@ -977,8 +972,9 @@ static int usbstrg_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *c
 
   if (ret >= 0)
     {
-      ctrlreq->len = min(len, ret);
-      ret          = EP_SUBMIT(dev->ep0, ctrlreq);
+      ctrlreq->len   = min(len, ret);
+      ctrlreq->flags = USBDEV_REQFLAGS_NULLPKT;
+      ret            = EP_SUBMIT(dev->ep0, ctrlreq);
       if (ret < 0)
         {
           usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_EPRESPQ), (uint16)-ret);
@@ -1160,7 +1156,6 @@ int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, ubyte config)
 
   /* Queue read requests in the bulk OUT endpoint */
 
-  DEBUGASSERT(priv->nrdq == 0);
   for (i = 0; i < CONFIG_USBSTRG_NRDREQS; i++)
     {
       privreq       = &priv->rdreqs[i];
@@ -1174,7 +1169,6 @@ int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, ubyte config)
           usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_RDSUBMIT), (uint16)-ret);
           goto errout;
         }
-      priv->nrdq++;
     }
 
   priv->config = config;
@@ -1246,7 +1240,6 @@ void usbstrg_wrcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req
 
   flags = irqsave();
   sq_addlast((sq_entry_t*)privreq, &priv->wrreqlist);
-  priv->nwrq++;
   irqrestore(flags);
 
   /* Process the received data unless this is some unusual condition */
@@ -1254,7 +1247,7 @@ void usbstrg_wrcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req
   switch (req->result)
     {
     case OK: /* Normal completion */
-      usbtrace(TRACE_CLASSWRCOMPLETE, priv->nwrq);
+      usbtrace(TRACE_CLASSWRCOMPLETE, req->xfrd);
       break;
 
     case -ESHUTDOWN: /* Disconnection */
@@ -1309,7 +1302,7 @@ void usbstrg_rdcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req
     {
     case 0: /* Normal completion */
       {
-        usbtrace(TRACE_CLASSRDCOMPLETE, priv->nrdq);
+        usbtrace(TRACE_CLASSRDCOMPLETE, req->xfrd);
 
         /* Add the filled read request from the rdreqlist */
 
@@ -1391,14 +1384,15 @@ void usbstrg_deferredresponse(FAR struct usbstrg_dev_s *priv, boolean failed)
   dev     = priv->usbdev;
   ctrlreq = priv->ctrlreq;
 
-  /* If no error occurs, response to the deferred setup command with a null
+  /* If no error occurs, respond to the deferred setup command with a null
    * packet.
    */
 
   if (!failed)
     {
-      ctrlreq->len = 0;
-      ret          = EP_SUBMIT(dev->ep0, ctrlreq);
+      ctrlreq->len   = 0;
+      ctrlreq->flags = USBDEV_REQFLAGS_NULLPKT;
+      ret            = EP_SUBMIT(dev->ep0, ctrlreq);
       if (ret < 0)
         {
           usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_DEFERREDRESPSUBMIT), (uint16)-ret);
