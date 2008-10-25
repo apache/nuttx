@@ -970,15 +970,18 @@ static int dm320_wrrequest(struct dm320_ep_s *privep)
            * bytes to send.
            */
 
+          privep->txnullpkt = 0;
           if (bytesleft > privep->ep.maxpacket)
             {
               nbytes = privep->ep.maxpacket;
-              privep->txnullpkt = 0;
             }
           else
             {
               nbytes = bytesleft;
-              privep->txnullpkt = (bytesleft == privep->ep.maxpacket);
+              if ((privreq->req.flags & USBDEV_REQFLAGS_NULLPKT) != 0)
+                {
+                  privep->txnullpkt = (bytesleft == privep->ep.maxpacket);
+                }
             }
 
           /* Send the largest number of bytes that we can in this packet */
@@ -1000,7 +1003,7 @@ static int dm320_wrrequest(struct dm320_ep_s *privep)
        * then we are finished with the transfer
        */
 
-      if (bytesleft <= 0 || !privep->txnullpkt)
+      if (bytesleft <= 0 && !privep->txnullpkt)
         {
           usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
           privep->txnullpkt = 0;
