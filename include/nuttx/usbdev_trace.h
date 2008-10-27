@@ -74,7 +74,28 @@
 #define TRACE_DEVERROR_ID        (0x0e00) /* USB controller driver error event */
 #define TRACE_CLSERROR_ID        (0x0f00) /* USB class driver error event */
 
-#define TRACE_NIDS               15
+#define TRACE_NIDS               16       /* Cannot exceed bits in usbtrace_idset_t */
+
+/* Bit settings for usbtrace_enable */
+
+#define TRACE_ID2BIT(id)         ((1) << ((id) >> 8))
+#define TRACE_INIT_BIT           TRACE_ID2BIT(TRACE_INIT_ID)
+#define TRACE_EP_BIT             TRACE_ID2BIT(TRACE_EP_ID)
+#define TRACE_DEV_BIT            TRACE_ID2BIT(TRACE_DEV_ID)
+#define TRACE_CLASS_BIT          TRACE_ID2BIT(TRACE_CLASS_ID)
+#define TRACE_CLASSAPI_BIT       TRACE_ID2BIT(TRACE_CLASSAPI_ID)
+#define TRACE_CLASSSTATE_BIT     TRACE_ID2BIT(TRACE_CLASSSTATE_ID)
+#define TRACE_INTENTRY_BIT       TRACE_ID2BIT(TRACE_INTENTRY_ID
+#define TRACE_INTDECODE_BIT      TRACE_ID2BIT(TRACE_INTDECODE_ID)
+#define TRACE_INTEXIT_BIT        TRACE_ID2BIT(TRACE_INTEXIT_ID)
+#define TRACE_OUTREQQUEUED_BIT   TRACE_ID2BIT(TRACE_OUTREQQUEUED_ID)
+#define TRACE_INREQQUEUED_BIT    TRACE_ID2BIT(TRACE_INREQQUEUED_ID)
+#define TRACE_READ_BIT           TRACE_ID2BIT(TRACE_READ_ID)
+#define TRACE_WRITE_BIT          TRACE_ID2BIT(TRACE_WRITE_ID)
+#define TRACE_COMPLETE_BIT       TRACE_ID2BIT(TRACE_COMPLETE_ID)
+#define TRACE_DEVERROR_BIT       TRACE_ID2BIT(TRACE_DEVERROR_ID)
+#define TRACE_CLSERROR_BIT       TRACE_ID2BIT(TRACE_CLSERROR_ID)
+#define TRACE_ALLBITS            ((usbtrace_idset_t)-1)
 
 /* Initialization events */
 
@@ -358,6 +379,12 @@ struct usbtrace_s
 
 typedef int (*trace_callback_t)(struct usbtrace_s *trace, void *arg);
 
+/* Bit mask input type for usbtrace_enable().  If  TRACE_NIDS grows beyond
+ * 16, then this will have to be changed to uint32
+ */
+
+typedef uint16 usbtrace_idset_t;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -374,18 +401,24 @@ extern "C" {
  * Name: usbtrace_enable
  *
  * Description:
- *  Enable/disable tracing
+ *  Enable/disable tracing per trace ID.  The initial state is all IDs enabled.
+ *
+ * Input Parameters:
+ *  idset - The bitset of IDs to be masked.  TRACE_ALLIDS enables all IDS; zero
+ *  masks all IDs.
+ *
+ * Returned Value:
+ *  The previous idset value.
  *
  * Assumptions:
- * - Initial state is enabled
  * - May be called from an interrupt handler
  *
  *******************************************************************************/
 
-#ifdef CONFIG_USBDEV_TRACE
-EXTERN void usbtrace_enable(boolean enable);
+#if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
+EXTERN usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset);
 #else
-#  define usbtrace_enable(enable)
+#  define usbtrace_enable(idset)
 #endif
 
 /*******************************************************************************

@@ -45,6 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/usbdev.h>
+#include <nuttx/usbdev_trace.h>
 
 #include "usbstrg.h"
 
@@ -81,6 +82,24 @@ int user_start(int argc, char *argv[])
 {
   void *handle;
   int ret;
+
+  /* Initialize USB trace output IDs */
+
+  usbtrace_enable(
+    TRACE_INIT_BIT|            /* Initialization events */
+    TRACE_EP_BIT|              /* Endpoint API calls */
+    TRACE_DEV_BIT|             /* USB device API calls */
+    TRACE_CLASS_BIT|           /* USB class driver API calls */
+    TRACE_CLASSAPI_BIT|        /* Other class driver system API calls */
+    TRACE_CLASSSTATE_BIT|      /* Track class driver state changes */
+    TRACE_OUTREQQUEUED_BIT|    /* Request queued for OUT endpoint */
+    TRACE_INREQQUEUED_BIT|     /* Request queued for IN endpoint */
+    TRACE_READ_BIT|            /* Read (OUT) action */
+    TRACE_WRITE_BIT|           /* Write (IN) action */
+    TRACE_COMPLETE_BIT|        /* Request completed */
+    TRACE_DEVERROR_BIT|        /* USB controller driver error event */
+    TRACE_CLSERROR_BIT         /* USB class driver error event */
+  );
 
   /* Register block drivers (architecture-specific) */
 
