@@ -99,6 +99,19 @@ int vdbg(const char *format, ...)
   va_end(ap);
   return ret;
 }
-#endif
+
+#ifdef CONFIG_ARCH_LOWPUTC
+int llvdbg(const char *format, ...)
+{
+  va_list ap;
+  int     ret;
+
+  va_start(ap, format);
+  ret = lib_lowvprintf(format, ap);
+  va_end(ap);
+  return ret;
+}
+#endif /* CONFIG_ARCH_LOWPUTC */
+#endif /* CONFIG_DEBUG_VERBOSE */
 #endif /* CONFIG_DEBUG */
 #endif /* CONFIG_CPP_HAVE_VARARGS */

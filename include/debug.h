@@ -79,8 +79,17 @@
 # ifdef CONFIG_DEBUG_VERBOSE
 #  define vdbg(format, arg...) \
      lib_rawprintf(EXTRA_FMT format EXTRA_ARG, ##arg)
+
+#     ifdef CONFIG_ARCH_LOWPUTC
+#       define llvdbg(format, arg...) \
+          lib_lowprintf(EXTRA_FMT format EXTRA_ARG, ##arg)
+#     else
+#         define llvdbg(x...)
+#     endif
+
 # else
 #  define vdbg(x...)
+#  define llvdbg(x...)
 # endif
 
 #else /* CONFIG_DEBUG */
@@ -88,69 +97,82 @@
 # define dbg(x...)
 # define lldbg(x...)
 # define vdbg(x...)
+# define llvdbg(x...)
 
 #endif /* CONFIG_DEBUG */
 
 /* Subsystem specific debug */
 
 #ifdef CONFIG_DEBUG_MM
-# define mdbg(format, arg...)   dbg(format, ##arg)
-# define mlldbg(format, arg...) lldbg(format, ##arg)
-# define mvdbg(format, arg...)  vdbg(format, ##arg)
+# define mdbg(format, arg...)    dbg(format, ##arg)
+# define mlldbg(format, arg...)  lldbg(format, ##arg)
+# define mvdbg(format, arg...)   vdbg(format, ##arg)
+# define mllvdbg(format, arg...) llvdbg(format, ##arg)
 #else
 # define mdbg(x...)
 # define mlldbg(x...)
 # define mvdbg(x...)
+# define mllvdbg(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_SCHED
-# define sdbg(format, arg...)   dbg(format, ##arg)
-# define slldbg(format, arg...) lldbg(format, ##arg)
-# define svdbg(format, arg...)  vdbg(format, ##arg)
+# define sdbg(format, arg...)    dbg(format, ##arg)
+# define slldbg(format, arg...)  lldbg(format, ##arg)
+# define svdbg(format, arg...)   vdbg(format, ##arg)
+# define sllvdbg(format, arg...) llvdbg(format, ##arg)
 #else
 # define sdbg(x...)
 # define slldbg(x...)
 # define svdbg(x...)
+# define sllvdbg(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_NET
-# define ndbg(format, arg...)   dbg(format, ##arg)
-# define nlldbg(format, arg...) lldbg(format, ##arg)
-# define nvdbg(format, arg...)  vdbg(format, ##arg)
+# define ndbg(format, arg...)    dbg(format, ##arg)
+# define nlldbg(format, arg...)  lldbg(format, ##arg)
+# define nvdbg(format, arg...)   vdbg(format, ##arg)
+# define nllvdbg(format, arg...) llvdbg(format, ##arg)
 #else
 # define ndbg(x...)
 # define nlldbg(x...)
 # define nvdbg(x...)
+# define nllvdbg(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_USB
-# define udbg(format, arg...)   dbg(format, ##arg)
-# define ulldbg(format, arg...) lldbg(format, ##arg)
-# define uvdbg(format, arg...)  vdbg(format, ##arg)
+# define udbg(format, arg...)    dbg(format, ##arg)
+# define ulldbg(format, arg...)  lldbg(format, ##arg)
+# define uvdbg(format, arg...)   vdbg(format, ##arg)
+# define ullvdbg(format, arg...) llvdbg(format, ##arg)
 #else
 # define udbg(x...)
 # define ulldbg(x...)
 # define uvdbg(x...)
+# define ullvdbg(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_FS
-# define fdbg(format, arg...)   dbg(format, ##arg)
-# define flldbg(format, arg...) lldbg(format, ##arg)
-# define fvdbg(format, arg...)  vdbg(format, ##arg)
+# define fdbg(format, arg...)    dbg(format, ##arg)
+# define flldbg(format, arg...)  lldbg(format, ##arg)
+# define fvdbg(format, arg...)   vdbg(format, ##arg)
+# define fllvdbg(format, arg...) llvdbg(format, ##arg)
 #else
 # define fdbg(x...)
 # define flldbg(x...)
 # define fvdbg(x...)
+# define fllvdbg(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_LIB
-# define ldbg(format, arg...)   dbg(format, ##arg)
-# define llldbg(format, arg...) lldbg(format, ##arg)
-# define lvdbg(format, arg...)  vdbg(format, ##arg)
+# define ldbg(format, arg...)    dbg(format, ##arg)
+# define llldbg(format, arg...)  lldbg(format, ##arg)
+# define lvdbg(format, arg...)   vdbg(format, ##arg)
+# define lllvdbg(format, arg...) llvdbg(format, ##arg)
 #else
 # define ldbg(x...)
 # define llldbg(x...)
 # define lvdbg(x...)
+# define lllvdbg(x...)
 #endif
 
 #else /* CONFIG_CPP_HAVE_VARARGS */
@@ -163,73 +185,89 @@
 # endif
 # ifndef CONFIG_DEBUG_VERBOSE
 #  define vdbg (void)
+#  ifndef CONFIG_ARCH_LOWPUTC
+#    define llvdbg (void)
+#  endif
 # endif
 #else
-# define dbg   (void)
-# define lldbg (void)
-# define vdbg  (void)
+# define dbg    (void)
+# define lldbg  (void)
+# define vdbg   (void)
+# define llvdbg (void)
 #endif
 
 /* Subsystem specific debug */
 
 #ifdef CONFIG_DEBUG_MM
-# define mdbg   dbg
-# define mlldbg lldbg
-# define mvdbg  vdbg
+# define mdbg    dbg
+# define mlldbg  lldbg
+# define mvdbg   vdbg
+# define mllvdbg llvdbg
 #else
-# define mdbg   (void)
-# define mlldbg (void)
-# define mvdbg  (void)
+# define mdbg    (void)
+# define mlldbg  (void)
+# define mvdbg   (void)
+# define mllvdbg (void)
 #endif
 
 #ifdef CONFIG_DEBUG_SCHED
-# define sdbg   dbg
-# define slldbg lldbg
-# define svdbg  vdbg
+# define sdbg    dbg
+# define slldbg  lldbg
+# define svdbg   vdbg
+# define sllvdbg llvdbg
 #else
-# define sdbg   (void)
-# define slldbg (void)
-# define svdbg  (void)
+# define sdbg    (void)
+# define slldbg  (void)
+# define svdbg   (void)
+# define sllvdbg (void)
 #endif
 
 #ifdef CONFIG_DEBUG_NET
-# define ndbg   dbg
-# define nlldbg lldbg
-# define nvdbg  vdbg
+# define ndbg    dbg
+# define nlldbg  lldbg
+# define nvdbg   vdbg
+# define nllvdbg llvdbg
 #else
-# define ndbg   (void)
-# define nlldbg (void)
-# define nvdbg  (void)
+# define ndbg    (void)
+# define nlldbg  (void)
+# define nvdbg   (void)
+# define nllvdbg (void)
 #endif
 
 #ifdef CONFIG_DEBUG_USB
-# define udbg   dbg
-# define ulldbg lldbg
-# define uvdbg  vdbg
+# define udbg    dbg
+# define ulldbg  lldbg
+# define uvdbg   vdbg
+# define ullvdbg llvdbg
 #else
-# define udbg   (void)
-# define ulldbg (void)
-# define uvdbg  (void)
+# define udbg    (void)
+# define ulldbg  (void)
+# define uvdbg   (void)
+# define ullvdbg (void)
 #endif
 
 #ifdef CONFIG_DEBUG_FS
-# define fdbg   dbg
-# define flldbg lldbg
-# define fvdbg  vdbg
+# define fdbg    dbg
+# define flldbg  lldbg
+# define fvdbg   vdbg
+# define fllvdbg llvdbg
 #else
-# define fdbg   (void)
-# define flldbg (void)
-# define fvdbg  (void)
+# define fdbg    (void)
+# define flldbg  (void)
+# define fvdbg   (void)
+# define fllvdbg (void)
 #endif
 
 #ifdef CONFIG_DEBUG_LIB
-# define ldbg   dbg
-# define llldbg lldbg
-# define lvdbg  vdbg
+# define ldbg    dbg
+# define llldbg  lldbg
+# define lvdbg   vdbg
+# define lllvdbg llvdbg
 #else
-# define ldbg   (void)
-# define llldbg (void)
-# define lvdbg  (void)
+# define ldbg    (void)
+# define llldbg  (void)
+# define lvdbg   (void)
+# define lllvdbg (void)
 #endif
 
 #endif /* CONFIG_CPP_HAVE_VARARGS */
@@ -280,6 +318,10 @@ EXTERN int lldbg(const char *format, ...);
 
 # ifdef CONFIG_DEBUG_VERBOSE
 EXTERN int vdbg(const char *format, ...);
+
+# ifdef CONFIG_ARCH_LOWPUTC
+EXTERN int llvdbg(const char *format, ...);
+# endif
 #endif
 #endif /* CONFIG_DEBUG */
 #endif /* CONFIG_CPP_HAVE_VARARGS */
