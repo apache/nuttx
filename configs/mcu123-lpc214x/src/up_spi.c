@@ -311,7 +311,7 @@ void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buf
 
       else if ((sr & LPC214X_SPI1SR_TFE) == 0)
         {
-          up_udelay(200);
+          up_udelay(100);
           sr = getreg8(LPC214X_SPI1_SR);
         }
     }
