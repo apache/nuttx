@@ -2073,7 +2073,7 @@ static int usbstrg_cmdwritestate(FAR struct usbstrg_dev_s *priv)
        * data to be written.
        */
 
-      privreq = (FAR struct usbstrg_req_s *)sq_peek(&priv->rdreqlist);
+      privreq = (FAR struct usbstrg_req_s *)sq_remfirst(&priv->rdreqlist);
 
       /* If there no request data available, then just return an error.
        * This will cause us to remain in the CMDWRITE state.  When a filled request is
@@ -2138,7 +2138,7 @@ static int usbstrg_cmdwritestate(FAR struct usbstrg_dev_s *priv)
       * to get the next read request.
       */
 
-      req->len      = priv->epbulkout->maxpacket;
+      req->len      = CONFIG_USBSTRG_BULKOUTREQLEN;
       req->private  = privreq;
       req->callback = usbstrg_rdcomplete;
 
@@ -2150,7 +2150,7 @@ static int usbstrg_cmdwritestate(FAR struct usbstrg_dev_s *priv)
 
       /* Did the host decide to stop early? */
 
-      if (xfrd != priv->epbulkout->maxpacket)
+      if (xfrd != CONFIG_USBSTRG_BULKOUTREQLEN)
         {
           priv->shortpacket = 1;
           goto errout;
