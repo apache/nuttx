@@ -2432,7 +2432,7 @@ void *usbstrg_workerthread(void *arg)
 
   /* Then loop until we are asked to terminate */
 
-  while (eventset != USBSTRG_EVENT_TERMINATEREQUEST)
+  while ((eventset & USBSTRG_EVENT_TERMINATEREQUEST) == 0)
     {
       /* Wait for some interesting event.  Note that we must both take the
        * lock (to eliminate race conditions with other threads) and disable
@@ -2453,70 +2453,59 @@ void *usbstrg_workerthread(void *arg)
 
       eventset         = priv->theventset;
       priv->theventset = USBSTRG_EVENT_NOEVENTS;
+
+      /* Were we awakened by some event that requires immediate action?
+       *
+       * - The USBSTRG_EVENT_DISCONNECT is signalled from the disconnect method
+       *   after all transfers have been stopped, when the host is disconnected.
+       *
+       * - The CUSBSTRG_EVENT_RESET is signalled when the bulk-storage-specific
+       *   USBSTRG_REQ_MSRESET EP0 setup received.  We must stop the current
+       *   operation and reinialize state.
+       *
+       * - The USBSTRG_EVENT_CFGCHANGE is signaled when the EP0 setup logic
+       *   receives a valid USB_REQ_SETCONFIGURATION request
+       *
+       * - The USBSTRG_EVENT_IFCHANGE is signaled when the EP0 setup logic
+       *   receives a valid USB_REQ_SETINTERFACE request
+       *
+       * - The USBSTRG_EVENT_ABORTBULKOUT event is signalled by the CMDFINISH
+       *   logic when there is a residue after processing a host-to-device
+       *   transfer.  We need to discard all incoming request.
+       *
+       * All other events are just wakeup calls and are intended only
+       * drive the state machine.
+       */
+
+      if ((eventset & (USBSTRG_EVENT_DISCONNECT|USBSTRG_EVENT_RESET|USBSTRG_EVENT_CFGCHANGE|
+                       USBSTRG_EVENT_IFCHANGE|USBSTRG_EVENT_ABORTBULKOUT)) != 0)
+        {
+          /* These events require that the current configuration be reset */
+
+          if ((eventset & USBSTRG_EVENT_IFCHANGE) != 0)
+            {
+              usbstrg_resetconfig(priv);
+            }
+
+         /* These events require that a new configuration be established */
+
+         if ((eventset & (USBSTRG_EVENT_CFGCHANGE|USBSTRG_EVENT_IFCHANGE)) != 0)
+           {
+             usbstrg_setconfig(priv, priv->thvalue);
+           }
+
+          /* These events required that we send a deferred EP0 setup response */
+
+          if ((eventset & (USBSTRG_EVENT_RESET|USBSTRG_EVENT_CFGCHANGE|USBSTRG_EVENT_IFCHANGE)) != 0)
+            {
+              usbstrg_deferredresponse(priv, FALSE);
+            }
+
+          /* For all of these events... terminate any transactions in progress */
+
+          priv->thstate = USBSTRG_STATE_IDLE;
+        }
       irqrestore(flags);
-
-      /* Were we awakened by some event that requires immediate action? */
-
-      /* The USBSTRG_EVENT_DISCONNECT is signalled from the disconnect method
-       * after all transfers have been stopped, when the host is disconnected.
-       */
-
-      if ((eventset & USBSTRG_EVENT_DISCONNECT) != 0)
-        {
-#warning LOGIC needed
-        }
-
-      /* Called with the bulk-storage-specific USBSTRG_REQ_MSRESET EP0 setup
-       * received.  We must stop the current operation and reinialize state.
-       */
-
-      if ((eventset & USBSTRG_EVENT_RESET) != 0)
-        {
-#warning LOGIC needed
-          priv->thstate = USBSTRG_STATE_IDLE;
-          usbstrg_deferredresponse(priv, FALSE);
-        }
-
-      /* The USBSTRG_EVENT_CFGCHANGE is signaled when the EP0 setup
-       * logic receives a USB_REQ_SETCONFIGURATION request
-       */
-
-      if ((eventset & USBSTRG_EVENT_CFGCHANGE) != 0)
-        {
-#warning LOGIC needed
-          usbstrg_setconfig(priv, priv->thvalue);
-          priv->thstate = USBSTRG_STATE_IDLE;
-          usbstrg_deferredresponse(priv, FALSE);
-        }
-
-      /* The USBSTRG_EVENT_IFCHANGE is signaled when the EP0 setup
-       * logic receives a USB_REQ_SETINTERFACE request
-       */
-      if ((eventset & USBSTRG_EVENT_IFCHANGE) != 0)
-        {
-#warning LOGIC needed
-          usbstrg_resetconfig(priv);
-          usbstrg_setconfig(priv, priv->thvalue);
-          priv->thstate = USBSTRG_STATE_IDLE;
-          usbstrg_deferredresponse(priv, FALSE);
-        }
-
-      /* Set by the CMDFINISH logic when there is a residue after processing
-       * a host-to-device transfer.  We need to discard all incoming request.
-       */
-
-      if ((eventset & USBSTRG_EVENT_ABORTBULKOUT) != 0)
-        {
-#warning LOGIC needed
-          priv->thstate = USBSTRG_STATE_IDLE;
-        }
-
-      /* All other events are just wakeup calls and are intended only
-       * drive the state maching.  Remember only the terminate request event...
-       * we'll process that at the end of the loop.
-       */
-
-      eventset &= USBSTRG_EVENT_TERMINATEREQUEST;
 
       /* Loop processing each SCSI command state.  Each state handling
        * function will do the following:
@@ -2530,7 +2519,7 @@ void *usbstrg_workerthread(void *arg)
        * will resume processing in the same state.
        */
 
-      for (ret = OK; ret == OK; )
+      do
         {
           switch (priv->thstate)
             {
@@ -2564,9 +2553,11 @@ void *usbstrg_workerthread(void *arg)
             default:
               usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_INVALIDSTATE), priv->thstate);
               priv->thstate = USBSTRG_STATE_IDLE;
+              ret           = OK;
               break;
             }
         }
+      while (ret == OK);
     }
 
   /* Transition to the TERMINATED state and exit */
