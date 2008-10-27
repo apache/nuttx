@@ -516,5 +516,8 @@
 	  larger then the endpoint's max packet (DM320 driver also fixed, untested)
 	* Added logic to the USB device interface:  A bit is needed to force the driver to
 	  to terminate an IN transfer with a short packet (zero-length if necessary).
+	* Fix an error in the NXP LPC214x USB device driver that was causing corruption of
+	  the request queue (M320 driver also fixed, untested)
+
 
 

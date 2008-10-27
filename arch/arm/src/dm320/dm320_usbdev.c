@@ -886,7 +886,7 @@ static void dm320_reqcomplete(struct dm320_ep_s *privep, sint16 result)
   int stalled = privep->stalled;
   irqstate_t flags;
 
-  /* Remove the complete request at the head of the endpoint request list */
+  /* Remove the completed request at the head of the endpoint request list */
 
   flags = irqsave();
   privreq = dm320_rqdequeue(privep);
@@ -1003,7 +1003,7 @@ static int dm320_wrrequest(struct dm320_ep_s *privep)
        * then we are finished with the transfer
        */
 
-      if (bytesleft <= 0 && !privep->txnullpkt)
+      if (privreq->req.xfrd >= privreq->req.len && !privep->txnullpkt)
         {
           usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
           privep->txnullpkt = 0;
@@ -1214,8 +1214,8 @@ static inline void dm320_ep0setup(struct dm320_usbdev_s *priv)
   value = GETUINT16(ctrl.value);
   len   = GETUINT16(ctrl.len);
 
-  uvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
-        ctrl.type, ctrl.req, value, index, len);
+  ullvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+          ctrl.type, ctrl.req, value, index, len);
 
   /* Dispatch any non-standard requests */
 
@@ -1575,7 +1575,7 @@ static int dm320_ctlrinterrupt(int irq, FAR void *context)
               }
             else
               {
-                uvdbg("Pending data on OUT endpoint\n");
+                ullvdbg("Pending data on OUT endpoint\n");
                 priv->rxpending = 1;
               }
           }
@@ -2357,7 +2357,7 @@ void up_usbinitialize(void)
 
 #ifdef CONFIG_DEBUG_USB
   chiprev = dm320_getreg16(DM320_BUSC_REVR);
-  udbg("DM320 revision : %d.%d\n", chiprev >> 4, chiprev & 0x0f);
+  ulldbg("DM320 revision : %d.%d\n", chiprev >> 4, chiprev & 0x0f);
 #endif
 
   /* Enable USB clock & GIO clock  */
