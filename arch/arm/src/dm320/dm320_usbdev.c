@@ -1039,34 +1039,29 @@ static int dm320_rdrequest(struct dm320_ep_s *privep)
     }
 
   usbtrace(TRACE_READ(privep->epphy), privreq->req.xfrd);
-  for (;;)
+
+  /* Receive the next packet */
+
+  buf        = privreq->req.buf + privreq->req.xfrd;
+  nbytesread = dm320_epread(privep->epphy, buf, privep->ep.maxpacket);
+  if (nbytesread < 0)
     {
-      /* Receive the next packet if (1) there are more bytes to be receive, or
-       * (2) the last packet was exactly maxpacketsize.
-       */
-
-      buf        = privreq->req.buf + privreq->req.xfrd;
-      nbytesread = dm320_epread(privep->epphy, buf, privep->ep.maxpacket);
-      if (nbytesread < 0)
-        {
-          usbtrace(TRACE_DEVERROR(DM320_TRACEERR_EPREAD), nbytesread);
-          return ERROR;
-        }
-
-      /* If the receive buffer is full or if the last packet was not full
-       * then we are finished with the transfer.
-       */
-
-      privreq->req.xfrd += nbytesread;
-      if (privreq->req.len < privreq->req.xfrd || nbytesread < privep->ep.maxpacket)
-        {
-          usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
-          dm320_reqcomplete(privep, OK);
-          return OK;
-        }
+      usbtrace(TRACE_DEVERROR(DM320_TRACEERR_EPREAD), nbytesread);
+      return ERROR;
     }
 
-  return OK; /* Won't get here */
+  /* If the receive buffer is full or if the last packet was not full
+   * then we are finished with the transfer.
+   */
+
+  privreq->req.xfrd += nbytesread;
+  if (privreq->req.len < privreq->req.xfrd || nbytesread < privep->ep.maxpacket)
+    {
+      usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
+      dm320_reqcomplete(privep, OK);
+    }
+
+  return OK;
 }
 
 /*******************************************************************************

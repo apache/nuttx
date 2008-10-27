@@ -1148,6 +1148,8 @@ nuttx-0.3.17 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  to terminate an IN transfer with a short packet (zero-length if necessary).
 	* Fix an error in the NXP LPC214x USB device driver that was causing corruption of
 	  the request queue (M320 driver also fixed, untested)
+	* Correct another error in the NXP LPC214x USB device driver that caused read failures
+	  when the request buffer size was larger than maxpacket.
 
 pascal-0.1.3 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
