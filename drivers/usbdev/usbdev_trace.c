@@ -146,7 +146,7 @@ void usbtrace(uint16 event, uint16 value)
       /* Yes... save the new trace data at the head */
 
       g_trace[g_head].event = event;
-      g_trace[g_tail].event = value;
+      g_trace[g_head].value = value;
 
       /* Increment the head and (probably) the tail index */
 
