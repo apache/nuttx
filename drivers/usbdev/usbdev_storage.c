@@ -22,6 +22,9 @@
  *   "SCSI Block Commands -2 (SBC-2)," American National Standard
  *   for Information Technology, November 13, 2004
  *
+ *   "SCSI Multimedia Commands - 3 (MMC-3),"  American National Standard
+ *   for Information Technology, November 12, 2001
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -193,8 +196,8 @@ static const struct usb_ifdesc_s g_ifdesc =
 {
   USB_SIZEOF_IFDESC,                            /* len */
   USB_DESC_TYPE_INTERFACE,                      /* type */
-  0,                                            /* ifno */
-  0,                                            /* alt */
+  USBSTRG_INTERFACEID,                          /* ifno */
+  USBSTRG_ALTINTERFACEID,                       /* alt */
   USBSTRG_NENDPOINTS,                           /* neps */
   USB_CLASS_MASS_STORAGE,                       /* class */
   SUBSTRG_SUBCLASS_SCSI,                        /* subclass */
@@ -942,11 +945,11 @@ static int usbstrg_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *c
 
         case USBSTRG_REQ_GETMAXLUN: /* Return number LUNs supported */
           {
-            if (ctrl->type != USBSTRG_TYPE_SETUPIN && value == 0)
+            if (ctrl->type == USBSTRG_TYPE_SETUPIN && value == 0)
               {
                 /* Only one interface is supported */
 
-                if (index != USBSTRG_CONFIGID)
+                if (index != USBSTRG_INTERFACEID)
                   {
                     usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_GETMAXLUNNDX), index);
                     ret = -EDOM;
