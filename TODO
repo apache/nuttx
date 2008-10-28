@@ -149,7 +149,9 @@ o Network (net/, netutils/)
   Priority:    Medium, The feature is not important, but it is important
                for NuttX to resolve the architectural issues.
 
-  Description: IPv6 support is incomplete
+  Description: IPv6 support is incomplete.  Adam Dunkels has recently announced
+               IPv6 support for uIP (currently only as part of Contiki).  Those
+               changes need to be ported to NuttX.
   Status:      Open
   Priority:    Medium
 
