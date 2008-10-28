@@ -714,7 +714,7 @@ static int inline usbstrg_cmdmodesense6(FAR struct usbstrg_dev_s *priv,
            *
            * (1) A MODESENSE6-specific mode parameter header,
            * (2) A variable length list of block descriptors, and
-           * (3) A variable lengtth list of mode page formats
+           * (3) A variable length list of mode page formats
            */
 
           mph->type  = 0; /* Medium type */
@@ -1743,7 +1743,7 @@ static int usbstrg_cmdparsestate(FAR struct usbstrg_dev_s *priv)
       break;
 
  /*                                                * 0x20-22 Vendor specific */
-    case SCSI_CMD_READFORMATCAPACITIES:           /* 0x23 Vendor-specific */
+    case SCSI_CMD_READFORMATCAPACITIES:           /* 0x23 Vendor-specific (defined in MMC spec) */
       ret = usbstrg_cmdreadformatcapacity(priv, buf);
       break;
  /*                                                * 0x24 Vendor specific */
@@ -2262,29 +2262,36 @@ static int usbstrg_cmdfinishstate(FAR struct usbstrg_dev_s *priv)
     case USBSTRG_FLAGS_DIRDEVICE2HOST:
       if (priv->cbwlen > 0)
         {
-          struct usbdev_req_s *req;
-
-          /* Take a request from the wrreqlist (we've already checked
-           * that is it not NULL)
+          /* On most commands (the exception is outgoing, write commands),
+           * the data has not not yet been sent.
            */
 
-          flags = irqsave();
-          privreq = (FAR struct usbstrg_req_s *)sq_remfirst(&priv->wrreqlist);
-          irqrestore(flags);
-
-          /* Send the write request */
-
-          req           = privreq->req;
-          req->len      = priv->nreqbytes;
-          req->callback = usbstrg_wrcomplete;
-          req->private  = privreq;
-          req->flags    = USBDEV_REQFLAGS_NULLPKT;
-
-          ret           = EP_SUBMIT(priv->epbulkin, privreq->req);
-          if (ret < 0)
+          if (priv->nreqbytes > 0)
             {
-              usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_CMDFINISHSUBMIT), (uint16)-ret);
-            }
+              struct usbdev_req_s *req;
+
+              /* Take a request from the wrreqlist (we've already checked
+               * that is it not NULL)
+               */
+
+              flags = irqsave();
+              privreq = (FAR struct usbstrg_req_s *)sq_remfirst(&priv->wrreqlist);
+              irqrestore(flags);
+
+              /* Send the write request */
+
+              req           = privreq->req;
+              req->len      = priv->nreqbytes;
+              req->callback = usbstrg_wrcomplete;
+              req->private  = privreq;
+              req->flags    = USBDEV_REQFLAGS_NULLPKT;
+
+              ret           = EP_SUBMIT(priv->epbulkin, privreq->req);
+              if (ret < 0)
+                {
+                  usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_CMDFINISHSUBMIT), (uint16)-ret);
+                }
+             }
 
           /* Stall the BULK In endpoint if there is a residue */
 
