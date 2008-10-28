@@ -41,6 +41,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
 #include <sys/types.h>
 #include <debug.h>
 #include <errno.h>

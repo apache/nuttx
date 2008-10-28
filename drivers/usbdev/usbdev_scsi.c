@@ -1332,7 +1332,7 @@ static inline int usbstrg_cmdwrite12(FAR struct usbstrg_dev_s *priv)
 
 static int inline usbstrg_setupcmd(FAR struct usbstrg_dev_s *priv, ubyte cdblen, ubyte flags)
 {
-  FAR struct usbstrg_lun_s *lun;
+  FAR struct usbstrg_lun_s *lun = NULL;
   uint32 datlen;
   ubyte  dir = flags & USBSTRG_FLAGS_DIRMASK;
   int    ret = OK;
@@ -1351,17 +1351,13 @@ static int inline usbstrg_setupcmd(FAR struct usbstrg_dev_s *priv, ubyte cdblen,
       lun       = &priv->luntab[priv->cbwlun];
       priv->lun = lun;
     }
-  else
+
+  /* Only a few commands may specify unsupported LUNs */
+
+  else if ((flags & USBSTRG_FLAGS_LUNNOTNEEDED) == 0)
     {
-      priv->lun = NULL;
-
-      /* Only a few commands may specify unsupported LUNs */
-
-      if ((flags & USBSTRG_FLAGS_LUNNOTNEEDED) == 0)
-        {
-          usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_CMDBADLUN), priv->cbwlun);
-          ret = -EINVAL;
-        }
+      usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_CMDBADLUN), priv->cbwlun);
+      ret = -EINVAL;
     }
 
   /* Extract the direction and data transfer length */

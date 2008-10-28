@@ -204,7 +204,7 @@ struct spi_ops_s
 
 struct spi_dev_s
 {
-  struct spi_ops_s *ops;
+  const struct spi_ops_s *ops;
 };
 
 /****************************************************************************
