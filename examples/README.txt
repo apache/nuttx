@@ -161,3 +161,21 @@ examples/usbstorage
   CONFIG_EXAMPLES_USBSTRG_DEVMINOR3 and CONFIG_EXAMPLES_USBSTRG_DEVPATH3
     Similar parameters that would have to be provided if CONFIG_EXAMPLES_USBSTRG_NLUNS
     is 3.
+
+  If CONFIG_USBDEV_TRACE is enabled (or CONFIG_DEBUG and CONFIG_DEBUG_USB), then
+  the example code will also manage the USB trace output.  The amount of trace output
+  can be controlled using:
+
+  CONFIG_EXAMPLES_USBSTRG_TRACEINIT
+    Show initialization events
+  CONFIG_EXAMPLES_USBSTRG_TRACECLASS
+    Show class driver events
+  CONFIG_EXAMPLES_USBSTRG_TRACETRANSFERS
+    Show data transfer events
+  CONFIG_EXAMPLES_USBSTRG_TRACECONTROLLER
+    Show controller events
+  CONFIG_EXAMPLES_USBSTRG_TRACEINTERRUPTS
+    Show interrupt-related events.
+
+  Error results are always shown in the trace output
+

@@ -53,6 +53,42 @@
  * Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_EXAMPLES_USBSTRG_TRACEINIT
+#  define TRACE_INIT_BITS       (TRACE_INIT_BIT)
+#else
+#  define TRACE_INIT_BITS       (0)
+#endif
+
+#define TRACE_ERROR_BITS        (TRACE_DEVERROR_BIT|TRACE_CLSERROR_BIT)
+
+#ifdef CONFIG_EXAMPLES_USBSTRG_TRACECLASS
+#  define TRACE_CLASS_BITS      (TRACE_CLASS_BIT|TRACE_CLASSAPI_BIT|TRACE_CLASSSTATE_BIT)
+#else
+#  define TRACE_CLASS_BITS      (0)
+#endif
+
+#ifdef CONFIG_EXAMPLES_USBSTRG_TRACETRANSFERS
+#  define TRACE_TRANSFER_BITS   (TRACE_OUTREQQUEUED_BIT|TRACE_INREQQUEUED_BIT|TRACE_READ_BIT|\
+                                 TRACE_WRITE_BIT|TRACE_COMPLETE_BIT)
+#else
+#  define TRACE_TRANSFER_BITS   (0)
+#endif
+
+#ifdef CONFIG_EXAMPLES_USBSTRG_TRACECONTROLLER
+#  define TRACE_CONTROLLER_BITS (TRACE_EP_BIT|TRACE_DEV_BIT)
+#else
+#  define TRACE_CONTROLLER_BITS (0)
+#endif
+
+#ifdef CONFIG_EXAMPLES_USBSTRG_TRACEINTERRUPTS
+#  define TRACE_INTERRUPT_BITS  (TRACE_INTENTRY_BIT|TRACE_INTDECODE_BIT|TRACE_INTEXIT_BIT)
+#else
+#  define TRACE_INTERRUPT_BITS  (0)
+#endif
+
+#define TRACE_BITSET            (TRACE_INIT_BITS|TRACE_ERROR_BITS|TRACE_CLASS_BITS|\
+                                 TRACE_TRANSFER_BITS|TRACE_CONTROLLER_BITS|TRACE_INTERRUPT_BITS)
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -271,21 +307,7 @@ int user_start(int argc, char *argv[])
 
   /* Initialize USB trace output IDs */
 
-  usbtrace_enable(
-    TRACE_INIT_BIT|            /* Initialization events */
-    TRACE_EP_BIT|              /* Endpoint API calls */
-    TRACE_DEV_BIT|             /* USB device API calls */
-    TRACE_CLASS_BIT|           /* USB class driver API calls */
-    TRACE_CLASSAPI_BIT|        /* Other class driver system API calls */
-    TRACE_CLASSSTATE_BIT|      /* Track class driver state changes */
-    TRACE_OUTREQQUEUED_BIT|    /* Request queued for OUT endpoint */
-    TRACE_INREQQUEUED_BIT|     /* Request queued for IN endpoint */
-    TRACE_READ_BIT|            /* Read (OUT) action */
-    TRACE_WRITE_BIT|           /* Write (IN) action */
-    TRACE_COMPLETE_BIT|        /* Request completed */
-    TRACE_DEVERROR_BIT|        /* USB controller driver error event */
-    TRACE_CLSERROR_BIT         /* USB class driver error event */
-  );
+  usbtrace_enable(TRACE_BITSET);
 
   /* Register block drivers (architecture-specific) */
 
