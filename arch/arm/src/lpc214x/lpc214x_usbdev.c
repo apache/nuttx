@@ -2791,8 +2791,21 @@ static int lpc214x_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 static int lpc214x_epstall(FAR struct usbdev_ep_s *ep, boolean resume)
 {
   FAR struct lpc214x_ep_s *privep = (FAR struct lpc214x_ep_s *)ep;
+  irqstate_t flags;
+
+  /* STALL or RESUME the endpoint */
+
+  flags = irqsave();
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, privep->epphy);
   lpc214x_usbcmd(CMD_USB_EP_SETSTATUS | privep->epphy, (resume ? 0 : USBDEV_EPSTALL));
+
+  /* If the endpoint of was resumed, then restart any queue write requests */
+
+  if (resume)
+    {
+      (void)lpc214x_wrrequest(privep);
+    }
+  irqrestore(flags);
   return OK;
 }
 

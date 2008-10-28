@@ -1294,6 +1294,10 @@ static inline void dm320_ep0setup(struct dm320_usbdev_s *priv)
                  (privep = dm320_epfindbyaddr(priv, index)) != NULL)
           {
             privep->halted = 0;
+
+            /* Restart the write queue */
+
+            (void)dm320_wrrequest(privep);
           }
         else
           {
@@ -1595,7 +1599,7 @@ static int dm320_ctlrinterrupt(int irq, FAR void *context)
 
             if (!dm320_rqempty(privep))
               {
-                dm320_wrrequest(privep);
+                (void)dm320_wrrequest(privep);
               }
           }
           break;
@@ -2038,7 +2042,7 @@ static int dm320_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
     {
       usbtrace(TRACE_DEVERROR(DM320_TRACEERR_NULLPACKET), 0);
       dm320_putreg8(dm320_getreg8(DM320_USB_PERTXCSR1) | USB_TXCSR1_TXPKTRDY, DM320_USB_PERTXCSR1);
-      dm320_abortrequest(privep, req, OK);
+      dm320_abortrequest(privep, privreq, OK);
     }
 
   /* If we are stalled, then drop all requests on the floor */
@@ -2056,7 +2060,7 @@ static int dm320_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
       /* Nothing to transfer -- exit success, with zero bytes transferred */
 
       usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
-      dm320_abortrequest(privep, req, OK);
+      dm320_abortrequest(privep, privreq, OK);
     }
 
   /* Handle IN (device-to-host) requests */
