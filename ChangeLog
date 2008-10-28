@@ -498,7 +498,7 @@
 	* Fixed an error in read(); it was not setting the errno on errors returned
 	  from the driver.
 
-0.3.17 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.17 2008-10-28 Gregory Nutt <spudmonkey@racsa.co.cr>
 	* Incorporate patch "[2164503] nuttx-0.3.16 does not build for ARM with USB disabled"
 	* Reduced the amount of memory reserved for USB serial control requests.  It
 	  was unnecessarily large.
@@ -520,6 +520,11 @@
 	  the request queue (M320 driver also fixed, untested)
 	* Correct another error in the NXP LPC214x USB device driver that caused read failures
 	  when the request buffer size was larger than maxpacket.
+	* Numerous corrections/extensions to the USB tracing logic included in 0.3.16 (but
+	  not integrated until 0.3.17)
+	* Fixed another bug in the NXP LPC214x USB device driver:  After a stalled endpoint
+	  is resumed (view CLEAR FEATURE), we must restart the IN (outgoing) queue.
 
+0.3.18 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 
