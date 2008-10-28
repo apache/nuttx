@@ -58,6 +58,192 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: usbstrg_enumerate
+ ****************************************************************************/
+
+#ifdef CONFIG_USBDEV_TRACE
+static int usbstrg_enumerate(struct usbtrace_s *trace, void *arg)
+{
+  switch (trace->event)
+    {
+    case TRACE_DEVINIT:
+      message("USB controller initialization: %04x\n", trace->value);
+      break;
+
+    case TRACE_DEVUNINIT:
+      message("USB controller un-initialization: %04x\n", trace->value);
+      break;
+
+    case TRACE_DEVREGISTER:
+      message("usbdev_register(): %04x\n", trace->value);
+      break;
+
+    case TRACE_DEVUNREGISTER:
+      message("usbdev_unregister(): %04x\n", trace->value);
+      break;
+
+    case TRACE_EPCONFIGURE:
+      message("Endpoint configure(): %04x\n", trace->value);
+      break;
+
+    case TRACE_EPDISABLE:
+      message("Endpoint disable(): %04x\n", trace->value);
+      break;
+
+    case TRACE_EPALLOCREQ:
+      message("Endpoint allocreq(): %04x\n", trace->value);
+      break;
+
+    case TRACE_EPFREEREQ:
+      message("Endpoint freereq(): %04x\n", trace->value);
+      break;
+
+    case TRACE_EPALLOCBUFFER:
+      message("Endpoint allocbuffer(): %04x\n", trace->value);
+      break;
+
+    case TRACE_EPFREEBUFFER:
+      message("Endpoint freebuffer(): %04x\n", trace->value);
+      break;
+
+    case TRACE_EPSUBMIT:
+      message("Endpoint submit(): %04x\n", trace->value);
+      break;
+
+    case TRACE_EPCANCEL:
+      message("Endpoint cancel(): %04x\n", trace->value);
+      break;
+
+    case TRACE_EPSTALL:
+      message("Endpoint stall(TRUE): %04x\n", trace->value);
+      break;
+
+    case TRACE_EPRESUME:
+      message("Endpoint stall(FALSE): %04x\n", trace->value);
+      break;
+
+    case TRACE_DEVALLOCEP:
+      message("Device allocep(): %04x\n", trace->value);
+      break;
+
+    case TRACE_DEVFREEEP:
+      message("Device freeep(): %04x\n", trace->value);
+      break;
+
+    case TRACE_DEVGETFRAME:
+      message("Device getframe(): %04x\n", trace->value);
+      break;
+
+    case TRACE_DEVWAKEUP:
+      message("Device wakeup(): %04x\n", trace->value);
+      break;
+
+    case TRACE_DEVSELFPOWERED:
+      message("Device selfpowered(): %04x\n", trace->value);
+      break;
+
+    case TRACE_DEVPULLUP:
+      message("Device pullup(): %04x\n", trace->value);
+      break;
+
+    case TRACE_CLASSBIND:
+      message("Class bind(): %04x\n", trace->value);
+      break;
+
+    case TRACE_CLASSUNBIND:
+      message("Class unbind(): %04x\n", trace->value);
+      break;
+
+    case TRACE_CLASSDISCONNECT:
+      message("Class disconnect(): %04x\n", trace->value);
+      break;
+
+    case TRACE_CLASSSETUP:
+      message("Class setup(): %04x\n", trace->value);
+      break;
+
+    case TRACE_CLASSSUSPEND:
+      message("Class suspend(): %04x\n", trace->value);
+      break;
+
+    case TRACE_CLASSRESUME:
+      message("Class resume(): %04x\n", trace->value);
+      break;
+
+    case TRACE_CLASSRDCOMPLETE:
+      message("Class RD request complete: %04x\n", trace->value);
+      break;
+
+    case TRACE_CLASSWRCOMPLETE:
+      message("Class WR request complete: %04x\n", trace->value);
+      break;
+
+    default:
+      switch (TRACE_ID(trace->event))
+        {
+        case TRACE_CLASSAPI_ID:        /* Other class driver system API calls */
+          message("Class API call %d: %04x\n", TRACE_DATA(trace->event), trace->value);
+          break;
+
+        case TRACE_CLASSSTATE_ID:      /* Track class driver state changes */
+          message("Class state %d: %04x\n", TRACE_DATA(trace->event), trace->value);
+          break;
+
+        case TRACE_INTENTRY_ID:        /* Interrupt handler entry */
+          message("Interrrupt %d entry: %04x\n", TRACE_DATA(trace->event), trace->value);
+          break;
+
+        case TRACE_INTDECODE_ID:       /* Decoded interrupt trace->event */
+          message("Interrrupt decode %d: %04x\n", TRACE_DATA(trace->event), trace->value);
+          break;
+
+        case TRACE_INTEXIT_ID:         /* Interrupt handler exit */
+          message("Interrrupt %d exit: %04x\n", TRACE_DATA(trace->event), trace->value);
+          break;
+
+        case TRACE_OUTREQQUEUED_ID:    /* Request queued for OUT endpoint */
+          message("EP%d OUT request queued: %04x\n", TRACE_DATA(trace->event), trace->value);
+          break;
+
+        case TRACE_INREQQUEUED_ID:     /* Request queued for IN endpoint */
+          message("EP%d IN request queued: %04x\n", TRACE_DATA(trace->event), trace->value);
+          break;
+
+        case TRACE_READ_ID:            /* Read (OUT) action */
+          message("EP%d OUT read: %04x\n", TRACE_DATA(trace->event), trace->value);
+          break;
+
+        case TRACE_WRITE_ID:           /* Write (IN) action */
+          message("EP%d IN write: %04x\n", TRACE_DATA(trace->event), trace->value);
+          break;
+
+        case TRACE_COMPLETE_ID:        /* Request completed */
+          message("EP%d request complete: %04x\n", TRACE_DATA(trace->event), trace->value);
+          break;
+
+        case TRACE_DEVERROR_ID:        /* USB controller driver error event */
+          message("Controller error: %02x:%04x\n", TRACE_DATA(trace->event), trace->value);
+          break;
+
+        case TRACE_CLSERROR_ID:        /* USB class driver error event */
+          message("Class error: %02x:%04x\n", TRACE_DATA(trace->event), trace->value);
+          break;
+
+        default:
+          message("Unrecognized event: %02x:%02x:%04x\n",
+                  TRACE_ID(trace->event) >> 8, TRACE_DATA(trace->event), trace->value);
+          break;
+        }
+    }
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -173,8 +359,21 @@ int user_start(int argc, char *argv[])
 #ifndef CONFIG_DISABLE_SIGNALS
   for (;;)
     {
+      msgflush();
       sleep(5);
+
+#ifdef CONFIG_USBDEV_TRACE
+      message("\nuser_start: USB TRACE DATA:\n");
+      ret =  usbtrace_enumerate(usbstrg_enumerate, NULL);
+      if (ret < 0)
+        {
+          message("user_start: usbtrace_enumerate failed: %d\n", -ret);
+          usbstrg_uninitialize(handle);
+          return 6;
+        }
+#else
       message("user_start: Still alive\n");
+#endif
     }
 #else
      message("user_start: Exiting\n");

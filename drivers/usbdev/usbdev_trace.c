@@ -143,7 +143,7 @@ void usbtrace(uint16 event, uint16 value)
   if ((g_maskedidset & TRACE_ID2BIT(event)) != 0)
     {
 #ifdef CONFIG_USBDEV_TRACE
-      /* Yes... save the new trace data at the nead */
+      /* Yes... save the new trace data at the head */
 
       g_trace[g_head].event = event;
       g_trace[g_tail].event = value;
@@ -354,16 +354,17 @@ void usbtrace(uint16 event, uint16 value)
 #ifdef CONFIG_USBDEV_TRACE
 int usbtrace_enumerate(trace_callback_t callback, void *arg)
 {
-  uint16 ndx = g_tail;
+  uint16 ndx;
+  uint32 idset;
   int ret = OK;
 
   /* Temporarily disable tracing */
 
-  usbtrace_enable(FALSE);
+  idset = usbtrace_enable(0);
 
   /* Visit every entry, starting with the tail */
 
-  while (g_tail != g_head)
+  for (ndx = g_tail; ndx != g_head; )
     {
       /* Call the user provided callback */
 
@@ -383,6 +384,13 @@ int usbtrace_enumerate(trace_callback_t callback, void *arg)
         }
     }
 
+  /* Discard the trace data after it has been reported */
+
+  g_tail = g_head;
+
+  /* Restore tracing state */
+
+  (void)usbtrace_enable(idset);
   return ret;
 }
 #endif /* CONFIG_USBDEV_TRACE */

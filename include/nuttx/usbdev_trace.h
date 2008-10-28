@@ -451,6 +451,7 @@ EXTERN void usbtrace(uint16 event, uint16 value);
 
 #ifdef CONFIG_USBDEV_TRACE
 EXTERN int usbtrace_enumerate(trace_callback_t callback, void *arg);
+#else
 #  define usbtrace_enumerate(event)
 #endif
 
