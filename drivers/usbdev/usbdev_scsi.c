@@ -97,6 +97,7 @@ static void   usbstrg_dumpdata(const char *msg, const ubyte *buf, int buflen);
 static uint16 usbstrg_getbe16(ubyte *buf);
 static uint32 usbstrg_getbe32(ubyte *buf);
 static void   usbstrg_putbe16(ubyte * buf, uint16 val);
+static void   usbstrg_putbe24(ubyte *buf, uint32 val);
 static void   usbstrg_putbe32(ubyte *buf, uint32 val);
 #if 0 /* not used */
 static uint16 usbstrg_getle16(ubyte *buf);
@@ -123,6 +124,8 @@ static inline int usbstrg_cmdmodesense6(FAR struct usbstrg_dev_s *priv,
                 FAR ubyte *buf);
 static inline int usbstrg_cmdstartstopunit(FAR struct usbstrg_dev_s *priv);
 static inline int usbstrg_cmdpreventmediumremoval(FAR struct usbstrg_dev_s *priv);
+static inline int usbstrg_cmdreadformatcapacity(FAR struct usbstrg_dev_s *priv,
+                FAR ubyte *buf);
 static inline int usbstrg_cmdreadcapacity10(FAR struct usbstrg_dev_s *priv,
                 FAR ubyte *buf);
 static inline int usbstrg_cmdread10(FAR struct usbstrg_dev_s *priv);
@@ -220,6 +223,22 @@ static void usbstrg_putbe16(ubyte * buf, uint16 val)
 {
   buf[0] = val >> 8;
   buf[1] = val;
+}
+
+/****************************************************************************
+ * Name: usbstrg_putbe24
+ *
+ * Description:
+ *   Store a 32-bit value in big-endian order to the location specified by
+ *   a byte pointer
+ *
+ ****************************************************************************/
+
+static void usbstrg_putbe24(ubyte *buf, uint32 val)
+{
+  buf[0] = val >> 16;
+  buf[1] = val >> 8;
+  buf[2] = val;
 }
 
 /****************************************************************************
@@ -777,6 +796,40 @@ static inline int usbstrg_cmdpreventmediumremoval(FAR struct usbstrg_dev_s *priv
 
       lun->locked = pmr->prevent & SCSICMD_PREVENTMEDIUMREMOVAL_TRANSPORT;
 #endif
+    }
+  return ret;
+}
+
+/****************************************************************************
+ * Name: usbstrg_cmdreadformatcapacity
+ *
+ * Description:
+ *   Handle SCSI_CMD_READFORMATCAPACITIES command (MMC)
+ *
+ ****************************************************************************/
+
+static inline int usbstrg_cmdreadformatcapacity(FAR struct usbstrg_dev_s *priv,
+                                                FAR ubyte *buf)
+{
+  FAR struct scsicmd_readformatcapcacities_s *rfc = (FAR struct scsicmd_readformatcapcacities_s *)priv->cdb;
+  FAR struct scsiresp_readformatcapacities_s *hdr;
+  FAR struct usbstrg_lun_s *lun = priv->lun;
+  int ret;
+
+  priv->u.alloclen = usbstrg_getbe16(rfc->alloclen);
+  ret = usbstrg_setupcmd(priv, SCSICMD_READFORMATCAPACITIES_SIZEOF, USBSTRG_FLAGS_DIRDEVICE2HOST);
+  if (ret == OK)
+    {
+      hdr = (FAR struct scsiresp_readformatcapacities_s *)buf;
+      memset(hdr, 0, SCSIRESP_READFORMATCAPACITIES_SIZEOF);
+      hdr->listlen = SCSIRESP_CURRCAPACITYDESC_SIZEOF;
+
+      /* Only the Current/Maximum Capacity Descriptor follows the header */
+
+      usbstrg_putbe32(hdr->nblocks, lun->nsectors);
+      hdr->type = SCIRESP_RDFMTCAPACITIES_FORMATED;
+      usbstrg_putbe24(hdr->blocklen, lun->sectorsize);
+      priv->nreqbytes = SCSIRESP_READFORMATCAPACITIES_SIZEOF;
     }
   return ret;
 }
@@ -1693,16 +1746,17 @@ static int usbstrg_cmdparsestate(FAR struct usbstrg_dev_s *priv)
       ret = usbstrg_cmdpreventmediumremoval(priv);
       break;
 
- /*                                                * 0x20-22 Vendor specific
-  * case SCSI_CMD_READFORMATCAPACITIES:            * 0x23 Vendor-specific
-  *                                                * 0x24 Vendor specific */
+ /*                                                * 0x20-22 Vendor specific */
+    case SCSI_CMD_READFORMATCAPACITIES:           /* 0x23 Vendor-specific */
+      ret = usbstrg_cmdreadformatcapacity(priv, buf);
+      break;
+ /*                                                * 0x24 Vendor specific */
 
     case SCSI_CMD_READCAPACITY10:                 /* 0x25 Mandatory */
       ret = usbstrg_cmdreadcapacity10(priv, buf);
       break;
 
  /*                                                * 0x26-27 Vendor specific */
-
     case SCSI_CMD_READ10:                         /* 0x28 Mandatory */
       return usbstrg_cmdread10(priv);
       break;

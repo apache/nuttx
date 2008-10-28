@@ -14,6 +14,9 @@
  *   "SCSI Block Commands -2 (SBC-2)," American National Standard
  *   for Information Technology, November 13, 2004
  *
+ *   "SCSI Multimedia Commands - 3 (MMC-3),"  American National Standard
+ *   for Information Technology, November 12, 2001
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -563,6 +566,12 @@
 #define SCSICMD_PREVENTMEDIUMREMOVAL_TRANSPORT   0x01 /* Removal prohibited from data transport */
 #define SCSICMD_PREVENTMEDIUMREMOVAL_MCHANGER    0x02 /* Removal prohibited from medium changer */
 
+/* Read format capacities */
+
+#define SCIRESP_RDFMTCAPACITIES_UNFORMATED       0x01 /* Unformatted media */
+#define SCIRESP_RDFMTCAPACITIES_FORMATED         0x02 /* Formatted media */
+#define SCIRESP_RDFMTCAPACITIES_NOMEDIA          0x03 /* No media */
+
 /* Read 6 */
 
 #define SCSICMD_READ6_MSLBAMASK                  0x1f
@@ -810,6 +819,39 @@ struct scsicmd_preventmediumremoval_s
   ubyte control;       /* 5: Control */
 };
 #define SCSICMD_PREVENTMEDIUMREMOVAL_SIZEOF 6
+
+struct scsicmd_readformatcapcacities_s
+{
+  ubyte opcode;        /* 0: 0x23 */
+  ubyte reserved[6];   /* 1-6: Reserved */
+  ubyte alloclen[2];   /* 7-8: Allocation length */
+  ubyte control;       /* 9: Control */
+};
+#define SCSICMD_READFORMATCAPACITIES_SIZEOF 10
+
+struct scsiresp_readformatcapacities_s
+{
+  /* Current capacity header */
+
+  ubyte reserved[3];  /* 0-2: Reserved */
+  ubyte listlen;      /* 3: Capacity list length */
+
+  /* Current/Maximum Capacity Descriptor (actually a separate structure) */
+
+  ubyte nblocks[4];   /* 4-7: Number of blocks */
+  ubyte type;         /* 8: Bits 2-7: Reserved, Bits 0-1: Descriptor type */
+  ubyte blocklen[3];  /* 9-11: Block length */
+};
+#define SCSIRESP_READFORMATCAPACITIES_SIZEOF 12
+#define SCSIRESP_CURRCAPACITYDESC_SIZEOF 8
+
+struct scsiresp_formattedcapacitydesc_s
+{
+  ubyte nblocks[4];   /* 0-3: Number of blocks */
+  ubyte type;         /* 4: Bits 2-7: Type, bits 0-1, reserved */
+  ubyte param[3];     /* 5-7: Type dependent parameter */
+};
+#define SCSIRESP_FORMATTEDCAPACITYDESC_SIZEOF 8
 
 struct scsicmd_readcapacity10_s
 {
