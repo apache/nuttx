@@ -497,7 +497,7 @@ static int usbstrg_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_
   FAR struct usbstrg_dev_s *priv = ((struct usbstrg_driver_s*)driver)->dev;
   FAR struct usbstrg_req_s *reqcontainer;
   irqstate_t flags;
-  int ret;
+  int ret = OK;
   int i;
 
   usbtrace(TRACE_CLASSBIND, 0);

@@ -417,7 +417,7 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
     {
     case MMCSD_CMDRESP_R1B:
       {
-        uint32 busy;
+        uint32 busy = 0;
         for (i = 0; i < slot->twrite && busy != 0xff; i++)
           {
             busy = SPI_SNDBYTE(spi, 0xff);
