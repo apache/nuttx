@@ -19,7 +19,7 @@ NuttX TODO List (Last updated July 31, 2008)
   (0)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (1)  ARM/DM320 (arch/arm/src/dm320/)
-  (3)  ARM/LPC214x (arch/arm/src/lpc214x/)
+  (5)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (7)  z80/z8 (arch/z80/)
   (8)  z16 (arch/z16/)
@@ -204,7 +204,10 @@ o Network (net/, netutils/)
 o USB (drivers/usbdev)
   ^^^^^^^^^^^^^^^^^^^^
 
-  Description: Implement USB bulk storage class driver
+  Description: The USB bulk storage class driver configuration (examples/usbstorage)
+               does not work reliably when debug is disabled (CONFIG_DEBUG+CONFIG_DEBUG_VERBOSE
+               +CONFIG_DEBUG_USB).  Race conditions are suspected (probably in the NXP LPC214x
+               USB controller driver).
   Status:      Open
   Priority:    High
 
@@ -348,10 +351,6 @@ o ARM/DM320 (arch/arm/src/dm320/)
 o ARM/LPC214x (arch/arm/src/lpc214x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  Description: Add MMC/SD support
-  Status:      Open
-  Priority:    Medium
-
   Description: Should use Vector Interrupts
   Status:      Open
   Priority:    Low
@@ -365,6 +364,17 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
                USB is connected (reports EBADF instead of ENOTCONN)
   Status:      Open
   Priority:    Low
+
+  Description: The USB bulk storage class driver configuration (examples/usbstorage)
+               does not work reliably when debug is disabled (CONFIG_DEBUG+CONFIG_DEBUG_VERBOSE
+               +CONFIG_DEBUG_USB).  Race conditions are suspected (probably in the NXP LPC214x
+               USB controller driver).
+  Status:      Open
+  Priority:    High
+
+  Description: At present the SPI driver is polled.  Should it be interrupt driven?
+  Status:      Open
+  Priority:    Medium
 
 o pjrc-8052 / MCS51 (arch/pjrc-8051/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
