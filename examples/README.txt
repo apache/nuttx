@@ -149,18 +149,19 @@ examples/usbstorage
   CONFIG_EXAMPLES_USBSTRG_NLUNS
     Defines the number of logical units (LUNs) exported by the USB storage
     driver.  Each LUN corresponds to one exported block driver (or partition
-    of a block driver).  May be 1, 2, or 3.
+    of a block driver).  May be 1, 2, or 3.  Default is 1.
   CONFIG_EXAMPLES_USBSTRG_DEVMINOR1
     The minor device number of the block driver for the first LUN. For
-    example, N in /dev/mmcsdN.  Used for registering the block driver.
+    example, N in /dev/mmcsdN.  Used for registering the block driver. Default
+    is zero.
   CONFIG_EXAMPLES_USBSTRG_DEVPATH1
-    The full path to the registered block driver.  Example, "/dev/mmcsd0"
+    The full path to the registered block driver.  Default is "/dev/mmcsd0"
   CONFIG_EXAMPLES_USBSTRG_DEVMINOR2 and CONFIG_EXAMPLES_USBSTRG_DEVPATH2
     Similar parameters that would have to be provided if CONFIG_EXAMPLES_USBSTRG_NLUNS
-    is 2 or 3.
+    is 2 or 3.  No defaults.
   CONFIG_EXAMPLES_USBSTRG_DEVMINOR3 and CONFIG_EXAMPLES_USBSTRG_DEVPATH3
     Similar parameters that would have to be provided if CONFIG_EXAMPLES_USBSTRG_NLUNS
-    is 3.
+    is 3.  No defaults.
 
   If CONFIG_USBDEV_TRACE is enabled (or CONFIG_DEBUG and CONFIG_DEBUG_USB), then
   the example code will also manage the USB trace output.  The amount of trace output
