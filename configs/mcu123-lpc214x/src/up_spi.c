@@ -133,7 +133,7 @@ static struct spi_dev_s g_spidev = { &g_spiops };
  *
  ****************************************************************************/
 
-void spi_select(FAR struct spi_dev_s *dev, boolean selected)
+static void spi_select(FAR struct spi_dev_s *dev, boolean selected)
 {
   uint32 bit = 1 << 20;
 
@@ -181,7 +181,7 @@ void spi_select(FAR struct spi_dev_s *dev, boolean selected)
  *
  ****************************************************************************/
 
-uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
+static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
 {
   uint32 divisor = LPC214X_PCLKFREQ / frequency;
 
@@ -213,7 +213,7 @@ uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
  *
  ****************************************************************************/
 
-ubyte spi_status(FAR struct spi_dev_s *dev)
+static ubyte spi_status(FAR struct spi_dev_s *dev)
 {
   /* I don't think there is anyway to determine these things on the mcu123.com
    * board.
@@ -236,7 +236,7 @@ ubyte spi_status(FAR struct spi_dev_s *dev)
  *
  ****************************************************************************/
 
-ubyte spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch)
+static ubyte spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch)
 {
   /* Wait while the TX FIFO is full */
 
@@ -270,7 +270,7 @@ ubyte spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch)
  *
  ****************************************************************************/
 
-void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen)
+static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen)
 {
   ubyte sr;
 

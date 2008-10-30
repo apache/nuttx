@@ -63,11 +63,40 @@ CONFIG_ARCH_BOARD=olimex-strp711
 CONFIG_ARCH_BOARD_OLIMEX_STRP711=y
 CONFIG_BOARD_LOOPSPERMSEC=3270
 CONFIG_ARCH_LEDS=y
-CONFIG_DRAM_SIZE=0x00008000
-CONFIG_DRAM_START=0x40000000
+CONFIG_DRAM_SIZE=0x00010000
+CONFIG_DRAM_START=0x20000000
 CONFIG_DRAM_END=(CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
 CONFIG_ARCH_INTERRUPTSTACK=0
 CONFIG_ARCH_STACKDUMP=y
+
+#
+# STR71x specific boot/build settings
+#
+# CONFIG_STR71X_BANK0, CONFIG_STR71X_BANK1, CONFIG_STR71X_BANK2, and CONFIG_STR71X_BANK3
+#   Enable initialize of external memory banks 0-3.
+# CONFIG_STR71X_BANK0_SIZE, CONFIG_STR71X_BANK1_SIZE, CONFIG_STR71X_BANK2_SIZE, and CONFIG_STR71X_BANK3_SIZE
+#   If a particular external memory bank is configured, then its width must be provided.
+#   8 and 16 (bits) are the only valid options.
+# CONFIG_STR71X_BANK0_WAITSTATES, CONFIG_STR71X_BANK1_WAITSTATES, CONFIG_STR71X_BANK2_WAITSTATES, and CONFIG_STR71X_BANK3_WAITSTATES
+#   If a particular external memory bank is configured, then the number of waistates
+#   for the bank must also be provided.  Valid options are {0, .., 15}
+# CONFIG_STR71X_BIGEXTMEM
+#   The default is to provide 20 bits of address for all external memory regions.  If
+#   any memory region is larger than 1Mb, then this option should be selected.  In this
+#   case, 24 bits of addressing will be used
+CONFIG_STR71X_BANK0=n
+CONFIG_STR71X_BANK0_SIZE=16
+CONFIG_STR71X_BANK0_WAITSTATES=0
+CONFIG_STR71X_BANK1=n
+CONFIG_STR71X_BANK0_SIZE=16
+CONFIG_STR71X_BANK1_WAITSTATES=0
+CONFIG_STR71X_BANK2=n
+CONFIG_STR71X_BANK0_SIZE=16
+CONFIG_STR71X_BANK3_WAITSTATES=0
+CONFIG_STR71X_BANK3=n
+CONFIG_STR71X_BANK0_SIZE=16
+CONFIG_STR71X_BANK2_WAITSTATES=0
+CONFIG_STR71X_BIGEXTMEM=n
 
 #
 # STR71x specific device driver settings
