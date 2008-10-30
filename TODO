@@ -208,8 +208,9 @@ o USB (drivers/usbdev)
 
   Description: The USB bulk storage class driver configuration (examples/usbstorage)
                does not work reliably when debug is disabled (CONFIG_DEBUG+CONFIG_DEBUG_VERBOSE
-               +CONFIG_DEBUG_USB).  Race conditions are suspected (probably in the NXP LPC214x
-               USB controller driver).
+               +CONFIG_DEBUG_USB) on WinXP (Linux appears to be fine).  A race condition would
+               would be a possibility.  The symptom is that that WinXP sends a MODE SENSE (6)
+               command with an unsupported mode page (0x1c/0x00)
   Status:      Open
   Priority:    High
 
@@ -369,8 +370,9 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
 
   Description: The USB bulk storage class driver configuration (examples/usbstorage)
                does not work reliably when debug is disabled (CONFIG_DEBUG+CONFIG_DEBUG_VERBOSE
-               +CONFIG_DEBUG_USB).  Race conditions are suspected (probably in the NXP LPC214x
-               USB controller driver).
+               +CONFIG_DEBUG_USB) on WinXP (Linux appears to be fine).  A race condition would
+               would be a possibility.  The symptom is that that WinXP sends a MODE SENSE (6)
+               command with an unsupported mode page (0x1c/0x00)
   Status:      Open
   Priority:    High
 
