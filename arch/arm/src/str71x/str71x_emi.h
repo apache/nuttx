@@ -48,49 +48,45 @@
  * Definitions
  ************************************************************************************/
 
-/* External Memory Interfac (EMI) registers *****************************************/
+/* External Memory Interfac (EMI) register offset ***********************************/
 
-#define STR71X_EMI_BCON0            (STR71X_EMI_BASE + 0x0000) /* 16-bits wide */
-#define STR71X_EMI_BCON1            (STR71X_EMI_BASE + 0x0004) /* 16-bits wide */
-#define STR71X_EMI_BCON2            (STR71X_EMI_BASE + 0x0008) /* 16-bits wide */
-#define STR71X_EMI_BCON3            (STR71X_EMI_BASE + 0x000c) /* 16-bits wide */
+#define STR71X_EMI_BCON0_OFFSET     (0x0000) /* 16-bits wide */
+#define STR71X_EMI_BCON1_OFFSET     (0x0004) /* 16-bits wide */
+#define STR71X_EMI_BCON2_OFFSET     (0x0008) /* 16-bits wide */
+#define STR71X_EMI_BCON3_OFFSET     (0x000c) /* 16-bits wide */
+
+/* External Memory Interfac (EMI) register addresses ********************************/
+
+#define STR71X_EMI_BCON0            (STR71X_EMI_BASE + STR71X_EMI_BCON0_OFFSET)
+#define STR71X_EMI_BCON1            (STR71X_EMI_BASE + STR71X_EMI_BCON1_OFFSET)
+#define STR71X_EMI_BCON2            (STR71X_EMI_BASE + STR71X_EMI_BCON2_OFFSET)
+#define STR71X_EMI_BCON3            (STR71X_EMI_BASE + STR71X_EMI_BCON3_OFFSET)
 
 /* Register bit settings ***********************************************************/
 
-/* EMI enable */
+/* Bank-N configuration register (BCONn) bit definitions */
 
-#define STR71X_EMI_ENABLE           (0x8000)
-
-/* Banks */
-
-#define STR71X_EMI_BANK0            (0x00)
-#define STR71X_EMI_BANK1            (0x01)
-#define STR71X_EMI_BANK2            (0x02)
-#define STR71X_EMI_BANK3            (0x03)
-
-/* EMI data bus length */
-
-#define STR71X_EMI_SIZE8            (0x0000)
-#define STR71X_EMI_SIZE16           (0x0001)
-
-/* Number of wait states */
-
-#define STR71X_EMI_0WaitState       (0x00)
-#define STR71X_EMI_1WaitState       (0x01)
-#define STR71X_EMI_2WaitStates      (0x02)
-#define STR71X_EMI_3WaitStates      (0x03)
-#define STR71X_EMI_4WaitStates      (0x04)
-#define STR71X_EMI_5WaitStates      (0x05)
-#define STR71X_EMI_6WaitStates      (0x06)
-#define STR71X_EMI_7WaitStates      (0x07)
-#define STR71X_EMI_8WaitStates      (0x08)
-#define STR71X_EMI_9WaitStates      (0x09)
-#define STR71X_EMI_10WaitStates     (0x0a)
-#define STR71X_EMI_11WaitStates     (0x0b)
-#define STR71X_EMI_12WaitStates     (0x0c)
-#define STR71X_EMI_13WaitStates     (0x0d)
-#define STR71X_EMI_14WaitStates     (0x0e)
-#define STR71X_EMI_15WaitStates     (0x0f)
+#define STR71X_EMIBCON_BSIZEMASK    (0x0003) /* Bits 0-1: Bank size */
+#define STR71X_EMIBCON_BSIZE8       (0x0000) /*   8-bit */
+#define STR71X_EMIBCON_BSIZE16      (0x0001) /*   16-bit */
+#define STR71X_EMIBCON_WSMASK       (0x003c) /* Bits 2-5: Wait states */
+#define STR71X_EMIBCON_WS0          (0x0000) /*   0 waitstates */
+#define STR71X_EMIBCON_WS1          (0x0004) /*   1 waitstates */
+#define STR71X_EMIBCON_WS2          (0x0008) /*   2 waitstates */
+#define STR71X_EMIBCON_WS3          (0x000c) /*   3 waitstates */
+#define STR71X_EMIBCON_WS4          (0x0010) /*   4 waitstates */
+#define STR71X_EMIBCON_WS5          (0x0014) /*   5 waitstates */
+#define STR71X_EMIBCON_WS6          (0x0018) /*   6 waitstates */
+#define STR71X_EMIBCON_WS7          (0x001c) /*   7 waitstates */
+#define STR71X_EMIBCON_WS8          (0x0020) /*   8 waitstates */
+#define STR71X_EMIBCON_WS9          (0x0024) /*   9 waitstates */
+#define STR71X_EMIBCON_WS10         (0x0028) /*   10 waitstates */
+#define STR71X_EMIBCON_WS11         (0x002c) /*   11 waitstates */
+#define STR71X_EMIBCON_WS12         (0x0030) /*   12 waitstates */
+#define STR71X_EMIBCON_WS13         (0x0034) /*   13 waitstates */
+#define STR71X_EMIBCON_WS14         (0x0038) /*   14 waitstates */
+#define STR71X_EMIBCON_WS15         (0x003c) /*   15 waitstates */
+#define STR71X_EMIBCON_ENABLE       (0x8000) /* Bit 15: Bank enable */
 
 /************************************************************************************
  * Public Types

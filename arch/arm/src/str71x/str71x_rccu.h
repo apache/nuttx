@@ -48,136 +48,85 @@
  * Definitions
  ************************************************************************************/
 
-/* Reset and Clock Control Unit (RCCU) registers ************************************/
+/* Reset and Clock Control Unit (RCCU) register offsets *****************************/
 
 /* All registers are 32-bits wide, but with the top 16 bits "reserved" */
 
-#define STR71X_RCCU_CCR              (STR71X_RCCU_BASE + 0x0000)    /* 32-bits wide */
-#define STR71X_RCCU_CFR              (STR71X_RCCU_BASE + 0x0008)    /* 32-bits wide */
-#define STR71X_RCCU_PLL1CR           (STR71X_RCCU_BASE + 0x0018)    /* 32-bits wide */
-#define STR71X_RCCU_PER              (STR71X_RCCU_BASE + 0x001c)    /* 32-bits wide */
-#define STR71X_RCCU_SMR              (STR71X_RCCU_BASE + 0x0020)    /* 32-bits wide */
+#define STR71X_RCCU_CCR_OFFSET       (0x0000)    /* 32-bits wide */
+#define STR71X_RCCU_CFR_OFFSET       (0x0008)    /* 32-bits wide */
+#define STR71X_RCCU_PLL1CR_OFFSET    (0x0018)    /* 32-bits wide */
+#define STR71X_RCCU_PER_OFFSET       (0x001c)    /* 32-bits wide */
+#define STR71X_RCCU_SMR_OFFSET       (0x0020)    /* 32-bits wide */
+
+/* Reset and Clock Control Unit (RCCU) register addresses ***************************/
+
+#define STR71X_RCCU_CCR              (STR71X_RCCU_BASE + STR71X_RCCU_CCR_OFFSET)
+#define STR71X_RCCU_CFR              (STR71X_RCCU_BASE + STR71X_RCCU_CFR_OFFSET)
+#define STR71X_RCCU_PLL1CR           (STR71X_RCCU_BASE + STR71X_RCCU_PLL1CR_OFFSET)
+#define STR71X_RCCU_PER              (STR71X_RCCU_BASE + STR71X_RCCU_PER_OFFSET)
+#define STR71X_RCCU_SMR              (STR71X_RCCU_BASE + STR71X_RCCU_SMR_OFFSET)
 
 /* Register bit settings ************************************************************/
-/* RCCU Clock Div */
 
-#define STR71X_RCCU_DEFAULT          (0x00)
-#define STR71X_RCCU_RCLK2            (0x01)
-#define STR71X_RCCU_RCLK4            (0x02)
-#define STR71X_RCCU_RCLK8            (0x03)
+/* RCCU CCR register bit definitions */
 
-/* RCCU RCLK Clocks */
+#define STR71X_RCCUCCR_LPOWFI        (0x00000001) /* Bit 0: Low power mode in wait-for-interrupt mode */
+#define STR71X_RCCUCCR_WFICLKSEL     (0x00000002) /* Bit 1: WFI clock select */
+#define STR71X_RCCUCCR_CKAFSEL       (0x00000004) /* Bit 2: Alternate function clock select */
+#define STR71X_RCCUCCR_SRESEN        (0x00000008) /* Bit 3: Software reset enable */
+#define STR71X_RCCUCCR_ENCLOCK       (0x00000080) /* Bit 7: Lock interrupt enable */
+#define STR71X_RCCUCCR_ENCKAF        (0x00000100) /* Bit 8: CKAF interrupt enable */
+#define STR71X_RCCUCCR_ENCK216       (0x00000200) /* Bit 9: CK2_16 interrupt enable */
+#define STR71X_RCCUCCR_ENSTOP        (0x00000400) /* Bit 10: Stop interrupt enable */
+#define STR71X_RCCUCCR_ENHALT        (0x00000800) /* Bit 11: Enable halt */
 
-#define STR71X_RCCU_PLL1_OUTPUT      (0)
-#define STR71X_RCCU_CLOCK216         (1)
-#define STR71X_RCCU_CLOCK2           (2)
-#define STR71X_RCCU_CK_AF            (3)
+/* RCCU CFR register bit definitions */
 
-/* RCCU PLL1 Multipliers */
+#define STR71X_RCCUCFR_CSUCKSEL      (0x00000001) /* Bit 0: CSU clock select */
+#define STR71X_RCCUCFR_LOCK          (0x00000002) /* Bit 1: PLL locked-in */
+#define STR71X_RCCUCFR_CKAFST        (0x00000004) /* Bit 2: CK_AF status */
+#define STR71X_RCCUCFR_CK216         (0x00000008) /* Bit 3: CLK2/16 selection */
+#define STR71X_RCCUCFR_CKSTOPEN      (0x00000010) /* Bit 4: Clock stop enable */
+#define STR71X_RCCUCFR_SOFTRES       (0x00000020) /* Bit 5: Software reset */
+#define STR71X_RCCUCFR_WDGRES        (0x00000040) /* Bit 6: Watchdog reset */
+#define STR71X_RCCUCFR_RTCALARM      (0x00000080) /* Bit 7: RTC alarm reset */
+#define STR71X_RCCUCFR_LVDRES        (0x00000200) /* Bit 9: Voltage regulator low voltage detector reset */
+#define STR71X_RCCUCFR_WKPRES        (0x00000400) /* Bit 10: External wakeup */
+#define STR71X_RCCUCFR_LOCKI         (0x00000800) /* Bit 11: Lock interrupt pending */
+#define STR71X_RCCUCFR_CKAFI         (0x00001000) /* Bit 12: CK_AF switching interrupt pending */
+#define STR71X_RCCUCFR_CK216I        (0x00002000) /* Bit 13: CK2_16 switching interrupt pending */
+#define STR71X_RCCUCFR_STOPI         (0x00004000) /* Bit 14: Stop interrupt pending */
+#define STR71X_RCCUCFR_DIV2          (0x00008000) /* Bit 15: OSCIN divided by 2 */
 
-#define STR71X_RCCU_PLL1_MUL12       (0x01)
-#define STR71X_RCCU_PLL1_MUL16       (0x03)
-#define STR71X_RCCU_PLL1_MUL20       (0x00)
-#define STR71X_RCCU_PLL1_MUL24       (0x02)
+/* RCCU PPL1CR register bit definitions */
 
-/* RCCU PLL1 Multipliers */
+#define STR71X_RCCUPLL1CR_DXMASK     (0x00000003) /* Bit 0-2: PLL1 clock divisor */
+#define STR71X_RCCUPLL1CR_DIV1       (0x00000000) /*   PLLCK / 1 */
+#define STR71X_RCCUPLL1CR_DIV2       (0x00000001) /*   PLLCK / 2 */
+#define STR71X_RCCUPLL1CR_DIV3       (0x00000002) /*   PLLCK / 3 */
+#define STR71X_RCCUPLL1CR_DIV4       (0x00000003) /*   PLLCK / 4 */
+#define STR71X_RCCUPLL1CR_DIV5       (0x00000004) /*   PLLCK / 5 */
+#define STR71X_RCCUPLL1CR_DIV6       (0x00000005) /*   PLLCK / 6 */
+#define STR71X_RCCUPLL1CR_DIV7       (0x00000006) /*   PLLCK / 7 */
+#define STR71X_RCCUPLL1CR_CLK2       (0x00000007) /*   FREEN==0: CLK2 */
+#define STR71X_RCCUPLL1CR_FREERM     (0x00000007) /*   FREEN==1: PLL1 in free running mode */
+#define STR71X_RCCUPLL1CR_MXMASK     (0x00000030) /* Bit 4-5: 
+#define STR71X_RCCUPLL1CR_MUL20      (0x00000000) /*   CLK2 * 20 */
+#define STR71X_RCCUPLL1CR_MUL12      (0x00000010) /*   CLK2 * 12 */
+#define STR71X_RCCUPLL1CR_MUL24      (0x00000020) /*   CLK2 * 24 */
+#define STR71X_RCCUPLL1CR_MUL16      (0x00000030) /*   CLK2 * 16 */
+#define STR71X_RCCUPLL1CR_FREFRANGE  (0x00000040) /* Bit 6: Reference frequency range select */
+#define STR71X_RCCUPLL1CR_FREEN      (0x00000080) /* Bit 7: PKL free running mode */
 
-#define STR71X_RCCU_PLL2_MUL12       (0x01)
-#define STR71X_RCCU_PLL2_MUL16       (0x03)
-#define STR71X_RCCU_PLL2_MUL20       (0x00)
-#define STR71X_RCCU_PLL2_MUL28       (0x02)
+/* RCCU PER register bit definitions */
 
-/* RCCU PLL Divisors */
+#define STR71X_RCCUPER_EMI           (0x00000004) /* Bit 2: EMI */
+#define STR71X_RCCUPER_USBKERNEL     (0x00000010) /* Bit 4: USB Kernel */
 
-#define STR71X_RCCU_DIV1             (0x00)
-#define STR71X_RCCU_DIV2             (0x01)
-#define STR71X_RCCU_DIV3             (0x02)
-#define STR71X_RCCU_DIV4             (0x03)
-#define STR71X_RCCU_DIV5             (0x04)
-#define STR71X_RCCU_DIV6             (0x05)
-#define STR71X_RCCU_DIV7             (0x06)
+/* RCCU SMR register bit definitions */
 
-/* RCCU USB Clocks */
-
-#define STR71X_RCCU_PLL2_OUTPUT      (0x01)
-#define STR71X_RCCU_USBCK            (0x00)
-
-/* RCCU Clocks */
-
-#define STR71X_RCCU_CLK2             (0)
-#define STR71X_RCCU_RCLK             (1)
-#define STR71X_RCCU_MCLK             (2)
-#define STR71X_RCCU_PCLK2            (3)
-#define STR71X_RCCU_PCLK1            (4)
-
-/* RCCU Interrupts */
-
-#define STR71X_RCCU_INTPLL1LOCK      (0x0080)
-#define STR71X_RCCU_INTCKAF          (0x0100)
-#define STR71X_RCCU_INTCK216         (0x0200)
-#define STR71X_RCCU_INTSTOP          (0x0400)
-
-/* RCCU Flags */
-
-#define STR71X_RCCU_PLL1LOCK         (0x0002)
-#define STR71X_RCCU_CKAFST           (0x0004)
-#define STR71X_RCCU_PLL1LOCKI        (0x0800)
-#define STR71X_RCCU_CKAFI            (0x1000)
-#define STR71X_RCCU_CK216I           (0x2000)
-#define STR71X_RCCU_STOPI            (0x4000
-
-/* RCCU Reset Sources */
-
-#define STR71X_RCCU_RESETSOURCESMASK (0x000006e0)
-#define STR71X_RCCU_EXTERNALRESET    (0x00000000)
-#define STR71X_RCCU_SOFTWARERESET    (0x00000020)
-#define STR71X_RCCU_WDGRESET         (0x00000040)
-#define STR71X_RCCU_RTCALARMRESET    (0x00000080)
-#define STR71X_RCCU_LVDRESET         (0x00000200)
-#define STR71X_RCCU_WKPRESET         (0x00000400
-
-/* RCCU PLL1 free running modes */
-
-#define STR71X_RCCU_PLL1FRM125       (0)
-#define STR71X_RCCU_PLL1FRM250       (1)
-#define STR71X_RCCU_PLL1FRM500       (2)
-
-#define STR71X_RCCU_DIV2_MASK        (0x00008000)
-#define STR71X_RCCU_DIV2_INDEX       (0x0f)
-#define STR71X_RCCU_FACT_MASK        (0x0003)
-
-#define STR71X_RCCU_FACT1_MASK       (0x0003)
-
-#define STR71X_RCCU_FACT2_MASK       (0x0300)
-#define STR71X_RCCU_FACT2_INDEX      (0x08)
-
-#define STR71X_RCCU_MX_MASK          (0x00000030)
-#define STR71X_RCCU_MX_INDEX         (0x04)
-
-#define STR71X_RCCU_DX_MASK          (0x00000007)
-
-#define STR71X_RCCU_FREFRANGE_MASK   (0x00000040)
-
-#define STR71X_RCCU_FRQRNG_MASK      (0x00000040)
-
-#define STR71X_RCCU_FREEN_MASK       (0x00000080)
-
-#define STR71X_RCCU_PLLEN_MASK       (0x00000080)
-
-#define STR71X_RCCU_CSU_CKSEL_MASK   (0x00000001)
-
-#define STR71X_RCCU_CK2_16_MASK      (0x00000008)
-
-#define STR71X_RCCU_CKAF_SEL_MASK    (0x00000004)
-
-#define STR71X_RCCU_LOCK_MASK        (0x00000002)
-
-#define STR71X_RCCU_USBEN_MASK       (0x0100)
-#define STR71X_RCCU_USBEN_INDEX      (0x08)
-
-/* RTC Oscillator Frequency value = 32 768 Hz */
-
-#define STR71X_RCCU_RTC_OSC          (32768)
+#define STR71X_RCCUSMR_WFI           (0x00000001) /* Bit 0: Wait for interrupt */
+#define STR71X_RCCUSMR_HALT          (0x00000000) /* Bit 1: Halt */
 
 /************************************************************************************
  * Public Types

@@ -38,12 +38,12 @@ ENTRY(_stext)
 SECTIONS
 {
 	/* The str71x has 256Kb of non-volatile memory beginning at address
-	 * 0x00000000 for program storage (Bank0, an addition 16Kb is avalable
+	 * 0x40000000 for program storage (Bank0, an addition 16Kb is avalable
 	 * for data storage in Bank1).  The OS entry point is via the reset vector
 	 * at address 0x00000000 where the FLASH is remapped at reset.
 	 */
 
-	. = 0x00000000;
+	. = 0x40000000;
 	.text : {
 		_stext = ABSOLUTE(.);
 		*(.text)
