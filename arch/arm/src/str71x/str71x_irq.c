@@ -160,6 +160,7 @@ void up_maskack_irq(int irq)
       /* Clear the interrupt by writing a one to the corresponding bit in the
        * IPR register.
        */
+
       reg32  = getreg32(STR71X_EIC_IPR);
       reg32 |= (1 << irq);
       putreg32(reg32, STR71X_EIC_IPR);
