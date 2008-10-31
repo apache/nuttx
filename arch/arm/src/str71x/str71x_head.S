@@ -553,7 +553,7 @@ __flashstart:
 	bl	str71x_prccuinit
 
 	/* Configure the uart so that we can get debug output as soon
-	 * as possible.  Modifies r0, r1, r2, and r14.
+	 * as possible.
 	 */
 
         bl	up_lowsetup

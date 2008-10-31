@@ -47,9 +47,9 @@ ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CMN_CSRCS	+= up_schedulesigaction.c up_sigdeliver.c
 endif
 
-CHIP_ASRCS	= str71x_lowputc.S
-CHIP_CSRCS	= str71x_prccu.c str71x_decodeirq.c str71x_irq.c str71x_timerisr.c \
-		  str71x_serial.c
+CHIP_ASRCS	= 
+CHIP_CSRCS	= str71x_prccu.c str71x_lowputc.c str71x_decodeirq.c str71x_irq.c \
+		  str71x_timerisr.c str71x_serial.c
 
 ifeq ($(CONFIG_USBDEV),y)
 CHIP_CSRCS	+= str71x_usbdev.c
