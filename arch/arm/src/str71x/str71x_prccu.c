@@ -1,0 +1,342 @@
+/********************************************************************************
+ * arch/arm/src/str71x/str71x_prccu.c
+ *
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ********************************************************************************/
+
+/********************************************************************************
+ * Included Files
+ ********************************************************************************/
+
+#include <nuttx/config.h>
+#include <sys/types.h>
+
+#include <assert.h>
+#include <debug.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+
+#include "chip.h"
+
+/********************************************************************************
+ * Definitions
+ ********************************************************************************/
+
+/* Input frequency (CLK2) is either the main oscillator or the main oscillator
+ * divided by 2.
+ */
+
+#ifdef STR71X_PLL1_DIV2
+#  define STR71X_PLL1_CLK2     (STR71X_RCCU_MAIN_OSC/2)
+#else
+#  define STR71X_RCCU_MAIN_OSC STR71X_RCCU_MAIN_OSC
+#endif
+
+/* Select set of peripherals to be enabled */
+
+/* APB1 periperals */
+
+#ifndef CONFIG_STR71X_I2C0
+#  define APB1EN_I2C0 STR71X_APB1_I2C0
+#else
+#  define APB1EN_I2C0 (0)
+#endif
+
+#ifndef CONFIG_STR71X_I2C1
+#  define APB1EN_I2C1 STR71X_APB1_I2C1
+#else
+#  define APB1EN_I2C1 (0)
+#endif
+
+#ifndef CONFIG_STR71X_UART0
+#  define APB1EN_UART0 STR71X_APB1_UART0
+#else
+#  define APB1EN_UART0 (0)
+#endif
+
+#ifndef CONFIG_STR71X_UART1
+#  define APB1EN_UART1 STR71X_APB1_UART1
+#else
+#  define APB1EN_UART1 (0)
+#endif
+
+#ifndef CONFIG_STR71X_UART2
+#  define APB1EN_UART2 STR71X_APB1_UART2
+#else
+#  define APB1EN_UART2 (0)
+#endif
+
+#ifndef CONFIG_STR71X_UART3
+#  define APB1EN_UART3 STR71X_APB1_UART3
+#else
+#  define APB1EN_UART3 (0)
+#endif
+
+#ifndef CONFIG_STR71X_USB
+#  define APB1EN_USB STR71X_APB1_USB
+#else
+#  define APB1EN_USB (0)
+#endif
+
+#ifndef CONFIG_STR71X_CAN
+#  define APB1EN_CAN STR71X_APB1_CAN
+#else
+#  define APB1EN_CAN (0)
+#endif
+
+#ifndef CONFIG_STR71X_BSPI0
+#  define APB1EN_BSPI0 STR71X_APB1_BSPI0
+#else
+#  define APB1EN_BSPI0 (0)
+#endif
+
+#ifndef CONFIG_STR71X_BSPI1
+#  define APB1EN_BSPI1 STR71X_APB1_BSPI1
+#else
+#  define APB1EN_BSPI1 (0)
+#endif
+
+#ifndef CONFIG_STR71X_HDLC
+#  define APB1EN_HDLC STR71X_APB1_HDLC
+#else
+#  define APB1EN_HDLC (0)
+#endif
+
+#define APB1EN_ALL (APB1EN_I2C0|APB1EN_I2C1|APB1EN_UART0|APB1EN_UART1|\
+                    APB1EN_UART2|APB1EN_UART3|APB1EN_USB|APB1EN_CAN|\
+                    APB1EN_BSPI0|APB1EN_BSPI1|APB1EN_HDLC)
+
+/* APB2 Peripherals */
+
+#ifndef CONFIG_STR71X_XTI
+#  define APB2EN_XTI STR71X_APB2_XTI
+#else
+#  define APB2EN_XTI (0)
+#endif
+
+#ifndef CONFIG_STR71X_GPIO0
+#  define APB2EN_GPIO0 STR71X_APB2_GPIO0
+#else
+#  define APB2EN_GPIO0 (0)
+#endif
+
+#ifndef CONFIG_STR71X_GPIO1
+#  define APB2EN_GPIO1 STR71X_APB2_GPIO1
+#else
+#  define APB2EN_GPIO1 (0)
+#endif
+
+#ifndef CONFIG_STR71X_GPIO2
+#  define APB2EN_GPIO2 STR71X_APB2_GPIO2
+#else
+#  define APB2EN_GPIO2 (0)
+#endif
+
+#ifndef CONFIG_STR71X_ADC12
+#  define APB2EN_ADC12 STR71X_APB2_ADC12
+#else
+#  define APB2EN_ADC12 (0)
+#endif
+
+#ifndef CONFIG_STR71X_CKOUT
+#  define APB2EN_CKOUT STR71X_APB2_CKOUT
+#else
+#  define APB2EN_CKOUT (0)
+#endif
+
+#define APB2EN_TIM0 (0) /* System timer -- always enabled */
+
+#ifndef CONFIG_STR71X_TIM1
+#  define APB2EN_TIM1 STR71X_APB2_TIM1
+#else
+#  define APB2EN_TIM1 (0)
+#endif
+
+#ifndef CONFIG_STR71X_TIM2
+#  define APB2EN_TIM2 STR71X_APB2_TIM2
+#else
+#  define APB2EN_TIM2 (0)
+#endif
+
+#ifndef CONFIG_STR71X_TIM3
+#  define APB2EN_TIM3 STR71X_APB2_TIM3
+#else
+#  define APB2EN_TIM3 (0)
+#endif
+
+#ifndef CONFIG_STR71X_RTC
+#  define APB2EN_RTC STR71X_APB2_RTC
+#else
+#  define APB2EN_RTC (0)
+#endif
+
+#define APB2EN_EIC (0) /* Interrupt controller always enabled */
+
+#define APB2EN_ALL (APB2EN_XTI|APB2EN_GPIO0|APB2EN_GPIO1|APB2EN_GPIO2|\
+                    APB2EN_ADC12|APB2EN_CKOUT|APB2EN_TIM0|APB2EN_TIM1|\
+                    APB2EN_TIM2|APB2EN_TIM3|APB2EN_RTC|APB2EN_EIC)
+
+/********************************************************************************
+ * Private Types
+ ********************************************************************************/
+
+/********************************************************************************
+ * Public Data
+ ********************************************************************************/
+
+/********************************************************************************
+ * Private Data
+ ********************************************************************************/
+
+/********************************************************************************
+ * Private Functions
+ ********************************************************************************/
+
+/********************************************************************************
+ * Public Funstions
+ ********************************************************************************/
+
+/********************************************************************************
+ * Name: str71x_prccuinit
+ *
+ * Description:
+ *   Initialize the PCU/RCCU based on the NuttX configuration and the board-specific
+ *   settings in board.h
+ *
+ ********************************************************************************/
+
+void str71x_prccuinit(void)
+{
+  uint32 reg32;
+  uint16 reg16;
+
+ /* Divide RCLK to obtain PCLK1 & 2 clock for the APB1 & 2 peripherals.  The divider
+  * values are provided in board.h
+  */
+
+  reg16  = getreg16(STR71X_PCU_PDIVR);
+  reg16 &= ~(STR71X_PCUPDIVR_FACT1MASK|STR71X_PCUPDIVR_FACT2MASK);
+  reg16 |= (STR71X_APB1_DIV|STR71X_APB2_DIV
+  putreg16(reg16, STR71X_PCU_PDIVR);
+
+  /* Configure the main system clock (MCLK) divider with value from board.h */
+
+  reg16 = getreg16(STR71X_PCU_MDIVR);
+  reg16 &= ~STR71X_PCUMDIVR_FACTMASK;
+  reg16 |= STR71X_MCLK_DIV
+  purreg16(reg16 , STR71X_PCU_MDIVR);
+
+  /* Turn off the PLL1 by setting bits DX[2:0] */
+
+  putreg32(STR71X_RCCUPLL1CR_CLK2, STR71X_RCCU_PLL1CR);
+
+  /* Configure the PLL1CR register using the provided multiplier and
+   * divider.  The FREF_RANGE bit is also set if the input frequency
+   * (CLK2) is greater than 3MHz.
+   */
+
+#if STR71X_PLL1_CLK2 > 3000000
+  putreg32(STR71X_PLL1OUT_MUL|STR71X_PLL1OUT_DIV, STR71X_RCCU_PLL1CR);
+#else
+  putreg32(STR71X_PLL1OUT_MUL|STR71X_PLL1OUT_DIV|STR71X_RCCUPLL1CR_FREFRANGE, STR71X_RCCU_PLL1CR);
+#endif
+
+  /* Wait for the PLL to lock */
+
+  while (getreg16(STR71X_RCCU_CFR) & STR71X_RCCUCFR_LOCK) == 0);
+
+  /* Set the CK2_16 Bit in the CFR to use CLK2/PLL1OUT as CLK3 */
+
+  reg32 = getreg32(STR71X_RCCU_CFR);
+  putreg32(reg32 | STR71X_RCCUCFR_CK216, STR71X_RCCU_CFR);
+
+  /* Wait for the PLL to lock */
+
+  while (getreg16(STR71X_RCCU_CFR) & STR71X_RCCUCFR_LOCK) == 0);
+
+  /* Select CLK3 (vs the alternative source) for RCLK in the clock
+   * control register (CCR)
+   */
+
+  reg16 = getreg16(STR71X_RCCU_CCR);
+  reg16 &= ~STR71X_RCCUCCR_CKAFSEL
+  putreg16(reg16, STR71X_RCCU_CCR);
+
+  /* Select PLL1OUT as the CLK3 */
+
+  reg32 = getreg32(STR71X_RCCU_CFR);
+  putreg32(reg32 | STR71X_RCCUCFR_CSUCKSEL, STR71X_RCCU_CFR);
+
+  /* Enable clocking on selected periperals */
+
+  putreg32(APB1EN_ALL, STR71X_APB1_CKDIS);
+  putreg32(APB2EN_ALL, STR71X_APB2_CKDIS);
+
+  /* Configure PLL2 */
+
+#if defined(CONFIG_STR71X_HDLC) || (defined(CONFIG_STR71X_USB) && defined(STR71X_USBIN_PLL2))
+  reg16  = getreg16(STR71X_PCU_PLL2CR);
+  reg16 &= ~(STR71X_PCUPPL2CR_MXMASK|STR71X_PCUPPL2CR_DXMASK);
+  reg16 |= (STR71X_PLL2OUT_MUL|STR71X_PLL2OUT_DIV);
+
+  /* Set the PLL2 FRQRNG bit according to the PLL2 input frequency */
+
+#if STR71X_PCU_HCLK_OSC < 3000000
+  reg16 &= ~STR71X_PCUPPL2CR_FRQRNG;
+#else
+  reg16 |= STR71X_PCUPPL2CR_FRQRNG;
+#else
+  putreg16(reg16, STR71X_PCU_PLL2CR);
+
+  /* Wait for PLL2 to lock in */
+  // while (getreg16(STR71X_PCU_PLL2CR) & STR71X_PCUPPL2CR_LOCK) == 0);
+#endif
+
+  /* Select the USB clock source */
+
+#ifdef CONFIG_STR71X_USB
+  reg16 = getreg16(STR71X_PCU_PLL2CR);
+#ifdef STR71X_USBIN_PLL2
+  /* PLL2 is the clock source to the USB */
+
+  reg16 |= STR71X_PCUPPL2CR_USBEN;
+#else
+  /* USBCLK pin is the clock source to the USB */
+
+  reg16 &= ~STR71X_PCUPPL2CR_USBEN;
+#endif
+  putreg16(reg16, STR71X_PCU_PLL2CR);
+#endif
+}
+
+

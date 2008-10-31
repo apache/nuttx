@@ -68,6 +68,27 @@
 
 /* Register bit settings ************************************************************/
 
+/* PCU MDIVR register bit definitions */
+
+#define STR71X_PCUMDIVR_FACTMASK    (0x0003) /* Bits 0-1: Division factor for main system clock */
+#define STR71X_PCUMDIVR_DIV1        (0x0000) /*   MCLK = RCLK */
+#define STR71X_PCUMDIVR_DIV2        (0x0001) /*   MCLK = RCLK / 2 */
+#define STR71X_PCUMDIVR_DIV4        (0x0002) /*   MCLK = RCLK / 4 */
+#define STR71X_PCUMDIVR_DIV8        (0x0003) /*   MCLK = RCLK / 8 */
+
+/* PCU PDIVR register bit definitions */
+
+#define STR71X_PCUPDIVR_FACT1MASK   (0x0003) /* Bits 0-1: Division factor for APB1 peripherals */
+#define STR71X_PCUPDIVR_APB1DIV1    (0x0000) /*   PCLK1 = RCLK */
+#define STR71X_PCUPDIVR_APB1DIV2    (0x0001) /*   PCLK1 = RCLK / 2 */
+#define STR71X_PCUPDIVR_APB1DIV4    (0x0002) /*   PCLK1 = RCLK / 4 */
+#define STR71X_PCUPDIVR_APB1DIV8    (0x0003) /*   PCLK1 = RCLK / 8 */
+#define STR71X_PCUPDIVR_FACT1MASK   (0x0300) /* Bits 8-9: Division factor for APB2 peripherals */
+#define STR71X_PCUPDIVR_APB2DIV1    (0x0000) /*   PCLK2 = RCLK */
+#define STR71X_PCUPDIVR_APB2DIV2    (0x0100) /*   PCLK2 = RCLK / 2 */
+#define STR71X_PCUPDIVR_APB2DIV4    (0x0200) /*   PCLK2 = RCLK / 4 */
+#define STR71X_PCUPDIVR_APB2DIV8    (0x0300) /*   PCLK2 = RCLK / 8 */
+
 /* PCU RSTR register bit definitions */
 
 #define STR71X_PCURSTR_EMIRESET     (0x0004) /* Bit 2: EMI reset */
@@ -88,7 +109,7 @@
 #define STR71X_PCUPPL2CR_MUL12      (0x0010) /*   CLK2 * 12 */
 #define STR71X_PCUPPL2CR_MUL28      (0x0020) /*   CLK2 * 28 */
 #define STR71X_PCUPPL2CR_MUL16      (0x0030) /*   CLK2 * 16 */
-#define STR71X_PCUPPL2CR_FRRRNG     (0x0040) /* Bit 6: PLL2 frequency range selection */
+#define STR71X_PCUPPL2CR_FRQRNG     (0x0040) /* Bit 6: PLL2 frequency range selection */
 #define STR71X_PCUPPL2CR_PLLEN      (0x0080) /* Bit 7: PLL2 enable */
 #define STR71X_PCUPPL2CR_USBEN      (0x0100) /* Bit 8: Enable PLL clock to USB */
 #define STR71X_PCUPPL2CR_IRQMASK    (0x0200) /* Bit 9: Enable interrupt request CPU on lock transition */

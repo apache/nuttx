@@ -82,6 +82,23 @@
 #endif
 
 /*****************************************************************************
+ * External references
+ *****************************************************************************/
+
+	.globl	str71x_prccuinit	/* Clock initialization */
+	.globl	up_lowsetup		/* Early initialization of UART */
+#ifdef CONFIG_USE_EARLYSERIALINIT
+	.globl	up_earlyserialinit	/* Early initialization of serial driver */
+#endif
+#ifdef CONFIG_ARCH_LEDS
+	.globl	up_ledinit		/* Boot LED setup */
+#endif
+#ifdef CONFIG_DEBUG
+	.globl	up_lowputc		/* Low-level debug output */
+#endif
+	.globl	os_start		/* NuttX entry point */
+
+/*****************************************************************************
  * Macros
  *****************************************************************************/
 
@@ -368,46 +385,9 @@ eicloop:
 	ldr	\value, =STR71X_APB1_APB1ALL
 	strh	\value, [\base1, #STR71X_APB_CKDIS_OFFSET]
 
-	/* Disable all(or most) APB1 peripherals */
-#if 1 /* See below */
+	/* Disable all(or most) APB2 peripherals */
 	ldr	\value, =(STR71X_APB2_APB2ALL & ~STR71X_APB2_EIC)
-#else
-	ldr	\value, =STR71X_APB2_APB2ALL
-#endif
 	strh	\value, [\base2, #STR71X_APB_CKDIS_OFFSET]
-
-	/* Reset and enable peripherals */
-#if 0
-	/* Hold all APB1 and APB2 peripherals under reset */
-
-	ldr	\value, =STR71X_APB1_APB1ALL
-	strh	\value, [\base1, #STR71X_APB_SWRES_OFFSET]
-	ldr	\value, =STR71X_APB2_APB2ALL
-	strh	\value, [\base2, #STR71X_APB_SWRES_OFFSET]
-
-	/* Wait that the selected macrocells exit from reset */
-
-	mov	\value, #10 
-loop1:	subs	\value, \value, #1
-	bne	loop1
-
-	/* Release APB1 and APB2 peripherals from reset */
-
-	mov	\value, #0
-	strh	\value, [\base1, #STR71X_APB_SWRES_OFFSET]
-	strh	\value, [\base2, #STR71X_APB_SWRES_OFFSET]
-
-	/* Enable clocking for all APB1 and APB2 peripherals */
-
-	strh	\value, [\base1, #STR71X_APB_CKDIS_OFFSET]
-	strh	\value, [\base2, #STR71X_APB_CKDIS_OFFSET];
-
-	/* Wait that the selected macrocells exit from reset */
-
-	mov	\value, #10
-loop2:	subs	\value, \value, #1
-	bne	loop2
-#endif
 
 	/* Allow EMI and USB */
 
@@ -543,13 +523,6 @@ __flashstart:
 
 	remap	r0, r1
 
-	/* Configure the uart so that we can get debug output as soon
-	 * as possible.  Modifies r0, r1, r2, and r14.
-	 */
-
-        bl	up_lowsetup
-	showprogress 'A'
-
 	/* Setup system stack (and get the BSS range) */
 
 	adr	r0, LC0
@@ -561,8 +534,6 @@ __flashstart:
 1:	cmp	r4, r5
 	strcc	r0, [r4], #4
 	bcc	1b
-
-	showprogress 'B'
 
 	/* Copy system .data sections to new home in RAM. */
 
@@ -577,6 +548,17 @@ __flashstart:
 	blt	1b
 
 #endif
+	/* Initialize clocking */
+
+	bl	str71x_prccuinit
+
+	/* Configure the uart so that we can get debug output as soon
+	 * as possible.  Modifies r0, r1, r2, and r14.
+	 */
+
+        bl	up_lowsetup
+	showprogress 'A'
+
 	/* Perform early serial initialization */
 
 	mov	fp, #0
@@ -584,10 +566,11 @@ __flashstart:
 	bl	up_earlyserialinit
 #endif
 
-	showprogress 'C'
+	showprogress 'B'
 
 	/* Call C++ constructors */
 
+#ifdef CONFIG_CPLUSPLUS
 	ldr 	r0, =__ctors_start__
 	ldr 	r1, =__ctors_end__
 ctor_loop:
@@ -601,7 +584,8 @@ ctor_loop:
 	b 	ctor_loop
 ctor_end:
 
-	showprogress 'D'
+	showprogress 'C'
+#endif
 	showprogress '\n'
 
 	/* Initialize onboard LEDs */
@@ -615,7 +599,8 @@ ctor_end:
 	b	os_start
 
 	/* Call destructors  -- never get here */
-#if 0
+
+#if 0 /* CONFIG_CPLUSPLUS */
 	ldr	r0, =__dtors_start__
 	ldr	r1, =__dtors_end__
 dtor_loop:
