@@ -314,20 +314,20 @@ void up_lowsetup(void)
    */
 
 #if HAVE_UART
-  reg16  = getreg16(STR71X_GPIO_PC0_OFFSET);
+  reg16  = getreg16(STR71X_GPIO0_PC0);
   reg16 &= STR71X_GPIO0_MASK;
   reg16 |= STR71X_GPIO0_PC0BITS;
-  putreg16(reg16, STR71X_GPIO_PC0_OFFSET);
+  putreg16(reg16, STR71X_GPIO0_PC0);
 
-  reg16 = getreg16(STR71X_GPIO_PC1_OFFSET);
+  reg16 = getreg16(STR71X_GPIO0_PC1);
   reg16 &= STR71X_GPIO0_MASK;
   reg16 |= STR71X_GPIO0_PC1BITS;
-  putreg16(reg16, STR71X_GPIO_PC1_OFFSET);
+  putreg16(reg16, STR71X_GPIO0_PC1);
 
-  reg16 = getreg16(STR71X_GPIO_PC2_OFFSET);
+  reg16 = getreg16(STR71X_GPIO0_PC2);
   reg16 &= STR71X_GPIO0_MASK;
   reg16 |= STR71X_GPIO0_PC2BITS;
-  putreg16(reg16, STR71X_GPIO_PC2_OFFSET);
+  putreg16(reg16, STR71X_GPIO0_PC2);
 #endif
 }
 

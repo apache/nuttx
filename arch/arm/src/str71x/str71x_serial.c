@@ -529,18 +529,18 @@ static int up_setup(struct uart_dev_s *dev)
       cr |= STR71X_UARTCR_STOPBIT05;
     }
 
-  putreg16(cr, STR71X_UART_CR_OFFSET);
+  up_serialout(priv, STR71X_UART_CR_OFFSET, cr);
 
   /* Clear FIFOs */
 
-  putreg16(0, STR71X_UART2_TXRSTR_OFFSET);
-  putreg16(0, SSTR71X_UART2_RXRSTR_OFFSET);
+  up_serialout(priv, STR71X_UART2_TXRSTR_OFFSET, 0);
+  up_serialout(priv, SSTR71X_UART2_RXRSTR_OFFSET, 0);
 
   /* We will take RX interrupts on either the FIFO half full or upon
    * a timeout.  The timeout is based upon BAUD rate ticks
    */
 
-  putreg16(50, STR71X_UART_TOR_OFFSET);
+  up_serialout(priv, STR71X_UART_TOR_OFFSET, 50);
 
   /* Set up the IER */
 

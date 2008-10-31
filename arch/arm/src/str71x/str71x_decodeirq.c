@@ -91,9 +91,11 @@ void up_decodeirq(uint32 *regs)
   current_regs = regs;
   PANIC(OSERR_ERREXCEPTION);
 #else
-  /* Read the IRQ number from the IVR register */
+  /* Read the IRQ number from the IVR register (Could probably get the same
+   * info from CIC register without the setup.
+   */
 
-  unsigned int irq = getreq32(STR71X_EIC_IVR_OFFSET);
+  unsigned int irq = getreq32(STR71X_EIC_IVR);
 
   /* Verify that the resulting IRQ number is valid */
 

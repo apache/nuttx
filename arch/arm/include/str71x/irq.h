@@ -110,6 +110,8 @@ extern "C" {
  * Public Functions
  ************************************************************************************/
 
+EXTERN int up_irqpriority(int irq, ubyte priority); /* Set interrupt priority (0-15) */
+
 #undef EXTERN
 #ifdef __cplusplus
 }

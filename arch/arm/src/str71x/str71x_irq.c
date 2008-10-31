@@ -72,9 +72,15 @@ uint32 *current_regs;
 
 void up_irqinitialize(void)
 {
+  uint32 reg32;
+
   /* The bulk of IRQ initialization if performed in str71x_head.S, so we
    * have very little to do here:
    */
+
+  /* Enable IRQs (but not FIQs -- they aren't used) */
+
+  putreg32(STR71X_EICICR_IRQEN, STR71X_EIC_ICR)
 
   /* Currents_regs is non-NULL only while processing an interrupt */
 
@@ -97,7 +103,16 @@ void up_irqinitialize(void)
 
 void up_disable_irq(int irq)
 {
-# warning "To be provided"
+  uint32 reg32;
+
+  if ((unsigned)irq < NR_IRQS)
+    {
+      /* Mask the IRQ by clearing the associated bit in the IER register */
+
+      reg32  = getreg32(STR71X_EIC_IER);
+      reg32 &= ~(1 << irq);
+      putreg32(reg32, STR71X_EIC_IER);
+    }
 }
 
 /****************************************************************************
@@ -110,7 +125,16 @@ void up_disable_irq(int irq)
 
 void up_enable_irq(int irq)
 {
-# warning "To be provided"
+  uint32 reg32;
+
+  if ((unsigned)irq < NR_IRQS)
+    {
+      /* Enable the IRQ by setting the associated bit in the IER register */
+
+      reg32  = getreg32(STR71X_EIC_IER);
+      reg32 |= (1 << irq);
+      putreg32(reg32, STR71X_EIC_IER);
+    }
 }
 
 /****************************************************************************
@@ -123,5 +147,48 @@ void up_enable_irq(int irq)
 
 void up_maskack_irq(int irq)
 {
-# warning "To be provided"
+  uint32 reg32;
+
+  if ((unsigned)irq < NR_IRQS)
+    {
+      /* Mask the IRQ by clearing the associated bit in the IER register */
+
+      reg32  = getreg32(STR71X_EIC_IER);
+      reg32 &= ~(1 << irq);
+      putreg32(reg32, STR71X_EIC_IER);
+
+      /* Clear the interrupt by writing a one to the corresponding bit in the
+       * IPR register.
+       */
+      reg32  = getreg32(STR71X_EIC_IPR);
+      reg32 |= (1 << irq);
+      putreg32(reg32, STR71X_EIC_IPR);
+
+    }
 }
+
+/****************************************************************************
+ * Name: up_irqpriority
+ *
+ * Description:
+ *   set interrupt priority
+ *
+ ****************************************************************************/
+
+int up_irqpriority(int irq, ubyte priority)
+{
+  uint32 reg32;
+
+  if ((unsigned)irq < NR_IRQS && priority < 16)
+    {
+      uint32 addr = STR71X_EIC_SIR(irq);
+      reg32  = getreg32(addr);
+      reg32 &= STR71X_EICSIR_SIPLMASK;
+      reg32 |= priority;
+      putreg32(reg32, addr);
+      return OK;
+    }
+
+  return -EINVAL;
+}
+
