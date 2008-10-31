@@ -81,24 +81,36 @@
 #ifndef CONFIG_STR71X_UART0
 #  define APB1EN_UART0 STR71X_APB1_UART0
 #else
+#  ifndef CONFIG_STR71X_GPIO0
+#    error "CONFIG_STR71X_UART0 requires CONFIG_STR71X_GPIO0"
+#  endif
 #  define APB1EN_UART0 (0)
 #endif
 
 #ifndef CONFIG_STR71X_UART1
 #  define APB1EN_UART1 STR71X_APB1_UART1
 #else
+#  ifndef CONFIG_STR71X_GPIO0
+#    error "CONFIG_STR71X_UART1 requires CONFIG_STR71X_GPIO0"
+#  endif
 #  define APB1EN_UART1 (0)
 #endif
 
 #ifndef CONFIG_STR71X_UART2
 #  define APB1EN_UART2 STR71X_APB1_UART2
 #else
+#  ifndef CONFIG_STR71X_GPIO0
+#    error "CONFIG_STR71X_UART2 requires CONFIG_STR71X_GPIO0"
+#  endif
 #  define APB1EN_UART2 (0)
 #endif
 
 #ifndef CONFIG_STR71X_UART3
 #  define APB1EN_UART3 STR71X_APB1_UART3
 #else
+#  ifndef CONFIG_STR71X_GPIO0
+#    error "CONFIG_STR71X_UART3 requires CONFIG_STR71X_GPIO0"
+#  endif
 #  define APB1EN_UART3 (0)
 #endif
 
@@ -206,6 +218,103 @@
                     APB2EN_ADC12|APB2EN_CKOUT|APB2EN_TIM0|APB2EN_TIM1|\
                     APB2EN_TIM2|APB2EN_TIM3|APB2EN_RTC|APB2EN_EIC)
 
+
+#if STR71X_PLL1OUT_MUL == 12
+#  define PLL1MUL STR71X_RCCUPLL1CR_MUL12
+#elif STR71X_PLL1OUT_MUL == 16
+#  define PLL1MUL STR71X_RCCUPLL1CR_MUL16
+#elif STR71X_PLL1OUT_MUL == 20
+#  define PLL1MUL STR71X_RCCUPLL1CR_MUL20
+#else STR71X_PLL1OUT_MUL == 24
+#  define PLL1MUL STR71X_RCCUPLL1CR_MUL24
+#else
+#  error "Unsupporetd value for STR71X_PLL1OUT_MUL"
+#endif
+
+#if STR71X_PLL1OUT_DIV == 1
+#  define PLL1DIV STR71X_RCCUPLL1CR_DIV1
+#elif STR71X_PLL1OUT_DIV == 2
+#  define PLL1DIV STR71X_RCCUPLL1CR_DIV2
+#elif STR71X_PLL1OUT_DIV == 3
+#  define PLL1DIV STR71X_RCCUPLL1CR_DIV3
+#elif STR71X_PLL1OUT_DIV == 4
+#  define PLL1DIV STR71X_RCCUPLL1CR_DIV4
+#elif STR71X_PLL1OUT_DIV == 5
+#  define PLL1DIV STR71X_RCCUPLL1CR_DIV5
+#elif STR71X_PLL1OUT_DIV == 6
+#  define PLL1DIV STR71X_RCCUPLL1CR_DIV6
+#elif STR71X_PLL1OUT_DIV == 7
+#  define PLL1DIV STR71X_RCCUPLL1CR_DIV7
+#else
+#  error "Unsupported value for STR71X_PLL1OUT_DIV"
+#endif
+
+#if STR71X_APB1_DIV == 1
+#  define APB1DIV STR71X_PCUPDIVR_APB1DIV1
+#elif STR71X_APB1_DIV == 2
+#  define APB1DIV STR71X_PCUPDIVR_APB1DIV2
+#elif STR71X_APB1_DIV == 4
+#  define APB1DIV STR71X_PCUPDIVR_APB1DIV4
+#elif STR71X_APB1_DIV == 8
+#  define APB1DIV STR71X_PCUPDIVR_APB1DIV8
+#else
+#  error "Unsupported value for STR71X_APB1_DIV"
+#endif
+
+#if STR71X_APB2_DIV == 1
+#  define APB2DIV STR71X_PCUPDIVR_APB2DIV1
+#elif STR71X_APB2_DIV == 2
+#  define APB2DIV STR71X_PCUPDIVR_APB2DIV2
+#elif STR71X_APB2_DIV == 4
+#  define APB2DIV STR71X_PCUPDIVR_APB2DIV4
+#elif STR71X_APB2_DIV == 8
+#  define APB2DIV STR71X_PCUPDIVR_APB2DIV8
+#else
+#  error "Unsupported value for STR71X_APB2_DIV"
+#endif
+
+#if STR71X_MCLK_DIV == 1
+#  define MCLKDIV STR71X_PCUMDIVR_DIV1
+#elif STR71X_MCLK_DIV == 2
+#  define MCLKDIV STR71X_PCUMDIVR_DIV2
+#elif STR71X_MCLK_DIV == 4
+#  define MCLKDIV STR71X_PCUMDIVR_DIV4
+#elif STR71X_MCLK_DIV == 8
+#  define MCLKDIV STR71X_PCUMDIVR_DIV8
+#else
+#  error "Unsupported value for STR71X_MCLK_DIV"
+#endif
+
+#if STR71X_PLL2OUT_MUL == 12
+#  define PLL2MUL STR71X_PCUPPL2CR_MUL12
+#elif STR71X_PLL2OUT_MUL == 16
+#  define PLL2MUL STR71X_PCUPPL2CR_MUL16
+#elif STR71X_PLL2OUT_MUL == 20
+#  define PLL2MUL STR71X_PCUPPL2CR_MUL20
+#else STR71X_PLL2OUT_MUL == 28
+#  define PLL2MUL STR71X_PCUPPL2CR_MUL28
+#else
+#  error "Unsupporetd value for STR71X_PLL2OUT_MUL"
+#endif
+
+#if STR71X_PLL2OUT_DIV == 1
+#  define PLL2DIV STR71X_PCUPPL2CR_DIV1
+#elif STR71X_PLL2OUT_DIV == 2
+#  define PLL2DIV STR71X_PCUPPL2CR_DIV2
+#elif STR71X_PLL2OUT_DIV == 3
+#  define PLL2DIV STR71X_PCUPPL2CR_DIV3
+#elif STR71X_PLL2OUT_DIV == 4
+#  define PLL2DIV STR71X_PCUPPL2CR_DIV4
+#elif STR71X_PLL2OUT_DIV == 5
+#  define PLL2DIV STR71X_PCUPPL2CR_DIV5
+#elif STR71X_PLL2OUT_DIV == 6
+#  define PLL2DIV STR71X_PCUPPL2CR_DIV6
+#elif STR71X_PLL2OUT_DIV == 7
+#  define PLL2DIV STR71X_PCUPPL2CR_DIV7
+#else
+#  error "Unsupported value for STR71X_PLL2OUT_DIV"
+#endif
+
 /********************************************************************************
  * Private Types
  ********************************************************************************/
@@ -246,14 +355,14 @@ void str71x_prccuinit(void)
 
   reg16  = getreg16(STR71X_PCU_PDIVR);
   reg16 &= ~(STR71X_PCUPDIVR_FACT1MASK|STR71X_PCUPDIVR_FACT2MASK);
-  reg16 |= (STR71X_APB1_DIV|STR71X_APB2_DIV
+  reg16 |= (APB1DIV|APB2DIV);
   putreg16(reg16, STR71X_PCU_PDIVR);
 
   /* Configure the main system clock (MCLK) divider with value from board.h */
 
   reg16 = getreg16(STR71X_PCU_MDIVR);
   reg16 &= ~STR71X_PCUMDIVR_FACTMASK;
-  reg16 |= STR71X_MCLK_DIV
+  reg16 |= MCLKDIV;
   purreg16(reg16 , STR71X_PCU_MDIVR);
 
   /* Turn off the PLL1 by setting bits DX[2:0] */
@@ -266,9 +375,9 @@ void str71x_prccuinit(void)
    */
 
 #if STR71X_PLL1_CLK2 > 3000000
-  putreg32(STR71X_PLL1OUT_MUL|STR71X_PLL1OUT_DIV, STR71X_RCCU_PLL1CR);
+  putreg32(PLL1MUL|PLL1DIV, STR71X_RCCU_PLL1CR);
 #else
-  putreg32(STR71X_PLL1OUT_MUL|STR71X_PLL1OUT_DIV|STR71X_RCCUPLL1CR_FREFRANGE, STR71X_RCCU_PLL1CR);
+  putreg32(PLL1MUL|PLL1DIV|STR71X_RCCUPLL1CR_FREFRANGE, STR71X_RCCU_PLL1CR);
 #endif
 
   /* Wait for the PLL to lock */
@@ -307,7 +416,7 @@ void str71x_prccuinit(void)
 #if defined(CONFIG_STR71X_HDLC) || (defined(CONFIG_STR71X_USB) && defined(STR71X_USBIN_PLL2))
   reg16  = getreg16(STR71X_PCU_PLL2CR);
   reg16 &= ~(STR71X_PCUPPL2CR_MXMASK|STR71X_PCUPPL2CR_DXMASK);
-  reg16 |= (STR71X_PLL2OUT_MUL|STR71X_PLL2OUT_DIV);
+  reg16 |= (PLL2MUL|PLL2DIV);
 
   /* Set the PLL2 FRQRNG bit according to the PLL2 input frequency */
 

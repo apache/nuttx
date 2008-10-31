@@ -103,12 +103,12 @@
  * Main system clock:     MCLK  = RCLK = 32MHz
  */
 
-#undef  STR71X_PLL1IN_DIV2                            /* Don't divide main OSC by two */
-#define STR71X_PLL1OUT_MUL   STR71X_RCCUPLL1CR_MUL16  /* PLL1OUT = 16 * CLK2 */
-#define STR71X_PLL1OUT_DIV   STR71X_RCCUPLL1CR_DIV2   /* PLL1OUT = CLK2 / 2 */
-#define STR71X_APB1_DIV      STR71X_PCUPDIVR_APB1DIV1 /* PCLK1 = RCLK */
-#define STR71X_APB2_DIV      STR71X_PCUPDIVR_APB1DIV1 /* PCLK2 = RCLK */
-#define STR71X_MCLK_DIV      STR71X_PCUMDIVR_DIV1     /* MCLK = RCLK */
+#undef  STR71X_PLL1IN_DIV2         /* Don't divide main OSC by two */
+#define STR71X_PLL1OUT_MUL   16    /* PLL1OUT = 16 * CLK2 */
+#define STR71X_PLL1OUT_DIV   2     /* PLL1OUT = CLK2 / 2 */
+#define STR71X_APB1_DIV      1     /* PCLK1 = RCLK */
+#define STR71X_APB2_DIV      1     /* PCLK2 = RCLK */
+#define STR71X_MCLK_DIV      1     /* MCLK = RCLK */
 
 /* PLL2 Setup -- only needed for HDLC or USB
  *
@@ -117,20 +117,20 @@
  * USB clock = 12 * HCLK / 1 = 48 MHz
  */
 
-#undef  STR71X_USBIN_PLL2                             /* USB input is USB clock */
-#define STR71X_PLL2OUT_MUL   STR71X_PCUPPL2CR_MUL12   /* PLL2OUT = 12 * HCLK */
-#define STR71X_PLL2OUT_DIV   STR71X_PCUPPL2CR_DIV1    /* PLL2OUT = HCLK / 1 */
+#undef  STR71X_USBIN_PLL2          /* USB input is USB clock */
+#define STR71X_PLL2OUT_MUL   12    /* PLL2OUT = 12 * HCLK */
+#define STR71X_PLL2OUT_DIV   1     /* PLL2OUT = HCLK / 1 */
 
 /* LED definitions **********************************************************/
 
-#define LED_STARTED       0
-#define LED_HEAPALLOCATE  1
-#define LED_IRQSENABLED   2
-#define LED_STACKCREATED  3
-#define LED_INIRQ         4
-#define LED_SIGNAL        5
-#define LED_ASSERTION     6
-#define LED_PANIC         7
+#define LED_STARTED          0
+#define LED_HEAPALLOCATE     1
+#define LED_IRQSENABLED      2
+#define LED_STACKCREATED     3
+#define LED_INIRQ            4
+#define LED_SIGNAL           5
+#define LED_ASSERTION        6
+#define LED_PANIC            7
 
 /****************************************************************************
  * Inline Functions
