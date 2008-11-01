@@ -526,5 +526,7 @@
 	  is resumed (view CLEAR FEATURE), we must restart the IN (outgoing) queue.
 
 0.3.18 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+	* Added port for the STMicro STR71x processor and configuration for the Olimex STR-P711
+	  board (untested as of the initial checkin).
 
 
