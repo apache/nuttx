@@ -47,6 +47,7 @@
 #include <nuttx/arch.h>
 
 #include "chip.h"
+#include "up_arch.h"
 
 /********************************************************************************
  * Definitions
@@ -57,9 +58,9 @@
  */
 
 #ifdef STR71X_PLL1_DIV2
-#  define STR71X_PLL1_CLK2     (STR71X_RCCU_MAIN_OSC/2)
+#  define STR71X_PLL1_CLK2 (STR71X_RCCU_MAIN_OSC/2)
 #else
-#  define STR71X_RCCU_MAIN_OSC STR71X_RCCU_MAIN_OSC
+#  define STR71X_PLL1_CLK2 STR71X_RCCU_MAIN_OSC
 #endif
 
 /* Select set of peripherals to be enabled */
@@ -225,7 +226,7 @@
 #  define PLL1MUL STR71X_RCCUPLL1CR_MUL16
 #elif STR71X_PLL1OUT_MUL == 20
 #  define PLL1MUL STR71X_RCCUPLL1CR_MUL20
-#else STR71X_PLL1OUT_MUL == 24
+#elif STR71X_PLL1OUT_MUL == 24
 #  define PLL1MUL STR71X_RCCUPLL1CR_MUL24
 #else
 #  error "Unsupporetd value for STR71X_PLL1OUT_MUL"
@@ -291,7 +292,7 @@
 #  define PLL2MUL STR71X_PCUPPL2CR_MUL16
 #elif STR71X_PLL2OUT_MUL == 20
 #  define PLL2MUL STR71X_PCUPPL2CR_MUL20
-#else STR71X_PLL2OUT_MUL == 28
+#elif STR71X_PLL2OUT_MUL == 28
 #  define PLL2MUL STR71X_PCUPPL2CR_MUL28
 #else
 #  error "Unsupporetd value for STR71X_PLL2OUT_MUL"
@@ -363,7 +364,7 @@ void str71x_prccuinit(void)
   reg16 = getreg16(STR71X_PCU_MDIVR);
   reg16 &= ~STR71X_PCUMDIVR_FACTMASK;
   reg16 |= MCLKDIV;
-  purreg16(reg16 , STR71X_PCU_MDIVR);
+  putreg16(reg16 , STR71X_PCU_MDIVR);
 
   /* Turn off the PLL1 by setting bits DX[2:0] */
 
@@ -382,7 +383,7 @@ void str71x_prccuinit(void)
 
   /* Wait for the PLL to lock */
 
-  while (getreg16(STR71X_RCCU_CFR) & STR71X_RCCUCFR_LOCK) == 0);
+  while ((getreg16(STR71X_RCCU_CFR) & STR71X_RCCUCFR_LOCK) == 0);
 
   /* Set the CK2_16 Bit in the CFR to use CLK2/PLL1OUT as CLK3 */
 
@@ -391,14 +392,14 @@ void str71x_prccuinit(void)
 
   /* Wait for the PLL to lock */
 
-  while (getreg16(STR71X_RCCU_CFR) & STR71X_RCCUCFR_LOCK) == 0);
+  while ((getreg16(STR71X_RCCU_CFR) & STR71X_RCCUCFR_LOCK) == 0);
 
   /* Select CLK3 (vs the alternative source) for RCLK in the clock
    * control register (CCR)
    */
 
   reg16 = getreg16(STR71X_RCCU_CCR);
-  reg16 &= ~STR71X_RCCUCCR_CKAFSEL
+  reg16 &= ~STR71X_RCCUCCR_CKAFSEL;
   putreg16(reg16, STR71X_RCCU_CCR);
 
   /* Select PLL1OUT as the CLK3 */
@@ -424,11 +425,11 @@ void str71x_prccuinit(void)
   reg16 &= ~STR71X_PCUPPL2CR_FRQRNG;
 #else
   reg16 |= STR71X_PCUPPL2CR_FRQRNG;
-#else
+#endif
   putreg16(reg16, STR71X_PCU_PLL2CR);
 
   /* Wait for PLL2 to lock in */
-  // while (getreg16(STR71X_PCU_PLL2CR) & STR71X_PCUPPL2CR_LOCK) == 0);
+  // while ((getreg16(STR71X_PCU_PLL2CR) & STR71X_PCUPPL2CR_LOCK) == 0);
 #endif
 
   /* Select the USB clock source */

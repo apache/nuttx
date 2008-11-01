@@ -110,7 +110,7 @@
 #define STR71X_RCCUPLL1CR_DIV7       (0x00000006) /*   PLLCK / 7 */
 #define STR71X_RCCUPLL1CR_CLK2       (0x00000007) /*   FREEN==0: CLK2 */
 #define STR71X_RCCUPLL1CR_FREERM     (0x00000007) /*   FREEN==1: PLL1 in free running mode */
-#define STR71X_RCCUPLL1CR_MXMASK     (0x00000030) /* Bit 4-5: 
+#define STR71X_RCCUPLL1CR_MXMASK     (0x00000030) /* Bit 4-5: PLL1 clock multiplier */
 #define STR71X_RCCUPLL1CR_MUL20      (0x00000000) /*   CLK2 * 20 */
 #define STR71X_RCCUPLL1CR_MUL12      (0x00000010) /*   CLK2 * 12 */
 #define STR71X_RCCUPLL1CR_MUL24      (0x00000020) /*   CLK2 * 24 */

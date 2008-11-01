@@ -39,10 +39,12 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <errno.h>
 #include <nuttx/irq.h>
+
 #include "up_arch.h"
-#include "os_internal.h"
 #include "up_internal.h"
+#include "chip.h"
 
 /****************************************************************************
  * Definitions
@@ -72,15 +74,13 @@ uint32 *current_regs;
 
 void up_irqinitialize(void)
 {
-  uint32 reg32;
-
   /* The bulk of IRQ initialization if performed in str71x_head.S, so we
    * have very little to do here:
    */
 
   /* Enable IRQs (but not FIQs -- they aren't used) */
 
-  putreg32(STR71X_EICICR_IRQEN, STR71X_EIC_ICR)
+  putreg32(STR71X_EICICR_IRQEN, STR71X_EIC_ICR);
 
   /* Currents_regs is non-NULL only while processing an interrupt */
 
@@ -178,11 +178,12 @@ void up_maskack_irq(int irq)
 
 int up_irqpriority(int irq, ubyte priority)
 {
+  uint32 addr;
   uint32 reg32;
 
   if ((unsigned)irq < NR_IRQS && priority < 16)
     {
-      uint32 addr = STR71X_EIC_SIR(irq);
+      addr   = STR71X_EIC_SIR(irq);
       reg32  = getreg32(addr);
       reg32 &= STR71X_EICSIR_SIPLMASK;
       reg32 |= priority;

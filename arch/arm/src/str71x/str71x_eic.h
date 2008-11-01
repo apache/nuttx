@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include "<arch/irq.h>
+#include <arch/irq.h>
 
 /************************************************************************************
  * Definitions
@@ -93,7 +93,7 @@
 #define STR71X_EIC_SIR31_OFFSET    (0x00dc)  /* 32-bits wide */
 
 #define STR71X_EIC_NCHANNELS       (32)
-#define STR71X_EIC_SIR_BASE        ((STR71X_EIC_BASE + STR71X_EIC_SIR_OFFSET)
+#define STR71X_EIC_SIR_BASE        (STR71X_EIC_BASE + STR71X_EIC_SIR_OFFSET)
 
 /* Enhanced Interupt Controller (EIC) registers *************************************/
 

@@ -38,9 +38,11 @@
  **************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
+
 #include "up_internal.h"
 #include "up_arch.h"
-#include "chp.h"
+#include "chip.h"
 
 /**************************************************************************
  * Private Definitions
@@ -51,7 +53,7 @@
 /* Is there a UART enabled? */
 
 #if defined(CONFIG_STR71X_UART0) || defined(CONFIG_STR71X_UART1) || \
-    defined(CONFIG_STR71X_UART2) || defined(CONFIG_STR71X_UART3))
+    defined(CONFIG_STR71X_UART2) || defined(CONFIG_STR71X_UART3)
 #  define HAVE_UART 1
 
 /* Is there a serial console? */
@@ -230,7 +232,7 @@
  */
 
 #define UART_BAUDDIVISOR (16 * STR71X_UART_BAUD)
-#define UART_BAUDRATE    ((PCLK1 + (UART_BAUDDIVISOR/2) / UART_BAUDDIVISOR)
+#define UART_BAUDRATE    ((PCLK1 + (UART_BAUDDIVISOR/2) / UART_BAUDDIVISOR))
 
 /**************************************************************************
  * Private Types
@@ -266,12 +268,10 @@
 
 void up_lowputc(char ch)
 {
-#if HAVE_CONSOLE
-  uint16 reg16;
-
+#ifdef HAVE_CONSOLE
   /* Wait until the TX FIFO is not full */
 
-  while (getreg16(STR71X_UART_SR(STR71X_UART_BASE)) & STR71X_UARTSR_TF != 0);
+  while ((getreg16(STR71X_UART_SR(STR71X_UART_BASE)) & STR71X_UARTSR_TF) != 0);
 
   /* Then send the character */
 
@@ -291,13 +291,13 @@ void up_lowputc(char ch)
 
 void up_lowsetup(void)
 {
-#if HAVE_CONSOLE
+#ifdef HAVE_CONSOLE
   uint16 reg16;
 
   /* Enable the selected console device */
   /* Set the UART baud rate */
 
-  putreg16(UART_BAUDRATE, STR71X_UART_BR(STR71X_UART_BASE));
+  putreg16((uint16)UART_BAUDRATE, STR71X_UART_BR(STR71X_UART_BASE));
 
   /* Configure the UART control registers */
 
@@ -305,8 +305,8 @@ void up_lowsetup(void)
 
   /* Clear FIFOs */
 
-  putreg16(0, STR71X_UART2_TXRSTR_(STR71X_UART_BASE));
-  putreg16(0, SSTR71X_UART2_RXRSTR(STR71X_UART_BASE));
+  putreg16(0, STR71X_UART_TXRSTR(STR71X_UART_BASE));
+  putreg16(0, STR71X_UART_RXRSTR(STR71X_UART_BASE));
 #endif
 
   /* Configure GPIO0 pins to enable all UARTs in the configuration
@@ -315,18 +315,18 @@ void up_lowsetup(void)
 
 #if HAVE_UART
   reg16  = getreg16(STR71X_GPIO0_PC0);
-  reg16 &= STR71X_GPIO0_MASK;
-  reg16 |= STR71X_GPIO0_PC0BITS;
+  reg16 &= STR71X_UART_GPIO0_MASK;
+  reg16 |= STR71X_UART_GPIO0_PC0BITS;
   putreg16(reg16, STR71X_GPIO0_PC0);
 
   reg16 = getreg16(STR71X_GPIO0_PC1);
-  reg16 &= STR71X_GPIO0_MASK;
-  reg16 |= STR71X_GPIO0_PC1BITS;
+  reg16 &= STR71X_UART_GPIO0_MASK;
+  reg16 |= STR71X_UART_GPIO0_PC1BITS;
   putreg16(reg16, STR71X_GPIO0_PC1);
 
   reg16 = getreg16(STR71X_GPIO0_PC2);
-  reg16 &= STR71X_GPIO0_MASK;
-  reg16 |= STR71X_GPIO0_PC2BITS;
+  reg16 &= STR71X_UART_GPIO0_MASK;
+  reg16 |= STR71X_UART_GPIO0_PC2BITS;
   putreg16(reg16, STR71X_GPIO0_PC2);
 #endif
 }

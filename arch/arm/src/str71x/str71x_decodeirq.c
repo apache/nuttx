@@ -95,7 +95,7 @@ void up_decodeirq(uint32 *regs)
    * info from CIC register without the setup.
    */
 
-  unsigned int irq = getreq32(STR71X_EIC_IVR);
+  unsigned int irq = getreg32(STR71X_EIC_IVR);
 
   /* Verify that the resulting IRQ number is valid */
 

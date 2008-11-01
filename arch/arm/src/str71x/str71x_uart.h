@@ -133,11 +133,11 @@
 #define STR71X_UARTCR_STOPBIT10     (0x0008) /*   1.0 stop bit */
 #define STR71X_UARTCR_STOPBIT15     (0x0010) /*   1.5 stop bits */
 #define STR71X_UARTCR_STOPBIT20     (0x0018) /*   2.0 stop bits */
-#define STR71X_UARTCR_PARITYODD     (0x0020) /* Bit 5:
-#define STR71X_UARTCR_LOOPBACK      (0x0040) /* Bit 6:
-#define STR71X_UARTCR_RUN           (0x0080) /* Bit 7: 
-#define STR71X_UARTCR_RXENABLE      (0x0100) /* Bit 8:
-#define STR71X_UARTCR_SCENABLE      (0x0200) /* Bit 9: 
+#define STR71X_UARTCR_PARITYODD     (0x0020) /* Bit 5: Parity selection */
+#define STR71X_UARTCR_LOOPBACK      (0x0040) /* Bit 6: Loopback mode enable */
+#define STR71X_UARTCR_RUN           (0x0080) /* Bit 7: Baudrate generator run bit */
+#define STR71X_UARTCR_RXENABLE      (0x0100) /* Bit 8: Receiver enable */
+#define STR71X_UARTCR_SCENABLE      (0x0200) /* Bit 9: SmartCard mode enable */
 #define STR71X_UARTCR_FIFOENABLE    (0x0400) /* Bit 10: FIFO enable */
 
 /* UART interrupt enable (IER) register */

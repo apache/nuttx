@@ -83,7 +83,7 @@
 #define STR71X_PCUPDIVR_APB1DIV2    (0x0001) /*   PCLK1 = RCLK / 2 */
 #define STR71X_PCUPDIVR_APB1DIV4    (0x0002) /*   PCLK1 = RCLK / 4 */
 #define STR71X_PCUPDIVR_APB1DIV8    (0x0003) /*   PCLK1 = RCLK / 8 */
-#define STR71X_PCUPDIVR_FACT1MASK   (0x0300) /* Bits 8-9: Division factor for APB2 peripherals */
+#define STR71X_PCUPDIVR_FACT2MASK   (0x0300) /* Bits 8-9: Division factor for APB2 peripherals */
 #define STR71X_PCUPDIVR_APB2DIV1    (0x0000) /*   PCLK2 = RCLK */
 #define STR71X_PCUPDIVR_APB2DIV2    (0x0100) /*   PCLK2 = RCLK / 2 */
 #define STR71X_PCUPDIVR_APB2DIV4    (0x0200) /*   PCLK2 = RCLK / 4 */
@@ -138,8 +138,9 @@
 #define STR71X_PCUPWRCR_PWRDWN      (0x0040) /* Bit 6: Activate standby mode */
 #define STR71X_PCUPWRCR_OSCBYP      (0x0080) /* Bit 7: 32KHz oscillator bypass */
 #define STR71X_PCUPWRCR_LVDDIS      (0x0100) /* Bit 8: Low voltage detector disable */
-#define STR71X_PCUPWRCR_LVDDIS      (0x0200) /* Bit 9: FLASH low speed (low power) select */
+#define STR71X_PCUPWRCR_FLASHLP     (0x0200) /* Bit 9: FLASH low speed (low power) select */
 #define STR71X_PCUPWRCR_VROK        (0x1000) /* Bit 12: Voltage regulator OK */
+#define STR71X_PCUPWRCR_WKUPALRM    (0x2000) /* Bit 13: Wakeup or alarm active */
 #define STR71X_PCUPWRCR_BUSY        (0x4000) /* Bit 14: PCU register backup logic busy */
 #define STR71X_PCUPWRCR_WREN        (0x8000) /* Bit 15: PCU register write enable */
 
