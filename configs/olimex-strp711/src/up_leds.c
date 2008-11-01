@@ -106,21 +106,21 @@ void up_ledinit(void)
   /* Set normal function output */
 
   reg16  = getreg16(STR71X_GPIO1_PC0);
-  reg16 |= STR71X_LEDGPIO1_BITS
+  reg16 |= STR71X_LEDGPIO1_BITS;
   putreg16(reg16, STR71X_GPIO1_PC0);
 
   reg16  = getreg16(STR71X_GPIO1_PC1);
-  reg16 &= ~STR71X_LEDGPIO1_BITS
+  reg16 &= ~STR71X_LEDGPIO1_BITS;
   putreg16(reg16, STR71X_GPIO1_PC1);
 
   reg16  = getreg16(STR71X_GPIO1_PC2);
-  reg16 |= STR71X_LEDGPIO1_BITS
+  reg16 |= STR71X_LEDGPIO1_BITS;
   putreg16(reg16, STR71X_GPIO1_PC2);
 
   /* Clear the LEDs (1 clears; 0 sets) */
 
   reg16  = getreg16(STR71X_GPIO1_PD);
-  reg16 |= STR71X_LEDGPIO1_BITS
+  reg16 |= STR71X_LEDGPIO1_BITS;
   putreg16(reg16, STR71X_GPIO1_PD);
 }
 
