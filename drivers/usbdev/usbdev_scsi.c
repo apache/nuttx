@@ -66,7 +66,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/scsi.h>
-#include <nuttx/usb_bulk.h>
+#include <nuttx/usb_storage.h>
 #include <nuttx/usbdev.h>
 #include <nuttx/usbdev_trace.h>
 

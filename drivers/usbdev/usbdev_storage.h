@@ -49,7 +49,7 @@
 #include <queue.h>
 
 #include <nuttx/fs.h>
-#include <nuttx/usb_bulk.h>
+#include <nuttx/usb_storage.h>
 #include <nuttx/usbdev.h>
 
 /****************************************************************************
