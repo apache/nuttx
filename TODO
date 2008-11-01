@@ -20,6 +20,7 @@ NuttX TODO List (Last updated July 31, 2008)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (1)  ARM/DM320 (arch/arm/src/dm320/)
   (5)  ARM/LPC214x (arch/arm/src/lpc214x/)
+  (3)  ARM/STR71x (arch/arm/src/str71x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (7)  z80/z8 (arch/z80/)
   (8)  z16 (arch/z16/)
@@ -377,6 +378,22 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
   Priority:    High
 
   Description: At present the SPI driver is polled.  Should it be interrupt driven?
+  Status:      Open
+  Priority:    Medium
+
+o ARM/STR71x (arch/arm/src/str71x/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: Basic port is complete but untested.  Complete integration
+  Status:      Open
+  Priority:    High
+
+  Description: Add SPI driver and integrate with MMC/SD support.
+  Status:      Open
+  Priority:    Medium
+
+  Description: Develop a USB driver and integrate with existing USB serial
+               and storage class drivers.
   Status:      Open
   Priority:    Medium
 
