@@ -82,15 +82,15 @@ void up_buttoninit(void)
   /* Configure the GPIO pins as inputs */
 
   reg16  = getreg16(STR71X_GPIO1_PC0);
-  reg16 |= STR71X_BOTHBUTTONS_GPIO1
+  reg16 |= STR71X_BOTHBUTTONS_GPIO1;
   putreg16(reg16, STR71X_GPIO1_PC0);
 
   reg16  = getreg16(STR71X_GPIO1_PC1);
-  reg16 &= ~STR71X_BOTHBUTTONS_GPIO1
+  reg16 &= ~STR71X_BOTHBUTTONS_GPIO1;
   putreg16(reg16, STR71X_GPIO1_PC1);
 
   reg16  = getreg16(STR71X_GPIO1_PC2);
-  reg16 &= ~STR71X_BOTHBUTTONS_GPIO1
+  reg16 &= ~STR71X_BOTHBUTTONS_GPIO1;
   putreg16(reg16, STR71X_GPIO1_PC2);
 }
 

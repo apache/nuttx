@@ -125,6 +125,7 @@
 #define STR71X_TIMERCR1_PWMI        (0x4000) /* Bit 14: Pulse width modulation input */
 #define STR71X_TIMERCR1_EN          (0x8000) /* Bit 15: Timer count enable */
 
+#define STR71X_TIMERCR2_DIVMASK     (0x00ff) /* Bits 0-7: Timer prescaler value */
 #define STR71X_TIMERCR2_OCBIE       (0x0800) /* Bit 11: Output capture B enable */
 #define STR71X_TIMERCR2_ICBIE       (0x1000) /* Bit 12: Input capture B enable */
 #define STR71X_TIMERCR2_TOIE        (0x2000) /* Bit 13: Timer overflow enable */

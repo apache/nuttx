@@ -49,37 +49,10 @@
  *****************************************************************************/
 
 /* This file holds the NuttX start logic that runs when the STR711
- * is reset.  This logic must be located at address 0x0000:0000 in
- * flash but may be linked to run at different locations based on
- * the selected mode:
- *
- * default: Executes from 0x0000:0000.  In non-default modes, the
- *   MEMAP register is set override the settings of the CPU configuration
- *   pins.
- *
- *  CONFIG_EXTMEM_MODE: Code executes from external memory starting at
- *    address 0x6000:0000.
- *
- *  CONFIG_RAM_MODE: Code executes from on-chip RAM at address
- *     0x2000:0000.
- *
- * Starupt Code must be linked to run at the correct address
- * corresponding to the selected mode.
+ * is reset.  This logic must be located at address 0x4000:0000 in
+ * flash.  It will also be mapped to address zero when the STR711 is
+ * reset.
  */
-
-#if defined(CONFIG_EXTMEM_MODE)
-#  if CONFIG_CODE_BASE != STR71X_EXTMEM_BASE
-#    error "CONFIG_CODE_BASE must be 0x60000000 in EXTMEM mode"
-#  endif
-#elif defined(CONFIG_RAM_MODE)
-#  if CONFIG_CODE_BASE != STR71X_ONCHIP_RAM_BASE
-#    error "CONFIG_CODE_BASE must be 0x20000000 in EXTMEM mode"
-#  endif
-#else
-#  if CONFIG_CODE_BASE != STR71X_FLASH_BASE
-#    error "CONFIG_CODE_BASE must be 0x00000000 in default mode"
-#  endif
-#endif
 
 /*****************************************************************************
  * External references
@@ -331,7 +304,7 @@
 
 	/* Zero IVR 31:16 */
 
-	str	\value, [\eicbase, STR71X_EIC_IVR_OFFSET]
+	str	\value, [\eicbase, #STR71X_EIC_IVR_OFFSET]
 
 	/* Set up the loop to initialize each SIR register.  Start
 	 * with IRQ number 0 and SIR0
@@ -435,9 +408,9 @@ eicloop:
  *
  * Description:
  *   Interrrupt vector table.  This must be located at the beginning
- *   of the memory space (at CONFIG_CODE_BASE).  The first entry in
- *   the vector table is the reset vector and this is the code that
- *   will execute whn the processor is reset.
+ *   of the memory space (at the beginning FLASH which will be mapped to
+ *   address 0x00000000).  The first entry in the vector table is the reset
+ *   vector and this is the code that will execute whn the processor is reset.
  *
  *****************************************************************************/
 
