@@ -123,6 +123,22 @@
 
 /* LED definitions **********************************************************/
 
+/* The Olimex board has only two LEDs, so following states are faked as
+ * follows
+ *
+ *                       SET         CLEAR
+ *  LED_STARTED          (none)      (n/a)
+ *  LED_HEAPALLOCATE     LED1        (n/a)
+ *  LED_IRQSENABLED      LED1        (n/a)
+ *  LED_STACKCREATED     LED1        (n/a)
+ *  LED_INIRQ            LED1+LED2   LED1
+ *  LED_SIGNAL           LED1+LED2   LED1
+ *  LED_ASSERTION        LED1+LED2   LED1
+ *  LED_PANIC            LED1+LED2*  LED1
+ *
+ *                      *The previous state of LED2 will be retained
+ */
+
 #define LED_STARTED          0
 #define LED_HEAPALLOCATE     1
 #define LED_IRQSENABLED      2
@@ -132,8 +148,38 @@
 #define LED_ASSERTION        6
 #define LED_PANIC            7
 
+/* Button definitions *******************************************************/
+
+/* The Olimex board has two buttons, one labled "BUT" and the other "WAKEUP" */
+
+#define BUT_BUTTON              1 /* Bit 0: BUT button is depressed */
+#define WAKEUP_BUTTON           2 /* Bit 1: WAKEUP button is depressed */
+
 /****************************************************************************
- * Inline Functions
+ * Public Data
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_BUTTONS
+EXTERN void up_buttoninit(void);
+EXTERN ubyte up_buttons(void);
+#endif
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+#endif
 
 #endif  /* _CONFIGS_OLIMEX_STRP711_BOARD_H */
