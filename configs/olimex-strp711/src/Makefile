@@ -40,7 +40,7 @@ CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(TOPDIR)/sched
 
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
-CSRCS		= up_spi.c up_leds.c
+CSRCS		= up_spi.c up_leds.c up_buttons.c
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
