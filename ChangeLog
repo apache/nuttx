@@ -528,5 +528,7 @@
 0.3.18 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 	* Added port for the STMicro STR71x processor and configuration for the Olimex STR-P711
 	  board (untested as of the initial checkin).
+	* Fix race condition workaround delay in LPC214X SPI logic.  It the cause of the very
+	  bad MMC/SD performance.
 
 
