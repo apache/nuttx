@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include "str71x_map.h"
+#include <arch/board/board.h>
 
 /************************************************************************************
  * Definitions
