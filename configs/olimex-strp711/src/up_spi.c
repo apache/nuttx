@@ -50,6 +50,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
+#include "str71x_internal.h"
 
 #if defined(CONFIG_STR71X_BSPI0) || defined(CONFIG_STR71X_BSPI1)
 
@@ -266,7 +267,7 @@ static const struct spi_ops_s g_spiops =
 };
 
 #ifdef CONFIG_STR71X_BSPI0
-static struct spi_dev_s g_spidev0 =
+static struct str71x_spidev_s g_spidev0 =
 {
   .spidev  = { &g_spiops },
   .spibase = STR71X_BSPI0_BASE,
@@ -275,7 +276,7 @@ static struct spi_dev_s g_spidev0 =
 #endif
 
 #ifdef CONFIG_STR71X_BSPI1
-static struct spi_dev_s g_spidev1 =
+static struct str71x_spidev_s g_spidev1 =
 {
   .spidev  = { &g_spiops },
   .spibase = STR71X_BSPI1_BASE,
@@ -329,7 +330,7 @@ static inline uint16 spi_getreg(FAR struct str71x_spidev_s *priv, ubyte offset)
 
 static inline void spi_putreg(FAR struct str71x_spidev_s *priv, ubyte offset, uint16 value)
 {
-  putreg16(priv, value, priv->spibase + offset);
+  putreg16(value, priv->spibase + offset);
 }
 
 /****************************************************************************
@@ -353,22 +354,22 @@ static void spi_select(FAR struct spi_dev_s *dev, boolean selected)
 
   DEBUGASSERT(priv && priv->spibase);
 
-  reg16 = spi_getreg(dev, STR71X_GPIO_PD_OFFSET);
+  reg16 = spi_getreg(priv, STR71X_GPIO_PD_OFFSET);
   if (selected)
     {
      /* Enable slave select (low enables) */
 
-      reg16 &= ~dev->cr;
-      spi_putreg(dev, STR71X_GPIO_PD_OFFSET, reg16);
+      reg16 &= ~priv->csbit;
+      spi_putreg(priv, STR71X_GPIO_PD_OFFSET, reg16);
     }
   else
     {
       /* Disable slave select (low enables) */
 
-       reg16 |= dev->cr;
-       spi_putreg(dev, STR71X_GPIO_PD_OFFSET, reg16);
+       reg16 |= priv->csbit;
+       spi_putreg(priv, STR71X_GPIO_PD_OFFSET, reg16);
 
-#if CONFIG_STR714X_BSPI0_TXFIFO_DEPTH > 1)
+#if CONFIG_STR714X_BSPI0_TXFIFO_DEPTH > 1
        /* Wait while the TX FIFO is full */
 
        while ((spi_getreg(priv, STR71X_BSPI_CSR2_OFFSET) & STR71X_BSPICSR2_TFF) != 0);
@@ -379,7 +380,7 @@ static void spi_select(FAR struct spi_dev_s *dev, boolean selected)
 #endif
        /* Write 0xff to the TX FIFO */
 
-       spi_putreg(ch, STR71X_BSPI_TXR_OFFSET, 0xff00);
+       spi_putreg(priv, STR71X_BSPI_TXR_OFFSET, 0xff00);
 
        /* Wait for the TX FIFO empty */
 
@@ -393,9 +394,9 @@ static void spi_select(FAR struct spi_dev_s *dev, boolean selected)
 
        do
          {
-           (void)(spi_getreg(priv, STR71X_BSPI_RXR_OFFSET);
+           (void)spi_getreg(priv, STR71X_BSPI_RXR_OFFSET);
          }
-       while (spi_getreg(priv, STR71X_BSPI_CSR2_OFFSET & STR71X_BSPICSR2_RFNE);
+       while (spi_getreg(priv, STR71X_BSPI_CSR2_OFFSET & STR71X_BSPICSR2_RFNE) != 0);
     }
 }
 
@@ -427,7 +428,7 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
    *     correct divisor is 2.1, calculated value is 2.
    */
 
-  divisor = (STR41X_PCLK1 + (frequency >> 1)) / frequency;
+  divisor = (STR71X_PCLK1 + (frequency >> 1)) / frequency;
 
   /* The divisor must be an even number and contrained to the range of
    * 5 (master mode, or 7 for slave mode) and 255.  These bits must
@@ -450,15 +451,14 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
   cr1 = spi_getreg(priv, STR71X_BSPI_CSR1_OFFSET);
   cr1 &= ~(STR71X_BSPICSR1_BSPE|STR71X_BSPICSR1_MSTR);
   spi_putreg(priv, STR71X_BSPI_CSR1_OFFSET, cr1);
-
-  spi_putreg(priv, STR71X_BSPI_CLK_OFFSET. (uint16)divisor);
+  spi_putreg(priv, STR71X_BSPI_CLK_OFFSET, (uint16)divisor);
 
   /* Now we can enable the BSP in master mode */
 
-  cr |= (STR71X_BSPICSR1_BSPE|STR71X_BSPICSR1_MSTR);
+  cr1 |= (STR71X_BSPICSR1_BSPE|STR71X_BSPICSR1_MSTR);
   spi_putreg(priv, STR71X_BSPI_CSR1_OFFSET, cr1);
 
-  return STR41X_PCLK1 / divisor;
+  return STR71X_PCLK1 / divisor;
 }
 
 /****************************************************************************
@@ -477,10 +477,6 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
 
 static ubyte spi_status(FAR struct spi_dev_s *dev)
 {
-  FAR struct str71x_spidev_s *priv = (FAR struct str71x_spidev_s *)dev;
-
-  DEBUGASSERT(priv && priv->spibase);
-
  /* I don't think there is anyway to determine these things on the Olimex
    * board.
    */
@@ -508,7 +504,7 @@ static ubyte spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch)
 
   DEBUGASSERT(priv && priv->spibase);
 
-#if CONFIG_STR714X_BSPI0_TXFIFO_DEPTH > 1)
+#if CONFIG_STR714X_BSPI0_TXFIFO_DEPTH > 1
   /* Wait while the TX FIFO is full */
 
   while ((spi_getreg(priv, STR71X_BSPI_CSR2_OFFSET) & STR71X_BSPICSR2_TFF) != 0);
@@ -520,7 +516,7 @@ static ubyte spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch)
 
   /* Write the byte to the TX FIFO */
 
-  spi_putreg(ch, STR71X_BSPI_TXR_OFFSET, (uint16)ch << 8);
+  spi_putreg(priv, STR71X_BSPI_TXR_OFFSET, (uint16)ch << 8);
 
   /* Wait for the RX FIFO not empty */
 
@@ -549,13 +545,9 @@ static ubyte spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch)
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen)
 {
   FAR struct str71x_spidev_s *priv = (FAR struct str71x_spidev_s *)dev;
- uint16 csr2;
+  uint16 csr2;
 
   DEBUGASSERT(priv && priv->spibase);
-  spibase = priv->spibase;
-
-#warning "To be provided"
-===
 
   /* Loop while thre are bytes remaining to be sent */
 
@@ -563,7 +555,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, siz
     {
       /* While the TX FIFO is not full and there are bytes left to send */
 
-      while ((spi_getreg(priv, STR71X_BSPI1_CSR2) & STR71X_BSPICSR2_TFF) == 0 && buflen > 0)
+      while ((spi_getreg(priv, STR71X_BSPI_CSR2_OFFSET) & STR71X_BSPICSR2_TFF) == 0 && buflen > 0)
         {
           /* Send the data */
 
@@ -579,7 +571,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, siz
     {
       /* Is there anything in the RX fifo? */
 
-      csr2 = spi_getreg(priv, STR71X_BSPI1_CSR2);
+      csr2 = spi_getreg(priv, STR71X_BSPI_CSR2_OFFSET);
       if ((csr2 & STR71X_BSPICSR2_RFNE) != 0)
         {
           /* Yes.. Read and discard */
@@ -596,7 +588,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, siz
       else if ((csr2 & STR71X_BSPICSR2_TFNE) != 0)
         {
           up_udelay(100);
-          csr2 = spi_getreg(priv, STR71X_BSPI1_CSR2);
+          csr2 = spi_getreg(priv, STR71X_BSPI_CSR2_OFFSET);
         }
     }
   while ((csr2 & STR71X_BSPICSR2_RFNE) != 0 || (csr2 & STR71X_BSPICSR2_TFNE) == 0);
@@ -634,7 +626,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t b
        * and (3) there are more bytes to be sent.
        */
 
-      while ((spi_getreg(priv, STR71X_BSPI1_CSR2) & STR71X_BSPICSR2_TFF) == 0 &&
+      while ((spi_getreg(priv, STR71X_BSPI_CSR2_OFFSET) & STR71X_BSPICSR2_TFF) == 0 &&
              (fifobytes < CONFIG_STR714X_BSPI0_TXFIFO_DEPTH) && buflen > 0)
         {
           spi_putreg(priv, STR71X_BSPI_TXR_OFFSET, 0xff00);
@@ -644,9 +636,9 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t b
 
       /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
 
-      while ((spi_getreg(priv, STR71X_BSPI1_CSR2) & STR71X_BSPICSR2_RFNE) != 0)
+      while ((spi_getreg(priv, STR71X_BSPI_CSR2_OFFSET) & STR71X_BSPICSR2_RFNE) != 0)
         {
-          *buffer++ = (ubyte)(spi_regreg(priv, STR71X_BSPI_RXR_OFFSET) >> 8);
+          *buffer++ = (ubyte)(spi_getreg(priv, STR71X_BSPI_RXR_OFFSET) >> 8);
           fifobytes--;
         }
     }
@@ -697,12 +689,12 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       reg16  = getreg16(STR71X_GPIO0_PC1);
       reg16 |= BSPIO_GPIO0_ALL;
-      reg17 &= ~BSPI0_GPIO0_SS;
+      reg16 &= ~BSPI0_GPIO0_SS;
       putreg16(reg16, STR71X_GPIO0_PC1);
 
       reg16  = getreg16(STR71X_GPIO0_PC2);
       reg16 |= BSPIO_GPIO0_ALL;
-      spi_putreg(priv, reg16, STR71X_GPIO0_PC2);
+      putreg16(reg16, STR71X_GPIO0_PC2);
 
       /* Start with chip slave disabled */
 
@@ -725,7 +717,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
     }
   else
 #endif
-#ifdef CONFIG_STR71X_BSPI1=y
+#ifdef CONFIG_STR71X_BSPI1
   if (port == 1)
     {
       /* Configure all GPIO pins to their alternate function EXCEPT
@@ -737,9 +729,9 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       reg16 |= BSPI1_GPIO0_ALL;
       putreg16(reg16, STR71X_GPIO0_PC0);
 
-      reg16  = getreg16(spi_putregSTR71X_GPIO0_PC1);
+      reg16  = getreg16(STR71X_GPIO0_PC1);
       reg16 |= BSPI1_GPIO0_ALL;
-      reg17 &= ~BSPI1_GPIO0_SS;
+      reg16 &= ~BSPI1_GPIO0_SS;
       putreg16(reg16, STR71X_GPIO0_PC1);
 
       reg16  = getreg16(STR71X_GPIO0_PC2);
@@ -749,8 +741,8 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       /* Start with chip slave disabled */
 
       reg16  = getreg16(STR71X_GPIO0_PD);
-      reg17 |= BSPI1_GPIO1_SS;
-      putreg16(priv, reg16, STR71X_GPIO0_PD);
+      reg16 |= BSPI1_GPIO0_SS;
+      putreg16(reg16, STR71X_GPIO0_PD);
 
       /* Set the clock divider to the maximum */
 
