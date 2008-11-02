@@ -123,10 +123,10 @@ static struct spi_dev_s g_spidev = { &g_spiops };
  * Name: spi_select
  *
  * Description:
- *   Enable/disable the SPI chip select
+ *   Enable/disable the SPI slave select
  *
  * Input Parameters:
- *   selected: TRUE: chip selected, FALSE: chip de-selected
+ *   selected: TRUE: slave selected, FALSE: slave de-selected
  *
  * Returned Value:
  *   None
@@ -139,13 +139,13 @@ static void spi_select(FAR struct spi_dev_s *dev, boolean selected)
 
   if (selected)
     {
-      /* Enable chip select (low enables) */
+      /* Enable slave select (low enables) */
 
       putreg32(bit, LPC214X_GPIO0_BASE+LPC214X_GPIO_CLR_OFFSET);
     }
   else
     {
-      /* Disable chip select (low enables) */
+      /* Disable slave select (low enables) */
 
       putreg32(bit, LPC214X_GPIO0_BASE+LPC214X_GPIO_SET_OFFSET);
 
