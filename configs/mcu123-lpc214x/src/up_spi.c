@@ -154,10 +154,15 @@ static void spi_select(FAR struct spi_dev_s *dev, boolean selected)
       while (!(getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_TNF));
       putreg16(0xff, LPC214X_SPI1_DR);
 
-      /* Then wait until TX FIFO and TX shift buffer are empty */
+      /* Wait until TX FIFO and TX shift buffer are empty */
 
       while (getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_BSY);
+
+      /* Wait until RX FIFO is not empty */
+
       while (!(getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_RNE));
+
+      /* Then read and discard bytes until the RX FIFO is empty */
 
       do
         {
@@ -290,7 +295,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, siz
         }
     }
 
-  /* Then discard all card responses until the TX FIFO is emptied. */
+  /* Then discard all card responses until the RX & TX FIFOs are emptied. */
 
   do
     {
@@ -304,12 +309,13 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, siz
           (void)getreg16(LPC214X_SPI1_DR);
         }
 
-      /* There is a race condition where TFE may go FALSE just before
-       * RNE goes true.  The nasty little delay in the following solves
-       * that (it could probably be tuned to improve performance).
+      /* There is a race condition where TFE may go TRUE just before
+       * RNE goes true and this loop terminates prematurely.  The nasty little
+       * delay in the following solves that (it could probably be tuned
+       * to improve performance).
        */
 
-      else if ((sr & LPC214X_SPI1SR_TFE) == 0)
+      else if ((sr & LPC214X_SPI1SR_TFE) != 0)
         {
           up_udelay(100);
           sr = getreg8(LPC214X_SPI1_SR);
