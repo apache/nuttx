@@ -52,6 +52,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
+#include "str71x_internal.h"
 
 #ifdef CONFIG_USE_SERIALDRIVER
 
@@ -180,28 +181,6 @@
 #else
 #  warning "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
 #endif
-
-/* Calculate the value of PCLK1 from settings in board.h.
- *
- * Example:
- *  STR71X_RCCU_MAIN_OSC = 4MHz (not divided by 2)
- *  CLK2 = 4MHz
- *  PLL1OUT = 16 * CLK2 / 2 = 32MHz
- *  CLK3 = 32MHz
- *  RCLK = 32MHz
- *  PCLK1 = 32MHz / 1 = 32MHz
- */
-
-#ifdef STR71X_PLL1IN_DIV2                    /* Input may be divided by 2 */
-#  define CLK2 (STR71X_RCCU_MAIN_OSC/2)      /* CLK2 is input to PLL1 */
-#else
-#  define CLK2 STR71X_RCCU_MAIN_OSC          /* CLK2 is input to PLL1 */
-#endif
-                                             /* PLL1OUT derives from CLK2 */
-#define PLL1OUT (STR71X_PLL1OUT_MUL * CLK2 / STR71X_PLL1OUT_DIV)
-#define CLK3    PLL1OUT                      /* CLK3 hard coded to be PLL1OUT */
-#define RCLK    CLK3                         /* RCLK hard coded to be CLK3 */
-#define PCLK1   (RCLK / STR71X_APB1_DIV)     /* PCLK1 derives from RCLK */
 
 /****************************************************************************
  * Private Types
@@ -486,7 +465,7 @@ static int up_setup(struct uart_dev_s *dev)
   /* Set the BAUD rate */
 
   divisor = 16 * priv->baud;
-  baud    =  (PCLK1 + divisor/2) / divisor;
+  baud    =  (STR71X_PCLK1 + divisor/2) / divisor;
   up_serialout(priv, STR71X_UART_BR_OFFSET, baud);
 
   /* Get mode setting */

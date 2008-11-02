@@ -49,32 +49,11 @@
 #include "up_arch.h"
 
 #include "chip.h"
+#include "str71x_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-/* Calculate the value of PCLK2 from settings in board.h.
- *
- * Example:
- *  STR71X_RCCU_MAIN_OSC = 4MHz
- *  CLK2                 = 4MHz (not divided by 2)
- *  PLL1OUT              = 16 * CLK2 / 2 = 32MHz
- *  CLK3                 = 32MHz
- *  RCLK                 = 32MHz
- *  PCLK2                = 32MHz / 1 = 32MHz
- */
-
-#ifdef STR71X_PLL1IN_DIV2                    /* Input may be divided by 2 */
-#  define CLK2 (STR71X_RCCU_MAIN_OSC/2)      /* CLK2 is input to PLL1 */
-#else
-#  define CLK2 STR71X_RCCU_MAIN_OSC          /* CLK2 is input to PLL1 */
-#endif
-                                             /* PLL1OUT derives from CLK2 */
-#define PLL1OUT (STR71X_PLL1OUT_MUL * CLK2 / STR71X_PLL1OUT_DIV)
-#define CLK3    PLL1OUT                      /* CLK3 hard coded to be PLL1OUT */
-#define RCLK    CLK3                         /* RCLK hard coded to be CLK3 */
-#define PCLK2   (RCLK / STR71X_APB2_DIV)     /* PCLK2 derives from RCLK */
 
 /* The desired timer interrupt frequency is provided by the definition
  * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
@@ -101,8 +80,8 @@
   * than the maximum.
   */
 
-#if PCLK2 > MAX_TIM0CLK
-#  define PCLK2_DIVIDER (((PCLK2) + (MAX_TIM0CLK+1)) / MAX_TIM0CLK)
+#if STR71X_PCLK2 > MAX_TIM0CLK
+#  define PCLK2_DIVIDER (((STR71X_PCLK2) + (MAX_TIM0CLK+1)) / MAX_TIM0CLK)
 #else
 #  define PCLK2_DIVIDER (1)
 #endif
@@ -116,7 +95,7 @@
    * TIM0CLK would 6,4000,000 and the final OCAR_VALUE would be 64,000.
    */
 
-#define ACTUAL_TIM0CLK (PCLK2 / PCLK2_DIVIDER)
+#define ACTUAL_TIM0CLK (STR71X_PCLK2 / PCLK2_DIVIDER)
 #define OCAR_VALUE     (ACTUAL_TIM0CLK / CLK_TCK)
 
 #if OCAR_VALUE > 65535
