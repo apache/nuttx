@@ -41,7 +41,7 @@ if [ -z ${PATH_ORIG} ]; then export PATH_ORIG=${PATH}; fi
 
 WD=`pwd`
 export BUILDROOT_BIN=${WD}/../buildroot/build_arm_nofpu/staging_dir/bin
-export STR41XCFGS=$WD/configs/olimex-strp711/scripts
-export PATH=${BUILDROOT_BIN}:${STR41XCFGS}:/sbin:/usr/sbin:${PATH_ORIG}
+export STR41XSCRIPTS=$WD/configs/olimex-strp711/scripts
+export PATH=${BUILDROOT_BIN}:${STR41XSCRIPTS}:/sbin:/usr/sbin:${PATH_ORIG}
 
 echo "PATH : ${PATH}"

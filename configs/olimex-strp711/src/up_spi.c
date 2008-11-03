@@ -665,8 +665,10 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t b
 FAR struct spi_dev_s *up_spiinitialize(int port)
 {
   FAR struct spi_dev_s *ret;
+  irqstate_t flags;
   uint16 reg16;
 
+  flags = irqsave();
 #ifdef CONFIG_STR71X_BSPI0
   if (port == 0)
     {
@@ -762,6 +764,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
     {
       ret = NULL;
     }
+  irqrestore(flags);
   return ret;
 }
 
