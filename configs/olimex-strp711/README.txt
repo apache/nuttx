@@ -1,3 +1,65 @@
+Olimex STR-P711
+^^^^^^^^^^^^^^^
+ Features:
+
+ - MCU: STR711FR2T6 16/32 bit ARM7TDMI™ with 256K Bytes Program Flash,
+   64K Bytes RAM, USB 2.0, RTC, 12 bit ADC, 4x UARTs, 2x I2C,2x SPI,
+   5x 32bit TIMERS, 2x PWM, 2x CCR, WDT, up to 50MHz operation
+ - Standard JTAG connector with ARM 2x10 pin layout for programming/debugging
+   with ARM-JTAG
+ - USB connector
+ - Two channel RS232 interface and drivers
+ - SD/MMC card connector
+ - Two buttons
+ - Trimpot connected to ADC
+ - Two status LEDs
+ - Buzzer
+ - UEXT - 10 pin extension connector for Olimex addon peripherials like MP3,
+   RF2.4Ghz, RFID etc. modules
+ - 2x SPI connectors
+ - I2C connector
+ - On board voltage regulator 3.3V with up to 800mA current
+ - Single power supply: 6V AC or DC required, USB port can power the board
+ - Power supply LED
+ - Power supply filtering capacitor
+ - RESET circuit
+ - RESET button
+ - 4 Mhz crystal oscillator
+ - 32768 Hz crystal and RTC
+
+ Power Supply
+
+   6V AC or DC (or powered from USB port)
+
+ GIO with on-board connections (others available for prototyping):
+
+   SIGNAL  DESCRIPTION           PIN
+   ------- --------------------- -----
+   MISO1   BSPI0 to MMC/SD       P0.4
+   MOSI1   "   " "" "    "       P0.5
+   SCLK1   "   " "" "    "       P0.6
+   SS1     "   " "" "    "       P0.7
+   U0RX    UART 0                P0.8
+   U0TX    "  " "                P0.9
+   U1RX    UART 1                P0.10
+   U1TX    "  " "                P0.11
+   BUZZ    Buzzer                P0.13
+   WAKE-UP Button                P0.15
+   AIN0    Potentiometer (AN_TR) P1.3
+   LED1    LED 1                 P1.8
+   LED2    LED 2                 P1.9
+   WP      MMC/SD write protect  P1.10
+   USBOP   USB                   P1.11
+   USBON   " "                   P1.12
+   BUT     Button                P1.13
+   CP      MMC/SD card present   P1.15
+
+ Jumpers
+   STNBY   Will pull pin 23 /STDBY low
+
+OpenOCD
+^^^^^^^
+
 For a debug environment, I am using OpenOCD with a Wiggler-clone JTAG interface.  The
 following steps worked for me with a 20081028 OpenOCD snapshot.
 
@@ -62,3 +124,4 @@ GENERAL STEPS:
   type 'target remote localhost:3333' to connect to the target
   The same commands from the telnet interface can now be accessed through the
   'monitor' command, e.g. 'monitor help' 
+

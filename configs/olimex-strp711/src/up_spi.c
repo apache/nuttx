@@ -76,6 +76,10 @@
 #  define CONFIG_STR714X_BSPI1_RXFIFO_DEPTH 8
 #endif
 
+#if defined(CONFIG_STR71X_HDLC) && defined (CONFIG_STR71X_BSPI1)
+#  warning "BSPI1 GPIO usage conflicts with HDLC"
+#endif
+
 /****************************************************************************
  * On the Olimex-STR-STR-P711, BSPI0 is not connected on board, but is
  * available on a header for use in the prototyping area.  BSPI connects
@@ -86,12 +90,12 @@
  *   PIN     NORMAL  ALTERNATE  Olimex-STR-STR-P711 Connection
  *   123/52  P0.0    S0.MISO *  UEXT-3 (Not connected on board)
  *   124/53  P0.1    S0.MOSI *  UEXT-4  " " "       " "" "   "
- *   125/54  P0.2    S0.SCLK *  UEXT-5  " " "       " "" "   "
+ *   125/54  P0.2    S0.SCLK ** UEXT-5  " " "       " "" "   "
  *   126/55  P0.3   ~SO.SS   ** UEXT-6  " " "       " "" "   "
  *
  *  * Programming the AF function selects UART3 by default.  BSPI must be
  *    enabled with the SPI_EN bit in the BOOTCR register
- *  * Programming the AF function selects I2C1 by default.  BSPI must be
+ * ** Programming the AF function selects I2C1 by default.  BSPI must be
  *    enabled with the SPI_EN bit in the BOOTCR register
  *
  * BSP1
@@ -101,19 +105,35 @@
  *   141/61  P0.6    S1.SCLK   SD_CARDBOT CLK/SCLK
  *   142/62  P0.7   ~S1.SS     SD_CARDBOT CD/DAT/CS
  *
+ * Two GPIO pins also connect to the MMC/SD slot:
+ *
+ *   PIN     NORMAL  ALTERNATE Olimex-STR-STR-P711 Connection
+ *   106/46  P1.10   USB clock MMC/SD write protect (WP)
+ *   111/49  P1.15   HDLC xmit MMC/SD card present (CP)
+ *
  ****************************************************************************/
 
 #define BSPI0_GPIO0_MISO (0x0001)
 #define BSPI0_GPIO0_MOSI (0x0002)
 #define BSPI0_GPIO0_SCLK (0x0004)
 #define BSPI0_GPIO0_SS   (0x0008)
+
+#define BSPIO_GPIO0-ALT  (BSPI0_GPIO0_MISO|BSPI0_GPIO0_MOSI|BSPI0_GPIO0_SCLK)
+#define BSPIO_GPIO0_OUT   BSPI0_GPIO0_SS
 #define BSPIO_GPIO0_ALL  (0x000f)
 
 #define BSPI1_GPIO0_MISO (0x0010)
 #define BSPI1_GPIO0_MOSI (0x0020)
 #define BSPI1_GPIO0_SCLK (0x0040)
 #define BSPI1_GPIO0_SS   (0x0080)
+
+#define BSPI1_GPIO0-ALT  (BSPI1_GPIO0_MISO|BSPI1_GPIO0_MOSI|BSPI1_GPIO0_SCLK)
+#define BSPI1_GPIO0_OUT   BSPI1_GPIO0_SS
 #define BSPI1_GPIO0_ALL  (0x00f0)
+
+#define MMCSD_GPIO1_WPIN (0x0400)
+#define MMCSD_GPIO1_CPIN (0x8000)
+#define MMCSD_GPIO1_ALL  (MMCSD_GPIO1_WPIN|MMCSD_GPIO1_CPIN)
 
 /* Configuration register settings ******************************************/
 
@@ -477,11 +497,20 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
 
 static ubyte spi_status(FAR struct spi_dev_s *dev)
 {
- /* I don't think there is anyway to determine these things on the Olimex
-   * board.
-   */
+  ubyte ret = 0;
+  uint16 reg16 = getreg16(STR71X_GPIO1_PD);
 
-  return SPI_STATUS_PRESENT;
+  if ((re16 & MMCSD_GPIO1_WPIN) != 0)
+    {
+      ret |= SPI_STATUS_WRPROTECTED;
+    }
+
+  if ((re16 & MMCSD_GPIO1_CPIN) != 0)
+    {
+      ret |= SPI_STATUS_PRESENT;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -679,6 +708,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       reg16 = getreg16(STR71X_PCU_BOOTCR);
       reg16 |= STR71X_PCUBOOTCR_BSPIOEN;
+      putreg16(reg16, STR71X_PCU_BOOTCR);
 
       /* Configure all GPIO pins to their alternate function EXCEPT
        * for the SS pin .. will will configure that as an output
@@ -690,8 +720,8 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       putreg16(reg16, STR71X_GPIO0_PC0);
 
       reg16  = getreg16(STR71X_GPIO0_PC1);
-      reg16 |= BSPIO_GPIO0_ALL;
-      reg16 &= ~BSPI0_GPIO0_SS;
+      req16 &= ~BSPIO_GPIO0_ALL;
+      reg16 |= BSPIO_GPIO0_ALT;
       putreg16(reg16, STR71X_GPIO0_PC1);
 
       reg16  = getreg16(STR71X_GPIO0_PC2);
@@ -706,7 +736,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       /* Set the clock divider to the maximum */
 
-      putreg16(255, STR71X_BSPI1_CLK);
+      putreg16(255, STR71X_BSPI0_CLK);
 
       /* Set FIFO sizes and disable the BSP1.  It won't be enabled
        * until the frequency is set.
@@ -732,8 +762,8 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       putreg16(reg16, STR71X_GPIO0_PC0);
 
       reg16  = getreg16(STR71X_GPIO0_PC1);
-      reg16 |= BSPI1_GPIO0_ALL;
-      reg16 &= ~BSPI1_GPIO0_SS;
+      req16 &= ~BSPI1_GPIO0_ALL;
+      reg16 |= BSPI1_GPIO0_ALT;
       putreg16(reg16, STR71X_GPIO0_PC1);
 
       reg16  = getreg16(STR71X_GPIO0_PC2);
@@ -756,6 +786,20 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       putreg16(STR71X_BSPI1_CSR1DISABLE, STR71X_BSPI1_CSR1);
       putreg16(STR71X_BSPI1_CSR2VALUE, STR71X_BSPI1_CSR2);
+
+      /* Configure GPIO1 pins for WP/CP input */
+
+      reg16  = getreg16(STR71X_GPIO1_PC0);
+      reg16 |= MMCSD_GPIO1_ALL;
+      putreg16(reg16, STR71X_GPIO1_PC0);
+
+      reg16  = getreg16(STR71X_GPIO1_PC1);
+      reg16 &= ~MMCSD_GPIO1_ALL;
+      putreg16(reg16, STR71X_GPIO1_PC1);
+
+      reg16  = getreg16(STR71X_GPIO1_PC2);
+      reg16 &= ~MMCSD_GPIO1_ALL;
+      putreg16(reg16, STR71X_GPIO1_PC2);
 
       ret = &g_spidev1.spidev;
     }

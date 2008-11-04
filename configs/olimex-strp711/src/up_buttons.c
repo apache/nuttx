@@ -50,13 +50,12 @@
 
 /* The Olimex board has two buttons, one labled "BUT" and the other "WAKEUP"
  *
- * P1.14: WAKEUP button
+ * P0.15: WAKEUP button
  * P1.13: BUT button
  */
 
 #define STR71X_BUTBUTTON_GPIO1    (0x2000)
-#define STR71X_WAKEUPBUTTON_GPIO1 (0x4000)
-#define STR71X_BOTHBUTTONS_GPIO1  (STR71X_BUTBUTTON_GPIO1|STR71X_WAKEUPBUTTON_GPIO1)
+#define STR71X_WAKEUPBUTTON_GPIO0 (0x8000)
 
 /****************************************************************************
  * Private Data
@@ -79,18 +78,30 @@ void up_buttoninit(void)
 {
   uint16 reg16;
 
-  /* Configure the GPIO pins as inputs */
+  /* Configure the GPIO0 & 1 pins as inputs */
+
+  reg16  = getreg16(STR71X_GPIO0_PC0);
+  reg16 |= STR71X_WAKEUPBUTTON_GPIO0;
+  putreg16(reg16, STR71X_GPIO0_PC0);
+
+  reg16  = getreg16(STR71X_GPIO0_PC1);
+  reg16 &= ~STR71X_WAKEUPBUTTON_GPIO0;
+  putreg16(reg16, STR71X_GPIO0_PC1);
+
+  reg16  = getreg16(STR71X_GPIO0_PC2);
+  reg16 &= ~STR71X_WAKEUPBUTTON_GPIO0;
+  putreg16(reg16, STR71X_GPIO0_PC2);
 
   reg16  = getreg16(STR71X_GPIO1_PC0);
-  reg16 |= STR71X_BOTHBUTTONS_GPIO1;
+  reg16 |= STR71X_BUTBUTTON_GPIO1;
   putreg16(reg16, STR71X_GPIO1_PC0);
 
   reg16  = getreg16(STR71X_GPIO1_PC1);
-  reg16 &= ~STR71X_BOTHBUTTONS_GPIO1;
+  reg16 &= ~STR71X_BUTBUTTON_GPIO1;
   putreg16(reg16, STR71X_GPIO1_PC1);
 
   reg16  = getreg16(STR71X_GPIO1_PC2);
-  reg16 &= ~STR71X_BOTHBUTTONS_GPIO1;
+  reg16 &= ~STR71X_BUTBUTTON_GPIO1;
   putreg16(reg16, STR71X_GPIO1_PC2);
 }
 
@@ -100,17 +111,18 @@ void up_buttoninit(void)
 
 ubyte up_buttons(void)
 {
-  uint16 reg16 = getreg16(STR71X_GPIO1_PD);
   ubyte ret    = 0;
 
-  if ((reg16 & STR71X_BUTBUTTON_GPIO1) != 0)
-    {
-      ret |= BUT_BUTTON;
-    }
-  if ((reg16 & STR71X_WAKEUPBUTTON_GPIO1) != 0)
+  if ((getreg16(STR71X_GPIO0_PD) & STR71X_WAKEUPBUTTON_GPIO0) != 0)
     {
       ret |= WAKEUP_BUTTON;
     }
+
+  if ((getreg16(STR71X_GPIO1_PD) & STR71X_BUTBUTTON_GPIO1) != 0)
+    {
+      ret |= BUT_BUTTON;
+    }
+
   return ret;
 }
 #endif /* CONFIG_ARCH_BUTTONS */
