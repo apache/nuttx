@@ -76,6 +76,12 @@
 #ifndef CONFIG_STR71X_I2C1
 #  define APB1EN_I2C1 STR71X_APB1_I2C1
 #else
+#  ifndef CONFIG_STR71X_GPIO0
+#    error "I2C1 requires GPIO0"
+#  endif
+#  ifdef CONFIG_STR71X_BSPI0
+#    error "I2C1 is incompatible with BSPI0"
+#  endif
 #  define APB1EN_I2C1 (0)
 #endif
 
@@ -110,7 +116,10 @@
 #  define APB1EN_UART3 STR71X_APB1_UART3
 #else
 #  ifndef CONFIG_STR71X_GPIO0
-#    error "CONFIG_STR71X_UART3 requires CONFIG_STR71X_GPIO0"
+#    error "UART3 requires GPIO0"
+#  endif
+#  ifdef CONFIG_STR71X_BSPI0
+#    error "UART3 is incompatible with BSPI0"
 #  endif
 #  define APB1EN_UART3 (0)
 #endif
@@ -130,12 +139,24 @@
 #ifndef CONFIG_STR71X_BSPI0
 #  define APB1EN_BSPI0 STR71X_APB1_BSPI0
 #else
+#  ifndef CONFIG_STR71X_GPIO0
+#    error "BSPI0 requires GPIO0"
+#  endif
+#  ifdef CONFIG_STR71X_UART3
+#    error "BSPI0 is incompatible with UART3"
+#  endif
+#  ifdef CONFIG_STR71X_I2C1
+#    error "BSPI0 is incompatible with I2C1"
+#  endif
 #  define APB1EN_BSPI0 (0)
 #endif
 
 #ifndef CONFIG_STR71X_BSPI1
 #  define APB1EN_BSPI1 STR71X_APB1_BSPI1
 #else
+#  ifndef CONFIG_STR71X_GPIO0
+#    error "BSPI1 requires GPIO0"
+#  endif
 #  define APB1EN_BSPI1 (0)
 #endif
 
