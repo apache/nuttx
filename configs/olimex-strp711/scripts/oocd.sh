@@ -7,16 +7,16 @@ openocd=$installdir/openocd
 
 # The root to the top-level NuttX directory should be in an environment variable
 
-if [ -z $STR41XCFGS ]; then
-	echo "Environment variable $STR41XCFGS is not defined"
+if [ -z $STR41XSCRIPTS ]; then
+	echo "Environment variable $STR41XSCRIPTS is not defined"
 	echo "Has NuttX been configured?"
 	echo "If so, try sourcing the setenv.sh script in the top-level directory"
 	exit 1
 fi
 
 # Check that at least one configuration file exists at that point
-if [ ! -f $STR41XCFGS/oocd_wiggler.cfg ]; then
-	echo "No configuration files found at $STR41XCFGS"
+if [ ! -f $STR41XSCRIPTS/oocd_wiggler.cfg ]; then
+	echo "No configuration files found at $STR41XSCRIPTS"
 	echo "Path to configuration files unknown"
 	exit 1
 fi
@@ -27,7 +27,7 @@ usage="USAGE: $0 [-h] [-d]  [-pp] [-ftdi]"
 
 debug=no
 interface=pp
-oocdcfg=$STR41XCFGS/oocd_wiggler.cfg
+oocdcfg=$STR41XSCRIPTS/oocd_wiggler.cfg
 while [ ! -z "$1" ]; do
 	case $1 in
 	-d )
@@ -36,11 +36,11 @@ while [ ! -z "$1" ]; do
 		;;
 	-pp )
 		interface=pp
-		oocdcfg=$STR41XCFGS/oocd_wiggler.cfg
+		oocdcfg=$STR41XSCRIPTS/oocd_wiggler.cfg
 		;;
 	-ftdi )
 		interface=ftdi
-		oocdcfg=$STR41XCFGS/oocd_ftdi.cfg
+		oocdcfg=$STR41XSCRIPTS/oocd_ftdi.cfg
 		;;
 	-h )
 		echo $usage
