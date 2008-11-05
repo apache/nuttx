@@ -16,7 +16,7 @@
   </b></big></h1>
   <p><small>by</small></p>
   <p>Gregory Nutt</p>
-  <p><small>Last Update: October 22, 2008</small></p>
+  <p><small>Last Update: November 5, 2008</small></p>
 </center>
 
 <center><h1>Table of Contents</h1></center>
@@ -601,13 +601,6 @@
   as described <a href="#configuringnuttx">below</a>.
 </p>
 <ul>
-  <li><code>configs/sim</code>:
-    A user-mode port of NuttX to the x86 Linux platform is available.
-    The purpose of this port is primarily to support OS feature developement.
-    This port does not support interrupts or a real timer (and hence no
-    round robin scheduler)  Otherwise, it is complete.
-  </li>
-
   <li><code>configs/c5471evm</code>:
     This is a port to the Spectrum Digital C5471 evaluation board.  The
     C5471 is a dual core processor from TI with an ARM7TDMI general purpose
@@ -616,12 +609,22 @@
     This port is complete, verified, and included in the NuttX release.
   </li>
 
+  <li><code>configs/ez80f0910200kitg</code>
+    ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200kitg
+    development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
+    tools.  The development environment is Cygwin under WinXP.
+  </li>
+
+  <li><code>configs/m68322evb</code>:
+    This is a work in progress for the venerable m68322evb board from
+    Motorola.
+  </li>
+
   <li><code>configs/mcu123-lpc214x</code>:
     This port is for the NXP LPC2148 as provided on the mcu123.com
     lpc214x development board.
     This OS is also built with the arm-elf toolchain* under Linux or Cygwin.
-    STATUS: This port is in progress and should be available in the
-    nuttx-0.2.5 release.
+    The port supports serial, timer0, spi, and usb.
   </li>
 
   <li><code>configs/ntosd-dm320</code>:
@@ -633,9 +636,12 @@
     NuttX 0.2.1 release.
   </li>
 
-  <li><code>configs/m68322evb</code>:
-    This is a work in progress for the venerable m68322evb board from
-    Motorola.
+  <li><code>configs/olimex-strp711</code>:
+    This port uses the Olimex STR-P711 board arm-elf toolchain* under Linux or Cygwin.
+    See the <a href="http://www.olimex.com/dev/str-p711.html">Olimex</a> web site
+    for futher information.
+    STATUS: Coding for the basic port -- serial console and system timer -- is complete
+    but untested to problems I am having using OpenOCD with a wiggler clone JTAG.
   </li>
 
   <li><code>configs/pjrc-8051</code>:
@@ -644,7 +650,19 @@
     This port is not quite ready for prime time.
   </li>
 
-  <li><code>configs/xtrs</code>
+  <li><code>configs/sim</code>:
+    A user-mode port of NuttX to the x86 Linux platform is available.
+    The purpose of this port is primarily to support OS feature developement.
+    This port does not support interrupts or a real timer (and hence no
+    round robin scheduler)  Otherwise, it is complete.
+  </li>
+
+  <li><code>configs/us7032evb1</code>:
+    This is a port of the Hitachi SH-1 on the Hitachi SH-1/US7032EVB1 board.
+    STATUS:  Work has just began on this port.
+  </li>
+
+  <li><code>configs/xtrs</code>:
     TRS80 Model 3.  This port uses a vintage computer based on the Z80.
     An emulator for this computer is available to run TRS80 programs on a 
     linux platform (http://www.tim-mann.org/xtrs.html).
@@ -657,10 +675,12 @@
     The development environment is Cygwin under WinXP.
   </li>
 
-  <li><code>configs/ez80f0910200kitg</code>
-    ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200kitg
-    development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
-    tools.  The development environment is Cygwin under WinXP.
+  <li><code>configs/z80sim</code>:
+    z80 Microcontroller.  This port uses a Z80 instruction set simulator.
+    That simulator can be found in the NuttX CVS
+    <a href="http://nuttx.cvs.sourceforge.net/nuttx/misc/sims/z80sim/">here</a>.
+    This port also the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain
+    under Linux or Cygwin(verfied with version 2.6.0).
   </li>
 
   <li><code>configs/z8encore000zco</code>
@@ -673,14 +693,6 @@
     z8Encore! Microcontroller.  This port use the Zilog z8f64200100kit
     development kit, Z8F6423 part, and the Zilog ZDS-II Windows command line
     tools.  The development environment is Cygwin under WinXP.
-  </li>
-
-  <li><code>configs/z80sim</code>:
-    z80 Microcontroller.  This port uses a Z80 instruction set simulator.
-    That simulator can be found in the NuttX CVS
-    <a href="http://nuttx.cvs.sourceforge.net/nuttx/misc/sims/z80sim/">here</a>.
-    This port also the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain
-    under Linux or Cygwin(verfied with version 2.6.0).
   </li>
 </ul>
 
@@ -1336,13 +1348,16 @@ The system can be re-made subsequently by just typing <code>make</code>.
   <li><code>CONFIG_RRLOAD_BINARY</code>:
     Make the rrload binary format used with BSPs from <a href="www.ridgerun.com">ridgerun.com</a>
      using the <code>tools/mkimage.sh</code> script.</li>
-   <li><code>CONFIG_INTELHEX_BINARY</code>:
+  <li><code>CONFIG_INTELHEX_BINARY</code>:
     Make the Intel HEX binary format used with many different loaders using the GNU objcopy program
     This option hould not be selected if you are not using the GNU toolchain.</li>
-   <li><code>CONFIG_RAW_BINARY</code>:
+  <li><code>CONFIG_MOTOROLA_SREC</code>:
+    Make the Motorola S-Record binary format used with many different loaders using the GNU objcopy program
+    Should not be selected if you are not using the GNU toolchain.</li>
+  <li><code>CONFIG_RAW_BINARY</code>:
     mmke a raw binary format file used with many different loaders using the GNU objcopy program.
     This option  should not be selected if you are not using the GNU toolchain.</li>
-   <li><code>CONFIG_HAVE_LIBM</code>:
+  <li><code>CONFIG_HAVE_LIBM</code>:
     Toolchain supports libm.a</li>
 </ul>
 

@@ -141,6 +141,9 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_INTELHEX_BINARY - make the Intel HEX binary format
 		  used with many different loaders using the GNU objcopy program
 		  Should not be selected if you are not using the GNU toolchain.
+		CONFIG_MOTOROLA_SREC - make the Motorola S-Record binary format
+		  used with many different loaders using the GNU objcopy program
+		  Should not be selected if you are not using the GNU toolchain.
 		CONFIG_RAW_BINARY - make a raw binary format file used with many
 		  different loaders using the GNU objcopy program.  This option
 		  should not be selected if you are not using the GNU toolchain.
@@ -373,6 +376,44 @@ setenv.sh -- This is a script that you can include that will be installed at
 Supported Boards
 ^^^^^^^^^^^^^^^^
 
+configs/c5471evm
+    This is a port to the Spectrum Digital C5471 evaluation board.  The
+    TMS320C5471 is a dual core processor from TI with an ARM7TDMI general
+    purpose processor and a c54 DSP.  It is also known as TMS320DA180 or just DA180. 
+    NuttX runs on the ARM core and is built with a GNU arm-elf toolchain*.
+    This port is complete, verified, and included in the NuttX release.
+
+configs/ez80f0910200kitg
+    ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200kitg
+    development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
+    tools.  The development environment is Cygwin under WinXP.
+
+configs/m68322evb
+    This is a work in progress for the venerable m68322evb board from
+    Motorola. This OS is also built with the arm-elf toolchain*.
+
+configs/mcu123-lpc214x
+    This port is for the NXP LPC2148 as provided on the mcu123.com
+    lpc214x development board. This OS is also built with the arm-elf
+    toolchain*.  The port supports serial, timer0, spi, and usb.
+
+configs/ntosd-dm320
+    This port uses the Neuros OSD with a GNU arm-elf toolchain*:
+    see http://wiki.neurostechnology.com/index.php/Developer_Welcome .
+    NuttX operates on the ARM9EJS of this dual core processor.
+    STATUS: This port is code complete, verified, and included in the
+    NuttX 0.2.1 release.
+
+configs/olimex-strp711
+    This port uses the Olimex STR-P711 board arm-elf toolchain* under Linux or Cygwin.
+    See the http://www.olimex.com/dev/str-p711.html" for futher information.
+    STATUS: Coding for the basic port -- serial console and system timer -- is complete
+    but untested to problems I am having using OpenOCD with a wiggler clone JTAG.
+
+configs/pjrc-8051
+    8051 Microcontroller.  This port uses the PJRC 87C52 development system
+    and the SDCC toolchain.   This port is not quite ready for prime time.
+
 configs/sim
     A user-mode port of NuttX to the x86 Linux platform is available.
     The purpose of this port is primarily to support OS feature development.
@@ -382,37 +423,9 @@ configs/sim
     NOTE: This target will not run on Cygwin probably for many reasons but
     first off because it uses some of the same symbols as does cygwin.dll.
 
-configs/c5471evm
-    This is a port to the Spectrum Digital C5471 evaluation board.  The
-    TMS320C5471 is a dual core processor from TI with an ARM7TDMI general
-    purpose processor and a c54 DSP.  It is also known as TMS320DA180 or just DA180. 
-    NuttX runs on the ARM core and is built with a GNU arm-elf toolchain*.
-    This port is complete, verified, and included in the NuttX release.
-
-configs/mcu123-lpc214x
-    This is a port to the mcu123.com lpc214x development board.
-    This OS is also built with the arm-elf toolchain*
-
-configs/ntosd-dm320
-    This port uses the Neuros OSD with a GNU arm-elf toolchain*:
-    see http://wiki.neurostechnology.com/index.php/Developer_Welcome .
-    NuttX operates on the ARM9EJS of this dual core processor.
-    STATUS: This port is code complete, verified, and included in the
-    NuttX 0.2.1 release.
-
-configs/mcu123-lpc214x
-    This port is for the NXP LPC2148 as provided on the mcu123.com
-    lpc214x development board.
-    STATUS: A basic port that boots and supports a serial console
-    is in place.
-
-configs/m68322evb
-    This is a work in progress for the venerable m68322evb board from
-    Motorola. This OS is also built with the arm-elf toolchain*.
-
-configs/pjrc-8051
-    8051 Microcontroller.  This port uses the PJRC 87C52 development system
-    and the SDCC toolchain.   This port is not quite ready for prime time.
+configs/us7032evb1
+    This is a port of the Hitachi SH-1 on the Hitachi SH-1/US7032EVB1 board.
+    STATUS:  Work has just began on this port.
 
 configs/xtrs
     TRS80 Model 3.  This port uses a vintage computer based on the Z80.
@@ -424,6 +437,13 @@ configs/z16f2800100zcog
     development kit and the Zilog ZDS-II Windows command line tools.  The
     development environment is Cygwin under WinXP.
 
+configs/z80sim
+    z80 Microcontroller.  This port uses a Z80 instruction set simulator.
+    That simulator can be found in the NuttX CVS at
+    http://nuttx.cvs.sourceforge.net/nuttx/misc/sims/z80sim.
+    This port also uses the SDCC toolchain (http://sdcc.sourceforge.net/")
+    (verified with version 2.6.0).
+
 configs/z8encore000zco
     z8Encore! Microcontroller.  This port use the Zilog z8encore000zco
     development kit, Z8F6403 part, and the Zilog ZDS-II Windows command line
@@ -433,18 +453,6 @@ configs/z8f64200100kit
     z8Encore! Microcontroller.  This port use the Zilog z8f64200100kit
     development kit, Z8F6423 part, and the Zilog ZDS-II Windows command line
     tools.  The development environment is Cygwin under WinXP.
-
-configs/ez80f0910200kitg
-    ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200kitg
-    development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
-    tools.  The development environment is Cygwin under WinXP.
-
-configs/z80sim
-    z80 Microcontroller.  This port uses a Z80 instruction set simulator.
-    That simulator can be found in the NuttX CVS at
-    http://nuttx.cvs.sourceforge.net/nuttx/misc/sims/z80sim.
-    This port also uses the SDCC toolchain (http://sdcc.sourceforge.net/")
-    (verified with version 2.6.0).
 
 Other ports for the for the TI TMS320DM270, M683222 and for MIPS are in various
 states of progress
