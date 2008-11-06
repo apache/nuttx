@@ -1,7 +1,7 @@
-/************************************************************
- * watchdog.h
+/****************************************************************************
+ * arch/arm/include/watchdog.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,33 +31,33 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_WATCHDOG_H
-#define __ARCH_WATCHDOG_H
+#ifndef __ARCH_ARM_INCLUDE_WATCHDOG_H
+#define __ARCH_ARM_INCLUDE_WATCHDOG_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
 /* IOCTL commands supported by the C5471 watchdog driver */
 
 #define WDIOC_KEEPALIVE 0x5701  /* Restart the watchdog timer */
 
-/************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-#endif /* __ARCH_WATCHDOG_H */
+#endif /* __ARCH_ARM_INCLUDE_WATCHDOG_H */
