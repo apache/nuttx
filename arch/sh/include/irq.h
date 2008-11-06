@@ -155,54 +155,6 @@ struct xcptcontext
  * Inline functions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-/* Save the current interrupt enable state & disable IRQs */
-
-static inline irqstate_t irqsave(void)
-{
-  unsigned int flags;
-  unsigned int temp;
-  __asm__ __volatile__
-    (
-     "\tmrs    %0, cpsr\n"
-     "\torr    %1, %0, #128\n"
-     "\tmsr    cpsr_c, %1"
-     : "=r" (flags), "=r" (temp)
-     :
-     : "memory");
-  return flags;
-}
-
-/* Restore saved IRQ & FIQ state */
-
-static inline void irqrestore(irqstate_t flags)
-{
-  __asm__ __volatile__
-    (
-     "msr    cpsr_c, %0"
-     :
-     : "r" (flags)
-     : "memory");
-}
-
-static inline void system_call(swint_t func, int parm1,
-			       int parm2, int parm3)
-{
-  __asm__ __volatile__
-    (
-     "mov\tr0,%0\n\t"
-     "mov\tr1,%1\n\t"
-     "mov\tr2,%2\n\t"
-     "mov\tr3,%3\n\t"
-     "swi\t0x900001\n\t"
-     :
-     : "r" ((long)(func)),  "r" ((long)(parm1)),
-       "r" ((long)(parm2)), "r" ((long)(parm3))
-     : "r0", "r1", "r2", "r3", "lr");
-}
-#endif
-
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
