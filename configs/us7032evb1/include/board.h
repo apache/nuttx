@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/us7032evb1/ostest/ld.script
+ * configs/us7032evb1/include/board.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,62 +33,62 @@
  *
  ****************************************************************************/
 
-OUTPUT_ARCH(sh)
-ENTRY(_stext)
-SECTIONS
-{
-	/* The us7032evb1 has CMON in PROM beginning at address 0x00000000 and
-	 * either 64Kb or 256Kb of SRAM beginning at 0x0a000000.  Neither the
-	 * PROM nor the first 8Kb of SRAM are avaible to the devoleper as these
-	 * are used by CMON.  The next 1Kb of SRAM is dedicated to relocated
-	 * interrupt vectors.
-	 */
+#ifndef _CONFIGS_US7032EVB1_BOARD_H
+#define _CONFIGS_US7032EVB1_BOARD_H
 
-	. = 0x0a002000;
-	.vects : {
-		_svect = ABSOLUTE(.);
-		*(.vects);		/* Redirected interrupt vectors	*/
-		_evect = ABSOLUTE(.);
-	}
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
-	. = 0x0a002400;
-	.text : {
-		_stext = ABSOLUTE(.);
-		*(.text)		/* Code				*/
-		*(.fixup)
-		*(.gnu.warning)
-		*(.rodata)		/* Read-only data		*/
-		*(.rodata.str1.4)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)			/* Global offset table		*/
-		_etext = ABSOLUTE(.);
-	}
+#ifndef __ASSEMBLY__
+# include <sys/types.h>
+#endif
+#include "chip.h"
 
-	.data : {
-		_sdata = ABSOLUTE(.);
-		*(.data)		/* Modifiable data		*/
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	}
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
 
-	.bss : {			/* BSS				*/
-		_sbss = ABSOLUTE(.);
-		*(.bss)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	}
-					/* Stabs debugging sections.	*/
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
+/* Clocking *****************************************************************/
+
+/* LED definitions **********************************************************/
+
+#define LED_STARTED          0
+#define LED_HEAPALLOCATE     1
+#define LED_IRQSENABLED      2
+#define LED_STACKCREATED     3
+#define LED_INIRQ            4
+#define LED_SIGNAL           5
+#define LED_ASSERTION        6
+#define LED_PANIC            7
+
+/* Button definitions *******************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_BUTTONS
+EXTERN void up_buttoninit(void);
+EXTERN ubyte up_buttons(void);
+#endif
+
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+#endif
+
+#endif  /* _CONFIGS_US7032EVB1_BOARD_H */

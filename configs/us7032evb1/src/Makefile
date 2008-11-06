@@ -1,5 +1,5 @@
-#!/bin/bash
-# configs/us7032evb1/ostest/setenv.sh
+############################################################################
+# configs/us7032evb1/src/Makefile
 #
 #   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -31,17 +31,47 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+############################################################################
 
-if [ "$(basename $0)" = "setenv.sh" ] ; then
-  echo "You must source this script, not run it!" 1>&2
-  exit 1
-fi
+-include $(TOPDIR)/Make.defs
 
-if [ -z ${PATH_ORIG} ]; then export PATH_ORIG=${PATH}; fi
+ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(TOPDIR)/sched
 
-WD=`pwd`
-export BUILDROOT_BIN=${WD}/../buildroot/build_sh/staging_dir/bin
-export SH1BINARIES=$WD/configs/us7032evb11/bin
-export PATH=${BUILDROOT_BIN}:${SH1BINARIES}:/sbin:/usr/sbin:${PATH_ORIG}
+ASRCS		= 
+AOBJS		= $(ASRCS:.S=$(OBJEXT))
+CSRCS		= up_leds.c
+COBJS		= $(CSRCS:.c=$(OBJEXT))
 
-echo "PATH : ${PATH}"
+SRCS		= $(ASRCS) $(CSRCS)
+OBJS		= $(AOBJS) $(COBJS)
+
+CFLAGS		+= -I $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+
+all: libboard$(LIBEXT)
+
+$(AOBJS): %$(OBJEXT): %.S
+	$(call ASSEMBLE, $<, $@)
+
+$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
+	$(call COMPILE, $<, $@)
+
+libboard$(LIBEXT): $(OBJS)
+	@( for obj in $(OBJS) ; do \
+		$(call ARCHIVE, $@, $${obj}); \
+	done ; )
+
+.depend: Makefile $(SRCS)
+	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@touch $@
+
+depend: .depend
+
+clean:
+	@rm -f libboard$(LIBEXT) *~ .*.swp
+	$(call CLEAN)
+
+distclean: clean
+	@rm -f Make.dep .depend
+
+-include Make.dep

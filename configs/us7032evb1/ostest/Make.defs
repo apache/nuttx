@@ -42,14 +42,14 @@ else
 			  -fomit-frame-pointer
 endif
 
-ARCHCPUFLAGS		= -mapcs-32 -mcpu=arm7tdmi -msoft-float -fno-builtin
+ARCHCPUFLAGS		= -m1 -fno-builtin
 ARCHPICFLAGS		= -fpic
 ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
 ARCHDEFINES		=
 ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include
 ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script
 
-CROSSDEV		= arm-elf-
+CROSSDEV		= sh-elf-
 CC			= $(CROSSDEV)gcc
 LD			= $(CROSSDEV)ld
 AR			= $(CROSSDEV)ar rcs
