@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sh/src/sh1/sh1_irq.c
+ *  arch/sh/src/common/up_initialstate.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,22 +39,14 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <errno.h>
-#include <nuttx/irq.h>
-
-#include "up_arch.h"
+#include <string.h>
+#include <nuttx/arch.h>
 #include "up_internal.h"
-#include "chip.h"
+#include "up_arch.h"
 
 /****************************************************************************
- * Definitions
+ * Private Definitions
  ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-uint32 *current_regs;
 
 /****************************************************************************
  * Private Data
@@ -65,78 +57,53 @@ uint32 *current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Public Funtions
+ * Name: up_getsr
+ ****************************************************************************/
+
+static inline irqstate_t up_getsr(void)
+{
+  irqstate_t flags;
+
+  __asm__ __volatile__
+    (
+      "stc     sr, %0\n\t"
+      : "=&z" (flags)
+      :
+      : "memory"
+    );
+  return flags;
+}
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_irqinitialize
+ * Name: up_initial_state
+ *
+ * Description:
+ *   A new thread is being started and a new TCB
+ *   has been created. This function is called to initialize
+ *   the processor specific portions of the new TCB.
+ *
+ *   This function must setup the intial architecture registers
+ *   and/or  stack so that execution will begin at tcb->start
+ *   on the next context switch.
+ *
  ****************************************************************************/
 
-void up_irqinitialize(void)
+void up_initial_state(_TCB *tcb)
 {
-#warning "To be provided"
+  struct xcptcontext *xcp = &tcb->xcp;
 
-  /* Currents_regs is non-NULL only while processing an interrupt */
+  /* Initialize the initial exception register context structure */
 
-  current_regs = NULL;
-
-  /* Enable interrupts */
-
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  irqenable();
+  memset(xcp, 0, sizeof(struct xcptcontext));
+  xcp->regs[REG_SP] = (uint32)tcb->adj_stack_ptr;
+  xcp->regs[REG_PC] = (uint32)tcb->start;
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  xcp->regs[REG_SR] = up_getsr() | 0x000000f0;
+#else
+  xcp->regs[REG_SR] = up_getsr() & ~0x000000f0;
 #endif
 }
-
-/****************************************************************************
- * Name: up_disable_irq
- *
- * Description:
- *   Disable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_disable_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_enable_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_irqpriority
- *
- * Description:
- *   set interrupt priority
- *
- ****************************************************************************/
-
-#warning "Should this be supported?"
-void up_irqpriority(int irq, ubyte priority)
-{
-#warning "To be provided"
-}
-

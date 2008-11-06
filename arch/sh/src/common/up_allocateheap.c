@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sh/src/sh1/sh1_irq.c
+ * arch/sh/src/common/up_allocateheap.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,23 +38,18 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
-#include <errno.h>
-#include <nuttx/irq.h>
+#include <debug.h>
+
+#include <nuttx/arch.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "chip.h"
 
 /****************************************************************************
- * Definitions
+ * Private Definitions
  ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-uint32 *current_regs;
 
 /****************************************************************************
  * Private Data
@@ -65,78 +60,23 @@ uint32 *current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_irqinitialize
- ****************************************************************************/
-
-void up_irqinitialize(void)
-{
-#warning "To be provided"
-
-  /* Currents_regs is non-NULL only while processing an interrupt */
-
-  current_regs = NULL;
-
-  /* Enable interrupts */
-
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  irqenable();
-#endif
-}
-
-/****************************************************************************
- * Name: up_disable_irq
+ * Name: up_allocate_heap
  *
  * Description:
- *   Disable the IRQ specified by 'irq'
+ *   The heap may be statically allocated by
+ *   defining CONFIG_HEAP_BASE and CONFIG_HEAP_SIZE.  If these
+ *   are not defined, then this function will be called to
+ *   dynamically set aside the heap region.
  *
  ****************************************************************************/
 
-void up_disable_irq(int irq)
+void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
-#warning "To be provided"
+  up_ledon(LED_HEAPALLOCATE);
+  *heap_start = (FAR void*)g_heapbase;
+  *heap_size = CONFIG_DRAM_END - g_heapbase;
 }
-
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_enable_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_irqpriority
- *
- * Description:
- *   set interrupt priority
- *
- ****************************************************************************/
-
-#warning "Should this be supported?"
-void up_irqpriority(int irq, ubyte priority)
-{
-#warning "To be provided"
-}
-

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sh/src/sh1/sh1_irq.c
+ *  arch/sh/src/common/up_interruptcontext.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,104 +39,30 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <errno.h>
+#include <nuttx/arch.h>
 #include <nuttx/irq.h>
-
-#include "up_arch.h"
 #include "up_internal.h"
-#include "chip.h"
 
 /****************************************************************************
- * Definitions
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-uint32 *current_regs;
-
-/****************************************************************************
- * Private Data
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Funtions
+ * Name: up_interrupt_context
+ *
+ * Description: Return TRUE is we are currently executing in
+ * the interrupt handler context.
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_irqinitialize
- ****************************************************************************/
-
-void up_irqinitialize(void)
+boolean up_interrupt_context(void)
 {
-#warning "To be provided"
-
-  /* Currents_regs is non-NULL only while processing an interrupt */
-
-  current_regs = NULL;
-
-  /* Enable interrupts */
-
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  irqenable();
-#endif
+   return current_regs != NULL;
 }
-
-/****************************************************************************
- * Name: up_disable_irq
- *
- * Description:
- *   Disable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_disable_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_enable_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_irqpriority
- *
- * Description:
- *   set interrupt priority
- *
- ****************************************************************************/
-
-#warning "Should this be supported?"
-void up_irqpriority(int irq, ubyte priority)
-{
-#warning "To be provided"
-}
-
