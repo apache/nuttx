@@ -329,11 +329,11 @@ __start0:
 
 	.data
 	.align	4
-	.globl	g_heapbase
-	.type	g_heapbase, object
-g_heapbase:
+	.globl	_g_heapbase
+	.type	_g_heapbase, object
+_g_heapbase:
 	.long	_ebss+CONFIG_PROC_STACK_SIZE
-	.size	g_heapbase, .-g_heapbase
+	.size	_g_heapbase, .-_g_heapbase
 
 	.end
 

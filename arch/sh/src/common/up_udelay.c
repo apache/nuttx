@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sh/src/sh1/sh1_irq.c
+ *  arch/sh/src/common/up_udelay.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,26 +38,26 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <errno.h>
-#include <nuttx/irq.h>
-
-#include "up_arch.h"
-#include "up_internal.h"
-#include "chip.h"
+#include <nuttx/arch.h>
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
+#define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
+#define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
+#define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
+
 /****************************************************************************
- * Public Data
+ * Private Types
  ****************************************************************************/
 
-uint32 *current_regs;
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
- * Private Data
+ * Private Variables
  ****************************************************************************/
 
 /****************************************************************************
@@ -65,78 +65,64 @@ uint32 *current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_irqinitialize
- ****************************************************************************/
-
-void up_irqinitialize(void)
-{
-#warning "To be provided"
-
-  /* Currents_regs is non-NULL only while processing an interrupt */
-
-  current_regs = NULL;
-
-  /* Enable interrupts */
-
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  irqenable();
-#endif
-}
-
-/****************************************************************************
- * Name: up_disable_irq
+ * Name: up_udelay
  *
  * Description:
- *   Disable the IRQ specified by 'irq'
+ *   Delay inline for the requested number of microseconds.  NOTE:  Because
+ *   of all of the setup, several microseconds will be lost before the actual
+ *   timing looop begins.  Thus, the delay will always be a few microseconds
+ *   longer than requested.
+ *
+ *   *** NOT multi-tasking friendly ***
+ *
+ * ASSUMPTIONS:
+ *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
  *
  ****************************************************************************/
 
-void up_disable_irq(int irq)
+void up_udelay(unsigned int microseconds)
 {
-#warning "To be provided"
+  volatile int i;
+
+  /* We'll do this a little at a time because we expect that the
+   * CONFIG_BOARD_LOOPSPERUSEC is very inaccurate during to truncation in
+   * the divisions of its calculation.  We'll use the largest values that
+   * we can in order to prevent significant error buildup in the loops.
+   */
+
+  while (microseconds > 1000)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPERMSEC; i++)
+        {
+        }
+      microseconds -= 1000;
+    }
+
+  while (microseconds > 100)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPER100USEC; i++)
+        {
+        }
+      microseconds -= 100;
+    }
+
+  while (microseconds > 10)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPER10USEC; i++)
+        {
+        }
+      microseconds -= 10;
+    }
+
+  while (microseconds > 0)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPERUSEC; i++)
+        {
+        }
+      microseconds--;
+    }
 }
-
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_enable_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_irqpriority
- *
- * Description:
- *   set interrupt priority
- *
- ****************************************************************************/
-
-#warning "Should this be supported?"
-void up_irqpriority(int irq, ubyte priority)
-{
-#warning "To be provided"
-}
-

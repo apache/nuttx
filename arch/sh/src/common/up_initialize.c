@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sh/src/sh1/sh1_irq.c
+ * arch/sh/src/common/up_initialize.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,26 +38,26 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
-#include <errno.h>
-#include <nuttx/irq.h>
+#include <debug.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/fs.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "chip.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+/* Define to enable timing loop calibration */
 
-uint32 *current_regs;
+#undef CONFIG_ARCH_CALIBRATION
 
 /****************************************************************************
- * Private Data
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -65,78 +65,92 @@ uint32 *current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Public Funtions
+ * Name: up_calibratedelay
+ *
+ * Description:
+ *   Delay loops are provided for short timing loops.  This function, if
+ *   enabled, will just wait for 100 seconds.  Using a stopwatch, you can
+ *   can then determine if the timing loops are properly calibrated.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_CALIBRATION) & defined(CONFIG_DEBUG)
+static void up_calibratedelay(void)
+{
+  int i;
+  slldbg("Beginning 100s delay\n");
+  for (i = 0; i < 100; i++)
+    {
+      up_mdelay(1000);
+    }
+  slldbg("End 100s delay\n");
+}
+#else
+# define up_calibratedelay()
+#endif
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_irqinitialize
+ * Name: up_initialize
+ *
+ * Description:
+ *   up_initialize will be called once during OS initialization after the
+ *   basic OS services have been initialized.  The architecture specific
+ *   details of initializing the OS will be handled here.  Such things as
+ *   setting up interrupt service routines, starting the clock, and
+ *   registering device drivers are some of the things that are different
+ *   for each processor and hardware platform.
+ *
+ *   up_initialize is called after the OS initialized but before the user
+ *   initialization logic has been started and before the libraries have
+ *   been initialized.  OS services and driver services are available.
+ *
  ****************************************************************************/
 
-void up_irqinitialize(void)
+void up_initialize(void)
 {
-#warning "To be provided"
-
-  /* Currents_regs is non-NULL only while processing an interrupt */
+  /* Initialize global variables */
 
   current_regs = NULL;
 
-  /* Enable interrupts */
+  /* Calibrate the timing loop */
 
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  irqenable();
+  up_calibratedelay();
+
+  /* Initialize the interrupt subsystem */
+
+  up_irqinitialize();
+
+  /* Initialize the system timer interrupt */
+
+#if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
+  up_timerinit();
 #endif
+
+  /* Register devices */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  devnull_register();   /* Standard /dev/null */
+#endif
+
+  /* Initialize the serial device driver */
+
+#ifdef CONFIG_USE_SERIALDRIVER
+  up_serialinit();
+#elif defined(CONFIG_DEV_LOWCONSOLE)
+  lowconsole_init();
+#endif
+
+  /* Initialize the netwok */
+
+  up_netinitialize();
+
+  /* Initializ USB */
+
+  up_usbinitialize();
+
+  up_ledon(LED_IRQSENABLED);
 }
-
-/****************************************************************************
- * Name: up_disable_irq
- *
- * Description:
- *   Disable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_disable_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_enable_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_irqpriority
- *
- * Description:
- *   set interrupt priority
- *
- ****************************************************************************/
-
-#warning "Should this be supported?"
-void up_irqpriority(int irq, ubyte priority)
-{
-#warning "To be provided"
-}
-

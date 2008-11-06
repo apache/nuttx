@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sh/src/sh1/sh1_irq.c
+ *  arch/sh/src/common/up_releasepending.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,22 +39,15 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <errno.h>
-#include <nuttx/irq.h>
-
-#include "up_arch.h"
+#include <sched.h>
+#include <debug.h>
+#include <nuttx/arch.h>
+#include "os_internal.h"
 #include "up_internal.h"
-#include "chip.h"
 
 /****************************************************************************
- * Definitions
+ * Private Definitions
  ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-uint32 *current_regs;
 
 /****************************************************************************
  * Private Data
@@ -65,78 +58,74 @@ uint32 *current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_irqinitialize
- ****************************************************************************/
-
-void up_irqinitialize(void)
-{
-#warning "To be provided"
-
-  /* Currents_regs is non-NULL only while processing an interrupt */
-
-  current_regs = NULL;
-
-  /* Enable interrupts */
-
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  irqenable();
-#endif
-}
-
-/****************************************************************************
- * Name: up_disable_irq
+ * Name: up_release_pending
  *
  * Description:
- *   Disable the IRQ specified by 'irq'
+ *   Release and ready-to-run tasks that have
+ *   collected in the pending task list.  This can call a
+ *   context switch if a new task is placed at the head of
+ *   the ready to run list.
  *
  ****************************************************************************/
 
-void up_disable_irq(int irq)
+void up_release_pending(void)
 {
-#warning "To be provided"
+  _TCB *rtcb = (_TCB*)g_readytorun.head;
+
+  slldbg("From TCB=%p\n", rtcb);
+
+  /* Merge the g_pendingtasks list into the g_readytorun task list */
+
+  /* sched_lock(); */
+  if (sched_mergepending())
+    {
+      /* The currently active task has changed!  We will need to
+       * switch contexts.  First check if we are operating in
+       * interrupt context:
+       */
+
+      if (current_regs)
+        {
+          /* Yes, then we have to do things differently.
+           * Just copy the current_regs into the OLD rtcb.
+           */
+
+           up_copystate(rtcb->xcp.regs, current_regs);
+
+          /* Restore the exception context of the rtcb at the (new) head 
+           * of the g_readytorun task list.
+           */
+
+          rtcb = (_TCB*)g_readytorun.head;
+          slldbg("New Active Task TCB=%p\n", rtcb);
+
+          /* Then switch contexts */
+
+          up_copystate(current_regs, rtcb->xcp.regs);
+        }
+
+      /* Copy the exception context into the TCB of the task that
+       * was currently active. if up_saveusercontext returns a non-zero
+       * value, then this is really the previously running task 
+       * restarting!
+       */
+
+      else if (!up_saveusercontext(rtcb->xcp.regs))
+        {
+          /* Restore the exception context of the rtcb at the (new) head 
+           * of the g_readytorun task list.
+           */
+
+          rtcb = (_TCB*)g_readytorun.head;
+          slldbg("New Active Task TCB=%p\n", rtcb);
+
+           /* Then switch contexts */
+
+          up_fullcontextrestore(rtcb->xcp.regs);
+        }
+    }
 }
-
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_enable_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_irqpriority
- *
- * Description:
- *   set interrupt priority
- *
- ****************************************************************************/
-
-#warning "Should this be supported?"
-void up_irqpriority(int irq, ubyte priority)
-{
-#warning "To be provided"
-}
-

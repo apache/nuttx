@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sh/src/sh1/sh1_irq.c
+ * common/up_exit.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,22 +39,19 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <errno.h>
-#include <nuttx/irq.h>
-
-#include "up_arch.h"
+#include <sched.h>
+#include <debug.h>
+#include <nuttx/arch.h>
+#include "os_internal.h"
 #include "up_internal.h"
-#include "chip.h"
+
+#ifdef CONFIG_DUMP_ON_EXIT
+#include <nuttx/fs.h>
+#endif
 
 /****************************************************************************
- * Definitions
+ * Private Definitions
  ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-uint32 *current_regs;
 
 /****************************************************************************
  * Private Data
@@ -65,78 +62,112 @@ uint32 *current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Public Funtions
+ * Name: _up_dumponexit
+ *
+ * Description:
+ *   Dump the state of all tasks whenever on task exits.  This is debug
+ *   instrumentation that was added to check file-related reference counting
+ *   but could be useful again sometime in the future.
+ *
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_irqinitialize
- ****************************************************************************/
-
-void up_irqinitialize(void)
+#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
+static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
 {
-#warning "To be provided"
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NFILE_STREAMS > 0
+  int i;
+#endif
 
-  /* Currents_regs is non-NULL only while processing an interrupt */
+  sdbg("  TCB=%p name=%s\n", tcb, tcb->argv[0]);
 
-  current_regs = NULL;
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  if (tcb->filelist)
+    {
+      sdbg("    filelist refcount=%d\n",
+           tcb->filelist->fl_crefs);
 
-  /* Enable interrupts */
+      for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
+        {
+          struct inode *inode = tcb->filelist->fl_files[i].f_inode;
+          if (inode)
+            {
+              sdbg("      fd=%d refcount=%d\n",
+                   i, inode->i_crefs);
+            }
+        }
+    }
+#endif
 
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  irqenable();
+#if CONFIG_NFILE_STREAMS > 0
+  if (tcb->streams)
+    {
+      sdbg("    streamlist refcount=%d\n",
+           tcb->streams->sl_crefs);
+
+      for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
+        {
+          struct file_struct *filep = &tcb->streams->sl_streams[i];
+          if (filep->fs_filedes >= 0)
+            {
+#if CONFIG_STDIO_BUFFER_SIZE > 0
+              sdbg("      fd=%d nbytes=%d\n",
+                   filep->fs_filedes,
+                  filep->fs_bufpos - filep->fs_bufstart);
+#else
+              sdbg("      fd=%d\n", filep->fs_filedes);
+#endif
+            }
+        }
+    }
 #endif
 }
+#endif
 
 /****************************************************************************
- * Name: up_disable_irq
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: _exit
  *
  * Description:
- *   Disable the IRQ specified by 'irq'
+ *   This function causes the currently executing task to cease
+ *   to exist.  This is a special case of task_delete() where the task to
+ *   be deleted is the currently executing task.  It is more complex because
+ *   a context switch must be perform to the the next ready to run task.
  *
  ****************************************************************************/
 
-void up_disable_irq(int irq)
+void _exit(int status)
 {
-#warning "To be provided"
-}
+  _TCB* tcb;
 
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
+  /* Disable interrupts.  They will be restored when the next
+   * task is started.
+   */
 
-void up_enable_irq(int irq)
-{
-#warning "To be provided"
-}
+  (void)irqsave();
 
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
+  slldbg("TCB=%p exitting\n", tcb);
 
-void up_maskack_irq(int irq)
-{
-#warning "To be provided"
-}
+#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
+  slldbg("Other tasks:\n");
+  sched_foreach(_up_dumponexit, NULL);
+#endif
 
-/****************************************************************************
- * Name: up_irqpriority
- *
- * Description:
- *   set interrupt priority
- *
- ****************************************************************************/
+  /* Destroy the task at the head of the ready to run list. */
 
-#warning "Should this be supported?"
-void up_irqpriority(int irq, ubyte priority)
-{
-#warning "To be provided"
+  (void)task_deletecurrent();
+
+  /* Now, perform the context switch to the new ready-to-run task at the
+   * head of the list.
+   */
+
+  tcb = (_TCB*)g_readytorun.head;
+  slldbg("New Active Task TCB=%p\n", tcb);
+
+  /* Then switch contexts */
+
+  up_fullcontextrestore(tcb->xcp.regs);
 }
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sh/src/sh1/sh1_irq.c
+ *  arch/sh/src/common/up_idle.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,22 +39,12 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <errno.h>
-#include <nuttx/irq.h>
-
-#include "up_arch.h"
+#include <nuttx/arch.h>
 #include "up_internal.h"
-#include "chip.h"
 
 /****************************************************************************
- * Definitions
+ * Private Definitions
  ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-uint32 *current_regs;
 
 /****************************************************************************
  * Private Data
@@ -65,78 +55,33 @@ uint32 *current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_irqinitialize
+ * Name: up_idle
+ *
+ * Description:
+ *   up_idle() is the logic that will be executed when their
+ *   is no other ready-to-run task.  This is processor idle
+ *   time and will continue until some interrupt occurs to
+ *   cause a context switch from the idle task.
+ *
+ *   Processing in this state may be processor-specific. e.g.,
+ *   this is where power management operations might be
+ *   performed.
+ *
  ****************************************************************************/
 
-void up_irqinitialize(void)
+void up_idle(void)
 {
-#warning "To be provided"
+#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
+  /* If the system is idle and there are no timer interrupts,
+   * then process "fake" timer interrupts. Hopefully, something
+   * will wake up.
+   */
 
-  /* Currents_regs is non-NULL only while processing an interrupt */
-
-  current_regs = NULL;
-
-  /* Enable interrupts */
-
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  irqenable();
+  sched_process_timer();
 #endif
-}
-
-/****************************************************************************
- * Name: up_disable_irq
- *
- * Description:
- *   Disable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_disable_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_enable_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_irqpriority
- *
- * Description:
- *   set interrupt priority
- *
- ****************************************************************************/
-
-#warning "Should this be supported?"
-void up_irqpriority(int irq, ubyte priority)
-{
-#warning "To be provided"
 }
 

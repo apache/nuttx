@@ -36,14 +36,18 @@
 HEAD_ASRC	= sh1_head.S
 
 CMN_ASRCS	= 
-CMN_CSRCS	= 
+CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
+		  up_createstack.c up_doirq.c up_exit.c up_idle.c up_initialize.c \
+		  up_initialstate.c up_interruptcontext.c up_lowputs.c \
+		  up_mdelay.c up_puts.c up_releasepending.c up_releasestack.c \
+		  up_reprioritizertr.c up_udelay.c up_unblocktask.c up_usestack.c
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-CMN_CSRCS	+= 
+CMN_CSRCS	+= up_schedulesigaction.c up_sigdeliver.c
 endif
 
 CHIP_ASRCS	= 
-CHIP_CSRCS	= sh1_lowputc.c sh1_irq.c
+CHIP_CSRCS	= sh1_lowputc.c sh1_irq.c sh1_timerisr.c
 
 ifeq ($(CONFIG_USBDEV),y)
 CHIP_CSRCS	+= 

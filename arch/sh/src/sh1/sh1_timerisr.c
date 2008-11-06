@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sh/src/sh1/sh1_irq.c
+ * arch/sh/src/sh1/sh1_timerisr.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,104 +39,79 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <errno.h>
-#include <nuttx/irq.h>
+#include <time.h>
+#include <debug.h>
+#include <nuttx/arch.h>
+#include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "clock_internal.h"
 #include "up_internal.h"
+#include "up_arch.h"
+
 #include "chip.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
+/* The desired timer interrupt frequency is provided by the definition
+ * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
+ * system clock ticks per second.  That value is a user configurable setting
+ * that defaults to 100 (100 ticks per second = 10 MS interval).
+ */
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-uint32 *current_regs;
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Public Funtions
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_irqinitialize
+ * Global Functions
  ****************************************************************************/
 
-void up_irqinitialize(void)
+/****************************************************************************
+ * Function:  up_timerisr
+ *
+ * Description:
+ *   The timer ISR will perform a variety of services for various portions
+ *   of the systems.
+ *
+ ****************************************************************************/
+
+int up_timerisr(int irq, uint32 *regs)
 {
-#warning "To be provided"
+   /* Process timer interrupt */
 
-  /* Currents_regs is non-NULL only while processing an interrupt */
+   sched_process_timer();
+   return 0;
+}
 
-  current_regs = NULL;
+/****************************************************************************
+ * Function:  up_timerinit
+ *
+ * Description:
+ *   This function is called during start-up to initialize
+ *   the timer interrupt.
+ *
+ ****************************************************************************/
 
-  /* Enable interrupts */
+void up_timerinit(void)
+{
+#warning "Timer initialization logic needed"
+#if 0
 
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  irqenable();
+  /* Set the IRQ interrupt priority */
+
+  up_irqpriority(STR71X_IRQ_SYSTIMER, 1);
+
+  /* Attach the timer interrupt vector */
+
+  (void)irq_attach(STR71X_IRQ_SYSTIMER, (xcpt_t)up_timerisr);
+
+  /* And enable the timer interrupt */
+
+  up_enable_irq(STR71X_IRQ_SYSTIMER);
 #endif
 }
-
-/****************************************************************************
- * Name: up_disable_irq
- *
- * Description:
- *   Disable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_disable_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_enable_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_irqpriority
- *
- * Description:
- *   set interrupt priority
- *
- ****************************************************************************/
-
-#warning "Should this be supported?"
-void up_irqpriority(int irq, ubyte priority)
-{
-#warning "To be provided"
-}
-

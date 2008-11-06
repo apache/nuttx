@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sh/src/sh1/sh1_irq.c
+ * arch/sh/src/common/up_createstack.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,105 +38,94 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
-#include <errno.h>
-#include <nuttx/irq.h>
+#include <sched.h>
+#include <debug.h>
+
+#include <nuttx/kmalloc.h>
+#include <nuttx/arch.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "chip.h"
 
 /****************************************************************************
- * Definitions
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-uint32 *current_regs;
-
-/****************************************************************************
- * Private Data
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Funtions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_irqinitialize
- ****************************************************************************/
-
-void up_irqinitialize(void)
-{
-#warning "To be provided"
-
-  /* Currents_regs is non-NULL only while processing an interrupt */
-
-  current_regs = NULL;
-
-  /* Enable interrupts */
-
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  irqenable();
-#endif
-}
-
-/****************************************************************************
- * Name: up_disable_irq
+ * Name: up_create_stack
  *
  * Description:
- *   Disable the IRQ specified by 'irq'
+ *   Allocate a stack for a new thread and setup
+ *   up stack-related information in the TCB.
  *
+ *   The following TCB fields must be initialized:
+ *   adj_stack_size: Stack size after adjustment for hardware,
+ *     processor, etc.  This value is retained only for debug
+ *     purposes.
+ *   stack_alloc_ptr: Pointer to allocated stack
+ *   adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
+ *     initial value of the stack pointer.
+ *
+ * Inputs:
+ *   tcb: The TCB of new task
+ *   stack_size:  The requested stack size.  At least this much
+ *     must be allocated.
  ****************************************************************************/
 
-void up_disable_irq(int irq)
+STATUS up_create_stack(_TCB *tcb, size_t stack_size)
 {
-#warning "To be provided"
+  if (tcb->stack_alloc_ptr &&
+      tcb->adj_stack_size != stack_size)
+    {
+      sched_free(tcb->stack_alloc_ptr);
+      tcb->stack_alloc_ptr = NULL;
+    }
+
+   if (!tcb->stack_alloc_ptr)
+     {
+       tcb->stack_alloc_ptr = (uint32 *)kzmalloc(stack_size);
+     }
+
+   if (tcb->stack_alloc_ptr)
+     {
+       size_t top_of_stack;
+       size_t size_of_stack;
+
+       /* The Arm7Tdmi uses a push-down stack:  the stack grows
+	* toward loweraddresses in memory.  The stack pointer
+	* register, points to the lowest, valid work address
+	* (the "top" of the stack).  Items on the stack are
+	* referenced as positive word offsets from sp.
+	*/
+
+       top_of_stack = (uint32)tcb->stack_alloc_ptr + stack_size - 4;
+
+       /* The Arm7Tdmi stack must be aligned at word (4 byte)
+	* boundaries. If necessary top_of_stack must be rounded
+	* down to the next boundary
+	*/
+
+       top_of_stack &= ~3;
+       size_of_stack = top_of_stack - (uint32)tcb->stack_alloc_ptr + 4;
+
+       /* Save the adjusted stack values in the _TCB */
+
+       tcb->adj_stack_ptr  = (uint32*)top_of_stack;
+       tcb->adj_stack_size = size_of_stack;
+
+       up_ledon(LED_STACKCREATED);
+       return OK;
+     }
+
+   return ERROR;
 }
-
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_enable_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_irqpriority
- *
- * Description:
- *   set interrupt priority
- *
- ****************************************************************************/
-
-#warning "Should this be supported?"
-void up_irqpriority(int irq, ubyte priority)
-{
-#warning "To be provided"
-}
-
