@@ -53,42 +53,141 @@
 
 /* IRQ channels */
 
-#define STR71X_IRQ_T0TIMI     (0)
-#define STR71X_IRQ_FLASH      (1)
-#define STR71X_IRQ_RCCU       (2)
-#define STR71X_IRQ_RTC        (3)
-#define STR71X_IRQ_WDG        (4)
-#define STR71X_IRQ_XTI        (5)
-#define STR71X_IRQ_USBHP      (6)
-#define STR71X_IRQ_I2C0ITERR  (7)
-#define STR71X_IRQ_I2C1ITERR  (8)
-#define STR71X_IRQ_UART0      (9)
-#define STR71X_IRQ_UART1     (10)
-#define STR71X_IRQ_UART2     (11)
-#define STR71X_IRQ_UART3     (12)
-#define STR71X_IRQ_SPI0      (13)
-#define STR71X_IRQ_SPI1      (14)
-#define STR71X_IRQ_I2C0      (15)
-#define STR71X_IRQ_I2C1      (16)
-#define STR71X_IRQ_CAN       (17)
-#define STR71X_IRQ_ADC       (18)
-#define STR71X_IRQ_T1TIMI    (19)
-#define STR71X_IRQ_T2TIMI    (20)
-#define STR71X_IRQ_T3TIMI    (21)
-#define STR71X_IRQ_HDLC      (25)
-#define STR71X_IRQ_USBLP     (26)
-#define STR71X_IRQ_T0TOI     (29)
-#define STR71X_IRQ_T0OC1     (30)
-#define STR71X_IRQ_T0OC2     (31)
+/* Illegal instructions / Address errors */
+
+#define SH1_INVINSTR_IRQ  (0)                  /* General invalid instruction */
+#define SH1_INVSLOT_IRQ   (1)                  /* Invalid slot instruction */
+#define SH1_BUSERR_IRQ    (2)                  /* CPU bus error */
+#define SH1_DMAERR_IRQ    (3)                  /* DMA bus error */
+#define SH1_NMI_IRQ       (4)                  /* NMI */
+#define SH1_USRBRK_IRQ    (6)                  /* User break */
+
+/* Support for traps can be provided by simply enabling the following and
+ * implementing the stubs to catch the interrupts
+ */
+
+#if 0
+#  define SH1_TRAP_IRQ    (7)                  /* TRAPA instruction (user break) */
+#  define SH1_TRAP0_IRQ   (SH1_TRAP_IRQ+0)     /* TRAPA instruction (user break) */
+#  define SH1_TRAP1_IRQ   (SH1_TRAP_IRQ+1)     /* "   " "         "  "  " "   " */
+#  define SH1_TRAP2_IRQ   (SH1_TRAP_IRQ+2)     /* "   " "         "  "  " "   " */
+#  define SH1_TRAP3_IRQ   (SH1_TRAP_IRQ+3)     /* "   " "         "  "  " "   " */
+#  define SH1_TRAP4_IRQ   (SH1_TRAP_IRQ+4)     /* "   " "         "  "  " "   " */
+#  define SH1_TRAP5_IRQ   (SH1_TRAP_IRQ+5)     /* "   " "         "  "  " "   " */
+#  define SH1_TRAP6_IRQ   (SH1_TRAP_IRQ+6)     /* "   " "         "  "  " "   " */
+#  define SH1_TRAP7_IRQ   (SH1_TRAP_IRQ+7)     /* "   " "         "  "  " "   " */
+#  define SH1_TRAP8_IRQ   (SH1_TRAP_IRQ+8)     /* "   " "         "  "  " "   " */
+#  define SH1_TRAP9_IRQ   (SH1_TRAP_IRQ+9)     /* "   " "         "  "  " "   " */
+#  define SH1_TRAP10_IRQ  (SH1_TRAP_IRQ+10)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP11_IRQ  (SH1_TRAP_IRQ+11)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP12_IRQ  (SH1_TRAP_IRQ+12)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP13_IRQ  (SH1_TRAP_IRQ+13)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP14_IRQ  (SH1_TRAP_IRQ+14)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP15_IRQ  (SH1_TRAP_IRQ+15)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP16_IRQ  (SH1_TRAP_IRQ+16)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP17_IRQ  (SH1_TRAP_IRQ+17)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP18_IRQ  (SH1_TRAP_IRQ+18)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP19_IRQ  (SH1_TRAP_IRQ+19)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP20_IRQ  (SH1_TRAP_IRQ+20)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP21_IRQ  (SH1_TRAP_IRQ+21)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP22_IRQ  (SH1_TRAP_IRQ+22)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP23_IRQ  (SH1_TRAP_IRQ+23)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP24_IRQ  (SH1_TRAP_IRQ+24)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP25_IRQ  (SH1_TRAP_IRQ+25)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP26_IRQ  (SH1_TRAP_IRQ+26)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP27_IRQ  (SH1_TRAP_IRQ+27)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP28_IRQ  (SH1_TRAP_IRQ+28)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP29_IRQ  (SH1_TRAP_IRQ+29)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP30_IRQ  (SH1_TRAP_IRQ+30)    /* "   " "         "  "  " "   " */
+#  define SH1_TRAP31_IRQ  (SH1_TRAP_IRQ+31)    /* "   " "         "  "  " "   " */
+#  define SH1_LASTTRAP_IRQ SH1_TRAP31_IRQ
+#else
+#  define SH1_LASTTRAP_IRQ (6)
+#endif
+
+/* Interrupts */
+
+#define SH1_IRQ_IRQ       (SH1_LASTTRAP_IRQ+1) /* IRQ0-7 */
+#define SH1_IRQ0_IRQ      (SH1_IRQ_IRQ+0)      /* IRQ0 */
+#define SH1_IRQ1_IRQ      (SH1_IRQ_IRQ+1)      /* IRQ1 */
+#define SH1_IRQ2_IRQ      (SH1_IRQ_IRQ+2)      /* IRQ2 */
+#define SH1_IRQ3_IRQ      (SH1_IRQ_IRQ+3)      /* IRQ3 */
+#define SH1_IRQ4_IRQ      (SH1_IRQ_IRQ+4)      /* IRQ4 */
+#define SH1_IRQ5_IRQ      (SH1_IRQ_IRQ+5)      /* IRQ5 */
+#define SH1_IRQ6_IRQ      (SH1_IRQ_IRQ+6)      /* IRQ6 */
+#define SH1_IRQ7_IRQ      (SH1_IRQ_IRQ+7)      /* IRQ7 */
+#define SH1_LASTIRQ_IRQ   SH1_IRQ7_IRQ
+
+/* On-chip modules -- The following may be unique to the 7032 */
+
+#ifdef CONFIG_ARCH_SH7032
+
+/* DMAC */
+
+#define SH1_DMAC0_IRQ    (SH1_LASTIRQ_IRQ+1)   /* DMAC0 */
+#define SH1_DEI0_IRQ     SH1_DMAC0_IRQ         /*   DEI0 */
+#define SH1_DMAC1_IRQ    (SH1_LASTIRQ_IRQ+2)   /* DMAC1 */
+#define SH1_DEI1_IRQ     SH1_DMAC1_IRQ         /*   DEI1 */
+#define SH1_DMAC2_IRQ    (SH1_LASTIRQ_IRQ+3)   /* DMAC2 */
+#define SH1_DEI2_IRQ     SH1_DMAC2_IRQ         /*   DEI2 */
+#define SH1_DMAC3_IRQ    (SH1_LASTIRQ_IRQ+4)   /* DMAC3 */
+#define SH1_DEI3_IRQ     SH1_DMAC3_IRQ         /*   DEI3 */
+#define SH1_LASTDMAC_IRQ SH1_DEI3_IRQ
+
+/* ITU */
+
+#define SH1_ITU0_IRQ     (SH1_LASTDMAC_IRQ+1)  /* ITU0 */
+#define SH1_IMIA0_IRQ    (SH1_ITU0_IRQ+0)      /*   IMIA0 */
+#define SH1_IMIBO_IRQ    (SH1_ITU0_IRQ+1)      /*   IMIB0 */
+#define SH1_OVI0_IRQ     (SH1_ITU0_IRQ+2)      /*   OVI0 */
+
+#define SH1_ITU1_IRQ     (SH1_LASTDMAC_IRQ+4)  /* ITU1 */
+#define SH1_IMIA1_IRQ    (SH1_ITU1_IRQ+0)      /*   IMIA1 */
+#define SH1_IMIB1_IRQ    (SH1_ITU1_IRQ+1)      /*   IMIB1 */
+#define SH1_OVI1_IRQ     (SH1_ITU1_IRQ+2)      /*   OVI1 */
+
+#define SH1_ITU2_IRQ     (SH1_LASTDMAC_IRQ+7)  /* ITU2 */
+#define SH1_IMIA2_IRQ    (SH1_ITU2_IRQ+0)      /*   IMIA2 */
+#define SH1_IMIB2_IRQ    (SH1_ITU2_IRQ+1)      /*   IMIB2 */
+#define SH1_OVI2_IRQ     (SH1_ITU2_IRQ+2)      /*   OVI2 */
+
+#define SH1_ITU3_IRQ     (SH1_LASTDMAC_IRQ+10) /* ITU3 */
+#define SH1_IMIA3_IRQ    (SH1_ITU3_IRQ+0)      /*   IMIA3 */
+#define SH1_IMIB3_IRQ    (SH1_ITU3_IRQ+1)      /*   IMIB3 */
+#define SH1_OVI3_IRQ     (SH1_ITU3_IRQ+2)      /*   OVI3 */
+
+#define SH1_ITU4_IRQ     (SH1_LASTDMAC_IRQ+13) /* ITU4 */
+#define SH1_IMIA4_IRQ    (SH1_ITU4_IRQ+0)      /*   IMIA4 */
+#define SH1_IMIB4_IRQ    (SH1_ITU4_IRQ+1)      /*   IMIB4 */
+#define SH1_OVI4_IRQ     (SH1_ITU4_IRQ+2)      /*   OVI4 */
+
+#define SH1_LASTITU_IRQ  (SH1_LASTDMAC_IRQ+15)
+
+/* SCI */
+
+#define SH1_SCI0_IRQ      (SH1_LASTITU_IRQ+1)  /* SCI0 */
+#define SH1_ERI0_IRQ      (SH1_SCI0_IRQ+0)     /*  ERI0 */
+#define SH1_RXI0_IRQ      (SH1_SCI0_IRQ+1)     /*  RxI0 */
+#define SH1_TXI0_IRQ      (SH1_SCI0_IRQ+2)     /*  TxI0 */
+#define SH1_TEI0_IRQ      (SH1_SCI0_IRQ+3)     /*  TEI0 */
+
+#define SH1_SCI1_IRQ      (SH1_LASTITU_IRQ+5)  /* SCI1 */
+#define SH1_ERI1_IRQ      (SH1_SCI1_IRQ+0)     /*   ERI1 */
+#define SH1_RXI1_IRQ      (SH1_SCI1_IRQ+1)     /*   RxI1 */
+#define SH1_TXI1_IRQ      (SH1_SCI1_IRQ+2)     /*   TxI1 */
+#define SH1_TEI1_IRQ      (SH1_SCI1_IRQ+3)     /*   TEI1 */
+
+#define SH1_LASTSCI_IRQ   (SH1_LASTITU_IRQ+9)
+
+#define SH1_PEI_IRQ       (SH1_LASTSCI_IRQ+1)  /* Parity control unit PEI */
+#define SH1_ADITI_IRQ     (SH1_LASTSCI_IRQ+2)  /* A/D ITI */
+#define SH1_WDTITI_IRQ    (SH1_LASTSCI_IRQ+3)  /* WDT ITI */
+#define SH1_CMI_IRQ       (SH1_LASTSCI_IRQ+4)  /* REF CMI */
 
 #define STR71X_IRQ_SYSTIMER  STR71X_IRQ_T0TIMI
-#define NR_IRQS               32
+#define NR_IRQS           (SH1_CMI_IRQ+1)
 
-/* FIQ channels */
-
-#define STR71X_FIQ_T0TIMI     (0X00000001)
-#define STR71X_FIQ_WDG        (0X00000002)
-#define STR71X_FIQ_WDGT0TIMIS (0X00000003)
+#endif
 
 /* Vector table offets **************************************************************/
 
@@ -117,37 +216,37 @@
 
 #define SH1_TRAP_VECOFFSET     (32*4)  /* 32-63: TRAPA instruction (user break) */
 #define SH1_TRAP0_VECOFFSET    (32*4)  /* 32: TRAPA instruction (user break) */
-#define SH1_TRAP1_VECOFFSET    (33*4)  /* 33: TRAPA instruction (user break) */
-#define SH1_TRAP2_VECOFFSET    (34*4)  /* 34: TRAPA instruction (user break) */
-#define SH1_TRAP3_VECOFFSET    (35*4)  /* 35: TRAPA instruction (user break) */
-#define SH1_TRAP4_VECOFFSET    (36*4)  /* 36: TRAPA instruction (user break) */
-#define SH1_TRAP5_VECOFFSET    (37*4)  /* 37: TRAPA instruction (user break) */
-#define SH1_TRAP6_VECOFFSET    (38*4)  /* 38: TRAPA instruction (user break) */
-#define SH1_TRAP7_VECOFFSET    (39*4)  /* 39: TRAPA instruction (user break) */
-#define SH1_TRAP8_VECOFFSET    (40*4)  /* 40: TRAPA instruction (user break) */
-#define SH1_TRAP9_VECOFFSET    (41*4)  /* 41: TRAPA instruction (user break) */
-#define SH1_TRAP10_VECOFFSET   (42*4)  /* 42: TRAPA instruction (user break) */
-#define SH1_TRAP11_VECOFFSET   (43*4)  /* 43: TRAPA instruction (user break) */
-#define SH1_TRAP12_VECOFFSET   (44*4)  /* 44: TRAPA instruction (user break) */
-#define SH1_TRAP13_VECOFFSET   (45*4)  /* 45: TRAPA instruction (user break) */
-#define SH1_TRAP14_VECOFFSET   (46*4)  /* 46: TRAPA instruction (user break) */
-#define SH1_TRAP15_VECOFFSET   (47*4)  /* 47: TRAPA instruction (user break) */
-#define SH1_TRAP16_VECOFFSET   (48*4)  /* 48: TRAPA instruction (user break) */
-#define SH1_TRAP17_VECOFFSET   (49*4)  /* 49: TRAPA instruction (user break) */
-#define SH1_TRAP18_VECOFFSET   (50*4)  /* 50: TRAPA instruction (user break) */
-#define SH1_TRAP19_VECOFFSET   (51*4)  /* 51: TRAPA instruction (user break) */
-#define SH1_TRAP20_VECOFFSET   (52*4)  /* 52: TRAPA instruction (user break) */
-#define SH1_TRAP21_VECOFFSET   (53*4)  /* 53: TRAPA instruction (user break) */
-#define SH1_TRAP22_VECOFFSET   (54*4)  /* 54: TRAPA instruction (user break) */
-#define SH1_TRAP23_VECOFFSET   (55*4)  /* 55: TRAPA instruction (user break) */
-#define SH1_TRAP24_VECOFFSET   (56*4)  /* 56: TRAPA instruction (user break) */
-#define SH1_TRAP25_VECOFFSET   (57*4)  /* 57: TRAPA instruction (user break) */
-#define SH1_TRAP26_VECOFFSET   (58*4)  /* 58: TRAPA instruction (user break) */
-#define SH1_TRAP27_VECOFFSET   (59*4)  /* 59: TRAPA instruction (user break) */
-#define SH1_TRAP28_VECOFFSET   (60*4)  /* 60: TRAPA instruction (user break) */
-#define SH1_TRAP29_VECOFFSET   (61*4)  /* 61: TRAPA instruction (user break) */
-#define SH1_TRAP30_VECOFFSET   (62*4)  /* 62: TRAPA instruction (user break) */
-#define SH1_TRAP31_VECOFFSET   (63*4)  /* 63: TRAPA instruction (user break) */
+#define SH1_TRAP1_VECOFFSET    (33*4)  /* 33: "   " "         "  "  " "   "  */
+#define SH1_TRAP2_VECOFFSET    (34*4)  /* 34: "   " "         "  "  " "   "  */
+#define SH1_TRAP3_VECOFFSET    (35*4)  /* 35: "   " "         "  "  " "   "  */
+#define SH1_TRAP4_VECOFFSET    (36*4)  /* 36: "   " "         "  "  " "   "  */
+#define SH1_TRAP5_VECOFFSET    (37*4)  /* 37: "   " "         "  "  " "   "  */
+#define SH1_TRAP6_VECOFFSET    (38*4)  /* 38: "   " "         "  "  " "   "  */
+#define SH1_TRAP7_VECOFFSET    (39*4)  /* 39: "   " "         "  "  " "   "  */
+#define SH1_TRAP8_VECOFFSET    (40*4)  /* 40: "   " "         "  "  " "   "  */
+#define SH1_TRAP9_VECOFFSET    (41*4)  /* 41: "   " "         "  "  " "   "  */
+#define SH1_TRAP10_VECOFFSET   (42*4)  /* 42: "   " "         "  "  " "   "  */
+#define SH1_TRAP11_VECOFFSET   (43*4)  /* 43: "   " "         "  "  " "   "  */
+#define SH1_TRAP12_VECOFFSET   (44*4)  /* 44: "   " "         "  "  " "   "  */
+#define SH1_TRAP13_VECOFFSET   (45*4)  /* 45: "   " "         "  "  " "   "  */
+#define SH1_TRAP14_VECOFFSET   (46*4)  /* 46: "   " "         "  "  " "   "  */
+#define SH1_TRAP15_VECOFFSET   (47*4)  /* 47: "   " "         "  "  " "   "  */
+#define SH1_TRAP16_VECOFFSET   (48*4)  /* 48: "   " "         "  "  " "   "  */
+#define SH1_TRAP17_VECOFFSET   (49*4)  /* 49: "   " "         "  "  " "   "  */
+#define SH1_TRAP18_VECOFFSET   (50*4)  /* 50: "   " "         "  "  " "   "  */
+#define SH1_TRAP19_VECOFFSET   (51*4)  /* 51: "   " "         "  "  " "   "  */
+#define SH1_TRAP20_VECOFFSET   (52*4)  /* 52: "   " "         "  "  " "   "  */
+#define SH1_TRAP21_VECOFFSET   (53*4)  /* 53: "   " "         "  "  " "   "  */
+#define SH1_TRAP22_VECOFFSET   (54*4)  /* 54: "   " "         "  "  " "   "  */
+#define SH1_TRAP23_VECOFFSET   (55*4)  /* 55: "   " "         "  "  " "   "  */
+#define SH1_TRAP24_VECOFFSET   (56*4)  /* 56: "   " "         "  "  " "   "  */
+#define SH1_TRAP25_VECOFFSET   (57*4)  /* 57: "   " "         "  "  " "   "  */
+#define SH1_TRAP26_VECOFFSET   (58*4)  /* 58: "   " "         "  "  " "   "  */
+#define SH1_TRAP27_VECOFFSET   (59*4)  /* 59: "   " "         "  "  " "   "  */
+#define SH1_TRAP28_VECOFFSET   (60*4)  /* 60: "   " "         "  "  " "   "  */
+#define SH1_TRAP29_VECOFFSET   (61*4)  /* 61: "   " "         "  "  " "   "  */
+#define SH1_TRAP30_VECOFFSET   (62*4)  /* 62: "   " "         "  "  " "   "  */
+#define SH1_TRAP31_VECOFFSET   (63*4)  /* 63: "   " "         "  "  " "   "  */
 
 /* Interrupts */
 
@@ -203,15 +302,15 @@
                                        /* 99:      Reserved */
 /* SCI */
 
-#define SH1_ERI0_VECOFFET      (100*4) /* 100: SCI0 ERI0 */
-#define SH1_RXI0_VECOFFET      (101*4) /* 101:      RxI0 */
-#define SH1_TXI0_VECOFFET      (102*4) /* 102:      TxI0 */
-#define SH1_TEI0_VECOFFET      (103*4) /* 103:      TEI0 */
+#define SH1_ERI0_VECOFFSET     (100*4) /* 100: SCI0 ERI0 */
+#define SH1_RXI0_VECOFFSET     (101*4) /* 101:      RxI0 */
+#define SH1_TXI0_VECOFFSET     (102*4) /* 102:      TxI0 */
+#define SH1_TEI0_VECOFFSET     (103*4) /* 103:      TEI0 */
 
-#define SH1_ERI1_VECOFFET      (104*4) /* 104: SCI1 ERI1 */
-#define SH1_RXI1_VECOFFET      (105*4) /* 105:      RxI1 */
-#define SH1_TXI1_VECOFFET      (106*4) /* 106:      TxI1 */
-#define SH1_TEI1_VECOFFET      (107*4) /* 107:      TEI1 */
+#define SH1_ERI1_VECOFFSET     (104*4) /* 104: SCI1 ERI1 */
+#define SH1_RXI1_VECOFFSET     (105*4) /* 105:      RxI1 */
+#define SH1_TXI1_VECOFFSET     (106*4) /* 106:      TxI1 */
+#define SH1_TEI1_VECOFFSET     (107*4) /* 107:      TEI1 */
 
 #define SH1_PEI_VECOFFSET      (108*4) /* 108: Parity control unit PEI */
 #define SH1_ADITI_VECOFFSET    (109*4) /* 109: A/D ITI */
