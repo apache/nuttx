@@ -612,6 +612,10 @@
 </tr>
 <tr>
   <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
   <td>
     <p>
       <b>NXP LPC214x</b>.
@@ -625,6 +629,27 @@
         USB driver, succesfully passing the OS test, and a NuttShell (NSH) configuration.
         Additional driver development is underway.
     </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>STMicro STR71x</b>.
+      Support is provided for the STMicro STR71x family of processors.  In particular,
+      support is provided for the Olimex STR-P711 evaluation board.
+      This port also used the GNU arm-elf toolchain* under Linux or Cygwin.
+    </p>
+    <p>
+      <b>STATUS:</b>
+      Coding is complete on the basic port (boot logic, system time, serial console),
+      but no testing has been performed due to some problems I am having with my
+      JTAG wiggler and OpenOCD on Linux.
+     </p>
   </td>
 </tr>
 <tr>
@@ -672,6 +697,26 @@
       address space during interrupt handling.
       This architecture has not been built in some time will likely have some compilation
       problems because of SDCC compiler differences.
+    </p>
+   </td>
+</tr>
+<tr>
+  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Renesas/Hitachi SuperH</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>SH-1 SH7032</b>.
+      This port uses the Hitachi SH-1 Low-Cost Evaluation Board (SH1_LCEVB1), US7032EVB,
+      with a GNU arm-elf toolchain* under Linux or Cygwin.
+    </p>
+    <p>
+     <b>STATUS:</b>
+      This port is in progress and should be available in the next release of NuttX.
     </p>
    </td>
 </tr>
@@ -786,8 +831,9 @@
 </table></center>
 
 <blockquote>* A highly modified <a href="http://buildroot.uclibc.org/">buildroot</a>
-is available that may be used to build a NuttX-compatible arm-elf toolchain under
-Linux or Cygwin.</blockquote>
+is available that may be used to build a NuttX-compatible ELF toolchain under
+Linux or Cygwin.  Configurations are available in that buildroot to support ARM,
+m68k, m68hc11, m68hc12, and SuperH ports.</blockquote>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -814,8 +860,9 @@ Linux or Cygwin.</blockquote>
       available for download from the
       <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">NuttX SourceForge</a>
       page.
-      This download may be used to build a NuttX-compatible arm-elf toolchain under Linux or Cygwin.
-      Additional support for m68k, m68hc11, and m68hc12 is available in the
+      This download may be used to build a NuttX-compatible ELF toolchain under Linux or Cygwin.
+      That toolchain will support ARM, m68k, m68hc11, m68hc12, and SuperH ports.
+      The buildroot CVS may be accessed in the 
       <a href="http://nuttx.cvs.sourceforge.net/nuttx/misc/buildroot/">NuttX CVS</a>.
     </p>
    </td>
@@ -924,7 +971,7 @@ Linux or Cygwin.</blockquote>
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <b>Others Environments?</b>
+    <b>Other Environments?</b>
   </td>
 </tr>
 <tr>
@@ -1097,9 +1144,11 @@ pascal-0.1.2 2008-02-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  and eliminate a compiler bug
 	* Changes so that runtime compiles with SDCC.
 
-buildroot-0.1.0 2007-03-09 &lt;spudmonkey@racsa.co.cr&gt
+buildroot-0.1.2 2007-11-06 &lt;spudmonkey@racsa.co.cr&gt
 
-	* Support for arm-elf toolchain
+	* Support for m68k-elf and m68hc11 toolchain
+	* Add patch to build older binutils with newer Texinfo version
+	* Add support for SH-1 toolchain
 </pre></ul>
 
 <table width ="100%">
@@ -1121,11 +1170,7 @@ nuttx-0.3.18 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-0.1.3 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-buildroot-0.1.1 2008-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Support for m68k-elf and m68hc11 toolchain
-	* Add patch to build older binutils with newer Texinfo version
-	* Add support for SH-1 toolchain
+buildroot-0.1.3 2008-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
 
 </pre></ul>
 
