@@ -1,7 +1,7 @@
-/************************************************************
- * limits.h
+/****************************************************************************
+ * arch/arm/include/limits.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,18 +31,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_LIMITS_H
-#define __ARCH_LIMITS_H
+#ifndef __ARCH_ARM_INCLUDE_LIMITS_H
+#define __ARCH_ARM_INCLUDE_LIMITS_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
 #define CHAR_BIT        8
 #define SCHAR_MIN	0x80
@@ -72,4 +72,4 @@
 #define LLONG_MIN	0x7fffffffffffffff
 #define ULLONG_MAX	0xffffffffffffffff
 
-#endif /* __ARCH_LIMITS_H */
+#endif /* __ARCH_ARM_INCLUDE_LIMITS_H */

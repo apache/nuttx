@@ -1,7 +1,7 @@
-/************************************************************
- * arch/irq.h
+/****************************************************************************
+ * arch/arm/include/irq.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,25 +31,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 /* This file should never be included directed but, rather,
  * only indirectly through nuttx/irq.h
  */
 
-#ifndef __ARCH_IRQ_H
-#define __ARCH_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_IRQ_H
+#define __ARCH_ARM_INCLUDE_IRQ_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/irq.h>
 #include <arch/chip/irq.h>
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
 /* IRQ Stack Frame Format:
  *
@@ -103,9 +103,9 @@
 #define REG_LR              REG_R14
 #define REG_PC              REG_R15
 
-/************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************/
+ ****************************************************************************/
 
 /* This struct defines the way the registers are stored.  We
  * need to save:
@@ -151,9 +151,9 @@ struct xcptcontext
 };
 #endif
 
-/************************************************************
+/****************************************************************************
  * Inline functions
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -203,13 +203,13 @@ static inline void system_call(swint_t func, int parm1,
 }
 #endif
 
-/************************************************************
+/****************************************************************************
  * Public Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -225,5 +225,5 @@ extern "C" {
 #endif
 #endif
 
-#endif /* __ARCH_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_IRQ_H */
 
