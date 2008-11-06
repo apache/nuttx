@@ -51,17 +51,7 @@
  * Definitions
  ****************************************************************************/
 
-/* IRQ Stack Frame Format:
- *
- * Context is always saved/restored in the same way:
- *
- *   (1) stmia rx, {r0-r14}
- *   (2) then the PC and CPSR
- *
- * This results in the following set of indices that
- * can be used to access individual registers in the
- * xcp.regs array:
- */
+/* IRQ Stack Frame Format: */
 
 #define REG_R0              (0)
 #define REG_R1              (1)
@@ -79,71 +69,34 @@
 #define REG_R13             (13)
 #define REG_R14             (14)
 #define REG_R15             (15)
-#define REG_CPSR            (16)
+#define REG_SP              REG_R15
+#define REG_SR              (16)
+#define REG_PC              (17)
 
-#define XCPTCONTEXT_REGS    (17)
+#define XCPTCONTEXT_REGS    (18)
 #define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
-
-#define REG_A1              REG_R0
-#define REG_A2              REG_R1
-#define REG_A3              REG_R2
-#define REG_A4              REG_R3
-#define REG_V1              REG_R4
-#define REG_V2              REG_R5
-#define REG_V3              REG_R6
-#define REG_V4              REG_R7
-#define REG_V5              REG_R8
-#define REG_V6              REG_R9
-#define REG_V7              REG_R10
-#define REG_SB              REG_R9
-#define REG_SL              REG_R10
-#define REG_FP              REG_R11
-#define REG_IP              REG_R12
-#define REG_SP              REG_R13
-#define REG_LR              REG_R14
-#define REG_PC              REG_R15
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* This struct defines the way the registers are stored.  We
- * need to save:
- *
- *  1	CPSR
- *  7	Static registers, v1-v7 (aka r4-r10)
- *  1	Frame pointer, fp (aka r11)
- *  1	Stack pointer, sp (aka r13)
- *  1	Return address, lr (aka r14)
- * ---
- * 11	(XCPTCONTEXT_USER_REG)
- *
- * On interrupts, we also need to save:
- *  4	Volatile registers, a1-a4 (aka r0-r3)
- *  1	Scratch Register, ip (aka r12)
- *---
- *  5	(XCPTCONTEXT_IRQ_REGS)
- *
- * For a total of 17 (XCPTCONTEXT_REGS)
- */
+/* This struct defines the way the registers are stored.  We need to save: */
 
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
-  /* The following function pointer is non-zero if there
-   * are pending signals to be processed.
+  /* The following function pointer is non-zero if there are pending signals
+   * to be processed.
    */
 
 #ifndef CONFIG_DISABLE_SIGNALS
   void *sigdeliver; /* Actual type is sig_deliver_t */
 #endif
 
-  /* These are saved copies of LR and CPSR used during
-   * signal processing.
-   */
+  /* These are saved copies of LR and SR used during signal processing. */
 
   uint32 saved_pc;
-  uint32 saved_cpsr;
+  uint32 saved_sr;
 
   /* Register save area */
 
