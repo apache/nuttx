@@ -76,6 +76,7 @@
 
 	.globl	_sbss			/* Start of BSS */
 	.globl	_ebss			/* End of BSS */
+	.globl	_svect			/* Start of the new vector location */
 
 #ifdef CONFIG_BOOT_FROM_FLASH
 	.globl	_eronly			/* Where .data defaults are stored in FLASH */
@@ -189,7 +190,7 @@ __start0:
 	/* Copy the monitor vectors to a002000-a00211f */
 
 	mov	#0, r0			/* R0: Monitor vector table at address 0 in PROM */
-	mov.l	.Lramvectab, r1		/* R1: Redirected vector table in SRAM */
+	mov.l	.Lsvect, r1		/* R1: Redirected vector table in SRAM */
 	mov.l	.Lvectend, r3		/* R3: Copy only up to external interrupts */
 1:
 	mov.l	@r0, r2			/* R2: Value from mnitor monitor vector table */
@@ -198,10 +199,11 @@ __start0:
 	add	#4, r1			/* R1: Address of next vector to write to SRAM vector table */
 	cmp/gt	r0, r3			/* Copy only only up to external interrupts at */
 	bt	1b			/* Continue looping until all copied */
+	nop				/* Delay slot */
 
 	/* Update the VBR to show new adddress of vector table */
 
-	mov.l	.Lramvectab, r0		/* R0: Address of SRAM vector table */
+	mov.l	.Lsvect, r0		/* R0: Address of SRAM vector table */
 	ldc	r0, vbr			/* Set VBR to start of SRAM vector table */
 
 	/* Initialize data segement */
@@ -217,6 +219,7 @@ __start0:
 	add	#4, r0			/* R0: Address to write next byte to .data */
 	cmp/gt	r0, r1			/* End of .data? */
 	bt	2b			/* Loop until end of data */
+	nop				/* Delay slot */
 #endif
 
 	/* Clear BSS */
@@ -229,6 +232,7 @@ __start0:
 	add	#4, r0			/* R0: Address of next byte to clear in BSS */
 	cmp/ge	r0, r1			/* End of BSS? */
 	bt	3b			/* Loop until the end of BSS */
+	nop				/* Delay slot
 
 	/* Configure the uart so that we can get debug output as soon
 	 * as possible.
@@ -311,8 +315,8 @@ __start0:
 	.long	_up_ledinit
 .Losstart:
 	.long   _os_start
-.Lramvectab:
-	.long   0xa002000
+.Lsvect:
+	.long   _svect
 .Lvectend:
 	.long   (SH1_IRQ7_VECOFFSET+3)
 
