@@ -95,7 +95,7 @@ int mem_parse(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv,
     {
       *pcvalue = '\0';
       pcvalue++;
- 
+
       lvalue = (unsigned long)strtol(pcvalue, NULL, 16);
       if (lvalue > 0xffffffff)
         {
