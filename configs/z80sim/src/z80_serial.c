@@ -227,7 +227,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int up_receive(struct uart_dev_s *dev, uint32 *status)
 {
-  uint8 ch = z80_getputc();
+  uint8 ch = z80_lowgetc();
   *status = 0;
   return ch;
 }
