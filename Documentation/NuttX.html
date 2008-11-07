@@ -580,7 +580,7 @@
   <td><br></td>
   <td>
     <p>
-      A user-mode port of NuttX to the x86 Linux platform is available.
+      A user-mode port of NuttX to the x86 Linux/Cygwin platform is available.
       The purpose of this port is primarily to support OS feature development.
     </p>
     <p>
@@ -625,9 +625,10 @@
     </p>
     <p>
       <b>STATUS:</b>
-        The basic port includes successful booting, timer interrupts, serial console,
-        USB driver, succesfully passing the OS test, and a NuttShell (NSH) configuration.
-        Additional driver development is underway.
+      This port boots and passes the OS test (examples/ostest).
+      The port is complete and verifed.  As of NuttX 0.3.17, the port includes:
+      timer interrupts, serial console, USB driver, and SPI-based MMC/SD card
+      support.  A verifed NuttShell (NSH) configuration is also available.
     </p>
   </td>
 </tr>
@@ -744,7 +745,7 @@
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <b>Zilog eZ80Acclaim!</b>
+    <b>Zilog eZ80 Acclaim!</b>
   </td>
 </tr>
 <tr>
