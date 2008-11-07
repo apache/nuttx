@@ -51,7 +51,13 @@
 
 /* Clocking *****************************************************************/
 
+#define SH1_CLOCK            10000000  /* 10 MHz */
+
 /* LED definitions **********************************************************/
+
+/* The SH1_LPEVB has no user controllable LEDs.  These are provided only
+ * in the event that CONFIG_ARCH_LEDs is enabled.
+ */
 
 #define LED_STARTED          0
 #define LED_HEAPALLOCATE     1

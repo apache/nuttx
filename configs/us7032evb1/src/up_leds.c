@@ -67,7 +67,9 @@
 #ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void)
 {
-#warning "To be provided"
+  /* The SH1_LPEVB has no user controllable LEDs.  This is provided only
+   * in the event that CONFIG_ARCH_LEDs is enabled.
+   */
 }
 
 /****************************************************************************
@@ -76,7 +78,9 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
-#warning "To be provided"
+  /* The SH1_LPEVB has no user controllable LEDs.  This is provided only
+   * in the event that CONFIG_ARCH_LEDs is enabled.
+   */
 }
 
 /****************************************************************************
@@ -85,6 +89,8 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-#warning "To be provided"
+  /* The SH1_LPEVB has no user controllable LEDs.  This is provided only
+   * in the event that CONFIG_ARCH_LEDs is enabled.
+   */
 }
 #endif /* CONFIG_ARCH_LEDS */
