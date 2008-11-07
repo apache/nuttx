@@ -47,6 +47,8 @@
 #include <signal.h>
 #include <nuttx/compiler.h>
 
+#if CONFIG_MQ_MAXMSGSIZE > 0
+
 /****************************************************************************
  * Compilations Switches
  ****************************************************************************/
@@ -210,5 +212,6 @@ EXTERN int          mq_dosend(mqd_t mqdes, FAR mqmsg_t *mqmsg, const void *msg,
 }
 #endif
 
+#endif /* CONFIG_MQ_MAXMSGSIZE > 0 */
 #endif /* __MQ_INTERNAL_H */
 
