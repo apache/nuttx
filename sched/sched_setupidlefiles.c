@@ -128,6 +128,8 @@ int sched_setupidlefiles(FAR _TCB *tcb)
 #else
   return OK;
 #endif /* CONFIG_NFILE_STREAMS */
+#else
+  return OK;
 #endif /* CONFIG_NFILE_DESCRIPTORS && CONFIG_DEV_CONSOLE */
 }
 
