@@ -200,3 +200,17 @@ void up_maskack_irq(int irq)
         }
     }
 }
+
+/****************************************************************************
+ * Name: up_prioritize_irq
+ *
+ * Description:
+ *   Set interrupt priority
+ *
+ ****************************************************************************/
+
+void up_prioritize_irq(int irq, int priority)
+{
+  /* To be provided */
+}
+

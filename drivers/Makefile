@@ -35,6 +35,8 @@
 
 -include $(TOPDIR)/Make.defs
 
+COMPILER	= ${shell basename $(CC)}
+
 ifeq ($(CONFIG_NET),y)
 include net/Make.defs
 ROOTDEPPATH	= --dep-path .
@@ -45,13 +47,25 @@ ifeq ($(CONFIG_USBDEV),y)
 include usbdev/Make.defs
 ROOTDEPPATH	= --dep-path .
 USBDEVDEPPATH	= --dep-path usbdev
-CFLAGS		+= -I$(TOPDIR)/drivers/usbdev
+ifeq ($(COMPILER),zneocc.exe)
+USBDEVDIR	= ${shell cygpath -w $(TOPDIR)/drivers/usbdev}
+CFLAGS		+= -usrinc:'$(USBDEVDIR)'
+else
+USBDEVDIR	= $(TOPDIR)/drivers/usbdev
+CFLAGS		+= -I$(USBDEVDIR)
+endif
 endif
 
 include mmcsd/Make.defs
 ROOTDEPPATH	= --dep-path .
 MMCSDDEPPATH	= --dep-path mmcsd
-CFLAGS		+= -I$(TOPDIR)/drivers/mmcsd
+ifeq ($(COMPILER),zneocc.exe)
+MMCSDDIR	= ${shell cygpath -w $(TOPDIR)/drivers/mmcsd}
+CFLAGS		+= -usrinc:'$(MMCSDDIR)'
+else
+MMCSDDIR	= $(TOPDIR)/drivers/mmcsd
+CFLAGS		+= -I$(MMCSDDIR)
+endif
 
 ASRCS		= $(NET_ASRCS) $(USBDEV_ASRCS) $(MMCSD_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))

@@ -82,7 +82,7 @@
 
 /* Streams */
 
-typedef FAR struct file_struct FILE;
+typedef struct file_struct FILE;
 
 /****************************************************************************
  * Public Variables
