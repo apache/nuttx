@@ -126,6 +126,12 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_ARCH_BOARD_name - For use in C code
 		CONFIG_ENDIAN_BIG - define if big endian (default is little
 		   endian)
+		CONFIG_ARCH_NOINTC - define if the architecture does not
+		  support an interrupt controller or otherwise cannot support
+		  APIs like up_enable_irq() and up_disable_irq().
+		CONFIG_ARCH_IRQPRIO
+		  Define if the architecture suports prioritizaton of interrupts
+		  and the up_prioritize_irq() API.
 
 	Some architectures require a description of the RAM configuration:
 
