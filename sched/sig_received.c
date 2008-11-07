@@ -37,6 +37,8 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <string.h>
 #include <signal.h>
@@ -44,6 +46,7 @@
 #include <sched.h>
 #include <debug.h>
 #include <nuttx/arch.h>
+
 #include "os_internal.h"
 #include "sem_internal.h"
 #include "sig_internal.h"
