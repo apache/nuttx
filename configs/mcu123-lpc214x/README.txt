@@ -1,8 +1,38 @@
 README
 ^^^^^^
 
-Tools
-^^^^^
+Toolchain
+^^^^^^^^^
+
+  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  be modified to point to the correct path to the SH toolchain (if
+  different from the default).
+
+  If you have no SH toolchain, one can be downloaded from the NuttX
+  SourceForge download site (https://sourceforge.net/project/showfiles.php?group_id=189573).
+
+  1. You must have already configured Nuttx in <some-dir>nuttx.
+
+     cd tools
+     ./configure.sh mcu123-lpc214x/<sub-dir>
+
+  2. Download the latest buildroot package into <some-dir>
+
+  3. unpack
+
+  4. cd <some-dir>/buildroot
+
+  5. cp configs/arm-defconfig .config
+
+  6. make oldconfig
+
+  7. make
+
+  8. Edit setenv.h so that the PATH variable includes the path to the
+     newly built binaries.
+
+Flash Tools
+^^^^^^^^^^^
 
 I use the lpc21isp tool to load NuttX into FLASH.  That tool is available
 in the files section at http://tech.groups.yahoo.com/group/lpc21isp/.  In
