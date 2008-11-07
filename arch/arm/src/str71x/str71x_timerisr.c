@@ -184,7 +184,7 @@ void up_timerinit(void)
 
   /* Set the IRQ interrupt priority */
 
-  up_irqpriority(STR71X_IRQ_SYSTIMER, 1);
+  up_prioritize_irq(STR71X_IRQ_SYSTIMER, 1);
 
   /* Attach the timer interrupt vector */
 

@@ -88,54 +88,14 @@ void up_irqinitialize(void)
 }
 
 /****************************************************************************
- * Name: up_disable_irq
- *
- * Description:
- *   Disable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_disable_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_enable_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-#warning "To be provided"
-}
-
-/****************************************************************************
- * Name: up_irqpriority
+ * Name: up_prioritize_irq
  *
  * Description:
  *   set interrupt priority
  *
  ****************************************************************************/
 
-#warning "Should this be supported?"
-void up_irqpriority(int irq, ubyte priority)
+void up_prioritize_irq(int irq, int priority)
 {
 #warning "To be provided"
 }
