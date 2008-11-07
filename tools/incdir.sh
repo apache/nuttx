@@ -36,13 +36,13 @@
 #  $1 : Compiler name as it appears in  config/*/*/Make.defs
 #  $2, $3, ...: Include file paths
 
-compiler=$1
+ccpath=$1
 shift
 dirlist=$@
 
 usage="USAGE: $0 <compiler-path> <dir1> [<dir2> [<dir3> ...]]"
 
-if [ -z "$compiler" ]; then
+if [ -z "$ccpath" ]; then
 	echo "Missing compiler path"
 	echo $usage
 	exit 1
@@ -74,13 +74,20 @@ fi
 # toolchains, we have to use the full windows-style paths to the header
 # files.
 
-fmt=std
-windows=no
+os=`uname -o`
+if [ "X$os" = "XCygwin" ]; then
+	windows=yes
+	compiler=`cygpath -u "$ccpath"`
+else
+	windows=no
+	compiler="$ccpath"
+fi
+exefile=`basename "$compiler"`
 
-exefile=`basename $compiler`
 if [ "X$exefile" = "Xez8cc.exe" -o "X$exefile" = "Xzneocc.exe" -o "X$exefile" = "XeZ80cc.exe" ]; then
 	fmt=userinc
-	windows=yes
+else
+	fmt=std
 fi
 
 # Now process each directory in the directory list
