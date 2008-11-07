@@ -346,7 +346,7 @@ static int can_xmit(FAR struct can_dev_s *dev)
 
   /* Check if the xmit FIFO is empty */
 
-  if (dev->cd_xmit.cf_head != dev->cd_xmit.cf_head)
+  if (dev->cd_xmit.cf_head != dev->cd_xmit.cf_tail)
     {
       /* Send the next message at the head of the FIFO */
 
@@ -728,7 +728,7 @@ int can_txdone(FAR struct can_dev_s *dev)
 
   /* Verify that the xmit FIFO is not empty */
 
-  if (dev->cd_xmit.cf_head != dev->cd_xmit.cf_head)
+  if (dev->cd_xmit.cf_head != dev->cd_xmit.cf_tail)
     {
       /* Remove the message at the head of the xmit FIFO */
 
