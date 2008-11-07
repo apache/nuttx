@@ -532,3 +532,6 @@
 	* Fix race condition workaround delay in LPC214X SPI logic.  It the cause of the very
 	  bad MMC/SD performance.
 	* Began port of the Hitachi SH-1 using the SH-1/US7032EVB1 board (this is a work in progress)
+	* Re-built all configurations that use SDCC and Zilog toolchains to make sure they still
+	  build (they didn't, but they do now).
+	* Fixed several erroneous "list empty" checks in the CAN driver.
