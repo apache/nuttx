@@ -123,7 +123,7 @@ src/Makefile
 Supported Architectures
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-arch/sim - Linux simulation
+arch/sim - Linux/Cygwin simulation
     A user-mode port of NuttX to the x86 Linux platform is available.
     The purpose of this port is primarily to support OS feature development.
     This port does not support interrupts or a real timer (and hence no
@@ -133,7 +133,7 @@ arch/arm - ARM-based micro-controllers
     This directory holds common ARM architectures.  At present, this includes
     the following subdirectories:
 
-    arch/arm/include and arch/arm/common
+    arch/arm/include and arch/arm/src/common
         Common ARM logic.
 
     arch/arm/include/c5471 and arch/arm/src/c5471
@@ -148,13 +148,28 @@ arch/arm - ARM-based micro-controllers
 
     arch/arm/include/lpc214x and arch/arm/src/lpc214x
         These directories provide support for NXP LPC214x family of
-        processors.
-        STATUS: This port is in progress and should be available in the
-        nuttx-0.2.5 release.
+        processors.  This port boots and passes the OS test (examples/ostest).
+        The port is complete and verifed.  As of NuttX 0.3.17, the port includes:
+        timer interrupts, serial console, USB driver, and SPI-based MMC/SD card
+        support.  A verifed NuttShell (NSH) configuration is also available.
+
+    arch/arm/include/str71x and arch/arm/src/str71x
+        These directories provide support for the STMicro STR71x processors.
+        Coding is complete on the basic port (boot logic, system time, serial console),
+        but no testing has been performed due to some problems I am having with my
+        JTAG wiggler and OpenOCD on Linux.
 
 arch/m68322
     A work in progress.
     STATUS:  Stalled for the moment.
+
+arch/sh - SuperH and related Hitachi/Renesas microcontrollers
+
+    arch/sh/include and arch/sh/src/common
+        Common SuperH logic.
+
+    arch/sh/include/shs and arch/sh/src/sh1
+        Support for the SH-1 processor.
 
 arch/pjrc-8051 - 8051/52 microcontrollers
     8051 Microcontroller.  This port is not quite ready for prime time.
@@ -163,7 +178,7 @@ arch/z16 - ZiLOG 16-bit processors
     This directory holds related, 16-bit architectures from ZiLOG.  At
     present, this includes the following subdirectories:
 
-    arch/z16/include and arch/z16/common
+    arch/z16/include and arch/z16/src/common
         Common microcontroller logic.
 
     arch/z16/include/z16f and arch/z16/src/z16f
@@ -175,7 +190,7 @@ arch/z80 - ZiLOG 8-bit microcontrollers
     This directory holds related, 8-bit architectures from ZiLOG.  At
     present, this includes the following subdirectories:
 
-    arch/z80/include and arch/z80/common
+    arch/z80/include and arch/z80/src/common
         Common microcontroller logic.
 
     arch/z80/include/z80 and arch/z80/src/z80
@@ -185,7 +200,9 @@ arch/z80 - ZiLOG 8-bit microcontrollers
 
     arch/z80/include/z8 and arch/z80/src/z8
         ZiLOG Z8Encore! Microcontroller
-        This is a work in progress.
+
+    arch/z80/include/ez80 and arch/z80/src/ez80
+        ZiLOG ez80 Acclaim! Microcontroller
 
 The following architecture directories are deprecated.  They have been
 replaced by the logic in arm/arm and will deleted at some point in the
