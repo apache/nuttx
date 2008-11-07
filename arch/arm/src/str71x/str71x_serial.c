@@ -426,6 +426,7 @@ static inline void up_restoreuartint(struct up_dev_s *priv, uint16 ier)
  * Name: up_waittxnotfull
  ****************************************************************************/
 
+#ifdef HAVE_CONSOLE
 static inline void up_waittxnotfull(struct up_dev_s *priv)
 {
   int tmp;
@@ -443,6 +444,7 @@ static inline void up_waittxnotfull(struct up_dev_s *priv)
         }
     }
 }
+#endif
 
 /****************************************************************************
  * Name: up_setup
@@ -932,6 +934,7 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
+#ifdef HAVE_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
   ubyte  ier;
 
@@ -951,6 +954,7 @@ int up_putc(int ch)
 
   up_waittxnotfull(priv);
   up_restoreuartint(priv, ier);
+#endif
   return ch;
 }
 
@@ -966,6 +970,7 @@ int up_putc(int ch)
 
 int up_putc(int ch)
 {
+#ifdef HAVE_CONSOLE
   /* Check for LF */
 
   if (ch == '\n')
@@ -976,6 +981,7 @@ int up_putc(int ch)
     }
 
   up_lowputc(ch);
+#endif
   return ch;
 }
 
