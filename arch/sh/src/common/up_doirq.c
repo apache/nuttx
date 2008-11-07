@@ -81,7 +81,7 @@ void up_doirq(int irq, uint32* regs)
 
        current_regs = regs;
 
-       /* Mask and acknowledge the interrupt */
+       /* Mask and acknowledge the interrupt (if supported by the chip) */
 
        up_maskack_irq(irq);
 

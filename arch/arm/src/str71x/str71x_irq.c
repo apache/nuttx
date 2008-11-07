@@ -169,14 +169,14 @@ void up_maskack_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_irqpriority
+ * Name: up_prioritize_irq
  *
  * Description:
  *   set interrupt priority
  *
  ****************************************************************************/
 
-int up_irqpriority(int irq, ubyte priority)
+int up_prioritize_irq(int irq, int priority)
 {
   uint32 addr;
   uint32 reg32;

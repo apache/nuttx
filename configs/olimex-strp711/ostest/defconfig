@@ -46,6 +46,12 @@
 #   the board that supports the particular chip or SoC.
 # CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
 # CONFIG_ARCH_BOARD_name - for use in C code
+# CONFIG_ARCH_NOINTC - define if the architecture does not
+#   support an interrupt controller or otherwise cannot support
+#   APIs like up_enable_irq() and up_disable_irq().
+# CONFIG_ARCH_IRQPRIO
+#   Define if the architecture suports prioritizaton of interrupts
+#   and the up_prioritize_irq() API.
 # CONFIG_BOARD_LOOPSPERMSEC - for delay loops
 # CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to Olimex STR-P711
 # CONFIG_ARCH_BUTTONS - Support reading buttons. Unique to Olimex STR-P711
@@ -62,6 +68,8 @@ CONFIG_ARCH_CHIP=str71x
 CONFIG_ARCH_STR71X=y
 CONFIG_ARCH_BOARD=olimex-strp711
 CONFIG_ARCH_BOARD_OLIMEX_STRP711=y
+CONFIG_ARCH_NOINTC=n
+CONFIG_ARCH_IRQPRIO=y
 CONFIG_BOARD_LOOPSPERMSEC=3270
 CONFIG_ARCH_LEDS=y
 CONFIG_ARCH_BUTTONS=y

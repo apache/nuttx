@@ -394,7 +394,9 @@ EXTERN boolean up_interrupt_context(void);
  *
  ****************************************************************************/
 
+#ifndef CONFIG_ARCH_NOINTC
 EXTERN void up_enable_irq(int irq);
+#endif
 
 /****************************************************************************
  * Name: up_disable_irq
@@ -410,7 +412,25 @@ EXTERN void up_enable_irq(int irq);
  *
  ****************************************************************************/
 
+#ifndef CONFIG_ARCH_NOINTC
 EXTERN void up_disable_irq(int irq);
+#endif
+
+
+/****************************************************************************
+ * Name: up_prioritize_irq
+ *
+ * Description:
+ *   Set the priority of an IRQ.
+ *
+ *   Since this API is not supported on all architectures, it should be
+ *   avoided in common implementations where possible.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_IRQPRIO
+EXTERN int up_prioritize_irq(int irq, int priority);
+#endif
 
 /****************************************************************************
  * These are standard interfaces that are exported by the OS

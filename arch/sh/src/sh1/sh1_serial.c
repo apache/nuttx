@@ -425,24 +425,16 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach the RDR full IRQ */
 
-  ret = irq_attach(priv->irq + , up_interrupt);
+  ret = irq_attach(priv->irq + SH1_RXI_IRQ_OFFSET, up_interrupt);
   if (ret == OK)
     {
-       /* Enable the interrupt 
-        */
+      /* Attach the TDR empty IRQ */
 
-       up_enable_irq(priv->irq);
-    }
-
-  /* Enable the RDR full and TDR empty interrupts at the interupt controller
-   * (RX and TX interrupts are still disabled in the SCI)
-   */
-
-  if (ret == OK)
-    {
-
-      up_enable_irq(priv->irq);
-      up_enable_irq(priv->irq);
+      ret = irq_attach(priv->irq + SH1_TXI_IRQ_OFFSET, up_interrupt);
+      if (ret < 0)
+        {
+          (void)irq_detach(priv->irq + SH1_RXI_IRQ_OFFSET);
+        }
     }
 
   return ret;

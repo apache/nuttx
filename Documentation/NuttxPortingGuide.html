@@ -1327,6 +1327,12 @@ The system can be re-made subsequently by just typing <code>make</code>.
      For use in C code</li>
   <li><code>CONFIG_ENDIAN_BIG</code>:
      Define if big endian (default is little endian).</li>
+  <li><code>CONFIG_ARCH_NOINTC</code>:
+     Define if the architecture does not support an interrupt controller
+     or otherwise cannot support APIs like up_enable_irq() and up_disable_irq().</li>
+  <li><code>CONFIG_ARCH_IRQPRIO</code>:
+     Define if the architecture suports prioritizaton of interrupts and the
+     up_prioritize_irq() API.</li>
 </ul>
 
 <p>

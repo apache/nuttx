@@ -232,7 +232,7 @@ __start0:
 	add	#4, r0			/* R0: Address of next byte to clear in BSS */
 	cmp/ge	r0, r1			/* End of BSS? */
 	bt	3b			/* Loop until the end of BSS */
-	nop				/* Delay slot
+	nop				/* Delay slot */
 
 	/* Configure the uart so that we can get debug output as soon
 	 * as possible.
