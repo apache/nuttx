@@ -51,6 +51,12 @@
 # CONFIG_ARCH_BOARD - identifies the configs subdirectory and, hence,
 #   the board that supports the particular chip or SoC.
 # CONFIG_ARCH_BOARD_name - for use in C code
+# CONFIG_ARCH_NOINTC - define if the architecture does not
+#   support an interrupt controller or otherwise cannot support
+#   APIs like up_enable_irq() and up_disable_irq().
+# CONFIG_ARCH_IRQPRIO
+#   Define if the architecture suports prioritizaton of interrupts
+#   and the up_prioritize_irq() API.
 # CONFIG_BOARD_LOOPSPERMSEC - for delay loops
 # CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
 # CONFIG_DRAM_SIZE - Describes the installed DRAM.
@@ -66,6 +72,8 @@ CONFIG_ARCH_CHIP_Z16F3211=n
 CONFIG_ARCH_CHIP_Z16F6411=n
 CONFIG_ARCH_BOARD=z16f2800100zcog
 CONFIG_ARCH_BOARD_Z16F2800100ZCOG=y
+CONFIG_ARCH_NOINTC=n
+CONFIG_ARCH_IRQPRIO=y
 CONFIG_BOARD_LOOPSPERMSEC=1250
 CONFIG_ENDIAN_BIG=y
 CONFIG_DRAM_SIZE=65536
