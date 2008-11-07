@@ -296,12 +296,13 @@
 #define SH1_SCISCR_SISOUT2  (0x01)        /*   Internal clock, SCK pin used for clock output */
 #define SH1_SCISCR_SXSIN1   (0x02)        /*   External clock, SCK pin used for clock input */
 #define SH1_SCISCR_SXSIN2   (0x03)        /*   External clock, SCK pin used for clock input */
-#define SH1_SCISCR_TEIE     (0x04)        /* Bit 2: Transmit end interrupt enable */
-#define SH1_SCISCR_MPIE     (0x08)        /* Bit 3: Multiprocessor interrupt enable */
-#define SH1_SCISCR_RE       (0x10)        /* Bit 4: Receiver enable */
-#define SH1_SCISCR_TE       (0x20)        /* Bit 5: Transmitter enable */
-#define SH1_SCISCR_RIE      (0x40)        /* Bit 6: Recieve-data-full interrupt enable */
-#define SH1_SCISCR_TIE      (Ox80)        /* Bit 7: Transmit-data-empty interrupt enable */
+#define SH1_SCISCR_TEIE     (0x04)        /* Bit 2: 1=Transmit end interrupt enable */
+#define SH1_SCISCR_MPIE     (0x08)        /* Bit 3: 1=Multiprocessor interrupt enable */
+#define SH1_SCISCR_RE       (0x10)        /* Bit 4: 1=Receiver enable */
+#define SH1_SCISCR_TE       (0x20)        /* Bit 5: 1=Transmitter enable */
+#define SH1_SCISCR_RIE      (0x40)        /* Bit 6: 1=Recieve-data-full interrupt enable */
+#define SH1_SCISCR_TIE      (Ox80)        /* Bit 7: 1=Transmit-data-empty interrupt enable */
+#define SH1_SCISCR_ALLINTS  (0xcc)
 
 #define SH1_SCISSR_MPBT     (0x01)        /* Bit 0: Multi-processor Bit in Transmit data */
 #define SH1_SCISSR_MPB      (0x02)        /* Bit 1: Multi-processor Bit in receive data */
@@ -314,47 +315,47 @@
 
 /* Interrupt Controller (INTC) */
 
-#define SH1_IPRA_IRQ3MASK   (0x000f)      /* Bits 0-3: IRQ3
+#define SH1_IPRA_IRQ3MASK   (0x000f)      /* Bits 0-3: IRQ3 */
 #define SH1_IPRA_IRQ3SHIFT  (0)
-#define SH1_IPRA_IRQ2MASK   (0x00f0)      /* Bits 4-7: IRQ2
+#define SH1_IPRA_IRQ2MASK   (0x00f0)      /* Bits 4-7: IRQ2 */
 #define SH1_IPRA_IRQ2SHIFT  (4)
-#define SH1_IPRA_IRQ1MASK   (0x0f00)      /* Bits 8-11: IRQ1
+#define SH1_IPRA_IRQ1MASK   (0x0f00)      /* Bits 8-11: IRQ1 */
 #define SH1_IPRA_IRQ1SHIFT  (8)
-#define SH1_IPRA_IRQ0MASK   (0xf000)      /* Bits 12-15: IRQ0
+#define SH1_IPRA_IRQ0MASK   (0xf000)      /* Bits 12-15: IRQ0 */
 #define SH1_IPRA_IRQ0SHIFT  (12)
 
-#define SH1_IPRB_IRQ7MASK   (0x000f)      /* Bits 0-3: IRQ7
+#define SH1_IPRB_IRQ7MASK   (0x000f)      /* Bits 0-3: IRQ7 */
 #define SH1_IPRB_IRQ7SHIFT  (0)
-#define SH1_IPRB_IRQ6MASK   (0x00f0)      /* Bits 4-7: IRQ6
+#define SH1_IPRB_IRQ6MASK   (0x00f0)      /* Bits 4-7: IRQ6 */
 #define SH1_IPRB_IRQ6SHIFT  (4)
-#define SH1_IPRB_IRQ5MASK   (0x0f00)      /* Bits 8-11: IRQ5
+#define SH1_IPRB_IRQ5MASK   (0x0f00)      /* Bits 8-11: IRQ5 */
 #define SH1_IPRB_IRQ5SHIFT  (8)
-#define SH1_IPRB_IRQ4MASK   (0xf000)      /* Bits 12-15: IRQ4
+#define SH1_IPRB_IRQ4MASK   (0xf000)      /* Bits 12-15: IRQ4 */
 #define SH1_IPRB_IRQ4SHIFT  (12)
 
-#define SH1_IPRC_ITU1MASK   (0x000f)      /* Bits 0-3: ITU1
+#define SH1_IPRC_ITU1MASK   (0x000f)      /* Bits 0-3: ITU1 */
 #define SH1_IPRC_ITU1SHIFT  (0)
-#define SH1_IPRC_ITU0MASK   (0x00f0)      /* Bits 4-7: ITU0
+#define SH1_IPRC_ITU0MASK   (0x00f0)      /* Bits 4-7: ITU0 */
 #define SH1_IPRC_ITU0SHIFT  (4)
-#define SH1_IPRC_DM23MASK   (0x0f00)      /* Bits 8-11: DMAC2,3
+#define SH1_IPRC_DM23MASK   (0x0f00)      /* Bits 8-11: DMAC2,3 */
 #define SH1_IPRC_DM23SHIFT  (8)
-#define SH1_IPRC_DM01MASK   (0xf000)      /* Bits 12-15: DMAC0,1
+#define SH1_IPRC_DM01MASK   (0xf000)      /* Bits 12-15: DMAC0,1 */
 #define SH1_IPRC_DM01SHIFT  (12)
 
-#define SH1_IPRD_SCI0MASK   (0x000f)      /* Bits 0-3: SCI0
+#define SH1_IPRD_SCI0MASK   (0x000f)      /* Bits 0-3: SCI0 */
 #define SH1_IPRD_SCI0SHIFT  (0)
-#define SH1_IPRD_ITU4MASK   (0x00f0)      /* Bits 4-7: ITU4
+#define SH1_IPRD_ITU4MASK   (0x00f0)      /* Bits 4-7: ITU4 */
 #define SH1_IPRD_ITU4SHIFT  (4)
-#define SH1_IPRD_ITU3MASK   (0x0f00)      /* Bits 8-11: ITU3
+#define SH1_IPRD_ITU3MASK   (0x0f00)      /* Bits 8-11: ITU3 */
 #define SH1_IPRD_ITU3SHIFT  (8)
-#define SH1_IPRD_ITU2MASK   (0xf000)      /* Bits 12-15: ITU2
+#define SH1_IPRD_ITU2MASK   (0xf000)      /* Bits 12-15: ITU2 */
 #define SH1_IPRD_ITU2SHIFT  (12)
 
-#define SH1_IPRE_WDRFMASK   (0x00f0)      /* Bits 4-7: WDT, REF
+#define SH1_IPRE_WDRFMASK   (0x00f0)      /* Bits 4-7: WDT, REF */
 #define SH1_IPRE_WDRFSHIFT  (4)
-#define SH1_IPRE_PRADMASK   (0x0f00)      /* Bits 8-11: PRT, A/D
+#define SH1_IPRE_PRADMASK   (0x0f00)      /* Bits 8-11: PRT, A/D */
 #define SH1_IPRE_PRADSHIFT  (8)
-#define SH1_IPRE_SCI1MASK   (0xf000)      /* Bits 12-15: SCI1
+#define SH1_IPRE_SCI1MASK   (0xf000)      /* Bits 12-15: SCI1 */
 #define SH1_IPRE_SCI1SHIFT  (12)
 
 #define SH1_ICR_IRQ7S       (0x0001)      /* Bits 0: Interrupt on falling edge of IRQ7 input */
