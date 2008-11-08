@@ -67,6 +67,29 @@
 	.section	.reset
 
 /*****************************************************************************
+ * Name: _up_fullcontextrestore
+ *
+ * Description:
+ *   restore context from a set of save registers
+ *
+ *  R4 :  Points to a the register save structure
+ *
+ *****************************************************************************/
+	.section irq
+	.global _up_fullcontextrestore
+	.type	_up_fullcontextrestore, #function
+
+_up_fullcontextrestore:
+	stc     sr, r8		/* Mask all interrupts */
+	mov.l	.Lintmask, r9
+	or	r9, r8
+	ldc     r8, sr
+
+	mov	r5, r15		/* Replace stack pointer with the context save */
+	bra	_up_restoreregs
+	.size	_up_fullcontextrestore, .-_up_fullcontextrestore
+
+/*****************************************************************************
  * Name: _up_vector
  *
  * Description:
@@ -100,7 +123,7 @@ _up_vector:
 	mov.l	r9, @-r15
 	mov.l	r8, @-r15
 
-	stc     sr, r8		/* Mask all interrupts */
+	stc     sr, r8			/* Mask all interrupts */
 	mov.l	.Lintmask, r9
 	or	r9, r8
 	ldc     r8, sr
@@ -111,15 +134,18 @@ _up_vector:
 	mov.l	r3, @-r15
 	mov.l	r2, @-r15
 	mov.l	r1, @-r15
-	mov.l	r0, @-r15
+	mov.l	r0, @r15
 
 	/* Setup parameters: R4=IRQ number, R5=base of saved state */
 
 	mov	r15, r5
-	add	#-XCPTCONTEXT_SIZE, r5
 
 	/* Switch to the interrupt stack */
 
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+	mov.l	.Lintstack, r15		/* SP = interrupt stack base */
+	mov.l	r5, @sp			/* Save the user stack pointer */
+#endif
 	/* Dispatch the interrupt */
 
         mov.l   .Ldoirq, r0
@@ -131,11 +157,14 @@ _up_vector:
 	 * one that we passed in via r5.
 	 */
 
-	add	#XCPTCONTEXT_SIZE, r0
+	add	#-XCPTCONTEXT_SIZE, r0
 	mov	r0, r15
 
-	/* Restore registers */
+	/* Restore registers.  R15 may point to either the stack or a saved
+	 * context structure inside of a TCB.
+	 */
 
+_up_restoreregs:
 	mov.l	@r15+, r0
 	mov.l	@r15+, r1
 	mov.l	@r15+, r2
@@ -157,15 +186,41 @@ _up_vector:
 	lds.l	@r15+, macl
 
 	mov.l	@r15+, r4
-	add	#4, r15
+	mov.l	@r15, r15	/* The real stack pointer */
 	rte
 	nop
 
 	.align	2
 .Lintmask:
 	.long	0x000000f0
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+.Lintstack:
+	.long	_up_stackbase
+#endif
 .Ldoirq:
         .long   _up_doirq
         .size   _up_vector, .-_up_vector
+
+/************************************************************************************
+ *  Name: up_interruptstack/g_userstack
+ *
+ * Description:
+ *   Shouldn't happen
+ *
+ ************************************************************************************/
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+	.bss
+	.align	4
+	.globl	_g_userstack
+	.type	_g_userstack, object
+_up_interruptstack:
+	.skip	((CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4)
+_g_userstack:
+_up_stackbase:
+	.skip	4
+	.size	_g_userstack, 4
+	.size	_up_interruptstack, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
+#endif
 	.end
 
