@@ -105,7 +105,7 @@ void up_release_pending(void)
 
           /* Then switch contexts */
 
-          up_copystate(current_regs, rtcb->xcp.regs);
+          current_regs = rtcb->xcp.regs;
         }
 
       /* Copy the exception context into the TCB of the task that

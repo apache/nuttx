@@ -131,7 +131,7 @@ void up_unblock_task(_TCB *tcb)
 
               /* Then switch contexts */
 
-              up_copystate(current_regs, rtcb->xcp.regs);
+              current_regs = rtcb->xcp.regs;
             }
 
           /* We are not in an interrupt handler.  Copy the user C context
