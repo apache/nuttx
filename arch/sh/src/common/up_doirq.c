@@ -66,7 +66,7 @@
  * Public Functions
  ****************************************************************************/
 
-void up_doirq(int irq, uint32* regs)
+uint32 *up_doirq(int irq, uint32* regs)
 {
   up_ledon(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
