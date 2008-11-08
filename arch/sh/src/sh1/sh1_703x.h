@@ -243,12 +243,12 @@
 
 /* Pin Function Controller (PFC) */
 
-#define SH1_PFC_PAIOR       (0x05ffffc4)  /* 16-bits wide */
-#define SH1_PFC_PBIOR       (0x05ffffc6)  /* 16-bits wide */
-#define SH1_PFC_PACR1       (0x05ffffc8)  /* 16-bits wide */
-#define SH1_PFC_PACR2       (0x05ffffca)  /* 16-bits wide */
-#define SH1_PFC_PBCR1       (0x05ffffcc)  /* 16-bits wide */
-#define SH1_PFC_PBCR2       (0x05ffffce)  /* 16-bits wide */
+#define SH1_PFC_PAIOR       (0x05ffffc4)  /* Port B I/O register (16-bits wide) */
+#define SH1_PFC_PBIOR       (0x05ffffc6)  /* Port B I/O register (16-bits wide) */
+#define SH1_PFC_PACR1       (0x05ffffc8)  /* Port A control register 1 (16-bits wide) */
+#define SH1_PFC_PACR2       (0x05ffffca)  /* Port A control register 2 (16-bits wide) */
+#define SH1_PFC_PBCR1       (0x05ffffcc)  /* Port B control register 1 (16-bits wide) */
+#define SH1_PFC_PBCR2       (0x05ffffce)  /* Port B control register 2 )16-bits wide) */
 
 /* Port C */
 
