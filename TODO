@@ -329,6 +329,14 @@ o Other Applications & Tests (examples/)
 o ARM (arch/arm/)
   ^^^^^^^^^^^^^^^
 
+  Description: ARM interrupt handling performance could be improved in many
+               ways.  One easy way is to use a pointer to the context save
+               area in current_regs instead of using up_copystate so much.
+               see handling of 'current_regs" in arch/sh/src/common/* for
+               examples of how this might be done.
+  Status:      Open
+  Priority:    Low
+
 o ARM/C5471 (arch/arm/src/c5471/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
