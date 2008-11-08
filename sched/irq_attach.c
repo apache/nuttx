@@ -91,7 +91,9 @@ int irq_attach(int irq, xcpt_t isr)
       state = irqsave();
       if (isr == NULL)
         {
+#ifndef CONFIG_ARCH_NOINTC
            up_disable_irq(irq);
+#endif
            isr = irq_unexpected_isr;
         }
 
