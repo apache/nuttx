@@ -55,18 +55,18 @@
 
 /* LED definitions **********************************************************/
 
-/* The SH1_LPEVB has no user controllable LEDs.  These are provided only
- * in the event that CONFIG_ARCH_LEDs is enabled.
+/* The SH1_LPEVB only a single LED controlled by either port A, pin 15, or
+ * port B, pin 15 (selectable via JP8).
  */
 
 #define LED_STARTED          0
 #define LED_HEAPALLOCATE     1
-#define LED_IRQSENABLED      2
-#define LED_STACKCREATED     3
-#define LED_INIRQ            4
-#define LED_SIGNAL           5
-#define LED_ASSERTION        6
-#define LED_PANIC            7
+#define LED_IRQSENABLED      1
+#define LED_STACKCREATED     1
+#define LED_INIRQ            0
+#define LED_SIGNAL           0
+#define LED_ASSERTION        0
+#define LED_PANIC            1
 
 /* Button definitions *******************************************************/
 

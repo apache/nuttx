@@ -54,6 +54,7 @@ SECTIONS
 	. = 0x0a002400;
 	.text : {
 		_stext = ABSOLUTE(.);
+		*(.reset)		/* Reset/IRQ code		*/
 		*(.text)		/* Code				*/
 		*(.fixup)
 		*(.gnu.warning)

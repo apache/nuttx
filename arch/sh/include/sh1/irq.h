@@ -327,6 +327,46 @@
 /* 116-255 reserved */
 #endif
 
+/* IRQ Stack Frame Format.  The SH-1 has a push down stack.  The PC
+ * and SR are pushed by hardware at the time an IRQ is taken.
+ */
+
+/* Saved to the stacked by up_vector */
+
+#define REG_R0              (0)
+#define REG_R1              (1)
+#define REG_R2              (2)
+#define REG_R3              (3)
+#define REG_R5              (5)
+#define REG_R6              (6)
+#define REG_R7              (7)
+#define REG_R8              (8)
+#define REG_R9              (9)
+#define REG_R10             (10)
+#define REG_R11             (11)
+#define REG_R12             (12)
+#define REG_R13             (13)
+#define REG_R14             (14)
+
+#define REG_PR              (15)
+#define REG_GBR             (16)
+#define REG_MACH            (17)
+#define REG_MACL            (18)
+
+/* Saved to the stack by the trampoline logic */
+
+#define REG_R4              (19)
+#define REG_R15             (20)
+#define REG_SP              REG_R15
+
+/* Pushed by hardware when the exception is taken */
+
+#define REG_PC              (21)
+#define REG_SR              (22)
+
+#define XCPTCONTEXT_REGS    (23)
+#define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
