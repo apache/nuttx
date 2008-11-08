@@ -153,7 +153,7 @@ void up_reprioritize_rtr(_TCB *tcb, ubyte priority)
 
               /* Then switch contexts */
 
-              up_copystate(current_regs, rtcb->xcp.regs);
+              current_regs = rtcb->xcp.regs;
             }
 
           /* Copy the exception context into the TCB at the (old) head of the

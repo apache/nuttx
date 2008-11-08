@@ -139,7 +139,7 @@ void up_block_task(_TCB *tcb, tstate_t task_state)
 
               /* Then switch contexts */
 
-              up_copystate(current_regs, rtcb->xcp.regs);
+              current_regs = rtcb->xcp.regs;
             }
 
           /* Copy the user C context into the TCB at the (old) head of the
