@@ -83,13 +83,21 @@ void up_doirq(int irq, uint32* regs)
 
        /* Mask and acknowledge the interrupt (if supported by the chip) */
 
+#ifndef CONFIG_ARCH_NOINTC
        up_maskack_irq(irq);
+#endif
 
        /* Deliver the IRQ */
 
        irq_dispatch(irq, regs);
 
-       /* Indicate that we are no long in an interrupt handler */
+       /* Get the current value of regs... it may have changed because
+        * of a context switch performed during interrupt processing.
+        */
+
+       regs = current_regs;
+
+       /* Indicate that we are no longer in an interrupt handler */
 
        current_regs = NULL;
 
@@ -97,8 +105,11 @@ void up_doirq(int irq, uint32* regs)
         * disabled.
         */
 
+#ifndef CONFIG_ARCH_NOINTC
        up_enable_irq(irq);
+#endif
     }
   up_ledoff(LED_INIRQ);
 #endif
+  return regs;
 }
