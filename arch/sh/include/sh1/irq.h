@@ -389,25 +389,29 @@ extern "C" {
 
 #ifndef __ASSEMBLY__
 
+/* Get the current value of the SR */
+
+static inline irqstate_t __getsr(void)
+{
+  irqstate_t flags;
+
+  __asm__ __volatile__ ("stc sr, %0" : "=r" (flags));
+  return flags;
+}
+
+/* Set the new value of the SR */
+
+static inline void __setsr(irqstate_t sr)
+{
+  __asm__ __volatile__ ("ldc %0, sr" : : "r" (sr));
+}
+
 /* Return the current interrupt enable state & disable IRQs */
 
 static inline irqstate_t irqsave(void)
 {
-  irqstate_t flags;
-  uint32 tmp;
-
-  __asm__ __volatile__
-    (
-      "stc     sr, %1\n\t"
-      "mov     %1, %0\n\t"
-      "or      #0xf0, %0\n\t"
-      "ldc     %0, sr\n\t"
-      "mov     %1, %0\n\t"
-      "and     #0xf0, %0"
-      : "=&z" (flags), "=&r" (tmp)
-      :
-      : "memory"
-    );
+  irqstate_t flags = __getsr();
+  __setsr(flags | 0x000000f0);
   return flags;
 }
 
@@ -415,36 +419,15 @@ static inline irqstate_t irqsave(void)
 
 static inline void irqdisable(void)
 {
-  unsigned long tmp;
-
-  __asm__ __volatile__
-    (
-      "stc     sr, %0\n\t"
-      "or      #0xf0, %0\n\t"
-      "ldc     %0, sr"
-      : "=&z" (tmp)
-      :
-      : "memory"
-    );
+  uint32 flags = __getsr();
+  __setsr(flags | 0x000000f0);
 }
 /* Enable IRQs */
 
 static inline void irqenable(void)
 {
-  uint32 tmp1;
-  uint32 tmp2;
-
-  __asm__ __volatile__
-    (
-      "stc     sr, %0\n\t"
-      "and     %1, %0\n\t"
-      "stc     r6_bank, %1\n\t"
-      "or      %1, %0\n\t"
-      "ldc     %0, sr"
-      : "=&r" (tmp1), "=r" (tmp2)
-      : "1" (~0x000000f0)
-      : "memory"
-    );
+  uint32 flags = __getsr();
+  __setsr(flags & ~0x000000f0);
 }
 
 /* Restore saved IRQ state */
