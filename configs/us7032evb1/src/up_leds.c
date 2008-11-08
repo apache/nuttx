@@ -48,6 +48,15 @@
  * Definitions
  ****************************************************************************/
 
+/* The SH1_LPEVB only a single LED controlled by either port A, pin 15, or
+ * port B, pin 15 (selectable via JP8).  In this file, we assume the portB
+ * setup.
+ */
+
+#define SH1_PBDR_LED  0x8000
+#define SH1_PBIOR_LED 0x8000
+#define SH1_PBCR2_LED 0xc000
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -67,9 +76,25 @@
 #ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void)
 {
-  /* The SH1_LPEVB has no user controllable LEDs.  This is provided only
-   * in the event that CONFIG_ARCH_LEDs is enabled.
-   */
+  uint16 reg16;
+
+  /* Setup port B, pin 15 as an output */
+
+  reg16  = getreg(SH1_PFC_PBIOR);
+  reg16 |= SH1_PBIOR_LED;
+  putreg(reg16, SH1_PFC_PBIOR);
+
+  /* Setup port B, pin 15 as a normal I/O register */
+
+  reg16  = getreg(SH1_PFC_PBCR1);
+  reg16 &= ~SH1_PBCR2_LED;
+  putreg(reg16, SH1_PFC_PBCR1);
+
+  /* Turn the LED off */
+
+  reg16  = getreg(SH1_PORTB_DR);
+  reg16 &= ~SH1_PBDR_LED;
+  putreg(reg16, SH1_PORTB_DR);
 }
 
 /****************************************************************************
@@ -78,9 +103,16 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
-  /* The SH1_LPEVB has no user controllable LEDs.  This is provided only
-   * in the event that CONFIG_ARCH_LEDs is enabled.
-   */
+  uint16 reg16;
+
+  if (led)
+    {
+      /* Turn the LED on */
+
+      reg16  = getreg(SH1_PORTB_DR);
+      reg16 |= SH1_PBDR_LED;
+      putreg(reg16, SH1_PORTB_DR);
+    }
 }
 
 /****************************************************************************
@@ -89,8 +121,15 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-  /* The SH1_LPEVB has no user controllable LEDs.  This is provided only
-   * in the event that CONFIG_ARCH_LEDs is enabled.
-   */
+  uint16 reg16;
+
+  if (led)
+    {
+      /* Turn the LED off */
+
+      reg16  = getreg(SH1_PORTB_DR);
+      reg16 &= ~SH1_PBDR_LED;
+      putreg(reg16, SH1_PORTB_DR);
+    }
 }
 #endif /* CONFIG_ARCH_LEDS */
