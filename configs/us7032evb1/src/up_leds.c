@@ -80,21 +80,21 @@ void up_ledinit(void)
 
   /* Setup port B, pin 15 as an output */
 
-  reg16  = getreg(SH1_PFC_PBIOR);
+  reg16  = getreg16(SH1_PFC_PBIOR);
   reg16 |= SH1_PBIOR_LED;
-  putreg(reg16, SH1_PFC_PBIOR);
+  putreg16(reg16, SH1_PFC_PBIOR);
 
   /* Setup port B, pin 15 as a normal I/O register */
 
-  reg16  = getreg(SH1_PFC_PBCR1);
+  reg16  = getreg16(SH1_PFC_PBCR1);
   reg16 &= ~SH1_PBCR2_LED;
-  putreg(reg16, SH1_PFC_PBCR1);
+  putreg16(reg16, SH1_PFC_PBCR1);
 
   /* Turn the LED off */
 
-  reg16  = getreg(SH1_PORTB_DR);
+  reg16  = getreg16(SH1_PORTB_DR);
   reg16 &= ~SH1_PBDR_LED;
-  putreg(reg16, SH1_PORTB_DR);
+  putreg16(reg16, SH1_PORTB_DR);
 }
 
 /****************************************************************************
@@ -109,9 +109,9 @@ void up_ledon(int led)
     {
       /* Turn the LED on */
 
-      reg16  = getreg(SH1_PORTB_DR);
+      reg16  = getreg16(SH1_PORTB_DR);
       reg16 |= SH1_PBDR_LED;
-      putreg(reg16, SH1_PORTB_DR);
+      putreg16(reg16, SH1_PORTB_DR);
     }
 }
 
@@ -127,9 +127,9 @@ void up_ledoff(int led)
     {
       /* Turn the LED off */
 
-      reg16  = getreg(SH1_PORTB_DR);
+      reg16  = getreg16(SH1_PORTB_DR);
       reg16 &= ~SH1_PBDR_LED;
-      putreg(reg16, SH1_PORTB_DR);
+      putreg16(reg16, SH1_PORTB_DR);
     }
 }
 #endif /* CONFIG_ARCH_LEDS */
