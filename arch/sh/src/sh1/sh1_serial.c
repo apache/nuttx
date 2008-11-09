@@ -53,19 +53,36 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#ifdef CONFIG_USE_SERIALDRIVER
-
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 /* Some sanity checks *******************************************************/
 
+/* Are there any SCIs? */
+
+#if !defined(CONFIG_SH1_SCI0) && !defined(CONFIG_SH1_SCI1)
+#  ifdef CONFIG_USE_SERIALDRIVER
+#    error "Serial driver selected, but SCIs not enabled"
+#  endif
+#  undef HAVE_CONSOLE
+#  undef CONFIG_USE_SERIALDRIVER
+#endif
+
+#ifdef CONFIG_USE_SERIALDRIVER
+
 /* Is there a serial console? */
 
-#if defined(CONFIG_SCI0_SERIAL_CONSOLE) || defined(CONFIG_SCI1_SERIAL_CONSOLE)
-#  define HAVE_CONSOLE
+#if defined(CONFIG_SCI0_SERIAL_CONSOLE) && defined(CONFIG_SH1_SCI0)
+#  define HAVE_CONSOLE 1
+#  undef CONFIG_SCI1_SERIAL_CONSOLE
+#elif defined(CONFIG_SCI1_SERIAL_CONSOLE) && defined(CONFIG_SH1_SCI1)
+#  define HAVE_CONSOLE 1
+#  undef CONFIG_SCI0_SERIAL_CONSOLE
 #else
+#  if defined(CONFIG_SCI0_SERIAL_CONSOLE) || defined(CONFIG_SCI1_SERIAL_CONSOLE)
+#    error "Serial console selected, but corresponding SCI not enabled"
+#  endif
 #  undef HAVE_CONSOLE
 #endif
 
