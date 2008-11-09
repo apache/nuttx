@@ -313,6 +313,85 @@
 #define SH1_SCISSR_RDRF     (0x40)        /* Bit 6: RDR contains valid received data */
 #define SH1_SCISSR_TDRE     (0x80)        /* Bit 7: TDR does not contain valid transmit data */
 
+/* Integrated Timer unit (ITU) */
+
+#define SH1_ITUTSTR_STR0    (0x01)        /* Bit 0: TCNT0 is counting */
+#define SH1_ITUTSTR_STR1    (0x02)        /* Bit 1: TCNT1 is counting */
+#define SH1_ITUTSTR_STR2    (0x04)        /* Bit 2: TCNT2 is counting */
+#define SH1_ITUTSTR_STR3    (0x08)        /* Bit 3: TCNT3 is counting */
+#define SH1_ITUTSTR_STR4    (0x10)        /* Bit 4: TCNT4 is counting */
+
+#define SH1_ITUTSNC_SYNC0   (0x01)        /* Bit 0: Channel 0 operates synchronously */
+#define SH1_ITUTSNC_SYNC1   (0x02)        /* Bit 1: Channel 1 operates synchronously */
+#define SH1_ITUTSNC_SYNC2   (0x04)        /* Bit 2: Channel 2 operates synchronously */
+#define SH1_ITUTSNC_SYNC3   (0x08)        /* Bit 3: Channel 3 operates synchronously */
+#define SH1_ITUTSNC_SYNC4   (0x10)        /* Bit 4: Channel 4 operates synchronously */
+
+#define SH1_ITUTMDR_PWM0    (0x01)        /* Bit 0: Channel 0 operated in PWM mode */
+#define SH1_ITUTMDR_PWM1    (0x02)        /* Bit 1: Channel 1 operated in PWM mode */
+#define SH1_ITUTMDR_PWM2    (0x04)        /* Bit 2: Channel 2 operated in PWM mode */
+#define SH1_ITUTMDR_PWM3    (0x08)        /* Bit 3: Channel 3 operated in PWM mode */
+#define SH1_ITUTMDR_PWM4    (0x10)        /* Bit 4: Channel 4 operated in PWM mode */
+#define SH1_ITUTMDR_FDIR    (0x20)        /* Bit 5: OVF set when TCNT2 overflows */
+#define SH1_ITUTMDR_MDF     (0x40)        /* Bit 6: Channel 2 operates in phase counting mode */
+
+#define SH1_ITUTFCR_BFA3    (0x01)        /* Bit 0: GRA3 & BRA3 operate in mode in channel 4 */
+#define SH1_ITUTFCR_BFB3    (0x02)        /* Bit 1: GRB3 & BRB3 operate in mode in channel 4 */
+#define SH1_ITUTFCR_BFA4    (0x04)        /* Bit 2: GRA4 & BRA4 operate in mode in channel 4 */
+#define SH1_ITUTFCR_BFB4    (0x08)        /* Bit 3: GRB4 & BRB4 operate in mode in channel 4 */
+#define SH1_ITUTFCR_CMDMASK (0x30)        /* Bit 4-5: Command */
+#define SH1_ITUTFCR_34NDEF  (0x00)        /*    Channels 3/4 normal (default) */
+#define SH1_ITUTFCR_34NORM  (0x10)        /*    Channels 3/4 normal */
+#define SH1_ITUTFCR_34CPWM  (0x20)        /*    Channels 3/4 in complementary PWM mode*/
+#define SH1_ITUTFCR_34RSPWN (0x30)        /*    Channels 3/4 in reset-synchronized PWM mode */
+
+#define SH1_ITUTOCR_OLS3    (0x01)        /* Bit 0: 1=TIOCA3, A4 & B4 not inverted */
+#define SH1_ITUTOCR_OLS4    (0x02)        /* Bit 1: 1=TIOCB3, XA4 & XB4 not inverted */
+
+#define SH1_ITUTCR_TPSCMSK  (0x07)        /* Bits 0-2: Clock setup, internal/external, divider */
+#define SH1_ITUTCR_DIV1     (0x00)        /*   Internal clock (phi) */
+#define SH1_ITUTCR_DIV2     (0x01)        /*   phi / 2 */
+#define SH1_ITUTCR_DIV4     (0x02)        /*   phi / 4 */
+#define SH1_ITUTCR_DIV8     (0x03)        /*   phi / 8 */
+#define SH1_ITUTCR_TCLKA    (0x04)        /*   External clock A (TCLKA) */
+#define SH1_ITUTCR_TCLKB    (0x05)        /*   External clock B (TCLKB) */
+#define SH1_ITUTCR_TCLKC    (0x06)        /*   External clock C (TCLKC) */
+#define SH1_ITUTCR_TCLKD    (0x07)        /*   External clock D (TCLKD) */
+#define SH1_ITUTCR_CKEGMSK  (0x18)        /* Bits 3-4: External clock input edge selection */
+#define SH1_ITUTCR_RISING   (0x00)        /*   Count rising edges */
+#define SH1_ITUTCR_FALLING  (0x08)        /*   Count falling edges */
+#define SH1_ITUTCR_BOTH     (0x10)        /*   Count both */
+#define SH1_ITUTCR_CCLRMSK  (0x60)        /* Bits 5-6: TCNT clear controls */
+#define SH1_ITUTCR_NCLR     (0x00)        /*   TCNT not cleared */
+#define SH1_ITUTCR_CGRA     (0x20)        /*   TCNT cleared by GRA */
+#define SH1_ITUTCR_CGRB     (0x40)        /*   TCNT cleared by GRB */
+#define SH1_ITUTCR_CSYNC    (0x60)        /*   Synchronized clear */
+
+#define SH1_ITUTIOR_IOAMSK  (0x07)        /* Bits 0-3: GRA function */
+#define SH1_ITUTIOR_OCGRAD  (0x00)        /*   GRA output comparator, disabled */
+#define SH1_ITUTIOR_OCGRA0  (0x01)        /*   GRA output comparator, 0 output at match */
+#define SH1_ITUTIOR_OCGRA1  (0x02)        /*   GRA output comparator, 1 output at match */
+#define SH1_ITUTIOR_OCATOG  (0x03)        /*   GRA output comparator, output toggles at match */
+#define SH1_ITUTIOR_ICGRAR  (0x04)        /*   GRA input capture, rising edge */
+#define SH1_ITUTIOR_ICGRAF  (0x05)        /*   GRA input capture, falling edge */
+#define SH1_ITUTIOR_ICGRAB  (0x06)        /*   GRA input capture, both edges */
+#define SH1_ITUTIOR_IOBMSK  (0x70)        /* Bits 4-6: GRB function */
+#define SH1_ITUTIOR_OCGRBD  (0x00)        /*   GRB output comparator, disabled */
+#define SH1_ITUTIOR_OCGRB0  (0x10)        /*   GRB output comparator, 0 output at match */
+#define SH1_ITUTIOR_OCGRB1  (0x20)        /*   GRB output comparator, 1 output at match */
+#define SH1_ITUTIOR_OCBTOG  (0x30)        /*   GRB output comparator, output toggles at match */
+#define SH1_ITUTIOR_ICGRBR  (0x40)        /*   GRB input capture, rising edge */
+#define SH1_ITUTIOR_ICGRBF  (0x50)        /*   GRB input capture, falling edge */
+#define SH1_ITUTIOR_ICGRBB  (0x60)        /*   GRB input capture, both edges */
+
+#define SH1_ITUTSR_IMFA     (0x01)        /* Bit 0: 0=Clearing condition, 1=setting confition */
+#define SH1_ITUTSR_IMFB     (0x02)        /* Bit 1: 0=Clearing condition, 1=setting confition */
+#define SH1_ITUTSR_OVF      (0x04)        /* Bit 2: 0=Clearing condition, 1=setting confition */
+
+#define SH1_ITUTIER_IMIEA   (0x01)        /* Bit 0: Enables interrupt request from IMFA */
+#define SH1_ITUTIER_IMIEB   (0x02)        /* Bit 1: Enables interrupt request from IMFB */
+#define SH1_ITUTIER_OVIE    (0x04)        /* Bit 2: Enables interrupt request from OVR */
+
 /* Interrupt Controller (INTC) */
 
 #define SH1_IPRA_IRQ3MASK   (0x000f)      /* Bits 0-3: IRQ3 */
