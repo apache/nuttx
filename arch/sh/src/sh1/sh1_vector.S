@@ -60,11 +60,189 @@
  * Macros
  *****************************************************************************/
 
+/************************************************************************************
+ * Macro: trampoline
+ *
+ * Description:
+ *   Enter on exception with:
+ *
+ *   SP -> PC
+ *         SR
+ *
+ *   Branch to up_vector with:
+ *
+ *   R4  : IRQ vector number
+ *   SP -> Saved R4
+ *         Saved SP (R15)
+ *         PC
+ *         SR
+ *
+ ************************************************************************************/
+
+	.macro	trampoline, irq, label
+	mov.l	r4, @-r15		/* Save R4 on the stack */
+	mov.w	.L\label, r4		/* With the IRQ number in R4 */
+	bra	_up_vector		/* Jump to the common vector handling logic */
+	nop
+.L\label:
+	.word	\irq
+	.endm
+
 /*****************************************************************************
  * Text
  *****************************************************************************/
 
 	.section	.reset
+
+/*****************************************************************************
+ * Name: _up_*_handler
+ *
+ * Description:
+ *   Trampoline entry points for each, individual IRQ
+ *
+ *  R4 :  Points to a the register save structure
+ *
+ *****************************************************************************/
+
+	.globl	_up_invalid_handler
+_up_invalid_handler:
+	trampoline NR_IRQS, 1
+
+#ifdef CONFIG_SH1_DMAC0
+	.globl	_up_dmac0_handler
+_up_dmac0_handler:
+	trampoline SH1_DEI0_IRQ, 2 /* DEI0 */
+#endif
+
+#ifdef CONFIG_SH1_DMAC1
+	.globl	_up_dmac1_handler
+_up_dmac1_handler:
+	trampoline SH1_DEI1_IRQ, 3 /* DEI1 */
+#endif
+
+#ifdef CONFIG_SH1_DMAC2
+	.globl	_up_dmac2_handler
+_up_dmac2_handler:
+	trampoline SH1_DEI2_IRQ, 4 /* DEI2 */
+#endif
+
+#ifdef CONFIG_SH1_DMAC3
+	.globl	_up_dmac3_handler
+_up_dmac4_handler:
+	trampoline SH1_DEI3_IRQ, 5 /* DEI3 */
+#endif
+
+	.globl	_up_imia0_handler
+	.globl	_up_imib0_handler
+	.globl	_up_ovi0_handler
+_up_imia0_handler:
+	trampoline SH1_IMIA0_IRQ, 6 /* IMIA0 */
+_up_imib0_handler:
+	trampoline SH1_IMIB0_IRQ, 7 /* IMIB0 */
+_up_ovi0_handler:
+	trampoline SH1_OVI0_IRQ, 8  /* OVI0 */
+
+#ifdef CONFIG_SH1_ITU1
+	.globl	_up_imia1_handler
+	.globl	_up_imib1_handler
+	.globl	_up_ovi1_handler
+_up_imia1_handler:
+	trampoline SH1_IMIA1_IRQ, 9 /* IMIA1 */
+_up_imib1_handler:
+	trampoline SH1_IMIB1_IRQ, 10 /* IMIB1 */
+_up_ovi1_handler:
+	trampoline SH1_OVI1_IRQ, 11  /* OVI1 */
+#endif
+
+#ifdef CONFIG_SH1_ITU2
+	.globl	_up_imia2_handler
+	.globl	_up_imib2_handler
+	.globl	_up_ovi2_handler
+_up_imia2_handler:
+	trampoline SH1_IMIA2_IRQ, 12 /* IMIA2 */
+_up_imib2_handler:
+	trampoline SH1_IMIB2_IRQ, 13 /* IMIB2 */
+_up_ovi2_handler:
+	trampoline SH1_OVI2_IRQ, 14  /* OVI2 */
+#endif
+
+#ifdef CONFIG_SH1_ITU3
+	.globl	_up_imia3_handler
+	.globl	_up_imib3_handler
+	.globl	_up_ovi3_handler
+_up_imia3_handler:
+	trampoline SH1_IMIA3_IRQ, 15 /* IMIA3 */
+_up_imib3_handler:
+	trampoline SH1_IMIB3_IRQ, 16 /* IMIB3 */
+_up_ovi3_handler:
+	trampoline SH1_OVI3_IRQ, 17  /* OVI3 */
+#endif
+
+#ifdef CONFIG_SH1_ITU4
+	.globl	_up_imia4_handler
+	.globl	_up_imib4_handler
+	.globl	_up_ovi4_handler
+_up_imia4_handler:
+	trampoline SH1_IMIA4_IRQ, 18 /* IMIA4 */
+_up_imib4_handler:
+	trampoline SH1_IMIB4_IRQ, 19 /* IMIB4 */
+_up_ovi4_handler:
+	trampoline SH1_OVI4_IRQ, 20  /* OVI4 */
+#endif
+
+#ifdef CONFIG_SH1_SCI0
+	.globl	_up_eri0_handler
+	.globl	_up_rxi0_handler
+	.globl	_up_txi0_handler
+	.globl	_up_tei0_handler
+_up_eri0_handler:
+	trampoline SH1_ERI0_IRQ, 21 /*  ERI0 */
+_up_rxi0_handler:
+	trampoline SH1_RXI0_IRQ, 22 /*  RxI0 */
+_up_txi0_handler:
+	trampoline SH1_TXI0_IRQ, 23 /*  TxI0 */
+_up_tei0_handler:
+	trampoline SH1_TEI0_IRQ, 24 /*  TEI0 */
+#endif
+
+#ifdef CONFIG_SH1_SCI1
+	.globl	_up_eri1_handler
+	.globl	_up_rxi1_handler
+	.globl	_up_txi1_handler
+	.globl	_up_tei1_handler
+_up_eri1_handler:
+	trampoline SH1_ERI1_IRQ, 25 /*  ERI1 */
+_up_rxi1_handler:
+	trampoline SH1_RXI1_IRQ, 26 /*  RxI1 */
+_up_txi1_handler:
+	trampoline SH1_TXI1_IRQ, 27 /*  TxI1 */
+_up_tei1_handler:
+	trampoline SH1_TEI1_IRQ, 28 /*  TEI1 */
+#endif
+
+#ifdef CONFIG_SH1_PCU
+	.globl	_up_pei_handler
+_up_pei_handler:
+	trampoline SH1_PEI_IRQ, 29 /* Parity control unit PEI */
+#endif
+
+#ifdef CONFIG_SH1_AD
+	.globl	_up_aditi_handler
+_up_aditi_handler:
+	trampoline SH1_ADITI_IRQ, 30 /* A/D ITI */
+#endif
+
+#ifdef CONFIG_SH1_WDT
+	.globl	_up_wdt_handler
+_up_wdt_handler:
+	trampoline SH1_WDTITI_IRQ, 31 /* WDT ITI */
+#endif
+
+#ifdef CONFIG_SH1_CMI
+	.globl	_up_cmi_handler
+_up_cmi_handler:
+	trampoline SH1_CMI_IRQ,32 /* REF CMI */
+#endif
 
 /*****************************************************************************
  * Name: _up_fullcontextrestore
@@ -75,7 +253,7 @@
  *  R4 :  Points to a the register save structure
  *
  *****************************************************************************/
-	.section irq
+
 	.global _up_fullcontextrestore
 	.type	_up_fullcontextrestore, #function
 
@@ -103,7 +281,6 @@ _up_fullcontextrestore:
  *
  *****************************************************************************/
 
-	.section irq
 	.global _up_vector
 	.type	_up_vector, #function
 
