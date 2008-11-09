@@ -56,9 +56,16 @@
 
 /* Is there a serial console? */
 
-#if defined(CONFIG_SCI0_SERIAL_CONSOLE) || defined(CONFIG_SCI1_SERIAL_CONSOLE)
-#  define HAVE_CONSOLE
+#if defined(CONFIG_SCI0_SERIAL_CONSOLE) && defined(CONFIG_SH1_SCI0)
+#  define HAVE_CONSOLE 1
+#  undef CONFIG_SCI1_SERIAL_CONSOLE
+#elif defined(CONFIG_SCI1_SERIAL_CONSOLE) && defined(CONFIG_SH1_SCI1)
+#  define HAVE_CONSOLE 1
+#  undef CONFIG_SCI0_SERIAL_CONSOLE
 #else
+#  if defined(CONFIG_SCI0_SERIAL_CONSOLE) || defined(CONFIG_SCI1_SERIAL_CONSOLE)
+#    error "Serial console selected, but corresponding SCI not enabled"
+#  endif
 #  undef HAVE_CONSOLE
 #endif
 
@@ -166,10 +173,12 @@
  *
  **************************************************************************/
 
+#ifdef HAVE_CONSOLE
 int inline up_txready(void)
 {
   return getreg8(SH1_SCI_BASE + SH1_SCI_SSR_OFFSET) & SH1_SCISSR_TDRE;
 }
+#endif
 
 /**************************************************************************
  * Public Functions
