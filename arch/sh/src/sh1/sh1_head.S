@@ -84,6 +84,68 @@
 	.globl	_edata			/* End of .data in RAM */
 #endif
 
+/* Interrupt handlers */
+	.globl	_up_invalid_handler
+#ifdef CONFIG_SH1_DMAC0
+	.globl	_up_dmac0_handler
+#endif
+#ifdef CONFIG_SH1_DMAC1
+	.globl	_up_dmac1_handler
+#endif
+#ifdef CONFIG_SH1_DMAC2
+	.globl	_up_dmac2_handler
+#endif
+#ifdef CONFIG_SH1_DMAC3
+	.globl	_up_dmac3_handler
+#endif
+	.globl	_up_imia0_handler
+	.globl	_up_imib0_handler
+	.globl	_up_ovi0_handler
+#ifdef CONFIG_SH1_ITU1
+	.globl	_up_imia1_handler
+	.globl	_up_imib1_handler
+	.globl	_up_ovi1_handler
+#endif
+#ifdef CONFIG_SH1_ITU2
+	.globl	_up_imia2_handler
+	.globl	_up_imib2_handler
+	.globl	_up_ovi2_handler
+#endif
+#ifdef CONFIG_SH1_ITU3
+	.globl	_up_imia3_handler
+	.globl	_up_imib3_handler
+	.globl	_up_ovi3_handler
+#endif
+#ifdef CONFIG_SH1_ITU4
+	.globl	_up_imia4_handler
+	.globl	_up_imib4_handler
+	.globl	_up_ovi4_handler
+#endif
+#ifdef CONFIG_SH1_SCI0
+	.globl	_up_eri0_handler
+	.globl	_up_rxi0_handler
+	.globl	_up_txi0_handler
+	.globl	_up_tei0_handler
+#endif
+#ifdef CONFIG_SH1_SCI1
+	.globl	_up_eri1_handler
+	.globl	_up_rxi1_handler
+	.globl	_up_txi1_handler
+	.globl	_up_tei1_handler
+#endif
+#ifdef CONFIG_SH1_PCU
+	.globl	_up_pei_handler
+#endif
+#ifdef CONFIG_SH1_AD
+	.globl	_up_aditi_handler
+#endif
+#ifdef CONFIG_SH1_WDT
+	.globl	_up_wdt_handler
+#endif
+#ifdef CONFIG_SH1_CMI
+	.globl	_up_cmi_handler
+#endif
+
 /*****************************************************************************
  * Macros
  *****************************************************************************/
@@ -126,17 +188,137 @@
 	.globl		__vector_table
 	.type		__vector_table, %object
 __vector_table:
-	/* Resets */
+	/* All of the SH-1 common vectors are copied from the CMON vector
+	 * area to here.  As a result, CMON will continue to intercept these
+	 * vectors.
+	 */
 
 	.long	__start		/* 0-1: Power-on reset (hard, NMI high) PC & SP */
 	.long	_ebss+CONFIG_PROC_STACK_SIZE-4
 	.long	__start		/* 2-3: Manual reset (soft, NMI low) PC & SP */
 	.long	_ebss+CONFIG_PROC_STACK_SIZE-4
 
-	.rept 252
-	.long	0
+	.rept SH1_NCMN_VECTORS-4
+	.long	_up_invalid_handler
 	.endr
 
+	/* The remaining vectors are unique to the SH-1 703x family */
+
+#ifdef CONFIG_SH1_DMAC0
+	.long	_up_dmac0_handler		/* 72: DMAC0 DEI0 */
+#else
+	.long	_up_invalid_handler		/* 72: DMAC0 DEI0 */
+#endif
+	.long	_up_invalid_handler		/* 73: Reserved */
+#ifdef CONFIG_SH1_DMAC1
+	.long	_up_dmac1_handler		/* 74: DMAC1 DEI1 */
+#else
+	.long	_up_invalid_handler		/* 74: DMAC1 DEI1 */
+#endif
+	.long	_up_invalid_handler		/* 75: Reserved */
+#ifdef CONFIG_SH1_DMAC2
+	.long	_up_dmac2_handler		/* 76: DMAC2 DEI2 */
+#else
+	.long	_up_invalid_handler		/* 76: DMAC2 DEI2 */
+#endif
+	.long	_up_invalid_handler		/* 77: Reserved */
+#ifdef CONFIG_SH1_DMAC3
+	.long	_up_dmac3_handler		/* 78: DMAC3 DEI3 */
+#else
+	.long	_up_invalid_handler		/* 78: DMAC3 DEI3 */
+#endif
+	.long	_up_invalid_handler		/* 79: Reserved */
+	.long	_up_imia0_handler		/* 80: ITU0 IMIA0 */
+	.long	_up_imib0_handler		/* 81:      IMIB0 */
+	.long	_up_ovi0_handler		/* 82:      OVI0 */
+	.long	_up_invalid_handler		/* 83: Reserved */
+#ifdef CONFIG_SH1_ITU1
+	.long	_up_imia1_handler		/* 84: ITU1 IMIA1 */
+	.long	_up_imib1_handler		/* 85:      IMIB1 */
+	.long	_up_ovi1_handler		/* 86:      OVI1 */
+#else
+	.long	_up_invalid_handler		/* 84: ITU1 IMIA1 */
+	.long	_up_invalid_handler		/* 85:      IMIB1 */
+	.long	_up_invalid_handler		/* 86:      OVI1 */
+#endif
+	.long	_up_invalid_handler		/* 87: Reserved */
+#ifdef CONFIG_SH1_ITU2
+	.long	_up_imia2_handler		/* 88: ITU2 IMIA2 */
+	.long	_up_imib2_handler		/* 89:      IMIB2 */
+	.long	_up_ovi2_handler		/* 90:      OVI2 */
+#else
+	.long	_up_invalid_handler		/* 88: ITU2 IMIA2 */
+	.long	_up_invalid_handler		/* 89:      IMIB2 */
+	.long	_up_invalid_handler		/* 90:      OVI2 */
+#endif
+	.long	_up_invalid_handler		/* 91: Reserved */
+#ifdef CONFIG_SH1_ITU3
+	.long	_up_imia3_handler		/* 92: ITU3 IMIA3 */
+	.long	_up_imib3_handler		/* 93:      IMIB3 */
+	.long	_up_ovi3_handler		/* 94:      OVI3 */
+#else
+	.long	_up_invalid_handler		/* 92: ITU3 IMIA3 */
+	.long	_up_invalid_handler		/* 93:      IMIB3 */
+	.long	_up_invalid_handler		/* 94:      OVI3 */
+#endif
+	.long	_up_invalid_handler		/* 95: Reserved */
+#ifdef CONFIG_SH1_ITU4
+	.long	_up_imia4_handler		/* 96: ITU4 IMIA4 */
+	.long	_up_imib4_handler		/* 97:      IMIB4 */
+	.long	_up_ovi4_handler		/* 98:      OVI4 */
+#else
+	.long	_up_invalid_handler		/* 96: ITU4 IMIA4 */
+	.long	_up_invalid_handler		/* 97:      IMIB4 */
+	.long	_up_invalid_handler		/* 98:      OVI4 */
+#endif
+	.long	_up_invalid_handler		/* 99: Reserved */
+#ifdef CONFIG_SH1_SCI0
+	.long	_up_eri0_handler		/* 100: SCI0 ERI0 */
+	.long	_up_rxi0_handler		/* 101:      RxI0 */
+	.long	_up_txi0_handler		/* 102:      TxI0 */
+	.long	_up_tei0_handler		/* 103:      TEI0 */
+#else
+	.long	_up_invalid_handler		/* 100: SCI0 ERI0 */
+	.long	_up_invalid_handler		/* 101:      RxI0 */
+	.long	_up_invalid_handler		/* 102:      TxI0 */
+	.long	_up_invalid_handler		/* 103:      TEI0 */
+#endif
+#ifdef CONFIG_SH1_SCI1
+	.long	_up_eri1_handler		/* 104: SCI1 ERI1 */
+	.long	_up_rxi1_handler		/* 105:      RxI1 */
+	.long	_up_txi1_handler		/* 106:      TxI1 */
+	.long	_up_tei1_handler		/* 107:      TEI1 */
+#else
+	.long	_up_invalid_handler		/* 104: SCI1 ERI1 */
+	.long	_up_invalid_handler		/* 105:      RxI1 */
+	.long	_up_invalid_handler		/* 106:      TxI1 */
+	.long	_up_invalid_handler		/* 107:      TEI1 */
+#endif
+#ifdef CONFIG_SH1_PCU
+	.long	_up_pei_handler			/* 108: Parity control unit PEI */
+#else
+	.long	_up_invalid_handler		/* 108: Parity control unit PEI */
+#endif
+#ifdef CONFIG_SH1_AD
+	.long	_up_aditi_handler		/* 109: A/D ITI */
+#else
+	.long	_up_invalid_handler		/* 109: A/D ITI */
+#endif
+	.long	_up_invalid_handler		/* 110: Reserved */
+	.long	_up_invalid_handler		/* 111: Reserved */
+#ifdef CONFIG_SH1_WDT
+	.long	_up_wdt_handler			/* 112: WDT ITI */
+#else
+	.long	_up_invalid_handler		/* 112: WDT ITI */
+#endif
+#ifdef CONFIG_SH1_CMI
+	.long	_up_cmi_handler			/* 113: REF CMI */
+#else
+	.long	_up_invalid_handler		/* 113: REF CMI */
+#endif
+	.rept (SH1_LAST_VNDX-SH1_CMI_VNDX)	/* 114-255: Reserved */
+	.long	_up_invalid_handler
+	.endr
 	.size	__vector_table, . - __vector_table
 
 /*****************************************************************************
@@ -318,7 +500,7 @@ __start0:
 .Lsvect:
 	.long   _svect
 .Lvectend:
-	.long   (SH1_IRQ7_VECOFFSET+3)
+	.long   ((4*SH1_NCMN_VECTORS)-1)
 	.size	__start, .-__start
 
 /*****************************************************************************
