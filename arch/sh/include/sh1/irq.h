@@ -190,7 +190,7 @@
 #define SH1_WDTITI_IRQ     (SH1_LASTSCI_IRQ+3)  /* WDT ITI */
 #define SH1_CMI_IRQ        (SH1_LASTSCI_IRQ+4)  /* REF CMI */
 
-#define STR71X_IRQ_SYSTIMER STR71X_IRQ_T0TIMI
+#define SH1_SYSTIMER_IRQ   SH1_IMIA0_IRQ
 #define NR_IRQS            (SH1_CMI_IRQ+1)
 
 #endif
