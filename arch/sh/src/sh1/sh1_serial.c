@@ -84,21 +84,51 @@
 #    error "Serial console selected, but corresponding SCI not enabled"
 #  endif
 #  undef HAVE_CONSOLE
+#  undef CONFIG_SCI0_SERIAL_CONSOLE
+#  undef CONFIG_SCI1_SERIAL_CONSOLE
 #endif
 
 /* Which SCI with be tty0/console and which tty1? */
 
-#if defined(CONFIG_SCI0_SERIAL_CONSOLE) || !defined(CONFIG_SCI1_SERIAL_CONSOLE)
-#  undef CONFIG_SCI1_SERIAL_CONSOLE
-#  ifdef CONFIG_SCI0_SERIAL_CONSOLE
-#    define CONSOLE_DEV   g_sci0port     /* SCI0 is console */
-#  endif
+/* CONFIG_SCI0_SERIAL_CONSOLE (implies CONFIG_SH1_SCI0 also defined) */
+
+#if defined(CONFIG_SCI0_SERIAL_CONSOLE)
+#  define CONSOLE_DEV     g_sci0port     /* SCI0 is console */
 #  define TTYS0_DEV       g_sci0port     /* SCI0 is tty0 */
-#  define TTYS1_DEV       g_sci1port     /* SCI1 is tty1 */
-#else
+#  ifdef CONFIG_SH1_SCI1
+#    define TTYS1_DEV     g_sci1port     /* SCI1 is tty1 */
+#  else
+#    undef TTYS1_DEV
+#  endif
+
+/* CONFIG_SCI1_SERIAL_CONSOLE (implies CONFIG_SH1_SCI1 also defined) */
+
+#elif defined(CONFIG_SCI1_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_sci1port     /* SCI1 is console */
 #  define TTYS0_DEV       g_sci1port     /* SCI1 is tty0 */
-#  define TTYS1_DEV       g_sci0port     /* SCI0 is tty1 */
+#  ifdef CONFIG_SH1_SCI0
+#    define TTYS1_DEV     g_sci0port     /* SCI0 is tty1 */
+#  else
+#    undef TTYS1_DEV                     /* No tty1 */
+#  endif
+
+/* No console, at least one of CONFIG_SH1_SCI0 and CONFIG_SH1_SCI1 defined */
+
+#elif defined(CONFIG_SH1_SCI0)
+#  undef  CONSOLE_DEV                    /* No console */
+#  define TTYS0_DEV       g_sci0port     /* SCI0 is tty0 */
+#  ifdef CONFIG_SH1_SCI1
+#    define TTYS1_DEV     g_sci1port     /* SCI1 is tty1 */
+#  else
+#    undef TTYS1_DEV                     /* No tty1 */
+#  endif
+
+/* Otherwise, there is no console and only CONFIG_SH1_SCI1 is defined */
+
+#else
+#  undef  CONSOLE_DEV                    /* No console */
+#  define TTYS0_DEV       g_sci1port     /* SCI1 is tty0 */
+#  undef TTYS1_DEV                       /* No tty1 */
 #endif
 
 /****************************************************************************
@@ -156,13 +186,18 @@ struct uart_ops_s g_sci_ops =
 
 /* I/O buffers */
 
+#ifdef CONFIG_SH1_SCI0
 static char g_sci0rxbuffer[CONFIG_SCI0_RXBUFSIZE];
 static char g_sci0txbuffer[CONFIG_SCI0_TXBUFSIZE];
+#endif
+#ifdef CONFIG_SH1_SCI1
 static char g_sci1rxbuffer[CONFIG_SCI1_RXBUFSIZE];
 static char g_sci1txbuffer[CONFIG_SCI1_TXBUFSIZE];
+#endif
 
-/* This describes the state of the SH1 sci0 port. */
+/* This describes the state of the SH1 SCI0 port. */
 
+#ifdef CONFIG_SH1_SCI0
 static struct up_dev_s g_sci0priv =
 {
   .scibase        = SH1_SCI0_BASE,
@@ -188,9 +223,11 @@ static uart_dev_t g_sci0port =
   .ops      = &g_sci_ops,
   .priv     = &g_sci0priv,
 };
+#endif
 
-/* This describes the state of the SH1 sci1 port. */
+/* This describes the state of the SH1 SCI1 port. */
 
+#ifdef CONFIG_SH1_SCI1
 static struct up_dev_s g_sci1priv =
 {
   .scibase        = SH1_SCI1_BASE,
@@ -216,6 +253,7 @@ static uart_dev_t g_sci1port =
   .ops      = &g_sci_ops,
   .priv     = &g_sci1priv,
 };
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -758,8 +796,12 @@ void up_earlyserialinit(void)
 
   /* Disable all UARTS */
 
+#ifdef TTYS0_DEV
   up_disableuartint(TTYS0_DEV.priv, NULL);
+#ifdef TTYS1_DEV
   up_disableuartint(TTYS1_DEV.priv, NULL);
+#endif
+#endif
 
   /* Configuration whichever one is the console */
 
@@ -788,8 +830,12 @@ void up_serialinit(void)
 
   /* Register all SCIs */
 
+#ifdef TTYS0_DEV
   (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
+#ifdef TTYS1_DEV
   (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
+#endif
+#endif
 }
 
 /****************************************************************************
