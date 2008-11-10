@@ -851,7 +851,7 @@ static void llutoascii(FAR struct lib_stream_s *obj, ubyte fmt, ubyte flags, uns
           if ((long long)lln < 0)
             {
               obj->put(obj, '-');
-              lln    = (unsigned long long)(-(long long)*lln);
+              lln    = (unsigned long long)(-(long long)lln);
             }
           else if (IS_SHOWPLUS(flags))
             {
@@ -1003,6 +1003,7 @@ static int getllusize(ubyte fmt, ubyte flags, unsigned long long lln)
  * Name: prejustify
  ****************************************************************************/
 
+#ifndef CONFIG_NOPRINTF_FIELDWIDTH
 static void prejustify(FAR struct lib_stream_s *obj, ubyte fmt,
                        ubyte flags, int fieldwidth, int numwidth)
 {
@@ -1062,11 +1063,13 @@ static void prejustify(FAR struct lib_stream_s *obj, ubyte fmt,
         break;
     }
 }
+#endif
 
 /****************************************************************************
  * Name: postjustify
  ****************************************************************************/
 
+#ifndef CONFIG_NOPRINTF_FIELDWIDTH
 static void postjustify(FAR struct lib_stream_s *obj, ubyte fmt,
                         ubyte flags, int fieldwidth, int numwidth)
 {
@@ -1094,6 +1097,8 @@ static void postjustify(FAR struct lib_stream_s *obj, ubyte fmt,
         break;
     }
 }
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
