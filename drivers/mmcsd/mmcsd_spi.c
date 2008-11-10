@@ -1350,7 +1350,7 @@ static void mmcsd_mediachanged(void *arg)
 int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
 {
   struct mmcsd_slot_s *slot;
-  ubyte devname[16];
+  char devname[16];
   int ret;
 
 #ifdef CONFIG_DEBUG
