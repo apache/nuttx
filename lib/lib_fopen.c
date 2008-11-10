@@ -212,7 +212,9 @@ FAR struct file_struct *lib_fdopen(int fd, FAR const char *mode,
         }
     }
 
+#if CONFIG_STDIO_BUFFER_SIZE > 0
 errout_with_sem:
+#endif
   stream_semgive(slist);
 
 errout:

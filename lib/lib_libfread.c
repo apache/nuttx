@@ -260,7 +260,9 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
             }
         }
 #endif
+#if CONFIG_STDIO_BUFFER_SIZE > 0
     short_read:
+#endif
       bytes_read = dest - (unsigned char*)ptr;
     err_out:
       lib_give_semaphore(stream);

@@ -168,8 +168,9 @@ void lib_releaselist(FAR struct streamlist *list)
 
        if (crefs <= 0)
           {
+#if CONFIG_STDIO_BUFFER_SIZE > 0
             int i;
-
+#endif
             /* Destroy the semaphore and release the filelist */
 
             (void)sem_destroy(&list->sl_sem);
