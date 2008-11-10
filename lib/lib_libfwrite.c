@@ -79,18 +79,18 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: lib_fwrite
  ****************************************************************************/
 
-ssize_t lib_fwrite(const void *ptr, size_t count, FILE *stream)
+ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
 #if CONFIG_STDIO_BUFFER_SIZE > 0
 {
-  const unsigned char *start = ptr;
-  const unsigned char *src   = ptr;
+  FAR const unsigned char *start = ptr;
+  FAR const unsigned char *src   = ptr;
   ssize_t ret = ERROR;
   unsigned char *dest;
 

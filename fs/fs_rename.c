@@ -72,7 +72,7 @@
  *
  ****************************************************************************/
 
-int rename(const char *oldpath, const char *newpath)
+int rename(FAR const char *oldpath, FAR const char *newpath)
 {
   FAR struct inode *oldinode;
   FAR struct inode *newinode;

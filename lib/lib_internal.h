@@ -70,7 +70,7 @@
 
 struct lib_stream_s;
 
-typedef void (*lib_putc_t)(struct lib_stream_s *this, int ch);
+typedef void (*lib_putc_t)(FAR struct lib_stream_s *this, int ch);
 
 struct lib_stream_s
 {
@@ -82,14 +82,14 @@ struct lib_stream_s
 struct lib_memstream_s
 {
   struct lib_stream_s  public;
-  char                *buffer;  /* Address of first byte in the buffer */
+  FAR char            *buffer;  /* Address of first byte in the buffer */
   int                  buflen;    /* Size of the buffer in bytes */
 };
 
 struct lib_stdstream_s
 {
   struct lib_stream_s  public;
-  FILE                *stream;
+  FAR FILE            *stream;
 };
 
 struct lib_rawstream_s
@@ -115,37 +115,37 @@ extern void  stream_semgive(FAR struct streamlist *list);
 
 /* Defined in lib_memstream.c */
 
-extern void lib_memstream(struct lib_memstream_s *memstream,
-                          char *bufstart, int buflen);
+extern void lib_memstream(FAR struct lib_memstream_s *memstream,
+                          FAR char *bufstart, int buflen);
 
 /* Defined in lib_stdstream.c */
 
-extern void lib_stdstream(struct lib_stdstream_s *stdstream,
-                          FILE *stream);
+extern void lib_stdstream(FAR struct lib_stdstream_s *stdstream,
+                          FAR FILE *stream);
 
 /* Defined in lib_rawstream.c */
 
-extern void lib_rawstream(struct lib_rawstream_s *rawstream,
+extern void lib_rawstream(FAR struct lib_rawstream_s *rawstream,
                           int fd);
 
 /* Defined in lib_lowstream.c */
 
 #ifdef CONFIG_ARCH_LOWPUTC
-extern void lib_lowstream(struct lib_stream_s *rawstream);
+extern void lib_lowstream(FAR struct lib_stream_s *rawstream);
 #endif
 
 /* Defined in lib_nullstream.c */
 
-extern void lib_nullstream(struct lib_stream_s *nullstream);
+extern void lib_nullstream(FAR struct lib_stream_s *nullstream);
 
 /* Defined in lib_libsprintf.c */
 
-extern int lib_sprintf (struct lib_stream_s *obj,
+extern int lib_sprintf (FAR struct lib_stream_s *obj,
                         const char *fmt, ...);
 
 /* Defined lib_libvsprintf.c */
 
-extern int lib_vsprintf(struct lib_stream_s *obj,
+extern int lib_vsprintf(FAR struct lib_stream_s *obj,
                         const char *src, va_list ap);
 
 /* Defined lib_rawprintf.c */
@@ -158,23 +158,23 @@ extern int lib_lowvprintf(const char *src, va_list ap);
 
 /* Defined in lib_libwrite.c */
 
-extern ssize_t lib_fwrite(const void *ptr, size_t count, FILE *stream);
+extern ssize_t lib_fwrite(const void *ptr, size_t count, FAR FILE *stream);
 
 /* Defined in lib_libfread.c */
 
-extern ssize_t lib_fread(void *ptr, size_t count, FILE *stream);
+extern ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream);
 
 /* Defined in lib_libfflush.c */
 
-extern ssize_t lib_fflush(FILE *stream, boolean bforce);
+extern ssize_t lib_fflush(FAR FILE *stream, boolean bforce);
 
 /* Defined in lib_rdflush.c */
 
-extern int lib_rdflush(FILE *stream);
+extern int lib_rdflush(FAR FILE *stream);
 
 /* Defined in lib_wrflush.c */
 
-int lib_wrflush(FILE *stream);
+int lib_wrflush(FAR FILE *stream);
 
 /* Defined in lib_sem.c */
 

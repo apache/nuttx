@@ -100,7 +100,7 @@
  *
  ****************************************************************************/
 
-int fgetpos(FILE *stream, fpos_t *pos)
+int fgetpos(FAR FILE *stream, FAR fpos_t *pos)
 {
   long position;
 

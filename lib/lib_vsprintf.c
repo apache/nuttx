@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib_vsprintf.c
+ * lib/lib_vsprintf.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -75,14 +75,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * vsprintf
+ * Name: vsprintf
  ****************************************************************************/
 
-int vsprintf (char *dest, const char *src, va_list ap)
+int vsprintf(FAR char *dest, const char *src, va_list ap)
 {
   struct lib_memstream_s memstream;
 
@@ -90,6 +90,6 @@ int vsprintf (char *dest, const char *src, va_list ap)
    * lib_vsprintf do the work.
    */
 
-  lib_memstream(&memstream, dest, LIB_BUFLEN_UNKNOWN);
-  return lib_vsprintf(&memstream.public, src, ap);
+  lib_memstream((FAR struct lib_memstream_s *)&memstream, dest, LIB_BUFLEN_UNKNOWN);
+  return lib_vsprintf((FAR struct lib_stream_s *)&memstream.public, src, ap);
 }

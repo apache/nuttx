@@ -43,9 +43,13 @@
  * Private Functions
  ****************************************************************************/
 
-static void stdstream_putc(struct lib_stream_s *this, int ch)
+/****************************************************************************
+ * Name: stdstream_putc
+ ****************************************************************************/
+
+static void stdstream_putc(FAR struct lib_stream_s *this, int ch)
 {
-  struct lib_stdstream_s *sthis = (struct lib_stdstream_s *)this;
+  FAR struct lib_stdstream_s *sthis = (FAR struct lib_stdstream_s *)this;
   if (this)
     {
       if (putc(ch, sthis->stream) != EOF)
@@ -59,8 +63,12 @@ static void stdstream_putc(struct lib_stream_s *this, int ch)
  * Public Functions
  ****************************************************************************/
 
-void lib_stdstream(struct lib_stdstream_s *stdstream,
-                   FILE *stream)
+/****************************************************************************
+ * Name: lib_stdstream
+ ****************************************************************************/
+
+void lib_stdstream(FAR struct lib_stdstream_s *stdstream,
+                   FAR FILE *stream)
 {
   stdstream->public.put  = stdstream_putc;
   stdstream->public.nput = 0;

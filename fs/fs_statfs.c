@@ -63,7 +63,7 @@ static inline int statpsuedofs(FAR struct inode *inode, FAR struct statfs *buf)
 }
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -82,10 +82,10 @@ static inline int statpsuedofs(FAR struct inode *inode, FAR struct statfs *buf)
  *
  ****************************************************************************/
 
-int statfs(const char *path, struct statfs *buf)
+int statfs(FAR const char *path, FAR struct statfs *buf)
 {
   FAR struct inode *inode;
-  const char       *relpath = NULL;
+  FAR const char   *relpath = NULL;
   int               ret     = OK;
 
   /* Sanity checks */

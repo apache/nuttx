@@ -121,7 +121,7 @@ static inline void _lib_consoleputc(int ch)
  ****************************************************************************/
 
 #ifdef CONFIG_FGETS_ECHO
-static inline void _lib_consoleputs(const char *str)
+static inline void _lib_consoleputs(FAR const char *str)
 {
   (void)write(1, str, strlen(str));
 }

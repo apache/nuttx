@@ -102,40 +102,40 @@ extern "C" {
 
 /* ANSI-like File System Interfaces */
 
-EXTERN int    fclose(FILE *stream);
-EXTERN int    fflush(FILE *stream);
-EXTERN int    feof(FILE *stream);
-EXTERN int    ferror(FILE *stream);
-EXTERN int    fgetc(FILE *stream);
-EXTERN int    fgetpos(FILE *stream, fpos_t *pos);
-EXTERN char  *fgets(char *s, int n, FILE *stream);
-EXTERN FILE  *fopen(const char *path, const char *type);
-EXTERN int    fprintf(FILE *stream, const char *format, ...);
-EXTERN int    fputc(int c, FILE *stream);
-EXTERN int    fputs(const char *s, FILE *stream);
-EXTERN size_t fread(void *ptr, size_t size, size_t n_items, FILE *stream);
+EXTERN int    fclose(FAR FILE *stream);
+EXTERN int    fflush(FAR FILE *stream);
+EXTERN int    feof(FAR FILE *stream);
+EXTERN int    ferror(FAR FILE *stream);
+EXTERN int    fgetc(FAR FILE *stream);
+EXTERN int    fgetpos(FAR FILE *stream, FAR fpos_t *pos);
+EXTERN char  *fgets(FAR char *s, int n, FAR FILE *stream);
+EXTERN FAR FILE *fopen(FAR const char *path, FAR const char *type);
+EXTERN int    fprintf(FAR FILE *stream, FAR const char *format, ...);
+EXTERN int    fputc(int c, FAR FILE *stream);
+EXTERN int    fputs(FAR const char *s, FAR FILE *stream);
+EXTERN size_t fread(FAR void *ptr, size_t size, size_t n_items, FAR FILE *stream);
 EXTERN int    fseek(FAR FILE *stream, long int offset, int whence);
-EXTERN int    fsetpos(FILE *stream, fpos_t *pos);
+EXTERN int    fsetpos(FAR FILE *stream, FAR fpos_t *pos);
 EXTERN long   ftell(FAR FILE *stream);
-EXTERN size_t fwrite(const void *ptr, size_t size, size_t n_items, FILE *stream);
-EXTERN char  *gets(char *s);
+EXTERN size_t fwrite(FAR const void *ptr, size_t size, size_t n_items, FAR FILE *stream);
+EXTERN FAR char *gets(FAR char *s);
 
 EXTERN int    printf(const char *format, ...);
-EXTERN int    puts(const char *s);
-EXTERN int    rename(const char *oldpath, const char *newpath);
-EXTERN int    sprintf(char *buf, const char *format, ...);
-EXTERN int    snprintf(char *buf, size_t size, const char *format, ...);
+EXTERN int    puts(FAR const char *s);
+EXTERN int    rename(FAR const char *oldpath, FAR const char *newpath);
+EXTERN int    sprintf(FAR char *buf, const char *format, ...);
+EXTERN int    snprintf(FAR char *buf, size_t size, const char *format, ...);
 
-EXTERN int    ungetc(int c, FILE *stream);
-EXTERN int    vprintf(const char *format, va_list ap);
-EXTERN int    vfprintf(FILE *stream, const char *format, va_list ap);
-EXTERN int    vsprintf(char *buf, const char *format, va_list ap);
-EXTERN int    vsnprintf(char *buf, size_t size, const char *format, va_list ap);
+EXTERN int    ungetc(int c, FAR FILE *stream);
+EXTERN int    vprintf(FAR const char *format, va_list ap);
+EXTERN int    vfprintf(FAR FILE *stream, const char *format, va_list ap);
+EXTERN int    vsprintf(FAR char *buf, const char *format, va_list ap);
+EXTERN int    vsnprintf(FAR char *buf, size_t size, const char *format, va_list ap);
 
 /* POSIX-like File System Interfaces */
 
-EXTERN FILE  *fdopen(int fd, const char *type);
-EXTERN int    statfs(const char *path, FAR struct statfs *buf);
+EXTERN FAR FILE *fdopen(int fd, FAR const char *type);
+EXTERN int    statfs(FAR const char *path, FAR struct statfs *buf);
 
 #undef EXTERN
 #if defined(__cplusplus)

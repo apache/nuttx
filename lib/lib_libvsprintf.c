@@ -109,60 +109,60 @@ enum
 /* Pointer to ASCII conversion */
 
 #ifdef CONFIG_PTR_IS_NOT_INT
-static void ptohex(struct lib_stream_s *obj, ubyte flags, void *p);
+static void ptohex(FAR struct lib_stream_s *obj, ubyte flags, FAR void *p);
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
-static int  getsizesize(ubyte fmt, ubyte flags, void *p)
+static int  getsizesize(ubyte fmt, ubyte flags, FAR void *p)
 #endif /* CONFIG_NOPRINTF_FIELDWIDTH */
 #endif /* CONFIG_PTR_IS_NOT_INT */
 
 /* Unsigned int to ASCII conversion */
 
-static void utodec(struct lib_stream_s *obj, unsigned int n);
-static void utohex(struct lib_stream_s *obj, unsigned int n, ubyte a);
-static void utooct(struct lib_stream_s *obj, unsigned int n);
-static void utobin(struct lib_stream_s *obj, unsigned int n);
-static void utoascii(struct lib_stream_s *obj, ubyte fmt,
+static void utodec(FAR struct lib_stream_s *obj, unsigned int n);
+static void utohex(FAR struct lib_stream_s *obj, unsigned int n, ubyte a);
+static void utooct(FAR struct lib_stream_s *obj, unsigned int n);
+static void utobin(FAR struct lib_stream_s *obj, unsigned int n);
+static void utoascii(FAR struct lib_stream_s *obj, ubyte fmt,
                      ubyte flags, unsigned int lln);
 
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
-static void fixup(ubyte fmt, ubyte *flags, int *n);
+static void fixup(ubyte fmt, FAR ubyte *flags, int *n);
 static int  getusize(ubyte fmt, ubyte flags, unsigned int lln);
 #endif
 
 /* Unsigned long int to ASCII conversion */
 
 #ifdef CONFIG_LONG_IS_NOT_INT
-static void lutodec(struct lib_stream_s *obj, unsigned long ln);
-static void lutohex(struct lib_stream_s *obj, unsigned long ln, ubyte a);
-static void lutooct(struct lib_stream_s *obj, unsigned long ln);
-static void lutobin(struct lib_stream_s *obj, unsigned long ln);
-static void lutoascii(struct lib_stream_s *obj, ubyte fmt,
+static void lutodec(FAR struct lib_stream_s *obj, unsigned long ln);
+static void lutohex(FAR struct lib_stream_s *obj, unsigned long ln, ubyte a);
+static void lutooct(FAR struct lib_stream_s *obj, unsigned long ln);
+static void lutobin(FAR struct lib_stream_s *obj, unsigned long ln);
+static void lutoascii(FAR struct lib_stream_s *obj, ubyte fmt,
                       ubyte flags, unsigned long ln);
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
-static void lfixup(ubyte fmt, ubyte *flags, long *ln);
-static int  getlusize(ubyte fmt, ubyte flags, unsigned long ln);
+static void lfixup(ubyte fmt, FAR ubyte *flags, long *ln);
+static int  getlusize(ubyte fmt, FAR ubyte flags, unsigned long ln);
 #endif
 #endif
 
 /* Unsigned long long int to ASCII conversions */
 
 #ifdef CONFIG_HAVE_LONG_LONG
-static void llutodec(struct lib_stream_s *obj, unsigned long long lln);
-static void llutohex(struct lib_stream_s *obj, unsigned long long lln, ubyte a);
-static void llutooct(struct lib_stream_s *obj, unsigned long long lln);
-static void llutobin(struct lib_stream_s *obj, unsigned long long lln);
-static void llutoascii(struct lib_stream_s *obj, ubyte fmt,
+static void llutodec(FAR struct lib_stream_s *obj, unsigned long long lln);
+static void llutohex(FAR struct lib_stream_s *obj, unsigned long long lln, ubyte a);
+static void llutooct(FAR struct lib_stream_s *obj, unsigned long long lln);
+static void llutobin(FAR struct lib_stream_s *obj, unsigned long long lln);
+static void llutoascii(FAR struct lib_stream_s *obj, ubyte fmt,
                        ubyte flags, unsigned long long lln);
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
-static void llfixup(ubyte fmt, ubyte *flags, long long *lln);
-static int  getllusize(ubyte fmt, ubyte flags, unsigned long long lln);
+static void llfixup(ubyte fmt, FAR ubyte *flags, FAR long long *lln);
+static int  getllusize(ubyte fmt, FAR ubyte flags, FAR unsigned long long lln);
 #endif
 #endif
 
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
-static void prejustify(struct lib_stream_s *obj, ubyte fmt,
+static void prejustify(FAR struct lib_stream_s *obj, ubyte fmt,
                        ubyte flags, int fieldwidth, int numwidth);
-static void postjustify(struct lib_stream_s *obj, ubyte fmt,
+static void postjustify(FAR struct lib_stream_s *obj, ubyte fmt,
                         ubyte flags, int fieldwidth, int numwidth);
 #endif
 
@@ -193,12 +193,12 @@ static const char g_nullstring[] = "(null)";
  ****************************************************************************/
 
 #ifdef CONFIG_PTR_IS_NOT_INT
-static void ptohex(struct lib_stream_s *obj, ubyte flags, void *p)
+static void ptohex(FAR struct lib_stream_s *obj, ubyte flags, FAR void *p)
 {
   union
   {
-    uint32  dw;
-    void   *p;
+    uint32    dw;
+    FAR void *p;
   } u;
   ubyte bits;
 
@@ -234,11 +234,10 @@ static void ptohex(struct lib_stream_s *obj, ubyte flags, void *p)
  ****************************************************************************/
 
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
-static int getpsize(ubyte flags, void *p)
+static int getpsize(ubyte flags, FAR void *p)
 {
   struct lib_stream_s nullstream;
   lib_nullstream(&nullstream);
-
 
   ptohex(&nullstream, flags, p);
   return nullstream.nput;
@@ -251,7 +250,7 @@ static int getpsize(ubyte flags, void *p)
  * Name: utodec
  ****************************************************************************/
 
-static void utodec(struct lib_stream_s *obj, unsigned int n)
+static void utodec(FAR struct lib_stream_s *obj, unsigned int n)
 {
   unsigned int remainder = n % 10;
   unsigned int dividend  = n / 10;
@@ -268,7 +267,7 @@ static void utodec(struct lib_stream_s *obj, unsigned int n)
  * Name: utohex
  ****************************************************************************/
 
-static void utohex(struct lib_stream_s *obj, unsigned int n, ubyte a)
+static void utohex(FAR struct lib_stream_s *obj, unsigned int n, ubyte a)
 {
   boolean nonzero = FALSE;
   ubyte bits;
@@ -301,7 +300,7 @@ static void utohex(struct lib_stream_s *obj, unsigned int n, ubyte a)
  * Name: utooct
  ****************************************************************************/
 
-static void utooct(struct lib_stream_s *obj, unsigned int n)
+static void utooct(FAR struct lib_stream_s *obj, unsigned int n)
 {
   unsigned int remainder = n & 0x7;
   unsigned int dividend = n >> 3;
@@ -318,7 +317,7 @@ static void utooct(struct lib_stream_s *obj, unsigned int n)
  * Name: utobin
  ****************************************************************************/
 
-static void utobin(struct lib_stream_s *obj, unsigned int n)
+static void utobin(FAR struct lib_stream_s *obj, unsigned int n)
 {
   unsigned int remainder = n & 1;
   unsigned int dividend = n >> 1;
@@ -335,7 +334,7 @@ static void utobin(struct lib_stream_s *obj, unsigned int n)
  * Name: lutoascii
  ****************************************************************************/
 
-static void utoascii(struct lib_stream_s *obj, ubyte fmt, ubyte flags, unsigned int n)
+static void utoascii(FAR struct lib_stream_s *obj, ubyte fmt, ubyte flags, unsigned int n)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -447,7 +446,7 @@ static void utoascii(struct lib_stream_s *obj, ubyte fmt, ubyte flags, unsigned 
  ****************************************************************************/
 
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
-static void fixup(ubyte fmt, ubyte *flags, int *n)
+static void fixup(ubyte fmt, FAR ubyte *flags, FAR int *n)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -504,7 +503,7 @@ static int getusize(ubyte fmt, ubyte flags, unsigned int n)
  * Name: lutodec
  ****************************************************************************/
 
-static void lutodec(struct lib_stream_s *obj, unsigned long n)
+static void lutodec(FAR struct lib_stream_s *obj, unsigned long n)
 {
   unsigned int  remainder = n % 10;
   unsigned long dividend  = n / 10;
@@ -521,7 +520,7 @@ static void lutodec(struct lib_stream_s *obj, unsigned long n)
  * Name: lutohex
  ****************************************************************************/
 
-static void lutohex(struct lib_stream_s *obj, unsigned long n, ubyte a)
+static void lutohex(FAR struct lib_stream_s *obj, unsigned long n, ubyte a)
 {
   boolean nonzero = FALSE;
   ubyte bits;
@@ -554,7 +553,7 @@ static void lutohex(struct lib_stream_s *obj, unsigned long n, ubyte a)
  * Name: lutooct
  ****************************************************************************/
 
-static void lutooct(struct lib_stream_s *obj, unsigned long n)
+static void lutooct(FAR struct lib_stream_s *obj, unsigned long n)
 {
   unsigned int  remainder = n & 0x7;
   unsigned long dividend  = n >> 3;
@@ -571,7 +570,7 @@ static void lutooct(struct lib_stream_s *obj, unsigned long n)
  * Name: lutobin
  ****************************************************************************/
 
-static void lutobin(struct lib_stream_s *obj, unsigned long n)
+static void lutobin(FAR struct lib_stream_s *obj, unsigned long n)
 {
   unsigned int  remainder = n & 1;
   unsigned long dividend  = n >> 1;
@@ -588,7 +587,7 @@ static void lutobin(struct lib_stream_s *obj, unsigned long n)
  * Name: lutoascii
  ****************************************************************************/
 
-static void lutoascii(struct lib_stream_s *obj, ubyte fmt, ubyte flags, unsigned long ln)
+static void lutoascii(FAR struct lib_stream_s *obj, ubyte fmt, ubyte flags, unsigned long ln)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -695,7 +694,7 @@ static void lutoascii(struct lib_stream_s *obj, ubyte fmt, ubyte flags, unsigned
  ****************************************************************************/
 
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
-static void lfixup(ubyte fmt, ubyte *flags, long *ln)
+static void lfixup(ubyte fmt, FAR ubyte *flags, FAR long *ln)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -754,7 +753,7 @@ static int getlusize(ubyte fmt, ubyte flags, unsigned long ln)
  * Name: llutodec
  ****************************************************************************/
 
-static void llutodec(struct lib_stream_s *obj, unsigned long long n)
+static void llutodec(FAR struct lib_stream_s *obj, unsigned long long n)
 {
   unsigned int remainder = n % 10;
   unsigned long long dividend = n / 10;
@@ -771,7 +770,7 @@ static void llutodec(struct lib_stream_s *obj, unsigned long long n)
  * Name: llutohex
  ****************************************************************************/
 
-static void llutohex(struct lib_stream_s *obj, unsigned long long n, ubyte a)
+static void llutohex(FAR struct lib_stream_s *obj, unsigned long long n, ubyte a)
 {
   boolean nonzero = FALSE;
   ubyte bits;
@@ -804,7 +803,7 @@ static void llutohex(struct lib_stream_s *obj, unsigned long long n, ubyte a)
  * Name: llutooct
  ****************************************************************************/
 
-static void llutooct(struct lib_stream_s *obj, unsigned long long n)
+static void llutooct(FAR struct lib_stream_s *obj, unsigned long long n)
 {
   unsigned int remainder = n & 0x7;
   unsigned long long dividend = n >> 3;
@@ -821,7 +820,7 @@ static void llutooct(struct lib_stream_s *obj, unsigned long long n)
  * Name: llutobin
  ****************************************************************************/
 
-static void llutobin(struct lib_stream_s *obj, unsigned long long n)
+static void llutobin(FAR struct lib_stream_s *obj, unsigned long long n)
 {
   unsigned int remainder = n & 1;
   unsigned long long dividend = n >> 1;
@@ -838,7 +837,7 @@ static void llutobin(struct lib_stream_s *obj, unsigned long long n)
  * Name: llutoascii
  ****************************************************************************/
 
-static void llutoascii(struct lib_stream_s *obj, ubyte fmt, ubyte flags, unsigned long long lln)
+static void llutoascii(FAR struct lib_stream_s *obj, ubyte fmt, ubyte flags, unsigned long long lln)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -945,7 +944,7 @@ static void llutoascii(struct lib_stream_s *obj, ubyte fmt, ubyte flags, unsigne
  ****************************************************************************/
 
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
-static void llfixup(ubyte fmt, ubyte *flags, long long *lln)
+static void llfixup(ubyte fmt, FAR ubyte *flags, FAR long long *lln)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -1004,7 +1003,7 @@ static int getllusize(ubyte fmt, ubyte flags, unsigned long long lln)
  * Name: prejustify
  ****************************************************************************/
 
-static void prejustify(struct lib_stream_s *obj, ubyte fmt,
+static void prejustify(FAR struct lib_stream_s *obj, ubyte fmt,
                        ubyte flags, int fieldwidth, int numwidth)
 {
   int i;
@@ -1068,7 +1067,7 @@ static void prejustify(struct lib_stream_s *obj, ubyte fmt,
  * Name: postjustify
  ****************************************************************************/
 
-static void postjustify(struct lib_stream_s *obj, ubyte fmt,
+static void postjustify(FAR struct lib_stream_s *obj, ubyte fmt,
                         ubyte flags, int fieldwidth, int numwidth)
 {
   int i;
@@ -1103,7 +1102,7 @@ static void postjustify(struct lib_stream_s *obj, ubyte fmt,
  * lib_vsprintf
  ****************************************************************************/
 
-int lib_vsprintf(struct lib_stream_s *obj, const char *src, va_list ap)
+int lib_vsprintf(FAR struct lib_stream_s *obj, const char *src, va_list ap)
 {
   char           *ptmp;
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH

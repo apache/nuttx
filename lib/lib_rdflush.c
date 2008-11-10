@@ -92,7 +92,7 @@
  ****************************************************************************/
 
 #if CONFIG_STDIO_BUFFER_SIZE > 0
-int lib_rdflush(FILE *stream)
+int lib_rdflush(FAR FILE *stream)
 {
   if (!stream)
     {

@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib_fgetc.c
+ * lib/lib_fgetc.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -84,7 +84,7 @@
  * fgetc
  **************************************************************************/
 
-int fgetc(FILE *stream)
+int fgetc(FAR FILE *stream)
 {
   unsigned char c;
   if (lib_fread(&c, 1, stream) > 0)

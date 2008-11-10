@@ -102,7 +102,7 @@
  *
  ****************************************************************************/
 
-int fsetpos(FILE *stream, fpos_t *pos)
+int fsetpos(FAR FILE *stream, FAR fpos_t *pos)
 {
 #if CONFIG_DEBUG
   if (!stream || !pos)
@@ -112,5 +112,5 @@ int fsetpos(FILE *stream, fpos_t *pos)
     }
 #endif
 
-  return fseek(stream, (off_t)*pos, SEEK_SET);
+  return fseek(stream, (FAR off_t)*pos, SEEK_SET);
 }

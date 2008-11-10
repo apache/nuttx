@@ -99,7 +99,7 @@
  *
  ****************************************************************************/
 
-int fflush(FILE *stream)
+int fflush(FAR FILE *stream)
 {
   /* Is the stream argument NULL? */
 
