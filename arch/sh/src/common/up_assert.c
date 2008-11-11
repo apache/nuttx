@@ -122,22 +122,27 @@ static void up_stackdump(uint32 sp, uint32 stack_base)
 #ifdef CONFIG_ARCH_STACKDUMP
 static inline void up_registerdump(void)
 {
+  uint32 *ptr = current_regs;
+
   /* Are user registers available from interrupt processing? */
 
-  if (current_regs)
+  if (ptr)
     {
-      int regs;
-
       /* Yes.. dump the interrupt registers */
 
-      for (regs = REG_R0; regs <= REG_R15; regs += 8)
-        {
-          uint32 *ptr = (uint32*)&current_regs[regs];
-          lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-                 regs, ptr[0], ptr[1], ptr[2], ptr[3],
-                 ptr[4], ptr[5], ptr[6], ptr[7]);
-        }
-      lldbg("SR: %08x\n", current_regs[REG_SR]);
+      lldbg("PC: %08x SR=%08x\n",
+            ptr[REG_PC], ptr[REG_SR]);
+
+      lldbg("PR: %08x GBR: %08x MACH: %08x MACL: %08x\n",
+            ptr[REG_PR], ptr[REG_GBR], ptr[REG_MACH], ptr[REG_MACL]);
+
+      lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n", 0,
+            ptr[REG_R0], ptr[REG_R1], ptr[REG_R2], ptr[REG_R3],
+            ptr[REG_R4], ptr[REG_R5], ptr[REG_R6], ptr[REG_R7]);
+
+      lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n", 8,
+            ptr[REG_R8], ptr[REG_R9], ptr[REG_R10], ptr[REG_R11],
+            ptr[REG_R12], ptr[REG_R13], ptr[REG_R14], ptr[REG_R15]);
     }
 }
 #else
