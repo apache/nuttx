@@ -174,9 +174,9 @@
  **************************************************************************/
 
 #ifdef HAVE_CONSOLE
-int inline up_txready(void)
+static inline int up_txready(void)
 {
-  return getreg8(SH1_SCI_BASE + SH1_SCI_SSR_OFFSET) & SH1_SCISSR_TDRE;
+  return (getreg8(SH1_SCI_BASE + SH1_SCI_SSR_OFFSET) & SH1_SCISSR_TDRE != 0);
 }
 #endif
 
