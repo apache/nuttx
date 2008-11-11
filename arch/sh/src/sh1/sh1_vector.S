@@ -73,15 +73,14 @@
  *
  *   R4  : IRQ vector number
  *   SP -> Saved R4
- *         Saved SP (R15)
  *         PC
  *         SR
  *
  ************************************************************************************/
 
 	.macro	trampoline, irq, label
-	mov.l	r4, @-r15		/* Save R4 on the stack */
-	mov.w	.L\label, r4		/* With the IRQ number in R4 */
+	mov.l	r4, @-r15		/* Save the value of R4 on the stack */
+	mov.w	.L\label, r4		/* R4=IRQ number */
 	bra	_up_vector		/* Jump to the common vector handling logic */
 	nop
 .L\label:
@@ -245,6 +244,169 @@ _up_cmi_handler:
 #endif
 
 /*****************************************************************************
+ * Name: _up_vector
+ *
+ * Description:
+ *   Execption entry point.  Upon entry:
+ *
+ *  R4 :  Holds IRQ number
+ *  SP -> Saved R4		(REG_R4=19)	See irq.h
+ *        PC			(REG_PC=20)
+ *        SR			(REG_SR=21)
+ *
+ *****************************************************************************/
+
+	.global _up_vector
+	.type	_up_vector, #function
+
+_up_vector:
+	/* Save r0-r3, r5-r7 on the stack so that we have a registers to work with.
+	 * After this, the stack will look like:
+	 *
+	 *  SP -> macl		(REG_MACL=10)	See irq.h
+	 *        mach		(REG_MACH=11)
+	 *        r0		(REG_R0=12)
+	 *        r1		(REG_R1=13)
+	 *        r2		(REG_R2=14)
+	 *        r3		(REG_R3=15)
+	 *        r5		(REG_R5=16)
+	 *        r6		(REG_R6=17)
+	 *        r7		(REG_R7=18)
+	 *        R4		(REG_R4=19)
+	 *        ...
+	 */
+
+	mov.l	r7, @-r15
+	mov.l	r6, @-r15
+
+	stc     sr, r6			/* Mask all interrupts */
+	mov.l	.Lintmask, r7
+	or	r7, r6
+	ldc     r6, sr
+
+	mov.l	r5, @-r15
+	mov.l	r3, @-r15
+	mov.l	r2, @-r15
+	mov.l	r1, @-r15
+	mov.l	r0, @-r15
+
+	sts.l	mach, @-r15
+	sts.l	macl, @-r15
+
+	/* Then save the value of the SP *before* the interrupt ocurred
+	 *
+	 * SP -> SP		(REG_SP=9) See irq.h
+	 *       macl		(REG_MACL=10)
+	 *       mach		(REG_MACH=11)
+	 *       ...
+	 */
+
+	mov	r15, r5		/* R5 = current SP */
+	add	#(12*4), r5	/* Account for sr, pc, r0-r7, mach, and macl */
+	mov.l	r5, @-r15	/* Save the SP before the interrupt */
+	
+	/* Save the remaining registers on the stack:
+	 *
+	 * SP -> r8		(REG_R8=0) See irq.h
+	 *       r9		(REG_R9=1)
+	 *       r10		(REG_R10=2)
+	 *       r11		(REG_R11=3)
+	 *       r12		(REG_R12=4)
+	 *       r13		(REG_R13=5)
+	 *       r14		(REG_R14=6)
+	 *       pr		(REG_PR=7)
+	 *       gbr		(REG_GBR=8)
+	 *       SP		(REG_SP=9)
+	 *       ...
+	 */
+
+	stc.l	gbr, @-r15
+	sts.l	pr, @-r15
+
+	mov.l	r14, @-r15
+	mov.l	r13, @-r15
+	mov.l	r12, @-r15
+	mov.l	r11, @-r15
+	mov.l	r10, @-r15
+	mov.l	r9, @-r15
+	mov.l	r8, @-r15
+
+	/* Setup parameters: R4=IRQ number, R5=base of saved state */
+
+	mov	r15, r5
+
+	/* Switch to the interrupt stack */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+	mov.l	.Lintstack, r15		/* SP = interrupt stack base */
+	mov.l	r5, @sp			/* Save the user stack pointer (pre-decremented) */
+
+	/* Dispatch the interrupt */
+
+        mov.l   .Ldoirq, r0
+        jsr     @r0
+        mov     r15, r14
+
+	/* Recover the user stack point */
+
+	mov.l	@sp, r15
+#else
+	/* Dispatch the interrupt */
+
+        mov.l   .Ldoirq, r0
+        jsr     @r0
+        mov     r15, r14
+#endif
+	/* On return, R0 holds the address of the base of the XCPTCONTEXT
+	 * structure to use for the return -- may not be the same as the
+	 * one that we passed in via r5.  If the value is different, then
+	 * we cannot assume that the values lie on the stack and we will
+	 * need to execute some more complete logic.
+	 */
+
+	cmp/eq	r0, r15
+	bf	.Lcontextswitch
+	mov	r0, r15
+
+	/* Restore registers from the stack. */
+
+	mov.l	@r15+, r8	/* 0-8: r8-r14, pr, and gbr */
+	mov.l	@r15+, r9
+	mov.l	@r15+, r10
+	mov.l	@r15+, r11
+	mov.l	@r15+, r12
+	mov.l	@r15+, r13
+	mov.l	@r15+, r14
+
+	lds.l	@r15+, pr
+	ldc.l	@r15+, gbr
+
+	add	#4, r15		/* 9: Skip SP restore */
+
+	lds.l	@r15+, macl	/* 10-11: mach and macl */
+	lds.l	@r15+, mach
+
+	mov.l	@r15+, r0	/* 12-18: r0-r3, r5-r7 */
+	mov.l	@r15+, r1
+	mov.l	@r15+, r2
+	mov.l	@r15+, r3
+	mov.l	@r15+, r5
+	mov.l	@r15+, r6
+	mov.l	@r15+, r7
+
+	mov.l	@r15+, r4	/* 19: r4 */
+	rte			/* 20-21: pc and sr */
+	nop
+	.align	2
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+.Lintstack:
+	.long	_up_stackbase
+#endif
+.Ldoirq:
+        .long   _up_doirq
+        .size   _up_vector, .-_up_vector
+
+/*****************************************************************************
  * Name: _up_fullcontextrestore
  *
  * Description:
@@ -258,98 +420,21 @@ _up_cmi_handler:
 	.type	_up_fullcontextrestore, #function
 
 _up_fullcontextrestore:
-	stc     sr, r8		/* Mask all interrupts */
+	/* Mask all interrupts */
+
+	stc     sr, r8
 	mov.l	.Lintmask, r9
 	or	r9, r8
 	ldc     r8, sr
 
-	mov	r5, r15		/* Replace stack pointer with the context save */
-	bra	_up_restoreregs
-	.size	_up_fullcontextrestore, .-_up_fullcontextrestore
+	/* Replace stack pointer with the context save */
 
-/*****************************************************************************
- * Name: _up_vector
- *
- * Description:
- *   Execption entry point.  Upon entry:
- *
- *  R4 :  Holds IRQ number
- *  SP -> Saved R4
- *        Saved SP (R15)
- *        PC
- *        SR
- *
- *****************************************************************************/
+	mov	r4, r15
 
-	.global _up_vector
-	.type	_up_vector, #function
+	/* Restore registers from a context structure */
 
-_up_vector:
-	/* Save the registers on the stack. (R4 is already saved) */
-
-	sts.l	macl, @-r15
-	sts.l	mach, @-r15
-	stc.l	gbr, @-r15
-	sts.l	pr, @-r15
-
-	mov.l	r14, @-r15
-	mov.l	r13, @-r15
-	mov.l	r12, @-r15
-	mov.l	r11, @-r15
-	mov.l	r10, @-r15
-	mov.l	r9, @-r15
-	mov.l	r8, @-r15
-
-	stc     sr, r8			/* Mask all interrupts */
-	mov.l	.Lintmask, r9
-	or	r9, r8
-	ldc     r8, sr
-
-	mov.l	r7, @-r15
-	mov.l	r6, @-r15
-	mov.l	r5, @-r15
-	mov.l	r3, @-r15
-	mov.l	r2, @-r15
-	mov.l	r1, @-r15
-	mov.l	r0, @r15
-
-	/* Setup parameters: R4=IRQ number, R5=base of saved state */
-
-	mov	r15, r5
-
-	/* Switch to the interrupt stack */
-
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
-	mov.l	.Lintstack, r15		/* SP = interrupt stack base */
-	mov.l	r5, @sp			/* Save the user stack pointer */
-#endif
-	/* Dispatch the interrupt */
-
-        mov.l   .Ldoirq, r0
-        jsr     @r0
-        mov     r15, r14
-
-	/* On return, R0 holds the address of the base of the XCPTCONTEXT
-	 * structure to use for the return (may not be the same as the
-	 * one that we passed in via r5.
-	 */
-
-	add	#-XCPTCONTEXT_SIZE, r0
-	mov	r0, r15
-
-	/* Restore registers.  R15 may point to either the stack or a saved
-	 * context structure inside of a TCB.
-	 */
-
-_up_restoreregs:
-	mov.l	@r15+, r0
-	mov.l	@r15+, r1
-	mov.l	@r15+, r2
-	mov.l	@r15+, r3
-	mov.l	@r15+, r5
-	mov.l	@r15+, r6
-	mov.l	@r15+, r7
-	mov.l	@r15+, r8
+.Lcontextswitch:
+	mov.l	@r15+, r8	/* 0-8: r8-r14, pr, and gbr */
 	mov.l	@r15+, r9
 	mov.l	@r15+, r10
 	mov.l	@r15+, r11
@@ -359,24 +444,50 @@ _up_restoreregs:
 
 	lds.l	@r15+, pr
 	ldc.l	@r15+, gbr
-	lds.l	@r15+, mach
-	lds.l	@r15+, macl
 
+	mov.l	@r15+, r4	/* r4: Saved SP */
+
+	lds.l	@r15+, macl	/* 10-11: mach and macl */
+	lds.l	@r15+, mach
+
+	mov.l	@r15+, r0	/* 12-17: r0-r3, r5-r6 */
+	mov.l	@r15+, r1
+	mov.l	@r15+, r2
+	mov.l	@r15+, r3
+	mov.l	@r15+, r5
+	mov.l	@r15+, r6
+
+	/* Copy the remainder of the stack context to the target stack.
+	 * At this point r15 points to offset REG_R6.
+	 */
+
+	add	#-16, r4	/* R4 points to offset REG_R7 in the new stack */
+	mov.l	@r15+, r7	/* R7=Saved R7 value */
+	mov.l	r7, @r4		/* Save at offset REG_R7 in the new stack */
+	mov.l	@r15+, r7	/* R7=Save R4 value */
+	mov.l	r7, @(4,r4)	/* Save at offset REG_R4 in the new stack */
+	mov.l	@r15+, r7	/* R7=Save PC value */
+	mov.l	r7, @(8,r4)	/* Save at offset REG_PC in the new stack */
+	mov.l	@r15+, r7	/* R7=Save SR value */
+	mov.l	r7, @(12,r4)	/* Save at offset REG_SR in the new stack */
+
+	/* Set the new stack pointer */
+
+	mov	r4, r15
+
+	/* Then recover the final register values from the new stack */
+
+	mov.l	@r15+, r7
 	mov.l	@r15+, r4
-	mov.l	@r15, r15	/* The real stack pointer */
+
+	/* And return from interrupt */
+
 	rte
 	nop
-
 	.align	2
 .Lintmask:
 	.long	0x000000f0
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
-.Lintstack:
-	.long	_up_stackbase
-#endif
-.Ldoirq:
-        .long   _up_doirq
-        .size   _up_vector, .-_up_vector
+	.size	_up_fullcontextrestore, .-_up_fullcontextrestore
 
 /************************************************************************************
  *  Name: up_interruptstack/g_userstack
@@ -388,14 +499,14 @@ _up_restoreregs:
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	.bss
-	.align	4
+	.align	2
 	.globl	_g_userstack
 	.type	_g_userstack, object
 _up_interruptstack:
 	.skip	((CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4)
 _g_userstack:
 _up_stackbase:
-	.skip	4
+	.skip	2
 	.size	_g_userstack, 4
 	.size	_up_interruptstack, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 #endif

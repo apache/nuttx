@@ -349,38 +349,44 @@
 
 /* Saved to the stacked by up_vector */
 
-#define REG_R0              (0)
-#define REG_R1              (1)
-#define REG_R2              (2)
-#define REG_R3              (3)
-#define REG_R5              (5)
-#define REG_R6              (6)
-#define REG_R7              (7)
-#define REG_R8              (8)
-#define REG_R9              (9)
-#define REG_R10             (10)
-#define REG_R11             (11)
-#define REG_R12             (12)
-#define REG_R13             (13)
-#define REG_R14             (14)
+#define REG_R8              (0)
+#define REG_R9              (1)
+#define REG_R10             (2)
+#define REG_R11             (3)
+#define REG_R12             (4)
+#define REG_R13             (5)
+#define REG_R14             (6)
 
-#define REG_PR              (15)
-#define REG_GBR             (16)
-#define REG_MACH            (17)
-#define REG_MACL            (18)
+#define REG_PR              (7)
+#define REG_GBR             (8)
+
+/* The value of the stack pointer *before* the interrupt occurred */
+
+#define REG_R15             (9)
+#define REG_SP              REG_R15
+
+/* These registers do not need to be preserved by up_saveusercontext */
+
+#define REG_MACL            (10)
+#define REG_MACH            (11)
+#define REG_R0              (12)
+#define REG_R1              (13)
+#define REG_R2              (14)
+#define REG_R3              (15)
+#define REG_R5              (16)
+#define REG_R6              (17)
+#define REG_R7              (18)
 
 /* Saved to the stack by the trampoline logic */
 
 #define REG_R4              (19)
-#define REG_R15             (20)
-#define REG_SP              REG_R15
 
 /* Pushed by hardware when the exception is taken */
 
-#define REG_PC              (21)
-#define REG_SR              (22)
+#define REG_PC              (20)
+#define REG_SR              (21)
 
-#define XCPTCONTEXT_REGS    (23)
+#define XCPTCONTEXT_REGS    (22)
 #define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 
 /************************************************************************************
