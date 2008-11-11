@@ -148,7 +148,7 @@ void _exit(int status)
 
   (void)irqsave();
 
-  slldbg("TCB=%p exitting\n", tcb);
+  slldbg("TCB=%p exitting\n", g_readytorun.head);
 
 #if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
   slldbg("Other tasks:\n");
@@ -164,7 +164,6 @@ void _exit(int status)
    */
 
   tcb = (_TCB*)g_readytorun.head;
-  slldbg("New Active Task TCB=%p\n", tcb);
 
   /* Then switch contexts */
 
