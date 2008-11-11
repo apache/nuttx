@@ -52,7 +52,7 @@
 #undef  CONFIG_SUPPRESS_INTERRUPTS    /* DEFINED: Do not enable interrupts */
 #undef  CONFIG_SUPPRESS_TIMER_INTS    /* DEFINED: No timer */
 #undef  CONFIG_SUPPRESS_SERIAL_INTS   /* DEFINED: Console will poll */
-#undef  CONFIG_SUPPRESS_SCI_CONFIG   /* DEFINED: Do not reconfig SCI */
+#undef  CONFIG_SUPPRESS_SCI_CONFIG    /* DEFINED: Do not reconfig SCI */
 #undef  CONFIG_DUMP_ON_EXIT           /* DEFINED: Dump task state on exit */
 
 /* Determine which (if any) console driver to use */

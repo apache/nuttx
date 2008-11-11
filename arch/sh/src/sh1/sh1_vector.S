@@ -339,7 +339,7 @@ _up_vector:
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	mov.l	.Lintstack, r15		/* SP = interrupt stack base */
-	mov.l	r5, @sp			/* Save the user stack pointer (pre-decremented) */
+	mov.l	r5, @r15		/* Save the user stack pointer (pre-decremented) */
 
 	/* Dispatch the interrupt */
 
@@ -349,7 +349,7 @@ _up_vector:
 
 	/* Recover the user stack point */
 
-	mov.l	@sp, r15
+	mov.l	@15, r15
 #else
 	/* Dispatch the interrupt */
 
