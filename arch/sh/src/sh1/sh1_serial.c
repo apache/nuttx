@@ -52,6 +52,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
+#include "os_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -155,7 +156,6 @@ static void    up_shutdown(struct uart_dev_s *dev);
 static int     up_attach(struct uart_dev_s *dev);
 static void    up_detach(struct uart_dev_s *dev);
 static int     up_interrupt(int irq, void *context);
-static int     up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int     up_receive(struct uart_dev_s *dev, uint32 *status);
 static void    up_rxint(struct uart_dev_s *dev, boolean enable);
 static boolean up_rxavailable(struct uart_dev_s *dev);
@@ -173,7 +173,6 @@ struct uart_ops_s g_sci_ops =
   .shutdown       = up_shutdown,
   .attach         = up_attach,
   .detach         = up_detach,
-  .ioctl          = up_ioctl,
   .receive        = up_receive,
   .rxint          = up_rxint,
   .rxavailable    = up_rxavailable,
@@ -201,7 +200,7 @@ static struct up_dev_s g_sci0priv =
 {
   .scibase        = SH1_SCI0_BASE,
   .baud           = CONFIG_SCI0_BAUD,
-  .irq            = SH1_SCI0_IRQ,
+  .irq            = SH1_SCI0_IRQBASE,
   .parity         = CONFIG_SCI0_PARITY,
   .bits           = CONFIG_SCI0_BITS,
   .stopbits2      = CONFIG_SCI0_2STOP,
@@ -231,7 +230,7 @@ static struct up_dev_s g_sci1priv =
 {
   .scibase        = SH1_SCI1_BASE,
   .baud           = CONFIG_SCI1_BAUD,
-  .irq            = SH1_SCI1_IRQ,
+  .irq            = SH1_SCI1_IRQBASE,
   .parity         = CONFIG_SCI1_PARITY,
   .bits           = CONFIG_SCI1_BITS,
   .stopbits2      = CONFIG_SCI1_2STOP,
@@ -386,6 +385,7 @@ static inline void up_setbrr(struct up_dev_s *priv, unsigned int baud)
 static int up_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_SCI_CONFIG
+  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   ubyte smr;
 
   /* Disable the transmitter and receiver */
@@ -404,11 +404,11 @@ static int up_setup(struct uart_dev_s *dev)
       smr |= SH1_SCISMR_CHR;
     }
 
-  if (parity == 1)
+  if (priv->parity == 1)
     {
       smr |= (SH1_SCISMR_PE|SH1_SCISMR_OE);
     }
-  else if (parity == 2)
+  else if (priv->parity == 2)
     {
       smr |= SH1_SCISMR_PE;
     }
@@ -507,7 +507,7 @@ static int up_attach(struct uart_dev_s *dev)
 static void up_detach(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  up_disable_irq(priv->irq);
+  up_disableuartint(priv, NULL);
   irq_detach(priv->irq);
 }
 
@@ -568,7 +568,7 @@ static int up_interrupt(int irq, void *context)
    * until we have been looping for a long time.
    */
 
-  for (passes = 0; passes < 256 && handled; passes++)
+  for (passes = 0, handled = FALSE; passes < 256 && handled; passes++)
     {
       handled = FALSE;
 
@@ -576,66 +576,27 @@ static int up_interrupt(int irq, void *context)
 
        priv->ssr = up_serialin(priv, SH1_SCI_SSR_OFFSET);
 
-      /* Handle incoming, receive bytes (with or without timeout) */
+      /* Handle incoming, receive bytes (RDRF: Receive Data Register Full) */
 
-      if ((priv->ssr & SH1_SCISR_RNE) != 0)
+      if ((priv->ssr & SH1_SCISSR_RDRF) != 0)
         {
-           /* Rx buffer not empty ... process incoming bytes */
+           /* Rx data register not empty ... process incoming bytes */
 
            uart_recvchars(dev);
+           handled = TRUE;
         }
 
-      /* Handle outgoing, transmit bytes */
+      /* Handle outgoing, transmit bytes (TDRE: Transmit Data Register Empty) */
 
-      if ((priv->ssr & SH1_SCISR_TF) == 0)
+      if ((priv->ssr & SH1_SCISSR_TDRE) != 0)
         {
-           /* Tx FIFO not full ... process outgoing bytes */
+           /* Tx data register empty ... process outgoing bytes */
 
            uart_xmitchars(dev);
+           handled = TRUE;
         }
     }
     return OK;
-}
-
-/****************************************************************************
- * Name: up_ioctl
- *
- * Description:
- *   All ioctl calls will be routed through this method
- *
- ****************************************************************************/
-
-static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
-{
-  struct inode      *inode = filep->f_inode;
-  struct uart_dev_s *dev   = inode->i_private;
-  struct up_dev_s   *priv  = (struct up_dev_s*)dev->priv;
-  int                ret    = OK;
-
-  switch (cmd)
-    {
-    case TIOCSERGSTRUCT:
-      {
-         struct up_dev_s *user = (struct up_dev_s*)arg;
-         if (!user)
-           {
-             *get_errno_ptr() = EINVAL;
-             ret = ERROR;
-           }
-         else
-           {
-             memcpy(user, dev, sizeof(struct up_dev_s));
-           }
-       }
-       break;
-
-    default:
-      *get_errno_ptr() = ENOTTY;
-      ret = ERROR;
-      break;
-    }
-
-  return ret;
 }
 
 /****************************************************************************
@@ -651,11 +612,11 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 static int up_receive(struct uart_dev_s *dev, uint32 *status)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  uint16 rxbufr;
+  ubyte rdr;
 
-  rxbufr  = up_serialin(priv, SH1_SCI_RXBUFR_OFFSET);
-  *status = (uint32)priv->ssr << 16 | rxbufr;
-  return rxbufr & 0xff;
+  rdr  = up_serialin(priv, SH1_SCI_RDR_OFFSET);
+  *status = (uint32)priv->ssr << 8 | rdr;
+  return (int)rdr;
 }
 
 /****************************************************************************
@@ -716,16 +677,17 @@ static boolean up_rxavailable(struct uart_dev_s *dev)
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  ubyte ssr;
 
   /* Write the data to the TDR */
 
-  up_serialout(priv, SH1_SCI_BASE + SH1_SCI_TDR_OFFSET, (ubyte)ch);
+  up_serialout(priv, SH1_SCI_TDR_OFFSET, (ubyte)ch);
 
   /* Clear the TDRE bit in the SSR */
 
   ssr  = up_serialin(priv, SH1_SCI_SSR_OFFSET);
   ssr &= ~SH1_SCISSR_TDRE;
-  up_serialout(priv, SH1_SCI_BASE + SH1_SCI_SSR_OFFSET, ssr);
+  up_serialout(priv, SH1_SCI_SSR_OFFSET, ssr);
 }
 
 /****************************************************************************
@@ -852,8 +814,6 @@ int up_putc(int ch)
   ubyte  scr;
 
   up_disableuartint(priv, &scr);
-  up_waittxready(priv);
-  up_serialout(priv, SH1_SCI_THR_OFFSET, (ubyte)ch);
 
   /* Check for LF */
 
@@ -862,8 +822,11 @@ int up_putc(int ch)
       /* Add CR */
 
       up_waittxready(priv);
-      up_serialout(priv, SH1_SCI_THR_OFFSET, '\r');
+      up_serialout(priv, SH1_SCI_TDR_OFFSET, '\r');
     }
+
+  up_waittxready(priv);
+  up_serialout(priv, SH1_SCI_TDR_OFFSET, (ubyte)ch);
 
   up_waittxready(priv);
   up_restoreuartint(priv, scr);
