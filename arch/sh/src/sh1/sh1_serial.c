@@ -64,12 +64,9 @@
 #if !defined(CONFIG_SH1_SCI0) && !defined(CONFIG_SH1_SCI1)
 #  ifdef CONFIG_USE_SERIALDRIVER
 #    error "Serial driver selected, but SCIs not enabled"
+#    undef CONFIG_USE_SERIALDRIVER
 #  endif
-#  undef HAVE_CONSOLE
-#  undef CONFIG_USE_SERIALDRIVER
 #endif
-
-#ifdef CONFIG_USE_SERIALDRIVER
 
 /* Is there a serial console? */
 
@@ -87,6 +84,8 @@
 #  undef CONFIG_SCI0_SERIAL_CONSOLE
 #  undef CONFIG_SCI1_SERIAL_CONSOLE
 #endif
+
+#ifdef CONFIG_USE_SERIALDRIVER
 
 /* Which SCI with be tty0/console and which tty1? */
 
