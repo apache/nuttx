@@ -161,11 +161,9 @@
 
 	.macro	showprogress, code
 #ifdef CONFIG_DEBUG
-	mov	r0, #\code
-	bl	up_lowputc
 	mov.l   .Llowputc, r0		/* Address of up_earlyserialinit */
 	jsr     @r0			/* Call it */
-	or      r0, r0			/* Delay slot */
+	mov	#\code, r4		/* Delay slot */
 #endif
 	.endm
 
