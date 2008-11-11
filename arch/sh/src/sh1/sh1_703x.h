@@ -55,7 +55,7 @@
 #define SH1_SCI1_BASE       (0x05fffec8)
 
 #define SH1_SCI_SMR_OFFSET  (0)  /* Serial Mode Register (8-bits wide) */
-#define SH1_SCI_BRR_OFFSET  (1)  /* Bit Rate Registr (8-bits wide) */
+#define SH1_SCI_BRR_OFFSET  (1)  /* Bit Rate Register (8-bits wide) */
 #define SH1_SCI_SCR_OFFSET  (2)  /* Serial Control Register (8-bits wide) */
 #define SH1_SCI_TDR_OFFSET  (3)  /* Transmit Data Register (8-bits wide) */
 #define SH1_SCI_SSR_OFFSET  (4)  /* Serial Status Register (8-bits wide) */
@@ -210,7 +210,7 @@
 #define SH1_UBC_BAMRL       (0x05ffff96)  /* 16-bits wide */
 #define SH1_UBC_BBR         (0x05ffff98)  /* 16-bits wide */
 
-/*Bus State Controller (BSC) */
+/* Bus State Controller (BSC) */
 
 #define SH1_BSC_BCR         (0x05ffffa0)  /* 16-bits wide */
 #define SH1_BSC_WCR1        (0x05ffffa2)  /* 16-bits wide */
