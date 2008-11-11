@@ -176,7 +176,9 @@
 #ifdef HAVE_CONSOLE
 static inline int up_txready(void)
 {
-  return (getreg8(SH1_SCI_BASE + SH1_SCI_SSR_OFFSET) & SH1_SCISSR_TDRE != 0);
+  /* Check the TDRE bit in the SSR.  1=TDR is empty */
+
+  return ((getreg8(SH1_SCI_BASE + SH1_SCI_SSR_OFFSET) & SH1_SCISSR_TDRE) != 0);
 }
 #endif
 
