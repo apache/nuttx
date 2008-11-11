@@ -97,8 +97,8 @@ _up_saveusercontext:
 	stc     sr, r0			/* Get and save the SR */
 	mov.l	r0, @-r4
 	sts.l	pr, @-r4		/* The return address is the restore PC */
+	add	#-(10*4), r4		/* Skip over r0-r7, mach and macl */
 	mov.l	r15, @-r4
-	add	#-(4*3), r4		/* Skip of mach, macl, r4 */
 	stc.l	gbr, @-r4
 	sts.l	pr, @-r4
 
@@ -109,11 +109,6 @@ _up_saveusercontext:
 	mov.l	r10, @-r4
 	mov.l	r9, @-r4
 	mov.l	r8, @-r4
-
-	/* Omit r1-r7.  They do not matter when saving user state..
-	 * the calling conventions do not require that the values of these
-	 * registers persist across function calls.
-	 */
 
 	/* And return zero */
 
