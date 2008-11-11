@@ -283,7 +283,7 @@
 #define SH1_SCISMR_OE       (0x10)        /* Bit 4: 0:Even parity, 1:Odd parity */
 #define SH1_SCISMR_PE       (0x20)        /* Bit 5: Parity enable */
 #define SH1_SCISMR_CHR      (0x40)        /* Bit 6: 0:8-bit data, 1:7-bit data */
-#define SH1_SCISMR_CA       (Ox80)        /* Bit 7: 0:Asynchronous, 1:clocked synchronous */
+#define SH1_SCISMR_CA       (0x80)        /* Bit 7: 0:Asynchronous, 1:clocked synchronous */
 
 #define SH1_SCISCR_CKEMASK  (0x03)        /* Bit 0-1: Internal clock source */
                                           /* Asynchronous mode: */
@@ -301,7 +301,7 @@
 #define SH1_SCISCR_RE       (0x10)        /* Bit 4: 1=Receiver enable */
 #define SH1_SCISCR_TE       (0x20)        /* Bit 5: 1=Transmitter enable */
 #define SH1_SCISCR_RIE      (0x40)        /* Bit 6: 1=Recieve-data-full interrupt enable */
-#define SH1_SCISCR_TIE      (Ox80)        /* Bit 7: 1=Transmit-data-empty interrupt enable */
+#define SH1_SCISCR_TIE      (0x80)        /* Bit 7: 1=Transmit-data-empty interrupt enable */
 #define SH1_SCISCR_ALLINTS  (0xcc)
 
 #define SH1_SCISSR_MPBT     (0x01)        /* Bit 0: Multi-processor Bit in Transmit data */
