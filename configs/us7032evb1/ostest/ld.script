@@ -45,14 +45,10 @@ SECTIONS
 	 */
 
 	. = 0x0a002000;
-	.vects : {
-		_svect = ABSOLUTE(.);
-		*(.vects);		/* Redirected interrupt vectors	*/
-		_evect = ABSOLUTE(.);
-	}
-
-	. = 0x0a002400;
 	.text : {
+		_svect = ABSOLUTE(.);
+		*(.vects);		/* Relocated interrupt vectors	*/
+		_evect = ABSOLUTE(.);
 		_stext = ABSOLUTE(.);
 		*(.reset)		/* Reset/IRQ code		*/
 		*(.text)		/* Code				*/
