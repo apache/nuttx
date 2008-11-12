@@ -137,14 +137,14 @@
 
 struct up_dev_s
 {
-  uint32  scibase;   /* Base address of SCI registers */
-  uint32  baud;      /* Configured baud */
-  ubyte   scr;       /* Saved SCR value */
-  ubyte   ssr;       /* Saved SR value (only used during interrupt processing) */
-  ubyte   irq;       /* IRQ associated with this SCI */
-  ubyte   parity;    /* 0=none, 1=odd, 2=even */
-  ubyte   bits;      /* Number of bits (7 or 8) */
-  boolean stopbits2; /* TRUE: Configure with 2 stop bits instead of 1 */
+          uint32 scibase;   /* Base address of SCI registers */
+          uint32 baud;      /* Configured baud */
+  volatile ubyte scr;       /* Saved SCR value */
+  volatile ubyte ssr;       /* Saved SR value (only used during interrupt processing) */
+           ubyte irq;       /* IRQ associated with this SCI */
+           ubyte parity;    /* 0=none, 1=odd, 2=even */
+           ubyte bits;      /* Number of bits (7 or 8) */
+         boolean stopbits2; /* TRUE: Configure with 2 stop bits instead of 1 */
 };
 
 /****************************************************************************
@@ -155,7 +155,10 @@ static int     up_setup(struct uart_dev_s *dev);
 static void    up_shutdown(struct uart_dev_s *dev);
 static int     up_attach(struct uart_dev_s *dev);
 static void    up_detach(struct uart_dev_s *dev);
-static int     up_interrupt(int irq, void *context);
+static int     up_rxinterrupt(int irq, void *context);
+static int     up_erinterrupt(int irq, void *context);
+static int     up_txinterrupt(int irq, void *context);
+static int     up_interrupt(int irqbase);
 static int     up_receive(struct uart_dev_s *dev, uint32 *status);
 static void    up_rxint(struct uart_dev_s *dev, boolean enable);
 static boolean up_rxavailable(struct uart_dev_s *dev);
@@ -276,10 +279,10 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, ubyte value)
 }
 
 /****************************************************************************
- * Name: up_disableuartint
+ * Name: up_disablesciint
  ****************************************************************************/
 
-static inline void up_disableuartint(struct up_dev_s *priv, ubyte *scr)
+static inline void up_disablesciint(struct up_dev_s *priv, ubyte *scr)
 {
   /* Return a copy of the current scr settings */
 
@@ -290,15 +293,15 @@ static inline void up_disableuartint(struct up_dev_s *priv, ubyte *scr)
 
   /* The disable all interrupts */
 
-  priv->scr |= SH1_SCISCR_ALLINTS;
+  priv->scr &= ~SH1_SCISCR_ALLINTS;
   up_serialout(priv, SH1_SCI_SCR_OFFSET, priv->scr);
 }
 
 /****************************************************************************
- * Name: up_restoreuartint
+ * Name: up_restoresciint
  ****************************************************************************/
 
-static inline void up_restoreuartint(struct up_dev_s *priv, ubyte scr)
+static inline void up_restoresciint(struct up_dev_s *priv, ubyte scr)
 {
   /* Set the interrupt bits in the scr value */
 
@@ -454,7 +457,7 @@ static int up_setup(struct uart_dev_s *dev)
 static void up_shutdown(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  up_disableuartint(priv, NULL);
+  up_disablesciint(priv, NULL);
 }
 
 /****************************************************************************
@@ -477,18 +480,38 @@ static int up_attach(struct uart_dev_s *dev)
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   int ret;
 
-  /* Attach the RDR full IRQ */
+  /* Attach the RDR full IRQ (RXI) that is enabled by the RIE SCR bit */
 
-  ret = irq_attach(priv->irq + SH1_RXI_IRQ_OFFSET, up_interrupt);
+  ret = irq_attach(priv->irq + SH1_RXI_IRQ_OFFSET, up_rxinterrupt);
   if (ret == OK)
     {
-      /* Attach the TDR empty IRQ */
+      /* The RIE interrupt enable also enables the receive error interrupt (ERI) */
 
-      ret = irq_attach(priv->irq + SH1_TXI_IRQ_OFFSET, up_interrupt);
-      if (ret < 0)
+      ret = irq_attach(priv->irq + SH1_ERI_IRQ_OFFSET, up_erinterrupt);
+      if (ret == OK)
         {
-          (void)irq_detach(priv->irq + SH1_RXI_IRQ_OFFSET);
+          /* Attach the TDR empty IRQ (TXI) enabled by the TIE SCR bit */
+
+          ret = irq_attach(priv->irq + SH1_TXI_IRQ_OFFSET, up_txinterrupt);
+          if (ret == OK)
+            {
+              /* All SCI0 interrupts share the same prioritization */
+
+              up_prioritize_irq(priv->irq, 7);  /* Set SCI priority midway */
+
+              /* Return OK on success */
+
+              return OK;
+            }
+
+          /* Detach the ERI interrupt on failure */
+
+          (void)irq_detach(priv->irq + SH1_ERI_IRQ_OFFSET);
         }
+
+      /* Detach the RXI interrupt on failure */
+
+      (void)irq_detach(priv->irq + SH1_RXI_IRQ_OFFSET);
     }
 
   return ret;
@@ -507,8 +530,47 @@ static int up_attach(struct uart_dev_s *dev)
 static void up_detach(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  up_disableuartint(priv, NULL);
-  irq_detach(priv->irq);
+
+  /* Disable all SCI interrupts */
+
+  up_disablesciint(priv, NULL);
+
+  /* Detach the SCI interrupts */
+
+  (void)irq_detach(priv->irq + SH1_RXI_IRQ_OFFSET);
+  (void)irq_detach(priv->irq + SH1_ERI_IRQ_OFFSET);
+  (void)irq_detach(priv->irq + SH1_RXI_IRQ_OFFSET);
+
+  /* Set the interrupt priority to zero (masking all SCI interrupts).  NOTE
+   * that all SCI0 interrupts share the same prioritization.
+   */
+
+  up_prioritize_irq(priv->irq, 0);
+}
+
+/****************************************************************************
+ * Name: up_rxinterrupt / up_erinterrupt / up_txinterrupt
+ *
+ * Description:
+ *   These are simple "front-ends" to up-interrupt to handle the different
+ *   IRQs used by the RX and TX interrupt.  The IRQ is necessary to work
+ *   back to the private data structure for the interrupt SCI.
+ *
+ ****************************************************************************/
+
+static int up_rxinterrupt(int irq, void *context)
+{
+  return up_interrupt(irq - SH1_RXI_IRQ_OFFSET);
+}
+
+static int up_erinterrupt(int irq, void *context)
+{
+  return up_interrupt(irq - SH1_ERI_IRQ_OFFSET);
+}
+
+static int up_txinterrupt(int irq, void *context)
+{
+  return up_interrupt(irq - SH1_TXI_IRQ_OFFSET);
 }
 
 /****************************************************************************
@@ -520,11 +582,11 @@ static void up_detach(struct uart_dev_s *dev)
  *   uart_transmitchars or uart_receivechar to perform the
  *   appropriate data transfers.  The interrupt handling logic\
  *   must be able to map the 'irq' number into the approprite
- *   uart_dev_s structure in order to call these functions.
+ *   up_dev_s structure in order to call these functions.
  *
  ****************************************************************************/
 
-static int up_interrupt(int irq, void *context)
+static int up_interrupt(int irqbase)
 {
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;
@@ -532,30 +594,16 @@ static int up_interrupt(int irq, void *context)
   boolean            handled;
 
 #ifdef CONFIG_SH1_SCI0
-  if (g_sci0priv.irq == irq)
+  if (g_sci0priv.irq == irqbase)
     {
       dev = &g_sci0port;
     }
   else
 #endif
 #ifdef CONFIG_SH1_SCI1
-  if (g_sci1priv.irq == irq)
+  if (g_sci1priv.irq == irqbase)
     {
       dev = &g_sci1port;
-    }
-  else
-#endif
-#ifdef CONFIG_SH1_SCI2
-  if (g_sci2priv.irq == irq)
-    {
-      dev = &g_sci2port;
-    }
-  else
-#endif
-#ifdef CONFIG_SH1_SCI3
-  if (g_sci3priv.irq == irq)
-    {
-      dev = &g_sci3port;
     }
   else
 #endif
@@ -568,7 +616,7 @@ static int up_interrupt(int irq, void *context)
    * until we have been looping for a long time.
    */
 
-  for (passes = 0, handled = FALSE; passes < 256 && handled; passes++)
+  for (passes = 0, handled = TRUE; passes < 256 && handled; passes++)
     {
       handled = FALSE;
 
@@ -595,6 +643,16 @@ static int up_interrupt(int irq, void *context)
            uart_xmitchars(dev);
            handled = TRUE;
         }
+
+      /* Clear all (clear-able) status flags.  Note that that SH-1 requires
+       * that you read the bit in the "1" then write "0" to the bit in order
+       * to clear it.  Any bits in the SSR that transitioned from 0->1 will
+       * not be effected by the following:
+       */
+
+      priv->ssr &= ~(SH1_SCISSR_TDRE|SH1_SCISSR_RDRF|SH1_SCISSR_ORER|\
+                     SH1_SCISSR_FER|SH1_SCISSR_PER|SH1_SCISSR_TEND);
+      up_serialout(priv, SH1_SCI_SSR_OFFSET, priv->ssr);
     }
     return OK;
 }
@@ -630,6 +688,14 @@ static int up_receive(struct uart_dev_s *dev, uint32 *status)
 static void up_rxint(struct uart_dev_s *dev, boolean enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  irqstate_t flags;
+
+  /* Disable interrupts to prevent asynchronous accesses */
+
+  flags = irqsave();
+
+  /* Are we enabling or disabling? */
+
   if (enable)
     {
       /* Enable the RDR full interrupt */
@@ -648,6 +714,7 @@ static void up_rxint(struct uart_dev_s *dev, boolean enable)
   /* Write the modified SCR value to hardware */
 
   up_serialout(priv, SH1_SCI_SCR_OFFSET, priv->scr);
+  irqrestore(flags);
 }
 
 /****************************************************************************
@@ -701,12 +768,35 @@ static void up_send(struct uart_dev_s *dev, int ch)
 static void up_txint(struct uart_dev_s *dev, boolean enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  irqstate_t flags;
+
+  /* Disable interrupts to prevent asynchronous accesses */
+
+  flags = irqsave();
+
+  /* Are we enabling or disabling? */
+
   if (enable)
     {
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
       /* Enable the TDR empty interrupt */
 
-#ifndef CONFIG_SUPPRESS_SERIAL_INTS
       priv->scr |= SH1_SCISCR_TIE;
+
+      /* If the TDR is already empty, then don't wait for the interrupt */
+
+#if 1
+      if (up_txready(dev))
+        {
+          /* Tx data register empty ... process outgoing bytes.  Note:
+           * this could call up_txint to be called recursively.  However,
+           * in this event, priv->scr should hold the correct value upon
+           * return from uuart_xmitchars().
+           */
+
+          uart_xmitchars(dev);
+        }
+#endif
 #endif
     }
   else
@@ -719,6 +809,7 @@ static void up_txint(struct uart_dev_s *dev, boolean enable)
   /* Write the modified SCR value to hardware */
 
   up_serialout(priv, SH1_SCI_SCR_OFFSET, priv->scr);
+  irqrestore(flags);
 }
 
 /****************************************************************************
@@ -736,7 +827,7 @@ static boolean up_txready(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -755,12 +846,12 @@ void up_earlyserialinit(void)
    * up_lowsetup
    */
 
-  /* Disable all UARTS */
+  /* Disable all SCIs */
 
 #ifdef TTYS0_DEV
-  up_disableuartint(TTYS0_DEV.priv, NULL);
+  up_disablesciint(TTYS0_DEV.priv, NULL);
 #ifdef TTYS1_DEV
-  up_disableuartint(TTYS1_DEV.priv, NULL);
+  up_disablesciint(TTYS1_DEV.priv, NULL);
 #endif
 #endif
 
@@ -813,7 +904,7 @@ int up_putc(int ch)
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
   ubyte  scr;
 
-  up_disableuartint(priv, &scr);
+  up_disablesciint(priv, &scr);
 
   /* Check for LF */
 
@@ -829,7 +920,7 @@ int up_putc(int ch)
   up_serialout(priv, SH1_SCI_TDR_OFFSET, (ubyte)ch);
 
   up_waittxready(priv);
-  up_restoreuartint(priv, scr);
+  up_restoresciint(priv, scr);
 #endif
   return ch;
 }
