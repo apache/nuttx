@@ -266,12 +266,12 @@ void up_prioritize_irq(int irq, int priority)
       goto ipre;
 #endif
     ipre:
-      reg   = SH1_INTC_IPRD;
+      reg   = SH1_INTC_IPRE;
       break;
 #endif
 
     default:
-      dbg("Disabled irq=%d\n", irq);
+      dbg("Invalid irq=%d\n", irq);
       return;
     }
 
