@@ -187,7 +187,7 @@ void up_timerinit(void)
 
   irq_attach(SH1_SYSTIMER_IRQ, (xcpt_t)up_timerisr);
 
-  /* Enabled interrupts from GRA compare match */
+  /* Enable interrupts on GRA compare match */
 
   putreg8(SH1_ITUTIER_IMIEA, SH1_ITU0_TIER);
 
