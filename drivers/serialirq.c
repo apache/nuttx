@@ -84,12 +84,20 @@ void uart_xmitchars(FAR uart_dev_t *dev)
 
   while (dev->xmit.head != dev->xmit.tail && uart_txready(dev))
     {
+      /* Send the next byte */
+
       uart_send(dev, dev->xmit.buffer[dev->xmit.tail]);
+
+      /* Increment the tail index */
 
       if (++(dev->xmit.tail) >= dev->xmit.size)
         {
           dev->xmit.tail = 0;
         }
+
+      /* A byte was removed from the buffer.  Inform any waiters
+       * there there is space available.
+       */
 
       if (dev->xmitwaiting)
         {
@@ -139,7 +147,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
       dev->recv.buffer[dev->recv.head] = uart_receive(dev, &status);
 
-      /* Increment the index */
+      /* Increment the head index */
 
       dev->recv.head = nexthead;
       if (++nexthead >= dev->recv.size)
