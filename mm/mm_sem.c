@@ -180,7 +180,7 @@ void mm_takesemaphore(void)
          ASSERT(mm_errno == EINTR);
        }
 
-      /* We have it.  Claim the stak and return */
+      /* We have it.  Claim the stake and return */
 
       g_holder      = my_pid;
       g_counts_held = 1;
