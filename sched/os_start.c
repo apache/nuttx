@@ -430,7 +430,7 @@ void os_start(void)
   sdbg("Starting init thread\n");
 #ifndef CONFIG_CUSTOM_STACK
   init_taskid = task_create("init", SCHED_PRIORITY_DEFAULT,
-                            CONFIG_IDLETHREAD_STACKSIZE,
+                            CONFIG_USERMAIN_STACKSIZE,
                             (main_t)user_start, (const char **)NULL);
 #else
   init_taskid = task_create("init", SCHED_PRIORITY_DEFAULT,

@@ -369,7 +369,13 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_BOOT_FROM_FLASH - Some configurations support XIP
 		  operation from FLASH.
 		CONFIG_STACK_POINTER - The initial stack pointer
-		CONFIG_IDLETHREAD_STACKSIZE - The size of the initial stack
+		CONFIG_IDLETHREAD_STACKSIZE - The size of the initial stack.
+		  This is the thread that (1) performs the inital boot of the system up
+		  to the point where user_start() is spawned, and (2) there after is the
+		  IDLE thread that executes only when there is no other thread ready to
+		  run.
+		CONFIG_USERMAIN_STACKSIZE - The size of the stack to allocate
+		  for the main user thread that begins at the user_start() entry point.
 		CONFIG_PTHREAD_STACK_MIN - Minimum pthread stack size
 		CONFIG_PTHREAD_STACK_DEFAULT - Default pthread stack size
 		CONFIG_HEAP_BASE - The beginning of the heap

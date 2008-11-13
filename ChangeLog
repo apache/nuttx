@@ -542,4 +542,8 @@
 	  gcc 3.4.5 toolchain (which has very limit SH-1 support to begin with), or perhaps with the
 	  CMON debugger.  At any rate, I have exhausted all of the energy that I am willing to put
 	  into this cool old processor for the time being.
+	* Renamed configuration item CONFIG_PROC_STACK_SIZE as CONFIG_IDLETHREAD_STACKSIZE:  It now
+	  only controls the size of the stack for the IDLE thread.  Added CONFIG_USERMAIN_STACKSIZE:
+	  This is the size of stack used with the user_start() thread is created.  The two stacks
+	  no longer have to be the same.
 
