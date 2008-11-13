@@ -717,7 +717,14 @@
     </p>
     <p>
      <b>STATUS:</b>
-      This port is in progress and should be available in the next release of NuttX.
+      This port is availble as of release 0.3.18 of NuttX.  The port is basically complete
+      and many examples run correctly.  However, there are remaining instabilities that
+      make the port un-usable.  The nature of these is not understood; the behavior is
+      that certain SH-1 instructions stop working as advertised.  This could be a silicon
+      problem, some pipeline issue that is not handled properly by the gcc 3.4.5 toolchain
+      (which has very limit SH-1 support to begin with), or perhaps with the CMON debugger.
+      At any rate, I have exhausted all of the energy that I am willing to put into this cool
+      old processor for the time being.
     </p>
    </td>
 </tr>
@@ -1165,18 +1172,25 @@ nuttx-0.3.18 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* Added port for the STMicro STR71x processor and configuration for the Olimex STR-P711
 	  board (STR71x testing is stalled because I have been unable to get OpenOCD to
 	  communicate with my JTAG wiggler on Linux).
-	* Fix race condition workaround delay in LPC214X SPI logic.  It the cause of the very
-	  bad MMC/SD performance.
+	* Fix race condition workaround delay in LPC214X SPI logic.  This was also the cause of the
+	  very bad MMC/SD performance.
 	* Began port of the Hitachi SH-1 using the SH-1/US7032EVB1 board
 	* Re-built all configurations that use SDCC and Zilog toolchains to make sure they still
 	  build (they didn't, but they do now).
 	* Fixed several erroneous "list empty" checks in the CAN driver.
-	* Hitachi SH-1 passes (reduced) examples/ostest (examples/nsh still fails)
+	* Hitachi SH-1 passes (reduced) examples/ostest; the examples/nsh test still fails.
+	  There are remaining instabilities that make the port un-usable.  The nature of these is
+	  not understood; the behavior is that certain SH-1 instructions stop working as advertised.
+	  This could be a silicon problem, some pipeline issue that is not handled properly by the
+	  gcc 3.4.5 toolchain (which has very limit SH-1 support to begin with), or perhaps with the
+	  CMON debugger.  At any rate, I have exhausted all of the energy that I am willing to put
+	  into this cool old processor for the time being.
 
 pascal-0.1.3 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 buildroot-0.1.3 2008-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
 
+	* Add support for H8/300 toolchain
 </pre></ul>
 
 <table width ="100%">
