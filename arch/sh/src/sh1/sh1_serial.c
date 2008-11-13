@@ -141,7 +141,7 @@ struct up_dev_s
           uint32 baud;      /* Configured baud */
   volatile ubyte scr;       /* Saved SCR value */
   volatile ubyte ssr;       /* Saved SR value (only used during interrupt processing) */
-           ubyte irq;       /* IRQ associated with this SCI */
+           ubyte irq;       /* Base IRQ associated with this SCI */
            ubyte parity;    /* 0=none, 1=odd, 2=even */
            ubyte bits;      /* Number of bits (7 or 8) */
          boolean stopbits2; /* TRUE: Configure with 2 stop bits instead of 1 */
@@ -155,10 +155,7 @@ static int     up_setup(struct uart_dev_s *dev);
 static void    up_shutdown(struct uart_dev_s *dev);
 static int     up_attach(struct uart_dev_s *dev);
 static void    up_detach(struct uart_dev_s *dev);
-static int     up_rxinterrupt(int irq, void *context);
-static int     up_erinterrupt(int irq, void *context);
-static int     up_txinterrupt(int irq, void *context);
-static int     up_interrupt(int irqbase);
+static int     up_interrupt(int irq, void *context);
 static int     up_receive(struct uart_dev_s *dev, uint32 *status);
 static void    up_rxint(struct uart_dev_s *dev, boolean enable);
 static boolean up_rxavailable(struct uart_dev_s *dev);
@@ -482,17 +479,17 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach the RDR full IRQ (RXI) that is enabled by the RIE SCR bit */
 
-  ret = irq_attach(priv->irq + SH1_RXI_IRQ_OFFSET, up_rxinterrupt);
+  ret = irq_attach(priv->irq + SH1_RXI_IRQ_OFFSET, up_interrupt);
   if (ret == OK)
     {
       /* The RIE interrupt enable also enables the receive error interrupt (ERI) */
 
-      ret = irq_attach(priv->irq + SH1_ERI_IRQ_OFFSET, up_erinterrupt);
+      ret = irq_attach(priv->irq + SH1_ERI_IRQ_OFFSET, up_interrupt);
       if (ret == OK)
         {
           /* Attach the TDR empty IRQ (TXI) enabled by the TIE SCR bit */
 
-          ret = irq_attach(priv->irq + SH1_TXI_IRQ_OFFSET, up_txinterrupt);
+          ret = irq_attach(priv->irq + SH1_TXI_IRQ_OFFSET, up_interrupt);
           if (ret == OK)
             {
               /* All SCI0 interrupts share the same prioritization */
@@ -549,31 +546,6 @@ static void up_detach(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: up_rxinterrupt / up_erinterrupt / up_txinterrupt
- *
- * Description:
- *   These are simple "front-ends" to up-interrupt to handle the different
- *   IRQs used by the RX and TX interrupt.  The IRQ is necessary to work
- *   back to the private data structure for the interrupt SCI.
- *
- ****************************************************************************/
-
-static int up_rxinterrupt(int irq, void *context)
-{
-  return up_interrupt(irq - SH1_RXI_IRQ_OFFSET);
-}
-
-static int up_erinterrupt(int irq, void *context)
-{
-  return up_interrupt(irq - SH1_ERI_IRQ_OFFSET);
-}
-
-static int up_txinterrupt(int irq, void *context)
-{
-  return up_interrupt(irq - SH1_TXI_IRQ_OFFSET);
-}
-
-/****************************************************************************
  * Name: up_interrupt
  *
  * Description:
@@ -586,7 +558,7 @@ static int up_txinterrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-static int up_interrupt(int irqbase)
+static int up_interrupt(int irq, void *context)
 {
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;
@@ -594,14 +566,16 @@ static int up_interrupt(int irqbase)
   boolean            handled;
 
 #ifdef CONFIG_SH1_SCI0
-  if (g_sci0priv.irq == irqbase)
+  if ((irq >= g_sci0priv.irq) && 
+      (irq <= g_sci0priv.irq +  SH1_SCI_NIRQS))
     {
       dev = &g_sci0port;
     }
   else
 #endif
 #ifdef CONFIG_SH1_SCI1
-  if (g_sci1priv.irq == irqbase)
+  if ((irq >= g_sci1priv.irq) && 
+      (irq <= g_sci1priv.irq +  SH1_SCI_NIRQS))
     {
       dev = &g_sci1port;
     }
@@ -654,7 +628,7 @@ static int up_interrupt(int irqbase)
                      SH1_SCISSR_FER|SH1_SCISSR_PER|SH1_SCISSR_TEND);
       up_serialout(priv, SH1_SCI_SSR_OFFSET, priv->ssr);
     }
-    return OK;
+  return OK;
 }
 
 /****************************************************************************
@@ -667,13 +641,30 @@ static int up_interrupt(int irqbase)
  *
  ****************************************************************************/
 
-static int up_receive(struct uart_dev_s *dev, uint32 *status)
+static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   ubyte rdr;
+  ubyte ssr;
+
+  /* Read the character from the RDR port */
 
   rdr  = up_serialin(priv, SH1_SCI_RDR_OFFSET);
+
+  /* Clear all read related status in  real ssr (so that when when rxavailable
+   * is called again, it will return false.
+   */
+
+  ssr = up_serialin(priv, SH1_SCI_SSR_OFFSET);
+  ssr &= ~(SH1_SCISSR_RDRF|SH1_SCISSR_ORER|SH1_SCISSR_FER|SH1_SCISSR_PER);
+  up_serialout(priv, SH1_SCI_SSR_OFFSET, ssr);
+
+  /* For status, return the SSR at the time that the interrupt was received */
+
   *status = (uint32)priv->ssr << 8 | rdr;
+
+  /* Return the received character */
+
   return (int)rdr;
 }
 
