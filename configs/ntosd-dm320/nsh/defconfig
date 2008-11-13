@@ -547,7 +547,7 @@ CONFIG_DM9X_ETRANS=n
 # CONFIG_CUSTOM_STACK - The up_ implementation will handle
 #   all stack operations outside of the nuttx model.
 # CONFIG_STACK_POINTER - The initial stack pointer (arm7tdmi only)
-# CONFIG_PROC_STACK_SIZE - The size of the initial stack
+# CONFIG_IDLETHREAD_STACKSIZE - The size of the initial stack
 # CONFIG_PTHREAD_STACK_MIN - Minimum pthread stack size
 # CONFIG_PTHREAD_STACK_DEFAULT - Default pthread stack size
 # CONFIG_HEAP_BASE - The beginning of the heap
@@ -556,7 +556,7 @@ CONFIG_DM9X_ETRANS=n
 CONFIG_BOOT_FROM_FLASH=n
 CONFIG_CUSTOM_STACK=n
 CONFIG_STACK_POINTER=
-CONFIG_PROC_STACK_SIZE=4096
+CONFIG_IDLETHREAD_STACKSIZE=4096
 CONFIG_PTHREAD_STACK_MIN=256
 CONFIG_PTHREAD_STACK_DEFAULT=4096
 CONFIG_HEAP_BASE=
