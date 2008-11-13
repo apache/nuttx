@@ -129,15 +129,29 @@ void uart_recvchars(FAR uart_dev_t *dev)
       nexthead = 0;
     }
 
+  /* Loop putting characters into the receive buffer until eithe: (1) the buffer
+   * is full, or (2) there are not further characters to add.
+   */
+
   while (nexthead != dev->recv.tail && uart_rxavailable(dev))
     {
+      /* Add the character to the buffer */
+
       dev->recv.buffer[dev->recv.head] = uart_receive(dev, &status);
+
+      /* Increment the index */
 
       dev->recv.head = nexthead;
       if (++nexthead >= dev->recv.size)
         {
            nexthead = 0;
         }
+
+      /* A character was added... if there is a thread waiting for more data, then
+       * post the recvsem semaphore to wake it up. NOTE: There is a logic error in
+       * the above looping logic: If nexthead == dev->recv.tail on entry and
+       * recvwaiting is true, the recvsem will never get posted!
+       */
 
       if (dev->recvwaiting)
         {
