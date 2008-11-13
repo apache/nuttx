@@ -10,34 +10,12 @@ examples
 
   Selects the examples/ostest example.
 
-examples/ostest
-^^^^^^^^^^^^^^^
+examples/hello
+^^^^^^^^^^^^^^
 
-  This is the NuttX 'qualification' suite.  It attempts to exercise
-  a broad set of OS functionality.  Its coverage is not very extensive
-  as of this writing, but it is used to qualify each NuttX release.
-
-  The behavior of the ostest can be modified with the following
-  settings in the configs/<board-name>/defconfig file:
-
-  * CONFIG_EXAMPLES_OSTEST_LOOPS
-      Used to control the number of executions of the test.  If
-      undefined, the test executes one time.  If defined to be
-      zero, the test runs forever.
-  * CONFIG_EXAMPLES_OSTEST_STACKSIZE
-      Used to create the ostest task.  Default is 8192.
-  * CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS
-      Specifies the number of threads to create in the barrier
-      test.  The default is 8 but a smaller number may be needed on
-      systems without sufficient memory to start so many threads.
-
-examples/nsh
-^^^^^^^^^^^^
-
-  This directory contains the NuttShell (NSH).  This is a simple
-  shell application.  With some additional development, NSH will
-  someday be a great NuttX application debugger.  NSH is described
-  in its own README located at examples/nsh/README.txt
+  This is the mandatory, "Hello, World!!" example.  It is little more
+  than examples/null with a single printf statement.  Again useful only
+  for bringing up new NuttX architectures.
 
 examples/mount
 ^^^^^^^^^^^^^^
@@ -62,6 +40,61 @@ examples/mount
       when CONFIG_EXAMPLES_MOUNT_DEVNAME is not defined.  The
       default is zero (meaning that "/dev/ram0" will be used).
 
+examples/netttest
+^^^^^^^^^^^^^^^^^
+
+  This is a simple network test for verifying client- and server-
+  functionality in a TCP/IP connection.
+
+examples/nsh
+^^^^^^^^^^^^
+
+  This directory contains the NuttShell (NSH).  This is a simple
+  shell application.  With some additional development, NSH will
+  someday be a great NuttX application debugger.  NSH is described
+  in its own README located at examples/nsh/README.txt
+
+examples/null
+^^^^^^^^^^^^^
+
+  This is the do nothing application.  It is only used for bringing
+  up new NuttX architectures in the most minimal of environments.
+
+examples/ostest
+^^^^^^^^^^^^^^^
+
+  This is the NuttX 'qualification' suite.  It attempts to exercise
+  a broad set of OS functionality.  Its coverage is not very extensive
+  as of this writing, but it is used to qualify each NuttX release.
+
+  The behavior of the ostest can be modified with the following
+  settings in the configs/<board-name>/defconfig file:
+
+  * CONFIG_EXAMPLES_OSTEST_LOOPS
+      Used to control the number of executions of the test.  If
+      undefined, the test executes one time.  If defined to be
+      zero, the test runs forever.
+  * CONFIG_EXAMPLES_OSTEST_STACKSIZE
+      Used to create the ostest task.  Default is 8192.
+  * CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS
+      Specifies the number of threads to create in the barrier
+      test.  The default is 8 but a smaller number may be needed on
+      systems without sufficient memory to start so many threads.
+
+examples/pashello
+^^^^^^^^^^^^^^^^^
+
+  This is "Hello, World" implemented via the Pascal P-Code interpreter
+
+examples/pipe
+^^^^^^^^^^^^^
+
+  A test of the mkfifo() and pipe() APIs.
+
+ * CONFIG_EXAMPLES_PIPE_STACKSIZE
+     Sets the size of the stack to use when creating the child tasks.
+     The default size is 1024.
+
 examples/romfs
 ^^^^^^^^^^^^^^
 
@@ -78,31 +111,11 @@ examples/romfs
   * CONFIG_EXAMPLES_ROMFS_MOUNTPOINT
       The location to mount the ROM disk.  Deafault: "/usr/local/share"
 
-examples/null
-^^^^^^^^^^^^^
+examples/serloop
+^^^^^^^^^^^^^^^^
 
-  This is the do nothing application.  It is only used for bringing
-  up new NuttX architectures.
-
-examples/hello
-^^^^^^^^^^^^^^
-
-  This is the mandatory, "Hello, World!!" example.  It is little more
-  than examples/null with a single printf statement.  Again useful only
-  for bringing up new NuttX architectures.
-
-examples/uip
-^^^^^^^^^^^^
-
-  This is a port of uIP example application.  It includes
-  conditionally compiled logic to exercise the uIP webserver,
-  webclient, telnet, smtp, dncpc, and resolver.
-
-examples/netttest
-^^^^^^^^^^^^^^^^^
-
-  This is a simple network test for verifying client- and server-
-  functionality in a TCP/IP connection.
+  This is a mindlessly simple loopback test on the console.  Useful
+  for testing new serial drivers.
 
 examples/udp
 ^^^^^^^^^^^^
@@ -110,19 +123,12 @@ examples/udp
   This is a simple network test for verifying client- and server-
   functionality over UDP.
 
-examples/pashello
-^^^^^^^^^^^^^^^^^
+examples/uip
+^^^^^^^^^^^^
 
-  This is "Hello, World" implemented via the Pascal P-Code interpreter
-
-examples/pipe
-^^^^^^^^^^^^^
-
-  A test of the mkfifo() and pipe() APIs.
-
- * CONFIG_EXAMPLES_PIPE_STACKSIZE
-     Sets the size of the stack to use when creating the child tasks.
-     The default size is 1024.
+  This is a port of uIP example application.  It includes
+  conditionally compiled logic to exercise the uIP webserver,
+  webclient, telnet, smtp, dncpc, and resolver.
 
 examples/usbserial
 ^^^^^^^^^^^^^^^^^^
