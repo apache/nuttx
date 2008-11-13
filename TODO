@@ -23,7 +23,7 @@ NuttX TODO List (Last updated July 31, 2008)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (1)  SH-1 (arch/sh)
-  (7)  z80/z8 (arch/z80/)
+  (8)  z80/z8/ez80 (arch/z80/)
   (8)  z16 (arch/z16/)
 
 o Task/Scheduler (sched/)
@@ -492,8 +492,8 @@ o SH-1 (arch/sh)
   Priority:     Low -- because the SH-1, SH7032, is very old and only of historical
                 interest.
 
-o z80/z8 (arch/z80)
- ^^^^^^^^^^^^^^^^^^
+o z80/z8/ez80 (arch/z80)
+ ^^^^^^^^^^^^^^^^^^^^^^^
 
   Description: The SDCC version the same problems with interger overflow during
                compilation as described for pjrc-8051.  At typical cause is code like
@@ -552,6 +552,13 @@ o z80/z8 (arch/z80)
   Status:      Open
   Priority:    Low
 
+  Description: The XTRS target (configs/xtrs) has a clean problem. The clean
+               rule removes .asm files.  This works because there are no .asm
+               files except in sub-directories that are provided from 'make clean' --
+               except for XTRS:  It has a .asm file in its src/ directory that
+               gets removed everytime clean is performd.
+  Status:      Open
+  Priority:    High if you happen to be working with XTRS.
 
 o z16 (arch/z16)
 ^^^^^^^^^^^^^^^^
