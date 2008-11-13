@@ -369,7 +369,7 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_BOOT_FROM_FLASH - Some configurations support XIP
 		  operation from FLASH.
 		CONFIG_STACK_POINTER - The initial stack pointer
-		CONFIG_PROC_STACK_SIZE - The size of the initial stack
+		CONFIG_IDLETHREAD_STACKSIZE - The size of the initial stack
 		CONFIG_PTHREAD_STACK_MIN - Minimum pthread stack size
 		CONFIG_PTHREAD_STACK_DEFAULT - Default pthread stack size
 		CONFIG_HEAP_BASE - The beginning of the heap
