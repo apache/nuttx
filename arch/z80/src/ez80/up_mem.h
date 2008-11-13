@@ -62,7 +62,7 @@
 
 #ifndef CONFIG_HEAP1_END
    extern unsigned long _stack;
-#  define CONFIG_HEAP1_END (((uint24)&_stack) - CONFIG_PROC_STACK_SIZE)
+#  define CONFIG_HEAP1_END (((uint24)&_stack) - CONFIG_IDLETHREAD_STACKSIZE)
 #endif
 
 /************************************************************************************

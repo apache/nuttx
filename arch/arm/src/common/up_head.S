@@ -297,7 +297,7 @@ __start:
 	 * _sbss is the start of the BSS region (see ld.script)
 	 * _ebss is the end of the BSS regsion (see ld.script)
 	 * The idle task stack starts at the end of BSS and is
-	 * of size CONFIG_PROC_STACK_SIZE.  The heap continues
+	 * of size CONFIG_IDLETHREAD_STACKSIZE.  The heap continues
 	 * from there until the end of memory.  See g_heapbase
 	 * below.
 	 */
@@ -305,7 +305,7 @@ __start:
 .Linitparms:
 	.long	_sbss
 	.long	_ebss
-	.long	_ebss+CONFIG_PROC_STACK_SIZE-4
+	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
 	.size	.Lvstart, .-.Lvstart
 
 	/* This global variable is unsigned long g_heapbase and is
@@ -318,7 +318,7 @@ __start:
 	.globl	g_heapbase
 	.type	g_heapbase, object
 g_heapbase:
-	.long	_ebss+CONFIG_PROC_STACK_SIZE
+	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
 	.size	g_heapbase, .-g_heapbase
 	.end
 

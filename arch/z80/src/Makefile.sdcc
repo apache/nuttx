@@ -110,7 +110,7 @@ up_mem.h:
 	@echo "#include <nuttx/config.h>" >>up_mem.h
 	@echo "" >>up_mem.h
 	@echo "#define CONFIG_STACK_END   $(CONFIG_DRAM_SIZE)" >> up_mem.h
-	@echo "#define CONFIG_STACK_BASE  (CONFIG_STACK_END - $(CONFIG_PROC_STACK_SIZE))" >> up_mem.h
+	@echo "#define CONFIG_STACK_BASE  (CONFIG_STACK_END - $(CONFIG_IDLETHREAD_STACKSIZE))" >> up_mem.h
 	@echo "#define CONFIG_HEAP1_END   CONFIG_STACK_BASE" >> up_mem.h
 	@echo "#define CONFIG_HEAP1_BASE  $(HEAP_BASE)" >> up_mem.h
 	@echo "" >>up_mem.h
@@ -125,8 +125,8 @@ else
 	@echo "	CONFIG_COMPILER	== 0" >> asm_mem.h
 endif
 	@echo "	CONFIG_STACK_END	== ($(CONFIG_DRAM_SIZE) - 1)" >> asm_mem.h
-	@echo "	CONFIG_STACK_BASE	== (CONFIG_STACK_END - $(CONFIG_PROC_STACK_SIZE))" >> asm_mem.h
-	@echo "	CONFIG_HEAP1_END	== (CONFIG_STACK_END - $(CONFIG_PROC_STACK_SIZE) - 1)" >> asm_mem.h
+	@echo "	CONFIG_STACK_BASE	== (CONFIG_STACK_END - $(CONFIG_IDLETHREAD_STACKSIZE))" >> asm_mem.h
+	@echo "	CONFIG_HEAP1_END	== (CONFIG_STACK_END - $(CONFIG_IDLETHREAD_STACKSIZE) - 1)" >> asm_mem.h
 	@echo "	CONFIG_HEAP1_BASE	== $(HEAP_BASE)" >> asm_mem.h
 
 # Combine all objects in this directory into a library
