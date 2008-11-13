@@ -345,7 +345,7 @@ _up_vector:
 
         mov.l   .Ldoirq, r0
         jsr     @r0
-        mov     r15, r14
+        nop
 
 	/* Recover the user stack point */
 
@@ -355,7 +355,7 @@ _up_vector:
 
         mov.l   .Ldoirq, r0
         jsr     @r0
-        mov     r15, r14
+        nop
 #endif
 	/* On return, R0 holds the address of the base of the XCPTCONTEXT
 	 * structure to use for the return -- may not be the same as the
@@ -368,17 +368,28 @@ _up_vector:
 	bf	.Lcontextswitch
 	mov	r0, r15
 
-	/* Restore registers from the stack. */
+	/* Restore registers from the stack. NOTE: We coudl improve interrupt
+         * performance by skipping the restore of r8-r14.  These will not
+         * be modified by the called C code
+         */
 
-	mov.l	@r15+, r8	/* 0-8: r8-r14, pr, and gbr */
+#if 1
+	/* Skip over static registers -- these will not be modified by the
+	 * called C code (r8-r14)
+         */
+
+	add	#(7*4), r15	/* 0-6: Skip over r8-r14 */
+#else
+	mov.l	@r15+, r8	/* 0-6: r8-r14 */
 	mov.l	@r15+, r9
 	mov.l	@r15+, r10
 	mov.l	@r15+, r11
 	mov.l	@r15+, r12
 	mov.l	@r15+, r13
 	mov.l	@r15+, r14
+#endif
 
-	lds.l	@r15+, pr
+	lds.l	@r15+, pr	/* 7-8: pr and gbr */
 	ldc.l	@r15+, gbr
 
 	add	#4, r15		/* 9: Skip SP restore */
