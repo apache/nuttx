@@ -16,7 +16,7 @@ NuttX TODO List (Last updated July 31, 2008)
   (3)  Build system
   (2)  NuttShell (NSH) (examples/nsh)
   (1)  Other Applications & Tests (examples/)
-  (1)  ARM (arch/arm/)
+  (2)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (1)  ARM/DM320 (arch/arm/src/dm320/)
   (6)  ARM/LPC214x (arch/arm/src/lpc214x/)
@@ -346,6 +346,14 @@ o ARM (arch/arm/)
                area in current_regs instead of using up_copystate so much.
                see handling of 'current_regs" in arch/sh/src/common/* for
                examples of how this might be done.
+  Status:      Open
+  Priority:    Low
+
+  Description: The ARM interrupt handler restores all regisers upon return.
+               This could be improved as well:  If there is not context
+               switch, then the static registers need not be restored
+               because they will not be modified by the called C code.
+               (see arch/sh/src/sh1/sh1_vector.S for example)
   Status:      Open
   Priority:    Low
 
