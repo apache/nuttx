@@ -66,12 +66,12 @@ struct xcptcontext
 
 #ifndef CONFIG_DISABLE_SIGNALS
   void *sigdeliver; /* Actual type is sig_deliver_t */
-#endif
 
   /* These are saved copies of LR and SR used during signal processing. */
 
   uint32 saved_pc;
   uint32 saved_sr;
+#endif
 
   /* Register save area */
 
