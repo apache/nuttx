@@ -136,7 +136,6 @@ struct xcptcontext
 
 #ifndef CONFIG_DISABLE_SIGNALS
   void *sigdeliver; /* Actual type is sig_deliver_t */
-#endif
 
   /* These are saved copies of LR and CPSR used during
    * signal processing.
@@ -144,6 +143,7 @@ struct xcptcontext
 
   uint32 saved_pc;
   uint32 saved_cpsr;
+#endif
 
   /* Register save area */
 
