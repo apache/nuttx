@@ -103,16 +103,16 @@ CONFIG_SH1_CMI=n
 #
 # SH1 specific device driver settings
 #
-# CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
+# CONFIG_SCIn_SERIAL_CONSOLE - selects the SCIn for the
 #   console and ttys0 (default is the UART0).
-# CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
+# CONFIG_SCIn_RXBUFSIZE - Characters are buffered as received.
 #   This specific the size of the receive buffer
-# CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
+# CONFIG_SCIn_TXBUFSIZE - Characters are buffered before
 #   being sent.  This specific the size of the transmit buffer
-# CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
-# CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
-# CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity, 3=mark 1, 4=space 0
-# CONFIG_UARTn_2STOP - Two stop bits
+# CONFIG_SCIn_BAUD - The configure BAUD of the UART.  Must be
+# CONFIG_SCIn_BITS - The number of bits.  Must be either 7 or 8.
+# CONFIG_SCIn_PARTIY - 0=no parity, 1=odd parity, 2=even parity, 3=mark 1, 4=space 0
+# CONFIG_SCIn_2STOP - Two stop bits
 #
 CONFIG_SCI0_SERIAL_CONSOLE=n
 CONFIG_SCI1_SERIAL_CONSOLE=y
