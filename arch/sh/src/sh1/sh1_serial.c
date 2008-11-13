@@ -562,8 +562,6 @@ static int up_interrupt(int irq, void *context)
 {
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;
-  int                passes;
-  boolean            handled;
 
 #ifdef CONFIG_SH1_SCI0
   if ((irq >= g_sci0priv.irq) && 
@@ -586,18 +584,18 @@ static int up_interrupt(int irq, void *context)
     }
   priv = (struct up_dev_s*)dev->priv;
 
-  /* Loop until there are no characters to be transferred or,
-   * until we have been looping for a long time.
+  /* Get the current SCI status  */
+
+  priv->ssr = up_serialin(priv, SH1_SCI_SSR_OFFSET);
+
+  /* Handle receive-related events with RIE is enabled.  RIE is enabled at
+   * times that driver is open EXCEPT when the driver is actively copying
+   * data from the circular buffer.  In that case, the read events must
+   * pend until RIE is set
    */
 
-  for (passes = 0, handled = TRUE; passes < 256 && handled; passes++)
+  if ((priv->scr & SH1_SCISCR_RIE) != 0)
     {
-      handled = FALSE;
-
-      /* Get the current SCI status  */
-
-       priv->ssr = up_serialin(priv, SH1_SCI_SSR_OFFSET);
-
       /* Handle incoming, receive bytes (RDRF: Receive Data Register Full) */
 
       if ((priv->ssr & SH1_SCISSR_RDRF) != 0)
@@ -605,29 +603,38 @@ static int up_interrupt(int irq, void *context)
            /* Rx data register not empty ... process incoming bytes */
 
            uart_recvchars(dev);
-           handled = TRUE;
         }
 
-      /* Handle outgoing, transmit bytes (TDRE: Transmit Data Register Empty) */
+      /* Clear all read related events (probably already done in up_receive)) */
 
-      if ((priv->ssr & SH1_SCISSR_TDRE) != 0)
-        {
-           /* Tx data register empty ... process outgoing bytes */
-
-           uart_xmitchars(dev);
-           handled = TRUE;
-        }
-
-      /* Clear all (clear-able) status flags.  Note that that SH-1 requires
-       * that you read the bit in the "1" then write "0" to the bit in order
-       * to clear it.  Any bits in the SSR that transitioned from 0->1 will
-       * not be effected by the following:
-       */
-
-      priv->ssr &= ~(SH1_SCISSR_TDRE|SH1_SCISSR_RDRF|SH1_SCISSR_ORER|\
-                     SH1_SCISSR_FER|SH1_SCISSR_PER|SH1_SCISSR_TEND);
-      up_serialout(priv, SH1_SCI_SSR_OFFSET, priv->ssr);
+      priv->ssr &= ~(SH1_SCISSR_RDRF|SH1_SCISSR_ORER|SH1_SCISSR_FER|SH1_SCISSR_PER);
     }
+
+  /* Handle outgoing, transmit bytes (TDRE: Transmit Data Register Empty)
+   * when TIE is enabled.  TIE is only enabled when the driver is waiting with
+   * buffered data.  Since TDRE is usually true, 
+   */
+
+  if ((priv->ssr & SH1_SCISSR_TDRE) != 0 && (priv->scr & SH1_SCISCR_TIE) != 0)
+    {
+       /* Tx data register empty ... process outgoing bytes */
+
+       uart_xmitchars(dev);
+
+       /* Clear the TDR empty flag (Possibly done in up_send, will have not
+        * effect if the TDR is still empty)
+        */
+
+      priv->ssr &= ~SH1_SCISSR_TDRE;
+    }
+
+  /* Clear all (clear-able) status flags.  Note that that SH-1 requires
+   * that you read the bit in the "1" then write "0" to the bit in order
+   * to clear it.  Any bits in the SSR that transitioned from 0->1 after
+   * we read the SR will not be effected by the following:
+   */
+
+  up_serialout(priv, SH1_SCI_SSR_OFFSET, priv->ssr);
   return OK;
 }
 
