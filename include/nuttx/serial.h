@@ -74,11 +74,11 @@
 
 struct uart_buffer_s
 {
-  sem_t     sem;    /* Used to control exclusive access to the buffer */
-  sint16    head;   /* Index to the head [IN] index in the buffer */
-  sint16    tail;   /* Index to the tail [OUT] index in the buffer */
-  sint16    size;   /* The allocated size of the buffer */
-  FAR char *buffer; /* Pointer to the allocated buffer memory */
+  sem_t           sem;    /* Used to control exclusive access to the buffer */
+  volatile sint16 head;   /* Index to the head [IN] index in the buffer */
+  volatile sint16 tail;   /* Index to the tail [OUT] index in the buffer */
+  sint16          size;   /* The allocated size of the buffer */
+  FAR char       *buffer; /* Pointer to the allocated buffer memory */
 };
 
 /* This structure defines all of the operations providd by the architecture specific
@@ -179,23 +179,17 @@ struct uart_ops_s
 
 struct uart_dev_s
 {
-  ubyte     open_count;			/* The number of times
-					 * the device has been opened */
-  boolean   xmitwaiting;		/* TRUE: User is waiting
-					 * for space in xmit.buffer */
-  boolean   recvwaiting;		/* TRUE: User is waiting
-					 * for space in recv.buffer */
-  boolean   isconsole;			/* TRUE: This is the serial console */
-  sem_t     closesem;			/* Locks out new opens while
-					 * close is in progress */
-  sem_t     xmitsem;			/* Used to wakeup user waiting
-					 * for space in xmit.buffer */
-  sem_t     recvsem;			/* Used to wakeup user waiting
-					 * for sapce in recv.buffer */
-  struct uart_buffer_s xmit;		/* Describes transmit buffer */
-  struct uart_buffer_s recv;		/* Describes receive buffer */
-  FAR const struct uart_ops_s *ops;	/* Arch-specific operations */
-  FAR void *priv;			/* Used by the arch-specific logic */
+  ubyte                open_count;  /* Number of times the device has been opened */
+  volatile boolean     xmitwaiting; /* TRUE: User waiting for space in xmit.buffer */
+  volatile boolean     recvwaiting; /* TRUE: User waiting for data in recv.buffer */
+  boolean              isconsole;   /* TRUE: This is the serial console */
+  sem_t                closesem;    /* Locks out new open while close is in progress */
+  sem_t                xmitsem;     /* Wakeup user waiting for space in xmit.buffer */
+  sem_t                recvsem;     /* Wakeup user waiting for data in recv.buffer */
+  struct uart_buffer_s xmit;        /* Describes transmit buffer */
+  struct uart_buffer_s recv;        /* Describes receive buffer */
+  FAR const struct uart_ops_s *ops; /* Arch-specific operations */
+  FAR void            *priv;       /* Used by the arch-specific logic */
 };
 typedef struct uart_dev_s uart_dev_t;
 
