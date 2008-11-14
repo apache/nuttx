@@ -366,12 +366,12 @@ EXTERN int lib_flushall(FAR struct streamlist *list);
 
 /* drivers ******************************************************************/
 
-/* Call in of these to register the corresponding default 
- * default drivers in the drivers/ subdirectory
+/* Call any of these to register the corresponding drivers in the drivers/
+ * subdirectory
  */
 
 EXTERN void devnull_register(void);
-
+EXTERN int losetup(const char *name, int minor, uint16 sectsize);
 
 #undef EXTERN
 #if defined(__cplusplus)
