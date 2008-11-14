@@ -61,7 +61,7 @@
  *
  * Inputs:
  *   pathname - the full path to the block driver to be opened
- *   mountflags - if MS_RDONLY is set, then driver must support write
+ *   mountflags - if MS_RDONLY is not set, then driver must support write
  *     operations (see include/sys/mount.h)
  *   ppinode - address of the location to return the inode reference
  *
