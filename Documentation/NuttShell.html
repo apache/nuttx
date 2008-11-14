@@ -1590,6 +1590,13 @@ nsh>
   Configuration settings specific to NSH as discussed at the <a href="#nshconfiguration">bottom</a> of this document.
 </p>
 
+<p>
+  Note that in addition to general NuttX configuation settings, each NSH command can be
+  individually disabled via the settings in the rightmost column.
+  All of these settings make the configuration of NSH potentially complex but also allow it to
+  squeeze into very small memory footprints.
+</p>
+
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
@@ -1603,134 +1610,175 @@ nsh>
   <tr bgcolor="#e4e4e4">
     <th align="left" width="25%">Command</th>
     <th align="left">Depends on Configuration</th>
+    <th align="left">Can Be Disabled with</th>
   </tr>
   <tr>
     <td><b><code>[</code></b></td>
     <td>!<code>CONFIG_EXAMPLES_NSH_DISABLESCRIPT</code></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_TEST</code></td>
   </tr>
   <tr>
     <td><b><code>cat</code></b></td>
     <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_CAT</code></td>
   </tr>
   <tr>
     <td><b><code>cd</code></b></td>
     <td>!<code>CONFIG_DISABLE_ENVIRON</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_CD</code></td>
   </tr>
   <tr>
     <td><b><code>cp</code></b></td>
     <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_CP</code></td>
   </tr>
   <tr>
     <td><b><code>echo</code></b></td>
     <td><br></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_ECHO</code></td>
   </tr>
   <tr>
     <td><b><code>exec</code></b></td>
     <td><br></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_EXEC</code></td>
   </tr>
   <tr>
     <td><b><code>exit</code></b></td>
     <td><br></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_EXIT</code></td>
   </tr>
   <tr>
     <td><b><code>get</code></b></td>
     <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_UDP</code> &amp;&amp;
         <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_NET_BUFSIZE</code> &gt;= 558<sup>1</sup></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_GET</code></td>
   </tr>
   <tr>
     <td><b><code>help</code></b></td>
     <td><br></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_HELP</code></td>
   </tr>
   <tr>
     <td><b><code>ifconfig</code></b></td>
     <td><code>CONFIG_NET</code></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_IFCONFIG</code></td>
   </tr>
   <tr>
     <td><b><code>ls</code></b></td>
     <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_LS</code></td>
   </tr>
   <tr>
     <td><b><code>mb,mh,mw</code></b></td>
     <td><br></td>
+    <td>
+      <code>CONFIG_EXAMPLES_NSH_DISABLE_MB</code>,<br>
+      <code>CONFIG_EXAMPLES_NSH_DISABLE_MH</code>,<br>
+      <code>CONFIG_EXAMPLES_NSH_DISABLE_MW</code>
+    </td>
   </tr>
   <tr>
     <td><b><code>mem</code></b></td>
     <td><br></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_MEM</code></td>
   </tr>
   <tr>
     <td><b><code>mkdir</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code><sup>4</sup></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_MKDIR</code></td>
   </tr>
   <tr>
     <td><b><code>mkfatfs</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_FAT</code></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_MKFATFS</code></td>
   </tr>
   <tr>
     <td><b><code>mkfifo</code></b></td>
     <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_MKFIFO</code></td>
   </tr>
   <tr>
     <td><b><code>mkrd</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code><sup>4</sup></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_MKRD</code></td>
   </tr>
   <tr>
     <td><b><code>mount</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_READABLE</code><sup>3</sup></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_MOUNT</code></td>
   </tr>
   <tr>
     <td><b><code>ping</code></b></td>
     <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_ICMP</code> &amp;&amp;
         <code>CONFIG_NET_ICMP_PING</code>  &amp;&amp; !<code>CONFIG_DISABLE_CLOCK</code> &amp;&amp;
         !<code>CONFIG_DISABLE_SIGNALS</code></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_PING</code></td>
   </tr>
   <tr>
     <td><b><code>ps</code></b></td>
     <td><br></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_PS</code></td>
   </tr>
   <tr>
     <td><b><code>put</code></b></td>
     <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_UDP</code> &amp;&amp;
     <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_NET_BUFSIZE</code> &gt;= 558<sup>1,2</sup></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_PUT</code></td>
   </tr>
   <tr>
     <td><b><code>pwd</code></b></td>
     <td>!<code>CONFIG_DISABLE_ENVIRON</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_PWD</code></td>
   </tr>
   <tr>
     <td><b><code>rm</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code><sup>4</sup></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_RM</code></td>
   </tr>
   <tr>
     <td><b><code>rmdir</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code><sup>4</sup></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_RMDIR</code></td>
   </tr>
   <tr>
     <td><b><code>set</code></b></td>
     <td>!<code>CONFIG_DISABLE_ENVIRON</code></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_SET</code></td>
   </tr>
   <tr>
     <td><b><code>sh</code></b></td>
     <td><code>CONFIG_NFILE_DESCRIPTORS &gt; 0 &amp;&amp; <code>CONFIG_NFILE_STREAMS &gt; 0 &amp;&amp; !<code>CONFIG_EXAMPLES_NSH_DISABLESCRIPT</code></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_SH</code></td>
   </tr>
   <tr>
     <td><b><code>sleep</code></b></td>
     <td>!<code>CONFIG_DISABLE_SIGNALS</code></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_SLEEP</code></td>
   </tr>
   <tr>
     <td><b><code>test</code></b></td>
     <td>!<code>CONFIG_EXAMPLES_NSH_DISABLESCRIPT</code></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_TEST</code></td>
   </tr>
   <tr>
     <td><b><code>umount</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_READABLE</code><sup>3</sup></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_UMOUNT</code></td>
   </tr>
   <tr>
     <td><b><code>unset</code></b></td>
     <td>!<code>CONFIG_DISABLE_ENVIRON</code></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_UNSET</code></td>
   </tr>
   <tr>
     <td><b><code>usleep</code></b></td>
     <td>!<code>CONFIG_DISABLE_SIGNALS</code></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_USLEEP</code></td>
+  </tr>
+  <tr>
+    <td><b><code>xd</code></b></td>
+    <td><br></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_XD</code></td>
   </tr>
 </table></center>
 
