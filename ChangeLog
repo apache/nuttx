@@ -547,3 +547,7 @@
 	  This is the size of stack used with the user_start() thread is created.  The two stacks
 	  no longer have to be the same.
 	* Add a loop device that converts a file into a block device.
+	* Each NSH command can not be disabled through a configuration setting. All of these
+          settings make the configuration of NSH potentially complex but also allow it to squeeze
+          into very small memory footprints.
+

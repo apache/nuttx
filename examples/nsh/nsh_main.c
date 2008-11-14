@@ -111,8 +111,13 @@ struct cmdarg_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int cmd_help(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-static int cmd_exit(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_HELP
+  static int cmd_help(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_EXIT
+  static int cmd_exit(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
 static int cmd_unrecognized(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 
 /****************************************************************************
@@ -128,89 +133,181 @@ static const char g_failure[]    = "1";
 
 static const struct cmdmap_s g_cmdmap[] =
 {
-#ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
+#if !defined(CONFIG_EXAMPLES_NSH_DISABLESCRIPT) && !defined(CONFIG_EXAMPLES_NSH_DISABLE_TEST)
   { "[",        cmd_lbracket, 4, NSH_MAX_ARGUMENTS, "<expression> ]" },
 #endif
+
 #if CONFIG_NFILE_DESCRIPTORS > 0
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_CAT
   { "cat",      cmd_cat,      2, NSH_MAX_ARGUMENTS, "<path> [<path> [<path> ...]]" },
+# endif
 #ifndef CONFIG_DISABLE_ENVIRON
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_CD
   { "cd",       cmd_cd,       1, 2, "[<dir-path>|-|~|..]" },
+# endif
 #endif
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_CP
   { "cp",       cmd_cp,       3, 3, "<source-path> <dest-path>" },
+# endif
 #endif
-#ifndef CONFIG_DISABLE_ENVIRON
+
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_ECHO
+# ifndef CONFIG_DISABLE_ENVIRON
   { "echo",     cmd_echo,     0, NSH_MAX_ARGUMENTS, "[<string|$name> [<string|$name>...]]" },
-#else
+# else
   { "echo",     cmd_echo,     0, NSH_MAX_ARGUMENTS, "[<string> [<string>...]]" },
+# endif
 #endif
+
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_EXEC
   { "exec",     cmd_exec,     2, 3, "<hex-address>" },
+#endif
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_EXIT
   { "exit",     cmd_exit,     1, 1, NULL },
+#endif
+
 #if defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_GET
   { "get",      cmd_get,      4, 7, "[-b|-n] [-f <local-path>] -h <ip-address> <remote-path>" },
+# endif
 #endif
+
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_HELP
   { "help",     cmd_help,     1, 1, NULL },
+#endif
+
 #ifdef CONFIG_NET
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_IFCONFIG
   { "ifconfig", cmd_ifconfig, 1, 1, NULL },
+# endif
 #endif
+
 #if CONFIG_NFILE_DESCRIPTORS > 0
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_LS
   { "ls",       cmd_ls,       1, 5, "[-lRs] <dir-path>" },
+# endif
 #endif
+
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_MB
   { "mb",       cmd_mb,       2, 3, "<hex-address>[=<hex-value>][ <hex-byte-count>]" },
+#endif
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_MEM
   { "mem",      cmd_mem,      1, 1, NULL },
+#endif
+
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_WRITABLE)
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_MKDIR
   { "mkdir",    cmd_mkdir,    2, 2, "<path>" },
+# endif
 #endif
+
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_FAT)
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_MKFATFS
   { "mkfatfs",  cmd_mkfatfs,  2, 2, "<path>" },
+# endif
 #endif
+
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_MKFIFO
   { "mkfifo",   cmd_mkfifo,   2, 2, "<path>" },
+# endif
 #endif
+
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_WRITABLE)
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_MKRD
   { "mkrd",     cmd_mkrd,     2, 6, "[-m <minor>] [-s <sector-size>] <nsectors>" },
+# endif
 #endif
+
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_MH
   { "mh",       cmd_mh,       2, 3, "<hex-address>[=<hex-value>][ <hex-byte-count>]" },
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_READABLE)
-  { "mount",    cmd_mount,    4, 5, "-t <fstype> <block-device> <dir-path>" },
 #endif
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_READABLE)
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_MOUNT
+  { "mount",    cmd_mount,    4, 5, "-t <fstype> <block-device> <dir-path>" },
+# endif
+#endif
+
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_MW
   { "mw",       cmd_mw,       2, 3, "<hex-address>[=<hex-value>][ <hex-byte-count>]" },
-  { "ps",       cmd_ps,       1, 1, NULL },
+#endif
+
 #if defined(CONFIG_NET) && defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING) && \
    !defined(CONFIG_DISABLE_CLOCK) && !defined(CONFIG_DISABLE_SIGNALS)
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_PING
   { "ping",     cmd_ping,     2, 6, "[-c <count>] [-i <interval>] <ip-address>" },
+# endif
 #endif
+
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_PS
+  { "ps",       cmd_ps,       1, 1, NULL },
+#endif
+
 #if defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_PUT
   { "put",      cmd_put,      4, 7, "[-b|-n] [-f <remote-path>] -h <ip-address> <local-path>" },
+# endif
 #endif
+
 #if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_PWD
   { "pwd",      cmd_pwd,      1, 1, NULL },
+# endif
 #endif
+
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_WRITABLE)
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_RM
   { "rm",       cmd_rm,       2, 2, "<file-path>" },
+# endif
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_RMDIR
   { "rmdir",    cmd_rmdir,    2, 2, "<dir-path>" },
+# endif
 #endif
+
 #ifndef CONFIG_DISABLE_ENVIRON
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_SET
   { "set",      cmd_set,      3, 3, "<name> <value>" },
+# endif
 #endif
+
 #if  CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0 && !defined(CONFIG_EXAMPLES_NSH_DISABLESCRIPT)
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_SH
   { "sh",       cmd_sh,       2, 2, "<script-path>" },
-#endif  /* CONFIG_NFILE_DESCRIPTORS && CONFIG_NFILE_STREAMS */
+# endif
+#endif
+
 #ifndef CONFIG_DISABLE_SIGNALS
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_SLEEP
   { "sleep",    cmd_sleep,    2, 2, "<sec>" },
-#endif /* CONFIG_DISABLE_SIGNALS */
-#ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
+# endif
+#endif
+
+#if !defined(CONFIG_EXAMPLES_NSH_DISABLESCRIPT) && !defined(CONFIG_EXAMPLES_NSH_DISABLE_TEST)
   { "test",     cmd_test,     3, NSH_MAX_ARGUMENTS, "<expression>" },
 #endif
+
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_READABLE)
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_UMOUNT
   { "umount",   cmd_umount,   2, 2, "<dir-path>" },
+# endif
 #endif
+
 #ifndef CONFIG_DISABLE_ENVIRON
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_UNSET
   { "unset",    cmd_unset,    2, 2, "<name>" },
+# endif
 #endif
+
 #ifndef CONFIG_DISABLE_SIGNALS
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_USLEEP
   { "usleep",   cmd_usleep,   2, 2, "<usec>" },
-#endif /* CONFIG_DISABLE_SIGNALS */
+# endif
+#endif
+
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_XD
   { "xd",       cmd_xd,       3, 3, "<hex-address> <byte-count>" },
+#endif
   { NULL,       NULL,         1, 1, NULL }
 };
 
@@ -245,6 +342,7 @@ const char g_fmtinternalerror[]  = "nsh: %s: Internal error\n";
  * Name: cmd_help
  ****************************************************************************/
 
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_HELP
 static int cmd_help(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   const struct cmdmap_s *ptr;
@@ -278,6 +376,7 @@ static int cmd_help(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     }
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: cmd_unrecognized
@@ -293,11 +392,13 @@ static int cmd_unrecognized(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  * Name: cmd_exit
  ****************************************************************************/
 
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_EXIT
 static int cmd_exit(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   nsh_exit(vtbl);
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: nsh_execute

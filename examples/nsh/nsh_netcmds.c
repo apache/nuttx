@@ -133,7 +133,7 @@ static inline uint16 ping_newid(void)
  * Name: uip_statistics
  ****************************************************************************/
 
-#ifdef CONFIG_NET_STATISTICS
+#if defined(CONFIG_NET_STATISTICS) && !defined(CONFIG_EXAMPLES_NSH_DISABLE_IFCONFIG)
 static inline void uip_statistics(FAR struct nsh_vtbl_s *vtbl)
 {
   nsh_output(vtbl, "uIP         IP ");
@@ -241,6 +241,7 @@ static inline void uip_statistics(FAR struct nsh_vtbl_s *vtbl)
 #else
 # define uip_statistics(vtbl)
 #endif
+
 
 /****************************************************************************
  * Name: ifconfig_callback
@@ -386,6 +387,7 @@ errout:
  ****************************************************************************/
 
 #if defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_GET
 int cmd_get(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   struct tftpc_args_s args;
@@ -419,17 +421,20 @@ int cmd_get(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   return OK;
 }
 #endif
+#endif
 
 /****************************************************************************
  * Name: cmd_ifconfig
  ****************************************************************************/
 
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_IFCONFIG
 int cmd_ifconfig(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   netdev_foreach(ifconfig_callback, vtbl);
   uip_statistics(vtbl);
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: cmd_ping
@@ -437,6 +442,7 @@ int cmd_ifconfig(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING) && \
    !defined(CONFIG_DISABLE_CLOCK) && !defined(CONFIG_DISABLE_SIGNALS)
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_PING
 int cmd_ping(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   FAR const char *fmt = g_fmtarginvalid;
@@ -576,6 +582,7 @@ errout:
   nsh_output(vtbl, fmt, argv[0]);
   return ERROR;
 }
+#endif
 #endif /* CONFIG_NET_ICMP && CONFIG_NET_ICMP_PING */
 
 /****************************************************************************
@@ -583,6 +590,7 @@ errout:
  ****************************************************************************/
 
 #if defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_PUT
 int cmd_put(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   struct tftpc_args_s args;
@@ -615,6 +623,7 @@ int cmd_put(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   free(fullpath);
   return OK;
 }
+#endif
 #endif
 
 #endif /* CONFIG_NET */

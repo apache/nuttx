@@ -329,69 +329,129 @@ extern void nsh_dumpbuffer(FAR struct nsh_vtbl_s *vtbl, const char *msg,
 
 /* Shell command handlers */
 
-extern int cmd_echo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-extern int cmd_exec(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-extern int cmd_mb(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-extern int cmd_mh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-extern int cmd_mw(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-extern int cmd_mem(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-extern int cmd_ps(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-extern int cmd_xd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_ECHO
+  extern int cmd_echo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_EXEC
+  extern int cmd_exec(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_MB
+  extern int cmd_mb(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_MH
+  extern int cmd_mh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_MW
+  extern int cmd_mw(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_MEM
+  extern int cmd_mem(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_PS
+  extern int cmd_ps(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_XD
+  extern int cmd_xd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
 
-#ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
+#if !defined(CONFIG_EXAMPLES_NSH_DISABLESCRIPT) && !defined(CONFIG_EXAMPLES_NSH_DISABLE_TEST)
 extern int cmd_test(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 extern int cmd_lbracket(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  extern int cmd_cat(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-  extern int cmd_cp(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-  extern int cmd_ls(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  ifndef CONFIG_EXAMPLES_NSH_DISABLE_CAT
+     extern int cmd_cat(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  endif
+#  ifndef CONFIG_EXAMPLES_NSH_DISABLE_CP
+     extern int cmd_cp(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  endif
+#  ifndef CONFIG_EXAMPLES_NSH_DISABLE_LS
+     extern int cmd_ls(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  endif
 # if CONFIG_NFILE_STREAMS > 0 && !defined(CONFIG_EXAMPLES_NSH_DISABLESCRIPT)
-  extern int cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#   ifndef CONFIG_EXAMPLES_NSH_DISABLE_SH
+      extern int cmd_sh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#   endif
 # endif  /* CONFIG_NFILE_STREAMS && !CONFIG_EXAMPLES_NSH_DISABLESCRIPT */
 # ifndef CONFIG_DISABLE_MOUNTPOINT
-    extern int cmd_mkfifo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#   ifndef CONFIG_EXAMPLES_NSH_DISABLE_MKFIFO
+      extern int cmd_mkfifo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#   endif
 #   ifdef CONFIG_FS_READABLE
-      extern int cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-      extern int cmd_umount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#     ifndef CONFIG_EXAMPLES_NSH_DISABLE_MOUNT
+        extern int cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#     endif
+#     ifndef CONFIG_EXAMPLES_NSH_DISABLE_UMOUNT
+        extern int cmd_umount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#     endif
 #     ifdef CONFIG_FS_WRITABLE
-        extern int cmd_mkdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-        extern int cmd_mkrd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-        extern int cmd_rm(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-        extern int cmd_rmdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#       ifndef CONFIG_EXAMPLES_NSH_DISABLE_MKDIR
+          extern int cmd_mkdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#       endif
+#       ifndef CONFIG_EXAMPLES_NSH_DISABLE_MKRD
+          extern int cmd_mkrd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#       endif
+#       ifndef CONFIG_EXAMPLES_NSH_DISABLE_RM
+          extern int cmd_rm(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#       endif
+#       ifndef CONFIG_EXAMPLES_NSH_DISABLE_RMDIR
+          extern int cmd_rmdir(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#       endif
 #     endif /* CONFIG_FS_WRITABLE */
 #   endif /* CONFIG_FS_READABLE */
 #   ifdef CONFIG_FS_FAT
-      extern int cmd_mkfatfs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#     ifndef CONFIG_EXAMPLES_NSH_DISABLE_MKFATFS
+        extern int cmd_mkfatfs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#     endif
 #   endif /* CONFIG_FS_FAT */
 # endif /* !CONFIG_DISABLE_MOUNTPOINT */
 # if !defined(CONFIG_DISABLE_ENVIRON)
-  extern int cmd_cd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-  extern int cmd_pwd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#   ifndef CONFIG_EXAMPLES_NSH_DISABLE_CD
+      extern int cmd_cd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#   endif
+#   ifndef CONFIG_EXAMPLES_NSH_DISABLE_PWD
+      extern int cmd_pwd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#   endif
 # endif /* !CONFIG_DISABLE_MOUNTPOINT */
 #endif /* CONFIG_NFILE_DESCRIPTORS */
 
 #if defined(CONFIG_NET)
-  extern int cmd_ifconfig(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  ifndef CONFIG_EXAMPLES_NSH_DISABLE_IFCONFIG
+     extern int cmd_ifconfig(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  endif
 #if defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
-  extern int cmd_get(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-  extern int cmd_put(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  ifndef CONFIG_EXAMPLES_NSH_DISABLE_GET
+     extern int cmd_get(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  endif
+#  ifndef CONFIG_EXAMPLES_NSH_DISABLE_PUT
+     extern int cmd_put(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  endif
 #endif
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING) && \
    !defined(CONFIG_DISABLE_CLOCK) && !defined(CONFIG_DISABLE_SIGNALS)
-  extern int cmd_ping(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  ifndef CONFIG_EXAMPLES_NSH_DISABLE_PING
+     extern int cmd_ping(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  endif
 #endif
 #endif
 
 #ifndef CONFIG_DISABLE_ENVIRON
-  extern int cmd_set(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-  extern int cmd_unset(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  ifndef CONFIG_EXAMPLES_NSH_DISABLE_SET
+     extern int cmd_set(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  endif
+#  ifndef CONFIG_EXAMPLES_NSH_DISABLE_UNSET
+     extern int cmd_unset(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  endif
 #endif /* CONFIG_DISABLE_ENVIRON */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-  extern int cmd_sleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
-  extern int cmd_usleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  ifndef CONFIG_EXAMPLES_NSH_DISABLE_SLEEP
+     extern int cmd_sleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  endif
+#  ifndef CONFIG_EXAMPLES_NSH_DISABLE_USLEEP
+     extern int cmd_usleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  endif
 #endif /* CONFIG_DISABLE_SIGNALS */
 
 #endif /* __NSH_H */
