@@ -126,7 +126,7 @@ off_t lseek(int fd, off_t offset, int whence)
         {
            /* Yes, then let it perform the seek */
 
-           err = (int)inode->u.i_ops->seek( filep, offset, whence);
+           err = (int)inode->u.i_ops->seek(filep, offset, whence);
            if (err < 0)
              {
                err = -err;
