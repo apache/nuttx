@@ -378,6 +378,9 @@ extern int cmd_lbracket(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #   endif
 # endif  /* CONFIG_NFILE_STREAMS && !CONFIG_EXAMPLES_NSH_DISABLESCRIPT */
 # ifndef CONFIG_DISABLE_MOUNTPOINT
+#   ifndef CONFIG_EXAMPLES_NSH_DISABLE_LOSETUP
+      extern int cmd_losetup(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#   endif
 #   ifndef CONFIG_EXAMPLES_NSH_DISABLE_MKFIFO
       extern int cmd_mkfifo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #   endif

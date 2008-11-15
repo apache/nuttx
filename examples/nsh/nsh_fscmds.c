@@ -648,6 +648,128 @@ errout:
 #endif
 
 /****************************************************************************
+ * Name: cmd_losetup
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_MOUNTPOINT)
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_LOSETUP
+int cmd_losetup(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+  char   *loopdev  = NULL;
+  char   *filepath = NULL;
+  boolean teardown = FALSE;
+  boolean readonly = FALSE;
+  off_t   offset   = 0;
+  int     ret      = ERROR;
+  int     option;
+
+  /* Get the losetup options:  Two forms are supported:
+   *
+   *   losetup -d <loop-device>
+   *   losetup [-o <offset>] [-r] <loop-device> <filename>
+   *
+   * NOTE that the -o and -r options are accepted with the -d option, but
+   * will be ignored.
+   */
+
+  while ((option = getopt(argc, argv, "d:o:r")) != ERROR)
+    {
+      switch (option)
+        {
+        case 'd':
+          loopdev  = nsh_getfullpath(vtbl, optarg);
+          teardown = TRUE;
+          break;
+
+        case 'o':
+          offset = atoi(optarg);
+          break;
+
+        case 'r':
+          readonly = TRUE;
+          break;
+
+        case '?':
+        default:
+          nsh_output(vtbl, g_fmtarginvalid, argv[0]);
+          return ERROR;
+        }
+    }
+
+  /* If this is not a tear down operation, then additional command line
+   * parameters are required.
+   */
+
+  if (!teardown)
+    {
+      /* There must be two arguments on the command line after the options */
+
+      if (optind + 1 < argc)
+        {
+          loopdev = nsh_getfullpath(vtbl, argv[optind]);
+          optind++;
+
+          filepath = nsh_getfullpath(vtbl, argv[optind]);
+          optind++;
+        }
+      else
+        {
+          nsh_output(vtbl, g_fmtargrequired, argv[0]);
+          goto errout_with_paths;
+        }
+    }
+
+  /* There should be nothing else on the command line */
+
+  if (optind < argc)
+   {
+     nsh_output(vtbl, g_fmttoomanyargs, argv[0]);
+     goto errout_with_paths;
+   }
+
+  /* Perform the teardown operation */
+
+  if (teardown)
+    {
+      /* Tear down the loop device. */
+
+      ret = loteardown(loopdev);
+      if (ret < 0)
+        {
+          nsh_output(vtbl, g_fmtcmdfailed, argv[0], "loteardown", NSH_ERRNO_OF(-ret));
+          goto errout_with_paths;
+        }
+    }
+  else
+    {
+      /* Set up the loop device */
+
+      ret = losetup(loopdev, filepath, 512, offset, readonly);
+      if (ret < 0)
+        {
+          nsh_output(vtbl, g_fmtcmdfailed, argv[0], "losetup", NSH_ERRNO_OF(-ret));
+          goto errout_with_paths;
+        }
+    }
+
+  /* Free memory */
+
+errout_with_paths:
+  if (loopdev)
+    {
+      free(loopdev);
+    }
+
+  if (filepath)
+    {
+      free(filepath);
+    }
+  return ret;
+}
+#endif
+#endif
+
+/****************************************************************************
  * Name: cmd_ls
  ****************************************************************************/
 

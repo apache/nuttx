@@ -188,6 +188,12 @@ static const struct cmdmap_s g_cmdmap[] =
 # endif
 #endif
 
+#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_MOUNTPOINT)
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_LOSETUP
+  { "losetup",   cmd_losetup, 3, 6, "[-d <dev-path>] | [[-o <offset>] [-r] <dev-path> <file-path>]" },
+# endif
+#endif
+
 #if CONFIG_NFILE_DESCRIPTORS > 0
 # ifndef CONFIG_EXAMPLES_NSH_DISABLE_LS
   { "ls",       cmd_ls,       1, 5, "[-lRs] <dir-path>" },
