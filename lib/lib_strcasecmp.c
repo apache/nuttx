@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_strcmp.c
+ * lib/lib_strcasecmp.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,20 +42,22 @@
  *****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <string.h>
+#include <ctype.h>
 
 /****************************************************************************
  * Public Functions
  *****************************************************************************/
 
 #ifndef CONFIG_ARCH_STRCMP
-int strcmp(const char *cs, const char *ct)
+int strcasecmp(const char *cs, const char *ct)
 {
   register signed char result;
   for (;;)
     {
-      if ((result = *cs - *ct++) != 0 || !*cs++)
+      if ((result = toupper(*cs) - toupper(*ct++)) != 0 || !*cs++)
 	break;
     }
   return result;

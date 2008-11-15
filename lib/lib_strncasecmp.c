@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib/lib_strcmp.c
+ * lib/lib_strncasecmp.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -42,21 +42,25 @@
  *****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <string.h>
+#include <ctype.h>
 
 /****************************************************************************
- * Public Functions
+ * Global Functions
  *****************************************************************************/
 
-#ifndef CONFIG_ARCH_STRCMP
-int strcmp(const char *cs, const char *ct)
+#ifndef CONFIG_ARCH_STRNCMP
+int strncmp(const char *cs, const char *ct, size_t nb)
 {
-  register signed char result;
-  for (;;)
+  register signed char result = 0;
+  for (; nb > 0; nb--)
     {
-      if ((result = *cs - *ct++) != 0 || !*cs++)
-	break;
+      if ((result = toupper(*cs) - toupper(*ct++)) != 0 || !*cs++)
+        {
+          break;
+        }
     }
   return result;
 }
