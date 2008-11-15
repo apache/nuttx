@@ -341,6 +341,23 @@ o losetup [-d <dev-path>] | [[-o <offset>] [-r] <ldev-path> <file-path>]
 
     losetup [-o <offset>] [-r] <dev-path> <file-path>
 
+  Example:
+
+    nsh> dd if=/dev/zero of=/tmp/image bs=512 count=512
+    nsh> ls -l /tmp
+    /tmp:
+     -rw-rw-rw-   262144 IMAGE
+    nsh> losetup /dev/loop0 /tmp/image
+    nsh> ls -l /dev
+    /dev:
+     brw-rw-rw-       0 loop0
+    nsh> mkfatfs /dev/loop0
+    nsh> mount -t vfat /dev/loop0 /mnt/example
+    nsh> ls -l /mnt
+    ls -l /mnt
+    /mnt:
+     drw-rw-rw-       0 example/
+
 o ls [-lRs] <dir-path>
 
   Show the contents of the directory at <dir-path>.  NOTE:

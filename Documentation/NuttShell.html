@@ -953,7 +953,24 @@ losetup [-o <offset>] [-r] &lt;dev-path&gt; &lt;file-path&gt;
 </pre></ul>
 <p>
   <b>Synopsis</b>.
-   Setup the loop device at &lt;dev-path&gt; to access the file at &lt;file-path&gt; as a block device:
+   Setup the loop device at &lt;dev-path&gt; to access the file at &lt;file-path&gt; as a block device.
+   Example:
+<ul><pre>
+nsh&gt; dd if=/dev/zero of=/tmp/image bs=512 count=512
+nsh&gt; ls -l /tmp
+/tmp:
+ -rw-rw-rw-   262144 IMAGE
+nsh&gt; losetup /dev/loop0 /tmp/image
+nsh&gt; ls -l /dev
+/dev:
+ brw-rw-rw-       0 loop0
+nsh&gt; mkfatfs /dev/loop0
+nsh&gt; mount -t vfat /dev/loop0 /mnt/example
+nsh&gt; ls -l /mnt
+ls -l /mnt
+/mnt:
+ drw-rw-rw-       0 example/
+</pre></ul>
 </p>
 
 <a <p><b>Command Syntax 2:</b></p>
