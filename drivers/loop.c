@@ -43,12 +43,14 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
+#include <sys/mount.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#include <semaphore.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -58,14 +60,20 @@
  * Private Definitions
  ****************************************************************************/
 
+#define loop_semgive(d) sem_post(&(d)->sem)  /* To match loop_semtake */
+#define MAX_OPENCNT     (255)                /* Limit of ubyte */
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 struct loop_struct_s
 {
+  sem_t        sem;          /* For safe read-modify-write operations */
   uint32       nsectors;     /* Number of sectors on device */
+  off_t        offset;       /* Offset (in bytes) to the first sector */
   uint16       sectsize;     /* The size of one sector */
+  ubyte        opencnt;      /* Count of open references to the loop device */
 #ifdef CONFIG_FS_WRITABLE
   boolean      writeenabled; /* TRUE: can write to device */
 #endif
@@ -76,6 +84,7 @@ struct loop_struct_s
  * Private Function Prototypes
  ****************************************************************************/
 
+static void    loop_semtake(FAR struct loop_struct_s *dev);
 static int     loop_open(FAR struct inode *inode);
 static int     loop_close(FAR struct inode *inode);
 static ssize_t loop_read(FAR struct inode *inode, unsigned char *buffer,
@@ -109,6 +118,24 @@ static const struct block_operations g_bops =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: loop_semtake
+ ****************************************************************************/
+
+static void loop_semtake(FAR struct loop_struct_s *dev)
+{
+  /* Take the semaphore (perhaps waiting) */
+
+  while (sem_wait(&dev->sem) != 0)
+    {
+      /* The only case that an error should occur here is if
+       * the wait was awakened by a signal.
+       */
+
+      ASSERT(errno == EINTR);
+    }
+}
+
+/****************************************************************************
  * Name: loop_open
  *
  * Description: Open the block device
@@ -117,11 +144,27 @@ static const struct block_operations g_bops =
 
 static int loop_open(FAR struct inode *inode)
 {
-  return OK;
+  FAR struct loop_struct_s *dev;
+  int ret = OK;
+
+  DEBUGASSERT(inode && inode->i_private);
+  dev = (FAR struct loop_struct_s *)inode->i_private;
+
+  loop_semtake(dev);
+  if (dev->opencnt == MAX_OPENCNT)
+    {
+      return -EMFILE;
+    }
+  else
+    {
+      dev->opencnt++;
+    }
+  loop_semgive(dev);
+  return ret;
 }
 
 /****************************************************************************
- * Name: loop_closel
+ * Name: loop_close
  *
  * Description: close the block device
  *
@@ -129,7 +172,23 @@ static int loop_open(FAR struct inode *inode)
 
 static int loop_close(FAR struct inode *inode)
 {
-  return OK;
+  FAR struct loop_struct_s *dev;
+  int ret = OK;
+
+  DEBUGASSERT(inode && inode->i_private);
+  dev = (FAR struct loop_struct_s *)inode->i_private;
+
+  loop_semtake(dev);
+  if (dev->opencnt == 0)
+    {
+      return -EIO;
+    }
+  else
+    {
+      dev->opencnt--;
+    }
+  loop_semgive(dev);
+  return ret;
 }
 
 /****************************************************************************
@@ -142,21 +201,28 @@ static int loop_close(FAR struct inode *inode)
 static ssize_t loop_read(FAR struct inode *inode, unsigned char *buffer,
                        size_t start_sector, unsigned int nsectors)
 {
-  struct loop_struct_s *dev;
+  FAR struct loop_struct_s *dev;
   size_t nbytesread;
   off_t offset;
   int ret;
 
   DEBUGASSERT(inode && inode->i_private);
-  dev = (struct loop_struct_s *)inode->i_private;
+  dev = (FAR struct loop_struct_s *)inode->i_private;
+
+  if (start_sector + nsectors > dev->nsectors)
+    {
+      dbg("Seek failed for offset=%d: %d\n", (int)offset, errno);
+      return -EIO;
+    }
 
   /* Calculate the offset to read the sectors and seek to the position */
 
-  offset = start_sector * dev->sectsize;
+  offset = start_sector * dev->sectsize + offset;
   ret = lseek(dev->fd, offset, SEEK_SET);
   if (ret == (off_t)-1)
     {
       dbg("Seek failed for offset=%d: %d\n", (int)offset, errno);
+      return -EIO;
     }
 
   /* Then read the requested number of sectors from that position */
@@ -188,17 +254,17 @@ static ssize_t loop_read(FAR struct inode *inode, unsigned char *buffer,
 static ssize_t loop_write(FAR struct inode *inode, const unsigned char *buffer,
                         size_t start_sector, unsigned int nsectors)
 {
-  struct loop_struct_s *dev;
+  FAR struct loop_struct_s *dev;
   size_t nbyteswritten;
   off_t offset;
   int ret;
 
   DEBUGASSERT(inode && inode->i_private);
-  dev = (struct loop_struct_s *)inode->i_private;
+  dev = (FAR struct loop_struct_s *)inode->i_private;
 
   /* Calculate the offset to write the sectors and seek to the position */
 
-  offset = start_sector * dev->sectsize;
+  offset = start_sector * dev->sectsize + offset;
   ret = lseek(dev->fd, offset, SEEK_SET);
   if (ret == (off_t)-1)
     {
@@ -233,12 +299,12 @@ static ssize_t loop_write(FAR struct inode *inode, const unsigned char *buffer,
 
 static int loop_geometry(FAR struct inode *inode, struct geometry *geometry)
 {
-  struct loop_struct_s *dev;
+  FAR struct loop_struct_s *dev;
 
   DEBUGASSERT(inode);
   if (geometry)
     {
-      dev = (struct loop_struct_s *)inode->i_private;
+      dev = (FAR struct loop_struct_s *)inode->i_private;
       geometry->geo_available     = TRUE;
       geometry->geo_mediachanged  = FALSE;
 #ifdef CONFIG_FS_WRITABLE
@@ -261,22 +327,22 @@ static int loop_geometry(FAR struct inode *inode, struct geometry *geometry)
  * Name: losetup
  *
  * Description:
- *   Setup the loop device so that it exports the file referenced by 'name'
+ *   Setup the loop device so that it exports the file referenced by 'filename'
  *   as a block device.
  *
  ****************************************************************************/
 
-int losetup(const char *name, int minor, uint16 sectsize)
+int losetup(const char *devname, const char *filename, uint16 sectsize,
+            off_t offset, boolean readonly)
 {
-  struct loop_struct_s *dev;
+  FAR struct loop_struct_s *dev;
   struct stat sb;
-  char devname[16];
   int ret;
 
   /* Sanity check */
 
 #ifdef CONFIG_DEBUG
-  if (minor < 0 || minor > 255 || !name || !sectsize)
+  if (!devname || !filename || !sectsize)
     {
       return -EINVAL;
     }
@@ -284,16 +350,16 @@ int losetup(const char *name, int minor, uint16 sectsize)
 
   /* Get the size of the file */
 
-  ret = stat(name, &sb);
+  ret = stat(filename, &sb);
   if (ret < 0)
     {
-      dbg("Failed to stat %s: %d\n", name, errno);
+      dbg("Failed to stat %s: %d\n", filename, errno);
       return -errno;
     }
 
   /* Check if the file system is big enough for one block */
 
-  if (sb.st_size < sectsize)
+  if (sb.st_size - offset < sectsize)
     {
       dbg("File is too small for blocksize\n");
       return -ERANGE;
@@ -301,18 +367,33 @@ int losetup(const char *name, int minor, uint16 sectsize)
 
   /* Allocate a loop device structure */
 
-  dev = (struct loop_struct_s *)malloc(sizeof(struct loop_struct_s));
+  dev = (FAR struct loop_struct_s *)zalloc(sizeof(struct loop_struct_s));
   if (!dev)
     {
       return -ENOMEM;
     }
 
-  /* Open the file.  First try to open the device W/R */
+  /* Initialize the geometry */
+
+  dev->nsectors  = (sb.st_size - offset) / sectsize;
+  dev->sectsize  = sectsize;
+  dev->offset    = offset;
+
+  /* Open the file. */
 
 #ifdef CONFIG_FS_WRITABLE
   dev->writeenabled = FALSE; /* Assume failure */
+  dev->fd           = -1;
 
-  dev->fd = open(name, O_RDWR);
+  /* First try to open the device R/W access (unless we are asked
+   * to open it readonly).
+   */
+
+  if (!readonly)
+    {
+      dev->fd = open(filename, O_RDWR);
+    }
+
   if (dev->fd >= 0)
     {
       dev->writeenabled = TRUE; /* Success */
@@ -322,32 +403,92 @@ int losetup(const char *name, int minor, uint16 sectsize)
     {
       /* If that fails, then try to open the device read-only */
 
-      dev->fd = open(name, O_RDWR);
+      dev->fd = open(filename, O_RDWR);
       if (dev->fd < 0)
         {
-          dbg("Failed to open %s: %d\n", name, errno);
-          free(dev);
-          return -errno;
+          dbg("Failed to open %s: %d\n", filename, errno);
+          ret = -errno;
+          goto errout_with_dev;
         }
     }
 
-  /* Initialize the remaining fields */
+  /* Inode private data will be reference to the loop device structure */
 
-  dev->nsectors     = sb.st_size / sectsize;  /* Number of sectors on device */
-  dev->sectsize     = sectsize;               /* The size of one sector */
+  ret = register_blockdriver(devname, &g_bops, 0, dev);
+  if (ret < 0)
+    {
+      fdbg("register_blockdriver failed: %d\n", -ret);
+      goto errout_with_fd;
+    }
 
-  /* Create a loop device name */
+  return OK;
 
- snprintf(devname, 16, "/dev/loop%d", minor);
+errout_with_fd:
+  close(dev->fd);
+errout_with_dev:
+  free(dev);
+  return ret;
+}
 
- /* Inode private data is a reference to the loop device stgructure */
+/****************************************************************************
+ * Name: loteardown
+ *
+ * Description:
+ *   Undo the setup performed by losetup
+ *
+ ****************************************************************************/
 
- ret = register_blockdriver(devname, &g_bops, 0, dev);
- if (ret < 0)
-   {
-     fdbg("register_blockdriver failed: %d\n", -ret);
-     free(dev);
-   }
+int loteardown(const char *devname)
+{
+  FAR struct loop_struct_s *dev;
+  FAR struct inode *inode;
+  int ret;
 
+  /* Sanity check */
+
+#ifdef CONFIG_DEBUG
+  if (!devname)
+    {
+      return -EINVAL;
+    }
+#endif
+
+  /* Open the block driver associated with devname so that we can get the inode
+   * reference.
+   */
+
+  ret = open_blockdriver(devname, MS_RDONLY, &inode);
+  if (ret < 0)
+    {
+      dbg("Failed to open %s: %d\n", devname, -ret);
+      return ret;
+    }
+
+  /* Inode private data is a reference to the loop device stgructure */
+
+  dev = (FAR struct loop_struct_s *)inode->i_private;
+  close_blockdriver(inode);
+
+  DEBUGASSERT(dev);
+
+  /* Are there still open references to the device */
+
+  if (dev->opencnt > 0)
+    {
+      return -EBUSY;
+    }
+
+  /* Otherwise, unregister the block device */
+
+  ret = unregister_blockdriver(devname);
+
+  /* Release the device structure */
+
+  if (dev->fd >= 0)
+    {
+      (void)close(dev->fd);
+    }
+
+  free(dev);
   return ret;
 }
