@@ -217,7 +217,7 @@ static int rd_geometry(FAR struct inode *inode, struct geometry *geometry)
 }
 
 /****************************************************************************
- * Name: rd_geometry
+ * Name: rd_ioctl
  *
  * Description: Return device geometry
  *
