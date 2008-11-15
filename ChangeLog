@@ -550,4 +550,6 @@
 	* Each NSH command can not be disabled through a configuration setting. All of these
           settings make the configuration of NSH potentially complex but also allow it to squeeze
           into very small memory footprints.
+	* Added a block to character (BCH) driver.  This is kind of the reverse of the loop
+	  device; it allows you access a block device like a character device.
 

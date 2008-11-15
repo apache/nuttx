@@ -370,8 +370,28 @@ EXTERN int lib_flushall(FAR struct streamlist *list);
  * subdirectory
  */
 
+/* Register /dev/null */
+
 EXTERN void devnull_register(void);
-EXTERN int losetup(const char *name, int minor, uint16 sectsize);
+
+/* Setup the loop device so that it exports the file referenced by 'filename'
+ * as a block device.
+ */
+
+EXTERN int losetup(const char *devname, const char *filename, uint16 sectsize,
+                   off_t offset, boolean readonly);
+EXTERN int loteardown(const char *devname);
+
+/*   Setup so that the block driver referenced by 'blkdev' can be accessed
+ *   similar to a character device.
+ */
+
+EXTERN int bchdev_register(const char *blkdev, const char *chardev, boolean readonly);
+EXTERN int bchdev_unregister(const char *chardev);
+EXTERN int bchlib_setup(const char *blkdev, boolean readonly, FAR void **handle);
+EXTERN int bchlib_teardown(FAR void *handle);
+EXTERN ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset, size_t len);
+EXTERN ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset, size_t len);
 
 #undef EXTERN
 #if defined(__cplusplus)

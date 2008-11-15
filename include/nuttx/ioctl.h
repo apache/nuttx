@@ -53,8 +53,9 @@
  */
 
 #define _FIOCBASE       (0x8700) /* File system ioctl commands */
-#define _BIOCBASE       (0x8800) /* Block driver ioctl commands */
-#define _SIOCBASE       (0x8900) /* Socket ioctl commandss */
+#define _DIOCBASE       (0x8800) /* Character driver ioctl commands */
+#define _BIOCBASE       (0x8900) /* Block driver ioctl commands */
+#define _SIOCBASE       (0x8a00) /* Socket ioctl commandss */
 
 /* Macros used to manage ioctl commands */
 
@@ -69,10 +70,25 @@
 #define _FIOCVALID(c)   (_IOC_TYPE(c)==_FIOCBASE)
 #define _FIOC(nr)       _IOC(_FIOCBASE,nr)
 
-#define FIOC_MMAP       _FIOC(0x0001)  /* IN:  None
+#define FIOC_MMAP       _FIOC(0x0001)  /* IN:  Location to return address (void **)
                                         * OUT: If media is directly acccesible,
                                         *      return (void*) base address
-                                        *      of file */
+                                        *      of file
+                                        */
+/* NuttX file system ioctl definitions */
+
+#define _DIOCVALID(c)   (_IOC_TYPE(c)==_DIOCBASE)
+#define _DIOC(nr)       _IOC(_DIOCBASE,nr)
+
+#define DIOC_GETPRIV    _DIOC(0x0001)  /* IN: Location to return handle (void **)
+                                        * OUT: Reference to internal data
+                                        *      structure.  May have a reference
+                                        *      incremented.
+                                        */
+#define DIOC_RELPRIV    _DIOC(0x0003)  /* IN: None
+                                        * OUT: None, reference obtained by
+                                        *      FIOC_GETPRIV released.
+                                        */
 
 /* NuttX block driver ioctl definitions */
 

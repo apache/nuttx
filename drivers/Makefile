@@ -53,7 +53,16 @@ ROOTDEPPATH	= --dep-path .
 MMCSDDEPPATH	= --dep-path mmcsd
 CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/drivers/mmcsd}
 
-ASRCS		= $(NET_ASRCS) $(USBDEV_ASRCS) $(MMCSD_ASRCS)
+ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
+ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
+include bch/Make.defs
+ROOTDEPPATH	= --dep-path .
+BCHDEPPATH	= --dep-path bch
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/drivers/bch}
+endif
+endif
+
+ASRCS		= $(NET_ASRCS) $(USBDEV_ASRCS) $(MMCSD_ASRCS) $(BCH_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		=
@@ -64,7 +73,7 @@ ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 CSRCS           += ramdisk.c
 endif
 endif
-CSRCS		+= $(NET_CSRCS) $(USBDEV_CSRCS) $(MMCSD_CSRCS)
+CSRCS		+= $(NET_CSRCS) $(USBDEV_CSRCS) $(MMCSD_CSRCS) $(BCH_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
@@ -72,7 +81,7 @@ OBJS		= $(AOBJS) $(COBJS)
 
 BIN		= libdrivers$(LIBEXT)
 
-VPATH		= net:usbdev:mmcsd
+VPATH		= net:usbdev:mmcsd:bch
 
 all:	$(BIN)
 
@@ -88,7 +97,7 @@ $(BIN):	$(OBJS)
 	done ; )
 
 .depend: Makefile $(SRCS)
-	@$(MKDEP) $(ROOTDEPPATH) $(NETDEPPATH) $(USBDEVDEPPATH) $(MMCSDDEPPATH) \
+	@$(MKDEP) $(ROOTDEPPATH) $(NETDEPPATH) $(USBDEVDEPPATH) $(MMCSDDEPPATH) $(BCHDEPPATH) \
 	  $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 
