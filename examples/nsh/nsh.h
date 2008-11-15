@@ -325,7 +325,7 @@ extern void nsh_freefullpath(char *relpath);
 /* Debug */
 
 extern void nsh_dumpbuffer(FAR struct nsh_vtbl_s *vtbl, const char *msg,
-                           const char *buffer, ssize_t nbytes);
+                           const ubyte *buffer, ssize_t nbytes);
 
 /* Shell command handlers */
 

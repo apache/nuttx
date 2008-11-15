@@ -312,7 +312,7 @@ int cmd_mem(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  ****************************************************************************/
 
 void nsh_dumpbuffer(FAR struct nsh_vtbl_s *vtbl, const char *msg,
-                    const char *buffer, ssize_t nbytes)
+                    const ubyte *buffer, ssize_t nbytes)
 {
   char line[128];
   int ch;
@@ -371,7 +371,7 @@ int cmd_xd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
       return ERROR;
     }
 
-  nsh_dumpbuffer(vtbl, "Hex dump", addr, nbytes);
+  nsh_dumpbuffer(vtbl, "Hex dump", (ubyte*)addr, nbytes);
   return OK;
 }
 #endif
