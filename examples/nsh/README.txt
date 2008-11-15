@@ -252,14 +252,37 @@ o cp <source-path> <dest-path>
 
 o dd if=<infile> of=<outfile> [bs=<sectsize>] [count=<sectors>] [skip=<sectors>]
 
-  Copy blocks from <infile> to <outfile>.
+  Copy blocks from <infile> to <outfile>.  <nfile> or <outfile> may
+  be the path to a standard file, a character device, or a block device.
 
-  Example:
+  Examples:
+
+    1. Read from character device, write to regular file.  This will
+       create a new file of the specified size filled with zero.
 
     nsh> dd if=/dev/zero of=/tmp/zeros bs=64 count=16
     nsh> ls -l /tmp
     /tmp:
      -rw-rw-rw-    1024 ZEROS
+
+    2. Read from character device, write to block device.  This will
+       fill the entire block device with zeros.
+
+    nsh> ls -l /dev
+    /dev:
+     brw-rw-rw-       0 ram0
+     crw-rw-rw-       0 zero
+    nsh> dd if=/dev/zero of=/dev/ram0
+
+    3. Read from a block devic, write to a character device.  This
+       will read the entire block device and dump the contents in
+       the bit bucket.
+
+    nsh> ls -l /dev
+    /dev:
+     crw-rw-rw-       0 null
+     brw-rw-rw-       0 ram0
+    nsh> dd if=/dev/ram0 of=/dev/null
 
 o echo [<string|$name> [<string|$name>...]]
 

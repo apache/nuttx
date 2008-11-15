@@ -209,11 +209,24 @@ static int dd_writeblk(struct dd_s *dd)
   ssize_t nbytes;
   off_t   offset = (dd->sector - dd->skip) * dd->sectsize;
 
+  /* Write the sector at the specified offset */
+
   nbytes = bchlib_write(DD_OUTHANDLE, (char*)dd->buffer, offset, dd->sectsize);
   if (nbytes < 0)
     {
-      nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "bshlib_write", NSH_ERRNO);
-      return ERROR;
+      /* bchlib_write return -EFBIG on attempts to write past the end of
+       * the device.
+       */
+
+      if (nbytes == -EFBIG)
+        {
+          dd->eof = TRUE; /* Set end-of-file */
+        }
+      else
+        {
+          nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "bshlib_write", NSH_ERRNO_OF(-nbytes));
+          return ERROR;
+        }
     }
 
   return OK;
@@ -238,7 +251,7 @@ static int dd_writech(struct dd_s *dd)
       nbytes = write(DD_OUTFD, buffer, dd->sectsize - written);
       if (nbytes < 0)
         {
-           nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "write", NSH_ERRNO);
+           nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "write", NSH_ERRNO_OF(-nbytes));
            return ERROR;
         }
 
@@ -263,11 +276,14 @@ static int dd_readblk(struct dd_s *dd)
   nbytes = bchlib_read(DD_INHANDLE, (char*)dd->buffer, offset, dd->sectsize);
   if (nbytes < 0)
     {
-      nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "bshlib_read", NSH_ERRNO);
+      nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "bshlib_read", NSH_ERRNO_OF(-nbytes));
       return ERROR;
     }
 
+  /* bchlib_read return 0 on attempts to write past the end of the device. */
+
   dd->nbytes = nbytes;
+  dd->eof    = (nbytes == 0);
   return OK;
 }
 #endif
@@ -287,7 +303,7 @@ static int dd_readch(struct dd_s *dd)
       nbytes = read(DD_INFD, buffer, dd->sectsize - dd->nbytes);
       if (nbytes < 0)
         {
-           nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "read", NSH_ERRNO);
+           nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "read", NSH_ERRNO_OF(-nbytes));
            return ERROR;
         }
 
@@ -337,7 +353,7 @@ static inline int dd_infopen(const char *name, struct dd_s *dd)
   type = dd_filetype(name);
   if (type < 0)
     {
-      nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "stat", NSH_ERRNO);
+      nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "stat", NSH_ERRNO_OF(-type));
       return type;
     }
 
@@ -449,9 +465,9 @@ static inline int dd_outfopen(const char *name, struct dd_s *dd)
 int cmd_dd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   struct dd_s dd;
-  const char *infile = NULL;
-  const char *outfile = NULL;
-  int ret;
+  char *infile = NULL;
+  char *outfile = NULL;
+  int ret = ERROR;
   int i;
 
   /* Initialize the dd structure */
@@ -490,11 +506,11 @@ int cmd_dd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     {
       if (strncmp(argv[i], "if=", 3) == 0)
         {
-          infile = &argv[i][3];
+          infile = nsh_getfullpath(vtbl, &argv[i][3]);
         }
       else if (strncmp(argv[i], "of=", 3) == 0)
         {
-          outfile = &argv[i][3];
+          outfile = nsh_getfullpath(vtbl, &argv[i][3]);
         }
       else if (strncmp(argv[i], "bs=", 3) == 0)
         {
@@ -514,14 +530,14 @@ int cmd_dd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   if (!infile || !outfile)
     {
       nsh_output(vtbl, g_fmtargrequired, g_dd);
-      return ERROR;
+      goto errout_with_paths;
     }
 #endif
 
   if (dd.skip < 0 || dd.skip > dd.nsectors)
     {
       nsh_output(vtbl, g_fmtarginvalid, g_dd);
-      return ERROR;
+      goto errout_with_paths;
     }
 
   /* Allocate the I/O buffer */
@@ -530,7 +546,7 @@ int cmd_dd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   if (!dd.buffer)
     {
       nsh_output(vtbl, g_fmtcmdoutofmemory, g_dd);
-      return ERROR;
+      goto errout_with_paths;
     }
 
   /* Open the input file */
@@ -538,7 +554,7 @@ int cmd_dd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   ret = dd_infopen(infile, &dd);
   if (ret < 0)
     {
-      return ret;
+      goto errout_with_paths;
     }
 
   /* Open the output file */
@@ -562,38 +578,53 @@ int cmd_dd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
           goto errout_with_outf;
         }
 
-      /* Pad with zero if necessary (at the end of file only) */
+      /* Has the incoming data stream ended? */
 
-      for (i = dd.nbytes; i < dd.sectsize; i++)
+      if (!dd.eof)
         {
-          dd.buffer[i] = 0;
-        }
+          /* Pad with zero if necessary (at the end of file only) */
 
-      /* Write one sector to the output file */
-
-      if (dd.sector >= dd.skip)
-        {
-          ret = DD_WRITE(&dd);
-          if (ret < 0)
+          for (i = dd.nbytes; i < dd.sectsize; i++)
             {
-              goto errout_with_outf;
+              dd.buffer[i] = 0;
             }
 
-          /* Decrement to show that a sector was written */
+          /* Write one sector to the output file */
 
-          dd.nsectors--;
+          if (dd.sector >= dd.skip)
+            {
+              ret = DD_WRITE(&dd);
+              if (ret < 0)
+                {
+                  goto errout_with_outf;
+                }
+
+              /* Decrement to show that a sector was written */
+
+              dd.nsectors--;
+            }
+
+          /* Increment the sector number */
+
+          dd.sector++;
         }
-
-      /* Increment the sector number */
-
-      dd.sector++;
     }
+  ret = OK;
 
 errout_with_outf:
   DD_INCLOSE(&dd);
 errout_with_inf:
   DD_OUTCLOSE(&dd);
   free(dd.buffer);
+errout_with_paths:
+  if (infile)
+    {
+      free(infile);
+    }
+  if (outfile)
+    {
+      free(outfile);
+    }
   return ret;
 }
 
