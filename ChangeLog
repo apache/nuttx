@@ -552,4 +552,5 @@
           into very small memory footprints.
 	* Added a block to character (BCH) driver.  This is kind of the reverse of the loop
 	  device; it allows you access a block device like a character device.
-
+	* Added strcasecmp() and strncasecmp()
+	* NSH: Added 'dd' command

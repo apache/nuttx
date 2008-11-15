@@ -151,6 +151,12 @@ static const struct cmdmap_s g_cmdmap[] =
 # endif
 #endif
 
+#if CONFIG_NFILE_DESCRIPTORS > 0
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_LS
+  { "dd",       cmd_dd,       3, 6, "if=<infile> of=<outfile> [bs=<sectsize>] [count=<sectors>] [skip=<sectors>]" },
+# endif
+#endif
+
 #ifndef CONFIG_EXAMPLES_NSH_DISABLE_ECHO
 # ifndef CONFIG_DISABLE_ENVIRON
   { "echo",     cmd_echo,     0, NSH_MAX_ARGUMENTS, "[<string|$name> [<string|$name>...]]" },

@@ -67,6 +67,8 @@ EXTERN char  *strcat(char *, const char *);
 EXTERN char  *strncat(char *, const char *, size_t);
 EXTERN int    strcmp(const char *, const char *);
 EXTERN int    strncmp(const char *, const char *, size_t);
+EXTERN int    strcasecmp(const char *, const char *);
+EXTERN int    strncasecmp(const char *, const char *, size_t);
 EXTERN char  *strcpy(char *dest, const char *src);
 EXTERN char  *strncpy(char *, const char *, size_t);
 EXTERN char  *strpbrk(const char *, const char *);

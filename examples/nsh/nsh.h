@@ -366,6 +366,9 @@ extern int cmd_lbracket(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #  ifndef CONFIG_EXAMPLES_NSH_DISABLE_CP
      extern int cmd_cp(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #  endif
+#  ifndef CONFIG_EXAMPLES_NSH_DISABLE_DD
+     extern int cmd_dd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  endif
 #  ifndef CONFIG_EXAMPLES_NSH_DISABLE_LS
      extern int cmd_ls(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #  endif
