@@ -94,6 +94,7 @@ void up_initialize(void)
   /* Register devices */
 
   devnull_register();       /* Standard /dev/null */
+  devzero_register();       /* Standard /dev/zero */
   up_devconsole();          /* Our private /dev/console */
 #if defined(CONFIG_FS_FAT) && !defined(CONFIG_DISABLE_MOUNTPOINT)
   up_registerblockdevice(); /* Our FAT ramdisk at /dev/ram0 */
