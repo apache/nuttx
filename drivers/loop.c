@@ -211,13 +211,13 @@ static ssize_t loop_read(FAR struct inode *inode, unsigned char *buffer,
 
   if (start_sector + nsectors > dev->nsectors)
     {
-      dbg("Seek failed for offset=%d: %d\n", (int)offset, errno);
+      dbg("Read past end of file\n");
       return -EIO;
     }
 
   /* Calculate the offset to read the sectors and seek to the position */
 
-  offset = start_sector * dev->sectsize + offset;
+  offset = start_sector * dev->sectsize + dev->offset;
   ret = lseek(dev->fd, offset, SEEK_SET);
   if (ret == (off_t)-1)
     {
@@ -264,7 +264,7 @@ static ssize_t loop_write(FAR struct inode *inode, const unsigned char *buffer,
 
   /* Calculate the offset to write the sectors and seek to the position */
 
-  offset = start_sector * dev->sectsize + offset;
+  offset = start_sector * dev->sectsize + dev->offset;
   ret = lseek(dev->fd, offset, SEEK_SET);
   if (ret == (off_t)-1)
     {
@@ -373,8 +373,9 @@ int losetup(const char *devname, const char *filename, uint16 sectsize,
       return -ENOMEM;
     }
 
-  /* Initialize the geometry */
+  /* Initialize the loop device structure. */
 
+  sem_init(&dev->sem, 0, 1);
   dev->nsectors  = (sb.st_size - offset) / sectsize;
   dev->sectsize  = sectsize;
   dev->offset    = offset;
