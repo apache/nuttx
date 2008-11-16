@@ -131,7 +131,7 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
 
       /* Are we resuming in the middle, or at the end of a string of arguments?
        * g_optptr == NULL means that we are started at the beginning of argv[optind];
-       * *g_optptr == means that we are starting at the beginning of optind+1
+       * *g_optptr == \0 means that we are starting at the beginning of optind+1
        */
 
       while (!g_optptr || !*g_optptr)
@@ -147,24 +147,26 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
                */
 
               optind++;
-              if (!argv[optind])
-                {
-                  /* There are no more arguments, we are finished */
+            }
 
-                  g_optptr       = NULL;
-                  g_binitialized = FALSE;
+          /* Check for the end of the argument list */
 
-                  /* Return -1 with optind == all of the arguments */
+          g_optptr = argv[optind];
+          if (!g_optptr)
+            {
+              /* There are no more arguments, we are finished */
 
-                  return ERROR;
-                }
+              g_binitialized = FALSE;
+
+              /* Return -1 with optind == all of the arguments */
+
+              return ERROR;
             }
 
           /* We are starting at the beginning of argv[optind].  In this case, the
            * first character must be '-'
            */
 
-          g_optptr = argv[optind];
           if (*g_optptr != '-')
             {
               /* The argument does not start with '-', we are finished */
@@ -238,9 +240,11 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
           }
 
         /* No.. is the optional argument the next argument in argv[] ? */
+
         if (argv[optind+1] && *argv[optind+1] != '-')
           {
-            /* Yes.. retun that */
+            /* Yes.. return that */
+
             optarg = argv[optind+1];
             optind += 2;
             g_optptr = NULL;
@@ -248,6 +252,7 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
           }
 
         /* No argument was supplied */
+
         optarg = NULL;
         optopt = *optchar;
         optind++;
