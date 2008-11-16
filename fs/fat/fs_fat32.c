@@ -304,7 +304,6 @@ static int fat_open(FAR struct file *filep, const char *relpath,
 
   ff->ff_open             = TRUE;
   ff->ff_oflags           = oflags;
-  ff->ff_sectorsincluster = 1;
 
   /* Save information that can be used later to recover the directory entry */
 
@@ -925,135 +924,137 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
         position = ff->ff_size;
     }
 
-  /* Set file position to the beginning of the file */
+  /* Set file position to the beginning of the file (first cluster,
+   * first sector in cluster)
+   */
 
   filep->f_pos            = 0;
-  ff->ff_sectorsincluster = 1;
+  ff->ff_sectorsincluster = fs->fs_fatsecperclus;
+
+  /* Get the start cluster of the file */
+
+  cluster = ff->ff_startcluster;
+
+  /* Create a new cluster chain if the file does not have one (and
+   * if we are seeking beyond zero
+   */
+
+  if (!cluster && position > 0)
+    {
+      cluster = fat_createchain(fs);
+      if (cluster < 0)
+        {
+          ret = cluster;
+          goto errout_with_semaphore;
+        }
+      ff->ff_startcluster = cluster;
+    }
 
   /* Move file position if necessary */
 
-  if (position)
+  if (cluster)
     {
-        /* Get the start cluster of the file */
+      /* If the file has a cluster chain, follow it to the
+       * requested position.
+       */
 
-        cluster = ff->ff_startcluster;
-        if (!cluster)
+      clustersize = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
+      for (;;)
         {
-            /* Create a new cluster chain if the file does not have one */
+          /* Skip over clusters prior to the one containing
+           * the requested position.
+           */
 
-            cluster = fat_createchain(fs);
-            if (cluster < 0)
+          ff->ff_currentcluster = cluster;
+          if (position < clustersize)
             {
-                ret = cluster;
-                goto errout_with_semaphore;
+              break;
             }
-            ff->ff_startcluster = cluster;
+
+          /* Extend the cluster chain if write in enabled.  NOTE:
+           * this is not consistent with the lseek description:
+           * "The  lseek() function allows the file offset to be
+           * set beyond the end of the file (but this does not
+           * change the size of the file).  If data is later written
+           * at  this  point, subsequent reads of the data in the
+           * gap (a "hole") return null bytes ('\0') until data
+           * is actually written into the gap."
+           */
+
+          if ((ff->ff_oflags & O_WROK) != 0)
+            {
+              /* Extend the cluster chain (fat_extendchain
+               * will follow the existing chain or add new
+               * clusters as needed.
+               */
+
+              cluster = fat_extendchain(fs, cluster);
+            }
+          else
+            {
+              /* Otherwise we can only follong the existing chain */
+
+              cluster = fat_getcluster(fs, cluster);
+            }
+
+          if (cluster < 0)
+            {
+              /* An error occurred getting the cluster */
+
+              ret = cluster;
+              goto errout_with_semaphore;
+            }
+
+          /* Zero means that there is no further clusters available
+           * in the chain.
+           */
+
+          if (cluster == 0)
+            {
+              /* At the position to the current locaiton and
+               * break out.
+               */
+
+              position = clustersize;
+              break;
+            }
+
+          if (cluster >= fs->fs_nclusters)
+            {
+              ret = -ENOSPC;
+              goto errout_with_semaphore;
+            }
+
+          /* Otherwise, update the position and continue looking */
+
+          filep->f_pos += clustersize;
+          position     -= clustersize;
         }
 
-        if (cluster)
-          {
-            /* If the file has a cluster chain, follow it to the
-             * requested position.
-             */
+      /* We get here after we have found the sector containing
+       * the requested position.
+       *
+       * Save the new file position
+       */
 
-            clustersize = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
-            for (;;)
-              {
-                /* Skip over clusters prior to the one containing
-                 * the requested position.
-                 */
+      filep->f_pos += position;
 
-                ff->ff_currentcluster = cluster;
-                if (position < clustersize)
-                  {
-                    break;
-                  }
+      /* Then get the current sector from the cluster and the offset
+       * into the cluster from the position
+       */
 
-                /* Extend the cluster chain if write in enabled.  NOTE:
-                 * this is not consistent with the lseek description:
-                 * "The  lseek() function allows the file offset to be
-                 * set beyond the end of the file (but this does not
-                 * change the size of the file).  If data is later written
-                 * at  this  point, subsequent reads of the data in the
-                 * gap (a "hole") return null bytes ('\0') until data
-                 * is actually written into the gap."
-                 */
+      (void)fat_currentsector(fs, ff, filep->f_pos);
 
-                if ((ff->ff_oflags & O_WROK) != 0)
-                  {
-                    /* Extend the cluster chain (fat_extendchain
-                     * will follow the existing chain or add new
-                     * clusters as needed.
-                     */
+      /* Load the sector corresponding to the position */
 
-                    cluster = fat_extendchain(fs, cluster);
-                  }
-                else
-                  {
-                    /* Otherwise we can only follong the existing chain */
-
-                    cluster = fat_getcluster(fs, cluster);
-                  }
-
-                if (cluster < 0)
-                  {
-                    /* An error occurred getting the cluster */
-
-                    ret = cluster;
-                    goto errout_with_semaphore;
-                  }
-
-                /* Zero means that there is no further clusters available
-                 * in the chain.
-                 */
-
-                if (cluster == 0)
-                  {
-                    /* At the position to the current locaiton and
-                     * break out.
-                     */
-
-                    position = clustersize;
-                    break;
-                  }
-
-                if (cluster >= fs->fs_nclusters)
-                  {
-                    ret = -ENOSPC;
-                    goto errout_with_semaphore;
-                  }
-
-                /* Otherwise, update the position and continue looking */
-
-                filep->f_pos += clustersize;
-                position     -= clustersize;
-              }
-
-            /* We get here after we have found the sector containing
-             * the requested position.
-             *
-             * Save the new file position
-             */
-
-            filep->f_pos += position;
-
-            /* Then get the current sector from the cluster and the offset
-             * into the cluster from the position
-             */
-
-            (void)fat_currentsector(fs, ff, filep->f_pos);
-
-            /* Load the sector corresponding to the position */
-
-            if ((position & SEC_NDXMASK(fs)) != 0)
-              {
-                ret = fat_ffcacheread(fs, ff, ff->ff_currentsector);
-                if (ret < 0)
-                  {
-                    goto errout_with_semaphore;
-                  }
-              }
-         }
+      if ((position & SEC_NDXMASK(fs)) != 0)
+        {
+          ret = fat_ffcacheread(fs, ff, ff->ff_currentsector);
+          if (ret < 0)
+            {
+              goto errout_with_semaphore;
+            }
+        }
     }
 
   /* If we extended the size of the file, then mark the file as modified. */
