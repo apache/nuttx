@@ -150,6 +150,8 @@ static int loop_open(FAR struct inode *inode)
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct loop_struct_s *)inode->i_private;
 
+  /* Make sure we have exclusive access to the state structure */
+
   loop_semtake(dev);
   if (dev->opencnt == MAX_OPENCNT)
     {
@@ -157,6 +159,8 @@ static int loop_open(FAR struct inode *inode)
     }
   else
     {
+      /* Increment the open count */
+
       dev->opencnt++;
     }
   loop_semgive(dev);
@@ -178,6 +182,8 @@ static int loop_close(FAR struct inode *inode)
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct loop_struct_s *)inode->i_private;
 
+  /* Make sure we have exclusive access to the state structure */
+
   loop_semtake(dev);
   if (dev->opencnt == 0)
     {
@@ -185,6 +191,8 @@ static int loop_close(FAR struct inode *inode)
     }
   else
     {
+      /* Decrement the open count */
+
       dev->opencnt--;
     }
   loop_semgive(dev);
