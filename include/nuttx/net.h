@@ -158,8 +158,10 @@ EXTERN int netdev_ioctl(int sockfd, int cmd, struct ifreq *req);
  * to this function.
  */
 
+#ifndef CONFIG_DISABLE_POLL
 struct pollfd; /* Forward reference -- see poll.h */
 EXTERN int net_poll(int sockfd, struct pollfd *fds);
+#endif
 
 /* netdev-register.c *********************************************************/
 /* This function is called by network interface device drivers to inform the

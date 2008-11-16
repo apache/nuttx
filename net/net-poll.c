@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && !defined(CONFIG_DISABLE_POLL)
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -77,4 +77,4 @@ int net_poll(int sockfd, struct pollfd *fds)
   return -ENOSYS;
 }
 
-#endif /* CONFIG_NET */
+#endif /* CONFIG_NET&& !CONFIG_DISABLE_POLL */
