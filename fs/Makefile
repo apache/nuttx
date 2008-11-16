@@ -41,13 +41,13 @@ AOBJS		= $(ASRCS:.S=$(OBJEXT))
 CSRCS		=
 ifeq ($(CONFIG_NFILE_DESCRIPTORS),0)
 ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
-CSRCS		+= fs_close.c fs_write.c fs_ioctl.c
+CSRCS		+= fs_close.c fs_write.c fs_ioctl.c fs_poll.c
 endif
 else
-CSRCS		+= fs_open.c fs_close.c fs_read.c fs_write.c fs_ioctl.c fs_lseek.c \
-		   fs_dup.c fs_mmap.c fs_opendir.c fs_closedir.c fs_stat.c fs_readdir.c \
-		   fs_readdirr.c fs_seekdir.c fs_telldir.c fs_rewinddir.c fs_files.c \
-		   fs_inode.c fs_inodefind.c fs_inodereserve.c fs_statfs.c \
+CSRCS		+= fs_open.c fs_close.c fs_read.c fs_write.c fs_ioctl.c fs_poll.c \
+		   fs_lseek.c fs_dup.c fs_mmap.c fs_opendir.c fs_closedir.c fs_stat.c \
+		   fs_readdir.c fs_readdirr.c fs_seekdir.c fs_telldir.c fs_rewinddir.c \
+		   fs_files.c fs_inode.c fs_inodefind.c fs_inodereserve.c fs_statfs.c \
 		   fs_inoderemove.c fs_registerdriver.c fs_unregisterdriver.c \
 		   fs_inodeaddref.c fs_inoderelease.c
 CSRCS		+= fs_registerblockdriver.c fs_unregisterblockdriver.c \
