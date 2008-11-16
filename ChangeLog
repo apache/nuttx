@@ -525,7 +525,7 @@
 	* Fixed another bug in the NXP LPC214x USB device driver:  After a stalled endpoint
 	  is resumed (view CLEAR FEATURE), we must restart the IN (outgoing) queue.
 
-0.3.18 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.18 2008-11-16 Gregory Nutt <spudmonkey@racsa.co.cr>
 	* Added port for the STMicro STR71x processor and configuration for the Olimex STR-P711
 	  board (STR71x testing is stalled because I have been unable to get OpenOCD to
 	  communicate with my JTAG wiggler on Linux).
@@ -557,3 +557,10 @@
 	* NSH: Added the 'losetup' command
 	* Fixed a FAT bug:  After recent changes, it would mount a (invalid) FAT file system
 	  even if the medium is not formatted!
+	* Corrected two important errors in FAT lseek implementation: (1) the sectors-per-cluster
+	  value was being reset to "1" and (2) important lseek logic was omitted when the seek
+	  position was zero.
+	* Fixed a bug in getopt().  It would fail if on certain combinations of terminal argument
+	  types.
+
+0.3.19 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
