@@ -357,6 +357,13 @@ o losetup [-d <dev-path>] | [[-o <offset>] [-r] <ldev-path> <file-path>]
     ls -l /mnt
     /mnt:
      drw-rw-rw-       0 example/
+    nsh> echo "This is a test" >/mnt/example/atest.txt
+    nsh> ls -l /mnt/example
+    /mnt/example:
+     -rw-rw-rw-      16 ATEST.TXT
+    nsh> cat /mnt/example/atest.txt
+    This is a test
+    nsh>
 
 o ls [-lRs] <dir-path>
 
