@@ -79,6 +79,9 @@
  * Description:
  *   Flush the current contents of the sector buffer (if dirty)
  *
+ * Assumptions:
+ *   Caller must assume mutual exclusion
+ *
  ****************************************************************************/
 
 int bchlib_flushsector(FAR struct bchlib_s *bch)
@@ -104,6 +107,9 @@ int bchlib_flushsector(FAR struct bchlib_s *bch)
  *
  * Description:
  *   Flush the current contents of the sector buffer (if dirty)
+ *
+ * Assumptions:
+ *   Caller must assume mutual exclusion
  *
  ****************************************************************************/
 

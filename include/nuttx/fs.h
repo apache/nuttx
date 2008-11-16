@@ -392,7 +392,9 @@ EXTERN int loteardown(const char *devname);
 EXTERN int bchdev_register(const char *blkdev, const char *chardev, boolean readonly);
 EXTERN int bchdev_unregister(const char *chardev);
 
-/* Low level, direct access: */
+/* Low level, direct access.  NOTE:  low-level access and character driver access
+ * are incompatible.  One and only one access method should be implemented.
+ */
 
 EXTERN int bchlib_setup(const char *blkdev, boolean readonly, FAR void **handle);
 EXTERN int bchlib_teardown(FAR void *handle);

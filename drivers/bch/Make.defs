@@ -35,6 +35,6 @@
 
 BCH_ASRCS  =
 BCH_CSRCS  = bchlib_setup.c bchlib_teardown.c bchlib_read.c bchlib_write.c \
-             bchlib_cache.c bchlib_refs.c bchlib_sem.c bchdev_register.c \
-	     bchdev_unregister.c bchdev_driver.c
+             bchlib_cache.c bchlib_sem.c bchdev_register.c bchdev_unregister.c \
+	     bchdev_driver.c
 

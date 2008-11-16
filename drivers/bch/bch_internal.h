@@ -88,8 +88,6 @@ EXTERN struct file_operations bch_fops;
  ****************************************************************************/
 
 EXTERN void bchlib_semtake(FAR struct bchlib_s *bch);
-EXTERN int  bchlib_incref(FAR struct bchlib_s *bch);
-EXTERN int  bchlib_decref(FAR struct bchlib_s *bch);
 EXTERN int  bchlib_flushsector(FAR struct bchlib_s *bch);
 EXTERN int  bchlib_readsector(FAR struct bchlib_s *bch, size_t sector);
 

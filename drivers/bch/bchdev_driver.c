@@ -102,9 +102,26 @@ struct file_operations bch_fops =
 static int bch_open(FAR struct file *filp)
 {
   FAR struct inode *inode = filp->f_inode;
+  FAR struct bchlib_s *bch;
+  int ret;
 
   DEBUGASSERT(inode && inode->i_private);
-  return bchlib_incref((FAR struct bchlib_s *)inode->i_private);
+  bch = (FAR struct bchlib_s *)inode->i_private;
+
+  /* Increment the reference count */
+
+  bchlib_semtake(bch);
+  if (bch->refs == MAX_OPENCNT)
+    {
+      return -EMFILE;
+    }
+  else
+    {
+      bch->refs++;
+    }
+  bchlib_semgive(bch);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -117,9 +134,32 @@ static int bch_open(FAR struct file *filp)
 static int bch_close(FAR struct file *filp)
 {
   FAR struct inode *inode = filp->f_inode;
+  FAR struct bchlib_s *bch;
+  int ret;
 
   DEBUGASSERT(inode && inode->i_private);
-  return bchlib_decref((FAR struct bchlib_s *)inode->i_private);
+  bch = (FAR struct bchlib_s *)inode->i_private;
+
+  /* Flush any dirty pages remaining in the cache */
+
+  bchlib_semtake(bch);
+  (void)bchlib_flushsector(bch);
+
+  /* Decrement the reference count (I don't use bchlib_decref() because I
+   * want the entire close operation to be atomic wrt other driver operations.
+   */
+
+  if (bch->refs == 0)
+    {
+      ret = -EIO;
+    }
+  else
+    {
+      bch->refs--;
+    }
+  bchlib_semgive(bch);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -192,15 +232,17 @@ static int bch_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
     {
       FAR struct bchlib_s **bchr = (FAR struct bchlib_s **)arg;
 
-      if (!bchr)
+      bchlib_semtake(bch);
+      if (!bchr && bch->refs < 255)
         {
           ret = -EINVAL;
         }
       else
         {
-          ret = bchlib_incref(bch);
+          bch->refs++;
           *bchr = bch;
         }
+      bchlib_semgive(bch);
     }
 
   return ret;
