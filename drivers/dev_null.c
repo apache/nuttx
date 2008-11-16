@@ -66,7 +66,8 @@ static struct file_operations devnull_fops =
   devnull_read,  /* read */
   devnull_write, /* write */
   0,             /* seek */
-  0              /* ioctl */
+  0,             /* ioctl */
+  0              /* poll */
 };
 
 /****************************************************************************

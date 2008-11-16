@@ -89,7 +89,8 @@ struct file_operations g_serialops =
   uart_read,  /* read */
   uart_write, /* write */
   0,          /* seek */
-  uart_ioctl  /* ioctl */
+  uart_ioctl, /* ioctl */
+  0           /* poll */
 };
 
 /************************************************************************************

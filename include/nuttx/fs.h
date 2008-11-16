@@ -57,6 +57,8 @@
  */
 
 struct file;
+struct pollfd;
+
 struct file_operations
 {
   /* The device driver open method differs from the mountpoint open method */
@@ -73,6 +75,7 @@ struct file_operations
   ssize_t (*write)(FAR struct file *filp, FAR const char *buffer, size_t buflen);
   off_t   (*seek)(FAR struct file *filp, off_t offset, int whence);
   int     (*ioctl)(FAR struct file *filp, int cmd, unsigned long arg);
+  int     (*poll)(FAR struct file *filp, struct pollfd *poll);
 
   /* The two structures need not be common after this point */
 };

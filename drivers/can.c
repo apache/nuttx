@@ -87,8 +87,9 @@ struct file_operations g_canops =
   can_close, /* close */
   can_read,  /* read */
   can_write, /* write */
-  0,          /* seek */
-  can_ioctl  /* ioctl */
+  0,         /* seek */
+  can_ioctl, /* ioctl */
+  0          /* poll */
 };
 
 /****************************************************************************

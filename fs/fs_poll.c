@@ -41,14 +41,198 @@
 
 #include <sys/types.h>
 #include <poll.h>
+#include <wdog.h>
 #include <errno.h>
+#include <assert.h>
+#include <debug.h>
 
 #include <nuttx/fs.h>
+#include <nuttx/sched.h>
+
 #include "fs_internal.h"
+
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
+#define poll_semgive(sem) sem_post(sem)
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: poll_semtake
+ ****************************************************************************/
+
+static void poll_semtake(FAR sem_t *sem)
+{
+  /* Take the semaphore (perhaps waiting) */
+
+  while (sem_wait(sem) != 0)
+    {
+      /* The only case that an error should occur here is if
+       * the wait was awakened by a signal.
+       */
+
+      ASSERT(errno == EINTR);
+    }
+}
+
+/****************************************************************************
+ * Name: poll_fdsetup
+ *
+ * Description:
+ *   Configure (or unconfigure) one file/socket descriptor for the poll
+ *   operation.  If fds and sem are non-null, then the poll is being setup.
+ *   if fds and sem are NULL, then the poll is being torn down.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+static int poll_fdsetup(int fd, FAR struct pollfd *fds)
+{
+  FAR struct filelist *list;
+  FAR struct file     *this_file;
+  FAR struct inode    *inode;
+  int                  ret = -ENOSYS;
+
+  /* Check for a valid file descriptor */
+
+  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
+    {
+      /* Perform the socket ioctl */
+
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
+        {
+          return net_poll(fds->fd, fds);
+        }
+      else
+#endif
+        {
+          return -EBADF;
+        }
+    }
+
+  /* Get the thread-specific file list */
+
+  list = sched_getfiles();
+  if (!list)
+    {
+      return -EMFILE;
+    }
+
+  /* Is a driver registered? Does it support the poll method?
+   * If not, return -ENOSYS
+   */
+
+  this_file = &list->fl_files[fd];
+  inode     = this_file->f_inode;
+
+  if (inode && inode->u.i_ops && inode->u.i_ops->poll)
+    {
+      /* Yes, then setup the poll */
+
+      ret = (int)inode->u.i_ops->poll(this_file, fds);
+    }
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: poll_setup
+ *
+ * Description:
+ *   Setup the poll operation for each descriptor in the list.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
+{
+  int ret;
+  int i;
+
+  /* Process each descriptor in the list */
+
+  for (i = 0; i < nfds; i++)
+    {
+      /* Setup the poll descriptor */
+
+      fds->sem     = sem;
+      fds->revents = 0;
+
+      /* Set up the poll */
+
+      ret = poll_fdsetup(fds->fd, fds);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: poll_teardown
+ *
+ * Description:
+ *   Teardown the poll operation for each descriptor in the list and return
+ *   the count of non-zero poll events.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count)
+{
+  int status;
+  int ret = OK;
+  int i;
+
+  /* Process each descriptor in the list */
+
+  for (i = 0; i < nfds; i++)
+    {
+      /* Teardown the poll */
+
+      status = poll_fdsetup(fds->fd, NULL);
+      if (status < 0)
+        {
+          ret = status;
+        }
+
+      /* Check if any events were posted */
+
+      if (fds->revents != 0)
+        {
+          (*count)++;
+        }
+
+      /* Un-initialize the poll structure */
+
+      fds->sem = NULL;
+    }
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: poll_timeout
+ *
+ * Description:
+ *   The wdog expired before any other events were received.
+ *
+ ****************************************************************************/
+
+static void poll_timeout(int argc, uint32 isem)
+{
+  /* Wake up the poller */
+
+  FAR sem_t *sem = (FAR sem_t *)isem;
+  poll_semgive(sem);
+}
 
 /****************************************************************************
  * Public Functions
@@ -87,11 +271,45 @@
 
 int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 {
-#ifdef CONFIG_CPP_HAVE_WARNING
-#  warning To be provided
-#endif
+  WDOG_ID wdog;
+  sem_t sem;
+  int count;
+  int ret;
 
-  errno = ENOSYS;
-  return ERROR;
+  sem_init(&sem, 0, 0);
+  ret = poll_setup(fds, nfds, &sem);
+  if (ret >= 0)
+    {
+      if (timeout >= 0)
+        {
+          /* Wait for the poll event with a timeout */
+
+          wdog = wd_create();
+          wd_start(wdog, poll_timeout, 1, (uint32)&sem);
+          poll_semtake(&sem);
+          wd_delete(wdog);
+        }
+      else
+        {
+          /* Wait for the poll event with not timeout */
+
+          poll_semtake(&sem);
+        }
+
+      /* Teardown the the poll operation and get the count of events */
+
+      ret = poll_teardown(fds, nfds, &count);
+    }
+  sem_destroy(&sem);
+
+  /* Check for errors */
+
+  if (ret < 0)
+    {
+      errno = -ret;
+      return ERROR;
+    }
+
+  return count;
 }
 

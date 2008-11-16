@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/dev_null.c
+ * net/net-poll.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,62 +34,47 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#ifdef CONFIG_NET
 
 #include <sys/types.h>
-#include <string.h>
+#include <sys/socket.h>
+#include <poll.h>
 #include <errno.h>
-#include <nuttx/fs.h>
+
+#include <nuttx/net.h>
+#include "net-internal.h"
 
 /****************************************************************************
- * Private Function Prototypes
+ * Global Functions
  ****************************************************************************/
-
-static ssize_t devzero_read(FAR struct file *, FAR char *, size_t);
-static ssize_t devzero_write(FAR struct file *, FAR const char *, size_t);
 
 /****************************************************************************
- * Private Data
+ * Function: net_poll
+ *
+ * Description:
+ *   The standard poll() operation redirects operations on socket descriptors
+ *   to this function.
+ *
+ * Parameters:
+ *   fd   - The socket descriptor of interest
+ *   fds  - The structures describing events to be monitored, OR NULL if
+ *          this is a request to stop monitoring events.
+ *
+ * Returned Value:
+ *  TBD
+ *
  ****************************************************************************/
 
-static struct file_operations devzero_fops =
+int net_poll(int sockfd, struct pollfd *fds)
 {
-  0,             /* open */
-  0,             /* close */
-  devzero_read,  /* read */
-  devzero_write, /* write */
-  0,             /* seek */
-  0,             /* ioctl */
-  0              /* poll */
-};
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-static ssize_t devzero_read(FAR struct file *filp, FAR char *buffer, size_t len)
-{
-  memset(buffer, 0, len);
-  return len;
+#ifdef CONFIG_CPP_HAVE_WARNING
+#  warning To be provided
+#endif
+  return -ENOSYS;
 }
 
-static ssize_t devzero_write(FAR struct file *filp, FAR const char *buffer, size_t len)
-{
-  return len;
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-void devzero_register(void)
-{
-  (void)register_driver("/dev/zero", &devzero_fops, 0666, NULL);
-}
+#endif /* CONFIG_NET */

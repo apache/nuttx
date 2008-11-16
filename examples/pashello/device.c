@@ -68,7 +68,8 @@ static struct file_operations hello_fops =
   hello_read,    /* read */
   0,             /* write */
   0,             /* seek */
-  0              /* ioctl */
+  0,             /* ioctl */
+  0              /* poll */
 };
 
 /****************************************************************************

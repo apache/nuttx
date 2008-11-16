@@ -564,3 +564,4 @@
 	  types.
 
 0.3.19 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+	* Add the basic infrastructure for support the poll() API

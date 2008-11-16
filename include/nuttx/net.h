@@ -153,6 +153,14 @@ EXTERN int net_close(int sockfd);
 struct ifreq; /* Forward reference -- see net/ioctls.h */
 EXTERN int netdev_ioctl(int sockfd, int cmd, struct ifreq *req);
 
+/* net-poll.c ****************************************************************/
+/* The standard poll() operation redirects operations on socket descriptors
+ * to this function.
+ */
+
+struct pollfd; /* Forward reference -- see poll.h */
+EXTERN int net_poll(int sockfd, struct pollfd *fds);
+
 /* netdev-register.c *********************************************************/
 /* This function is called by network interface device drivers to inform the
  * socket layer of their existence.  This registration is necesary to support

@@ -52,7 +52,7 @@ endif
 endif
 
 NETDEV_ASRCS	=
-NETDEV_CSRCS	= netdev-register.c netdev-ioctl.c netdev-txnotify.c \
+NETDEV_CSRCS	= netdev-register.c netdev-ioctl.c net-poll.c netdev-txnotify.c \
 		  netdev-findbyname.c netdev-findbyaddr.c netdev-count.c \
 		  netdev-foreach.c
 

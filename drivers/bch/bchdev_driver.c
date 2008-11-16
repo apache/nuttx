@@ -85,7 +85,8 @@ struct file_operations bch_fops =
   bch_read,  /* read */
   bch_write, /* write */
   0,         /* seek */
-  bch_ioctl  /* ioctl */
+  bch_ioctl, /* ioctl */
+  0          /* poll */
 };
 
 /****************************************************************************
