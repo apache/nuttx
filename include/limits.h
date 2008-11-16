@@ -1,7 +1,7 @@
 /********************************************************************************
- * limits.h
+ * include/limits.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -33,8 +33,8 @@
  *
  ********************************************************************************/
 
-#ifndef __LIMITS_H
-#define __LIMITS_H
+#ifndef __INCLUDE_LIMITS_H
+#define __INCLUDE_LIMITS_H
 
 /********************************************************************************
  * Included Files
@@ -191,4 +191,4 @@
 #define SEM_NSEMS_MAX  _POSIX_SEM_NSEMS_MAX
 #define SEM_VALUE_MAX  _POSIX_SEM_VALUE_MAX
 
-#endif /* __LIMITS_H */
+#endif /* __INCLUDE_LIMITS_H */

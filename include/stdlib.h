@@ -1,7 +1,7 @@
-/************************************************************
- * stdlib.h
+/****************************************************************************
+ * include/stdlib.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,21 +31,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-#ifndef __STDLIB_H
-#define __STDLIB_H
+#ifndef __INCLUDE_STDLIB_H
+#define __INCLUDE_STDLIB_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
 /* The C standard specifies two constants, EXIT_SUCCESS and
  * EXIT_FAILURE, that may be passed to exit() to indicate
@@ -64,9 +64,9 @@
 # define environ get_environ_ptr()
 #endif
 
-/************************************************************
+/****************************************************************************
  * Global Type Definitions
- ************************************************************/
+ ****************************************************************************/
 
 struct mallinfo
 {
@@ -80,13 +80,13 @@ struct mallinfo
                  * by free (not in use) chunks.*/
 };
 
-/************************************************************
+/****************************************************************************
  * Global Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -144,4 +144,4 @@ EXTERN int        mallinfo(struct mallinfo *info);
 }
 #endif
 
-#endif /* __STDLIB_H */
+#endif /* __INCLUDE_STDLIB_H */

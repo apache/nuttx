@@ -1,7 +1,7 @@
-/************************************************************
- * dirent.h
+/****************************************************************************
+ * include/dirent.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,22 +31,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-#ifndef __DIRENT_H
-#define __DIRENT_H
+#ifndef __INCLUDE_DIRENT_H
+#define __INCLUDE_DIRENT_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <limits.h>
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
 /* File type code for the d_type field in dirent struct.
  * Note that because of the simplified filesystem organization
@@ -63,9 +63,9 @@
 #define DIRENT_ISBLK(dtype)       (((dtype) & DTYPE_BLK) != 0 )
 #define DIRENT_ISDIRECTORY(dtype) (((dtype) & DTYPE_DIRECTORY) != 0 )
 
-/************************************************************
+/****************************************************************************
  * Public Type Definitions
- ************************************************************/
+ ****************************************************************************/
 
 /* The POSIX specification requires that the caller of readdir_r
  * provide storage "large enough for a dirent with the d_name
@@ -81,13 +81,13 @@ struct dirent
 
 typedef void DIR;
 
-/************************************************************
+/****************************************************************************
  * Public Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -113,4 +113,4 @@ EXTERN int        telldir(FAR DIR *dirp);
 }
 #endif
 
-#endif /* __DIRENT_H */
+#endif /* __INCLUDE_DIRENT_H */
