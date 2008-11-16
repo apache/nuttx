@@ -314,10 +314,10 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
   fs->fs_rootentcnt = MBR_GETROOTENTCNT(fs->fs_buffer);
   if (fs->fs_rootentcnt != 0)
-  {
+    {
       notfat32       = TRUE; /* Must be zero for FAT32 */
       rootdirsectors = (32 * fs->fs_rootentcnt  + fs->fs_hwsectorsize - 1) / fs->fs_hwsectorsize;
-  }
+    }
 
   /* Determine the number of sectors in a FAT. */
 
@@ -655,28 +655,32 @@ int fat_mount(struct fat_mountpt_s *fs, boolean writeable)
        * partition and see if we can find the boot record there.
        */
  
-      if (PART1_GETTYPE(fs->fs_buffer) != 0)
+      if (PART1_GETTYPE(fs->fs_buffer) == 0)
         {
-          /* There appears to be a partition, get the sector number of the
-           * partition (LBA)
-           */
+          fdbg("No MBR or partition\n");
+          goto errout_with_buffer;
+        }
 
-          fs->fs_fatbase = PART1_GETSTARTSECTOR(fs->fs_buffer);
+      /* There appears to be a partition, get the sector number of the
+       * partition (LBA)
+       */
 
-          /* Read the new candidate boot sector */
+      fs->fs_fatbase = PART1_GETSTARTSECTOR(fs->fs_buffer);
 
-          ret = fat_hwread(fs, fs->fs_buffer, fs->fs_fatbase, 1);
-          if (ret < 0)
-          {
-              goto errout_with_buffer;
-          }
+      /* Read the new candidate boot sector */
 
-          /* Check if this is a boot record */
+      ret = fat_hwread(fs, fs->fs_buffer, fs->fs_fatbase, 1);
+      if (ret < 0)
+        {
+          goto errout_with_buffer;
+        }
 
-          if (fat_checkbootrecord(fs) != OK)
-            {
-              goto errout_with_buffer;
-            }
+      /* Check if this is a boot record */
+
+      if (fat_checkbootrecord(fs) != OK)
+        {
+          fdbg("No valid MBR\n");
+          goto errout_with_buffer;
         }
     }
 
