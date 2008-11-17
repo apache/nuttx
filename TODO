@@ -230,6 +230,14 @@ o Libraries (lib/)
   Status:      Open
   Priority:    Medium
 
+  Description: Buffered C, character-oriented I/O is not very useful when
+               dealing with a console.  The behavior is to read a full buffer
+               of data then return the individual characters from the buffer.
+               But that is very hostile when working with a human interface.
+  Status:      Open
+  Priority:    Medium.  Workarounds:  Set CONFIG_STDIO_BUFFER_SIZE=0 in the
+               configuration file.
+
 o File system / Generic drivers (fs/, drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
