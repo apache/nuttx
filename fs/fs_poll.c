@@ -48,6 +48,7 @@
 
 #include <nuttx/fs.h>
 #include <nuttx/sched.h>
+#include <nuttx/clock.h>
 
 #include "fs_internal.h"
 
@@ -195,6 +196,7 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count)
 
   /* Process each descriptor in the list */
 
+  *count = 0;
   for (i = 0; i < nfds; i++)
     {
       /* Teardown the poll */
@@ -228,7 +230,7 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count)
  *
  ****************************************************************************/
 
-static void poll_timeout(int argc, uint32 isem)
+static void poll_timeout(int argc, uint32 isem, ...)
 {
   /* Wake up the poller */
 
@@ -284,16 +286,19 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
     {
       if (timeout >= 0)
         {
-          /* Wait for the poll event with a timeout */
+          /* Wait for the poll event with a timeout.  Note that the
+           * millisecond timeout has to be converted to system clock
+           * ticks for wd_start
+           */
 
           wdog = wd_create();
-          wd_start(wdog, poll_timeout, 1, (uint32)&sem);
+          wd_start(wdog,  MSEC2TICK(timeout), poll_timeout, 1, (uint32)&sem);
           poll_semtake(&sem);
           wd_delete(wdog);
         }
       else
         {
-          /* Wait for the poll event with not timeout */
+          /* Wait for the poll event with no timeout */
 
           poll_semtake(&sem);
         }

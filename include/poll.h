@@ -89,14 +89,25 @@
  * Public Type Definitions
  ****************************************************************************/
 
+/* The number of poll descriptors (required by poll() specification */
+
 typedef unsigned int nfds_t;
+
+/* In the standard poll() definition, the size of the event set is 'short'.
+ * Here we pick the smallest storage element that will contain all of the
+ * poll events.
+ */
+
+typedef ubyte pollevent_t;
+
+/* This is the Nuttx variant of the standard pollfd structure. */
 
 struct pollfd
 {
-  int    fd;       /* The descriptor being polled */
-  sem_t  *sem;     /* Pointer to semaphore used to post output event */
-  ubyte  events;   /* The input event flags */
-  ubyte  revents;  /* The output event flags */
+  int         fd;       /* The descriptor being polled */
+  sem_t      *sem;      /* Pointer to semaphore used to post output event */
+  pollevent_t events;   /* The input event flags */
+  pollevent_t revents;  /* The output event flags */
 };
 
 /****************************************************************************
