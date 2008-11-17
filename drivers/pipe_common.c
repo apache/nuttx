@@ -519,11 +519,11 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
 #ifndef CONFIG_DISABLE_POLL
 int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds)
 {
-  struct inode      *inode    = filep->f_inode;
-  struct pipe_dev_s *dev      = inode->i_private;
-  pollevent_t        eventset;
-  pipe_ndx_t         nbytes;
-  int                i;
+  FAR struct inode      *inode    = filep->f_inode;
+  FAR struct pipe_dev_s *dev      = inode->i_private;
+  pollevent_t            eventset;
+  pipe_ndx_t             nbytes;
+  int                    i;
 
   /* Some sanity checking */
 #if CONFIG_DEBUG
