@@ -163,12 +163,12 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
     {
       /* Setup the poll descriptor */
 
-      fds->sem     = sem;
-      fds->revents = 0;
+      fds[i].sem     = sem;
+      fds[i].revents = 0;
 
       /* Set up the poll */
 
-      ret = poll_fdsetup(fds->fd, fds);
+      ret = poll_fdsetup(fds[i].fd, &fds[i]);
       if (ret < 0)
         {
           return ret;
@@ -201,7 +201,7 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count)
     {
       /* Teardown the poll */
 
-      status = poll_fdsetup(fds->fd, NULL);
+      status = poll_fdsetup(fds[i].fd, NULL);
       if (status < 0)
         {
           ret = status;
@@ -209,14 +209,14 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count)
 
       /* Check if any events were posted */
 
-      if (fds->revents != 0)
+      if (fds[i].revents != 0)
         {
           (*count)++;
         }
 
       /* Un-initialize the poll structure */
 
-      fds->sem = NULL;
+      fds[i].sem = NULL;
     }
   return ret;
 }
