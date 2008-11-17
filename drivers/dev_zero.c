@@ -45,6 +45,7 @@
 
 #include <sys/types.h>
 #include <string.h>
+#include <poll.h>
 #include <errno.h>
 #include <nuttx/fs.h>
 
@@ -54,6 +55,9 @@
 
 static ssize_t devzero_read(FAR struct file *, FAR char *, size_t);
 static ssize_t devzero_write(FAR struct file *, FAR const char *, size_t);
+#ifndef CONFIG_DISABLE_POLL
+static int     devzero_poll(FAR struct file *filp, FAR struct pollfd *fds);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -66,12 +70,18 @@ static struct file_operations devzero_fops =
   devzero_read,  /* read */
   devzero_write, /* write */
   0,             /* seek */
-  0,             /* ioctl */
-  0              /* poll */
+  0              /* ioctl */
+#ifndef CONFIG_DISABLE_POLL
+  , devzero_poll /* poll */
+#endif
 };
 
 /****************************************************************************
  * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: devzero_read
  ****************************************************************************/
 
 static ssize_t devzero_read(FAR struct file *filp, FAR char *buffer, size_t len)
@@ -80,10 +90,33 @@ static ssize_t devzero_read(FAR struct file *filp, FAR char *buffer, size_t len)
   return len;
 }
 
+/****************************************************************************
+ * Name: devzero_write
+ ****************************************************************************/
+
 static ssize_t devzero_write(FAR struct file *filp, FAR const char *buffer, size_t len)
 {
   return len;
 }
+
+/****************************************************************************
+ * Name: devzero_poll
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static int devzero_poll(FAR struct file *filp, FAR struct pollfd *fds)
+{
+  if (fds)
+    {
+      fds->revents |= (fds->events & (POLLIN|POLLOUT));
+      if (fds->revents != 0)
+        {
+          sem_post(fds->sem);
+        }
+    }
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions

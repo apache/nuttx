@@ -45,6 +45,7 @@
 
 #include <sys/types.h>
 #include <string.h>
+#include <poll.h>
 #include <errno.h>
 #include <nuttx/fs.h>
 
@@ -54,6 +55,9 @@
 
 static ssize_t devnull_read(FAR struct file *, FAR char *, size_t);
 static ssize_t devnull_write(FAR struct file *, FAR const char *, size_t);
+#ifndef CONFIG_DISABLE_POLL
+static int     devnull_poll(FAR struct file *filp, FAR struct pollfd *poll);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -66,8 +70,10 @@ static struct file_operations devnull_fops =
   devnull_read,  /* read */
   devnull_write, /* write */
   0,             /* seek */
-  0,             /* ioctl */
-  0              /* poll */
+  0              /* ioctl */
+#ifndef CONFIG_DISABLE_POLL
+  , devnull_poll /* poll */
+#endif
 };
 
 /****************************************************************************
@@ -91,6 +97,25 @@ static ssize_t devnull_write(FAR struct file *filp, FAR const char *buffer, size
 {
   return len; /* Say that everything was written */
 }
+
+/****************************************************************************
+ * Name: devnull_poll
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static int devnull_poll(FAR struct file *filp, FAR struct pollfd *fds)
+{
+  if (fds)
+    {
+      fds->revents |= (fds->events & (POLLIN|POLLOUT));
+      if (fds->revents != 0)
+        {
+          sem_post(fds->sem);
+        }
+    }
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions

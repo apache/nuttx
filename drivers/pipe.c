@@ -82,8 +82,10 @@ static struct file_operations pipe_fops =
   pipecommon_read,   /* read */
   pipecommon_write,  /* write */
   0,                 /* seek */
-  0,                 /* ioctl */
-  0,                 /* pipe */
+  0                  /* ioctl */
+#ifndef CONFIG_DISABLE_POLL
+  , pipecommon_poll  /* poll */
+#endif
 };
 
 static sem_t  g_pipesem     = { 1 };

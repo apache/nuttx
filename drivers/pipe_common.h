@@ -42,15 +42,23 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <poll.h>
 
 #ifndef CONFIG_DEV_PIPE_SIZE
 #  define CONFIG_DEV_PIPE_SIZE 1024
 #endif
+
 #if CONFIG_DEV_PIPE_SIZE > 0
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+/* Maximum number of threads than can be waiting for POLL events */
+
+#ifndef CONFIG_DEV_PIPE_NPOLLWAITERS
+#  define CONFIG_DEV_PIPE_NPOLLWAITERS 2
+#endif
 
 /* Maximum number of open's supported on pipe */
 
@@ -70,6 +78,11 @@ typedef uint16 pipe_ndx_t;  /* 16-bit index */
 typedef ubyte pipe_ndx_t;   /*  8-bit index */
 #endif
 
+/* This structure represents the state of one pipe.  A reference to this
+ * structure is retained in the i_private field of the inode whenthe pipe/fifo
+ * device is registered.
+ */
+
 struct pipe_dev_s
 {
   sem_t      d_bfsem;       /* Used to serialize access to d_buffer and indices */
@@ -80,8 +93,20 @@ struct pipe_dev_s
   ubyte      d_refs;        /* References counts on pipe (limited to 255) */
   ubyte      d_nwriters;    /* Number of reference counts for write access */
   ubyte      d_pipeno;      /* Pipe minor number */
-  ubyte     *d_buffer;      /* Buffer alloated when device opend */
+  ubyte     *d_buffer;      /* Buffer allocated when device opened */
+
+  /* The following is a list if poll structures of threads waiting for
+   * driver events. The 'struct pollfd' reference for each open is also
+   * retained in the f_priv field of the 'struct file'.
+   */
+
+#ifndef CONFIG_DISABLE_POLL
+  struct pollfd *d_fds[CONFIG_DEV_PIPE_NPOLLWAITERS];
+#endif
 };
+
+/* 
+ */
 
 /****************************************************************************
  * Public Function Prototypes
@@ -100,6 +125,9 @@ EXTERN int     pipecommon_open(FAR struct file *filep);
 EXTERN int     pipecommon_close(FAR struct file *filep);
 EXTERN ssize_t pipecommon_read(FAR struct file *, FAR char *, size_t);
 EXTERN ssize_t pipecommon_write(FAR struct file *, FAR const char *, size_t);
+#ifndef CONFIG_DISABLE_POLL
+EXTERN int     pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

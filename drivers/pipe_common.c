@@ -52,6 +52,8 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <assert.h>
+#include <debug.h>
+
 #include <nuttx/fs.h>
 
 #include "pipe_common.h"
@@ -95,6 +97,33 @@ static void pipecommon_semtake(sem_t *sem)
       ASSERT(errno == EINTR);
     }
 }
+
+/****************************************************************************
+ * Name: pipecommon_pollnotify
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev, pollevent_t eventset)
+{
+  int i;
+
+  for (i = 0; i < CONFIG_DEV_PIPE_NPOLLWAITERS; i++)
+    {
+      struct pollfd *fds = dev->d_fds[i];
+      if (fds)
+        {
+          fds->revents |= (fds->events & eventset);
+          if (fds->revents != 0)
+            {
+              fvdbg("Report events: %02x\n", fds->revents);
+              sem_post(fds->sem);
+            }
+        }
+    }
+}
+#else
+#  define pipecommon_pollnotify(dev,event)
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -167,6 +196,10 @@ int pipecommon_open(FAR struct file *filep)
               return -ENOMEM;
             }
         }
+
+      /* There is no, file-specific private data (at least not yet) */
+
+      filep->f_priv = NULL;
 
       /* Increment the reference count on the pipe instance */
 
@@ -335,6 +368,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
       sem_post(&dev->d_bfsem);
       ret = sem_wait(&dev->d_rdsem);
       sched_unlock();
+
       if (ret < 0  || sem_wait(&dev->d_bfsem) < 0) 
         {
           return ERROR;
@@ -361,8 +395,12 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
       sem_post(&dev->d_wrsem);
     }
 
+  /* Notify all poll/select waiters that they can write to the FIFO */
+
+  pipecommon_pollnotify(dev, POLLOUT);
+
   sem_post(&dev->d_bfsem);
-  return nread;	    
+  return nread;
 }
 
 /****************************************************************************
@@ -426,6 +464,10 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
                   sem_post(&dev->d_rdsem);
                 }
 
+              /* Notify all poll/select waiters that they can write to the FIFO */
+
+              pipecommon_pollnotify(dev, POLLIN);
+
               /* Return the number of bytes written */
 
               sem_post(&dev->d_bfsem);
@@ -469,5 +511,98 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
         }
     }
 }
+
+/****************************************************************************
+ * Name: pipecommon_poll
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds)
+{
+  struct inode      *inode    = filep->f_inode;
+  struct pipe_dev_s *dev      = inode->i_private;
+  pollevent_t        eventset;
+  pipe_ndx_t         nbytes;
+  int                i;
+
+  /* Some sanity checking */
+#if CONFIG_DEBUG
+  if (!dev)
+    {
+      return -ENODEV;
+    }
+#endif
+
+  /* Find an available slot for the poll structure reference */
+
+  pipecommon_semtake(&dev->d_bfsem);
+  for (i = 0; i < CONFIG_DEV_PIPE_NPOLLWAITERS; i++)
+    {
+      /* Find the slot with the value equal to filep->f_priv.  If there
+       * is not previously installed poll structure, then f_priv will
+       * be NULL and we will find the first unused slot.  If f_priv is
+       * is non-NULL, then we will find the slot that was used for the
+       * previous setup.
+       */
+
+      if (dev->d_fds[i] == filep->f_priv)
+        {
+          dev->d_fds[i] = fds;
+          break;
+        }
+    }
+
+  if (i >= CONFIG_DEV_PIPE_NPOLLWAITERS)
+    {
+      DEBUGASSERT(fds == NULL);
+      return -EBUSY;
+    }
+
+  /* Set or clear the poll event structure reference in the 'struct file'
+   * private data.
+   */
+
+  filep->f_priv = fds;
+
+  /* Check if we should immediately notify on any of the requested events */
+
+  if (fds)
+    {
+      /* Determine how many bytes are in the buffer */
+
+      if (dev->d_wrndx >= dev->d_rdndx)
+        {
+          nbytes = dev->d_wrndx - dev->d_rdndx;
+        }
+      else
+        {
+          nbytes = (CONFIG_DEV_PIPE_SIZE-1) + dev->d_wrndx - dev->d_rdndx;
+        }
+
+      /* Notify the POLLOUT event if the pipe is not full */
+
+      eventset = 0;
+      if (nbytes < (CONFIG_DEV_PIPE_SIZE-1))
+        {
+          eventset |= POLLOUT;
+        }
+
+      /* Notify the POLLIN event if the pipe is not empty */
+
+      if (nbytes > 0)
+        {
+          eventset |= POLLIN;
+        }
+
+      if (eventset)
+        {
+          pipecommon_pollnotify(dev, eventset);
+        }
+    }
+
+  sem_post(&dev->d_bfsem);
+  return OK;
+}
+#endif
 
 #endif /* CONFIG_DEV_PIPE_SIZE > 0 */
