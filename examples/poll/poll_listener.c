@@ -89,12 +89,12 @@ void *poll_listener(pthread_addr_t pvarg)
 
   /* Open the FIFO for non-blocking read */
 
-  message("poll_listener: Opening %s for non-blocking read\n", FIFO_PATH);
-  fd = open(FIFO_PATH, O_RDONLY|O_NONBLOCK);
+  message("poll_listener: Opening %s for non-blocking read\n", FIFO_PATH1);
+  fd = open(FIFO_PATH1, O_RDONLY|O_NONBLOCK);
   if (fd < 0)
     {
       message("poll_listener: ERROR Failed to open FIFO %s: %d\n",
-              FIFO_PATH, errno);
+              FIFO_PATH1, errno);
       (void)close(fd);
       return (void*)-1;
     }
@@ -113,10 +113,12 @@ void *poll_listener(pthread_addr_t pvarg)
       timeout     = FALSE;
       pollin      = FALSE;
 
-      ret = poll(&fds, 1, LISTENER_DELAY);
+      ret = poll(&fds, 1, POLL_LISTENER_DELAY);
+
+      message("\npoll_listener: poll returned: %d\n", ret);
       if (ret < 0)
         {
-          message("poll_listener: ERROR poll failed: %d\n");
+          message("poll_listener: ERROR poll failed: %d\n", errno);
         }
       else if (ret == 0)
         {
@@ -157,11 +159,7 @@ void *poll_listener(pthread_addr_t pvarg)
             {
               if (nbytes == 0 || errno == EAGAIN)
                 {
-                  if (timeout)
-                    {
-                      message("poll_listener: No read data available\n");
-                    }
-                  else if (pollin)
+                  if (pollin)
                     {
                       message("poll_listener: ERROR no read data\n");
                     }

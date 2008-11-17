@@ -182,7 +182,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
         {
           if (readfds)
             {
-              if (pollset[fd].revents & POLLIN)
+              if (pollset[ndx].revents & POLLIN)
                 {
                   FD_SET(pollset[ndx].fd, readfds);
                   ret++;
@@ -191,7 +191,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
           if (writefds)
             {
-              if (pollset[fd].revents & POLLOUT)
+              if (pollset[ndx].revents & POLLOUT)
                 {
                   FD_SET(pollset[ndx].fd, writefds);
                   ret++;
@@ -200,7 +200,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
           if (exceptfds)
             {
-              if (pollset[fd].revents & POLLERR)
+              if (pollset[ndx].revents & POLLERR)
                 {
                   FD_SET(pollset[ndx].fd, exceptfds);
                   ret++;

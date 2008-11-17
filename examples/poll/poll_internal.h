@@ -50,10 +50,12 @@
  * Definitions
  ****************************************************************************/
 
-#define FIFO_PATH "/dev/fifo0"
+#define FIFO_PATH1 "/dev/fifo0"
+#define FIFO_PATH2 "/dev/fifo1"
 
-#define LISTENER_DELAY 2000 /* 2 seconds */
-#define WRITER_DELAY   4    /* 4 seconds */
+#define POLL_LISTENER_DELAY   2000   /* 2 seconds */
+#define SELECT_LISTENER_DELAY 4      /* 4 seconds */
+#define WRITER_DELAY          6      /* 6 seconds */
 
 #ifdef CONFIG_DISABLE_POLL
 #  error "The polling API is disabled"
@@ -84,5 +86,6 @@
  ****************************************************************************/
 
 extern void *poll_listener(pthread_addr_t pvarg);
+extern void *select_listener(pthread_addr_t pvarg);
 
 #endif /* __EXAMPLES_PIPE_PIPE_H */

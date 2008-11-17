@@ -1,5 +1,5 @@
 /****************************************************************************
- * examples/poll/poll_main.c
+ * examples/poll/select_listener.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -41,13 +41,13 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/select.h>
 
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 #include <pthread.h>
 #include <fcntl.h>
-#include <poll.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -74,117 +74,120 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: user_initialize
+ * Name: select_listener
  ****************************************************************************/
 
-void user_initialize(void)
+void *select_listener(pthread_addr_t pvarg)
 {
-}
-
-/****************************************************************************
- * Name: user_start
- ****************************************************************************/
-
-int user_start(int argc, char *argv[])
-{
+  fd_set rfds;
+  struct timeval tv;
   char buffer[64];
   ssize_t nbytes;
-  pthread_t tid1;
-  pthread_t tid2;
-  int count;
-  int fd1;
-  int fd2;
+  boolean timeout;
+  boolean ready;
+  int fd;
   int ret;
 
-  /* Open FIFOs */
+  /* Open the FIFO for non-blocking read */
 
-  message("\nuser_start: Creating FIFO %s\n", FIFO_PATH1);
-  ret = mkfifo(FIFO_PATH1, 0666);
-  if (ret < 0)
+  message("select_listener: Opening %s for non-blocking read\n", FIFO_PATH2);
+  fd = open(FIFO_PATH2, O_RDONLY|O_NONBLOCK);
+  if (fd < 0)
     {
-      message("user_start: mkfifo failed: %d\n", errno);
-      return 1;
-    }
-
-  message("\nuser_start: Creating FIFO %s\n", FIFO_PATH2);
-  ret = mkfifo(FIFO_PATH2, 0666);
-  if (ret < 0)
-    {
-      message("user_start: mkfifo failed: %d\n", errno);
-      return 2;
-    }
-
-  /* Open the FIFOs for blocking, write */
-
-  fd1 = open(FIFO_PATH1, O_WRONLY);
-  if (fd1 < 0)
-    {
-      message("user_start: Failed to open FIFO %s for writing, errno=%d\n",
-              FIFO_PATH1, errno);
-      return 2;
-    }
-
-  fd2 = open(FIFO_PATH2, O_WRONLY);
-  if (fd2 < 0)
-    {
-      message("user_start: Failed to open FIFO %s for writing, errno=%d\n",
+      message("select_listener: ERROR Failed to open FIFO %s: %d\n",
               FIFO_PATH2, errno);
-      return 2;
-    }
-
-  /* Start the listener */
-
- message("user_start: Starting poll_listener thread\n");
-
-  ret = pthread_create(&tid1, NULL, poll_listener, NULL);
-  if (ret != 0)
-    {
-      message("user_start: Failed to create poll_listener thread: %d\n", ret);
-      return 3;
-    }
-
- message("user_start: Starting select_listener thread\n");
-
-  ret = pthread_create(&tid2, NULL, select_listener, NULL);
-  if (ret != 0)
-    {
-      message("user_start: Failed to create select_listener thread: %d\n", ret);
-      return 3;
+      (void)close(fd);
+      return (void*)-1;
     }
 
   /* Loop forever */
 
-  for (count = 0; ; count++)
+  for (;;)
     {
-      /* Send a message to the listener... this should wake the listener
-       * from the poll.
-       */
+      message("select_listener: Calling select()\n");
 
-      sprintf(buffer, "Message %d", count);
-      nbytes = write(fd1, buffer, strlen(buffer));
-      if (nbytes < 0)
+      FD_ZERO(&rfds);
+      FD_SET(fd, &rfds);
+
+      tv.tv_sec  = SELECT_LISTENER_DELAY;
+      tv.tv_usec = 0;
+
+      timeout     = FALSE;
+      ready      = FALSE;
+
+      ret = select(fd+1, &rfds, NULL, NULL, &tv);
+      message("\nselect_listener: select returned: %d\n", ret);
+
+      if (ret < 0)
         {
-          message("user_start: Write to fd1 failed: %d\n", errno);
-          return 4;
+          message("select_listener: ERROR select failed: %d\n");
+        }
+      else if (ret == 0)
+        {
+          message("select_listener: Timeout\n");
+          timeout = TRUE;
+        }
+      else
+        {
+          if (ret != 1)
+            {
+              message("select_listener: ERROR poll reported: %d\n");
+            }
+          else
+            {
+              ready = TRUE;
+            }
+
+          if (!FD_ISSET(fd, rfds))
+            {
+              message("select_listener: ERROR fd=%d not in fd_set\n");
+            }
         }
 
-      nbytes = write(fd2, buffer, strlen(buffer));
-      if (nbytes < 0)
-        {
-          message("user_start: Write fd2 failed: %d\n", errno);
-          return 4;
-        }
+      /* In any event, read until the pipe is empty */
 
-      message("\nuser_start: Sent '%s' (%d bytes)\n", buffer, nbytes);
+      do
+        {
+          nbytes = read(fd, buffer, 63);
+          if (nbytes <= 0)
+            {
+              if (nbytes == 0 || errno == EAGAIN)
+                {
+                  if (ready)
+                    {
+                      message("select_listener: ERROR no read data\n");
+                    }
+                }
+              else if (errno != EINTR)
+                {
+                  message("select_listener: read failed: %d\n", errno);
+                }
+              nbytes = 0;
+            }
+          else
+            {
+              if (timeout)
+                {
+                  message("select_listener: ERROR? Poll timeout, but data read\n");
+                  message("               (might just be a race condition)\n");
+                }
+
+              buffer[nbytes] = '\0';
+              message("select_listener: Read '%s' (%d bytes)\n", buffer, nbytes);
+            }
+
+          timeout = FALSE;
+          ready  = FALSE;
+        }
+      while (nbytes > 0);
+
+      /* Make sure that everything is displayed */
+
       msgflush();
-
-      /* Wait awhile.  This delay should be long enough that the
-       * listener will timeout.
-       */
-
-      sleep(WRITER_DELAY);
     }
 
-  fflush(stdout);
-  return 0;
+  /* Won't get here */
+
+  (void)close(fd);
+  return NULL;
 }
