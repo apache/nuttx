@@ -80,6 +80,8 @@
 
 void uart_xmitchars(FAR uart_dev_t *dev)
 {
+  uint16 nbytes = 0;
+
   /* Send while we still have data & room in the fifo */
 
   while (dev->xmit.head != dev->xmit.tail && uart_txready(dev))
@@ -87,22 +89,13 @@ void uart_xmitchars(FAR uart_dev_t *dev)
       /* Send the next byte */
 
       uart_send(dev, dev->xmit.buffer[dev->xmit.tail]);
+      nbytes++;
 
       /* Increment the tail index */
 
       if (++(dev->xmit.tail) >= dev->xmit.size)
         {
           dev->xmit.tail = 0;
-        }
-
-      /* A byte was removed from the buffer.  Inform any waiters
-       * there there is space available.
-       */
-
-      if (dev->xmitwaiting)
-        {
-          dev->xmitwaiting = FALSE;
-          (void)sem_post(&dev->xmitsem);
         }
     }
 
@@ -113,6 +106,15 @@ void uart_xmitchars(FAR uart_dev_t *dev)
   if (dev->xmit.head == dev->xmit.tail)
     {
       uart_disabletxint(dev);
+    }
+
+  /* If any bytes were removed from the buffer, inform any waiters
+   * there there is space available.
+   */
+
+  if (nbytes)
+    {
+      uart_datasent(dev);
     }
 }
 
@@ -131,6 +133,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
 {
   unsigned int status;
   int nexthead = dev->recv.head + 1;
+  uint16 nbytes = 0;
 
   if (nexthead >= dev->recv.size)
     {
@@ -146,6 +149,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
       /* Add the character to the buffer */
 
       dev->recv.buffer[dev->recv.head] = uart_receive(dev, &status);
+      nbytes++;
 
       /* Increment the head index */
 
@@ -154,18 +158,15 @@ void uart_recvchars(FAR uart_dev_t *dev)
         {
            nexthead = 0;
         }
+    }
 
-      /* A character was added... if there is a thread waiting for more data, then
-       * post the recvsem semaphore to wake it up. NOTE: There is a logic error in
-       * the above looping logic: If nexthead == dev->recv.tail on entry and
-       * recvwaiting is true, the recvsem will never get posted!
-       */
+  /* If any bytes were added to the buffer, inform any waiters
+   * there there is new incoming data available.
+   */
 
-      if (dev->recvwaiting)
-        {
-          dev->recvwaiting = FALSE;
-          (void)sem_post(&dev->recvsem);
-        }
+  if (nbytes)
+    {
+      uart_datareceived(dev);
     }
 }
 

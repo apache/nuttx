@@ -44,6 +44,7 @@
 #include <semaphore.h>
 #include <string.h>
 #include <fcntl.h>
+#include <poll.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -77,6 +78,9 @@ static int     uart_close(FAR struct file *filep);
 static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
 static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
 static int     uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+#ifndef CONFIG_DISABLE_POLL
+static int     uart_poll(FAR struct file *filep, FAR struct pollfd *fds);
+#endif
 
 /************************************************************************************
  * Private Variables
@@ -89,8 +93,10 @@ struct file_operations g_serialops =
   uart_read,  /* read */
   uart_write, /* write */
   0,          /* seek */
-  uart_ioctl, /* ioctl */
-  0           /* poll */
+  uart_ioctl  /* ioctl */
+#ifndef CONFIG_DISABLE_POLL
+  , uart_poll /* poll */
+#endif
 };
 
 /************************************************************************************
@@ -118,6 +124,33 @@ static void uart_takesem(FAR sem_t *sem)
  ************************************************************************************/
 
 #define uart_givesem(sem) (void)sem_post(sem)
+
+/****************************************************************************
+ * Name: uart_pollnotify
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static void uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset)
+{
+  int i;
+
+  for (i = 0; i < CONFIG_DEV_CONSOLE_NPOLLWAITERS; i++)
+    {
+      struct pollfd *fds = dev->fds[i];
+      if (fds)
+        {
+          fds->revents |= (fds->events & eventset);
+          if (fds->revents != 0)
+            {
+              fvdbg("Report events: %02x\n", fds->revents);
+              sem_post(fds->sem);
+            }
+        }
+    }
+}
+#else
+#  define uart_pollnotify(dev,event)
+#endif
 
 /************************************************************************************
  * Name: uart_putxmitchar
@@ -340,6 +373,98 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   return dev->ops->ioctl(filep, cmd, arg);
 }
 
+/****************************************************************************
+ * Name: uart_poll
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+int uart_poll(FAR struct file *filep, FAR struct pollfd *fds)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR uart_dev_t   *dev   = inode->i_private;
+  pollevent_t       eventset;
+  int               ndx;
+  int               i;
+
+  /* Some sanity checking */
+#if CONFIG_DEBUG
+  if (!dev)
+    {
+      return -ENODEV;
+    }
+#endif
+
+  /* Find an available slot for the poll structure reference */
+
+  uart_takesem(&dev->pollsem);
+  for (i = 0; i < CONFIG_DEV_CONSOLE_NPOLLWAITERS; i++)
+    {
+      /* Find the slot with the value equal to filep->f_priv.  If there
+       * is not previously installed poll structure, then f_priv will
+       * be NULL and we will find the first unused slot.  If f_priv is
+       * is non-NULL, then we will find the slot that was used for the
+       * previous setup.
+       */
+
+      if (dev->fds[i] == filep->f_priv)
+        {
+          dev->fds[i] = fds;
+          break;
+        }
+    }
+
+  if (i >= CONFIG_DEV_CONSOLE_NPOLLWAITERS)
+    {
+      DEBUGASSERT(fds == NULL);
+      return -EBUSY;
+    }
+
+  /* Set or clear the poll event structure reference in the 'struct file'
+   * private data.
+   */
+
+  filep->f_priv = fds;
+
+  /* Check if we should immediately notify on any of the requested events */
+
+  if (fds)
+    {
+      /* Check if the xmit buffer is full. */
+
+      eventset = 0;
+
+      uart_takesem(&dev->xmit.sem);
+      ndx = dev->xmit.head + 1;
+      if (ndx >= dev->xmit.size)
+        {
+          ndx = 0;
+        }
+      if (ndx != dev->xmit.tail)
+       {
+         eventset |= POLLOUT;
+       }
+      uart_givesem(&dev->xmit.sem);
+
+      /* Check if the receive buffer is empty */
+
+      uart_takesem(&dev->recv.sem);
+      if (dev->recv.head != dev->recv.tail)
+       {
+         eventset |= POLLIN;
+       }
+      uart_givesem(&dev->recv.sem);
+
+      if (eventset)
+        {
+          uart_pollnotify(dev, eventset);
+        }
+    }
+
+  uart_givesem(&dev->pollsem);
+  return OK;
+}
+#endif
+
 /************************************************************************************
  * Name: uart_close
  *
@@ -513,7 +638,62 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
   sem_init(&dev->closesem, 0, 1);
   sem_init(&dev->xmitsem,  0, 0);
   sem_init(&dev->recvsem,  0, 0);
+#ifndef CONFIG_DISABLE_POLL
+  sem_init(&dev->pollsem,  0, 1);
+#endif
 
   dbg("Registering %s\n", path);
   return register_driver(path, &g_serialops, 0666, dev);
 }
+
+/************************************************************************************
+ * Name: uart_datareceived
+ *
+ * Description:
+ *   This function is called from uart_recvchars when new serial data is place in 
+ *   the driver's circular buffer.  This function will wake-up any stalled read()
+ *   operations that are waiting for incoming data.
+ *
+ ************************************************************************************/
+
+void uart_datareceived(FAR uart_dev_t *dev)
+{
+  /* Awaken any awaiting read() operations */
+
+  if (dev->recvwaiting)
+    {
+      dev->recvwaiting = FALSE;
+      (void)sem_post(&dev->recvsem);
+    }
+
+  /* Notify all poll/select waiters that they can read from the recv buffer */
+
+  uart_pollnotify(dev, POLLIN);
+
+}
+
+/************************************************************************************
+ * Name: uart_datasent
+ *
+ * Description:
+ *   This function is called from uart_xmitchars after serial data has been sent,
+ *   freeing up some space in the driver's circular buffer. This function will
+ *   wake-up any stalled write() operations that was waiting for space to buffer
+ *   outgoing data.
+ *
+ ************************************************************************************/
+
+void uart_datasent(FAR uart_dev_t *dev)
+{
+  if (dev->xmitwaiting)
+    {
+      dev->xmitwaiting = FALSE;
+      (void)sem_post(&dev->xmitsem);
+    }
+
+  /* Notify all poll/select waiters that they can write to xmit buffer */
+
+  uart_pollnotify(dev, POLLOUT);
+}
+
+

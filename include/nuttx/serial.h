@@ -49,6 +49,14 @@
  * Definitions
  ************************************************************************************/
 
+/* Maximum number of threads than can be waiting for POLL events */
+
+#ifndef CONFIG_DEV_CONSOLE_NPOLLWAITERS
+#  define CONFIG_DEV_CONSOLE_NPOLLWAITERS 2
+#endif
+
+/* vtable access helpers */
+
 #define uart_setup(dev)          dev->ops->setup(dev)
 #define uart_shutdown(dev)       dev->ops->shutdown(dev)
 #define uart_attach(dev)         dev->ops->attach(dev)
@@ -186,10 +194,23 @@ struct uart_dev_s
   sem_t                closesem;    /* Locks out new open while close is in progress */
   sem_t                xmitsem;     /* Wakeup user waiting for space in xmit.buffer */
   sem_t                recvsem;     /* Wakeup user waiting for data in recv.buffer */
+#ifndef CONFIG_DISABLE_POLL
+  sem_t                pollsem;     /* Manages exclusive access to fds[] */
+#endif
   struct uart_buffer_s xmit;        /* Describes transmit buffer */
   struct uart_buffer_s recv;        /* Describes receive buffer */
   FAR const struct uart_ops_s *ops; /* Arch-specific operations */
-  FAR void            *priv;       /* Used by the arch-specific logic */
+  FAR void            *priv;        /* Used by the arch-specific logic */
+
+  /* The following is a list if poll structures of threads waiting for
+   * driver events. The 'struct pollfd' reference for each open is also
+   * retained in the f_priv field of the 'struct file'.
+   */
+
+#ifndef CONFIG_DISABLE_POLL
+  struct pollfd *fds[CONFIG_DEV_CONSOLE_NPOLLWAITERS];
+#endif
+
 };
 typedef struct uart_dev_s uart_dev_t;
 
@@ -244,6 +265,31 @@ EXTERN void uart_xmitchars(FAR uart_dev_t *dev);
  ************************************************************************************/
 
 EXTERN void uart_recvchars(FAR uart_dev_t *dev);
+
+/************************************************************************************
+ * Name: uart_datareceived
+ *
+ * Description:
+ *   This function is called from uart_recvchars when new serial data is place in 
+ *   the driver's circular buffer.  This function will wake-up any stalled read()
+ *   operations that are waiting for incoming data.
+ *
+ ************************************************************************************/
+
+EXTERN void uart_datareceived(FAR uart_dev_t *dev);
+
+/************************************************************************************
+ * Name: uart_datasent
+ *
+ * Description:
+ *   This function is called from uart_xmitchars after serial data has been sent,
+ *   freeing up some space in the driver's circular buffer. This function will
+ *   wake-up any stalled write() operations that was waiting for space to buffer
+ *   outgoing data.
+ *
+ ************************************************************************************/
+
+EXTERN void uart_datasent(FAR uart_dev_t *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)

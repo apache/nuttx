@@ -53,6 +53,9 @@
 
 static ssize_t devconsole_read(struct file *, char *, size_t);
 static ssize_t devconsole_write(struct file *, const char *, size_t);
+#ifndef CONFIG_DISABLE_POLL
+static int     devconsole_poll(FAR struct file *filep, FAR struct pollfd *fds);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -62,14 +65,16 @@ static struct file_operations devconsole_fops =
 {
   .read		= devconsole_read,
   .write	= devconsole_write,
+#ifndef CONFIG_DISABLE_POLL
+  .poll         = devconsole_poll,
+#endif
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-
- static ssize_t devconsole_read(struct file *filp, char *buffer, size_t len)
+static ssize_t devconsole_read(struct file *filp, char *buffer, size_t len)
 {
   return up_hostread(buffer, len);
 }
@@ -77,6 +82,11 @@ static struct file_operations devconsole_fops =
 static ssize_t devconsole_write(struct file *filp, const char *buffer, size_t len)
 {
   return up_hostwrite(buffer, len);
+}
+
+static int devconsole_poll(FAR struct file *filep, FAR struct pollfd *fds)
+{
+  return OK;
 }
 
 /****************************************************************************

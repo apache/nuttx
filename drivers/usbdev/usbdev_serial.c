@@ -526,14 +526,6 @@ static uint16 usbclass_fillrequest(FAR struct usbser_dev_s *priv, char *reqbuf, 
         {
           xmit->tail = 0;
         }
-
-      /* Check if we have to wake up the serial driver */
-
-      if (serdev->xmitwaiting)
-        {
-          serdev->xmitwaiting = FALSE;
-          sem_post(&serdev->xmitsem);
-        }
     }
 
   /* When all of the characters have been sent from the buffer
@@ -543,6 +535,15 @@ static uint16 usbclass_fillrequest(FAR struct usbser_dev_s *priv, char *reqbuf, 
   if (xmit->head == xmit->tail)
     {
       uart_disabletxint(serdev);
+    }
+
+  /* If any bytes were removed from the buffer, inform any waiters
+   * there there is space available.
+   */
+
+  if (nbytes)
+    {
+      uart_datasent(serdev);
     }
 
   irqrestore(flags);
@@ -651,6 +652,7 @@ static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
   FAR struct uart_buffer_s *recv = &serdev->recv;
   uint16 currhead;
   uint16 nexthead;
+  uint16 nbytes = 0;
 
   /* Get the next head index. During the time that RX interrupts are disabled, the
    * the serial driver will be extracting data from the circular buffer and modifying
@@ -684,7 +686,7 @@ static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
    * then we have overrun the serial driver and data will be lost.
    */
 
-  while (nexthead != recv->tail && reqlen > 0)
+  while (nexthead != recv->tail && nbytes < reqlen)
     {
       /* Copy one byte to the head of the circular RX buffer */
 
@@ -693,21 +695,7 @@ static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
       /* Update counts and indices */
 
       currhead = nexthead;
-      reqlen--;
-
-      /* Wake up the serial driver if it is waiting for incoming data. If we
-       * are running in an interrupt handler, then the serial driver will
-       * not run until the interrupt handler returns.  But we will exercise
-       * care in the following just in case the serial driver does run.
-       */
-
-      if (priv->rxenabled && serdev->recvwaiting)
-        {
-          recv->head          = currhead;
-          serdev->recvwaiting = FALSE;
-          sem_post(&serdev->recvsem);
-          currhead            = recv->head;
-        }
+      nbytes++;
 
       /* Increment the head index and check for wrap around */
 
@@ -731,9 +719,20 @@ static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
       priv->rxhead = currhead;
     }
 
+  /* If data was added to the incoming serial buffer, then wake up any
+   * threads is waiting for incoming data. If we are running in an interrupt
+   * handler, then the serial driver will not run until the interrupt handler
+   * returns.
+   */
+
+  if (priv->rxenabled && nbytes > 0)
+    {
+      uart_datareceived(serdev);
+    }
+
   /* Return an error if the entire packet could not be transferred */
 
-  if (reqlen > 0)
+  if (nbytes < reqlen)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RXOVERRUN), 0);
       return -ENOSPC;
@@ -2017,15 +2016,9 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, boolean enable)
             {
               serdev->recv.head = priv->rxhead;
 
-              /* Is the serial driver waiting for more data? */
+              /* Yes... signal the availability of new data */
 
-              if (serdev->recvwaiting)
-                {
-                  /* Yes... signal the availability of new data */
-
-                  sem_post(&serdev->recvsem);
-                  serdev->recvwaiting = FALSE;
-                }
+              uart_datareceived(serdev);
             }
 
           /* RX "interrupts are no longer disabled */
