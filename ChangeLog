@@ -564,4 +564,7 @@
 	  types.
 
 0.3.19 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
-	* Add the basic infrastructure for support the poll() API
+	* Add poll() and select() APIs (in the initial check-in, these work only with character devices) 
+	* Add poll() methods to /dev/null, /dev/zero, pipes, and fifos.
+	* Add examples/poll for testing poll() and select()
+
