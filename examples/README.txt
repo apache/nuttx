@@ -120,7 +120,12 @@ examples/serloop
 ^^^^^^^^^^^^^^^^
 
   This is a mindlessly simple loopback test on the console.  Useful
-  for testing new serial drivers.
+  for testing new serial drivers.  Configuration options include:
+
+  * CONFIG_EXAMPLES_SERLOOP_BUFIO
+      Use C buffered I/O (getchar/putchar) vs. raw console I/O
+      (read/read).  The behavior of the NuttX getchar() call is
+      very hostile unless you also set CONFIG_STDIO_BUFFER_SIZE=0.
 
 examples/udp
 ^^^^^^^^^^^^
