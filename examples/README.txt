@@ -95,6 +95,11 @@ examples/pipe
      Sets the size of the stack to use when creating the child tasks.
      The default size is 1024.
 
+examples/poll
+^^^^^^^^^^^^^
+
+  A test of the poll() API using FIFOs.
+
 examples/romfs
 ^^^^^^^^^^^^^^
 
