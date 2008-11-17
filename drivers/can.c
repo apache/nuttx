@@ -88,8 +88,10 @@ struct file_operations g_canops =
   can_read,  /* read */
   can_write, /* write */
   0,         /* seek */
-  can_ioctl, /* ioctl */
-  0          /* poll */
+  can_ioctl  /* ioctl */
+#ifndef CONFIG_DISABLE_POLL
+  , 0        /* poll */
+#endif
 };
 
 /****************************************************************************

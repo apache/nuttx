@@ -84,10 +84,12 @@ static ssize_t devconsole_write(struct file *filp, const char *buffer, size_t le
   return up_hostwrite(buffer, len);
 }
 
+#ifndef CONFIG_DISABLE_POLL
 static int devconsole_poll(FAR struct file *filep, FAR struct pollfd *fds)
 {
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Public Functions

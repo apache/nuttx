@@ -75,8 +75,10 @@ struct file_operations g_serialops =
   lowconsole_read,  /* read */
   lowconsole_write, /* write */
   0,                /* seek */
-  lowconsole_ioctl, /* ioctl */
-  0                 /* poll */
+  lowconsole_ioctl  /* ioctl */
+#ifndef CONFIG_DISABLE_POLL
+  , 0              /* poll */
+#endif
 };
 
 /****************************************************************************
