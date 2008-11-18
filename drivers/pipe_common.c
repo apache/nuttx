@@ -517,7 +517,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds)
+int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setup)
 {
   FAR struct inode      *inode    = filep->f_inode;
   FAR struct pipe_dev_s *dev      = inode->i_private;
@@ -539,7 +539,7 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds)
   for (i = 0; i < CONFIG_DEV_PIPE_NPOLLWAITERS; i++)
     {
       /* Find the slot with the value equal to filep->f_priv.  If there
-       * is not previously installed poll structure, then f_priv will
+       * is no previously installed poll structure, then f_priv will
        * be NULL and we will find the first unused slot.  If f_priv is
        * is non-NULL, then we will find the slot that was used for the
        * previous setup.
@@ -547,14 +547,14 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds)
 
       if (dev->d_fds[i] == filep->f_priv)
         {
-          dev->d_fds[i] = fds;
+          dev->d_fds[i] = (setup ? fds : NULL);
           break;
         }
     }
 
   if (i >= CONFIG_DEV_PIPE_NPOLLWAITERS)
     {
-      DEBUGASSERT(fds == NULL);
+      DEBUGASSERT(setup);
       return -EBUSY;
     }
 
@@ -562,13 +562,16 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds)
    * private data.
    */
 
-  filep->f_priv = fds;
-
-  /* Check if we should immediately notify on any of the requested events */
-
-  if (fds)
+  filep->f_priv = NULL; /* Assume teardown */
+  if (setup)
     {
-      /* Determine how many bytes are in the buffer */
+      /* Set the poll event structure reference in the 'struct file' private data.  */
+
+      filep->f_priv = fds;
+
+      /* Check if we should immediately notify on any of the requested events.  First,
+       * Determine how many bytes are in the buffer
+       */
 
       if (dev->d_wrndx >= dev->d_rdndx)
         {

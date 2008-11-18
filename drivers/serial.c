@@ -79,7 +79,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
 static int     uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
-static int     uart_poll(FAR struct file *filep, FAR struct pollfd *fds);
+static int     uart_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setup);
 #endif
 
 /************************************************************************************
@@ -400,7 +400,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-int uart_poll(FAR struct file *filep, FAR struct pollfd *fds)
+int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setup)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR uart_dev_t   *dev   = inode->i_private;
@@ -422,7 +422,7 @@ int uart_poll(FAR struct file *filep, FAR struct pollfd *fds)
   for (i = 0; i < CONFIG_DEV_CONSOLE_NPOLLWAITERS; i++)
     {
       /* Find the slot with the value equal to filep->f_priv.  If there
-       * is not previously installed poll structure, then f_priv will
+       * is no previously installed poll structure, then f_priv will
        * be NULL and we will find the first unused slot.  If f_priv is
        * is non-NULL, then we will find the slot that was used for the
        * previous setup.
@@ -430,14 +430,14 @@ int uart_poll(FAR struct file *filep, FAR struct pollfd *fds)
 
       if (dev->fds[i] == filep->f_priv)
         {
-          dev->fds[i] = fds;
+          dev->fds[i] = (setup ? fds : NULL);
           break;
         }
     }
 
   if (i >= CONFIG_DEV_CONSOLE_NPOLLWAITERS)
     {
-      DEBUGASSERT(fds == NULL);
+      DEBUGASSERT(setup);
       return -EBUSY;
     }
 
@@ -445,13 +445,12 @@ int uart_poll(FAR struct file *filep, FAR struct pollfd *fds)
    * private data.
    */
 
-  filep->f_priv = fds;
-
-  /* Check if we should immediately notify on any of the requested events */
-
-  if (fds)
+  filep->f_priv = NULL; /* Assume teardown */
+  if (setup)
     {
-      /* Check if the xmit buffer is full. */
+      /* Check if we should immediately notify on any of the requested events.
+       * First, check if the xmit buffer is full.
+       */
 
       eventset = 0;
 

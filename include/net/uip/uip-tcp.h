@@ -118,6 +118,7 @@
 
 struct uip_driver_s;      /* Forward reference */
 struct uip_callback_s;    /* Forward reference */
+
 struct uip_conn
 {
   dq_entry_t node;        /* Implements a doubly linked list */
@@ -179,13 +180,13 @@ struct uip_conn
 
   /* accept() is called when the TCP logic has created a connection */
 
-  void *accept_private;
-  int (*accept)(struct uip_conn *listener, struct uip_conn *conn);
+  FAR void *accept_private;
+  int (*accept)(FAR struct uip_conn *listener, struct uip_conn *conn);
 
   /* connection_event() is called on any of the subset of connection-related events */
 
-  void *connection_private;
-  void (*connection_event)(struct uip_conn *conn, uint16 flags);
+  FAR void *connection_private;
+  void (*connection_event)(FAR struct uip_conn *conn, uint16 flags);
 };
 
 /* The following structure is used to handle read-ahead buffering for TCP

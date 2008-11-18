@@ -108,6 +108,12 @@ struct pollfd
   sem_t      *sem;      /* Pointer to semaphore used to post output event */
   pollevent_t events;   /* The input event flags */
   pollevent_t revents;  /* The output event flags */
+
+  /* The socket poll logic needs a place to retain state info */
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET_TCP) && CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+  FAR void   *private;
+#endif
 };
 
 /****************************************************************************

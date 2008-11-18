@@ -84,17 +84,17 @@ typedef uint16 socktimeo_t;
 
 struct socket
 {
-  int         s_crefs;     /* Reference count on the socket */
-  uint8       s_type;      /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
-  uint8       s_flags;     /* See _SF_* definitions */
+  int           s_crefs;     /* Reference count on the socket */
+  uint8         s_type;      /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
+  uint8         s_flags;     /* See _SF_* definitions */
 #ifdef CONFIG_NET_SOCKOPTS
-  sockopt_t   s_options;   /* Selected socket options */
+  sockopt_t     s_options;   /* Selected socket options */
 #ifndef CONFIG_DISABLE_CLOCK
-  socktimeo_t s_rcvtimeo;  /* Receive timeout value (in deciseconds) */
-  socktimeo_t s_sndtimeo;  /* Send timeout value (in deciseconds) */
+  socktimeo_t   s_rcvtimeo;  /* Receive timeout value (in deciseconds) */
+  socktimeo_t   s_sndtimeo;  /* Send timeout value (in deciseconds) */
 #endif
 #endif
-  void       *s_conn;      /* Connection: struct uip_conn or uip_udp_conn */
+  void         *s_conn;      /* Connection: struct uip_conn or uip_udp_conn */
 };
 
 /* This defines a list of sockets indexed by the socket descriptor */
