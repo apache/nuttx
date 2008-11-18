@@ -81,7 +81,7 @@
  *   NOTE: poll() is the fundamental API for performing such monitoring
  *   operation under NuttX.  select() is provided for compatibility and
  *   is simply a layer of added logic on top of poll().  As such, select()
- *   is more wasteful of resources and poll() is the recommend API to be
+ *   is more wasteful of resources and poll() is the recommended API to be
  *   used.
  *
  * Input parameters:
@@ -96,7 +96,7 @@
  *  Return:
  *   0: Timer expired
  *  >0: The number of bits set in the three sets of descriptors
- *  -1: An error occurred (errno will be set approrpiately)
+ *  -1: An error occurred (errno will be set appropriately)
  *
  ****************************************************************************/
 
