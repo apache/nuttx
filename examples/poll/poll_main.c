@@ -91,6 +91,9 @@ int user_start(int argc, char *argv[])
   ssize_t nbytes;
   pthread_t tid1;
   pthread_t tid2;
+#ifdef HAVE_NETPOLL
+  pthread_t tid3;
+#endif
   int count;
   int fd1;
   int fd2;
@@ -132,9 +135,9 @@ int user_start(int argc, char *argv[])
       return 2;
     }
 
-  /* Start the listener */
+  /* Start the listeners */
 
- message("user_start: Starting poll_listener thread\n");
+  message("user_start: Starting poll_listener thread\n");
 
   ret = pthread_create(&tid1, NULL, poll_listener, NULL);
   if (ret != 0)
@@ -143,7 +146,7 @@ int user_start(int argc, char *argv[])
       return 3;
     }
 
- message("user_start: Starting select_listener thread\n");
+  message("user_start: Starting select_listener thread\n");
 
   ret = pthread_create(&tid2, NULL, select_listener, NULL);
   if (ret != 0)
@@ -151,6 +154,16 @@ int user_start(int argc, char *argv[])
       message("user_start: Failed to create select_listener thread: %d\n", ret);
       return 3;
     }
+
+#ifdef HAVE_NETPOLL
+  message("user_start: Starting net_listener thread\n");
+
+  ret = pthread_create(&tid3, NULL, net_listener, NULL);
+  if (ret != 0)
+    {
+      message("user_start: Failed to create net_listener thread: %d\n", ret);
+    }
+#endif
 
   /* Loop forever */
 

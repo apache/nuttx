@@ -160,7 +160,7 @@ EXTERN int netdev_ioctl(int sockfd, int cmd, struct ifreq *req);
 
 #ifndef CONFIG_DISABLE_POLL
 struct pollfd; /* Forward reference -- see poll.h */
-EXTERN int net_poll(int sockfd, struct pollfd *fds);
+EXTERN int net_poll(int sockfd, struct pollfd *fds, boolean setup);
 #endif
 
 /* netdev-register.c *********************************************************/

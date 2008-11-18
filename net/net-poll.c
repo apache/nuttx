@@ -42,10 +42,18 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
+#include <stdlib.h>
 #include <poll.h>
 #include <errno.h>
+#include <debug.h>
 
+#include <net/uip/uip.h>
 #include <nuttx/net.h>
+#include <nuttx/arch.h>
+
+#include <uip/uip-internal.h>
+
 #include "net-internal.h"
 
 /****************************************************************************
@@ -57,7 +65,7 @@
  * buffering.
  */
 
-#if defined(CONFIG_DISABLE_POLL) && CONFIG_NSOCKET_DESCRIPTORS > 0 && \
+#if !defined(CONFIG_DISABLE_POLL) && CONFIG_NSOCKET_DESCRIPTORS > 0 && \
     defined(CONFIG_NET_TCP) && CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
 #  define HAVE_NETPOLL 1
 #else
@@ -67,11 +75,6 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-struct net_poll_s
-{
-  FAR struct pollfd         *fds;  /* The descriptor poll info */
-};
 
 /****************************************************************************
  * Private Functions
@@ -101,7 +104,7 @@ struct net_poll_s
 static uint16 poll_interrupt(struct uip_driver_s *dev, FAR void *conn,
                              FAR void *pvprivate, uint16 flags)
 {
-  struct pollfd *fds = (struct recvfrom_s *)pvprivate;
+  FAR struct pollfd *fds = (FAR struct pollfd *)pvprivate;
 
   nvdbg("flags: %04x\n", flags);
 
@@ -134,7 +137,7 @@ static uint16 poll_interrupt(struct uip_driver_s *dev, FAR void *conn,
 
       if (eventset)
         {
-          fds->revevents |= eventset;
+          fds->revents |= eventset;
           sem_post(fds->sem);
         }
     }
@@ -159,7 +162,7 @@ static uint16 poll_interrupt(struct uip_driver_s *dev, FAR void *conn,
  ****************************************************************************/
 
 #ifdef HAVE_NETPOLL
-static inline int net_pollsetup((FAR struct uip_conn *)conn, struct pollfd *fds)
+static inline int net_pollsetup(FAR struct uip_conn *conn, struct pollfd *fds)
 {
   FAR struct uip_callback_s *cb;
   irqstate_t flags;
@@ -215,7 +218,6 @@ static inline int net_pollsetup((FAR struct uip_conn *)conn, struct pollfd *fds)
 
 errout_with_irq:
   irqrestore(flags);
-  free(nps);
 errout:
   return ret;
 }
@@ -236,19 +238,17 @@ errout:
  ****************************************************************************/
 
 #ifdef HAVE_NETPOLL
-static inline int net_pollteardown((FAR struct uip_conn *)conn, struct pollfd *fds)
+static inline int net_pollteardown(FAR struct uip_conn *conn, struct pollfd *fds)
 {
   FAR struct uip_callback_s *cb;
   irqstate_t flags;
-  int ret;
 
   /* Sanity check */
 
 #ifdef CONFIG_DEBUG
   if (!conn || !fds || !fds->private)
     {
-      ret = -EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 #endif
 
@@ -294,7 +294,7 @@ static inline int net_pollteardown((FAR struct uip_conn *)conn, struct pollfd *f
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-int net_poll(int sockfd, struct pollfd *fds)
+int net_poll(int sockfd, struct pollfd *fds, boolean setup)
 {
 #ifndef HAVE_NETPOLL
   return -ENOSYS;
@@ -334,17 +334,17 @@ int net_poll(int sockfd, struct pollfd *fds)
 #endif
 
   /* Check if we are setting up or tearing down the poll */
-  if (fds)
+  if (setup)
     {
       /* Perform the TCP/IP poll() setup */
 
-      ret = net_pollsetup((FAR struct uip_conn *)psock->conn, fds);
+      ret = net_pollsetup((FAR struct uip_conn *)psock->s_conn, fds);
     }
   else
     {
       /* Perform the TCP/IP poll() teardown */
 
-      ret = net_pollteardown((FAR struct uip_conn *)psock->conn);
+      ret = net_pollteardown((FAR struct uip_conn *)psock->s_conn, fds);
     }
 
 errout:

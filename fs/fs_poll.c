@@ -109,7 +109,7 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, boolean setup)
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
       if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
         {
-          return net_poll(fds->fd, fds);
+          return net_poll(fds->fd, fds, setup);
         }
       else
 #endif

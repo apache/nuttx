@@ -38,7 +38,7 @@
 
 ASRCS	= 
 AOBJS	= $(ASRCS:.S=$(OBJEXT))
-CSRCS	= poll_main.c poll_listener.c select_listener.c 
+CSRCS	= poll_main.c poll_listener.c select_listener.c net_listener.c
 COBJS	= $(CSRCS:.c=$(OBJEXT))
 
 SRCS	= $(ASRCS) $(CSRCS)
