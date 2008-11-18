@@ -345,7 +345,7 @@ static inline void recvfrom_tcpsender(struct uip_driver_s *dev, struct recvfrom_
  *   TCP receive operation via by the uIP layer.
  *
  * Parameters:
- *   dev      The sructure of the network driver that caused the interrupt
+ *   dev      The structure of the network driver that caused the interrupt
  *   conn     The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
  *
@@ -999,11 +999,13 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
 
   /* Verify that non-NULL pointers were passed */
 
+#ifdef CONFIG_DEBUG
   if (!buf)
     {
       err = EINVAL;
       goto errout;
     }
+#endif
 
   /* Get the underlying socket structure */
   /* Verify that the sockfd corresponds to valid, allocated socket */
