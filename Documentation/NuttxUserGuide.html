@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: September 10, 2008</p>
+      <p>Last Updated: November 18, 2008</p>
     </td>
   </tr>
 </table>
@@ -5998,14 +5998,23 @@ interface of the same name.
 </p>
 
 <h3><a name="driveroperations">2.11.2 Driver Operations</a></h3>
-<a name="drvrfcntlops">
+<ul>
+  <li><a href="#drvrfcntlops">2.11.2.1 <code>fcntl.h</code></a></li>
+  <li><a href="#drvrunistdops">2.11.2.2 <code>unistd.h</code></a></li>
+  <li><a href="#drvrioctlops">2.11.2.3 <code>sys/ioctl.h</code></a></li>
+  <li><a href="#drvrpollops">2.11.2.4 <code>poll.h</code></a></li>
+  <li><a href="#drvselectops">2.11.2.5 <code>sys/select.h</code></a></li>
+</ul>
+
+<h4><a name="drvrfcntlops">2.11.2.1 fcntl.h</a></h4>
+
 <ul><pre>
   #include &lt;fcntl.h&gt;
   int open(const char *path, int oflag, ...);
 </pre></ul>
-</a>
 
-<a name="drvrunistdops">
+<h4><a name="drvrunistdops">2.11.2.2 unistd.h</a></h4>
+
 <ul><pre>
   #include &lt;unistd.h&gt;
   int     close(int fd);
@@ -6016,14 +6025,103 @@ interface of the same name.
   int     unlink(const char *path);
   ssize_t write(int fd, const void *buf, size_t nbytes);
 </pre></ul>
-</a>
 
-<a name="drvrioctlops">
+<h4><a name="drvrioctlops">2.11.2.3 sys/ioctl.h</a></h4>
+
 <ul><pre>
   #include &lt;sys/ioctl.h&gt;
   int     ioctl(int fd, int req, unsigned long arg);
 </pre></ul>
-</a>
+
+<h4><a name="drvrpollops">2.11.2.4 poll.h</a></h4>
+
+<h5><a name="poll">2.11.2.4.1 poll</a></H5>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include &lt;poll.h&gt;
+  int     poll(struct pollfd *fds, nfds_t nfds, int timeout);
+</pre>
+<p>
+  <b>Description:</b>
+   <code>poll()</code> waits for one of a set of file descriptors to become ready to
+   perform I/O.  If none of the events requested (and no error) has
+   occurred for any of  the  file  descriptors,  then  <code>poll()</code> blocks until
+   one of the events occurs.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>fds</code>. List of structures describing file descriptors to be monitored.</li>
+  <li><code>nfds</code>. The number of entries in the list.</li>
+  <li><code>timeout</code>. Specifies an upper limit on the time for which <code>poll()</code> will
+    block in milliseconds.  A negative value of <code>timeout</code> means an infinite
+    timeout.</li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+</p>
+<p>
+  On success, the number of structures that have nonzero <cod>revents</code> fields.
+  A value of 0 indicates that the call timed out and no file descriptors were ready.
+  On error, -1 is returned, and <code>errno</code> is set appropriately:
+</p>
+<ul>
+  <li><code>EBADF</code>. An invalid file descriptor was given in one of the sets.</li>
+  <li><code>EFAULT</code>. The fds address is invalid</li>
+  <li><code>EINTR</code>. A signal occurred before any requested event.</li>
+  <li><code>EINVAL</code>. The nfds value exceeds a system limit.</li>
+  <li><code>ENOMEM</code>. There was no space to allocate internal data structures.</li>
+  <li><code>ENOSYS</code>. One or more of the drivers supporting the file descriptor does not support the poll method.</li>
+</ul>
+
+<h4><a name="drvselectops">2.11.2.5 sys/select.h</a></h4>
+
+<h5><a name="select">2.11.2.5.1 select</a></H5>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+  #include &lt;sys/select.h&gt;
+  int     select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
+                 FAR fd_set *exceptfds, FAR struct timeval *timeout);
+</pre>
+<p>
+  <b>Description:</b>
+  <code>select()</code> allows a program to monitor multiple file descriptors, waiting
+  until one or more of the file descriptors become &quot;ready&quot; for some class
+  of I/O operation (e.g., input possible).  A file descriptor is
+  considered  ready if it is possible to perform the corresponding I/O
+  operation (e.g., read(2)) without blocking.
+</p>
+<p>
+  <b>NOTE:</b> <a href="#poll"><code>poll()</code></a> is the fundamental API for performing such monitoring
+  operation under NuttX.  <code>select()</code> is provided for compatibility and
+  is simply a layer of added logic on top of <code>poll()</code>.  As such, <code>select()</code>
+  is more wasteful of resources and <a href="#poll"><code>poll()</code></a> is the recommended API to be
+  used.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>nfds</code>. the maximum file descriptor number (+1) of any descriptor in any of the three sets.</li>
+  <li><code>readfds</code>. the set of descriptions to monitor for read-ready events</li>
+  <li><code>writefds</code>. the set of descriptions to monitor for write-ready events</li>
+  <li><code>exceptfds</code>. the set of descriptions to monitor for error events</li>
+  <li><code>timeout</code>. Return at this time if none of these events of interest occur.</li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+</p>
+<ul>
+  <li><code>0:</code> Timer expired</li>
+  <li><code>&gt;0:</code> The number of bits set in the three sets of descriptors</li>
+  <li><code>-1:</code> An error occurred (<code>errno</code> will be set appropriately,
+    see <a href="#poll"><code>poll()</code></a>).</li>
+</ul>
 
 <h3><a name="directoryoperations">2.11.3 Directory Operations</a></h3>
 <a name="dirdirentops">
@@ -7292,6 +7390,7 @@ notify a task when a message is available on a queue.
   <li><a href="#exit">exit</a></li>
   <li><a href="#fatsupport">FAT File System Support</a></li>
   <li><a href="#standardio">fclose</a></li>
+  <li><a href="#drvrfcntlops">fcntl.h</a></li>
   <li><a href="#standardio">fdopen</a></li>
   <li><a href="#standardio">feof</a></li>
   <li><a href="#standardio">ferror</a></li>
@@ -7309,7 +7408,7 @@ notify a task when a message is available on a queue.
   <li><a href="#standardio">fread</a></li>
   <li><a href="#standardio">fseek</a></li>
   <li><a href="#standardio">fsetpos</a></li>
-  <li><a href="#standardio">fstat(</a></li>
+  <li><a href="#standardio">fstat</a></li>
   <li><a href="#standardio">ftell</a></li>
   <li><a href="#standardio">fwrite</a></li>
   <li><a href="#dirunistdops">getcwd</a></li>
@@ -7343,9 +7442,11 @@ notify a task when a message is available on a queue.
   <li><a href="#drvrfcntlops">open</a></li>
   <li><a href="#dirdirentops">opendir</a></li>
   <li><a href="#OS_Interfaces">OS Interfaces</a></li>
+  <li><a href="#pipe">pipe</a></li>
 </td>
 <td valign="top" width="33%">
-  <li><a href="#pipe">pipe</a></li>
+  <li><a href="#poll">poll</a></li>
+  <li><a href="#drvrpollops">poll.h</a></li>
   <li><a href="#standardio">printf</a></li>
   <li><a href="#Pthread">Pthread Interfaces</a>
   <li><a href="#pthreadattrdestroy">pthread_attr_destroy</a></li>
@@ -7416,9 +7517,9 @@ notify a task when a message is available on a queue.
   <li><a href="#mmapxip">ROM disk driver</a></li>
   <li><a href="#mmapxip">ROMFS</a></li>
   <li><a href="#schedgetparam">sched_getparam</a></li>
+  <li><a href="#schedgetprioritymax">sched_get_priority_max</a></li>
 </td>
 <td valign="top">
-  <li><a href="#schedgetprioritymax">sched_get_priority_max</a></li>
   <li><a href="#schedgetprioritymin">sched_get_priority_min</a></li>
   <li><a href="#schedgetrrinterval">sched_get_rr_interval</a></li>
   <li><a href="#schedlockcount">sched_lockcount</a></li>
@@ -7427,6 +7528,7 @@ notify a task when a message is available on a queue.
   <li><a href="#schedsetscheduler">sched_setscheduler</a></li>
   <li><a href="#schedunlock">sched_unlock</a></li>
   <li><a href="#sched_yield">sched_yield</a></li>
+  <li><a href="#select">select</a></li>
   <li><a href="#Semaphores">Counting Semaphore Interfaces</a>
   <li><a href="#semclose">sem_close</a></li>
   <li><a href="#semdestroy">sem_destroy</a></li>
@@ -7460,6 +7562,8 @@ notify a task when a message is available on a queue.
   <li><a href="#standardio">Standard I/O</a></li>
   <li><a href="#standardio">stat</a></li>
   <li><a href="#standardio">statfs</a></li>
+  <li><a href="#drvselectops">sys/select.h</a></li>
+  <li><a href="#drvrioctlops">sys/ioctl.h</a></li>
   <li><a href="#taskactivate">task_activate</a></li>
   <li><a href="#Task_Control">Task Control Interfaces</a>
   <li><a href="#taskcreate">task_create</a></li>
@@ -7476,6 +7580,7 @@ notify a task when a message is available on a queue.
   <li><a href="#ClocksNTimers">Timers</a></li>
   <li><a href="#timersettime">timer_settime</a></li>
   <li><a href="#standardio">ungetc</a></li>
+  <li><a href="#drvrunistdops">unistd.h</a></li>
   <li><a href="#drvrunistdops">unlink</a></li>
   <li><a href="#standardio">vfprintf</a></li>
   <li><a href="#standardio">vprintf</a></li>
