@@ -1207,6 +1207,7 @@ nuttx-0.3.19 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  full buffer of read data before return.  This means that getc would stall when it needed
 	  to refill the input buffer. The old behavior (read full blocks) might be useful in other
 	  contexts, so it is still available within the driver as a configuration option.
+	* Implement poll() and select() support for TCP/IP sockets
 
 pascal-0.1.3 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
