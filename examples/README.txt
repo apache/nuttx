@@ -98,7 +98,9 @@ examples/pipe
 examples/poll
 ^^^^^^^^^^^^^
 
-  A test of the poll() API using FIFOs.
+  A test of the poll() and select() APIs using FIFOs and, if available,
+  stdin, and a TCP/IP socket.  This example also includes a nice select
+  based TCP/IP server example.
 
 examples/romfs
 ^^^^^^^^^^^^^^
