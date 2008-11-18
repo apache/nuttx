@@ -124,8 +124,7 @@ examples/serloop
 
   * CONFIG_EXAMPLES_SERLOOP_BUFIO
       Use C buffered I/O (getchar/putchar) vs. raw console I/O
-      (read/read).  The behavior of the NuttX getchar() call is
-      very hostile unless you also set CONFIG_STDIO_BUFFER_SIZE=0.
+      (read/read).
 
 examples/udp
 ^^^^^^^^^^^^

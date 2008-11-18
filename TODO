@@ -9,13 +9,14 @@ NuttX TODO List (Last updated November 17, 2008)
   (1)  C++ Support
  (12)  Network (net/, netutils/)
   (1)  USB (drivers/usbdev)
-  (3)  Libraries (lib/)
+  (4)  Libraries (lib/)
   (6)  File system/Generic drivers (fs/, drivers/)
   (1)  Pascal add-on (pcode/)
   (2)  Documentation (Documentation/)
   (3)  Build system
   (2)  NuttShell (NSH) (examples/nsh)
   (1)  Other Applications & Tests (examples/)
+  (2)  Linux/Cywgin simulation (arch/sim)
   (2)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (1)  ARM/DM320 (arch/arm/src/dm320/)
@@ -230,13 +231,19 @@ o Libraries (lib/)
   Status:      Open
   Priority:    Medium
 
-  Description: Buffered C, character-oriented I/O is not very useful when
-               dealing with a console.  The behavior is to read a full buffer
-               of data then return the individual characters from the buffer.
-               But that is very hostile when working with a human interface.
+  Description: fgets implementation does not use C-buffered I/O, but rather
+               talks to serial driver directly via read().  It includes VT-100
+               specific editting commands.  This gets should be renamed readlin()
+               and a more generic fgets() should be implemented.
   Status:      Open
-  Priority:    Medium.  Workarounds:  Set CONFIG_STDIO_BUFFER_SIZE=0 in the
-               configuration file.
+  Priority:    Low (unless you are using mixed C-buffered I/O with fgets and
+               fgetc, for example).
+
+  Description: Need some minimal termios support... at a minimum, enough to
+               switch between raw and "normal" modes to support behavior like
+               that needed for readline().
+  Status:      Open
+  Priority:    Low
 
 o File system / Generic drivers (fs/, drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -318,16 +325,21 @@ o Build system
   Priority:    Low
 
   Description: Dependencies do not work correctly under configs/<board>/src
-               (same as arch/<arch>/src/board).  Seems to be worse using SDCC.
+               (same as arch/<arch>/src/board).
   Status:      Open
   Priority:    Medium (maybe higher for z80 target)
 
   Description: It would be nice to de-couple some of the behaviors enabled by
                CONFIG_DEBUG.  For example, CONFIG_DEBUG turns on debug output,
                but also disables optimization make the binary much bigger.
-  Status:      Low.  There workaround is easy.. just edit the configuration's
+  Status:      Open
+  Priority:    Low.  There workaround is easy.. just edit the configuration's
                Make.def file to control the behavior that you want.
-  Priority:    Very low.
+
+  Description: Need a NuttX configuration tool.  The number of configuration
+               settings has become quite large and difficult to manage manually.
+  Status:      Open
+  Priority:    Medium-low
 
 o NuttShell (NSH) (examples/nsh)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -350,6 +362,24 @@ o Other Applications & Tests (examples/)
   Description: The redirection test (part of examples/pipe) terminates
                incorrectly on the Cywgin-based simulation platform (but works
                fine on the Linux-based simulation platform).
+
+o Linux/Cywgin simulation (arch/sim)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: Need to implement timing.  Use system timing resources to fake
+               a NuttX real time clock.  At present, the timer is driven in
+               non-realtime (like 1000x realtime) and causes some behavior
+               differences from real platforms.
+  Status:      Open
+  Priority:    Low (because the simulator is only a test/development platform)
+
+  Description: The simulated serial driver also has some odd behavior.  It
+               will stall for a long time on reads when the C stdio buffers are
+               being refilled. This only effects the behavior of things like
+               fgetc().  Workaround: Set CONFIG_STDIO_BUFFER_SIZE=0, suppressing
+               all C buffered I/O.
+  Status:      Open
+  Priority:    Low (because the simulator is only a test/development platform)
 
 o ARM (arch/arm/)
   ^^^^^^^^^^^^^^^

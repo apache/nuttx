@@ -318,8 +318,9 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
             }
         }
 
+#ifdef CONFIG_DEV_SERIAL_FULLBLOCKS
       /* No... then we would have to wait to get receive more data.
-       * If the user has specified the O_NONBLOCK option, then do not
+       * If the user has specified the O_NONBLOCK option, then just
        * return what we have.
        */
 
@@ -333,15 +334,36 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
             {
               recvd = -EAGAIN;
             }
+          break;
+       }
+#else
+      /* No... the circular buffer is empty.  Have we returned anything
+       * to the caller?
+       */
 
-          /* Break out of the loop and return the number of bytes
+      else if (recvd > 0)
+       {
+          /* Yes.. break out of the loop and return the number of bytes
            * received up to the wait condition.
            */
 
           break;
-        }
+       }
 
-      /* Otherwise we are going to wait */
+      /* No... then we would have to wait to get receive some data.
+       * If the user has specified the O_NONBLOCK option, then do not
+       * wait.
+       */
+
+      else if (filep->f_oflags & O_NONBLOCK)
+        {
+          /* Break out of the loop returning -EAGAIN */
+
+          recvd = -EAGAIN;
+          break;
+        }
+#endif
+      /* Otherwise we are going to have to wait for data to arrive */
 
       else
         {
