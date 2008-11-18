@@ -1203,6 +1203,10 @@ nuttx-0.3.19 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* Add poll() and select() APIs (in the initial check-in, these work only with character devices) 
 	* Add poll() methods to /dev/null, /dev/zero, pipes, fifos, and serial drivers.
 	* Add examples/poll for testing poll() and select()
+	* Fix hostile behavior of getc, fgetc, getchar, etc.: the serial driver was waiting for a
+	  full buffer of read data before return.  This means that getc would stall when it needed
+	  to refill the input buffer. The old behavior (read full blocks) might be useful in other
+	  contexts, so it is still available within the driver as a configuration option.
 
 pascal-0.1.3 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
