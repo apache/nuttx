@@ -76,7 +76,7 @@ struct file_operations
   off_t   (*seek)(FAR struct file *filp, off_t offset, int whence);
   int     (*ioctl)(FAR struct file *filp, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
-  int     (*poll)(FAR struct file *filp, struct pollfd *fds, boolean setup);
+  int     (*poll)(FAR struct file *filp, struct pollfd *fds);
 #endif
 
   /* The two structures need not be common after this point */

@@ -79,7 +79,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
 static int     uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
-static int     uart_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setup);
+static int     uart_poll(FAR struct file *filep, FAR struct pollfd *fds);
 #endif
 
 /************************************************************************************
@@ -400,7 +400,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setup)
+int uart_poll(FAR struct file *filep, FAR struct pollfd *fds)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR uart_dev_t   *dev   = inode->i_private;
@@ -430,14 +430,14 @@ int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setup)
 
       if (dev->fds[i] == filep->f_priv)
         {
-          dev->fds[i] = (setup ? fds : NULL);
+          dev->fds[i] = fds;
           break;
         }
     }
 
   if (i >= CONFIG_DEV_CONSOLE_NPOLLWAITERS)
     {
-      DEBUGASSERT(setup);
+      DEBUGASSERT(fds != NULL);
       return -EBUSY;
     }
 
@@ -445,12 +445,13 @@ int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setup)
    * private data.
    */
 
-  filep->f_priv = NULL; /* Assume teardown */
-  if (setup)
+  filep->f_priv = fds;
+
+  /* Check if we should immediately notify on any of the requested events */
+
+  if (fds)
     {
-      /* Check if we should immediately notify on any of the requested events.
-       * First, check if the xmit buffer is full.
-       */
+      /* Check if the xmit buffer is full. */
 
       eventset = 0;
 

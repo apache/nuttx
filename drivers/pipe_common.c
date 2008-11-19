@@ -517,7 +517,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setup)
+int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds)
 {
   FAR struct inode      *inode    = filep->f_inode;
   FAR struct pipe_dev_s *dev      = inode->i_private;
@@ -547,14 +547,14 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setu
 
       if (dev->d_fds[i] == filep->f_priv)
         {
-          dev->d_fds[i] = (setup ? fds : NULL);
+          dev->d_fds[i] = fds;
           break;
         }
     }
 
   if (i >= CONFIG_DEV_PIPE_NPOLLWAITERS)
     {
-      DEBUGASSERT(setup);
+      DEBUGASSERT(fds != NULL);
       return -EBUSY;
     }
 
@@ -562,16 +562,13 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setu
    * private data.
    */
 
-  filep->f_priv = NULL; /* Assume teardown */
-  if (setup)
+  filep->f_priv = fds;
+
+  /* Check if we should immediately notify on any of the requested events */
+
+  if (fds)
     {
-      /* Set the poll event structure reference in the 'struct file' private data.  */
-
-      filep->f_priv = fds;
-
-      /* Check if we should immediately notify on any of the requested events.  First,
-       * Determine how many bytes are in the buffer
-       */
+      /* Determine how many bytes are in the buffer */
 
       if (dev->d_wrndx >= dev->d_rdndx)
         {

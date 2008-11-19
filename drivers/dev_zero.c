@@ -56,7 +56,7 @@
 static ssize_t devzero_read(FAR struct file *, FAR char *, size_t);
 static ssize_t devzero_write(FAR struct file *, FAR const char *, size_t);
 #ifndef CONFIG_DISABLE_POLL
-static int     devzero_poll(FAR struct file *filp, FAR struct pollfd *fds, boolean setup);
+static int     devzero_poll(FAR struct file *filp, FAR struct pollfd *fds);
 #endif
 
 /****************************************************************************
@@ -104,9 +104,9 @@ static ssize_t devzero_write(FAR struct file *filp, FAR const char *buffer, size
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-static int devzero_poll(FAR struct file *filp, FAR struct pollfd *fds, boolean setup)
+static int devzero_poll(FAR struct file *filp, FAR struct pollfd *fds)
 {
-  if (setup)
+  if (fds)
     {
       fds->revents |= (fds->events & (POLLIN|POLLOUT));
       if (fds->revents != 0)

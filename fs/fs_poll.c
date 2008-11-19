@@ -93,7 +93,7 @@ static void poll_semtake(FAR sem_t *sem)
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-static int poll_fdsetup(int fd, FAR struct pollfd *fds, boolean setup)
+static int poll_fdsetup(int fd, FAR struct pollfd *fds)
 {
   FAR struct filelist *list;
   FAR struct file     *this_file;
@@ -109,7 +109,7 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, boolean setup)
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
       if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
         {
-          return net_poll(fds->fd, fds, setup);
+          return net_poll(fd, fds);
         }
       else
 #endif
@@ -137,7 +137,7 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, boolean setup)
     {
       /* Yes, then setup the poll */
 
-      ret = (int)inode->u.i_ops->poll(this_file, fds, setup);
+      ret = (int)inode->u.i_ops->poll(this_file, fds);
     }
   return ret;
 }
@@ -168,7 +168,7 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
 
       /* Set up the poll */
 
-      ret = poll_fdsetup(fds[i].fd, &fds[i], TRUE);
+      ret = poll_fdsetup(fds[i].fd, &fds[i]);
       if (ret < 0)
         {
           return ret;
@@ -201,7 +201,7 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count)
     {
       /* Teardown the poll */
 
-      status = poll_fdsetup(fds[i].fd, &fds[i], FALSE);
+      status = poll_fdsetup(fds[i].fd, NULL);
       if (status < 0)
         {
           ret = status;
