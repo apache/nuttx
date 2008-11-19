@@ -100,7 +100,42 @@ examples/poll
 
   A test of the poll() and select() APIs using FIFOs and, if available,
   stdin, and a TCP/IP socket.  This example also includes a nice select
-  based TCP/IP server example.
+  based TCP/IP server example.  In order to build this test, you must the
+  following selected in your NuttX configuration file:
+
+  CONFIG_NFILE_DESCRIPTORS          - Defined to be greater than 0
+  CONFIG_DISABLE_POLL               - NOT defined
+
+  In order to use the TCP/IP select test, you have also the following
+  additional things selected in your NuttX configuration file:
+
+  CONFIG_NET                        - Defined for general network support
+  CONFIG_NET_TCP                    - Defined for TCP/IP support
+  CONFIG_NSOCKET_DESCRIPTORS        - Defined to be greater than 0
+  CONFIG_NET_NTCP_READAHEAD_BUFFERS - Defined to be greater than zero
+
+  In additional to the target device-side example, there is also
+  a host-side application in this directory.  It can be compiled under
+  Linux or Cygwin as follows:
+
+    cd examples/usbserial
+    make -f Makefile.host TOPDIR=../../. TARGETIP=<target-ip>
+
+  Where <target-ip> is the IP address of your target board.
+
+  This will generate a small program called 'host'.  Usage:
+
+  1. Build the examples/poll target program with TCP/IP poll support
+     and start the target.
+
+  3. Then start the host application:
+
+       ./host
+
+  The host and target will exchange are variety of small messages. Each
+  message sent from the host should cause the select to return in target.
+  The target example should read the small message and send it back to
+  the host.  The host should then receive the echo'ed message.
 
 examples/romfs
 ^^^^^^^^^^^^^^
@@ -156,6 +191,36 @@ examples/usbserial
      Send only small, single packet messages.  Default: Send large and small.
   CONFIG_EXAMPLES_USBSERIAL_ONLYBIG
      Send only large, multi-packet messages.  Default: Send large and small.
+
+  In additional to the target device-side example, there is also
+  a host-side application in this directory.  It can be compiled under
+  Linux or Cygwin as follows:
+
+    cd examples/usbserial
+    make -f Makefile.host TOPDIR=../../.
+
+  This will generate a small program called 'host'.  Usage:
+
+  1. Build the examples/usbserial target program and start the target.
+
+  2. Wait a bit, then do enter:
+
+     dmesg
+
+     At the end of the dmesg output, you should see the the seria
+     device was successfully idenfied and assigned to a tty device,
+     probably /dev/ttyUSB0.
+
+  3. Then start the host application:
+
+       ./host [<tty-dev>]
+
+     Where:
+
+       <tty-dev> is the USB TTY device to use.  The default is /dev/ttyUSB0.
+
+  The host and target will exchange are variety of very small and very large
+  serial messages.
 
 examples/usbstorage
 ^^^^^^^^^^^^^^^^^^
