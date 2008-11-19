@@ -172,6 +172,7 @@ uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint16 flags)
 
           if (readahead2)
             {
+              readahead2->rh_nbytes = 0;
               (void)uip_readahead(readahead2, buf, buflen);
 
               /* Save the readahead buffer in the connection structure where
