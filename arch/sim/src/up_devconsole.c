@@ -54,7 +54,7 @@
 static ssize_t devconsole_read(struct file *, char *, size_t);
 static ssize_t devconsole_write(struct file *, const char *, size_t);
 #ifndef CONFIG_DISABLE_POLL
-static int     devconsole_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setup);
+static int     devconsole_poll(FAR struct file *filep, FAR struct pollfd *fds);
 #endif
 
 /****************************************************************************
@@ -85,7 +85,7 @@ static ssize_t devconsole_write(struct file *filp, const char *buffer, size_t le
 }
 
 #ifndef CONFIG_DISABLE_POLL
-static int devconsole_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setup)
+static int devconsole_poll(FAR struct file *filep, FAR struct pollfd *fds)
 {
   return OK;
 }
