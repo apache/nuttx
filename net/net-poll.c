@@ -162,8 +162,9 @@ static uint16 poll_interrupt(struct uip_driver_s *dev, FAR void *conn,
  ****************************************************************************/
 
 #ifdef HAVE_NETPOLL
-static inline int net_pollsetup(FAR struct uip_conn *conn, struct pollfd *fds)
+static inline int net_pollsetup(FAR struct socket *psock, struct pollfd *fds)
 {
+  FAR struct uip_conn *conn = psock->s_conn;
   FAR struct uip_callback_s *cb;
   irqstate_t flags;
   int ret;
@@ -171,7 +172,7 @@ static inline int net_pollsetup(FAR struct uip_conn *conn, struct pollfd *fds)
   /* Sanity check */
 
 #ifdef CONFIG_DEBUG
-  if (!conn || !fds || fds->private)
+  if (!conn || !fds || psock->private)
     {
       ret = -EINVAL;
       goto errout;
@@ -199,7 +200,7 @@ static inline int net_pollsetup(FAR struct uip_conn *conn, struct pollfd *fds)
 
   /* Save the nps reference in the poll structure for use at teardown as well */
 
-  fds->private = (FAR void *)cb;
+  psock->private = (FAR void *)cb;
 
   /* Check for read data availability now */
 
@@ -238,15 +239,16 @@ errout:
  ****************************************************************************/
 
 #ifdef HAVE_NETPOLL
-static inline int net_pollteardown(FAR struct uip_conn *conn, struct pollfd *fds)
+static inline int net_pollteardown(FAR struct socket *psock)
 {
+  FAR struct uip_conn *conn = psock->s_conn;
   FAR struct uip_callback_s *cb;
   irqstate_t flags;
 
   /* Sanity check */
 
 #ifdef CONFIG_DEBUG
-  if (!conn || !fds || !fds->private)
+  if (!conn || !psock->private)
     {
       return -EINVAL;
     }
@@ -254,7 +256,7 @@ static inline int net_pollteardown(FAR struct uip_conn *conn, struct pollfd *fds
 
   /* Recover the socket descriptor poll state info from the poll structure */
 
-  cb = (FAR struct uip_callback_s *)fds->private;
+  cb = (FAR struct uip_callback_s *)psock->private;
   if (cb)
     {
       /* Release the callback */
@@ -265,7 +267,7 @@ static inline int net_pollteardown(FAR struct uip_conn *conn, struct pollfd *fds
 
       /* Release the poll/select data slot */
 
-      fds->private = NULL;
+      psock->private = NULL;
     }
 
   return OK;
@@ -294,23 +296,13 @@ static inline int net_pollteardown(FAR struct uip_conn *conn, struct pollfd *fds
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-int net_poll(int sockfd, struct pollfd *fds, boolean setup)
+int net_poll(int sockfd, struct pollfd *fds)
 {
 #ifndef HAVE_NETPOLL
   return -ENOSYS;
 #else
   FAR struct socket *psock;
   int ret;
-
-  /* Verify that non-NULL pointers were passed */
-
-#ifdef CONFIG_DEBUG
-  if (!fds)
-    {
-      ret = -EINVAL;
-      goto errout;
-    }
-#endif
 
   /* Get the underlying socket structure and verify that the sockfd
    * corresponds to valid, allocated socket
@@ -334,17 +326,17 @@ int net_poll(int sockfd, struct pollfd *fds, boolean setup)
 #endif
 
   /* Check if we are setting up or tearing down the poll */
-  if (setup)
+  if (fds)
     {
       /* Perform the TCP/IP poll() setup */
 
-      ret = net_pollsetup((FAR struct uip_conn *)psock->s_conn, fds);
+      ret = net_pollsetup(psock, fds);
     }
   else
     {
       /* Perform the TCP/IP poll() teardown */
 
-      ret = net_pollteardown((FAR struct uip_conn *)psock->s_conn, fds);
+      ret = net_pollteardown(psock);
     }
 
 errout:

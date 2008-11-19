@@ -95,6 +95,12 @@ struct socket
 #endif
 #endif
   void         *s_conn;      /* Connection: struct uip_conn or uip_udp_conn */
+
+  /* The socket poll logic needs a place to retain state info */
+
+#if !defined(CONFIG_DISABLE_POLL) && defined(CONFIG_NET_TCP) && CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+  FAR void   *private;
+#endif
 };
 
 /* This defines a list of sockets indexed by the socket descriptor */
@@ -160,7 +166,7 @@ EXTERN int netdev_ioctl(int sockfd, int cmd, struct ifreq *req);
 
 #ifndef CONFIG_DISABLE_POLL
 struct pollfd; /* Forward reference -- see poll.h */
-EXTERN int net_poll(int sockfd, struct pollfd *fds, boolean setup);
+EXTERN int net_poll(int sockfd, struct pollfd *fds);
 #endif
 
 /* netdev-register.c *********************************************************/
