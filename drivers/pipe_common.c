@@ -197,10 +197,6 @@ int pipecommon_open(FAR struct file *filep)
             }
         }
 
-      /* There is no, file-specific private data (at least not yet) */
-
-      filep->f_priv = NULL;
-
       /* Increment the reference count on the pipe instance */
 
       dev->d_refs++;
@@ -517,58 +513,58 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds)
+int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                    boolean setup)
 {
   FAR struct inode      *inode    = filep->f_inode;
   FAR struct pipe_dev_s *dev      = inode->i_private;
   pollevent_t            eventset;
   pipe_ndx_t             nbytes;
+  int                    ret      = OK;
   int                    i;
 
   /* Some sanity checking */
+
 #if CONFIG_DEBUG
-  if (!dev)
+  if (!dev || !fds)
     {
       return -ENODEV;
     }
 #endif
 
-  /* Find an available slot for the poll structure reference */
+  /* Are we setting up the poll?  Or tearing it down? */
 
   pipecommon_semtake(&dev->d_bfsem);
-  for (i = 0; i < CONFIG_DEV_PIPE_NPOLLWAITERS; i++)
+  if (setup)
     {
-      /* Find the slot with the value equal to filep->f_priv.  If there
-       * is no previously installed poll structure, then f_priv will
-       * be NULL and we will find the first unused slot.  If f_priv is
-       * is non-NULL, then we will find the slot that was used for the
-       * previous setup.
+      /* This is a request to set up the poll.  Find an available
+       * slot for the poll structure reference
        */
 
-      if (dev->d_fds[i] == filep->f_priv)
+      for (i = 0; i < CONFIG_DEV_PIPE_NPOLLWAITERS; i++)
         {
-          dev->d_fds[i] = fds;
-          break;
+          /* Find an available slot */
+
+          if (!dev->d_fds[i])
+            {
+              /* Bind the poll structure and this slot */
+
+              dev->d_fds[i] = fds;
+              fds->private  = &dev->d_fds[i];
+              break;
+            }
         }
-    }
 
-  if (i >= CONFIG_DEV_PIPE_NPOLLWAITERS)
-    {
-      DEBUGASSERT(fds != NULL);
-      return -EBUSY;
-    }
+      if (i >= CONFIG_DEV_PIPE_NPOLLWAITERS)
+        {
+          fds->private = NULL;
+          ret          = -EBUSY;
+          goto errout;
+        }
 
-  /* Set or clear the poll event structure reference in the 'struct file'
-   * private data.
-   */
-
-  filep->f_priv = fds;
-
-  /* Check if we should immediately notify on any of the requested events */
-
-  if (fds)
-    {
-      /* Determine how many bytes are in the buffer */
+      /* Should immediately notify on any of the requested events?
+       * First, determine how many bytes are in the buffer
+       */
 
       if (dev->d_wrndx >= dev->d_rdndx)
         {
@@ -599,9 +595,29 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds)
           pipecommon_pollnotify(dev, eventset);
         }
     }
+  else
+    {
+      /* This is a request to tear down the poll. */
 
+      struct pollfd **slot = (struct pollfd **)fds->private;
+
+#ifdef CONFIG_DEBUG
+      if (!slot)
+        {
+          ret              = -EIO;
+          goto errout;
+        }
+#endif
+
+      /* Remove all memory of the poll setup */
+
+      *slot                = NULL;
+      fds->private         = NULL;
+    }
+
+errout:
   sem_post(&dev->d_bfsem);
-  return OK;
+  return ret;
 }
 #endif
 

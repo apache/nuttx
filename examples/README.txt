@@ -99,8 +99,7 @@ examples/poll
 ^^^^^^^^^^^^^
 
   A test of the poll() and select() APIs using FIFOs and, if available,
-  stdin, and a TCP/IP socket.  This example also includes a nice select
-  based TCP/IP server example.  In order to build this test, you must the
+  stdin, and a TCP/IP socket.  In order to build this test, you must the
   following selected in your NuttX configuration file:
 
   CONFIG_NFILE_DESCRIPTORS          - Defined to be greater than 0
@@ -113,6 +112,11 @@ examples/poll
   CONFIG_NET_TCP                    - Defined for TCP/IP support
   CONFIG_NSOCKET_DESCRIPTORS        - Defined to be greater than 0
   CONFIG_NET_NTCP_READAHEAD_BUFFERS - Defined to be greater than zero
+
+  CONFIG_EXAMPLE_POLL_NOMAC         - (May be defined to use software assigned MAC)
+  CONFIG_EXAMPLE_POLL_IPADDR        - Target IP address
+  CONFIG_EXAMPLE_POLL_DRIPADDR      - Default router IP addess
+  CONFIG_EXAMPLE_POLL_NETMASK       - Network mask
 
   In additional to the target device-side example, there is also
   a host-side application in this directory.  It can be compiled under

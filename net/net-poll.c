@@ -172,7 +172,7 @@ static inline int net_pollsetup(FAR struct socket *psock, struct pollfd *fds)
   /* Sanity check */
 
 #ifdef CONFIG_DEBUG
-  if (!conn || !fds || psock->private)
+  if (!conn || !fds)
     {
       ret = -EINVAL;
       goto errout;
@@ -200,7 +200,7 @@ static inline int net_pollsetup(FAR struct socket *psock, struct pollfd *fds)
 
   /* Save the nps reference in the poll structure for use at teardown as well */
 
-  psock->private = (FAR void *)cb;
+  fds->private = (FAR void *)cb;
 
   /* Check for read data availability now */
 
@@ -239,7 +239,7 @@ errout:
  ****************************************************************************/
 
 #ifdef HAVE_NETPOLL
-static inline int net_pollteardown(FAR struct socket *psock)
+static inline int net_pollteardown(FAR struct socket *psock, struct pollfd *fds)
 {
   FAR struct uip_conn *conn = psock->s_conn;
   FAR struct uip_callback_s *cb;
@@ -248,7 +248,7 @@ static inline int net_pollteardown(FAR struct socket *psock)
   /* Sanity check */
 
 #ifdef CONFIG_DEBUG
-  if (!conn || !psock->private)
+  if (!conn || !fds->private)
     {
       return -EINVAL;
     }
@@ -256,7 +256,7 @@ static inline int net_pollteardown(FAR struct socket *psock)
 
   /* Recover the socket descriptor poll state info from the poll structure */
 
-  cb = (FAR struct uip_callback_s *)psock->private;
+  cb = (FAR struct uip_callback_s *)fds->private;
   if (cb)
     {
       /* Release the callback */
@@ -267,7 +267,7 @@ static inline int net_pollteardown(FAR struct socket *psock)
 
       /* Release the poll/select data slot */
 
-      psock->private = NULL;
+      fds->private = NULL;
     }
 
   return OK;
@@ -286,9 +286,10 @@ static inline int net_pollteardown(FAR struct socket *psock)
  *   to this function.
  *
  * Input Parameters:
- *   fd   - The socket descriptor of interest
- *   fds  - The structure describing the events to be monitored, OR NULL if
- *          this is a request to stop monitoring events.
+ *   fd    - The socket descriptor of interest
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *   setup - TRUE: Setup up the poll; FALSE: Teardown the poll
  *
  * Returned Value:
  *  0: Success; Negated errno on failure
@@ -296,7 +297,7 @@ static inline int net_pollteardown(FAR struct socket *psock)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-int net_poll(int sockfd, struct pollfd *fds)
+int net_poll(int sockfd, struct pollfd *fds, boolean setup)
 {
 #ifndef HAVE_NETPOLL
   return -ENOSYS;
@@ -326,7 +327,7 @@ int net_poll(int sockfd, struct pollfd *fds)
 #endif
 
   /* Check if we are setting up or tearing down the poll */
-  if (fds)
+  if (setup)
     {
       /* Perform the TCP/IP poll() setup */
 
@@ -336,7 +337,7 @@ int net_poll(int sockfd, struct pollfd *fds)
     {
       /* Perform the TCP/IP poll() teardown */
 
-      ret = net_pollteardown(psock);
+      ret = net_pollteardown(psock, fds);
     }
 
 errout:

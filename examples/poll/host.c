@@ -99,7 +99,7 @@ int main(int argc, char **argv, char **envp)
 
   myaddr.sin_family      = AF_INET;
   myaddr.sin_port        = htons(LISTENER_PORT);
-  myaddr.sin_addr.s_addr = htonl(inet_addr(TARGETIP));
+  myaddr.sin_addr.s_addr = inet_addr(TARGETIP);
 
   message("client: Connecting to %s...\n", TARGETIP);
   if (connect( sockfd, (struct sockaddr*)&myaddr, sizeof(struct sockaddr_in)) < 0)
@@ -111,7 +111,7 @@ int main(int argc, char **argv, char **envp)
 
   /* Then send and receive messages */
 
-  for (i = 0; ; i++);
+  for (i = 0; ; i++)
     {
       sprintf(outbuf, "Remote message %d", i);
       len = strlen(outbuf);
@@ -139,6 +139,8 @@ int main(int argc, char **argv, char **envp)
           message("client: recv failed: %d\n", errno);
           goto errout_with_socket;
         }
+
+      inbuf[nbytesrecvd] = '\0';
       message("client: Received '%s' (%d bytes)\n", inbuf, nbytesrecvd);
 
       if (nbytesrecvd != len)

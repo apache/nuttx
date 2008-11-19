@@ -52,6 +52,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <net/uip/uip-lib.h>
 #include "poll_internal.h"
 
 /****************************************************************************
@@ -107,6 +108,7 @@ static boolean net_closeclient(struct net_listener_s *nls, int sd)
 
 static inline boolean net_incomingdata(struct net_listener_s *nls, int sd)
 {
+  char *ptr;
   int nbytes;
   int ret;
 
@@ -139,25 +141,26 @@ static inline boolean net_incomingdata(struct net_listener_s *nls, int sd)
       else
         {
           nls->buffer[ret]='\0';
-          message("poll_listener: Read '%s' (%d bytes)\n", sd, nls->buffer, ret);
+          message("poll_listener: Read '%s' (%d bytes)\n", nls->buffer, ret);
 
           /* Echo the data back to the client */
 
-          for (nbytes = ret; nbytes > 0; )
+          for (nbytes = ret, ptr = nls->buffer; nbytes > 0; )
             {
-              ret = send(sd, nls->buffer, nbytes, 0);
+              ret = send(sd, ptr, nbytes, 0);
               if (ret < 0)
                 {
                   if (errno != EINTR)
                     {
-                       message("net_listener: Send faile sd=%d: \n", sd, errno);
+                       message("net_listener: Send failed sd=%d: \n", sd, errno);
                        net_closeclient(nls, sd);
                        return FALSE;
                     }
                 }
               else
                 {
-                  nbytes += ret;
+                  nbytes -= ret;
+                  ptr    += ret;
                 }
             }
         }
@@ -272,6 +275,46 @@ static inline boolean net_mksocket(struct net_listener_s *nls)
 }
 
 /****************************************************************************
+ * Name: net_configure
+ ****************************************************************************/
+
+static void net_configure(void)
+{
+  struct in_addr addr;
+#if defined(CONFIG_EXAMPLE_POLL_NOMAC)
+  ubyte mac[IFHWADDRLEN];
+#endif
+
+  /* Configure uIP */
+  /* Many embedded network interfaces must have a software assigned MAC */
+
+#ifdef CONFIG_EXAMPLE_POLL_NOMAC
+  mac[0] = 0x00;
+  mac[1] = 0xe0;
+  mac[2] = 0xb0;
+  mac[3] = 0x0b;
+  mac[4] = 0xba;
+  mac[5] = 0xbe;
+  uip_setmacaddr("eth0", mac);
+#endif
+
+  /* Set up our host address */
+
+  addr.s_addr = HTONL(CONFIG_EXAMPLE_POLL_IPADDR);
+  uip_sethostaddr("eth0", &addr);
+
+  /* Set up the default router address */
+
+  addr.s_addr = HTONL(CONFIG_EXAMPLE_POLL_DRIPADDR);
+  uip_setdraddr("eth0", &addr);
+
+  /* Setup the subnet mask */
+
+  addr.s_addr = HTONL(CONFIG_EXAMPLE_POLL_NETMASK);
+  uip_setnetmask("eth0", &addr);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -286,6 +329,10 @@ void *net_listener(pthread_addr_t pvarg)
   int nsds;
   int ret;
   int i;
+
+  /* Configure uIP */
+
+  net_configure();
 
   /* Set up a listening socket */
 

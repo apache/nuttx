@@ -156,9 +156,15 @@ int user_start(int argc, char *argv[])
     }
 
 #ifdef HAVE_NETPOLL
+#if 0 /* select doesn't work for connections yet */
   message("user_start: Starting net_listener thread\n");
 
   ret = pthread_create(&tid3, NULL, net_listener, NULL);
+#else
+  message("user_start: Starting net_reader thread\n");
+
+  ret = pthread_create(&tid3, NULL, net_reader, NULL);
+#endif
   if (ret != 0)
     {
       message("user_start: Failed to create net_listener thread: %d\n", ret);

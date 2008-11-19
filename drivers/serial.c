@@ -79,7 +79,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
 static int     uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
-static int     uart_poll(FAR struct file *filep, FAR struct pollfd *fds);
+static int     uart_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setup);
 #endif
 
 /************************************************************************************
@@ -400,58 +400,57 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-int uart_poll(FAR struct file *filep, FAR struct pollfd *fds)
+int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setup)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR uart_dev_t   *dev   = inode->i_private;
   pollevent_t       eventset;
   int               ndx;
+  int               ret   = OK;
   int               i;
 
   /* Some sanity checking */
+
 #if CONFIG_DEBUG
-  if (!dev)
+  if (!dev || !fds)
     {
       return -ENODEV;
     }
 #endif
 
-  /* Find an available slot for the poll structure reference */
+  /* Are we setting up the poll?  Or tearing it down? */
 
   uart_takesem(&dev->pollsem);
-  for (i = 0; i < CONFIG_DEV_CONSOLE_NPOLLWAITERS; i++)
+  if (setup)
     {
-      /* Find the slot with the value equal to filep->f_priv.  If there
-       * is no previously installed poll structure, then f_priv will
-       * be NULL and we will find the first unused slot.  If f_priv is
-       * is non-NULL, then we will find the slot that was used for the
-       * previous setup.
+      /* This is a request to set up the poll.  Find an available
+       * slot for the poll structure reference
        */
 
-      if (dev->fds[i] == filep->f_priv)
+      for (i = 0; i < CONFIG_DEV_CONSOLE_NPOLLWAITERS; i++)
         {
-          dev->fds[i] = fds;
-          break;
+          /* Find an available slot */
+
+          if (!dev->fds[i])
+            {
+              /* Bind the poll structure and this slot */
+
+              dev->fds[i]  = fds;
+              fds->private = &dev->fds[i];
+              break;
+            }
         }
-    }
 
-  if (i >= CONFIG_DEV_CONSOLE_NPOLLWAITERS)
-    {
-      DEBUGASSERT(fds != NULL);
-      return -EBUSY;
-    }
+      if (i >= CONFIG_DEV_CONSOLE_NPOLLWAITERS)
+        {
+          fds->private = NULL;
+          ret          = -EBUSY;
+          goto errout;
+        }
 
-  /* Set or clear the poll event structure reference in the 'struct file'
-   * private data.
-   */
-
-  filep->f_priv = fds;
-
-  /* Check if we should immediately notify on any of the requested events */
-
-  if (fds)
-    {
-      /* Check if the xmit buffer is full. */
+      /* Should immediately notify on any of the requested events?
+       * First, check if the xmit buffer is full.
+       */
 
       eventset = 0;
 
@@ -480,10 +479,31 @@ int uart_poll(FAR struct file *filep, FAR struct pollfd *fds)
         {
           uart_pollnotify(dev, eventset);
         }
+
+    }
+  else if (fds->private)
+    {
+      /* This is a request to tear down the poll. */
+
+      struct pollfd **slot = (struct pollfd **)fds->private;
+
+#ifdef CONFIG_DEBUG
+      if (!slot)
+        {
+          ret              = -EIO;
+          goto errout;
+        }
+#endif
+
+      /* Remove all memory of the poll setup */
+
+      *slot                = NULL;
+      fds->private         = NULL;
     }
 
+errout:
   uart_givesem(&dev->pollsem);
-  return OK;
+  return ret;
 }
 #endif
 

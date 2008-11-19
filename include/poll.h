@@ -108,6 +108,7 @@ struct pollfd
   sem_t      *sem;      /* Pointer to semaphore used to post output event */
   pollevent_t events;   /* The input event flags */
   pollevent_t revents;  /* The output event flags */
+  FAR void   *private;  /* For use by drivers */
 };
 
 /****************************************************************************

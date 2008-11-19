@@ -110,5 +110,6 @@ extern void *select_listener(pthread_addr_t pvarg);
 
 #ifdef HAVE_NETPOLL
 extern void *net_listener(pthread_addr_t pvarg);
+extern void *net_reader(pthread_addr_t pvarg);
 #endif
 #endif /* __EXAMPLES_PIPE_PIPE_H */
