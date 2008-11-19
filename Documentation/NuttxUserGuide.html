@@ -6051,6 +6051,25 @@ interface of the same name.
    one of the events occurs.
 </p>
 <p>
+  <b>Configuration Settings</b>.
+  In order to use the <code>poll()</code> API, the following must be defined
+  in your NuttX configuration file:
+</p>
+<ul>
+  <li><code>CONFIG_NFILE_DESCRIPTORS</code> Defined to be greater than 0</li>
+  <li><code>CONFIG_DISABLE_POLL</code> NOT defined</li>
+</ul>
+<p>
+  In order to use the select with TCP/IP sockets test, you must also have the following additional things
+  selected in your NuttX configuration file:
+</p>
+<ul>
+  <li><code>CONFIG_NET</code> Defined for general network support</li>
+  <li><code>CONFIG_NET_TCP</code> Defined for TCP/IP support</li>
+  <li><code>CONFIG_NSOCKET_DESCRIPTORS</code> Defined to be greater than 0</li>
+  <li><code>CONFIG_NET_NTCP_READAHEAD_BUFFERS</code> Defined to be greater than zero</li>
+</ul>
+<p>
   <b>Input Parameters:</b>
 </p>
 <ul>
