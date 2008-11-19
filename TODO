@@ -214,11 +214,17 @@ o Network (net/, netutils/)
   Status:      Open
   Priority:    Medium
 
-  Description: poll()/select is not implement for UDP sockets because they do
+  Description: poll()/select() is not implemented for UDP sockets because they do
                do not support read-ahead buffering.  Therefore, there is never
                a case where you can read from a UDP socket without blocking.
   Status:      Open, depends on UDP read-ahead support
   Priority:    Medium
+
+  Description: poll()/select() does not detect incoming connections.  As a result
+               they are not useful for implementing servers in the usual way.
+  Status:      Open.
+  Priority:    High.  There is a work-around (compare examples/poll/net_reader.c
+               to examples/poll/net_listener.c).
 
 o USB (drivers/usbdev)
   ^^^^^^^^^^^^^^^^^^^^
