@@ -1208,6 +1208,10 @@ nuttx-0.3.19 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  to refill the input buffer. The old behavior (read full blocks) might be useful in other
 	  contexts, so it is still available within the driver as a configuration option.
 	* Implement poll() and select() support for TCP/IP sockets
+	* Fixed an important bug in the TCP/IP buffering logic.  When TCP/IP read-ahead is enabled
+	  and not recv() is in-place when a TCP/IP packet is received, the packet is placed into
+	  a read-ahead buffer.  However, the old contents of the read-ahead buffer were not being
+	  cleared and old data would contaminate the newly received buffer.
 
 pascal-0.1.3 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
