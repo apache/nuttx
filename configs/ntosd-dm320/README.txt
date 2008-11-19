@@ -137,6 +137,12 @@ This alternative configuration directory may be used to
 enable networking using the OSDs DM9000A Ethernet interface.
 It uses examples/nettest to excercise the TCP/IP network.
 
+poll
+^^^^
+
+This configuration exercises the poll()/select() text at
+examples/poll
+
 uip
 ^^^
 
