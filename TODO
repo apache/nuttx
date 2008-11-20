@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 19, 2008)
+NuttX TODO List (Last updated November 20, 2008)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (7)  Task/Scheduler (sched/)
@@ -7,7 +7,7 @@ NuttX TODO List (Last updated November 19, 2008)
   (1)  Signals (sched/, arch/)
   (1)  pthreads (sched/)
   (1)  C++ Support
- (15)  Network (net/, netutils/)
+ (12)  Network (net/, netutils/)
   (1)  USB (drivers/usbdev)
   (4)  Libraries (lib/)
   (6)  File system/Generic drivers (fs/, drivers/)
@@ -190,21 +190,16 @@ o Network (net/, netutils/)
   Priority:    Low
 
   Description: At present, there cannot be two concurrent active TCP send
-               operations in progress.  This is because the uIP ACK logic will
-               support only one transfer at a time.  The solution is simple:
-               A mutex will be needed to make sure that each send that is
-               started is able to be the exclusive sender until all of the
-               data to be sent has been ACKed.
+               operations in progress using the same socket.  This is because
+               the uIP ACK logic will support only one transfer at a time.  The
+               solution is simple: A mutex will be needed to make sure that each 
+               send that is started is able to be the exclusive sender until all of
+               the data to be sent has been ACKed.
   Status:      Open.  There is some temporary logic to examples/nsh that does
                this same fix and that temporary logic should be removed when
                send() is fixed.
   Priority:    Medium-Low.  This is an important issue for applications that
                send on the same TCP socket from multiple threads.
-
-  Description: Some application-level interface to the ICMP logic is needed
-               to support ping from the target.
-  Status:      Open
-  Priority:    Low
 
   Description: TCP supports read-ahead buffering to handle the receipt of
                TCP/IP packets when there is no read() in place.  Should such
