@@ -228,22 +228,41 @@ boolean uip_islistener(uint16 portno)
  *
  ****************************************************************************/
 
-int uip_accept(struct uip_conn *conn, uint16 portno)
+int uip_accept(struct uip_driver_s *dev, struct uip_conn *conn, uint16 portno)
 {
   struct uip_conn *listener;
   int ret = ERROR;
 
   /* The interrupt logic has already allocated and initialized a TCP
-   * connection -- now check if is an application in place to accept the
+   * connection -- now check there if is an application in place to accept the
    * connection.
    */
 
   listener = uip_tcplistener(portno);
-  if (listener && listener->accept)
+  if (listener)
     {
-      /* Yes.. accept the connection */
+      /* Yes, there is a listener.  Is it accepting connections now? */
 
-      ret = listener->accept(listener, conn);
+      if (listener->accept)
+        {
+         /* Yes.. accept the connection */
+
+          ret = listener->accept(listener, conn);
+        }
+#ifdef CONFIG_NET_TCPBACKLOG
+      else
+        {
+          /* Add the connection to the backlog and notify any threads that
+           * may be waiting on poll()/select() that the connection is available.
+           */
+
+          ret =  uip_backlogadd(listener, conn);
+          if (ret == OK)
+            {
+              (void)uip_tcpcallback(dev, conn, UIP_BACKLOG);
+            }
+        }
+#endif
     }
    return ret;
 }

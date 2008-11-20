@@ -123,7 +123,7 @@ EXTERN void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hs
 
 EXTERN void uip_listeninit(void);
 EXTERN boolean uip_islistener(uint16 port);
-EXTERN int uip_accept(struct uip_conn *conn, uint16 portno);
+EXTERN int uip_accept(struct uip_driver_s *dev, struct uip_conn *conn, uint16 portno);
 
 /* Defined in uip-tcpsend.c *************************************************/
 

@@ -6070,6 +6070,14 @@ interface of the same name.
   <li><code>CONFIG_NET_NTCP_READAHEAD_BUFFERS</code> Defined to be greater than zero</li>
 </ul>
 <p>
+  In order to for select to work with incoming connections, you must also select:
+</p>
+<ul>
+  <li><code>CONFIG_NET_TCPBACKLOG</code>
+  Incoming connections pend in a backlog until <code>accept()</cod> is called.
+  The size of the backlog is selected when <code>listen()</code> is called.</li>
+</ul>
+<p>
   <b>Input Parameters:</b>
 </p>
 <ul>

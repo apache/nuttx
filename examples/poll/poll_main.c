@@ -156,7 +156,7 @@ int user_start(int argc, char *argv[])
     }
 
 #ifdef HAVE_NETPOLL
-#if 0 /* select doesn't work for connections yet */
+#ifdef CONFIG_NET_TCPBACKLOG
   message("user_start: Starting net_listener thread\n");
 
   ret = pthread_create(&tid3, NULL, net_listener, NULL);

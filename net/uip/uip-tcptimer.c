@@ -2,7 +2,7 @@
  * net/uip/uip-tcptimer.c
  * Poll for the availability of TCP TX data
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:

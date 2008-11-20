@@ -81,7 +81,10 @@
  *   UIP_POLL      IN:  Used for polling the application.  This is provided
  *                      periodically from the drivers to support (1) timed
  *                      operations, and (2) to check if the application has
-*                       data that it wants to send
+ *                      data that it wants to send
+ *                 OUT: Not used
+ *   UIP_BACKLOG   IN:  There is a new connection in the backlog list set
+ *                      up by the listen() command. (TCP only)
  *                 OUT: Not used
  *   UIP_CLOSE     IN:  The remote host has closed the connection, thus the
  *                      connection has gone away. (TCP only)
@@ -110,11 +113,12 @@
 #define UIP_SNDACK     (1 << 2)
 #define UIP_REXMIT     (1 << 3)
 #define UIP_POLL       (1 << 4)
-#define UIP_CLOSE      (1 << 5)
-#define UIP_ABORT      (1 << 6)
-#define UIP_CONNECTED  (1 << 7)
-#define UIP_TIMEDOUT   (1 << 8)
-#define UIP_ECHOREPLY  (1 << 9)
+#define UIP_BACKLOG    (1 << 5)
+#define UIP_CLOSE      (1 << 6)
+#define UIP_ABORT      (1 << 7)
+#define UIP_CONNECTED  (1 << 8)
+#define UIP_TIMEDOUT   (1 << 9)
+#define UIP_ECHOREPLY  (1 << 10)
 
 #define UIP_CONN_EVENTS (UIP_CLOSE|UIP_ABORT|UIP_CONNECTED|UIP_TIMEDOUT)
 

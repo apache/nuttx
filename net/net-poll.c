@@ -114,9 +114,9 @@ static uint16 poll_interrupt(struct uip_driver_s *dev, FAR void *conn,
     {
       pollevent_t eventset = 0;
 
-      /* Check for data availability events. */
+      /* Check for data or connection availability events. */
 
-      if ((flags & UIP_NEWDATA) != 0)
+      if ((flags & (UIP_NEWDATA|UIP_BACKLOG)) != 0)
         {
           eventset |= POLLIN & fds->events;
         }
@@ -174,8 +174,7 @@ static inline int net_pollsetup(FAR struct socket *psock, struct pollfd *fds)
 #ifdef CONFIG_DEBUG
   if (!conn || !fds)
     {
-      ret = -EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 #endif
 
@@ -194,7 +193,7 @@ static inline int net_pollsetup(FAR struct socket *psock, struct pollfd *fds)
 
   /* Initialize the callbcack structure */
 
-  cb->flags    = UIP_NEWDATA|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
+  cb->flags    = UIP_NEWDATA|UIP_BACKLOG|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
   cb->private  = (FAR void *)fds;
   cb->event    = poll_interrupt;
 
@@ -219,7 +218,6 @@ static inline int net_pollsetup(FAR struct socket *psock, struct pollfd *fds)
 
 errout_with_irq:
   irqrestore(flags);
-errout:
   return ret;
 }
 #endif /* HAVE_NETPOLL */

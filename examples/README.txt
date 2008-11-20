@@ -118,6 +118,11 @@ examples/poll
   CONFIG_EXAMPLE_POLL_DRIPADDR      - Default router IP addess
   CONFIG_EXAMPLE_POLL_NETMASK       - Network mask
 
+  In order to for select to work with incoming connections, you
+  must also select:
+
+  CONFIG_NET_TCPBACKLOG             - Incoming connections pend in a backlog until accept() is called.
+
   In additional to the target device-side example, there is also
   a host-side application in this directory.  It can be compiled under
   Linux or Cygwin as follows:

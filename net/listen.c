@@ -114,7 +114,7 @@ int listen(int sockfd, int backlog)
     }
 
   /* Verify that the sockfd corresponds to a connected SOCK_STREAM */
-  
+
   conn = (struct uip_conn *)psock->s_conn;
   if (psock->s_type != SOCK_STREAM || !psock->s_conn || conn->lport <= 0)
     {
@@ -122,16 +122,27 @@ int listen(int sockfd, int backlog)
       goto errout;
     }
 
+  /* Set up the backlog for this connection */
+
+#ifdef CONFIG_NET_TCPBACKLOG
+  err = uip_backlogcreate(conn, backlog);
+  if (err < 0)
+    {
+      err = -err;
+      goto errout;
+    }
+#endif
+
   /* Start listening to the bound port.  This enables callbacks when accept()
-   * is called; and someday should enable post() or select() logic.
+   * is called and enables poll()/select() logic.
    */
-  
+
   uip_listen(conn);
   psock->s_flags |= _SF_LISTENING;
   return OK;
 
 errout:
-  *get_errno_ptr() = err;
+  errno = err;
   return ERROR;
 }
 

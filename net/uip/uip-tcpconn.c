@@ -316,6 +316,24 @@ void uip_tcpfree(struct uip_conn *conn)
     }
 #endif
 
+  /* Remove any backlog attached to this connection */
+
+#ifdef CONFIG_NET_TCPBACKLOG
+  if (conn->backlog)
+    {
+      uip_backlogdestroy(conn);
+    }
+
+  /* If this connection is, itself, backlogged, then remove it from the
+   * parent connection's backlog list.
+   */
+
+  if (conn->blparent)
+    {
+      uip_backlogdelete(conn->blparent, conn);
+    }
+#endif
+
   /* Mark the connection available and put it into the free list */
 
   conn->tcpstateflags = UIP_CLOSED;

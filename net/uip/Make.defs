@@ -53,7 +53,7 @@ ifeq ($(CONFIG_NET_TCP),y)
 
 UIP_CSRCS += uip-tcpconn.c uip-tcppoll.c uip-tcptimer.c uip-tcpsend.c \
              uip-tcpinput.c uip-tcpappsend.c uip-listen.c uip-tcpcallback.c \
-             uip-tcpreadahead.c
+             uip-tcpreadahead.c uip-tcpbacklog.c
 
 endif
 

@@ -77,19 +77,19 @@
 
 /* The TCP states used in the struct uip_conn tcpstateflags field */
 
-#define UIP_CLOSED      0 /* The connection is not in use and available */
-#define UIP_ALLOCATED   1 /* The connection is allocated, but not yet initialized */
-#define UIP_SYN_RCVD    2
-#define UIP_SYN_SENT    3
-#define UIP_ESTABLISHED 4
-#define UIP_FIN_WAIT_1  5
-#define UIP_FIN_WAIT_2  6
-#define UIP_CLOSING     7
-#define UIP_TIME_WAIT   8
-#define UIP_LAST_ACK    9
-
-#define UIP_TS_MASK     15
-#define UIP_STOPPED     16
+#define UIP_TS_MASK     0x0f /* Bits 0-3: TCP state */
+#define UIP_CLOSED      0x00 /* The connection is not in use and available */
+#define UIP_ALLOCATED   0x01 /* The connection is allocated, but not yet initialized */
+#define UIP_SYN_RCVD    0x02
+#define UIP_SYN_SENT    0x03
+#define UIP_ESTABLISHED 0x04
+#define UIP_FIN_WAIT_1  0x05
+#define UIP_FIN_WAIT_2  0x06
+#define UIP_CLOSING     0x07
+#define UIP_TIME_WAIT   0x08
+#define UIP_LAST_ACK    0x09
+#define UIP_STOPPED     0x10 /* Bit 4: stopped */
+                             /* Bit 5-7: Unused, but not available */
 
 /* Flag bits in 16-bit flags+ipoffset IPv4 TCP header field */
 
@@ -118,13 +118,11 @@
 
 struct uip_driver_s;      /* Forward reference */
 struct uip_callback_s;    /* Forward reference */
+struct uip_backlog_s;     /* Forward reference */
 
 struct uip_conn
 {
   dq_entry_t node;        /* Implements a doubly linked list */
-#if 0 /* Not used */
-  uip_ipaddr_t lipaddr;   /* The local IP address */
-#endif
   uip_ipaddr_t ripaddr;   /* The IP address of the remote host */
   uint16 lport;           /* The local TCP port, in network byte order */
   uint16 rport;           /* The remoteTCP port, in network byte order */
@@ -146,10 +144,29 @@ struct uip_conn
   uint8  nrtx;            /* The number of retransmissions for the last
                            * segment sent */
 
-  /* Read-ahead buffering */
+  /* Read-ahead buffering.
+   *
+   * readahead - A singly linked list of type struct uip_readahead_s
+   *   where the TCP/IP read-ahead data is retained.
+   */
 
 #if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
-  sq_queue_t readahead;
+  sq_queue_t readahead;   /* Read-ahead buffering */
+#endif
+
+  /* Listen backlog support
+   *
+   *   blparent - The backlog parent.  If this connection is backlogged,
+   *     this field will be non-null and will refer to the TCP connection
+   *     structure in which this connection is backlogged.
+   *   backlog - The pending connection backlog.  If this connection is
+   *     configured as a listener with backlog, then this refers to the
+   *     struct uip_backlog_s tear-off structure that manages that backlog.
+   */
+
+#ifdef CONFIG_NET_TCPBACKLOG
+  struct uip_conn      *blparent;
+  struct uip_backlog_s *backlog;
 #endif
 
   /* Application callbacks:
@@ -201,6 +218,27 @@ struct uip_readahead_s
   sq_entry_t rh_node;      /* Supports a singly linked list */
   uint16 rh_nbytes;        /* Number of bytes available in this buffer */
   uint8  rh_buffer[CONFIG_NET_TCP_READAHEAD_BUFSIZE];
+};
+#endif
+
+/* Support for listen backlog:
+ *
+ *   struct uip_blcontainer_s describes one backlogged connection
+ *   struct uip_backlog_s is a "tear-off" describing all backlog for a
+ *      listener connection
+ */
+
+#ifdef CONFIG_NET_TCPBACKLOG
+struct uip_blcontainer_s
+{
+  dq_entry_t           bc_node;    /* Implements a doubly linked list */
+  FAR struct uip_conn *bc_conn;    /* Holds reference to the new connection structure */
+};
+
+struct uip_backlog_s
+{
+  dq_queue_t           bl_free;    /* Implements a doubly-linked list of free containers */
+  dq_queue_t           bl_pending; /* Implements a doubly-linked list of pending connections */
 };
 #endif
 
@@ -349,6 +387,27 @@ extern int uip_unlisten(struct uip_conn *conn);
 extern struct uip_readahead_s *uip_tcpreadaheadalloc(void);
 extern void uip_tcpreadaheadrelease(struct uip_readahead_s *buf);
 #endif /* CONFIG_NET_NTCP_READAHEAD_BUFFERS */
+
+/* Backlog support */
+
+#ifdef CONFIG_NET_TCPBACKLOG
+/* APIs to create and terminate TCP backlog support */
+
+extern int uip_backlogcreate(FAR struct uip_conn *conn, int nblg);
+extern int uip_backlogdestroy(FAR struct uip_conn *conn);
+
+/* APIs to manage individual backlog actions */
+
+extern int uip_backlogadd(FAR struct uip_conn *conn, FAR struct uip_conn *blconn);
+extern FAR struct uip_conn *uip_backlogremove(FAR struct uip_conn *conn);
+extern int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blconn);
+
+#else
+#  define uip_backlogcreate(conn,nblg) (-ENOSYS)
+#  define uip_backlogdestroy(conn)     (-ENOSYS)
+#  define uip_backlogadd(conn,blconn)  (-ENOSYS)
+#  define uip_backlogremove(conn)      (NULL)
+#endif
 
 /* Tell the sending host to stop sending data.
  *

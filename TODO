@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 17, 2008)
+NuttX TODO List (Last updated November 19, 2008)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (7)  Task/Scheduler (sched/)
@@ -7,7 +7,7 @@ NuttX TODO List (Last updated November 17, 2008)
   (1)  Signals (sched/, arch/)
   (1)  pthreads (sched/)
   (1)  C++ Support
- (14)  Network (net/, netutils/)
+ (15)  Network (net/, netutils/)
   (1)  USB (drivers/usbdev)
   (4)  Libraries (lib/)
   (6)  File system/Generic drivers (fs/, drivers/)

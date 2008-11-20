@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/accept.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -289,7 +289,9 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
       goto errout;
     }
 
-  /* Verify that a valid memory block has been provided to receive the address address */
+  /* Verify that a valid memory block has been provided to receive
+   * the address
+   */
 
 #ifdef CONFIG_NET_IPv6
   if (addr->sa_family != AF_INET6 || *addrlen < sizeof(struct sockaddr_in6))
@@ -301,7 +303,9 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
       goto errout;
   }
 
-  /* Allocate a socket descriptor for the new connection now (so that it cannot fail later) */
+  /* Allocate a socket descriptor for the new connection now
+   * (so that it cannot fail later)
+   */
 
   newfd = sockfd_allocate();
   if (newfd < 0)
@@ -317,68 +321,79 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
       goto errout_with_socket;
     }
 
-  /* Set the socket state to accepting */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_ACCEPT);
-
-  /* Perform the TCP accept operation */
-
-  /* Initialize the state structure.  This is done with interrupts
-   * disabled because we don't want anything to happen until we
-   * are ready.
+  /* Check the backlog to see if there is a connection already pending
+   * for this listener.
    */
 
-  save                  = irqsave();
-  state.acpt_addr       = inaddr;
-  state.acpt_newconn    = NULL;
-  state.acpt_result     = OK;
-  sem_init(&state.acpt_sem, 0, 0);
+  save = irqsave();
+  conn = (struct uip_conn *)psock->s_conn;
 
-  /* Set up the callback in the connection */
+#ifdef CONFIG_NET_TCPBACKLOG
+  state.acpt_newconn = uip_backlogremove(conn);
+  if (!state.acpt_newconn)
+#endif
+    {
+      /* Set the socket state to accepting */
 
-  conn                  = (struct uip_conn *)psock->s_conn;
-  conn->accept_private  = (void*)&state;
-  conn->accept          = accept_interrupt;
+      psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_ACCEPT);
 
-  /* Wait for the send to complete or an error to occur:  NOTES: (1)
-   * sem_wait will also terminate if a signal is received, (2) interrupts
-   * are disabled!  They will be re-enabled while the task sleeps and
-   * automatically re-enabled when the task restarts.
-   */
+      /* Perform the TCP accept operation */
 
-  ret = sem_wait(&state.acpt_sem);
+      /* Initialize the state structure.  This is done with interrupts
+       * disabled because we don't want anything to happen until we
+       * are ready.
+       */
 
-  /* Make sure that no further interrupts are processed */
+      state.acpt_addr       = inaddr;
+      state.acpt_newconn    = NULL;
+      state.acpt_result     = OK;
+      sem_init(&state.acpt_sem, 0, 0);
 
-  conn->accept_private = NULL;
-  conn->accept         = NULL;
+      /* Set up the callback in the connection */
 
-  sem_destroy(&state. acpt_sem);
+      conn->accept_private  = (void*)&state;
+      conn->accept          = accept_interrupt;
+
+      /* Wait for the send to complete or an error to occur:  NOTES: (1)
+       * sem_wait will also terminate if a signal is received, (2) interrupts
+       * are disabled!  They will be re-enabled while the task sleeps and
+       * automatically re-enabled when the task restarts.
+       */
+
+      ret = sem_wait(&state.acpt_sem);
+
+      /* Make sure that no further interrupts are processed */
+
+      conn->accept_private = NULL;
+      conn->accept         = NULL;
+
+      sem_destroy(&state. acpt_sem);
+
+      /* Set the socket state to idle */
+
+      psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
+
+      /* Check for a errors.  Errors are signaled by negative errno values
+       * for the send length
+       */
+
+      if (state.acpt_result != 0)
+        {
+          err = state.acpt_result;
+         goto errout_with_irq;
+        }
+
+      /* If sem_wait failed, then we were probably reawakened by a signal. In
+       * this case, sem_wait will have set errno appropriately.
+       */
+
+      if (ret < 0)
+        {
+          err = -ret;
+          goto errout_with_irq;
+        }
+    }
   irqrestore(save);
-
-  /* Set the socket state to idle */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
-
-  /* Check for a errors.  Errors are signaled by negative errno values
-   * for the send length
-   */
-
-  if (state.acpt_result != 0)
-    {
-      err = state.acpt_result;
-      goto errout_with_socket;
-    }
-
-  /* If sem_wait failed, then we were probably reawakened by a signal. In
-   * this case, sem_wait will have set errno appropriately.
-   */
-
-  if (ret < 0)
-    {
-      err = -ret;
-      goto errout_with_socket;
-    }
 
   /* Initialize the socket structure and mark the socket as connected */
 
@@ -386,6 +401,9 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
   pnewsock->s_conn   = state.acpt_newconn;
   pnewsock->s_flags |= _SF_CONNECTED;
   return newfd;
+
+errout_with_irq:
+  irqrestore(save);
 
 errout_with_socket:
   sockfd_release(newfd);
