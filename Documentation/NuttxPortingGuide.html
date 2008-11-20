@@ -1595,6 +1595,11 @@ The system can be re-made subsequently by just typing <code>make</code>.
     <code>CONFIG_NET_TCP_CONNS</code>: Maximum number of TCP connections (all tasks).
   </li>
   <li>
+    <code>CONFIG_NET_TCPBACKLOG</code>:
+    Incoming connections pend in a backlog until <code>accept()</code> is called.
+    The size of the backlog is selected when <code>listen()</code> is called.
+  </li>
+  <li>
     <code>CONFIG_NET_TCP_READAHEAD_BUFSIZE</code>: Size of TCP read-ahead buffers
   </li>
   <li>
