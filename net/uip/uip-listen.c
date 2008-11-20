@@ -259,7 +259,7 @@ int uip_accept(struct uip_driver_s *dev, struct uip_conn *conn, uint16 portno)
           ret =  uip_backlogadd(listener, conn);
           if (ret == OK)
             {
-              (void)uip_tcpcallback(dev, conn, UIP_BACKLOG);
+              (void)uip_tcpcallback(dev, listener, UIP_BACKLOG);
             }
         }
 #endif

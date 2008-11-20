@@ -99,14 +99,14 @@ struct accept_s
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static inline void accept_tcpsender(struct uip_conn *conn, struct accept_s *pstate)
-{
- #ifdef CONFIG_NET_IPv6
-  FAR struct sockaddr_in6 *addr = pstate->acpt_addr;
+#ifdef CONFIG_NET_IPv6
+static inline void accept_tcpsender(FAR struct uip_conn *conn,
+                                    FAR struct sockaddr_in6 *addr)
 #else
-  FAR struct sockaddr_in *addr  = pstate->acpt_addr;
+static inline void accept_tcpsender(FAR struct uip_conn *conn,
+                                    FAR struct sockaddr_in *addr)
 #endif
-
+{
   if (addr)
     {
       addr->sin_family = AF_INET;
@@ -143,7 +143,7 @@ static int accept_interrupt(struct uip_conn *listener, struct uip_conn *conn)
     {
       /* Get the connection address */
 
-      accept_tcpsender(conn, pstate);
+      accept_tcpsender(conn, pstate->acpt_addr);
 
       /* Save the connection structure */
 
@@ -293,15 +293,18 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
    * the address
    */
 
+  if (addr)
+    {
 #ifdef CONFIG_NET_IPv6
-  if (addr->sa_family != AF_INET6 || *addrlen < sizeof(struct sockaddr_in6))
+      if (addr->sa_family != AF_INET6 || *addrlen < sizeof(struct sockaddr_in6))
 #else
-  if (addr->sa_family != AF_INET || *addrlen < sizeof(struct sockaddr_in))
+      if (addr->sa_family != AF_INET || *addrlen < sizeof(struct sockaddr_in))
 #endif
-  {
-      err = EBADF;
-      goto errout;
-  }
+        {
+          err = EBADF;
+          goto errout;
+        }
+    }
 
   /* Allocate a socket descriptor for the new connection now
    * (so that it cannot fail later)
@@ -330,7 +333,14 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 
 #ifdef CONFIG_NET_TCPBACKLOG
   state.acpt_newconn = uip_backlogremove(conn);
-  if (!state.acpt_newconn)
+  if (state.acpt_newconn)
+    {
+      /* Yes... get the address of the connected client */
+
+      nvdbg("Pending conn=%p\n", state.acpt_newconn);
+      accept_tcpsender(state.acpt_newconn, inaddr);
+    }
+  else
 #endif
     {
       /* Set the socket state to accepting */
@@ -380,7 +390,7 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
       if (state.acpt_result != 0)
         {
           err = state.acpt_result;
-         goto errout_with_irq;
+          goto errout_with_irq;
         }
 
       /* If sem_wait failed, then we were probably reawakened by a signal. In
@@ -409,7 +419,7 @@ errout_with_socket:
   sockfd_release(newfd);
 
 errout:
-  *get_errno_ptr() = err;
+  errno = err;
   return ERROR;
 }
 

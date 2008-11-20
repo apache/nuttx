@@ -220,12 +220,6 @@ o Network (net/, netutils/)
   Status:      Open, depends on UDP read-ahead support
   Priority:    Medium
 
-  Description: poll()/select() does not detect incoming connections.  As a result
-               they are not useful for implementing servers in the usual way.
-  Status:      Open.
-  Priority:    High.  There is a work-around (compare examples/poll/net_reader.c
-               to examples/poll/net_listener.c).
-
 o USB (drivers/usbdev)
   ^^^^^^^^^^^^^^^^^^^^
 

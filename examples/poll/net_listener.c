@@ -181,11 +181,13 @@ static inline boolean net_connection(struct net_listener_s *nls)
   for (;;)
 #endif
     {
-      message("net_listener: Accepting accepting connection on sd=%d\n", nls->listensd);
+      message("net_listener: Accepting new connection on sd=%d\n", nls->listensd);
+
       sd = accept(nls->listensd, NULL, NULL);
       if (sd < 0)
         {
-          message("net_listener: accept failed: %d\n", sd);
+          message("net_listener: accept failed: %d\n", errno);
+
           if (errno != EINTR)
             {
               return FALSE;
@@ -194,6 +196,8 @@ static inline boolean net_connection(struct net_listener_s *nls)
       else
         {
           /* Add the new connection to the master set */
+
+          message("net_listener: Connection accepted for sd=%d\n", sd);
 
           FD_SET(sd, &nls->master);
           if (sd > nls->mxsd)

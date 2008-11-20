@@ -208,7 +208,7 @@ void uip_callbackfree(FAR struct uip_callback_s *cb, FAR struct uip_callback_s *
  ****************************************************************************/
 
 uint16 uip_callbackexecute(FAR struct uip_driver_s *dev, void *pvconn, uint16 flags,
-                          FAR struct uip_callback_s *list)
+                           FAR struct uip_callback_s *list)
 {
   FAR struct uip_callback_s *next;
   irqstate_t save;

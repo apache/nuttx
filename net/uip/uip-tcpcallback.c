@@ -254,7 +254,7 @@ uint16 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint16 f
    *                 (In UIP_NEWDATA is cleared bu UIP_SNDACK is not set, then
    *                 dev->d_len should also be cleared).
    */
- 
+
   ret = uip_callbackexecute(dev, conn, flags, conn->list);
 
   /* There may be no new data handler in place at them moment that the new

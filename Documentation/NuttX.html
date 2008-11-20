@@ -1215,6 +1215,7 @@ nuttx-0.3.19 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* Implemented support for connection backlog.  The size of the backlog is specified by the
 	  second argument of the standard listen() API.  Hooks are provided to support poll()/select()
 	  waiting for connections, with a subsequent call to accept() to use the backlogged connection.
+	* Fixed a minor bug in accept().  It should allow the address and addresslen values to be NULL
 
 pascal-0.1.3 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
