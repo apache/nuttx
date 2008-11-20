@@ -165,6 +165,7 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
 
       fds[i].sem     = sem;
       fds[i].revents = 0;
+      fds[i].private = NULL;
 
       /* Set up the poll */
 
