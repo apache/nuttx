@@ -287,6 +287,9 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NET_TCP_READAHEAD_BUFSIZE - Size of TCP read-ahead buffers
 		CONFIG_NET_NTCP_READAHEAD_BUFFERS - Number of TCP read-ahead buffers
 		  (may be zero)
+		CONFIG_NET_TCPBACKLOG - Incoming connections pend in a backlog until
+		  accept() is called. The size of the backlog is selected when listen()
+		  is called.
 		CONFIG_NET_UDP - UDP support on or off
 		CONFIG_NET_UDP_CHECKSUMS - UDP checksums on or off
 		CONFIG_NET_UDP_CONNS - The maximum amount of concurrent UDP
