@@ -231,14 +231,14 @@ struct uip_readahead_s
 #ifdef CONFIG_NET_TCPBACKLOG
 struct uip_blcontainer_s
 {
-  dq_entry_t           bc_node;    /* Implements a doubly linked list */
+  sq_entry_t           bc_node;    /* Implements a singly linked list */
   FAR struct uip_conn *bc_conn;    /* Holds reference to the new connection structure */
 };
 
 struct uip_backlog_s
 {
-  dq_queue_t           bl_free;    /* Implements a doubly-linked list of free containers */
-  dq_queue_t           bl_pending; /* Implements a doubly-linked list of pending connections */
+  sq_queue_t           bl_free;    /* Implements a singly-linked list of free containers */
+  sq_queue_t           bl_pending; /* Implements a singly-linked list of pending connections */
 };
 #endif
 

@@ -125,7 +125,7 @@ int uip_backlogcreate(FAR struct uip_conn *conn, int nblg)
       blc = (FAR struct uip_blcontainer_s*)(((FAR ubyte*)bls) + offset);
       for (i = 0; i < nblg; i++)
         {
-          dq_addfirst(&blc->bc_node, &bls->bl_free);
+          sq_addfirst(&blc->bc_node, &bls->bl_free);
         }
     }
 
@@ -187,7 +187,7 @@ int uip_backlogdestroy(FAR struct uip_conn *conn)
 
        /* Handle any pending connections in the backlog */
 
-       while ((blc = (FAR struct uip_blcontainer_s*)dq_remfirst(&blg->bl_pending)) != NULL)
+       while ((blc = (FAR struct uip_blcontainer_s*)sq_remfirst(&blg->bl_pending)) != NULL)
          {
            blconn = blc->bc_conn;
            if (blconn)
@@ -241,7 +241,7 @@ int uip_backlogadd(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
     {
        /* Allocate a container for the connection from the free list */
 
-       blc = (FAR struct uip_blcontainer_s *)dq_remfirst(&bls->bl_free);
+       blc = (FAR struct uip_blcontainer_s *)sq_remfirst(&bls->bl_free);
        if (!blc)
          {
            ndbg("Failed to allocate container\n");
@@ -254,7 +254,7 @@ int uip_backlogadd(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
             */
 
            blc->bc_conn = blconn;
-           dq_addlast(&blc->bc_node, &bls->bl_pending);
+           sq_addlast(&blc->bc_node, &bls->bl_pending);
            ret = OK;
          }
     }
@@ -293,7 +293,7 @@ struct uip_conn *uip_backlogremove(FAR struct uip_conn *conn)
         * (FIFO)
         */
 
-       blc = (FAR struct uip_blcontainer_s *)dq_remfirst(&bls->bl_pending);
+       blc = (FAR struct uip_blcontainer_s *)sq_remfirst(&bls->bl_pending);
        if (blc)
          {
            /* Extract the connection reference from the container and put
@@ -302,7 +302,7 @@ struct uip_conn *uip_backlogremove(FAR struct uip_conn *conn)
 
            blconn       = blc->bc_conn;
            blc->bc_conn = NULL;
-           dq_addlast(&blc->bc_node, &bls->bl_free);
+           sq_addlast(&blc->bc_node, &bls->bl_free);
          }
     }
 
@@ -327,6 +327,7 @@ int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
 {
   FAR struct uip_backlog_s     *bls;
   FAR struct uip_blcontainer_s *blc;
+  FAR struct uip_blcontainer_s *prev;
 
   nvdbg("conn=%p blconn=%p\n", conn, blconn);
 
@@ -342,15 +343,33 @@ int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
     {
        /* Find the container hold the connection */
 
-       for (blc = (FAR struct uip_blcontainer_s *)dq_peek(&bls->bl_pending);
+       for (blc = (FAR struct uip_blcontainer_s *)sq_peek(&bls->bl_pending), prev = NULL;
             blc;
-            blc = (FAR struct uip_blcontainer_s *)dq_next(&blc->bc_node))
+            prev = blc, blc = (FAR struct uip_blcontainer_s *)sq_next(&blc->bc_node))
          {
             if (blc->bc_conn == blconn)
               {
-                /* Remove the a container from the list of pending connections */
+                if (prev)
+                  {
+                    /* Remove the a container from the middle of the list of
+                     * pending connections
+                      */
 
-                dq_rem(&blc->bc_node, &bls->bl_pending);
+                    (void)sq_remafter(&prev->bc_node, &bls->bl_pending);
+                  }
+                else
+                  {
+                    /* Remove the a container from the head of the list of
+                     * pending connections
+                     */
+
+                    (void)sq_remfirst(&bls->bl_pending);
+                  }
+
+                /* Put container in the free list */
+
+                blc->bc_conn = NULL;
+                sq_addlast(&blc->bc_node, &bls->bl_free);
                 return OK;
               }
           }
