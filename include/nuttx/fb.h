@@ -209,6 +209,9 @@ struct fb_planeinfo_s
 struct fb_cmap_s
 {
  uint16  len;              /* Number of color entries */
+
+ /* Each color component.  Any may be NULL if not used */
+
  uint16 *red;              /* Table of red values */
  uint16 *green;            /* Table of red values */
  uint16 *blue;             /* Table of red values */
