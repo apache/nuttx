@@ -580,4 +580,4 @@
 	  second argument of the standard listen() API.  Hooks are provided to support poll()/select()
 	  waiting for connections, with a subsequent call to accept() to use the backlogged connection.
 	* Fixed a minor bug in accept().  It should allow the address and addresslen values to be NULL
-
+	* Added first-cut definition for a framebuffer interface

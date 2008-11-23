@@ -44,7 +44,7 @@ CSRCS		= up_initialize.c up_idle.c up_interruptcontext.c \
 		  up_releasestack.c  up_unblocktask.c up_blocktask.c \
 		  up_releasepending.c up_reprioritizertr.c \
 		  up_exit.c up_schedulesigaction.c up_allocateheap.c \
-		  up_devconsole.c
+		  up_devconsole.c up_framebuffer.c
 HOSTSRCS	= up_stdio.c
 ifeq ($(CONFIG_FS_FAT),y)
 CSRCS		+= up_blockdevice.c up_deviceimage.c
