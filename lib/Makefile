@@ -71,7 +71,7 @@ endif
 
 STDLIB_SRCS	= lib_rand.c
 
-MATH_SRCS	= lib_rint.c
+MATH_SRCS	= lib_rint.c lib_fixedmath.c
 
 UNISTD_SRCS	= lib_getopt.c
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
