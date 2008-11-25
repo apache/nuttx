@@ -163,6 +163,18 @@
 # define fllvdbg(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_GRAPHICS
+# define gdbg(format, arg...)    dbg(format, ##arg)
+# define glldbg(format, arg...)  lldbg(format, ##arg)
+# define gvdbg(format, arg...)   vdbg(format, ##arg)
+# define gllvdbg(format, arg...) llvdbg(format, ##arg)
+#else
+# define gdbg(x...)
+# define glldbg(x...)
+# define gvdbg(x...)
+# define gllvdbg(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_LIB
 # define ldbg(format, arg...)    dbg(format, ##arg)
 # define llldbg(format, arg...)  lldbg(format, ##arg)
@@ -256,6 +268,18 @@
 # define flldbg  (void)
 # define fvdbg   (void)
 # define fllvdbg (void)
+#endif
+
+#ifdef CONFIG_DEBUG_GRAPHICS
+# define gdbg    dbg
+# define glldbg  lldbg
+# define gvdbg   vdbg
+# define gllvdbg llvdbg
+#else
+# define gdbg    (void)
+# define glldbg  (void)
+# define gvdbg   (void)
+# define gllvdbg (void)
 #endif
 
 #ifdef CONFIG_DEBUG_LIB
