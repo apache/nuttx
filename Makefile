@@ -55,12 +55,14 @@ BOARD_DIR	= configs/$(CONFIG_ARCH_BOARD)
 # NuttX source tree (they must be specifically installed)
 
 PCODE_DIR	:= ${shell if [ -r pcode/Makefile ]; then echo "pcode"; fi}
+NX_DIR		:= ${shell if [ -r graphics/nx/Makefile ]; then echo "graphics/nx"; fi}
+ADDON_DIRS	:= $(PCODE_DIR) $(NX_DIR)
 
 # FSDIRS depend on file descriptor support; NONFSDIRS do not
 #   (except for parts of FSDIRS).  We will exclude FSDIRS
 #   from the build if file descriptor support is disabled
 
-NONFSDIRS	= sched lib $(ARCH_SRC) mm examples/$(CONFIG_EXAMPLE) $(PCODE_DIR)
+NONFSDIRS	= sched lib $(ARCH_SRC) mm examples/$(CONFIG_EXAMPLE) $(ADDON_DIRS)
 FSDIRS		= fs drivers
 
 ifeq ($(CONFIG_NET),y)
@@ -109,7 +111,11 @@ LINKLIBS	+= fs/libfs$(LIBEXT) drivers/libdrivers$(LIBEXT)
 endif
 
 ifneq ($(PCODE_DIR),)
-LINKLIBS	+= pcode/libpcode$(LIBEXT)
+LINKLIBS	+= $(PCODE_DIR)/libpcode$(LIBEXT)
+endif
+
+ifneq ($(NX_DIR),)
+LINKLIBS	+= $(NX_DIR)/libnx$(LIBEXT)
 endif
 
 # This is the name of the final target
@@ -195,6 +201,9 @@ drivers/libdrivers$(LIBEXT): context
 
 pcode/libpcode$(LIBEXT): context
 	@$(MAKE) -C pcode TOPDIR="$(TOPDIR)" libpcode$(LIBEXT)
+
+graphics/nx/libnx$(LIBEXT): context
+	@$(MAKE) -C graphics/nx TOPDIR="$(TOPDIR)" libnx$(LIBEXT)
 
 examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT): context
 	@$(MAKE) -C examples/$(CONFIG_EXAMPLE) TOPDIR="$(TOPDIR)" lib$(CONFIG_EXAMPLE)$(LIBEXT)
