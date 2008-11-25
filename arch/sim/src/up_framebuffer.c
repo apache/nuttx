@@ -71,7 +71,7 @@
 #elif CONFIG_SIM_FBBPP == 8
 #  define FB_FMT FB_FMT_RGB8
 #elif CONFIG_SIM_FBBPP == 16
-#  define FB_FMT FB_FMT_RGB16
+#  define FB_FMT FB_FMT_RGB16_565
 #elif CONFIG_SIM_FBBPP == 24
 #  define FB_FMT FB_FMT_RGB24
 #elif CONFIG_SIM_FBBPP == 32
@@ -184,7 +184,7 @@ struct fb_vtable_s g_fbobject =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: 
+ * Name: up_getvideoinfo
  ****************************************************************************/
 
 static int up_getvideoinfo(FAR struct fb_vtable_s *vtable,
