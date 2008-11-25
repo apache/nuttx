@@ -62,7 +62,7 @@ ADDON_DIRS	:= $(PCODE_DIR) $(NX_DIR)
 #   (except for parts of FSDIRS).  We will exclude FSDIRS
 #   from the build if file descriptor support is disabled
 
-NONFSDIRS	= sched lib $(ARCH_SRC) mm examples/$(CONFIG_EXAMPLE) $(ADDON_DIRS)
+NONFSDIRS	= sched lib $(ARCH_SRC) mm examples/$(CONFIG_EXAMPLE) $(ADDON_DIRS) graphics/nxglib
 FSDIRS		= fs drivers
 
 ifeq ($(CONFIG_NET),y)
@@ -93,7 +93,8 @@ endif
 #   is disabled.
 
 LINKLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEXT) \
-		  lib/liblib$(LIBEXT) examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT)
+		  lib/liblib$(LIBEXT) examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT) \
+		  graphics/nxglib/libnxglib$(LIBEXT)
 
 ifeq ($(CONFIG_NET),y)
 LINKLIBS	+= net/libnet$(LIBEXT) netutils/libnetutils$(LIBEXT) 
@@ -201,6 +202,9 @@ drivers/libdrivers$(LIBEXT): context
 
 pcode/libpcode$(LIBEXT): context
 	@$(MAKE) -C pcode TOPDIR="$(TOPDIR)" libpcode$(LIBEXT)
+
+graphics/nxglib/libnxglib$(LIBEXT): context
+	@$(MAKE) -C graphics/nxglib TOPDIR="$(TOPDIR)" libnxglib$(LIBEXT)
 
 graphics/nx/libnx$(LIBEXT): context
 	@$(MAKE) -C graphics/nx TOPDIR="$(TOPDIR)" libnx$(LIBEXT)

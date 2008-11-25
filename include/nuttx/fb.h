@@ -213,11 +213,11 @@ struct fb_cmap_s
 
  /* Each color component.  Any may be NULL if not used */
 
- uint16 *red;              /* Table of red values */
- uint16 *green;            /* Table of red values */
- uint16 *blue;             /* Table of red values */
+ ubyte *red;               /* Table of 8-bit red values */
+ ubyte *green;             /* Table of 8-bit green values */
+ ubyte *blue;              /* Table of 8-bit blue values */
 #ifdef CONFIG_FB_TRANSPARENCY
- uint16 *transp;           /* Table of transparency */
+ ubyte *transp;            /* Table of 8-bit transparency */
 #endif
 };
 #endif
