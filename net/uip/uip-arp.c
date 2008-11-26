@@ -2,7 +2,7 @@
  * net/uip/uip-arp.c
  * Implementation of the ARP Address Resolution Protocol.
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on uIP which also has a BSD style license:
@@ -126,13 +126,36 @@ struct arp_entry
  * Private Data
  ****************************************************************************/
 
-static const struct ether_addr broadcast_ethaddr =
+/* Support for broadcast address */
+
+static const struct ether_addr g_broadcast_ethaddr =
   {{0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
-static const uint16 broadcast_ipaddr[2] = {0xffff, 0xffff};
+static const uint16 g_broadcast_ipaddr[2] = {0xffff, 0xffff};
 
-static struct arp_entry arp_table[CONFIG_NET_ARPTAB_SIZE];
+/* Support for IGMP multicast addresses.
+ *
+ * Well-known ethernet multicast address:
+ *
+ * ADDRESS           TYPE   USAGE
+ * 01-00-0c-cc-cc-cc 0x0802 CDP (Cisco Discovery Protocol), VTP (Virtual Trunking Protocol)
+ * 01-00-0c-cc-cc-cd 0x0802 Cisco Shared Spanning Tree Protocol Address
+ * 01-80-c2-00-00-00 0x0802 Spanning Tree Protocol (for bridges) IEEE 802.1D
+ * 01-80-c2-00-00-02 0x0809 Ethernet OAM Protocol IEEE 802.3ah
+ * 01-00-5e-xx-xx-xx 0x0800 IPv4 IGMP Multicast Address
+ * 33-33-00-00-00-00 0x86DD IPv6 Neighbor Discovery
+ * 33-33-xx-xx-xx-xx 0x86DD IPv6 Multicast Address (RFC3307)
+ *
+ * The following is the first three octects of the IGMP address:
+ */
+
+#if defined(CONFIG_NET_MULTICAST) && !defined(CONFIG_NET_IPv6)
+static const ubyte g_multicast_ethaddr[3] = {0x01, 0x00, 0x5e};
+#endif
+
+/* The table of known address mappings */
+
+static struct arp_entry g_arptable[CONFIG_NET_ARPTAB_SIZE];
 static uint8 g_arptime;
-
 
 /****************************************************************************
  * Private Functions
@@ -173,7 +196,7 @@ static void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr)
 
   for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
     {
-      tabptr = &arp_table[i];
+      tabptr = &g_arptable[i];
 
       /* Only check those entries that are actually in use. */
 
@@ -201,7 +224,7 @@ static void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr)
 
   for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
     {
-      tabptr = &arp_table[i];
+      tabptr = &g_arptable[i];
       if (tabptr->at_ipaddr == 0)
         {
           break;
@@ -218,7 +241,7 @@ static void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr)
       int   j      = 0;
       for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
         {
-          tabptr = &arp_table[i];
+          tabptr = &g_arptable[i];
           if (g_arptime - tabptr->at_time > tmpage)
             {
               tmpage = g_arptime - tabptr->at_time;
@@ -226,7 +249,7 @@ static void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr)
             }
         }
       i = j;
-      tabptr = &arp_table[i];
+      tabptr = &g_arptable[i];
     }
 
   /* Now, i is the ARP table entry which we will fill with the new
@@ -249,7 +272,7 @@ void uip_arp_init(void)
   int i;
   for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
     {
-      memset(&arp_table[i].at_ipaddr, 0, sizeof(in_addr_t));
+      memset(&g_arptable[i].at_ipaddr, 0, sizeof(in_addr_t));
     }
 }
 
@@ -268,7 +291,7 @@ void uip_arp_timer(void)
   ++g_arptime;
   for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
     {
-      tabptr = &arp_table[i];
+      tabptr = &g_arptable[i];
       if (tabptr->at_ipaddr != 0 && g_arptime - tabptr->at_time >= UIP_ARP_MAXAGE)
         {
           tabptr->at_ipaddr = 0;
@@ -394,10 +417,33 @@ void uip_arp_out(struct uip_driver_s *dev)
 
   /* First check if destination is a local broadcast. */
 
-  if (uiphdr_ipaddr_cmp(IPBUF->eh_destipaddr, broadcast_ipaddr))
+  if (uiphdr_ipaddr_cmp(IPBUF->eh_destipaddr, g_broadcast_ipaddr))
     {
-      memcpy(ETHBUF->dest, broadcast_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
+      memcpy(ETHBUF->dest, g_broadcast_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
     }
+#if defined(CONFIG_NET_MULTICAST) && !defined(CONFIG_NET_IPv6)
+  /* Check if the destination address is a multicast address
+   *
+   * - IPv4: multicast addresses lie in the class D group -- The address range
+   *   224.0.0.0 to 239.255.255.255 (224.0.0.0/4)
+   *
+   * - IPv6 multicast addresses are have the high-order octet of the
+   *   addresses=0xff (ff00::/8.)
+   */
+
+ else if (IPBUF->eh_destipaddr[0] >= HTONS(0xe000) &&
+          IPBUF->eh_destipaddr[0] <= HTONS(0xefff))
+   {
+     /* Build the well-known IPv4 IGMP ethernet address.  The first
+      * three bytes are fixed; the final three variable come from the
+      * last three bytes of the IP address.
+      */
+
+     const ubyte *ip = ((ubyte*)IPBUF->eh_destipaddr) + 1;
+     memcpy(ETHBUF->dest,  g_multicast_ethaddr, 3);
+     memcpy(&ETHBUF->dest[3], ip, 3);
+   }
+#endif
   else
     {
       /* Check if the destination address is on the local network. */
@@ -423,7 +469,7 @@ void uip_arp_out(struct uip_driver_s *dev)
 
       for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
         {
-          tabptr = &arp_table[i];
+          tabptr = &g_arptable[i];
           if (uip_ipaddr_cmp(ipaddr, tabptr->at_ipaddr))
             {
               break;
