@@ -67,6 +67,11 @@ OBJEXT			= .o
 LIBEXT			= .lib
 EXEEXT			= .cmd
 
+define PREPROCESS
+	@echo "CPP: $1->$2"
+	@$(CPP) $(CPPFLAGS) $1 -o $2
+endef
+
 define COMPILE
 	@echo "CC: $1"
 	@$(CC) -c $(CFLAGS) $1 -o $2

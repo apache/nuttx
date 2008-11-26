@@ -1,5 +1,5 @@
 ############################################################################
-# configs/z80sim/Make.defs
+# configs/z80sim/nsh/Make.defs
 #
 #   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -66,6 +66,11 @@ ASMEXT			= .asm
 OBJEXT			= .o
 LIBEXT			= .lib
 EXEEXT			= .hex
+
+define PREPROCESS
+	@echo "CPP: $1->$2"
+	@$(CPP) $(CPPFLAGS) $1 -o $2
+endef
 
 define COMPILE
 	@echo "CC: $1"

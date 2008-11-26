@@ -1,5 +1,5 @@
 ##############################################################################
-# configs/olimex-strp711/nsh/Make.defs
+# configs/us7032evb1/nsh/Make.defs
 #
 #   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -51,6 +51,7 @@ ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/nsh/ld.script
 
 CROSSDEV		= sh-elf-
 CC			= $(CROSSDEV)gcc
+CPP			= $(CROSSDEV)gcc -E
 LD			= $(CROSSDEV)ld
 AR			= $(CROSSDEV)ar rcs
 NM			= $(CROSSDEV)nm
@@ -59,6 +60,7 @@ OBJDUMP			= $(CROSSDEV)objdump
 
 CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) -pipe
+CPPFLAGS		= $(ARCHINCLUDES) $(ARCHDEFINES)
 AFLAGS			= $(CFLAGS) -D__ASSEMBLY__
 
 OBJEXT			= .o
@@ -68,6 +70,11 @@ EXEEXT			=
 ifeq ("${CONFIG_DEBUG}","y")
   LDFLAGS		+= -g
 endif
+
+define PREPROCESS
+	@echo "CPP: $1->$2"
+	@$(CPP) $(CPPFLAGS) $1 -o $2
+endef
 
 define COMPILE
 	@echo "CC: $1"

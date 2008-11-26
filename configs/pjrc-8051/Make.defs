@@ -56,11 +56,17 @@ AR			= sdcclib -a
 
 CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES)
+CPPFLAGS		= $(ARCHINCLUDES) $(ARCHDEFINES)
 
 ASMEXT			= .asm
 OBJEXT			= .rel
 LIBEXT			= .lib
 EXEEXT			= .hex
+
+define PREPROCESS
+	@echo "CPP: $1->$2"
+	@$(CPP) $(CPPFLAGS) $1 -o $2
+endef
 
 define COMPILE
 	@echo "CC: $1"
