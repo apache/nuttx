@@ -1,5 +1,5 @@
 ############################################################################
-# grapics/nxglib/Makefile
+# graphics/nxglib/Make.defs
 #
 #   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,43 +33,6 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+NXGLIB_ASRCS  =
+NXGLIB_CSRCS  = nxglib_rgb2yuv.c nxglib_yuv2rgb.c
 
-ASRCS		= 
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-
-CSRCS		= nxglib_rgb2yuv.c nxglib_yuv2rgb.c
-COBJS		= $(CSRCS:.c=$(OBJEXT))
-
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
-
-BIN		= libnxglib$(LIBEXT)
-
-all:	$(BIN)
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-$(BIN): $(OBJS)
-	@( for obj in $(OBJS) ; do \
-		$(call ARCHIVE, $@, $${obj}); \
-	done ; )
-
-.depend: Makefile $(SRCS)
-	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	@touch $@
-
-depend: .depend
-
-clean:
-	@rm -f $(BIN) *~ .*.swp
-	$(call CLEAN)
-
-distclean: clean
-	@rm -f Make.dep .depend
-
--include Make.dep
