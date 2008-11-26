@@ -1,0 +1,78 @@
+############################################################################
+# graphics/nxglib/Makefile.sources
+#
+#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+-include $(TOPDIR)/.config
+-include $(TOPDIR)/Make.defs
+
+ifeq ($(NXGLIB_BITSPERPIXEL),1)
+NXGLIB_SUFFIX	:= _1bpp
+endif
+ifeq ($(NXGLIB_BITSPERPIXEL),2)
+NXGLIB_SUFFIX	:= _2bpp
+endif
+ifeq ($(NXGLIB_BITSPERPIXEL),4)
+NXGLIB_SUFFIX	:= _4bpp
+endif
+ifeq ($(NXGLIB_BITSPERPIXEL),8)
+NXGLIB_SUFFIX	:= _8bpp
+endif
+ifeq ($(NXGLIB_BITSPERPIXEL),16)
+NXGLIB_SUFFIX	:= _16bpp
+endif
+ifeq ($(NXGLIB_BITSPERPIXEL),2)
+NXGLIB_SUFFIX	:= _32bpp
+endif
+ifeq ($(NXGLIB_BITSPERPIXEL),2)
+NXGLIB_SUFFIX	:= _64bpp
+endif
+
+CPPFLAGS	+= -DNXGLIB_BITSPERPIXEL=$(NXGLIB_BITSPERPIXEL)
+CPPFLAGS	+= -DNXGLIB_SUFFIX=$(NXGLIB_SUFFIX)
+
+FILL_CSRC	= nxglib_fillrectangle$(NXGLIB_SUFFIX).c
+GEN_CSRCS	= $(FILL_CSRC)
+
+all:	$(GEN_CSRCS)
+.PHONY : clean distclean $(GEN_CSRCS)
+
+$(FILL_CSRC) : nxglib_fillrectangle.c nxglib_bitblit.h
+	$(call PREPROCESS, $<, $@)
+
+clean:
+	@rm -f *~ .*.swp
+
+distclean: clean
+	@rm -f nxglib_fillrectangle_*bpp.c
+

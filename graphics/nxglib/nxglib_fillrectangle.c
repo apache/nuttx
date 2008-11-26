@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/nxglib.h
+ * graphics/nxglib/nxglib_fillrectangle.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,69 +33,83 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NXGLIB_H
-#define __INCLUDE_NUTTX_NXGLIB_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <nuttx/fb.h>
+#include <nuttx/nxglib.h>
+
+#include "nxglib_bitblit.h"
 
 /****************************************************************************
- * Public Types
+ * Pre-Processor Definitions
  ****************************************************************************/
 
-/* Graphics structures ******************************************************/
+#ifndef NXGLIB_SUFFIX
+#  error "NXGLIB_SUFFIX must be defined before including this header file"
+#endif
 
-/* A given coordinate is limited to the screen height an width.  If either
- * of those values exceed 32,767 pixels, then the following will have to need
- * to change:
- */
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
 
-typedef sint16 nxgl_coord_t;
-
-/* Describes a point on the display */
-
-struct nxgl_point_s
-{
-  nxgl_coord_t x;         /* Range: 0 to screen width - 1 */
-  nxgl_coord_t y;         /* Rnage: 0 to screen height - 1*/
-};
-
-/* Describes a rectangle on the display */
-
-struct nxgl_rect_s
-{
-  struct nxgl_point_t pt1; /* Upper, left-hand corner */
-  struct nxgl_point_t pt2; /* Lower, right-hand corner */
-};
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-# define EXTERN extern "C"
-extern "C" {
-#else
-# define EXTERN extern
-#endif
-
 /****************************************************************************
- * Public Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
-/* Color conversons */
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-EXTERN void nxgl_rgb2yuv(ubyte r, ubyte g, ubyte b, ubyte *y, ubyte *u, ubyte *v);
-EXTERN void nxgl_yuv2rgb(ubyte y, ubyte u, ubyte v, ubyte *r, ubyte *g, ubyte *b);
+/****************************************************************************
+ * Name: nxgl_fillrectangle*
+ *
+ * Descripton:
+ *   Fill a rectangle region in the framebuffer memory with a fixed color
+ *
+ ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
+void nxgl_fillrectangle##NXGLIB_SUFFIX
+(
+  FAR struct fb_planeinfo_s *pinfo,
+  FAR const struct nxgl_rect_s *rect, NX_PIXEL_T color
+)
+{
+  ubyte *line;
+  unsigned int width;
+  unsigned int stride;
+  unsigned int rows;
+
+  /* Get the width of the framebuffer in bytes */
+
+  stride = pinfo->stride;
+
+  /* Get the dimensions of the rectange to fill in pixels */
+
+  width  = rect.pt2.x - rect.pt1.x;
+  rows   = rect.pt2.y - rect.pt1.y;
+
+  /* Get the address of the first byte in the first line to write */
+
+  line   = pinfo->fbmem + rect.pt1.y * stride + NX_SCALEX(rect.pt1.x);
+
+  /* Then fill the rectangle line-by-line */
+
+  while (rows--)
+    {
+      NXGL_MEMSET(line, color, width);
+      line += stride;
+    }
 }
-#endif
-
-#endif /* __INCLUDE_NUTTX_NXGLIB_H */
