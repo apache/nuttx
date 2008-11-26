@@ -70,7 +70,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxs_copyrectangle_*bpp
+ * Name: nxgl_copyrectangle_*bpp
  *
  * Descripton:
  *   Copy a rectangular bitmap image into the specific position in the
@@ -78,9 +78,9 @@
  *
  ****************************************************************************/
 
-void NXGL_FUNCNAME(nxs_copyrectangle,NXGLIB_SUFFIX)
+void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
 (FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *dest,
- FAR const NXGL_PIXEL_T *src, FAR const struct nxgl_point_s *origin,
+ FAR const void *src, FAR const struct nxgl_point_s *origin,
  unsigned int srcstride)
 {
   const ubyte *sptr;
@@ -105,7 +105,7 @@ void NXGL_FUNCNAME(nxs_copyrectangle,NXGLIB_SUFFIX)
 
   while (rows--)
     {
-      NXGL_MEMCPY(dest, sptr, width);
+      NXGL_MEMCPY((NXGL_PIXEL_T*)dest, (NXGL_PIXEL_T*)sptr, width);
       dptr += deststride;
       sptr += srcstride;
     }

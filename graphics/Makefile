@@ -42,7 +42,7 @@ include nxglib/Make.defs
 DEPPATH		+= --dep-path nxglib
 CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/graphics/nxglib}
 
-HAVENX		= `if [ -d nx ]; then echo "y"; else echo "n";fi`
+HAVENX		:= ${shell if [ -d nx ]; then echo "y"; else echo "n";fi}
 ifeq ($(HAVENX),y)
 include nx/Make.defs
 DEPPATH		+= --dep-path nx

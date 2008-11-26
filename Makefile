@@ -61,11 +61,15 @@ ADDON_DIRS	:= $(PCODE_DIR) $(NX_DIR)
 #   (except for parts of FSDIRS).  We will exclude FSDIRS
 #   from the build if file descriptor support is disabled
 
-NONFSDIRS	= sched lib $(ARCH_SRC) mm examples/$(CONFIG_EXAMPLE) $(ADDON_DIRS) graphics
+NONFSDIRS	= sched lib $(ARCH_SRC) mm examples/$(CONFIG_EXAMPLE) $(ADDON_DIRS)
 FSDIRS		= fs drivers
 
 ifeq ($(CONFIG_NET),y)
 NONFSDIRS	+= net netutils
+endif
+
+ifeq ($(CONFIG_NXGRAPHICS),y)
+NONFSDIRS	+= graphics
 endif
 
 # CLEANDIRS are the directories that will clean in.  These are
@@ -92,8 +96,7 @@ endif
 #   is disabled.
 
 LINKLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEXT) \
-		  lib/liblib$(LIBEXT) examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT) \
-		  graphics/libgraphics$(LIBEXT)
+		  lib/liblib$(LIBEXT) examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT)
 
 ifeq ($(CONFIG_NET),y)
 LINKLIBS	+= net/libnet$(LIBEXT) netutils/libnetutils$(LIBEXT) 
@@ -116,6 +119,10 @@ endif
 
 ifneq ($(NX_DIR),)
 LINKLIBS	+= $(NX_DIR)/libnx$(LIBEXT)
+endif
+
+ifeq ($(CONFIG_NXGRAPHICS),y)
+LINKLIBS        += graphics/libgraphics$(LIBEXT)
 endif
 
 # This is the name of the final target

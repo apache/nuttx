@@ -86,7 +86,7 @@
 
 void NXGL_FUNCNAME(nxglib_filltrapezoid,NXGLIB_SUFFIX)
 (FAR struct fb_videoinfo_s *vinfo, FAR struct fb_planeinfo_s *pinfo,
- FAR const struct nxgl_trapezoid_s *trap, NXGL_PIXEL_T color)
+ FAR const struct nxgl_trapezoid_s *trap, nxgl_mxpixel_t color)
 {
   unsigned int stride;
   ubyte *line;
@@ -152,7 +152,7 @@ void NXGL_FUNCNAME(nxglib_filltrapezoid,NXGLIB_SUFFIX)
 
           /* Then draw the run from (line + clipx1) to (line + clipx2) */
 
-          NXGL_MEMSET(line + NXGL_SCALEX(ix1), color, ix2 - ix1 + 1);
+          NXGL_MEMSET(line + NXGL_SCALEX(ix1), (NXGL_PIXEL_T)color, ix2 - ix1 + 1);
         }
 
       /* Move to the start of the next line */
