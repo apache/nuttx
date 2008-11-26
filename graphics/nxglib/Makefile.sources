@@ -61,42 +61,73 @@ endif
 CPPFLAGS	+= -DNXGLIB_BITSPERPIXEL=$(NXGLIB_BITSPERPIXEL)
 CPPFLAGS	+= -DNXGLIB_SUFFIX=$(NXGLIB_SUFFIX)
 
-FILL1_CSRCS	= nxglib_fillrectangle_1bpp.c nxglib_fillrectangle_2bpp.c \
+RFILL1_CSRCS	= nxglib_fillrectangle_1bpp.c nxglib_fillrectangle_2bpp.c \
 		  nxglib_fillrectangle_4bpp.c
-FILL2_CSRCS	= nxglib_fillrectangle_8bpp.c nxglib_fillrectangle_16bpp.c \
+RFILL2_CSRCS	= nxglib_fillrectangle_8bpp.c nxglib_fillrectangle_16bpp.c \
 		  nxglib_fillrectangle_24bpp.c nxglib_fillrectangle_32bpp.c
-MOVE1_CSRCS	= nxglib_moverectangle_1bpp.c nxglib_moverectangle_2bpp.c \
+TFILL1_CSRCS	= nxglib_filltrapezoid_1bpp.c nxglib_filltrapezoid_2bpp.c \
+		  nxglib_filltrapezoid_4bpp.c
+TFILL2_CSRCS	= nxglib_filltrapezoid_8bpp.c nxglib_filltrapezoid_16bpp.c \
+		  nxglib_filltrapezoid_24bpp.c nxglib_filltrapezoid_32bpp.c
+RMOVE1_CSRCS	= nxglib_moverectangle_1bpp.c nxglib_moverectangle_2bpp.c \
 		  nxglib_moverectangle_4bpp.c
-MOVE2_CSRCS	= nxglib_moverectangle_8bpp.c nxglib_moverectangle_16bpp.c \
+RMOVE2_CSRCS	= nxglib_moverectangle_8bpp.c nxglib_moverectangle_16bpp.c \
 		  nxglib_moverectangle_24bpp.c nxglib_moverectangle_32bpp.c
+RCOPY1_CSRCS	= nxglib_copyrectangle_1bpp.c nxglib_copyrectangle_2bpp.c \
+		  nxglib_copyrectangle_4bpp.c
+RCOPY2_CSRCS	= nxglib_copyrectangle_8bpp.c nxglib_copyrectangle_16bpp.c \
+		  nxglib_copyrectangle_24bpp.c nxglib_copyrectangle_32bpp.c
 
-GEN_CSRCS	= $(FILL1_CSRCS) $(FILL2_CSRCS) $(MOVE1_CSRCS) $(MOVE2_CSRCS)
+GEN_CSRCS	= $(RFILL1_CSRCS) $(RFILL2_CSRCS) $(TFILL1_CSRCS) $(TFILL2_CSRCS) \
+		  $(RMOVE1_CSRCS) $(RMOVE2_CSRCS) $(RCOPY1_CSRCS) $(RCOPY2_CSRCS)
 
 all:	$(GEN_CSRCS)
 .PHONY : clean distclean
 
-$(FILL1_CSRCS) : nxglib_fillrectangle.c nxglib_bitblit.h
+$(RFILL1_CSRCS) : nxglib_fillrectangle.c nxglib_bitblit.h
 ifneq ($(NXGLIB_BITSPERPIXEL),)
 	$(call PREPROCESS, nxglib_fillrectangle.c, $@)
 endif
 
-$(FILL2_CSRCS) : nxglib_fillrectangle.c nxglib_bitblit.h
+$(RFILL2_CSRCS) : nxglib_fillrectangle.c nxglib_bitblit.h
 ifneq ($(NXGLIB_BITSPERPIXEL),)
 	$(call PREPROCESS, nxglib_fillrectangle.c, $@)
 endif
 
-$(MOVE1_CSRCS) : nxglib_moverectangle.c nxglib_bitblit.h
+$(TFILL1_CSRCS) : nxglib_filltrapezoid.c nxglib_bitblit.h
+ifneq ($(NXGLIB_BITSPERPIXEL),)
+	$(call PREPROCESS, nxglib_filltrapezoid.c, $@)
+endif
+
+$(TFILL2_CSRCS) : nxglib_filltrapezoid.c nxglib_bitblit.h
+ifneq ($(NXGLIB_BITSPERPIXEL),)
+	$(call PREPROCESS, nxglib_filltrapezoid.c, $@)
+endif
+
+$(RMOVE1_CSRCS) : nxglib_moverectangle.c nxglib_bitblit.h
 ifneq ($(NXGLIB_BITSPERPIXEL),)
 	$(call PREPROCESS, nxglib_moverectangle.c, $@)
 endif
 
-$(MOVE2_CSRCS) : nxglib_moverectangle.c nxglib_bitblit.h
+$(RMOVE2_CSRCS) : nxglib_moverectangle.c nxglib_bitblit.h
 ifneq ($(NXGLIB_BITSPERPIXEL),)
 	$(call PREPROCESS, nxglib_moverectangle.c, $@)
 endif
+
+$(RCOPY1_CSRCS) : nxglib_copyrectangle.c nxglib_bitblit.h
+ifneq ($(NXGLIB_BITSPERPIXEL),)
+	$(call PREPROCESS, nxglib_copyrectangle.c, $@)
+endif
+
+$(RCOPY2_CSRCS) : nxglib_copyrectangle.c nxglib_bitblit.h
+ifneq ($(NXGLIB_BITSPERPIXEL),)
+	$(call PREPROCESS, nxglib_copyrectangle.c, $@)
+endif
+
 clean:
 	@rm -f *~ .*.swp
 
 distclean: clean
-	@rm -f nxglib_fillrectangle_*bpp.c nxglib_moverectangle_*bpp.c
+	@rm -f nxglib_fillrectangle_*bpp.c nxglib_filltrapezoid_*bpp.c
+	@rm -f nxglib_moverectangle_*bpp.c nxglib_copyrectangle_*bpp.c
 

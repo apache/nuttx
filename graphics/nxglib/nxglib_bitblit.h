@@ -123,8 +123,8 @@
 #  define NXGL_MEMSET(dest,value,width) \
    { \
      FAR ubyte *_ptr = (FAR ubyte*)dest; \
-     int nbytes      = NXGL_SCALEX(width); \
-     while (nbytes--) \
+     int        _nby = NXGL_SCALEX(width); \
+     while (_nby--) \
        { \
          *_ptr++ = value; \
        } \
@@ -133,8 +133,8 @@
    { \
      FAR ubyte *_dptr = (FAR ubyte*)dest; \
      FAR ubyte *_sptr = (FAR ubyte*)src; \
-     int nbytes      = NXGL_SCALEX(width); \
-     while (nbytes--) \
+     int        _nby  = NXGL_SCALEX(width); \
+     while (_nby--) \
        { \
          *_dptr++ = *_sptr++; \
        } \
@@ -143,8 +143,9 @@
 #elif NXGLIB_BITSPERPIXEL == 24
 #  define NXGL_MEMSET(dest,value,width) \
    { \
-     FAR ubyte *_ptr = (FAR ubyte*)dest; \
-     while (width--) \
+     FAR ubyte   *_ptr  = (FAR ubyte*)dest; \
+     nxgl_coord_t _npix = width; \
+     while (_npix--) \
        { \
          *_ptr++ = value; \
          *_ptr++ = value >> 8; \
@@ -153,9 +154,10 @@
    }
 #  define NXGL_MEMCPY(dest,src,width) \
    { \
-     FAR ubyte *_dptr = (FAR ubyte*)dest; \
-     FAR ubyte *_sptr = (FAR ubyte*)src; \
-     while (width--) \
+     FAR ubyte   *_dptr = (FAR ubyte*)dest; \
+     FAR ubyte   *_sptr = (FAR ubyte*)src; \
+     nxgl_coord_t _npix = width; \
+     while (_npix--) \
        { \
          *_dptr++ = *_sptr++; \
          *_dptr++ = *_sptr++; \
@@ -166,7 +168,8 @@
 #  define NXGL_MEMSET(dest,value,width) \
    { \
      FAR nx_pixel_t *_ptr = (FAR ubyte*)dest; \
-     while (width--) \
+     nxgl_coord_t   _npix = width; \
+     while (_npix--) \
        { \
          *_ptr++ = value; \
        } \
@@ -175,7 +178,8 @@
    { \
      FAR nx_pixel_t *_dptr = (FAR ubyte*)dest; \
      FAR nx_pixel_t *_sptr = (FAR ubyte*)src; \
-     while (width--) \
+     nxgl_coord_t    _npix = width; \
+     while (_npix--) \
        { \
          *_dptr++ = *_sptr++; \
        } \
