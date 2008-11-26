@@ -19,7 +19,7 @@ NuttX TODO List (Last updated November 20, 2008)
   (2)  Linux/Cywgin simulation (arch/sim)
   (2)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
-  (1)  ARM/DM320 (arch/arm/src/dm320/)
+  (3)  ARM/DM320 (arch/arm/src/dm320/)
   (6)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
@@ -431,6 +431,16 @@ o ARM/DM320 (arch/arm/src/dm320/)
   Description: A USB device controller driver was added but has never been tested.
   Status:      Open
   Priority:    Medium
+
+  Description: A framebuffer "driver" was added, however, it remains untested.
+  Status:      Open
+  Priority:    Medium
+
+  Description: In order to use the framebuffer "driver" additional video encoder
+               logic is required to setupt composite video output or to interface
+               with an LCD.
+  Status:      Open
+  Priority:    Medium (high if you need to use the framebuffer driver)
 
 o ARM/LPC214x (arch/arm/src/lpc214x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
