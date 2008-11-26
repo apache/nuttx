@@ -52,6 +52,7 @@ ARCHSCRIPT		=
 
 CROSSDEV		=
 CC			= $(CROSSDEV)gcc
+CPP			= $(CROSSDEV)gcc -E
 LD			= $(CROSSDEV)ld
 AR			= $(CROSSDEV)ar rcs
 NM			= $(CROSSDEV)nm
@@ -60,6 +61,7 @@ OBJDUMP			= $(CROSSDEV)objdump
 
 CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) -pipe
+CPPFLAGS		= $(ARCHINCLUDES) $(ARCHDEFINES)
 AFLAGS			= $(CFLAGS) -D__ASSEMBLY__
 
 OBJEXT			= .o
@@ -75,6 +77,11 @@ ifeq ("${CONFIG_DEBUG}","y")
   LDFLAGS		+= -g
 endif
 EXTRA_LIBS		= -lm
+
+define PREPROCESS
+	@echo "CPP: $1->$2"
+	@$(CPP) $(CPPFLAGS) $1 -o $2
+endef
 
 define COMPILE
 	@echo "CC: $1"

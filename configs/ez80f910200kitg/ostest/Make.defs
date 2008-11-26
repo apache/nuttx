@@ -135,6 +135,11 @@ HEXEXT			= .hex
 # to compile and assembly source files and to insert the resulting
 # object files into an archive
 
+define PREPROCESS
+	@echo "CPP: $1->$2"
+	@$(CPP) $(CPPFLAGS) $1 -o $2
+endef
+
 define COMPILE
 	@#echo "CC: $1"
 	@$(CC) $(CFLAGS) $1
