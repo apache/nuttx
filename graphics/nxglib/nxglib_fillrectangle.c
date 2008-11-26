@@ -81,11 +81,8 @@
  *
  ****************************************************************************/
 
-void nxgl_fillrectangle##NXGLIB_SUFFIX
-(
-  FAR struct fb_planeinfo_s *pinfo,
-  FAR const struct nxgl_rect_s *rect, NX_PIXEL_T color
-)
+void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
+(FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect, NX_PIXEL_T color)
 {
   ubyte *line;
   unsigned int width;
@@ -98,12 +95,12 @@ void nxgl_fillrectangle##NXGLIB_SUFFIX
 
   /* Get the dimensions of the rectange to fill in pixels */
 
-  width  = rect.pt2.x - rect.pt1.x;
-  rows   = rect.pt2.y - rect.pt1.y;
+  width  = rect->pt2.x - rect->pt1.x;
+  rows   = rect->pt2.y - rect->pt1.y;
 
   /* Get the address of the first byte in the first line to write */
 
-  line   = pinfo->fbmem + rect.pt1.y * stride + NX_SCALEX(rect.pt1.x);
+  line   = pinfo->fbmem + rect->pt1.y * stride + NX_SCALEX(rect->pt1.x);
 
   /* Then fill the rectangle line-by-line */
 

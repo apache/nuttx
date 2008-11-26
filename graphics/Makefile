@@ -63,6 +63,31 @@ BIN		= libgraphics$(LIBEXT)
 VPATH		= nxglib:nx
 
 all:	$(BIN)
+.PHONY : depend clean distclean gensources gen1bppsources gen2bppsource gen4bppsource \
+	 gen8bppsource gen16bppsource gen24bppsource gen32bppsources
+
+gen1bppsources:
+	@make -C nxglib -f Makefile.sources TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=1
+
+gen2bppsource:
+	@make -C nxglib -f Makefile.sources TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=2
+
+gen4bppsource:
+	@make -C nxglib -f Makefile.sources TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=4
+
+gen8bppsource:
+	@make -C nxglib -f Makefile.sources TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=8
+
+gen16bppsource:
+	@make -C nxglib -f Makefile.sources TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=16
+
+gen24bppsource:
+	@make -C nxglib -f Makefile.sources TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=24
+
+gen32bppsources:
+	@make -C nxglib -f Makefile.sources TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=32
+
+gensources: gen1bppsources gen2bppsource gen4bppsource gen8bppsource gen16bppsource gen24bppsource gen32bppsources
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -70,22 +95,24 @@ $(AOBJS): %$(OBJEXT): %.S
 $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(BIN): $(OBJS)
+$(BIN): gensources $(OBJS)
 	@( for obj in $(OBJS) ; do \
 		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
-.depend: Makefile $(SRCS)
+.depend: gensources Makefile $(SRCS)
 	@$(MKDEP) $(DEPPATH) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 
 depend: .depend
 
 clean:
+	@make -C nxglib -f Makefile.sources clean TOPDIR=$(TOPDIR)
 	@rm -f $(BIN) *~ .*.swp
 	$(call CLEAN)
 
 distclean: clean
+	@make -C nxglib -f Makefile.sources distclean TOPDIR=$(TOPDIR)
 	@rm -f Make.dep .depend
 
 -include Make.dep

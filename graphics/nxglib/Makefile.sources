@@ -51,24 +51,35 @@ endif
 ifeq ($(NXGLIB_BITSPERPIXEL),16)
 NXGLIB_SUFFIX	:= _16bpp
 endif
-ifeq ($(NXGLIB_BITSPERPIXEL),2)
-NXGLIB_SUFFIX	:= _32bpp
+ifeq ($(NXGLIB_BITSPERPIXEL),24)
+NXGLIB_SUFFIX	:= _24bpp
 endif
-ifeq ($(NXGLIB_BITSPERPIXEL),2)
-NXGLIB_SUFFIX	:= _64bpp
+ifeq ($(NXGLIB_BITSPERPIXEL),32)
+NXGLIB_SUFFIX	:= _32bpp
 endif
 
 CPPFLAGS	+= -DNXGLIB_BITSPERPIXEL=$(NXGLIB_BITSPERPIXEL)
 CPPFLAGS	+= -DNXGLIB_SUFFIX=$(NXGLIB_SUFFIX)
 
-FILL_CSRC	= nxglib_fillrectangle$(NXGLIB_SUFFIX).c
-GEN_CSRCS	= $(FILL_CSRC)
+FILL1_CSRCS	= nxglib_fillrectangle_1bpp.c nxglib_fillrectangle_2bpp.c \
+		  nxglib_fillrectangle_4bpp.c
+FILL2_CSRCS	= nxglib_fillrectangle_8bpp.c nxglib_fillrectangle_16bpp.c \
+		  nxglib_fillrectangle_24bpp.c nxglib_fillrectangle_32bpp.c
+
+GEN_CSRCS	= $(FILL1_CSRCS) $(FILL2_CSRCS)
 
 all:	$(GEN_CSRCS)
-.PHONY : clean distclean $(GEN_CSRCS)
+.PHONY : clean distclean
 
-$(FILL_CSRC) : nxglib_fillrectangle.c nxglib_bitblit.h
-	$(call PREPROCESS, $<, $@)
+$(FILL1_CSRCS) : nxglib_fillrectangle.c nxglib_bitblit.h
+ifneq ($(NXGLIB_BITSPERPIXEL),)
+	$(call PREPROCESS, nxglib_fillrectangle.c, $@)
+endif
+
+$(FILL2_CSRCS) : nxglib_fillrectangle.c nxglib_bitblit.h
+ifneq ($(NXGLIB_BITSPERPIXEL),)
+	$(call PREPROCESS, nxglib_fillrectangle.c, $@)
+endif
 
 clean:
 	@rm -f *~ .*.swp

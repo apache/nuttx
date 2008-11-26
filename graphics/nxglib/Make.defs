@@ -33,6 +33,11 @@
 #
 ############################################################################
 
-NXGLIB_ASRCS  =
-NXGLIB_CSRCS  = nxglib_rgb2yuv.c nxglib_yuv2rgb.c
+NXGLIB_ASRCS	=
+
+#FILL_CSRCS1	= nxglib_fillrectangle_1bpp.c nxglib_fillrectangle_2bpp.c \
+#		  nxglib_fillrectangle_4bpp.c
+FILL_CSRCS2	= nxglib_fillrectangle_8bpp.c nxglib_fillrectangle_16bpp.c \
+		  nxglib_fillrectangle_24bpp.c nxglib_fillrectangle_32bpp.c
+NXGLIB_CSRCS	= nxglib_rgb2yuv.c nxglib_yuv2rgb.c $(FILL_CSRCS1) $(FILL_CSRCS2)
 

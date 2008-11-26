@@ -122,8 +122,8 @@
 
 #  define NXGL_MEMSET(dest,value,width) \
    { \
-     FAR uybte *_ptr = (FAR ubyte*)dest; \
-     int nbytes      = NX_SCALEX(width)); \
+     FAR ubyte *_ptr = (FAR ubyte*)dest; \
+     int nbytes      = NX_SCALEX(width); \
      while (nbytes--) \
        { \
          *_ptr++ = value; \
@@ -133,7 +133,7 @@
    { \
      FAR ubyte *_dptr = (FAR ubyte*)dest; \
      FAR ubyte *_sptr = (FAR ubyte*)src; \
-     int nbytes      = NX_SCALEX(width)); \
+     int nbytes      = NX_SCALEX(width); \
      while (npixels--) \
        { \
          *_dptr++ = *_sptr++; \
@@ -143,7 +143,7 @@
 #elif NXGLIB_BITSPERPIXEL == 24
 #  define NXGL_MEMSET(dest,value,width) \
    { \
-     FAR uybte *_ptr = (FAR ubyte*)dest; \
+     FAR ubyte *_ptr = (FAR ubyte*)dest; \
      while (width--) \
        { \
          *_ptr++ = value; \
@@ -181,6 +181,11 @@
        } \
    }
 #endif
+
+/* Form a function name by concatenating two strings */
+
+#define _NXGL_FUNCNAME(a,b) a ## b
+#define NXGL_FUNCNAME(a,b)  _NXGL_FUNCNAME(a,b)
 
 /****************************************************************************
  * Public Types
