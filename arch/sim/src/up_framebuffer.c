@@ -102,9 +102,9 @@ static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno, FAR stru
 
   /* The following is provided only if the video hardware supports RGB color mapping */
 
-#if CONFIG_FB_CMAP
+#ifdef CONFIG_FB_CMAP
 static int up_getcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap);
-static int up_putcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap);
+static int up_putcmap(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s *cmap);
 #endif
   /* The following is provided only if the video hardware supports a hardware cursor */
 
@@ -141,7 +141,7 @@ static const struct fb_planeinfo_s g_planeinfo =
 
 /* Simulated RGB mapping */
 
-#if CONFIG_FB_CMAP
+#ifdef CONFIG_FB_CMAP
 static struct fb_cmap_s g_cmap;
 #endif
 
@@ -165,7 +165,7 @@ struct fb_vtable_s g_fbobject =
 {
   .getvideoinfo  = up_getvideoinfo,
   .getplaneinfo  = up_getplaneinfo,
-#if CONFIG_FB_CMAP
+#ifdef CONFIG_FB_CMAP
   .getcmap       = up_getcmap,
   .putcmap       = up_putcmap,
 #endif
@@ -221,16 +221,16 @@ static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
  * Name: up_getcmap
  ****************************************************************************/
 
-#if CONFIG_FB_CMAP
+#ifdef CONFIG_FB_CMAP
 static int up_getcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap)
 {
+  int len
   int i;
 
   dbg("vtable=%p cmap=%p cmap->len\n", vtable, cmap, cmap->len);
   if (vtable && cmap)
     {
-      cmap->len = 256;
-      for (i = 0; i < 256, i++)
+      for (i = cmap.first, len = 0; i < 256 && len < cmap.len, i++, len++)
         {
           cmap->red[i]    = i;
           cmap->green[i]  = i;
@@ -239,6 +239,7 @@ static int up_getcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap
           cmap->transp[i] = i;
 #endif
         }
+      cmap.len = len;
       return OK;
     }
   dbg("Returning EINVAL\n");
@@ -250,8 +251,8 @@ static int up_getcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap
  * Name: up_putcmap
  ****************************************************************************/
 
-#if CONFIG_FB_CMAP
-static int up_putcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap)
+#ifdef CONFIG_FB_CMAP
+static int up_putcmap(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s *cmap)
 {
   dbg("vtable=%p cmap=%p cmap->len\n", vtable, cmap, cmap->len);
   if (vtable && cmap)
