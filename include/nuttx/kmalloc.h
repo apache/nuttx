@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __KMALLOC_H
-#define __KMALLOC_H
+#ifndef __INCLUDE_NUTTX_KMALLOC_H
+#define __INCLUDE_NUTTX_KMALLOC_H
 
 /****************************************************************************
  * Included Files
@@ -91,4 +91,4 @@ KMALLOC_EXTERN void sched_free(FAR void *address);
 }
 #endif
 
-#endif /* __KMALLOC_H */
+#endif /* __INCLUDE_NUTTX_KMALLOC_H */

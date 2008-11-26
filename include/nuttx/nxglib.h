@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/color/nxglib_yuv2rgb.c
+ * include/nuttx/nxglib.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,70 +33,40 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_NXGLIB_H
+#define __INCLUDE_NUTTX_NXGLIB_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <sys/types.h>
-#include <debug.h>
-#include <fixedmath.h>
-
-#include <nuttx/nxglib.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Public Types
  ****************************************************************************/
 
-#define b16_P3441 0x0000581a    /*   0.344147 */
-#define b16_P7141 0x0000b6d2    /*   0.714142 */
-#define b16_1P402 0x000166ea    /*   1.402008 */
-#define b16_1P772 0x0001c5a2    /*   1.722003 */
-#define b16_128P0 0x00800000    /* 128.000000 */
+#undef EXTERN
+#if defined(__cplusplus)
+# define EXTERN extern "C"
+extern "C" {
+#else
+# define EXTERN extern
+#endif
 
 /****************************************************************************
- * Private Types
+ * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
+/* Color conversons */
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+EXTERN void nxgl_rgb2yuv(ubyte r, ubyte g, ubyte b, ubyte *y, ubyte *u, ubyte *v);
+EXTERN void nxgl_yuv2rgb(ubyte y, ubyte u, ubyte v, ubyte *r, ubyte *g, ubyte *b);
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nxgl_yuv2rgb
- *
- * Description:
- *   Convert 8-bit RGB triplet to 8-bit YUV triplet
- *
- *
- ****************************************************************************/
-
-void nxgl_yuv2rgb(ubyte y, ubyte u, ubyte v, ubyte *r, ubyte *g, ubyte *b)
-{
-  b16_t vm128 = itob16(v) - b16_128P0;
-  b16_t um128 = itob16(u) - b16_128P0;
-
-  /* Per the JFIF specification:
-   *
-   * R = Y                         + 1.40200 * (V - 128.0)
-   * G = Y - 0.34414 * (U - 128.0) - 0.71414 * (V - 128.0)
-   * B = Y + 1.77200 * (U - 128.0)
-   */
-
-  *r = (ubyte)b16toi(itob16(y) +                             b16muli(b16_1P402, vm128));
-  *g = (ubyte)b16toi(itob16(y) - b16muli(b16_P3441, um128) - b16muli(b16_P7141, vm128));
-  *b = (ubyte)b16toi(itob16(y) + b16muli(b16_1P772, um128));
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __INCLUDE_NUTTX_NXGLIB_H */
