@@ -629,3 +629,4 @@ errout_with_paths:
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS && !CONFIG_EXAMPLES_NSH_DISABLE_DD */
+
