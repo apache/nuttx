@@ -585,3 +585,5 @@
 	* Added fixed precision math support
 	* Added some color converson routines into what may become a real graphics library someday.
 	* Added a framebuffer driver for the DM320 (untested on initial check-in)
+	* Network: add support for outgoing multicast addresses
+	* Added some rasterizers to the graphics library

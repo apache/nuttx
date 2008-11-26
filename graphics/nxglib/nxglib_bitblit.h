@@ -61,69 +61,69 @@
 
 #if NXGLIB_BITSPERPIXEL == 1
 
-#  define NX_PIXELSHIFT          3
-#  define NX_PIXELMASK           7
-#  define NX_MULTIPIXEL(p)       ((p) ? 0xff | 0x00)
-#  define NX_PIXEL_T             ubyte
+#  define NXGL_PIXELSHIFT          3
+#  define NXGL_PIXELMASK           7
+#  define NXGL_MULTIPIXEL(p)       ((p) ? 0xff | 0x00)
+#  define NXGL_PIXEL_T             ubyte
 
 #elif NXGLIB_BITSPERPIXEL == 2
 
-#  define NX_PIXELSHIFT          2
-#  define NX_PIXELMASK           3
-#  define NX_MULTIPIXEL(p)       ((ubyte)(p) << 6 | (ubyte)(p) << 4 | (ubyte)(p) << 2 | (p))
-#  define NX_PIXEL_T             ubyte
+#  define NXGL_PIXELSHIFT          2
+#  define NXGL_PIXELMASK           3
+#  define NXGL_MULTIPIXEL(p)       ((ubyte)(p) << 6 | (ubyte)(p) << 4 | (ubyte)(p) << 2 | (p))
+#  define NXGL_PIXEL_T             ubyte
 
 #elif NXGLIB_BITSPERPIXEL == 4
 
-#  define NX_PIXELSHIFT          1
-#  define NX_PIXELMASK           1
-#  define NX_MULTIPIXEL(p)       ((ubyte)(p) << 4 | (p))
-#  define NX_PIXEL_T             ubyte
+#  define NXGL_PIXELSHIFT          1
+#  define NXGL_PIXELMASK           1
+#  define NXGL_MULTIPIXEL(p)       ((ubyte)(p) << 4 | (p))
+#  define NXGL_PIXEL_T             ubyte
 
 #elif NXGLIB_BITSPERPIXEL == 8
 
-#  define NX_SCALEX(x)           (x)
-#  define NX_PIXEL_T             ubyte
+#  define NXGL_SCALEX(x)           (x)
+#  define NXGL_PIXEL_T             ubyte
 
 #elif NXGLIB_BITSPERPIXEL == 16
 
-#  define NX_SCALEX(x)           ((x) << 1)
-#  define NX_PIXEL_T             uint16
+#  define NXGL_SCALEX(x)           ((x) << 1)
+#  define NXGL_PIXEL_T             uint16
 
 #elif NXGLIB_BITSPERPIXEL == 24
 
-#  define NX_SCALEX(x)           (((x) << 1) + (x))
-#  define NX_PIXEL_T             uint32
+#  define NXGL_SCALEX(x)           (((x) << 1) + (x))
+#  define NXGL_PIXEL_T             uint32
 
 #elif NXGLIB_BITSPERPIXEL == 32
 
-#  define NX_SCALEX(x)           ((x) << 2)
-#  define NX_PIXEL_T             uint32
+#  define NXGL_SCALEX(x)           ((x) << 2)
+#  define NXGL_PIXEL_T             uint32
 
 #endif
 
 #if NXGLIB_BITSPERPIXEL < 8
-#  define NX_SCALEX(x)           ((x) >> NX_PIXELSHIFT)
-#  define NX_REMAINDERX(x)       ((x) & NX_PIXELMASK)
-#  define NX_ALIGNDOWN(x)        ((x) & ~NX_PIXELMASK)
-#  define NX_ALIGNUP(x)          (((x) + NX_PIXELMASK) & ~NX_PIXELMASK)
+#  define NXGL_SCALEX(x)           ((x) >> NXGL_PIXELSHIFT)
+#  define NXGL_REMAINDERX(x)       ((x) & NXGL_PIXELMASK)
+#  define NXGL_ALIGNDOWN(x)        ((x) & ~NXGL_PIXELMASK)
+#  define NXGL_ALIGNUP(x)          (((x) + NXGL_PIXELMASK) & ~NXGL_PIXELMASK)
 
-#  ifdef CONFIG_NX_PACKEDMSFIRST
-#    define NX_MASKEDSRC1(s,r)   ((s) & (((ubyte)0xff) >> (8 - ((r) << pixelshift))))
-#    define NX_MASKEDVALUE1(s,r) ((s) & (((ubyte)0xff) << ((r) << NX_PIXELSHFIT)))
-#    define NX_MASKEDSRC2(s,r)   ((s) & (((ubyte)0xff) >> ((r) << pixelshift)))
-#    define NX_MASKEDVALUE2(s,r) ((s) & (((ubyte)0xff) << (8 - ((r) << NX_PIXELSHFIT))))
+#  ifdef CONFIG_NXGL_PACKEDMSFIRST
+#    define NXGL_MASKEDSRC1(s,r)   ((s) & (((ubyte)0xff) >> (8 - ((r) << pixelshift))))
+#    define NXGL_MASKEDVALUE1(s,r) ((s) & (((ubyte)0xff) << ((r) << NXGL_PIXELSHFIT)))
+#    define NXGL_MASKEDSRC2(s,r)   ((s) & (((ubyte)0xff) >> ((r) << pixelshift)))
+#    define NXGL_MASKEDVALUE2(s,r) ((s) & (((ubyte)0xff) << (8 - ((r) << NXGL_PIXELSHFIT))))
 #  else
-#    define NX_MASKEDSRC1(s,r)   ((s) & (((ubyte)0xff) >> ((r) << pixelshift)))
-#    define NX_MASKEDVALUE1(s,r) ((s) & (((ubyte)0xff) << (8 - ((r) << NX_PIXELSHFIT))))
-#    define NX_MASKEDSRC2(s,r)   ((s) & (((ubyte)0xff) >> (8 - ((r) << pixelshift))))
-#    define NX_MASKEDVALUE2(s,r) ((s) & (((ubyte)0xff) << ((r) << NX_PIXELSHFIT)))
+#    define NXGL_MASKEDSRC1(s,r)   ((s) & (((ubyte)0xff) >> ((r) << pixelshift)))
+#    define NXGL_MASKEDVALUE1(s,r) ((s) & (((ubyte)0xff) << (8 - ((r) << NXGL_PIXELSHFIT))))
+#    define NXGL_MASKEDSRC2(s,r)   ((s) & (((ubyte)0xff) >> (8 - ((r) << pixelshift))))
+#    define NXGL_MASKEDVALUE2(s,r) ((s) & (((ubyte)0xff) << ((r) << NXGL_PIXELSHFIT)))
 #  endif
 
 #  define NXGL_MEMSET(dest,value,width) \
    { \
      FAR ubyte *_ptr = (FAR ubyte*)dest; \
-     int nbytes      = NX_SCALEX(width); \
+     int nbytes      = NXGL_SCALEX(width); \
      while (nbytes--) \
        { \
          *_ptr++ = value; \
@@ -133,8 +133,8 @@
    { \
      FAR ubyte *_dptr = (FAR ubyte*)dest; \
      FAR ubyte *_sptr = (FAR ubyte*)src; \
-     int nbytes      = NX_SCALEX(width); \
-     while (npixels--) \
+     int nbytes      = NXGL_SCALEX(width); \
+     while (nbytes--) \
        { \
          *_dptr++ = *_sptr++; \
        } \

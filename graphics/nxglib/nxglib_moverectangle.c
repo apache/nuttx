@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/color/nxglib_rgb2yuv.c
+ * graphics/nxglib/nxglib_moverectangle.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,35 +40,25 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <debug.h>
-#include <fixedmath.h>
-
+#include <nuttx/fb.h>
 #include <nuttx/nxglib.h>
+
+#include "nxglib_bitblit.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-
-#define b16_P0813 0x000014d0    /* 0.0813 */
-#define b16_P1140 0x00001d2f    /* 0.1140 */
-#define b16_P1687 0x00002b30    /* 0.1687 */
-#define b16_P2990 0x00004c8b    /* 0.2990 */
-#define b16_P3313 0x000054d0    /* 0.3313 */
-#define b16_P4187 0x00006b30    /* 0.4187 */
-#define b16_P5000 0x00008000    /* 0.5000 */
-#define b16_P5870 0x00009646    /* 0.5870 */
-#define b16_128P0 0x00800000    /* 128.0 */
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -80,23 +70,57 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_rgb2yuv
+ * Name: nxgl_moverectangle_*bpp
  *
- * Description:
- *   Convert 8-bit RGB triplet to 8-bit YUV triplet
+ * Descripton:
+ *   Move a rectangular region from location to another in the
+ *   framebuffer memory.
  *
  ****************************************************************************/
 
-void nxgl_rgb2yuv(ubyte r, ubyte g, ubyte b, ubyte *y, ubyte *u, ubyte *v)
+void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
+(FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect,
+ FAR struct nxgl_point_s *offset)
 {
-  /* Per the JFIF specification:
-   *
-   * Y =       (0.2990 * R) + (0.5870 * G) + (0.1140 * B)
-   * U = 128 - (0.1687 * R) - (0.3313 * G) + (0.5000 * B)
-   * V = 128 + (0.5000 * R) - (0.4187 * G) - (0.0813 * B);
-   */
+  const ubyte *sptr;
+  ubyte *dptr;
+  unsigned int width;
+  unsigned int stride;
+  unsigned int rows;
 
-  *y = (ubyte)b16toi(b16muli(b16_P2990, r) + b16muli(b16_P5870, g) + b16muli(b16_P1140, b));
-  *u = (ubyte)b16toi(b16_128P0 - b16muli(b16_P1687, r) - b16muli(b16_P3313, g) + b16muli(b16_P5000, b));
-  *v = (ubyte)b16toi(b16_128P0 + b16muli(b16_P5000, r) - b16muli(b16_P4187, g) - b16muli(b16_P0813, b));
+  /* Get the width of the framebuffer in bytes */
+
+  stride = pinfo->stride;
+
+  /* Get the dimensions of the rectange to fill:  height in rows and width in bytes */
+
+  width = NXGL_SCALEX(rect->pt2.x - rect->pt1.x);
+  rows = rect->pt2.y - rect->pt1.y;
+
+  /* Case 1:  The starting position is above the display */
+
+  if (offset->y < 0)
+    {
+      dptr = pinfo->fbmem + rect->pt1.y * stride + NXGL_SCALEX(rect->pt1.x);
+      sptr = dptr - offset->y * stride - NXGL_SCALEX(offset->x);
+
+      while (rows--)
+        {
+          NXGL_MEMCPY(dptr, sptr, width);
+          dptr += stride;
+          sptr  += stride;
+        }
+    }
+  else
+    {
+      dptr = pinfo->fbmem + rect->pt2.y * stride + NXGL_SCALEX(rect->pt1.x);
+      sptr = dptr - offset->y * stride - NXGL_SCALEX(offset->x);
+
+      while (rows--)
+        {
+          dptr -= stride;
+          sptr -= stride;
+          NXGL_MEMCPY(dptr, sptr, width);
+        }
+    }
 }

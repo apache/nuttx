@@ -35,9 +35,14 @@
 
 NXGLIB_ASRCS	=
 
-#FILL_CSRCS1	= nxglib_fillrectangle_1bpp.c nxglib_fillrectangle_2bpp.c \
+#FILL1_CSRCS	= nxglib_fillrectangle_1bpp.c nxglib_fillrectangle_2bpp.c \
 #		  nxglib_fillrectangle_4bpp.c
-FILL_CSRCS2	= nxglib_fillrectangle_8bpp.c nxglib_fillrectangle_16bpp.c \
+FILL2_CSRCS	= nxglib_fillrectangle_8bpp.c nxglib_fillrectangle_16bpp.c \
 		  nxglib_fillrectangle_24bpp.c nxglib_fillrectangle_32bpp.c
-NXGLIB_CSRCS	= nxglib_rgb2yuv.c nxglib_yuv2rgb.c $(FILL_CSRCS1) $(FILL_CSRCS2)
+#MOVE1_CSRCS	= nxglib_moverectangle_1bpp.c nxglib_moverectangle_2bpp.c \
+#		  nxglib_moverectangle_4bpp.c
+MOVE2_CSRCS	= nxglib_moverectangle_8bpp.c nxglib_moverectangle_16bpp.c \
+		  nxglib_moverectangle_24bpp.c nxglib_moverectangle_32bpp.c
+NXGLIB_CSRCS	= nxglib_rgb2yuv.c nxglib_yuv2rgb.c \
+		  $(FILL1_CSRCS) $(FILL2_CSRCS) $(MOVE1_CSRCS) $(MOVE2_CSRCS)
 

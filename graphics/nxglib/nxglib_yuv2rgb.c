@@ -81,7 +81,6 @@
  * Description:
  *   Convert 8-bit RGB triplet to 8-bit YUV triplet
  *
- *
  ****************************************************************************/
 
 void nxgl_yuv2rgb(ubyte y, ubyte u, ubyte v, ubyte *r, ubyte *g, ubyte *b)

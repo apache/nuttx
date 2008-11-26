@@ -68,8 +68,8 @@ struct nxgl_point_s
 
 struct nxgl_rect_s
 {
-  struct nxgl_point_t pt1; /* Upper, left-hand corner */
-  struct nxgl_point_t pt2; /* Lower, right-hand corner */
+  struct nxgl_point_s pt1; /* Upper, left-hand corner */
+  struct nxgl_point_s pt2; /* Lower, right-hand corner */
 };
 
 /****************************************************************************
@@ -88,10 +88,90 @@ extern "C" {
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Color conversons */
+/* Color conversons *********************************************************/
+
+/****************************************************************************
+ * Name: nxgl_rgb2yuv
+ *
+ * Description:
+ *   Convert 8-bit RGB triplet to 8-bit YUV triplet
+ *
+ ****************************************************************************/
 
 EXTERN void nxgl_rgb2yuv(ubyte r, ubyte g, ubyte b, ubyte *y, ubyte *u, ubyte *v);
+
+/****************************************************************************
+ * Name: nxgl_yuv2rgb
+ *
+ * Description:
+ *   Convert 8-bit RGB triplet to 8-bit YUV triplet
+ *
+ ****************************************************************************/
+
 EXTERN void nxgl_yuv2rgb(ubyte y, ubyte u, ubyte v, ubyte *r, ubyte *g, ubyte *b);
+
+/* Rasterizers **************************************************************/
+
+/****************************************************************************
+ * Name: nxgl_fillrectangle_*bpp
+ *
+ * Descripton:
+ *   Fill a rectangle region in the framebuffer memory with a fixed color
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_fillrectangle_1bpp(FAR struct fb_planeinfo_s *pinfo,
+                                    FAR const struct nxgl_rect_s *rect,
+                                    ubyte color);
+EXTERN void nxgl_fillrectangle_2bpp(FAR struct fb_planeinfo_s *pinfo,
+                                    FAR const struct nxgl_rect_s *rect,
+                                    ubyte color);
+EXTERN void nxgl_fillrectangle_4bpp(FAR struct fb_planeinfo_s *pinfo,
+                                    FAR const struct nxgl_rect_s *rect,
+                                    ubyte color);
+EXTERN void nxgl_fillrectangle_8bpp(FAR struct fb_planeinfo_s *pinfo,
+                                    FAR const struct nxgl_rect_s *rect,
+                                    ubyte color);
+EXTERN void nxgl_fillrectangle_16bpp(FAR struct fb_planeinfo_s *pinfo,
+                                     FAR const struct nxgl_rect_s *rect,
+                                     uint16 color);
+EXTERN void nxgl_fillrectangle_24bpp(FAR struct fb_planeinfo_s *pinfo,
+                                     FAR const struct nxgl_rect_s *rect,
+                                     uint32 color);
+EXTERN void nxgl_fillrectangle_32bpp(FAR struct fb_planeinfo_s *pinfo,
+                                     FAR const struct nxgl_rect_s *rect,
+                                     uint32 color);
+
+/****************************************************************************
+ * Name: nxgl_moverectangle_*bpp
+ *
+ * Descripton:
+ *   Move a rectangular region from location to another in the
+ *   framebuffer memory.
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_moverectangle_1bpp(FAR struct fb_planeinfo_s *pinfo,
+                                    FAR const struct nxgl_rect_s *rect,
+                                    FAR struct nxgl_point_s *offset);
+EXTERN void nxgl_moverectangle_2bpp(FAR struct fb_planeinfo_s *pinfo,
+                                    FAR const struct nxgl_rect_s *rect,
+                                    FAR struct nxgl_point_s *offset);
+EXTERN void nxgl_moverectangle_4bpp(FAR struct fb_planeinfo_s *pinfo,
+                                    FAR const struct nxgl_rect_s *rect,
+                                    FAR struct nxgl_point_s *offset);
+EXTERN void nxgl_moverectangle_8bpp(FAR struct fb_planeinfo_s *pinfo,
+                                    FAR const struct nxgl_rect_s *rect,
+                                    FAR struct nxgl_point_s *offset);
+EXTERN void nxgl_moverectangle_16bpp(FAR struct fb_planeinfo_s *pinfo,
+                                     FAR const struct nxgl_rect_s *rect,
+                                     FAR struct nxgl_point_s *offset);
+EXTERN void nxgl_moverectangle_24bpp(FAR struct fb_planeinfo_s *pinfo,
+                                     FAR const struct nxgl_rect_s *rect,
+                                     FAR struct nxgl_point_s *offset);
+EXTERN void nxgl_moverectangle_32bpp(FAR struct fb_planeinfo_s *pinfo,
+                                     FAR const struct nxgl_rect_s *rect,
+                                     FAR struct nxgl_point_s *offset);
 
 #undef EXTERN
 #if defined(__cplusplus)

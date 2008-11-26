@@ -62,9 +62,10 @@ BIN		= libgraphics$(LIBEXT)
 
 VPATH		= nxglib:nx
 
-all:	$(BIN)
-.PHONY : depend clean distclean gensources gen1bppsources gen2bppsource gen4bppsource \
-	 gen8bppsource gen16bppsource gen24bppsource gen32bppsources
+all:	mklibgraphics
+.PHONY : depend clean distclean mklibgraphics gensources gen1bppsources \
+	 gen2bppsource gen4bppsource gen8bppsource gen16bppsource gen24bppsource \
+	 gen32bppsources
 
 gen1bppsources:
 	@make -C nxglib -f Makefile.sources TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=1
@@ -95,10 +96,12 @@ $(AOBJS): %$(OBJEXT): %.S
 $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(BIN): gensources $(OBJS)
+$(BIN): $(OBJS)
 	@( for obj in $(OBJS) ; do \
 		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
+
+mklibgraphics: gensources $(BIN)
 
 .depend: gensources Makefile $(SRCS)
 	@$(MKDEP) $(DEPPATH) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep

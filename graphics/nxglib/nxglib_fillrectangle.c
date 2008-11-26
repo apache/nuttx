@@ -74,7 +74,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_fillrectangle*
+ * Name: nxgl_fillrectangle_*bpp
  *
  * Descripton:
  *   Fill a rectangle region in the framebuffer memory with a fixed color
@@ -82,7 +82,7 @@
  ****************************************************************************/
 
 void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
-(FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect, NX_PIXEL_T color)
+(FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect, NXGL_PIXEL_T color)
 {
   ubyte *line;
   unsigned int width;
@@ -100,7 +100,7 @@ void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
 
   /* Get the address of the first byte in the first line to write */
 
-  line   = pinfo->fbmem + rect->pt1.y * stride + NX_SCALEX(rect->pt1.x);
+  line   = pinfo->fbmem + rect->pt1.y * stride + NXGL_SCALEX(rect->pt1.x);
 
   /* Then fill the rectangle line-by-line */
 
