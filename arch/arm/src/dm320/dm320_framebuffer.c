@@ -46,6 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/fb.h>
+#include <nuttx/nxglib.h>
 
 #include "up_arch.h"
 #include "dm320_memorymap.h"
@@ -1201,7 +1202,7 @@ static int dm320_putcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *c
     {
        /* Convert the RGB to YUV */
 
-       rgb2yuv(cmap->red[i], cmap->green[i], cmap->blue[i], &y, &u, &v);
+       nxgl_rgb2yuv(cmap->red[i], cmap->green[i], cmap->blue[i], &y, &u, &v);
 
        /* Program the CLUT */
 
