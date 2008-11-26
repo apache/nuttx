@@ -206,12 +206,13 @@ struct fb_planeinfo_s
  * that mapping.
  */
 
-#if CONFIG_FB_CMAP
+#ifdef CONFIG_FB_CMAP
 struct fb_cmap_s
 {
- uint16  len;              /* Number of color entries */
+ uint16  first;            /* Offset offset first color entry in tables */
+ uint16  len;              /* Number of color entries  in tables */
 
- /* Each color component.  Any may be NULL if not used */
+ /* Tables of  color component.  Any may be NULL if not used */
 
  ubyte *red;               /* Table of 8-bit red values */
  ubyte *green;             /* Table of 8-bit green values */
@@ -264,7 +265,7 @@ struct fb_cursorattrib_s
 #ifdef CONFIG_FB_HWCURSORIMAGE
   ubyte fmt;                     /* Video format of cursor */
 #endif
-  struct fb_cursorpos_s pos;     /* Current cursor position */
+  struct fb_cursorpos_s  pos;    /* Current cursor position */
 #ifdef CONFIG_FB_HWCURSORSIZE
   struct fb_cursorsize_s mxsize; /* Maximum cursor size */
   struct fb_cursorsize_s size;   /* Current size */
@@ -299,15 +300,15 @@ struct fb_vtable_s
 
   /* The following is provided only if the video hardware supports RGB color mapping */
 
-#if CONFIG_FB_CMAP
+#ifdef CONFIG_FB_CMAP
   int (*getcmap)(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap);
-  int (*putcmap)(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap);
+  int (*putcmap)(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s *cmap);
 #endif
   /* The following is provided only if the video hardware supports a hardware cursor */
 
 #ifdef CONFIG_FB_HWCURSOR
   int (*getcursor)(FAR struct fb_vtable_s *vtable, FAR struct fb_cursorattrib_s *attrib);
-  int (*setcursor)(FAR struct fb_vtable_s *vtable, FAR struct fb_setcursor_s *setttings);
+  int (*setcursor)(FAR struct fb_vtable_s *vtable, FAR struct fb_setcursor_s *settings);
 #endif
 };
 

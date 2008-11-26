@@ -580,4 +580,8 @@
 	  second argument of the standard listen() API.  Hooks are provided to support poll()/select()
 	  waiting for connections, with a subsequent call to accept() to use the backlogged connection.
 	* Fixed a minor bug in accept().  It should allow the address and addresslen values to be NULL
-	* Added first-cut definition for a framebuffer interface
+	* Added first-cut definition for a framebuffer interface (and simulated framebuffer for testing
+	  purposes only)
+	* Added fixed precision math support
+	* Added some color converson routines into what may become a real graphics library someday.
+	* Added a framebuffer driver for the DM320 (untested on initial check-in)
