@@ -158,7 +158,7 @@ extern int lib_lowvprintf(const char *src, va_list ap);
 
 /* Defined in lib_libwrite.c */
 
-extern ssize_t lib_fwrite(const void *ptr, size_t count, FAR FILE *stream);
+extern ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream);
 
 /* Defined in lib_libfread.c */
 
