@@ -480,6 +480,26 @@
     </p>
 </tr>
 
+<tr>
+  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Graphics Support</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>Framebuffer drivers.</li>
+    </p>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>Graphics library and tiny windowing system under developement.</li>
+    </p>
+</tr>
 </table></center>
 
 <p>
@@ -530,8 +550,8 @@
   </tr>
 </table>
 
-<p><b>nuttx-0.3.18</b>.
-  The 30<sup>th</sup> release of NuttX (nuttx-0.3.18) is available for download
+<p><b>nuttx-0.3.19</b>.
+  The 31<sup>st</sup> release of NuttX (nuttx-0.3.19) is available for download
   from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
   website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
@@ -539,46 +559,43 @@
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  This release includes two partially completed ports, several new features, and a
-  couple of important bug fixes.  The two partially completed ports are:
-  <ul>
-    <li>The STMicro STR71x processor and configuration for the Olimex STR-P711 board, and</li>
-    <li>The Hitachi SH-1 using the SH1_LCEVB1 (SH-1/US7032EVB1) board.</li>
-  </ul>
-</p>
+  This release includes the following new feature:
 <p>
-  Progress on these ports is stalled (as detailed in the ChangeLog).
-</p>
-<p>
-  The new features focus primarily on management of block devices and extensions of
-  the NuttShell (NSH).  These new features include:
-  <ul>
-    <li>A loop device that converts a file into a block device,</li>
-    <li>A block to character (BCH) driver that  allow access a block device as if it were character device, </li>
-    <li>Added strcasecmp() and strncasecmp() libc functions, and </li>
-    <li>Added the 'dd' and 'losetup' commands to NSH. These commands (along with mkfatfs and mount),
-        give good managment of filesystems on the target.</li>
-  </ul>
-</p>
+<ul>
+  <li>Add <code>poll()</code> and <code>select()</code> APIs that may be used to monitor for data
+    availability on character devices or TCP/IP sockets.
+  </li>
+  <li>Implemented support TCP/IP connection backlog.
+   This allows <code>poll()</code>/<code>select()</code> to wake-up on new connections to a listener socket.
+  </li>
+  <li>Added definition of a framebuffer driver and implement framebuffer drivers for the
+    simulated platform and the TI DM320 (untested as of the inital check-in).
+  </li>
+  <li>Partially developed a graphics framework based on the framebuffer drivers, however,
+    this will not be ready for use for a few more release. 
+    Currently this includes only a few color conversion routines and some rasteizing functions.
+    A tiny windowing system is under development but not ready for check-in yet.
+  <li>Added support for fixed precision math.
+  </li>
+  <li>Added support for outgoing multicast packets.
+  </li>
+</ul>
 <p>
   Several bugs were fixed, the most important of which are:
-  <ul>
-    <li>Fixd a race condition workaround delay in LPC214X SPI logic.  This was also
-        the cause of some bad MMC/SD performance on that platform.</li>
-    <li>Fixed a recently introduced FAT file system problem: It would mount a (invalid)
-        FAT file system even if the medium is not formatted!</li>
-    <li>Corrected two iother important errors in the FAT lseek implementation:
-        (1) the sectors-per-cluster value was being reset to "1" and (2) important
-        lseek logic was omitted when the seek position was zero.</li>
-  </ul>
 </p>
+  <li>Fixed an important bug in the TCP/IP buffering logic.
+    When TCP/IP read-ahead is enabled and not recv() is in-place when a TCP/IP packet is received,
+    the packet is placed into a read-ahead buffer.
+    However, the old contents of the read-ahead buffer were not being cleared and old data would 
+    contaminate the newly received buffer.
+  </li>
+  <li>Changed the behavior of the serial driver read.
+    It now returns data as it is available rather than waiting for the full requested read size.
+    This makes functions like <code>fgetc()</code> work much more smoothly.
+  </li>
 <p>
-  The FAT filesystem has had many bugs fixed in it and, I think, is now maturing
-  and becoming stable.
-</p>
-<p>
-  These changes were verified only on the mcu123.com NXP LPC2148 board, the Hitachi
-  SH1_LCEVB1 board, and the Linux simulator, all using a Linux development environment.
+  These changes were verified only on the Neuros OSD (ARM) and the Linux simulator using a
+  Linux development environment.
   Please report any errors to me.
 </p>
 
@@ -692,7 +709,7 @@
     </p>
     <p>
       <b>STATUS:</b>
-        The basic port (timer interrupts, serial ports, network, etc.) is complete.
+        The basic port (timer interrupts, serial ports, network, framebuffe, etc.) is complete.
         All implemented features have been verified with the exception of the USB device-side
         driver; that implementation is complete but completely untested.
     </p>
@@ -1136,42 +1153,30 @@ Other memory:
 </table>
 
 <pre><ul>
-nuttx-0.3.18 2008-11-16 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-	* Added port for the STMicro STR71x processor and configuration for the Olimex STR-P711
-	  board (STR71x testing is stalled because I have been unable to get OpenOCD to
-	  communicate with my JTAG wiggler on Linux).
-	* Fix race condition workaround delay in LPC214X SPI logic.  This was also the cause of the
-	  very bad MMC/SD performance.
-	* Began port of the Hitachi SH-1 using the SH-1/US7032EVB1 board
-	* Re-built all configurations that use SDCC and Zilog toolchains to make sure they still
-	  build (they didn't, but they do now).
-	* Fixed several erroneous "list empty" checks in the CAN driver.
-	* Hitachi SH-1 passes (reduced) examples/ostest; the examples/nsh test still fails.
-	  There are remaining instabilities that make the port un-usable.  The nature of these is
-	  not understood; the behavior is that certain SH-1 instructions stop working as advertised.
-	  This could be a silicon problem, some pipeline issue that is not handled properly by the
-	  gcc 3.4.5 toolchain (which has very limit SH-1 support to begin with), or perhaps with the
-	  CMON debugger.  At any rate, I have exhausted all of the energy that I am willing to put
-	  into this cool old processor for the time being.
-	* Renamed configuration item CONFIG_PROC_STACK_SIZE as CONFIG_IDLETHREAD_STACKSIZE:  It now
-	  only controls the size of the stack for the IDLE thread.  Added CONFIG_USERMAIN_STACKSIZE:
-	  This is the size of stack used with the user_start() thread is created.  The two stacks
-	  no longer have to be the same.
-	* Add a loop device that converts a file into a block device.
-	* Each NSH command can not be disabled through a configuration setting. All of these
-	  settings make the configuration of NSH potentially complex but also allow it to squeeze
-	  into very small memory footprints.
-	* Added a block to character (BCH) driver.  This is kind of the reverse of the loop
-	  device; it allows you access a block device like a character device.
-	* NSH: Added the 'dd' command
-	* NSH: Added the 'losetup' command
-	* Fixed a FAT bug:  After recent changes, it would mount a (invalid) FAT file system
-	  even if the medium is not formatted!
-	* Corrected two important errors in FAT lseek implementation: (1) the sectors-per-cluster
-	  value was being reset to '1' and (2) important lseek logic was omitted when the seek
-	  position was zero.
-	* Fixed a bug in getopt().  It would fail if on certain combinations of terminal argument
-	  types.
+nuttx-0.3.19 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+	* Add poll() and select() APIs (in the initial check-in, these work only with character devices) 
+	* Add poll() methods to /dev/null, /dev/zero, pipes, fifos, and serial drivers.
+	* Add examples/poll for testing poll() and select()
+	* Fix hostile behavior of getc, fgetc, getchar, etc.: the serial driver was waiting for a
+	  full buffer of read data before return.  This means that getc would stall when it needed
+	  to refill the input buffer. The old behavior (read full blocks) might be useful in other
+	  contexts, so it is still available within the driver as a configuration option.
+	* Implement poll() and select() support for TCP/IP sockets
+	* Fixed an important bug in the TCP/IP buffering logic.  When TCP/IP read-ahead is enabled
+	  and not recv() is in-place when a TCP/IP packet is received, the packet is placed into
+	  a read-ahead buffer.  However, the old contents of the read-ahead buffer were not being
+	  cleared and old data would contaminate the newly received buffer.
+	* Implemented support for connection backlog.  The size of the backlog is specified by the
+	  second argument of the standard listen() API.  Hooks are provided to support poll()/select()
+	  waiting for connections, with a subsequent call to accept() to use the backlogged connection.
+	* Fixed a minor bug in accept().  It should allow the address and addresslen values to be NULL
+	* Added first-cut definition for a framebuffer interface (and simulated framebuffer for testing
+	  purposes only)
+	* Added fixed precision math support
+	* Added some color converson routines into what may become a real graphics library someday.
+	* Added a framebuffer driver for the DM320 (untested on initial check-in)
+	* Network: add support for outgoing multicast addresses
+	* Added some rasterizers to the graphics library
 
 pascal-0.1.2 2008-02-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1199,30 +1204,7 @@ buildroot-0.1.2 2007-11-06 &lt;spudmonkey@racsa.co.cr&gt
 </table>
 
 <pre><ul>
-nuttx-0.3.19 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-	* Add poll() and select() APIs (in the initial check-in, these work only with character devices) 
-	* Add poll() methods to /dev/null, /dev/zero, pipes, fifos, and serial drivers.
-	* Add examples/poll for testing poll() and select()
-	* Fix hostile behavior of getc, fgetc, getchar, etc.: the serial driver was waiting for a
-	  full buffer of read data before return.  This means that getc would stall when it needed
-	  to refill the input buffer. The old behavior (read full blocks) might be useful in other
-	  contexts, so it is still available within the driver as a configuration option.
-	* Implement poll() and select() support for TCP/IP sockets
-	* Fixed an important bug in the TCP/IP buffering logic.  When TCP/IP read-ahead is enabled
-	  and not recv() is in-place when a TCP/IP packet is received, the packet is placed into
-	  a read-ahead buffer.  However, the old contents of the read-ahead buffer were not being
-	  cleared and old data would contaminate the newly received buffer.
-	* Implemented support for connection backlog.  The size of the backlog is specified by the
-	  second argument of the standard listen() API.  Hooks are provided to support poll()/select()
-	  waiting for connections, with a subsequent call to accept() to use the backlogged connection.
-	* Fixed a minor bug in accept().  It should allow the address and addresslen values to be NULL
-	* Added first-cut definition for a framebuffer interface (and simulated framebuffer for testing
-	  purposes only)
-	* Added fixed precision math support
-	* Added some color converson routines into what may become a real graphics library someday.
-	* Added a framebuffer driver for the DM320 (untested on initial check-in)
-	* Network: add support for outgoing multicast addresses
-	* Added some rasterizers to the graphics library
+nuttx-0.3.20 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-0.1.3 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
