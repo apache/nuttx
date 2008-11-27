@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxbe/nxbe_redraw.c
+ * graphics/nxglib/nxsglib_nulloverlap.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,12 +40,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <errno.h>
-#include <debug.h>
-
+#include <nuttx/fb.h>
 #include <nuttx/nxglib.h>
-#include "nxbe.h"
-//#include "nxfe.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -54,12 +50,6 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-struct nxbe_redraw_s
-{
-  struct nxbe_clipops_s cops;
-  FAR struct nxbe_window_s *wnd;
-};
 
 /****************************************************************************
  * Private Data
@@ -74,66 +64,27 @@ struct nxbe_redraw_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxbe_clipredraw
- ****************************************************************************/
-
-static void nxbe_clipredraw(FAR struct nxbe_clipops_s *cops,
-                           FAR struct nxbe_plane_s *plane,
-                           FAR const struct nxgl_rect_s *rect)
-{
-  FAR struct nxbe_window_s *wnd = ((struct nxbe_redraw_s *)cops)->wnd;
-  if (wnd)
-    {
-      nxfe_redrawreq(wnd, rect);
-    }
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxbe_redraw
+ * Name: nxgl_rectoverlap
  *
- * Descripton:
- *   Re-draw the visible portions of the rectangular region for the
- *   specified window
+ * Description:
+ *   Return TRUE if the two rectangles overlap
  *
  ****************************************************************************/
 
-void nxbe_redraw(FAR struct nxbe_state_s *be,
-                 FAR struct nxbe_window_s *wnd,
-                 FAR const struct nxgl_rect_s *rect)
+boolean nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1,
+                         FAR struct nxgl_rect_s *rect2)
 {
-  struct nxbe_redraw_s info;
-  struct nxgl_rect_s remaining;
-#if CONFIG_NX_NPLANES > 1
-  int i;
-#endif
+  /* The neither is wholly above, below, right, or left of the other, then
+   * the two rectangles overlap in some fashion.
+   */
 
-  /* Clip to the limits of the window and of the background screen */
-
-  nxgl_rectintersect(&remaining, rect, &be->bkgd.bounds);
-  nxgl_rectintersect(&remaining, &remaining, &wnd->bounds);
-  if (!nxgl_nullrect(&remaining))
-    {
-      /* Now, request to re-draw any visible rectangular regions not obscured
-       * by windows above this one.
-       */
-
-      info.cops.visible  = nxbe_clipredraw;
-      info.cops.obscured = nxbe_clipnull;
-      info.wnd           = wnd;
-
-#if CONFIG_NX_NPLANES > 1
-      for (i = 0; i < be->vinfo.nplanes; i++)
-        {
-          nxbe_clipper(wnd->above, &remaining, NX_CLIPORDER_DEFAULT,
-                       &info.cops, &be->plane[i]);
-        }
-#else
-      nxbe_clipper(wnd->above, &remaining, NX_CLIPORDER_DEFAULT,
-                   &info.cops, &be->plane[0]);
-#endif
-    }
+  return (rect1->pt1.x < rect2->pt2.x) &&  /* FALSE: rect1 is wholly to the right */
+         (rect2->pt1.x < rect1->pt2.x) &&  /* FALSE: rect2 is wholly to the right */
+         (rect1->pt1.y < rect2->pt2.y) &&  /* FALSE: rect1 is wholly below rect2 */
+         (rect2->pt1.y < rect1->pt2.y);    /* FALSE: rect2 is wholly below rect1 */
 }
+

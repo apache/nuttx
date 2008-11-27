@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxbe/nxbe_redraw.c
+ * graphics/nxglib/nxsglib_rectintersect.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,12 +40,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <errno.h>
-#include <debug.h>
-
+#include <nuttx/fb.h>
 #include <nuttx/nxglib.h>
-#include "nxbe.h"
-//#include "nxfe.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -54,12 +50,6 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-struct nxbe_redraw_s
-{
-  struct nxbe_clipops_s cops;
-  FAR struct nxbe_window_s *wnd;
-};
 
 /****************************************************************************
  * Private Data
@@ -74,66 +64,23 @@ struct nxbe_redraw_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxbe_clipredraw
- ****************************************************************************/
-
-static void nxbe_clipredraw(FAR struct nxbe_clipops_s *cops,
-                           FAR struct nxbe_plane_s *plane,
-                           FAR const struct nxgl_rect_s *rect)
-{
-  FAR struct nxbe_window_s *wnd = ((struct nxbe_redraw_s *)cops)->wnd;
-  if (wnd)
-    {
-      nxfe_redrawreq(wnd, rect);
-    }
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxbe_redraw
+ * Name: nxgl_rectintersect
  *
- * Descripton:
- *   Re-draw the visible portions of the rectangular region for the
- *   specified window
+ * Description:
+ *   Return the rectangle representing the intersection of the two rectangles.
  *
  ****************************************************************************/
 
-void nxbe_redraw(FAR struct nxbe_state_s *be,
-                 FAR struct nxbe_window_s *wnd,
-                 FAR const struct nxgl_rect_s *rect)
+void nxgl_rectintersect(FAR struct nxgl_rect_s *dest,
+                        FAR const struct nxgl_rect_s *src1,
+                        FAR const struct nxgl_rect_s *src2)
 {
-  struct nxbe_redraw_s info;
-  struct nxgl_rect_s remaining;
-#if CONFIG_NX_NPLANES > 1
-  int i;
-#endif
-
-  /* Clip to the limits of the window and of the background screen */
-
-  nxgl_rectintersect(&remaining, rect, &be->bkgd.bounds);
-  nxgl_rectintersect(&remaining, &remaining, &wnd->bounds);
-  if (!nxgl_nullrect(&remaining))
-    {
-      /* Now, request to re-draw any visible rectangular regions not obscured
-       * by windows above this one.
-       */
-
-      info.cops.visible  = nxbe_clipredraw;
-      info.cops.obscured = nxbe_clipnull;
-      info.wnd           = wnd;
-
-#if CONFIG_NX_NPLANES > 1
-      for (i = 0; i < be->vinfo.nplanes; i++)
-        {
-          nxbe_clipper(wnd->above, &remaining, NX_CLIPORDER_DEFAULT,
-                       &info.cops, &be->plane[i]);
-        }
-#else
-      nxbe_clipper(wnd->above, &remaining, NX_CLIPORDER_DEFAULT,
-                   &info.cops, &be->plane[0]);
-#endif
-    }
+  dest->pt1.x = ngl_max(src1->pt1.x, src2->pt1.x);
+  dest->pt1.y = ngl_max(src1->pt1.y, src2->pt1.y);
+  dest->pt2.x = ngl_min(src1->pt2.x, src2->pt2.x);
+  dest->pt2.y = ngl_min(src1->pt2.y, src2->pt2.y);
 }

@@ -306,6 +306,89 @@ EXTERN void nxgl_copyrectangle_32bpp(FAR struct fb_planeinfo_s *pinfo,
                                      FAR const struct nxgl_point_s *origin,
                                      unsigned int srcstride);
 
+/****************************************************************************
+ * Name: nxgl_rectcopy
+ *
+ * Description:
+ *   This is essentially memcpy for rectangles.  We don't do structure
+ *   assignements because some compilers are not good at that.
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_rectcopy(FAR struct nxgl_rect_s *dest,
+                          FAR const struct nxgl_rect_s *src);
+
+/****************************************************************************
+ * Name: nxgl_rectoffset
+ *
+ * Description:
+ *   Offset the rectangle position by the specified dx, dy values.
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_rectoffset(FAR struct nxgl_rect_s *dest,
+                            FAR const struct nxgl_rect_s *src,
+                            nxgl_coord_t dx, nxgl_coord_t dy);
+
+/****************************************************************************
+ * Name: nxgl_vectoradd
+ *
+ * Description:
+ *   Add two 2x1 vectors and save the result to a third.
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_vectoradd(FAR struct nxgl_point_s *dest,
+                           FAR const struct nxgl_point_s *v1,
+                           FAR const struct nxgl_point_s *v2);
+
+/****************************************************************************
+ * Name: nxgl_rectintersect
+ *
+ * Description:
+ *   Return the rectangle representing the intersection of the two rectangles.
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_rectintersect(FAR struct nxgl_rect_s *dest,
+                               FAR const struct nxgl_rect_s *src1,
+                               FAR const struct nxgl_rect_s *src2);
+
+/****************************************************************************
+ * Name: nxgl_nonintersecting
+ *
+ * Description:
+ *   Return the regions of rectangle rect 1 that do not intersect with
+ *   rect2.  This may be up to founr rectangles some of which may be
+ *   degenerate (and can be picked off with nxgl_nullrect)
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_nonintersecting(FAR struct nxgl_rect_s result[4],
+                                 FAR const struct nxgl_rect_s *rect1,
+                                 FAR const struct nxgl_rect_s *rect2);
+
+/****************************************************************************
+ * Name: nxgl_rectoverlap
+ *
+ * Description:
+ *   Return TRUE if the two rectangles overlap
+ *
+ ****************************************************************************/
+
+EXTERN boolean nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1,
+                                FAR struct nxgl_rect_s *rect2);
+
+/****************************************************************************
+ * Name: nxgl_nullrect
+ *
+ * Description:
+ *   Return TRUE if the area of the retangle is <= 0.
+ *
+ ****************************************************************************/
+
+EXTERN boolean nxgl_nullrect(FAR const struct nxgl_rect_s *rect);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

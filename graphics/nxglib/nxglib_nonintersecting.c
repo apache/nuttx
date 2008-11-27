@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxbe/nxbe_redraw.c
+ * graphics/nxglib/nxsglib_rectnonintersecting.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,12 +40,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <errno.h>
-#include <debug.h>
-
+#include <nuttx/fb.h>
 #include <nuttx/nxglib.h>
-#include "nxbe.h"
-//#include "nxfe.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -54,12 +50,6 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-struct nxbe_redraw_s
-{
-  struct nxbe_clipops_s cops;
-  FAR struct nxbe_window_s *wnd;
-};
 
 /****************************************************************************
  * Private Data
@@ -74,66 +64,53 @@ struct nxbe_redraw_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxbe_clipredraw
- ****************************************************************************/
-
-static void nxbe_clipredraw(FAR struct nxbe_clipops_s *cops,
-                           FAR struct nxbe_plane_s *plane,
-                           FAR const struct nxgl_rect_s *rect)
-{
-  FAR struct nxbe_window_s *wnd = ((struct nxbe_redraw_s *)cops)->wnd;
-  if (wnd)
-    {
-      nxfe_redrawreq(wnd, rect);
-    }
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxbe_redraw
+ * Name: nxgl_nonintersecting
  *
- * Descripton:
- *   Re-draw the visible portions of the rectangular region for the
- *   specified window
+ * Description:
+ *   Return the regions of rectangle rect 1 that do not intersect with
+ *   rect2.  This may be up to founr rectangles some of which may be
+ *   degenerate (and can be picked off with nxgl_nullrect)
  *
  ****************************************************************************/
 
-void nxbe_redraw(FAR struct nxbe_state_s *be,
-                 FAR struct nxbe_window_s *wnd,
-                 FAR const struct nxgl_rect_s *rect)
+void nxgl_nonintersecting(FAR struct nxgl_rect_s result[4],
+                          FAR const struct nxgl_rect_s *rect1,
+                          FAR const struct nxgl_rect_s *rect2)
 {
-  struct nxbe_redraw_s info;
-  struct nxgl_rect_s remaining;
-#if CONFIG_NX_NPLANES > 1
-  int i;
-#endif
+  struct nxgl_rect_s intersection;
 
-  /* Clip to the limits of the window and of the background screen */
+  /* Get the intersection of the two rectangles */
 
-  nxgl_rectintersect(&remaining, rect, &be->bkgd.bounds);
-  nxgl_rectintersect(&remaining, &remaining, &wnd->bounds);
-  if (!nxgl_nullrect(&remaining))
-    {
-      /* Now, request to re-draw any visible rectangular regions not obscured
-       * by windows above this one.
-       */
+  nxgl_rectintersect(&intersection, rect1, rect2);
 
-      info.cops.visible  = nxbe_clipredraw;
-      info.cops.obscured = nxbe_clipnull;
-      info.wnd           = wnd;
+  /* Then return the four rectangles representing the regions NON included
+   * in the intersection.  Some of these rectangles may be invalid (zero
+   * area), but those can be picked off using nxgl_nullrect()
+   */
 
-#if CONFIG_NX_NPLANES > 1
-      for (i = 0; i < be->vinfo.nplanes; i++)
-        {
-          nxbe_clipper(wnd->above, &remaining, NX_CLIPORDER_DEFAULT,
-                       &info.cops, &be->plane[i]);
-        }
-#else
-      nxbe_clipper(wnd->above, &remaining, NX_CLIPORDER_DEFAULT,
-                   &info.cops, &be->plane[0]);
-#endif
-    }
+  result[NX_TOP_NDX].pt1.x    = rect1->pt1.x;
+  result[NX_TOP_NDX].pt1.y    = rect1->pt1.y;
+  result[NX_TOP_NDX].pt2.x    = rect1->pt2.x;
+  result[NX_TOP_NDX].pt2.y    = intersection.pt1.y;
+
+  result[NX_BOTTOM_NDX].pt1.x = rect1->pt1.x;
+  result[NX_BOTTOM_NDX].pt1.y = intersection.pt2.y;
+  result[NX_BOTTOM_NDX].pt2.x = rect1->pt2.x;
+  result[NX_BOTTOM_NDX].pt2.y = rect1->pt2.y;
+
+  result[NX_LEFT_NDX].pt1.x   = rect1->pt1.x;
+  result[NX_LEFT_NDX].pt1.y   = intersection.pt1.y;
+  result[NX_LEFT_NDX].pt2.x   = intersection.pt1.x;
+  result[NX_LEFT_NDX].pt2.y   = intersection.pt2.y;
+
+  result[NX_RIGHT_NDX].pt1.x  = intersection.pt2.x;
+  result[NX_RIGHT_NDX].pt1.y  = intersection.pt1.y;
+  result[NX_RIGHT_NDX].pt2.x  = rect1->pt2.x;
+  result[NX_RIGHT_NDX].pt2.y  = intersection.pt2.y;
 }
+
+

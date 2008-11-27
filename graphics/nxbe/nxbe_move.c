@@ -41,10 +41,9 @@
 #include <sys/types.h>
 
 #include <nuttx/nxglib.h>
-#include <nuttx/nx.h>
 
 #include "nxbe.h"
-#include "nxfe.h"
+//#include "nxfe.h"
 
 /****************************************************************************
  * Pre-Processor Definitions

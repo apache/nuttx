@@ -44,8 +44,8 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/nx.h>
-#include "nxfe.h"
+#include <nuttx/nxglib.h>
+#include "nxbe.h"
 
 /****************************************************************************
  * Pre-Processor Definitions

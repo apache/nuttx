@@ -40,8 +40,8 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-#include <nuttx/nx.h>
-#include "nxfe.h"
+#include <nuttx/nxglib.h>
+#include "nxbe.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -108,6 +108,6 @@ void nxbe_setsize(FAR struct nxbe_window_s *wnd,
   /* Report the new size/position */
 
 #ifdef CONFIG_NX_MULTIUSER
-  nxmu_getposition(wnd);
+  nxmu_reportposition(wnd);
 #endif
 }

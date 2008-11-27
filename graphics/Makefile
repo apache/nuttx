@@ -42,17 +42,21 @@ include nxglib/Make.defs
 DEPPATH		+= --dep-path nxglib
 CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/graphics/nxglib}
 
-HAVENX		:= ${shell if [ -d nx ]; then echo "y"; else echo "n";fi}
+include nxbe/Make.defs
+DEPPATH		+= --dep-path nxbe
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/graphics/nxbe}
+
+HAVENX		:= ${shell if [ -d nxmu ]; then echo "y"; else echo "n";fi}
 ifeq ($(HAVENX),y)
-include nx/Make.defs
-DEPPATH		+= --dep-path nx
-CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/graphics/nx}
+include nxmu/Make.defs
+DEPPATH		+= --dep-path nxmu
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/graphics/nxmu}
 endif
 
-ASRCS		= $(NXGLIB_ASRCS) $(NX_ASRCS)
+ASRCS		= $(NXGLIB_ASRCS) $(NXBE_ASRCS) $(NX_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= $(NXGLIB_CSRCS) $(NX_CSRCS)
+CSRCS		= $(NXGLIB_CSRCS) $(NXBE_CSRCS) $(NX_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
@@ -60,7 +64,7 @@ OBJS		= $(AOBJS) $(COBJS)
 
 BIN		= libgraphics$(LIBEXT)
 
-VPATH		= nxglib:nx
+VPATH		= nxglib:nxbe:nxmu
 
 all:	mklibgraphics
 .PHONY : depend clean distclean mklibgraphics gensources gen1bppsources \
