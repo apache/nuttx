@@ -167,8 +167,8 @@
 #else
 #  define NXGL_MEMSET(dest,value,width) \
    { \
-     FAR nx_pixel_t *_ptr = (FAR ubyte*)dest; \
-     nxgl_coord_t   _npix = width; \
+     FAR NXGL_PIXEL_T *_ptr = (FAR NXGL_PIXEL_T*)dest; \
+     nxgl_coord_t     _npix = width; \
      while (_npix--) \
        { \
          *_ptr++ = value; \
@@ -176,9 +176,9 @@
    }
 #  define NXGL_MEMCPY(dest,src,width) \
    { \
-     FAR nx_pixel_t *_dptr = (FAR ubyte*)dest; \
-     FAR nx_pixel_t *_sptr = (FAR ubyte*)src; \
-     nxgl_coord_t    _npix = width; \
+     FAR NXGL_PIXEL_T *_dptr = (FAR NXGL_PIXEL_T*)dest; \
+     FAR NXGL_PIXEL_T *_sptr = (FAR NXGL_PIXEL_T*)src; \
+     nxgl_coord_t      _npix = width; \
      while (_npix--) \
        { \
          *_dptr++ = *_sptr++; \
