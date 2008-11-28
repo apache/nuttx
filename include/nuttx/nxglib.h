@@ -411,6 +411,18 @@ EXTERN void nxgl_runoffset(FAR struct nxgl_run_s *dest,
                            nxgl_coord_t dx, nxgl_coord_t dy);
 
 /****************************************************************************
+ * Name: nxgl_runcopy
+ *
+ * Description:
+ *   This is essentially memcpy for runs.  We don't do structure assignments
+ *   because some compilers are not good at that.
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_runcopy(FAR struct nxgl_run_s *dest,
+                         FAR const struct nxgl_run_s *src);
+
+/****************************************************************************
  * Name: nxgl_trapoffset
  *
  * Description:
@@ -421,6 +433,18 @@ EXTERN void nxgl_runoffset(FAR struct nxgl_run_s *dest,
 EXTERN void nxgl_trapoffset(FAR struct nxgl_trapezoid_s *dest,
                             FAR const struct nxgl_trapezoid_s *src,
                             nxgl_coord_t dx, nxgl_coord_t dy);
+
+/****************************************************************************
+ * Name: nxgl_trapcopy
+ *
+ * Description:
+ *   This is essentially memcpy for trapezoids.  We don't do structure
+ *   assignments because some compilers are not good at that.
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_trapcopy(FAR struct nxgl_trapezoid_s *dest,
+                          FAR const struct nxgl_trapezoid_s *src);
 
 #undef EXTERN
 #if defined(__cplusplus)

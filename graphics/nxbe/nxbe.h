@@ -287,6 +287,26 @@ EXTERN void nxbe_fill(FAR struct nxbe_window_s *wnd,
                       nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
+ * Name: nxbe_filltrapezoid
+ *
+ * Description:
+ *  Fill the specified rectangle in the window with the specified color
+ *
+ * Input Parameters:
+ *   wnd  - The window structure reference
+ *   rect - The location to be filled
+ *   col  - The color to use in the fill
+ *
+ * Return:
+ *   None
+ *
+ ****************************************************************************/
+
+EXTERN void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
+                               FAR const struct nxgl_trapezoid_s *trap,
+                               nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+
+/****************************************************************************
  * Name: nxbe_move
  *
  * Description:
