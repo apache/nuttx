@@ -16,7 +16,7 @@
   </b></big></h1>
   <p><small>by</small></p>
   <p>Gregory Nutt</p>
-  <p><small>Last Update: November 26, 2008</small></p>
+  <p><small>Last Update: November 28, 2008</small></p>
 </center>
 
 <center><h1>Table of Contents</h1></center>
@@ -1652,7 +1652,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
 </ul>
 
-<h2>SPI-based MMC/SD driver<h2>
+<h2>SPI-based MMC/SD driver</h2>
 <ul>
   <li>
     <code>CONFIG_MMCSD_NSLOTS</code>: Number of MMC/SD slots supported by the driver. Default is one.
@@ -1851,6 +1851,66 @@ The system can be re-made subsequently by just typing <code>make</code>.
   <li>
     <code>CONFIG_USBSTRG_REMOVABLE</code>:
     Select if the media is removable
+  </li>
+</ul>
+
+<h2>Graphics related configuration settings</h3>
+<ul>
+  <li>
+    <code>CONFIG_NXGRAPHICS</code>
+    Enables overall support for graphics library and NX
+  </li>
+</ul>
+
+<h3>NX configuration setting</h3>
+<ul>
+  <li>
+    <code>CONFIG_NX_MULTIUSER</code>
+    Configures NX in multi-user mode
+  </li>
+  <li>
+    <code>CONFIG_NX_NPLANES</code>
+    Some YUV color formats requires support for multiple planes,
+    one for each color component.  Unless you have such special
+    hardware, this value should be undefined or set to 1
+  </li>
+  <li>
+    <code>CONFIG_NXGLIB_DISABLE_1BPP</code>, <code>CONFIG_NXGLIB_DISABLE_2BPP</code>,
+    <code>CONFIG_NXGLIB_DISABLE_4BPP</code>, <code>CONFIG_NXGLIB_DISABLE_8BPP</code>
+    <code>CONFIG_NXGLIB_DISABLE_16BPP</code>, <code>CONFIG_NXGLIB_DISABLE_24BPP</code>, and
+    <code>CONFIG_NXGLIB_DISABLE_32BPP
+    NX supports a variety of pixel depths.  You can save some
+    memory by disabling support for unused color depths.
+  </li>
+  <li>
+    <code>CONFIG_NXGL_PACKEDMSFIRST</code>
+    If a pixel depth of less than 8-bits is used, then NX needs
+    to know if the pixels pack from the MS to LS or from LS to MS
+  </li>
+  <li>
+    <code>CONFIG_NX_MOUSE</code>
+    Build in support for mouse input
+  </li>
+  <li>
+    <code>CONFIG_NX_KBD</code>
+    Build in support of keypad/keyboard input
+  </li>
+</ul>
+
+<h3>NX Multi-user only options</h3>
+<ul>
+  <li>
+    <code>CONFIG_NX_BLOCKING</code>
+    Open the client message queues in blocking mode.  In this case,
+    <code>nx_eventhandler()</code> will never return.
+  </li>
+  <li>
+    <code>CONFIG_NX_MXSERVERMSGS</code> and <code>CONFIG_NX_MXCLIENTMSGS</code>
+    Specifies the maximum number of messages that can fit in
+    the message queues.  No additional resources are allocated, but
+    this can be set to prevent flooding of the client or server with
+    too many messages (<code>CONFIG_PREALLOC_MQ_MSGS</code> controls how many
+    messages are pre-allocated).
   </li>
 </ul>
 
