@@ -433,6 +433,39 @@ EXTERN int up_prioritize_irq(int irq, int priority);
 #endif
 
 /****************************************************************************
+ * Name: up_mdelay and up_udelay
+ *
+ * Description:
+ *   Some device drivers may require that the plaform-specific logic
+ *   provide these timing loops for short delays.
+ *
+ ***************************************************************************/
+
+EXTERN void up_mdelay(unsigned int milliseconds);
+EXTERN void up_udelay(unsigned int microseconds);
+
+/****************************************************************************
+ * Name: up_fbinitialize, up_fbuninitialize, up_fbgetvplane
+ *
+ * Description:
+ *   If an architecture supports a framebuffer, then it must provide APIs
+ *   to access the framebuffer as follows:
+ *
+ *   up_fbinitialize   - Initialize the video hardware
+ *   up_fbgetvplane    - Return a a reference to the framebuffer object for
+ *                       the specified video plane.  Most OSDs support
+ *                       multiple planes of video.
+ *   up_fbuninitialize - Unitialize the framebuffer support
+ *
+ ***************************************************************************/
+
+struct fb_vtable_s; /* See nuttx/fb.h */
+
+EXTERN int up_fbinitialize(void);
+EXTERN FAR struct fb_vtable_s *up_fbgetvplane(int vplane);
+EXTERN void fb_uninitialize(void);
+
+/****************************************************************************
  * These are standard interfaces that are exported by the OS
  * for use by the architecture specific logic
  ****************************************************************************/
@@ -462,18 +495,6 @@ EXTERN void sched_process_timer(void);
  ***************************************************************************/
 
 EXTERN void irq_dispatch(int irq, FAR void *context);
-
-/****************************************************************************
- * Name: up_mdelay and up_udelay
- *
- * Description:
- *   Some device drivers may require that the plaform-specific logic
- *   provide these timing loops for short delays.
- *
- ***************************************************************************/
-
-EXTERN void up_mdelay(unsigned int milliseconds);
-EXTERN void up_udelay(unsigned int microseconds);
 
 /****************************************************************************
  * Debug interfaces exported by the architecture-specific logic

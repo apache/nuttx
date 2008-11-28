@@ -336,10 +336,23 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_getfbobject
+ * Name: up_fbinitialize
  *
  * Description:
- *   Get a reference to the framebuffer object
+ *   Initialize the video hardware
+ *
+ ****************************************************************************/
+
+int up_fbinitialize(void)
+{
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_fbgetvplane
+ *
+ * Description:
+ *   Return a a reference to the framebuffer object for the specified video plane.
  *
  * Input parameters:
  *   None
@@ -347,9 +360,25 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
  * Returned value:
  *   Reference to the framebuffer object (NULL on failure)
  *
+ ***************************************************************************/
+
+FAR struct fb_vtable_s *up_fbgetvplane(int vplane)
+{
+  if (vplane == 0)
+    {
+      return &g_fbobject;
+    }
+  else
+    {
+      return NULL;
+    }
+}
+
+/****************************************************************************
+ * Name: up_fbteardown
  ****************************************************************************/
 
-FAR const struct fb_vtable_s *up_getfbobject(void)
+void fb_uninitialize(void)
 {
-  return &g_fbobject;
 }
+
