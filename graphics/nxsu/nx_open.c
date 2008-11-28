@@ -97,6 +97,20 @@ static inline int nxsu_setup(FAR struct fb_vtable_s *fb,
     }
 #endif
 
+  /* Initialize the non-NULL elements of the background window */
+
+  fe->be.bkgd.be = &fe->be;
+
+  fe->be.bkgd.bounds.pt2.x = fe->be.vinfo.xres;
+  fe->be.bkgd.bounds.pt2.y = fe->be.vinfo.yres;
+
+  /* Complete initialization of the server state structure.  The
+   * window list contains only one element:  The background window
+   * with nothing else above or below it
+   */
+
+  fe->be.topwnd = &fe->be.bkgd;
+
  /* Initialize the mouse position */
 
 #ifdef CONFIG_NX_MOUSE
