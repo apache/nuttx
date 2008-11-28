@@ -1357,6 +1357,10 @@ static int dm320_setcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_setcurs
 
 /****************************************************************************
  * Name: up_fbinitialize
+ *
+ * Description:
+ *   Initialize the video hardware
+ *
  ****************************************************************************/
 
 int up_fbinitialize(void)
@@ -1379,46 +1383,43 @@ int up_fbinitialize(void)
 }
 
 /****************************************************************************
- * Name: up_getvid0vtable
- ****************************************************************************/
+ * Name: up_fbgetvplane
+ *
+ * Description:
+ *   Return a a reference to the framebuffer object for the specified video plane.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned value:
+ *   Reference to the framebuffer object (NULL on failure)
+ *
+ ***************************************************************************/
 
+FAR struct fb_vtable_s *up_fbgetvplane(int vplane)
+{
+  switch (vplane)
+    {
 #ifndef CONFIG_DM320_VID0_DISABLE
-FAR struct fb_vtable_s up_getvid0vtable(void)
-{
-  return g_vid0vtable;
-}
+      case DM320_VIDWIN0: /* VID0 window */
+        return &g_vid0vtable;
 #endif
-
-/****************************************************************************
- * Name: up_getvid1vtable
- ****************************************************************************/
-
 #ifndef CONFIG_DM320_VID1_DISABLE
-FAR struct fb_vtable_s up_getvid1vtable(void)
-{
-  return g_vid1vtable;
-}
+      case DM320_VIDWIN1: /* VID1 window */
+        return &g_vid1vtable;
 #endif
-
-/****************************************************************************
- * Name: up_getosd0vtable
- ****************************************************************************/
-
 #ifndef CONFIG_DM320_OSD0_DISABLE
-FAR struct fb_vtable_s up_getosd0vtable(void)
-{
-  return g_osd0vtable;
-}
+      case DM320_OSDWIN0: /* OSD2 window */
+        return &g_osd0vtable;
 #endif
-
-/****************************************************************************
- * Name: up_getosd1vtable
- ****************************************************************************/
-
 #ifndef CONFIG_DM320_OSD1_DISABLE
-FAR struct fb_vtable_s up_getosd1vtable(void)
-{
-  return g_osd1vtable;
+      case DM320_OSDWIN1: /* OSD2 window */
+        return &g_osd1vtable;
+#endif
+      default:
+        break;
+    }
+  return NULL;
 }
 #endif
 
@@ -1426,7 +1427,7 @@ FAR struct fb_vtable_s up_getosd1vtable(void)
  * Name: up_fbteardown
  ****************************************************************************/
 
-void cleanup_module(void)
+void fb_teardown(void)
 {
   /* Disable the hardware */
 
