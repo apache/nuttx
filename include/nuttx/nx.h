@@ -82,14 +82,14 @@ typedef FAR void *NXWINDOW;
 
 struct nx_callback_s
 {
-  void (*redraw)(NXWINDOW handle, FAR const struct nxgl_rect_s *rect, boolean more);
-  void (*position)(NXWINDOW handle, FAR const struct nxgl_rect_s *size,
+  void (*redraw)(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect, boolean more);
+  void (*position)(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
                    FAR const struct nxgl_point_s *pos);
 #ifdef CONFIG_NX_MOUSE
-  void (*mousein)(NXWINDOW handle, FAR const struct nxgl_point_s *pos, ubyte buttons);
+  void (*mousein)(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos, ubyte buttons);
 #endif
 #ifdef CONFIG_NX_KBD
-  void (*kbdin)(NXWINDOW handle, ubyte nch, const ubyte *ch);
+  void (*kbdin)(NXWINDOW hwnd, ubyte nch, const ubyte *ch);
 #endif
 };
 
