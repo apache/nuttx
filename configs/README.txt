@@ -368,6 +368,43 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_USBSTRG_REMOVABLE
 		  Select if the media is removable
 
+	Graphics related configuration settings
+
+		CONFIG_NXGRAPHICS
+		  Enables overall support for graphics library and NX
+		CONFIG_NX_MULTIUSER
+		  Configures NX in multi-user mode
+		CONFIG_NX_NPLANES
+		  Some YUV color formats requires support for multiple planes,
+		  one for each color component.  Unless you have such special
+		  hardware, this value should be undefined or set to 1
+		CONFIG_NXGLIB_DISABLE_1BPP, CONFIG_NXGLIB_DISABLE_2BPP,
+		CONFIG_NXGLIB_DISABLE_4BPP, CONFIG_NXGLIB_DISABLE_8BPP,
+		CONFIG_NXGLIB_DISABLE_16BPP, CONFIG_NXGLIB_DISABLE_24BPP, and
+		CONFIG_NXGLIB_DISABLE_32BPP
+		  NX supports a variety of pixel depths.  You can save some
+		  memory by disabling support for unused color depths.
+		CONFIG_NXGL_PACKEDMSFIRST
+		  If a pixel depth of less than 8-bits is used, then NX needs
+		  to know if the pixels pack from the MS to LS or from LS to MS
+		CONFIG_NX_MOUSE
+		  Build in support for mouse input
+		CONFIG_NX_KBD
+		  Build in support of keypad/keyboard input
+
+	NX Multi-user only options:
+
+		CONFIG_NX_BLOCKING
+		  Open the client message queues in blocking mode.  In this case,
+		  nx_eventhandler() will never return.
+		CONFIG_NX_MXSERVERMSGS and CONFIG_NX_MXCLIENTMSGS
+		  Specifies the maximum number of messages that can fit in
+		  the message queues.  No additional resources are allocated, but
+		  this can be set to prevent flooding of the client or server with
+		  too many messages (CONFIG_PREALLOC_MQ_MSGS controls how many
+		  messages are pre-allocated).
+
+
 	Stack and heap information
 
 		CONFIG_BOOT_FROM_FLASH - Some configurations support XIP

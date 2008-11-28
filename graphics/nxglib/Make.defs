@@ -35,8 +35,8 @@
 
 NXGLIB_ASRCS	=
 
-#RFILL1_CSRCS	= nxglib_fillrectangle_1bpp.c nxglib_fillrectangle_2bpp.c \
-#		  nxglib_fillrectangle_4bpp.c
+RFILL1_CSRCS	= nxglib_fillrectangle_1bpp.c nxglib_fillrectangle_2bpp.c \
+		  nxglib_fillrectangle_4bpp.c
 RFILL2_CSRCS	= nxglib_fillrectangle_8bpp.c nxglib_fillrectangle_16bpp.c \
 		  nxglib_fillrectangle_24bpp.c nxglib_fillrectangle_32bpp.c
 #TFILL1_CSRCS	= nxglib_filltrapezoid_1bpp.c nxglib_filltrapezoid_2bpp.c \
