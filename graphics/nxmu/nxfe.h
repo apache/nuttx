@@ -219,7 +219,7 @@ struct nxclimsg_mousein_s
 
 /* This message reports a new keypad event to a particular window */
 
-#ifdef CONFIG_NX_KBDIN
+#ifdef CONFIG_NX_KBD
 struct nxclimsg_key
 {
   uint32 msgid;                  /* NX_CLIMSG_KBDIN */
@@ -370,7 +370,7 @@ struct nxsvrmsg_mousein_s
  * interrupt handler).
  */
 
-#ifdef CONFIG_NX_EXTERNKBD
+#ifdef CONFIG_NX_KBD
 struct nxsvrmsg_kbdin_s
 {
   uint32     msgid;                  /* NX_SVRMSG_KBDIN */
