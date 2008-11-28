@@ -91,6 +91,7 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
   nxgl_mxpixel_t color)
 {
   unsigned int stride;
+  unsigned int width;
   ubyte *line;
   int nrows;
   b16_t x1;
@@ -99,6 +100,13 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
   nxgl_coord_t y2;
   b16_t dx1dy;
   b16_t dx2dy;
+
+#if NXGLIB_BITSPERPIXEL < 8
+  ubyte *dest;
+  ubyte  mpixel = NXGL_MULTIPIXEL(color);
+  ubyte  mask;
+  int    lnlen;
+#endif
 
   /* Get the width of the framebuffer in bytes */
 
@@ -155,10 +163,11 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
           ngl_swap(dx1dy, dx2dy, tmp);
         }
 
-      /* Convert the positions to integer */
+      /* Convert the positions to integer and get the run width */
 
-      ix1 = b16toi(x1);
-      ix2 = b16toi(x2);
+      ix1   = b16toi(x1);
+      ix2   = b16toi(x2);
+      width = ix2 - ix1 + 1;
 
       /* Handle some corner cases where we draw nothing.  Otherwise, we will
        * always draw at least one pixel.
@@ -174,9 +183,50 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
           ix1 = ngl_clipl(ix1, bounds->pt1.x);
           ix2 = ngl_clipr(ix2, bounds->pt2.x);
 
+#if NXGLIB_BITSPERPIXEL < 8
+          /* Handle masking of the fractional initial byte */
+
+#ifdef CONFIG_NXGL_PACKEDMSFIRST
+          mask  = (ubyte)(0xff >> (8 - NXGL_REMAINDERX(ix1));
+#else
+          mask  = (ubyte)(0xff << (8 - NXGL_REMAINDERX(ix1)));
+#endif
+          dest  = line;
+          lnlen = width;
+
+          if (lnlen > 1 && mask)
+            {
+              dest[0] = (dest[0] & ~mask) | (mpixel & mask);
+              mask = 0xff;
+              dest++;
+              lnlen--;
+            }
+
+          /* Handle masking of the fractional final byte */
+
+#ifdef CONFIG_NXGL_PACKEDMSFIRST
+          mask &= (ubyte)(0xff << (8 - NXGL_REMAINDERX(ix2)));
+#else
+          mask &= (ubyte)(0xff >> (8 - NXGL_REMAINDERX(ix2)));
+#endif
+          if (lnlen > 0 && mask)
+            {
+              dest[lnlen-1] = (dest[lnlen-1] & ~mask) | (mpixel & mask);
+              lnlen--;
+            }
+
+          /* Handle all of the unmasked bytes in-between */
+
+          if (lnlen > 0)
+            {
+              NXGL_MEMSET(dest, (NXGL_PIXEL_T)color, lnlen);
+            }
+
+#else
           /* Then draw the run from (line + ix1) to (line + ix2) */
 
-          NXGL_MEMSET(line + NXGL_SCALEX(ix1), (NXGL_PIXEL_T)color, ix2 - ix1 + 1);
+          NXGL_MEMSET(line + NXGL_SCALEX(ix1), (NXGL_PIXEL_T)color, width);
+#endif
         }
 
       /* Move to the start of the next line */

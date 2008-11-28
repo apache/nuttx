@@ -63,7 +63,7 @@
 
 #  define NXGL_PIXELSHIFT          3
 #  define NXGL_PIXELMASK           7
-#  define NXGL_MULTIPIXEL(p)       ((p) ? 0xff | 0x00)
+#  define NXGL_MULTIPIXEL(p)       ((p) ? 0xff : 0x00)
 #  define NXGL_PIXEL_T             ubyte
 
 #elif NXGLIB_BITSPERPIXEL == 2
