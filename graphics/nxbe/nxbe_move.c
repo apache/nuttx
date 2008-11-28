@@ -43,7 +43,7 @@
 #include <nuttx/nxglib.h>
 
 #include "nxbe.h"
-//#include "nxfe.h"
+#include "nxfe.h"
 
 /****************************************************************************
  * Pre-Processor Definitions

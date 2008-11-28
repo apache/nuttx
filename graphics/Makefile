@@ -46,11 +46,14 @@ include nxbe/Make.defs
 DEPPATH		+= --dep-path nxbe
 CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/graphics/nxbe}
 
-HAVENX		:= ${shell if [ -d nxmu ]; then echo "y"; else echo "n";fi}
-ifeq ($(HAVENX),y)
+ifeq ($(CONFIG_NX_MULTIUSER),y)
 include nxmu/Make.defs
 DEPPATH		+= --dep-path nxmu
 CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/graphics/nxmu}
+else
+include nxsu/Make.defs
+DEPPATH		+= --dep-path nxsu
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/graphics/nxsu}
 endif
 
 ASRCS		= $(NXGLIB_ASRCS) $(NXBE_ASRCS) $(NX_ASRCS)
@@ -64,7 +67,11 @@ OBJS		= $(AOBJS) $(COBJS)
 
 BIN		= libgraphics$(LIBEXT)
 
+ifeq ($(CONFIG_NX_MULTIUSER),y)
 VPATH		= nxglib:nxbe:nxmu
+else
+VPATH		= nxglib:nxbe:nxsu
+endif
 
 all:	mklibgraphics
 .PHONY : depend clean distclean mklibgraphics gensources gen1bppsources \
