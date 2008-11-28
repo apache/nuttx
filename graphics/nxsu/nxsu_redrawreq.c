@@ -80,18 +80,16 @@
 
 void nxfe_redrawreq(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *rect)
 {
-  FAR struct nxbe_state_s  *be  = wnd->be;
-  FAR struct nxfe_state_s  *fe  = (FAR struct nxfe_state_s *)be;
-  struct nxgl_rect_s        relrect;
+  struct nxgl_rect_s relrect;
 
 #ifdef CONFIG_DEBUG
-  if (wnd)
+  if (!wnd)
     {
       return;
     }
 #endif
 
-  if (fe->cb->redraw)
+  if (wnd->cb->redraw)
     {
       /* Convert the frame rectangle to a window-relative rectangle */
 
@@ -99,7 +97,7 @@ void nxfe_redrawreq(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s 
 
       /* And request the redraw */
 
-      fe->cb->redraw((NXWINDOW)wnd, &relrect, FALSE);
+      wnd->cb->redraw((NXWINDOW)wnd, &relrect, FALSE);
     }
 }
 

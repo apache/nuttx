@@ -79,7 +79,7 @@
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect
- *   wnd    - Location to return the handle of the new window
+ *   cb     - Callbacks used to process windo events
  *
  * Return:
  *   Success: A non-NULL handle used with subsequent NX accesses
@@ -87,14 +87,14 @@
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle)
+NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb)
 {
   FAR struct nxfe_state_s *fe = (FAR struct nxfe_state_s *)handle;
   FAR struct nxbe_state_s *be = &fe->be;
   FAR struct nxbe_window_s *wnd;
 
 #ifdef CONFIG_DEBUG
-  if (!fe)
+  if (!fe || !cb)
     {
       errno = EINVAL;
       return NULL;
@@ -113,6 +113,7 @@ NXWINDOW nx_openwindow(NXHANDLE handle)
   /* Initialize the window structure */
 
   wnd->be           = be;
+  wnd->cb           = cb;
 
   /* Insert the new window at the top on the display.  topwind is
    * never NULL (it may point only at the background window, however)
@@ -123,6 +124,10 @@ NXWINDOW nx_openwindow(NXHANDLE handle)
 
   be->topwnd->above = wnd;
   be->topwnd        = wnd;
+
+  /* Report the initialize size/position of the window */
+
+  nxfe_reportposition((NXWINDOW)wnd);
 
   /* Provide the initial mouse settings */
 

@@ -589,3 +589,5 @@
 	* Added some rasterizers to the graphics library
 
 0.3.20 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+	* Initial release of a tiny windowing system for NuttX (not well tested at initial check-in)
+

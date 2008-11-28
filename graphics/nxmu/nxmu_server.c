@@ -378,7 +378,7 @@ int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb)
          case NX_SVRMSG_OPENWINDOW: /* Create a new window */
            {
              FAR struct nxsvrmsg_openwindow_s *openmsg = (FAR struct nxsvrmsg_openwindow_s *)buffer;
-             nxmu_openwindow(openmsg->conn, &fe.be, openmsg->wnd);
+             nxmu_openwindow(openmsg->conn, &fe.be, openmsg->wnd, openmsg->cb);
            }
            break;
 
@@ -454,6 +454,7 @@ int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb)
          case NX_SVRMSG_SETBGCOLOR: /* Set the color of the background */
            {
              FAR struct nxsvrmsg_setbgcolor_s *bgcolormsg = (FAR struct nxsvrmsg_setbgcolor_s *)buffer;
+             nxgl_colorcopy(fe.be.bgcolor, bgcolormsg->color);
              nxbe_fill(&fe.be.bkgd, &fe.be.bkgd.bounds, bgcolormsg->color);
            }
            break;
@@ -478,8 +479,15 @@ int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb)
          /* Messages sent to the backgound window ***************************/
 
          case NX_CLIMSG_REDRAW: /* Re-draw the background window */
-           nxbe_redraw(&fe.be, &fe.be.bkgd, &fe.be.bkgd.bounds);
-           break;
+            {
+              FAR struct nxclimsg_redraw_s *redraw = (FAR struct nxclimsg_redraw_s *)buffer;
+              DEBUGASSERT(redraw->wnd == &fe.be.bkgd);
+              gvdbg("Re-draw background rect={(%d,%d),(%d,%d)}\n",
+                    redraw->rect.pt1.x, redraw->rect.pt1.y,
+                    redraw->rect.pt2.x, redraw->rect.pt2.y);
+              nxbe_fill(&fe.be.bkgd, &redraw->rect, fe.be.bgcolor);
+            }
+          break;
 
          case NX_CLIMSG_MOUSEIN:      /* Ignored */
          case NX_CLIMSG_KBDIN:

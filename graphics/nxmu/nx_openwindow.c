@@ -79,7 +79,7 @@
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect
- *   wnd    - Location to return the handle of the new window
+ *   cb     - Callbacks used to process windo events
  *
  * Return:
  *   Success: A non-NULL handle used with subsequent NX accesses
@@ -87,12 +87,20 @@
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle)
+NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb)
 {
   FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
   FAR struct nxbe_window_s *wnd;
   struct nxsvrmsg_openwindow_s outmsg;
   int ret;
+
+#ifdef CONFIG_DEBUG
+  if (!conn || !cb)
+    {
+      errno = EINVAL;
+      return NULL;
+    }
+#endif
 
   /* Pre-allocate the window structure */
 
@@ -108,6 +116,7 @@ NXWINDOW nx_openwindow(NXHANDLE handle)
   outmsg.msgid = NX_SVRMSG_OPENWINDOW;
   outmsg.conn  = conn;
   outmsg.wnd   = wnd;
+  outmsg.cb    = cb;
 
   ret = mq_send(conn->cwrmq, &outmsg, sizeof(struct nxsvrmsg_openwindow_s), NX_SVRMSG_PRIO);
   if (ret < 0)

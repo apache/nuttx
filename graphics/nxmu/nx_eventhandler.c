@@ -128,6 +128,7 @@ int nx_eventhandler(NXHANDLE handle)
 {
   FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
   struct nxsvrmsg_s      *msg;
+  struct nxbe_window_s   *wnd;
   ubyte                   buffer[NX_MXCLIMSGLEN];
   int                     nbytes;
 
@@ -182,7 +183,9 @@ int nx_eventhandler(NXHANDLE handle)
       if (conn->cb->redraw)
         {
           FAR struct nxclimsg_redraw_s *redraw = (FAR struct nxclimsg_redraw_s *)buffer;
-          conn->cb->redraw((NXWINDOW)redraw->wnd, &redraw->rect, redraw->more);
+          wnd = redraw->wnd;
+          DEBUGASSERT(wnd);
+          wnd->cb->redraw((NXWINDOW)wnd, &redraw->rect, redraw->more);
         }
       break;
 
@@ -190,7 +193,9 @@ int nx_eventhandler(NXHANDLE handle)
       if (conn->cb->position)
         {
           FAR struct nxclimsg_newposition_s *postn = (FAR struct nxclimsg_newposition_s *)buffer;
-          conn->cb->position((NXWINDOW)postn->wnd, &postn->size, &postn->pos);
+          wnd = postn->wnd;
+          DEBUGASSERT(wnd);
+          wnd->cb->position((NXWINDOW)wnd, &postn->size, &postn->pos, &postn->bounds);
         }
       break;
 
@@ -199,7 +204,9 @@ int nx_eventhandler(NXHANDLE handle)
       if (conn->cb->mousein)
         {
           FAR struct nxclimsg_mousein_s *mouse = (FAR struct nxclimsg_mousein_s *)buffer;
-          conn->cb->mousein((NXWINDOW)mouse->wnd, &mouse->pos, mouse->buttons);
+          wnd = mouse->wnd;
+          DEBUGASSERT(wnd);
+          wnd->cb->mousein((NXWINDOW)wnd, &mouse->pos, mouse->buttons);
         }
       break;
 #endif
@@ -209,13 +216,15 @@ int nx_eventhandler(NXHANDLE handle)
       if (conn->cb->kbdin)
         {
           FAR struct nxclimsg_kbdin_s *kbd = (FAR struct nxclimsg_kbdin_s *)buffer;
-          conn->cb->kbdin((NXWINDOW)kbd->wnd, kbd->nch, kbd->ch);
+          wnd = kbd->wnd;
+          DEBUGASSERT(wnd);
+          wnd->cb->kbdin((NXWINDOW)wnd, kbd->nch, kbd->ch);
         }
       break;
 #endif
 
     default:
-      gdbg("Unrecogized message opcode: %d\n", (FAR struct nxsvrmsg_s *)buffer->msgid);
+      gdbg("Unrecognized message opcode: %d\n", ((FAR struct nxsvrmsg_s *)buffer)->msgid);
       break;
     }
 

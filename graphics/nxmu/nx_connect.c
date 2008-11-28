@@ -99,7 +99,6 @@ static uint32 g_nxcid    = 1;
  *
  * Input Parameters:
  *   svrmqname - The name for the server incoming message queue
- *   cb     - Callbacks used to process received NX server messages
  *
  * Return:
  *   Success: A non-NULL handle used with subsequent NX accesses
@@ -107,8 +106,7 @@ static uint32 g_nxcid    = 1;
  *
  ****************************************************************************/
 
-NXHANDLE nx_connectionstance(FAR const char *svrmqname,
-                             FAR const struct nx_callback_s *cb)
+NXHANDLE nx_connectionstance(FAR const char *svrmqname)
 {
   FAR struct nxfe_conn_s *conn;
   struct nxsvrmsg_s       msg;
@@ -119,7 +117,7 @@ NXHANDLE nx_connectionstance(FAR const char *svrmqname,
   /* Sanity checking */
 
 #ifdef CONFIG_DEBUG
-  if (!svrmqname || !cb)
+  if (!svrmqname)
     {
       errno = EINVAL;
       return NULL;
@@ -134,10 +132,6 @@ NXHANDLE nx_connectionstance(FAR const char *svrmqname,
       errno = ENOMEM;
       goto errout;
     }
-
-  /* Save the callback vtable */
-
-  conn->cb = cb;
 
   /* Create the client MQ name */
 

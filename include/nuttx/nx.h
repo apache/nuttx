@@ -53,6 +53,13 @@
 
 #define NX_DEFAULT_SERVER_MQNAME "/dev/nxs"
 
+/* Mouse button bits */
+
+#define NX_MOUSE_NOBUTTONS    0x00
+#define NX_MOUSE_LEFTBUTTON   0x01
+#define NX_MOUSE_CENTERBUTTON 0x02
+#define NX_MOUSE_RIGHTBUTTON  0x04
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -75,19 +82,93 @@ typedef FAR void *NXWINDOW;
 
 /* NX server callbacks ******************************************************/
 
-/* These define callbacks that must be provided to nx_connect.  These
+/* These define callbacks that must be provided to nx_openwindow.  These
  * callbacks will be invoked as part of the processing performed by
- * nx_message()
+ * nx_eventhandler()
  */
 
 struct nx_callback_s
 {
+  /**************************************************************************
+   * Name: redraw
+   *
+   * Descripton:
+   *   NX requests that the client re-draw the portion of the window within
+   *   with rectangle.
+   *
+   * Input Parameters:
+   *   hwnd - Window handle
+   *   rect - The rectangle that needs to be re-drawn (in window relative
+   *          coordinates
+   *   more - TRUE:  More re-draw requests will follow
+   *
+   * Returned Value:
+   *   None
+   *
+   **************************************************************************/
+
   void (*redraw)(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect, boolean more);
+
+  /**************************************************************************
+   * Name: position
+   *
+   * Descripton:
+   *   The size or position of the window has changed (or the window was
+   *   just created with zero size.
+   *
+   * Input Parameters:
+   *   hwnd   - Window handle
+   *   size   - The size of the window (pt1 should always be zero)
+   *   pos    - The position of the upper left hand corner of the window on
+   *            the overalll display
+   *   bounds - The bounding rectangle that the describes the entire
+   *            display
+   *
+   * Returned Value:
+   *   None
+   *
+   **************************************************************************/
+
   void (*position)(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
-                   FAR const struct nxgl_point_s *pos);
+                   FAR const struct nxgl_point_s *pos,
+                   FAR const struct nxgl_rect_s *bounds);
+
+  /**************************************************************************
+   * Name: mousein
+   *
+   * Descripton:
+   *   New mouse data is available for the window
+   *
+   * Input Parameters:
+   *   hwnd    - Window handle
+   *   pos     - The (x,y) position of the mouse
+   *   buttons - See NX_MOUSE_* definitions
+   *
+   * Returned Value:
+   *   None
+   *
+   **************************************************************************/
+
 #ifdef CONFIG_NX_MOUSE
   void (*mousein)(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos, ubyte buttons);
 #endif
+
+  /**************************************************************************
+   * Name: kbdin
+   *
+   * Descripton:
+   *   New keyboard/keypad data is available for the window
+   *
+   * Input Parameters:
+   *   hwnd - Window handle
+   *   nch  - The number of characters that are available in ch[]
+   *   ch   - The array of characters
+   *
+   * Returned Value:
+   *   None
+   *
+   **************************************************************************/
+
 #ifdef CONFIG_NX_KBD
   void (*kbdin)(NXWINDOW hwnd, ubyte nch, const ubyte *ch);
 #endif
@@ -135,7 +216,7 @@ extern "C" {
 
 #ifdef CONFIG_NX_MULTIUSER
 EXTERN int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb);
-#  define nx_run(fb) (NX_DEFAULT_SERVER_MQNAME, fb)
+#  define nx_run(fb) nx_runinstance(NX_DEFAULT_SERVER_MQNAME, fb)
 #endif
 
 /****************************************************************************
@@ -155,7 +236,6 @@ EXTERN int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb);
  *
  * Input Parameters:
  *   svrmqname - The name for the server incoming message queue
- *   cb        - Callbacks used to process received NX server messages
  *
  * Return:
  *   Success: A non-NULL handle used with subsequent NX accesses
@@ -164,9 +244,8 @@ EXTERN int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb);
  ****************************************************************************/
 
 #ifdef CONFIG_NX_MULTIUSER
-EXTERN NXHANDLE nx_connectionstance(FAR const char *svrmqname,
-                                    FAR const struct nx_callback_s *cb);
-#  define nx_connect(cb) nx_connectionstance(NX_DEFAULT_SERVER_MQNAME, cb)
+EXTERN NXHANDLE nx_connectionstance(FAR const char *svrmqname);
+#  define nx_connect(cb) nx_connectionstance(NX_DEFAULT_SERVER_MQNAME)
 #endif
 
 /****************************************************************************
@@ -190,8 +269,7 @@ EXTERN NXHANDLE nx_connectionstance(FAR const char *svrmqname,
  ****************************************************************************/
 
 #ifndef CONFIG_NX_MULTIUSER
-EXTERN NXHANDLE nx_open(FAR struct fb_vtable_s *fb,
-                        FAR const struct nx_callback_s *cb);
+EXTERN NXHANDLE nx_open(FAR struct fb_vtable_s *fb);
 #endif
 
 /****************************************************************************
@@ -271,7 +349,7 @@ EXTERN int nx_eventhandler(NXHANDLE handle);
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect
- *   wnd    - Location to return the handle of the new window
+ *   cb     - Callbacks used to process window events
  *
  * Return:
  *   Success: A non-NULL handle used with subsequent NX accesses
@@ -279,7 +357,8 @@ EXTERN int nx_eventhandler(NXHANDLE handle);
  *
  ****************************************************************************/
 
-EXTERN NXWINDOW nx_openwindow(NXHANDLE handle);
+EXTERN NXWINDOW nx_openwindow(NXHANDLE handle,
+                              FAR const struct nx_callback_s *cb);
 
 /****************************************************************************
  * Name: nx_closewindow
@@ -333,6 +412,23 @@ EXTERN int nx_getposition(NXWINDOW hwnd);
 EXTERN int nx_setposition(NXWINDOW hwnd, FAR struct nxgl_point_s *pos);
 
 /****************************************************************************
+ * Name: nx_setsize
+ *
+ * Description:
+ *  Set the size of the selected window
+ *
+ * Input Parameters:
+ *   hwnd   - The window handle
+ *   size   - The new size of the window.
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nx_setsize(NXWINDOW hwnd, FAR struct nxgl_rect_s *size);
+
+/****************************************************************************
  * Name: nx_raise
  *
  * Description:
@@ -380,7 +476,7 @@ EXTERN int nx_lower(NXWINDOW hwnd);
  *
  ****************************************************************************/
 
-EXTERN int nx_fill(NXWINDOW hwnd, FAR struct nxgl_rect_s *rect,
+EXTERN int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
                    nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************

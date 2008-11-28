@@ -57,6 +57,10 @@
 
 /* Configuration ************************************************************/
 
+#ifdef CONFIG_DISABLE_MQUEUE
+#  error "Message queues are disabled(CONFIG_DISABLE_MQUEUE)"
+#endif
+
 #ifndef CONFIG_NX_MXSERVERMSGS
 #  define CONFIG_NX_MXSERVERMSGS 32 /* Number of pending messages in server MQ */
 #endif
@@ -203,6 +207,7 @@ struct nxclimsg_newposition_s
   FAR struct nxbe_window_s *wnd; /* The window whose position/size has changed */
   FAR struct nxgl_rect_s size;   /* The current window size */
   FAR struct nxgl_point_s pos;   /* The current window position */
+  FAR struct nxgl_rect_s bounds; /* Size of screen */
 };
 
 /* This message reports a new mouse event to a particular window */
@@ -249,6 +254,7 @@ struct nxsvrmsg_openwindow_s
   uint32 msgid;                      /* NX_SVRMSG_OPENWINDOW */
   FAR struct nxfe_conn_s *conn;      /* The specific connection sending the message */
   FAR struct nxbe_window_s *wnd;     /* The pre-allocated window structure */
+  FAR const struct nx_callback_s *cb; /* Event handling callbacks */
 };
 
 /* This message informs the server that client wishes to close a window */
@@ -429,7 +435,8 @@ EXTERN void nxmu_semtake(sem_t *sem);
 
 EXTERN void nxmu_openwindow(FAR struct nxfe_conn_s *conn,
                             FAR struct nxbe_state_s *be,
-                            FAR struct nxbe_window_s *wnd);
+                            FAR struct nxbe_window_s *wnd,
+                            FAR const struct nx_callback_s *cb);
 
 /****************************************************************************
  * Name: nxfe_reportposition

@@ -58,7 +58,15 @@
 #endif
 
 #ifndef CONFIG_EXAMPLES_NX_BGCOLOR
-#  define CONFIG_EXAMPLES_NX_BGCOLOR 0
+#  define CONFIG_EXAMPLES_NX_BGCOLOR ' '
+#endif
+
+#ifndef CONFIG_EXAMPLES_NX_COLOR1
+#  define CONFIG_EXAMPLES_NX_COLOR1 '1'
+#endif
+
+#ifndef CONFIG_EXAMPLES_NX_COLOR2
+#  define CONFIG_EXAMPLES_NX_COLOR2 '2'
 #endif
 
 /* Debug ********************************************************************/

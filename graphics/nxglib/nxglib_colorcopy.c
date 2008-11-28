@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxmu/nxmu__mouse.c
+ * graphics/nxglib/nxsglib_colorcopy.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,13 +40,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/nx.h>
-#include "nxfe.h"
-
-#ifdef CONFIG_NX_MOUSE
+#include <nuttx/fb.h>
+#include <nuttx/nxglib.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -59,10 +54,6 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-static struct nxgl_point_s g_mpos;
-static struct nxgl_rect_s g_mrange;
-static struct g_mbutton;
 
 /****************************************************************************
  * Public Data
@@ -77,102 +68,22 @@ static struct g_mbutton;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxmu_mouseinit
+ * Name: nxgl_colorcopy
  *
  * Description:
- *   Initialize with the mouse in the center of the display
+ *   This is essentially memcpy for colors.  This does very little for us
+ *   other than hide all of the conditional compilation for planar colors
+ *   in one place.
  *
  ****************************************************************************/
 
-void nxmu_mouseinit(int x, int y)
+void nxgl_colorcopy(nxgl_mxpixel_t dest[CONFIG_NX_NPLANES],
+                    const nxgl_mxpixel_t src[CONFIG_NX_NPLANES])
 {
-  g_mrange.x = x;
-  g_mrange.y = y;
-  g_mpos.x   = x / 2;
-  g_mpos.y   = y / 2;
-  g_mbutton  = 0;
-}
+  int i;
 
-/****************************************************************************
- * Name: nxmu_mousereport
- *
- * Description:
- *   Report mouse position info to the specified window
- *
- ****************************************************************************/
-
-void nxmu_mousereport(struct nxbe_window_s *wnd)
-{
-  struct nxclimsg_mousein_s outmsg;
-  int ret;
-
-  outmsg.msgid   = NX_CLIMSG_MOUSEIN;
-  outmsg.wnd     = wnd;
-  outmsg.pos.x   = g_mpos.x;
-  outmsg.pos.y   = g_mpos.y;
-  outmsg.buttons = g_mbutton;
-
-  ret = mq_send(wnd->conn->swrmq, outmsg, sizeof(struct nxclimsg_mousein_s), NX_SVRMSG_PRIO);
-  if (ret < 0)
+  for (i = 0; i < CONFIG_NX_NPLANES; i++)
     {
-      gdbg("mq_send failed: %d\n", errno);
+      dest[i] = src[i];
     }
 }
-
-/****************************************************************************
- * Name: nxmu_mousein
- *
- * Description:
- *   New positional data has been received from the thread or interrupt
- *   handler that manages some kind of pointing hardware.  Route that
- *   positional data to the appropriate window client.
- *
- ****************************************************************************/
-
-void nxmu_mousein(FAR struct nxfe_state_s *fe,
-                  FAR const struct nxgl_point_s *pos, int button)
-{
-  struct nxbe_window_s *wnd;
-  x_coord_t x = pos->x;
-  x_coord_t y = pos->y;
-
-  /* Clip x and y to within the bounding rectangle */
-
-  if (x < 0)
-    {
-      x = 0;
-    }
-  else if (x >= g_mbound.x)
-    {
-      x = g_mbound.x - 1;
-    }
-
-  if (y < 0)
-    {
-      y = 0;
-    }
-  else if (y >= g_mbound.y)
-    {
-      y = g_mbound.y - 1;
-    }
-
-  /* Look any change in values */
-
-  if (x != g_mpos.x || y != g_mpos.y || button != g_mbutton)
-    {
-      /* Update the mouse value */
-
-      g_mpos.x  = x;
-      g_mpos.y  = y;
-      b_mbutton = button;
-
-      /* Pick the window to receive the mouse event */
-
-      for (wnd = fe->be.topwnd; wnd; wnd = wnd->below)
-        {
-          nxmu_mousereport(wnd);
-        }
-    }
-}
-
-#endif /* CONFIG_NX_MOUSE */

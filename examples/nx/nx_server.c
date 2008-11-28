@@ -45,6 +45,7 @@
 #include <unistd.h>
 #include <sched.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/nx.h>
@@ -91,7 +92,7 @@ int nx_servertask(int argc, char *argv[])
       return 1;
     }
 
-  fb = up_fbgetvplane(CONFIG_EXAMPLES_NX_VPLANE)
+  fb = up_fbgetvplane(CONFIG_EXAMPLES_NX_VPLANE);
   if (!fb)
     {
       message("nx_serverthread: up_fbgetvplane failed, vplane=%d\n", CONFIG_EXAMPLES_NX_VPLANE);

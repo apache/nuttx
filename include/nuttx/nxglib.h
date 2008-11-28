@@ -446,6 +446,18 @@ EXTERN void nxgl_trapoffset(FAR struct nxgl_trapezoid_s *dest,
 EXTERN void nxgl_trapcopy(FAR struct nxgl_trapezoid_s *dest,
                           FAR const struct nxgl_trapezoid_s *src);
 
+/****************************************************************************
+ * Name: nxgl_colorcopy
+ *
+ * Description:
+ *   This is essentially memcpy for colors.  This does very little for us
+ *   other than hide all of the conditional compilation for planar colors
+ *   in one place.
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_colorcopy(nxgl_mxpixel_t dest[CONFIG_NX_NPLANES],
+                           const nxgl_mxpixel_t src[CONFIG_NX_NPLANES]);
 #undef EXTERN
 #if defined(__cplusplus)
 }

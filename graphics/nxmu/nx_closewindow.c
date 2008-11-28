@@ -89,6 +89,7 @@
 int nx_closewindow(NXWINDOW hwnd)
 {
   FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
+  FAR struct nxfe_conn_s *conn = wnd->conn;
   struct nxsvrmsg_closewindow_s outmsg;
   int ret;
 

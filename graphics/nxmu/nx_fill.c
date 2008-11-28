@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/nxglib.h>
 #include <nuttx/nx.h>
 
 #include "nxfe.h"
@@ -88,13 +89,12 @@
  *
  ****************************************************************************/
 
-int nx_fill(NXWINDOW hwnd, FAR struct nxgl_rect_s *rect,
+int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
             nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
   FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
   struct nxsvrmsg_fill_s  outmsg;
   int                     ret;
-  int                     i;
 
 #ifdef CONFIG_DEBUG
   if (!wnd || !wnd->conn || !rect || !color)
@@ -110,11 +110,7 @@ int nx_fill(NXWINDOW hwnd, FAR struct nxgl_rect_s *rect,
   outmsg.wnd   = wnd;
 
   nxgl_rectcopy(&outmsg.rect, rect);
-
-  for (i = 0; i < CONFIG_NX_NPLANES; i++)
-    {
-      outmsg.color[i] = color[i];
-    }
+  nxgl_colorcopy(outmsg.color, color);
 
   /* Forward the fill command to the server */
 

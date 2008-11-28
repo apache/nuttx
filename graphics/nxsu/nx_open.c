@@ -57,9 +57,27 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static void nxsu_bkgdredraw(NXWINDOW hwnd,
+                            FAR const struct nxgl_rect_s *rect, boolean more);
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
+static const struct nx_callback_s g_bkgdcb =
+{
+  nxsu_bkgdredraw,   /* redraw */
+  NULL               /* position */
+#ifdef CONFIG_NX_MOUSE
+  , NULL             /* mousein */
+#endif
+#ifdef CONFIG_NX_KBD
+  , NULL             /* my kbdin */
+#endif
+};
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -67,6 +85,21 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxsu_bkgdredraw
+ ****************************************************************************/
+
+static void nxsu_bkgdredraw(NXWINDOW hwnd,
+                            FAR const struct nxgl_rect_s *rect, boolean more)
+{
+  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
+  FAR struct nxbe_state_s  *be  = wnd->be;
+
+  gvdbg("BG redraw rect={(%d,%d),(%d,%d)}\n",
+        rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y);
+  nxbe_fill(wnd, &wnd->bounds, be->bgcolor);
+}
 
 /****************************************************************************
  * Name: nxsu_setup
@@ -97,9 +130,11 @@ static inline int nxsu_setup(FAR struct fb_vtable_s *fb,
     }
 #endif
 
-  /* Initialize the non-NULL elements of the background window */
+  /* Initialize the non-NULL elements of the back-end structure window */
+  /* Initialize the background window */
 
   fe->be.bkgd.be = &fe->be;
+  fe->be.bkgd.cb = &g_bkgdcb;
 
   fe->be.bkgd.bounds.pt2.x = fe->be.vinfo.xres;
   fe->be.bkgd.bounds.pt2.y = fe->be.vinfo.yres;
@@ -133,7 +168,6 @@ static inline int nxsu_setup(FAR struct fb_vtable_s *fb,
  *
  * Input Parameters:
  *   fb - Vtable "object" of the framebuffer "driver" to use
- *   cb - Callbacks used to process received NX server messages
  *
  * Return:
  *   Success: A non-NULL handle used with subsequent NX accesses
@@ -141,7 +175,7 @@ static inline int nxsu_setup(FAR struct fb_vtable_s *fb,
  *
  ****************************************************************************/
 
-NXHANDLE nx_open(FAR struct fb_vtable_s *fb, FAR const struct nx_callback_s *cb)
+NXHANDLE nx_open(FAR struct fb_vtable_s *fb)
 {
   FAR struct nxfe_state_s *fe;
   int ret;
@@ -149,7 +183,7 @@ NXHANDLE nx_open(FAR struct fb_vtable_s *fb, FAR const struct nx_callback_s *cb)
   /* Sanity checking */
 
 #ifdef CONFIG_DEBUG
-  if (!cb)
+  if (!fb)
     {
       errno = EINVAL;
       return NULL;
@@ -165,10 +199,6 @@ NXHANDLE nx_open(FAR struct fb_vtable_s *fb, FAR const struct nx_callback_s *cb)
       return NULL;
     }
 
-  /* Save the callback vtable */
-
-  fe->cb = cb;
-
   /* Initialize and configure the server */
 
   ret = nxsu_setup(fb, fe);
@@ -177,6 +207,9 @@ NXHANDLE nx_open(FAR struct fb_vtable_s *fb, FAR const struct nx_callback_s *cb)
       return NULL; /* nxsu_setup sets errno */
     }
 
+  /* Fill the initial background window */
+
+  nxbe_fill(&fe->be.bkgd, &fe->be.bkgd.bounds, fe->be.bgcolor);
   return (NXHANDLE)fe;
 }
 

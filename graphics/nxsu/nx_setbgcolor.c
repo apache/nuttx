@@ -98,6 +98,7 @@ int nx_setbgcolor(NXHANDLE handle,
     }
 #endif
 
+  nxgl_colorcopy(fe->be.bgcolor, color);
   nxbe_fill(&fe->be.bkgd, &fe->be.bkgd.bounds, color);
   return OK;
 }

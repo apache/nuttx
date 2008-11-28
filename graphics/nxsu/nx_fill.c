@@ -88,7 +88,7 @@
  *
  ****************************************************************************/
 
-int nx_fill(NXWINDOW hwnd, FAR struct nxgl_rect_s *rect,
+int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
             nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
 #ifdef CONFIG_DEBUG

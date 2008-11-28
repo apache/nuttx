@@ -125,21 +125,22 @@ struct nxbe_window_s
 {
   /* State information */
 
-  FAR struct nxbe_state_s *be;      /* The back-end state structure */
+  FAR struct nxbe_state_s *be;        /* The back-end state structure */
 #ifdef CONFIG_NX_MULTIUSER
-  FAR struct nxfe_conn_s *conn;     /* Connection to the window client */
+  FAR struct nxfe_conn_s *conn;       /* Connection to the window client */
 #endif
+  FAR const struct nx_callback_s *cb; /* Event handling callbacks */
 
   /* The following links provide the window's vertical position using a
    * singly linked list.
    */
 
-  FAR struct nxbe_window_s *above;  /* The window "above" this window */
-  FAR struct nxbe_window_s *below;  /* The window "below this one */
+  FAR struct nxbe_window_s *above;    /* The window "above" this window */
+  FAR struct nxbe_window_s *below;    /* The window "below this one */
 
 
-  struct nxgl_rect_s bounds;        /* The bounding rectangle of window */
-  struct nxgl_point_s origin;       /* The position of the top-left corner of the window */
+  struct nxgl_rect_s bounds;          /* The bounding rectangle of window */
+  struct nxgl_point_s origin;         /* The position of the top-left corner of the window */
 };
 
 /* Back-end state ***********************************************************/
@@ -152,6 +153,13 @@ struct nxbe_state_s
 
   FAR struct nxbe_window_s *topwnd; /* The window at the top of the display */
   struct nxbe_window_s bkgd;        /* The background window is always at the bottom */
+
+  /* At present, only a solid colored background is supported for refills.  The
+   * following provides the background color.  It would be nice to support
+   * background bitmap images as well.
+   */
+
+  nxgl_mxpixel_t bgcolor[CONFIG_NX_NPLANES];
 
   /* vinfo describes the video controller and plane[n].pinfo describes color
    * plane 'n' supported by the video controller.  Most common color models

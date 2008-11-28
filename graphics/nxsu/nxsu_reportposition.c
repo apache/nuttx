@@ -80,8 +80,7 @@
 
 void nxfe_reportposition(FAR struct nxbe_window_s *wnd)
 {
-  FAR struct nxbe_state_s  *be  = wnd->be;
-  FAR struct nxfe_state_s  *fe  = (FAR struct nxfe_state_s *)be;
+  FAR struct nxbe_state_s  *be = wnd->be;
   struct nxgl_rect_s        rect;
 
 #ifdef CONFIG_DEBUG
@@ -95,14 +94,14 @@ void nxfe_reportposition(FAR struct nxbe_window_s *wnd)
    * with the way things are done in multiple user mode.
    */
 
-  if (fe->cb->position)
+  if (wnd->cb->position)
     {
       /* Convert the frame rectangle to a window-relative rectangle */
 
       nxgl_rectoffset(&rect, &wnd->bounds, -wnd->origin.x, -wnd->origin.y);
 
-      /* And pride this to the client */
+      /* And provide this to the client */
 
-      fe->cb->position(wnd, &rect, &wnd->origin);
+      wnd->cb->position(wnd, &rect, &wnd->origin, &be->bkgd.bounds);
     }
 }

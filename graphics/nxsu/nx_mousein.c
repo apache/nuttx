@@ -105,9 +105,9 @@ void nxsu_mousereport(struct nxbe_window_s *wnd)
 {
   /* Give the keypad event only to the top child */
 
-  if (fe->be.cb->mousein)
+  if (win->cb->mousein)
     {
-      fe->be.cb->mousein(wnd, &g_mpos, g_mbutton);
+      win->cb->mousein((NXWINDOW)wnd, &g_mpos, g_mbutton);
     }
 }
 

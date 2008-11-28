@@ -61,7 +61,10 @@
 
 /* Server state structure ***************************************************/
 
-/* This the the server 'front-end' state structure */
+/* This the the server 'front-end' state structure.  It is really the same
+ * as the back-end state, but we wrap the back-end state so that we can add
+ * things to the structure in the future
+ */
 
 struct nxfe_state_s
 {
@@ -71,10 +74,6 @@ struct nxfe_state_s
    */
 
   struct nxbe_state_s be;
-
-  /* Event handling callbacks */
-
-  FAR const struct nx_callback_s *cb; /* Message handling callbacks */
 };
 
 /****************************************************************************
