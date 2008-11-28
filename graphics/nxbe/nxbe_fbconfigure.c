@@ -128,6 +128,7 @@ int nxbe_fbconfigure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
       if (be->plane[i].pinfo.bpp == 1)
         {
           be->plane[i].fillrectangle = nxgl_fillrectangle_1bpp;
+          be->plane[i].filltrapezoid = nxgl_filltrapezoid_1bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_1bpp;
           be->plane[i].copyrectangle = nxgl_copyrectangle_1bpp;
         }
@@ -137,6 +138,7 @@ int nxbe_fbconfigure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
       if (be->plane[i].pinfo.bpp == 2)
         {
           be->plane[i].fillrectangle = nxgl_fillrectangle_2bpp;
+          be->plane[i].filltrapezoid = nxgl_filltrapezoid_2bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_2bpp;
           be->plane[i].copyrectangle = nxgl_copyrectangle_2bpp;
         }
@@ -146,6 +148,7 @@ int nxbe_fbconfigure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
       if (be->plane[i].pinfo.bpp == 4)
         {
           be->plane[i].fillrectangle = nxgl_fillrectangle_4bpp;
+          be->plane[i].filltrapezoid = nxgl_filltrapezoid_4bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_4bpp;
           be->plane[i].copyrectangle = nxgl_copyrectangle_4bpp;
         }
@@ -155,6 +158,7 @@ int nxbe_fbconfigure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
       if (be->plane[i].pinfo.bpp == 8)
         {
           be->plane[i].fillrectangle = nxgl_fillrectangle_8bpp;
+          be->plane[i].filltrapezoid = nxgl_filltrapezoid_8bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_8bpp;
           be->plane[i].copyrectangle = nxgl_copyrectangle_8bpp;
         }
@@ -164,6 +168,7 @@ int nxbe_fbconfigure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
       if (be->plane[i].pinfo.bpp == 16)
         {
           be->plane[i].fillrectangle = nxgl_fillrectangle_16bpp;
+          be->plane[i].filltrapezoid = nxgl_filltrapezoid_16bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_16bpp;
           be->plane[i].copyrectangle = nxgl_copyrectangle_16bpp;
         }
@@ -173,6 +178,7 @@ int nxbe_fbconfigure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
       if (be->plane[i].pinfo.bpp == 24)
         {
           be->plane[i].fillrectangle = nxgl_fillrectangle_24bpp;
+          be->plane[i].filltrapezoid = nxgl_filltrapezoid_24bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_24bpp;
           be->plane[i].copyrectangle = nxgl_copyrectangle_24bpp;
         }
@@ -182,6 +188,7 @@ int nxbe_fbconfigure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
       if (be->plane[i].pinfo.bpp == 32)
         {
           be->plane[i].fillrectangle = nxgl_fillrectangle_32bpp;
+          be->plane[i].filltrapezoid = nxgl_filltrapezoid_32bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_32bpp;
           be->plane[i].copyrectangle = nxgl_copyrectangle_32bpp;
         }

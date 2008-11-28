@@ -55,13 +55,6 @@
 #  define CONFIG_NX_NPLANES      1  /* Max number of color planes supported */
 #endif
 
-/* Mnemonics for indices */
-
-#define NX_TOP_NDX           (0)
-#define NX_LEFT_NDX          (1)
-#define NX_RIGHT_NDX         (2)
-#define NX_BOTTOM_NDX        (3)
-
 /* These are the values for the clipping order provided to nx_clipper */
 
 #define NX_CLIPORDER_TLRB    (0)   /* Top-left-right-bottom */
@@ -86,6 +79,10 @@ struct nxbe_plane_s
 
   void (*fillrectangle)(FAR struct fb_planeinfo_s *pinfo,
                         FAR const struct nxgl_rect_s *rect,
+                        nxgl_mxpixel_t color);
+  void (*filltrapezoid)(FAR struct fb_planeinfo_s *pinfo,
+                        FAR const struct nxgl_trapezoid_s *trap,
+                        FAR const struct nxgl_rect_s *bounds,
                         nxgl_mxpixel_t color);
   void (*moverectangle)(FAR struct fb_planeinfo_s *pinfo,
                         FAR const struct nxgl_rect_s *rect,

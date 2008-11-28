@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxglib/nxglib_filltrapezoid.c
+ * graphics/nxglib/nxsglib_runoffset.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -41,18 +41,11 @@
 
 #include <sys/types.h>
 #include <fixedmath.h>
-#include <nuttx/fb.h>
 #include <nuttx/nxglib.h>
-
-#include "nxglib_bitblit.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-
-#ifndef NXGLIB_SUFFIX
-#  error "NXGLIB_SUFFIX must be defined before including this header file"
-#endif
 
 /****************************************************************************
  * Private Types
@@ -75,117 +68,19 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxglib_filltrapezoid_*bpp
+ * Name: nxgl_runoffset
  *
- * Descripton:
- *   Fill a trapezoidal region in the framebuffer memory with a fixed color.
- *   Clip the trapezoid to lie within a boundng box.  This is useful for
- *   drawing complex shapes that can be broken into a set of trapezoids.
+ * Description:
+ *   Offset the run position by the specified dx, dy values.
  *
  ****************************************************************************/
 
-void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
-  FAR struct fb_planeinfo_s *pinfo,
-  FAR const struct nxgl_trapezoid_s *trap,
-  FAR const struct nxgl_rect_s *bounds,
-  nxgl_mxpixel_t color)
+void nxgl_runoffset(FAR struct nxgl_run_s *dest,
+                    FAR const struct nxgl_run_s *src,
+                    nxgl_coord_t dx, nxgl_coord_t dy)
 {
-  unsigned int stride;
-  ubyte *line;
-  int nrows;
-  b16_t x1;
-  b16_t x2;
-  nxgl_coord_t y1;
-  nxgl_coord_t y2;
-  b16_t dx1dy;
-  b16_t dx2dy;
-
-  /* Get the width of the framebuffer in bytes */
-
-  stride = pinfo->stride;
-
-  /* Get the top run position and the number of rows to draw */
-
-  x1 = trap->top.x1;
-  x2 = trap->top.x2;
-
-  /* Calculate the slope of the left and right side of the trapezoid */
-
-  dx1dy = b16divi((trap->bot.x1 - x1), nrows);
-  dx2dy = b16divi((trap->bot.x2 - x2), nrows);
-
-  /* Perform vertical clipping */
-
-  y1 = trap->top.y;
-  if (y1 < bounds->pt1.y)
-    {
-      int dy = bounds->pt1.y - y1;
-      x1    += dy * dx1dy;
-      x2    += dy * dx2dy;
-      y1     = bounds->pt1.y;
-    }
-
-  y2 = trap->bot.y;
-  if (y2 > bounds->pt2.y)
-    {
-      y2 = bounds->pt2.y;
-    }
-
-  /* Then calculate the number of rows to render */
-
-  nrows  = y2 - y1 + 1;
-
-  /* Get the address of the first byte on the first line */
-
-  line   = pinfo->fbmem + y1 * stride ;
-
-  /* Then fill the trapezoid line-by-line */
-
-  while (nrows--)
-    {
-      int ix1;
-      int ix2;
-
-      /* Handle the special case where the sides cross (as in an hourglass) */
-
-      if (x1 > x2)
-        {
-          b16_t tmp;
-          ngl_swap(x1, x2, tmp);
-          ngl_swap(dx1dy, dx2dy, tmp);
-        }
-
-      /* Convert the positions to integer */
-
-      ix1 = b16toi(x1);
-      ix2 = b16toi(x2);
-
-      /* Handle some corner cases where we draw nothing.  Otherwise, we will
-       * always draw at least one pixel.
-       */
-
-      if (x1 > x2 || ix2 < bounds->pt1.x || ix1 > bounds->pt2.x)
-        {
-          /* Get a clipped copies of the starting and ending X positions.  This
-           * clipped truncates "down" and gives the quantized pixel holding the
-           * fractional X position
-           */
-
-          ix1 = ngl_clipl(ix1, bounds->pt1.x);
-          ix2 = ngl_clipr(ix2, bounds->pt2.x);
-
-          /* Then draw the run from (line + ix1) to (line + ix2) */
-
-          NXGL_MEMSET(line + NXGL_SCALEX(ix1), (NXGL_PIXEL_T)color, ix2 - ix1 + 1);
-        }
-
-      /* Move to the start of the next line */
-
-      line += stride;
-
-      /* Add the dx/dy value to get the run positions on the next row */
-
-      x1   += dx1dy;
-      x2   += dx2dy;
-    }
+  b16_t b16dx = itob16(dx);
+  dest->x1  += b16dx;
+  dest->x2  += b16dx;
+  dest->y   += dy;
 }

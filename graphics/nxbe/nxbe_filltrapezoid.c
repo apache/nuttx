@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxglib/nxglib_filltrapezoid.c
+ * graphics/nxbe/nxbe_filltrapezoid.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -41,22 +41,24 @@
 
 #include <sys/types.h>
 #include <fixedmath.h>
-#include <nuttx/fb.h>
 #include <nuttx/nxglib.h>
 
-#include "nxglib_bitblit.h"
+#include "nxbe.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#ifndef NXGLIB_SUFFIX
-#  error "NXGLIB_SUFFIX must be defined before including this header file"
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+struct nxbe_filltrap_s
+{
+  struct nxbe_clipops_s cops;
+  struct nxgl_trapezoid_s trap;
+  nxgl_mxpixel_t color;
+};
 
 /****************************************************************************
  * Private Data
@@ -71,121 +73,90 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxbe_clipfilltrapezoid
+ *
+ * Description:
+ *  Called from nxbe_clipper() to performed the fill operation on visible portions
+ *  of the rectangle.
+ *
+ ****************************************************************************/
+
+static void nxbe_clipfilltrapezoid(FAR struct nxbe_clipops_s *cops,
+                                   FAR struct nxbe_plane_s *plane,
+                                   FAR const struct nxgl_rect_s *rect)
+{
+  struct nxbe_filltrap_s *fillinfo = (struct nxbe_filltrap_s *)cops;
+  plane->filltrapezoid(&plane->pinfo, &fillinfo->trap, rect, fillinfo->color);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxglib_filltrapezoid_*bpp
+ * Name: nxbe_filltrapezoid
  *
- * Descripton:
- *   Fill a trapezoidal region in the framebuffer memory with a fixed color.
- *   Clip the trapezoid to lie within a boundng box.  This is useful for
- *   drawing complex shapes that can be broken into a set of trapezoids.
+ * Description:
+ *  Fill the specified rectangle in the window with the specified color
+ *
+ * Input Parameters:
+ *   wnd  - The window structure reference
+ *   rect - The location to be filled
+ *   col  - The color to use in the fill
+ *
+ * Return:
+ *   None
  *
  ****************************************************************************/
 
-void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
-  FAR struct fb_planeinfo_s *pinfo,
-  FAR const struct nxgl_trapezoid_s *trap,
-  FAR const struct nxgl_rect_s *bounds,
-  nxgl_mxpixel_t color)
+void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
+                        FAR const struct nxgl_trapezoid_s *trap,
+                        nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
-  unsigned int stride;
-  ubyte *line;
-  int nrows;
-  b16_t x1;
-  b16_t x2;
-  nxgl_coord_t y1;
-  nxgl_coord_t y2;
-  b16_t dx1dy;
-  b16_t dx2dy;
+  struct nxbe_filltrap_s info;
+  struct nxgl_rect_s bounds;
+  struct nxgl_rect_s remaining;
+  int i;
 
-  /* Get the width of the framebuffer in bytes */
-
-  stride = pinfo->stride;
-
-  /* Get the top run position and the number of rows to draw */
-
-  x1 = trap->top.x1;
-  x2 = trap->top.x2;
-
-  /* Calculate the slope of the left and right side of the trapezoid */
-
-  dx1dy = b16divi((trap->bot.x1 - x1), nrows);
-  dx2dy = b16divi((trap->bot.x2 - x2), nrows);
-
-  /* Perform vertical clipping */
-
-  y1 = trap->top.y;
-  if (y1 < bounds->pt1.y)
+#ifdef CONFIG_DEBUG
+  if (!wnd || !trap)
     {
-      int dy = bounds->pt1.y - y1;
-      x1    += dy * dx1dy;
-      x2    += dy * dx2dy;
-      y1     = bounds->pt1.y;
+      return;
     }
+#endif
 
-  y2 = trap->bot.y;
-  if (y2 > bounds->pt2.y)
+  /* Offset the trapezoid by the window origin to position it within
+   * the framebuffer region
+   */
+
+  nxgl_trapoffset(&info.trap, trap, wnd->origin.x, wnd->origin.y);
+
+  /* Now create a bounding box that contains the trapezoid */
+
+  bounds.pt1.x = b16toi(ngl_min(info.trap.top.x1, info.trap.bot.x1));
+  bounds.pt1.y = b16toi(info.trap.top.y);
+  bounds.pt2.x = b16toi(ngl_max(info.trap.top.x2, info.trap.bot.x2));
+  bounds.pt2.y = b16toi(info.trap.bot.y);
+
+  /* Clip to the limits of the window and of the background screen */
+
+  nxgl_rectintersect(&remaining, &bounds, &wnd->bounds);
+  nxgl_rectintersect(&remaining, &remaining, &wnd->be->bkgd.bounds);
+
+  if (!nxgl_nullrect(&remaining))
     {
-      y2 = bounds->pt2.y;
-    }
-
-  /* Then calculate the number of rows to render */
-
-  nrows  = y2 - y1 + 1;
-
-  /* Get the address of the first byte on the first line */
-
-  line   = pinfo->fbmem + y1 * stride ;
-
-  /* Then fill the trapezoid line-by-line */
-
-  while (nrows--)
-    {
-      int ix1;
-      int ix2;
-
-      /* Handle the special case where the sides cross (as in an hourglass) */
-
-      if (x1 > x2)
+#if CONFIG_NX_NPLANES > 1
+      for (i = 0; i < wnd->be->vinfo.nplanes; i++)
+#else
+      i = 0;
+#endif
         {
-          b16_t tmp;
-          ngl_swap(x1, x2, tmp);
-          ngl_swap(dx1dy, dx2dy, tmp);
+          info.cops.visible  = nxbe_clipfilltrapezoid;
+          info.cops.obscured = nxbe_clipnull;
+          info.color         = color[i];
+
+          nxbe_clipper(wnd->above, &remaining, NX_CLIPORDER_DEFAULT,
+                       &info.cops, &wnd->be->plane[i]);
         }
-
-      /* Convert the positions to integer */
-
-      ix1 = b16toi(x1);
-      ix2 = b16toi(x2);
-
-      /* Handle some corner cases where we draw nothing.  Otherwise, we will
-       * always draw at least one pixel.
-       */
-
-      if (x1 > x2 || ix2 < bounds->pt1.x || ix1 > bounds->pt2.x)
-        {
-          /* Get a clipped copies of the starting and ending X positions.  This
-           * clipped truncates "down" and gives the quantized pixel holding the
-           * fractional X position
-           */
-
-          ix1 = ngl_clipl(ix1, bounds->pt1.x);
-          ix2 = ngl_clipr(ix2, bounds->pt2.x);
-
-          /* Then draw the run from (line + ix1) to (line + ix2) */
-
-          NXGL_MEMSET(line + NXGL_SCALEX(ix1), (NXGL_PIXEL_T)color, ix2 - ix1 + 1);
-        }
-
-      /* Move to the start of the next line */
-
-      line += stride;
-
-      /* Add the dx/dy value to get the run positions on the next row */
-
-      x1   += dx1dy;
-      x2   += dx2dy;
     }
 }

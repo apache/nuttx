@@ -48,6 +48,15 @@
  * Pre-processor definitions
  ****************************************************************************/
 
+/* Mnemonics for indices */
+
+#define NX_TOP_NDX           (0)
+#define NX_LEFT_NDX          (1)
+#define NX_RIGHT_NDX         (2)
+#define NX_BOTTOM_NDX        (3)
+
+/* Handy macros */
+
 #define ngl_min(a,b)       ((a) < (b) ? (a) : (b))
 #define ngl_max(a,b)       ((a) > (b) ? (a) : (b))
 #define ngl_swap(a,b,t)    do { t = a; a = b; b = t; } while (0);
@@ -196,39 +205,39 @@ EXTERN void nxgl_fillrectangle_32bpp(FAR struct fb_planeinfo_s *pinfo,
  *
  * Descripton:
  *   Fill a trapezoidal region in the framebuffer memory with a fixed color.
- *   This is useful for drawing complex shape -- (most) complex shapes can be
- *   broken into a set of trapezoids.
+ *   Clip the trapezoid to lie within a boundng box.  This is useful for
+ *   drawing complex shapes that can be broken into a set of trapezoids.
  *
  ****************************************************************************/
 
-EXTERN void nxglib_filltrapezoid_1bpp(FAR struct fb_videoinfo_s *vinfo,
-                                      FAR struct fb_planeinfo_s *pinfo,
-                                      FAR const struct nxgl_trapezoid_s *trap,
-                                      nxgl_mxpixel_t color);
-EXTERN void nxglib_filltrapezoid_2bpp(FAR struct fb_videoinfo_s *vinfo,
-                                      FAR struct fb_planeinfo_s *pinfo,
-                                      FAR const struct nxgl_trapezoid_s *trap,
-                                      nxgl_mxpixel_t color);
-EXTERN void nxglib_filltrapezoid_4bpp(FAR struct fb_videoinfo_s *vinfo,
-                                      FAR struct fb_planeinfo_s *pinfo,
-                                      FAR const struct nxgl_trapezoid_s *trap,
-                                      nxgl_mxpixel_t color);
-EXTERN void nxglib_filltrapezoid_8bpp(FAR struct fb_videoinfo_s *vinfo,
-                                      FAR struct fb_planeinfo_s *pinfo,
-                                      FAR const struct nxgl_trapezoid_s *trap,
-                                      nxgl_mxpixel_t color);
-EXTERN void nxglib_filltrapezoid_16bpp(FAR struct fb_videoinfo_s *vinfo,
-                                       FAR struct fb_planeinfo_s *pinfo,
-                                       FAR const struct nxgl_trapezoid_s *trap,
-                                       nxgl_mxpixel_t color);
-EXTERN void nxglib_filltrapezoid_24bpp(FAR struct fb_videoinfo_s *vinfo,
-                                       FAR struct fb_planeinfo_s *pinfo,
-                                       FAR const struct nxgl_trapezoid_s *trap,
-                                       nxgl_mxpixel_t color);
-EXTERN void nxglib_filltrapezoid_32bpp(FAR struct fb_videoinfo_s *vinfo,
-                                       FAR struct fb_planeinfo_s *pinfo,
-                                       FAR const struct nxgl_trapezoid_s *trap,
-                                       nxgl_mxpixel_t color);
+EXTERN void nxgl_filltrapezoid_1bpp(FAR struct fb_planeinfo_s *pinfo,
+                                    FAR const struct nxgl_trapezoid_s *trap,
+                                    FAR const struct nxgl_rect_s *bounds,
+                                    nxgl_mxpixel_t color);
+EXTERN void nxgl_filltrapezoid_2bpp(FAR struct fb_planeinfo_s *pinfo,
+                                    FAR const struct nxgl_trapezoid_s *trap,
+                                    FAR const struct nxgl_rect_s *bounds,
+                                    nxgl_mxpixel_t color);
+EXTERN void nxgl_filltrapezoid_4bpp(FAR struct fb_planeinfo_s *pinfo,
+                                    FAR const struct nxgl_trapezoid_s *trap,
+                                    FAR const struct nxgl_rect_s *bounds,
+                                    nxgl_mxpixel_t color);
+EXTERN void nxgl_filltrapezoid_8bpp(FAR struct fb_planeinfo_s *pinfo,
+                                    FAR const struct nxgl_trapezoid_s *trap,
+                                    FAR const struct nxgl_rect_s *bounds,
+                                    nxgl_mxpixel_t color);
+EXTERN void nxgl_filltrapezoid_16bpp(FAR struct fb_planeinfo_s *pinfo,
+                                    FAR const struct nxgl_trapezoid_s *trap,
+                                    FAR const struct nxgl_rect_s *bounds,
+                                    nxgl_mxpixel_t color);
+EXTERN void nxgl_filltrapezoid_24bpp(FAR struct fb_planeinfo_s *pinfo,
+                                     FAR const struct nxgl_trapezoid_s *trap,
+                                     FAR const struct nxgl_rect_s *bounds,
+                                     nxgl_mxpixel_t color);
+EXTERN void nxgl_filltrapezoid_32bpp(FAR struct fb_planeinfo_s *pinfo,
+                                     FAR const struct nxgl_trapezoid_s *trap,
+                                     FAR const struct nxgl_rect_s *bounds,
+                                     nxgl_mxpixel_t color);
 
 /****************************************************************************
  * Name: nxgl_moverectangle_*bpp
@@ -388,6 +397,30 @@ EXTERN boolean nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1,
  ****************************************************************************/
 
 EXTERN boolean nxgl_nullrect(FAR const struct nxgl_rect_s *rect);
+
+/****************************************************************************
+ * Name: nxgl_runoffset
+ *
+ * Description:
+ *   Offset the run position by the specified dx, dy values.
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_runoffset(FAR struct nxgl_run_s *dest,
+                           FAR const struct nxgl_run_s *src,
+                           nxgl_coord_t dx, nxgl_coord_t dy);
+
+/****************************************************************************
+ * Name: nxgl_trapoffset
+ *
+ * Description:
+ *   Offset the trapezoid position by the specified dx, dy values.
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_trapoffset(FAR struct nxgl_trapezoid_s *dest,
+                            FAR const struct nxgl_trapezoid_s *src,
+                            nxgl_coord_t dx, nxgl_coord_t dy);
 
 #undef EXTERN
 #if defined(__cplusplus)

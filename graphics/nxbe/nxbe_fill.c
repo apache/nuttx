@@ -121,14 +121,22 @@ void nxbe_fill(FAR struct nxbe_window_s *wnd,
     }
 #endif
 
-  /* Offset the rectangle by the window origin to convert it into a bounding box */
+  /* Offset the rectangle by the window origin to convert it into a
+   * bounding box
+   */
 
   nxgl_rectoffset(&remaining, rect, wnd->origin.x, wnd->origin.y);
 
-  /* Clip to the limits of the window and of the background screen */
+  /* Clip to the bounding box to the limits of the window and of the
+   * background screen
+   */
 
   nxgl_rectintersect(&remaining, &remaining, &wnd->bounds);
   nxgl_rectintersect(&remaining, &remaining, &wnd->be->bkgd.bounds);
+
+  /* Then clip the bounding box due to other windows above this one.
+   * Render the portions of the trapezoid exposed in visible regions.
+   */
 
   if (!nxgl_nullrect(&remaining))
     {
@@ -143,7 +151,7 @@ void nxbe_fill(FAR struct nxbe_window_s *wnd,
           info.color         = color[i];
 
           nxbe_clipper(wnd->above, &remaining, NX_CLIPORDER_DEFAULT,
-                       &info.cops, &wnd->be->plane[0]);
+                       &info.cops, &wnd->be->plane[i]);
         }
     }
 }
