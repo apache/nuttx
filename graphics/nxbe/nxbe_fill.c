@@ -121,9 +121,13 @@ void nxbe_fill(FAR struct nxbe_window_s *wnd,
     }
 #endif
 
+  /* Offset the rectangle by the window origin to convert it into a bounding box */
+
+  nxgl_rectoffset(&remaining, rect, wnd->origin.x, wnd->origin.y);
+
   /* Clip to the limits of the window and of the background screen */
 
-  nxgl_rectintersect(&remaining, rect, &wnd->bounds);
+  nxgl_rectintersect(&remaining, &remaining, &wnd->bounds);
   nxgl_rectintersect(&remaining, &remaining, &wnd->be->bkgd.bounds);
 
   if (!nxgl_nullrect(&remaining))

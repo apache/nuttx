@@ -123,6 +123,8 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
                 FAR const struct nxgl_point_s *origin, unsigned int stride)
 {
   struct nx_bitmap_s info;
+  struct nxgl_rect_s bounds;
+  struct nxgl_point_s offset;
   struct nxgl_rect_s remaining;
   int i;
 
@@ -133,11 +135,16 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
     }
 #endif
 
+  /* Offset the rectangle and image origin by the window origin */
+
+  nxgl_rectoffset(&bounds, dest, wnd->origin.x, wnd->origin.y);
+  nxgl_vectoradd(&offset, origin, &wnd->origin);
+
   /* Verify that the destination rectangle begins "below" and to the "right"
    * of the origin
    */
 
-  if (dest->pt1.x < origin->x || dest->pt1.y < origin->y)
+  if (bounds.pt1.x < origin->x || bounds.pt1.y < origin->y)
     {
       gdbg("Bad dest start position\n");
       return;
@@ -147,7 +154,7 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
    * with of the source bitmap data
    */
 
-  if ((((dest->pt2.x - origin->x) * wnd->be->plane[0].pinfo.bpp) >> 3) > stride)
+  if ((((bounds.pt2.x - offset.x) * wnd->be->plane[0].pinfo.bpp) >> 3) > stride)
     {
       gdbg("Bad dest width\n");
       return;
@@ -155,7 +162,7 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
 
   /* Clip to the limits of the window and of the background screen */
 
-  nxgl_rectintersect(&remaining, dest, &wnd->bounds);
+  nxgl_rectintersect(&remaining, &bounds, &wnd->bounds);
   nxgl_rectintersect(&remaining, &remaining, &wnd->be->bkgd.bounds);
   if (nxgl_nullrect(&remaining))
     {
@@ -173,8 +180,8 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
       info.cops.visible  = nxs_clipcopy;
       info.cops.obscured = nxbe_clipnull;
       info.src           = src[i];
-      info.origin.x      = origin->x;
-      info.origin.y      = origin->y;
+      info.origin.x      = offset.x;
+      info.origin.y      = offset.y;
       info.stride        = stride;
 
       nxbe_clipper(wnd->above, &remaining, NX_CLIPORDER_DEFAULT,
