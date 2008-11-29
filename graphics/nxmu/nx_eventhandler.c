@@ -108,19 +108,25 @@ static inline void nx_disconnected(FAR struct nxfe_conn_s *conn)
  *
  * Description:
  *   The client code must call this function periodically to process
- *   incoming messages from the server.
+ *   incoming messages from the server.  If CONFIG_NX_BLOCKING is defined,
+ *   then this function not return until a server message is received.
+ *
+ *   When CONFIG_NX_BLOCKING is not defined, the client must exercise
+ *   caution in the looping to assure that it does not eat up all of
+ *   the CPU bandwidth calling nx_eventhandler repeatedly.  nx_eventnotify
+ *   may be called to get a signal event whenever a new incoming server
+ *   event is avaiable.
  *
  * Input Parameters:
  *   handle - the handle returned by nx_connect
  *
  * Return:
- *   >0: The length of the message received in msgbuffer
- *    0: No message was received
- *   <0: An error occurred and errno has been set appropriately
- *
- *   Of particular interest, it will return errno == EHOSTDOWN when the
- *   server is disconnected.  After that event, the handle can not longer
- *   be used.
+ *     OK: No errors occurred.  If CONFIG_NX_BLOCKING is defined, then
+ *         one or more server message was processed.
+ *  ERROR: An error occurred and errno has been set appropriately.  Of
+ *         particular interest, it will return errno == EHOSTDOWN when the
+ *         server is disconnected.  After that event, the handle can no
+ *         longer be used.
  *
  ****************************************************************************/
 
@@ -168,13 +174,14 @@ int nx_eventhandler(NXHANDLE handle)
   /* Dispatch the message appropriately */
 
   msg = (struct nxsvrmsg_s *)buffer;
+  gvdbg("Received msgid=%d\n", msg->msgid);
   switch (msg->msgid)
     {
-    case NX_SVRMSG_CONNECT:
+    case NX_CLIMSG_CONNECTED:
       nx_connected(conn);
       break;
 
-    case NX_SVRMSG_DISCONNECT:
+    case NX_CLIMSG_DISCONNECTED:
       nx_disconnected(conn);
       errno = EHOSTDOWN;
       return ERROR;
