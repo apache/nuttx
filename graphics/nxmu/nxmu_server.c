@@ -124,7 +124,7 @@ static inline void nxmu_connect(FAR struct nxfe_conn_s *conn)
 
   /* Send the handshake message back to the client */
 
-  ret = mq_send(conn->cwrmq, &outmsg, sizeof(struct nxclimsg_s), NX_CLIMSG_PRIO);
+  ret = mq_send(conn->swrmq, &outmsg, sizeof(struct nxclimsg_s), NX_CLIMSG_PRIO);
   if (ret < 0)
     {
       gdbg("mq_send failed: %d\n", errno);
