@@ -119,8 +119,8 @@ typedef uint32 sigset_t;     /* Bit set of 32 signals */
 
 union sigval
 {
-  int   sival_int;           /* Integer value */
-  void *sival_ptr;           /* Pointer value */
+  int       sival_int;       /* Integer value */
+  FAR void *sival_ptr;       /* Pointer value */
 };
 
 /* This structure contains elements that define a queue signal. The following is
