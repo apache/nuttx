@@ -53,10 +53,6 @@
 #  define CONFIG_EXAMPLES_NX_VPLANE 0
 #endif
 
-#ifndef CONFIG_EXAMPLES_NX_STACKSIZE
-#  define CONFIG_EXAMPLES_NX_STACKSIZE 2048
-#endif
-
 #ifndef CONFIG_EXAMPLES_NX_BGCOLOR
 #  define CONFIG_EXAMPLES_NX_BGCOLOR ' '
 #endif
@@ -67,6 +63,21 @@
 
 #ifndef CONFIG_EXAMPLES_NX_COLOR2
 #  define CONFIG_EXAMPLES_NX_COLOR2 '2'
+#endif
+
+#ifdef CONFIG_NX_MULTIUSER
+#  ifdef CONFIG_DISABLE_MQUEUE
+#    error "The multi-threaded example requires MQ support (CONFIG_DISABLE_MQUEUE=n)"
+#  endif
+#  ifdef CONFIG_DISABLE_SIGNALS
+#    error "This example requires signal support (CONFIG_DISABLE_SIGNALS=n)"
+#  endif
+#  ifndef CONFIG_EXAMPLES_NX_STACKSIZE
+#    define CONFIG_EXAMPLES_NX_STACKSIZE 2048
+#  endif
+#  ifndef CONFIG_EXAMPLES_NX_SERVERPRIO
+#    define CONFIG_EXAMPLES_NX_SERVERPRIO 100
+#  endif
 #endif
 
 /* Debug ********************************************************************/
