@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxsu/nx_open.c
+ * graphics/nxmu/nx_requestbkgd.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,8 +40,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -57,13 +55,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-static void nxsu_bkgdredraw(NXWINDOW hwnd,
-                            FAR const struct nxgl_rect_s *rect, boolean more);
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -71,146 +62,80 @@ static void nxsu_bkgdredraw(NXWINDOW hwnd,
  * Public Data
  ****************************************************************************/
 
-const struct nx_callback_s g_bkgdcb =
-{
-  nxsu_bkgdredraw,   /* redraw */
-  NULL               /* position */
-#ifdef CONFIG_NX_MOUSE
-  , NULL             /* mousein */
-#endif
-#ifdef CONFIG_NX_KBD
-  , NULL             /* my kbdin */
-#endif
-};
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: nxsu_bkgdredraw
- ****************************************************************************/
-
-static void nxsu_bkgdredraw(NXWINDOW hwnd,
-                            FAR const struct nxgl_rect_s *rect, boolean more)
-{
-  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
-  FAR struct nxbe_state_s  *be  = wnd->be;
-
-  gvdbg("BG redraw rect={(%d,%d),(%d,%d)}\n",
-        rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y);
-  nxbe_fill(wnd, &wnd->bounds, be->bgcolor);
-}
-
-/****************************************************************************
- * Name: nxsu_setup
- ****************************************************************************/
-
-static inline int nxsu_setup(FAR struct fb_vtable_s *fb,
-                             FAR struct nxfe_state_s *fe)
-{
-  int ret;
-
-  /* Configure the framebuffer device */
-
-  ret = nxbe_fbconfigure(fb, &fe->be);
-  if (ret < 0)
-    {
-      gdbg("nxs_fbconfigure failed: %d\n", -ret);
-      errno = -ret;
-      return ERROR;
-    }
-
-#if CONFIG_FB_CMAP
-  ret = nxbe_colormap(fb);
-  if (ret < 0)
-    {
-      gdbg("nx_colormap failed: %d\n", -ret);
-      errno = -ret;
-      return ERROR;
-    }
-#endif
-
-  /* Initialize the non-NULL elements of the back-end structure window */
-  /* Initialize the background window */
-
-  fe->be.bkgd.be = &fe->be;
-  fe->be.bkgd.cb = &g_bkgdcb;
-
-  fe->be.bkgd.bounds.pt2.x = fe->be.vinfo.xres;
-  fe->be.bkgd.bounds.pt2.y = fe->be.vinfo.yres;
-
-  /* Complete initialization of the server state structure.  The
-   * window list contains only one element:  The background window
-   * with nothing else above or below it
-   */
-
-  fe->be.topwnd = &fe->be.bkgd;
-
- /* Initialize the mouse position */
-
-#ifdef CONFIG_NX_MOUSE
-  nxsu_mouseinit(fe->be.vinfo.xres, fe->be.vinfo.yres);
-#endif
-  return OK;
-}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_open
+ * Name: nx_requestbkgd
  *
  * Description:
- *   Create, initialize and return an NX handle for use in subsequent
- *   NX API calls.  nx_open is the single user equivalent of nx_connect
- *   plus nx_run.
+ *   NX normally controls a separate window called the background window.
+ *   It repaints the window as necessary using only a solid color fill.  The
+ *   background window always represents the entire screen and is always
+ *   below other windows.  It is useful for an application to control the
+ *   background window in the following conditions:
+ *
+ *   - If you want to implement a windowless solution.  The single screen
+ *     can be used to creat a truly simple graphic environment.  In this
+ *     case, you should probably also de-select CONFIG_NX_MULTIUSER as well.
+ *   - When you want more on the background than a solid color.  For
+ *     example, if you want an image in the background, or animations in the
+ *     background, or live video, etc.
+ *
+ *   This API only requests the handle of the background window.  That
+ *   handle will be returned asynchronously in a subsequent position and
+ *   redraw callbacks.
+ *
+ *
+ *   Cautions:
+ *   - The following should never be called using the background window.
+ *     They are guaranteed to cause severe crashes:
+ *
+ *       nx_setposition, nx_setsize, nx_raise, nx_lower.
+ *
+ *   - Neither nx_opengbwindow or nx_closebgwindow should be called more than
+ *     once.  Multiple instances of the background window are not supported.
  *
  * Input Parameters:
- *   fb - Vtable "object" of the framebuffer "driver" to use
+ *   handle - The handle returned by nx_connect
+ *   cb     - Callbacks to use for processing background window events
  *
  * Return:
- *   Success: A non-NULL handle used with subsequent NX accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ *   OK: Success; ERROR of failure with errno set appropriately.
  *
  ****************************************************************************/
 
-NXHANDLE nx_open(FAR struct fb_vtable_s *fb)
+int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb)
 {
-  FAR struct nxfe_state_s *fe;
+  FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
+  struct nxsvrmsg_requestbkgd_s outmsg;
   int ret;
 
-  /* Sanity checking */
-
 #ifdef CONFIG_DEBUG
-  if (!fb)
+  if (!conn || !cb)
     {
       errno = EINVAL;
-      return NULL;
+      return ERROR;
     }
 #endif
 
-  /* Allocate the NX state structure */
+  /* Request access to the background window from the server */
 
-  fe = (FAR struct nxfe_state_s *)zalloc(sizeof(struct nxfe_state_s));
-  if (!fe)
-    {
-      errno = ENOMEM;
-      return NULL;
-    }
+  outmsg.msgid = NX_SVRMSG_REQUESTBKGD;
+  outmsg.conn  = conn;
+  outmsg.cb    = cb;
 
-  /* Initialize and configure the server */
-
-  ret = nxsu_setup(fb, fe);
+  ret = mq_send(conn->cwrmq, &outmsg, sizeof(struct nxsvrmsg_requestbkgd_s), NX_SVRMSG_PRIO);
   if (ret < 0)
     {
-      return NULL; /* nxsu_setup sets errno */
+      gdbg("mq_send failed: %d\n", errno);
+      return ERROR;
     }
-
-  /* Fill the initial background window */
-
-  nxbe_fill(&fe->be.bkgd, &fe->be.bkgd.bounds, fe->be.bgcolor);
-  return (NXHANDLE)fe;
+  return OK;
 }
 

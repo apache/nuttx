@@ -377,6 +377,64 @@ EXTERN NXWINDOW nx_openwindow(NXHANDLE handle,
 EXTERN int nx_closewindow(NXWINDOW hwnd);
 
 /****************************************************************************
+ * Name: nx_requestbkgd
+ *
+ * Description:
+ *   NX normally controls a separate window called the background window.
+ *   It repaints the window as necessary using only a solid color fill.  The
+ *   background window always represents the entire screen and is always
+ *   below other windows.  It is useful for an application to control the
+ *   background window in the following conditions:
+ *
+ *   - If you want to implement a windowless solution.  The single screen
+ *     can be used to creat a truly simple graphic environment.  In this
+ *     case, you should probably also de-select CONFIG_NX_MULTIUSER as well.
+ *   - When you want more on the background than a solid color.  For
+ *     example, if you want an image in the background, or animations in the
+ *     background, or live video, etc.
+ *
+ *   This API only requests the handle of the background window.  That
+ *   handle will be returned asynchronously in a subsequent position and
+ *   redraw callbacks.
+ *
+ *   Cautions:
+ *   - The following should never be called using the background window.
+ *     They are guaranteed to cause severe crashes:
+ *
+ *       nx_setposition, nx_setsize, nx_raise, nx_lower.
+ *
+ *   - Neither nx_opengbwindow or nx_closebgwindow should be called more than
+ *     once.  Multiple instances of the background window are not supported.
+ *
+ * Input Parameters:
+ *   handle - The handle returned by nx_connect
+ *   cb     - Callbacks to use for processing background window events
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb);
+
+/****************************************************************************
+ * Name: nx_releasebkgd
+ *
+ * Description:
+ *   Release the background window previously acquired using nx_openbgwindow
+ *   and return control of the background to NX.
+ *
+ * Input Parameters:
+ *   hwnd - The handle returned (indirectly) by nx_requestbkgd
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nx_releasebkgd(NXWINDOW hwnd);
+
+/****************************************************************************
  * Name: nx_getposition
  *
  * Description:

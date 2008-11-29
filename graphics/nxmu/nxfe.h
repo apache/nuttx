@@ -154,6 +154,8 @@ enum nxmsg_e
   NX_SVRMSG_DISCONNECT,       /* Tear down connection with terminating client */
   NX_SVRMSG_OPENWINDOW,       /* Create a new window */
   NX_SVRMSG_CLOSEWINDOW,      /* Close an existing window */
+  NX_SVRMSG_REQUESTBKGD,      /* Open the background window */
+  NX_SVRMSG_RELEASEBKGD,      /* Release the background window */
   NX_SVRMSG_SETPOSITION,      /* Window position has changed */
   NX_SVRMSG_SETSIZE,          /* Window size has changed */
   NX_SVRMSG_GETPOSITION,      /* Get the current window position and size */
@@ -263,6 +265,22 @@ struct nxsvrmsg_closewindow_s
 {
   uint32 msgid;                      /* NX_SVRMSG_CLOSEWINDOW */
   FAR struct nxbe_window_s *wnd;     /* The window to be closed */
+};
+
+/* This message requests the server to create a new window */
+
+struct nxsvrmsg_requestbkgd_s
+{
+  uint32 msgid;                      /* NX_SVRMSG_REQUESTBKGD */
+  FAR struct nxfe_conn_s *conn;      /* The specific connection sending the message */
+  FAR const struct nx_callback_s *cb; /* Event handling callbacks */
+};
+
+/* This message informs the server that client wishes to close a window */
+
+struct nxsvrmsg_releasebkgd_s
+{
+  uint32 msgid;                      /* NX_SVRMSG_RELEASEBKGD */
 };
 
 /* This message informs the server that the size or position of the window has changed */
@@ -437,6 +455,44 @@ EXTERN void nxmu_openwindow(FAR struct nxfe_conn_s *conn,
                             FAR struct nxbe_state_s *be,
                             FAR struct nxbe_window_s *wnd,
                             FAR const struct nx_callback_s *cb);
+
+/****************************************************************************
+ * Name: nxmu_requestbkgd
+ *
+ * Description:
+ *   Perform the server-side operation for the nx_requestbkgd operation:
+ *   Give the client control of the background window connection and receipt
+ *   of all background window callbacks.
+ *
+ *   conn - The client containing connection information [IN]
+ *   be   - The server state structure [IN]
+ *   cb   - Callbacks used to process window events
+ *
+ * Return:
+ *   None
+ *
+ ****************************************************************************/
+
+EXTERN void nxmu_requestbkgd(FAR struct nxfe_conn_s *conn,
+                             FAR struct nxbe_state_s *be,
+                             FAR const struct nx_callback_s *cb);
+
+/****************************************************************************
+ * Name: nxmu_releasebkgd
+ *
+ * Description:
+ *   Release the background window previously acquired using nxmu_openbgwindow
+ *   and return control of the background to NX.
+ *
+ * Input Parameters:
+ *   fe - The front-end state structure
+ *
+ * Return:
+ *   None
+ *
+ ****************************************************************************/
+
+EXTERN void nxmu_releasebkgd(FAR struct nxfe_state_s *fe);
 
 /****************************************************************************
  * Name: nxfe_reportposition

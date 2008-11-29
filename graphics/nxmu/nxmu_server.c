@@ -389,6 +389,19 @@ int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb)
            }
            break;
 
+         case NX_SVRMSG_REQUESTBKGD: /* Give access to the background window */
+           {
+             FAR struct nxsvrmsg_requestbkgd_s *rqbgmsg = (FAR struct nxsvrmsg_requestbkgd_s *)buffer;
+             nxmu_requestbkgd(rqbgmsg->conn, &fe.be, rqbgmsg->cb);
+           }
+           break;
+
+         case NX_SVRMSG_RELEASEBKGD: /* End access to the background window */
+           {
+             nxmu_releasebkgd(&fe);
+           }
+           break;
+
          case NX_SVRMSG_SETPOSITION: /* Change window position */
            {
              FAR struct nxsvrmsg_setposition_s *setposmsg = (FAR struct nxsvrmsg_setposition_s *)buffer;

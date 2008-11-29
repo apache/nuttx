@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxmu/nxmu_openwindow.c
+ * graphics/nxsu/nx_requestbkgd.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,7 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <errno.h>
+#include <debug.h>
 
 #include <nuttx/nx.h>
 #include "nxfe.h"
@@ -68,53 +71,83 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxmu_openwindow
+ * Name: nx_requestbkgd
  *
  * Description:
- *   Create a new window.
+ *   NX normally controls a separate window called the background window.
+ *   It repaints the window as necessary using only a solid color fill.  The
+ *   background window always represents the entire screen and is always
+ *   below other windows.  It is useful for an application to control the
+ *   background window in the following conditions:
+ *
+ *   - If you want to implement a windowless solution.  The single screen
+ *     can be used to creat a truly simple graphic environment.  In this
+ *     case, you should probably also de-select CONFIG_NX_MULTIUSER as well.
+ *   - When you want more on the background than a solid color.  For
+ *     example, if you want an image in the background, or animations in the
+ *     background, or live video, etc.
+ *
+ *   This API only requests the handle of the background window.  That
+ *   handle will be returned asynchronously in a subsequent position and
+ *   redraw callbacks.
+ *
+ *   Cautions:
+ *   - The following should never be called using the background window.
+ *     They are guaranteed to cause severe crashes:
+ *
+ *       nx_setposition, nx_setsize, nx_raise, nx_lower.
+ *
+ *   - Neither nx_opengbwindow or nx_closebgwindow should be called more than
+ *     once.  Multiple instances of the background window are not supported.
  *
  * Input Parameters:
- *   conn - The client containing connection information [IN]
- *   be   - The server state structure [IN]
- *   wnd  - The pre-allocated window structure to be ininitilized [IN/OUT]
- *   cb   - Callbacks used to process window events
+ *   handle - The handle returned by nx_connect
+ *   cb     - Callbacks to use for processing background window events
  *
  * Return:
- *   None
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-void nxmu_openwindow(FAR struct nxfe_conn_s *conn,
-                     FAR struct nxbe_state_s *be,
-                     FAR struct nxbe_window_s *wnd,
-                     FAR const struct nx_callback_s *cb)
+int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb)
 {
-  /* The window structure was allocated in nx_openwindow and all fields have
-   * been set to zero (except sem... see below).  We need only initialize the
-   * the non zero fields and insert the new window.
-   */
+  FAR struct nxfe_state_s *fe = (FAR struct nxfe_state_s *)handle;
+  FAR struct nxbe_state_s *be = &fe->be;
 
-  wnd->be   = be;
-  wnd->conn = conn;
-  wnd->cb   = cb;
+#ifdef CONFIG_DEBUG
+  if (!fe || !cb)
+    {
+      errno = EINVAL;
+      return ERROR;
+    }
+#endif
 
-  /* Now, insert the new window at the top on the display.  topwind is
-   * never NULL (it may point only at the background window, however)
-   */
+  /* Replace the NX background windo callbacks with the client's callbacks */
 
-  wnd->above        = NULL;
-  wnd->below        = be->topwnd;
+  be->bkgd.cb = cb;
 
-  be->topwnd->above = wnd;
-  be->topwnd        = wnd;
+  /* Report the size/position of the background window to the client */
 
-  /* Report the initial size/position of the window to the client */
+  nxfe_reportposition((NXWINDOW)&be->bkgd);
 
-  nxfe_reportposition((NXWINDOW)wnd);
+  /* Redraw the background window */
 
-  /* Provide the initial mouse settings to the client */
+  nxfe_redrawreq(&be->bkgd, &be->bkgd.bounds);
+
+  /* Provide the mouse settings to the client */
 
 #ifdef CONFIG_NX_MOUSE
-  nxmu_mousereport(wnd);
+  nxsu_mousereport(be->bkgd);
 #endif
+
+  /* In this single-user mode, we could return the background window
+   * handle here.  However, we cannot do that in the multi-user case
+   * because that handle is known only to the server.  Instead, the
+   * background window handle is returned to the client via a redraw
+   * callback.  So we will do the same in the single-user case for
+   * compatibility.
+   */
+
+  return OK;
 }
+

@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxmu/nxmu_openwindow.c
+ * graphics/nxmu/nxmu_requestbkgd.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,7 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <errno.h>
+#include <debug.h>
 
 #include <nuttx/nx.h>
 #include "nxfe.h"
@@ -68,15 +71,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxmu_openwindow
+ * Name: nxmu_requestbkgd
  *
  * Description:
- *   Create a new window.
+ *   Perform the server-side operation for the nx_requestbkgd operation:
+ *   Give the client control of the background window connection and receipt
+ *   of all background window callbacks.
  *
- * Input Parameters:
  *   conn - The client containing connection information [IN]
  *   be   - The server state structure [IN]
- *   wnd  - The pre-allocated window structure to be ininitilized [IN/OUT]
  *   cb   - Callbacks used to process window events
  *
  * Return:
@@ -84,37 +87,36 @@
  *
  ****************************************************************************/
 
-void nxmu_openwindow(FAR struct nxfe_conn_s *conn,
-                     FAR struct nxbe_state_s *be,
-                     FAR struct nxbe_window_s *wnd,
-                     FAR const struct nx_callback_s *cb)
+void nxmu_requestbkgd(FAR struct nxfe_conn_s *conn,
+                      FAR struct nxbe_state_s *be,
+                      FAR const struct nx_callback_s *cb)
 {
-  /* The window structure was allocated in nx_openwindow and all fields have
-   * been set to zero (except sem... see below).  We need only initialize the
-   * the non zero fields and insert the new window.
+#ifdef CONFIG_DEBUG
+  if (!conn || !be || !cb)
+    {
+      errno = EINVAL;
+    }
+#endif
+
+  /* Set the client's callback vtable and and replace the server
+   * connection with the clients connection.
    */
 
-  wnd->be   = be;
-  wnd->conn = conn;
-  wnd->cb   = cb;
+  be->bkgd.cb   = cb;
+  be->bkgd.conn = conn;
 
-  /* Now, insert the new window at the top on the display.  topwind is
-   * never NULL (it may point only at the background window, however)
-   */
+  /* Report the size/position of the background window to the client */
 
-  wnd->above        = NULL;
-  wnd->below        = be->topwnd;
+  nxfe_reportposition((NXWINDOW)&be->bkgd);
 
-  be->topwnd->above = wnd;
-  be->topwnd        = wnd;
+  /* Redraw the background window */
 
-  /* Report the initial size/position of the window to the client */
+  nxfe_redrawreq(&be->bkgd, &be->bkgd.bounds);
 
-  nxfe_reportposition((NXWINDOW)wnd);
-
-  /* Provide the initial mouse settings to the client */
+  /* Provide the mouse settings */
 
 #ifdef CONFIG_NX_MOUSE
-  nxmu_mousereport(wnd);
+  nxsu_mousereport(be->bkgd);
 #endif
 }
+

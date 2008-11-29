@@ -88,6 +88,8 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+EXTERN const struct nx_callback_s g_bkgdcb;
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/

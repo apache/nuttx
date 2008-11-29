@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxmu/nxmu_openwindow.c
+ * graphics/nxsu/nx_releasebkgd.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,7 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <errno.h>
+#include <debug.h>
 
 #include <nuttx/nx.h>
 #include "nxfe.h"
@@ -68,53 +71,40 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxmu_openwindow
+ * Name: nx_releasebkgd
  *
  * Description:
- *   Create a new window.
+ *   Release the background window previously acquired using nx_openbgwindow
+ *   and return control of the background to NX.
  *
  * Input Parameters:
- *   conn - The client containing connection information [IN]
- *   be   - The server state structure [IN]
- *   wnd  - The pre-allocated window structure to be ininitilized [IN/OUT]
- *   cb   - Callbacks used to process window events
+ *   hwnd - The handle returned (indirectly) by nx_requestbkgd
  *
  * Return:
- *   None
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-void nxmu_openwindow(FAR struct nxfe_conn_s *conn,
-                     FAR struct nxbe_state_s *be,
-                     FAR struct nxbe_window_s *wnd,
-                     FAR const struct nx_callback_s *cb)
+void nx_releasebkgd(NXWINDOW hwnd)
 {
-  /* The window structure was allocated in nx_openwindow and all fields have
-   * been set to zero (except sem... see below).  We need only initialize the
-   * the non zero fields and insert the new window.
-   */
+  FAR struct nxfe_state_s *fe = (FAR struct nxfe_state_s *)hwnd;
+  FAR struct nxbe_state_s *be = &fe->be;
 
-  wnd->be   = be;
-  wnd->conn = conn;
-  wnd->cb   = cb;
-
-  /* Now, insert the new window at the top on the display.  topwind is
-   * never NULL (it may point only at the background window, however)
-   */
-
-  wnd->above        = NULL;
-  wnd->below        = be->topwnd;
-
-  be->topwnd->above = wnd;
-  be->topwnd        = wnd;
-
-  /* Report the initial size/position of the window to the client */
-
-  nxfe_reportposition((NXWINDOW)wnd);
-
-  /* Provide the initial mouse settings to the client */
-
-#ifdef CONFIG_NX_MOUSE
-  nxmu_mousereport(wnd);
+#ifdef CONFIG_DEBUG
+  if (!fe)
+    {
+      errno = EINVAL;
+      return ERROR;
+    }
 #endif
+
+  /* Restore the NX background window callbacks */
+
+  be->bkgd.cb = &g_bkgdcb;
+
+  /* Redraw the background window */
+
+  nxfe_redrawreq(&be->bkgd, &be->bkgd.bounds);
+  return OK;
 }
+
