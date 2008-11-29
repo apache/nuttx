@@ -35,7 +35,7 @@
 
 NX_ASRCS	=
 NXAPI_CSRCS	= nx_bitmap.c nx_closewindow.c nx_connect.c nx_disconnect.c \
-		  nx_eventhandler.c nx_fill.c nx_filltrapezoid.c \
+		  nx_eventhandler.c nx_eventnotify.c nx_fill.c nx_filltrapezoid.c \
 		  nx_getposition.c nx_kbdchin.c nx_kbdin.c nx_lower.c \
 		  nx_mousein.c nx_move.c nx_openwindow.c nx_raise.c \
 		  nx_releasebkgd.c nx_requestbkgd.c nx_setsize.c \

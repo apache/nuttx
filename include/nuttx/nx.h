@@ -321,24 +321,56 @@ EXTERN void nx_close(NXHANDLE handle);
  * Description:
  *   The client code must call this function periodically to process
  *   incoming messages from the server.  If CONFIG_NX_BLOCKING is defined,
- *   then this function will never return until the host is disconnected.
+ *   then this function not return until a server message is received.
+ *
+ *   When CONFIG_NX_BLOCKING is not defined, the client must exercise
+ *   caution in the looping to assure that it does not eat up all of
+ *   the CPU bandwidth calling nx_eventhandler repeatedly.  nx_eventnotify
+ *   may be called to get a signal event whenever a new incoming server
+ *   event is avaiable.
  *
  * Input Parameters:
  *   handle - the handle returned by nx_connect
  *
  * Return:
- *   >0: The length of the message received in msgbuffer
- *    0: No message was received
- *   <0: An error occurred and errno has been set appropriately
- *
- *   Of particular interest, it will return errno == EHOSTDOWN when the
- *   server is disconnected.  After that event, the handle can not longer
- *   be used.
+ *     OK: No errors occurred.  If CONFIG_NX_BLOCKING is defined, then
+ *         one or more server message was processed.
+ *  ERROR: An error occurred and errno has been set appropriately.  Of
+ *         particular interest, it will return errno == EHOSTDOWN when the
+ *         server is disconnected.  After that event, the handle can no
+ *         longer be used.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NX_MULTIUSER
 EXTERN int nx_eventhandler(NXHANDLE handle);
+#else
+#  define nx_eventhandler(handle) (OK)
+#endif
+
+/****************************************************************************
+ * Name: nx_eventnotify
+ *
+ * Description:
+ *   Rather than calling nx_eventhandler periodically, the client may
+ *   register to receive a signal when a server event is available.  The
+ *   client can then call nv_eventhandler() only when incoming events are
+ *   available.
+ *
+ * Input Parameters:
+ *   handle - the handle returned by nx_connect
+ *
+ * Return:
+ *      OK: No errors occurred.  If CONFIG_NX_BLOCKING is defined, then
+ *          one or more server message was processed.
+ *   ERROR: An error occurred and errno has been set appropriately
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NX_MULTIUSER) && !defined(CONFIG_DISABLE_SIGNALS)
+EXTERN int nx_eventnotify(NXHANDLE handle, int signo);
+#else
+#  define nx_eventnotify(handle, signo) (OK)
 #endif
 
 /****************************************************************************
