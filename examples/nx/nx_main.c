@@ -44,6 +44,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sched.h>
+#include <signal.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -63,10 +64,14 @@
 enum exitcode_e
 {
   NXEXIT_SUCCESS = 0,
+  NXEXIT_SIGPROCMASK,
+  NXEXIT_SIGACTION,
+  NXEXIT_EVENTNOTIFY,
   NXEXIT_TASKCREATE,
   NXEXIT_FBINITIALIZE,
   NXEXIT_FBGETVPLANE,
   NXEXIT_NXOPEN,
+  NXEXIT_NXCONNECT,
   NXEXIT_NXSETBGCOLOR,
   NXEXIT_NXOPENWINDOW,
   NXEXIT_NXSETSIZE,
@@ -126,8 +131,25 @@ static const struct nx_callback_s g_nxcb2 =
 #endif
 };
 
+/* The connecton handler */
+
+static NXHANDLE g_hnx = NULL;
+static int g_exitcode = NXEXIT_SUCCESS;
+
+/* Initialized to zero, incremented when connected */
+
+#ifdef CONFIG_NX_MULTIUSER
+static boolean g_connected = FALSE;
+#endif
+static boolean b_haveresolution = FALSE;
+static sem_t g_semevent = {0};
+
+/* The screen resolution */
+
 static nxgl_coord_t g_xres;
 static nxgl_coord_t g_yres;
+
+/* Colors used to fill window 1 & 2 */
 
 static nxgl_mxpixel_t g_color1[CONFIG_NX_NPLANES];
 static nxgl_mxpixel_t g_color2[CONFIG_NX_NPLANES];
@@ -180,10 +202,19 @@ static void nxeg_position1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
            pos->x, pos->y,
            bounds->pt1.x, bounds->pt1.y, bounds->pt2.x, bounds->pt2.y);
 
-  /* Save the window limits */
+  /* Have we picked off the window bounds yet? */
 
-  g_xres = bounds->pt2.x;
-  g_yres = bounds->pt2.y;
+  if (!b_haveresolution)
+    {
+      /* Save the window limits (these should be the same for all places and all windows */
+
+      g_xres = bounds->pt2.x;
+      g_yres = bounds->pt2.y;
+
+      b_haveresolution = TRUE;
+      sem_post(&g_semevent);
+      message("nxeg_position2: Have xres=%d yres=%d\n", g_xres, g_yres);
+    }
 }
 
 /****************************************************************************
@@ -201,11 +232,6 @@ static void nxeg_position2(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
            size->pt1.x, size->pt1.y, size->pt2.x, size->pt2.y,
            pos->x, pos->y,
            bounds->pt1.x, bounds->pt1.y, bounds->pt2.x, bounds->pt2.y);
-
-  /* Save the window limits */
-
-  g_xres = bounds->pt2.x;
-  g_yres = bounds->pt2.y;
 }
 
 /****************************************************************************
@@ -281,6 +307,194 @@ static void nxeg_kbdin2(NXWINDOW hwnd, ubyte nch, const ubyte *ch)
 #endif
 
 /****************************************************************************
+ * Name: nxeg_suinitialize
+ ****************************************************************************/
+
+#ifdef CONFIG_NX_MULTIUSER
+static void nxeg_sigaction(int signo, FAR siginfo_t *info, FAR void *context)
+{
+  int ret;
+
+  /* I know... you are not supposed to call printf from signal handlers */
+
+  message("nxeg_sigaction: received signo=%d\n", signo);
+  ret = nx_eventhandler(g_hnx);
+
+  /* If we received a message, we must be connected */
+
+  if (!g_connected)
+    {
+      g_connected = TRUE;
+      sem_post(&g_semevent);
+      message("nxeg_sigaction: Connected\n");
+    }
+
+  /* Request notification of further incoming events */
+
+  ret = nx_eventnotify(g_hnx, CONFIG_EXAMPLES_NX_NOTIFYSIGNO);
+  if (ret < 0)
+     {
+       message("nxeg_sigaction: nx_eventnotify failed: %d\n", errno);
+     }
+}
+#endif
+
+/****************************************************************************
+ * Name: nxeg_suinitialize
+ ****************************************************************************/
+
+#ifndef CONFIG_NX_MULTIUSER
+static inline int nxeg_suinitialize(void)
+{
+  FAR struct fb_vtable_s *fb;
+  int ret;
+
+  /* Initialize the frame buffer device */
+
+  message("nxeg_initialize: Initializing framebuffer\n");
+  ret = up_fbinitialize();
+  if (ret < 0)
+    {
+      message("nxeg_initialize: up_fbinitialize failed: %d\n", -ret);
+      g_exitcode = NXEXIT_FBINITIALIZE;
+      return ERROR;
+    }
+
+  fb = up_fbgetvplane(CONFIG_EXAMPLES_NX_VPLANE);
+  if (!fb)
+    {
+      message("nxeg_initialize: up_fbgetvplane failed, vplane=%d\n", CONFIG_EXAMPLES_NX_VPLANE);
+      g_exitcode = NXEXIT_FBGETVPLANE;
+      return ERROR;
+    }
+
+  /* Then open NX */
+
+  message("nxeg_initialize: Open NX\n");
+  g_hnx = nx_open(fb);
+  if (!g_hnx)
+    {
+      message("user_start: nx_open failed: %d\n", errno);
+      g_exitcode = NXEXIT_NXOPEN;
+      return ERROR;
+    }
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: nxeg_initialize
+ ****************************************************************************/
+
+#ifdef CONFIG_NX_MULTIUSER
+static inline int nxeg_muinitialize(void)
+{
+  struct sigaction act;
+  sigset_t sigset;
+  pid_t servrid;
+  int ret;
+
+  /* Set up to catch a signal */
+
+  message("nxeg_initialize: Unmasking signal %d\n" , CONFIG_EXAMPLES_NX_NOTIFYSIGNO);
+  (void)sigemptyset(&sigset);
+  (void)sigaddset(&sigset, CONFIG_EXAMPLES_NX_NOTIFYSIGNO);
+  ret = sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+  if (ret < 0)
+    {
+      message("nxeg_initialize: sigprocmask failed: \n", ret);
+      g_exitcode = NXEXIT_SIGPROCMASK;
+      return ERROR;
+    }
+
+  message("nxeg_initialize: Registering signal handler\n" );
+  act.sa_sigaction = nxeg_sigaction;
+  act.sa_flags     = SA_SIGINFO;
+  (void)sigfillset(&act.sa_mask);
+  (void)sigdelset(&act.sa_mask, CONFIG_EXAMPLES_NX_NOTIFYSIGNO);
+
+  ret = sigaction(CONFIG_EXAMPLES_NX_NOTIFYSIGNO, &act, NULL);
+  if (ret < 0)
+    {
+      message("nxeg_initialize: sigaction failed: %d\n" , ret);
+      g_exitcode = NXEXIT_SIGACTION;
+      return ERROR;
+    }
+
+  /* Start the server task */
+
+  message("nxeg_initialize: Starting nx_servertask task\n");
+  servrid = task_create("NX Server", CONFIG_EXAMPLES_NX_SERVERPRIO,
+                        CONFIG_EXAMPLES_NX_STACKSIZE, nx_servertask, NULL);
+  if (servrid < 0)
+    {
+      message("nxeg_initialize: Failed to create nx_servertask task: %d\n", errno);
+      g_exitcode = NXEXIT_TASKCREATE;
+      return ERROR;
+    }
+
+  /* Wait a bit to let the server get started */
+
+  sleep(2);
+
+  /* Connect to the server */
+
+  g_hnx = nx_connect();
+  if (g_hnx)
+    {
+       /* Request notification of incoming events */
+
+       ret = nx_eventnotify(g_hnx, CONFIG_EXAMPLES_NX_NOTIFYSIGNO);
+       if (ret < 0)
+         {
+            message("nxeg_initialize: nx_eventnotify failed: %d\n", errno);
+            (void)nx_disconnect(g_hnx);
+            g_hnx      = NULL;
+            g_exitcode = NXEXIT_EVENTNOTIFY;
+            return ERROR;
+         }
+
+       /* Don't return until we are connected to the server */
+
+       while (!g_connected)
+         {
+           (void)sem_wait(&g_semevent);
+         }
+    }
+  else
+    {
+      message("user_start: nx_connect failed: %d\n", errno);
+      g_exitcode = NXEXIT_NXCONNECT;
+      return ERROR;
+    }
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: nxeg_initialize
+ ****************************************************************************/
+
+static int nxeg_initialize(void)
+{
+  int i;
+
+  /* Initialize window colors */
+
+  for (i = 0; i < CONFIG_NX_NPLANES; i++)
+    {
+      g_color1[i] = CONFIG_EXAMPLES_NX_COLOR1;
+      g_color2[i] = CONFIG_EXAMPLES_NX_COLOR2;
+    }
+
+#ifdef CONFIG_NX_MULTIUSER
+  return nxeg_muinitialize();
+#else
+  return nxeg_suinitialize();
+#endif
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -298,80 +512,21 @@ void user_initialize(void)
 
 int user_start(int argc, char *argv[])
 {
-  NXHANDLE hnx;
   NXWINDOW hwnd1;
   NXWINDOW hwnd2;
-#ifndef CONFIG_NX_MULTIUSER
-  FAR struct fb_vtable_s *fb;
-#else
-  pid_t servrid;
-#endif
   struct nxgl_rect_s rect;
   struct nxgl_point_s pt;
   nxgl_mxpixel_t color;
-  int exitcode = NXEXIT_SUCCESS;
   int ret;
-  int i;
 
-  /* Initialize window colors */
+  /* Initialize */
 
-  for (i = 0; i < CONFIG_NX_NPLANES; i++)
-    {
-      g_color1[i] = CONFIG_EXAMPLES_NX_COLOR1;
-      g_color1[2] = CONFIG_EXAMPLES_NX_COLOR2;
-    }
-
-#ifdef CONFIG_NX_MULTIUSER
-  /* Start the server task */
-
-  message("user_start: Starting nx_servertask task\n");
-  servrid = task_create("NX Server", CONFIG_EXAMPLES_NX_SERVERPRIO,
-                        CONFIG_EXAMPLES_NX_STACKSIZE, nx_servertask, NULL);
-  if (servrid < 0)
-    {
-      message("user_start: Failed to create nx_servertask task: %d\n", errno);
-      exitcode = NXEXIT_TASKCREATE;
-      goto errout;
-    }
-
-  /* Wait a bit to let the server get started */
-
-  sleep(2);
-
-  /* Connect to the server */
-
-  hnx = nx_connect();
-#else
-  /* Initialize the frame buffer device */
-
-  message("user_start: Initializing framebuffer\n");
-  ret = up_fbinitialize();
-  if (ret < 0)
-    {
-      message("user_start: up_fbinitialize failed: %d\n", -ret);
-      exitcode = NXEXIT_FBINITIALIZE;
-      goto errout;
-    }
-
-  fb = up_fbgetvplane(CONFIG_EXAMPLES_NX_VPLANE);
-  if (!fb)
-    {
-      message("user_start: up_fbgetvplane failed, vplane=%d\n", CONFIG_EXAMPLES_NX_VPLANE);
-      exitcode = NXEXIT_FBGETVPLANE;
-      goto errout;
-    }
-
-  /* Then open NX */
-
-  message("user_start: Open NX\n");
-  hnx = nx_open(fb);
-#endif
-
-  message("user_start: NX handle=%p\n", hnx);
-  if (!hnx)
+  ret = nxeg_initialize();
+  message("user_start: NX handle=%p\n", g_hnx);
+  if (!g_hnx || ret < 0)
     {
       message("user_start: Failed to get NX handle: %d\n", errno);
-      exitcode = NXEXIT_NXOPEN;
+      g_exitcode = NXEXIT_NXOPEN;
       goto errout;
     }
 
@@ -379,29 +534,37 @@ int user_start(int argc, char *argv[])
 
   message("user_start: Set background color=%d\n", CONFIG_EXAMPLES_NX_BGCOLOR);
   color = CONFIG_EXAMPLES_NX_BGCOLOR;
-  ret = nx_setbgcolor(hnx, &color);
+  ret = nx_setbgcolor(g_hnx, &color);
   if (ret < 0)
     {
       message("user_start: nx_setbgcolor failed: %d\n", errno);
-      exitcode = NXEXIT_NXSETBGCOLOR;
+      g_exitcode = NXEXIT_NXSETBGCOLOR;
       goto errout_with_nx;
     }
+  (void)nx_eventhandler(g_hnx); /* Check for server events -- normally done in a loop */
 
   /* Create window #1 */
 
   message("user_start: Create window #1\n");
-  hwnd1 = nx_openwindow(hnx, &g_nxcb1);
+  hwnd1 = nx_openwindow(g_hnx, &g_nxcb1);
   message("user_start: hwnd1=%p\n", hwnd1);
 
   if (!hwnd1)
     {
       message("user_start: nx_openwindow failed: %d\n", errno);
-      exitcode = NXEXIT_NXOPENWINDOW;
+      g_exitcode = NXEXIT_NXOPENWINDOW;
       goto errout_with_nx;
+    }
+
+  /* Wait until we have the screen resolution */
+
+  while (!b_haveresolution)
+    {
+      (void)sem_wait(&g_semevent);
     }
   message("user_start: Screen resolution (%d,%d)\n", g_xres, g_yres);
 
-  /* Set the size of the window 2 */
+  /* Set the size of the window 1 */
 
   rect.pt1.x = 0;
   rect.pt1.y = 0;
@@ -413,7 +576,7 @@ int user_start(int argc, char *argv[])
   if (ret < 0)
     {
       message("user_start: nx_setsize failed: %d\n", errno);
-      exitcode = NXEXIT_NXSETSIZE;
+      g_exitcode = NXEXIT_NXSETSIZE;
       goto errout_with_hwnd1;
     }
 
@@ -425,20 +588,28 @@ int user_start(int argc, char *argv[])
   if (ret < 0)
     {
       message("user_start: nx_setposition failed: %d\n", errno);
-      exitcode = NXEXIT_NXSETPOSITION;
+      g_exitcode = NXEXIT_NXSETPOSITION;
       goto errout_with_hwnd1;
     }
+
+  /* Sleep a bit -- both so that we can see the result of the above operations
+   * but also, in the multi-user case, so that the server can get a chance to
+   * actually do them!
+   */
+
+  message("user_start: Sleeping\n\n");
+  sleep(2);
 
   /* Create window #2 */
 
   message("user_start: Create window #1\n");
-  hwnd2 = nx_openwindow(hnx, &g_nxcb2);
+  hwnd2 = nx_openwindow(g_hnx, &g_nxcb2);
   message("user_start: hwnd2=%p\n", hwnd2);
 
   if (!hwnd2)
     {
       message("user_start: nx_openwindow failed: %d\n", errno);
-      exitcode = NXEXIT_NXOPENWINDOW;
+      g_exitcode = NXEXIT_NXOPENWINDOW;
       goto errout_with_hwnd1;
     }
 
@@ -449,7 +620,7 @@ int user_start(int argc, char *argv[])
   if (ret < 0)
     {
       message("user_start: nx_setsize failed: %d\n", errno);
-      exitcode = NXEXIT_NXSETSIZE;
+      g_exitcode = NXEXIT_NXSETSIZE;
       goto errout_with_hwnd2;
     }
 
@@ -461,9 +632,14 @@ int user_start(int argc, char *argv[])
   if (ret < 0)
     {
       message("user_start: nx_setposition failed: %d\n", errno);
-      exitcode = NXEXIT_NXSETPOSITION;
+      g_exitcode = NXEXIT_NXSETPOSITION;
       goto errout_with_hwnd2;
     }
+
+  /* Sleep a bit */
+
+  message("user_start: Sleeping\n\n");
+  sleep(2);
 
   /* Lower window 2 */
 
@@ -472,9 +648,14 @@ int user_start(int argc, char *argv[])
   if (ret < 0)
     {
       message("user_start: nx_lower failed: %d\n", errno);
-      exitcode = NXEXIT_NXSETPOSITION;
+      g_exitcode = NXEXIT_NXSETPOSITION;
       goto errout_with_hwnd2;
     }
+
+  /* Sleep a bit */
+
+  message("user_start: Sleeping\n\n");
+  sleep(2);
 
   /* Close the window 2 */
 
@@ -484,7 +665,7 @@ errout_with_hwnd2:
   if (ret < 0)
     {
       message("user_start: nx_openwindow failed: %d\n", errno);
-      exitcode = NXEXIT_NXCLOSEWINDOW;
+      g_exitcode = NXEXIT_NXCLOSEWINDOW;
       goto errout_with_nx;
     }
 
@@ -496,7 +677,7 @@ errout_with_hwnd1:
   if (ret < 0)
     {
       message("user_start: nx_openwindow failed: %d\n", errno);
-      exitcode = NXEXIT_NXCLOSEWINDOW;
+      g_exitcode = NXEXIT_NXCLOSEWINDOW;
       goto errout_with_nx;
     }
 
@@ -505,13 +686,13 @@ errout_with_nx:
   /* Disconnect from the server */
 
   message("user_start: Disconnect from the server\n");
-  nx_disconnect(hnx);
+  nx_disconnect(g_hnx);
 #else
   /* Close the server */
 
   message("user_start: Close NX\n");
-  nx_close(hnx);
+  nx_close(g_hnx);
 #endif
 errout:
-  return exitcode;
+  return g_exitcode;
 }
