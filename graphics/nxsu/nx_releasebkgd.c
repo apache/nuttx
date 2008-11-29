@@ -85,7 +85,7 @@
  *
  ****************************************************************************/
 
-void nx_releasebkgd(NXWINDOW hwnd)
+int nx_releasebkgd(NXWINDOW hwnd)
 {
   FAR struct nxfe_state_s *fe = (FAR struct nxfe_state_s *)hwnd;
   FAR struct nxbe_state_s *be = &fe->be;

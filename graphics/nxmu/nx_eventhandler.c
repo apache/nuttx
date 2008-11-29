@@ -187,45 +187,53 @@ int nx_eventhandler(NXHANDLE handle)
       return ERROR;
 
     case NX_CLIMSG_REDRAW:
-      if (conn->cb->redraw)
-        {
-          FAR struct nxclimsg_redraw_s *redraw = (FAR struct nxclimsg_redraw_s *)buffer;
-          wnd = redraw->wnd;
-          DEBUGASSERT(wnd);
-          wnd->cb->redraw((NXWINDOW)wnd, &redraw->rect, redraw->more);
-        }
+      {
+        FAR struct nxclimsg_redraw_s *redraw = (FAR struct nxclimsg_redraw_s *)buffer;
+        wnd = redraw->wnd;
+        DEBUGASSERT(wnd);
+        if (wnd->cb->redraw)
+          {
+            wnd->cb->redraw((NXWINDOW)wnd, &redraw->rect, redraw->more);
+          }
+      }
       break;
 
     case NX_CLIMSG_NEWPOSITION:
-      if (conn->cb->position)
-        {
-          FAR struct nxclimsg_newposition_s *postn = (FAR struct nxclimsg_newposition_s *)buffer;
-          wnd = postn->wnd;
-          DEBUGASSERT(wnd);
-          wnd->cb->position((NXWINDOW)wnd, &postn->size, &postn->pos, &postn->bounds);
-        }
+      {
+        FAR struct nxclimsg_newposition_s *postn = (FAR struct nxclimsg_newposition_s *)buffer;
+        wnd = postn->wnd;
+        DEBUGASSERT(wnd);
+        if (wnd->cb->position)
+          {
+            wnd->cb->position((NXWINDOW)wnd, &postn->size, &postn->pos, &postn->bounds);
+          }
+      }
       break;
 
 #ifdef CONFIG_NX_KBD
     case NX_CLIMSG_MOUSEIN:
-      if (conn->cb->mousein)
-        {
-          FAR struct nxclimsg_mousein_s *mouse = (FAR struct nxclimsg_mousein_s *)buffer;
-          wnd = mouse->wnd;
-          DEBUGASSERT(wnd);
-          wnd->cb->mousein((NXWINDOW)wnd, &mouse->pos, mouse->buttons);
+      {
+        FAR struct nxclimsg_mousein_s *mouse = (FAR struct nxclimsg_mousein_s *)buffer;
+        wnd = mouse->wnd;
+        DEBUGASSERT(wnd);
+        if (wnd->cb->mousein)
+          {
+            wnd->cb->mousein((NXWINDOW)wnd, &mouse->pos, mouse->buttons);
+          }
         }
       break;
 #endif
 
 #ifdef CONFIG_NX_KBD
     case NX_CLIMSG_KBDIN:
-      if (conn->cb->kbdin)
-        {
-          FAR struct nxclimsg_kbdin_s *kbd = (FAR struct nxclimsg_kbdin_s *)buffer;
-          wnd = kbd->wnd;
-          DEBUGASSERT(wnd);
-          wnd->cb->kbdin((NXWINDOW)wnd, kbd->nch, kbd->ch);
+      {
+        FAR struct nxclimsg_kbdin_s *kbd = (FAR struct nxclimsg_kbdin_s *)buffer;
+        wnd = kbd->wnd;
+         DEBUGASSERT(wnd);
+        if (wnd->cb->kbdin)
+          {
+            wnd->cb->kbdin((NXWINDOW)wnd, kbd->nch, kbd->ch);
+          }
         }
       break;
 #endif

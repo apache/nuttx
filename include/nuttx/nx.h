@@ -227,10 +227,15 @@ EXTERN int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb);
  *   connection is normally needed per thread as each connection can host
  *   multiple windows.
  *
- *   NOTE that multiple instances of the NX server may run at the same time,
- *   each with different message queue names.  nx_connect() is simply
- *   a macro that can be used when only one server instance is required.  In
- *   that case, a default server name is used.
+ *   NOTES:
+ *   - This function returns before the connection is fully instantiated.
+ *     it is necessary to wait for the connection event before using the
+ *     returned handle.
+ *   - Multiple instances of the NX server may run at the same time,
+ *     each with different message queue names.
+ *   - nx_connect() is simply a macro that can be used when only one
+ *     server instance is required.  In that case, a default server name
+ *     is used.
  *
  *   Multiple user mode only!
  *
@@ -356,6 +361,9 @@ EXTERN int nx_eventhandler(NXHANDLE handle);
  *   register to receive a signal when a server event is available.  The
  *   client can then call nv_eventhandler() only when incoming events are
  *   available.
+ *
+ *   Only one such event is issued.  Upon receipt of the signal, if the client
+ *   wishes further notifications, it must call nx_eventnotify again.
  *
  * Input Parameters:
  *   handle - the handle returned by nx_connect

@@ -80,14 +80,14 @@
 
 static inline void nxmu_disconnect(FAR struct nxfe_conn_s *conn)
 {
-  struct nxclimsg_s outmsg;
-  int               ret;
+  struct nxclimsg_disconnected_s outmsg;
+  int ret;
 
   /* Send the handshake message back to the client */
 
   outmsg.msgid = NX_CLIMSG_DISCONNECTED;
 
-  ret = mq_send(conn->swrmq, &outmsg, sizeof(struct nxclimsg_s), NX_CLIMSG_PRIO);
+  ret = mq_send(conn->swrmq, &outmsg, sizeof(struct nxclimsg_disconnected_s), NX_CLIMSG_PRIO);
   if (ret < 0)
     {
       gdbg("mq_send failed: %d\n", errno);
@@ -104,9 +104,9 @@ static inline void nxmu_disconnect(FAR struct nxfe_conn_s *conn)
 
 static inline void nxmu_connect(FAR struct nxfe_conn_s *conn)
 {
-  char              mqname[NX_CLIENT_MXNAMELEN];
-  struct nxclimsg_s outmsg;
-  int               ret;
+  char mqname[NX_CLIENT_MXNAMELEN];
+  struct nxclimsg_connected_s outmsg;
+  int ret;
 
   /* Create the client MQ name */
 
@@ -114,7 +114,6 @@ static inline void nxmu_connect(FAR struct nxfe_conn_s *conn)
 
   /* Open the client MQ -- this should have already been created by the client */
 
-  outmsg.msgid = NX_CLIMSG_CONNECTED;
   conn->swrmq  = mq_open(mqname, O_WRONLY);
   if (conn->swrmq == (mqd_t)-1)
     {
@@ -124,7 +123,9 @@ static inline void nxmu_connect(FAR struct nxfe_conn_s *conn)
 
   /* Send the handshake message back to the client */
 
-  ret = mq_send(conn->swrmq, &outmsg, sizeof(struct nxclimsg_s), NX_CLIMSG_PRIO);
+  outmsg.msgid = NX_CLIMSG_CONNECTED;
+
+  ret = mq_send(conn->swrmq, &outmsg, sizeof(struct nxclimsg_connected_s), NX_CLIMSG_PRIO);
   if (ret < 0)
     {
       gdbg("mq_send failed: %d\n", errno);
@@ -376,7 +377,7 @@ int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb)
          case NX_SVRMSG_OPENWINDOW: /* Create a new window */
            {
              FAR struct nxsvrmsg_openwindow_s *openmsg = (FAR struct nxsvrmsg_openwindow_s *)buffer;
-             nxmu_openwindow(openmsg->conn, &fe.be, openmsg->wnd, openmsg->cb);
+             nxmu_openwindow(&fe.be, openmsg->wnd);
            }
            break;
 

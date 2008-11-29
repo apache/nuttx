@@ -74,29 +74,23 @@
  *   Create a new window.
  *
  * Input Parameters:
- *   conn - The client containing connection information [IN]
- *   be   - The server state structure [IN]
+ *   be  - The back-end status structure
  *   wnd  - The pre-allocated window structure to be ininitilized [IN/OUT]
- *   cb   - Callbacks used to process window events
  *
  * Return:
  *   None
  *
  ****************************************************************************/
 
-void nxmu_openwindow(FAR struct nxfe_conn_s *conn,
-                     FAR struct nxbe_state_s *be,
-                     FAR struct nxbe_window_s *wnd,
-                     FAR const struct nx_callback_s *cb)
+void nxmu_openwindow(FAR struct nxbe_state_s *be, FAR struct nxbe_window_s *wnd)
 {
   /* The window structure was allocated in nx_openwindow and all fields have
-   * been set to zero (except sem... see below).  We need only initialize the
-   * the non zero fields and insert the new window.
+   * been set to zero cb and conn which were initialized on the client side.
+   * On the server side, we need only initialize a few more the non zero fields
+   * and insert the new window at the top of the display.
    */
 
   wnd->be   = be;
-  wnd->conn = conn;
-  wnd->cb   = cb;
 
   /* Now, insert the new window at the top on the display.  topwind is
    * never NULL (it may point only at the background window, however)

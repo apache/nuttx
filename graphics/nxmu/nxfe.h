@@ -110,7 +110,6 @@ struct nxfe_conn_s
 
   mqd_t crdmq;                        /* MQ to read from the server (may be non-blocking) */
   mqd_t cwrmq;                        /* MQ to write to the server (blocking) */
-  FAR const struct nx_callback_s *cb; /* Message handling callbacks */
 
   /* These are only usable on the server side of the connection */
 
@@ -179,14 +178,25 @@ enum nxmsg_e
 
 /* Server-to-Client Message Structures **************************************/
 
-/* The generic message structure.  All messages begin with this form.  Also, messages
- * that have no data other than the msgid event use this structure.  This includes:
- * NX_CLIMSG_CONNECTED and NX_CLIMSG_DISCONNECTED.
- */
+/* The generic message structure.  All messages begin with this form. */
 
 struct nxclimsg_s
 {
   uint32 msgid;                  /* Any of nxclimsg_e */
+};
+
+/* The server is now connected */
+
+struct nxclimsg_connected_s
+{
+  uint32 msgid;                  /* NX_CLIMSG_REDRAW_CONNECTED */
+};
+
+/* The server is now disconnected */
+
+struct nxclimsg_disconnected_s
+{
+  uint32 msgid;                  /* NX_CLIMSG_REDRAW_DISCONNECTED */
 };
 
 /* This message is received when a requested window has been opened.  If wnd is NULL
@@ -254,9 +264,7 @@ struct nxsvrmsg_s                    /* Generic server message */
 struct nxsvrmsg_openwindow_s
 {
   uint32 msgid;                      /* NX_SVRMSG_OPENWINDOW */
-  FAR struct nxfe_conn_s *conn;      /* The specific connection sending the message */
   FAR struct nxbe_window_s *wnd;     /* The pre-allocated window structure */
-  FAR const struct nx_callback_s *cb; /* Event handling callbacks */
 };
 
 /* This message informs the server that client wishes to close a window */
@@ -442,8 +450,7 @@ EXTERN void nxmu_semtake(sem_t *sem);
  *   Create a new window.
  *
  * Input Parameters:
- *   conn - The client containing connection information [IN]
- *   svr  - The server state structure [IN]
+ *   be  - The back-end status structure
  *   wnd  - The pre-allocated window structure to be ininitilized [IN/OUT]
  *
  * Return:
@@ -451,10 +458,8 @@ EXTERN void nxmu_semtake(sem_t *sem);
  *
  ****************************************************************************/
 
-EXTERN void nxmu_openwindow(FAR struct nxfe_conn_s *conn,
-                            FAR struct nxbe_state_s *be,
-                            FAR struct nxbe_window_s *wnd,
-                            FAR const struct nx_callback_s *cb);
+EXTERN void nxmu_openwindow(FAR struct nxbe_state_s *be,
+                            FAR struct nxbe_window_s *wnd);
 
 /****************************************************************************
  * Name: nxmu_requestbkgd
@@ -565,7 +570,7 @@ EXTERN nxmu_mousein(FAR struct nxfe_state_s *fe,
  ****************************************************************************/
 
 #ifdef CONFIG_NX_KBD
-EXTERN void nxmu_kbdin(FAR struct nxs_server_s *svr, ubyte nch, ubyte *ch);
+EXTERN void nxmu_kbdin(FAR struct nxfe_state_s *fe, ubyte nch, ubyte *ch);
 #endif
 
 #undef EXTERN

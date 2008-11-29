@@ -111,12 +111,17 @@ NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb)
       return NULL;
     }
 
+  /* Setup only the connection structure.  We'll need this to communicate with
+   * the server.  The server will set everything else up.
+   */
+
+  wnd->conn   = conn;
+  wnd->cb     = cb;
+
   /* Request initialization the new window from the server */
 
   outmsg.msgid = NX_SVRMSG_OPENWINDOW;
-  outmsg.conn  = conn;
   outmsg.wnd   = wnd;
-  outmsg.cb    = cb;
 
   ret = mq_send(conn->cwrmq, &outmsg, sizeof(struct nxsvrmsg_openwindow_s), NX_SVRMSG_PRIO);
   if (ret < 0)

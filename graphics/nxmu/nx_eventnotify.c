@@ -84,6 +84,9 @@
  *   client can then call nv_eventhandler() only when incoming events are
  *   available.
  *
+ *   Only one such event is issued.  Upon receipt of the signal, if the client
+ *   wishes further notifications, it must call nx_eventnotify again.
+ *
  * Input Parameters:
  *   handle - the handle returned by nx_connect
  *
