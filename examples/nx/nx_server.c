@@ -84,25 +84,25 @@ int nx_servertask(int argc, char *argv[])
 
   /* Initialize the frame buffer device */
 
-  message("nx_serverthread: Initializing framebuffer\n");
+  message("nx_servertask: Initializing framebuffer\n");
   ret = up_fbinitialize();
   if (ret < 0)
     {
-      message("nx_serverthread: up_fbinitialize failed: %d\n", -ret);
+      message("nx_servertask: up_fbinitialize failed: %d\n", -ret);
       return 1;
     }
 
   fb = up_fbgetvplane(CONFIG_EXAMPLES_NX_VPLANE);
   if (!fb)
     {
-      message("nx_serverthread: up_fbgetvplane failed, vplane=%d\n", CONFIG_EXAMPLES_NX_VPLANE);
+      message("nx_servertask: up_fbgetvplane failed, vplane=%d\n", CONFIG_EXAMPLES_NX_VPLANE);
       return 2;
     }
 
   /* Then start the server */
 
   ret = nx_run(fb);
-  message("nx_serverthread: nx_run returned: %d\n", errno);
+  message("nx_servertask: nx_run returned: %d\n", errno);
   return 3;
 }
 
