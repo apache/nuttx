@@ -152,7 +152,7 @@ NXHANDLE nx_connectionstance(FAR const char *svrmqname)
 #else
   conn->crdmq = mq_open(climqname, O_RDONLY|O_CREAT|O_NONBLOCK, 0666, &attr);
 #endif
-  if (conn->crdmq)
+  if (conn->crdmq == (mqd_t)-1)
     {
       gdbg("mq_open(%s) failed: %d\n", climqname, errno);
       goto errout_with_conn;
@@ -165,7 +165,7 @@ NXHANDLE nx_connectionstance(FAR const char *svrmqname)
   attr.mq_flags   = 0;
 
   conn->cwrmq = mq_open(svrmqname, O_WRONLY|O_CREAT, 0666, &attr);
-  if (conn->cwrmq)
+  if (conn->cwrmq == (mqd_t)-1)
     {
       gdbg("mq_open(%s) failed: %d\n", svrmqname, errno);
       goto errout_with_rmq;

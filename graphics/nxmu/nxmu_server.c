@@ -116,7 +116,7 @@ static inline void nxmu_connect(FAR struct nxfe_conn_s *conn)
 
   outmsg.msgid = NX_CLIMSG_CONNECTED;
   conn->swrmq  = mq_open(mqname, O_WRONLY);
-  if (conn->swrmq)
+  if (conn->swrmq == (mqd_t)-1)
     {
       gdbg("mq_open(%s) failed: %d\n", mqname, errno);
       outmsg.msgid = NX_CLIMSG_DISCONNECTED;
@@ -224,7 +224,7 @@ static inline int nxmu_setup(FAR const char *mqname,
   attr.mq_flags   = 0;
 
   fe->conn.crdmq = mq_open(mqname, O_RDONLY|O_CREAT, 0666, &attr);
-  if (fe->conn.crdmq)
+  if (fe->conn.crdmq == (mqd_t)-1)
     {
       gdbg("mq_open(%s) failed: %d\n", mqname, errno);
       return ERROR; /* mq_open sets errno */
@@ -239,10 +239,8 @@ static inline int nxmu_setup(FAR const char *mqname,
    * the server message loop.
    */
 
-  /* Open the server MQ for writing (same attributes) */
-
-  fe->conn.cwrmq = mq_open(mqname, O_WRONLY);
-  if (fe->conn.cwrmq)
+  fe->conn.swrmq = mq_open(mqname, O_WRONLY);
+  if (fe->conn.swrmq == (mqd_t)-1)
     {
       gdbg("mq_open(%s) failed: %d\n", mqname, errno);
       mq_close(fe->conn.crdmq);
