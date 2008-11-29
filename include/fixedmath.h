@@ -54,6 +54,9 @@
 #define b8HALF          0x0080                  /* 0.5 */
 #define b8ONETENTH      0x001a                  /* 0.1 (acutally 0.1015625) */
 #define b8ONEHUNDRTH    0x0003                  /* 0.01 (actualy 0.0117198765) */
+#define b8HALFPI        0x0192                  /* 1.5703125 */
+#define b8PI            0x0324                  /* 3.1406250 */
+#define b8TWOPI         0x0648                  /* 6.2812500 */
 
 #define b8MAX           0x7fff                  /* Max value of b8_t */
 #define ub8MAX          0xffff                  /* Max value of rb8_t */
@@ -68,6 +71,9 @@
 #define b16ONETENTH     0x0000199a              /* 0.1 (actually 0.100006..) */
 #define b16ONEHUNDRTH   0x0000028f              /* 0.01 (actually 0.0099945..) */
 #define b16ONETHOUSTH   0x00000042              /* 0.001 (actually 0.000100708..)*/
+#define b16HALFPI       0x0001921f              /* 1.57078552246 */
+#define b16PI           0x0003243f              /* 3.14158630371 */
+#define b16TWOPI        0x0006487b              /* 6.28312683105 */
 
 #define b16MAX          0x7fffffff              /* Max value of b16_t */
 #define ub16MAX         0xffffffff              /* Max value of ub16_t */
@@ -84,6 +90,9 @@
 #define b32ONEHUNDRTH   0x00000000028f5c29      /* 0.01 */
 #define b32ONETHOUSTH   0x0000000000418937      /* 0.001 */
 #define b32ONETENTHOU   0x0000000000068db9      /* 0.0001 */
+#define b32HALFPI       0x00000001921eb9ff      /* 1.57078134990 */
+#define b32PI           0x00000003243f6b4f      /* 3.14159269980 */
+#define b32TWOPI        0x00000006487ae7fd      /* 6.28312539984 */
 
 #define b32MAX          0x7fffffffffffffff      /* Max value of b16_t */
 #define ub32MAX         0xffffffffffffffff      /* Max value of ub16_t */
@@ -131,6 +140,8 @@
 #define b8mulb8(a,b)    b16tob8((b16_t)(a)*(b16_t)(b) /* Muliplication */
 #define ub8mulub8(a,b)  ub16toub8((ub16_t)(a)*(ub16_t)(b) /* Muliplication */
 #define b8muli(a,i)     ((a)*(i))               /* Simple multiplication by integer */
+#define b8sqr(a)        b8mulb8(a,a)            /* Square */
+#define ub8sqr(a)       ub8mulub8(a,a)          /* Square */
 #define b8divb8(a,b)    b8tob16(a)/(b16_t)(b)   /* Division */
 #define ub8divub8(a,b)  ub8toub16(a)/(ub16_t)(b) /* Division */
 #define b8divi(a,i)     ((a)/(i))               /* Simple division by integer */
@@ -162,9 +173,11 @@
 #define b16idiv(i,j)    (((i)<<16)/j)           /* Division of integer, b16 result */
 
 #ifdef CONFIG_HAVE_LONG_LONG
-#  define b16mulb16(a,b)   b32tob16((b32_t)(a)*(b32_t)(b) /* Muliplication */
+#  define b16mulb16(a,b)   b32tob16((b32_t)(a)*(b32_t)(b)) /* Muliplication */
 #  define ub16mulub16(a,b) ub32toub16((ub32_t)(a)*(ub32_t)(b)
-#  define b16divb16(a,b)   b16tob32(a)/(b32_t)(b)         /* Division */
+#  define b16sqr(a)        b16mulb16(a,a)                  /* Square */
+#  define ub16sqr(a)       ub16mulub16(a,a)                /* Square */
+#  define b16divb16(a,b)   b16tob32(a)/(b32_t)(b)          /* Division */
 #  define ub16divub16(a,b) ub16toub32(a)/(ub32_t)(b)
 #endif
 
@@ -196,9 +209,14 @@ extern "C" {
 #ifndef CONFIG_HAVE_LONG_LONG
 EXTERN b16_t  b16mulb16(b16_t m1, b16_t m2);
 EXTERN ub16_t ub16mulub16(ub16_t m1, ub16_t m2);
+EXTERN b16_t  b16sqr(b16_t a);
+EXTERN ub16_t ub16sqr(ub16_t a);
 EXTERN b16_t  b16divb16(b16_t num, b16_t denom);
 EXTERN ub16_t ub16divub16(ub16_t num, ub16_t denom);
 #endif
+
+EXTERN b16_t b16sin(b16_t rad);
+EXTERN b16_t b16cos(b16_t rad);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -165,6 +165,53 @@ ub16_t ub16mulub16(ub16_t m1, ub16_t m2)
  * Name: b16divb16
  **************************************************************************/
 
+b16_t b16sqr(b16_t a)
+{
+  b16_t sq;
+
+  /* The result is always positive.  Just take the absolute value */
+
+  if (a < 0)
+    {
+      a = -a;
+    }
+
+  /* Overflow occurred if the result is negative */
+
+  sq = (bt_t)ub16sqr(a);
+  if (sq < 0)
+    {
+      sq = b16MAX;
+    }
+  return sq;
+}
+
+/****************************************************************************
+ * Name: b16divb16
+ **************************************************************************/
+
+ub16_t ub16sqr(ub16_t a)
+{
+ /* Let:
+ *
+  *   m = mi*2**16 + mf                                               (b16)
+  *
+  * Then:
+  *
+  *  m*m = (mi*mi)*2**32 + 2*(m1*m2)*2**16 + mf*mf                    (b32)
+  *      = (mi*mi)*2**16 + 2*(mi*mf)       + mf*mf*2**-16             (b16)
+  */
+
+  uint32 mi = ((uint32)m1 >> 16);
+  uint32 mf = ((uint32)m1 & 0x0000ffff);
+
+  return (mi*mi << 16) + (mi*mf << 1) (((mf*mf) + b16HALF) >> 16);
+}
+
+/****************************************************************************
+ * Name: b16divb16
+ **************************************************************************/
+
 b16_t b16divb16(b16_t num, b16_t denom)
 {
   boolean negate;
