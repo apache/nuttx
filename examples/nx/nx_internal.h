@@ -49,6 +49,10 @@
 
 /* Configuration ************************************************************/
 
+#ifndef CONFIG_NXGRAPHICS
+#  error "NX is not enabled (CONFIG_NXGRAPHICS)"
+#endif
+
 #ifndef CONFIG_EXAMPLES_NX_VPLANE
 #  define CONFIG_EXAMPLES_NX_VPLANE 0
 #endif
