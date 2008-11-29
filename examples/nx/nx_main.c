@@ -325,7 +325,8 @@ int user_start(int argc, char *argv[])
   /* Start the server task */
 
   message("user_start: Starting nx_servertask task\n");
-  servrid = task_create("NX Server", 50, CONFIG_EXAMPLES_NX_STACKSIZE, nx_servertask, NULL);
+  servrid = task_create("NX Server", CONFIG_EXAMPLES_NX_SERVERPRIO,
+                        CONFIG_EXAMPLES_NX_STACKSIZE, nx_servertask, NULL);
   if (servrid < 0)
     {
       message("user_start: Failed to create nx_servertask task: %d\n", errno);
