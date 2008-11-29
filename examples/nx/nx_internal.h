@@ -82,6 +82,9 @@
 #  ifndef CONFIG_EXAMPLES_NX_SERVERPRIO
 #    define CONFIG_EXAMPLES_NX_SERVERPRIO 100
 #  endif
+#  ifndef CONFIG_EXAMPLES_NX_NOTIFYSIGNO
+#    define CONFIG_EXAMPLES_NX_NOTIFYSIGNO 4
+#  endif
 #endif
 
 /* Debug ********************************************************************/
