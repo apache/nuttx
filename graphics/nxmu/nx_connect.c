@@ -94,8 +94,12 @@ static uint32 g_nxcid    = 1;
  *   connection is normally needed per thread as each connection can host
  *   multiple windows.
  *
- *   NOTE that multiple instances of the NX server may run at the same time,
- *   each with different message queue names.
+ *   NOTES:
+ *   - This function returns before the connection is fully instantiated.
+ *     it is necessary to wait for the connection event before using the
+ *     returned handle.
+ *   - Multiple instances of the NX server may run at the same time,
+ *     each with different message queue names.
  *
  * Input Parameters:
  *   svrmqname - The name for the server incoming message queue
@@ -183,6 +187,7 @@ NXHANDLE nx_connectionstance(FAR const char *svrmqname)
       goto errout_with_wmq;
     }
 
+#if 0
   /* Now read until we get a response to this message.  The server will
    * respond with either (1) NX_CLIMSG_CONNECTED, in which case the state
    * will change to NX_CLISTATE_CONNECTED, or (2) NX_CLIMSG_DISCONNECTED
@@ -197,9 +202,10 @@ NXHANDLE nx_connectionstance(FAR const char *svrmqname)
           gdbg("nx_message failed: %d\n", errno);
           goto errout_with_wmq;
         }
+      usleep(300000);
     }
   while (conn->state != NX_CLISTATE_CONNECTED);
-
+#endif
   return (NXHANDLE)conn;
 
 errout_with_wmq:
