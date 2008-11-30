@@ -1,6 +1,9 @@
 README
 ^^^^^^
 
+This directory contains tiny graphics support for NuttX.  The contents of this directory
+are only build if CONFIG_NXGRAPHICS is defined in the NuttX configuration file.
+
 Roadmap
 ^^^^^^^
 
@@ -20,6 +23,14 @@ at the present, but here is the longer term roadmap:
               and without NXTOOLKIT for raw access to window memory.
   NXGLIB    - Low level graphics utilities and direct framebuffer rendering logic.
               NX is build on NXGLIB.
+
+Related Header Files
+^^^^^^^^^^^^^^^^^^^^
+
+include/nuttx/nxglib.h    -- Describes the NXGLIB C interfaces
+include/nuttx/nx.h        -- Describes the NX C interfaces
+include/nutt/nxtk.h       -- Will describe the NXTOOLKIT C interfaces
+include/nuttx/nxwidgets.h -- Will describe the NXWIDGETS classes
 
 Directories:
 ^^^^^^^^^^^^
@@ -51,4 +62,10 @@ graphics/nxsu
   multiple graphics clients then communicate with the server via a POSIX message
   queue to serialize window operations from many threads. The multi-user front-end
   is selected when CONFIG_NX_MULTIUSER is defined in the NuttX configuration file.
+
+graphics/nxtoolkit
+  This is where the NXTOOLKIT implementation will reside.
+
+graphics/nxwidgets
+  This is where the NXWIDGETS implementation will reside.
 
