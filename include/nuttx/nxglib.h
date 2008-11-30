@@ -75,7 +75,7 @@
  * the smallest common pixel representation:
  */
 
-#if !defined(CONFIG_NXGLIB_DISABLE_32BPP) || defined(CONFIG_NXGLIB_DISABLE_24BPP)
+#if !defined(CONFIG_NXGLIB_DISABLE_32BPP) || !defined(CONFIG_NXGLIB_DISABLE_24BPP)
 typedef uint32 nxgl_mxpixel_t;
 #elif !defined(CONFIG_NXGLIB_DISABLE_16BPP)
 typedef uint16 nxgl_mxpixel_t;

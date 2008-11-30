@@ -16,7 +16,7 @@ NuttX TODO List (Last updated November 20, 2008)
   (3)  Build system
   (2)  NuttShell (NSH) (examples/nsh)
   (1)  Other Applications & Tests (examples/)
-  (2)  Linux/Cywgin simulation (arch/sim)
+  (1)  Linux/Cywgin simulation (arch/sim)
   (2)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
@@ -383,14 +383,7 @@ o Other Applications & Tests (examples/)
 o Linux/Cywgin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  Description: Need to implement timing.  Use system timing resources to fake
-               a NuttX real time clock.  At present, the timer is driven in
-               non-realtime (like 1000x realtime) and causes some behavior
-               differences from real platforms.
-  Status:      Open
-  Priority:    Low (because the simulator is only a test/development platform)
-
-  Description: The simulated serial driver also has some odd behavior.  It
+  Description: The simulated serial driver has some odd behavior.  It
                will stall for a long time on reads when the C stdio buffers are
                being refilled. This only effects the behavior of things like
                fgetc().  Workaround: Set CONFIG_STDIO_BUFFER_SIZE=0, suppressing

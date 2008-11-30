@@ -591,4 +591,6 @@
 0.3.20 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 	* Initial release of a tiny windowing system for NuttX (not well tested at initial check-in)
 	* Add fixed precision sin() and cos() (not well tested at initial check-in)
-
+	* Add an X11-based simulated framebuffer driver
+	* The simulated target now has an option (CONFIG_SIM_WALLTIME) that will let the simulation
+	  run in more-or-less realtime.

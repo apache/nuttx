@@ -40,8 +40,12 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <debug.h>
+
+#include <nuttx/fb.h>
 
 #include "nxbe.h"
 
@@ -78,9 +82,9 @@
  ****************************************************************************/
 
 #if CONFIG_FB_CMAP
-int nxbe_colormap(FAR const fb_vtable_s *fb)
+int nxbe_colormap(FAR struct fb_vtable_s *fb)
 {
-  struct fb_cmap cmap;
+  struct fb_cmap_s cmap;
   ubyte  *alloc;
   ubyte  *red;
   ubyte  *green;
@@ -94,7 +98,7 @@ int nxbe_colormap(FAR const fb_vtable_s *fb)
 
   /* Allocate the color map tables */
 
-  size  = 3 * NX_NCOLORS * sizeof(uint16);
+  size  = 3 * CONFIG_NX_NCOLORS * sizeof(uint16);
   alloc = (ubyte*)malloc(size);
   if (alloc < 0)
     {
@@ -103,8 +107,8 @@ int nxbe_colormap(FAR const fb_vtable_s *fb)
   memset(alloc, 0xff, size);
 
   red   = alloc;
-  green = &alloc[NX_NCOLORS];
-  blue  = &alloc[2*NX_NCOLORS];
+  green = &alloc[CONFIG_NX_NCOLORS];
+  blue  = &alloc[2*CONFIG_NX_NCOLORS];
 
   /* Initialize the color map tables. 6*6*6 = 216, the rest
    * are (0xffff, 0xffff, 0xffff)
@@ -113,15 +117,15 @@ int nxbe_colormap(FAR const fb_vtable_s *fb)
   ndx = 0;
   for (i = 0; i < 6; i++)
     {
-      rval = (i * (NX_NCOLORS-1) / 5) << 8;
+      rval = (i * (CONFIG_NX_NCOLORS-1) / 5) << 8;
       for (j = 0; j < 6; j++)
         {
-          gval = (j * (NX_NCOLORS-1) / 5) << 8;
+          gval = (j * (CONFIG_NX_NCOLORS-1) / 5) << 8;
           for (k = 0; k < 6; k++)
             {
               red[ndx]   = rval;
               green[ndx] = gval;
-              blue[ndx]  = k * (NX_NCOLORS-1) / 5;
+              blue[ndx]  = k * (CONFIG_NX_NCOLORS-1) / 5;
               ndx++;
             }
         }
@@ -129,7 +133,7 @@ int nxbe_colormap(FAR const fb_vtable_s *fb)
 
   /* Now configure the cmap structure */
 
-  cmap.len    = NX_NCOLORS;
+  cmap.len    = CONFIG_NX_NCOLORS;
   cmap.red    = red;
   cmap.green  = green;
   cmap.blue   = blue;
@@ -141,7 +145,7 @@ int nxbe_colormap(FAR const fb_vtable_s *fb)
 
   ret =fb->putcmap(fb, &cmap);
 
-  free(cmap);
+  free(alloc);
   return ret;
 }
 #endif

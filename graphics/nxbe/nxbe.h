@@ -55,6 +55,10 @@
 #  define CONFIG_NX_NPLANES      1  /* Max number of color planes supported */
 #endif
 
+#ifndef CONFIG_NX_NCOLORS
+#  define CONFIG_NX_NCOLORS 256
+#endif
+
 /* These are the values for the clipping order provided to nx_clipper */
 
 #define NX_CLIPORDER_TLRB    (0)   /* Top-left-right-bottom */
@@ -199,7 +203,7 @@ extern "C" {
  ****************************************************************************/
 
 #if CONFIG_FB_CMAP
-EXTERN int nxbe_colormap(FAR const fb_vtable_s *fb);
+EXTERN int nxbe_colormap(FAR struct fb_vtable_s *fb);
 #endif
 
 /****************************************************************************

@@ -50,6 +50,11 @@ nx
   - The default in defconfig is to use a generic memory buffer
     for the framebuffer.  defconfig-x11 is an example with X11
     support enabled.
+  - The default is the single-user NX implementation.  To select
+    the multi-user NX implementation:
+
+      CONFG_NX_MULTIUSER=y
+      CONFIG_DISABLE_MQUEUE=n
 
 ostest
 

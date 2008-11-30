@@ -124,7 +124,7 @@ extern int up_x11initialize(unsigned short width, unsigned short height,
 #ifdef CONFIG_FB_CMAP
 extern int up_x11cmap(unsigned short first, unsigned short len,
                       unsigned char *red, unsigned char *green,
-                      unsigned char *blue, unsigned char  *transp)
+                      unsigned char *blue, unsigned char  *transp);
 #endif
 #endif
 
@@ -132,7 +132,11 @@ extern int up_x11cmap(unsigned short first, unsigned short len,
  * Private Data
  ****************************************************************************/
 
+/* The simulated framebuffer memory */
+
+#ifndef CONFIG_SIM_X11FB
 static ubyte g_fb[FB_SIZE];
+#endif
 
 /* This structure describes the simulated video controller */
 
@@ -158,12 +162,6 @@ static const struct fb_planeinfo_s g_planeinfo =
 /* This structure describes the single, X11 color plane */
 
 static struct fb_planeinfo_s g_planeinfo;
-#endif
-
-/* Simulated RGB mapping */
-
-#ifdef CONFIG_FB_CMAP
-static struct fb_cmap_s g_cmap;
 #endif
 
 /* Current cursor position */
@@ -245,16 +243,13 @@ static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
 #ifdef CONFIG_FB_CMAP
 static int up_getcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap)
 {
-#ifdef CONFIG_SIM_X11FB
-  return up_x11cmap(cmap->start, cmap->len, cmap->red, cmap->green, cmap->blue, cmap->transp);
-#else
-  int len
+  int len;
   int i;
 
-  dbg("vtable=%p cmap=%p cmap->len\n", vtable, cmap, cmap->len);
+  dbg("vtable=%p cmap=%p len=%d\n", vtable, cmap, cmap->len);
   if (vtable && cmap)
     {
-      for (i = cmap.first, len = 0; i < 256 && len < cmap.len, i++, len++)
+      for (i = cmap->first, len = 0; i < 256 && len < cmap->len; i++, len++)
         {
           cmap->red[i]    = i;
           cmap->green[i]  = i;
@@ -263,12 +258,12 @@ static int up_getcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap
           cmap->transp[i] = i;
 #endif
         }
-      cmap.len = len;
+
+      cmap->len = len;
       return OK;
     }
   dbg("Returning EINVAL\n");
   return -EINVAL;
-#endif
 }
 #endif
 
@@ -279,13 +274,17 @@ static int up_getcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap
 #ifdef CONFIG_FB_CMAP
 static int up_putcmap(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s *cmap)
 {
-  dbg("vtable=%p cmap=%p cmap->len\n", vtable, cmap, cmap->len);
+#ifdef CONFIG_SIM_X11FB
+  return up_x11cmap(cmap->first, cmap->len, cmap->red, cmap->green, cmap->blue, NULL);
+#else
+  dbg("vtable=%p cmap=%p len=%d\n", vtable, cmap, cmap->len);
   if (vtable && cmap)
     {
       return OK;
     }
   dbg("Returning EINVAL\n");
   return -EINVAL;
+#endif
 }
 #endif
 

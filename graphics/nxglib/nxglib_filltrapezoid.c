@@ -117,6 +117,12 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
   x1 = trap->top.x1;
   x2 = trap->top.x2;
 
+  /* Calculate the number of rows to render */
+
+  y1    = trap->top.y;
+  y2    = trap->bot.y;
+  nrows = y2 - y1 + 1;
+
   /* Calculate the slope of the left and right side of the trapezoid */
 
   dx1dy = b16divi((trap->bot.x1 - x1), nrows);
@@ -124,28 +130,31 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
 
   /* Perform vertical clipping */
 
-  y1 = trap->top.y;
   if (y1 < bounds->pt1.y)
     {
+      /* Calculate the x values for the new top run */
+
       int dy = bounds->pt1.y - y1;
       x1    += dy * dx1dy;
       x2    += dy * dx2dy;
+
+      /* Clip and re-calculate the number of rows to render */
+
       y1     = bounds->pt1.y;
+      nrows  = y2 - y1 + 1;
     }
 
-  y2 = trap->bot.y;
   if (y2 > bounds->pt2.y)
     {
-      y2 = bounds->pt2.y;
+      /* Clip and re-calculate the number of rows to render */
+
+      y2     = bounds->pt2.y;
+      nrows  = y2 - y1 + 1;
     }
-
-  /* Then calculate the number of rows to render */
-
-  nrows  = y2 - y1 + 1;
 
   /* Get the address of the first byte on the first line */
 
-  line   = pinfo->fbmem + y1 * stride ;
+  line = pinfo->fbmem + y1 * stride ;
 
   /* Then fill the trapezoid line-by-line */
 
