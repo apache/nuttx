@@ -42,10 +42,16 @@ nx
   CONFIG_SIM_FBBPP    - Pixel depth in bits
 
   NOTES:
-  - If CONFIG_SIM_X11FB is selected then CONFIG_SIM_FBBPP must
-    match the resolution of the display.
+  - If CONFIG_SIM_X11FB is selected then the following are
+    needed
+
+      CONFIG_SIM_FBBPP (must match the resolution of the display).
+      CONFIG_FB_CMAP=y
+
+    My system has 24-bit color, but packed into 32-bit words so
+    the correct seeting of CONFIG_SIM_FBBPP is 32.
   - For whatever value of CONFIG_SIM_FBBPP is selected, then
-    the corresponing CONFIG_NXGLIB_DISABLE_*BPP setting must
+    the corresponidng CONFIG_NXGLIB_DISABLE_*BPP setting must
     not be disabled.
   - The default in defconfig is to use a generic memory buffer
     for the framebuffer.  defconfig-x11 is an example with X11
