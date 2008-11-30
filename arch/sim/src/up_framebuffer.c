@@ -114,6 +114,21 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_setcursor_
 #endif
 
 /****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_SIM_X11FB
+extern int up_x11initialize(unsigned short width, unsigned short height,
+                            void **fbmem, unsigned int *fblen, unsigned char *bpp,
+                            unsigned short *stride);
+#ifdef CONFIG_FB_CMAP
+extern int up_x11cmap(unsigned short first, unsigned short len,
+                      unsigned char *red, unsigned char *green,
+                      unsigned char *blue, unsigned char  *transp)
+#endif
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -129,6 +144,7 @@ static const struct fb_videoinfo_s g_videoinfo =
   .nplanes  = 1,
 };
 
+#ifndef CONFIG_SIM_X11FB
 /* This structure describes the single, simulated color plane */
 
 static const struct fb_planeinfo_s g_planeinfo =
@@ -138,6 +154,11 @@ static const struct fb_planeinfo_s g_planeinfo =
   .stride   = FB_WIDTH,
   .bpp      = CONFIG_SIM_FBBPP,
 };
+#else
+/* This structure describes the single, X11 color plane */
+
+static struct fb_planeinfo_s g_planeinfo;
+#endif
 
 /* Simulated RGB mapping */
 
@@ -224,6 +245,9 @@ static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
 #ifdef CONFIG_FB_CMAP
 static int up_getcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap)
 {
+#ifdef CONFIG_SIM_X11FB
+  return up_x11cmap(cmap->start, cmap->len, cmap->red, cmap->green, cmap->blue, cmap->transp);
+#else
   int len
   int i;
 
@@ -244,6 +268,7 @@ static int up_getcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap
     }
   dbg("Returning EINVAL\n");
   return -EINVAL;
+#endif
 }
 #endif
 
@@ -345,7 +370,13 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
 
 int up_fbinitialize(void)
 {
+#ifdef CONFIG_SIM_X11FB
+  return up_x11initialize(CONFIG_SIM_FBWIDTH, CONFIG_SIM_FBHEIGHT,
+                          &g_planeinfo.fbmem, &g_planeinfo.fblen,
+                          &g_planeinfo.bpp, &g_planeinfo.stride);
+#else
   return OK;
+#endif
 }
 
 /****************************************************************************

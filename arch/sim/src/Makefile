@@ -45,7 +45,7 @@ CSRCS		= up_initialize.c up_idle.c up_interruptcontext.c \
 		  up_releasepending.c up_reprioritizertr.c \
 		  up_exit.c up_schedulesigaction.c up_allocateheap.c \
 		  up_devconsole.c up_framebuffer.c
-HOSTSRCS	= up_stdio.c
+HOSTSRCS	= up_stdio.c up_x11framebuffer.c
 ifeq ($(CONFIG_FS_FAT),y)
 CSRCS		+= up_blockdevice.c up_deviceimage.c
 endif
@@ -63,7 +63,7 @@ SRCS		= $(ASRCS) $(CSRCS) $(HOSTSRCS)
 OBJS		= $(AOBJS) $(COBJS) $(HOSTOBJS)
 
 LDFLAGS		= $(ARCHSCRIPT)
-STDLIBS		= -lc
+STDLIBS		= -lX11 -lXext -lc
 ifeq ($(CONFIG_FS_FAT),y)
 STDLIBS		+= -lz
 endif
