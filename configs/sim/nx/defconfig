@@ -225,6 +225,14 @@ CONFIG_PREALLOC_WDOGS=32
 CONFIG_PREALLOC_TIMERS=8
 
 #
+# Framebuffer driver options
+CONFIG_FB_CMAP=n
+CONFIG_FB_HWCURSOR=n
+CONFIG_FB_HWCURSORIMAGE=n
+#CONFIG_FB_HWCURSORSIZE
+#CONFIG_FB_TRANSPARENCY
+
+#
 # FAT filesystem configuration
 # CONFIG_FS_FAT - Enable FAT filesystem support
 # CONFIG_FAT_SECTORSIZE - Max supported sector size

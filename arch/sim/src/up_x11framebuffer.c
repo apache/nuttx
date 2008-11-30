@@ -228,7 +228,7 @@ static void up_x11uninitialize(void)
  * Name: up_x11mapsharedmem
  ***************************************************************************/
 
-static inline int up_x11mapsharedmem(int bpp, unsigned int fblen)
+static inline int up_x11mapsharedmem(int depth, unsigned int fblen)
 {
 #ifndef CONFIG_SIM_X11NOSHM
   Status result;
@@ -246,8 +246,8 @@ static inline int up_x11mapsharedmem(int bpp, unsigned int fblen)
 
       up_x11traperrors();
       g_image = XShmCreateImage(g_display, DefaultVisual(g_display, g_screen), 
-                              bpp, ZPixmap, NULL, &g_xshminfo,
-                              g_fbpixelwidth, g_fbpixelheight);
+                                depth, ZPixmap, NULL, &g_xshminfo,
+                                g_fbpixelwidth, g_fbpixelheight);
       if (up_x11untraperrors())
         {
           up_x11uninitialize();
@@ -303,7 +303,7 @@ shmerror:
 
       g_framebuffer = (unsigned char*)malloc(fblen);
 
-      g_image = XCreateImage(g_display, DefaultVisual(g_display,g_screen), bpp,
+      g_image = XCreateImage(g_display, DefaultVisual(g_display,g_screen), depth,
                              ZPixmap, 0, (char*)g_framebuffer, g_fbpixelwidth, g_fbpixelheight,
                              8, 0);
 
@@ -335,6 +335,7 @@ int up_x11initialize(unsigned short width, unsigned short height,
                      unsigned short *stride)
 {
   XWindowAttributes windowAttributes;
+  int depth;
   int ret;
 
   /* Save inputs */
@@ -353,10 +354,20 @@ int up_x11initialize(unsigned short width, unsigned short height,
   /* Determine the supported pixel bpp of the current window */
 
   XGetWindowAttributes(g_display, DefaultRootWindow(g_display), &windowAttributes);
-  printf("Pixel bpp is %d bits\n", windowAttributes.depth);
 
-  *bpp    = windowAttributes.depth;
-  *stride = (windowAttributes.depth * width / 8);
+  /* Get the pixel depth.  If the depth is 24-bits, use 32 because X expects
+   * 32-bit aligment anyway.
+   */
+
+  depth =  windowAttributes.depth;
+  if (depth == 24)
+    {
+      depth = 32;
+    }
+  printf("Pixel bpp is %d bits (using %d)\n", windowAttributes.depth, depth);
+
+  *bpp    = depth;
+  *stride = (depth * width / 8);
   *fblen  = (*stride * height);
 
   /* Map the window to shared memory */
