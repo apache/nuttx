@@ -1,7 +1,7 @@
 /****************************************************************************
- * up_idle.c
+ * arch/sim/src/up_hostusleep.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,11 +37,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <sys/types.h>
-#include <time.h>
-#include <nuttx/arch.h>
-#include "up_internal.h"
+#include <unistd.h>
 
 /****************************************************************************
  * Private Definitions
@@ -50,21 +46,6 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-#ifdef CONFIG_SIM_X11FB
-static int g_x11refresh = 0;
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#if defined(CONFIG_SIM_WALLTIME) || defined(CONFIG_SIM_X11FB)
-extern int up_hostusleep(unsigned int usec);
-#ifdef CONFIG_SIM_X11FB
-extern void up_x11update(void);
-#endif
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -75,47 +56,11 @@ extern void up_x11update(void);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_idle
- *
- * Description:
- *   up_idle() is the logic that will be executed when their
- *   is no other ready-to-run task.  This is processor idle
- *   time and will continue until some interrupt occurs to
- *   cause a context switch from the idle task.
- *
- *   Processing in this state may be processor-specific. e.g.,
- *   this is where power management operations might be
- *   performed.
- *
+ * Name: up_hostusleep
  ****************************************************************************/
 
-void up_idle(void)
+int up_hostusleep(unsigned int usec)
 {
-  /* If the system is idle, then process "fake" timer interrupts.
-   * Hopefully, something will wake up.
-   */
-
-  sched_process_timer();
-
-  /* Run the network if enabled */
-
-#if defined(CONFIG_NET) && defined(linux)
-  uipdriver_loop();
-#endif
-
-  /* Wait a bit so that the sched_process_timer() is called close to the
-   * correct rate.
-   */
-
-#if defined(CONFIG_SIM_WALLTIME) || defined(CONFIG_SIM_X11FB)
-  (void)up_hostusleep(1000000 / CLK_TCK);
-#ifdef CONFIG_SIM_X11FB
-  g_x11refresh += 1000000 / CLK_TCK;
-  if (g_x11refresh > 500000)
-    {
-      up_x11update();
-    }
-#endif
-#endif
+  return usleep(usec);
 }
 
