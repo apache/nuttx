@@ -197,7 +197,7 @@ static inline int nxmu_setup(FAR const char *mqname,
   ret = nxbe_fbconfigure(fb, &fe->be);
   if (ret < 0)
     {
-      gdbg("nxs_fbconfigure failed: %d\n", -ret);
+      gdbg("nxbe_fbconfigure failed: %d\n", -ret);
       errno = -ret;
       return ERROR;
     }
@@ -206,7 +206,7 @@ static inline int nxmu_setup(FAR const char *mqname,
   ret = nxbe_colormap(fb);
   if (ret < 0)
     {
-      gdbg("nx_colormap failed: %d\n", -ret);
+      gdbg("nxbe_colormap failed: %d\n", -ret);
       errno = -ret;
       return ERROR;
     }

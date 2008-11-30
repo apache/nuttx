@@ -116,7 +116,7 @@ static inline int nxsu_setup(FAR struct fb_vtable_s *fb,
   ret = nxbe_fbconfigure(fb, &fe->be);
   if (ret < 0)
     {
-      gdbg("nxs_fbconfigure failed: %d\n", -ret);
+      gdbg("nxbe_fbconfigure failed: %d\n", -ret);
       errno = -ret;
       return ERROR;
     }
@@ -125,7 +125,7 @@ static inline int nxsu_setup(FAR struct fb_vtable_s *fb,
   ret = nxbe_colormap(fb);
   if (ret < 0)
     {
-      gdbg("nx_colormap failed: %d\n", -ret);
+      gdbg("nxbe_colormap failed: %d\n", -ret);
       errno = -ret;
       return ERROR;
     }
