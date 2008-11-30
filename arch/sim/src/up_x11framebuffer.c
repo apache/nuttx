@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/up_framebuffer.c
+ * arch/sim/src/up_x11framebuffer.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -170,12 +170,12 @@ static int up_x11untraperrors(void)
 #endif
 
 /****************************************************************************
- * Name: up_x11uninitialize
+ * Name: up_x11uninitX
  ***************************************************************************/
 
-void up_x11uninitialize(void)
+static void up_x11uninitX(void)
 {
-  fprintf(stderr, "Uninitalizing\n");
+  fprintf(stderr, "Uninitalizing X\n");
 #ifndef CONFIG_SIM_X11NOSHM
   if (g_shmcheckpoint > 4)
     {
@@ -196,9 +196,24 @@ void up_x11uninitialize(void)
   if (g_shmcheckpoint > 1)
     {
       XDestroyImage(g_image);
-      if (!b_useshm)
+    }
+  XCloseDisplay(g_display);
+}
+
+/****************************************************************************
+ * Name: up_x11uninitialize
+ ***************************************************************************/
+
+#ifndef CONFIG_SIM_X11NOSHM
+static void up_x11uninitialize(void)
+{
+  fprintf(stderr, "Uninitalizing\n");
+  if (g_shmcheckpoint > 1)
+    {
+      if (!b_useshm && g_framebuffer)
         {
           free(g_framebuffer);
+          g_framebuffer = 0;
         }
     }
 
@@ -206,8 +221,8 @@ void up_x11uninitialize(void)
     {
       g_shmcheckpoint = 1;
     }
-  XCloseDisplay(g_display);
 }
+#endif
 
 /****************************************************************************
  * Name: up_x11mapsharedmem
@@ -219,7 +234,7 @@ static inline int up_x11mapsharedmem(int bpp, unsigned int fblen)
   Status result;
 #endif
 
-  atexit(up_x11uninitialize);
+  atexit(up_x11uninitX);
   g_shmcheckpoint = 1;
   b_useshm = 0;
 
@@ -289,7 +304,7 @@ shmerror:
       g_framebuffer = (unsigned char*)malloc(fblen);
 
       g_image = XCreateImage(g_display, DefaultVisual(g_display,g_screen), bpp,
-                             ZPixmap, 0, (char *) g_framebuffer, g_fbpixelwidth, g_fbpixelheight,
+                             ZPixmap, 0, (char*)g_framebuffer, g_fbpixelwidth, g_fbpixelheight,
                              8, 0);
 
       if (g_image == NULL)
@@ -301,27 +316,6 @@ shmerror:
       g_shmcheckpoint++;
     }
   return 0;
-}
-
-/****************************************************************************
- * Name: up_x11update
- ***************************************************************************/
-
-static void up_x11update(void)
-{
-#ifndef CONFIG_SIM_X11NOSHM
-  if (b_useshm)
-    {
-      XShmPutImage(g_display, g_window, g_gc, g_image, 0, 0, 0, 0,
-                   g_fbpixelwidth, g_fbpixelheight, 0);
-    }
-  else
-#endif
-    {
-      XPutImage(g_display, g_window, g_gc, g_image, 0, 0, 0, 0,
-                g_fbpixelwidth, g_fbpixelheight);
-    }
-  XSync(g_display, 0);
 }
 
 /****************************************************************************
@@ -363,12 +357,13 @@ int up_x11initialize(unsigned short width, unsigned short height,
 
   *bpp    = windowAttributes.depth;
   *stride = (windowAttributes.depth * width / 8);
-  *fbmem  = (void*)g_framebuffer;
   *fblen  = (*stride * height);
 
   /* Map the window to shared memory */
 
   up_x11mapsharedmem(windowAttributes.depth, *fblen);
+
+  *fbmem  = (void*)g_framebuffer;
   return 0;
 }
 
@@ -411,3 +406,25 @@ int up_x11cmap(unsigned short first, unsigned short len,
 
   return 0;
 }
+
+/****************************************************************************
+ * Name: up_x11update
+ ***************************************************************************/
+
+void up_x11update(void)
+{
+#ifndef CONFIG_SIM_X11NOSHM
+  if (b_useshm)
+    {
+      XShmPutImage(g_display, g_window, g_gc, g_image, 0, 0, 0, 0,
+                   g_fbpixelwidth, g_fbpixelheight, 0);
+    }
+  else
+#endif
+    {
+      XPutImage(g_display, g_window, g_gc, g_image, 0, 0, 0, 0,
+                g_fbpixelwidth, g_fbpixelheight);
+    }
+  XSync(g_display, 0);
+}
+
