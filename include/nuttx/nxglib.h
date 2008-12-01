@@ -359,9 +359,9 @@ EXTERN void nxgl_vectoradd(FAR struct nxgl_point_s *dest,
  *
  ****************************************************************************/
 
-EXTERN void nxgl_vectorsubtract(FAR struct nxgl_point_s *dest,
-                                FAR const struct nxgl_point_s *v1,
-                                FAR const struct nxgl_point_s *v2);
+EXTERN void nxgl_vectsubtract(FAR struct nxgl_point_s *dest,
+                              FAR const struct nxgl_point_s *v1,
+                              FAR const struct nxgl_point_s *v2);
 
 /****************************************************************************
  * Name: nxgl_rectintersect
