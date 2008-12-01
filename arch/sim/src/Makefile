@@ -74,6 +74,7 @@ LDPATHES	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
 LDLIBS		= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
 
 all: up_head$(OBJEXT) libarch$(LIBEXT)
+.PHONY: clean distclean cleanrel depend
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -111,7 +112,7 @@ nuttx.rel : libarch$(LIBEXT) $(HOSTOS)-names.dat $(LINKOBJS)
 # Generate the final NuttX binary by linking the host-specific objects with the NuttX
 # specific objects (with munged names)
 
-nuttx$(EXEEXT): nuttx.rel $(HOSTOBJS)
+nuttx$(EXEEXT): cleanrel nuttx.rel $(HOSTOBJS)
 	@echo "LD:  nuttx$(EXEEXT)"
 	@$(CC) $(LDFLAGS) $(LDPATHES) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(STDLIBS)
 	@$(NM) $(TOPDIR)/$@ | \
@@ -125,9 +126,11 @@ nuttx$(EXEEXT): nuttx.rel $(HOSTOBJS)
 
 depend: .depend
 
-clean:
-	@rm -f nuttx.rel libarch$(LIBEXT) *~ .*.swp
+cleanrel: 
 	@rm -f nuttx.rel GNU/Linux-names.dat Cygwin-names.dat
+
+clean: cleanrel
+	@rm -f nuttx.rel libarch$(LIBEXT) *~ .*.swp
 	$(call CLEAN)
 
 distclean: clean
