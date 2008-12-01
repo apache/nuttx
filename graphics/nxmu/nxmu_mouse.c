@@ -106,16 +106,30 @@ void nxmu_mousereport(struct nxbe_window_s *wnd)
   struct nxclimsg_mousein_s outmsg;
   int ret;
 
-  outmsg.msgid   = NX_CLIMSG_MOUSEIN;
-  outmsg.wnd     = wnd;
-  outmsg.pos.x   = g_mpos.x;
-  outmsg.pos.y   = g_mpos.y;
-  outmsg.buttons = g_mbutton;
+  /* Does this window support mouse callbacks? */
 
-  ret = mq_send(wnd->conn->swrmq, outmsg, sizeof(struct nxclimsg_mousein_s), NX_SVRMSG_PRIO);
-  if (ret < 0)
+  if (win->cb->mousein)
     {
-      gdbg("mq_send failed: %d\n", errno);
+      /* Yes.. Does the mount position lie within the window? */
+
+      if (nxgl_rectinside(wnd->bounds, g_mpos))
+        {
+          /* Yes... Convert the mouse position to window relative
+           * coordinates and send it to the client
+           */
+
+          outmsg.msgid   = NX_CLIMSG_MOUSEIN;
+          outmsg.wnd     = wnd;
+          outmsg.buttons = g_mbutton;
+          nxgl_vectsubtract(&outmsg.pos, g_mpos, wnd->origin);
+
+          ret = mq_send(wnd->conn->swrmq, outmsg,
+                        sizeof(struct nxclimsg_mousein_s), NX_SVRMSG_PRIO);
+          if (ret < 0)
+            {
+              gdbg("mq_send failed: %d\n", errno);
+            }
+        }
     }
 }
 

@@ -103,11 +103,21 @@ void nxsu_mouseinit(int x, int y)
 
 void nxsu_mousereport(struct nxbe_window_s *wnd)
 {
-  /* Give the keypad event only to the top child */
+  struct nxgl_point_s relpos;
+
+  /* Does this window support mouse callbacks? */
 
   if (win->cb->mousein)
     {
-      win->cb->mousein((NXWINDOW)wnd, &g_mpos, g_mbutton, wnd->arg);
+      /* Yes.. Does the mount position lie within the window? */
+
+      if (nxgl_rectinside(wnd->bounds, g_mpos))
+        {
+          /* Yes... Convert the mouse position to window relative coordinates */
+
+          nxgl_vectsubtract(&relpos, g_mpos, wnd->origin);
+          win->cb->mousein((NXWINDOW)wnd, &relpos, g_mbutton, wnd->arg);
+        }
     }
 }
 
