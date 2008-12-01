@@ -352,6 +352,18 @@ EXTERN void nxgl_vectoradd(FAR struct nxgl_point_s *dest,
                            FAR const struct nxgl_point_s *v2);
 
 /****************************************************************************
+ * Name: nxgl_vectorsubtract
+ *
+ * Description:
+ *   Add subtract vector v2 from vector v1 and return the result in vector dest
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_vectorsubtract(FAR struct nxgl_point_s *dest,
+                                FAR const struct nxgl_point_s *v1,
+                                FAR const struct nxgl_point_s *v2);
+
+/****************************************************************************
  * Name: nxgl_rectintersect
  *
  * Description:
@@ -400,6 +412,17 @@ EXTERN void nxgl_nonintersecting(FAR struct nxgl_rect_s result[4],
 
 EXTERN boolean nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1,
                                 FAR struct nxgl_rect_s *rect2);
+
+/****************************************************************************
+ * Name: nxgl_rectinside
+ *
+ * Description:
+ *   Return TRUE if the point pt lies within rect.
+ *
+ ****************************************************************************/
+
+EXTERN boolean nxgl_rectinside(FAR const struct nxgl_rect_s *rect,
+                               FAR const struct nxgl_point_s *pt);
 
 /****************************************************************************
  * Name: nxgl_nullrect

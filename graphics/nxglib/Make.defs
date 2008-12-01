@@ -52,8 +52,9 @@ RMOVE2_CSRCS	= nxglib_moverectangle_8bpp.c nxglib_moverectangle_16bpp.c \
 RCOPY2_CSRCS	= nxglib_copyrectangle_8bpp.c nxglib_copyrectangle_16bpp.c \
 		  nxglib_copyrectangle_24bpp.c nxglib_copyrectangle_32bpp.c
 RECT_CSRCS	= nxglib_rectcopy.c nxglib_rectoffset.c nxglib_vectoradd.c \
-		  nxglib_rectintersect.c nxglib_nonintersecting.c \
-		  nxglib_rectunion.c nxglib_rectoverlap.c nxglib_nullrect.c
+		  nxglib_vectsubtract.c nxglib_rectintersect.c \
+		  nxglib_nonintersecting.c nxglib_rectunion.c nxglib_rectinside.c \
+		  nxglib_rectoverlap.c nxglib_nullrect.c
 TRAP_CSRCS	= nxglib_runoffset.c nxglib_runcopy.c \
 		  nxglib_trapoffset.c nxglib_trapcopy.c
 COLOR_CSRCS	= nxglib_colorcopy.c
