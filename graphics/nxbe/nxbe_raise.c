@@ -72,18 +72,6 @@ struct nxbe_raise_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxbe_clipraise
- ****************************************************************************/
-
-static void nxbe_clipraise(FAR struct nxbe_clipops_s *cops,
-                          FAR struct nxbe_plane_s *plane,
-                          FAR const struct nxgl_rect_s *rect)
-{
-  FAR struct nxbe_window_s *wnd = ((struct nxbe_raise_s *)cops)->wnd;
-  nxfe_redrawreq(wnd, rect);
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -98,34 +86,12 @@ static void nxbe_clipraise(FAR struct nxbe_clipops_s *cops,
 void nxbe_raise(FAR struct nxbe_window_s *wnd)
 {
   FAR struct nxbe_state_s *be = wnd->be;
-  struct nxgl_rect_s       rect;
-  struct nxbe_raise_s        info;
+
+  /* If this window is already at the top of the display, then do nothing */
 
   if (!wnd->above)
     {
       return;
-    }
-
-  /* Redraw the bits that are currently obscured */
-
-  nxgl_rectintersect(&rect, &wnd->bounds, &be->bkgd.bounds);
-  if (!nxgl_nullrect(&rect))
-    {
-      int i;
-
-      info.cops.visible  = nxbe_clipnull;
-      info.cops.obscured = nxbe_clipraise;
-      info.wnd           = wnd;
-
-#if CONFIG_NX_NPLANES > 1
-      for (i = 0; i < be->vinfo.nplanes; i++)
-#else
-      i = 0;
-#endif
-        {
-          nxbe_clipper(wnd->above, &rect, NX_CLIPORDER_DEFAULT,
-                       &info.cops, &be->plane[i]);
-        }
     }
 
   /* Remove window from the list.  Note that there is always
@@ -142,4 +108,10 @@ void nxbe_raise(FAR struct nxbe_window_s *wnd)
 
   be->topwnd->above  = wnd;
   be->topwnd         = wnd;
+
+  /* This window is now at the top of the display, we know, therefore, that
+   * it is not obscured by another window
+   */
+
+  nxfe_redrawreq(wnd, &wnd->bounds);
 }
