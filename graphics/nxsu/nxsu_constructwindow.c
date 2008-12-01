@@ -72,57 +72,80 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_openwindow
+ * Name: nxfe_constructwindow
  *
  * Description:
- *   Create a new window.
+ *   This function is the same a nx_openwindow EXCEPT that the client provides
+ *   the window structure instance.  nx_constructwindow will initialize the
+ *   the pre-allocated window structure for use by NX.  This function is
+ *   provided in addition to nx_open window in order to support a kind of
+ *   inheritance:  The caller's window structure may include extensions that
+ *   are not visible to NX.
+ *
+ *   NOTE:  wnd must have been allocated using malloc() (or related allocators)
+ *   Once provided to nxfe_constructwindow() that memory is owned and managed
+ *   by NX.  On certain error conditions or when the window is closed, NX will
+ *   free() the the window.
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect
- *   cb     - Callbacks used to process windo events
+ *   wnd    - The pre-allocated window structure.
+ *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
  * Return:
- *   Success: A non-NULL handle used with subsequent NX accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately.  In the
+ *   case of ERROR, NX will have dealloated the pre-allocated window.
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
-                       FAR void *arg)
+int nxfe_constructwindow(NXHANDLE handle, FAR struct nxbe_window_s *wnd,
+                         FAR const struct nx_callback_s *cb, FAR void *arg)
 {
-  FAR struct nxbe_window_s *wnd;
-  int ret;
+  FAR struct nxfe_state_s *fe = (FAR struct nxfe_state_s *)handle;
+  FAR struct nxbe_state_s *be = &fe->be;
 
 #ifdef CONFIG_DEBUG
-  if (!handle || !cb)
+  if (!wnd)
     {
       errno = EINVAL;
-      return NULL;
+      return ERROR;
+    }
+
+  if (!fe || !cb)
+    {
+      free(wnd);
+      errno = EINVAL;
+      return ERROR;
     }
 #endif
 
-  /* Pre-allocate the window structure */
+  /* Initialize the window structure */
 
-  wnd = (FAR struct nxbe_window_s *)zalloc(sizeof(struct nxbe_window_s));
-  if (!wnd)
-    {
-      errno = ENOMEM;
-      return NULL;
-    }
+  wnd->be           = be;
+  wnd->cb           = cb;
+  wnd->arg          = arg;
 
-  /* Then let nxfe_constructwindow do the rest */
+  /* Insert the new window at the top on the display.  topwind is
+   * never NULL (it may point only at the background window, however)
+   */
 
-  ret = nxfe_constructwindow(handle, wnd, cb, arg);
-  if (ret < 0)
-    {
-      /* An error occurred, the window has been freed */
+  wnd->above        = NULL;
+  wnd->below        = be->topwnd;
 
-      return NULL;
-    }
+  be->topwnd->above = wnd;
+  be->topwnd        = wnd;
 
-  /* Return the initialized window reference */
+  /* Report the initialize size/position of the window */
 
-  return (NXWINDOW)wnd;
+  nxfe_reportposition((NXWINDOW)wnd);
+
+  /* Provide the initial mouse settings */
+
+#ifdef CONFIG_NX_MOUSE
+  nxsu_mousereport(wnd);
+#endif
+
+  return OK;
 }
 

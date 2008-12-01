@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxsu/nx_openwindow.c
+ * graphics/nxmu/nx_openwindow.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -72,57 +72,76 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_openwindow
+ * Name: nxfe_constructwindow
  *
  * Description:
- *   Create a new window.
+ *   This function is the same a nx_openwindow EXCEPT that the client provides
+ *   the window structure instance.  nx_constructwindow will initialize the
+ *   the pre-allocated window structure for use by NX.  This function is
+ *   provided in addition to nx_open window in order to support a kind of
+ *   inheritance:  The caller's window structure may include extensions that
+ *   are not visible to NX.
+ *
+ *   NOTE:  wnd must have been allocated using malloc() (or related allocators)
+ *   Once provided to nxfe_constructwindow() that memory is owned and managed
+ *   by NX.  On certain error conditions or when the window is closed, NX will
+ *   free() the the window.
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect
- *   cb     - Callbacks used to process windo events
+ *   wnd    - The pre-allocated window structure.
+ *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
  * Return:
- *   Success: A non-NULL handle used with subsequent NX accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately.  In the
+ *   case of ERROR, NX will have dealloated the pre-allocated window.
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
-                       FAR void *arg)
+int nxfe_constructwindow(NXHANDLE handle, FAR struct nxbe_window_s *wnd,
+                         FAR const struct nx_callback_s *cb, FAR void *arg)
 {
-  FAR struct nxbe_window_s *wnd;
+  FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
+  struct nxsvrmsg_openwindow_s outmsg;
   int ret;
 
 #ifdef CONFIG_DEBUG
-  if (!handle || !cb)
+  if (!wnd)
     {
       errno = EINVAL;
-      return NULL;
+      return ERROR;
+    }
+
+  if (!conn || !cb)
+    {
+      free(wnd);
+      errno = EINVAL;
+      return ERROR;
     }
 #endif
 
-  /* Pre-allocate the window structure */
+  /* Setup only the connection structure, callbacks and client private data
+   * reference. The server will set everything else up.
+   */
 
-  wnd = (FAR struct nxbe_window_s *)zalloc(sizeof(struct nxbe_window_s));
-  if (!wnd)
-    {
-      errno = ENOMEM;
-      return NULL;
-    }
+  wnd->conn   = conn;
+  wnd->cb     = cb;
+  wnd->arg    = arg;
 
-  /* Then let nxfe_constructwindow do the rest */
+  /* Request initialization the new window from the server */
 
-  ret = nxfe_constructwindow(handle, wnd, cb, arg);
+  outmsg.msgid = NX_SVRMSG_OPENWINDOW;
+  outmsg.wnd   = wnd;
+
+  ret = mq_send(conn->cwrmq, &outmsg, sizeof(struct nxsvrmsg_openwindow_s), NX_SVRMSG_PRIO);
   if (ret < 0)
     {
-      /* An error occurred, the window has been freed */
-
-      return NULL;
+      gdbg("mq_send failed: %d\n", errno);
+      free(wnd);
+      return ERROR;
     }
 
-  /* Return the initialized window reference */
-
-  return (NXWINDOW)wnd;
+  return OK;
 }
 
