@@ -137,7 +137,7 @@ int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb)
   /* Provide the mouse settings to the client */
 
 #ifdef CONFIG_NX_MOUSE
-  nxsu_mousereport(be->bkgd);
+  nxsu_mousereport(&be->bkgd);
 #endif
 
   /* In this single-user mode, we could return the background window

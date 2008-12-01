@@ -116,7 +116,7 @@ void nxmu_requestbkgd(FAR struct nxfe_conn_s *conn,
   /* Provide the mouse settings */
 
 #ifdef CONFIG_NX_MOUSE
-  nxsu_mousereport(be->bkgd);
+  nxsu_mousereport(&be->bkgd);
 #endif
 }
 

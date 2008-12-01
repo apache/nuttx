@@ -167,7 +167,7 @@ static nxgl_mxpixel_t g_color2[CONFIG_NX_NPLANES];
 static void nxeg_redraw1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
                          boolean more, FAR void *arg)
 {
-  message("nxeg_redraw%d: hwnd=%p rect={(%d,%d),(%d,%d)} more=%s arg=%p\n",
+  message("nxeg_redraw%d: hwnd=%p rect={(%d,%d),(%d,%d)} more=%s\n",
            (int)arg, hwnd,
            rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y,
            more ? "TRUE" : "FALSE");
@@ -181,11 +181,10 @@ static void nxeg_redraw1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 static void nxeg_redraw2(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
                          boolean more, FAR void *arg)
 {
-  message("nxeg_redraw%d: hwnd=%p rect={(%d,%d),(%d,%d)} more=%s arg=%p\n",
+  message("nxeg_redraw%d: hwnd=%p rect={(%d,%d),(%d,%d)} more=%s\n",
            (int)arg, hwnd,
            rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y,
-           more ? "TRUE" : "FALSE",
-           arg);
+           more ? "TRUE" : "FALSE");
   nx_fill(hwnd, rect, g_color2);
 }
 
@@ -248,7 +247,7 @@ static void nxeg_mousein1(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
                           ubyte buttons, FAR void *arg)
 {
   message("nxeg_mousein%d: hwnd=%p pos=(%d,%d) button=%02x\n",
-           arg, hwnd,  pos->x, pos->y, buttons);
+           (int)arg, hwnd,  pos->x, pos->y, buttons);
 }
 #endif
 
@@ -260,8 +259,31 @@ static void nxeg_mousein1(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
 static void nxeg_mousein2(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
                           ubyte buttons, FAR void *arg)
 {
-  message("nxeg_mousein2: hwnd=%p pos=(%d,%d) button=%02x\n",
-           hwnd,  pos->x, pos->y, buttons);
+  message("nxeg_mousein%d: hwnd=%p pos=(%d,%d) button=%02x\n",
+          (int)arg, hwnd,  pos->x, pos->y, buttons);
+}
+#endif
+
+/****************************************************************************
+ * Name: nxeg_drivemouse
+ ****************************************************************************/
+
+#ifdef CONFIG_NX_MOUSE
+static void nxeg_drivemouse(void)
+{
+  nxgl_coord_t x;
+  nxgl_coord_t y;
+  nxgl_coord_t xstep = g_xres / 8;
+  nxgl_coord_t ystep = g_yres / 8;
+
+  for (x = 0; x < g_xres; x += xstep)
+    {
+      for (y = 0; y < g_yres; y += ystep)
+        {
+          message("nxeg_drivemouse: Mouse left button at (%d,%d)\n", x, y);
+          (void)nx_mousein(g_hnx, x, y, NX_MOUSE_LEFTBUTTON);
+        }
+    }
 }
 #endif
 
@@ -681,7 +703,18 @@ int user_start(int argc, char *argv[])
   message("user_start: Sleeping\n\n");
   sleep(1);
 
-  /* Lower window 1 */
+  /* Put mouse left-button clicks all over the screen and see who responds */
+
+#ifdef CONFIG_NX_MOUSE
+  nxeg_drivemouse();
+
+  /* Sleep a bit */
+
+  message("user_start: Sleeping\n\n");
+  sleep(1);
+#endif
+
+  /* Raise window 2 */
 
   message("user_start: Raise window #2\n");
   ret = nx_raise(hwnd2);
@@ -691,6 +724,12 @@ int user_start(int argc, char *argv[])
       g_exitcode = NXEXIT_NXSETPOSITION;
       goto errout_with_hwnd2;
     }
+
+  /* Put mouse left-button clicks all over the screen and see who responds */
+
+#ifdef CONFIG_NX_MOUSE
+  nxeg_drivemouse();
+#endif
 
   /* Sleep a bit */
 

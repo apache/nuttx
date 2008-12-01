@@ -571,10 +571,16 @@ EXTERN void nxmu_mouseinit(int x, int y);
  * Description:
  *   Report mouse position info to the specified window
  *
+ * Input Parameters:
+ *   wnd - The window to receive the mouse report
+ *
+ * Returned Value:
+ *   0: Mouse report sent; >0: Mouse report not sent; <0: An error occurred
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_NX_MOUSE
-EXTERN void nxmu_mousereport(struct nxbe_window_s *wnd);
+EXTERN int nxmu_mousereport(struct nxbe_window_s *wnd);
 #endif
 
 /****************************************************************************

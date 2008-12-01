@@ -43,6 +43,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/nxglib.h>
 #include <nuttx/nx.h>
 #include "nxfe.h"
 
@@ -61,8 +62,8 @@
  ****************************************************************************/
 
 static struct nxgl_point_s g_mpos;
-static struct nxgl_rect_s g_mrange;
-static struct g_mbutton;
+static struct nxgl_point_s g_mrange;
+static ubyte               g_mbutton;
 
 /****************************************************************************
  * Public Data
@@ -99,20 +100,26 @@ void nxmu_mouseinit(int x, int y)
  * Description:
  *   Report mouse position info to the specified window
  *
+ * Input Parameters:
+ *   wnd - The window to receive the mouse report
+ *
+ * Returned Value:
+ *   0: Mouse report sent; >0: Mouse report not sent; <0: An error occurred
+ *
  ****************************************************************************/
 
-void nxmu_mousereport(struct nxbe_window_s *wnd)
+int nxmu_mousereport(struct nxbe_window_s *wnd)
 {
   struct nxclimsg_mousein_s outmsg;
   int ret;
 
   /* Does this window support mouse callbacks? */
 
-  if (win->cb->mousein)
+  if (wnd->cb->mousein)
     {
-      /* Yes.. Does the mount position lie within the window? */
+      /* Yes.. Is the mouse position visible in this window? */
 
-      if (nxgl_rectinside(wnd->bounds, g_mpos))
+      if (nxbe_visible(wnd, &g_mpos))
         {
           /* Yes... Convert the mouse position to window relative
            * coordinates and send it to the client
@@ -121,7 +128,7 @@ void nxmu_mousereport(struct nxbe_window_s *wnd)
           outmsg.msgid   = NX_CLIMSG_MOUSEIN;
           outmsg.wnd     = wnd;
           outmsg.buttons = g_mbutton;
-          nxgl_vectsubtract(&outmsg.pos, g_mpos, wnd->origin);
+          nxgl_vectsubtract(&outmsg.pos, &g_mpos, &wnd->origin);
 
           ret = mq_send(wnd->conn->swrmq, outmsg,
                         sizeof(struct nxclimsg_mousein_s), NX_SVRMSG_PRIO);
@@ -129,8 +136,13 @@ void nxmu_mousereport(struct nxbe_window_s *wnd)
             {
               gdbg("mq_send failed: %d\n", errno);
             }
+          return ret;
         }
     }
+
+  /* No error occurred, but the mouse report was not sent */
+
+  return 1;
 }
 
 /****************************************************************************
@@ -144,11 +156,12 @@ void nxmu_mousereport(struct nxbe_window_s *wnd)
  ****************************************************************************/
 
 void nxmu_mousein(FAR struct nxfe_state_s *fe,
-                  FAR const struct nxgl_point_s *pos, int button)
+                  FAR const struct nxgl_point_s *pos, int buttons)
 {
   struct nxbe_window_s *wnd;
-  x_coord_t x = pos->x;
-  x_coord_t y = pos->y;
+  nxgl_coord_t x = pos->x;
+  nxgl_coord_t y = pos->y;
+  int ret;
 
   /* Clip x and y to within the bounding rectangle */
 
@@ -156,35 +169,43 @@ void nxmu_mousein(FAR struct nxfe_state_s *fe,
     {
       x = 0;
     }
-  else if (x >= g_mbound.x)
+  else if (x >= g_mrange.x)
     {
-      x = g_mbound.x - 1;
+      x = g_mrange.x - 1;
     }
 
   if (y < 0)
     {
       y = 0;
     }
-  else if (y >= g_mbound.y)
+  else if (y >= g_mrange.y)
     {
-      y = g_mbound.y - 1;
+      y = g_mrange.y - 1;
     }
 
   /* Look any change in values */
 
-  if (x != g_mpos.x || y != g_mpos.y || button != g_mbutton)
+  if (x != g_mpos.x || y != g_mpos.y || buttons != g_mbutton)
     {
       /* Update the mouse value */
 
       g_mpos.x  = x;
       g_mpos.y  = y;
-      b_mbutton = button;
+      g_mbutton = buttons;
 
-      /* Pick the window to receive the mouse event */
+
+      /* Pick the window to receive the mouse event.  Start with
+       * the top window and go down.  Step with the first window
+       * that gets the mouse report
+       */
 
       for (wnd = fe->be.topwnd; wnd; wnd = wnd->below)
         {
-          nxmu_mousereport(wnd);
+          ret = nxsu_mousereport(wnd);
+          if (ret == 0)
+            {
+              break;
+            }
         }
     }
 }
