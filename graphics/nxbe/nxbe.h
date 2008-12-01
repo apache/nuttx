@@ -400,6 +400,18 @@ EXTERN void nxbe_redrawbelow(FAR struct nxbe_state_s *be,
                              FAR const struct nxgl_rect_s *rect);
 
 /****************************************************************************
+ * Name: nxbe_visible
+ *
+ * Descripton:
+ *   Return true if the point, pt, in window wnd is visible.  pt is in
+ *   absolute screen coordinates
+ *
+ ****************************************************************************/
+
+EXTERN boolean nxbe_visible(FAR struct nxbe_window_s *wnd,
+                            FAR const struct nxgl_point_s *pos);
+
+/****************************************************************************
  * Name: nxbe_clipper
  *
  * Descripton:

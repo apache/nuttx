@@ -79,5 +79,5 @@ boolean nxgl_rectinside(FAR const struct nxgl_rect_s *rect,
                         FAR const struct nxgl_point_s *pt)
 {
   return (pt->x >= rect->pt1.x && pt->x <= rect->pt2.x &&
-          pt->x >= rect->pt1.y && pt->y <= rect->pt2.y);
+          pt->y >= rect->pt1.y && pt->y <= rect->pt2.y);
 }

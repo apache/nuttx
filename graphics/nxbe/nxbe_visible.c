@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxglib/nxsglib_vectorsubtract.c
+ * graphics/nxbe/nxbe_redraw.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,8 +40,13 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <nuttx/fb.h>
+#include <errno.h>
+#include <debug.h>
+
 #include <nuttx/nxglib.h>
+
+#include "nxbe.h"
+#include "nxfe.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -50,6 +55,12 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+struct nxbe_visible_s
+{
+  struct nxbe_clipops_s cops;
+  boolean visible;
+};
 
 /****************************************************************************
  * Private Data
@@ -64,23 +75,60 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxbe_clipvisible
+ ****************************************************************************/
+
+static void nxbe_clipvisible(FAR struct nxbe_clipops_s *cops,
+                             FAR struct nxbe_plane_s *plane,
+                             FAR const struct nxgl_rect_s *rect)
+{
+  FAR struct nxbe_visible_s *info = (FAR struct nxbe_visible_s *)cops;
+  info->visible = TRUE;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_vectsubtract
+ * Name: nxbe_visible
  *
- * Description:
- *   Add subtract vector v2 from vector v1 and return the result in vector dest
+ * Descripton:
+ *   Return true if the point, pt, in window wnd is visible.  pt is in
+ *   absolute screen coordinates
  *
  ****************************************************************************/
 
-void nxgl_vectsubtract(FAR struct nxgl_point_s *dest,
-                       FAR const struct nxgl_point_s *v1,
-                       FAR const struct nxgl_point_s *v2)
+boolean nxbe_visible(FAR struct nxbe_window_s *wnd,
+                     FAR const struct nxgl_point_s *pos)
 {
-  dest->x = v1->x - v2->x;
-  dest->y = v1->y - v2->y;
+  struct nxbe_visible_s info;
+
+  /* Check if the absolute position lies within the window */
+
+  if (!nxgl_rectinside(&wnd->bounds, pos))
+    {
+      return FALSE;
+    }
+
+  /* If this is the top window, then the psition is visible */
+
+  if (!wnd->above)
+    {
+      return TRUE;
+    }
+
+  /* The position within the window range, but the window is not at
+   * the top.  We will have to work harder to determine if the point
+   * visible
+   */
+
+  info.cops.visible  = nxbe_clipvisible;
+  info.cops.obscured = nxbe_clipnull;
+  info.visible       = FALSE;
+
+  nxbe_clipper(wnd->above, &wnd->bounds, NX_CLIPORDER_DEFAULT,
+                   &info.cops, &wnd->be->plane[0]);
+
+  return info.visible;
 }
-
-
