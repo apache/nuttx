@@ -10,8 +10,11 @@ Roadmap
 This directory holds NuttX graphic packages.  Not all of these packages are implemented
 at the present, but here is the longer term roadmap:
 
-  NXWIDGETS - A high level, C++, object-oriented library for object-oriented access
-              to graphics widgets.  NXWIDGETS is built on top of NXTOOLKIT and NX.
+  NXWIDGETS - I had originally planned a high level, C++, object-oriented library for
+              object-oriented access to graphics widgets.  However, because C++ compilers
+              are not available for some of the targets supported by NuttX, I have
+              decided to implement the entire solution in  C -- that makes the solution
+              much uglier, but works fine on all platforms.
   NXTOOLKIT - A set of C graphics tools that provide higher-level window drawing
               operations.  The toolkit can be used for window-oriented graphics
               without NXWIDGETS and is built on top of NX.
@@ -29,8 +32,8 @@ Related Header Files
 
 include/nuttx/nxglib.h    -- Describes the NXGLIB C interfaces
 include/nuttx/nx.h        -- Describes the NX C interfaces
-include/nutt/nxtk.h       -- Will describe the NXTOOLKIT C interfaces
-include/nuttx/nxwidgets.h -- Will describe the NXWIDGETS classes
+include/nutt/nxtk.h       -- Describe the NXTOOLKIT C interfaces
+include/nuttx/nxwidgets.h -- Will describe the NXWIDGETS classes (no longer planned)
 
 Directories:
 ^^^^^^^^^^^^
@@ -64,8 +67,10 @@ graphics/nxsu
   is selected when CONFIG_NX_MULTIUSER is defined in the NuttX configuration file.
 
 graphics/nxtoolkit
-  This is where the NXTOOLKIT implementation will reside.
+  This is where the NXTOOLKIT implementation resides.  This toolkit is built on
+  top of NX and works with either the single-user or multi-user NX version. See
+  include/nuttx/nxtk.h
 
 graphics/nxwidgets
-  This is where the NXWIDGETS implementation will reside.
+  At one time, I planned to put NXWIDGETS implementation here, but not anymore.
 
