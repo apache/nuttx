@@ -39,7 +39,7 @@
 ASRCS	= 
 AOBJS	= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS	= nx_main.c
+CSRCS	= nx_main.c nx_events.c
 ifeq ($(CONFIG_NX_MULTIUSER),y)
 CSRCS	+= nx_server.c
 endif

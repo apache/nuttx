@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <semaphore.h>
 
 /****************************************************************************
  * Definitions
@@ -94,11 +95,20 @@
 #  ifdef CONFIG_DISABLE_SIGNALS
 #    error "This example requires signal support (CONFIG_DISABLE_SIGNALS=n)"
 #  endif
+#  ifdef CONFIG_DISABLE_PTHREAD
+#    error "This example requires pthread support (CONFIG_DISABLE_PTHREAD=n)"
+#  endif
+#  ifndef CONFIG_NX_BLOCKING
+#    error "This example depends on CONFIG_NX_BLOCKING"
+#  endif
 #  ifndef CONFIG_EXAMPLES_NX_STACKSIZE
 #    define CONFIG_EXAMPLES_NX_STACKSIZE 2048
 #  endif
+#  ifndef CONFIG_EXAMPLES_NX_LISTENERPRIO
+#    define CONFIG_EXAMPLES_NX_LISTENERPRIO 100
+#  endif
 #  ifndef CONFIG_EXAMPLES_NX_CLIENTPRIO
-#    define CONFIG_EXAMPLES_NX_CLIENTPRIO 80
+#    define CONFIG_EXAMPLES_NX_CLIENTPRIO 100
 #  endif
 #  ifndef CONFIG_EXAMPLES_NX_SERVERPRIO
 #    define CONFIG_EXAMPLES_NX_SERVERPRIO 120
@@ -132,9 +142,54 @@
  * Public Types
  ****************************************************************************/
 
+enum exitcode_e
+{
+  NXEXIT_SUCCESS = 0,
+  NXEXIT_SIGPROCMASK,
+  NXEXIT_SCHEDSETPARAM,
+  NXEXIT_EVENTNOTIFY,
+  NXEXIT_TASKCREATE,
+  NXEXIT_PTHREADCREATE,
+  NXEXIT_FBINITIALIZE,
+  NXEXIT_FBGETVPLANE,
+  NXEXIT_NXOPEN,
+  NXEXIT_NXCONNECT,
+  NXEXIT_NXSETBGCOLOR,
+  NXEXIT_NXOPENWINDOW,
+  NXEXIT_NXSETSIZE,
+  NXEXIT_NXSETPOSITION,
+  NXEXIT_NXCLOSEWINDOW,
+  NXEXIT_LOSTSERVERCONN
+};
+
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
+
+/* The connecton handler */
+
+extern NXHANDLE g_hnx;
+
+/* NX callback vtables */
+
+extern const struct nx_callback_s g_nxcb1;
+extern const struct nx_callback_s g_nxcb2;
+
+/* The screen resolution */
+
+nxgl_coord_t g_xres;
+nxgl_coord_t g_yres;
+
+extern boolean b_haveresolution;
+#ifdef CONFIG_NX_MULTIUSER
+extern boolean g_connected;
+#endif
+extern sem_t g_semevent;
+
+/* Colors used to fill window 1 & 2 */
+
+extern nxgl_mxpixel_t g_color1[CONFIG_NX_NPLANES];
+extern nxgl_mxpixel_t g_color2[CONFIG_NX_NPLANES];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -142,6 +197,7 @@
 
 #if defined(CONFIG_NXGRAPHICS) && defined(CONFIG_NX_MULTIUSER)
 extern int nx_servertask(int argc, char *argv[]);
+extern FAR void *nx_listenerthread(FAR void *arg);
 #endif
 
 #endif /* __EXAMPLES_NX_NX_INTERNAL_H */

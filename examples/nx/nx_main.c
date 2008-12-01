@@ -44,7 +44,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sched.h>
-#include <signal.h>
+#include <pthread.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -61,208 +61,43 @@
  * Private Types
  ****************************************************************************/
 
-enum exitcode_e
-{
-  NXEXIT_SUCCESS = 0,
-  NXEXIT_SIGPROCMASK,
-  NXEXIT_SIGACTION,
-  NXEXIT_EVENTNOTIFY,
-  NXEXIT_TASKCREATE,
-  NXEXIT_FBINITIALIZE,
-  NXEXIT_FBGETVPLANE,
-  NXEXIT_NXOPEN,
-  NXEXIT_NXCONNECT,
-  NXEXIT_NXSETBGCOLOR,
-  NXEXIT_NXOPENWINDOW,
-  NXEXIT_NXSETSIZE,
-  NXEXIT_NXSETPOSITION,
-  NXEXIT_NXCLOSEWINDOW
-};
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-
-static void nxeg_redraw1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                         boolean morem, FAR void *arg);
-static void nxeg_redraw2(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                         boolean more, FAR void *arg);
-static void nxeg_position1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
-                           FAR const struct nxgl_point_s *pos,
-                           FAR const struct nxgl_rect_s *bounds,
-                           FAR void *arg);
-static void nxeg_position2(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
-                           FAR const struct nxgl_point_s *pos,
-                           FAR const struct nxgl_rect_s *bounds,
-                           FAR void *arg);
-#ifdef CONFIG_NX_MOUSE
-static void nxeg_mousein1(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                          ubyte buttons, FAR void *arg);
-static void nxeg_mousein2(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                          ubyte buttons, FAR void *arg);
-#endif
-#ifdef CONFIG_NX_KBD
-static void nxeg_kbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch);
-#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct nx_callback_s g_nxcb1 =
-{
-  nxeg_redraw1,   /* redraw */
-  nxeg_position1  /* position */
-#ifdef CONFIG_NX_MOUSE
-  , nxeg_mousein1 /* mousein */
-#endif
-#ifdef CONFIG_NX_KBD
-  , nxeg_kbdin1   /* my kbdin */
-#endif
-};
+static int g_exitcode = NXEXIT_SUCCESS;
 
-static const struct nx_callback_s g_nxcb2 =
-{
-  nxeg_redraw2,   /* redraw */
-  nxeg_position2  /* position */
-#ifdef CONFIG_NX_MOUSE
-  , nxeg_mousein2 /* mousein */
-#endif
-#ifdef CONFIG_NX_KBD
-  , nxeg_kbdin2   /* my kbdin */
-#endif
-};
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 /* The connecton handler */
 
-static NXHANDLE g_hnx = NULL;
-static int g_exitcode = NXEXIT_SUCCESS;
-
-/* Initialized to zero, incremented when connected */
-
-#ifdef CONFIG_NX_MULTIUSER
-static boolean g_connected = FALSE;
-#endif
-static boolean b_haveresolution = FALSE;
-static sem_t g_semevent = {0};
+NXHANDLE g_hnx = NULL;
 
 /* The screen resolution */
 
-static nxgl_coord_t g_xres;
-static nxgl_coord_t g_yres;
+nxgl_coord_t g_xres;
+nxgl_coord_t g_yres;
+
+boolean b_haveresolution = FALSE;
+#ifdef CONFIG_NX_MULTIUSER
+boolean g_connected = FALSE;
+#endif
+sem_t g_semevent = {0};
 
 /* Colors used to fill window 1 & 2 */
 
-static nxgl_mxpixel_t g_color1[CONFIG_NX_NPLANES];
-static nxgl_mxpixel_t g_color2[CONFIG_NX_NPLANES];
+nxgl_mxpixel_t g_color1[CONFIG_NX_NPLANES];
+nxgl_mxpixel_t g_color2[CONFIG_NX_NPLANES];
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: nxeg_redraw1
- ****************************************************************************/
-
-static void nxeg_redraw1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                         boolean more, FAR void *arg)
-{
-  message("nxeg_redraw%d: hwnd=%p rect={(%d,%d),(%d,%d)} more=%s\n",
-           (int)arg, hwnd,
-           rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y,
-           more ? "TRUE" : "FALSE");
-  nx_fill(hwnd, rect, g_color1);
-}
-
-/****************************************************************************
- * Name: nxeg_redraw2
- ****************************************************************************/
-
-static void nxeg_redraw2(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                         boolean more, FAR void *arg)
-{
-  message("nxeg_redraw%d: hwnd=%p rect={(%d,%d),(%d,%d)} more=%s\n",
-           (int)arg, hwnd,
-           rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y,
-           more ? "TRUE" : "FALSE");
-  nx_fill(hwnd, rect, g_color2);
-}
-
-/****************************************************************************
- * Name: nxeg_position1
- ****************************************************************************/
-
-static void nxeg_position1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
-                           FAR const struct nxgl_point_s *pos,
-                           FAR const struct nxgl_rect_s *bounds,
-                           FAR void *arg)
-{
-  /* Report the position */
-
-  message("nxeg_position%d: hwnd=%p size={(%d,%d),(%d,%d)} pos=(%d,%d) bounds={(%d,%d),(%d,%d)}\n",
-           arg, hwnd,
-           size->pt1.x, size->pt1.y, size->pt2.x, size->pt2.y,
-           pos->x, pos->y,
-           bounds->pt1.x, bounds->pt1.y, bounds->pt2.x, bounds->pt2.y);
-
-  /* Have we picked off the window bounds yet? */
-
-  if (!b_haveresolution)
-    {
-      /* Save the window limits (these should be the same for all places and all windows */
-
-      g_xres = bounds->pt2.x;
-      g_yres = bounds->pt2.y;
-
-      b_haveresolution = TRUE;
-      sem_post(&g_semevent);
-      message("nxeg_position2: Have xres=%d yres=%d\n", g_xres, g_yres);
-    }
-}
-
-/****************************************************************************
- * Name: nxeg_position2
- ****************************************************************************/
-
-static void nxeg_position2(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
-                           FAR const struct nxgl_point_s *pos,
-                           FAR const struct nxgl_rect_s *bounds,
-                           FAR void *arg)
-{
-  /* Report the position */
-
-  message("nxeg_position%d: hwnd=%p size={(%d,%d),(%d,%d)} pos=(%d,%d) bounds={(%d,%d),(%d,%d)}\n",
-           arg, hwnd,
-           size->pt1.x, size->pt1.y, size->pt2.x, size->pt2.y,
-           pos->x, pos->y,
-           bounds->pt1.x, bounds->pt1.y, bounds->pt2.x, bounds->pt2.y);
-}
-
-/****************************************************************************
- * Name: nxeg_mousein1
- ****************************************************************************/
-
-#ifdef CONFIG_NX_MOUSE
-static void nxeg_mousein1(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                          ubyte buttons, FAR void *arg)
-{
-  message("nxeg_mousein%d: hwnd=%p pos=(%d,%d) button=%02x\n",
-           (int)arg, hwnd,  pos->x, pos->y, buttons);
-}
-#endif
-
-/****************************************************************************
- * Name: nxeg_mousein2
- ****************************************************************************/
-
-#ifdef CONFIG_NX_MOUSE
-static void nxeg_mousein2(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                          ubyte buttons, FAR void *arg)
-{
-  message("nxeg_mousein%d: hwnd=%p pos=(%d,%d) button=%02x\n",
-          (int)arg, hwnd,  pos->x, pos->y, buttons);
-}
-#endif
 
 /****************************************************************************
  * Name: nxeg_drivemouse
@@ -284,85 +119,6 @@ static void nxeg_drivemouse(void)
           (void)nx_mousein(g_hnx, x, y, NX_MOUSE_LEFTBUTTON);
         }
     }
-}
-#endif
-
-/****************************************************************************
- * Name: nxeg_kbdinfo
- ****************************************************************************/
-
-#ifdef CONFIG_NX_KBD
-static void nxeg_kbdinfo(ubyte nch, const ubyte *ch)
-{
-  int i;
-  for (i = 0; i < nch; i++)
-    {
-      if (isprint(ch[i]))
-        {
-          message("          ch[%d]=  (%02x)", i, ch[i]);
-        }
-      else
-        {
-          message("          ch[%d]=%c (%02x)", i, ch[i], ch[i]);
-        }
-    }
-}
-#endif
-
-/****************************************************************************
- * Name: nxeg_kbdin1
- ****************************************************************************/
-
-#ifdef CONFIG_NX_KBD
-static void nxeg_kbdin1(NXWINDOW hwnd, ubyte nch, const ubyte *ch)
-{
-  message("nxeg_kbdin1: hwnd=%p nch=%d\n", hwnd, nch);
-  nxeg_kbdinfo(nch, ch);
-}
-#endif
-
-/****************************************************************************
- * Name: nxeg_kbdin2
- ****************************************************************************/
-
-#ifdef CONFIG_NX_KBD
-static void nxeg_kbdin2(NXWINDOW hwnd, ubyte nch, const ubyte *ch)
-{
-  message("nxeg_kbdin2: hwnd=%p nch=%d\n", hwnd, nch);
-  nxeg_kbdinfo(nch, ch);
-}
-#endif
-
-/****************************************************************************
- * Name: nxeg_suinitialize
- ****************************************************************************/
-
-#ifdef CONFIG_NX_MULTIUSER
-static void nxeg_sigaction(int signo, FAR siginfo_t *info, FAR void *context)
-{
-  int ret;
-
-  /* I know... you are not supposed to call printf from signal handlers */
-
-  message("nxeg_sigaction: received signo=%d\n", signo);
-  ret = nx_eventhandler(g_hnx);
-
-  /* If we received a message, we must be connected */
-
-  if (!g_connected)
-    {
-      g_connected = TRUE;
-      sem_post(&g_semevent);
-      message("nxeg_sigaction: Connected\n");
-    }
-
-  /* Request notification of further incoming events */
-
-  ret = nx_eventnotify(g_hnx, CONFIG_EXAMPLES_NX_NOTIFYSIGNO);
-  if (ret < 0)
-     {
-       message("nxeg_sigaction: nx_eventnotify failed: %d\n", errno);
-     }
 }
 #endif
 
@@ -416,35 +172,19 @@ static inline int nxeg_suinitialize(void)
 #ifdef CONFIG_NX_MULTIUSER
 static inline int nxeg_muinitialize(void)
 {
-  struct sigaction act;
-  sigset_t sigset;
+  struct sched_param param;
+  pthread_t thread;
   pid_t servrid;
   int ret;
 
-  /* Set up to catch a signal */
+  /* Set the client task priority */
 
-  message("nxeg_initialize: Unmasking signal %d\n" , CONFIG_EXAMPLES_NX_NOTIFYSIGNO);
-  (void)sigemptyset(&sigset);
-  (void)sigaddset(&sigset, CONFIG_EXAMPLES_NX_NOTIFYSIGNO);
-  ret = sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+  param.sched_priority = CONFIG_EXAMPLES_NX_CLIENTPRIO;
+  ret = sched_setparam(0, &param);
   if (ret < 0)
     {
-      message("nxeg_initialize: sigprocmask failed: \n", ret);
-      g_exitcode = NXEXIT_SIGPROCMASK;
-      return ERROR;
-    }
-
-  message("nxeg_initialize: Registering signal handler\n" );
-  act.sa_sigaction = nxeg_sigaction;
-  act.sa_flags     = SA_SIGINFO;
-  (void)sigfillset(&act.sa_mask);
-  (void)sigdelset(&act.sa_mask, CONFIG_EXAMPLES_NX_NOTIFYSIGNO);
-
-  ret = sigaction(CONFIG_EXAMPLES_NX_NOTIFYSIGNO, &act, NULL);
-  if (ret < 0)
-    {
-      message("nxeg_initialize: sigaction failed: %d\n" , ret);
-      g_exitcode = NXEXIT_SIGACTION;
+      message("nxeg_initialize: sched_setparam failed: %d\n" , ret);
+      g_exitcode = NXEXIT_SCHEDSETPARAM;
       return ERROR;
     }
 
@@ -462,22 +202,30 @@ static inline int nxeg_muinitialize(void)
 
   /* Wait a bit to let the server get started */
 
-  sleep(2);
+  sleep(1);
 
   /* Connect to the server */
 
   g_hnx = nx_connect();
   if (g_hnx)
     {
-       /* Request notification of incoming events */
+       pthread_attr_t attr;
 
-       ret = nx_eventnotify(g_hnx, CONFIG_EXAMPLES_NX_NOTIFYSIGNO);
-       if (ret < 0)
+       /* Start a separate thread to listen for server events.  This is probably
+        * the least efficient way to do this, but it makes this example flow more
+        * smoothly.
+        */
+
+       (void)pthread_attr_init(&attr);
+       param.sched_priority = CONFIG_EXAMPLES_NX_LISTENERPRIO;
+       (void)pthread_attr_setschedparam(&attr, &param);
+       (void)pthread_attr_setstacksize(&attr, CONFIG_EXAMPLES_NX_STACKSIZE);
+
+       ret = pthread_create(&thread, &attr, nx_listenerthread, NULL);
+       if (ret != 0)
          {
-            message("nxeg_initialize: nx_eventnotify failed: %d\n", errno);
-            (void)nx_disconnect(g_hnx);
-            g_hnx      = NULL;
-            g_exitcode = NXEXIT_EVENTNOTIFY;
+            printf("nxeg_initialize: pthread_create failed: %d\n", ret);
+            g_exitcode = NXEXIT_PTHREADCREATE;
             return ERROR;
          }
 
@@ -485,33 +233,16 @@ static inline int nxeg_muinitialize(void)
 
        while (!g_connected)
          {
-            /* Assuming that the incoming message queue is configured non-blocking,
-             * we can poll the event handler here.  This accounts for the case where
-             * the server is higher prioirty than the client.  In that case, the
-             * server will have already responded to the connection request BEFORE
-             * the nx_eventnotify was called.
-             */
+           /* Wait for the listener thread to wake us up when we really
+            * are connected.
+            */
 
-             ret = nx_eventhandler(g_hnx);
-             if (ret == 0)
-               {
-                 /* If a message was received, then we are connected */
-
-                 g_connected = TRUE;
-               }
-
-             /* Otherwise, we will have to wait for the event handler to wake up up
-              * when we really are connected.
-              */
-             else
-               {
-                 (void)sem_wait(&g_semevent);
-               }
+           (void)sem_wait(&g_semevent);
          }
     }
   else
     {
-      message("user_start: nx_connect failed: %d\n", errno);
+      message("nxeg_initialize: nx_connect failed: %d\n", errno);
       g_exitcode = NXEXIT_NXCONNECT;
       return ERROR;
     }
@@ -589,7 +320,6 @@ int user_start(int argc, char *argv[])
       g_exitcode = NXEXIT_NXSETBGCOLOR;
       goto errout_with_nx;
     }
-  (void)nx_eventhandler(g_hnx); /* Check for server events -- normally done in a loop */
 
   /* Create window #1 */
 

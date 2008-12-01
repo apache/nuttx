@@ -74,10 +74,20 @@ examples/nx
 
     CONFIG_EXAMPLES_NX_STACKSIZE -- The stacksize to use when creating
       the NX server.  Default 2048
-    CONFIG_EXAMPLES_NX_CLIENTPRIO -- The client priority.  Default: 80
+    CONFIG_EXAMPLES_NX_CLIENTPRIO -- The client priority.  Default: 100
     CONFIG_EXAMPLES_NX_SERVERPRIO -- The server priority.  Default: 120
+    CONFIG_EXAMPLES_NX_LISTENERPRIO -- The priority of the event listener
+      thread. Default 80.
     CONFIG_EXAMPLES_NX_NOTIFYSIGNO -- The signal number to use with
       nx_eventnotify().  Default: 4
+
+  If CONFIG_NX_MULTIUSER is defined, then the example also expects the
+  following settings and will generate an error if they are not as expected:
+
+    CONFIG_DISABLE_MQUEUE=n
+    CONFIG_DISABLE_SIGNALS=n
+    CONFIG_DISABLE_PTHREAD=n
+    CONFIG_NX_BLOCKING=y
 
 examples/null
 ^^^^^^^^^^^^^
