@@ -24,11 +24,13 @@ rewinddir    NXrewinddir
 rmdir        NXrmdir
 seekdir      NXseekdir
 select       NXselect
+sleep        NXsleep
 socket       NXsocket
 stat         NXstat
 statfs       NXstatfs
 system       NXsystem
 umount       NXumount
 unlink       NXunlink
+usleep       NXusleep
 write        NXwrite
 zmalloc      NXzmalloc
