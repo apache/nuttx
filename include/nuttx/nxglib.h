@@ -364,6 +364,19 @@ EXTERN void nxgl_rectintersect(FAR struct nxgl_rect_s *dest,
                                FAR const struct nxgl_rect_s *src2);
 
 /****************************************************************************
+ * Name: nxgl_rectunion
+ *
+ * Description:
+ *   Given two rectanges, src1 and src2, return the larger rectangle that 
+ *   contains both, dest.
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_rectunion(FAR struct nxgl_rect_s *dest,
+                           FAR const struct nxgl_rect_s *src1,
+                           FAR const struct nxgl_rect_s *src2);
+
+/****************************************************************************
  * Name: nxgl_nonintersecting
  *
  * Description:
