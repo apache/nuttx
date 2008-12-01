@@ -395,7 +395,7 @@ EXTERN int nx_eventnotify(NXHANDLE handle, int signo);
  *   Create a new window.
  *
  * Input Parameters:
- *   handle - The handle returned by nx_connect
+ *   handle - The handle returned by nx_connect or nx_open
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
@@ -585,6 +585,26 @@ EXTERN int nx_lower(NXWINDOW hwnd);
 
 EXTERN int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
                    nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+
+
+/****************************************************************************
+ * Name: nx_filltrapezoid
+ *
+ * Description:
+ *  Fill the specified trapezoidal region in the window with the specified color
+ *
+ * Input Parameters:
+ *   hwnd  - The window handle
+ *   trap  - The trapezoidal region to be filled
+ *   color - The color to use in the fill
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nx_filltrapezoid(NXWINDOW hwnd, FAR struct nxgl_trapezoid_s *trap,
+                            nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nx_setbgcolor
