@@ -389,7 +389,7 @@ int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb)
          case NX_SVRMSG_REQUESTBKGD: /* Give access to the background window */
            {
              FAR struct nxsvrmsg_requestbkgd_s *rqbgmsg = (FAR struct nxsvrmsg_requestbkgd_s *)buffer;
-             nxmu_requestbkgd(rqbgmsg->conn, &fe.be, rqbgmsg->cb);
+             nxmu_requestbkgd(rqbgmsg->conn, &fe.be, rqbgmsg->cb, rqbgmsg->arg);
            }
            break;
 
@@ -473,7 +473,7 @@ int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb)
          case NX_SVRMSG_MOUSEIN: /* New mouse report from mouse client */
            {
              FAR struct nxsvrmsg_mousein_s *mousemsg = (FAR struct nxsvrmsg_mousein_s *)buffer;
-             nxmu_mousein(&fe.be, &mousemsg->pt, mousemsg->buttons);
+             nxmu_mousein(&fe, &mousemsg->pt, mousemsg->buttons);
            }
            break;
 #endif
@@ -481,7 +481,7 @@ int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb)
          case NX_SVRMSG_KBDIN: /* New keyboard report from keyboard client */
            {
              FAR struct nxsvrmsg_kbdin_s *kbdmsg = (FAR struct nxsvrmsg_kbdin_s *)buffer;
-             nxmu_kbdin(&fe.be, kbdmsg->nch, kbdmsg->ch);
+             nxmu_kbdin(&fe, kbdmsg->nch, kbdmsg->ch);
            }
            break;
 #endif
