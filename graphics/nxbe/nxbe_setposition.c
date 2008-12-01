@@ -107,7 +107,7 @@ void nxbe_setposition(FAR struct nxbe_window_s *wnd,
    * background window.
    */
 
-  nxgl_rectintersect(&rect, &rect, &wnd->be->bkgd.bounds);
+  nxgl_rectintersect(&rect, &wnd->bounds, &wnd->be->bkgd.bounds);
 
   /* Then redraw this window AND all windows below it. Having moved the
    * window, we may have exposed previoulsy obscured portions of windows
