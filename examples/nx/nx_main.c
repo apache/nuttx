@@ -551,7 +551,7 @@ int user_start(int argc, char *argv[])
   /* Create window #1 */
 
   message("user_start: Create window #1\n");
-  hwnd1 = nx_openwindow(g_hnx, &g_nxcb1, (FAR void *)2);
+  hwnd1 = nx_openwindow(g_hnx, &g_nxcb1, (FAR void *)1);
   message("user_start: hwnd1=%p\n", hwnd1);
 
   if (!hwnd1)
