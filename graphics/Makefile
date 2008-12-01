@@ -56,10 +56,14 @@ DEPPATH		+= --dep-path nxsu
 CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/graphics/nxsu}
 endif
 
-ASRCS		= $(NXGLIB_ASRCS) $(NXBE_ASRCS) $(NX_ASRCS)
+include nxtk/Make.defs
+DEPPATH		+= --dep-path nxtk
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/graphics/nxtk}
+
+ASRCS		= $(NXGLIB_ASRCS) $(NXBE_ASRCS) $(NX_ASRCS) $(NXTK_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= $(NXGLIB_CSRCS) $(NXBE_CSRCS) $(NX_CSRCS)
+CSRCS		= $(NXGLIB_CSRCS) $(NXBE_CSRCS) $(NX_CSRCS) $(NXTK_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
@@ -68,9 +72,9 @@ OBJS		= $(AOBJS) $(COBJS)
 BIN		= libgraphics$(LIBEXT)
 
 ifeq ($(CONFIG_NX_MULTIUSER),y)
-VPATH		= nxglib:nxbe:nxmu
+VPATH		= nxglib:nxbe:nxmu:nxtk
 else
-VPATH		= nxglib:nxbe:nxsu
+VPATH		= nxglib:nxbe:nxsu:nxtk
 endif
 
 all:	mklibgraphics
