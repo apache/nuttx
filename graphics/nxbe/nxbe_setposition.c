@@ -81,6 +81,7 @@
 void nxbe_setposition(FAR struct nxbe_window_s *wnd,
                       FAR const struct nxgl_point_s *pos)
 {
+  struct nxgl_rect_s before;
   struct nxgl_rect_s rect;
 
 #ifdef CONFIG_DEBUG
@@ -101,13 +102,15 @@ void nxbe_setposition(FAR struct nxbe_window_s *wnd,
 
   /* Add the new window origin back into the bounding box */
 
+  nxgl_rectcopy(&before, &wnd->bounds);
   nxgl_rectoffset(&wnd->bounds, &rect, wnd->origin.x, wnd->origin.y);
 
-  /* Clip the rectangle so that is lies with the screen defined by the
-   * background window.
+  /* Get the union of the 'before' bounding box and the 'after' bounding
+   * this union is the region of the display that must be updated.
    */
 
-  nxgl_rectintersect(&rect, &wnd->bounds, &wnd->be->bkgd.bounds);
+  nxgl_rectunion(&rect, &before, &wnd->bounds);
+  nxgl_rectintersect(&rect, &rect, &wnd->be->bkgd.bounds);
 
   /* Then redraw this window AND all windows below it. Having moved the
    * window, we may have exposed previoulsy obscured portions of windows
