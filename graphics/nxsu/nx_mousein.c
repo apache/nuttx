@@ -96,7 +96,7 @@ void nxsu_mouseinit(int x, int y)
 }
 
 /****************************************************************************
- * Name: nxmu_mousereport
+ * Name: nxsu_mousereport
  *
  * Description:
  *   Report mouse position info to the specified window

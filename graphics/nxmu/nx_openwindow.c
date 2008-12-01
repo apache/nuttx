@@ -95,7 +95,7 @@ NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
   int ret;
 
 #ifdef CONFIG_DEBUG
-  if (!conn || !cb)
+  if (!handle || !cb)
     {
       errno = EINVAL;
       return NULL;

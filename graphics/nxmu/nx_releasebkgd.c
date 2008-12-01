@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxsu/nx_releasebkgd.c
+ * graphics/nxmu/nx_releasebkgd.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

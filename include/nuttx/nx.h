@@ -256,8 +256,8 @@ EXTERN int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb);
  ****************************************************************************/
 
 #ifdef CONFIG_NX_MULTIUSER
-EXTERN NXHANDLE nx_connectionstance(FAR const char *svrmqname);
-#  define nx_connect(cb) nx_connectionstance(NX_DEFAULT_SERVER_MQNAME)
+EXTERN NXHANDLE nx_connectinstance(FAR const char *svrmqname);
+#  define nx_connect(cb) nx_connectinstance(NX_DEFAULT_SERVER_MQNAME)
 #endif
 
 /****************************************************************************
@@ -458,13 +458,16 @@ EXTERN int nx_closewindow(NXWINDOW hwnd);
  * Input Parameters:
  *   handle - The handle returned by nx_connect
  *   cb     - Callbacks to use for processing background window events
+ *   arg    - User provided argument (see nx_openwindow, nx_constructwindow)
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-EXTERN int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb);
+EXTERN int nx_requestbkgd(NXHANDLE handle,
+                          FAR const struct nx_callback_s *cb,
+                          FAR void *arg);
 
 /****************************************************************************
  * Name: nx_releasebkgd

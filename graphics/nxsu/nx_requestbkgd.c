@@ -103,13 +103,15 @@
  * Input Parameters:
  *   handle - The handle returned by nx_connect
  *   cb     - Callbacks to use for processing background window events
+ *   arg    - User provided argument (see nx_openwindow, nx_constructwindow)
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb)
+int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb,
+                   FAR void *arg)
 {
   FAR struct nxfe_state_s *fe = (FAR struct nxfe_state_s *)handle;
   FAR struct nxbe_state_s *be = &fe->be;
@@ -124,7 +126,8 @@ int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb)
 
   /* Replace the NX background windo callbacks with the client's callbacks */
 
-  be->bkgd.cb = cb;
+  be->bkgd.cb  = cb;
+  be->bkgd.arg = arg;
 
   /* Report the size/position of the background window to the client */
 

@@ -54,6 +54,31 @@ examples/nsh
   someday be a great NuttX application debugger.  NSH is described
   in its own README located at examples/nsh/README.txt
 
+examples/nx
+^^^^^^^^^^^
+
+  This directory contains a simple test of a subset of the NX APIs
+  defined in include/nuttx/nx.h.  The following configuration options
+  can be selected:
+
+    CONFIG_EXAMPLES_NX_VPLANE -- The plane to select from the frame-
+      buffer driver for use in the test.  Default: 0
+    CONFIG_EXAMPLES_NX_BGCOLOR -- The color of the background.  Default: ' '.
+    CONFIG_EXAMPLES_NX_COLOR1 -- The color of window 1. Default: '1'
+    CONFIG_EXAMPLES_NX_COLOR2 -- The color of window 2. Default: '2'
+
+  This test can be performed with either the single-user version of
+  NX or with the multiple user version of NX selected with CONFIG_NX_MULTIUSER.
+  If CONFIG_NX_MULTIUSER is defined, then the following configuration
+  options also apply:
+
+    CONFIG_EXAMPLES_NX_STACKSIZE -- The stacksize to use when creating
+      the NX server.  Default 2048
+    CONFIG_EXAMPLES_NX_CLIENTPRIO -- The client priority.  Default: 80
+    CONFIG_EXAMPLES_NX_SERVERPRIO -- The server priority.  Default: 120
+    CONFIG_EXAMPLES_NX_NOTIFYSIGNO -- The signal number to use with
+      nx_eventnotify().  Default: 4
+
 examples/null
 ^^^^^^^^^^^^^
 

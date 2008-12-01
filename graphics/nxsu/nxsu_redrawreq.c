@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxmu/nxsu_redrawreq.c
+ * graphics/nxsu/nxsu_redrawreq.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

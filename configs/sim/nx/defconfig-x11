@@ -430,6 +430,29 @@ CONFIG_EXAMPLES_NSH_FATNSECTORS=1024
 CONFIG_EXAMPLES_NSH_FATMOUNTPT=/tmp
 
 #
+# Settings for examples/nx
+#
+# CONFIG_EXAMPLES_NX_VPLANE -- The plane to select from the frame-
+#   buffer driver for use in the test.  Default: 0
+# CONFIG_EXAMPLES_NX_BGCOLOR -- The color of the background.  Default: ' '.
+# CONFIG_EXAMPLES_NX_COLOR1 -- The color of window 1. Default: '1'
+# CONFIG_EXAMPLES_NX_COLOR2 -- The color of window 2. Default: '2'
+# CONFIG_EXAMPLES_NX_STACKSIZE -- The stacksize to use when creating
+#   the NX server.  Default 2048
+# CONFIG_EXAMPLES_NX_CLIENTPRIO -- The client priority.  Default: 80
+# CONFIG_EXAMPLES_NX_SERVERPRIO -- The server priority.  Default: 120
+# CONFIG_EXAMPLES_NX_NOTIFYSIGNO -- The signal number to use with
+#   nx_eventnotify().  Default: 4
+CONFIG_EXAMPLES_NX_VPLANE=0
+#CONFIG_EXAMPLES_NX_BGCOLOR
+#CONFIG_EXAMPLES_NX_COLOR1
+#CONFIG_EXAMPLES_NX_COLOR2
+CONFIG_EXAMPLES_NX_STACKSIZE=8192
+CONFIG_EXAMPLES_NX_CLIENTPRIO=80
+CONFIG_EXAMPLES_NX_SERVERPRIO=120
+CONFIG_EXAMPLES_NX_NOTIFYSIGNO=4
+
+#
 # Settings for examples/mount
 CONFIG_EXAMPLES_MOUNT_DEVNAME="/dev/ram0"
 #CONFIG_EXAMPLES_MOUNT_NSECTORS=2048

@@ -81,6 +81,7 @@
  *   conn - The client containing connection information [IN]
  *   be   - The server state structure [IN]
  *   cb   - Callbacks used to process window events
+ *   arg  - User provided argument (see nx_openwindow, nx_constructwindow)
  *
  * Return:
  *   None
@@ -89,7 +90,8 @@
 
 void nxmu_requestbkgd(FAR struct nxfe_conn_s *conn,
                       FAR struct nxbe_state_s *be,
-                      FAR const struct nx_callback_s *cb)
+                      FAR const struct nx_callback_s *cb,
+                      FAR void *arg)
 {
 #ifdef CONFIG_DEBUG
   if (!conn || !be || !cb)
@@ -103,6 +105,7 @@ void nxmu_requestbkgd(FAR struct nxfe_conn_s *conn,
    */
 
   be->bkgd.cb   = cb;
+  be->bkgd.arg  = arg;
   be->bkgd.conn = conn;
 
   /* Report the size/position of the background window to the client */
@@ -116,7 +119,7 @@ void nxmu_requestbkgd(FAR struct nxfe_conn_s *conn,
   /* Provide the mouse settings */
 
 #ifdef CONFIG_NX_MOUSE
-  nxsu_mousereport(&be->bkgd);
+  nxmu_mousereport(&be->bkgd);
 #endif
 }
 

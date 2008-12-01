@@ -130,7 +130,7 @@ int nxmu_mousereport(struct nxbe_window_s *wnd)
           outmsg.buttons = g_mbutton;
           nxgl_vectsubtract(&outmsg.pos, &g_mpos, &wnd->origin);
 
-          ret = mq_send(wnd->conn->swrmq, outmsg,
+          ret = mq_send(wnd->conn->swrmq, &outmsg,
                         sizeof(struct nxclimsg_mousein_s), NX_SVRMSG_PRIO);
           if (ret < 0)
             {
@@ -155,8 +155,8 @@ int nxmu_mousereport(struct nxbe_window_s *wnd)
  *
  ****************************************************************************/
 
-void nxmu_mousein(FAR struct nxfe_state_s *fe,
-                  FAR const struct nxgl_point_s *pos, int buttons)
+int nxmu_mousein(FAR struct nxfe_state_s *fe,
+                 FAR const struct nxgl_point_s *pos, int buttons)
 {
   struct nxbe_window_s *wnd;
   nxgl_coord_t x = pos->x;
@@ -193,7 +193,6 @@ void nxmu_mousein(FAR struct nxfe_state_s *fe,
       g_mpos.y  = y;
       g_mbutton = buttons;
 
-
       /* Pick the window to receive the mouse event.  Start with
        * the top window and go down.  Step with the first window
        * that gets the mouse report
@@ -201,13 +200,23 @@ void nxmu_mousein(FAR struct nxfe_state_s *fe,
 
       for (wnd = fe->be.topwnd; wnd; wnd = wnd->below)
         {
-          ret = nxsu_mousereport(wnd);
-          if (ret == 0)
+          /* The background window normally has no callback structure
+           * (unless a client has taken control of the background via
+           * nx_requestbkgd()).
+           */
+
+          if (wnd->cb)
             {
-              break;
+              ret = nxmu_mousereport(wnd);
+              if (ret == 0)
+                {
+                  break;
+                }
             }
         }
     }
+
+  return OK;
 }
 
 #endif /* CONFIG_NX_MOUSE */

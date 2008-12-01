@@ -104,13 +104,15 @@
  * Input Parameters:
  *   handle - The handle returned by nx_connect
  *   cb     - Callbacks to use for processing background window events
+ *   arg    - User provided argument (see nx_openwindow, nx_constructwindow)
  *
  * Return:
  *   OK: Success; ERROR of failure with errno set appropriately.
  *
  ****************************************************************************/
 
-int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb)
+int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb,
+                   FAR void *arg)
 {
   FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
   struct nxsvrmsg_requestbkgd_s outmsg;
@@ -129,6 +131,7 @@ int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb)
   outmsg.msgid = NX_SVRMSG_REQUESTBKGD;
   outmsg.conn  = conn;
   outmsg.cb    = cb;
+  outmsg.arg   = arg;
 
   ret = mq_send(conn->cwrmq, &outmsg, sizeof(struct nxsvrmsg_requestbkgd_s), NX_SVRMSG_PRIO);
   if (ret < 0)

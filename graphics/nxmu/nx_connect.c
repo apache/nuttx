@@ -110,7 +110,7 @@ static uint32 g_nxcid    = 1;
  *
  ****************************************************************************/
 
-NXHANDLE nx_connectionstance(FAR const char *svrmqname)
+NXHANDLE nx_connectinstance(FAR const char *svrmqname)
 {
   FAR struct nxfe_conn_s *conn;
   struct nxsvrmsg_s       msg;

@@ -100,7 +100,8 @@ int nx_releasebkgd(NXWINDOW hwnd)
 
   /* Restore the NX background window callbacks */
 
-  be->bkgd.cb = &g_bkgdcb;
+  be->bkgd.cb  = &g_bkgdcb;
+  be->bkgd.arg = NULL;
 
   /* Redraw the background window */
 

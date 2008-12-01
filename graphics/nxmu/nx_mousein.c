@@ -85,17 +85,17 @@
 int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, ubyte buttons)
 {
   FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
-  struct nxsvrmsg_mousein_s   outmsg;
+  struct nxsvrmsg_mousein_s outmsg;
   int ret;
 
   /* Inform the server that this client no longer exists */
 
-  msg.msgid   = NX_SVRMSG_MOUSEIN;
-  msg.pt.x    = x;
-  msg.pt.y    = y;
-  msg.buttons = buttons;
+  outmsg.msgid   = NX_SVRMSG_MOUSEIN;
+  outmsg.pt.x    = x;
+  outmsg.pt.y    = y;
+  outmsg.buttons = buttons;
 
-  ret = mq_send(conn->c_cwrmq, &outmsg, sizeof(struct nxsvrmsg_mousein_s), NX_SVRMSG_PRIO);
+  ret = mq_send(conn->cwrmq, &outmsg, sizeof(struct nxsvrmsg_mousein_s), NX_SVRMSG_PRIO);
   if (ret < 0)
     {
       gdbg("mq_send failed: %d\n", errno);

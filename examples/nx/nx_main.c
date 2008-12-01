@@ -485,7 +485,28 @@ static inline int nxeg_muinitialize(void)
 
        while (!g_connected)
          {
-           (void)sem_wait(&g_semevent);
+            /* Assuming that the incoming message queue is configured non-blocking,
+             * we can poll the event handler here.  This accounts for the case where
+             * the server is higher prioirty than the client.  In that case, the
+             * server will have already responded to the connection request BEFORE
+             * the nx_eventnotify was called.
+             */
+
+             ret = nx_eventhandler(g_hnx);
+             if (ret == 0)
+               {
+                 /* If a message was received, then we are connected */
+
+                 g_connected = TRUE;
+               }
+
+             /* Otherwise, we will have to wait for the event handler to wake up up
+              * when we really are connected.
+              */
+             else
+               {
+                 (void)sem_wait(&g_semevent);
+               }
          }
     }
   else

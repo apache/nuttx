@@ -231,7 +231,7 @@ struct nxclimsg_mousein_s
   FAR struct nxbe_window_s *wnd; /* The handle of window receiving mouse input */
   struct nxgl_point_s pos;       /* Mouse X/Y position */
   ubyte buttons;                 /* Mouse button set */
-}
+};
 #endif
 
 /* This message reports a new keypad event to a particular window */
@@ -282,6 +282,7 @@ struct nxsvrmsg_requestbkgd_s
   uint32 msgid;                      /* NX_SVRMSG_REQUESTBKGD */
   FAR struct nxfe_conn_s *conn;      /* The specific connection sending the message */
   FAR const struct nx_callback_s *cb; /* Event handling callbacks */
+  FAR void *arg;                     /* Client argument used with callbacks */
 };
 
 /* This message informs the server that client wishes to close a window */
@@ -392,9 +393,9 @@ struct nxsvrmsg_setbgcolor_s
 struct nxsvrmsg_mousein_s
 {
   uint32 msgid;                      /* NX_SVRMSG_MOUSEIN */
-  struct nx_point_x pt;              /* Mouse X/Y position */
+  struct nxgl_point_s pt;            /* Mouse X/Y position */
   ubyte buttons;                     /* Mouse button set */
-}
+};
 #endif
 
 /* This message reports a new keyboard event from a hardware controller attached to
@@ -408,7 +409,7 @@ struct nxsvrmsg_kbdin_s
   uint32     msgid;                  /* NX_SVRMSG_KBDIN */
   ubyte      nch                     /* Number of characters received */
   ubyte      ch[1];                  /* Array of received characters */
-}
+};
 #endif
 
 /****************************************************************************
@@ -505,6 +506,7 @@ EXTERN void nxmu_openwindow(FAR struct nxbe_state_s *be,
  *   conn - The client containing connection information [IN]
  *   be   - The server state structure [IN]
  *   cb   - Callbacks used to process window events
+ *   arg  - User provided argument (see nx_openwindow, nx_constructwindow)
  *
  * Return:
  *   None
@@ -513,7 +515,8 @@ EXTERN void nxmu_openwindow(FAR struct nxbe_state_s *be,
 
 EXTERN void nxmu_requestbkgd(FAR struct nxfe_conn_s *conn,
                              FAR struct nxbe_state_s *be,
-                             FAR const struct nx_callback_s *cb);
+                             FAR const struct nx_callback_s *cb,
+                             FAR void *arg);
 
 /****************************************************************************
  * Name: nxmu_releasebkgd
@@ -594,8 +597,8 @@ EXTERN int nxmu_mousereport(struct nxbe_window_s *wnd);
  ****************************************************************************/
 
 #ifdef CONFIG_NX_MOUSE
-EXTERN nxmu_mousein(FAR struct nxfe_state_s *fe,
-                    FAR const struct nxgl_point_s *pos, int button);
+EXTERN int nxmu_mousein(FAR struct nxfe_state_s *fe,
+                        FAR const struct nxgl_point_s *pos, int button);
 #endif
 
 /****************************************************************************

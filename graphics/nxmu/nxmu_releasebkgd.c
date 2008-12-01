@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxsu/nxmu_releasebkgd.c
+ * graphics/nxmu/nxmu_releasebkgd.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -101,6 +101,7 @@ void nxmu_releasebkgd(FAR struct nxfe_state_s *fe)
    */
 
   be->bkgd.cb   = NULL;
+  be->bkgd.arg  = NULL;
   be->bkgd.conn = &fe->conn;
 
   /* Redraw the background window */

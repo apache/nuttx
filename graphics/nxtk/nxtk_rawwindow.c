@@ -81,7 +81,7 @@ struct nxtk_rawwindow_s
 static void nxtk_close(NXTWINDOW hwnd)
 {
   FAR struct nxtk_rawwindow_s *this = (FAR struct nxtk_rawwindow_s *)hwnd;
-  nx_close(this->hwnd);
+  nx_closewindow(this->hwnd);
   free(this);
 }
 
