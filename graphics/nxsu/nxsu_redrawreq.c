@@ -97,7 +97,7 @@ void nxfe_redrawreq(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s 
 
       /* And request the redraw */
 
-      wnd->cb->redraw((NXWINDOW)wnd, &relrect, FALSE);
+      wnd->cb->redraw((NXWINDOW)wnd, &relrect, FALSE, wnd->arg);
     }
 }
 

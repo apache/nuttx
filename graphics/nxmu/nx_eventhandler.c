@@ -193,7 +193,7 @@ int nx_eventhandler(NXHANDLE handle)
         DEBUGASSERT(wnd);
         if (wnd->cb->redraw)
           {
-            wnd->cb->redraw((NXWINDOW)wnd, &redraw->rect, redraw->more);
+            wnd->cb->redraw((NXWINDOW)wnd, &redraw->rect, redraw->more, wnd->arg);
           }
       }
       break;
@@ -205,7 +205,7 @@ int nx_eventhandler(NXHANDLE handle)
         DEBUGASSERT(wnd);
         if (wnd->cb->position)
           {
-            wnd->cb->position((NXWINDOW)wnd, &postn->size, &postn->pos, &postn->bounds);
+            wnd->cb->position((NXWINDOW)wnd, &postn->size, &postn->pos, &postn->bounds, wnd->arg);
           }
       }
       break;
@@ -218,7 +218,7 @@ int nx_eventhandler(NXHANDLE handle)
         DEBUGASSERT(wnd);
         if (wnd->cb->mousein)
           {
-            wnd->cb->mousein((NXWINDOW)wnd, &mouse->pos, mouse->buttons);
+            wnd->cb->mousein((NXWINDOW)wnd, &mouse->pos, mouse->buttons, wnd->arg);
           }
         }
       break;
@@ -232,7 +232,7 @@ int nx_eventhandler(NXHANDLE handle)
          DEBUGASSERT(wnd);
         if (wnd->cb->kbdin)
           {
-            wnd->cb->kbdin((NXWINDOW)wnd, kbd->nch, kbd->ch);
+            wnd->cb->kbdin((NXWINDOW)wnd, kbd->nch, kbd->ch, wnd->arg);
           }
         }
       break;

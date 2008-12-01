@@ -84,20 +84,22 @@ enum exitcode_e
  ****************************************************************************/
 
 static void nxeg_redraw1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                         boolean more);
+                         boolean morem, FAR void *arg);
 static void nxeg_redraw2(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                         boolean more);
+                         boolean more, FAR void *arg);
 static void nxeg_position1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
                            FAR const struct nxgl_point_s *pos,
-                           FAR const struct nxgl_rect_s *bounds);
+                           FAR const struct nxgl_rect_s *bounds,
+                           FAR void *arg);
 static void nxeg_position2(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
                            FAR const struct nxgl_point_s *pos,
-                           FAR const struct nxgl_rect_s *bounds);
+                           FAR const struct nxgl_rect_s *bounds,
+                           FAR void *arg);
 #ifdef CONFIG_NX_MOUSE
 static void nxeg_mousein1(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                          ubyte buttons);
+                          ubyte buttons, FAR void *arg);
 static void nxeg_mousein2(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                          ubyte buttons);
+                          ubyte buttons, FAR void *arg);
 #endif
 #ifdef CONFIG_NX_KBD
 static void nxeg_kbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch);
@@ -163,10 +165,10 @@ static nxgl_mxpixel_t g_color2[CONFIG_NX_NPLANES];
  ****************************************************************************/
 
 static void nxeg_redraw1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                         boolean more)
+                         boolean more, FAR void *arg)
 {
-  message("nxeg_redraw1: hwnd=%p rect={(%d,%d),(%d,%d)} more=%s\n",
-           hwnd,
+  message("nxeg_redraw%d: hwnd=%p rect={(%d,%d),(%d,%d)} more=%s arg=%p\n",
+           (int)arg, hwnd,
            rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y,
            more ? "TRUE" : "FALSE");
   nx_fill(hwnd, rect, g_color1);
@@ -177,12 +179,13 @@ static void nxeg_redraw1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
  ****************************************************************************/
 
 static void nxeg_redraw2(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                         boolean more)
+                         boolean more, FAR void *arg)
 {
-  message("nxeg_redraw2: hwnd=%p rect={(%d,%d),(%d,%d)} more=%s\n",
-           hwnd,
+  message("nxeg_redraw%d: hwnd=%p rect={(%d,%d),(%d,%d)} more=%s arg=%p\n",
+           (int)arg, hwnd,
            rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y,
-           more ? "TRUE" : "FALSE");
+           more ? "TRUE" : "FALSE",
+           arg);
   nx_fill(hwnd, rect, g_color2);
 }
 
@@ -192,12 +195,13 @@ static void nxeg_redraw2(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
 static void nxeg_position1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
                            FAR const struct nxgl_point_s *pos,
-                           FAR const struct nxgl_rect_s *bounds)
+                           FAR const struct nxgl_rect_s *bounds,
+                           FAR void *arg)
 {
   /* Report the position */
 
-  message("nxeg_position1: hwnd=%p size={(%d,%d),(%d,%d)} pos=(%d,%d) bounds={(%d,%d),(%d,%d)}\n",
-           hwnd,
+  message("nxeg_position%d: hwnd=%p size={(%d,%d),(%d,%d)} pos=(%d,%d) bounds={(%d,%d),(%d,%d)}\n",
+           arg, hwnd,
            size->pt1.x, size->pt1.y, size->pt2.x, size->pt2.y,
            pos->x, pos->y,
            bounds->pt1.x, bounds->pt1.y, bounds->pt2.x, bounds->pt2.y);
@@ -223,12 +227,13 @@ static void nxeg_position1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
 
 static void nxeg_position2(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
                            FAR const struct nxgl_point_s *pos,
-                           FAR const struct nxgl_rect_s *bounds)
+                           FAR const struct nxgl_rect_s *bounds,
+                           FAR void *arg)
 {
   /* Report the position */
 
-  message("nxeg_position2: hwnd=%p size={(%d,%d),(%d,%d)} pos=(%d,%d) bounds={(%d,%d),(%d,%d)}\n",
-           hwnd,
+  message("nxeg_position%d: hwnd=%p size={(%d,%d),(%d,%d)} pos=(%d,%d) bounds={(%d,%d),(%d,%d)}\n",
+           arg, hwnd,
            size->pt1.x, size->pt1.y, size->pt2.x, size->pt2.y,
            pos->x, pos->y,
            bounds->pt1.x, bounds->pt1.y, bounds->pt2.x, bounds->pt2.y);
@@ -240,10 +245,10 @@ static void nxeg_position2(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
 
 #ifdef CONFIG_NX_MOUSE
 static void nxeg_mousein1(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                          ubyte buttons)
+                          ubyte buttons, FAR void *arg)
 {
-  message("nxeg_mousein1: hwnd=%p pos=(%d,%d) button=%02x\n",
-           hwnd,  pos->x, pos->y, buttons);
+  message("nxeg_mousein%d: hwnd=%p pos=(%d,%d) button=%02x\n",
+           arg, hwnd,  pos->x, pos->y, buttons);
 }
 #endif
 
@@ -253,7 +258,7 @@ static void nxeg_mousein1(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
 
 #ifdef CONFIG_NX_MOUSE
 static void nxeg_mousein2(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                          ubyte buttons)
+                          ubyte buttons, FAR void *arg)
 {
   message("nxeg_mousein2: hwnd=%p pos=(%d,%d) button=%02x\n",
            hwnd,  pos->x, pos->y, buttons);
@@ -546,7 +551,7 @@ int user_start(int argc, char *argv[])
   /* Create window #1 */
 
   message("user_start: Create window #1\n");
-  hwnd1 = nx_openwindow(g_hnx, &g_nxcb1);
+  hwnd1 = nx_openwindow(g_hnx, &g_nxcb1, (FAR void *)2);
   message("user_start: hwnd1=%p\n", hwnd1);
 
   if (!hwnd1)
@@ -580,8 +585,18 @@ int user_start(int argc, char *argv[])
       goto errout_with_hwnd1;
     }
 
-  pt.x = g_xres / 4;
-  pt.y = g_yres / 4;
+  /* Sleep a bit -- both so that we can see the result of the above operations
+   * but also, in the multi-user case, so that the server can get a chance to
+   * actually do them!
+   */
+
+  message("user_start: Sleeping\n\n");
+  sleep(1);
+
+  /* Set the position of window #1 */
+
+  pt.x = g_xres / 8;
+  pt.y = g_yres / 8;
 
   message("user_start: Set hwnd1 postion to (%d,%d)\n", pt.x, pt.y);
   ret = nx_setposition(hwnd1, &pt);
@@ -592,18 +607,15 @@ int user_start(int argc, char *argv[])
       goto errout_with_hwnd1;
     }
 
-  /* Sleep a bit -- both so that we can see the result of the above operations
-   * but also, in the multi-user case, so that the server can get a chance to
-   * actually do them!
-   */
+  /* Sleep a bit */
 
   message("user_start: Sleeping\n\n");
   sleep(2);
 
   /* Create window #2 */
 
-  message("user_start: Create window #1\n");
-  hwnd2 = nx_openwindow(g_hnx, &g_nxcb2);
+  message("user_start: Create window #2\n");
+  hwnd2 = nx_openwindow(g_hnx, &g_nxcb2, (FAR void *)2);
   message("user_start: hwnd2=%p\n", hwnd2);
 
   if (!hwnd2)
@@ -612,6 +624,11 @@ int user_start(int argc, char *argv[])
       g_exitcode = NXEXIT_NXOPENWINDOW;
       goto errout_with_hwnd1;
     }
+
+  /* Sleep a bit */
+
+  message("user_start: Sleeping\n\n");
+  sleep(1);
 
   /* Set the size of the window 2 == size of window 1*/
 
@@ -623,6 +640,13 @@ int user_start(int argc, char *argv[])
       g_exitcode = NXEXIT_NXSETSIZE;
       goto errout_with_hwnd2;
     }
+
+  /* Sleep a bit */
+
+  message("user_start: Sleeping\n\n");
+  sleep(1);
+
+  /* Set the position of window #2 */
 
   pt.x = g_xres - rect.pt2.x - pt.x;
   pt.y = g_yres - rect.pt2.y - pt.y;
@@ -648,6 +672,22 @@ int user_start(int argc, char *argv[])
   if (ret < 0)
     {
       message("user_start: nx_lower failed: %d\n", errno);
+      g_exitcode = NXEXIT_NXSETPOSITION;
+      goto errout_with_hwnd2;
+    }
+
+  /* Sleep a bit */
+
+  message("user_start: Sleeping\n\n");
+  sleep(1);
+
+  /* Lower window 1 */
+
+  message("user_start: Raise window #2\n");
+  ret = nx_raise(hwnd2);
+  if (ret < 0)
+    {
+      message("user_start: nx_raise failed: %d\n", errno);
       g_exitcode = NXEXIT_NXSETPOSITION;
       goto errout_with_hwnd2;
     }

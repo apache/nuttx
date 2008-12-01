@@ -93,7 +93,7 @@ int nx_kbdchin(NXHANDLE handle, ubyte ch)
 
   if (wnd->cb->kbdin)
     {
-      wnd->kbdin(wnd, 1, &ch);
+      wnd->cb->kbdin(wnd, 1, &ch, wnd->arg);
     }
 }
 

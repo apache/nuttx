@@ -101,13 +101,15 @@ struct nx_callback_s
    *   rect - The rectangle that needs to be re-drawn (in window relative
    *          coordinates
    *   more - TRUE:  More re-draw requests will follow
+   *   arg  - User provided argument (see nx_openwindow, nx_constructwindow)
    *
    * Returned Value:
    *   None
    *
    **************************************************************************/
 
-  void (*redraw)(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect, boolean more);
+  void (*redraw)(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+                 boolean more, FAR void *arg);
 
   /**************************************************************************
    * Name: position
@@ -123,6 +125,7 @@ struct nx_callback_s
    *            the overalll display
    *   bounds - The bounding rectangle that the describes the entire
    *            display
+   *   arg    - User provided argument (see nx_openwindow, nx_constructwindow)
    *
    * Returned Value:
    *   None
@@ -131,7 +134,8 @@ struct nx_callback_s
 
   void (*position)(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
                    FAR const struct nxgl_point_s *pos,
-                   FAR const struct nxgl_rect_s *bounds);
+                   FAR const struct nxgl_rect_s *bounds,
+                   FAR void *arg);
 
   /**************************************************************************
    * Name: mousein
@@ -143,6 +147,7 @@ struct nx_callback_s
    *   hwnd    - Window handle
    *   pos     - The (x,y) position of the mouse
    *   buttons - See NX_MOUSE_* definitions
+   *   arg     - User provided argument (see nx_openwindow, nx_constructwindow)
    *
    * Returned Value:
    *   None
@@ -150,7 +155,8 @@ struct nx_callback_s
    **************************************************************************/
 
 #ifdef CONFIG_NX_MOUSE
-  void (*mousein)(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos, ubyte buttons);
+  void (*mousein)(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
+                  ubyte buttons, FAR void *arg);
 #endif
 
   /**************************************************************************
@@ -163,6 +169,7 @@ struct nx_callback_s
    *   hwnd - Window handle
    *   nch  - The number of characters that are available in ch[]
    *   ch   - The array of characters
+   *   arg  - User provided argument (see nx_openwindow, nx_constructwindow)
    *
    * Returned Value:
    *   None
@@ -170,7 +177,7 @@ struct nx_callback_s
    **************************************************************************/
 
 #ifdef CONFIG_NX_KBD
-  void (*kbdin)(NXWINDOW hwnd, ubyte nch, const ubyte *ch);
+  void (*kbdin)(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg);
 #endif
 };
 
@@ -390,6 +397,7 @@ EXTERN int nx_eventnotify(NXHANDLE handle, int signo);
  * Input Parameters:
  *   handle - The handle returned by nx_connect
  *   cb     - Callbacks used to process window events
+ *   arg    - User provided value that will be returned with NX callbacks.
  *
  * Return:
  *   Success: A non-NULL handle used with subsequent NX accesses
@@ -398,7 +406,8 @@ EXTERN int nx_eventnotify(NXHANDLE handle, int signo);
  ****************************************************************************/
 
 EXTERN NXWINDOW nx_openwindow(NXHANDLE handle,
-                              FAR const struct nx_callback_s *cb);
+                              FAR const struct nx_callback_s *cb,
+                              FAR void *arg);
 
 /****************************************************************************
  * Name: nx_closewindow

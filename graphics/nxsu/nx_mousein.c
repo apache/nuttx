@@ -107,7 +107,7 @@ void nxsu_mousereport(struct nxbe_window_s *wnd)
 
   if (win->cb->mousein)
     {
-      win->cb->mousein((NXWINDOW)wnd, &g_mpos, g_mbutton);
+      win->cb->mousein((NXWINDOW)wnd, &g_mpos, g_mbutton, wnd->arg);
     }
 }
 

@@ -61,7 +61,8 @@
  ****************************************************************************/
 
 static void nxsu_bkgdredraw(NXWINDOW hwnd,
-                            FAR const struct nxgl_rect_s *rect, boolean more);
+                            FAR const struct nxgl_rect_s *rect,
+                            boolean more, FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -92,7 +93,8 @@ const struct nx_callback_s g_bkgdcb =
  ****************************************************************************/
 
 static void nxsu_bkgdredraw(NXWINDOW hwnd,
-                            FAR const struct nxgl_rect_s *rect, boolean more)
+                            FAR const struct nxgl_rect_s *rect,
+                            boolean more, FAR void *arg)
 {
   FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
   FAR struct nxbe_state_s  *be  = wnd->be;
