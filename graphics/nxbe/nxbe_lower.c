@@ -79,7 +79,8 @@
 
 void nxbe_lower(FAR struct nxbe_window_s *wnd)
 {
-  FAR struct nxbe_state_s *be = wnd->be;
+  FAR struct nxbe_state_s  *be = wnd->be;
+  FAR struct nxbe_window_s *below;
 
   /* If the window is already at the bottom, then there is nothing to do */
 
@@ -108,15 +109,17 @@ void nxbe_lower(FAR struct nxbe_window_s *wnd)
       be->topwnd->above = NULL;
     }
 
-  /* Redraw the windows that were below us (excluding this window that
-   * will be at the bottom; it is currently not in the list)
-   */
+  /* Remember the window that was just below us */
 
-  nxbe_redrawbelow(be, wnd->below, &wnd->bounds);
+  below = wnd->below;
 
   /* Then put the lowered window at the bottom (just above the background window) */
 
   wnd->below     = &be->bkgd;
   wnd->above     = be->bkgd.above;
   be->bkgd.above = wnd;
+
+  /* Redraw the windows that were below us (but now are above) */
+
+  nxbe_redrawbelow(be, below, &wnd->bounds);
 }
