@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxtk/nxtk_opentoolbar.c
+ * graphics/nxtk/nxtk_raise.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -75,55 +75,22 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxtk_opentoolbar
+ * Name: nxtk_raise
  *
  * Description:
- *   Create a tool bar at the top of the specified framed window
+ *   Bring the window containing the specified client sub-window to the top
+ *   of the display.
  *
- * Input Parameters:
- *   hfwnd   - The handle returned by nxtk_openwindow
- *   height - The request height of the toolbar in pixels
- *   cb     - Callbacks used to process toolbar events
- *   arg    - User provided value that will be returned with toolbar callbacks.
+ * Input parameters:
+ *   hfwnd - the window to be raised.  This must have been previously created
+ *           by nxtk_openwindow().
  *
- * Return:
- *   Success: A non-NULL handle used with subsequent NXTK toolbar accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ * Returned value:
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-NXTKTOOLBAR nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
-                             FAR const struct nx_callback_s *cb,
-                             FAR void *arg)
+int nxtk_raise(NXTKWINDOW hfwnd)
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
-
-#ifdef CONFIG_DEBUG
-  if (!hfwnd || !cb)
-    {
-      errno = EINVAL;
-      return NULL;
-    }
-#endif
-
-  /* Initialize the toolbar info */
-
-  fwnd->tbheight = height;
-  fwnd->tbcb     = cb;
-  fwnd->tbarg    = arg;
-
-  /* Calculate the new dimensions of the toolbar and client windows */
-
-  nxtk_setsubwindows(fwnd);
-
-  /* Then redraw the entire window, even the client window must be
-   * redraw because it has changed its vertical position and size.
-   */
-
-  nxfe_redrawreq(&fwnd->wnd, &fwnd->wnd.bounds);
-
-  /* Return the initialized toolbar reference */
-
-  return (NXTKTOOLBAR)fwnd;
+  return nx_raise((NXWINDOW)hfwnd);
 }
-

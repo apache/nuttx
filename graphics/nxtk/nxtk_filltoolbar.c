@@ -94,8 +94,7 @@ int nxtk_filltoolbar(NXTKTOOLBAR htb, FAR const struct nxgl_rect_s *rect,
                      nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)htb;
-  struct nxgl_rect_s  relbounds;
-  struct nxgl_rect_s cliprect;
+  struct nxgl_rect_s fillrect;
 
 #ifdef CONFIG_DEBUG
   if (!htb || !rect || !color)
@@ -105,12 +104,14 @@ int nxtk_filltoolbar(NXTKTOOLBAR htb, FAR const struct nxgl_rect_s *rect,
     }
 #endif
 
-  /* Clip the rectangle to lie within the toolbar region */
+  /* Clip the rectangle so that it lies within the sub-window bounds
+   * then move the rectangle to that it is relative to the containing
+   * window.
+   */
 
-  nxgl_rectoffset(&relbounds, &fwnd->tbrect, fwnd->tbrect.pt1.x, fwnd->tbrect.pt1.y);
-  nxgl_rectintersect(&cliprect, rect, &relbounds);
+  nxtk_subwindowclip(fwnd, &fillrect, rect, &fwnd->tbrect);
 
   /* Then fill it */
 
-  return nx_fill((NXWINDOW)htb, &cliprect, color);
+  return nx_fill((NXWINDOW)htb, &fillrect, color);
 }

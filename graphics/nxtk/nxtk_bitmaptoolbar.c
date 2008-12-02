@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxtk/nxtk_opentoolbar.c
+ * graphics/nxtk/nxtk_bitmaptoolbar.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,14 +40,12 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/nx.h>
 #include <nuttx/nxtk.h>
 
-#include "nxfe.h"
 #include "nxtk_internal.h"
 
 /****************************************************************************
@@ -75,55 +73,51 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxtk_opentoolbar
+ * Name: nxtk_bitmaptoolbar
  *
  * Description:
- *   Create a tool bar at the top of the specified framed window
+ *   Copy a rectangular region of a larger image into the rectangle in the
+ *   specified toolbar sub-window.
  *
  * Input Parameters:
- *   hfwnd   - The handle returned by nxtk_openwindow
- *   height - The request height of the toolbar in pixels
- *   cb     - Callbacks used to process toolbar events
- *   arg    - User provided value that will be returned with toolbar callbacks.
+ *   htb    - The toolbar sub-window that will receive the bitmap image
+ *   dest   - Describes the rectangular region on in the toolbar sub-window
+ *            will receive the bit map.
+ *   src    - The start of the source image.
+ *   origin - The origin of the upper, left-most corner of the full bitmap.
+ *            Both dest and origin are in window coordinates, however, origin
+ *            may lie outside of the display.
+ *   stride - The width of the full source image in pixels.
  *
  * Return:
- *   Success: A non-NULL handle used with subsequent NXTK toolbar accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-NXTKTOOLBAR nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
-                             FAR const struct nx_callback_s *cb,
-                             FAR void *arg)
+int nxtk_bitmaptoolbar(NXTKWINDOW htb, FAR const struct nxgl_rect_s *dest,
+                       FAR const void *src[CONFIG_NX_NPLANES],
+                       FAR const struct nxgl_point_s *origin, unsigned int stride)
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
+  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)htb;
+  struct nxgl_rect_s clipdest;
 
 #ifdef CONFIG_DEBUG
-  if (!hfwnd || !cb)
+  if (!htb || !dest || !src || !origin)
     {
       errno = EINVAL;
-      return NULL;
+      return ERROR;
     }
 #endif
 
-  /* Initialize the toolbar info */
-
-  fwnd->tbheight = height;
-  fwnd->tbcb     = cb;
-  fwnd->tbarg    = arg;
-
-  /* Calculate the new dimensions of the toolbar and client windows */
-
-  nxtk_setsubwindows(fwnd);
-
-  /* Then redraw the entire window, even the client window must be
-   * redraw because it has changed its vertical position and size.
+  /* Clip the rectangle so that it lies within the sub-window bounds
+   * then move the rectangle to that it is relative to the containing
+   * window.
    */
 
-  nxfe_redrawreq(&fwnd->wnd, &fwnd->wnd.bounds);
+  nxtk_subwindowclip(fwnd, &clipdest, dest, &fwnd->tbrect);
 
-  /* Return the initialized toolbar reference */
+  /* Then copy the bitmap */
 
-  return (NXTKTOOLBAR)fwnd;
+  nx_bitmap((NXWINDOW)htb, &clipdest, src, origin, stride);
+  return OK;
 }
-

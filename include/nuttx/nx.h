@@ -598,7 +598,7 @@ EXTERN int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
  *
  * Input Parameters:
  *   hwnd  - The window handle
- *   clip - Clipping region (may be null)
+ *   clip  - Clipping rectangle relative to window (may be null)
  *   trap  - The trapezoidal region to be filled
  *   color - The color to use in the fill
  *

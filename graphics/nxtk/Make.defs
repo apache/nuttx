@@ -35,9 +35,9 @@
 
 NXTK_ASRCS	=
 NXTKWIN_CSRCS	= nxtk_openwindow.c nxtk_closewindow.c nxtk_getposition.c \
-		  nxtk_setposition.c nxtk_setsize.c nxtk_fillwindow.c \
-		  nxtk_filltrapwindow.c nxtk_events.c \
-                  nxtk_setsubwindows.c
+		  nxtk_setposition.c nxtk_setsize.c nxtk_raise.c nxtk_lower.c \
+		  nxtk_fillwindow.c nxtk_filltrapwindow.c nxtk_movewindow.c \
+		  nxtk_bitmapwindow.c nxtk_events.c nxtk_setsubwindows.c
 NXTKTB_CSRCS	= nxtk_opentoolbar.c nxtk_closetoolbar.c nxtk_filltoolbar.c \
-		  nxtk_filltraptoolbar.c
-NXTK_CSRCS	= $(NXTKWIN_CSRCS) $(NXTKTB_CSRCS)
+		  nxtk_filltraptoolbar.c nxtk_movetoolbar.c nxtk_bitmaptoolbar.c
+NXTK_CSRCS	= $(NXTKWIN_CSRCS) $(NXTKTB_CSRCS) nxtk_subwindowclip.c nxtk_subwindowmove.c

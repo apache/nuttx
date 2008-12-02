@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxtk/nxtk_opentoolbar.c
+ * graphics/nxtk/nxtk_movetoolbar.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -75,55 +75,45 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxtk_opentoolbar
+ * Name: nxtk_movetoolbar
  *
  * Description:
- *   Create a tool bar at the top of the specified framed window
+ *   Move a rectangular region within the toolbar sub-window of a framed window
  *
  * Input Parameters:
- *   hfwnd   - The handle returned by nxtk_openwindow
- *   height - The request height of the toolbar in pixels
- *   cb     - Callbacks used to process toolbar events
- *   arg    - User provided value that will be returned with toolbar callbacks.
+ *   htb   - The toolbar sub-window within which the move is to be done.
+ *            This must have been previously created by nxtk_openwindow().
+ *   rect   - Describes the rectangular region relative to the toolbar
+ *            sub-window to move
+ *   offset - The offset to move the region
  *
  * Return:
- *   Success: A non-NULL handle used with subsequent NXTK toolbar accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-NXTKTOOLBAR nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
-                             FAR const struct nx_callback_s *cb,
-                             FAR void *arg)
+int nxtk_movetoolbar(NXTKTOOLBAR htb, FAR const struct nxgl_rect_s *rect,
+                     FAR const struct nxgl_point_s *offset)
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
+  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)htb;
+  struct nxgl_rect_s srcrect;
+  struct nxgl_point_s clipoffset;
 
 #ifdef CONFIG_DEBUG
-  if (!hfwnd || !cb)
+  if (!htb || !rect || !offset)
     {
       errno = EINVAL;
-      return NULL;
+      return ERROR;
     }
 #endif
 
-  /* Initialize the toolbar info */
-
-  fwnd->tbheight = height;
-  fwnd->tbcb     = cb;
-  fwnd->tbarg    = arg;
-
-  /* Calculate the new dimensions of the toolbar and client windows */
-
-  nxtk_setsubwindows(fwnd);
-
-  /* Then redraw the entire window, even the client window must be
-   * redraw because it has changed its vertical position and size.
+  /* Make sure that both the source and dest rectangle lie within the
+   * toolbar sub-window 
    */
 
-  nxfe_redrawreq(&fwnd->wnd, &fwnd->wnd.bounds);
+  nxtk_subwindowmove(fwnd, &srcrect, &clipoffset, rect, offset, &fwnd->tbrect);
 
-  /* Return the initialized toolbar reference */
+  /* Then move it within the toolbar window */
 
-  return (NXTKTOOLBAR)fwnd;
+  return nx_move((NXTKTOOLBAR)htb, &srcrect, &clipoffset);
 }
-

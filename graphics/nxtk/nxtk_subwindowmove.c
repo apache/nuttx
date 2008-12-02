@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxtk/nxtk_internal.h
+ * graphics/nxtk/nxtk_subwindowmove.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,117 +33,46 @@
  *
  ****************************************************************************/
 
-#ifndef __GRAPHICS_NXTK_NXTK_INTERNAL_H
-#define __GRAPHICS_NXTK_NXTK_INTERNAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <debug.h>
 
+#include <nuttx/nx.h>
 #include <nuttx/nxtk.h>
-#include "nxbe.h"
+
 #include "nxfe.h"
+#include "nxtk_internal.h"
 
 /****************************************************************************
- * Pre-processor definitions
+ * Pre-Processor Definitions
  ****************************************************************************/
-
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_NXTK_BORDERWIDTH
-#  define CONFIG_NXTK_BORDERWIDTH 2
-#endif
-
-#ifndef CONFIG_NXTK_BORDERCOLOR1
-#  define CONFIG_NXTK_BORDERCOLOR1 0x00a9a9a9
-#endif
-
-#ifndef CONFIG_NXTK_BORDERCOLOR2
-#  define CONFIG_NXTK_BORDERCOLOR2 0x00696969
-#endif
 
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
 
-/* This is the internal representation of the framed window object */
-
-struct nxtk_framedwindow_s
-{
-  struct nxbe_window_s wnd;      /* The raw NX window */
-
-  /* The toolbar region and callbacks */
-
-  nxgl_coord_t tbheight;
-  struct nxgl_rect_s tbrect;
-  FAR const struct nx_callback_s *tbcb;
-  FAR void *tbarg;
-
-  /* Window data region and callbacks */
-
-  struct nxgl_rect_s fwrect;
-  FAR const struct nx_callback_s *fwcb;
-  FAR void *fwarg;
-};
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-# define EXTERN extern "C"
-extern "C" {
-#else
-# define EXTERN extern
-#endif
-
-/* That is the callback for the framed window */
-
-extern FAR const struct nx_callback_s g_nxtkcb;
-
 /****************************************************************************
- * Public Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxtk_setsubwindows
- *
- * Description:
- *   Give the window dimensions, border width, and toolbar height,
- *   calculate the new dimensions of the toolbar region and client window
- *   region
- *
+ * Public Functions
  ****************************************************************************/
-
-EXTERN void nxtk_setsubwindows(FAR struct nxtk_framedwindow_s *fwnd);
-
-/****************************************************************************
- * Name: nxtk_subwindowclip
- *
- * Description:
- *   Clip the src rectangle so that it lies within the sub-window bounds
- *   then move the rectangle to that it is relative to the containing
- *   window.
- *
- * Input parameters:
- *   fwnd   - The framed window to be used
- *   dest   - The locaton to put the result
- *   src    - The src rectangle in relative sub-window coordinates
- *   bounds - The subwindow bounds in absolute screen coordinates.
- *
- * Returned value:
- *   None
- *
- ****************************************************************************/
-
-EXTERN void nxtk_subwindowclip(FAR struct nxtk_framedwindow_s *fwnd,
-                               FAR struct nxgl_rect_s *dest,
-                               FAR const struct nxgl_rect_s *src,
-                               FAR const struct nxgl_rect_s *bounds);
 
 /****************************************************************************
  * Name: nxtk_subwindowmove
@@ -167,15 +96,57 @@ EXTERN void nxtk_subwindowclip(FAR struct nxtk_framedwindow_s *fwnd,
  *
  ****************************************************************************/
 
-EXTERN void nxtk_subwindowmove(FAR struct nxtk_framedwindow_s *fwnd,
-                               FAR struct nxgl_rect_s *destrect,
-                               FAR struct nxgl_point_s *destoffset,
-                               FAR const struct nxgl_rect_s *srcrect,
-                               FAR const struct nxgl_point_s *srcoffset,
-                               FAR const struct nxgl_rect_s *bounds);
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
+void nxtk_subwindowmove(FAR struct nxtk_framedwindow_s *fwnd,
+                        FAR struct nxgl_rect_s *destrect,
+                        FAR struct nxgl_point_s *destoffset,
+                        FAR const struct nxgl_rect_s *srcrect,
+                        FAR const struct nxgl_point_s *srcoffset,
+                        FAR const struct nxgl_rect_s *bounds)
+{
+  struct nxgl_rect_s abssrc;
 
-#endif /* __GRAPHICS_NXTK_NXTK_INTERNAL_H */
+  /* Temporarily, position the src rectangle in absolute screen coordinates */
+
+  nxgl_rectoffset(&abssrc, srcrect, bounds->pt1.x, bounds->pt1.y);
+
+  /* Clip the src rectangle to lie within the client window region */
+
+  nxgl_rectintersect(&abssrc, &abssrc, &fwnd->fwrect);
+
+  /* Clip the offset so that the source rectangle does not move out of the
+   * the client sub-window.
+   */
+
+  destoffset->x = srcoffset->x;
+  if (destoffset->x < 0)
+    {
+      if (abssrc.pt1.x + destoffset->x < bounds->pt1.x)
+        {
+           destoffset->x = bounds->pt1.x - abssrc.pt1.x;
+        }
+    }
+  else if (abssrc.pt2.x + destoffset->x > bounds->pt2.x)
+    {
+       destoffset->x = bounds->pt2.x - abssrc.pt2.x;
+    }
+
+  destoffset->y = srcoffset->y;
+  if (destoffset->y < 0)
+    {
+      if (abssrc.pt1.y + destoffset->y < bounds->pt1.y)
+        {
+           destoffset->y = bounds->pt1.y - abssrc.pt1.y;
+        }
+    }
+  else if (abssrc.pt2.y + destoffset->y > bounds->pt2.y)
+    {
+       destoffset->y = bounds->pt2.y - abssrc.pt2.y;
+    }
+
+
+  /* Then move the rectangle so that is relative to the containing window, not the
+   * client subwindow
+   */
+
+  nxgl_rectoffset(destrect, &abssrc, -fwnd->wnd.bounds.pt1.x, -fwnd->wnd.bounds.pt1.y);
+}

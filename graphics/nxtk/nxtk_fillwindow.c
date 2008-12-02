@@ -94,8 +94,7 @@ int nxtk_fillwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
                     nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
-  struct nxgl_rect_s relbounds;
-  struct nxgl_rect_s cliprect;
+  struct nxgl_rect_s fillrect;
 
 #ifdef CONFIG_DEBUG
   if (!hfwnd || !rect || !color)
@@ -105,12 +104,14 @@ int nxtk_fillwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
     }
 #endif
 
-  /* Clip the rectangle to lie within the client window region */
+  /* Clip the rectangle so that it lies within the sub-window bounds
+   * then move the rectangle to that it is relative to the containing
+   * window.
+   */
 
-  nxgl_rectoffset(&relbounds, &fwnd->fwrect, fwnd->fwrect.pt1.x, fwnd->fwrect.pt1.y);
-  nxgl_rectintersect(&cliprect, rect, &relbounds);
+  nxtk_subwindowclip(fwnd, &fillrect, rect, &fwnd->fwrect);
 
   /* Then fill it */
 
-  return nx_fill((NXWINDOW)hfwnd, &cliprect, color);
+  return nx_fill((NXWINDOW)hfwnd, &fillrect, color);
 }

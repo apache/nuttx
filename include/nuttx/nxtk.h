@@ -172,6 +172,24 @@ EXTERN int nxtk_setposition(NXTKWINDOW hfwnd, FAR struct nxgl_point_s *pos);
 EXTERN int nxtk_setsize(NXTKWINDOW hfwnd, FAR struct nxgl_rect_s *size);
 
 /****************************************************************************
+ * Name: nxtk_raise
+ *
+ * Description:
+ *   Bring the window containing the specified client sub-window to the top
+ *   of the display.
+ *
+ * Input parameters:
+ *   hfwnd - the window to be raised.  This must have been previously created
+ *           by nxtk_openwindow().
+ *
+ * Returned value:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_raise(NXTKWINDOW hfwnd);
+
+/****************************************************************************
  * Name: nxtk_fillwindow
  *
  * Description:
@@ -191,13 +209,82 @@ EXTERN int nxtk_fillwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
                            nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
+ * Name: nxtk_filltrapwindow
+ *
+ * Description:
+ *  Fill the specified rectangle in the client window with the specified color
+ *
+ * Input Parameters:
+ *   hfwnd - The window handle returned by nxtk_openwindow
+ *   trap  - The trapezoidal region to be filled
+ *   color - The color to use in the fill
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_filltrapwindow(NXTKWINDOW hfwnd,
+                               FAR const struct nxgl_trapezoid_s *trap,
+                               nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+
+/****************************************************************************
+ * Name: nxtk_movewindow
+ *
+ * Description:
+ *   Move a rectangular region within the client sub-window of a framed window
+ *
+ * Input Parameters:
+ *   hfwnd   - The client sub-window within which the move is to be done.
+ *            This must have been previously created by nxtk_openwindow().
+ *   rect   - Describes the rectangular region relative to the client
+ *            sub-window to move
+ *   offset - The offset to move the region
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_movewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
+                           FAR const struct nxgl_point_s *offset);
+
+/****************************************************************************
+ * Name: nxtk_bitmapwindow
+ *
+ * Description:
+ *   Copy a rectangular region of a larger image into the rectangle in the
+ *   specified client sub-window.
+ *
+ * Input Parameters:
+ *   hfwnd    The client sub0window that will receive the bitmap image
+ *   dest   - Describes the rectangular region on in the client sub-window
+ *            will receive the bit map.
+ *   src    - The start of the source image.
+ *   origin - The origin of the upper, left-most corner of the full bitmap.
+ *            Both dest and origin are in window coordinates, however, origin
+ *            may lie outside of the display.
+ *   stride - The width of the full source image in pixels.
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_bitmapwindow(NXTKWINDOW hfwnd,
+                             FAR const struct nxgl_rect_s *dest,
+                             FAR const void *src[CONFIG_NX_NPLANES],
+                             FAR const struct nxgl_point_s *origin,
+                             unsigned int stride);
+
+/****************************************************************************
  * Name: nxtk_opentoolbar
  *
  * Description:
  *   Create a tool bar at the top of the specified framed window
  *
  * Input Parameters:
- *   hwnd   - The handle returned by nxtk_openwindow
+ *   hfwnd   - The handle returned by nxtk_openwindow
  *   height - The request height of the toolbar in pixels
  *   cb     - Callbacks used to process toolbar events
  *   arg    - User provided value that will be returned with toolbar callbacks.
@@ -208,7 +295,7 @@ EXTERN int nxtk_fillwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  *
  ****************************************************************************/
 
-EXTERN NXTKTOOLBAR nxtk_opentoolbar(NXTKWINDOW hwnd, nxgl_coord_t height,
+EXTERN NXTKTOOLBAR nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
                                     FAR const struct nx_callback_s *cb,
                                     FAR void *arg);
 
@@ -246,6 +333,25 @@ EXTERN void nxtk_closetoolbar(NXTKTOOLBAR htb);
 
 EXTERN int nxtk_filltoolbar(NXTKTOOLBAR htb, FAR const struct nxgl_rect_s *rect,
                             nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+
+/****************************************************************************
+ * Name: nxtk_filltraptoolbar
+ *
+ * Description:
+ *  Fill the specified rectangle in the toolbar with the specified color
+ *
+ * Input Parameters:
+ *   htb - The window handle returned by nxtk_openwindow
+ *   trap  - The trapezoidal region to be filled
+ *   color - The color to use in the fill
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_filltraptoolbar(NXTKTOOLBAR htb, FAR const struct nxgl_trapezoid_s *trap,
+                                nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 #undef EXTERN
 #if defined(__cplusplus)
 }
