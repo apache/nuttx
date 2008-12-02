@@ -43,9 +43,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-#include <nuttx/nxtk.h>
-#include "nxbe.h"
-#include "nxfe.h"
+#include <nuttx/nx.h>
 
 /****************************************************************************
  * Pre-processor definitions
@@ -55,42 +53,13 @@
  * Public Types
  ****************************************************************************/
 
-/* This is an objects, implemented in C, that provides access to the NX
- * window APIs.  Why would you use this object instead of direct calls to the
- * nx_ APIs?  So that you can support polymorphism.  (Doesn't this make you
- * really appreciate C++?).  All of the APIs provided in the NX toolkit
- * export this interface.
- *
- * The methods provided in this call table are the nx_* window APIs discussed
- * in include/nx.h accessed through a vtable.  See that header for description
- * of each method.
- */
+/* This is the handle that can be used to access the window data region */
 
-typedef FAR struct nxtk_base_s *NXTWINDOW;
-struct nxtk_base_s
-{
-  /* Destructor */
+typedef FAR void *NXTKWINDOW;
 
-  void (*close)(NXTWINDOW hwnd);
+/* This is the handle that can be used to access the window toolbar */
 
-  /* Window methods (documented in include/nuttx/nx.h) */
-
-  int (*getposition)(NXTWINDOW hwnd);
-  int (*setposition)(NXTWINDOW hwnd, FAR struct nxgl_point_s *pos);
-  int (*setsize)(NXTWINDOW hwnd, FAR struct nxgl_rect_s *size);
-  int (*raise)(NXTWINDOW hwnd);
-  int (*lower)(NXTWINDOW hwnd);
-  int (*fill)(NXTWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-              nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
-  int (*filltrapezoid)(NXTWINDOW hwnd, FAR struct nxgl_trapezoid_s *trap,
-                       nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
-  int (*move)(NXTWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-              FAR const struct nxgl_point_s *offset);
-  int (*bitmap)(NXTWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
-                FAR const void *src[CONFIG_NX_NPLANES],
-                FAR const struct nxgl_point_s *origin,
-                unsigned int stride);
-};
+typedef FAR void *NXTKTOOLBAR;
 
 /****************************************************************************
  * Public Data
@@ -109,27 +78,174 @@ extern "C" {
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxtk_rawwindow
+ * Name: nxtk_openwindow
  *
  * Description:
- *    This function is the constructor for a raw NXTWINDOW object. 
- *    This provides a one-to-one mapping with the window APIs in nx.h.
+ *   Create a new, framed window.
  *
  * Input Parameters:
- *   handle - The handle returned by nx_connect or nx_open
+ *   handle - The handle returned by nx_connect
  *   cb     - Callbacks used to process window events
- *   arg    - User provided value that will be returned with NX callbacks.
+ *   arg    - User provided value that will be returned with NXTK callbacks.
  *
  * Return:
- *   Success: A non-NULL handle used with subsequent method calls
+ *   Success: A non-NULL handle used with subsequent NXTK window accesses
  *   Failure:  NULL is returned and errno is set appropriately
  *
  ****************************************************************************/
 
-EXTERN NXTWINDOW nxtk_rawwindow(NXHANDLE handle,
-                                FAR const struct nx_callback_s *cb,
-                                FAR void *arg);
+EXTERN NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
+                                  FAR const struct nx_callback_s *cb,
+                                  FAR void *arg);
 
+/****************************************************************************
+ * Name: nxtk_closewindow
+ *
+ * Description:
+ *   Close the window opened by nxtk_openwindow
+ *
+ * Input Parameters:
+ *   hfwnd - The handle returned by nxtk_openwindow
+ *
+ * Return:
+ *   Success: A non-NULL handle used with subsequent NXTK window accesses
+ *   Failure:  NULL is returned and errno is set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN void nxtk_closewindow(NXTKWINDOW hfwnd);
+
+/****************************************************************************
+ * Name: nxtk_getposition
+ *
+ * Description:
+ *  Request the position and size information for the selected framed window.
+ *  The size/position for the client window and toolbar will be return
+ *  asynchronously through the client callback function pointer.
+ *
+ * Input Parameters:
+ *   hfwnd - The window handle returned by nxtk_openwindow.
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_getposition(NXTKWINDOW hfwnd);
+
+/****************************************************************************
+ * Name: nxtk_setposition
+ *
+ * Description:
+ *  Set the position for the selected client window.  This position does not
+ *  include the offsets for the borders nor for any toolbar.  Those offsets
+ *  will be added in to set the full window position.
+ *
+ * Input Parameters:
+ *   hfwnd - The window handle returned by nxtk_openwindow
+ *   pos   - The new position of the client sub-window
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_setposition(NXTKWINDOW hfwnd, FAR struct nxgl_point_s *pos);
+
+/****************************************************************************
+ * Name: nxtk_setsize
+ *
+ * Description:
+ *  Set the size for the selected client window.  This size does not
+ *  include the sizes of the borders nor for any toolbar.  Those sizes
+ *  will be added in to set the full window size.
+ *
+ * Input Parameters:
+ *   hfwnd - The window handle returned by nxtk_openwindow
+ *   size  - The new size of the client sub-window.
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_setsize(NXTKWINDOW hfwnd, FAR struct nxgl_rect_s *size);
+
+/****************************************************************************
+ * Name: nxtk_fillwindow
+ *
+ * Description:
+ *  Fill the specified rectangle in the client window with the specified color
+ *
+ * Input Parameters:
+ *   hfwnd - The window handle returned by nxtk_openwindow
+ *   rect  - The location within the client window to be filled
+ *   color - The color to use in the fill
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_fillwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
+                           nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+
+/****************************************************************************
+ * Name: nxtk_opentoolbar
+ *
+ * Description:
+ *   Create a tool bar at the top of the specified framed window
+ *
+ * Input Parameters:
+ *   hwnd   - The handle returned by nxtk_openwindow
+ *   height - The request height of the toolbar in pixels
+ *   cb     - Callbacks used to process toolbar events
+ *   arg    - User provided value that will be returned with toolbar callbacks.
+ *
+ * Return:
+ *   Success: A non-NULL handle used with subsequent NXTK toolbar accesses
+ *   Failure:  NULL is returned and errno is set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN NXTKTOOLBAR nxtk_opentoolbar(NXTKWINDOW hwnd, nxgl_coord_t height,
+                                    FAR const struct nx_callback_s *cb,
+                                    FAR void *arg);
+
+/****************************************************************************
+ * Name: nxtk_closetoolbar
+ *
+ * Description:
+ *   Create a tool bar at the top of the specified framed window
+ *
+ * Input Parameters:
+ *   htb - The toolbar handle returned by nxtk_opentoolbar
+ *
+ * Return:
+ *   None
+ *
+ ****************************************************************************/
+
+EXTERN void nxtk_closetoolbar(NXTKTOOLBAR htb);
+
+/****************************************************************************
+ * Name: nxtk_filltoolbar
+ *
+ * Description:
+ *  Fill the specified rectangle in the client window with the specified color
+ *
+ * Input Parameters:
+ *   htb  -  The toolbar handle returned by nxtk_opentoolbar
+ *   rect  - The location within the toolbar window to be filled
+ *   color - The color to use in the fill
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_filltoolbar(NXTKTOOLBAR htb, FAR const struct nxgl_rect_s *rect,
+                            nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 #undef EXTERN
 #if defined(__cplusplus)
 }
