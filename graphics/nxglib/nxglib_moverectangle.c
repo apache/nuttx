@@ -147,8 +147,8 @@ void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
 
   /* Get the dimensions of the rectange to fill:  height in rows and width in bytes */
 
-  width = NXGL_SCALEX(rect->pt2.x - rect->pt1.x);
-  rows = rect->pt2.y - rect->pt1.y;
+  width = NXGL_SCALEX(rect->pt2.x - rect->pt1.x + 1);
+  rows  = rect->pt2.y - rect->pt1.y + 1;
 
 #if NXGLIB_BITSPERPIXEL < 8
 # ifdef CONFIG_NXGL_PACKEDMSFIRST

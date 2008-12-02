@@ -217,7 +217,7 @@ struct nxclimsg_newposition_s
 {
   uint32 msgid;                  /* NX_CLIMSG_NEWPOSITION */
   FAR struct nxbe_window_s *wnd; /* The window whose position/size has changed */
-  FAR struct nxgl_rect_s size;   /* The current window size */
+  FAR struct nxgl_size_s size;   /* The current window size */
   FAR struct nxgl_point_s pos;   /* The current window position */
   FAR struct nxgl_rect_s bounds; /* Size of screen */
 };
@@ -307,7 +307,7 @@ struct nxsvrmsg_setsize_s
 {
   uint32 msgid;                      /* NX_SVRMSG_SETSIZE */
   FAR struct nxbe_window_s *wnd;     /* The window whose position/size has changed */
-  FAR struct nxgl_rect_s  size;      /* The new window size */
+  FAR struct nxgl_size_s  size;      /* The new window size */
 };
 
 /* This message informs the server that the size or position of the window has changed */

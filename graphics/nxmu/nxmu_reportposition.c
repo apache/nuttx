@@ -86,14 +86,12 @@ void nxfe_reportposition(FAR struct nxbe_window_s *wnd)
 
   /* Send the size/position info */
 
-  outmsg.msgid = NX_CLIMSG_NEWPOSITION;
-  outmsg.wnd   = wnd;
-  outmsg.pos.x = wnd->origin.x;
-  outmsg.pos.y = wnd->origin.y;
+  outmsg.msgid  = NX_CLIMSG_NEWPOSITION;
+  outmsg.wnd    = wnd;
+  outmsg.pos.x  = wnd->origin.x;
+  outmsg.pos.y  = wnd->origin.y;
 
-  /* Convert the window bounding box to a window-relative rectangle */
-
-  nxgl_rectoffset(&outmsg.size, &wnd->bounds, -wnd->origin.x, -wnd->origin.y);
+  nxgl_rectsize(&outmsg.size, &wnd->bounds);
 
   /* Provide the background window bounding box which is the screen limits
    * It must always have (0,0) as its origin

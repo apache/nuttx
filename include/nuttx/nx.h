@@ -120,7 +120,7 @@ struct nx_callback_s
    *
    * Input Parameters:
    *   hwnd   - Window handle
-   *   size   - The size of the window (pt1 should always be zero)
+   *   size   - The size of the window
    *   pos    - The position of the upper left hand corner of the window on
    *            the overalll display
    *   bounds - The bounding rectangle that the describes the entire
@@ -132,7 +132,7 @@ struct nx_callback_s
    *
    **************************************************************************/
 
-  void (*position)(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
+  void (*position)(NXWINDOW hwnd, FAR const struct nxgl_size_s *size,
                    FAR const struct nxgl_point_s *pos,
                    FAR const struct nxgl_rect_s *bounds,
                    FAR void *arg);
@@ -536,7 +536,7 @@ EXTERN int nx_setposition(NXWINDOW hwnd, FAR struct nxgl_point_s *pos);
  *
  ****************************************************************************/
 
-EXTERN int nx_setsize(NXWINDOW hwnd, FAR struct nxgl_rect_s *size);
+EXTERN int nx_setsize(NXWINDOW hwnd, FAR struct nxgl_size_s *size);
 
 /****************************************************************************
  * Name: nx_raise

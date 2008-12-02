@@ -104,8 +104,8 @@ void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
 
   /* Get the dimensions of the rectange to fill in pixels */
 
-  width  = rect->pt2.x - rect->pt1.x;
-  rows   = rect->pt2.y - rect->pt1.y;
+  width  = rect->pt2.x - rect->pt1.x + 1;
+  rows   = rect->pt2.y - rect->pt1.y + 1;
 
   /* Get the address of the first byte in the first line to write */
 

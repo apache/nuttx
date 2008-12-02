@@ -142,7 +142,7 @@ void nxtk_setsubwindows(FAR struct nxtk_framedwindow_s *fwnd)
 
   /* Divide up the horizontal dimensions of the window */
 
-  fullwidth = fwnd->wnd.bounds.pt2.x - fwnd->wnd.bounds.pt1.x;
+  fullwidth = fwnd->wnd.bounds.pt2.x - fwnd->wnd.bounds.pt1.x + 1;
   bdrwidth  = ngl_min(2 * CONFIG_NXTK_BORDERWIDTH, fullwidth);
   fwwidth   = fullwidth - bdrwidth;
   fwleft    = fwnd->wnd.origin.x + bdrwidth/2;
@@ -151,11 +151,11 @@ void nxtk_setsubwindows(FAR struct nxtk_framedwindow_s *fwnd)
 
   fwnd->tbrect.pt1.x = fwleft;
   fwnd->tbrect.pt1.y = tbtop;
-  fwnd->tbrect.pt2.x = fwleft + fwwidth;
+  fwnd->tbrect.pt2.x = fwleft + fwwidth - 1;
   fwnd->tbrect.pt2.y = tbtop + tbheight - 1;
 
   fwnd->fwrect.pt1.x = fwleft;
   fwnd->fwrect.pt1.y = fwtop;
-  fwnd->fwrect.pt2.x = fwleft + fwwidth;
+  fwnd->fwrect.pt2.x = fwleft + fwwidth - 1;
   fwnd->fwrect.pt2.y = fwtop + fwheight - 1;
 }

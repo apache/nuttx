@@ -63,7 +63,7 @@
 
 static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
                         boolean morem, FAR void *arg);
-static void nxtk_position(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
+static void nxtk_position(NXWINDOW hwnd, FAR const struct nxgl_size_s *size,
                           FAR const struct nxgl_point_s *pos,
                           FAR const struct nxgl_rect_s *bounds,
                           FAR void *arg);
@@ -155,37 +155,38 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
  * Name: nxtk_position
  ****************************************************************************/
 
-static void nxtk_position(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
+static void nxtk_position(NXWINDOW hwnd, FAR const struct nxgl_size_s *size,
                            FAR const struct nxgl_point_s *pos,
                            FAR const struct nxgl_rect_s *bounds,
                            FAR void *arg)
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hwnd;
-  struct nxgl_rect_s relrect;
+  struct nxgl_size_s subwindowsize;
 
-  gvdbg("nxtk_position: hwnd=%p size={(%d,%d),(%d,%d)} pos=(%d,%d) bounds={(%d,%d),(%d,%d)}\n",
-        hwnd, size->pt1.x, size->pt1.y, size->pt2.x, size->pt2.y,
-        pos->x, pos->y,
+  gvdbg("nxtk_position: hwnd=%p size=(%d,%d) pos=(%d,%d) bounds={(%d,%d),(%d,%d)}\n",
+        hwnd, size->w, size->w, pos->x, pos->y,
         bounds->pt1.x, bounds->pt1.y, bounds->pt2.x, bounds->pt2.y);
 
   /* Recalculate the dimensions of the toolbar and client windows */
 
   nxtk_setsubwindows(fwnd);
 
-  /* Report the size position of the client sub-window */
+  /* Report the size / position of the client sub-window */
 
   if (fwnd->fwcb->position)
     {
-      nxgl_rectoffset(&relrect, &fwnd->fwrect, fwnd->fwrect.pt1.x, fwnd->fwrect.pt1.y);
-      fwnd->fwcb->position((NXTKWINDOW)fwnd, &relrect, &fwnd->fwrect.pt1, bounds, fwnd->fwarg);
+      nxgl_rectsize(&subwindowsize, &fwnd->fwrect);
+      fwnd->fwcb->position((NXTKWINDOW)fwnd, &subwindowsize,
+                           &fwnd->fwrect.pt1, bounds, fwnd->fwarg);
     }
 
-  /* Report the size position of the toolbar sub-window */
+  /* Report the size / position of the toolbar sub-window */
 
   if (fwnd->tbcb && fwnd->tbcb->position)
     {
-      nxgl_rectoffset(&relrect, &fwnd->tbrect, fwnd->tbrect.pt1.x, fwnd->tbrect.pt1.y);
-      fwnd->tbcb->position((NXTKWINDOW)fwnd, &relrect, &fwnd->fwrect.pt1, bounds, fwnd->tbarg);
+      nxgl_rectsize(&subwindowsize, &fwnd->tbrect);
+      fwnd->tbcb->position((NXTKWINDOW)fwnd, &subwindowsize,
+                           &fwnd->tbrect.pt1, bounds, fwnd->tbarg);
     }
 }
 

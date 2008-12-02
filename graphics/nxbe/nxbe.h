@@ -261,7 +261,7 @@ EXTERN void nxbe_setposition(FAR struct nxbe_window_s *wnd,
  ****************************************************************************/
 
 EXTERN void nxbe_setsize(FAR struct nxbe_window_s *wnd,
-                         FAR const struct nxgl_rect_s *size);
+                         FAR const struct nxgl_size_s *size);
 
 /****************************************************************************
  * Name: nxbe_raise

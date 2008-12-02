@@ -81,7 +81,7 @@
 void nxfe_reportposition(FAR struct nxbe_window_s *wnd)
 {
   FAR struct nxbe_state_s  *be = wnd->be;
-  struct nxgl_rect_s        rect;
+  struct nxgl_size_s        size;
 
 #ifdef CONFIG_DEBUG
   if (!wnd)
@@ -96,9 +96,9 @@ void nxfe_reportposition(FAR struct nxbe_window_s *wnd)
 
   if (wnd->cb->position)
     {
-      /* Convert the frame rectangle to a window-relative rectangle */
+      /* Get the size of the bounding rectangle */
 
-      nxgl_rectoffset(&rect, &wnd->bounds, -wnd->origin.x, -wnd->origin.y);
+      nxgl_rectsize(&size, &wnd->bounds);
 
       /* And provide this to the client */
 

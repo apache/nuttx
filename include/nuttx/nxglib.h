@@ -100,6 +100,14 @@ struct nxgl_point_s
   nxgl_coord_t y;         /* Y position, range: 0 to screen height - 1 */
 };
 
+/* Describes the size of a rectangulare region */
+
+struct nxgl_size_s
+{
+  nxgl_coord_t w;        /* Width in pixels */
+  nxgl_coord_t h;        /* Height in rows */
+};
+
 /* Describes a rectangle on the display */
 
 struct nxgl_rect_s
@@ -423,6 +431,17 @@ EXTERN boolean nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1,
 
 EXTERN boolean nxgl_rectinside(FAR const struct nxgl_rect_s *rect,
                                FAR const struct nxgl_point_s *pt);
+
+/****************************************************************************
+ * Name: nxgl_rectsize
+ *
+ * Description:
+ *   Return the size of the specified rectangle.
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_rectsize(FAR struct nxgl_size_s *size,
+                          FAR const struct nxgl_rect_s *rect);
 
 /****************************************************************************
  * Name: nxgl_nullrect

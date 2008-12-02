@@ -91,10 +91,10 @@
  *
  ****************************************************************************/
 
-int nxtk_setsize(NXTKWINDOW hfwnd, FAR struct nxgl_rect_s *size)
+int nxtk_setsize(NXTKWINDOW hfwnd, FAR struct nxgl_size_s *size)
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
-  struct nxgl_rect_s newsize;
+  struct nxgl_size_s newsize;
 
 #ifdef CONFIG_DEBUG
   if (!hfwnd || !size)
@@ -106,10 +106,8 @@ int nxtk_setsize(NXTKWINDOW hfwnd, FAR struct nxgl_rect_s *size)
 
   /* Add the sizes need for the toolbar and the borders */
 
-  newsize.pt1.x = 0;
-  newsize.pt1.y = 0;
-  newsize.pt2.x = size->pt2.x + 2 * CONFIG_NXTK_BORDERWIDTH;
-  newsize.pt2.y = size->pt2.y + fwnd->tbheight + 2 * CONFIG_NXTK_BORDERWIDTH;
+  newsize.w = size->w + 2 * CONFIG_NXTK_BORDERWIDTH;
+  newsize.h = size->w + fwnd->tbheight + 2 * CONFIG_NXTK_BORDERWIDTH;
 
   /* Then set the window size */
 

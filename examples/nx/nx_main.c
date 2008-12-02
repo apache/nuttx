@@ -293,7 +293,7 @@ int user_start(int argc, char *argv[])
 {
   NXWINDOW hwnd1;
   NXWINDOW hwnd2;
-  struct nxgl_rect_s rect;
+  struct nxgl_size_s size;
   struct nxgl_point_s pt;
   nxgl_mxpixel_t color;
   int ret;
@@ -344,13 +344,11 @@ int user_start(int argc, char *argv[])
 
   /* Set the size of the window 1 */
 
-  rect.pt1.x = 0;
-  rect.pt1.y = 0;
-  rect.pt2.x = g_xres/2;
-  rect.pt2.y = g_yres/2;
+  size.w = g_xres / 2;
+  size.h = g_yres / 2;
 
-  message("user_start: Set hwnd1 size to (%d,%d)\n", rect.pt2.x, rect.pt2.y);
-  ret = nx_setsize(hwnd1, &rect);
+  message("user_start: Set hwnd1 size to (%d,%d)\n", size.w, size.h);
+  ret = nx_setsize(hwnd1, &size);
   if (ret < 0)
     {
       message("user_start: nx_setsize failed: %d\n", errno);
@@ -405,8 +403,8 @@ int user_start(int argc, char *argv[])
 
   /* Set the size of the window 2 == size of window 1*/
 
-  message("user_start: Set hwnd2 size to (%d,%d)\n", rect.pt2.x, rect.pt2.y);
-  ret = nx_setsize(hwnd2, &rect);
+  message("user_start: Set hwnd2 size to (%d,%d)\n", size.w, size.h);
+  ret = nx_setsize(hwnd2, &size);
   if (ret < 0)
     {
       message("user_start: nx_setsize failed: %d\n", errno);
@@ -421,8 +419,8 @@ int user_start(int argc, char *argv[])
 
   /* Set the position of window #2 */
 
-  pt.x = g_xres - rect.pt2.x - pt.x;
-  pt.y = g_yres - rect.pt2.y - pt.y;
+  pt.x = g_xres - size.w - pt.x;
+  pt.y = g_yres - size.h - pt.y;
 
   message("user_start: Set hwnd2 postion to (%d,%d)\n", pt.x, pt.y);
   ret = nx_setposition(hwnd2, &pt);

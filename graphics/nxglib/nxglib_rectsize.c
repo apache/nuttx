@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxmu/nx_setsize.c
+ * graphics/nxglib/nxglib_rectsize.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,11 +40,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/nx.h>
-#include "nxfe.h"
+#include <nuttx/fb.h>
+#include <nuttx/nxglib.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -71,47 +68,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_setsize`
+ * Name: nxgl_rectsize
  *
  * Description:
- *  Set the size of the selected window
- *
- * Input Parameters:
- *   hwnd   - The window handle
- *   size   - The new size of the window.
- *
- * Return:
- *   OK on success; ERROR on failure with errno set appropriately
+ *   Return the size of the specified rectangle.
  *
  ****************************************************************************/
 
-int nx_setsize(NXWINDOW hwnd, FAR struct nxgl_size_s *size)
+void nxgl_rectsize(FAR struct nxgl_size_s *size,
+                   FAR const struct nxgl_rect_s *rect)
 {
-  FAR struct nxbe_window_s   *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_setsize_s outmsg;
-  int                       ret;
-
-#ifdef CONFIG_DEBUG
-  if (!wnd || !size)
-    {
-      errno = EINVAL;
-      return ERROR;
-    }
-#endif
-
-  /* Then inform the server of the changed position */
-
-  outmsg.msgid  = NX_SVRMSG_SETSIZE;
-  outmsg.wnd    = wnd;
-  outmsg.size.w = size->w;
-  outmsg.size.h = size->h;
-
-  ret = mq_send(wnd->conn->cwrmq, &outmsg, sizeof(struct nxsvrmsg_setsize_s), NX_SVRMSG_PRIO);
-  if (ret < 0)
-    {
-      gdbg("mq_send failed: %d\n", errno);
-      return ERROR;
-    }
-
-  return OK;
+  size->w = rect->pt2.x - rect->pt1.x + 1;
+  size->h = rect->pt2.y - rect->pt1.y + 1;
 }

@@ -79,7 +79,7 @@
  ****************************************************************************/
 
 void nxbe_setsize(FAR struct nxbe_window_s *wnd,
-                  FAR const struct nxgl_rect_s *size)
+                  FAR const struct nxgl_size_s *size)
 {
   struct nxgl_rect_s bounds;
 
@@ -96,19 +96,18 @@ void nxbe_setsize(FAR struct nxbe_window_s *wnd,
 
   /* Add the window origin to supplied size get the new window bounding box */
 
-  nxgl_rectoffset(&wnd->bounds, size, wnd->origin.x, wnd->origin.y);
+  wnd->bounds.pt2.x = wnd->bounds.pt1.x + size->w - 1;
+  wnd->bounds.pt2.y = wnd->bounds.pt1.y + size->h - 1;
+
+  /* Clip the new bounding box so that lies within the background screen */
+
+  nxgl_rectintersect(&wnd->bounds, &wnd->bounds, &wnd->be->bkgd.bounds);
 
   /* We need to update the larger of the two rectangles.  That will be the
    * union of the before and after sizes.
    */
 
   nxgl_rectunion(&bounds, &bounds, &wnd->bounds);
-
-  /* Clip the bounding box so that is lies with the screen defined by the
-   * background window.
-   */
-
-  nxgl_rectintersect(&bounds, &bounds, &wnd->be->bkgd.bounds);
 
   /* Then redraw this window AND all windows below it. Having resized the
    * window, we may have exposed previoulsy obscured portions of windows

@@ -125,8 +125,8 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
 
   /* Calculate the slope of the left and right side of the trapezoid */
 
-  dx1dy = b16divi((trap->bot.x1 - x1), nrows);
-  dx2dy = b16divi((trap->bot.x2 - x2), nrows);
+  dx1dy = b16divi((trap->bot.x1 - x1), nrows - 1);
+  dx2dy = b16divi((trap->bot.x2 - x2), nrows - 1);
 
   /* Perform vertical clipping */
 

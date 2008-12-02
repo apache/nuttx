@@ -430,7 +430,7 @@ int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb)
          case NX_SVRMSG_LOWER: /* Lower the window to the bottom of the display */
            {
              FAR struct nxsvrmsg_lower_s *lowermsg = (FAR struct nxsvrmsg_lower_s *)buffer;
-             nxbe_raise(lowermsg->wnd);
+             nxbe_lower(lowermsg->wnd);
            }
            break;
 
