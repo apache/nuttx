@@ -444,7 +444,7 @@ int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb)
          case NX_SVRMSG_FILLTRAP: /* Fill a trapezoidal region in the window with a color */
            {
              FAR struct nxsvrmsg_filltrapezoid_s *trapmsg = (FAR struct nxsvrmsg_filltrapezoid_s *)buffer;
-             nxbe_filltrapezoid(trapmsg->wnd, &trapmsg->trap, trapmsg->color);
+             nxbe_filltrapezoid(trapmsg->wnd, &trapmsg->clip, &trapmsg->trap, trapmsg->color);
            }
            break;
          case NX_SVRMSG_MOVE: /* Move a rectangular region within the window */

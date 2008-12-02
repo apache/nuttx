@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <string.h>
 #include <mqueue.h>
 #include <errno.h>
 #include <debug.h>
@@ -80,6 +81,7 @@
  *
  * Input Parameters:
  *   hwnd  - The window handle
+ *   clip - Clipping region (may be null)
  *   trap  - The trapezoidal region to be filled
  *   color - The color to use in the fill
  *
@@ -88,7 +90,8 @@
  *
  ****************************************************************************/
 
-int nx_filltrapezoid(NXWINDOW hwnd, FAR struct nxgl_trapezoid_s *trap,
+int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
+                     FAR const struct nxgl_trapezoid_s *trap,
                      nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
   FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
@@ -109,6 +112,14 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR struct nxgl_trapezoid_s *trap,
   outmsg.msgid = NX_SVRMSG_FILLTRAP;
   outmsg.wnd   = wnd;
 
+  if (clip)
+    {
+      nxgl_rectcopy(&outmsg.clip, clip);
+    }
+  else
+    {
+      memset(&outmsg.clip, 0, sizeof(struct nxgl_rect_s));
+    }
   nxgl_trapcopy(&outmsg.trap, trap);
 
   for (i = 0; i < CONFIG_NX_NPLANES; i++)

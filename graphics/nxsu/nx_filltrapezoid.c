@@ -80,6 +80,7 @@
  *
  * Input Parameters:
  *   hwnd  - The window handle
+ *   clip - Clipping region (may be null)
  *   trap  - The trapezoidal region to be filled
  *   color - The color to use in the fill
  *
@@ -88,7 +89,8 @@
  *
  ****************************************************************************/
 
-int nx_filltrapezoid(NXWINDOW hwnd, FAR struct nxgl_trapezoid_s *trap,
+int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
+                     FAR const struct nxgl_trapezoid_s *trap,
                      nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
 #ifdef CONFIG_DEBUG
@@ -99,6 +101,6 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR struct nxgl_trapezoid_s *trap,
     }
 #endif
 
-  nxbe_filltrapezoid((FAR struct nxbe_window_s *)hwnd, trap, color);
+  nxbe_filltrapezoid((FAR struct nxbe_window_s *)hwnd, clip, trap, color);
   return OK;
 }

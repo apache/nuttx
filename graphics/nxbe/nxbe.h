@@ -311,6 +311,7 @@ EXTERN void nxbe_fill(FAR struct nxbe_window_s *wnd,
  *
  * Input Parameters:
  *   wnd  - The window structure reference
+ *   clip - Clipping region (may be null)
  *   rect - The location to be filled
  *   col  - The color to use in the fill
  *
@@ -320,6 +321,7 @@ EXTERN void nxbe_fill(FAR struct nxbe_window_s *wnd,
  ****************************************************************************/
 
 EXTERN void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
+                               FAR const struct nxgl_rect_s *clip,
                                FAR const struct nxgl_trapezoid_s *trap,
                                nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 

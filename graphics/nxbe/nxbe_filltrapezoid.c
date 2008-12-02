@@ -101,7 +101,8 @@ static void nxbe_clipfilltrapezoid(FAR struct nxbe_clipops_s *cops,
  *
  * Input Parameters:
  *   wnd  - The window structure reference
- *   rect - The location to be filled
+ *   clip - Clipping region (in relative window coordinates)
+ *   rect - The location to be filled (in relative window coordinates)
  *   col  - The color to use in the fill
  *
  * Return:
@@ -110,11 +111,11 @@ static void nxbe_clipfilltrapezoid(FAR struct nxbe_clipops_s *cops,
  ****************************************************************************/
 
 void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
+                        FAR const struct nxgl_rect_s *clip,
                         FAR const struct nxgl_trapezoid_s *trap,
                         nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
   struct nxbe_filltrap_s info;
-  struct nxgl_rect_s bounds;
   struct nxgl_rect_s remaining;
   int i;
 
@@ -131,30 +132,43 @@ void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
 
   nxgl_trapoffset(&info.trap, trap, wnd->origin.x, wnd->origin.y);
 
-  /* Now create a bounding box that contains the trapezoid */
+  /* Create a bounding box that contains the trapezoid */
 
-  bounds.pt1.x = b16toi(ngl_min(info.trap.top.x1, info.trap.bot.x1));
-  bounds.pt1.y = b16toi(info.trap.top.y);
-  bounds.pt2.x = b16toi(ngl_max(info.trap.top.x2, info.trap.bot.x2));
-  bounds.pt2.y = b16toi(info.trap.bot.y);
+  remaining.pt1.x = b16toi(ngl_min(info.trap.top.x1, info.trap.bot.x1));
+  remaining.pt1.y = b16toi(info.trap.top.y);
+  remaining.pt2.x = b16toi(ngl_max(info.trap.top.x2, info.trap.bot.x2));
+  remaining.pt2.y = b16toi(info.trap.bot.y);
+
+  /* Clip to any user specified clipping window */
+
+  if (clip && !nxgl_nullrect(clip))
+    {
+      struct nxgl_rect_s tmp;
+      nxgl_rectoffset(&tmp, clip, wnd->origin.x, wnd->origin.y);
+      nxgl_rectintersect(&remaining, &remaining, &tmp);
+    }
 
   /* Clip to the limits of the window and of the background screen */
 
-  nxgl_rectintersect(&remaining, &bounds, &wnd->bounds);
+  nxgl_rectintersect(&remaining, &remaining, &wnd->bounds);
   nxgl_rectintersect(&remaining, &remaining, &wnd->be->bkgd.bounds);
 
   if (!nxgl_nullrect(&remaining))
     {
+      info.cops.visible  = nxbe_clipfilltrapezoid;
+      info.cops.obscured = nxbe_clipnull;
+
+      nxgl_trapcopy(&info.trap, trap);
+
+      /* Then process each color plane */
+
 #if CONFIG_NX_NPLANES > 1
       for (i = 0; i < wnd->be->vinfo.nplanes; i++)
 #else
       i = 0;
 #endif
         {
-          info.cops.visible  = nxbe_clipfilltrapezoid;
-          info.cops.obscured = nxbe_clipnull;
-          info.color         = color[i];
-
+          info.color = color[i];
           nxbe_clipper(wnd->above, &remaining, NX_CLIPORDER_DEFAULT,
                        &info.cops, &wnd->be->plane[i]);
         }

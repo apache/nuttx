@@ -350,6 +350,7 @@ struct nxsvrmsg_filltrapezoid_s
 {
   uint32  msgid;                     /* NX_SVRMSG_FILLTRAP */
   FAR struct nxbe_window_s *wnd;     /* The window to fill  */
+  FAR struct nxgl_rect_s clip;       /* The clipping window */
   struct nxgl_trapezoid_s trap;      /* The trapezoidal region in the window to fill */
   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]; /* Color to use in the fill */
 };
