@@ -92,7 +92,7 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
 {
   unsigned int stride;
   unsigned int width;
-  ubyte *line;
+  FAR ubyte *line;
   int nrows;
   b16_t x1;
   b16_t x2;
@@ -102,10 +102,10 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
   b16_t dx2dy;
 
 #if NXGLIB_BITSPERPIXEL < 8
-  ubyte *dest;
-  ubyte  mpixel = NXGL_MULTIPIXEL(color);
-  ubyte  mask;
-  int    lnlen;
+  FAR ubyte *dest;
+  ubyte mpixel = NXGL_MULTIPIXEL(color);
+  ubyte mask;
+  int lnlen;
 #endif
 
   /* Get the width of the framebuffer in bytes */

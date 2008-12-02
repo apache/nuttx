@@ -84,18 +84,18 @@
 void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
 (FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect, nxgl_mxpixel_t color)
 {
-  ubyte *line;
+  FAR ubyte *line;
   unsigned int width;
   unsigned int stride;
-  int    rows;
+  int rows;
 
 #if NXGLIB_BITSPERPIXEL < 8
-  ubyte *dest;
-  ubyte  mpixel = NXGL_MULTIPIXEL(color);
-  ubyte  leadmask;
-  ubyte  tailmask;
-  ubyte  mask;
-  int    lnlen;
+  FAR ubyte *dest;
+  ubyte mpixel = NXGL_MULTIPIXEL(color);
+  ubyte leadmask;
+  ubyte tailmask;
+  ubyte mask;
+  int lnlen;
 #endif
 
   /* Get the width of the framebuffer in bytes */

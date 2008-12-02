@@ -83,11 +83,20 @@ void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
  FAR const void *src, FAR const struct nxgl_point_s *origin,
  unsigned int srcstride)
 {
-  const ubyte *sptr;
-  ubyte *dptr;
+  FAR const ubyte *sline;
+  FAR ubyte *dline;
   unsigned int width;
   unsigned int deststride;
   unsigned int rows;
+
+#if NXGLIB_BITSPERPIXEL < 8
+  FAR const ubyte *sptr;
+  FAR ubyte *dptr;
+  ubyte leadmask;
+  ubyte tailmask;
+  ubyte mask;
+  int lnlen;
+#endif
 
   /* Get the width of the framebuffer in bytes */
 
@@ -98,15 +107,70 @@ void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
   width = NXGL_SCALEX(dest->pt2.x - dest->pt1.x);
   rows = dest->pt2.y - dest->pt1.y;
 
+#if NXGLIB_BITSPERPIXEL < 8
+# ifdef CONFIG_NXGL_PACKEDMSFIRST
+
+  /* Get the mask for pixels that are ordered so that they pack from the
+   * MS byte down.
+   */
+
+  leadmask = (ubyte)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x)));
+  tailmask = (ubyte)(0xff << (8 - NXGL_REMAINDERX(dest->pt2.x-1)));
+# else
+  /* Get the mask for pixels that are ordered so that they pack from the
+   * LS byte up.
+   */
+
+  leadmask = (ubyte)(0xff << (8 - NXGL_REMAINDERX(dest->pt1.x)));
+  tailmask = (ubyte)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x-1)));
+# endif
+#endif
+
   /* Then copy the image */
 
-  sptr = (const ubyte*)src + NXGL_SCALEX(dest->pt1.x - origin->x) + (dest->pt1.y - origin->y) * srcstride;
-  dptr = pinfo->fbmem + dest->pt1.y * deststride + NXGL_SCALEX(dest->pt1.x);
+  sline = (const ubyte*)src + NXGL_SCALEX(dest->pt1.x - origin->x) + (dest->pt1.y - origin->y) * srcstride;
+  dline = pinfo->fbmem + dest->pt1.y * deststride + NXGL_SCALEX(dest->pt1.x);
 
   while (rows--)
     {
-      NXGL_MEMCPY((NXGL_PIXEL_T*)dest, (NXGL_PIXEL_T*)sptr, width);
-      dptr += deststride;
-      sptr += srcstride;
+#if NXGLIB_BITSPERPIXEL < 8
+     /* Handle masking of the fractional initial byte */
+
+     mask  = leadmask;
+     sptr  = sline;
+     dptr  = dline;
+     lnlen = width;
+
+     if (lnlen > 1 && mask)
+        {
+          dptr[0] = (dptr[0] & ~mask) | (sptr[0] & mask);
+          mask = 0xff;
+          dptr++;
+          sptr++;
+          lnlen--;
+        }
+
+      /* Handle masking of the fractional final byte */
+
+      mask &= tailmask;
+      if (lnlen > 0 && mask)
+        {
+          dptr[lnlen-1] = (dptr[lnlen-1] & ~mask) | (sptr[lnlen-1] & mask);
+          lnlen--;
+        }
+
+      /* Handle all of the unmasked bytes in-between */
+
+      if (lnlen > 0)
+        {
+          NXGL_MEMCPY(dptr, sptr, lnlen);
+        }
+#else
+      /* Copy the whole line */
+
+      NXGL_MEMCPY((NXGL_PIXEL_T*)dest, (NXGL_PIXEL_T*)sline, width);
+#endif
+      dline += deststride;
+      sline += srcstride;
     }
 }

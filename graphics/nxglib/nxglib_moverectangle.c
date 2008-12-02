@@ -66,6 +66,54 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxgl_lowresmemcpy
+ ****************************************************************************/
+
+#if NXGLIB_BITSPERPIXEL < 8
+static inline void nxgl_lowresmemcpy(FAR ubyte *dline, FAR const ubyte *sline,
+                                     unsigned int width,
+                                     ubyte leadmask, ubyte tailmask)
+{
+  FAR const ubyte *sptr;
+  FAR ubyte *dptr;
+  ubyte mask;
+  int lnlen;
+
+  /* Handle masking of the fractional initial byte */
+
+  mask  = leadmask;
+  sptr  = sline;
+  dptr  = dline;
+  lnlen = width;
+
+  if (lnlen > 1 && mask)
+     {
+       dptr[0] = (dptr[0] & ~mask) | (sptr[0] & mask);
+       mask = 0xff;
+       dptr++;
+       sptr++;
+       lnlen--;
+     }
+
+   /* Handle masking of the fractional final byte */
+
+   mask &= tailmask;
+   if (lnlen > 0 && mask)
+     {
+       dptr[lnlen-1] = (dptr[lnlen-1] & ~mask) | (sptr[lnlen-1] & mask);
+       lnlen--;
+     }
+
+   /* Handle all of the unmasked bytes in-between */
+
+   if (lnlen > 0)
+     {
+       NXGL_MEMCPY(dptr, sptr, lnlen);
+     }
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -82,11 +130,16 @@ void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
 (FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect,
  FAR struct nxgl_point_s *offset)
 {
-  const ubyte *sptr;
-  ubyte *dptr;
+  FAR const ubyte *sline;
+  FAR ubyte *dline;
   unsigned int width;
   unsigned int stride;
   unsigned int rows;
+
+#if NXGLIB_BITSPERPIXEL < 8
+  ubyte leadmask;
+  ubyte tailmask;
+#endif
 
   /* Get the width of the framebuffer in bytes */
 
@@ -97,30 +150,60 @@ void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
   width = NXGL_SCALEX(rect->pt2.x - rect->pt1.x);
   rows = rect->pt2.y - rect->pt1.y;
 
+#if NXGLIB_BITSPERPIXEL < 8
+# ifdef CONFIG_NXGL_PACKEDMSFIRST
+
+  /* Get the mask for pixels that are ordered so that they pack from the
+   * MS byte down.
+   */
+
+  leadmask = (ubyte)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x)));
+  tailmask = (ubyte)(0xff << (8 - NXGL_REMAINDERX(rect->pt2.x-1)));
+# else
+  /* Get the mask for pixels that are ordered so that they pack from the
+   * LS byte up.
+   */
+
+  leadmask = (ubyte)(0xff << (8 - NXGL_REMAINDERX(rect->pt1.x)));
+  tailmask = (ubyte)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x-1)));
+# endif
+#endif
+
   /* Case 1:  The starting position is above the display */
 
   if (offset->y < 0)
     {
-      dptr = pinfo->fbmem + rect->pt1.y * stride + NXGL_SCALEX(rect->pt1.x);
-      sptr = dptr - offset->y * stride - NXGL_SCALEX(offset->x);
+      dline = pinfo->fbmem + rect->pt1.y * stride + NXGL_SCALEX(rect->pt1.x);
+      sline = dline - offset->y * stride - NXGL_SCALEX(offset->x);
 
       while (rows--)
         {
-          NXGL_MEMCPY(dptr, sptr, width);
-          dptr += stride;
-          sptr  += stride;
+#if NXGLIB_BITSPERPIXEL < 8
+          nxgl_lowresmemcpy(dline, sline, width, leadmask, tailmask);
+#else
+          NXGL_MEMCPY(dline, sline, width);
+#endif
+          dline += stride;
+          sline += stride;
         }
     }
+
+  /* Case 2: It's not */
+
   else
     {
-      dptr = pinfo->fbmem + rect->pt2.y * stride + NXGL_SCALEX(rect->pt1.x);
-      sptr = dptr - offset->y * stride - NXGL_SCALEX(offset->x);
+      dline = pinfo->fbmem + rect->pt2.y * stride + NXGL_SCALEX(rect->pt1.x);
+      sline = dline - offset->y * stride - NXGL_SCALEX(offset->x);
 
       while (rows--)
         {
-          dptr -= stride;
-          sptr -= stride;
-          NXGL_MEMCPY(dptr, sptr, width);
+          dline -= stride;
+          sline -= stride;
+#if NXGLIB_BITSPERPIXEL < 8
+          nxgl_lowresmemcpy(dline, sline, width, leadmask, tailmask);
+#else
+          NXGL_MEMCPY(dline, sline, width);
+#endif
         }
     }
 }
