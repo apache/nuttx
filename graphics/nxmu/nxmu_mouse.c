@@ -128,7 +128,7 @@ int nxmu_mousereport(struct nxbe_window_s *wnd)
           outmsg.msgid   = NX_CLIMSG_MOUSEIN;
           outmsg.wnd     = wnd;
           outmsg.buttons = g_mbutton;
-          nxgl_vectsubtract(&outmsg.pos, &g_mpos, &wnd->origin);
+          nxgl_vectsubtract(&outmsg.pos, &g_mpos, &wnd->bounds.pt1);
 
           ret = mq_send(wnd->conn->swrmq, &outmsg,
                         sizeof(struct nxclimsg_mousein_s), NX_SVRMSG_PRIO);

@@ -90,9 +90,9 @@ void nxtk_setsubwindows(FAR struct nxtk_framedwindow_s *fwnd)
 {
   nxgl_coord_t fullheight;
   nxgl_coord_t bdrheight = 0;
-  nxgl_coord_t tbtop     = fwnd->wnd.origin.y;
+  nxgl_coord_t tbtop     = fwnd->wnd.bounds.pt1.y;
   nxgl_coord_t tbheight  = 0;
-  nxgl_coord_t fwtop     = fwnd->wnd.origin.y;
+  nxgl_coord_t fwtop     = fwnd->wnd.bounds.pt1.y;
   nxgl_coord_t fwheight  = 0;
   nxgl_coord_t fullwidth;
   nxgl_coord_t bdrwidth;
@@ -145,7 +145,7 @@ void nxtk_setsubwindows(FAR struct nxtk_framedwindow_s *fwnd)
   fullwidth = fwnd->wnd.bounds.pt2.x - fwnd->wnd.bounds.pt1.x + 1;
   bdrwidth  = ngl_min(2 * CONFIG_NXTK_BORDERWIDTH, fullwidth);
   fwwidth   = fullwidth - bdrwidth;
-  fwleft    = fwnd->wnd.origin.x + bdrwidth/2;
+  fwleft    = fwnd->wnd.bounds.pt1.x + bdrwidth / 2;
 
   /* Realize the positions/dimensions */
 

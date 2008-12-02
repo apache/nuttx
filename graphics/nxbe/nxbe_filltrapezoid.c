@@ -130,7 +130,7 @@ void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
    * the framebuffer region
    */
 
-  nxgl_trapoffset(&info.trap, trap, wnd->origin.x, wnd->origin.y);
+  nxgl_trapoffset(&info.trap, trap, wnd->bounds.pt1.x, wnd->bounds.pt1.y);
 
   /* Create a bounding box that contains the trapezoid */
 
@@ -144,7 +144,7 @@ void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
   if (clip && !nxgl_nullrect(clip))
     {
       struct nxgl_rect_s tmp;
-      nxgl_rectoffset(&tmp, clip, wnd->origin.x, wnd->origin.y);
+      nxgl_rectoffset(&tmp, clip, wnd->bounds.pt1.x, wnd->bounds.pt1.y);
       nxgl_rectintersect(&remaining, &remaining, &tmp);
     }
 

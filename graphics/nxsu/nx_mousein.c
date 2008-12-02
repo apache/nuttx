@@ -123,7 +123,7 @@ int nxsu_mousereport(struct nxbe_window_s *wnd)
         {
           /* Yes... Convert the mouse position to window relative coordinates */
 
-          nxgl_vectsubtract(&relpos, &g_mpos, &wnd->origin);
+          nxgl_vectsubtract(&relpos, &g_mpos, &wnd->bounds.pt1);
           wnd->cb->mousein((NXWINDOW)wnd, &relpos, g_mbutton, wnd->arg);
           return OK;
         }

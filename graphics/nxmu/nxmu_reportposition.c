@@ -88,8 +88,8 @@ void nxfe_reportposition(FAR struct nxbe_window_s *wnd)
 
   outmsg.msgid  = NX_CLIMSG_NEWPOSITION;
   outmsg.wnd    = wnd;
-  outmsg.pos.x  = wnd->origin.x;
-  outmsg.pos.y  = wnd->origin.y;
+  outmsg.pos.x  = wnd->bounds.pt1.x;
+  outmsg.pos.y  = wnd->bounds.pt1.y;
 
   nxgl_rectsize(&outmsg.size, &wnd->bounds);
 

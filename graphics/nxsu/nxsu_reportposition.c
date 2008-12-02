@@ -102,6 +102,6 @@ void nxfe_reportposition(FAR struct nxbe_window_s *wnd)
 
       /* And provide this to the client */
 
-      wnd->cb->position(wnd, &rect, &wnd->origin, &be->bkgd.bounds, wnd->arg);
+      wnd->cb->position(wnd, &rect, &wnd->bounds.pt1, &be->bkgd.bounds, wnd->arg);
     }
 }

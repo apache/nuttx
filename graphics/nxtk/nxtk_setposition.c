@@ -100,7 +100,7 @@ int nxtk_setposition(NXTKWINDOW hfwnd, FAR struct nxgl_point_s *pos)
   /* Calculate the offset that is requested and add that to the window origin. */
 
   nxgl_vectsubtract(&offset, pos, &fwnd->fwrect.pt1);
-  nxgl_vectoradd(&newpos, &offset, &fwnd->wnd.origin);
+  nxgl_vectoradd(&newpos, &offset, &fwnd->wnd.bounds.pt1);
 
   /* Then set that position */
 

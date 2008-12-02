@@ -86,7 +86,7 @@ void nxfe_redrawreq(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s 
   outmsg.msgid = NX_CLIMSG_REDRAW;
   outmsg.wnd   = wnd;
   outmsg.more  = FALSE;
-  nxgl_rectoffset(&outmsg.rect, rect, -wnd->origin.x, -wnd->origin.y);
+  nxgl_rectoffset(&outmsg.rect, rect, -wnd->bounds.pt1.x, -wnd->bounds.pt1.y);
 
   ret = mq_send(wnd->conn->swrmq, &outmsg, sizeof(struct nxclimsg_redraw_s), NX_CLIMSG_PRIO);
   if (ret < 0)

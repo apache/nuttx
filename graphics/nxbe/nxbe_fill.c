@@ -125,7 +125,7 @@ void nxbe_fill(FAR struct nxbe_window_s *wnd,
    * bounding box
    */
 
-  nxgl_rectoffset(&remaining, rect, wnd->origin.x, wnd->origin.y);
+  nxgl_rectoffset(&remaining, rect, wnd->bounds.pt1.x, wnd->bounds.pt1.y);
 
   /* Clip to the bounding box to the limits of the window and of the
    * background screen

@@ -137,8 +137,8 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
 
   /* Offset the rectangle and image origin by the window origin */
 
-  nxgl_rectoffset(&bounds, dest, wnd->origin.x, wnd->origin.y);
-  nxgl_vectoradd(&offset, origin, &wnd->origin);
+  nxgl_rectoffset(&bounds, dest, wnd->bounds.pt1.x, wnd->bounds.pt1.y);
+  nxgl_vectoradd(&offset, origin, &wnd->bounds.pt1);
 
   /* Verify that the destination rectangle begins "below" and to the "right"
    * of the origin

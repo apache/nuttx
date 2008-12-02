@@ -93,17 +93,12 @@ void nxbe_setposition(FAR struct nxbe_window_s *wnd,
 
   /* Back out the old window origin position from the bounding box */
 
-  nxgl_rectoffset(&rect, &wnd->bounds, -wnd->origin.x, -wnd->origin.y);
+  nxgl_rectoffset(&rect, &wnd->bounds, -wnd->bounds.pt1.x, -wnd->bounds.pt1.y);
 
-  /* Set the new origin */
-
-  wnd->origin.x = pos->x;
-  wnd->origin.y = pos->y;
-
-  /* Add the new window origin back into the bounding box */
+  /* Add the new window origin into the bounding box */
 
   nxgl_rectcopy(&before, &wnd->bounds);
-  nxgl_rectoffset(&wnd->bounds, &rect, wnd->origin.x, wnd->origin.y);
+  nxgl_rectoffset(&wnd->bounds, &rect, pos->x, pos->y);
 
   /* Get the union of the 'before' bounding box and the 'after' bounding
    * this union is the region of the display that must be updated.

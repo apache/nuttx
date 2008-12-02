@@ -94,7 +94,7 @@ void nxbe_setsize(FAR struct nxbe_window_s *wnd,
 
   nxgl_rectcopy(&bounds, &wnd->bounds);
 
-  /* Add the window origin to supplied size get the new window bounding box */
+  /* Add the window origin to the supplied size get the new window bounding box */
 
   wnd->bounds.pt2.x = wnd->bounds.pt1.x + size->w - 1;
   wnd->bounds.pt2.y = wnd->bounds.pt1.y + size->h - 1;

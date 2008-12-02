@@ -142,10 +142,11 @@ struct nxbe_window_s
   FAR struct nxbe_window_s *above;    /* The window "above" this window */
   FAR struct nxbe_window_s *below;    /* The window "below this one */
 
-  /* Window geometry */
+  /* Window geometry.  The window is described by a rectangle in the
+   * absolute screen coordinate system (0,0)->(xres,yres)
+   */
 
   struct nxgl_rect_s bounds;          /* The bounding rectangle of window */
-  struct nxgl_point_s origin;         /* The position of the top-left corner of the window */
 
   /* Client state information this is provide in window callbacks */
 

@@ -106,6 +106,6 @@ int nxtk_filltrapwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_trapezoid_s *tra
 
   /* Perform the fill, clipping to the client window */
 
-  nxgl_rectoffset(&relclip, &fwnd->fwrect, -fwnd->wnd.origin.x, -fwnd->wnd.origin.y);
+  nxgl_rectoffset(&relclip, &fwnd->fwrect, -fwnd->wnd.bounds.pt1.x, -fwnd->wnd.bounds.pt1.y);
   return nx_filltrapezoid((NXWINDOW)hfwnd, &relclip, trap, color);
 }

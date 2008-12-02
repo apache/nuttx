@@ -93,7 +93,7 @@ void nxfe_redrawreq(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s 
     {
       /* Convert the frame rectangle to a window-relative rectangle */
 
-      nxgl_rectoffset(&relrect, rect, -wnd->origin.x, -wnd->origin.y);
+      nxgl_rectoffset(&relrect, rect, -wnd->bounds.pt1.x, -wnd->bounds.pt1.y);
 
       /* And request the redraw */
 

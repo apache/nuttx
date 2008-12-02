@@ -210,7 +210,7 @@ void nxbe_move(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *rect
 
   /* Offset the rectangle by the window origin to create a bounding box */
 
-  nxgl_rectoffset(&info.srcrect, rect, wnd->origin.x, wnd->origin.y);
+  nxgl_rectoffset(&info.srcrect, rect, wnd->bounds.pt1.x, wnd->bounds.pt1.y);
 
   /* Clip to the limits of the window and of the background screen */
 
