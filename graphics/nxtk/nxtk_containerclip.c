@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxtk/nxtk_subwindowclip.c
+ * graphics/nxtk/nxtk_containerclip.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -75,20 +75,20 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxtk_subwindowclip
+ * Name: nxtk_containerclip
  *
  * Description:
- *   We are given a 'src' rectangle in sub-window, relative coordinates
- *   (i.e., (0,0) is the top left corner of the sub-window).  This function
- *   will (1) clip that src rectangle so that it lies within the sub-window
- *   bounds, and then (2) move the rectangle to that it is relative to the
- *   containing window (i.e., (0,0) is the top left corner of the containing
- *   window).
+ *   We are given a 'src' rectangle in containing window, relative coordinates
+ *   (i.e., (0,0) is the top left corner of the outer, containing window).
+ *   This function will (1) clip that src rectangle so that it lies within
+ *   the sub-window bounds, and then (2) move the rectangle to that it is
+ *   relative to the sub-window (i.e., (0,0) is the top left corner of the
+ *   sub-window).
  *
  * Input parameters:
  *   fwnd   - The framed window to be used
  *   dest   - The locaton to put the result
- *   src    - The src rectangle in relative sub-window coordinates
+ *   src    - The src rectangle in relative container-window coordinates
  *   bounds - The subwindow bounds in absolute screen coordinates.
  *
  * Returned value:
@@ -96,24 +96,28 @@
  *
  ****************************************************************************/
 
-void nxtk_subwindowclip(FAR struct nxtk_framedwindow_s *fwnd,
+void nxtk_containerclip(FAR struct nxtk_framedwindow_s *fwnd,
                         FAR struct nxgl_rect_s *dest,
                         FAR const struct nxgl_rect_s *src,
                         FAR const struct nxgl_rect_s *bounds)
 {
-  struct nxgl_rect_s tmp;
+  struct nxgl_rect_s relbounds;
 
-  /* Temporarily, position the src rectangle in absolute screen coordinates */
-
-  nxgl_rectoffset(&tmp, src, bounds->pt1.x, bounds->pt1.y);
-
-  /* Clip the src rectangle to lie within the client window region */
-
-  nxgl_rectintersect(&tmp, &tmp, bounds);
-
-  /* Then move the rectangle so that is relative to the containing window, not the
-   * client subwindow
+  /* The 'src' rectangle is relative to the containing window. Convert
+   * the sub-window to the same origin.
    */
 
-  nxgl_rectoffset(dest, &tmp, -fwnd->wnd.bounds.pt1.x, -fwnd->wnd.bounds.pt1.y);
+  nxgl_rectoffset(&relbounds, bounds, -fwnd->wnd.bounds.pt1.x,
+                  -fwnd->wnd.bounds.pt1.y);
+
+  /* The interection then leaves the portion of the containing window that
+   * needs to be updated window that needs to be updated.
+   */
+
+  nxgl_rectintersect(dest, src, &relbounds);
+
+  /* Offset this so that is relative to client subwindow origin */
+
+  nxgl_rectoffset(dest, dest, fwnd->wnd.bounds.pt1.x - bounds->pt1.x,
+                  fwnd->wnd.bounds.pt1.y - bounds->pt1.y);
 }

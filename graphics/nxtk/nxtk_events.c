@@ -108,26 +108,26 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hwnd;
   struct nxgl_rect_s intersection;
-  struct nxgl_rect_s relbounds;
 
   DEBUGASSERT(hwnd && rect && fwnd->fwcb);
 
   gvdbg("nxtk_redraw: hwnd=%p rect={(%d,%d),(%d,%d)} more=%d\n",
         hwnd, rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y, more);
 
-  /* If any part of the rectangle overlaps the client window region, then
+  /* The incoming rectangle (rect) is relative to the containing window
+   * (i.e., (0,0) is the top left corner of the outer, containing window).
+   * If any part of the rectangle overlaps the client sub-window region, then
    * forward the redraw callback.
    */
 
   if (fwnd->fwcb->redraw)
     {
-      /* Convert the client window into a window relative rectangle, then
-       * get the intersection with the incoming rectangle.  That leaves the
-       * portion of the client window that needs to be updated.
+      /* Clip the redraw rectangle so that it lies within the client sub-window
+       * bounds and move the rectangle to that it is relative to the client
+       * sub-window (i.e., (0,0) is the top left corner of the client sub-window).
        */
 
-      nxgl_rectoffset(&relbounds, &fwnd->fwrect, -fwnd->fwrect.pt1.x, -fwnd->fwrect.pt1.y);
-      nxgl_rectintersect(&intersection, rect, &relbounds);
+      nxtk_containerclip(fwnd, &intersection, rect, &fwnd->fwrect);
 
       gvdbg("nxtk_redraw: fwrect intersction={(%d,%d),(%d,%d)}\n",
            intersection.pt1.x, intersection.pt1.y,
@@ -145,13 +145,12 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
   if (fwnd->tbcb && fwnd->tbcb->redraw)
     {
-      /* Convert the toolbar window into a window relative rectangle, then
-       * get the intersection with the incoming rectangle.  That leaves the
-       * portion of the toolbar window that needs to be updated.
+      /* Clip the redraw rectangle so that it lies within the toolbar sub-window
+       * bounds and move the rectangle to that it is relative to the toolbar
+       * sub-window (i.e., (0,0) is the top left corner of the client sub-window).
        */
 
-      nxgl_rectoffset(&relbounds, &fwnd->tbrect, -fwnd->tbrect.pt1.x, -fwnd->tbrect.pt1.y);
-      nxgl_rectintersect(&intersection, rect, &relbounds);
+      nxtk_containerclip(fwnd, &intersection, rect, &fwnd->tbrect);
 
       gvdbg("nxtk_redraw: tbrect intersction={(%d,%d),(%d,%d)}\n",
            intersection.pt1.x, intersection.pt1.y,

@@ -151,6 +151,33 @@ EXTERN void nxtk_subwindowclip(FAR struct nxtk_framedwindow_s *fwnd,
                                FAR const struct nxgl_rect_s *bounds);
 
 /****************************************************************************
+ * Name: nxtk_containerclip
+ *
+ * Description:
+ *   We are given a 'src' rectangle in containing window, relative coordinates
+ *   (i.e., (0,0) is the top left corner of the outer, containing window).
+ *   This function will (1) clip that src rectangle so that it lies within
+ *   the sub-window bounds, and then (2) move the rectangle to that it is
+ *   relative to the sub-window (i.e., (0,0) is the top left corner of the
+ *   sub-window).
+ *
+ * Input parameters:
+ *   fwnd   - The framed window to be used
+ *   dest   - The locaton to put the result
+ *   src    - The src rectangle in relative container-window coordinates
+ *   bounds - The subwindow bounds in absolute screen coordinates.
+ *
+ * Returned value:
+ *   None
+ *
+ ****************************************************************************/
+
+EXTERN void nxtk_containerclip(FAR struct nxtk_framedwindow_s *fwnd,
+                               FAR struct nxgl_rect_s *dest,
+                               FAR const struct nxgl_rect_s *src,
+                              FAR const struct nxgl_rect_s *bounds);
+
+/****************************************************************************
  * Name: nxtk_subwindowmove
  *
  * Description:
@@ -178,6 +205,7 @@ EXTERN void nxtk_subwindowmove(FAR struct nxtk_framedwindow_s *fwnd,
                                FAR const struct nxgl_rect_s *srcrect,
                                FAR const struct nxgl_point_s *srcoffset,
                                FAR const struct nxgl_rect_s *bounds);
+
 /****************************************************************************
  * Name: nxtk_drawframe
  *
@@ -197,6 +225,7 @@ EXTERN void nxtk_subwindowmove(FAR struct nxtk_framedwindow_s *fwnd,
 
 EXTERN int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
                           FAR const struct nxgl_rect_s *bounds);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
