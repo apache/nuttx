@@ -187,7 +187,7 @@ int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
   nxtk_drawframeside(fwnd, &frame, bounds, g_bordercolor2);
 #endif
 
-  /* Draw the inner right side,  Thickness: 1, Color: CONFIG_NXTK_BORDERCOLOR2 */
+  /* Draw the inner left side,  Thickness: 1, Color: CONFIG_NXTK_BORDERCOLOR2 */
 
 #if CONFIG_NXTK_BORDERWIDTH > 1
   frame.pt1.y = CONFIG_NXTK_BORDERWIDTH - 1 + tbsize.h;
