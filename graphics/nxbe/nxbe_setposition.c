@@ -107,14 +107,14 @@ void nxbe_setposition(FAR struct nxbe_window_s *wnd,
   nxgl_rectunion(&rect, &before, &wnd->bounds);
   nxgl_rectintersect(&rect, &rect, &wnd->be->bkgd.bounds);
 
+  /* Report the new size/position */
+
+  nxfe_reportposition(wnd);
+
   /* Then redraw this window AND all windows below it. Having moved the
    * window, we may have exposed previoulsy obscured portions of windows
    * below this one.
    */
 
   nxbe_redrawbelow(wnd->be, wnd, &rect);
-
-  /* Report the new size/position */
-
-  nxfe_reportposition(wnd);
 }

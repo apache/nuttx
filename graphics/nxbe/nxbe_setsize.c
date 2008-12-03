@@ -109,14 +109,14 @@ void nxbe_setsize(FAR struct nxbe_window_s *wnd,
 
   nxgl_rectunion(&bounds, &bounds, &wnd->bounds);
 
+  /* Report the new size/position */
+
+  nxfe_reportposition(wnd);
+
   /* Then redraw this window AND all windows below it. Having resized the
    * window, we may have exposed previoulsy obscured portions of windows
    * below this one.
    */
 
   nxbe_redrawbelow(wnd->be, wnd, &bounds);
-
-  /* Report the new size/position */
-
-  nxfe_reportposition(wnd);
 }
