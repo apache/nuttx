@@ -95,21 +95,21 @@ void nxgl_nonintersecting(FAR struct nxgl_rect_s result[4],
   result[NX_TOP_NDX].pt1.x    = rect1->pt1.x;
   result[NX_TOP_NDX].pt1.y    = rect1->pt1.y;
   result[NX_TOP_NDX].pt2.x    = rect1->pt2.x;
-  result[NX_TOP_NDX].pt2.y    = intersection.pt1.y;
+  result[NX_TOP_NDX].pt2.y    = intersection.pt1.y - 1;
 
   result[NX_BOTTOM_NDX].pt1.x = rect1->pt1.x;
-  result[NX_BOTTOM_NDX].pt1.y = intersection.pt2.y;
+  result[NX_BOTTOM_NDX].pt1.y = intersection.pt2.y + 1;
   result[NX_BOTTOM_NDX].pt2.x = rect1->pt2.x;
   result[NX_BOTTOM_NDX].pt2.y = rect1->pt2.y;
 
-  result[NX_LEFT_NDX].pt1.x   = rect1->pt1.x;
+  result[NX_LEFT_NDX].pt1.x   = rect1->pt1.x + 1;
   result[NX_LEFT_NDX].pt1.y   = intersection.pt1.y;
   result[NX_LEFT_NDX].pt2.x   = intersection.pt1.x;
   result[NX_LEFT_NDX].pt2.y   = intersection.pt2.y;
 
   result[NX_RIGHT_NDX].pt1.x  = intersection.pt2.x;
   result[NX_RIGHT_NDX].pt1.y  = intersection.pt1.y;
-  result[NX_RIGHT_NDX].pt2.x  = rect1->pt2.x;
+  result[NX_RIGHT_NDX].pt2.x  = rect1->pt2.x - 1;
   result[NX_RIGHT_NDX].pt2.y  = intersection.pt2.y;
 }
 

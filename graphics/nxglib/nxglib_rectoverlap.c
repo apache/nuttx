@@ -82,9 +82,9 @@ boolean nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1,
    * the two rectangles overlap in some fashion.
    */
 
-  return (rect1->pt1.x < rect2->pt2.x) &&  /* FALSE: rect1 is wholly to the right */
-         (rect2->pt1.x < rect1->pt2.x) &&  /* FALSE: rect2 is wholly to the right */
-         (rect1->pt1.y < rect2->pt2.y) &&  /* FALSE: rect1 is wholly below rect2 */
-         (rect2->pt1.y < rect1->pt2.y);    /* FALSE: rect2 is wholly below rect1 */
+  return (rect1->pt1.x <= rect2->pt2.x) &&  /* FALSE: rect1 is wholly to the right */
+         (rect2->pt1.x <= rect1->pt2.x) &&  /* FALSE: rect2 is wholly to the right */
+         (rect1->pt1.y <= rect2->pt2.y) &&  /* FALSE: rect1 is wholly below rect2 */
+         (rect2->pt1.y <= rect1->pt2.y);    /* FALSE: rect2 is wholly below rect1 */
 }
 
