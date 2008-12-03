@@ -54,7 +54,7 @@
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_NXTK_BORDERWIDTH
-#  define CONFIG_NXTK_BORDERWIDTH 2
+#  define CONFIG_NXTK_BORDERWIDTH 4
 #endif
 
 #ifndef CONFIG_NXTK_BORDERCOLOR1
@@ -104,6 +104,11 @@ extern "C" {
 /* That is the callback for the framed window */
 
 extern FAR const struct nx_callback_s g_nxtkcb;
+
+/* Frame border colors */
+
+extern nxgl_mxpixel_t g_bordercolor1[CONFIG_NX_NPLANES];
+extern nxgl_mxpixel_t g_bordercolor2[CONFIG_NX_NPLANES];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -173,6 +178,25 @@ EXTERN void nxtk_subwindowmove(FAR struct nxtk_framedwindow_s *fwnd,
                                FAR const struct nxgl_rect_s *srcrect,
                                FAR const struct nxgl_point_s *srcoffset,
                                FAR const struct nxgl_rect_s *bounds);
+/****************************************************************************
+ * Name: nxtk_drawframe
+ *
+ * Description:
+ *   Redraw the window frame.
+ *
+ * Input parameters:
+ *   fwnd   - the framed window whose frame needs to be re-drawn.  This must
+ *            have been previously created by nxtk_openwindow().
+ *   bounds - Only draw the ports of the frame within this bounding box.
+ *            (window relative coordinates).
+ *
+ * Returned value:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
+                          FAR const struct nxgl_rect_s *bounds);
 #undef EXTERN
 #if defined(__cplusplus)
 }

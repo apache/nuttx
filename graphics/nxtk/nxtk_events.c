@@ -108,6 +108,7 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hwnd;
   struct nxgl_rect_s intersection;
+  struct nxgl_rect_s relbounds;
 
   DEBUGASSERT(hwnd && rect && fwnd->fwcb);
 
@@ -120,7 +121,14 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
   if (fwnd->fwcb->redraw)
     {
-      nxgl_rectintersect(&intersection, &fwnd->fwrect, rect);
+      /* Convert the client window into a window relative rectangle, then
+       * get the intersection with the incoming rectangle.  That leaves the
+       * portion of the client window that needs to be updated.
+       */
+
+      nxgl_rectoffset(&relbounds, &fwnd->fwrect, -fwnd->fwrect.pt1.x, -fwnd->fwrect.pt1.y);
+      nxgl_rectintersect(&intersection, rect, &relbounds);
+
       gvdbg("nxtk_redraw: fwrect intersction={(%d,%d),(%d,%d)}\n",
            intersection.pt1.x, intersection.pt1.y,
            intersection.pt2.x, intersection.pt2.y);
@@ -137,7 +145,14 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
   if (fwnd->tbcb && fwnd->tbcb->redraw)
     {
-      nxgl_rectintersect(&intersection, &fwnd->tbrect, rect);
+      /* Convert the toolbar window into a window relative rectangle, then
+       * get the intersection with the incoming rectangle.  That leaves the
+       * portion of the toolbar window that needs to be updated.
+       */
+
+      nxgl_rectoffset(&relbounds, &fwnd->tbrect, -fwnd->tbrect.pt1.x, -fwnd->tbrect.pt1.y);
+      nxgl_rectintersect(&intersection, rect, &relbounds);
+
       gvdbg("nxtk_redraw: tbrect intersction={(%d,%d),(%d,%d)}\n",
            intersection.pt1.x, intersection.pt1.y,
            intersection.pt2.x, intersection.pt2.y);
@@ -148,7 +163,9 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
         }
     }
 
-#warning "Need to redraw frame as well"
+  /* Then draw the frame */
+
+  nxtk_drawframe(fwnd, rect);
 }
 
 /****************************************************************************
@@ -164,7 +181,7 @@ static void nxtk_position(NXWINDOW hwnd, FAR const struct nxgl_size_s *size,
   struct nxgl_size_s subwindowsize;
 
   gvdbg("nxtk_position: hwnd=%p size=(%d,%d) pos=(%d,%d) bounds={(%d,%d),(%d,%d)}\n",
-        hwnd, size->w, size->w, pos->x, pos->y,
+        hwnd, size->w, size->h, pos->x, pos->y,
         bounds->pt1.x, bounds->pt1.y, bounds->pt2.x, bounds->pt2.y);
 
   /* Recalculate the dimensions of the toolbar and client windows */
