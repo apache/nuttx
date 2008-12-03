@@ -113,8 +113,13 @@ void nxtk_setsubwindows(FAR struct nxtk_framedwindow_s *fwnd)
 
       /* Position the toolbar and client window just under the top border */
 
-      tbtop += (bdrheight / 2);
+#if CONFIG_NXTK_BORDERWIDTH > 1
+      tbtop += CONFIG_NXTK_BORDERWIDTH - 1;
+      fwtop = tbtop + 1;
+#else
+      tbtop += CONFIG_NXTK_BORDERWIDTH;
       fwtop = tbtop;
+#endif
 
       /* Is it big enough for any part of the toolbar? */
 
