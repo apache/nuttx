@@ -107,7 +107,7 @@ int nxtk_setsize(NXTKWINDOW hfwnd, FAR struct nxgl_size_s *size)
   /* Add the sizes need for the toolbar and the borders */
 
   newsize.w = size->w + 2 * CONFIG_NXTK_BORDERWIDTH;
-  newsize.h = size->w + fwnd->tbheight + 2 * CONFIG_NXTK_BORDERWIDTH;
+  newsize.h = size->h + fwnd->tbheight + 2 * CONFIG_NXTK_BORDERWIDTH;
 
   /* Then set the window size */
 
