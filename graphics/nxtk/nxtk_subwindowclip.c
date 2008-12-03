@@ -102,9 +102,9 @@ void nxtk_subwindowclip(FAR struct nxtk_framedwindow_s *fwnd,
 
   /* Temporarily, position the src rectangle in absolute screen coordinates */
 
-  nxgl_rectoffset(&tmp, dest, bounds->pt1.x, bounds->pt1.y);
+  nxgl_rectoffset(&tmp, src, bounds->pt1.x, bounds->pt1.y);
 
-  /* Clip the dest rectangle to lie within the client window region */
+  /* Clip the src rectangle to lie within the client window region */
 
   nxgl_rectintersect(&tmp, &tmp, bounds);
 
