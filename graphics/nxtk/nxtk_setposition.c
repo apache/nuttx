@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxtk/tk_setposition.c
+ * graphics/nxtk/nxtk_setposition.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
