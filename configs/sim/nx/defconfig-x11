@@ -437,6 +437,9 @@ CONFIG_EXAMPLES_NSH_FATMOUNTPT=/tmp
 # CONFIG_EXAMPLES_NX_BGCOLOR -- The color of the background.  Default: ' '.
 # CONFIG_EXAMPLES_NX_COLOR1 -- The color of window 1. Default: '1'
 # CONFIG_EXAMPLES_NX_COLOR2 -- The color of window 2. Default: '2'
+# CONFIG_EXAMPLES_NX_TBCOLOR -- The color ofthe toolbar. Default: '3'
+# CONFIG_EXAMPLES_NX_RAWWINDOWS -- Use raw windows;  Default is to
+#   use pretty, framed NXTK windows with toolbars.
 # CONFIG_EXAMPLES_NX_STACKSIZE -- The stacksize to use when creating
 #   the NX server.  Default 2048
 # CONFIG_EXAMPLES_NX_CLIENTPRIO -- The client priority.  Default: 80
@@ -447,6 +450,8 @@ CONFIG_EXAMPLES_NX_VPLANE=0
 #CONFIG_EXAMPLES_NX_BGCOLOR
 #CONFIG_EXAMPLES_NX_COLOR1
 #CONFIG_EXAMPLES_NX_COLOR2
+#CONFIG_EXAMPLES_NX_TBCOLOR
+CONFIG_EXAMPLES_NX_RAWWINDOWS=n
 CONFIG_EXAMPLES_NX_STACKSIZE=8192
 CONFIG_EXAMPLES_NX_CLIENTPRIO=80
 CONFIG_EXAMPLES_NX_SERVERPRIO=120
