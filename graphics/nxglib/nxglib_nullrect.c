@@ -77,6 +77,6 @@
 
 boolean nxgl_nullrect(FAR const struct nxgl_rect_s *rect)
 {
-  return (rect->pt1.x >= rect->pt2.x || rect->pt1.y >= rect->pt2.y);
+  return (rect->pt1.x > rect->pt2.x || rect->pt1.y > rect->pt2.y);
 }
 
