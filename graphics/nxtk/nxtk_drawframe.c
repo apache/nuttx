@@ -187,7 +187,11 @@ int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
   nxtk_drawframeside(fwnd, &frame, bounds, g_bordercolor2);
 #endif
 
-  /* Draw the inner left side,  Thickness: 1, Color: CONFIG_NXTK_BORDERCOLOR2 */
+  /* Draw the inner left side,  Thickness: 1, Color: CONFIG_NXTK_BORDERCOLOR2.
+   * This segment stops at the bottom of the toolbar.  If there is a
+   * tool bar, then we have to continue this to the top of the display
+   * using g_bordercolor1 (see below)
+   */
 
 #if CONFIG_NXTK_BORDERWIDTH > 1
   frame.pt1.y = CONFIG_NXTK_BORDERWIDTH - 1 + tbsize.h;
@@ -203,7 +207,7 @@ int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
 
   /* Draw the inner left side,  Thickness:  CONFIG_NXTK_BORDERWIDTH-1,
    * Color: CONFIG_NXTK_BORDERCOLOR1
- */
+   */
 
 #if CONFIG_NXTK_BORDERWIDTH > 1
   frame.pt1.x = wndsize.w - CONFIG_NXTK_BORDERWIDTH;
@@ -213,5 +217,22 @@ int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
   frame.pt2.x = frame.pt1.x;
 #endif
   nxtk_drawframeside(fwnd, &frame, bounds, g_bordercolor1);
+
+  /* When there is a toolbar, we also have to patch in this tiny
+   * line segment -- Is there a better way?
+   */
+
+#if CONFIG_NXTK_BORDERWIDTH > 1
+  if (tbsize.h > 0)
+    {
+      frame.pt1.y = 0;
+      frame.pt2.y = CONFIG_NXTK_BORDERWIDTH + tbsize.h;
+
+      frame.pt1.x = CONFIG_NXTK_BORDERWIDTH - 1;
+      frame.pt2.x = frame.pt1.x;
+      nxtk_drawframeside(fwnd, &frame, bounds, g_bordercolor1);
+    }
+#endif
+
   return OK;
 }

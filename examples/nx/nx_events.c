@@ -46,11 +46,18 @@
 #include <errno.h>
 
 #include <nuttx/nx.h>
+#include <nuttx/nxtk.h>
 #include "nx_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_EXAMPLES_NX_RAWWINDOWS
+#  define NXEGWINDOW NXWINDOW
+#else
+#  define NXEGWINDOW NXTKWINDOW
+#endif
 
 /****************************************************************************
  * Private Types
@@ -60,26 +67,34 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void nxeg_redraw1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                         boolean morem, FAR void *arg);
-static void nxeg_redraw2(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                         boolean more, FAR void *arg);
-static void nxeg_position1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
-                           FAR const struct nxgl_point_s *pos,
-                           FAR const struct nxgl_rect_s *bounds,
-                           FAR void *arg);
-static void nxeg_position2(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
-                           FAR const struct nxgl_point_s *pos,
-                           FAR const struct nxgl_rect_s *bounds,
-                           FAR void *arg);
+static void nxeg_redraw(NXEGWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+                        boolean morem, FAR void *arg);
+static void nxeg_position(NXEGWINDOW hwnd, FAR const struct nxgl_size_s *size,
+                          FAR const struct nxgl_point_s *pos,
+                          FAR const struct nxgl_rect_s *bounds,
+                          FAR void *arg);
 #ifdef CONFIG_NX_MOUSE
-static void nxeg_mousein1(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                          ubyte buttons, FAR void *arg);
-static void nxeg_mousein2(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                          ubyte buttons, FAR void *arg);
+static void nxeg_mousein(NXEGWINDOW hwnd, FAR const struct nxgl_point_s *pos,
+                         ubyte buttons, FAR void *arg);
 #endif
 #ifdef CONFIG_NX_KBD
-static void nxeg_kbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch);
+static void nxeg_kbdin(NXEGWINDOW hwnd, ubyte nch, const ubyte *ch);
+#endif
+
+#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
+static void nxeg_tbredraw(NXEGWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+                          boolean morem, FAR void *arg);
+static void nxeg_tbposition(NXEGWINDOW hwnd, FAR const struct nxgl_size_s *size,
+                            FAR const struct nxgl_point_s *pos,
+                            FAR const struct nxgl_rect_s *bounds,
+                            FAR void *arg);
+#ifdef CONFIG_NX_MOUSE
+static void nxeg_tbmousein(NXEGWINDOW hwnd, FAR const struct nxgl_point_s *pos,
+                            ubyte buttons, FAR void *arg);
+#endif
+#ifdef CONFIG_NX_KBD
+static void nxeg_tbkbdin(NXEGWINDOW hwnd, ubyte nch, const ubyte *ch);
+#endif
 #endif
 
 /****************************************************************************
@@ -90,77 +105,115 @@ static void nxeg_kbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch);
  * Public Data
  ****************************************************************************/
 
-const struct nx_callback_s g_nxcb1 =
+const struct nx_callback_s g_nxcb =
 {
-  nxeg_redraw1,   /* redraw */
-  nxeg_position1  /* position */
+  nxeg_redraw,   /* redraw */
+  nxeg_position  /* position */
 #ifdef CONFIG_NX_MOUSE
-  , nxeg_mousein1 /* mousein */
+  , nxeg_mousein /* mousein */
 #endif
 #ifdef CONFIG_NX_KBD
-  , nxeg_kbdin1   /* my kbdin */
+  , nxeg_kbdin   /* my kbdin */
 #endif
 };
 
-const struct nx_callback_s g_nxcb2 =
+#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
+const struct nx_callback_s g_tbcb =
 {
-  nxeg_redraw2,   /* redraw */
-  nxeg_position2  /* position */
+  nxeg_tbredraw,   /* redraw */
+  nxeg_tbposition  /* position */
 #ifdef CONFIG_NX_MOUSE
-  , nxeg_mousein2 /* mousein */
+  , nxeg_tbmousein /* mousein */
 #endif
 #ifdef CONFIG_NX_KBD
-  , nxeg_kbdin2   /* my kbdin */
+  , nxeg_tbkbdin   /* my kbdin */
 #endif
 };
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxeg_fillwindow
+ ****************************************************************************/
+
+static inline void nxeg_fillwindow(NXEGWINDOW hwnd,
+                                   FAR const struct nxgl_rect_s *rect,
+                                   nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+{
+  int ret;
+
+#ifdef CONFIG_EXAMPLES_NX_RAWWINDOWS
+  ret = nx_fill(hwnd, rect, color);
+  if (ret < 0)
+    {
+      message("nxeg_fillwindow: nx_fill failed: %d\n", errno);
+    }
+#else
+  ret = nxtk_fillwindow(hwnd, rect, color);
+  if (ret < 0)
+    {
+      message("nxeg_fillwindow: nxtk_fillwindow failed: %d\n", errno);
+    }
+#endif
+}
+
+/****************************************************************************
+ * Name: nxeg_fillwindow
+ ****************************************************************************/
+
+#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
+static inline void nxeg_filltoolbar(NXTKTOOLBAR htb,
+                                   FAR const struct nxgl_rect_s *rect,
+                                   nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+{
+  int ret;
+
+  ret = nxtk_filltoolbar(htb, rect, color);
+  if (ret < 0)
+    {
+      message("nxeg_filltoolbar: nxtk_filltoolbar failed: %d\n", errno);
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: nxeg_redraw1
  ****************************************************************************/
 
-static void nxeg_redraw1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                         boolean more, FAR void *arg)
+static void nxeg_redraw(NXEGWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+                        boolean more, FAR void *arg)
 {
   message("nxeg_redraw%d: hwnd=%p rect={(%d,%d),(%d,%d)} more=%s\n",
            (int)arg, hwnd,
            rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y,
            more ? "TRUE" : "FALSE");
-  nx_fill(hwnd, rect, g_color1);
+
+  if (arg == (FAR void *)2)
+    {
+      nxeg_fillwindow(hwnd, rect, g_color2);
+    }
+  else
+    {
+      nxeg_fillwindow(hwnd, rect, g_color1);
+    }
 }
 
 /****************************************************************************
- * Name: nxeg_redraw2
+ * Name: nxeg_position
  ****************************************************************************/
 
-static void nxeg_redraw2(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                         boolean more, FAR void *arg)
-{
-  message("nxeg_redraw%d: hwnd=%p rect={(%d,%d),(%d,%d)} more=%s\n",
-           (int)arg, hwnd,
-           rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y,
-           more ? "TRUE" : "FALSE");
-  nx_fill(hwnd, rect, g_color2);
-}
-
-/****************************************************************************
- * Name: nxeg_position1
- ****************************************************************************/
-
-static void nxeg_position1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
-                           FAR const struct nxgl_point_s *pos,
-                           FAR const struct nxgl_rect_s *bounds,
-                           FAR void *arg)
+static void nxeg_position(NXEGWINDOW hwnd, FAR const struct nxgl_size_s *size,
+                          FAR const struct nxgl_point_s *pos,
+                          FAR const struct nxgl_rect_s *bounds,
+                          FAR void *arg)
 {
   /* Report the position */
 
-  message("nxeg_position%d: hwnd=%p size={(%d,%d),(%d,%d)} pos=(%d,%d) bounds={(%d,%d),(%d,%d)}\n",
-           arg, hwnd,
-           size->pt1.x, size->pt1.y, size->pt2.x, size->pt2.y,
-           pos->x, pos->y,
+  message("nxeg_position%d: hwnd=%p size=(%d,%d) pos=(%d,%d) bounds={(%d,%d),(%d,%d)}\n",
+           arg, hwnd, size->w, size->h, pos->x, pos->y,
            bounds->pt1.x, bounds->pt1.y, bounds->pt2.x, bounds->pt2.y);
 
   /* Have we picked off the window bounds yet? */
@@ -179,46 +232,15 @@ static void nxeg_position1(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
 }
 
 /****************************************************************************
- * Name: nxeg_position2
- ****************************************************************************/
-
-static void nxeg_position2(NXWINDOW hwnd, FAR const struct nxgl_rect_s *size,
-                           FAR const struct nxgl_point_s *pos,
-                           FAR const struct nxgl_rect_s *bounds,
-                           FAR void *arg)
-{
-  /* Report the position */
-
-  message("nxeg_position%d: hwnd=%p size={(%d,%d),(%d,%d)} pos=(%d,%d) bounds={(%d,%d),(%d,%d)}\n",
-           arg, hwnd,
-           size->pt1.x, size->pt1.y, size->pt2.x, size->pt2.y,
-           pos->x, pos->y,
-           bounds->pt1.x, bounds->pt1.y, bounds->pt2.x, bounds->pt2.y);
-}
-
-/****************************************************************************
- * Name: nxeg_mousein1
+ * Name: nxeg_mousein
  ****************************************************************************/
 
 #ifdef CONFIG_NX_MOUSE
-static void nxeg_mousein1(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                          ubyte buttons, FAR void *arg)
+static void nxeg_mousein(NXEGWINDOW hwnd, FAR const struct nxgl_point_s *pos,
+                         ubyte buttons, FAR void *arg)
 {
   message("nxeg_mousein%d: hwnd=%p pos=(%d,%d) button=%02x\n",
            (int)arg, hwnd,  pos->x, pos->y, buttons);
-}
-#endif
-
-/****************************************************************************
- * Name: nxeg_mousein2
- ****************************************************************************/
-
-#ifdef CONFIG_NX_MOUSE
-static void nxeg_mousein2(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                          ubyte buttons, FAR void *arg)
-{
-  message("nxeg_mousein%d: hwnd=%p pos=(%d,%d) button=%02x\n",
-          (int)arg, hwnd,  pos->x, pos->y, buttons);
 }
 #endif
 
@@ -245,27 +267,108 @@ static void nxeg_kbdinfo(ubyte nch, const ubyte *ch)
 #endif
 
 /****************************************************************************
- * Name: nxeg_kbdin1
+ * Name: nxeg_kbdin
  ****************************************************************************/
 
 #ifdef CONFIG_NX_KBD
-static void nxeg_kbdin1(NXWINDOW hwnd, ubyte nch, const ubyte *ch)
+static void nxeg_kbdin(NXEGWINDOW hwnd, ubyte nch, const ubyte *ch)
 {
-  message("nxeg_kbdin1: hwnd=%p nch=%d\n", hwnd, nch);
+  message("nxeg_kbdin: hwnd=%p nch=%d\n", hwnd, nch);
   nxeg_kbdinfo(nch, ch);
 }
+#endif
+
+/****************************************************************************
+ * Name: nxeg_tbredraw
+ ****************************************************************************/
+
+#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
+static void nxeg_tbredraw(NXEGWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+                          boolean more, FAR void *arg)
+{
+  message("nxeg_tbredraw%d: hwnd=%p rect={(%d,%d),(%d,%d)} more=%s\n",
+           (int)arg, hwnd,
+           rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y,
+           more ? "TRUE" : "FALSE");
+  nxeg_filltoolbar(hwnd, rect, g_tbcolor);
+}
+#endif
+
+/****************************************************************************
+ * Name: nxeg_position1
+ ****************************************************************************/
+
+#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
+static void nxeg_tbposition(NXEGWINDOW hwnd, FAR const struct nxgl_size_s *size,
+                           FAR const struct nxgl_point_s *pos,
+                           FAR const struct nxgl_rect_s *bounds,
+                           FAR void *arg)
+{
+  /* Report the position */
+
+  message("nxeg_ptbosition%d: hwnd=%p size=(%d,%d) pos=(%d,%d) bounds={(%d,%d),(%d,%d)}\n",
+           arg, hwnd, size->w, size->h, pos->x, pos->y,
+           bounds->pt1.x, bounds->pt1.y, bounds->pt2.x, bounds->pt2.y);
+}
+#endif
+
+/****************************************************************************
+ * Name: nxeg_tbmousein
+ ****************************************************************************/
+
+#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
+#ifdef CONFIG_NX_MOUSE
+static void nxeg_tbmousein(NXEGWINDOW hwnd, FAR const struct nxgl_point_s *pos,
+                          ubyte buttons, FAR void *arg)
+{
+  message("nxeg_tbmousein%d: hwnd=%p pos=(%d,%d) button=%02x\n",
+           (int)arg, hwnd,  pos->x, pos->y, buttons);
+}
+#endif
+#endif
+
+/****************************************************************************
+ * Name: nxeg_tbkbdin
+ ****************************************************************************/
+
+#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
+#ifdef CONFIG_NX_KBD
+static void nxeg_tbkbdin(NXEGWINDOW hwnd, ubyte nch, const ubyte *ch)
+{
+  message("nxeg_tbkbdin: ERROR -- toolbar should not received keyboard input\n";
+  message("nxeg_tbkbdin: hwnd=%p nch=%d\n", hwnd, nch);
+  nxeg_kbdinfo(nch, ch);
+}
+#endif
 #endif
 
 /****************************************************************************
  * Name: nxeg_kbdin2
  ****************************************************************************/
 
+#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
 #ifdef CONFIG_NX_KBD
-static void nxeg_kbdin2(NXWINDOW hwnd, ubyte nch, const ubyte *ch)
+static void nxeg_kbdin2(NXEGWINDOW hwnd, ubyte nch, const ubyte *ch)
 {
   message("nxeg_kbdin2: hwnd=%p nch=%d\n", hwnd, nch);
   nxeg_kbdinfo(nch, ch);
 }
+#endif
+#endif
+
+/****************************************************************************
+ * Name: nxeg_mousein2
+ ****************************************************************************/
+
+#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
+#ifdef CONFIG_NX_MOUSE
+static void nxeg_mousein2(NXEGWINDOW hwnd, FAR const struct nxgl_point_s *pos,
+                          ubyte buttons, FAR void *arg)
+{
+  message("nxeg_mousein%d: hwnd=%p pos=(%d,%d) button=%02x\n",
+          (int)arg, hwnd,  pos->x, pos->y, buttons);
+}
+#endif
 #endif
 
 /****************************************************************************
@@ -280,8 +383,6 @@ static void nxeg_kbdin2(NXWINDOW hwnd, ubyte nch, const ubyte *ch)
 FAR void *nx_listenerthread(FAR void *arg)
 {
   int ret;
-
-  /* Set up to catch a signal */
 
   /* Process events forever */
 

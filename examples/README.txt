@@ -66,6 +66,9 @@ examples/nx
     CONFIG_EXAMPLES_NX_BGCOLOR -- The color of the background.  Default: ' '.
     CONFIG_EXAMPLES_NX_COLOR1 -- The color of window 1. Default: '1'
     CONFIG_EXAMPLES_NX_COLOR2 -- The color of window 2. Default: '2'
+    CONFIG_EXAMPLES_NX_TBCOLOR -- The color of the toolbar. Default: '3'
+    CONFIG_EXAMPLES_NX_RAWWINDOWS -- Use raw windows;  Default is to
+      use pretty, framed NXTK windows with toolbars.
 
   This test can be performed with either the single-user version of
   NX or with the multiple user version of NX selected with CONFIG_NX_MULTIUSER.

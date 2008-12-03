@@ -189,6 +189,24 @@ EXTERN int nxtk_setsize(NXTKWINDOW hfwnd, FAR struct nxgl_size_s *size);
 EXTERN int nxtk_raise(NXTKWINDOW hfwnd);
 
 /****************************************************************************
+ * Name: nxtk_lower
+ *
+ * Description:
+ *   Lower the window containing the specified client sub-window to the
+ *   bottom of the display.
+ *
+ * Input parameters:
+ *   hfwnd - the window to be lowered.  This must have been previously created
+ *           by nxtk_openwindow().
+ *
+ * Returned value:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_lower(NXTKWINDOW hfwnd);
+
+/****************************************************************************
  * Name: nxtk_fillwindow
  *
  * Description:

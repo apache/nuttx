@@ -88,6 +88,20 @@
 # endif
 #endif
 
+#ifndef CONFIG_EXAMPLES_NX_TBCOLOR
+#  if CONFIG_SIM_FBBPP == 24 || CONFIG_SIM_FBBPP == 32
+#    define CONFIG_EXAMPLES_NX_TBCOLOR 0x00a9a9a9
+#  elif CONFIG_SIM_FBBPP = 16
+#    define CONFIG_EXAMPLES_NX_TBCOLOR 0xad55
+#  else
+#    define CONFIG_EXAMPLES_NX_TBCOLOR '3'
+#  endif
+#endif
+
+#ifndef CONFIG_TOOLBAR_HEIGHT
+#  define CONFIG_TOOLBAR_HEIGHT 16
+#endif
+
 #ifdef CONFIG_NX_MULTIUSER
 #  ifdef CONFIG_DISABLE_MQUEUE
 #    error "The multi-threaded example requires MQ support (CONFIG_DISABLE_MQUEUE=n)"
@@ -153,11 +167,14 @@ enum exitcode_e
   NXEXIT_FBINITIALIZE,
   NXEXIT_FBGETVPLANE,
   NXEXIT_NXOPEN,
+  NXEXIT_NXOPENTOOLBAR,
   NXEXIT_NXCONNECT,
   NXEXIT_NXSETBGCOLOR,
   NXEXIT_NXOPENWINDOW,
   NXEXIT_NXSETSIZE,
   NXEXIT_NXSETPOSITION,
+  NXEXIT_NXLOWER,
+  NXEXIT_NXRAISE,
   NXEXIT_NXCLOSEWINDOW,
   NXEXIT_LOSTSERVERCONN
 };
@@ -172,8 +189,10 @@ extern NXHANDLE g_hnx;
 
 /* NX callback vtables */
 
-extern const struct nx_callback_s g_nxcb1;
-extern const struct nx_callback_s g_nxcb2;
+extern const struct nx_callback_s g_nxcb;
+#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
+extern const struct nx_callback_s g_tbcb;
+#endif
 
 /* The screen resolution */
 
@@ -190,6 +209,9 @@ extern sem_t g_semevent;
 
 extern nxgl_mxpixel_t g_color1[CONFIG_NX_NPLANES];
 extern nxgl_mxpixel_t g_color2[CONFIG_NX_NPLANES];
+#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
+extern nxgl_mxpixel_t g_tbcolor[CONFIG_NX_NPLANES];
+#endif
 
 /****************************************************************************
  * Public Function Prototypes

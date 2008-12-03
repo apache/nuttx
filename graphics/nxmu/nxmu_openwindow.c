@@ -104,7 +104,7 @@ void nxmu_openwindow(FAR struct nxbe_state_s *be, FAR struct nxbe_window_s *wnd)
 
   /* Report the initial size/position of the window to the client */
 
-  nxfe_reportposition((NXWINDOW)wnd);
+  nxfe_reportposition(wnd);
 
   /* Provide the initial mouse settings to the client */
 
