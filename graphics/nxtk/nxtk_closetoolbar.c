@@ -84,11 +84,11 @@
  *   htb - The toolbar handle returned by nxtk_opentoolbar
  *
  * Return:
- *   None
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-void nxtk_closetoolbar(NXTKTOOLBAR htb)
+int nxtk_closetoolbar(NXTKTOOLBAR htb)
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)htb;
 
@@ -107,5 +107,6 @@ void nxtk_closetoolbar(NXTKTOOLBAR htb)
    */
 
   nxfe_redrawreq(&fwnd->wnd, &fwnd->wnd.bounds);
+  return OK;
 }
 

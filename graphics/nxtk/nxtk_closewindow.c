@@ -84,13 +84,12 @@
  *   hfwnd - The handle returned by nxtk_openwindow
  *
  * Return:
- *   Success: A non-NULL handle used with subsequent NXTK window accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-void nxtk_closewindow(NXTKWINDOW hfwnd)
+int nxtk_closewindow(NXTKWINDOW hfwnd)
 {
-  nx_closewindow((NXWINDOW)hfwnd);
+  return nx_closewindow((NXWINDOW)hfwnd);
 }
 

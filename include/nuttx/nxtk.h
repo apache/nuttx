@@ -108,12 +108,11 @@ EXTERN NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
  *   hfwnd - The handle returned by nxtk_openwindow
  *
  * Return:
- *   Success: A non-NULL handle used with subsequent NXTK window accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-EXTERN void nxtk_closewindow(NXTKWINDOW hfwnd);
+EXTERN int nxtk_closewindow(NXTKWINDOW hfwnd);
 
 /****************************************************************************
  * Name: nxtk_getposition
@@ -309,11 +308,11 @@ EXTERN NXTKTOOLBAR nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
  *   htb - The toolbar handle returned by nxtk_opentoolbar
  *
  * Return:
- *   None
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-EXTERN void nxtk_closetoolbar(NXTKTOOLBAR htb);
+EXTERN int nxtk_closetoolbar(NXTKTOOLBAR htb);
 
 /****************************************************************************
  * Name: nxtk_filltoolbar
