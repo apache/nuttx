@@ -81,8 +81,9 @@
  *   Move a rectangular region within the toolbar sub-window of a framed window
  *
  * Input Parameters:
- *   htb   - The toolbar sub-window within which the move is to be done.
- *            This must have been previously created by nxtk_openwindow().
+ *   hfwnd  - The sub-window containing the toolbar within which the move is
+ *            to be done. This must have been previously created by
+ *            nxtk_openwindow().
  *   rect   - Describes the rectangular region relative to the toolbar
  *            sub-window to move
  *   offset - The offset to move the region
@@ -92,15 +93,15 @@
  *
  ****************************************************************************/
 
-int nxtk_movetoolbar(NXTKTOOLBAR htb, FAR const struct nxgl_rect_s *rect,
+int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
                      FAR const struct nxgl_point_s *offset)
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)htb;
+  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
   struct nxgl_rect_s srcrect;
   struct nxgl_point_s clipoffset;
 
 #ifdef CONFIG_DEBUG
-  if (!htb || !rect || !offset)
+  if (!hfwnd || !rect || !offset)
     {
       errno = EINVAL;
       return ERROR;
@@ -115,5 +116,5 @@ int nxtk_movetoolbar(NXTKTOOLBAR htb, FAR const struct nxgl_rect_s *rect,
 
   /* Then move it within the toolbar window */
 
-  return nx_move((NXTKTOOLBAR)htb, &srcrect, &clipoffset);
+  return nx_move((NXWINDOW)hfwnd, &srcrect, &clipoffset);
 }

@@ -87,14 +87,13 @@
  *   arg    - User provided value that will be returned with toolbar callbacks.
  *
  * Return:
- *   Success: A non-NULL handle used with subsequent NXTK toolbar accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-NXTKTOOLBAR nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
-                             FAR const struct nx_callback_s *cb,
-                             FAR void *arg)
+int nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
+                     FAR const struct nx_callback_s *cb,
+                     FAR void *arg)
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
 
@@ -102,7 +101,7 @@ NXTKTOOLBAR nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
   if (!hfwnd || !cb)
     {
       errno = EINVAL;
-      return NULL;
+      return ERROR;
     }
 #endif
 
@@ -124,6 +123,6 @@ NXTKTOOLBAR nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
 
   /* Return the initialized toolbar reference */
 
-  return (NXTKTOOLBAR)fwnd;
+  return OK;
 }
 

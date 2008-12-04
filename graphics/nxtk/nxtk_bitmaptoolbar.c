@@ -80,7 +80,7 @@
  *   specified toolbar sub-window.
  *
  * Input Parameters:
- *   htb    - The toolbar sub-window that will receive the bitmap image
+ *   hfwnd  - The sub-window twhose toolbar will receive the bitmap image
  *   dest   - Describes the rectangular region on in the toolbar sub-window
  *            will receive the bit map.
  *   src    - The start of the source image.
@@ -94,15 +94,15 @@
  *
  ****************************************************************************/
 
-int nxtk_bitmaptoolbar(NXTKWINDOW htb, FAR const struct nxgl_rect_s *dest,
+int nxtk_bitmaptoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *dest,
                        FAR const void *src[CONFIG_NX_NPLANES],
                        FAR const struct nxgl_point_s *origin, unsigned int stride)
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)htb;
+  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
   struct nxgl_rect_s clipdest;
 
 #ifdef CONFIG_DEBUG
-  if (!htb || !dest || !src || !origin)
+  if (!hfwnd || !dest || !src || !origin)
     {
       errno = EINVAL;
       return ERROR;
@@ -118,6 +118,6 @@ int nxtk_bitmaptoolbar(NXTKWINDOW htb, FAR const struct nxgl_rect_s *dest,
 
   /* Then copy the bitmap */
 
-  nx_bitmap((NXWINDOW)htb, &clipdest, src, origin, stride);
+  nx_bitmap((NXWINDOW)hfwnd, &clipdest, src, origin, stride);
   return OK;
 }

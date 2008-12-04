@@ -81,16 +81,16 @@
  *   Create a tool bar at the top of the specified framed window
  *
  * Input Parameters:
- *   htb - The toolbar handle returned by nxtk_opentoolbar
+ *   hfwnd - The handle returned by nxtk_openwindow
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nxtk_closetoolbar(NXTKTOOLBAR htb)
+int nxtk_closetoolbar(NXTKWINDOW hfwnd)
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)htb;
+  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
 
   /* Un-initialize the toolbar info */
 

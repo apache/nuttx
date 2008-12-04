@@ -166,7 +166,7 @@ static inline void nxeg_fillwindow(NXEGWINDOW hwnd,
  ****************************************************************************/
 
 #ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
-static inline void nxeg_filltoolbar(NXTKTOOLBAR htb,
+static inline void nxeg_filltoolbar(NXTKWINDOW htb,
                                    FAR const struct nxgl_rect_s *rect,
                                    nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {

@@ -81,7 +81,7 @@
  *  Fill the specified rectangle in the toolbar with the specified color
  *
  * Input Parameters:
- *   htb - The window handle returned by nxtk_openwindow
+ *   hfwnd - The handle returned by nxtk_openwindow
  *   trap  - The trapezoidal region to be filled
  *   color - The color to use in the fill
  *
@@ -90,14 +90,14 @@
  *
  ****************************************************************************/
 
-int nxtk_filltraptoolbar(NXTKTOOLBAR htb, FAR const struct nxgl_trapezoid_s *trap,
+int nxtk_filltraptoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_trapezoid_s *trap,
                         nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)htb;
+  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
   struct nxgl_rect_s relclip;
 
 #ifdef CONFIG_DEBUG
-  if (!htb || !trap || !color)
+  if (!hfwnd || !trap || !color)
     {
       errno = EINVAL;
       return ERROR;
@@ -107,5 +107,5 @@ int nxtk_filltraptoolbar(NXTKTOOLBAR htb, FAR const struct nxgl_trapezoid_s *tra
   /* Perform the fill, clipping to the client window */
 
   nxgl_rectoffset(&relclip, &fwnd->tbrect, -fwnd->wnd.bounds.pt1.x, -fwnd->wnd.bounds.pt1.y);
-  return nx_filltrapezoid((NXWINDOW)htb, &relclip, trap, color);
+  return nx_filltrapezoid((NXWINDOW)hfwnd, &relclip, trap, color);
 }

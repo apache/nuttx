@@ -256,18 +256,18 @@ static inline int nxeg_setposition(NXTKWINDOW hwnd, FAR struct nxgl_point_s *pos
  ****************************************************************************/
 
 #ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
-static inline NXTKTOOLBAR nxeq_opentoolbar(NXTKWINDOW hwnd, nxgl_coord_t height,
-                                           FAR const struct nx_callback_s *cb,
-                                           FAR void *arg)
+static inline int nxeq_opentoolbar(NXTKWINDOW hwnd, nxgl_coord_t height,
+                                   FAR const struct nx_callback_s *cb,
+                                   FAR void *arg)
 {
-  NXTKTOOLBAR htb;
-  htb = nxtk_opentoolbar(hwnd, height, cb, arg);
-  if (!htb < 0)
+  int ret;
+  ret = nxtk_opentoolbar(hwnd, height, cb, arg);
+  if (ret < 0)
     {
       message("user_start: nxtk_opentoolbar failed: %d\n", errno);
       g_exitcode = NXEXIT_NXOPENTOOLBAR;
     }
-  return htb;
+  return ret;
 }
 #endif
 
@@ -505,8 +505,6 @@ int user_start(int argc, char *argv[])
 #else
   NXTKWINDOW hwnd1;
   NXTKWINDOW hwnd2;
-  NXTKTOOLBAR htb1;
-  NXTKTOOLBAR htb2;
 #endif
   struct nxgl_size_s size;
   struct nxgl_point_s pt;
@@ -595,8 +593,8 @@ int user_start(int argc, char *argv[])
 
 #ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
   message("user_start: Add toolbar to window #1\n");
-  htb1 = nxeq_opentoolbar(hwnd1, CONFIG_TOOLBAR_HEIGHT, &g_tbcb, (FAR void*)1);
-  if (!htb1)
+  ret = nxeq_opentoolbar(hwnd1, CONFIG_TOOLBAR_HEIGHT, &g_tbcb, (FAR void*)1);
+  if (ret < 0)
     {
       goto errout_with_hwnd1;
     }
@@ -655,8 +653,8 @@ int user_start(int argc, char *argv[])
 
 #ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
   message("user_start: Add toolbar to window #2\n");
-  htb2 = nxeq_opentoolbar(hwnd2, CONFIG_TOOLBAR_HEIGHT, &g_tbcb, (FAR void*)2);
-  if (!htb2)
+  ret = nxeq_opentoolbar(hwnd2, CONFIG_TOOLBAR_HEIGHT, &g_tbcb, (FAR void*)2);
+  if (ret < 0)
     {
       goto errout_with_hwnd2;
     }

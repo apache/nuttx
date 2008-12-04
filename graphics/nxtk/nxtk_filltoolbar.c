@@ -81,7 +81,7 @@
  *  Fill the specified rectangle in the client window with the specified color
  *
  * Input Parameters:
- *   htb  -  The toolbar handle returned by nxtk_opentoolbar
+ *   hfwnd - The handle returned by nxtk_openwindow
  *   rect  - The location within the toolbar window to be filled
  *   color - The color to use in the fill
  *
@@ -90,14 +90,14 @@
  *
  ****************************************************************************/
 
-int nxtk_filltoolbar(NXTKTOOLBAR htb, FAR const struct nxgl_rect_s *rect,
+int nxtk_filltoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
                      nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)htb;
+  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
   struct nxgl_rect_s fillrect;
 
 #ifdef CONFIG_DEBUG
-  if (!htb || !rect || !color)
+  if (!hfwnd || !rect || !color)
     {
       errno = EINVAL;
       return ERROR;
@@ -113,5 +113,5 @@ int nxtk_filltoolbar(NXTKTOOLBAR htb, FAR const struct nxgl_rect_s *rect,
 
   /* Then fill it */
 
-  return nx_fill((NXWINDOW)htb, &fillrect, color);
+  return nx_fill((NXWINDOW)hfwnd, &fillrect, color);
 }
