@@ -89,6 +89,11 @@ endif
 CPPFLAGS	+= -DNXGLIB_BITSPERPIXEL=$(NXGLIB_BITSPERPIXEL)
 CPPFLAGS	+= -DNXGLIB_SUFFIX=$(NXGLIB_SUFFIX)
 
+RFILL_TMP	= $(RFILL_CSRC:.c=.i)
+TFILL_TMP	= $(TFILL_CSRC:.c=.i)
+RMOVE_TMP	= $(RMOVE_CSRC:.c=.i)
+RCOPY_TMP	= $(RCOPY_CSRC:.c=.i)
+
 GEN_CSRCS	= $(RFILL_CSRC) $(TFILL_CSRC) $(RMOVE_CSRC) $(RCOPY_CSRC)
 
 all:	$(GEN_CSRCS)
@@ -96,26 +101,34 @@ all:	$(GEN_CSRCS)
 
 $(RFILL_CSRC) : nxglib_fillrectangle.c nxglib_bitblit.h
 ifneq ($(NXGLIB_BITSPERPIXEL),)
-	$(call PREPROCESS, nxglib_fillrectangle.c, $@)
+	@$(call PREPROCESS, nxglib_fillrectangle.c, $(RFILL_TMP))
+	@cat $(RFILL_TMP) | sed -e "/^#/d" >$@
+	@rm -f  $(RFILL_TMP)
 endif
 
 $(TFILL_CSRC) : nxglib_filltrapezoid.c nxglib_bitblit.h
 ifneq ($(NXGLIB_BITSPERPIXEL),)
-	$(call PREPROCESS, nxglib_filltrapezoid.c, $@)
+	@$(call PREPROCESS, nxglib_filltrapezoid.c, $(TFILL_TMP))
+	@cat $(TFILL_TMP) | sed -e "/^#/d" >$@
+	@rm -f  $(TFILL_TMP)
 endif
 
 $(RMOVE_CSRC) : nxglib_moverectangle.c nxglib_bitblit.h
 ifneq ($(NXGLIB_BITSPERPIXEL),)
-	$(call PREPROCESS, nxglib_moverectangle.c, $@)
+	@$(call PREPROCESS, nxglib_moverectangle.c, $(RMOVE_TMP))
+	@cat $(RMOVE_TMP) | sed -e "/^#/d" >$@
+	@rm -f  $(RMOVE_TMP)
 endif
 
 $(RCOPY_CSRC) : nxglib_copyrectangle.c nxglib_bitblit.h
 ifneq ($(NXGLIB_BITSPERPIXEL),)
-	$(call PREPROCESS, nxglib_copyrectangle.c, $@)
+	@$(call PREPROCESS, nxglib_copyrectangle.c, $(RCOPY_TMP))
+	@cat $(RCOPY_TMP) | sed -e "/^#/d" >$@
+	@rm -f  $(RCOPY_TMP)
 endif
 
 clean:
-	@rm -f *~ .*.swp
+	@rm -f *~ .*.swp *.i
 
 distclean: clean
 	@rm -f nxglib_fillrectangle_*bpp.c nxglib_filltrapezoid_*bpp.c

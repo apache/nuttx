@@ -64,6 +64,8 @@ endif
 CPPFLAGS	+= -DNXFONTS_BITSPERPIXEL=$(NXFONTS_BITSPERPIXEL)
 CPPFLAGS	+= -DNXFONTS_SUFFIX=$(NXFONTS_SUFFIX)
 
+CONV_TMP	= $(CONV_CSRC:.c=.i)
+
 GEN_CSRCS	= $(CONV_CSRC)
 
 all:	$(GEN_CSRCS)
@@ -71,11 +73,13 @@ all:	$(GEN_CSRCS)
 
 $(CONV_CSRC) : nxfonts_convert.c
 ifneq ($(NXFONTS_BITSPERPIXEL),)
-	$(call PREPROCESS, nxfonts_convert.c, $@)
+	@$(call PREPROCESS, $<, $(CONV_TMP))
+	@cat $(CONV_TMP) | sed -e "/^#/d" >$@
+	@rm -f  $(CONV_TMP)
 endif
 
 clean:
-	@rm -f *~ .*.swp
+	@rm -f *~ .*.swp *.i
 
 distclean: clean
 	@rm -f nxfonts_convert_*bpp.c
