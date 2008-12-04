@@ -99,6 +99,7 @@ int nxtk_bitmapwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *dest,
                       FAR const struct nxgl_point_s *origin, unsigned int stride)
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
+  struct nxgl_point_s wndorigin;
   struct nxgl_rect_s clipdest;
 
 #ifdef CONFIG_DEBUG
@@ -116,8 +117,22 @@ int nxtk_bitmapwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *dest,
 
   nxtk_subwindowclip(fwnd, &clipdest, dest, &fwnd->fwrect);
 
+  /* Now, move the bitmap origin so that it is relative to the containing
+   * window, not the sub-window.
+   *
+   * Temporarily, position the origin in absolute screen coordinates
+   */
+
+  nxgl_vectoradd(&wndorigin, origin, &fwnd->fwrect.pt1);
+
+  /* Then move the origin so that is relative to the containing window, not the
+   * client subwindow
+   */
+
+  nxgl_vectsubtract(&wndorigin, &wndorigin, &fwnd->wnd.bounds.pt1);
+
   /* Then copy the bitmap */
 
-  nx_bitmap((NXWINDOW)hfwnd, &clipdest, src, origin, stride);
+  nx_bitmap((NXWINDOW)hfwnd, &clipdest, src, &wndorigin, stride);
   return OK;
 }

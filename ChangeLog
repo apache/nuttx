@@ -596,4 +596,5 @@
 	  run in more-or-less realtime.
 	* Added more more extensive window support:  frames, toolbars, etc.
 	* Added support for bitmap fonts
+	* Integrated the new font support with a font test in examples/nx
 

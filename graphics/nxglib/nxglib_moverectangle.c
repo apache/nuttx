@@ -145,9 +145,11 @@ void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
 
   stride = pinfo->stride;
 
-  /* Get the dimensions of the rectange to fill:  height in rows and width in bytes */
+  /* Get the dimensions of the rectange to fill: width in pixels, height
+   * in rows
+   */
 
-  width = NXGL_SCALEX(rect->pt2.x - rect->pt1.x + 1);
+  width = rect->pt2.x - rect->pt1.x + 1;
   rows  = rect->pt2.y - rect->pt1.y + 1;
 
 #if NXGLIB_BITSPERPIXEL < 8

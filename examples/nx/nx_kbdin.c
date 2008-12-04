@@ -316,7 +316,6 @@ void nxeg_tbkbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg)
   FAR struct nxeg_state_s *st = (FAR struct nxeg_state_s *)arg;
   message("nxeg_tbkbdin: ERROR -- toolbar should not received keyboard input\n");
   message("nxeg_tbkbdin%d: hwnd=%p nch=%d\n", st->wnum, hwnd, nch);
-  nxeg_kbdinfo(nch, ch);
 }
 #endif
 

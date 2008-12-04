@@ -145,9 +145,9 @@ static inline void nxeg_fillwindow(NXEGWINDOW hwnd,
     {
       message("nxeg_fillwindow: nxtk_fillwindow failed: %d\n", errno);
     }
+#endif
 #ifdef CONFIG_NX_KBD
   nxeg_filltext(hwnd, rect, st);
-#endif
 #endif
 }
 
