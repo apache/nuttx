@@ -81,7 +81,7 @@
  *
  ****************************************************************************/
 
-int int nx_kbdin(NXHANDLE handle, ubyte nch const char *ch)
+int nx_kbdin(NXHANDLE handle, ubyte nch, FAR const ubyte *ch)
 {
   FAR struct nxfe_state_s  *fe = (FAR struct nxfe_state_s *)handle;
   FAR struct nxbe_window_s *wnd = fe->be.topwnd;
@@ -92,7 +92,7 @@ int int nx_kbdin(NXHANDLE handle, ubyte nch const char *ch)
 
   if (wnd->cb->kbdin)
     {
-      wnd->cb->kbdin(wnd, kbd->nch, kbd->ch, wnd->arg);
+      wnd->cb->kbdin(wnd, nch, ch, wnd->arg);
     }
 }
 

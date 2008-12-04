@@ -237,11 +237,11 @@ struct nxclimsg_mousein_s
 /* This message reports a new keypad event to a particular window */
 
 #ifdef CONFIG_NX_KBD
-struct nxclimsg_key
+struct nxclimsg_kbdin_s
 {
   uint32 msgid;                  /* NX_CLIMSG_KBDIN */
   FAR struct nxbe_window_s *wnd; /* The handle of window receiving keypad input */
-  ubyte nch                      /* Number of characters received */
+  ubyte nch;                     /* Number of characters received */
   ubyte ch[1];                   /* Array of received characters */
 };
 #endif
@@ -408,7 +408,7 @@ struct nxsvrmsg_mousein_s
 struct nxsvrmsg_kbdin_s
 {
   uint32     msgid;                  /* NX_SVRMSG_KBDIN */
-  ubyte      nch                     /* Number of characters received */
+  ubyte      nch ;                   /* Number of characters received */
   ubyte      ch[1];                  /* Array of received characters */
 };
 #endif
@@ -613,7 +613,7 @@ EXTERN int nxmu_mousein(FAR struct nxfe_state_s *fe,
  ****************************************************************************/
 
 #ifdef CONFIG_NX_KBD
-EXTERN void nxmu_kbdin(FAR struct nxfe_state_s *fe, ubyte nch, ubyte *ch);
+EXTERN void nxmu_kbdin(FAR struct nxfe_state_s *fe, ubyte nch, FAR ubyte *ch);
 #endif
 
 #undef EXTERN

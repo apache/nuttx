@@ -72,7 +72,7 @@ static void nxtk_mousein(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
                          ubyte buttons, FAR void *arg);
 #endif
 #ifdef CONFIG_NX_KBD
-static void nxtk_kbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch);
+static void nxtk_kbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg);
 #endif
 
 /****************************************************************************
@@ -91,7 +91,7 @@ const struct nx_callback_s g_nxtkcb =
   , nxtk_mousein  /* mousein */
 #endif
 #ifdef CONFIG_NX_KBD
-  , nxtk_kbdin1   /* kbdin */
+  , nxtk_kbdin    /* kbdin */
 #endif
 };
 
@@ -252,7 +252,7 @@ static void nxtk_mousein(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
  ****************************************************************************/
 
 #ifdef CONFIG_NX_KBD
-static void nxtk_kbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch)
+static void nxtk_kbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg)
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hwnd;
 
@@ -260,7 +260,7 @@ static void nxtk_kbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch)
 
   if (fwnd->fwcb->kbdin)
     {
-      fwnd->fwcb->kbdin((NXTKWINDOW)fwnd, nch, ch);
+      fwnd->fwcb->kbdin((NXTKWINDOW)fwnd, nch, ch, fwnd->fwarg);
     }
 }
 #endif

@@ -43,6 +43,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <sched.h>
 #include <pthread.h>
 #include <errno.h>
@@ -71,6 +72,12 @@
  ****************************************************************************/
 
 static int g_exitcode = NXEXIT_SUCCESS;
+
+#ifdef CONFIG_NX_KBD
+static const ubyte g_kbdmsg1[] = "NuttX is cool!";
+static const ubyte g_kbdmsg2[] = "NuttX is fun!";
+#endif
+
 
 /****************************************************************************
  * Public Data
@@ -660,6 +667,23 @@ int user_start(int argc, char *argv[])
   sleep(1);
 #endif
 
+  /* Give keyboard input to the top window -- should be window #2 */
+
+#ifdef CONFIG_NX_KBD
+  message("user_start: Send keyboard input: %s\n", g_kbdmsg1);
+  ret = nx_kbdin(g_hnx, strlen((FAR const char *)g_kbdmsg1), g_kbdmsg1);
+  if (ret < 0)
+    {
+      message("user_start: nx_kbdin failed: %d\n", errno);
+      goto errout_with_hwnd2;
+    }
+
+  /* Sleep a bit */
+
+  message("user_start: Sleeping\n\n");
+  sleep(1);
+#endif
+
   /* Lower window 2 */
 
   message("user_start: Lower window #2\n");
@@ -678,6 +702,23 @@ int user_start(int argc, char *argv[])
 
 #ifdef CONFIG_NX_MOUSE
   nxeg_drivemouse();
+
+  /* Sleep a bit */
+
+  message("user_start: Sleeping\n\n");
+  sleep(1);
+#endif
+
+  /* Give keyboard input to the top window -- should be window #1 */
+
+#ifdef CONFIG_NX_KBD
+  message("user_start: Send keyboard input: %s\n", g_kbdmsg2);
+  ret = nx_kbdin(g_hnx, strlen((FAR const char *)g_kbdmsg2), g_kbdmsg2);
+  if (ret < 0)
+    {
+      message("user_start: nx_kbdin failed: %d\n", errno);
+      goto errout_with_hwnd2;
+    }
 
   /* Sleep a bit */
 

@@ -177,7 +177,7 @@ struct nx_callback_s
    **************************************************************************/
 
 #ifdef CONFIG_NX_KBD
-  void (*kbdin)(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg);
+  void (*kbdin)(NXWINDOW hwnd, ubyte nch, FAR const ubyte *ch, FAR void *arg);
 #endif
 };
 
@@ -687,7 +687,7 @@ EXTERN int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
 
 #ifdef CONFIG_NX_KBD
 EXTERN int nx_kbdchin(NXHANDLE handle, ubyte ch);
-EXTERN int nx_kbdin(NXHANDLE handle, ubyte nch const char *ch);
+EXTERN int nx_kbdin(NXHANDLE handle, ubyte nch, FAR const ubyte *ch);
 #endif
 
 /****************************************************************************

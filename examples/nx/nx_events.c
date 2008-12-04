@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <semaphore.h>
 #include <debug.h>
 #include <errno.h>
@@ -78,7 +79,7 @@ static void nxeg_mousein(NXEGWINDOW hwnd, FAR const struct nxgl_point_s *pos,
                          ubyte buttons, FAR void *arg);
 #endif
 #ifdef CONFIG_NX_KBD
-static void nxeg_kbdin(NXEGWINDOW hwnd, ubyte nch, const ubyte *ch);
+static void nxeg_kbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg);
 #endif
 
 #ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
@@ -93,7 +94,7 @@ static void nxeg_tbmousein(NXEGWINDOW hwnd, FAR const struct nxgl_point_s *pos,
                             ubyte buttons, FAR void *arg);
 #endif
 #ifdef CONFIG_NX_KBD
-static void nxeg_tbkbdin(NXEGWINDOW hwnd, ubyte nch, const ubyte *ch);
+static void nxeg_tbkbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg);
 #endif
 #endif
 
@@ -256,11 +257,11 @@ static void nxeg_kbdinfo(ubyte nch, const ubyte *ch)
     {
       if (isprint(ch[i]))
         {
-          message("          ch[%d]=  (%02x)", i, ch[i]);
+          message("          ch[%d]=%c (%02x)\n", i, ch[i], ch[i]);
         }
       else
         {
-          message("          ch[%d]=%c (%02x)", i, ch[i], ch[i]);
+          message("          ch[%d]=  (%02x)\n", i, ch[i]);
         }
     }
 }
@@ -271,9 +272,9 @@ static void nxeg_kbdinfo(ubyte nch, const ubyte *ch)
  ****************************************************************************/
 
 #ifdef CONFIG_NX_KBD
-static void nxeg_kbdin(NXEGWINDOW hwnd, ubyte nch, const ubyte *ch)
+static void nxeg_kbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg)
 {
-  message("nxeg_kbdin: hwnd=%p nch=%d\n", hwnd, nch);
+  message("nxeg_kbdin%d: hwnd=%p nch=%d\n", (int)arg, hwnd, nch);
   nxeg_kbdinfo(nch, ch);
 }
 #endif
@@ -333,40 +334,11 @@ static void nxeg_tbmousein(NXEGWINDOW hwnd, FAR const struct nxgl_point_s *pos,
 
 #ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
 #ifdef CONFIG_NX_KBD
-static void nxeg_tbkbdin(NXEGWINDOW hwnd, ubyte nch, const ubyte *ch)
+static void nxeg_tbkbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg)
 {
-  message("nxeg_tbkbdin: ERROR -- toolbar should not received keyboard input\n";
-  message("nxeg_tbkbdin: hwnd=%p nch=%d\n", hwnd, nch);
+  message("nxeg_tbkbdin: ERROR -- toolbar should not received keyboard input\n");
+  message("nxeg_tbkbdin%d: hwnd=%p nch=%d\n", (int)arg, hwnd, nch);
   nxeg_kbdinfo(nch, ch);
-}
-#endif
-#endif
-
-/****************************************************************************
- * Name: nxeg_kbdin2
- ****************************************************************************/
-
-#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
-#ifdef CONFIG_NX_KBD
-static void nxeg_kbdin2(NXEGWINDOW hwnd, ubyte nch, const ubyte *ch)
-{
-  message("nxeg_kbdin2: hwnd=%p nch=%d\n", hwnd, nch);
-  nxeg_kbdinfo(nch, ch);
-}
-#endif
-#endif
-
-/****************************************************************************
- * Name: nxeg_mousein2
- ****************************************************************************/
-
-#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
-#ifdef CONFIG_NX_MOUSE
-static void nxeg_mousein2(NXEGWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                          ubyte buttons, FAR void *arg)
-{
-  message("nxeg_mousein%d: hwnd=%p pos=(%d,%d) button=%02x\n",
-          (int)arg, hwnd,  pos->x, pos->y, buttons);
 }
 #endif
 #endif

@@ -94,7 +94,7 @@ int nx_kbdchin(NXHANDLE handle, ubyte ch)
   outmsg.nch   = 1;
   outmsg.ch[0] = ch;
 
-  ret = mq_send(conn->c_cwrmq, &outmsg, sizeof(struct nxsvrmsg_kbdin_s), NX_SVRMSG_PRIO);
+  ret = mq_send(conn->cwrmq, &outmsg, sizeof(struct nxsvrmsg_kbdin_s), NX_SVRMSG_PRIO);
   if (ret < 0)
     {
       gdbg("mq_send failed: %d\n", errno);
