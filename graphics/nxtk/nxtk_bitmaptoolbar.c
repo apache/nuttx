@@ -85,8 +85,8 @@
  *            will receive the bit map.
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
- *            Both dest and origin are in window coordinates, however, origin
- *            may lie outside of the display.
+ *            Both dest and origin are in sub-window coordinates, however, the
+ *            origin may lie outside of the sub-window display.
  *   stride - The width of the full source image in pixels.
  *
  * Return:

@@ -143,7 +143,7 @@ static void nxeg_drivemouse(void)
 static void nxeg_initstate(FAR struct nxeg_state_s *st, int wnum,
                            nxgl_mxpixel_t color)
 {
-#if !defined(CONFIG_EXAMPLES_NX_RAWWINDOWS) && defined(CONFIG_NX_KBD)
+#ifdef CONFIG_NX_KBD
   FAR const struct nx_font_s *fontset;
 #endif
 
@@ -158,7 +158,7 @@ static void nxeg_initstate(FAR struct nxeg_state_s *st, int wnum,
    * state structure
    */
 
-#if !defined(CONFIG_EXAMPLES_NX_RAWWINDOWS) && defined(CONFIG_NX_KBD)
+#ifdef CONFIG_NX_KBD
   fontset      = nxf_getfontset();
   st->nchars   = 0;
   st->nglyphs  = 0;

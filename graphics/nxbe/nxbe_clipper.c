@@ -179,7 +179,7 @@ void nxbe_clipper(FAR struct nxbe_window_s *wnd,
                   FAR struct nxbe_clipops_s *cops,
                   FAR struct nxbe_plane_s *plane)
 {
-  struct nxbe_clipstack_s     stack;
+  struct nxbe_clipstack_s   stack;
   FAR struct nxbe_window_s *currw;
   struct nxgl_rect_s        rect;
   struct nxgl_rect_s        obscuredrect;

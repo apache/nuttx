@@ -61,7 +61,6 @@
  * pixel depths that are not directly addressable (1,2,4, and 24).
  */
 
-#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
 #if CONFIG_EXAMPLES_NX_BPP == 8
 #  define RENDERER nxf_convert_8bpp
 #elif CONFIG_EXAMPLES_NX_BPP == 16
@@ -70,7 +69,6 @@
 #  define RENDERER nxf_convert_32bpp
 #else
 #  error "Unsupported CONFIG_EXAMPLES_NX_BPP"
-#endif
 #endif
 
 /****************************************************************************
@@ -97,7 +95,6 @@
  * Name: nxeg_fillchar
  ****************************************************************************/
 
-#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
 static void nxeg_fillchar(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
                           FAR const struct nxeg_bitmap_s *bm)
 {
@@ -110,41 +107,23 @@ static void nxeg_fillchar(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
   if (!nxgl_nullrect(&intersection))
     {
       FAR void *src = (FAR void *)bm->glyph->bitmap;
-      ret = nxtk_bitmapwindow((NXTKWINDOW)hwnd, &intersection, src,
+#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
+      ret = nxtk_bitmapwindow((NXTKWINDOW)hwnd, &intersection, &src,
                               &bm->bounds.pt1,
                               (unsigned int)bm->glyph->stride);
-#if 0
-EXTERN int nxtk_bitmapwindow(NXTKWINDOW hfwnd,
-                             FAR const struct nxgl_rect_s *dest,
-                             FAR const void *src[CONFIG_NX_NPLANES],
-                             FAR const struct nxgl_point_s *origin,
-                             unsigned int stride);
-#endif
       if (ret < 0)
         {
           message("nxeg_fillchar: nxtk_bitmapwindow failed: %d\n", errno);
         }
-    }
-}
+#else
+      ret = nx_bitmap((NXWINDOW)hwnd, &intersection, &src,
+                      &bm->bounds.pt1,
+                      (unsigned int)bm->glyph->stride);
+      if (ret < 0)
+        {
+          message("nxeg_fillchar: nx_bitmapwindow failed: %d\n", errno);
+        }
 #endif
-
-/****************************************************************************
- * Name: nxeg_kbdinfo
- ****************************************************************************/
-
-static void nxeg_kbdinfo(ubyte nch, const ubyte *ch)
-{
-  int i;
-  for (i = 0; i < nch; i++)
-    {
-      if (isprint(ch[i]))
-        {
-          message("          ch[%d]=%c (%02x)\n", i, ch[i], ch[i]);
-        }
-      else
-        {
-          message("          ch[%d]=  (%02x)\n", i, ch[i]);
-        }
     }
 }
 
@@ -152,13 +131,11 @@ static void nxeg_kbdinfo(ubyte nch, const ubyte *ch)
  * Name: nxeg_renderglyph
  ****************************************************************************/
 
-#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
 static inline FAR const struct nxeg_glyph_s *
 nxeg_renderglyph(FAR struct nxeg_state_s *st, ubyte ch)
 {
   FAR struct nxeg_glyph_s *glyph = NULL;
   FAR nxgl_mxpixel_t *ptr;
-  int bmstride;
   int bmsize;
   int row;
   int col;
@@ -170,13 +147,15 @@ nxeg_renderglyph(FAR struct nxeg_state_s *st, ubyte ch)
     {
       /* Allocate the glyph */
 
-      glyph = &st->glyph[st->nglyphs];
+      glyph         = &st->glyph[st->nglyphs];
+      glyph->code   = ch;
 
       /* Allocate the maximum size for the bitmap */
 
       glyph->stride = (st->width * CONFIG_EXAMPLES_NX_BPP + 4) / 8;
       bmsize        =  glyph->stride * st->height;
       glyph->bitmap = (FAR ubyte *)malloc(bmsize);
+
       if (glyph->bitmap)
         {
           /* Initialize the glyph memory to the background color */
@@ -196,7 +175,7 @@ nxeg_renderglyph(FAR struct nxeg_state_s *st, ubyte ch)
           /* Then render the glyph into the allocated memory */
 
           glyph->width = RENDERER((FAR nxgl_mxpixel_t*)glyph->bitmap,
-                                  st->height, st->width, bmstride,
+                                  st->height, st->width, glyph->stride,
                                   ch, CONFIG_EXAMPLES_NX_FONTCOLOR);
           if (glyph->width <= 0)
             {
@@ -216,13 +195,11 @@ nxeg_renderglyph(FAR struct nxeg_state_s *st, ubyte ch)
 
   return glyph;
 }
-#endif
 
 /****************************************************************************
  * Name: nxeg_getglyph
  ****************************************************************************/
 
-#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
 static FAR const struct nxeg_glyph_s *
 nxeg_getglyph(FAR struct nxeg_state_s *st, ubyte ch)
 {
@@ -230,8 +207,7 @@ nxeg_getglyph(FAR struct nxeg_state_s *st, ubyte ch)
 
   /* First, try to find the glyph in the cache of pre-rendered glyphs */
 
-  message("nxeg_getglyph: ch=%02x\n", ch);
-  for (i = 0; i < st->nglyphs; i++)
+   for (i = 0; i < st->nglyphs; i++)
     {
       if (st->glyph[i].code == ch)
         {
@@ -243,13 +219,11 @@ nxeg_getglyph(FAR struct nxeg_state_s *st, ubyte ch)
 
    return nxeg_renderglyph(st, ch);
 }
-#endif
 
 /****************************************************************************
  * Name: nxeg_addchar
  ****************************************************************************/
 
-#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
 static FAR const struct nxeg_bitmap_s *
 nxeg_addchar(FAR struct nxeg_state_s *st, ubyte ch)
 {
@@ -260,12 +234,11 @@ nxeg_addchar(FAR struct nxeg_state_s *st, ubyte ch)
 
   /* Is there space for another character on the display? */
 
-  message("nxeg_addchar: ch=%02x\n", ch);
   if (st->nchars < NXTK_MAXKBDCHARS)
     {
        /* Yes, setup the bitmap */
 
-       bm = &st->bm[st->nchars];
+       bm       = &st->bm[st->nchars];
 
        /* Find the matching glyph */
 
@@ -295,19 +268,17 @@ nxeg_addchar(FAR struct nxeg_state_s *st, ubyte ch)
        bm->bounds.pt1.x = leftx;
        bm->bounds.pt1.y = 2;
        bm->bounds.pt2.x = leftx + bm->glyph->width - 1;
-       bm->bounds.pt2.x = 2 + st->height - 1;
+       bm->bounds.pt2.y = 2 + st->height - 1;
 
        st->nchars++;
     }
   return bm;
 }
-#endif
 
 /****************************************************************************
  * Name: nxeg_addchars
  ****************************************************************************/
 
-#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
 static inline void nxeg_addchars(NXWINDOW hwnd, FAR struct nxeg_state_s *st,
                                  ubyte nch, FAR const ubyte *ch)
 {
@@ -319,7 +290,6 @@ static inline void nxeg_addchars(NXWINDOW hwnd, FAR struct nxeg_state_s *st,
       nxeg_fillchar(hwnd, &bm->bounds, bm);
     }
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -333,11 +303,7 @@ void nxeg_kbdin(NXWINDOW hwnd, ubyte nch, FAR const ubyte *ch, FAR void *arg)
 {
   FAR struct nxeg_state_s *st = (FAR struct nxeg_state_s *)arg;
   message("nxeg_kbdin%d: hwnd=%p nch=%d\n", st->wnum, hwnd, nch);
-#ifdef CONFIG_EXAMPLES_NX_RAWWINDOWS
-  nxeg_kbdinfo(nch, ch);
-#else
   nxeg_addchars(hwnd, st, nch, ch);
-#endif
 }
 
 /****************************************************************************
@@ -358,7 +324,6 @@ void nxeg_tbkbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg)
  * Name: nxeg_tbkbdin
  ****************************************************************************/
 
-#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
 void nxeg_filltext(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
                    FAR struct nxeg_state_s *st)
 {
@@ -368,6 +333,5 @@ void nxeg_filltext(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
       nxeg_fillchar(hwnd, rect, &st->bm[i]);
     }
 }
-#endif
 
 #endif /* CONFIG_NX_KBD */

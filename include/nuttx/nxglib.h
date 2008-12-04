@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <fixedmath.h>
+#include <nuttx/fb.h>
 
 /****************************************************************************
  * Pre-processor definitions

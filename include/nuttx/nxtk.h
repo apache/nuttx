@@ -273,10 +273,11 @@ EXTERN int nxtk_movewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  *   hfwnd    The client sub0window that will receive the bitmap image
  *   dest   - Describes the rectangular region on in the client sub-window
  *            will receive the bit map.
- *   src    - The start of the source image.
+ *   src    - The start of the source image(s). This is an array source
+ *            images of size CONFIG_NX_NPLANES.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
- *            Both dest and origin are in window coordinates, however, origin
- *            may lie outside of the display.
+ *            Both dest and origin are in sub-window coordinates, however, the
+ *            origin may lie outside of the sub-window display.
  *   stride - The width of the full source image in pixels.
  *
  * Return:
@@ -286,7 +287,7 @@ EXTERN int nxtk_movewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
 
 EXTERN int nxtk_bitmapwindow(NXTKWINDOW hfwnd,
                              FAR const struct nxgl_rect_s *dest,
-                             FAR const void **src,
+                             FAR const void *src[CONFIG_NX_NPLANES],
                              FAR const struct nxgl_point_s *origin,
                              unsigned int stride);
 
@@ -364,6 +365,7 @@ EXTERN int nxtk_filltoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect
 
 EXTERN int nxtk_filltraptoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_trapezoid_s *trap,
                                 nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+
 /****************************************************************************
  * Name: nxtk_movetoolbar
  *
@@ -399,8 +401,8 @@ EXTERN int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect
  *            will receive the bit map.
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
- *            Both dest and origin are in window coordinates, however, origin
- *            may lie outside of the display.
+ *            Both dest and origin are in sub-window coordinates, however, the
+ *            origin may lie outside of the sub-window display.
  *   stride - The width of the full source image in pixels.
  *
  * Return:

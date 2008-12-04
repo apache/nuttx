@@ -228,7 +228,7 @@ struct nxeg_state_s
   ubyte wnum;                        /* Window number */
   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]; /* Window color */
 
-#if !defined(CONFIG_EXAMPLES_NX_RAWWINDOWS) && defined(CONFIG_NX_KBD)
+#ifdef CONFIG_NX_KBD
   ubyte height;                      /* Max height of a font in pixels */
   ubyte width;                       /* Max width of a font in pixels */
 
@@ -287,9 +287,9 @@ extern FAR void *nx_listenerthread(FAR void *arg);
 extern void nxeg_kbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg);
 #ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
 extern void nxeg_tbkbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg);
+#endif
 extern void nxeg_filltext(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
                           FAR struct nxeg_state_s *st);
-#endif
 #endif
 
 #endif /* __EXAMPLES_NX_NX_INTERNAL_H */

@@ -102,10 +102,12 @@ void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
 
   deststride = pinfo->stride;
 
-  /* Get the dimensions of the rectange to fill:  height in rows and width in bytes */
+  /* Get the dimensions of the rectange to fill: width in pixels,
+   * height in rows
+   */
 
-  width = NXGL_SCALEX(dest->pt2.x - dest->pt1.x + 1);
-  rows = dest->pt2.y - dest->pt1.y + 1;
+  width = dest->pt2.x - dest->pt1.x + 1;
+  rows  = dest->pt2.y - dest->pt1.y + 1;
 
 #if NXGLIB_BITSPERPIXEL < 8
 # ifdef CONFIG_NXGL_PACKEDMSFIRST
@@ -168,7 +170,7 @@ void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
 #else
       /* Copy the whole line */
 
-      NXGL_MEMCPY((NXGL_PIXEL_T*)dest, (NXGL_PIXEL_T*)sline, width);
+      NXGL_MEMCPY((NXGL_PIXEL_T*)dline, (NXGL_PIXEL_T*)sline, width);
 #endif
       dline += deststride;
       sline += srcstride;
