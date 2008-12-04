@@ -44,6 +44,8 @@
 #include <nuttx/nxglib.h>
 #include <nuttx/nxfonts.h>
 
+#include "nxfonts_internal.h"
+
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
@@ -138,7 +140,6 @@ int NXF_FUNCNAME(nxf_convert,NXFONTS_SUFFIX)
 (FAR NXF_PIXEL_T *dest, uint16 height, uint16 width, uint16 stride,
  uint16 ch, nxgl_mxpixel_t color)
 {
-  FAR const struct nx_fontset_s *set;
   FAR const struct nx_fontbitmap_s *bm;
   FAR ubyte *line;
   FAR NXF_PIXEL_T *dptr;
@@ -156,16 +157,6 @@ int NXF_FUNCNAME(nxf_convert,NXFONTS_SUFFIX)
   int nbits;
 #endif
 
-  /* Check if we have the fontset containing this character code */
-
-  set = nxf_getfontset(ch);
-  if (!set)
-    {
-      /* No fontset?  Nothing to rend, return the width of a 7-bit space */
-
-      return g_7bitfonts.spwidth;
-   }
-
   /* Map the character code to a bitmap font */
 
   bm = nxf_getbitmap(ch);
@@ -173,7 +164,7 @@ int NXF_FUNCNAME(nxf_convert,NXFONTS_SUFFIX)
     {
       /* No character?  Nothing to rend, return the width of a space */
 
-      return set->spwidth;
+      return g_fonts.spwidth;
     }
 
   /* Get the starting position */
@@ -285,5 +276,5 @@ int NXF_FUNCNAME(nxf_convert,NXFONTS_SUFFIX)
         }
     }
 #endif
-  return bm->metric.width;
+  return bm->metric.width + bm->metric.xoffset;
 }

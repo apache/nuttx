@@ -53,6 +53,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/nx.h>
 #include <nuttx/nxtk.h>
+#include <nuttx/nxfonts.h>
+
 #include "nx_internal.h"
 
 /****************************************************************************
@@ -73,11 +75,12 @@
 
 static int g_exitcode = NXEXIT_SUCCESS;
 
+static struct nxeg_state_s g_wstate[2];
+
 #ifdef CONFIG_NX_KBD
 static const ubyte g_kbdmsg1[] = "NuttX is cool!";
 static const ubyte g_kbdmsg2[] = "NuttX is fun!";
 #endif
-
 
 /****************************************************************************
  * Public Data
@@ -134,16 +137,73 @@ static void nxeg_drivemouse(void)
 #endif
 
 /****************************************************************************
+ * Name: nxeg_initstate
+ ****************************************************************************/
+
+static void nxeg_initstate(FAR struct nxeg_state_s *st, int wnum,
+                           nxgl_mxpixel_t color)
+{
+#if !defined(CONFIG_EXAMPLES_NX_RAWWINDOWS) && defined(CONFIG_NX_KBD)
+  FAR const struct nx_font_s *fontset;
+#endif
+
+  /* Initialize the window number (used for debug output only) and color
+   * (used for redrawing the window)
+   */
+
+  st->wnum     = wnum;
+  st->color[0] = color;
+
+  /* Get information about the font set being used and save this in the
+   * state structure
+   */
+
+#if !defined(CONFIG_EXAMPLES_NX_RAWWINDOWS) && defined(CONFIG_NX_KBD)
+  fontset      = nxf_getfontset();
+  st->nchars   = 0;
+  st->nglyphs  = 0;
+  st->height   = fontset->mxheight;
+  st->width    = fontset->mxwidth;
+#endif
+}
+
+/****************************************************************************
+ * Name: nxeg_freestate
+ ****************************************************************************/
+
+#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
+static void nxeg_freestate(FAR struct nxeg_state_s *st)
+{
+#ifdef CONFIG_NX_KBD
+  int i;
+
+  if (st)
+    {
+      for (i = 0; i < st->nglyphs; i++)
+        {
+           if (st->glyph[i].bitmap)
+              {
+                free(st->glyph[i].bitmap);
+              }
+           st->glyph[i].bitmap = NULL;
+        }
+      st->nchars = 0;
+     }
+#endif
+}
+#endif
+
+/****************************************************************************
  * Name: nxeg_openwindow
  ****************************************************************************/
 
 #ifdef CONFIG_EXAMPLES_NX_RAWWINDOWS
-static inline NXWINDOW nxeg_openwindow(FAR const struct nx_callback_s *cb,
-                                       FAR void *arg)
+static inline NXEGWINDOW nxeg_openwindow(FAR const struct nx_callback_s *cb,
+                                       FAR struct nxeg_state_s *state)
 {
-  NXWINDOW hwnd;
+  NXEGWINDOW hwnd;
 
-  hwnd = nx_openwindow(g_hnx, cb, arg);
+  hwnd = nx_openwindow(g_hnx, cb, (FAR void *)state);
   if (!hwnd)
     {
       message("user_start: nx_openwindow failed: %d\n", errno);
@@ -152,12 +212,12 @@ static inline NXWINDOW nxeg_openwindow(FAR const struct nx_callback_s *cb,
   return hwnd;
 }
 #else
-static inline NXTKWINDOW nxeg_openwindow(FAR const struct nx_callback_s *cb,
-                                         FAR void *arg)
+static inline NXEGWINDOW nxeg_openwindow(FAR const struct nx_callback_s *cb,
+                                         FAR struct nxeg_state_s *state)
 {
-  NXTKWINDOW hwnd;
+  NXEGWINDOW hwnd;
 
-  hwnd = nxtk_openwindow(g_hnx, cb, arg);
+  hwnd = nxtk_openwindow(g_hnx, cb, (FAR void *)state);
   if (!hwnd)
     {
       message("user_start: nxtk_openwindow failed: %d\n", errno);
@@ -172,25 +232,26 @@ static inline NXTKWINDOW nxeg_openwindow(FAR const struct nx_callback_s *cb,
  ****************************************************************************/
 
 #ifdef CONFIG_EXAMPLES_NX_RAWWINDOWS
-static inline int nxeg_closewindow(NXWINDOW hwnd)
+static inline int nxeg_closewindow(NXEGWINDOW hwnd, FAR struct nxeg_state_s *state)
 {
   int ret = nx_closewindow(hwnd);
   if (ret < 0)
     {
-      message("user_start: nx_openwindow failed: %d\n", errno);
+      message("user_start: nx_closewindow failed: %d\n", errno);
       g_exitcode = NXEXIT_NXCLOSEWINDOW;
     }
   return ret;
 }
 #else
-static inline int nxeg_closewindow(NXTKWINDOW hwnd)
+static inline int nxeg_closewindow(NXEGWINDOW hwnd, FAR struct nxeg_state_s *state)
 {
   int ret = nxtk_closewindow(hwnd);
   if (ret < 0)
     {
-      message("user_start: nxtk_openwindow failed: %d\n", errno);
+      message("user_start: nxtk_closewindow failed: %d\n", errno);
       g_exitcode = NXEXIT_NXCLOSEWINDOW;
     }
+  nxeg_freestate(state);
   return ret;
 }
 #endif
@@ -200,7 +261,7 @@ static inline int nxeg_closewindow(NXTKWINDOW hwnd)
  ****************************************************************************/
 
 #ifdef CONFIG_EXAMPLES_NX_RAWWINDOWS
-static inline int nxeg_setsize(NXWINDOW hwnd, FAR struct nxgl_size_s *size)
+static inline int nxeg_setsize(NXEGWINDOW hwnd, FAR struct nxgl_size_s *size)
 {
   int ret = nx_setsize(hwnd, size);
   if (ret < 0)
@@ -211,7 +272,7 @@ static inline int nxeg_setsize(NXWINDOW hwnd, FAR struct nxgl_size_s *size)
   return ret;
 }
 #else
-static inline int nxeg_setsize(NXTKWINDOW hwnd, FAR struct nxgl_size_s *size)
+static inline int nxeg_setsize(NXEGWINDOW hwnd, FAR struct nxgl_size_s *size)
 {
   int ret = nxtk_setsize(hwnd, size);
   if (ret < 0)
@@ -228,7 +289,7 @@ static inline int nxeg_setsize(NXTKWINDOW hwnd, FAR struct nxgl_size_s *size)
  ****************************************************************************/
 
 #ifdef CONFIG_EXAMPLES_NX_RAWWINDOWS
-static inline int nxeg_setposition(NXWINDOW hwnd, FAR struct nxgl_point_s *pos)
+static inline int nxeg_setposition(NXEGWINDOW hwnd, FAR struct nxgl_point_s *pos)
 {
   int ret = nx_setposition(hwnd, pos);
   if (ret < 0)
@@ -239,7 +300,7 @@ static inline int nxeg_setposition(NXWINDOW hwnd, FAR struct nxgl_point_s *pos)
   return ret;
 }
 #else
-static inline int nxeg_setposition(NXTKWINDOW hwnd, FAR struct nxgl_point_s *pos)
+static inline int nxeg_setposition(NXEGWINDOW hwnd, FAR struct nxgl_point_s *pos)
 {
   int ret = nxtk_setposition(hwnd, pos);
   if (ret < 0)
@@ -256,12 +317,12 @@ static inline int nxeg_setposition(NXTKWINDOW hwnd, FAR struct nxgl_point_s *pos
  ****************************************************************************/
 
 #ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
-static inline int nxeq_opentoolbar(NXTKWINDOW hwnd, nxgl_coord_t height,
+static inline int nxeq_opentoolbar(NXEGWINDOW hwnd, nxgl_coord_t height,
                                    FAR const struct nx_callback_s *cb,
-                                   FAR void *arg)
+                                   FAR struct nxeg_state_s *state)
 {
   int ret;
-  ret = nxtk_opentoolbar(hwnd, height, cb, arg);
+  ret = nxtk_opentoolbar(hwnd, height, cb, (FAR void *)state);
   if (ret < 0)
     {
       message("user_start: nxtk_opentoolbar failed: %d\n", errno);
@@ -276,7 +337,7 @@ static inline int nxeq_opentoolbar(NXTKWINDOW hwnd, nxgl_coord_t height,
  ****************************************************************************/
 
 #ifdef CONFIG_EXAMPLES_NX_RAWWINDOWS
-static inline int nxeg_lower(NXWINDOW hwnd)
+static inline int nxeg_lower(NXEGWINDOW hwnd)
 {
   int ret = nx_lower(hwnd);
   if (ret < 0)
@@ -287,7 +348,7 @@ static inline int nxeg_lower(NXWINDOW hwnd)
   return ret;
 }
 #else
-static inline int nxeg_lower(NXTKWINDOW hwnd)
+static inline int nxeg_lower(NXEGWINDOW hwnd)
 {
   int ret = nxtk_lower(hwnd);
   if (ret < 0)
@@ -304,7 +365,7 @@ static inline int nxeg_lower(NXTKWINDOW hwnd)
  ****************************************************************************/
 
 #ifdef CONFIG_EXAMPLES_NX_RAWWINDOWS
-static inline int nxeg_raise(NXWINDOW hwnd)
+static inline int nxeg_raise(NXEGWINDOW hwnd)
 {
   int ret = nx_raise(hwnd);
   if (ret < 0)
@@ -315,7 +376,7 @@ static inline int nxeg_raise(NXWINDOW hwnd)
   return ret;
 }
 #else
-static inline int nxeg_raise(NXTKWINDOW hwnd)
+static inline int nxeg_raise(NXEGWINDOW hwnd)
 {
   int ret = nxtk_raise(hwnd);
   if (ret < 0)
@@ -499,13 +560,8 @@ void user_initialize(void)
 
 int user_start(int argc, char *argv[])
 {
-#ifdef CONFIG_EXAMPLES_NX_RAWWINDOWS
-  NXWINDOW hwnd1;
-  NXWINDOW hwnd2;
-#else
-  NXTKWINDOW hwnd1;
-  NXTKWINDOW hwnd2;
-#endif
+  NXEGWINDOW hwnd1;
+  NXEGWINDOW hwnd2;
   struct nxgl_size_s size;
   struct nxgl_point_s pt;
   nxgl_mxpixel_t color;
@@ -537,7 +593,8 @@ int user_start(int argc, char *argv[])
   /* Create window #1 */
 
   message("user_start: Create window #1\n");
-  hwnd1 = nxeg_openwindow(&g_nxcb, (FAR void *)1);
+  nxeg_initstate(&g_wstate[0], 1, CONFIG_EXAMPLES_NX_COLOR1);
+  hwnd1 = nxeg_openwindow(&g_nxcb, &g_wstate[0]);
   message("user_start: hwnd1=%p\n", hwnd1);
   if (!hwnd1)
     {
@@ -593,7 +650,7 @@ int user_start(int argc, char *argv[])
 
 #ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
   message("user_start: Add toolbar to window #1\n");
-  ret = nxeq_opentoolbar(hwnd1, CONFIG_TOOLBAR_HEIGHT, &g_tbcb, (FAR void*)1);
+  ret = nxeq_opentoolbar(hwnd1, CONFIG_TOOLBAR_HEIGHT, &g_tbcb, &g_wstate[0]);
   if (ret < 0)
     {
       goto errout_with_hwnd1;
@@ -608,7 +665,8 @@ int user_start(int argc, char *argv[])
   /* Create window #2 */
 
   message("user_start: Create window #2\n");
-  hwnd2 = nxeg_openwindow(&g_nxcb, (FAR void *)2);
+  nxeg_initstate(&g_wstate[1], 2, CONFIG_EXAMPLES_NX_COLOR2);
+  hwnd2 = nxeg_openwindow(&g_nxcb, &g_wstate[1]);
   message("user_start: hwnd1=%p\n", hwnd1);
   if (!hwnd1)
     {
@@ -653,7 +711,7 @@ int user_start(int argc, char *argv[])
 
 #ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
   message("user_start: Add toolbar to window #2\n");
-  ret = nxeq_opentoolbar(hwnd2, CONFIG_TOOLBAR_HEIGHT, &g_tbcb, (FAR void*)2);
+  ret = nxeq_opentoolbar(hwnd2, CONFIG_TOOLBAR_HEIGHT, &g_tbcb, &g_wstate[1]);
   if (ret < 0)
     {
       goto errout_with_hwnd2;
@@ -748,13 +806,13 @@ int user_start(int argc, char *argv[])
 
 errout_with_hwnd2:
   message("user_start: Close window\n");
-  (void)nxeg_closewindow(hwnd2);
+  (void)nxeg_closewindow(hwnd2, &g_wstate[2]);
 
   /* Close the window1 */
 
 errout_with_hwnd1:
   message("user_start: Close window #1\n");
-  (void)nxeg_closewindow(hwnd1);
+  (void)nxeg_closewindow(hwnd1, &g_wstate[0]);
 
 errout_with_nx:
 #ifdef CONFIG_NX_MULTIUSER

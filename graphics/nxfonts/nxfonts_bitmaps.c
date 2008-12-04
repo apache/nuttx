@@ -41,6 +41,8 @@
 #include <sys/types.h>
 #include <nuttx/nxfonts.h>
 
+#include "nxfonts_internal.h"
+
 /* Pick the fontset */
 
 #ifdef CONFIG_NXFONT_SANS
@@ -1622,25 +1624,27 @@ NXFONT_DEFMETRIC(255),
 
 struct nx_fontset_s g_7bitfonts =
 {
-  NXFONT_MAXHEIGHT,     /* Max. height of a glyph in rows */
-  NXFONT_MAXWIDTH,      /* Max. width of a glyph in pixels */
-  NXFONT_MIN7BIT,       /* First font code */
-  NXFONT_N7BITFONTS,    /* Number of bitmap fonts */
-  NXFONT_SPACEWIDTH,    /* The width of a space in pixels */
-  g_7bitmaps            /* List of fonts */
+  NXFONT_MIN7BIT,          /* First glyph code */
+  NXFONT_N7BITFONTS,       /* Number of bitmap glyphs */
+  g_7bitmaps               /* List of glyphs */
 };
 
 #if CONFIG_NXFONTS_CHARBITS >= 8
 struct nx_fontset_s g_8bitfonts =
 {
-  NXFONT_MAXHEIGHT,     /* Max. height of a glyph in rows */
-  NXFONT_MAXWIDTH,      /* Max. width of a glyph in pixels */
-  NXFONT_MIN8BIT,       /* First font code */
-  NXFONT_N8BITFONTS,    /* Number of bitmap fonts */
-  NXFONT_SPACEWIDTH,    /* The width of a space in pixels */
-  g_8bitmaps            /* List of fonts */
+  NXFONT_MIN8BIT,          /* First glyph code */
+  NXFONT_N8BITFONTS,       /* Number of bitmap glyphs */
+  g_8bitmaps               /* List of glyphs */
 };
 #endif
+
+struct nx_font_s g_fonts =
+{
+  NXFONT_MAXHEIGHT,        /* Max. height of a glyph in rows */
+  NXFONT_MAXWIDTH,         /* Max. width of a glyph in pixels */
+  CONFIG_NXFONTS_CHARBITS, /* Max number of bits per character code */
+  NXFONT_SPACEWIDTH,       /* The width of a space in pixels */
+};
 
 /****************************************************************************
  * Private Functions

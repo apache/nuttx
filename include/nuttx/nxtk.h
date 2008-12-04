@@ -286,7 +286,7 @@ EXTERN int nxtk_movewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
 
 EXTERN int nxtk_bitmapwindow(NXTKWINDOW hfwnd,
                              FAR const struct nxgl_rect_s *dest,
-                             FAR const void *src[CONFIG_NX_NPLANES],
+                             FAR const void **src,
                              FAR const struct nxgl_point_s *origin,
                              unsigned int stride);
 

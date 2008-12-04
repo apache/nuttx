@@ -43,6 +43,8 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <semaphore.h>
+#include <nuttx/nx.h>
+#include <nuttx/nxtk.h>
 
 /****************************************************************************
  * Definitions
@@ -58,10 +60,14 @@
 #    define CONFIG_EXAMPLES_NX_VPLANE 0
 #endif
 
+#ifndef CONFIG_EXAMPLES_NX_BPP
+#  define CONFIG_EXAMPLES_NX_BPP 32
+#endif
+
 #ifndef CONFIG_EXAMPLES_NX_BGCOLOR
-#  if CONFIG_SIM_FBBPP == 24 || CONFIG_SIM_FBBPP == 32
+#  if CONFIG_EXAMPLES_NX_BPP == 24 || CONFIG_EXAMPLES_NX_BPP == 32
 #    define CONFIG_EXAMPLES_NX_BGCOLOR 0x007b68ee
-#  elif CONFIG_SIM_FBBPP = 16
+#  elif CONFIG_EXAMPLES_NX_BPP = 16
 #    define CONFIG_EXAMPLES_NX_BGCOLOR 0x3088
 #  else
 #    define CONFIG_EXAMPLES_NX_BGCOLOR ' '
@@ -69,9 +75,9 @@
 #endif
 
 #ifndef CONFIG_EXAMPLES_NX_COLOR1
-#  if CONFIG_SIM_FBBPP == 24 || CONFIG_SIM_FBBPP == 32
+#  if CONFIG_EXAMPLES_NX_BPP == 24 || CONFIG_EXAMPLES_NX_BPP == 32
 #    define CONFIG_EXAMPLES_NX_COLOR1 0x00e6e6fa
-#  elif CONFIG_SIM_FBBPP = 16
+#  elif CONFIG_EXAMPLES_NX_BPP = 16
 #    define CONFIG_EXAMPLES_NX_COLOR1 0x30c8
 #  else
 #    define CONFIG_EXAMPLES_NX_COLOR1 '1'
@@ -79,9 +85,9 @@
 #endif
 
 #ifndef CONFIG_EXAMPLES_NX_COLOR2
-#  if CONFIG_SIM_FBBPP == 24 || CONFIG_SIM_FBBPP == 32
+#  if CONFIG_EXAMPLES_NX_BPP == 24 || CONFIG_EXAMPLES_NX_BPP == 32
 #    define CONFIG_EXAMPLES_NX_COLOR2 0x00dcdcdc
-#  elif CONFIG_SIM_FBBPP = 16
+#  elif CONFIG_EXAMPLES_NX_BPP = 16
 #    define CONFIG_EXAMPLES_NX_COLOR2 0x30cc
 #  else
 #    define CONFIG_EXAMPLES_NX_COLOR2 '2'
@@ -89,12 +95,22 @@
 #endif
 
 #ifndef CONFIG_EXAMPLES_NX_TBCOLOR
-#  if CONFIG_SIM_FBBPP == 24 || CONFIG_SIM_FBBPP == 32
+#  if CONFIG_EXAMPLES_NX_BPP == 24 || CONFIG_EXAMPLES_NX_BPP == 32
 #    define CONFIG_EXAMPLES_NX_TBCOLOR 0x00a9a9a9
-#  elif CONFIG_SIM_FBBPP = 16
+#  elif CONFIG_EXAMPLES_NX_BPP = 16
 #    define CONFIG_EXAMPLES_NX_TBCOLOR 0xad55
 #  else
-#    define CONFIG_EXAMPLES_NX_TBCOLOR '3'
+#    define CONFIG_EXAMPLES_NX_TBCOLOR 'T'
+#  endif
+#endif
+
+#ifndef CONFIG_EXAMPLES_NX_FONTCOLOR
+#  if CONFIG_EXAMPLES_NX_BPP == 24 || CONFIG_EXAMPLES_NX_BPP == 32
+#    define CONFIG_EXAMPLES_NX_FONTCOLOR 0x00000000
+#  elif CONFIG_EXAMPLES_NX_BPP = 16
+#    define CONFIG_EXAMPLES_NX_FONTCOLOR 0x0000
+#  else
+#    define CONFIG_EXAMPLES_NX_FONTCOLOR 'F'
 #  endif
 #endif
 
@@ -131,6 +147,14 @@
 #    define CONFIG_EXAMPLES_NX_NOTIFYSIGNO 4
 #  endif
 #endif
+
+#ifdef CONFIG_EXAMPLES_NX_RAWWINDOWS
+#  define NXEGWINDOW NXWINDOW
+#else
+#  define NXEGWINDOW NXTKWINDOW
+#endif
+
+#define NXTK_MAXKBDCHARS 16
 
 /* Debug ********************************************************************/
 
@@ -179,6 +203,43 @@ enum exitcode_e
   NXEXIT_LOSTSERVERCONN
 };
 
+/* Describes one cached glyph bitmap */
+
+struct nxeg_glyph_s
+{
+  ubyte code;                        /* Character code */
+  ubyte width;                       /* Visible width of this glyph */
+  ubyte stride;                      /* Width of the glyph row in bytes */
+  FAR ubyte *bitmap;                 /* Allocated bitmap memory */
+};
+
+/* Describes on character on the display */
+
+struct nxeg_bitmap_s
+{
+  struct nxgl_rect_s bounds;            /* Size/position of bitmap */
+  FAR const struct nxeg_glyph_s *glyph; /* The cached glyph */
+};
+
+/* Describes the overall state of on one window */
+
+struct nxeg_state_s
+{
+  ubyte wnum;                        /* Window number */
+  nxgl_mxpixel_t color[CONFIG_NX_NPLANES]; /* Window color */
+
+#if !defined(CONFIG_EXAMPLES_NX_RAWWINDOWS) && defined(CONFIG_NX_KBD)
+  ubyte height;                      /* Max height of a font in pixels */
+  ubyte width;                       /* Max width of a font in pixels */
+
+  ubyte nchars;                      /* Number of KBD chars received */
+  ubyte nglyphs;                     /* Number of glyphs cached */
+
+  struct nxeg_bitmap_s bm[NXTK_MAXKBDCHARS];
+  struct nxeg_glyph_s  glyph[NXTK_MAXKBDCHARS];
+#endif
+};
+
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
@@ -220,6 +281,15 @@ extern nxgl_mxpixel_t g_tbcolor[CONFIG_NX_NPLANES];
 #if defined(CONFIG_NXGRAPHICS) && defined(CONFIG_NX_MULTIUSER)
 extern int nx_servertask(int argc, char *argv[]);
 extern FAR void *nx_listenerthread(FAR void *arg);
+#endif
+
+#ifdef CONFIG_NX_KBD
+extern void nxeg_kbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg);
+#ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
+extern void nxeg_tbkbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg);
+extern void nxeg_filltext(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+                          FAR struct nxeg_state_s *st);
+#endif
 #endif
 
 #endif /* __EXAMPLES_NX_NX_INTERNAL_H */

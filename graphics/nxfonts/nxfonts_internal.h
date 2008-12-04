@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxfonts/nxfonts_getfont.h
+ * graphics/nxfonts/nxfonts_internal.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -22,8 +22,8 @@
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
  * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT}
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING}
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
  * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
  * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
  * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
@@ -33,114 +33,61 @@
  *
  ****************************************************************************/
 
+#ifndef __GRAPHICS_NXFONTS_NXFONTS_INTERNAL_H
+#define __GRAPHICS_NXFONTS_NXFONTS_INTERNAL_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <debug.h>
 
 #include <nuttx/nxfonts.h>
 
-#include "nxfonts_internal.h"
-
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_NXFONTS_CHARBITS
+#  define CONFIG_NXFONTS_CHARBITS 7
+#endif
+
+/* Only font supported for now */
+
+#define CONFIG_NXFONT_SANS 1
+
 /****************************************************************************
- * Private Data
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nxf_getglyphset
- *
- * Description:
- *   Return information about the font set containtined he selected
- *   character encoding.
- *
- * Input Parameters:
- *   ch - character code
- *
- ****************************************************************************/
-
-static inline FAR const struct nx_fontset_s *nxf_getglyphset(uint16 ch)
-{
-  if (ch < 128)
-    {
-      if (ch >= g_7bitfonts.first && ch < g_7bitfonts.first + g_7bitfonts.nchars)
-        {
-          return &g_7bitfonts;
-        }
-      gdbg("No bitmap for 7-bit code %d\n", ch);
-    }
-  else if (ch < 256)
-    {
-#if CONFIG_NXFONTS_CHARBITS >= 8
-      if (ch >= g_8bitfonts.first && ch < g_8bitfonts.first + g_8bitfonts.nchars)
-        {
-          return &g_8bitfonts;
-        }
-      gdbg("No bitmap for 8-bit code %d\n", ch);
+#undef EXTERN
+#if defined(__cplusplus)
+# define EXTERN extern "C"
+extern "C" {
 #else
-      gdbg("8-bit font support disabled: %d\n", ch);
+# define EXTERN extern
 #endif
-    }
-  else
-    {
-      gdbg("16-bit font not currently supported\n");
-    }
-  return NULL;
-}
+
+EXTERN struct nx_fontset_s g_7bitfonts;
+#if CONFIG_NXFONTS_CHARBITS >= 8
+EXTERN struct nx_fontset_s g_8bitfonts;
+#endif
+EXTERN struct nx_font_s g_fonts;
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Name: nxf_getfontset
- *
- * Description:
- *   Return information about the current font set
- *
- * Input Parameters:
- *   None
- *
- ****************************************************************************/
-
-FAR const struct nx_font_s *nxf_getfontset(void)
-{
-  return &g_fonts;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
-/****************************************************************************
- * Name: nxf_getbitmap
- *
- * Description:
- *   Return font bitmap information for the selected character encoding.
- *
- * Input Parameters:
- *   ch - character code
- *
- ****************************************************************************/
-
-FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16 ch)
-{
-  FAR const struct nx_fontset_s *set = nxf_getglyphset(ch);
-  FAR struct nx_fontbitmap_s *bm = NULL;
-
-  if (set)
-    {
-      bm = &set->bitmap[ch - set->first];
-    }
-  return bm;
-}
+#endif /* __GRAPHICS_NXFONTS_NXFONTS_INTERNAL_H */

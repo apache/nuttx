@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <nuttx/nxglib.h>
 
 /****************************************************************************
  * Pre-processor definitions
@@ -50,6 +51,8 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* This structures provides the metrics for one glyph */
 
 struct nx_fontmetic_s
 {
@@ -61,20 +64,34 @@ struct nx_fontmetic_s
   uint32 unused   : 6;
 };
 
+/* This structure bings the glyph metrics to the glyph bitmap */
+
 struct nx_fontbitmap_s
 {
   struct nx_fontmetic_s metric; /* Character metrics */
   FAR const ubyte *bitmap;      /* Pointer to the character bitmap */
 };
 
+/* This structure describes one contiguous grouping of glyphs that
+ * can be described by an array starting with encoding 'first' and
+ * extending through (first + nchars - 1).
+ */
+
 struct nx_fontset_s
 {
-  uint32 mxheight : 6;      /* Max height of one glyph in rows */
-  uint32 mxwidth  : 6;      /* Max width of any glyph in pixels */
-  uint32 first    : 8;      /* First bitmap character code */
-  uint32 nchars   : 8;      /* Number of bitmap character codes */
-  uint32 spwidth  : 4;      /* The width of a space in pixels */
+  ubyte  first;             /* First bitmap character code */
+  ubyte  nchars;            /* Number of bitmap character codes */
   FAR const struct nx_fontbitmap_s *bitmap;
+};
+
+/* This structure describes the overall fontset */
+
+struct nx_font_s
+{
+  ubyte  mxheight;          /* Max height of one glyph in rows */
+  ubyte  mxwidth;           /* Max width of any glyph in pixels */
+  ubyte  mxbits;            /* Max number of bits per character code */
+  ubyte  spwidth;           /* The width of a space in pixels */
 };
 
 /****************************************************************************
@@ -89,11 +106,6 @@ extern "C" {
 # define EXTERN extern
 #endif
 
-EXTERN struct nx_fontset_s g_7bitfonts;
-#if CONFIG_NXFONTS_CHARBITS >= 8
-EXTERN struct nx_fontset_s g_8bitfonts;
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -102,15 +114,14 @@ EXTERN struct nx_fontset_s g_8bitfonts;
  * Name: nxf_getfontset
  *
  * Description:
- *   Return information about the font set containtined he selected
- *   character encoding.
+ *   Return information about the current font set
  *
  * Input Parameters:
- *   ch - character code
+ *   None
  *
  ****************************************************************************/
 
-EXTERN FAR const struct nx_fontset_s *nxf_getfontset(uint16 ch);
+EXTERN FAR const struct nx_font_s *nxf_getfontset(void);
 
 /****************************************************************************
  * Name: nxf_getbitmap
@@ -124,6 +135,46 @@ EXTERN FAR const struct nx_fontset_s *nxf_getfontset(uint16 ch);
  ****************************************************************************/
 
 EXTERN FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16 ch);
+
+/****************************************************************************
+ * Name: nxf_convert_*bpp
+ *
+ * Description:
+ *   Convert the 1BPP font to a new pixel depth
+ *
+ * Input Parameters:
+ *   dest   - The destination buffer provided by the caller.
+ *   height - The max height of the returned char in rows
+ *   width  - The max width of the returned char in pixels
+ *   stride - The width of the destination buffer in bytes
+ *   ch     - The character code to convert
+ *   color  - The color to use for '1' bits in the font bitmap
+ *            (0 bits are transparent)
+ *
+ * Returned Value:
+ *  On Success, this function returns the actual width of the font in bytes.
+ *  on failed, a negated errno is retured.
+ *
+ ****************************************************************************/
+
+EXTERN int nxf_convert_2bpp(FAR ubyte *dest, uint16 height,
+                            uint16 width, uint16 stride, uint16 ch,
+                            nxgl_mxpixel_t color);
+EXTERN int nxf_convert_4bpp(FAR ubyte *dest, uint16 height,
+                            uint16 width, uint16 stride, uint16 ch,
+                            nxgl_mxpixel_t color);
+EXTERN int nxf_convert_8bpp(FAR ubyte *dest, uint16 height,
+                            uint16 width, uint16 stride, uint16 ch,
+                            nxgl_mxpixel_t color);
+EXTERN int nxf_convert_16bpp(FAR uint16 *dest, uint16 height,
+                             uint16 width, uint16 stride, uint16 ch,
+                             nxgl_mxpixel_t color);
+EXTERN int nxf_convert_24bpp(FAR uint32 *dest, uint16 height,
+                             uint16 width, uint16 stride, uint16 ch,
+                             nxgl_mxpixel_t color);
+EXTERN int nxf_convert_32bpp(FAR uint32 *dest, uint16 height,
+                             uint16 width, uint16 stride, uint16 ch,
+                             nxgl_mxpixel_t color);
 
 #undef EXTERN
 #if defined(__cplusplus)
