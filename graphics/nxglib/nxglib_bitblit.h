@@ -108,18 +108,6 @@
 #  define NXGL_ALIGNDOWN(x)        ((x) & ~NXGL_PIXELMASK)
 #  define NXGL_ALIGNUP(x)          (((x) + NXGL_PIXELMASK) & ~NXGL_PIXELMASK)
 
-#  ifdef CONFIG_NXGL_PACKEDMSFIRST
-#    define NXGL_MASKEDSRC1(s,r)   ((s) & (((ubyte)0xff) >> (8 - ((r) << pixelshift))))
-#    define NXGL_MASKEDVALUE1(s,r) ((s) & (((ubyte)0xff) << ((r) << NXGL_PIXELSHFIT)))
-#    define NXGL_MASKEDSRC2(s,r)   ((s) & (((ubyte)0xff) >> ((r) << pixelshift)))
-#    define NXGL_MASKEDVALUE2(s,r) ((s) & (((ubyte)0xff) << (8 - ((r) << NXGL_PIXELSHFIT))))
-#  else
-#    define NXGL_MASKEDSRC1(s,r)   ((s) & (((ubyte)0xff) >> ((r) << pixelshift)))
-#    define NXGL_MASKEDVALUE1(s,r) ((s) & (((ubyte)0xff) << (8 - ((r) << NXGL_PIXELSHFIT))))
-#    define NXGL_MASKEDSRC2(s,r)   ((s) & (((ubyte)0xff) >> (8 - ((r) << pixelshift))))
-#    define NXGL_MASKEDVALUE2(s,r) ((s) & (((ubyte)0xff) << ((r) << NXGL_PIXELSHFIT)))
-#  endif
-
 #  define NXGL_MEMSET(dest,value,width) \
    { \
      FAR ubyte *_ptr = (FAR ubyte*)dest; \

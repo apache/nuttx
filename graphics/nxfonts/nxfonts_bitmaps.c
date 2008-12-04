@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxmu/nxfe.h
+ * graphics/nxfonts/nxfonts_bitmap.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -1622,21 +1622,22 @@ NXFONT_DEFMETRIC(255),
 
 struct nx_fontset_s g_7bitfonts =
 {
-  14,                   /* ascent: Pixels above base (max) */
-  9,                    /* descent: Pixels below base (max) */
+  NXFONT_MAXHEIGHT,     /* Max. height of a glyph in rows */
+  NXFONT_MAXWIDTH,      /* Max. width of a glyph in pixels */
   NXFONT_MIN7BIT,       /* First font code */
   NXFONT_N7BITFONTS,    /* Number of bitmap fonts */
-  0,                    /* (unused) */
+  NXFONT_SPACEWIDTH,    /* The width of a space in pixels */
   g_7bitmaps            /* List of fonts */
 };
 
 #if CONFIG_NXFONTS_CHARBITS >= 8
 struct nx_fontset_s g_8bitfonts =
 {
-  14                    /* ascent: Pixels above base (max) */
-  9                     /* descent: Pixels below base (max) */
+  NXFONT_MAXHEIGHT,     /* Max. height of a glyph in rows */
+  NXFONT_MAXWIDTH,      /* Max. width of a glyph in pixels */
   NXFONT_MIN8BIT,       /* First font code */
   NXFONT_N8BITFONTS,    /* Number of bitmap fonts */
+  NXFONT_SPACEWIDTH,    /* The width of a space in pixels */
   g_8bitmaps            /* List of fonts */
 };
 #endif
