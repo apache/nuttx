@@ -386,7 +386,7 @@ EXTERN boolean up_interrupt_context(void);
  *
  *   This function implements enabling of the device specified by 'irq'
  *   at the interrupt controller level if supported by the architecture
- *   (irqsave() supports the global level, the device level is hardware
+ *   (irqrestore() supports the global level, the device level is hardware
  *   specific).
  *
  *   Since this API is not supported on all architectures, it should be

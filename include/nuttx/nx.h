@@ -99,7 +99,7 @@ struct nx_callback_s
    * Input Parameters:
    *   hwnd - Window handle
    *   rect - The rectangle that needs to be re-drawn (in window relative
-   *          coordinates
+   *          coordinates)
    *   more - TRUE:  More re-draw requests will follow
    *   arg  - User provided argument (see nx_openwindow, nx_constructwindow)
    *
@@ -122,7 +122,7 @@ struct nx_callback_s
    *   hwnd   - Window handle
    *   size   - The size of the window
    *   pos    - The position of the upper left hand corner of the window on
-   *            the overalll display
+   *            the overall display
    *   bounds - The bounding rectangle that the describes the entire
    *            display
    *   arg    - User provided argument (see nx_openwindow, nx_constructwindow)
@@ -141,7 +141,7 @@ struct nx_callback_s
    * Name: mousein
    *
    * Descripton:
-   *   New mouse data is available for the window
+   *   New mouse data is available for the window.
    *
    * Input Parameters:
    *   hwnd    - Window handle
@@ -346,7 +346,7 @@ EXTERN void nx_close(NXHANDLE handle);
  *
  * Return:
  *     OK: No errors occurred.  If CONFIG_NX_BLOCKING is defined, then
- *         one or more server message was processed.
+ *         one or more server messages were processed.
  *  ERROR: An error occurred and errno has been set appropriately.  Of
  *         particular interest, it will return errno == EHOSTDOWN when the
  *         server is disconnected.  After that event, the handle can no
@@ -376,9 +376,7 @@ EXTERN int nx_eventhandler(NXHANDLE handle);
  *   handle - the handle returned by nx_connect
  *
  * Return:
- *      OK: No errors occurred.  If CONFIG_NX_BLOCKING is defined, then
- *          one or more server message was processed.
- *   ERROR: An error occurred and errno has been set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
@@ -452,7 +450,7 @@ EXTERN int nx_closewindow(NXWINDOW hwnd);
  *
  *       nx_setposition, nx_setsize, nx_raise, nx_lower.
  *
- *   - Neither nx_opengbwindow or nx_closebgwindow should be called more than
+ *   - Neither nx_requestbkgd or nx_releasebkgd should be called more than
  *     once.  Multiple instances of the background window are not supported.
  *
  * Input Parameters:
@@ -555,7 +553,7 @@ EXTERN int nx_setsize(NXWINDOW hwnd, FAR struct nxgl_size_s *size);
 EXTERN int nx_raise(NXWINDOW hwnd);
 
 /****************************************************************************
- * Name: nx_raise
+ * Name: nx_lower
  *
  * Description:
  *   Lower the specified window to the bottom of the display.
@@ -664,7 +662,7 @@ EXTERN int nx_move(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
  *            may lie outside of the display.
- *   stride - The width of the full source image in pixels.
+ *   stride - The width of the full source image in bytes.
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately

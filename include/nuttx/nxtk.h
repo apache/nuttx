@@ -225,7 +225,7 @@ EXTERN int nxtk_fillwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  * Name: nxtk_filltrapwindow
  *
  * Description:
- *  Fill the specified rectangle in the client window with the specified color
+ *  Fill the specified trapezoid in the client window with the specified color
  *
  * Input Parameters:
  *   hfwnd - The window handle returned by nxtk_openwindow
@@ -298,8 +298,8 @@ EXTERN int nxtk_bitmapwindow(NXTKWINDOW hfwnd,
  *   Create a tool bar at the top of the specified framed window
  *
  * Input Parameters:
- *   hfwnd   - The handle returned by nxtk_openwindow
- *   height - The request height of the toolbar in pixels
+ *   hfwnd  - The handle returned by nxtk_openwindow
+ *   height - The requested height of the toolbar in pixels
  *   cb     - Callbacks used to process toolbar events
  *   arg    - User provided value that will be returned with toolbar callbacks.
  *
@@ -316,7 +316,7 @@ EXTERN int nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
  * Name: nxtk_closetoolbar
  *
  * Description:
- *   Create a tool bar at the top of the specified framed window
+ *   Remove the tool bar at the top of the specified framed window
  *
  * Input Parameters:
  *   hfwnd - The handle returned by nxtk_openwindow
@@ -332,7 +332,7 @@ EXTERN int nxtk_closetoolbar(NXTKWINDOW hfwnd);
  * Name: nxtk_filltoolbar
  *
  * Description:
- *  Fill the specified rectangle in the client window with the specified color
+ *  Fill the specified rectangle in the toolbar sub-window with the specified color
  *
  * Input Parameters:
  *   hfwnd - The handle returned by nxtk_openwindow
@@ -351,7 +351,7 @@ EXTERN int nxtk_filltoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect
  * Name: nxtk_filltraptoolbar
  *
  * Description:
- *  Fill the specified rectangle in the toolbar with the specified color
+ *  Fill the specified trapezoid in the toolbar sub-window with the specified color
  *
  * Input Parameters:
  *   hfwnd - The handle returned by nxtk_openwindow
@@ -403,7 +403,7 @@ EXTERN int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in sub-window coordinates, however, the
  *            origin may lie outside of the sub-window display.
- *   stride - The width of the full source image in pixels.
+ *   stride - The width of the full source image in bytes.
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately

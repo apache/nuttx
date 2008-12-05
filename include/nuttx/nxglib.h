@@ -101,7 +101,7 @@ struct nxgl_point_s
   nxgl_coord_t y;         /* Y position, range: 0 to screen height - 1 */
 };
 
-/* Describes the size of a rectangulare region */
+/* Describes the size of a rectangular region */
 
 struct nxgl_size_s
 {
@@ -109,7 +109,7 @@ struct nxgl_size_s
   nxgl_coord_t h;        /* Height in rows */
 };
 
-/* Describes a rectangle on the display */
+/* Describes a positioned rectangle on the display */
 
 struct nxgl_rect_s
 {
@@ -329,7 +329,7 @@ EXTERN void nxgl_copyrectangle_32bpp(FAR struct fb_planeinfo_s *pinfo,
  *
  * Description:
  *   This is essentially memcpy for rectangles.  We don't do structure
- *   assignements because some compilers are not good at that.
+ *   assignments because some compilers are not good at that.
  *
  ****************************************************************************/
 
@@ -402,7 +402,7 @@ EXTERN void nxgl_rectunion(FAR struct nxgl_rect_s *dest,
  *
  * Description:
  *   Return the regions of rectangle rect 1 that do not intersect with
- *   rect2.  This may be up to founr rectangles some of which may be
+ *   rect2.  This will be four rectangles ,some of which may be
  *   degenerate (and can be picked off with nxgl_nullrect)
  *
  ****************************************************************************/

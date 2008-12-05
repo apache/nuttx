@@ -64,7 +64,7 @@ struct nx_fontmetic_s
   uint32 unused   : 6;
 };
 
-/* This structure bings the glyph metrics to the glyph bitmap */
+/* This structure binds the glyph metrics to the glyph bitmap */
 
 struct nx_fontbitmap_s
 {
@@ -117,7 +117,7 @@ extern "C" {
  *   Return information about the current font set
  *
  * Input Parameters:
- *   None
+ *   An instance of struct nx_font_s describing the font set.
  *
  ****************************************************************************/
 
@@ -131,6 +131,9 @@ EXTERN FAR const struct nx_font_s *nxf_getfontset(void);
  *
  * Input Parameters:
  *   ch - character code
+ *
+ * Returned Value:
+ *   An instance of struct nx_fontbitmap_s describing the glyph.
  *
  ****************************************************************************/
 

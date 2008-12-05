@@ -26,7 +26,7 @@ at the present, but here is the longer term roadmap:
               are more-or-less interchangable.  NX can be used without NXWIDGETS
               and without NXTOOLKIT for raw access to window memory.
   NXGLIB    - Low level graphics utilities and direct framebuffer rendering logic.
-              NX is build on NXGLIB.
+              NX is built on top of NXGLIB.
 
 Related Header Files
 ^^^^^^^^^^^^^^^^^^^^
