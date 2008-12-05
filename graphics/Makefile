@@ -136,11 +136,13 @@ depend: .depend
 
 clean:
 	@make -C nxglib -f Makefile.sources clean TOPDIR=$(TOPDIR)
+	@make -C nxfonts -f Makefile.sources clean TOPDIR=$(TOPDIR)
 	@rm -f $(BIN) *~ .*.swp
 	$(call CLEAN)
 
 distclean: clean
 	@make -C nxglib -f Makefile.sources distclean TOPDIR=$(TOPDIR)
+	@make -C nxfonts -f Makefile.sources distclean TOPDIR=$(TOPDIR)
 	@rm -f Make.dep .depend
 
 -include Make.dep
