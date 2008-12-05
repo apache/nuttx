@@ -29,7 +29,7 @@
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
   <td>
     <a href="#overview">Overview</a>.<br>
-    What is NuttX?
+    What is NuttX?  Look at all those files and features... How can it be a tiny OS?
   </td>
 </tr>
 <tr>
@@ -476,7 +476,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>Bult-in USB trace functionality for USB debug.</li>
+      <li>Built-in USB trace functionality for USB debug.</li>
     </p>
 </tr>
 
@@ -497,7 +497,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>Graphics library and tiny windowing system under developement.</li>
+      <li>Graphics library and tiny windowing system under development.</li>
     </p>
 </tr>
 </table></center>
@@ -505,7 +505,7 @@
 <p>
   <b>NuttX Add-Ons</b>.
   The following packages are available to extend the basic NuttX feature set:
-<p>
+</p>
 <center><table width="90%">
 
 <tr>
@@ -539,7 +539,124 @@
         <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
         website.</li>
     </p>
+  </td>
 </tr>
+</table></center>
+
+<p>
+  <b>Look at all those files and features... How can it be a tiny OS?</b>.
+  The NuttX feature list (above) is fairly long and if you look at the NuttX
+  source tree, you will see that there are hundreds of source files comprising
+  NuttX.  How can NuttX be a tiny OS will all of that?
+</p>
+<center><table width="90%">
+
+<tr>
+  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Lots of Features -- More can be smaller!</b>
+  </td>
+</tr>
+
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      The philosophy behind that NuttX is that lots of features are great... <i>BUT</i>
+      also that if you don't use those features, then you should not have to pay a penalty
+      for the unused features.
+      And, with NuttX, you don't!  If you don't use a feature, it will not
+      be included in the final executable binary.
+      You only have to pay the penalty of increased footprint for the features
+      that you actually use.
+    </p>
+    <p>
+      Using a variety of technologies, NuttX can scale from the very tiny to
+      the moderate-size system.  I have executed NuttX with some simple applications
+      in as little as 32Kb <i>total</i> memory (code and data).
+      On the other hand, I often run richly featured NuttX builds that require
+      memory up to 100Kb.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Many, many files -- More really is smaller!</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      One may be intimidated by the size NuttX source tree.  There are hundreds of source files!
+      How can that be a tiny OS?
+      Actually, the large number of files is one of the tricks to keep NuttX small and
+      as scalable as possible.
+      Most files contain only a single function. 
+      Sometimes just one tiny function with only a few lines of code.
+      Why?
+    </p>
+    <ul>
+      <li>
+        <b>Static Libraries</b>.
+        Because in the NuttX build processed, objects are compiled and saved into
+        <i>static libraries</i> (<i>archives</i>).
+        Then, when the file executable is linked, only the object files that are needed
+        are extracted from the archive and added to the final executable.
+        By having many, many tiny source files, you can assure that no code that you do
+        not execute is ever included in the link.
+        And by having many, tiny source files you have better granularity --
+        if you don't use that tiny function of even just a few lines of code, it will
+        not be included in the binary.
+      </li>
+    </ul>
+  </td>
+</tr>
+
+<tr>
+  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Other Tricks</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      As mentioned above, the use of many, tiny source files and linking from static
+      libraries keeps the size of NuttX down.
+      Other tricks used in NuttX include:
+    </p>
+    <ul>
+      <li>
+         <b>Configuration Files</b>.
+         Before you build NuttX, you must provide a configuration file that specifies
+         what features you plan to use and which features you do not.
+         This configuration file contains a long list of settings that control
+         what is built into NuttX and what is not.
+         There are hundreds of such settings
+         (see the <a href="NuttxPortingGuide.html#apndxconfigs">NuttX Porting Guide</a>
+         for a partial list that excludes platform specific settings).
+         These many, many configuration options allow NuttX to be highly tuned to
+         meet size requirements.
+         The downside to all of these configuration options is that it greatly
+         complicates the maintenance of NuttX -- but that is my problem, not yours.
+      </li>
+      <li>
+         <b>Weak Symbols</b>
+         The GNU toolchain supports <i>weak</i> symbols and these also help to keep
+         the size of NuttX down.
+         Weak symbols prevent object files from being drawn into the link even if they
+         are accessed from source code.
+         Careful use of weak symbols is another trick for keep unused code out of the
+         final binary.
+      </li>
+    </ul>
+  </td>
+</tr>
+
 </table></center>
 
 <table width ="100%">
@@ -569,11 +686,11 @@
    This allows <code>poll()</code>/<code>select()</code> to wake-up on new connections to a listener socket.
   </li>
   <li>Added definition of a framebuffer driver and implement framebuffer drivers for the
-    simulated platform and the TI DM320 (untested as of the inital check-in).
+    simulated platform and the TI DM320 (untested as of the initial check-in).
   </li>
   <li>Partially developed a graphics framework based on the framebuffer drivers, however,
     this will not be ready for use for a few more release. 
-    Currently this includes only a few color conversion routines and some rasteizing functions.
+    Currently this includes only a few color conversion routines and some rasterizing functions.
     A tiny windowing system is under development but not ready for check-in yet.
   <li>Added support for fixed precision math.
   </li>
@@ -664,9 +781,9 @@
     <p>
       <b>STATUS:</b>
       This port boots and passes the OS test (examples/ostest).
-      The port is complete and verifed.  As of NuttX 0.3.17, the port includes:
+      The port is complete and verified.  As of NuttX 0.3.17, the port includes:
       timer interrupts, serial console, USB driver, and SPI-based MMC/SD card
-      support.  A verifed NuttShell (NSH) configuration is also available.
+      support.  A verified NuttShell (NSH) configuration is also available.
     </p>
   </td>
 </tr>
@@ -709,7 +826,7 @@
     </p>
     <p>
       <b>STATUS:</b>
-        The basic port (timer interrupts, serial ports, network, framebuffe, etc.) is complete.
+        The basic port (timer interrupts, serial ports, network, framebuffer, etc.) is complete.
         All implemented features have been verified with the exception of the USB device-side
         driver; that implementation is complete but completely untested.
     </p>
@@ -755,7 +872,7 @@
     </p>
     <p>
      <b>STATUS:</b>
-      This port is availble as of release 0.3.18 of NuttX.  The port is basically complete
+      This port is available as of release 0.3.18 of NuttX.  The port is basically complete
       and many examples run correctly.  However, there are remaining instabilities that
       make the port un-usable.  The nature of these is not understood; the behavior is
       that certain SH-1 instructions stop working as advertised.  This could be a silicon
