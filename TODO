@@ -350,7 +350,7 @@ o Build system
   Status:      Open
   Priority:    Medium-low
 
-  Description: If CONFIG_NXGRAPHICS is enabled, the build fails the first time
+  Description: If CONFIG_NX is enabled, the build fails the first time
                saying that there is "No rule to make target..." for one of the
                auto-generated graphics files.  This is a nuisance, but if you
                simply build again (with the source files already auto-generated)

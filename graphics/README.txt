@@ -2,7 +2,7 @@ README
 ^^^^^^
 
 This directory contains tiny graphics support for NuttX.  The contents of this directory
-are only build if CONFIG_NXGRAPHICS is defined in the NuttX configuration file.
+are only build if CONFIG_NX is defined in the NuttX configuration file.
 
 Roadmap
 ^^^^^^^
@@ -79,4 +79,58 @@ graphics/nxtk
 
 graphics/nxwidgets
   At one time, I planned to put NXWIDGETS implementation here, but not anymore.
+
+Configuration Settings
+^^^^^^^^^^^^^^^^^^^^^^
+
+CONFIG_NX
+  Enables overall support for graphics library and NX
+CONFIG_NX_MULTIUSER
+  Configures NX in multi-user mode
+CONFIG_NX_NPLANES
+  Some YUV color formats requires support for multiple planes, one for each
+  color component.  Unless you have such special hardware, this value should be
+  undefined or set to 1.
+CONFIG_NX_DISABLE_1BPP, CONFIG_NX_DISABLE_2BPP,
+CONFIG_NX_DISABLE_4BPP, CONFIG_NX_DISABLE_8BPP,
+CONFIG_NX_DISABLE_16BPP, CONFIG_NX_DISABLE_24BPP, and
+CONFIG_NX_DISABLE_32BPP
+  NX supports a variety of pixel depths.  You can save some memory by disabling
+  support for unused color depths.
+CONFIG_NX_PACKEDMSFIRST
+  If a pixel depth of less than 8-bits is used, then NX needs to know if the
+  pixels pack from the MS to LS or from LS to MS
+CONFIG_NX_MOUSE
+  Build in support for mouse input.
+CONFIG_NX_KBD
+  Build in support of keypad/keyboard input.
+CONFIG_NXTK_BORDERWIDTH
+  Specifies with with of the border (in pixels) used with framed windows.
+  The default is 4.
+CONFIG_NXTK_BORDERCOLOR1 and CONFIG_NXTK_BORDERCOLOR2
+  Specify the colors of the border used with framed windows.
+  CONFIG_NXTK_BORDERCOLOR2 is the shadow side color and so is normally darker.
+  The default is medium and dark grey, respectively
+CONFIG_NXTK_AUTORAISE
+  If set, a window will be raised to the top if the mouse position is over a
+  visible portion of the window.  Default: A mouse button must be clicked over
+  a visible portion of the window.
+CONFIG_NXFONTS_CHARBITS
+  The number of bits in the character set.  Current options are only 7 and 8.
+  The default is 7.
+CONFIG_NXFONT_SANS
+  At present, there is only one font.  But if there were were more, then this
+  option would select the sans serif font.
+
+NX Multi-user only options:
+
+CONFIG_NX_BLOCKING
+  Open the client message queues in blocking mode.  In this case,
+  nx_eventhandler() will not return until a message is received and processed.
+CONFIG_NX_MXSERVERMSGS and CONFIG_NX_MXCLIENTMSGS
+  Specifies the maximum number of messages that can fit in the message queues.
+  No additional resources are allocated, but this can be set to prevent
+  flooding of the client or server with too many messages (CONFIG_PREALLOC_MQ_MSGS
+  controls how many messages are pre-allocated).
+
 

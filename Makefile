@@ -68,7 +68,7 @@ ifeq ($(CONFIG_NET),y)
 NONFSDIRS	+= net netutils
 endif
 
-ifeq ($(CONFIG_NXGRAPHICS),y)
+ifeq ($(CONFIG_NX),y)
 NONFSDIRS	+= graphics
 endif
 
@@ -121,7 +121,7 @@ ifneq ($(NX_DIR),)
 LINKLIBS	+= $(NX_DIR)/libnx$(LIBEXT)
 endif
 
-ifeq ($(CONFIG_NXGRAPHICS),y)
+ifeq ($(CONFIG_NX),y)
 LINKLIBS        += graphics/libgraphics$(LIBEXT)
 endif
 

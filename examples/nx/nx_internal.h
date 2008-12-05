@@ -52,8 +52,8 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_NXGRAPHICS
-#  error "NX is not enabled (CONFIG_NXGRAPHICS)"
+#ifndef CONFIG_NX
+#  error "NX is not enabled (CONFIG_NX)"
 #endif
 
 #ifndef CONFIG_EXAMPLES_NX_VPLANE
@@ -278,7 +278,7 @@ extern nxgl_mxpixel_t g_tbcolor[CONFIG_NX_NPLANES];
  * Public Function Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_NXGRAPHICS) && defined(CONFIG_NX_MULTIUSER)
+#if defined(CONFIG_NX) && defined(CONFIG_NX_MULTIUSER)
 extern int nx_servertask(int argc, char *argv[]);
 extern FAR void *nx_listenerthread(FAR void *arg);
 #endif

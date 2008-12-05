@@ -195,7 +195,7 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
 #if NXGLIB_BITSPERPIXEL < 8
           /* Handle masking of the fractional initial byte */
 
-#ifdef CONFIG_NXGL_PACKEDMSFIRST
+#ifdef CONFIG_NX_PACKEDMSFIRST
           mask  = (ubyte)(0xff >> (8 - NXGL_REMAINDERX(ix1));
 #else
           mask  = (ubyte)(0xff << (8 - NXGL_REMAINDERX(ix1)));
@@ -213,7 +213,7 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
 
           /* Handle masking of the fractional final byte */
 
-#ifdef CONFIG_NXGL_PACKEDMSFIRST
+#ifdef CONFIG_NX_PACKEDMSFIRST
           mask &= (ubyte)(0xff << (8 - NXGL_REMAINDERX(ix2)));
 #else
           mask &= (ubyte)(0xff >> (8 - NXGL_REMAINDERX(ix2)));

@@ -51,7 +51,7 @@
 #include <nuttx/nx.h>
 #include "nx_internal.h"
 
-#if defined(CONFIG_NXGRAPHICS) && defined(CONFIG_NX_MULTIUSER)
+#ifdef CONFIG_NX_MULTIUSER
 
 /****************************************************************************
  * Definitions
@@ -106,4 +106,4 @@ int nx_servertask(int argc, char *argv[])
   return 3;
 }
 
-#endif
+#endif /* CONFIG_NX_MULTIUSER */

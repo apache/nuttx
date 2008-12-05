@@ -191,7 +191,7 @@ int NXF_FUNCNAME(nxf_convert,NXFONTS_SUFFIX)
       col   = 0;
       dptr  = (FAR NXF_PIXEL_T*)line;
       pixel = *dptr;
-#ifdef CONFIG_NXF_PACKEDMSFIRST
+#ifdef CONFIG_NX_PACKEDMSFIRST
       mask  = NXF_PIXELMASK << (8 - NXFONTS_BITSPERPIXEL);
 #else
       mask  = NXF_PIXELMASK;
@@ -215,7 +215,7 @@ int NXF_FUNCNAME(nxf_convert,NXFONTS_SUFFIX)
                   pixel = ((pixel & ~mask) | (mpixel & mask));
                 }
 
-#ifdef CONFIG_NXF_PACKEDMSFIRST
+#ifdef CONFIG_NX_PACKEDMSFIRST
               mask >>= NXFONTS_BITSPERPIXEL;
 #else
               mask <<= NXFONTS_BITSPERPIXEL;

@@ -51,7 +51,7 @@ nx
     My system has 24-bit color, but packed into 32-bit words so
     the correct seeting of CONFIG_SIM_FBBPP is 32.
   - For whatever value of CONFIG_SIM_FBBPP is selected, then
-    the corresponidng CONFIG_NXGLIB_DISABLE_*BPP setting must
+    the corresponidng CONFIG_NX_DISABLE_*BPP setting must
     not be disabled.
   - The default in defconfig is to use a generic memory buffer
     for the framebuffer.  defconfig-x11 is an example with X11

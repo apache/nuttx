@@ -110,7 +110,7 @@ void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
   rows  = dest->pt2.y - dest->pt1.y + 1;
 
 #if NXGLIB_BITSPERPIXEL < 8
-# ifdef CONFIG_NXGL_PACKEDMSFIRST
+# ifdef CONFIG_NX_PACKEDMSFIRST
 
   /* Get the mask for pixels that are ordered so that they pack from the
    * MS byte down.

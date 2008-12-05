@@ -124,7 +124,7 @@ int nxbe_fbconfigure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
        * will signicantly increase the size
        */
 
-#ifndef CONFIG_NXGLIB_DISABLE_1BPP
+#ifndef CONFIG_NX_DISABLE_1BPP
       if (be->plane[i].pinfo.bpp == 1)
         {
           be->plane[i].fillrectangle = nxgl_fillrectangle_1bpp;
@@ -134,7 +134,7 @@ int nxbe_fbconfigure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
         }
       else
 #endif
-#ifndef CONFIG_NXGLIB_DISABLE_2BPP
+#ifndef CONFIG_NX_DISABLE_2BPP
       if (be->plane[i].pinfo.bpp == 2)
         {
           be->plane[i].fillrectangle = nxgl_fillrectangle_2bpp;
@@ -144,7 +144,7 @@ int nxbe_fbconfigure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
         }
       else
 #endif
-#ifndef CONFIG_NXGLIB_DISABLE_4BPP
+#ifndef CONFIG_NX_DISABLE_4BPP
       if (be->plane[i].pinfo.bpp == 4)
         {
           be->plane[i].fillrectangle = nxgl_fillrectangle_4bpp;
@@ -154,7 +154,7 @@ int nxbe_fbconfigure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
         }
       else
 #endif
-#ifndef CONFIG_NXGLIB_DISABLE_8BPP
+#ifndef CONFIG_NX_DISABLE_8BPP
       if (be->plane[i].pinfo.bpp == 8)
         {
           be->plane[i].fillrectangle = nxgl_fillrectangle_8bpp;
@@ -164,7 +164,7 @@ int nxbe_fbconfigure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
         }
       else
 #endif
-#ifndef CONFIG_NXGLIB_DISABLE_16BPP
+#ifndef CONFIG_NX_DISABLE_16BPP
       if (be->plane[i].pinfo.bpp == 16)
         {
           be->plane[i].fillrectangle = nxgl_fillrectangle_16bpp;
@@ -174,7 +174,7 @@ int nxbe_fbconfigure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
         }
       else
 #endif
-#ifndef CONFIG_NXGLIB_DISABLE_24BPP
+#ifndef CONFIG_NX_DISABLE_24BPP
       if (be->plane[i].pinfo.bpp == 24)
         {
           be->plane[i].fillrectangle = nxgl_fillrectangle_24bpp;
@@ -184,7 +184,7 @@ int nxbe_fbconfigure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
         }
       else
 #endif
-#ifndef CONFIG_NXGLIB_DISABLE_32BPP
+#ifndef CONFIG_NX_DISABLE_32BPP
       if (be->plane[i].pinfo.bpp == 32)
         {
           be->plane[i].fillrectangle = nxgl_fillrectangle_32bpp;
