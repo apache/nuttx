@@ -18,6 +18,7 @@ at the present, but here is the longer term roadmap:
   NXTOOLKIT - A set of C graphics tools that provide higher-level window drawing
               operations.  The toolkit can be used for window-oriented graphics
               without NXWIDGETS and is built on top of NX.
+  NXFONTS   - A set of C graphics tools for present (bitmap) font images.
   NX        - The tiny NuttX windowing system.  This includes both a small-footprint,
               single user implementaton (NXSU as described below) and a somewhat
               larger multi-user implentation (NXMU as described below).  Both
@@ -33,6 +34,7 @@ Related Header Files
 include/nuttx/nxglib.h    -- Describes the NXGLIB C interfaces
 include/nuttx/nx.h        -- Describes the NX C interfaces
 include/nutt/nxtk.h       -- Describe the NXTOOLKIT C interfaces
+include/nutt/nxfont.h     -- Describe sthe NXFONT C interfaces
 include/nuttx/nxwidgets.h -- Will describe the NXWIDGETS classes (no longer planned)
 
 Directories:
@@ -66,7 +68,11 @@ graphics/nxsu
   queue to serialize window operations from many threads. The multi-user front-end
   is selected when CONFIG_NX_MULTIUSER is defined in the NuttX configuration file.
 
-graphics/nxtoolkit
+graphics/nxfonts
+  This is where the NXFONTS implementation resides.  This is a relatively low-
+  level set of charset set/glyph management APIs.  See include/nuttx/nxfonts.h
+
+graphics/nxtk
   This is where the NXTOOLKIT implementation resides.  This toolkit is built on
   top of NX and works with either the single-user or multi-user NX version. See
   include/nuttx/nxtk.h
