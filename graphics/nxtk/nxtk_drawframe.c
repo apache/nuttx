@@ -169,7 +169,7 @@ int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
    */
 
   frame.pt1.y = 0;
-  frame.pt2.y = wndsize.h - 1;
+  frame.pt2.y = wndsize.h - 2;
 
   frame.pt1.x = 0;
 #if CONFIG_NXTK_BORDERWIDTH > 1
@@ -226,7 +226,7 @@ int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
   if (tbsize.h > 0)
     {
       frame.pt1.y = 0;
-      frame.pt2.y = CONFIG_NXTK_BORDERWIDTH + tbsize.h;
+      frame.pt2.y = CONFIG_NXTK_BORDERWIDTH + tbsize.h - 2;
 
       frame.pt1.x = CONFIG_NXTK_BORDERWIDTH - 1;
       frame.pt2.x = frame.pt1.x;
