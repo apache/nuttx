@@ -1,99 +1,114 @@
 <html>
-
 <head>
-<title>NuttX Porting Manual</title>
+<title>NuttX Porting Guide</title>
 <meta name="author" content="Gregory Nutt">
 </head>
 
 <body background="backgd.gif">
 <hr><hr>
-<center><h1><i>Under Construction</i></h1></center>
+<table width ="100%">
+  <tr align="center" bgcolor="#e4e4e4">
+    <td>
+      <h1><big><font color="#3c34ec">
+        <i>NuttX RTOS Porting Guide</i>
+      </font></big></h1>
+      <p>Last Updated: December 5, 2008</p>
+    </td>
+  </tr>
+</table>
 <hr><hr>
-<center>
-  <h1><big><b>
-    <p>NuttX Operating System</br>
-    Porting Guide</p>
-  </b></big></h1>
-  <p><small>by</small></p>
-  <p>Gregory Nutt</p>
-  <p><small>Last Update: December 5, 2008</small></p>
-</center>
 
-<center><h1>Table of Contents</h1></center>
-<li><a href="#Introduction">1.0 Introduction</a></li>
-<li><a href="#DirectoryStructure">2.0 Directory Structure</a></li>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+  <h1>Table of Contents</h1>
+    </td>
+  </tr>
+</table>
+
 <ul>
-  <li><a href="#DirStructDocumentation">2.1 Documentation</a></li>
-  <l1><a href="#DirStructArch">2.2 arch/</a></li>
+  <a href="#Introduction">1.0 Introduction</a><br>
+  <a href="#DirectoryStructure">2.0 Directory Structure</a>
   <ul>
-    <li><a href="#archdirectorystructure">2.2.1 Subdirectory Structure</a></li>
-    <li><a href="#summaryofarchfiles">2.2.2 Summary of Files</a></li>
-    <li><a href="#supportedarchitectures">2.2.3 Supported Architectures</a></li>
-  </ul>
-  <li><a href="#DirStructConfigs">2.3 configs/</a></li>
-  <ul>
-    <li><a href="#configsdirectorystructure">2.3.1 Subdirectory Structure</a></li>
-    <li><a href="#summaryofconfigfiles">2.3.2 Summary of Files</a></li>
+    <a href="#DirStructDocumentation">2.1 Documentation</a></br>
+    <a href="#DirStructArch">2.2 arch/</a>
     <ul>
-      <li><a href="#boardlogic">2.3.2.1 Board Specific Logic</a></li>
-      <li><a href="#boardconfigsubdirs">2.3.2.2 Board Specific Configuration Sub-Directories</a></li>
+      <a href="#archdirectorystructure">2.2.1 Subdirectory Structure</a><br>
+      <a href="#summaryofarchfiles">2.2.2 Summary of Files</a><br>
+      <a href="#supportedarchitectures">2.2.3 Supported Architectures</a>
     </ul>
-    <li><a href="#supportedboards">2.3.3 Supported Boards</a></li>
+    <a href="#DirStructConfigs">2.3 configs/</a>
+    <ul>
+      <a href="#configsdirectorystructure">2.3.1 Subdirectory Structure</a><br>
+      <a href="#summaryofconfigfiles">2.3.2 Summary of Files</a>
+      <ul>
+        <a href="#boardlogic">2.3.2.1 Board Specific Logic</a><br>
+        <a href="#boardconfigsubdirs">2.3.2.2 Board Specific Configuration Sub-Directories</a>
+      </ul>
+      <a href="#supportedboards">2.3.3 Supported Boards</a>
+    </ul>
+    <a href="#DirStructDrivers">2.4 drivers/</a><br>
+    <a href="#DirStructExamples">2.5 examples/</a><br>
+    <a href="#DirStructFs">2.6 fs/</a><br>
+    <a href="#DirStructGraphics">2.7 graphics/</a><br>
+    <a href="#DirStructInclude">2.8 include/</a><br>
+    <a href="#DirStructLib">2.9 lib/</a><br>
+    <a href="#DirStructMm">2.10 mm/</a><br>
+    <a href="#DirStructNet">2.11 net</a><br>
+    <a href="#DirStructNetUtils">2.12 netutils</a><br>
+    <a href="#DirStructSched">2.13 sched/</a><br>
+    <a href="#DirStructTools">2.14 tools/</a><br>
+    <a href="#topmakefile">2.15 Makefile</a>
   </ul>
-  <li><a href="#DirStructDrivers">2.4 drivers/</a></li>
-  <li><a href="#DirStructExamples">2.5 examples/</a></li>
-  <li><a href="#DirStructFs">2.6 fs/</a></li>
-  <li><a href="#DirStructGraphics">2.7 graphics/</a></li>
-  <li><a href="#DirStructInclude">2.8 include/</a></li>
-  <li><a href="#DirStructLib">2.9 lib/</a></li>
-  <li><a href="#DirStructMm">2.10 mm/</a></li>
-  <li><a href="#DirStructNet">2.11 net</a></li>
-  <li><a href="#DirStructNetUtils">2.12 netutils</a></li>
-  <li><a href="#DirStructSched">2.13 sched/</a></li>
-  <li><a href="#DirStructTools">2.14 tools/</a></li>
-  <li><a href="#topmakefile">2.15 Makefile</a></li>
-</ul>
-<li><a href="#configandbuild">3.0 Configuring and Building</a></li>
-<ul>
-  <li><a href="#configuringnuttx">3.1 Configuring NuttX</a></li>
-  <li><a href="#buildingnuttx">3.2 Building NuttX</a></li>
-</ul>
-<li><a href="#ArchAPIs">4.0 Architecture APIs</a></li>
-<ul>
-  <li><a href="#imports">4.1 APIs Exported by Architecture-Specific Logic to NuttX</a></li>
+  <a href="#configandbuild">3.0 Configuring and Building</a>
   <ul>
-    <li><a href="#upinitialize">4.1.1 <code>up_initialize()</code></a></li>
-    <li><a href="#upidle">4.1.2 <code>up_idle()</code></a></li>
-    <li><a href="#upinitialstate">4.1.3 <code>up_initial_state()</code></a></li>
-    <li><a href="#upcreatestack">4.1.4 <code>up_create_stack()</code></a></li>
-    <li><a href="#upusestack">4.1.5 <code>up_use_stack()</code></a></li>
-    <li><a href="#upreleasestack">4.1.6 <code>up_release_stack()</code></a></li>
-    <li><a href="#upunblocktask">4.1.7 <code>up_unblock_task()</code></a></li>
-    <li><a href="#upblocktask">4.1.8 <code>up_block_task()</code></a></li>
-    <li><a href="#upreleasepending">4.1.9 <code>up_release_pending()</code></a></li>
-    <li><a href="#upreprioritizertr">4.1.10 <code>up_reprioritize_rtr()</code></a></li>
-    <li><a href="#_exit">4.1.11 <code>_exit()</code></a></li>
-    <li><a href="#upassert">4.1.12 <code>up_assert()</code></a></li>
-    <li><a href="#upschedulesigaction">4.1.13 <code>up_schedule_sigaction()</code></a></li>
-    <li><a href="#upallocateheap">4.1.14 <code>up_allocate_heap()</code></a></li>
-    <li><a href="#upinterruptcontext">4.1.15 <code>up_interrupt_context()</code></a></li>
-    <li><a href="#updisableirq">4.1.16 <code>up_disable_irq()</code></a></li>
-    <li><a href="#upenableirq">4.1.17 <code>up_enable_irq()</code></a></li>
-    <li><a href="#upputc">4.1.18 <code>up_putc()</code></a></li>
+    <a href="#configuringnuttx">3.1 Configuring NuttX</a><br>
+    <a href="#buildingnuttx">3.2 Building NuttX</a>
   </ul>
-  <li><a href="#exports">4.2 APIs Exported by NuttX to Architecture-Specific Logic</a></li>
+  <a href="#ArchAPIs">4.0 Architecture APIs</a>
   <ul>
-    <li><a href="#osstart">4.2.1 <code>os_start()</code></a></li>
-    <li><a href="#listmgmt">4.2.2 OS List Management APIs</a></li></li>
-    <li><a href="#schedprocesstimer">4.2.3 <code>sched_process_timer()</code></a></li>
-    <li><a href="#irqdispatch">4.2.4 <code>irq_dispatch()</code></a></li>
+    <a href="#imports">4.1 APIs Exported by Architecture-Specific Logic to NuttX</a>
+    <ul>
+      <a href="#upinitialize">4.1.1 <code>up_initialize()</code></a><br>
+      <a href="#upidle">4.1.2 <code>up_idle()</code></a><br>
+      <a href="#upinitialstate">4.1.3 <code>up_initial_state()</code></a><br>
+      <a href="#upcreatestack">4.1.4 <code>up_create_stack()</code></a><br>
+      <a href="#upusestack">4.1.5 <code>up_use_stack()</code></a><br>
+      <a href="#upreleasestack">4.1.6 <code>up_release_stack()</code></a><br>
+      <a href="#upunblocktask">4.1.7 <code>up_unblock_task()</code></a><br>
+      <a href="#upblocktask">4.1.8 <code>up_block_task()</code></a><br>
+      <a href="#upreleasepending">4.1.9 <code>up_release_pending()</code></a><br>
+      <a href="#upreprioritizertr">4.1.10 <code>up_reprioritize_rtr()</code></a><br>
+      <a href="#_exit">4.1.11 <code>_exit()</code></a><br>
+      <a href="#upassert">4.1.12 <code>up_assert()</code></a><br>
+      <a href="#upschedulesigaction">4.1.13 <code>up_schedule_sigaction()</code></a><br>
+      <a href="#upallocateheap">4.1.14 <code>up_allocate_heap()</code></a><br>
+      <a href="#upinterruptcontext">4.1.15 <code>up_interrupt_context()</code></a><br>
+      <a href="#updisableirq">4.1.16 <code>up_disable_irq()</code></a><br>
+      <a href="#upenableirq">4.1.17 <code>up_enable_irq()</code></a><br>
+      <a href="#upprioritizeirq">4.1.18 <code>up_prioritize_irq()</code></a></br>
+      <a href="#upputc">4.1.19 <code>up_putc()</code></a>
+    </ul>
+    <a href="#exports">4.2 APIs Exported by NuttX to Architecture-Specific Logic</a>
+    <ul>
+      <a href="#osstart">4.2.1 <code>os_start()</code></a><br>
+      <a href="#listmgmt">4.2.2 OS List Management APIs</a><br><br>
+      <a href="#schedprocesstimer">4.2.3 <code>sched_process_timer()</code></a><br>
+      <a href="#irqdispatch">4.2.4 <code>irq_dispatch()</code></a>
+    </ul>
   </ul>
+  <a href="#NxFileSystem">5.0 NuttX File System</a><br>
+  <a href="#apndxconfigs">Appendix A: NuttX Configuration Settings</a><br>
+  <a href="#apndxtrademarks">Appendix B:  Trademarks</a>
 </ul>
-<li><a href="#NxFileSystem">5.0 NuttX File System</a></li>
-<li><a href="#apndxconfigs">Appendix A: NuttX Configuration Settings</a></li>
-<li><a href="#apndxtrademarks">Appendix B:  Trademarks</a></li>
-<hr>
-<h1>1.0 <a name="Introduction">Introduction</a></h1>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <h1>1.0 <a name="Introduction">Introduction</a></h1>
+    </td>
+  </tr>
+</table>
 
 <p><b>Overview</b>
   This document provides and overview of the NuttX build and configuration
@@ -104,10 +119,13 @@
   See also <code>arch/README.txt</code> and <code>configs/README.txt</code>.
 </p>
 
-<p><b>General Philosophy</b>.
-
-<hr>
-<h1>2.0 <a name="DirectoryStructure">Directory Structure</a></h1>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <h1>2.0 <a name="DirectoryStructure">Directory Structure</a></h1>
+    </td>
+  </tr>
+</table>
 
 <p>
   <b>Directory Structure</b>.
@@ -868,8 +886,14 @@ tools/
   Use of this <code>Makefile</code> to build NuttX is described <a href="#buildingnuttx">below</a>.
 </p>
 
-<hr>
-<h1>3.0 <a name="configandbuild">Configuring and Building</a></h1>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <h1>3.0 <a name="configandbuild">Configuring and Building</a></h1>
+    </td>
+  </tr>
+</table>
+
 <h2><a name="configuringnuttx">3.1 Configuring NuttX</a></h2>
 <p>
   <b>Manual Configuration</b>.
@@ -948,7 +972,13 @@ The system can be re-made subsequently by just typing <code>make</code>.
   <li>Creating make dependencies.
 </ul>
 
-<h1>4.0 <a name="ArchAPIs">Architecture APIs</a></h1>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <h1>4.0 <a name="ArchAPIs">Architecture APIs</a></h1>
+    </td>
+  </tr>
+</table>
 
 <p>
   The file <code>include/nuttx/arch.h</code> identifies by prototype all of the APIs that must
@@ -1285,28 +1315,76 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="updisableirq">4.1.16 <code>up_disable_irq()</code></a></h3>
-<p><b>Prototype</b>: <code>void up_disable_irq(int irq);</code></p>
+<p><b>Prototype</b>:</p>
+<ul><pre>
+#ifndef CONFIG_ARCH_NOINTC
+  void up_disable_irq(int irq);
+#endf
+</pre></ul>
 
 <p><b>Description</b>.
   Disable the IRQ specified by 'irq'
+  On many architectures, there are three levels of interrupt enabling: (1)
+  at the global level, (2) at the level of the interrupt controller,
+  and (3) at the device level.  In order to receive interrupts, they
+  must be enabled at all three levels.
+</p>
+<p>
+  This function implements enabling of the device specified by 'irq'
+  at the interrupt controller level if supported by the architecture
+  (irqsave() supports the global level, the device level is hardware
+  specific).
+<p>
+  If the architecture does not support <code>up_disable_irq</code>,
+  <code>CONFIG_ARCH_NOINTC</code> should be defined in the NuttX configuration file.
+  Since this API cannot be supported on all architectures, it should be
+  avoided in common implementations where possible.
 </p>
 
 <h3><a name="upenableirq">4.1.17 <code>up_enable_irq()</code></a></h3>
-<p><b>Prototype</b>: <code>void up_enable_irq(int irq);</code></p>
+<p><b>Prototype</b>:</p>
+<ul><pre>
+#ifndef CONFIG_ARCH_NOINTC
+  void up_enable_irq(int irq);
+#endf
+</pre></ul>
 
 <p><b>Description</b>.
-  Enable the IRQ specified by 'irq'
+  This function implements disabling of the device specified by 'irq'
+  at the interrupt controller level if supported by the architecture
+  (irqrestore() supports the global level, the device level is hardware
+  specific).
+</p>
+<p>
+  If the architecture does not support <code>up_disable_irq</code>,
+  <code>CONFIG_ARCH_NOINTC</code> should be defined in the NuttX configuration file.
+  Since this API cannot be supported on all architectures, it should be
+  avoided in common implementations where possible.
 </p>
 
-<h3><a name="upputc">4.1.18 <code>up_putc()</code></a></h3>
+<h3><a name="upprioritizeirq">4.1.18 <code>up_prioritize_irq()</code></a></h3>
+<p><b>Prototype</b>:</p>
+<ul><pre>
+#ifdef CONFIG_ARCH_IRQPRIO
+  void up_enable_irq(int irq);
+#endf
+</pre></ul>
+<p><b>Description</b>.
+  Set the priority of an IRQ.
+</p>
+<p>
+  If the architecture supports <code>up_enable_irq</code>,
+  <code>CONFIG_ARCH_IRQPRIO</code> should be defined in the NuttX configuration file.
+  Since this API cannot be supported on all architectures, it should be
+  avoided in common implementations where possible.
+</p>
+
+<h3><a name="upputc">4.1.19 <code>up_putc()</code></a></h3>
 
 <p><b>Prototype</b>: <code>int up_putc(int ch);</code></p>
 <p><b>Description</b>.
   This is a debug interface exported by the architecture-specific logic.
   Output one character on the console
-<p>
-  This API is <i>NOT</i> required if <code>CONFIG_HEAP_BASE</code>
-  is defined.
 </p>
 
 <h2><a name="exports">4.2 APIs Exported by NuttX to Architecture-Specific Logic</a></h2>
@@ -1345,7 +1423,13 @@ The system can be re-made subsequently by just typing <code>make</code>.
   the appropriate, registered handling logic.
 </p>
 
-<h1><a name="NxFileSystem">5.0 NuttX File System</a></h1>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <h1><a name="NxFileSystem">5.0 NuttX File System</a></h1>
+    </td>
+  </tr>
+</table>
 
 <p><b>Overview</b>.
   NuttX includes an optional, scalable file system.
@@ -1395,7 +1479,13 @@ The system can be re-made subsequently by just typing <code>make</code>.
   from the very tiny platform to the moderate platform.
 </p>
 
-<h1><a name="apndxconfigs">Appendix A:  NuttX Configuration Settings</a></h1>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <h1><a name="apndxconfigs">Appendix A:  NuttX Configuration Settings</a></h1>
+    </td>
+  </tr>
+</table>
 
 <p>
   The following variables are recognized by the build (you may
@@ -1977,7 +2067,13 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
 </ul>
 
-<h1><a name="apndxtrademarks">Appendix B:  Trademarks</a></h1>
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <h1><a name="apndxtrademarks">Appendix B:  Trademarks</a></h1>
+    </td>
+  </tr>
+</table>
 
   <li>ARM, ARM7 ARM7TDMI, ARM9, ARM926EJS are trademarks of Advanced RISC Machines, Limited.</li>
   <li>Cygwin is a trademark of Red Hat, Incorporated.</li>
