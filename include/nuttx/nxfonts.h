@@ -150,33 +150,39 @@ EXTERN FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16 ch);
  *   height - The max height of the returned char in rows
  *   width  - The max width of the returned char in pixels
  *   stride - The width of the destination buffer in bytes
- *   ch     - The character code to convert
+ *   bm     - Describes the character glyph to convert
  *   color  - The color to use for '1' bits in the font bitmap
  *            (0 bits are transparent)
  *
  * Returned Value:
- *  On Success, this function returns the actual width of the font in bytes.
- *  on failed, a negated errno is retured.
+ *  OK on Success, ERROR: on failure with errno set appropriately.
+ *  (never fails)
  *
  ****************************************************************************/
 
 EXTERN int nxf_convert_2bpp(FAR ubyte *dest, uint16 height,
-                            uint16 width, uint16 stride, uint16 ch,
+                            uint16 width, uint16 stride,
+                            FAR const struct nx_fontbitmap_s *bm,
                             nxgl_mxpixel_t color);
 EXTERN int nxf_convert_4bpp(FAR ubyte *dest, uint16 height,
-                            uint16 width, uint16 stride, uint16 ch,
+                            uint16 width, uint16 stride,
+                            FAR const struct nx_fontbitmap_s *bm,
                             nxgl_mxpixel_t color);
 EXTERN int nxf_convert_8bpp(FAR ubyte *dest, uint16 height,
-                            uint16 width, uint16 stride, uint16 ch,
+                            uint16 width, uint16 stride,
+                            FAR const struct nx_fontbitmap_s *bm,
                             nxgl_mxpixel_t color);
 EXTERN int nxf_convert_16bpp(FAR uint16 *dest, uint16 height,
-                             uint16 width, uint16 stride, uint16 ch,
+                             uint16 width, uint16 stride,
+                             FAR const struct nx_fontbitmap_s *bm,
                              nxgl_mxpixel_t color);
 EXTERN int nxf_convert_24bpp(FAR uint32 *dest, uint16 height,
-                             uint16 width, uint16 stride, uint16 ch,
+                             uint16 width, uint16 stride,
+                             FAR const struct nx_fontbitmap_s *bm,
                              nxgl_mxpixel_t color);
 EXTERN int nxf_convert_32bpp(FAR uint32 *dest, uint16 height,
-                             uint16 width, uint16 stride, uint16 ch,
+                             uint16 width, uint16 stride,
+                             FAR const struct nx_fontbitmap_s *bm,
                              nxgl_mxpixel_t color);
 
 #undef EXTERN

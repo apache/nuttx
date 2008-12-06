@@ -164,6 +164,7 @@ static void nxeg_initstate(FAR struct nxeg_state_s *st, int wnum,
   st->nglyphs  = 0;
   st->height   = fontset->mxheight;
   st->width    = fontset->mxwidth;
+  st->spwidth  = fontset->spwidth;
 #endif
 }
 

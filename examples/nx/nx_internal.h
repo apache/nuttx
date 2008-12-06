@@ -208,8 +208,9 @@ enum exitcode_e
 struct nxeg_glyph_s
 {
   ubyte code;                        /* Character code */
-  ubyte width;                       /* Visible width of this glyph */
-  ubyte stride;                      /* Width of the glyph row in bytes */
+  ubyte height;                      /* Height of this glyph (in rows) */
+  ubyte width;                       /* Width of this glyph (in pixels) */
+  ubyte stride;                      /* Width of the glyph row (in bytes) */
   FAR ubyte *bitmap;                 /* Allocated bitmap memory */
 };
 
@@ -231,6 +232,7 @@ struct nxeg_state_s
 #ifdef CONFIG_NX_KBD
   ubyte height;                      /* Max height of a font in pixels */
   ubyte width;                       /* Max width of a font in pixels */
+  ubyte spwidth;                     /* The width of a space */
 
   ubyte nchars;                      /* Number of KBD chars received */
   ubyte nglyphs;                     /* Number of glyphs cached */

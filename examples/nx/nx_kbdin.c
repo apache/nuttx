@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 #include <debug.h>
 #include <errno.h>
@@ -98,32 +99,37 @@
 static void nxeg_fillchar(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
                           FAR const struct nxeg_bitmap_s *bm)
 {
+  FAR void *src = (FAR void *)bm->glyph->bitmap;
   struct nxgl_rect_s intersection;
   int ret;
 
-  /* Get the intersection of the redraw region and the characer bitmap */
+  /* Handle the special case of spaces which have no glyph bitmap */
 
-  nxgl_rectintersect(&intersection, rect, &bm->bounds);
-  if (!nxgl_nullrect(&intersection))
+  if (src)
     {
-      FAR void *src = (FAR void *)bm->glyph->bitmap;
+      /* Get the intersection of the redraw region and the characer bitmap */
+
+      nxgl_rectintersect(&intersection, rect, &bm->bounds);
+      if (!nxgl_nullrect(&intersection))
+        {
 #ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
-      ret = nxtk_bitmapwindow((NXTKWINDOW)hwnd, &intersection, &src,
-                              &bm->bounds.pt1,
-                              (unsigned int)bm->glyph->stride);
-      if (ret < 0)
-        {
-          message("nxeg_fillchar: nxtk_bitmapwindow failed: %d\n", errno);
-        }
+          ret = nxtk_bitmapwindow((NXTKWINDOW)hwnd, &intersection, &src,
+                                  &bm->bounds.pt1,
+                                  (unsigned int)bm->glyph->stride);
+          if (ret < 0)
+            {
+              message("nxeg_fillchar: nxtk_bitmapwindow failed: %d\n", errno);
+            }
 #else
-      ret = nx_bitmap((NXWINDOW)hwnd, &intersection, &src,
-                      &bm->bounds.pt1,
-                      (unsigned int)bm->glyph->stride);
-      if (ret < 0)
-        {
-          message("nxeg_fillchar: nx_bitmapwindow failed: %d\n", errno);
-        }
+          ret = nx_bitmap((NXWINDOW)hwnd, &intersection, &src,
+                          &bm->bounds.pt1,
+                          (unsigned int)bm->glyph->stride);
+          if (ret < 0)
+            {
+              message("nxeg_fillchar: nx_bitmapwindow failed: %d\n", errno);
+            }
 #endif
+        }
     }
 }
 
@@ -132,13 +138,14 @@ static void nxeg_fillchar(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
  ****************************************************************************/
 
 static inline FAR const struct nxeg_glyph_s *
-nxeg_renderglyph(FAR struct nxeg_state_s *st, ubyte ch)
+nxeg_renderglyph(FAR struct nxeg_state_s *st, FAR const struct nx_fontbitmap_s *bm, ubyte ch)
 {
   FAR struct nxeg_glyph_s *glyph = NULL;
   FAR nxgl_mxpixel_t *ptr;
   int bmsize;
   int row;
   int col;
+  int ret;
 
   /* Make sure that there is room for another glyph */
 
@@ -150,10 +157,15 @@ nxeg_renderglyph(FAR struct nxeg_state_s *st, ubyte ch)
       glyph         = &st->glyph[st->nglyphs];
       glyph->code   = ch;
 
-      /* Allocate the maximum size for the bitmap */
+      /* Get the dimensions of the glyph */
 
-      glyph->stride = (st->width * CONFIG_EXAMPLES_NX_BPP + 4) / 8;
-      bmsize        =  glyph->stride * st->height;
+      glyph->width  = bm->metric.width + bm->metric.xoffset;
+      glyph->height = bm->metric.height + bm->metric.yoffset;
+
+      /* Allocate memory to hold the glyph with its offsets */
+
+      glyph->stride = (glyph->width * CONFIG_EXAMPLES_NX_BPP + 7) / 8;
+      bmsize        =  glyph->stride * glyph->height;
       glyph->bitmap = (FAR ubyte *)malloc(bmsize);
 
       if (glyph->bitmap)
@@ -164,9 +176,9 @@ nxeg_renderglyph(FAR struct nxeg_state_s *st, ubyte ch)
 # error "Additional logic is needed here"
 #else
           ptr = (FAR nxgl_mxpixel_t *)glyph->bitmap;
-          for (row = 0; row < st->height; row++)
+          for (row = 0; row < glyph->height; row++)
             {
-              for (col = 0; col < st->width; col++)
+              for (col = 0; col < glyph->width; col++)
                 {
                   *ptr++ = st->color[0];
                 }
@@ -174,12 +186,14 @@ nxeg_renderglyph(FAR struct nxeg_state_s *st, ubyte ch)
 #endif
           /* Then render the glyph into the allocated memory */
 
-          glyph->width = RENDERER((FAR nxgl_mxpixel_t*)glyph->bitmap,
-                                  st->height, st->width, glyph->stride,
-                                  ch, CONFIG_EXAMPLES_NX_FONTCOLOR);
-          if (glyph->width <= 0)
+          ret = RENDERER((FAR nxgl_mxpixel_t*)glyph->bitmap,
+                          glyph->height, glyph->width, glyph->stride,
+                          bm, CONFIG_EXAMPLES_NX_FONTCOLOR);
+          if (ret < 0)
             {
-              message("nxeg_renderglyph: RENDERER returned width=%d\n", glyph->width);
+              /* Actually, the RENDERER never returns a failure */
+
+              message("nxeg_renderglyph: RENDERER failed\n");
               free(glyph->bitmap);
               glyph->bitmap = NULL;
               glyph         = NULL;
@@ -197,11 +211,37 @@ nxeg_renderglyph(FAR struct nxeg_state_s *st, ubyte ch)
 }
 
 /****************************************************************************
- * Name: nxeg_getglyph
+ * Name: nxeg_addspace
+ ****************************************************************************/
+
+static inline FAR const struct nxeg_glyph_s *
+nxeg_addspace(FAR struct nxeg_state_s *st, ubyte ch)
+{
+  FAR struct nxeg_glyph_s *glyph = NULL;
+
+  /* Make sure that there is room for another glyph */
+
+  if (st->nglyphs < NXTK_MAXKBDCHARS)
+    {
+      /* Allocate the NULL glyph */
+
+      glyph        = &st->glyph[st->nglyphs];
+      memset(glyph, 0, sizeof(struct nxeg_glyph_s));
+
+      glyph->code  = ' ';
+      glyph->width = st->spwidth;
+
+      st->nglyphs++;
+    }
+  return glyph;
+}
+
+/****************************************************************************
+ * Name: nxeg_findglyph
  ****************************************************************************/
 
 static FAR const struct nxeg_glyph_s *
-nxeg_getglyph(FAR struct nxeg_state_s *st, ubyte ch)
+nxeg_findglyph(FAR struct nxeg_state_s *st, ubyte ch)
 {
   int i;
 
@@ -214,10 +254,45 @@ nxeg_getglyph(FAR struct nxeg_state_s *st, ubyte ch)
           return &st->glyph[i];
         }
     }
+  return NULL;
+}
 
-   /* No, it is not cached... render it now and add it to the cache */
+/****************************************************************************
+ * Name: nxeg_getglyph
+ ****************************************************************************/
 
-   return nxeg_renderglyph(st, ch);
+static FAR const struct nxeg_glyph_s *
+nxeg_getglyph(FAR struct nxeg_state_s *st, ubyte ch)
+{
+  FAR const struct nxeg_glyph_s *glyph;
+  FAR const struct nx_fontbitmap_s *bm;
+
+  /* First, try to find the glyph in the cache of pre-rendered glyphs */
+
+  glyph = nxeg_findglyph(st, ch);
+  if (!glyph)
+    {
+      /* No, it is not cached... Does the code map to a glyph? */
+
+      bm = nxf_getbitmap(ch);
+      if (!bm)
+        {
+          /* No, there is no glyph for this code.  Use space */
+
+          glyph = nxeg_findglyph(st, ' ');
+          if (!glyph)
+            {
+              /* There isn't fake glyph for ' ' yet... create one */
+
+              glyph = nxeg_addspace(st, ' ');
+            }
+        }
+      else
+        {
+          glyph =  nxeg_renderglyph(st, bm, ch);
+        }
+    }
+  return glyph;
 }
 
 /****************************************************************************
@@ -229,7 +304,6 @@ nxeg_addchar(FAR struct nxeg_state_s *st, ubyte ch)
 {
   FAR struct nxeg_bitmap_s *bm = NULL;
   FAR struct nxeg_bitmap_s *bmleft;
-  FAR const struct nx_font_s *fontset;
   nxgl_coord_t leftx;
 
   /* Is there space for another character on the display? */
@@ -238,7 +312,7 @@ nxeg_addchar(FAR struct nxeg_state_s *st, ubyte ch)
     {
        /* Yes, setup the bitmap */
 
-       bm       = &st->bm[st->nchars];
+       bm = &st->bm[st->nchars];
 
        /* Find the matching glyph */
 
@@ -254,8 +328,7 @@ nxeg_addchar(FAR struct nxeg_state_s *st, ubyte ch)
          {
             /* The first character is one space from the left */
 
-            fontset = nxf_getfontset();
-            leftx   = fontset->spwidth;
+            leftx  = st->spwidth;
          }
        else
          {
@@ -268,7 +341,7 @@ nxeg_addchar(FAR struct nxeg_state_s *st, ubyte ch)
        bm->bounds.pt1.x = leftx;
        bm->bounds.pt1.y = 2;
        bm->bounds.pt2.x = leftx + bm->glyph->width - 1;
-       bm->bounds.pt2.y = 2 + st->height - 1;
+       bm->bounds.pt2.y = 2 + bm->glyph->height - 1;
 
        st->nchars++;
     }
@@ -287,7 +360,10 @@ static inline void nxeg_addchars(NXWINDOW hwnd, FAR struct nxeg_state_s *st,
   while (nch--)
     {
       bm = nxeg_addchar(st, *ch++);
-      nxeg_fillchar(hwnd, &bm->bounds, bm);
+      if (bm)
+        {
+          nxeg_fillchar(hwnd, &bm->bounds, bm);
+        }
     }
 }
 
@@ -327,6 +403,11 @@ void nxeg_filltext(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
                    FAR struct nxeg_state_s *st)
 {
   int i;
+
+  /* Fill each character on the display (Only the characters within rect
+   * will actually be redrawn).
+   */
+
   for (i = 0; i < st->nchars; i++)
     {
       nxeg_fillchar(hwnd, rect, &st->bm[i]);
