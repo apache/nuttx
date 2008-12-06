@@ -11,9 +11,10 @@ NuttX TODO List (Last updated November 20, 2008)
   (1)  USB (drivers/usbdev)
   (4)  Libraries (lib/)
   (6)  File system/Generic drivers (fs/, drivers/)
+  (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (2)  Documentation (Documentation/)
-  (3)  Build system
+  (5)  Build system
   (2)  NuttShell (NSH) (examples/nsh)
   (1)  Other Applications & Tests (examples/)
   (1)  Linux/Cywgin simulation (arch/sim)
@@ -298,6 +299,22 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Medium-Low
 
+o Graphics subystem (graphics/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: If CONFIG_NX is enabled, the build fails the first time
+               saying that there is "No rule to make target..." for one of the
+               auto-generated graphics files.  This is a nuisance, but if you
+               simply build again (with the source files already auto-generated)
+               the problem does not reoccur.
+  Status:      Open
+  Priority:    Low, the work-around is simple
+
+  Description: Testing of all APIs is not complete.  See
+               http://nuttx.sourceforge.net/NXGraphicsSubsystem.html#testcoverage
+  Status:      Open
+  Priority:    Medium
+
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -349,14 +366,6 @@ o Build system
                settings has become quite large and difficult to manage manually.
   Status:      Open
   Priority:    Medium-low
-
-  Description: If CONFIG_NX is enabled, the build fails the first time
-               saying that there is "No rule to make target..." for one of the
-               auto-generated graphics files.  This is a nuisance, but if you
-               simply build again (with the source files already auto-generated)
-               the problem does not reoccur.
-  Status:      Open
-  Priority:    Low, the work-around is simple
 
 o NuttShell (NSH) (examples/nsh)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

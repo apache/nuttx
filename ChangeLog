@@ -588,7 +588,7 @@
 	* Network: add support for outgoing multicast addresses
 	* Added some rasterizers to the graphics library
 
-0.3.20 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.0 2008-12-06 Gregory Nutt <spudmonkey@racsa.co.cr>
 	* Initial release of a tiny windowing system for NuttX
 	* Add fixed precision sin() and cos() (not well tested at initial check-in)
 	* Add an X11-based simulated framebuffer driver
@@ -597,4 +597,6 @@
 	* Added more more extensive window support:  frames, toolbars, etc.
 	* Added support for bitmap fonts
 	* Integrated the new font support with a font test in examples/nx
+	* Add documentation for NX graphics subsystem
 
+0.4.1 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
