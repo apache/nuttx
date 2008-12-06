@@ -255,8 +255,8 @@ static inline int nxmu_setup(FAR const char *mqname,
   fe->be.bkgd.conn = &fe->conn;
   fe->be.bkgd.be   = (FAR struct nxbe_state_s*)fe;
 
-  fe->be.bkgd.bounds.pt2.x = fe->be.vinfo.xres;
-  fe->be.bkgd.bounds.pt2.y = fe->be.vinfo.yres;
+  fe->be.bkgd.bounds.pt2.x = fe->be.vinfo.xres - 1;
+  fe->be.bkgd.bounds.pt2.y = fe->be.vinfo.yres - 1;
 
   /* Complete initialization of the server state structure.  The
    * window list contains only one element:  The background window
