@@ -58,11 +58,23 @@
 #endif
 
 #ifndef CONFIG_NXTK_BORDERCOLOR1
-#  define CONFIG_NXTK_BORDERCOLOR1 0x00a9a9a9
+#  if !defined(CONFIG_NX_DISABLE_32BPP) || !defined(CONFIG_NX_DISABLE_24BPP)
+#    define CONFIG_NXTK_BORDERCOLOR1 0x00a9a9a9
+#  elif !defined(CONFIG_NX_DISABLE_16BPP)
+#    define CONFIG_NXTK_BORDERCOLOR1 0xad55
+#  else
+#    define CONFIG_NXTK_BORDERCOLOR1 'B'
+#  endif
 #endif
 
 #ifndef CONFIG_NXTK_BORDERCOLOR2
-#  define CONFIG_NXTK_BORDERCOLOR2 0x00696969
+#  if !defined(CONFIG_NX_DISABLE_32BPP) || !defined(CONFIG_NX_DISABLE_24BPP)
+#    define CONFIG_NXTK_BORDERCOLOR2 0x00696969
+#  elif !defined(CONFIG_NX_DISABLE_16BPP)
+#    define CONFIG_NXTK_BORDERCOLOR2 0x6b4d
+#  else
+#    define CONFIG_NXTK_BORDERCOLOR2 'b'
+#  endif
 #endif
 
 /****************************************************************************
