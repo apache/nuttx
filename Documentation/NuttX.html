@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 4, 2008</p>
+      <p>Last Updated: December 6, 2008</p>
     </td>
   </tr>
 </table>
@@ -671,52 +671,28 @@
   </tr>
 </table>
 
-<p><b>nuttx-0.3.19</b>.
-  The 31<sup>st</sup> release of NuttX (nuttx-0.3.19) is available for download
+<p><b>nuttx-0.4.0</b>.
+  The 32<sup>nd</sup> release of NuttX (nuttx-0.4.10) is available for download
   from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
   website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
-<p>
-  This release includes the following new feature:
-<p>
-<ul>
-  <li>Add <code>poll()</code> and <code>select()</code> APIs that may be used to monitor for data
-    availability on character devices or TCP/IP sockets.
-  </li>
-  <li>Implemented support TCP/IP connection backlog.
-   This allows <code>poll()</code>/<code>select()</code> to wake-up on new connections to a listener socket.
-  </li>
-  <li>Added definition of a framebuffer driver and implement framebuffer drivers for the
-    simulated platform and the TI DM320 (untested as of the initial check-in).
-  </li>
-  <li>Partially developed a graphics framework based on the framebuffer drivers, however,
-    this will not be ready for use for a few more release. 
-    Currently this includes only a few color conversion routines and some rasterizing functions.
-    A tiny windowing system is under development but not ready for check-in yet.
-  <li>Added support for fixed precision math.
-  </li>
-  <li>Added support for outgoing multicast packets.
-  </li>
-</ul>
-<p>
-  Several bugs were fixed, the most important of which are:
+  This release adds graphics support and a tiny windowing subsystem.
+  That new graphics subystem is documented in a <a href="NXGraphicsSubsystem.html">user manual</a>.
+  No other substantial changes were made.
 </p>
-  <li>Fixed an important bug in the TCP/IP buffering logic.
-    When TCP/IP read-ahead is enabled and not recv() is in-place when a TCP/IP packet is received,
-    the packet is placed into a read-ahead buffer.
-    However, the old contents of the read-ahead buffer were not being cleared and old data would 
-    contaminate the newly received buffer.
-  </li>
-  <li>Changed the behavior of the serial driver read.
-    It now returns data as it is available rather than waiting for the full requested read size.
-    This makes functions like <code>fgetc()</code> work much more smoothly.
-  </li>
 <p>
-  These changes were verified only on the Neuros OSD (ARM) and the Linux simulator using a
-  Linux development environment.
+  The version number was bumped up to 0.4.0 in part to reflect the new graphics subsystem,
+  but also to recognize the NuttX is approaching complete functionality.  In the 0.3.x
+  versions, network support was added, Pascal P-code runtime support was added, FAT and
+  ROMFS filesystems were added, MMC/SD and USB device support were added.  There were
+  also numerous extensions to the NuttShell, NuttX APIs, and architecture ports.
+</p>
+<p>
+  These changes were verified only on the NuttX simulation platform with X11 windows
+  simulating a device framebuffer.
   Please report any errors to me.
 </p>
 
@@ -1274,30 +1250,16 @@ Other memory:
 </table>
 
 <pre><ul>
-nuttx-0.3.19 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-	* Add poll() and select() APIs (in the initial check-in, these work only with character devices) 
-	* Add poll() methods to /dev/null, /dev/zero, pipes, fifos, and serial drivers.
-	* Add examples/poll for testing poll() and select()
-	* Fix hostile behavior of getc, fgetc, getchar, etc.: the serial driver was waiting for a
-	  full buffer of read data before return.  This means that getc would stall when it needed
-	  to refill the input buffer. The old behavior (read full blocks) might be useful in other
-	  contexts, so it is still available within the driver as a configuration option.
-	* Implement poll() and select() support for TCP/IP sockets
-	* Fixed an important bug in the TCP/IP buffering logic.  When TCP/IP read-ahead is enabled
-	  and not recv() is in-place when a TCP/IP packet is received, the packet is placed into
-	  a read-ahead buffer.  However, the old contents of the read-ahead buffer were not being
-	  cleared and old data would contaminate the newly received buffer.
-	* Implemented support for connection backlog.  The size of the backlog is specified by the
-	  second argument of the standard listen() API.  Hooks are provided to support poll()/select()
-	  waiting for connections, with a subsequent call to accept() to use the backlogged connection.
-	* Fixed a minor bug in accept().  It should allow the address and addresslen values to be NULL
-	* Added first-cut definition for a framebuffer interface (and simulated framebuffer for testing
-	  purposes only)
-	* Added fixed precision math support
-	* Added some color converson routines into what may become a real graphics library someday.
-	* Added a framebuffer driver for the DM320 (untested on initial check-in)
-	* Network: add support for outgoing multicast addresses
-	* Added some rasterizers to the graphics library
+nuttx-0.4.0 2008-12-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+	* Initial release of a tiny windowing system for NuttX
+	* Add fixed precision sin() and cos() (not well tested at initial check-in)
+	* Add an X11-based simulated framebuffer driver
+	* The simulated target now has an option (CONFIG_SIM_WALLTIME) that will let the simulation
+	  run in more-or-less realtime.
+	* Added more more extensive window support:  frames, toolbars, etc.
+	* Added support for bitmap fonts
+	* Integrated the new font support with a font test in examples/nx
+	* Add documentation for NX graphics subsystem
 
 pascal-0.1.2 2008-02-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1325,15 +1287,7 @@ buildroot-0.1.2 2007-11-06 &lt;spudmonkey@racsa.co.cr&gt
 </table>
 
 <pre><ul>
-nuttx-0.3.20 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-	* Initial release of a tiny windowing system for NuttX
-	* Add fixed precision sin() and cos() (not well tested at initial check-in)
-	* Add an X11-based simulated framebuffer driver
-	* The simulated target now has an option (CONFIG_SIM_WALLTIME) that will let the simulation
-	  run in more-or-less realtime.
-	* Added more more extensive window support:  frames, toolbars, etc.
-	* Added support for bitmap fonts
-	* Integrated the new font support with a font test in examples/nx
+nuttx-0.4.1 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-0.1.3 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
