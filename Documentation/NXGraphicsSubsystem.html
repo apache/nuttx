@@ -148,7 +148,7 @@
      </ul>
    </p>
    <p>
-     <i><b>2.5</b> <a href="#nxfonts2">NX Fonts Support (<code>NXFONTS</code>)</a></i><br>
+     <i><b>2.5</b> <a href="#nxfonts2">NX Fonts Support (<code>NXFONTS</code>)</a></i>
    </p>
    <p>
      <ul>
@@ -157,6 +157,9 @@
         <i>2.5.3 <a href="#nxfgetbitmap"><code>nxf_getbitmap()</code></a></i><br>
         <i>2.5.4 <a href="#nxfconvertbpp"><code>nxf_convert_*bpp()</code></a></i>
      </ul>
+   </p>
+   <p>
+     <i><b>2.6</b> <a href="#samplecode">Sample Code</a></i>
    </p>
   </ul>
   <p>
@@ -176,6 +179,13 @@
   <p>
     <big><b>Appendix C</b> <a href="#testcoverage">NX Test Coverage</a></big>
   </p>
+    <ul>
+      <i><b>Table C.1:</b> <a href="#nxglibcoverage">NXGLIB API Test Coverage</a></i><br>
+      <i><b>Table C.2:</b> <a href="#nxcbcoverage">NX Server Callbacks Test Coverage</a></i><br>
+      <i><b>Table C.3:</b> <a href="#nxcoverage">NX API Test Coverage</a></i><br>
+      <i><b>Table C.4:</b> <a href="#nxtkcoverage">NXTK API Test Coverage</a></i><br>
+      <i><b>Table C.5:</b> <a href="#nxfontscoverage">NXFONTS API Test Coverage</a></i><br>
+    </ul>
   </td>
   </tr>
 </table>
@@ -1714,6 +1724,43 @@ int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, ubyte buttons);
 
 <h2>2.4 <a name="nxtk2">NX Tool Kit (<code>NXTK</code>)</a></h2>
 
+<p>
+  NXTK implements  where the <i>framed window</i>.
+  NX framed windows consist of three components within one NX window:
+</p>
+<ol>
+  <li>The window <i>border</i>,</li>
+  <li>The main <i>client window</i> area, and</li>
+  <li>A <i>toolbar</i> area</li>
+</ol>
+
+<p>
+  Each sub-window represents a region within one window.
+  <a href="#screenshot">Figure 1</a> shows some simple NX framed windows.
+  NXTK allows these sub-windows to be managed more-or-less independently:
+</p>
+<ul>
+  <li>
+    Each component has its own callbacks for redraw and position events
+    as well as mouse and keyboard inputs.
+    The client sub-window callbacks are registered when the framed window is
+    created with a call to <a href="#nxtkopenwindow"><code>nxtk_openwindow()</code></a>;
+    Separate toolbar sub-window callbakcs are reigistered when the toolbar
+    is added using <a href="#nxtkopentoolbar"><code>nxtk_opentoolbar()</code></a>.
+    (NOTES: (1) only the client sub-window receives keyboard input and,
+    (2) border callbacks are not currently accessible by the user).
+  <li>
+  </li>
+    All position informational provided within the callback is relative
+    to the specific sub-window.
+    That is, the origin (0,0) of the coordinate system for each sub-window
+    begins at the top left corner of the subwindow.
+    This means that toolbar logic need not be concerned about client window
+    geometry (and vice versa) and, for example, common toolbar logic can
+    be used with different windows.
+  </li>
+</ul>
+
 <h3>2.4.1 <a name="nxtktypes"><code>NXTK Types()</code></a></h3>
 
 <p>
@@ -2103,9 +2150,9 @@ int nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
       <a href="#nxtkopenwindow"><code>nxtk_openwindow()</code></a>.
     <dt><code>height</code>
     <dd>The requested height of the toolbar in pixels.
-    <dt><code></code>
+    <dt><code>cb</code>
     <dd>Callbacks used to process toolbar events.
-    <dt><code></code>
+    <dt><code>arg</code>
     <dd>User provided value that will be returned with toolbar callbacks.
   </dl>
 </p>
@@ -2392,22 +2439,28 @@ FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16 ch);
 #include &lt;nuttx/nxfonts.h&gt;
 
 int nxf_convert_2bpp(FAR ubyte *dest, uint16 height,
-                     uint16 width, uint16 stride, uint16 ch,
+                     uint16 width, uint16 stride,
+                     FAR const struct nx_fontbitmap_s *bm,
                      nxgl_mxpixel_t color);
 int nxf_convert_4bpp(FAR ubyte *dest, uint16 height,
-                     uint16 width, uint16 stride, uint16 ch,
+                     uint16 width, uint16 stride,
+                     FAR const struct nx_fontbitmap_s *bm,
                      nxgl_mxpixel_t color);
 int nxf_convert_8bpp(FAR ubyte *dest, uint16 height,
-                     uint16 width, uint16 stride, uint16 ch,
+                     uint16 width, uint16 stride,
+                     FAR const struct nx_fontbitmap_s *bm,
                      nxgl_mxpixel_t color);
 int nxf_convert_16bpp(FAR uint16 *dest, uint16 height,
-                      uint16 width, uint16 stride, uint16 ch,
+                      uint16 width, uint16 stride,
+                      FAR const struct nx_fontbitmap_s *bm,
                       nxgl_mxpixel_t color);
 int nxf_convert_24bpp(FAR uint32 *dest, uint16 height,
-                      uint16 width, uint16 stride, uint16 ch,
+                      uint16 width, uint16 stride,
+                      FAR const struct nx_fontbitmap_s *bm,
                       nxgl_mxpixel_t color);
 int nxf_convert_32bpp(FAR uint32 *dest, uint16 height,
-                      uint16 width, uint16 stride, uint16 ch,
+                      uint16 width, uint16 stride,
+                      FAR const struct nx_fontbitmap_s *bm,
                       nxgl_mxpixel_t color);
 </pre></ul>
 <p>
@@ -2424,16 +2477,39 @@ int nxf_convert_32bpp(FAR uint32 *dest, uint16 height,
     <dd>The max width of the returned char in pixels.
     <dt><code>stride</code>
     <dd>The width of the destination buffer in bytes.
-    <dt><code>ch</code>
-    <dd>The character code to convert.
+    <dt><code>bm</code>
+    <dd>Describes the character glyph to convert
     <dt><code>color</code>
     <dd>The color to use for '1' bits in the font bitmap (0 bits are transparent).
   </dl></ul>
 </p>
 <p>
   <b>Returned Value:</b>
-  On Success, these functions returns the actual width of the font in bytes.
-  on failed, a negated <code>errno</code> is retured.
+  <code>OK</code> on success;
+  <code>ERROR</code> on failure with <code>errno</code> set appropriately.
+</p>
+
+<h2>2.6 <a name="samplecode">Sample Code</a></h2>
+
+<p><b><code>examples/nx</code></b>.
+  No sample code is provided in this document.
+  However, an example can be found in the NuttX source tree at <code>examples/nx</code>.
+  That code is intended to test NX.
+  Since it is test code, it is designed to exercise functionality and does not necessarily
+  represent best NX coding practices.
+</p>
+
+<p>
+  In its current form, the NX graphics system provides a low level of graphics and window
+  support.
+  Most of the complexity of manage redrawing and handling mouse and keyboard events must
+  be implemented by the NX client code.
+</p>
+
+<p><b>Building <code>examples/nx</code></b>.
+  Testing was performed using the Linux/Cygwin-based NuttX simulator.
+  Instructions are provided for building that simulation are provided in 
+  <a href="#testcoverage">Appendix C</a> of this document.
 </p>
 
 <table width ="100%">
@@ -2602,17 +2678,468 @@ int nxf_convert_32bpp(FAR uint32 *dest, uint16 height,
   </tr>
 </table>
 
-<p>
+<p><b><code>examples/nx</code></b>.
   The primary test tool for debugging NX resides at <code>examples/nx</code>.
-  At present, that test only exercises a subset of NX; the remainder is essentially
-  untested.
+</p>
+<p><b>Building <code>examples/nx</code></b>.
+  NX testing was performed using <code>examples/nx</code> with the
+  Linux/Cygwin-based NuttX simulator.
+  Configuration files for building this test can be found in <code>configs/sim/nx</code>.
+  There are two alternative configurations for building the simulation:
+</p>
+<ol>
+  <li>
+    The default configuration using the configuration file at
+    <code>configs/sim/nx/defconfig</code>.
+    This default configuration exercises the NX logic a 8 BPP but provides no visual feedback.
+    In this configuration, a very simple, simulated framebuffer driver is used that is
+    based upon a simple region of memory posing as video memory.
+    That default configuration can be built as follows:
+<ul><pre>
+cd &lt;NuttX-Directory&gt;/tools
+./configure sim/nx
+cd  &lt;NuttX-Directory&gt;
+make
+./nuttx
+</pre></ul>
+  </li>
+  <li>
+    A preferred configuration extends the test with a simulated framebuffer driver
+    that uses an X window as a framebuffer.
+    This configuration uses the configuration file at <code>configs/sim/nx/defconfig-x11</code>.
+    This is a superior test configuration because the X window appears at your desktop
+    and you can see the NX output.
+    This preferred configuration can be built as follows:
+<ul><pre>
+cd &lt;NuttX-Directory&gt;/tools
+./configure sim/nx
+cd  &lt;NuttX-Directory&gt;
+cp &lt;NuttX-Directory&gt;/configs/sim/nx/defconfig-x11 .config
+make
+./nuttx
+</pre></ul>
+  </li>
+</ol>
+<p>
+    Why isn't this configuration the default?  Because not all systems the use NX support X.
+</p>
+
+<p><b>Test Coverage</b>.
+  At present, <code>examples/nx</code>t only exercises a subset of NX;
+  the remainder is essentially untested.
   The following table describes the testing performed on each NX API:
 </p>
 
-<center><h1>Table C.1: NX Test Coverage</h1></center>
+<center><h2>Table C.1: <a name="nxglibcoverage">NXGLIB API Test Coverage</a></h2></center>
+<center><table border="1" width="80%">
+<tr>
+  <th width="40%">Function</th>
+  <th width="60%">Special Setup/Notes</th>
+  <th width="5%">Verified</th></tr>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglrgb2yuv"><code>nxgl_rgb2yuv()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglyuv2rgb"><code>nxgl_yuv2rgb()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglrectcopy"><code>nxgl_rectcopy()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglrectoffset"><code>nxgl_rectoffset()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglvectoradd"><code>nxgl_vectoradd()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglvectorsubtract"><code>nxgl_vectorsubtract()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglrectintersect"><code>nxgl_rectintersect()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglrectunion"><code>nxgl_rectunion()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglnonintersecting"><code>nxgl_nonintersecting()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglrectoverlap"><code>nxgl_rectoverlap()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglrectinside"><code>nxgl_rectinside()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglrectsize"><code>nxgl_rectsize()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglnullrect"><code>nxgl_nullrect()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglrunoffset"><code>nxgl_runoffset()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglruncopy"><code>nxgl_runcopy()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxgltrapoffset"><code>nxgl_trapoffset()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxgltrapcopy"><code>nxgl_trapcopy()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglcolorcopy"><code>nxgl_colorcopy</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+</table></center>
 
-<center><table border="1" width="50%">
-  <tr><th><i>To be provided</i></th></tr>
+
+<center><h2>Table C.2: <a name="nxcbcoverage">NX Server Callbacks Test Coverage</a></h2></center>
+<center><table border="1" width="80%">
+<tr>
+  <th width="40%">Function</th>
+  <th width="60%">Special Setup/Notes</th>
+  <th width="5%">Verified</th></tr>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxcbredraw"><code>redraw()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxcbposition"><code>position()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxcbmousein"><code>mousein()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxcbkbdin"><code>kbdin()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+</table></center>
+
+<center><h2>Table C.3: <a name="nxcoverage">NX API Test Coverage</a></h2></center>
+<center><table border="1" width="80%">
+<tr>
+  <th width="40%">Function</th>
+  <th width="60%">Special Setup/Notes</th>
+  <th width="5%">Verified</th></tr>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxruninstance"><code>nx_runinstance()</code></a></td>
+  <td>Change to <code>CONFIG_NX_MULTIUSER=y</code> in the
+     <code>&lt;NuttX-Directory&gt;/.config</code> file </td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxconnectinstance"><code>nx_connectinstance()</code></a></td>
+  <td>Change to <code>CONFIG_NX_MULTIUSER=y</code> in the
+     <code>&lt;NuttX-Directory&gt;/.config</code> file </td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxopen"><code>nx_open()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxdisconnect"><code>nx_disconnect()</code></a></td>
+  <td>Change to <code>CONFIG_NX_MULTIUSER=y</code> in the
+     <code>&lt;NuttX-Directory&gt;/.config</code> file </td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxclose"><code>nx_close()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxeventhandler"><code>nx_eventhandler()</code></a></td>
+  <td>Change to <code>CONFIG_NX_MULTIUSER=y</code> in the
+     <code>&lt;NuttX-Directory&gt;/.config</code> file</td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxeventnotify"><code>nx_eventnotify()</code></a></td>
+  <td>This is not used in the current version of <code>examples/nx</code>,
+      was tested in a previous version)</td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxopenwindow"><code>nx_openwindow()</code></a></td>
+  <td>Change to <code>CONFIG_EXAMPLES_NX_RAWWINDOWS=y</code> in the
+     <code>&lt;NuttX-Directory&gt;/.config</code> file</td>
+</td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxclosewindow"><code>nx_closewindow()</code></a></td>
+  <td>Change to <code>CONFIG_EXAMPLES_NX_RAWWINDOWS=y</code> in the
+     <code>&lt;NuttX-Directory&gt;/.config</code> file</td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxrequestbkgd"><code>nx_requestbkgd()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxreleasebkgd"><code>nx_releasebkgd()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxgetposition"><code>nx_getposition()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxsetposition"><code>nx_setposition()</code></a></td>
+  <td>Change to <code>CONFIG_EXAMPLES_NX_RAWWINDOWS=y</code> in the
+     <code>&lt;NuttX-Directory&gt;/.config</code> file</td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxsetsize"><code>nx_setsize()</code></a></td>
+  <td>Change to <code>CONFIG_EXAMPLES_NX_RAWWINDOWS=y</code> in the
+     <code>&lt;NuttX-Directory&gt;/.config</code> file</td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxraise"><code>nx_raise()</code></a></td>
+  <td>Change to <code>CONFIG_EXAMPLES_NX_RAWWINDOWS=y</code> in the
+     <code>&lt;NuttX-Directory&gt;/.config</code> file</td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxlower"><code>nx_lower()</code></a></td>
+  <td>Change to <code>CONFIG_EXAMPLES_NX_RAWWINDOWS=y</code> in the
+     <code>&lt;NuttX-Directory&gt;/.config</code> file</td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxfill"><code>nx_fill()</code></a></td>
+  <td>Change to <code>CONFIG_EXAMPLES_NX_RAWWINDOWS=y</code> in the
+     <code>&lt;NuttX-Directory&gt;/.config</code> file</td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxfilltrapezoid"><code>nx_filltrapezoid()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglrgb2yuv"><code>nx_setbgcolor()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxmove"><code>nx_move()</code></a></td>
+  <td>Change to <code>CONFIG_EXAMPLES_NX_RAWWINDOWS=y</code> in the
+     <code>&lt;NuttX-Directory&gt;/.config</code> file</td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxbitmap"><code>nx_bitmap()</code></a></td>
+  <td>Change to <code>CONFIG_EXAMPLES_NX_RAWWINDOWS=y</code> in the
+     <code>&lt;NuttX-Directory&gt;/.config</code> file.</td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxkbdin"><code>nx_kbdin()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxmousein"><code>nx_mousein()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+</table></center>
+
+
+<center><h2>Table C.4: <a name="nxtkcoverage">NXTK API Test Coverage</a></h2></center>
+<center><table border="1" width="80%">
+<tr>
+  <th width="40%">Function</th>
+  <th width="60%">Special Setup/Notes</th>
+  <th width="5%">Verified</th></tr>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkopenwindow"><code>nxtk_openwindow()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkclosewindow"><code>nxtk_closewindow()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkgetposition"><code>nxtk_getposition()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtksetposition"><code>nxtk_setposition()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtksetsize"><code>nxtk_setsize()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkraise"><code>nxtk_raise()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtklower"><code>nxtk_lower()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkfillwindow"><code>nxtk_fillwindow()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkfilltrapwindow"><code>nxtk_filltrapwindow()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkmovewindow"><code>nxtk_movewindow()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkbitmapwindow"><code>nxtk_bitmapwindow()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkopentoolbar"><code>nxtk_opentoolbar()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkclosetoolbar"><code>nxtk_closetoolbar()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkfilltoolbar"><code>nxtk_filltoolbar()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkfilltraptoolbar"><code>nxtk_filltraptoolbar()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkmovetoolbar"><code>nxtk_movetoolbar()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkbitmaptoolbar"><code>nxtk_bitmaptoolbar()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+</table></center>
+
+<center><h2>Table C.5: <a name="nxfontscoverage">NXFONTS API Test Coverage</a></h2></center>
+<center><table border="1" width="80%">
+<tr>
+  <th width="40%">Function</th>
+  <th width="60%">Special Setup/Notes</th>
+  <th width="5%">Verified</th></tr>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxfgetfontset"><code>nxf_getfontset()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxfgetbitmap"><code>nxf_getbitmap()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxfconvertbpp"><code>nxf_convert_2bpp()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxfconvertbpp"><code>nxf_convert_4bpp()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxfconvertbpp"><code>nxf_convert_8bpp()</code></a></td>
+  <td>Use <code>defconfig</code> when building.</td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxfconvertbpp"><code>nxf_convert_16bpp()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxfconvertbpp"><code>nxf_convert_24bpp()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxfconvertbpp"><code>nxf_convert_32bpp()</code></a></td>
+  <td>Use <code>defconfig-x11</code> when building.</td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
 </table></center>
 
 </body>
