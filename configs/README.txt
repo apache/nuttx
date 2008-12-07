@@ -458,6 +458,11 @@ configs/ez80f0910200kitg
     development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
     tools.  The development environment is Cygwin under WinXP.
 
+configs/ez80f0910200zco
+    ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200zco
+    development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
+    tools.  The development environment is Cygwin under WinXP.
+
 configs/m68322evb
     This is a work in progress for the venerable m68322evb board from
     Motorola. This OS is also built with the arm-elf toolchain*.
