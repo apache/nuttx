@@ -105,8 +105,8 @@ EXTERN FAR struct dirent *readdir(FAR DIR *dirp);
 EXTERN int        readdir_r(FAR DIR *dirp, FAR struct dirent *entry,
                             FAR struct dirent **result);
 EXTERN void       rewinddir(FAR DIR *dirp);
-EXTERN void       seekdir(FAR DIR *dirp, int loc);
-EXTERN int        telldir(FAR DIR *dirp);
+EXTERN void       seekdir(FAR DIR *dirp, off_t loc);
+EXTERN off_t      telldir(FAR DIR *dirp);
 
 #undef EXTERN
 #if defined(__cplusplus)
