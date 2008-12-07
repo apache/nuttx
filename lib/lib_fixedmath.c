@@ -178,7 +178,7 @@ b16_t b16sqr(b16_t a)
 
   /* Overflow occurred if the result is negative */
 
-  sq = (bt_t)ub16sqr(a);
+  sq = (b16_t)ub16sqr(a);
   if (sq < 0)
     {
       sq = b16MAX;
@@ -202,10 +202,10 @@ ub16_t ub16sqr(ub16_t a)
   *      = (mi*mi)*2**16 + 2*(mi*mf)       + mf*mf*2**-16             (b16)
   */
 
-  uint32 mi = ((uint32)m1 >> 16);
-  uint32 mf = ((uint32)m1 & 0x0000ffff);
+  uint32 mi = ((uint32)a >> 16);
+  uint32 mf = ((uint32)a & 0x0000ffff);
 
-  return (mi*mi << 16) + (mi*mf << 1) (((mf*mf) + b16HALF) >> 16);
+  return (mi*mi << 16) + (mi*mf << 1) + ((mf*mf + b16HALF) >> 16);
 }
 
 /****************************************************************************
