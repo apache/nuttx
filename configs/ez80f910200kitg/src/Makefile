@@ -61,7 +61,7 @@ $(AOBJS): %$(OBJEXT): %$(ASMEXT)
 	$(call ASSEMBLE, $<, $@)
 
 $(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
-	$(call COMPILE, `cygpath -w $<`, $@)
+	$(call COMPILE, $<, $@)
 
 libboard$(LIBEXT): $(OBJS)
 	@( for obj in $(OBJS) ; do \

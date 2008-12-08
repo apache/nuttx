@@ -136,12 +136,12 @@ endef
 
 define COMPILE
 	@#echo "CC: $1"
-	@$(CC) $(CFLAGS) $1
+	@(wfile=`cygpath -w $1`; $(CC) $(CFLAGS) $$wfile)
 endef
 
 define ASSEMBLE
 	@#echo "AS: $1"
-	@$(AS) -c $(AFLAGS) $1
+	@(wfile=`cygpath -w $1`; $(AS) $(AFLAGS) $$wfile)
 endef
 
 define ARCHIVE

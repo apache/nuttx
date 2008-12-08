@@ -77,10 +77,10 @@ $(HEAD_GENSRC) $(GENSRCS) : %$(ASMEXT): %.S
 	@rm $@.tmp
 
 $(AOBJS) $(HEAD_AOBJ): %$(OBJEXT): %$(ASMEXT)
-	$(call ASSEMBLE, `cygpath -w $<`, $@)
+	$(call ASSEMBLE, $<, $@)
 
 $(COBJS): %$(OBJEXT): %.c
-	$(call COMPILE, `cygpath -w $<`, $@)
+	$(call COMPILE, $<, $@)
 
 libarch$(LIBEXT): $(OBJS)
 	@( for obj in $(OBJS) ; do \
