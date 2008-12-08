@@ -61,7 +61,9 @@
 # CONFIG_ENDIAN_BIG - Define for big-endian operation
 # CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
 # CONFIG_DRAM_SIZE - Describes the installed DRAM.
-# CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to z8 board architecture.
+# CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
+# CONFIG_ARCH_BUTTONS -  Provide button APIs. Unique to board architecture.
+# CONFIG_ARCH_TIMERHOOK - Provide board-specific hooks into periodic timer logic.
 #
 CONFIG_ARCH=z80
 CONFIG_ARCH_Z80=y
@@ -77,7 +79,10 @@ CONFIG_ARCH_IRQPRIO=n
 CONFIG_BOARD_LOOPSPERMSEC=1250
 CONFIG_ENDIAN_BIG=y
 CONFIG_DRAM_SIZE=65536
-CONFIG_ARCH_LEDS=n
+CONFIG_ARCH_LEDS=y
+CONFIG_ARCH_BUTTONS=n
+CONFIG_ARCH_TIMERHOOK=y
+
 #
 # eZ8 specific device driver settings
 #
