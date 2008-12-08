@@ -243,7 +243,6 @@ ub16_t ub16divub16(ub16_t num, ub16_t denom)
   *          = numi*2**32 / den + numf*2**16 /den                     (b16)
   */
 
-
   /* Check for overflow in the first part of the quotient */
 
   term1 = ((uint32)num & 0xffff0000) / denom;
