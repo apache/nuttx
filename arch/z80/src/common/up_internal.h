@@ -156,6 +156,12 @@ EXTERN void up_ledoff(int led);
 # define up_ledoff(led)
 #endif
 
+/* Architecture specific hook into the timer interrupt handler */
+
+#ifdef CONFIG_ARCH_TIMERHOOK
+EXTERN void up_timerhook(void);
+#endif
+
 /* Defined in board/up_network.c */
 
 #ifdef CONFIG_NET

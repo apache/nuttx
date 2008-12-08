@@ -94,8 +94,15 @@ void mm_initialize(FAR void *heapstart, size_t heapsize)
 {
   int i;
 
+  /* The following two lines have cause problems for some ZiLog compilers
+   * in the past.  Life is easier if we just the suppress them for those
+   * tools.
+   */
+
+#ifndef __ZILOG__
   CHECK_ALLOCNODE_SIZE;
   CHECK_FREENODE_SIZE;
+#endif
 
   /* Set up global variables */
 

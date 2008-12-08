@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_EZ80F910200ZCO_SRC_EZ80F910200ZCO+H
-#define _CONFIGS_EZ80F910200ZCO_SRC_EZ80F910200ZCO+H
+#ifndef _CONFIGS_EZ80F910200ZCO_SRC_EZ80F910200ZCO_H
+#define _CONFIGS_EZ80F910200ZCO_SRC_EZ80F910200ZCO_H
 
 /****************************************************************************
  * Included Files
@@ -51,7 +51,7 @@
 #define EZ80_LEDGPIOCNTRL 0x800000 /* CS2: (See below) */
 #define EZ80_PLTFMSRAM    0xb80000 /* CS2: Platform SRAM (512Kb) */
 #define EZ80_MODULESRAM   0xc00000 /* CS1: Module SRAM (up to 2Mb) */
-#define EZ80_ONCHIPFLASH  0xffe000 /* On-chip SRAM (8Kb) */
+#define EZ80_ONCHIPSRAM   0xffe000 /* On-chip SRAM (8Kb) */
 
 /* LED and port emulation memory register addresses */
 
@@ -62,8 +62,8 @@
 #define EZ80_TRIGGERS     EZ80_LEDCATHODE
 #define EZ80_GPIODATA     0x800002 /* RD/WR: GPIO data */
 
-#define getmmreg(a)       (*(ubyte*)(a))
-#define putmmreg(v,a)     (*(ubyte*)(a) = (v))
+#define ez80_getmmreg8(a)   (*(ubyte*)(a))
+#define ez80_putmmreg8(v,a) (*(ubyte*)(a) = (v))
 
 /* LED anode/GPIO port output control bit definitions */
 
@@ -142,4 +142,4 @@ extern "C" {
 }
 #endif
 
-#endif  /* _CONFIGS_EZ80F910200ZCO_SRC_EZ80F910200ZCO+H */
+#endif  /* _CONFIGS_EZ80F910200ZCO_SRC_EZ80F910200ZCO_H */

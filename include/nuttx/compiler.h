@@ -228,7 +228,7 @@
 
 #elif defined(__ZILOG__)
 
-/* At present, only the Zilog ZNeo compiler is recognized */
+/* At present, only the following Zilog compilers are recognized */
 
 #  if !defined(__ZNEO__) && !defined(__EZ8__) && !defined(__EZ80__)
 #    warning "Unrecognized Zilog compiler"
