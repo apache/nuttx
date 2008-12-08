@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/olimex-strp711/src/up_leds.c
+ * configs/ez80f910200zco/src/ez80_leds.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -49,15 +49,6 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-/* The Olimex board has two buttons, one labled "BUT" and the other "WAKEUP"
- *
- * P0.15: WAKEUP button
- * P1.13: BUT button
- */
-
-#define STR71X_BUTBUTTON_GPIO1    (0x2000)
-#define STR71X_WAKEUPBUTTON_GPIO0 (0x8000)
 
 /****************************************************************************
  * Private Data
