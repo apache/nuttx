@@ -93,10 +93,17 @@ int up_timerisr(int irq, chipreg_t *regs)
   reg = inp(EZ80_TMR0_CTL);
 #endif
 
-   /* Process timer interrupt */
+  /* Process timer interrupt */
 
-   sched_process_timer();
-   return 0;
+  sched_process_timer();
+   
+ /* Architecture specific hook into the timer interrupt handler */
+
+#ifdef CONFIG_ARCH_TIMERHOOK
+  up_timerhook();
+#endif
+
+  return 0;
 }
 
 /***************************************************************************
