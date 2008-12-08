@@ -117,11 +117,11 @@ LINKCMDTEMPLATE 	= $(TOPDIR)/configs/ez80f910200kitg/ostest/ostest.linkcmd
 # Tool names/pathes
 
 CROSSDEV		=
-CC			= $(ZDSBINDIR)/eZ80cc.exe
+CC			= $(ZDSBINDIR)/ez80cc.exe
 CPP			= gcc -E
-LD			= $(ZDSBINDIR)/eZ80link.exe
-AS			= $(ZDSBINDIR)/eZ80asm.exe
-AR			= $(ZDSBINDIR)/eZ80lib.exe
+LD			= $(ZDSBINDIR)/ez80link.exe
+AS			= $(ZDSBINDIR)/ez80asm.exe
+AR			= $(ZDSBINDIR)/ez80lib.exe
 
 # File extensions
 

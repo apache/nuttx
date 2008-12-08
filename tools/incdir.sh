@@ -68,7 +68,7 @@ fi
 #   sdcc                        -I<dir2> -I<dir2> -I<dir3> ...
 #   $(ZDSBINDIR)/ez8cc.exe      -usrinc:'<dir1>:<dir2:<dir3>:...`
 #   $(ZDSBINDIR)/zneocc.exe     -usrinc:'<dir1>:<dir2:<dir3>:...`
-#   $(ZDSBINDIR)/eZ80cc.exe     -usrinc:'<dir1>:<dir2:<dir3>:...`
+#   $(ZDSBINDIR)/ez80cc.exe     -usrinc:'<dir1>:<dir2:<dir3>:...`
 #
 # Furthermore, just to make matters more difficult, with Windows based
 # toolchains, we have to use the full windows-style paths to the header
@@ -84,7 +84,7 @@ else
 fi
 exefile=`basename "$compiler"`
 
-if [ "X$exefile" = "Xez8cc.exe" -o "X$exefile" = "Xzneocc.exe" -o "X$exefile" = "XeZ80cc.exe" ]; then
+if [ "X$exefile" = "Xez8cc.exe" -o "X$exefile" = "Xzneocc.exe" -o "X$exefile" = "Xez80cc.exe" ]; then
 	fmt=userinc
 else
 	fmt=std
