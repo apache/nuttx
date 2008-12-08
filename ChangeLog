@@ -601,4 +601,7 @@
 
 0.4.1 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 	* Added board support fot the ZiLog ez80Acclaim! ez80f910200zco Development Kit.
+	* Fixed several compilation errors in fixed precision math library when built
+	  against toolchains that do not support 64-bit type 'long long'.
+	* Fix errors in some function prototypes in dirent.h
 

@@ -43,7 +43,14 @@ CFLAGS		= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(INCLUDES) $(ARCH
 
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
-CSRCS		= ez80_lowinit.c ez80_leds.c
+
+CSRCS		= ez80_lowinit.c
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS		+= ez80_leds.c
+endif
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS		+= ez80_buttons.c
+endif
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
