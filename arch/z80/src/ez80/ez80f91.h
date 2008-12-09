@@ -62,65 +62,94 @@
 
 /* EMACC Registers  *****************************************************************/
 
-#define EZ80_EMAC_TEST         0x20
-#define EZ80_EMAC_CFG1         0x21
-#define EZ80_EMAC_CFG2         0x22
-#define EZ80_EMAC_CFG3         0x23
-#define EZ80_EMAC_CFG4         0x24
-#define EZ80_EMAC_STAD_0       0x25
-#define EZ80_EMAC_STAD_1       0x26
-#define EZ80_EMAC_STAD_2       0x27
-#define EZ80_EMAC_STAD_3       0x28
-#define EZ80_EMAC_STAD_4       0x29
-#define EZ80_EMAC_STAD_5       0x2a
-#define EZ80_EMAC_TPTV_L       0x2b
-#define EZ80_EMAC_TPTV_H       0x2c
-#define EZ80_EMAC_IPGT         0x2d
-#define EZ80_EMAC_IPGR1        0x2e
-#define EZ80_EMAC_IPGR2        0x2f
-#define EZ80_EMAC_MAXF_L       0x30
-#define EZ80_EMAC_MAXF_H       0x31
-#define EZ80_EMAC_AFR          0x32
-#define EZ80_EMAC_HTBL_0       0x33
-#define EZ80_EMAC_HTBL_1       0x34
-#define EZ80_EMAC_HTBL_2       0x35
-#define EZ80_EMAC_HTBL_3       0x36
-#define EZ80_EMAC_HTBL_4       0x37
-#define EZ80_EMAC_HTBL_5       0x38
-#define EZ80_EMAC_HTBL_6       0x39
-#define EZ80_EMAC_HTBL_7       0x3a
-#define EZ80_EMAC_MIIMGT       0x3b
-#define EZ80_EMAC_CTLD_L       0x3c
-#define EZ80_EMAC_CTLD_H       0x3d
-#define EZ80_EMAC_RGAD         0x3e
-#define EZ80_EMAC_FIAD         0x3f
-#define EZ80_EMAC_PTMR         0x40
-#define EZ80_EMAC_RST          0x41
-#define EZ80_EMAC_TLBP_L       0x42
-#define EZ80_EMAC_TLBP_H       0x43
-#define EZ80_EMAC_BP_L         0x44
-#define EZ80_EMAC_BP_H         0x45
-#define EZ80_EMAC_BP_U         0x46
-#define EZ80_EMAC_RHBP_L       0x47
-#define EZ80_EMAC_RHBP_H       0x48
-#define EZ80_EMAC_RRP_L        0x49
-#define EZ80_EMAC_RRP_H        0x4a
-#define EZ80_EMAC_BUFSZ        0x4b
-#define EZ80_EMAC_IEN          0x4c
-#define EZ80_EMAC_ISTAT        0x4d
-#define EZ80_EMAC_PRSD_L       0x4e
-#define EZ80_EMAC_PRSD_H       0x4f
-#define EZ80_EMAC_MIISTAT      0x50
-#define EZ80_EMAC_RWP_L        0x51
-#define EZ80_EMAC_RWP_H        0x52
-#define EZ80_EMAC_TRP_L        0x53
-#define EZ80_EMAC_TRP_H        0x54
-#define EZ80_EMAC_BLKSLFT_L    0x55
-#define EZ80_EMAC_BLKSLFT_H    0x56
-#define EZ80_EMAC_FDATA_L      0x57
-#define EZ80_EMAC_FDATA_H      0x58
-#define EZ80_EMAC_FFLAGS       0x59
-#define EZ80_EMAC_FLAGS        0x59
+#define EZ80_EMAC_TEST         0x20  /* EMAC test register */
+#define EZ80_EMAC_CFG1         0x21  /* EMAC configuration 1 register */
+#define EZ80_EMAC_CFG2         0x22  /* EMAC configuration 2 register */
+#define EZ80_EMAC_CFG3         0x23  /* EMAC configuration 3 register */
+#define EZ80_EMAC_CFG4         0x24  /* EMAC configuration 4 register */
+#define EZ80_EMAC_STAD_0       0x25  /* EMAC station address register 0 */
+#define EZ80_EMAC_STAD_1       0x26  /* EMAC station address register 1 */
+#define EZ80_EMAC_STAD_2       0x27  /* EMAC station address register 2 */
+#define EZ80_EMAC_STAD_3       0x28  /* EMAC station address register 3 */
+#define EZ80_EMAC_STAD_4       0x29  /* EMAC station address register 4 */
+#define EZ80_EMAC_STAD_5       0x2a  /* EMAC station address register 5 */
+#define EZ80_EMAC_TPTV_L       0x2b  /* Transit pause timer value (low) */
+#define EZ80_EMAC_TPTV_H       0x2c  /* Transit pause timer value (high) */
+#define EZ80_EMAC_IPGT         0x2d  /* EMAC Interpacket gap register */
+#define EZ80_EMAC_IPGR1        0x2e  /* Non-back-to-back IPG register 1 */
+#define EZ80_EMAC_IPGR2        0x2f  /* Non-back-to-back IPG register 2 */
+#define EZ80_EMAC_MAXF_L       0x30  /* EMAC maximum frame length register (low) */
+#define EZ80_EMAC_MAXF_H       0x31  /* EMAC maximum frame length register (high) */
+#define EZ80_EMAC_AFR          0x32  /* EMAC address filter register */
+#define EZ80_EMAC_HTBL_0       0x33  /* EMAC hash table register 0 */
+#define EZ80_EMAC_HTBL_1       0x34  /* EMAC hash table register 1 */
+#define EZ80_EMAC_HTBL_2       0x35  /* EMAC hash table register 2 */
+#define EZ80_EMAC_HTBL_3       0x36  /* EMAC hash table register 3 */
+#define EZ80_EMAC_HTBL_4       0x37  /* EMAC hash table register 4 */
+#define EZ80_EMAC_HTBL_5       0x38  /* EMAC hash table register 5 */
+#define EZ80_EMAC_HTBL_6       0x39  /* EMAC hash table register 6 */
+#define EZ80_EMAC_HTBL_7       0x3a  /* EMAC hash table register 7 */
+#define EZ80_EMAC_MIIMGT       0x3b  /* EMACS MII management register */
+#define EZ80_EMAC_CTLD_L       0x3c  /* PHY configuration data register (low) */
+#define EZ80_EMAC_CTLD_H       0x3d  /* PHY configuration data register (high) */
+#define EZ80_EMAC_RGAD         0x3e  /* PHY address register */
+#define EZ80_EMAC_FIAD         0x3f  /* PHY unit select register */
+#define EZ80_EMAC_PTMR         0x40  /* EMAC transmit polling timer register */
+#define EZ80_EMAC_RST          0x41  /* EMAC reset control register */
+#define EZ80_EMAC_TLBP_L       0x42  /* EMAC tranmit lower boundary pointer (low) */
+#define EZ80_EMAC_TLBP_H       0x43  /* EMAC tranmit lower boundary pointer (high) */
+#define EZ80_EMAC_BP_L         0x44  /* EMAC boundary pointer register (low) */
+#define EZ80_EMAC_BP_H         0x45  /* EMAC boundary pointer register (high) */
+#define EZ80_EMAC_BP_U         0x46  /* EMAC boundary pointer register (upper byte) */
+#define EZ80_EMAC_RHBP_L       0x47  /* EMAC receive high boundary pointer register (low) */
+#define EZ80_EMAC_RHBP_H       0x48  /* EMAC receive high boundary pointer register (high) */
+#define EZ80_EMAC_RRP_L        0x49  /* EMAC receive read pointer (low) */
+#define EZ80_EMAC_RRP_H        0x4a  /* EMAC receive read pointer (high) */
+#define EZ80_EMAC_BUFSZ        0x4b  /* EMAC buffer size register */
+#define EZ80_EMAC_IEN          0x4c  /* EMAC interrupt enable register */
+#define EZ80_EMAC_ISTAT        0x4d  /* EMAC interrupt status register */
+#define EZ80_EMAC_PRSD_L       0x4e  /* PHY read status data register (low) */
+#define EZ80_EMAC_PRSD_H       0x4f  /* PHY read status data register (high) */
+#define EZ80_EMAC_MIISTAT      0x50  /* EMAC MII status register */
+#define EZ80_EMAC_RWP_L        0x51  /* EMAC receive write pointer (low) */
+#define EZ80_EMAC_RWP_H        0x52  /* EMAC receive write pointer (high) */
+#define EZ80_EMAC_TRP_L        0x53  /* EMAC transmit read pointer (low) */
+#define EZ80_EMAC_TRP_H        0x54  /* EMAC transmit read pointer (high) */
+#define EZ80_EMAC_BLKSLFT_L    0x55  /* EMAC receive blocks left register (low) */
+#define EZ80_EMAC_BLKSLFT_H    0x56  /* EMAC receive blocks left register (high) */
+#define EZ80_EMAC_FDATA_L      0x57  /* EMAC FIFO data register (low) */
+#define EZ80_EMAC_FDATA_H      0x58  /* EMAC FIFO data register (low) */
+#define EZ80_EMAC_FFLAGS       0x59  /* EMAC FIFO flags register */
+
+/* EMAC configuration 1/2/3 registers ***********************************************/
+
+#define EMAC_CFG1_DCRCC        0x01  /* Bit 0: 1=4 bytes of proprietary header */
+#define EMAC_CFG1_HUGEN        0x02  /* Bit 1: 1=Allow unlimited size frames to be recieved */
+#define EMAC_CFG1_FLCHK        0x04  /* Bit 2: 1=Frame lengths compared to length/type */
+#define EMAC_CFG1_FULLHD       0x08  /* Bit 3: 1=Enable full duplex mode */
+#define EMAC_CFG1_CRCEN        0x10  /* Bit 4: 1=Append CRC to every frame */
+#define EMAC_CFG1_VLPAD        0x20  /* Bit 5: 1=Pad all short frames to 64 bytes, append CRC */
+#define EMAC_CFG1_ADPADN       0x40  /* Bit 6: 1=Enable frame detection by check VALN protocol ID */
+#define EMAC_CFG1_PADEN        0x80  /* Bit 7: 1=Padd all short frames with zeros. */
+
+#define EMAC_CFG2_LCOLMASK     0x3f  /* Bits 0-5: Number bytes after start frame for collision */
+#define EMAC_CFG2_NOBO         0x40  /* Bit 6: 1=immediate transmit after collision */
+#define EMAC_CFG2_BPNB         0x80  /* Bit 7: 1=after collision retransmit without back-off */
+
+#define EMAC_CFG3_RETRYMASK    0x0f  /* Bits 0-3: Number retransmissions before abort */
+#define EMAC_CFG3_BITMD        0x10  /* Bit 4: 1=Enable 10Mbps ENDEC mode */
+#define EMAC_CFG3_XSDFR        0x20  /* Bit 5: 1=Defer to carrier indefinitely */
+#define EMAC_CFG3_PUREP        0x40  /* Bit 6: 1=Verify preamble */
+#define EMAC_CFG3_LONGP        0x80  /* Bit 7: 1=only allow preamble < 12 bytes */
+
+#define EMAC_CFG4_RXEN         0x01  /* Bit 0: 1=Receive frames */
+#define EMAC_CFG4_TPAUSE       0x02  /* Bit 1: 1=Force pause condition */
+#define EMAC_CFG4_TXFC         0x04  /* Bit 2: 1=Transmit pause control frames */
+#define EMAC_CFG4_RXFC         0x08  /* Bit 3: 1=Act on receive pause control frames */
+#define EMAC_CFG4_PARF         0x10  /* Bit 4: 1=Receive all frames */
+#define EMAC_CFG4_THDF         0x20  /* Bit 5: 1=Asser back-pressure */
+#define EMAC_CFG4_TPCF         0x40  /* Bit 6: 1=Transmit pause control frame. */
+                                     /* Bit 7: reserved */
 
 /* PLL Registers  *******************************************************************/
 
