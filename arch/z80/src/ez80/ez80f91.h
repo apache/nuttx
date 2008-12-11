@@ -41,9 +41,20 @@
  * Included Files
  ************************************************************************************/
 
+#include "ez80f91_emac.h"
+
 /************************************************************************************
  * Definitions
  ************************************************************************************/
+
+/* Memory map ***********************************************************************/
+
+#define EZ80_ONCHIPFLASH  0x000000 /* CS0: 256Kb of on-chip flash */
+#define EZ80_OFFCHIPCS0   0x400000 /* CS0: Off chip use (usually flash) */
+#define EZ80_OFFCHIPCS2   0x800000 /* CS2: Off chip use (e.g. memory mapped I/O) */
+#define EZ80_OFFCHIPCS1   0xc00000 /* CS1: Off chip use (usually SRAM) */
+#define EZ80_EMACSRAM     0xffc000 /* On-chip EMAC SRAM (8Kb) */
+#define EZ80_ONCHIPSRAM   0xffe000 /* On-chip SRAM (8Kb) */
 
 /* Product ID Registers  ************************************************************/
 
@@ -96,8 +107,8 @@
 #define EZ80_EMAC_FIAD         0x3f  /* PHY unit select register */
 #define EZ80_EMAC_PTMR         0x40  /* EMAC transmit polling timer register */
 #define EZ80_EMAC_RST          0x41  /* EMAC reset control register */
-#define EZ80_EMAC_TLBP_L       0x42  /* EMAC tranmit lower boundary pointer (low) */
-#define EZ80_EMAC_TLBP_H       0x43  /* EMAC tranmit lower boundary pointer (high) */
+#define EZ80_EMAC_TLBP_L       0x42  /* EMAC transmit lower boundary pointer (low) */
+#define EZ80_EMAC_TLBP_H       0x43  /* EMAC transmit lower boundary pointer (high) */
 #define EZ80_EMAC_BP_L         0x44  /* EMAC boundary pointer register (low) */
 #define EZ80_EMAC_BP_H         0x45  /* EMAC boundary pointer register (high) */
 #define EZ80_EMAC_BP_U         0x46  /* EMAC boundary pointer register (upper byte) */
@@ -118,38 +129,8 @@
 #define EZ80_EMAC_BLKSLFT_L    0x55  /* EMAC receive blocks left register (low) */
 #define EZ80_EMAC_BLKSLFT_H    0x56  /* EMAC receive blocks left register (high) */
 #define EZ80_EMAC_FDATA_L      0x57  /* EMAC FIFO data register (low) */
-#define EZ80_EMAC_FDATA_H      0x58  /* EMAC FIFO data register (low) */
+#define EZ80_EMAC_FDATA_H      0x58  /* EMAC FIFO data register (high) */
 #define EZ80_EMAC_FFLAGS       0x59  /* EMAC FIFO flags register */
-
-/* EMAC configuration 1/2/3 registers ***********************************************/
-
-#define EMAC_CFG1_DCRCC        0x01  /* Bit 0: 1=4 bytes of proprietary header */
-#define EMAC_CFG1_HUGEN        0x02  /* Bit 1: 1=Allow unlimited size frames to be recieved */
-#define EMAC_CFG1_FLCHK        0x04  /* Bit 2: 1=Frame lengths compared to length/type */
-#define EMAC_CFG1_FULLHD       0x08  /* Bit 3: 1=Enable full duplex mode */
-#define EMAC_CFG1_CRCEN        0x10  /* Bit 4: 1=Append CRC to every frame */
-#define EMAC_CFG1_VLPAD        0x20  /* Bit 5: 1=Pad all short frames to 64 bytes, append CRC */
-#define EMAC_CFG1_ADPADN       0x40  /* Bit 6: 1=Enable frame detection by check VALN protocol ID */
-#define EMAC_CFG1_PADEN        0x80  /* Bit 7: 1=Padd all short frames with zeros. */
-
-#define EMAC_CFG2_LCOLMASK     0x3f  /* Bits 0-5: Number bytes after start frame for collision */
-#define EMAC_CFG2_NOBO         0x40  /* Bit 6: 1=immediate transmit after collision */
-#define EMAC_CFG2_BPNB         0x80  /* Bit 7: 1=after collision retransmit without back-off */
-
-#define EMAC_CFG3_RETRYMASK    0x0f  /* Bits 0-3: Number retransmissions before abort */
-#define EMAC_CFG3_BITMD        0x10  /* Bit 4: 1=Enable 10Mbps ENDEC mode */
-#define EMAC_CFG3_XSDFR        0x20  /* Bit 5: 1=Defer to carrier indefinitely */
-#define EMAC_CFG3_PUREP        0x40  /* Bit 6: 1=Verify preamble */
-#define EMAC_CFG3_LONGP        0x80  /* Bit 7: 1=only allow preamble < 12 bytes */
-
-#define EMAC_CFG4_RXEN         0x01  /* Bit 0: 1=Receive frames */
-#define EMAC_CFG4_TPAUSE       0x02  /* Bit 1: 1=Force pause condition */
-#define EMAC_CFG4_TXFC         0x04  /* Bit 2: 1=Transmit pause control frames */
-#define EMAC_CFG4_RXFC         0x08  /* Bit 3: 1=Act on receive pause control frames */
-#define EMAC_CFG4_PARF         0x10  /* Bit 4: 1=Receive all frames */
-#define EMAC_CFG4_THDF         0x20  /* Bit 5: 1=Asser back-pressure */
-#define EMAC_CFG4_TPCF         0x40  /* Bit 6: 1=Transmit pause control frame. */
-                                     /* Bit 7: reserved */
 
 /* PLL Registers  *******************************************************************/
 
