@@ -44,14 +44,16 @@
  * Definitions
  ****************************************************************************/
 
-/* Memory map */
-
-#define EZ80_ONCHIPFLASH  0x000000 /* CS0: 256Kb of on-chip flash */
+/* Memory map.  Board-specific extensions to the basic ez80f91 memory map
+ * (see arch/z80/src/ez80/ez80f91.h
+ */
+                                   /* CS0: 0x000000 256Kb of on-chip flash */
 #define EZ80_OFFCHIPFLASH 0x400000 /* CS0: Off chip flash (Up to 4Mb-256Kb) */
 #define EZ80_LEDGPIOCNTRL 0x800000 /* CS2: (See below) */
 #define EZ80_PLTFMSRAM    0xb80000 /* CS2: Platform SRAM (512Kb) */
 #define EZ80_MODULESRAM   0xc00000 /* CS1: Module SRAM (up to 2Mb) */
-#define EZ80_ONCHIPSRAM   0xffe000 /* On-chip SRAM (8Kb) */
+                                   /* 0xffc000 On-chip EMAC SRAM (8Kb) */
+                                   /* 0xffe000 On-chip SRAM (8Kb) */
 
 /* LED and port emulation memory register addresses */
 
