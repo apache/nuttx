@@ -123,12 +123,12 @@
 
 /* EMAC bufsize register bit settings ***********************************************/
 
-#define EMAC_BUFSIZ_BUFSZMASK  0xc0  /* Bits 6-6: Rx/Tx buffer size */
-#  define EMAC_BUFSIZ_256b     0x00  /*   EMAC Rx/Tx buffer size = 256 bytes */
-#  define EMAC_BUFSIZ_128b     0x40  /*   EMAC Rx/Tx buffer size = 128 bytes */
-#  define EMAC_BUFSIZ_64b      0x80  /*   EMAC Rx/Tx buffer size = 64 bytes */
-#  define EMAC_BUFSIZ_32b      0xc0  /*   EMAC Rx/Tx buffer size = 32 bytes */
-#define EMAC_BUFSIZ_TPCFLMASK  0x3f /* Bits 0-5: Tranmsit pause frame level */
+#define EMAC_BUFSZ_BUFSZMASK   0xc0  /* Bits 6-6: Rx/Tx buffer size */
+#  define EMAC_BUFSZ_256b      0x00  /*   EMAC Rx/Tx buffer size = 256 bytes */
+#  define EMAC_BUFSZ_128b      0x40  /*   EMAC Rx/Tx buffer size = 128 bytes */
+#  define EMAC_BUFSZ_64b       0x80  /*   EMAC Rx/Tx buffer size = 64 bytes */
+#  define EMAC_BUFSZ_32b       0xc0  /*   EMAC Rx/Tx buffer size = 32 bytes */
+#define EMAC_BUFSZ_TPCFLMASK   0x3f /* Bits 0-5: Tranmsit pause frame level */
 
 /* EMAC interrupt enable register bit settings **************************************/
 
