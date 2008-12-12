@@ -1,4 +1,4 @@
-/* httpd-cgi.h
+/* httpd_cgi.h
  * Web server script interface header file
  * Author: Adam Dunkels <adam@sics.se>
  *

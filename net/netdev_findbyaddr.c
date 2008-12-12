@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/netdev-foreach.c
+ * net/netdev_findbyaddr.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,11 +41,13 @@
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <sys/types.h>
+#include <string.h>
+#include <errno.h>
 #include <debug.h>
-#include <nuttx/net.h>
+
 #include <net/uip/uip-arch.h>
 
-#include "net-internal.h"
+#include "net_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -68,48 +70,60 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Function: netdev_maskcmp
+ ****************************************************************************/
+
+static inline boolean netdev_maskcmp(const uip_ipaddr_t *ipaddr,
+                                     const uip_ipaddr_t *raddr,
+                                     const uip_ipaddr_t *netmask)
+{
+#ifndef CONFIG_NET_IPv6
+  return (*ipaddr & *netmask) == (*raddr & *netmask);
+#else
+# warning "Not implemented for IPv6"
+#endif
+}
+
+/****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_foreach
+ * Function: netdev_findbyaddr
  *
  * Description:
- *   Enumerate each registered network device.
- *
- *   NOTE: netdev semaphore held throughout enumeration.
+ *   Find a previously registered network device by matching a remote address
+ *   with the subnet served by the device
  *
  * Parameters:
- *   callback - Will be called for each registered device
- *   arg      - User argument passed to callback()
+ *   raddr - Pointer to the remote address of a connection
  *
  * Returned Value:
- *  0:Enumeration completed 1:Enumeration terminated early by callback
+ *  Pointer to driver on success; null on failure
  *
  * Assumptions:
  *  Called from normal user mode
  *
  ****************************************************************************/
 
-int netdev_foreach(netdev_callback_t callback, void *arg)
+FAR struct uip_driver_s *netdev_findbyaddr(const uip_ipaddr_t *raddr)
 {
   struct uip_driver_s *dev;
-  int ret = 0;
 
-  if (callback)
+  if (raddr)
     {
       netdev_semtake();
       for (dev = g_netdevices; dev; dev = dev->flink)
         {
-          if (callback(dev, arg) != 0)
+          if (netdev_maskcmp(&dev->d_ipaddr, raddr, &dev->d_netmask))
             {
-              ret = 1;
-              break;
+              netdev_semgive();
+              return dev;
             }
         }
       netdev_semgive();
     }
-  return ret;
+  return NULL;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

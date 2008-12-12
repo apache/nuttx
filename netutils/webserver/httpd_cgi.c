@@ -1,4 +1,4 @@
-/* httpd-cgi.c
+/* httpd_cgi.c
  * Web server script interface
  * Author: Adam Dunkels <adam@sics.se>
  *
@@ -39,7 +39,7 @@
 #include <net/uip/uip.h>
 #include <net/uip/httpd.h>
 
-#include "httpd-cgi.h"
+#include "httpd_cgi.h"
 
 #define CONFIG_HTTPDCGI_FILESTATS 1
 #undef CONFIG_HTTPDCGI_DCPSTATS

@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/netdev-findbyname.c
+ * net/netdev_foreach.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,12 +41,11 @@
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <sys/types.h>
-#include <string.h>
-#include <errno.h>
-
+#include <debug.h>
+#include <nuttx/net.h>
 #include <net/uip/uip-arch.h>
 
-#include "net-internal.h"
+#include "net_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -73,40 +72,44 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_findbyname
+ * Function: netdev_foreach
  *
  * Description:
- *   Find a previously registered network device using its assigned
- *   network interface name
+ *   Enumerate each registered network device.
+ *
+ *   NOTE: netdev semaphore held throughout enumeration.
  *
  * Parameters:
- *   ifname The interface name of the device of interest
+ *   callback - Will be called for each registered device
+ *   arg      - User argument passed to callback()
  *
  * Returned Value:
- *  Pointer to driver on success; null on failure
+ *  0:Enumeration completed 1:Enumeration terminated early by callback
  *
  * Assumptions:
  *  Called from normal user mode
  *
  ****************************************************************************/
 
-FAR struct uip_driver_s *netdev_findbyname(const char *ifname)
+int netdev_foreach(netdev_callback_t callback, void *arg)
 {
   struct uip_driver_s *dev;
-  if (ifname)
+  int ret = 0;
+
+  if (callback)
     {
       netdev_semtake();
       for (dev = g_netdevices; dev; dev = dev->flink)
         {
-          if (strcmp(ifname, dev->d_ifname) == 0)
+          if (callback(dev, arg) != 0)
             {
-              netdev_semgive();
-              return dev;
+              ret = 1;
+              break;
             }
         }
       netdev_semgive();
     }
-  return NULL;
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

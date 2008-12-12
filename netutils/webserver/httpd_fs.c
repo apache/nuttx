@@ -1,7 +1,7 @@
 /****************************************************************************
- * netutils/webserver/httpd-fsdata.h
+ * netutils/webserver/httpd_fs.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on uIP which also has a BSD style license:
@@ -13,6 +13,7 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -36,44 +37,103 @@
  *
  ****************************************************************************/
 
-#ifndef __HTTPD_FSDATA_H__
-#define __HTTPD_FSDATA_H__
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <sys/types.h>
-#include <net/uip/uip.h>
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#include <net/uip/httpd.h>
 
-struct httpd_fsdata_file
+#include "httpd.h"
+#include "httpd_fsdata.h"
+
+#ifndef NULL
+#define NULL 0
+#endif /* NULL */
+
+#include "httpd_fsdata.c"
+
+#if HTTPD_FS_STATISTICS
+static uint16 count[HTTPD_FS_NUMFILES];
+#endif /* HTTPD_FS_STATISTICS */
+
+static uint8 httpd_fs_strcmp(const char *str1, const char *str2)
 {
-  const struct httpd_fsdata_file *next;
-  const unsigned char *name;
-  const unsigned char *data;
-  const int len;
-#ifdef HTTPD_FS_STATISTICS
-#if HTTPD_FS_STATISTICS == 1
-  uint16 count;
-#endif /* HTTPD_FS_STATISTICS */
-#endif /* HTTPD_FS_STATISTICS */
-};
+  int i;
 
-struct httpd_fsdata_file_noconst
+  i = 0;
+  for (;;)
+    {
+      if (str2[i] == 0 || str1[i] == '\r' || str1[i] == '\n')
+        {
+          return 0;
+        }
+
+      if (str1[i] != str2[i])
+        {
+          return 1;
+        }
+
+      i++;
+    }
+}
+
+int httpd_fs_open(const char *name, struct httpd_fs_file *file)
 {
-  struct httpd_fsdata_file *next;
-  char *name;
-  char *data;
-  int len;
-#ifdef HTTPD_FS_STATISTICS
-#if HTTPD_FS_STATISTICS == 1
-  uint16 count;
+#if HTTPD_FS_STATISTICS
+  uint16 i = 0;
 #endif /* HTTPD_FS_STATISTICS */
-#endif /* HTTPD_FS_STATISTICS */
-};
+  struct httpd_fsdata_file_noconst *f;
 
-#endif /* __HTTPD_FSDATA_H__ */
+  for(f = (struct httpd_fsdata_file_noconst *)HTTPD_FS_ROOT;
+      f != NULL;
+      f = (struct httpd_fsdata_file_noconst *)f->next)
+    {
+      if (httpd_fs_strcmp(name, f->name) == 0)
+        {
+          file->data = f->data;
+          file->len  = f->len;
+#if HTTPD_FS_STATISTICS
+          ++count[i];
+#endif /* HTTPD_FS_STATISTICS */
+          return 1;
+        }
+#if HTTPD_FS_STATISTICS
+      ++i;
+#endif /* HTTPD_FS_STATISTICS */
+    }
+  return 0;
+}
+
+void httpd_fs_init(void)
+{
+#if HTTPD_FS_STATISTICS
+  uint16 i;
+  for(i = 0; i < HTTPD_FS_NUMFILES; i++)
+    {
+      count[i] = 0;
+    }
+#endif /* HTTPD_FS_STATISTICS */
+}
+
+#if HTTPD_FS_STATISTICS
+uint16 httpd_fs_count(char *name)
+{
+  struct httpd_fsdata_file_noconst *f;
+  uint16 i;
+
+  i = 0;
+  for(f = (struct httpd_fsdata_file_noconst *)HTTPD_FS_ROOT;
+      f != NULL;
+      f = (struct httpd_fsdata_file_noconst *)f->next)
+    {
+      if (httpd_fs_strcmp(name, f->name) == 0)
+        {
+          return count[i];
+        }
+      ++i;
+    }
+  return 0;
+}
+#endif /* HTTPD_FS_STATISTICS */

@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/netdev-count.c
+ * net/net_timeval2dsec.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,66 +38,39 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#if defined(CONFIG_NET) && defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
 
 #include <sys/types.h>
-#include <string.h>
+#include <sys/socket.h>
 #include <errno.h>
+#include <nuttx/clock.h>
 
-#include <net/uip/uip-arch.h>
-
-#include "net-internal.h"
-
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Priviate Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include "net_internal.h"
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_count
+ * Function: net_timeval2dsec
  *
  * Description:
- *   Return the number of network devices
+ *   Convert a struct timeval to deciseconds.  Needed by setsockopt() to
+ *   save new timeout values.
  *
  * Parameters:
- *   None
+ *   tv   The struct timeval to convert
  *
  * Returned Value:
- *   The number of network devices
+ *   the converted value
  *
  * Assumptions:
- *  Called from normal user mode
  *
  ****************************************************************************/
 
-int netdev_count(void)
+socktimeo_t net_timeval2dsec(struct timeval *tv)
 {
-  struct uip_driver_s *dev;
-  int ndev;
-
-  netdev_semtake();
-  for (dev = g_netdevices, ndev = 0; dev; dev = dev->flink, ndev++);
-  netdev_semgive();
-  return ndev;
+  return (uint16)(tv->tv_sec* DSEC_PER_SEC + tv->tv_usec / USEC_PER_DSEC);
 }
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */
+#endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/net-poll.c
+ * net/net_poll.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -54,7 +54,7 @@
 
 #include <uip/uip-internal.h>
 
-#include "net-internal.h"
+#include "net_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -62,7 +62,7 @@
 #include <net/uip/httpd.h>
 
 #include "httpd.h"
-#include "httpd-cgi.h"
+#include "httpd_cgi.h"
 
 /****************************************************************************
  * Definitions

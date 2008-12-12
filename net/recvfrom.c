@@ -51,7 +51,7 @@
 #include <nuttx/clock.h>
 #include <net/uip/uip-arch.h>
 
-#include "net-internal.h"
+#include "net_internal.h"
 #include "uip/uip-internal.h"
 
 /****************************************************************************

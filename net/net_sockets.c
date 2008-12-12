@@ -1,5 +1,5 @@
 /****************************************************************************
- * net-sockets.c
+ * net_sockets.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -51,7 +51,7 @@
 #include <nuttx/net.h>
 #include <nuttx/kmalloc.h>
 
-#include "net-internal.h"
+#include "net_internal.h"
 
 /****************************************************************************
  * Definitions

@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/net-dsec2timeval.c
+ * net/netdev_findbyname.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,43 +38,75 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <sys/types.h>
-#include <sys/socket.h>
+#include <string.h>
 #include <errno.h>
-#include <nuttx/clock.h>
 
-#include "net-internal.h"
+#include <net/uip/uip-arch.h>
+
+#include "net_internal.h"
+
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Priviate Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_dsec2timeval
+ * Function: netdev_findbyname
  *
  * Description:
- *   Convert a decisecond timeout value to a struct timeval.  Needed by
- *   getsockopt() to report timeout values.
+ *   Find a previously registered network device using its assigned
+ *   network interface name
  *
  * Parameters:
- *   dsec The decisecond value to convert
- *   tv   The struct timeval to receive the converted value
+ *   ifname The interface name of the device of interest
  *
  * Returned Value:
- *   None
+ *  Pointer to driver on success; null on failure
  *
  * Assumptions:
+ *  Called from normal user mode
  *
  ****************************************************************************/
 
-void net_dsec2timeval(uint16 dsec, struct timeval *tv)
+FAR struct uip_driver_s *netdev_findbyname(const char *ifname)
 {
-  uint16 remainder;
-  tv->tv_sec  = dsec / DSEC_PER_SEC;
-  remainder   = dsec - tv->tv_sec * DSEC_PER_SEC;
-  tv->tv_usec = remainder * USEC_PER_DSEC;
+  struct uip_driver_s *dev;
+  if (ifname)
+    {
+      netdev_semtake();
+      for (dev = g_netdevices; dev; dev = dev->flink)
+        {
+          if (strcmp(ifname, dev->d_ifname) == 0)
+            {
+              netdev_semgive();
+              return dev;
+            }
+        }
+      netdev_semgive();
+    }
+  return NULL;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/netdev-txnotify.c
+ * net/net_arptimer.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,69 +38,92 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
 
-#include <sys/types.h>
-#include <string.h>
-#include <errno.h>
+#include <time.h>
+#include <wdog.h>
 #include <debug.h>
 
-#include <net/uip/uip-arch.h>
+#include <net/uip/uip-arp.h>
 
-#include "net-internal.h"
+#include "net_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Priviate Types
- ****************************************************************************/
+/* ARP timer interval = 10 seconds. CLK_TCK is the number of clock ticks
+ * per second
+ */
+
+#define ARPTIMER_WDINTERVAL (10*CLK_TCK)
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+static WDOG_ID g_arptimer;           /* ARP timer */
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Function: arptimer_poll
+ *
+ * Description:
+ *   Periodic timer handler.  Called from the timer interrupt handler.
+ *
+ * Parameters:
+ *   argc - The number of available arguments
+ *   arg  - The first argument
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void arptimer_poll(int argc, uint32 arg, ...)
+{
+  /* Call the ARP timer function every 10 seconds. */
+
+  uip_arp_timer();
+
+  /* Setup the watchdog timer again */
+
+  (void)wd_start(g_arptimer, ARPTIMER_WDINTERVAL, arptimer_poll, 0);
+}
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_txnotify
+ * Function: arptimer_init
  *
  * Description:
- *   Notify the device driver that new TX data is available.
+ *   Initialized the 10 second timer that is need by uIP to age ARP
+ *   associations
  *
  * Parameters:
- *   raddr - Pointer to the remote address to send the data
+ *   None
  *
  * Returned Value:
- *  None
+ *   None
  *
  * Assumptions:
- *  Called from normal user mode
+ *   Called once at system initialization time
  *
  ****************************************************************************/
 
-void netdev_txnotify(const uip_ipaddr_t *raddr)
+void arptimer_init(void)
 {
-  /* Find the device driver that serves the subnet of the remote address */
+  /* Create and start the ARP timer */
 
-  struct uip_driver_s *dev = netdev_findbyaddr(raddr);
-  if (dev && dev->d_txavail)
-    {
-      /* Notify the device driver that new TX data is available. */
-
-      (void)dev->d_txavail(dev);
-    }
+  g_arptimer = wd_create();
+ (void)wd_start(g_arptimer, ARPTIMER_WDINTERVAL, arptimer_poll, 0);
 }
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */
+#endif /* CONFIG_NET */

@@ -38,7 +38,7 @@
 ifeq ($(CONFIG_NET),y)
 SOCK_ASRCS	=
 SOCK_CSRCS	= socket.c bind.c connect.c sendto.c recv.c recvfrom.c \
-		  net-sockets.c net-close.c
+		  net_sockets.c net_close.c
 
 ifeq ($(CONFIG_NET_TCP),y)
 SOCK_CSRCS	+= send.c listen.c accept.c 
@@ -47,14 +47,14 @@ endif
 ifeq ($(CONFIG_NET_SOCKOPTS),y)
 SOCK_CSRCS      += setsockopt.c getsockopt.c 
 ifneq ($(CONFIG_DISABLE_CLOCK),y)
-SOCK_CSRCS	+= net-timeo.c net-dsec2timeval.c net-timeval2dsec.c net-arptimer.c
+SOCK_CSRCS	+= net_timeo.c net_dsec2timeval.c net_timeval2dsec.c net_arptimer.c
 endif
 endif
 
 NETDEV_ASRCS	=
-NETDEV_CSRCS	= netdev-register.c netdev-ioctl.c net-poll.c netdev-txnotify.c \
-		  netdev-findbyname.c netdev-findbyaddr.c netdev-count.c \
-		  netdev-foreach.c
+NETDEV_CSRCS	= netdev_register.c netdev_ioctl.c net_poll.c netdev_txnotify.c \
+		  netdev_findbyname.c netdev_findbyaddr.c netdev_count.c \
+		  netdev_foreach.c
 
 include uip/Make.defs
 endif

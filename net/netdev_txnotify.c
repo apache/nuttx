@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/net-timeo.c
+ * net/netdev_txnotify.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,48 +38,69 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <sys/types.h>
+#include <string.h>
+#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/clock.h>
+#include <net/uip/uip-arch.h>
 
-#include "net-internal.h"
+#include "net_internal.h"
+
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Priviate Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_timeo
+ * Function: netdev_txnotify
  *
  * Description:
- *   Check if a timeout has elapsed.  This can be called from a socket poll
- *   function to determine if a timeout has occurred.
+ *   Notify the device driver that new TX data is available.
  *
  * Parameters:
- *   start_time Timeout start time in system clock ticks
- *   timeout    Timeout value in deciseconds.
+ *   raddr - Pointer to the remote address to send the data
  *
  * Returned Value:
- *   0 (FALSE) if not timeout; 1 (TRUE) if timeout
+ *  None
  *
  * Assumptions:
+ *  Called from normal user mode
  *
  ****************************************************************************/
 
-int net_timeo(uint32 start_time, socktimeo_t timeo)
+void netdev_txnotify(const uip_ipaddr_t *raddr)
 {
-  uint32 timeo_ticks =  DSEC2TICK(timeo);
-  uint32 elapsed     =  g_system_timer - start_time;
+  /* Find the device driver that serves the subnet of the remote address */
 
-  if (elapsed >= timeo_ticks)
+  struct uip_driver_s *dev = netdev_findbyaddr(raddr);
+  if (dev && dev->d_txavail)
     {
-      return TRUE;
+      /* Notify the device driver that new TX data is available. */
+
+      (void)dev->d_txavail(dev);
     }
-  return FALSE;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
-
+#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

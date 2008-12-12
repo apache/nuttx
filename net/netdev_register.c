@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/net-arptimer.c
+ * net/netdev_register.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,92 +38,120 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
-#include <time.h>
-#include <wdog.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <stdio.h>
+#include <semaphore.h>
+#include <assert.h>
+#include <string.h>
+#include <errno.h>
 #include <debug.h>
 
-#include <net/uip/uip-arp.h>
+#include <net/if.h>
+#include <net/ethernet.h>
+#include <net/uip/uip-arch.h>
 
-#include "net-internal.h"
+#include "net_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/* ARP timer interval = 10 seconds. CLK_TCK is the number of clock ticks
- * per second
- */
-
-#define ARPTIMER_WDINTERVAL (10*CLK_TCK)
+/****************************************************************************
+ * Priviate Types
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static WDOG_ID g_arptimer;           /* ARP timer */
+static int g_next_devnum = 0;
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* List of registered ethernet device drivers */
+struct uip_driver_s *g_netdevices = NULL;
+sem_t                g_netdev_sem;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: arptimer_poll
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static void arptimer_poll(int argc, uint32 arg, ...)
-{
-  /* Call the ARP timer function every 10 seconds. */
-
-  uip_arp_timer();
-
-  /* Setup the watchdog timer again */
-
-  (void)wd_start(g_arptimer, ARPTIMER_WDINTERVAL, arptimer_poll, 0);
-}
-
-/****************************************************************************
- * Public Functions
+ * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: arptimer_init
+ * Function: netdev_semtake
  *
  * Description:
- *   Initialized the 10 second timer that is need by uIP to age ARP
- *   associations
- *
- * Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called once at system initialization time
+ *   Managed access to the network device list
  *
  ****************************************************************************/
 
-void arptimer_init(void)
+void netdev_semtake(void)
 {
-  /* Create and start the ARP timer */
+  /* Take the semaphore (perhaps waiting) */
 
-  g_arptimer = wd_create();
- (void)wd_start(g_arptimer, ARPTIMER_WDINTERVAL, arptimer_poll, 0);
+  while (sem_wait(&g_netdev_sem) != 0)
+    {
+      /* The only case that an error should occr here is if
+       * the wait was awakened by a signal.
+       */
+
+      ASSERT(*get_errno_ptr() == EINTR);
+    }
 }
 
-#endif /* CONFIG_NET */
+/****************************************************************************
+ * Function: netdev_register
+ *
+ * Description:
+ *   Register a netword device driver and assign a name to it so tht it can
+ *   be found in subsequent network ioctl operations on the device.
+ *
+ * Parameters:
+ *   dev - The device driver structure to register
+ *
+ * Returned Value:
+ *  0:Success; -1 on failure
+ *
+ * Assumptions:
+ *  Called during system initialization from normal user mode
+ *
+ ****************************************************************************/
+
+int netdev_register(FAR struct uip_driver_s *dev)
+{
+  if (dev)
+    {
+      int devnum;
+      netdev_semtake();
+
+      /* Assign a device name to the the interface */
+
+      devnum = g_next_devnum++;
+      snprintf( dev->d_ifname, IFNAMSIZ, "eth%d", devnum );
+
+      /* Add the device to the list of known network devices */
+
+      dev->flink  = g_netdevices;
+      g_netdevices = dev;
+      netdev_semgive();
+
+      nlldbg("Registered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",
+             dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
+             dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
+             dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5],
+             dev->d_ifname);
+
+      return OK;
+    }
+  return -EINVAL;
+}
+
+#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

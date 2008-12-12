@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/netdev-register.c
+ * net/netdev_count.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,19 +41,12 @@
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <stdio.h>
-#include <semaphore.h>
-#include <assert.h>
 #include <string.h>
 #include <errno.h>
-#include <debug.h>
 
-#include <net/if.h>
-#include <net/ethernet.h>
 #include <net/uip/uip-arch.h>
 
-#include "net-internal.h"
+#include "net_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -67,15 +60,9 @@
  * Private Data
  ****************************************************************************/
 
-static int g_next_devnum = 0;
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-/* List of registered ethernet device drivers */
-struct uip_driver_s *g_netdevices = NULL;
-sem_t                g_netdev_sem;
 
 /****************************************************************************
  * Private Functions
@@ -86,72 +73,31 @@ sem_t                g_netdev_sem;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_semtake
+ * Function: netdev_count
  *
  * Description:
- *   Managed access to the network device list
- *
- ****************************************************************************/
-
-void netdev_semtake(void)
-{
-  /* Take the semaphore (perhaps waiting) */
-
-  while (sem_wait(&g_netdev_sem) != 0)
-    {
-      /* The only case that an error should occr here is if
-       * the wait was awakened by a signal.
-       */
-
-      ASSERT(*get_errno_ptr() == EINTR);
-    }
-}
-
-/****************************************************************************
- * Function: netdev_register
- *
- * Description:
- *   Register a netword device driver and assign a name to it so tht it can
- *   be found in subsequent network ioctl operations on the device.
+ *   Return the number of network devices
  *
  * Parameters:
- *   dev - The device driver structure to register
+ *   None
  *
  * Returned Value:
- *  0:Success; -1 on failure
+ *   The number of network devices
  *
  * Assumptions:
- *  Called during system initialization from normal user mode
+ *  Called from normal user mode
  *
  ****************************************************************************/
 
-int netdev_register(FAR struct uip_driver_s *dev)
+int netdev_count(void)
 {
-  if (dev)
-    {
-      int devnum;
-      netdev_semtake();
+  struct uip_driver_s *dev;
+  int ndev;
 
-      /* Assign a device name to the the interface */
-
-      devnum = g_next_devnum++;
-      snprintf( dev->d_ifname, IFNAMSIZ, "eth%d", devnum );
-
-      /* Add the device to the list of known network devices */
-
-      dev->flink  = g_netdevices;
-      g_netdevices = dev;
-      netdev_semgive();
-
-      nlldbg("Registered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",
-             dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-             dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-             dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5],
-             dev->d_ifname);
-
-      return OK;
-    }
-  return -EINVAL;
+  netdev_semtake();
+  for (dev = g_netdevices, ndev = 0; dev; dev = dev->flink, ndev++);
+  netdev_semgive();
+  return ndev;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

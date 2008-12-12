@@ -50,7 +50,7 @@
 
 #include <arch/irq.h>
 
-#include "net-internal.h"
+#include "net_internal.h"
 
 /****************************************************************************
  * Definitions

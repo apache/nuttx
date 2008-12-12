@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/net-timeval2dsec.c
+ * net/net_timeo.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,36 +41,45 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
 
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <errno.h>
+#include <debug.h>
+
 #include <nuttx/clock.h>
 
-#include "net-internal.h"
+#include "net_internal.h"
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_timeval2dsec
+ * Function: net_timeo
  *
  * Description:
- *   Convert a struct timeval to deciseconds.  Needed by setsockopt() to
- *   save new timeout values.
+ *   Check if a timeout has elapsed.  This can be called from a socket poll
+ *   function to determine if a timeout has occurred.
  *
  * Parameters:
- *   tv   The struct timeval to convert
+ *   start_time Timeout start time in system clock ticks
+ *   timeout    Timeout value in deciseconds.
  *
  * Returned Value:
- *   the converted value
+ *   0 (FALSE) if not timeout; 1 (TRUE) if timeout
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-socktimeo_t net_timeval2dsec(struct timeval *tv)
+int net_timeo(uint32 start_time, socktimeo_t timeo)
 {
-  return (uint16)(tv->tv_sec* DSEC_PER_SEC + tv->tv_usec / USEC_PER_DSEC);
+  uint32 timeo_ticks =  DSEC2TICK(timeo);
+  uint32 elapsed     =  g_system_timer - start_time;
+
+  if (elapsed >= timeo_ticks)
+    {
+      return TRUE;
+    }
+  return FALSE;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+
