@@ -70,8 +70,8 @@
 #if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
 struct recvfrom_s
 {
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
   FAR struct socket         *rf_sock;      /* The parent socket structure */
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
   uint32                     rf_starttime; /* rcv start time for determining timeout */
 #endif
   FAR struct uip_callback_s *rf_cb;        /* Reference to callback instance */
@@ -675,10 +675,10 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf, size_t len,
   pstate->rf_buffer    = buf;
   pstate->rf_from      = infrom;
 
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
   /* Set up the start time for the timeout */
 
   pstate->rf_sock      = psock;
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
   pstate->rf_starttime = g_system_timer;
 #endif
 }
