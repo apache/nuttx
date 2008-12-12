@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip-icmpinput.c
+ * net/uip/uip_icmpinput.c
  * Handling incoming ICMP/ICMP6 input
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
@@ -53,7 +53,7 @@
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>
 
-#include "uip-internal.h"
+#include "uip_internal.h"
 
 #ifdef CONFIG_NET_ICMP
 

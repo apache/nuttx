@@ -1,7 +1,7 @@
 /****************************************************************************
- * uip_tcpconn.c
+ * net/uip/uip_tcpconn.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Large parts of this file were leveraged from uIP logic:
@@ -58,7 +58,7 @@
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>
 
-#include "uip-internal.h"
+#include "uip_internal.h"
 
 /****************************************************************************
  * Public Data

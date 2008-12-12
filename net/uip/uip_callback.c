@@ -1,9 +1,8 @@
 /****************************************************************************
- * net/uip/uip-callback.c
+ * net/uip/uip_callback.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
- *
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -49,7 +48,7 @@
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>
 
-#include "uip-internal.h"
+#include "uip_internal.h"
 
 /****************************************************************************
  * Private Data

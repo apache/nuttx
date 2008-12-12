@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/uip/uip-udpsend.c
+ * net/uip/uip_udpsend.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -51,7 +51,7 @@
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>
 
-#include "uip-internal.h"
+#include "uip_internal.h"
 
 /****************************************************************************
  * Definitions

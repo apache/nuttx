@@ -34,26 +34,26 @@
 ############################################################################
 
 UIP_ASRCS =
-UIP_CSRCS = 
+UIP_CSRCS =
 
 ifeq ($(CONFIG_NET),y)
 
 # Common IP source files
 
-UIP_CSRCS += uip-initialize.c uip-setipid.c uip-arp.c uip-input.c uip-send.c \
-             uip-poll.c uip-chksum.c uip-callback.c
+UIP_CSRCS += uip_initialize.c uip_setipid.c uip_arp.c uip_input.c uip_send.c \
+             uip_poll.c uip_chksum.c uip_callback.c
 
 ifeq ($(CONFIG_NET_IPv6),y)
-UIP_CSRCS += uip-neighbor.c
+UIP_CSRCS += uip_neighbor.c
 endif
 
 # TCP source files
 
 ifeq ($(CONFIG_NET_TCP),y)
 
-UIP_CSRCS += uip-tcpconn.c uip-tcppoll.c uip-tcptimer.c uip-tcpsend.c \
-             uip-tcpinput.c uip-tcpappsend.c uip-listen.c uip-tcpcallback.c \
-             uip-tcpreadahead.c uip-tcpbacklog.c
+UIP_CSRCS += uip_tcpconn.c uip_tcppoll.c uip_tcptimer.c uip_tcpsend.c \
+             uip_tcpinput.c uip_tcpappsend.c uip_listen.c uip_tcpcallback.c \
+             uip_tcpreadahead.c uip_tcpbacklog.c
 
 endif
 
@@ -61,8 +61,8 @@ endif
 
 ifeq ($(CONFIG_NET_UDP),y)
 
-UIP_CSRCS += uip-udpconn.c uip-udppoll.c uip-udpsend.c uip-udpinput.c \
-             uip-udpcallback.c
+UIP_CSRCS += uip_udpconn.c uip_udppoll.c uip_udpsend.c uip_udpinput.c \
+             uip_udpcallback.c
 
 endif
 
@@ -70,11 +70,11 @@ endif
 
 ifeq ($(CONFIG_NET_ICMP),y)
 
-UIP_CSRCS += uip-icmpinput.c
+UIP_CSRCS += uip_icmpinput.c
 
 ifeq ($(CONFIG_NET_ICMP_PING),y)
 ifneq ($(CONFIG_DISABLE_CLOCK),y)
-UIP_CSRCS += uip-icmpping.c uip-icmppoll.c uip-icmpsend.c
+UIP_CSRCS += uip_icmpping.c uip_icmppoll.c uip_icmpsend.c
 endif
 endif
 

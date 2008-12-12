@@ -1,5 +1,5 @@
 /*
- * uip-neighbor.c
+ * uip_neighbor.c
  * Database of link-local neighbors, used by IPv6 code and to be used by
  * a future ARP code rewrite.
  *
@@ -35,7 +35,7 @@
 #include <string.h>
 #include <debug.h>
 
-#include "uip-neighbor.h"
+#include "uip_neighbor.h"
 
 #define MAX_TIME 128
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip-icmppoll.c
+ * net/uip/uip_icmppoll.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -47,7 +47,7 @@
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>
 
-#include "uip-internal.h"
+#include "uip_internal.h"
 
 /****************************************************************************
  * Definitions

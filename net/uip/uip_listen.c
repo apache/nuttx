@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/uip/uip-listen.c
+ * net/uip/uip_listen.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * A direct leverage of logic from uIP which also has b BSD style license
@@ -49,7 +49,7 @@
 
 #include <net/uip/uipopt.h>
 
-#include "uip-internal.h"
+#include "uip_internal.h"
 
 /****************************************************************************
  * Private Data

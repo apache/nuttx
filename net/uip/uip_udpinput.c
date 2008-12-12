@@ -1,13 +1,14 @@
 /****************************************************************************
- * uip-send.c
+ * net/uip/uip_udpinput.c
+ * Handling incoming UDP input
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
- * Based in part on uIP which also has a BSD stylie license:
+ * Adapted for NuttX from logic in uIP which also has a BSD-like license:
  *
- *   Author: Adam Dunkels <adam@dunkels.com>
- *   Copyright (c) 2001-2003, Adam Dunkels.
+ *   Original author Adam Dunkels <adam@dunkels.com>
+ *   Copyright () 2001-2003, Adam Dunkels.
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,34 +42,26 @@
  * Included Files
  ****************************************************************************/
 
-#include <string.h>
+#include <nuttx/config.h>
+#if defined(CONFIG_NET) && defined(CONFIG_NET_UDP)
+
+#include <sys/types.h>
 #include <debug.h>
 
+#include <net/uip/uipopt.h>
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>
+
+#include "uip_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
+#define UDPBUF ((struct uip_udpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Global Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Constant Data
+ * Public Variables
  ****************************************************************************/
 
 /****************************************************************************
@@ -76,31 +69,84 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_send
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: uip_udpinput
  *
  * Description:
- *   Called from socket logic in response to a xmit or poll request from the
- *   the network interface driver.
+ *   Handle incoming UDP input
+ *
+ * Parameters:
+ *   dev - The device driver structure containing the received UDP packet
+ *
+ * Return:
+ *   None
  *
  * Assumptions:
- *   Called from the interrupt level or, at a mimimum, with interrupts
- *   disabled.
+ *   Called from the interrupt level or with interrupts disabled.
  *
  ****************************************************************************/
 
-void uip_send(struct uip_driver_s *dev, const void *buf, int len)
+void uip_udpinput(struct uip_driver_s *dev)
 {
-  /* Some sanity checks -- note that the actually available length in the 
-   * buffer is considerably less than CONFIG_NET_BUFSIZE.
+  struct uip_udp_conn *conn;
+
+  /* UDP processing is really just a hack. We don't do anything to the UDP/IP
+   * headers, but let the UDP application do all the hard work. If the
+   * application sets d_sndlen, it has a packet to send.
    */
 
-  if (dev && len > 0 && len < CONFIG_NET_BUFSIZE)
+  dev->d_len    -= UIP_IPUDPH_LEN;
+#ifdef CONFIG_NET_UDP_CHECKSUMS
+  dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
+  if (UDPBUF->udpchksum != 0 && uip_udpchksum(dev) != 0xffff)
     {
-      memcpy(dev->d_snddata, buf, len);
-      dev->d_sndlen = len;
-   }
+#ifdef CONFIG_NET_STATISTICS
+      uip_stat.udp.drop++;
+      uip_stat.udp.chkerr++;
+#endif
+      ndbg("Bad UDP checksum\n");
+      dev->d_len = 0;
+    }
+  else
+#endif
+    {
+      /* Demultiplex this UDP packet between the UDP "connections". */
+
+      conn = uip_udpactive(UDPBUF);
+      if (conn)
+        {
+          /* Setup for the application callback */
+
+          dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
+          dev->d_snddata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
+          dev->d_sndlen  = 0;
+
+          /* Perform the application callback */
+
+          uip_udpcallback(dev, conn, UIP_NEWDATA);
+
+          /* If the application has data to send, setup the UDP/IP header */
+
+          if (dev->d_sndlen > 0)
+            {
+              uip_udpsend(dev, conn);
+            }
+        }
+      else
+        {
+          ndbg("No listener on UDP port\n");
+          dev->d_len = 0;
+        }
+    }
+
+  return;
 }
+
+#endif /* CONFIG_NET && CONFIG_NET_UDP */

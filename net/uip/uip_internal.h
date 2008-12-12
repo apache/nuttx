@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/uip/uip-internal.h
+ * net/uip/uip_internal.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -111,11 +111,11 @@ EXTERN struct uip_conn *uip_tcplistener(uint16 portno);
 EXTERN struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf);
 EXTERN void uip_tcpnextsequence(void);
 
-/* Defined in uip-tcppoll.c *************************************************/
+/* Defined in uip_tcppoll.c *************************************************/
 
 EXTERN void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn);
 
-/* Defined in uip-udptimer.c ************************************************/
+/* Defined in uip_udptimer.c ************************************************/
 
 EXTERN void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec);
 
@@ -125,7 +125,7 @@ EXTERN void uip_listeninit(void);
 EXTERN boolean uip_islistener(uint16 port);
 EXTERN int uip_accept(struct uip_driver_s *dev, struct uip_conn *conn, uint16 portno);
 
-/* Defined in uip-tcpsend.c *************************************************/
+/* Defined in uip_tcpsend.c *************************************************/
 
 EXTERN void uip_tcpsend(struct uip_driver_s *dev, struct uip_conn *conn,
                         uint16 flags, uint16 len);
@@ -133,14 +133,14 @@ EXTERN void uip_tcpreset(struct uip_driver_s *dev);
 EXTERN void uip_tcpack(struct uip_driver_s *dev, struct uip_conn *conn,
                        uint8 ack);
 
-/* Defined in uip-tcpappsend.c **********************************************/
+/* Defined in uip_tcpappsend.c **********************************************/
 
 EXTERN void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
                            uint16 result);
 EXTERN void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn,
                           uint16 result);
 
-/* Defined in uip-tcpinput.c ************************************************/
+/* Defined in uip_tcpinput.c ************************************************/
 
 EXTERN void uip_tcpinput(struct uip_driver_s *dev);
 
@@ -149,7 +149,7 @@ EXTERN void uip_tcpinput(struct uip_driver_s *dev);
 EXTERN uint16 uip_tcpcallback(struct uip_driver_s *dev,
                               struct uip_conn *conn, uint16 flags);
 
-/* Defined in uip-tcpreadahead.c ********************************************/
+/* Defined in uip_tcpreadahead.c ********************************************/
 
 #if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
 EXTERN void uip_tcpreadaheadinit(void);
@@ -166,15 +166,15 @@ EXTERN void uip_udpinit(void);
 EXTERN struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf);
 EXTERN struct uip_udp_conn *uip_nextudpconn(struct uip_udp_conn *conn);
 
-/* Defined in uip-udppoll.c *************************************************/
+/* Defined in uip_udppoll.c *************************************************/
 
 EXTERN void uip_udppoll(struct uip_driver_s *dev, struct uip_udp_conn *conn);
 
-/* Defined in uip-udpsend.c *************************************************/
+/* Defined in uip_udpsend.c *************************************************/
 
 EXTERN void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn);
 
-/* Defined in uip-udpinput.c ************************************************/
+/* Defined in uip_udpinput.c ************************************************/
 
 EXTERN void uip_udpinput(struct uip_driver_s *dev);
 
@@ -185,16 +185,16 @@ EXTERN void uip_udpcallback(struct uip_driver_s *dev,
 #endif /* CONFIG_NET_UDP */
 
 #ifdef CONFIG_NET_ICMP
-/* Defined in uip-icmpinput.c ***********************************************/
+/* Defined in uip_icmpinput.c ***********************************************/
 
 EXTERN void uip_icmpinput(struct uip_driver_s *dev);
 
 #ifdef CONFIG_NET_ICMP_PING
-/* Defined in uip-icmpoll.c *************************************************/
+/* Defined in uip_icmpoll.c *************************************************/
 
 EXTERN void uip_icmppoll(struct uip_driver_s *dev);
 
-/* Defined in uip-icmsend.c *************************************************/
+/* Defined in uip_icmsend.c *************************************************/
 
 EXTERN void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr);
 

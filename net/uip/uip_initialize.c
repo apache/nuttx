@@ -1,8 +1,7 @@
 /****************************************************************************
- * net/uip/uip-udpinput.c
- * Handling incoming UDP input
+ * net/uip/uip_initialize.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -43,26 +42,49 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_UDP)
+#ifdef CONFIG_NET
 
-#include <sys/types.h>
-#include <debug.h>
-
-#include <net/uip/uipopt.h>
 #include <net/uip/uip.h>
-#include <net/uip/uip-arch.h>
 
-#include "uip-internal.h"
+#include "uip_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-#define UDPBUF ((struct uip_udpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
-
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
+
+/* IP/TCP/UDP/ICMP statistics for all network interfaces */
+
+#ifdef CONFIG_NET_STATISTICS
+struct uip_stats uip_stat;
+#endif
+
+/* Increasing number used for the IP ID field. */
+
+uint16 g_ipid;
+
+const uip_ipaddr_t g_alloneaddr =
+#ifdef CONFIG_NET_IPv6
+  {0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff};
+#else
+  0xffffffff;
+#endif
+
+const uip_ipaddr_t g_allzeroaddr =
+#ifdef CONFIG_NET_IPv6
+  {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
+#else
+  0x00000000;
+#endif
+
+/* Reassembly timer (units: deci-seconds) */
+
+#if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
+uint8 uip_reasstmr;
+#endif
 
 /****************************************************************************
  * Private Variables
@@ -77,76 +99,46 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_udpinput
+ * Name: uip_initialize
  *
  * Description:
- *   Handle incoming UDP input
+ *   Perform initialization of the uIP layer
  *
  * Parameters:
- *   dev - The device driver structure containing the received UDP packet
+ *   None
  *
  * Return:
  *   None
  *
- * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
- *
  ****************************************************************************/
 
-void uip_udpinput(struct uip_driver_s *dev)
+void uip_initialize(void)
 {
-  struct uip_udp_conn *conn;
+  /* Initialize callback support */
 
-  /* UDP processing is really just a hack. We don't do anything to the UDP/IP
-   * headers, but let the UDP application do all the hard work. If the
-   * application sets d_sndlen, it has a packet to send.
-   */
+  uip_callbackinit();
 
-  dev->d_len    -= UIP_IPUDPH_LEN;
-#ifdef CONFIG_NET_UDP_CHECKSUMS
-  dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
-  if (UDPBUF->udpchksum != 0 && uip_udpchksum(dev) != 0xffff)
-    {
-#ifdef CONFIG_NET_STATISTICS
-      uip_stat.udp.drop++;
-      uip_stat.udp.chkerr++;
+  /* Initialize the listening port structures */
+
+#ifdef CONFIG_NET_TCP
+  uip_listeninit();
+
+  /* Initialize the TCP/IP connection structures */
+
+  uip_tcpinit();
+
+  /* Initialize the TCP/IP read-ahead buffering */
+
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+  uip_tcpreadaheadinit();
 #endif
-      ndbg("Bad UDP checksum\n");
-      dev->d_len = 0;
-    }
-  else
+#endif /* CONFIG_NET_TCP */
+
+  /* Initialize the UDP connection structures */
+
+#ifdef CONFIG_NET_UDP
+  uip_udpinit();
 #endif
-    {
-      /* Demultiplex this UDP packet between the UDP "connections". */
-
-      conn = uip_udpactive(UDPBUF);
-      if (conn)
-        {
-          /* Setup for the application callback */
-
-          dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
-          dev->d_snddata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
-          dev->d_sndlen  = 0;
-
-          /* Perform the application callback */
-
-          uip_udpcallback(dev, conn, UIP_NEWDATA);
-
-          /* If the application has data to send, setup the UDP/IP header */
-
-          if (dev->d_sndlen > 0)
-            {
-              uip_udpsend(dev, conn);
-            }
-        }
-      else
-        {
-          ndbg("No listener on UDP port\n");
-          dev->d_len = 0;
-        }
-    }
-
-  return;
 }
+#endif /* CONFIG_NET */
 
-#endif /* CONFIG_NET && CONFIG_NET_UDP */

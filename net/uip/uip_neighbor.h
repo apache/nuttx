@@ -1,4 +1,4 @@
-/* uip-neighbor.h
+/* uip_neighbor.h
  * Header file for database of link-local neighbors, used by IPv6 code and
  * to be used by future ARP code.
  * Author: Adam Dunkels <adam@sics.se>

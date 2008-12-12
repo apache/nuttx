@@ -1,9 +1,8 @@
 /****************************************************************************
- * net/uip/uip-tcpreadahead.c
+ * net/uip/uip_tcpreadahead.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
- *
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -47,7 +46,7 @@
 
 #include <net/uip/uip.h>
 
-#include "uip-internal.h"
+#include "uip_internal.h"
 
 /****************************************************************************
  * Private Data

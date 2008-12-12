@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip-tcptimer.c
+ * net/uip/uip_tcptimer.c
  * Poll for the availability of TCP TX data
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
@@ -52,7 +52,7 @@
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>
 
-#include "uip-internal.h"
+#include "uip_internal.h"
 
 /****************************************************************************
  * Definitions

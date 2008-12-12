@@ -1,14 +1,13 @@
 /****************************************************************************
- * net/uip/uip-tcppoll.c
- * Poll for the availability of TCP TX data
+ * net/uip/uip_send.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007i, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
- * Adapted for NuttX from logic in uIP which also has a BSD-like license:
+ * Based in part on uIP which also has a BSD stylie license:
  *
- *   Original author Adam Dunkels <adam@dunkels.com>
- *   Copyright () 2001-2003, Adam Dunkels.
+ *   Author: Adam Dunkels <adam@dunkels.com>
+ *   Copyright (c) 2001-2003, Adam Dunkels.
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,24 +41,34 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
-
-#include <sys/types.h>
+#include <string.h>
 #include <debug.h>
 
-#include <net/uip/uipopt.h>
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>
-
-#include "uip-internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Private Type Declarations
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Constant Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Constant Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -67,64 +76,31 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: uip_tcppoll
+ * Name: uip_send
  *
  * Description:
- *   Poll a TCP connection structure for availability of TX data
- *
- * Parameters:
- *   dev - The device driver structure to use in the send operation
- *   conn - The TCP "connection" to poll for TX data
- *
- * Return:
- *   None
+ *   Called from socket logic in response to a xmit or poll request from the
+ *   the network interface driver.
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   Called from the interrupt level or, at a mimimum, with interrupts
+ *   disabled.
  *
  ****************************************************************************/
 
-void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn)
+void uip_send(struct uip_driver_s *dev, const void *buf, int len)
 {
-  uint8 result;
-
-  /* Verify that the connection is established and if the connection has
-   * oustanding (unacknowledged) sent data.
+  /* Some sanity checks -- note that the actually available length in the 
+   * buffer is considerably less than CONFIG_NET_BUFSIZE.
    */
 
-  if ((conn->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED &&
-      !uip_outstanding(conn))
+  if (dev && len > 0 && len < CONFIG_NET_BUFSIZE)
     {
-      /* Set up for the callback */
-
-      dev->d_snddata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
-      dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
-
-      dev->d_len     = 0;
-      dev->d_sndlen  = 0;
-
-      /* Perfom the callback */
-
-      result = uip_tcpcallback(dev, conn, UIP_POLL);
-
-      /* Handle the callback response */
-
-      uip_tcpappsend(dev, conn, result);
-    }
-  else
-    {
-      /* Nothing to do for this connection */
-
-      dev->d_len = 0;
-    }
+      memcpy(dev->d_snddata, buf, len);
+      dev->d_sndlen = len;
+   }
 }
-
-#endif /* CONFIG_NET && CONFIG_NET_TCP */

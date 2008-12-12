@@ -1,9 +1,8 @@
 /****************************************************************************
- * net/uip/uip-setipid.c
+ * net/uip/uip_udpcallback.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
- *
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,14 +38,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && defined(CONFIG_NET_UDP)
 
 #include <sys/types.h>
 #include <debug.h>
 
+#include <net/uip/uipopt.h>
 #include <net/uip/uip.h>
+#include <net/uip/uip-arch.h>
 
-#include "uip-internal.h"
+#include "uip_internal.h"
 
 /****************************************************************************
  * Private Data
@@ -61,18 +62,29 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_setipid
+ * Function: uip_udpcallback
  *
  * Description:
- *   This function may be used at boot time to set the initial ip_id.
+ *   Inform the application holding the UDP socket of a change in state.
  *
  * Assumptions:
+ *   This function is called at the interrupt level with interrupts disabled.
  *
  ****************************************************************************/
 
-void uip_setipid(uint16 id)
+void uip_udpcallback(struct uip_driver_s *dev, struct uip_udp_conn *conn,
+                     uint16 flags)
 {
-  g_ipid = id;
+  nvdbg("flags: %04x\n", flags);
+
+  /* Some sanity checking */
+
+  if (conn)
+    {
+      /* Perform the callback */
+
+      flags = uip_callbackexecute(dev, conn, flags, conn->list);
+    }
 }
 
-#endif /* CONFIG_NET */
+#endif /* CONFIG_NET && CONFIG_NET_UDP */

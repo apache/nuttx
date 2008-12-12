@@ -1,6 +1,6 @@
 /****************************************************************************
- * net/uip/uip-udppoll.c
- * Poll for the availability of UDP TX data
+ * net/uip/uip_tcppoll.c
+ * Poll for the availability of TCP TX data
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -43,7 +43,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_UDP)
+#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
 #include <sys/types.h>
 #include <debug.h>
@@ -52,7 +52,7 @@
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>
 
-#include "uip-internal.h"
+#include "uip_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -75,14 +75,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_udppoll
+ * Name: uip_tcppoll
  *
  * Description:
- *   Poll a UDP "connection" structure for availability of TX data
+ *   Poll a TCP connection structure for availability of TX data
  *
  * Parameters:
  *   dev - The device driver structure to use in the send operation
- *   conn - The UDP "connection" to poll for TX data
+ *   conn - The TCP "connection" to poll for TX data
  *
  * Return:
  *   None
@@ -92,36 +92,39 @@
  *
  ****************************************************************************/
 
-void uip_udppoll(struct uip_driver_s *dev, struct uip_udp_conn *conn)
+void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn)
 {
-  /* Verify that the UDP connection is valid */
+  uint8 result;
 
-  if (conn->lport != 0)
+  /* Verify that the connection is established and if the connection has
+   * oustanding (unacknowledged) sent data.
+   */
+
+  if ((conn->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED &&
+      !uip_outstanding(conn))
     {
-      /* Setup for the application callback */
+      /* Set up for the callback */
 
-      dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
-      dev->d_snddata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
+      dev->d_snddata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
+      dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
 
       dev->d_len     = 0;
       dev->d_sndlen  = 0;
 
-      /* Perform the application callback */
+      /* Perfom the callback */
 
-      uip_udpcallback(dev, conn, UIP_POLL);
+      result = uip_tcpcallback(dev, conn, UIP_POLL);
 
-      /* If the application has data to send, setup the UDP/IP header */
+      /* Handle the callback response */
 
-      if (dev->d_sndlen > 0)
-        {
-          uip_udpsend(dev, conn);
-          return;
-        }
+      uip_tcpappsend(dev, conn, result);
     }
+  else
+    {
+      /* Nothing to do for this connection */
 
-  /* Make sure that d_len is zero meaning that there is nothing to be sent */
-
-  dev->d_len   = 0;
+      dev->d_len = 0;
+    }
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_UDP */
+#endif /* CONFIG_NET && CONFIG_NET_TCP */
