@@ -52,7 +52,7 @@
 #include <nuttx/net.h>
 #include <nuttx/arch.h>
 
-#include <uip/uip-internal.h>
+#include <uip/uip_internal.h>
 
 #include "net_internal.h"
 
