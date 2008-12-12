@@ -350,7 +350,6 @@ static void *telnetd_handler(void *arg)
 
   if (pstate)
     {
-
       /* Initialize the thread state structure */
 
       memset(pstate, 0, sizeof(struct telnetd_s));
@@ -389,7 +388,7 @@ static void *telnetd_handler(void *arg)
 
   dbg("[%d] Exitting\n", sockfd);
   close(sockfd);
-  pthread_exit(NULL);
+  return NULL;
 }
 
 /****************************************************************************

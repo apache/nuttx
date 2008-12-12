@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <nuttx/compiler.h>
 #include <net/uip/uipopt.h>
 
 /****************************************************************************
@@ -88,7 +89,9 @@
 
 #if UIP_UDP_MSS < TFTP_MAXPACKETSIZE
 #  define TFTP_PACKETSIZE   UIP_UDP_MSS
-#  warning "uIP MSS is too small for TFTP"
+#  ifdef CONFIG_CPP_HAVE_WARNING
+#    warning "uIP MSS is too small for TFTP"
+#  endif
 #else
 #  define TFTP_PACKETSIZE   TFTP_MAXPACKETSIZE
 #endif

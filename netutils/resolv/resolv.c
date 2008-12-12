@@ -344,15 +344,16 @@ int recv_response(struct sockaddr_in *addr)
 /* Get the binding for name. */
 
 #ifdef CONFIG_NET_IPv6
-int resolv_query(const char *name, struct sockaddr_in6 *addr)
+int resolv_query(FAR const char *name, FAR struct sockaddr_in6 *addr)
 #else
-int resolv_query(const char *name, struct sockaddr_in *addr)
+int resolv_query(FAR const char *name, FAR struct sockaddr_in *addr)
 #endif
 {
   int retries;
   int ret;
 
-  // Loop while receive timeout errors occur and there are remaining retries
+  /* Loop while receive timeout errors occur and there are remaining retries */
+
   for (retries = 0; retries < 3; retries++)
     {
       if (send_query(name, addr) < 0)
@@ -364,16 +365,19 @@ int resolv_query(const char *name, struct sockaddr_in *addr)
       if (ret >= 0)
         {
           /* Response received successfully */
+
           return OK;
         }
 
-      else if (*get_errno_ptr() != EAGAIN)
+      else if (errno != EAGAIN)
         {
           /* Some failure other than receive timeout occurred */
+
           return ERROR;
         }
     }
-  return ret;
+
+  return ERROR;
 }
 
 /* Obtain the currently configured DNS server. */

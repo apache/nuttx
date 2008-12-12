@@ -1,7 +1,7 @@
 /****************************************************************************
- * netutils/uiplib/uip-gethostaddr.c
+ * netutils/uiplib/uip_getmacaddr.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,51 +53,49 @@
 #include <net/uip/uip-lib.h>
 
 /****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_gethostaddr
+ * Name: uip_getmacaddr
  *
  * Description:
  *   Get the network driver IP address
  *
  * Parameters:
  *   ifname   The name of the interface to use
- *   ipaddr   The location to return the IP address
+ *   macaddr  The location to return the MAC address
  *
  * Return:
  *   0 on sucess; -1 on failure
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
-int uip_gethostaddr(const char *ifname, struct in6_addr *addr)
-#else
-int uip_gethostaddr(const char *ifname, struct in_addr *addr)
-#endif
+int uip_getmacaddr(const char *ifname, uint8 *macaddr)
 {
   int ret = ERROR;
-  if (ifname && addr)
+  if (ifname && macaddr)
     {
+      /* Get a socket (only so that we get access to the INET subsystem) */
+
       int sockfd = socket(PF_INET, UIPLIB_SOCK_IOCTL, 0);
       if (sockfd >= 0)
         {
           struct ifreq req;
+          memset (&req, 0, sizeof(struct ifreq));
+
+          /* Put the driver name into the request */
+
           strncpy(req.ifr_name, ifname, IFNAMSIZ);
-          ret = ioctl(sockfd, SIOCGIFADDR, (unsigned long)&req);
+
+          /* Perform the ioctl to get the MAC address */
+
+          ret = ioctl(sockfd, SIOCGIFHWADDR, (unsigned long)&req);
           if (!ret)
             {
-#ifdef CONFIG_NET_IPv6
-#error "req.ifr_addr.s_addr not big enough for IPv6 address"
-              memcpy(addr, &req.ifr_addr, sizeof(struct in6_addr));
-#else
-              memcpy(addr, &req.ifr_addr, sizeof(struct in_addr));
-#endif
+              /* Return the MAC address */
+
+              memcpy(macaddr, &req.ifr_hwaddr.sa_data, IFHWADDRLEN);
             }
         }
     }

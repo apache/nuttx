@@ -34,6 +34,8 @@
 #include <string.h>
 #include <sys/socket.h>
 
+#include <nuttx/compiler.h>
+
 #include <net/uip/uip.h>
 #include <net/uip/httpd.h>
 
@@ -115,7 +117,9 @@ httpd_cgifunction httpd_cgi(char *name)
       return (*f)->function;
     }
   }
-#warning REVISIT -- must wait to return
+#ifdef CONFIG_CPP_HAVE_WARNING
+#  warning REVISIT -- must wait to return
+#endif
   return nullfunction;
 }
 

@@ -53,6 +53,8 @@
 #include <string.h>
 #include <sys/socket.h>
 
+#include <nuttx/compiler.h>
+
 #include <net/uip/uip.h>
 #include <net/uip/resolv.h>
 
@@ -360,7 +362,9 @@ static void newdata(struct uip_driver_s *dev)
 
 uint8 uip_interrupt_event(struct uip_driver_s *dev, struct uip_conn *conn, uint8 flags)
 {
-#warning OBSOLETE -- needs to be redesigned
+#ifdef CONFIG_CPP_HAVE_WARNING
+#  warning OBSOLETE -- needs to be redesigned
+#endif
   g_return = flags;
 
   if ((flags & UIP_CONNECTED) != 0)
@@ -442,26 +446,40 @@ uint8 uip_interrupt_event(struct uip_driver_s *dev, struct uip_conn *conn, uint8
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: webclient_init
+ ****************************************************************************/
+ 
 void webclient_init(void)
 {
 }
 
-unsigned char webclient_get(const char *host, uint16 port, char *file)
+/****************************************************************************
+ * Name: webclient_get
+ ****************************************************************************/
+ 
+unsigned char webclient_get(FAR const char *host, uint16 port, FAR char *file)
 {
-  uip_ipaddr_t *ipaddr;
   static uip_ipaddr_t addr;
   struct sockaddr_in server;
   int sockfd;
 
   /* First check if the host is an IP address. */
 
-  ipaddr = &addr;
-  if (uiplib_ipaddrconv(host, (unsigned char *)addr) == 0)
+  if (!uiplib_ipaddrconv(host, (unsigned char *)addr))
     {
-      if (resolv_query(host, &ipaddr) < 0)
+      /* 'host' does not point to a avalid address string.  Try to resolve
+       *  the host name to an IP address.
+       */
+ 
+      if (resolv_query(host, &server) < 0)
         {
           return ERROR;
         }
+
+      /* Save the host address */
+
+      addr = server.sin_addr.s_addr;
   }
 
   /* Create a socket */
@@ -473,7 +491,7 @@ unsigned char webclient_get(const char *host, uint16 port, char *file)
     }
 
   /* Connect to server.  First we have to set some fields in the
-   * 'server' structure.  The system will assign me an arbitrary
+   * 'server' address structure.  The system will assign me an arbitrary
    * local port that is not in use.
    */
 

@@ -45,6 +45,7 @@ typedef unsigned int  uint32;
 typedef unsigned char boolean;
 # define HTONS(a) htons(a)
 # define HTONL(a) htonl(a)
+# define CONFIG_CPP_HAVE_WARNING 1
 # define dbg(...) printf(__VA_ARGS__)
 # define vdbg(...) printf(__VA_ARGS__)
 # define TRUE  (1)
@@ -54,6 +55,7 @@ typedef unsigned char boolean;
 #else
 # include <nuttx/config.h>
 # include <debug.h>
+# include <nuttx/compiler.h>
 # include <net/uip/dhcpd.h>
 #endif
 
@@ -389,8 +391,10 @@ in_addr_t dhcpd_allocipaddr(void)
       lease = dhcpd_findbyipaddr(ipaddr);
       if ((!lease || dhcpd_leaseexpired(lease)))
         {
-#warning "FIXME: Should check if anything responds to an ARP request or ping"
-#warning "       to verify that there is no other user of this IP address"
+#ifdef CONFIG_CPP_HAVE_WARNING
+#  warning "FIXME: Should check if anything responds to an ARP request or ping"
+#  warning "       to verify that there is no other user of this IP address"
+#endif
           memset(g_state.ds_leases[ipaddr - CONFIG_NETUTILS_DHCPD_STARTIP].mac, 0, DHCP_HLEN_ETHERNET);
           g_state.ds_leases[ipaddr - CONFIG_NETUTILS_DHCPD_STARTIP].allocated = TRUE;
 #ifdef HAVE_LEASE_TIME
@@ -412,7 +416,7 @@ static inline boolean dhcpd_parseoptions(void)
   uint8 *ptr;
   uint8 overloaded;
   uint8 currfield;
-  int optlen;
+  int optlen = 0;
   int remaining;
 
   /* Verify that the option field starts with a valid magic number */
@@ -775,6 +779,8 @@ static inline int dhcpd_openresponder(void)
 
 static void dhcpd_initpacket(uint8 mtype)
 {
+  uint32 nulladdr = 0;
+  
   /* Set up the generic parts of the DHCP server message */
 
   memset(&g_state.ds_outpacket, 0, sizeof(struct dhcpmsg_s));
@@ -786,7 +792,7 @@ static void dhcpd_initpacket(uint8 mtype)
   memcpy(&g_state.ds_outpacket.xid, &g_state.ds_inpacket.xid, 4);
   memcpy(g_state.ds_outpacket.chaddr, g_state.ds_inpacket.chaddr, 16);
 
-  if (g_state.ds_outpacket.giaddr)
+  if (memcmp(g_state.ds_outpacket.giaddr, &nulladdr, 4) != 0)
     {
       g_state.ds_outpacket.flags  = g_state.ds_inpacket.flags;
     }

@@ -489,7 +489,7 @@ static void *httpd_handler(void *arg)
 
   dbg("[%d] Exitting\n", sockfd);
   close(sockfd);
-  pthread_exit(NULL);
+  return NULL;
 }
 
 /****************************************************************************
