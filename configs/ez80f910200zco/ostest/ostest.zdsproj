@@ -42,7 +42,7 @@
 </tool>
 <tool name="Debugger">
 <options>
-<option name="target" type="string" change-action="rebuild">eZ80DevPlatform_F91_Flash</option>
+<option name="target" type="string" change-action="rebuild">eZ80F91ModDevKit_Flash</option>
 <option name="debugtool" type="string" change-action="none">Simulator</option>
 <option name="usepageerase" type="boolean" change-action="none">true</option>
 </options>

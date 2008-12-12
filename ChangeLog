@@ -604,4 +604,6 @@
 	* Fixed several compilation errors in fixed precision math library when built
 	  against toolchains that do not support 64-bit type 'long long'.
 	* Fix errors in some function prototypes in dirent.h
+	* Add eZ80F91 EMAC driver
+	* Fix recvfrom() compilation error -- only noted under ZDS
 

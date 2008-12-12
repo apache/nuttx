@@ -165,9 +165,17 @@ EXTERN void up_timerhook(void);
 /* Defined in board/up_network.c */
 
 #ifdef CONFIG_NET
-EXTERN void up_netinitialize(void);
+EXTERN int  up_netinitialize(void);
+EXTERN void up_netuninitialize(void);
+# ifdef CONFIG_ARCH_MCFILTER
+EXTERN int up_multicastfilter(FAR struct uip_driver_s *dev, FAR ubyte *mac, boolean enable);
+# else
+#   define up_multicastfilter(dev, mac, enable)
+# endif
 #else
 # define up_netinitialize()
+# define up_netuninitialize()
+# define up_multicastfilter(dev, mac, enable)
 #endif
 
 /* Return the current value of the stack pointer (used in stack dump logic) */
