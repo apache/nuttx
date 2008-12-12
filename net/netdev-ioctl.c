@@ -82,7 +82,7 @@
 static void ioctl_getipaddr(struct sockaddr *outaddr, uip_ipaddr_t *inaddr)
 {
 #ifdef CONFIG_NET_IPv6
-#error " big enough for IPv6 address"
+#error "Not big enough for IPv6 address"
   struct sockaddr_in6 *dest = (struct sockaddr_in6 *)outaddr;
   dest->sin_family = AF_INET6;
   dest->sin_port   = 0;
@@ -106,7 +106,15 @@ static void ioctl_setipaddr(uip_ipaddr_t *outaddr, struct sockaddr *inaddr)
 #endif
 }
 
-static void ioctl_ifup(FAR struct uip_driver_s *dev)
+/****************************************************************************
+ * Name: ioctl_ifup / ioctl_ifdown
+ *
+ * Description:
+ *   Bring the interface up/down
+ *
+ ****************************************************************************/
+
+static inline void ioctl_ifup(FAR struct uip_driver_s *dev)
 {
   if (dev->d_ifup)
     {
@@ -114,7 +122,7 @@ static void ioctl_ifup(FAR struct uip_driver_s *dev)
     }
 }
 
-static void ioctl_ifdown(FAR struct uip_driver_s *dev)
+static inline void ioctl_ifdown(FAR struct uip_driver_s *dev)
 {
   if (dev->d_ifdown)
     {
@@ -225,7 +233,7 @@ int netdev_ioctl(int sockfd, int cmd, struct ifreq *req)
         memcpy(req->ifr_hwaddr.sa_data, dev->d_mac.ether_addr_octet, IFHWADDRLEN);
         break;
 
-      case SIOCSIFHWADDR:  /* Set hardware address */
+      case SIOCSIFHWADDR:  /* Set hardware address -- will not take effect until ifup */
         req->ifr_hwaddr.sa_family = AF_INETX;
         memcpy(dev->d_mac.ether_addr_octet, req->ifr_hwaddr.sa_data, IFHWADDRLEN);
         break;
@@ -253,7 +261,7 @@ int netdev_ioctl(int sockfd, int cmd, struct ifreq *req)
   return OK;
 
 errout:
-  *get_errno_ptr() = err;
+  errno = err;
   return ERROR;
 }
 
