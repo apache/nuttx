@@ -181,7 +181,7 @@
 
 #define UIP_MAXSYNRTX 5
 
-/* The TCP maximum segment size. This is should not be to set to more
+/* The TCP maximum segment size. This is should not be set to more
  * than CONFIG_NET_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN.
  */
 
