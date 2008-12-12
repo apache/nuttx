@@ -185,7 +185,7 @@ static void uip_arp_dump(struct arp_hdr *arp)
 
 static void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr)
 {
-  struct arp_entry *tabptr;
+  struct arp_entry *tabptr = NULL;
   in_addr_t         ipaddr = uip_ip4addr_conv(pipaddr);
   int               i;
 
@@ -402,7 +402,7 @@ void uip_arp_arpin(struct uip_driver_s *dev)
 
 void uip_arp_out(struct uip_driver_s *dev)
 {
-  struct arp_entry *tabptr;
+  struct arp_entry *tabptr = NULL;
   in_addr_t         ipaddr;
   in_addr_t         destipaddr;
   int               i;
