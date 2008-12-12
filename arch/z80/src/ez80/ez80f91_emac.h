@@ -90,6 +90,13 @@
 /* EMAC MII management register bit settings ****************************************/
 
 #define EMAC_MIIMGMT_CLKMASK   0x07  /* Bits 0-2: Divisor that produces MDC from SCLK */
+#  define EMAC_MDC_DIV4        0x01  /*        MDC = SCLK / 4 */
+#  define EMAC_MDC_DIV6        0x02  /*        MDC = SCLK / 6 */
+#  define EMAC_MDC_DIV8        0x03  /*        MDC = SCLK / 8 */
+#  define EMAC_MDC_DIV10       0x04  /*        MDC = SCLK / 10 */
+#  define EMAC_MDC_DIV14       0x05  /*        MDC = SCLK / 14 */
+#  define EMAC_MDC_DIV20       0x06  /*        MDC = SCLK / 20 */
+#  define EMAC_MDC_DIV28       0x07  /*        MDC = SCLK / 28 */
 #define EMAC_MIIMGMT_SPRE      0x08  /* Bit 3: 1=Suppress MDO preamble */
 #define EMAC_MIIMGMT_SCAN      0x10  /* Bit 4: 1=Perform continus read cycles */
 #define EMAC_MIIMGMT_SCINC     0x20  /* Bit 5: 1=Increment PHY address on scan cycle */
@@ -240,7 +247,7 @@
 /* EMAC descriptor structure (7 bytes) */
 
 #ifndef __ASSEMBLY__
-struct emac_desc_s
+struct ez80emac_desc_s
 {
   uint24 np;      /* Pointer to the start of the next packet */
   uint16 pktsize; /* Number of bytes in the packet, including the 4 CRC
