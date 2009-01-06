@@ -14,7 +14,7 @@ NuttX TODO List (Last updated November 20, 2008)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (2)  Documentation (Documentation/)
-  (5)  Build system
+  (5)  Build system / Toolchains
   (2)  NuttShell (NSH) (examples/nsh)
   (1)  Other Applications & Tests (examples/)
   (1)  Linux/Cywgin simulation (arch/sim)
@@ -366,6 +366,13 @@ o Build system
                settings has become quite large and difficult to manage manually.
   Status:      Open
   Priority:    Medium-low
+
+  Descripton   I am having trouble using the newer gcc 4.2.4 + binutils 2.19
+               toolchain for ARM.  The problem is in arch/arm/src/Makefile:
+               In the call to objcopy to relocate the .data section, arm-elf-objcopy
+               dies with a 'Floating point exception'  No clue to the cause yet.
+  Status:      Open
+  Priority:    Medium-Low -- workaroung, stick with the 3.4.5 toolchain
 
 o NuttShell (NSH) (examples/nsh)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

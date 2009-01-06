@@ -606,4 +606,7 @@
 	* Fix errors in some function prototypes in dirent.h
 	* Add eZ80F91 EMAC driver
 	* Fix recvfrom() compilation error -- only noted under ZDS
+	* Updated all ARM Make.def files to work with gcc 2.4.2 (However, there are
+	  still some build issues associated with that toolchain in use of arm-elf-objcopy
+	  -- see the TODO.txt list for details)
 
