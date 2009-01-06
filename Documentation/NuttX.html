@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 12, 2008</p>
+      <p>Last Updated: January 6, 2009</p>
     </td>
   </tr>
 </table>
@@ -1294,12 +1294,18 @@ nuttx-0.4.1 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* Fix errors in some function prototypes in dirent.h
 	* Add eZ80F91 EMAC driver
 	* Fix recvfrom() compilation error -- only noted under ZDS
+	* Updated all ARM Make.def files to work with gcc 2.4.2 (However, there are
+	  still some build issues associated with that toolchain in use of arm-elf-objcopy
+	  -- see the TODO.txt list for details)
 
 pascal-0.1.3 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 buildroot-0.1.3 2008-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Add support for H8/300 toolchain
+	* Add support for GCC 4.2.4 and binutils 2.19
+	* New ARM configuration using  GCC 4.2.4 and binutils 2.19
+	  (Note: this doesn't work with NuttX yet... to nuttx TODO.txt list).
 </pre></ul>
 
 <table width ="100%">
