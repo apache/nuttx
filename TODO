@@ -372,7 +372,7 @@ o Build system
                In the call to objcopy to relocate the .data section, arm-elf-objcopy
                dies with a 'Floating point exception'  No clue to the cause yet.
   Status:      Open
-  Priority:    Medium-Low -- workaroung, stick with the 3.4.5 toolchain
+  Priority:    Medium-Low -- workaroung, stick with the 3.4.6 toolchain
 
 o NuttShell (NSH) (examples/nsh)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
