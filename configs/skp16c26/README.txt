@@ -9,22 +9,38 @@ BUILDING THE R8C/M16C/M32C GNU TOOLCHAIN
    Change to the directory just above the NuttX installation.  If <nuttx-dir> is
    where NuttX is installed, then cd to <nuttx-dir>/..
 
-2. Get the buildroot Module
+2. Get and Install the buildroot Module
 
-   Check out the misc/buildroot module (or download the appropriate buildroot package).
-   CVS checkout instructions:
+   a. Using a release tarball:
 
-     cvs -d:pserver:anonymous@nuttx.cvs.sourceforge.net:/cvsroot/nuttx login
-     cvs -z3 -d:pserver:anonymous@nuttx.cvs.sourceforge.net:/cvsroot/nuttx co -P nuttx
+     cd <nuttx-dir>/..
+     Download the appropriate buildroot package.
+     unpack the buildroot package
+     rename the directory to buildroot
 
-3. Move the buildroot Source Tree and create the archive directory
+   b. Using CVS
+   
+     Check out the misc/buildroot module. CVS checkout instructions:
 
-     mv misc/buildroot .
+        cvs -d:pserver:anonymous@nuttx.cvs.sourceforge.net:/cvsroot/nuttx login
+        cvs -z3 -d:pserver:anonymous@nuttx.cvs.sourceforge.net:/cvsroot/nuttx co -P misc/buildroot
+
+     Move the buildroot Source Tree and create the archive directory
+
+        mv misc/buildroot .
+
+   Make the archive directory:
+  
      mkdir archive
 
-   The <nuttx>/../buildroot is where the toolchain is built;
-   The <nuttx>/../archive directory is where toolchain sources will be downloaded.
+   The <nuttx-dir>/../buildroot is where the toolchain is built;
+   The <nuttx-dir>/../archive directory is where toolchain sources will be downloaded.
 
+3. Make sure that NuttX is configured
+
+     cd <nuttx-dir>/tools
+     ./configure.sh <nuttx-configuration>
+     
 4. Configure and Make the buildroot
 
      cd buildroot
@@ -33,7 +49,9 @@ BUILDING THE R8C/M16C/M32C GNU TOOLCHAIN
      make
 
    This will download the large source packages for the toolchain and build the toolchain.
-   The resulting binaries will be under buildroot/build_m32c.
+   The resulting binaries will be under buildroot/build_m32c.  There will also be a
+   large build directory called toolchain_build_m32c; this directory can be removed once
+   the build completes successfully.
 
 Cygwin GCC BUILD NOTES
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -61,6 +79,7 @@ Cygwin GCC BUILD NOTES
    toolchain_build_m32c/gcc-4.2.4-initial, then the final GCC is produced in
    toolchain_build_m32c/gcc-4.2.4-final.  The above error will occur twice:  Once for
    the intial GCC build (see above) and once for the final GCC build. For the final GCC
-   build, the workaround is the same except that the directory will be toolchain_build_m32c/gcc-4.2.4-final/gcc.
+   build, the workaround is the same except that the directory will be
+   toolchain_build_m32c/gcc-4.2.4-final/gcc.
 
    
