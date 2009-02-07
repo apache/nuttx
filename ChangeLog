@@ -599,7 +599,7 @@
 	* Integrated the new font support with a font test in examples/nx
 	* Add documentation for NX graphics subsystem
 
-0.4.1 2008-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.1 2009-02-06 Gregory Nutt <spudmonkey@racsa.co.cr>
 	* Added board support fot the ZiLog ez80Acclaim! ez80f910200zco Development Kit.
 	* Fixed several compilation errors in fixed precision math library when built
 	  against toolchains that do not support 64-bit type 'long long'.
@@ -610,5 +610,8 @@
 	  still some build issues associated with that toolchain in use of arm-elf-objcopy
 	  -- see the TODO.txt list for details)
 	* Fix problems with Z16F and eZ80 compilation introduced with recent changes.
+
+0.4.2 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
 
 

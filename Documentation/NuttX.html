@@ -671,29 +671,26 @@
   </tr>
 </table>
 
-<p><b>nuttx-0.4.0</b>.
-  The 32<sup>nd</sup> release of NuttX (nuttx-0.4.10) is available for download
+<p><b>nuttx-0.4.1</b>.
+  The 33<sup>rd</sup> release of NuttX (nuttx-0.4.1) is available for download
   from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
   website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
-  This release adds graphics support and a tiny windowing subsystem.
-  That new graphics subystem is documented in a <a href="NXGraphicsSubsystem.html">user manual</a>.
-  No other substantial changes were made.
+<p>
+  This is a minor bugfix release.
+  The primary reason for this release is to correct numerous build errors that have accumulated for the ZiLOG ZDS-II based targets.
+  All ZDS-II targets now build correctly (but have not been re-tested).
+  In addition to platform-specific build failures,  release also adds the following features which were not tested as of the time of the release:
+  <ul>
+    <li>Board support fot the ZiLog ez80Acclaim! ez80f910200zco Development Kit,</li>
+    <li>ZiLOG eZ80F91 EMAC driver</li>
+  </ul>
 </p>
 <p>
-  The version number was bumped up to 0.4.0 in part to reflect the new graphics subsystem,
-  but also to recognize the NuttX is approaching complete functionality.  In the 0.3.x
-  versions, network support was added, Pascal P-code runtime support was added, FAT and
-  ROMFS filesystems were added, MMC/SD and USB device support were added.  There were
-  also numerous extensions to the NuttShell, NuttX APIs, and architecture ports.
-</p>
-<p>
-  These changes were verified only on the NuttX simulation platform with X11 windows
-  simulating a device framebuffer.
-  Please report any errors to me.
+  These changes were verified only on the NuttX simulation platform. Please report any errors to me.
 </p>
 
 <table width ="100%">
@@ -1250,16 +1247,18 @@ Other memory:
 </table>
 
 <pre><ul>
-nuttx-0.4.0 2008-12-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-	* Initial release of a tiny windowing system for NuttX
-	* Add fixed precision sin() and cos() (not well tested at initial check-in)
-	* Add an X11-based simulated framebuffer driver
-	* The simulated target now has an option (CONFIG_SIM_WALLTIME) that will let the simulation
-	  run in more-or-less realtime.
-	* Added more more extensive window support:  frames, toolbars, etc.
-	* Added support for bitmap fonts
-	* Integrated the new font support with a font test in examples/nx
-	* Add documentation for NX graphics subsystem
+nuttx-0.4.1 2009-02-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+	* Added board support fot the ZiLog ez80Acclaim! ez80f910200zco Development Kit.
+	* Fixed several compilation errors in fixed precision math library when built
+	  against toolchains that do not support 64-bit type 'long long'.
+	* Fix errors in some function prototypes in dirent.h
+	* Add eZ80F91 EMAC driver
+	* Fix recvfrom() compilation error -- only noted under ZDS
+	* Updated all ARM Make.def files to work with gcc 2.4.2 (However, there are
+	  still some build issues associated with that toolchain in use of arm-elf-objcopy
+	  -- see the TODO.txt list for details)
+	* Fix problems with Z16F and eZ80 compilation introduced with recent changes.
 
 pascal-0.1.2 2008-02-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1287,21 +1286,11 @@ buildroot-0.1.2 2007-11-06 &lt;spudmonkey@racsa.co.cr&gt
 </table>
 
 <pre><ul>
-nuttx-0.4.1 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-	* Added board support fot the ZiLog ez80Acclaim! ez80f910200zco Development Kit.
-	* Fixed several compilation errors in fixed precision math library when built
-	  against toolchains that do not support 64-bit type 'long long'.
-	* Fix errors in some function prototypes in dirent.h
-	* Add eZ80F91 EMAC driver
-	* Fix recvfrom() compilation error -- only noted under ZDS
-	* Updated all ARM Make.def files to work with gcc 2.4.2 (However, there are
-	  still some build issues associated with that toolchain in use of arm-elf-objcopy
-	  -- see the TODO.txt list for details)
-	* Fix problems with Z16F and eZ80 compilation introduced with recent changes.
+nuttx-0.4.2 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-pascal-0.1.3 2008-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-buildroot-0.1.3 2008-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
+buildroot-0.1.3 2009-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Add support for H8/300 toolchain
 	* Add support for GCC 4.2.4 and binutils 2.19
