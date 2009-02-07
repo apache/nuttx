@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sh/include/types.h
+ * arch/sh/include/sh1/types.h
  *
  *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -33,18 +33,16 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
+/* This file should never be included directed but, rather, only indirectly\
  * through sys/types.h
  */
 
-#ifndef __ARCH_SH_INCLUDE_TYPES_H
-#define __ARCH_SH_INCLUDE_TYPES_H
+#ifndef __ARCH_SH_INCLUDE_SH1_TYPES_H
+#define __ARCH_SH_INCLUDE_SH1_TYPES_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
-#include <arch/chip/types.h>
 
 /****************************************************************************
  * Definitions
@@ -54,8 +52,31 @@
  * Type Declarations
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+
+/* These are the sizes of the standard GNU types */
+
+typedef char sbyte;
+typedef unsigned char ubyte;
+typedef unsigned char uint8;
+typedef unsigned char boolean;
+typedef short sint16;
+typedef unsigned short uint16;
+typedef int sint32;
+typedef unsigned int uint32;
+typedef long long sint64;
+typedef unsigned long long uint64;
+
+/* This is the size of the interrupt state save returned by
+ * irqsave()
+ */
+
+typedef unsigned long irqstate_t;
+
+#endif /* __ASSEMBLY__ */
+
 /****************************************************************************
  * Global Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_SH_INCLUDE_TYPES_H */
+#endif /* __ARCH_SH_INCLUDE_SH1_TYPES_H */
