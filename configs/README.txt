@@ -498,6 +498,10 @@ configs/sim
     NOTE: This target will not run on Cygwin probably for many reasons but
     first off because it uses some of the same symbols as does cygwin.dll.
 
+configs/skp16c26
+    Renesas M16C processor on the Renesas SKP16C26 StarterKit.  This port
+    uses the GNU m32c toolchain.
+
 configs/us7032evb1
     This is a port of the Hitachi SH-1 on the Hitachi SH-1/US7032EVB1 board.
     STATUS:  Work has just began on this port.
