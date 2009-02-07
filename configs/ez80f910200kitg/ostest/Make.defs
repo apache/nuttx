@@ -147,7 +147,6 @@ endef
 
 define ASSEMBLE
 	@#echo "AS: $1"
-	@$(AS) -c $(AFLAGS) $1
 	@(wfile=`cygpath -w $1`; $(AS) $(AFLAGS) $$wfile)
 endef
 

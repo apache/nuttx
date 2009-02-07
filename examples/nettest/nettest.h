@@ -57,7 +57,11 @@
 
    /* Used printf for debug output */
 
-#  define message(...)   printf(__VA_ARGS__)
+#  ifdef CONFIG_CPP_HAVE_VARARGS
+#    define message(...) printf(__VA_ARGS__)
+#  else
+#    define message printf
+#  endif
 
    /* Have SO_LINGER */
 
@@ -67,7 +71,11 @@
 
    /* Used lib_rawprintf() so that there is not confusion from buffered IO */
 
-# define message(...) lib_rawprintf(__VA_ARGS__)
+#  ifdef CONFIG_CPP_HAVE_VARARGS
+#    define message(...) lib_rawprintf(__VA_ARGS__)
+#  else
+#    define message lib_rawprintf
+#  endif
 
    /* At present, uIP does only abortive disconnects */
 

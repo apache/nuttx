@@ -41,9 +41,9 @@ TARG_AOBJS	= $(TARG_ASRCS:.S=$(OBJEXT))
 
 TARG_CSRCS	= nettest.c
 ifeq ($(CONFIG_EXAMPLE_NETTEST_SERVER),y)
-TARG_CSRCS	+= nettest-server.c
+TARG_CSRCS	+= nettest_server.c
 else
-TARG_CSRCS	+= nettest-client.c
+TARG_CSRCS	+= nettest_client.c
 endif
 
 TARG_COBJS	= $(TARG_CSRCS:.c=$(OBJEXT))
@@ -61,9 +61,9 @@ endif
 
 HOST_SRCS	= host.c
 ifeq ($(CONFIG_EXAMPLE_NETTEST_SERVER),y)
-HOST_SRCS	+= nettest-client.c
+HOST_SRCS	+= nettest_client.c
 else
-HOST_SRCS	+= nettest-server.c
+HOST_SRCS	+= nettest_server.c
 endif
 
 HOST_OBJS	= $(HOST_SRCS:.c=.o)
