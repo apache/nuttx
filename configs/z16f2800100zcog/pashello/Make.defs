@@ -137,7 +137,7 @@ endef
 define COMPILE
 	@#echo "CC: $1"
 	@(wfile=`cygpath -w $1`; $(CC) $(CFLAGS) $$wfile)
-eendef
+endef
 
 define ASSEMBLE
 	@#echo "AS: $1"

@@ -62,7 +62,9 @@
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_MMCSD_NSLOTS
-#  warning "CONFIG_MMCSD_NSLOTS not defined"
+#  ifdef CONFIG_CPP_HAVE_WARNING
+#    warning "CONFIG_MMCSD_NSLOTS not defined"
+#  endif
 #  define CONFIG_MMCSD_NSLOTS 1
 #endif
 
@@ -1098,7 +1100,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 {
   FAR struct spi_dev_s *spi = slot->spi;
   ubyte csd[16];
-  uint32 result;
+  uint32 result = MMCSD_SPIR1_IDLESTATE;
   int i, j;
 
   /* Assume that the card is not ready (we'll clear this on successful car

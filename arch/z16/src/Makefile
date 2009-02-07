@@ -39,7 +39,7 @@
 COMPILER	= ${shell basename $(CC)}
 ARCHSRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 ifeq ($(COMPILER),zneocc.exe)
-WARCHSRCDIR	= ${shell cygpath -w $(ARCHSRCDIR)}
+WARCHSRCDIR	:= ${shell cygpath -w $(ARCHSRCDIR)}
 USRINCLUDES	= -usrinc:'.;$(WTOPDIR)\sched;$(WARCHSRCDIR);$(WARCHSRCDIR)\common'
 else
 WARCHSRCDIR	= $(ARCHSRCDIR)
@@ -85,11 +85,7 @@ $(OBJS) $(HEAD_AOBJ): %$(OBJEXT): %.S
 endif
 
 $(COBJS): %$(OBJEXT): %.c
-ifeq ($(COMPILER),zneocc.exe)
-	$(call COMPILE, `cygpath -w $<`, $@)
-else
 	$(call COMPILE, $<, $@)
-endif
 
 libarch$(LIBEXT): $(OBJS)
 	@( for obj in $(OBJS) ; do \
