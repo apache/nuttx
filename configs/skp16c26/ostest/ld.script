@@ -37,7 +37,7 @@ OUTPUT_ARCH(m32c)
 ENTRY(_stext)
 SECTIONS
 {
-	/* Flash memory begins at address 0xf0000 for the M20262F8 part and
+	/* "Far" flash memory begins at address 0xf0000 for the M20262F8 part and
 	 * ends at address 0xfffff (all parts).  The program entry point is
 	 * the first address in flash
 	 */
@@ -55,9 +55,9 @@ SECTIONS
 		_etext = ABSOLUTE(.);
 	}
 
-	_eronly = ABSOLUTE(.);		/* End of read-only values      */
-					/* .data will be relocated from */
-					/* this address                 */
+	_enronly = ABSOLUTE(.);		/* End of read-only values      */
+					/* .ndata will be relocated     */
+					/* from this address            */
 
 	/* The "variable" vector table will be fixed at the following address */
 
@@ -84,7 +84,7 @@ SECTIONS
 		_efixvect = ABSOLUTE(.);
 	}
 
-	/* Internal RAM begins at address 0x00400 (all parts) and ends at
+	/* Internal "near" RAM begins at address 0x00400 (all parts) and ends at
 	 * address 0x00bff (M20262F6 and M20262F8 parts).  With the RAM
 	 * region, used is .data followed by .bss.  The remainder of RAM
 	 * carved up by the start-up code into stacks and heaps.
@@ -92,19 +92,38 @@ SECTIONS
 
 	. = 0x00400;
 
-	.data : {
-		_sdata = ABSOLUTE(.);
+	.ndata : {
+		_sndata = ABSOLUTE(.);
 		*(.data)
 		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
+		_endata = ABSOLUTE(.);
 	}
 
-	.bss : {			/* BSS				*/
-		_sbss = ABSOLUTE(.);
+	.nbss : {			/* BSS				*/
+		_snbss = ABSOLUTE(.);
 		*(.bss)
 		*(COMMON)
-		_ebss = ABSOLUTE(.);
+		_enbss = ABSOLUTE(.);
 	}
+
+	/* "Far" RAM begins at 0x10000.  The SKP16C26 has no far RAM */
+/*
+	. = 0x10000;
+
+	.fdata : {
+		_sfdata = ABSOLUTE(.);
+		*(.data)
+		CONSTRUCTORS
+		_efdata = ABSOLUTE(.);
+	}
+
+	.fbss : {			/* BSS				*/
+		_sfbss = ABSOLUTE(.);
+		*(.bss)
+		*(COMMON)
+		_efbss = ABSOLUTE(.);
+	}
+*/
 					/* Stabs debugging sections.	*/
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
