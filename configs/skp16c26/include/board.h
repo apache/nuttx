@@ -44,10 +44,53 @@
 #ifndef __ASSEMBLY__
 # include <sys/types.h>
 #endif
+#include "sfr262.h"  		/* M16C/26 special function register definitions */
+#include "skp_lcd.h"  		/* SKP LCD function definitions */
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
+
+/* Xin Freq */
+
+#define	XIN_FREQ	20e6	/* 20MHz */
+
+/* Switches */
+
+#define	S1 		p8_3 
+#define S2 		p8_2 
+#define S3 		p8_1 
+#define S1_DDR		pd8_3
+#define S2_DDR		pd8_2
+#define S3_DDR		pd8_1
+
+/* LEDs */
+#define	RED_LED		p8_0
+#define	YLW_LED		p7_4
+#define	GRN_LED		p7_2
+
+#define	RED_DDR 	pd8_0		// LED port direction register
+#define	YLW_DDR 	pd7_4
+#define	GRN_DDR 	pd7_2
+
+/********************************************************************************/
+/* Macro Definitions 															*/
+/********************************************************************************/
+
+#define LED_ON      	0
+#define LED_OFF     	1
+
+#define ENABLE_IRQ   	{_asm(" FSET I");}
+#define DISABLE_IRQ		{_asm(" FCLR I");}
+
+/* Use these macros for switch inputs */
+
+#define ENABLE_SWITCHES {S1_DDR = 0; S2_DDR = 0; S3_DDR = 0;}
+
+/* Use these macros to control the LEDs */
+
+#define LED(led, state) ((led) = !state)
+#define ENABLE_LEDS {RED_LED = LED_OFF; YLW_LED = LED_OFF; GRN_LED = LED_OFF; RED_DDR = 1; YLW_DDR = 1; GRN_DDR = 1; }
 
 /************************************************************************************
  * Inline Functions

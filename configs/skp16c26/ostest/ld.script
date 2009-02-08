@@ -37,9 +37,12 @@ OUTPUT_ARCH(m32c)
 ENTRY(_stext)
 SECTIONS
 {
-	/* The OS entry point is here */
+	/* Flash memory begins at address 0xf0000 for the M20262F8 part and
+	 * ends at address 0xfffff (all parts).  The program entry point is
+	 * the first address in flash
+	 */
 
-	. = 0x00008000;
+	. = 0xf0000;
 	.text : {
 		_stext = ABSOLUTE(.);
 		*(.text)
@@ -52,8 +55,42 @@ SECTIONS
 		_etext = ABSOLUTE(.);
 	}
 
-	_eronly = ABSOLUTE(.);		/* See below                    */
-	. = ALIGN(4096);
+	_eronly = ABSOLUTE(.);		/* End of read-only values      */
+					/* .data will be relocated from */
+					/* this address                 */
+
+	/* The "variable" vector table will be fixed at the following address */
+
+	. = 0xffd00
+	.varvect : {
+		_svarvect = ABSOLUTE(.);
+		*(.varvect)
+		_evarvect = ABSOLUTE(.);
+	}
+
+	/* Followed by the special page/fixed vector table. */
+
+	. = 0xffe00
+	.specpg : {
+		_sspecpg = ABSOLUTE(.);
+		*(.specpg)
+		_especpg = ABSOLUTE(.);
+	}
+
+	. = 0xfffdc
+	.fixvect : {
+		_sfixvect = ABSOLUTE(.);
+		*(.fixvect)
+		_efixvect = ABSOLUTE(.);
+	}
+
+	/* Internal RAM begins at address 0x00400 (all parts) and ends at
+	 * address 0x00bff (M20262F6 and M20262F8 parts).  With the RAM
+	 * region, used is .data followed by .bss.  The remainder of RAM
+	 * carved up by the start-up code into stacks and heaps.
+	 */
+
+	. = 0x00400;
 
 	.data : {
 		_sdata = ABSOLUTE(.);
