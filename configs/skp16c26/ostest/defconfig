@@ -41,7 +41,7 @@
 #   particular chip or SoC that the architecture is implemented
 #   in.
 # CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
-# CONFIG_ARCH_CHIP_name - For use in C code
+# CONFIG_ARCH_CHIP_name - Identifies the specific chip variant For use in C code
 # CONFIG_ARCH_BOARD - identifies the configs subdirectory and, hence,
 #   the board that supports the particular chip or SoC.
 # CONFIG_ARCH_BOARD_name - for use in C code
@@ -59,7 +59,7 @@
 CONFIG_ARCH=sh
 CONFIG_ARCH_SH=y
 CONFIG_ARCH_CHIP=m16c
-CONFIG_ARCH_CHIP_M16C=y
+CONFIG_ARCH_CHIP_M30262F8=y
 CONFIG_ARCH_BOARD=skp16c26
 CONFIG_ARCH_BOARD_SKP16C26=y
 CONFIG_ENDIAN_BIG=y
