@@ -53,7 +53,7 @@ else
   ARCHOPTIMIZATION	= -Os -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
 endif
 
-ARCHCPUFLAGS		= --m16c -msoft-float -fno-builtin
+ARCHCPUFLAGS		= -mcpu=m16c -fno-builtin
 ARCHPICFLAGS		= -fpic
 ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
 ARCHDEFINES		=
