@@ -91,12 +91,13 @@
  * 0x00400 - DATA		Size: Determined by linker
  *           BSS		Size: Determined by linker
  *           Idle stack		Size: CONFIG_IDLETHREAD_STACKSIZE
- *           Interrupt stack	Size: CONFIG_M16C_ISTACKSIZE
+ *           Interrupt stack	Size: CONFIG_ARCH_INTERRUPTSTACK
  *           Heap		Size: Everything remaining
  * 0x00bff - (end+1)
  */
 
 	.data
+#if 0
 	.globl	_g_stackbase
 	.type	_g_stackbase, object
 _g_stackbase:
@@ -107,16 +108,13 @@ _g_stackbase:
 	.globl	_g_istackbase
 	.type	_g_istackbase, object
 _g_istackbase:
-	.word	_enbss+CONFIG_IDLETHREAD_STACKSIZE-4
+	.word	_enbss+CONFIG_IDLETHREAD_STACKSIZE
 	.size	_g_istackbase, .-_g_istackbase
-
-
- * The heap extends from _g_heapbase to the end of RAM.
- */
+#endif
 	.globl	_g_heapbase
 	.type	_g_heapbase, object
 _g_heapbase:
-	.word	_enbss+CONFIG_IDLETHREAD_STACKSIZE+CONFIG_M16C_ISTACKSIZE
+	.word	_enbss+CONFIG_IDLETHREAD_STACKSIZE+CONFIG_ARCH_INTERRUPTSTACK
 	.size	_g_heapbase, .-_g_heapbase
 
 /************************************************************************************
@@ -346,9 +344,13 @@ _g_heapbase:
 	.type	__start, #function
 __start:
 
-/* Set the istack pointer */
+/* Set the interrupt and user stack pointers */
 
-	ldc	#_enbss, isp		/* Set idle thread stack pointer to the end of BSS */
+	mov.w	#_enbss, R0
+	ldc	R0, usp			/* Set the user stack pointer */
+	add.w	#CONFIG_IDLETHREAD_STACKSIZE, R0
+	ldc	R0, isp			/* Set interrupt thread stack pointer to the end of BSS */
+	fset	U			/* Set bit 7 (U) to select the user stack pointer */
 
 /* Set BCLK speed. At reset, the processor clock  (BLCK) defaults to a divisor of 8.
  * This sets clock to F1 (divide by 1) on XIN: BCLK = XIN frequency.

@@ -191,7 +191,7 @@
 #  define M16C_INT0_IRQ       (_LAST_FIXED+24)   /* ffd74: INT0 */
 #  define M16C_INT1_IRQ       (_LAST_FIXED+25)   /* ffd78: INT1 */
 
-#  define NR_IRQS             (_LAST_FIXED+26   /* Total number of supported IRQs */
+#  define NR_IRQS             (_LAST_FIXED+26)   /* Total number of supported IRQs */
 #endif
 
 #define M16C_SYSTIMER_IRQ     M16C_TMRA0_IRQ
@@ -226,6 +226,34 @@ extern "C" {
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+/* Save the current interrupt enable state & disable IRQs */
+
+static inline irqstate_t irqsave(void)
+{
+  irqstate_t flags;
+  __asm__ __volatile__
+    (
+     "\tstc	flg, %0\n"
+     "\tfclr	I\n"
+     : "=r" (flags)
+     :
+     : "memory");
+  return flags;
+}
+
+/* Restore saved IRQ & FIQ state */
+
+static inline void irqrestore(irqstate_t flags)
+{
+  __asm__ __volatile__
+    (
+     "ldc	%0, flg"
+     :
+     : "r" (flags)
+     : "memory");
+}
+
 #endif
 
 /************************************************************************************

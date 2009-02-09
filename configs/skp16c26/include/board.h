@@ -44,8 +44,6 @@
 #ifndef __ASSEMBLY__
 # include <sys/types.h>
 #endif
-#include "sfr262.h"  		/* M16C/26 special function register definitions */
-#include "skp_lcd.h"  		/* SKP LCD function definitions */
 
 /************************************************************************************
  * Definitions
@@ -79,9 +77,6 @@
 
 #define LED_ON      	0
 #define LED_OFF     	1
-
-#define ENABLE_IRQ   	{_asm(" FSET I");}
-#define DISABLE_IRQ		{_asm(" FCLR I");}
 
 /* Use these macros for switch inputs */
 
