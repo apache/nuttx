@@ -47,7 +47,8 @@ CMN_CSRCS	+= up_schedulesigaction.c up_sigdeliver.c
 endif
 
 CHIP_ASRCS	= sh1_vector.S sh1_saveusercontext.S
-CHIP_CSRCS	= sh1_lowputc.c sh1_irq.c sh1_timerisr.c sh1_serial.c
+CHIP_CSRCS	= sh1_lowputc.c sh1_irq.c sh1_timerisr.c sh1_serial.c \
+		  sh1_initialstate.c sh1_dumpstate.c
 
 ifeq ($(CONFIG_USBDEV),y)
 CHIP_CSRCS	+= 

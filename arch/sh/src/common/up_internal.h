@@ -209,6 +209,14 @@ extern void up_usbuninitialize(void);
 # define up_usbuninitialize()
 #endif
 
+/* Defined in chip-specific logic */
+
+#ifdef CONFIG_ARCH_STACKDUMP
+extern void up_dumpstate(void);
+#else
+#  define up_dumpstate()
+#endif
+
 #endif /* __ASSEMBLY__ */
 
 #endif  /* ___ARCH_SH_SRC_COMMON_UP_INTERNAL_H */
