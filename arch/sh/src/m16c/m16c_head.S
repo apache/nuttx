@@ -80,7 +80,7 @@
 	.globl	__SPECIAL_\num
 	.word	__SPECIAL_\num	& 0x0ffff
 	.endm
-#enif
+#endif
 
 /************************************************************************************
  * Data
@@ -90,31 +90,32 @@
  * 
  * 0x00400 - DATA		Size: Determined by linker
  *           BSS		Size: Determined by linker
- *           Idle stack		Size: CONFIG_IDLETHREAD_STACKSIZE
  *           Interrupt stack	Size: CONFIG_ARCH_INTERRUPTSTACK
+ *           Idle stack		Size: CONFIG_IDLETHREAD_STACKSIZE
  *           Heap		Size: Everything remaining
  * 0x00bff - (end+1)
  */
 
 	.data
 #if 0
-	.globl	_g_stackbase
-	.type	_g_stackbase, object
-_g_stackbase:
-	.word	_enbss
-	.size	_g_heapbase, .-_g_heapbase
-	.size	_g_istackbase, .-_g_istackbase
-
 	.globl	_g_istackbase
 	.type	_g_istackbase, object
 _g_istackbase:
-	.word	_enbss+CONFIG_IDLETHREAD_STACKSIZE
+	.word	_enbss
 	.size	_g_istackbase, .-_g_istackbase
+
+	.globl	_g_stackbase
+	.type	_g_stackbase, object
+_g_stackbase:
+	.word	_enbss+CONFIG_ARCH_INTERRUPTSTACK
+	.size	_g_heapbase, .-_g_heapbase
+	.size	_g_istackbase, .-_g_istackbase
+
 #endif
 	.globl	_g_heapbase
 	.type	_g_heapbase, object
 _g_heapbase:
-	.word	_enbss+CONFIG_IDLETHREAD_STACKSIZE+CONFIG_ARCH_INTERRUPTSTACK
+	.word	_enbss+CONFIG_ARCH_INTERRUPTSTACK+CONFIG_IDLETHREAD_STACKSIZE
 	.size	_g_heapbase, .-_g_heapbase
 
 /************************************************************************************
@@ -278,16 +279,16 @@ _g_heapbase:
 	.long	_m16c_unexpected_isr		/* ffdc0: Not supported */
 	.long	_m16c_unexpected_isr		/* ffdc4: Not supported */
 	.long	_m16c_unexpected_isr		/* ffdc8: Not supported */
-	.long	_m16c_unexpected_isr		/* ffdcc: Not supported1 */
+	.long	_m16c_unexpected_isr		/* ffdcc: Not supported */
 	.long	_m16c_unexpected_isr		/* ffdd0: Not supported */
-	.long	_m16c_unexpected_isr		/* ffdd4: Not supported3 */
+	.long	_m16c_unexpected_isr		/* ffdd4: Not supported */
 	.long	_m16c_unexpected_isr		/* ffdd8: Not supported */
 	.long	_m16c_unexpected_isr		/* ffddc: Not supported */
 	.long	_m16c_unexpected_isr		/* ffde0: Not supported */
-	.long	_m16c_unexpected_isr		/* ffde4: Not supported7 */
+	.long	_m16c_unexpected_isr		/* ffde4: Not supported */
 	.long	_m16c_unexpected_isr		/* ffde8: Not supported */
-\	.long	_m16c_unexpected_isr		/* ffdec: Not supported */
-	.long	_m16c_unexpected_isr		/* ffdf0: Not supported0 */
+	.long	_m16c_unexpected_isr		/* ffdec: Not supported */
+	.long	_m16c_unexpected_isr		/* ffdf0: Not supported */
 	.long	_m16c_unexpected_isr		/* ffdf4: Not supported */
 	.long	_m16c_unexpected_isr		/* ffdf8: Not supported */
 	.long	_m16c_unexpected_isr		/* ffdfc: Not supported */
@@ -340,24 +341,25 @@ _g_heapbase:
  ************************************************************************************/
 
  	.text
-	.global __start
+	.globl	__start
+	.globl	_enbss
 	.type	__start, #function
 __start:
 
 /* Set the interrupt and user stack pointers */
 
 	mov.w	#_enbss, R0
-	ldc	R0, usp			/* Set the user stack pointer */
-	add.w	#CONFIG_IDLETHREAD_STACKSIZE, R0
 	ldc	R0, isp			/* Set interrupt thread stack pointer to the end of BSS */
+	add.w	#CONFIG_IDLETHREAD_STACKSIZE, R0
 	fset	U			/* Set bit 7 (U) to select the user stack pointer */
+	ldc	R0, sp			/* Set the user stack pointer */
 
 /* Set BCLK speed. At reset, the processor clock  (BLCK) defaults to a divisor of 8.
  * This sets clock to F1 (divide by 1) on XIN: BCLK = XIN frequency.
  */
 
- 	mov.b	#0x01h, M16C_PRCR	/* Unprotect CM0 to change clock setting */
-	mov.b	#0x08h, M16C_CM0	/* enable CM17 and CM16 to set BCLK to F1
+ 	mov.b	#0x01, M16C_PRCR	/* Unprotect CM0 to change clock setting */
+	mov.b	#0x08, M16C_CM0		/* enable CM17 and CM16 to set BCLK to F1
 					 * CM17 & CM16 defaults to 0 after reset and
 					 * so we only need to reset CM06 to 0 */
 	mov.b	#0x00,M16C_PRCR		/* protect CM0 */
@@ -368,7 +370,10 @@ __start:
 
  	mov.b	#0xc0, M16C_IFSR	/* Set b7 & b6 if application will use INT4 & INT5 */
 	ldc	#M16C_IRAM_BASE, sb	/* Set sb register (to what?) */
-	ldintb	#_svarvect
+
+	.globl	_svarvect
+	ldc	#(_svarvect >> 8), intbh
+	ldc	#_svarvect, intbl
 
 /* Clear .bss sections */
 
@@ -386,10 +391,11 @@ __start:
 
 /* Pass control to NuttX */
 
-	.glbl	_os_start
+	.globl	_os_start
 	jsr.a	_os_start
 
 /* NuttX will not return, but just in case... */
 
-.Lreturned:
-	jmp	.Lreturned
+_os_exit:
+	jmp.s	_os_exit
+	.end
