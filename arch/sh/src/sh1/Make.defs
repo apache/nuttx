@@ -1,7 +1,7 @@
 ##############################################################################
 # arch/sh/src/sh1/Make.defs
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -42,13 +42,13 @@ CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
 		  up_mdelay.c up_puts.c up_releasepending.c up_releasestack.c \
 		  up_reprioritizertr.c up_udelay.c up_unblocktask.c up_usestack.c
 
-ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-CMN_CSRCS	+= up_schedulesigaction.c up_sigdeliver.c
-endif
-
 CHIP_ASRCS	= sh1_vector.S sh1_saveusercontext.S
 CHIP_CSRCS	= sh1_lowputc.c sh1_irq.c sh1_timerisr.c sh1_serial.c \
 		  sh1_initialstate.c sh1_dumpstate.c
+
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+CMN_CSRCS	+= sh1_schedulesigaction.c sh1_sigdeliver.c
+endif
 
 ifeq ($(CONFIG_USBDEV),y)
 CHIP_CSRCS	+= 

@@ -1,7 +1,7 @@
 /****************************************************************************
- * common/up_schedulesigaction.c
+ * arch/sh/src/m16c/m16c_schedulesigaction.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -141,6 +141,9 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
 
           else
             {
+#if 1
+#  warning "Missing logic to schedule signals"
+#else
               /* Save the return PC and SR and one scratch register
                * These will be restored by the signal trampoline after
                * the signals have been delivered.
@@ -156,7 +159,7 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
 
               current_regs[REG_PC]  = (uint32)up_sigdeliver;
               current_regs[REG_SR] |= 0x000000f0;
-
+#endif
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
                */
@@ -173,7 +176,10 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
 
       else
         {
-          /* Save the return PC and SR and one scratch register
+ #if 1
+#  warning "Missing logic to schedule signals"
+#else
+         /* Save the return PC and SR and one scratch register
            * These will be restored by the signal trampoline after
            * the signals have been delivered.
            */
@@ -188,6 +194,7 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
 
           tcb->xcp.regs[REG_PC]  = (uint32)up_sigdeliver;
           tcb->xcp.regs[REG_SR] |= 0x000000f0 ;
+#endif
         }
 
       irqrestore(flags);
