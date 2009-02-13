@@ -61,7 +61,7 @@ SECTIONS
 
 	/* The "variable" vector table will be fixed at the following address */
 
-	. = 0xffd00
+	. = 0xffd00;
 	.varvect : {
 		_svarvect = ABSOLUTE(.);
 		*(.varvect)
@@ -70,14 +70,14 @@ SECTIONS
 
 	/* Followed by the special page/fixed vector table. */
 
-	. = 0xffe00
+	. = 0xffe00;
 	.specpg : {
 		_sspecpg = ABSOLUTE(.);
 		*(.specpg)
 		_especpg = ABSOLUTE(.);
 	}
 
-	. = 0xfffdc
+	. = 0xfffdc;
 	.fixvect : {
 		_sfixvect = ABSOLUTE(.);
 		*(.fixvect)
@@ -107,23 +107,22 @@ SECTIONS
 	}
 
 	/* "Far" RAM begins at 0x10000.  The SKP16C26 has no far RAM */
-/*
+
 	. = 0x10000;
 
 	.fdata : {
 		_sfdata = ABSOLUTE(.);
-		*(.data)
+		*(.fdata)
 		CONSTRUCTORS
 		_efdata = ABSOLUTE(.);
 	}
 
 	.fbss : {			/* BSS				*/
 		_sfbss = ABSOLUTE(.);
-		*(.bss)
+		*(.fbss)
 		*(COMMON)
 		_efbss = ABSOLUTE(.);
 	}
-*/
 					/* Stabs debugging sections.	*/
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
