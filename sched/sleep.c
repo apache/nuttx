@@ -1,7 +1,7 @@
-/************************************************************
- * sleep.c
+/****************************************************************************
+ * sched/sleep.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,57 +31,57 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <unistd.h>
 #include <signal.h>
 
-/************************************************************
- * Definitions
- ************************************************************/
+/****************************************************************************
+ * Preprocessor Definitions
+ ****************************************************************************/
 
-/************************************************************
- * Private Type Declarations
- ************************************************************/
+/****************************************************************************
+ * Private Type Definitions
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function: sleep
  *
  * Description:
- *   As typically declared in unistd.h.  sleep() is a simple
- *   application of sigtimedwait.
+ *   As typically declared in unistd.h.  sleep() is a simple application of
+ *   sigtimedwait.
  *
  * Parameters:
  *   seconds
  *
  * Returned Value:
- *   Zero if the requested time has elapsed, or the number
- *   of seconds left to sleep.
+ *   Zero if the requested time has elapsed, or the number of seconds left
+ *   to sleep.
  *
  * Assumptions:
  *
- ************************************************************/
+ ****************************************************************************/
 
 unsigned int sleep(unsigned int seconds)
 {
@@ -95,7 +95,7 @@ unsigned int sleep(unsigned int seconds)
       ts.tv_sec = seconds;
       ts.tv_nsec = 0;
       (void)sigtimedwait(&set, &value, &ts);
-  }
+    }
 
   return 0;
 }
