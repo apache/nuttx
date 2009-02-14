@@ -47,6 +47,19 @@
  * Definitions
  ************************************************************************************/
 
+/* FLG register bits */
+
+#define M16C_FLG_C         0x0001    /* Bit 0: Carry flag */
+#define M16C_FLG_D         0x0002    /* Bit 1: Debug flag */
+#define M16C_FLG_Z         0x0004    /* Bit 2: Zero flag */
+#define M16C_FLG_S         0x0008    /* Bit 3: Sign flag */
+#define M16C_FLG_B         0x0010    /* Bit 4: Register bank flag */
+#define M16C_FLG_O         0x0020    /* Bit 5: Overflow flag */
+#define M16C_FLG_I         0x0040    /* Bit 6: Interrupt enable flag */
+#define M16C_FLG_U         0x0080    /* Bit 7: Stack pointer select flag */
+                                     /* Bits 8-11: Reserved */
+#define M16C_FLG_IPLMASK   0x7000    /* Bits 12:14: Processor interrupt priority level */
+                                     /* Bit 15: Reserved */
 /* Memory Map */
 
 /* Memory-mapped special function registers begin at address 0x00000 */

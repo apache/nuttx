@@ -196,18 +196,63 @@
 
 #define M16C_SYSTIMER_IRQ     M16C_TMRA0_IRQ
 
-/* IRQ Stack Frame Format.  The SH-1 has a push down stack.  The PC
- * and SR are pushed by hardware at the time an IRQ is taken.
+/* IRQ Stack Frame Format.  The M16C has a push down stack.  The CPU performs
+ * the following actions when an interrupt is taken:
+ *
+ *  - Save FLG regsiter
+ *  - Clear I, D, and U flags in FLG register
+ *  - Builds stack frame like:
+ * 
+ *    sp   -> PC bits 0-7
+ *    sp+1 -> PC bits 8-15
+ *    sp+2 -> FLG bits 0-7
+ *    sp+3 -> FLG (Bits 12-14) + PC (bits 16-19)
+ *
+ *  - Sets IPL
+ *  - Vectors to interrupt handler
  */
 
-/* To be provided */
+#define REG_PC20               0    /* 20-bit PC [0]:bits 16-19 [1]:bits 8-15 [2]: bits 0-7 */
+#define REG_FLGPCHI            3    /* 8-bit FLG (bits 12-14) PC (bits 16-19) as would be
+                                     * presented by an interrupt */
+#define REG_FLG                4    /* 8-bit FLG register (bits 0-7) */
+#define REG_PC16               5    /* 16-bit PC [0]:bits8-15 [1]:bits 0-7 */
+#define REG_FB                 7    /* 16-bit FB register */
+#define REG_SB                 9    /* 16-bit SB register */
+#define REG_A1                11    /* 16-bit A1 register */
+#define REG_R3                13    /* 16-bit R3 register */
+#define REG_R2                15    /* 16-bit R2 register */
+#define REG_R1                17    /* 16-bit R1 register */
+#define REG_R0                19    /* 16-bit R0 register */
 
-#define XCPTCONTEXT_REGS      (1)
-#define XCPTCONTEXT_SIZE      (4 * XCPTCONTEXT_REGS)
+#define XCPTCONTEXT_SIZE      21
 
 /************************************************************************************
  * Public Types
  ************************************************************************************/
+/* This struct defines the way the registers are stored.  We need to save: */
+
+#ifndef __ASSEMBLY__
+struct xcptcontext
+{
+  /* The following function pointer is non-zero if there are pending signals
+   * to be processed.
+   */
+
+#ifndef CONFIG_DISABLE_SIGNALS
+  FAR void *sigdeliver; /* Actual type is sig_deliver_t */
+
+  /* These are saved copies of LR and SR used during signal processing. */
+
+  ubyte saved_pc[2];
+  ubyte saved_flg;
+#endif
+
+  /* Register save area */
+
+  ubyte regs[XCPTCONTEXT_SIZE];
+};
+#endif
 
 /************************************************************************************
  * Public Data

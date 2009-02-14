@@ -36,7 +36,7 @@
 HEAD_ASRC	= sh1_head.S
 
 CMN_ASRCS	= 
-CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
+CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c \
 		  up_createstack.c up_doirq.c up_exit.c up_idle.c up_initialize.c \
 		  up_initialstate.c up_interruptcontext.c up_lowputs.c \
 		  up_mdelay.c up_puts.c up_releasepending.c up_releasestack.c \
@@ -44,7 +44,7 @@ CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
 
 CHIP_ASRCS	= sh1_vector.S sh1_saveusercontext.S
 CHIP_CSRCS	= sh1_lowputc.c sh1_irq.c sh1_timerisr.c sh1_serial.c \
-		  sh1_initialstate.c sh1_dumpstate.c
+		  sh1_initialstate.c sh1_copystate.c sh1_dumpstate.c
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CMN_CSRCS	+= sh1_schedulesigaction.c sh1_sigdeliver.c

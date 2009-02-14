@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/sh/src/common/up_copystate.c
+ *  arch/sh/src/m16c/m16c_initialstate.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,15 +38,17 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <sys/types.h>
-
-#include "os_internal.h"
+#include <string.h>
+#include <nuttx/arch.h>
 #include "up_internal.h"
+#include "up_arch.h"
 
 /****************************************************************************
- * Definitions
+ * Preprocessor Definitions
  ****************************************************************************/
+
+#define M16C_DEFAULT_IPL   0     /* Global M16C Interrupt priority level */
 
 /****************************************************************************
  * Private Data
@@ -57,21 +59,65 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_getsr
+ ****************************************************************************/
+
+static inline irqstate_t up_getsr(void)
+{
+  irqstate_t flags;
+
+  __asm__ __volatile__
+    (
+      "stc     sr, %0\n\t"
+      : "=&z" (flags)
+      :
+      : "memory"
+    );
+  return flags;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_undefinedinsn
+ * Name: up_initial_state
+ *
+ * Description:
+ *   A new thread is being started and a new TCB has been created. This
+ *   function is called to initialize the processor specific portions of the
+ *   new TCB.
+ *
+ *   This function must setup the intial architecture registers and/or stack
+ *   so that execution will begin at tcb->start on the next context switch.
+ *
  ****************************************************************************/
 
-/* A little faster than most memcpy's */
-
-void up_copystate(uint32 *dest, uint32 *src)
+void up_initial_state(FAR _TCB *tcb)
 {
-  int i;
-  for (i = 0; i < XCPTCONTEXT_REGS; i++)
-    {
-      *dest++ = *src++;
-    }
-}
+  FAR struct xcptcontext *xcp  = &tcb->xcp;
+  FAR ubyte              *regs = xcp->regs;
 
+  /* Initialize the initial exception register context structure */
+
+  memset(xcp, 0, sizeof(struct xcptcontext));
+
+  /* Offset 0-2: 20-bit PC [0]:bits 16-19 [1]:bits 8-15 [2]: bits 0-7 */
+
+  *regs++ = (uint32)tcb->start >> 16; /* Bits 16-19 of PC */
+  *regs++ = (uint32)tcb->start >> 8;  /* Bits 8-15 of PC */
+  *regs++ = (uint32)tcb->start;       /* Bits 0-7 of PC */
+
+  /* Offset 3: FLG (bits 12-14) PC (bits 16-19) as would be present by an interrupt */
+
+  *regs++ = ((M16C_DEFAULT_IPL << 4) | ((uint32)tcb->start >> 16));
+
+  /* Offset 4: FLG (bits 0-7) */
+
+  *regs++ = M16C_FLG_U | M16C_FLG_I;
+
+  /* Offset 5-6: 16-bit PC [0]:bits8-15 [1]:bits 0-7 */
+
+  *regs++ = (uint32)tcb->start >> 8;  /* Bits 8-15 of PC */
+  *regs++ = (uint32)tcb->start;       /* Bits 0-7 of PC */
+}

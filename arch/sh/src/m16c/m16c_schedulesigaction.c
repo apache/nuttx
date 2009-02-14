@@ -141,25 +141,24 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
 
           else
             {
-#if 1
-#  warning "Missing logic to schedule signals"
-#else
               /* Save the return PC and SR and one scratch register
                * These will be restored by the signal trampoline after
                * the signals have been delivered.
                */
 
-              tcb->xcp.sigdeliver   = sigdeliver;
-              tcb->xcp.saved_pc     = current_regs[REG_PC];
-              tcb->xcp.saved_sr     = current_regs[REG_SR];
+              tcb->xcp.sigdeliver      = sigdeliver;
+              tcb->xcp.saved_pc[0]     = current_regs[REG_PC16];
+              tcb->xcp.saved_pc[1]     = current_regs[REG_PC16+1];
+              tcb->xcp.saved_flg       = current_regs[REG_FLG];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
 
-              current_regs[REG_PC]  = (uint32)up_sigdeliver;
-              current_regs[REG_SR] |= 0x000000f0;
-#endif
+              current_regs[REG_PC16]   = (uint32)up_sigdeliver >> 8;
+              current_regs[REG_PC16+1] = (uint32)up_sigdeliver;
+              current_regs[REG_FLG]   &= ~M16C_FLG_I;
+
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
                */
@@ -176,25 +175,23 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
 
       else
         {
- #if 1
-#  warning "Missing logic to schedule signals"
-#else
-         /* Save the return PC and SR and one scratch register
+          /* Save the return PC and SR and one scratch register
            * These will be restored by the signal trampoline after
            * the signals have been delivered.
            */
 
-          tcb->xcp.sigdeliver    = sigdeliver;
-          tcb->xcp.saved_pc      = tcb->xcp.regs[REG_PC];
-          tcb->xcp.saved_sr      = tcb->xcp.regs[REG_SR];
+          tcb->xcp.sigdeliver       = sigdeliver;
+          tcb->xcp.saved_pc[0]      = tcb->xcp.regs[REG_PC16];
+          tcb->xcp.saved_pc[1]      = tcb->xcp.regs[REG_PC16+1];
+          tcb->xcp.saved_flg        = tcb->xcp.regs[REG_FLG];
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
            */
 
-          tcb->xcp.regs[REG_PC]  = (uint32)up_sigdeliver;
-          tcb->xcp.regs[REG_SR] |= 0x000000f0 ;
-#endif
+          tcb->xcp.regs[REG_PC16]   = (uint32)up_sigdeliver >> 8;
+          tcb->xcp.regs[REG_PC16+1] = (uint32)up_sigdeliver;
+          tcb->xcp.regs[REG_FLG]   &= ~M16C_FLG_I;
         }
 
       irqrestore(flags);

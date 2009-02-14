@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/sh/src/m16c/m16c_sigdeliver.c
+ * arch/sh/src/sh1/up_copystate.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,17 +40,9 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sched.h>
-#include <debug.h>
-
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
 
 #include "os_internal.h"
 #include "up_internal.h"
-#include "up_arch.h"
-
-#ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
  * Definitions
@@ -69,78 +61,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_sigdeliver
- *
- * Description:
- *   This is the a signal handling trampoline.  When a
- *   signal action was posted.  The task context was mucked
- *   with and forced to branch to this location with interrupts
- *   disabled.
- *
+ * Name: up_copystate
  ****************************************************************************/
 
-void up_sigdeliver(void)
+/* A little faster than most memcpy's */
+
+void up_copystate(uint32 *dest, uint32 *src)
 {
-#ifndef CONFIG_DISABLE_SIGNALS
-  _TCB  *rtcb = (_TCB*)g_readytorun.head;
-  ubyte regs[XCPTCONTEXT_SIZE];
-  sig_deliver_t sigdeliver;
-
-  /* Save the errno.  This must be preserved throughout the
-   * signal handling so that the the user code final gets
-   * the correct errno value (probably EINTR).
-   */
-
-  int saved_errno = rtcb->pterrno;
-
-  up_ledon(LED_SIGNAL);
-
-  sdbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  ASSERT(rtcb->xcp.sigdeliver != NULL);
-
-  /* Save the real return state on the stack. */
-
-  up_copystate(regs, rtcb->xcp.regs);
-  regs[REG_PC16]   = rtcb->xcp.saved_pc[0];
-  regs[REG_PC16+1] = rtcb->xcp.saved_pc[1];
-  regs[REG_FLG]    = rtcb->xcp.saved_flg;
-
-  /* Get a local copy of the sigdeliver function pointer.
-   * we do this so that we can nullify the sigdeliver
-   * function point in the TCB and accept more signal
-   * deliveries while processing the current pending
-   * signals.
-   */
-
-  sigdeliver           = rtcb->xcp.sigdeliver;
-  rtcb->xcp.sigdeliver = NULL;
-
-  /* Then restore the task interrupt state. */
-
-  irqrestore(rtcb->xcp.saved_flg);
-
-  /* Deliver the signals */
-
-  sigdeliver(rtcb);
-
-  /* Output any debug messaged BEFORE restoreing errno
-   * (becuase they may alter errno), then restore the
-   * original errno that is needed by the user logic
-   * (it is probably EINTR).
-   */
-
-  sdbg("Resuming\n");
-  rtcb->pterrno = saved_errno;
-
-  /* Then restore the correct state for this thread of
-   * execution.
-   */
-
-  up_ledoff(LED_SIGNAL);
-  up_fullcontextrestore(regs);
-#endif
+  int i;
+  for (i = 0; i < XCPTCONTEXT_REGS; i++)
+    {
+      *dest++ = *src++;
+    }
 }
-
-#endif /* !CONFIG_DISABLE_SIGNALS */
 
