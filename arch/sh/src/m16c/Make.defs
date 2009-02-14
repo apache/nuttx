@@ -42,7 +42,6 @@ CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c \
 		  up_releasepending.c up_releasestack.c up_reprioritizertr.c \
 		  up_udelay.c up_unblocktask.c up_usestack.c
 
-#CHIP_ASRCS	= m16c_vectors.S m16c_saveusercontext.S m16c_restorecontext.S
 CHIP_ASRCS	= m16c_vectors.S
 #CHIP_CSRCS	= m16c_initialstate.c m16c_copystate.c m16c_lowputc.c m16c_irq.c \
 #		  m16c_timerisr.c m16c_serial.c

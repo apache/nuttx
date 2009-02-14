@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <string.h>
 
 #include "os_internal.h"
 #include "up_internal.h"

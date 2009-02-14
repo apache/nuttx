@@ -48,7 +48,7 @@
  * Preprocessor Definitions
  ****************************************************************************/
 
-#define M16C_DEFAULT_IPL   0     /* Global M16C Interrupt priority level */
+#define M16C_DEFAULT_IPL   0     /* Default M16C Interrupt priority level */
 
 /****************************************************************************
  * Private Data
@@ -57,24 +57,6 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: up_getsr
- ****************************************************************************/
-
-static inline irqstate_t up_getsr(void)
-{
-  irqstate_t flags;
-
-  __asm__ __volatile__
-    (
-      "stc     sr, %0\n\t"
-      : "=&z" (flags)
-      :
-      : "memory"
-    );
-  return flags;
-}
 
 /****************************************************************************
  * Public Functions
@@ -102,22 +84,26 @@ void up_initial_state(FAR _TCB *tcb)
 
   memset(xcp, 0, sizeof(struct xcptcontext));
 
-  /* Offset 0-2: 20-bit PC [0]:bits 16-19 [1]:bits 8-15 [2]: bits 0-7 */
-
-  *regs++ = (uint32)tcb->start >> 16; /* Bits 16-19 of PC */
-  *regs++ = (uint32)tcb->start >> 8;  /* Bits 8-15 of PC */
-  *regs++ = (uint32)tcb->start;       /* Bits 0-7 of PC */
-
-  /* Offset 3: FLG (bits 12-14) PC (bits 16-19) as would be present by an interrupt */
+  /* Offset 0: FLG (bits 12-14) PC (bits 16-19) as would be present by an interrupt */
 
   *regs++ = ((M16C_DEFAULT_IPL << 4) | ((uint32)tcb->start >> 16));
 
-  /* Offset 4: FLG (bits 0-7) */
+  /* Offset 1: FLG (bits 0-7) */
 
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  *regs++ = M16C_FLG_U;
+#else
   *regs++ = M16C_FLG_U | M16C_FLG_I;
+#endif
 
-  /* Offset 5-6: 16-bit PC [0]:bits8-15 [1]:bits 0-7 */
+  /* Offset 2-3: 16-bit PC [0]:bits8-15 [1]:bits 0-7 */
 
   *regs++ = (uint32)tcb->start >> 8;  /* Bits 8-15 of PC */
   *regs++ = (uint32)tcb->start;       /* Bits 0-7 of PC */
+
+  /* Offset 18-20: User stack pointer */
+
+   regs   = &xcp->regs[REG_SP];
+  *regs++ = (uint32)tcb->adj_stack_ptr >> 8;  /* Bits 8-15 of SP */
+  *regs   = (uint32)tcb->adj_stack_ptr;       /* Bits 0-7 of SP */
 }
