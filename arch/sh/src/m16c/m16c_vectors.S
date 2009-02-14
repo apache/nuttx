@@ -283,6 +283,20 @@
  * Name: 
  *
  * Description:
+ *   The M16C has a push down stack.  The CPU performs the following actions when an
+ *   interrupt is taken:
+ *
+ *  - Save FLG regsiter
+ *  - Clear I, D, and U flags in FLG register
+ *  - Builds stack frame like:
+ * 
+ *    sp   -> PC bits 0-7
+ *    sp+1 -> PC bits 8-15
+ *    sp+2 -> FLG bits 0-7
+ *    sp+3 -> FLG (Bits 12-14) + PC (bits 16-19)
+ *
+ *  - Sets IPL
+ *  - Vectors to interrupt handler
  *
  ************************************************************************************/
 
