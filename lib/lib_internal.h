@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <stdio.h>
+#include <limits.h>
 #include <semaphore.h>
 
 /****************************************************************************
@@ -58,7 +59,7 @@
 # define lib_give_semaphore(s)
 #endif
 
-#define LIB_BUFLEN_UNKNOWN (0x7fffffff)
+#define LIB_BUFLEN_UNKNOWN INT_MAX
 
 /****************************************************************************
  * Public Types
