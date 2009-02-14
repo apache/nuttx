@@ -613,5 +613,7 @@
 
 0.4.2 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* Add support for the Renesas M16C MCU and the SKP16C26 StarterKit.
+
 
 
