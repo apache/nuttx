@@ -125,7 +125,7 @@ typedef enum tstate_e tstate_t;
 
 /* The following is the form of a thread start-up function */
 
-typedef FAR void (*start_t)(void);
+typedef void (*start_t)(void);
 
 /* This is the entry point into the main thread of the task
  * or into a created pthread within the task.
