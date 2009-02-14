@@ -614,6 +614,13 @@
 0.4.2 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Add support for the Renesas M16C MCU and the SKP16C26 StarterKit.
+	* Kevin Franzen has integrated and verified the ez80Acclaim! port and he has
+	  graciously provided the following critical changes:
+	  - Fix interrupt vectors positioning; they were being positioned wrong by
+	    64 bytes.
+	  - Corrected some stack handling errors during interrupt handling contextg
+	    save and restore.
+	  - Corrected vector intialization logic
 
 
 

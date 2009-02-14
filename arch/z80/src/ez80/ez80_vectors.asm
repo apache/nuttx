@@ -210,7 +210,7 @@ _ez80_rstcommon:
 	push	de			; Offset 2: DE
 	push	bc			; Offset 1: BC
 
-	ld	b, a			;   Save the reset number in B
+	ld	c, a			;   Save the reset number in C
 	ld	a, i			;   Carry bit holds interrupt state
 	push	af			; Offset 0: I with interrupt state in carry
 	di
@@ -221,7 +221,6 @@ _ez80_rstcommon:
 	add	hl, sp			;
 	push	hl			; Place argument #2 at the top of stack
 	push	bc			; Argument #1 is the Reset number
-	inc	sp			; (make byte sized)
 	call	_up_doirq		; Decode the IRQ
 
 	; On return, HL points to the beginning of the reg structure to restore
@@ -241,9 +240,7 @@ _ez80_rstcommon:
 	pop	ix			; Offset 3: IX
 	pop	iy			; Offset 4: IY
 	exx				;   Use alternate BC/DE/HL
-	ld	hl, #-2			;   Offset of SP to account for ret addr on stack
-	pop	de			; Offset 5: HL' = Stack pointer after return
-	add	hl, de			;   HL = Stack pointer value before return
+	pop	hl			; Offset 5: HL' = Stack pointer after return
 	exx				;   Restore original BC/DE/HL
 	pop	hl			; Offset 6: HL
 	pop	af			; Offset 7: AF
@@ -273,21 +270,31 @@ _ez80_initvectors:
 	; Initialize the vector table
 
 	ld	iy, _ez80_vectable
+	ld	ix, 4
 	ld	bc, 4
 	ld	b, NVECTORS
-	ld	hl, _ez80_handlers
-	ld	de, handlersize
+	xor	a, a			; Clear carry
+	ld	hl, handlersize
+	ld	de, _ez80_handlers
+	sbc	hl, de			; Length of irq handler in hl
+	ld	d, h
+	ld	e, l
+	ld	hl, _ez80_handlers 	; Start of handlers in hl
+
 	ld	a, 0
 $1:
-	ld	(iy), hl	; Store IRQ handler
-	ld	(iy+3), a	; Pad to 4 bytes
-	add	hl, de		; Point to next handler
-	add	iy, bc		; Point to next entry in vector table
-	djnz	$1		; Loop until all vectors have been written
+	ld	(iy), hl		; Store IRQ handler
+	ld	(iy+3), a		; Pad to 4 bytes
+	add	hl, de			; Point to next handler
+	push	de
+	ld	de, 4
+	add	iy, de			; Point to next entry in vector table
+	pop	de
+	djnz	$1			; Loop until all vectors have been written
 
 	; Select interrupt mode 2
-	
-	im	2		; Interrupt mode 2
+
+	im	2			; Interrupt mode 2
 
 	; Write the address of the vector table into the interrupt vector base
 
@@ -304,5 +311,8 @@ $1:
 	define	.IVECTS, space = RAM, align = 200h
 	segment	.IVECTS
 
+	; The first 64 bytes are not used... the vectors actually start at +0x40
+_ez80_vecreserve:
+	ds	64
 _ez80_vectable:
-	ds NVECTORS * 4
+	ds	NVECTORS * 4

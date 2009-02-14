@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: February 13, 2009</p>
+      <p>Last Updated: February 14, 2009</p>
     </td>
   </tr>
 </table>
@@ -898,7 +898,13 @@
     </p>
     <p>
       <b>STATUS:</b>
-      This is a work in progress.  Verified ez80 support will be announced in a future NuttX release.
+      Kevin Franzen has integrated and verified the ez80Acclaim! port and he has
+      graciously provided the changes that he made.  So I do not have first hand
+      experience, but the ez80Acclaim! port should be functional.
+      Kevin's changes were released in NuttX version 0.4.2.
+    </p>
+    <p>
+      The EMAC driver has not yet been verified.
     </p>
    </td>
 </tr>
@@ -1289,6 +1295,13 @@ buildroot-0.1.2 2007-11-06 &lt;spudmonkey@racsa.co.cr&gt
 nuttx-0.4.2 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Add support for the Renesas M16C MCU and the SKP16C26 StarterKit.
+	* Kevin Franzen has integrated and verified the ez80Acclaim! port and he has
+	  graciously provided the following critical changes:
+	  - Fix interrupt vectors positioning; they were being positioned wrong by
+	    64 bytes.
+	  - Corrected some stack handling errors during interrupt handling contextg
+	    save and restore.
+	  - Corrected vector intialization logic
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
