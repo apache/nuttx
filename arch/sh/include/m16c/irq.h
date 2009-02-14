@@ -64,13 +64,11 @@
 #  define M16C_WDOG_IRQ        5                 /* ffff0: Watchdog timer */
 #  define M16C_DBC_IRQ         6                 /* ffff4: DBC */
 #  define M16C_NMI_IRQ         7                 /* ffff8: NMI */
-#  define M16C_RESET_IRQ       8                 /* ffffc: Reset */
-#  define _LAST_FIXED          8
+#  define _LAST_FIXED          7
 #else
 #  define M16C_WDOG_IRQ        4                 /* ffff0: Watchdog timer */
 #  define M16C_NMI_IRQ         5                 /* ffff8: NMI */
-#  define M16C_RESET_IRQ       6                 /* ffffc: Reset */
-#  define _LAST_FIXED          6
+#  define _LAST_FIXED          5
 #endif
 
 /* Variable vector table (fixed at address 0xffd00) */
@@ -80,7 +78,8 @@
 #  define M16C_SWINT0_IRQ     M16C_BRK_IRQ       /*        S/W interrupt  0 */
 #  define M16C_INT3_IRQ       (_LAST_FIXED+2)    /* ffd10: INT3 */
 #  define M16C_SWINT4_IRQ     M16C_INT3_IRQ      /*        S/W interrupt  4 */
-#  define M16C_SWINT5_IRQ     (_LAST_FIXED+3)    /* ffd14: Reserved / S/W interrupt 5 */
+#  define M16C_CTXSV_SWINT    (_LAST_FIXED+3)    /* ffd14: Reserved -- used by NuttX */
+#  define M16C_SWINT5_IRQ     M16C_CTXSV_SWINT   /*        S/W interrupt 5 */
 #  define M16C_SWINT6_IRQ     (_LAST_FIXED+4)    /* ffd18: Reserved / S/W interrupt 6 */
 #  define M16C_SWINT7_IRQ     (_LAST_FIXED+5)    /* ffd1c: Reserved / S/W interrupt 7 */
 #  define M16C_INT5_IRQ       (_LAST_FIXED+6)    /* ffd20: INT5 */
@@ -130,7 +129,8 @@
 #  define M16C_INT1_IRQ       (_LAST_FIXED+28)   /* ffd78: INT1 */
 #  define M16C_SWINT30_IRQ    M16C_INT1_IRQ      /*        S/W interrupt 30 */
 #  define M16C_SWINT31_IRQ    (_LAST_FIXED+29)   /* ffd7c: Reserved / S/W interrupt 31 */
-#  define M16C_SWINT32_IRQ    (_LAST_FIXED+30)   /* ffd80: S/W interrupt 32 */
+#  define M16C_CTXRSTR_SWINT  (_LAST_FIXED+30)   /* ffd80: Used by NuttX */
+#  define M16C_SWINT32IRQ     M16C_CTXRSTR_SWINT /*        S/W interrupt 32 */
 #  define M16C_SWINT33_IRQ    (_LAST_FIXED+31)   /* ffd84: S/W interrupt 33 */
 #  define M16C_SWINT34_IRQ    (_LAST_FIXED+32)   /* ffd88: S/W interrupt 34 */
 #  define M16C_SWINT35_IRQ    (_LAST_FIXED+33)   /* ffd8c: S/W interrupt 35 */
@@ -167,31 +167,33 @@
 #else
 #  define M16C_BRK_IRQ        (_LAST_FIXED+1)    /* ffd00: BRK instruction */
 #  define M16C_INT3_IRQ       (_LAST_FIXED+2)    /* ffd10: INT3 */
-#  define M16C_INT5_IRQ       (_LAST_FIXED+3)    /* ffd20: INT5 */
-#  define M16C_INT4_IRQ       (_LAST_FIXED+4)    /* ffd24: INT4 */
-#  define M16C_UART2BCD_IRQ   (_LAST_FIXED+5)    /* ffd28: UART2 bus collision detection */
-#  define M16C_DMA0_IRQ       (_LAST_FIXED+6)    /* ffd2c: DMA0 */
-#  define M16C_DMA1_IRQ       (_LAST_FIXED+7)    /* ffd30: DMA1 */
-#  define M16C_KEYINP_IRQ     (_LAST_FIXED+8)    /* ffd34: Key input interrupt */
-#  define M16C_ADC_IRQ        (_LAST_FIXED+9)    /* ffd38: A-D */
-#  define M16C_UARTXNAK_IRQ   (_LAST_FIXED+10)   /* ffd3c UART2 transmit/NACK2 */
-#  define M16C_UARTRACK_IRQ   (_LAST_FIXED+11)   /* ffd40: UART2 receive/ACK2 */
-#  define M16C_UART0XMT_IRQ   (_LAST_FIXED+12)   /* ffd44: UART0 transmit */
-#  define M16C_UART0RCV_IRQ   (_LAST_FIXED+13)   /* ffd48: UART0 receive */
-#  define M16C_UART1XMT_IRQ   (_LAST_FIXED+14)   /* ffd4c: UART1 transmit */
-#  define M16C_UART1RCV_IRQ   (_LAST_FIXED+15)   /* ffd50: UART1 receive */
-#  define M16C_TMRA0_IRQ      (_LAST_FIXED+16)   /* ffd54: Timer A0 */
-#  define M16C_TMRA1_IRQ      (_LAST_FIXED+17)   /* ffd58: Timer A1 */
-#  define M16C_TMRA2_IRQ      (_LAST_FIXED+18)   /* ffd5c: Timer A2 */
-#  define M16C_TMRA3_IRQ      (_LAST_FIXED+19)   /* ffd60: Timer A3 */
-#  define M16C_TMRA4_IRQ      (_LAST_FIXED+20)   /* ffd64: Timer A4 */
-#  define M16C_TMRB0_IRQ      (_LAST_FIXED+21)   /* ffd68: Timer B0 */
-#  define M16C_TMRB1_IRQ      (_LAST_FIXED+22)   /* ffd6c: Timer B1 */
-#  define M16C_TMRB2_IRQ      (_LAST_FIXED+23)   /* ffd70: Timer B2 */
-#  define M16C_INT0_IRQ       (_LAST_FIXED+24)   /* ffd74: INT0 */
-#  define M16C_INT1_IRQ       (_LAST_FIXED+25)   /* ffd78: INT1 */
+#  define M16C_CTXSV_SWINT    (_LAST_FIXED+3)    /* ffd14: Reserved -- SWINT5 used by NuttX */
+#  define M16C_INT5_IRQ       (_LAST_FIXED+5)    /* ffd20: INT5 */
+#  define M16C_INT4_IRQ       (_LAST_FIXED+6)    /* ffd24: INT4 */
+#  define M16C_UART2BCD_IRQ   (_LAST_FIXED+7)    /* ffd28: UART2 bus collision detection */
+#  define M16C_DMA0_IRQ       (_LAST_FIXED+8)    /* ffd2c: DMA0 */
+#  define M16C_DMA1_IRQ       (_LAST_FIXED+9)    /* ffd30: DMA1 */
+#  define M16C_KEYINP_IRQ     (_LAST_FIXED+10)   /* ffd34: Key input interrupt */
+#  define M16C_ADC_IRQ        (_LAST_FIXED+11)   /* ffd38: A-D */
+#  define M16C_UARTXNAK_IRQ   (_LAST_FIXED+12)   /* ffd3c UART2 transmit/NACK2 */
+#  define M16C_UARTRACK_IRQ   (_LAST_FIXED+13)   /* ffd40: UART2 receive/ACK2 */
+#  define M16C_UART0XMT_IRQ   (_LAST_FIXED+14)   /* ffd44: UART0 transmit */
+#  define M16C_UART0RCV_IRQ   (_LAST_FIXED+15)   /* ffd48: UART0 receive */
+#  define M16C_UART1XMT_IRQ   (_LAST_FIXED+16)   /* ffd4c: UART1 transmit */
+#  define M16C_UART1RCV_IRQ   (_LAST_FIXED+17)   /* ffd50: UART1 receive */
+#  define M16C_TMRA0_IRQ      (_LAST_FIXED+18)   /* ffd54: Timer A0 */
+#  define M16C_TMRA1_IRQ      (_LAST_FIXED+19)   /* ffd58: Timer A1 */
+#  define M16C_TMRA2_IRQ      (_LAST_FIXED+20)   /* ffd5c: Timer A2 */
+#  define M16C_TMRA3_IRQ      (_LAST_FIXED+21)   /* ffd60: Timer A3 */
+#  define M16C_TMRA4_IRQ      (_LAST_FIXED+22)   /* ffd64: Timer A4 */
+#  define M16C_TMRB0_IRQ      (_LAST_FIXED+23)   /* ffd68: Timer B0 */
+#  define M16C_TMRB1_IRQ      (_LAST_FIXED+24)   /* ffd6c: Timer B1 */
+#  define M16C_TMRB2_IRQ      (_LAST_FIXED+25)   /* ffd70: Timer B2 */
+#  define M16C_INT0_IRQ       (_LAST_FIXED+26)   /* ffd74: INT0 */
+#  define M16C_INT1_IRQ       (_LAST_FIXED+27)   /* ffd78: INT1 */
+#  define M16C_CTXRSTR_SWINT  (_LAST_FIXED+4)    /* ffd80: S/W interrupt 32, used by NuttX */
 
-#  define NR_IRQS             (_LAST_FIXED+26)   /* Total number of supported IRQs */
+#  define NR_IRQS             (_LAST_FIXED+28)   /* Total number of supported IRQs */
 #endif
 
 #define M16C_SYSTIMER_IRQ     M16C_TMRA0_IRQ
@@ -199,7 +201,7 @@
 /* IRQ Stack Frame Format.  The M16C has a push down stack.  The CPU performs
  * the following actions when an interrupt is taken:
  *
- *  - Save FLG regsiter
+ *  - Save FLG register
  *  - Clear I, D, and U flags in FLG register
  *  - Builds stack frame like:
  * 
@@ -212,20 +214,20 @@
  *  - Vectors to interrupt handler
  */
 
-#define REG_PC20               0    /* 20-bit PC [0]:bits 16-19 [1]:bits 8-15 [2]: bits 0-7 */
-#define REG_FLGPCHI            3    /* 8-bit FLG (bits 12-14) PC (bits 16-19) as would be
+#define REG_FLGPCHI            0    /* 8-bit FLG (bits 12-14) + PC (bits 16-19) as would be
                                      * presented by an interrupt */
-#define REG_FLG                4    /* 8-bit FLG register (bits 0-7) */
-#define REG_PC16               5    /* 16-bit PC [0]:bits8-15 [1]:bits 0-7 */
-#define REG_FB                 7    /* 16-bit FB register */
-#define REG_SB                 9    /* 16-bit SB register */
-#define REG_A1                11    /* 16-bit A1 register */
-#define REG_R3                13    /* 16-bit R3 register */
-#define REG_R2                15    /* 16-bit R2 register */
-#define REG_R1                17    /* 16-bit R1 register */
-#define REG_R0                19    /* 16-bit R0 register */
+#define REG_FLG                1    /* 8-bit FLG register (bits 0-7) */
+#define REG_PC16               2    /* 16-bit PC [0]:bits8-15 [1]:bits 0-7 */
+#define REG_FB                 4    /* 16-bit FB register */
+#define REG_SB                 6    /* 16-bit SB register */
+#define REG_A1                 8    /* 16-bit A1 register */
+#define REG_R3                10    /* 16-bit R3 register */
+#define REG_R2                12    /* 16-bit R2 register */
+#define REG_R1                14    /* 16-bit R1 register */
+#define REG_R0                16    /* 16-bit R0 register */
+#define REG_SP                18    /* 16-bit user stack pointer */
 
-#define XCPTCONTEXT_SIZE      21
+#define XCPTCONTEXT_SIZE      20
 
 /************************************************************************************
  * Public Types
@@ -240,7 +242,7 @@ struct xcptcontext
    */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-  FAR void *sigdeliver; /* Actual type is sig_deliver_t */
+  void *sigdeliver; /* Actual type is sig_deliver_t */
 
   /* These are saved copies of LR and SR used during signal processing. */
 

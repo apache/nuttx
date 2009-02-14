@@ -145,7 +145,7 @@ __start:
 /* Set the interrupt and user stack pointers */
 
 	mov.w	#_enbss, R0
-	ldc	R0, isp			/* Set interrupt thread stack pointer to the end of BSS */
+	ldc	R0, isp			/* Set the interrupt stack pointer to the end of BSS */
 	add.w	#CONFIG_IDLETHREAD_STACKSIZE, R0
 	fset	U			/* Set bit 7 (U) to select the user stack pointer */
 	ldc	R0, sp			/* Set the user stack pointer */
@@ -190,8 +190,8 @@ __start:
 
 /* Initialize near .data sections (.rodata is not moved) */
 
-	mov.w	_g_enronly, a0		/* a0: Low 16 bits of source */
-	mov.b	_g_enronly+2, r1h	/* r1h: 4 order bits of source */
+	mov.w	_g_enronly, a0		/* a0: Low 16 bits of source address */
+	mov.b	_g_enronly+2, r1h	/* 4 MS of 20-bit source address */
 	mov.w	_g_sndata, a1		/* a1: start of near .data */
 	mov.w	_g_endata, r3		/* r3: end of near .data */
 	sub.w	a1, r3			/* r3: size of near .data */
@@ -212,4 +212,5 @@ __start:
 
 _os_exit:
 	jmp.s	_os_exit
+	.size	__start, .-__start
 	.end
