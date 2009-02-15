@@ -132,16 +132,16 @@
 #define M16C_DAR1          0x00034    /* DMA1 destination pointer */
 #define M16C_TCR1          0x00038    /* DMA1 transfer counter */
 #define M16C_DM1CON        0x0003c    /* DMA1 control */
-#define M16C_INT3IC        0x00044    /* INT3 interrupt control  */
+#define M16C_INT3IC        0x00044    /* INT3 interrupt control */
 #define M16C_INT5IC        0x00048    /* INT5 interrupt control */
 #define M16C_INT4IC        0x00049    /* INT4 interrupt control */
-#define M16C_BCNIC         0x0004a    /* Bus collision detection interrupt control  */
+#define M16C_BCNIC         0x0004a    /* Bus collision detection interrupt control */
 #define M16C_DM0IC         0x0004b    /* DMA0 interrupt control */
 #define M16C_DM1IC         0x0004c    /* DMA1 interrupt control */
 #define M16C_KUPIC         0x0004d    /* Key input interrupt control */
 #define M16C_ADIC          0x0004e    /* A-D conversion interrupt control */
-#define M16C_S2TIC         0x0004f    /* UART2 transmit interrupt control    */
-#define M16C_S2RIC         0x00050    /* UART2 receive interrupt control    */
+#define M16C_S2TIC         0x0004f    /* UART2 transmit interrupt control */
+#define M16C_S2RIC         0x00050    /* UART2 receive interrupt control */
 #define M16C_S0TIC         0x00051    /* UART0 transmit interrupt control */
 #define M16C_S0RIC         0x00052    /* UART0 receive interrupt control */
 #define M16C_S1TIC         0x00053    /* UART1 transmit interrupt control */
@@ -160,26 +160,26 @@
 #define M16C_FMR1          0x001b5    /* Flash Control 1 */
 #define M16C_FMR0          0x001b7    /* Flash Control 0 */
 #define M16C_PCLKR         0x0025e    /* Peripheral Clock Select */
-#define M16C_TA11          0x00342    /* Timer A1-1  */
-#define M16C_TA21          0x00344    /* Timer A2-1  */
-#define M16C_TA41          0x00346    /* Timer A4-1  */
-#define M16C_INVC0         0x00348    /* Three-phase PWM control 0  */
-#define M16C_INVC1         0x00349    /* Three-phase PWM control 1  */
-#define M16C_IDB0          0x0034a    /* Three-phase output buffer 0  */
-#define M16C_IDB1          0x0034b    /* Three-phase output buffer 1  */
+#define M16C_TA11          0x00342    /* Timer A1-1 */
+#define M16C_TA21          0x00344    /* Timer A2-1 */
+#define M16C_TA41          0x00346    /* Timer A4-1 */
+#define M16C_INVC0         0x00348    /* Three-phase PWM control 0 */
+#define M16C_INVC1         0x00349    /* Three-phase PWM control 1 */
+#define M16C_IDB0          0x0034a    /* Three-phase output buffer 0 */
+#define M16C_IDB1          0x0034b    /* Three-phase output buffer 1 */
 #define M16C_DTT           0x0034c    /* Dead time timer */
 #define M16C_ICTB2         0x0034d    /* Timer B2 interrupt occurences frequency set counter */
-#define M16C_IFSR          0x0035f    /* Interrupt request cause select  */
-#define M16C_U2SMR4        0x00374    /* UART2 special mode register4  */
-#define M16C_U2SMR3        0x00375    /* UART2 special mode register3  */
-#define M16C_U2SMR2        0x00376    /* UART2 special mode register2  */
-#define M16C_U2SMR         0x00377    /* UART2 special mode  */
-#define M16C_U2MR          0x00378    /* UART2 transmit/receive mode  */
-#define M16C_U2BRG         0x00379    /* UART2 bit rate generator    */
-#define M16C_U2TB          0x0037a    /* UART2 transmit buffer  */
-#define M16C_U2C0          0x0037c    /* UART2 transmit/receive control 0  */
-#define M16C_U2C1          0x0037d    /* UART2 transmit/receive control 1  */
-#define M16C_U2RB          0x0037e    /* UART2 receive buffer  */
+#define M16C_IFSR          0x0035f    /* Interrupt request cause select */
+#define M16C_U2SMR4        0x00374    /* UART2 special mode register4 */
+#define M16C_U2SMR3        0x00375    /* UART2 special mode register3 */
+#define M16C_U2SMR2        0x00376    /* UART2 special mode register2 */
+#define M16C_U2SMR         0x00377    /* UART2 special mode */
+#define M16C_U2MR          0x00378    /* UART2 transmit/receive mode */
+#define M16C_U2BRG         0x00379    /* UART2 bit rate generator */
+#define M16C_U2TB          0x0037a    /* UART2 transmit buffer */
+#define M16C_U2C0          0x0037c    /* UART2 transmit/receive control 0 */
+#define M16C_U2C1          0x0037d    /* UART2 transmit/receive control 1 */
+#define M16C_U2RB          0x0037e    /* UART2 receive buffer */
 #define M16C_TABSR         0x00380    /* Count start flag */
 #define M16C_CPSRF         0x00381    /* Clock prescaler reset flag */
 #define M16C_ONSF          0x00382    /* One-shot start flag */
@@ -201,7 +201,7 @@
 #define M16C_TB0MR         0x0039b    /* Timer B0 mode */
 #define M16C_TB1MR         0x0039c    /* Timer B1 mode */
 #define M16C_TB2MR         0x0039d    /* Timer B2 mode */
-#define M16C_TB2SC         0x0039e    /* Timer B2 special mode  */
+#define M16C_TB2SC         0x0039e    /* Timer B2 special mode */
 #define M16C_U0MR          0x003a0    /* UART0 transmit/receive mode */
 #define M16C_U0BRG         0x003a1    /* UART0 bit rate generator */
 #define M16C_U0TB          0x003a2    /* UART0 transmit buffer */
