@@ -41,7 +41,9 @@
 #include <sys/types.h>
 #include <time.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
+#include <arch/board/board.h>
 
 #include "clock_internal.h"
 #include "up_internal.h"

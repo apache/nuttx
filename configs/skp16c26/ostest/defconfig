@@ -33,7 +33,8 @@
 #
 ############################################################################
 #
-# architecture selection
+# architecture selection.  NOTE:  There are additional M16C-specific
+# settings that are provided via the arch/board/board.h file.
 #
 # CONFIG_ARCH - identifies the arch subdirectory and, hence, the
 #   processor architecture.

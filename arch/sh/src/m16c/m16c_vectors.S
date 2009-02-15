@@ -346,6 +346,13 @@ _m16c_commonvector:
 	fclr	u				/* Back to interrupt stack */
 	push.w	r0				/* Save user sp on isp */
 
+/* Allow nested interrupts */
+
+#ifdef M16C_INTERRUPT_IPL
+	fset	i				/* Enable interrupts */
+	ldipl	#M16C_INTERRUPT_IPL		/* Set interrupt level */
+#endif
+
 /* Then call _up_doirq with r1=IRQ number, r2=address of context info.  At this
  * point, the interrupt stack holds the address of the last byte of the context
  * info array
@@ -353,6 +360,10 @@ _m16c_commonvector:
 
  	stc	isp, r2				/* R2 = address of base of context info */
 	jsr.a	_up_doirq
+
+#ifdef M16C_INTERRUPT_IPL
+	fclr	i				/* Disable interrupts */
+#endif
 
 /* Upon return, r0 will hold address of the base of the new context info structure
  * use for return.  Most of the time this will be the same as the address passed to
