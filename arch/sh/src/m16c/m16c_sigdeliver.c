@@ -102,9 +102,9 @@ void up_sigdeliver(void)
   /* Save the real return state on the stack. */
 
   up_copystate(regs, rtcb->xcp.regs);
-  regs[REG_PC16]   = rtcb->xcp.saved_pc[0];
-  regs[REG_PC16+1] = rtcb->xcp.saved_pc[1];
-  regs[REG_FLG]    = rtcb->xcp.saved_flg;
+  regs[REG_PC]   = rtcb->xcp.saved_pc[0];
+  regs[REG_PC+1] = rtcb->xcp.saved_pc[1];
+  regs[REG_FLG]  = rtcb->xcp.saved_flg;
 
   /* Get a local copy of the sigdeliver function pointer.
    * we do this so that we can nullify the sigdeliver

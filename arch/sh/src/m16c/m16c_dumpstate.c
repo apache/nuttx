@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/sh/src/sh1/sh1_assert.c
+ * arch/sh/src/m16c/m16c_assert.c
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "os_internal.h"
+#include "chip.h"
 
 #ifdef CONFIG_ARCH_STACKDUMP
 
@@ -55,8 +56,8 @@
  * Definitions
  ****************************************************************************/
 
-/* Output debug info if stack dump is selected -- even if 
- * debug is not selected.
+/* Output debug info if stack dump is selected -- even if  debug is not
+ * selected.
  */
 
 #ifdef CONFIG_ARCH_STACKDUMP
@@ -73,17 +74,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sh1_getsp
+ * Name: m16c_getsp
  ****************************************************************************/
 
-static inline uint32 sh1_getsp(void)
+static inline uint16 m16c_getsp(void)
 {
-  uint32 sp;
+  uint16 sp;
 
   __asm__ __volatile__
     (
-      "mov   r15, %0\n\t"
-      : "=&z" (sp)
+      "\tstc sp, %0\n\t"
+      : "=r" (sp)
       :
       : "memory"
     );
@@ -91,29 +92,28 @@ static inline uint32 sh1_getsp(void)
 }
 
 /****************************************************************************
- * Name: sh1_stackdump
+ * Name: m16c_stackdump
  ****************************************************************************/
 
-static void sh1_stackdump(uint32 sp, uint32 stack_base)
+static void m16c_stackdump(uint16 sp, uint16 stack_base)
 {
-  uint32 stack ;
+  uint16 stack;
 
-  for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
+  for (stack = sp & ~7; stack < stack_base; stack += 8)
     {
-      uint32 *ptr = (uint32*)stack;
-      lldbg("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-             stack, ptr[0], ptr[1], ptr[2], ptr[3],
-             ptr[4], ptr[5], ptr[6], ptr[7]);
+      ubyte *ptr = (ubyte*)stack;
+      lldbg("%04x: %02x %02x %02x %02x %02x %02x %02x %02x\n",
+             stack, ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5], ptr[6], ptr[7]);
     }
 }
 
 /****************************************************************************
- * Name: sh1_registerdump
+ * Name: m16c_registerdump
  ****************************************************************************/
 
-static inline void sh1_registerdump(void)
+static inline void m16c_registerdump(void)
 {
-  uint32 *ptr = current_regs;
+  ubyte *ptr = (ubyte*) current_regs;
 
   /* Are user registers available from interrupt processing? */
 
@@ -121,19 +121,18 @@ static inline void sh1_registerdump(void)
     {
       /* Yes.. dump the interrupt registers */
 
-      lldbg("PC: %08x SR=%08x\n",
-            ptr[REG_PC], ptr[REG_SR]);
+      lldbg("PC: %02x%02x%02x FLG: %02x00%02x FB: %02x%02x SB: %02x%02x SP: %02x%02x\n",
+            ptr[REG_FLGPCHI] & 0xff, ptr[REG_PC], ptr[REG_PC+1],
+            ptr[REG_FLGPCHI] >> 8, ptr[REG_FLG],
+            ptr[REG_FB], ptr[REG_FB+1],
+            ptr[REG_SB], ptr[REG_SB+1],
+            ptr[REG_SP], ptr[REG_SP+1]);
 
-      lldbg("PR: %08x GBR: %08x MACH: %08x MACL: %08x\n",
-            ptr[REG_PR], ptr[REG_GBR], ptr[REG_MACH], ptr[REG_MACL]);
+      lldbg("R0: %02x%02x R1: %02x%02x R2: %02x%02x A0: %02x%02x A1: %02x%02x\n",
+            ptr[REG_R0], ptr[REG_R0+1], ptr[REG_R1], ptr[REG_R1+1],
+            ptr[REG_R2], ptr[REG_R2+1], ptr[REG_R3], ptr[REG_R3+1],
+            ptr[REG_A0], ptr[REG_A0+1], ptr[REG_A1], ptr[REG_A1+1]);
 
-      lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n", 0,
-            ptr[REG_R0], ptr[REG_R1], ptr[REG_R2], ptr[REG_R3],
-            ptr[REG_R4], ptr[REG_R5], ptr[REG_R6], ptr[REG_R7]);
-
-      lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n", 8,
-            ptr[REG_R8], ptr[REG_R9], ptr[REG_R10], ptr[REG_R11],
-            ptr[REG_R12], ptr[REG_R13], ptr[REG_R14], ptr[REG_R15]);
     }
 }
 
@@ -148,39 +147,47 @@ static inline void sh1_registerdump(void)
 void up_dumpstate(void)
 {
   _TCB *rtcb        = (_TCB*)g_readytorun.head;
-  uint32 sp         = sh1_getsp();
-  uint32 ustackbase;
-  uint32 ustacksize;
+  uint16 sp         = m16c_getsp();
+  uint16 ustackbase;
+  uint16 ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  uint32 istackbase;
-  uint32 istacksize;
+  uint16 istackbase;
+  uint16 istacksize;
 #endif
 
   /* Get the limits on the user stack memory */
 
   if (rtcb->pid == 0)
     {
-      ustackbase = g_heapbase - 4;
+      ustackbase = g_heapbase - 1;
       ustacksize = CONFIG_IDLETHREAD_STACKSIZE;
     }
   else
     {
-      ustackbase = (uint32)rtcb->adj_stack_ptr;
-      ustacksize = (uint32)rtcb->adj_stack_size;
+      ustackbase = (uint16)rtcb->adj_stack_ptr;
+      ustacksize = (uint16)rtcb->adj_stack_size;
     }
 
-  /* Get the limits on the interrupt stack memory */
+  /* Get the limits on the interrupt stack memory. The near RAM memory map is as follows:
+   * 
+   * 0x00400 - DATA		Size: Determined by linker
+   *           BSS		Size: Determined by linker
+   *           Interrupt stack	Size: CONFIG_ARCH_INTERRUPTSTACK
+   *           Idle stack		Size: CONFIG_IDLETHREAD_STACKSIZE
+   *           Heap		Size: Everything remaining
+   * 0x00bff - (end+1)
+   */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  istackbase = (uint32)&g_userstack;
-  istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4;
+  istackbase = g_enbss;
+  istacksize = CONFIG_ARCH_INTERRUPTSTACK;
 
   /* Show interrupt stack info */
 
-  lldbg("sp:     %08x\n", sp);
+  lldbg("sp:     %04x\n", sp);
   lldbg("IRQ stack:\n");
-  lldbg("  base: %08x\n", istackbase);
-  lldbg("  size: %08x\n", istacksize);
+  lldbg("  base: %04x\n", istackbase);
+  lldbg("  size: %04x\n", istacksize);
 
   /* Does the current stack pointer lie within the interrupt
    * stack?
@@ -190,25 +197,25 @@ void up_dumpstate(void)
     {
       /* Yes.. dump the interrupt stack */
 
-      sh1_stackdump(sp, istackbase);
+      m16c_stackdump(sp, istackbase);
 
       /* Extract the user stack pointer which should lie
        * at the base of the interrupt stack.
        */
 
       sp = g_userstack;
-      lldbg("sp:     %08x\n", sp);
+      lldbg("sp:     %04x\n", sp);
     }
 
   /* Show user stack info */
 
   lldbg("User stack:\n");
-  lldbg("  base: %08x\n", ustackbase);
-  lldbg("  size: %08x\n", ustacksize);
+  lldbg("  base: %04x\n", ustackbase);
+  lldbg("  size: %04x\n", ustacksize);
 #else
-  lldbg("sp:         %08x\n", sp);
-  lldbg("stack base: %08x\n", ustackbase);
-  lldbg("stack size: %08x\n", ustacksize);
+  lldbg("sp:         %04x\n", sp);
+  lldbg("stack base: %04x\n", ustackbase);
+  lldbg("stack size: %04x\n", ustacksize);
 #endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
@@ -223,12 +230,12 @@ void up_dumpstate(void)
     }
   else
     {
-      sh1_stackdump(sp, ustackbase);
+      m16c_stackdump(sp, ustackbase);
     }
 
   /* Then dump the registers (if available) */
 
-  sh1_registerdump();
+  m16c_registerdump();
 }
 
 #endif /* CONFIG_ARCH_STACKDUMP */
