@@ -51,7 +51,7 @@
 
 /* Xin Freq */
 
-#define	XIN_FREQ	20e6	/* 20MHz */
+#define	M16C_XIN_FREQ	20000000	/* 20MHz */
 
 /* Switches */
 
@@ -67,9 +67,38 @@
 #define	YLW_LED		p7_4
 #define	GRN_LED		p7_2
 
-#define	RED_DDR 	pd8_0		// LED port direction register
+#define	RED_DDR 	pd8_0		/* LED port direction register */
 #define	YLW_DDR 	pd7_4
 #define	GRN_DDR 	pd7_2
+
+/* Define any of the following to specify interrupt priorities.  A default
+ * value of 5 will be used for any unspecified values
+ */
+
+#undef  M16C_INT3_PRIO                  /* INT3 interrupt priority  */
+#undef  M16C_INT5_PRIO                  /* INT5 interrupt priority */
+#undef  M16C_INT4_PRIO                  /* INT4 interrupt priority */
+#undef  M16C_BCN_PRIO                   /* Bus collision detection interrupt priority  */
+#undef  M16C_DM0_PRIO                   /* DMA0 interrupt priority */
+#undef  M16C_DM1_PRIO                   /* DMA1 interrupt priority */
+#undef  M16C_KUP_PRIO                   /* Key input interrupt priority */
+#undef  M16C_AD_PRIO                    /* A-D conversion interrupt priority */
+#undef  M16C_S2T_PRIO                   /* UART2 transmit interrupt priority    */
+#undef  M16C_S2R_PRIO                   /* UART2 receive interrupt priority    */
+#undef  M16C_S0T_PRIO                   /* UART0 transmit interrupt priority */
+#undef  M16C_S0R_PRIO                   /* UART0 receive interrupt priority */
+#undef  M16C_S1T_PRIO                   /* UART1 transmit interrupt priority */
+#undef  M16C_S1R_PRIO                   /* UART1 receive interrupt priority */
+#define M16C_TA0_PRIO   5               /* Timer A0 interrupt priority */
+#undef  M16C_TA1_PRIO                   /* Timer A1 interrupt priority */
+#undef  M16C_TA2_PRIO                   /* Timer A2 interrupt priority */
+#undef  M16C_TA3_PRIO                   /* Timer A3 interrupt priority */
+#undef  M16C_TA4_PRIO                   /* Timer A4 interrupt priority */
+#undef  M16C_TB0_PRIO                   /* Timer B0 interrupt priority */
+#undef  M16C_TB1_PRIO                   /* Timer B1 interrupt priority */
+#undef  M16C_TB2_PRIO                   /* Timer B2 interrupt priority */
+#undef  M16C_INT0_PRIO                  /* INT0 interrupt priority */
+#undef  M16C_INT1_PRIO                  /* INT1 interrupt priority */
 
 /********************************************************************************/
 /* Macro Definitions 															*/
