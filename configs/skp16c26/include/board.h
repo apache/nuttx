@@ -63,6 +63,7 @@
 #define S3_DDR		pd8_1
 
 /* LEDs */
+
 #define	RED_LED		p8_0
 #define	YLW_LED		p7_4
 #define	GRN_LED		p7_2
@@ -70,6 +71,11 @@
 #define	RED_DDR 	pd8_0		/* LED port direction register */
 #define	YLW_DDR 	pd7_4
 #define	GRN_DDR 	pd7_2
+
+/* IPL settings */
+
+#define M16C_DEFAULT_IPL   0     /* Default M16C Interrupt priority level */
+#undef  M16C_INTERRUPT_IPL       /* Default interrupt IPL to enabled nested interrupts */
 
 /* Define any of the following to specify interrupt priorities.  A default
  * value of 5 will be used for any unspecified values
