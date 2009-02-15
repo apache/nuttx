@@ -268,5 +268,4 @@ extern uint32 g_heapbase;	/* Start of the heap */
 
 #endif /* __ASSEMBLY__ */
 
-
 #endif /* __ARCH_SH_SRC_M16C_CHIP_H */

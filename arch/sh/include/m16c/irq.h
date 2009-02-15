@@ -196,6 +196,8 @@
 #  define NR_IRQS             (_LAST_FIXED+28)   /* Total number of supported IRQs */
 #endif
 
+/* Timer A0 is the system timer used by NuttX */
+
 #define M16C_SYSTIMER_IRQ     M16C_TMRA0_IRQ
 
 /* IRQ Stack Frame Format.  The M16C has a push down stack.  The CPU performs
