@@ -45,6 +45,9 @@
 # CONFIG_ARCH_BOARD - identifies the configs subdirectory and, hence,
 #   the board that supports the particular chip or SoC.
 # CONFIG_ARCH_BOARD_name - for use in C code
+# CONFIG_ARCH_NOINTC - define if the architecture does not
+#   support an interrupt controller or otherwise cannot support
+#   APIs like up_enable_irq() and up_disable_irq().
 # CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
 # CONFIG_BOARD_LOOPSPERMSEC - for delay loops
 # CONFIG_DRAM_SIZE - Describes the internal SRAM.
@@ -62,6 +65,7 @@ CONFIG_ARCH_CHIP=m16c
 CONFIG_ARCH_CHIP_M30262F8=y
 CONFIG_ARCH_BOARD=skp16c26
 CONFIG_ARCH_BOARD_SKP16C26=y
+CONFIG_ARCH_NOINTC=y
 CONFIG_ENDIAN_BIG=y
 CONFIG_DRAM_SIZE=0x00800
 CONFIG_DRAM_START=0x00400
