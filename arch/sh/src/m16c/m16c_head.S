@@ -63,62 +63,74 @@
  */
 
 	.section .rodata
+	.globl	_g_snbss
 	.type	_g_snbss, object
 _g_snbss:
 	.word	_g_snbss
 	.size	_g_snbss, .-_g_snbss
 
+	.globl	_g_enbss
 	.type	_g_enbss, object
 _g_enbss:
 	.word	_g_enbss
 	.size	_g_enbss, .-_g_enbss
 
+	.globl	_g_sndata
 	.type	_g_sndata, object
 _g_sndata:
 	.word	_g_sndata
 	.size	_g_sndata, .-_g_sndata
 
+	.globl	_g_endata
 	.type	_g_endata, object
 _g_endata:
 	.word	_g_endata
 	.size	_g_endata, .-_g_endata
 
+	.globl	_g_enronly
 	.type	_g_enronly, object
 _g_enronly:
 	.long	_g_enronly
 	.size	_g_enronly, .-_g_efronly
 
 #ifdef CONFIG_M16C_HAVEFARRAM
+	.globl	_g_sfbss
 	.type	_g_sfbss, object
 _g_sfbss:
 	.long	_g_sfbss
 	.size	_g_sfbss, .-_g_sfbss
 
+	.globl	_g_efbss
 	.type	_g_efbss, object
 _g_efbss:
 	.long	_g_efbss
 	.size	_g_efbss, .-_g_efbss
 
+	.globl	_g_sfdata
 	.type	_g_sfdata, object
 _g_sfdata:
 	.long	_g_sfdata
 	.size	_g_sfdata, .-_g_sfdata
 
+	.globl	_g_efdata
 	.type	_g_efdata, object
 _g_efdata:
 	.long	_g_efdata
 	.size	_g_efdata, .-_g_efdata
 
+	.globl	_g_efronly
 	.type	_g_efronly, object
 _g_efronly:
 	.long	_g_efronly
 	.size	_g_efronly, .-_g_efronly
 #endif
+	.globl	_g_svarvect
 	.type	_g_svarvect, object
 _g_svarvect:
 	.long	_svarvect
 	.size	_g_svarvect, .-_g_svarvect
 
+	.globl	_g_heapbase
 	.type	_g_heapbase, object
 _g_heapbase:
 	.long	_enbss+CONFIG_ARCH_INTERRUPTSTACK+CONFIG_IDLETHREAD_STACKSIZE
