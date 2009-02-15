@@ -217,17 +217,18 @@
 #define REG_FLGPCHI            0    /* 8-bit FLG (bits 12-14) + PC (bits 16-19) as would be
                                      * presented by an interrupt */
 #define REG_FLG                1    /* 8-bit FLG register (bits 0-7) */
-#define REG_PC16               2    /* 16-bit PC [0]:bits8-15 [1]:bits 0-7 */
+#define REG_PC                 2    /* 16-bit PC [0]:bits8-15 [1]:bits 0-7 */
 #define REG_FB                 4    /* 16-bit FB register */
 #define REG_SB                 6    /* 16-bit SB register */
 #define REG_A1                 8    /* 16-bit A1 register */
-#define REG_R3                10    /* 16-bit R3 register */
-#define REG_R2                12    /* 16-bit R2 register */
-#define REG_R1                14    /* 16-bit R1 register */
-#define REG_R0                16    /* 16-bit R0 register */
-#define REG_SP                18    /* 16-bit user stack pointer */
+#define REG_A0                10    /* 16-bit A0 register */
+#define REG_R3                12    /* 16-bit R3 register */
+#define REG_R2                14    /* 16-bit R2 register */
+#define REG_R1                16    /* 16-bit R1 register */
+#define REG_R0                18    /* 16-bit R0 register */
+#define REG_SP                20    /* 16-bit user stack pointer */
 
-#define XCPTCONTEXT_SIZE      20
+#define XCPTCONTEXT_SIZE      22
 
 /************************************************************************************
  * Public Types
