@@ -49,6 +49,24 @@
  * Definitions
  ************************************************************************************/
 
+/* User configuration checks ********************************************************/
+
+/* According to SKP16C26 documention, "SIO/UART1 pins are used for communication
+ * between the SKP16C26 board kernel and KD30 Debugger through the ICD. Do not
+ * connect these pins to any other circuit, as UART1 cannot be used in the user
+ * program. For details, please see ICD (RTA-FoUSB-MON) User Manual on Target M16C
+ * ROM Monitor Resources or related ICD application notes."
+ *
+ * However, the schematic appears to show that SIO/UART2 is actual connection.
+ * To be safe, we will error out on either selection:
+ */
+
+#if !defined(CONFIG_UART1_DISABLE) || !defined(CONFIG_UART2_DISABLE)
+#  error "UART1/2 should not be used on SKP16C26"
+#endif
+
+/* Hardware defintitions ************************************************************/
+
 /* Xin Freq */
 
 #define	M16C_XIN_FREQ	20000000	/* 20MHz */
@@ -72,6 +90,8 @@
 #define	YLW_DDR 	pd7_4
 #define	GRN_DDR 	pd7_2
 
+/* Interrupt Priority Levels ********************************************************/
+
 /* IPL settings */
 
 #define M16C_DEFAULT_IPL   0     /* Default M16C Interrupt priority level */
@@ -81,30 +101,30 @@
  * value of 5 will be used for any unspecified values
  */
 
-#undef  M16C_INT3_PRIO                  /* INT3 interrupt priority  */
-#undef  M16C_INT5_PRIO                  /* INT5 interrupt priority */
-#undef  M16C_INT4_PRIO                  /* INT4 interrupt priority */
-#undef  M16C_BCN_PRIO                   /* Bus collision detection interrupt priority  */
-#undef  M16C_DM0_PRIO                   /* DMA0 interrupt priority */
-#undef  M16C_DM1_PRIO                   /* DMA1 interrupt priority */
-#undef  M16C_KUP_PRIO                   /* Key input interrupt priority */
-#undef  M16C_AD_PRIO                    /* A-D conversion interrupt priority */
-#undef  M16C_S2T_PRIO                   /* UART2 transmit interrupt priority    */
-#undef  M16C_S2R_PRIO                   /* UART2 receive interrupt priority    */
-#undef  M16C_S0T_PRIO                   /* UART0 transmit interrupt priority */
-#undef  M16C_S0R_PRIO                   /* UART0 receive interrupt priority */
-#undef  M16C_S1T_PRIO                   /* UART1 transmit interrupt priority */
-#undef  M16C_S1R_PRIO                   /* UART1 receive interrupt priority */
-#define M16C_TA0_PRIO   5               /* Timer A0 interrupt priority */
-#undef  M16C_TA1_PRIO                   /* Timer A1 interrupt priority */
-#undef  M16C_TA2_PRIO                   /* Timer A2 interrupt priority */
-#undef  M16C_TA3_PRIO                   /* Timer A3 interrupt priority */
-#undef  M16C_TA4_PRIO                   /* Timer A4 interrupt priority */
-#undef  M16C_TB0_PRIO                   /* Timer B0 interrupt priority */
-#undef  M16C_TB1_PRIO                   /* Timer B1 interrupt priority */
-#undef  M16C_TB2_PRIO                   /* Timer B2 interrupt priority */
-#undef  M16C_INT0_PRIO                  /* INT0 interrupt priority */
-#undef  M16C_INT1_PRIO                  /* INT1 interrupt priority */
+#undef  M16C_INT3_PRIO           /* INT3 interrupt priority  */
+#undef  M16C_INT5_PRIO           /* INT5 interrupt priority */
+#undef  M16C_INT4_PRIO           /* INT4 interrupt priority */
+#undef  M16C_BCN_PRIO            /* Bus collision detection interrupt priority  */
+#undef  M16C_DM0_PRIO            /* DMA0 interrupt priority */
+#undef  M16C_DM1_PRIO            /* DMA1 interrupt priority */
+#undef  M16C_KUP_PRIO            /* Key input interrupt priority */
+#undef  M16C_AD_PRIO             /* A-D conversion interrupt priority */
+#undef  M16C_S2T_PRIO            /* UART2 transmit interrupt priority    */
+#undef  M16C_S2R_PRIO            /* UART2 receive interrupt priority    */
+#undef  M16C_S0T_PRIO            /* UART0 transmit interrupt priority */
+#undef  M16C_S0R_PRIO            /* UART0 receive interrupt priority */
+#undef  M16C_S1T_PRIO            /* UART1 transmit interrupt priority */
+#undef  M16C_S1R_PRIO            /* UART1 receive interrupt priority */
+#define M16C_TA0_PRIO   5        /* Timer A0 interrupt priority */
+#undef  M16C_TA1_PRIO            /* Timer A1 interrupt priority */
+#undef  M16C_TA2_PRIO            /* Timer A2 interrupt priority */
+#undef  M16C_TA3_PRIO            /* Timer A3 interrupt priority */
+#undef  M16C_TA4_PRIO            /* Timer A4 interrupt priority */
+#undef  M16C_TB0_PRIO            /* Timer B0 interrupt priority */
+#undef  M16C_TB1_PRIO            /* Timer B1 interrupt priority */
+#undef  M16C_TB2_PRIO            /* Timer B2 interrupt priority */
+#undef  M16C_INT0_PRIO           /* INT0 interrupt priority */
+#undef  M16C_INT1_PRIO           /* INT1 interrupt priority */
 
 /********************************************************************************/
 /* Macro Definitions 															*/
