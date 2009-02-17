@@ -24,7 +24,8 @@ NuttX TODO List (Last updated November 20, 2008)
   (6)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
-  (1)  SH-1 (arch/sh)
+  (1)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
+  (2)  Renesas M16C/26 (arch/sh/src/m16c)
   (8)  z80/z8/ez80 (arch/z80/)
   (8)  z16 (arch/z16/)
 
@@ -547,8 +548,8 @@ o pjrc-8052 / MCS51 (arch/pjrc-8051/)
   Priority:    Low -- only because there as so many other issues with 8051
 
 
-o SH-1 (arch/sh)
-  ^^^^^^^^^^^^^^
+o Hitachi/Renesas SH-1 (arch/sh/src/sh1)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Description:  There are instabilities that make the SH-1 port un-usable.  The
                 nature of these is not understood; the behavior is that certain SH-1
@@ -569,6 +570,18 @@ o SH-1 (arch/sh)
   Status:       Open
   Priority:     Low -- because the SH-1, SH7032, is very old and only of historical
                 interest.
+
+o Renesas M16C/26 (arch/sh/src/m16c)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: Coding of the initial port is complete, but is untested.
+  Status:      Open
+  Priority:    Low
+
+  Description: Serial drivers were developed for the M16C, however, the SKP16C26
+               StarterKit has not serial connectors.
+  Status:      Open
+  Priority:    Low
 
 o z80/z8/ez80 (arch/z80)
  ^^^^^^^^^^^^^^^^^^^^^^^
