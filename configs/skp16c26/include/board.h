@@ -109,8 +109,8 @@
 #undef  M16C_DM1_PRIO            /* DMA1 interrupt priority */
 #undef  M16C_KUP_PRIO            /* Key input interrupt priority */
 #undef  M16C_AD_PRIO             /* A-D conversion interrupt priority */
-#undef  M16C_S2T_PRIO            /* UART2 transmit interrupt priority    */
-#undef  M16C_S2R_PRIO            /* UART2 receive interrupt priority    */
+#undef  M16C_S2T_PRIO            /* UART2 transmit interrupt priority */
+#undef  M16C_S2R_PRIO            /* UART2 receive interrupt priority */
 #undef  M16C_S0T_PRIO            /* UART0 transmit interrupt priority */
 #undef  M16C_S0R_PRIO            /* UART0 receive interrupt priority */
 #undef  M16C_S1T_PRIO            /* UART1 transmit interrupt priority */
