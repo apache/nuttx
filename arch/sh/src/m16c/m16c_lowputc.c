@@ -71,8 +71,8 @@
 #  undef CONFIG_UART2_SERIAL_CONSOLE
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE) && !defined(CONFIG_UART2_DISABLE)
 #  define HAVE_CONSOLE 1
+#  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
 #else
 #  if defined(CONFIG_UART0_SERIAL_CONSOLE) || defined(CONFIG_UART1_SERIAL_CONSOLE)|| defined(CONFIG_UART2_SERIAL_CONSOLE)
 #    error "Serial console selected, but corresponding UART not enabled"
@@ -183,7 +183,7 @@
 #ifdef HAVE_CONSOLE
 static inline int up_txready(void)
 {
-  /* Check the TI bit in the CI register.  1=Transmit buffer emptyy */
+  /* Check the TI bit in the CI register.  1=Transmit buffer empty */
 
   return ((getreg8(M16C_UART_BASE + M16C_UART_C1) & UART_C1_TI) != 0);
 }
