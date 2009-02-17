@@ -98,12 +98,6 @@ extern uint32 *current_regs;
  */
 
 extern uint32 g_heapbase;
-
-/* Address of the saved user stack pointer */
-
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
-extern uint32 g_userstack;
-#endif
 #endif
 
 /****************************************************************************
