@@ -92,6 +92,18 @@ static inline uint16 m16c_getsp(void)
 }
 
 /****************************************************************************
+ * Name: m16c_getusersp
+ ****************************************************************************/
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+static inline uint16 m16c_getusersp(void)
+{
+  ubyte *ptr = (ubyte*) current_regs;
+  return (uint16)ptr[REG_SP] << 8 | ptr[REG_SP+1];
+}
+#endif
+
+/****************************************************************************
  * Name: m16c_stackdump
  ****************************************************************************/
 
@@ -199,11 +211,9 @@ void up_dumpstate(void)
 
       m16c_stackdump(sp, istackbase);
 
-      /* Extract the user stack pointer which should lie
-       * at the base of the interrupt stack.
-       */
+      /* Extract the user stack pointer from the register area */
 
-      sp = g_userstack;
+      sp = m16c_getusersp();
       lldbg("sp:     %04x\n", sp);
     }
 
