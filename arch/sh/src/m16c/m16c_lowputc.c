@@ -49,6 +49,12 @@
 #include "up_internal.h"
 #include "m16c_uart.h"
 
+/* Is there any serial support?  This might be the case if the board does
+ * not have serial ports but supports stdout through, say, an LCD.
+ */
+
+#if !defined(CONFIG_UART0_DISABLE) && !defined(CONFIG_UART1_DISABLE) && !defined(CONFIG_UART2_DISABLE)
+
 /**************************************************************************
  * Private Definitions
  **************************************************************************/
@@ -59,7 +65,7 @@
 #  define M16C_XIN_PRESCALER 1
 #endif
 
-/* Is there a serial console? */
+/* We know that we have a serial port enabled.  Is one of them a serial console? */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE) && !defined(CONFIG_UART0_DISABLE)
 #  define HAVE_CONSOLE 1
@@ -74,9 +80,6 @@
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #else
-#  if defined(CONFIG_UART0_SERIAL_CONSOLE) || defined(CONFIG_UART1_SERIAL_CONSOLE)|| defined(CONFIG_UART2_SERIAL_CONSOLE)
-#    error "Serial console selected, but corresponding UART not enabled"
-#  endif
 #  undef HAVE_CONSOLE
 #endif
 
@@ -291,3 +294,8 @@ void up_lowsetup(void)
   regval = (ubyte)getreg16(M16C_UART_BASE + M16C_UART_RB);
 #endif
 }
+
+#elif defined(CONFIG_UART0_SERIAL_CONSOLE) || defined(CONFIG_UART1_SERIAL_CONSOLE)|| defined(CONFIG_UART2_SERIAL_CONSOLE)
+#    error "A serial console selected, but corresponding UART not enabled"
+#endif /*  !CONFIG_UART0_DISABLE && !CONFIG_UART1_DISABLE && !CONFIG_UART2_DISABLE */
+

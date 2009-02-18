@@ -55,6 +55,12 @@
 #include "os_internal.h"
 #include "m16c_uart.h"
 
+/* Is there any serial support?  This might be the case if the board does
+ * not have serial ports but supports a console through, say, an LCD.
+ */
+
+#if !defined(CONFIG_UART0_DISABLE) && !defined(CONFIG_UART1_DISABLE) && !defined(CONFIG_UART2_DISABLE)
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -1056,16 +1062,16 @@ static boolean up_txready(struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: up_earlyconsoleinit
  *
  * Description:
  *   Performs the low level UART initialization early in 
  *   debug so that the serial console will be available
- *   during bootup.  This must be called before up_serialinit.
+ *   during bootup.  This must be called before up_consoleinit.
  *
  ****************************************************************************/
 
-void up_earlyserialinit(void)
+void up_earlyconsoleinit(void)
 {
   /* NOTE:  All GPIO configuration for the UARTs was performed in
    * up_lowsetup
@@ -1092,15 +1098,15 @@ void up_earlyserialinit(void)
 }
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: up_consoleinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
- *   that up_earlyserialinit was called previously.
+ *   that up_earlyconsoleinit was called previously.
  *
  ****************************************************************************/
 
-void up_serialinit(void)
+void up_consoleinit(void)
 {
   /* Register the console */
 
@@ -1184,3 +1190,7 @@ int up_putc(int ch)
 }
 
 #endif /* CONFIG_USE_SERIALDRIVER */
+#elif defined(CONFIG_UART0_SERIAL_CONSOLE) || defined(CONFIG_UART1_SERIAL_CONSOLE)|| defined(CONFIG_UART2_SERIAL_CONSOLE)
+#    error "A serial console selected, but corresponding UART not enabled"
+#endif /*  !CONFIG_UART0_DISABLE && !CONFIG_UART1_DISABLE && !CONFIG_UART2_DISABLE */
+

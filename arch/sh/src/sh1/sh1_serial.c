@@ -829,16 +829,16 @@ static boolean up_txready(struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: up_earlyconsoleinit
  *
  * Description:
  *   Performs the low level SCI initialization early in 
  *   debug so that the serial console will be available
- *   during bootup.  This must be called before up_serialinit.
+ *   during bootup.  This must be called before up_consoleinit.
  *
  ****************************************************************************/
 
-void up_earlyserialinit(void)
+void up_earlyconsoleinit(void)
 {
   /* NOTE:  All GPIO configuration for the SCIs was performed in
    * up_lowsetup
@@ -862,15 +862,15 @@ void up_earlyserialinit(void)
 }
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: up_consoleinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
- *   that up_earlyserialinit was called previously.
+ *   that up_earlyconsoleinit was called previously.
  *
  ****************************************************************************/
 
-void up_serialinit(void)
+void up_consoleinit(void)
 {
   /* Register the console */
 

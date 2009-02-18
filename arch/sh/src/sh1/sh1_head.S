@@ -62,7 +62,7 @@
 
 	.globl	_up_lowsetup		/* Early initialization of UART */
 #ifdef CONFIG_USE_EARLYSERIALINIT
-	.globl	_up_earlyserialinit	/* Early initialization of serial driver */
+	.globl	_up_earlyconsoleinit	/* Early initialization of console driver */
 #endif
 #ifdef CONFIG_ARCH_LEDS
 	.globl	_up_ledinit		/* Boot LED setup */
@@ -161,7 +161,7 @@
 
 	.macro	showprogress, code
 #ifdef CONFIG_DEBUG
-	mov.l   .Llowputc, r0		/* Address of up_earlyserialinit */
+	mov.l   .Llowputc, r0		/* Address of up_earlyconsoleinit */
 	jsr     @r0			/* Call it */
 	mov	#\code, r4		/* Delay slot */
 #endif
@@ -427,7 +427,7 @@ __start0:
 	/* Perform early serial initialization */
 
 #ifdef CONFIG_USE_EARLYSERIALINIT
-	mov.l   .Learlyser, r0		/* Address of up_earlyserialinit */
+	mov.l   .Learlyser, r0		/* Address of up_earlyconsoleinit */
 	jsr     @r0			/* Call it */
 	or      r0, r0			/* Delay slot */
 #endif
@@ -483,7 +483,7 @@ __start0:
 	.long   _ebss
 #ifdef CONFIG_USE_EARLYSERIALINIT
 .Learlyser:
-	.long	_up_earlyserialinit
+	.long	_up_earlyconsoleinit
 #endif
 .Llowsetup:
 	.long	_up_lowsetup
