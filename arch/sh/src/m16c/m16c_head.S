@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 #include "chip.h"
+#include "up_internal.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -47,6 +48,22 @@
 /************************************************************************************
  * Macro Definitions
  ************************************************************************************/
+
+/*****************************************************************************
+ * Name: showprogress
+ *
+ * Description:
+ *   Print a character on the UART to show boot status.
+ *
+ *****************************************************************************/
+
+	.macro	showprogress, code
+#ifdef CONFIG_DEBUG
+	.globl	_up_lowputc
+	mov.b	r#\code1l		/* Character to print */
+	jsr.a	_up_lowputc		/* Print it */
+#endif
+	.endm
 
 /************************************************************************************
  * Data
@@ -186,6 +203,12 @@ __start:
 	ldc	r1, intbh
 	ldc	r0, intbl
 
+/* Configure the uart so that we can get debug output as soon as possible. */
+
+	.globl	_up_lowsetup		/* Early initialization of UART */
+	jsr.a	_up_lowsetup
+	showprogress 'A'
+
 /* Clear near .bss sections */
 
 	mov.b	#0x00, r0l		/* r0l: 0 */
@@ -195,6 +218,8 @@ __start:
 	sstr.b				/* Clear near .bss */
 
 /* Clear far .bss sections */
+
+	showprogress 'B'
 
 #ifdef CONFIG_M16C_HAVEFARRAM
 # warning "Far RAM support not implemented"
@@ -211,9 +236,34 @@ __start:
 
 /* Initialize far .data sections (.rodata is not moved) */
 
+	showprogress 'C'
+
 #ifdef CONFIG_M16C_HAVEFARRAM
 # warning "Far RAM support not implemented"
 #endif
+
+/* Perform early serial initialization */
+
+#ifdef CONFIG_USE_EARLYSERIALINIT
+	.globl	_up_earlyserialinit	/* Early initialization of serial driver */
+	jsr.a	 _up_earlyserialinit	/* Call it */
+	showprogress 'D'
+#endif
+
+/* Call C++ constructors */
+
+#ifdef CONFIG_CPLUSPLUS
+#  warning "No C++ support yet"
+	showprogress 'E'
+#endif
+
+/* Initialize onboard LEDs */
+
+#ifdef CONFIG_ARCH_LEDS
+	.globl	_up_ledinit		/* Boot LED setup */
+	jsr.a	_up_ledinit		/* Call it */
+#endif
+	showprogress '\n'
 
 /* Pass control to NuttX */
 
