@@ -242,10 +242,10 @@ __start:
 # warning "Far RAM support not implemented"
 #endif
 
-/* Perform early serial initialization */
+/* Perform early console initialization */
 
 #ifdef CONFIG_USE_EARLYSERIALINIT
-	.globl	_up_earlyconsoleinit	/* Early initialization of serial driver */
+	.globl	_up_earlyconsoleinit	/* Early initialization of console driver */
 	jsr.a	 _up_earlyconsoleinit	/* Call it */
 	showprogress 'D'
 #endif
