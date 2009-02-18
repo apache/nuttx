@@ -424,10 +424,10 @@ __start0:
 
 	showprogress 'A'
 
-	/* Perform early serial initialization */
+	/* Perform early console initialization */
 
 #ifdef CONFIG_USE_EARLYSERIALINIT
-	mov.l   .Learlyser, r0		/* Address of up_earlyconsoleinit */
+	mov.l   .Learlyconsole, r0	/* Address of up_earlyconsoleinit */
 	jsr     @r0			/* Call it */
 	or      r0, r0			/* Delay slot */
 #endif
@@ -482,7 +482,7 @@ __start0:
 .Lebss:
 	.long   _ebss
 #ifdef CONFIG_USE_EARLYSERIALINIT
-.Learlyser:
+.Learlyconsole:
 	.long	_up_earlyconsoleinit
 #endif
 .Llowsetup:
