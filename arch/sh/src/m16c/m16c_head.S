@@ -245,8 +245,8 @@ __start:
 /* Perform early serial initialization */
 
 #ifdef CONFIG_USE_EARLYSERIALINIT
-	.globl	_up_earlyserialinit	/* Early initialization of serial driver */
-	jsr.a	 _up_earlyserialinit	/* Call it */
+	.globl	_up_earlyconsoleinit	/* Early initialization of serial driver */
+	jsr.a	 _up_earlyconsoleinit	/* Call it */
 	showprogress 'D'
 #endif
 

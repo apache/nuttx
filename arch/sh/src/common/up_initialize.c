@@ -136,10 +136,15 @@ void up_initialize(void)
   devnull_register();   /* Standard /dev/null */
 #endif
 
-  /* Initialize the serial device driver */
+  /* Initialize the console device driver.  NOTE that the naming
+   * implies that the console is a serial driver.  That is usually the case,
+   * however, if no UARTs are enabled, the console could als be provided
+   * through some other device, such as an LCD.  Architecture-specific logic
+   * will have to detect that case.
+   */
 
 #ifdef CONFIG_USE_SERIALDRIVER
-  up_serialinit();
+  up_consoleinit();
 #elif defined(CONFIG_DEV_LOWCONSOLE)
   lowconsole_init();
 #endif

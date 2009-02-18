@@ -55,7 +55,12 @@
 #undef  CONFIG_SUPPRESS_SCI_CONFIG    /* DEFINED: Do not reconfig SCI */
 #undef  CONFIG_DUMP_ON_EXIT           /* DEFINED: Dump task state on exit */
 
-/* Determine which (if any) console driver to use */
+/* Determine which (if any) console driver to use.  NOTE that the naming
+ * implies that the console is a serial driver.  That is usually the case,
+ * however, if no UARTs are enabled, the console could als be provided
+ * through some other device, such as an LCD.  Architecture-specific logic
+ * will have to detect that case.
+ */
 
 #if CONFIG_NFILE_DESCRIPTORS == 0 || defined(CONFIG_DEV_LOWCONSOLE)
 #  undef CONFIG_USE_SERIALDRIVER
@@ -142,11 +147,11 @@ extern void up_vectorfiq(void);
 /* Defined in up_serial.c */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-extern void up_earlyserialinit(void);
-extern void up_serialinit(void);
+extern void up_earlyconsoleinit(void);
+extern void up_consoleinit(void);
 #else
-# define up_earlyserialinit()
-# define up_serialinit()
+# define up_earlyconsoleinit()
+# define up_consoleinit()
 #endif
 
 /* Defined in drivers/lowconsole.c */
