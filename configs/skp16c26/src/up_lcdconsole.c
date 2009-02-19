@@ -56,7 +56,7 @@
 #  undef HAVE_SERIALCONSOLE
 #endif
 
-#ifndef HAVE_SERIALCONSOLE
+#if !defined(HAVE_SERIALCONSOLE) && defined(CONFIG_ARCH_LCD)
 
 /************************************************************************************
  * Definitions
@@ -71,22 +71,8 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Public Funtions
+ * Public Functions
  ************************************************************************************/
-
-/************************************************************************************
- * Name: up_lowsetup
- *
- * Description:
- *   This performs basic initialization of the hardware used for the console.
- *   Its purpose is to get the console output availabe as soon as possible.
- *
- ************************************************************************************/
-
-void up_lowsetup(void)
-{
-#	warning "To be provided"
-}
 
 /************************************************************************************
  * Name: up_earlyconsoleinit
@@ -98,10 +84,11 @@ void up_lowsetup(void)
  *
  ************************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DEV_LOWCONSOLE)
+#ifdef CONFIG_USE_EARLYSERIALINIT
+# warning "You probably need to define CONFIG_ARCH_LOWCONSOLE"
 void up_earlyconsoleinit(void)
 {
-  /* In this context, up_earlyconsoleinit does not need to do anything. */
+  /* There is probably a problem if we are here */
 }
 #endif
 
@@ -114,10 +101,13 @@ void up_earlyconsoleinit(void)
  *
  ************************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DEV_LOWCONSOLE)
+#if CONFIG_USE_SERIALDRIVER
+# warning "You probably need to define CONFIG_ARCH_LOWCONSOLE"
 void up_consoleinit(void)
 {
-  /* In this context, up_earlyconsoleinit does not need to do anything. */
+  /* There is probably a problem if we are here */
+
+   lowconsole_init();
 }
 #endif
 
@@ -131,7 +121,7 @@ void up_consoleinit(void)
 
 void up_lowputc(char ch)
 {
-#	warning "To be provided"
+  up_lcdputc(ch);
 }
 
 /************************************************************************************
@@ -144,10 +134,8 @@ void up_lowputc(char ch)
 
 int up_putc(int ch)
 {
-  /* Same as up_lowputc in this context */
-
-  up_lowputc(ch);
+  up_lcdputc(ch);
   return ch;
 }
 
-#endif /* HAVE_SERIALCONSOLE */
+#endif /* !HAVE_SERIALCONSOLE && CONFIG_ARCH_LCD */

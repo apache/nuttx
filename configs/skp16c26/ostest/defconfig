@@ -59,7 +59,9 @@
 #   stack in bytes.  If not defined, the user task stacks will be
 #   used during interrupt handling.
 # CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
-#
+# CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to skp16c26.
+# CONFIG_ARCH_LCD - Configure LCD.  Unique to skp16c26.
+
 CONFIG_ARCH=sh
 CONFIG_ARCH_SH=y
 CONFIG_ARCH_CHIP=m16c
@@ -74,6 +76,8 @@ CONFIG_DRAM_END=(CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
 CONFIG_BOARD_LOOPSPERMSEC=16945
 CONFIG_ARCH_INTERRUPTSTACK=128
 CONFIG_ARCH_STACKDUMP=y
+CONFIG_ARCH_LEDS=n
+CONFIG_ARCH_LCD=y
 
 #
 # M16C specific device driver settings
