@@ -56,7 +56,7 @@
 #  undef HAVE_SERIALCONSOLE
 #endif
 
-#if !defined(HAVE_SERIALCONSOLE) && defined(CONFIG_ARCH_LCD)
+#if !defined(HAVE_SERIALCONSOLE) && defined(CONFIG_ARCH_LCD) && defined(CONFIG_LCD_CONSOLE)
 
 /************************************************************************************
  * Definitions
