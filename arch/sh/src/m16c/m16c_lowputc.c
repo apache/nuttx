@@ -49,12 +49,6 @@
 #include "up_internal.h"
 #include "m16c_uart.h"
 
-/* Is there any serial support?  This might be the case if the board does
- * not have serial ports but supports stdout through, say, an LCD.
- */
-
-#if !defined(CONFIG_UART0_DISABLE) && !defined(CONFIG_UART1_DISABLE) && !defined(CONFIG_UART2_DISABLE)
-
 /**************************************************************************
  * Private Definitions
  **************************************************************************/
@@ -65,26 +59,40 @@
 #  define M16C_XIN_PRESCALER 1
 #endif
 
-/* We know that we have a serial port enabled.  Is one of them a serial console? */
+/* Is there any serial support?  This might be the case if the board does
+ * not have serial ports but supports stdout through, say, an LCD.
+ */
+
+#if defined(CONFIG_UART0_DISABLE) || defined(CONFIG_UART1_DISABLE) || defined(CONFIG_UART2_DISABLE)
+#  define HAVE_SERIAL
+#else
+#  undef HAVE_SERIAL
+#endif
+
+/* Is one of the serial ports a console? */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE) && !defined(CONFIG_UART0_DISABLE)
-#  define HAVE_CONSOLE 1
+#  define HAVE_SERIALCONSOLE 1
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_UART2_SERIAL_CONSOLE
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE) && !defined(CONFIG_UART1_DISABLE)
-#  define HAVE_CONSOLE 1
+#  define HAVE_SERIALCONSOLE 1
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART2_SERIAL_CONSOLE
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE) && !defined(CONFIG_UART2_DISABLE)
-#  define HAVE_CONSOLE 1
+#  define HAVE_SERIALCONSOLE 1
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #else
-#  undef HAVE_CONSOLE
+#  if defined(CONFIG_UART0_SERIAL_CONSOLE) || defined(CONFIG_UART1_SERIAL_CONSOLE)|| defined(CONFIG_UART2_SERIAL_CONSOLE)
+#    error "A serial console selected, but corresponding UART not enabled"
+#  endif
+#  undef HAVE_SERIALCONSOLE
 #endif
 
 /* Select UART parameters for the selected console */
 
+#ifdef HAVE_SERIALCONSOLE
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
 #  define M16C_UART_BASE     M16C_UART0_BASE
 #  define M16C_UART_BAUD     CONFIG_UART0_BAUD
@@ -155,6 +163,8 @@
 #define M16C_UART_BRG_VALUE \
 	((M16C_XIN_FREQ / (16 * M16C_XIN_PRESCALER * M16C_UART_BAUD)) - 1)
 
+#endif /* HAVE_SERIALCONSOLE */
+
 /**************************************************************************
  * Private Types
  **************************************************************************/
@@ -183,42 +193,17 @@
  *
  **************************************************************************/
 
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIALCONSOLE
 static inline int up_txready(void)
 {
   /* Check the TI bit in the CI register.  1=Transmit buffer empty */
 
   return ((getreg8(M16C_UART_BASE + M16C_UART_C1) & UART_C1_TI) != 0);
 }
-#endif
+#endif /* HAVE_SERIALCONSOLE */
 
 /**************************************************************************
- * Public Functions
- **************************************************************************/
-
-/**************************************************************************
- * Name: up_lowputc
- *
- * Description:
- *   Output one byte on the serial console
- *
- **************************************************************************/
-
-void up_lowputc(char ch)
-{
-#ifdef HAVE_CONSOLE
-  /* Wait until the transmit buffer is empty */
-
-  while (!up_txready());
-
-  /* Write the data to the transmit buffer */
-
-  putreg16((uint16)ch, M16C_UART_BASE + M16C_UART_TB);
-#endif
-}
-
-/**************************************************************************
- * Name: up_lowsetup
+ * Name: up_lowserialsetup
  *
  * Description:
  *   This performs basic initialization of the UART used for the serial
@@ -227,9 +212,9 @@ void up_lowputc(char ch)
  *
  **************************************************************************/
 
-void up_lowsetup(void)
+#if defined(HAVE_SERIALCONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
+static inline void up_lowserialsetup(void)
 {
-#if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   ubyte regval;
 
   /* Set the baud rate generator */
@@ -292,10 +277,61 @@ void up_lowsetup(void)
   /* Read any data left in the RX fifo */
 
   regval = (ubyte)getreg16(M16C_UART_BASE + M16C_UART_RB);
+}
+#endif /* HAVE_SERIALCONFIG && !CONFIG_SUPPRESS_UART_CONFIG */
+
+/**************************************************************************
+ * Public Functions
+ **************************************************************************/
+
+/**************************************************************************
+ * Name: up_lowputc
+ *
+ * Description:
+ *   Output one byte on the serial console.
+ *
+ **************************************************************************/
+
+#ifdef HAVE_SERIAL  /* Assume needed if we have serial. See for e.g., up_lcd.c */
+void up_lowputc(char ch)
+{
+#ifdef HAVE_SERIALCONSOLE
+  /* Wait until the transmit buffer is empty */
+
+  while (!up_txready());
+
+  /* Write the data to the transmit buffer */
+
+  putreg16((uint16)ch, M16C_UART_BASE + M16C_UART_TB);
 #endif
 }
+#endif
 
-#elif defined(CONFIG_UART0_SERIAL_CONSOLE) || defined(CONFIG_UART1_SERIAL_CONSOLE)|| defined(CONFIG_UART2_SERIAL_CONSOLE)
-#    error "A serial console selected, but corresponding UART not enabled"
-#endif /*  !CONFIG_UART0_DISABLE && !CONFIG_UART1_DISABLE && !CONFIG_UART2_DISABLE */
+/**************************************************************************
+ * Name: up_lowsetup
+ *
+ * Description:
+ *   This performs basic initialization of the UART used for the serial
+ *   console.  Its purpose is to get the console output availabe as soon
+ *   as possible.
+ *
+ **************************************************************************/
 
+void up_lowsetup(void)
+{
+  /* Here we initialize the serial console early so that it can be used
+   * for bring-up debugging.
+   */
+
+#if defined(HAVE_SERIALCONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
+  up_lowserialsetup()
+#endif
+
+  /* The LCD is initialized here to because it may be that the LCD is
+   * used for console output.
+   */
+
+#ifdef CONFIG_ARCH_LCD
+  up_lcdinit();
+#endif
+}
