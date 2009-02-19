@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sh/src/common/up_internal.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -188,6 +188,16 @@ extern void up_ledoff(int led);
 # define up_ledinit()
 # define up_ledon(led)
 # define up_ledoff(led)
+#endif
+
+/* Defined in board/up_lcd.c */
+
+#ifdef CONFIG_ARCH_LCD
+extern void up_lcdinit(void);
+extern void up_lcdputc(char ch);
+#else
+# define up_lcdinit()
+# define up_lcdputc(ch)
 #endif
 
 /* Defined in board/up_network.c */
