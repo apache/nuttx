@@ -106,25 +106,31 @@
 /* Is there a serial console? */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE) && !defined(CONFIG_UART0_DISABLE)
-#  define HAVE_CONSOLE 1
+#  define HAVE_SERIALCONSOLE 1
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_UART2_SERIAL_CONSOLE
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE) && !defined(CONFIG_UART1_DISABLE)
-#  define HAVE_CONSOLE 1
+#  define HAVE_SERIALCONSOLE 1
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART2_SERIAL_CONSOLE
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE) && !defined(CONFIG_UART2_DISABLE)
-#  define HAVE_CONSOLE 1
+#  define HAVE_SERIALCONSOLE 1
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #else
 #  if defined(CONFIG_UART0_SERIAL_CONSOLE) || defined(CONFIG_UART1_SERIAL_CONSOLE)|| defined(CONFIG_UART2_SERIAL_CONSOLE)
 #    error "Serial console selected, but corresponding UART not enabled"
 #  endif
-#  undef HAVE_CONSOLE
+#  undef HAVE_SERIALCONSOLE
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_UART2_SERIAL_CONSOLE
+#endif
+
+#if defined(HAVE_SERIALCONSOLE) && defined(CONFIG_LCD_CONSOLE)
+#  error "Both serial and LCD consoles are defined"
+#elif !defined(HAVE_SERIALCONSOLE) && !defined(CONFIG_LCD_CONSOLE)
+#  warning "No console is defined"
 #endif
 
 #ifdef CONFIG_USE_SERIALDRIVER
@@ -469,7 +475,7 @@ static inline void up_restoreuartint(struct up_dev_s *priv, ubyte enables)
  * Name: up_waittxready
  ****************************************************************************/
 
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIALCONSOLE
 static inline void up_waittxready(struct up_dev_s *priv)
 {
   int tmp;
@@ -1091,7 +1097,7 @@ void up_earlyconsoleinit(void)
 
   /* Configuration whichever one is the console */
 
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIALCONSOLE
   CONSOLE_DEV.isconsole = TRUE;
   up_setup(&CONSOLE_DEV);
 #endif
@@ -1110,7 +1116,7 @@ void up_consoleinit(void)
 {
   /* Register the console */
 
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIALCONSOLE
   (void)uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
@@ -1137,7 +1143,7 @@ void up_consoleinit(void)
 
 int up_putc(int ch)
 {
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIALCONSOLE
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
   ubyte  ucon;
 
@@ -1174,7 +1180,7 @@ int up_putc(int ch)
 
 int up_putc(int ch)
 {
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIALCONSOLE
   /* Check for LF */
 
   if (ch == '\n')

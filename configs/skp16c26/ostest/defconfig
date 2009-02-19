@@ -120,6 +120,10 @@ CONFIG_UART1_2STOP=0
 CONFIG_UART2_2STOP=0
 
 #
+# Enable LCD console
+CONFIG_LCD_CONSOLE=y
+
+#
 # General build options
 #
 # CONFIG_RRLOAD_BINARY - make the rrload binary format used with

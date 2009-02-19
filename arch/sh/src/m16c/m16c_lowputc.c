@@ -90,6 +90,12 @@
 #  undef HAVE_SERIALCONSOLE
 #endif
 
+#if defined(HAVE_SERIALCONSOLE) && defined(CONFIG_LCD_CONSOLE)
+#  error "Both serial and LCD consoles are defined"
+#elif !defined(HAVE_SERIALCONSOLE) && !defined(CONFIG_LCD_CONSOLE)
+#  warning "No console is defined"
+#endif
+
 /* Select UART parameters for the selected console */
 
 #ifdef HAVE_SERIALCONSOLE
@@ -292,7 +298,7 @@ static inline void up_lowserialsetup(void)
  *
  **************************************************************************/
 
-#ifdef HAVE_SERIAL  /* Assume needed if we have serial. See for e.g., up_lcd.c */
+#if defined(HAVE_SERIAL) && !defined(CONFIG_LCD_CONSOLE)
 void up_lowputc(char ch)
 {
 #ifdef HAVE_SERIALCONSOLE
