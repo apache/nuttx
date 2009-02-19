@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/lowconsole.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@ static int     lowconsole_ioctl(struct file *filep, int cmd, unsigned long arg);
  * Private Variables
  ****************************************************************************/
 
-struct file_operations g_serialops =
+struct file_operations g_consoleops =
 {
   0,                /* open */
   0,                /* close */
@@ -77,7 +77,7 @@ struct file_operations g_serialops =
   0,                /* seek */
   lowconsole_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , 0              /* poll */
+  , 0               /* poll */
 #endif
 };
 
@@ -128,5 +128,5 @@ static ssize_t lowconsole_write(struct file *filep, const char *buffer, size_t b
 
 void lowconsole_init(void)
 {
-  (void)register_driver("/dev/console", &g_serialops, 0666, NULL);
+  (void)register_driver("/dev/console", &g_consoleops, 0666, NULL);
 }
