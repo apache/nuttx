@@ -71,25 +71,6 @@
 
 #define	M16C_XIN_FREQ	20000000	/* 20MHz */
 
-/* Switches */
-
-#define	S1 		p8_3 
-#define S2 		p8_2 
-#define S3 		p8_1 
-#define S1_DDR		pd8_3
-#define S2_DDR		pd8_2
-#define S3_DDR		pd8_1
-
-/* LEDs */
-
-#define	RED_LED		p8_0
-#define	YLW_LED		p7_4
-#define	GRN_LED		p7_2
-
-#define	RED_DDR 	pd8_0		/* LED port direction register */
-#define	YLW_DDR 	pd7_4
-#define	GRN_DDR 	pd7_2
-
 /* Interrupt Priority Levels ********************************************************/
 
 /* IPL settings */
@@ -126,21 +107,29 @@
 #undef  M16C_INT0_PRIO           /* INT0 interrupt priority */
 #undef  M16C_INT1_PRIO           /* INT1 interrupt priority */
 
-/********************************************************************************/
-/* Macro Definitions 															*/
-/********************************************************************************/
+/* LED definitions **********************************************************/
 
-#define LED_ON      	0
-#define LED_OFF     	1
+                                 /* GREEN YELLOW RED */
+#define LED_STARTED       0      /*  OFF   OFF   OFF */
+#define LED_HEAPALLOCATE  1      /*  ON    OFF   OFF */
+#define LED_IRQSENABLED   2      /*  OFF   ON    OFF */
+#define LED_STACKCREATED  3      /*  ON    ON    OFF */
+#define LED_INIRQ         4      /*  ON    OFF   ON  */
+#define LED_SIGNAL        5      /*  OFF   ON    ON  */
+#define LED_ASSERTION     6      /*  ON    ON    ON  */
+#define LED_PANIC         7      /*  NC**  NC**  ON* */
 
-/* Use these macros for switch inputs */
+/* *=FLASHING **=if INIRQ, SIGNAL, or ASSERTION will be flashing */
 
-#define ENABLE_SWITCHES {S1_DDR = 0; S2_DDR = 0; S3_DDR = 0;}
+/* BUTTON definitions **************************************************************/
 
-/* Use these macros to control the LEDs */
+#define SW1_PRESSED       0x01   /* Bit 0: 1=SW1 pressed */
+#define SW2_PRESSED       0x02   /* Bit 1: 1=SW2 pressed */
+#define SW3_PRESSED       0x04   /* Bit 2: 1=SW3 pressed */
 
-#define LED(led, state) ((led) = !state)
-#define ENABLE_LEDS {RED_LED = LED_OFF; YLW_LED = LED_OFF; GRN_LED = LED_OFF; RED_DDR = 1; YLW_DDR = 1; GRN_DDR = 1; }
+/************************************************************************************
+ * Macro Definitions
+ ************************************************************************************/
 
 /************************************************************************************
  * Inline Functions

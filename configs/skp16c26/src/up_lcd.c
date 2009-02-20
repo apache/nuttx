@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <ctype.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -50,23 +51,34 @@
  * Definitions
  ************************************************************************************/
 
+/* LCD dimensions *******************************************************************/
+
+#define LCD_NLINES       2          /* Two lines */
+#define LCD_NCHARS       8          /* Eight characters per line */
+
 /* LCD commands *********************************************************************/
 
-#define LCD_CLEAR        0x01    /* Clear LCD display and home cursor */
-#define LCD_HOME_L1      0x80    /* move cursor to line 1 */
-#define LCD_HOME_L2      0xc0    /* move cursor to line 2 */
-#define CURSOR_MODE_DEC  0x04    /* Cursor auto decrement after R/W */
-#define CURSOR_MODE_INC  0x06    /* Cursor auto increment after R/W */
-#define FUNCTION_SET     0x28    /* Setup, 4 bits,2 lines, 5X7 */
-#define LCD_CURSOR_ON    0x0e    /* Display ON with Cursor */
-#define LCD_CURSOR_OFF   0x0c    /* Display ON with Cursor off */
-#define LCD_CURSOR_BLINK 0x0d    /* Display on with blinking cursor */
-#define LCD_CURSOR_LEFT  0x10    /* Move Cursor Left One Position */
-#define LCD_CURSOR_RIGHT 0x14    /* Move Cursor Right One Position */
+#define LCD_CLEAR        0x01       /* Clear LCD display and home cursor */
+#define CURSOR_MODE_DEC  0x04       /* Cursor auto decrement after R/W */
+#define CURSOR_MODE_INC  0x06       /* Cursor auto increment after R/W */
+#define LCD_CURSOR_ON    0x0e       /* Display ON with Cursor */
+#define LCD_CURSOR_OFF   0x0c       /* Display ON with Cursor off */
+#define LCD_CURSOR_BLINK 0x0d       /* Display on with blinking cursor */
+#define LCD_CURSOR_LEFT  0x10       /* Move Cursor Left One Position */
+#define LCD_CURSOR_RIGHT 0x14       /* Move Cursor Right One Position */
+#define FUNCTION_SET     0x28       /* Setup, 4 bits,2 lines, 5X7 */
+#define LCD_CGRAM        0x40       /* Map characters to CG RAM */
+#define LCD_POS_L1(p)    (0x80 | p) /* Move cursor to line 1, character p+1 */
+#define LCD_POS_L2(p)    (0xc0 | p) /* Move cursor to line 2, character p+1 */
+#define LCD_HOME_L1      0x80       /* Move cursor to line 1 */
+#define LCD_HOME_L2      0xc0       /* Move cursor to line 2 */
 
 /************************************************************************************
  * Private Data
  ************************************************************************************/
+
+static ubyte g_nchars;              /* Number of characters in lines 2 */
+static ubyte g_line[LCD_NCHARS];    /* The content of lines 2 */
 
 /************************************************************************************
  * Private Functions
@@ -166,6 +178,32 @@ void up_lcdwrite(boolean data, ubyte ch)
 }
 
 /************************************************************************************
+ * Name: up_scroll
+ ************************************************************************************/
+
+static void up_scroll(void)
+{
+  int i;
+
+  /* Clear the display and position the cursor at the beginning of line 1 */
+
+  up_lcdwrite(FALSE, LCD_CLEAR);
+  up_lcdwrite(FALSE, LCD_HOME_L1);
+
+  /* Copy line 2 to line 1 */
+
+  for (i = 0; i < g_nchars; i++)
+    {
+      up_lcdwrite(TRUE, g_line[i]);
+    }
+
+  /* Position the cursor at the beginning of line 2 */
+
+  up_lcdwrite(FALSE, LCD_HOME_L2);
+  g_nchars = 0;
+}
+
+/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -220,7 +258,23 @@ void up_lcdinit(void)
 
 void up_lcdputc(char ch)
 {
-  up_lcdwrite(TRUE, ch);
+  /* Check for new line */
+
+  if (ch == '\n')
+    {
+      up_scroll();
+    }
+
+  /* Should we wrap to truncate at the end of line???  Let's truncate.  In either
+   * case, let's ignore all other non-printable characters.
+   */
+
+  else if (g_nchars < LCD_NCHARS && isprint(ch))
+    {
+      up_lcdwrite(TRUE, ch);
+      g_line[g_nchars] = ch;
+      g_nchars++;
+    }
 }
 
 #endif /* CONFIG_ARCH_LCD */

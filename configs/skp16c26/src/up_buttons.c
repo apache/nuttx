@@ -48,6 +48,14 @@
  * Definitions
  ****************************************************************************/
 
+/* The SKP62C26 has 3 buttons control by bits 1, 2, and 3 in port 8. */
+
+#define SW1_BIT             (1 << 3)   /* Bit 3, port 8 */
+#define SW2_BIT             (1 << 2)   /* Bit 2, port 8 */
+#define SW3_BIT             (1 << 1)   /* Bit 1, port 8 */
+
+#define SW_PRESSED(p,b)     (((p) & (b)) == 0)
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -67,6 +75,11 @@
 #ifdef CONFIG_ARCH_BUTTONS
 void up_buttoninit(void)
 {
+  ubyte regval;
+
+  regval  = getreg8(M16C_PD8);
+  regval |= (SW1_BIT | SW2_BIT | SW3_BIT);
+  putreg8(regval, M16C_PD8);
 }
 
 /****************************************************************************
@@ -75,5 +88,24 @@ void up_buttoninit(void)
 
 ubyte up_buttons(void)
 {
+  ubyte swset  = 0;
+  ubyte regval = getreg8(M16C_P8);
+
+  if (SW_PRESSED(regval, SW1_BIT))
+    {
+      swset |= SW1_PRESSED;
+    }
+
+  if (SW_PRESSED(regval, SW2_BIT))
+    {
+      swset |= SW2_PRESSED;
+    }
+
+  if (SW_PRESSED(regval, SW3_BIT))
+    {
+      swset |= SW3_PRESSED;
+    }
+
+  return swset;
 }
 #endif /* CONFIG_ARCH_BUTTONS */
