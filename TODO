@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 20, 2008)
+NuttX TODO List (Last updated February 19, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (7)  Task/Scheduler (sched/)
@@ -24,8 +24,8 @@ NuttX TODO List (Last updated November 20, 2008)
   (6)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
-  (1)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
-  (2)  Renesas M16C/26 (arch/sh/src/m16c)
+  (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
+  (4)  Renesas M16C/26 (arch/sh/src/m16c)
   (8)  z80/z8/ez80 (arch/z80/)
   (8)  z16 (arch/z16/)
 
@@ -571,6 +571,26 @@ o Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   Priority:     Low -- because the SH-1, SH7032, is very old and only of historical
                 interest.
 
+  Description:  arch/sh has been restructured to support M16C.  Need to verify that
+                SH-1 still builds.
+  Status:       Open
+  Priority:     Low
+
+  Description:  The M16C target cannot be built.  The GNU m16c-elf-ld link fails with 
+                the following message:
+
+                m32c-elf-ld: BFD (GNU Binutils) 2.19 assertion fail /home/Owner/projects/nuttx/buildroot/toolchain_build_m32c/binutils-2.19/bfd/elf32-m32c.c:482
+
+                Where the reference line is:
+
+                /* If the symbol is out of range for a 16-bit address,
+                   we must have allocated a plt entry.  */
+                BFD_ASSERT (*plt_offset != (bfd_vma) -1);
+
+                No workaround is known at this time.
+  Status:       Open
+  Priority:     High -- this is a show stopper for M16C.
+
 o Renesas M16C/26 (arch/sh/src/m16c)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -579,9 +599,13 @@ o Renesas M16C/26 (arch/sh/src/m16c)
   Priority:    Low
 
   Description: Serial drivers were developed for the M16C, however, the SKP16C26
-               StarterKit has not serial connectors.
+               StarterKit has no serial connectors.
   Status:      Open
   Priority:    Low
+
+  Description: Should implement SPI, I2C, Virual EEPROM, FLASH, RTC drivers
+  Status:      Open
+  Priority:    Medium
 
 o z80/z8/ez80 (arch/z80)
  ^^^^^^^^^^^^^^^^^^^^^^^
