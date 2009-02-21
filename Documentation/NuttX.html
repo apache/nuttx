@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: February 16, 2009</p>
+      <p>Last Updated: February 20, 2009</p>
     </td>
   </tr>
 </table>
@@ -877,8 +877,21 @@
     <p>
       <b>STATUS:</b>
       Initial source files released in nuttx-0.4.2.
-      At this point, the port has not been integrated;
-      That milestone will be announced in NuttX release notes when it is achieved.
+      At this point, the port has not been integrated;	the target cannot be built
+      because the GNU <code>m16c-elf-ld</code> link fails with  the following message:
+    </p>
+    <ul>
+    <code>m32c-elf-ld: BFD (GNU Binutils) 2.19 assertion fail /home/Owner/projects/nuttx/buildroot/toolchain_build_m32c/binutils-2.19/bfd/elf32-m32c.c:482</code>
+    </ul>
+    <p>Where the reference line is:</p>
+    <ul><pre>
+/* If the symbol is out of range for a 16-bit address,
+   we must have allocated a plt entry.  */
+BFD_ASSERT (*plt_offset != (bfd_vma) -1);
+</pre></ul>
+    <p>
+      No workaround is known at this time.  This is a show stopper for M16C for
+      the time being.
     </p>
    </td>
 </tr>
@@ -1316,7 +1329,19 @@ buildroot-0.1.2 2007-11-06 &lt;spudmonkey@racsa.co.cr&gt
 <pre><ul>
 nuttx-0.4.2 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* Add support for the Renesas M16C MCU and the SKP16C26 StarterKit.
+	* Add support for the Renesas M16C MCU and the SKP16C26 StarterKit. However, 
+	  the target cannot be built because the GNU m16c-elf-ld link fails with 
+	  the following message:
+
+	    m32c-elf-ld: BFD (GNU Binutils) 2.19 assertion fail /home/Owner/projects/nuttx/buildroot/toolchain_build_m32c/binutils-2.19/bfd/elf32-m32c.c:482
+
+	  Where the reference line is:
+
+	    /* If the symbol is out of range for a 16-bit address,
+	       we must have allocated a plt entry.  */
+	     BFD_ASSERT (*plt_offset != (bfd_vma) -1);
+
+	  No workaround is known at this time.  This is a show stopper for M16C.
 	* Kevin Franzen has integrated and verified the ez80Acclaim! port and he has
 	  graciously provided the following critical changes:
 	  - Fix interrupt vectors positioning; they were being positioned wrong by
