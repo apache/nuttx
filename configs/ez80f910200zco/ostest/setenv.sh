@@ -44,7 +44,7 @@ fi
 # Instead, alias are provided for all of the ZDS-II command line tools.
 # Version 4.10.1 installed in the default location is assumed here.
 #
-ZDSBINDIR="C:/Program\ Files/ZiLOG/ZDSII_eZ80Acclaim!_4.10.1/bin"
+ZDSBINDIR="C:/Program\ Files/ZiLOG/ZDSII_eZ80Acclaim!_4.11.1/bin"
 alias ez8asm="${ZDSBINDIR}/ez8asm.exe"
 alias ez8cc="${ZDSBINDIR}/ez8cc.exe"
 alias ez8lib="${ZDSBINDIR}/ez8lib.exe"

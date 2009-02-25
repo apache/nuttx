@@ -4,8 +4,15 @@ README.txt
 ZDS-II Compiler Versions
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-4.11.0
-  This is the only version that this code has been built against.
+Different configurations have been build for this board using ZDS-11
+Versions 4.11.0 and 4.11.1.  You have to check the files */Make.defs
+to see how the build is configured:  Check the definitions of
+ZDSVERSION (if present) and ZDSINSTALLDIR.
+
+NOTE:  Different versions of the ZDS-II compiler may also require
+different versions of .linkcmd and .zdsproj files as well.
+
+Version 4.11.0
 
   Although it compiles without error, the 4.11.0 compiler generates
   bad code on one of the files, mm/mm_initialize.c.  Below is a simple work-

@@ -1,4 +1,4 @@
-<project type="Executable" project-type="Standard" configuration="Debug" created-by="c:4.11:07071801" modified-by="c:4.11:07071801">
+<project type="Executable" project-type="Standard" configuration="Debug" created-by="c:4.11:07071801" modified-by="c:4.11:08011102">
 <cpu>eZ80F91</cpu>
 
 <!-- file information -->
@@ -42,7 +42,7 @@
 </tool>
 <tool name="Debugger">
 <options>
-<option name="target" type="string" change-action="rebuild">eZ80F91ModDevKit_Flash</option>
+<option name="target" type="string" change-action="rebuild">eZ80DevPlatform_F91_Flash</option>
 <option name="debugtool" type="string" change-action="none">USBSmartCable</option>
 <option name="usepageerase" type="boolean" change-action="none">true</option>
 </options>
@@ -100,13 +100,13 @@
 <option name="xref" type="boolean" change-action="none">true</option>
 <option name="undefisfatal" type="boolean" change-action="none">true</option>
 <option name="warnisfatal" type="boolean" change-action="none">false</option>
-<option name="sort" type="string" change-action="none">NAME</option>
+<option name="sort" type="string" change-action="none">ADDRESS</option>
 <option name="padhex" type="boolean" change-action="build">false</option>
 <option name="fplib" type="string" change-action="build">Real</option>
 <option name="useadddirectives" type="boolean" change-action="build">false</option>
 <option name="linkconfig" type="string" change-action="build">Standard</option>
 <option name="flashinfo" type="string" change-action="build">000000-0001FF</option>
-<option name="ram" type="string" change-action="build">B7E000-B7FFFF</option>
+<option name="ram" type="string" change-action="build">B8000-BfFFFF</option>
 <option name="rom" type="string" change-action="build">000000-03FFFF</option>
 <option name="extio" type="string" change-action="build">000000-00FFFF</option>
 <option name="intio" type="string" change-action="build">000000-0000FF</option>
