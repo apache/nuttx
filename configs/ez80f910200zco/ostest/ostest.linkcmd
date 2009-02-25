@@ -83,10 +83,10 @@ DEFINE __FLASH_ADDR_U_INIT_PARAM = $00
 
 define _SYS_CLK_FREQ = 50000000
 
-define _OSC_FREQ = 5000000
-define _SYS_CLK_SRC = 1
-define _OSC_FREQ_MULT = 10
-define __PLL_CTL0_INIT_PARAM = $41
+define _OSC_FREQ = 50000000
+define _SYS_CLK_SRC = 0
+define _OSC_FREQ_MULT = 1
+define __PLL_CTL0_INIT_PARAM = $0
 
 /* arch/z80/src/Makefile.zdsii will append target, object and library paths below */
 

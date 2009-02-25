@@ -37,7 +37,8 @@ include ${TOPDIR}/.config
 
 # These are the directories where the ZDS-II toolchain is installed
 
-ZDSINSTALLDIR		:= C:/Program\ Files/ZiLOG/ZDSII_eZ80Acclaim!_4.11.0
+ZDSVERSION		:= 4.11.1
+ZDSINSTALLDIR		:= C:/Program\ Files/ZiLOG/ZDSII_eZ80Acclaim!_$(ZDSVERSION)
 ZDSBINDIR		:= $(ZDSINSTALLDIR)/bin
 ZDSSTDINCDIR		:= $(ZDSINSTALLDIR)/include/std
 ZDSZILOGINCDIR		:= $(ZDSINSTALLDIR)/include/zilog
