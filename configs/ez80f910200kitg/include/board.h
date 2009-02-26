@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/ez80f910200kitg/include/board.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,10 @@
  * Definitions
  ****************************************************************************/
  
+/* Clocking */
+
+#define EZ80_SYS_CLK_FREQ           50000000
+
 /* LED pattern definitions */
 
 #define LED_STARTED                 0
