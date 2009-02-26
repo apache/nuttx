@@ -62,11 +62,6 @@
  * Definitions
  ****************************************************************************/
 
-/* The system clock frequency is defined in the linkcmd file */
-
-extern unsigned long SYS_CLK_FREQ;
-#define _DEFCLK ((unsigned long)&SYS_CLK_FREQ)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -291,7 +286,7 @@ static inline void ez80_waittxready(struct ez80_dev_s *priv)
 
 static inline void ez80_setbaud(struct ez80_dev_s *priv, uint24 baud)
 {
-  uint24 brg_divisor;
+  uint32 brg_divisor;
   ubyte lctl;
 
   /* The resulting BAUD and depends on the system clock frequency and the
@@ -304,7 +299,7 @@ static inline void ez80_setbaud(struct ez80_dev_s *priv, uint24 baud)
    * BRG_Divisor = SYSTEM_CLOCK_FREQUENCY / 16 / BAUD
    */
 
-   brg_divisor = ( _DEFCLK + (baud << 3)) / (baud << 4);
+   brg_divisor = (ez80_systemclock + (baud << 3)) / (baud << 4);
 
    /* Set the DLAB bit to enable access to the BRG registers */
 

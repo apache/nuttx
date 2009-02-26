@@ -57,9 +57,6 @@
 
 /* The system clock frequency is defined in the linkcmd file */
 
-extern unsigned long SYS_CLK_FREQ;
-#define _DEFCLK ((unsigned long)&SYS_CLK_FREQ)
-
 #ifdef CONFIG_UART0_SERIAL_CONSOLE
 #  define ez80_inp(offs)     inp((EZ80_UART0_BASE+(offs)))
 #  define ez80_outp(offs,val) outp((EZ80_UART0_BASE+(offs)), (val))
@@ -115,7 +112,7 @@ extern unsigned long SYS_CLK_FREQ;
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
 static void ez80_setbaud(void)
 {
-  uint24 brg_divisor;
+  uint32 brg_divisor;
   ubyte lctl;
 
   /* The resulting BAUD and depends on the system clock frequency and the
@@ -128,7 +125,7 @@ static void ez80_setbaud(void)
    * BRG_Divisor = SYSTEM_CLOCK_FREQUENCY / 16 / BAUD
    */
 
-   brg_divisor = ( _DEFCLK + (CONFIG_UART_BAUD << 3)) / (CONFIG_UART_BAUD << 4);
+   brg_divisor = (ez80_systemclock + (CONFIG_UART_BAUD << 3)) / (CONFIG_UART_BAUD << 4);
 
    /* Set the DLAB bit to enable access to the BRG registers */
 
