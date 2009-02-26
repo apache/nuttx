@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_loweruart.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,16 +58,16 @@
 /* The system clock frequency is defined in the linkcmd file */
 
 #ifdef CONFIG_UART0_SERIAL_CONSOLE
-#  define ez80_inp(offs)     inp((EZ80_UART0_BASE+(offs)))
-#  define ez80_outp(offs,val) outp((EZ80_UART0_BASE+(offs)), (val))
-#  define CONFIG_UART_BAUD      CONFIG_UART0_BAUD
+#  define ez80_inp(offs)       inp((EZ80_UART0_BASE+(offs)))
+#  define ez80_outp(offs,val)  outp((EZ80_UART0_BASE+(offs)), (val))
+#  define CONFIG_UART_BAUD     CONFIG_UART0_BAUD
 #  if CONFIG_UART0_BITS == 7
-#    define CONFIG_UART_BITS EZ80_UARTCHAR_7BITS
+#    define CONFIG_UART_BITS   EZ80_UARTCHAR_7BITS
 #  else
-#    define CONFIG_UART_BITS EZ80_UARTCHAR_8BITS
+#    define CONFIG_UART_BITS   EZ80_UARTCHAR_8BITS
 #  endif
 #  if CONFIG_UART0_2STOP != 0
-#    define CONFIG_UART_2STOP EZ80_UARTLCTl_2STOP
+#    define CONFIG_UART_2STOP  EZ80_UARTLCTl_2STOP
 #  else
 #    define CONFIG_UART_2STOP 0
 #  endif
@@ -79,18 +79,18 @@
 #    define CONFIG_UART_PARITY 0
 #  endif
 #else
-#  define ez80_inp(offs)     inp((EZ80_UART1_BASE+(offs)))
-#  define ez80_outp(offs.val) outp((EZ80_UART1_BASE+(offs)), (val))
-#  define CONFIG_UART_BAUD      CONFIG_UART1_BAUD
+#  define ez80_inp(offs)       inp((EZ80_UART1_BASE+(offs)))
+#  define ez80_outp(offs.val)  outp((EZ80_UART1_BASE+(offs)), (val))
+#  define CONFIG_UART_BAUD     CONFIG_UART1_BAUD
 #  if CONFIG_UART1_BITS == 7
-#    define CONFIG_UART_BITS EZ80_UARTCHAR_7BITS
+#    define CONFIG_UART_BITS   EZ80_UARTCHAR_7BITS
 #  else
-#    define CONFIG_UART_BITS EZ80_UARTCHAR_8BITS
+#    define CONFIG_UART_BITS   EZ80_UARTCHAR_8BITS
 #  endif
 #  if CONFIG_UART1_2STOP != 0
-#    define CONFIG_UART_2STOP EZ80_UARTLCTl_2STOP
+#    define CONFIG_UART_2STOP  EZ80_UARTLCTl_2STOP
 #  else
-#    define CONFIG_UART_2STOP 0
+#    define CONFIG_UART_2STOP  0
 #  endif
 #  if CONFIG_UART1_PARITY == 1 /* Odd parity */
 #    define CONFIG_UART_PARITY EZ80_UARTLCTL_PEN
