@@ -1,7 +1,7 @@
 ############################################################################
 # configs/ez80f910200zco/nettest/defconfig
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -58,8 +58,7 @@
 #   Define if the architecture suports prioritizaton of interrupts
 #   and the up_prioritize_irq() API.
 # CONFIG_BOARD_LOOPSPERMSEC - for delay loops
-# CONFIG_ENDIAN_BIG - Define for big-endian operation
-# CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
+# CONFIG_ENDIAN_BIG - Define for big endian (default is little endian)
 # CONFIG_DRAM_SIZE - Describes the installed DRAM.
 # CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
 # CONFIG_ARCH_BUTTONS -  Provide button APIs. Unique to board architecture.
@@ -84,7 +83,7 @@ CONFIG_ARCH_BUTTONS=n
 CONFIG_ARCH_TIMERHOOK=y
 
 #
-# eZ8 specific device driver settings
+# eZ80 specific device driver settings
 #
 # CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
 #   console and ttyS0 (default is the UART0). 
@@ -203,13 +202,13 @@ CONFIG_ARCH_LOWPUTC=y
 CONFIG_RR_INTERVAL=0
 CONFIG_SCHED_INSTRUMENTATION=n
 CONFIG_TASK_NAME_SIZE=0
-CONFIG_START_YEAR=2008
-CONFIG_START_MONTH=12
-CONFIG_START_DAY=7
+CONFIG_START_YEAR=2009
+CONFIG_START_MONTH=2
+CONFIG_START_DAY=25
 CONFIG_JULIAN_TIME=n
 CONFIG_HAVE_LOWUARTINIT=y
-CONFIG_DEV_CONSOLE=n
-CONFIG_DEV_LOWCONSOLE=n
+CONFIG_DEV_CONSOLE=y
+CONFIG_DEV_LOWCONSOLE=y
 
 #
 # The following can be used to disable categories of

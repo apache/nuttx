@@ -1,7 +1,7 @@
 #!/bin/bash
 # configs/ez80f910200zco/nettest/setenv.sh
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ fi
 # Instead, alias are provided for all of the ZDS-II command line tools.
 # Version 4.10.1 installed in the default location is assumed here.
 #
-ZDSBINDIR="C:/Program\ Files/ZiLOG/ZDSII_eZ80Acclaim!_4.10.1/bin"
+ZDSBINDIR="C:/Program\ Files/ZiLOG/ZDSII_eZ80Acclaim!_4.11.1/bin"
 alias ez8asm="${ZDSBINDIR}/ez8asm.exe"
 alias ez8cc="${ZDSBINDIR}/ez8cc.exe"
 alias ez8lib="${ZDSBINDIR}/ez8lib.exe"

@@ -1,7 +1,7 @@
 ############################################################################
 # configs/ez80f910200kitg/ostest/Make.defs
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,8 @@ include ${TOPDIR}/.config
 
 # These are the directories where the ZDS-II toolchain is installed
 
-ZDSINSTALLDIR		:= C:/Program\ Files/ZiLOG/ZDSII_eZ80Acclaim!_4.11.0
+ZDSVERSION		:= 4.11.1
+ZDSINSTALLDIR		:= C:/Program\ Files/ZiLOG/ZDSII_eZ80Acclaim!_$(ZDSVERSION)
 ZDSBINDIR		:= $(ZDSINSTALLDIR)/bin
 ZDSSTDINCDIR		:= $(ZDSINSTALLDIR)/include/std
 ZDSZILOGINCDIR		:= $(ZDSINSTALLDIR)/include/zilog
