@@ -35,10 +35,10 @@
 
 -FORMAT=OMF695,INTEL32
 -map -maxhexlen=64 -quiet -NOwarnoverlap -xref -unresolved=fatal
--sort NAME=ascending -warn -NOdebug -NOigcase
+-sort ADDRESS=ascending -warn -NOdebug -NOigcase
 
 RANGE ROM $000000 : $03FFFF
-RANGE RAM $B7E000 : $B7FFFF
+RANGE RAM $B80000 : $BFFFFF
 RANGE EXTIO $000000 : $00FFFF
 RANGE INTIO $000000 : $0000FF
 
@@ -59,22 +59,22 @@ DEFINE __low_romcode = copy base of CODE
 DEFINE __low_code = base of CODE
 DEFINE __len_code = length of CODE
 DEFINE __copy_code_to_ram = 0
-DEFINE __crtl = 0
+DEFINE __crtl = 1
 DEFINE __CS0_LBR_INIT_PARAM = $10
 DEFINE __CS0_UBR_INIT_PARAM = $1f
 DEFINE __CS0_CTL_INIT_PARAM = $a8
 DEFINE __CS0_BMC_INIT_PARAM = $02
-DEFINE __CS1_LBR_INIT_PARAM = $b8
-DEFINE __CS1_UBR_INIT_PARAM = $b9
+DEFINE __CS1_LBR_INIT_PARAM = $c0
+DEFINE __CS1_UBR_INIT_PARAM = $c7
 DEFINE __CS1_CTL_INIT_PARAM = $28
 DEFINE __CS1_BMC_INIT_PARAM = $02
 DEFINE __CS2_LBR_INIT_PARAM = $80
 DEFINE __CS2_UBR_INIT_PARAM = $bf
 DEFINE __CS2_CTL_INIT_PARAM = $28
 DEFINE __CS2_BMC_INIT_PARAM = $81
-DEFINE __CS3_LBR_INIT_PARAM = $60
-DEFINE __CS3_UBR_INIT_PARAM = $7f
-DEFINE __CS3_CTL_INIT_PARAM = $a8
+DEFINE __CS3_LBR_INIT_PARAM = $00
+DEFINE __CS3_UBR_INIT_PARAM = $00
+DEFINE __CS3_CTL_INIT_PARAM = $00
 DEFINE __CS3_BMC_INIT_PARAM = $02
 DEFINE __RAM_CTL_INIT_PARAM = $C0
 DEFINE __RAM_ADDR_U_INIT_PARAM = $B7
@@ -86,7 +86,9 @@ define _SYS_CLK_FREQ = 50000000
 define _OSC_FREQ = 50000000
 define _SYS_CLK_SRC = 0
 define _OSC_FREQ_MULT = 1
-define __PLL_CTL0_INIT_PARAM = $0
+define __PLL_CTL0_INIT_PARAM = $40
+
+define _zsl_g_clock_xdefine = 50000000
 
 /* arch/z80/src/Makefile.zdsii will append target, object and library paths below */
 
