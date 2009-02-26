@@ -44,6 +44,10 @@
  * Definitions
  ****************************************************************************/
 
+/* Clocking */
+
+#define EZ80_SYS_CLK_FREQ           50000000
+
 /* LED pattern definitions                 ON                OFF            */
 
 #define LED_STARTED                 0  /*  '0'               N/A            */
