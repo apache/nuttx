@@ -633,6 +633,7 @@
 	  - Corrected some stack handling errors during interrupt handling contextg
 	    save and restore.
 	  - Corrected vector intialization logic
+	* ez80Acclaim!: Corrected overflow problem in calculation of baud rate divisor
 
 
 
