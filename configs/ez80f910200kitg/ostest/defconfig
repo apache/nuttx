@@ -85,6 +85,7 @@ CONFIG_ARCH_TIMERHOOK=n
 #
 # eZ80 specific device driver settings
 #
+# CONFIG_UARTn_DISABLE - Disables all support for UARTn.
 # CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
 #   console and ttyS0 (default is the UART0). 
 # CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
@@ -95,6 +96,8 @@ CONFIG_ARCH_TIMERHOOK=n
 # CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
 # CONFIG_UARTn_2STOP - 0=1 stop bit; 1=Two stop bits
 #
+CONFIG_UART0_DISABLE=n
+CONFIG_UART1_DISABLE=y
 CONFIG_UART0_SERIAL_CONSOLE=y
 CONFIG_UART1_SERIAL_CONSOLE=n
 CONFIG_UART0_TXBUFSIZE=0
