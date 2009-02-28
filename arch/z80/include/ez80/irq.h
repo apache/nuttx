@@ -219,8 +219,8 @@ struct xcptcontext
 
   /* The following retains that state during signal execution */
 
-  chipreg_t saved_pc;     /* Saved return address */
-  chipreg_t saved_irqctl; /* Saved interrupt state */
+  chipreg_t saved_pc;    /* Saved return address */
+  chipreg_t saved_i;     /* Saved interrupt state */
 #endif
 };
 #endif

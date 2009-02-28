@@ -45,6 +45,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <arch/board/board.h>
 
 #include "chip/switch.h"
 #include "os_internal.h"
@@ -83,7 +84,7 @@ void up_sigdeliver(void)
 {
 #ifndef CONFIG_DISABLE_SIGNALS
   FAR _TCB  *rtcb = (_TCB*)g_readytorun.head;
-  chipret_t regs[XCPTCONTEXT_REGS];
+  chipreg_t regs[XCPTCONTEXT_REGS];
   sig_deliver_t sigdeliver;
 
   /* Save the errno.  This must be preserved throughout the signal handling
@@ -101,7 +102,7 @@ void up_sigdeliver(void)
 
   /* Save the real return state on the stack. */
 
-  z80_copystate(regs, rtcb->xcp.regs);
+  ez80_copystate(regs, rtcb->xcp.regs);
   regs[XCPT_PC] = rtcb->xcp.saved_pc;
   regs[XCPT_I]  = rtcb->xcp.saved_i;
 
@@ -134,7 +135,7 @@ void up_sigdeliver(void)
    */
 
   up_ledoff(LED_SIGNAL);
-  z80_restoreusercontext(regs);
+  ez80_restorecontext(regs);
 #endif
 }
 
