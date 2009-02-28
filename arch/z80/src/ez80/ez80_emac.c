@@ -117,11 +117,6 @@
 #  error "Unsupported CONFIG_EZ80_PKTBUFSIZE value"
 #endif
 
-/* The system clock frequency is defined in the linkcmd file */
-
-extern unsigned long SYS_CLK_FREQ;
-#define _DEFCLK ((unsigned long)&SYS_CLK_FREQ)
-
 /* Select the fastest MDC clock that does not exceed 25MHz.  The MDC
  * clock derives from the SCLK divided by 4, 6, 8, 10, 14, 20, or 28.
  */
@@ -152,10 +147,10 @@ extern unsigned long SYS_CLK_FREQ;
 #define EMAC_RETRY             0x0f        /* CFG3: Maximum number of retry default value */
 
 /* Poll timer setting.  The transmit poll timer is set in increments of
- * SYSCLCK / 256
+ * SYSCLCK / 256.  NOTE: The system clock frequency is defined in the board.h file.
  */
 
-#define EMAC_PTMR              ((CONFIG_EZ80_TXPOLLTIMERMS * (_DEFCLK / 1000) >> 8))
+#define EMAC_PTMR              ((CONFIG_EZ80_TXPOLLTIMERMS * (ez80_systemclock / 1000) >> 8))
 
   /* EMAC system interrupts :
    *

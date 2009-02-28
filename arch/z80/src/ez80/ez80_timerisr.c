@@ -1,7 +1,7 @@
 /***************************************************************************
  * arch/z80/src/ez80/ez80_timerisr.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,11 +52,6 @@
 /***************************************************************************
  * Definitions
  ***************************************************************************/
-
-/* The system clock frequency is defined in the linkcmd file */
-
-extern unsigned long SYS_CLK_FREQ;
-#define _DEFCLK ((unsigned long)&SYS_CLK_FREQ)
 
 /***************************************************************************
  * Private Types
@@ -143,9 +138,11 @@ void up_timerinit(void)
    *
    * For a system timer of 50,000,000 that would result in a reload value of
    * 31,250
+   *
+   * NOTE: The system clock frequency value is defined in the board.h file
    */
 
-  reload = (uint16)(_DEFCLK / 1600);
+  reload = (uint16)(ez80_systemclock / 1600);
   outp(EZ80_TMR0_RRH, (ubyte)(reload >> 8));
   outp(EZ80_TMR0_RRL, (ubyte)(reload));
 

@@ -2,7 +2,7 @@
  * arch/z80/src/ez80/ez80f91.h
  * arch/z80/src/chip/ez80f91.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -206,7 +206,7 @@
 #  define EZ80_TMRCLKDIV_16    0x08        /*   01:  16 */
 #  define EZ80_TMRCLKDIV_64    0x10        /*   10:  64 */
 #  define EZ80_TMRCLKDIV_256   0x18        /*   11: 256 */
-#define EZ80_TMRCTL_TIMCONT    0x04        /* Bit 2: Continusous mode */
+#define EZ80_TMRCTL_TIMCONT    0x04        /* Bit 2: Continuous mode */
 #define EZ80_TMRCTL_RLD        0x02        /* Bit 1: Force reload */
 #define EZ80_TMRCTL_TIMEN      0x01        /* Bit 0: Programmable reload timer enabled */
 

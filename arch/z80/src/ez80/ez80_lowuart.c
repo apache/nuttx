@@ -55,8 +55,6 @@
  * Private Definitions
  ****************************************************************************/
 
-/* The system clock frequency is defined in the board.h file */
-
 /* Is there any serial support?  This might be the case if the board does
  * not have serial ports but supports stdout through, say, an LCD.
  */
@@ -148,11 +146,13 @@ static void ez80_setbaud(void)
   /* The resulting BAUD and depends on the system clock frequency and the
    * BRG divisor as follows:
    *
-   * BAUD = SYSTEM_CLOCK_FREQUENCY / (16 * BRG_Divisor)
+   *   BAUD = SYSTEM_CLOCK_FREQUENCY / (16 * BRG_Divisor)
    *
    * Or
    *
-   * BRG_Divisor = SYSTEM_CLOCK_FREQUENCY / 16 / BAUD
+   *   BRG_Divisor = SYSTEM_CLOCK_FREQUENCY / 16 / BAUD
+   *
+   * NOTE: The system clock frequency value is defined in the board.h file
    */
 
    brg_divisor = (ez80_systemclock + (CONFIG_UART_BAUD << 3)) / (CONFIG_UART_BAUD << 4);
