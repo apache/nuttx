@@ -288,7 +288,7 @@
  *             The supported model is (1) all code on ROM, and (2) all data
  *             and stacks in internal (far) RAM.
  * Z8Acclaim:  In Z80 mode, all pointers are 16-bits.  In ADL mode, all pointers
- *             and 24 bits.
+ *             are 24 bits.
  */
 
 #  if defined(__ZNEO__)

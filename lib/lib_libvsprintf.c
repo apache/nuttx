@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib_libvsprintf.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -331,7 +331,7 @@ static void utobin(FAR struct lib_stream_s *obj, unsigned int n)
 }
 
 /****************************************************************************
- * Name: lutoascii
+ * Name: utoascii
  ****************************************************************************/
 
 static void utoascii(FAR struct lib_stream_s *obj, ubyte fmt, ubyte flags, unsigned int n)

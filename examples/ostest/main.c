@@ -1,7 +1,7 @@
 /****************************************************************************
  * main.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -499,5 +499,6 @@ int user_start(int argc, char *argv[])
       printf("user_start: Started user_main at PID=%d\n", result);
     }
 
+  printf("user_start: Exitting\n");
   return 0;
 }
