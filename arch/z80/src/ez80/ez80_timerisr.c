@@ -76,7 +76,7 @@
 
 int up_timerisr(int irq, chipreg_t *regs)
 {
-  ubyte reg;
+  volatile ubyte reg;
 
   /* Read the appropropriate timer0 registr to clear the interrupt */
   
@@ -116,7 +116,7 @@ void up_timerinit(void)
   ubyte  reg;
 
   /* Disable the timer */
-  
+
   outp(EZ80_TMR0_CTL, 0x00);
 
   /* Attach system timer interrupts */

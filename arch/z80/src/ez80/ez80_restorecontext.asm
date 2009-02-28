@@ -99,7 +99,7 @@ _ez80_restorecontext:
 	; Restore interrupt state
 
 	ex	af, af'			; Recover interrupt state
-	jp	po, noinrestore		; No parity, IFF2=0, means disabled
+	jp	po, noinrestore		; Odd parity, IFF2=0, means disabled
 	ex	af, af'			; Restore AF (before enabling interrupts)
 	ei				; yes.. Enable interrupts
 	ret				; and return
