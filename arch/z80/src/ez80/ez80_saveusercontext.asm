@@ -122,7 +122,7 @@ _ez80_saveusercontext:
 
 	; Save the current interrupt state at offset 0
 
-	ld	a, i			; Get interrupt state
+	ld	a, i			; Get interrupt state in parity bit
 	push	af
 	pop	hl
 	ld	(iy + XCPT_I), hl	; Index 0: I w/interrupt state in parity/overflow
