@@ -1,7 +1,7 @@
 ############################################################################
 # arch/z80/src/ez80/Make.defs
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ CMN_CSRCS	= up_initialize.c up_allocateheap.c up_createstack.c \
 		  up_releasestack.c up_interruptcontext.c up_blocktask.c \
 		  up_unblocktask.c up_exit.c up_releasepending.c \
 		  up_reprioritizertr.c up_idle.c up_assert.c up_doirq.c \
-		  up_mdelay.c up_udelay.c up_usestack.c
+		  up_mdelay.c up_udelay.c up_usestack.c up_puts.c
 
 CHIP_ASRCS	= ez80_startup.asm ez80_io.asm ez80_irqsave.asm \
 		  ez80_saveusercontext.asm ez80_restorecontext.asm

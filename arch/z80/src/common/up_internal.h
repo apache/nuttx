@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/common/up_internal.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -139,6 +139,10 @@ EXTERN void lowconsole_init(void);
 #else
 # define lowconsole_init()
 #endif
+
+/* Low level string output */
+
+extern void up_puts(const char *str);
 
 /* Defined in up_timerisr.c */
 
