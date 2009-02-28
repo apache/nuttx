@@ -116,13 +116,18 @@ struct uart_ops_s g_uart_ops =
 
 /* I/O buffers */
 
+#ifndef CONFIG_UART0_DISABLE
 static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
+#endif
+#ifndef CONFIG_UART1_DISABLE
 static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
+#endif
 
 /* This describes the state of the UART0 port. */
 
+#ifndef CONFIG_UART0_DISABLE
 static struct ez80_dev_s g_uart0priv =
 {
   EZ80_UART0_BASE,          /* uartbase */
@@ -163,9 +168,11 @@ static uart_dev_t g_uart0port =
   &g_uart_ops,              /* ops */
   &g_uart0priv,             /* priv */
 };
+#endif
 
 /* This describes the state of the UART1 port. */
 
+#ifndef CONFIG_UART1_DISABLE
 static struct ez80_dev_s g_uart1priv =
 {
   EZ80_UART1_BASE,          /* uartbase */
@@ -206,17 +213,29 @@ static uart_dev_t g_uart1port =
   &g_uart_ops,              /* ops */
   &g_uart1priv,             /* priv */
 };
+#endif
 
 /* Now, which one with be tty0/console and which tty1? */
 
-#ifdef CONFIG_UART0_SERIAL_CONSOLE
+#if defined(CONFIG_UART0_SERIAL_CONSOLE) && !defined(CONFIG_DISABLE_UART0)
 # define CONSOLE_DEV     g_uart0port
 # define TTYS0_DEV       g_uart0port
-# define TTYS1_DEV       g_uart1port
-#else
+# if !defined(CONFIG_UART1_DISABLE)
+#   define TTYS1_DEV     g_uart1port
+# endif
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE) && !defined(CONFIG_DISABLE_UART1)
 # define CONSOLE_DEV     g_uart1port
 # define TTYS0_DEV       g_uart1port
-# define TTYS1_DEV       g_uart0port
+# if !defined(CONFIG_UART0_DISABLE)
+#   define TTYS1_DEV     g_uart0port
+# endif
+#elif !defined(CONFIG_DISABLE_UART0)
+# define TTYS0_DEV       g_uart0port
+# if !defined(CONFIG_UART1_DISABLE)
+#   define TTYS1_DEV     g_uart1port
+# endif
+#elif !defined(CONFIG_DISABLE_UART0)
+# define TTYS0_DEV       g_uart1port
 #endif
 
 /****************************************************************************
@@ -389,7 +408,7 @@ static int ez80_setup(struct uart_dev_s *dev)
 
 static void ez80_shutdown(struct uart_dev_s *dev)
 {
-  struct ez80_dev_s *priv = (struct ez80_dev_s*)CONSOLE_DEV.priv;
+  struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
   ez80_disableuartint(priv);
 }
 
@@ -644,11 +663,55 @@ static boolean ez80_txempty(struct uart_dev_s *dev)
 
 void up_earlyserialinit(void)
 {
-  ez80_disableuartint(TTYS0_DEV.priv);
-  ez80_disableuartint(TTYS1_DEV.priv);
+  ubyte regval;
 
+  /* Make sure that all UART interrupts are disabled */
+
+  ez80_disableuartint(TTYS0_DEV.priv);
+#ifdef TTYS1DEV
+  ez80_disableuartint(TTYS1_DEV.priv);
+#endif
+
+  /* Configure pins for usage of UARTs */
+
+#ifndef CONFIG_UART0_DISABLE
+  /* Set Port D, pins 0 and 1 for their alternate function (Mode 7) to enable UART0 */
+
+  regval  = inp(EZ80_PD_DDR);
+  regval |= 3;
+  outp(EZ80_PD_DDR, regval);
+
+  regval  = inp(EZ80_PD_ALT1);
+  regval &= ~3;
+  outp(EZ80_PD_ALT1, regval);
+
+  regval  = inp(EZ80_PD_ALT2);
+  regval |= 3;
+  outp(EZ80_PD_ALT2, regval);
+#endif
+
+#ifndef CONFIG_UART1_DISABLE
+  /* Set Port C, pins 0 and 1 for their alternate function (Mode 7) to enable UART1 */
+
+  regval  = inp(EZ80_PC_DDR);
+  regval |= 3;
+  outp(EZ80_PC_DDR, regval);
+
+  regval  = inp(EZ80_PC_ALT1);
+  regval &= ~3;
+  outp(EZ80_PC_ALT1, regval);
+
+  regval  = inp(EZ80_PC_ALT2);
+  regval |= 3;
+  outp(EZ80_PC_ALT2, regval);
+#endif
+
+  /* If there is a console, then configure the console now */
+
+#ifdef CONSOLE_DEV
   CONSOLE_DEV.isconsole = TRUE;
   ez80_setup(&CONSOLE_DEV);
+#endif
 }
 
 /****************************************************************************
@@ -662,9 +725,13 @@ void up_earlyserialinit(void)
 
 void up_serialinit(void)
 {
+#ifdef CONSOLE_DEV
   (void)uart_register("/dev/console", &CONSOLE_DEV);
+#endif
   (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
+#ifdef TTYS1DEV
   (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
+#endif
 }
 
 /****************************************************************************
@@ -678,6 +745,7 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
+#ifdef CONSOLE_DEV
   struct ez80_dev_s *priv = (struct ez80_dev_s*)CONSOLE_DEV.priv;
   ubyte ier = ez80_serialin(priv, EZ80_UART_IER);
 
@@ -703,6 +771,7 @@ int up_putc(int ch)
   ez80_waittxready(priv);
   ez80_restoreuartint(priv, ier);
   return ch;
+#endif
 }
 
 #else /* CONFIG_USE_SERIALDRIVER */

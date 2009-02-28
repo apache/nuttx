@@ -55,9 +55,39 @@
  * Private Definitions
  ****************************************************************************/
 
-/* The system clock frequency is defined in the linkcmd file */
+/* The system clock frequency is defined in the board.h file */
 
-#ifdef CONFIG_UART0_SERIAL_CONSOLE
+/* Is there any serial support?  This might be the case if the board does
+ * not have serial ports but supports stdout through, say, an LCD.
+ */
+
+#if defined(CONFIG_UART0_DISABLE) || defined(CONFIG_UART1_DISABLE)
+#  define HAVE_SERIAL
+#else
+#  undef HAVE_SERIAL
+#endif
+
+/* Is one of the serial ports a console? */
+
+#if defined(CONFIG_UART0_SERIAL_CONSOLE) && !defined(CONFIG_UART0_DISABLE)
+#  define HAVE_SERIALCONSOLE 1
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE) && !defined(CONFIG_UART1_DISABLE)
+#  define HAVE_SERIALCONSOLE 1
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#else
+#  warning "No console is defined"
+#  if defined(CONFIG_UART0_SERIAL_CONSOLE) || defined(CONFIG_UART1_SERIAL_CONSOLE)
+#    error "A serial console selected, but corresponding UART not enabled"
+#  endif
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef HAVE_SERIALCONSOLE
+#endif
+
+/* Select UART parameters for the selected console */
+
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
 #  define ez80_inp(offs)       inp((EZ80_UART0_BASE+(offs)))
 #  define ez80_outp(offs,val)  outp((EZ80_UART0_BASE+(offs)), (val))
 #  define CONFIG_UART_BAUD     CONFIG_UART0_BAUD
@@ -78,7 +108,7 @@
 #  else
 #    define CONFIG_UART_PARITY 0
 #  endif
-#else
+#elif defined(CONFIG_UART0_SERIAL_CONSOLE)
 #  define ez80_inp(offs)       inp((EZ80_UART1_BASE+(offs)))
 #  define ez80_outp(offs.val)  outp((EZ80_UART1_BASE+(offs)), (val))
 #  define CONFIG_UART_BAUD     CONFIG_UART1_BAUD
@@ -109,7 +139,7 @@
  * Private Functions
  ****************************************************************************/
 
-#ifndef CONFIG_SUPPRESS_UART_CONFIG
+#if defined(HAVE_SERIALCONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
 static void ez80_setbaud(void)
 {
   uint32 brg_divisor;
@@ -139,7 +169,7 @@ static void ez80_setbaud(void)
    lctl &= ~EZ80_UARTLCTL_DLAB;
    ez80_outp(EZ80_UART_LCTL, lctl);
 }
-#endif /* CONFIG_SUPPRESS_UART_CONFIG */
+#endif /* HAVE_SERIALCONSOLE && !CONFIG_SUPPRESS_UART_CONFIG */
 
 /****************************************************************************
  * Public Functions
@@ -151,14 +181,49 @@ static void ez80_setbaud(void)
 
 void up_lowuartinit(void)
 {
-#ifndef CONFIG_SUPPRESS_UART_CONFIG
-  ubyte reg;
+#ifdef HAVE_SERIAL
+  ubyte regval;
 
+  /* Configure pins for usage of UARTs (whether or not we have a console) */
+
+#ifndef CONFIG_UART0_DISABLE
+  /* Set Port D, pins 0 and 1 for their alternate function (Mode 7) to enable UART0 */
+
+  regval  = inp(EZ80_PD_DDR);
+  regval |= 3;
+  outp(EZ80_PD_DDR, regval);
+
+  regval  = inp(EZ80_PD_ALT1);
+  regval &= ~3;
+  outp(EZ80_PD_ALT1, regval);
+
+  regval  = inp(EZ80_PD_ALT2);
+  regval |= 3;
+  outp(EZ80_PD_ALT2, regval);
+#endif
+
+#ifndef CONFIG_UART1_DISABLE
+  /* Set Port C, pins 0 and 1 for their alternate function (Mode 7) to enable UART1 */
+
+  regval  = inp(EZ80_PC_DDR);
+  regval |= 3;
+  outp(EZ80_PC_DDR, regval);
+
+  regval  = inp(EZ80_PC_ALT1);
+  regval &= ~3;
+  outp(EZ80_PC_ALT1, regval);
+
+  regval  = inp(EZ80_PC_ALT2);
+  regval |= 3;
+  outp(EZ80_PC_ALT2, regval);
+#endif
+
+#if defined(HAVE_SERIALCONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   /* Disable interrupts from the UART */
 
-  reg = ez80_inp(EZ80_UART_IER);
-  reg &= ~EZ80_UARTEIR_INTMASK;
-  ez80_outp(EZ80_UART_IER, reg);
+  regval = ez80_inp(EZ80_UART_IER);
+  regval &= ~EZ80_UARTEIR_INTMASK;
+  ez80_outp(EZ80_UART_IER, regval);
 
   /* Set the baud rate */
 
@@ -167,22 +232,25 @@ void up_lowuartinit(void)
 
   /* Set the character properties */
 
-  reg = ez80_inp(EZ80_UART_LCTL);
-  reg &= ~EZ80_UARTLCTL_MASK;
-  reg |= (CONFIG_UART_BITS | CONFIG_UART_2STOP | CONFIG_UART_PARITY);
-  ez80_outp(EZ80_UART_LCTL, reg);
+  regval = ez80_inp(EZ80_UART_LCTL);
+  regval &= ~EZ80_UARTLCTL_MASK;
+  regval |= (CONFIG_UART_BITS | CONFIG_UART_2STOP | CONFIG_UART_PARITY);
+  ez80_outp(EZ80_UART_LCTL, regval);
 
   /* Enable and flush the receive FIFO */
 
-  reg = EZ80_UARTFCTL_FIFOEN;
-  ez80_outp(EZ80_UART_FCTL, reg);
-  reg |= (EZ80_UARTFCTL_CLRTxF|EZ80_UARTFCTL_CLRRxF);
-  ez80_outp(EZ80_UART_FCTL, reg);
+  regval = EZ80_UARTFCTL_FIFOEN;
+  ez80_outp(EZ80_UART_FCTL, regval);
+  regval |= (EZ80_UARTFCTL_CLRTxF|EZ80_UARTFCTL_CLRRxF);
+  ez80_outp(EZ80_UART_FCTL, regval);
 
   /* Set the receive trigger level to 1 */
 
-  reg |= EZ80_UARTTRIG_1;
-  ez80_outp(EZ80_UART_FCTL, reg);
-#endif /* CONFIG_SUPPRESS_UART_CONFIG */
+  regval |= EZ80_UARTTRIG_1;
+  ez80_outp(EZ80_UART_FCTL, regval);
+
+#endif /* HAVE_SERIALCONSOLE && !CONFIG_SUPPRESS_UART_CONFIG */
+#endif /* HAVE_SERIAL */
 }
+
 #endif /* CONFIG_USE_LOWUARTINIT */
