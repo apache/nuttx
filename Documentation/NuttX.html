@@ -671,8 +671,8 @@
   </tr>
 </table>
 
-<p><b>nuttx-0.4.1</b>.
-  The 33<sup>rd</sup> release of NuttX (nuttx-0.4.1) is available for download
+<p><b>nuttx-0.4.2</b>.
+  The 34<sup>th</sup> release of NuttX (nuttx-0.4.2) is available for download
   from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
   website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
@@ -680,17 +680,27 @@
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  This is a minor bugfix release.
-  The primary reason for this release is to correct numerous build errors that have accumulated for the ZiLOG ZDS-II based targets.
-  All ZDS-II targets now build correctly (but have not been re-tested).
-  In addition to platform-specific build failures,  release also adds the following features which were not tested as of the time of the release:
+  This release adds no new OS features but does include support for two new architectures:
   <ul>
-    <li>Board support fot the ZiLog ez80Acclaim! ez80f910200zco Development Kit,</li>
-    <li>ZiLOG eZ80F91 EMAC driver</li>
-  </ul>
+  <li>
+    <b>ez80Acclaim!</b>
+      Basic support has been integrated and verified for the ez80f910200zcog-d board (eZ80F91-based).
+      That basic support includes timer interrupts and serial console.
+      Ongoing work includes an EMAC driver that should be integrated for the next release nuttx-0.4.2.
+    </p>
+    <p>
+       eZ80Acclaim! support has been in the code base for some time, but has only just
+       been integrated due to toolchain issues.
+    </p>
+  <li>
+    <p>Renesas M16C/20</b>.
+      Support for the Renesas SKP16C20 board has been included in the NuttX source tree.
+      However, as was with the eZ80Acclaim!, testing and integration of that port is stalled due to toolchain issues.
+    </p>
+  </li>
 </p>
 <p>
-  These changes were verified only on the NuttX simulation platform. Please report any errors to me.
+  These changes were verified only on the ZiLOG ez80f910200zcog-d platform. Please report any errors to me.
 </p>
 
 <table width ="100%">
@@ -941,10 +951,10 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
     <p>
       <b>STATUS:</b>
       Testing with the ZiLOG ez80f0910200kitg has been performed only on the on the ZDS-II simulator.
-      However, support with the  ZiLOG ez80f0910200zcog-d is complete.
+      However, support for the  ZiLOG ez80f0910200zcog-d is complete.
       The first integrated version was released in NuttX version 0.4.2.
       As of this writing, that port provides basic board support with a serial console.
-      An eZ80F09 EMAC driver has been developed, but not fully tested as of that releas.
+      An eZ80F09 EMAC driver has been developed, but not fully tested as of that release.
     </p>
    </td>
 </tr>
@@ -1293,18 +1303,31 @@ Other memory:
 </table>
 
 <pre><ul>
-nuttx-0.4.1 2009-02-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-0.4.2 2009-02-28 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* Added board support fot the ZiLog ez80Acclaim! ez80f910200zco Development Kit.
-	* Fixed several compilation errors in fixed precision math library when built
-	  against toolchains that do not support 64-bit type 'long long'.
-	* Fix errors in some function prototypes in dirent.h
-	* Add eZ80F91 EMAC driver
-	* Fix recvfrom() compilation error -- only noted under ZDS
-	* Updated all ARM Make.def files to work with gcc 2.4.2 (However, there are
-	  still some build issues associated with that toolchain in use of arm-elf-objcopy
-	  -- see the TODO.txt list for details)
-	* Fix problems with Z16F and eZ80 compilation introduced with recent changes.
+	* M16C: Add support for the Renesas M16C MCU and the SKP16C26 StarterKit. However, 
+	  the target cannot be built because the GNU m16c-elf-ld link fails with 
+	  the following message:
+
+	    m32c-elf-ld: BFD (GNU Binutils) 2.19 assertion fail /home/Owner/projects/nuttx/buildroot/toolchain_build_m32c/binutils-2.19/bfd/elf32-m32c.c:482
+
+	  Where the reference line is:
+
+	    /* If the symbol is out of range for a 16-bit address,
+	       we must have allocated a plt entry.  */
+	     BFD_ASSERT (*plt_offset != (bfd_vma) -1);
+
+	  No workaround is known at this time.  This is a show stopper for M16C.
+
+	* ez80Acclaim!: Fix interrupt vectors positioning; they were being positioned
+	  wrong by 64 bytes (Kevin Franzen).
+	* ez80Acclaim!: Corrected some stack handling errors during interrupt handling
+	   context save and restore (Kevin Franzen).
+	* ez80Acclaim!: Corrected vector intialization logic (Kevin Franzen).
+	* ez80Acclaim!: Corrected overflow problem in the calculation of UART baud rate
+	    divisor, the system timer divisor, and the EMAC poll timer.
+	* ez80Acclaim!: Fixed GPIO pin configuration get serial output
+	* ez80Acclaim!: Correct stack overflow in ostest example configuration
 
 pascal-0.1.2 2008-02-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1332,31 +1355,7 @@ buildroot-0.1.2 2007-11-06 &lt;spudmonkey@racsa.co.cr&gt
 </table>
 
 <pre><ul>
-nuttx-0.4.2 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* M16C: Add support for the Renesas M16C MCU and the SKP16C26 StarterKit. However, 
-	  the target cannot be built because the GNU m16c-elf-ld link fails with 
-	  the following message:
-
-	    m32c-elf-ld: BFD (GNU Binutils) 2.19 assertion fail /home/Owner/projects/nuttx/buildroot/toolchain_build_m32c/binutils-2.19/bfd/elf32-m32c.c:482
-
-	  Where the reference line is:
-
-	    /* If the symbol is out of range for a 16-bit address,
-	       we must have allocated a plt entry.  */
-	     BFD_ASSERT (*plt_offset != (bfd_vma) -1);
-
-	  No workaround is known at this time.  This is a show stopper for M16C.
-
-	* ez80Acclaim!: Fix interrupt vectors positioning; they were being positioned
-	  wrong by 64 bytes (Kevin Franzen).
-	* ez80Acclaim!: Corrected some stack handling errors during interrupt handling
-	   context save and restore (Kevin Franzen).
-	* ez80Acclaim!: Corrected vector intialization logic (Kevin Franzen).
-	* ez80Acclaim!: Corrected overflow problem in the calculation of UART baud rate
-	    divisor, the system timer divisor, and the EMAC poll timer.
-	* ez80Acclaim!: Fixed GPIO pin configuration get serial output
-	* ez80Acclaim!: Correct stack overflow in ostest example configuration
+nuttx-0.4.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
