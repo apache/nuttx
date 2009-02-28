@@ -611,7 +611,7 @@
 	  -- see the TODO.txt list for details)
 	* Fix problems with Z16F and eZ80 compilation introduced with recent changes.
 
-0.4.2 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.2 2009-02-28 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* M16C: Add support for the Renesas M16C MCU and the SKP16C26 StarterKit. However, 
 	  the target cannot be built because the GNU m16c-elf-ld link fails with 
@@ -636,6 +636,8 @@
 	    divisor, the system timer divisor, and the EMAC poll timer.
 	* ez80Acclaim!: Fixed GPIO pin configuration get serial output
 	* ez80Acclaim!: Correct stack overflow in ostest example configuration
+	* ez80Acclaim!: Fixed restoration of interrupts state on interrupt level context swith.
 
+0.4.3 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 
