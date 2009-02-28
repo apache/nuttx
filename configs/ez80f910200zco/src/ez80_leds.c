@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/ez80f910200zco/src/ez80_leds.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -200,6 +200,7 @@ static const ubyte *g_prevglyph = g_chspace;
 
 static ubyte g_anodecol         = 1;
 static ubyte g_cathoderow       = 0;
+static sbyte g_intcount         = 0;
 
 /****************************************************************************
  * Private Functions
@@ -252,8 +253,8 @@ void up_ledon(int led)
       break;
 
     case LED_INIRQ:
-      g_currglyph = g_chI;
-      break;
+      g_intcount++;
+      return;
 
     case LED_ASSERTION:
       g_currglyph = g_chA;
@@ -280,7 +281,18 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-  g_currglyph = g_prevglyph;
+  if (led == LED_INIRQ)
+    {
+      g_intcount--;
+    }
+  else if (led == LED_PANIC && g_intcount > 0)
+    {
+      g_currglyph = g_chI;
+    }
+  else
+    {
+      g_currglyph = g_prevglyph;
+    }
 }
 
 /****************************************************************************

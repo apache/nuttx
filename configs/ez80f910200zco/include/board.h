@@ -55,7 +55,7 @@
 #define LED_IRQSENABLED             2  /*  'E'               N/A            */
 #define LED_STACKCREATED            3  /*  'C'               N/A            */
 #define LED_IDLE                    4  /*  'R'               N/A            */
-#define LED_INIRQ                   5  /*  'I'              (previous)      */
+#define LED_INIRQ                   5  /*  (ignored)        (ignored)       */
 #define LED_ASSERTION               6  /*  'A'              (previous)      */
 #define LED_SIGNAL                  7  /*  'S'              (previous)      */
 #define LED_PANIC                   8  /*  '*'              (previous)      */
