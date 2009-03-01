@@ -2,7 +2,7 @@
  * uip-arch.h
  * Defines architecture-specific device driver interfaces to uIP
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Derived largely from portions of uIP with has a similar BSD-styple license:
