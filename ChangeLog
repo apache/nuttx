@@ -600,7 +600,7 @@
 	* Add documentation for NX graphics subsystem
 
 0.4.1 2009-02-06 Gregory Nutt <spudmonkey@racsa.co.cr>
-	* Added board support fot the ZiLog ez80Acclaim! ez80f910200zco Development Kit.
+	* Added board support fot the ZiLog eZ80Acclaim! ez80f910200zco Development Kit.
 	* Fixed several compilation errors in fixed precision math library when built
 	  against toolchains that do not support 64-bit type 'long long'.
 	* Fix errors in some function prototypes in dirent.h
@@ -627,17 +627,24 @@
 
 	  No workaround is known at this time.  This is a show stopper for M16C.
 
-	* ez80Acclaim!: Fix interrupt vectors positioning; they were being positioned
+	* eZ80Acclaim!: Fix interrupt vectors positioning; they were being positioned
 	  wrong by 64 bytes (Kevin Franzen).
-	* ez80Acclaim!: Corrected some stack handling errors during interrupt handling
+	* eZ80Acclaim!: Corrected some stack handling errors during interrupt handling
 	   context save and restore (Kevin Franzen).
-	* ez80Acclaim!: Corrected vector intialization logic (Kevin Franzen).
-	* ez80Acclaim!: Corrected overflow problem in the calculation of UART baud rate
+	* eZ80Acclaim!: Corrected vector intialization logic (Kevin Franzen).
+	* eZ80Acclaim!: Corrected overflow problem in the calculation of UART baud rate
 	    divisor, the system timer divisor, and the EMAC poll timer.
-	* ez80Acclaim!: Fixed GPIO pin configuration get serial output
-	* ez80Acclaim!: Correct stack overflow in ostest example configuration
-	* ez80Acclaim!: Fixed restoration of interrupts state on interrupt level context swith.
+	* eZ80Acclaim!: Fixed GPIO pin configuration get serial output
+	* eZ80Acclaim!: Correct stack overflow in ostest example configuration
+	* eZ80Acclaim!: Fixed restoration of interrupts state on interrupt level context swith.
 
 0.4.3 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* z8Encore! and eZ80Acclaim!: Fixed the serial driver initialization sequence
+	* eZ80Acclaim!: Fixed error in vector table:  Missing space set aside for the
+	  "unused" vectors.  As a result, all vectors above timer4 were skewed.
+	* eZ80Acclaim!: Fixed logic error in UART interrupt handler.
+	* Many fixes in FAT file system and in NSH for correct compilation with ZDS-II
+	* eZ80Acclaim!: Added and verified a NuttShell (NSH) configuration.
 
 
