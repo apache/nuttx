@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: February 28, 2009</p>
+      <p>Last Updated: March 1, 2009</p>
     </td>
   </tr>
 </table>
@@ -683,7 +683,7 @@
   This release adds no new OS features but does include support for two new architectures:
   <ul>
   <li>
-    <b>ez80Acclaim!</b>
+    <b>eZ80Acclaim!</b>
       Basic support has been integrated and verified for the ez80f910200zcog-d board (eZ80F91-based).
       That basic support includes timer interrupts and serial console.
       Ongoing work includes an EMAC driver that should be integrated for the next release nuttx-0.4.2.
@@ -698,6 +698,7 @@
       However, as was with the eZ80Acclaim!, testing and integration of that port is stalled due to toolchain issues.
     </p>
   </li>
+  </ul>
 </p>
 <p>
   These changes were verified only on the ZiLOG ez80f910200zcog-d platform. Please report any errors to me.
@@ -1158,7 +1159,7 @@ m68k, m68hc11, m68hc12, and SuperH ports.</blockquote>
       </p>
     </ul>
     <p>
-      At present, only the Zilog Z16F, z8Encore, and ez80Acclaim ports use a native Windows toolchain
+      At present, only the Zilog Z16F, z8Encore, and eZ80Acclaim ports use a native Windows toolchain
       (the Zilog ZDS-II toolchain).
     </p.
   </td>
@@ -1319,15 +1320,15 @@ nuttx-0.4.2 2009-02-28 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	  No workaround is known at this time.  This is a show stopper for M16C.
 
-	* ez80Acclaim!: Fix interrupt vectors positioning; they were being positioned
+	* eZ80Acclaim!: Fix interrupt vectors positioning; they were being positioned
 	  wrong by 64 bytes (Kevin Franzen).
-	* ez80Acclaim!: Corrected some stack handling errors during interrupt handling
+	* eZ80Acclaim!: Corrected some stack handling errors during interrupt handling
 	   context save and restore (Kevin Franzen).
-	* ez80Acclaim!: Corrected vector intialization logic (Kevin Franzen).
-	* ez80Acclaim!: Corrected overflow problem in the calculation of UART baud rate
+	* eZ80Acclaim!: Corrected vector intialization logic (Kevin Franzen).
+	* eZ80Acclaim!: Corrected overflow problem in the calculation of UART baud rate
 	    divisor, the system timer divisor, and the EMAC poll timer.
-	* ez80Acclaim!: Fixed GPIO pin configuration get serial output
-	* ez80Acclaim!: Correct stack overflow in ostest example configuration
+	* eZ80Acclaim!: Fixed GPIO pin configuration get serial output
+	* eZ80Acclaim!: Correct stack overflow in ostest example configuration
 
 pascal-0.1.2 2008-02-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1356,6 +1357,13 @@ buildroot-0.1.2 2007-11-06 &lt;spudmonkey@racsa.co.cr&gt
 
 <pre><ul>
 nuttx-0.4.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+	* z8Encore! and eZ80Acclaim!: Fixed the serial driver initialization sequence
+	* eZ80Acclaim!: Fixed error in vector table:  Missing space set aside for the
+	  &quot;unused&quot; vectors.  As a result, all vectors above timer4 were skewed.
+	* eZ80Acclaim!: Fixed logic error in UART interrupt handler.
+	* Many fixes in FAT file system and in NSH for correct compilation with ZDS-II
+	* eZ80Acclaim!: Added and verified a NuttShell (NSH) configuration.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
