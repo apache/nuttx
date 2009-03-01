@@ -93,6 +93,7 @@ CONFIG_ARCH_TIMERHOOK=y
 # CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
 #   being sent.  This specific the size of the transmit buffer
 # CONFIG_UARTn_BAUD - The configure BAUD of the UART.
+# CONFIG_UARTn_BITS - The number of data bits (7 or 8)
 # CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
 # CONFIG_UARTn_2STOP - 0=1 stop bit; 1=Two stop bits
 #
@@ -100,12 +101,14 @@ CONFIG_UART0_DISABLE=n
 CONFIG_UART1_DISABLE=y
 CONFIG_UART0_SERIAL_CONSOLE=y
 CONFIG_UART1_SERIAL_CONSOLE=n
-CONFIG_UART0_TXBUFSIZE=0
+CONFIG_UART0_TXBUFSIZE=64
 CONFIG_UART1_TXBUFSIZE=0
-CONFIG_UART0_RXBUFSIZE=0
+CONFIG_UART0_RXBUFSIZE=192
 CONFIG_UART1_RXBUFSIZE=0
 CONFIG_UART0_BAUD=57600
 CONFIG_UART1_BAUD=57600
+CONFIG_UART0_BITS=0
+CONFIG_UART1_BITS=0
 CONFIG_UART0_PARITY=0
 CONFIG_UART1_PARITY=0
 CONFIG_UART0_2STOP=0
@@ -195,7 +198,7 @@ CONFIG_HAVE_LIBM=n
 # CONFIG_DEV_CONSOLE - Set if architecture-specific logic
 #   provides /dev/console.  Enables stdout, stderr, stdin.
 # CONFIG_DEV_LOWCONSOLE - Use the simple, low-level serial console
-#   driver (minimul support)
+#   driver (minimal, write-only support)
 #
 CONFIG_EXAMPLE=ostest
 CONFIG_DEBUG=y
