@@ -130,7 +130,7 @@ CONFIG_UART1_2STOP=0
 #   should poll for a Tx packet (milliseconds)
 # CONFIG_ARCH_MCFILTER - Enalbes multicast MAC address filtering (not
 #   fully implemented
-CONFIG_EZ80_EMAC=n
+CONFIG_EZ80_EMAC=y
 CONFIG_EZ80_FIAD=0x1f
 CONFIG_EZ80_PKTBUFSIZE=64
 CONFIG_EZ80_NTXPKTBUFS=64
@@ -215,7 +215,7 @@ CONFIG_START_DAY=1
 CONFIG_JULIAN_TIME=n
 CONFIG_HAVE_LOWUARTINIT=y
 CONFIG_DEV_CONSOLE=y
-CONFIG_DEV_LOWCONSOLE=y
+CONFIG_DEV_LOWCONSOLE=n
 
 #
 # The following can be used to disable categories of
