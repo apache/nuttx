@@ -70,11 +70,6 @@
 #ifdef CONFIG_ARCH_LEDS
 	xref	_up_ledinit:ROM
 #endif
-#if defined(CONFIG_USE_LOWUARTINIT)
-	xref	_z16f_lowuartinit:ROM
-#elif defined(CONFIG_USE_EARLYSERIALINIT)
-	xref	_up_earlyserialinit:ROM
-#endif
 	xref	_os_start:ROM
 	xref	_up_doirq:ROM
 	xref	_low_nearbss
