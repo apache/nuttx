@@ -472,15 +472,20 @@ static int ez80_interrrupt(int irq, void *context)
   struct ez80_dev_s   *priv;
   volatile uint32    cause;
 
+#ifndef CONFIG_UART0_DISABLE
   if (g_uart0priv.irq == irq)
     {
       dev = &g_uart0port;
     }
-  else if (g_uart1priv.irq == irq)
+  else
+#endif
+#ifndef CONFIG_UART1_DISABLE
+  if (g_uart1priv.irq == irq)
     {
       dev = &g_uart1port;
     }
   else
+#endif
     {
       PANIC(OSERR_INTERNAL);
     }
@@ -488,14 +493,18 @@ static int ez80_interrrupt(int irq, void *context)
 
   cause = ez80_serialin(priv, EZ80_UART_IIR) & EZ80_UARTIIR_CAUSEMASK;
 
-  if (cause == (EZ80_UARTINSTS_CTO|EZ80_UARTIIR_INTBIT) ||
-      cause == (EZ80_UARTINSTS_RDR|EZ80_UARTIIR_INTBIT))
+  /* Check for character timeout (CTO) or Receiver Data Ready (RDR) */
+
+  if (cause == EZ80_UARTINSTS_CTO || cause == EZ80_UARTINSTS_RDR)
     {
       /* Receive characters from the RX fifo */
 
       uart_recvchars(dev);
     }
-  else if (cause == (EZ80_UARTINSTS_TC|EZ80_UARTIIR_INTBIT))
+
+  /* Check for transmission buffer empty */
+
+  else if (cause == EZ80_UARTINSTS_TBE)
     {
       uart_xmitchars(dev);
     }
@@ -655,13 +664,11 @@ static boolean ez80_txempty(struct uart_dev_s *dev)
  * Name: up_serialinit
  *
  * Description:
- *   Performs the low level UART initialization early in 
- *   debug so that the serial console will be available
- *   during bootup.  This must be called before up_serialinit.
+ *   Register serial console and serial ports.
  *
  ****************************************************************************/
 
-void up_earlyserialinit(void)
+void up_serialinit(void)
 {
   ubyte regval;
 
@@ -712,19 +719,9 @@ void up_earlyserialinit(void)
   CONSOLE_DEV.isconsole = TRUE;
   ez80_setup(&CONSOLE_DEV);
 #endif
-}
 
-/****************************************************************************
- * Name: up_serialinit
- *
- * Description:
- *   Register serial console and serial ports.  This assumes
- *   that up_earlyserialinit was called previously.
- *
- ****************************************************************************/
+  /* Register console and tty devices */
 
-void up_serialinit(void)
-{
 #ifdef CONSOLE_DEV
   (void)uart_register("/dev/console", &CONSOLE_DEV);
 #endif
@@ -788,8 +785,8 @@ int up_putc(int ch)
 # define ez80_outp(offs,val) outp((EZ80_UART0_BASE+(offs)), (val))
 #endif
 
-#define ez80_txready() ((ez80_inp(EZ80_UART_LSR) & EZ80_UARTLSR_THRE) != 0)
-#define ez80_send(ch)  ez80_outp(EZ80_UART_THR, ch)
+#define ez80_txready()       ((ez80_inp(EZ80_UART_LSR) & EZ80_UARTLSR_THRE) != 0)
+#define ez80_send(ch)        ez80_outp(EZ80_UART_THR, ch)
 
 /****************************************************************************
  * Private Function Prototypes
