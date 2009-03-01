@@ -67,7 +67,6 @@
 
 #if CONFIG_NFILE_DESCRIPTORS == 0 || defined(CONFIG_DEV_LOWCONSOLE)
 #  undef CONFIG_USE_SERIALDRIVER
-#  undef CONFIG_USE_EARLYSERIALINIT
 #  ifdef CONFIG_HAVE_LOWUARTINIT
 #    define CONFIG_USE_LOWUARTINIT 1
 #  else
@@ -75,7 +74,6 @@
 #  endif
 #elif defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS > 0
 #  define CONFIG_USE_SERIALDRIVER 1
-#  define CONFIG_USE_EARLYSERIALINIT 1
 #  undef CONFIG_USE_LOWUARTINIT
 #endif
 
@@ -125,10 +123,8 @@ void up_addregion(void);
 /* Defined in up_serial.c */
 
 #ifdef CONFIG_USE_SERIALDRIVER
-EXTERN void up_earlyserialinit(void);
 EXTERN void up_serialinit(void);
 #else
-# define up_earlyserialinit()
 # define up_serialinit()
 #endif
 
