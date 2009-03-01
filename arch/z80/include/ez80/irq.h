@@ -61,53 +61,53 @@
 #define EZ80_PLL_IRQ        (3) /* Vector 0x4c */
 #define EZ80_FLASH_IRQ      (4) /* Vector 0x50 */
 
-#define EZ80_TIMER0_IRQ     (5) /* Vector Ox54 */
-#define EZ80_TIMER1_IRQ     (6) /* Vector Ox58 */
-#define EZ80_TIMER2_IRQ     (7) /* Vector Ox5c */
-#define EZ80_TIMER3_IRQ     (8) /* Vector Ox60 */
+#define EZ80_TIMER0_IRQ     (5) /* Vector 0x54 */
+#define EZ80_TIMER1_IRQ     (6) /* Vector 0x58 */
+#define EZ80_TIMER2_IRQ     (7) /* Vector 0x5c */
+#define EZ80_TIMER3_IRQ     (8) /* Vector 0x60 */
 
-#define EZ80_RTC_IRQ        (9) /* Vector Ox6C */
-#define EZ80_UART0_IRQ     (10) /* Vector Ox70 */
-#define EZ80_UART1_IRQ     (11) /* Vector Ox74 */
+#define EZ80_RTC_IRQ        (9) /* Vector 0x6C */
+#define EZ80_UART0_IRQ     (10) /* Vector 0x70 */
+#define EZ80_UART1_IRQ     (11) /* Vector 0x74 */
 
-#define EZ80_I2C_IRQ       (12) /* Vector Ox78 */
-#define EZ80_SPI_IRQ       (13) /* Vector Ox7c */
+#define EZ80_I2C_IRQ       (12) /* Vector 0x78 */
+#define EZ80_SPI_IRQ       (13) /* Vector 0x7c */
 
-#define EZ80_PORTA0_IRQ    (14) /* Vector Ox80 */
-#define EZ80_PORTA1_IRQ    (15) /* Vector Ox84 */
-#define EZ80_PORTA2_IRQ    (16) /* Vector Ox88 */
-#define EZ80_PORTA3_IRQ    (17) /* Vector Ox8c */
-#define EZ80_PORTA4_IRQ    (18) /* Vector Ox90 */
-#define EZ80_PORTA5_IRQ    (19) /* Vector Ox94 */
-#define EZ80_PORTA6_IRQ    (20) /* Vector Ox98 */
-#define EZ80_PORTA7_IRQ    (21) /* Vector Ox9c */
+#define EZ80_PORTA0_IRQ    (14) /* Vector 0x80 */
+#define EZ80_PORTA1_IRQ    (15) /* Vector 0x84 */
+#define EZ80_PORTA2_IRQ    (16) /* Vector 0x88 */
+#define EZ80_PORTA3_IRQ    (17) /* Vector 0x8c */
+#define EZ80_PORTA4_IRQ    (18) /* Vector 0x90 */
+#define EZ80_PORTA5_IRQ    (19) /* Vector 0x94 */
+#define EZ80_PORTA6_IRQ    (20) /* Vector 0x98 */
+#define EZ80_PORTA7_IRQ    (21) /* Vector 0x9c */
 
-#define EZ80_PORTB0_IRQ    (22) /* Vector Oxa0 */
-#define EZ80_PORTB1_IRQ    (23) /* Vector Oxa4 */
-#define EZ80_PORTB2_IRQ    (24) /* Vector Oxa8 */
-#define EZ80_PORTB3_IRQ    (25) /* Vector Oxac */
-#define EZ80_PORTB4_IRQ    (26) /* Vector Oxb0 */
-#define EZ80_PORTB5_IRQ    (27) /* Vector Oxb4 */
-#define EZ80_PORTB6_IRQ    (28) /* Vector Oxb8 */
-#define EZ80_PORTB7_IRQ    (29) /* Vector Oxbc */
+#define EZ80_PORTB0_IRQ    (22) /* Vector 0xa0 */
+#define EZ80_PORTB1_IRQ    (23) /* Vector 0xa4 */
+#define EZ80_PORTB2_IRQ    (24) /* Vector 0xa8 */
+#define EZ80_PORTB3_IRQ    (25) /* Vector 0xac */
+#define EZ80_PORTB4_IRQ    (26) /* Vector 0xb0 */
+#define EZ80_PORTB5_IRQ    (27) /* Vector 0xb4 */
+#define EZ80_PORTB6_IRQ    (28) /* Vector 0xb8 */
+#define EZ80_PORTB7_IRQ    (29) /* Vector 0xbc */
 
-#define EZ80_PORTC0_IRQ    (30) /* Vector Oxc0 */
-#define EZ80_PORTC1_IRQ    (31) /* Vector Oxc4 */
-#define EZ80_PORTC2_IRQ    (32) /* Vector Oxc8 */
-#define EZ80_PORTC3_IRQ    (33) /* Vector Oxcc */
-#define EZ80_PORTC4_IRQ    (34) /* Vector Oxd0 */
-#define EZ80_PORTC5_IRQ    (35) /* Vector Oxd4 */
-#define EZ80_PORTC6_IRQ    (36) /* Vector Oxd8 */
-#define EZ80_PORTC7_IRQ    (37) /* Vector Oxdc */
+#define EZ80_PORTC0_IRQ    (30) /* Vector 0xc0 */
+#define EZ80_PORTC1_IRQ    (31) /* Vector 0xc4 */
+#define EZ80_PORTC2_IRQ    (32) /* Vector 0xc8 */
+#define EZ80_PORTC3_IRQ    (33) /* Vector 0xcc */
+#define EZ80_PORTC4_IRQ    (34) /* Vector 0xd0 */
+#define EZ80_PORTC5_IRQ    (35) /* Vector 0xd4 */
+#define EZ80_PORTC6_IRQ    (36) /* Vector 0xd8 */
+#define EZ80_PORTC7_IRQ    (37) /* Vector 0xdc */
 
-#define EZ80_PORTD0_IRQ    (38) /* Vector Oxe0 */
-#define EZ80_PORTD1_IRQ    (39) /* Vector Oxe4 */
-#define EZ80_PORTD2_IRQ    (40) /* Vector Oxe8 */
-#define EZ80_PORTD3_IRQ    (41) /* Vector Oxec */
-#define EZ80_PORTD4_IRQ    (42) /* Vector Oxf0 */
-#define EZ80_PORTD5_IRQ    (43) /* Vector Oxf4 */
-#define EZ80_PORTD6_IRQ    (44) /* Vector Oxf8 */
-#define EZ80_PORTD7_IRQ    (45) /* Vector Oxfc */
+#define EZ80_PORTD0_IRQ    (38) /* Vector 0xe0 */
+#define EZ80_PORTD1_IRQ    (39) /* Vector 0xe4 */
+#define EZ80_PORTD2_IRQ    (40) /* Vector 0xe8 */
+#define EZ80_PORTD3_IRQ    (41) /* Vector 0xec */
+#define EZ80_PORTD4_IRQ    (42) /* Vector 0xf0 */
+#define EZ80_PORTD5_IRQ    (43) /* Vector 0xf4 */
+#define EZ80_PORTD6_IRQ    (44) /* Vector 0xf8 */
+#define EZ80_PORTD7_IRQ    (45) /* Vector 0xfc */
 
 #define NR_IRQS            (46)
 #define EZ80_IRQ_SYSTIMER  EZ80_TIMER0_IRQ
