@@ -721,35 +721,26 @@ static boolean z8_txempty(FAR struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_earlyserialinit
- *
- * Description:
- *   Performs the low level UART initialization early in 
- *   debug so that the serial console will be available
- *   during bootup.  This must be called before z8_serialinit.
- *
- ****************************************************************************/
-
-void up_earlyserialinit(void)
-{
-  (void)z8_disableuartirq(&TTYS0_DEV);
-  (void)z8_disableuartirq(&TTYS1_DEV);
-
-  CONSOLE_DEV.isconsole = TRUE;
-  z8_setup(&CONSOLE_DEV);
-}
-
-/****************************************************************************
  * Name: up_serialinit
  *
  * Description:
- *   Register serial console and serial ports.  This assumes
- *   that up_earlyserialinit was called previously.
+ *   Register serial console and serial ports.
  *
  ****************************************************************************/
 
 void up_serialinit(void)
 {
+   /* Disable all UART interrupts */
+
+  (void)z8_disableuartirq(&TTYS0_DEV);
+  (void)z8_disableuartirq(&TTYS1_DEV);
+
+  /* Initialize the console for early use */
+  CONSOLE_DEV.isconsole = TRUE;
+  z8_setup(&CONSOLE_DEV);
+
+  /* Reigster console and tty devices */
+
   (void)uart_register("/dev/console", &CONSOLE_DEV);
   (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
   (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
