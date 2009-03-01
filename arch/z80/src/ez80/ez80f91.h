@@ -377,7 +377,7 @@
 #define EZ80_UARTLCTL_FPE      0x20         /* Bit 5: Force parity error */
 #define EZ80_UARTLCTL_EPS      0x10         /* Bit 4: Even parity select */
 #define EZ80_UARTLCTL_PEN      0x08         /* Bit 3: Parity enable */
-#define EZ80_UARTLCTl_2STOP    0x04         /* Bit 2: 2 stop bits */
+#define EZ80_UARTLCTL_2STOP    0x04         /* Bit 2: 2 stop bits */
 #define EZ80_UARTLCTL_CHAR     0x03         /* Bits 0-2: Number of data bits */
 #  define EZ80_UARTCHAR_5BITS  0x00         /*   00: 5 data bits */
 #  define EZ80_UARTCHAR_6BITS  0x01         /*   01: 6 data bits */
