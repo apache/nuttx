@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh_ddcmd.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -224,7 +224,8 @@ static int dd_writeblk(struct dd_s *dd)
         }
       else
         {
-          nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "bshlib_write", NSH_ERRNO_OF(-nbytes));
+          FAR struct nsh_vtbl_s *vtbl = dd->vtbl;
+          nsh_output(vtbl, g_fmtcmdfailed, g_dd, "bshlib_write", NSH_ERRNO_OF(-nbytes));
           return ERROR;
         }
     }
@@ -251,7 +252,8 @@ static int dd_writech(struct dd_s *dd)
       nbytes = write(DD_OUTFD, buffer, dd->sectsize - written);
       if (nbytes < 0)
         {
-           nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "write", NSH_ERRNO_OF(-nbytes));
+           FAR struct nsh_vtbl_s *vtbl = dd->vtbl;
+           nsh_output(vtbl, g_fmtcmdfailed, g_dd, "write", NSH_ERRNO_OF(-nbytes));
            return ERROR;
         }
 
@@ -276,7 +278,8 @@ static int dd_readblk(struct dd_s *dd)
   nbytes = bchlib_read(DD_INHANDLE, (char*)dd->buffer, offset, dd->sectsize);
   if (nbytes < 0)
     {
-      nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "bshlib_read", NSH_ERRNO_OF(-nbytes));
+      FAR struct nsh_vtbl_s *vtbl = dd->vtbl;
+      nsh_output(vtbl, g_fmtcmdfailed, g_dd, "bshlib_read", NSH_ERRNO_OF(-nbytes));
       return ERROR;
     }
 
@@ -303,7 +306,8 @@ static int dd_readch(struct dd_s *dd)
       nbytes = read(DD_INFD, buffer, dd->sectsize - dd->nbytes);
       if (nbytes < 0)
         {
-           nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "read", NSH_ERRNO_OF(-nbytes));
+           FAR struct nsh_vtbl_s *vtbl = dd->vtbl;
+           nsh_output(vtbl, g_fmtcmdfailed, g_dd, "read", NSH_ERRNO_OF(-nbytes));
            return ERROR;
         }
 
@@ -345,6 +349,7 @@ static int dd_filetype(const char *filename)
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 static inline int dd_infopen(const char *name, struct dd_s *dd)
 {
+  FAR struct nsh_vtbl_s *vtbl = dd->vtbl;
   int ret;
   int type;
 
@@ -353,7 +358,7 @@ static inline int dd_infopen(const char *name, struct dd_s *dd)
   type = dd_filetype(name);
   if (type < 0)
     {
-      nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "stat", NSH_ERRNO_OF(-type));
+      nsh_output(vtbl, g_fmtcmdfailed, g_dd, "stat", NSH_ERRNO_OF(-type));
       return type;
     }
 
@@ -364,7 +369,7 @@ static inline int dd_infopen(const char *name, struct dd_s *dd)
       DD_INFD = open(name, O_RDONLY);
       if (DD_INFD < 0)
         {
-          nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "open", NSH_ERRNO);
+          nsh_output(vtbl, g_fmtcmdfailed, g_dd, "open", NSH_ERRNO);
           return ERROR;
         }
 
@@ -390,7 +395,8 @@ static inline int dd_infopen(const char *name, struct dd_s *dd)
   DD_INFD = open(name, O_RDONLY);
   if (DD_INFD < 0)
     {
-      nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "open", NSH_ERRNO);
+      FAR struct nsh_vtbl_s *vtbl = dd->vtbl;
+      nsh_output(vtbl, g_fmtcmdfailed, g_dd, "open", NSH_ERRNO);
       return ERROR;
     }
   return OK;
@@ -432,7 +438,8 @@ static inline int dd_outfopen(const char *name, struct dd_s *dd)
       DD_OUTFD = open(name, O_WRONLY|O_CREAT|O_TRUNC, 0644);
       if (DD_OUTFD < 0)
         {
-          nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "open", NSH_ERRNO);
+          FAR struct nsh_vtbl_s *vtbl = dd->vtbl;
+          nsh_output(vtbl, g_fmtcmdfailed, g_dd, "open", NSH_ERRNO);
           return ERROR;
         }
 
@@ -447,6 +454,7 @@ static inline int dd_outfopen(const char *name, struct dd_s *dd)
   DD_OUTFD = open(name, O_WRONLY|O_CREAT|O_TRUNC, 0644);
   if (DD_OUTFD < 0)
     {
+      FAR struct nsh_vtbl_s *vtbl = dd->vtbl;
       nsh_output(dd->vtbl, g_fmtcmdfailed, g_dd, "open", NSH_ERRNO);
       return ERROR;
     }

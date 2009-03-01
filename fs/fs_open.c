@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs_open.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,7 +90,9 @@ int open(const char *path, int oflags, ...)
     }
 
 #ifdef CONFIG_FILE_MODE
-# warning "File creation not implemented"
+#  ifdef CONFIG_CPP_HAVE_WARNING
+#    warning "File creation not implemented"
+#  endif
 
   /* If the file is opened for creation, then get the mode bits */
 

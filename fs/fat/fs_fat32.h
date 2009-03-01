@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_fat32.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 200, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -319,10 +319,10 @@
 #define MBR_PUTVOLID16(p,v)        fat_putuint32(UBYTE_PTR(p,BS16_VOLID),v)
 #define MBR_PUTVOLID32(p,v)        fat_putuint32(UBYTE_PTR(p,BS32_VOLID),v)
 
-#define PART1_PUTSTARTSECTOR(p,v) fat_putuint32(UBYTE_PTR(p,PART_ENTRY1+PART_STARTSECTOR,v))
-#define PART1_PUTSIZE(p,v)        fat_putuint32(UBYTE_PTR(p,PART_ENTRY1+PART_SIZE,v))
-#define PART2_PUTSTARTSECTOR(p,v) fat_putuint32(UBYTE_PTR(p,PART_ENTRY2+PART_STARTSECTOR,v))
-#define PART2_PUTSIZE(p,v)        fat_putuint32(UBYTE_PTR(p,PART_ENTRY2+PART_SIZE,v))
+#define PART1_PUTSTARTSECTOR(p,v) fat_putuint32(UBYTE_PTR(p,PART_ENTRY1+PART_STARTSECTOR),v)
+#define PART1_PUTSIZE(p,v)        fat_putuint32(UBYTE_PTR(p,PART_ENTRY1+PART_SIZE),v)
+#define PART2_PUTSTARTSECTOR(p,v) fat_putuint32(UBYTE_PTR(p,PART_ENTRY2+PART_STARTSECTOR),v)
+#define PART2_PUTSIZE(p,v)        fat_putuint32(UBYTE_PTR(p,PART_ENTRY2+PART_SIZE),v)
 
 /* But for multi-byte values, the endian-ness of the target vs. the little
  * endian order of the byte stream or alignment of the data within the byte
@@ -373,19 +373,19 @@
 # define FAT_GETFAT16(p,i)         fat_getuint16(UBYTE_PTR(p,i))
 # define FAT_GETFAT32(p,i)         fat_getuint32(UBYTE_PTR(p,i))
 
-# define MBR_PUTRESVDSECCOUNT(p,v) fat_putuint16(UBYTE_PTR(p,BS_RESVDSECCOUNT,v))
-# define MBR_PUTFATSZ16(p,v)       fat_putuint16(UBYTE_PTR(p,BS_FATSZ16,v))
-# define MBR_PUTSECPERTRK(p,v)     fat_putuint16(UBYTE_PTR(p,BS_SECPERTRK,v))
-# define MBR_PUTNUMHEADS(p,v)      fat_putuint16(UBYTE_PTR(p,BS_NUMHEADS,v))
-# define MBR_PUTHIDSEC(p,v)        fat_putuint32(UBYTE_PTR(p,BS_HIDSEC,v))
-# define MBR_PUTTOTSEC32(p,v)      fat_putuint32(UBYTE_PTR(p,BS_TOTSEC32,v))
-# define MBR_PUTFATSZ32(p,v)       fat_putuint32(UBYTE_PTR(p,BS32_FATSZ32,v))
-# define MBR_PUTEXTFLAGS(p,v)      fat_putuint16(UBYTE_PTR(p,BS32_EXTFLAGS,v))
-# define MBR_PUTFSVER(p,v)         fat_putuint16(UBYTE_PTR(p,BS32_FSVER,v))
-# define MBR_PUTROOTCLUS(p,v)      fat_putuint32(UBYTE_PTR(p,BS32_ROOTCLUS,v))
-# define MBR_PUTFSINFO(p,v)        fat_putuint16(UBYTE_PTR(p,BS32_FSINFO,v))
-# define MBR_PUTBKBOOTSEC(p,v)     fat_putuint16(UBYTE_PTR(p,BS32_BKBOOTSEC,v))
-# define MBR_PUTSIGNATURE(p,v)     fat_getuint16(UBYTE_PTR(p,BS_SIGNATURE),v)
+# define MBR_PUTRESVDSECCOUNT(p,v) fat_putuint16(UBYTE_PTR(p,BS_RESVDSECCOUNT),v)
+# define MBR_PUTFATSZ16(p,v)       fat_putuint16(UBYTE_PTR(p,BS_FATSZ16),v)
+# define MBR_PUTSECPERTRK(p,v)     fat_putuint16(UBYTE_PTR(p,BS_SECPERTRK),v)
+# define MBR_PUTNUMHEADS(p,v)      fat_putuint16(UBYTE_PTR(p,BS_NUMHEADS),v)
+# define MBR_PUTHIDSEC(p,v)        fat_putuint32(UBYTE_PTR(p,BS_HIDSEC),v)
+# define MBR_PUTTOTSEC32(p,v)      fat_putuint32(UBYTE_PTR(p,BS_TOTSEC32),v)
+# define MBR_PUTFATSZ32(p,v)       fat_putuint32(UBYTE_PTR(p,BS32_FATSZ32),v)
+# define MBR_PUTEXTFLAGS(p,v)      fat_putuint16(UBYTE_PTR(p,BS32_EXTFLAGS),v)
+# define MBR_PUTFSVER(p,v)         fat_putuint16(UBYTE_PTR(p,BS32_FSVER),v)
+# define MBR_PUTROOTCLUS(p,v)      fat_putuint32(UBYTE_PTR(p,BS32_ROOTCLUS),v)
+# define MBR_PUTFSINFO(p,v)        fat_putuint16(UBYTE_PTR(p,BS32_FSINFO),v)
+# define MBR_PUTBKBOOTSEC(p,v)     fat_putuint16(UBYTE_PTR(p,BS32_BKBOOTSEC),v)
+# define MBR_PUTSIGNATURE(p,v)     fat_putuint16(UBYTE_PTR(p,BS_SIGNATURE),v)
 
 # define FSI_PUTLEADSIG(p,v)       fat_putuint32(UBYTE_PTR(p,FSI_LEADSIG),v)
 # define FSI_PUTSTRUCTSIG(p,v)     fat_putuint32(UBYTE_PTR(p,FSI_STRUCTSIG),v)

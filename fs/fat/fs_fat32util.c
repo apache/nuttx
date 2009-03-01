@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs_fat32util.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -549,7 +549,9 @@ void fat_semgive(struct fat_mountpt_s *fs)
 
 uint32 fat_systime2fattime(void)
 {
-#warning "Time not implemented"
+#ifdef CONFIG_CPP_HAVE_WARNING
+#  warning "Time not implemented"
+#endif
     return 0;
 }
 
@@ -571,7 +573,9 @@ uint32 fat_systime2fattime(void)
 
 time_t fat_fattime2systime(uint16 fattime, uint16 fatdate)
 {
-#warning "Time not implemented"
+#ifdef CONFIG_CPP_HAVE_WARNING
+#  warning "Time not implemented"
+#endif
     return 0;
 }
 
