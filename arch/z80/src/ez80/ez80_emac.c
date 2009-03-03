@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/ez80_emac.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -226,7 +226,8 @@ struct ez80mac_statistics_s
   uint32 tx_timeouts;  /* Number of Tx timeout errors */
   uint32 sys_int;      /* Number of system interrupts received */
 };
-#  define EMAC_STAT(priv,name) (((priv)->stat.(name))++)
+#  define _MKFIELD(a,b,c)        a->b##c
+#  define EMAC_STAT(priv,name)   _MKFIELD(priv,stat.,name)++
 #else
 #  define EMAC_STAT(priv,name)
 #endif
@@ -306,6 +307,7 @@ static struct ez80emac_driver_s g_emac;
 
 /* MII logic */
 
+static void    ez80emac_waitmiibusy(void);
 static void    ez80emac_miiwrite(FAR struct ez80emac_driver_s *priv, ubyte offset,
                  uint16 value);
 static uint16  ez80emac_miiread(FAR struct ez80emac_driver_s *priv, uint32 offset);
@@ -346,6 +348,27 @@ static int     ez80emac_txavail(struct uip_driver_s *dev);
  ****************************************************************************/
 
 /****************************************************************************
+ * Function: ez80emac_waitmiibusy
+ *
+ * Description:
+ *   Wait for the MII to become available.
+ *
+ * Parameters:
+ *   priv   - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void ez80emac_waitmiibusy(void)
+{
+  /* Wait for any preceding MII management operation to complete */
+
+  while ((inp(EZ80_EMAC_MIISTAT) & EMAC_MIISTAT_BUSY) != 0);
+}
+
+/****************************************************************************
  * Function: ez80emac_miiwrite
  *
  * Description:
@@ -365,9 +388,9 @@ static void ez80emac_miiwrite(FAR struct ez80emac_driver_s *priv, ubyte offset, 
 {
   ubyte regval;
 
-  /* Wait for MII management operation to complete */
+  /* Wait for any preceding MII management operation to complete */
 
-  while (inp(EZ80_EMAC_MIISTAT) & EMAC_MIISTAT_BUSY);
+  ez80emac_waitmiibusy();
 
   /* Set up PHY addressing */
 
@@ -405,9 +428,9 @@ static uint16 ez80emac_miiread(FAR struct ez80emac_driver_s *priv, uint32 offset
 {
   ubyte regval;
   
-  /* Wait for MII management operation to complete */
+  /* Wait for any preceding MII management operation to complete */
 
-  while (inp(EZ80_EMAC_MIISTAT) & EMAC_MIISTAT_BUSY);
+  ez80emac_waitmiibusy();
 
   /* Set up PHY addressing */
 
@@ -422,7 +445,7 @@ static uint16 ez80emac_miiread(FAR struct ez80emac_driver_s *priv, uint32 offset
 
   /* Wait for MII management operation to complete */
 
-  while (inp(EZ80_EMAC_MIISTAT) & EMAC_MIISTAT_BUSY);
+  ez80emac_waitmiibusy();
   return ((uint16)inp(EZ80_EMAC_PRSD_H) << 8 | inp(EZ80_EMAC_PRSD_L));
 }
 
