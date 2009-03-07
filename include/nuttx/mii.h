@@ -61,26 +61,26 @@
 
 /* DP83840: 0x07-0x11, 0x14, 0x1a, 0x1d-0x1f reserved */
 
-#define MII_DCOUNTER                0x12    /* Disconnect counter */
-#define MII_FCSCOUNTER              0x13    /* False carrier sense counter */
-#define MII_NWAYTEST                0x14    /* N-way auto-neg test reg */
-#define MII_RERRCOUNTER             0x15    /* Receive error counter */
-#define MII_SREVISION               0x16    /* Silicon revision */
-#define MII_LBRERROR                0x18    /* Loopback, bypass and receiver error */
-#define MII_PHYADDR                 0x19    /* PHY address */
-#define MII_10BTSR                  0x1b    /* 10BASE-T status register */
-#define MII_10BTCR                  0x1c    /* 10BASE-T configuration register */
+#define MII_DP83840_COUNTER         0x12    /* Disconnect counter */
+#define MII_DP83840_FCSCOUNTER      0x13    /* False carrier sense counter */
+#define MII_DP83840_NWAYTEST        0x14    /* N-way auto-neg test reg */
+#define MII_DP83840_RERRCOUNTER     0x15    /* Receive error counter */
+#define MII_DP83840_SREVISION       0x16    /* Silicon revision */
+#define MII_DP83840_LBRERROR        0x18    /* Loopback, bypass and receiver error */
+#define MII_DP83840_PHYADDR         0x19    /* PHY address */
+#define MII_DP83840_10BTSR          0x1b    /* 10BASE-T status register */
+#define MII_DP83840_10BTCR          0x1c    /* 10BASE-T configuration register */
 
 /* Am79c874: 0x08-0x0f, 0x14, 0x16, 0x19-0x1f reserved */
 
-#define MII_NPADVERTISE             0x07    /* Auto-negotiation next page advertisement */
-#define MII_MISCFEATURES            0x10    /* Miscellaneous features reg */
-#define MII_INTCS                   0x11    /* Interrupt control/status */
-#define MII_DIAGNOSTIC              0x12    /* Diagnostic register */
-#define MII_LOOPBACK                0x13    /* Power management/loopback register */
-#define MII_MODEC                   0x15    /* Mode control register */
-#define MII_DISCONNECT              0x17    /* Disconnect counter */
-#define MII_RCVERROR                0x18    /* Receive error counter */
+#define MII_AM79C874_NPADVERTISE    0x07    /* Auto-negotiation next page advertisement */
+#define MII_AM79C874_MISCFEATURES   0x10    /* Miscellaneous features reg */
+#define MII_AM79C874_INTCS          0x11    /* Interrupt control/status */
+#define MII_AM79C874_DIAGNOSTIC     0x12    /* Diagnostic register */
+#define MII_AM79C874_LOOPBACK       0x13    /* Power management/loopback register */
+#define MII_AM79C874_MODEC          0x15    /* Mode control register */
+#define MII_AM79C874_DISCONNECT     0x17    /* Disconnect counter */
+#define MII_AM79C874_RCVERROR       0x18    /* Receive error counter */
 
 /* */
 
@@ -94,7 +94,7 @@
 /* MII Control register bit definitions */
 
 #define MII_MCR_SPEED1000           0x0040  /* Bit 6: MSB of Speed (1000 reserved on 10/100) */
-#define MII_MCR_CTST                0x0080  /* Bit 7: Enable ollision test  */
+#define MII_MCR_CTST                0x0080  /* Bit 7: Enable collision test  */
 #define MII_MCR_FULLDPLX            0x0100  /* Bit 8: Full duplex */
 #define MII_MCR_ANRESTART           0x0200  /* Bit 9: Restart auto negotiation */
 #define MII_MCR_ISOLATE             0x0400  /* Bit 10: Electronically isolate PHY from MII */
@@ -124,9 +124,12 @@
 
 /* MII ID2 register bits */
 
-#define MII_PHYID2_OUI              0xfc00  /* OUI mask */
+#define MII_PHYID2_OUI              0xfc00  /* Bits 19-24 of OUI mask */
 #define MII_PHYID2_MODEL            0x03f0  /* Model number mask */
 #define MII_PHYID2_REV              0x000f  /* Revision number mask */
+
+#define MII_PHYID1_AM79C874         0x0022  /* ID1 value for Am79c874 */
+#define MII_PHYID2_AM79C874         0x561b  /* ID2 value for Am79c874 Rev B */
 
 /* Advertisement control register bit definitions */
 
@@ -165,7 +168,7 @@
 #define MII_LPA_LPACK               0x4000  /* Bit 14: Link partner acknowledgement */
 #define MII_LPA_NXTPAGE             0x8000  /* Bit 15: Next page requested */
 
-/* Link partnter ability in next page format */
+/* Link partner ability in next page format */
 
 #define MII_LPANP_MESSAGE           0x07ff  /* Bits 0-10: Link partner's message code */
 #define MII_LPANP_TOGGLE            0x0800  /* Bit 11: Link partner toggle */
@@ -194,6 +197,13 @@
 
 #define MII_PHYADDR_DUPLEX          0x0080
 #define MII_PHYADDR_SPEED           0x0040
+
+/* Am79c874 diagnostics register */
+
+#define AM79C874_DIAG_RXLOCK        0x0100  /* Bit 8: 1=Rcv PLL locked on */
+#define AM79C874_DIAG_RXPASS        0x0200  /* Bit 9: 2=Operating in 100Base-X mode */
+#define AM79C874_DIAG_100MBPS       0x0400  /* Bit 10: 1=ANEG result is 100Mbps */
+#define AM79C874_DIAG_FULLDPLX      0x0800  /* Bit 11: 1=ANEG result is full duplex */
 
 /****************************************************************************
  * Type Definitions
