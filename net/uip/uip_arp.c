@@ -2,7 +2,7 @@
  * net/uip/uip_arp.c
  * Implementation of the ARP Address Resolution Protocol.
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on uIP which also has a BSD style license:
@@ -88,7 +88,7 @@
 struct arp_hdr
 {
   uint16 ah_hwtype;        /* 16-bit Hardware type (Ethernet=0x001) */
-  uint16 ah_protocol;      /* 16-bit Protocoal type (IP=0x0800 */
+  uint16 ah_protocol;      /* 16-bit Protocol type (IP=0x0800) */
   uint8  ah_hwlen;         /*  8-bit Hardware address size (6) */
   uint8  ah_protolen;      /*  8-bit Procotol address size (4) */
   uint16 ah_opcode;        /* 16-bit Operation */
@@ -167,7 +167,7 @@ static void uip_arp_dump(struct arp_hdr *arp)
   ndbg("  HW type: %04x Protocol: %04x\n",
        arp->ah_hwtype, arp->ah_protocol);\
   ndbg("  HW len: %02x Proto len: %02x Operation: %04x\n",
-        arp->ah_hwlen, arp->ah_protolen, arp->ah_opcode);
+       arp->ah_hwlen, arp->ah_protolen, arp->ah_opcode);
   ndbg("  Sender MAC: %02x:%02x:%02x:%02x:%02x:%02x IP: %d.%d.%d.%d\n",
        arp->ah_shwaddr[0], arp->ah_shwaddr[1], arp->ah_shwaddr[2],
        arp->ah_shwaddr[3], arp->ah_shwaddr[4], arp->ah_shwaddr[5],
@@ -322,6 +322,7 @@ void uip_arp_timer(void)
 
 void uip_arp_arpin(struct uip_driver_s *dev)
 {
+  struct arp_hdr *parp = ARPBUF;
   in_addr_t ipaddr;
 
   if (dev->d_len < (sizeof(struct arp_hdr) + UIP_LLH_LEN))
@@ -331,34 +332,36 @@ void uip_arp_arpin(struct uip_driver_s *dev)
     }
   dev->d_len = 0;
 
-  ipaddr = uip_ip4addr_conv(ARPBUF->ah_dipaddr);
-  switch(ARPBUF->ah_opcode)
+  ipaddr = uip_ip4addr_conv(parp->ah_dipaddr);
+  switch(parp->ah_opcode)
     {
       case HTONS(ARP_REQUEST):
         /* ARP request. If it asked for our address, we send out a reply. */
 
         if (uip_ipaddr_cmp(ipaddr, dev->d_ipaddr))
           {
+            struct uip_eth_hdr *peth = ETHBUF;
+ 
             /* First, we register the one who made the request in our ARP
              * table, since it is likely that we will do more communication
              * with this host in the future.
              */
 
-            uip_arp_update(ARPBUF->ah_sipaddr, ARPBUF->ah_shwaddr);
+            uip_arp_update(parp->ah_sipaddr, parp->ah_shwaddr);
 
-            ARPBUF->ah_opcode = HTONS(ARP_REPLY);
-            memcpy(ARPBUF->ah_dhwaddr, ARPBUF->ah_shwaddr, ETHER_ADDR_LEN);
-            memcpy(ARPBUF->ah_shwaddr, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
-            memcpy(ETHBUF->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
-            memcpy(ETHBUF->dest, ARPBUF->ah_dhwaddr, ETHER_ADDR_LEN);
+            parp->ah_opcode = HTONS(ARP_REPLY);
+            memcpy(parp->ah_dhwaddr, parp->ah_shwaddr, ETHER_ADDR_LEN);
+            memcpy(parp->ah_shwaddr, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+            memcpy(peth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+            memcpy(peth->dest, parp->ah_dhwaddr, ETHER_ADDR_LEN);
 
-            ARPBUF->ah_dipaddr[0] = ARPBUF->ah_sipaddr[0];
-            ARPBUF->ah_dipaddr[1] = ARPBUF->ah_sipaddr[1];
-            uiphdr_ipaddr_copy(ARPBUF->ah_sipaddr, &dev->d_ipaddr);
-            uip_arp_dump(ARPBUF);
+            parp->ah_dipaddr[0] = parp->ah_sipaddr[0];
+            parp->ah_dipaddr[1] = parp->ah_sipaddr[1];
+            uiphdr_ipaddr_copy(parp->ah_sipaddr, &dev->d_ipaddr);
+            uip_arp_dump(parp);
 
-            ETHBUF->type          = HTONS(UIP_ETHTYPE_ARP);
-            dev->d_len            = sizeof(struct arp_hdr) + UIP_LLH_LEN;
+            peth->type          = HTONS(UIP_ETHTYPE_ARP);
+            dev->d_len          = sizeof(struct arp_hdr) + UIP_LLH_LEN;
           }
         break;
 
@@ -369,7 +372,7 @@ void uip_arp_arpin(struct uip_driver_s *dev)
 
         if (uip_ipaddr_cmp(ipaddr, dev->d_ipaddr))
           {
-            uip_arp_update(ARPBUF->ah_sipaddr, ARPBUF->ah_shwaddr);
+            uip_arp_update(parp->ah_sipaddr, parp->ah_shwaddr);
           }
         break;
     }
@@ -402,10 +405,13 @@ void uip_arp_arpin(struct uip_driver_s *dev)
 
 void uip_arp_out(struct uip_driver_s *dev)
 {
-  struct arp_entry *tabptr = NULL;
-  in_addr_t         ipaddr;
-  in_addr_t         destipaddr;
-  int               i;
+  struct arp_entry   *tabptr = NULL;
+  struct arp_hdr     *parp   = ARPBUF;
+  struct uip_eth_hdr *peth   = ETHBUF;
+  struct ethip_hdr   *pip    = IPBUF;
+  in_addr_t           ipaddr;
+  in_addr_t           destipaddr;
+  int                 i;
 
   /* Find the destination IP address in the ARP table and construct
    * the Ethernet header. If the destination IP addres isn't on the
@@ -417,9 +423,9 @@ void uip_arp_out(struct uip_driver_s *dev)
 
   /* First check if destination is a local broadcast. */
 
-  if (uiphdr_ipaddr_cmp(IPBUF->eh_destipaddr, g_broadcast_ipaddr))
+  if (uiphdr_ipaddr_cmp(pip->eh_destipaddr, g_broadcast_ipaddr))
     {
-      memcpy(ETHBUF->dest, g_broadcast_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
+      memcpy(peth->dest, g_broadcast_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
     }
 #if defined(CONFIG_NET_MULTICAST) && !defined(CONFIG_NET_IPv6)
   /* Check if the destination address is a multicast address
@@ -431,24 +437,24 @@ void uip_arp_out(struct uip_driver_s *dev)
    *   addresses=0xff (ff00::/8.)
    */
 
- else if (IPBUF->eh_destipaddr[0] >= HTONS(0xe000) &&
-          IPBUF->eh_destipaddr[0] <= HTONS(0xefff))
+ else if (pip->eh_destipaddr[0] >= HTONS(0xe000) &&
+          pip->eh_destipaddr[0] <= HTONS(0xefff))
    {
      /* Build the well-known IPv4 IGMP ethernet address.  The first
       * three bytes are fixed; the final three variable come from the
       * last three bytes of the IP address.
       */
 
-     const ubyte *ip = ((ubyte*)IPBUF->eh_destipaddr) + 1;
-     memcpy(ETHBUF->dest,  g_multicast_ethaddr, 3);
-     memcpy(&ETHBUF->dest[3], ip, 3);
+     const ubyte *ip = ((ubyte*)pip->eh_destipaddr) + 1;
+     memcpy(peth->dest,  g_multicast_ethaddr, 3);
+     memcpy(&peth->dest[3], ip, 3);
    }
 #endif
   else
     {
       /* Check if the destination address is on the local network. */
 
-      destipaddr = uip_ip4addr_conv(IPBUF->eh_destipaddr);
+      destipaddr = uip_ip4addr_conv(pip->eh_destipaddr);
       if (!uip_ipaddr_maskcmp(destipaddr, dev->d_ipaddr, dev->d_netmask))
         {
           /* Destination address was not on the local network, so we need to
@@ -482,35 +488,35 @@ void uip_arp_out(struct uip_driver_s *dev)
            * overwrite the IP packet with an ARP request.
            */
 
-          memset(ETHBUF->dest, 0xff, ETHER_ADDR_LEN);
-          memset(ARPBUF->ah_dhwaddr, 0x00, ETHER_ADDR_LEN);
-          memcpy(ETHBUF->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
-          memcpy(ARPBUF->ah_shwaddr, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+          memset(peth->dest, 0xff, ETHER_ADDR_LEN);
+          memset(parp->ah_dhwaddr, 0x00, ETHER_ADDR_LEN);
+          memcpy(peth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+          memcpy(parp->ah_shwaddr, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
 
-          uiphdr_ipaddr_copy(ARPBUF->ah_dipaddr, &ipaddr);
-          uiphdr_ipaddr_copy(ARPBUF->ah_sipaddr, &dev->d_ipaddr);
+          uiphdr_ipaddr_copy(parp->ah_dipaddr, &ipaddr);
+          uiphdr_ipaddr_copy(parp->ah_sipaddr, &dev->d_ipaddr);
 
-          ARPBUF->ah_opcode   = HTONS(ARP_REQUEST);
-          ARPBUF->ah_hwtype   = HTONS(ARP_HWTYPE_ETH);
-          ARPBUF->ah_protocol = HTONS(UIP_ETHTYPE_IP);
-          ARPBUF->ah_hwlen    = ETHER_ADDR_LEN;
-          ARPBUF->ah_protolen = 4;
-          uip_arp_dump(ARPBUF);
+          parp->ah_opcode   = HTONS(ARP_REQUEST);
+          parp->ah_hwtype   = HTONS(ARP_HWTYPE_ETH);
+          parp->ah_protocol = HTONS(UIP_ETHTYPE_IP);
+          parp->ah_hwlen    = ETHER_ADDR_LEN;
+          parp->ah_protolen = 4;
+          uip_arp_dump(parp);
 
-          ETHBUF->type        = HTONS(UIP_ETHTYPE_ARP);
-          dev->d_len          = sizeof(struct arp_hdr) + UIP_LLH_LEN;
+          peth->type        = HTONS(UIP_ETHTYPE_ARP);
+          dev->d_len        = sizeof(struct arp_hdr) + UIP_LLH_LEN;
           return;
         }
 
       /* Build an ethernet header. */
 
-      memcpy(ETHBUF->dest, tabptr->at_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
+      memcpy(peth->dest, tabptr->at_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
     }
 
   /* Finish populating the ethernet header */
 
-  memcpy(ETHBUF->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
-  ETHBUF->type = HTONS(UIP_ETHTYPE_IP);
-  dev->d_len  += UIP_LLH_LEN;
+  memcpy(peth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+  peth->type  = HTONS(UIP_ETHTYPE_IP);
+  dev->d_len += UIP_LLH_LEN;
 }
 #endif /* CONFIG_NET */
