@@ -66,6 +66,12 @@
  * Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_EZ80_RAMADDR
+#  define CONFIG_EZ80_RAMADDR EZ80_EMACSRAM
+#endif
+
 #if CONFIG_NET_BUFSIZE > 1518
 #  error "MAXF size too big for this device"
 #endif
@@ -343,6 +349,10 @@ static int     ez80emac_ifup(struct uip_driver_s *dev);
 static int     ez80emac_ifdown(struct uip_driver_s *dev);
 static int     ez80emac_txavail(struct uip_driver_s *dev);
 
+/* Initialization */
+
+static int     ez80_emacinitialize(void);
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -481,7 +491,7 @@ static boolean ez80emac_miipoll(FAR struct ez80emac_driver_s *priv, uint32 offse
         {
           if ((value & bits) == 0)
             {
-                return TRUE;
+               return TRUE;
             }
         }
       else
@@ -616,7 +626,7 @@ static void ez80emac_miiautonegotiate(FAR struct ez80emac_driver_s *priv)
       priv->bfullduplex = FALSE;
     }
 
-  /* set MII control */
+  /* Set MII control */
 
   mcr = ez80emac_miiread(priv, MII_MCR);
   if (priv->bfullduplex)
@@ -639,15 +649,13 @@ static void ez80emac_miiautonegotiate(FAR struct ez80emac_driver_s *priv)
   ez80emac_miiwrite(priv, MII_MCR, mcr);
 
   nvdbg("MII registers (FIAD=%lx)\n", CONFIG_EZ80_FIAD);
-  nvdbg("  %-10s: %04x\n", "MII_MCR",       ez80emac_miiread(priv, MII_MCR));
-  nvdbg("  %-10s: %04x\n", "MII_MSR",       ez80emac_miiread(priv, MII_MSR));
-  nvdbg("  %-10s: %04x\n", "MII_PHYID1",    ez80emac_miiread(priv, MII_PHYID1));
-  nvdbg("  %-10s: %04x\n", "MII_PHYID2",    ez80emac_miiread(priv, MII_PHYID2));
-  nvdbg("  %-10s: %04x\n", "MII_ADVERTISE", ez80emac_miiread(priv, MII_ADVERTISE));
-  nvdbg("  %-10s: %04x\n", "MII_LPA",       ez80emac_miiread(priv, MII_LPA));
-  nvdbg("  %-10s: %04x\n", "MII_EXPANSION", ez80emac_miiread(priv, MII_EXPANSION));
-  nvdbg("  %-10s: %04x\n", "MII_LBRERROR",  ez80emac_miiread(priv, MII_LBRERROR));
-  nvdbg("  %-10s: %04x\n", "MII_PHYADDR",   ez80emac_miiread(priv, MII_PHYADDR));
+  nvdbg("  MII_MCR:       %04x\n", ez80emac_miiread(priv, MII_MCR));
+  nvdbg("  MII_MSR:       %04x\n", ez80emac_miiread(priv, MII_MSR));
+  nvdbg("  MII_PHYID1:    %04x\n", ez80emac_miiread(priv, MII_PHYID1));
+  nvdbg("  MII_PHYID2:    %04x\n", ez80emac_miiread(priv, MII_PHYID2));
+  nvdbg("  MII_ADVERTISE: %04x\n", ez80emac_miiread(priv, MII_ADVERTISE));
+  nvdbg("  MII_LPA:       %04x\n", ez80emac_miiread(priv, MII_LPA));
+  nvdbg("  MII_EXPANSION: %04x\n", ez80emac_miiread(priv, MII_EXPANSION));
 }
 
 /****************************************************************************
@@ -1015,7 +1023,7 @@ static int ez80emac_rxinterrupt(int irq, FAR void *context)
    * result is the BLKSLFT register.
    */
 
-  nvdbg("rxnext=%p {%06x, %u, %04x} rrp=%02x%02x rwp=%02%02 blkslft=%02x istat=%02x\n",
+  nvdbg("rxnext=%p {%06x, %u, %04x} rrp=%02x%02x rwp=%02x%02x blkslft=%02x istat=%02x\n",
         rxdesc, rxdesc->np, rxdesc->pktsize, rxdesc->stat,
         inp(EZ80_EMAC_RRP_H), inp(EZ80_EMAC_RRP_L),
         inp(EZ80_EMAC_RWP_H), inp(EZ80_EMAC_RWP_L),
@@ -1070,7 +1078,7 @@ static int ez80emac_rxinterrupt(int irq, FAR void *context)
   rxdesc->pktsize = 0;
   rxdesc->stat    = 0;
 
-  nvdbg("rxnext=%p {%06x, %u, %04x} rrp=%02x%02x rwp=%02%02 blkslft=%02x istat=%02x\n",
+  nvdbg("rxnext=%p {%06x, %u, %04x} rrp=%02x%02x rwp=%02x%02x blkslft=%02x istat=%02x\n",
         rxdesc, rxdesc->np, rxdesc->pktsize, rxdesc->stat,
         inp(EZ80_EMAC_RRP_H), inp(EZ80_EMAC_RRP_L),
         inp(EZ80_EMAC_RWP_H), inp(EZ80_EMAC_RWP_L),
@@ -1190,7 +1198,7 @@ static int ez80emac_sysinterrupt(int irq, FAR void *context)
 
   if ((istat & EMAC_ISTAT_RXOVR) != 0)
     {
-      ndbg("Rx OVR rxnext=%p {%06x, %u, %04x} rrp=%02x%02x rwp=%02%02 blkslft=%02x istat=%02x\n",
+      ndbg("Rx OVR rxnext=%p {%06x, %u, %04x} rrp=%02x%02x rwp=%02x%02x blkslft=%02x istat=%02x\n",
            priv->rxnext, priv->rxnext->np, priv->rxnext->pktsize, priv->rxnext->stat,
            inp(EZ80_EMAC_RRP_H), inp(EZ80_EMAC_RRP_L),
            inp(EZ80_EMAC_RWP_H), inp(EZ80_EMAC_RWP_L),
@@ -1298,80 +1306,80 @@ static int ez80emac_ifup(FAR struct uip_driver_s *dev)
 {
   FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)dev->d_private;
   ubyte regval;
+  int ret;
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24)
 
   /* Bring up the interface -- Must be down right now */
 
   DEBUGASSERT((inp(EZ80_EMAC_PTMR) == 0));
   DEBUGASSERT((inp(EZ80_EMAC_CFG4) & EMAC_CFG4_RXEN) == 0);
 
-  /* Soft reset Rx/Tx */
+  /* Reset hardware */
 
-  regval  = inp(EZ80_EMAC_RST);
-  regval |= (EMAC_RST_HRRFN|EMAC_RST_HRTFN);
-  outp(EZ80_EMAC_RST, regval);
-  regval &= ~(EMAC_RST_HRRFN|EMAC_RST_HRTFN);
-  outp(EZ80_EMAC_RST, regval);
-
-  /* EMAC_AFR_BC - Accept broadcast messages
-   * EMAC_AFR_MC - Accept any multicast message
-   * EMAC_AFR_QMC - Accept only qualified multicast messages
-   */
+  ret = ez80_emacinitialize();
+  if (ret == 0)
+    {
+      /* EMAC_AFR_BC - Accept broadcast messages
+       * EMAC_AFR_MC - Accept any multicast message
+       * EMAC_AFR_QMC - Accept only qualified multicast messages
+       */
 
 #ifdef CONFIG_EZ80_MCFILTER
-  outp(EZ80_EMAC_AFR, EMAC_AFR_BC|EMAC_AFR_QMC|EMAC_AFR_MC);
+      outp(EZ80_EMAC_AFR, EMAC_AFR_BC|EMAC_AFR_QMC|EMAC_AFR_MC);
 #else
-  outp(EZ80_EMAC_AFR, EMAC_AFR_BC|EMAC_AFR_MC);
+      outp(EZ80_EMAC_AFR, EMAC_AFR_BC|EMAC_AFR_MC);
 #endif
 
-  /* Set the MAC address */
+      /* Set the MAC address */
 
-  outp(EZ80_EMAC_STAD_0, priv->dev.d_mac.ether_addr_octet[0]);
-  outp(EZ80_EMAC_STAD_1, priv->dev.d_mac.ether_addr_octet[1]);
-  outp(EZ80_EMAC_STAD_2, priv->dev.d_mac.ether_addr_octet[2]);
-  outp(EZ80_EMAC_STAD_3, priv->dev.d_mac.ether_addr_octet[3]);
-  outp(EZ80_EMAC_STAD_4, priv->dev.d_mac.ether_addr_octet[4]);
-  outp(EZ80_EMAC_STAD_5, priv->dev.d_mac.ether_addr_octet[5]);
+      outp(EZ80_EMAC_STAD_0, priv->dev.d_mac.ether_addr_octet[0]);
+      outp(EZ80_EMAC_STAD_1, priv->dev.d_mac.ether_addr_octet[1]);
+      outp(EZ80_EMAC_STAD_2, priv->dev.d_mac.ether_addr_octet[2]);
+      outp(EZ80_EMAC_STAD_3, priv->dev.d_mac.ether_addr_octet[3]);
+      outp(EZ80_EMAC_STAD_4, priv->dev.d_mac.ether_addr_octet[4]);
+      outp(EZ80_EMAC_STAD_5, priv->dev.d_mac.ether_addr_octet[5]);
 
-  /* Enable/disable promiscuous mode */
+      /* Enable/disable promiscuous mode */
 
-  regval = inp(EZ80_EMAC_AFR);
+      regval = inp(EZ80_EMAC_AFR);
 #if defined(CONFIG_EZ80_EMACPROMISC)
-  regval |= EMAC_AFR_PROM;
+      regval |= EMAC_AFR_PROM;
 #else
-  regval &= ~EMAC_AFR_PROM;
+      regval &= ~EMAC_AFR_PROM;
 #endif
-  outp(EZ80_EMAC_AFR, regval);
+      outp(EZ80_EMAC_AFR, regval);
 
-  /* Enable Rx */
+      /* Enable Rx */
 
-  regval = inp(EZ80_EMAC_CFG4);
-  regval |= EMAC_CFG4_RXEN;
-  outp(EZ80_EMAC_CFG4, regval);
+      regval = inp(EZ80_EMAC_CFG4);
+      regval |= EMAC_CFG4_RXEN;
+      outp(EZ80_EMAC_CFG4, regval);
 
-  /* Enable the Tx poll timer */
+      /* Enable the Tx poll timer */
 
-  outp(EZ80_EMAC_PTMR, EMAC_PTMR);
+      outp(EZ80_EMAC_PTMR, EMAC_PTMR);
 
-  /* Turn on interrupts */
+      /* Turn on interrupts */
 
-  outp(EZ80_EMAC_ISTAT, 0xff);           /* Clear all pending interrupts */
-  outp(EZ80_EMAC_IEN, EMAC_EIN_HANDLED); /* Enable all interrupts */
+      outp(EZ80_EMAC_ISTAT, 0xff);           /* Clear all pending interrupts */
+      outp(EZ80_EMAC_IEN, EMAC_EIN_HANDLED); /* Enable all interrupts */
 
-  /* Set and activate a timer process */
+      /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_polltimer, 1, (uint32)priv);
+     (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_polltimer, 1, (uint32)priv);
 
-  /* Enable the Ethernet interrupt */
+      /* Enable the Ethernet interrupt */
 
-  priv->bifup = TRUE;
-  up_enable_irq(EZ80_EMACRX_IRQ);
-  up_enable_irq(EZ80_EMACTX_IRQ);
-  up_enable_irq(EZ80_EMACSYS_IRQ);
-  return OK;
+      priv->bifup = TRUE;
+      up_enable_irq(EZ80_EMACRX_IRQ);
+      up_enable_irq(EZ80_EMACTX_IRQ);
+      up_enable_irq(EZ80_EMACSYS_IRQ);
+      ret = OK;
+    }
+  return ret;
 }
 
 /****************************************************************************
@@ -1466,10 +1474,6 @@ static int ez80emac_txavail(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Function: ez80emac_initialize
  *
  * Description:
@@ -1483,31 +1487,40 @@ static int ez80emac_txavail(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-int up_netinitialize(void)
+static int ez80_emacinitialize(void)
 {
   struct ez80emac_driver_s *priv = &g_emac;
   uint24 addr;
   ubyte regval;
   int ret;
 
-  /* Initialize the hardware
-   *
-   * The ez80 has a fixed 8kb of EMAC SRAM memory located in the high
-   * address space (we don't need to know where, we can get then from
-   * the EZ80_EMAC_BP_U register). The EMAC memory is broken into
-   * two parts: the Tx buffer and the Rx buffer.
+  /* Reset the EMAC hardware */
+
+  outp(EZ80_EMAC_IEN, 0);        /* Disable all interrupts */
+  outp(EZ80_EMAC_RST, 0);        /* Reset everything */
+  outp(EZ80_EMAC_RST, 0xff);
+  outp(EZ80_EMAC_RST, 0);
+  
+  /* The ez80 has a fixed 8kb of EMAC SRAM memory (+ 8kb of
+   * general purpose SRAM) located in the high address space.
+   * Configure the GP and EMAC SRAM
+   */
+ 
+  outp(EZ80_RAM_CTL, (RAMCTL_ERAMEN|RAMCTL_GPRAMEN));
+  outp(EZ80_RAM_ADDR_U, (CONFIG_EZ80_RAMADDR >> 16));
+  outp(EZ80_EMAC_BP_U, (CONFIG_EZ80_RAMADDR >> 16));
+
+  /* The EMAC memory is broken into two parts: the Tx buffer and the Rx buffer.
    *
    * The TX buffer lies at the beginning of the EMAC memory.
    * The Transmit Lower Boundary Pointer Register, TLBP, holds the
    * least significant 12-bits of the starting address of the Tx buffer.
+   * The Transmit Write Pointer, TRP, will be set to the TLBP.
    */
 
-  outp(EZ80_EMAC_TLBP_L, 0); /* Bits 0-7 set to zero */
-  outp(EZ80_EMAC_TLBP_H, 0); /* Bits 8-12 set to zero */
-
-  addr                  = (uint24)inp(EZ80_EMAC_BP_U) << 16 |
-                          (uint24)inp(EZ80_EMAC_TLBP_H) << 8 |
-                          (uint24)inp(EZ80_EMAC_TLBP_L);
+  addr                  = CONFIG_EZ80_RAMADDR;
+  outp(EZ80_EMAC_TLBP_L, addr & 0xff);
+  outp(EZ80_EMAC_TLBP_H, (addr >> 8) & 0xff);
 
   priv->txstart         = (FAR struct ez80emac_desc_s *)(addr);
   priv->txnext          = priv->txstart;
@@ -1518,8 +1531,9 @@ int up_netinitialize(void)
   priv->txnext->pktsize = 0;
   priv->txnext->stat    = 0;
 
-  nvdbg("txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
+  nvdbg("txnext=%p {%06x, %u, %04x} tlbp=%02x%02x trp=%02x%02x\n",
         priv->txnext, priv->txnext->np, priv->txnext->pktsize, priv->txnext->stat,
+        inp(EZ80_EMAC_TLBP_H), inp(EZ80_EMAC_TLBP_L),
         inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
 
   /* The Boundary Pointer Register, EMAC_BP, points to the start of the Rx
@@ -1527,12 +1541,10 @@ int up_netinitialize(void)
    * write-able.
    */
 
-  outp(EZ80_EMAC_BP_L, EMAC_TXBUFSIZE & 0xe0);
-  outp(EZ80_EMAC_BP_H, (EMAC_TXBUFSIZE >> 8) & 0x1f);
+  addr                 += EMAC_TXBUFSIZE;
+  outp(EZ80_EMAC_BP_L, addr & 0xff);
+  outp(EZ80_EMAC_BP_H, (addr >> 8) & 0xff);
 
-  addr                  = (uint24)inp(EZ80_EMAC_BP_U) << 16 |
-                          (uint24)inp(EZ80_EMAC_BP_H) << 8 |
-                          (uint24)inp(EZ80_EMAC_BP_L);
   priv->rxstart         = (FAR struct ez80emac_desc_s *)(addr);
   priv->rxnext          = priv->rxstart;
 
@@ -1540,27 +1552,27 @@ int up_netinitialize(void)
   priv->rxnext->pktsize = 0;
   priv->rxnext->stat    = 0;
 
-  nvdbg("rxnext=%p {%06x, %u, %04x} bp=%06x\n",
-        priv->rxnext, priv->rxnext->np, priv->rxnext->pktsize,
-        priv->rxnext->stat, addr);
+  nvdbg("rxnext=%p {%06x, %u, %04x} bp=%02x%02x\n",
+        priv->rxnext, priv->rxnext->np, priv->rxnext->pktsize, priv->rxnext->stat,
+        inp(EZ80_EMAC_BP_H), inp(EZ80_EMAC_BP_L));
 
   /* The EMAC Receive Read Pointer (RRP) register(s) should be initialized
-   * to the EMAC_BEZ80_EMAC_RRP_HP value (start of the Receive buffer). The RRP register
-   * points to where the next Receive packet is read from. The EMAC_BP[12:5]
-   * is loaded into this register whenever the EMAC_RST [(HRRFN) is set to 1.
-   * The RxDMA block uses the RRP[12:5] to compare to RWP[12:5] for determining
-   * how many buffers remain. The result equates to the BLKSLFT register.
+   * to the start of the Receive buffer. The RRP register points to where the
+   * next Receive packet is read from. The EMAC_BP[12:5] is loaded into this
+   * register whenever the EMAC_RST [(HRRFN) is set to 1. The RxDMA block uses
+   * the RRP[12:5] to compare to RWP[12:5] for determining how many buffers
+   * remain. The result equates to the BLKSLFT register.
    *
-   * The read-only EMAC Receive Write Pointer (RWP) egisters reports the
+   * The read-only EMAC Receive Write Pointer (RWP) registers report the
    * current RxDMA Receive Write pointer. This pointer gets initialized to EMAC_BP
    * whenever EMAC_RST bits SRST or HRRTN are set. Because the size of the packet
    * is limited to a minimum of 32 bytes, the last five bits are always zero.
    */
 
-  outp(EZ80_EMAC_RRP_H, inp(EZ80_EMAC_BP_H));
-  outp(EZ80_EMAC_RRP_L, inp(EZ80_EMAC_BP_L));
+  outp(EZ80_EMAC_RRP_H, addr & 0xff);
+  outp(EZ80_EMAC_RRP_L, (addr >> 8) & 0xff);
 
-  nvdbg("rrp=%02x%02x rwp=%02%02\n",
+  nvdbg("rrp=%02x%02x rwp=%02x%02x\n",
         inp(EZ80_EMAC_RRP_H), inp(EZ80_EMAC_RRP_L),
         inp(EZ80_EMAC_RWP_H), inp(EZ80_EMAC_RWP_L));
 
@@ -1568,15 +1580,14 @@ int up_netinitialize(void)
    * of the Rx buffer + 1.  Only bits EMAC_RHBP[12:5] are write-able.
    */
 
-  outp(EZ80_EMAC_RHBP_L, EMAC_TOTAL_BUFSIZE & 0xe0);
-  outp(EZ80_EMAC_RHBP_H, (EMAC_TOTAL_BUFSIZE >> 8) & 0x1f);
-
-  addr          = (uint24)inp(EZ80_EMAC_BP_U) << 16 |
-                  (uint24)inp(EZ80_EMAC_RHBP_H) << 8 |
-                  (uint24)inp(EZ80_EMAC_RHBP_L);
+  addr         += EMAC_RXBUFSIZE;
+  outp(EZ80_EMAC_RHBP_L, addr & 0xff);
+  outp(EZ80_EMAC_RHBP_H, (addr >> 8) & 0xff);
   priv->rxendp1 = (FAR struct ez80emac_desc_s *)addr;
 
-  nvdbg("rxendp1=%p bp=%06x\n", priv->rxendp1, addr);
+  nvdbg("rxendp1=%p rhbp=%02x%02x\n",
+        priv->rxendp1,
+        inp(EZ80_EMAC_RHBP_H), inp(EZ80_EMAC_RHBP_L));
 
   /* The Tx and Receive buffers are divided into packet buffers of either
    * 256, 128, 64, or 32 bytes selected by BufSize register bits 7 and 6.
@@ -1589,13 +1600,13 @@ int up_netinitialize(void)
   /* Software reset */
 
   outp(EZ80_EMAC_ISTAT, 0xff); /* Clear any pending interupts */
-  regval = inp(EZ80_EMAC_RST);
+  regval  = inp(EZ80_EMAC_RST);
   regval |= EMAC_RST_SRST;
   outp(EZ80_EMAC_RST, regval);
   regval &= ~EMAC_RST_SRST;
   outp(EZ80_EMAC_RST, regval);
 
-  nvdbg("After soft reset: rwp=%02%02 trp=%02x%02x\n",
+  nvdbg("After soft reset: rwp=%02x%02x trp=%02x%02x\n",
         inp(EZ80_EMAC_RWP_H), inp(EZ80_EMAC_RWP_L),
         inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
 
@@ -1673,6 +1684,34 @@ int up_netinitialize(void)
 
   outp(EZ80_EMAC_TPTV_L, EMAC_TPTV & 0xff);
   outp(EZ80_EMAC_TPTV_H, EMAC_TPTV >> 8);
+  return OK;
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function: ez80emac_initialize
+ *
+ * Description:
+ *   Initialize the Ethernet driver
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+int up_netinitialize(void)
+{
+  struct ez80emac_driver_s *priv = &g_emac;
+  int ret;
 
   /* Disable all interrupts */
 
@@ -1683,7 +1722,7 @@ int up_netinitialize(void)
   ret = irq_attach(EZ80_EMACSYS_IRQ, ez80emac_sysinterrupt);
   if (ret < 0)
     {
-      ndbg("Unable to attach IRQ %d\n", EZ80_EMACSYS_IRQ);
+      nlldbg("Unable to attach IRQ %d\n", EZ80_EMACSYS_IRQ);
       ret = -EAGAIN;
       goto errout;
     }
@@ -1691,7 +1730,7 @@ int up_netinitialize(void)
   ret = irq_attach(EZ80_EMACRX_IRQ, ez80emac_rxinterrupt);
   if (ret < 0)
     {
-      ndbg("Unable to attach IRQ %d\n", EZ80_EMACRX_IRQ);
+      nlldbg("Unable to attach IRQ %d\n", EZ80_EMACRX_IRQ);
       ret = -EAGAIN;
       goto errout;
     }
@@ -1699,7 +1738,7 @@ int up_netinitialize(void)
   ret = irq_attach(EZ80_EMACTX_IRQ, ez80emac_txinterrupt);
   if (ret < 0)
     {
-      ndbg("Unable to attach IRQ %d\n", EZ80_EMACTX_IRQ);
+      nlldbg("Unable to attach IRQ %d\n", EZ80_EMACTX_IRQ);
       ret = -EAGAIN;
       goto errout;
     }
@@ -1726,7 +1765,7 @@ int up_netinitialize(void)
 
 errout:
   up_netuninitialize();
-  return ERROR;
+  return ret;
 }
 
 /****************************************************************************
