@@ -123,12 +123,28 @@
 #  error "Unsupported CONFIG_EZ80_PKTBUFSIZE value"
 #endif
 
+/* Am79c874 PHY configuration */
+
+#define EZ80_EMAC_AUTONEG  0
+#define EZ80_EMAC_100BFD   1
+#define EZ80_EMAC_100BHD   2
+#define EZ80_EMAC_10BFD    3
+#define EZ80_EMAC_10BHD    4
+
+#ifndef CONFIG_EZ80_PHYCONFIG
+#  define CONFIG_EZ80_PHYCONFIG EZ80_EMAC_10BFD
+#endif
+
 /* Select the fastest MDC clock that does not exceed 25MHz.  The MDC
  * clock derives from the SCLK divided by 4, 6, 8, 10, 14, 20, or 28.
  */
 
 #ifndef CONFIG_EZ80_MDCDIV
-#  define CONFIG_EZ80_MDCDIV EMAC_MDC_DIV4
+#  ifdef CONFIG_EZ80_PHYAM79C874
+#    define CONFIG_EZ80_MDCDIV EMAC_MDC_DIV20
+#  else
+#    define CONFIG_EZ80_MDCDIV EMAC_MDC_DIV4
+#  endif
 #endif
 
 /* Select the Tx poll timer.  If not specified, a 10MS timer is set */
@@ -319,7 +335,7 @@ static void    ez80emac_miiwrite(FAR struct ez80emac_driver_s *priv, ubyte offse
 static uint16  ez80emac_miiread(FAR struct ez80emac_driver_s *priv, uint32 offset);
 static boolean ez80emac_miipoll(FAR struct ez80emac_driver_s *priv, uint32 offset,
                  uint16 bits, boolean bclear);
-static void    ez80emac_miiautonegotiate(FAR struct ez80emac_driver_s *priv);
+static int     ez80emac_miiautonegotiate(FAR struct ez80emac_driver_s *priv);
 
 /* Multi-cast filtering */
 
@@ -523,7 +539,156 @@ static boolean ez80emac_miipoll(FAR struct ez80emac_driver_s *priv, uint32 offse
  *
  ****************************************************************************/
 
-static void ez80emac_miiautonegotiate(FAR struct ez80emac_driver_s *priv)
+#ifdef CONFIG_EZ80_PHYAM79C874
+static int ez80emac_miiautonegotiate(FAR struct ez80emac_driver_s *priv)
+{
+  uint16 phyval;
+  boolean bauto;
+  int ret = OK;
+  int i;
+
+  /* Verify that the detect PHY is an AMD Am87c874 as expected */
+
+#ifdef CONFIG_DEBUG /* Parameter checking only done when DEBUG is enabled */
+  phyval = ez80emac_miiread(priv, MII_PHYID1);
+  if (phyval != MII_PHYID1_AM79C874)
+    {
+      ndbg("Not an Am79c874 PHY: PHY1=%04x vs %04x\n", phyval, MII_PHYID1_AM79C874);
+      ret = -ENODEV;
+      goto dumpregs;
+    }
+
+  phyval = ez80emac_miiread(priv, MII_PHYID2);
+  if (phyval != MII_PHYID2_AM79C874)
+    {
+      ndbg("Not an Am79c874 PHY: PHY2=%04x vs %04x\n", phyval, MII_PHYID2_AM79C874);
+      ret = -ENODEV;
+      goto dumpregs;
+    }
+#endif
+
+  /* Check if the PHY can do auto-negotiation */
+
+  phyval = ez80emac_miiread(priv, MII_MSR);
+  if (phyval & MII_MSR_ANEGABLE)
+    {
+      phyval = MII_MCR_ANRESTART | MII_MCR_ANENABLE;
+      bauto  = TRUE;
+    }
+  else
+    {
+      phyval = 0;
+      bauto = FALSE;
+
+      /* PADEN - EMAC pads all short frames by adding zeroes to the end of
+       *         the data field. This bit is used in conjunction with ADPADN
+       *         and VLPAD.
+       * CRCEN - Append CRC to every frame regardless of padding options.
+       */
+
+      outp(EZ80_EMAC_CFG1, EMAC_CFG1_PADEN|EMAC_CFG1_CRCEN);
+    }
+
+  /* Set the configured link capabilities */
+
+#if CONFIG_EZ80_PHYCONFIG == EZ80_EMAC_AUTONEG
+
+   ndbg("Configure autonegotiation\n");
+   if (bauto)
+    {
+      ez80emac_miiwrite(priv, MII_ADVERTISE, 
+                        MII_ADVERTISE_100BASETXFULL|MII_ADVERTISE_100BASETXHALF|
+                        MII_ADVERTISE_10BASETXFULL|MII_ADVERTISE_10BASETXHALF|
+                        MII_ADVERTISE_CSMA);
+    }
+  else
+    {
+      ndbg("Am79c784 is not capable of autonegotiation\n");
+    }
+
+#elif CONFIG_EZ80_PHYCONFIG == EZ80_EMAC_100BFD
+
+  ndbg("100BASETX full duplex\n");
+  phyval |= MII_MCR_SPEED100 | MII_MCR_FULLDPLX;
+  ez80emac_miiwrite(priv, MII_ADVERTISE,
+                    MII_ADVERTISE_100BASETXFULL|MII_ADVERTISE_100BASETXHALF|
+                    MII_ADVERTISE_10BASETXFULL|MII_ADVERTISE_10BASETXHALF|
+                    MII_ADVERTISE_CSMA);
+
+#elif CONFIG_EZ80_PHYCONFIG == EZ80_EMAC_100BHD
+
+  ndbg("100BASETX half duplex\n");
+  phyval |= MII_MCR_SPEED100;
+  ez80emac_miiwrite(priv, MII_ADVERTISE,
+                    MII_ADVERTISE_100BASETXHALF|MII_ADVERTISE_10BASETXFULL|
+                    MII_ADVERTISE_10BASETXHALF|MII_ADVERTISE_CSMA);
+
+#elif CONFIG_EZ80_PHYCONFIG == EZ80_EMAC_10BFD
+
+  ndbg("10BASETX full duplex\n");
+  phyval |= MII_MCR_FULLDPLX;
+  ez80emac_miiwrite(priv, MII_ADVERTISE,
+                    MII_ADVERTISE_10BASETXFULL|MII_ADVERTISE_10BASETXHALF|MII_ADVERTISE_CSMA);
+
+#elif CONFIG_EZ80_PHYCONFIG == EZ80_EMAC_10BHD
+
+  ndbg("10BASETX half duplex\n");
+  ez80emac_miiwrite(priv, MII_ADVERTISE,
+                    MII_ADVERTISE_10BASETXHALF|MII_ADVERTISE_CSMA);
+
+#else
+#  error "No recognized value of CONFIG_EZ80_PHYCONFIG"
+#endif
+
+  ez80emac_miiwrite(priv, MII_MCR, phyval);
+
+  /* Wait for a link to be established */
+
+  for (i = 0; i < 50; i++)
+    {
+      phyval = ez80emac_miiread(priv, MII_MSR);
+      if ((phyval & (MII_MSR_ANEGCOMPLETE | MII_MSR_LINKSTATUS)) != 0)
+        {
+           break;
+        }
+      up_mdelay(10);
+    }
+
+  if ((phyval & MII_MSR_LINKSTATUS) == 0)
+    {
+      ndbg("Failed to establish link\n");
+      ret = -ETIMEDOUT;
+    }
+  else
+    {
+      /* Read the Am79c874 diagnostics register for link settings */
+
+      phyval = ez80emac_miiread(priv, MII_AM79C874_DIAGNOSTIC);
+      if (phyval & AM79C874_DIAG_FULLDPLX)
+        {
+          outp(EZ80_EMAC_CFG1, EMAC_CFG1_PADEN|EMAC_CFG1_CRCEN|EMAC_CFG1_FULLHD);
+        }
+      else
+        {
+          outp(EZ80_EMAC_CFG1, EMAC_CFG1_PADEN|EMAC_CFG1_CRCEN);
+        }
+    }
+
+dumpregs:
+  nvdbg("Am79c874 MII registers (FIAD=%lx)\n", CONFIG_EZ80_FIAD);
+  nvdbg("  MII_MCR:         %04x\n", ez80emac_miiread(priv, MII_MCR));
+  nvdbg("  MII_MSR:         %04x\n", ez80emac_miiread(priv, MII_MSR));
+  nvdbg("  MII_PHYID1:      %04x\n", ez80emac_miiread(priv, MII_PHYID1));
+  nvdbg("  MII_PHYID2:      %04x\n", ez80emac_miiread(priv, MII_PHYID2));
+  nvdbg("  MII_ADVERTISE:   %04x\n", ez80emac_miiread(priv, MII_ADVERTISE));
+  nvdbg("  MII_LPA:         %04x\n", ez80emac_miiread(priv, MII_LPA));
+  nvdbg("  MII_EXPANSION:   %04x\n", ez80emac_miiread(priv, MII_EXPANSION));
+  nvdbg("  MII_DIAGNOSTICS: %04x\n", ez80emac_miiread(priv, MII_AM79C874_DIAGNOSTIC));
+  nvdbg("EMAC CFG1:         %02x\n", inp(EZ80_EMAC_CFG1));
+  return ret;
+}
+#else
+static int ez80emac_miiautonegotiate(FAR struct ez80emac_driver_s *priv)
 {
   uint16 advertise;
   uint16 lpa;
@@ -656,7 +821,10 @@ static void ez80emac_miiautonegotiate(FAR struct ez80emac_driver_s *priv)
   nvdbg("  MII_ADVERTISE: %04x\n", ez80emac_miiread(priv, MII_ADVERTISE));
   nvdbg("  MII_LPA:       %04x\n", ez80emac_miiread(priv, MII_LPA));
   nvdbg("  MII_EXPANSION: %04x\n", ez80emac_miiread(priv, MII_EXPANSION));
+  nvdbg("EMAC CFG1:         %02x\n", inp(EZ80_EMAC_CFG11));
+  return OK;
 }
+#endif
 
 /****************************************************************************
  * Function: ez80emac_machash
@@ -1308,9 +1476,13 @@ static int ez80emac_ifup(FAR struct uip_driver_s *dev)
   ubyte regval;
   int ret;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24)
+  ndbg("Bringing up: MAC %02x:%02x:%02x:%02x:%02x:%02x\n",
+       dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
+       dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
+       dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
+  ndbg("             IP  %d.%d.%d.%d\n",
+       dev->d_ipaddr >> 24,       (dev->d_ipaddr >> 16) & 0xff,
+      (dev->d_ipaddr >> 8) & 0xff, dev->d_ipaddr & 0xff);
 
   /* Bring up the interface -- Must be down right now */
 
@@ -1678,7 +1850,7 @@ static int ez80_emacinitialize(void)
 
   /* Set auto-negotion */
 
-  ez80emac_miiautonegotiate(priv);
+  ret = ez80emac_miiautonegotiate(priv);
 
   /* Initialize DMA / FIFO */
 
