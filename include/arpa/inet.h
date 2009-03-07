@@ -62,10 +62,15 @@
 # define HTONL(nl) (nl)
 #else
 # define HTONS(ns) \
-  (uint16)(((((uint16)(ns)) & 0xff) << 8) | ((((uint16)(ns)) >> 8) & 0xff))
+  (unsigned short) \
+    (((((unsigned short)(ns)) & 0x00ff) << 8) | \
+     ((((unsigned short)(ns)) >> 8) & 0x00ff))
 # define HTONL(nl) \
-  ((((nl) & 0xff) << 24) | (((nl) & 0xff00) << 8) | \
-   (((nl) & 0xff0000) >> 8) | (((nl) & 0xff000000) >> 24))
+  (unsigned long) \
+    (((((unsigned long)(nl)) & 0x000000ffL) << 24) | \
+     ((((unsigned long)(nl)) & 0x0000ff00L) <<  8) | \
+     ((((unsigned long)(nl)) & 0x00ff0000L) >>  8) | \
+     ((((unsigned long)(nl)) & 0xff000000L) >> 24))
 #endif
 
 #define NTOHS(hs) HTONS(hs)
