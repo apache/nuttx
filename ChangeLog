@@ -646,5 +646,6 @@
 	* eZ80Acclaim!: Fixed logic error in UART interrupt handler.
 	* Many fixes in FAT file system and in NSH for correct compilation with ZDS-II
 	* eZ80Acclaim!: Added and verified a NuttShell (NSH) configuration.
+	* eZ80Acclaim!: Correct endian-ness; defconfig files said BIG endian.
 
 
