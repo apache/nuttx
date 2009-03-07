@@ -225,7 +225,7 @@
 #define EMAC_RXDESC_UOPCODE   0x0040 /* Bit 6: 1=Unsupported Op Code is indicated in the Op
                                       * Code field of the Ethernet packet. */
 #define EMAC_RXDESC_VLAN      0x0080 /* Bit 7: 1=The packet is a VLAN packet */
-#define EMAC_RXDESC_BCPKT     0x0100 /* Bit 8: 1=packet contains a broadcast address.
+#define EMAC_RXDESC_BCPKT     0x0100 /* Bit 8: 1=packet contains a broadcast address */
 #define EMAC_RXDESC_MCPKT     0x0200 /* Bit 9: 1=The packet contains a multicast address */
 #define EMAC_RXDESC_CR        0x0400 /* Bit 10: 1=The packet is a control frame */
 #define EMAC_RXDESC_PCF       0x0800 /* Bit 11: 1=The packet is a pause control frame */

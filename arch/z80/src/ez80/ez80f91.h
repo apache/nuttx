@@ -53,8 +53,8 @@
 #define EZ80_OFFCHIPCS0   0x400000 /* CS0: Off chip use (usually flash) */
 #define EZ80_OFFCHIPCS2   0x800000 /* CS2: Off chip use (e.g. memory mapped I/O) */
 #define EZ80_OFFCHIPCS1   0xc00000 /* CS1: Off chip use (usually SRAM) */
-#define EZ80_EMACSRAM     0xffc000 /* On-chip EMAC SRAM (8Kb) */
-#define EZ80_ONCHIPSRAM   0xffe000 /* On-chip SRAM (8Kb) */
+#define EZ80_EMACSRAM     0xffc000 /* On-chip EMAC SRAM (8Kb) on reset*/
+#define EZ80_ONCHIPSRAM   0xffe000 /* On-chip SRAM (8Kb) on reset */
 
 /* Product ID Registers  ************************************************************/
 
@@ -302,6 +302,11 @@
 #define EZ80_RAM_ADDR_U        0xb5
 #define EZ80_MBIST_GPR         0xb6
 #define EZ80_MBIST_EMR         0xb7
+
+/* RAMCTL bit definitions ************************************************************/
+
+#define RAMCTL_ERAMEN          (1 << 6) /* Bit 7: 1=On chip EMAC SRAM is enabled */
+#define RAMCTL_GPRAMEN         (1 << 7) /* Bit 7: 1=On chip GP SRAM is enabled */
 
 /* SPI Registers *********************************************************************/
 
