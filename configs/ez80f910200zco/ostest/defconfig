@@ -119,6 +119,8 @@ CONFIG_UART1_2STOP=0
 #
 # CONFIG_EZ80_EMAC - Enables support for ez80 EMAC driver.
 # CONFIG_EZ80_FIAD - Provides the MII address of the PHY device
+# CONFIG_EZ80_PHYAM79C874 - Define for Am79c874 PHY
+# CONFIG_EZ80_RAMADDR - Address of internal SRAM (default is 0xffc000)
 # CONFIG_EZ80_PKTBUFSIZE, CONFIG_EZ80_NTXPKTBUFS, and CONFIG_EZ80_NRXPKTBUFS -
 #   The size of one packet buffer and the number of Rx and Tx packet
 #   buffers. This must add up to exactly 8192 bytes.
@@ -131,6 +133,8 @@ CONFIG_UART1_2STOP=0
 #   fully implemented
 CONFIG_EZ80_EMAC=n
 CONFIG_EZ80_FIAD=0x1f
+CONFIG_EZ80_PHYAM79C874=y
+CONFIG_EZ80_RAMADDR=0xf7c000
 CONFIG_EZ80_PKTBUFSIZE=64
 CONFIG_EZ80_NTXPKTBUFS=64
 CONFIG_EZ80_NRXPKTBUFS=64
@@ -246,7 +250,7 @@ CONFIG_DISABLE_POLL=y
 # CONFIG_NOPRINTF_FIELDWIDTH - sprintf-related logic is a
 #   little smaller if we do not support fieldwidthes
 #
-CONFIG_NOPRINTF_FIELDWIDTH=y
+CONFIG_NOPRINTF_FIELDWIDTH=n
 
 #
 # Allow for architecture optimized implementations
