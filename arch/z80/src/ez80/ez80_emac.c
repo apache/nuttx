@@ -171,7 +171,7 @@
 #define EMAC_IPGT              0x12        /* IPGT: Back-to-back IPG default value */
 #define EMAC_IPGR1             0x0c        /* IPGR1: Non-back-to-back IPG default value */
 #define EMAC_IPGR2             0x12        /* IPGR2: Non-back-to-back IPG default value */
-#define EMAC_MAXF       CONFIG_NET_BUFSIZE /* Maximum packet length value */
+#define EMAC_MAXF              0x0600      /* Maximum packet length value (reset value) */
 #define EMAC_LCOL              0x37        /* CFG2: Late collision window default value */
 #define EMAC_RETRY             0x0f        /* CFG3: Maximum number of retry default value */
 
@@ -1173,7 +1173,7 @@ static int ez80emac_txinterrupt(int irq, FAR void *context)
   nvdbg("New txhead=%p {%06x, %u, %04x} trp=%02x%02x istat=%02x\n",
         priv->txhead, priv->txhead->np, priv->txhead->pktsize, priv->txhead->stat,
         inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L), istat);
-
+ 
   return OK;
 }
 
