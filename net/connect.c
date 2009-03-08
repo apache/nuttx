@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/connect.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -144,7 +144,7 @@ static void connection_event(struct uip_conn *conn, uint16 flags)
 
 #ifdef CONFIG_NET_TCP
 static inline int tcp_setup_callbacks(FAR struct socket *psock,
-                                       FAR struct tcp_connect_s *pstate)
+                                      FAR struct tcp_connect_s *pstate)
 {
   FAR struct uip_conn *conn = psock->s_conn;
   int ret = -EBUSY;
