@@ -1,7 +1,7 @@
 /********************************************************************************
  * pthread.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -155,14 +155,14 @@ typedef pthread_addr_t  any_t;
 typedef pthread_addr_t (*pthread_startroutine_t)(pthread_addr_t);
 typedef pthread_startroutine_t  pthread_func_t;
 
-struct pthread_addr_s
+struct pthread_attr_s
 {
   size_t stacksize;    /* Size of the stack allocated for the pthead */
   sint16 priority;     /* Priority of the pthread */
   ubyte  policy;       /* Pthread scheduler policy */
   ubyte  inheritsched; /* Inherit parent prio/policy? */
 };
-typedef struct pthread_addr_s pthread_attr_t;
+typedef struct pthread_attr_s pthread_attr_t;
 
 typedef pid_t pthread_t;
 

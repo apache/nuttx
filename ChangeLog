@@ -650,5 +650,7 @@
 	* Restructured parts of the uIP port for correct compilation with ZDS-II
 	* eZ80Acclaim!: Complete basic integration of the eZ80F91 EMAC driver.  The
 	  driver is basically functional and should mature prior to the 0.4.3 release.
+	* Implemented priority inheritance logic for POSIX semaphores.  Because the pthread
+	  mutexes are built on semaphores, they will have this property as well.
 
 

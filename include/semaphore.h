@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/semaphore.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,6 +64,9 @@ struct sem_s
 {
   sint16 semcount;              /* >0 -> Num counts available */
                                 /* <0 -> Num tasks waiting for semaphore */
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  void  *holder;                /* Holder TCB (actual type is _TCB) */
+#endif
 };
 typedef struct sem_s sem_t;
 

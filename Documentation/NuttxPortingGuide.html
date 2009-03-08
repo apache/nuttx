@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: December 5, 2008</p>
+      <p>Last Updated: March 8, 2009</p>
     </td>
   </tr>
 </table>
@@ -1623,8 +1623,13 @@ The system can be re-made subsequently by just typing <code>make</code>.
     provides /dev/console.  Enables stdout, stderr, stdin.
   </li>
   <li>
-    <code>CONFIG_MUTEX_TYPES</code>: Set to enabled support for recursive and
+    <code>CONFIG_MUTEX_TYPES</code>: Set to enable support for recursive and
     errorcheck mutexes.  Enables <code>pthread_mutexattr_settype()</code>.
+  </li>
+  <li>
+    <code>CONFIG_PRIORITY_INHERITANCE </code>: Set to enable support for
+    priority inheritance on mutexes and semaphores.
+  </li>
 </ul>
 
 <p>

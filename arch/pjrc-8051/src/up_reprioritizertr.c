@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * up_reprioritizertr.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
@@ -45,23 +45,23 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Private Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Funtions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Funtions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: up_reprioritize_rtr
  *
  * Description:
@@ -79,18 +79,31 @@
  *   tcb: The TCB of the task that has been reprioritized
  *   priority: The new task priority
  *
- ************************************************************/
+ ****************************************************************************/
 
 void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority)
 {
   /* Verify that the caller is sane */
 
-  if (tcb->task_state < FIRST_READY_TO_RUN_STATE ||
-      tcb->task_state > LAST_READY_TO_RUN_STATE ||
-      priority < SCHED_PRIORITY_MIN || 
+#if CONFIG_DEBUG /* We only check parameters when debug is enabled */
+  if (priority < SCHED_PRIORITY_MIN || 
       priority > SCHED_PRIORITY_MAX)
     {
        PANIC(OSERR_BADREPRIORITIZESTATE);
+    }
+  else
+#endif
+  if (tcb->task_state < FIRST_READY_TO_RUN_STATE ||
+           tcb->task_state > LAST_READY_TO_RUN_STATE)
+    {
+      /* This is a hack and needs to be fixed.. here some taks is reprioritizing
+       * another task that is not running.  Here we just set the priority of
+       * the task -- BUT some of the other states are also prioritized and the
+       * waiting task should also be re-ordered in the prioritized wiating list.
+       * As a consequence, the other task is still waiting at the lower priority.
+       */
+
+       tcb->sched_priority = priority;
     }
   else
     {
@@ -109,6 +122,9 @@ void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority)
       /* Setup up the new task priority */
 
       tcb->sched_priority = (ubyte)priority;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+      tcb->base_priority = (ubyte)priority;
+#endif
 
       /* Return the task to the specified blocked task list.
        * sched_addreadytorun will return TRUE if the task was

@@ -1,7 +1,7 @@
-/************************************************************
- * sched_setparam.c
+/****************************************************************************
+ * sched/sched_setparam.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
@@ -44,35 +44,35 @@
 #include <nuttx/arch.h>
 #include "os_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name:  sched_setparam
  *
  * Description:
@@ -100,7 +100,7 @@
  *
  * Assumptions:
  *
- ************************************************************/
+ ****************************************************************************/
 
 int sched_setparam(pid_t pid, const struct sched_param *param)
 {
@@ -185,6 +185,9 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
              /* Change the task priority */
 
              tcb->sched_priority = (ubyte)sched_priority;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+             tcb->base_priority  = (ubyte)sched_priority;
+#endif
            }
          break;
 
@@ -218,6 +221,9 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
              /* Change the task priority */
 
              tcb->sched_priority = (ubyte)sched_priority;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+             tcb->base_priority  = (ubyte)sched_priority;
+#endif
 
              /* Put it back into the ready-to-run task list */
 
@@ -241,6 +247,9 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
             /* Change the task priority */
 
             tcb->sched_priority = (ubyte)sched_priority;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+            tcb->base_priority  = (ubyte)sched_priority;
+#endif
 
             /* Put it back into the prioritized list at the correct
              * position
@@ -256,6 +265,9 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
             /* Just change the task's priority */
 
             tcb->sched_priority = (ubyte)sched_priority;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+            tcb->base_priority  = (ubyte)sched_priority;
+#endif
           }
         break;
     }

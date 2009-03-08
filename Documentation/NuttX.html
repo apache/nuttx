@@ -285,7 +285,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>Realtime, deterministic.</li>
+      <li>Realtime, deterministic, with support for priority inheritance</li>
     </p>
 </tr>
 
@@ -1371,6 +1371,8 @@ nuttx-0.4.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* Restructured parts of the uIP port for correct compilation with ZDS-II
 	* eZ80Acclaim!: Complete basic integration of the eZ80F91 EMAC driver.  The
 	  driver is basically functional and should mature prior to the 0.4.3 release.
+	* Implemented priority inheritance logic for POSIX semaphores.  Because the pthread
+	  mutexes are built on semaphores, they will have this property as well.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

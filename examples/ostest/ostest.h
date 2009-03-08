@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/ostest/ostest.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -134,5 +134,9 @@ extern void rr_test(void);
 /* barrier.c ****************************************************************/
 
 extern void barrier_test(void);
+
+/* prioinherit.c ************************************************************/
+
+extern void priority_inheritance(void);
 
 #endif /* __OSTEST_H */

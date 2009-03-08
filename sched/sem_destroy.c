@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sem_destroy.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,7 +103,8 @@ int sem_destroy (FAR sem_t *sem)
     {
       /* There is really no particular action that we need
        * take to destroy a semaphore.  We will just reset
-       * the count to some reasonable value (1).
+       * the count to some reasonable value (1) and release
+       * ownership.
        *
        * Check if other threads are waiting on the semaphore.
        * In this case, the behavior is undefined.  We will:
@@ -114,6 +115,9 @@ int sem_destroy (FAR sem_t *sem)
         {
           sem->semcount = 1;
         }
+#ifdef CONFIG_PRIORITY_INHERITANCE
+      sem->holder = NULL;
+#endif
       ret = OK;
     }
 

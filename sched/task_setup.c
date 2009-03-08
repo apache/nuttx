@@ -1,7 +1,7 @@
 /****************************************************************************
- * task_setup.c
+ * sched/task_setup.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -184,6 +184,9 @@ STATUS task_schedsetup(FAR _TCB *tcb, int priority,
 
       tcb->init_priority  = (ubyte)priority;
       tcb->sched_priority = (ubyte)priority;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+      tcb->base_priority  = (ubyte)priority;
+#endif
       tcb->start          = start;
       tcb->entry.main     = main;
 

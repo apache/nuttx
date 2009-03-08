@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sem_post.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,6 +104,9 @@
 
 int sem_post(FAR sem_t *sem)
 {
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  FAR _TCB  *rtcb = (FAR _TCB*)g_readytorun.head;
+#endif
   FAR _TCB  *stcb;
   STATUS     ret = ERROR;
   irqstate_t saved_state;
@@ -122,6 +125,9 @@ int sem_post(FAR sem_t *sem)
       /* Perform the semaphore unlock operation. */
 
       ASSERT(sem->semcount < SEM_VALUE_MAX);
+#ifdef CONFIG_PRIORITY_INHERITANCE
+      sem->holder = NULL;
+#endif
       sem->semcount++;
 
       /* If the result of of semaphore unlock is non-positive, then
@@ -151,6 +157,18 @@ int sem_post(FAR sem_t *sem)
               up_unblock_task(stcb);
             }
         }
+
+      /* Check if we need to drop our priority.  Our priority could have
+       * been boosted while we held the semaphore.
+       */
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+      if (rtcb->sched_priority != rtcb->base_priority)
+        {
+           up_reprioritize_rtr(rtcb, rtcb->base_priority);
+        }
+#endif
+
       ret = OK;
 
       /* Interrupts may now be enabled. */

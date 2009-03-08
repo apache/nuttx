@@ -1,7 +1,7 @@
 /****************************************************************************
- * main.c
+ * ostest/main.c
  *
- *   Copyright (C) 2007, 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -381,6 +381,14 @@ static int user_main(int argc, char *argv[])
       barrier_test();
       check_test_memory_usage();
 #endif
+
+#if defined(CONFIG_PRIORITY_INHERITANCE) && !defined(CONFIG_DISABLE_SIGNALS) && !defined(CONFIG_DISABLE_PTHREAD)
+      /* Verify priority inheritance */
+
+      printf("\nuser_main: priority inheritance test\n");
+      priority_inheritance();
+      check_test_memory_usage();
+#endif /* CONFIG_PRIORITY_INHERITANCE && !CONFIG_DISABLE_SIGNALS && !CONFIG_DISABLE_PTHREAD */
 
       /* Compare memory usage at time user_start started until
        * user_main exits.  These should not be identical, but should

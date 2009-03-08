@@ -1,7 +1,7 @@
 ############################################################################
 # examples/ostest/Makefile
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,34 +39,46 @@
 ASRCS	= 
 AOBJS	= $(ASRCS:.S=$(OBJEXT))
 CSRCS	= main.c dev_null.c
+
 ifneq ($(CONFIG_DISABLE_PTHREAD),y)
 CSRCS	+= cancel.c cond.c mutex.c sem.c barrier.c
 ifneq ($(CONFIG_RR_INTERVAL),0)
 CSRCS	+= roundrobin.c
-endif
+endif # CONFIG_RR_INTERVAL
 ifeq ($(CONFIG_MUTEX_TYPES),y)
 CSRCS   += rmutex.c
-endif
-endif
+endif # CONFIG_MUTEX_TYPES
+endif # CONFIG_DISABLE_PTHREAD
+
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CSRCS	+= sighand.c
 ifneq ($(CONFIG_DISABLE_PTHREAD),y)
 ifneq ($(CONFIG_DISABLE_CLOCK),y)
 CSRCS	+= timedwait.c
-endif
-endif
-endif
+endif # CONFIG_DISABLE_CLOCK
+endif # CONFIG_DISABLE_PTHREAD
+endif # CONFIG_DISABLE_SIGNALS
+
 ifneq ($(CONFIG_DISABLE_MQUEUE),y)
 ifneq ($(CONFIG_DISABLE_PTHREAD),y)
 CSRCS	+= mqueue.c 
 ifneq ($(CONFIG_DISABLE_CLOCK),y)
 CSRCS	+= timedmqueue.c 
-endif
-endif
-endif
+endif # CONFIG_DISABLE_CLOCK
+endif # CONFIG_DISABLE_PTHREAD
+endif # CONFIG_DISABLE_MQUEUE
+
 ifneq ($(CONFIG_DISABLE_POSIX_TIMERS),y)
 CSRCS	+= posixtimer.c
 endif
+
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+ifneq ($(CONFIG_DISABLE_PTHREAD),y)
+ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
+CSRCS	+= prioinherit.c
+endif # CONFIG_PRIORITY_INHERITANCE
+endif # CONFIG_DISABLE_PTHREAD
+endif # CONFIG_DISABLE_SIGNALS
 
 COBJS	= $(CSRCS:.c=$(OBJEXT))
 

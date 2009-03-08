@@ -1,7 +1,7 @@
 /****************************************************************************
- * pthread_create.c
+ * sched/pthread_create.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -303,7 +303,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   if (attr->inheritsched == PTHREAD_INHERIT_SCHED)
     {
-      /* Get the priority of this thread. */
+      /* Get the priority for this thread. */
 
       struct sched_param param;
       status = sched_getparam(0, &param);

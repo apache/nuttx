@@ -1,7 +1,7 @@
 NuttX TODO List (Last updated February 19, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  (7)  Task/Scheduler (sched/)
+  (6)  Task/Scheduler (sched/)
   (1)  Dynamic loader (N/A)
   (2)  Memory Managment (mm/)
   (1)  Signals (sched/, arch/)
@@ -52,10 +52,6 @@ o Task/Scheduler (sched/)
                child tasks.
   Status:      Open
   Priority:    Low
-
-  Description: Implement priority inheritance
-  Status:      Open
-  Priority:    Medium, this is a good feature for realtime systems.
 
   Description: Several APIs do not set errno.  Need to review all APIs.
   Status:      Open

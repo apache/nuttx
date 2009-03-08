@@ -1,7 +1,7 @@
 /********************************************************************************
  * nuttx/sched.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -177,6 +177,9 @@ struct _TCB
   entry_t  entry;                        /* Entry Point into the thread         */
   exitfunc_t exitfunc;                   /* Called if exit is called.           */
   ubyte    sched_priority;               /* Current priority of the thread      */
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  ubyte    base_priority;                /* "Normal" priority of the thread     */
+#endif
   ubyte    task_state;                   /* Current state of the thread         */
   uint16   flags;                        /* Misc. general status flags          */
   sint16   lockcount;                    /* 0=preemptable (not-locked)          */

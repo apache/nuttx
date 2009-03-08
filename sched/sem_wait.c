@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sem_wait.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -98,6 +98,9 @@
 int sem_wait(FAR sem_t *sem)
 {
   FAR _TCB  *rtcb = (FAR _TCB*)g_readytorun.head;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  FAR _TCB  *htcb;
+#endif
   int        ret = ERROR;
   irqstate_t saved_state;
 
@@ -125,6 +128,9 @@ int sem_wait(FAR sem_t *sem)
           /* It is, let the task take the semaphore. */
 
           sem->semcount--;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+          sem->holder = rtcb;
+#endif
           rtcb->waitsem = NULL;
           ret = OK;
         }
@@ -144,7 +150,7 @@ int sem_wait(FAR sem_t *sem)
               PANIC(OSERR_BADWAITSEM);
             }
 
-          /* Handle the POSIX semaphore */
+          /* Handle the POSIX semaphore (but don't set the owner yet) */
 
           sem->semcount--;
 
@@ -152,11 +158,36 @@ int sem_wait(FAR sem_t *sem)
 
           rtcb->waitsem = sem;
 
+          /* If priority inheritance is enabled, then check the priority of
+           * the holder of the semaphore.
+           */
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+          /* Disable context switching.  The following operations must be
+           * atomic with regard to the scheduler.
+           */
+
+          sched_lock();
+          htcb = sem->holder;
+          if (htcb && htcb->sched_priority < rtcb->sched_priority)
+            {
+              /* Raise the priority of the holder of the semaphore.  This
+               * cannot cause a context switch because we have preemption
+               * disabled.  The task will be marked "pending" and the switch
+               * will occur during up_block_task() processing.
+               */
+               
+              up_reprioritize_rtr(htcb, rtcb->sched_priority);
+            }
+#endif
           /* Add the TCB to the prioritized semaphore wait queue */
 
           *get_errno_ptr() = 0;
           up_block_task(rtcb, TSTATE_WAIT_SEM);
 
+#ifdef CONFIG_PRIORITY_INHERITANCE
+          sched_unlock();
+#endif
           /* When we resume at this point, either (1) the semaphore has been
            * assigned to this thread of execution, or (2) the semaphore wait
            * has been interrupted by a signal.  We can detect the latter case
@@ -165,6 +196,11 @@ int sem_wait(FAR sem_t *sem)
 
           if (*get_errno_ptr() != EINTR)
             {
+              /* We hold the semaphore */
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+              sem->holder = rtcb;
+#endif
               ret = OK;
             }
           else
