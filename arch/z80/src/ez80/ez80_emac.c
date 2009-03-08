@@ -112,24 +112,31 @@
 #endif
 
 #if CONFIG_EZ80_PKTBUFSIZE == 256
-#  define EMAC_BUFSZ EMAC_BUFSZ_256b
+#  define EMAC_BUFSZ          EMAC_BUFSZ_256b
+#  define EMAC_PKTBUF_SHIFT   8
 #elif CONFIG_EZ80_PKTBUFSIZE == 128
-#  define EMAC_BUFSZ EMAC_BUFSZ_128b
+#  define EMAC_BUFSZ          EMAC_BUFSZ_128b
+#  define EMAC_PKTBUF_SHIFT   7
 #elif CONFIG_EZ80_PKTBUFSIZE == 64
-#  define EMAC_BUFSZ EMAC_BUFSZ_64b
+#  define EMAC_BUFSZ          EMAC_BUFSZ_64b
+#  define EMAC_PKTBUF_SHIFT   6
 #elif CONFIG_EZ80_PKTBUFSIZE == 32
-#  define EMAC_BUFSZ EMAC_BUFSZ_32b
+#  define EMAC_BUFSZ          EMAC_BUFSZ_32b
+#  define EMAC_PKTBUF_SHIFT   5
 #else
 #  error "Unsupported CONFIG_EZ80_PKTBUFSIZE value"
 #endif
 
+#define EMAC_PKTBUF_MASK     (CONFIG_EZ80_PKTBUFSIZE - 1)
+#define EMAC_PKTBUF_ALIGN(a) (((a) + EMAC_PKTBUF_MASK - 1) & ~EMAC_PKTBUF_MASK)
+
 /* Am79c874 PHY configuration */
 
-#define EZ80_EMAC_AUTONEG  0
-#define EZ80_EMAC_100BFD   1
-#define EZ80_EMAC_100BHD   2
-#define EZ80_EMAC_10BFD    3
-#define EZ80_EMAC_10BHD    4
+#define EZ80_EMAC_AUTONEG    0
+#define EZ80_EMAC_100BFD     1
+#define EZ80_EMAC_100BHD     2
+#define EZ80_EMAC_10BFD      3
+#define EZ80_EMAC_10BHD      4
 
 #ifndef CONFIG_EZ80_PHYCONFIG
 #  define CONFIG_EZ80_PHYCONFIG EZ80_EMAC_10BFD
@@ -269,8 +276,6 @@ struct ez80emac_driver_s
    *            by ez80emac_transmit() when Tx is started and by ez80emac_reclaimtxdesc()
    *            when Tx processing completes.  txhead == NULL is also a sure
    *            indication that there is no Tx in progress.
-   * txtail:    Points to the last Tx descriptor queued for output. Initialized
-   *            to NULL.  Set by ez80emac_transmit() when a new Tx descriptor is added.
    * txnext:    Points to the next free Tx descriptor. Initialized to txstart; set
    *            when ez80emac_transmit() adds the descriptor; reset to txstart when the
    *            last Tx packet is sent.
@@ -278,7 +283,6 @@ struct ez80emac_driver_s
 
   FAR struct ez80emac_desc_s *txstart;
   FAR struct ez80emac_desc_s *txhead;
-  FAR struct ez80emac_desc_s *txtail;
   FAR struct ez80emac_desc_s *txnext;
 
   /* Rx buffer management
@@ -335,7 +339,7 @@ static void    ez80emac_miiwrite(FAR struct ez80emac_driver_s *priv, ubyte offse
 static uint16  ez80emac_miiread(FAR struct ez80emac_driver_s *priv, uint32 offset);
 static boolean ez80emac_miipoll(FAR struct ez80emac_driver_s *priv, uint32 offset,
                  uint16 bits, boolean bclear);
-static int     ez80emac_miiautonegotiate(FAR struct ez80emac_driver_s *priv);
+static int     ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv);
 
 /* Multi-cast filtering */
 
@@ -522,7 +526,7 @@ static boolean ez80emac_miipoll(FAR struct ez80emac_driver_s *priv, uint32 offse
 }
 
 /****************************************************************************
- * Function: ez80emac_miiautonegotiate
+ * Function: ez80emac_miiconfigure
  *
  * Description:
  *   Dump all MII registers
@@ -540,7 +544,7 @@ static boolean ez80emac_miipoll(FAR struct ez80emac_driver_s *priv, uint32 offse
  ****************************************************************************/
 
 #ifdef CONFIG_EZ80_PHYAM79C874
-static int ez80emac_miiautonegotiate(FAR struct ez80emac_driver_s *priv)
+static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 {
   uint16 phyval;
   boolean bauto;
@@ -688,7 +692,7 @@ dumpregs:
   return ret;
 }
 #else
-static int ez80emac_miiautonegotiate(FAR struct ez80emac_driver_s *priv)
+static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 {
   uint16 advertise;
   uint16 lpa;
@@ -924,72 +928,97 @@ static void ez80emac_machash(FAR ubyte *mac, int *ndx, int *bitno)
 static int ez80emac_transmit(struct ez80emac_driver_s *priv)
 {
   FAR struct ez80emac_desc_s *txdesc;
+  FAR struct ez80emac_desc_s *txnext;
+  ubyte     *psrc;
+  ubyte     *pdest;
+  uint24     len;
   irqstate_t flags;
-  ubyte regval;
+  ubyte      regval;
+
+  nvdbg("ENTRY: txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
+        priv->txnext, priv->txnext->np, priv->txnext->pktsize, priv->txnext->stat,
+        inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
 
   /* Increment statistics */
 
+  flags = irqsave();
   EMAC_STAT(priv, tx_queued);
 
-  /* Copy the data to the next packet in the Tx buffer */
-
-  flags           = irqsave();
-  txdesc          = priv->txnext;
-  txdesc->np      = 0;
-  txdesc->pktsize = priv->dev.d_len;
-  txdesc->stat    = 0;
-  memcpy((ubyte*)txdesc + SIZEOF_EMACSDESC, priv->dev.d_buf, priv->dev.d_len);
-
-  /* Add the new Tx descriptor to the tail of the chain. Is there a
-   * descriptor queued before this one?
+  /* The current packet to be sent is txnetx; Calculate the new txnext and
+   * set the ownership to host so that the EMAC does not try to transmit
+   * the next packet.
+   *
+   * The new txnext will be the current txnext plus the size of the descriptor
+   * header plus the size of the data to be transferred, aligned up to the next
+   * packet buffer size.  NOTE: that there is no check to see if we have
+   * overran the EMAC buffer -- i.e., if the next txnext has not yet been
+   * tranmitted.
    */
 
-  if (priv->txtail)
-    {
-      /* Yes, link it to this one */
+  txdesc = priv->txnext;
+ 
+  len    = EMAC_PKTBUF_ALIGN(priv->dev.d_len + SIZEOF_EMACSDESC);
+  txnext = (FAR struct ez80emac_desc_s *)((ubyte*)txdesc + len);
+  
+  /* Handle wraparound to the beginning of the TX region */
 
-      priv->txtail->np  = (uint24)txdesc;
+  if ((ubyte*)txnext + SIZEOF_EMACSDESC >= (ubyte*)priv->rxstart)
+    {
+      txnext = (FAR struct ez80emac_desc_s *)
+        ((ubyte*)priv->txstart + ((ubyte*)txnext - (ubyte*)priv->rxstart));
+    }
+
+  priv->txnext    = txnext;
+  txnext->np      = 0;
+  txnext->pktsize = 0;
+  txnext->stat    = 0; /* Bit 15: 0=Host (eZ80 CPU) owns, 1=EMAC owns. */
+
+  /* Copy the data to the next packet in the Tx buffer (handling wraparound) */
+
+  psrc            = priv->dev.d_buf;
+  pdest           = (ubyte*)txdesc + SIZEOF_EMACSDESC;
+  len             = (ubyte*)priv->rxstart - pdest;
+  if (len >= priv->dev.d_len)
+    {
+      /* The entire packet will fit into the EMAC SRAM without wrapping */
+
+      memcpy(pdest, psrc, priv->dev.d_len);
     }
   else
     {
-      /* No.. then there are no pending Tx actions.  This
-       * descriptor is both the new head and tail.
-       */
+      /* Handle wrap to the beginning of the buffer */
+
+      memcpy(pdest, psrc, len);
+      memcpy(priv->txstart, &psrc[len], (priv->dev.d_len - len));
+    }
+
+  if (!priv->txhead)
+    {
+      /* There are no pending TX actions.  This descriptor is the new head */
 
       priv->txhead = txdesc;
     }
-
-  /* In any event, this descriptor is the new tail */
-
-  priv->txtail = txdesc;
-
-  /* Caculate the address of the next, available Tx descriptor.
-   * Hmmm... need some way to determine if the next descriptor
-   * is in use or not.
-   */
-
-  priv->txnext = (FAR struct ez80emac_desc_s *)
-    ((FAR ubyte*)txdesc + txdesc->pktsize + SIZEOF_EMACSDESC);
-  if (priv->txnext >= priv->rxstart)
-    {
-      priv->txnext = priv->txstart;
-    }
-
-  /* Setup the new 'next' Tx descriptor (very dangerous with
-   * no check for overrun!)
-   */
-
-  priv->txnext->np      = 0;
-  priv->txnext->pktsize = 0;
-  priv->txnext->stat    = 0;
 
   /* Then, give ownership of the descriptor to the hardware.  It should
    * perform the transmission on its next polling cycle.
    */
 
-  txdesc->np   = (uint24)priv->txnext;
-  txdesc->stat = EMAC_TXDESC_OWNER;
+  txdesc->np      = (uint24)priv->txnext;
+  txdesc->pktsize = priv->dev.d_len;
+  txdesc->stat    = EMAC_TXDESC_OWNER;
+
+  /* Enable the TX poll timer.  The poll timer may alread be running.  In that
+   * case, this will force the hardware to poll again now
+   */
+
+  outp(EZ80_EMAC_PTMR, EMAC_PTMR);
   irqrestore(flags);
+
+  nvdbg("EXIT: txdesc=%p {%06x, %u, %04x}\n",
+        txdesc, txdesc->np, txdesc->pktsize, txdesc->stat);
+  nvdbg("      txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
+        txnext, txnext->np, txnext->pktsize, txnext->stat,
+        inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
@@ -1021,26 +1050,24 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
 static int ez80emac_uiptxpoll(struct uip_driver_s *dev)
 {
   struct ez80emac_driver_s *priv = (struct ez80emac_driver_s *)dev->d_private;
+  int ret = 0;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
    */
 
+  nvdbg("Poll result: d_len=%d\n", priv->dev.d_len);
   if (priv->dev.d_len > 0)
     {
       uip_arp_out(&priv->dev);
-      ez80emac_transmit(priv);
-
-      /* Check if there is room in the DM90x0 to hold another packet. If not,
-       * return a non-zero value to terminate the poll.
-       */
+      ret = ez80emac_transmit(priv);
     }
 
   /* If zero is returned, the polling will continue until all connections have
    * been examined.
    */
 
-  return 0;
+  return ret;
 }
 
 /****************************************************************************
@@ -1113,10 +1140,14 @@ static int ez80emac_txinterrupt(int irq, FAR void *context)
   priv->txhead = (FAR struct ez80emac_desc_s *)txdesc->np;
   if (!priv->txhead)
     {
-      /* If there is no new head, then there is no tail either */
+      /* No pending TX -- This should never happen because there
+       * is always a dummy descriptor at the end of the list owned
+       * by the host.  Reset to the beginining of the buffer
+       * and stop the poll timer
+       */
 
+      outp(EZ80_EMAC_PTMR, 0);
       priv->txnext = priv->txstart;
-      priv->txtail = NULL;
 
       /* Reset the transmit function.  That should force the TRP to be
        * the same as TDLP which is the set to txstart.
@@ -1142,6 +1173,7 @@ static int ez80emac_txinterrupt(int irq, FAR void *context)
   nvdbg("New txhead=%p {%06x, %u, %04x} trp=%02x%02x istat=%02x\n",
         priv->txhead, priv->txhead->np, priv->txhead->pktsize, priv->txhead->stat,
         inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L), istat);
+
   return OK;
 }
 
@@ -1442,9 +1474,7 @@ static void ez80emac_polltimer(int argc, uint32 arg, ...)
 {
   struct ez80emac_driver_s *priv = (struct ez80emac_driver_s *)arg;
 
-  /* Check if there is room in the send another TXr packet.  */
-
-  /* If so, update TCP timing states and poll uIP for new XMIT data */
+  /* Poll uIP for new XMIT data */
 
   (void)uip_timer(&priv->dev, ez80emac_uiptxpoll, EMAC_POLLHSEC);
 
@@ -1486,7 +1516,6 @@ static int ez80emac_ifup(FAR struct uip_driver_s *dev)
 
   /* Bring up the interface -- Must be down right now */
 
-  DEBUGASSERT((inp(EZ80_EMAC_PTMR) == 0));
   DEBUGASSERT((inp(EZ80_EMAC_CFG4) & EMAC_CFG4_RXEN) == 0);
 
   /* Reset hardware */
@@ -1530,10 +1559,6 @@ static int ez80emac_ifup(FAR struct uip_driver_s *dev)
       regval |= EMAC_CFG4_RXEN;
       outp(EZ80_EMAC_CFG4, regval);
 
-      /* Enable the Tx poll timer */
-
-      outp(EZ80_EMAC_PTMR, EMAC_PTMR);
-
       /* Turn on interrupts */
 
       outp(EZ80_EMAC_ISTAT, 0xff);           /* Clear all pending interrupts */
@@ -1543,7 +1568,7 @@ static int ez80emac_ifup(FAR struct uip_driver_s *dev)
 
      (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_polltimer, 1, (uint32)priv);
 
-      /* Enable the Ethernet interrupt */
+      /* Enable the Ethernet interrupts */
 
       priv->bifup = TRUE;
       up_enable_irq(EZ80_EMACRX_IRQ);
@@ -1697,7 +1722,6 @@ static int ez80_emacinitialize(void)
   priv->txstart         = (FAR struct ez80emac_desc_s *)(addr);
   priv->txnext          = priv->txstart;
   priv->txhead          = NULL;
-  priv->txtail          = NULL;
 
   priv->txnext->np      = 0;
   priv->txnext->pktsize = 0;
@@ -1848,9 +1872,9 @@ static int ez80_emacinitialize(void)
       goto errout;
     }
 
-  /* Set auto-negotion */
+  /* Configure the PHY */
 
-  ret = ez80emac_miiautonegotiate(priv);
+  ret = ez80emac_miiconfigure(priv);
 
   /* Initialize DMA / FIFO */
 
@@ -2021,7 +2045,6 @@ void up_netuninitialize(void)
 
   priv->txnext = priv->txstart;
   priv->txhead = NULL;
-  priv->txtail = NULL;
 
   irq_detach(EZ80_EMACRX_IRQ);
   irq_detach(EZ80_EMACTX_IRQ);
