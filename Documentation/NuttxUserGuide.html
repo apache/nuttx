@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: November 18, 2008</p>
+      <p>Last Updated: March 8, 2009</p>
     </td>
   </tr>
 </table>
@@ -1718,9 +1718,11 @@ interface of the same name.
 <p>
   Some operating systems avoid priority inversion by <I>automatically</I>
   increasing the priority of the low-priority <I>Task C</I> (the operable
-  buzz-word for this behavior is <I>priority inheritance</I>).  NuttX does not
-  support this behavior.  As a consequence, it is left to the designer to
-  provide implementations that will not suffer from priority inversion.
+  buzz-word for this behavior is <I>priority inheritance</I>).  NuttX
+  supports this behavior, but only if <code>CONFIG_PRIORITY_INHERITANCE</code>
+  is defined in your OS configuration file.  If <code>CONFIG_PRIORITY_INHERITANCE</code>
+  is not defined, then it is left to the designer to provide implementations
+  that will not suffer from priority inversion.
   The designer may, as examples:
 </p>
 <ul>
