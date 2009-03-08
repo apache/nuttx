@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_icmsend.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,6 +90,8 @@
 
 void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr)
 {
+  struct uip_icmpip_hdr *picmp = ICMPBUF;
+
   if (dev->d_sndlen > 0)
     {
       /* The total length to send is the size of the application data plus
@@ -110,52 +112,52 @@ void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr)
 
 #ifdef CONFIG_NET_IPv6
 
-      ICMPBUF->vtc         = 0x60;
-      ICMPBUF->tcf         = 0x00;
-      ICMPBUF->flow        = 0x00;
-      ICMPBUF->len[0]      = (dev->d_sndlen >> 8);
-      ICMPBUF->len[1]      = (dev->d_sndlen & 0xff);
-      ICMPBUF->nexthdr     = UIP_PROTO_ICMP;
-      ICMPBUF->hoplimit    = UIP_TTL;
+      picmp->vtc         = 0x60;
+      picmp->tcf         = 0x00;
+      picmp->flow        = 0x00;
+      picmp->len[0]      = (dev->d_sndlen >> 8);
+      picmp->len[1]      = (dev->d_sndlen & 0xff);
+      picmp->nexthdr     = UIP_PROTO_ICMP;
+      picmp->hoplimit    = UIP_TTL;
 
-      uip_ipaddr_copy(ICMPBUF->srcipaddr, &dev->d_ipaddr);
-      uip_ipaddr_copy(ICMPBUF->destipaddr, destaddr);
+      uip_ipaddr_copy(picmp->srcipaddr, &dev->d_ipaddr);
+      uip_ipaddr_copy(picmp->destipaddr, destaddr);
 
 #else /* CONFIG_NET_IPv6 */
 
-      ICMPBUF->vhl         = 0x45;
-      ICMPBUF->tos         = 0;
-      ICMPBUF->len[0]      = (dev->d_len >> 8);
-      ICMPBUF->len[1]      = (dev->d_len & 0xff);
+      picmp->vhl         = 0x45;
+      picmp->tos         = 0;
+      picmp->len[0]      = (dev->d_len >> 8);
+      picmp->len[1]      = (dev->d_len & 0xff);
       ++g_ipid;
-      ICMPBUF->ipid[0]     = g_ipid >> 8;
-      ICMPBUF->ipid[1]     = g_ipid & 0xff;
-      ICMPBUF->ipoffset[0] = UIP_TCPFLAG_DONTFRAG >> 8;
-      ICMPBUF->ipoffset[1] = UIP_TCPFLAG_DONTFRAG & 0xff;
-      ICMPBUF->ttl         = UIP_TTL;
-      ICMPBUF->proto       = UIP_PROTO_ICMP;
+      picmp->ipid[0]     = g_ipid >> 8;
+      picmp->ipid[1]     = g_ipid & 0xff;
+      picmp->ipoffset[0] = UIP_TCPFLAG_DONTFRAG >> 8;
+      picmp->ipoffset[1] = UIP_TCPFLAG_DONTFRAG & 0xff;
+      picmp->ttl         = UIP_TTL;
+      picmp->proto       = UIP_PROTO_ICMP;
 
-      uiphdr_ipaddr_copy(ICMPBUF->srcipaddr, &dev->d_ipaddr);
-      uiphdr_ipaddr_copy(ICMPBUF->destipaddr, destaddr);
+      uiphdr_ipaddr_copy(picmp->srcipaddr, &dev->d_ipaddr);
+      uiphdr_ipaddr_copy(picmp->destipaddr, destaddr);
 
       /* Calculate IP checksum. */
 
-      ICMPBUF->ipchksum    = 0;
-      ICMPBUF->ipchksum    = ~(uip_ipchksum(dev));
+      picmp->ipchksum    = 0;
+      picmp->ipchksum    = ~(uip_ipchksum(dev));
 
 #endif /* CONFIG_NET_IPv6 */
 
       /* Calculate the ICMP checksum. */
 
-      ICMPBUF->icmpchksum   = 0;
-      ICMPBUF->icmpchksum   = ~(uip_icmpchksum(dev));
-      if (ICMPBUF->icmpchksum == 0)
+      picmp->icmpchksum  = 0;
+      picmp->icmpchksum  = ~(uip_icmpchksum(dev));
+      if (picmp->icmpchksum == 0)
         {
-          ICMPBUF->icmpchksum = 0xffff;
+          picmp->icmpchksum = 0xffff;
         }
 
       nvdbg("Outgoing ICMP packet length: %d (%d)\n",
-            dev->d_len, (ICMPBUF->len[0] << 8) | ICMPBUF->len[1]);
+            dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
       uip_stat.icmp.sent++;

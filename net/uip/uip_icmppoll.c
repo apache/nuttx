@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_icmppoll.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,8 +52,6 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-#define ICMPBUF ((struct uip_icmpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Public Variables

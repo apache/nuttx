@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_udpsend.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -57,7 +57,7 @@
  * Definitions
  ****************************************************************************/
 
-#define UDPBUF  ((struct uip_udpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define UDPBUF ((struct uip_udpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Public Variables
@@ -95,6 +95,8 @@
 
 void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn)
 {
+  struct uip_udpip_hdr *pudpbuf = UDPBUF;
+
   if (dev->d_sndlen > 0)
     {
       /* The total lenth to send is the size of the application data plus
@@ -109,62 +111,62 @@ void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn)
 
 #ifdef CONFIG_NET_IPv6
 
-      UDPBUF->vtc         = 0x60;
-      UDPBUF->tcf         = 0x00;
-      UDPBUF->flow        = 0x00;
-      UDPBUF->len[0]      = (dev->d_sndlen >> 8);
-      UDPBUF->len[1]      = (dev->d_sndlen & 0xff);
-      UDPBUF->nexthdr     = UIP_PROTO_UDP;
-      UDPBUF->hoplimit    = conn->ttl;
+      pudpbuf->vtc         = 0x60;
+      pudpbuf->tcf         = 0x00;
+      pudpbuf->flow        = 0x00;
+      pudpbuf->len[0]      = (dev->d_sndlen >> 8);
+      pudpbuf->len[1]      = (dev->d_sndlen & 0xff);
+      pudpbuf->nexthdr     = UIP_PROTO_UDP;
+      pudpbuf->hoplimit    = conn->ttl;
 
-      uip_ipaddr_copy(UDPBUF->srcipaddr, &dev->d_ipaddr);
-      uip_ipaddr_copy(UDPBUF->destipaddr, &conn->ripaddr);
+      uip_ipaddr_copy(pudpbuf->srcipaddr, &dev->d_ipaddr);
+      uip_ipaddr_copy(pudpbuf->destipaddr, &conn->ripaddr);
 
 #else /* CONFIG_NET_IPv6 */
 
-      UDPBUF->vhl         = 0x45;
-      UDPBUF->tos         = 0;
-      UDPBUF->len[0]      = (dev->d_len >> 8);
-      UDPBUF->len[1]      = (dev->d_len & 0xff);
+      pudpbuf->vhl         = 0x45;
+      pudpbuf->tos         = 0;
+      pudpbuf->len[0]      = (dev->d_len >> 8);
+      pudpbuf->len[1]      = (dev->d_len & 0xff);
       ++g_ipid;
-      UDPBUF->ipid[0]     = g_ipid >> 8;
-      UDPBUF->ipid[1]     = g_ipid & 0xff;
-      UDPBUF->ipoffset[0] = 0;
-      UDPBUF->ipoffset[1] = 0;
-      UDPBUF->ttl         = conn->ttl;
-      UDPBUF->proto       = UIP_PROTO_UDP;
+      pudpbuf->ipid[0]     = g_ipid >> 8;
+      pudpbuf->ipid[1]     = g_ipid & 0xff;
+      pudpbuf->ipoffset[0] = 0;
+      pudpbuf->ipoffset[1] = 0;
+      pudpbuf->ttl         = conn->ttl;
+      pudpbuf->proto       = UIP_PROTO_UDP;
 
-      uiphdr_ipaddr_copy(UDPBUF->srcipaddr, &dev->d_ipaddr);
-      uiphdr_ipaddr_copy(UDPBUF->destipaddr, &conn->ripaddr);
+      uiphdr_ipaddr_copy(pudpbuf->srcipaddr, &dev->d_ipaddr);
+      uiphdr_ipaddr_copy(pudpbuf->destipaddr, &conn->ripaddr);
 
       /* Calculate IP checksum. */
 
-      UDPBUF->ipchksum    = 0;
-      UDPBUF->ipchksum    = ~(uip_ipchksum(dev));
+      pudpbuf->ipchksum    = 0;
+      pudpbuf->ipchksum    = ~(uip_ipchksum(dev));
 
 #endif /* CONFIG_NET_IPv6 */
 
       /* Initialize the UDP header */
 
-      UDPBUF->srcport     = conn->lport;
-      UDPBUF->destport    = conn->rport;
-      UDPBUF->udplen      = HTONS(dev->d_sndlen + UIP_UDPH_LEN);
+      pudpbuf->srcport     = conn->lport;
+      pudpbuf->destport    = conn->rport;
+      pudpbuf->udplen      = HTONS(dev->d_sndlen + UIP_UDPH_LEN);
 
 #ifdef CONFIG_NET_UDP_CHECKSUMS
       /* Calculate UDP checksum. */
 
-      UDPBUF->udpchksum   = 0;
-      UDPBUF->udpchksum   = ~(uip_udpchksum(dev));
-      if (UDPBUF->udpchksum == 0)
+      pudpbuf->udpchksum   = 0;
+      pudpbuf->udpchksum   = ~(uip_udpchksum(dev));
+      if (pudpbuf->udpchksum == 0)
         {
-          UDPBUF->udpchksum = 0xffff;
+          pudpbuf->udpchksum = 0xffff;
         }
 #else
-      UDPBUF->udpchksum   = 0;
+      pudpbuf->udpchksum   = 0;
 #endif
 
       nvdbg("Outgoing UDP packet length: %d (%d)\n",
-           dev->d_len, (UDPBUF->len[0] << 8) | UDPBUF->len[1]);
+           dev->d_len, (pudpbuf->len[0] << 8) | pudpbuf->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
       uip_stat.udp.sent++;

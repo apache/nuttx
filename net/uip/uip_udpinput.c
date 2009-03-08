@@ -2,7 +2,7 @@
  * net/uip/uip_udpinput.c
  * Handling incoming UDP input
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -96,6 +96,7 @@
 void uip_udpinput(struct uip_driver_s *dev)
 {
   struct uip_udp_conn *conn;
+  struct uip_udpip_hdr *pbuf = UDPBUF;
 
   /* UDP processing is really just a hack. We don't do anything to the UDP/IP
    * headers, but let the UDP application do all the hard work. If the
@@ -105,7 +106,7 @@ void uip_udpinput(struct uip_driver_s *dev)
   dev->d_len    -= UIP_IPUDPH_LEN;
 #ifdef CONFIG_NET_UDP_CHECKSUMS
   dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
-  if (UDPBUF->udpchksum != 0 && uip_udpchksum(dev) != 0xffff)
+  if (pudpbuf->udpchksum != 0 && uip_udpchksum(dev) != 0xffff)
     {
 #ifdef CONFIG_NET_STATISTICS
       uip_stat.udp.drop++;
@@ -119,7 +120,7 @@ void uip_udpinput(struct uip_driver_s *dev)
     {
       /* Demultiplex this UDP packet between the UDP "connections". */
 
-      conn = uip_udpactive(UDPBUF);
+      conn = uip_udpactive(pudpbuf);
       if (conn)
         {
           /* Setup for the application callback */

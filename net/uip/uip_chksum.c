@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_chksum.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  *
@@ -105,13 +105,14 @@ static uint16 chksum(uint16 sum, const uint8 *data, uint16 len)
 
 static uint16 upper_layer_chksum(struct uip_driver_s *dev, uint8 proto)
 {
+  struct uip_ip_hdr *pbuf = BUF;
   uint16 upper_layer_len;
   uint16 sum;
 
 #ifdef CONFIG_NET_IPv6
-  upper_layer_len = (((uint16)(BUF->len[0]) << 8) + BUF->len[1]);
+  upper_layer_len = (((uint16)(pbuf->len[0]) << 8) + pbuf->len[1]);
 #else /* CONFIG_NET_IPv6 */
-  upper_layer_len = (((uint16)(BUF->len[0]) << 8) + BUF->len[1]) - UIP_IPH_LEN;
+  upper_layer_len = (((uint16)(pbuf->len[0]) << 8) + pbuf->len[1]) - UIP_IPH_LEN;
 #endif /* CONFIG_NET_IPv6 */
 
   /* First sum pseudoheader. */
@@ -122,7 +123,7 @@ static uint16 upper_layer_chksum(struct uip_driver_s *dev, uint8 proto)
 
   /* Sum IP source and destination addresses. */
 
-  sum = chksum(sum, (uint8 *)&BUF->srcipaddr, 2 * sizeof(uip_ipaddr_t));
+  sum = chksum(sum, (uint8 *)&pbuf->srcipaddr, 2 * sizeof(uip_ipaddr_t));
 
   /* Sum TCP header and data. */
 
@@ -231,7 +232,8 @@ uint16 uip_udpchksum(struct uip_driver_s *dev)
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
 uint16 uip_icmpchksum(struct uip_driver_s *dev)
 {
-  return uip_chksum((uint16*)&ICMPBUF->type, dev->d_sndlen);
+  struct uip_icmpip_hdr *picmp = ICMPBUF;
+  return uip_chksum((uint16*)&picmp->type, dev->d_sndlen);
 }
 #endif
 

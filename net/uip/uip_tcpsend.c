@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_tcpsend.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -92,7 +92,9 @@
 
 static void uip_tcpsendcomplete(struct uip_driver_s *dev)
 {
-  BUF->ttl         = UIP_TTL;
+  struct uip_tcpip_hdr *pbuf = BUF;
+
+  pbuf->ttl         = UIP_TTL;
 
 #ifdef CONFIG_NET_IPv6
 
@@ -100,48 +102,48 @@ static void uip_tcpsendcomplete(struct uip_driver_s *dev)
    * length.
    */
 
-  BUF->len[0]      = ((dev->d_len - UIP_IPH_LEN) >> 8);
-  BUF->len[1]      = ((dev->d_len - UIP_IPH_LEN) & 0xff);
+  pbuf->len[0]      = ((dev->d_len - UIP_IPH_LEN) >> 8);
+  pbuf->len[1]      = ((dev->d_len - UIP_IPH_LEN) & 0xff);
 
 #else /* CONFIG_NET_IPv6 */
 
-  BUF->len[0]      = (dev->d_len >> 8);
-  BUF->len[1]      = (dev->d_len & 0xff);
+  pbuf->len[0]      = (dev->d_len >> 8);
+  pbuf->len[1]      = (dev->d_len & 0xff);
 
 #endif /* CONFIG_NET_IPv6 */
 
-  BUF->urgp[0]     = BUF->urgp[1] = 0;
+  pbuf->urgp[0]     = pbuf->urgp[1] = 0;
 
   /* Calculate TCP checksum. */
 
-  BUF->tcpchksum   = 0;
-  BUF->tcpchksum   = ~(uip_tcpchksum(dev));
+  pbuf->tcpchksum   = 0;
+  pbuf->tcpchksum   = ~(uip_tcpchksum(dev));
 
 #ifdef CONFIG_NET_IPv6
 
-  BUF->vtc         = 0x60;
-  BUF->tcf         = 0x00;
-  BUF->flow        = 0x00;
+  pbuf->vtc         = 0x60;
+  pbuf->tcf         = 0x00;
+  pbuf->flow        = 0x00;
 
 #else /* CONFIG_NET_IPv6 */
 
-  BUF->vhl         = 0x45;
-  BUF->tos         = 0;
-  BUF->ipoffset[0] = 0;
-  BUF->ipoffset[1] = 0;
+  pbuf->vhl         = 0x45;
+  pbuf->tos         = 0;
+  pbuf->ipoffset[0] = 0;
+  pbuf->ipoffset[1] = 0;
   ++g_ipid;
-  BUF->ipid[0]     = g_ipid >> 8;
-  BUF->ipid[1]     = g_ipid & 0xff;
+  pbuf->ipid[0]     = g_ipid >> 8;
+  pbuf->ipid[1]     = g_ipid & 0xff;
 
   /* Calculate IP checksum. */
 
-  BUF->ipchksum    = 0;
-  BUF->ipchksum    = ~(uip_ipchksum(dev));
+  pbuf->ipchksum    = 0;
+  pbuf->ipchksum    = ~(uip_ipchksum(dev));
 
 #endif /* CONFIG_NET_IPv6 */
 
   nvdbg("Outgoing TCP packet length: %d (%d)\n",
-       dev->d_len, (BUF->len[0] << 8) | BUF->len[1]);
+       dev->d_len, (pbuf->len[0] << 8) | pbuf->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
   uip_stat.tcp.sent++;
@@ -171,15 +173,17 @@ static void uip_tcpsendcomplete(struct uip_driver_s *dev)
 
 static void uip_tcpsendcommon(struct uip_driver_s *dev, struct uip_conn *conn)
 {
-  memcpy(BUF->ackno, conn->rcv_nxt, 4);
-  memcpy(BUF->seqno, conn->snd_nxt, 4);
+  struct uip_tcpip_hdr *pbuf = BUF;
 
-  BUF->proto    = UIP_PROTO_TCP;
-  BUF->srcport  = conn->lport;
-  BUF->destport = conn->rport;
+  memcpy(pbuf->ackno, conn->rcv_nxt, 4);
+  memcpy(pbuf->seqno, conn->snd_nxt, 4);
 
-  uiphdr_ipaddr_copy(BUF->srcipaddr, &dev->d_ipaddr);
-  uiphdr_ipaddr_copy(BUF->destipaddr, &conn->ripaddr);
+  pbuf->proto    = UIP_PROTO_TCP;
+  pbuf->srcport  = conn->lport;
+  pbuf->destport = conn->rport;
+
+  uiphdr_ipaddr_copy(pbuf->srcipaddr, &dev->d_ipaddr);
+  uiphdr_ipaddr_copy(pbuf->destipaddr, &conn->ripaddr);
 
   if (conn->tcpstateflags & UIP_STOPPED)
     {
@@ -187,13 +191,13 @@ static void uip_tcpsendcommon(struct uip_driver_s *dev, struct uip_conn *conn)
        * window so that the remote host will stop sending data.
        */
 
-      BUF->wnd[0] = 0;
-      BUF->wnd[1] = 0;
+      pbuf->wnd[0] = 0;
+      pbuf->wnd[1] = 0;
     }
   else
     {
-      BUF->wnd[0] = ((CONFIG_NET_RECEIVE_WINDOW) >> 8);
-      BUF->wnd[1] = ((CONFIG_NET_RECEIVE_WINDOW) & 0xff);
+      pbuf->wnd[0] = ((CONFIG_NET_RECEIVE_WINDOW) >> 8);
+      pbuf->wnd[1] = ((CONFIG_NET_RECEIVE_WINDOW) & 0xff);
     }
 
   /* Finish the IP portion of the message, calculate checksums and send
@@ -230,9 +234,11 @@ static void uip_tcpsendcommon(struct uip_driver_s *dev, struct uip_conn *conn)
 
 void uip_tcpsend(struct uip_driver_s *dev, struct uip_conn *conn, uint16 flags, uint16 len)
 {
-  BUF->flags     = flags;
+  struct uip_tcpip_hdr *pbuf = BUF;
+
+  pbuf->flags     = flags;
   dev->d_len     = len;
-  BUF->tcpoffset = (UIP_TCPH_LEN / 4) << 4;
+  pbuf->tcpoffset = (UIP_TCPH_LEN / 4) << 4;
   uip_tcpsendcommon(dev, conn);
 }
 
@@ -255,6 +261,8 @@ void uip_tcpsend(struct uip_driver_s *dev, struct uip_conn *conn, uint16 flags, 
 
 void uip_tcpreset(struct uip_driver_s *dev)
 {
+  struct uip_tcpip_hdr *pbuf = BUF;
+
   uint16 tmp16;
   uint8  seqbyte;
 
@@ -262,54 +270,54 @@ void uip_tcpreset(struct uip_driver_s *dev)
   uip_stat.tcp.rst++;
 #endif
 
-  BUF->flags     = TCP_RST | TCP_ACK;
-  dev->d_len     = UIP_IPTCPH_LEN;
-  BUF->tcpoffset = 5 << 4;
+  pbuf->flags     = TCP_RST | TCP_ACK;
+  dev->d_len      = UIP_IPTCPH_LEN;
+  pbuf->tcpoffset = 5 << 4;
 
   /* Flip the seqno and ackno fields in the TCP header. */
 
-  seqbyte        = BUF->seqno[3];
-  BUF->seqno[3]  = BUF->ackno[3];
-  BUF->ackno[3]  = seqbyte;
+  seqbyte         = pbuf->seqno[3];
+  pbuf->seqno[3]  = pbuf->ackno[3];
+  pbuf->ackno[3]  = seqbyte;
 
-  seqbyte        = BUF->seqno[2];
-  BUF->seqno[2]  = BUF->ackno[2];
-  BUF->ackno[2]  = seqbyte;
+  seqbyte         = pbuf->seqno[2];
+  pbuf->seqno[2]  = pbuf->ackno[2];
+  pbuf->ackno[2]  = seqbyte;
 
-  seqbyte        = BUF->seqno[1];
-  BUF->seqno[1]  = BUF->ackno[1];
-  BUF->ackno[1]  = seqbyte;
+  seqbyte         = pbuf->seqno[1];
+  pbuf->seqno[1]  = pbuf->ackno[1];
+  pbuf->ackno[1]  = seqbyte;
 
-  seqbyte        = BUF->seqno[0];
-  BUF->seqno[0]  = BUF->ackno[0];
-  BUF->ackno[0]  = seqbyte;
+  seqbyte         = pbuf->seqno[0];
+  pbuf->seqno[0]  = pbuf->ackno[0];
+  pbuf->ackno[0]  = seqbyte;
 
   /* We also have to increase the sequence number we are
    * acknowledging. If the least significant byte overflowed, we need
    * to propagate the carry to the other bytes as well.
    */
 
-  if (++(BUF->ackno[3]) == 0)
+  if (++(pbuf->ackno[3]) == 0)
     {
-      if (++(BUF->ackno[2]) == 0)
+      if (++(pbuf->ackno[2]) == 0)
         {
-          if (++(BUF->ackno[1]) == 0)
+          if (++(pbuf->ackno[1]) == 0)
             {
-              ++(BUF->ackno[0]);
+              ++(pbuf->ackno[0]);
             }
         }
     }
 
   /* Swap port numbers. */
 
-  tmp16         = BUF->srcport;
-  BUF->srcport  = BUF->destport;
-  BUF->destport = tmp16;
+  tmp16          = pbuf->srcport;
+  pbuf->srcport  = pbuf->destport;
+  pbuf->destport = tmp16;
 
   /* Swap IP addresses. */
 
-  uiphdr_ipaddr_copy(BUF->destipaddr, BUF->srcipaddr);
-  uiphdr_ipaddr_copy(BUF->srcipaddr, &dev->d_ipaddr);
+  uiphdr_ipaddr_copy(pbuf->destipaddr, pbuf->srcipaddr);
+  uiphdr_ipaddr_copy(pbuf->srcipaddr, &dev->d_ipaddr);
 
   /* And send out the RST packet */
 
@@ -337,18 +345,20 @@ void uip_tcpreset(struct uip_driver_s *dev)
 
 void uip_tcpack(struct uip_driver_s *dev, struct uip_conn *conn, uint8 ack)
 {
+  struct uip_tcpip_hdr *pbuf = BUF;
+
   /* Save the ACK bits */
 
-  BUF->flags = ack;
+  pbuf->flags      = ack;
 
   /* We send out the TCP Maximum Segment Size option with our ack. */
 
-  BUF->optdata[0] = TCP_OPT_MSS;
-  BUF->optdata[1] = TCP_OPT_MSS_LEN;
-  BUF->optdata[2] = (UIP_TCP_MSS) / 256;
-  BUF->optdata[3] = (UIP_TCP_MSS) & 255;
-  dev->d_len      = UIP_IPTCPH_LEN + TCP_OPT_MSS_LEN;
-  BUF->tcpoffset  = ((UIP_TCPH_LEN + TCP_OPT_MSS_LEN) / 4) << 4;
+  pbuf->optdata[0] = TCP_OPT_MSS;
+  pbuf->optdata[1] = TCP_OPT_MSS_LEN;
+  pbuf->optdata[2] = (UIP_TCP_MSS) / 256;
+  pbuf->optdata[3] = (UIP_TCP_MSS) & 255;
+  dev->d_len       = UIP_IPTCPH_LEN + TCP_OPT_MSS_LEN;
+  pbuf->tcpoffset  = ((UIP_TCPH_LEN + TCP_OPT_MSS_LEN) / 4) << 4;
 
   /* Complete the common portions of the TCP message */
 

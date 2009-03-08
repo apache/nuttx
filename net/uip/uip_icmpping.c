@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_icmpping.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -149,6 +149,7 @@ static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
                              void *pvprivate, uint16 flags)
 {
   struct icmp_ping_s *pstate = (struct icmp_ping_s *)pvprivate;
+  ubyte *ptr;
   int failcode = -ETIMEDOUT;
   int i;
 
@@ -212,24 +213,26 @@ static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
               (flags & UIP_NEWDATA) == 0 &&   /* No incoming data */
               !pstate->png_sent)              /* Request not sent */
              {
+              struct uip_icmpip_hdr *picmp = ICMPBUF;
+
               /* We can send the ECHO request now.
                *
                * Format the ICMP ECHO request packet
                */
 
-              ICMPBUF->type  = ICMP_ECHO_REQUEST;
-              ICMPBUF->icode = 0;
+              picmp->type  = ICMP_ECHO_REQUEST;
+              picmp->icode = 0;
 #ifndef CONFIG_NET_IPv6
-              ICMPBUF->id     = htons(pstate->png_id);
-              ICMPBUF->seqno  = htons(pstate->png_seqno);
+              picmp->id    = htons(pstate->png_id);
+              picmp->seqno = htons(pstate->png_seqno);
 #else
 # error "IPv6 ECHO Request not implemented"
 #endif
               /* Add some easily verifiable data */
 
-              for (i = 0; i < pstate->png_datlen; i++)
+              for (i = 0, ptr = ICMPDAT; i < pstate->png_datlen; i++)
                 {
-                  ICMPDAT[i] = i;
+                  *ptr++ = i;
                 }
 
               /* Send the ICMP echo request.  Note that d_sndlen is set to

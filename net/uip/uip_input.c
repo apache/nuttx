@@ -2,7 +2,7 @@
  * net/uip/uip_input.c
  * The uIP TCP/IP stack code.
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -144,7 +144,10 @@ static uint8 uip_reassflags;
 #if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
 static uint8 uip_reass(void)
 {
-  uint16 offset, len;
+  struct uip_ip_hdr *pbuf  = BUF;
+  struct uip_ip_hdr *pfbuf = FBUF;
+  uint16 offset;
+  uint16 len;
   uint16 i;
 
   /* If uip_reasstmr is zero, no packet is present in the buffer, so we
@@ -154,7 +157,7 @@ static uint8 uip_reass(void)
 
   if (!uip_reasstmr)
     {
-      memcpy(uip_reassbuf, &BUF->vhl, UIP_IPH_LEN);
+      memcpy(uip_reassbuf, &pbuf->vhl, UIP_IPH_LEN);
       uip_reasstmr   = UIP_REASS_MAXAGE;
       uip_reassflags = 0;
 
@@ -167,12 +170,12 @@ static uint8 uip_reass(void)
    * fragment into the buffer.
    */
 
-  if (uiphdr_addr_cmp(BUF->srcipaddr, FBUF->srcipaddr) && 
-      uiphdr_addr_cmp(BUF->destipaddr == FBUF->destipaddr) &&
-      BUF->g_ipid[0] == FBUF->g_ipid[0] && BUF->g_ipid[1] == FBUF->g_ipid[1])
+  if (uiphdr_addr_cmp(pbuf->srcipaddr, pfbuf->srcipaddr) && 
+      uiphdr_addr_cmp(pbuf->destipaddr == pfbuf->destipaddr) &&
+      pbuf->g_ipid[0] == pfbuf->g_ipid[0] && pbuf->g_ipid[1] == pfbuf->g_ipid[1])
     {
-      len = (BUF->len[0] << 8) + BUF->len[1] - (BUF->vhl & 0x0f) * 4;
-      offset = (((BUF->ipoffset[0] & 0x3f) << 8) + BUF->ipoffset[1]) * 8;
+      len = (pbuf->len[0] << 8) + pbuf->len[1] - (pbuf->vhl & 0x0f) * 4;
+      offset = (((pbuf->ipoffset[0] & 0x3f) << 8) + pbuf->ipoffset[1]) * 8;
 
       /* If the offset or the offset + fragment length overflows the
        * reassembly buffer, we discard the entire packet.
@@ -186,7 +189,7 @@ static uint8 uip_reass(void)
 
       /* Copy the fragment into the reassembly buffer, at the right offset. */
 
-      memcpy(&uip_reassbuf[UIP_IPH_LEN + offset], (char *)BUF + (int)((BUF->vhl & 0x0f) * 4), len);
+      memcpy(&uip_reassbuf[UIP_IPH_LEN + offset], (char *)pbuf + (int)((pbuf->vhl & 0x0f) * 4), len);
 
     /* Update the bitmap. */
 
@@ -218,7 +221,7 @@ static uint8 uip_reass(void)
      * we have received the final fragment.
      */
 
-    if ((BUF->ipoffset[0] & IP_MF) == 0)
+    if ((pbuf->ipoffset[0] & IP_MF) == 0)
       {
         uip_reassflags |= UIP_REASS_FLAG_LASTFRAG;
         uip_reasslen = offset + len;
@@ -258,17 +261,17 @@ static uint8 uip_reass(void)
          */
 
         uip_reasstmr = 0;
-        memcpy(BUF, FBUF, uip_reasslen);
+        memcpy(pbuf, pfbuf, uip_reasslen);
 
         /* Pretend to be a "normal" (i.e., not fragmented) IP packet from
          * now on.
          */
 
-        BUF->ipoffset[0] = BUF->ipoffset[1] = 0;
-        BUF->len[0] = uip_reasslen >> 8;
-        BUF->len[1] = uip_reasslen & 0xff;
-        BUF->ipchksum = 0;
-        BUF->ipchksum = ~(uip_ipchksum(dev));
+        pbuf->ipoffset[0] = pbuf->ipoffset[1] = 0;
+        pbuf->len[0] = uip_reasslen >> 8;
+        pbuf->len[1] = uip_reasslen & 0xff;
+        pbuf->ipchksum = 0;
+        pbuf->ipchksum = ~(uip_ipchksum(dev));
 
         return uip_reasslen;
       }
@@ -294,6 +297,8 @@ nullreturn:
 
 void uip_input(struct uip_driver_s *dev)
 {
+  struct uip_ip_hdr *pbuf = BUF;
+
   /* This is where the input processing starts. */
 
 #ifdef CONFIG_NET_STATISTICS
@@ -305,7 +310,7 @@ void uip_input(struct uip_driver_s *dev)
 #ifdef CONFIG_NET_IPv6
   /* Check validity of the IP header. */
 
-  if ((BUF->vtc & 0xf0) != 0x60) 
+  if ((pbuf->vtc & 0xf0) != 0x60) 
     {
       /* IP version and header length. */
 
@@ -313,13 +318,13 @@ void uip_input(struct uip_driver_s *dev)
       uip_stat.ip.drop++;
       uip_stat.ip.vhlerr++;
 #endif
-      ndbg("Invalid IPv6 version: %d\n", BUF->vtc >> 4);
+      ndbg("Invalid IPv6 version: %d\n", pbuf->vtc >> 4);
       goto drop;
     }
 #else /* CONFIG_NET_IPv6 */
   /* Check validity of the IP header. */
 
-  if (BUF->vhl != 0x45)
+  if (pbuf->vhl != 0x45)
     {
       /* IP version and header length. */
 
@@ -327,7 +332,7 @@ void uip_input(struct uip_driver_s *dev)
       uip_stat.ip.drop++;
       uip_stat.ip.vhlerr++;
 #endif
-      ndbg("Invalid IP version or header length: %02x\n", BUF->vhl);
+      ndbg("Invalid IP version or header length: %02x\n", pbuf->vhl);
       goto drop;
     }
 #endif /* CONFIG_NET_IPv6 */
@@ -339,9 +344,9 @@ void uip_input(struct uip_driver_s *dev)
    * we set d_len to the correct value.
    */
 
-  if ((BUF->len[0] << 8) + BUF->len[1] <= dev->d_len)
+  if ((pbuf->len[0] << 8) + pbuf->len[1] <= dev->d_len)
     {
-      dev->d_len = (BUF->len[0] << 8) + BUF->len[1];
+      dev->d_len = (pbuf->len[0] << 8) + pbuf->len[1];
 #ifdef CONFIG_NET_IPv6
       /* The length reported in the IPv6 header is the length of the
        * payload that follows the header. However, uIP uses the d_len
@@ -363,7 +368,7 @@ void uip_input(struct uip_driver_s *dev)
 #ifndef CONFIG_NET_IPv6
   /* Check the fragment flag. */
 
-  if ((BUF->ipoffset[0] & 0x3f) != 0 || BUF->ipoffset[1] != 0)
+  if ((pbuf->ipoffset[0] & 0x3f) != 0 || pbuf->ipoffset[1] != 0)
     {
 #if UIP_REASSEMBLY
       dev->d_len = uip_reass();
@@ -389,11 +394,11 @@ void uip_input(struct uip_driver_s *dev)
     */
 
 #if defined(CONFIG_NET_BROADCAST) && defined(CONFIG_NET_UDP)
-  if (BUF->proto == UIP_PROTO_UDP &&
+  if (pbuf->proto == UIP_PROTO_UDP &&
 #ifndef CONFIG_NET_IPv6
-      uip_ipaddr_cmp(uip_ip4addr_conv(BUF->destipaddr), g_alloneaddr))
+      uip_ipaddr_cmp(uip_ip4addr_conv(pbuf->destipaddr), g_alloneaddr))
 #else
-      uip_ipaddr_cmp(BUF->destipaddr, g_alloneaddr))
+      uip_ipaddr_cmp(pbuf->destipaddr, g_alloneaddr))
 #endif
     {
       uip_udpinput(dev);
@@ -416,7 +421,7 @@ void uip_input(struct uip_driver_s *dev)
        */
 
 #if defined(CONFIG_NET_PINGADDRCONF) && !defined(CONFIG_NET_IPv6)
-      if (BUF->proto == UIP_PROTO_ICMP)
+      if (pbuf->proto == UIP_PROTO_ICMP)
         {
           ndbg("Possible ping config packet received\n");
           uip_icmpinput(dev);
@@ -436,7 +441,7 @@ void uip_input(struct uip_driver_s *dev)
     {
       /* Check if the packet is destined for our IP address. */
 #ifndef CONFIG_NET_IPv6
-      if (!uip_ipaddr_cmp(uip_ip4addr_conv(BUF->destipaddr), dev->d_ipaddr))
+      if (!uip_ipaddr_cmp(uip_ip4addr_conv(pbuf->destipaddr), dev->d_ipaddr))
         {
 #ifdef CONFIG_NET_STATISTICS
           uip_stat.ip.drop++;
@@ -451,8 +456,8 @@ void uip_input(struct uip_driver_s *dev)
        * multicast packets that are sent to the ff02::/16 addresses.
        */
 
-      if (!uip_ipaddr_cmp(BUF->destipaddr, dev->d_ipaddr) &&
-           BUF->destipaddr & HTONL(0xffff0000) != HTONL(0xff020000))
+      if (!uip_ipaddr_cmp(pbuf->destipaddr, dev->d_ipaddr) &&
+           pbuf->destipaddr & HTONL(0xffff0000) != HTONL(0xff020000))
         {
 #ifdef CONFIG_NET_STATISTICS
           uip_stat.ip.drop++;
@@ -480,7 +485,7 @@ void uip_input(struct uip_driver_s *dev)
    * according to the protocol.
    */
 
-  switch (BUF->proto)
+  switch (pbuf->proto)
     {
 #ifdef CONFIG_NET_TCP
       case UIP_PROTO_TCP:   /* TCP input */

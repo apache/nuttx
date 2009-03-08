@@ -2,7 +2,7 @@
  * net/uip/uip_tcpinput.c
  * Handling incoming TCP input
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -97,6 +97,7 @@
 void uip_tcpinput(struct uip_driver_s *dev)
 {
   struct uip_conn *conn = NULL;
+  struct uip_tcpip_hdr *pbuf = BUF;
   uint16 tmp16;
   uint16 flags;
   uint8  opt;
@@ -127,7 +128,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
 
   /* Demultiplex this segment. First check any active connections. */
 
-  conn = uip_tcpactive(BUF);
+  conn = uip_tcpactive(pbuf);
   if (conn)
     {
       goto found;
@@ -139,13 +140,13 @@ void uip_tcpinput(struct uip_driver_s *dev)
    * it is an old packet and we send a RST.
    */
 
-  if ((BUF->flags & TCP_CTL) == TCP_SYN)
+  if ((pbuf->flags & TCP_CTL) == TCP_SYN)
     {
       /* This is a SYN packet for a connection.  Find the connection
        * listening on this port.
        */
 
-      tmp16 = BUF->destport;
+      tmp16 = pbuf->destport;
       if (uip_islistener(tmp16))
         {
           /* We matched the incoming packet with a connection in LISTEN.
@@ -157,7 +158,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
            * user application to accept it.
            */
 
-          conn = uip_tcpaccept(BUF);
+          conn = uip_tcpaccept(pbuf);
           if (conn)
             {
               /* The connection structure was successfully allocated.  Now see
@@ -193,9 +194,9 @@ void uip_tcpinput(struct uip_driver_s *dev)
 
           /* Parse the TCP MSS option, if present. */
 
-          if ((BUF->tcpoffset & 0xf0) > 0x50)
+          if ((pbuf->tcpoffset & 0xf0) > 0x50)
             {
-              for (i = 0; i < ((BUF->tcpoffset >> 4) - 5) << 2 ;)
+              for (i = 0; i < ((pbuf->tcpoffset >> 4) - 5) << 2 ;)
                 {
                   opt = dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + i];
                   if (opt == TCP_OPT_END)
@@ -256,7 +257,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
 
   /* We do not send resets in response to resets. */
 
-  if (BUF->flags & TCP_RST)
+  if (pbuf->flags & TCP_RST)
     {
       goto drop;
     }
@@ -277,7 +278,7 @@ found:
    * before we accept the reset.
    */
 
-  if (BUF->flags & TCP_RST)
+  if (pbuf->flags & TCP_RST)
     {
       conn->tcpstateflags = UIP_CLOSED;
       ndbg("RESET - TCP state: UIP_CLOSED\n");
@@ -290,7 +291,7 @@ found:
    * any data to us.
    */
 
-  len = (BUF->tcpoffset >> 4) << 2;
+  len = (pbuf->tcpoffset >> 4) << 2;
 
   /* d_len will contain the length of the actual TCP data. This is
    * calculated by subtracting the length of the TCP header (in
@@ -305,10 +306,10 @@ found:
    */
 
   if (!(((conn->tcpstateflags & UIP_TS_MASK) == UIP_SYN_SENT) &&
-      ((BUF->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))))
+      ((pbuf->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))))
     {
-      if ((dev->d_len > 0 || ((BUF->flags & (TCP_SYN | TCP_FIN)) != 0)) &&
-          memcmp(BUF->seqno, conn->rcv_nxt, 4) != 0)
+      if ((dev->d_len > 0 || ((pbuf->flags & (TCP_SYN | TCP_FIN)) != 0)) &&
+          memcmp(pbuf->seqno, conn->rcv_nxt, 4) != 0)
         {
             uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
             return;
@@ -321,14 +322,14 @@ found:
    * retransmission timer.
    */
 
-  if ((BUF->flags & TCP_ACK) && uip_outstanding(conn))
+  if ((pbuf->flags & TCP_ACK) && uip_outstanding(conn))
     {
       /* Temporary variables. */
 
       uint8 acc32[4];
       uip_add32(conn->snd_nxt, conn->len, acc32);
 
-      if (memcmp(BUF->ackno, acc32, 4) == 0)
+      if (memcmp(pbuf->ackno, acc32, 4) == 0)
         {
           /* Update sequence number. */
 
@@ -414,13 +415,13 @@ found:
          * state.
          */
 
-        if ((flags & UIP_ACKDATA) && (BUF->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))
+        if ((flags & UIP_ACKDATA) && (pbuf->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))
           {
             /* Parse the TCP MSS option, if present. */
 
-            if ((BUF->tcpoffset & 0xf0) > 0x50)
+            if ((pbuf->tcpoffset & 0xf0) > 0x50)
               {
-                for (i = 0; i < ((BUF->tcpoffset >> 4) - 5) << 2 ;)
+                for (i = 0; i < ((pbuf->tcpoffset >> 4) - 5) << 2 ;)
                   {
                     opt = dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN + i];
                     if (opt == TCP_OPT_END)
@@ -471,7 +472,7 @@ found:
               }
 
             conn->tcpstateflags = UIP_ESTABLISHED;
-            memcpy(conn->rcv_nxt, BUF->seqno, 4);
+            memcpy(conn->rcv_nxt, pbuf->seqno, 4);
             nvdbg("TCP state: UIP_ESTABLISHED\n");
 
             uip_incr32(conn->rcv_nxt, 1);
@@ -494,7 +495,7 @@ found:
 
         /* We do not send resets in response to resets. */
 
-        if (BUF->flags & TCP_RST)
+        if (pbuf->flags & TCP_RST)
           {
             goto drop;
           }
@@ -514,7 +515,7 @@ found:
          * sequence numbers will be screwed up.
          */
 
-        if (BUF->flags & TCP_FIN && !(conn->tcpstateflags & UIP_STOPPED))
+        if (pbuf->flags & TCP_FIN && !(conn->tcpstateflags & UIP_STOPPED))
           {
             if (uip_outstanding(conn))
               {
@@ -544,10 +545,10 @@ found:
          * data that we must pass to the application.
          */
 
-        if ((BUF->flags & TCP_URG) != 0)
+        if ((pbuf->flags & TCP_URG) != 0)
           {
 #ifdef CONFIG_NET_TCPURGDATA
-            dev->d_urglen = (BUF->urgp[0] << 8) | BUF->urgp[1];
+            dev->d_urglen = (pbuf->urgp[0] << 8) | pbuf->urgp[1];
             if (dev->d_urglen > dev->d_len)
               {
                 /* There is more urgent data in the next segment to come. */
@@ -565,9 +566,9 @@ found:
             dev->d_urglen   = 0;
 #else /* CONFIG_NET_TCPURGDATA */
             dev->d_appdata =
-              ((uint8*)dev->d_appdata) + ((BUF->urgp[0] << 8) | BUF->urgp[1]);
+              ((uint8*)dev->d_appdata) + ((pbuf->urgp[0] << 8) | pbuf->urgp[1]);
             dev->d_len    -=
-              (BUF->urgp[0] << 8) | BUF->urgp[1];
+              (pbuf->urgp[0] << 8) | pbuf->urgp[1];
 #endif /* CONFIG_NET_TCPURGDATA */
           }
 
@@ -597,7 +598,7 @@ found:
          * "persistent timer" and uses the retransmission mechanim.
          */
 
-        tmp16 = ((uint16)BUF->wnd[0] << 8) + (uint16)BUF->wnd[1];
+        tmp16 = ((uint16)pbuf->wnd[0] << 8) + (uint16)pbuf->wnd[1];
         if (tmp16 > conn->initialmss || tmp16 == 0)
           {
             tmp16 = conn->initialmss;
@@ -655,7 +656,7 @@ found:
           {
             uip_incr32(conn->rcv_nxt, dev->d_len);
           }
-        if (BUF->flags & TCP_FIN)
+        if (pbuf->flags & TCP_FIN)
           {
             if (flags & UIP_ACKDATA)
               {
@@ -696,7 +697,7 @@ found:
             uip_incr32(conn->rcv_nxt, dev->d_len);
           }
 
-        if (BUF->flags & TCP_FIN)
+        if (pbuf->flags & TCP_FIN)
           {
             conn->tcpstateflags = UIP_TIME_WAIT;
             conn->timer         = 0;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_tcpappsend.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -56,8 +56,6 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-#define BUF ((struct uip_tcpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Public Variables
