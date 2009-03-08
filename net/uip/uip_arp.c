@@ -327,6 +327,7 @@ void uip_arp_arpin(struct uip_driver_s *dev)
 
   if (dev->d_len < (sizeof(struct arp_hdr) + UIP_LLH_LEN))
     {
+      ndbg("Too small\n");    
       dev->d_len = 0;
       return;
     }
@@ -336,6 +337,8 @@ void uip_arp_arpin(struct uip_driver_s *dev)
   switch(parp->ah_opcode)
     {
       case HTONS(ARP_REQUEST):
+        nvdbg("ARP request for IP %04lx\n", (long)ipaddr);    
+
         /* ARP request. If it asked for our address, we send out a reply. */
 
         if (uip_ipaddr_cmp(ipaddr, dev->d_ipaddr))
@@ -366,6 +369,8 @@ void uip_arp_arpin(struct uip_driver_s *dev)
         break;
 
       case HTONS(ARP_REPLY):
+        nvdbg("ARP reply for IP %04lx\n", (long)ipaddr);    
+
         /* ARP reply. We insert or update the ARP table if it was meant
          * for us.
          */
@@ -484,6 +489,8 @@ void uip_arp_out(struct uip_driver_s *dev)
 
       if (i == CONFIG_NET_ARPTAB_SIZE)
         {
+           nvdbg("ARP request for IP %04lx\n", (long)ipaddr);    
+
           /* The destination address was not in our ARP table, so we
            * overwrite the IP packet with an ARP request.
            */
