@@ -647,5 +647,8 @@
 	* Many fixes in FAT file system and in NSH for correct compilation with ZDS-II
 	* eZ80Acclaim!: Added and verified a NuttShell (NSH) configuration.
 	* eZ80Acclaim!: Correct endian-ness; defconfig files said BIG endian.
+	* Restructured parts of the uIP port for correct compilation with ZDS-II
+	* eZ80Acclaim!: Complete basic integration of the eZ80F91 EMAC driver.  The
+	  driver is basically functional and should mature prior to the 0.4.3 release.
 
 
