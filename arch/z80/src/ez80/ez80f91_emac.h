@@ -196,7 +196,7 @@
 #define EMAC_TXDESC_HUGE      0x1000 /* Bit 12: 1=Packet size is very large(Pkt_Size > MAXF). */
 #define EMAC_TXDESC_BPA       0x2000 /* Bit 13: 1=Back pressure applied */
 #define EMAC_TXDESC_ABORT     0x4000 /* Bit 14: 1=Packet aborted (not transmitted). */
-#define EMAC_TXDESC_OWNER     0x8000 /* Bit 15: 0=Host (eZ80®) owns, 1=EMAC owns. */
+#define EMAC_TXDESC_OWNER     0x8000 /* Bit 15: 0=Host (eZ80 CPU) owns, 1=EMAC owns. */
 
 /* Receive Descriptor Status ********************************************************/
 
