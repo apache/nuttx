@@ -82,6 +82,10 @@ CONFIG_ARCH_BOARD_SIM=y
 #   provides /dev/console.  Enables stdout, stderr, stdin.
 # CONFIG_DEV_LOWCONSOLE - Use the simple, low-level serial console
 #   driver (minimul support)
+# CONFIG_MUTEX_TYPES: Set to enable support for recursive and
+#   errorcheck mutexes. Enables pthread_mutexattr_settype().
+# CONFIG_PRIORITY_INHERITANCE : Set to enable support for priority
+#   inheritance on mutexes and semaphores. 
 #
 CONFIG_EXAMPLE=ostest
 CONFIG_DEBUG=y

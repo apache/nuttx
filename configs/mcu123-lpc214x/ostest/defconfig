@@ -1,7 +1,7 @@
 ############################################################################
 # configs/mcu123-lpc214x/ostest/defconfig
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -180,6 +180,8 @@ CONFIG_START_DAY=1
 CONFIG_JULIAN_TIME=n
 CONFIG_DEV_CONSOLE=y
 CONFIG_DEV_LOWCONSOLE=y
+CONFIG_MUTEX_TYPES=n
+CONFIG_PRIORITY_INHERITANCE=n
 
 #
 # The following can be used to disable categories of

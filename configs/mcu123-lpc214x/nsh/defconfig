@@ -1,7 +1,7 @@
 ############################################################################
 # configs/mcu123-lpc214x/nsh/defconfig
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -165,6 +165,10 @@ CONFIG_HAVE_LIBM=n
 #   provides /dev/console.  Enables stdout, stderr, stdin.
 # CONFIG_DEV_LOWCONSOLE - Use the simple, low-level serial console
 #   driver (minimul support)
+# CONFIG_MUTEX_TYPES: Set to enable support for recursive and
+#   errorcheck mutexes. Enables pthread_mutexattr_settype().
+# CONFIG_PRIORITY_INHERITANCE : Set to enable support for priority
+#   inheritance on mutexes and semaphores. 
 #
 CONFIG_EXAMPLE=nsh
 CONFIG_DEBUG=n
@@ -180,6 +184,8 @@ CONFIG_START_DAY=1
 CONFIG_JULIAN_TIME=n
 CONFIG_DEV_CONSOLE=y
 CONFIG_DEV_LOWCONSOLE=n
+CONFIG_MUTEX_TYPES=n
+CONFIG_PRIORITY_INHERITANCE=n
 
 #
 # The following can be used to disable categories of
