@@ -1,7 +1,7 @@
 ############################################################################
 # configs/z16f2800100zcog/pashello/defconfig
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -155,6 +155,12 @@ CONFIG_HAVE_LIBM=n
 #   Used to initialize the internal time logic.
 # CONFIG_DEV_CONSOLE - Set if architecture-specific logic
 #   provides /dev/console.  Enables stdout, stderr, stdin.
+# CONFIG_DEV_LOWCONSOLE - Use the simple, low-level serial console
+#   driver (minimul support)
+# CONFIG_MUTEX_TYPES: Set to enable support for recursive and
+#   errorcheck mutexes. Enables pthread_mutexattr_settype().
+# CONFIG_PRIORITY_INHERITANCE : Set to enable support for priority
+#   inheritance on mutexes and semaphores. 
 #
 CONFIG_EXAMPLE=pashello
 CONFIG_DEBUG=y
@@ -170,6 +176,8 @@ CONFIG_START_DAY=28
 CONFIG_JULIAN_TIME=n
 CONFIG_DEV_CONSOLE=y
 CONFIG_DEV_LOWCONSOLE=y
+CONFIG_MUTEX_TYPES=n
+CONFIG_PRIORITY_INHERITANCE=n
 
 #
 # The following can be used to disable categories of
