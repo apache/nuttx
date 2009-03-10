@@ -110,9 +110,7 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
 
   /* Verify that the requested priority is in the valid range */
 
-  if (!param ||
-      param->sched_priority < SCHED_PRIORITY_MIN || 
-      param->sched_priority > SCHED_PRIORITY_MAX)
+  if (!param)
     {
       errno = EINVAL;
       return ERROR;

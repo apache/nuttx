@@ -104,7 +104,7 @@ int pthread_setschedprio(pthread_t thread, int prio)
 
   /* Set the errno to some non-zero value (failsafe) */
 
-  *get_errno_ptr() = EINVAL;
+  errno = EINVAL;
 
   /* Call sched_setparam() to change the priority */
 
@@ -114,7 +114,7 @@ int pthread_setschedprio(pthread_t thread, int prio)
     {
       /* If sched_setparam() fails, return the errno */
 
-      ret = *get_errno_ptr();
+      ret = errno;
     }
   return ret;
 }

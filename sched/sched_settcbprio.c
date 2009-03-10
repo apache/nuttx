@@ -105,6 +105,15 @@ int sched_settcbprio(FAR _TCB *tcb, int sched_priority)
   tstate_t   task_state;
   irqstate_t saved_state;
 
+  /* Verify that the requested priority is in the valid range */
+
+  if (sched_priority < SCHED_PRIORITY_MIN || 
+      sched_priority > SCHED_PRIORITY_MAX)
+    {
+      errno = EINVAL;
+      return ERROR;
+    }
+
   /* We need to assure that there there is no interrupt activity while
    * performing the following.
    */
