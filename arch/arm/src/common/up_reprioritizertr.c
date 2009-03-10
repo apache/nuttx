@@ -85,25 +85,12 @@ void up_reprioritize_rtr(_TCB *tcb, ubyte priority)
 {
   /* Verify that the caller is sane */
 
-#if CONFIG_DEBUG /* We only check parameters when debug is enabled */
-  if (priority < SCHED_PRIORITY_MIN || 
+  if (tcb->task_state < FIRST_READY_TO_RUN_STATE ||
+      tcb->task_state > LAST_READY_TO_RUN_STATE ||
+      priority < SCHED_PRIORITY_MIN || 
       priority > SCHED_PRIORITY_MAX)
     {
        PANIC(OSERR_BADREPRIORITIZESTATE);
-    }
-  else
-#endif
-  if (tcb->task_state < FIRST_READY_TO_RUN_STATE ||
-           tcb->task_state > LAST_READY_TO_RUN_STATE)
-    {
-      /* This is a hack and needs to be fixed.. here some taks is reprioritizing
-       * another task that is not running.  Here we just set the priority of
-       * the task -- BUT some of the other states are also prioritized and the
-       * waiting task should also be re-ordered in the prioritized wiating list.
-       * As a consequence, the other task is still waiting at the lower priority.
-       */
-
-       tcb->sched_priority = priority;
     }
   else
     {
