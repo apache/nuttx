@@ -175,9 +175,14 @@ int sem_wait(FAR sem_t *sem)
                * cannot cause a context switch because we have preemption
                * disabled.  The task will be marked "pending" and the switch
                * will occur during up_block_task() processing.
+               *
+               * NOTE that we have to restore base_priority because
+               * up_reprioritize_rtr() should set both.
                */
-               
+
+              int base_priority = htcb->base_priority;
               up_reprioritize_rtr(htcb, rtcb->sched_priority);
+              htcb->base_priority = base_priority;
             }
 #endif
           /* Add the TCB to the prioritized semaphore wait queue */
