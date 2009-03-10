@@ -42,10 +42,6 @@
 #include "sem_internal.h"
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Definitions
  ****************************************************************************/
 
@@ -115,9 +111,10 @@ int sem_destroy (FAR sem_t *sem)
         {
           sem->semcount = 1;
         }
-#ifdef CONFIG_PRIORITY_INHERITANCE
-      sem->holder = NULL;
-#endif
+
+      /* Release holders of the semaphore */
+
+      sem_destroyholder(sem);
       ret = OK;
     }
 

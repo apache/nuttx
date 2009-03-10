@@ -1,7 +1,7 @@
-/************************************************************
- * sem_internal.h
+/****************************************************************************
+ * sched/sem_internal.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef __SEM_INTERNAL_H
 #define __SEM_INTERNAL_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <semaphore.h>
@@ -46,13 +46,13 @@
 #include <queue.h>
 #include <nuttx/compiler.h>
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
 /* This is the named semaphore structure */
 
@@ -67,17 +67,17 @@ struct nsem_s
 };
 typedef struct nsem_s nsem_t;
 
-/************************************************************
+/****************************************************************************
  * Public Variables
- ************************************************************/
+ ****************************************************************************/
 
 /* This is a list of dyanamically allocated named semaphores */
 
 extern dq_queue_t g_nsems;
 
-/************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -89,6 +89,22 @@ extern "C" {
 EXTERN void weak_function sem_initialize(void);
 EXTERN void               sem_waitirq(FAR _TCB *wtcb);
 EXTERN FAR nsem_t        *sem_findnamed(const char *name);
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+EXTERN void sem_initholders(void);
+EXTERN void sem_destroyholder(sem_t *sem);
+EXTERN void sem_addholder(sem_t *sem);
+EXTERN void sem_boostpriority(sem_t *sem);
+EXTERN void sem_releaseholder(sem_t *sem);
+EXTERN void sem_restorebaseprio(sem_t *sem);
+#else
+#  define sem_initholders()
+#  define sem_destroyholder(sem)
+#  define sem_addholder(sem)
+#  define sem_boostpriority(sem)
+#  define sem_releaseholder(sem)
+#  define sem_restorebaseprio(sem)
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

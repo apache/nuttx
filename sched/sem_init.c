@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sem_init.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,10 +41,6 @@
 #include <limits.h>
 #include <semaphore.h>
 #include "sem_internal.h"
-
-/****************************************************************************
- * Compilation Switches
- ****************************************************************************/
 
 /****************************************************************************
  * Definitions
@@ -101,7 +97,12 @@ int sem_init (FAR sem_t *sem, int pshared, unsigned int value)
 
   if (sem && value <= SEM_VALUE_MAX)
     {
-      sem->semcount = (sint16)value;
+      sem->semcount     = (sint16)value;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+      sem->hlist.flink  = NULL;
+      sem->hlist.holder = NULL;
+      sem->hlist.counts = 0;
+#endif
       ret = OK;
     }
 

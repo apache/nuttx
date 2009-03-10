@@ -58,6 +58,19 @@ extern "C" {
  * Public Type Declarations
  ****************************************************************************/
 
+/* This structure contains the holder of a semaphore */
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+struct semholder_s
+{
+#if !defined(CONFIG_SEM_PREALLOCHOLDERS) || CONFIG_SEM_PREALLOCHOLDERS > 0
+  struct semholder_s *flink;    /* Implements singly linked list */
+#endif
+  void  *holder;                /* Holder TCB (actual type is _TCB) */
+  sint16 counts;                /* Number of counts owned by this holder */
+};
+#endif
+
 /* This is the generic semaphore structure. */
 
 struct sem_s
@@ -65,7 +78,7 @@ struct sem_s
   sint16 semcount;              /* >0 -> Num counts available */
                                 /* <0 -> Num tasks waiting for semaphore */
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  void  *holder;                /* Holder TCB (actual type is _TCB) */
+  struct semholder_s hlist;     /* List of holders of semaphore counts */
 #endif
 };
 typedef struct sem_s sem_t;

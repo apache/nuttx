@@ -1,7 +1,7 @@
 ############################################################################
 # sched/Makefile
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -42,28 +42,35 @@ MISC_SRCS	= os_start.c get_errno_ptr.c \
 		  sched_setupstreams.c sched_getfiles.c sched_getsockets.c sched_getstreams.c \
 		  sched_setupidlefiles.c sched_setuptaskfiles.c sched_setuppthreadfiles.c \
 		  sched_releasefiles.c
+
 TSK_SRCS	= task_create.c task_init.c task_setup.c task_activate.c \
 		  task_start.c task_delete.c task_deletecurrent.c task_restart.c \
 		  exit.c abort.c atexit.c getpid.c  \
 		  sched_addreadytorun.c sched_removereadytorun.c sched_addprioritized.c \
 		  sched_mergepending.c sched_addblocked.c sched_removeblocked.c \
 		  sched_free.c sched_gettcb.c sched_releasetcb.c
+
 SCHED_SRCS	= sched_setparam.c sched_settcbprio.c sched_getparam.c \
 		  sched_setscheduler.c sched_getscheduler.c \
 		  sched_yield.c sched_rrgetinterval.c sched_foreach.c \
 		  sched_getprioritymax.c sched_getprioritymin.c \
 		  sched_lock.c sched_unlock.c sched_lockcount.c
+
 ENV_SRCS	= env_getenvironptr.c env_dup.c env_share.c env_release.c \
 		  env_findvar.c env_removevar.c \
 		  env_clearenv.c env_getenv.c env_putenv.c env_setenv.c env_unsetenv.c
+
 WDOG_SRCS	= wd_initialize.c wd_create.c wd_start.c wd_cancel.c wd_delete.c \
 		  wd_gettime.c
+
 TIME_SRCS	= sched_processtimer.c
+
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 TIME_SRCS	+= sleep.c usleep.c
 endif
 CLOCK_SRCS	= clock_initialize.c mktime.c gmtime_r.c clock_settime.c clock_gettime.c \
 		  clock_getres.c clock_time2ticks.c clock_abstime2ticks.c clock_ticks2time.c
+
 SIGNAL_SRCS	= sig_initialize.c \
 		  sig_action.c sig_procmask.c sig_pending.c sig_suspend.c \
 		  sig_kill.c sig_queue.c sig_waitinfo.c sig_timedwait.c \
@@ -73,6 +80,7 @@ SIGNAL_SRCS	= sig_initialize.c \
                   sig_unmaskpendingsignal.c sig_removependingsignal.c \
 		  sig_releasependingsignal.c sig_lowest.c sig_mqnotempty.c \
 		  sig_cleanup.c sig_received.c sig_deliver.c
+
 MQUEUE_SRCS	= mq_open.c mq_close.c mq_unlink.c \
 		  mq_send.c mq_timedsend.c mq_sndinternal.c \
 		  mq_receive.c mq_timedreceive.c mq_rcvinternal.c \
@@ -81,6 +89,7 @@ MQUEUE_SRCS	= mq_open.c mq_close.c mq_unlink.c \
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 MQUEUE_SRCS	+= mq_notify.c
 endif
+
 PTHREAD_SRCS	= pthread_attrinit.c pthread_attrdestroy.c \
 		  pthread_attrsetschedpolicy.c pthread_attrgetschedpolicy.c \
 		  pthread_attrsetinheritsched.c pthread_attrgetinheritsched.c \
@@ -108,14 +117,20 @@ endif
 ifeq ($(CONFIG_MUTEX_TYPES),y)
 PTHREAD_SRCS	+= pthread_mutexattrsettype.c pthread_mutexattrgettype.c
 endif
+
 SEM_SRCS	= sem_initialize.c sem_init.c sem_destroy.c\
 		  sem_open.c sem_close.c sem_unlink.c \
 		  sem_wait.c sem_trywait.c sem_post.c sem_getvalue.c \
                   sem_waitirq.c sem_findnamed.c
+ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
+SEM_SRCS	+= sem_holder.c
+endif
+
 ifneq ($(CONFIG_DISABLE_POSIX_TIMERS),y)
 TIMER_SRCS	= timer_initialize.c timer_create.c timer_delete.c timer_getoverrun.c \
 		  timer_gettime.c timer_settime.c timer_release.c
 endif
+
 IRQ_SRCS	= irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 
 CSRCS		= $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS) $(WDOG_SRCS) $(TIME_SRCS) \

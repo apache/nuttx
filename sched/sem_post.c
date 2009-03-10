@@ -46,10 +46,6 @@
 #include "sem_internal.h"
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Definitions
  ****************************************************************************/
 
@@ -104,9 +100,6 @@
 
 int sem_post(FAR sem_t *sem)
 {
-#ifdef CONFIG_PRIORITY_INHERITANCE
-  FAR _TCB  *rtcb = (FAR _TCB*)g_readytorun.head;
-#endif
   FAR _TCB  *stcb;
   STATUS     ret = ERROR;
   irqstate_t saved_state;
@@ -125,9 +118,7 @@ int sem_post(FAR sem_t *sem)
       /* Perform the semaphore unlock operation. */
 
       ASSERT(sem->semcount < SEM_VALUE_MAX);
-#ifdef CONFIG_PRIORITY_INHERITANCE
-      sem->holder = NULL;
-#endif
+      sem_releaseholder(sem);
       sem->semcount++;
 
       /* If the result of of semaphore unlock is non-positive, then
@@ -158,17 +149,12 @@ int sem_post(FAR sem_t *sem)
             }
         }
 
-      /* Check if we need to drop our priority.  Our priority could have
-       * been boosted while we held the semaphore.
+      /* Check if we need to drop the priority of any threads holding
+       * this semaphore.  The priority could have been boosted while they
+       * held the semaphore.
        */
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
-      if (rtcb->sched_priority != rtcb->base_priority)
-        {
-           up_reprioritize_rtr(rtcb, rtcb->base_priority);
-        }
-#endif
-
+      sem_restorebaseprio(sem);
       ret = OK;
 
       /* Interrupts may now be enabled. */

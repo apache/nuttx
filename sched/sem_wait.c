@@ -42,12 +42,9 @@
 #include <errno.h>
 #include <assert.h>
 #include <nuttx/arch.h>
+
 #include "os_internal.h"
 #include "sem_internal.h"
-
-/****************************************************************************
- * Compilation Switches
- ****************************************************************************/
 
 /****************************************************************************
  * Definitions
@@ -98,10 +95,7 @@
 int sem_wait(FAR sem_t *sem)
 {
   FAR _TCB  *rtcb = (FAR _TCB*)g_readytorun.head;
-#ifdef CONFIG_PRIORITY_INHERITANCE
-  FAR _TCB  *htcb;
-#endif
-  int        ret = ERROR;
+  int        ret  = ERROR;
   irqstate_t saved_state;
 
   /* This API should not be called from interrupt handlers */
@@ -128,9 +122,7 @@ int sem_wait(FAR sem_t *sem)
           /* It is, let the task take the semaphore. */
 
           sem->semcount--;
-#ifdef CONFIG_PRIORITY_INHERITANCE
-          sem->holder = rtcb;
-#endif
+          sem_addholder(sem);
           rtcb->waitsem = NULL;
           ret = OK;
         }
@@ -168,22 +160,12 @@ int sem_wait(FAR sem_t *sem)
            */
 
           sched_lock();
-          htcb = sem->holder;
-          if (htcb && htcb->sched_priority < rtcb->sched_priority)
-            {
-              /* Raise the priority of the holder of the semaphore.  This
-               * cannot cause a context switch because we have preemption
-               * disabled.  The task will be marked "pending" and the switch
-               * will occur during up_block_task() processing.
-               *
-               * NOTE that we have to restore base_priority because
-               * sched_setparam() should set both.
-               */
 
-              int base_priority = htcb->base_priority;
-              (void)sched_settcbprio(htcb, rtcb->sched_priority);
-              htcb->base_priority = base_priority;
-            }
+          /* Boost the priority of any threads holding a count on the
+           * semaphore.
+           */
+
+          sem_boostpriority(sem);
 #endif
           /* Add the TCB to the prioritized semaphore wait queue */
 
@@ -203,9 +185,7 @@ int sem_wait(FAR sem_t *sem)
             {
               /* We hold the semaphore */
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
-              sem->holder = rtcb;
-#endif
+              sem_addholder(sem);
               ret = OK;
             }
           else
