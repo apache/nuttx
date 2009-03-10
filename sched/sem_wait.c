@@ -177,11 +177,14 @@ int sem_wait(FAR sem_t *sem)
                * will occur during up_block_task() processing.
                *
                * NOTE that we have to restore base_priority because
-               * up_reprioritize_rtr() should set both.
+               * sched_setparam() should set both.
                */
 
+              struct sched_param sparam;
               int base_priority = htcb->base_priority;
-              up_reprioritize_rtr(htcb, rtcb->sched_priority);
+
+              sparam.sched_priority = rtcb->sched_priority;
+              (void)sched_setparam(htcb->pid, &sparam);
               htcb->base_priority = base_priority;
             }
 #endif
