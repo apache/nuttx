@@ -322,8 +322,12 @@ static int user_main(int argc, char *argv[])
     /* Verify pthreads and condition variables */
 
       printf("\nuser_main: condition variable test\n");
+#ifdef CONFIG_PRIORITY_INHERITANCE
+      printf("\n           Skipping, Test logic incompatible with priority inheritance\n");
+#else
       cond_test();
       check_test_memory_usage();
+#endif
 #endif
 
 #if !defined(CONFIG_DISABLE_SIGNALS) && !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_DISABLE_CLOCK)
