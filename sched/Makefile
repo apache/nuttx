@@ -48,7 +48,7 @@ TSK_SRCS	= task_create.c task_init.c task_setup.c task_activate.c \
 		  sched_addreadytorun.c sched_removereadytorun.c sched_addprioritized.c \
 		  sched_mergepending.c sched_addblocked.c sched_removeblocked.c \
 		  sched_free.c sched_gettcb.c sched_releasetcb.c
-SCHED_SRCS	= sched_setparam.c sched_getparam.c \
+SCHED_SRCS	= sched_setparam.c sched_settcbprio.c sched_getparam.c \
 		  sched_setscheduler.c sched_getscheduler.c \
 		  sched_yield.c sched_rrgetinterval.c sched_foreach.c \
 		  sched_getprioritymax.c sched_getprioritymin.c \

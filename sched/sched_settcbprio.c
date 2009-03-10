@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sched_setparam.c
+ * sched/sched_settcbprio.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_setparam
+ * Name:  sched_settcbprio
  *
  * Description:
  *   This function sets the priority of a specified task.
@@ -83,11 +83,8 @@
  *   tasks with the same priority.
  *
  * Inputs:
- *   pid - the task ID of the task to reprioritize.  If pid is
- *     zero, the priority of the calling task is changed.
- *   param - A structure whose member sched_priority is the integer
- *      priority.  The range of valid priority numbers is from
- *      SCHED_PRIORITY_MIN through SCHED_PRIORITY_MAX.
+ *   tcb - the TCB of task to reprioritize.
+ *   sched_priority - The new task priority
  *
  * Return Value:
  *   On success, sched_setparam() returns 0 (OK). On error, -1
@@ -101,6 +98,139 @@
  * Assumptions:
  *
  ****************************************************************************/
+
+int sched_settcbprio(FAR _TCB *tcb, int sched_priority)
+{
+  FAR _TCB  *rtcb = (FAR _TCB*)g_readytorun.head;
+  tstate_t   task_state;
+  irqstate_t saved_state;
+
+  /* We need to assure that there there is no interrupt activity while
+   * performing the following.
+   */
+
+  saved_state = irqsave();
+
+  /* There are four cases that must be considered: */
+
+  task_state = tcb->task_state;
+  switch (task_state)
+    {
+       /* CASE 1. The task is running or ready-to-run and a context switch
+        * may be caused by the re-prioritization 
+        */
+
+       case TSTATE_TASK_RUNNING:
+
+         /* A context switch will occur if the new priority of the running
+          * task becomes less than OR EQUAL TO the next highest priority
+          * ready to run task.
+          */
+
+         if (sched_priority <= tcb->flink->sched_priority)
+           {
+             /* A context switch will occur. */
+
+             up_reprioritize_rtr(tcb, (ubyte)sched_priority);
+           }
+
+         /* Otherwise, we can just change priority since it has no effect */
+
+         else
+           {
+             /* Change the task priority */
+
+             tcb->sched_priority = (ubyte)sched_priority;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+             tcb->base_priority  = (ubyte)sched_priority;
+#endif
+           }
+         break;
+
+       /* CASE 2. The task is running or ready-to-run and a context switch
+        * may be caused by the re-prioritization
+        */
+
+       case TSTATE_TASK_READYTORUN:
+
+         /* A context switch will occur if the new priority of the ready-to
+          * run task is (strictly) greater than the current running task 
+          */
+
+         if (sched_priority > rtcb->sched_priority)
+           {
+             /* A context switch will occur. */
+
+             up_reprioritize_rtr(tcb, (ubyte)sched_priority);
+           }
+
+         /* Otherwise, we can just change priority and re-schedule (since it
+          * have no other effect).
+          */
+
+         else
+           {
+             /* Remove the TCB from the ready-to-run task list */
+
+             ASSERT(!sched_removereadytorun(tcb));
+
+             /* Change the task priority */
+
+             tcb->sched_priority = (ubyte)sched_priority;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+             tcb->base_priority  = (ubyte)sched_priority;
+#endif
+
+             /* Put it back into the ready-to-run task list */
+
+             ASSERT(!sched_addreadytorun(tcb));
+           }
+         break;
+
+       /* CASE 3. The task is not in the ready to run list.  Changing its
+        * Priority cannot effect the currently executing task.
+        */
+
+     default:
+        /* CASE 3a. The task resides in a prioritized list. */
+
+        if (g_tasklisttable[task_state].prioritized)
+          {
+            /* Remove the TCB from the prioritized task list */
+
+            dq_rem((FAR dq_entry_t*)tcb, (FAR dq_queue_t*)g_tasklisttable[task_state].list);
+
+            /* Change the task priority */
+
+            tcb->sched_priority = (ubyte)sched_priority;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+            tcb->base_priority  = (ubyte)sched_priority;
+#endif
+
+            /* Put it back into the prioritized list at the correct
+             * position
+             */
+
+            sched_addprioritized(tcb, (FAR dq_queue_t*)g_tasklisttable[task_state].list);
+          }
+
+        /* CASE 3b. The task resides in a non-prioritized list. */
+
+        else
+          {
+            /* Just change the task's priority */
+
+            tcb->sched_priority = (ubyte)sched_priority;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+            tcb->base_priority  = (ubyte)sched_priority;
+#endif
+          }
+        break;
+    }
+
+  irqrestore(saved_state);
+  return OK;
+}
 
 int sched_setparam(pid_t pid, const struct sched_param *param)
 {

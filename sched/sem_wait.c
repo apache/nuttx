@@ -110,7 +110,7 @@ int sem_wait(FAR sem_t *sem)
 
   /* Assume any errors reported are due to invalid arguments. */
 
-  *get_errno_ptr() = EINVAL;
+  errno = EINVAL;
 
   if (sem)
     {
@@ -180,17 +180,14 @@ int sem_wait(FAR sem_t *sem)
                * sched_setparam() should set both.
                */
 
-              struct sched_param sparam;
               int base_priority = htcb->base_priority;
-
-              sparam.sched_priority = rtcb->sched_priority;
-              (void)sched_setparam(htcb->pid, &sparam);
+              (void)sched_settcbprio(htcb, rtcb->sched_priority);
               htcb->base_priority = base_priority;
             }
 #endif
           /* Add the TCB to the prioritized semaphore wait queue */
 
-          *get_errno_ptr() = 0;
+          errno = 0;
           up_block_task(rtcb, TSTATE_WAIT_SEM);
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
@@ -202,7 +199,7 @@ int sem_wait(FAR sem_t *sem)
            * be examining the errno value.
            */
 
-          if (*get_errno_ptr() != EINTR)
+          if (errno != EINTR)
             {
               /* We hold the semaphore */
 

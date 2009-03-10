@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/os_internal.h
  *
- *   Copyright (C) 2007-2009Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -252,6 +252,7 @@ extern boolean sched_addprioritized(FAR _TCB *newTcb,
 extern boolean sched_mergepending(void);
 extern void    sched_addblocked(FAR _TCB *btcb, tstate_t task_state);
 extern void    sched_removeblocked(FAR _TCB *btcb);
+extern int sched_settcbprio(FAR _TCB *tcb, int sched_priority);
 extern FAR _TCB *sched_gettcb(pid_t pid);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
