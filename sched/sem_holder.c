@@ -55,7 +55,7 @@
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_SEM_PREALLOCHOLDERS
-#  define CONFIG_SEM_PREALLOCHOLDERS (4*CONFIG_MAX_TASKS)
+#  define CONFIG_SEM_PREALLOCHOLDERS 0
 #endif
 
 /****************************************************************************
@@ -229,7 +229,7 @@ static inline void sem_freeholder(sem_t *sem, FAR struct semholder_s *pholder)
 
 void sem_initholders(void)
 {
-#ifdef CONFIG_SEM_PREALLOCHOLDERS
+#if CONFIG_SEM_PREALLOCHOLDERS > 0
  int i;
 
   /* Put all of the pre-allocated holder structures into  free list */
@@ -352,20 +352,19 @@ void sem_boostpriority(sem_t *sem)
       if (pholder->counts > 0)
         {
           htcb = pholder->holder;
+#if CONFIG_SEM_NNESTPRIO > 0
+#  error "Missing implementation"
+#else
           if (htcb && htcb->sched_priority < rtcb->sched_priority)
             {
               /* Raise the priority of the holder of the semaphore.  This
                * cannot cause a context switch because we have preemption
                * disabled.  The task will be marked "pending" and the switch
                * will occur during up_block_task() processing.
-               *
-               * NOTE that we have to restore base_priority because
-               * sched_setparam() should set both.
                */
 
-              int base_priority = htcb->base_priority;
-              (void)sched_settcbprio(htcb, rtcb->sched_priority);
-              htcb->base_priority = base_priority;
+              (void)sched_setpriority(htcb, rtcb->sched_priority);
+#endif
             }
         }
     }
@@ -450,6 +449,9 @@ void sem_restorebaseprio(sem_t *sem)
           htcb = pholder->holder;
           if (htcb)
             {
+#if CONFIG_SEM_NNESTPRIO > 0
+#  error "Missing implementation"
+#else
               /* Was the priority of this thread boosted? NOTE:  There is
                * a logical flaw here:  If the thread holds multiple semaphore
                * and has been boosted multiple times, then there is no mechanism
@@ -461,7 +463,7 @@ void sem_restorebaseprio(sem_t *sem)
                 {
                   up_reprioritize_rtr(rtcb, htcb->base_priority);
                 }
-
+#endif
               /* When no more counts are held, remove the holder from the list */
 
               if (pholder->counts <= 0)

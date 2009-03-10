@@ -109,9 +109,6 @@ void up_reprioritize_rtr(_TCB *tcb, ubyte priority)
       /* Setup up the new task priority */
 
       tcb->sched_priority = (ubyte)priority;
-#ifdef CONFIG_PRIORITY_INHERITANCE
-      tcb->base_priority = (ubyte)priority;
-#endif
 
       /* Return the task to the specified blocked task list.
        * sched_addreadytorun will return TRUE if the task was

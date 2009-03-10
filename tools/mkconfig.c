@@ -1,7 +1,7 @@
 /****************************************************************************
- * mkconfig.c
+ * tools/mkconfig.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -239,6 +239,17 @@ int main(int argc, char **argv, char **envp)
   printf("#  undef CONFIG_NFILE_STREAMS\n");
   printf("#  define CONFIG_NFILE_STREAMS 3\n");
   printf("# endif\n");
+  printf("#endif\n\n");
+  printf("/* If priority inheritance is disabled, then do not allocate any\n");
+  printf(" * associated resources.\n");
+  printf(" */\n\n");
+  printf("#if !defined(CONFIG_PROIRITY_INHERITANCE) || !defined(CONFIG_SEM_PREALLOCHOLDERSS)\n");
+  printf("# undef CONFIG_SEM_PREALLOCHOLDERS\n");
+  printf("# define CONFIG_SEM_PREALLOCHOLDERSS 0\n");
+  printf("#endif\n\n");
+  printf("#if !defined(CONFIG_PROIRITY_INHERITANCE) || !defined(CONFIG_SEM_NNESTPRIO)\n");
+  printf("# undef CONFIG_SEM_NNESTPRIO\n");
+  printf("# define CONFIG_SEM_NNESTPRIO 0\n");
   printf("#endif\n\n");
   printf("/* If no file descriptors are configured, then make certain no\n");
   printf(" * streams are configured either.\n");

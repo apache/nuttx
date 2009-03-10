@@ -252,7 +252,12 @@ extern boolean sched_addprioritized(FAR _TCB *newTcb,
 extern boolean sched_mergepending(void);
 extern void    sched_addblocked(FAR _TCB *btcb, tstate_t task_state);
 extern void    sched_removeblocked(FAR _TCB *btcb);
-extern int sched_settcbprio(FAR _TCB *tcb, int sched_priority);
+extern int     sched_setpriority(FAR _TCB *tcb, int sched_priority);
+#ifdef CONFIG_PRIORITY_INHERITANCE
+extern int     sched_reprioritize(FAR _TCB *tcb, int sched_priority);
+#else
+#  define sched_reprioritize(tcb,sched_priority) sched_setpriority(tcb,sched_priority)
+#endif
 extern FAR _TCB *sched_gettcb(pid_t pid);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0

@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sched_setparam.c
+ * sched/sched_reprioritize.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,10 @@
 #include <sys/types.h>
 #include <sched.h>
 #include <errno.h>
-#include <nuttx/arch.h>
+
 #include "os_internal.h"
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
 
 /****************************************************************************
  * Definitions
@@ -73,7 +75,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_setparam
+ * Name:  sched_reprioritize
  *
  * Description:
  *   This function sets the priority of a specified task.
@@ -83,11 +85,8 @@
  *   tasks with the same priority.
  *
  * Inputs:
- *   pid - the task ID of the task to reprioritize.  If pid is
- *     zero, the priority of the calling task is changed.
- *   param - A structure whose member sched_priority is the integer
- *      priority.  The range of valid priority numbers is from
- *      SCHED_PRIORITY_MIN through SCHED_PRIORITY_MAX.
+ *   tcb - the TCB of task to reprioritize.
+ *   sched_priority - The new task priority
  *
  * Return Value:
  *   On success, sched_setparam() returns 0 (OK). On error, -1
@@ -102,52 +101,28 @@
  *
  ****************************************************************************/
 
-int sched_setparam(pid_t pid, const struct sched_param *param)
+int sched_reprioritize(FAR _TCB *tcb, int sched_priority)
 {
-  FAR _TCB  *rtcb;
-  FAR _TCB  *tcb;
-  int        ret;
-
-  /* Verify that the requested priority is in the valid range */
-
-  if (!param)
-    {
-      errno = EINVAL;
-      return ERROR;
-    }
-
-  /* Prohibit modifications to the head of the ready-to-run task
-   * list while adjusting the priority
+  /* This function is equivalent to sched_setpriority() BUT it also has the
+   * side effect of discarding all priority inheritance history.  This is
+   * done only on explicit, user-initiated reprioritization.
    */
 
-  sched_lock();
-
-  /* Check if the task to reprioritize is the calling task */
-
-  rtcb = (FAR _TCB*)g_readytorun.head;
-  if (pid == 0 || pid == rtcb->pid)
+  int ret = sched_setpriority(tcb, sched_priority);
+  if (ret == 0)
     {
-      tcb = rtcb;
+       /* Reset the base_priority -- the priority that the thread would return
+        * to once it posts the semaphore.
+        */
+
+       tcb->base_priority  = (ubyte)sched_priority;
+
+       /* Discard any pending reprioritizations as well */
+
+#  if CONFIG_SEM_NNESTPRIO > 0
+       tcb->npend_reprio   = 0;
+#  endif
     }
-
-  /* The pid is not the calling task, we will have to search for it */
-
-  else
-    {
-      tcb = sched_gettcb(pid);
-      if (!tcb)
-        {
-          /* No task with this pid was found */
-
-          errno = ESRCH;
-          sched_unlock();
-          return ERROR;
-        }
-    }
-
- /* Then perform the reprioritization */
-
- ret = sched_reprioritize(tcb, param->sched_priority);
- sched_unlock();
- return ret;
+  return ret;
 }
+#endif /* CONFIG_PRIORITY_INHERITANCE */

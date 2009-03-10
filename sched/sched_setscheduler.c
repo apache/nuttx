@@ -173,7 +173,7 @@ int sched_setscheduler(pid_t pid, int policy,
 
   /* Set the new priority */
 
-  ret = sched_settcbprio(tcb, param->sched_priority);
+  ret = sched_reprioritize(tcb, param->sched_priority);
   sched_unlock();
 
   if (ret != OK)

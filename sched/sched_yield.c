@@ -96,5 +96,5 @@ int sched_yield(void)
    * be rescheduled behind any other tasks at the same priority.
    */
 
-  return sched_settcbprio(rtcb, rtcb->sched_priority);
+  return sched_setpriority(rtcb, rtcb->sched_priority);
 }

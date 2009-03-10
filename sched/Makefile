@@ -50,11 +50,14 @@ TSK_SRCS	= task_create.c task_init.c task_setup.c task_activate.c \
 		  sched_mergepending.c sched_addblocked.c sched_removeblocked.c \
 		  sched_free.c sched_gettcb.c sched_releasetcb.c
 
-SCHED_SRCS	= sched_setparam.c sched_settcbprio.c sched_getparam.c \
+SCHED_SRCS	= sched_setparam.c sched_setpriority.c sched_getparam.c \
 		  sched_setscheduler.c sched_getscheduler.c \
 		  sched_yield.c sched_rrgetinterval.c sched_foreach.c \
 		  sched_getprioritymax.c sched_getprioritymin.c \
 		  sched_lock.c sched_unlock.c sched_lockcount.c
+ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
+SEM_SRCS	+= sched_reprioritize.c 
+endif
 
 ENV_SRCS	= env_getenvironptr.c env_dup.c env_share.c env_release.c \
 		  env_findvar.c env_removevar.c \

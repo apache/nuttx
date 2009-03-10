@@ -178,6 +178,10 @@ struct _TCB
   exitfunc_t exitfunc;                   /* Called if exit is called.           */
   ubyte    sched_priority;               /* Current priority of the thread      */
 #ifdef CONFIG_PRIORITY_INHERITANCE
+#  if CONFIG_SEM_NNESTPRIO > 0
+  ubyte    npend_reprio;                 /* Number of nested reprioritizations  */
+  ubyte    pend_reprios[CONFIG_SEM_NNESTPRIO];
+#  endif
   ubyte    base_priority;                /* "Normal" priority of the thread     */
 #endif
   ubyte    task_state;                   /* Current state of the thread         */

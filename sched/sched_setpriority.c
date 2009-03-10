@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched_settcbprio.c
+ * sched/sched_setpriority.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -73,7 +73,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_settcbprio
+ * Name:  sched_setpriority
  *
  * Description:
  *   This function sets the priority of a specified task.
@@ -99,7 +99,7 @@
  *
  ****************************************************************************/
 
-int sched_settcbprio(FAR _TCB *tcb, int sched_priority)
+int sched_setpriority(FAR _TCB *tcb, int sched_priority)
 {
   FAR _TCB  *rtcb = (FAR _TCB*)g_readytorun.head;
   tstate_t   task_state;
@@ -150,9 +150,6 @@ int sched_settcbprio(FAR _TCB *tcb, int sched_priority)
              /* Change the task priority */
 
              tcb->sched_priority = (ubyte)sched_priority;
-#ifdef CONFIG_PRIORITY_INHERITANCE
-             tcb->base_priority  = (ubyte)sched_priority;
-#endif
            }
          break;
 
@@ -186,9 +183,6 @@ int sched_settcbprio(FAR _TCB *tcb, int sched_priority)
              /* Change the task priority */
 
              tcb->sched_priority = (ubyte)sched_priority;
-#ifdef CONFIG_PRIORITY_INHERITANCE
-             tcb->base_priority  = (ubyte)sched_priority;
-#endif
 
              /* Put it back into the ready-to-run task list */
 
@@ -212,9 +206,6 @@ int sched_settcbprio(FAR _TCB *tcb, int sched_priority)
             /* Change the task priority */
 
             tcb->sched_priority = (ubyte)sched_priority;
-#ifdef CONFIG_PRIORITY_INHERITANCE
-            tcb->base_priority  = (ubyte)sched_priority;
-#endif
 
             /* Put it back into the prioritized list at the correct
              * position
@@ -230,65 +221,10 @@ int sched_settcbprio(FAR _TCB *tcb, int sched_priority)
             /* Just change the task's priority */
 
             tcb->sched_priority = (ubyte)sched_priority;
-#ifdef CONFIG_PRIORITY_INHERITANCE
-            tcb->base_priority  = (ubyte)sched_priority;
-#endif
           }
         break;
     }
 
   irqrestore(saved_state);
   return OK;
-}
-
-int sched_setparam(pid_t pid, const struct sched_param *param)
-{
-  FAR _TCB  *rtcb;
-  FAR _TCB  *tcb;
-  int        ret;
-
-  /* Verify that the requested priority is in the valid range */
-
-  if (!param ||
-      param->sched_priority < SCHED_PRIORITY_MIN || 
-      param->sched_priority > SCHED_PRIORITY_MAX)
-    {
-      errno = EINVAL;
-      return ERROR;
-    }
-
-  /* Prohibit modifications to the head of the ready-to-run task
-   * list while adjusting the priority
-   */
-
-  sched_lock();
-
-  /* Check if the task to reprioritize is the calling task */
-
-  rtcb = (FAR _TCB*)g_readytorun.head;
-  if (pid == 0 || pid == rtcb->pid)
-    {
-      tcb = rtcb;
-    }
-
-  /* The pid is not the calling task, we will have to search for it */
-
-  else
-    {
-      tcb = sched_gettcb(pid);
-      if (!tcb)
-        {
-          /* No task with this pid was found */
-
-          errno = ESRCH;
-          sched_unlock();
-          return ERROR;
-        }
-    }
-
- /* Then perform the reprioritization */
-
- ret = sched_settcbprio(tcb, param->sched_priority);
- sched_unlock();
- return ret;
 }

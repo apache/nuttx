@@ -237,7 +237,10 @@ static void *lowpri_thread(void *parameter)
     }
   else
     {
-      printf("lowpri_thread: Priority before sem_post: %d\n", sparam.sched_priority);
+      printf("lowpri_thread: %s priority before sem_post: %d\n",
+             sparam.sched_priority != g_highpri ? "ERROR" : "SUCCESS",
+             sparam.sched_priority);
+
       if (sparam.sched_priority != g_highpri)
         {
           printf("               ERROR should have been %d\n", g_highpri);
@@ -252,7 +255,10 @@ static void *lowpri_thread(void *parameter)
     }
   else
     {
-      printf("lowpri_thread: Final priority: %d\n", sparam.sched_priority);
+      printf("lowpri_thread: %s final priority: %d\n",
+             sparam.sched_priority != g_lowpri ? "ERROR" : "SUCCESS",
+             sparam.sched_priority);
+
       if (sparam.sched_priority != g_lowpri)
         {
           printf("               ERROR should have been %d\n", g_lowpri);
