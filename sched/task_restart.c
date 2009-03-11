@@ -151,6 +151,9 @@ STATUS task_restart(pid_t pid)
        tcb->sched_priority = tcb->init_priority;
 #ifdef CONFIG_PRIORITY_INHERITANCE
        tcb->base_priority  = tcb->init_priority;
+#  if CONFIG_SEM_NNESTPRIO > 0
+       tcb->npend_reprio   = 0;
+#  endif
 #endif
 
        /* Re-initialize the processor-specific portion of the TCB
