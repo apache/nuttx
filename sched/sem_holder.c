@@ -241,6 +241,110 @@ static int sem_foreachholder(FAR sem_t *sem, holderhandler_t handler, FAR void *
 }
 
 /****************************************************************************
+ * Name: sem_boostholderprio
+ ****************************************************************************/
+
+static int sem_boostholderprio(struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
+{
+  FAR _TCB *htcb = (FAR _TCB *)pholder->holder;
+  FAR _TCB *rtcb = (FAR _TCB*)arg;
+#if CONFIG_SEM_NNESTPRIO > 0
+  int i;
+#endif
+
+  /* Make sure that the thread is still active.  If it exited without releasing
+   * its counts, then that would be a bad thing.  But we can take no real
+   * action because we don't know know that the program is doing.  Perhaps its
+   * plan is to kill a thread, then destroy the semaphore.
+   */
+
+  if (!sched_verifytcb(htcb))
+   {
+      sdbg("TCB 0x%08x is a stale handle, counts lost\n", htcb);
+      sem_freeholder(sem, pholder);
+   }
+
+#if CONFIG_SEM_NNESTPRIO > 0
+
+  /* If the priority of the thread that is waiting for a count is greater than
+   * the base priority of the thread holding a count, then we may need to
+   * adjust the holder's priority now or later to that priority.
+   */
+
+  else if (rtcb->sched_priority > htcb->base_priority)
+    {
+      /* If the new priority is greater than the current, possibly already
+       * boosted priority of the holder thread, then we will have to raise
+       * the holder's priority now.
+       */
+
+      if (rtcb->sched_priority > htcb->sched_priority)
+        {
+          /* If the current priority has already been boosted, then add the
+           * boost priority to the list of restoration priorities.  When the
+           * higher priority thread gets its count, then we need to revert
+           * to this saved priority, not to the base priority.
+           */
+
+          if (htcb->sched_priority > htcb->base_priority)
+            {
+              /* Save the current, boosted priority */
+
+              if (htcb->npend_reprio < CONFIG_SEM_NNESTPRIO)
+                {
+                  htcb->pend_reprios[htcb->npend_reprio] = htcb->sched_priority;
+                  htcb->npend_reprio++;
+                }
+              else
+                {
+                  sdgb("CONFIG_SEM_NNESTPRIO exceeded\n");
+                }  
+            }
+
+          /* Raise the priority of the holder of the semaphore.  This
+           * cannot cause a context switch because we have preemption
+           * disabled.  The task will be marked "pending" and the switch
+           * will occur during up_block_task() processing.
+           */
+
+          (void)sched_setpriority(htcb, rtcb->sched_priority);
+        }
+      else
+        {
+          /* The new priority is above the base priority of the holder,
+           * but not as high as its current working priority.  Just put it
+           * in the list of pending restoration priorities so that when the
+           * higher priority thread gets its count, we can revert to this
+           * saved priority and not to the base priority.
+           */
+
+          htcb->pend_reprios[htcb->npend_reprio] = rtcb->sched_priority;
+          htcb->npend_reprio++;
+        }
+    }
+
+#else
+  /* If the priority of the thread that is waiting for a count is less than
+   * of equal to the priority of the thread holding a count, then do nothing
+   * because the thread is already running at a sufficient priority.
+   */
+
+   else if (rtcb->sched_priority > htcb->sched_priority)
+     {
+       /* Raise the priority of the holder of the semaphore.  This
+        * cannot cause a context switch because we have preemption
+        * disabled.  The task will be marked "pending" and the switch
+        * will occur during up_block_task() processing.
+        */
+
+       (void)sched_setpriority(htcb, rtcb->sched_priority);
+    }
+#endif
+
+  return 0;
+}
+
+/****************************************************************************
  * Name: sem_verifyholder
  ****************************************************************************/
 
@@ -502,41 +606,13 @@ void sem_addholder(FAR sem_t *sem)
 void sem_boostpriority(FAR sem_t *sem)
 {
   FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
-  FAR _TCB *htcb;
-  struct semholder_s *pholder;
 
-  /* Traverse the list of holders */
+  /* Boost the priority of every thread holding counts on this semaphore
+   * that are lower in priority than the new thread that is waiting for a
+   * count.
+   */
 
-  pholder = &sem->hlist;
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
-  for (; pholder; pholder = pholder->flink)
-#endif
-    {
-      /* As an artifact, there will be holders that have no counts.  This
-       * because they have posted the semaphore and there count was decrement
-       * by sem_releaseholder(), but they are still being retained in the
-       * list to be harvested by sem_restorebaseprio.
-       */
-
-      if (pholder->counts > 0)
-        {
-          htcb = pholder->holder;
-#if CONFIG_SEM_NNESTPRIO > 0
-#  error "Missing implementation"
-#else
-          if (htcb && htcb->sched_priority < rtcb->sched_priority)
-            {
-              /* Raise the priority of the holder of the semaphore.  This
-               * cannot cause a context switch because we have preemption
-               * disabled.  The task will be marked "pending" and the switch
-               * will occur during up_block_task() processing.
-               */
-
-              (void)sched_setpriority(htcb, rtcb->sched_priority);
-#endif
-            }
-        }
-    }
+   (void)sem_foreachholder(sem, sem_boostholderprio, rtcb);
 }
 
 /****************************************************************************
@@ -566,7 +642,9 @@ void sem_releaseholder(FAR sem_t *sem)
   pholder = sem_findholder(sem, rtcb);
   if (pholder && pholder->counts > 0)
     {
-      /* Decrement the counts on this holder */
+      /* Decrement the counts on this holder -- the holder will be freed
+       * later in sem_restorebaseprio.
+       */
 
       pholder->counts--;
     }
