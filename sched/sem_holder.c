@@ -99,7 +99,8 @@ static inline FAR struct semholder_s *sem_allocholder(sem_t *sem)
 
   if (!sem->hlist.holder)
     {
-      pholder = &sem->hlist;
+      pholder          = &sem->hlist;
+      pholder->counts  = 0;
     }
   else
     {
