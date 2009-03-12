@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sem_internal.h
+ * sched/ched_verifytcb.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,85 +33,51 @@
  *
  ****************************************************************************/
 
-#ifndef __SEM_INTERNAL_H
-#define __SEM_INTERNAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <sys/types.h>
-#include <semaphore.h>
 #include <sched.h>
-#include <queue.h>
-#include <nuttx/compiler.h>
+#include "os_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Type Declarations
+ * Private Type Declarations
  ****************************************************************************/
 
-/* This is the named semaphore structure */
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
 
-struct nsem_s
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sched_verifytcb
+ *
+ * Description:
+ *   Return TRUE if the tcb refers to an active task; FALSE if it is a stale
+ *   TCB handle.
+ *
+ ****************************************************************************/
+
+boolean sched_verifytcb(FAR _TCB *tcb)
 {
-  FAR struct nsem_s *flink;     /* Forward link */
-  FAR struct nsem_s *blink;     /* Backward link */
-  uint16             nconnect;  /* Number of connections to semaphore */
-  FAR char          *name;      /* Semaphore name (NULL if un-named) */
-  boolean            unlinked;  /* TRUE if the semaphore has been unlinked */
-  sem_t              sem;       /* The semaphore itself */
-};
-typedef struct nsem_s nsem_t;
+  /* Return true if the PID hashes to this TCB. */
 
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/* This is a list of dyanamically allocated named semaphores */
-
-extern dq_queue_t g_nsems;
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
-EXTERN void weak_function sem_initialize(void);
-EXTERN void               sem_waitirq(FAR _TCB *wtcb);
-EXTERN FAR nsem_t        *sem_findnamed(const char *name);
-
-#ifdef CONFIG_PRIORITY_INHERITANCE
-EXTERN void sem_initholders(void);
-EXTERN void sem_destroyholder(FAR sem_t *sem);
-EXTERN void sem_addholder(FAR sem_t *sem);
-EXTERN void sem_boostpriority(FAR sem_t *sem);
-EXTERN void sem_releaseholder(FAR sem_t *sem);
-EXTERN void sem_restorebaseprio(FAR _TCB *stcb, FAR sem_t *sem);
-EXTERN void sem_canceled(FAR sem_t *sem);
-#else
-#  define sem_initholders()
-#  define sem_destroyholder(sem)
-#  define sem_addholder(sem)
-#  define sem_boostpriority(sem)
-#  define sem_releaseholder(sem)
-#  define sem_restorebaseprio(stcb,sem)
-#  define sem_canceled(sem)
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
+  return tcb == g_pidhash[PIDHASH(tcb->pid)].tcb;
 }
-#endif
-
-#endif /* __SEM_INTERNAL_H */
 

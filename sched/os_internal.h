@@ -259,6 +259,7 @@ extern int     sched_reprioritize(FAR _TCB *tcb, int sched_priority);
 #  define sched_reprioritize(tcb,sched_priority) sched_setpriority(tcb,sched_priority)
 #endif
 extern FAR _TCB *sched_gettcb(pid_t pid);
+extern boolean sched_verifytcb(FAR _TCB *tcb);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
 extern int     sched_setupidlefiles(FAR _TCB *tcb);

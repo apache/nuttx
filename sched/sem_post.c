@@ -100,7 +100,7 @@
 
 int sem_post(FAR sem_t *sem)
 {
-  FAR _TCB  *stcb;
+  FAR _TCB  *stcb = NULL;
   STATUS     ret = ERROR;
   irqstate_t saved_state;
 
@@ -125,6 +125,13 @@ int sem_post(FAR sem_t *sem)
        * there must be some task waiting for the semaphore.
        */
 
+#ifdef CONFIG_PRIORITY_INHERITANCE
+      /* Don't let it run until we complete the priority restoration
+       * steps.
+       */
+
+      sched_lock();
+#endif
       if (sem->semcount <= 0)
         {
           /* Check if there are any tasks in the waiting for semaphore
@@ -154,7 +161,10 @@ int sem_post(FAR sem_t *sem)
        * held the semaphore.
        */
 
-      sem_restorebaseprio(sem);
+#ifdef CONFIG_PRIORITY_INHERITANCE
+      sem_restorebaseprio(stcb, sem);
+      sched_unlock();
+#endif
       ret = OK;
 
       /* Interrupts may now be enabled. */

@@ -172,9 +172,6 @@ int sem_wait(FAR sem_t *sem)
           errno = 0;
           up_block_task(rtcb, TSTATE_WAIT_SEM);
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
-          sched_unlock();
-#endif
           /* When we resume at this point, either (1) the semaphore has been
            * assigned to this thread of execution, or (2) the semaphore wait
            * has been interrupted by a signal.  We can detect the latter case
@@ -190,8 +187,13 @@ int sem_wait(FAR sem_t *sem)
             }
           else
             {
+              sem_canceled(sem);	            
               sem->semcount++;
             }
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+          sched_unlock();
+#endif
         }
 
       /* Interrupts may now be enabled. */

@@ -40,6 +40,7 @@
 #include <sys/types.h>
 #include <semaphore.h>
 #include <sched.h>
+#include <assert.h>
 #include <debug.h>
 #include <nuttx/arch.h>
 
@@ -61,6 +62,8 @@
 /****************************************************************************
  * Private Type Declarations
  ****************************************************************************/
+
+typedef int (*holderhandler_t)(struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg);
 
 /****************************************************************************
  * Global Variables
@@ -208,6 +211,172 @@ static inline void sem_freeholder(sem_t *sem, FAR struct semholder_s *pholder)
 }
 
 /****************************************************************************
+ * Name: sem_foreachholder
+ ****************************************************************************/
+
+static int sem_foreachholder(FAR sem_t *sem, holderhandler_t handler, FAR void *arg)
+{
+  struct semholder_s *pholder = &sem->hlist;
+  int ret = 0;
+
+#if CONFIG_SEM_PREALLOCHOLDERS > 0
+  for (; pholder && ret == 0; pholder = next)
+#endif
+    {
+#if CONFIG_SEM_PREALLOCHOLDERS > 0
+      /* In case this holder gets deleted */
+
+      next = pholder->flink;
+#endif
+      /* The initial "built-in" container may hold a NULL holder */
+
+      if (pholder->holder)
+        {
+          /* Call the handler */
+
+          ret = handler(pholder, sem, arg);
+        }
+    }
+  return ret;
+}
+
+/****************************************************************************
+ * Name: sem_verifyholder
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG
+static int sem_verifyholder(struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
+{
+  FAR _TCB *htcb = (FAR _TCB *)pholder->holder;
+
+#if CONFIG_SEM_NNESTPRIO > 0
+  DEBUGASSERT(htcb->npend_repri == 0);
+#endif
+  DEBUGASSERT(htcb->sched_priority == htcb->base_priority);
+  return 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: sem_restoreholderprio
+ ****************************************************************************/
+
+static int sem_restoreholderprio(struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
+{
+  FAR _TCB *htcb = (FAR _TCB *)pholder->holder;
+#if CONFIG_SEM_NNESTPRIO > 0
+  FAR _TCB *stcb = (FAR _TCB *)arg;
+  int rpriority;
+  int i;
+  int j;
+#endif
+
+  /* Make sure that the thread is still active.  If it exited without releasing
+   * its counts, then that would be a bad thing.  But we can take no real
+   * action because we don't know know that the program is doing.  Perhaps its
+   * plan is to kill a thread, then destroy the semaphore.
+   */
+
+  if (!sched_verifytcb(htcb))
+   {
+      sdbg("TCB 0x%08x is a stale handle, counts lost\n", htcb);
+      sem_freeholder(sem, pholder);
+   }
+
+  /* Was the priority of this thread boosted? If so, then drop its priority
+   * back to the correct level.
+   */
+
+  else if (htcb->sched_priority != htcb->base_priority)
+    {
+#if CONFIG_SEM_NNESTPRIO > 0
+      /* Are there other, pending priority levels to revert to? */
+
+      if (htcb->npend_reprio < 1)
+        {
+          /* No... the thread has only been boosted once */
+
+          DEBUGASSERT(hctb->sched_priority == stcb->sched_priority && npend_reprio == 0);
+          rpriority = htcb->base_priority;
+        }
+
+      /* There are multiple pending priority levels. The thread's "boosted"
+       * priority could greater than or equal to "stcb->sched_priority" (it could be
+       * greater if its priority we boosted becuase it also holds another semaphore.
+       */
+
+      else if (htcb->sched_priority <= stcb->sched_priority)
+        {
+          /* The thread has been boosted to the same priority as the task
+           * that just received the count.  We will simply reprioritized
+           * to the next highest priority that we have in rpriority.
+           */
+
+          /* Find the highest pending priority and remove it from the list */
+
+          for (i = 1, j = 0; i < htcb->npend_reprio; i++)
+            {
+              if (htcb->pend_reprios[i] > htcb->pend_reprios[j])
+                {
+                  j = i;
+                }
+            }
+
+          /* Remove the highest priority pending priority from the list */
+
+          rpriority = htcb->pend_reprios[j];
+          i = htcb->npend_reprio - 1;
+          if (i > 0)
+            {
+              htcb->pend_reprios[j] = htcb->pend_reprios[i];
+            }
+          htcb->npend_reprio = i;
+
+          /* And apply that priority to the thread */
+
+          sched_reprioritize(htcb, rpriority);
+        }                    
+      else
+        {
+          /* The thread has been boosted to a higher priority than the task.  The
+           * pending priority should be in he list (unless it was lost because of
+           * of list overflow).
+           *
+           * Search the list for the matching priority.
+           */
+
+          for (i = 0; i < htcb->npend_reprio; i++)
+            {
+              /* Does this pending priority match the priority of the thread
+               * that just received the count? 
+               */
+
+              if (htcb->pend_reprios[i] == stcb->sched_priority)
+                {
+                  /* Yes, remove it from the list */
+
+                  j = htcb->npend_reprio - 1;
+                  if (j > 0)
+                    {
+                      htcb->pend_reprios[i] = htcb->pend_reprios[j];
+                    }
+                   htcb->npend_reprio = j;
+                   break;
+                }
+            }
+        }
+#else
+      /* There is no alternative restore priorities, drop the priority
+       * all the way back to the threads "base" priority.
+       */
+
+      sched_reprioritize(htcb, htcb->base_priority);
+#endif
+    }
+  return 0;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -260,7 +429,7 @@ void sem_initholders(void)
  *
  ****************************************************************************/
 
-void sem_destroyholder(sem_t *sem)
+void sem_destroyholder(FAR sem_t *sem)
 {
 #if 0
   FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
@@ -297,7 +466,7 @@ void sem_destroyholder(sem_t *sem)
  *
  ****************************************************************************/
 
-void sem_addholder(sem_t *sem)
+void sem_addholder(FAR sem_t *sem)
 {
   FAR _TCB               *rtcb = (FAR _TCB*)g_readytorun.head;
   FAR struct semholder_s *pholder;
@@ -330,7 +499,7 @@ void sem_addholder(sem_t *sem)
  *
  ****************************************************************************/
 
-void sem_boostpriority(sem_t *sem)
+void sem_boostpriority(FAR sem_t *sem)
 {
   FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
   FAR _TCB *htcb;
@@ -387,7 +556,7 @@ void sem_boostpriority(sem_t *sem)
  *
  ****************************************************************************/
 
-void sem_releaseholder(sem_t *sem)
+void sem_releaseholder(FAR sem_t *sem)
 {
   FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
   FAR struct semholder_s *pholder;
@@ -407,12 +576,24 @@ void sem_releaseholder(sem_t *sem)
  * Function:  sem_restorebaseprio
  *
  * Description:
- *   Check if we need to drop the priority of any threads holding the
- *   semaphore.  The priority could have been boosted while they held the
- *   semaphore.
+ *   This function is called after the current running task releases a
+ *   count on the semaphore.  It will check if we need to drop the priority
+ *   of any threads holding a count on the semaphore.  Their priority could
+ *   have been boosted while they held the count.
  *
  * Parameters:
- *   sem - A reference to the semaphore being posted
+ *   stcb - The TCB of the task that was just started (if any).  If the
+ *     post action caused a count to be given to another thread, then stcb
+ *     is the TCB that received the count.  Note, just because stcb received
+ *     the count, it does not mean that it it is higher priority than other threads.
+ *   sem - A reference to the semaphore being posted.
+ *     - If the semaphore count is <0 then there are still threads waiting
+ *       for a count.  stcb should be non-null and will be higher priority than
+ *       all of the other threads still waiting.
+ *     - If it is ==0 then stcb refers to the thread that got the last count; no
+ *       other threads are waiting.
+ *     - If it is >0 then there should be no threads waiting for counts and
+ *       stcb should be null.
  *
  * Return Value:
  *   0 (OK) or -1 (ERROR) if unsuccessful
@@ -421,58 +602,84 @@ void sem_releaseholder(sem_t *sem)
  *
  ****************************************************************************/
 
-void sem_restorebaseprio(sem_t *sem)
+void sem_restorebaseprio(FAR _TCB *stcb, FAR sem_t *sem)
 {
-  FAR _TCB  *rtcb = (FAR _TCB*)g_readytorun.head;
-  FAR _TCB *htcb;
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
   struct semholder_s *pholder;
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
-  struct semholder_s *next;
-#endif
 
-  /* Check if the semaphore is still available */
+  /* Check our assumptions */
 
-  if (sem->semcount > 0)
+  DEBUGASSERT((sem->semcount > 0  && stcb == NULL) ||
+              (sem->semcount <= 0 && stcb != NULL));
+
+  /* Perfom the following actions only if a new thread was given a count. */
+
+  if (stcb)
     {
-      /* Traverse the list of holders */
+      /* Adjust the priority of every holder as necessary */
 
-      pholder = &sem->hlist;
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
-      for (; pholder; pholder = next)
+      (void)sem_foreachholder(sem, sem_restoreholderprio, stcb);
+    }
+
+  /* If there are no tasks waiting for available counts, then all holders
+   * should be at their base priority.
+   */
+
+#ifdef CONFIG_DEBUG
+  else
+    {
+      (void)sem_foreachholder(sem, sem_verifyholder, NULL);
+    }
 #endif
+
+  /* In any case, the currently execuing task should have an entry in the 
+   * list and we need to decrement the number of counts that it holds.  When it
+   * holds no further counts, it must be removed from the list of holders.
+   */
+
+  pholder = sem_findholder(sem, rtcb);
+  if (pholder)
+    {
+      /* When no more counts are held, remove the holder from the list.  The
+       * count was decremented in sem_releaseholder.
+       */
+
+      if (pholder->counts <= 0)
         {
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
-          next = pholder->flink; /* In case pholder gets deleted */
-#endif
-          /* The initial "built-in" container may hold a NULL holder */
-
-          htcb = pholder->holder;
-          if (htcb)
-            {
-#if CONFIG_SEM_NNESTPRIO > 0
-#  error "Missing implementation"
-#else
-              /* Was the priority of this thread boosted? NOTE:  There is
-               * a logical flaw here:  If the thread holds multiple semaphore
-               * and has been boosted multiple times, then there is no mechanism
-               * to know the correct priority to restore and we may error in
-               * prematurely lowering the priority.
-               */
-
-              if (htcb->sched_priority != htcb->base_priority)
-                {
-                  up_reprioritize_rtr(rtcb, htcb->base_priority);
-                }
-#endif
-              /* When no more counts are held, remove the holder from the list */
-
-              if (pholder->counts <= 0)
-                {
-	          sem_freeholder(sem, pholder);
-                }
-            }
+          sem_freeholder(sem, pholder);
         }
     }
+}
+
+/****************************************************************************
+ * Function:  sem_canceled
+ *
+ * Description:
+ *   Called from sem_post() after a thread that was waiting for a semaphore
+ *   count was awakened because of a signal and the semaphore wait has been
+ *   canceld.
+ *
+ * Parameters:
+ *   sem - A reference to the semaphore no longer being waited for
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+void sem_canceled(FAR sem_t *sem)
+{
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+
+  /* Check our assumptions */
+
+  DEBUGASSERT(sem->semcount <= 0);
+
+  /* Adjust the priority of every holder as necessary */
+
+  (void)sem_foreachholder(sem, sem_restoreholderprio, rtcb);
 }
 
 #endif /* CONFIG_PRIORITY_INHERITANCE */
