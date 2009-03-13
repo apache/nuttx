@@ -85,7 +85,14 @@ CONFIG_ARCH_BOARD_SIM=y
 # CONFIG_MUTEX_TYPES: Set to enable support for recursive and
 #   errorcheck mutexes. Enables pthread_mutexattr_settype().
 # CONFIG_PRIORITY_INHERITANCE : Set to enable support for priority
-#   inheritance on mutexes and semaphores. 
+#   inheritance on mutexes and semaphores.
+# CONFIG_SEM_PREALLOCHOLDERS: This setting is only used if priority
+#   inheritance is enabled.  It defines the maximum number of different
+#   threads (minus one) that can take counts on a semaphore with priority
+#   inheritance support.  This may be set to zero if priority inheritance
+#   is disabled OR if you are only using semaphores as mutexes (only
+#   one holder) OR if no more than two threads participate using a
+#   counting semaphore.
 #
 CONFIG_EXAMPLE=ostest
 CONFIG_DEBUG=y
@@ -103,6 +110,7 @@ CONFIG_DEV_CONSOLE=y
 CONFIG_DEV_LOWCONSOLE=n
 CONFIG_MUTEX_TYPES=y
 CONFIG_PRIORITY_INHERITANCE=n
+CONFIG_SEM_PREALLOCHOLDERS=3
 
 #
 # The following can be used to disable categories of
