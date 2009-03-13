@@ -93,6 +93,11 @@ CONFIG_ARCH_BOARD_SIM=y
 #   is disabled OR if you are only using semaphores as mutexes (only
 #   one holder) OR if no more than two threads participate using a
 #   counting semaphore.
+# CONFIG_SEM_NNESTPRIO.  If priority inheritance is enabled, then this
+#   setting is the maximum number of higher priority threads (minus 1)
+#   than can be waiting for another thread to release a count on a
+#   semaphore.  This value may be set to zero if no more than one
+#   thread is expected to wait for a semaphore.
 #
 CONFIG_EXAMPLE=ostest
 CONFIG_DEBUG=y
@@ -110,7 +115,8 @@ CONFIG_DEV_CONSOLE=y
 CONFIG_DEV_LOWCONSOLE=n
 CONFIG_MUTEX_TYPES=y
 CONFIG_PRIORITY_INHERITANCE=n
-CONFIG_SEM_PREALLOCHOLDERS=3
+CONFIG_SEM_PREALLOCHOLDERS=0
+CONFIG_SEM_NNESTPRIO=0
 
 #
 # The following can be used to disable categories of

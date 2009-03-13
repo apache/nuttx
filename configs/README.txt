@@ -207,6 +207,12 @@ defconfig -- This is a configuration file similar to the Linux
 		  are only using semaphores as mutexes (only one holder) OR
 		  if no more than two threads participate using a counting
 		  semaphore.
+		CONFIG_SEM_NNESTPRIO.  If priority inheritance is enabled,
+		  then this setting is the maximum number of higher priority
+		  threads (minus 1) than can be waiting for another thread
+		  to release a count on a semaphore.  This value may be set
+		  to zero if no more than one thread is expected to wait for
+		  a semaphore.
 
 	The following can be used to disable categories of APIs supported
 	by the OS.  If the compiler supports weak functions, then it
