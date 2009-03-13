@@ -251,6 +251,7 @@ static int sem_foreachholder(FAR sem_t *sem, holderhandler_t handler, FAR void *
 static int sem_recoverholders(struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
 {
   sem_freeholder(sem, pholder);
+  return 0;
 }
 
 /****************************************************************************
@@ -372,6 +373,23 @@ static int sem_verifyholder(struct semholder_s *pholder, FAR sem_t *sem, FAR voi
   DEBUGASSERT(htcb->npend_reprio == 0);
 #endif
   DEBUGASSERT(htcb->sched_priority == htcb->base_priority);
+  return 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: sem_dumpholder
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_SEM_PHDEBUG)
+static int sem_dumpholder(struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
+{
+#if CONFIG_SEM_PREALLOCHOLDERS > 0
+  dbg("  %08x: %08x %08x %04x\n",
+      pholder, pholder->flink, pholder->holder, pholder->counts);
+#else
+  dbg("  %08x: %08x %04x\n", pholder, pholder->holder, pholder->counts);
+#endif
   return 0;
 }
 #endif
@@ -759,7 +777,7 @@ void sem_restorebaseprio(FAR _TCB *stcb, FAR sem_t *sem)
  * Description:
  *   Called from sem_post() after a thread that was waiting for a semaphore
  *   count was awakened because of a signal and the semaphore wait has been
- *   canceld.
+ *   canceled.
  *
  * Parameters:
  *   sem - A reference to the semaphore no longer being waited for
@@ -783,5 +801,60 @@ void sem_canceled(FAR sem_t *sem)
 
   (void)sem_foreachholder(sem, sem_restoreholderprio, rtcb);
 }
+
+/****************************************************************************
+ * Function:  sem_enumholders
+ *
+ * Description:
+ *   Show information about threads currently waiting on this semaphore
+ *
+ * Parameters:
+ *   sem - A reference to the semaphore
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_SEM_PHDEBUG)
+void sem_enumholders(FAR sem_t *sem)
+{
+  (void)sem_foreachholder(sem, sem_dumpholder, NULL);
+}
+#endif
+
+/****************************************************************************
+ * Function:  sem_nfreeholders
+ *
+ * Description:
+ *   Return the number of available holder containers.  This is a good way
+ *   to find out which threads are not calling sem_destroy.
+ *
+ * Parameters:
+ *   sem - A reference to the semaphore
+ *
+ * Return Value:
+ *   The number of available holder containers
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_SEM_PHDEBUG)
+int sem_nfreeholders(void)
+{
+#if CONFIG_SEM_PREALLOCHOLDERS > 0
+  FAR struct semholder_s *pholder;
+  int n;
+  
+  for (pholder = g_freeholders, n = 0; pholder; pholder = pholder->flink) n++;
+  return n;
+#else
+  return 0;
+#endif
+}
+#endif
 
 #endif /* CONFIG_PRIORITY_INHERITANCE */

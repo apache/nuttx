@@ -71,6 +71,14 @@
 #  define CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS 8
 #endif
 
+/* Priority inheritance */
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_PRIORITY_INHERITANCE) && defined(CONFIG_SEM_PHDEBUG)
+#  define dump_nfreeholders(s) printf(s " nfreeholders: %d\n", sem_nfreeholders())
+#else
+#  define dump_nfreeholders(s)
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -138,5 +146,17 @@ extern void barrier_test(void);
 /* prioinherit.c ************************************************************/
 
 extern void priority_inheritance(void);
+
+/* APIs exported (conditionally) by the OS specifically for testing of
+ * priority inheritance
+ */
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_PRIORITY_INHERITANCE) && defined(CONFIG_SEM_PHDEBUG)
+extern void sem_enumholders(FAR sem_t *sem);
+extern int sem_nfreeholders(void);
+#else
+#  define sem_enumholders(sem)
+#  define sem_nfreeholders()
+#endif
 
 #endif /* __OSTEST_H */

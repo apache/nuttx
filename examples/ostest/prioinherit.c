@@ -269,6 +269,7 @@ static void *lowpri_thread(void *parameter)
               printf("    g_highstate[%d]: %d\n", i, (int)g_highstate[i]);
             }
           printf("    I still have a count on the semaphore\n");
+          sem_enumholders(&g_sem);
           fflush(stdout);
           sleep(1);
         }
@@ -308,6 +309,7 @@ static void *lowpri_thread(void *parameter)
     }
 
   ret = pthread_getschedparam(pthread_self(), &policy, &sparam);
+  sem_enumholders(&g_sem);
   sem_post(&g_sem);
   if (ret != 0)
     {
@@ -352,6 +354,7 @@ static void *lowpri_thread(void *parameter)
           printf("               ERROR should have been %d\n", g_lowpri);
         } 
     }
+  sem_enumholders(&g_sem);
 
   printf("lowpri_thread-%d: Okay... I'm done!\n", threadno);
   fflush(stdout);
@@ -396,6 +399,7 @@ void priority_inheritance(void)
   g_medpri = my_pri - 1;
 
   sem_init(&g_sem, 0, NLOWPRI_THREADS);
+  dump_nfreeholders("priority_inheritance:");
 
   /* Start the low priority threads */
 
@@ -429,6 +433,7 @@ void priority_inheritance(void)
     }
   printf("priority_inheritance: Waiting...\n");
   sleep(2);
+  dump_nfreeholders("priority_inheritance:");
 
   /* Start the medium priority thread */
 
@@ -458,6 +463,7 @@ void priority_inheritance(void)
     }
   printf("priority_inheritance: Waiting...\n");
   sleep(1);
+  dump_nfreeholders("priority_inheritance:");
 
   /* Start the high priority threads */
 
@@ -491,6 +497,8 @@ void priority_inheritance(void)
           printf("priority_inheritance: pthread_create failed, status=%d\n", status);
         }
     }
+  dump_nfreeholders("priority_inheritance:");
+  fflush(stdout);
 
   /* Wait for all thread instances to complete */
 
@@ -499,19 +507,23 @@ void priority_inheritance(void)
       printf("priority_inheritance: Waiting for highpri_thread-%d to complete\n", i+1);
       fflush(stdout);
       (void)pthread_join(highpri[i], &result);
+      dump_nfreeholders("priority_inheritance:");
   }
   printf("priority_inheritance: Waiting for medpri_thread to complete\n");
   fflush(stdout);
   (void)pthread_join(medpri, &result);
+  dump_nfreeholders("priority_inheritance:");
   for (i = 0; i < NLOWPRI_THREADS; i++)
     {
       printf("priority_inheritance: Waiting for lowpri_thread-%d to complete\n", i+1);
       fflush(stdout);
       (void)pthread_join(lowpri[i], &result);
+      dump_nfreeholders("priority_inheritance:");
     }
 
   printf("priority_inheritance: Finished\n");
   sem_destroy(&g_sem);
+  dump_nfreeholders("priority_inheritance:");
   fflush(stdout);
 #endif /* CONFIG_PRIORITY_INHERITANCE && !CONFIG_DISABLE_SIGNALS && !CONFIG_DISABLE_PTHREAD */
 }

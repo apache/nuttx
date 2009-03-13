@@ -155,6 +155,10 @@ static void check_test_memory_usage(void)
 #else
   memcpy(&g_mmprevious, &g_mmafter, sizeof(struct mallinfo));
 #endif
+
+  /* If so enabled, show the use of priority inheritance resources */
+
+  dump_nfreeholders("user_main:");
 }
 #else
 # define check_test_memory_usage()
