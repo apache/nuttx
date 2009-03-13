@@ -252,9 +252,6 @@ static int sem_boostholderprio(struct semholder_s *pholder, FAR sem_t *sem, FAR 
 {
   FAR _TCB *htcb = (FAR _TCB *)pholder->holder;
   FAR _TCB *rtcb = (FAR _TCB*)arg;
-#if CONFIG_SEM_NNESTPRIO > 0
-  int i;
-#endif
 
   /* Make sure that the thread is still active.  If it exited without releasing
    * its counts, then that would be a bad thing.  But we can take no real
@@ -301,7 +298,7 @@ static int sem_boostholderprio(struct semholder_s *pholder, FAR sem_t *sem, FAR 
                 }
               else
                 {
-                  sdgb("CONFIG_SEM_NNESTPRIO exceeded\n");
+                  sdbg("CONFIG_SEM_NNESTPRIO exceeded\n");
                 }  
             }
 
@@ -358,7 +355,7 @@ static int sem_verifyholder(struct semholder_s *pholder, FAR sem_t *sem, FAR voi
   FAR _TCB *htcb = (FAR _TCB *)pholder->holder;
 
 #if CONFIG_SEM_NNESTPRIO > 0
-  DEBUGASSERT(htcb->npend_repri == 0);
+  DEBUGASSERT(htcb->npend_reprio == 0);
 #endif
   DEBUGASSERT(htcb->sched_priority == htcb->base_priority);
   return 0;
@@ -404,7 +401,7 @@ static int sem_restoreholderprio(struct semholder_s *pholder, FAR sem_t *sem, FA
         {
           /* No... the thread has only been boosted once */
 
-          DEBUGASSERT(hctb->sched_priority == stcb->sched_priority && npend_reprio == 0);
+          DEBUGASSERT(htcb->sched_priority == stcb->sched_priority && htcb->npend_reprio == 0);
           rpriority = htcb->base_priority;
         }
 

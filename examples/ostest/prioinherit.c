@@ -60,7 +60,11 @@
 #  define CONFIG_SEM_PREALLOCHOLDERS 0
 #endif
 #define NLOWPRI_THREADS  (CONFIG_SEM_PREALLOCHOLDERS+1)
-#define NHIGHPRI_THREADS 1
+
+#ifndef CONFIG_SEM_NNESTPRIO
+#  define CONFIG_SEM_NNESTPRIO 0
+#endif
+#define NHIGHPRI_THREADS (CONFIG_SEM_NNESTPRIO+1)
 
 /****************************************************************************
  * Private Data
