@@ -218,6 +218,9 @@ static inline void sem_freeholder(sem_t *sem, FAR struct semholder_s *pholder)
 static int sem_foreachholder(FAR sem_t *sem, holderhandler_t handler, FAR void *arg)
 {
   struct semholder_s *pholder = &sem->hlist;
+#if CONFIG_SEM_PREALLOCHOLDERS > 0
+  struct semholder_s *next;
+#endif
   int ret = 0;
 
 #if CONFIG_SEM_PREALLOCHOLDERS > 0

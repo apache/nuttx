@@ -99,7 +99,9 @@ int sem_init (FAR sem_t *sem, int pshared, unsigned int value)
     {
       sem->semcount     = (sint16)value;
 #ifdef CONFIG_PRIORITY_INHERITANCE
+#if CONFIG_SEM_PREALLOCHOLDERS > 0
       sem->hlist.flink  = NULL;
+#endif
       sem->hlist.holder = NULL;
       sem->hlist.counts = 0;
 #endif

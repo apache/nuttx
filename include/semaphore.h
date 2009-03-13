@@ -63,7 +63,7 @@ extern "C" {
 #ifdef CONFIG_PRIORITY_INHERITANCE
 struct semholder_s
 {
-#if !defined(CONFIG_SEM_PREALLOCHOLDERS) || CONFIG_SEM_PREALLOCHOLDERS > 0
+#if CONFIG_SEM_PREALLOCHOLDERS > 0
   struct semholder_s *flink;    /* Implements singly linked list */
 #endif
   void  *holder;                /* Holder TCB (actual type is _TCB) */

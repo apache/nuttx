@@ -243,11 +243,11 @@ int main(int argc, char **argv, char **envp)
   printf("/* If priority inheritance is disabled, then do not allocate any\n");
   printf(" * associated resources.\n");
   printf(" */\n\n");
-  printf("#if !defined(CONFIG_PROIRITY_INHERITANCE) || !defined(CONFIG_SEM_PREALLOCHOLDERSS)\n");
+  printf("#if !defined(CONFIG_PRIORITY_INHERITANCE) || !defined(CONFIG_SEM_PREALLOCHOLDERS)\n");
   printf("# undef CONFIG_SEM_PREALLOCHOLDERS\n");
-  printf("# define CONFIG_SEM_PREALLOCHOLDERSS 0\n");
+  printf("# define CONFIG_SEM_PREALLOCHOLDERS 0\n");
   printf("#endif\n\n");
-  printf("#if !defined(CONFIG_PROIRITY_INHERITANCE) || !defined(CONFIG_SEM_NNESTPRIO)\n");
+  printf("#if !defined(CONFIG_PRIORITY_INHERITANCE) || !defined(CONFIG_SEM_NNESTPRIO)\n");
   printf("# undef CONFIG_SEM_NNESTPRIO\n");
   printf("# define CONFIG_SEM_NNESTPRIO 0\n");
   printf("#endif\n\n");

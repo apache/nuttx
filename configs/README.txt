@@ -199,6 +199,14 @@ defconfig -- This is a configuration file similar to the Linux
 		  errorcheck mutexes.  Enables pthread_mutexattr_settype().
 		CONFIG_PRIORITY_INHERITANCE - Set to enable support for
 		  priority inheritance on mutexes and semaphores.
+		CONFIG_SEM_PREALLOCHOLDERS: This setting is only used if priority
+		  inheritance is enabled.  It defines the maximum number of
+		  different threads (minus one) that can take counts on a
+		  semaphore with priority inheritance support.  This may be 
+		  set to zero if priority inheritance is disabled OR if you
+		  are only using semaphores as mutexes (only one holder) OR
+		  if no more than two threads participate using a counting
+		  semaphore.
 
 	The following can be used to disable categories of APIs supported
 	by the OS.  If the compiler supports weak functions, then it

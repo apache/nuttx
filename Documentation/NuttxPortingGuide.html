@@ -1627,8 +1627,17 @@ The system can be re-made subsequently by just typing <code>make</code>.
     errorcheck mutexes.  Enables <code>pthread_mutexattr_settype()</code>.
   </li>
   <li>
-    <code>CONFIG_PRIORITY_INHERITANCE </code>: Set to enable support for
+    <code>CONFIG_PRIORITY_INHERITANCE</code>: Set to enable support for
     priority inheritance on mutexes and semaphores.
+  </li>
+  <li>
+    <code>CONFIG_SEM_PREALLOCHOLDERS: </code>: This setting is only used
+    if priority inheritance is enabled.
+    It defines the maximum number of different threads (minus one) that
+    can take counts on a semaphore with priority inheritance support.
+    This may be set to zero if priority inheritance is disabled OR if you
+    are only using semaphores as mutexes (only one holder) OR if no more
+    than two threads participate using a counting semaphore.
   </li>
 </ul>
 
