@@ -245,6 +245,15 @@ static int sem_foreachholder(FAR sem_t *sem, holderhandler_t handler, FAR void *
 }
 
 /****************************************************************************
+ * Name: sem_recoverholders
+ ****************************************************************************/
+
+static int sem_recoverholders(struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
+{
+  sem_freeholder(sem, pholder);
+}
+
+/****************************************************************************
  * Name: sem_boostholderprio
  ****************************************************************************/
 
@@ -353,6 +362,11 @@ static int sem_boostholderprio(struct semholder_s *pholder, FAR sem_t *sem, FAR 
 static int sem_verifyholder(struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
 {
   FAR _TCB *htcb = (FAR _TCB *)pholder->holder;
+
+  /* Called after a semaphore has been released (incremented), the semaphore
+   * could is non-negative, and there is no thread waiting for the count.
+   * In this case, the priority of the holder should not be boosted.
+   */
 
 #if CONFIG_SEM_NNESTPRIO > 0
   DEBUGASSERT(htcb->npend_reprio == 0);
@@ -536,23 +550,32 @@ void sem_initholders(void)
 
 void sem_destroyholder(FAR sem_t *sem)
 {
-#if 0
   FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
 
   /* It is an error is a semaphore is destroyed while there are any holders
    * (except perhaps the thread releas the semaphore itself).  Hmmm.. but
    * we actually have to assume that the caller knows what it is doing because
    * could have killed another thread that is the actual holder of the semaphore.
+   * We cannot make any assumptions about the state of the semaphore or the
+   * state of any of the holder threads.
+   *
+   * So just recover any stranded holders and hope the task knows what it is
+   * doing.
    */
 
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
-  DEBUGASSERT((!sem->hlist.holder || sem->hlist.holder == rtcb) && !sem->hlist.flink);
+  if (sem->hlist.holder || sem->hlist.flink)
+    {
+      sdbg("Semaphore destroyed with holders\n");
+      (void)sem_foreachholder(sem, sem_recoverholders, NULL);
+    }
 #else
-  DEBUGASSERT(!sem->hlist.holder || sem->hlist.holder == rtcb);
-#endif
-#endif
-
+  if (sem->hlist.holder)
+    {
+      sdbg("Semaphore destroyed with holder\n");
+    }
   sem->hlist.holder = NULL;
+#endif
 }
 
 /****************************************************************************
