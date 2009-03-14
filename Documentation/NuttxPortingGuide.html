@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: March 8, 2009</p>
+      <p>Last Updated: March 13, 2009</p>
     </td>
   </tr>
 </table>
@@ -1629,9 +1629,13 @@ The system can be re-made subsequently by just typing <code>make</code>.
   <li>
     <code>CONFIG_PRIORITY_INHERITANCE</code>: Set to enable support for
     priority inheritance on mutexes and semaphores.
+    Priority inheritance is a strategy of addessing
+    <a href="NuttxUserGuide.html#priorityinversion"><i>priority inversion</i></a>.
+    Details of the NuttX implementation of priority inheritance is
+    discussed <a href="NuttxUserGuide.html#priorityinheritance">elsewhere</a>.
   </li>
   <li>
-    <code>CONFIG_SEM_PREALLOCHOLDERS: </code>: This setting is only used
+    <code>CONFIG_SEM_PREALLOCHOLDERS</code>: This setting is only used
     if priority inheritance is enabled.
     It defines the maximum number of different threads (minus one) that
     can take counts on a semaphore with priority inheritance support.
@@ -1640,7 +1644,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
     than two threads participate using a counting semaphore.
   </li>
   <li>
-    <code>CONFIG_SEM_NNESTPRIO. </code>: If priority inheritance is enabled,
+    <code>CONFIG_SEM_NNESTPRIO</code>: If priority inheritance is enabled,
     then this setting is the maximum number of higher priority threads (minus
     1) than can be waiting for another thread to release a count on a semaphore.
     This value may be set to zero if no more than one thread is expected to

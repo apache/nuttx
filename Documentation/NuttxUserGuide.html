@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: March 8, 2009</p>
+      <p>Last Updated: March 13, 2009</p>
     </td>
   </tr>
 </table>
@@ -1695,8 +1695,9 @@ interface of the same name.
   and, as a result, can adversely affect system response times.
 </p>
 <p>
-  <b>Priority Inversion</b>.  Proper use of semaphores avoids the issues of
-  sched_lock().  However, consider the following example:
+  <a name="priorityinversion"><b>Priority Inversion</b></a>.
+  Proper use of semaphores avoids the issues of <code>sched_lock()</code>.
+  However, consider the following example:
   <OL>
     <li>Some low-priority task, <I>Task C</I>, acquires a semphore in order to
       get exclusive access to a protected resource.</li>
@@ -1731,6 +1732,77 @@ interface of the same name.
   <li>Boost the priority of the low-priority task before the semaphore is
     acquired, or</li>
   <li>Use sched_lock() in the low-priority task.</li>
+</ul>
+<p>
+  <a name="priorityinheritance"><b>Priority Inheritance</b></a>.
+  As mentioned, NuttX does support <i>priority inheritance</i> provided that
+  <code>CONFIG_PRIORITY_INHERITANCE</code> is defined in your OS configuration file.
+  However, the implementation and configuration of the priority inheritance feature
+  is sufficiently complex that more needs to be said.
+  How can a feature that can be described by a single, simple sentence require such
+  a complex implementation:
+</p>
+<ul>
+  <li>
+    <b><code>CONFIG_SEM_PREALLOCHOLDERS</code>.</b>
+    First of all, in NuttX priority inheritance is implement on POSIX counting
+    semaphores.  The reason for this is that these semaphores are the most
+    primitive waiting mechanism in NuttX; Most other waiting facilities are
+    based on semaphores.  So if priority inheritance is implemented for POSIX
+    counting semaphores, then most NuttX waiting mechanisms will have this
+    capability.
+    <p>
+      Complexity arises because counting semaphores can have numerous
+      holders of semaphore counts.  Therefore, in order to implement
+      priority inheritance across all holders, then internal data
+      structures must be allocated to manage the various holders associated
+      with a semaphore.
+      The setting <code>CONFIG_SEM_PREALLOCHOLDERS</code> defines the maximum
+      number of different threads (minus one per semaphore instance) that can
+      take counts on a semaphore with priority inheritance support.
+      This setting defines the size of a single pool of preallocated structures.
+      It may be set to zero if priority inheritance is disabled OR if you
+      are only using semaphores as mutexes (only one holder) OR if no more
+      than two threads participate using a counting semaphore.
+    </p>
+    <p>
+      The cost associated with setting <code>CONFIG_SEM_PREALLOCHOLDERS</code>
+      is slightly increased code size and around 6-12 bytes times the value
+      of <code>CONFIG_SEM_PREALLOCHOLDERS</code>.
+    </p>
+  </li>
+  <li>
+    <b><code>CONFIG_SEM_NNESTPRIO</code>:</b>
+    In addition, there may be multiple threads of various priorities that
+    need to wait for a count from the semaphore.
+    These, the lower priority thread holding the semaphore may have to
+    be boosted numerous time and, to make things more complex, will have
+    to keep track of all of the boost priorities values in in order to
+    correctly restore the priorities after a count has been handed out
+    to the higher priority thread.
+    The <code>CONFIG_SEM_NNESTPRIO</code> defines the size of an array,
+    one array per active thread.
+    This setting is the maximum number of higher priority threads (minus
+    1) than can be waiting for another thread to release a count on a semaphore.
+    This value may be set to zero if no more than one thread is expected to
+    wait for a semaphore.
+    <p>
+      The cost associated with setting <code>CONFIG_SEM_NNESTPRIO</code>
+      is slightly increased code size and (<code>CONFIG_SEM_PREALLOCHOLDERS</code> + 1)
+      times the maximum number of active threads.
+    </p>
+  </li>
+  <li>
+    <b>Increased Susceptibility to Bad Thread Behavior</b>.
+    These various structures tie the semaphore implementation more tightly to
+    the behavior of the implementation.  For examples, if a thread executes while
+    holding counts on a semaphore, or if a thread exits without call <code>sem_destroy()</code>
+    then.  Or what if the thread with the boosted priority reprioritizes itself?
+    The NuttX implement of priority inheritance attempts to handle all of these
+    types of corner cases, but it is very likely that some are missed.
+    The worst case result is that memory could by stranded within the priority
+    inheritance logic.
+  </li>
 </ul>
 <p>
   POSIX semaphore interfaces:
