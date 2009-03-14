@@ -48,6 +48,7 @@
 #include <debug.h>
 #include <wdog.h>
 #include <errno.h>
+#include <assert.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -241,19 +242,21 @@
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
 struct ez80mac_statistics_s
 {
-  uint32 rx_int;       /* Number of Rx interrupts received */
-  uint32 rx_ip;        /* Number of Rx IP packets received */
-  uint32 rx_arp;       /* Number of Rx ARP packets received */
-  uint32 rx_dropped;   /* Number of dropped, unsupported Rx packets */
-  uint32 rx_errors;    /* Number of Rx errors (all types) */
-  uint32 rx_ovrerrors; /* Number of FIFO overrun errors */
-  uint32 tx_queued;    /* Number of Tx descriptors queued */
-  uint32 tx_int;       /* Number of Tx interrupts received */
-  uint32 tx_errors;    /* Number of Tx errors (all types) */
-  uint32 tx_abterrors; /* Number of aborted Tx descriptors */
-  uint32 tx_fsmerrors; /* Number of Tx state machine errors */
-  uint32 tx_timeouts;  /* Number of Tx timeout errors */
-  uint32 sys_int;      /* Number of system interrupts received */
+  uint32 rx_int;         /* Number of Rx interrupts received */
+  uint32 rx_packets;     /* Number of packets received (sum of the following): */
+  uint32   rx_ip;        /*   Number of Rx IP packets received */
+  uint32   rx_arp;       /*   Number of Rx ARP packets received */
+  uint32   rx_dropped;   /*   Number of dropped, unsupported Rx packets */
+  uint32   rx_nok;       /*   Number of Rx packets received without OK bit */
+  uint32 rx_errors;      /* Number of Rx errors (rx_overerrors + rx_nok) */
+  uint32   rx_ovrerrors; /*   Number of FIFO overrun errors */
+  uint32 tx_int;         /* Number of Tx interrupts received */
+  uint32 tx_packets;     /* Number of Tx descriptors queued */
+  uint32 tx_errors;      /* Number of Tx errors (sum of the following) */
+  uint32   tx_abterrors; /*   Number of aborted Tx descriptors */
+  uint32   tx_fsmerrors; /*   Number of Tx state machine errors */
+  uint32   tx_timeouts;  /*   Number of Tx timeout errors */
+  uint32 sys_int;        /* Number of system interrupts received */
 };
 #  define _MKFIELD(a,b,c)        a->b##c
 #  define EMAC_STAT(priv,name)   _MKFIELD(priv,stat.,name)++
@@ -347,10 +350,13 @@ static int     ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv);
 static void ez80emac_machash(FAR ubyte *mac, int *ndx, int *bitno)
 #endif
 
-/* Common TX/RX logic */
+/* TX/RX logic */
 
 static int     ez80emac_transmit(struct ez80emac_driver_s *priv);
 static int     ez80emac_uiptxpoll(struct uip_driver_s *dev);
+
+static inline FAR struct ez80emac_desc_s *ez80emac_rwp(void);
+static inline FAR struct ez80emac_desc_s *ez80emac_rrp(void);
 static int     ez80emac_receive(struct ez80emac_driver_s *priv);
 
 /* Interrupt handling */
@@ -943,7 +949,7 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
   /* Increment statistics */
 
   flags = irqsave();
-  EMAC_STAT(priv, tx_queued);
+  EMAC_STAT(priv, tx_packets);
 
   /* The current packet to be sent is txnetx; Calculate the new txnext and
    * set the ownership to host so that the EMAC does not try to transmit
@@ -1072,6 +1078,46 @@ static int ez80emac_uiptxpoll(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: ez80emac_rwp
+ *
+ * Description:
+ *   Get the eZ80 RWP value
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The current RWP value expressed as a pointer to a descriptor
+ *
+ ****************************************************************************/
+
+static inline FAR struct ez80emac_desc_s *ez80emac_rwp(void)
+{
+  return (FAR struct ez80emac_desc_s *)
+    (CONFIG_EZ80_RAMADDR + ((uint24)inp(EZ80_EMAC_RWP_H) << 8) + (uint24)inp(EZ80_EMAC_RWP_L));
+}
+
+/****************************************************************************
+ * Function: ez80emac_rrp
+ *
+ * Description:
+ *   Get the eZ80 RRP value
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The current RRP value expressed as a pointer to a descriptor
+ *
+ ****************************************************************************/
+
+static inline FAR struct ez80emac_desc_s *ez80emac_rrp(void)
+{
+  return (FAR struct ez80emac_desc_s *)
+    (CONFIG_EZ80_RAMADDR + ((uint24)inp(EZ80_EMAC_RRP_H) << 8) + (uint24)inp(EZ80_EMAC_RRP_L));
+}
+
+/****************************************************************************
  * Function: ez80emac_receive
  *
  * Description:
@@ -1092,23 +1138,24 @@ static int ez80emac_uiptxpoll(struct uip_driver_s *dev)
 
 static int ez80emac_receive(struct ez80emac_driver_s *priv)
 {
-  FAR struct ez80emac_desc_s   *rxdesc = priv->rxnext;
+  FAR struct ez80emac_desc_s *rxdesc = priv->rxnext;
+  FAR struct ez80emac_desc_s *rwp;
   ubyte *psrc;
   ubyte *pdest;
   int    pktlen;
   int    npackets;
 
   /* The RRP register points to where the next Receive packet is read from.
-   * The read-only EMAC Receive Write Pointer (RWP) egisters reports the
+   * The read-only EMAC Receive Write Pointer (RWP) register reports the
    * current RxDMA Receive Write pointer.  The RxDMA block uses the RRP[12:5]
    * to compare to RWP[12:5] for determining how many buffers remain. The
    * result is the BLKSLFT register.
    */
 
-  nvdbg("rxnext=%p {%06x, %u, %04x} rrp=%02x%02x rwp=%02x%02x blkslft=%02x\n",
+  rwp = ez80emac_rwp();
+  nvdbg("rxnext=%p {%06x, %u, %04x} rrp=%06x rwp=%06x blkslft=%02x\n",
         rxdesc, rxdesc->np, rxdesc->pktsize, rxdesc->stat,
-        inp(EZ80_EMAC_RRP_H), inp(EZ80_EMAC_RRP_L),
-        inp(EZ80_EMAC_RWP_H), inp(EZ80_EMAC_RWP_L),
+        ez80emac_rrp(), rwp,
         inp(EZ80_EMAC_BLKSLFT_H), inp(EZ80_EMAC_BLKSLFT_L));
 
   /* The RxDMA reads the data from the RxFIFO and stores it in the EMAC
@@ -1121,14 +1168,19 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
    * set to 1.
    */
 
-  /* Process all packets that ownership has been given to the ez80 */
-
   npackets = 0;
-  while ((rxdesc->stat & EMAC_TXDESC_OWNER) != 0)
+  while (rxdesc != rwp)
     {
+      DEBUGASSERT(rxdesc == ez80emac_rrp());
+      EMAC_STAT(priv, rx_packets);
+
+      /* Skip over bad packers */
+    
       if ((rxdesc->stat & EMAC_RXDESC_OK) == 0)
         {
           nvdbg("Skipping bad RX pkt: %04x\n", rxdesc->stat);
+          EMAC_STAT(priv, rx_errors);
+          EMAC_STAT(priv, rx_nok);
           continue;
         }
 
@@ -1178,11 +1230,23 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
       rxdesc->pktsize = 0;
       rxdesc->stat    = 0;
 
-      rxdesc = priv->rxnext;
-      nvdbg("rxnext=%p {%06x, %u, %04x} rrp=%02x%02x rwp=%02x%02x blkslft=%02x\n",
+      /* Update pointers */
+
+      rxdesc          = priv->rxnext;
+      rwp             = ez80emac_rwp();
+
+      /* Update the RRP to match our rxnext pointer: "For the hardware flow control
+       * to function properly, the software must update the hardare RRP (EmacRrp)
+       * pointer whenever the software version is upated.  The RxDMA uses RWP
+       * and the RRP to determine how many packets remain in the Rx buffer.
+       */
+
+      outp(EZ80_EMAC_RRP_L, (ubyte)((uint24)rxdesc & 0xff));
+      outp(EZ80_EMAC_RRP_H, (ubyte)(((uint24)rxdesc >> 8) & 0xff));
+
+      nvdbg("rxnext=%p {%06x, %u, %04x} rrp=%06x rwp=%06x blkslft=%02x\n",
             rxdesc, rxdesc->np, rxdesc->pktsize, rxdesc->stat,
-            inp(EZ80_EMAC_RRP_H), inp(EZ80_EMAC_RRP_L),
-            inp(EZ80_EMAC_RWP_H), inp(EZ80_EMAC_RWP_L),
+            ez80emac_rrp(), rwp,
             inp(EZ80_EMAC_BLKSLFT_H), inp(EZ80_EMAC_BLKSLFT_L));
 
       /* We only accept IP packets of the configured type and ARP packets */
@@ -1768,8 +1832,8 @@ static int ez80_emacinitialize(void)
    */
 
   addr                  = CONFIG_EZ80_RAMADDR;
-  outp(EZ80_EMAC_TLBP_L, addr & 0xff);
-  outp(EZ80_EMAC_TLBP_H, (addr >> 8) & 0xff);
+  outp(EZ80_EMAC_TLBP_L, (ubyte)(addr & 0xff));
+  outp(EZ80_EMAC_TLBP_H, (ubyte)((addr >> 8) & 0xff));
 
   priv->txstart         = (FAR struct ez80emac_desc_s *)(addr);
   priv->txnext          = priv->txstart;
@@ -1790,8 +1854,8 @@ static int ez80_emacinitialize(void)
    */
 
   addr                 += EMAC_TXBUFSIZE;
-  outp(EZ80_EMAC_BP_L, addr & 0xff);
-  outp(EZ80_EMAC_BP_H, (addr >> 8) & 0xff);
+  outp(EZ80_EMAC_BP_L, (ubyte)(addr & 0xff));
+  outp(EZ80_EMAC_BP_H, (ubyte)((addr >> 8) & 0xff));
 
   priv->rxstart         = (FAR struct ez80emac_desc_s *)(addr);
   priv->rxnext          = priv->rxstart;
@@ -1817,8 +1881,8 @@ static int ez80_emacinitialize(void)
    * is limited to a minimum of 32 bytes, the last five bits are always zero.
    */
 
-  outp(EZ80_EMAC_RRP_H, addr & 0xff);
-  outp(EZ80_EMAC_RRP_L, (addr >> 8) & 0xff);
+  outp(EZ80_EMAC_RRP_L, (ubyte)(addr & 0xff));
+  outp(EZ80_EMAC_RRP_H, (ubyte)((addr >> 8) & 0xff));
 
   nvdbg("rrp=%02x%02x rwp=%02x%02x\n",
         inp(EZ80_EMAC_RRP_H), inp(EZ80_EMAC_RRP_L),
@@ -1829,8 +1893,8 @@ static int ez80_emacinitialize(void)
    */
 
   addr         += EMAC_RXBUFSIZE;
-  outp(EZ80_EMAC_RHBP_L, addr & 0xff);
-  outp(EZ80_EMAC_RHBP_H, (addr >> 8) & 0xff);
+  outp(EZ80_EMAC_RHBP_L, (ubyte)(addr & 0xff));
+  outp(EZ80_EMAC_RHBP_H, (ubyte)((addr >> 8) & 0xff));
   priv->rxendp1 = (FAR struct ez80emac_desc_s *)addr;
 
   nvdbg("rxendp1=%p rhbp=%02x%02x\n",
