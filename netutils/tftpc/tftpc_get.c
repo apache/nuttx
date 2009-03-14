@@ -155,7 +155,7 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
   int sd;                     /* Socket descriptor for socket I/O */
   int fd;                     /* File descriptor for file I/O */
   int retry;                  /* Retry counter */
-  int nbytesrecvd;            /* The number of bytes received in the packet */
+  int nbytesrecvd = 0;        /* The number of bytes received in the packet */
   int ndatabytes;             /* The number of data bytes received */
   int result = ERROR;         /* Assume failure */
   int ret;                    /* Generic return status */

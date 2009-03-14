@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh_telnetd.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This is a leverage of similar logic from uIP:
@@ -284,7 +284,7 @@ static void nsh_putchar(struct telnetd_s *pstate, uint8 ch)
     {
       pstate->tn_cmd[tio->tio_bufndx] = '\0';
       nsh_telnetdump(&pstate->tn_vtbl, "TELNET CMD",
-                     pstate->tn_cmd, strlen(pstate->tn_cmd));
+                     (ubyte*)pstate->tn_cmd, strlen(pstate->tn_cmd));
       nsh_parse(&pstate->tn_vtbl, pstate->tn_cmd);
       tio->tio_bufndx = 0;
     }
@@ -335,7 +335,7 @@ static void nsh_flush(FAR struct telnetd_s *pstate)
   if (pstate->tn_sndlen > 0)
     {
       nsh_telnetdump(&pstate->tn_vtbl, "Shell output",
-                     pstate->tn_outbuffer, pstate->tn_sndlen);
+                     (ubyte*)pstate->tn_outbuffer, pstate->tn_sndlen);
       tio_semtake(tio); /* Only one call to send at a time */
       if (send(tio->tio_sockfd, pstate->tn_outbuffer, pstate->tn_sndlen, 0) < 0)
         {
@@ -458,6 +458,7 @@ static void *nsh_connection(void *arg)
 {
   struct telnetd_s  *pstate = nsh_allocstruct();
   struct telnetio_s *tio    = (struct telnetio_s *)zalloc(sizeof(struct telnetio_s));
+  struct nsh_vtbl_s *vtbl   = &pstate->tn_vtbl;
   int                sockfd = (int)arg;
   int                ret    = ERROR;
 
@@ -476,12 +477,12 @@ static void *nsh_connection(void *arg)
 
       /* Output a greeting */
 
-      nsh_output(&pstate->tn_vtbl, g_nshgreeting);
+      nsh_output(vtbl, g_nshgreeting);
 
       /* Execute the startup script */
 
 #if defined(CONFIG_EXAMPLES_NSH_ROMFSETC) && !defined(CONFIG_EXAMPLES_NSH_CONSOLE)
-     (void)nsh_script(&pstate->tn_vtbl, "init", NSH_INITPATH);
+     (void)nsh_script(vtbl, "init", NSH_INITPATH);
 #endif
 
       /* Loop processing each TELNET command */
@@ -490,7 +491,7 @@ static void *nsh_connection(void *arg)
         {
           /* Display the prompt string */
 
-          nsh_output(&pstate->tn_vtbl, g_nshprompt);
+          nsh_output(vtbl, g_nshprompt);
           nsh_flush(pstate);
 
           /* Read a buffer of data from the TELNET client */
@@ -502,8 +503,8 @@ static void *nsh_connection(void *arg)
 
               /* Process the received TELNET data */
 
-              nsh_telnetdump(&pstate->tn_vtbl, "Received buffer",
-                             tio->tio_inbuffer, ret);
+              nsh_telnetdump(vtbl, "Received buffer",
+                             (ubyte*)tio->tio_inbuffer, ret);
               ret = nsh_receive(pstate, ret);
             }
         }
@@ -528,7 +529,7 @@ static void *nsh_connection(void *arg)
 
   dbg("[%d] Exitting\n", sockfd);
   close(sockfd);
-  pthread_exit(NULL);
+  return NULL;
 }
 
 /****************************************************************************
