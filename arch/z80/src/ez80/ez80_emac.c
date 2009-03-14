@@ -347,10 +347,11 @@ static int     ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv);
 static void ez80emac_machash(FAR ubyte *mac, int *ndx, int *bitno)
 #endif
 
-/* Common TX logic */
+/* Common TX/RX logic */
 
 static int     ez80emac_transmit(struct ez80emac_driver_s *priv);
 static int     ez80emac_uiptxpoll(struct uip_driver_s *dev);
+static int     ez80emac_receive(struct ez80emac_driver_s *priv);
 
 /* Interrupt handling */
 
@@ -1071,6 +1072,172 @@ static int ez80emac_uiptxpoll(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: ez80emac_receive
+ *
+ * Description:
+ *   Process received packets pending in the RX buffer
+ *
+ * Parameters:
+ *   priv  - Driver data instance
+ *
+ * Returned Value:
+ *   0: Success, but nothing received
+ *  >0: Success, number of packets received
+ *  <0: ERROR, negated error number
+ *
+ * Returned Value:
+ *  Interrupts are disabled
+ *
+ ****************************************************************************/
+
+static int ez80emac_receive(struct ez80emac_driver_s *priv)
+{
+  FAR struct ez80emac_desc_s   *rxdesc = priv->rxnext;
+  ubyte *psrc;
+  ubyte *pdest;
+  int    pktlen;
+  int    npackets;
+
+  /* The RRP register points to where the next Receive packet is read from.
+   * The read-only EMAC Receive Write Pointer (RWP) egisters reports the
+   * current RxDMA Receive Write pointer.  The RxDMA block uses the RRP[12:5]
+   * to compare to RWP[12:5] for determining how many buffers remain. The
+   * result is the BLKSLFT register.
+   */
+
+  nvdbg("rxnext=%p {%06x, %u, %04x} rrp=%02x%02x rwp=%02x%02x blkslft=%02x\n",
+        rxdesc, rxdesc->np, rxdesc->pktsize, rxdesc->stat,
+        inp(EZ80_EMAC_RRP_H), inp(EZ80_EMAC_RRP_L),
+        inp(EZ80_EMAC_RWP_H), inp(EZ80_EMAC_RWP_L),
+        inp(EZ80_EMAC_BLKSLFT_H), inp(EZ80_EMAC_BLKSLFT_L));
+
+  /* The RxDMA reads the data from the RxFIFO and stores it in the EMAC
+   * memory Receive buffer. When the end of the packet is detected, the
+   * RxDMA reads the next two bytes from the RxFIFO and writes them into
+   * the Rx descriptor status LSB and MSB. The packet length counter is
+   * stored into the descriptor table packet length field, the descriptor
+   * table next pointer is written into the Rx descriptor table and finally 
+   * the Rx_DONE_STAT bit in the EMAC Interrupt Status Register register is
+   * set to 1.
+   */
+
+  /* Process all packets that ownership has been given to the ez80 */
+
+  npackets = 0;
+  while ((rxdesc->stat & EMAC_TXDESC_OWNER) != 0)
+    {
+      if ((rxdesc->stat & EMAC_RXDESC_OK) == 0)
+        {
+          nvdbg("Skipping bad RX pkt: %04x\n", rxdesc->stat);
+          continue;
+        }
+
+      /* We have a good packet. Check if the packet is a valid size
+       * for the uIP buffer configuration (I routinely see
+       */
+
+      if (rxdesc->pktsize > CONFIG_NET_BUFSIZE)
+        {
+          nvdbg("Truncated oversize RX pkt: %d->%d\n", rxdesc->pktsize, CONFIG_NET_BUFSIZE);
+          pktlen = CONFIG_NET_BUFSIZE;
+        }
+      else
+        {
+          pktlen = rxdesc->pktsize;
+        }
+
+      /* Copy the data data from the hardware to priv->dev.d_buf */
+
+      psrc  = (FAR ubyte*)priv->rxnext + SIZEOF_EMACSDESC;
+      pdest =  priv->dev.d_buf;
+
+      /* Check for wraparound */
+
+     if ((FAR ubyte*)(psrc + pktlen) > (FAR ubyte*)priv->rxendp1)
+        {
+          int nbytes = (int)((FAR ubyte*)priv->rxendp1 - (FAR ubyte*)psrc);
+          nvdbg("RX wraps after %d bytes\n", nbytes + SIZEOF_EMACSDESC);
+ 
+          memcpy(pdest, psrc, nbytes);
+          memcpy(&pdest[nbytes], priv->rxstart, pktlen - nbytes);
+        }
+      else
+        {
+          memcpy(pdest, psrc, pktlen);
+        }
+
+      /* Set the amount of data in priv->dev.d_len */
+
+      priv->dev.d_len = pktlen;
+
+      /* Reclaim the Rx descriptor */
+
+      priv->rxnext    = (FAR struct ez80emac_desc_s *)rxdesc->np;
+
+      rxdesc->np      = 0;
+      rxdesc->pktsize = 0;
+      rxdesc->stat    = 0;
+
+      rxdesc = priv->rxnext;
+      nvdbg("rxnext=%p {%06x, %u, %04x} rrp=%02x%02x rwp=%02x%02x blkslft=%02x\n",
+            rxdesc, rxdesc->np, rxdesc->pktsize, rxdesc->stat,
+            inp(EZ80_EMAC_RRP_H), inp(EZ80_EMAC_RRP_L),
+            inp(EZ80_EMAC_RWP_H), inp(EZ80_EMAC_RWP_L),
+            inp(EZ80_EMAC_BLKSLFT_H), inp(EZ80_EMAC_BLKSLFT_L));
+
+      /* We only accept IP packets of the configured type and ARP packets */
+
+#ifdef CONFIG_NET_IPv6
+      if (ETHBUF->type == HTONS(UIP_ETHTYPE_IP6))
+#else
+      if (ETHBUF->type == HTONS(UIP_ETHTYPE_IP))
+#endif
+        {
+          nvdbg("IP packet received (%02x)\n", ETHBUF->type);
+          EMAC_STAT(priv, rx_ip);
+
+          uip_arp_ipin();
+          uip_input(&priv->dev);
+
+          /* If the above function invocation resulted in data that should be
+           * sent out on the network, the field  d_len will set to a value > 0.
+           */
+
+          if (priv->dev.d_len > 0)
+            {
+              uip_arp_out(&priv->dev);
+              ez80emac_transmit(priv);
+            }
+        }
+      else if (ETHBUF->type == htons(UIP_ETHTYPE_ARP))
+        {
+          nvdbg("ARP packet received (%02x)\n", ETHBUF->type);
+          EMAC_STAT(priv, rx_arp);
+
+          uip_arp_arpin(&priv->dev);
+
+          /* If the above function invocation resulted in data that should be
+           * sent out on the network, the field  d_len will set to a value > 0.
+           */
+
+          if (priv->dev.d_len > 0)
+            {
+              ez80emac_transmit(priv);
+            }
+        }
+#ifdef CONFIG_DEBUG
+      else
+        {
+          ndbg("Unsupported packet type dropped (%02x)\n", ETHBUF->type);
+          EMAC_STAT(priv, rx_dropped);
+        }
+#endif
+      npackets++;
+    }
+  return npackets;
+}
+
+/****************************************************************************
  * Function: ez80emac_txinterrupt
  *
  * Description:
@@ -1194,10 +1361,8 @@ static int ez80emac_txinterrupt(int irq, FAR void *context)
 
 static int ez80emac_rxinterrupt(int irq, FAR void *context)
 {
-  FAR struct ez80emac_driver_s *priv = &g_emac;
-  FAR struct ez80emac_desc_s *rxdesc = priv->rxnext;
-  ubyte istat;
-  int pktlen;
+  FAR struct ez80emac_driver_s *priv   = &g_emac;
+  ubyte  istat;
 
   /* EMAC Rx interrupts:
    *
@@ -1216,122 +1381,9 @@ static int ez80emac_rxinterrupt(int irq, FAR void *context)
 
   EMAC_STAT(priv, rx_int);
 
-  /* The RRP register points to where the next Receive packet is read from.
-   * The read-only EMAC Receive Write Pointer (RWP) egisters reports the
-   * current RxDMA Receive Write pointer.  The RxDMA block uses the RRP[12:5]
-   * to compare to RWP[12:5] for determining how many buffers remain. The
-   * result is the BLKSLFT register.
-   */
+  /* Process any RX packets pending the RX buffer */
 
-  nvdbg("rxnext=%p {%06x, %u, %04x} rrp=%02x%02x rwp=%02x%02x blkslft=%02x istat=%02x\n",
-        rxdesc, rxdesc->np, rxdesc->pktsize, rxdesc->stat,
-        inp(EZ80_EMAC_RRP_H), inp(EZ80_EMAC_RRP_L),
-        inp(EZ80_EMAC_RWP_H), inp(EZ80_EMAC_RWP_L),
-        inp(EZ80_EMAC_BLKSLFT_H), inp(EZ80_EMAC_BLKSLFT_L),
-        istat);
-
-  /* The RxDMA reads the data from the RxFIFO and stores it in the EMAC
-   * memory Receive buffer. When the end of the packet is detected, the
-   * RxDMA reads the next two bytes from the RxFIFO and writes them into
-   * the Rx descriptor status LSB and MSB. The packet length counter is
-   * stored into the descriptor table packet length field, the descriptor
-   * table next pointer is written into the Rx descriptor table and finally 
-   * the Rx_DONE_STAT bit in the EMAC Interrupt Status Register register is
-   * set to 1.
-   */
-
-  /* Check if this packet was received intact */
-
-  if ((rxdesc->stat & EMAC_RXDESC_OK) == 0)
-    {
-      /* No frame received in this descriptor yet */
-
-      return OK;
-    }
-
-  /* We have a good packet. Check if the packet is a valid size
-   * for the uIP buffer configuration
-   */
-
-  if (rxdesc->pktsize > CONFIG_NET_BUFSIZE)
-    {
-      nvdbg("receive oversize pkt\n");
-      pktlen = CONFIG_NET_BUFSIZE;
-    }
-  else
-    {
-      pktlen = rxdesc->pktsize;
-    }
-
-  /* Copy the data data from the hardware to priv->dev.d_buf.  Set
-   * amount of data in priv->dev.d_len
-   */
-
-  memcpy(priv->dev.d_buf, (FAR ubyte*)priv->rxnext + SIZEOF_EMACSDESC, pktlen);
-  priv->dev.d_len = pktlen;
-
-  /* Reclaim the Rx descriptor */
-
-  priv->rxnext    = (FAR struct ez80emac_desc_s *)rxdesc->np;
-
-  rxdesc->np      = 0;
-  rxdesc->pktsize = 0;
-  rxdesc->stat    = 0;
-
-  nvdbg("rxnext=%p {%06x, %u, %04x} rrp=%02x%02x rwp=%02x%02x blkslft=%02x istat=%02x\n",
-        rxdesc, rxdesc->np, rxdesc->pktsize, rxdesc->stat,
-        inp(EZ80_EMAC_RRP_H), inp(EZ80_EMAC_RRP_L),
-        inp(EZ80_EMAC_RWP_H), inp(EZ80_EMAC_RWP_L),
-        inp(EZ80_EMAC_BLKSLFT_H), inp(EZ80_EMAC_BLKSLFT_L),
-        istat);
-
-  /* We only accept IP packets of the configured type and ARP packets */
-
-#ifdef CONFIG_NET_IPv6
-  if (ETHBUF->type == HTONS(UIP_ETHTYPE_IP6))
-#else
-  if (ETHBUF->type == HTONS(UIP_ETHTYPE_IP))
-#endif
-    {
-      nvdbg("IP packet received (%02x)\n", ETHBUF->type);
-      EMAC_STAT(priv, rx_ip);
-
-      uip_arp_ipin();
-      uip_input(&priv->dev);
-
-      /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
-       */
-
-      if (priv->dev.d_len > 0)
-        {
-          uip_arp_out(&priv->dev);
-          ez80emac_transmit(priv);
-        }
-    }
-  else if (ETHBUF->type == htons(UIP_ETHTYPE_ARP))
-    {
-      nvdbg("ARP packet received (%02x)\n", ETHBUF->type);
-      EMAC_STAT(priv, rx_arp);
-
-      uip_arp_arpin(&priv->dev);
-
-      /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
-       */
-
-      if (priv->dev.d_len > 0)
-        {
-          ez80emac_transmit(priv);
-        }
-    }
-#ifdef CONFIG_DEBUG
-  else
-    {
-      ndbg("Unsupported packet type dropped (%02x)\n", ETHBUF->type);
-      EMAC_STAT(priv, rx_dropped);
-    }
-#endif
+  (void)ez80emac_receive(priv);
   return OK;
 }
 
