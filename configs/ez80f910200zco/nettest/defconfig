@@ -210,7 +210,19 @@ CONFIG_HAVE_LIBM=n
 # CONFIG_MUTEX_TYPES: Set to enable support for recursive and
 #   errorcheck mutexes. Enables pthread_mutexattr_settype().
 # CONFIG_PRIORITY_INHERITANCE : Set to enable support for priority
-#   inheritance on mutexes and semaphores. 
+#   inheritance on mutexes and semaphores.
+# CONFIG_SEM_PREALLOCHOLDERS: This setting is only used if priority
+#   inheritance is enabled.  It defines the maximum number of different
+#   threads (minus one) that can take counts on a semaphore with priority
+#   inheritance support.  This may be set to zero if priority inheritance
+#   is disabled OR if you are only using semaphores as mutexes (only
+#   one holder) OR if no more than two threads participate using a
+#   counting semaphore.
+# CONFIG_SEM_NNESTPRIO.  If priority inheritance is enabled, then this
+#   setting is the maximum number of higher priority threads (minus 1)
+#   than can be waiting for another thread to release a count on a
+#   semaphore.  This value may be set to zero if no more than one
+#   thread is expected to wait for a semaphore.
 #
 CONFIG_EXAMPLE=nettest
 CONFIG_DEBUG=y
@@ -230,6 +242,8 @@ CONFIG_DEV_CONSOLE=y
 CONFIG_DEV_LOWCONSOLE=y
 CONFIG_MUTEX_TYPES=n
 CONFIG_PRIORITY_INHERITANCE=n
+CONFIG_SEM_PREALLOCHOLDERS=0
+CONFIG_SEM_NNESTPRIO=0
 
 #
 # The following can be used to disable categories of
@@ -588,6 +602,13 @@ CONFIG_NXFONTS_CHARBITS=7
 CONFIG_NX_BLOCKING=y
 CONFIG_NX_MXSERVERMSGS=32
 CONFIG_NX_MXCLIENTMSGS=16
+
+#
+# Settings for examples/poll
+CONFIG_EXAMPLE_POLL_NOMAC=y
+CONFIG_EXAMPLE_POLL_IPADDR=(10L<<24|0L<<16|0L<<8|2L)
+CONFIG_EXAMPLE_POLL_DRIPADDR=(10L<<24|0L<<16|0L<<8|1L)
+CONFIG_EXAMPLE_POLL_NETMASK=(255L<<24|255L<<16|255L<<8|0L)
 
 #
 # Settings for examples/uip

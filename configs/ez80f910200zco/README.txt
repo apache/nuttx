@@ -31,6 +31,10 @@ Version 4.11.0
  
    /* Set up global variables */
 
+   UPDATE:  I don't know if 4.11.1 has this same problem (I bet not since
+   I submitted the bug to ZiLOG), but I have permanently worked around the
+   above problem for all ZiLOG compiler.
+
 Other Versions
   If you use any version of ZDS-II other than 4.11.0 or if you install ZDS-II
   at any location other than the default location, you will have to modify
@@ -70,5 +74,10 @@ nettest
     This configuration is used for testing the eZ80F91 EMAC driver.  It
     builds examples/nettest.  See examples/README.txt for more information
     about nettest.
+
+poll
+    This configuration is also used for testing the eZ80F91 EMAC driver.  It
+    builds examples/poll.  See examples/README.txt for more information
+    about the poll test.
 
 Check out any README.txt files in these <sub-directory>s.
