@@ -95,7 +95,7 @@
 
 void uip_udpinput(struct uip_driver_s *dev)
 {
-  struct uip_udp_conn *conn;
+  struct uip_udp_conn  *conn;
   struct uip_udpip_hdr *pbuf = UDPBUF;
 
   /* UDP processing is really just a hack. We don't do anything to the UDP/IP
@@ -106,7 +106,7 @@ void uip_udpinput(struct uip_driver_s *dev)
   dev->d_len    -= UIP_IPUDPH_LEN;
 #ifdef CONFIG_NET_UDP_CHECKSUMS
   dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
-  if (pudpbuf->udpchksum != 0 && uip_udpchksum(dev) != 0xffff)
+  if (pbuf->udpchksum != 0 && uip_udpchksum(dev) != 0xffff)
     {
 #ifdef CONFIG_NET_STATISTICS
       uip_stat.udp.drop++;
@@ -120,7 +120,7 @@ void uip_udpinput(struct uip_driver_s *dev)
     {
       /* Demultiplex this UDP packet between the UDP "connections". */
 
-      conn = uip_udpactive(pudpbuf);
+      conn = uip_udpactive(pbuf);
       if (conn)
         {
           /* Setup for the application callback */
