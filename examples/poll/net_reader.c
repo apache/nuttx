@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/poll/net_reader.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,9 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <net/if.h>
 #include <net/uip/uip-lib.h>
+
 #include "poll_internal.h"
 
 /****************************************************************************
@@ -141,7 +143,7 @@ static void net_receive(int sd)
         {
           FD_ZERO(&readset);
           FD_SET(sd, &readset);
-          ret = select(sd + 1, &readset, NULL, NULL, &timeout);
+          ret = select(sd + 1, (FAR fd_set*)&readset, (FAR fd_set*)NULL, (FAR fd_set*)NULL, &timeout);
         }
       while (ret < 0 && errno == EINTR);
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/poll/select_listener.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -115,7 +115,7 @@ void *select_listener(pthread_addr_t pvarg)
       timeout     = FALSE;
       ready      = FALSE;
 
-      ret = select(fd+1, &rfds, NULL, NULL, &tv);
+      ret = select(fd+1, (FAR fd_set*)&rfds, (FAR fd_set*)NULL, (FAR fd_set*)NULL, &tv);
       message("\nselect_listener: select returned: %d\n", ret);
 
       if (ret < 0)

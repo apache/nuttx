@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/poll/net_listener.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,9 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <net/if.h>
 #include <net/uip/uip-lib.h>
+
 #include "poll_internal.h"
 
 /****************************************************************************
@@ -165,6 +167,7 @@ static inline boolean net_incomingdata(struct net_listener_s *nls, int sd)
             }
         }
     }
+  return 0;
 }
 
 /****************************************************************************
@@ -207,6 +210,7 @@ static inline boolean net_connection(struct net_listener_s *nls)
           return TRUE;
         }
     }
+  return FALSE;
 }
 
 /****************************************************************************
@@ -367,7 +371,7 @@ void *net_listener(pthread_addr_t pvarg)
 
       message("net_listener: Calling select(), listener sd=%d\n", nls.listensd);
       memcpy(&nls.working, &nls.master, sizeof(fd_set));
-      ret = select(nls.mxsd + 1, &nls.working, NULL, NULL, &timeout);
+      ret = select(nls.mxsd + 1, (FAR fd_set*)&nls.working, (FAR fd_set*)NULL, (FAR fd_set*)NULL, &timeout);
       if (ret < 0)
         {
           message("net_listener: select failed: %d\n", errno);

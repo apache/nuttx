@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/poll/poll_internal.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,14 +73,27 @@
 
 /* If debug is enabled, then use lib_rawprintf so that OS debug output and
  * the test output are synchronized.
+ *
+ * These macros will differ depending upon if the toolchain supports
+ * macros with a variable number of arguments or not.
  */
 
-#ifdef CONFIG_DEBUG
-#  define message(...) lib_rawprintf(__VA_ARGS__)
-#  define msgflush()
+#ifdef CONFIG_CPP_HAVE_VARARGS
+# ifdef CONFIG_DEBUG
+#   define message(...) lib_rawprintf(__VA_ARGS__)
+#   define msgflush()
+# else
+#   define message(...) printf(__VA_ARGS__)
+#   define msgflush()   fflush(stdout)
+# endif
 #else
-#  define message(...) printf(__VA_ARGS__)
-#  define msgflush()   fflush(stdout)
+# ifdef CONFIG_DEBUG
+#   define message      lib_rawprintf
+#   define msgflush()
+# else
+#   define message      printf
+#   define msgflush()   fflush(stdout)
+# endif
 #endif
 
 #define FIFO_PATH1 "/dev/fifo0"
