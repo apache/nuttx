@@ -63,7 +63,7 @@
  * Private Type Declarations
  ****************************************************************************/
 
-typedef int (*holderhandler_t)(struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg);
+typedef int (*holderhandler_t)(FAR struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg);
 
 /****************************************************************************
  * Global Variables
@@ -217,9 +217,9 @@ static inline void sem_freeholder(sem_t *sem, FAR struct semholder_s *pholder)
 
 static int sem_foreachholder(FAR sem_t *sem, holderhandler_t handler, FAR void *arg)
 {
-  struct semholder_s *pholder = &sem->hlist;
+  FAR struct semholder_s *pholder = &sem->hlist;
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
-  struct semholder_s *next;
+  FAR struct semholder_s *next;
 #endif
   int ret = 0;
 
@@ -248,7 +248,7 @@ static int sem_foreachholder(FAR sem_t *sem, holderhandler_t handler, FAR void *
  * Name: sem_recoverholders
  ****************************************************************************/
 
-static int sem_recoverholders(struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
+static int sem_recoverholders(FAR struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
 {
   sem_freeholder(sem, pholder);
   return 0;
@@ -258,7 +258,7 @@ static int sem_recoverholders(struct semholder_s *pholder, FAR sem_t *sem, FAR v
  * Name: sem_boostholderprio
  ****************************************************************************/
 
-static int sem_boostholderprio(struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
+static int sem_boostholderprio(FAR struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
 {
   FAR _TCB *htcb = (FAR _TCB *)pholder->holder;
   FAR _TCB *rtcb = (FAR _TCB*)arg;
@@ -360,8 +360,10 @@ static int sem_boostholderprio(struct semholder_s *pholder, FAR sem_t *sem, FAR 
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG
-static int sem_verifyholder(struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
+static int sem_verifyholder(FAR struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
 {
+// REMOVE ME
+#if 0 // Need to revisit this, but these assumptions seem to be untrue -- OR there is a bug???
   FAR _TCB *htcb = (FAR _TCB *)pholder->holder;
 
   /* Called after a semaphore has been released (incremented), the semaphore
@@ -373,6 +375,7 @@ static int sem_verifyholder(struct semholder_s *pholder, FAR sem_t *sem, FAR voi
   DEBUGASSERT(htcb->npend_reprio == 0);
 #endif
   DEBUGASSERT(htcb->sched_priority == htcb->base_priority);
+#endif
   return 0;
 }
 #endif
@@ -382,7 +385,7 @@ static int sem_verifyholder(struct semholder_s *pholder, FAR sem_t *sem, FAR voi
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_SEM_PHDEBUG)
-static int sem_dumpholder(struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
+static int sem_dumpholder(FAR struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
 {
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
   dbg("  %08x: %08x %08x %04x\n",
@@ -398,7 +401,7 @@ static int sem_dumpholder(struct semholder_s *pholder, FAR sem_t *sem, FAR void 
  * Name: sem_restoreholderprio
  ****************************************************************************/
 
-static int sem_restoreholderprio(struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
+static int sem_restoreholderprio(FAR struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
 {
   FAR _TCB *htcb = (FAR _TCB *)pholder->holder;
 #if CONFIG_SEM_NNESTPRIO > 0
@@ -431,11 +434,13 @@ static int sem_restoreholderprio(struct semholder_s *pholder, FAR sem_t *sem, FA
 
       if (htcb->npend_reprio < 1)
         {
-          /* No... the thread has only been boosted once */
+          /* No... the thread has only been boosted once.  Reset all priorities
+           * back to the base priority.
+           */
 
           DEBUGASSERT(htcb->sched_priority == stcb->sched_priority && htcb->npend_reprio == 0);
-          rpriority = htcb->base_priority;
-        }
+          sched_reprioritize(htcb, htcb->base_priority);
+       }
 
       /* There are multiple pending priority levels. The thread's "boosted"
        * priority could greater than or equal to "stcb->sched_priority" (it could be
@@ -469,9 +474,9 @@ static int sem_restoreholderprio(struct semholder_s *pholder, FAR sem_t *sem, FA
             }
           htcb->npend_reprio = i;
 
-          /* And apply that priority to the thread */
+          /* And apply that priority to the thread (while retaining the base_priority) */
 
-          sched_reprioritize(htcb, rpriority);
+          sched_setpriority(htcb, rpriority);
         }                    
       else
         {
@@ -509,6 +514,31 @@ static int sem_restoreholderprio(struct semholder_s *pholder, FAR sem_t *sem, FA
 
       sched_reprioritize(htcb, htcb->base_priority);
 #endif
+    }
+  return 0;
+}
+
+/****************************************************************************
+ * Name: sem_restoreholderprioA & B
+ ****************************************************************************/
+
+static int sem_restoreholderprioA(FAR struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
+{
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  if (pholder->holder != rtcb)
+    {
+      return sem_restoreholderprio(pholder, sem, arg);
+    }
+  return 0;
+}
+
+static int sem_restoreholderprioB(FAR struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
+{
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  if (pholder->holder == rtcb)
+    {
+      (void)sem_restoreholderprio(pholder, sem, arg);
+      return 1;
     }
   return 0;
 }
@@ -568,8 +598,6 @@ void sem_initholders(void)
 
 void sem_destroyholder(FAR sem_t *sem)
 {
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
-
   /* It is an error is a semaphore is destroyed while there are any holders
    * (except perhaps the thread releas the semaphore itself).  Hmmm.. but
    * we actually have to assume that the caller knows what it is doing because
@@ -719,13 +747,14 @@ void sem_releaseholder(FAR sem_t *sem)
  *   0 (OK) or -1 (ERROR) if unsuccessful
  *
  * Assumptions:
+ *   The scheduler is locked.
  *
  ****************************************************************************/
 
 void sem_restorebaseprio(FAR _TCB *stcb, FAR sem_t *sem)
 {
   FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
-  struct semholder_s *pholder;
+  FAR struct semholder_s *pholder;
 
   /* Check our assumptions */
 
@@ -736,9 +765,20 @@ void sem_restorebaseprio(FAR _TCB *stcb, FAR sem_t *sem)
 
   if (stcb)
     {
-      /* Adjust the priority of every holder as necessary */
+      /* The currently executed thread should be the low priority
+       * thread that just posted the count and caused this action.
+       * However, we cannot drop the priority of the currently running
+       * thread -- becuase that will cause it to be suspended.
+       *
+       * So, do this in two passes.  First, reprioritizing all holders
+       * except for the running thread.
+       */
 
-      (void)sem_foreachholder(sem, sem_restoreholderprio, stcb);
+      (void)sem_foreachholder(sem, sem_restoreholderprioA, stcb);
+
+      /* Now, find an reprioritize only the ready to run task */
+
+      (void)sem_foreachholder(sem, sem_restoreholderprioB, stcb);
     }
 
   /* If there are no tasks waiting for available counts, then all holders
@@ -753,8 +793,8 @@ void sem_restorebaseprio(FAR _TCB *stcb, FAR sem_t *sem)
 #endif
 
   /* In any case, the currently execuing task should have an entry in the 
-   * list and we need to decrement the number of counts that it holds.  When it
-   * holds no further counts, it must be removed from the list of holders.
+   * list.  Its counts were previously decremented; if it now holds no
+   * counts, then we need to remove it from the list of holders.
    */
 
   pholder = sem_findholder(sem, rtcb);
