@@ -654,3 +654,6 @@
 	  mutexes are built on semaphores, they will have this property as well.
 
 0.4.4 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* examples/nsh:  A debug option was left on that can (and does) cause
+	  infinite loops and stack overflows.

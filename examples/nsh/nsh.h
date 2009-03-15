@@ -153,7 +153,7 @@
 
 /* Define to enable dumping of all input/output buffers */
 
-#define CONFIG_EXAMPLES_NSH_TELNETD_DUMPBUFFER 1
+#undef CONFIG_EXAMPLES_NSH_TELNETD_DUMPBUFFER
 #undef CONFIG_EXAMPLES_NSH_FULLPATH
 
 /* Make sure that the home directory is defined */
