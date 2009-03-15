@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/recvfrom.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -129,7 +129,7 @@ static void recvfrom_newdata(struct uip_driver_s *dev, struct recvfrom_s *pstate
   /* Copy the new appdata into the user buffer */
 
   memcpy(pstate->rf_buffer, dev->d_appdata, recvlen);
-  nvdbg("Received %d bytes (of %d)\n", recvlen, dev->d_len);
+  nvdbg("Received %d bytes (of %d)\n", (int)recvlen, (int)dev->d_len);
 
   /* Update the accumulated size of the data read */
 
