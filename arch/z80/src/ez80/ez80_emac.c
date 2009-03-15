@@ -942,9 +942,13 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
   irqstate_t flags;
   ubyte      regval;
 
-  nvdbg("ENTRY: txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
-        priv->txnext, priv->txnext->np, priv->txnext->pktsize, priv->txnext->stat,
-        inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
+  /* Careful:  This function can be called from outside of the interrupt
+   * handler and, therefore, may be suspended when debug output is generated!
+   */
+
+  nllvdbg("ENTRY: txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
+          priv->txnext, priv->txnext->np, priv->txnext->pktsize, priv->txnext->stat,
+          inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
 
   /* Increment statistics */
 
@@ -1021,10 +1025,10 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
   outp(EZ80_EMAC_PTMR, EMAC_PTMR);
   irqrestore(flags);
 
-  nvdbg("EXIT: txdesc=%p {%06x, %u, %04x}\n",
-        txdesc, txdesc->np, txdesc->pktsize, txdesc->stat);
-  nvdbg("      txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
-        txnext, txnext->np, txnext->pktsize, txnext->stat,
+  nllvdbg("EXIT: txdesc=%p {%06x, %u, %04x}\n",
+          txdesc, txdesc->np, txdesc->pktsize, txdesc->stat);
+  nllvdbg("      txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
+          txnext, txnext->np, txnext->pktsize, txnext->stat,
         inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
