@@ -197,6 +197,8 @@
 # endif
 # ifndef CONFIG_DEBUG_VERBOSE
 #  define vdbg (void)
+#  define llvdbg (void)
+# else
 #  ifndef CONFIG_ARCH_LOWPUTC
 #    define llvdbg (void)
 #  endif
