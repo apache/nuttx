@@ -142,12 +142,29 @@ void uip_icmpinput(struct uip_driver_s *dev)
 
       /* Recalculate the ICMP checksum */
 
+#if 0
+      /* The slow way... sum over the ICMP message */
+
       picmp->icmpchksum = 0;
       picmp->icmpchksum = ~uip_icmpchksum(dev, (((uint16)picmp->len[0] << 8) | (uint16)picmp->len[1]) - UIP_IPH_LEN);
       if (picmp->icmpchksum == 0)
         {
           picmp->icmpchksum = 0xffff;
         }
+#else
+      /* The quick way -- Since only the type has changed, just adjust the
+       * checksum for the change of type
+       */
+
+      if( picmp->icmpchksum >= HTONS(0xffff - (ICMP_ECHO_REQUEST << 8)))
+        {
+          picmp->icmpchksum += HTONS(ICMP_ECHO_REQUEST << 8) + 1;
+        }
+      else
+        {
+          picmp->icmpchksum += HTONS(ICMP_ECHO_REQUEST << 8);
+        }
+#endif
 
       nvdbg("Outgoing ICMP packet length: %d (%d)\n",
             dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
