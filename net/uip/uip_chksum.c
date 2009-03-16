@@ -229,11 +229,11 @@ uint16 uip_udpchksum(struct uip_driver_s *dev)
 
 /* Calculate the checksum of the ICMP message */
 
-#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
-uint16 uip_icmpchksum(struct uip_driver_s *dev)
+#if defined(CONFIG_NET_ICMP)
+uint16 uip_icmpchksum(struct uip_driver_s *dev, int len)
 {
   struct uip_icmpip_hdr *picmp = ICMPBUF;
-  return uip_chksum((uint16*)&picmp->type, dev->d_sndlen);
+  return uip_chksum((uint16*)&picmp->type, len);
 }
 #endif
 

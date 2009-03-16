@@ -366,7 +366,7 @@ extern uint16 uip_ipchksum(struct uip_driver_s *dev);
 extern uint16 uip_tcpchksum(struct uip_driver_s *dev);
 
 extern uint16 uip_udpchksum(struct uip_driver_s *dev);
-extern uint16 uip_icmpchksum(struct uip_driver_s *dev);
+extern uint16 uip_icmpchksum(struct uip_driver_s *dev, int len);
 
 #endif /* __UIP_ARCH_H */
 

@@ -150,7 +150,7 @@ void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr)
       /* Calculate the ICMP checksum. */
 
       picmp->icmpchksum  = 0;
-      picmp->icmpchksum  = ~(uip_icmpchksum(dev));
+      picmp->icmpchksum  = ~(uip_icmpchksum(dev, dev->d_sndlen));
       if (picmp->icmpchksum == 0)
         {
           picmp->icmpchksum = 0xffff;

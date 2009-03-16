@@ -131,21 +131,23 @@ void uip_icmpinput(struct uip_driver_s *dev)
         }
 #endif
 
-      picmp->type = ICMP_ECHO_REPLY;
+      /* Change the ICMP type */
 
-      if (picmp->icmpchksum >= HTONS(0xffff - (ICMP_ECHO_REPLY << 8)))
-        {
-          picmp->icmpchksum += HTONS(ICMP_ECHO_REPLY << 8) + 1;
-        }
-      else
-        {
-          picmp->icmpchksum += HTONS(ICMP_ECHO_REPLY << 8);
-        }
+      picmp->type = ICMP_ECHO_REPLY;
 
       /* Swap IP addresses. */
 
       uiphdr_ipaddr_copy(picmp->destipaddr, picmp->srcipaddr);
       uiphdr_ipaddr_copy(picmp->srcipaddr, &dev->d_ipaddr);
+
+      /* Recalculate the ICMP checksum */
+
+      picmp->icmpchksum = 0;
+      picmp->icmpchksum = ~uip_icmpchksum(dev, (((uint16)picmp->len[0] << 8) | (uint16)picmp->len[1]) - UIP_IPH_LEN);
+      if (picmp->icmpchksum == 0)
+        {
+          picmp->icmpchksum = 0xffff;
+        }
 
       nvdbg("Outgoing ICMP packet length: %d (%d)\n",
             dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
