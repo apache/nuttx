@@ -18,10 +18,3 @@ highly influenced by uIP) include:
 
   dhcpd - Dynamic Host Configuration Protocol (DHCP) server
 
-NOTE: For test purposes, the dhcpd library can be built as a
-host-based DHCPD server.  This can be built as follows:
-
-  cd netutils/dhcpd
-  make -f Makefile.host
-
-

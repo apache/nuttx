@@ -13,6 +13,17 @@ examples
 examples/hello
 ^^^^^^^^^^^^^^
 
+  This examples builds a tiny DCHP server for the target system.
+  
+  NOTE: For test purposes, this example can be built as a
+  host-based DHCPD server.  This can be built as follows:
+
+    cd examples/dhcpd
+    make -f Makefile.host
+
+examples/hello
+^^^^^^^^^^^^^^
+
   This is the mandatory, "Hello, World!!" example.  It is little more
   than examples/null with a single printf statement.  Again useful only
   for bringing up new NuttX architectures.

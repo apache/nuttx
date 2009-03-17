@@ -658,3 +658,4 @@
 	* examples/nsh:  A debug option was left on that can (and does) cause
 	  infinite loops and stack overflows.
 	* net/uip: Correct calculation of checksum on ICMP ping response.
+	* examples/dchpd: Added a tiny DHCP server example
