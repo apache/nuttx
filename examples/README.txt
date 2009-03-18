@@ -10,7 +10,7 @@ examples
 
   Selects the examples/ostest example.
 
-examples/hello
+examples/dhcpd
 ^^^^^^^^^^^^^^
 
   This examples builds a tiny DCHP server for the target system.
@@ -20,6 +20,17 @@ examples/hello
 
     cd examples/dhcpd
     make -f Makefile.host
+
+  Kernel configuratin settings:
+
+    CONFIG_EXAMPLE_DHCPD_NOMAC     - (May be defined to use software assigned MAC)
+    CONFIG_EXAMPLE_DHCPD_IPADDR    - Target IP address
+    CONFIG_EXAMPLE_DHCPD_DRIPADDR  - Default router IP addess
+    CONFIG_EXAMPLE_DHCPD_NETMASK   - Network mask
+
+  See also CONFIG_NETUTILS_DHCPD_* settings described elsewhere
+  and used in netutils/dhcpd/dhcpd.c. These settings are required
+  to described the behavior of the daemon.
 
 examples/hello
 ^^^^^^^^^^^^^^
