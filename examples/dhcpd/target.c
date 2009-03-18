@@ -1,7 +1,7 @@
 /****************************************************************************
- * examples/dhcpd/dhcpd.c
+ * examples/dhcpd/target.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,23 +36,72 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+ 
+#include <nuttx/config.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <net/if.h>
+#include <net/uip/uip-lib.h>
+#include <net/uip/dhcpd.h>
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * user_initialize
  ****************************************************************************/
 
-extern int dhcpd_run(void);
+#ifndef CONFIG_HAVE_WEAKFUNCTIONS
+void user_initialize(void)
+{
+  /* Stub that must be provided only if the toolchain does not support weak
+   * functions.
+   */
+}
+#endif
 
 /****************************************************************************
- * main
+ * user_start
  ****************************************************************************/
 
-int main(int argc, char **argv, char **envp)
+int user_start(int argc, char *argv[])
 {
+  struct in_addr addr;
+#if defined(CONFIG_EXAMPLE_DHCPD_NOMAC)
+  uint8 mac[IFHWADDRLEN];
+#endif
+
+/* Many embedded network interfaces must have a software assigned MAC */
+
+#ifdef CONFIG_EXAMPLE_DHCPD_NOMAC
+  mac[0] = 0x00;
+  mac[1] = 0xe0;
+  mac[2] = 0xb0;
+  mac[3] = 0x0b;
+  mac[4] = 0xba;
+  mac[5] = 0xbe;
+  uip_setmacaddr("eth0", mac);
+#endif
+
+  /* Set up our host address */
+
+  addr.s_addr = HTONL(CONFIG_EXAMPLE_DHCPD_IPADDR);
+  uip_sethostaddr("eth0", &addr);
+
+  /* Set up the default router address */
+
+  addr.s_addr = HTONL(CONFIG_EXAMPLE_DHCPD_DRIPADDR);
+  uip_setdraddr("eth0", &addr);
+
+  /* Setup the subnet mask */
+
+  addr.s_addr = HTONL(CONFIG_EXAMPLE_DHCPD_NETMASK);
+  uip_setnetmask("eth0", &addr);
+
+  /* Then start the server */
+  
   dhcpd_run();
   return 0;
 }

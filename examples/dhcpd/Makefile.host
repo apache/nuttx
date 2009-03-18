@@ -1,7 +1,7 @@
 ############################################################################
 # examples/dhcpd/Makefile.host
 #
-#   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@ WD		= ${shell pwd}
 TOPDIR		= $(WD)/../..
 include $(TOPDIR)/Make.defs
 
-OBJS		= daemon.o1 dhcpd.o1
+OBJS		= host.o1 dhcpd.o1
 BIN		= dhcpd
 
 HOSTCFLAGS	+= -DCONFIG_NETUTILS_DHCPD_HOST=1
@@ -51,7 +51,6 @@ all: $(BIN)
 .PHONY: clean context clean_context distclean
 
 $(OBJS): %.o1: %.c
-	echo $(VPATH)/dhcpd.c
 	$(HOSTCC) -c $(HOSTCFLAGS) $< -o $@
 
 $(BIN): $(OBJS)

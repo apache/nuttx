@@ -38,7 +38,7 @@
 
 ASRCS	= 
 AOBJS	= $(ASRCS:.S=$(OBJEXT))
-CSRCS	= daemon.c
+CSRCS	= target.c
 COBJS	= $(CSRCS:.c=$(OBJEXT))
 
 SRCS	= $(ASRCS) $(CSRCS)
