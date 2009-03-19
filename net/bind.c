@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/bind.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,8 +55,8 @@
  *
  * Description:
  *   bind() gives the socket 'sockfd' the local address 'addr'. 'addr' is
- *   'addrlen' bytes long. Traditionally, this is called “assigning a name to
- *   a socket.” When a socket is created with socket, it exists in a name
+ *   'addrlen' bytes long. Traditionally, this is called "assigning a name to
+ *   a socket." When a socket is created with socket, it exists in a name
  *   space (address family) but has no name assigned.
  *
  * Parameters:
