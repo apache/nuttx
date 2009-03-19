@@ -46,6 +46,40 @@
 #include <net/uip/dhcpd.h>
 
 /****************************************************************************
+ * Preprocessor Definitions
+ ****************************************************************************/
+
+/* Configuation Checkes *****************************************************/
+/* BEWARE:
+ * There are other configuration settings needed in netutitls/dhcpd/dhcpdc.s,
+ * but there are default values for those so we cannot check them here.
+ */
+
+#ifndef CONFIG_EXAMPLE_DHCPD_IPADDR
+#  error "You must define CONFIG_EXAMPLE_DHCPD_IPADDR"
+#endif
+
+#ifndef CONFIG_EXAMPLE_DHCPD_DRIPADDR
+#  error "You must define "
+#endif
+
+#ifndef CONFIG_EXAMPLE_DHCPD_NETMASK
+#  error "You must define CONFIG_EXAMPLE_DHCPD_NETMASK"
+#endif
+
+#ifndef CONFIG_NET
+#  error "You must define CONFIG_NET"
+#endif
+
+#ifndef CONFIG_NET_UDP
+#  error "You must define CONFIG_NET_UDP"
+#endif
+
+#ifndef CONFIG_NET_BROADCAST
+#  error "You must define CONFIG_NET_BROADCAST"
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
