@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_udpconn.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Large parts of this file were leveraged from uIP logic:
@@ -135,6 +135,62 @@ static struct uip_udp_conn *uip_find_conn(uint16 portno)
     }
 
   return NULL;
+}
+
+/****************************************************************************
+ * Name: uip_selectport()
+ *
+ * Description:
+ *   Select an unused port number.
+ *
+ *   NOTE that in prinicple this function could fail if there is no available
+ *   port number.  There is no check for that case and it would actually
+ *   in an infinite loop if that were the case.  In this simple, small UDP
+ *   implementation, it is reasonable to assume that that error cannot happen
+ *   and that a port number will always be available.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Return:
+ *   Next available port number
+ *
+ ****************************************************************************/
+
+static uint16 uip_selectport(void)
+{
+  uint16 portno;
+
+  /* Find an unused local port number.  Loop until we find a valid
+   * listen port number that is not being used by any other connection.
+   */
+
+  irqstate_t flags = irqsave();
+  do
+    {
+      /* Guess that the next available port number will be the one after
+       * the last port number assigned.
+       */
+
+      ++g_last_udp_port;
+
+      /* Make sure that the port number is within range */
+
+      if (g_last_udp_port >= 32000)
+        {
+          g_last_udp_port = 4096;
+        }
+    }
+  while (uip_find_conn(htons(g_last_udp_port)));
+
+  /* Initialize and return the connection structure, bind it to the
+   * port number
+   */
+
+  portno = g_last_udp_port;
+  irqrestore(flags);
+
+  return portno;
 }
 
 /****************************************************************************
@@ -311,9 +367,16 @@ int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
   int ret = -EADDRINUSE;
   irqstate_t flags;
 
-  /* Never set lport to zero! */
+  /* Is the user requesting to bind to any port? */
 
-  if (addr->sin_port)
+  if (!addr->sin_port)
+    {
+      /* Yes.. Find an unused local port number */
+
+      conn->lport = htons(uip_selectport());
+      ret         = OK;
+    }
+  else
     {
       /* Interrupts must be disabled while access the UDP connection list */
 
@@ -326,12 +389,11 @@ int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
           /* No.. then bind the socket to the port */
 
           conn->lport = addr->sin_port;
-          ret = OK;
+          ret         = OK;
         }
 
       irqrestore(flags);
     }
-
   return ret;
 }
 
@@ -361,39 +423,18 @@ int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in6 *addr)
 int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
 #endif
 {
-  /* Has this structure already been bound to a local port? */
+  /* Has this address already been bound to a local port (lport)? */
 
   if (!conn->lport)
     {
-      /* No..Find an unused local port number.  Loop until we find a valid
-       * listen port number that is not being used by any other connection.
+      /* No.. Find an unused local port number and bind it to the
+       * connection structure.
        */
 
-      irqstate_t flags = irqsave();
-      do
-        {
-          /* Guess that the next available port number will be the one after
-           * the last port number assigned.
-           */
-
-          ++g_last_udp_port;
-
-          /* Make sure that the port number is within range */
-
-          if (g_last_udp_port >= 32000)
-            {
-              g_last_udp_port = 4096;
-            }
-        }
-      while (uip_find_conn(htons(g_last_udp_port)));
-
-      /* Initialize and return the connection structure, bind it to the
-       * port number
-       */
-
-      conn->lport = HTONS(g_last_udp_port);
-      irqrestore(flags);
+      conn->lport = htons(uip_selectport());
     }
+
+  /* Is there a remote port (rport) */
 
   if (addr)
     {
