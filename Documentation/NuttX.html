@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 17, 2009</p>
+      <p>Last Updated: March 18, 2009</p>
     </td>
   </tr>
 </table>
@@ -1350,6 +1350,10 @@ nuttx-0.4.4 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  infinite loops and stack overflows.
 	* net/uip: Correct calculation of checksum on ICMP ping response.
 	* examples/dchpd: Added a tiny DHCP server example
+	* net/uip: Correct UDP bind behavior.  It should select a valid port number
+	  if it receives a port number of zero.
+	* netutils/dhcpd:  Corrrect for ZDS compiler.  Fix issue with re-use of a
+	  port number.  Fix a number of broadcast-related problems.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

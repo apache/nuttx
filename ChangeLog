@@ -659,3 +659,7 @@
 	  infinite loops and stack overflows.
 	* net/uip: Correct calculation of checksum on ICMP ping response.
 	* examples/dchpd: Added a tiny DHCP server example
+	* net/uip: Correct UDP bind behavior.  It should select a valid port number
+	  if it receives a port number of zero.
+	* netutils/dhcpd:  Corrrect for ZDS compiler.  Fix issue with re-use of a
+	  port number. Fix a number of broadcast-related problems.
