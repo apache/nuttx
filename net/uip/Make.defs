@@ -1,7 +1,7 @@
 ############################################################################
 # Make.defs
 #
-#   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,8 @@ ifeq ($(CONFIG_NET),y)
 
 # Common IP source files
 
-UIP_CSRCS += uip_initialize.c uip_setipid.c uip_arp.c uip_input.c uip_send.c \
-             uip_poll.c uip_chksum.c uip_callback.c
+UIP_CSRCS += uip_initialize.c uip_setipid.c uip_arp.c uip_arptab.c uip_input.c \
+	     uip_send.c uip_poll.c uip_chksum.c uip_callback.c
 
 ifeq ($(CONFIG_NET_IPv6),y)
 UIP_CSRCS += uip_neighbor.c

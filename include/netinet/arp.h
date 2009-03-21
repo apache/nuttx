@@ -1,7 +1,7 @@
 /****************************************************************************
- * netinet/ether.h
+ * netinet/arp.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NETINET_ETHER_H
-#define __NETINET_ETHER_H
+#ifndef __NETINET_ARP_H
+#define __NETINET_ARP_H
 
 /****************************************************************************
  * Included Files
@@ -42,18 +42,47 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <net/ethernet.h>
+#include <nuttx/ioctl.h>
 
 /****************************************************************************
  * Public Definitions
  ****************************************************************************/
 
+/* Three ioctls are available on all PF_INET sockets, but only if the NuttX
+ * configuration CONFIG_NET_ARPIOCTLS is defined. Each ioctl takes a pointer
+ * to a 'struct arpreq' as its parameter.
+ */
+
+#define SIOCSARP        _ARPIOC(1) /* Set a ARP mapping */
+#define SIOCDARP        _ARPIOC(2) /* Delete an ARP mapping */
+#define SIOCGARP        _ARPIOC(3) /* Get an ARP mapping */
+
+/* Values for the FLAGS field in struct arpreq */
+
+#define ATF_COM         0x01      /* Lookup complete */
+#define ATF_PERM	0x02      /* Permanent entry */
+#define ATF_PUBL	0x04      /* Publish entry */
+#define ATF_USETRAILERS	0x10      /* Trailers requested */
+#define ATF_NETMASK	0x20      /* Use a netmask */
+#define ATF_DONTPUB	0x40      /* Don't answer */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
 
+/* All ARP ioctls take a pointer to a struct arpreq as their parameter: */
+
+struct arpreq
+{
+  struct sockaddr arp_pa;      /* Protocol address */
+  struct sockaddr arp_ha;      /* Hardware address */
+  struct sockaddr arp_netmask; /* Netmask of protocol address */
+  ubyte  arp_flags;            /* Flags */
+  ubyte  arp_dev[IFNAMSIZ+1];  /* Device name (zero terminated)*/
+};
+
 /****************************************************************************
- * Public Function Prototypes
+ * Public Data
  ****************************************************************************/
 
 #ifdef __cplusplus
@@ -63,15 +92,19 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN char *ether_ntoa(const struct ether_addr *addr);
-EXTERN struct ether_addr *ether_aton(const char *asc);
-EXTERN int ether_ntohost(char *hostname, const struct ether_addr *addr);
-EXTERN int ether_hostton(const char *hostname, struct ether_addr *addr);
-EXTERN int ether_line(const char *line, struct ether_addr *addr, char *hostname);
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/* If CONFIG_NET_ARPIOCTLS is defined then the semi-standard ioctl commands
+ * described above are supported.  If not, you can call the uIP ARP interfaces
+ * directly in a very non-standard way.  See include/net/uip/uip-arp.h for
+ * prototypes.
+ */
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*   __NETINET_ETHER_H */
+#endif /*   __NETINET_ARP_H */

@@ -1,11 +1,11 @@
 /****************************************************************************
- * include/net/uip/uip-arch.h
- * Macros and definitions for the ARP module.
+ * net/uip/uip_arptab.c
+ * Implementation of the ARP Address Resolution Protocol.
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
- * Derived from uIP with has a similar BSD-styple license:
+ * Based originally on uIP which also has a BSD style license:
  *
  *   Author: Adam Dunkels <adam@dunkels.com>
  *   Copyright (c) 2001-2003, Adam Dunkels.
@@ -38,67 +38,47 @@
  *
  ****************************************************************************/
 
-#ifndef __UIP_ARP_H__
-#define __UIP_ARP_H__
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#ifdef CONFIG_NET
+
 #include <sys/types.h>
-#include <nuttx/compiler.h>
+#include <sys/ioctl.h>
+
+#include <string.h>
+#include <debug.h>
+
+#include <netinet/in.h>
 #include <net/ethernet.h>
-#include <net/uip/uip.h>
+#include <net/uip/uip-arch.h>
+#include <net/uip/uip-arp.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Definitions
  ****************************************************************************/
 
-/* Recognized values of the type bytes in the Ethernet header */
-
-#define UIP_ETHTYPE_ARP 0x0806
-#define UIP_ETHTYPE_IP  0x0800
-#define UIP_ETHTYPE_IP6 0x86dd
-
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
 
-/* The Ethernet header -- 14 bytes. The first two fields are type 'struct
- * ether_addr but are represented as a simple byte array here because
- * some compilers refuse to pack 6 byte structures.
- */
-
-struct uip_eth_hdr
-{
-  uint8  dest[6]; /* Ethernet destination address (6 bytes) */
-  uint8  src[6];  /* Ethernet source address (6 bytes) */
-  uint16 type;    /* Type code (2 bytes) */
-};
-
-/* One entry in the ARP table (volatile!) */
-
-struct arp_entry
-{
-  in_addr_t         at_ipaddr;   /* IP address */
-  struct ether_addr at_ethaddr;  /* Hardware address */
-  uint8             at_time;
-};
-
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+/* The table of known address mappings */
+
+static struct arp_entry g_arptable[CONFIG_NET_ARPTAB_SIZE];
+static uint8 g_arptime;
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -110,55 +90,14 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN void uip_arp_init(void);
-
-/****************************************************************************
- * Name: uip_arp_init
- *
- * Description:
- *   The uip_arp_ipin() function should be called whenever an IP packet
- *   arrives from the Ethernet. This function refreshes the ARP table or
- *   inserts a new mapping if none exists. The function assumes that an
- *   IP packet with an Ethernet header is present in the d_buf buffer
- *   and that the length of the packet is in the d_len field.
- *
- ****************************************************************************/
-
-#define uip_arp_ipin()
-
-/****************************************************************************
- * Name: uip_arp_arpin
- *
- * Description:
- *   The uip_arp_arpin() should be called when an ARP packet is received
- *   by the Ethernet driver. This function also assumes that the
- *   Ethernet frame is present in the d_buf buffer. When the
- *   uip_arp_arpin() function returns, the contents of the d_buf
- *   buffer should be sent out on the Ethernet if the d_len field
- *   is > 0.
- *
- ****************************************************************************/
-
-EXTERN void uip_arp_arpin(struct uip_driver_s *dev);
-
-/****************************************************************************
- * Name: uip_arp_arpin
- *
- * Description:
- *   The uip_arp_out() function should be called when an IP packet
- *   should be sent out on the Ethernet. This function creates an
- *   Ethernet header before the IP header in the d_buf buffer. The
- *   Ethernet header will have the correct Ethernet MAC destination
- *   address filled in if an ARP table entry for the destination IP
- *   address (or the IP address of the default router) is present. If no
- *   such table entry is found, the IP packet is overwritten with an ARP
- *   request and we rely on TCP to retransmit the packet that was
- *   overwritten. In any case, the d_len field holds the length of
- *   the Ethernet frame that should be transmitted.
- *
- ****************************************************************************/
-
-EXTERN void uip_arp_out(struct uip_driver_s *dev);
+void uip_arp_init(void)
+{
+  int i;
+  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
+    {
+      memset(&g_arptable[i].at_ipaddr, 0, sizeof(in_addr_t));
+    }
+}
 
 /****************************************************************************
  * Name: uip_arp_timer
@@ -171,7 +110,21 @@ EXTERN void uip_arp_out(struct uip_driver_s *dev);
  *
  ****************************************************************************/
 
-EXTERN void uip_arp_timer(void);
+void uip_arp_timer(void)
+{
+  struct arp_entry *tabptr;
+  int i;
+
+  ++g_arptime;
+  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
+    {
+      tabptr = &g_arptable[i];
+      if (tabptr->at_ipaddr != 0 && g_arptime - tabptr->at_time >= UIP_ARP_MAXAGE)
+        {
+          tabptr->at_ipaddr = 0;
+        }
+    }
+}
 
 /****************************************************************************
  * Name: uip_arp_update
@@ -181,7 +134,7 @@ EXTERN void uip_arp_timer(void);
  *   address of an existing association.
  *
  * Input parameters:
- *   pipaddr - Refers to an IP address uint16[2] in network order
+ *   pipaddr - Refers to an IP address uint16[2]
  *   ethaddr - Refers to a HW address uint8[IFHWADDRLEN]
  *
  * Assumptions
@@ -189,7 +142,82 @@ EXTERN void uip_arp_timer(void);
  *
  ****************************************************************************/
 
-EXTERN void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr);
+void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr)
+{
+  struct arp_entry *tabptr = NULL;
+  in_addr_t         ipaddr = uip_ip4addr_conv(pipaddr);
+  int               i;
+
+  /* Walk through the ARP mapping table and try to find an entry to
+   * update. If none is found, the IP -> MAC address mapping is
+   * inserted in the ARP table.
+   */
+
+  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
+    {
+      tabptr = &g_arptable[i];
+
+      /* Only check those entries that are actually in use. */
+
+      if (tabptr->at_ipaddr != 0)
+        {
+          /* Check if the source IP address of the incoming packet matches
+           * the IP address in this ARP table entry.
+           */
+
+          if (uip_ipaddr_cmp(ipaddr, tabptr->at_ipaddr))
+            {
+              /* An old entry found, update this and return. */
+
+              memcpy(tabptr->at_ethaddr.ether_addr_octet, ethaddr, ETHER_ADDR_LEN);
+              tabptr->at_time = g_arptime;
+              return;
+            }
+        }
+    }
+
+  /* If we get here, no existing ARP table entry was found, so we create one. */
+
+  /* First, we try to find an unused entry in the ARP table. */
+
+  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
+    {
+      tabptr = &g_arptable[i];
+      if (tabptr->at_ipaddr == 0)
+        {
+          break;
+        }
+    }
+
+  /* If no unused entry is found, we try to find the oldest entry and
+   * throw it away.
+   */
+
+  if (i == CONFIG_NET_ARPTAB_SIZE)
+    {
+      uint8 tmpage = 0;
+      int   j      = 0;
+      for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
+        {
+          tabptr = &g_arptable[i];
+          if (g_arptime - tabptr->at_time > tmpage)
+            {
+              tmpage = g_arptime - tabptr->at_time;
+              j = i;
+            }
+        }
+      i = j;
+      tabptr = &g_arptable[i];
+    }
+
+  /* Now, i is the ARP table entry which we will fill with the new
+   * information.
+   */
+
+  tabptr->at_ipaddr = ipaddr;
+  memcpy(tabptr->at_ethaddr.ether_addr_octet, ethaddr, ETHER_ADDR_LEN);
+  tabptr->at_time = g_arptime;
+}
 
 /****************************************************************************
  * Name: uip_arp_find
@@ -198,7 +226,7 @@ EXTERN void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr);
  *   Find the ARP entry corresponding to this IP address.
  *
  * Input parameters:
- *   ipaddr - Refers to an IP address in network order
+ *   ipaddr - Refers to an IP addressin network order
  *
  * Assumptions
  *   Interrupts are disabled; Returned value will become unstable when
@@ -206,35 +234,20 @@ EXTERN void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr);
  *
  ****************************************************************************/
 
-EXTERN struct arp_entry *uip_arp_find(in_addr_t ipaddr);
+struct arp_entry *uip_arp_find(in_addr_t ipaddr)
+{
+  struct arp_entry *tabptr;
+  int i;
 
-
-/****************************************************************************
- * Name: uip_arp_delete
- *
- * Description:
- *   Remove an IP association from the ARP table
- *
- * Input parameters:
- *   ipaddr - Refers to an IP address in network order
- *
- * Assumptions
- *   Interrupts are disabled
- *
- ****************************************************************************/
-
-#define uip_arp_delete(ipaddr) \
-{ \
-  struct arp_entry *tabptr = uip_arp_find(ipaddr); \
-  if (tabptr) \
-    { \
-      tabptr->at_ipaddr = 0; \
-    } \
+  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
+    {
+      tabptr = &g_arptable[i];
+      if (uip_ipaddr_cmp(ipaddr, tabptr->at_ipaddr))
+        {
+          return tabptr;
+        }
+    }
+  return NULL;
 }
 
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __UIP_ARP_H__ */
+#endif /* CONFIG_NET */

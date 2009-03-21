@@ -115,13 +115,6 @@ struct ethip_hdr
   uint16 eh_ipoption[2];   /* (optional) */
 };
 
-struct arp_entry
-{
-  in_addr_t         at_ipaddr;
-  struct ether_addr at_ethaddr;
-  uint8             at_time;
-};
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -152,11 +145,6 @@ static const uint16 g_broadcast_ipaddr[2] = {0xffff, 0xffff};
 static const ubyte g_multicast_ethaddr[3] = {0x01, 0x00, 0x5e};
 #endif
 
-/* The table of known address mappings */
-
-static struct arp_entry g_arptable[CONFIG_NET_ARPTAB_SIZE];
-static uint8 g_arptime;
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -183,121 +171,9 @@ static void uip_arp_dump(struct arp_hdr *arp)
 # define uip_arp_dump(arp)
 #endif
 
-static void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr)
-{
-  struct arp_entry *tabptr = NULL;
-  in_addr_t         ipaddr = uip_ip4addr_conv(pipaddr);
-  int               i;
-
-  /* Walk through the ARP mapping table and try to find an entry to
-   * update. If none is found, the IP -> MAC address mapping is
-   * inserted in the ARP table.
-   */
-
-  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
-    {
-      tabptr = &g_arptable[i];
-
-      /* Only check those entries that are actually in use. */
-
-      if (tabptr->at_ipaddr != 0)
-        {
-          /* Check if the source IP address of the incoming packet matches
-           * the IP address in this ARP table entry.
-           */
-
-          if (uip_ipaddr_cmp(ipaddr, tabptr->at_ipaddr))
-            {
-              /* An old entry found, update this and return. */
-              memcpy(tabptr->at_ethaddr.ether_addr_octet, ethaddr, ETHER_ADDR_LEN);
-              tabptr->at_time = g_arptime;
-
-              return;
-            }
-        }
-    }
-
-  /* If we get here, no existing ARP table entry was found, so we
-     create one. */
-
-  /* First, we try to find an unused entry in the ARP table. */
-
-  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
-    {
-      tabptr = &g_arptable[i];
-      if (tabptr->at_ipaddr == 0)
-        {
-          break;
-        }
-    }
-
-  /* If no unused entry is found, we try to find the oldest entry and
-   * throw it away.
-   */
-
-  if (i == CONFIG_NET_ARPTAB_SIZE)
-    {
-      uint8 tmpage = 0;
-      int   j      = 0;
-      for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
-        {
-          tabptr = &g_arptable[i];
-          if (g_arptime - tabptr->at_time > tmpage)
-            {
-              tmpage = g_arptime - tabptr->at_time;
-              j = i;
-            }
-        }
-      i = j;
-      tabptr = &g_arptable[i];
-    }
-
-  /* Now, i is the ARP table entry which we will fill with the new
-   * information.
-   */
-
-  tabptr->at_ipaddr = ipaddr;
-  memcpy(tabptr->at_ethaddr.ether_addr_octet, ethaddr, ETHER_ADDR_LEN);
-  tabptr->at_time = g_arptime;
-}
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/* Initialize the ARP module. */
-
-void uip_arp_init(void)
-{
-  int i;
-  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
-    {
-      memset(&g_arptable[i].at_ipaddr, 0, sizeof(in_addr_t));
-    }
-}
-
-/* Periodic ARP processing function.
- *
- * This function performs periodic timer processing in the ARP module
- * and should be called at regular intervals. The recommended interval
- * is 10 seconds between the calls.
- */
-
-void uip_arp_timer(void)
-{
-  struct arp_entry *tabptr;
-  int i;
-
-  ++g_arptime;
-  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
-    {
-      tabptr = &g_arptable[i];
-      if (tabptr->at_ipaddr != 0 && g_arptime - tabptr->at_time >= UIP_ARP_MAXAGE)
-        {
-          tabptr->at_ipaddr = 0;
-        }
-    }
-}
 
 /* ARP processing for incoming ARP packets.
  *
@@ -410,13 +286,12 @@ void uip_arp_arpin(struct uip_driver_s *dev)
 
 void uip_arp_out(struct uip_driver_s *dev)
 {
-  struct arp_entry   *tabptr = NULL;
-  struct arp_hdr     *parp   = ARPBUF;
-  struct uip_eth_hdr *peth   = ETHBUF;
-  struct ethip_hdr   *pip    = IPBUF;
-  in_addr_t           ipaddr;
-  in_addr_t           destipaddr;
-  int                 i;
+  const struct arp_entry *tabptr = NULL;
+  struct arp_hdr         *parp   = ARPBUF;
+  struct uip_eth_hdr     *peth   = ETHBUF;
+  struct ethip_hdr       *pip    = IPBUF;
+  in_addr_t               ipaddr;
+  in_addr_t               destipaddr;
 
   /* Find the destination IP address in the ARP table and construct
    * the Ethernet header. If the destination IP addres isn't on the
@@ -478,16 +353,8 @@ void uip_arp_out(struct uip_driver_s *dev)
 
       /* Check if we already have this destination address in the ARP table */
 
-      for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
-        {
-          tabptr = &g_arptable[i];
-          if (uip_ipaddr_cmp(ipaddr, tabptr->at_ipaddr))
-            {
-              break;
-            }
-        }
-
-      if (i == CONFIG_NET_ARPTAB_SIZE)
+      tabptr = uip_arp_find(ipaddr);
+      if (!tabptr)
         {
            nvdbg("ARP request for IP %04lx\n", (long)ipaddr);    
 

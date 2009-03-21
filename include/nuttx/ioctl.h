@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/ioctl.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,7 @@
 #define _DIOCBASE       (0x8800) /* Character driver ioctl commands */
 #define _BIOCBASE       (0x8900) /* Block driver ioctl commands */
 #define _SIOCBASE       (0x8a00) /* Socket ioctl commandss */
+#define _ARPBASE        (0x8b00) /* ARP ioctl commandss */
 
 /* Macros used to manage ioctl commands */
 
@@ -99,6 +100,11 @@
                                         * OUT: If media is directly acccesible,
                                         *      return (void*) base address
                                         *      of device memory */
+
+/* NuttX ARP driver ioctl definitions (see netinet/arp.h) */
+
+#define _ARPIOCVALID(c)   (_IOC_TYPE(c)==_ARPBASE)
+#define _ARPIOC(nr)       _IOC(_ARPBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions

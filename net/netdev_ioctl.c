@@ -253,6 +253,13 @@ int netdev_ioctl(int sockfd, int cmd, struct ifreq *req)
         err = ENOSYS;
         goto errout;
 
+#ifdef CONFIG_NET_ARPIOCTLS
+      case SIOCSARP:  /* Set a ARP mapping */
+      case SIOCDARP:  /* Delete an ARP mapping */
+      case SIOCGARP:  /* Get an ARP mapping */
+# error "IOCTL Commands not implemented"
+#endif
+
       default:
         err = EINVAL;
         goto errout;
