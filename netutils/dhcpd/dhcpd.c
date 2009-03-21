@@ -56,6 +56,7 @@ typedef unsigned char boolean;
 # include <nuttx/config.h>
 # include <debug.h>
 # include <nuttx/compiler.h>
+# include <net/uip/uip-arp.h>
 # include <net/uip/dhcpd.h>
 #endif
 
@@ -824,7 +825,29 @@ static int dhcpd_sendpacket(int bbroadcast)
   int len;
   int ret = ERROR;
 
-  /* Determine which address to respond to (or if we need to broadcast the response) */
+#ifdef CONFIG_NETUTILS_DHCPD_IGNOREBROADCAST
+  /* This is a hack.  I've had problems with Windows machines responding
+   * to unicast.  I think this is associated with a Windows registry key in
+   * HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DHCPServer\Parameters:
+   * The IgnoreBroadcastFlag value controls this behavior:  A value of 1 will
+   * cause the server to ignore the client broadcast flag and always respond
+   * with multicast; the value 0 to allows clients to request unicast.
+   */
+
+   ipaddr = INADDR_BROADCAST;
+#else
+  /* Determine which address to respond to (or if we need to broadcast the response)
+   *
+   * (1) If he caller know that it needs to multicast the response, it will set bbroadcast.
+   * (2) Otherwise, if the client already has and address (ciaddr), then use that for uni-cast
+   * (3) Broadcast if the client says it can't handle uni-cast (BOOTP_BROADCAST set)
+   * (4) Otherwise, the client claims it can handle the uni-casst response and we 
+   *     will uni-cast to the offered address (yiaddr).
+   *
+   * NOTE: We really should also check the giaddr field.  If no zero, the server should
+   * send any return messages to the 'DHCP server' port on the BOOTP relay agent whose
+   * address appears in 'giaddr'.
+   */
 
   if (bbroadcast)
     {
@@ -832,6 +855,9 @@ static int dhcpd_sendpacket(int bbroadcast)
     }
   else if (memcmp(g_state.ds_outpacket.ciaddr, g_anyipaddr, 4) != 0)
     {
+#ifndef CONFIG_NETUTILS_DHCPD_HOST // Backdoor uIP path to update ARP
+      uip_arp_update((uint16*)g_state.ds_outpacket.ciaddr, g_state.ds_outpacket.chaddr);
+#endif
       memcpy(&ipaddr, g_state.ds_outpacket.ciaddr, 4);
     }
   else if (g_state.ds_outpacket.flags & HTONS(BOOTP_BROADCAST))
@@ -840,8 +866,12 @@ static int dhcpd_sendpacket(int bbroadcast)
     }
   else
     {
+#ifndef CONFIG_NETUTILS_DHCPD_HOST // Backdoor uIP path to update ARP
+      uip_arp_update((uint16*)g_state.ds_outpacket.yiaddr, g_state.ds_outpacket.chaddr);
+#endif
       memcpy(&ipaddr, g_state.ds_outpacket.yiaddr, 4);
     }
+#endif
 
   /* Create a socket to respond with a packet to the client.  We
    * cannot re-use the listener socket because it is not bound correctly
@@ -892,7 +922,11 @@ static inline int dhcpd_sendoffer(in_addr_t ipaddr, uint32 leasetime)
 
   /* Send the offer response */
 
+#ifdef CONFIG_NETUTILS_DHCPD_IGNOREBROADCAST
   return dhcpd_sendpacket(TRUE);
+#else
+  return dhcpd_sendpacket(FALSE);
+#endif
 }
 
 /****************************************************************************
@@ -933,7 +967,11 @@ int dhcpd_sendack(in_addr_t ipaddr)
 
   dhcpd_addoption32(DHCP_OPTION_LEASE_TIME, htonl(leasetime));
 
+#ifdef CONFIG_NETUTILS_DHCPD_IGNOREBROADCAST
   if (dhcpd_sendpacket(TRUE) < 0)
+#else
+  if (dhcpd_sendpacket(FALSE) < 0)
+#endif
     {
       return ERROR;
     }
