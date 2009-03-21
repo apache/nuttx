@@ -53,11 +53,12 @@ typedef unsigned char boolean;
 # define ERROR (-1)
 # define OK    (0)
 #else
-# include <nuttx/config.h>
-# include <debug.h>
-# include <nuttx/compiler.h>
-# include <net/uip/uip-arp.h>
-# include <net/uip/dhcpd.h>
+# include <nuttx/config.h>    /* NuttX configuration */
+# include <debug.h>           /* For ndbg, vdbg */
+# include <nuttx/compiler.h>  /* For CONFIG_CPP_HAVE_WARNING */
+# include <arch/irq.h>        /* For irqstore() and friends -- REVISIT */
+# include <net/uip/uip-arp.h> /* For low-level ARP interfaces -- REVISIT */
+# include <net/uip/dhcpd.h>   /* Advertised DHCPD APIs */
 #endif
 
 #include <sys/types.h>
@@ -261,6 +262,27 @@ static struct dhcpd_state_s g_state;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: dhcpd_arpupdate
+ ****************************************************************************/
+
+#ifndef CONFIG_NETUTILS_DHCPD_HOST
+static inline void dhcpd_arpupdate(uint16 *pipaddr, uint8 *phwaddr)
+{
+  irqstate_t flags;
+
+  /* Disable interrupts and update the ARP table -- very non-portable hack.
+   * REVISIT -- switch to the SIOCSARP ioctl call if/when it is implemented.
+   */
+
+  flags = irqsave();
+  uip_arp_update(pipaddr, phwaddr);
+  irqrestore(flags);
+}
+#else
+#  define dhcpd_arpupdate(pipaddr,phwaddr)
+#endif
 
 /****************************************************************************
  * Name: dhcpd_time
@@ -855,9 +877,7 @@ static int dhcpd_sendpacket(int bbroadcast)
     }
   else if (memcmp(g_state.ds_outpacket.ciaddr, g_anyipaddr, 4) != 0)
     {
-#ifndef CONFIG_NETUTILS_DHCPD_HOST // Backdoor uIP path to update ARP
-      uip_arp_update((uint16*)g_state.ds_outpacket.ciaddr, g_state.ds_outpacket.chaddr);
-#endif
+      dhcpd_arpupdate((uint16*)g_state.ds_outpacket.ciaddr, g_state.ds_outpacket.chaddr);
       memcpy(&ipaddr, g_state.ds_outpacket.ciaddr, 4);
     }
   else if (g_state.ds_outpacket.flags & HTONS(BOOTP_BROADCAST))
@@ -866,9 +886,7 @@ static int dhcpd_sendpacket(int bbroadcast)
     }
   else
     {
-#ifndef CONFIG_NETUTILS_DHCPD_HOST // Backdoor uIP path to update ARP
-      uip_arp_update((uint16*)g_state.ds_outpacket.yiaddr, g_state.ds_outpacket.chaddr);
-#endif
+      dhcpd_arpupdate((uint16*)g_state.ds_outpacket.yiaddr, g_state.ds_outpacket.chaddr);
       memcpy(&ipaddr, g_state.ds_outpacket.yiaddr, 4);
     }
 #endif
