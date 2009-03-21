@@ -663,3 +663,4 @@
 	  if it receives a port number of zero.
 	* netutils/dhcpd:  Corrrect for ZDS compiler.  Fix issue with re-use of a
 	  port number. Fix a number of broadcast-related problems.
+	* eZ80Acclaim!: Add a tiny webserver configuration

@@ -2,7 +2,7 @@
  * netutils/webserver/httpd.c
  * httpd Web server
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This is a leverage of similar logic from uIP:
@@ -120,7 +120,7 @@ static const char g_httpheader404[]         =
 #ifdef CONFIG_NETUTILS_HTTPD_DUMPBUFFER
 static void httpd_dumpbuffer(const char *buffer, ssize_t nbytes)
 {
-#ifdef CONFIG_DEBUG
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_NET)
   char line[128];
   int ch;
   int i;
@@ -148,7 +148,7 @@ static void httpd_dumpbuffer(const char *buffer, ssize_t nbytes)
               sprintf(&line[strlen(line)], "%c", ch >= 0x20 && ch <= 0x7e ? ch : '.');
             }
         }
-      dbg("%s\n", line);
+      nvdbg("%s\n", line);
     }
 #endif
 }
@@ -159,14 +159,14 @@ static void httpd_dumpbuffer(const char *buffer, ssize_t nbytes)
 #ifdef CONFIG_NETUTILS_HTTPD_DUMPPSTATE
 static void httpd_dumppstate(struct httpd_state *pstate, const char *msg)
 {
-#ifdef CONFIG_DEBUG
-  dbg("[%d] pstate(%p): [%s]\n", pstate->ht_sockfd, pstate, msg);
-  dbg("  filename:      [%s]\n", pstate->ht_filename);
-  dbg("  htfile len:    %d\n", pstate->ht_file.len);
-  dbg("  sockfd:        %d\n", pstate->ht_sockfd);
-  dbg("  scriptptr:     %p\n", pstate->ht_scriptptr);
-  dbg("  scriptlen:     %d\n", pstate->ht_scriptlen);
-  dbg("  sndlen:        %d\n", pstate->ht_sndlen);
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_NET)
+  nvdbg("[%d] pstate(%p): [%s]\n", pstate->ht_sockfd, pstate, msg);
+  nvdbg("  filename:      [%s]\n", pstate->ht_filename);
+  nvdbg("  htfile len:    %d\n", pstate->ht_file.len);
+  nvdbg("  sockfd:        %d\n", pstate->ht_sockfd);
+  nvdbg("  scriptptr:     %p\n", pstate->ht_scriptptr);
+  nvdbg("  scriptlen:     %d\n", pstate->ht_scriptlen);
+  nvdbg("  sndlen:        %d\n", pstate->ht_sndlen);
 #endif
 }
 #else
@@ -272,8 +272,8 @@ static int httpd_addchunk(struct httpd_state *pstate, const char *buffer, int le
         {
           chunklen = len;
         }
-      vdbg("[%d] sndlen=%d len=%d newlen=%d chunklen=%d\n",
-           pstate->ht_sockfd, pstate->ht_sndlen, len, newlen, chunklen);
+      nvdbg("[%d] sndlen=%d len=%d newlen=%d chunklen=%d\n",
+            pstate->ht_sockfd, pstate->ht_sndlen, len, newlen, chunklen);
 
       /* Copy that chunk into the send buffer */
 
@@ -403,7 +403,7 @@ static inline int httpd_cmd(struct httpd_state *pstate)
   recvlen = recv(pstate->ht_sockfd, pstate->ht_buffer, HTTPD_IOBUFFER_SIZE, 0);
   if (recvlen < 0)
     {
-      dbg("[%d] recv failed: %d\n", pstate->ht_sockfd, errno);
+      ndbg("[%d] recv failed: %d\n", pstate->ht_sockfd, errno);
       return ERROR;
     }
   httpd_dumpbuffer(pstate->ht_buffer, recvlen);
@@ -412,7 +412,7 @@ static inline int httpd_cmd(struct httpd_state *pstate)
 
   if (strncmp(pstate->ht_buffer, g_httpcmdget, strlen(g_httpcmdget)) != 0)
     {
-      dbg("[%d] Unsupported command\n", pstate->ht_sockfd);
+      ndbg("[%d] Unsupported command\n", pstate->ht_sockfd);
       return ERROR;
     }
 
@@ -420,7 +420,7 @@ static inline int httpd_cmd(struct httpd_state *pstate)
 
   if (pstate->ht_buffer[4] != ISO_slash)
     {
-      dbg("[%d] Missing path\n", pstate->ht_sockfd);
+      ndbg("[%d] Missing path\n", pstate->ht_sockfd);
       return ERROR;
     }
   else if (pstate->ht_buffer[5] == ISO_space)
@@ -437,7 +437,7 @@ static inline int httpd_cmd(struct httpd_state *pstate)
         }
         pstate->ht_filename[i]='\0';
     }
-  dbg("[%d] Filename: %s\n", pstate->ht_sockfd, pstate->ht_filename);
+  nvdbg("[%d] Filename: %s\n", pstate->ht_sockfd, pstate->ht_filename);
 
   /* Then send the file */
 
@@ -460,7 +460,7 @@ static void *httpd_handler(void *arg)
   int                 sockfd = (int)arg;
   int                 ret    = ERROR;
 
-  dbg("[%d] Started\n", sockfd);
+  nvdbg("[%d] Started\n", sockfd);
 
   /* Verify that the state structure was successfully allocated */
 
@@ -487,7 +487,7 @@ static void *httpd_handler(void *arg)
 
   /* Exit the task */
 
-  dbg("[%d] Exitting\n", sockfd);
+  nvdbg("[%d] Exitting\n", sockfd);
   close(sockfd);
   return NULL;
 }

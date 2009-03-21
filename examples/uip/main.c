@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/uip/main.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on uIP which also has a BSD style license:
@@ -191,6 +191,7 @@ int user_start(int argc, char *argv[])
 
   /* Get an IP address */
 
+  printf("Getting IP address\n");
   if (handle)
     {
         struct dhcpc_state ds;
@@ -213,11 +214,14 @@ int user_start(int argc, char *argv[])
 #endif
 
 #if defined(CONFIG_EXAMPLE_UIP_WEBSERVER)
+  printf("Starting webserver\n");
   httpd_init();
   httpd_listen();
 #elif defined(CONFIG_EXAMPLE_UIP_TELNETD)
+  printf("Starting telnetd\n");
   telnetd_init();
 #elif defined(CONFIG_EXAMPLE_UIP_SMTP)
+  printf("Sending mail\n");
   uip_ipaddr(addr.s_addr, 127, 0, 0, 1);
   handle = smtp_open();
   if (handle)
@@ -228,6 +232,7 @@ int user_start(int argc, char *argv[])
       smtp_close(handle);
     }
 #elif defined(CONFIG_EXAMPLE_UIP_WEBCLIENT)
+  printf("Getting webpage\n");
   webclient_init();
   addr.s_addr = HTONL(CONFIG_EXAMPLE_UIP_DNSADDR);
   resolv_conf(&addr);

@@ -1,7 +1,7 @@
 /****************************************************************************
  * netutils/uiplib/uip_server.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,7 +94,7 @@ void uip_server(uint16 portno, pthread_startroutine_t handler, int stacksize)
   listensd = socket(PF_INET, SOCK_STREAM, 0);
   if (listensd < 0)
     {
-      dbg("socket failure: %d\n", errno);
+      ndbg("socket failure: %d\n", errno);
       return;
     }
 
@@ -104,7 +104,7 @@ void uip_server(uint16 portno, pthread_startroutine_t handler, int stacksize)
   optval = 1;
   if (setsockopt(listensd, SOL_SOCKET, SO_REUSEADDR, (void*)&optval, sizeof(int)) < 0)
     {
-      dbg("setsockopt SO_REUSEADDR failure: %d\n", errno);
+      ndbg("setsockopt SO_REUSEADDR failure: %d\n", errno);
       goto errout_with_socket;
     }
 #endif
@@ -117,7 +117,7 @@ void uip_server(uint16 portno, pthread_startroutine_t handler, int stacksize)
 
   if (bind(listensd, (struct sockaddr*)&myaddr, sizeof(struct sockaddr_in)) < 0)
     {
-      dbg("bind failure: %d\n", errno);
+      ndbg("bind failure: %d\n", errno);
       goto errout_with_socket;
     }
 
@@ -125,23 +125,23 @@ void uip_server(uint16 portno, pthread_startroutine_t handler, int stacksize)
 
   if (listen(listensd, 5) < 0)
     {
-      dbg("listen failure %d\n", errno);
+      ndbg("listen failure %d\n", errno);
       goto errout_with_socket;
     }
 
   /* Begin accepting connections */
 
-  dbg("Accepting connections on port %d\n", ntohs(portno));
+  nvdbg("Accepting connections on port %d\n", ntohs(portno));
   for (;;)
     {
       addrlen = sizeof(struct sockaddr_in);
       acceptsd = accept(listensd, (struct sockaddr*)&myaddr, &addrlen);
       if (acceptsd < 0)
         {
-          dbg("accept failure: %d\n", errno);
+          ndbg("accept failure: %d\n", errno);
           break;;
         }
-      dbg("Connection accepted -- spawning sd=%d\n", acceptsd);
+      nvdbg("Connection accepted -- spawning sd=%d\n", acceptsd);
 
       /* Configure to "linger" until all data is sent when the socket is closed */
 
@@ -151,7 +151,7 @@ void uip_server(uint16 portno, pthread_startroutine_t handler, int stacksize)
       if (setsockopt(acceptsd, SOL_SOCKET, SO_LINGER, &ling, sizeof(struct linger)) < 0)
         {
           close(acceptsd);
-          dbg("setsockopt SO_LINGER failure: %d\n", errno);
+          ndbg("setsockopt SO_LINGER failure: %d\n", errno);
           break;;
         }
 #endif
@@ -166,7 +166,7 @@ void uip_server(uint16 portno, pthread_startroutine_t handler, int stacksize)
       if (pthread_create(&child, &attr, handler, (void*)acceptsd) != 0)
         {
           close(acceptsd);
-          dbg("create_create failed\n");
+          ndbg("create_create failed\n");
           break;
         }
 
