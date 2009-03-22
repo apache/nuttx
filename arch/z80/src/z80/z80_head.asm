@@ -1,7 +1,7 @@
 ;**************************************************************************
 ; arch/z80/src/z80/z80_head.asm
 ;
-;   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+;   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
 ;   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 ;
 ; Redistribution and use in source and binary forms, with or without
@@ -205,8 +205,8 @@ _up_rstcommon::
 	push	bc			; Offset 1: BC
 
 	ld	b, a			;   Save the reset number in B
-	ld	a, i			;   Carry bit holds interrupt state
-	push	af			; Offset 0: I with interrupt state in carry
+	ld	a, i			;   Parity bit holds interrupt state
+	push	af			; Offset 0: I with interrupt state in parity
 	di
 
 	; Call the interrupt decode logic. SP points to the beggining of the reg structure
@@ -251,7 +251,7 @@ _up_rstcommon::
 	; Restore interrupt state
 
 	ex	af, af'			; Recover interrupt state
-	jr	nc, nointenable		; No carry, IFF2=0, means disabled
+	jp	po, nointenable		; Odd parity, IFF2=0, means disabled
 	ex	af, af'			; Restore AF (before enabling interrupts)
 	ei				; yes
 	reti

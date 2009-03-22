@@ -1,7 +1,7 @@
 ;**************************************************************************
 ; arch/z80/src/z80/z80_restoreusercontext.asm
 ;
-;   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+;   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
 ;   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 ;
 ; Redistribution and use in source and binary forms, with or without
@@ -72,7 +72,7 @@ _z80_restoreusercontext:
 	; Restore registers.  HL points to the beginning of the reg structure to restore
 
 	ex	af, af'			; Select alternate AF
-	pop	af			; Offset 0: AF' = I with interrupt state in carry
+	pop	af			; Offset 0: AF' = I with interrupt state in parity
 	ex	af, af'			;   Restore original AF
 	pop	bc			; Offset 1: BC
 	pop	de			; Offset 2: DE
@@ -95,7 +95,7 @@ _z80_restoreusercontext:
 	; Restore interrupt state
 
 	ex	af, af'			; Recover interrupt state
-	jr	nc, noinrestore		; No carry, IFF2=0, means disabled
+	jp	po, noinrestore		; Odd parity, IFF2=0, means disabled
 	ex	af, af'			; Restore AF (before enabling interrupts)
 	ei				; yes.. Enable interrupts
 	ret				; and return
