@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 21, 2009</p>
+      <p>Last Updated: March 22, 2009</p>
     </td>
   </tr>
 </table>
@@ -1353,8 +1353,12 @@ nuttx-0.4.4 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* net/uip: Correct UDP bind behavior.  It should select a valid port number
 	  if it receives a port number of zero.
 	* netutils/dhcpd:  Corrrect for ZDS compiler.  Fix issue with re-use of a
-	  port number.  Fix a number of broadcast-related problems.
+	  port number.  Fixed a number of broadcast-related problems.
 	* eZ80Acclaim!: Add a tiny webserver configuration
+	* eZ80Acclaim!: Fixed an important bug in the EMAC Tx timeout logic. It was
+	  always timing out when the load was heavy and worse, for some reason,
+	  resetting the Tx function caused unexpected registers to be reset in
+	  the Rcv function was well.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
