@@ -1,7 +1,7 @@
 ;*************************************************************************
 ; arch/z80/src/z80/z80_saveusercontext.asm
 ;
-;   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+;   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
 ;   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 ;
 ; Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 	; Register save area layout
 
-	.globl	XCPT_I		; Offset 0: Saved I w/interrupt state in carry
+	.globl	XCPT_I		; Offset 0: Saved I w/interrupt state in parity
 	.globl	XCPT_BC		; Offset 1: Saved BC register
 	.globl	XCPT_DE		; Offset 2: Saved DE register
 	.globl	XCPT_IX		; Offset 3: Saved IX register
@@ -85,7 +85,7 @@ _z80_saveusercontext:
 	ld	a, i			; Get interrupt state
 	push	af
 	pop	hl
-	ld	XCPT_I(iy), l		; Offset 0: I w/interrupt state in carry
+	ld	XCPT_I(iy), l		; Offset 0: I w/interrupt state in parity
 	ld	XCPT_I+1(iy), h
 
 	; Save BC at offset 1

@@ -1,7 +1,7 @@
 ;**************************************************************************
 ; arch/z80/src/ez80/ez80_restorcontext.asm
 ;
-;   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+;   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
 ;   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 ;
 ; Redistribution and use in source and binary forms, with or without
@@ -76,7 +76,7 @@ _ez80_restorecontext:
 	; Restore registers.  HL points to the beginning of the reg structure to restore
 
 	ex	af, af'			; Select alternate AF
-	pop	af			; Offset 0: AF' = I with interrupt state in carry
+	pop	af			; Offset 0: AF' = I with interrupt state in parity
 	ex	af, af'			;   Restore original AF
 	pop	bc			; Offset 1: BC
 	pop	de			; Offset 2: DE

@@ -1,7 +1,7 @@
 ;**************************************************************************
 ; configs/xtrs/src/xtrs_head.asm
 ;
-;   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+;   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
 ;   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 ;
 ; Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@
 
 	; Register save area layout
 
-	XCPT_I 	==  0		; Offset 0: Saved I w/interrupt state in carry
+	XCPT_I 	==  0		; Offset 0: Saved I w/interrupt state in parity
 	XCPT_BC	==  2		; Offset 1: Saved BC register
 	XCPT_DE	==  4		; Offset 2: Saved DE register
 	XCPT_IX	==  6		; Offset 3: Saved IX register
@@ -198,8 +198,8 @@ _up_rstcommon:
 	push	bc			; Offset 1: BC
 
 	ld	b, a			;   Save the reset number in B
-	ld	a, i			;   Carry bit holds interrupt state
-	push	af			; Offset 0: I with interrupt state in carry
+	ld	a, i			;   Parity bit holds interrupt state
+	push	af			; Offset 0: I with interrupt state in parity
 	di
 
 	; Call the interrupt decode logic. SP points to the beggining of the reg structure
@@ -221,7 +221,7 @@ _up_rstcommon:
 	; Restore registers.  HL points to the beginning of the reg structure to restore
 
 	ex	af, af'			; Select alternate AF
-	pop	af			; Offset 0: AF' = I with interrupt state in carry
+	pop	af			; Offset 0: AF' = I with interrupt state in parity
 	ex	af, af'			;   Restore original AF
 	pop	bc			; Offset 1: BC
 	pop	de			; Offset 2: DE
@@ -244,7 +244,7 @@ _up_rstcommon:
 	; Restore interrupt state
 
 	ex	af, af'			; Recover interrupt state
-	jr	nc, nointenable		; No carry, IFF2=0, means disabled
+	jp	po, nointenable		; Odd parity, IFF2=0, means disabled
 	ex	af, af'			; Restore AF (before enabling interrupts)
 	ei				; yes
 	reti

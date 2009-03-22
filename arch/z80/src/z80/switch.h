@@ -2,7 +2,7 @@
  * arch/z80/src/z80/switch.h
  * arch/z80/src/chip/switch.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@
 
 /* Macros for portability ***********************************************************
  *
- * Common logic in arch/z80/src/common is customized for the z8 context switching
+ * Common logic in arch/z80/src/common is customized for the z80 context switching
  * logic via the following macros.
  */
 
@@ -60,7 +60,7 @@
 
 #define INIT_IRQCONTEXT()        current_regs = NULL
 
-/* IN_INTERRUPT returns TRUE if the system is current operating in the interrupt
+/* IN_INTERRUPT returns TRUE if the system is currently operating in the interrupt
  * context.  IN_INTERRUPT is the inline equivalent of up_interrupt_context().
  */
 

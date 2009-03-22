@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/z80/z80_irq.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,7 +84,7 @@ chipreg_t *current_regs;
 irqstate_t irqsave(void) __naked
 {
   _asm
-	ld	a, i		; AF Carry bit holds interrupt state
+	ld	a, i		; AF Parity bit holds interrupt state
 	di			; Interrupts are disabled
 	push	af		; Return AF in HL
 	pop	hl		;
@@ -105,8 +105,8 @@ void irqrestore(irqstate_t flags) __naked
   _asm
 	di			; Assume disabled
 	pop	hl		; HL = return address
-	pop	af		; AF Carry bit hold interrupt state
-	jr	nc, statedisable
+	pop	af		; AF Parity bit holds interrupt state
+	jp	po, statedisable
 	ei
 statedisable:
 	push	af		; Restore stack

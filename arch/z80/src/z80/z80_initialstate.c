@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/z80/z80_initialstate.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,7 @@
  *   has been created. This function is called to initialize
  *   the processor specific portions of the new TCB.
  *
- *   This function must setup the intial architecture registers
+ *   This function must setup the initial architecture registers
  *   and/or  stack so that execution will begin at tcb->start
  *   on the next context switch.
  *
@@ -85,7 +85,7 @@ void up_initial_state(_TCB *tcb)
 
   memset(xcp, 0, sizeof(struct xcptcontext));
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[XCPT_I]  = Z80_C_FLAG; /* Carry flag will enable interrupts */
+  xcp->regs[XCPT_I]  = Z80_PV_FLAG; /* Parity flag will enable interrupts */
 #endif
   xcp->regs[XCPT_SP] = (chipreg_t)tcb->adj_stack_ptr;
   xcp->regs[XCPT_PC] = (chipreg_t)tcb->start;

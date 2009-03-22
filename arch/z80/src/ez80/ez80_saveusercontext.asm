@@ -1,7 +1,7 @@
 ;*************************************************************************
 ; arch/z80/src/ez80/ez80_saveusercontext.asm
 ;
-;   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+;   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
 ;   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 ;
 ; Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@
 	.if CONFIG_EZ80_Z80MODE
 	; Register save area layout
 
-	XCPT_I		equ	2*0	; Offset 0: Saved I w/interrupt state in carry
+	XCPT_I		equ	2*0	; Offset 0: Saved I w/interrupt state in parity
 	XCPT_BC		equ	2*1	; Offset 1: Saved BC register
 	XCPT_DE		equ	2*2	; Offset 2: Saved DE register
 	XCPT_IX		equ	2*3	; Offset 3: Saved IX register
@@ -73,7 +73,7 @@
 	.else
 	; Register save area layout
 
-	XCPT_I		equ	3*0	; Offset 0: Saved I w/interrupt state in carry
+	XCPT_I		equ	3*0	; Offset 0: Saved I w/interrupt state in parity
 	XCPT_BC		equ	3*1	; Offset 1: Saved BC register
 	XCPT_DE		equ	3*2	; Offset 2: Saved DE register
 	XCPT_IX		equ	3*3	; Offset 3: Saved IX register
