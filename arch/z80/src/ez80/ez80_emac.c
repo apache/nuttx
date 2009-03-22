@@ -276,7 +276,7 @@ struct ez80emac_driver_s
    *            Tx/Rx memory).
    * txhead:    Points to the oldest Tx descriptor queued for output (but for
    *            which output has not yet completed.  Initialized to NULL; set
-   *            by ez80emac_transmit() when Tx is started and by ez80emac_reclaimtxdesc()
+   *            by ez80emac_transmit() when Tx is started and by ez80emac_txinterrupt()
    *            when Tx processing completes.  txhead == NULL is also a sure
    *            indication that there is no Tx in progress.
    * txnext:    Points to the next free Tx descriptor. Initialized to txstart; set
@@ -946,7 +946,7 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
    * handler and, therefore, may be suspended when debug output is generated!
    */
 
-  nllvdbg("ENTRY: txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
+  nllvdbg("txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
           priv->txnext, priv->txnext->np, priv->txnext->pktsize, priv->txnext->stat,
           inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
 
@@ -1025,11 +1025,11 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
   outp(EZ80_EMAC_PTMR, EMAC_PTMR);
   irqrestore(flags);
 
-  nllvdbg("EXIT: txdesc=%p {%06x, %u, %04x}\n",
+  nllvdbg("txdesc=%p {%06x, %u, %04x}\n",
           txdesc, txdesc->np, txdesc->pktsize, txdesc->stat);
-  nllvdbg("      txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
+  nllvdbg("txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
           txnext, txnext->np, txnext->pktsize, txnext->stat,
-        inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
+          inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
@@ -1323,7 +1323,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
 static int ez80emac_txinterrupt(int irq, FAR void *context)
 {
   FAR struct ez80emac_driver_s *priv = &g_emac;
-  FAR struct ez80emac_desc_s *txdesc = priv->txhead;
+  FAR struct ez80emac_desc_s *txhead = priv->txhead;
   ubyte regval;
   ubyte istat;
 
@@ -1340,74 +1340,72 @@ static int ez80emac_txinterrupt(int irq, FAR void *context)
   istat = inp(EZ80_EMAC_ISTAT) & EMAC_ISTAT_TXEVENTS;
   outp(EZ80_EMAC_ISTAT, istat);
 
+  EMAC_STAT(priv, tx_int);
+
   /* All events are packet/control frame transmit complete events */
 
   nvdbg("txhead=%p {%06x, %u, %04x} trp=%02x%02x istat=%02x\n",
-        txdesc, txdesc->np, txdesc->pktsize, txdesc->stat,
+        txhead, txhead->np, txhead->pktsize, txhead->stat,
         inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L), istat);
 
-  EMAC_STAT(priv, tx_int);
+  /* Handle all packets in the list that are no longer owned by the hardware */
 
-  /* Check if the packet is still owned by the hardware */
-
-  if ((txdesc->stat & EMAC_TXDESC_OWNER) != 0)
+  while (txhead && (txhead->stat & EMAC_TXDESC_OWNER) == 0)
     {
-      ndbg("Descriptor %p still owned by H/W {%06x, %u, %04x} trp=%02x%02x istat=%02x\n",
-           txdesc, txdesc->np, txdesc->pktsize, txdesc->stat,
-           inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L), istat);
-      return OK;
+      if ((txhead->stat & EMAC_TXDESC_ABORT) != 0)
+        {
+          ndbg("Descriptor %p aborted {%06x, %u, %04x} trp=%02x%02x\n",
+               txhead, txhead->np, txhead->pktsize, txhead->stat,
+               inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
+
+          EMAC_STAT(priv, tx_errors);
+          EMAC_STAT(priv, tx_abterrors);
+        }
+
+      /* Get the address of the next Tx descriptor in the list (if any) */
+
+      txhead = (FAR struct ez80emac_desc_s *)txhead->np;
+      if (txhead)
+        {
+          nvdbg("txhead=%p {%06x, %u, %04x} trp=%02x%02x\n",
+                txhead, txhead->np, txhead->pktsize, txhead->stat,
+                inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
+        }
     }
 
-  /* Handle errors */
+  /* Save the new head.  If it is NULL, then we have read all the way to 
+   * the terminating description with np==NULL.
+   */
 
-  else if ((txdesc->stat & EMAC_TXDESC_ABORT) != 0)
-    {
-      ndbg("Descriptor %p aborted {%06x, %u, %04x} trp=%02x%02x istat=%02x\n",
-           txdesc, txdesc->np, txdesc->pktsize, txdesc->stat,
-           inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L), istat);
-
-      EMAC_STAT(priv, tx_errors);
-      EMAC_STAT(priv, tx_abterrors);
-    }
-
-  /* Get the address of the next Tx descriptor in the list (if any) */
-
-  priv->txhead = (FAR struct ez80emac_desc_s *)txdesc->np;
+  priv->txhead = txhead;
   if (!priv->txhead)
     {
-      /* No pending TX -- This should never happen because there
-       * is always a dummy descriptor at the end of the list owned
-       * by the host.  Reset to the beginining of the buffer
-       * and stop the poll timer
+      nvdbg("No pending Tx.. Stopping XMIT function.\n");
+      
+      /* Stop the Tx poll timer. (It will get restarted when we have
+       * something to send
        */
 
       outp(EZ80_EMAC_PTMR, 0);
-      priv->txnext = priv->txstart;
 
       /* Reset the transmit function.  That should force the TRP to be
-       * the same as TDLP which is the set to txstart.
+       * the same as TDLP which is then set to txstart.
        */
+
+#if 0 // Seems to reset RWP as well ???
+      priv->txnext = priv->txstart;
 
       regval = inp(EZ80_EMAC_RST);
       regval |= EMAC_RST_HRTFN;
       outp(EZ80_EMAC_RST, regval);
       regval &= ~EMAC_RST_HRTFN;
       outp(EZ80_EMAC_RST, regval);
+#endif
 
-      /* If no further xmits are pending, then cancel the TX timeout */
+      /* Cancel any pending the TX timeout */
 
       wd_cancel(priv->txtimeout);
     }
-
-  /* Clean up the old Tx descriptor -- not really necessary */
-
-  txdesc->np      = 0;
-  txdesc->pktsize = 0;
-  txdesc->stat    = 0;
-
-  nvdbg("New txhead=%p {%06x, %u, %04x} trp=%02x%02x istat=%02x\n",
-        priv->txhead, priv->txhead->np, priv->txhead->pktsize, priv->txhead->stat,
-        inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L), istat);
  
   return OK;
 }

@@ -662,5 +662,9 @@
 	* net/uip: Correct UDP bind behavior.  It should select a valid port number
 	  if it receives a port number of zero.
 	* netutils/dhcpd:  Corrrect for ZDS compiler.  Fix issue with re-use of a
-	  port number. Fix a number of broadcast-related problems.
+	  port number. Fixed a number of broadcast-related problems.
 	* eZ80Acclaim!: Add a tiny webserver configuration
+	* eZ80Acclaim!: Fixed an important bug in the EMAC Tx timeout logic. It was
+	  always timing out when the load was heavy and worse, for some reason,
+	  resetting the Tx function caused unexpected registers to be reset in
+	  the Rcv function was well.
