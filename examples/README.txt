@@ -249,9 +249,17 @@ examples/udp
 examples/uip
 ^^^^^^^^^^^^
 
-  This is a port of uIP example application.  It includes
-  conditionally compiled logic to exercise the uIP webserver,
-  webclient, telnet, smtp, dncpc, and resolver.
+  This is a port of uIP example application.  It includes conditionally
+  compiled logic to exercise the uIP webserver, webclient, telnet, smtp,
+  dncpc, and resolver.  
+
+  Other configuratin items apply also to the selected network utility.
+  For example, the additional relevant settings for the uIP webserver
+  are:
+
+    CONFIG_NETUTILS_HTTPDSTACKSIZE
+    CONFIG_NETUTILS_HTTPDFILESTATS
+    CONFIG_NETUTILS_HTTPDNETSTATS
 
 examples/usbserial
 ^^^^^^^^^^^^^^^^^^

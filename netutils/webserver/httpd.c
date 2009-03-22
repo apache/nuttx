@@ -76,9 +76,6 @@
 #define ISO_slash   0x2f
 #define ISO_colon   0x3a
 
-#undef CONFIG_NETUTILS_HTTPD_DUMPBUFFER
-#undef CONFIG_NETUTILS_HTTPD_DUMPPSTATE
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -186,7 +183,7 @@ static int handle_script(struct httpd_state *pstate)
   int len;
   char *ptr;
 
-  while(pstate->ht_file.len > 0)
+  while (pstate->ht_file.len > 0)
     {
       /* Check if we should start executing a script */
 
@@ -353,8 +350,10 @@ static int httpd_sendfile(struct httpd_state *pstate)
 
   pstate->ht_sndlen = 0;
 
+  nvdbg("[%d] sending file '%s'\n", pstate->ht_sockfd, pstate->ht_filename);
   if (!httpd_fs_open(pstate->ht_filename, &pstate->ht_file))
     {
+      ndbg("[%d] '%s' not found\n", pstate->ht_sockfd, pstate->ht_filename);
       memcpy(pstate->ht_filename, g_http404path, strlen(g_http404path));
       httpd_fs_open(g_http404path, &pstate->ht_file);
       if (send_headers(pstate, g_httpheader404, strlen(g_httpheader404)) == OK)
@@ -466,19 +465,14 @@ static void *httpd_handler(void *arg)
 
   if (pstate)
     {
-      /* Loop processing each HTTP command */
-//    do
-        {
-          /* Re-initialize the thread state structure */
+      /* Re-initialize the thread state structure */
 
-          memset(pstate, 0, sizeof(struct httpd_state));
-          pstate->ht_sockfd = sockfd;
+      memset(pstate, 0, sizeof(struct httpd_state));
+      pstate->ht_sockfd = sockfd;
 
-          /* Then handle the next httpd command */
+      /* Then handle the next httpd command */
 
-          ret = httpd_cmd(pstate);
-        }
-//    while (ret == OK);
+      ret = httpd_cmd(pstate);
 
       /* End of command processing -- Clean up and exit */
 

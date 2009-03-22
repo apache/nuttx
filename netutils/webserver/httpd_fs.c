@@ -1,7 +1,7 @@
 /****************************************************************************
  * netutils/webserver/httpd_fs.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on uIP which also has a BSD style license:
@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Included Files
+ * Included Header Files
  ****************************************************************************/
 
 #include <sys/types.h>
@@ -48,15 +48,27 @@
 #include "httpd.h"
 #include "httpd_fsdata.h"
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 #ifndef NULL
 #define NULL 0
 #endif /* NULL */
 
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
 #include "httpd_fsdata.c"
 
-#if HTTPD_FS_STATISTICS
+#if CONFIG_NETUTILS_HTTPDFSSTATS
 static uint16 count[HTTPD_FS_NUMFILES];
-#endif /* HTTPD_FS_STATISTICS */
+#endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 static uint8 httpd_fs_strcmp(const char *str1, const char *str2)
 {
@@ -79,11 +91,15 @@ static uint8 httpd_fs_strcmp(const char *str1, const char *str2)
     }
 }
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 int httpd_fs_open(const char *name, struct httpd_fs_file *file)
 {
-#if HTTPD_FS_STATISTICS
+#if CONFIG_NETUTILS_HTTPDFSSTATS
   uint16 i = 0;
-#endif /* HTTPD_FS_STATISTICS */
+#endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
   struct httpd_fsdata_file_noconst *f;
 
   for(f = (struct httpd_fsdata_file_noconst *)HTTPD_FS_ROOT;
@@ -94,30 +110,30 @@ int httpd_fs_open(const char *name, struct httpd_fs_file *file)
         {
           file->data = f->data;
           file->len  = f->len;
-#if HTTPD_FS_STATISTICS
+#if CONFIG_NETUTILS_HTTPDFSSTATS
           ++count[i];
-#endif /* HTTPD_FS_STATISTICS */
+#endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
           return 1;
         }
-#if HTTPD_FS_STATISTICS
+#if CONFIG_NETUTILS_HTTPDFSSTATS
       ++i;
-#endif /* HTTPD_FS_STATISTICS */
+#endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
     }
   return 0;
 }
 
 void httpd_fs_init(void)
 {
-#if HTTPD_FS_STATISTICS
+#if CONFIG_NETUTILS_HTTPDFSSTATS
   uint16 i;
   for(i = 0; i < HTTPD_FS_NUMFILES; i++)
     {
       count[i] = 0;
     }
-#endif /* HTTPD_FS_STATISTICS */
+#endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
 }
 
-#if HTTPD_FS_STATISTICS
+#if CONFIG_NETUTILS_HTTPDFSSTATS
 uint16 httpd_fs_count(char *name)
 {
   struct httpd_fsdata_file_noconst *f;
@@ -136,4 +152,4 @@ uint16 httpd_fs_count(char *name)
     }
   return 0;
 }
-#endif /* HTTPD_FS_STATISTICS */
+#endif /* CONFIG_NETUTILS_HTTPDFSSTATS */

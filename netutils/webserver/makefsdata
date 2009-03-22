@@ -25,7 +25,7 @@ foreach $file (@files) {
     if(-f $file) {
 	
 	print "Adding file $file\n";
-	
+
 	open(FILE, $file) || die "Could not open file $file\n";
 
 	$file =~ s-^-/-;
@@ -33,27 +33,24 @@ foreach $file (@files) {
 	$fvar =~ s-/-_-g;
 	$fvar =~ s-\.-_-g;
 	# for AVR, add PROGMEM here
-	print(OUTPUT "static const unsigned char data".$fvar."[] = {\n");
-	print(OUTPUT "\t/* $file */\n\t");
+	print(OUTPUT "static const unsigned char data".$fvar."[] =\n");
+	print(OUTPUT "{\n  /* $file */\n\n  ");
 	for($j = 0; $j < length($file); $j++) {
 	    printf(OUTPUT "%#02x, ", unpack("C", substr($file, $j, 1)));
 	}
-	printf(OUTPUT "0,\n");
-	
+	printf(OUTPUT "0x00,\n  ");
 	
 	$i = 0;        
 	while(read(FILE, $data, 1)) {
-	    if($i == 0) {
-		print(OUTPUT "\t");
-	    }
 	    printf(OUTPUT "%#02x, ", unpack("C", $data));
 	    $i++;
 	    if($i == 10) {
 		print(OUTPUT "\n");
 		$i = 0;
+		print(OUTPUT "  ");
 	    }
 	}
-	print(OUTPUT "0};\n\n");
+	print(OUTPUT "0x00\n};\n\n");
 	close(FILE);
 	push(@fvars, $fvar);
 	push(@pfiles, $file);
@@ -74,5 +71,5 @@ for($i = 0; $i < @fvars; $i++) {
     print(OUTPUT "sizeof(data$fvar) - ". (length($file) + 1) ."}};\n\n");
 }
 
-print(OUTPUT "#define HTTPD_FS_ROOT file$fvars[$i - 1]\n\n");
+print(OUTPUT "#define HTTPD_FS_ROOT     file$fvars[$i - 1]\n\n");
 print(OUTPUT "#define HTTPD_FS_NUMFILES $i\n");

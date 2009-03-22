@@ -1,7 +1,7 @@
 /****************************************************************************
  * netutils/webserver/httpd_fsdata.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on uIP which also has a BSD style license:
@@ -56,11 +56,11 @@ struct httpd_fsdata_file
   FAR const ubyte *name;
   FAR const ubyte *data;
   int len;
-#ifdef HTTPD_FS_STATISTICS
-#if HTTPD_FS_STATISTICS == 1
+#ifdef CONFIG_NETUTILS_HTTPDFSSTATS
+#if CONFIG_NETUTILS_HTTPDFSSTATS == 1
   uint16 count;
-#endif /* HTTPD_FS_STATISTICS */
-#endif /* HTTPD_FS_STATISTICS */
+#endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
+#endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
 };
 
 struct httpd_fsdata_file_noconst
@@ -69,11 +69,11 @@ struct httpd_fsdata_file_noconst
   FAR char *name;
   FAR char *data;
   int len;
-#ifdef HTTPD_FS_STATISTICS
-#if HTTPD_FS_STATISTICS == 1
+#ifdef CONFIG_NETUTILS_HTTPDFSSTATS
+#if CONFIG_NETUTILS_HTTPDFSSTATS == 1
   uint16 count;
-#endif /* HTTPD_FS_STATISTICS */
-#endif /* HTTPD_FS_STATISTICS */
+#endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
+#endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
 };
 
 #endif /* __HTTPD_FSDATA_H__ */

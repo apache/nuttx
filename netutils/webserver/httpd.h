@@ -1,7 +1,7 @@
 /****************************************************************************
  * netutils/webserver/httpd.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on uIP which also has a BSD style license:
@@ -53,7 +53,20 @@
  * Definitions
  ****************************************************************************/
 
-#define HTTPD_FS_STATISTICS 1
+/* As threads are created to handle each request, a stack must be allocated
+ * for the thread.  Use a default if the user provided no stacksize.
+ */
+
+#ifndef  CONFIG_NETUTILS_HTTPDSTACKSIZE
+# define CONFIG_NETUTILS_HTTPDSTACKSIZE 4096
+#endif
+
+#undef  CONFIG_NETUTILS_HTTPDFSSTATS
+#define CONFIG_NETUTILS_HTTPDFSSTATS 1
+
+#ifndef  CONFIG_NET_STATISTICS
+#  undef CONFIG_NETUTILS_HTTPDNETSTATS
+#endif
 
 /* For efficiency reasons, the size of the IO buffer should be a multiple
  * of the TCP MSS value.  Also, the current design requires that the IO
@@ -65,14 +78,6 @@
 /* this is the maximum size of a file path */
 
 #define HTTPD_MAX_FILENAME  20
-
-/* As threads are created to handle each request, a stack must be allocated
- * for the thread.  Use a default if the user provided no stacksize.
- */
-
-#ifndef CONFIG_NETUTILS_HTTPDSTACKSIZE
-# define CONFIG_NETUTILS_HTTPDSTACKSIZE 4096
-#endif
 
 /****************************************************************************
  * Public Types
@@ -99,11 +104,11 @@ struct httpd_state
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef HTTPD_FS_STATISTICS
-#if HTTPD_FS_STATISTICS == 1
+#ifdef CONFIG_NETUTILS_HTTPDFSSTATS
+#if CONFIG_NETUTILS_HTTPDFSSTATS == 1
 extern uint16 httpd_fs_count(char *name);
-#endif /* HTTPD_FS_STATISTICS */
-#endif /* HTTPD_FS_STATISTICS */
+#endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
+#endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
 
 /* file must be allocated by caller and will be filled in by the function. */
 
