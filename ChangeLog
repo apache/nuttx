@@ -668,3 +668,6 @@
 	  always timing out when the load was heavy and worse, for some reason,
 	  resetting the Tx function caused unexpected registers to be reset in
 	  the Rcv function was well.
+	* Z80: Patch incorported: "[2696648] Z80: interrupt flag stored in parity bit"
+	  (submitted by JPelletier).  The is the same fix that was needed for the
+	  eZ80 and fixed in 0.4.2.
