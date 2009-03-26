@@ -250,8 +250,8 @@ examples/uip
 ^^^^^^^^^^^^
 
   This is a port of uIP example application.  It includes conditionally
-  compiled logic to exercise the uIP webserver, webclient, telnet, smtp,
-  dncpc, and resolver.  
+  compiled logic to exercise the uIP webserver, telnet, smtp, dhcpc,
+  and resolver.  
 
   Other configuratin items apply also to the selected network utility.
   For example, the additional relevant settings for the uIP webserver

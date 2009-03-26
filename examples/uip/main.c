@@ -75,9 +75,6 @@
 # include <net/uip/telnetd.h>
 #elif defined(CONFIG_EXAMPLE_UIP_WEBSERVER)
 # include <net/uip/httpd.h>
-#elif defined(CONFIG_EXAMPLE_UIP_WEBCLIENT)
-# include <net/uip/resolv.h>
-# include <net/uip/webclient.h>
 #elif !defined(CONFIG_EXAMPLE_UIP_DHCPC)
 # error "No network application specified"
 #endif
@@ -174,7 +171,7 @@ int user_start(int argc, char *argv[])
   addr.s_addr = HTONL(CONFIG_EXAMPLE_UIP_NETMASK);
   uip_setnetmask("eth0", &addr);
 
-#if defined(CONFIG_EXAMPLE_UIP_DHCPC) || defined(CONFIG_EXAMPLE_UIP_WEBCLIENT)
+#if defined(CONFIG_EXAMPLE_UIP_DHCPC)
   /* Set up the resolver */
 
   resolv_init();
@@ -231,12 +228,6 @@ int user_start(int argc, char *argv[])
                 g_msg_body, strlen(g_msg_body));
       smtp_close(handle);
     }
-#elif defined(CONFIG_EXAMPLE_UIP_WEBCLIENT)
-  printf("Getting webpage\n");
-  webclient_init();
-  addr.s_addr = HTONL(CONFIG_EXAMPLE_UIP_DNSADDR);
-  resolv_conf(&addr);
-  resolv_query(CONFIG_EXAMPLE_UIP_SERVERURL);
 #endif
 
   while(1)
@@ -249,30 +240,3 @@ int user_start(int argc, char *argv[])
     }
   return 0;
 }
-
-#if defined(CONFIG_EXAMPLE_UIP_WEBCLIENT)
-void webclient_closed(void)
-{
-  printf("Webclient: connection closed\n");
-}
-
-void webclient_aborted(void)
-{
-  printf("Webclient: connection aborted\n");
-}
-
-void webclient_timedout(void)
-{
-  printf("Webclient: connection timed out\n");
-}
-
-void webclient_connected(void)
-{
-  printf("Webclient: connected, waiting for data...\n");
-}
-
-void webclient_datahandler(char *data, uint16 len)
-{
-  printf("Webclient: got %d bytes of data.\n", len);
-}
-#endif
