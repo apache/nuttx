@@ -49,15 +49,9 @@
  ****************************************************************************/
 
 #ifndef CONFIG_NETUTILS_WEBCLIENT_HOST
-
 #  include <nuttx/config.h>
 #  include <nuttx/compiler.h>
 #  include <debug.h>
-
-#  include <net/uip/uip.h>
-#  include <net/uip/uip-lib.h>
-#  include <net/uip/resolv.h>
-
 #endif
 
 #include <sys/types.h>
@@ -66,6 +60,12 @@
 #include <string.h>
 #include <errno.h>
 
+#ifdef CONFIG_HAVE_GETHOSTBYNAME
+#  include <netdb.h>
+#else
+#  include <net/uip/resolv.h>
+#endif
+
 #include <netinet/in.h>
 #include <net/uip/webclient.h>
 
@@ -73,21 +73,21 @@
  * Definitions
  ****************************************************************************/
 
-#define WEBCLIENT_TIMEOUT 100
+#define WEBCLIENT_TIMEOUT          100
 
 #define WEBCLIENT_STATE_STATUSLINE 0
 #define WEBCLIENT_STATE_HEADERS    1
 #define WEBCLIENT_STATE_DATA       2
 #define WEBCLIENT_STATE_CLOSE      3
 
-#define HTTPFLAG_NONE   0
-#define HTTPFLAG_OK     1
-#define HTTPFLAG_MOVED  2
-#define HTTPFLAG_ERROR  3
+#define HTTPSTATUS_NONE            0
+#define HTTPSTATUS_OK              1
+#define HTTPSTATUS_MOVED           2
+#define HTTPSTATUS_ERROR           3
 
-#define ISO_nl       0x0a
-#define ISO_cr       0x0d
-#define ISO_space    0x20
+#define ISO_nl                     0x0a
+#define ISO_cr                     0x0d
+#define ISO_space                  0x20
 
 /****************************************************************************
  * Private Types
@@ -96,7 +96,7 @@
 struct wget_s
 {
   ubyte state;
-  ubyte httpflag;
+  ubyte httpstatus;
 
   /* These describe the just-received buffer of data */
 
@@ -113,11 +113,9 @@ struct wget_s
 #ifdef CONFIG_WEBCLIENT_GETMIMETYPE
   char mimetype[CONFIG_NETUTILS_WEBCLIENT_MAXMIMESIZE];
 #endif
-#ifdef CONFIG_WEBCLIENT_GETHOST
-  char host[CONFIG_NETUTILS_WEBCLIENT_MAXHOSTNAME];
-#endif
+  char hostname[CONFIG_NETUTILS_WEBCLIENT_MAXHOSTNAME];
+  char filename[CONFIG_NETUTILS_WEBCLIENT_MAXFILENAME];
 };
-
 
 /****************************************************************************
  * Private Data
@@ -129,14 +127,10 @@ static const char g_http11[]          = "HTTP/1.1";
 static const char g_httpcontenttype[] = "content-type: ";
 #endif
 static const char g_httphost[]        = "host: ";
-#ifdef CONFIG_WEBCLIENT_GETHOST
 static const char g_httplocation[]    = "location: ";
-#endif
 
 static const char g_httpget[]         = "GET ";
-#ifdef CONFIG_WEBCLIENT_GETHOST
 static const char g_httphttp[]        = "http://";
-#endif
 
 static const char g_httpuseragentfields[] =
   "Connection: close\r\n"
@@ -164,7 +158,62 @@ static char *wget_strcpy(char *dest, const char *src)
 {
   int len = strlen(src);
   memcpy(dest, src, len);
+  dest[len] = '\0';
   return dest + len;
+}
+
+/****************************************************************************
+ * Name: wget_resolvehost
+ ****************************************************************************/
+
+static inline int wget_resolvehost(const char *hostname, in_addr_t *ipaddr)
+{
+#ifdef CONFIG_HAVE_GETHOSTBYNAME
+
+  struct hostent *he;
+
+  nvdbg("Getting address of %s\n", hostname);
+  he = gethostbyname(hostname);
+  if (!he)
+    {
+      ndbg("gethostbyname failed: %d\n", h_errno);
+      return ERROR;
+    }
+
+  nvdbg("Using IP address %04x%04x\n", (uint16)he->h_addr[1], (uint16)he->h_addr[0]);
+  memcpy(ipaddr, he->h_addr, sizeof(in_addr_t));
+  return OK;
+
+#else
+
+# ifdef CONFIG_NET_IPv6
+  struct sockaddr_in6 addr;
+# else
+  struct sockaddr_in addr;
+# endif
+
+  /* First check if the host is an IP address. */
+
+  if (!uiplib_ipaddrconv(hostname, (ubyte*)ipaddr))
+    {
+      /* 'host' does not point to a valid address string.  Try to resolve
+       *  the host name to an IP address.
+       */
+ 
+      if (resolv_query(hostname, &addr) < 0)
+        {
+          /* Needs to set the errno here */
+
+          return ERROR;
+        }
+
+      /* Save the host address -- Needs fixed for IPv6 */
+
+      *ipaddr = addr.sin_addr.s_addr;
+  }
+  return OK;
+
+#endif
 }
 
 /****************************************************************************
@@ -190,13 +239,13 @@ static inline int wget_parsestatus(struct wget_s *ws)
               (strncmp(ws->line, g_http11, strlen(g_http11)) == 0))
             {
               dest = &(ws->line[9]);
-              ws->httpflag = HTTPFLAG_NONE;
+              ws->httpstatus = HTTPSTATUS_NONE;
 
               /* Check for 200 OK */
 
               if (strncmp(dest, g_http200, strlen(g_http200)) == 0)
                 {
-                  ws->httpflag = HTTPFLAG_OK;
+                  ws->httpstatus = HTTPSTATUS_OK;
                 }
 
               /* Check for 301 Moved permanently or 302 Found. Location: header line
@@ -207,7 +256,7 @@ static inline int wget_parsestatus(struct wget_s *ws)
                        strncmp(dest, g_http302, strlen(g_http302)) == 0)
                 {
 
-                  ws->httpflag = HTTPFLAG_MOVED;
+                  ws->httpstatus = HTTPSTATUS_MOVED;
                 }
             }
           else
@@ -240,6 +289,7 @@ static inline int wget_parseheaders(struct wget_s *ws)
 {
   int offset;
   int ndx;
+  int i;
 
   offset = ws->offset;
   ndx    = ws->ndx;
@@ -261,7 +311,7 @@ static inline int wget_parseheaders(struct wget_s *ws)
                */
 
               ws->state = WEBCLIENT_STATE_DATA;
-              return OK;
+              goto exit;
             }
 
           ws->line[ndx] = '\0';
@@ -280,32 +330,42 @@ static inline int wget_parseheaders(struct wget_s *ws)
                 }
               strncpy(ws->mimetype, ws->line + strlen(g_httpcontenttype) - 1, sizeof(ws->mimetype));
             }
-#  ifdef CONFIG_WEBCLIENT_GETHOST
           else
-#  endif
 #endif
-#ifdef CONFIG_WEBCLIENT_GETHOST
           if (strncasecmp(ws->line, g_httplocation, strlen(g_httplocation)) == 0)
             {
+              /* Save a pointer to the location */
+
               char *dest = ws->line + strlen(g_httplocation) - 1;
+
+              /* Concatenate the hostname */
 
               if (strncmp(dest, g_httphttp, strlen(g_httphttp)) == 0)
                 {
-                  dest += 7;
-                  for(i = 0; i < ws->ndx - 7; ++i)
+                  for(i = 0, dest += 7; i < ws->ndx - 7; i++, dest++)
                     {
                       if (*dest == 0 || *dest == '/' || *dest == ' ' || *dest == ':')
                         {
-                          ws->host[i] = 0;
+                          ws->hostname[i] = 0;
                           break;
                         }
-                      ws->host[i] = *dest;
-                      ++dest;
+                      else if (i < CONFIG_NETUTILS_WEBCLIENT_MAXHOSTNAME-1)
+                        {
+                          ws->hostname[i] = *dest;
+                        }
                     }
                 }
-              strncpy(ws->file, dest, sizeof(ws->file));
+
+              /* Copy the location */
+
+              strncpy(ws->filename, dest, CONFIG_NETUTILS_WEBCLIENT_MAXFILENAME-1);
+
+              /* Make sure that everything is NULL terminated */
+
+              ws->hostname[CONFIG_NETUTILS_WEBCLIENT_MAXHOSTNAME-1] = '\0';
+              ws->filename[CONFIG_NETUTILS_WEBCLIENT_MAXFILENAME-1] = '\0';
+              nvdbg("New hostname='%s' filename='%s'\n", ws->hostname, ws->filename);
             }
-#endif
 
           /* We're done parsing, so we reset the pointer and start the
            * next line.
@@ -316,10 +376,11 @@ static inline int wget_parseheaders(struct wget_s *ws)
       else
         {
           ndx++;
-          offset++;
         }
+      offset++;
     }
 
+exit:
   ws->offset = offset;
   ws->ndx    = ndx;
   return OK;
@@ -333,136 +394,153 @@ static inline int wget_parseheaders(struct wget_s *ws)
  * Name: wget
  ****************************************************************************/
  
-int wget(FAR const char *host, uint16 port, FAR const char *file,
+int wget(uint16 port,
+         FAR const char *hostname, FAR const char *filename,
          FAR char *buffer, int buflen, wget_callback_t callback)
 {
-#ifndef CONFIG_NETUTILS_WEBCLIENT_HOST
-  static uip_ipaddr_t addr;
-#endif
   struct sockaddr_in server;
   struct wget_s ws;
+  boolean redirected;
   char *dest;
   int sockfd;
   int len;
   int ret = OK;
 
-  /* First check if the host is an IP address. */
+  /* Initialize the state structure */
 
-#ifndef CONFIG_NETUTILS_WEBCLIENT_HOST
-  if (!uiplib_ipaddrconv(host, (unsigned char *)addr))
+  memset(&ws, 0, sizeof(struct wget_s));
+  ws.buffer = buffer;
+  ws.buflen = buflen;
+  strncpy(ws.hostname, hostname, CONFIG_NETUTILS_WEBCLIENT_MAXHOSTNAME);
+  strncpy(ws.filename, filename, CONFIG_NETUTILS_WEBCLIENT_MAXFILENAME);
+
+  /* The following sequence may repeat indefinitely if we are redirected */
+
+  do
     {
-      /* 'host' does not point to a avalid address string.  Try to resolve
-       *  the host name to an IP address.
-       */
- 
-      if (resolv_query(host, &server) < 0)
+      /* Create a socket */
+
+      sockfd = socket(AF_INET, SOCK_STREAM, 0);
+      if (sockfd < 0)
         {
+          /* socket failed.  It will set the errno appropriately */
+
+          ndbg("socket failed: %d\n", errno);
           return ERROR;
         }
 
-      /* Save the host address */
+      /* Get the server adddress from the host name */
 
-      addr = server.sin_addr.s_addr;
-  }
-#endif
-
-  /* Create a socket */
-
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (sockfd < 0)
-    {
-      /* socket failed.  It will set the errno appropriately */
-
-      ndbg("socket failed: %d\n", errno);
-      return ERROR;
-    }
-
-  /* Connect to server.  First we have to set some fields in the
-   * 'server' address structure.  The system will assign me an arbitrary
-   * local port that is not in use.
-   */
-
-  server.sin_family = AF_INET;
-  memcpy(&server.sin_addr.s_addr, &host, sizeof(in_addr_t));
-  server.sin_port   = htons(port);
-
-  ret = connect(sockfd, (struct sockaddr *)&server, sizeof(struct sockaddr_in));
-  if (ret < 0)
-    {
-      ndbg("connect failed: %d\n", errno);
-      goto errout;
-  }
-
-  /* Send the GET request */
-
-  dest   = (char *)buffer;
-  dest   = wget_strcpy(dest, g_httpget);
-  dest   = wget_strcpy(dest, file);
- *dest++ = ISO_space;
-  dest   = wget_strcpy(dest, g_http10);
-  dest   = wget_strcpy(dest, g_httpcrnl);
-  dest   = wget_strcpy(dest, g_httphost);
-  dest   = wget_strcpy(dest, host);
-  dest   = wget_strcpy(dest, g_httpcrnl);
-  dest   = wget_strcpy(dest, g_httpuseragentfields);
-  len    = dest - buffer;
-
-  ret    = send(sockfd, buffer, len, 0);
-  if (ret < 0)
-    {
-      ndbg("send failed: %d\n", errno);
-      goto errout;
-    }
-
-  /* Now get the response */
-
-  memset(&ws, 0, sizeof(struct wget_s));
-  ws.state  = WEBCLIENT_STATE_STATUSLINE;
-  ws.buffer = buffer;
-  ws.buflen = buflen;
-  
-  for (;;)
-    {
-      ws.datend = recv(sockfd, ws.buffer, ws.buflen, 0);
-      if (ws.datend < 0)
+      server.sin_family = AF_INET;
+      server.sin_port   = htons(port);
+      ret = wget_resolvehost(ws.hostname, &server.sin_addr.s_addr);
+      if (ret < 0)
         {
-          ndbg("recv failed: %d\n", errno);
-          ret = ws.datend;
+          /* Could not resolve host (or malformed IP address) */
+
+          ndbg("Failed to resolve hostname\n");
+          ret = -EHOSTUNREACH;
+          goto errout_with_errno;
+        }
+
+      /* Connect to server.  First we have to set some fields in the
+       * 'server' address structure.  The system will assign me an arbitrary
+       * local port that is not in use.
+       */
+
+      ret = connect(sockfd, (struct sockaddr *)&server, sizeof(struct sockaddr_in));
+      if (ret < 0)
+        {
+          ndbg("connect failed: %d\n", errno);
           goto errout;
         }
-      else if (ret == 0)
+
+      /* Send the GET request */
+
+      dest   = ws.buffer;
+      dest   = wget_strcpy(dest, g_httpget);
+      dest   = wget_strcpy(dest, filename);
+     *dest++ = ISO_space;
+      dest   = wget_strcpy(dest, g_http10);
+      dest   = wget_strcpy(dest, g_httpcrnl);
+      dest   = wget_strcpy(dest, g_httphost);
+      dest   = wget_strcpy(dest, hostname);
+      dest   = wget_strcpy(dest, g_httpcrnl);
+      dest   = wget_strcpy(dest, g_httpuseragentfields);
+      len    = dest - buffer;
+
+      ret    = send(sockfd, buffer, len, 0);
+      if (ret < 0)
         {
-          break;
+          ndbg("send failed: %d\n", errno);
+          goto errout;
         }
-  
-      ws.offset = 0;
-      if (ws.state == WEBCLIENT_STATE_STATUSLINE)
+
+      /* Now loop to get the file sent in response to the GET.  This
+       * loop continues until either we read the end of file (nbytes == 0)
+       * or until we detect that we have been redirected.
+       */
+
+      ws.state   = WEBCLIENT_STATE_STATUSLINE;
+      redirected = FALSE;
+      for(;;)
         {
-          ret = wget_parsestatus(&ws);
-          if (ret < 0)
+          ws.datend = recv(sockfd, ws.buffer, ws.buflen, 0);
+          if (ws.datend < 0)
             {
+              ndbg("recv failed: %d\n", errno);
+              ret = ws.datend;
               goto errout_with_errno;
             }
-        }
-
-      if (ws.state == WEBCLIENT_STATE_HEADERS)
-        {
-          ret = wget_parseheaders(&ws);
-          if (ret < 0)
+          else if (ret == 0)
             {
-              goto errout_with_errno;
+              close(sockfd);            
+              break;
             }
-        }
 
-      /* Let the client decide what to do with the received file */
+          /* Handle initial parsing of the status line */
 
-      if (ws.state == WEBCLIENT_STATE_DATA && ws.httpflag != HTTPFLAG_MOVED)
-        {
-          callback(&ws.buffer, ws.offset, ws.datend, &buflen);
+          ws.offset = 0;
+          if (ws.state == WEBCLIENT_STATE_STATUSLINE)
+            {
+              ret = wget_parsestatus(&ws);
+              if (ret < 0)
+                {
+                  goto errout_with_errno;
+                }
+            }
+
+          /* Parse the HTTP data */
+
+          if (ws.state == WEBCLIENT_STATE_HEADERS)
+            {
+              ret = wget_parseheaders(&ws);
+              if (ret < 0)
+                {
+                  goto errout_with_errno;
+                }
+            }
+
+          /* Dispose of the data payload */
+
+          if (ws.state == WEBCLIENT_STATE_DATA)
+            {
+              if (ws.httpstatus != HTTPSTATUS_MOVED)
+                {
+                  /* Let the client decide what to do with the received file */
+
+                  callback(&ws.buffer, ws.offset, ws.datend, &buflen);
+                }
+              else
+                {
+                  redirected = TRUE;
+                  close(sockfd);            
+                  break;
+                }
+            }
         }
     }
-
-  close(sockfd);
+  while (redirected);
   return OK;
 
 errout_with_errno:

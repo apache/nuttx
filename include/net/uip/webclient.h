@@ -55,10 +55,6 @@
  * Pre-processor definitions
  ****************************************************************************/
 
-#ifndef CONFIG_NETUTILS_WEBCLIENT_MAXURLLEN
-#  define CONFIG_NETUTILS_WEBCLIENT_MAXURLLEN 100
-#endif
-
 #ifndef CONFIG_NETUTILS_WEBCLIENT_MAXHTTPLINE
 #  define CONFIG_NETUTILS_WEBCLIENT_MAXHTTPLINE 200
 #endif
@@ -69,6 +65,10 @@
 
 #ifndef CONFIG_NETUTILS_WEBCLIENT_MAXHOSTNAME
 #  define CONFIG_NETUTILS_WEBCLIENT_MAXHOSTNAME 40
+#endif
+
+#ifndef CONFIG_NETUTILS_WEBCLIENT_MAXFILENAME
+#  define CONFIG_NETUTILS_WEBCLIENT_MAXFILENAME 100
 #endif
 
 /****************************************************************************
@@ -122,10 +122,10 @@ extern "C" {
  *   query answer.
  *
  * Input Parameters
- *   host     - A pointer to a string containing either a host name or
- *              a numerical IP address in dotted decimal notation (e.g., 192.168.23.1).
  *   port     - The port number to which to connect, in host byte order.
- *   file     - A pointer to the name of the file to get.
+ *   hostname - A pointer to a string containing either a host name or
+ *              a numerical IP address in dotted decimal notation (e.g., 192.168.23.1).
+ *   filename - A pointer to the name of the file to get.
  *   buffer   - A user provided buffer to receive the file data (also
  *              used for the outgoing GET request
  *   buflen   - The size of the user provided buffer
@@ -138,7 +138,8 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int wget(FAR const char *host, uint16 port, FAR const char *file,
+EXTERN int wget(uint16 port,
+                FAR const char *hostname, FAR const char *filename,
                 FAR char *buffer, int buflen, wget_callback_t callback);
 
 #undef EXTERN

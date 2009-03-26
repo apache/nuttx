@@ -38,6 +38,10 @@
  ****************************************************************************/
 
 #include <net/uip/webclient.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 
 /****************************************************************************
  * Private Data
@@ -47,20 +51,42 @@
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: callback
+ ****************************************************************************/
+
 static void callback(FAR char **buffer, int offset, int datend, FAR int *buflen)
 {
+  (void)write(1, &((*buffer)[offset]), datend - offset);
+}
+
+/****************************************************************************
+ * Name: show_usage
+ ****************************************************************************/
+
+static void show_usage(const char *progname, int exitcode)
+{
+  fprintf(stderr, "USAGE: %s <host> <filename>\n", progname);
+  exit(exitcode);
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 /****************************************************************************
- * main
+ * Name: main
  ****************************************************************************/
 
 int main(int argc, char **argv, char **envp)
 {
   char buffer[1024];
-  wget(argv[0], 80, argv[1], buffer, 1024, callback);
+
+  if (argc != 3)
+    {
+      show_usage(argv[0], 1);
+    }
+
+  printf("WGET: Getting %s from %s\n", argv[2], argv[1]);
+  wget(80, argv[1], argv[2], buffer, 1024, callback);
   return 0;
 }

@@ -38,11 +38,16 @@
  ****************************************************************************/
  
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <net/if.h>
+
+#include <net/uip/uip.h>
 #include <net/uip/uip-lib.h>
+#include <net/uip/resolv.h>
 #include <net/uip/webclient.h>
 
 /****************************************************************************
@@ -79,6 +84,8 @@
  * Private Data
  ****************************************************************************/
 
+static char g_iobuffer[512];
+
 /****************************************************************************
  * user_initialize
  ****************************************************************************/
@@ -99,6 +106,7 @@ void user_initialize(void)
 int user_start(int argc, char *argv[])
 {
   struct in_addr addr;
+  static uip_ipaddr_t addr;
 #if defined(CONFIG_EXAMPLE_WGET_NOMAC)
   uint8 mac[IFHWADDRLEN];
 #endif
@@ -132,6 +140,6 @@ int user_start(int argc, char *argv[])
 
   /* Then start the server */
   
-  wget(Needs more work);
+  wget(80, CONFIG_EXAMPLE_WGET_HOSTNAME, CONFIG_EXAMPLE_WGET_FILENAME, g_iobuffer, 512, callback);
   return 0;
 }
