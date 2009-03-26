@@ -46,7 +46,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#ifndef CONFIG_NETUTILS_WEBCLIENT_HOST
+#  include <nuttx/config.h>
+#endif
 #include <sys/types.h>
 
 /****************************************************************************

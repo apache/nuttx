@@ -671,3 +671,5 @@
 	* Z80: Patch incorported: "[2696648] Z80: interrupt flag stored in parity bit"
 	  (submitted by JPelletier).  The is the same fix that was needed for the
 	  eZ80 and fixed in 0.4.2.
+	* netutils: Added logic to support a simple wget() function
+	* examples/wget: Added a test for wget()

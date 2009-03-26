@@ -48,21 +48,25 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <nuttx/compiler.h>
+#ifndef CONFIG_NETUTILS_WEBCLIENT_HOST
+
+#  include <nuttx/config.h>
+#  include <nuttx/compiler.h>
+#  include <debug.h>
+
+#  include <net/uip/uip.h>
+#  include <net/uip/uip-lib.h>
+#  include <net/uip/resolv.h>
+
+#endif
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-#include <debug.h>
 
 #include <netinet/in.h>
-
-#include <net/uip/uip.h>
-#include <net/uip/uip-lib.h>
-#include <net/uip/resolv.h>
 #include <net/uip/webclient.h>
 
 /****************************************************************************
@@ -236,7 +240,6 @@ static inline int wget_parseheaders(struct wget_s *ws)
 {
   int offset;
   int ndx;
-  char *dest;
 
   offset = ws->offset;
   ndx    = ws->ndx;
@@ -269,7 +272,8 @@ static inline int wget_parseheaders(struct wget_s *ws)
           if (strncasecmp(ws->line, g_httpcontenttype, strlen(g_httpcontenttype)) == 0)
             {
               /* Found Content-type field. */
-              dest = strchr(ws->line, ';');
+
+              char *dest = strchr(ws->line, ';');
               if (dest != NULL)
                 {
                   *dest = 0;
@@ -283,7 +287,7 @@ static inline int wget_parseheaders(struct wget_s *ws)
 #ifdef CONFIG_WEBCLIENT_GETHOST
           if (strncasecmp(ws->line, g_httplocation, strlen(g_httplocation)) == 0)
             {
-              dest = ws->line + strlen(g_httplocation) - 1;
+              char *dest = ws->line + strlen(g_httplocation) - 1;
 
               if (strncmp(dest, g_httphttp, strlen(g_httphttp)) == 0)
                 {
@@ -332,7 +336,9 @@ static inline int wget_parseheaders(struct wget_s *ws)
 int wget(FAR const char *host, uint16 port, FAR const char *file,
          FAR char *buffer, int buflen, wget_callback_t callback)
 {
+#ifndef CONFIG_NETUTILS_WEBCLIENT_HOST
   static uip_ipaddr_t addr;
+#endif
   struct sockaddr_in server;
   struct wget_s ws;
   char *dest;
@@ -342,6 +348,7 @@ int wget(FAR const char *host, uint16 port, FAR const char *file,
 
   /* First check if the host is an IP address. */
 
+#ifndef CONFIG_NETUTILS_WEBCLIENT_HOST
   if (!uiplib_ipaddrconv(host, (unsigned char *)addr))
     {
       /* 'host' does not point to a avalid address string.  Try to resolve
@@ -357,6 +364,7 @@ int wget(FAR const char *host, uint16 port, FAR const char *file,
 
       addr = server.sin_addr.s_addr;
   }
+#endif
 
   /* Create a socket */
 
@@ -454,7 +462,6 @@ int wget(FAR const char *host, uint16 port, FAR const char *file,
         }
     }
 
-okout:
   close(sockfd);
   return OK;
 

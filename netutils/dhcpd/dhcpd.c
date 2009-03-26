@@ -43,11 +43,16 @@ typedef unsigned char uint8;
 typedef unsigned short uint16;
 typedef unsigned int  uint32;
 typedef unsigned char boolean;
+
 # define HTONS(a) htons(a)
 # define HTONL(a) htonl(a)
+
 # define CONFIG_CPP_HAVE_WARNING 1
+# define FAR
+
 # define ndbg(...) printf(__VA_ARGS__)
 # define nvdbg(...) printf(__VA_ARGS__)
+
 # define TRUE  (1)
 # define FALSE (0)
 # define ERROR (-1)
