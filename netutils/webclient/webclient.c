@@ -303,72 +303,77 @@ static inline int wget_parseheaders(struct wget_s *ws)
            * we parse it.
            */
 
-          if (ws->line[0] == ISO_cr)
+          if (ndx > 0) /* Should always be true */
             {
-              /* This was the last header line (i.e., and empty "\r\n"), so
-               * we are done with the headers and proceed with the actual
-               * data.
-               */
+              if (ws->line[0] == ISO_cr)
+                {
+                  /* This was the last header line (i.e., and empty "\r\n"), so
+                   * we are done with the headers and proceed with the actual
+                   * data.
+                   */
 
-              ws->state = WEBCLIENT_STATE_DATA;
-              goto exit;
-            }
+                  ws->state = WEBCLIENT_STATE_DATA;
+                  goto exit;
+               }
 
-          ws->line[ndx] = '\0';
+              /* Truncate the trailing \r\n */
 
-          /* Check for specific HTTP header fields. */
+              ws->line[ndx-1] = '\0';
+
+              /* Check for specific HTTP header fields. */
 
 #ifdef CONFIG_WEBCLIENT_GETMIMETYPE
-          if (strncasecmp(ws->line, g_httpcontenttype, strlen(g_httpcontenttype)) == 0)
-            {
-              /* Found Content-type field. */
-
-              char *dest = strchr(ws->line, ';');
-              if (dest != NULL)
+              if (strncasecmp(ws->line, g_httpcontenttype, strlen(g_httpcontenttype)) == 0)
                 {
-                  *dest = 0;
-                }
-              strncpy(ws->mimetype, ws->line + strlen(g_httpcontenttype) - 1, sizeof(ws->mimetype));
-            }
-          else
-#endif
-          if (strncasecmp(ws->line, g_httplocation, strlen(g_httplocation)) == 0)
-            {
-              /* Save a pointer to the location */
+                  /* Found Content-type field. */
 
-              char *dest = ws->line + strlen(g_httplocation) - 1;
-
-              /* Concatenate the hostname */
-
-              if (strncmp(dest, g_httphttp, strlen(g_httphttp)) == 0)
-                {
-                  for(i = 0, dest += 7; i < ws->ndx - 7; i++, dest++)
+                  char *dest = strchr(ws->line, ';');
+                  if (dest != NULL)
                     {
-                      if (*dest == 0 || *dest == '/' || *dest == ' ' || *dest == ':')
+                      *dest = 0;
+                   }
+                  strncpy(ws->mimetype, ws->line + strlen(g_httpcontenttype), sizeof(ws->mimetype));
+                }
+              else
+#endif
+              if (strncasecmp(ws->line, g_httplocation, strlen(g_httplocation)) == 0)
+                {
+                  /* Save a pointer to the location */
+
+                  char *dest = ws->line + strlen(g_httplocation);
+
+                  /* Concatenate the hostname */
+
+                  if (strncmp(dest, g_httphttp, strlen(g_httphttp)) == 0)
+                    {
+                      for(i = 0, dest += 7; i < ws->ndx - 7; i++, dest++)
                         {
-                          ws->hostname[i] = 0;
-                          break;
-                        }
-                      else if (i < CONFIG_NETUTILS_WEBCLIENT_MAXHOSTNAME-1)
-                        {
-                          ws->hostname[i] = *dest;
+                          if (*dest == 0 || *dest == '/' || *dest == ' ' || *dest == ':')
+                            {
+                              ws->hostname[i] = 0;
+                              break;
+                            }
+                          else if (i < CONFIG_NETUTILS_WEBCLIENT_MAXHOSTNAME-1)
+                            {
+                              ws->hostname[i] = *dest;
+                            }
                         }
                     }
+
+                  /* Copy the location */
+
+                  strncpy(ws->filename, dest, CONFIG_NETUTILS_WEBCLIENT_MAXFILENAME-1);
+
+                  /* Make sure that everything is NULL terminated */
+
+                  ws->hostname[CONFIG_NETUTILS_WEBCLIENT_MAXHOSTNAME-1] = '\0';
+                  ws->filename[CONFIG_NETUTILS_WEBCLIENT_MAXFILENAME-1] = '\0';
+                  nvdbg("New hostname='%s' filename='%s'\n", ws->hostname, ws->filename);
                 }
-
-              /* Copy the location */
-
-              strncpy(ws->filename, dest, CONFIG_NETUTILS_WEBCLIENT_MAXFILENAME-1);
-
-              /* Make sure that everything is NULL terminated */
-
-              ws->hostname[CONFIG_NETUTILS_WEBCLIENT_MAXHOSTNAME-1] = '\0';
-              ws->filename[CONFIG_NETUTILS_WEBCLIENT_MAXFILENAME-1] = '\0';
-              nvdbg("New hostname='%s' filename='%s'\n", ws->hostname, ws->filename);
             }
 
-          /* We're done parsing, so we reset the pointer and start the
-           * next line.
+          /* We're done parsing this line, so we reset the index to the start
+           * of the next line.
            */
 
           ndx = 0;
