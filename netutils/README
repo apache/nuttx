@@ -16,5 +16,6 @@ include:
 Additional applications that were not part of uIP (but which are
 highly influenced by uIP) include:
 
-  dhcpd - Dynamic Host Configuration Protocol (DHCP) server
+  dhcpd     - Dynamic Host Configuration Protocol (DHCP) server
+  tftpc     - TFTP client
 
