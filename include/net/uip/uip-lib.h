@@ -1,11 +1,14 @@
 /****************************************************************************
  * net/uip/uiplib.h
- * Various uIP library functions.
+ * Various non-standard APIs to support netutils.  All non-standard and
+ * intended only for internal use.
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
- * Based on uIP which also has a BSD style license:
+ * Some of these APIs derive from uIP but all of them use the uip_ prefix
+ * to identify them as members of this library.  uIP also has a BSD style
+ * license:
  *
  *   Author: Adam Dunkels <adam@sics.se>
  *   Copyright (c) 2002, Adam Dunkels.
@@ -39,8 +42,8 @@
  *
  ****************************************************************************/
 
-#ifndef __UIPLIB_H__
-#define __UIPLIB_H__
+#ifndef __NET_UIP_UIP_LIB_H
+#define __NET_UIP_UIP_LIB_H
 
 /****************************************************************************
  * Included Files
@@ -105,8 +108,14 @@ extern int uip_setdraddr(const char *ifname, const struct in_addr *addr);
 extern int uip_setnetmask(const char *ifname, const struct in_addr *addr);
 #endif
 
+/* HTTP support */
+
+extern int  uip_parsehttpurl(const char *url, uint16 *port,
+                             char *hostname, int hostlen,
+                             char *filename, int namelen);
+
 /* Generic server logic */
 
 extern void uip_server(uint16 portno, pthread_startroutine_t handler, int stacksize);
 
-#endif /* __UIPLIB_H__ */
+#endif /* __NET_UIP_UIP_LIB_H */
