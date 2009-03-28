@@ -66,7 +66,7 @@
 #endif
 
 #ifndef CONFIG_EXAMPLE_WGET_DRIPADDR
-#  error "You must define "
+#  error "You must define CONFIG_EXAMPLE_WGET_DRIPADDR"
 #endif
 
 #ifndef CONFIG_EXAMPLE_WGET_NETMASK
