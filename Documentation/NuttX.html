@@ -1363,9 +1363,13 @@ nuttx-0.4.4 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  (submitted by JPelletier).  The is the same fix that was needed for the
 	  eZ80 and fixed in 0.4.2.
 	* netutils: Added logic to support a simple wget() function
-	* examples/wget: Added a test for wget() (Not yet tested because of
-	  some current networking limitations).
+	* examples/wget: Added a test for wget()  -- NOTE
 	* lib/strncasecmp: Fix cut'n'paste error in function name.
+	* NSH: Added wget command (untested and temorarily disabled)-- see NOTE.
+
+	NOTE: Features related to wget are not tested on the target platform in this
+	release and, hence, most likely have problems.  I don't have the correct network
+	settup to perform that testing now (I'm in a hotel).
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
