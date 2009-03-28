@@ -51,8 +51,8 @@
  * Global Functions
  *****************************************************************************/
 
-#ifndef CONFIG_ARCH_STRNCMP
-int strncmp(const char *cs, const char *ct, size_t nb)
+#ifndef CONFIG_ARCH_STRNCASECMP
+int strncasecmp(const char *cs, const char *ct, size_t nb)
 {
   register signed char result = 0;
   for (; nb > 0; nb--)
