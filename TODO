@@ -1,5 +1,5 @@
-NuttX TODO List (Last updated February 19, 2009)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NuttX TODO List (Last updated March 28, 2009)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (6)  Task/Scheduler (sched/)
   (1)  Dynamic loader (N/A)
@@ -16,7 +16,7 @@ NuttX TODO List (Last updated February 19, 2009)
   (2)  Documentation (Documentation/)
   (5)  Build system / Toolchains
   (2)  NuttShell (NSH) (examples/nsh)
-  (1)  Other Applications & Tests (examples/)
+  (2)  Other Applications & Tests (examples/)
   (1)  Linux/Cywgin simulation (arch/sim)
   (2)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
@@ -120,8 +120,10 @@ o Network (net/, netutils/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Description: Several of the netutils/ apps are untested.  These include
-               uIP's netutils/smtp, dhcpd, resolv, webclient.  Only minimal
-               testing of the others has been performed.
+               uIP's netutils/smtp and resolv.  The webclient code has been
+               tested on host using gethosbyname(), but not depends on the
+               untested resolve logic. Only minimal testing of the others
+               has been performed.
   Status:      Open
   Priority:    Medium, Important but not core NuttX functionality
 
@@ -381,10 +383,13 @@ o NuttShell (NSH) (examples/nsh)
   Status:      Open
   Priority:    Low
 
-  Description: Here are some commands that would be good to have in NSH:
-               ping
+  Description: The wget command has been incorporated into NSH, however
+               it is still untested as of this writing (only because I
+               have not had the correct network setup for the testing
+               yet).  Since wget depends on the also untest uIP resolv/
+               logic, it is like non-functional.
   Status:      Open
-  Priority:    Low
+  Priority:    Med-High
 
 o Other Applications & Tests (examples/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -392,6 +397,13 @@ o Other Applications & Tests (examples/)
   Description: The redirection test (part of examples/pipe) terminates
                incorrectly on the Cywgin-based simulation platform (but works
                fine on the Linux-based simulation platform).
+  Status:      Open
+  Priority:    Low
+
+  Description: examples/wget is untested on the target (it has been tested
+               on the host, but not in the target using the uIP resolv logic).
+  Status:      Open
+  Priority:    Med
 
 o Linux/Cywgin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

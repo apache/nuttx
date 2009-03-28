@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: November 15, 2008</p>
+      <p>Last Updated: March 28, 2009</p>
     </td>
   </tr>
 </table>
@@ -275,7 +275,13 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdxd">2.33 Hexadecimal Dump (xd)</a>
+    <a href="#cmdwget">2.33 Get File Via HTTP (wget)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdxd">2.34 Hexadecimal Dump (xd)</a>
   </td>
 </tr>
 <tr>
@@ -1673,7 +1679,34 @@ usleep &lt;usec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdxd"><h2>2.33 Hexadecimal dump (xd)</h2></a>
+    <a name="cmdwget">2.33 Get File Via HTTP (wget)</a>
+  </td>
+  </tr>
+</table>
+
+<a <p><b>Command Syntax:</b></p>
+<ul><pre>
+wget [-o &lt;local-path&gt;] &lt;url&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Use HTTP to copy the file at <code>&lt;url&gt;</code> to the current directory.
+</p>
+<p><b>Options:</b></p>
+<ul><table>
+  <tr>
+    <td><b><code>-o &lt;local-path&gt;</code></b></td>
+    <td>
+      The file will be saved relative to the current working directory
+      and with the same name as on the HTTP server unless <code>&lt;local-path&gt;</code> is provided.
+    </td>
+  </tr>
+</table></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdxd"><h2>2.34 Hexadecimal dump (xd)</h2></a>
   </td>
   </tr>
 </table>
@@ -1908,6 +1941,12 @@ nsh>
     <td><b><code>usleep</code></b></td>
     <td>!<code>CONFIG_DISABLE_SIGNALS</code></td>
     <td><code>CONFIG_EXAMPLES_NSH_DISABLE_USLEEP</code></td>
+  </tr>
+  <tr>
+    <td><b><code>wget</code></b></td>
+    <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_TCP</code> &amp;&amp;
+        <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_WGET</code></td>
   </tr>
   <tr>
     <td><b><code>xd</code></b></td>
@@ -2255,6 +2294,7 @@ nsh>
   <li><a href="#cmdunmount"><code>umount</code></a></li>
   <li><a href="#cmdunset"><code>unset</code></a></li>
   <li><a href="#cmdusleep"><code>usleep</code></a></li>
+  <li><a href="#cmdwget"><code>wget</code></a></li>
   <li><a href="#cmdxd"><code>xd</code></a></li>
 </ul></td>
 </tr></table>

@@ -317,6 +317,12 @@ static const struct cmdmap_s g_cmdmap[] =
 # endif
 #endif
 
+#if defined(CONFIG_NET_TCP) && CONFIG_NFILE_DESCRIPTORS > 0
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_GET
+  { "wget",     cmd_wget,     2, 3, "[-o <local-path>] <url>" },
+# endif
+#endif
+
 #ifndef CONFIG_EXAMPLES_NSH_DISABLE_XD
   { "xd",       cmd_xd,       3, 3, "<hex-address> <byte-count>" },
 #endif

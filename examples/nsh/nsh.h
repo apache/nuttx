@@ -434,6 +434,11 @@ extern int cmd_lbracket(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
      extern int cmd_put(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #  endif
 #endif
+#if defined(CONFIG_NET_TCP) && CONFIG_NFILE_DESCRIPTORS > 0
+#  ifndef CONFIG_EXAMPLES_NSH_DISABLE_WGET
+     extern int cmd_wget(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  endif
+#endif
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING) && \
    !defined(CONFIG_DISABLE_CLOCK) && !defined(CONFIG_DISABLE_SIGNALS)
 #  ifndef CONFIG_EXAMPLES_NSH_DISABLE_PING

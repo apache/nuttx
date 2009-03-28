@@ -96,7 +96,7 @@
  */
 
 typedef void (*wget_callback_t)(FAR char **buffer, int offset,
-                                int datend, FAR int *buflen);
+                                int datend, FAR int *buflen, FAR void *arg);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -130,6 +130,7 @@ extern "C" {
  *   buflen   - The size of the user provided buffer
  *   callback - As data is obtained from the host, this function is
  *              to dispose of each block of file data as it is received.
+ *   arg      - User argument passed to callback.
  *
  * Returned Value:
  *   0: if the GET operation completed successfully;
@@ -138,7 +139,7 @@ extern "C" {
  ****************************************************************************/
 
 EXTERN int wget(FAR const char *url, FAR char *buffer, int buflen,
-                wget_callback_t callback);
+                wget_callback_t callback, FAR void *arg);
 
 #undef EXTERN
 #ifdef __cplusplus

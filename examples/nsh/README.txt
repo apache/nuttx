@@ -303,8 +303,8 @@ o exit
 
 o get [-b|-n] [-f <local-path>] -h <ip-address> <remote-path>
 
-  Copy the file at <remote-address> from the host whose IP address is
-  identified by <ip-address>.  Other options:
+  Use TFTP to copy the file at <remote-address> from the host whose IP
+  address is identified by <ip-address>.  Other options:
 
   -f <local-path>
      The file will be saved relative to the current working directory
@@ -717,6 +717,16 @@ o usleep <usec>
 
   Pause execution (sleep) of <usec> microseconds.
 
+o wget [-o <local-path>] <url>
+
+  Use HTTP to copy the file at <url> to the current directory.
+  Options:
+
+  -o <local-path>
+     The file will be saved relative to the current working directory
+     and with the same name as on the HTTP server unless <local-path>
+     is provided.
+
 o xd <hex-address> <byte-count>
 
   Dump <byte-count> bytes of data from address <hex-address>
@@ -780,10 +790,11 @@ Command Dependencies on Configuration Settings
   umount     !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_READABLE
   unset      !CONFIG_DISABLE_ENVIRON
   usleep     !CONFIG_DISABLE_SIGNALS
+  get        CONFIG_NET && CONFIG_NET_TCP && CONFIG_NFILE_DESCRIPTORS > 0
   xd         ---
 
 * NOTES:
-  1. Because of hardware padding, the actual required for put and get
+  1. Because of hardware padding, the actual buffersize required for put and get
      operations size may be larger.
   2. Special TFTP server start-up optionss will probably be required to permit
      creation of file for the correct operation of the put command.
@@ -808,7 +819,7 @@ also allow it to squeeze into very small memory footprints.
   CONFIG_EXAMPLES_NSH_DISABLE_PWD,      CONFIG_EXAMPLES_NSH_DISABLE_RM,      CONFIG_EXAMPLES_NSH_DISABLE_RMDIR,
   CONFIG_EXAMPLES_NSH_DISABLE_SET,      CONFIG_EXAMPLES_NSH_DISABLE_SH,      CONFIG_EXAMPLES_NSH_DISABLE_SLEEP,
   CONFIG_EXAMPLES_NSH_DISABLE_TEST,     CONFIG_EXAMPLES_NSH_DISABLE_UMOUNT,  CONFIG_EXAMPLES_NSH_DISABLE_UNSET,
-  CONFIG_EXAMPLES_NSH_DISABLE_USLEEP,   CONFIG_EXAMPLES_NSH_DISABLE_XD
+  CONFIG_EXAMPLES_NSH_DISABLE_USLEEP,   CONFIG_EXAMPLES_NSH_DISABLE_WGET,    CONFIG_EXAMPLES_NSH_DISABLE_XD
 
 NSH-Specific Configuration Settings
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

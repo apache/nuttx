@@ -94,7 +94,8 @@ static char g_iobuffer[512];
  * Name: callback
  ****************************************************************************/
 
-static void callback(FAR char **buffer, int offset, int datend, FAR int *buflen)
+static void callback(FAR char **buffer, int offset, int datend,
+                     FAR int *buflen, FAR void *arg)
 {
   (void)write(1, &((*buffer)[offset]), datend - offset);
 }
@@ -155,6 +156,6 @@ int user_start(int argc, char *argv[])
 
   /* Then start the server */
   
-  wget(CONFIG_EXAMPLE_WGET_URL, g_iobuffer, 512, callback);
+  wget(CONFIG_EXAMPLE_WGET_URL, g_iobuffer, 512, callback, NULL);
   return 0;
 }

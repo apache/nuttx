@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh_netcmds.c
  *
- *   Copyright (C) 2007, 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,12 +41,14 @@
 #ifdef CONFIG_NET
 
 #include <sys/types.h>
+#include <sys/stat.h>    /* Needed for open */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <sched.h>
-#include <libgen.h>
+#include <fcntl.h>       /* Needed for open */
+#include <libgen.h>      /* Needed for basename */
 #include <errno.h>
 
 #include <nuttx/net.h>
@@ -68,6 +70,13 @@
 #if defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
 #  include <net/uip/uip-lib.h>
 #  include <net/uip/tftp.h>
+#endif
+
+#if defined(CONFIG_NET_TCP) && CONFIG_NFILE_DESCRIPTORS > 0
+#  ifndef CONFIG_EXAMPLES_NSH_DISABLE_WGET
+#    include <net/uip/uip-lib.h>
+#    include <net/uip/webclient.h>
+#  endif
 #endif
 
 #include "nsh.h"
@@ -302,9 +311,11 @@ int tftpc_parseargs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv,
 
           case ':':
             fmt = g_fmtargrequired;
+            goto errout;
 
           case '?':
           default:
+            fmt = g_fmtarginvalid;
             goto errout;
         }
     }
@@ -376,6 +387,20 @@ errout:
   nsh_output(vtbl, fmt, argv[0]);
   return ERROR;
 }
+#endif
+
+/****************************************************************************
+ * Name: wget_callback
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_TCP) && CONFIG_NFILE_DESCRIPTORS > 0
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_WGET
+static void wget_callback(FAR char **buffer, int offset, int datend,
+                          FAR int *buflen, FAR void *arg)
+{
+  (void)write((int)arg, &((*buffer)[offset]), datend - offset);
+}
+#endif
 #endif
 
 /****************************************************************************
@@ -622,6 +647,131 @@ int cmd_put(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     }
   free(fullpath);
   return OK;
+}
+#endif
+#endif
+
+/****************************************************************************
+ * Name: cmd_wget
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_TCP) && CONFIG_NFILE_DESCRIPTORS > 0
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_WGET
+int cmd_wget(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+  char *localfile = NULL;
+  char *allocfile = NULL;
+  char *buffer    = NULL;
+  char *fullpath  = NULL;
+  char *url;
+  char *fmt;
+  int option;
+  int fd = -1;
+  int ret;
+
+  /* Get the wget options */
+
+  while ((option = getopt(argc, argv, ":o:")) != ERROR)
+    {
+      switch (option)
+        {
+          case 'o':
+            localfile = optarg;
+            break;
+
+          case ':':
+            fmt = g_fmtargrequired;
+            goto errout;
+
+          case '?':
+          default:
+            fmt = g_fmtarginvalid;
+            goto errout;
+        }
+    }
+
+  /* There should be exactly on parameter left on the command-line */
+
+  if (optind == argc-1)
+    {
+      url = argv[optind];
+    }
+  else if (optind >= argc)
+    {
+      fmt = g_fmttoomanyargs;
+      goto errout;
+    }
+  else
+    {
+      fmt = g_fmtargrequired;
+      goto errout;
+    }
+
+  /* Get the local file name */
+
+  if (!localfile)
+    {
+      allocfile = strdup(url);
+      localfile = basename(allocfile);
+    }
+
+  /* Get the full path to the local file */
+
+  fullpath = nsh_getfullpath(vtbl, localfile);
+
+  /* Open the the local file for writing */
+
+  fd = open(fullpath, O_WRONLY|O_CREAT|O_TRUNC, 0644);
+  if (fd < 0)
+    {
+      nsh_output(vtbl, g_fmtcmdfailed, argv[0], "open", NSH_ERRNO);
+      ret = ERROR;
+      goto exit;
+    }
+
+  /* Allocate an I/O buffer */
+
+  buffer = malloc(512);
+  if (!buffer)
+    {
+      fmt = g_fmtcmdoutofmemory;
+      goto errout;
+    }
+
+  /* And perform the wget */
+
+  ret = wget(argv[1], buffer, 512, wget_callback, (FAR void *)fd);
+  if (ret < 0)
+    {
+      nsh_output(vtbl, g_fmtcmdfailed, argv[0], "wget", NSH_ERRNO);
+      goto exit;
+     }
+
+  /* Free allocated resources */
+
+exit:
+  if (fd >= 0)
+    {
+      close(fd);
+    }
+  if (allocfile)
+    {
+      free(allocfile);
+    }
+  if (fullpath)
+    {
+      free(fullpath);
+    }
+  if (buffer)
+    {
+      free(buffer);
+    }
+  return ret;
+
+errout:
+  nsh_output(vtbl, fmt, argv[0]);
+  ret = ERROR;
+  goto exit;
 }
 #endif
 #endif

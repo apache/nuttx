@@ -56,7 +56,8 @@
  * Name: callback
  ****************************************************************************/
 
-static void callback(FAR char **buffer, int offset, int datend, FAR int *buflen)
+static void callback(FAR char **buffer, int offset, int datend,
+                     FAR int *buflen, FAR void *arg)
 {
   (void)write(1, &((*buffer)[offset]), datend - offset);
 }
@@ -89,7 +90,7 @@ int main(int argc, char **argv, char **envp)
     }
 
   printf("WGET: Getting %s\n", argv[1]);
-  ret = wget(argv[1], buffer, 1024, callback);
+  ret = wget(argv[1], buffer, 1024, callback, NULL);
   if (ret < 0)
     {
       fprintf(stderr, "WGET: wget failed: %s\n", strerror(errno));

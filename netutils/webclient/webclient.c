@@ -404,7 +404,7 @@ exit:
  ****************************************************************************/
  
 int wget(FAR const char *url, FAR char *buffer, int buflen,
-         wget_callback_t callback)
+         wget_callback_t callback, FAR void *arg)
 {
   struct sockaddr_in server;
   struct wget_s ws;
@@ -559,7 +559,7 @@ int wget(FAR const char *url, FAR char *buffer, int buflen,
                 {
                   /* Let the client decide what to do with the received file */
 
-                  callback(&ws.buffer, ws.offset, ws.datend, &buflen);
+                  callback(&ws.buffer, ws.offset, ws.datend, &buflen, arg);
                 }
               else
                 {
