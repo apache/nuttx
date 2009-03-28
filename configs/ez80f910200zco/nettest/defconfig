@@ -224,7 +224,7 @@ CONFIG_HAVE_LIBM=n
 #   semaphore.  This value may be set to zero if no more than one
 #   thread is expected to wait for a semaphore.
 #
-CONFIG_EXAMPLE=nettest
+CONFIG_EXAMPLE=wget
 CONFIG_DEBUG=y
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_NET=n
@@ -755,6 +755,21 @@ CONFIG_EXAMPLES_MOUNT_DEVNAME="/dev/ram0"
 #CONFIG_EXAMPLES_MOUNT_NSECTORS=2048
 #CONFIG_EXAMPLES_MOUNT_SECTORSIZE=512
 #CONFIG_EXAMPLES_MOUNT_RAMDEVNO=1
+
+#
+# Settings for examples/wget
+# CONFIG_EXAMPLE_WGET_HOSTNAME - The host that serves the file
+# CONFIG_EXAMPLE_WGET_FILENAME - The name of the file to get (with leading '/')
+# CONFIG_EXAMPLE_WGET_NOMAC - (May be defined to use software assigned MAC)
+# CONFIG_EXAMPLE_WGET_IPADDR - Target IP address
+# CONFIG_EXAMPLE_WGET_DRIPADDR - Default router IP addess
+# CONFIG_EXAMPLE_WGET_NETMASK - Network mask
+CONFIG_EXAMPLE_WGET_HOSTNAME="www.nuttx.org"
+CONFIG_EXAMPLE_WGET_FILENAME="/index.html"
+CONFIG_EXAMPLE_WGET_NOMAC=y
+CONFIG_EXAMPLE_WGET_IPADDR=(10L<<24|0L<<16|0L<<8|2L)
+CONFIG_EXAMPLE_WGET_DRIPADDR=(10L<<24|0L<<16|0L<<8|1L)
+CONFIG_EXAMPLE_WGET_NETMASK=(255L<<24|255L<<16|255L<<8|0L)
 
 #
 # Stack and heap information
