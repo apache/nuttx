@@ -224,7 +224,7 @@ CONFIG_HAVE_LIBM=n
 #   semaphore.  This value may be set to zero if no more than one
 #   thread is expected to wait for a semaphore.
 #
-CONFIG_EXAMPLE=wget
+CONFIG_EXAMPLE=nettest
 CONFIG_DEBUG=y
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_NET=n
