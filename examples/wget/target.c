@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <unistd.h>
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -87,6 +88,21 @@
 static char g_iobuffer[512];
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+/****************************************************************************
+ * Name: callback
+ ****************************************************************************/
+
+static void callback(FAR char **buffer, int offset, int datend, FAR int *buflen)
+{
+  (void)write(1, &((*buffer)[offset]), datend - offset);
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+/****************************************************************************
  * user_initialize
  ****************************************************************************/
 
@@ -106,7 +122,6 @@ void user_initialize(void)
 int user_start(int argc, char *argv[])
 {
   struct in_addr addr;
-  static uip_ipaddr_t addr;
 #if defined(CONFIG_EXAMPLE_WGET_NOMAC)
   uint8 mac[IFHWADDRLEN];
 #endif

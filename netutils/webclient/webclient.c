@@ -48,7 +48,7 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef CONFIG_NETUTILS_WEBCLIENT_HOST
+#ifndef CONFIG_WEBCLIENT_HOST
 #  include <nuttx/config.h>
 #  include <nuttx/compiler.h>
 #  include <debug.h>
@@ -107,14 +107,14 @@ struct wget_s
 
   /* Buffer HTTP header data and parse line at a time */
 
-  char line[CONFIG_NETUTILS_WEBCLIENT_MAXHTTPLINE];
+  char line[CONFIG_WEBCLIENT_MAXHTTPLINE];
   int  ndx;
 
 #ifdef CONFIG_WEBCLIENT_GETMIMETYPE
-  char mimetype[CONFIG_NETUTILS_WEBCLIENT_MAXMIMESIZE];
+  char mimetype[CONFIG_WEBCLIENT_MAXMIMESIZE];
 #endif
-  char hostname[CONFIG_NETUTILS_WEBCLIENT_MAXHOSTNAME];
-  char filename[CONFIG_NETUTILS_WEBCLIENT_MAXFILENAME];
+  char hostname[CONFIG_WEBCLIENT_MAXHOSTNAME];
+  char filename[CONFIG_WEBCLIENT_MAXFILENAME];
 };
 
 /****************************************************************************
@@ -353,7 +353,7 @@ static inline int wget_parseheaders(struct wget_s *ws)
                               ws->hostname[i] = 0;
                               break;
                             }
-                          else if (i < CONFIG_NETUTILS_WEBCLIENT_MAXHOSTNAME-1)
+                          else if (i < CONFIG_WEBCLIENT_MAXHOSTNAME-1)
                             {
                               ws->hostname[i] = *dest;
                             }
@@ -362,12 +362,12 @@ static inline int wget_parseheaders(struct wget_s *ws)
 
                   /* Copy the location */
 
-                  strncpy(ws->filename, dest, CONFIG_NETUTILS_WEBCLIENT_MAXFILENAME-1);
+                  strncpy(ws->filename, dest, CONFIG_WEBCLIENT_MAXFILENAME-1);
 
                   /* Make sure that everything is NULL terminated */
 
-                  ws->hostname[CONFIG_NETUTILS_WEBCLIENT_MAXHOSTNAME-1] = '\0';
-                  ws->filename[CONFIG_NETUTILS_WEBCLIENT_MAXFILENAME-1] = '\0';
+                  ws->hostname[CONFIG_WEBCLIENT_MAXHOSTNAME-1] = '\0';
+                  ws->filename[CONFIG_WEBCLIENT_MAXFILENAME-1] = '\0';
                   nvdbg("New hostname='%s' filename='%s'\n", ws->hostname, ws->filename);
                 }
             }
@@ -416,8 +416,8 @@ int wget(uint16 port,
   memset(&ws, 0, sizeof(struct wget_s));
   ws.buffer = buffer;
   ws.buflen = buflen;
-  strncpy(ws.hostname, hostname, CONFIG_NETUTILS_WEBCLIENT_MAXHOSTNAME);
-  strncpy(ws.filename, filename, CONFIG_NETUTILS_WEBCLIENT_MAXFILENAME);
+  strncpy(ws.hostname, hostname, CONFIG_WEBCLIENT_MAXHOSTNAME);
+  strncpy(ws.filename, filename, CONFIG_WEBCLIENT_MAXFILENAME);
 
   /* The following sequence may repeat indefinitely if we are redirected */
 

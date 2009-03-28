@@ -308,7 +308,7 @@ examples/usbserial
   serial messages.
 
 examples/usbstorage
-^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 
   This example registers a block device driver, then exports the block
   the device using the USB storage class driver.  Configuration options:
@@ -346,4 +346,38 @@ examples/usbstorage
     Show interrupt-related events.
 
   Error results are always shown in the trace output
+
+examples/wget
+^^^^^^^^^^^^^
+
+  A simple web client example.  It will obtain a file from a server using the HTTP
+  protocol.  Settings unique to this example include:
+
+    CONFIG_EXAMPLE_WGET_HOSTNAME  - The host that serves the file
+    CONFIG_EXAMPLE_WGET_FILENAME  - The name of the file to get (with leading '/')
+    CONFIG_EXAMPLE_WGET_NOMAC     - (May be defined to use software assigned MAC)
+    CONFIG_EXAMPLE_WGET_IPADDR    - Target IP address
+    CONFIG_EXAMPLE_WGET_DRIPADDR  - Default router IP addess
+    CONFIG_EXAMPLE_WGET_NETMASK   - Network mask
+
+  This example uses netutils/webclient.  Additional configuration settings apply
+  to that code as follows (but built-in defaults are probably OK):
+
+    CONFIG_WEBCLIENT_GETMIMETYPE, CONFIG_WEBCLIENT_MAXHTTPLINE,
+    CONFIG_WEBCLIENT_MAXMIMESIZE, CONFIG_WEBCLIENT_MAXHOSTNAME,
+    CONFIG_WEBCLIENT_MAXFILENAME
+
+  Of course, the example also requires other settings including CONFIG_NET and
+  CONFIG_NET_TCP.  The example also uses the uIP resolver which requires CONFIG_UDP.
+
+  WARNNG: As of this writing, wget is untested on the target platform.  At present
+  it has been tested only in the host-based configuration described in the following
+  note.  The primary difference is that the target version will rely on the also
+  untested uIP name resolver.
+
+  NOTE: For test purposes, this example can be built as a host-based wget function.
+  This can be built as follows:
+
+    cd examples/wget
+    make -f Makefile.host
 

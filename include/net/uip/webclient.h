@@ -46,7 +46,7 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef CONFIG_NETUTILS_WEBCLIENT_HOST
+#ifndef CONFIG_WEBCLIENT_HOST
 #  include <nuttx/config.h>
 #endif
 #include <sys/types.h>
@@ -55,20 +55,20 @@
  * Pre-processor definitions
  ****************************************************************************/
 
-#ifndef CONFIG_NETUTILS_WEBCLIENT_MAXHTTPLINE
-#  define CONFIG_NETUTILS_WEBCLIENT_MAXHTTPLINE 200
+#ifndef CONFIG_WEBCLIENT_MAXHTTPLINE
+#  define CONFIG_WEBCLIENT_MAXHTTPLINE 200
 #endif
 
-#ifndef CONFIG_NETUTILS_WEBCLIENT_MAXMIMESIZE
-#  define CONFIG_NETUTILS_WEBCLIENT_MAXMIMESIZE 32
+#ifndef CONFIG_WEBCLIENT_MAXMIMESIZE
+#  define CONFIG_WEBCLIENT_MAXMIMESIZE 32
 #endif
 
-#ifndef CONFIG_NETUTILS_WEBCLIENT_MAXHOSTNAME
-#  define CONFIG_NETUTILS_WEBCLIENT_MAXHOSTNAME 40
+#ifndef CONFIG_WEBCLIENT_MAXHOSTNAME
+#  define CONFIG_WEBCLIENT_MAXHOSTNAME 40
 #endif
 
-#ifndef CONFIG_NETUTILS_WEBCLIENT_MAXFILENAME
-#  define CONFIG_NETUTILS_WEBCLIENT_MAXFILENAME 100
+#ifndef CONFIG_WEBCLIENT_MAXFILENAME
+#  define CONFIG_WEBCLIENT_MAXFILENAME 100
 #endif
 
 /****************************************************************************

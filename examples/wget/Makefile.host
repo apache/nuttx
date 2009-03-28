@@ -40,7 +40,7 @@ include $(TOPDIR)/Make.defs
 OBJS		= host.o1 webclient.o1
 BIN		= wget
 
-HOSTCFLAGS	+= -DCONFIG_NETUTILS_WEBCLIENT_HOST=1
+HOSTCFLAGS	+= -DCONFIG_WEBCLIENT_HOST=1
 HOSTCFLAGS	+= -I. -include hostdefs.h
 VPATH		= $(TOPDIR)/netutils/webclient:.
 
