@@ -249,13 +249,17 @@ examples/udp
 examples/uip
 ^^^^^^^^^^^^
 
-  This is a port of uIP example application.  It includes conditionally
-  compiled logic to exercise the uIP webserver, telnet, smtp, dhcpc,
-  and resolver.  
+  This is a port of uIP tiny webserver example application.  Settings
+  specific to this example include:
 
-  Other configuratin items apply also to the selected network utility.
-  For example, the additional relevant settings for the uIP webserver
-  are:
+    CONFIG_EXAMPLE_UIP_NOMAC     - (May be defined to use software assigned MAC)
+    CONFIG_EXAMPLE_UIP_IPADDR    - Target IP address
+    CONFIG_EXAMPLE_UIP_DRIPADDR  - Default router IP addess
+    CONFIG_EXAMPLE_UIP_NETMASK   - Network mask
+    CONFIG_EXAMPLE_UIP_DHCPC     - Select to get IP address via DHCP
+
+  Other configuration items apply also to the selected webserver net utility.
+  Additional relevant settings for the uIP webserver net utility are:
 
     CONFIG_NETUTILS_HTTPDSTACKSIZE
     CONFIG_NETUTILS_HTTPDFILESTATS

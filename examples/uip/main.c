@@ -62,22 +62,14 @@
 
 /* DHCPC may be used in conjunction with any other feature (or not) */
 
-#if defined(CONFIG_EXAMPLE_UIP_DHCPC)
+#ifdef CONFIG_EXAMPLE_UIP_DHCPC
 # include <net/uip/resolv.h>
 # include <net/uip/dhcpc.h>
 #endif
 
-/* Pick the netutils feature under test (which may be DHCPC) */
+/* Include uIP webserver definitions */
 
-#if defined(CONFIG_EXAMPLE_UIP_SMTP)
-# include <net/uip/smtp.h>
-#elif defined(CONFIG_EXAMPLE_UIP_TELNETD)
-# include <net/uip/telnetd.h>
-#elif defined(CONFIG_EXAMPLE_UIP_WEBSERVER)
-# include <net/uip/httpd.h>
-#elif !defined(CONFIG_EXAMPLE_UIP_DHCPC)
-# error "No network application specified"
-#endif
+#include <net/uip/httpd.h>
 
 /****************************************************************************
  * Definitions
@@ -100,14 +92,6 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-#if defined(CONFIG_EXAMPLE_UIP_SMTP)
-static const char g_host_name[] = "localhost";
-static const char g_recipient[] = "spudmonkey@racsa.co.cr";
-static const char g_sender[]    = "nuttx-testing@example.com";
-static const char g_subject[]   = "Testing SMTP from NuttX";
-static const char g_msg_body[]  = "Test message sent by NuttX\r\n";
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -136,7 +120,7 @@ int user_start(int argc, char *argv[])
 #if defined(CONFIG_EXAMPLE_UIP_DHCPC) || defined(CONFIG_EXAMPLE_UIP_NOMAC)
   uint8 mac[IFHWADDRLEN];
 #endif
-#if defined(CONFIG_EXAMPLE_UIP_DHCPC) || defined(CONFIG_EXAMPLE_UIP_SMTP)
+#ifdef CONFIG_EXAMPLE_UIP_DHCPC
   void *handle;
 #endif
 
@@ -154,10 +138,10 @@ int user_start(int argc, char *argv[])
 
   /* Set up our host address */
 
-#if !defined(CONFIG_EXAMPLE_UIP_DHCPC)
-  addr.s_addr = HTONL(CONFIG_EXAMPLE_UIP_IPADDR);
-#else
+#ifdef CONFIG_EXAMPLE_UIP_DHCPC
   addr.s_addr = 0;
+#else
+  addr.s_addr = HTONL(CONFIG_EXAMPLE_UIP_IPADDR);
 #endif
   uip_sethostaddr("eth0", &addr);
 
@@ -171,13 +155,11 @@ int user_start(int argc, char *argv[])
   addr.s_addr = HTONL(CONFIG_EXAMPLE_UIP_NETMASK);
   uip_setnetmask("eth0", &addr);
 
-#if defined(CONFIG_EXAMPLE_UIP_DHCPC)
+#ifdef CONFIG_EXAMPLE_UIP_DHCPC
   /* Set up the resolver */
 
   resolv_init();
-#endif
 
-#if defined(CONFIG_EXAMPLE_UIP_DHCPC)
   /* Get the MAC address of the NIC */
 
   uip_getmacaddr("eth0", mac);
@@ -210,25 +192,9 @@ int user_start(int argc, char *argv[])
     }
 #endif
 
-#if defined(CONFIG_EXAMPLE_UIP_WEBSERVER)
   printf("Starting webserver\n");
   httpd_init();
   httpd_listen();
-#elif defined(CONFIG_EXAMPLE_UIP_TELNETD)
-  printf("Starting telnetd\n");
-  telnetd_init();
-#elif defined(CONFIG_EXAMPLE_UIP_SMTP)
-  printf("Sending mail\n");
-  uip_ipaddr(addr.s_addr, 127, 0, 0, 1);
-  handle = smtp_open();
-  if (handle)
-    {
-      smtp_configure(handle, g_host_name, &addr.s_addr);
-      smtp_send(handle, g_recipient, NULL, g_sender, g_subject,
-                g_msg_body, strlen(g_msg_body));
-      smtp_close(handle);
-    }
-#endif
 
   while(1)
     {
