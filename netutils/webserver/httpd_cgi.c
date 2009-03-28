@@ -52,10 +52,25 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static void nullfunction(struct httpd_state *pstate, char *ptr);
+#ifdef CONFIG_NETUTILS_HTTPDNETSTATS
+static void net_stats(struct httpd_state *pstate, char *ptr);
+#endif
+
+#ifdef CONFIG_NETUTILS_HTTPDFILESTATS
+static void file_stats(struct httpd_state *pstate, char *ptr);
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_NETUTILS_HTTPDFILESTATS
 HTTPD_CGI_CALL(file, "file-stats", file_stats);
+#endif
 #ifdef CONFIG_NETUTILS_HTTPDNETSTATS
 HTTPD_CGI_CALL(net, "net-stats", net_stats);
 #endif
@@ -94,9 +109,17 @@ static const char last_ack[] = /*  "LAST-ACK"*/
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: nullfunction
+ ****************************************************************************/
+
 static void nullfunction(struct httpd_state *pstate, char *ptr)
 {
 }
+
+/****************************************************************************
+ * Name: net_stats
+ ****************************************************************************/
 
 #ifdef CONFIG_NETUTILS_HTTPDNETSTATS
 static void net_stats(struct httpd_state *pstate, char *ptr)
@@ -109,6 +132,20 @@ static void net_stats(struct httpd_state *pstate, char *ptr)
       snprintf(buffer, 16, "%5u\n", ((uip_stats_t *)&uip_stat)[i]);
       send(pstate->ht_sockfd, buffer, strlen(buffer), 0);
     }
+}
+#endif
+
+/****************************************************************************
+ * Name: file_stats
+ ****************************************************************************/
+
+#ifdef CONFIG_NETUTILS_HTTPDFILESTATS
+static void file_stats(struct httpd_state *pstate, char *ptr)
+{
+  char buffer[16];
+  char *pcount = strchr(ptr, ' ') + 1;
+  snprintf(buffer, 16, "%5u", httpd_fs_count(pcount));
+  (void)send(pstate->ht_sockfd, buffer, strlen(buffer), 0);
 }
 #endif
 
@@ -131,13 +168,3 @@ httpd_cgifunction httpd_cgi(char *name)
     }
   return nullfunction;
 }
-
-#ifdef CONFIG_NETUTILS_HTTPDFILESTATS
-static void file_stats(struct httpd_state *pstate, char *ptr)
-{
-  char buffer[16];
-  char *pcount = strchr(ptr, ' ') + 1;
-  snprintf(buffer, 16, "%5u", httpd_fs_count(pcount));
-  (void)send(pstate->ht_sockfd, buffer, strlen(buffer), 0);
-}
-#endif
