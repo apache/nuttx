@@ -109,8 +109,9 @@ int uip_parsehttpurl(const char *url, uint16 *port,
       if (*src == ':')
         {
           uint16 accum = 0;
-          src++;
-          while (*src >= '0' && *src <= 9)
+          src++; /* Skip over the colon */
+ 
+          while (*src >= '0' && *src <= '9')
             {
               accum = 10*accum + *src - '0';
               src++;
