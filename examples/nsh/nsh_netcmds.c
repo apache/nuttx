@@ -740,7 +740,7 @@ int cmd_wget(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
   /* And perform the wget */
 
-  ret = wget(argv[1], buffer, 512, wget_callback, (FAR void *)fd);
+  ret = wget(url, buffer, 512, wget_callback, (FAR void *)fd);
   if (ret < 0)
     {
       nsh_output(vtbl, g_fmtcmdfailed, argv[0], "wget", NSH_ERRNO);
