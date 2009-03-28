@@ -155,6 +155,6 @@ int user_start(int argc, char *argv[])
 
   /* Then start the server */
   
-  wget(80, CONFIG_EXAMPLE_WGET_HOSTNAME, CONFIG_EXAMPLE_WGET_FILENAME, g_iobuffer, 512, callback);
+  wget(CONFIG_EXAMPLE_WGET_URL, g_iobuffer, 512, callback);
   return 0;
 }

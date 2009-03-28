@@ -42,6 +42,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 
 /****************************************************************************
  * Private Data
@@ -66,7 +67,7 @@ static void callback(FAR char **buffer, int offset, int datend, FAR int *buflen)
 
 static void show_usage(const char *progname, int exitcode)
 {
-  fprintf(stderr, "USAGE: %s <host> <filename>\n", progname);
+  fprintf(stderr, "USAGE: %s <url>\n", progname);
   exit(exitcode);
 }
 
@@ -80,13 +81,18 @@ static void show_usage(const char *progname, int exitcode)
 int main(int argc, char **argv, char **envp)
 {
   char buffer[1024];
+  int ret;
 
-  if (argc != 3)
+  if (argc != 2)
     {
       show_usage(argv[0], 1);
     }
 
-  printf("WGET: Getting %s from %s\n", argv[2], argv[1]);
-  wget(80, argv[1], argv[2], buffer, 1024, callback);
+  printf("WGET: Getting %s\n", argv[1]);
+  ret = wget(argv[1], buffer, 1024, callback);
+  if (ret < 0)
+    {
+      fprintf(stderr, "WGET: wget failed: %s\n", strerror(errno));
+    }
   return 0;
 }

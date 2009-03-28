@@ -37,12 +37,12 @@ WD		= ${shell pwd}
 TOPDIR		= $(WD)/../..
 include $(TOPDIR)/Make.defs
 
-OBJS		= host.o1 webclient.o1
+OBJS		= host.o1 webclient.o1 uip_parsehttpurl.o1
 BIN		= wget
 
 HOSTCFLAGS	+= -DCONFIG_WEBCLIENT_HOST=1
 HOSTCFLAGS	+= -I. -include hostdefs.h
-VPATH		= $(TOPDIR)/netutils/webclient:.
+VPATH		= $(TOPDIR)/netutils/webclient:$(TOPDIR)/netutils/uiplib:.
 
 all: $(BIN)
 .PHONY: clean context clean_context distclean
@@ -56,11 +56,22 @@ net/uip:
 net/uip/webclient.h: net/uip $(TOPDIR)/include/net/uip/webclient.h
 	@cp -a $(TOPDIR)/include/net/uip/webclient.h net/uip/.
 
-$(BIN): net/uip/webclient.h $(OBJS)
+net/uip/uip-lib.h: net/uip $(TOPDIR)/include/net/uip/uip-lib.h
+	@cp -a $(TOPDIR)/include/net/uip/uip-lib.h net/uip/.
+
+nuttx:
+	@mkdir nuttx
+
+nuttx/config.h: nuttx
+	@touch nuttx/config.h
+
+headers: net/uip/webclient.h net/uip/uip-lib.h nuttx/config.h
+
+$(BIN): headers $(OBJS)
 	$(HOSTCC) $(HOSTLDFLAGS) $(OBJS) -o $@
 
 clean:
 	@rm -f $(BIN).* *.o1 *~
-	@rm -rf net
+	@rm -rf net nuttx
 
 

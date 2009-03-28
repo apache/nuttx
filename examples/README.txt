@@ -353,8 +353,7 @@ examples/wget
   A simple web client example.  It will obtain a file from a server using the HTTP
   protocol.  Settings unique to this example include:
 
-    CONFIG_EXAMPLE_WGET_HOSTNAME  - The host that serves the file
-    CONFIG_EXAMPLE_WGET_FILENAME  - The name of the file to get (with leading '/')
+    CONFIG_EXAMPLE_WGET_URL       - The URL of the file to get
     CONFIG_EXAMPLE_WGET_NOMAC     - (May be defined to use software assigned MAC)
     CONFIG_EXAMPLE_WGET_IPADDR    - Target IP address
     CONFIG_EXAMPLE_WGET_DRIPADDR  - Default router IP addess

@@ -122,10 +122,9 @@ extern "C" {
  *   query answer.
  *
  * Input Parameters
- *   port     - The port number to which to connect, in host byte order.
- *   hostname - A pointer to a string containing either a host name or
- *              a numerical IP address in dotted decimal notation (e.g., 192.168.23.1).
- *   filename - A pointer to the name of the file to get.
+ *   url      - A pointer to a string containing either the full URL to
+ *              the file to get (e.g., http://www.nutt.org/index.html, or
+ *              http://192.168.23.1:80/index.html).
  *   buffer   - A user provided buffer to receive the file data (also
  *              used for the outgoing GET request
  *   buflen   - The size of the user provided buffer
@@ -138,9 +137,8 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int wget(uint16 port,
-                FAR const char *hostname, FAR const char *filename,
-                FAR char *buffer, int buflen, wget_callback_t callback);
+EXTERN int wget(FAR const char *url, FAR char *buffer, int buflen,
+                wget_callback_t callback);
 
 #undef EXTERN
 #ifdef __cplusplus
