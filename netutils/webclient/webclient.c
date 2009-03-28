@@ -67,6 +67,7 @@
 #endif
 
 #include <netinet/in.h>
+#include <net/uip/uip-lib.h>
 #include <net/uip/webclient.h>
 
 /****************************************************************************
@@ -95,8 +96,12 @@
 
 struct wget_s
 {
+  /* Internal status */
+
   ubyte state;
   ubyte httpstatus;
+
+  uint16 port;       /* The port number to use in the connection */
 
   /* These describe the just-received buffer of data */
 
@@ -128,13 +133,11 @@ static const char g_httpcontenttype[] = "content-type: ";
 #endif
 static const char g_httphost[]        = "host: ";
 static const char g_httplocation[]    = "location: ";
-
 static const char g_httpget[]         = "GET ";
-static const char g_httphttp[]        = "http://";
 
 static const char g_httpuseragentfields[] =
   "Connection: close\r\n"
-  "User-Agent: uIP/1.0 (; http://www.sics.se/~adam/uip/)\r\n\r\n";
+  "User-Agent: NuttX/0.4.x (; http://www.nuttx.org/)\r\n\r\n";
 
 static const char g_http200[]         = "200 ";
 static const char g_http301[]         = "301 ";
@@ -289,7 +292,6 @@ static inline int wget_parseheaders(struct wget_s *ws)
 {
   int offset;
   int ndx;
-  int i;
 
   offset = ws->offset;
   ndx    = ws->ndx;
@@ -338,36 +340,14 @@ static inline int wget_parseheaders(struct wget_s *ws)
 #endif
               if (strncasecmp(ws->line, g_httplocation, strlen(g_httplocation)) == 0)
                 {
-                  /* Save a pointer to the location */
+                  /* Parse the new HTTP host and filename from the URL.  Note that
+                   * the return value is ignored.  In the event of failure, we
+                   * retain the current location.
+                   */
 
-                  char *dest = ws->line + strlen(g_httplocation);
-
-                  /* Concatenate the hostname */
-
-                  if (strncmp(dest, g_httphttp, strlen(g_httphttp)) == 0)
-                    {
-                      for(i = 0, dest += 7; i < ws->ndx - 7; i++, dest++)
-                        {
-                          if (*dest == 0 || *dest == '/' || *dest == ' ' || *dest == ':')
-                            {
-                              ws->hostname[i] = 0;
-                              break;
-                            }
-                          else if (i < CONFIG_WEBCLIENT_MAXHOSTNAME-1)
-                            {
-                              ws->hostname[i] = *dest;
-                            }
-                        }
-                    }
-
-                  /* Copy the location */
-
-                  strncpy(ws->filename, dest, CONFIG_WEBCLIENT_MAXFILENAME-1);
-
-                  /* Make sure that everything is NULL terminated */
-
-                  ws->hostname[CONFIG_WEBCLIENT_MAXHOSTNAME-1] = '\0';
-                  ws->filename[CONFIG_WEBCLIENT_MAXFILENAME-1] = '\0';
+                  (void)uip_parsehttpurl(ws->line + strlen(g_httplocation), &ws->port,
+                                         ws->hostname, CONFIG_WEBCLIENT_MAXHOSTNAME,
+                                         ws->filename, CONFIG_WEBCLIENT_MAXFILENAME);
                   nvdbg("New hostname='%s' filename='%s'\n", ws->hostname, ws->filename);
                 }
             }
@@ -397,11 +377,34 @@ exit:
 
 /****************************************************************************
  * Name: wget
+ *
+ * Description:
+ *   Obtain the requested file from an HTTP server using the GET method.
+ *
+ *   Note: If the function is passed a host name, it must already be in
+ *   the resolver cache in order for the function to connect to the web
+ *   server. It is therefore up to the calling module to implement the
+ *   resolver calls and the signal handler used for reporting a resolv
+ *   query answer.
+ *
+ * Input Parameters
+ *   url      - A pointer to a string containing either the full URL to
+ *              the file to get (e.g., http://www.nutt.org/index.html, or
+ *              http://192.168.23.1:80/index.html).
+ *   buffer   - A user provided buffer to receive the file data (also
+ *              used for the outgoing GET request
+ *   buflen   - The size of the user provided buffer
+ *   callback - As data is obtained from the host, this function is
+ *              to dispose of each block of file data as it is received.
+ *
+ * Returned Value:
+ *   0: if the GET operation completed successfully;
+ *  -1: On a failure with errno set appropriately 
+ *
  ****************************************************************************/
  
-int wget(uint16 port,
-         FAR const char *hostname, FAR const char *filename,
-         FAR char *buffer, int buflen, wget_callback_t callback)
+int wget(FAR const char *url, FAR char *buffer, int buflen,
+         wget_callback_t callback)
 {
   struct sockaddr_in server;
   struct wget_s ws;
@@ -416,13 +419,35 @@ int wget(uint16 port,
   memset(&ws, 0, sizeof(struct wget_s));
   ws.buffer = buffer;
   ws.buflen = buflen;
-  strncpy(ws.hostname, hostname, CONFIG_WEBCLIENT_MAXHOSTNAME);
-  strncpy(ws.filename, filename, CONFIG_WEBCLIENT_MAXFILENAME);
+  ws.port   = 80;
+
+  /* Parse the hostname (with optional port number) and filename from the URL */
+
+  ret = uip_parsehttpurl(url, &ws.port,
+                         ws.hostname, CONFIG_WEBCLIENT_MAXHOSTNAME,
+                         ws.filename, CONFIG_WEBCLIENT_MAXFILENAME);
+  if (ret != 0)
+    {
+      ndbg("Malformed HTTP URL: %s\n", url);
+      errno = -ret;
+      return ERROR;
+    }
+  nvdbg("hostname='%s' filename='%s'\n", ws.hostname, ws.filename);
 
   /* The following sequence may repeat indefinitely if we are redirected */
 
   do
     {
+      /* Re-initialize portions of the state structure that could have
+       * been left from the previous time through the loop and should not
+       * persist with the new connection.
+       */
+
+      ws.httpstatus = HTTPSTATUS_NONE;
+      ws.offset     = 0;
+      ws.datend     = 0;
+      ws.ndx        = 0;
+
       /* Create a socket */
 
       sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -437,7 +462,7 @@ int wget(uint16 port,
       /* Get the server adddress from the host name */
 
       server.sin_family = AF_INET;
-      server.sin_port   = htons(port);
+      server.sin_port   = htons(ws.port);
       ret = wget_resolvehost(ws.hostname, &server.sin_addr.s_addr);
       if (ret < 0)
         {
@@ -464,12 +489,12 @@ int wget(uint16 port,
 
       dest   = ws.buffer;
       dest   = wget_strcpy(dest, g_httpget);
-      dest   = wget_strcpy(dest, filename);
+      dest   = wget_strcpy(dest, ws.filename);
      *dest++ = ISO_space;
       dest   = wget_strcpy(dest, g_http10);
       dest   = wget_strcpy(dest, g_httpcrnl);
       dest   = wget_strcpy(dest, g_httphost);
-      dest   = wget_strcpy(dest, hostname);
+      dest   = wget_strcpy(dest, ws.hostname);
       dest   = wget_strcpy(dest, g_httpcrnl);
       dest   = wget_strcpy(dest, g_httpuseragentfields);
       len    = dest - buffer;
