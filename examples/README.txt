@@ -230,6 +230,25 @@ examples/romfs
   * CONFIG_EXAMPLES_ROMFS_MOUNTPOINT
       The location to mount the ROM disk.  Deafault: "/usr/local/share"
 
+examples/sendmail
+^^^^^^^^^^^^^^^^^
+
+  This examples exercises the uIP SMTP logic by sending a test message
+  to a selected recipient.
+
+  NOTE 1: This test is not integrated into NuttX as of this writing,
+  it can only be built to execute of the Cygwin/Linux host for unit-
+  testing of the logic.
+
+    cd examples/sendmail
+    make -f Makefile.host
+
+  NOTE 2: This sendmail example only works for the simplest of 
+  environments.  Virus protection software on your host may have
+  to be disabled to allow you to send messages.  Only very open,
+  unprotected recipients can be used.  Most will protect themselves
+  from this test email because it looks like SPAM.
+
 examples/serloop
 ^^^^^^^^^^^^^^^^
 
