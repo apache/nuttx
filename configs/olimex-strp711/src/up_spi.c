@@ -1,10 +1,8 @@
 /****************************************************************************
  * config/olimex-strp711/src/up_spi.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
- *
- * This logic emulates the Prolific PL2303 serial/USB converter
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -267,7 +265,7 @@ static inline void   spi_putreg(FAR struct str71x_spidev_s *priv, ubyte offset, 
 
 static void   spi_select(FAR struct spi_dev_s *dev, enum spidev_e devid, boolean selected);
 static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
-static ubyte  spi_status(FAR struct spi_dev_s *dev);
+static ubyte  spi_status(FAR struct spi_dev_s *dev, enum spidev_e devid);
 static ubyte  spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch);
 static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen);
 static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t buflen);
@@ -431,7 +429,8 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spidev_e devid, boolean s
  *   Set the SPI frequency.
  *
  * Input Parameters:
- *   frequency: The SPI frequency requested
+ *   dev -       Device-specific state data
+ *   frequency - The SPI frequency requested
  *
  * Returned Value:
  *   Returns the actual frequency selected
@@ -492,14 +491,15 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
  *   Get SPI/MMC status
  *
  * Input Parameters:
- *   None
+ *   dev -   Device-specific state data
+ *   devid - Identifies the device to report status on
  *
  * Returned Value:
  *   Returns a bitset of status values (see SPI_STATUS_* defines
  *
  ****************************************************************************/
 
-static ubyte spi_status(FAR struct spi_dev_s *dev)
+static ubyte spi_status(FAR struct spi_dev_s *dev, enum spidev_e devid)
 {
   ubyte ret = 0;
   uint16 reg16 = getreg16(STR71X_GPIO1_PD);
@@ -524,7 +524,8 @@ static ubyte spi_status(FAR struct spi_dev_s *dev)
  *   Send one byte on SPI
  *
  * Input Parameters:
- *   ch - the byte to send
+ *   dev - Device-specific state data
+ *   ch -  The byte to send
  *
  * Returned Value:
  *   response
@@ -567,6 +568,7 @@ static ubyte spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch)
  *   Send a block of data on SPI
  *
  * Input Parameters:
+ *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer of data to be sent
  *   buflen - the length of data to send from the buffer
  *
@@ -634,6 +636,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, siz
  *   Revice a block of data from SPI
  *
  * Input Parameters:
+ *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to recieve data
  *   buflen - the length of data that can be received in the buffer
  *
