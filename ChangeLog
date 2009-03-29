@@ -653,7 +653,7 @@
 	* Implemented priority inheritance logic for POSIX semaphores.  Because the pthread
 	  mutexes are built on semaphores, they will have this property as well.
 
-0.4.4 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.4 2009-03-29 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* examples/nsh:  A debug option was left on that can (and does) cause
 	  infinite loops and stack overflows.
@@ -672,10 +672,13 @@
 	  (submitted by JPelletier).  The is the same fix that was needed for the
 	  eZ80 and fixed in 0.4.2.
 	* netutils: Added logic to support a simple wget() function
-	* examples/wget: Added a test for wget()  -- NOTE
+	* examples/wget: Added a test for wget() (untested -- see NOTE)
 	* lib/strncasecmp: Fix cut'n'paste error in function name.
-	* NSH: Added wget command (untested and temorarily disabled)-- see NOTE.
+	* NSH: Added wget command (untested -- see NOTE).
+	* examples/sendmail: A simple sendmail example (untested -- see NOTE)
 
-	NOTE: Features related to wget are not tested on the target platform in this
-	release and, hence, most likely have problems.  I don't have the correct network
-	settup to perform that testing now (I'm in a hotel).
+	NOTE: Features related to wget and sendmail are not tested on the target platform
+	in this release and, hence, most likely have problems.  I don't have the correct network
+	network setup to perform that testing now (I'm in a hotel).
+
+0.4.5 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
