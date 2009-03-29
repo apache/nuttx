@@ -16,7 +16,7 @@ NuttX TODO List (Last updated March 28, 2009)
   (2)  Documentation (Documentation/)
   (5)  Build system / Toolchains
   (2)  NuttShell (NSH) (examples/nsh)
-  (2)  Other Applications & Tests (examples/)
+  (3)  Other Applications & Tests (examples/)
   (1)  Linux/Cywgin simulation (arch/sim)
   (2)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
@@ -119,11 +119,10 @@ o C++ Support
 o Network (net/, netutils/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  Description: Several of the netutils/ apps are untested.  These include
-               uIP's netutils/smtp and resolv.  The webclient code has been
-               tested on host using gethosbyname(), but not depends on the
-               untested resolve logic. Only minimal testing of the others
-               has been performed.
+  Description: One critical part of netutils/ apps is untested: The uIP
+               resolver in netutils/resolv.  The webclient code has been
+               tested on host using gethosbyname(), but still depends on the
+               untested resolve logic.
   Status:      Open
   Priority:    Medium, Important but not core NuttX functionality
 
@@ -404,6 +403,12 @@ o Other Applications & Tests (examples/)
                on the host, but not in the target using the uIP resolv logic).
   Status:      Open
   Priority:    Med
+
+  Description: examples/sendmail is untested on the target (it has been tested
+               on the host, but not on the target.
+  Status:      Open
+  Priority:    Med
+
 
 o Linux/Cywgin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

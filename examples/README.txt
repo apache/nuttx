@@ -234,14 +234,25 @@ examples/sendmail
 ^^^^^^^^^^^^^^^^^
 
   This examples exercises the uIP SMTP logic by sending a test message
-  to a selected recipient.
-
-  NOTE 1: This test is not integrated into NuttX as of this writing,
-  it can only be built to execute of the Cygwin/Linux host for unit-
-  testing of the logic.
+  to a selected recipient.  This test can also be built to execute on
+  the Cygwin/Linux host environment:
 
     cd examples/sendmail
     make -f Makefile.host
+
+ Settings unique to this example include:
+
+    CONFIG_EXAMPLE_SENDMAIL_NOMAC     - May be defined to use software assigned MAC (optional)
+    CONFIG_EXAMPLE_SENDMAIL_IPADDR    - Target IP address (required)
+    CONFIG_EXAMPLE_SENDMAIL_DRIPADDR  - Default router IP addess (required)
+    CONFIG_EXAMPLE_SENDMAILT_NETMASK  - Network mask (required)
+    CONFIG_EXAMPLE_SENDMAIL_RECIPIENT - The recipient of the email (required)
+    CONFIG_EXAMPLE_SENDMAIL_SENDER    - Optional. Default: "nuttx-testing@example.com"
+    CONFIG_EXAMPLE_SENDMAIL_SUBJECT   - Optional. Default: "Testing SMTP from NuttX"
+    CONFIG_EXAMPLE_SENDMAIL_BODY   -    Optional. Default: "Test message sent by NuttX"
+
+  NOTE: This test has not been verified on the NuttX target environment.
+  As of this writing, unit-tested in the Cygwin/Linux host environment.
 
   NOTE 2: This sendmail example only works for the simplest of 
   environments.  Virus protection software on your host may have
