@@ -682,3 +682,7 @@
 	network setup to perform that testing now (I'm in a hotel).
 
 0.4.5 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* Add an enumeration argument to the SPI chip select and status methods so
+	  that the interface can handle more than one device.
+	* eZ80Acclaim!: Add a generic SPI driver for all eZ80 boards.

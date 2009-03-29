@@ -688,6 +688,12 @@ o z80/z8/ez80 (arch/z80)
   Status:      Open
   Priority:    High if you happen to be working with XTRS.
 
+  Description: A "generic" SPI driver has been coded for the eZ80Acclaim!
+               However, this remains untested since I have no SPI devices for
+               the board (yet).
+  Status:      Open
+  Priority:    Med
+
 o z16 (arch/z16)
 ^^^^^^^^^^^^^^^^
 
