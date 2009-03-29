@@ -263,9 +263,9 @@ static inline void   spi_putreg(FAR struct str71x_spidev_s *priv, ubyte offset, 
 
 /* SPI methods */
 
-static void   spi_select(FAR struct spi_dev_s *dev, enum spidev_e devid, boolean selected);
+static void   spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
 static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
-static ubyte  spi_status(FAR struct spi_dev_s *dev, enum spidev_e devid);
+static ubyte  spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 static ubyte  spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch);
 static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen);
 static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t buflen);
@@ -369,7 +369,7 @@ static inline void spi_putreg(FAR struct str71x_spidev_s *priv, ubyte offset, ui
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_dev_s *dev, enum spidev_e devid, boolean selected)
+static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
 {
   FAR struct str71x_spidev_s *priv = (FAR struct str71x_spidev_s *)dev;
   uint16 reg16;
@@ -499,7 +499,7 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
  *
  ****************************************************************************/
 
-static ubyte spi_status(FAR struct spi_dev_s *dev, enum spidev_e devid)
+static ubyte spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   ubyte ret = 0;
   uint16 reg16 = getreg16(STR71X_GPIO1_PD);
