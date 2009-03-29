@@ -362,7 +362,7 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
 
   /* Select SPI */
 
-  SPI_SELECT(spi, TRUE);
+  SPI_SELECT(spi, SPIDEV_MMCSD, TRUE);
 
   /* Send command code */
 
@@ -409,7 +409,7 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
   if (i == 0)
     {
       fdbg("Failed: i=%d response=%02x\n", i, response);
-      SPI_SELECT(spi, FALSE);
+      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
       return (uint32)-1;
     }
 
@@ -469,7 +469,7 @@ static void mmcsd_setblklen(FAR struct mmcsd_slot_s *slot, uint32 length)
   uint32 result;
 
   result = mmcsd_sendcmd(slot, &g_cmd16, length);
-  SPI_SELECT(spi, FALSE);
+  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
 }
 
 /****************************************************************************
@@ -604,7 +604,7 @@ static int mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, ubyte *buffer,
   ubyte response;
   int i;
 
-  SPI_SELECT(spi, FALSE);
+  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
   SPI_SNDBYTE(spi, 0xff);
 
   /* Send the CMD9 or CMD10 */
@@ -644,13 +644,13 @@ static int mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, ubyte *buffer,
 
           (void)SPI_SNDBYTE(spi, 0xff);
           (void)SPI_SNDBYTE(spi, 0xff);
-          SPI_SELECT(spi, FALSE);
+          SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
           return OK;
         }
     }
 
 errout_with_eio:
-  SPI_SELECT(spi, FALSE);
+  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
   return -EIO;
 }
 
@@ -697,12 +697,12 @@ static int mmcsd_open(FAR struct inode *inode)
   /* Select the slave */
 
   mmcsd_semtake(&slot->sem);
-  SPI_SELECT(spi, FALSE);
+  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
 
   /* Verify that the MMC/SD card is alive and ready for business */
 
   ret = mmcsd_waitready(slot);
-  SPI_SELECT(spi, FALSE);
+  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
   mmcsd_semgive(&slot->sem);
   return ret;
 }
@@ -790,7 +790,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   /* Select the slave and synchronize */
 
   mmcsd_semtake(&slot->sem);
-  SPI_SELECT(spi, FALSE);
+  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
   (void)SPI_SNDBYTE(spi, 0xff);
 
   /* Send CMD17: Reads a block of the size selected by the SET_BLOCKLEN
@@ -836,7 +836,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
           /* On success, return the number of sectors transfer */
 
-          SPI_SELECT(spi, FALSE);
+          SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
           mmcsd_semgive(&slot->sem);
 
           fvdbg("(%d) Read %d bytes:\n", i, nbytes);
@@ -846,7 +846,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
     }
 
 errout_with_eio:
-  SPI_SELECT(spi, FALSE);
+  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
   mmcsd_semgive(&slot->sem);
   return -EIO;
 }
@@ -932,7 +932,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
   /* Select the slave and synchronize */
 
   mmcsd_semtake(&slot->sem);
-  SPI_SELECT(spi, FALSE);
+  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
   (void)SPI_SNDBYTE(spi, 0xff);
 
   /* Send CMD24 (WRITE_BLOCK) and verify that good R1 status is returned */
@@ -941,7 +941,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
   if (response != MMCSD_SPIR1_OK)
     {
       fdbg("CMD24 failed: R1=%02x\n", response);
-      SPI_SELECT(spi, FALSE);
+      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
       ret = -EIO;
       goto errout_with_sem;
     }
@@ -976,7 +976,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
   /* Wait until the card is no longer busy */
 
   ret = mmcsd_waitready(slot);
-  SPI_SELECT(spi, FALSE);
+  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
   mmcsd_semgive(&slot->sem);
 
   /* Verify that the card successfully became non-busy */
@@ -1141,7 +1141,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
   fvdbg("Send CMD0\n");
   for (i = 0; i < 2; i++)
     {
-      SPI_SELECT(spi, FALSE);
+      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
 
       for (j = 10; j; j--)
         {
@@ -1151,7 +1151,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
       /* Send CMD0 (GO_TO_IDLE) to put MMC/SD in IDLE/SPI mode */
 
       result = mmcsd_sendcmd(slot, &g_cmd0, 0);
-      SPI_SELECT(spi, FALSE);
+      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
 
       /* Return from CMD0 is R1 which should now show IDLE STATE */
 
@@ -1177,16 +1177,16 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
   for (i = 100; i; --i)
     {
       fvdbg("%d. Send CMD55\n", i);
-      SPI_SELECT(spi, FALSE);
+      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
       SPI_SNDBYTE(spi, 0xff);
       result = mmcsd_sendcmd(slot, &g_cmd55, 0);
-      SPI_SELECT(spi, FALSE);
+      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
 
       fvdbg("%d. Send ACMD41\n", i);
-      SPI_SELECT(spi, FALSE);
+      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
       SPI_SNDBYTE(spi, 0xff);
       result = mmcsd_sendcmd(slot, &g_acmd41, 0);
-      SPI_SELECT(spi, FALSE);
+      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
 
       /* If this is an MMC card, it will response with ILLEGAL COMMAND */
 
@@ -1198,10 +1198,10 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
           for (i = 100; i; --i)
             {
               fvdbg("%d. Send CMD1\n", i);
-              SPI_SELECT(spi, FALSE);
+              SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
               SPI_SNDBYTE(spi, 0xff);
               result = mmcsd_sendcmd(slot, &g_cmd1, 0);
-              SPI_SELECT(spi, FALSE);
+              SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
 
               if (result == MMCSD_SPIR1_OK)
                 {

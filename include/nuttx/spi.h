@@ -53,17 +53,22 @@
  * Name: SPI_SELECT
  *
  * Description:
- *   Enable/disable the SPI chip select. Required.
+ *   Enable/disable the SPI chip select.   The implementation of this method
+ *   must include handshaking:  If a device is selected, it must hold off
+ *   all other attempts to select the device until the device is deselected.
+ *   Required.
  *
  * Input Parameters:
- *   select: TRUE: chip selected, FALSE: chip de-selected
+ *   dev -      Device-specific state data
+ *   devid -    Identifies the device to select
+ *   selected - TRUE: slave selected, FALSE: slave de-selected
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-#define SPI_SELECT(d,b) ((d)->ops->select(d,b))
+#define SPI_SELECT(d,id,s) ((d)->ops->select(d,id,s))
 
 /****************************************************************************
  * Name: SPI_SETFREQUENCY
@@ -183,12 +188,23 @@
 
 typedef void (*mediachange_t)(void *arg);
 
+/* If the board supports multiple SPI devices, this enumeration identifies
+ * which is selected or de-seleted.
+ */
+
+enum spidev_e
+{
+  SPIDEV_NONE = 0,  /* Not a valid value */
+  SPIDEV_MMCSD,     /* Select SPI MMC/SD device */
+  SPIDEV_ETHERNET   /* Select SPI ethernet device */
+};
+
 /* The SPI vtable */
 
 struct spi_dev_s;
 struct spi_ops_s
 {
-  void   (*select)(FAR struct spi_dev_s *dev, boolean selected);
+  void   (*select)(FAR struct spi_dev_s *dev, enum spidev_e devid, boolean selected);
   uint32 (*setfrequency)(FAR struct spi_dev_s *dev, uint32 frequency);
   ubyte  (*status)(FAR struct spi_dev_s *dev);
   ubyte  (*sndbyte)(FAR struct spi_dev_s *dev, ubyte ch);
@@ -223,7 +239,7 @@ extern "C" {
  * Name: up_spiinitialize
  *
  * Description:
- *   Initialize the selected SPI port
+ *   Initialize the selected SPI port.
  *
  * Input Parameter:
  *   Port number (for hardware that has mutiple SPI interfaces)
