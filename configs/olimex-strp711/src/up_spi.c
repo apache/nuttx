@@ -265,7 +265,7 @@ static inline void   spi_putreg(FAR struct str71x_spidev_s *priv, ubyte offset, 
 
 /* SPI methods */
 
-static void   spi_select(FAR struct spi_dev_s *dev, boolean selected);
+static void   spi_select(FAR struct spi_dev_s *dev, enum spidev_e devid, boolean selected);
 static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
 static ubyte  spi_status(FAR struct spi_dev_s *dev);
 static ubyte  spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch);
@@ -357,17 +357,21 @@ static inline void spi_putreg(FAR struct str71x_spidev_s *priv, ubyte offset, ui
  * Name: spi_select
  *
  * Description:
- *   Enable/disable the SPI slave select
+ *   Enable/disable the SPI slave select.  The implementation of this method
+ *   must include handshaking:  If a device is selected, it must hold off
+ *   all other attempts to select the device until the device is deselected.
  *
  * Input Parameters:
- *   selected: TRUE: slave selected, FALSE: slave de-selected
+ *   dev -      Device-specific state data
+ *   devid -    Identifies the device to select
+ *   selected - TRUE: slave selected, FALSE: slave de-selected
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_dev_s *dev, boolean selected)
+static void spi_select(FAR struct spi_dev_s *dev, enum spidev_e devid, boolean selected)
 {
   FAR struct str71x_spidev_s *priv = (FAR struct str71x_spidev_s *)dev;
   uint16 reg16;
