@@ -86,9 +86,9 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void   spi_select(FAR struct spi_dev_s *dev, enum spidev_e devid, boolean selected);
+static void   spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
 static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
-static ubyte  spi_status(FAR struct spi_dev_s *dev, enum spidev_e devid);
+static ubyte  spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 static ubyte  spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch);
 static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen);
 static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t buflen);
@@ -135,7 +135,7 @@ static struct spi_dev_s g_spidev = { &g_spiops };
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_dev_s *dev, enum spidev_e devid, boolean selected)
+static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
 {
   uint32 bit = 1 << 20;
 
@@ -222,7 +222,7 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
  *
  ****************************************************************************/
 
-static ubyte spi_status(FAR struct spi_dev_s *dev, enum spidev_e devid)
+static ubyte spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   /* I don't think there is anyway to determine these things on the mcu123.com
    * board.

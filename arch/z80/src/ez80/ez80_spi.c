@@ -66,6 +66,7 @@
  ****************************************************************************/
 
 static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
+static void   spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static ubyte  spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch);
 static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen);
 static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t buflen);
@@ -78,6 +79,7 @@ static const struct spi_ops_s g_spiops =
 {
   ez80_spiselect,    /* Provided externally by board logic */
   spi_setfrequency,
+  spi_setmode,
   ez80_spistatus,    /* Provided externally by board logic */
   spi_sndbyte,
   spi_sndblock,
@@ -146,6 +148,58 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
   outp(EZ80_SPI_BRG_L, (brg >> 8) & 0xff);
 
   return ((EZ80_SYS_CLK_FREQ+1)/2 + brg - 1) / brg;
+}
+
+/****************************************************************************
+ * Name: spi_setmode
+ *
+ * Description:
+ *   Set the SPI mode. Optional.  See enum spi_mode_e for mode definitions
+ *
+ * Input Parameters:
+ *   dev -  Device-specific state data
+ *   mode - The SPI mode requested
+ *
+ * Returned Value:
+ *   none
+ *
+ ****************************************************************************/
+
+static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
+{
+  ubyte modebits;
+  ubyte regval;
+
+  /* Select the CTL register bits based on the selected mode */
+
+  switch (mode)
+    {
+    case SPIDEV_MODE0: /* CPOL=0 CHPHA=0 */
+      modebits = 0;
+      break;
+
+    case SPIDEV_MODE1: /* CPOL=0 CHPHA=1 */
+      modebits = SPI_CTL_CPHA;
+      break;
+
+    case SPIDEV_MODE2: /* CPOL=1 CHPHA=0 */
+      modebits = SPI_CTL_CPOL;
+      break;
+
+    case SPIDEV_MODE3: /* CPOL=1 CHPHA=1 */
+      modebits = (SPI_CTL_CPOL|SPI_CTL_CPHA);
+      break;
+
+    default:
+      return;
+    }
+
+    /* Then set those bits in the CTL register */
+
+    regval = inp(EZ80_SPI_CTL);
+    regval &= ~(SPI_CTL_CPOL|SPI_CTL_CPHA);
+    regval |= modebits;
+    outp(EZ80_SPI_CTL, regval);
 }
 
 /****************************************************************************
@@ -367,7 +421,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   /* Enable the SPI.
    * NOTE 1: Interrupts are not used in this driver version.
-   * NOTE 2: Certain devices may need changes to SCK polarity settings.
+   * NOTE 2: Initial mode is mode=0.
    */
 
   outp(EZ80_SPI_CTL, SPI_CTL_SPIEN|SPI_CTL_MASTEREN);

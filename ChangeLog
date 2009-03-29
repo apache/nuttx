@@ -686,3 +686,5 @@
 	* Add an enumeration argument to the SPI chip select and status methods so
 	  that the interface can handle more than one device.
 	* eZ80Acclaim!: Add a generic SPI driver for all eZ80 boards.
+	* Add a setmode() method to the SPI interface to handle parts with differing
+	  mode requirements.

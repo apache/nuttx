@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/usbdev/spi.h
+ * include/nuttx/spi.h
  *
- *   Copyright(C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright(C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,6 +86,23 @@
  ****************************************************************************/
 
 #define SPI_SETFREQUENCY(d,f) ((d)->ops->setfrequency(d,f))
+
+/****************************************************************************
+ * Name: SPI_SETMODE
+ *
+ * Description:
+ *   Set the SPI mode. Optional.  See enum spi_mode_e for mode definitions
+ *
+ * Input Parameters:
+ *   dev -  Device-specific state data
+ *   mode - The SPI mode requested
+ *
+ * Returned Value:
+ *   none
+ *
+ ****************************************************************************/
+
+#define SPI_SETMODE(d,m) ((d)->ops->mode(d,m))
 
 /****************************************************************************
  * Name: SPI_STATUS
@@ -198,11 +215,21 @@ typedef void (*mediachange_t)(void *arg);
  * which is selected or de-seleted.
  */
 
-enum spidev_e
+enum spi_dev_e
 {
   SPIDEV_NONE = 0,  /* Not a valid value */
   SPIDEV_MMCSD,     /* Select SPI MMC/SD device */
   SPIDEV_ETHERNET   /* Select SPI ethernet device */
+};
+
+/* Certain SPI devices may required differnt clocking modes */
+
+enum spi_mode_e
+{
+  SPIDEV_MODE0 = 0,  /* CPOL=0 CHPHA=0 */
+  SPIDEV_MODE1,      /* CPOL=0 CHPHA=1 */
+  SPIDEV_MODE2,      /* CPOL=1 CHPHA=0 */
+  SPIDEV_MODE3       /* CPOL=1 CHPHA=1 */
 };
 
 /* The SPI vtable */
@@ -210,9 +237,10 @@ enum spidev_e
 struct spi_dev_s;
 struct spi_ops_s
 {
-  void   (*select)(FAR struct spi_dev_s *dev, enum spidev_e devid, boolean selected);
+  void   (*select)(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
   uint32 (*setfrequency)(FAR struct spi_dev_s *dev, uint32 frequency);
-  ubyte  (*status)(FAR struct spi_dev_s *dev, enum spidev_e devid);
+  void   (*setmode)(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
+  ubyte  (*status)(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
   ubyte  (*sndbyte)(FAR struct spi_dev_s *dev, ubyte ch);
   void   (*sndblock)(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen);
   void   (*recvblock)(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t buflen);
