@@ -113,8 +113,8 @@ extern "C" {
  *      will bind the SPI driver to the SPI MMC/SD driver.
  */
 
-EXTERN void ez80_spiselect(FAR struct spi_dev_s *dev, enum spidev_e devid, boolean selected);
-EXTERN ubyte ez80_spistatus(FAR struct spi_dev_s *dev, enum spidev_e devid);
+EXTERN void ez80_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
+EXTERN ubyte ez80_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 
 #undef EXTERN
 #ifdef __cplusplus
