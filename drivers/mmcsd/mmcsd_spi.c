@@ -576,7 +576,7 @@ static void mmcsd_checkwrprotect(FAR struct mmcsd_slot_s *slot, ubyte *csd)
    * reports temporary write protect.
    */
 
-  if ((SPI_STATUS(spi) & SPI_STATUS_WRPROTECTED) != 0 ||
+  if ((SPI_STATUS(spi, SPIDEV_MMCSD) & SPI_STATUS_WRPROTECTED) != 0 ||
       MMCSD_CSD_PERMWRITEPROTECT(csd) ||
       MMCSD_CSD_TMPWRITEPROTECT(csd))
     {
@@ -1116,7 +1116,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
    * interface
    */
 
-  if ((SPI_STATUS(spi) & SPI_STATUS_PRESENT) == 0)
+  if ((SPI_STATUS(spi, SPIDEV_MMCSD) & SPI_STATUS_PRESENT) == 0)
     {
       fdbg("No card present\n");
       slot->state |= MMCSD_SLOTSTATUS_NODISK;
@@ -1296,7 +1296,7 @@ static void mmcsd_mediachanged(void *arg)
   /* Check if media was removed or inserted */
 
   slot->state &= ~(MMCSD_SLOTSTATUS_NODISK|MMCSD_SLOTSTATUS_NOTREADY|MMCSD_SLOTSTATUS_MEDIACHGD);
-  if ((SPI_STATUS(spi) & SPI_STATUS_PRESENT) == 0)
+  if ((SPI_STATUS(spi, SPIDEV_MMCSD) & SPI_STATUS_PRESENT) == 0)
     {
       /* Media is not present */
 

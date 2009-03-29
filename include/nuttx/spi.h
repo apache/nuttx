@@ -77,7 +77,8 @@
  *   Set the SPI frequency. Required.
  *
  * Input Parameters:
- *   frequency: The SPI frequency requested
+ *   dev -       Device-specific state data
+ *   frequency - The SPI frequency requested
  *
  * Returned Value:
  *   Returns the actual frequency selected
@@ -93,15 +94,16 @@
  *   Get SPI/MMC status.  Optional.
  *
  * Input Parameters:
- *   None
+ *   dev -   Device-specific state data
+ *   devid - Identifies the device to report status on
  *
  * Returned Value:
  *   Returns a bitset of status values (see SPI_STATUS_* defines
  *
  ****************************************************************************/
 
-#define SPI_STATUS(d) \
-  ((d)->ops->status ? (d)->ops->status(d) : SPI_STATUS_PRESENT)
+#define SPI_STATUS(d,id) \
+  ((d)->ops->status ? (d)->ops->status(d, id) : SPI_STATUS_PRESENT)
 
 /* SPI status bits -- Some dedicated for SPI MMC/SD support and may have no
  * relationship to SPI other than needed by the SPI MMC/SD interface
@@ -117,7 +119,8 @@
  *   Send one byte on SPI. Required.
  *
  * Input Parameters:
- *   ch - the byte to send
+ *   dev - Device-specific state data
+ *   ch  - The byte to send
  *
  * Returned Value:
  *   None
@@ -133,6 +136,7 @@
  *   Send a block of data on SPI. Required.
  *
  * Input Parameters:
+ *   dev -   Device-specific state data
  *   buffer - A pointer to the buffer of data to be sent
  *   buflen - the length of data to send from the buffer
  *
@@ -150,6 +154,7 @@
  *   Revice a block of data from SPI. Required.
  *
  * Input Parameters:
+ *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to recieve data
  *   buflen - the length of data that can be received in the buffer
  *
@@ -169,8 +174,9 @@
  *   Optional
  *
  * Input Parameters:
+ *   dev -      Device-specific state data
  *   callback - The funtion to call on the media change
- *   arg - A caller provided value to return with the callback
+ *   arg -      A caller provided value to return with the callback
  *
  * Returned Value:
  *   0 on success; negated errno on failure.
@@ -206,7 +212,7 @@ struct spi_ops_s
 {
   void   (*select)(FAR struct spi_dev_s *dev, enum spidev_e devid, boolean selected);
   uint32 (*setfrequency)(FAR struct spi_dev_s *dev, uint32 frequency);
-  ubyte  (*status)(FAR struct spi_dev_s *dev);
+  ubyte  (*status)(FAR struct spi_dev_s *dev, enum spidev_e devid);
   ubyte  (*sndbyte)(FAR struct spi_dev_s *dev, ubyte ch);
   void   (*sndblock)(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen);
   void   (*recvblock)(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t buflen);
