@@ -53,7 +53,8 @@
  * Name: I2C_SETFREQUENCY
  *
  * Description:
- *   Set the I2C frequency. Required.
+ *   Set the I2C frequency. This frequency will be retained in the struct
+ *   i2c_dev_s instance and will be used with all transfers.  Required.
  *
  * Input Parameters:
  *   dev -       Device-specific state data
@@ -67,10 +68,31 @@
 #define I2C_SETFREQUENCY(d,f) ((d)->ops->setfrequency(d,f))
 
 /****************************************************************************
+ * Name: I2C_SETADDRESS
+ *
+ * Description:
+ *   Set the I2C slave address. This frequency will be retained in the struct
+ *   i2c_dev_s instance and will be used with all transfers.  Required.
+ *
+ * Input Parameters:
+ *   dev -     Device-specific state data
+ *   address - The I2C slave address
+ *
+ * Returned Value:
+ *   Returns the actual frequency selected
+ *
+ ****************************************************************************/
+
+#define I2C_SETADDRESS(d,f) ((d)->ops->setaddress(d,f))
+
+/****************************************************************************
  * Name: I2C_WRITE
  *
  * Description:
- *   Send a block of data on I2C. Required.
+ *   Send a block of data on I2C using the previously selected I2C
+ *   frequency and slave address. Each write operational will be an 'atomic'
+ *   operation in the sense that any other I2C actions will be serialized
+ *   and pend until this write completes. Required.
  *
  * Input Parameters:
  *   dev -    Device-specific state data
@@ -82,13 +104,16 @@
  *
  ****************************************************************************/
 
-#define I2C_WRITE(d,b,l) ((d)->ops->sndblock(d,b,l))
+#define I2C_WRITE(d,b,l) ((d)->ops->write(d,b,l))
 
 /****************************************************************************
  * Name: I2C_READ
  *
  * Description:
- *   Receive a block of data from I2C. Required.
+ *   Receive a block of data from I2C using the previously selected I2C
+ *   frequency and slave address. Each read operational will be an 'atomic'
+ *   operation in the sense that any other I2C actions will be serialized
+ *   and pend until this read completes. Required.
  *
  * Input Parameters:
  *   dev -   Device-specific state data
@@ -100,7 +125,7 @@
  *
  ****************************************************************************/
 
-#define I2C_READ(d,b,l) ((d)->ops->sndblock(d,b,l))
+#define I2C_READ(d,b,l) ((d)->ops->read(d,b,l))
 
 /****************************************************************************
  * Public Types
@@ -112,18 +137,19 @@ struct i2c_dev_s;
 struct i2c_ops_s
 {
   uint32 (*setfrequency)(FAR struct i2c_dev_s *dev, uint32 frequency);
-  int    (*write)(FAR struct i2c_dev_s *dev, int addr, const ubyte *buffer, int buflen);
-  int    (*read)(FAR struct i2c_dev_s *dev, int addr, ubyte *buffer, int buflen);
+  int    (*setaddress)(FAR struct i2c_dev_s *dev, int addr);
+  int    (*write)(FAR struct i2c_dev_s *dev, const ubyte *buffer, int buflen);
+  int    (*read)(FAR struct i2c_dev_s *dev, ubyte *buffer, int buflen);
 };
 
 /* I2C private data.  This structure only defines the initial fields of the
  * structure visible to the I2C client.  The specific implementation may 
- * add additional, device specific fields
+ * add additional, device specific fields after the vtable.
  */
 
 struct i2c_dev_s
 {
-  const struct i2c_ops_s *ops;
+  const struct i2c_ops_s *ops; /* I2C vtable */
 };
 
 /****************************************************************************
@@ -142,7 +168,10 @@ extern "C" {
  * Name: up_i2cinitialize
  *
  * Description:
- *   Initialize the selected I2C port.
+ *   Initialize the selected I2C port. And return a unique instance of struct
+ *   struct i2c_dev_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a 
+ *   different frequency and slave address.
  *
  * Input Parameter:
  *   Port number (for hardware that has mutiple I2C interfaces)
