@@ -47,6 +47,11 @@
  * Definitions
  ****************************************************************************/
 
+/* I2C address calculation.  Convert 7-bit address to 8-bit read/write address */
+
+#define I2C_READADDR(a)  (((a) << 1) | 1)
+#define I2C_WRITEADDR(a)  ((a) << 1)
+
 /* Access macros */
 
 /****************************************************************************
