@@ -47,10 +47,28 @@
  * Definitions
  ****************************************************************************/
 
-/* I2C address calculation.  Convert 7-bit address to 8-bit read/write address */
+/* I2C address calculation.  Convert 7- and 10-bit address to 8-bit and
+ * 16-bit read/write address
+ */
 
-#define I2C_READADDR(a)  (((a) << 1) | 1)
-#define I2C_WRITEADDR(a)  ((a) << 1)
+#define I2C_READBIT          0x01
+
+/* Conver 7- to 8-bit address */
+
+#define I2C_ADDR8(a)         ((a) << 1)
+#define I2C_WRITEADDR8(a)    I2C_ADDR8(a)
+#define I2C_READADDR8(a)     (I2C_ADDR8(a) | I2C_READBIT)
+
+/* Convert 10- to 16-bit address */
+
+#define I2C_ADDR10H(a)       (0xf0 | (((a) >> 7) & 0x06))
+#define I2C_ADDR10L(a)       ((a) & 0xff)
+
+#define I2C_WRITEADDR10H(a)  I2C_ADDR10H(a)
+#define I2C_WRITEADDR10L(a)  I2C_ADDR10L(a)
+
+#define I2C_READADDR10H(a)   (I2C_ADDR10H(a) | I2C_READBIT)
+#define I2C_READADDR10L(a)   I2C_ADDR10L(a)
 
 /* Access macros */
 
@@ -82,13 +100,14 @@
  * Input Parameters:
  *   dev -     Device-specific state data
  *   address - The I2C slave address
+ *   nbits -   The number of address bits provided (7 or 10)
  *
  * Returned Value:
  *   Returns the actual frequency selected
  *
  ****************************************************************************/
 
-#define I2C_SETADDRESS(d,f) ((d)->ops->setaddress(d,f))
+#define I2C_SETADDRESS(d,f,b) ((d)->ops->setaddress(d,f,b))
 
 /****************************************************************************
  * Name: I2C_WRITE
@@ -142,7 +161,7 @@ struct i2c_dev_s;
 struct i2c_ops_s
 {
   uint32 (*setfrequency)(FAR struct i2c_dev_s *dev, uint32 frequency);
-  int    (*setaddress)(FAR struct i2c_dev_s *dev, int addr);
+  int    (*setaddress)(FAR struct i2c_dev_s *dev, int addr, int nbits);
   int    (*write)(FAR struct i2c_dev_s *dev, const ubyte *buffer, int buflen);
   int    (*read)(FAR struct i2c_dev_s *dev, ubyte *buffer, int buflen);
 };
