@@ -2,7 +2,7 @@
  * arch/z80/src/z8/chip.h
  * arch/z80/src/chip/chip.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -167,27 +167,35 @@
 /* I2C Status Register Bit Definitions **********************************************/
 
 #if defined(_Z8FMC16) || defined(_Z8F1680)
+#  define I2C_ISTAT_NCKI   (1 << 0) /* Bit 0: 1=NAK Interrupt */
+#  define I2C_ISTAT_SPRS   (1 << 1) /* Bit 1: 1=STOP/RESTART condition Interrupt */
+#  define I2C_ISTAT_ARBLST (1 << 2) /* Bit 2: 1=Arbitration lost */
+#  define I2C_ISTAT_RD     (1 << 3) /* Bit 3: 1=Read */
+#  define I2C_ISTAT_GCA    (1 << 4) /* Bit 4: 1=General Call Address */
+#  define I2C_ISTAT_SAM    (1 << 5) /* Bit 5: 1=Slave address match */
+#  define I2C_ISTAT_RDRF   (1 << 6) /* Bit 6: 1=Receive Data Register Full */
+#  define I2C_ISTAT_TDRE   (1 << 7) /* Bit 7: 1=Transmit Data Register Empty */
 #else
-#  define I2C_STAT_NCKI (1 << 0) /* Bit 0: 1=NACK Interrupt */
-#  define I2C_STAT_DSS  (1 << 1) /* Bit 1: 1=Data Shift State */
-#  define I2C_STAT_TAS  (1 << 2) /* Bit 2: 1=Transmit Address State */
-#  define I2C_STAT_RD   (1 << 3) /* Bit 3: 1=Read */
-#  define I2C_STAT_10B  (1 << 4) /* Bit 4: 1=10-Bit Address */
-#  define I2C_STAT_ACK  (1 << 5) /* Bit 5: 1=Acknowledge */
-#  define I2C_STAT_RDRF (1 << 6) /* Bit 6: 1=Receive Data Register Full */
-#  define I2C_STAT_TDRE (1 << 7) /* Bit 7: 1=Transmit Data Register Empty */
+#  define I2C_STAT_NCKI    (1 << 0) /* Bit 0: 1=NAK Interrupt */
+#  define I2C_STAT_DSS     (1 << 1) /* Bit 1: 1=Data Shift State */
+#  define I2C_STAT_TAS     (1 << 2) /* Bit 2: 1=Transmit Address State */
+#  define I2C_STAT_RD      (1 << 3) /* Bit 3: 1=Read */
+#  define I2C_STAT_10B     (1 << 4) /* Bit 4: 1=10-Bit Address */
+#  define I2C_STAT_ACK     (1 << 5) /* Bit 5: 1=Acknowledge */
+#  define I2C_STAT_RDRF    (1 << 6) /* Bit 6: 1=Receive Data Register Full */
+#  define I2C_STAT_TDRE    (1 << 7) /* Bit 7: 1=Transmit Data Register Empty */
 #endif
 
 /* I2C Control Register Bit Definitions *********************************************/
 
-#define I2C_CTL_FILTEN  (1 << 0) /* Bit 0: 1=I2C Signal Filter Enable */
-#define I2C_CTL_FLUSH   (1 << 1) /* Bit 1: 1=Flush Data */
-#define I2C_CTL_NAK     (1 << 2) /* Bit 2: 1=Send NAK */
-#define I2C_CTL_TXI     (1 << 3) /* Bit 3: 1=Enable TDRE interrupts */
-#define I2C_CTL_BIRQ    (1 << 4) /* Bit 4: 1=Baud Rate Generator Interrupt Request */
-#define I2C_CTL_STOP    (1 << 5) /* Bit 5: 1=Send Stop Condition */
-#define I2C_CTL_START   (1 << 6) /* Bit 6: 1=Send Start Condition */
-#define I2C_CTL_IEN     (1 << 7) /* Bit 7: 1=I2C Enable */
+#define I2C_CTL_FILTEN     (1 << 0) /* Bit 0: 1=I2C Signal Filter Enable */
+#define I2C_CTL_FLUSH      (1 << 1) /* Bit 1: 1=Flush Data */
+#define I2C_CTL_NAK        (1 << 2) /* Bit 2: 1=Send NAK */
+#define I2C_CTL_TXI        (1 << 3) /* Bit 3: 1=Enable TDRE interrupts */
+#define I2C_CTL_BIRQ       (1 << 4) /* Bit 4: 1=Baud Rate Generator Interrupt Request */
+#define I2C_CTL_STOP       (1 << 5) /* Bit 5: 1=Send Stop Condition */
+#define I2C_CTL_START      (1 << 6) /* Bit 6: 1=Send Start Condition */
+#define I2C_CTL_IEN        (1 << 7) /* Bit 7: 1=I2C Enable */
 
 /* Register access macros ***********************************************************
  *
