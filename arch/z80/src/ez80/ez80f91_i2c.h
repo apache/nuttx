@@ -80,12 +80,43 @@
 #define I2C_SR_SHIFT     3        /* Bits 3-7: 5-bit status code */
 #define I2C_SR_MASK      (0x1c << I2C_SR_SHIFT)
 
+
+#define I2C_SR_BUSERR      0x00 /* Bus error */
+#define I2C_SR_MSTART      0x08 /* START condition transmitted */
+#define I2C_SR_MREPSTART   0x10 /* Repeated START condition transmitted */
+#define I2C_SR_MADDRWRACK  0x18 /* Address and Write bit transmitted, ACK received */
+#define I2C_SR_MADDRWR     0x20 /* Address and Write bit transmitted, ACK not received */
+#define I2C_SR_MDATAWRACK  0x28 /* Data byte transmitted in MASTER mode, ACK received */
+#define I2C_SR_MDATAWR     0x30 /* Data byte transmitted in MASTER mode, ACK not received */
+#define I2C_SR_ARBLOST1    0x38 /* Arbitration lost in address or data byte */
+#define I2C_SR_MADDRRDACK  0x40 /* Address and Read bit transmitted, ACK received */
+#define I2C_SR_MADDRRD     0x48 /* Address and Read bit transmitted, ACK not received */
+#define I2C_SR_MDATARDACK  0x50 /* Data byte received in MASTER mode, ACK transmitted */
+#define I2C_SR_MDATARDNAK  0x58 /* Data byte received in MASTER mode, NACK transmitted */
+#define I2C_SR_SADDRWRACK  0x60 /* Slave address and Write bit received, ACK transmitted */
+#define I2C_SR_ARBLOST2    0x68 /* Arbitration lost in address as master, slave address and Write bit received, ACK transmitted */
+#define I2C_SR_SGCARDACK   0x70 /* General Call address received, ACK transmitted */
+#define I2C_SR_ARBLOST3    0x78 /* Arbitration lost in address as master, General Call address received, ACK transmitted */
+#define I2C_SR_SDATARDACK  0x80 /* Data byte received after slave address received, ACK transmitted */
+#define I2C_SR_SDATARDNAK  0x88 /* Data byte received after slave address received, NACK transmitted */
+#define I2C_SR_SDATAGCAACK 0x90 /* Data byte received after General Call received, ACK transmitted */
+#define I2C_SR_SDATAGCANAK 0x98 /* Data byte received after General Call received, NACK transmitted */
+#define I2C_SR_SSTOP       0xa0 /* STOP or repeated START condition received in SLAVE mode */
+#define I2C_SR_SSADDRRDACK 0xa8 /* Slave address and Read bit received, ACK transmitted */
+#define I2C_SR_ARBLOST4    0xb0 /* Arbitration lost in address as master, slave address and Read bit received, ACK transmitted */
+#define I2C_SR_SDATAWRACK  0xb8 /* Data byte transmitted in SLAVE mode, ACK received */
+#define I2C_SR_SDATAWR     0xc0 /* Data byte transmitted in SLAVE mode, ACK not received */
+#define I2C_SR_SLDATAWR    0xc8 /* Last byte transmitted in SLAVE mode, ACK received */
+#define I2C_SR_MADDR2WRACK 0xd0 /* Second Address byte and Write bit transmitted, ACK received */
+#define I2C_SR_MADDR2WR    0xd8 /* Second Address byte and Write bit transmitted, ACK not received */
+#define I2C_SR_NONE        0xf8 /* No relevant status information, IFLG = 0 */
+
 /* Clock Control Register (CCR) Bit Definitions */
 
 #define I2C_CCR_NSHIFT   0        /* Bits 0-2: I2C clock divider exponent */
 #define I2C_CCR_NMASK    (0x07 << I2C_CCR_NSHIFT)
 #define I2C_CCR_MSHIFT   3        /* Bits 3-6: I2C clock divider scalar value */
-#define I2C_CCR_NMASK    (0x0f << I2C_CCR_MSHIFT)
+#define I2C_CCR_MMASK    (0x0f << I2C_CCR_MSHIFT)
 
 /* Software Reset Register (SRR) Bit Definitions */
 /* Writing any value to this register performs a software reset of the I2C module */
