@@ -688,3 +688,6 @@
 	* eZ80Acclaim!: Add a generic SPI driver for all eZ80 boards.
 	* Add a setmode() method to the SPI interface to handle parts with differing
 	  mode requirements.
+	* include/nuttx/i2c.h: Defined a standard I2C interface
+	* eZ80Acclaim!: Add an I2C driver.
+	* eZ8Encore!: Add an I2C driver.

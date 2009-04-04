@@ -688,8 +688,14 @@ o z80/z8/ez80 (arch/z80)
   Status:      Open
   Priority:    High if you happen to be working with XTRS.
 
-  Description: A "generic" SPI driver has been coded for the eZ80Acclaim!
-               However, this remains untested since I have no SPI devices for
+  Description: A "generic" SPI and I2C drivers have been coded for the eZ80Acclaim!
+               However, these remains untested since I have no SPI or I2C devices for
+               the board (yet).
+  Status:      Open
+  Priority:    Med
+
+  Description: A "generic" I2C driver has been coded for the eZ8Encore!
+               However, this remains untested since I have no I2C devices for
                the board (yet).
   Status:      Open
   Priority:    Med

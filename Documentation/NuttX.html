@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 29, 2009</p>
+      <p>Last Updated: April 4, 2009</p>
     </td>
   </tr>
 </table>
@@ -948,7 +948,7 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
       Integration and testing of NuttX on the  ZiLOG ez80f0910200zcog-d is complete.
       The first integrated version was released in NuttX version 0.4.2 (with important early bugfixes
       in 0.4.3 and 0.4.4).
-      As of this writing, that port provides basic board support with a serial console and eZ80F91 EMAC driver.
+      As of this writing, that port provides basic board support with a serial console, SPI, and eZ80F91 EMAC driver.
     </p>
    </td>
 </tr>
@@ -1361,10 +1361,15 @@ nuttx-0.4.5 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* eZ80Acclaim!: Add a generic SPI driver for all eZ80 boards.
 	* Add a setmode() method to the SPI interface to handle parts with differing
 	  mode requirements.
+	* include/nuttx/i2c.h: Defined a standard I2C interface
+	* eZ80Acclaim!: Add an I2C driver.
+	* eZ8Encore!: Add an I2C driver.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 buildroot-0.1.4 2009-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
+
+	* Add support for a blackfin toolchain using GCC 4.2.4 and binutils 2.19
 
 </pre></ul>
 
