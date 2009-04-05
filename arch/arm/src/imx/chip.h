@@ -49,6 +49,7 @@
 #include "imx_usbd.h"
 #include "imx_i2c.h"
 #include "imx_cspi.h"
+#include "imx_gpio.h"
 #include "imx_aitc.h"
 
 /************************************************************************************

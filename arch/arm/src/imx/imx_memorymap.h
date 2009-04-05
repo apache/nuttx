@@ -107,10 +107,6 @@
 #define   IMX_PLL_OFFSET          0x0001b000
 #define   IMX_SC_OFFSET           0x0001b800
 #define IMX_GPIO_OFFSET           0x0001c000 /* -0x0001cfff GPIO                4Kb */
-#define   IMX_PTA_OFFSET          0x0001c000
-#define   IMX_PTB_OFFSET          0x0001c100
-#define   IMX_PTC_OFFSET          0x0001c200
-#define   IMX_PTD_OFFSET          0x0001c300
                                              /* -0x0001ffff Reserved           12Kb */
 #define IMX_EIM_OFFSET            0x00020000 /* -0x00020fff WEIM                4Kb */
 #define IMX_SDRAMC_OFFSET         0x00021000 /* -0x00021fff SDRAMC              4Kb */
@@ -148,10 +144,6 @@
 #define IMX_PLL_VBASE             (IMX_PERIPHERALS_VSECTION + IMX_PLL_OFFSET)
 #define IMX_SC_VBASE              (IMX_PERIPHERALS_VSECTION + IMX_SC_OFFSET)
 #define IMX_GPIO_VBASE            (IMX_PERIPHERALS_VSECTION + IMX_GPIO_OFFSET)
-#define IMX_PTA_VBASE             (IMX_PERIPHERALS_VSECTION + IMX_PTA_OFFSET)
-#define IMX_PTB_VBASE             (IMX_PERIPHERALS_VSECTION + IMX_PTB_OFFSET)
-#define IMX_PTC_VBASE             (IMX_PERIPHERALS_VSECTION + IMX_PTC_OFFSET)
-#define IMX_PTD_VBASE             (IMX_PERIPHERALS_VSECTION + IMX_PTD_OFFSET)
 #define IMX_EIM_VBASE             (IMX_PERIPHERALS_VSECTION + IMX_EIM_OFFSET)
 #define IMX_SDRAMC_VBASE          (IMX_PERIPHERALS_VSECTION + IMX_SDRAMC_OFFSET)
 #define IMX_DSPA_VBASE            (IMX_PERIPHERALS_VSECTION + IMX_DSPA_OFFSET)
