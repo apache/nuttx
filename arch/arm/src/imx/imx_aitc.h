@@ -74,7 +74,7 @@
 #define AITC_FIPNDL_OFFSET           0x0064
 
 /* AITC Register Addresses **********************************************************/
-)
+
 #define IMX_AITC_INTCNTL             (IMX_AITC_VBASE + AITC_INTCNTL_OFFSET)
 #define IMX_AITC_NIMASK              (IMX_AITC_VBASE + AITC_NIMASK_OFFSET)
 #define IMX_AITC_INTENNUM            (IMX_AITC_VBASE + AITC_INTENNUM_OFFSET)
