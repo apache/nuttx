@@ -49,6 +49,7 @@
                                              /* -0x000fffff Double Map Image    1Mb */
                                              /* -0x001fffff Bootstrap ROM       1Mb */
 #define IMX_PERIPHERALS_PSECTION  0x00200000 /* -0x002fffff Peripherals         1Mb */
+#define IMX_ESRAM_PSECTION        0x00300000 /* -0x003fffff Embedded SRAM     128Kb */
 #define IMX_SDRAM0_PSECTION       0x08000000 /* -0x0bffffff SDRAM0 (CSD0)      64Mb */
 #define IMX_SDRAM1_PSECTION       0x0c000000 /* -0x0fffffff SDRAM1 (CSD1)      64Mb */
 #define IMX_FLASH_PSECTION        0x10000000 /* -0x11ffffff FLASH  (CS0)       32Mb */
