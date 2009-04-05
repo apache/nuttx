@@ -41,6 +41,7 @@
  ************************************************************************************/
 
 #include "imx_memorymap.h"
+#include "imx_system.h"
 #include "imx_wdog.h"
 #include "imx_timer.h"
 #include "imx_rtc.h"
