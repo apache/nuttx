@@ -65,8 +65,8 @@
 /* PLL Register Offsets *************************************************************/
 
 #define PLL_CSCR_OFFSET         0x0000 /* Clock Source Control Register */
-#define PLL_MCTL0_OFFSET        0x0004 /* MCU PLL Control Register 0 */
-#define PLL_MCTL1_OFFSET        0x0008 /* MCU PLL Control Register 1 */
+#define PLL_MPCTL0_OFFSET       0x0004 /* MCU PLL Control Register 0 */
+#define PLL_MPCTL1_OFFSET       0x0008 /* MCU PLL & System Clock Control Register 1 */
 #define PLL_SPCTL0_OFFSET       0x000c /* System PLL Control Register 0 */
 #define PLL_SPCTL1_OFFSET       0x0010 /* System PLL Control Register 1 */
 #define PLL_PCDR_OFFSET         0x0020 /* Peripherial Clock Divider Register */
@@ -74,8 +74,8 @@
 /* PLL Register Addresses ***********************************************************/
 
 #define IMX_PLL_CSCR            (IMX_PLL_VBASE + PLL_CSCR_OFFSET)
-#define IMX_PLL_MCTL0           (IMX_PLL_VBASE + PLL_MCTL0_OFFSET)
-#define IMX_PLL_MCTL1           (IMX_PLL_VBASE + PLL_MCTL1_OFFSET)
+#define IMX_PLL_MPCTL0          (IMX_PLL_VBASE + PLL_MPCTL0_OFFSET)
+#define IMX_PLL_MPCTL1          (IMX_PLL_VBASE + PLL_MPCTL1_OFFSET)
 #define IMX_PLL_SPCTL0          (IMX_PLL_VBASE + PLL_SPCTL0_OFFSET)
 #define IMX_PLL_SPCTL1          (IMX_PLL_VBASE + PLL_SPCTL1_OFFSET)
 #define IMX_PLL_PCDR            (IMX_PLL_VBASE + PLL_PCDR_OFFSET)
@@ -87,7 +87,7 @@
 #define SC_RSR_OFFSET           0x0000 /* Reset Source Register */
 #define SC_SIDR_OFFSET          0x0004 /* Silicon ID Register */
 #define SC_FMCR_OFFSET          0x0008 /* Function Muxing Control Register */
-#define SC_GPCR_OFFSET          0x000c /* Global Peripherial Control Regiser */
+#define SC_GPCR_OFFSET          0x000c /* Global Peripheral Control Regiser */
 
 /* SC Register Addresses ************************************************************/
 
