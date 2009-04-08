@@ -440,8 +440,10 @@ defconfig -- This is a configuration file similar to the Linux
 
 	Stack and heap information
 
-		CONFIG_BOOT_FROM_FLASH - Some configurations support XIP
-		  operation from FLASH.
+		CONFIG_BOOT_RUNFROMFLASH - Some configurations support XIP
+		  operation from FLASH but must copy initialized .data sections to RAM.
+		CONFIG_BOOT_COPYTORAM -  Some configurations boot in FLASH
+		  but copy themselves entirely into RAM for better performance.
 		CONFIG_STACK_POINTER - The initial stack pointer
 		CONFIG_IDLETHREAD_STACKSIZE - The size of the initial stack.
 		  This is the thread that (1) performs the inital boot of the system up
