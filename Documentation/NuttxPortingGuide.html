@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: March 13, 2009</p>
+      <p>Last Updated: April 8, 2009</p>
     </td>
   </tr>
 </table>
@@ -2061,8 +2061,12 @@ The system can be re-made subsequently by just typing <code>make</code>.
 
 <ul>
   <li>
-    <code>CONFIG_BOOT_FROM_FLASH</code>: Some configurations support XIP
-    operation from FLASH.
+    <code>CONFIG_BOOT_RUNFROMFLASH</code>: Some configurations support XIP
+    operation from FLASH but must copy initialized .data sections to RAM.
+  </li>
+  <li>
+    <code>CONFIG_BOOT_COPYTORAM</code>: Some configurations boot in FLASH
+    but copy themselves entirely into RAM for better performance.
   </li>
   <li>
     <code>CONFIG_STACK_POINTER</code>: The initial stack pointer
