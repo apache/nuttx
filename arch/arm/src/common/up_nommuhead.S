@@ -93,7 +93,7 @@ __start:
 
 	/* Copy system .data sections to new home in RAM. */
 
-#ifdef CONFIG_BOOT_FROM_FLASH
+#ifdef CONFIG_BOOT_RUNFROMFLASH
 
 	adr	r3, LC2
 	ldmia	r3, {r0, r1, r2}
@@ -141,7 +141,7 @@ LC0:	.long	_sbss
 	.long	_ebss
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
 
-#ifdef CONFIG_BOOT_FROM_FLASH
+#ifdef CONFIG_BOOT_RUNFROMFLASH
 LC2:	.long	_eronly	/* Where .data defaults are stored in FLASH */
 	.long	_sdata	/* Where .data needs to reside in SDRAM */
 	.long	_edata

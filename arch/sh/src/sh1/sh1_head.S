@@ -1,7 +1,7 @@
 /*****************************************************************************
  * arch/sh/src/sh1/sh1_head.S
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,7 @@
 	.globl	_ebss			/* End of BSS */
 	.globl	_svect			/* Start of the new vector location */
 
-#ifdef CONFIG_BOOT_FROM_FLASH
+#ifdef CONFIG_BOOT_RUNFROMFLASH
 	.globl	_eronly			/* Where .data defaults are stored in FLASH */
 	.global	_sdata			/* Start of .data in RAM */
 	.globl	_edata			/* End of .data in RAM */
@@ -388,7 +388,7 @@ __start0:
 
 	/* Initialize data segement */
 
-#ifdef CONFIG_BOOT_FROM_FLASH
+#ifdef CONFIG_BOOT_RUNFROMFLASH
 	mov.l	.Lsdata, r0		/* R0: Start of .data segment */
 	mov.l	.Ledata, r1		/* R1: End+1 of .data segment */
 	mov.l	.Leronly, r2		/* R2: Start of FLASH .data segment copy */
@@ -469,7 +469,7 @@ __start0:
 	nop
 
 	.align 2
-#ifdef CONFIG_BOOT_FROM_FLASH
+#ifdef CONFIG_BOOT_RUNFROMFLASH
 .Leronly:
 	.long   _eronly
 .Lsdata:
