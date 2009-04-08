@@ -1,7 +1,7 @@
 #!/bin/bash
 # zipme.sh
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ TAR="tar cvf"
 ZIP=gzip
 
 # This is a list of bad directories that have creapt into the CVS tree
-# due to bad imports, renamed directories, etc.
+# due to bad imports, renamed directories, unfinished ports, etc.
 
 GARBAGEDIRS="\
   configs/m68332evb/src/src\
