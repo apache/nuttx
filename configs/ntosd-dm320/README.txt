@@ -8,7 +8,7 @@ Toolchain
   be modified to point to the correct path to the SH toolchain (if
   different from the default).
 
-  If you have no SH toolchain, one can be downloaded from the NuttX
+  If you have no ARM toolchain, one can be downloaded from the NuttX
   SourceForge download site (https://sourceforge.net/project/showfiles.php?group_id=189573).
 
   1. You must have already configured Nuttx in <some-dir>nuttx.
@@ -45,20 +45,20 @@ ARM/DM320-specific Configuration Options
 
 	CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
-	   CONFIG_ARCH_CHIP=c5471
+	   CONFIG_ARCH_CHIP=dm320
 
 	CONFIG_ARCH_CHIP_name - For use in C code
 
-	   CONFIG_ARCH_CHIP_C5471
+	   CONFIG_ARCH_CHIP_DM320
 
 	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
 	   hence, the board that supports the particular chip or SoC.
 
-	   CONFIG_ARCH_BOARD=c5471evm (for the Spectrum Digital C5471 EVM)
+	   CONFIG_ARCH_BOARD=ntosd-dm320
 
 	CONFIG_ARCH_BOARD_name - For use in C code
 
-	   CONFIG_ARCH_BOARD_C5471EVM (for the Spectrum Digital C5471 EVM)
+	   CONFIG_ARCH_BOARD_NTOSD_DM320 (for the Spectrum Digital C5471 EVM)
 
 	CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
 	   of delay loops
