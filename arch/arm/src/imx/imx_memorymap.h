@@ -74,9 +74,13 @@
 
 /* Virtual Memory Map ***************************************************************/
 
-#define IMX_SDRAM_VSECTION        0x00000000 /* -(+CONFIG_DRAM_SIZE)                */
-#define IMX_FLASH_VSECTION        0x80000000 /* -(+CONFIG_FLASH_SIZE)               */
-#define IMX_PERIPHERALS_VSECTION  0xe0000000 /* -0xe00fffff                     1Mb */
+/* We use a simple identity mapping.  The MMU is really only used to control the
+ * D-cache
+ */
+
+#define IMX_PERIPHERALS_VSECTION  0x00200000 /* -0x002fffff                     1Mb */
+#define IMX_SDRAM_VSECTION        0x08000000 /* -(+CONFIG_DRAM_SIZE)                */
+#define IMX_FLASH_VSECTION        0x10000000 /* -(+CONFIG_FLASH_SIZE)               */
 
 /* Peripheral Register Offsets ******************************************************/
 
@@ -157,7 +161,7 @@
  * This offset reserves space for the MMU page cache.
  */
 
-#define NUTTX_START_VBASE         (IMX_SDRAM_VBASE+PGTABLE_SIZE)
+#define NUTTX_START_VADDR         (IMX_SDRAM_VSECTION+PGTABLE_SIZE)
 
 /* Section MMU Flags  */
 

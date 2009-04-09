@@ -214,8 +214,8 @@
 
 #define USBD_DADR_DADR_SHIFT        0        /* Bit 0-8: Desired RAM Address */
 #define USBD_DADR_DADR_MASK        (0x1ff << USBD_DADR_DADR_SHIFT)
-#define USBD_DADR_BSY:1;           (1 << 30) /* Bit 30: Busy */
-#define USBD_DADR_CFG:1;           (1 << 31) /* Bit 31: Configuration */
+#define USBD_DADR_BSY              (1 << 30) /* Bit 30: Busy */
+#define USBD_DADR_CFG              (1 << 31) /* Bit 31: Configuration */
 
 /* USBD DDAT Register */
 

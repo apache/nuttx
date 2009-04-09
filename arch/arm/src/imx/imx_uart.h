@@ -160,7 +160,7 @@
 #define UART2_UCR3_PARERREN   (1 << 12) /* Bit 12: Parity Error Interrupt Enable */
 #define UART2_UCR3_DTREN      (1 << 13) /* Bit 13: Data Terminal Ready Interrupt Enable */
 #define UART2_UCR3_DPEC_SHIFT 14        /* Bit 14-15: DTR Interrupt Edge Control */
-#define UART2_UCR3_DPEC_SHIFT (0x03 << UART_UCR4_DPEC_SHIFT)
+#define UART2_UCR3_DPEC_MASK  (0x03 << UART_UCR4_DPEC_SHIFT)
 
 /* UART Control Register 4 */
 
