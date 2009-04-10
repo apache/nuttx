@@ -1,7 +1,8 @@
 /****************************************************************************
- * arch/arm/src/common/up_initialize.c
+ * arch/arm/src/imx/imx_gpio.c
+ * arch/arm/src/chip/imx_gpio.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,26 +39,21 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <sys/types.h>
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/fs.h>
 
 #include "up_arch.h"
-#include "up_internal.h"
+#include "imx_gpio.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/* Define to enable timing loop calibration */
-
-#undef CONFIG_ARM_CALIBRATION
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 /****************************************************************************
- * Private Types
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -65,96 +61,50 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_calibratedelay
- *
- * Description:
- *   Delay loops are provided for short timing loops.  This function, if
- *   enabled, will just wait for 100 seconds.  Using a stopwatch, you can
- *   can then determine if the timing loops are properly calibrated.
- *
+ * Public Funtions
  ****************************************************************************/
 
-#if defined(CONFIG_ARM_CALIBRATION) & defined(CONFIG_DEBUG)
-static void up_calibratedelay(void)
+/****************************************************************************
+ * Name: imxgpio_configoutput
+ ****************************************************************************/
+
+void imxgpio_configoutput(int port, int bit, int value)
 {
-  int i;
-  slldbg("Beginning 100s delay\n");
-  for (i = 0; i < 100; i++)
+  imxgpio_configinput(port, bit);         /* Same as input except: */
+  imxgpio_dirout(GPIOA, 2);                 /* Output */
+
+  if (value)
     {
-      up_mdelay(1000);
+      imxgpio_setoutput(GPIOA, 2);          /* Set output = 1 */
     }
-  slldbg("End 100s delay\n");
+  else
+    {
+      imxgpio_clroutput(GPIOA, 2);          /* Set output = 0 */
+    }
 }
-#else
-# define up_calibratedelay()
-#endif
 
 /****************************************************************************
- * Public Functions
+ * Name: imxgpio_configinput
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_initialize
- *
- * Description:
- *   up_initialize will be called once during OS initialization after the
- *   basic OS services have been initialized.  The architecture specific
- *   details of initializing the OS will be handled here.  Such things as
- *   setting up interrupt service routines, starting the clock, and
- *   registering device drivers are some of the things that are different
- *   for each processor and hardware platform.
- *
- *   up_initialize is called after the OS initialized but before the user
- *   initialization logic has been started and before the libraries have
- *   been initialized.  OS services and driver services are available.
- *
- ****************************************************************************/
-
-void up_initialize(void)
+void imxgpio_configinput(int port, int bit)
 {
-  /* Initialize global variables */
+  imxgpio_pullupdisable(GPIOA, 2);          /* No pullup */
+  imxgpio_dirin(GPIOA, 2);                  /* Input */
+  imxgpio_gpiofunc(GPIOA, 2);               /* Use as GPIO */
+  imxgpio_primaryperipheralfunc(GPIOA, 2);  /* Not necessary */
+  imxgpio_ocrain(GPIOA, 2);                 /* Output AIN */
+  imxgpio_aoutgpio(GPIOA, 2);               /* AOUT input is GPIO */
+  imxgpio_boutgpio(GPIOA, 2);               /* BOUT input is GPIO */
+}
 
-  current_regs = NULL;
+/****************************************************************************
+ * Name: imxgpio_configprimary
+ ****************************************************************************/
 
-  /* Calibrate the timing loop */
-
-  up_calibratedelay();
-
-  /* Add any extra memory fragments to the memory manager */
-
-  up_addregion();
-
-  /* Initialize the interrupt subsystem */
-
-  up_irqinitialize();
-
-  /* Initialize the system timer interrupt */
-
-#if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
-  up_timerinit();
-#endif
-
-  /* Register devices */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  devnull_register();   /* Standard /dev/null */
-#endif
-
-  /* Initialize the serial device driver */
-
-#ifdef CONFIG_USE_SERIALDRIVER
-  up_serialinit();
-#elif defined(CONFIG_DEV_LOWCONSOLE)
-  lowconsole_init();
-#endif
-
-  /* Initialize the netwok */
-
-  up_netinitialize();
-
-  /* Initializ USB */
-
-  up_usbinitialize();
-
-  up_ledon(LED_IRQSENABLED);
+void imxgpio_configprimary(int port, int bit)
+{
+  imxgpio_configinput(port, bit);           /* Same as input except: */
+  imxgpio_peripheralfunc(GPIOA, 2);         /* Use as peripheral */
+  imxgpio_primaryperipheralfunc(GPIOA, 2);  /* Primary function*/
 }

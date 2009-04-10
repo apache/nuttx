@@ -1,7 +1,8 @@
 /****************************************************************************
- * arch/arm/src/common/up_initialize.c
+ * arch/arm/src/imx/imx_allocateheap.c
+ * arch/arm/src/chip/imx_allocateheap.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,26 +39,20 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <sys/types.h>
 #include <debug.h>
-
+#include <nuttx/mm.h>
 #include <nuttx/arch.h>
-#include <nuttx/fs.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Private Definitions
  ****************************************************************************/
 
-/* Define to enable timing loop calibration */
-
-#undef CONFIG_ARM_CALIBRATION
-
 /****************************************************************************
- * Private Types
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -65,96 +60,54 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_calibratedelay
- *
- * Description:
- *   Delay loops are provided for short timing loops.  This function, if
- *   enabled, will just wait for 100 seconds.  Using a stopwatch, you can
- *   can then determine if the timing loops are properly calibrated.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_ARM_CALIBRATION) & defined(CONFIG_DEBUG)
-static void up_calibratedelay(void)
-{
-  int i;
-  slldbg("Beginning 100s delay\n");
-  for (i = 0; i < 100; i++)
-    {
-      up_mdelay(1000);
-    }
-  slldbg("End 100s delay\n");
-}
-#else
-# define up_calibratedelay()
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_initialize
+ * Name: up_allocate_heap
  *
  * Description:
- *   up_initialize will be called once during OS initialization after the
- *   basic OS services have been initialized.  The architecture specific
- *   details of initializing the OS will be handled here.  Such things as
- *   setting up interrupt service routines, starting the clock, and
- *   registering device drivers are some of the things that are different
- *   for each processor and hardware platform.
- *
- *   up_initialize is called after the OS initialized but before the user
- *   initialization logic has been started and before the libraries have
- *   been initialized.  OS services and driver services are available.
+ *   The heap may be statically allocated by defining CONFIG_HEAP_BASE and
+ *   CONFIG_HEAP_SIZE.  If these are not defined, then this function will be
+ *   called to dynamically set aside the heap region.
  *
  ****************************************************************************/
 
-void up_initialize(void)
+void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
-  /* Initialize global variables */
-
-  current_regs = NULL;
-
-  /* Calibrate the timing loop */
-
-  up_calibratedelay();
-
-  /* Add any extra memory fragments to the memory manager */
-
-  up_addregion();
-
-  /* Initialize the interrupt subsystem */
-
-  up_irqinitialize();
-
-  /* Initialize the system timer interrupt */
-
-#if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
-  up_timerinit();
-#endif
-
-  /* Register devices */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  devnull_register();   /* Standard /dev/null */
-#endif
-
-  /* Initialize the serial device driver */
-
-#ifdef CONFIG_USE_SERIALDRIVER
-  up_serialinit();
-#elif defined(CONFIG_DEV_LOWCONSOLE)
-  lowconsole_init();
-#endif
-
-  /* Initialize the netwok */
-
-  up_netinitialize();
-
-  /* Initializ USB */
-
-  up_usbinitialize();
-
-  up_ledon(LED_IRQSENABLED);
+  up_ledon(LED_HEAPALLOCATE);
+  *heap_start = (FAR void*)g_heapbase;
+  *heap_size  = (IMX_SDRAM_VSECTION + CONFIG_DRAM_SIZE) - g_heapbase;
 }
+
+/****************************************************************************
+ * Name: up_addregion
+ *
+ * Description:
+ *   Memory may be added in non-contiguous chunks.  Additional chunks are
+ *   added by calling this function.
+ *
+ ****************************************************************************/
+
+#if CONFIG_MM_REGIONS > 1
+void up_addregion(void)
+{
+  /* If a bootloader that copies us to DRAM, but not to the beginning of DRAM,
+   * then recover that memory by adding another memory region.
+   */
+
+#if !defined(CONFIG_BOOT_RUNFROMFLASH) && !defined(CONFIG_BOOT_COPYTORAM)
+#  if (CONFIG_DRAM_NUTTXENTRY & 0xffff0000) != CONFIG_DRAM_VSTART
+  uint32 start = CONFIG_DRAM_VSTART + 0x1000;
+  uint32 end   = (CONFIG_DRAM_NUTTXENTRY & 0xffff0000);
+  mm_addregion((FAR void*)start, end - start);
+#  endif
+#endif
+
+  /* Check for any additional memory regions */
+
+#if defined(CONFIG_HEAP2_BASE) && defined(CONFIG_HEAP2_END)
+  mm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_END - CONFIG_HEAP2_BASE);
+#endif
+}
+#endif

@@ -74,13 +74,61 @@
 
 /* Virtual Memory Map ***************************************************************/
 
-/* We use a simple identity mapping.  The MMU is really only used to control the
- * D-cache
+/* There are three operational memory configurations:
+ *
+ * 1. We execute in place in FLASH (CONFIG_BOOT_RUNFROMFLASH=y).  In this case:
+ *
+ *    - Our vectors must be located at the beginning of FLASH and will
+ *      also be mapped to address zero (because of the i.MX's "double map image."
+ *    - All vector addresses are FLASH absolute addresses,
+ *    - DRAM cannot reside at address zero,
+ *    - Vectors at address zero (CR_V is not set),
+ *    - The boot logic must configure SDRAM and, 
+ *    - The .data section in RAM must be initialized.
+ *
+ * 2. We boot in FLASH but copy ourselves to DRAM from better performance.
+ *    (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=y).  In this case:
+ *
+ *    - Our code image is in FLASH and we boot to FLASH initially, then copy
+ *      ourself to DRAM,
+ *    - DRAM will be mapped to address zero,
+ *    - The RESET vector is a FLASH absolute address,
+ *    - All other vectors are absulte and reference functions in the final mapped SDRAM address
+ *    - Vectors at address zero (CR_V is not set), and
+ *    - The boot logic must configure SDRAM.
+ *
+ * 3. There is bootloader that copies us to DRAM, but probably not to the beginning
+ *    of DRAM (say to 0x0900:0000) (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=n).
+ *    In this case:
+ *
+ *    - DRAM will be mapped to address zero,
+ *    - Interrupt vectors will be copied to address zero,
+ *    - Memory between the end of the vector area (say 0x0800:0400) and the beginning
+ *      of the page table (0x0900:0000) will be given to the memory manager as a second
+ *      memory region,
+ *    - All vectors are absulte and reference functions in the final mapped SDRAM address
+ *    - Vectors at address zero (CR_V is not set), and
+ *    - We must assume that the bootloader has configured SDRAM.
  */
 
+#ifdef CONFIG_BOOT_RUNFROMFLASH
+   /* Use the identity mapping */
+
+#  define IMX_SDRAM_VSECTION      0x08000000 /* -(+CONFIG_DRAM_SIZE)                */
+#else
+   /* Map SDRAM to address zero */
+
+#  define IMX_SDRAM_VSECTION      0x00000000 /* -(+CONFIG_DRAM_SIZE)                */
+#endif
+
+/* We use a identity mapping for other regions */
+
 #define IMX_PERIPHERALS_VSECTION  0x00200000 /* -0x002fffff                     1Mb */
-#define IMX_SDRAM_VSECTION        0x08000000 /* -(+CONFIG_DRAM_SIZE)                */
 #define IMX_FLASH_VSECTION        0x10000000 /* -(+CONFIG_FLASH_SIZE)               */
+
+/* In any event, the vector base address is 0x0000:0000 */
+
+#define VECTOR_BASE               0x00000000
 
 /* Peripheral Register Offsets ******************************************************/
 
@@ -161,7 +209,11 @@
  * This offset reserves space for the MMU page cache.
  */
 
-#define NUTTX_START_VADDR         (IMX_SDRAM_VSECTION+PGTABLE_SIZE)
+#define NUTTX_START_VADDR         ((CONFIG_DRAM_NUTTXENTRY & 0xfff00000) | PGTABLE_SIZE)
+
+#if NUTTX_START_VADDR != CONFIG_DRAM_NUTTXENTRY
+# error "CONFIG_DRAM_NUTTXENTRY does not have correct offset for page table"
+#endif
 
 /* Section MMU Flags  */
 
@@ -174,27 +226,23 @@
  * We will reuse this memory for coarse page tables as follows:
  */
 
-#define PGTABLE_BASE_PBASE        IMX_SDRAM0_PSECTION
-#define PGTABLE_SDRAM_PBASE       PGTABLE_BASE_PBASE
-#define PGTABLE_COARSE_BASE_PBASE (PGTABLE_BASE_PBASE+0x00000800)
-#define PGTABLE_COARSE_END_PBASE  (PGTABLE_BASE_PBASE+0x00003000)
-#define PTTABLE_PERIPHERALS_PBASE (PGTABLE_BASE_PBASE+0x00003000)
-#define PGTABLE_END_PBASE         (PGTABLE_BASE_PBASE+0x00004000)
+#define PGTABLE_PBASE             IMX_SDRAM0_PSECTION
+#define PGTABLE_SDRAM_PBASE       PGTABLE_PBASE
+#define PGTABLE_COARSE_PBASE      (PGTABLE_PBASE+0x00000800)
+#define PGTABLE_COARSE_PEND       (PGTABLE_PBASE+0x00003000)
+#define PTTABLE_PERIPHERALS_PBASE (PGTABLE_PBASE+0x00003000)
+#define PGTABLE_PEND              (PGTABLE_PBASE+0x00004000)
 
-#define PGTABLE_BASE_VBASE        IMX_SDRAM_VSECTION
-#define PGTABLE_SDRAM_VBASE       PGTABLE_BASE_VBASE
-#define PGTABLE_COARSE_BASE_VBASE (PGTABLE_BASE_VBASE+0x00000800)
-#define PGTABLE_COARSE_END_VBASE  (PGTABLE_BASE_VBASE+0x00003000)
-#define PTTABLE_PERIPHERALS_VBASE (PGTABLE_BASE_VBASE+0x00003000)
-#define PGTABLE_END_VBASE         (PGTABLE_BASE_VBASE+0x00004000)
+#define PGTABLE_VBASE             IMX_SDRAM_VSECTION
+#define PGTABLE_SDRAM_VBASE       PGTABLE_VBASE
+#define PGTABLE_COARSE_VBASE      (PGTABLE_VBASE+0x00000800)
+#define PGTABLE_COARSE_VEND       (PGTABLE_VBASE+0x00003000)
+#define PTTABLE_PERIPHERALS_VBASE (PGTABLE_VBASE+0x00003000)
+#define PGTABLE_VEND              (PGTABLE_VBASE+0x00004000)
 
 #define PGTBALE_COARSE_TABLE_SIZE (4*256)
-#define PGTABLE_COARSE_ALLOC      (PGTABLE_COARSE_END_VBASE-PGTABLE_COARSE_BASE_VBASE)
+#define PGTABLE_COARSE_ALLOC      (PGTABLE_COARSE_VEND-PGTABLE_COARSE_VBASE)
 #define PGTABLE_NCOARSE_TABLES    (PGTABLE_COARSE_SIZE / PGTBALE_COARSE_TABLE_ALLOC)
-
-/* This is the base address of the interrupt vectors on the ARM926 */
-
-#define VECTOR_BASE               IMX_VECTOR_VBASE
 
 /************************************************************************************
  * Inline Functions
