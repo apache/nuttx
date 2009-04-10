@@ -123,12 +123,12 @@
 #define PMD_TYPE_COARSE     0x00000001
 #define PMD_TYPE_SECT       0x00000002
 #define PMD_TYPE_FINE       0x00000003
-                                    /* Bits 3:2:   Depends on descriptor */
+                                        /* Bits 3:2:   Depends on descriptor */
 #define PMD_BIT4            0x00000010  /* Bit  4:     Must be one */
 #define PMD_DOMAIN_MASK     0x000001e0  /* Bits 8:5:   Domain control bits */
 #define PMD_DOMAIN(x)       ((x) << 5)
 #define PMD_PROTECTION      0x00000200  /* Bit 9:      v5 only */
-                                    /* Bits 31:10: Depend on descriptor */
+                                        /* Bits 31:10: Depend on descriptor */
 
 /* Level 1 Section Descriptor.  Section descriptors allow fast, single
  * level mapping between 1Mb address regions.

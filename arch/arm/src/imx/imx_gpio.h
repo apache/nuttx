@@ -1,5 +1,6 @@
 /************************************************************************************
  * arch/arm/src/imx/imx_gpio.h
+ * arch/arm/src/chip/imx_gpio.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,6 +40,8 @@
 /************************************************************************************
  * Included Files
  ************************************************************************************/
+
+#include "up_arch.h"                     /* getreg32(), putreg32() */
  
 /************************************************************************************
  * Definitions
@@ -180,3 +183,376 @@
  ************************************************************************************/
 
 #endif  /* __ARCH_ARM_IMX_GPIO_H */
+
+#ifndef __ASSEMBLY__
+
+/* Handler circular include... This file includes up_arch.h, but this file is
+ * included by up_arch.h (via chip.h) BEFORE getreg32 is defined.
+ */
+
+#if !defined(__ARCH_ARM_IMX_GPIOHELPERS_H) && defined(getreg32)
+#define __ARCH_ARM_IMX_GPIOHELPERS_H
+
+/* Select whether the pin is an input or output */
+
+static inline void imxgpio_dirout(int port, int bit)
+{
+  uint32 regval = getreg32(IMX_GPIO_DDIR(port));
+  regval |= (1 << bit);
+  putreg32(regval, IMX_GPIO_DDIR(port));
+}
+
+static inline void imxgpio_dirin(int port, int bit)
+{
+  uint32 regval = getreg32(IMX_GPIO_DDIR(port));
+  regval &= ~(1 << bit);
+  putreg32(regval, IMX_GPIO_DDIR(port));
+}
+
+/* Select input configuration */
+
+static inline void imxgpio_ocrain(int port, int bit)
+{
+  uint32 regval;
+  uint32 regaddr;
+  int    shift;
+
+  if (bit < 16)
+    {
+      regaddr = IMX_GPIO_OCR1(port);
+      shift   = (bit << 1);
+    }
+  else
+    {
+      regaddr = IMX_GPIO_OCR2(port);
+      shift   = ((bit - 16) << 1);
+    }
+
+  regval  = getreg32(regaddr);
+  regval &= ~(3 << shift);
+  putreg32(regval, regaddr);
+}
+
+static inline void imxgpio_ocrbin(int port, int bit)
+{
+  uint32 regval;
+  uint32 regaddr;
+  int    shift;
+
+  if (bit < 16)
+    {
+      regaddr = IMX_GPIO_OCR1(port);
+      shift   = (bit << 1);
+    }
+  else
+    {
+      regaddr = IMX_GPIO_OCR2(port);
+      shift   = ((bit - 16) << 1);
+    }
+
+  regval  = getreg32(regaddr);
+  regval &= ~(3 << shift);
+  regval |= (1 << shift);
+  putreg32(regval, regaddr);
+}
+
+static inline void imxgpio_ocrcin(int port, int bit)
+{
+  uint32 regval;
+  uint32 regaddr;
+  int    shift;
+
+  if (bit < 16)
+    {
+      regaddr = IMX_GPIO_OCR1(port);
+      shift   = (bit << 1);
+    }
+  else
+    {
+      regaddr = IMX_GPIO_OCR2(port);
+      shift   = ((bit - 16) << 1);
+    }
+
+  regval  = getreg32(regaddr);
+  regval &= ~(3 << shift);
+  regval |= (2 << shift);
+  putreg32(regval, regaddr);
+}
+
+static inline void imxgpio_ocrodrin(int port, int bit)
+{
+  uint32 regval;
+  uint32 regaddr;
+  int    shift;
+
+  if (bit < 16)
+    {
+      regaddr = IMX_GPIO_OCR1(port);
+      shift   = (bit << 1);
+    }
+  else
+    {
+      regaddr = IMX_GPIO_OCR2(port);
+      shift   = ((bit - 16) << 1);
+    }
+
+  regval  = getreg32(regaddr);
+  regval |= (3 << shift);
+  putreg32(regval, regaddr);
+}
+
+/* Input configuration */
+
+static inline void imxgpio_aoutgpio(int port, int bit)
+{
+  uint32 regval;
+  uint32 regaddr;
+  int    shift;
+
+  if (bit < 16)
+    {
+      regaddr = IMX_GPIO_ICONFA1(port);
+      shift   = (bit << 1);
+    }
+  else
+    {
+      regaddr = IMX_GPIO_ICONFA2(port);
+      shift   = ((bit - 16) << 1);
+    }
+
+  regval  = getreg32(regaddr);
+  regval &= ~(3 << shift);
+  putreg32(regval, regaddr);
+}
+
+static inline void imxgpio_aoutisr(int port, int bit)
+{
+  uint32 regval;
+  uint32 regaddr;
+  int    shift;
+
+  if (bit < 16)
+    {
+      regaddr = IMX_GPIO_ICONFA1(port);
+      shift   = (bit << 1);
+    }
+  else
+    {
+      regaddr = IMX_GPIO_ICONFA2(port);
+      shift   = ((bit - 16) << 1);
+    }
+
+  regval  = getreg32(regaddr);
+  regval &= ~(3 << shift);
+  regval |= (1 << shift);
+  putreg32(regval, regaddr);
+}
+
+static inline void imxgpio_aout0(int port, int bit)
+{
+  uint32 regval;
+  uint32 regaddr;
+  int    shift;
+
+  if (bit < 16)
+    {
+      regaddr = IMX_GPIO_ICONFA1(port);
+      shift   = (bit << 1);
+    }
+  else
+    {
+      regaddr = IMX_GPIO_ICONFA2(port);
+      shift   = ((bit - 16) << 1);
+    }
+
+  regval  = getreg32(regaddr);
+  regval &= ~(3 << shift);
+  regval |= (2 << shift);
+  putreg32(regval, regaddr);
+}
+
+static inline void imxgpio_aout1(int port, int bit)
+{
+  uint32 regval;
+  uint32 regaddr;
+  int    shift;
+
+  if (bit < 16)
+    {
+      regaddr = IMX_GPIO_ICONFA1(port);
+      shift   = (bit << 1);
+    }
+  else
+    {
+      regaddr = IMX_GPIO_ICONFA2(port);
+      shift   = ((bit - 16) << 1);
+    }
+
+  regval  = getreg32(regaddr);
+  regval |= (3 << shift);
+  putreg32(regval, regaddr);
+}
+
+static inline void imxgpio_boutgpio(int port, int bit)
+{
+  uint32 regval;
+  uint32 regaddr;
+  int    shift;
+
+  if (bit < 16)
+    {
+      regaddr = IMX_GPIO_ICONFB1(port);
+      shift   = (bit << 1);
+    }
+  else
+    {
+      regaddr = IMX_GPIO_ICONFB2(port);
+      shift   = ((bit - 16) << 1);
+    }
+
+  regval  = getreg32(regaddr);
+  regval &= ~(3 << shift);
+  putreg32(regval, regaddr);
+}
+
+static inline void imxgpio_boutisr(int port, int bit)
+{
+  uint32 regval;
+  uint32 regaddr;
+  int    shift;
+
+  if (bit < 16)
+    {
+      regaddr = IMX_GPIO_ICONFB1(port);
+      shift   = (bit << 1);
+    }
+  else
+    {
+      regaddr = IMX_GPIO_ICONFB2(port);
+      shift   = ((bit - 16) << 1);
+    }
+
+  regval  = getreg32(regaddr);
+  regval &= ~(3 << shift);
+  regval |= (1 << shift);
+  putreg32(regval, regaddr);
+}
+
+static inline void imxgpio_bout0(int port, int bit)
+{
+  uint32 regval;
+  uint32 regaddr;
+  int    shift;
+
+  if (bit < 16)
+    {
+      regaddr = IMX_GPIO_ICONFB1(port);
+      shift   = (bit << 1);
+    }
+  else
+    {
+      regaddr = IMX_GPIO_ICONFB2(port);
+      shift   = ((bit - 16) << 1);
+    }
+
+  regval  = getreg32(regaddr);
+  regval &= ~(3 << shift);
+  regval |= (2 << shift);
+  putreg32(regval, regaddr);
+}
+
+static inline void imxgpio_bout1(int port, int bit)
+{
+  uint32 regval;
+  uint32 regaddr;
+  int    shift;
+
+  if (bit < 16)
+    {
+      regaddr = IMX_GPIO_ICONFB1(port);
+      shift   = (bit << 1);
+    }
+  else
+    {
+      regaddr = IMX_GPIO_ICONFB2(port);
+      shift   = ((bit - 16) << 1);
+    }
+
+  regval  = getreg32(regaddr);
+  regval |= (3 << shift);
+  putreg32(regval, regaddr);
+}
+
+/* Select whether the pin is used for its GPIO function or for
+ * its peripheral function.  Also select the primary or alternate
+ * peripheral function.
+ */
+
+static inline void imxgpio_gpiofunc(int port, int bit)
+{
+  uint32 regval = getreg32(IMX_GPIO_GIUS(port));
+  regval |= (1 << bit);
+  putreg32(regval, IMX_GPIO_GIUS(port));
+}
+
+static inline void imxgpio_peripheralfunc(int port, int bit)
+{
+  uint32 regval = getreg32(IMX_GPIO_GIUS(port));
+  regval &= ~(1 << bit);
+  putreg32(regval, IMX_GPIO_GIUS(port));
+}
+
+static inline void imxgpio_altperipheralfunc(int port, int bit)
+{
+  uint32 regval = getreg32(IMX_GPIO_GPR(port));
+  regval |= (1 << bit);
+  putreg32(regval, IMX_GPIO_GPR(port));
+}
+
+static inline void imxgpio_primaryperipheralfunc(int port, int bit)
+{
+  uint32 regval = getreg32(IMX_GPIO_GPR(port));
+  regval &= ~(1 << bit);
+  putreg32(regval, IMX_GPIO_GPR(port));
+}
+
+/* Enable/disable pullups */
+
+static inline void imxgpio_pullupenable(int port, int bit)
+{
+  uint32 regval = getreg32(IMX_GPIO_PUEN(port));
+  regval |= (1 << bit);
+  putreg32(regval, IMX_GPIO_PUEN(port));
+}
+
+static inline void imxgpio_pullupdisable(int port, int bit)
+{
+  uint32 regval = getreg32(IMX_GPIO_PUEN(port));
+  regval &= ~(1 << bit);
+  putreg32(regval, IMX_GPIO_PUEN(port));
+}
+
+static inline void imxgpio_setoutput(int port, int bit)
+{
+  uint32 regval = getreg32(IMX_GPIO_DR(port));
+  regval |= (1 << bit);
+  putreg32(regval, IMX_GPIO_DR(port));
+}
+
+static inline void imxgpio_clroutput(int port, int bit)
+{
+  uint32 regval = getreg32(IMX_GPIO_DR(port));
+  regval &= ~(1 << bit);
+  putreg32(regval, IMX_GPIO_DR(port));
+}
+
+/* Useful functions for normal configurations */
+
+extern void imxgpio_configreset(int port, int bit);
+extern void imxgpio_configoutput(int port, int bit, int value);
+extern void imxgpio_configinput(int port, int bit);
+extern void imxgpio_configprimary(int port, int bit);
+
+#endif
+
+#endif  /* __ARCH_ARM_IMX_GPIOHELPERS_H */

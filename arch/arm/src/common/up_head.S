@@ -1,7 +1,7 @@
-/********************************************************************
- * common/up_head.S
+/****************************************************************************
+ * arch/arm/src/common/up_head.S
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,19 +31,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************/
+ ****************************************************************************/
 
-/********************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "up_internal.h"
 #include "up_arch.h"
 
-/**************************************************************************
+/**********************************************************************************
  * Conditional Compilation
- **************************************************************************/
+ **********************************************************************************/
 
 #undef ALIGNMENT_TRAP
 #undef CPU_DCACHE_WRITETHROUGH
@@ -51,9 +51,41 @@
 #undef CPU_DCACHE_DISABLE
 #undef CPU_ICACHE_DISABLE
 
-/********************************************************************
+/* There are three operational memory configurations:
+ *
+ * 1. We execute in place in FLASH (CONFIG_BOOT_RUNFROMFLASH=y).  In this case
+ *    the boot logic must:
+ *
+ *    - Configure SDRAM and, 
+ *    - Initialize the .data section in RAM.
+ */
+
+#ifdef CONFIG_BOOT_RUNFROMFLASH
+#  define CONFIGURE_SDRAM
+
+/* 2. We boot in FLASH but copy ourselves to DRAM from better performance.
+ *    (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=y).  In this case
+ *    the boot logic must:
+ *
+ *    - Configure SDRAM and, 
+ *    - Copy ourself to DRAM (after mapping it)
+ */
+
+#elif defined(CONFIG_BOOT_COPYTORAM)
+#  define CONFIG_SDRAM
+
+/* 3. There is bootloader that copies us to DRAM (but probably not to the beginning)
+ *    (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=n). In this case the
+ *    boot logic must:
+ *
+ *    - Nothing special.
+ */
+
+#endif
+
+/****************************************************************************
  * Definitions
- ********************************************************************/
+ ****************************************************************************/
 
 /* The physical address of the beginning of SDRAM is provided by
  * CONFIG_DRAM_START.  The size of installed SDRAM is provided by
@@ -63,9 +95,9 @@
 
 #define NSDRAM_SECTIONS (CONFIG_DRAM_SIZE >> 20)
 
-/********************************************************************
+/****************************************************************************
  * Assembly Macros
- ********************************************************************/
+ ****************************************************************************/
 
 /* Since the page table is closely related to the NuttX base
  * address, we can convert the page table base address to the
@@ -88,9 +120,9 @@
 	.endm
 #endif
 
-/********************************************************************
+/****************************************************************************
  * Name: __start
- ********************************************************************/
+ ****************************************************************************/
 
 /* We assume the bootloader has already initialized most of the h/w for
  * us and that only leaves us having to do some os specific things
@@ -105,9 +137,14 @@ __start:
 	mov	r0, #(SVC_MODE | PSR_I_BIT | PSR_F_BIT)
 	msr	cpsr_c, r0
 
+	/* Initialize DRAM using a macro provided by board-specific logic */
+
+#ifdef CONFIG_SDRAM
+	config_sdram
+#endif
 	/* Clear the 16K level 1 page table */
 
-	ldr	r4, .LCppgtable		/* r4=phys. page table */
+	ldr	r4, .LCppgtable			/* r4=phys. page table */
 	mov	r0, r4
 	mov	r1, #0
 	add	r2, r0, #PGTABLE_SIZE
@@ -126,9 +163,9 @@ __start:
 	 */
 
 	mksection r0, r4			/* r0=phys. base section */
-	ldr	r1, .LCmmuflags		/* FLGS=MMU_MEMFLAGS */
-	add	r3, r1, r0		/* r3=flags + base */
-	str	r3, [r4, r0, lsr #18]	/* identity mapping */
+	ldr	r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
+	add	r3, r1, r0			/* r3=flags + base */
+	str	r3, [r4, r0, lsr #18]		/* identity mapping */
 
 	/* Create a "normal" single section mapping for the first
 	 * MB of memory.  Now, we have the first 1MB mapping to
@@ -137,20 +174,20 @@ __start:
 	 * moved the physical mapping out of the way.
 	 */
 
-	ldr	r2, .LCvpgtable		/* r2=virt. page table */
+	ldr	r2, .LCvpgtable			/* r2=virt. page table */
 	mksection r0, r2			/* r0=virt. base section */
-	str	r3, [r4, r0, lsr #18]	/* identity mapping */
+	str	r3, [r4, r0, lsr #18]		/* identity mapping */
 
-	/* The following logic will set up the ARM926 for normal operation */
+	/* The following logic will set up the ARM920/ARM926 for normal operation */
 
 	mov	r0, #0
 	mcr	p15, 0, r0, c7, c7		/* Invalidate I,D caches */
-	mcr	p15, 0, r0, c7, c10, 4	/* Drain write buffer */
+	mcr	p15, 0, r0, c7, c10, 4		/* Drain write buffer */
 	mcr	p15, 0, r0, c8, c7		/* Invalidate I,D TLBs */
 	mcr	p15, 0, r4, c2, c0		/* Load page table pointer */
 
 #ifdef CPU_DCACHE_WRITETHROUGH
-	mov	r0, #4			/* Disable write-back on caches explicitly */
+	mov	r0, #4				/* Disable write-back on caches explicitly */
 	mcr	p15, 7, r0, c15, c0, 0
 #endif 
 
@@ -164,17 +201,25 @@ __start:
 	mcr	p15, 0, r0, c3, c0		/* Load domain access register */
 	mrc	p15, 0, r0, c1, c0		/* Get control register */
 	
-	/* Clear bits (see start.h) */
+	/* Clear bits (see arm.h) */
 
 	bic	r0, r0, #(CR_R|CR_F|CR_Z)
 	bic	r0, r0, #(CR_A|CR_C|CR_W)
 	bic	r0, r0, #(CR_I)
 
-	/* Set bits (see start.h) */
+	/* Set bits (see arm.h) */
 
 	orr	r0, r0, #(CR_M|CR_P|CR_D)
-	orr	r0, r0, #(CR_S|CR_V)
+	
+	/* In most architectures, vectors are reloated to 0xffff0000.
+	 * -- but not all
+	 */
 
+#ifndef CONFIG_ARCH_LOWVECTORS
+	orr	r0, r0, #(CR_S)
+#else
+	orr	r0, r0, #(CR_S|CR_V)
+#endif
 #ifdef CPU_CACHE_ROUND_ROBIN
 	orr	r0, r0, #(CR_RR)
 #endif
@@ -197,9 +242,9 @@ __start:
 
 	mov	pc, lr
 
-/**************************************************************************
+/**********************************************************************************
  * PC_Relative Data
- **************************************************************************/
+ **********************************************************************************/
 
 	/* These addresses are all virtual address */
 	
@@ -211,15 +256,15 @@ __start:
 	.long	MMU_MEMFLAGS
 	.type	.LCppagetable, %object
 .LCppgtable:
-	.long	CONFIG_DRAM_START  /* Physical start of DRAM */
+	.long	CONFIG_DRAM_START		/* Physical start of DRAM */
 	.type	.LCvpagetable, %object
 .LCvpgtable:
-	.long	CONFIG_DRAM_VSTART /* Virtual start of DRAM */
+	.long	CONFIG_DRAM_VSTART		/* Virtual start of DRAM */
 	.size	_start, .-_start
 
-/**************************************************************************
+/**********************************************************************************
  * Name: .Lvstart
- **************************************************************************/
+ **********************************************************************************/
 
 /* The following is executed after the MMU has been enabled. This uses
  * absolute addresses; this is not position independent.
@@ -231,19 +276,19 @@ __start:
 
 	/* Remove the temporary null mapping */
 
-	ldr	r4, .LCvpgtable		/* r4=virtual page table */
-	ldr	r1, .LCppgtable		/* r1=phys. page table */
+	ldr	r4, .LCvpgtable			/* r4=virtual page table */
+	ldr	r1, .LCppgtable			/* r1=phys. page table */
 	mksection r3, r1			/* r2=phys. base addr */
-	mov	r0, #0			/* flags + base = 0 */
-	str	r0, [r4, r3, lsr #18]	/* Undo identity mapping */
+	mov	r0, #0				/* flags + base = 0 */
+	str	r0, [r4, r3, lsr #18]		/* Undo identity mapping */
 
 	/* Now setup the pagetables for our normal SDRAM mappings
 	 * mapped region.  We round NUTTX_START_VADDR down to the
 	 * nearest megabyte boundary.
 	 */
 
-	ldr	r1, .LCmmuflags		/* FLGS=MMU_MEMFLAGS */
-	add	r3, r3, r1		/* r3=flags + base */
+	ldr	r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
+	add	r3, r3, r1			/* r3=flags + base */
 
 	add	r0, r4, #(NUTTX_START_VADDR & 0xff000000) >> 18
 	bic	r2, r3, #0x00f00000
@@ -269,7 +314,7 @@ __start:
 	mov     fp, #0
 
 .Lbssinit:	
-	cmp     r0, r1		       /* Clear up to _bss_end_ */
+	cmp     r0, r1		       		/* Clear up to _bss_end_ */
 	strcc	fp, [r0],#4
 	bcc	.Lbssinit
 

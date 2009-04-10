@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/common/up_initialize.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -119,6 +119,10 @@ void up_initialize(void)
   /* Calibrate the timing loop */
 
   up_calibratedelay();
+
+  /* Add any extra memory fragments to the memory manager */
+
+  up_addregion();
 
   /* Initialize the interrupt subsystem */
 

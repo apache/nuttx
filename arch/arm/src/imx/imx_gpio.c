@@ -1,6 +1,6 @@
 /****************************************************************************
- * configs/mx1ads/src/up_leds.c
- * arch/arm/src/board/up_leds.c
+ * arch/arm/src/imx/imx_gpio.c
+ * arch/arm/src/chip/imx_gpio.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,10 +40,16 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include "up_internal.h"
+
+#include "up_arch.h"
+#include "imx_gpio.h"
 
 /****************************************************************************
  * Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -55,69 +61,50 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: imx_ledon
- ****************************************************************************/
-
-static inline void imx_ledon(void)
-{
-}
-
-/****************************************************************************
- * Name: imx_ledoff
- ****************************************************************************/
-
-static void imx_ledoff(void)
-{
-}
-
-/****************************************************************************
  * Public Funtions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: imxgpio_configoutput
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
+void imxgpio_configoutput(int port, int bit, int value)
 {
-  /* Configure Port A, Bit 2 as an output, initial value=1 */
+  imxgpio_configinput(port, bit);         /* Same as input except: */
+  imxgpio_dirout(GPIOA, 2);                 /* Output */
 
-  imxgpio_configoutput(GPIOA, 2, 1);
-}
-
-/****************************************************************************
- * Name: up_ledon
- ****************************************************************************/
-
-void up_ledon(int led)
-{
-  switch (led)
+  if (value)
     {
-      case LED_STARTED:
-      case LED_HEAPALLOCATE:
-      case LED_IRQSENABLED:
-      case LED_STACKCREATED:
-        imxgpio_setoutput(GPIOA, 2);  /* Port A, Bit 2 = 1 */
-        break;
-
-      case LED_INIRQ:
-      case LED_SIGNAL:
-      case LED_ASSERTION:
-      case LED_PANIC:
-      default:
-        imxgpio_clroutput(GPIOA, 2);  /* Port A, Bit 2 = 0 */
-        break;
+      imxgpio_setoutput(GPIOA, 2);          /* Set output = 1 */
+    }
+  else
+    {
+      imxgpio_clroutput(GPIOA, 2);          /* Set output = 0 */
     }
 }
 
 /****************************************************************************
- * Name: up_ledoff
+ * Name: imxgpio_configinput
  ****************************************************************************/
 
-void up_ledoff(int led)
+void imxgpio_configinput(int port, int bit)
 {
-  imxgpio_clroutput(GPIOA, 2);  /* Port A, Bit 2 = 0 */
+  imxgpio_pullupdisable(GPIOA, 2);          /* No pullup */
+  imxgpio_dirin(GPIOA, 2);                  /* Input */
+  imxgpio_gpiofunc(GPIOA, 2);               /* Use as GPIO */
+  imxgpio_primaryperipheralfunc(GPIOA, 2);  /* Not necessary */
+  imxgpio_ocrain(GPIOA, 2);                 /* Output AIN */
+  imxgpio_aoutgpio(GPIOA, 2);               /* AOUT input is GPIO */
+  imxgpio_boutgpio(GPIOA, 2);               /* BOUT input is GPIO */
 }
 
-#endif /* CONFIG_ARCH_LEDS */
+/****************************************************************************
+ * Name: imxgpio_configprimary
+ ****************************************************************************/
+
+void imxgpio_configprimary(int port, int bit)
+{
+  imxgpio_configinput(port, bit);           /* Same as input except: */
+  imxgpio_peripheralfunc(GPIOA, 2);         /* Use as peripheral */
+  imxgpio_primaryperipheralfunc(GPIOA, 2);  /* Primary function*/
+}

@@ -145,6 +145,14 @@ extern void up_vectoraddrexcptn(void);
 extern void up_vectorirq(void);
 extern void up_vectorfiq(void);
 
+/* Defined in up_allocateheap.c */
+
+#if CONFIG_MM_REGIONS > 1
+void up_addregion(void);
+#else
+# define up_addregion()
+#endif
+
 /* Defined in up_serial.c */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0

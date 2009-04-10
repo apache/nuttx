@@ -1,6 +1,6 @@
 /****************************************************************************
- * configs/mx1ads/src/up_leds.c
- * arch/arm/src/board/up_leds.c
+ * arch/arm/src/imx/imx_allocateheap.c
+ * arch/arm/src/chip/imx_allocateheap.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,10 +40,15 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <debug.h>
+#include <nuttx/mm.h>
+#include <nuttx/arch.h>
+
+#include "up_arch.h"
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Private Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -55,69 +60,54 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: imx_ledon
- ****************************************************************************/
-
-static inline void imx_ledon(void)
-{
-}
-
-/****************************************************************************
- * Name: imx_ledoff
- ****************************************************************************/
-
-static void imx_ledoff(void)
-{
-}
-
-/****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: up_allocate_heap
+ *
+ * Description:
+ *   The heap may be statically allocated by defining CONFIG_HEAP_BASE and
+ *   CONFIG_HEAP_SIZE.  If these are not defined, then this function will be
+ *   called to dynamically set aside the heap region.
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
+void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
-  /* Configure Port A, Bit 2 as an output, initial value=1 */
-
-  imxgpio_configoutput(GPIOA, 2, 1);
+  up_ledon(LED_HEAPALLOCATE);
+  *heap_start = (FAR void*)g_heapbase;
+  *heap_size  = (IMX_SDRAM_VSECTION + CONFIG_DRAM_SIZE) - g_heapbase;
 }
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: up_addregion
+ *
+ * Description:
+ *   Memory may be added in non-contiguous chunks.  Additional chunks are
+ *   added by calling this function.
+ *
  ****************************************************************************/
 
-void up_ledon(int led)
+#if CONFIG_MM_REGIONS > 1
+void up_addregion(void)
 {
-  switch (led)
-    {
-      case LED_STARTED:
-      case LED_HEAPALLOCATE:
-      case LED_IRQSENABLED:
-      case LED_STACKCREATED:
-        imxgpio_setoutput(GPIOA, 2);  /* Port A, Bit 2 = 1 */
-        break;
+  /* If a bootloader that copies us to DRAM, but not to the beginning of DRAM,
+   * then recover that memory by adding another memory region.
+   */
 
-      case LED_INIRQ:
-      case LED_SIGNAL:
-      case LED_ASSERTION:
-      case LED_PANIC:
-      default:
-        imxgpio_clroutput(GPIOA, 2);  /* Port A, Bit 2 = 0 */
-        break;
-    }
+#if !defined(CONFIG_BOOT_RUNFROMFLASH) && !defined(CONFIG_BOOT_COPYTORAM)
+#  if (CONFIG_DRAM_NUTTXENTRY & 0xffff0000) != CONFIG_DRAM_VSTART
+  uint32 start = CONFIG_DRAM_VSTART + 0x1000;
+  uint32 end   = (CONFIG_DRAM_NUTTXENTRY & 0xffff0000);
+  mm_addregion((FAR void*)start, end - start);
+#  endif
+#endif
+
+  /* Check for any additional memory regions */
+
+#if defined(CONFIG_HEAP2_BASE) && defined(CONFIG_HEAP2_END)
+  mm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_END - CONFIG_HEAP2_BASE);
+#endif
 }
-
-/****************************************************************************
- * Name: up_ledoff
- ****************************************************************************/
-
-void up_ledoff(int led)
-{
-  imxgpio_clroutput(GPIOA, 2);  /* Port A, Bit 2 = 0 */
-}
-
-#endif /* CONFIG_ARCH_LEDS */
+#endif
