@@ -55,6 +55,22 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: imx_ledon
+ ****************************************************************************/
+
+static inline void imx_ledon(void)
+{
+}
+
+/****************************************************************************
+ * Name: imx_ledoff
+ ****************************************************************************/
+
+static void imx_ledoff(void)
+{
+}
+
+/****************************************************************************
  * Public Funtions
  ****************************************************************************/
 
@@ -65,7 +81,9 @@
 #ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void)
 {
-# error "Missing implementation"
+  /* Configure Port A, Bit 2 as an output, initial value=1 */
+
+  imxgpio_configoutput(GPIOA, 2, 1);
 }
 
 /****************************************************************************
@@ -74,7 +92,23 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
-# error "Missing implementation"
+  switch (led)
+    {
+      case LED_STARTED:
+      case LED_HEAPALLOCATE:
+      case LED_IRQSENABLED:
+      case LED_STACKCREATED:
+        imxgpio_setoutput(GPIOA, 2);  /* Port A, Bit 2 = 1 */
+        break;
+
+      case LED_INIRQ:
+      case LED_SIGNAL:
+      case LED_ASSERTION:
+      case LED_PANIC:
+      default:
+        imxgpio_clroutput(GPIOA, 2);  /* Port A, Bit 2 = 0 */
+        break;
+    }
 }
 
 /****************************************************************************
@@ -83,6 +117,7 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-# error "Missing implementation"
+  imxgpio_clroutput(GPIOA, 2);  /* Port A, Bit 2 = 0 */
 }
+
 #endif /* CONFIG_ARCH_LEDS */

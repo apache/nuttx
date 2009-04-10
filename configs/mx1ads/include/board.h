@@ -48,6 +48,20 @@
 /************************************************************************************
  * Definitions
  ************************************************************************************/
+ 
+/* LED definitions ******************************************************************/
+
+/* The MX1ADS has only one usable LED: Port A, bit 2 */
+
+                                /* ON   OFF */
+#define LED_STARTED       0     /* OFF  OFF */
+#define LED_HEAPALLOCATE  1     /* OFF  OFF */
+#define LED_IRQSENABLED   2     /* OFF  OFF */
+#define LED_STACKCREATED  3     /* OFF  OFF */
+#define LED_INIRQ         4     /* ON   OFF */
+#define LED_SIGNAL        5     /* ON   OFF */
+#define LED_ASSERTION     6     /* ON   OFF */
+#define LED_PANIC         7     /* ON   OFF */
 
 /************************************************************************************
  * Inline Functions
