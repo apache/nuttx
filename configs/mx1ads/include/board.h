@@ -48,7 +48,26 @@
 /************************************************************************************
  * Definitions
  ************************************************************************************/
- 
+
+/* Clock settings */
+
+#define IMX_SYS_CLK_FREQ    16780000
+#define IMX_SYSPLL_CLK_FREQ 16000000
+#define IMX_PERCLK1_FREQ    96000000
+
+/* MPCTL */
+
+#define IMX_MPCTL0_VALUE    0x04632410 /* For 150MHz MCU PLL clock */
+#define IMX_MPCTL0_VALUE    0x03AA11B9 /* For 150 MHz ARM clock with 32.768 KHz crystal */
+
+/* SPCTL */
+
+#define IMX_SPCTL0_VALUE    0x07AA16A6; /* For 96MHz peripheral clock with 32.768 KHz crystal */
+
+/* PDCR */
+
+#define IMX_PCDR_VALUE      0x00000055
+
 /* LED definitions ******************************************************************/
 
 /* The MX1ADS has only one usable LED: Port A, bit 2 */

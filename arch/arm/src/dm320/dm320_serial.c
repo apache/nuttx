@@ -1,7 +1,8 @@
 /****************************************************************************
- * dm320/dm320_serial.c
+ * arch/arm/src/dm320/dm320_serial.c
+ * arch/arm/src/chip/dm320_serial.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,8 +61,6 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-#define BASE_BAUD 115200
 
 /****************************************************************************
  * Private Types
@@ -548,8 +547,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
          struct up_dev_s *user = (struct up_dev_s*)arg;
          if (!user)
            {
-             *get_errno_ptr() = EINVAL;
-             ret = ERROR;
+             ret = -EINVAL;
            }
          else
            {
@@ -576,8 +574,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
       break;
 
     default:
-      *get_errno_ptr() = ENOTTY;
-      ret = ERROR;
+      ret = -ENOTTY;
       break;
     }
 

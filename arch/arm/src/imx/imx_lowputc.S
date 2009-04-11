@@ -1,8 +1,8 @@
 /**************************************************************************
- * arch/arm/src/dm320/dm320_lowputc.S
- * arch/arm/src/chip/dm320_lowputc.S
+ * arch/arm/src/imx/imx_lowputc.S
+ * arch/arm/src/chip/imx_lowputc.S
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,33 +86,24 @@ up_lowputc:
 	/* On entry, r0 holds the character to be printed */
 
 #ifdef CONFIG_UART1_SERIAL_CONSOLE
-	ldr	r2, =DM320_UART1_REGISTER_BASE	/* r2=UART1 base */
+	ldr	r2, =IMX_UART1_VBASE	/* r2=UART1 base */
 #else
-	ldr	r2, =DM320_UART0_REGISTER_BASE	/* r2=UART0 base */
+	ldr	r2, =IMX_UART2_VBASE	/* r2=UART0 base */
 #endif
 
-	/* Poll the TX fifo trigger level bit of the UART_SSR
-	 * register.  When the bit is non-zero, the TX FIFO is no
-	 * longer full
+	/* Poll the TX fifo trigger level bit of the UART status register #2 . 
+	 * When the bit is non-zero, the TX Buffer FIFO is empty.
 	 */
 
-1:	ldrh	r1, [r2, #UART_SR]
-	tst	r1, #UART_SR_TFTI
+1:	ldr	r1, [r2, #UART_USR2]
+	tst	r1, #UART_USR2_TXFE
 	beq	1b
 
 	/* Send the character by writing it into the UART_DTRR
 	 * register.
 	 */
 
-	strh	r0, [r2, #UART_DTRR]
-
-	/* Wait for the tranmsit regiser to be emptied. This is
-	 * detemined when TX register empty bit of the SR is zero.
-	 */
-
-2:	ldrh	r1, [r2, #UART_SR]
-	tst	r1, #UART_SR_TREF
-	bne	2b
+	str	r0, [r2, #UART_TXD0]
 
 	/* If the character that we just sent was a linefeed,
 	 * then send a carriage return as well.
@@ -122,7 +113,16 @@ up_lowputc:
 	moveq   r0, #'\r'
 	beq     1b
 
-	/* And return */
+	/* Wait for the tranmsit regiser to be emptied. When the bit is
+	 * non-zero, the TX Buffer FIFO is empty.
+	 */
+
+2:	ldrh	r1, [r2, #UART_USR2]
+	tst	r1, #UART_USR2_TXFE
+	beq	2b
+
+	/* Then return */
 
 	mov     pc, lr
+	.end
 

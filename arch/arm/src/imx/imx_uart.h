@@ -81,7 +81,7 @@
 /* UART Receiver Register */
 
 #define UART_RXD_DATA_SHIFT   0         /* Bits 0-7: Received Data */
-#define UART_RXD_DATA_MASK    (0x7f << UART_RXD_DATA_SHIFT)
+#define UART_RXD_DATA_MASK    (0xff << UART_RXD_DATA_SHIFT)
 #define UART_RXD_PRERR        (1 << 10) /* Bit 10: Parity Error */
 #define UART_RXD_BRK          (1 << 11) /* Bit 11: Break Detect */
 #define UART_RXD_FRMERR       (1 << 12) /* Bit 12: Frame Error */
@@ -211,6 +211,14 @@
 #define UART_USR2_DTRF        (1 << 13) /* Bit 13: DTR edge triggered interrupt flag */
 #define UART_USR2_TXFE        (1 << 14) /* Bit 14: Transmit Buffer FIFO empty */
 #define UART_USR2_ADET        (1 << 15) /* Bit 15: Automatic baud rate detection complete */
+
+/* UART Test Register */
+
+#define UART_UTS_TXFULL       (1 << 4)  /* Bit 4: TxFIFO FULL */
+#define UART_UTS_RXEMPTY      (1 << 5)  /* Bit 5: RxFIFO Empty */
+#define UART_UTS_TXEMPTY      (1 << 6)  /* Bit 6: TxFIFO */
+#define UART_UTS_LOOP         (1 << 12) /* Bit 12: Loop TX and RX for Test */
+#define UART_UTS_FRCPERR      (1 << 13) /* Bit 13: Force Parity Error */
 
 /************************************************************************************
  * Inline Functions
