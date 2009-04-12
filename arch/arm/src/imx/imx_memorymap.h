@@ -53,11 +53,11 @@
 #define IMX_SDRAM0_PSECTION       0x08000000 /* -0x0bffffff SDRAM0 (CSD0)      64Mb */
 #define IMX_SDRAM1_PSECTION       0x0c000000 /* -0x0fffffff SDRAM1 (CSD1)      64Mb */
 #define IMX_FLASH_PSECTION        0x10000000 /* -0x11ffffff FLASH  (CS0)       32Mb */
-#define IMX_CS1_PSECTION          0x12000000 /* -0x12ffffff CS1                32Mb */
-#define IMX_CS2_PSECTION          0x13000000 /* -0x13ffffff CS2                32Mb */
-#define IMX_CS3_PSECTION          0x14000000 /* -0x14ffffff CS3                32Mb */
-#define IMX_CS4_PSECTION          0x15000000 /* -0x15ffffff CS4                32Mb */
-#define IMX_CS5_PSECTION          0x16000000 /* -0x16ffffff CS5                32Mb */
+#define IMX_CS1_PSECTION          0x12000000 /* -0x12ffffff CS1                16Mb */
+#define IMX_CS2_PSECTION          0x13000000 /* -0x13ffffff CS2                16Mb */
+#define IMX_CS3_PSECTION          0x14000000 /* -0x14ffffff CS3                16Mb */
+#define IMX_CS4_PSECTION          0x15000000 /* -0x15ffffff CS4                16Mb */
+#define IMX_CS5_PSECTION          0x16000000 /* -0x16ffffff CS5                16Mb */
 
 /* Sizes of Address Sections ********************************************************/
 
@@ -66,11 +66,11 @@
 #define IMX_SDRAM0_NSECTIONS      16         /* 16Mb Based on CONFIG_DRAM_SIZE      */
 #define IMX_SDRAM1_NSECTIONS      0          /* 64Mb (Not mapped)                   */
 #define IMX_FLASH_NSECTIONS       32         /* 64Mb Based on CONFIG_FLASH_SIZE     */
-#define IMX_CS1_NSECTIONS         0          /* 32Mb (Not mapped)                   */
-#define IMX_CS2_NSECTIONS         0          /* 32Mb (Not mapped)                   */
-#define IMX_CS3_NSECTIONS         0          /* 32Mb (Not mapped)                   */
-#define IMX_CS4_NSECTIONS         0          /* 32Mb (Not mapped)                   */
-#define IMX_CS5_NSECTIONS         0          /* 32Mb (Not mapped)                   */
+#define IMX_CS1_NSECTIONS         16         /* 16Mb                                */
+#define IMX_CS2_NSECTIONS         16         /* 16Mb                                */
+#define IMX_CS3_NSECTIONS         16         /* 16Mb                                */
+#define IMX_CS4_NSECTIONS         16         /* 16Mb                                */
+#define IMX_CS5_NSECTIONS         16         /* 16Mb                                */
 
 /* Virtual Memory Map ***************************************************************/
 
@@ -125,6 +125,11 @@
 
 #define IMX_PERIPHERALS_VSECTION  0x00200000 /* -0x002fffff                     1Mb */
 #define IMX_FLASH_VSECTION        0x10000000 /* -(+CONFIG_FLASH_SIZE)               */
+#define IMX_CS1_VSECTION          0x12000000 /* -0x12ffffff CS1                32Mb */
+#define IMX_CS2_VSECTION          0x13000000 /* -0x13ffffff CS2                32Mb */
+#define IMX_CS3_VSECTION          0x14000000 /* -0x14ffffff CS3                32Mb */
+#define IMX_CS4_VSECTION          0x15000000 /* -0x15ffffff CS4                32Mb */
+#define IMX_CS5_VSECTION          0x16000000 /* -0x16ffffff CS5                32Mb */
 
 /* In any event, the vector base address is 0x0000:0000 */
 
@@ -161,7 +166,7 @@
 #define   IMX_SC_OFFSET           0x0001b800
 #define IMX_GPIO_OFFSET           0x0001c000 /* -0x0001cfff GPIO                4Kb */
                                              /* -0x0001ffff Reserved           12Kb */
-#define IMX_EIM_OFFSET            0x00020000 /* -0x00020fff WEIM                4Kb */
+#define IMX_EIM_OFFSET            0x00020000 /* -0x00020fff EIM                 4Kb */
 #define IMX_SDRAMC_OFFSET         0x00021000 /* -0x00021fff SDRAMC              4Kb */
 #define IMX_DSPA_OFFSET           0x00022000 /* -0x00022fff DSPA                4Kb */
 #define IMX_AITC_OFFSET           0x00023000 /* -0x00023fff AITC                4Kb */

@@ -82,6 +82,64 @@
 
 /* PLL Register Bit Definitions *****************************************************/
 
+#define PLL_CSCR_MPEN           (1 << 0) /* Bit 0: 1 = MCU PLL enabled */
+#define PLL_CSCR_SPEN           (1 << 1) /* Bit 1: System PLL Enable */
+#define PLL_CSCR_BCLKDIV_SHIFT  10        /* Bits 13–10: BClock Divider */
+#define PLL_CSCR_BCLKDIV_MASK   (15 << PLL_CSCR_BCLK_DIV_SHIFT)
+#define PLL_CSCR_PRESC          (1 << 15) /* Bit 15: MPU PLL clock prescaler */
+#define PLL_CSCR_SYSTEM_SEL     (1 << 16) /* Bit 16: System clock source select */
+#define PLL_CSCR_OSCEN          (1 << 17) /* Bit 17: Ext. 16MHz oscillator enable */
+#define PLL_CSCR_CLK16_SEL      (1 << 18) /* Bit 18: Select BT ref RFBTCLK16 */
+#define PLL_CSCR_MPLLRESTART    (1 << 21) /* Bit 21: MPLL Restart */
+#define PLL_CSCR_SPLLRESTART    (1 << 22) /* Bit 22: SPLL Restart */
+#define PLL_CSCR_SDCNT_SHIFT    24        /* Bits 25–24: Shut-Down Control */
+#define PLL_CSCR_SDCNT_MASK     (3 << PLL_CSCR_SDCNT_SHIFT)
+#define   CSCR_SDCNT_2ndEDGE    (1 << PLL_CSCR_SDCNT_SHIFT)
+#define   CSCR_SDCNT_3rdEDGE    (2 << PLL_CSCR_SDCNT_SHIFT)
+#define   CSCR_SDCNT_4thEDGE    (3 << PLL_CSCR_SDCNT_SHIFT)
+#define PLL_CSCR_USBDIV_SHIFT   28        /* Bits 28–26: USB Divider */
+#define PLL_CSCR_USBDIV_MASK    (7 << PLL_CSCR_USB_DIV_SHIFT)
+#define PLL_CSCR_CLKOSEL_SHIFT  29        /* Bits 31–29: CLKO Select */
+#define PLL_CSCR_CLKOSEL_MASK   (7 << PLL_CSCR_CLKOSEL_SHIFT)
+#define   CSCR_CLKOSEL_PERCLK1  (0 << PLL_CSCR_CLKOSEL_SHIFT)
+#define   CSCR_CLKOSEL_HCLK     (1 << PLL_CSCR_CLKOSEL_SHIFT)
+#define   CSCR_CLKOSEL_CLK48M   (2 << PLL_CSCR_CLKOSEL_SHIFT)
+#define   CSCR_CLKOSEL_CLK16M   (3 << PLL_CSCR_CLKOSEL_SHIFT)
+#define   CSCR_CLKOSEL_PREMCLK  (4 << PLL_CSCR_CLKOSEL_SHIFT)
+#define   CSCR_CLKOSEL_FCLK     (5 << PLL_CSCR_CLKOSEL_SHIFT)
+
+#define PLL_MPCTL0_MFN_SHIFT    0         /* Bits 9–0: Multiplication Factor (Numerator) */
+#define PLL_MPCTL0_MFN_MASK     (0x03ff << PLL_MPCTL0_MFN_SHIFT)
+#define PLL_MPCTL0_MFI_SHIFT    10        /* Bits 13–10: Multiplication Factor (Integer) */
+#define PLL_MPCTL0_MFI_MASK     (0x0f << PLL_MPCTL0_MFI_SHIFT)
+#define PLL_MPCTL0_MFD_SHIFT    16        /* Bits 25–16: Multiplication Factor (Denominator) */
+#define PLL_MPCTL0_MFD_MASK     (0x03ff << PLL_MPCTL0_MFD_SHIFT)
+#define PLL_MPCTL0_PD_SHIFT     26        /* Bits 29–26: Predivider Factor */
+#define PLL_MPCTL0_PD_MASK      (0x0f << PLL_MPCTL0_PD_SHIFT
+
+#define PLL_MPCTL1_BRMO         (1 << 6)  /* Bit 6: Controls the BRM order */
+
+#define PLL_SPCTL0_MFN_SHIFT    0         /* Bits 9–0: Multiplication Factor (Numerator) */
+#define PLL_SPCTL0_MFN_MASK     (0x03ff << PLL_SPCTL0_MFN_SHIFT)
+#define PLL_SPCTL0_MFI_SHIFT    10        /* Bits 13–10: Multiplication Factor (Integer) */
+#define PLL_SPCTL0_MFI_MASK     (0x0f << PLL_SPCTL0_MFI_SHIFT)
+#define PLL_SPCTL0_MFD_SHIFT    16        /* Bits 25–16: Multiplication Factor (Denominator) */
+#define PLL_SPCTL0_MFD_MASK     (0x03ff << PLL_SPCTL0_MFD_SHIFT)
+#define PLL_SPCTL0_PD_SHIFT     26        /* Bits 29–26: Predivider Factor */
+#define PLL_SPCTL0_PD_MASK      (0x0f << PLL_SPCTL0_PD_SHIFT)
+
+#define PLL_SPCTL1_BRMO         (1 << 6)  /* Bit 6: Controls the BRM order */
+#define PLL_SPCTL1_LF           (1 << 15) /* Bit 15: Indicates if System PLL is locked */
+
+#define PLL_PCDR_PCLKDIV1_SHIFT 0         /* Bits 3–0: Peripheral Clock Divider 1 */
+#define PLL_PCDR_PCLKDIV1_MASK  (0x0f << PLL_PCDR_PCLKDIV1_SHIFT)
+#define PLL_PCDR_PCLKDIV2_SHIFT 4         /* Bits 7–4: Peripheral Clock Divider 2 */
+#define PLL_PCDR_PCLKDIV2_MASK  (0x0f << PLL_PCDR_PCLKDIV2_SHIFT)
+#define PLL_PCDR_PCLKDIV3_SHIFT 16        /* Bits 22–16: Peripheral Clock Divider 3 */
+#define PLL_PCDR_PCLKDIV3_MASK  (0x7f << PLL_PCDR_PCLKDIV3_SHIFT)
+
+/* PLL Helper Macros ****************************************************************/
+
 /* SC Register Offsets **************************************************************/
 
 #define SC_RSR_OFFSET           0x0000 /* Reset Source Register */
