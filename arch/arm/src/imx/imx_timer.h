@@ -76,6 +76,11 @@
 #define TIMER_TCTL_TEN              (1 << 0)  /* Bit 0: Timer Enable */
 #define TIMER_TCTL_CLKSOURCE_SHIFT  1         /* Bit 1-4: Clock Source */
 #define TIMER_TCTL_CLKSOURCE_MASK   (0x07 << TIMER_TCTL_CLKSOURCE_SHIFT)
+#define   TCTL_CLKSOURCE_STOPCOUNT  (0x00 << TIMER_TCTL_CLKSOURCE_SHIFT)
+#define   TCTL_CLKSOURCE_PERCLK1    (0x01 << TIMER_TCTL_CLKSOURCE_SHIFT)
+#define   TCTL_CLKSOURCE_PERCLK1D16 (0x02 << TIMER_TCTL_CLKSOURCE_SHIFT)
+#define   TCTL_CLKSOURCE_TIN        (0x03 << TIMER_TCTL_CLKSOURCE_SHIFT)
+#define   TCTL_CLKSOURCE_32KHX      (0x04 << TIMER_TCTL_CLKSOURCE_SHIFT)
 #define TIMER_TCTL_IRQEN            (1 << 5)  /* Bit 5: Interrupt Request Enable */
 #define TIMER_TCTL_OM               (1 << 6)  /* Bit 6: Output Mode */
 #define TIMER_TCTL_CAP              (1 << 7)  /* Bit 7: Capture Edge */
