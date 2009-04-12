@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/dm320/dm320_timerisr.c
- * arch/arm/src/chip/dm320_timerisr.c
+ * arch/arm/src/imx/imx_timerisr.c
+ * arch/arm/src/chip/imx_timerisr.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,9 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <debug.h>
+#include <errno.h>
 #include <nuttx/arch.h>
+
 #include "clock_internal.h"
 #include "up_internal.h"
 #include "up_arch.h"
@@ -49,49 +51,6 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-/* DM320 Timers
- *
- * Each of the general-purpose timers can run in one of two modes:  one-
- * shot mode and free-run mode.  In one-shot mode, an interrupt only 
- * occurs once and then the timer must be explicitly reset to begin the 
- * timing operation again.  In free-run mode, when the timer generates an 
- * interrupt, the timer counter is automatically reloaded to start the count 
- * operation again.  Use the bit field MODE in TMMDx to configure the 
- * timer for one-shot more or free-run mode. The bit field MODE in TMMDx
- * also allows you to stop the timer.
- * 
- * Either the ARM clock divided by 2 (CLK_ARM/2) or an external clock 
- * connected to the M27XI pin can be selected as the clock source of the 
- * timer.
- *
- * The actual clock frequency used in the timer count operation is the input 
- * clock divided by: 1 plus the value set in the bit field PRSCL of the 
- * register TMPRSCLx (10 bits).  The timer expires when it reaches the 
- * value set in the bit field DIV of the register TMDIVx (16 bits) plus 1. 
- * PRSCL+1 is the source clock frequency divide factor and DIV+1 is the 
- * timer count value.  The frequency of a timer interrupt is given by the 
- * following equation:
- *
- * Interrupt Frequency = (Source Clock Frequency) / (PRSCL+1) / (DIV+1)
- */
-
-/* System Timer
- *
- * Timer0 is dedicated as the system timer.  The rate of system timer
- * interrupts is assumed to to 10MS per tick / 100Hz. The following
- * register settings are used for timer 0
- *
- * System clock formula:
- *   Interrupt Frequency = (Source Clock Frequency) / (PRSCL+1) / (DIV+1)
- *   Source Clock Frequency = 27MHz  (PLL clock)
- *   DIV                    = 26,999 (Yields 1Khz timer clock)
- *   PRSCL                  = 9      (Produces 100Hz interrupts)
- */
-
-#define DM320_TMR0_MODE  DM320_TMR_MODE_FREERUN /* Free running */
-#define DM320_TMR0_DIV   26999                  /* (see above) */
-#define DM320_TMR0_PRSCL 9                      /* (see above) */
 
 /****************************************************************************
  * Private Types
@@ -116,10 +75,25 @@
 
 int up_timerisr(int irq, uint32 *regs)
 {
-   /* Process timer interrupt */
+  uint32 tstat;
+  int    ret = -EIO;
 
-   sched_process_timer();
-   return 0;
+  /* Get and clear the interrupt status */
+
+  tstat = getreg32(IMX_TIMER1_TSTAT);
+  putreg32(0, IMX_TIMER1_TSTAT);
+
+  /* Verify that this is a timer interrupt */
+
+  if ((tstat & TIMER_TSTAT_COMP) != 0)
+    {
+      /* Process timer interrupt */
+
+      sched_process_timer();
+      ret = OK;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -133,22 +107,55 @@ int up_timerisr(int irq, uint32 *regs)
 
 void up_timerinit(void)
 {
-  up_disable_irq(DM320_IRQ_SYSTIMER);
+  uint32 tctl;
 
-  /* Start timer0 running so that an interrupt is generated at
-   * the rate MSEC_PER_TICK.
+  /* Make sure the timer interrupts are disabled */
+
+  up_disable_irq(IMX_IRQ_SYSTIMER);
+
+  /* Make sure that timer1 is disabled */
+
+  putreg32(0, IMX_TIMER1_TCTL);
+  putreg32(0, IMX_TIMER1_TPRER);
+
+  /* Select restart mode with source = PERCLK1. In restart mode, after
+   * the compare value is reached, the counter resets to 0x00000000, the
+   * compare event (COMP) bit of the timer status register is set, an
+   * interrupt is issued if the interrupt request enable (IRQEN) bit of
+   * the corresponding TCTL register is set, and the counter resumes
+   * counting.
    */
 
-  putreg16(DM320_TMR0_PRSCL, DM320_TIMER0_TMPRSCL); /* Timer 0 Prescalar */
-  putreg16(DM320_TMR0_DIV, DM320_TIMER0_TMDIV);     /* Timer 0 Divisor (count) */
+  tctl = TCTL_CLKSOURCE_PERCLK1;
+  putreg32(tctl, IMX_TIMER1_TCTL);
 
-  /* Start the timer */
+  /* The timer is driven by PERCLK1.  Set prescaler for division by one
+   * so that the clock is driven at PERCLK1.
+   *
+   * putreg(0, IMX_TIMER1_TPRER); -- already the case 
+   *
+   * Set the compare register so that the COMP interrupt is generated
+   * with a period of MSEC_PER_TICK.  The value IMX_PERCLK1_FREQ/1000
+   * (defined in board.h) is the number of counts in millisecond, so:
+   */
 
-  putreg16(DM320_TMR0_MODE, DM320_TIMER0_TMMD); /* Timer 0 Mode */
+   putreg32((IMX_PERCLK1_FREQ / 1000) * MSEC_PER_TICK, IMX_TIMER1_TCMP);
+
+  /* Configure to provide timer COMP interrupts when TCN increments
+   * to TCMP.
+   */
+
+  tctl |= TIMER_TCTL_IRQEN;
+  putreg32(tctl, IMX_TIMER1_TCTL);
+
+  /* Finally, enable the timer (be be the last operation on TCTL) */
+
+  tctl |= TIMER_TCTL_TEN;
+  putreg32(tctl, IMX_TIMER1_TCTL);
 
   /* Attach and enable the timer interrupt */
 
-  irq_attach(DM320_IRQ_SYSTIMER, (xcpt_t)up_timerisr);
-  up_enable_irq(DM320_IRQ_SYSTIMER);
+  irq_attach(IMX_IRQ_SYSTIMER, (xcpt_t)up_timerisr);
+  up_enable_irq(IMX_IRQ_SYSTIMER);
 }
 
