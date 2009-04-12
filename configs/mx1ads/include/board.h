@@ -49,24 +49,92 @@
  * Definitions
  ************************************************************************************/
 
-/* Clock settings */
+/* Clock settings -- All clock values are precalculated */
 
-#define IMX_SYS_CLK_FREQ    16780000
-#define IMX_SYSPLL_CLK_FREQ 16000000
-#define IMX_PERCLK1_FREQ    96000000
+#define IMX_SYS_CLK_FREQ    16780000  /* Crystal frequency */
 
-/* MPCTL */
+/* MPCTL0 -- Controls the MCU clock:
+ *
+ *                                                MFI + MFN / (MFD+1)
+ *  IMX_MCUPLL_CLK_FREQ = 2 * IMX_SYS_CLK_FREQ * --------------------
+ *                                                    PD + 1
+ */
 
-#define IMX_MPCTL0_VALUE    0x04632410 /* For 150MHz MCU PLL clock */
-#define IMX_MPCTL0_VALUE    0x03AA11B9 /* For 150 MHz ARM clock with 32.768 KHz crystal */
+#if 0 /* 150 MHz */
+#  define IMX_MPCTL0_MFN   16
+#  define IMX_MPCTL0_MFI   9
+#  define IMX_MPCTL0_MFD   99
+#  define IMX_MPCTL0_PD    1
+#else /* 180 MHz */
+#  define IMX_MPCTL0_MFN   441
+#  define IMX_MPCTL0_MFI   4
+#  define IMX_MPCTL0_MFD   938
+#  define IMX_MPCTL0_PD    0
+#endif
 
-/* SPCTL */
+#define IMX_MPCTL0_VALUE \
+  ((IMX_MPCTL0_MFN << PLL_MPCTL0_MFN_SHIFT) |\
+   (IMX_MPCTL0_MFI << PLL_MPCTL0_MFI_SHIFT) |\
+   (IMX_MPCTL0_MFD << PLL_MPCTL0_MFD_SHIFT) |\
+   (IMX_MPCTL0_PD << PLL_MPCTL0_PD_SHIFT))
 
-#define IMX_SPCTL0_VALUE    0x07AA16A6; /* For 96MHz peripheral clock with 32.768 KHz crystal */
+/* This yields: */
 
-/* PDCR */
+#if 0 /* 150 MHz */
+#  define IMX_MCUPLL_CLK_FREQ 153704800
+#else /* 180 MHz */
+#  define IMX_MCUPLL_CLK_FREQ 183561405
+#endif
 
-#define IMX_PCDR_VALUE      0x00000055
+/* SPCTL0 -- Controls the system PLL:
+ *
+ *                                                MFI + MFN / (MFD+1)
+ *  IMX_SYSPLL_CLK_FREQ = 2 * IMX_SYS_CLK_FREQ * --------------------
+ *                                                    PD + 1
+ */
+
+#define IMX_SPCTL0_MFN   678
+#define IMX_SPCTL0_MFI   5
+#define IMX_SPCTL0_MFD   938
+#define IMX_SPCTL0_PD    1
+
+#define IMX_SPCTL0_VALUE \
+  ((IMX_SPCTL0_MFN << PLL_SPCTL0_MFN_SHIFT) |\
+   (IMX_SPCTL0_MFI << PLL_SPCTL0_MFI_SHIFT) |\
+   (IMX_SPCTL0_MFD << PLL_SPCTL0_MFD_SHIFT) |\
+   (IMX_SPCTL0_PD << PLL_SPCTL0_PD_SHIFT))
+
+/* This yields: */
+
+#define IMX_SYSPLL_CLK_FREQ 96015910
+
+/* PDCR -- Controls peripheral clocks */
+
+#define IMX_PCLKDIV1 5
+#define IMX_PCLKDIV2 5
+#define IMX_PCLKDIV3 0
+
+#define IMX_PCDR_VALUE \
+  ((IMX_PCLKDIV1 << PLL_PCDR_PCLKDIV1_SHIFT) |\
+   (IMX_PCLKDIV2 << PLL_PCDR_PCLKDIV2_SHIFT) |\
+   (IMX_PCLKDIV3 << PLL_PCDR_PCLKDIV3_SHIFT))
+
+/* IMX_PERCLK1_FREQ = IMX_SYSPLL_CLK_FREQ / IMX_PCLKDIV1 + 1 */
+
+#define IMX_PERCLK1_FREQ    16002651
+
+/* IMX_PERCLK2_FREQ = IMX_SYSPLL_CLK_FREQ / IMX_PCLKDIV2 + 1 */
+
+#define IMX_PERCLK2_FREQ    16002651
+
+/* IMX_PERCLK2_FREQ = IMX_SYSPLL_CLK_FREQ / IMX_PCLKDIV4 + 1 */
+
+#define IMX_PERCLK2_FREQ    96015910
+
+/* CSCR settings -- Controls HCLK and BCLK and USB clock */
+
+#define IMX_CSCR_BCLKDIV 1
+#define IMX_CSCR_USBDIV  6
 
 /* LED definitions ******************************************************************/
 
@@ -87,6 +155,13 @@
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+/* All i.MX architectures must provide the following entry point.  This entry point
+ * is called early in the intitialization -- after all memory has been configured
+ * and mapped but before any devices have been initialized.
+ */
+
+extern void imx_boardinitialize(void);
 
 #endif
 
