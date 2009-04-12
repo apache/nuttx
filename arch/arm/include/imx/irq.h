@@ -50,23 +50,29 @@
 
 /* i.MX1 Interrupts */
 
-#define IMX_IRQ_UART3PFERR           ( 0)
-#define IMX_IRQ_UART3RTS             ( 1)
-#define IMX_IRQ_UART3DTR             ( 2)
-#define IMX_IRQ_UART3UARTC           ( 3)
-#define IMX_IRQ_UART3TX              ( 4)
-#define IMX_IRQ_PENUP                ( 5)
+#ifndef CONFIG_ARCH_CHIP_IMXL
+#  define IMX_IRQ_UART3PFERR         ( 0)
+#  define IMX_IRQ_UART3RTS           ( 1)
+#  define IMX_IRQ_UART3DTR           ( 2)
+#  define IMX_IRQ_UART3UARTC         ( 3)
+#  define IMX_IRQ_UART3TX            ( 4)
+#  define IMX_IRQ_PENUP              ( 5)
+#endif
 #define IMX_IRQ_CSI                  ( 6)
 #define IMX_IRQ_MMAMAC               ( 7)
 #define IMX_IRQ_MMA                  ( 8)
-#define IMX_IRQ_COMP                 ( 9)
+#ifndef CONFIG_ARCH_CHIP_IMXL
+#  define IMX_IRQ_COMP               ( 9)
+#endif
 #define IMX_IRQ_MSHCXINT             (10)
 #define IMX_IRQ_GPIOPORTA            (11)
 #define IMX_IRQ_GPIOPORTB            (12)
 #define IMX_IRQ_GPIOPORTC            (13)
 #define IMX_IRQ_LCDC                 (14)
-#define IMX_IRQ_SIM                  (15)
-#define IMX_IRQ_SIMDATA              (16)
+#ifndef CONFIG_ARCH_CHIP_IMXL
+#  define IMX_IRQ_SIM                (15)
+#  define IMX_IRQ_SIMDATA            (16)
+#endif
 #define IMX_IRQ_RTC                  (17)
 #define IMX_IRQ_RTCSAMINT            (18)
 #define IMX_IRQ_UART2PFERR           (19)
@@ -81,12 +87,16 @@
 #define IMX_IRQ_UART1UARTC           (28)
 #define IMX_IRQ_UART1TX              (29)
 #define IMX_IRQ_UART1RX              (30)
-#define IMX_IRQ_PENDATA              (33)
+#ifndef CONFIG_ARCH_CHIP_IMXL
+#  define IMX_IRQ_PENDATA            (33)
+#endif
 #define IMX_IRQ_PWM                  (34)
 #define IMX_IRQ_MMCSD                (35)
-#define IMX_IRQ_SSI2TX               (36)
-#define IMX_IRQ_SSI2RX               (37)
-#define IMX_IRQ_SSI2ERR              (38)
+#ifndef CONFIG_ARCH_CHIP_IMXL
+#  define IMX_IRQ_SSI2TX             (36)
+#  define IMX_IRQ_SSI2RX             (37)
+#  define IMX_IRQ_SSI2ERR            (38)
+#endif
 #define IMX_IRQ_I2C                  (39)
 #define IMX_IRQ_CSPI2                (40)
 #define IMX_IRQ_CSPI1                (41)
@@ -94,7 +104,9 @@
 #define IMX_IRQ_SSITXERR             (43)
 #define IMX_IRQ_SSIRX                (44)
 #define IMX_IRQ_SSIRXERR             (45)
-#define IMX_IRQ_TOUCH                (46)
+#ifndef CONFIG_ARCH_CHIP_IMXL
+#  define IMX_IRQ_TOUCH              (46)
+#endif
 #define IMX_IRQ_USBD0                (47)
 #define IMX_IRQ_USBD1                (48)
 #define IMX_IRQ_USBD2                (49)
@@ -102,10 +114,12 @@
 #define IMX_IRQ_USBD4                (51)
 #define IMX_IRQ_USBD5                (52)
 #define IMX_IRQ_USBD6                (53)
-#define IMX_IRQ_UART3RX              (54)
-#define IMX_IRQ_BTSYS                (55)
-#define IMX_IRQ_BTTIM                (56)
-#define IMX_IRQ_BTWUI                (57)
+#ifndef CONFIG_ARCH_CHIP_IMXL
+#  define IMX_IRQ_UART3RX            (54)
+#  define IMX_IRQ_BTSYS              (55)
+#  define IMX_IRQ_BTTIM              (56)
+#  define IMX_IRQ_BTWUI              (57)
+#endif
 #define IMX_IRQ_TIMER2               (58)
 #define IMX_IRQ_TIMER1               (59)
 #define IMX_IRQ_DMAERR               (60)

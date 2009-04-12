@@ -71,15 +71,40 @@ extern uint32 _vector_end;   /* End+1 of vector block */
  * Private Variables
  ************************************************************************************/
 
+/* Mapping of the external memory regions will probably have to be made board
+ * specific.
+ */
+
 static const struct section_mapping_s section_mapping[] =
 {
   { IMX_PERIPHERALS_PSECTION, IMX_PERIPHERALS_VSECTION, 
     IMX_PERIPHERALS_MMUFLAGS, IMX_PERIPHERALS_NSECTIONS},
   { IMX_FLASH_PSECTION,       IMX_FLASH_VSECTION, 
     IMX_FLASH_MMUFLAGS,       IMX_FLASH_NSECTIONS},
+  { IMX_CS1_PSECTION,         IMX_CS1_VSECTION, 
+    IMX_PERIPHERALS_MMUFLAGS, IMX_CS1_NSECTIONS},
+  { IMX_CS2_PSECTION,         IMX_CS2_VSECTION, 
+    IMX_PERIPHERALS_MMUFLAGS, IMX_CS2_NSECTIONS},
+  { IMX_CS3_PSECTION,         IMX_CS3_VSECTION, 
+    IMX_PERIPHERALS_MMUFLAGS, IMX_CS3_NSECTIONS},
+  { IMX_CS4_PSECTION,         IMX_CS4_VSECTION, 
+    IMX_PERIPHERALS_MMUFLAGS, IMX_CS4_NSECTIONS},
+  { IMX_CS5_PSECTION,         IMX_CS5_VSECTION, 
+    IMX_PERIPHERALS_MMUFLAGS, IMX_CS5_NSECTIONS},
 };
 
 #define NMAPPINGS (sizeof(section_mapping) / sizeof(struct section_mapping_s))
+
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
+
+/* All i.MX architectures must provide the following entry point.  This entry point
+ * is called early in the intitialization -- after all memory has been configured
+ * and mapped but before any devices have been initialized.
+ */
+
+extern void imx_boardinitialize(void);
 
 /************************************************************************************
  * Private Functions
@@ -181,4 +206,8 @@ void up_boot(void)
    */
 
   up_copyvectorblock();
+
+  /* Perform board-specific initialiation */
+
+  imx_boardinitialize();
 }

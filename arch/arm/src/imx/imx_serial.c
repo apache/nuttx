@@ -63,6 +63,14 @@
  * Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+
+/* The i.MXL chip has only two UARTs */
+
+#if defined(CONFIG_ARCH_CHIP_IMXL) && !defined(CONFIG_UART3_DISABLE)
+#  define CONFIG_UART3_DISABLE 1
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -497,6 +505,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Setup hardware flow control */
 
+  regval = 0;
 #if 0
   if (priv->hwfc)
     {
@@ -508,9 +517,13 @@ static int up_setup(struct uart_dev_s *dev)
 
       /* Set CTS trigger level */
 
-      up_serilout(priv, UART_UCR4, 30 << UART_UCR4_CTSTL_SHIFT);
+      regval |= 30 << UART_UCR4_CTSTL_SHIFT;
    }
 #endif
+
+  /* i.MX reference clock (PERCLK1) is configured for 16MHz */
+
+  up_serialout(priv, UART_UCR4, regval | UART_UCR4_REF16);
 
   /* Setup the new UART configuration */
 
