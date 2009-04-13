@@ -1,8 +1,8 @@
 /********************************************************************************
- * arch/arm/src/dm320/dm320_decodeirq.c
- * arch/arm/src/chip/dm320_decodeirq.c
+ * arch/arm/src/imx/imx_decodeirq.c
+ * arch/arm/src/chip/imx_decodeirq.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,46 +76,48 @@ void up_decodeirq(uint32* regs)
   current_regs = regs;
   PANIC(OSERR_ERREXCEPTION);
 #else
-  /* Decode the interrupt.  First, fetch the interrupt id register. */
+  uint32 regval;
+  int    irq;
 
-  uint16 irqentry = getreg16(DM320_INTC_IRQENTRY0);
+  /* Decode the interrupt.  First, fetch the NIVECSR register. */
 
-  /* The irqentry value is an offset into a table.  Zero means no interrupt. */
+  regval = getreg32(IMX_AITC_NIVECSR);
 
-  if (irqentry != 0)
+  /* The MS 16 bits of the NIVECSR register contains vector index for the
+   * highest pending normal interrupt.
+   */
+
+  irq = regval >> AITC_NIVECSR_NIVECTOR_SHIFT;
+
+  /* If irq < 64, then this is the IRQ.  If there is no pending interrupt,
+   * then irq will be >= 64 (it will be 0xffff for illegal source).
+   */
+
+  if (irq < NR_IRQS)
     {
-      /* If non-zero, then we can map the table offset into an IRQ number */
+      /* Mask and acknowledge the interrupt */
 
-      int irq = (irqentry >> 2) - 1;
+      up_maskack_irq(irq);
 
-      /* Verify that the resulting IRQ number is valid */
+      /* Current regs non-zero indicates that we are processing an interrupt;
+       * current_regs is also used to manage interrupt level context switches.
+       */
 
-      if ((unsigned)irq < NR_IRQS)
-        {
-          /* Mask and acknowledge the interrupt */
+      current_regs = regs;
 
-          up_maskack_irq(irq);
+      /* Deliver the IRQ */
 
-          /* Current regs non-zero indicates that we are processing an interrupt;
-           * current_regs is also used to manage interrupt level context switches.
-           */
+      irq_dispatch(irq, regs);
 
-          current_regs = regs;
+      /* Indicate that we are no long in an interrupt handler */
 
-          /* Deliver the IRQ */
+      current_regs = NULL;
 
-          irq_dispatch(irq, regs);
+      /* Unmask the last interrupt (global interrupts are still
+       * disabled.
+       */
 
-          /* Indicate that we are no long in an interrupt handler */
-
-          current_regs = NULL;
-
-          /* Unmask the last interrupt (global interrupts are still
-           * disabled.
-           */
-
-          up_enable_irq(irq);
-        }
+      up_enable_irq(irq);
     }
 #endif
 }

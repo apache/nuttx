@@ -47,7 +47,7 @@ CMN_CSRCS	= up_assert.c up_blocktask.c up_copystate.c up_createstack.c \
 
 CHIP_ASRCS	= imx_lowputc.S
 CHIP_CSRCS	= imx_boot.c imx_gpio.c imx_allocateheap.c imx_irq.c \
-		  imx_serial.c imx_timerisr.c  # imx_decodeirq.c imx_framebuffer.c
+		  imx_serial.c imx_timerisr.c  imx_decodeirq.c #imx_framebuffer.c
 
 ifeq ($(CONFIG_USBDEV),y)
 CHIP_CSRCS	+= imx_usbdev.c
