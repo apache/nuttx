@@ -106,6 +106,12 @@
 
 /* AITC Register Bit Definitions ****************************************************/
 
+
+#define AITC_NIVECSR_NIPRILVL_SHIFT  0  /* Bits 15–0: Priority of highest priority interrupt */
+#define AITC_NIVECSR_NIPRILVL_MASK   (0x0000ffff << AITC_NIVECSR_NIPRILVL_SHIFT);
+#define AITC_NIVECSR_NIVECTOR_SHIFT  16 /* Bits 31–16: Vector index of highest priority interrupt */
+#define AITC_NIVECSR_NIVECTOR_MASK   (0x0000ffff << AITC_NIVECSR_NIVECTOR_SHIFT);
+
 /************************************************************************************
  * Inline Functions
  ************************************************************************************/
