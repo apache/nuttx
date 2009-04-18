@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/ez80/ez80_spi.c
+ * arch/arm/src/imx/imx_spi.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -49,21 +49,59 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "ez80f91_spi.h"
+#include "imx_cspi.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_CHIP_EZ80F91
-# define GPIOB_SPI_PINSET  0x38  /* MISO+MSOI+SCK. Excludes SS */
+/* The i.MX1/L supports 2 SPI interfaces.  Which have been endabled? */
+
+#ifndef CONFIG_SPI1_DISABLE
+#  define SPI1_NDX 0           /* Index to SPI1 in g_spidev[] */
+#  ifndef CONFIG_SPI2_DISABLE
+#   define SPI2_NDX 1          /* Index to SPI2 in g_spidev[] */
+#   define NSPIS 2             /* Two SPI interfaces: SPI1 & SPI2 */
+#  else
+#   define NSPIS 1             /* One SPI interface: SPI1 */
+#  endif
 #else
-#  error "Check GPIO initialization for this chip"
+#  ifndef CONFIG_SPI2_DISABLE
+#   define SPI2_NDX 0          /* Index to SPI2 in g_spidev[] */
+#   define NSPIS 1             /* One SPI interface: SPI2 */
+#  else
+#   define NSPIS 0             /* No SPI interfaces */
+#  endif
 #endif
+
+/* Compile the rest of the file only if at least one SPI interface has been
+ * enabled.
+ */
+
+#if NSPIS > 0
+
+/****************************************************************************
+ * Private Type Definitions
+ ****************************************************************************/
+
+struct imx_spidev_s
+{
+  const struct spi_ops_s *ops;  /* Common SPI operations */
+  uint32 base;                  /* SPI register base address */
+};
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+ /* SPI helpers */
+ 
+static inline uint32 spi_getreg(struct imx_spidev_s *priv, unsigned int offset);
+static inline void spi_readreg(struct imx_spidev_s *priv, unsigned int offset, uint32 value);
+static ubyte  spi_waitspif(struct imx_spidev_s *priv);
+static ubyte  spi_transfer(struct imx_spidev_s *priv, ubyte ch);
+
+/* SPI methods */
 
 static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
 static void   spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
@@ -75,23 +113,36 @@ static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t
  * Private Data
  ****************************************************************************/
 
+/* Common SPI operations */
+
 static const struct spi_ops_s g_spiops =
 {
-  ez80_spiselect,    /* Provided externally by board logic */
+  imx_spiselect,    /* Provided externally by board logic */
   spi_setfrequency,
   spi_setmode,
-  ez80_spistatus,    /* Provided externally by board logic */
+  imx_spistatus,    /* Provided externally by board logic */
   spi_sndbyte,
   spi_sndblock,
   spi_recvblock,
 };
 
-/* This supports is only a single SPI bus/port.  If you port this to an
- * architecture with multiple SPI busses/ports, then the following must
- * become an array with one 'struct spi_dev_s' instance per bus.
- */
+/* This supports is up to two SPI busses/ports */
 
-static struct spi_dev_s g_spidev = { &g_spiops };
+static struct imx_spidev_s g_spidev[] =
+{
+#ifndef CONFIG_SPI1_DISABLE
+  {
+    .ops  = &g_spiops,
+    .base = IMX_CSPI1_VBASE
+  },
+#endif
+#ifndef CONFIG_SPI1_DISABLE
+  {
+    .ops  = &g_spiops,
+    .base = IMX_CSPI2_VBASE
+  },
+#endif
+};
 
 /****************************************************************************
  * Public Data
@@ -100,6 +151,106 @@ static struct spi_dev_s g_spidev = { &g_spiops };
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: spi_getreg
+ *
+ * Description:
+ *   Read the SPI register at this offeset
+ *
+ * Input Parameters:
+ *   priv   - Device-specific state data
+ *   offset - Offset to the SPI register from the register base address
+ *
+ * Returned Value:
+ *   Value of the register at this offset
+ *
+ ****************************************************************************/
+
+static inline uint32 spi_getreg(struct imx_spidev_s *priv, unsigned int offset)
+{
+  return getreg32(priv->base + offset);
+}
+
+/****************************************************************************
+ * Name: spi_putreg
+ *
+ * Description:
+ *   Write the value to the SPI register at this offeset
+ *
+ * Input Parameters:
+ *   priv   - Device-specific state data
+ *   offset - Offset to the SPI register from the register base address
+ *   value  - Value to write
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void spi_readreg(struct imx_spidev_s *priv, unsigned int offset, uint32 value)
+{
+  putreg32(value, priv->base + offset);
+}
+
+/****************************************************************************
+ * Name: spi_waitspif
+ *
+ * Description:
+ *   Wait space available in the Tx FIFO.
+ *
+ * Input Parameters:
+ *   priv   - Device-specific state data
+ *
+ * Returned Value:
+ *   Status register mode bits
+ *
+ ****************************************************************************/
+
+static uint32 spi_waitspif(struct imx_spidev_s *priv)
+{
+  uint32 status;
+
+  /* Wait for the device to be ready to accept another byte (or for an error
+   * to be reported).
+   */
+#error "Missing logic"
+  return status;
+}
+
+/****************************************************************************
+ * Name: spi_transfer
+ *
+ * Description:
+ *   Send one byte on SPI, return the response
+ *
+ * Input Parameters:
+ *   priv   - Device-specific state data
+ *   ch - the byte to send
+ *
+ * Returned Value:
+ *   response
+ *
+ ****************************************************************************/
+
+static ubyte spi_transfer(struct imx_spidev_s *priv, ubyte ch)
+{
+   ubyte status;
+
+  /* Send the byte, repeating if some error occurs */
+
+  for(;;)
+    {
+#error "Missing logic"
+
+      /* Wait for the device to be ready to accept another byte */
+
+      status = spi_waitspif(oriv);
+
+      /* Return the next byte from the Rx FIFO */
+#error "Missing logic"
+    }
+}
 
 /****************************************************************************
  * Name: spi_setfrequency
@@ -118,36 +269,9 @@ static struct spi_dev_s g_spidev = { &g_spiops };
 
 static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
 {
-  /* We want select divisor to provide the highest frequency (SPIR) that does NOT
-   * exceed the requested frequency.:
-   *
-   *   SPIR <= System Clock Frequency / (2 * BRG)
-   *
-   * So
-   *
-   *   BRG >= System Clock Frequency / (2 * SPIR)
-   */
- 
-  uint32 brg = ((EZ80_SYS_CLK_FREQ+1)/2 + frequency - 1) / frequency;
-
-  /* "When configured as a Master, the 16-bit divisor value must be between
-   * 0003h and FFFFh, inclusive. When configured as a Slave, the 16-bit
-   * divisor value must be between 0004h and FFFFh, inclusive."
-   */
-
-  if (brg < 3)
-    {
-      brg = 3;
-    }
-  else if (brg > 0xffff)
-    {
-      brg = 0xfff;
-    }
-
-  outp(EZ80_SPI_BRG_L, brg & 0xff);
-  outp(EZ80_SPI_BRG_L, (brg >> 8) & 0xff);
-
-  return ((EZ80_SYS_CLK_FREQ+1)/2 + brg - 1) / brg;
+  struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
+#error "Missing logic"
+  return frequency;
 }
 
 /****************************************************************************
@@ -167,7 +291,8 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
 
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
-  ubyte modebits;
+  struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
+  uint32 modebits;
   ubyte regval;
 
   /* Select the CTL register bits based on the selected mode */
@@ -175,96 +300,27 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
   switch (mode)
     {
     case SPIDEV_MODE0: /* CPOL=0 CHPHA=0 */
-      modebits = 0;
+#error "Missing logic"
       break;
 
     case SPIDEV_MODE1: /* CPOL=0 CHPHA=1 */
-      modebits = SPI_CTL_CPHA;
+#error "Missing logic"
       break;
 
     case SPIDEV_MODE2: /* CPOL=1 CHPHA=0 */
-      modebits = SPI_CTL_CPOL;
+#error "Missing logic"
       break;
 
     case SPIDEV_MODE3: /* CPOL=1 CHPHA=1 */
-      modebits = (SPI_CTL_CPOL|SPI_CTL_CPHA);
+#error "Missing logic"
       break;
 
     default:
       return;
     }
 
-    /* Then set those bits in the CTL register */
-
-    regval = inp(EZ80_SPI_CTL);
-    regval &= ~(SPI_CTL_CPOL|SPI_CTL_CPHA);
-    regval |= modebits;
-    outp(EZ80_SPI_CTL, regval);
-}
-
-/****************************************************************************
- * Name: spi_waitspif
- *
- * Description:
- *   Wait for the SPIF bit to be set in the status register signifying the
- *   the data transfer was finished.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Status register mode bits
- *
- ****************************************************************************/
-
-static ubyte spi_waitspif(void)
-{
-  ubyte status;
-
-  /* Wait for the device to be ready to accept another byte (or for an error
-   * to be reported
-   */
-
-  do
-    {
-      status = inp(EZ80_SPI_SR) & (SPI_SR_SPIF|SPI_SR_WCOL|SPI_SR_MODF);
-    }
-  while (status == 0);
-  return status;
-}
-
-/****************************************************************************
- * Name: spi_transfer
- *
- * Description:
- *   Send one byte on SPI, return th response
- *
- * Input Parameters:
- *   ch - the byte to send
- *
- * Returned Value:
- *   response
- *
- ****************************************************************************/
-
-static ubyte spi_transfer(ubyte ch)
-{
-   ubyte status;
-
-  /* Send the byte, repeating if some error occurs */
-
-  for(;;)
-    {
-      outp(EZ80_SPI_TSR, ch);
-
-      /* Wait for the device to be ready to accept another byte */
-
-      status = spi_waitspif();
-      if ((status & SPI_SR_SPIF) != 0)
-        {
-          return inp(EZ80_SPI_RBR);
-        }
-    }
+    /* Then set the selected mode */
+#error "Missing logic"
 }
 
 /****************************************************************************
@@ -284,7 +340,8 @@ static ubyte spi_transfer(ubyte ch)
 
 static ubyte spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch)
 {
-  return spi_transfer(ch);
+  struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
+  return spi_transfer(priv, ch);
 }
 
 /*************************************************************************
@@ -305,13 +362,14 @@ static ubyte spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch)
 
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen)
 {
-  ubyte response;
+  struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
+  uint32 response;
 
   /* Loop while thre are bytes remaining to be sent */
 
   while (buflen-- > 0)
     {
-      response = spi_transfer(*buffer++);
+      response = spi_transfer(priv, *buffer++);
     }
 }
 
@@ -333,13 +391,13 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, siz
 
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t buflen)
 {
-  ubyte response;
+  struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
 
   /* Loop while thre are bytes remaining to be sent */
 
   while (buflen-- > 0)
     {
-      *buffer = spi_transfer(0xff);
+      *buffer = (ubyte)spi_transfer(prive, 0xff);
     }
 }
 
@@ -371,60 +429,53 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t b
 
 FAR struct spi_dev_s *up_spiinitialize(int port)
 {
+  struct imx_spidev_s *priv;
   ubyte regval;
 
   /* Only the SPI1 interface is supported */
 
-#ifdef CONFIG_DEBUG
-  if (port != 1)
+  switch (port)
     {
+#ifndef CONFIG_SPI1_DISABLE
+    case 1:
+      /* Select SPI1 */
+
+      priv = &g_spidev[SPI1_NDX];
+
+      /* Configure SPI1 GPIOs */
+#error "Missing logic"
+      break;
+#endif
+
+#ifndef CONFIG_SPI2_DISABLE
+    case 2:
+      /* Select SPI1 */
+
+      priv = &g_spidev[SPI2_NDX];
+
+      /* Configure SPI1 GPIOs */
+#error "Missing logic"
+      break;
+#endif
+
+    default:
       return NULL;
     }
-#endif
 
   /* Disable SPI */
-
-  outp(EZ80_SPI_CTL, 0);
-
-  /* Configure GPIOs.  For the eZ80F91, the pin mapping for the four SPI pins
-   * is:
-   *
-   *  GPIO ALT   MASTER  SLAVE   COMMENT
-   *  ---- ----- ------- ------- ---------------------------------
-   *   PB2 SS    INPUT   INPUT   Managed by board specific logic
-   *   PB3 SCLK  OUTPUT  INPUT
-   *   PB4 MISO  INPUT   OUTPUT
-   *   PB5 MOSI  OUTPUT  INPUT
-   *
-   * Select the alternate function for PB2-5:
-   */
-
-#ifdef CONFIG_ARCH_CHIP_EZ80F91
-  regval  = inp(EZ80_PB_DDR);
-  regval |= GPIOB_SPI_PINSET;
-  outp(EZ80_PB_DDR, regval);
-
-  regval  = inp(EZ80_PB_ALT1);
-  regval &= ~GPIOB_SPI_PINSET;
-  outp(EZ80_PB_ALT1, regval);
-
-  regval  = inp(EZ80_PB_ALT2);
-  regval |= GPIOB_SPI_PINSET;
-  outp(EZ80_PB_ALT2, regval);
-#else
-#  error "Check GPIO initialization for this chip"
-#endif
+#error "Missing logic"
 
   /* Set the initial clock frequency for indentification mode < 400kHz */
 
-  spi_setfrequency(NULL, 400000);
+  spi_setfrequency((FAR struct spi_dev_s *)priv, 400000);
 
   /* Enable the SPI.
    * NOTE 1: Interrupts are not used in this driver version.
    * NOTE 2: Initial mode is mode=0.
    */
 
-  outp(EZ80_SPI_CTL, SPI_CTL_SPIEN|SPI_CTL_MASTEREN);
-
-  return &g_spidev;
+#error "Missing logic"
+  return (FAR struct spi_dev_s *)priv;
 }
+
+#endife /* NSPIS > 0 */

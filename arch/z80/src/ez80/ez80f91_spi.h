@@ -60,7 +60,7 @@
  * No bit definitions -- These two 8-bit registers set the 16-bit BRG divider value
  */
 
-/*SPI Control (CTL} Register Definitions */
+/* SPI Control (CTL} Register Definitions */
 
 #define SPI_CTL_IRQEN    (1 << 7) /* Bit 7: 1=SPI system interrupt is enabled */
 #define SPI_CTL_SPIEN    (1 << 5) /* Bit 5: 1=SPI is enabled */
@@ -109,8 +109,8 @@ extern "C" {
  *      GPIOs in the way your board is configured.
  *   2. Add a call to up_spiinitialize() in your low level initialization logic
  *   3. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling  mmcsd_spislotinitializ()
- *      will bind the SPI driver to the SPI MMC/SD driver.
+ *      SPI driver to higher level logic (e.g., calling  mmcsd_spislotinitialize(),
+ *      for example, will bind the SPI driver to the SPI MMC/SD driver).
  */
 
 EXTERN void ez80_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
