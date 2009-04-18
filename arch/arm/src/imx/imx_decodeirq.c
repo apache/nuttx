@@ -79,45 +79,51 @@ void up_decodeirq(uint32* regs)
   uint32 regval;
   int    irq;
 
-  /* Decode the interrupt.  First, fetch the NIVECSR register. */
-
-  regval = getreg32(IMX_AITC_NIVECSR);
-
-  /* The MS 16 bits of the NIVECSR register contains vector index for the
-   * highest pending normal interrupt.
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * current_regs is also used to manage interrupt level context switches.
    */
 
-  irq = regval >> AITC_NIVECSR_NIVECTOR_SHIFT;
+  current_regs = regs;
 
-  /* If irq < 64, then this is the IRQ.  If there is no pending interrupt,
-   * then irq will be >= 64 (it will be 0xffff for illegal source).
-   */
+  /* Loop while there are pending interrupts to be processed */
 
-  if (irq < NR_IRQS)
+  do
     {
-      /* Mask and acknowledge the interrupt */
+      /* Decode the interrupt.  First, fetch the NIVECSR register. */
 
-      up_maskack_irq(irq);
+      regval = getreg32(IMX_AITC_NIVECSR);
 
-      /* Current regs non-zero indicates that we are processing an interrupt;
-       * current_regs is also used to manage interrupt level context switches.
+      /* The MS 16 bits of the NIVECSR register contains vector index for the
+       * highest pending normal interrupt.
        */
 
-      current_regs = regs;
+      irq = regval >> AITC_NIVECSR_NIVECTOR_SHIFT;
 
-      /* Deliver the IRQ */
-
-      irq_dispatch(irq, regs);
-
-      /* Indicate that we are no long in an interrupt handler */
-
-      current_regs = NULL;
-
-      /* Unmask the last interrupt (global interrupts are still
-       * disabled.
+      /* If irq < 64, then this is the IRQ.  If there is no pending interrupt,
+       * then irq will be >= 64 (it will be 0xffff for illegal source).
        */
 
-      up_enable_irq(irq);
+      if (irq < NR_IRQS)
+        {
+          /* Mask and acknowledge the interrupt */
+
+          up_maskack_irq(irq);
+
+          /* Deliver the IRQ */
+
+          irq_dispatch(irq, regs);
+
+          /* Unmask the last interrupt (global interrupts are still
+           * disabled).
+           */
+
+          up_enable_irq(irq);
+        }
     }
+  while (irq < NR_IRQS);
+
+  /* Indicate that we are no longer in an interrupt handler */
+
+  current_regs = NULL;
 #endif
 }

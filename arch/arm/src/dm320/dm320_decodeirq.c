@@ -106,12 +106,12 @@ void up_decodeirq(uint32* regs)
 
           irq_dispatch(irq, regs);
 
-          /* Indicate that we are no long in an interrupt handler */
+          /* Indicate that we are no longer in an interrupt handler */
 
           current_regs = NULL;
 
           /* Unmask the last interrupt (global interrupts are still
-           * disabled.
+           * disabled).
            */
 
           up_enable_irq(irq);

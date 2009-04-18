@@ -85,4 +85,44 @@
  * Inline Functions
  ************************************************************************************/
 
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif /* __cplusplus */
+
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+
+/* The external functions, imx_spiselect and imx_spistatus must be provided by
+ * board-specific logic.  The are implementations of the select and status methods
+ * SPI interface defined by struct spi_ops_s (see include/nuttx/spi.h).  All other
+ * methods (including up_spiinitialize()) are provided by common logic.  To use this
+ * common SPI logic on your board:
+ *
+ *   1. Provide imx_spiselect() and imx_spistatus() functions in your board-specific 
+ *      logic.  This function will perform chip selection and status operations using
+ *      GPIOs in the way your board is configured.
+ *   2. Add a call to up_spiinitialize() in your low level initialization logic
+ *   3. The handle returned by up_spiinitialize() may then be used to bind the
+ *      SPI driver to higher level logic (e.g., calling  mmcsd_spislotinitialize(),
+ *      for example, will bind the SPI driver to the SPI MMC/SD driver).
+ */
+
+EXTERN void imx_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
+EXTERN ubyte imx_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __ASSEMBLY__ */
+
 #endif  /* __ARCH_ARM_IMX_CSPI_H */
