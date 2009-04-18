@@ -74,7 +74,7 @@ CONFIG_ARCH_INTERRUPTSTACK=0
 CONFIG_ARCH_STACKDUMP=y
 
 #
-# IMX specific device driver settings
+# IMX specific serial device driver settings
 #
 # CONFIG_UARTn_DISABLE - select to disable all support for
 #   the UART
@@ -113,6 +113,14 @@ CONFIG_UART3_PARITY=0
 CONFIG_UART1_2STOP=0
 CONFIG_UART2_2STOP=0
 CONFIG_UART3_2STOP=0
+
+#
+# IMX specific SPI device driver settings
+#
+# CONFIG_SPIn_DISABLE - select to disable all support for
+#   the SPI
+CONFIG_SPI1_DISABLE=n
+CONFIG_SPI2_DISABLE=y
 
 #
 # General build options
