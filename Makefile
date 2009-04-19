@@ -98,9 +98,20 @@ endif
 LINKLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEXT) \
 		  lib/liblib$(LIBEXT) examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT)
 
+# Add libraries for network support.  CXX, CXXFLAGS, and COMPILEXX must
+# be defined in Make.defs for this to work!
+
+ifneq ($(CXX),)
+LINKLIBS	+= libxx/liblibxx$(LIBEXT)
+endif
+
+# Add libraries for network support
+
 ifeq ($(CONFIG_NET),y)
 LINKLIBS	+= net/libnet$(LIBEXT) netutils/libnetutils$(LIBEXT) 
 endif
+
+# Add libraries for file system support
 
 ifeq ($(CONFIG_NFILE_DESCRIPTORS),0)
 ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
@@ -113,9 +124,13 @@ else
 LINKLIBS	+= fs/libfs$(LIBEXT) drivers/libdrivers$(LIBEXT)
 endif
 
+# Add libraries for Pascall P-Code
+
 ifneq ($(PCODE_DIR),)
 LINKLIBS	+= $(PCODE_DIR)/libpcode$(LIBEXT)
 endif
+
+# Add libraries for the NX graphics sub-system
 
 ifneq ($(NX_DIR),)
 LINKLIBS	+= $(NX_DIR)/libnx$(LIBEXT)
@@ -187,6 +202,11 @@ sched/libsched$(LIBEXT): context
 
 lib/liblib$(LIBEXT): context
 	@$(MAKE) -C lib TOPDIR="$(TOPDIR)" liblib$(LIBEXT)
+
+ifneq ($(CXX),)
+libxx/liblibxx$(LIBEXT): context
+	@$(MAKE) -C libxx TOPDIR="$(TOPDIR)" liblibxx$(LIBEXT)
+endif
 
 $(ARCH_SRC)/libarch$(LIBEXT): context
 	@$(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libarch$(LIBEXT)
