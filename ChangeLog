@@ -681,7 +681,7 @@
 	in this release and, hence, most likely have problems.  I don't have the correct network
 	network setup to perform that testing now (I'm in a hotel).
 
-0.4.5 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.5 2009-04-19 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Add an enumeration argument to the SPI chip select and status methods so
 	  that the interface can handle more than one device.
@@ -694,3 +694,8 @@
 	* Add support for the Freescale i.MX1/L architecture and a configuration for
 	  the Freescale MX1ADS development board.
 	* examples/helloxx: Added a simple C++ hello world example
+	* include/css: Added std header files
+	* libxx: New C++-only directory provides support for minimal C++ applications
+
+0.4.6 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
