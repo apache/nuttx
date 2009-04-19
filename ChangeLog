@@ -693,3 +693,4 @@
 	* eZ8Encore!: Add an I2C driver.
 	* Add support for the Freescale i.MX1/L architecture and a configuration for
 	  the Freescale MX1ADS development board.
+	* examples/helloxx: Added a simple C++ hello world example

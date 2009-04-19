@@ -21,7 +21,7 @@ examples/dhcpd
     cd examples/dhcpd
     make -f Makefile.host
 
-  Kernel configuratin settings:
+  NuttX configuration settings:
 
     CONFIG_EXAMPLE_DHCPD_NOMAC     - (May be defined to use software assigned MAC)
     CONFIG_EXAMPLE_DHCPD_IPADDR    - Target IP address
@@ -38,6 +38,21 @@ examples/hello
   This is the mandatory, "Hello, World!!" example.  It is little more
   than examples/null with a single printf statement.  Again useful only
   for bringing up new NuttX architectures.
+
+  NuttX configuration settings:
+
+    CONFIG_EXAMPLE_HELLOXX_NOSTATICCONST - Set if system does not support
+      static constructors.
+    CONFIG_EXAMPLE_HELLOXX_NOSTACKCONST - Set if the systgem does not
+      support constructionof objects on the stack.
+
+examples/helloxx
+^^^^^^^^^^^^^^^^
+
+  This is C++ version of the "Hello, World!!" example.  It is intended
+  only to verify that the C++ compiler is function, that basic C++
+  library suupport is available, and that class are instantiated
+  correctly.
 
 examples/mount
 ^^^^^^^^^^^^^^

@@ -314,13 +314,13 @@ EXTERN void   weak_function fs_initialize(void);
 
 EXTERN STATUS register_driver(const char *path,
                               const struct file_operations *fops,
-                              mode_t mode, void *private);
+                              mode_t mode, void *priv);
 
 /* fs_registerdriver.c ******************************************************/
 
 EXTERN STATUS register_blockdriver(const char *path,
                                    const struct block_operations *bops,
-                                   mode_t mode, void *private);
+                                   mode_t mode, void *priv);
 
 /* fs_unregisterdriver.c ****************************************************/
 
