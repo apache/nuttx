@@ -37,6 +37,7 @@ include ${TOPDIR}/.config
 
 CROSSDEV		= arm-elf-
 CC			= $(CROSSDEV)gcc
+CXX			= $(CROSSDEV)g++
 CPP			= $(CROSSDEV)gcc -E
 LD			= $(CROSSDEV)ld
 AR			= $(CROSSDEV)ar rcs
@@ -47,6 +48,11 @@ OBJDUMP			= $(CROSSDEV)objdump
 ARCHCCVERSION		= ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q'}
 ARCHCCMAJOR		= ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
 
+ARCHCFLAGS		= -fno-builtin
+ARCHCXXFLAGS		= -fno-builtin -fno-exceptions
+ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
+ARCHWARNINGSXX		= -Wall -Wshadow
+
 ifeq ("${CONFIG_DEBUG}","y")
   ARCHOPTIMIZATION	= -g
 else
@@ -55,17 +61,19 @@ else
 endif
 
 ifeq ($(ARCHCCMAJOR),4)
-  ARCHCPUFLAGS		= -mtune=arm9tdmi -march=armv4t -msoft-float -fno-builtin
+  ARCHCPUFLAGS		= -mtune=arm9tdmi -march=armv4t -msoft-float
 else
-  ARCHCPUFLAGS		= -mapcs-32 -mtune=arm9tdmi -march=armv4t -msoft-float -fno-builtin
+  ARCHCPUFLAGS		= -mapcs-32 -mtune=arm9tdmi -march=armv4t -msoft-float
 endif
-ARCHPICFLAGS		= -fpic
-ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
 ARCHDEFINES		=
 ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include
+
+ARCHPICFLAGS		= -fpic
 ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script
 
-CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
+CFLAGS			= $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
+			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) -pipe
+CXXFLAGS		= $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
 			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) -pipe
 CPPFLAGS		= $(ARCHINCLUDES) $(ARCHDEFINES)
 AFLAGS			= $(CFLAGS) -D__ASSEMBLY__
@@ -86,6 +94,11 @@ endef
 define COMPILE
 	@echo "CC: $1"
 	@$(CC) -c $(CFLAGS) $1 -o $2
+endef
+
+define COMPILEXX
+	@echo "CXX: $1"
+	@$(CXX) -c $(CXXFLAGS) $1 -o $2
 endef
 
 define ASSEMBLE
