@@ -527,7 +527,7 @@ static FAR void *g_vid0base = 0;
 static FAR void *g_vid0ppbase = 0;
 #endif
 
-static const struct fb_vtable_s g_vid0vtable =
+static struct fb_vtable_s g_vid0vtable =
 {
   .getvideoinfo = dm320_getvid0videoinfo,
   .getplaneinfo = dm320_getvid0planeinfo,
@@ -542,7 +542,7 @@ static const struct fb_vtable_s g_vid0vtable =
 #ifndef CONFIG_DM320_VID1_DISABLE
 static FAR void *g_vid1base = 0;
 
-static const struct fb_vtable_s g_vid1vtable =
+static struct fb_vtable_s g_vid1vtable =
 {
   .getvideoinfo = dm320_getvid1videoinfo,
   .getplaneinfo = dm320_getvid1planeinfo,
@@ -555,7 +555,7 @@ static const struct fb_vtable_s g_vid1vtable =
 
 #ifndef CONFIG_DM320_OSD0_DISABLE
 static FAR void *g_osd0base = 0;
-static const struct fb_vtable_s g_osd0vtable =
+static struct fb_vtable_s g_osd0vtable =
 {
   .getvideoinfo = dm320_getosd0videoinfo,
   .getplaneinfo = dm320_getosd0planeinfo,
@@ -573,7 +573,7 @@ static const struct fb_vtable_s g_osd0vtable =
 
 #ifndef CONFIG_DM320_OSD1_DISABLE
 static FAR void *g_osd1base = 0;
-static const struct fb_vtable_s g_osd1vtable =
+static struct fb_vtable_s g_osd1vtable =
 {
   .getvideoinfo = dm320_getosd1videoinfo,
   .getplaneinfo = dm320_getosd1planeinfo,
@@ -1421,7 +1421,6 @@ FAR struct fb_vtable_s *up_fbgetvplane(int vplane)
     }
   return NULL;
 }
-#endif
 
 /****************************************************************************
  * Name: up_fbteardown
