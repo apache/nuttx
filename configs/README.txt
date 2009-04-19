@@ -154,6 +154,9 @@ defconfig -- This is a configuration file similar to the Linux
 		  different loaders using the GNU objcopy program.  This option
 		  should not be selected if you are not using the GNU toolchain.
 		CONFIG_HAVE_LIBM - toolchain supports libm.a
+		CONFIG_HAVE_CXX - toolchain supports C++ and CXX, CXXFLAGS, and
+		  COMPILEXX have been defined in the configuratins Make.defs
+		  file.
 
 	General OS setup
 

@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: April 8, 2009</p>
+      <p>Last Updated: April 19, 2009</p>
     </td>
   </tr>
 </table>
@@ -1539,18 +1539,27 @@ The system can be re-made subsequently by just typing <code>make</code>.
 <ul>
   <li><code>CONFIG_RRLOAD_BINARY</code>:
     Make the rrload binary format used with BSPs from <a href="www.ridgerun.com">ridgerun.com</a>
-     using the <code>tools/mkimage.sh</code> script.</li>
+    using the <code>tools/mkimage.sh</code> script.
+  </li>
   <li><code>CONFIG_INTELHEX_BINARY</code>:
     Make the Intel HEX binary format used with many different loaders using the GNU objcopy program
-    This option hould not be selected if you are not using the GNU toolchain.</li>
+    This option hould not be selected if you are not using the GNU toolchain.
+  </li>
   <li><code>CONFIG_MOTOROLA_SREC</code>:
     Make the Motorola S-Record binary format used with many different loaders using the GNU objcopy program
-    Should not be selected if you are not using the GNU toolchain.</li>
+    Should not be selected if you are not using the GNU toolchain.
+  </li>
   <li><code>CONFIG_RAW_BINARY</code>:
     mmke a raw binary format file used with many different loaders using the GNU objcopy program.
-    This option  should not be selected if you are not using the GNU toolchain.</li>
+    This option  should not be selected if you are not using the GNU toolchain.
+  </li>
   <li><code>CONFIG_HAVE_LIBM</code>:
-    Toolchain supports libm.a</li>
+    Toolchain supports libm.a
+  </li>
+  <li><code>CONFIG_HAVE_CXX</code>:
+    Toolchain supports C++ and <code>CXX</code>, <code>CXXFLAGS</code>, and <code>COMPILEXX</code>
+    have been defined in the configuratins <code>Make.defs</code> file.
+  </li>
 </ul>
 
 <h2>General OS setup</h2>

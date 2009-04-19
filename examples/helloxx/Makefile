@@ -1,5 +1,5 @@
 ############################################################################
-# examples/hello/Makefile
+# examples/helloxx/Makefile
 #
 #   Copyright (C) 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -52,10 +52,14 @@ all:	$(BIN)
 .PHONY:	clean depend chkcxx
 
 chkcxx:
-ifndef CXX
-	@echo "In order to use this example, you toolchain must support C++"
-	@echo "and CXX, CXXFLAGS, and COMPILEXX must be defined in the Make.defs"
-	@echo "file of the configuration that you are using."
+ifneq ($(CONFIG_HAVE_CXX),y)
+	@echo ""
+	@echo "In order to use this example, you toolchain must support must"
+	@echo ""
+	@echo "  (1) Explicitly seelct CONFIG_HAVE_CXX to build in C++ support"
+	@echo "  (2) Define CXX, CXXFLAGS, and COMPILEXX in the Make.defs file"
+	@echo "      of the configuration that you are using."
+	@echo ""
 	@exit 1
 endif
 

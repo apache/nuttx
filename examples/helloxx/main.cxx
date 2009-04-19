@@ -1,5 +1,5 @@
 //***************************************************************************
-// examples/hello/main.c
+// examples/helloxx/main.c
 //
 //   Copyright (C) 2009 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

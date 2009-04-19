@@ -101,7 +101,7 @@ LINKLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEXT
 # Add libraries for network support.  CXX, CXXFLAGS, and COMPILEXX must
 # be defined in Make.defs for this to work!
 
-ifneq ($(CXX),)
+ifeq ($(CONFIG_HAVE_CXX),y)
 LINKLIBS	+= libxx/liblibxx$(LIBEXT)
 endif
 
@@ -203,10 +203,8 @@ sched/libsched$(LIBEXT): context
 lib/liblib$(LIBEXT): context
 	@$(MAKE) -C lib TOPDIR="$(TOPDIR)" liblib$(LIBEXT)
 
-ifneq ($(CXX),)
 libxx/liblibxx$(LIBEXT): context
 	@$(MAKE) -C libxx TOPDIR="$(TOPDIR)" liblibxx$(LIBEXT)
-endif
 
 $(ARCH_SRC)/libarch$(LIBEXT): context
 	@$(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libarch$(LIBEXT)
