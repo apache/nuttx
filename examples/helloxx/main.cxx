@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/init.h>
-#include <stdio.h>
+#include <cstdio>
 #include <debug.h>
 
 //***************************************************************************
