@@ -65,7 +65,7 @@
  */
 
 #if CONFIG_DRAM_START != 0x01000000
-# error "Invalid setting for CONFIG_DRAM_START
+# error "Invalid setting for CONFIG_DRAM_START"
 #endif
 
 /* Section/Region Name             Phys Address    Size  TLB Enty        CW */
@@ -119,7 +119,7 @@
 /* DM320 Virtual Memory Map */
 
 #if CONFIG_DRAM_VSTART != 0x00000000
-# error "Invalid setting for CONFIG_DRAM_VSTART
+# error "Invalid setting for CONFIG_DRAM_VSTART"
 #endif
 
 /* Section/Region Name               Virt Address  End        Size  CW */

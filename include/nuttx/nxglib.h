@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/nxglib.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,12 @@
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_NX_NPLANES
+#  define CONFIG_NX_NPLANES  1  /* Max number of color planes supported */
+#endif
 
 /* Mnemonics for indices */
 
