@@ -55,7 +55,7 @@ else
 endif
 
 ifeq ($(ARCHCCMAJOR),4)
-  ARCHCPUFLAGS		= -mtune=arm9tdmi -march=armv5te -msoft-float -fno-builtin
+  ARCHCPUFLAGS		= -mtune=arm9tdmi -march=armv5te -mfloat-abi=soft -fno-builtin
 else
   ARCHCPUFLAGS		= -mapcs-32 -mtune=arm9tdmi -march=armv5te -msoft-float -fno-builtin
 endif
