@@ -61,9 +61,9 @@ else
 endif
 
 ifeq ($(ARCHCCMAJOR),4)
-  ARCHCPUFLAGS		= -mtune=arm9tdmi -march=armv4t -mfloat-abi=soft
+  ARCHCPUFLAGS		= -mtune=arm920t -march=armv4t -mfloat-abi=soft
 else
-  ARCHCPUFLAGS		= -mapcs-32 -mtune=arm9tdmi -march=armv4t -msoft-float
+  ARCHCPUFLAGS		= -mapcs-32 -mtune=arm920t -march=armv4t -msoft-float
 endif
 ARCHDEFINES		=
 ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include

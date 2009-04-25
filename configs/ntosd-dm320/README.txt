@@ -5,7 +5,7 @@ Toolchain
 ^^^^^^^^^
 
   A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
-  be modified to point to the correct path to the SH toolchain (if
+  be modified to point to the correct path to the ARM926 GCC toolchain (if
   different from the default).
 
   If you have no ARM toolchain, one can be downloaded from the NuttX
@@ -22,7 +22,8 @@ Toolchain
 
   4. cd <some-dir>/buildroot
 
-  5. cp configs/arm-defconfig .config
+  5. cp configs/arm-defconfig .config OR
+     cp configs/arm926t_defconfig-4.2.4 .config
 
   6. make oldconfig
 
