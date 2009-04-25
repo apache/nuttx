@@ -847,7 +847,7 @@ ZDS-II toolchain in Cygwin-based environment. Please report any errors to me.
 
 This tarball contains a complete CVS snapshot from March 29, 2009.
 
-nuttx-0.4.4
+nuttx-0.4.5
 ^^^^^^^^^^^
 
 This is the 37th release of NuttX.  This release focuses on a few new features.

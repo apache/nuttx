@@ -548,10 +548,10 @@ static inline void imxgpio_clroutput(int port, int bit)
 
 /* Useful functions for normal configurations */
 
-extern void imxgpio_configreset(int port, int bit);
 extern void imxgpio_configoutput(int port, int bit, int value);
 extern void imxgpio_configinput(int port, int bit);
-extern void imxgpio_configprimary(int port, int bit);
+extern void imxgpio_configpfoutput(int port, int bit);
+extern void imxgpio_configpfinput(int port, int bit);
 
 #endif
 

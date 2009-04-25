@@ -1070,10 +1070,10 @@ void up_earlyserialinit(void)
 
    /* Configure UART1 pins: RXD, TXD, RTS, and CTS */
 
-   imxgpio_configprimary(GPIOC, 9);
-   imxgpio_configprimary(GPIOC, 10);
-   imxgpio_configprimary(GPIOC, 11);
-   imxgpio_configprimary(GPIOC, 12);
+   imxgpio_configpfoutput(GPIOC, 9);  /* Port C, pin  9: CTS */
+   imxgpio_configpfinput(GPIOC, 10);  /* Port C, pin 10: RTS */
+   imxgpio_configpfoutput(GPIOC, 11); /* Port C, pin 11: TXD */
+   imxgpio_configpfinput(GPIOC, 12);  /* Port C, pin 12: RXD */
 #endif
 
    /* Configure and disable the UART2 */
@@ -1083,13 +1083,13 @@ void up_earlyserialinit(void)
    up_serialout(&g_uart2priv, UART_UCR2, 0);
 
    /* Configure UART2 pins: RXD, TXD, RTS, and CTS (only, also
-    * supports DTR, DCD, RI, and DSR
+    * supports DTR, DCD, RI, and DSR -- not configured)
     */
 
-   imxgpio_configprimary(GPIOB, 28);
-   imxgpio_configprimary(GPIOB, 29);
-   imxgpio_configprimary(GPIOB, 30);
-   imxgpio_configprimary(GPIOB, 31);
+   imxgpio_configpfoutput(GPIOB, 28); /* Port B, pin 28: CTS */
+   imxgpio_configpfinput(GPIOB, 29);  /* Port B, pin 29: RTS */
+   imxgpio_configpfoutput(GPIOB, 30); /* Port B, pin 30: TXD */
+   imxgpio_configpfinput(GPIOB, 31);  /* Port B, pin 31: RXD */
 #endif
 
    /* Configure and disable the UART3 */
@@ -1099,13 +1099,13 @@ void up_earlyserialinit(void)
    up_serialout(&g_uart3priv, UART_UCR2, 0);
 
    /* Configure UART2 pins: RXD, TXD, RTS, and CTS (only, also
-    * supports DTR, DCD, RI, and DSR
+    * supports DTR, DCD, RI, and DSR -- not configured)
     */
 
-   imxgpio_configprimary(GPIOC, 28);
-   imxgpio_configprimary(GPIOC, 29);
-   imxgpio_configprimary(GPIOC, 30);
-   imxgpio_configprimary(GPIOC, 31);
+   imxgpio_configpfoutput(GPIOC, 28); /* Port C, pin 18: CTS */
+   imxgpio_configpfinput(GPIOC, 29);  /* Port C, pin 29: RTS */
+   imxgpio_configpfoutput(GPIOC, 30); /* Port C, pin 30: TXD */
+   imxgpio_configpfinput(GPIOC, 31);  /* Port C, pin 31: RXD */
 #endif
 
   /* Then enable the console UART.  The others will be initialized
