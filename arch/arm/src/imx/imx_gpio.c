@@ -70,16 +70,16 @@
 
 void imxgpio_configoutput(int port, int bit, int value)
 {
-  imxgpio_configinput(port, bit);         /* Same as input except: */
-  imxgpio_dirout(GPIOA, 2);                 /* Output */
+  imxgpio_configinput(port, bit);            /* Same as input except: */
+  imxgpio_dirout(port, bit);                 /* Output */
 
   if (value)
     {
-      imxgpio_setoutput(GPIOA, 2);          /* Set output = 1 */
+      imxgpio_setoutput(port, bit);          /* Set output = 1 */
     }
   else
     {
-      imxgpio_clroutput(GPIOA, 2);          /* Set output = 0 */
+      imxgpio_clroutput(port, bit);          /* Set output = 0 */
     }
 }
 
@@ -89,22 +89,34 @@ void imxgpio_configoutput(int port, int bit, int value)
 
 void imxgpio_configinput(int port, int bit)
 {
-  imxgpio_pullupdisable(GPIOA, 2);          /* No pullup */
-  imxgpio_dirin(GPIOA, 2);                  /* Input */
-  imxgpio_gpiofunc(GPIOA, 2);               /* Use as GPIO */
-  imxgpio_primaryperipheralfunc(GPIOA, 2);  /* Not necessary */
-  imxgpio_ocrain(GPIOA, 2);                 /* Output AIN */
-  imxgpio_aoutgpio(GPIOA, 2);               /* AOUT input is GPIO */
-  imxgpio_boutgpio(GPIOA, 2);               /* BOUT input is GPIO */
+  imxgpio_pullupdisable(port, bit);          /* No pullup */
+  imxgpio_dirin(port, bit);                  /* Input */
+  imxgpio_gpiofunc(port, bit);               /* Use as GPIO */
+  imxgpio_primaryperipheralfunc(port, bit);  /* Not necessary */
+  imxgpio_ocrain(port, bit);                 /* Output AIN */
+  imxgpio_aoutgpio(port, bit);               /* AOUT input is GPIO */
+  imxgpio_boutgpio(port, bit);               /* BOUT input is GPIO */
 }
 
 /****************************************************************************
- * Name: imxgpio_configprimary
+ * Name: imxgpio_configpfoutput
  ****************************************************************************/
 
-void imxgpio_configprimary(int port, int bit)
+void imxgpio_configpfoutput(int port, int bit)
 {
-  imxgpio_configinput(port, bit);           /* Same as input except: */
-  imxgpio_peripheralfunc(GPIOA, 2);         /* Use as peripheral */
-  imxgpio_primaryperipheralfunc(GPIOA, 2);  /* Primary function*/
+  imxgpio_configinput(port, bit);            /* Same as input except: */
+  imxgpio_peripheralfunc(port, bit);         /*   Use as peripheral */
+  imxgpio_primaryperipheralfunc(port, bit);  /*   Primary function*/
+  imxgpio_dirout(port, bit);                 /*   Make output */
+}
+
+/****************************************************************************
+ * Name: imxgpio_configpfinput
+ ****************************************************************************/
+
+void imxgpio_configpfinput(int port, int bit)
+{
+  imxgpio_configinput(port, bit);            /* Same as input except: */
+  imxgpio_peripheralfunc(port, bit);         /*   Use as peripheral */
+  imxgpio_primaryperipheralfunc(port, bit);  /*   Primary function*/
 }
