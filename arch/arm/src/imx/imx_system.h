@@ -156,6 +156,18 @@
 
 /* SC Register Bit Definitions ******************************************************/
 
+
+#define FMCR_SDCS_SEL           (1 << 0) /* Bit 0: 1:CSD0 selected */
+#define FMCR_SDCS1_SEL          (1 << 1) /* Bit 1: 1:CSD1 selected */
+#define FMCR_EXT_BREN           (1 << 2) /* Bit 2: 1:External bus request enabled */
+#define FMCR_SSI_TXCLKSEL       (1 << 3) /* Bit 3: 1:Input from Port B[19] SIM_CLK pin */
+#define FMCR_SSI_TXFSSEL        (1 << 4) /* Bit 4: 1:Input from Port B[18] SIM_RST pin */
+#define FMCR_SSI_RXDATSEL       (1 << 5) /* Bit 5: 1:Input from Port B[16] SIM_TX pin */
+#define FMCR_SSI_RXCLKSEL       (1 << 6) /* Bit 6: 1:Input from Port B[15] SIM_PD pin */
+#define FMCR_SSI_RXFSSEL        (1 << 7) /* Bit 7: 1:Input from Port B[14] SIM_SVEN pin */
+#define FMCR_SPI2_RXDSEL        (1 << 8) /* Bit 8: 1:Input from SPI2_RXD_1 pin
+                                          * (AOUT of Port D[9]) */
+
 /* SDRAMC Register Offsets **********************************************************/
 
 #define SDRAMC_SDCTL0_OFFSET    0x0000                
