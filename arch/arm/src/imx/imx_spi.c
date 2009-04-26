@@ -38,17 +38,21 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/spi.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <debug.h>
 
-#include <arch/board/board.h>
 #include <nuttx/arch.h>
 #include <nuttx/spi.h>
-#include <arch/io.h>
+
+#include <arch/irq.h>
+#include <arch/board/board.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
 
 #include "chip.h"
+#include "imx_gpio.h"
 #include "imx_cspi.h"
 
 /****************************************************************************
@@ -80,6 +84,10 @@
 
 #if NSPIS > 0
 
+/* The number of words that will fit in the Tx FIFO */
+
+#define IMX_TXFIFO_WORDS 8
+
 /****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
@@ -90,11 +98,36 @@ struct imx_spidev_s
 #ifndef CONFIG_SPI_POLLWAIT
   sem_t  sem;                   /* Wait for transfer to complete */
 #endif
+
+  /* These following are the source and destination buffers of the transfer.
+   * they are retained in this structure so that they will be accessible
+   * from an interrupt handler.  The actual type of the buffer is ubyte is
+   * nbits <=8 and uint16 is nbits >8.
+   */
+
+  void  *txbuffer;              /* Source buffer */
+  void  *rxbuffer;              /* Destination buffer */
+
+  /* These are functions pointers that are configured to perform the
+   * appropriate transfer for the particular kind of exchange that is
+   * occurring.  Differnt functions may be selected depending on (1)
+   * if the tx or txbuffer is NULL and depending on the number of bits
+   * per word.
+   */
+
+  void  (*txword)(struct imx_spidev_s *priv);
+  void  (*rxword)(struct imx_spidev_s *priv);
+
   uint32 base;                  /* SPI register base address */
   uint32 frequency;             /* Current desired SCLK frequency */
   uint32 actual;                /* Current actual SCLK frequency */
+
+  int    ntxwords;              /* Number of words left to transfer on the Tx FIFO */
+  int    nrxwords;              /* Number of words received on the Rx FIFO */
+  int    nwords;                /* Number of words to be exchanged */
+
   ubyte  mode;                  /* Current mode */
-  ubyte  nbytes;                /* Current number of bits per word */
+  ubyte  nbits;                 /* Current number of bits per word */
 #ifndef CONFIG_SPI_POLLWAIT
   ubyte  irq;                   /* SPI IRQ number */
 #endif
@@ -104,22 +137,36 @@ struct imx_spidev_s
  * Private Function Prototypes
  ****************************************************************************/
 
- /* SPI helpers */
+ /* SPI register access */
  
 static inline uint32 spi_getreg(struct imx_spidev_s *priv, unsigned int offset);
 static inline void spi_putreg(struct imx_spidev_s *priv, unsigned int offset, uint32 value);
+
+/* SPI data transfer */
+
+static void   spi_txnull(struct imx_spidev_s *priv);
+static void   spi_txuint16(struct imx_spidev_s *priv);
+static void   spi_txubyte(struct imx_spidev_s *priv);
+static void   spi_rxnull(struct imx_spidev_s *priv);
+static void   spi_rxuint16(struct imx_spidev_s *priv);
+static void   spi_rxubyte(struct imx_spidev_s *priv);
+static int    spi_performtx(struct imx_spidev_s *priv);
+static inline void spi_performrx(struct imx_spidev_s *priv);
+static int    spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
+                           void *rxbuffer, unsigned int nwords);
+
+/* Interrupt handling */
+
 #ifndef CONFIG_SPI_POLLWAIT
 static inline struct imx_spidev_s *spi_mapirq(int irq);
 static int    spi_interrupt(int irq, void *context);
 #endif
-static int    spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
-                           void *rxbuffer, unsigned int nwords);
 
 /* SPI methods */
 
 static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
 static void   spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
-static ubyte  spi_send(FAR struct spi_dev_s *dev, uint16 wd);
+static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd);
 static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t buflen);
 static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t buflen);
 
@@ -131,13 +178,13 @@ static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t 
 
 static const struct spi_ops_s g_spiops =
 {
-  .select    = imx_spiselect,    /* Provided externally by board logic */
-  .frequency = spi_setfrequency,
-  .setmode   = spi_setmode,
-  .status    = imx_spistatus,    /* Provided externally by board logic */
-  .send      = spi_send,
-  .sndblock  = spi_sndblock,
-  .recvblock = spi_recvblock,
+  .select       = imx_spiselect,    /* Provided externally by board logic */
+  .setfrequency = spi_setfrequency,
+  .setmode      = spi_setmode,
+  .status       = imx_spistatus,    /* Provided externally by board logic */
+  .send         = spi_send,
+  .sndblock     = spi_sndblock,
+  .recvblock    = spi_recvblock,
 };
 
 /* This supports is up to two SPI busses/ports */
@@ -147,7 +194,7 @@ static struct imx_spidev_s g_spidev[] =
 #ifndef CONFIG_SPI1_DISABLE
   {
     .ops  = &g_spiops,
-    .base = IMX_CSPI1_VBASE
+    .base = IMX_CSPI1_VBASE,
 #ifndef CONFIG_SPI_POLLWAIT
     .irq  = IMX_IRQ_CSPI1,
 #endif
@@ -156,7 +203,7 @@ static struct imx_spidev_s g_spidev[] =
 #ifndef CONFIG_SPI2_DISABLE
   {
     .ops  = &g_spiops,
-    .base = IMX_CSPI2_VBASE
+    .base = IMX_CSPI2_VBASE,
 #ifndef CONFIG_SPI_POLLWAIT
     .irq  = IMX_IRQ_CSPI2,
 #endif
@@ -214,6 +261,318 @@ static inline void spi_putreg(struct imx_spidev_s *priv, unsigned int offset, ui
 }
 
 /****************************************************************************
+ * Name: spi_txnull, spi_txuint16, and spi_txubyte
+ *
+ * Description:
+ *   Transfer all ones, a ubyte, or uint16 to Tx FIFO and update the txbuffer
+ *   pointer appropriately.  The selected function dependes on (1) if there
+ *   is a source txbuffer provided, and (2) if the number of bits per
+ *   word is <=8 or >8.
+ *
+ * Input Parameters:
+ *   priv   - Device-specific state data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void spi_txnull(struct imx_spidev_s *priv)
+{
+  spi_putreg(priv, CSPI_TXD_OFFSET, 0xffff);
+}
+
+static void spi_txuint16(struct imx_spidev_s *priv)
+{
+  uint16 *ptr = (uint16*)priv->txbuffer;
+  spi_putreg(priv, CSPI_TXD_OFFSET, *ptr++);
+  priv->txbuffer = (void*)ptr;
+}
+
+static void spi_txubyte(struct imx_spidev_s *priv)
+{
+  ubyte *ptr = (ubyte*)priv->txbuffer;
+  spi_putreg(priv, CSPI_TXD_OFFSET, *ptr++);
+  priv->txbuffer = (void*)ptr;
+}
+
+/****************************************************************************
+ * Name: spi_rxnull, spi_rxuint16, and spi_rxubyte
+ *
+ * Description:
+ *   Discard input, save a ubyte, or or save a uint16 from Tx FIFO in the
+ *   user rxvbuffer and update the rxbuffer pointer appropriately.  The
+ *   selected function dependes on (1) if there is a desination rxbuffer
+ *   provided, and (2) if the number of bits per word is <=8 or >8.
+ *
+ * Input Parameters:
+ *   priv   - Device-specific state data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void spi_rxnull(struct imx_spidev_s *priv)
+{
+  (void)spi_getreg(priv, CSPI_RXD_OFFSET);
+}
+
+static void spi_rxuint16(struct imx_spidev_s *priv)
+{
+  uint16 *ptr = (uint16*)priv->rxbuffer;
+  *ptr++ = (uint16)spi_getreg(priv, CSPI_TXD_OFFSET);
+  priv->rxbuffer = (void*)ptr;
+}
+
+static void spi_rxubyte(struct imx_spidev_s *priv)
+{
+  ubyte *ptr = (ubyte*)priv->rxbuffer;
+  *ptr++ = (ubyte)spi_getreg(priv, CSPI_TXD_OFFSET);
+  priv->rxbuffer = (void*)ptr;
+}
+
+/****************************************************************************
+ * Name: spi_performtx
+ *
+ * Description:
+ *   If the Tx FIFO is empty, then transfer as many words as we can to
+ *   the FIFO.
+ *
+ * Input Parameters:
+ *   priv   - Device-specific state data
+ *
+ * Returned Value:
+ *   The number of words written to the Tx FIFO (a value from 0 to 8,
+ *   inclusive).
+ *
+ ****************************************************************************/
+
+static int spi_performtx(struct imx_spidev_s *priv)
+{
+  uint32 regval;
+  int ntxd = 0;  /* Number of words written to Tx FIFO */
+
+  /* Check if the Tx FIFO is empty */
+
+  if ((spi_getreg(priv, CSPI_INTCS_OFFSET) & CSPI_INTCS_TE) != 0)
+    {
+      /* Check if all of the Tx words have been sent */
+
+      if (priv->ntxwords > 0)
+        {
+          /* No.. Transfer more words until either the TxFIFO is full or
+           * until all of the user provided data has been sent.
+           */
+
+          for (; ntxd < priv->ntxwords && ntxd < IMX_TXFIFO_WORDS; ntxd++)
+            {
+               priv->txword(priv);
+            }
+
+          /* Update the count of words to to transferred */
+
+          priv->ntxwords -= ntxd;
+        }
+      else
+        {
+          /* Yes.. The transfer is complete, disable Tx FIFO empty interrupt */
+
+          regval = spi_getreg(priv, CSPI_INTCS_OFFSET);
+          regval &= ~CSPI_INTCS_TEEN;
+          spi_putreg(priv, CSPI_INTCS_OFFSET, regval);
+        }
+    }
+  return ntxd;
+}
+
+/****************************************************************************
+ * Name: spi_performrx
+ *
+ * Description:
+ *   Transfer as many bytes as possible from the Rx FIFO to the user Rx
+ *   buffer (if one was provided).
+ *
+ * Input Parameters:
+ *   priv   - Device-specific state data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void spi_performrx(struct imx_spidev_s *priv)
+{
+  /* Loop while data is available in the Rx FIFO */
+
+  while ((spi_getreg(priv, CSPI_INTCS_OFFSET) & CSPI_INTCS_RR) != 0)
+    {
+      /* Have all of the requested words been transferred from the Rx FIFO? */
+
+      if (priv->nrxwords < priv->nwords)
+        {
+          /* No.. Read more data from Rx FIFO */
+
+          priv->rxword(priv);
+          priv->nrxwords++;
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: spi_startxfr
+ *
+ * Description:
+ *   If data was added to the Tx FIFO, then start the exchange
+ *
+ * Input Parameters:
+ *   priv  - Device-specific state data
+ *   ntxd  - The number of bytes added to the Tx FIFO by spi_performtx.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void spi_startxfr(struct imx_spidev_s *priv, int ntxd)
+{
+  uint32 regval;
+
+  /* The XCH bit initiates an exchange in master mode.  It remains set
+   * remains set while the exchange is in progress but is automatically
+   * clear when all data in the Tx FIFO and shift register are shifted out.
+   * So if we have added data to the Tx FIFO on this interrupt, we must
+   * set the XCH bit to resume the exchange.
+   */
+
+  if (ntxd > 0)
+   {
+      regval = spi_getreg(priv, CSPI_CTRL_OFFSET);
+      regval |= CSPI_CTRL_XCH;
+      spi_putreg(priv, CSPI_CTRL_OFFSET, regval);
+   }
+}
+
+/****************************************************************************
+ * Name: spi_transfer
+ *
+ * Description:
+ *   Exchange a block data with the SPI device
+ *
+ * Input Parameters:
+ *   priv   - Device-specific state data
+ *   txbuffer - The buffer of data to send to the device (may be NULL).
+ *   rxbuffer - The buffer to receive data from the device (may be NULL).
+ *   nwords   - The total number of words to be exchanged.  If the interface
+ *              uses <= 8 bits per word, then this is the number of ubytes;
+ *              if the interface uses >8 bits per word, then this is the
+ *              number of uint16's
+ *
+ * Returned Value:
+ *   0: success, <0:Negated error number on failure
+ *
+ ****************************************************************************/
+
+static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
+                        void *rxbuffer, unsigned int nwords)
+{
+#ifndef CONFIG_SPI_POLLWAIT
+  irqstate_t flags;
+#endif
+  uint32 regval;
+  int ntxd;
+  int ret;
+
+  /* Set up to perform the transfer */
+
+  priv->txbuffer     = (ubyte*)txbuffer; /* Source buffer */
+  priv->rxbuffer     = (ubyte*)rxbuffer; /* Destination buffer */
+  priv->ntxwords     = nwords;           /* Number of words left to send */
+  priv->nrxwords     = 0;                /* Number of words received */
+  priv->nwords       = nwords;           /* Total number of exchanges */
+
+  /* Set up the low-level data transfer function pointers */
+ 
+  if (priv->nbits > 8)
+    {
+      priv->txword = spi_txuint16;
+      priv->rxword = spi_rxuint16;
+    }
+  else
+    {
+      priv->txword = spi_txubyte;
+      priv->rxword = spi_rxubyte;
+    }
+   
+  if (!txbuffer)
+    {
+      priv->txword = spi_txnull;
+    }
+
+  if (!rxbuffer)
+    {
+      priv->rxword = spi_rxnull;
+    }
+
+  /* Prime the Tx FIFO to start the sequence (saves one interrupt) */
+
+#ifndef CONFIG_SPI_POLLWAIT
+  flags = irqsave();
+  ntxd  = spi_performtx(priv);
+  spi_startxfr(priv, ntxd);
+
+  /* Enable transmit empty interrupt */
+ 
+  regval = spi_getreg(priv, CSPI_INTCS_OFFSET);
+  regval |= CSPI_INTCS_TEEN;
+  spi_putreg(priv, CSPI_INTCS_OFFSET, regval);
+  irqrestore(flags);
+
+  /* Wait for the transfer to complete.  Since there is no handshake
+   * with SPI, the following should complete even if there are problems
+   * with the transfer, so it should be safe with no timeout.
+   */
+
+  do
+    {
+      /* Wait to be signaled from the interrupt handler */
+
+      ret = sem_wait(&priv->sem);
+    }
+  while (ret < 0 && errno == EINTR);
+#else
+  /* Perform the transfer using polling logic.  This will totally
+   * dominate the CPU until the transfer is complete.  Only recommended
+   * if (1) your SPI is very fast, and (2) if you only use very short
+   * transfers.
+   */
+
+  do
+    {
+      /* Handle outgoing Tx FIFO transfers */
+
+      ntxd = spi_performtx(priv);
+
+      /* Handle incoming Rx FIFO transfers */
+
+      spi_performrx(priv);
+
+      /* Resume the transfer */
+
+      spi_startxfr(priv, ntxd);
+
+      /* If there are other threads at this same priority level,
+       * the following may help:
+       */
+
+      sched_yield();
+    }
+  while (priv->nrxwords < priv->nwords);
+#endif
+  return OK;
+}
+
+/****************************************************************************
  * Name: spi_mapirq
  *
  * Description:
@@ -248,7 +607,7 @@ static inline struct imx_spidev_s *spi_mapirq(int irq)
 #endif
 
 /****************************************************************************
- * Name: spi_transfer
+ * Name: spi_interrupt
  *
  * Description:
  *   Exchange a block data with the SPI device
@@ -271,37 +630,33 @@ static inline struct imx_spidev_s *spi_mapirq(int irq)
 static int spi_interrupt(int irq, void *context)
 {
   struct imx_spidev_s *priv = spi_mapirq(irq);
-  DBGASSERT(priv != NULL);
-# error "Missing logic"
+  int ntxd;
+
+  DEBUGASSERT(priv != NULL);
+
+  /* Handle outgoing Tx FIFO transfers */
+
+  ntxd = spi_performtx(priv);
+
+  /* Handle incoming Rx FIFO transfers */
+
+  spi_performrx(priv);
+
+  /* Resume the transfer */
+
+  spi_startxfr(priv, ntxd);
+
+  /* Check if the transfer is complete */
+
+  if (priv->nrxwords >= priv->nwords)
+    {
+      /* Yes, wake up the waiting thread */
+
+      sem_post(&priv->sem);
+    }
   return OK;
 }
 #endif
-
-/****************************************************************************
- * Name: spi_transfer
- *
- * Description:
- *   Exchange a block data with the SPI device
- *
- * Input Parameters:
- *   priv   - Device-specific state data
- *   txbuffer - The buffer of data to send to the device (may be NULL).
- *   rxbuffer - The buffer to receive data from the device (may be NULL).
- *   nwords   - The total number of words to be exchanged.  If the interface
- *              uses <= 8 bits per word, then this is the number of ubytes;
- *              if the interface uses >8 bits per word, then this is the
- *              number of uint16's
- *
- * Returned Value:
- *   0: success, <0:Negated error number on failure
- *
- ****************************************************************************/
-
-static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
-                        void *rxbuffer, unsigned int nwords)
-{
-#error "Missing logic"
-}
 
 /****************************************************************************
  * Name: spi_setfrequency
@@ -323,55 +678,55 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
   uint32 actual = priv->actual;
 
-  if (priv & frequency != priv->frequency)
+  if (priv && frequency != priv->frequency)
     {
       uint32 freqbits;
       uint32 regval;
 
-      if (frequency >= PERCLK2 / 4)
+      if (frequency >= IMX_PERCLK2_FREQ / 4)
         {
           freqbits = CSPI_CTRL_DIV4;
-          actual   = PERCLK2 / 4;
+          actual   = IMX_PERCLK2_FREQ / 4;
         }
-      else if (frequency >= PERCLK2 / 8)
+      else if (frequency >= IMX_PERCLK2_FREQ / 8)
         {
           freqbits = CSPI_CTRL_DIV8;
-          actual   = PERCLK2 / 8;
+          actual   = IMX_PERCLK2_FREQ / 8;
         }
-      else if (frequency >= PERCLK2 / 16)
+      else if (frequency >= IMX_PERCLK2_FREQ / 16)
         {
           freqbits = CSPI_CTRL_DIV16;
-          actual   = PERCLK2 / 16;
+          actual   = IMX_PERCLK2_FREQ / 16;
         }
-      else if (frequency >= PERCLK2 / 32)
+      else if (frequency >= IMX_PERCLK2_FREQ / 32)
         {
           freqbits = CSPI_CTRL_DIV32;
-          actual   = PERCLK2 / 32;
+          actual   = IMX_PERCLK2_FREQ / 32;
         }
-      else if (frequency >= PERCLK2 / 64)
+      else if (frequency >= IMX_PERCLK2_FREQ / 64)
         {
           freqbits = CSPI_CTRL_DIV64;
-          actual   = PERCLK2 / 64;
+          actual   = IMX_PERCLK2_FREQ / 64;
         }
-      else if (frequency >= PERCLK2 / 128)
+      else if (frequency >= IMX_PERCLK2_FREQ / 128)
         {
           freqbits = CSPI_CTRL_DIV128;
-          actual   = PERCLK2 / 128;
+          actual   = IMX_PERCLK2_FREQ / 128;
         }
-      else if (frequency >= PERCLK2 / 256)
+      else if (frequency >= IMX_PERCLK2_FREQ / 256)
         {
           freqbits = CSPI_CTRL_DIV256;
-          actual   = PERCLK2 / 256;
+          actual   = IMX_PERCLK2_FREQ / 256;
         }
-      else /*if (frequency >= PERCLK2 / 512) */
+      else /*if (frequency >= IMX_PERCLK2_FREQ / 512) */
         {
           freqbits = CSPI_CTRL_DIV512;
-          actual   = PERCLK2 / 512;
+          actual   = IMX_PERCLK2_FREQ / 512;
         }
 
       /* Then set the selected frequency */
 
-      regval = spi_regreg(priv, CSPI_CTRL_OFFSET);
+      regval = spi_getreg(priv, CSPI_CTRL_OFFSET);
       regval &= ~(CSPI_CTRL_DATARATE_MASK);
       regval |= freqbits;
       spi_putreg(priv, CSPI_CTRL_OFFSET, regval);
@@ -401,7 +756,7 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
-  if (priv & mode != priv->mode)
+  if (priv && mode != priv->mode)
     {
       uint32 modebits;
       uint32 regval;
@@ -432,7 +787,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
       /* Then set the selected mode */
 
-      regval = spi_regreg(priv, CSPI_CTRL_OFFSET);
+      regval = spi_getreg(priv, CSPI_CTRL_OFFSET);
       regval &= ~(CSPI_CTRL_PHA|CSPI_CTRL_POL);
       regval |= modebits;
       spi_putreg(priv, CSPI_CTRL_OFFSET, regval);
@@ -564,7 +919,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       imxgpio_configpfinput(GPIOC, 16);  /* Port C, pin 16: MISO */
       imxgpio_configpfoutput(GPIOC, 17); /* Port C, pin 17: MOSI */
       break;
-#endif
+#endif /* CONFIG_SPI1_DISABLE */
 
 #ifndef CONFIG_SPI2_DISABLE
     case 2:
@@ -616,24 +971,21 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       imxgpio_configoutput(GPIOD, 10);
 #endif
       break;
-#endif
+#endif /* CONFIG_SPI2_DISABLE */
 
     default:
       return NULL;
     }
 
-  /* Disable SPI */
-#error "Missing logic"
-
   /* Initialize the state structure */
 
-ifndef CONFIG_SPI_POLLWAIT
+#ifndef CONFIG_SPI_POLLWAIT
    sem_init(&priv->sem, 0, 0);
 #endif
 
   /* Initialize control register: min frequency, ignore ready, master mode, mode=0, 8-bit */
 
-  spi_putreg(priv, IMX_CSPI_CTRL_OFFSET, 
+  spi_putreg(priv, CSPI_CTRL_OFFSET, 
              CSPI_CTRL_DIV512 |                /* Lowest frequency */
              CSPI_CTRL_DRCTL_IGNRDY |          /* Ignore ready */
              CSPI_CTRL_MODE |                  /* Master mode */
@@ -650,7 +1002,7 @@ ifndef CONFIG_SPI_POLLWAIT
 
   /* Enable interrupts on data ready (and certain error conditions */
 
-ifndef CONFIG_SPI_POLLWAIT
+#ifndef CONFIG_SPI_POLLWAIT
   spi_putreg(priv, CSPI_INTCS_OFFSET,
              CSPI_INTCS_RREN |                 /* RXFIFO Data Ready Interrupt Enable */
              CSPI_INTCS_ROEN |                 /* RXFIFO Overflow Interrupt Enable */
@@ -671,22 +1023,22 @@ ifndef CONFIG_SPI_POLLWAIT
 
   /* Attach the interrupt */
 
-ifndef CONFIG_SPI_POLLWAIT
+#ifndef CONFIG_SPI_POLLWAIT
   irq_attach(priv->irq, (xcpt_t)spi_interrupt);
 #endif
 
   /* Enable SPI */
 
-  regval = spi_getreg(priv, IMX_CSPI_CTRL_OFFSET);
+  regval = spi_getreg(priv, CSPI_CTRL_OFFSET);
   regval |= CSPI_CTRL_SPIEN;
-  spi_putreg(priv, IMX_CSPI_CTRL_OFFSET, regval);
+  spi_putreg(priv, CSPI_CTRL_OFFSET, regval);
 
   /* Enable SPI interrupts */
 
-ifndef CONFIG_SPI_POLLWAIT
+#ifndef CONFIG_SPI_POLLWAIT
   up_enable_irq(priv->irq);
 #endif
   return (FAR struct spi_dev_s *)priv;
 }
 
-#endife /* NSPIS > 0 */
+#endif /* NSPIS > 0 */
