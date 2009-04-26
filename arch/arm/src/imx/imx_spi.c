@@ -166,9 +166,15 @@ static int    spi_interrupt(int irq, void *context);
 
 static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
 static void   spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
+static void   spi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd);
-static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t buflen);
-static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t buflen);
+#ifdef CONFIG_SPI_EXCHANGE
+static void   spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+                           FAR void *rxbuffer, size_t nwords);
+#else
+static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords);
+static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -181,10 +187,15 @@ static const struct spi_ops_s g_spiops =
   .select       = imx_spiselect,    /* Provided externally by board logic */
   .setfrequency = spi_setfrequency,
   .setmode      = spi_setmode,
+  .setbits      = spi_setbits,
   .status       = imx_spistatus,    /* Provided externally by board logic */
   .send         = spi_send,
+#ifdef CONFIG_SPI_EXCHANGE
+  .exchange     = spi_exchange,
+#else
   .sndblock     = spi_sndblock,
   .recvblock    = spi_recvblock,
+#endif
 };
 
 /* This supports is up to two SPI busses/ports */
@@ -795,6 +806,34 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 }
 
 /****************************************************************************
+ * Name: spi_setbits
+ *
+ * Description:
+ *   Set the number if bits per word.
+ *
+ * Input Parameters:
+ *   dev -  Device-specific state data
+ *   nbits - The number of bits requests
+ *
+ * Returned Value:
+ *   none
+ *
+ ****************************************************************************/
+
+static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
+{
+  struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
+  if (priv && nbits != priv->nbits && nbits > 0 && nbits <= 16)
+    {
+      uint32 regval = spi_getreg(priv, CSPI_CTRL_OFFSET);
+      regval       &= ~CSPI_CTRL_BITCOUNT_MASK;
+      regval       |= ((nbits - 1) << CSPI_CTRL_BITCOUNT_SHIFT);
+      spi_putreg(priv, CSPI_CTRL_OFFSET, regval);
+      priv->nbits   = nbits;
+    }
+}
+
+/****************************************************************************
  * Name: spi_send
  *
  * Description:
@@ -819,6 +858,35 @@ static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
   return response;
 }
 
+/****************************************************************************
+ * Name: SPI_EXCHANGE
+ *
+ * Description:
+ *   Exahange a block of data from SPI. Required.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   buffer   - A pointer to the buffer of data to be sent
+ *   rxbuffer - A pointer to the buffer in which to recieve data
+ *   nwords   - the length of data that to be exchanged in units of words.
+ *              The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into ubytes; if nbits >8, the data is packed into uint16's
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_EXCHANGE
+static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+                         FAR void *rxbuffer, size_t nwords)
+{
+  struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
+  (void)spi_transfer(priv, txbuffer, rxbuffer, nwords);
+}
+#endif
+
 /*************************************************************************
  * Name: spi_sndblock
  *
@@ -828,7 +896,7 @@ static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
  * Input Parameters:
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer of data to be sent
- *   buflen - the length of data to send from the buffer in number of words.
+ *   nwords - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
  *            packed into ubytes; if nbits >8, the data is packed into uint16's
@@ -838,11 +906,13 @@ static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
  *
  ****************************************************************************/
 
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t buflen)
+#ifndef CONFIG_SPI_EXCHANGE
+static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
-  (void)spi_transfer(priv, buffer, NULL, buflen);
+  (void)spi_transfer(priv, buffer, NULL, nwords);
 }
+#endif
 
 /****************************************************************************
  * Name: spi_recvblock
@@ -853,7 +923,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  * Input Parameters:
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to recieve data
- *   buflen - the length of data that can be received in the buffer in number
+ *   nwords - the length of data that can be received in the buffer in number
  *            of words.  The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
  *            packed into ubytes; if nbits >8, the data is packed into uint16's
@@ -863,11 +933,13 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *
  ****************************************************************************/
 
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t buflen)
+#ifndef CONFIG_SPI_EXCHANGE
+static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
-  (void)spi_transfer(priv, NULL, buffer, buflen);
+  (void)spi_transfer(priv, NULL, buffer, nwords);
 }
+#endif
 
 /****************************************************************************
  * Public Functions
