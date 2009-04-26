@@ -131,6 +131,8 @@
 #define CSPI_INTCS_ROEN            (1 << 14) /* BIT 14: RXFIFO Overflow Interrupt Enable */
 #define CSPI_INTCS_BOEN            (1 << 15) /* Bit 15: Bit Count Overflow Interrupt Enable */
 
+#define CSPI_INTCS_ALLINTS         0x0000ff00
+
 /* CSPI Sample Period Control Register */
 
 #define CSPI_SPCR_WAIT_SHIFT       0

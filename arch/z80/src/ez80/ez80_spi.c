@@ -67,7 +67,7 @@
 
 static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
 static void   spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
-static ubyte  spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch);
+static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd);
 static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen);
 static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t buflen);
 
@@ -81,7 +81,7 @@ static const struct spi_ops_s g_spiops =
   spi_setfrequency,
   spi_setmode,
   ez80_spistatus,    /* Provided externally by board logic */
-  spi_sndbyte,
+  spi_send,
   spi_sndblock,
   spi_recvblock,
 };
@@ -268,23 +268,24 @@ static ubyte spi_transfer(ubyte ch)
 }
 
 /****************************************************************************
- * Name: spi_sndbyte
+ * Name: spi_send
  *
  * Description:
- *   Send one byte on SPI
+ *   Exchange one word on SPI
  *
  * Input Parameters:
  *   dev - Device-specific state data
- *   ch -  The byte to send
+ *   wd  - The word to send.  the size of the data is determined by the
+ *         number of bits selected for the SPI interface.
  *
  * Returned Value:
  *   response
  *
  ****************************************************************************/
 
-static ubyte spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch)
+static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
 {
-  return spi_transfer(ch);
+  return spi_transfer((ubyte)wd);
 }
 
 /*************************************************************************
@@ -296,22 +297,26 @@ static ubyte spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch)
  * Input Parameters:
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer of data to be sent
- *   buflen - the length of data to send from the buffer
+ *   buflen - the length of data to send from the buffer in number of words.
+ *            The wordsize is determined by the number of bits-per-word
+ *            selected for the SPI interface.  If nbits <= 8, the data is
+ *            packed into ubytes; if nbits >8, the data is packed into uint16's
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen)
+static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t buflen)
 {
+  FAR const ubyte *ptr = (FAR const ubyte*)buffer;
   ubyte response;
 
   /* Loop while thre are bytes remaining to be sent */
 
   while (buflen-- > 0)
     {
-      response = spi_transfer(*buffer++);
+      response = spi_transfer(*ptr++);
     }
 }
 
@@ -324,22 +329,26 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, siz
  * Input Parameters:
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to recieve data
- *   buflen - the length of data that can be received in the buffer
+ *   buflen - the length of data that can be received in the buffer in number
+ *            of words.  The wordsize is determined by the number of bits-per-word
+ *            selected for the SPI interface.  If nbits <= 8, the data is
+ *            packed into ubytes; if nbits >8, the data is packed into uint16's
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t buflen)
+static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t buflen)
 {
+  FAR ubyte *ptr = (FAR ubyte*)buffer;
   ubyte response;
 
   /* Loop while thre are bytes remaining to be sent */
 
   while (buflen-- > 0)
     {
-      *buffer = spi_transfer(0xff);
+      *ptr++ = spi_transfer(0xff);
     }
 }
 

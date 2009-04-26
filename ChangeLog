@@ -699,3 +699,8 @@
 
 0.4.6 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* Change SPI interface so that is can accomodate interfaces where the
+	  number of bits per word is greater an 8 (such as with many 9-bit display
+	  interfaces). -- this might have broken a few things which will need to
+	  be retested!
+

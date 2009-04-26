@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mmcsd/mmcsd_spi.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -333,7 +333,7 @@ static int mmcsd_waitready(FAR struct mmcsd_slot_s *slot)
 
   for (i = 0; i < slot->twrite; i++)
     {
-      response = SPI_SNDBYTE(spi, 0xff);
+      response = SPI_SEND(spi, 0xff);
       if (response == 0xff)
         {
           return OK;
@@ -366,23 +366,23 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
 
   /* Send command code */
 
-  SPI_SNDBYTE(spi, cmd->cmd);
+  SPI_SEND(spi, cmd->cmd);
 
   /* Send command's arguments */
 
   if (cmd->arg == MMCSD_CMDARG_NONE)
     {
-      SPI_SNDBYTE(spi, 0x00);
-      SPI_SNDBYTE(spi, 0x00);
-      SPI_SNDBYTE(spi, 0x00);
-      SPI_SNDBYTE(spi, 0x00);
+      SPI_SEND(spi, 0x00);
+      SPI_SEND(spi, 0x00);
+      SPI_SEND(spi, 0x00);
+      SPI_SEND(spi, 0x00);
     }
   else
     {
-      SPI_SNDBYTE(spi, arg >> 24);
-      SPI_SNDBYTE(spi, arg >> 16);
-      SPI_SNDBYTE(spi, arg >> 8);
-      SPI_SNDBYTE(spi, arg);
+      SPI_SEND(spi, arg >> 24);
+      SPI_SEND(spi, arg >> 16);
+      SPI_SEND(spi, arg >> 8);
+      SPI_SEND(spi, arg);
     }
 
   /* Send CRC if needed.  The SPI interface is initialized in non-protected
@@ -392,18 +392,18 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
 
   if (cmd->cmd == 0x40)
     {
-      SPI_SNDBYTE(spi, 0x95);
+      SPI_SEND(spi, 0x95);
     }
   else
     {
-      SPI_SNDBYTE(spi, 0xff);
+      SPI_SEND(spi, 0xff);
     }
 
   /* Get the response to the command */
 
   for (i = 0; i < 9 && response == 0xff; i++)
     {
-      response = SPI_SNDBYTE(spi, 0xff);
+      response = SPI_SEND(spi, 0xff);
     }
 
   if (i == 0)
@@ -422,7 +422,7 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
         uint32 busy = 0;
         for (i = 0; i < slot->twrite && busy != 0xff; i++)
           {
-            busy = SPI_SNDBYTE(spi, 0xff);
+            busy = SPI_SEND(spi, 0xff);
           }
         fvdbg("Return R1B=%02x\n", response);
       }
@@ -437,7 +437,7 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
     case MMCSD_CMDRESP_R2:
       {
         result  = ((uint32) response << 8) & 0x0000ff00;
-        result |= SPI_SNDBYTE(spi, 0xff) & 0xff;
+        result |= SPI_SEND(spi, 0xff) & 0xff;
         fvdbg("Return R2=%04x\n", result);
       }
       return result;
@@ -445,10 +445,10 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
     case MMCSD_CMDRESP_R3:
     default:
       {
-        result  = ((uint32) response << 24) & 0xff000000;
-        result |= ((uint32) SPI_SNDBYTE(spi, 0xff) << 16) & 0x00ff0000;
-        result |= ((uint32) SPI_SNDBYTE(spi, 0xff) << 8) & 0x0000ff00;
-        result |= SPI_SNDBYTE(spi, 0xff) & 0xff;
+        result  = ((uint32)response << 24) & 0xff000000;
+        result |= ((uint32)SPI_SEND(spi, 0xff) << 16) & 0x00ff0000;
+        result |= ((uint32)SPI_SEND(spi, 0xff) << 8) & 0x0000ff00;
+        result |= SPI_SEND(spi, 0xff) & 0xff;
         fvdbg("Return R3=%08x\n", result);
       }
       return result;
@@ -605,7 +605,7 @@ static int mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, ubyte *buffer,
   int i;
 
   SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
-  SPI_SNDBYTE(spi, 0xff);
+  SPI_SEND(spi, 0xff);
 
   /* Send the CMD9 or CMD10 */
 
@@ -620,8 +620,8 @@ static int mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, ubyte *buffer,
 
   for (i = 0; i < 8; i++)
     {
-      response = SPI_SNDBYTE(spi, 0xff);
-      fvdbg("%d. SPI sndbyte returned %02x\n", i, response);
+      response = SPI_SEND(spi, 0xff);
+      fvdbg("%d. SPI send returned %02x\n", i, response);
 
       /* If a read operation fails and the card cannot provide the requested
        * data, it will send a data error token instead.  The 4 least
@@ -637,13 +637,13 @@ static int mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, ubyte *buffer,
         {
           for (i = 0; i < 16; ++i)
             {
-              *buffer++ = SPI_SNDBYTE(spi, 0xff);
+              *buffer++ = SPI_SEND(spi, 0xff);
             }
 
           /* CRC receive */
 
-          (void)SPI_SNDBYTE(spi, 0xff);
-          (void)SPI_SNDBYTE(spi, 0xff);
+          SPI_SEND(spi, 0xff);
+          SPI_SEND(spi, 0xff);
           SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
           return OK;
         }
@@ -791,7 +791,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
   mmcsd_semtake(&slot->sem);
   SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
-  (void)SPI_SNDBYTE(spi, 0xff);
+  SPI_SEND(spi, 0xff);
 
   /* Send CMD17: Reads a block of the size selected by the SET_BLOCKLEN
    * command and verify that good R1 status is returned
@@ -810,8 +810,8 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
     {
       /* Synchronize */
 
-      response = SPI_SNDBYTE(spi, 0xff);
-      fvdbg("(%d) SPI sndbyte returned %02x\n", i, response);
+      response = SPI_SEND(spi, 0xff);
+      fvdbg("(%d) SPI send returned %02x\n", i, response);
 
       /* If a read operation fails and the card cannot provide the requested
        * data, it will send a data error token instead.  The 4 least
@@ -831,8 +831,8 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
           /* Receive and ignore the two CRC bytes */
 
-          (void)SPI_SNDBYTE(spi, 0xff);
-          (void)SPI_SNDBYTE(spi, 0xff);
+          SPI_SEND(spi, 0xff);
+          SPI_SEND(spi, 0xff);
 
           /* On success, return the number of sectors transfer */
 
@@ -933,7 +933,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
 
   mmcsd_semtake(&slot->sem);
   SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
-  (void)SPI_SNDBYTE(spi, 0xff);
+  SPI_SEND(spi, 0xff);
 
   /* Send CMD24 (WRITE_BLOCK) and verify that good R1 status is returned */
 
@@ -952,20 +952,20 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
    * 3. Followed by the block of data
    */
 
-  (void)SPI_SNDBYTE(spi, 0xff);
-  (void)SPI_SNDBYTE(spi, MMCSD_SPIDT_STARTBLKSNGL);
+  SPI_SEND(spi, 0xff);
+  SPI_SEND(spi, MMCSD_SPIDT_STARTBLKSNGL);
   (void)SPI_SNDBLOCK(spi, buffer, nbytes);
 
   /* Add the bogus CRC.  By default, the SPI interface is initialized in
    * non-protected mode.  However, we still have to send bogus CRC values
    */
 
-  (void)SPI_SNDBYTE(spi, 0xff);
-  (void)SPI_SNDBYTE(spi, 0xff);
+  SPI_SEND(spi, 0xff);
+  SPI_SEND(spi, 0xff);
 
   /* Now get the data response */
 
-  response = SPI_SNDBYTE(spi, 0xff);
+  response = SPI_SEND(spi, 0xff);
   if ((response & MMCSD_SPIDR_MASK) != MMCSD_SPIDR_ACCEPTED)
     {
       fdbg("Bad data response: %02x\n", response);
@@ -1145,7 +1145,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 
       for (j = 10; j; j--)
         {
-          SPI_SNDBYTE(spi, 0xff);
+          SPI_SEND(spi, 0xff);
         }
 
       /* Send CMD0 (GO_TO_IDLE) to put MMC/SD in IDLE/SPI mode */
@@ -1178,13 +1178,13 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
     {
       fvdbg("%d. Send CMD55\n", i);
       SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
-      SPI_SNDBYTE(spi, 0xff);
+      SPI_SEND(spi, 0xff);
       result = mmcsd_sendcmd(slot, &g_cmd55, 0);
       SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
 
       fvdbg("%d. Send ACMD41\n", i);
       SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
-      SPI_SNDBYTE(spi, 0xff);
+      SPI_SEND(spi, 0xff);
       result = mmcsd_sendcmd(slot, &g_acmd41, 0);
       SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
 
@@ -1199,7 +1199,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
             {
               fvdbg("%d. Send CMD1\n", i);
               SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
-              SPI_SNDBYTE(spi, 0xff);
+              SPI_SEND(spi, 0xff);
               result = mmcsd_sendcmd(slot, &g_cmd1, 0);
               SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
 
