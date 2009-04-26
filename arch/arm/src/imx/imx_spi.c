@@ -87,12 +87,17 @@
 struct imx_spidev_s
 {
   const struct spi_ops_s *ops;  /* Common SPI operations */
+#ifndef CONFIG_SPI_POLLWAIT
+  sem_t  sem;                   /* Wait for transfer to complete */
+#endif
   uint32 base;                  /* SPI register base address */
   uint32 frequency;             /* Current desired SCLK frequency */
   uint32 actual;                /* Current actual SCLK frequency */
   ubyte  mode;                  /* Current mode */
   ubyte  nbytes;                /* Current number of bits per word */
+#ifndef CONFIG_SPI_POLLWAIT
   ubyte  irq;                   /* SPI IRQ number */
+#endif
 };
 
 /****************************************************************************
@@ -103,16 +108,20 @@ struct imx_spidev_s
  
 static inline uint32 spi_getreg(struct imx_spidev_s *priv, unsigned int offset);
 static inline void spi_putreg(struct imx_spidev_s *priv, unsigned int offset, uint32 value);
-static ubyte  spi_waitspif(struct imx_spidev_s *priv);
-static ubyte  spi_transfer(struct imx_spidev_s *priv, ubyte ch);
+#ifndef CONFIG_SPI_POLLWAIT
+static inline struct imx_spidev_s *spi_mapirq(int irq);
+static int    spi_interrupt(int irq, void *context);
+#endif
+static int    spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
+                           void *rxbuffer, unsigned int nwords);
 
 /* SPI methods */
 
 static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
 static void   spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
-static ubyte  spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch);
-static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen);
-static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t buflen);
+static ubyte  spi_send(FAR struct spi_dev_s *dev, uint16 wd);
+static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t buflen);
+static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t buflen);
 
 /****************************************************************************
  * Private Data
@@ -122,13 +131,13 @@ static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t
 
 static const struct spi_ops_s g_spiops =
 {
-  imx_spiselect,    /* Provided externally by board logic */
-  spi_setfrequency,
-  spi_setmode,
-  imx_spistatus,    /* Provided externally by board logic */
-  spi_sndbyte,
-  spi_sndblock,
-  spi_recvblock,
+  .select    = imx_spiselect,    /* Provided externally by board logic */
+  .frequency = spi_setfrequency,
+  .setmode   = spi_setmode,
+  .status    = imx_spistatus,    /* Provided externally by board logic */
+  .send      = spi_send,
+  .sndblock  = spi_sndblock,
+  .recvblock = spi_recvblock,
 };
 
 /* This supports is up to two SPI busses/ports */
@@ -139,14 +148,18 @@ static struct imx_spidev_s g_spidev[] =
   {
     .ops  = &g_spiops,
     .base = IMX_CSPI1_VBASE
+#ifndef CONFIG_SPI_POLLWAIT
     .irq  = IMX_IRQ_CSPI1,
+#endif
   },
 #endif
-#ifndef CONFIG_SPI1_DISABLE
+#ifndef CONFIG_SPI2_DISABLE
   {
     .ops  = &g_spiops,
     .base = IMX_CSPI2_VBASE
+#ifndef CONFIG_SPI_POLLWAIT
     .irq  = IMX_IRQ_CSPI2,
+#endif
   },
 #endif
 };
@@ -201,62 +214,93 @@ static inline void spi_putreg(struct imx_spidev_s *priv, unsigned int offset, ui
 }
 
 /****************************************************************************
- * Name: spi_waitspif
+ * Name: spi_mapirq
  *
  * Description:
- *   Wait space available in the Tx FIFO.
+ *   Map an IRQ number into the appropriate SPI device
  *
  * Input Parameters:
- *   priv   - Device-specific state data
+ *   irq   - The IRQ number to be mapped
  *
  * Returned Value:
- *   Status register mode bits
+ *   On success, a reference to the private data structgure for this IRQ.
+ *   NULL on failrue.
  *
  ****************************************************************************/
 
-static uint32 spi_waitspif(struct imx_spidev_s *priv)
+#ifndef CONFIG_SPI_POLLWAIT
+static inline struct imx_spidev_s *spi_mapirq(int irq)
 {
-  uint32 status;
-
-  /* Wait for the device to be ready to accept another byte (or for an error
-   * to be reported).
-   */
-#error "Missing logic"
-  return status;
+  switch (irq)
+    {
+#ifndef CONFIG_SPI1_DISABLE
+      case IMX_IRQ_CSPI1:
+        return &g_spidev[SPI1_NDX];
+#endif
+#ifndef CONFIG_SPI2_DISABLE
+      case IMX_IRQ_CSPI2:
+        return &g_spidev[SPI2_NDX];
+#endif
+      default:
+        return NULL;
+    }
 }
+#endif
 
 /****************************************************************************
  * Name: spi_transfer
  *
  * Description:
- *   Send one byte on SPI, return the response
+ *   Exchange a block data with the SPI device
  *
  * Input Parameters:
  *   priv   - Device-specific state data
- *   ch - the byte to send
+ *   txbuffer - The buffer of data to send to the device (may be NULL).
+ *   rxbuffer - The buffer to receive data from the device (may be NULL).
+ *   nwords   - The total number of words to be exchanged.  If the interface
+ *              uses <= 8 bits per word, then this is the number of ubytes;
+ *              if the interface uses >8 bits per word, then this is the
+ *              number of uint16's
  *
  * Returned Value:
- *   response
+ *   0: success, <0:Negated error number on failure
  *
  ****************************************************************************/
 
-static ubyte spi_transfer(struct imx_spidev_s *priv, ubyte ch)
+#ifndef CONFIG_SPI_POLLWAIT
+static int spi_interrupt(int irq, void *context)
 {
-   ubyte status;
+  struct imx_spidev_s *priv = spi_mapirq(irq);
+  DBGASSERT(priv != NULL);
+# error "Missing logic"
+  return OK;
+}
+#endif
 
-  /* Send the byte, repeating if some error occurs */
+/****************************************************************************
+ * Name: spi_transfer
+ *
+ * Description:
+ *   Exchange a block data with the SPI device
+ *
+ * Input Parameters:
+ *   priv   - Device-specific state data
+ *   txbuffer - The buffer of data to send to the device (may be NULL).
+ *   rxbuffer - The buffer to receive data from the device (may be NULL).
+ *   nwords   - The total number of words to be exchanged.  If the interface
+ *              uses <= 8 bits per word, then this is the number of ubytes;
+ *              if the interface uses >8 bits per word, then this is the
+ *              number of uint16's
+ *
+ * Returned Value:
+ *   0: success, <0:Negated error number on failure
+ *
+ ****************************************************************************/
 
-  for(;;)
-    {
+static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
+                        void *rxbuffer, unsigned int nwords)
+{
 #error "Missing logic"
-
-      /* Wait for the device to be ready to accept another byte */
-
-      status = spi_waitspif(oriv);
-
-      /* Return the next byte from the Rx FIFO */
-#error "Missing logic"
-    }
 }
 
 /****************************************************************************
@@ -396,24 +440,28 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 }
 
 /****************************************************************************
- * Name: spi_sndbyte
+ * Name: spi_send
  *
  * Description:
- *   Send one byte on SPI
+ *   Exchange one word on SPI
  *
  * Input Parameters:
  *   dev - Device-specific state data
- *   ch -  The byte to send
+ *   wd  - The word to send.  the size of the data is determined by the
+ *         number of bits selected for the SPI interface.
  *
  * Returned Value:
  *   response
  *
  ****************************************************************************/
 
-static ubyte spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch)
+static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
 {
-  struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
-  return spi_transfer(priv, ch);
+  struct imx_spidev_s *priv = (struct imx_spidev_s*)dev;
+  uint16 response = 0;
+
+  (void)spi_transfer(priv, &wd, &response, 1);
+  return response;
 }
 
 /*************************************************************************
@@ -425,24 +473,20 @@ static ubyte spi_sndbyte(FAR struct spi_dev_s *dev, ubyte ch)
  * Input Parameters:
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer of data to be sent
- *   buflen - the length of data to send from the buffer
+ *   buflen - the length of data to send from the buffer in number of words.
+ *            The wordsize is determined by the number of bits-per-word
+ *            selected for the SPI interface.  If nbits <= 8, the data is
+ *            packed into ubytes; if nbits >8, the data is packed into uint16's
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen)
+static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t buflen)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
-  uint32 response;
-
-  /* Loop while thre are bytes remaining to be sent */
-
-  while (buflen-- > 0)
-    {
-      response = spi_transfer(priv, *buffer++);
-    }
+  (void)spi_transfer(priv, buffer, NULL, buflen);
 }
 
 /****************************************************************************
@@ -454,23 +498,20 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, siz
  * Input Parameters:
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to recieve data
- *   buflen - the length of data that can be received in the buffer
+ *   buflen - the length of data that can be received in the buffer in number
+ *            of words.  The wordsize is determined by the number of bits-per-word
+ *            selected for the SPI interface.  If nbits <= 8, the data is
+ *            packed into ubytes; if nbits >8, the data is packed into uint16's
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t buflen)
+static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t buflen)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
-
-  /* Loop while thre are bytes remaining to be sent */
-
-  while (buflen-- > 0)
-    {
-      *buffer = (ubyte)spi_transfer(prive, 0xff);
-    }
+  (void)spi_transfer(priv, NULL, buffer, buflen);
 }
 
 /****************************************************************************
@@ -584,7 +625,13 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   /* Disable SPI */
 #error "Missing logic"
 
-  /* Initialize control rebistger: min frequency, ignore ready, master mode, mode=0, 8-bit */
+  /* Initialize the state structure */
+
+ifndef CONFIG_SPI_POLLWAIT
+   sem_init(&priv->sem, 0, 0);
+#endif
+
+  /* Initialize control register: min frequency, ignore ready, master mode, mode=0, 8-bit */
 
   spi_putreg(priv, IMX_CSPI_CTRL_OFFSET, 
              CSPI_CTRL_DIV512 |                /* Lowest frequency */
@@ -603,10 +650,14 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   /* Enable interrupts on data ready (and certain error conditions */
 
+ifndef CONFIG_SPI_POLLWAIT
   spi_putreg(priv, CSPI_INTCS_OFFSET,
              CSPI_INTCS_RREN |                 /* RXFIFO Data Ready Interrupt Enable */
              CSPI_INTCS_ROEN |                 /* RXFIFO Overflow Interrupt Enable */
              CSPI_INTCS_BOEN);                 /* Bit Count Overflow Interrupt Enable */
+#else
+  spi_putreg(priv, CSPI_INTCS_OFFSET, 0);      /* No interrupts */
+#endif
 
   /* Set the clock source=bit clock and number of clocks inserted between
    * transactions = 2.
@@ -620,7 +671,9 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   /* Attach the interrupt */
 
-  irq_attach(priv->irq, (xcpt_t)imx_spinterrupt);
+ifndef CONFIG_SPI_POLLWAIT
+  irq_attach(priv->irq, (xcpt_t)spi_interrupt);
+#endif
 
   /* Enable SPI */
 
@@ -630,7 +683,9 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   /* Enable SPI interrupts */
 
+ifndef CONFIG_SPI_POLLWAIT
   up_enable_irq(priv->irq);
+#endif
   return (FAR struct spi_dev_s *)priv;
 }
 
