@@ -88,6 +88,11 @@ struct imx_spidev_s
 {
   const struct spi_ops_s *ops;  /* Common SPI operations */
   uint32 base;                  /* SPI register base address */
+  uint32 frequency;             /* Current desired SCLK frequency */
+  uint32 actual;                /* Current actual SCLK frequency */
+  ubyte  mode;                  /* Current mode */
+  ubyte  nbytes;                /* Current number of bits per word */
+  ubyte  irq;                   /* SPI IRQ number */
 };
 
 /****************************************************************************
@@ -97,7 +102,7 @@ struct imx_spidev_s
  /* SPI helpers */
  
 static inline uint32 spi_getreg(struct imx_spidev_s *priv, unsigned int offset);
-static inline void spi_readreg(struct imx_spidev_s *priv, unsigned int offset, uint32 value);
+static inline void spi_putreg(struct imx_spidev_s *priv, unsigned int offset, uint32 value);
 static ubyte  spi_waitspif(struct imx_spidev_s *priv);
 static ubyte  spi_transfer(struct imx_spidev_s *priv, ubyte ch);
 
@@ -134,12 +139,14 @@ static struct imx_spidev_s g_spidev[] =
   {
     .ops  = &g_spiops,
     .base = IMX_CSPI1_VBASE
+    .irq  = IMX_IRQ_CSPI1,
   },
 #endif
 #ifndef CONFIG_SPI1_DISABLE
   {
     .ops  = &g_spiops,
     .base = IMX_CSPI2_VBASE
+    .irq  = IMX_IRQ_CSPI2,
   },
 #endif
 };
@@ -188,7 +195,7 @@ static inline uint32 spi_getreg(struct imx_spidev_s *priv, unsigned int offset)
  *
  ****************************************************************************/
 
-static inline void spi_readreg(struct imx_spidev_s *priv, unsigned int offset, uint32 value)
+static inline void spi_putreg(struct imx_spidev_s *priv, unsigned int offset, uint32 value)
 {
   putreg32(value, priv->base + offset);
 }
@@ -270,8 +277,66 @@ static ubyte spi_transfer(struct imx_spidev_s *priv, ubyte ch)
 static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
-#error "Missing logic"
-  return frequency;
+  uint32 actual = priv->actual;
+
+  if (priv & frequency != priv->frequency)
+    {
+      uint32 freqbits;
+      uint32 regval;
+
+      if (frequency >= PERCLK2 / 4)
+        {
+          freqbits = CSPI_CTRL_DIV4;
+          actual   = PERCLK2 / 4;
+        }
+      else if (frequency >= PERCLK2 / 8)
+        {
+          freqbits = CSPI_CTRL_DIV8;
+          actual   = PERCLK2 / 8;
+        }
+      else if (frequency >= PERCLK2 / 16)
+        {
+          freqbits = CSPI_CTRL_DIV16;
+          actual   = PERCLK2 / 16;
+        }
+      else if (frequency >= PERCLK2 / 32)
+        {
+          freqbits = CSPI_CTRL_DIV32;
+          actual   = PERCLK2 / 32;
+        }
+      else if (frequency >= PERCLK2 / 64)
+        {
+          freqbits = CSPI_CTRL_DIV64;
+          actual   = PERCLK2 / 64;
+        }
+      else if (frequency >= PERCLK2 / 128)
+        {
+          freqbits = CSPI_CTRL_DIV128;
+          actual   = PERCLK2 / 128;
+        }
+      else if (frequency >= PERCLK2 / 256)
+        {
+          freqbits = CSPI_CTRL_DIV256;
+          actual   = PERCLK2 / 256;
+        }
+      else /*if (frequency >= PERCLK2 / 512) */
+        {
+          freqbits = CSPI_CTRL_DIV512;
+          actual   = PERCLK2 / 512;
+        }
+
+      /* Then set the selected frequency */
+
+      regval = spi_regreg(priv, CSPI_CTRL_OFFSET);
+      regval &= ~(CSPI_CTRL_DATARATE_MASK);
+      regval |= freqbits;
+      spi_putreg(priv, CSPI_CTRL_OFFSET, regval);
+
+      priv->frequency = frequency;
+      priv->actual    = actual;
+    }
+
+  return actual;
 }
 
 /****************************************************************************
@@ -292,35 +357,42 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
-  uint32 modebits;
-  ubyte regval;
-
-  /* Select the CTL register bits based on the selected mode */
-
-  switch (mode)
+  if (priv & mode != priv->mode)
     {
-    case SPIDEV_MODE0: /* CPOL=0 CHPHA=0 */
-#error "Missing logic"
-      break;
+      uint32 modebits;
+      uint32 regval;
 
-    case SPIDEV_MODE1: /* CPOL=0 CHPHA=1 */
-#error "Missing logic"
-      break;
+      /* Select the CTL register bits based on the selected mode */
 
-    case SPIDEV_MODE2: /* CPOL=1 CHPHA=0 */
-#error "Missing logic"
-      break;
+      switch (mode)
+        {
+        case SPIDEV_MODE0: /* CPOL=0 CHPHA=0 */
+          modebits = 0;
+          break;
 
-    case SPIDEV_MODE3: /* CPOL=1 CHPHA=1 */
-#error "Missing logic"
-      break;
+        case SPIDEV_MODE1: /* CPOL=0 CHPHA=1 */
+          modebits = CSPI_CTRL_PHA;
+          break;
 
-    default:
-      return;
+        case SPIDEV_MODE2: /* CPOL=1 CHPHA=0 */
+          modebits = CSPI_CTRL_POL;
+         break;
+
+        case SPIDEV_MODE3: /* CPOL=1 CHPHA=1 */
+          modebits = CSPI_CTRL_PHA|CSPI_CTRL_POL;
+          break;
+
+        default:
+          return;
+        }
+
+      /* Then set the selected mode */
+
+      regval = spi_regreg(priv, CSPI_CTRL_OFFSET);
+      regval &= ~(CSPI_CTRL_PHA|CSPI_CTRL_POL);
+      regval |= modebits;
+      spi_putreg(priv, CSPI_CTRL_OFFSET, regval);
     }
-
-    /* Then set the selected mode */
-#error "Missing logic"
 }
 
 /****************************************************************************
@@ -442,8 +514,14 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       priv = &g_spidev[SPI1_NDX];
 
-      /* Configure SPI1 GPIOs */
-#error "Missing logic"
+      /* Configure SPI1 GPIOs (NOTE that SS is not initialized here, the
+       * logic in this file makes no assumptions about chip select)
+       */
+
+      imxgpio_configpfinput(GPIOC, 13);  /* Port C, pin 13: RDY */
+      imxgpio_configpfoutput(GPIOC, 14); /* Port C, pin 14: SCLK */
+      imxgpio_configpfinput(GPIOC, 16);  /* Port C, pin 16: MISO */
+      imxgpio_configpfoutput(GPIOC, 17); /* Port C, pin 17: MOSI */
       break;
 #endif
 
@@ -454,7 +532,48 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       priv = &g_spidev[SPI2_NDX];
 
       /* Configure SPI1 GPIOs */
-#error "Missing logic"
+      /* SCLK: AIN of Port A, pin 0 -OR- AIN of Port D, pin 7 */
+
+#if 1
+      imxgpio_configoutput(GPIOA, 0); /* Set GIUS=1 OCR=0 DIR=OUT */
+#else
+      imxgpio_configoutput(GPIOD, 7); /* Set GIUS=1 OCR=0 DIR=OUT */
+#endif
+
+      /* SS: AIN of Port A, pin 17 -OR- AIN of Port D, pin 8.(NOTE that SS
+       * is not initialized here, the logic in this file makes no assumptions
+       * about chip select)
+       */
+
+      /* RXD: AOUT of Port A, pin 1 -OR- AOUT of Port D, pin 9 */
+
+#if 1
+      imxgpio_configinput(GPIOA, 1); /* Set GIUS=1 OCR=0 DIR=IN */
+
+      /* Select input from SPI2_RXD_0 pin (AOUT Port A, pin 1) */
+
+      regval = getreg32(IMX_SC_FMCR);
+      regval &= ~FMCR_SPI2_RXDSEL;
+      putreg32(regval, IMX_SC_FMCR);
+#else
+      imxgpio_configinput(GPIOD, 9); /* Set GIUS=1 OCR=0 DIR=IN */
+
+      /* Select input from SPI2_RXD_1 pin (AOUT Port D, pin 9) */
+
+      regval = getreg32(IMX_SC_FMCR);
+      regval |= FMCR_SPI2_RXDSEL;
+      putreg32(regval, IMX_SC_FMCR);
+#endif
+
+      /* TXD: BIN of Port D, pin 31 -OR- AIN of Port D, pin 10 */
+
+#if 1
+      imxgpio_configinput(GPIOD, 31);
+      imxgpio_ocrbin(GPIOD, 31);
+      imxgpio_dirout(GPIOD, 31);
+#else 
+      imxgpio_configoutput(GPIOD, 10);
+#endif
       break;
 #endif
 
@@ -465,16 +584,53 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   /* Disable SPI */
 #error "Missing logic"
 
-  /* Set the initial clock frequency for indentification mode < 400kHz */
+  /* Initialize control rebistger: min frequency, ignore ready, master mode, mode=0, 8-bit */
+
+  spi_putreg(priv, IMX_CSPI_CTRL_OFFSET, 
+             CSPI_CTRL_DIV512 |                /* Lowest frequency */
+             CSPI_CTRL_DRCTL_IGNRDY |          /* Ignore ready */
+             CSPI_CTRL_MODE |                  /* Master mode */
+             (7 << CSPI_CTRL_BITCOUNT_SHIFT)); /* 8-bit data */
+
+  /* Make sure state agrees with data */
+
+  priv->mode  = SPIDEV_MODE0;
+  priv->nbits = 8;
+
+  /* Set the initial clock frequency for identification mode < 400kHz */
 
   spi_setfrequency((FAR struct spi_dev_s *)priv, 400000);
 
-  /* Enable the SPI.
-   * NOTE 1: Interrupts are not used in this driver version.
-   * NOTE 2: Initial mode is mode=0.
+  /* Enable interrupts on data ready (and certain error conditions */
+
+  spi_putreg(priv, CSPI_INTCS_OFFSET,
+             CSPI_INTCS_RREN |                 /* RXFIFO Data Ready Interrupt Enable */
+             CSPI_INTCS_ROEN |                 /* RXFIFO Overflow Interrupt Enable */
+             CSPI_INTCS_BOEN);                 /* Bit Count Overflow Interrupt Enable */
+
+  /* Set the clock source=bit clock and number of clocks inserted between
+   * transactions = 2.
    */
 
-#error "Missing logic"
+  spi_putreg(priv, CSPI_SPCR_OFFSET, 2);
+
+  /* No DMA */
+
+  spi_putreg(priv, CSPI_DMA_OFFSET, 0);
+
+  /* Attach the interrupt */
+
+  irq_attach(priv->irq, (xcpt_t)imx_spinterrupt);
+
+  /* Enable SPI */
+
+  regval = spi_getreg(priv, IMX_CSPI_CTRL_OFFSET);
+  regval |= CSPI_CTRL_SPIEN;
+  spi_putreg(priv, IMX_CSPI_CTRL_OFFSET, regval);
+
+  /* Enable SPI interrupts */
+
+  up_enable_irq(priv->irq);
   return (FAR struct spi_dev_s *)priv;
 }
 
