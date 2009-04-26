@@ -80,6 +80,7 @@ static const struct spi_ops_s g_spiops =
   ez80_spiselect,    /* Provided externally by board logic */
   spi_setfrequency,
   spi_setmode,
+  NULL,              /* Variable number of bits not implemented */
   ez80_spistatus,    /* Provided externally by board logic */
   spi_send,
   spi_sndblock,

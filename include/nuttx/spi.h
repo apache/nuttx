@@ -105,6 +105,23 @@
 #define SPI_SETMODE(d,m) ((d)->ops->mode ? (d)->ops->mode(d,m) : (void))
 
 /****************************************************************************
+ * Name: SPI_SETBITS
+ *
+ * Description:
+ *   Set the number if bits per word.
+ *
+ * Input Parameters:
+ *   dev -  Device-specific state data
+ *   nbits - The number of bits requests
+ *
+ * Returned Value:
+ *   none
+ *
+ ****************************************************************************/
+
+#define SPI_SETBITS(d,b) ((d)->ops->setbits ? (d)->ops->setbits(d,b) : (void))
+
+/****************************************************************************
  * Name: SPI_STATUS
  *
  * Description:
@@ -156,7 +173,7 @@
  * Input Parameters:
  *   dev    - Device-specific state data
  *   buffer - A pointer to the buffer of data to be sent
- *   buflen - the length of data to send from the buffer in number of words.
+ *   nwords - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
  *            packed into ubytes; if nbits >8, the data is packed into uint16's
@@ -166,18 +183,22 @@
  *
  ****************************************************************************/
 
-#define SPI_SNDBLOCK(d,b,l) ((d)->ops->sndblock(d,b,l))
+#ifdef CONFIG_SPI_EXCHANGE
+#  define SPI_SNDBLOCK(d,b,l) ((d)->ops->exchange(d,b,0,l))
+#else
+#  define SPI_SNDBLOCK(d,b,l) ((d)->ops->sndblock(d,b,l))
+#endif
 
 /****************************************************************************
  * Name: SPI_RECVBLOCK
  *
  * Description:
- *   Revice a block of data from SPI. Required.
+ *   Receive a block of data from SPI. Required.
  *
  * Input Parameters:
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to recieve data
- *   buflen - the length of data that can be received in the buffer in number
+ *   nwords - the length of data that can be received in the buffer in number
  *            of words.  The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
  *            packed into ubytes; if nbits >8, the data is packed into uint16's
@@ -187,7 +208,35 @@
  *
  ****************************************************************************/
 
-#define SPI_RECVBLOCK(d,b,l) ((d)->ops->recvblock(d,b,l))
+#ifdef CONFIG_SPI_EXCHANGE
+#  define SPI_RECVBLOCK(d,b,l) ((d)->ops->exchange(d,0,b,l))
+#else
+#  define SPI_RECVBLOCK(d,b,l) ((d)->ops->recvblock(d,b,l))
+#endif
+
+/****************************************************************************
+ * Name: SPI_EXCHANGE
+ *
+ * Description:
+ *   Exahange a block of data from SPI. Required.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   buffer   - A pointer to the buffer of data to be sent
+ *   rxbuffer - A pointer to the buffer in which to recieve data
+ *   nwords   - the length of data that to be exchanged in units of words.
+ *              The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into ubytes; if nbits >8, the data is packed into uint16's
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_EXCHANGE
+#  define SPI_EXCHANGE(d,t,r,l) ((d)->ops->exchange(d,t,r,l))
+#endif
 
 /****************************************************************************
  * Name: SPI_REGISTERCALLBACK
@@ -247,10 +296,15 @@ struct spi_ops_s
   void   (*select)(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
   uint32 (*setfrequency)(FAR struct spi_dev_s *dev, uint32 frequency);
   void   (*setmode)(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
+  void   (*setbits)(FAR struct spi_dev_s *dev, int nbits);
   ubyte  (*status)(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
   uint16 (*send)(FAR struct spi_dev_s *dev, uint16 wd);
-  void   (*sndblock)(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t buflen);
-  void   (*recvblock)(FAR struct spi_dev_s *dev, FAR void *buffer, size_t buflen);
+#ifdef CONFIG_SPI_EXCHANGE
+  void   (*exchange)(FAR struct spi_dev_s *dev, FAR const void *txbuffer, FAR void *rxbuffer, size_t nwords);
+#else
+  void   (*sndblock)(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords);
+  void   (*recvblock)(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords);
+#endif
   int    (*registercallback)(FAR struct spi_dev_s *dev, mediachange_t callback, void *arg);
 };
 

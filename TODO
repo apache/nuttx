@@ -21,9 +21,9 @@ NuttX TODO List (Last updated April 12, 2009)
   (2)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
-  (1)  ARM/i.MX (arch/arm/src/imx/)
-  (6)  ARM/LPC214x (arch/arm/src/lpc214x/)
-  (3)  ARM/STR71x (arch/arm/src/str71x/)
+  (2)  ARM/i.MX (arch/arm/src/imx/)
+  (3)  ARM/LPC214x (arch/arm/src/lpc214x/)
+  (4)  ARM/STR71x (arch/arm/src/str71x/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
@@ -483,6 +483,10 @@ o ARM/i.MX (arch/arm/src/imx/)
   Status:      Open (and in work)
   Priority:    Medium (high if you need i.MX1/L support)
 
+  Description: SPI methods are not thread safe.  Needs a semaphore to protect from re-entrancy.
+  Status:      Open
+  Priority:    Medium -- Will be very high if you do SPI access from multiple threads.
+
 o ARM/LPC214x (arch/arm/src/lpc214x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -509,8 +513,15 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
   Priority:    High
 
   Description: At present the SPI driver is polled.  Should it be interrupt driven?
+               Look at arch/arm/src/imx/imx_spi.c -- that is a good example of an
+               interrupt driven SPI driver.  Should be very easy to part that architecture
+               to the LPC.
   Status:      Open
   Priority:    Medium
+
+  Description: SPI methods are not thread safe.  Needs a semaphore to protect from re-entrancy.
+  Status:      Open
+  Priority:    Medium -- Will be very high if you do SPI access from multiple threads.
 
   Description: At present the SPI driver is polled -AND- there is a rather large, arbitrary,
                delay in one of the block access routines.  The purpose of the delay is to
@@ -534,6 +545,10 @@ o ARM/STR71x (arch/arm/src/str71x/)
                and storage class drivers.
   Status:      Open
   Priority:    Medium
+
+  Description: SPI methods are not thread safe.  Needs a semaphore to protect from re-entrancy.
+  Status:      Open
+  Priority:    Medium -- Will be very high if you do SPI access from multiple threads.
 
 o pjrc-8052 / MCS51 (arch/pjrc-8051/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -703,6 +718,10 @@ o z80/z8/ez80 (arch/z80)
                the board (yet).
   Status:      Open
   Priority:    Med
+
+  Description: SPI methods are not thread safe.  Needs a semaphore to protect from re-entrancy.
+  Status:      Open
+  Priority:    Medium -- Will be very high if you do SPI access from multiple threads.
 
   Description: A "generic" I2C driver has been coded for the eZ8Encore!
                However, this remains untested since I have no I2C devices for
