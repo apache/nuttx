@@ -85,7 +85,7 @@ nuttx: $(HEAD_AOBJ) board/libboard$(LIBEXT)
 		--start-group $(LDLIBS) -lboard --end-group $(EXTRA_LIBS) $(LIBGCC)
 ifeq ($(CONFIG_BOOT_RUNFROMFLASH),y)
 	@export flashloc=`$(OBJDUMP) --all-headers $(TOPDIR)/$@ | grep _eronly | cut -d' ' -f1`;  \
-	$(OBJCOPY) --adjust-section-vma=.data=0x$$flashloc $(TOPDIR)/$@ $(TOPDIR)/$@.flashimage
+	$(OBJCOPY) $(OBJCOPYARGS) --adjust-section-vma=.data=0x$$flashloc $(TOPDIR)/$@ $(TOPDIR)/$@.flashimage
 	@mv $(TOPDIR)/$@.flashimage $(TOPDIR)/$@
 endif
 	@$(NM) $(TOPDIR)/$@ | \
@@ -93,7 +93,7 @@ endif
 	sort > $(TOPDIR)/System.map
 	@export vflashstart=`$(OBJDUMP) --all-headers $(TOPDIR)/$@ | grep _vflashstart | cut -d' ' -f1`;  \
 	if [ ! -z "$$vflashstart" ]; then \
-		$(OBJCOPY) --adjust-section-vma=.vector=0x$$vflashstart $(TOPDIR)/$@ $(TOPDIR)/$@.flashimage; \
+		$(OBJCOPY) $(OBJCOPYARGS) --adjust-section-vma=.vector=0x$$vflashstart $(TOPDIR)/$@ $(TOPDIR)/$@.flashimage; \
 		mv $(TOPDIR)/$@.flashimage $(TOPDIR)/$@; \
 	fi
 
