@@ -1393,6 +1393,11 @@ nuttx-0.4.6 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* SPI: Add a method to set the number of bits per word.  Also add an
 	  alternative interface for so that (eventually) I can phase the sndblock
 	  and recvblock methods and replace them with a single exchange method
+	* Build:  objcopy fails with toolchains that use newer GCC and binutils.  The
+	  following arguments need to be included in the objcopy command line "-R .note
+	  -R .note.gnu.build-id -R .comment"  This has bin fixed in arch/arm/src/Makefile,
+	  but other architectures may have the same problem.  Thanks to Dave Marples
+	  for verifying this.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
