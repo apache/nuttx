@@ -245,13 +245,13 @@ ifeq ($(CONFIG_RRLOAD_BINARY),y)
 	fi
 endif
 ifeq ($(CONFIG_INTELHEX_BINARY),y)
-	@$(OBJCOPY) -O ihex $(TOPDIR)/$@ $(TOPDIR)/$@.ihx
+	@$(OBJCOPY) $(OBJCOPYARGS) -O ihex $(TOPDIR)/$@ $(TOPDIR)/$@.ihx
 endif
 ifeq ($(CONFIG_MOTOROLA_SREC),y)
-	@$(OBJCOPY) -O srec $(TOPDIR)/$@ $(TOPDIR)/$@.srec
+	@$(OBJCOPY) $(OBJCOPYARGS) -O srec $(TOPDIR)/$@ $(TOPDIR)/$@.srec
 endif
 ifeq ($(CONFIG_RAW_BINARY),y)
-	@$(OBJCOPY) -O binary $(TOPDIR)/$@ $(TOPDIR)/$@.bin
+	@$(OBJCOPY) $(OBJCOPYARGS) -O binary $(TOPDIR)/$@ $(TOPDIR)/$@.bin
 endif
 
 depend:
