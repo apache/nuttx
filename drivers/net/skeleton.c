@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/skeleton.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -202,7 +202,7 @@ static int skel_uiptxpoll(struct uip_driver_s *dev)
       uip_arp_out(&skel->sk_dev);
       skel_transmit(skel);
 
-      /* Check if there is room in the DM90x0 to hold another packet. If not,
+      /* Check if there is room in the device to hold another packet. If not,
        * return a non-zero value to terminate the poll.
        */
     }
@@ -553,7 +553,7 @@ static int skel_txavail(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-/* Initialize the DM90x0 chip and driver */
+/* Initialize the Ethernet controller and driver */
 
 int skel_initialize(void)
 {
