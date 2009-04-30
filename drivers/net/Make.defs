@@ -40,5 +40,8 @@ ifeq ($(CONFIG_NET),y)
 ifeq ($(CONFIG_NET_DM90x0),y)
 NET_CSRCS  += dm90x0.c
 endif
+ifeq ($(CONFIG_NET_CS89x0),y)
+NET_CSRCS  += cs89x0.c
+endif
 endif
 

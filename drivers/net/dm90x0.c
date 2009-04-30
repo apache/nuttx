@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/dm9x.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References: Davicom data sheets (DM9000-DS-F03-041906.pdf,
