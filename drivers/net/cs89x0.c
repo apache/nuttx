@@ -57,6 +57,8 @@
  * Definitions
  ****************************************************************************/
 
+#error "Under construction -- do not use"
+
 /* CONFIG_CS89x0_NINTERFACES determines the number of physical interfaces
  * that will be supported.
  */
@@ -192,24 +194,70 @@ static void cs89x0_putreg(struct cs89x0_driver_s *cs89x0, int offset, uint16 val
 
 static uint16 cs89x0_getppreg(struct cs89x0_driver_s *cs89x0, int addr)
 {
+  /* In memory mode, the CS89x0's internal registers and frame buffers are mapped
+   * into a contiguous 4kb block providing direct access to the internal registers
+   * and frame buffers.
+   */
+
+#ifdef CONFIG_CS89x0_MEMMODE
+  if (cs89x0->cs_memmode)
+    {
 #ifdef CONFIG_CS89x0_ALIGN16
-  putreg16((uint16)addr, cs89x0->cs_base + CS89x0_PPTR_OFFSET);
-  return getreg16(s89x0->cs_base + CS89x0_PDATA_OFFSET);
+      return getreg16(s89x0->cs_ppbase + (CS89x0_PDATA_OFFSET << ??));
 #else
-  putreg32((uint32)addr, cs89x0->cs_base + CS89x0_PPTR_OFFSET);
-  return (uint16)getreg32(s89x0->cs_base + CS89x0_PDATA_OFFSET);
+      return (uint16)getreg32(s89x0->cs_ppbase + (CS89x0_PDATA_OFFSET << ??));
 #endif
+    }
+
+    /* When configured in I/O mode, the CS89x0 is accessed through eight, 16-bit
+     * I/O ports that in the host system's I/O space.
+     */
+
+  else
+#endif
+    {
+#ifdef CONFIG_CS89x0_ALIGN16
+      putreg16((uint16)addr, cs89x0->cs_base + CS89x0_PPTR_OFFSET);
+      return getreg16(s89x0->cs_base + CS89x0_PDATA_OFFSET);
+#else
+      putreg32((uint32)addr, cs89x0->cs_base + CS89x0_PPTR_OFFSET);
+      return (uint16)getreg32(s89x0->cs_base + CS89x0_PDATA_OFFSET);
+#endif
+    }
 }
 
 static void cs89x0_putppreg(struct cs89x0_driver_s *cs89x0, int addr, uint16 value)
 {
+  /* In memory mode, the CS89x0's internal registers and frame buffers are mapped
+   * into a contiguous 4kb block providing direct access to the internal registers
+   * and frame buffers.
+   */
+
+#ifdef CONFIG_CS89x0_MEMMODE
+  if (cs89x0->cs_memmode)
+    {
 #ifdef CONFIG_CS89x0_ALIGN16
-  putreg16((uint16)addr, cs89x0->cs_base + CS89x0_PPTR_OFFSET);
-  putreg16(value), cs89x0->cs_base + CS89x0_PDATA_OFFSET);
+      putreg16(value), cs89x0->cs_ppbase + (CS89x0_PDATA_OFFSET << ??));
 #else
-  putreg32((uint32)addr, cs89x0->cs_base + CS89x0_PPTR_OFFSET);
-  putreg32((uint32)value, cs89x0->cs_base + CS89x0_PDATA_OFFSET);
+      putreg32((uint32)value, cs89x0->cs_ppbase + (CS89x0_PDATA_OFFSET << ??));
 #endif
+    }
+
+    /* When configured in I/O mode, the CS89x0 is accessed through eight, 16-bit
+     * I/O ports that in the host system's I/O space.
+     */
+
+  else
+#endif
+    {
+#ifdef CONFIG_CS89x0_ALIGN16
+      putreg16((uint16)addr, cs89x0->cs_base + CS89x0_PPTR_OFFSET);
+      putreg16(value, cs89x0->cs_base + CS89x0_PDATA_OFFSET);
+#else
+      putreg32((uint32)addr, cs89x0->cs_base + CS89x0_PPTR_OFFSET);
+      putreg32((uint32)value, cs89x0->cs_base + CS89x0_PDATA_OFFSET);
+#endif
+    }
 }
 
 /****************************************************************************
@@ -550,15 +598,14 @@ static int cs89x0_interrupt(int irq, FAR void *context)
               {
                 ndbg("Transmit underrun\n");
 #ifdef CONFIG_CS89x0_XMITEARLY
-            
                 cd89x0->cs_txunderrun++;
                 if (cd89x0->cs_txunderrun == 3)
                   {
-                    cd89x0->send_cmd = TX_AFTER_381;
+                    cd89x0->cs_txstart = PPR_TXCMD_TXSTART381;
                   }
                 else if (cd89x0->cs_txunderrun == 6)
                   {
-                    cd89x0->send_cmd = TX_AFTER_ALL;
+                    cd89x0->cs_txstart = PPR_TXCMD_TXSTARTFULL;
                   }
 #endif
               }

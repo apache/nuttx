@@ -88,13 +88,18 @@ struct cs89x0_driver_s
    */
 
   FAR void *cs_base;           /* CS89x0 region base address */
+#ifdef CONFIG_CS89x0_MEMMODE
   FAR void *cs_ppbase;         /* CS89x0 page packet base address */
+#endif
   ubyte     cs_irq;            /* CS89x00 IRQ number */
 
   /* Driver internal state fields.  These must be zeroed by before the
    * instance of this structure is passed to cs89x0_initialize
    */
- 
+#ifdef CONFIG_CS89x0_XMITEARLY
+  ubyte     txstart;           /* Bits 6-7 of TxCMD controls Tx race */
+#endif
+  boolean   cs_memmode;        /* TRUE:memory mode FALSE: I/O mode */
   boolean   cs_bifup;          /* TRUE:ifup FALSE:ifdown */
   WDOG_ID   cs_txpoll;         /* TX poll timer */
   WDOG_ID   cs_txtimeout;      /* TX timeout timer */
