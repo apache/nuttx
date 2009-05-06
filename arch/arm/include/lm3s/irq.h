@@ -57,7 +57,6 @@
  */
 
 #ifdef CONFIG_CHIP_LM3S6918
-
                                   /* Vector 0-15: Processor exceptions */
 #  define LM3S_IRQ_GPIOA      (0) /* Vector 16: GPIO Port A */
 #  define LM3S_IRQ_GPIOB      (1) /* Vector 17: GPIO Port B */
