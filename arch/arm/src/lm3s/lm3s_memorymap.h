@@ -49,7 +49,7 @@
 
 /* Memory map ***********************************************************************/
  
-#ifdef CONFIG_CHIP_LM3S6918
+#ifdef CONFIG_ARCH_CHIP_LM3S6918
 #  define LM3S_FLASH_BASE     0x00000000 /* -0x0003ffff: On-chip FLASH */
                                          /* -0x1fffffff: Reserved */
 #  define LM3S_SRAM_BASE      0x20000000 /* -0x2000ffff: Bit-banded on-chip SRAM */
@@ -74,7 +74,7 @@
 
 /* Peripheral base addresses ********************************************************/
 
-#ifdef CONFIG_CHIP_LM3S6918
+#ifdef CONFIG_ARCH_CHIP_LM3S6918
 /* FiRM Peripheral Base Addresses */
 
 #  define LM3S_WDOG_BASE      (LM3S_FPERIPH_BASE + 0x00000) /* -0x00fff: Watchdog Timer */
