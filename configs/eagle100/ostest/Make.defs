@@ -60,7 +60,6 @@ else
 endif
 
 ARCHCPUFLAGS		= -mtune=cortex-m3 -march=armv7-m -mfloat-abi=soft
-endif
 ARCHDEFINES		=
 ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include
 ARCHXXINCLUDES		= -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
