@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/mx1ads/src/up_leds.c
+ * configs/eagle100/src/up_leds.c
  * arch/arm/src/board/up_leds.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
@@ -65,9 +65,9 @@
 #ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void)
 {
-  /* Configure Port A, Bit 2 as an output, initial value=1 */
+  /* Configure Port A, Bit 6 as an output, initial value=OFF */
 
-  imxgpio_configoutput(GPIOA, 2, 1);
+#warning "Missing Logic"
 }
 
 /****************************************************************************
@@ -76,23 +76,7 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
-  switch (led)
-    {
-      case LED_STARTED:
-      case LED_HEAPALLOCATE:
-      case LED_IRQSENABLED:
-      case LED_STACKCREATED:
-        imxgpio_setoutput(GPIOA, 2);  /* Port A, Bit 2 = 1 */
-        break;
-
-      case LED_INIRQ:
-      case LED_SIGNAL:
-      case LED_ASSERTION:
-      case LED_PANIC:
-      default:
-        imxgpio_clroutput(GPIOA, 2);  /* Port A, Bit 2 = 0 */
-        break;
-    }
+#warning "Missing Logic"
 }
 
 /****************************************************************************
@@ -101,7 +85,7 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-  imxgpio_clroutput(GPIOA, 2);  /* Port A, Bit 2 = 0 */
+#warning "Missing Logic"
 }
 
 #endif /* CONFIG_ARCH_LEDS */

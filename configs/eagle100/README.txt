@@ -5,33 +5,35 @@ Toolchain
 ^^^^^^^^^
 
   A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
-  be modified to point to the correct path to the ARM920T GCC toolchain (if
+  be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
   different from the default).
 
-  If you have no ARM toolchain, one can be downloaded from the NuttX
+  If you have no Cortex-M3 toolchain, one can be downloaded from the NuttX
   SourceForge download site (https://sourceforge.net/project/showfiles.php?group_id=189573).
 
-  1. You must have already configured Nuttx in <some-dir>nuttx.
+  1. You must have already configured Nuttx in <some-dir>/nuttx.
 
      cd tools
-     ./configure.sh mx1ads/<sub-dir>
+     ./configure.sh eagle100/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
-  3. unpack
+  3. unpack the buildroot tarball.  The resulting directory may
+     have versioning information on it like buildroot-x.y.z.  If so,
+     rename <some-dir>/buildroot-x.y.z to <some-dir>/buildroot.
 
   4. cd <some-dir>/buildroot
 
-  5. cp configs/arm920t-defconfig-4.2.4 .config
+  5. cp configs/cortexm3-defconfig-4.3.3 .config
 
   6. make oldconfig
 
   7. make
 
-  8. Edit setenv.h so that the PATH variable includes the path to the
-     newly built binaries.
+  8. Edit setenv.h, if necessary, so that the PATH variable includes
+     the path to the newly built binaries.
 
-ARM/i.MX1-specific Configuration Options
+Eagle100-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 	CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
@@ -45,22 +47,21 @@ ARM/i.MX1-specific Configuration Options
 
 	CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
-	   CONFIG_ARCH_CHIP=imx
+	   CONFIG_ARCH_CHIP=lm3s
 
-	CONFIG_ARCH_CHIP_name - For use in C code.  Could be line _IMX1,
-	   _IMXL, _IMX21, _IMX27, _IMX31, etc. (not all of which are
-	   supported).
+	CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
+	   chip:
 
-	   CONFIG_ARCH_CHIP_IMX1
+	   CONFIG_ARCH_CHIP_LM3S6918
 
 	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
 	   hence, the board that supports the particular chip or SoC.
 
-	   CONFIG_ARCH_BOARD=mx1ads (for the Freescale MX1ADS evaluation board)
+	   CONFIG_ARCH_BOARD=eagle100 (for the MicroMint Eagle-100 development board)
 
 	CONFIG_ARCH_BOARD_name - For use in C code
 
-	   CONFIG_ARCH_BOARD_MX1ADS (for the Spectrum Digital C5471 EVM)
+	   CONFIG_ARCH_BOARD_EAGLE100
 
 	CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
 	   of delay loops
@@ -68,23 +69,28 @@ ARM/i.MX1-specific Configuration Options
 	CONFIG_ENDIAN_BIG - define if big endian (default is little
 	   endian)
 
-	CONFIG_DRAM_SIZE - Describes the installed DRAM.
+	CONFIG_DRAM_SIZE - Describes the installed DRAM (SRAM in this case):
+
+	   CONFIG_DRAM_SIZE=0x00010000 (64Kb)
 
 	CONFIG_DRAM_START - The start address of installed DRAM
 
-	CONFIG_DRAM_VSTART - The startaddress of DRAM (virtual)
+	   CONFIG_DRAM_SIZE=0x00000000
 
 	CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
 	   have LEDs
 
 	CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
 	   stack. If defined, this symbol is the size of the interrupt
-	   stack in bytes.  If not defined, the user task stacks will be
+	    stack in bytes.  If not defined, the user task stacks will be
 	  used during interrupt handling.
 
 	CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 
-  IMX specific device driver settings
+	CONFIG_ARCH_BOOTLOADER - Configure to use the MicroMint Eagle-100
+	   Ethernet bootloader.
+
+  LM3S6818 specific device driver settings
 
 	CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
 	   console and ttys0 (default is the UART0).
@@ -97,24 +103,14 @@ ARM/i.MX1-specific Configuration Options
 	CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
 	CONFIG_UARTn_2STOP - Two stop bits
 
-  IMX USB Configuration
-
-	CONFIG_IMX_GIO_USBATTACH
-	   GIO that detects USB attach/detach events
-	CONFIG_IMX_GIO_USBDPPULLUP
-	   GIO 
-	CONFIG_DMA320_USBDEV_DMA
-	   Enable IMX-specific DMA support
-	CONFIG_IMX_GIO_USBATTACH=6
-
 Configurations
 ^^^^^^^^^^^^^^
 
-Each MX1ADS configuration is maintained in a sudirectory and
+Each Eagle-100 configuration is maintained in a sudirectory and
 can be selected as follow:
 
 	cd tools
-	./configure.sh imxads/<subdir>
+	./configure.sh eagle100/<subdir>
 	cd -
 	. ./setenv.sh
 
