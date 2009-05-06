@@ -1,5 +1,5 @@
 ############################################################################
-# configs/mx1ads/ostest/defconfig
+# configs/eagle100/ostest/defconfig
 #
 #   Copyright (C) 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -49,32 +49,29 @@
 # CONFIG_BOARD_LOOPSPERMSEC - for delay loops
 # CONFIG_DRAM_SIZE - Describes the installed DRAM.
 # CONFIG_DRAM_START - The start address of DRAM (physical)
-# CONFIG_DRAM_VSTART - The startaddress of DRAM (virtual)
-# CONFIG_ARCH_LOWVECTORS - Leave ARM interrupt vectors at 0x0000:0000
-#   instead of moving to 0xffff:0000
 # CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
 #   stack. If defined, this symbol is the size of the interrupt
 #   stack in bytes.  If not defined, the user task stacks will be
 #   used during interrupt handling.
 # CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
-#
+# CONFIG_ARCH_BOOTLOADER - Configure to use the MicroMint Eagle-100
+#   Ethernet bootloader.
 CONFIG_ARCH=arm
 CONFIG_ARCH_ARM=y
-CONFIG_ARCH_CHIP=imx
-CONFIG_ARCH_CHIP_IMX1=y
-CONFIG_ARCH_BOARD=mx1ads
-CONFIG_ARCH_BOARD_MX1ADS=y
+CONFIG_ARCH_CHIP=lm3s
+CONFIG_ARCH_CHIP_LM3S6918
+CONFIG_ARCH_BOARD=eagle100
+CONFIG_ARCH_BOARD_EAGLE100=y
 CONFIG_BOARD_LOOPSPERMSEC=16945
-CONFIG_DRAM_SIZE=0x01000000
-CONFIG_DRAM_START=0x08000000
-CONFIG_DRAM_VSTART=0x00000000
-CONFIG_DRAM_NUTTXENTRY=0x01004000
-CONFIG_ARCH_LOWVECTORS=y
+CONFIG_DRAM_SIZE=0x00010000
+CONFIG_DRAM_START=0x00000000
+CONFIG_DRAM_NUTTXENTRY=0x00002000
 CONFIG_ARCH_INTERRUPTSTACK=n
 CONFIG_ARCH_STACKDUMP=y
+CONFIG_ARCH_BOOTLOADER=y
 
 #
-# IMX specific serial device driver settings
+# LM3S6918 specific serial device driver settings
 #
 # CONFIG_UARTn_DISABLE - select to disable all support for
 #   the UART
@@ -115,7 +112,7 @@ CONFIG_UART2_2STOP=0
 CONFIG_UART3_2STOP=0
 
 #
-# IMX specific SPI device driver settings
+# LM3S6918 specific SPI device driver settings
 #
 # CONFIG_SPIn_DISABLE - select to disable all support for
 #   the SPI
@@ -186,12 +183,12 @@ CONFIG_ARCH_LOWPUTC=y
 CONFIG_RR_INTERVAL=200
 CONFIG_SCHED_INSTRUMENTATION=n
 CONFIG_TASK_NAME_SIZE=0
-CONFIG_START_YEAR=2008
-CONFIG_START_MONTH=8
-CONFIG_START_DAY=29
+CONFIG_START_YEAR=2009
+CONFIG_START_MONTH=5
+CONFIG_START_DAY=6
 CONFIG_JULIAN_TIME=n
 CONFIG_DEV_CONSOLE=y
-CONFIG_DEV_LOWCONSOLE=n
+CONFIG_DEV_LOWCONSOLE=y
 CONFIG_MUTEX_TYPES=n
 CONFIG_PRIORITY_INHERITANCE=n
 
@@ -348,113 +345,6 @@ CONFIG_NET_BROADCAST=n
 # CONFIG_NET_RESOLV_ENTRIES - Number of resolver entries
 CONFIG_NET_DHCP_LIGHT=n
 CONFIG_NET_RESOLV_ENTRIES=4
-
-#
-# USB Device Configuration
-#
-# CONFIG_USBDEV
-#   Enables USB device support
-# CONFIG_USBDEV_ISOCHRONOUS
-#   Build in extra support for isochronous endpoints
-# CONFIG_USBDEV_DUALSPEED
-#   Hardware handles high and full speed operation (USB 2.0)
-# CONFIG_USBDEV_SELFPOWERED
-#   Will cause USB features to indicate that the device is
-#   self-powered
-# CONFIG_USBDEV_MAXPOWER
-#   Maximum power consumption in mA
-# CONFIG_USBDEV_TRACE
-#   Enables USB tracing for debug
-# CONFIG_USBDEV_TRACE_NRECORDS
-#   Number of trace entries to remember
-CONFIG_USBDEV=n
-CONFIG_USBDEV_ISOCHRONOUS=n
-CONFIG_USBDEV_DUALSPEED=n
-CONFIG_USBDEV_SELFPOWERED=y
-CONFIG_USBDEV_MAXPOWER=100
-CONFIG_USBDEV_TRACE=n
-CONFIG_USBDEV_TRACE_NRECORDS=128
-
-#
-# IMX USB Configuration
-#
-# CONFIG_IMX_GIO_USBATTACH
-#   GIO that detects USB attach/detach events
-# CONFIG_IMX_GIO_USBDPPULLUP
-#   GIO 
-# CONFIG_DMA320_USBDEV_DMA
-#   Enable IMX-specific DMA support
-CONFIG_IMX_GIO_USBATTACH=6
-CONFIG_IMX_GIO_USBDPPULLUP=17
-CONFIG_IMX_VENDORID=0xd320
-CONFIG_IMX_PRODUCTID=0x3211
-CONFIG_IMX_USBDEV_DMA=n
-
-#
-# USB Serial Device Configuration
-#
-# CONFIG_USBSER_EPINTIN
-#   The logical 7-bit address of a hardware endpoint that supports
-#   interrupt IN operation
-# CONFIG_USBSER_EPBULKOUT
-#   The logical 7-bit address of a hardware endpoint that supports
-#   bulk OUT operation
-# CONFIG_USBSER_EPBULKIN
-#   The logical 7-bit address of a hardware endpoint that supports
-#   bulk IN operation
-# CONFIG_USBSER_NWRREQS and CONFIG_USBSER_NRDREQS
-#   The number of write/read requests that can be in flight
-# CONFIG_USBSER_VENDORID and CONFIG_USBSER_VENDORSTR
-#   The vendor ID code/string
-# CONFIG_USBSER_PRODUCTID and CONFIG_USBSER_PRODUCTSTR
-#   The product ID code/string
-# CONFIG_USBSER_RXBUFSIZE and CONFIG_USBSER_TXBUFSIZE
-#   Size of the serial receive/transmit buffers
-CONFIG_USBSER_EPINTIN=3
-CONFIG_USBSER_EPBULKOUT=2
-CONFIG_USBSER_EPBULKIN=1
-CONFIG_USBSER_NWRREQS=4
-CONFIG_USBSER_NRDREQS=4
-CONFIG_USBSER_VENDORID=0x067b
-CONFIG_USBSER_PRODUCTID=0x2303
-CONFIG_USBSER_VENDORSTR="Nuttx"
-CONFIG_USBSER_PRODUCTSTR="USBdev Serial"
-CONFIG_USBSER_RXBUFSIZE=512
-CONFIG_USBSER_TXBUFSIZE=512
-
-#
-# USB Storage Device Configuration
-#
-# CONFIG_USBSTRG_EP0MAXPACKET
-#   Max packet size for endpoint 0
-# CONFIG_USBSTRG_EPBULKOUT and CONFIG_USBSTRG_EPBULKIN
-#   The logical 7-bit address of a hardware endpoints that support
-#   bulk OUT and IN operations
-# CONFIG_USBSTRG_NWRREQS and CONFIG_USBSTRG_NRDREQS
-#   The number of write/read requests that can be in flight
-# CONFIG_USBSTRG_BULKINREQLEN and CONFIG_USBSTRG_BULKOUTREQLEN
-#   The size of the buffer in each write/read request.  This
-#   value needs to be at least as large as the endpoint
-#   maxpacket and ideally as large as a block device sector.
-# CONFIG_USBSTRG_VENDORID and CONFIG_USBSTRG_VENDORSTR
-#   The vendor ID code/string
-# CONFIG_USBSTRG_PRODUCTID and CONFIG_USBSTRG_PRODUCTSTR
-#   The product ID code/string
-# CONFIG_USBSTRG_REMOVABLE
-#   Select if the media is removable
-CONFIG_USBSTRG_EP0MAXPACKET=64
-CONFIG_USBSTRG_EPBULKOUT=2
-CONFIG_USBSTRG_EPBULKIN=1
-CONFIG_USBSTRG_NRDREQS=2
-CONFIG_USBSTRG_NWRREQS=2
-CONFIG_USBSTRG_BULKINREQLEN=256
-CONFIG_USBSTRG_BULKOUTREQLEN=256
-CONFIG_USBSTRG_VENDORID=0x584e
-CONFIG_USBSTRG_VENDORSTR="NuttX"
-CONFIG_USBSTRG_PRODUCTID=0x5342
-CONFIG_USBSTRG_PRODUCTSTR="USBdev Storage"
-CONFIG_USBSTRG_VERSIONNO=0x0399
-CONFIG_USBSTRG_REMOVABLE=y
 
 #
 # Settings for examples/uip
