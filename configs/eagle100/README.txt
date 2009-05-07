@@ -33,6 +33,10 @@ Toolchain
   8. Edit setenv.h, if necessary, so that the PATH variable includes
      the path to the newly built binaries.
 
+  See the file configs/README.txt in the buildroot source tree.  That has more
+  detailed PLUS some special instructions that you will need to follow if you are
+  building a Cortex-M3 toolchain for Cygwin under Windows.
+
 Eagle100-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
