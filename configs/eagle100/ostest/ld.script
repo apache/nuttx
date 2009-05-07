@@ -60,7 +60,7 @@ SECTIONS
 
 	/* The LM3S6918 has 64Kb of SRAM beginning at the following address */
 
-	. = 0x20000000
+	. = 0x20000000;
 	.data : {
 		_sdata = ABSOLUTE(.);
 		*(.data)

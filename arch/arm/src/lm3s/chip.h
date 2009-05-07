@@ -44,6 +44,7 @@
 #include <sys/types.h>
 
 #include "lm3s_memorymap.h"     /* Memory map */
+#include "lm3s_syscontrol.h"    /* System control module */
 
 /************************************************************************************
  * Definitions
