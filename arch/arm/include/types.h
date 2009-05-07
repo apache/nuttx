@@ -67,11 +67,16 @@ typedef unsigned int uint32;
 typedef long long sint64;
 typedef unsigned long long uint64;
 
-/* This is the size of the interrupt state save returned by
- * irqsave()
+/* This is the size of the interrupt state save returned by irqsave().  For
+ * ARM, a 32 register value is returned, for the thumb2, Cortex-M3, the 16-bit
+ * primask register value is returned,
  */
 
+#ifdef __thumb2__
+typedef unsigned short irqstate_t;
+#else /* __thumb2__ */
 typedef unsigned int irqstate_t;
+#endif /* __thumb2__ */
 
 #endif /* __ASSEMBLY__ */
 

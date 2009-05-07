@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/include/irq.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather,
- * only indirectly through nuttx/irq.h
+/* This file should never be included directed but, rather, only indirectly
+ * through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_IRQ_H
@@ -157,6 +157,49 @@ struct xcptcontext
 
 #ifndef __ASSEMBLY__
 
+#ifdef __thumb2__
+
+/* Save the current interrupt enable state & disable IRQs */
+
+static inline irqstate_t irqsave(void)
+{
+  unsigned short primask;
+
+  /* Return the the current value of primask register and set
+   * bit 0 of the primask register to disable interrupts
+   */
+
+  __asm__ __volatile__
+    (
+     "\tmrs    %0, primask\n"
+     "\tcpsid  i\n"
+     : "=r" (primask)
+     :
+     : "memory");
+  return primask;
+}
+
+/* Restore saved IRQ & FIQ state */
+
+static inline void irqrestore(irqstate_t primask)
+{
+  /* If bit 0 of the primask is 0, then we need to restore
+   * interupts.
+   */
+
+  __asm__ __volatile__
+    (
+     "\ttst    %0, #1\n"
+     "\tbne    1f\n"
+     "\tcpsie  i\n"
+     "1:\n"
+     :
+     : "r" (primask)
+     : "memory");
+}
+
+#else /* __thumb2__ */
+
 /* Save the current interrupt enable state & disable IRQs */
 
 static inline irqstate_t irqsave(void)
@@ -201,7 +244,8 @@ static inline void system_call(swint_t func, int parm1,
        "r" ((long)(parm2)), "r" ((long)(parm3))
      : "r0", "r1", "r2", "r3", "lr");
 }
-#endif
+#endif /* __thumb2__ */
+#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Public Variables
