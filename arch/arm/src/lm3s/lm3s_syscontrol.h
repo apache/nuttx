@@ -81,7 +81,7 @@
 #define LM3S_SYSCON_DCGC2_OFFSET      0x128 /* Deep Sleep Mode Clock Gating Control Register 2 */
 #define LM3S_SYSCON_DSLPCLKCFG_OFFSET 0x144 /* Deep Sleep Clock Configuration*/
 #else
-#  error "Peripheral base addresses not specified for this LM3S chip"
+#  error "System control register offsets not specified for this LM3S chip"
 #endif
 
 /* System Control Register Addresses ************************************************/
