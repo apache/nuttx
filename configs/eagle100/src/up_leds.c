@@ -70,6 +70,10 @@
 #ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void)
 {
+  /* Make sure that the GPIOE peripheral is enabled */
+
+  modifyreg32(LM3S_SYSCON_RCGC2_OFFSET, 0, SYSCON_RCGC2_GPIOE);
+
   /* Configure Port E, Bit 1 as an output, initial value=OFF */
 
   lm3s_configgpio(GPIO_DIR_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTE | 1);
