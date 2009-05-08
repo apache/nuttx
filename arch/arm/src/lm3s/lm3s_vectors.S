@@ -43,19 +43,26 @@
  * Preprocessor Definitions
  ************************************************************************************/
 
-#ifndef CONFIG_DEBUG
-#  define lm3s_uncaught 0
-#endif
+/* Memory Map:
+ *
+ * 0x0000:0000 - Beginning of FLASH. Address of vectors (if not using bootloader)
+ * 0x0002:0000 - Address of vectors if using bootloader
+ * 0x0003:ffff - End of flash
+ * 0x2000:0000 - Start of SRAM and start of .data (_sdata)
+ *             - End of .data (_edata) abd start of .bss (_sbss)
+ *             - End of .bss (_ebss) and bottom of idle stack
+ *             - _ebss + CONFIG_IDLETHREAD_STACKSIZE = end of idle stack, start of heap
+ * 0x2000:ffff - End of SRAM and end of heap
+ */
+
+#define IDLE_STACK      (_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
+#define HEAP_BASE       (_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
 
 /************************************************************************************
  * Global Symbols
  ************************************************************************************/
 
-	.globl		_vectors
-	.globl		lm3s_pendsvhandler
-	.globl		lm3s_systickhandler
-	.globl		lm3s_faulthandler
-	.globl		lm3s_portsvchandler
+	.globl		dispach_irq
 
 /************************************************************************************
  * Macros
@@ -76,125 +83,158 @@
 
 _vectors:
 /* Processor Exceptions */
-	.word	__stack_end__		/* Vector 0: Reset stack pointer */
-	.word	_start			/* Vector 1: Reset vector */
-	.word	lm3s_nmihandler		/* Vector 2: Non-Maskable Interrupt (NMI) */
-	.word	lm3s_faulthandler	/* Vector 3: Hard fault */
-	.word	lm3s_uncaught		/* Vector 4: Memory management (MPU) */
-	.word	lm3s_uncaught		/* Vector 5: Bus fault */
-	.word	lm3s_uncaught		/* Vector 6: Usage fault */
-	.word	lm3s_uncaught		/* Vector 7: Reserved */
-	.word	lm3s_uncaught		/* Vector 8: Reserved */
-	.word	lm3s_uncaught		/* Vector 9: Reserved */
-	.word	lm3s_uncaught		/* Vector 10: Reserved */
-	.word	lm3s_svchandler		/* Vector 11: SVC call */
-	.word	lm3s_uncaught		/* Vector 12: Debug monitor */
-	.word	lm3s_uncaught		/* Vector 13: Reserved */
-	.word	lm3s_pendsvhandler	/* Vector 14: Pendable system service request */
-	.word	lm3s_systickhandler	/* Vector 15: System tick */
+	.word	IDLE_STACK		/* Vector  0: Reset stack pointer */
+	.word	_start			/* Vector  1: Reset vector */
+	.word	lm3s_nmi		/* Vector  2: Non-Maskable Interrupt (NMI) */
+	.word	lm3s_hardfault		/* Vector  3: Hard fault */
+	.word	lm3s_mpu		/* Vector  4: Memory management (MPU) */
+	.word	lm3s_busfault		/* Vector  5: Bus fault */
+	.word	lm3s_usagefault		/* Vector  6: Usage fault */
+	.word	lm3s_reserved		/* Vector  7: Reserved */
+	.word	lm3s_reserved		/* Vector  8: Reserved */
+	.word	lm3s_reserved		/* Vector  9: Reserved */
+	.word	lm3s_reserved		/* Vector 10: Reserved */
+	.word	lm3s_svcall		/* Vector 11: SVC call */
+	.word	lm3s_dbgmonitor		/* Vector 12: Debug monitor */
+	.word	lm3s_reserved		/* Vector 13: Reserved */
+	.word	lm3s_pendsv		/* Vector 14: Pendable system service request */
+	.word	lm3s_systick		/* Vector 15: System tick */
 
 /* External Interrupts */
 
 #ifdef CONFIG_ARCH_CHIP_LM3S6918
-	.word	lm3s_gpioahandler	/* Vector 16: GPIO Port A */
-	.word	lm3s_gpiobhandler	/* Vector 17: GPIO Port B */
-	.word	lm3s_gpiodhandler	/* Vector 18: GPIO Port C */
-	.word	lm3s_gpioehandler	/* Vector 19: GPIO Port D */
-	.word	lm3s_gpioehandler	/* Vector 20: GPIO Port E */
-	.word	lm3s_uart0handler	/* Vector 21: UART 0 */
-	.word	lm3s_uart1handler	/* Vector 22: UART 1 */
-	.word	lm3s_ssi0handler	/* Vector 23: SSI 0 */
-	.word	lm3s_i2c0handler	/* Vector 24: I2C 0 */
-	.word	lm3s_uncaught		/* Vector 25: Reserved */
-	.word	lm3s_uncaught		/* Vector 26: Reserved */
-	.word	lm3s_uncaught		/* Vector 27: Reserved */
-	.word	lm3s_uncaught		/* Vector 28: Reserved */
-	.word	lm3s_uncaught		/* Vector 29: Reserved */
-	.word	lm3s_adc0handler	/* Vector 30: ADC Sequence 0 */
-	.word	lm3s_adc1handler	/* Vector 31: ADC Sequence 1 */
-	.word	lm3s_adc2handler	/* Vector 32: ADC Sequence 2 */
-	.word	lm3s_adc3handler	/* Vector 33: ADC Sequence 3 */
-	.word	lm3s_wdoghandler	/* Vector 34: Watchdog Timer */
-	.word	lm3s_tmr0ahandler	/* Vector 35: Timer 0 A */
-	.word	lm3s_tmr0bhandler	/* Vector 36: Timer 0 B */
-	.word	lm3s_tmr1ahandler	/* Vector 37: Timer 1 A */
-	.word	lm3s_tmr1bhandler	/* Vector 38: Timer 1 B */
-	.word	lm3s_tmr2ahandler	/* Vector 39: Timer 2 A */
-	.word	lm3s_tmr2bhandler	/* Vector 40: Timer 3 B */
-	.word	lm3s_cmp0handler	/* Vector 41: Analog Comparator 0 */
-	.word	lm3s_dmp1handler	/* Vector 42: Analog Comparator 1 */
-	.word	lm3s_uncaught		/* Vector 43: Reserved */
-	.word	lm3s_sysconhandler	/* Vector 44: System Control */
-	.word	lm3s_flashconhandler	/* Vector 45: FLASH Control */
-	.word	lm3s_gpiofhandler	/* Vector 46: GPIO Port F */
-	.word	lm3s_gpioghandler	/* Vector 47: GPIO Port G */
-	.word	lm3s_gpiohhandler	/* Vector 48: GPIO Port H */
-	.word	lm3s_uncaught		/* Vector 49: Reserved */
-	.word	lm3s_ssi1handler	/* Vector 50: SSI 1 */
-	.word	lm3s_tmr3ahandler	/* Vector 51: Timer 3 A */
-	.word	lm3s_tmr3bhandler	/* Vector 52: Timer 3 B */
-	.word	lm3s_i2c1handler	/* Vector 53: I2C 1 */
-	.word	lm3s_uncaught		/* Vector 54: Reserved */
-	.word	lm3s_uncaught		/* Vector 55: Reserved */
-	.word	lm3s_uncaught		/* Vector 56: Reserved */
-	.word	lm3s_uncaught		/* Vector 57: Reserved */
- 	.word	lm3s_ethhandler		/* Vector 58: Ethernet Controller */
-	.word	lm3s_hibhandler		/* Vector 59: Hibernation Module */
-	.word	lm3s_uncaught		/* Vector 60: Reserved */
-	.word	lm3s_uncaught		/* Vector 61: Reserved */
-	.word	lm3s_uncaught		/* Vector 62: Reserved */
-	.word	lm3s_uncaught		/* Vector 63: Reserved */
-	.word	lm3s_uncaught		/* Vector 64: Reserved */
-	.word	lm3s_uncaught		/* Vector 65: Reserved */
-	.word	lm3s_uncaught		/* Vector 66: Reserved */
-	.word	lm3s_uncaught		/* Vector 67: Reserved */
-	.word	lm3s_uncaught		/* Vector 68: Reserved */
-	.word	lm3s_uncaught		/* Vector 69: Reserved */
-	.word	lm3s_uncaught		/* Vector 70: Reserved */
-#else
-#  error "Vectors not specified for this LM3S chip"
-#endif
-	.text
-	.thumb_func
-#ifdef CONFIG_ARCH_CHIP_LM3S6918
-	HANDLER	lm3s_gpioahandler, LM3S_IRQ_GPIOA	/* Vector 16: GPIO Port A */
-	HANDLER	lm3s_gpiobhandler, LM3S_IRQ_GPIOB	/* Vector 17: GPIO Port B */
-	HANDLER	lm3s_gpiodhandler, LM3S_IRQ_GPIOC	/* Vector 18: GPIO Port C */
-	HANDLER	lm3s_gpioehandler, LM3S_IRQ_GPIOD	/* Vector 19: GPIO Port D */
-	HANDLER	lm3s_gpioehandler, LM3S_IRQ_GPIOE	/* Vector 20: GPIO Port E */
-	HANDLER	lm3s_uart0handler, LM3S_IRQ_UART0	/* Vector 21: UART 0 */
-	HANDLER	lm3s_uart1handler, LM3S_IRQ_UART1	/* Vector 22: UART 1 */
-	HANDLER	lm3s_ssi0handler, LM3S_IRQ_SSI0		/* Vector 23: SSI 0 */
-	HANDLER	lm3s_i2c0handler, LM3S_IRQ_I2C0		/* Vector 24: I2C 0 */
-	HANDLER	lm3s_adc0handler, LM3S_IRQ_ADC0		/* Vector 30: ADC Sequence 0 */
-	HANDLER	lm3s_adc1handler, LM3S_IRQ_ADC1		/* Vector 31: ADC Sequence 1 */
-	HANDLER	lm3s_adc2handler, LM3S_IRQ_ADC2		/* Vector 32: ADC Sequence 2 */
-	HANDLER	lm3s_adc3handler, LM3S_IRQ_ADC3		/* Vector 33: ADC Sequence 3 */
-	HANDLER	lm3s_wdoghandler, LM3S_IRQ_WDOG		/* Vector 34: Watchdog Timer */
-	HANDLER	lm3s_tmr0ahandler, LM3S_IRQ_TIMER0A	/* Vector 35: Timer 0 A */
-	HANDLER	lm3s_tmr0bhandler, LM3S_IRQ_TIMER0B	/* Vector 36: Timer 0 B */
-	HANDLER	lm3s_tmr1ahandler, LM3S_IRQ_TIMER1A	/* Vector 37: Timer 1 A */
-	HANDLER	lm3s_tmr1bhandler, LM3S_IRQ_TIMER1B	/* Vector 38: Timer 1 B */
-	HANDLER	lm3s_tmr2ahandler, LM3S_IRQ_TIMER2A	/* Vector 39: Timer 2 A */
-	HANDLER	lm3s_tmr2bhandler, LM3S_IRQ_TIMER2B	/* Vector 40: Timer 3 B */
-	HANDLER	lm3s_cmp0handler, LM3S_IRQ_COMPARE0	/* Vector 41: Analog Comparator 0 */
-	HANDLER	lm3s_dmp1handler, LM3S_IRQ_COMPARE1	/* Vector 42: Analog Comparator 1 */
-	HANDLER	lm3s_sysconhandler, LM3S_IRQ_SYSCON	/* Vector 44: System Control */
-	HANDLER	lm3s_flashconhandler, LM3S_IRQ_FLASHCON	/* Vector 45: FLASH Control */
-	HANDLER	lm3s_gpiofhandler, LM3S_IRQ_GPIOF	/* Vector 46: GPIO Port F */
-	HANDLER	lm3s_gpioghandler, LM3S_IRQ_GPIOG	/* Vector 47: GPIO Port G */
-	HANDLER	lm3s_gpiohhandler, LM3S_IRQ_GPIOH	/* Vector 48: GPIO Port H */
-	HANDLER	lm3s_ssi1handler, LM3S_IRQ_SSI1		/* Vector 50: SSI 1 */
-	HANDLER	lm3s_tmr3ahandler, LM3S_IRQ_TIMER3A	/* Vector 51: Timer 3 A */
-	HANDLER	lm3s_tmr3bhandler, LM3S_IRQ_TIMER3B	/* Vector 52: Timer 3 B */
-	HANDLER	lm3s_i2c1handler, LM3S_IRQ_I2C1		/* Vector 53: I2C 1 */
- 	HANDLER	lm3s_ethhandler	, LM3S_IRQ_ETHCON	/* Vector 58: Ethernet Controller */
-	HANDLER	lm3s_hibhandler	, LM3S_IRQ_HIBERNATE	/* Vector 59: Hibernation Module */
+	.word	lm3s_gpioa		/* Vector 16: GPIO Port A */
+	.word	lm3s_gpiob		/* Vector 17: GPIO Port B */
+	.word	lm3s_gpiod		/* Vector 18: GPIO Port C */
+	.word	lm3s_gpioe		/* Vector 19: GPIO Port D */
+	.word	lm3s_gpioe		/* Vector 20: GPIO Port E */
+	.word	lm3s_uart0		/* Vector 21: UART 0 */
+	.word	lm3s_uart1		/* Vector 22: UART 1 */
+	.word	lm3s_ssi0		/* Vector 23: SSI 0 */
+	.word	lm3s_i2c0		/* Vector 24: I2C 0 */
+	.word	lm3s_reserved		/* Vector 25: Reserved */
+	.word	lm3s_reserved		/* Vector 26: Reserved */
+	.word	lm3s_reserved		/* Vector 27: Reserved */
+	.word	lm3s_reserved		/* Vector 28: Reserved */
+	.word	lm3s_reserved		/* Vector 29: Reserved */
+	.word	lm3s_adc0		/* Vector 30: ADC Sequence 0 */
+	.word	lm3s_adc1		/* Vector 31: ADC Sequence 1 */
+	.word	lm3s_adc2		/* Vector 32: ADC Sequence 2 */
+	.word	lm3s_adc3		/* Vector 33: ADC Sequence 3 */
+	.word	lm3s_wdog		/* Vector 34: Watchdog Timer */
+	.word	lm3s_tmr0a		/* Vector 35: Timer 0 A */
+	.word	lm3s_tmr0b		/* Vector 36: Timer 0 B */
+	.word	lm3s_tmr1a		/* Vector 37: Timer 1 A */
+	.word	lm3s_tmr1b		/* Vector 38: Timer 1 B */
+	.word	lm3s_tmr2a		/* Vector 39: Timer 2 A */
+	.word	lm3s_tmr2b		/* Vector 40: Timer 3 B */
+	.word	lm3s_cmp0		/* Vector 41: Analog Comparator 0 */
+	.word	lm3s_dmp1		/* Vector 42: Analog Comparator 1 */
+	.word	lm3s_reserved		/* Vector 43: Reserved */
+	.word	lm3s_syscon		/* Vector 44: System Control */
+	.word	lm3s_flashcon		/* Vector 45: FLASH Control */
+	.word	lm3s_gpiof		/* Vector 46: GPIO Port F */
+	.word	lm3s_gpiog		/* Vector 47: GPIO Port G */
+	.word	lm3s_gpioh		/* Vector 48: GPIO Port H */
+	.word	lm3s_reserved		/* Vector 49: Reserved */
+	.word	lm3s_ssi1		/* Vector 50: SSI 1 */
+	.word	lm3s_tmr3a		/* Vector 51: Timer 3 A */
+	.word	lm3s_tmr3b		/* Vector 52: Timer 3 B */
+	.word	lm3s_i2c1		/* Vector 53: I2C 1 */
+	.word	lm3s_reserved		/* Vector 54: Reserved */
+	.word	lm3s_reserved		/* Vector 55: Reserved */
+	.word	lm3s_reserved		/* Vector 56: Reserved */
+	.word	lm3s_reserved		/* Vector 57: Reserved */
+ 	.word	lm3s_eth		/* Vector 58: Ethernet Controller */
+	.word	lm3s_hib		/* Vector 59: Hibernation Module */
+	.word	lm3s_reserved		/* Vector 60: Reserved */
+	.word	lm3s_reserved		/* Vector 61: Reserved */
+	.word	lm3s_reserved		/* Vector 62: Reserved */
+	.word	lm3s_reserved		/* Vector 63: Reserved */
+	.word	lm3s_reserved		/* Vector 64: Reserved */
+	.word	lm3s_reserved		/* Vector 65: Reserved */
+	.word	lm3s_reserved		/* Vector 66: Reserved */
+	.word	lm3s_reserved		/* Vector 67: Reserved */
+	.word	lm3s_reserved		/* Vector 68: Reserved */
+	.word	lm3s_reserved		/* Vector 69: Reserved */
+	.word	lm3s_reserved		/* Vector 70: Reserved */
 #else
 #  error "Vectors not specified for this LM3S chip"
 #endif
 
-#ifdef CONFIG_DEBUG
-	HANDLER	lm3s_uncaught, NR_IRQS			/* Unexpected vector (default is to reset) */
+/************************************************************************************
+ * .text
+ ************************************************************************************/
+
+	.text
+	.thumb_func
+	HANDLER	lm3s_reserved, LMSB_IRQ_RESERVED	/* Unexpected/reserved vector */
+	HANDLER lm3s_nmi, LMSB_IRQ_NMI                  /* Vector  2: Non-Maskable Interrupt (NMI) */
+	HANDLER lm3s_hardfault, LMSB_IRQ_HARDFAULT      /* Vector  3: Hard fault */
+	HANDLER lm3s_mpu, LMSB_IRQ_MPU                  /* Vector  4: Memory management (MPU) */
+	HANDLER lm3s_busfault, LMSB_IRQ_BUSFAULT        /* Vector  5: Bus fault */
+	HANDLER lm3s_usagefault, LMSB_IRQ_USAGEFAULT    /* Vector  6: Usage fault */
+	HANDLER lm3s_svcall, LMSB_IRQ_SVCALL            /* Vector 11: SVC call */
+	HANDLER lm3s_dbgmonitor, LMSB_IRQ_DBGMONITOR    /* Vector 12: Debug Monitor */
+	HANDLER lm3s_pendsv, LMSB_IRQ_PENDSV            /* Vector 14: Penable system service request */
+	HANDLER lm3s_systick, LMSB_IRQ_SYSTICK          /* Vector 15: System tick */
+
+#ifdef CONFIG_ARCH_CHIP_LM3S6918
+	HANDLER	lm3s_gpioa, LM3S_IRQ_GPIOA		/* Vector 16: GPIO Port A */
+	HANDLER	lm3s_gpiob, LM3S_IRQ_GPIOB		/* Vector 17: GPIO Port B */
+	HANDLER	lm3s_gpiod, LM3S_IRQ_GPIOC		/* Vector 18: GPIO Port C */
+	HANDLER	lm3s_gpioe, LM3S_IRQ_GPIOD		/* Vector 19: GPIO Port D */
+	HANDLER	lm3s_gpioe, LM3S_IRQ_GPIOE		/* Vector 20: GPIO Port E */
+	HANDLER	lm3s_uart0, LM3S_IRQ_UART0		/* Vector 21: UART 0 */
+	HANDLER	lm3s_uart1, LM3S_IRQ_UART1		/* Vector 22: UART 1 */
+	HANDLER	lm3s_ssi0, LM3S_IRQ_SSI0		/* Vector 23: SSI 0 */
+	HANDLER	lm3s_i2c0, LM3S_IRQ_I2C0		/* Vector 24: I2C 0 */
+	HANDLER	lm3s_adc0, LM3S_IRQ_ADC0		/* Vector 30: ADC Sequence 0 */
+	HANDLER	lm3s_adc1, LM3S_IRQ_ADC1		/* Vector 31: ADC Sequence 1 */
+	HANDLER	lm3s_adc2, LM3S_IRQ_ADC2		/* Vector 32: ADC Sequence 2 */
+	HANDLER	lm3s_adc3, LM3S_IRQ_ADC3		/* Vector 33: ADC Sequence 3 */
+	HANDLER	lm3s_wdog, LM3S_IRQ_WDOG		/* Vector 34: Watchdog Timer */
+	HANDLER	lm3s_tmr0a, LM3S_IRQ_TIMER0A		/* Vector 35: Timer 0 A */
+	HANDLER	lm3s_tmr0b, LM3S_IRQ_TIMER0B		/* Vector 36: Timer 0 B */
+	HANDLER	lm3s_tmr1a, LM3S_IRQ_TIMER1A		/* Vector 37: Timer 1 A */
+	HANDLER	lm3s_tmr1b, LM3S_IRQ_TIMER1B		/* Vector 38: Timer 1 B */
+	HANDLER	lm3s_tmr2a, LM3S_IRQ_TIMER2A		/* Vector 39: Timer 2 A */
+	HANDLER	lm3s_tmr2b, LM3S_IRQ_TIMER2B		/* Vector 40: Timer 3 B */
+	HANDLER	lm3s_cmp0, LM3S_IRQ_COMPARE0		/* Vector 41: Analog Comparator 0 */
+	HANDLER	lm3s_dmp1, LM3S_IRQ_COMPARE1		/* Vector 42: Analog Comparator 1 */
+	HANDLER	lm3s_syscon, LM3S_IRQ_SYSCON		/* Vector 44: System Control */
+	HANDLER	lm3s_flashcon, LM3S_IRQ_FLASHCON	/* Vector 45: FLASH Control */
+	HANDLER	lm3s_gpiof, LM3S_IRQ_GPIOF		/* Vector 46: GPIO Port F */
+	HANDLER	lm3s_gpiog, LM3S_IRQ_GPIOG		/* Vector 47: GPIO Port G */
+	HANDLER	lm3s_gpioh, LM3S_IRQ_GPIOH		/* Vector 48: GPIO Port H */
+	HANDLER	lm3s_ssi1, LM3S_IRQ_SSI1		/* Vector 50: SSI 1 */
+	HANDLER	lm3s_tmr3a, LM3S_IRQ_TIMER3A		/* Vector 51: Timer 3 A */
+	HANDLER	lm3s_tmr3b, LM3S_IRQ_TIMER3B		/* Vector 52: Timer 3 B */
+	HANDLER	lm3s_i2c1, LM3S_IRQ_I2C1		/* Vector 53: I2C 1 */
+ 	HANDLER	lm3s_eth, LM3S_IRQ_ETHCON		/* Vector 58: Ethernet Controller */
+	HANDLER	lm3s_hib, LM3S_IRQ_HIBERNATE		/* Vector 59: Hibernation Module */
+#else
+#  error "Vectors not specified for this LM3S chip"
 #endif
-	.end
+
+/************************************************************************************
+ * .rodata
+ ************************************************************************************/
+
+	.section	.rodata, "a"
+
+/* Variables: _sbss is the start of the BSS region (see ld.script) _ebss is the end
+ * of the BSS regsion (see ld.script). The idle task stack starts at the end of BSS
+ * and is of size CONFIG_IDLETHREAD_STACKSIZE.  The IDLE thread is the thread that
+ * the system boots on and, eventually, becomes the idle, do nothing task that runs
+ * only when there is nothing else to run.  The heap continues from there until the
+ * end of memory.  See g_heapbase below.
+ */
+
+        .globl  g_heapbase
+        .type   g_heapbase, object
+g_heapbase:
+        .long   _ebss+CONFIG_IDLETHREAD_STACKSIZE
+        .size   g_heapbase, .-g_heapbase
+
+        .end

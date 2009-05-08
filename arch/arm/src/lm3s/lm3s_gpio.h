@@ -354,26 +354,55 @@
 
 /* Bit-encoded input to lm3s_configgpio() *******************************************/
 
-#define GPIO_DIR_MASK                 (1 << 31) /* Bit 31: GPIO direction */
-#define GPIO_DIR_OUTPUT               (1 << 31)
-#define GPIO_DIR_INPUT                (0 << 31)
+#define GPIO_FUNC_SHIFT               30                         /* Bit 31-30: GPIO function */
+#define GPIO_FUNC_MASK                (3 << GPIO_FUNC_SHIFT)
+#define GPIO_FUNC_INPUT               (0 << GPIO_FUNC_SHIFT)     /*   Normal GPIO input */
+#define GPIO_FUNC_OUTPUT              (1 << GPIO_FUNC_SHIFT)     /*   Normal GPIO output */
+#define GPIO_FUNC_PERIPHERAL          (2 << GPIO_FUNC_SHIFT)     /*   Peripheral function */
+#define GPIO_FUNC_INTERRUPT           (3 << GPIO_FUNC_SHIFT)     /*   Interrupt function */
 
-#define GPIO_VALUE_MASK               (1 << 6)  /* Bit 6: If output, inital value of output */
-#define GPIO_VALUE_ONE                (1 << 6)
-#define GPIO_VALUE_ZERO               (0 << 6)
+#define GPIO_INT_SHIFT                27                         /* Bits 29-27: Interrupt type */
+#define GPIO_INT_MASK                 (7 << GPIO_INT_SHIFT)
+#define GPIO_INT_FALLINGEDGE          (0 << GPIO_INT_SHIFT)      /*   Interrupt on falling edge */
+#define GPIO_INT_RISINGEDGE           (1 << GPIO_INT_SHIFT)      /*   Interrupt on rising edge */
+#define GPIO_INT_BOTHEDGES            (2 << GPIO_INT_SHIFT)      /*   Interrupt on both edges */
+#define GPIO_INT_LOWLEVEL             (3 << GPIO_INT_SHIFT)      /*   Interrupt on low level */
+#define GPIO_INT_HIGHLEVEL            (4 << GPIO_INT_SHIFT)      /*   Interrupt on high level */
 
-#define GPIO_PORT_SHIFT               3         /* Bit 3-5:  Port number */
-#define GPIO_PORT_MASK                (0x07 << GPIO_PORT_SHIFT)
-#define GPIO_PORTA                    (0 << GPIO_PORT_SHIFT)
-#define GPIO_PORTB                    (1 << GPIO_PORT_SHIFT)
-#define GPIO_PORTC                    (2 << GPIO_PORT_SHIFT)
-#define GPIO_PORTD                    (3 << GPIO_PORT_SHIFT)
-#define GPIO_PORTE                    (4 << GPIO_PORT_SHIFT)
-#define GPIO_PORTF                    (5 << GPIO_PORT_SHIFT)
-#define GPIO_PORTG                    (6 << GPIO_PORT_SHIFT)
-#define GPIO_PORTH                    (7 << GPIO_PORT_SHIFT)
+#define GPIO_STRENGTH_SHIFT           25                         /* Bits 26-25: Pad drive strength */
+#define GPIO_STRENGTH_MASK            (3 << GPIO_STRENGTH_SHIFT)
+#define GPIO_STRENGTH_2MA             (0 << GPIO_STRENGTH_SHIFT) /*   2mA pad drive strength */
+#define GPIO_STRENGTH_4MA             (1 << GPIO_STRENGTH_SHIFT) /*   4mA pad drive strength */
+#define GPIO_STRENGTH_8MA             (2 << GPIO_STRENGTH_SHIFT) /*   8mA pad drive strength */
+#define GPIO_STRENGTH_8MASC           (3 << GPIO_STRENGTH_SHIFT) /*   8mA Pad drive with slew rate control */
 
-#define GPIO_NUMBER_SHIFT             0         /* Bits 0-2: GPIO number: 0-7 */
+#define GPIO_PADTYPE_SHIFT            22                         /* Bits 22-24: Pad type */
+#define GPIO_PADTYPE_MASK             (0 << GPIO_PADTYPE_SHIFT)
+#define GPIO_PADTYPE_STD              (1 << GPIO_PADTYPE_SHIFT)  /*   Push-pull */
+#define GPIO_PADTYPE_STDWPU           (2 << GPIO_PADTYPE_SHIFT)  /*   Push-pull with weak pull-up */
+#define GPIO_PADTYPE_STDWPD           (3 << GPIO_PADTYPE_SHIFT)  /*   Push-pull with weak pull-down */
+#define GPIO_PADTYPE_OD               (4 << GPIO_PADTYPE_SHIFT)  /*   Open-drain */
+#define GPIO_PADTYPE_ODWPU            (5 << GPIO_PADTYPE_SHIFT)  /*   Open-drain with weak pull-up */
+#define GPIO_PADTYPE_ODWPD            (6 << GPIO_PADTYPE_SHIFT)  /*   Open-drain with weak pull-down */
+#define GPIO_PADTYPE_ANALOG           (7 << GPIO_PADTYPE_SHIFT)  /*   Analog comparator */
+
+#define GPIO_VALUE_SHIFT              6                          /* Bit 6: If output, inital value of output */
+#define GPIO_VALUE_MASK               (1 << GPIO_VALUE_SHIFT)
+#define GPIO_VALUE_ZERO               (0 << GPIO_VALUE_SHIFT)    /*   Initial value is zero */
+#define GPIO_VALUE_ONE                (1 << GPIO_VALUE_SHIFT)    /*   Initial value is one */
+
+#define GPIO_PORT_SHIFT               3                          /* Bit 3-5:  Port number */
+#define GPIO_PORT_MASK                (7 << GPIO_PORT_SHIFT)
+#define GPIO_PORTA                    (0 << GPIO_PORT_SHIFT)     /*   GPIOA */
+#define GPIO_PORTB                    (1 << GPIO_PORT_SHIFT)     /*   GPIOB */
+#define GPIO_PORTC                    (2 << GPIO_PORT_SHIFT)     /*   GPIOC */
+#define GPIO_PORTD                    (3 << GPIO_PORT_SHIFT)     /*   GPIOD */
+#define GPIO_PORTE                    (4 << GPIO_PORT_SHIFT)     /*   GPIOE */
+#define GPIO_PORTF                    (5 << GPIO_PORT_SHIFT)     /*   GPIOF */
+#define GPIO_PORTG                    (6 << GPIO_PORT_SHIFT)     /*   GPIOG */
+#define GPIO_PORTH                    (7 << GPIO_PORT_SHIFT)     /*   GPIOH */
+
+#define GPIO_NUMBER_SHIFT             0                          /* Bits 0-2: GPIO number: 0-7 */
 #define GPIO_NUMBER_MASK              (0x07 << GPIO_NUMBER_SHIFT)
 
 /************************************************************************************
