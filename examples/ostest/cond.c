@@ -123,6 +123,7 @@ static void *thread_waiter(void *parameter)
 
       waiter_nloops++;
     }
+  return NULL;
 }
 
 static void *thread_signaler(void *parameter)

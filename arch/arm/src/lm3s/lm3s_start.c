@@ -1,6 +1,6 @@
 /****************************************************************************
- * configs/eagle100/src/up_leds.c
- * arch/arm/src/board/up_leds.c
+ * arch/arm/src/lm3s/lm3s_start.c
+ * arch/arm/src/chip/lm3s_start.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -41,14 +41,16 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-#include <arch/board/board.h>
+#include <assert.h>
+#include <debug.h>
 
-#include "chip.h"
+#include <nuttx/init.h>
+
 #include "up_arch.h"
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Private Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -56,74 +58,112 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* These values are setup by the linker script */
+
+extern const uint32 _eronly;    /* End of read only (.text + .rodata) */
+extern uint32 _sdata;           /* Start of .data */
+extern uint32 _edata;           /* End+1 of .data */
+extern uint32 _sbss;            /* Start of .bss */
+extern uint32 _ebss;            /* End+1 of .bss */
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: showprogress
+ *
+ * Description:
+ *   Print a character on the UART to show boot status.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG
+#  define showprogress(c) up_lowputc(c)
+#else
+#  define showprogress(c)
+#endif
+
+/****************************************************************************
+ * Name: up_lowsetup
+ *
+ * Description:
+ *   Set up initial clocking
+ *
+ ****************************************************************************/
+
+static inline void up_lowsetup(void)
+{
+  up_clockconfig();
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: _start
+ *
+ * Description:
+ *   This is the reset entry point.
+ *
  ****************************************************************************/
+
+void _start(void)
+{
+  const uint32 *src;
+  uint32 *dest;
+
+  /* Configure the uart so that we can get debug output as soon as possible */
+
+  up_lowsetup();
+  showprogress('A');
+
+  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
+   * certain that there are no issues with the state of global variables.
+   */
+
+  for (dest = &_sbss; dest < &_ebss; )
+    {
+      *dest++ = 0;
+    }
+  showprogress('B');
+
+  /* Move the intialized data section from his temporary holding spot in
+   * FLASH into the correct place in SRAM.  The correct place in SRAM is
+   * give by _sdata and _edata.  The temporary location is in FLASH at the
+   * end of all of the other read-only data (.text, .rodata) at _eronly.
+   */
+
+  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
+    {
+      *dest++ = *src++;
+    }
+  showprogress('C');
+
+  /* Perform early serial initialization */
+
+#ifdef CONFIG_USE_EARLYSERIALINIT
+  up_earlyserialinit();
+#endif
+  showprogress('D');
+
+  /* Initialize onboard LEDs */
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
-{
-  /* Make sure that the GPIOE peripheral is enabled */
+  up_ledinit();
+#endif
+  showprogress('E');
 
-  modifyreg32(LM3S_SYSCON_RCGC2_OFFSET, 0, SYSCON_RCGC2_GPIOE);
+  /* Then start NuttX */
 
-  /* Configure Port E, Bit 1 as an output, initial value=OFF */
+  showprogress('\n');
+  os_start();
 
-  lm3s_configgpio(GPIO_DIR_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTE | 1);
+  /* Shoulnd't get here */
+
+  for(;;);
 }
-
-/****************************************************************************
- * Name: up_ledon
- ****************************************************************************/
-
-void up_ledon(int led)
-{
-  switch (led)
-    {
-      case LED_STARTED:
-      case LED_HEAPALLOCATE:
-      default:
-        break;
-      case LED_IRQSENABLED:
-      case LED_STACKCREATED:
-      case LED_INIRQ:
-      case LED_SIGNAL:
-      case LED_ASSERTION:
-      case LED_PANIC:
-        modifyreg32(LM3S_GPIOE_DATA, 0, (1 << 1));
-        break;
-    }
-}
-
-/****************************************************************************
- * Name: up_ledoff
- ****************************************************************************/
-
-void up_ledoff(int led)
-{
-  switch (led)
-    {
-      case LED_IRQSENABLED:
-      case LED_STACKCREATED:
-      default:
-        break;
-
-      case LED_STARTED:
-      case LED_HEAPALLOCATE:
-      case LED_INIRQ:
-      case LED_SIGNAL:
-      case LED_ASSERTION:
-      case LED_PANIC:
-        modifyreg32(LM3S_GPIOE_DATA, (1 << 1), 0);
-        break;
-    }
-}
-
-#endif /* CONFIG_ARCH_LEDS */

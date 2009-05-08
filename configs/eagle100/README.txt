@@ -79,7 +79,11 @@ Eagle100-specific Configuration Options
 
 	CONFIG_DRAM_START - The start address of installed DRAM
 
-	   CONFIG_DRAM_SIZE=0x00000000
+	   CONFIG_DRAM_START=0x20000000
+
+	CONFIG_DRAM_END - Last address+1 of installed RAM
+
+	   CONFIG_DRAM_END=(CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
 
 	CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
 	   have LEDs
