@@ -712,3 +712,6 @@
 	  -R .note.gnu.build-id -R .comment"  This has bin fixed in arch/arm/src/Makefile,
 	  but other architectures may have the same problem.  Thanks to Dave Marples
 	  for verifying this.
+	* Began adding support for the MicroMint Eagle100 board.  This board has a
+	  Luminary LM3S6918 Cortex-M3.
+

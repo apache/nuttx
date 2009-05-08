@@ -50,7 +50,6 @@
 /* GPIO Register Offsets ************************************************************/
 
 #ifdef CONFIG_ARCH_CHIP_LM3S6918
-
 #  define LM3S_GPIO_DATA_OFFSET       0x000 /* GPIO Data */
 #  define LM3S_GPIO_DIR_OFFSET        0x400 /* GPIO Direction */
 #  define LM3S_GPIO_IS_OFFSET         0x404 /* GPIO Interrupt Sense */
@@ -355,19 +354,55 @@
 
 /* Bit-encoded input to lm3s_configgpio() *******************************************/
 
-#define GPIO_DIR_MASK                 (1 << 31) /* GPIO direction */
+#define GPIO_DIR_MASK                 (1 << 31) /* Bit 31: GPIO direction */
 #define GPIO_DIR_OUTPUT               (1 << 31)
 #define GPIO_DIR_INPUT                (0 << 31)
 
-#define GPIO_VALUE_MASK               (1 << 6)  /* If output, inital value of output */
+#define GPIO_VALUE_MASK               (1 << 6)  /* Bit 6: If output, inital value of output */
 #define GPIO_VALUE_ONE                (1 << 6)
 #define GPIO_VALUE_ZERO               (0 << 6)
 
-#define GPIO_NUMBER_MASK              (0x3f)    /* GPIO number: 0-63 */
+#define GPIO_PORT_SHIFT               3         /* Bit 3-5:  Port number */
+#define GPIO_PORT_MASK                (0x07 << GPIO_PORT_SHIFT)
+#define GPIO_PORTA                    (0 << GPIO_PORT_SHIFT)
+#define GPIO_PORTB                    (1 << GPIO_PORT_SHIFT)
+#define GPIO_PORTC                    (2 << GPIO_PORT_SHIFT)
+#define GPIO_PORTD                    (3 << GPIO_PORT_SHIFT)
+#define GPIO_PORTE                    (4 << GPIO_PORT_SHIFT)
+#define GPIO_PORTF                    (5 << GPIO_PORT_SHIFT)
+#define GPIO_PORTG                    (6 << GPIO_PORT_SHIFT)
+#define GPIO_PORTH                    (7 << GPIO_PORT_SHIFT)
+
+#define GPIO_NUMBER_SHIFT             0         /* Bits 0-2: GPIO number: 0-7 */
+#define GPIO_NUMBER_MASK              (0x07 << GPIO_NUMBER_SHIFT)
 
 /************************************************************************************
  * Public Types
  ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/************************************************************************************
+ * Inline Functions
+ ************************************************************************************/
+
+static inline uint32 lm3s_gpiobaseaddress(unsigned int port)
+{
+#ifdef CONFIG_ARCH_CHIP_LM3S6918
+  unsigned int portno = (port >> GPIO_PORT_SHIFT) & 7;
+  if (portno < 4)
+    {
+      return LM3S_GPIOA_BASE + 0x1000 * portno;
+    }
+  else
+    {
+      return LM3S_GPIOE_BASE + 0x1000 * portno;
+    }
+#else
+#  error "GPIO register base addresses not known for this LM3S chip"
+  return 0;
+#endif
+}
 
 /************************************************************************************
  * Public Data
@@ -394,4 +429,5 @@ EXTERN int lm3s_configgpio(uint32 bitset);
 }
 #endif
 
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_LM3S_LM3S_GPIO_H */
