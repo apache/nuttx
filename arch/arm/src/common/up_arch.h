@@ -82,11 +82,28 @@ static inline void putreg16(uint16 val, unsigned int addr)
  __asm__ __volatile__("\tstrh %0, [%1]\n\t": : "r"(val), "r"(addr));
 }
 
-/* Most DM320 registers are 16-bits wide */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-#define getreg(a)   getreg16(a)
-#define putreg(v,a) putreg16(v,a)
-
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
 #endif
 
+/* Atomic modification of registers */
+
+EXTERN void modifyreg8(unsigned int addr, ubyte clearbits, ubyte setbits);
+EXTERN void modifyreg16(unsigned int addr, uint16 clearbits, uint16 setbits);
+EXTERN void modifyreg32(unsigned int addr, uint32 clearbits, uint32 setbits);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
 #endif  /* ___ARCH_ARM_SRC_COMMON_UP_ARCH_H */

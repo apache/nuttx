@@ -1,7 +1,7 @@
-/********************************************************************
+/****************************************************************************
  * common/up_nommuhead.S
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,19 +31,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************/
+ ****************************************************************************/
 
-/********************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "up_internal.h"
 #include "up_arch.h"
 
-/********************************************************************
+/****************************************************************************
  * Macros
- ********************************************************************/
+ ****************************************************************************/
 
 	/* This macro will modify r0, r1, r2 and r14 */
 
@@ -57,9 +57,9 @@
 	.endm
 #endif
 
-/********************************************************************
+/****************************************************************************
  * OS Entry Point
- ********************************************************************/
+ ****************************************************************************/
 
 /* We assume the bootloader has already initialized most of the h/w for
  * us and that only leaves us having to do some os specific things
