@@ -94,6 +94,8 @@ Eagle100-specific Configuration Options
 	CONFIG_ARCH_BOOTLOADER - Configure to use the MicroMint Eagle-100
 	   Ethernet bootloader.
 
+	CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
+
   LM3S6818 specific device driver settings
 
 	CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
