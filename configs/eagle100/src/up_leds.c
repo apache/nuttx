@@ -40,6 +40,11 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+
+#include <arch/board/board.h>
+
+#include "chip.h"
+#include "up_arch.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -65,9 +70,9 @@
 #ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void)
 {
-  /* Configure Port A, Bit 6 as an output, initial value=OFF */
+  /* Configure Port E, Bit 1 as an output, initial value=OFF */
 
-#warning "Missing Logic"
+  lm3s_configgpio(GPIO_DIR_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTE | 1);
 }
 
 /****************************************************************************
@@ -76,7 +81,21 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
-#warning "Missing Logic"
+  switch (led)
+    {
+      case LED_STARTED:
+      case LED_HEAPALLOCATE:
+      default:
+        break;
+      case LED_IRQSENABLED:
+      case LED_STACKCREATED:
+      case LED_INIRQ:
+      case LED_SIGNAL:
+      case LED_ASSERTION:
+      case LED_PANIC:
+        modifyreg32(LM3S_GPIOE_DATA, 0, (1 << 1));
+        break;
+    }
 }
 
 /****************************************************************************
@@ -85,7 +104,22 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-#warning "Missing Logic"
+  switch (led)
+    {
+      case LED_IRQSENABLED:
+      case LED_STACKCREATED:
+      default:
+        break;
+
+      case LED_STARTED:
+      case LED_HEAPALLOCATE:
+      case LED_INIRQ:
+      case LED_SIGNAL:
+      case LED_ASSERTION:
+      case LED_PANIC:
+        modifyreg32(LM3S_GPIOE_DATA, (1 << 1), 0);
+        break;
+    }
 }
 
 #endif /* CONFIG_ARCH_LEDS */

@@ -55,7 +55,7 @@
 
 /* LED definitions ******************************************************************/
 
-/* The Eagle-100 has only one user LED: Port A, Bit 6.  Below are the mapping of this
+/* The Eagle-100 has only one user LED: Port E, Bit 1.  Below is the mapping of this
  * single LED.  From this single LED, we can get the following information:
  *
  *   OFF Steady:    The system has failed to boot to the point of enabling interrupts
