@@ -1,7 +1,7 @@
 /****************************************************************************
- * common/up_vectortab.S
+ * arch/arm/src/common/up_modifyreg16.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,65 +39,47 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <debug.h>
+
+#include <arch/irq.h>
+#include <nuttx/arch.h>
+
+#include "up_arch.h"
+
 /****************************************************************************
- * Definitions
+ * Private Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Global Data
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Assembly Macros
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _vector_start
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: modifyreg16
  *
  * Description:
- *   Vector initialization block
+ *   Atomically modify the specified bits in a memory mapped register
+ *
  ****************************************************************************/
 
-	.globl	_vector_start
+void modifyreg16(unsigned int addr, uint16 clearbits, uint16 setbits)
+{
+  irqstate_t flags;
+  uint16     regval;
 
-/* These will be relocated to VECTOR_BASE. */
-
-_vector_start:
-	ldr	pc, .Lresethandler		/* 0x00: Reset */
-	ldr	pc, .Lundefinedhandler		/* 0x04: Undefined instruction */
-	ldr	pc, .Lswihandler		/* 0x08: Software interrupt */
-	ldr	pc, .Lprefetchaborthandler	/* 0x0c: Prefetch abort */
-	ldr	pc, .Ldataaborthandler		/* 0x10: Data abort */
-	ldr	pc, .Laddrexcptnhandler		/* 0x14: Address exception */
-	ldr	pc, .Lirqhandler		/* 0x18: IRQ */
-	ldr	pc, .Lfiqhandler		/* 0x1c: FIQ */
-
-	.globl   __start
-	.globl	up_vectorundefinsn
-	.globl	up_vectorswi
-	.globl	up_vectorprefetch
-	.globl	up_vectordata
-	.globl	up_vectoraddrexcptn
-	.globl	up_vectorirq
-	.globl	up_vectorfiq
-
-.Lresethandler:
-	.long   __start
-.Lundefinedhandler:
-	.long	up_vectorundefinsn
-.Lswihandler:
-	.long	up_vectorswi
-.Lprefetchaborthandler:
-	.long	up_vectorprefetch
-.Ldataaborthandler:
-	.long	up_vectordata
-.Laddrexcptnhandler:
-	.long	up_vectoraddrexcptn
-.Lirqhandler:
-	.long	up_vectorirq
-.Lfiqhandler:
-	.long	up_vectorfiq
-
-	.globl	_vector_end
-_vector_end:
-	.end
+  flags   = irqsave();
+  regval  = getreg16(addr);
+  regval &= ~clearbits;
+  regval |= setbits;
+  putreg16(regval, addr);
+  irqrestore(flags);
+}
