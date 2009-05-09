@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: April 19, 2009</p>
+      <p>Last Updated: May 9, 2009</p>
     </td>
   </tr>
 </table>
@@ -92,9 +92,15 @@
     <a href="#exports">4.2 APIs Exported by NuttX to Architecture-Specific Logic</a>
     <ul>
       <a href="#osstart">4.2.1 <code>os_start()</code></a><br>
-      <a href="#listmgmt">4.2.2 OS List Management APIs</a><br><br>
+      <a href="#listmgmt">4.2.2 OS List Management APIs</a><br>
       <a href="#schedprocesstimer">4.2.3 <code>sched_process_timer()</code></a><br>
       <a href="#irqdispatch">4.2.4 <code>irq_dispatch()</code></a>
+    </ul>
+    <a href="#ledsupport">4.3 LED Support</a>
+    <ul>
+      <a href="#ledheaders">4.3.1 Header Files</a><br>
+      <a href="#leddefinitions">4.3.2 LED Definitions</a><br>
+      <a href="#ledapis">4.3.3 Common LED interfaces</a>
     </ul>
   </ul>
   <a href="#NxFileSystem">5.0 NuttX File System</a><br>
@@ -1422,6 +1428,142 @@ The system can be re-made subsequently by just typing <code>make</code>.
   specific logic in order to dispaly an interrupt to
   the appropriate, registered handling logic.
 </p>
+
+<h2><a name="ledsupport">4.3 LED Support</a></h2>
+
+<p>
+  A board architecture may or may not have LEDs.
+  If the board does have LEDs, then most architectures provide similar LED support that is enabled when <code>CONFIG_ARCH_LEDS</code>
+  is selected in the NuttX configuration file.
+  This LED support is part of architecture-specific logic and is not managed by the core NuttX logic.
+  However, the support provided by each architecture is sufficiently similar that it can be documented here.
+</p>
+
+<h3><a name="ledheaders">4.3.1 Header Files</a></h3>
+
+<p>
+  LED-related definitions are provided in two header files:
+  <ul>
+    <li>
+       LED definitions are provided for each board in the <code>board.h</code> that resides
+       in the <code><i>&lt;board-name&gt;</i>/include/board.h</code> file (which is also
+       linked to <code>include/arch/board/board.h</code> when the RTOS is configured).
+       Those definitions are discussed <a href="#leddefinitions">below</a>.
+    </li>
+    <li>
+       The board-specific logic provides unique instances of the LED interfaces.
+       This is because the implementation of LED support may be very different
+       on different boards.
+       Prototypes for these board-specific implementations are, however, provided
+       in architecture-common header files.
+       That header file is usually at <code><i>&lt;arch-name&gt;</i>/src/common/up_internal.h</code>,
+       but could be at other locations in particular architectures.
+       These prototypes are discussed <a href="#ledapis">below</a>.
+    </li>
+  </ul>
+</p>
+
+<h3><a name="leddefinitions">4.3.2 LED Definitions</a></h3>
+
+<p>
+   The implementation of LED support is very specific to a board architecture. 
+   Some boards have several LEDS, others have only one or two. 
+   Some have none. 
+   Others LED matrices and show alphnumeric data, etc.
+   The NuttX logic does not refer to specific LEDS, rather, it refers to an event to be shown on the LEDS
+   in whatever manner is appropriate for the board;
+   the way that this event is presented depends upon the hardware available on the board.
+</p>
+<p>
+   The model used by NuttX is that the board can show 8 events defined as follows in <code><i>&lt;board-name&gt;</i>/include/board.h</code>:
+</p>
+<ul><pre>
+#define LED_STARTED       ??
+#define LED_HEAPALLOCATE  ??
+#define LED_IRQSENABLED   ??
+#define LED_STACKCREATED  ??
+#define LED_INIRQ         ??
+#define LED_SIGNAL        ??
+#define LED_ASSERTION     ??
+#define LED_PANIC         ??
+</pre></ul>
+<p>
+  The specific value assigned to each pre-processor variable can be whatever makes the implementation easiest for the board logic.
+  The <i>meaning</i> associated with each definition is as follows:
+</p>
+<ul>
+  <li>
+    <code>LED_STARTED</code> is the value that describes the setting of the LEDs when the LED logic is first initialized.
+    This LED value is set but never cleared.
+  </li>
+  <li>
+    <code>LED_HEAPALLOCATE</code> indicates that the NuttX heap has been configured.
+    This is an important place in the boot sequence because if the memory is configured wrong, it will probably crash leaving this LED setting.
+    This LED value is set but never cleared.
+  </li>
+  <li>
+    <code>LED_IRQSENABLED</code> indicates that interrupts have been enabled.
+    Again, during bring-up (or if there are hardware problems), it is very likely that the system may crash just when interrupts are enabled, leaving this setting on the LEDs.
+    This LED value is set but never cleared.
+  </li>
+  <li>
+    <code>LED_STACKCREATED</code> is set each time a new stack is created.
+    If set, it means that the system attempted to start at least one new thread.
+    This LED value is set but never cleared.
+  </li>
+  <li>
+    <code>LED_INIRQ</code> is set and cleared on entry and exit from each interrupt.
+    If interrupts are working okay, this LED will have a dull glow.
+  </li>
+  <li>
+    <code>LED_SIGNAL</code> is set and cleared on entry and exit from a signal handler.
+    Signal handlers are tricky so this is especially useful during bring-up or a new architecture.
+  </li>
+  <li>
+    <code>LED_ASSERTION</code> is set if an assertion occurs.
+  </li>
+  <li>
+    <code>LED_PANIC</code> will blink at around 1Hz if the system panics and hangs.
+  </li>
+</ul>
+
+<h3><a name="ledapis">4.3.3 Common LED interfaces</a></h3>
+
+<p>
+  The <code><i>&lt;arch-name&gt;</i>/src/common/up_internal.h</code> probably has definitions
+  like:
+</p>
+<ul><pre>
+/* Defined in board/up_leds.c */
+
+#ifdef CONFIG_ARCH_LEDS
+extern void up_ledinit(void);
+extern void up_ledon(int led);
+extern void up_ledoff(int led);
+#else
+# define up_ledinit()
+# define up_ledon(led)
+# define up_ledoff(led)
+#endif
+</pre></ul>
+<p>
+   Where:
+<p>
+<ul>
+  <li>
+    <code>void up_ledinit(void)</code> is called early in power-up initialization to initialize the LED hardware.
+  </li>
+  <li>
+    <code>up_ledon(int led)</code> is called to instantiate the LED presentation of the event.
+    The <code>led</code> argument is one of the definitions provided in <code><i>&lt;board-name&gt;</i>/include/board.h</code>.
+  </li>
+  <li>
+    <code>up_ledoff(int led</code>is called to terminate the LED presentation of the event.
+    The <code>led</code> argument is one of the definitions provided in <code><i>&lt;board-name&gt;</i>/include/board.h</code>.
+    Note that only <code>LED_INIRQ</code>, <code>LED_SIGNAL</code>, <code>LED_ASSERTION</code>, and <code>LED_PANIC</code>
+    indications are terminated.
+  </li>
+</ul>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
