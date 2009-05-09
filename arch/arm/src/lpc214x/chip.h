@@ -47,6 +47,7 @@
 /* Memory Map ***************************************************************************************/
 
 #define LPC214X_FLASH_BASE              0x00000000
+#define LPC214X_FIO_BASE                0x3fffc000
 #define LPC214X_ONCHIP_RAM_BASE         0x40000000
 #define LPC214X_USBDMA_RAM_BASE         0x7fd00000
 #define LPC214X_BOOT_BLOCK              0x7fffd000
@@ -56,7 +57,12 @@
 
 /* Peripheral Registers ****************************************************************************/
 
-/* Register block base addresses */
+/* FIO Register block base addresses */
+
+#define LPC214X_FIO0_BASE               0x3fffc000  /* Fast I/O 0 base address */
+#define LPC214X_FIO1_BASE               0x3fffc020  /* Fast I/O 1 base address */
+
+/* APB Register block base addresses */
 
 #define LPC214X_WD_BASE                 0xe0000000  /* Watchdog base address */
 #define LPC214X_TMR0_BASE               0xe0004000  /* Timer 0 base address*/
@@ -79,11 +85,14 @@
 
 #define LPC214X_SCB_BASE                0xe01fc000  /* System Control Block (SBC) base address */
 #define   LPC214X_MAM_BASE              0xe01fc000  /* Memory Accelerator Module (MAM) base address */
+#define   LPC214X_SCS                   0xe01fc1a0  /* System Control and Status flags (SCS) */
 #define   LPC214X_MEMMAP                0xe01fc040  /* Memory Mapping Control */
 #define   LPC214X_PLL_BASE              0xe01fc080  /* Phase Locked Loop (PLL) base address */
 #define   LPC214X_PCON_BASE             0xe01fc0c0  /* Power Control (PCON) base address */
 #define   LPC214X_APBDIV                0xe01fc100  /* APBDIV Address */
 #define   LPC214X_EXT_BASE              0xe01fc140  /* External Interrupt base address */       
+
+/* AHB Register block base addresses */
 
 #define LPC214X_EMC_BASE                0xffe00000  /* External Memory Controller (EMC) base address */
 #define LPC214X_VIC_BASE                0xfffff000  /* Vectored Interrupt Controller (VIC) Base */
@@ -169,6 +178,7 @@
 #define LPC214X_PINSEL2_OFFSET          0x14   /* Pin function select register 2 */
 
 /* Analog to Digital (AD) Converter registger offsets */
+
 #define LPC214X_AD_ADCR_OFFSET          0x00   /* A/D Control Register */
 #define LPC214X_AD_ADGDR_OFFSET         0x04   /* A/D Global Data Register (only one common register!) */
 #define LPC214X_AD_ADGSR_OFFSET         0x08   /* A/D Global Start Register */
@@ -239,6 +249,14 @@
 #define LPC214X_GPIO_SET_OFFSET         0x04   /* Pin Output Set Register */
 #define LPC214X_GPIO_DIR_OFFSET         0x08   /* Pin Direction Register */
 #define LPC214X_GPIO_CLR_OFFSET         0x0c   /* Pin Output Clear Register */
+
+/* FIO register offsets */
+
+#define LPC214X_FIO_DIR_OFFSET          0x00   /* Fast GPIO Port Direction Register */
+#define LPC214X_FIO_MASK_OFFSET         0x10   /* Fast GPIO Mask Register */
+#define LPC214X_FIO_PIN_OFFSET          0x14   /* Fast GPIO Pin Value Register */
+#define LPC214X_FIO_SET_OFFSET          0x18   /* Fast GPIO Port Output Set Register */
+#define LPC214X_FIO_CLR_OFFSET          0x1c   /* Fast GPIO Port Output Clear Register */
 
 /* Memory Accelerator Module (MAM) Regiser Offsets */
 

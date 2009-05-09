@@ -433,6 +433,14 @@
 #endif
 	.endm
 
+	.macro configfastport, base, tmp
+#ifdef CONFIG_LPC214x_FIO
+	ldr	\base, =LPC214X_SCS
+	mov	\tmp, #0x03
+	str	\tmp,[\base]
+#endif
+	.endm
+
 /*****************************************************************************
  * Text
  *****************************************************************************/
@@ -533,6 +541,10 @@ __start:
 	/* Configure the DAC and ADC */
 	
 	configdac	r0, r1
+
+	/* Configure Fast GPIO Port */
+
+	configfastport  r0, r1
 
 	/* Configure the uart so that we can get debug output as soon
 	 * as possible.  Modifies r0, r1, r2, and r14.
