@@ -98,9 +98,12 @@ ARM/LPC214X-specific Configuration Options
 
   LPC2148 specific chip initialization
 
+    These provide register setup values:
 	CONFIG_EXTMEM_MODE, CONFIG_RAM_MODE, CONFIG_CODE_BASE, CONFIG_PLL_SETUP,
 	CONFIG_MAM_SETUP, CONFIG_APBDIV_SETUP, CONFIG_EMC_SETUP, CONFIG_BCFG0_SETUP,
 	CONFIG_BCFG1_SETUP, CONFIG_BCFG2_SETUP, CONFIG_BCFG3_SETUP, CONFIG_ADC_SETUP
+
+	CONFIG_LPC214x_FIO - Enable fast GPIO (vs. legacy, "old" GPIO).
 
   LPC214X specific device driver settings
 

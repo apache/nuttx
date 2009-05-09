@@ -50,11 +50,25 @@
 
 /* P1.16-P1.23 control LEDS 1-8 */
 
-#define LEDBIT(led)  (0x00010000 << (led))
-#define ALLLEDS      (0x00ff0000)
+#define LEDBIT(led)     (0x00010000 << (led))
+#define ALLLEDS         (0x00ff0000)
 
-#define putled(v,r)  putreg32((v),(LPC214X_GPIO1_BASE+(r)))
-#define CLRLEDS      putled(ALLLEDS,LPC214X_GPIO_SET_OFFSET)
+#ifdef CONFIG_LPC214x_FIO
+#  define putled(v,r)    putreg32((v),(LPC214X_FIO1_BASE+(r)))
+#  define CLRLEDS        putled(ALLLEDS,LPC214X_FIO_SET_OFFSET)
+
+#  define LED_SET_OFFSET LPC214X_FIO_SET_OFFSET
+#  define LED_CLR_OFFSET LPC214X_FIO_CLR_OFFSET
+#  define LED_DIR_OFFSET LPC214X_FIO_DIR_OFFSET
+
+#else
+#  define putled(v,r)    putreg32((v),(LPC214X_GPIO1_BASE+(r)))
+#  define CLRLEDS        putled(ALLLEDS,LPC214X_GPIO_SET_OFFSET)
+
+#  define LED_SET_OFFSET LPC214X_GPIO_SET_OFFSET
+#  define LED_CLR_OFFSET LPC214X_GPIO_CLR_OFFSET
+#  define LED_DIR_OFFSET LPC214X_GPIO_DIR_OFFSET
+#endif
 
 /****************************************************************************
  * Private Data
@@ -77,9 +91,9 @@ void up_ledinit(void)
 {
   /* Initilize GIOs P1.16-P1.23 */
 
-  putled(ALLLEDS,LPC214X_GPIO_DIR_OFFSET);
-  putled(ALLLEDS,LPC214X_GPIO_SET_OFFSET);
-  putled(LEDBIT(0),LPC214X_GPIO_CLR_OFFSET);
+  putled(ALLLEDS,LED_DIR_OFFSET);
+  putled(ALLLEDS,LED_SET_OFFSET);
+  putled(LEDBIT(0),LED_CLR_OFFSET);
 }
 
 /****************************************************************************
@@ -88,7 +102,7 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
-  putled(LEDBIT(led),LPC214X_GPIO_CLR_OFFSET);
+  putled(LEDBIT(led),LED_CLR_OFFSET);
 }
 
 /****************************************************************************
@@ -97,6 +111,6 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-  putled(LEDBIT(led),LPC214X_GPIO_SET_OFFSET);
+  putled(LEDBIT(led),LED_SET_OFFSET);
 }
 #endif /* CONFIG_ARCH_LEDS */
