@@ -82,6 +82,16 @@
 #define LPC214X_CCLKFREQ  (LPC214X_FOSC*LPC214X_PLL_M)
 #define LPC214X_PCLKFREQ  (LPC214X_CCLKFREQ/LPC214X_APB_DIV)
 
+#ifdef CONFIG_LPC214x_FIO
+#  define CS_SET_REGISTER (LPC214X_FIO0_BASE+LPC214X_FIO_SET_OFFSET)
+#  define CS_CLR_REGISTER (LPC214X_FIO0_BASE+LPC214X_FIO_CLR_OFFSET)
+#  define CS_DIR_REGISTER (LPC214X_FIO0_BASE+LPC214X_FIO_DIR_OFFSET)
+#else
+#  define CS_SET_REGISTER (LPC214X_GPIO0_BASE+LPC214X_GPIO_SET_OFFSET)
+#  define CS_CLR_REGISTER (LPC214X_GPIO0_BASE+LPC214X_GPIO_CLR_OFFSET)
+#  define CS_DIR_REGISTER (LPC214X_GPIO0_BASE+LPC214X_GPIO_DIR_OFFSET)
+#endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -143,13 +153,13 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean 
     {
       /* Enable slave select (low enables) */
 
-      putreg32(bit, LPC214X_GPIO0_BASE+LPC214X_GPIO_CLR_OFFSET);
+      putreg32(bit, CS_CLR_REGISTER);
     }
   else
     {
       /* Disable slave select (low enables) */
 
-      putreg32(bit, LPC214X_GPIO0_BASE+LPC214X_GPIO_SET_OFFSET);
+      putreg32(bit, CS_SET_REGISTER);
 
       /* Wait for the TX FIFO not full indication */
 
@@ -425,7 +435,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
    *   PINSEL1 P0.17/CAP1.2/SCK1/MAT1.2  Bits 2-3=10 for SCK1
    *   PINSEL1 P0.18/CAP1.3/MISO1/MAT1.3 Bits 4-5=10 for MISO1
    *   PINSEL1 P0.19/MAT1.2/MOSI1/CAP1.2 Bits 6-7=10 for MOSI1
-   *   PINSEL1 P0.20/MAT1.3/SSEL1/EINT3  Bits 8-9=10 for P0.20 (we'll control it via GPIO)
+   *   PINSEL1 P0.20/MAT1.3/SSEL1/EINT3  Bits 8-9=10 for P0.20 (we'll control it via GPIO or FIO)
    */
 
   regval32  = getreg32(LPC214X_PINSEL1);
@@ -438,9 +448,9 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   /* Disable chip select using P0.20 (SSEL1)  (low enables) */
 
   regval32 = 1 << 20;
-  putreg32(regval32, LPC214X_GPIO0_BASE+LPC214X_GPIO_SET_OFFSET);
-  regval32 |= getreg32(LPC214X_GPIO0_BASE+LPC214X_GPIO_DIR_OFFSET);
-  putreg32(regval32, LPC214X_GPIO0_BASE+LPC214X_GPIO_DIR_OFFSET);
+  putreg32(regval32, CS_SET_REGISTER);
+  regval32 |= getreg32(CS_DIR_REGISTER);
+  putreg32(regval32, CS_DIR_REGISTER);
 
   /* Enable peripheral clocking to SPI1 */
 

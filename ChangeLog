@@ -714,4 +714,6 @@
 	  for verifying this.
 	* Began adding support for the MicroMint Eagle100 board.  This board has a
 	  Luminary LM3S6918 Cortex-M3.
+	* Add configuration option to enable fast GPIO (vs. legacy, "slow" GPIO) for
+	  LPC214x.
 
