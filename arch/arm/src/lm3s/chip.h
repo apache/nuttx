@@ -46,6 +46,7 @@
 #include "lm3s_memorymap.h"     /* Memory map */
 #include "lm3s_syscontrol.h"    /* System control module */
 #include "lm3s_gpio.h"          /* GPIO module */
+#include "lm3s_uart.h"          /* UART peripherals */
 
 /************************************************************************************
  * Definitions
