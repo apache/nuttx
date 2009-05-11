@@ -33,16 +33,23 @@
  *
  ****************************************************************************/
 
+/* The LM3S6918 has 256Kb of FLASH beginning at address 0x0000:0000. However,
+ * if the the Eagle100 Ethernet bootloader is used, then the entry point must
+ * be at the following offset in FLASH (and the size of the FLASH must be
+ * reduced to 248Kb):
+ */
+
+MEMORY
+{
+/*  flash (rx) : ORIGIN = 0x00000000, LENGTH = 256K */
+    flash (rx) : ORIGIN = 0x00002000, LENGTH = 248K
+    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
+}
+
 OUTPUT_ARCH(arm)
 ENTRY(_stext)
 SECTIONS
 {
-	/* The LM3S6918 has 256Kb of FLASH beginning at address 0x0000:0000.
-	 * However, if the the tiny Eagle100 Ethernet bootloader is used, then
-	 * the entry point must be at the following offset:
-	 */
-
-	. = 0x00002000;
 	.text : {
 		_stext = ABSOLUTE(.);
 		*(.text)
@@ -53,27 +60,25 @@ SECTIONS
 		*(.glue_7t)
 		*(.got)			/* Global offset table		*/
 		_etext = ABSOLUTE(.);
-	}
+	} > flash
 
 	_eronly = ABSOLUTE(.);		/* See below                    */
-	. = ALIGN(4096);
 
 	/* The LM3S6918 has 64Kb of SRAM beginning at the following address */
 
-	. = 0x20000000;
 	.data : {
 		_sdata = ABSOLUTE(.);
 		*(.data)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	}
+	} > sram AT > flash
 
 	.bss : {			/* BSS				*/
 		_sbss = ABSOLUTE(.);
 		*(.bss)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
-	}
+	} > sram
 					/* Stabs debugging sections.	*/
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }

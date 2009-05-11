@@ -76,7 +76,7 @@ void up_ledinit(void)
 
   /* Configure Port E, Bit 1 as an output, initial value=OFF */
 
-  lm3s_configgpio(GPIO_DIR_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTE | 1);
+  lm3s_configgpio(GPIO_FUNC_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTE | 1);
 }
 
 /****************************************************************************

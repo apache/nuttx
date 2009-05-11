@@ -51,7 +51,43 @@
 
 /* Clocking *************************************************************************/
 
-#define LM3X_ARM_CLK_FREQ    50000000  /* 50MHz */
+/* RCC settings */
+
+#define SYSCON_RCC_XTAL      SYSCON_RCC_XTAL8000KHZ /* Eagle100 on-board crystall is 8.00 MHz */
+#define XTAL_FREQUENCY       8000000
+
+/* Oscillator source is the main oscillator (not internal, internal/4, 30KHz or
+ * 30KHz from hibernate module) */
+
+#define SYSCON_RCC_OSCSRC    SYSCON_RCC_OSCSRC_MOSC
+#define SYSCON_RCC2_OSCSRC   SYSCON_RCC2_OSCSRC2_MOSC
+#define OSCSRC_FREQUENCY     XTAL_FREQUENCY
+
+/* Use system divider = 4; this corresponds to a system clock frequency
+ * of (400 / 2) / 4 = 50MHz
+ */
+
+#define LM3S_SYSDIV          4
+#define SYSCLK_FREQUENCY     50000000  /* 50MHz */
+
+/* Other RCC settings:
+ *
+ * - Main and internal oscillators enabled.
+ * - PLL and sys dividers not bypassed
+ * - PLL not powered down
+ * - No auto-clock gating reset
+ */
+
+#define LM3S_RCC_VALUE (SYSCON_RCC_OSCSRC | SYSCON_RCC_XTAL | SYSCON_RCC_USESYSDIV | SYSCON_RCC_SYSDIV(LM3S_SYSDIV))
+
+/* RCC2 settings -- RCC2 not used.  Other RCC2 settings
+ *
+ * - PLL and sys dividers not bypassed.
+ * - PLL not powered down
+ * - Not using RCC2
+ */
+
+#define LM3S_RCC2_VALUE (SYSCON_RCC2_OSCSRC | SYSCON_RCC2_SYSDIV(LM3S_SYSDIV))
 
 /* LED definitions ******************************************************************/
 

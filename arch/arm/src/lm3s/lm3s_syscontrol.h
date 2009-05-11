@@ -121,7 +121,7 @@
 /* Device Identification 0 (DID0), offset 0x000 */
 
 #define SYSCON_DID0_MINOR_SHIFT       0         /* Bits 7-0: Minor Revision of the device */
-#define SYSCON_DID0_MINRO_MASK        (0xff << SYSCON_DID0_MINOR_SHIFT)
+#define SYSCON_DID0_MINOR_MASK        (0xff << SYSCON_DID0_MINOR_SHIFT)
 #define SYSCON_DID0_MAJOR_SHIFT       8         /* Bits 15-8: Major Revision of the device */
 #define SYSCON_DID0_MAJOR_MASK        (0xff << SYSCON_DID0_MAJOR_SHIFT)
 #define SYSCON_DID0_CLASS_SHIFT       16        /* Bits 23-16: Device Class */
@@ -229,6 +229,17 @@
 
 #define SYSCON_LDOPCTL_VADJ_SHIFT     0         /* Bits 5-0: LDO Output Voltage */
 #define SYSCON_LDOPCTL_VADJ_MASK      (0x3f << SYSCON_LDOPCTL_VADJ_SHIFT)
+#  define SYSCON_LPDOPCTL_2500MV      (0x00 << SYSCON_LDOPCTL_VADJ_SHIFT) /* 2.5V (reset)*/
+#  define SYSCON_LPDOPCTL_2450MV      (0x01 << SYSCON_LDOPCTL_VADJ_SHIFT) /* 2.45V */
+#  define SYSCON_LPDOPCTL_2400MV      (0x02 << SYSCON_LDOPCTL_VADJ_SHIFT) /* 2.4V */
+#  define SYSCON_LPDOPCTL_2350MV      (0x03 << SYSCON_LDOPCTL_VADJ_SHIFT) /* 2.35V */
+#  define SYSCON_LPDOPCTL_2300MV      (0x04 << SYSCON_LDOPCTL_VADJ_SHIFT) /* 2.3V */
+#  define SYSCON_LPDOPCTL_2250MV      (0x05 << SYSCON_LDOPCTL_VADJ_SHIFT) /* 2.25V */
+#  define SYSCON_LPDOPCTL_2750MV      (0x1b << SYSCON_LDOPCTL_VADJ_SHIFT) /* 2.75V */
+#  define SYSCON_LPDOPCTL_2700MV      (0x1c << SYSCON_LDOPCTL_VADJ_SHIFT) /* 2.7V */
+#  define SYSCON_LPDOPCTL_2650MV      (0x1d << SYSCON_LDOPCTL_VADJ_SHIFT) /* 2.65V */
+#  define SYSCON_LPDOPCTL_2600MV      (0x1e << SYSCON_LDOPCTL_VADJ_SHIFT) /* 2.6V */
+#  define SYSCON_LPDOPCTL_2550MV      (0x1f << SYSCON_LDOPCTL_VADJ_SHIFT) /* 2.55V */
 
 /* Software Reset Control 0 (SRCR0), offset 0x040 */
 
@@ -293,13 +304,34 @@
 #define SYSCON_RCC_IOSCDIS            (1 << 1)  /* Bit 1: Internal Oscillator Disable */
 #define SYSCON_RCC_OSCSRC_SHIFT       4         /* Bits 5-4: Oscillator Source */
 #define SYSCON_RCC_OSCSRC_MASK        (0x03 << SYSCON_RCC_OSCSRC_SHIFT)
+#  define SYSCON_RCC_OSCSRC_MOSC      (0 << SYSCON_RCC_OSCSRC_SHIFT) /* Main oscillator */
+#  define SYSCON_RCC_OSCSRC_IOSC      (1 << SYSCON_RCC_OSCSRC_SHIFT) /* Internal oscillator (reset) */
+#  define SYSCON_RCC_OSCSRC_IOSC4     (2 << SYSCON_RCC_OSCSRC_SHIFT) /* Internal oscillator / 4 */
+#  define SYSCON_RCC_OSCSRC_30KHZ     (3 << SYSCON_RCC_OSCSRC_SHIFT) /* 30KHz internal oscillator */
 #define SYSCON_RCC_XTAL_SHIFT         6         /* Bits 9-6: Crystal Value */
 #define SYSCON_RCC_XTAL_MASK          (0x0f << SYSCON_RCC_XTAL_SHIFT)
+#  define SYSCON_RCC_XTAL1000KHZ      ( 0 << SYSCON_RCC_XTAL_SHIFT)  /* 1.0000MHz (NO PLL) */
+#  define SYSCON_RCC_XTAL1843KHZ      ( 1 << SYSCON_RCC_XTAL_SHIFT)  /* 1.8432MHz (NO PLL) */
+#  define SYSCON_RCC_XTAL2000KHZ      ( 2 << SYSCON_RCC_XTAL_SHIFT)  /* 2.0000MHz (NO PLL) */
+#  define SYSCON_RCC_XTAL2580KHZ      ( 3 << SYSCON_RCC_XTAL_SHIFT)  /* 2.4576MHz (NO PLL) */
+#  define SYSCON_RCC_XTAL3580KHZ      ( 4 << SYSCON_RCC_XTAL_SHIFT)  /* 3.5795MHz */
+#  define SYSCON_RCC_XTAL3686KHZ      ( 5 << SYSCON_RCC_XTAL_SHIFT)  /* 3.6864MHz */
+#  define SYSCON_RCC_XTAL4000KHZ      ( 6 << SYSCON_RCC_XTAL_SHIFT)  /* 4.0000MHz */
+#  define SYSCON_RCC_XTAL4096KHZ      ( 7 << SYSCON_RCC_XTAL_SHIFT)  /* 4.0960MHz */
+#  define SYSCON_RCC_XTAL4915KHZ      ( 8 << SYSCON_RCC_XTAL_SHIFT)  /* 4.9152MHz */
+#  define SYSCON_RCC_XTAL5000KHZ      ( 9 << SYSCON_RCC_XTAL_SHIFT)  /* 5.0000MHz */
+#  define SYSCON_RCC_XTAL5120KHZ      (10 << SYSCON_RCC_XTAL_SHIFT)  /* 5.1200MHz */
+#  define SYSCON_RCC_XTAL6000KHZ      (11 << SYSCON_RCC_XTAL_SHIFT)  /* 6.0000MHz (reset value) */
+#  define SYSCON_RCC_XTAL6144KHZ      (12 << SYSCON_RCC_XTAL_SHIFT)  /* 6.1440MHz */
+#  define SYSCON_RCC_XTAL7373KHZ      (13 << SYSCON_RCC_XTAL_SHIFT)  /* 7.3728MHz */
+#  define SYSCON_RCC_XTAL8000KHZ      (14 << SYSCON_RCC_XTAL_SHIFT)  /* 8.0000MHz */
+#  define SYSCON_RCC_XTAL8192KHZ      (15 << SYSCON_RCC_XTAL_SHIFT)  /* 8.1920MHz */
 #define SYSCON_RCC_BYPASS             (1 << 11) /* Bit 11: PLL Bypass */
 #define SYSCON_RCC_PWRDN              (1 << 13) /* Bit 13: PLL Power Down */
 #define SYSCON_RCC_USESYSDIV          (1 << 22) /* Bit 22: Enable System Clock Divider */
 #define SYSCON_RCC_SYSDIV_SHIFT       26        /* Bits 26-23: System Clock Divisor */
 #define SYSCON_RCC_SYSDIV_MASK        (0x0f << SYSCON_RCC_SYSDIV_SHIFT)
+#  define SYSCON_RCC_SYSDIV(n)        ((n-1) << SYSCON_RCC_SYSDIV_SHIFT)
 #define SYSCON_RCC_ACG                (1 << 27) /* Bit 27: Auto Clock Gating */
 
 /* XTAL to PLL Translation (PLLCFG), offset 0x064 */
@@ -313,10 +345,16 @@
 
 #define SYSCON_RCC2_OSCSRC2_SHIFT     4         /* Bits 6-4: Oscillator Source */
 #define SYSCON_RCC2_OSCSRC2_MASK      (0x07 << SYSCON_RCC2_OSCSRC2_SHIFT)
+#  define SYSCON_RCC2_OSCSRC2_MOSC    (0 << SYSCON_RCC2_OSCSRC2_SHIFT) /* Main oscillator */
+#  define SYSCON_RCC2_OSCSRC2_IOSC    (1 << SYSCON_RCC2_OSCSRC2_SHIFT) /* Internal oscillator (reset) */
+#  define SYSCON_RCC2_OSCSRC2_IOSC4   (2 << SYSCON_RCC2_OSCSRC2_SHIFT) /* Internal oscillator / 4 */
+#  define SYSCON_RCC2_OSCSRC2_30KHZ   (3 << SYSCON_RCC2_OSCSRC2_SHIFT) /* 30KHz internal oscillator */
+#  define SYSCON_RCC2_OSCSRC2_32KHZ   (7 << SYSCON_RCC2_OSCSRC2_SHIFT) /* 32.768KHz external oscillator */
 #define SYSCON_RCC2_BYPASS2           (1 << 11) /* Bit 11: Bypass PLL */
 #define SYSCON_RCC2_PWRDN2            (1 << 13) /* Bit 13: Power-Down PLL */
 #define SYSCON_RCC2_SYSDIV2_SHIFT     23        /* Bits 28-23: System Clock Divisor */
 #define SYSCON_RCC2_SYSDIV2_MASK      (0x3f << SYSCON_RCC2_SYSDIV2_SHIFT)
+#  define SYSCON_RCC2_SYSDIV(n)       ((n-1) << SYSCON_RCC2_SYSDIV2_SHIFT)
 #define SYSCON_RCC2_USERCC2           (1 << 31) /* Bit 31: Use RCC2 When set */
 
 /* Run Mode Clock Gating Control Register 0 (RCGC0), offset 0x100 */
@@ -442,8 +480,47 @@
  * Public Data
  ************************************************************************************/
 
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
+/****************************************************************************
+ * Name: lm3s_clockconfig
+ *
+ * Description:
+ *   Called to check to new clock based on desired rcc and rcc2 settings.
+ *   This is use to set up the initial clocking but can be used later to
+ *   support slow clocked, low power consumption modes.
+ *
+ ****************************************************************************/
+
+EXTERN void lm3s_clockconfig(uint32 newrcc, uint32 newrcc2);
+
+/****************************************************************************
+ * Name: up_clockconfig
+ *
+ * Description:
+ *   Called early in the bootsequence (before .data and .bss are available)
+ *   in order to configure initial clocking.
+ *
+ ****************************************************************************/
+
+EXTERN void up_clockconfig(void);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_LM3S_LM3S_SYSCONTROL_H */
