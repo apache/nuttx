@@ -458,7 +458,7 @@ static inline void up_waittxnotfull(struct up_dev_s *priv)
 
 static int up_setup(struct uart_dev_s *dev)
 {
-#ifndef CONFIG_SUPPRESS_STR71X_UART_CONFIG
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   uint32 divisor;
   uint32 baud;
@@ -668,6 +668,7 @@ static int up_interrupt(int irq, void *context)
            /* Rx buffer not empty ... process incoming bytes */
 
            uart_recvchars(dev);
+           handled = TRUE;
         }
 
       /* Handle outgoing, transmit bytes */
@@ -677,6 +678,7 @@ static int up_interrupt(int irq, void *context)
            /* Tx FIFO not full ... process outgoing bytes */
 
            uart_xmitchars(dev);
+           handled = TRUE;
         }
     }
     return OK;
@@ -756,7 +758,7 @@ static void up_rxint(struct uart_dev_s *dev, boolean enable)
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   if (enable)
     {
-      /* Receive an interrupt when the Rx FIFO is half full (or and IDLE
+      /* Receive an interrupt when the Rx FIFO is half full (or an IDLE
        * timeout occurs.
        */
 
