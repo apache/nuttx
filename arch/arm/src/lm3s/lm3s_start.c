@@ -69,6 +69,8 @@ extern uint32 _edata;           /* End+1 of .data */
 extern uint32 _sbss;            /* Start of .bss */
 extern uint32 _ebss;            /* End+1 of .bss */
 
+extern void lm3s_vectors(void);
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -109,6 +111,14 @@ void _start(void)
   up_clockconfig();
   up_lowsetup();
   showprogress('A');
+
+  /* If we booted from a bootloader, then set the NVIC to use our copy of
+   * of the vectors in FLASH.
+   */
+
+#ifdef CONFIG_ARCH_BOOTLOADER
+  putreg32((uint32)lm3s_vectors, NVIC_VECTAB);
+#endif
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
