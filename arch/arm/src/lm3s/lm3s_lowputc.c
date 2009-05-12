@@ -219,8 +219,9 @@ void up_lowputc(char ch)
 
 void up_lowsetup(void)
 {
+  uint32 rcgc1;
 #ifdef HAVE_CONSOLE
-  uint16 ctl;
+  uint32 ctl;
 
   /* Enable the selected console device */
   /* 1. Disable the UART by clearing the UARTEN bit in the UART CTL register */
@@ -247,18 +248,34 @@ void up_lowsetup(void)
   putreg32(ctl, LM3S_CONSOLE_BASE+LM3S_UART_CTL_OFFSET);
 #endif
 
-  /* Configure GPIO pins to enable all UARTs in the configuration
-   * (the serial driver later depends on this configuration) 
+  /* Peripheral clocking to the selected UART modules and to the GPIO
+   * modules used for the pin configuration.  NOTE: this function is
+   * called very early in the boot sequence so we do not need to be
+   * concerned about exclusive access to registers.
+   */
+
+  rcgc1  = getreg32(LM3S_SYSCON_RCGC1);
+#if !defined(CONFIG_UART0_DISABLE) && !defined(CONFIG_UART1_DISABLE)
+  rcgc1 |= (SYSCON_RCGC1_UART0|SYSCON_RCGC2_GPIOA|SYSCON_RCGC1_UART1|SYSCON_RCGC2_GPIOD);
+#elif !defined(CONFIG_UART0_DISABLE)
+  rcgc1 |= (SYSCON_RCGC1_UART0|SYSCON_RCGC2_GPIOA);
+#elif !defined(CONFIG_UART1_DISABLE)
+  rcgc1 |= (SYSCON_RCGC1_UART1|SYSCON_RCGC2_GPIOD);
+#endif
+  putreg32(rcgc1, LM3S_SYSCON_RCGC1);
+
+  /* Then configure GPIO pins to enable the selected UARTs.  NOTE: The
+   * serial driver later depends on this pin configuration.
    */
 
 #ifndef CONFIG_UART0_DISABLE
-  lm3x_configgpio(GPIO_UART0_RX);
-  lm3x_configgpio(GPIO_UART0_TX);
+  lm3s_configgpio(GPIO_UART0_RX);
+  lm3s_configgpio(GPIO_UART0_TX);
 #endif
 
 #ifndef CONFIG_UART1_DISABLE
-  lm3x_configgpio(GPIO_UART1_RX);
-  lm3x_configgpio(GPIO_UART1_TX);
+  lm3s_configgpio(GPIO_UART1_RX);
+  lm3s_configgpio(GPIO_UART1_TX);
 #endif
 }
 

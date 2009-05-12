@@ -60,8 +60,28 @@
  * Public Data
  ************************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+#ifndef __ASSEMBLY__
 
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/* Defined in lm3s_lowputc.c */
+
+EXTERN void up_lowsetup(void);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_LM3S_CHIP_H */
