@@ -85,6 +85,10 @@ Eagle100-specific Configuration Options
 
 	   CONFIG_DRAM_END=(CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
 
+	CONFIG_ARCH_IRQPRIO - The LM3S6918 supports interrupt prioritization
+
+	   CONFIG_ARCH_IRQPRIO=y
+
 	CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
 	   have LEDs
 
