@@ -115,7 +115,7 @@
 
 #define UART_LCRH_VALUE (UART_LCRH_NBITS|UART_LCRH_PARITY|UART_LCRH_NSTOP|UART_LCRH_FEN)
 
-/* Calculate BAUD rate from PCLK1:
+/* Calculate BAUD rate from the SYS clock:
  *
  * "The baud-rate divisor is a 22-bit number consisting of a 16-bit integer and a 6-bit
  *  fractional part. The number formed by these two values is used by the baud-rate generator
@@ -220,7 +220,7 @@ void up_lowputc(char ch)
 void up_lowsetup(void)
 {
   uint32 rcgc1;
-#ifdef HAVE_CONSOLE
+#if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   uint32 ctl;
 
   /* Enable the selected console device */
@@ -244,7 +244,7 @@ void up_lowsetup(void)
 
   /* 5. Enable the UART by setting the UARTEN bit in the UART CTL register */
 
-  ctl |= UART_CTL_UARTEN;
+  ctl |= (UART_CTL_UARTEN|UART_CTL_TXE|UART_CTL_RXE);
   putreg32(ctl, LM3S_CONSOLE_BASE+LM3S_UART_CTL_OFFSET);
 #endif
 

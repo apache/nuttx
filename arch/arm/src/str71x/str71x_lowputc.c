@@ -271,7 +271,8 @@ void up_lowputc(char ch)
 
 void up_lowsetup(void)
 {
-#ifdef HAVE_CONSOLE
+#if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
+
   uint16 reg16;
 
   /* Enable the selected console device */
