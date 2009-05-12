@@ -47,6 +47,7 @@
 #include "lm3s_syscontrol.h"    /* System control module */
 #include "lm3s_gpio.h"          /* GPIO module */
 #include "lm3s_uart.h"          /* UART peripherals */
+#include "cortexm3_nvic.h"      /* Nested, vectored interrupt controller */
 
 /************************************************************************************
  * Definitions
