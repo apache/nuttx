@@ -88,19 +88,6 @@ extern uint32 _ebss;            /* End+1 of .bss */
 #endif
 
 /****************************************************************************
- * Name: up_lowsetup
- *
- * Description:
- *   Set up initial clocking
- *
- ****************************************************************************/
-
-static inline void up_lowsetup(void)
-{
-  up_clockconfig();
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -119,6 +106,7 @@ void _start(void)
 
   /* Configure the uart so that we can get debug output as soon as possible */
 
+  up_clockconfig();
   up_lowsetup();
   showprogress('A');
 

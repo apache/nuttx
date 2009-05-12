@@ -154,7 +154,7 @@
 #  elif CONFIG_STR71X_UART3
 #    define TTYS1_DEV   g_uart3port       /* UART3 is tty1 */
 #  endif
-#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+#elif defined(CONFIG_UART3_SERIAL_CONSOLE)
 #  ifndef CONFIG_STR71X_UART3
 #    error "UART3 not selected, cannot be console"
 #  endif
