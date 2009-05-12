@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lm3s/lm3s_vectors.S
+ * arch/arm/src/lm3s/lm3slm3s_vectors.S
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -80,8 +80,10 @@
 	.section	.vectors, "ax"
 	.code		16
 	.align		0
+        .globl		lm3s_vectors
+        .type		lm3s_vectors, function
 
-_vectors:
+lm3s_vectors:
 /* Processor Exceptions */
 	.word	IDLE_STACK		/* Vector  0: Reset stack pointer */
 	.word	_start			/* Vector  1: Reset vector */
@@ -161,6 +163,7 @@ _vectors:
 #else
 #  error "Vectors not specified for this LM3S chip"
 #endif
+	.size	lm3s_vectors, .-lm3s_vectors
 
 /************************************************************************************
  * .text

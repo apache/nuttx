@@ -51,9 +51,9 @@
  * Definitions
  ************************************************************************************/
 
-/* IRQ numbers.  The IRQ number corresponds to the bit number in interrupt registers.
- * This includes all externally generated interrupts (but excludes processor
- * exceptions)
+/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
+ * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
+ * to handle mapping tables.
  */
 
 /* Processor Exceptions (vectors 0-15) */
@@ -61,64 +61,65 @@
 #define LMSB_IRQ_RESERVED     (0) /* Reserved vector (only used with CONFIG_DEBUG) */
                                   /* Vector  0: Reset stack pointer value */
                                   /* Vector  1: Reset (not handler as an IRQ) */
-#define LMSB_IRQ_NMI          (1) /* Vector  2: Non-Maskable Interrupt (NMI) */
-#define LMSB_IRQ_HARDFAULT    (2) /* Vector  3: Hard fault */
-#define LMSB_IRQ_MPU          (3) /* Vector  4: Memory management (MPU) */
-#define LMSB_IRQ_BUSFAULT     (4) /* Vector  5: Bus fault */
-#define LMSB_IRQ_USAGEFAULT   (5) /* Vector  6: Usage fault */
-#define LMSB_IRQ_SVCALL       (6) /* Vector 11: SVC call */
-#define LMSB_IRQ_DBGMONITOR   (7) /* Vector 12: Debug Monitor */
+#define LMSB_IRQ_NMI          (2) /* Vector  2: Non-Maskable Interrupt (NMI) */
+#define LMSB_IRQ_HARDFAULT    (3) /* Vector  3: Hard fault */
+#define LMSB_IRQ_MPU          (4) /* Vector  4: Memory management (MPU) */
+#define LMSB_IRQ_BUSFAULT     (5) /* Vector  5: Bus fault */
+#define LMSB_IRQ_USAGEFAULT   (6) /* Vector  6: Usage fault */
+#define LMSB_IRQ_SVCALL      (11) /* Vector 11: SVC call */
+#define LMSB_IRQ_DBGMONITOR  (12) /* Vector 12: Debug Monitor */
                                   /* Vector 13: Reserved */
-#define LMSB_IRQ_PENDSV       (8) /* Vector 14: Penable system service request */
-#define LMSB_IRQ_SYSTICK      (9) /* Vector 15: System tick */
+#define LMSB_IRQ_PENDSV      (14) /* Vector 14: Pendable system service request */
+#define LMSB_IRQ_SYSTICK     (15) /* Vector 15: System tick */
 
-/* External interrupts (vectors > 16) */
+/* External interrupts (vectors >= 16) */
 
+#define LM3S_IRQ_INTERRUPTS  (16) /* Vector number of the first external interrupt */
 #ifdef CONFIG_ARCH_CHIP_LM3S6918
 
-#  define LM3S_IRQ_GPIOA     (10) /* Vector 16: GPIO Port A */
-#  define LM3S_IRQ_GPIOB     (11) /* Vector 17: GPIO Port B */
-#  define LM3S_IRQ_GPIOC     (12) /* Vector 18: GPIO Port C */
-#  define LM3S_IRQ_GPIOD     (13) /* Vector 19: GPIO Port D */
-#  define LM3S_IRQ_GPIOE     (14) /* Vector 20: GPIO Port E */
-#  define LM3S_IRQ_UART0     (15) /* Vector 21: UART 0 */
-#  define LM3S_IRQ_UART1     (16) /* Vector 22: UART 1 */
-#  define LM3S_IRQ_SSI0      (17) /* Vector 23: SSI 0 */
-#  define LM3S_IRQ_I2C0      (18) /* Vector 24: I2C 0 */
+#  define LM3S_IRQ_GPIOA     (16) /* Vector 16: GPIO Port A */
+#  define LM3S_IRQ_GPIOB     (17) /* Vector 17: GPIO Port B */
+#  define LM3S_IRQ_GPIOC     (18) /* Vector 18: GPIO Port C */
+#  define LM3S_IRQ_GPIOD     (19) /* Vector 19: GPIO Port D */
+#  define LM3S_IRQ_GPIOE     (20) /* Vector 20: GPIO Port E */
+#  define LM3S_IRQ_UART0     (21) /* Vector 21: UART 0 */
+#  define LM3S_IRQ_UART1     (22) /* Vector 22: UART 1 */
+#  define LM3S_IRQ_SSI0      (23) /* Vector 23: SSI 0 */
+#  define LM3S_IRQ_I2C0      (24) /* Vector 24: I2C 0 */
                                   /* Vector 25-29: Reserved */
-#  define LM3S_IRQ_ADC0      (19) /* Vector 30: ADC Sequence 0 */
-#  define LM3S_IRQ_ADC1      (20) /* Vector 31: ADC Sequence 1 */
-#  define LM3S_IRQ_ADC2      (21) /* Vector 32: ADC Sequence 2 */
-#  define LM3S_IRQ_ADC3      (22) /* Vector 33: ADC Sequence 3 */
-#  define LM3S_IRQ_WDOG      (23) /* Vector 34: Watchdog Timer */
-#  define LM3S_IRQ_TIMER0A   (24) /* Vector 35: Timer 0 A */
-#  define LM3S_IRQ_TIMER0B   (25) /* Vector 36: Timer 0 B */
-#  define LM3S_IRQ_TIMER1A   (26) /* Vector 37: Timer 1 A */
-#  define LM3S_IRQ_TIMER1B   (27) /* Vector 38: Timer 1 B */
-#  define LM3S_IRQ_TIMER2A   (28) /* Vector 39: Timer 2 A */
-#  define LM3S_IRQ_TIMER2B   (29) /* Vector 40: Timer 3 B */
-#  define LM3S_IRQ_COMPARE0  (30) /* Vector 41: Analog Comparator 0 */
-#  define LM3S_IRQ_COMPARE1  (31) /* Vector 42: Analog Comparator 1 */
+#  define LM3S_IRQ_ADC0      (30) /* Vector 30: ADC Sequence 0 */
+#  define LM3S_IRQ_ADC1      (31) /* Vector 31: ADC Sequence 1 */
+#  define LM3S_IRQ_ADC2      (32) /* Vector 32: ADC Sequence 2 */
+#  define LM3S_IRQ_ADC3      (33) /* Vector 33: ADC Sequence 3 */
+#  define LM3S_IRQ_WDOG      (34) /* Vector 34: Watchdog Timer */
+#  define LM3S_IRQ_TIMER0A   (35) /* Vector 35: Timer 0 A */
+#  define LM3S_IRQ_TIMER0B   (36) /* Vector 36: Timer 0 B */
+#  define LM3S_IRQ_TIMER1A   (37) /* Vector 37: Timer 1 A */
+#  define LM3S_IRQ_TIMER1B   (38) /* Vector 38: Timer 1 B */
+#  define LM3S_IRQ_TIMER2A   (39) /* Vector 39: Timer 2 A */
+#  define LM3S_IRQ_TIMER2B   (40) /* Vector 40: Timer 3 B */
+#  define LM3S_IRQ_COMPARE0  (41) /* Vector 41: Analog Comparator 0 */
+#  define LM3S_IRQ_COMPARE1  (42) /* Vector 42: Analog Comparator 1 */
                                   /* Vector 43: Reserved */
-#  define LM3S_IRQ_SYSCON    (32) /* Vector 44: System Control */
-#  define LM3S_IRQ_FLASHCON  (33) /* Vector 45: FLASH Control */
-#  define LM3S_IRQ_GPIOF     (34) /* Vector 46: GPIO Port F */
-#  define LM3S_IRQ_GPIOG     (35) /* Vector 47: GPIO Port G */
-#  define LM3S_IRQ_GPIOH     (36) /* Vector 48: GPIO Port H */
+#  define LM3S_IRQ_SYSCON    (44) /* Vector 44: System Control */
+#  define LM3S_IRQ_FLASHCON  (45) /* Vector 45: FLASH Control */
+#  define LM3S_IRQ_GPIOF     (46) /* Vector 46: GPIO Port F */
+#  define LM3S_IRQ_GPIOG     (47) /* Vector 47: GPIO Port G */
+#  define LM3S_IRQ_GPIOH     (48) /* Vector 48: GPIO Port H */
                                   /* Vector 49: Reserved */
-#  define LM3S_IRQ_SSI1      (37) /* Vector 50: SSI 1 */
-#  define LM3S_IRQ_TIMER3A   (38) /* Vector 51: Timer 3 A */
-#  define LM3S_IRQ_TIMER3B   (39) /* Vector 52: Timer 3 B */
-#  define LM3S_IRQ_I2C1      (40) /* Vector 53: I2C 1 */
+#  define LM3S_IRQ_SSI1      (50) /* Vector 50: SSI 1 */
+#  define LM3S_IRQ_TIMER3A   (51) /* Vector 51: Timer 3 A */
+#  define LM3S_IRQ_TIMER3B   (52) /* Vector 52: Timer 3 B */
+#  define LM3S_IRQ_I2C1      (53) /* Vector 53: I2C 1 */
                                   /* Vectors 54-57: Reserved */
-#  define LM3S_IRQ_ETHCON    (41) /* Vector 58: Ethernet Controller */
-#  define LM3S_IRQ_HIBERNATE (42) /* Vector 59: Hibernation Module */
+#  define LM3S_IRQ_ETHCON    (58) /* Vector 58: Ethernet Controller */
+#  define LM3S_IRQ_HIBERNATE (59) /* Vector 59: Hibernation Module */
                                   /* Vectors 60-70: Reserved */
 #else
 #  error "IRQ Numbers not specified for this LM3S chip"
 #endif
 
-#define NR_IRQS              (43)
+#define NR_IRQS              (60) /* Really only 43 */
 
 /************************************************************************************
  * Public Types

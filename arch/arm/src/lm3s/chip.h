@@ -53,6 +53,16 @@
  * Definitions
  ************************************************************************************/
 
+/* The LM3S6918 only supports 8 priority levels.  The hardware priority mechanism
+ * will only look at the upper N bits of the 8-bit priority level (where N is 3 for
+ * the Stellaris family), so any prioritization must be performed in those bits.
+ * The default priority level is set to the middle value
+ */
+
+#define NVIC_SYSH_PRIORITY_MIN     0x00
+#define NVIC_SYSH_PRIORITY_DEFAULT 0x80
+#define NVIC_SYSH_PRIORITY_MAX     0xe0
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
