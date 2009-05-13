@@ -102,9 +102,13 @@ void up_sigdeliver(void)
   /* Save the real return state on the stack. */
 
   up_copystate(regs, rtcb->xcp.regs);
-  regs[REG_PC]   = rtcb->xcp.saved_pc;
-  regs[REG_CPSR] = rtcb->xcp.saved_cpsr;
-
+  regs[REG_PC]         = rtcb->xcp.saved_pc;
+#ifdef __thumb2__
+  regs[REG_PRIMASK]    = rtcb->xcp.saved_primask;
+  regs[REG_XPSR]       = rtcb->xcp.saved_xpsr;
+#else
+  regs[REG_CPSR]       = rtcb->xcp.saved_cpsr;
+#endif
   /* Get a local copy of the sigdeliver function pointer.
    * we do this so that we can nullify the sigdeliver
    * function point in the TCB and accept more signal
@@ -117,7 +121,11 @@ void up_sigdeliver(void)
 
   /* Then restore the task interrupt statat. */
 
+#ifdef __thumb2__
+  irqrestore((uint16)regs[REG_PRIMASK]);
+#else
   irqrestore(regs[REG_CPSR]);
+#endif
 
   /* Deliver the signals */
 

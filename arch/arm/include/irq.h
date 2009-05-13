@@ -48,7 +48,7 @@
 #include <arch/chip/irq.h>
 
 #ifdef __thumb2__
-# include <arch/irq_thumb2.h>
+# include <arch/irq_cortexm3.h>
 #else
 # include <arch/irq_arm.h>
 #endif
