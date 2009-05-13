@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lm3s/chip.h
+ * arch/arm/src/common/cortexm3_psr.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,36 +33,59 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LM3S_CHIP_H
-#define __ARCH_ARM_SRC_LM3S_CHIP_H
+#ifndef __ARCH_ARM_SRC_COMMON_CORTEXM_PSR_H
+#define __ARCH_ARM_SRC_COMMON_CORTEXM_PSR_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
-#include <nuttx/config.h>
-#include <sys/types.h>
-
-#include "lm3s_memorymap.h"     /* Memory map */
-#include "lm3s_syscontrol.h"    /* System control module */
-#include "lm3s_gpio.h"          /* GPIO module */
-#include "lm3s_uart.h"          /* UART peripherals */
-#include "cortexm3_nvic.h"      /* Nested, vectored interrupt controller */
+#ifndef __ASSEMBLY__
+# include <sys/types.h>
+#endif
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
-/************************************************************************************
- * Public Types
- ************************************************************************************/
+/* Application Program Status Register (APSR) */
+
+#define CORTEXM3_APSR_Q           (1 << 27) /* Bit 27: Sticky saturation flag */
+#define CORTEXM3_APSR_V           (1 << 28) /* Bit 28: Overflow flag */
+#define CORTEXM3_APSR_C           (1 << 29) /* Bit 29: Carry/borrow flag */
+#define CORTEXM3_APSR_Z           (1 << 30) /* Bit 30: Zero flag */
+#define CORTEXM3_APSR_N           (1 << 31) /* Bit 31: Negative, less than flag */
+
+/* Interrupt Program Status Register (IPSR) */
+
+#define CORTEMX_IPSR_ISR_SHIFT    0         /* Bits 8-0: ISR number */
+#define CORTEMX_IPSR_ISR_MASK     (0x1ff << CORTEMX_IPSR_ISR_SHIFT)
+
+/* Execution PSR Register (EPSR) */
+
+#define CORTEMX_EPSR_ICIIT1_SHIFT 10        /* Bits 15-10: Interrupt-Continuable-Instruction/If-Then bits */
+#define CORTEMX_EPSR_ICIIT1_MASK  (3 << CORTEMX_EPSR_ICIIT1_SHIFT)
+#define CORTEMX_EPSR_T            (1 << 24) /* Bit 24: T-bit */
+#define CORTEMX_EPSR_ICIIT2_SHIFT 25        /* Bits 26-25: Interrupt-Continuable-Instruction/If-Then bits */
+#define CORTEMX_EPSR_ICIIT2_MASK  (3 << CORTEMX_EPSR_ICIIT2_SHIFT)
+
+/* Save xPSR bits */
+
+#define CORTEMX_IPSR_ISR_SHIFT    0         /* Bits 8-0: ISR number */
+#define CORTEMX_IPSR_ISR_MASK     (0x1ff << CORTEMX_IPSR_ISR_SHIFT)
+#define CORTEMX_EPSR_ICIIT1_SHIFT 25        /* Bits 15-10: Interrupt-Continuable-Instruction/If-Then bits */
+#define CORTEMX_EPSR_ICIIT1_MASK  (3 << CORTEMX_EPSR_ICIIT_SHIFT)
+#define CORTEMX_EPSR_T            (1 << 24) /* Bit 24: T-bit */
+#define CORTEMX_EPSR_ICIIT2_SHIFT 25        /* Bits 26-25: Interrupt-Continuable-Instruction/If-Then bits */
+#define CORTEMX_EPSR_ICIIT2_MASK  (3 << CORTEMX_EPSR_ICIIT_SHIFT)
+#define CORTEXM3_APSR_Q           (1 << 27) /* Bit 27: Sticky saturation flag */
+#define CORTEXM3_APSR_V           (1 << 28) /* Bit 28: Overflow flag */
+#define CORTEXM3_APSR_C           (1 << 29) /* Bit 29: Carry/borrow flag */
+#define CORTEXM3_APSR_Z           (1 << 30) /* Bit 30: Zero flag */
+#define CORTEXM3_APSR_N           (1 << 31) /* Bit 31: Negative, less than flag */
 
 /************************************************************************************
- * Public Data
+ * Inline Functions
  ************************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#endif /* __ARCH_ARM_SRC_LM3S_CHIP_H */
+#endif  /* __ARCH_ARM_SRC_COMMON_CORTEXM_PSR_H */

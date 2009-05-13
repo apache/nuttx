@@ -132,7 +132,12 @@ static inline void up_registerdump(void)
                  regs, ptr[0], ptr[1], ptr[2], ptr[3],
                  ptr[4], ptr[5], ptr[6], ptr[7]);
         }
+
+#ifdef __thumb2__
+      lldbg("xPSR: %08x\n", current_regs[REG_XPSR]);
+#else
       lldbg("CPSR: %08x\n", current_regs[REG_CPSR]);
+#endif
     }
 }
 #else

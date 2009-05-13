@@ -47,205 +47,23 @@
 #include <nuttx/irq.h>
 #include <arch/chip/irq.h>
 
+#ifdef __thumb2__
+# include <arch/irq_thumb2.h>
+#else
+# include <arch/irq_arm.h>
+#endif
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-/* IRQ Stack Frame Format:
- *
- * Context is always saved/restored in the same way:
- *
- *   (1) stmia rx, {r0-r14}
- *   (2) then the PC and CPSR
- *
- * This results in the following set of indices that
- * can be used to access individual registers in the
- * xcp.regs array:
- */
-
-#define REG_R0              (0)
-#define REG_R1              (1)
-#define REG_R2              (2)
-#define REG_R3              (3)
-#define REG_R4              (4)
-#define REG_R5              (5)
-#define REG_R6              (6)
-#define REG_R7              (7)
-#define REG_R8              (8)
-#define REG_R9              (9)
-#define REG_R10             (10)
-#define REG_R11             (11)
-#define REG_R12             (12)
-#define REG_R13             (13)
-#define REG_R14             (14)
-#define REG_R15             (15)
-#define REG_CPSR            (16)
-
-#define XCPTCONTEXT_REGS    (17)
-#define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
-
-#define REG_A1              REG_R0
-#define REG_A2              REG_R1
-#define REG_A3              REG_R2
-#define REG_A4              REG_R3
-#define REG_V1              REG_R4
-#define REG_V2              REG_R5
-#define REG_V3              REG_R6
-#define REG_V4              REG_R7
-#define REG_V5              REG_R8
-#define REG_V6              REG_R9
-#define REG_V7              REG_R10
-#define REG_SB              REG_R9
-#define REG_SL              REG_R10
-#define REG_FP              REG_R11
-#define REG_IP              REG_R12
-#define REG_SP              REG_R13
-#define REG_LR              REG_R14
-#define REG_PC              REG_R15
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* This struct defines the way the registers are stored.  We
- * need to save:
- *
- *  1	CPSR
- *  7	Static registers, v1-v7 (aka r4-r10)
- *  1	Frame pointer, fp (aka r11)
- *  1	Stack pointer, sp (aka r13)
- *  1	Return address, lr (aka r14)
- * ---
- * 11	(XCPTCONTEXT_USER_REG)
- *
- * On interrupts, we also need to save:
- *  4	Volatile registers, a1-a4 (aka r0-r3)
- *  1	Scratch Register, ip (aka r12)
- *---
- *  5	(XCPTCONTEXT_IRQ_REGS)
- *
- * For a total of 17 (XCPTCONTEXT_REGS)
- */
-
-#ifndef __ASSEMBLY__
-struct xcptcontext
-{
-  /* The following function pointer is non-zero if there
-   * are pending signals to be processed.
-   */
-
-#ifndef CONFIG_DISABLE_SIGNALS
-  void *sigdeliver; /* Actual type is sig_deliver_t */
-
-  /* These are saved copies of LR and CPSR used during
-   * signal processing.
-   */
-
-  uint32 saved_pc;
-  uint32 saved_cpsr;
-#endif
-
-  /* Register save area */
-
-  uint32 regs[XCPTCONTEXT_REGS];
-};
-#endif
-
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#ifdef __thumb2__
-
-/* Save the current interrupt enable state & disable IRQs */
-
-static inline irqstate_t irqsave(void)
-{
-  unsigned short primask;
-
-  /* Return the the current value of primask register and set
-   * bit 0 of the primask register to disable interrupts
-   */
-
-  __asm__ __volatile__
-    (
-     "\tmrs    %0, primask\n"
-     "\tcpsid  i\n"
-     : "=r" (primask)
-     :
-     : "memory");
-  return primask;
-}
-
-/* Restore saved IRQ & FIQ state */
-
-static inline void irqrestore(irqstate_t primask)
-{
-  /* If bit 0 of the primask is 0, then we need to restore
-   * interupts.
-   */
-
-  __asm__ __volatile__
-    (
-     "\ttst    %0, #1\n"
-     "\tbne    1f\n"
-     "\tcpsie  i\n"
-     "1:\n"
-     :
-     : "r" (primask)
-     : "memory");
-}
-
-#else /* __thumb2__ */
-
-/* Save the current interrupt enable state & disable IRQs */
-
-static inline irqstate_t irqsave(void)
-{
-  unsigned int flags;
-  unsigned int temp;
-  __asm__ __volatile__
-    (
-     "\tmrs    %0, cpsr\n"
-     "\torr    %1, %0, #128\n"
-     "\tmsr    cpsr_c, %1"
-     : "=r" (flags), "=r" (temp)
-     :
-     : "memory");
-  return flags;
-}
-
-/* Restore saved IRQ & FIQ state */
-
-static inline void irqrestore(irqstate_t flags)
-{
-  __asm__ __volatile__
-    (
-     "msr    cpsr_c, %0"
-     :
-     : "r" (flags)
-     : "memory");
-}
-
-static inline void system_call(swint_t func, int parm1,
-			       int parm2, int parm3)
-{
-  __asm__ __volatile__
-    (
-     "mov\tr0,%0\n\t"
-     "mov\tr1,%1\n\t"
-     "mov\tr2,%2\n\t"
-     "mov\tr3,%3\n\t"
-     "swi\t0x900001\n\t"
-     :
-     : "r" ((long)(func)),  "r" ((long)(parm1)),
-       "r" ((long)(parm2)), "r" ((long)(parm3))
-     : "r0", "r1", "r2", "r3", "lr");
-}
-#endif /* __thumb2__ */
-#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Public Variables
