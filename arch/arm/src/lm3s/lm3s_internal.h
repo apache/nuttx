@@ -43,6 +43,10 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include "up_internal.h"
+#include "lm3s_memorymap.h"
+#include "lm3s_gpio.h"
+
 /************************************************************************************
  * Definitions
  ************************************************************************************/
@@ -247,6 +251,15 @@ EXTERN void up_clockconfig(void);
 
 EXTERN int lm3s_configgpio(uint32 bitset);
 
+/****************************************************************************
+ * Name: lm3s_pendsv
+ *
+ * Description:
+ *   This is PendSV exception handler that performs context switching
+ *
+ ****************************************************************************/
+
+EXTERN int lm3s_pendsv(int irq, FAR void *context);
 
 #undef EXTERN
 #if defined(__cplusplus)

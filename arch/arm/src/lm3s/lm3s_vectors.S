@@ -1,5 +1,6 @@
 /************************************************************************************
- * arch/arm/src/lm3s/lm3slm3s_vectors.S
+ * arch/arm/src/lm3s/lm3s_vectors.S
+ * arch/arm/src/chip/lm3s_vectors.S
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

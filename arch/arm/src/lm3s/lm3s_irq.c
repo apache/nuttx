@@ -173,6 +173,12 @@ void up_irqinitialize(void)
 
   current_regs = NULL;
 
+  /* Attach the PendSV exception handler.  This is used for performing
+   * context switches.
+   */
+
+  irq_attach(LMSB_IRQ_PENDSV, lm3s_pendsv);
+
   /* Attach all processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG
@@ -183,7 +189,6 @@ void up_irqinitialize(void)
   irq_attach(LMSB_IRQ_USAGEFAULT, lm3s_usagefault);
   irq_attach(LMSB_IRQ_SVCALL, lm3s_svcall);
   irq_attach(LMSB_IRQ_DBGMONITOR, lm3s_dbgmonitor);
-  irq_attach(LMSB_IRQ_PENDSV, lm3s_pendsv);
   irq_attach(LMSB_IRQ_RESERVED, lm3s_reserved);
 #endif
 
@@ -364,14 +369,6 @@ int lm3s_dbgmonitor(int irq, FAR void *context)
 {
   (void)irqsave();
   dbg("PANIC!!! Debug Monitor receieved\n");
-  PANIC(OSERR_UNEXPECTEDISR);
-  return 0;
-}
-
-int lm3s_pendsv(int irq, FAR void *context)
-{
-  (void)irqsave();
-  dbg("PANIC!!! PendSV received\n");
   PANIC(OSERR_UNEXPECTEDISR);
   return 0;
 }
