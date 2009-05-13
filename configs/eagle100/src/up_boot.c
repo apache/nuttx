@@ -68,8 +68,4 @@
 
 void lm3s_boardinitialize(void)
 {
-#warning "Missing logic"
-#ifdef CONFIG_NET
-#  warning "Missing logic"
-#endif
 }
