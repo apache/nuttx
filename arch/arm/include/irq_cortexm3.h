@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/irq_thumb2.h
+ * arch/arm/include/irq_cortexm3.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -57,14 +57,14 @@
  * registers on the stack in this (address) order:
  */
 
-#define REG_XPSR            (16) /* xPSR */
-#define REG_R15             (15) /* R15 = PC */
-#define REG_R14             (14) /* R14 = LR */
-#define REG_R12             (13) /* R12 */
-#define REG_R3              (12) /* R3 */
-#define REG_R2              (11) /* R2 */
-#define REG_R1              (10) /* R1 */
-#define REG_R0              (9)  /* R0 */
+#define REG_XPSR            (17) /* xPSR */
+#define REG_R15             (16) /* R15 = PC */
+#define REG_R14             (15) /* R14 = LR */
+#define REG_R12             (14) /* R12 */
+#define REG_R3              (13) /* R3 */
+#define REG_R2              (12) /* R2 */
+#define REG_R1              (11) /* R1 */
+#define REG_R0              (10) /* R0 */
 
 #define HW_XCPT_REGS        (8)
 #define HW_XCPT_SIZE        (4 * HW_XCPT_REGS)
@@ -73,18 +73,22 @@
  * logic.
  */
 
-#define REG_R13             (8) /* R13 = SP at time of interrupt */
-#define REG_R11             (7) /* R11 */
-#define REG_R10             (6) /* R10 */
-#define REG_R9              (5) /* R9 */
-#define REG_R8              (4) /* R8 */
-#define REG_R7              (3) /* R7 */
-#define REG_R6              (2) /* R6 */
-#define REG_R5              (1) /* R5 */
-#define REG_R4              (0) /* R4 */
+#define REG_R11             (9) /* R11 */
+#define REG_R10             (8) /* R10 */
+#define REG_R9              (7) /* R9 */
+#define REG_R8              (6) /* R8 */
+#define REG_R7              (5) /* R7 */
+#define REG_R6              (4) /* R6 */
+#define REG_R5              (3) /* R5 */
+#define REG_R4              (2) /* R4 */
+#define REG_PRIMASK         (1) /* PRIMASK */
+#define REG_R13             (0) /* R13 = SP at time of interrupt */
 
-#define XCPTCONTEXT_REGS    (17)
-#define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
+#define SW_XCPT_REGS        (10)
+#define SW_XCPT_SIZE        (4 * SW_XCPT_REGS)
+
+#define XCPTCONTEXT_REGS    (HW_XCPT_REGS + SW_XCPT_REGS)
+#define XCPTCONTEXT_SIZE    (HW_XCPT_SIZE + SW_XCPT_SIZE)
 
 #define REG_A1              REG_R0
 #define REG_A2              REG_R1
@@ -123,11 +127,12 @@ struct xcptcontext
 #ifndef CONFIG_DISABLE_SIGNALS
   void *sigdeliver; /* Actual type is sig_deliver_t */
 
-  /* These are saved copies of LR and CPSR used during
+  /* These are saved copies of LR, PRIMASK, and xPSR used during
    * signal processing.
    */
 
   uint32 saved_pc;
+  uint32 saved_primask;
   uint32 saved_xpsr;
 #endif
 

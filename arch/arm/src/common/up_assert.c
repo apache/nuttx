@@ -134,7 +134,8 @@ static inline void up_registerdump(void)
         }
 
 #ifdef __thumb2__
-      lldbg("xPSR: %08x\n", current_regs[REG_XPSR]);
+      lldbg("xPSR: %08x PRIMASK: %08x\n",
+            current_regs[REG_XPSR],  current_regs[REG_PRIMASK]);
 #else
       lldbg("CPSR: %08x\n", current_regs[REG_CPSR]);
 #endif

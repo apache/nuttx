@@ -38,6 +38,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/irq.h>
 
 /************************************************************************************
  * Preprocessor Definitions
@@ -64,6 +65,10 @@
 
 	.globl		dispach_irq
 
+	.syntax		unified
+	.thumb
+	.file		"lm3s_vectors.S"
+
 /************************************************************************************
  * Macros
  ************************************************************************************/
@@ -76,8 +81,8 @@
 
 	.macro	HANDLER, label, irqno
 \label:
-	mov	r0, \irqno
-	br	lm3s_irqcommon
+	mov	r0, #\irqno
+	b	lm3s_irqcommon
 	.endm
 
 /************************************************************************************
@@ -86,7 +91,7 @@
 
 	.section	.vectors, "ax"
 	.code		16
-	.align		0
+	.align		2
         .globl		lm3s_vectors
         .type		lm3s_vectors, function
 
@@ -177,7 +182,6 @@ lm3s_vectors:
  ************************************************************************************/
 
 	.text
-	.thumb_func
         .type   handlers, function
 handlers:
 	HANDLER	lm3s_reserved, LMSB_IRQ_RESERVED	/* Unexpected/reserved vector */
@@ -194,8 +198,8 @@ handlers:
 #ifdef CONFIG_ARCH_CHIP_LM3S6918
 	HANDLER	lm3s_gpioa, LM3S_IRQ_GPIOA		/* Vector 16: GPIO Port A */
 	HANDLER	lm3s_gpiob, LM3S_IRQ_GPIOB		/* Vector 17: GPIO Port B */
-	HANDLER	lm3s_gpiod, LM3S_IRQ_GPIOC		/* Vector 18: GPIO Port C */
-	HANDLER	lm3s_gpioe, LM3S_IRQ_GPIOD		/* Vector 19: GPIO Port D */
+	HANDLER	lm3s_gpioc, LM3S_IRQ_GPIOC		/* Vector 18: GPIO Port C */
+	HANDLER	lm3s_gpiod, LM3S_IRQ_GPIOD		/* Vector 19: GPIO Port D */
 	HANDLER	lm3s_gpioe, LM3S_IRQ_GPIOE		/* Vector 20: GPIO Port E */
 	HANDLER	lm3s_uart0, LM3S_IRQ_UART0		/* Vector 21: UART 0 */
 	HANDLER	lm3s_uart1, LM3S_IRQ_UART1		/* Vector 22: UART 1 */
@@ -248,9 +252,10 @@ lm3s_irqcommon:
 	/* Complete the context save */
 
 	mrs	r1, psp			/* R1=The process stack pointer */
-	mov	r3, r1			/* R3=Copy of the process stack pointer */
-	add	r3, #HW_XCPT_SIZE	/* R3=PSP before the interrupt was taken */
-	stmdb	r1!, {r3-r11}		/* Save the remaining registers plus the SP value */
+	mov	r2, r1			/* R2=Copy of the process stack pointer */
+	add	r2, #HW_XCPT_SIZE	/* R2=PSP before the interrupt was taken */
+	mrs	r3, primask		/* R3=Current PRIMASK setting */
+	stmdb	r1!, {r2-r11}		/* Save the remaining registers plus the SP value */
 
 	/* Disable interrupts, select the stack to use for interrupt handling
 	 * and call up_doirq to handle the interrupt
@@ -286,15 +291,21 @@ lm3s_irqcommon:
 	 */
 
         add	r1, r0, #(XCPTCONTEXT_SIZE-4)	/* r2=offset HW save area */
-	ldmia	r1, {r4, r11}		/* Eight registers in HW save area */
+	ldmia	r1, {r4-r11}		/* Eight registers in HW save area */
 	ldr	r1, [r0, #(4*REG_SP)]	/* R1=Value of SP before interrupt */
-	stmdb	r1!, {r4, r11}		/* Eight registers in HW save area */
-	mov	psp, r1			/* New PSP */
+	stmdb	r1!, {r4-r11}		/* Eight registers in HW save area */
+	msr	psp, r1			/* New PSP */
 
 	/* We simply need to "unwind" the same stack frame that we created */
 1:
+	stmdb	r0!, {r2-r11}		/* Recover R4-R11 + 2 temp values */
+
+	/* Do we need to restore interrupts? */
+
+	tst	r3, #1			/* PRIMASK it 1=1 means that interrupts are masked */
+	bne	2f
 	cpsie	i			/* Restore interrupts */
-	stmdb	r0!, {r3-r11}		/* Recover R4-R11 (R3 does not have the correct value yet) * the remaining registers plus the SP value */
+2:
 	bx	r14			/* And return */
 	.size	handler, .-handlers
 
