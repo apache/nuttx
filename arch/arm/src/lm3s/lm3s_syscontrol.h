@@ -480,47 +480,8 @@
  * Public Data
  ************************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
- * Name: lm3s_clockconfig
- *
- * Description:
- *   Called to check to new clock based on desired rcc and rcc2 settings.
- *   This is use to set up the initial clocking but can be used later to
- *   support slow clocked, low power consumption modes.
- *
- ****************************************************************************/
-
-EXTERN void lm3s_clockconfig(uint32 newrcc, uint32 newrcc2);
-
-/****************************************************************************
- * Name: up_clockconfig
- *
- * Description:
- *   Called early in the bootsequence (before .data and .bss are available)
- *   in order to configure initial clocking.
- *
- ****************************************************************************/
-
-EXTERN void up_clockconfig(void);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_LM3S_LM3S_SYSCONTROL_H */

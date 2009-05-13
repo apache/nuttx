@@ -68,9 +68,16 @@
  * Macros
  ************************************************************************************/
 
+/* On entry into an IRQ, the hardware automatically saves the xPSR, PC, LR, R12, R0-R3
+ * registers on the stack, then branches to an instantantiation of the following
+ * macro.  This macro simply loads the IRQ number into R0, then jumps to the common
+ * IRQ handling logic.
+ */
+
 	.macro	HANDLER, label, irqno
 \label:
-#warning "Missing logic"
+	mov	r0, \irqno
+	br	lm3s_irqcommon
 	.endm
 
 /************************************************************************************
@@ -171,6 +178,8 @@ lm3s_vectors:
 
 	.text
 	.thumb_func
+        .type   handlers, function
+handlers:
 	HANDLER	lm3s_reserved, LMSB_IRQ_RESERVED	/* Unexpected/reserved vector */
 	HANDLER lm3s_nmi, LMSB_IRQ_NMI                  /* Vector  2: Non-Maskable Interrupt (NMI) */
 	HANDLER lm3s_hardfault, LMSB_IRQ_HARDFAULT      /* Vector  3: Hard fault */
@@ -218,6 +227,93 @@ lm3s_vectors:
 	HANDLER	lm3s_hib, LM3S_IRQ_HIBERNATE		/* Vector 59: Hibernation Module */
 #else
 #  error "Vectors not specified for this LM3S chip"
+#endif
+
+
+/* Common IRQ handling logic.  On entry here, the stack is like the following:
+ *
+ *      REG_XPSR
+ *      REG_R15
+ *      REG_R14
+ *      REG_R12
+ *      REG_R3
+ *      REG_R2
+ *      REG_R1
+ * PSP->REG_R0
+ *
+ * and R0 contains the IRQ number
+ */
+
+lm3s_irqcommon:
+	/* Complete the context save */
+
+	mrs	r1, psp			/* R1=The process stack pointer */
+	mov	r3, r1			/* R3=Copy of the process stack pointer */
+	add	r3, #HW_XCPT_SIZE	/* R3=PSP before the interrupt was taken */
+	stmdb	r1!, {r3-r11}		/* Save the remaining registers plus the SP value */
+
+	/* Disable interrupts, select the stack to use for interrupt handling
+	 * and call up_doirq to handle the interrupt
+	 */
+
+	cpsid	i			/* Disable further interrupts */
+
+	/* If CONFIG_ARCH_INTERRUPTSTACK is defined, we will use a special interrupt
+	 * stack pointer.  The way that this is done here prohibits nested interrupts!
+	 * Otherwise, we will re-use the process stack for interrupt level processing.
+	 */
+
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
+	ld	sp, #up_interruptstack_base
+#else
+	mov	sp, r1			/* Use the process stack pointer */
+#endif
+	stmdb	sp!, {r1, r14}		/* Save the process SP and the return LR */
+	bl	up_doirq		/* R0=IRQ, R1=register save */
+	ldmia	sp!, {r1, r14}		/* Recover the process SP and the return LR */
+
+	/* On return from up_doirq, R0 will hold a pointer to register context
+	 * array to use for the interrupt return.  If that return value is the same
+	 * as current stack pointer, then things are relatively easy.
+	 */
+
+	cmp	r0, r1
+	beq	1f			/* Branch if no context switch */
+
+	/* We are returning from a context switch.  This is different because in this
+	 * case, the register save structure does not lie on the stack but, rather,
+	 * is within a TCB structure.  We'll have to copy some values to the stack.
+	 */
+
+        add	r1, r0, #(XCPTCONTEXT_SIZE-4)	/* r2=offset HW save area */
+	ldmia	r1, {r4, r11}		/* Eight registers in HW save area */
+	ldr	r1, [r0, #(4*REG_SP)]	/* R1=Value of SP before interrupt */
+	stmdb	r1!, {r4, r11}		/* Eight registers in HW save area */
+	mov	psp, r1			/* New PSP */
+
+	/* We simply need to "unwind" the same stack frame that we created */
+1:
+	cpsie	i			/* Restore interrupts */
+	stmdb	r0!, {r3-r11}		/* Recover R4-R11 (R3 does not have the correct value yet) * the remaining registers plus the SP value */
+	bx	r14			/* And return */
+	.size	handler, .-handlers
+
+/************************************************************************************
+ *  Name: up_interruptstack/g_userstack
+ *
+ * Description:
+ *   Shouldn't happen
+ *
+ ************************************************************************************/
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+        .bss
+        .align  4
+up_interruptstack:
+        .skip   ((CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4)
+up_interruptstack_base:
+        .skip   4
+        .size   up_interruptstack, .-up_interruptstack
 #endif
 
 /************************************************************************************

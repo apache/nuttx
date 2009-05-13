@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/common/arm.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,19 +44,15 @@
 # include <sys/types.h>
 #endif
 
-/**************************************************************************
- * Conditional Compilation
- **************************************************************************/
+/************************************************************************************
+ * Definitions
+ ************************************************************************************/
 
 #undef CONFIG_ALIGNMENT_TRAP
 #undef CONFIG_DCACHE_WRITETHROUGH
 #undef CONFIG_CACHE_ROUND_ROBIN
 #undef CONFIG_DCACHE_DISABLE
 #undef CONFIG_ICACHE_DISABLE
-
-/************************************************************************************
- * Definitions
- ************************************************************************************/
 
 /* ARM9EJS **************************************************************************/
 
