@@ -37,6 +37,44 @@ Toolchain
   detailed PLUS some special instructions that you will need to follow if you are
   building a Cortex-M3 toolchain for Cygwin under Windows.
 
+Ethernet-Bootloader
+^^^^^^^^^^^^^^^^^^^
+
+  Here are some notes about using the Luminary Ethernet boot-loader built
+  into the Eagle-100 board.
+
+  - The board has no fixed IP address but uses DHCP to get an address.
+    I use a D-link router; I can use a web browser to surf to the D-link
+    web page to get the address assigned by 
+
+  - Then you can use this IP address in your browser to surf to the Eagle-100
+    board.  It presents several interesting pages -- the most important is
+    the page called "Firmware Update".  That page includes instructions on
+    how to download code to the Eagle-100.
+
+  - You will need the "LM Flash Programmer application".  You can get that
+    program from the Luminary web site.  There is a link on the LM3S6918 page.
+
+  - Is there any documentation for using the bootloader?  Yes and No:  There
+    is an application note covering the bootloader on the Luminary site, but
+    it is not very informative.
+
+  - Are there any special things I have to do in my code, other than setting 
+    the origin to 0x0000:2000 (APP_START_ADDRESS)?  No.  The bootload assumes
+    that you have a vector table at that address .  The bootloader does the
+    following each time it boots (after you have downloaded the first valid
+    application):
+
+    o The bootloader sets the vector table register to the APP_START_ADDRESS,
+    o It sets the stack pointer to the address at APP_START_ADDRESS, and then
+    o Jumps to the address at APP_START_ADDRESS+4.
+
+  - You can force the bootloader to skip starting the application and stay
+    in the update mode.  You will need to do this in order to download a new
+    application.  You force the update mode by holding the user button on the
+    Eagle-100 board while resetting the board.  The user button is GPIOA, pin 6
+    (call FORCED_UPDATE_PIN in the bootloader code).
+
 Eagle100-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
