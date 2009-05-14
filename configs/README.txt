@@ -474,6 +474,11 @@ configs/c5471evm
     NuttX runs on the ARM core and is built with a GNU arm-elf toolchain*.
     This port is complete, verified, and included in the NuttX release.
 
+configs/eagle100
+    Micromint Eagle-100 Development board.  This board is based on the 
+    an ARM Cortex-M3 MCU, the Luminary LM3S6918. This OS is built with the
+    arm-elf toolchain*.  STATUS:  This port is currently under development.
+
 configs/ez80f0910200kitg
     ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200kitg
     development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
@@ -492,6 +497,12 @@ configs/mcu123-lpc214x
     This port is for the NXP LPC2148 as provided on the mcu123.com
     lpc214x development board. This OS is also built with the arm-elf
     toolchain*.  The port supports serial, timer0, spi, and usb.
+
+configs/mx1ads
+    This is a port to the Motorola MX1ADS development board.  That board
+    is based on the Freescale i.MX1 processor.  The i.MX1 is an ARM920T.
+    STATUS:  This port is nearly code complete but still under development
+    (work is stalled until I devote time to the Micromint Eagle-100)
 
 configs/ntosd-dm320
     This port uses the Neuros OSD with a GNU arm-elf toolchain*:
