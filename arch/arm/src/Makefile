@@ -77,7 +77,7 @@ libarch$(LIBEXT): $(OBJS)
 	done ; )
 
 board/libboard$(LIBEXT):
-	$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT)
+	@$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT)
 
 nuttx: $(HEAD_AOBJ) board/libboard$(LIBEXT)
 	@echo "LD: nuttx"
