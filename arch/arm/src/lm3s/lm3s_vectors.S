@@ -64,6 +64,7 @@
  * Global Symbols
  ************************************************************************************/
 
+	.globl		__start
 	.globl		dispach_irq
 
 	.syntax		unified
@@ -99,7 +100,7 @@
 lm3s_vectors:
 /* Processor Exceptions */
 	.word	IDLE_STACK		/* Vector  0: Reset stack pointer */
-	.word	_start			/* Vector  1: Reset vector */
+	.word	__start			/* Vector  1: Reset vector */
 	.word	lm3s_nmi		/* Vector  2: Non-Maskable Interrupt (NMI) */
 	.word	lm3s_hardfault		/* Vector  3: Hard fault */
 	.word	lm3s_mpu		/* Vector  4: Memory management (MPU) */

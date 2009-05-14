@@ -210,6 +210,7 @@
 
 /* Device Capabilities 4 (DC4), offset 0x01c */
 
+#define SYSCON_DC4_GPIO(n)            (1 << (n))
 #define SYSCON_DC4_GPIOA              (1 << 0)  /* Bit 0: GPIO Port A Present */
 #define SYSCON_DC4_GPIOB              (1 << 1)  /* Bit 1: GPIO Port B Present */
 #define SYSCON_DC4_GPIOC              (1 << 2)  /* Bit 2: GPIO Port C Present */
@@ -264,6 +265,7 @@
 
 /* Software Reset Control 2 (SRCR2), offset 0x048 */
 
+#define SYSCON_SRCR2_GPIO(n)          (1 << (n))
 #define SYSCON_SRCR2_GPIOA            (1 << 0)  /* Bit 0: Port A Reset Control */
 #define SYSCON_SRCR2_GPIOB            (1 << 1)  /* Bit 1: Port B Reset Control */
 #define SYSCON_SRCR2_GPIOC            (1 << 2)  /* Bit 2: Port C Reset Control */
@@ -382,6 +384,7 @@
 
 /* Run Mode Clock Gating Control Register 2 (RCGC2), offset 0x108 */
 
+#define SYSCON_RCGC2_GPIO(n)          (1 << (n))
 #define SYSCON_RCGC2_GPIOA            (1 << 0)  /* Bit 0: Port A Clock Gating Control */
 #define SYSCON_RCGC2_GPIOB            (1 << 1)  /* Bit 1: Port B Clock Gating Control */
 #define SYSCON_RCGC2_GPIOC            (1 << 2)  /* Bit 2: Port C Clock Gating Control */
@@ -418,6 +421,7 @@
 
 /* Sleep Mode Clock Gating Control Register 2 (SCGC2), offset 0x118 */
 
+#define SYSCON_SCGC2_GPIO(n)          (1 << (n))
 #define SYSCON_SCGC2_GPIOA            (1 << 0)  /* Bit 0: Port A Clock Gating Control */
 #define SYSCON_SCGC2_GPIOB            (1 << 1)  /* Bit 1: Port B Clock Gating Control */
 #define SYSCON_SCGC2_GPIOC            (1 << 2)  /* Bit 2: Port C Clock Gating Control */
@@ -454,6 +458,7 @@
 
 /* Deep Sleep Mode Clock Gating Control Register 2 (DCGC2), offset 0x128 */
 
+#define SYSCON_DCGC2_GPIO(n)          (1 << (n))
 #define SYSCON_DCGC2_GPIOA            (1 << 0)  /* Bit 0: Port A Clock Gating Control */
 #define SYSCON_DCGC2_GPIOB            (1 << 1)  /* Bit 1: Port B Clock Gating Control */
 #define SYSCON_DCGC2_GPIOC            (1 << 2)  /* Bit 2: Port C Clock Gating Control */

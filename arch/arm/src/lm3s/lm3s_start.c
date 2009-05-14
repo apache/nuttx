@@ -102,7 +102,7 @@ extern void lm3s_vectors(void);
  *
  ****************************************************************************/
 
-void _start(void)
+void __start(void)
 {
   const uint32 *src;
   uint32 *dest;
