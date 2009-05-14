@@ -175,6 +175,17 @@ void up_irqinitialize(void)
 
   current_regs = NULL;
 
+  /* Initialize support for GPIO interrupts if included in this build */
+
+#ifndef CONFIG_LM3S_DISABLE_GPIO_IRQS
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+  if (gpio_irqinitialize != NULL)
+#endif
+    {
+      gpio_irqinitialize();
+    }
+#endif
+
   /* Attach the PendSV exception handler and set it to the minimum
    * prioirity.  The PendSV exception is used for performing
    * context switches.

@@ -250,8 +250,6 @@ EXTERN void lm3s_clockconfig(uint32 newrcc, uint32 newrcc2);
 
 EXTERN void up_clockconfig(void);
 
-/* Configure a GPIO pin */
-
 /****************************************************************************
  * Name: lm3s_configgpio
  *
@@ -291,6 +289,16 @@ EXTERN void lm3s_gpiowrite(uint32 pinset, boolean value);
  ****************************************************************************/
 
 EXTERN boolean lm3s_gpioread(uint32 pinset, boolean value);
+
+/****************************************************************************
+ * Name: gpio_irqinitialize
+ *
+ * Description:
+ *   Initialize all vectors to the unexpected interrupt handler
+ *
+ ****************************************************************************/
+
+EXTERN int weak_function gpio_irqinitialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
