@@ -113,14 +113,6 @@ void __start(void)
   up_lowsetup();
   showprogress('A');
 
-  /* If we booted from a bootloader, then set the NVIC to use our copy of
-   * of the vectors in FLASH.
-   */
-
-#ifdef CONFIG_ARCH_BOOTLOADER
-  putreg32((uint32)lm3s_vectors, NVIC_VECTAB);
-#endif
-
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
    */
