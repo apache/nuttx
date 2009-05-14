@@ -565,14 +565,10 @@ int lm3s_initialize(void)
   /* Enable Port F for Ethernet LEDs: LED0=Bit 3; LED1=Bit 2 */
 
 #ifdef CONFIG_LM3S_ETHLEDS
-  /* Make sure that the GPIOF peripheral is enabled */
-
-  modifyreg32(LM3S_SYSCON_RCGC2_OFFSET, 0, SYSCON_RCGC2_GPIOF);
-
   /* Configure the pins for the peripheral function */
 
-  lm3s_configgpio(GPIO_FUNC_PERIPHERAL | GPIO_STRENGTH_2MA | GPIO_PADTYPE_STD | GPIO_PORTF | 2);
-  lm3s_configgpio(GPIO_FUNC_PERIPHERAL | GPIO_STRENGTH_2MA | GPIO_PADTYPE_STD | GPIO_PORTF | 3);
+  lm3s_configgpio(GPIO_ETHPHY_LED0 | GPIO_STRENGTH_2MA | GPIO_PADTYPE_STD);
+  lm3s_configgpio(GPIO_ETHPHY_LED1 | GPIO_STRENGTH_2MA | GPIO_PADTYPE_STD);
 #endif
 
 #warning "Missing logic"

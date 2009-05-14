@@ -57,11 +57,18 @@
  * The default priority level is set to the middle value
  */
 
-#define NVIC_SYSH_PRIORITY_MIN     0x00
-#define NVIC_SYSH_PRIORITY_DEFAULT 0x80
-#define NVIC_SYSH_PRIORITY_MAX     0xe0
+#define NVIC_SYSH_PRIORITY_MIN     0xe0 /* All bits set in minimum priority */
+#define NVIC_SYSH_PRIORITY_DEFAULT 0x80 /* Midpoint is the default */
+#define NVIC_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
 
 /* Bit-encoded input to lm3s_configgpio() *******************************************/
+
+/* Encoding:
+ * FFFS SPPP IIIn nnnn nnnn nnnn nVPP PBBB
+ *
+ * These bits set the primary function of the pin:
+ * FFFn nnnn nnnn nnnn nnnn nnnn nnnn nnnn
+ */
 
 #define GPIO_FUNC_SHIFT               29                         /* Bit 31-29: GPIO function */
 #define GPIO_FUNC_MASK                (7 << GPIO_FUNC_SHIFT)     /* (See table 9-1 in data sheet) */
@@ -75,23 +82,21 @@
 #define GPIO_FUNC_PFIO                (5 << GPIO_FUNC_SHIFT)     /*   Digital input/output (SSI, UART) */
 #define GPIO_FUNC_ANINPUT             (6 << GPIO_FUNC_SHIFT)     /*   Analog input (Comparator) */
 #define GPIO_FUNC_INTERRUPT           (7 << GPIO_FUNC_SHIFT)     /*   Interrupt function */
+#define GPIO_FUNC_MAX                 GPIO_FUNC_INTERRUPT
 
-#define GPIO_INT_SHIFT                26                         /* Bits 28-26: Interrupt type */
-#define GPIO_INT_MASK                 (7 << GPIO_INT_SHIFT)
-#define GPIO_INT_FALLINGEDGE          (0 << GPIO_INT_SHIFT)      /*   Interrupt on falling edge */
-#define GPIO_INT_RISINGEDGE           (1 << GPIO_INT_SHIFT)      /*   Interrupt on rising edge */
-#define GPIO_INT_BOTHEDGES            (2 << GPIO_INT_SHIFT)      /*   Interrupt on both edges */
-#define GPIO_INT_LOWLEVEL             (3 << GPIO_INT_SHIFT)      /*   Interrupt on low level */
-#define GPIO_INT_HIGHLEVEL            (4 << GPIO_INT_SHIFT)      /*   Interrupt on high level */
+/* That primary may be modified by the following options
+ * nnnS SPPP nnnn nnnn nnnn nnnn nnnn nnnn
+ */
 
-#define GPIO_STRENGTH_SHIFT           24                         /* Bits 25-24: Pad drive strength */
+#define GPIO_STRENGTH_SHIFT           27                         /* Bits 28-27: Pad drive strength */
 #define GPIO_STRENGTH_MASK            (3 << GPIO_STRENGTH_SHIFT)
 #define GPIO_STRENGTH_2MA             (0 << GPIO_STRENGTH_SHIFT) /*   2mA pad drive strength */
 #define GPIO_STRENGTH_4MA             (1 << GPIO_STRENGTH_SHIFT) /*   4mA pad drive strength */
 #define GPIO_STRENGTH_8MA             (2 << GPIO_STRENGTH_SHIFT) /*   8mA pad drive strength */
 #define GPIO_STRENGTH_8MASC           (3 << GPIO_STRENGTH_SHIFT) /*   8mA Pad drive with slew rate control */
+#define GPIO_STRENGTH_MAX             GPIO_STRENGTH_8MASC
 
-#define GPIO_PADTYPE_SHIFT            21                         /* Bits 21-23: Pad type */
+#define GPIO_PADTYPE_SHIFT            24                         /* Bits 26-24: Pad type */
 #define GPIO_PADTYPE_MASK             (7 << GPIO_PADTYPE_SHIFT)
 #define GPIO_PADTYPE_STD              (0 << GPIO_PADTYPE_SHIFT)  /*   Push-pull */
 #define GPIO_PADTYPE_STDWPU           (1 << GPIO_PADTYPE_SHIFT)  /*   Push-pull with weak pull-up */
@@ -101,10 +106,30 @@
 #define GPIO_PADTYPE_ODWPD            (5 << GPIO_PADTYPE_SHIFT)  /*   Open-drain with weak pull-down */
 #define GPIO_PADTYPE_ANALOG           (6 << GPIO_PADTYPE_SHIFT)  /*   Analog comparator */
 
+/* If the pin is an interrupt, then the following options apply
+ * nnnn nnnn IIIn nnnn nnnn nnnn nnnn nnnn
+ */
+
+#define GPIO_INT_SHIFT                21                         /* Bits 23-21: Interrupt type */
+#define GPIO_INT_MASK                 (7 << GPIO_INT_SHIFT)
+#define GPIO_INT_FALLINGEDGE          (0 << GPIO_INT_SHIFT)      /*   Interrupt on falling edge */
+#define GPIO_INT_RISINGEDGE           (1 << GPIO_INT_SHIFT)      /*   Interrupt on rising edge */
+#define GPIO_INT_BOTHEDGES            (2 << GPIO_INT_SHIFT)      /*   Interrupt on both edges */
+#define GPIO_INT_LOWLEVEL             (3 << GPIO_INT_SHIFT)      /*   Interrupt on low level */
+#define GPIO_INT_HIGHLEVEL            (4 << GPIO_INT_SHIFT)      /*   Interrupt on high level */
+
+/* If the pin is an GPIO digital output, then this identifies the initial output value:
+ * nnnn nnnn nnnn nnnn nnnn nnnn nVnn nnnn
+ */
+
 #define GPIO_VALUE_SHIFT              6                          /* Bit 6: If output, inital value of output */
 #define GPIO_VALUE_MASK               (1 << GPIO_VALUE_SHIFT)
 #define GPIO_VALUE_ZERO               (0 << GPIO_VALUE_SHIFT)    /*   Initial value is zero */
 #define GPIO_VALUE_ONE                (1 << GPIO_VALUE_SHIFT)    /*   Initial value is one */
+
+/* This identifies the GPIO port
+ * nnnn nnnn nnnn nnnn nnnn nnnn nnPP Pnnn
+ */
 
 #define GPIO_PORT_SHIFT               3                          /* Bit 3-5:  Port number */
 #define GPIO_PORT_MASK                (7 << GPIO_PORT_SHIFT)
@@ -116,6 +141,10 @@
 #define GPIO_PORTF                    (5 << GPIO_PORT_SHIFT)     /*   GPIOF */
 #define GPIO_PORTG                    (6 << GPIO_PORT_SHIFT)     /*   GPIOG */
 #define GPIO_PORTH                    (7 << GPIO_PORT_SHIFT)     /*   GPIOH */
+
+/* This identifies the bit in the port:
+ * nnnn nnnn nnnn nnnn nnnn nnnn nnnn nBBB
+ */
 
 #define GPIO_NUMBER_SHIFT             0                           /* Bits 0-2: GPIO number: 0-7 */
 #define GPIO_NUMBER_MASK              (7 << GPIO_NUMBER_SHIFT)
@@ -171,24 +200,6 @@
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
-
-static inline uint32 lm3s_gpiobaseaddress(unsigned int port)
-{
-#ifdef CONFIG_ARCH_CHIP_LM3S6918
-  unsigned int portno = (port >> GPIO_PORT_SHIFT) & 7;
-  if (portno < 4)
-    {
-      return LM3S_GPIOA_BASE + 0x1000 * portno;
-    }
-  else
-    {
-      return LM3S_GPIOE_BASE + 0x1000 * portno;
-    }
-#else
-#  error "GPIO register base addresses not known for this LM3S chip"
-  return 0;
-#endif
-}
 
 /************************************************************************************
  * Public Data
@@ -249,7 +260,7 @@ EXTERN void up_clockconfig(void);
  *
  ****************************************************************************/
 
-EXTERN int lm3s_configgpio(uint32 bitset);
+EXTERN int lm3s_configgpio(uint32 cfgset);
 
 /****************************************************************************
  * Name: lm3s_pendsv
@@ -260,6 +271,26 @@ EXTERN int lm3s_configgpio(uint32 bitset);
  ****************************************************************************/
 
 EXTERN int lm3s_pendsv(int irq, FAR void *context);
+
+/****************************************************************************
+ * Name: lm3s_gpiowrite
+ *
+ * Description:
+ *   Write one or zero to the selected GPIO pin
+ *
+ ****************************************************************************/
+
+EXTERN void lm3s_gpiowrite(uint32 pinset, boolean value);
+
+/****************************************************************************
+ * Name: lm3s_gpioread
+ *
+ * Description:
+ *   Read one or zero from the selected GPIO pin
+ *
+ ****************************************************************************/
+
+EXTERN boolean lm3s_gpioread(uint32 pinset, boolean value);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -43,11 +43,11 @@ CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
 		  up_prefetchabort.c up_releasepending.c up_releasestack.c \
 		  up_reprioritizertr.c up_schedulesigaction.c \
 		  up_sigdeliver.c up_syscall.c up_unblocktask.c \
-		  up_undefinedinsn.c up_usestack.c
+		  up_undefinedinsn.c up_usestack.c up_doirq.c
 
 CHIP_ASRCS	= lm3s_context.S
 CHIP_CSRCS	= lm3s_start.c lm3s_syscontrol.c lm3s_irq.c lm3s_pendsv.c \
-		  lm3s_timerisr.c lm3s_lowputc.c lm3s_serial.c
+		  lm3s_gpio.c lm3s_timerisr.c lm3s_lowputc.c lm3s_serial.c
 
 ifdef CONFIG_NET
 CHIP_CSRCS	+= lm3s_ethernet.c

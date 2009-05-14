@@ -40,7 +40,9 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+
 #include <nuttx/irq.h>
+#include <nuttx/arch.h>
 
 #include "up_arch.h"
 #include "os_internal.h"
@@ -173,13 +175,17 @@ void up_irqinitialize(void)
 
   current_regs = NULL;
 
-  /* Attach the PendSV exception handler.  This is used for performing
+  /* Attach the PendSV exception handler and set it to the minimum
+   * prioirity.  The PendSV exception is used for performing
    * context switches.
    */
 
   irq_attach(LMSB_IRQ_PENDSV, lm3s_pendsv);
+#ifdef CONFIG_ARCH_IRQPRIO
+  up_prioritize_irq(LMSB_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN);
+#endif
 
-  /* Attach all processor exceptions (except reset and sys tick) */
+  /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG
   irq_attach(LMSB_IRQ_NMI, lm3s_nmi);
@@ -285,7 +291,7 @@ int up_prioritize_irq(int irq, int priority)
   uint32 regval;
   int shift;
 
-  DEBUGASSERT(irq >= LMSB_IRQ_MPU && irq < NR_IRQS && (unsigned)priority <= NVIC_SYSH_PRIORITY_MAX);
+  DEBUGASSERT(irq >= LMSB_IRQ_MPU && irq < NR_IRQS && (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 
   if (irq < LM3S_IRQ_INTERRUPTS)
     {
