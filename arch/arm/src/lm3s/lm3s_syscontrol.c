@@ -210,10 +210,9 @@ void lm3s_clockconfig(uint32 newrcc, uint32 newrcc2)
   if (((rcc & SYSCON_RCC_MOSCDIS) && !(newrcc & SYSCON_RCC_MOSCDIS)) ||
       ((rcc & SYSCON_RCC_IOSCDIS) && !(newrcc & SYSCON_RCC_IOSCDIS)))
     {
-      /* Enable any selected osciallators */
+      /* Enable any selected osciallators (but don't disable any yet) */
 
-      rcc &= ~RCC_OSCMASK;
-      rcc |= (newrcc & RCC_OSCMASK);
+      rcc &= (~RCC_OSCMASK | (newrcc & RCC_OSCMASK));
       putreg32(rcc, LM3S_SYSCON_RCC);
 
       /* Wait for the newly selected oscillator(s) to settle.  This is tricky because
