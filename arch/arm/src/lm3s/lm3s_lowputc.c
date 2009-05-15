@@ -220,47 +220,61 @@ void up_lowputc(char ch)
 
 void up_lowsetup(void)
 {
+  uint32 regval;
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   uint32 ctl;
-
-  /* Enable the selected console device */
-  /* 1. Disable the UART by clearing the UARTEN bit in the UART CTL register */
-
-  ctl = getreg32(LM3S_CONSOLE_BASE+LM3S_UART_CTL_OFFSET);
-  ctl &= ~UART_CTL_UARTEN;
-  putreg32(ctl, LM3S_CONSOLE_BASE+LM3S_UART_CTL_OFFSET);
-
-  /* 2. Write the integer portion of the BRD to the UART IBRD register */
-
-  putreg32(LM3S_BRDI, LM3S_CONSOLE_BASE+LM3S_UART_IBRD_OFFSET);
-
-  /* 3. Write the fractional portion of the BRD to the UART FBRD register */
-
-  putreg32(LM3S_DIVFRAC, LM3S_CONSOLE_BASE+LM3S_UART_FBRD_OFFSET);
-
-  /* 4. Write the desired serial parameters to the UART LCRH register */
-
-  putreg32(UART_LCRH_VALUE, LM3S_CONSOLE_BASE+LM3S_UART_LCRH_OFFSET);
-
-  /* 5. Enable the UART by setting the UARTEN bit in the UART CTL register */
-
-  ctl |= (UART_CTL_UARTEN|UART_CTL_TXE|UART_CTL_RXE);
-  putreg32(ctl, LM3S_CONSOLE_BASE+LM3S_UART_CTL_OFFSET);
 #endif
 
-  /* Then configure GPIO pins to enable the selected UARTs.  NOTE: The
-   * serial driver later depends on this pin configuration.
+  /* Enable the selected UARTs and configure GPIO pins to need by the
+   * the selected UARTs.  NOTE: The serial driver later depends on
+   * this pin configuration -- whether or not a serial console is selected.
    */
 
 #ifndef CONFIG_UART0_DISABLE
+  regval  = getreg32(LM3S_SYSCON_RCGC1);
+  regval |= SYSCON_RCGC1_UART0;
+  putreg32(regval, LM3S_SYSCON_RCGC1);
+
   lm3s_configgpio(GPIO_UART0_RX);
   lm3s_configgpio(GPIO_UART0_TX);
 #endif
 
 #ifndef CONFIG_UART1_DISABLE
+  regval  = getreg32(LM3S_SYSCON_RCGC1);
+  regval |= SYSCON_RCGC1_UART1;
+  putreg32(regval, LM3S_SYSCON_RCGC1);
+
   lm3s_configgpio(GPIO_UART1_RX);
   lm3s_configgpio(GPIO_UART1_TX);
 #endif
+
+  /* Enable the selected console device */
+
+#if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
+  /* Disable the UART by clearing the UARTEN bit in the UART CTL register */
+
+  ctl = getreg32(LM3S_CONSOLE_BASE+LM3S_UART_CTL_OFFSET);
+  ctl &= ~UART_CTL_UARTEN;
+  putreg32(ctl, LM3S_CONSOLE_BASE+LM3S_UART_CTL_OFFSET);
+
+  /* Write the integer portion of the BRD to the UART IBRD register */
+
+  putreg32(LM3S_BRDI, LM3S_CONSOLE_BASE+LM3S_UART_IBRD_OFFSET);
+
+  /* Write the fractional portion of the BRD to the UART FBRD register */
+
+  putreg32(LM3S_DIVFRAC, LM3S_CONSOLE_BASE+LM3S_UART_FBRD_OFFSET);
+
+  /* Write the desired serial parameters to the UART LCRH register */
+
+  putreg32(UART_LCRH_VALUE, LM3S_CONSOLE_BASE+LM3S_UART_LCRH_OFFSET);
+
+  /* Enable the UART by setting the UARTEN bit in the UART CTL register */
+
+  ctl |= (UART_CTL_UARTEN|UART_CTL_TXE|UART_CTL_RXE);
+  putreg32(ctl, LM3S_CONSOLE_BASE+LM3S_UART_CTL_OFFSET);
+#endif
+
 }
 
 

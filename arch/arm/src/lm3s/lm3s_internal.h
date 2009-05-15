@@ -183,7 +183,7 @@
 #define GPIO_PWM4_CCP    (GPIO_FUNC_PFIO | GPIO_PORTC | 7)       /* PC7: Capture/Compare/PWM4 (CCP4) */
 #define GPIO_UART1_RX    (GPIO_FUNC_PFINPUT | GPIO_PORTD | 2)    /* PD2: UART 1 receive (U1Rx) */
 #define GPIO_UART1_TX    (GPIO_FUNC_PFOUTPUT | GPIO_PORTD | 3)   /* PD3: UART 1 transmit (U1Tx) */
-#define GPIO_SSI1_CLK    (GPIO_FUNC_PFIO1 | GPIO_PORTE | 0)      /* PE0: SSI1 clock (SSI1Clk) */
+#define GPIO_SSI1_CLK    (GPIO_FUNC_PFIO | GPIO_PORTE | 0)       /* PE0: SSI1 clock (SSI1Clk) */
 #define GPIO_SSI1_FSS    (GPIO_FUNC_PFIO | GPIO_PORTE | 1)       /* PE1: SSI1 frame (SSI1Fss) */
 #define GPIO_SSI1_RX     (GPIO_FUNC_PFINPUT | GPIO_PORTE | 2)    /* PE2: SSI1 receive (SSI1Rx) */
 #define GPIO_SSI1_TX     (GPIO_FUNC_PFOUTPUT | GPIO_PORTE | 3)   /* PE3: SSI1 transmit (SSI1Tx) */
