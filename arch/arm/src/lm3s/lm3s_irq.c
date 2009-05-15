@@ -41,6 +41,8 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <debug.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
@@ -72,6 +74,83 @@ uint32 *current_regs;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: lm3s_nmi, lm3s_hardfault, lm3s_mpu, lm3s_busfault, lm3s_usagefault,
+ *       lm3s_svcall, lm3s_dbgmonitor, lm3s_pendsv, lm3s_reserved
+ *
+ * Description:
+ *   Handlers for various execptions.  None are handled and all are fatal
+ *   error conditions.  The only advantage these provided over the default
+ *   unexpected interrupt handler is that they provide a diagnostic output.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG
+static int lm3s_nmi(int irq, FAR void *context)
+{
+  (void)irqsave();
+  dbg("PANIC!!! NMI received\n");
+  PANIC(OSERR_UNEXPECTEDISR);
+  return 0;
+}
+
+static int lm3s_hardfault(int irq, FAR void *context)
+{
+  (void)irqsave();
+  dbg("PANIC!!! Hard fault received\n");
+  PANIC(OSERR_UNEXPECTEDISR);
+  return 0;
+}
+
+static int lm3s_mpu(int irq, FAR void *context)
+{
+  (void)irqsave();
+  dbg("PANIC!!! MPU interrupt received\n");
+  PANIC(OSERR_UNEXPECTEDISR);
+  return 0;
+}
+
+static int lm3s_busfault(int irq, FAR void *context)
+{
+  (void)irqsave();
+  dbg("PANIC!!! Bus fault recived\n");
+  PANIC(OSERR_UNEXPECTEDISR);
+  return 0;
+}
+
+static int lm3s_usagefault(int irq, FAR void *context)
+{
+  (void)irqsave();
+  dbg("PANIC!!! Usage fault received\n");
+  PANIC(OSERR_UNEXPECTEDISR);
+  return 0;
+}
+
+static int lm3s_svcall(int irq, FAR void *context)
+{
+  (void)irqsave();
+  dbg("PANIC!!! SVCALL received\n");
+  PANIC(OSERR_UNEXPECTEDISR);
+  return 0;
+}
+
+static int lm3s_dbgmonitor(int irq, FAR void *context)
+{
+  (void)irqsave();
+  dbg("PANIC!!! Debug Monitor receieved\n");
+  PANIC(OSERR_UNEXPECTEDISR);
+  return 0;
+}
+
+static int lm3s_reserved(int irq, FAR void *context)
+{
+  (void)irqsave();
+  dbg("PANIC!!! Reserved interrupt\n");
+  PANIC(OSERR_UNEXPECTEDISR);
+  return 0;
+}
+#endif
 
 /****************************************************************************
  * Name: lml3s_irqinfo
@@ -320,81 +399,5 @@ int up_prioritize_irq(int irq, int priority)
   regval     |= (priority << shift);
   putreg32(regval, regaddr);
   return OK;
-}
-#endif
-
-/****************************************************************************
- * Name: lm3s_nmi, lm3s_hardfault, lm3s_mpu, lm3s_busfault, lm3s_usagefault,
- *       lm3s_svcall, lm3s_dbgmonitor, lm3s_pendsv, lm3s_reserved
- *
- * Description:
- *   Handlers for various execptions.  None are handler and all are fatal
- *   error conditions.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG
-int lm3s_nmi(int irq, FAR void *context)
-{
-  (void)irqsave();
-  dbg("PANIC!!! NMI received\n");
-  PANIC(OSERR_UNEXPECTEDISR);
-  return 0;
-}
-
-int lm3s_hardfault(int irq, FAR void *context)
-{
-  (void)irqsave();
-  dbg("PANIC!!! Hard fault received\n");
-  PANIC(OSERR_UNEXPECTEDISR);
-  return 0;
-}
-
-int lm3s_mpu(int irq, FAR void *context)
-{
-  (void)irqsave();
-  dbg("PANIC!!! MPU interrupt received\n");
-  PANIC(OSERR_UNEXPECTEDISR);
-  return 0;
-}
-
-int lm3s_busfault(int irq, FAR void *context)
-{
-  (void)irqsave();
-  dbg("PANIC!!! Bus fault recived\n");
-  PANIC(OSERR_UNEXPECTEDISR);
-  return 0;
-}
-
-int lm3s_usagefault(int irq, FAR void *context)
-{
-  (void)irqsave();
-  dbg("PANIC!!! Usage fault received\n");
-  PANIC(OSERR_UNEXPECTEDISR);
-  return 0;
-}
-
-int lm3s_svcall(int irq, FAR void *context)
-{
-  (void)irqsave();
-  dbg("PANIC!!! SVCALL received\n");
-  PANIC(OSERR_UNEXPECTEDISR);
-  return 0;
-}
-
-int lm3s_dbgmonitor(int irq, FAR void *context)
-{
-  (void)irqsave();
-  dbg("PANIC!!! Debug Monitor receieved\n");
-  PANIC(OSERR_UNEXPECTEDISR);
-  return 0;
-}
-
-int lm3s_reserved(int irq, FAR void *context)
-{
-  (void)irqsave();
-  dbg("PANIC!!! Reserved interrupt\n");
-  PANIC(OSERR_UNEXPECTEDISR);
-  return 0;
 }
 #endif
