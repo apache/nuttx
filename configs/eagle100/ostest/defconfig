@@ -131,6 +131,9 @@ CONFIG_LM3S_ETHLEDS=n
 # CONFIG_INTELHEX_BINARY - make the Intel HEX binary format
 #   used with many different loaders using the GNU objcopy program
 #   Should not be selected if you are not using the GNU toolchain.
+# CONFIG_MOTOROLA_SREC - make the Motorola S-Record binary format
+#   used with many different loaders using the GNU objcopy program
+#   Should not be selected if you are not using the GNU toolchain.
 # CONFIG_RAW_BINARY - make a raw binary format file used with many
 #   different loaders using the GNU objcopy program.  This option
 #   should not be selected if you are not using the GNU toolchain.
@@ -138,7 +141,8 @@ CONFIG_LM3S_ETHLEDS=n
 #
 CONFIG_RRLOAD_BINARY=n
 CONFIG_INTELHEX_BINARY=n
-CONFIG_RAW_BINARY=n
+CONFIG_MOTOROLA_SREC=n
+CONFIG_RAW_BINARY=y
 CONFIG_HAVE_LIBM=n
 
 #

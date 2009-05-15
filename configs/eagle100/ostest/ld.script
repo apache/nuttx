@@ -52,10 +52,12 @@ SECTIONS
 {
 	.text : {
 		_stext = ABSOLUTE(.);
+		*(.vectors)
 		*(.text)
 		*(.fixup)
 		*(.gnu.warning)
 		*(.rodata)
+		*(.rodata.str1.1)
 		*(.glue_7)
 		*(.glue_7t)
 		*(.got)			/* Global offset table		*/
