@@ -331,9 +331,9 @@
 #define SYSCON_RCC_BYPASS             (1 << 11) /* Bit 11: PLL Bypass */
 #define SYSCON_RCC_PWRDN              (1 << 13) /* Bit 13: PLL Power Down */
 #define SYSCON_RCC_USESYSDIV          (1 << 22) /* Bit 22: Enable System Clock Divider */
-#define SYSCON_RCC_SYSDIV_SHIFT       26        /* Bits 26-23: System Clock Divisor */
+#define SYSCON_RCC_SYSDIV_SHIFT       23        /* Bits 26-23: System Clock Divisor */
 #define SYSCON_RCC_SYSDIV_MASK        (0x0f << SYSCON_RCC_SYSDIV_SHIFT)
-#  define SYSCON_RCC_SYSDIV(n)        ((n-1) << SYSCON_RCC_SYSDIV_SHIFT)
+#  define SYSCON_RCC_SYSDIV(n)        (((n)-1) << SYSCON_RCC_SYSDIV_SHIFT)
 #define SYSCON_RCC_ACG                (1 << 27) /* Bit 27: Auto Clock Gating */
 
 /* XTAL to PLL Translation (PLLCFG), offset 0x064 */

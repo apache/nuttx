@@ -79,7 +79,7 @@
 #define DEN_0                  0
 #define DEN_X                  0
 
-#define PUR_SHIFT              2
+#define PUR_SHIFT              1
 #define PUR_1                  (1 << PUR_SHIFT)   /* Set/clear bit in GPIO PUR register */
 #define PUR_0                  0
 #define PUR_X                  0
@@ -316,7 +316,7 @@ static inline void lm3s_gpiopadstrength(uint32 base, uint32 pin, uint32 cfgset)
            * DRV8 bit in the GPIODR8R register are automatically cleared by hardware."
            */
 
-          regoffset = LM3S_GPIOA_DR2R;
+          regoffset = LM3S_GPIO_DR2R_OFFSET;
         }
         break;
 
@@ -329,7 +329,7 @@ static inline void lm3s_gpiopadstrength(uint32 base, uint32 pin, uint32 cfgset)
            * in the GPIO DR8R register are automatically cleared by hardware."
            */
 
-          regoffset = LM3S_GPIOA_DR4R;
+          regoffset = LM3S_GPIO_DR4R_OFFSET;
         }
         break;
 
@@ -354,7 +354,7 @@ static inline void lm3s_gpiopadstrength(uint32 base, uint32 pin, uint32 cfgset)
            * DRV4 bit in the GPIO DR4R register are automatically cleared by hardware."
            */
 
-          regoffset = LM3S_GPIOA_DR8R;
+          regoffset = LM3S_GPIO_DR8R_OFFSET;
         }
         break;
     }
