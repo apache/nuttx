@@ -153,14 +153,14 @@
 #define LM3S_REMAINDER  (SYSCLK_FREQUENCY - LM3S_BRDDEN * LM3S_BRDI)
 #define LM3S_DIVFRAC    ((LM3S_REMAINDER * 64 + (LM3S_BRDDEN/2)) / LM3S_BRDDEN)
 
-/* For example: LM3S_CONSOLE_BAUD = 115,200, SYSCLK_FREQUENCY = 20,000,000:
+/* For example: LM3S_CONSOLE_BAUD = 115,200, SYSCLK_FREQUENCY = 50,000,000:
  *
  * LM3S_BRDDEN    = (16 * 115,200)                           = 1,843,200
- * LM3S_BRDI      = 20,000,000 / 1,843,200                   = 10
- * LM3S_REMAINDER = 20,000,000 - 1,843,200 * 10              = 1,568,000
- * LM3S_DIVFRAC   = (1,568,000 * 64 + 921,600) / 1,843,200   = 54
+ * LM3S_BRDI      = 50,000,000 / 1,843,200                   = 27
+ * LM3S_REMAINDER = 50,000,000 - 1,843,200 * 27              = 233,600
+ * LM3S_DIVFRAC   = (233,600 * 64 + 921,600) / 1,843,200     = 8
  *
- * Which should yied BAUD = 20,000,000 / (16 * (10 + 54/64)) = 115273.8
+ * Which should yied BAUD = 50,000,000 / (16 * (27 + 8/64)) = 115207.37
  */
 
 /**************************************************************************

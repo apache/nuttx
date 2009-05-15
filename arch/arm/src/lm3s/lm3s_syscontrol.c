@@ -158,7 +158,7 @@ static inline void lm3s_plllock(void)
     {
       /* Check if the PLL is locked on */
 
-      if (getreg32(LM3S_SYSCON_RIS) & SYSCON_IMC_PLLLIM)
+      if ((getreg32(LM3S_SYSCON_RIS) & SYSCON_RIS_PLLLRIS) != 0)
         {
           /* Yes.. return now */
 
@@ -212,7 +212,8 @@ void lm3s_clockconfig(uint32 newrcc, uint32 newrcc2)
     {
       /* Enable any selected osciallators */
 
-      rcc &= (~RCC_OSCMASK|(newrcc & RCC_OSCMASK));
+      rcc &= ~RCC_OSCMASK;
+      rcc |= (newrcc & RCC_OSCMASK);
       putreg32(rcc, LM3S_SYSCON_RCC);
 
       /* Wait for the newly selected oscillator(s) to settle.  This is tricky because
@@ -254,7 +255,7 @@ void lm3s_clockconfig(uint32 newrcc, uint32 newrcc2)
 
   lm3s_delay(16);
 
-  /* Set the requested system deivider and disable the non-selected osciallators */
+  /* Set the requested system divider and disable the non-selected osciallators */
 
   rcc &= ~RCC_DIVMASK;
   rcc |= newrcc & RCC_DIVMASK;
