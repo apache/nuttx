@@ -89,6 +89,7 @@ int lm3s_pendsv(int irq, FAR void *context)
    * the TCB register save area.
    */
 
+  svdbg("Command: %d regs: %08x\n", svregs[REG_R0], tcbregs);
   switch (svregs[REG_R0])
     {
       /* R0=0:  This is a save context command.  In this case, we simply need

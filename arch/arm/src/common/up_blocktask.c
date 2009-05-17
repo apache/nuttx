@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/common/up_blocktask.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,12 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+
 #include <sched.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
+
 #include "os_internal.h"
 #include "up_internal.h"
 
@@ -129,7 +132,7 @@ void up_block_task(_TCB *tcb, tstate_t task_state)
                * Just copy the current_regs into the OLD rtcb.
                */
 
-               up_copystate(rtcb->xcp.regs, current_regs);
+               up_savestate(rtcb->xcp.regs);
 
               /* Restore the exception context of the rtcb at the (new) head 
                * of the g_readytorun task list.
@@ -139,7 +142,7 @@ void up_block_task(_TCB *tcb, tstate_t task_state)
 
               /* Then switch contexts */
 
-              up_copystate(current_regs, rtcb->xcp.regs);
+              up_restorestate(rtcb->xcp.regs);
             }
 
           /* Copy the user C context into the TCB at the (old) head of the

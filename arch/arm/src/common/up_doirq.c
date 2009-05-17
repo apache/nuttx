@@ -66,7 +66,11 @@
  * Public Functions
  ****************************************************************************/
 
-uint32 *up_doirq(int irq, uint32* regs)
+#ifdef __thumb2__
+uint32 *up_doirq(int irq, uint32 *regs)
+#else
+void up_doirq(int irq, uint32 *regs)
+#endif
 {
   up_ledon(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
@@ -94,8 +98,9 @@ uint32 *up_doirq(int irq, uint32* regs)
         * of context switching for te particular chip.
         */
 
+#ifdef __thumb2__
        regs = current_regs;
-
+#endif
        /* Indicate that we are no long in an interrupt handler */
 
        current_regs = NULL;
@@ -108,5 +113,7 @@ uint32 *up_doirq(int irq, uint32* regs)
     }
   up_ledoff(LED_INIRQ);
 #endif
+#ifdef __thumb2__
   return regs;
+#endif
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_schedulesigaction.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -137,6 +137,12 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
            * interrupted task is the same as the one that
            * must receive the signal, then we will have to modify
            * the return state as well as the state in the TCB.
+           *
+           * Hmmm... there looks like a latent bug here: The following
+           * logic would fail in the strange case where we are in an
+           * interrupt handler, the thread is signalling itself, but
+           * a context switch to another task has occurred so that
+           * current_regs does not refer to the thread at g_readytorun.head!
            */
 
           else
@@ -171,7 +177,7 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
                * is the same as the interrupt return context.
                */
 
-              up_copystate(tcb->xcp.regs, current_regs);
+              up_savestate(tcb->xcp.regs);
             }
         }
 

@@ -151,6 +151,7 @@ void __start(void)
 
   /* Then start NuttX */
 
+  showprogress('\r');
   showprogress('\n');
   os_start();
 

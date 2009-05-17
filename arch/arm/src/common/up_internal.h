@@ -71,6 +71,20 @@
 # define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
+/* Macros to handle saving and restore interrupt state.  In the current ARM
+ * model, the state is always copied to and from the stack and TCB.  In the
+ * Cortex-M3 model, the state is copied from the stack to the TCB, but only
+ * a referenced is passed to get the the state from the TCB.
+ */
+
+#ifdef __thumb2__
+#  define up_savestate(regs)    up_copystate(regs, current_regs)
+#  define up_restorestate(regs) (current_regs = regs)
+#else
+#  define up_savestate(regs)    up_copystate(regs, current_regs)
+#  define up_restorestate(regs) up_copystate(current_regs, regs)
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -122,7 +136,11 @@ extern void up_boot(void);
 extern void up_copystate(uint32 *dest, uint32 *src);
 extern void up_dataabort(uint32 *regs);
 extern void up_decodeirq(uint32 *regs);
+#ifdef __thumb2__
 extern uint32 *up_doirq(int irq, uint32 *regs);
+#else
+extern void up_doirq(int irq, uint32 *regs);
+#endif
 extern void up_fullcontextrestore(uint32 *regs) __attribute__ ((noreturn));
 extern void up_irqinitialize(void);
 extern void up_prefetchabort(uint32 *regs);

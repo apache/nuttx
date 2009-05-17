@@ -178,13 +178,25 @@ static inline void irqrestore(irqstate_t primask)
 
   __asm__ __volatile__
     (
-     "\ttst    %0, #1\n"
-     "\tbne    1f\n"
-     "\tcpsie  i\n"
-     "1:\n"
-     :
-     : "r" (primask)
-     : "memory");
+      "\ttst    %0, #1\n"
+      "\tbne    1f\n"
+      "\tcpsie  i\n"
+      "1:\n"
+      :
+      : "r" (primask)
+      : "memory");
+}
+
+/* Get the basepri register */
+
+static inline void setbasepri(uint32 basepri)
+{
+  __asm__ __volatile__
+    (
+      "\msr basepri, %0\n"
+      :
+      : "r" (basepri)
+      : "memory");
 }
 
 #endif /* __ASSEMBLY__ */

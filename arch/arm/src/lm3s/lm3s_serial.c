@@ -39,11 +39,13 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+
 #include <unistd.h>
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial.h>
@@ -52,8 +54,6 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
-
-#ifdef CONFIG_USE_SERIALDRIVER
 
 /****************************************************************************
  * Definitions
@@ -81,6 +81,12 @@
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef HAVE_CONSOLE
 #endif
+
+/* If we are not using the serial driver for the console, then we
+ * still must provide some minimal implementation of up_putc.
+ */
+
+#ifdef CONFIG_USE_SERIALDRIVER
 
 /* Which UART with be tty0/console and which tty1? */
 
@@ -796,7 +802,7 @@ static boolean up_txempty(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************

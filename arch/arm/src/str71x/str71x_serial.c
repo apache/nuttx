@@ -54,8 +54,6 @@
 #include "up_internal.h"
 #include "str71x_internal.h"
 
-#ifdef CONFIG_USE_SERIALDRIVER
-
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -73,10 +71,16 @@
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE) || defined(CONFIG_UART1_SERIAL_CONSOLE) ||\
    defined(CONFIG_UART2_SERIAL_CONSOLE) || defined(CONFIG_UART3_SERIAL_CONSOLE)
-#  define HAVE_CONSOLE
+#  define HAVE_CONSOLE 1
 #else
 #  undef HAVE_CONSOLE
 #endif
+
+/* If we are not using the serial driver for the console, then we
+ * still must provide some minimal implementation of up_putc().
+ */
+
+#ifdef CONFIG_USE_SERIALDRIVER
 
 /* Which UART with be tty0/console and which tty1?  tty2? tty3? */
 
@@ -855,7 +859,7 @@ static boolean up_txempty(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************

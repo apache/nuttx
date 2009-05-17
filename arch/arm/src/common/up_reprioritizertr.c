@@ -142,7 +142,7 @@ void up_reprioritize_rtr(_TCB *tcb, ubyte priority)
                * Just copy the current_regs into the OLD rtcb.
                */
 
-               up_copystate(rtcb->xcp.regs, current_regs);
+               up_savestate(rtcb->xcp.regs);
 
               /* Restore the exception context of the rtcb at the (new) head 
                * of the g_readytorun task list.
@@ -153,7 +153,7 @@ void up_reprioritize_rtr(_TCB *tcb, ubyte priority)
 
               /* Then switch contexts */
 
-              up_copystate(current_regs, rtcb->xcp.regs);
+              up_restorestate(rtcb->xcp.regs);
             }
 
           /* Copy the exception context into the TCB at the (old) head of the
