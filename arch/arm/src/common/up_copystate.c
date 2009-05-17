@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/common/up_copystate.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,9 +69,22 @@
 void up_copystate(uint32 *dest, uint32 *src)
 {
   int i;
-  for (i = 0; i < XCPTCONTEXT_REGS; i++)
+
+  /* In the current ARM model, the state is always copied to and from the
+   * stack and TCB.  In the Cortex-M3 model, the state is copied from the
+   * stack to the TCB, but only a referenced is passed to get the the state
+   * from the TCB.  So the following check makes sense only for the Cortex-M3
+   * model:
+   */
+
+#ifdef __thumb2__
+  if (src != dest)
+#endif
     {
-      *dest++ = *src++;
+      for (i = 0; i < XCPTCONTEXT_REGS; i++)
+        {
+          *dest++ = *src++;
+        }
     }
 }
 

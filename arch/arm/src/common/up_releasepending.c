@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/common/up_releasepending.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,7 +94,7 @@ void up_release_pending(void)
            * Just copy the current_regs into the OLD rtcb.
            */
 
-           up_copystate(rtcb->xcp.regs, current_regs);
+           up_savestate(rtcb->xcp.regs);
 
           /* Restore the exception context of the rtcb at the (new) head 
            * of the g_readytorun task list.
@@ -105,7 +105,7 @@ void up_release_pending(void)
 
           /* Then switch contexts */
 
-          up_copystate(current_regs, rtcb->xcp.regs);
+          up_restorestate(rtcb->xcp.regs);
         }
 
       /* Copy the exception context into the TCB of the task that

@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_sigdeliver.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,6 +109,7 @@ void up_sigdeliver(void)
 #else
   regs[REG_CPSR]       = rtcb->xcp.saved_cpsr;
 #endif
+
   /* Get a local copy of the sigdeliver function pointer.
    * we do this so that we can nullify the sigdeliver
    * function point in the TCB and accept more signal

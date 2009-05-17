@@ -55,6 +55,12 @@
  * Definitions
  ****************************************************************************/
 
+/* Enable debug features that are probably on desireable during bringup */
+
+#define LM2S_IRQ_DEBUG 1
+
+/* Get a 32-bit version of the default priority */
+
 #define DEFPRIORITY32 \
   (NVIC_SYSH_PRIORITY_DEFAULT << 24 |\
    NVIC_SYSH_PRIORITY_DEFAULT << 16 |\
@@ -74,6 +80,39 @@ uint32 *current_regs;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: lm3s_dumpnvic
+ *
+ * Description:
+ *   Dump some interesting NVIC registers
+ *
+ ****************************************************************************/
+
+#if defined(LM2S_IRQ_DEBUG) && defined (CONFIG_DEBUG)
+static void lm3s_dumpnvic(const char *msg, int irq)
+{
+  slldbg("NVIC (%s, irq=%d):\n", msg, irq);
+  slldbg("  INTCTRL:    %08x VECTAB: %08x\n",
+         getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
+  slldbg("  IRQ ENABLE: %08x %08x\n",
+         getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE));
+  slldbg("  SYSH_PRIO:  %08x %08x %08x\n",
+         getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
+         getreg32(NVIC_SYSH12_15_PRIORITY));
+  slldbg("  IRQ PRIO:   %08x %08x %08x %08x\n", 
+        getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
+        getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
+  slldbg("              %08x %08x %08x %08x\n", 
+        getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
+        getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
+  slldbg("              %08x %08x %08x %08x\n", 
+        getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
+        getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
+}
+#else
+#  define lm3s_dumpnvic(msg, irq)
+#endif
 
 /****************************************************************************
  * Name: lm3s_nmi, lm3s_hardfault, lm3s_mpu, lm3s_busfault, lm3s_usagefault,
@@ -217,7 +256,7 @@ static int lml3s_irqinfo(int irq, uint32 *regaddr, uint32 *bit)
 }
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -233,6 +272,10 @@ void up_irqinitialize(void)
 
   /* Set all interrrupts (and exceptions) to the default priority */
 
+  putreg32(DEFPRIORITY32, NVIC_SYSH4_7_PRIORITY);
+  putreg32(DEFPRIORITY32, NVIC_SYSH8_11_PRIORITY);
+  putreg32(DEFPRIORITY32, NVIC_SYSH12_15_PRIORITY);
+
   putreg32(DEFPRIORITY32, NVIC_IRQ0_3_PRIORITY);
   putreg32(DEFPRIORITY32, NVIC_IRQ4_7_PRIORITY);
   putreg32(DEFPRIORITY32, NVIC_IRQ8_11_PRIORITY);
@@ -245,10 +288,6 @@ void up_irqinitialize(void)
   putreg32(DEFPRIORITY32, NVIC_IRQ36_39_PRIORITY);
   putreg32(DEFPRIORITY32, NVIC_IRQ40_43_PRIORITY);
   putreg32(DEFPRIORITY32, NVIC_IRQ44_47_PRIORITY);
-  putreg32(DEFPRIORITY32, NVIC_IRQ48_51_PRIORITY);
-  putreg32(DEFPRIORITY32, NVIC_IRQ52_55_PRIORITY);
-  putreg32(DEFPRIORITY32, NVIC_IRQ56_59_PRIORITY);
-  putreg32(DEFPRIORITY32, NVIC_IRQ60_63_PRIORITY);
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
@@ -272,7 +311,7 @@ void up_irqinitialize(void)
 
   irq_attach(LMSB_IRQ_PENDSV, lm3s_pendsv);
 #ifdef CONFIG_ARCH_IRQPRIO
-  up_prioritize_irq(LMSB_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN);
+/* up_prioritize_irq(LMSB_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
 
   /* Attach all other processor exceptions (except reset and sys tick) */
@@ -288,6 +327,8 @@ void up_irqinitialize(void)
   irq_attach(LMSB_IRQ_RESERVED, lm3s_reserved);
 #endif
 
+  lm3s_dumpnvic("inital", NR_IRQS);
+
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
   /* Initialize FIQs */
@@ -298,6 +339,7 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts */
 
+  setbasepri(0);
   irqrestore(0);
 #endif
 }
@@ -324,6 +366,7 @@ void up_disable_irq(int irq)
       regval &= ~bit;
       putreg32(regval, regaddr);
     }
+  lm3s_dumpnvic("disable", irq);
 }
 
 /****************************************************************************
@@ -348,6 +391,7 @@ void up_enable_irq(int irq)
       regval |= bit;
       putreg32(regval, regaddr);
     }
+  lm3s_dumpnvic("enable", irq);
 }
 
 /****************************************************************************
@@ -385,6 +429,7 @@ int up_prioritize_irq(int irq, int priority)
 
   if (irq < LM3S_IRQ_INTERRUPTS)
     {
+      irq    -= 4;
       regaddr = NVIC_SYSH_PRIORITY(irq);
     }
   else
@@ -398,6 +443,8 @@ int up_prioritize_irq(int irq, int priority)
   regval     &= ~(0xff << shift);
   regval     |= (priority << shift);
   putreg32(regval, regaddr);
+
+  lm3s_dumpnvic("prioritize", irq);
   return OK;
 }
 #endif
