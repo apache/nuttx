@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/common/up_initialstate.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,9 +40,15 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <string.h>
+
 #include <nuttx/arch.h>
+
 #include "up_internal.h"
 #include "up_arch.h"
+
+#ifdef __thumb2__
+#  include "cortexm3_psr.h"
+#endif
 
 /****************************************************************************
  * Private Definitions
@@ -81,18 +87,36 @@ void up_initial_state(_TCB *tcb)
   /* Initialize the initial exception register context structure */
 
   memset(xcp, 0, sizeof(struct xcptcontext));
+
+  /* Save the initial stack point */
+
   xcp->regs[REG_SP]      = (uint32)tcb->adj_stack_ptr;
-  xcp->regs[REG_PC]      = (uint32)tcb->start;
 
 #ifdef __thumb2__
+  /* Save the task entry point (stripping off the thumb bit) */
+
+  xcp->regs[REG_PC]      = (uint32)tcb->start & ~1;
+  
+  /* Specify thumb mode */
+
+  xcp->regs[REG_XPSR]    = CORTEXM3_XPSR_T;
+
+  /* Enable or disable interrupts, based on user configuration */
+
 # ifdef CONFIG_SUPPRESS_INTERRUPTS
   xcp->regs[REG_PRIMASK] = 1;
 # endif
-#else
+#else /* __thumb2__ */
+  /* Save the task entry point */
+
+  xcp->regs[REG_PC]      = (uint32)tcb->start;
+
+  /* Enable or disable interrupts, based on user configuration */
+
 # ifdef CONFIG_SUPPRESS_INTERRUPTS
   xcp->regs[REG_CPSR]    = SVC_MODE | PSR_I_BIT | PSR_F_BIT;
 # else
   xcp->regs[REG_CPSR]    = SVC_MODE | PSR_F_BIT;
 # endif
-#endif
+#endif /* __thumb2__ */
 }
