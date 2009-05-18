@@ -84,6 +84,13 @@ ARM/i.MX1-specific Configuration Options
 
 	CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 
+	CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
+	   cause a 100 second delay during boot-up.  This 100 second delay
+	   serves no purpose other than it allows you to calibratre
+	   CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
+	   the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
+	   the delay actually is 100 seconds.
+
   IMX specific device driver settings
 
 	CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
