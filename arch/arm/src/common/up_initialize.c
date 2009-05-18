@@ -52,10 +52,6 @@
  * Definitions
  ****************************************************************************/
 
-/* Define to enable timing loop calibration */
-
-#undef CONFIG_ARM_CALIBRATION
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -74,16 +70,16 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARM_CALIBRATION) & defined(CONFIG_DEBUG)
+#if defined(CONFIG_ARCH_CALIBRATION) && defined(CONFIG_DEBUG)
 static void up_calibratedelay(void)
 {
   int i;
-  slldbg("Beginning 100s delay\n");
+  lldbg("Beginning 100s delay\n");
   for (i = 0; i < 100; i++)
     {
       up_mdelay(1000);
     }
-  slldbg("End 100s delay\n");
+  lldbg("End 100s delay\n");
 }
 #else
 # define up_calibratedelay()
