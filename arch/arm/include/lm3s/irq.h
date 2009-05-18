@@ -59,19 +59,19 @@
 
 /* Processor Exceptions (vectors 0-15) */
 
-#define LMSB_IRQ_RESERVED     (0) /* Reserved vector (only used with CONFIG_DEBUG) */
+#define LM3S_IRQ_RESERVED     (0) /* Reserved vector (only used with CONFIG_DEBUG) */
                                   /* Vector  0: Reset stack pointer value */
                                   /* Vector  1: Reset (not handler as an IRQ) */
-#define LMSB_IRQ_NMI          (2) /* Vector  2: Non-Maskable Interrupt (NMI) */
-#define LMSB_IRQ_HARDFAULT    (3) /* Vector  3: Hard fault */
-#define LMSB_IRQ_MPU          (4) /* Vector  4: Memory management (MPU) */
-#define LMSB_IRQ_BUSFAULT     (5) /* Vector  5: Bus fault */
-#define LMSB_IRQ_USAGEFAULT   (6) /* Vector  6: Usage fault */
-#define LMSB_IRQ_SVCALL      (11) /* Vector 11: SVC call */
-#define LMSB_IRQ_DBGMONITOR  (12) /* Vector 12: Debug Monitor */
+#define LM3S_IRQ_NMI          (2) /* Vector  2: Non-Maskable Interrupt (NMI) */
+#define LM3S_IRQ_HARDFAULT    (3) /* Vector  3: Hard fault */
+#define LM3S_IRQ_MPU          (4) /* Vector  4: Memory management (MPU) */
+#define LM3S_IRQ_BUSFAULT     (5) /* Vector  5: Bus fault */
+#define LM3S_IRQ_USAGEFAULT   (6) /* Vector  6: Usage fault */
+#define LM3S_IRQ_SVCALL      (11) /* Vector 11: SVC call */
+#define LM3S_IRQ_DBGMONITOR  (12) /* Vector 12: Debug Monitor */
                                   /* Vector 13: Reserved */
-#define LMSB_IRQ_PENDSV      (14) /* Vector 14: Pendable system service request */
-#define LMSB_IRQ_SYSTICK     (15) /* Vector 15: System tick */
+#define LM3S_IRQ_PENDSV      (14) /* Vector 14: Pendable system service request */
+#define LM3S_IRQ_SYSTICK     (15) /* Vector 15: System tick */
 
 /* External interrupts (vectors >= 16) */
 

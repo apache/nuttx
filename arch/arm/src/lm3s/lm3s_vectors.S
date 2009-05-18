@@ -60,6 +60,13 @@
 #define IDLE_STACK      (_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
 #define HEAP_BASE       (_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
 
+/* The Cortex-M3 return from interrupt is unusual.  We provide the following special
+ * address to the BX instruction.  The particular value also forces a return to
+ * thread mode and covers state from the main stack point, the MSP (vs. the MSP).
+ */
+
+#define EXC_RETURN      0xfffffff9
+
 /************************************************************************************
  * Global Symbols
  ************************************************************************************/
@@ -82,6 +89,7 @@
  */
 
 	.macro	HANDLER, label, irqno
+	.thumb_func
 \label:
 	mov	r0, #\irqno
 	b	lm3s_irqcommon
@@ -98,7 +106,9 @@
         .type		lm3s_vectors, function
 
 lm3s_vectors:
+
 /* Processor Exceptions */
+
 	.word	IDLE_STACK		/* Vector  0: Reset stack pointer */
 	.word	__start			/* Vector  1: Reset vector */
 	.word	lm3s_nmi		/* Vector  2: Non-Maskable Interrupt (NMI) */
@@ -185,17 +195,18 @@ lm3s_vectors:
 
 	.text
         .type   handlers, function
+        .thumb_func
 handlers:
-	HANDLER	lm3s_reserved, LMSB_IRQ_RESERVED	/* Unexpected/reserved vector */
-	HANDLER lm3s_nmi, LMSB_IRQ_NMI                  /* Vector  2: Non-Maskable Interrupt (NMI) */
-	HANDLER lm3s_hardfault, LMSB_IRQ_HARDFAULT      /* Vector  3: Hard fault */
-	HANDLER lm3s_mpu, LMSB_IRQ_MPU                  /* Vector  4: Memory management (MPU) */
-	HANDLER lm3s_busfault, LMSB_IRQ_BUSFAULT        /* Vector  5: Bus fault */
-	HANDLER lm3s_usagefault, LMSB_IRQ_USAGEFAULT    /* Vector  6: Usage fault */
-	HANDLER lm3s_svcall, LMSB_IRQ_SVCALL            /* Vector 11: SVC call */
-	HANDLER lm3s_dbgmonitor, LMSB_IRQ_DBGMONITOR    /* Vector 12: Debug Monitor */
-	HANDLER lm3s_pendsv, LMSB_IRQ_PENDSV            /* Vector 14: Penable system service request */
-	HANDLER lm3s_systick, LMSB_IRQ_SYSTICK          /* Vector 15: System tick */
+	HANDLER	lm3s_reserved, LM3S_IRQ_RESERVED	/* Unexpected/reserved vector */
+	HANDLER lm3s_nmi, LM3S_IRQ_NMI                  /* Vector  2: Non-Maskable Interrupt (NMI) */
+	HANDLER lm3s_hardfault, LM3S_IRQ_HARDFAULT      /* Vector  3: Hard fault */
+	HANDLER lm3s_mpu, LM3S_IRQ_MPU                  /* Vector  4: Memory management (MPU) */
+	HANDLER lm3s_busfault, LM3S_IRQ_BUSFAULT        /* Vector  5: Bus fault */
+	HANDLER lm3s_usagefault, LM3S_IRQ_USAGEFAULT    /* Vector  6: Usage fault */
+	HANDLER lm3s_svcall, LM3S_IRQ_SVCALL            /* Vector 11: SVC call */
+	HANDLER lm3s_dbgmonitor, LM3S_IRQ_DBGMONITOR    /* Vector 12: Debug Monitor */
+	HANDLER lm3s_pendsv, LM3S_IRQ_PENDSV            /* Vector 14: Penable system service request */
+	HANDLER lm3s_systick, LM3S_IRQ_SYSTICK          /* Vector 15: System tick */
 
 #ifdef CONFIG_ARCH_CHIP_LM3S6918
 	HANDLER	lm3s_gpioa, LM3S_IRQ_GPIOA		/* Vector 16: GPIO Port A */
@@ -245,17 +256,18 @@ handlers:
  *      REG_R3
  *      REG_R2
  *      REG_R1
- * PSP->REG_R0
+ * MSP->REG_R0
  *
  * and R0 contains the IRQ number
  */
 
 lm3s_irqcommon:
+
 	/* Complete the context save */
 
-	mrs	r1, psp			/* R1=The process stack pointer */
-	mov	r2, r1			/* R2=Copy of the process stack pointer */
-	add	r2, #HW_XCPT_SIZE	/* R2=PSP before the interrupt was taken */
+	mrs	r1, msp			/* R1=The main stack pointer */
+	mov	r2, r1			/* R2=Copy of the main stack pointer */
+	add	r2, #HW_XCPT_SIZE	/* R2=MSP before the interrupt was taken */
 	mrs	r3, primask		/* R3=Current PRIMASK setting */
 	stmdb	r1!, {r2-r11}		/* Save the remaining registers plus the SP value */
 
@@ -267,17 +279,19 @@ lm3s_irqcommon:
 
 	/* If CONFIG_ARCH_INTERRUPTSTACK is defined, we will use a special interrupt
 	 * stack pointer.  The way that this is done here prohibits nested interrupts!
-	 * Otherwise, we will re-use the process stack for interrupt level processing.
+	 * Otherwise, we will re-use the main stack for interrupt level processing.
 	 */
 
 #ifdef CONFIG_ARCH_INTERRUPTSTACK
 	ld	sp, #up_interruptstack_base
+	str	r1, [sp, #-4]!		/* Save the MSP on the interrupt stack */
+	bl	up_doirq		/* R0=IRQ, R1=register save (msp) */
+	ldr	r1, [sp, #+4]!		/* Recover R1=main stack pointer */
 #else
-	mov	sp, r1			/* Use the process stack pointer */
+	mov	sp, r1			/* We are using the main stack pointer */
+	bl	up_doirq		/* R0=IRQ, R1=register save (msp) */
+	mov	r1, sp			/* Recover R1=main stack pointer */
 #endif
-	stmdb	sp!, {r1, r14}		/* Save the process SP and the return LR */
-	bl	up_doirq		/* R0=IRQ, R1=register save */
-	ldmia	sp!, {r1, r14}		/* Recover the process SP and the return LR */
 
 	/* On return from up_doirq, R0 will hold a pointer to register context
 	 * array to use for the interrupt return.  If that return value is the same
@@ -287,27 +301,38 @@ lm3s_irqcommon:
 	cmp	r0, r1
 	beq	1f			/* Branch if no context switch */
 
-	/* We are returning from a context switch.  This is different because in this
-	 * case, the register save structure does not lie on the stack but, rather,
-	 * is within a TCB structure.  We'll have to copy some values to the stack.
+	/* We are returning with a pending context switch.  This case is different
+	 * because in this case, the register save structure does not lie on the
+	 * stack but, rather, are within a TCB structure.  We'll have to copy some
+	 * values to the stack.
 	 */
 
-        add	r1, r0, #(XCPTCONTEXT_SIZE-4)	/* r2=offset HW save area */
+        add	r1, r0, #SW_XCPT_REGS	/* r2=offset HW save area */
 	ldmia	r1, {r4-r11}		/* Eight registers in HW save area */
 	ldr	r1, [r0, #(4*REG_SP)]	/* R1=Value of SP before interrupt */
 	stmdb	r1!, {r4-r11}		/* Eight registers in HW save area */
-	msr	psp, r1			/* New PSP */
+	ldmia	r0!, {r2-r11}		/* Recover R4-R11 + 2 temp values */
+	b	2f			/* Re-join common logic */
 
-	/* We simply need to "unwind" the same stack frame that we created */
+	/* We are returning with no context switch.  We simply need to "unwind"
+	 * the same stack frame that we created
+	 */
 1:
-	stmdb	r0!, {r2-r11}		/* Recover R4-R11 + 2 temp values */
+	ldmia	r1!, {r2-r11}		/* Recover R4-R11 + 2 temp values */
+2:
+	msr	msp, r1			/* Recover the return MSP value */
 
 	/* Do we need to restore interrupts? */
 
-	tst	r3, #1			/* PRIMASK it 1=1 means that interrupts are masked */
-	bne	2f
+	tst	r3, #1			/* PRIMASK bit 1=1 means that interrupts are masked */
+	bne	3f
 	cpsie	i			/* Restore interrupts */
-2:
+
+	/* Always return with R14 containing the special value that will: (1)
+	 * return to thread mode, and (2) continue to use the MSP
+	 */
+3:
+	ldr	r14, =EXC_RETURN	/* Load the special value */
 	bx	r14			/* And return */
 	.size	handler, .-handlers
 
@@ -323,9 +348,8 @@ lm3s_irqcommon:
         .bss
         .align  4
 up_interruptstack:
-        .skip   ((CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4)
+        .skip   (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 up_interruptstack_base:
-        .skip   4
         .size   up_interruptstack, .-up_interruptstack
 #endif
 

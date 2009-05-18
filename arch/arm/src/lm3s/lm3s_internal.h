@@ -213,6 +213,26 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+/* These 'addresses' of these values are setup by the linker script.  They are
+ * not actual uint32 storage locations! They are only used meaningfully in the
+ * following way:
+ *
+ *  - The linker script defines, for example, the symbol_sdata.
+ *  - The declareion extern uint32 _sdata; makes C happy.  C will believe
+ *    that the value _sdata is the address of a uint32 variable _data (it is
+ *    not!).
+ *  - We can recoved the linker value then by simply taking the address of
+ *    of _data.  like:  uint32 *pdata = &_sdata;
+ */
+
+extern uint32 _stext;           /* Start of .text */
+extern uint32 _etext;           /* End_1 of .text + .rodata) */
+extern const uint32 _eronly;    /* End+1 of read only section (.text + .rodata) */
+extern uint32 _sdata;           /* Start of .data */
+extern uint32 _edata;           /* End+1 of .data */
+extern uint32 _sbss;            /* Start of .bss */
+extern uint32 _ebss;            /* End+1 of .bss */
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -261,14 +281,25 @@ EXTERN void up_clockconfig(void);
 EXTERN int lm3s_configgpio(uint32 cfgset);
 
 /****************************************************************************
- * Name: lm3s_pendsv
+ * Name: lm3s_svcall
  *
  * Description:
- *   This is PendSV exception handler that performs context switching
+ *   This is SVCall exception handler that performs context switching
  *
  ****************************************************************************/
 
-EXTERN int lm3s_pendsv(int irq, FAR void *context);
+EXTERN int lm3s_svcall(int irq, FAR void *context);
+
+/****************************************************************************
+ * Name: lm3s_hardfault
+ *
+ * Description:
+ *   This is Hard Fault exception handler.  It also catches SVC call
+ *   exceptions that are performed in bad contexts.
+ *
+ ****************************************************************************/
+
+EXTERN int lm3s_hardfault(int irq, FAR void *context);
 
 /****************************************************************************
  * Name: lm3s_gpiowrite
