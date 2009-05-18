@@ -50,39 +50,39 @@
 
 /* Application Program Status Register (APSR) */
 
-#define CORTEXM3_APSR_Q           (1 << 27) /* Bit 27: Sticky saturation flag */
-#define CORTEXM3_APSR_V           (1 << 28) /* Bit 28: Overflow flag */
-#define CORTEXM3_APSR_C           (1 << 29) /* Bit 29: Carry/borrow flag */
-#define CORTEXM3_APSR_Z           (1 << 30) /* Bit 30: Zero flag */
-#define CORTEXM3_APSR_N           (1 << 31) /* Bit 31: Negative, less than flag */
+#define CORTEXM3_APSR_Q            (1 << 27) /* Bit 27: Sticky saturation flag */
+#define CORTEXM3_APSR_V            (1 << 28) /* Bit 28: Overflow flag */
+#define CORTEXM3_APSR_C            (1 << 29) /* Bit 29: Carry/borrow flag */
+#define CORTEXM3_APSR_Z            (1 << 30) /* Bit 30: Zero flag */
+#define CORTEXM3_APSR_N            (1 << 31) /* Bit 31: Negative, less than flag */
 
 /* Interrupt Program Status Register (IPSR) */
 
-#define CORTEMX_IPSR_ISR_SHIFT    0         /* Bits 8-0: ISR number */
-#define CORTEMX_IPSR_ISR_MASK     (0x1ff << CORTEMX_IPSR_ISR_SHIFT)
+#define CORTEXM3_IPSR_ISR_SHIFT    0         /* Bits 8-0: ISR number */
+#define CORTEXM3_IPSR_ISR_MASK     (0x1ff << CORTEXM3_IPSR_ISR_SHIFT)
 
 /* Execution PSR Register (EPSR) */
 
-#define CORTEMX_EPSR_ICIIT1_SHIFT 10        /* Bits 15-10: Interrupt-Continuable-Instruction/If-Then bits */
-#define CORTEMX_EPSR_ICIIT1_MASK  (3 << CORTEMX_EPSR_ICIIT1_SHIFT)
-#define CORTEMX_EPSR_T            (1 << 24) /* Bit 24: T-bit */
-#define CORTEMX_EPSR_ICIIT2_SHIFT 25        /* Bits 26-25: Interrupt-Continuable-Instruction/If-Then bits */
-#define CORTEMX_EPSR_ICIIT2_MASK  (3 << CORTEMX_EPSR_ICIIT2_SHIFT)
+#define CORTEXM3_EPSR_ICIIT1_SHIFT 10        /* Bits 15-10: Interrupt-Continuable-Instruction/If-Then bits */
+#define CORTEXM3_EPSR_ICIIT1_MASK  (3 << CORTEXM3_EPSR_ICIIT1_SHIFT)
+#define CORTEXM3_EPSR_T            (1 << 24) /* Bit 24: T-bit */
+#define CORTEXM3_EPSR_ICIIT2_SHIFT 25        /* Bits 26-25: Interrupt-Continuable-Instruction/If-Then bits */
+#define CORTEXM3_EPSR_ICIIT2_MASK  (3 << CORTEXM3_EPSR_ICIIT2_SHIFT)
 
 /* Save xPSR bits */
 
-#define CORTEMX_IPSR_ISR_SHIFT    0         /* Bits 8-0: ISR number */
-#define CORTEMX_IPSR_ISR_MASK     (0x1ff << CORTEMX_IPSR_ISR_SHIFT)
-#define CORTEMX_EPSR_ICIIT1_SHIFT 25        /* Bits 15-10: Interrupt-Continuable-Instruction/If-Then bits */
-#define CORTEMX_EPSR_ICIIT1_MASK  (3 << CORTEMX_EPSR_ICIIT_SHIFT)
-#define CORTEMX_EPSR_T            (1 << 24) /* Bit 24: T-bit */
-#define CORTEMX_EPSR_ICIIT2_SHIFT 25        /* Bits 26-25: Interrupt-Continuable-Instruction/If-Then bits */
-#define CORTEMX_EPSR_ICIIT2_MASK  (3 << CORTEMX_EPSR_ICIIT_SHIFT)
-#define CORTEXM3_APSR_Q           (1 << 27) /* Bit 27: Sticky saturation flag */
-#define CORTEXM3_APSR_V           (1 << 28) /* Bit 28: Overflow flag */
-#define CORTEXM3_APSR_C           (1 << 29) /* Bit 29: Carry/borrow flag */
-#define CORTEXM3_APSR_Z           (1 << 30) /* Bit 30: Zero flag */
-#define CORTEXM3_APSR_N           (1 << 31) /* Bit 31: Negative, less than flag */
+#define CORTEXM3_XPSR_ISR_SHIFT    CORTEXM3_IPSR_ISR_SHIFT
+#define CORTEXM3_XPSR_ISR_MASK     CORTEXM3_IPSR_ISR_MASK
+#define CORTEXM3_XPSR_ICIIT1_SHIFT CORTEXM3_EPSR_ICIIT1_SHIFT/
+#define CORTEXM3_XPSR_ICIIT1_MASK  CORTEXM3_EPSR_ICIIT1_MASK
+#define CORTEXM3_XPSR_T            CORTEXM3_EPSR_T
+#define CORTEXM3_XPSR_ICIIT2_SHIFT CORTEXM3_EPSR_ICIIT2_SHIFT
+#define CORTEXM3_XPSR_ICIIT2_MASK  CORTEXM3_EPSR_ICIIT2_MASK
+#define CORTEXM3_XPSR_Q            CORTEXM3_APSR_Q
+#define CORTEXM3_XPSR_V            CORTEXM3_APSR_V
+#define CORTEXM3_XPSR_C            CORTEXM3_APSR_C
+#define CORTEXM3_XPSR_Z            CORTEXM3_APSR_Z
+#define CORTEXM3_XPSR_N            CORTEXM3_APSR_N
 
 /************************************************************************************
  * Inline Functions
