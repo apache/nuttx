@@ -298,7 +298,7 @@ lm3s_irqcommon:
 	 * as current stack pointer, then things are relatively easy.
 	 */
 
-	cmp	r0, r1
+	cmp	r0, r1			/* Context switch? */
 	beq	1f			/* Branch if no context switch */
 
 	/* We are returning with a pending context switch.  This case is different
@@ -307,11 +307,11 @@ lm3s_irqcommon:
 	 * values to the stack.
 	 */
 
-        add	r1, r0, #SW_XCPT_REGS	/* r2=offset HW save area */
-	ldmia	r1, {r4-r11}		/* Eight registers in HW save area */
+        add	r1, r0, #SW_XCPT_SIZE	/* R1=Address of HW save area in reg array */
+	ldmia	r1, {r4-r11}		/* Fetch eight registers in HW save area */
 	ldr	r1, [r0, #(4*REG_SP)]	/* R1=Value of SP before interrupt */
-	stmdb	r1!, {r4-r11}		/* Eight registers in HW save area */
-	ldmia	r0!, {r2-r11}		/* Recover R4-R11 + 2 temp values */
+	stmdb	r1!, {r4-r11}		/* Store eight registers in HW save area */
+	ldmia	r0, {r2-r11}		/* Recover R4-R11 + 2 temp values */
 	b	2f			/* Re-join common logic */
 
 	/* We are returning with no context switch.  We simply need to "unwind"
