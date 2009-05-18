@@ -148,7 +148,7 @@ struct xcptcontext
 
 #ifndef __ASSEMBLY__
 
-/* Save the current interrupt enable state & disable IRQs */
+/* Save the current primask state & disable IRQs */
 
 static inline irqstate_t irqsave(void)
 {
@@ -168,7 +168,7 @@ static inline irqstate_t irqsave(void)
   return primask;
 }
 
-/* Restore saved IRQ & FIQ state */
+/* Restore saved primask state */
 
 static inline void irqrestore(irqstate_t primask)
 {
@@ -187,18 +187,81 @@ static inline void irqrestore(irqstate_t primask)
       : "memory");
 }
 
-/* Get the basepri register */
+/* Get/set the primask register */
+
+static inline ubyte getprimask(void)
+{
+  uint32 primask;
+  __asm__ __volatile__
+    (
+     "\tmrs  %0, primask\n"
+     : "=r" (primask)
+     :
+     : "memory");
+  return (ubyte)primask;
+}
+
+static inline void setprimask(uint32 primask)
+{
+  __asm__ __volatile__
+    (
+      "\tmsr primask, %0\n"
+      :
+      : "r" (primask)
+      : "memory");
+}
+
+/* Get/set the basepri register */
+
+static inline ubyte getbasepri(void)
+{
+  uint32 basepri;
+  __asm__ __volatile__
+    (
+     "\tmrs  %0, basepri\n"
+     : "=r" (basepri)
+     :
+     : "memory");
+  return (ubyte)basepri;
+}
 
 static inline void setbasepri(uint32 basepri)
 {
   __asm__ __volatile__
     (
-      "\msr basepri, %0\n"
+      "\tmsr basepri, %0\n"
       :
       : "r" (basepri)
       : "memory");
 }
 
+/* Get IPSR */
+
+static inline uint32 getipsr(void)
+{
+  uint32 ipsr;
+  __asm__ __volatile__
+    (
+     "\tmrs  %0, ipsr\n"
+     : "=r" (ipsr)
+     :
+     : "memory");
+  return ipsr;
+}
+
+/* SVC system call */
+
+static inline void svcall(uint32 cmd, uint32 arg)
+{
+  __asm__ __volatile__
+    (
+      "\tmov  r0, %0\n"
+      "\tmov  r1, %1\n"
+      "\tsvc  0\n"
+      :
+      : "r" (cmd), "r" (arg)
+      : "memory");
+}
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************

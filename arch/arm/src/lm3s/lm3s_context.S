@@ -84,12 +84,9 @@ up_saveusercontext:
 
 	/* Perform the System call with R0=0 and R1=regs */
 
-	ldr	r2, nvic_intctrl	/* R2: Address NVIC INTCTRL registers */
-	ldr	r3, [r2, #0]		/* R3: Content of NVIC INCTRL */
-	orr	r3, r3, #NVIC_INTCTRL_PENDSVSET
 	mov	r1, r0			/* R1: regs */
 	mov	r0, #0			/* R0: 0 means save context (also return value) */
-	str     r3, [r2, #0]		/* Force Pend SV */
+	svc	0			/* Force synchronous SVCall (or Hard Fault) */
 
 	/* There are two return conditions.  On the first return, R0 (the
 	 * return value will be zero.  On the second return we need to
@@ -124,22 +121,13 @@ up_fullcontextrestore:
 
 	/* Perform the System call with R0=1 and R1=regs */
 
-	ldr	r2, nvic_intctrl	/* R2: Address NVIC INTCTRL registers */
-	ldr	r3, [r2, #0]		/* R3: Content of NVIC INCTRL */
-	orr	r3, r3, #NVIC_INTCTRL_PENDSVSET
 	mov	r1, r0			/* R1: regs */
 	mov	r0, #1			/* R0: 1 means restore context */
-	str     r3, [r2, #0]		/* Force Pend SV */
+	svc	0			/* Force synchronous SVCall (or Hard Fault) */
 
 	/* This call should not return */
 
 	bx	lr			/* Unnecessary ... will not return */
 	.size		up_fullcontextrestore, .-up_fullcontextrestore
-
-        .align  2
-	.type		nvic_intctrl, object
-nvic_intctrl:
-        .word   NVIC_INTCTRL
-	.size		nvic_intctrl, .-nvic_intctrl
         .end
 

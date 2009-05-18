@@ -45,6 +45,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <arch/irq.h>
 
 #include "up_arch.h"
 #include "os_internal.h"
@@ -55,9 +56,11 @@
  * Definitions
  ****************************************************************************/
 
-/* Enable debug features that are probably on desireable during bringup */
+/* Enable NVIC debug features that are probably only desireable during
+ * bringup
+ */
 
-#define LM2S_IRQ_DEBUG 1
+#undef LM2S_IRQ_DEBUG
 
 /* Get a 32-bit version of the default priority */
 
@@ -92,9 +95,17 @@ uint32 *current_regs;
 #if defined(LM2S_IRQ_DEBUG) && defined (CONFIG_DEBUG)
 static void lm3s_dumpnvic(const char *msg, int irq)
 {
+  irqstate_t flags;
+
+  flags = irqsave();
   slldbg("NVIC (%s, irq=%d):\n", msg, irq);
   slldbg("  INTCTRL:    %08x VECTAB: %08x\n",
          getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
+#if 0
+  slldbg("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
+         getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
+         getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
+#endif
   slldbg("  IRQ ENABLE: %08x %08x\n",
          getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE));
   slldbg("  SYSH_PRIO:  %08x %08x %08x\n",
@@ -109,14 +120,15 @@ static void lm3s_dumpnvic(const char *msg, int irq)
   slldbg("              %08x %08x %08x %08x\n", 
         getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
         getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
+  irqrestore(flags);
 }
 #else
 #  define lm3s_dumpnvic(msg, irq)
 #endif
 
 /****************************************************************************
- * Name: lm3s_nmi, lm3s_hardfault, lm3s_mpu, lm3s_busfault, lm3s_usagefault,
- *       lm3s_svcall, lm3s_dbgmonitor, lm3s_pendsv, lm3s_reserved
+ * Name: lm3s_nmi, lm3s_mpu, lm3s_busfault, lm3s_usagefault, lm3s_pendsv,
+ *       lm3s_dbgmonitor, lm3s_pendsv, lm3s_reserved
  *
  * Description:
  *   Handlers for various execptions.  None are handled and all are fatal
@@ -130,14 +142,6 @@ static int lm3s_nmi(int irq, FAR void *context)
 {
   (void)irqsave();
   dbg("PANIC!!! NMI received\n");
-  PANIC(OSERR_UNEXPECTEDISR);
-  return 0;
-}
-
-static int lm3s_hardfault(int irq, FAR void *context)
-{
-  (void)irqsave();
-  dbg("PANIC!!! Hard fault received\n");
   PANIC(OSERR_UNEXPECTEDISR);
   return 0;
 }
@@ -166,10 +170,10 @@ static int lm3s_usagefault(int irq, FAR void *context)
   return 0;
 }
 
-static int lm3s_svcall(int irq, FAR void *context)
+static int lm3s_pendsv(int irq, FAR void *context)
 {
   (void)irqsave();
-  dbg("PANIC!!! SVCALL received\n");
+  dbg("PANIC!!! PendSV received\n");
   PANIC(OSERR_UNEXPECTEDISR);
   return 0;
 }
@@ -202,7 +206,7 @@ static int lm3s_reserved(int irq, FAR void *context)
 
 static int lml3s_irqinfo(int irq, uint32 *regaddr, uint32 *bit)
 {
-  DEBUGASSERT(irq >= LMSB_IRQ_MPU && irq < NR_IRQS);
+  DEBUGASSERT(irq >= LM3S_IRQ_NMI && irq < NR_IRQS);
 
   /* Check for external interrupt */
 
@@ -229,19 +233,19 @@ static int lml3s_irqinfo(int irq, uint32 *regaddr, uint32 *bit)
   else
     {
        *regaddr = NVIC_SYSHCON;
-       if (irq == LMSB_IRQ_MPU)
+       if (irq == LM3S_IRQ_MPU)
         {
           *bit = NVIC_SYSHCON_MEMFAULTENA;
         }
-      else if (irq == LMSB_IRQ_BUSFAULT)
+      else if (irq == LM3S_IRQ_BUSFAULT)
         {
           *bit = NVIC_SYSHCON_BUSFAULTENA;
         }
-      else if (irq == LMSB_IRQ_USAGEFAULT)
+      else if (irq == LM3S_IRQ_USAGEFAULT)
         {
           *bit = NVIC_SYSHCON_USGFAULTENA;
         }
-      else if (irq == LMSB_IRQ_SYSTICK)
+      else if (irq == LM3S_IRQ_SYSTICK)
         {
           *regaddr = NVIC_SYSTICK_CTRL;
           *bit = NVIC_SYSTICK_CTRL_ENABLE;
@@ -304,27 +308,31 @@ void up_irqinitialize(void)
     }
 #endif
 
-  /* Attach the PendSV exception handler and set it to the minimum
-   * prioirity.  The PendSV exception is used for performing
-   * context switches.
+  /* Attach the SVCall and Hard Fault exception handlers.  The SVCall
+   * exception is used for performing context switches; The Hard Fault
+   * must also be caught because a SVCall may show up as a Hard Fault
+   * under certain conditions.
    */
 
-  irq_attach(LMSB_IRQ_PENDSV, lm3s_pendsv);
+  irq_attach(LM3S_IRQ_SVCALL, lm3s_svcall);
+  irq_attach(LM3S_IRQ_HARDFAULT, lm3s_hardfault);
+
+  /* Set the priority of the SVCall interrupt */
+
 #ifdef CONFIG_ARCH_IRQPRIO
-/* up_prioritize_irq(LMSB_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
+/* up_prioritize_irq(LM3S_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG
-  irq_attach(LMSB_IRQ_NMI, lm3s_nmi);
-  irq_attach(LMSB_IRQ_HARDFAULT, lm3s_hardfault);
-  irq_attach(LMSB_IRQ_MPU, lm3s_mpu);
-  irq_attach(LMSB_IRQ_BUSFAULT, lm3s_busfault);
-  irq_attach(LMSB_IRQ_USAGEFAULT, lm3s_usagefault);
-  irq_attach(LMSB_IRQ_SVCALL, lm3s_svcall);
-  irq_attach(LMSB_IRQ_DBGMONITOR, lm3s_dbgmonitor);
-  irq_attach(LMSB_IRQ_RESERVED, lm3s_reserved);
+  irq_attach(LM3S_IRQ_NMI, lm3s_nmi);
+  irq_attach(LM3S_IRQ_MPU, lm3s_mpu);
+  irq_attach(LM3S_IRQ_BUSFAULT, lm3s_busfault);
+  irq_attach(LM3S_IRQ_USAGEFAULT, lm3s_usagefault);
+  irq_attach(LM3S_IRQ_PENDSV, lm3s_pendsv);
+  irq_attach(LM3S_IRQ_DBGMONITOR, lm3s_dbgmonitor);
+  irq_attach(LM3S_IRQ_RESERVED, lm3s_reserved);
 #endif
 
   lm3s_dumpnvic("inital", NR_IRQS);
@@ -339,7 +347,7 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts */
 
-  setbasepri(0);
+  setbasepri(NVIC_SYSH_PRIORITY_MAX);
   irqrestore(0);
 #endif
 }
@@ -425,7 +433,7 @@ int up_prioritize_irq(int irq, int priority)
   uint32 regval;
   int shift;
 
-  DEBUGASSERT(irq >= LMSB_IRQ_MPU && irq < NR_IRQS && (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
+  DEBUGASSERT(irq >= LM3S_IRQ_MPU && irq < NR_IRQS && (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 
   if (irq < LM3S_IRQ_INTERRUPTS)
     {

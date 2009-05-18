@@ -1,6 +1,6 @@
 /****************************************************************************
- * arch/arm/src/lm3s/lm3s_start.c
- * arch/arm/src/chip/lm3s_start.c
+ * arch/arm/src/lm3s/lm3s_svcall.c
+ * arch/arm/src/chip/lm3s_svcall.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -41,18 +41,20 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <string.h>
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/init.h>
+#include <arch/irq.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "os_internal.h"
 #include "lm3s_internal.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#undef DEBUG_SVCALL         /* Define to debug SVCall */
 
 /****************************************************************************
  * Private Data
@@ -62,92 +64,83 @@
  * Public Data
  ****************************************************************************/
 
-extern void lm3s_vectors(void);
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: showprogress
- *
- * Description:
- *   Print a character on the UART to show boot status.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG
-#  define showprogress(c) up_lowputc(c)
-#else
-#  define showprogress(c)
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: lm3s_svcall
  *
  * Description:
- *   This is the reset entry point.
+ *   This is SVCall exception handler that performs context switching
  *
  ****************************************************************************/
 
-void __start(void)
+int lm3s_svcall(int irq, FAR void *context)
 {
-  const uint32 *src;
-  uint32 *dest;
+  uint32 *svregs  = (uint32*)context;
+  uint32 *tcbregs = (uint32*)svregs[REG_R1];
 
-  /* Configure the uart so that we can get debug output as soon as possible */
+  DEBUGASSERT(svregs && svregs == current_regs && tcbregs);
 
-  up_clockconfig();
-  up_lowsetup();
-  showprogress('A');
-
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
+  /* The SVCall software interrupt is called with R0 = SVC command and R1 = 
+   * the TCB register save area.
    */
 
-  for (dest = &_sbss; dest < &_ebss; )
-    {
-      *dest++ = 0;
-    }
-  showprogress('B');
+  sllvdbg("Command: %d svregs: %p tcbregs: %08x\n", svregs[REG_R0], svregs, tcbregs);
 
-  /* Move the intialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
-
-  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
-    {
-      *dest++ = *src++;
-    }
-  showprogress('C');
-
-  /* Perform early serial initialization */
-
-#ifdef CONFIG_USE_EARLYSERIALINIT
-  up_earlyserialinit();
+#ifdef DEBUG_SVCALL
+  lldbg("SVCall Entry:\n");
+  lldbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+        svregs[REG_R0],  svregs[REG_R1],  svregs[REG_R2],  svregs[REG_R3],
+        svregs[REG_R4],  svregs[REG_R5],  svregs[REG_R6],  svregs[REG_R7]);
+  lldbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+        svregs[REG_R8],  svregs[REG_R9],  svregs[REG_R10], svregs[REG_R11],
+        svregs[REG_R12], svregs[REG_R13], svregs[REG_R14], svregs[REG_R15]);
+  lldbg("  PSR=%08x\n", svregs[REG_XPSR]);
 #endif
-  showprogress('D');
 
-  /* Initialize onboard LEDs */
+  /* Handle the SVCall according to the command in R0 */
 
-#ifdef CONFIG_ARCH_LEDS
-  up_ledinit();
+  switch (svregs[REG_R0])
+    {
+      /* R0=0:  This is a save context command.  In this case, we simply need
+       * to copy the svregs to the tdbregs and return.
+       */
+
+      case 0:
+        memcpy(tcbregs, svregs, XCPTCONTEXT_SIZE);
+        break;
+
+      /* R1=1: This a restore context command.  In this case, we simply need to
+       * set current_regs to tcbrgs.  svregs == current_regs is the normal exception
+       * turn.  By setting current_regs = tcbregs, we force the return through
+       * the saved context.
+       */
+
+      case 1:
+        current_regs = tcbregs;
+        break;
+
+      default:
+        PANIC(OSERR_INTERNAL);
+        break;
+    }
+    
+#ifdef DEBUG_SVCALL
+  lldbg("SVCall Return:\n");
+  lldbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+        current_regs[REG_R0],  current_regs[REG_R1],  current_regs[REG_R2],  current_regs[REG_R3],
+        current_regs[REG_R4],  current_regs[REG_R5],  current_regs[REG_R6],  current_regs[REG_R7]);
+  lldbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+        current_regs[REG_R8],  current_regs[REG_R9],  current_regs[REG_R10], current_regs[REG_R11],
+        current_regs[REG_R12], current_regs[REG_R13], current_regs[REG_R14], current_regs[REG_R15]);
+  lldbg("  PSR=%08x\n", current_regs[REG_XPSR]);
 #endif
-  showprogress('E');
 
-  /* Then start NuttX */
-
-  showprogress('\r');
-  showprogress('\n');
-  os_start();
-
-  /* Shoulnd't get here */
-
-  for(;;);
+  return OK;
 }
