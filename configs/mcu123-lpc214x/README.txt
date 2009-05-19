@@ -43,7 +43,24 @@ I use the script lpc21isp.sh to perform the actual download.  You will
 probably have to make some changes to this script in order to use it.
 For example, the path to the built lpc21isp binary will most likely
 have to change.  Then move this script to the top level NuttX
-directory and simply execute it to load NuttX onto the board.
+directory and simply execute it to load NuttX onto the board (after
+entering ISP mode).
+
+Here are the detailed steps I use:
+
+1. Make sure you exit minicom (or whatever terminal emulator you are
+   using).  It will interfere with the download.
+
+2. On the MCU123 board, I need to put a jumper on JP3-INT. On that board,
+   JP3-INT is connected to P0.14 of LPC214x. When P0.14 is low and RTS is
+   changed from high to low, the LPC214x will enter ISP (In System Programming) 
+   state.
+
+3. start lpc21isp.sh
+
+4. reset the board
+
+
 
 ARM/LPC214X-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
