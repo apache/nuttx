@@ -42,7 +42,7 @@ This changes are shown in lpc21ips-1.60.diff.
 I use the script lpc21isp.sh to perform the actual download.  You will
 probably have to make some changes to this script in order to use it.
 For example, the path to the built lpc21isp binary will most likely
-have to have change.  Then move this script to the top level NuttX
+have to change.  Then move this script to the top level NuttX
 directory and simply execute it to load NuttX onto the board.
 
 ARM/LPC214X-specific Configuration Options
