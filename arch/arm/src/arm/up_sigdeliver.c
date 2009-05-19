@@ -1,7 +1,7 @@
 /****************************************************************************
- *  arch/arm/src/common/up_prefetchabort.c
+ * arch/arm/src/arm/up_sigdeliver.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,24 +38,23 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <sched.h>
 #include <debug.h>
+
 #include <nuttx/irq.h>
+#include <nuttx/arch.h>
+
 #include "os_internal.h"
 #include "up_internal.h"
+#include "up_arch.h"
+
+#ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-/* Output debug info if stack dump is selected -- even if 
- * debug is not selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  lldbg
-# define lldbg lib_lowprintf
-#endif
 
 /****************************************************************************
  * Private Data
@@ -70,12 +69,75 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_prefetchabort
+ * Name: up_sigdeliver
+ *
+ * Description:
+ *   This is the a signal handling trampoline.  When a
+ *   signal action was posted.  The task context was mucked
+ *   with and forced to branch to this location with interrupts
+ *   disabled.
+ *
  ****************************************************************************/
 
-void up_prefetchabort(uint32 *regs)
+void up_sigdeliver(void)
 {
-  lldbg("Prefetch abort at 0x%x\n", regs[REG_PC]);
-  current_regs = regs;
-  PANIC(OSERR_ERREXCEPTION);
-}
+  _TCB  *rtcb = (_TCB*)g_readytorun.head;
+  uint32 regs[XCPTCONTEXT_REGS];
+  sig_deliver_t sigdeliver;
+
+  /* Save the errno.  This must be preserved throughout the
+   * signal handling so that the the user code final gets
+   * the correct errno value (probably EINTR).
+   */
+
+  int saved_errno = rtcb->pterrno;
+
+  up_ledon(LED_SIGNAL);
+
+  sdbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
+        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
+  ASSERT(rtcb->xcp.sigdeliver != NULL);
+
+  /* Save the real return state on the stack. */
+
+  up_copystate(regs, rtcb->xcp.regs);
+  regs[REG_PC]         = rtcb->xcp.saved_pc;
+  regs[REG_CPSR]       = rtcb->xcp.saved_cpsr;
+
+  /* Get a local copy of the sigdeliver function pointer.
+   * we do this so that we can nullify the sigdeliver
+   * function point in the TCB and accept more signal
+   * deliveries while processing the current pending
+   * signals.
+   */
+
+  sigdeliver           = rtcb->xcp.sigdeliver;
+  rtcb->xcp.sigdeliver = NULL;
+
+  /* Then restore the task interrupt statat. */
+
+  irqrestore(regs[REG_CPSR]);
+
+  /* Deliver the signals */
+
+  sigdeliver(rtcb);
+
+  /* Output any debug messaged BEFORE restoreing errno
+   * (becuase they may alter errno), then restore the
+   * original errno that is needed by the user logic
+   * (it is probably EINTR).
+   */
+
+  sdbg("Resuming\n");
+  rtcb->pterrno = saved_errno;
+
+  /* Then restore the correct state for this thread of
+   * execution.
+   */
+
+  up_ledoff(LED_SIGNAL);
+  up_fullcontextrestore(regs);
+\}
+
+#endif /* !CONFIG_DISABLE_SIGNALS */
+

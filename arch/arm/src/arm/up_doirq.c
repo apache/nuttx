@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/up_doirq.c
+ * arch/arm/src/arm/up_doirq.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -66,11 +66,7 @@
  * Public Functions
  ****************************************************************************/
 
-#ifdef __thumb2__
-uint32 *up_doirq(int irq, uint32 *regs)
-#else
 void up_doirq(int irq, uint32 *regs)
-#endif
 {
   up_ledon(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
@@ -93,14 +89,6 @@ void up_doirq(int irq, uint32 *regs)
 
        irq_dispatch(irq, regs);
 
-       /* If a context switch occurred while processing the interrupt
-        * then current_regs may have value (depending upon the implementaton
-        * of context switching for te particular chip.
-        */
-
-#ifdef __thumb2__
-       regs = current_regs;
-#endif
        /* Indicate that we are no long in an interrupt handler */
 
        current_regs = NULL;
@@ -112,8 +100,5 @@ void up_doirq(int irq, uint32 *regs)
        up_enable_irq(irq);
     }
   up_ledoff(LED_INIRQ);
-#endif
-#ifdef __thumb2__
-  return regs;
 #endif
 }

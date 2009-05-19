@@ -1,7 +1,7 @@
 /****************************************************************************
- * common/up_assert.c
+ * arch/arm/src/arm/up_assert.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -121,22 +121,6 @@ static inline void up_registerdump(void)
 
   if (current_regs)
     {
-#ifdef __thumb2__
-      /* Yes.. dump the interrupt registers */
-
-      lldbg("R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-            current_regs[REG_R0],  current_regs[REG_R1],
-            current_regs[REG_R2],  current_regs[REG_R3],
-            current_regs[REG_R4],  current_regs[REG_R5],
-            current_regs[REG_R6],  current_regs[REG_R7]);
-      lldbg("R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-            current_regs[REG_R8],  current_regs[REG_R9],
-            current_regs[REG_R10], current_regs[REG_R11],
-            current_regs[REG_R12], current_regs[REG_R13],
-            current_regs[REG_R14], current_regs[REG_R15]);
-      lldbg("xPSR: %08x PRIMASK: %08x\n",
-            current_regs[REG_XPSR],  current_regs[REG_PRIMASK]);
-#else
       int regs;
 
       /* Yes.. dump the interrupt registers */
@@ -150,7 +134,6 @@ static inline void up_registerdump(void)
         }
 
       lldbg("CPSR: %08x\n", current_regs[REG_CPSR]);
-#endif
     }
 }
 #else

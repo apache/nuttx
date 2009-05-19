@@ -1,7 +1,7 @@
 /****************************************************************************
- * common/up_sigdeliver.c
+ * arch/arm/src/arm/up_vectortab.S
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,116 +39,65 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <sched.h>
-#include <debug.h>
-
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-
-#include "os_internal.h"
-#include "up_internal.h"
-#include "up_arch.h"
-
-#ifndef CONFIG_DISABLE_SIGNALS
-
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
+ * Global Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Assembly Macros
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_sigdeliver
+ * Name: _vector_start
  *
  * Description:
- *   This is the a signal handling trampoline.  When a
- *   signal action was posted.  The task context was mucked
- *   with and forced to branch to this location with interrupts
- *   disabled.
- *
+ *   Vector initialization block
  ****************************************************************************/
 
-void up_sigdeliver(void)
-{
-#ifndef CONFIG_DISABLE_SIGNALS
-  _TCB  *rtcb = (_TCB*)g_readytorun.head;
-  uint32 regs[XCPTCONTEXT_REGS];
-  sig_deliver_t sigdeliver;
+	.globl	_vector_start
 
-  /* Save the errno.  This must be preserved throughout the
-   * signal handling so that the the user code final gets
-   * the correct errno value (probably EINTR).
-   */
+/* These will be relocated to VECTOR_BASE. */
 
-  int saved_errno = rtcb->pterrno;
+_vector_start:
+	ldr	pc, .Lresethandler		/* 0x00: Reset */
+	ldr	pc, .Lundefinedhandler		/* 0x04: Undefined instruction */
+	ldr	pc, .Lswihandler		/* 0x08: Software interrupt */
+	ldr	pc, .Lprefetchaborthandler	/* 0x0c: Prefetch abort */
+	ldr	pc, .Ldataaborthandler		/* 0x10: Data abort */
+	ldr	pc, .Laddrexcptnhandler		/* 0x14: Address exception */
+	ldr	pc, .Lirqhandler		/* 0x18: IRQ */
+	ldr	pc, .Lfiqhandler		/* 0x1c: FIQ */
 
-  up_ledon(LED_SIGNAL);
+	.globl   __start
+	.globl	up_vectorundefinsn
+	.globl	up_vectorswi
+	.globl	up_vectorprefetch
+	.globl	up_vectordata
+	.globl	up_vectoraddrexcptn
+	.globl	up_vectorirq
+	.globl	up_vectorfiq
 
-  sdbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  ASSERT(rtcb->xcp.sigdeliver != NULL);
+.Lresethandler:
+	.long   __start
+.Lundefinedhandler:
+	.long	up_vectorundefinsn
+.Lswihandler:
+	.long	up_vectorswi
+.Lprefetchaborthandler:
+	.long	up_vectorprefetch
+.Ldataaborthandler:
+	.long	up_vectordata
+.Laddrexcptnhandler:
+	.long	up_vectoraddrexcptn
+.Lirqhandler:
+	.long	up_vectorirq
+.Lfiqhandler:
+	.long	up_vectorfiq
 
-  /* Save the real return state on the stack. */
-
-  up_copystate(regs, rtcb->xcp.regs);
-  regs[REG_PC]         = rtcb->xcp.saved_pc;
-#ifdef __thumb2__
-  regs[REG_PRIMASK]    = rtcb->xcp.saved_primask;
-  regs[REG_XPSR]       = rtcb->xcp.saved_xpsr;
-#else
-  regs[REG_CPSR]       = rtcb->xcp.saved_cpsr;
-#endif
-
-  /* Get a local copy of the sigdeliver function pointer.
-   * we do this so that we can nullify the sigdeliver
-   * function point in the TCB and accept more signal
-   * deliveries while processing the current pending
-   * signals.
-   */
-
-  sigdeliver           = rtcb->xcp.sigdeliver;
-  rtcb->xcp.sigdeliver = NULL;
-
-  /* Then restore the task interrupt statat. */
-
-#ifdef __thumb2__
-  irqrestore((uint16)regs[REG_PRIMASK]);
-#else
-  irqrestore(regs[REG_CPSR]);
-#endif
-
-  /* Deliver the signals */
-
-  sigdeliver(rtcb);
-
-  /* Output any debug messaged BEFORE restoreing errno
-   * (becuase they may alter errno), then restore the
-   * original errno that is needed by the user logic
-   * (it is probably EINTR).
-   */
-
-  sdbg("Resuming\n");
-  rtcb->pterrno = saved_errno;
-
-  /* Then restore the correct state for this thread of
-   * execution.
-   */
-
-  up_ledoff(LED_SIGNAL);
-  up_fullcontextrestore(regs);
-#endif
-}
-
-#endif /* !CONFIG_DISABLE_SIGNALS */
-
+	.globl	_vector_end
+_vector_end:
+	.end

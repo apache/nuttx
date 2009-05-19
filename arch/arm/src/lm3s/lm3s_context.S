@@ -40,7 +40,7 @@
 
 #include <nuttx/config.h>
 #include <arch/irq.h>
-#include "cortexm3_nvic.h"
+#include "nvic.h"
 
 /************************************************************************************
  * Preprocessor Definitions

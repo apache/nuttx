@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 #include "os_internal.h"
-#include "cortexm3_nvic.h"
+#include "nvic.h"
 #include "lm3s_internal.h"
 
 /****************************************************************************

@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/Makefile
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,14 @@
 -include chip/Make.defs
 
 ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(TOPDIR)/sched
+ifeq ($(CONFIG_ARCH_CORTEXM3),y)
+ARCH_SUBDIR	= cortexm3
+else
+ARCH_SUBDIR	= arm
+endif
+
+CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common \
+		   -I$(ARCH_SRCDIR)/$(ARCH_SUBDIR) -I$(TOPDIR)/sched
 
 HEAD_AOBJ	= $(HEAD_ASRC:.S=$(OBJEXT))
 
@@ -61,7 +68,7 @@ BOARDDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src/board
 
 LIBGCC		= ${shell $(CC) -print-libgcc-file-name}
 
-VPATH		= chip:common
+VPATH		= chip:common:$(ARCH_SUBDIR)
 
 all: $(HEAD_OBJ) libarch$(LIBEXT)
 
@@ -101,7 +108,8 @@ endif
 	@if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR="$(TOPDIR)" depend ; \
 	fi
-	@$(MKDEP) --dep-path chip --dep-path common $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@$(MKDEP) --dep-path chip --dep-path common --dep-path $(ARCH_SUBDIR) \
+	 $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 
 depend: .depend

@@ -47,6 +47,7 @@
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 
+#include "nvic.h"
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"

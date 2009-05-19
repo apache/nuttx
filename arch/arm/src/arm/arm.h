@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/common/arm.h
+ * arch/arm/src/arm/arm.h
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

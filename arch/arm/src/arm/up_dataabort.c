@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/up_arch.h
+ * arch/arm/src/arm/up_dataabort.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,76 +33,49 @@
  *
  ****************************************************************************/
 
-#ifndef ___ARCH_ARM_SRC_COMMON_UP_ARCH_H
-#define ___ARCH_ARM_SRC_COMMON_UP_ARCH_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifndef __ASSEMBLY__
-# include <sys/types.h>
-#endif
-
-#include <arch/board/board.h>
-#include "chip.h"
+#include <sys/types.h>
+#include <debug.h>
+#include <nuttx/irq.h>
+#include "os_internal.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-# define getreg8(a)           (*(volatile ubyte *)(a))
-# define putreg8(v,a)         (*(volatile ubyte *)(a) = (v))
-# define getreg32(a)          (*(volatile uint32 *)(a))
-# define putreg32(v,a)        (*(volatile uint32 *)(a) = (v))
-
-/* Some compiler options will convert short loads and stores into byte loads
- * and stores.  We don't want this to happen for IO reads and writes!
+/* Output debug info if stack dump is selected -- even if 
+ * debug is not selected.
  */
 
-/* # define getreg16(a)       (*(volatile uint16 *)(a)) */
-static inline uint16 getreg16(unsigned int addr)
-{
-  uint16 retval;
- __asm__ __volatile__("\tldrh %0, [%1]\n\t" : "=r"(retval) : "r"(addr));
-  return retval;
-}
-
-/* define putreg16(v,a)       (*(volatile uint16 *)(a) = (v)) */
-static inline void putreg16(uint16 val, unsigned int addr)
-{
- __asm__ __volatile__("\tstrh %0, [%1]\n\t": : "r"(val), "r"(addr));
-}
+#ifdef CONFIG_ARCH_STACKDUMP
+# undef  lldbg
+# define lldbg lib_lowprintf
+#endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Data
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
-/* Atomic modification of registers */
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-EXTERN void modifyreg8(unsigned int addr, ubyte clearbits, ubyte setbits);
-EXTERN void modifyreg16(unsigned int addr, uint16 clearbits, uint16 setbits);
-EXTERN void modifyreg32(unsigned int addr, uint32 clearbits, uint32 setbits);
+/****************************************************************************
+ * Name: up_dataabort
+ ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
+void up_dataabort(uint32 *regs)
+{
+  lldbg("Data abort at 0x%x\n", regs[REG_PC]);
+  current_regs = regs;
+  PANIC(OSERR_ERREXCEPTION);
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif  /* ___ARCH_ARM_SRC_COMMON_UP_ARCH_H */

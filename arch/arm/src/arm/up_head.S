@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/up_head.S
+ * arch/arm/src/arm/up_head.S
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

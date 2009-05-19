@@ -1,7 +1,7 @@
 /****************************************************************************
- * common/up_cache.S
+ * arch/arm/src/cortexm3/up_doirq.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,37 +38,76 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "up_internal.h"
+#include <sys/types.h>
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <assert.h>
 #include "up_arch.h"
+#include "os_internal.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-#define CACHE_DLINESIZE    32
-
 /****************************************************************************
- * Assembly Macros
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_flushicache
+ * Private Data
  ****************************************************************************/
 
-/* Esure coherency between the Icache and the Dcache in the region described 
- * by r0=start and r1=end.
- */
-	.globl	up_flushicache
-	.type	up_flushicache,%function
-up_flushicache:
-	bic	r0, r0, #CACHE_DLINESIZE - 1
-1:	mcr	p15, 0, r0, c7, c10, 1		/* Clean D entry */
-	mcr	p15, 0, r0, c7, c5, 1		/* Invalidate I entry */
-	add	r0, r0, #CACHE_DLINESIZE
-	cmp	r0, r1
-	blo	1b
-	mcr	p15, 0, r0, c7, c10, 4		/* Drain WB */
-	mov	pc, lr
-	.size	up_flushicache, .-up_flushicache
-	.end
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+uint32 *up_doirq(int irq, uint32 *regs)
+{
+  up_ledon(LED_INIRQ);
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  PANIC(OSERR_ERREXCEPTION);
+#else
+  if ((unsigned)irq < NR_IRQS)
+    {
+       /* Current regs non-zero indicates that we are processing
+        * an interrupt; current_regs is also used to manage
+        * interrupt level context switches.
+        */
+
+       current_regs = regs;
+
+       /* Mask and acknowledge the interrupt */
+
+       up_maskack_irq(irq);
+
+       /* Deliver the IRQ */
+
+       irq_dispatch(irq, regs);
+
+       /* If a context switch occurred while processing the interrupt
+        * then current_regs may have change value.  If we return any value
+        * different from the input regs, then the lower level will know
+        * that a context switch occurred during interrupt processing.
+        */
+
+       regs = current_regs;
+
+       /* Indicate that we are no long in an interrupt handler */
+
+       current_regs = NULL;
+
+       /* Unmask the last interrupt (global interrupts are still
+        * disabled.
+        */
+
+       up_enable_irq(irq);
+    }
+  up_ledoff(LED_INIRQ);
+#endif
+  return regs;
+}
