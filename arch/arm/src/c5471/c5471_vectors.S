@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/c5471/c5471_vectors.S
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
+
+#include "arm.h"
 #include "up_arch.h"
 
 /************************************************************************************

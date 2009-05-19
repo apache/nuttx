@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
+#include "arm.h"
 #include "up_arch.h"
 
 /************************************************************************************

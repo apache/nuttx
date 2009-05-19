@@ -1,7 +1,7 @@
-/************************************************************
- * c5471/c5471_irq.c
+/****************************************************************************
+ * arch/arm/src/c5471/c5471_irq.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,35 +31,38 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+
 #include <nuttx/irq.h>
+
+#include "arm.h"
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
 #define ILR_EDGESENSITIVE 0x00000020
 #define ILR_PRIORITY      0x0000001E
 
-/************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************/
+ ****************************************************************************/
 
 uint32 *current_regs;
 
-/************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************/
+ ****************************************************************************/
 
 /* The value of _vflashstart is defined in ld.script.  It
  * could be hard-coded because we know that correct IRAM
@@ -87,11 +90,11 @@ static up_vector_t g_vectorinittab[] =
 };
 #define NVECTORS ((sizeof(g_vectorinittab)) / sizeof(up_vector_t))
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: up_ackirq
  *
  * Description:
@@ -100,7 +103,7 @@ static up_vector_t g_vectorinittab[] =
  *   output. Clear source IRQ register. Enables a new IRQ
  *   generation. Reset by internal logic.
  *
- ************************************************************/
+ ****************************************************************************/
 
 static inline void up_ackirq(unsigned int irq)
 {
@@ -109,7 +112,7 @@ static inline void up_ackirq(unsigned int irq)
   putreg32(reg | 0x00000001, INT_CTRL_REG); /* write the NEW_IRQ_AGR bit. */
 }
 
-/************************************************************
+/****************************************************************************
  * Name: up_ackfiq
  *
  * Description:
@@ -118,7 +121,7 @@ static inline void up_ackirq(unsigned int irq)
  *   output. Clear source FIQ register. Enables a new FIQ
  *   generation. Reset by internal logic.
  *
- ************************************************************/
+ ****************************************************************************/
 
 static inline void up_ackfiq(unsigned int irq)
 {
@@ -127,9 +130,9 @@ static inline void up_ackfiq(unsigned int irq)
   putreg32(reg | 0x00000002, INT_CTRL_REG); /* write the NEW_FIQ_AGR bit. */
 }
 
-/************************************************************
+/****************************************************************************
  * Name: up_vectorinitialize
- ************************************************************/
+ ****************************************************************************/
 
 static inline void up_vectorinitialize(void)
 {
@@ -143,13 +146,13 @@ static inline void up_vectorinitialize(void)
     }
 }
 
-/************************************************************
- * Public Funtions
- ************************************************************/
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: up_irqinitialize
- ************************************************************/
+ ****************************************************************************/
 
 void up_irqinitialize(void)
 {
@@ -182,13 +185,13 @@ void up_irqinitialize(void)
 #endif
 }
 
-/************************************************************
+/****************************************************************************
  * Name: up_disable_irq
  *
  * Description:
  *   Disable the IRQ specified by 'irq'
  *
- ************************************************************/
+ ****************************************************************************/
 
 void up_disable_irq(int irq)
 {
@@ -199,13 +202,13 @@ void up_disable_irq(int irq)
     }
 }
 
-/************************************************************
+/****************************************************************************
  * Name: up_enable_irq
  *
  * Description:
  *   Enable the IRQ specified by 'irq'
  *
- ************************************************************/
+ ****************************************************************************/
 
 void up_enable_irq(int irq)
 {
@@ -216,13 +219,13 @@ void up_enable_irq(int irq)
     }
 }
 
-/************************************************************
+/****************************************************************************
  * Name: up_maskack_irq
  *
  * Description:
  *   Mask the IRQ and acknowledge it
  *
- ************************************************************/
+ ****************************************************************************/
 
 void up_maskack_irq(int irq)
 {
