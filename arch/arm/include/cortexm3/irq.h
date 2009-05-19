@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/irq_arm.h
+ * arch/arm/include/cortexm3/irq.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,8 +37,8 @@
  * through nuttx/irq.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_IRQ_ARM_H
-#define __ARCH_ARM_INCLUDE_IRQ_ARM_H
+#ifndef __ARCH_ARM_INCLUDE_CORTEXM3_IRQ_H
+#define __ARCH_ARM_INCLUDE_CORTEXM3_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -51,38 +51,44 @@
  * Definitions
  ****************************************************************************/
 
-/* IRQ Stack Frame Format:
- *
- * Context is always saved/restored in the same way:
- *
- *   (1) stmia rx, {r0-r14}
- *   (2) then the PC and CPSR
- *
- * This results in the following set of indices that
- * can be used to access individual registers in the
- * xcp.regs array:
+/* IRQ Stack Frame Format: */
+
+/* On entry into an IRQ, the hardware automatically saves the following
+ * registers on the stack in this (address) order:
  */
 
-#define REG_R0              (0)
-#define REG_R1              (1)
-#define REG_R2              (2)
-#define REG_R3              (3)
-#define REG_R4              (4)
-#define REG_R5              (5)
-#define REG_R6              (6)
-#define REG_R7              (7)
-#define REG_R8              (8)
-#define REG_R9              (9)
-#define REG_R10             (10)
-#define REG_R11             (11)
-#define REG_R12             (12)
-#define REG_R13             (13)
-#define REG_R14             (14)
-#define REG_R15             (15)
-#define REG_CPSR            (16)
+#define REG_XPSR            (17) /* xPSR */
+#define REG_R15             (16) /* R15 = PC */
+#define REG_R14             (15) /* R14 = LR */
+#define REG_R12             (14) /* R12 */
+#define REG_R3              (13) /* R3 */
+#define REG_R2              (12) /* R2 */
+#define REG_R1              (11) /* R1 */
+#define REG_R0              (10) /* R0 */
 
-#define XCPTCONTEXT_REGS    (17)
-#define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
+#define HW_XCPT_REGS        (8)
+#define HW_XCPT_SIZE        (4 * HW_XCPT_REGS)
+
+/* The following additional registers are stored by the interrupt handling
+ * logic.
+ */
+
+#define REG_R11             (9) /* R11 */
+#define REG_R10             (8) /* R10 */
+#define REG_R9              (7) /* R9 */
+#define REG_R8              (6) /* R8 */
+#define REG_R7              (5) /* R7 */
+#define REG_R6              (4) /* R6 */
+#define REG_R5              (3) /* R5 */
+#define REG_R4              (2) /* R4 */
+#define REG_PRIMASK         (1) /* PRIMASK */
+#define REG_R13             (0) /* R13 = SP at time of interrupt */
+
+#define SW_XCPT_REGS        (10)
+#define SW_XCPT_SIZE        (4 * SW_XCPT_REGS)
+
+#define XCPTCONTEXT_REGS    (HW_XCPT_REGS + SW_XCPT_REGS)
+#define XCPTCONTEXT_SIZE    (HW_XCPT_SIZE + SW_XCPT_SIZE)
 
 #define REG_A1              REG_R0
 #define REG_A2              REG_R1
@@ -107,24 +113,8 @@
  * Public Types
  ****************************************************************************/
 
-/* This struct defines the way the registers are stored.  We
- * need to save:
- *
- *  1	CPSR
- *  7	Static registers, v1-v7 (aka r4-r10)
- *  1	Frame pointer, fp (aka r11)
- *  1	Stack pointer, sp (aka r13)
- *  1	Return address, lr (aka r14)
- * ---
- * 11	(XCPTCONTEXT_USER_REG)
- *
- * On interrupts, we also need to save:
- *  4	Volatile registers, a1-a4 (aka r0-r3)
- *  1	Scratch Register, ip (aka r12)
- *---
- *  5	(XCPTCONTEXT_IRQ_REGS)
- *
- * For a total of 17 (XCPTCONTEXT_REGS)
+/* The following structure is included in the TCB and defines the complete
+ * state of the thread.
  */
 
 #ifndef __ASSEMBLY__
@@ -137,12 +127,13 @@ struct xcptcontext
 #ifndef CONFIG_DISABLE_SIGNALS
   void *sigdeliver; /* Actual type is sig_deliver_t */
 
-  /* These are saved copies of LR and CPSR used during
+  /* These are saved copies of LR, PRIMASK, and xPSR used during
    * signal processing.
    */
 
   uint32 saved_pc;
-  uint32 saved_cpsr;
+  uint32 saved_primask;
+  uint32 saved_xpsr;
 #endif
 
   /* Register save area */
@@ -157,49 +148,119 @@ struct xcptcontext
 
 #ifndef __ASSEMBLY__
 
-/* Save the current interrupt enable state & disable IRQs */
+/* Save the current primask state & disable IRQs */
 
 static inline irqstate_t irqsave(void)
 {
-  unsigned int flags;
-  unsigned int temp;
+  unsigned short primask;
+
+  /* Return the the current value of primask register and set
+   * bit 0 of the primask register to disable interrupts
+   */
+
   __asm__ __volatile__
     (
-     "\tmrs    %0, cpsr\n"
-     "\torr    %1, %0, #128\n"
-     "\tmsr    cpsr_c, %1"
-     : "=r" (flags), "=r" (temp)
+     "\tmrs    %0, primask\n"
+     "\tcpsid  i\n"
+     : "=r" (primask)
      :
      : "memory");
-  return flags;
+  return primask;
 }
 
-/* Restore saved IRQ & FIQ state */
+/* Restore saved primask state */
 
-static inline void irqrestore(irqstate_t flags)
+static inline void irqrestore(irqstate_t primask)
+{
+  /* If bit 0 of the primask is 0, then we need to restore
+   * interupts.
+   */
+
+  __asm__ __volatile__
+    (
+      "\ttst    %0, #1\n"
+      "\tbne    1f\n"
+      "\tcpsie  i\n"
+      "1:\n"
+      :
+      : "r" (primask)
+      : "memory");
+}
+
+/* Get/set the primask register */
+
+static inline ubyte getprimask(void)
+{
+  uint32 primask;
+  __asm__ __volatile__
+    (
+     "\tmrs  %0, primask\n"
+     : "=r" (primask)
+     :
+     : "memory");
+  return (ubyte)primask;
+}
+
+static inline void setprimask(uint32 primask)
 {
   __asm__ __volatile__
     (
-     "msr    cpsr_c, %0"
-     :
-     : "r" (flags)
-     : "memory");
+      "\tmsr primask, %0\n"
+      :
+      : "r" (primask)
+      : "memory");
 }
 
-static inline void system_call(swint_t func, int parm1,
-			       int parm2, int parm3)
+/* Get/set the basepri register */
+
+static inline ubyte getbasepri(void)
+{
+  uint32 basepri;
+  __asm__ __volatile__
+    (
+     "\tmrs  %0, basepri\n"
+     : "=r" (basepri)
+     :
+     : "memory");
+  return (ubyte)basepri;
+}
+
+static inline void setbasepri(uint32 basepri)
 {
   __asm__ __volatile__
     (
-     "mov\tr0,%0\n\t"
-     "mov\tr1,%1\n\t"
-     "mov\tr2,%2\n\t"
-     "mov\tr3,%3\n\t"
-     "swi\t0x900001\n\t"
+      "\tmsr basepri, %0\n"
+      :
+      : "r" (basepri)
+      : "memory");
+}
+
+/* Get IPSR */
+
+static inline uint32 getipsr(void)
+{
+  uint32 ipsr;
+  __asm__ __volatile__
+    (
+     "\tmrs  %0, ipsr\n"
+     : "=r" (ipsr)
      :
-     : "r" ((long)(func)),  "r" ((long)(parm1)),
-       "r" ((long)(parm2)), "r" ((long)(parm3))
-     : "r0", "r1", "r2", "r3", "lr");
+     : "memory");
+  return ipsr;
+}
+
+/* SVC system call */
+
+static inline void svcall(uint32 cmd, uint32 arg)
+{
+  __asm__ __volatile__
+    (
+      "\tmov  r0, %0\n"
+      "\tmov  r1, %1\n"
+      "\tsvc  0\n"
+      :
+      : "r" (cmd), "r" (arg)
+      : "memory");
 }
 #endif /* __ASSEMBLY__ */
 
@@ -225,5 +286,5 @@ extern "C" {
 #endif
 #endif
 
-#endif /* __ARCH_ARM_INCLUDE_IRQ_ARM_H */
+#endif /* __ARCH_ARM_INCLUDE_CORTEXM3_IRQ_H */
 
