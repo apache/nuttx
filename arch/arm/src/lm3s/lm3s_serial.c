@@ -595,6 +595,7 @@ static int up_interrupt(int irq, void *context)
    * until we have been looping for a long time.
    */
 
+  handled = TRUE;
   for (passes = 0; passes < 256 && handled; passes++)
     {
       handled = FALSE;
@@ -616,7 +617,7 @@ static int up_interrupt(int irq, void *context)
 
       /* Handle outgoing, transmit bytes */
 
-      if ((mis & UART_MIS_TXMIS) == 0)
+      if ((mis & UART_MIS_TXMIS) != 0)
         {
            /* Tx FIFO not full ... process outgoing bytes */
 
