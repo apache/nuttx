@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>	/* NuttX configuration settings */
 #include <arch/board/board.h>	/* Board-specific settings */
+
 #include "arm.h"		/* ARM-specific settings */
 #include "chip.h"		/* Chip-specific settings */
 #include "up_internal.h"

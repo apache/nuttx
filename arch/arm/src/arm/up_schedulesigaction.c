@@ -45,6 +45,7 @@
 
 #include <nuttx/arch.h>
 
+#include "arm.h"
 #include "os_internal.h"
 #include "up_internal.h"
 #include "up_arch.h"

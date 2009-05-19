@@ -137,7 +137,7 @@ void up_sigdeliver(void)
 
   up_ledoff(LED_SIGNAL);
   up_fullcontextrestore(regs);
-\}
+}
 
 #endif /* !CONFIG_DISABLE_SIGNALS */
 

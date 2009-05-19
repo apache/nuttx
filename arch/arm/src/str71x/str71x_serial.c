@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/str71x/str71x_serial.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,7 +63,7 @@
 /* Is there a UART enabled? */
 
 #if !defined(CONFIG_STR71X_UART0) && !defined(CONFIG_STR71X_UART1) && \
-    !defined(CONFIG_STR71X_UART2) && !defined(CONFIG_STR71X_UART3))
+    !defined(CONFIG_STR71X_UART2) && !defined(CONFIG_STR71X_UART3)
 #  error "No UARTs enabled"
 #endif
 

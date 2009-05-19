@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/st71x/st71x_irq.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <errno.h>
 #include <nuttx/irq.h>
 
+#include "arm.h"
 #include "up_arch.h"
 #include "up_internal.h"
 #include "chip.h"
