@@ -1,6 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lm3s/lm3s_svcall.c
- * arch/arm/src/chip/lm3s_svcall.c
+ * arch/arm/src/cortexm3/up_hardfault.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -47,14 +46,18 @@
 
 #include <arch/irq.h>
 
+#include "up_arch.h"
 #include "os_internal.h"
-#include "lm3s_internal.h"
+#include "nvic.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#undef DEBUG_SVCALL         /* Define to debug SVCall */
+#undef DEBUG_HARDFAULTS         /* Define to debug hard faults */
+
+#define INSN_SVC0        0xdf00 /* insn: svc 0 */
 
 /****************************************************************************
  * Private Data
@@ -73,74 +76,66 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lm3s_svcall
+ * Name: up_hardfault
  *
  * Description:
- *   This is SVCall exception handler that performs context switching
+ *   This is Hard Fault exception handler.  It also catches SVC call
+ *   exceptions that are performed in bad contexts.
  *
  ****************************************************************************/
 
-int lm3s_svcall(int irq, FAR void *context)
+int up_hardfault(int irq, FAR void *context)
 {
-  uint32 *svregs  = (uint32*)context;
-  uint32 *tcbregs = (uint32*)svregs[REG_R1];
+  uint32 *regs = (uint32*)context;
+  uint16 *pc;
+  uint16 insn;
 
-  DEBUGASSERT(svregs && svregs == current_regs && tcbregs);
+  /* Dump some hard fault info */
 
-  /* The SVCall software interrupt is called with R0 = SVC command and R1 = 
-   * the TCB register save area.
-   */
-
-  sllvdbg("Command: %d svregs: %p tcbregs: %08x\n", svregs[REG_R0], svregs, tcbregs);
-
-#ifdef DEBUG_SVCALL
-  lldbg("SVCall Entry:\n");
+#ifdef DEBUG_HARDFAULTS
+  lldbg("Hard Fault:\n");
+  lldbg("  IRQ: %d regs: %p\n", irq, regs);
+  lldbg("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x\n",
+        getbasepri(), getprimask(), getipsr());
+  lldbg("  CFAULTS: %08x HFAULTS: %08x DFAULTS: %08x BFAULTADDR: %08x AFAULTS: %08x\n",
+        getreg32(NVIC_CFAULTS), getreg32(NVIC_HFAULTS),
+        getreg32(NVIC_DFAULTS), getreg32(NVIC_BFAULT_ADDR),
+        getreg32(NVIC_AFAULTS));
   lldbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        svregs[REG_R0],  svregs[REG_R1],  svregs[REG_R2],  svregs[REG_R3],
-        svregs[REG_R4],  svregs[REG_R5],  svregs[REG_R6],  svregs[REG_R7]);
+        regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
+        regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
   lldbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        svregs[REG_R8],  svregs[REG_R9],  svregs[REG_R10], svregs[REG_R11],
-        svregs[REG_R12], svregs[REG_R13], svregs[REG_R14], svregs[REG_R15]);
-  lldbg("  PSR=%08x\n", svregs[REG_XPSR]);
+        regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+        regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+  lldbg("  PSR=%08x\n", regs[REG_XPSR]);
 #endif
 
-  /* Handle the SVCall according to the command in R0 */
+  /* Get the value of the program counter where the fault occurred */
 
-  switch (svregs[REG_R0])
+  pc = (uint16*)regs[REG_PC] - 1;
+  if ((void*)pc >= (void*)&_stext && (void*)pc < (void*)&_etext)
     {
-      /* R0=0:  This is a save context command.  In this case, we simply need
-       * to copy the svregs to the tdbregs and return.
-       */
+      /* Fetch the instruction that caused the Hard fault */
 
-      case 0:
-        memcpy(tcbregs, svregs, XCPTCONTEXT_SIZE);
-        break;
+      insn = *pc;
 
-      /* R1=1: This a restore context command.  In this case, we simply need to
-       * set current_regs to tcbrgs.  svregs == current_regs is the normal exception
-       * turn.  By setting current_regs = tcbregs, we force the return through
-       * the saved context.
-       */
-
-      case 1:
-        current_regs = tcbregs;
-        break;
-
-      default:
-        PANIC(OSERR_INTERNAL);
-        break;
-    }
-    
-#ifdef DEBUG_SVCALL
-  lldbg("SVCall Return:\n");
-  lldbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        current_regs[REG_R0],  current_regs[REG_R1],  current_regs[REG_R2],  current_regs[REG_R3],
-        current_regs[REG_R4],  current_regs[REG_R5],  current_regs[REG_R6],  current_regs[REG_R7]);
-  lldbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        current_regs[REG_R8],  current_regs[REG_R9],  current_regs[REG_R10], current_regs[REG_R11],
-        current_regs[REG_R12], current_regs[REG_R13], current_regs[REG_R14], current_regs[REG_R15]);
-  lldbg("  PSR=%08x\n", current_regs[REG_XPSR]);
+#ifdef DEBUG_HARDFAULTS
+      lldbg("  PC: %p INSN: %04x\n", pc, insn);
 #endif
 
+      /* If this was the instruction 'svc 0', then forward processing
+       * to the SVCall handler
+       */
+
+      if (insn == INSN_SVC0)
+        {
+          sllvdbg("Forward SVCall\n");
+          return up_svcall(irq, context);
+        }
+    }
+
+  (void)irqsave();
+  dbg("PANIC!!! Hard fault: %08x\n", getreg32(NVIC_HFAULTS));
+  PANIC(OSERR_UNEXPECTEDISR);
   return OK;
 }
