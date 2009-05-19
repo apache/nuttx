@@ -1,5 +1,5 @@
 /****************************************************************************
- * task_activate.c
+ * sched/task_activate.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
