@@ -398,9 +398,9 @@ static int up_setup(struct uart_dev_s *dev)
    *  write to the UARTLCRH register for the changes to take effect. ..."
    */
 
-  den       = priv->baud << 16;
+  den       = priv->baud << 4;
   brdi      = SYSCLK_FREQUENCY / den;
-  remainder = priv->baud - den * brdi;
+  remainder = SYSCLK_FREQUENCY - den * brdi;
   divfrac   = ((remainder << 6) + (den >> 1)) / den;
 
   up_serialout(priv, LM3S_UART_IBRD_OFFSET, brdi);
@@ -465,7 +465,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Enable the FIFOs */
 
-#ifndef CONFIG_SUPPRESS_UART_CONFIG
+#ifdef CONFIG_SUPPRESS_UART_CONFIG
   lcrh = up_serialin(priv, LM3S_UART_LCRH_OFFSET);
 #endif
   lcrh |= UART_LCRH_FEN;
@@ -473,7 +473,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Enable Rx, Tx, and the UART */
 
-#ifndef CONFIG_SUPPRESS_UART_CONFIG
+#ifdef CONFIG_SUPPRESS_UART_CONFIG
   ctl = up_serialin(priv, LM3S_UART_CTL_OFFSET);
 #endif
   ctl |= (UART_CTL_UARTEN|UART_CTL_TXE|UART_CTL_RXE);
@@ -760,18 +760,38 @@ static void up_send(struct uart_dev_s *dev, int ch)
 static void up_txint(struct uart_dev_s *dev, boolean enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  irqstate_t flags;
+
+  flags = irqsave();
   if (enable)
     {
       /* Set to receive an interrupt when the TX fifo is half emptied */
+
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       priv->im |= UART_IM_TXIM;
+      up_serialout(priv, LM3S_UART_IM_OFFSET, priv->im);
+
+      /* The serial driver wants an interrupt here, but will not get get
+       * one unless we "prime the pump."  I believe that this is because
+       * behave like a level interrupt and the LM3S interrupts behave
+       * (at least by default) like edge interrupts.
+       *
+       * In any event, faking a TX interrupt here solves the problem;
+       * Call uart_xmitchars() just as would have been done if we recieved
+       * the TX interrupt.
+       */
+
+      uart_xmitchars(dev);
 #endif
     }
   else
     {
+      /* Disable the TX interrupt */
+
       priv->im &= ~UART_IM_TXIM;
+      up_serialout(priv, LM3S_UART_IM_OFFSET, priv->im);
     }
-  up_serialout(priv, LM3S_UART_IM_OFFSET, priv->im);
+  irqrestore(flags);
 }
 
 /****************************************************************************
