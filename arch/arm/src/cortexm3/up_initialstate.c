@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/common/up_copystate.c
+ * arch/arm/src/cortexm3/up_initialstate.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,14 +38,17 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <sys/types.h>
+#include <string.h>
 
-#include "os_internal.h"
+#include <nuttx/arch.h>
+
 #include "up_internal.h"
+#include "up_arch.h"
+#include "psr.h"
 
 /****************************************************************************
- * Definitions
+ * Private Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -61,30 +64,43 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_undefinedinsn
+ * Name: up_initial_state
+ *
+ * Description:
+ *   A new thread is being started and a new TCB
+ *   has been created. This function is called to initialize
+ *   the processor specific portions of the new TCB.
+ *
+ *   This function must setup the intial architecture registers
+ *   and/or  stack so that execution will begin at tcb->start
+ *   on the next context switch.
+ *
  ****************************************************************************/
 
-/* A little faster than most memcpy's */
-
-void up_copystate(uint32 *dest, uint32 *src)
+void up_initial_state(_TCB *tcb)
 {
-  int i;
+  struct xcptcontext *xcp = &tcb->xcp;
 
-  /* In the current ARM model, the state is always copied to and from the
-   * stack and TCB.  In the Cortex-M3 model, the state is copied from the
-   * stack to the TCB, but only a referenced is passed to get the the state
-   * from the TCB.  So the following check makes sense only for the Cortex-M3
-   * model:
-   */
+  /* Initialize the initial exception register context structure */
 
-#ifdef __thumb2__
-  if (src != dest)
-#endif
-    {
-      for (i = 0; i < XCPTCONTEXT_REGS; i++)
-        {
-          *dest++ = *src++;
-        }
-    }
+  memset(xcp, 0, sizeof(struct xcptcontext));
+
+  /* Save the initial stack pointer */
+
+  xcp->regs[REG_SP]      = (uint32)tcb->adj_stack_ptr;
+
+  /* Save the task entry point (stripping off the thumb bit) */
+
+  xcp->regs[REG_PC]      = (uint32)tcb->start & ~1;
+  
+  /* Specify thumb mode */
+
+  xcp->regs[REG_XPSR]    = CORTEXM3_XPSR_T;
+
+  /* Enable or disable interrupts, based on user configuration */
+
+# ifdef CONFIG_SUPPRESS_INTERRUPTS
+  xcp->regs[REG_PRIMASK] = 1;
+# endif
 }
 

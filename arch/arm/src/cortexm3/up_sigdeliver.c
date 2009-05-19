@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lm3s/lm3s_timerisr.c
+ * arch/arm/src/cortexm3/up_sigdeliver.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,105 +38,107 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <time.h>
-#include <debug.h>
-#include <nuttx/arch.h>
-#include <arch/board/board.h>
 
-#include "nvic.h"
-#include "clock_internal.h"
+#include <sys/types.h>
+#include <sched.h>
+#include <debug.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+
+#include "os_internal.h"
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip.h"
-#include "lm3s_internal.h"
+#ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/* The desired timer interrupt frequency is provided by the definition
- * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
- * system clock ticks per second.  That value is a user configurable setting
- * that defaults to 100 (100 ticks per second = 10 MS interval).
- *
- * The timer counts at the rate SYSCLK_FREQUENCY as defined in the board.h
- * header file.
- */
-
-#define SYSTICK_RELOAD ((SYSCLK_FREQUENCY / CLK_TCK) - 1)
-
-/* The size of the reload field is 24 bits.  Verify taht the reload value
- * will fit in the reload register.
- */
-
-#if SYSTICK_RELOAD > 0x00ffffff
-#  error SYSTICK_RELOAD exceeds the range of the RELOAD register
-#endif
-
 /****************************************************************************
- * Private Types
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  up_timerisr
+ * Name: up_sigdeliver
  *
  * Description:
- *   The timer ISR will perform a variety of services for various portions
- *   of the systems.
+ *   This is the a signal handling trampoline.  When a
+ *   signal action was posted.  The task context was mucked
+ *   with and forced to branch to this location with interrupts
+ *   disabled.
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32 *regs)
+void up_sigdeliver(void)
 {
-   /* Process timer interrupt */
+  _TCB  *rtcb = (_TCB*)g_readytorun.head;
+  uint32 regs[XCPTCONTEXT_REGS];
+  sig_deliver_t sigdeliver;
 
-   sched_process_timer();
-   return 0;
+  /* Save the errno.  This must be preserved throughout the
+   * signal handling so that the the user code final gets
+   * the correct errno value (probably EINTR).
+   */
+
+  int saved_errno = rtcb->pterrno;
+
+  up_ledon(LED_SIGNAL);
+
+  sdbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
+        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
+  ASSERT(rtcb->xcp.sigdeliver != NULL);
+
+  /* Save the real return state on the stack. */
+
+  up_copystate(regs, rtcb->xcp.regs);
+  regs[REG_PC]         = rtcb->xcp.saved_pc;
+  regs[REG_PRIMASK]    = rtcb->xcp.saved_primask;
+  regs[REG_XPSR]       = rtcb->xcp.saved_xpsr;
+
+  /* Get a local copy of the sigdeliver function pointer.
+   * we do this so that we can nullify the sigdeliver
+   * function point in the TCB and accept more signal
+   * deliveries while processing the current pending
+   * signals.
+   */
+
+  sigdeliver           = rtcb->xcp.sigdeliver;
+  rtcb->xcp.sigdeliver = NULL;
+
+  /* Then restore the task interrupt statat. */
+
+  irqrestore((uint16)regs[REG_PRIMASK]);
+
+  /* Deliver the signals */
+
+  sigdeliver(rtcb);
+
+  /* Output any debug messaged BEFORE restoreing errno
+   * (becuase they may alter errno), then restore the
+   * original errno that is needed by the user logic
+   * (it is probably EINTR).
+   */
+
+  sdbg("Resuming\n");
+  rtcb->pterrno = saved_errno;
+
+  /* Then restore the correct state for this thread of
+   * execution.
+   */
+
+  up_ledoff(LED_SIGNAL);
+  up_fullcontextrestore(regs);
 }
 
-/****************************************************************************
- * Function:  up_timerinit
- *
- * Description:
- *   This function is called during start-up to initialize
- *   the timer interrupt.
- *
- ****************************************************************************/
+#endif /* !CONFIG_DISABLE_SIGNALS */
 
-void up_timerinit(void)
-{
-  uint32 regval;
-
-  /* Set the SysTick interrupt to the default priority */
-
-  regval = getreg32(NVIC_SYSH12_15_PRIORITY);
-  regval &= ~NVIC_SYSH_PRIORITY_PR15_MASK;
-  regval |= (NVIC_SYSH_PRIORITY_DEFAULT << NVIC_SYSH_PRIORITY_PR15_SHIFT);
-  putreg32(regval, NVIC_SYSH12_15_PRIORITY);
-
-  /* Configure SysTick to interrupt at the requested rate */
-
-  putreg32(SYSTICK_RELOAD, NVIC_SYSTICK_RELOAD);
-
-  /* Attach the timer interrupt vector */
-
-  (void)irq_attach(LM3S_IRQ_SYSTICK, (xcpt_t)up_timerisr);
-
-  /* Enable SysTick interrupts */
-
-  putreg32((NVIC_SYSTICK_CTRL_CLKSOURCE|NVIC_SYSTICK_CTRL_TICKINT|NVIC_SYSTICK_CTRL_ENABLE), NVIC_SYSTICK_CTRL);
-
-  /* And enable the timer interrupt */
-
-  up_enable_irq(LM3S_IRQ_SYSTICK);
-}

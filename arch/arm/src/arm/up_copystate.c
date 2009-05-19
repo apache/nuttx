@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/common/up_undefinedinsn.c
+ * arch/arm/src/arm/up_copystate.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
-#include <debug.h>
 
 #include "os_internal.h"
 #include "up_internal.h"
@@ -47,15 +47,6 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-/* Output debug info if stack dump is selected -- even if 
- * debug is not selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  lldbg
-# define lldbg lib_lowprintf
-#endif
 
 /****************************************************************************
  * Private Data
@@ -73,9 +64,19 @@
  * Name: up_undefinedinsn
  ****************************************************************************/
 
-void up_undefinedinsn(uint32 *regs)
+/* A little faster than most memcpy's */
+
+void up_copystate(uint32 *dest, uint32 *src)
 {
-  lldbg("Undefined instruction at 0x%x\n", regs[REG_PC]);
-  current_regs = regs;
-  PANIC(OSERR_UNDEFINEDINSN);
+  int i;
+
+  /* In the current ARM model, the state is always copied to and from the
+   * stack and TCB.
+   */
+
+  for (i = 0; i < XCPTCONTEXT_REGS; i++)
+    {
+      *dest++ = *src++;
+    }
 }
+

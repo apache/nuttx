@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/common/cortexm3_psr.h
+ * arch/arm/src/cortexm3/psr.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

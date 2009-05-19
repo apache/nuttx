@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/common/up_dataabort.c
+ *  arch/arm/src/src/up_prefetchabort.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,12 +70,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_dataabort
+ * Name: up_prefetchabort
  ****************************************************************************/
 
-void up_dataabort(uint32 *regs)
+void up_prefetchabort(uint32 *regs)
 {
-  lldbg("Data abort at 0x%x\n", regs[REG_PC]);
+  lldbg("Prefetch abort at 0x%x\n", regs[REG_PC]);
   current_regs = regs;
   PANIC(OSERR_ERREXCEPTION);
 }

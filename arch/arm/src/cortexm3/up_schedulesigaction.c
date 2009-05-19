@@ -1,7 +1,7 @@
 /****************************************************************************
- * common/up_schedulesigaction.c
+ * arch/arm/src/cortexm3/up_schedulesigaction.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 
 #include <nuttx/arch.h>
 
+#include "psr.h"
 #include "os_internal.h"
 #include "up_internal.h"
 #include "up_arch.h"
@@ -154,24 +155,16 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
 
               tcb->xcp.sigdeliver       = sigdeliver;
               tcb->xcp.saved_pc         = current_regs[REG_PC];
-#ifdef __thumb2__
               tcb->xcp.saved_primask    = current_regs[REG_PRIMASK];
               tcb->xcp.saved_xpsr       = current_regs[REG_XPSR];
-#else
-              tcb->xcp.saved_cpsr       = current_regs[REG_CPSR];
-#endif
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
 
               current_regs[REG_PC]      = (uint32)up_sigdeliver;
-#ifdef __thumb2__
               current_regs[REG_PRIMASK] = 1;
-              current_regs[REG_XPSR]    = 0;
-#else
-              current_regs[REG_CPSR]    = SVC_MODE | PSR_I_BIT | PSR_F_BIT;
-#endif
+              current_regs[REG_XPSR]    = CORTEXM3_XPSR_T;
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
@@ -196,24 +189,16 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
 
           tcb->xcp.sigdeliver       = sigdeliver;
           tcb->xcp.saved_pc         = tcb->xcp.regs[REG_PC];
-#ifdef __thumb2__
           tcb->xcp.saved_primask    = tcb->xcp.regs[REG_PRIMASK];
           tcb->xcp.saved_xpsr       = tcb->xcp.regs[REG_XPSR];
-#else
-          tcb->xcp.saved_cpsr       = tcb->xcp.regs[REG_CPSR];
-#endif
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
            */
 
           tcb->xcp.regs[REG_PC]      = (uint32)up_sigdeliver;
-#ifdef __thumb2__
           tcb->xcp.regs[REG_PRIMASK] = 1;
-          tcb->xcp.regs[REG_XPSR]    = 0;
-#else
-          tcb->xcp.regs[REG_CPSR]    = SVC_MODE | PSR_I_BIT | PSR_F_BIT;
-#endif
+          tcb->xcp.regs[REG_XPSR]    = CORTEXM3_XPSR_T;
         }
 
       irqrestore(flags);

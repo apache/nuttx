@@ -1,7 +1,7 @@
 /****************************************************************************
- *  arch/arm/src/common/up_syscall.c
+ * arch/arm/src/arm/up_nommuhead.S
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,57 +38,128 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <debug.h>
-#include "up_arch.h"
-#include "os_internal.h"
 #include "up_internal.h"
+#include "up_arch.h"
 
 /****************************************************************************
- * Definitions
+ * Macros
  ****************************************************************************/
 
-/* Output debug info if stack dump is selected -- even if 
- * debug is not selected.
- */
+	/* This macro will modify r0, r1, r2 and r14 */
 
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  lldbg
-# define lldbg lib_lowprintf
+#ifdef CONFIG_DEBUG
+	.macro	showprogress, code
+	mov	r0, #\code
+	bl	up_lowputc
+	.endm
+#else
+	.macro	showprogress, code
+	.endm
 #endif
 
 /****************************************************************************
- * Private Data
+ * OS Entry Point
  ****************************************************************************/
 
-/****************************************************************************
- * vectors
- ****************************************************************************/
+/* We assume the bootloader has already initialized most of the h/w for
+ * us and that only leaves us having to do some os specific things
+ * below.
+ */
+	.text
+        .global __start
+	.type	__start, #function
+__start:
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+	/* First, setup initial processor mode */
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+	mov	r0, #(SVC_MODE | PSR_I_BIT | PSR_F_BIT )
+	msr	cpsr, r0
 
-/****************************************************************************
- * Name: up_syscall
- *
- * Description:
- *   SWI interrupts will vection here with insn=the SWI
- *   instruction and xcp=the interrupt context
- *
- *   The handler may get the SWI number be de-referencing
- *   the return address saved in the xcp and decoding
- *   the SWI instruction
- *
- ****************************************************************************/
+	showprogress 'A'
 
-void up_syscall(uint32 *regs)
-{
-  lldbg("Syscall from 0x%x\n", regs[REG_PC]);
-  current_regs = regs;
-  PANIC(OSERR_ERREXCEPTION);
-}
+	/* Setup system stack (and get the BSS range) */
+
+	adr	r0, LC0
+	ldmia   r0, {r4, r5, sp}
+
+	/* Clear system BSS section */
+
+	mov	r0, #0
+1:	cmp	r4, r5
+	strcc	r0, [r4], #4
+	bcc	1b
+
+	showprogress 'B'
+
+	/* Copy system .data sections to new home in RAM. */
+
+#ifdef CONFIG_BOOT_RUNFROMFLASH
+
+	adr	r3, LC2
+	ldmia	r3, {r0, r1, r2}
+
+1:	ldmia	r0!, {r3 - r10}
+	stmia	r1!, {r3 - r10}
+	cmp	r1, r2
+	blt	1b
+
+#endif
+
+	/* Perform early serial initialization */
+
+	mov	fp, #0
+#ifdef CONFIG_USE_EARLYSERIALINIT
+	bl	up_earlyserialinit
+#endif
+
+#ifdef CONFIG_DEBUG
+	mov	r0, #'C'
+	bl	up_putc
+	mov	r0, #'\n'
+	bl	up_putc
+#endif
+	/* Initialize onboard LEDs */
+
+#ifdef CONFIG_ARCH_LEDS
+	bl	up_ledinit
+#endif
+
+	/* Then jump to OS entry */
+
+	b	os_start
+
+	/* Variables:
+	 * _sbss is the start of the BSS region (see ld.script)
+	 * _ebss is the end of the BSS regsion (see ld.script)
+	 * The idle task stack starts at the end of BSS and is
+	 * of size CONFIG_IDLETHREAD_STACKSIZE.  The heap continues
+	 * from there until the end of memory.  See g_heapbase
+	 * below.
+	 */
+
+LC0:	.long	_sbss
+	.long	_ebss
+	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+
+#ifdef CONFIG_BOOT_RUNFROMFLASH
+LC2:	.long	_eronly	/* Where .data defaults are stored in FLASH */
+	.long	_sdata	/* Where .data needs to reside in SDRAM */
+	.long	_edata
+#endif
+	.size	__start, .-__start
+
+	/* This global variable is unsigned long g_heapbase and is
+	 * exported from here only because of its coupling to LCO
+	 * above.
+	 */
+
+	.data
+	.align	4
+	.globl	g_heapbase
+	.type	g_heapbase, object
+g_heapbase:
+	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
+	.size	g_heapbase, .-g_heapbase
+
+	.end
+

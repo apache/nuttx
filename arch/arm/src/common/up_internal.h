@@ -77,7 +77,7 @@
  * a referenced is passed to get the the state from the TCB.
  */
 
-#ifdef __thumb2__
+#ifdef CONFIG_ARCH_CORTEXM3
 #  define up_savestate(regs)    up_copystate(regs, current_regs)
 #  define up_restorestate(regs) (current_regs = regs)
 #else
@@ -136,7 +136,7 @@ extern void up_boot(void);
 extern void up_copystate(uint32 *dest, uint32 *src);
 extern void up_dataabort(uint32 *regs);
 extern void up_decodeirq(uint32 *regs);
-#ifdef __thumb2__
+#ifdef CONFIG_ARCH_CORTEXM3
 extern uint32 *up_doirq(int irq, uint32 *regs);
 #else
 extern void up_doirq(int irq, uint32 *regs);

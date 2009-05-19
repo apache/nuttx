@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/common/cortexm3_nvic.h
+ * arch/arm/src/cortexm3/nvic.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
