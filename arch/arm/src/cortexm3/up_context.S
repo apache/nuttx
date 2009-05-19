@@ -1,6 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lm3s/lm3s_context.S
- * arch/arm/src/chip/lm3s_context.S
+ * arch/arm/src/cortexm3/up_context.S
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -52,7 +51,7 @@
 
 	.syntax		unified
 	.thumb
-	.file		"lm3s_context.S"
+	.file		"up_context.S"
 
 /************************************************************************************
  * Macros

@@ -118,6 +118,26 @@ extern uint32 g_heapbase;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 extern uint32 g_userstack;
 #endif
+
+/* These 'addresses' of these values are setup by the linker script.  They are
+ * not actual uint32 storage locations! They are only used meaningfully in the
+ * following way:
+ *
+ *  - The linker script defines, for example, the symbol_sdata.
+ *  - The declareion extern uint32 _sdata; makes C happy.  C will believe
+ *    that the value _sdata is the address of a uint32 variable _data (it is
+ *    not!).
+ *  - We can recoved the linker value then by simply taking the address of
+ *    of _data.  like:  uint32 *pdata = &_sdata;
+ */
+
+extern uint32 _stext;           /* Start of .text */
+extern uint32 _etext;           /* End_1 of .text + .rodata */
+extern const uint32 _eronly;    /* End+1 of read only section (.text + .rodata) */
+extern uint32 _sdata;           /* Start of .data */
+extern uint32 _edata;           /* End+1 of .data */
+extern uint32 _sbss;            /* Start of .bss */
+extern uint32 _ebss;            /* End+1 of .bss */
 #endif
 
 /****************************************************************************
@@ -134,24 +154,27 @@ extern uint32 g_userstack;
 
 extern void up_boot(void);
 extern void up_copystate(uint32 *dest, uint32 *src);
-extern void up_dataabort(uint32 *regs);
 extern void up_decodeirq(uint32 *regs);
-#ifdef CONFIG_ARCH_CORTEXM3
-extern uint32 *up_doirq(int irq, uint32 *regs);
-#else
-extern void up_doirq(int irq, uint32 *regs);
-#endif
 extern void up_fullcontextrestore(uint32 *regs) __attribute__ ((noreturn));
 extern void up_irqinitialize(void);
-extern void up_prefetchabort(uint32 *regs);
 extern int  up_saveusercontext(uint32 *regs);
 extern void up_sigdeliver(void);
-extern void up_syscall(uint32 *regs);
 extern int  up_timerisr(int irq, uint32 *regs);
-extern void up_undefinedinsn(uint32 *regs);
 extern void up_lowputc(char ch);
 extern void up_puts(const char *str);
 extern void up_lowputs(const char *str);
+
+#ifdef CONFIG_ARCH_CORTEXM3
+extern uint32 *up_doirq(int irq, uint32 *regs);
+extern int  up_svcall(int irq, FAR void *context);
+extern int  up_hardfault(int irq, FAR void *context);
+#else
+extern void up_doirq(int irq, uint32 *regs);
+extern void up_dataabort(uint32 *regs);
+extern void up_prefetchabort(uint32 *regs);
+extern void up_syscall(uint32 *regs);
+extern void up_undefinedinsn(uint32 *regs);
+#endif
 
 /* Defined in up_vectors.S */
 

@@ -315,8 +315,8 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(LM3S_IRQ_SVCALL, lm3s_svcall);
-  irq_attach(LM3S_IRQ_HARDFAULT, lm3s_hardfault);
+  irq_attach(LM3S_IRQ_SVCALL, up_svcall);
+  irq_attach(LM3S_IRQ_HARDFAULT, up_hardfault);
 
   /* Set the priority of the SVCall interrupt */
 
