@@ -44,13 +44,22 @@
  * Included Files
  ****************************************************************************/
 
+/* Include NuttX-specific IRQ definitions */
+
 #include <nuttx/irq.h>
+
+/* Include chip-specific IRQ definitions (including IRQ numbers) */
+
 #include <arch/chip/irq.h>
 
-#ifdef __thumb2__
-# include <arch/irq_cortexm3.h>
+/* Include ARM architectgure-specific IRQ definitions (including register
+ * save structure and irqsave()/irqrestore() macros
+ */
+
+#ifdef CONFIG_ARCH_CORTEXM3
+# include <arch/cortexm3/irq.h>
 #else
-# include <arch/irq_arm.h>
+# include <arch/arm/irq.h>
 #endif
 
 /****************************************************************************
