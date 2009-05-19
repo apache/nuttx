@@ -54,6 +54,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
+#include "os_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -95,7 +96,7 @@
 #  define TTYS0_DEV       g_uart0port     /* UART0 is ttyS0 */
 #  ifndef CONFIG_UART1_DISABLE
 #    define TTYS1_DEV     g_uart1port     /* UART1 is ttyS1 */
-#  elif
+#  else
 #    undef TTYS1_DEV                      /* No ttyS1 */
 #  endif
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
@@ -103,7 +104,7 @@
 #  define TTYS0_DEV       g_uart1port     /* UART1 is ttyS0 */
 #  ifndef CONFIG_UART0_DISABLE
 #    define TTYS1_DEV     g_uart0port     /* UART0 is ttyS1 */
-#  elif
+#  else
 #    undef TTYS1_DEV                      /* No ttyS1 */
 #  endif
 #elif !defined(CONFIG_UART0_DISABLE)
@@ -111,7 +112,7 @@
 #  define TTYS0_DEV       g_uart1port     /* UART1 is ttyS0 */
 #  ifndef CONFIG_UART1_DISABLE
 #    define TTYS1_DEV     g_uart1port     /* UART1 is ttyS1 */
-#  elif
+#  else
 #    undef TTYS1_DEV                      /* No ttyS1 */
 #  endif
 #elif !defined(CONFIG_UART1_DISABLE)
@@ -356,9 +357,9 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Disable the UART by clearing the UARTEN bit in the UART CTL register */
 
-  ctl = getreg32(LM3S_CONSOLE_BASE+LM3S_UART_CTL_OFFSET);
+  ctl = up_serialin(priv, LM3S_UART_CTL_OFFSET);
   ctl &= ~UART_CTL_UARTEN;
-  putreg32(ctl, LM3S_CONSOLE_BASE+LM3S_UART_CTL_OFFSET);
+  up_serialout(priv, LM3S_UART_CTL_OFFSET, ctl);
 
   /* Calculate BAUD rate from the SYS clock:
    *
@@ -399,7 +400,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   den       = priv->baud << 16;
   brdi      = SYSCLK_FREQUENCY / den;
-  remainder = priv->baud - den * brdi
+  remainder = priv->baud - den * brdi;
   divfrac   = ((remainder << 6) + (den >> 1)) / den;
 
   up_serialout(priv, LM3S_UART_IBRD_OFFSET, brdi);
@@ -460,15 +461,15 @@ static int up_setup(struct uart_dev_s *dev)
    * yet because the interrupt is still disabled at the interrupt controller.
    */
 
-  serial_out(priv, LM3S_UART_IM_OFFSET, UART_IM_RXIM|UART_IM_RTIM);
+  up_serialout(priv, LM3S_UART_IM_OFFSET, UART_IM_RXIM|UART_IM_RTIM);
 
   /* Enable the FIFOs */
 
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-  lrch = up_serialin(priv, LM3S_UART_LCRH_OFFSET);
+  lcrh = up_serialin(priv, LM3S_UART_LCRH_OFFSET);
 #endif
   lcrh |= UART_LCRH_FEN;
-  serial_out(priv, LM3S_UART_LCRH_OFFSET, lcrh);
+  up_serialout(priv, LM3S_UART_LCRH_OFFSET, lcrh);
 
   /* Enable Rx, Tx, and the UART */
 
@@ -638,7 +639,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
-  struct up_dev_s   *priv  = (struct up_dev_s*)dev->priv;
   int                ret    = OK;
 
   switch (cmd)
@@ -873,7 +873,7 @@ int up_putc(int ch)
 {
 #ifdef HAVE_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
-  ubyte  im;
+  uint32 im;
 
   up_disableuartint(priv, &im);
   up_waittxnotfull(priv);
