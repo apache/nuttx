@@ -697,7 +697,7 @@
 	* include/css: Added std header files
 	* libxx: New C++-only directory provides support for minimal C++ applications
 
-0.4.6 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.6 2009-05-19 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Change SPI interface so that is can accomodate interfaces where the
 	  number of bits per word is greater an 8 (such as with many 9-bit display
@@ -721,4 +721,6 @@
 	  and Cortex-M3.
 	* sched/: pthread_create() must return a (non-negated) errno value on failure.
 	* configs/eagle100/nsh: Add a NuttShell (NSH) configuration for the Eagle-100
+
+0.4.7 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
