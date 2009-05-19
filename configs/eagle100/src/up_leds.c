@@ -64,6 +64,8 @@
  * Public Functions
  ****************************************************************************/
 
+static boolean g_nest;
+
 /****************************************************************************
  * Name: up_ledinit
  ****************************************************************************/
@@ -78,6 +80,7 @@ void up_ledinit(void)
   /* Configure Port E, Bit 1 as an output, initial value=OFF */
 
   lm3s_configgpio(GPIO_FUNC_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTE | 1);
+  g_nest = 0;
 }
 
 /****************************************************************************
@@ -92,12 +95,14 @@ void up_ledon(int led)
       case LED_HEAPALLOCATE:
       default:
         break;
-      case LED_IRQSENABLED:
-      case LED_STACKCREATED:
+
       case LED_INIRQ:
       case LED_SIGNAL:
       case LED_ASSERTION:
       case LED_PANIC:
+        g_nest++;
+      case LED_IRQSENABLED:
+      case LED_STACKCREATED:
         modifyreg32(LM3S_GPIOE_DATA, 0, (1 << 1));
         break;
     }
@@ -113,16 +118,19 @@ void up_ledoff(int led)
     {
       case LED_IRQSENABLED:
       case LED_STACKCREATED:
+      case LED_STARTED:
+      case LED_HEAPALLOCATE:
       default:
         break;
 
-      case LED_STARTED:
-      case LED_HEAPALLOCATE:
       case LED_INIRQ:
       case LED_SIGNAL:
       case LED_ASSERTION:
       case LED_PANIC:
-        modifyreg32(LM3S_GPIOE_DATA, (1 << 1), 0);
+        if (--g_nest <= 0)
+          {
+            modifyreg32(LM3S_GPIOE_DATA, (1 << 1), 0);
+          }
         break;
     }
 }
