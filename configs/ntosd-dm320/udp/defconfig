@@ -37,9 +37,11 @@
 #
 # CONFIG_ARCH - identifies the arch subdirectory and, hence, the
 #   processor architecture.
-# CONFIG_ARCH_name - for use in C code.  This identifies the
-#   particular chip or SoC that the architecture is implemented
+# CONFIG_ARCH_family - for use in C code.  This identifies the
+#   particular chip family that the architecture is implemented
 #   in.
+# CONFIG_ARCH_architecture - for use in C code.  This identifies the
+#   specific architecture within the chip familyl.
 # CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 # CONFIG_ARCH_CHIP_name - For use in C code
 # CONFIG_ARCH_BOARD - identifies the configs subdirectory and, hence,
@@ -58,6 +60,7 @@
 #
 CONFIG_ARCH=arm
 CONFIG_ARCH_ARM=y
+CONFIG_ARCH_ARM7TDMI=y
 CONFIG_ARCH_CHIP=dm320
 CONFIG_ARCH_CHIP_DM320=y
 CONFIG_ARCH_BOARD=ntosd-dm320

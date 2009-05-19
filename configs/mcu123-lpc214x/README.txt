@@ -53,9 +53,13 @@ ARM/LPC214X-specific Configuration Options
 
 	   CONFIG_ARCH=arm
 
-	CONFIG_ARCH_name - For use in C code:
+	CONFIG_ARCH_family - For use in C code:
 
 	   CONFIG_ARCH_ARM=y
+
+	CONFIG_ARCH_architecture - For use in C code:
+
+	   CONFIG_ARCH_ARM7TDMI=y
 
 	CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 

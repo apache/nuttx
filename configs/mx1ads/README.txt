@@ -39,9 +39,13 @@ ARM/i.MX1-specific Configuration Options
 
 	   CONFIG_ARCH=arm
 
-	CONFIG_ARCH_name - For use in C code:
+	CONFIG_ARCH_family - For use in C code:
 
 	   CONFIG_ARCH_ARM=y
+
+	CONFIG_ARCH_architecture - For use in C code:
+
+	   CONFIG_ARCH_ARM920T=y
 
 	CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
