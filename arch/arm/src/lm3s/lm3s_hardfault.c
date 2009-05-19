@@ -130,7 +130,7 @@ int lm3s_hardfault(int irq, FAR void *context)
 
       if (insn == INSN_SVC0)
         {
-          llvdbg("Forward SVCall\n");
+          sllvdbg("Forward SVCall\n");
           return lm3s_svcall(LM3S_IRQ_SVCALL, context);
         }
     }
