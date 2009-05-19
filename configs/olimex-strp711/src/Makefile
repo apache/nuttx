@@ -36,7 +36,7 @@
 -include $(TOPDIR)/Make.defs
 
 ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(TOPDIR)/sched
+CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/arm -I$(TOPDIR)/sched
 
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))

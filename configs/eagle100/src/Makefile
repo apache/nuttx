@@ -46,7 +46,7 @@ SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
 
 ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common
+CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/cortexm3
 
 all: libboard$(LIBEXT)
 
