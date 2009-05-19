@@ -1421,13 +1421,15 @@ nuttx-0.4.6 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  -R .note.gnu.build-id -R .comment"  This has bin fixed in arch/arm/src/Makefile,
 	  but other architectures may have the same problem.  Thanks to Dave Marples
 	  for verifying this.
-	* Added support for the MicroMint Eagle100 board.  This board has a
-	  Luminary LM3S6918 Cortex-M3. Added a configuration to build examples/ostest.
-	* Add configuration option to enable fast GPIO (vs. legacy, "slow" GPIO) for
-	  LPC214x.
-	* Restructured the arch/arm directory structure to better suppor ARM and
-	  Cortex-M3.
-	* pthread_create() must return a (non-negated) errno value on failure.
+	* configs/eagle100/ostest: Added support for the MicroMint Eagle100 board. 
+	  This board has a Luminary LM3S6918 Cortex-M3. Added a configuration to build
+	  examples/ostest.
+	* arch/arm/src/lpc214x: Add configuration option to enable fast GPIO (vs.
+	  legacy, "slow" GPIO) for LPC214x.
+	* arch/arm: Restructured the arch/arm directory structure to better suppor ARM
+	  and Cortex-M3.
+	* sched/: pthread_create() must return a (non-negated) errno value on failure.
+	* configs/eagle100/nsh: Add a NuttShell (NSH) configuration for the Eagle-100
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
