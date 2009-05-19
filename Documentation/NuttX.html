@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 9, 2009</p>
+      <p>Last Updated: May 19, 2009</p>
     </td>
   </tr>
 </table>
@@ -687,8 +687,8 @@
   </tr>
 </table>
 
-<p><b>nuttx-0.4.5</b>.
-  The 37<sup>th</sup> release of NuttX (nuttx-0.4.5) is available for download
+<p><b>nuttx-0.4.6</b>.
+  The 38<sup>th</sup> release of NuttX (nuttx-0.4.6) is available for download
   from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
   website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
@@ -696,26 +696,19 @@
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  This release focuses on a few new features.
-  <ul>
-    <li>
-      The basic port for the FreeScale ARM920T i.MX1 processor on the
-      Freescale MX1ADS board.  Coding is complete for this port, but it is
-      has not yet fully integrated.
-    </li>
-    <li>
-      Extended I2C and SPI interface definitions
-    </li>
-    <li>
-      Add basic support for C++ applications.  Very simple C++ applications
-      can now be built against NuttX without any external libraries.  At
-      present, only the most primitive C++ programs are supported, but it
-      is hoped that this support will be extended in future releases.
-    </li>
-  </ul>
+  The release features support for the Micromint Eagle-100 development board.
+  This board is based around, the Luminary LM3S6918 MCU.
+  This is the first ARM Cortex-M3 architecture supported by Nuttx.
+  This initial, basic port includes timer and serial console with configurations to execute the NuttX OS test and to run the <a href="NuttShell.html">NuttShell (NSH)</a>.
+  Work is still underway on this port and current plans are to have I2C, SSI, MMC/SD, and and Ethernet driver in the 0.4.7 release.
 </p>
 <p>
-  See the Changelog for a detailed description of these changes.
+  Additional work was done on the MXADS i.MX1 port, however, that work has been set aside
+  until I complete work on the Eagle-100 (I also need to come up with a 3V power supply).
+</p>
+<p>
+  Other changes in this release include: Extensions to the SPI interface definition in order to handle 9-bit interfaces to displays.
+  Several bugs were fixed (see the <a href="#currentrelease">ChangeLog</a> for a complete list of changes).
 </p>
 
 <table width ="100%">
@@ -867,13 +860,16 @@
   <td>
     <p>
       <b>Luminary LM3S6918</b>.
-      This port uses theMicromint Eagle-10 development board with a GNU arm-elf toolchain*
+      This port uses the Micromint Eagle-100 development board with a GNU arm-elf toolchain*
       under either Linux or Cygwin.
     </p>
     <p>
       <b>STATUS:</b>
-        This port is in progress.  Coding is complete on the basic port (timer, serial console, SPI).
-        Verified support for the Cortex-M3 will be announced in a future release of NuttX.
+        This initial, basic release of this port has been verifed and included in NuttX
+        version 0.4.6.  The basic port includes timer and serial console with configurations
+        to execute the NuttX OS test and to run the <a href="NuttShell.html">NuttShell (NSH)</a>.
+        Work is still underway on this port and current plans are to have I2C, SSI, MMC/SD, and
+        and Ethernet driver in the 0.4.7 release.
     </p>
    </td>
 </tr>
@@ -1361,21 +1357,30 @@ Other memory:
 </table>
 
 <pre><ul>
-nuttx-0.4.5 2009-04-19 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-0.4.6 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* Add an enumeration argument to the SPI chip select and status methods so
-	  that the interface can handle more than one device.
-	* eZ80Acclaim!: Add a generic SPI driver for all eZ80 boards.
-	* Add a setmode() method to the SPI interface to handle parts with differing
-	  mode requirements.
-	* include/nuttx/i2c.h: Defined a standard I2C interface
-	* eZ80Acclaim!: Add an I2C driver.
-	* eZ8Encore!: Add an I2C driver.
-	* Add support for the Freescale i.MX1/L architecture and a configuration for
-	  the Freescale MX1ADS development board.
-	* examples/helloxx: Added a simple C++ hello world example
-	* include/css: Added std header files
-	* libxx: New C++-only directory provides support for minimal C++ applications
+	* Change SPI interface so that is can accomodate interfaces where the
+	  number of bits per word is greater an 8 (such as with many 9-bit display
+	  interfaces). -- this might have broken a few things which will need to
+	  be retested!
+	* arch/arm/src/imx: Added i.MX SPI driver
+	* SPI: Add a method to set the number of bits per word.  Also add an
+	  alternative interface for so that (eventually) I can phase the sndblock
+	  and recvblock methods and replace them with a single exchange method
+	* Build:  objcopy fails with toolchains that use newer GCC and binutils.  The
+	  following arguments need to be included in the objcopy command line "-R .note
+	  -R .note.gnu.build-id -R .comment"  This has bin fixed in arch/arm/src/Makefile,
+	  but other architectures may have the same problem.  Thanks to Dave Marples
+	  for verifying this.
+	* configs/eagle100/ostest: Added support for the MicroMint Eagle100 board. 
+	  This board has a Luminary LM3S6918 Cortex-M3. Added a configuration to build
+	  examples/ostest.
+	* arch/arm/src/lpc214x: Add configuration option to enable fast GPIO (vs.
+	  legacy, "slow" GPIO) for LPC214x.
+	* arch/arm: Restructured the arch/arm directory structure to better suppor ARM
+	  and Cortex-M3.
+	* sched/: pthread_create() must return a (non-negated) errno value on failure.
+	* configs/eagle100/nsh: Add a NuttShell (NSH) configuration for the Eagle-100
 
 pascal-0.1.2 2008-02-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1406,30 +1411,7 @@ buildroot-0.1.5 2009-04-25 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <pre><ul>
-nuttx-0.4.6 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Change SPI interface so that is can accomodate interfaces where the
-	  number of bits per word is greater an 8 (such as with many 9-bit display
-	  interfaces). -- this might have broken a few things which will need to
-	  be retested!
-	* arch/arm/src/imx: Added i.MX SPI driver
-	* SPI: Add a method to set the number of bits per word.  Also add an
-	  alternative interface for so that (eventually) I can phase the sndblock
-	  and recvblock methods and replace them with a single exchange method
-	* Build:  objcopy fails with toolchains that use newer GCC and binutils.  The
-	  following arguments need to be included in the objcopy command line "-R .note
-	  -R .note.gnu.build-id -R .comment"  This has bin fixed in arch/arm/src/Makefile,
-	  but other architectures may have the same problem.  Thanks to Dave Marples
-	  for verifying this.
-	* configs/eagle100/ostest: Added support for the MicroMint Eagle100 board. 
-	  This board has a Luminary LM3S6918 Cortex-M3. Added a configuration to build
-	  examples/ostest.
-	* arch/arm/src/lpc214x: Add configuration option to enable fast GPIO (vs.
-	  legacy, "slow" GPIO) for LPC214x.
-	* arch/arm: Restructured the arch/arm directory structure to better suppor ARM
-	  and Cortex-M3.
-	* sched/: pthread_create() must return a (non-negated) errno value on failure.
-	* configs/eagle100/nsh: Add a NuttShell (NSH) configuration for the Eagle-100
+nuttx-0.4.7 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
