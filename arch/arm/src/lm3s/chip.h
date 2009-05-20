@@ -47,6 +47,8 @@
 #include "lm3s_syscontrol.h"    /* System control module */
 #include "lm3s_gpio.h"          /* GPIO module */
 #include "lm3s_uart.h"          /* UART peripherals */
+#include "lm3s_ethernet.h"      /* Ethernet MAC and PHY */
+#include "lm3s_flash.h"         /* FLASH */
 
 /************************************************************************************
  * Definitions
