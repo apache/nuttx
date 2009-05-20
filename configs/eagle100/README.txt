@@ -166,6 +166,11 @@ Eagle100-specific Configuration Options
 	CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
 	CONFIG_UARTn_2STOP - Two stop bits
 
+	CONFIG_LM3S_ETHERNET - This must be set (along with CONFIG_NET)
+	  to build the LM3S Ethernet driver
+	CONFIG_LM3S_BOARDMAC - If the board-specific logic can provide
+	  a MAC address (via lm3s_ethernetmac()), then this should be selected.
+
 Configurations
 ^^^^^^^^^^^^^^
 
