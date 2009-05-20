@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/mii.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,15 +49,29 @@
 
 /* MII register offsets *****************************************************/
 
-/* Apparently common registers */
+/* Common MII management registers. The IEEE 802.3 standard specifies a
+ * register set for controlling and gathering status from the PHY layer. The
+ * registers are collectively known as the MII Management registers and are
+ * detailed in Section 22.2.4 of the IEEE 802.3 specification.
+ */
 
 #define MII_MCR                     0x00    /* MII management control */
 #define MII_MSR                     0x01    /* MII management status */
 #define MII_PHYID1                  0x02    /* PHY ID 1 */
 #define MII_PHYID2                  0x03    /* PHY ID 2 */
 #define MII_ADVERTISE               0x04    /* Auto-negotiation advertisement */
-#define MII_LPA                     0x05    /* Auto-negotiation link partner ability */
-#define MII_EXPANSION               0x06    /* Auto-negotiation expansion register*/
+#define MII_LPA                     0x05    /* Auto-negotiation link partner base page ability */
+#define MII_EXPANSION               0x06    /* Auto-negotiation expansion */
+#define MII_NEXTPAGE                0x07    /* Auto-negotiation next page */
+#define MII_LPANEXTPAGE             0x08    /* Auto-negotiation link partner received next page */
+#define MII_MSCONTROL               0x09    /* Master/slave control register */
+#define MII_MSSTATUS                0x0a    /* Master/slave status register */
+#define MII_PSECONTROL              0x0b    /* PSE control register */
+#define MII_PSESTATUS               0x0c    /* PSE status register */
+#define MII_MMDCONTROL              0x0d    /* MMD access control register */
+#define MII_ESTATUS                 0x0f    /* Extended status register */
+
+/* Registers 16-31 may be used for vendor specific abilities */
 
 /* DP83840: 0x07-0x11, 0x14, 0x1a, 0x1d-0x1f reserved */
 
@@ -76,17 +90,25 @@
 #define MII_AM79C874_NPADVERTISE    0x07    /* Auto-negotiation next page advertisement */
 #define MII_AM79C874_MISCFEATURES   0x10    /* Miscellaneous features reg */
 #define MII_AM79C874_INTCS          0x11    /* Interrupt control/status */
-#define MII_AM79C874_DIAGNOSTIC     0x12    /* Diagnostic register */
-#define MII_AM79C874_LOOPBACK       0x13    /* Power management/loopback register */
+#define MII_AM79C874_DIAGNOSTIC     0x12    /* Diagnostic */
+#define MII_AM79C874_LOOPBACK       0x13    /* Power management/loopback */
 #define MII_AM79C874_MODEC          0x15    /* Mode control register */
 #define MII_AM79C874_DISCONNECT     0x17    /* Disconnect counter */
 #define MII_AM79C874_RCVERROR       0x18    /* Receive error counter */
+
+/* Luminary LM3S6918 built-in PHY */
+
+#define MII_LM3S_VSPECIFIC          0x10    /* Vendor-Specific */
+#define MII_LM3S_INTCS              0x11    /* Interrupt control/status */
+#define MII_LM3S_DIAGNOSTIC         0x12    /* Diagnostic */
+#define MII_LM3S_XCVRCONTROL        0x13    /* Transceiver Control */
+#define MII_LM3S_LEDCONFIG          0x17    /* LED Configuration */
+#define MII_LM3S_MDICONTROL         0x18    /* Ethernet PHY Management MDI/MDIX Control */
 
 /* */
 
 #define MII_CTRL1000                0x09    /* 1000BASE-T control */
 #define MII_STAT1000                0x0a    /* 1000BASE-T status */
-#define MII_ESTATUS                 0x0f    /* Extended Status */
 #define MII_NCONFIG                 0x1c    /* Network interface config */
 
 /* MII register bit settings ************************************************/
@@ -201,7 +223,7 @@
 /* Am79c874 diagnostics register */
 
 #define AM79C874_DIAG_RXLOCK        0x0100  /* Bit 8: 1=Rcv PLL locked on */
-#define AM79C874_DIAG_RXPASS        0x0200  /* Bit 9: 2=Operating in 100Base-X mode */
+#define AM79C874_DIAG_RXPASS        0x0200  /* Bit 9: 1=Operating in 100Base-X mode */
 #define AM79C874_DIAG_100MBPS       0x0400  /* Bit 10: 1=ANEG result is 100Mbps */
 #define AM79C874_DIAG_FULLDPLX      0x0800  /* Bit 11: 1=ANEG result is full duplex */
 
