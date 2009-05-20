@@ -115,13 +115,31 @@
 
 #ifndef __ASSEMBLY__
 
-/* All LM3S architectures must provide the following entry point.  This entry point
- * is called early in the intitialization -- after all memory has been configured
- * and mapped but before any devices have been initialized.
- */
+/************************************************************************************
+ * Name: lm3s_boardinitialize
+ *
+ * Description:
+ *   All LM3S architectures must provide the following entry point.  This entry point
+ *   is called early in the intitialization -- after all memory has been configured
+ *   and mapped but before any devices have been initialized.
+ *
+ ************************************************************************************/
 
 extern void lm3s_boardinitialize(void);
 
+/************************************************************************************
+ * Name: lm3s_ethernetmac
+ *
+ * Description:
+ *   For the Ethernet Eval Kits, the MAC address will be stored in the non-volatile
+ *   USER0 and USER1 registers.  If CONFIG_LM3S_BOARDMAC is defined, this function
+ *   will obtain the MAC address from these registers.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_LM3S_BOARDMAC
+extern void lm3s_ethernetmac(struct ether_addr *ethaddr);
 #endif
 
+#endif /* __ASSEMBLY__ */
 #endif  /* __ARCH_BOARD_BOARD_H */
