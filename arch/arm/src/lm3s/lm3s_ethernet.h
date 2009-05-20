@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <nuttx/mii.h>
 
 /************************************************************************************
  * Definitions
@@ -66,8 +67,11 @@
 #define LM3S_MAC_MRXD_OFFSET  0x030 /* Ethernet MAC Management Receive Data */
 #define LM3S_MAC_NP_OFFSET    0x034 /* Ethernet MAC Number of Packets */
 #define LM3S_MAC_TR_OFFSET    0x038 /* Ethernet MAC Transmission Request */
+#ifndef CONFIG_ARCH_CHIP_LM3S6918
+#  define LM3S_MAC_TS_OFFSET  0x03c /* Ethernet MAC Time Stamp Configuration */
+#endif
 
-/* MII Management Registers (see include/nuttx/mii.h) */
+/* MII Management Register Offsets (see include/nuttx/mii.h) */
 
 /* Ethernet Controller Register Addresses *******************************************/
 
@@ -86,6 +90,25 @@
 #define LM3S_MAC_MRXD         (LM3S_ETHCON_BASE + LM3S_MAC_MRXD_OFFSET)
 #define LM3S_MAC_NP           (LM3S_ETHCON_BASE + LM3S_MAC_NP_OFFSET)
 #define LM3S_MAC_TR           (LM3S_ETHCON_BASE + LM3S_MAC_TR_OFFSET)
+#ifndef CONFIG_ARCH_CHIP_LM3S6918
+#  define LM3S_MAC_TS         (LM3S_ETHCON_BASE + LM3S_MAC_TS_OFFSET)
+#endif
+
+/* Memory Mapped MII Management Registers */
+
+#define MAC_MII_MCR           (LM3S_ETHCON_BASE + MII_MCR)
+#define MAC_MII_MSR           (LM3S_ETHCON_BASE + MII_MSR)
+#define MAC_MII_PHYID1        (LM3S_ETHCON_BASE + MII_PHYID1)
+#define MAC_MII_PHYID2        (LM3S_ETHCON_BASE + MII_PHYID2)
+#define MAC_MII_ADVERTISE     (LM3S_ETHCON_BASE + MII_ADVERTISE)
+#define MAC_MII_LPA           (LM3S_ETHCON_BASE + MII_LPA)
+#define MAC_MII_EXPANSION     (LM3S_ETHCON_BASE + MII_EXPANSION)
+#define MAC_MII_VSPECIFIC     (LM3S_ETHCON_BASE + MII_LM3S_VSPECIFIC)
+#define MAC_MII_INTCS         (LM3S_ETHCON_BASE + MII_LM3S_INTCS)
+#define MAC_MII_DIAGNOSTIC    (LM3S_ETHCON_BASE + MII_LM3S_DIAGNOSTIC)
+#define MAC_MII_XCVRCONTROL   (LM3S_ETHCON_BASE + MII_LM3S_XCVRCONTROL)
+#define MAC_MII_LEDCONFIG     (LM3S_ETHCON_BASE + MII_LM3S_LEDCONFIG)
+#define MAC_MII_MDICONTROL    (LM3S_ETHCON_BASE + MII_LM3S_MDICONTROL)
 
 /* Ethernet Controller Register Bit Definitions *************************************/
 
