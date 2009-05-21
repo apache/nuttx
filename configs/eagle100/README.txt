@@ -168,6 +168,7 @@ Eagle100-specific Configuration Options
 
 	CONFIG_LM3S_ETHERNET - This must be set (along with CONFIG_NET)
 	  to build the LM3S Ethernet driver
+	CONFIG_LM3S_ETHLEDS - Enable to use Ethernet LEDs on the board.
 	CONFIG_LM3S_BOARDMAC - If the board-specific logic can provide
 	  a MAC address (via lm3s_ethernetmac()), then this should be selected.
 

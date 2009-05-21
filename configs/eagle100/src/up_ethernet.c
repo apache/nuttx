@@ -41,6 +41,8 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <assert.h>
+
 #include <arch/board/board.h>
 #include <net/ethernet.h>
 
@@ -72,24 +74,22 @@
 #ifdef CONFIG_LM3S_BOARDMAC
 void lm3s_ethernetmac(struct ether_addr *ethaddr)
 {
-struct ether_addr
-{
   uint32 user0;
   uint32 user1;
 
   /* Get the current value of the user registers */
 
-  user0 = getreg32();
-  user1 = getreg32();
+  user0 = getreg32(LM3S_FLASH_USERREG0);
+  user1 = getreg32(LM3S_FLASH_USERREG1);
   DEBUGASSERT(user0 != 0xffffffff && user1 == 0xffffffff);
 
   /* Re-format that MAC address the way that uIP expects to see it */
 
-  ethaddr->ether_addr_octet.addr[0] = ((user0 >>  0) & 0xff);
-  ethaddr->ether_addr_octet.addr[1] = ((user0 >>  8) & 0xff);
-  ethaddr->ether_addr_octet.addr[2] = ((user0 >> 16) & 0xff);
-  ethaddr->ether_addr_octet.addr[3] = ((user1 >>  0) & 0xff);
-  ethaddr->ether_addr_octet.addr[4] = ((user1 >>  8) & 0xff);
-  ethaddr->ether_addr_octet.addr[5] = ((user1 >> 16) & 0xff);
+  ethaddr->ether_addr_octet[0] = ((user0 >>  0) & 0xff);
+  ethaddr->ether_addr_octet[1] = ((user0 >>  8) & 0xff);
+  ethaddr->ether_addr_octet[2] = ((user0 >> 16) & 0xff);
+  ethaddr->ether_addr_octet[3] = ((user1 >>  0) & 0xff);
+  ethaddr->ether_addr_octet[4] = ((user1 >>  8) & 0xff);
+  ethaddr->ether_addr_octet[5] = ((user1 >> 16) & 0xff);
 }
 #endif
