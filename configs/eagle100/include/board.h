@@ -138,6 +138,7 @@ extern void lm3s_boardinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_LM3S_BOARDMAC
+struct ether_addr;
 extern void lm3s_ethernetmac(struct ether_addr *ethaddr);
 #endif
 
