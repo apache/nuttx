@@ -205,6 +205,12 @@ Eagle100-specific Configuration Options
 	CONFIG_LM3S_ETHLEDS - Enable to use Ethernet LEDs on the board.
 	CONFIG_LM3S_BOARDMAC - If the board-specific logic can provide
 	  a MAC address (via lm3s_ethernetmac()), then this should be selected.
+	CONFIG_LM3S_ETHHDUPLEX - Set to force half duplex operation
+	CONFIG_LM3S_ETHNOAUTOCRC - Set to suppress auto-CRC generation
+	CONFIG_LM3S_ETHNOPAD - Set to suppress Tx padding
+	CONFIG_LM3S_MULTICAST - Set to enable multicast frames
+	CONFIG_LM3S_PROMISCUOUS - Set to enable promiscuous mode
+	CONFIG_LM3S_BADCRC - Set to enable bad CRC rejection.
 
 Configurations
 ^^^^^^^^^^^^^^

@@ -136,10 +136,22 @@ CONFIG_SPI2_DISABLE=y
 # CONFIG_LM3S_ETHLEDS - Enable to use Ethernet LEDs on the board.
 # CONFIG_LM3S_BOARDMAC - If the board-specific logic can provide
 #   a MAC address (via lm3s_ethernetmac()), then this should be selected.
-
+# CONFIG_LM3S_ETHHDUPLEX - Set to force half duplex operation
+# CONFIG_LM3S_ETHNOAUTOCRC - Set to suppress auto-CRC generation
+# CONFIG_LM3S_ETHNOPAD - Set to suppress Tx padding
+# CONFIG_LM3S_MULTICAST - Set to enable multicast frames
+# CONFIG_LM3S_PROMISCUOUS - Set to enable promiscuous mode
+# CONFIG_LM3S_BADCRC - Set to enable bad CRC rejection.
+# 
 CONFIG_LM3S_ETHERNET=y
 CONFIG_LM3S_ETHLEDS=n
 CONFIG_LM3S_BOARDMAC=y
+CONFIG_LM3S_ETHHDUPLEX=n
+CONFIG_LM3S_ETHNOAUTOCRC=n
+CONFIG_LM3S_ETHNOPAD=n
+CONFIG_LM3S_MULTICAST=n
+CONFIG_LM3S_PROMISCUOUS=n
+CONFIG_LM3S_BADCRC=n
 
 #
 # General build options
