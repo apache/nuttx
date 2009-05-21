@@ -44,8 +44,7 @@
 #include <sys/types.h>
 
 #include "up_internal.h"
-#include "lm3s_memorymap.h"
-#include "lm3s_gpio.h"
+#include "chip.h"
 
 /************************************************************************************
  * Definitions
@@ -289,6 +288,29 @@ EXTERN boolean lm3s_gpioread(uint32 pinset, boolean value);
  ****************************************************************************/
 
 EXTERN int weak_function gpio_irqinitialize(void);
+
+/****************************************************************************
+ * Function: lm3s_initialize
+ *
+ * Description:
+ *   Initialize the Ethernet driver for one interface.  If the LM3S chip
+ *   supports multiple Ethernet controllers, then bould specific logic
+ *   must implement up_netinitialize() and call this function to initialize
+ *   the desiresed interfaces.
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#if LMS_NETHCONTROLLERS > 1
+EXTERN int lm3s_initialize(int intf);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

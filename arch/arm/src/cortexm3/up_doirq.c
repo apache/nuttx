@@ -72,42 +72,43 @@ uint32 *up_doirq(int irq, uint32 *regs)
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC(OSERR_ERREXCEPTION);
 #else
-  if ((unsigned)irq < NR_IRQS)
-    {
-       /* Current regs non-zero indicates that we are processing
-        * an interrupt; current_regs is also used to manage
-        * interrupt level context switches.
-        */
+  /* Nested interrupts are not supported in this implementation.  If you want
+   * implemented nested interrupts, you would have to (1) change the way that
+   * current regs is handled and (2) the design associated with
+   * CONFIG_ARCH_INTERRUPTSTACK.
+   */
 
-       current_regs = regs;
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * current_regs is also used to manage interrupt level context switches.
+   */
 
-       /* Mask and acknowledge the interrupt */
+  DEBUGASSERT(current_regs == NULL);
+  current_regs = regs;
 
-       up_maskack_irq(irq);
+  /* Mask and acknowledge the interrupt */
 
-       /* Deliver the IRQ */
+  up_maskack_irq(irq);
 
-       irq_dispatch(irq, regs);
+  /* Deliver the IRQ */
 
-       /* If a context switch occurred while processing the interrupt
-        * then current_regs may have change value.  If we return any value
-        * different from the input regs, then the lower level will know
-        * that a context switch occurred during interrupt processing.
-        */
+  irq_dispatch(irq, regs);
 
-       regs = current_regs;
+  /* If a context switch occurred while processing the interrupt then
+   * current_regs may have change value.  If we return any value different
+   * from the input regs, then the lower level will know that a context
+   * switch occurred during interrupt processing.
+   */
 
-       /* Indicate that we are no long in an interrupt handler */
+  regs = current_regs;
 
-       current_regs = NULL;
+  /* Indicate that we are no long in an interrupt handler */
 
-       /* Unmask the last interrupt (global interrupts are still
-        * disabled.
-        */
+  current_regs = NULL;
 
-       up_enable_irq(irq);
-    }
-  up_ledoff(LED_INIRQ);
+  /* Unmask the last interrupt (global interrupts are still disabled) */
+
+  up_enable_irq(irq);
 #endif
+  up_ledoff(LED_INIRQ);
   return regs;
 }

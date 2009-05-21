@@ -43,16 +43,26 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-#include "lm3s_memorymap.h"     /* Memory map */
-#include "lm3s_syscontrol.h"    /* System control module */
-#include "lm3s_gpio.h"          /* GPIO module */
-#include "lm3s_uart.h"          /* UART peripherals */
-#include "lm3s_ethernet.h"      /* Ethernet MAC and PHY */
-#include "lm3s_flash.h"         /* FLASH */
-
 /************************************************************************************
  * Definitions
  ************************************************************************************/
+
+/* Get customizations for each supported chip (only the LM3S6918 right now) */
+
+#ifdef CONFIG_ARCH_CHIP_LM3S6918
+#  define LMS_NETHCONTROLLERS 1  /* One ethenet controller */
+#else
+#  error "No Ethernet support for this LM3S chip"
+#endif
+
+/* Then get all of the register definitions */
+
+#include "lm3s_memorymap.h"      /* Memory map */
+#include "lm3s_syscontrol.h"     /* System control module */
+#include "lm3s_gpio.h"           /* GPIO module */
+#include "lm3s_uart.h"           /* UART peripherals */
+#include "lm3s_ethernet.h"       /* Ethernet MAC and PHY */
+#include "lm3s_flash.h"          /* FLASH */
 
 /************************************************************************************
  * Public Types
