@@ -171,6 +171,14 @@
 
 #define MAC_MDV_MASK          0xff      /* Bits 7-0: Clock Divider */
 
+/* Ethernet MAC Management Transmit Data (MACTXD), offset 0x02c */
+
+#define MAC_MTXD_MASK         0xffff    /* Bits 15-0: MII Register Transmit Data */
+
+/* Ethernet MAC Management Receive Data (MACRXD), offset 0x030 */
+
+#define MAC_MTRD_MASK         0xffff    /* Bits 15-0: MII Register Receive Data */
+
 /* Ethernet MAC Number of Packets (MACNP), offset 0x034 */
 
 #define MAC_NP_MASK           0x3f      /* Bits 5-0: Number of Packets in Receive FIFO */

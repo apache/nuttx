@@ -955,7 +955,7 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
   flags = irqsave();
   EMAC_STAT(priv, tx_packets);
 
-  /* The current packet to be sent is txnetx; Calculate the new txnext and
+  /* The current packet to be sent is txnext; Calculate the new txnext and
    * set the ownership to host so that the EMAC does not try to transmit
    * the next packet.
    *
@@ -967,10 +967,10 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
    */
 
   txdesc = priv->txnext;
- 
+
   len    = EMAC_PKTBUF_ALIGN(priv->dev.d_len + SIZEOF_EMACSDESC);
   txnext = (FAR struct ez80emac_desc_s *)((ubyte*)txdesc + len);
-  
+
   /* Handle wraparound to the beginning of the TX region */
 
   if ((ubyte*)txnext + SIZEOF_EMACSDESC >= (ubyte*)priv->rxstart)
@@ -1070,6 +1070,10 @@ static int ez80emac_uiptxpoll(struct uip_driver_s *dev)
   nvdbg("Poll result: d_len=%d\n", priv->dev.d_len);
   if (priv->dev.d_len > 0)
     {
+      /* Send the packet.  ez80emac_transmit() will return zero if the
+       * packet was successfully handled.
+       */
+
       uip_arp_out(&priv->dev);
       ret = ez80emac_transmit(priv);
     }
