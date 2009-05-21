@@ -61,6 +61,72 @@
  * Definitions
  ****************************************************************************/
 
+/* Half duplex can be forced if CONFIG_LM3S_ETHHDUPLEX is defined. */
+
+#ifdef CONFIG_LM3S_ETHHDUPLEX
+#  define LM3S_DUPLEX_SETBITS 0
+#  define LM3S_DUPLEX_CLRBITS MAC_TCTL_DUPLEX
+#else 
+#  define LM3S_DUPLEX_SETBITS MAC_TCTL_DUPLEX
+#  define LM3S_DUPLEX_CLRBITS 0
+#endif
+
+/* Auto CRC generation can be suppressed if CONFIG_LM3S_ETHNOAUTOCRC is definde */
+
+#ifdef CONFIG_LM3S_ETHNOAUTOCRC
+#  define LM3S_CRC_SETBITS 0
+#  define LM3S_CRC_CLRBITS MAC_TCTL_CRC
+#else 
+#  define LM3S_CRC_SETBITS MAC_TCTL_CRC
+#  define LM3S_CRC_CLRBITS 0
+#endif
+
+/* Tx padding can be suppressed if CONFIG_LM3S_ETHNOPAD is defined */
+
+#ifdef CONFIG_LM3S_ETHNOPAD
+#  define LM3S_PADEN_SETBITS 0
+#  define LM3S_PADEN_CLRBITS MAC_TCTL_PADEN
+#else 
+#  define LM3S_PADEN_SETBITS MAC_TCTL_PADEN
+#  define LM3S_PADEN_CLRBITS 0
+#endif
+
+#define LM3S_TCTCL_SETBITS (LM3S_DUPLEX_SETBITS|LM3S_CRC_SETBITS|LM3S_PADEN_SETBITS)
+#define LM3S_TCTCL_CLRBITS (LM3S_DUPLEX_CLRBITS|LM3S_CRC_CLRBITS|LM3S_PADEN_CLRBITS)
+
+/* Multicast frames can be enabled by defining CONFIG_LM3S_MULTICAST */
+
+#ifdef CONFIG_LM3S_MULTICAST
+#  define LM3S_AMUL_SETBITS MAC_RCTL_AMUL
+#  define LM3S_AMUL_CLRBITS 0
+#else 
+#  define LM3S_AMUL_SETBITS 0
+#  define LM3S_AMUL_CLRBITS MAC_RCTL_AMUL
+#endif
+
+/* Promiscuous mode can be enabled by defining CONFIG_LM3S_PROMISCUOUS */
+
+#ifdef CONFIG_LM3S_PROMISCUOUS
+#  define LM3S_PRMS_SETBITS MAC_RCTL_PRMS
+#  define LM3S_PRMS_CLRBITS 0
+#else 
+#  define LM3S_PRMS_SETBITS 0
+#  define LM3S_PRMS_CLRBITS MAC_RCTL_PRMS
+#endif
+
+/* Bad CRC rejection can be enabled by define CONFIG_LM3S_BADCRC */
+
+#ifdef CONFIG_LM3S_BADCRC
+#  define LM3S_BADCRC_SETBITS MAC_RCTL_BADCRC
+#  define LM3S_BADCRC_CLRBITS 0
+#else 
+#  define LM3S_BADCRC_SETBITS 0
+#  define LM3S_BADCRC_CLRBITS MAC_RCTL_BADCRC
+#endif
+
+#define LM3S_RCTCL_SETBITS (LM3S_AMUL_SETBITS|LM3S_PRMS_SETBITS|LM3S_BADCRC_SETBITS)
+#define LM3S_RCTCL_CLRBITS (LM3S_AMUL_CLRBITS|LM3S_PRMS_CLRBITS|LM3S_BADCRC_CLRBITS)
+
 /* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define LM3S_WDDELAY   (1*CLK_TCK)
@@ -151,7 +217,9 @@ static inline uint32 lm3s_ethin(struct lm3s_driver_s *priv, int offset);
 static inline void lm3s_ethout(struct lm3s_driver_s *priv, int offset, uint32 value);
 #endif
 static void   lm3s_ethreset(struct lm3s_driver_s *priv);
+#if 0 /* Not used */
 static void   lm3s_phywrite(struct lm3s_driver_s *priv, int regaddr, uint16 value);
+#endif
 static uint16 lm3s_phyread(struct lm3s_driver_s *priv, int regaddr);
 
 /* Common TX logic */
@@ -216,7 +284,7 @@ static inline uint32 lm3s_ethin(struct lm3s_driver_s *priv, int offset)
  * Parameters:
  *   priv   - Reference to the driver state structure
  *   offset - Byte offset of the register from the ethernet base address
- *   value  - The value to write the the Ethernet register
+ *   value  - The value to write the Ethernet register
  *
  * Returned Value:
  *   None
@@ -323,13 +391,32 @@ static void lm3s_ethreset(struct lm3s_driver_s *priv)
  *
  ****************************************************************************/
 
+#if 0 /* Not used */
 static void lm3s_phywrite(struct lm3s_driver_s *priv, int regaddr, uint16 value)
 {
-# warning "Missing Logic"
+  /* Wait for any MII transactions in progress to complete */
+
+  while ((lm3s_ethin(priv, LM3S_MAC_MCTL_OFFSET) & MAC_MCTL_START) != 0);
+
+  /* Set up the data to be written */
+
+  DEBUGASSERT(value < MAC_MTXD_MASK);
+  lm3s_ethout(priv, LM3S_MAC_MTXD_OFFSET, value);
+
+  /* Set up the PHY register address and start the write operation */
+
+  regaddr <<= MAC_MCTL_REGADR_SHIFT;
+  DEBUGASSERT((regaddr & MAC_MTXD_MASK) == regaddr);
+  lm3s_ethout(priv, LM3S_MAC_MCTL_OFFSET, regaddr | MAC_MCTL_WRITE | MAC_MCTL_START);
+
+  /* Wait for the write transaction to complete */
+
+  while ((lm3s_ethin(priv, LM3S_MAC_MCTL_OFFSET) & MAC_MCTL_START) != 0);
 }
+#endif
 
 /****************************************************************************
- * Function: lm3s_phywrite
+ * Function: lm3s_phyread
  *
  * Description:
  *   Write a 16-bit word to a PHY register
@@ -346,8 +433,23 @@ static void lm3s_phywrite(struct lm3s_driver_s *priv, int regaddr, uint16 value)
 
 static uint16 lm3s_phyread(struct lm3s_driver_s *priv, int regaddr)
 {
-# warning "Missing Logic"
-  return 0;
+  /* Wait for any MII transactions in progress to complete */
+
+  while ((lm3s_ethin(priv, LM3S_MAC_MCTL_OFFSET) & MAC_MCTL_START) != 0);
+
+  /* Set up the PHY register address and start the read operation */
+
+  regaddr <<= MAC_MCTL_REGADR_SHIFT;
+  DEBUGASSERT((regaddr & MAC_MTXD_MASK) == regaddr);
+  lm3s_ethout(priv, LM3S_MAC_MCTL_OFFSET, regaddr | MAC_MCTL_START);
+
+  /* Wait for the write transaction to complete */
+
+  while ((lm3s_ethin(priv, LM3S_MAC_MCTL_OFFSET) & MAC_MCTL_START) != 0);
+
+  /* Read and return the PHY data */
+
+  return (uint16)(lm3s_ethin(priv, LM3S_MAC_MRXD_OFFSET) & MAC_MTRD_MASK);
 }
 
 /****************************************************************************
@@ -367,20 +469,85 @@ static uint16 lm3s_phyread(struct lm3s_driver_s *priv, int regaddr)
 
 static int lm3s_transmit(struct lm3s_driver_s *priv)
 {
+  irqstate_t flags;
+  uint32     regval;
+  ubyte     *dbuf;
+  int        pktlen;
+  int        bytesleft;
+  int        ret = -EBUSY;
+
   /* Verify that the hardware is ready to send another packet */
-#warning "Missing logic"
-  /* Increment statistics */
 
-  /* Disable Ethernet interrupts */
+  flags = irqsave();
+  if ((lm3s_ethin(priv, LM3S_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
+    {
+      /* Increment statistics */
 
-  /* Send the packet: address=priv->ld_dev.d_buf, length=priv->ld_dev.d_len */
+      EMAC_STAT(priv, tx_packets);
 
-  /* Restore Ethernet interrupts */
+      /* Transfer the packet into the Tx FIFO.  The LS 16-bits of the first
+       * 32-bit word written to the Tx FIFO contains the Ethernet payload
+       * data length.  That is the full length of the message (d_len) minus
+       * the size of the Ethernet header (14).
+       */
 
-  /* Setup the TX timeout watchdog (perhaps restarting the timer) */
+      pktlen     = priv->ld_dev.d_len;
+      nvdbg("Sending packet, pktlen: %d\n", pktlen);
+      DEBUGASSERT(pktlen > UIP_LLH_LEN);
 
-  (void)wd_start(priv->ld_txtimeout, LM3S_TXTIMEOUT, lm3s_txtimeout, 1, (uint32)priv);
-  return OK;
+      dbuf       = priv->ld_dev.d_buf;
+      regval     = (uint32)(pktlen - 4);
+      regval    |= ((uint32)(*dbuf++) << 16);
+      regval    |= ((uint32)(*dbuf++) << 24);
+      lm3s_ethout(priv, LM3S_MAC_DATA_OFFSET, regval);
+
+      /* Write all of the whole, 32-bit values in the middle of the packet */
+
+      for (bytesleft = pktlen - 2; bytesleft > 3; bytesleft -= 4, dbuf += 4)
+        {
+          /* Transfer a whole word from the user buffer.  Note, the user
+           * buffer may be un-aligned.
+           */
+
+          lm3s_ethout(priv, LM3S_MAC_DATA_OFFSET, *(uint32*)dbuf);
+        }
+
+      /* Write the last, partial word in the FIFO */
+
+      if (bytesleft > 0)
+        {
+          /* Write the last word */
+
+          regval = 0;
+          switch (bytesleft)
+            {
+              case 0:
+              default:
+                break;
+
+              case 3:
+                regval |= ((uint32)dbuf[2] << 16);
+              case 2:
+                regval |= ((uint32)dbuf[1] << 8);
+              case 1:
+                regval |= (uint32)dbuf[0];
+                break;
+            }
+          lm3s_ethout(priv, LM3S_MAC_DATA_OFFSET, regval);
+        }
+
+      /* Activate the transmitter */
+
+      lm3s_ethout(priv, LM3S_MAC_TR_OFFSET, MAC_TR_NEWTX);
+
+      /* Setup the TX timeout watchdog (perhaps restarting the timer) */
+
+      (void)wd_start(priv->ld_txtimeout, LM3S_TXTIMEOUT, lm3s_txtimeout, 1, (uint32)priv);
+      ret = OK;
+    }
+
+  irqrestore(flags);
+  return ret;
 }
 
 /****************************************************************************
@@ -407,27 +574,29 @@ static int lm3s_transmit(struct lm3s_driver_s *priv)
 static int lm3s_uiptxpoll(struct uip_driver_s *dev)
 {
   struct lm3s_driver_s *priv = (struct lm3s_driver_s *)dev->d_private;
+  int ret = OK;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
    */
 
+  nvdbg("Poll result: d_len=%d\n", priv->dev.d_len);
   if (priv->ld_dev.d_len > 0)
     {
-      uip_arp_out(&priv->ld_dev);
-      lm3s_transmit(priv);
-
-      /* Check if there is room in the device to hold another packet. If not,
-       * return a non-zero value to terminate the poll.
+      /* Send the packet.  lm3s_transmit() will return zero if the
+       * packet was successfully handled.
        */
-#warning "Missing logic"
+
+      DEBUGASSERT((lm3s_ethin(priv, LM3S_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
+      uip_arp_out(&priv->ld_dev);
+      ret =lm3s_transmit(priv);
     }
 
   /* If zero is returned, the polling will continue until all connections have
    * been examined.
    */
 
-  return 0;
+  return ret;
 }
 
 /****************************************************************************
@@ -476,6 +645,7 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
 
       regval = lm3s_ethin(priv, LM3S_MAC_DATA_OFFSET);
       pktlen = (int)(regval & 0x0000ffff);
+      nvdbg("Receiving packet, pktlen: %d\n", pktlen);
 
       /* Check if the pktlen is valid.  It should be large enough to
        * hold an Ethernet header and small enough to fit entirely in
@@ -512,13 +682,14 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
 
       *dbuf++   = (ubyte)((regval >> 16) & 0xff);
       *dbuf++   = (ubyte)((regval >> 24) & 0xff);
-      bytesleft = pktlen - 2;
 
       /* Read all of the whole, 32-bit values in the middle of the packet */
 
-      for (; bytesleft > 3; bytesleft -= 4, dbuf += 4)
+      for (bytesleft = pktlen - 2; bytesleft > 3; bytesleft -= 4, dbuf += 4)
         {
-          /* Read a whole word */
+          /* Transfer a whole word to the user buffer.  Note, the user
+           * buffer may be un-aligned.
+           */
 
           *(uint32*)dbuf = lm3s_ethin(priv, LM3S_MAC_DATA_OFFSET);
         }
@@ -619,12 +790,19 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
 
 static void lm3s_txdone(struct lm3s_driver_s *priv)
 {
-  /* Check for errors and update statistics */
-#warning "Missing logic"
-
-  /* If no further xmits are pending, then cancel the TX timeout */
+  /* Cancel the TX timeout */
 
   wd_cancel(priv->ld_txtimeout);
+
+  /* Verify that the Tx FIFO is not in use.  The NEWTX bit initiates an
+   * Ethernet transmission once the packet has been placed in the TX FIFO.
+   * This bit is cleared once the transmission has been completed.  Since
+   * we get here because of of TXEMP which indicates that the packet was
+   * transmitted and that the TX FIFO is empty, NEWTX should always be zero
+   * at this point.
+   */
+
+  DEBUGASSERT((lm3s_ethin(priv, LM3S_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
 
   /* Then poll uIP for new XMIT data */
 
@@ -741,9 +919,14 @@ static void lm3s_txtimeout(int argc, uint32 arg, ...)
 
   /* Increment statistics and dump debug info */
 
+  ndbg("Tx timeout\n");
   EMAC_STAT(priv, tx_timeouts);
 
   /* Then reset the hardware */
+
+  DEBUGASSERT(priv->ld_bifup);
+  lm3s_ifdown(&priv->ld_dev);
+  lm3s_ifup(&priv->ld_dev);
 
   /* Then poll uIP for new XMIT data */
 
@@ -771,16 +954,24 @@ static void lm3s_polltimer(int argc, uint32 arg, ...)
 {
   struct lm3s_driver_s *priv = (struct lm3s_driver_s *)arg;
 
-  /* Check if there is room in the send another Tx packet.  */
-#warning "Missing logic"
+  /* Check if we can send another Tx packet now.  The NEWTX bit initiates an
+   * Ethernet transmission once the packet has been placed in the TX FIFO.
+   * This bit is cleared once the transmission has been completed.
+   *
+   * NOTE: This can cause missing poll cycles and, hence, some timing
+   * inaccuracies.
+   */
 
-  /* If so, update TCP timing states and poll uIP for new XMIT data */
+  if ((lm3s_ethin(priv, LM3S_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
+    {
+      /* If so, update TCP timing states and poll uIP for new XMIT data */
 
-  (void)uip_timer(&priv->ld_dev, lm3s_uiptxpoll, LM3S_POLLHSEC);
+      (void)uip_timer(&priv->ld_dev, lm3s_uiptxpoll, LM3S_POLLHSEC);
 
-  /* Setup the watchdog poll timer again */
+      /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->ld_txpoll, LM3S_WDDELAY, lm3s_polltimer, 1, arg);
+      (void)wd_start(priv->ld_txpoll, LM3S_WDDELAY, lm3s_polltimer, 1, arg);
+    }
 }
 
 /****************************************************************************
@@ -837,19 +1028,19 @@ static int lm3s_ifup(struct uip_driver_s *dev)
    * TX Padding Enabled).
    */
 
-# warning "These should be configurable items"
   regval  = lm3s_ethin(priv, LM3S_MAC_TCTL_OFFSET);
-  regval |= (MAC_TCTL_DUPLEX|MAC_TCTL_CRC|MAC_TCTL_PADEN);
+  regval &= ~LM3S_TCTCL_CLRBITS;
+  regval |= LM3S_TCTCL_SETBITS;
   lm3s_ethout(priv, LM3S_MAC_TCTL_OFFSET, regval);
   nvdbg("TCTL:  %08x\n", regval);
 
   /* Setup the receive control register (Disable multicast frames, disable
-   * promiscuous mode, disable bad CRC rejection). >>> These should be configurable items <<<
+   * promiscuous mode, disable bad CRC rejection).
    */
 
-# warning "These should be configurable items"
   regval  = lm3s_ethin(priv, LM3S_MAC_RCTL_OFFSET);
-  regval &= ~(MAC_RCTL_BADCRC | MAC_RCTL_PRMS | MAC_RCTL_AMUL);
+  regval &= ~LM3S_RCTCL_CLRBITS;
+  regval |= LM3S_RCTCL_SETBITS;
   lm3s_ethout(priv, LM3S_MAC_RCTL_OFFSET, regval);
   nvdbg("RCTL:  %08x\n", regval);
 
@@ -866,9 +1057,11 @@ static int lm3s_ifup(struct uip_driver_s *dev)
   nvdbg("TS:    %08x\n", regval);
 #endif
 
-  /* Wait for the link to come up */
-
-# warning "This should use a semaphore and an interrupt"
+  /* Wait for the link to come up.  This following is not very conservative
+   * of system resources -- it really should wait gracefully on a semaphore
+   * and the interrupt handler should post the semaphore when LINKSTATUS is
+   * set
+   */
 
   ndbg("Waiting for link\n");
   do
@@ -960,6 +1153,10 @@ static int lm3s_ifdown(struct uip_driver_s *dev)
   irqstate_t flags;
   uint32 regval;
 
+  ndbg("Taking down: %d.%d.%d.%d\n",
+       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+
   /* Cancel the TX poll timer and TX timeout timers */
 
   flags = irqsave();
@@ -1040,16 +1237,20 @@ static int lm3s_txavail(struct uip_driver_s *dev)
   struct lm3s_driver_s *priv = (struct lm3s_driver_s *)dev->d_private;
   irqstate_t flags;
 
+  /* Ignore the notification if the interface is not yet up or if the Tx FIFO
+   * hardware is not available at this time.  The NEWTX bit initiates an
+   * Ethernet transmission once the packet has been placed in the TX FIFO.
+   * This bit is cleared once the transmission has been completed.  When the
+   * transmission completes, lm3s_txdone() will be called and the Tx polling
+   * will occur at that time.
+   */
+
   flags = irqsave();
-
-  /* Ignore the notification if the interface is not yet up */
-
-  if (priv->ld_bifup)
+  if (priv->ld_bifup && (lm3s_ethin(priv, LM3S_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
     {
-      /* Check if there is room in the hardware to hold another outgoing packet. */
-#warning "Missing logic"
-
-      /* If so, then poll uIP for new XMIT data */
+      /* If the interface is up and we can use the Tx FIFO, then poll uIP
+       * for new Tx data
+       */
 
       (void)uip_poll(&priv->ld_dev, lm3s_uiptxpoll);
     }
@@ -1088,6 +1289,8 @@ static inline int lm3s_initialize(int intf)
   int ret;
 
   /* Check if the Ethernet module is present */
+
+  ndbg("Setting up eth%d\n", intf);
 
 #if LMS_NETHCONTROLLERS > 1
 # error "This debug check only works with one interface"
