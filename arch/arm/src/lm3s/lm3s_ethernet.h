@@ -139,6 +139,7 @@
 #define MAC_IM_RXERM          (1 << 4)  /* Bit 4:  Mask Receive Error */
 #define MAC_IM_MDINTM         (1 << 5)  /* Bit 5:  Mask MII Transaction Complete */
 #define MAC_IM_PHYINTM        (1 << 6)  /* Bit 6:  Mask PHY Interrupt */
+#define MAC_IM_ALLINTS        0x7f
 
 /* Ethernet MAC Receive Control (MACRCTL), offset 0x008 */
 
