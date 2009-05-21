@@ -1,6 +1,21 @@
 README
 ^^^^^^
 
+References:
+^^^^^^^^^^
+
+  Micromint: http://www.micromint.com/
+  Luminary:  http://www.luminarymicro.com/
+
+Development Environment
+^^^^^^^^^^^^^^^^^^^^^^^
+
+  Either Linux or Cygwin on Windows can be used for the development environment.
+  The source has been built only using the GNU toolchain (see below).  Other
+  toolchains will likely cause problems. Testing was performed using the Cygwin
+  environment because the Luminary FLASH programming application was used for
+  writing to FLASH and this application works only under Windows.
+
 Toolchain
 ^^^^^^^^^
 
@@ -43,8 +58,10 @@ Ethernet-Bootloader
   Here are some notes about using the Luminary Ethernet boot-loader built
   into the Eagle-100 board.
 
+  Built-In Application:
+
   - The board has no fixed IP address but uses DHCP to get an address.
-    I use a D-link router; I can use a web browser to surf to the D-link
+    I used a D-link router; I can use a web browser to surf to the D-link
     web page to get the address assigned by 
 
   - Then you can use this IP address in your browser to surf to the Eagle-100
@@ -52,15 +69,22 @@ Ethernet-Bootloader
     the page called "Firmware Update".  That page includes instructions on
     how to download code to the Eagle-100.
 
+  - After you burn the first program, you lose this application.  Then you
+    will probably be better off connected directly to the Eagle-100 board
+    or through a switch (The router caused problems for me during downloads).
+
+  Using the Ethernet Bootloader:
+
   - You will need the "LM Flash Programmer application".  You can get that
     program from the Luminary web site.  There is a link on the LM3S6918 page.
 
   - Is there any documentation for using the bootloader?  Yes and No:  There
     is an application note covering the bootloader on the Luminary site, but
-    it is not very informative.
+    it is not very informative.  The Eagle100 User's Manual has the best
+    information.
 
   - Are there any special things I have to do in my code, other than setting 
-    the origin to 0x0000:2000 (APP_START_ADDRESS)?  No.  The bootload assumes
+    the origin to 0x0000:2000 (APP_START_ADDRESS)?  No.  The bootloader assumes
     that you have a vector table at that address .  The bootloader does the
     following each time it boots (after you have downloaded the first valid
     application):
@@ -74,6 +98,16 @@ Ethernet-Bootloader
     application.  You force the update mode by holding the user button on the
     Eagle-100 board while resetting the board.  The user button is GPIOA, pin 6
     (call FORCED_UPDATE_PIN in the bootloader code).
+
+  - Note 1:  I had to remove my D-Link router from the configuration in order
+    to use the LM Flash Programmer (the Bootloader issues BOOTP requests to
+    communicate with the LM Flash Programmer, my router was responding to
+    these BOOTP requests and hosing the download).  It is safer to connect
+    via a switch or via an Ethernet switch.
+
+  - Note 2:  You don't need the router's DHCPD server in the download
+    configuration; the Luminary Flash Programmer has the capability of
+    temporarily assigning the IP address to the Eagle-100 via BOOTP.
 
 Eagle100-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -185,8 +219,23 @@ can be selected as follow:
 
 Where <subdir> is one of the following:
 
+nettest
+^^^^^^^
+
+This configuration directory may be used to enable networking using the
+LM3S6918's Ethernet controller. It uses examples/nettest to excercise the
+TCP/IP network.
+
+nsh
+^^^
+
+Configures the NuttShell (nsh) located at examples/nsh.  The
+Configuration enables both the serial and telnetd NSH interfaces.
+
 ostest
 ^^^^^^
 
 This configuration directory, performs a simple OS test using
 examples/ostest.
+
+

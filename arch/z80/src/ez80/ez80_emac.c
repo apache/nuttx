@@ -1179,7 +1179,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
       EMAC_STAT(priv, rx_packets);
 
       /* Skip over bad packers */
-    
+
       if ((rxdesc->stat & EMAC_RXDESC_OK) == 0)
         {
           nvdbg("Skipping bad RX pkt: %04x\n", rxdesc->stat);
@@ -1381,7 +1381,7 @@ static int ez80emac_txinterrupt(int irq, FAR void *context)
   if (!priv->txhead)
     {
       nvdbg("No pending Tx.. Stopping XMIT function.\n");
-      
+
       /* Stop the Tx poll timer. (It will get restarted when we have
        * something to send
        */
@@ -1406,7 +1406,7 @@ static int ez80emac_txinterrupt(int irq, FAR void *context)
 
       wd_cancel(priv->txtimeout);
     }
- 
+
   return OK;
 }
 
