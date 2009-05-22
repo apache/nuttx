@@ -13,7 +13,7 @@ NuttX TODO List (Last updated April 12, 2009)
   (6)  File system/Generic drivers (fs/, drivers/)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
-  (2)  Documentation (Documentation/)
+  (0)  Documentation (Documentation/)
   (5)  Build system / Toolchains
   (2)  NuttShell (NSH) (examples/nsh)
   (3)  Other Applications & Tests (examples/)
@@ -329,14 +329,6 @@ o Pascal Add-On (pcode/)
 
 o Documentation (Documentation/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  Description: Document driver/ logic
-  Status:      Open
-  Priority:    Low
-
-  Description: Document C-library APIs
-  Status:      Open
-  Priority:    Low
 
 o Build system
   ^^^^^^^^^^^^

@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: May 21, 2009</p>
+      <p>Last Updated: May 22, 2009</p>
     </td>
   </tr>
 </table>
@@ -1017,7 +1017,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   initialized.  The architecture specific details of
   initializing the OS will be handled here.  Such things as
   setting up interrupt service routines, starting the
-  clock, and registering device drivers are some of the
+  clock, and registering <a href="#DeviceDrivers">device drivers</a> are some of the
   things that are different for each processor and hardware
   platform.
 </p>
@@ -1606,7 +1606,7 @@ extern void up_ledoff(int led);
 
 <p>
   Any user supplied data or logic can be accessed via the psuedo-file system.
-  Built in support is provided for character and block drivers in the
+  Built in support is provided for character and block <a href="#DeviceDrivers">drivers</a> in the
   <code>/dev</code> psuedo file system directory.
 </p>
 
@@ -1616,7 +1616,7 @@ extern void up_ledoff(int led);
   mass storage device.
   NuttX supports the standard <code>mount()</code> command that allows
   a block driver to be bound to a mountpoint within the psuedo file system
-  and to a a file system.
+  and to a file system.
   At present, NuttX supports only the VFAT file system.
 </p>
 
@@ -1648,7 +1648,10 @@ extern void up_ledoff(int led);
     <li><i>Block</i> Device Drivers, and</li>
     <li>Other <i>Specialized</i> Drivers.</li>
   </ul>
-  As discussed in the following paragraphs.
+  These different device driver types are discussed in the following paragraphs.
+  Note: device driver support requires that the <i>in-memory</i>, <i>psuedo</i> file system
+  is enabled by setting the CONFIG_NFILE_DESCRIPTORS in the NuttX configuration file to a 
+  non-zero value.
 </p>
 
 <h2><a name="chardrivers">6.1 Character Device Drivers</a></h2>
@@ -1666,13 +1669,13 @@ extern void up_ledoff(int led);
     Each character device driver must implement an instance of <code>struct file_operations</code>.
     That structure defines a call table with the following methods:
     <ul>
-     <p><code>int open(FAR struct file *filp);</code></p>
-     <p><code>int close(FAR struct file *filp);</code></p>
-     <p><code>ssize_t read(FAR struct file *filp, FAR char *buffer, size_t buflen);</code></p>
-     <p><code>ssize_t write(FAR struct file *filp, FAR const char *buffer, size_t buflen);</code></p>
-     <p><code>off_t seek(FAR struct file *filp, off_t offset, int whence);</code></p>
-     <p><code>int ioctl(FAR struct file *filp, int cmd, unsigned long arg);</code></p>
-     <p><code>int poll(FAR struct file *filp, struct pollfd *fds, boolean setup);</code></p>
+     <p><code>int open(FAR struct file *filp);</code><br>
+     <code>int close(FAR struct file *filp);</code><br>
+     <code>ssize_t read(FAR struct file *filp, FAR char *buffer, size_t buflen);</code><br>
+     <code>ssize_t write(FAR struct file *filp, FAR const char *buffer, size_t buflen);</code><br>
+     <code>off_t seek(FAR struct file *filp, off_t offset, int whence);</code><br>
+     <code>int ioctl(FAR struct file *filp, int cmd, unsigned long arg);</code><br>
+     <code>int poll(FAR struct file *filp, struct pollfd *fds, boolean setup);</code></p>
     </ul>
   </li>
   <li>
@@ -1683,10 +1686,12 @@ extern void up_ledoff(int led);
   </li>
   <li>
     <b>User Access</b>.
-    After it has been registered, the character driver can be accessed by user code using the standard functions <code>open()</code>, <code>close()</code>, <code>read()</code>, <code>write()</code>, etc.
+    After it has been registered, the character driver can be accessed by user code using the standard
+    <a href="NuttxUserGuide.html#driveroperations">driver operations</a> including
+    <code>open()</code>, <code>close()</code>, <code>read()</code>, <code>write()</code>, etc.
   </li>
   <li>
-    <b>Examples</b>.
+    <b>Examples</b>:
     <code>drivers/dev_null.c</code>, <code>drivers/fifo.c</code>, <code>drivers/serial.c</code>, etc.
   </li>
 </ul>
@@ -1706,12 +1711,12 @@ extern void up_ledoff(int led);
     Each block device driver must implement an instance of <code>struct block_operations</code>.
     That structure defines a call table with the following methods:
     <ul>
-     <p><code>int open(FAR struct inode *inode);</code></p>
-     <p><code>int close(FAR struct inode *inode);</code></p>
-     <p><code>ssize_t read(FAR struct inode *inode, FAR unsigned char *buffer, size_t start_sector, unsigned int nsectors);</code></p>
-     <p><code>ssize_t write(FAR struct inode *inode, FAR const unsigned char *buffer, size_t start_sector, unsigned int nsectors);</code></p>
-     <p><code>int geometry(FAR struct inode *inode, FAR struct geometry *geometry);</code></p>
-     <p><code>int ioctl(FAR struct inode *inode, int cmd, unsigned long arg);</code></p>
+     <p><code>int open(FAR struct inode *inode);</code><br>
+     <code>int close(FAR struct inode *inode);</code><br>
+     <code>ssize_t read(FAR struct inode *inode, FAR unsigned char *buffer, size_t start_sector, unsigned int nsectors);</code><br>
+     <code>ssize_t write(FAR struct inode *inode, FAR const unsigned char *buffer, size_t start_sector, unsigned int nsectors);</code><br>
+     <code>int geometry(FAR struct inode *inode, FAR struct geometry *geometry);</code><br>
+     <code>int ioctl(FAR struct inode *inode, int cmd, unsigned long arg);</code></p>
     </ul>
   </li>
   <li>
@@ -1726,17 +1731,17 @@ extern void up_ledoff(int led);
     indirectly through the <code>mount()</code> API.
     The <code>mount()</code> API binds a block driver instance with a file system and with a mountpoint.
     Then the user may use the block driver to access the file system on the underlying media.
-    <b>Example:</b> See the <code>cmd_mount()</code> implementation in <code>examples/nsh/nsh_fscmds.c</code>.
+    <i>Example</i>: See the <code>cmd_mount()</code> implementation in <code>examples/nsh/nsh_fscmds.c</code>.
   </li>
   <li>
     <b>Accessing a Character Driver as a Block Device</b>.
     See the loop device at <code>drivers/loop.c</code>.
-    <b>Example:</b> See the <code>cmd_losetup()</code> implementation in <code>examples/nsh/nsh_fscmds.c</code>.
+    <i>Example</i>: See the <code>cmd_losetup()</code> implementation in <code>examples/nsh/nsh_fscmds.c</code>.
   </li>
   <li>
     <b>Accessing a Block Driver as Character Device</b>.
     See the Block-to-Character (BCH) conversion logic in <code>drivers/bch/</code>.
-    <b>Example:</b> See the <code>cmd_dd()</code> implementation in <code>examples/nsh/nsh_ddcmd.c</code>.
+    <i>Example</i>: See the <code>cmd_dd()</code> implementation in <code>examples/nsh/nsh_ddcmd.c</code>.
   </li>
   <li>
     <b>Examples</b>.
@@ -1760,7 +1765,7 @@ extern void up_ledoff(int led);
     Each Eterhenet driver registers itself by calling <code>netdev_register()</code>.
   </li>
   <li>
-    <b>Examples</b>.
+    <b>Examples</b>:
     <code>drivers/net/dm90x0.c</code>, <code>arch/drivers/arm/src/c5471/c5471_ethernet.c</code>, <code>arch/z80/src/ez80/ez80_emac.c</code>, etc.
   </li>
 </ul>
@@ -1777,13 +1782,13 @@ extern void up_ledoff(int led);
     Each SPI device driver must implement an instance of <code>struct spi_ops_s</code>.
     That structure defines a call table with the following methods:
     <ul>
-     <p><code>void select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);</code></p>
-     <p><code>uint32 setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);</code></p>
-     <p><code>void setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);</code></p>
-     <p><code>void setbits(FAR struct spi_dev_s *dev, int nbits);</code></p>
-     <p><code>ubyte status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);</code></p>
-     <p><code>uint16 send(FAR struct spi_dev_s *dev, uint16 wd);</code></p>
-     <p><code>void exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer, FAR void *rxbuffer, size_t nwords);</code></p>
+     <p><code>void select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);</code><br>
+     <code>uint32 setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);</code><br>
+     <code>void setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);</code><br>
+     <code>void setbits(FAR struct spi_dev_s *dev, int nbits);</code><br>
+     <code>ubyte status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);</code><br>
+     <code>uint16 send(FAR struct spi_dev_s *dev, uint16 wd);</code><br>
+     <code>void exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer, FAR void *rxbuffer, size_t nwords);</code><br>
      <p><codei>nt registercallback(FAR struct spi_dev_s *dev, mediachange_t callback, void *arg);</code></p>
   </ul>
   <li>
@@ -1793,7 +1798,7 @@ extern void up_ledoff(int led);
     See for example, <code>int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)</code> in <code>drivers/mmcsd/mmcsd_spi.c</code>.
   </li>
   <li>
-    <b>Examples</b>.
+    <b>Examples</b>:
     <code>drivers/loop.c</code>, <code>drivers/mmcds/mmcsd_spi.c</code>, <code>drivers/ramdisk.c</code>, etc.
   </li>
 </ul>
@@ -1810,10 +1815,10 @@ extern void up_ledoff(int led);
     Each I2C device driver must implement an instance of <code>struct i2c_ops_s</code>.
     That structure defines a call table with the following methods:
     <ul>
-     <p><code>uint32 setfrequency(FAR struct i2c_dev_s *dev, uint32 frequency);</code></p>
-     <p><code>int setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits);</code></p>
-     <p><code>int write(FAR struct i2c_dev_s *dev, const ubyte *buffer, int buflen);</code></p>
-     <p><code>int read(FAR struct i2c_dev_s *dev, ubyte *buffer, int buflen);</code></p>
+     <p><code>uint32 setfrequency(FAR struct i2c_dev_s *dev, uint32 frequency);</code><br>
+     <code>int setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits);</code><br>
+     <code>int write(FAR struct i2c_dev_s *dev, const ubyte *buffer, int buflen);</code><br>
+     <code>int read(FAR struct i2c_dev_s *dev, ubyte *buffer, int buflen);</code></p>
   </ul>
   <li>
     <b>Binding I2C Drivers</b>.
@@ -1821,7 +1826,7 @@ extern void up_ledoff(int led);
     higher level device driver.
   </li>
   <li>
-    <b>Examples</b>.
+    <b>Examples</b>:
     <code>arch/z80/src/ez80/ez80_i2c.c</code>, <code>arch/z80/src/z8/z8_i2c.c</code>, etc.
   </li>
 </ul>
@@ -1838,18 +1843,18 @@ extern void up_ledoff(int led);
     Each serial device driver must implement an instance of <code>struct uart_ops_s</code>.
     That structure defines a call table with the following methods:
     <ul>
-     <p><code>int setup(FAR struct uart_dev_s *dev);</code></p>
-     <p><code>void shutdown(FAR struct uart_dev_s *dev);</code></p>
-     <p><code>int attach(FAR struct uart_dev_s *dev);</code></p>
-     <p><code>void detach(FAR struct uart_dev_s *dev);</code></p>
-     <p><code>int ioctl(FAR struct file *filep, int cmd, unsigned long arg);</code></p>
-     <p><code>int receive(FAR struct uart_dev_s *dev, unsigned int *status);</code></p>
-     <p><code>void rxint(FAR struct uart_dev_s *dev, boolean enable);</code></p>
-     <p><code>boolean rxavailable(FAR struct uart_dev_s *dev);</code></p>
-     <p><code>void send(FAR struct uart_dev_s *dev, int ch);</code></p>
-     <p><code>void txint(FAR struct uart_dev_s *dev, boolean enable);</code></p>
-     <p><code>boolean txready(FAR struct uart_dev_s *dev);</code></p>
-     <p><code>boolean txempty(FAR struct uart_dev_s *dev);</code></p>
+     <p><code>int setup(FAR struct uart_dev_s *dev);</code><br>
+     <code>void shutdown(FAR struct uart_dev_s *dev);</code><br>
+     <code>int attach(FAR struct uart_dev_s *dev);</code><br>
+     <code>void detach(FAR struct uart_dev_s *dev);</code><br>
+     <code>int ioctl(FAR struct file *filep, int cmd, unsigned long arg);</code><br>
+     <code>int receive(FAR struct uart_dev_s *dev, unsigned int *status);</code><br>
+     <code>void rxint(FAR struct uart_dev_s *dev, boolean enable);</code><br>
+     <code>boolean rxavailable(FAR struct uart_dev_s *dev);</code><br>
+     <code>void send(FAR struct uart_dev_s *dev, int ch);</code><br>
+     <code>void txint(FAR struct uart_dev_s *dev, boolean enable);</code><br>
+     <code>boolean txready(FAR struct uart_dev_s *dev);</code><br>
+     <code>boolean txempty(FAR struct uart_dev_s *dev);</code></p>
     </ul>
   </li>
   <li>
@@ -1865,7 +1870,7 @@ extern void up_ledoff(int led);
     Serial drivers are, ultimately, normal <a href="#chardrivers">character drivers</a> and are accessed as other character drivers.
   </li>
   <li>
-    <b>Examples</b>.
+    <b>Examples</b>:
     <code>arch/arm/src/chip/lm3s_serial.c</code>, <code>arch/arm/src/lpc214x/lpc214x_serial.c</code>, <code>arch/z16/src/z16f/z16f_serial.c</code>, etc.
   </li>
 </ul>
