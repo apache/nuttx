@@ -580,7 +580,7 @@ static int lm3s_uiptxpoll(struct uip_driver_s *dev)
    * the field d_len is set to a value > 0.
    */
 
-  nvdbg("Poll result: d_len=%d\n", priv->dev.d_len);
+  nvdbg("Poll result: d_len=%d\n", priv->ld_dev.d_len);
   if (priv->ld_dev.d_len > 0)
     {
       /* Send the packet.  lm3s_transmit() will return zero if the
@@ -769,7 +769,6 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
         }
 #endif
     }
-  while ( /* FIX ME */ TRUE /* FIX ME */); /* While there are more packets to be processed */
 }
 
 /****************************************************************************
@@ -1085,7 +1084,7 @@ static int lm3s_ifup(struct uip_driver_s *dev)
 
   /* Enable the Ethernet transmitter */
 
-  regval  = lm3s_ethin(priv, LM3S_MAC_RCTL_OFFSET);
+  regval  = lm3s_ethin(priv, LM3S_MAC_TCTL_OFFSET);
   regval |= MAC_TCTL_TXEN;
   lm3s_ethout(priv, LM3S_MAC_TCTL_OFFSET, regval);
 
