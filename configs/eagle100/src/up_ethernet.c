@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <debug.h>
 #include <assert.h>
 
 #include <arch/board/board.h>
@@ -81,7 +82,9 @@ void lm3s_ethernetmac(struct ether_addr *ethaddr)
 
   user0 = getreg32(LM3S_FLASH_USERREG0);
   user1 = getreg32(LM3S_FLASH_USERREG1);
-  DEBUGASSERT(user0 != 0xffffffff && user1 == 0xffffffff);
+
+  nlldbg("user: %06x:%06x\n", user1 & 0x00ffffff, user0 & 0x00ffffff);
+  DEBUGASSERT(user0 != 0xffffffff && user1 != 0xffffffff);
 
   /* Re-format that MAC address the way that uIP expects to see it */
 
