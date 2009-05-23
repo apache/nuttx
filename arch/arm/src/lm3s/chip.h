@@ -50,9 +50,9 @@
 /* Get customizations for each supported chip (only the LM3S6918 right now) */
 
 #ifdef CONFIG_ARCH_CHIP_LM3S6918
-#  define LMS_NUARTS          2  /* Two UART modules */
-#  define LMS_NSSI            2  /* Two SSI modules */
-#  define LMS_NETHCONTROLLERS 1  /* One ethenet controller */
+#  define LM3S_NUARTS          2  /* Two UART modules */
+#  define LM3S_NSSI            2  /* Two SSI modules */
+#  define LM3S_NETHCONTROLLERS 1  /* One ethenet controller */
 #else
 #  error "No Ethernet support for this LM3S chip"
 #endif
@@ -63,7 +63,7 @@
 #include "lm3s_syscontrol.h"     /* System control module */
 #include "lm3s_gpio.h"           /* GPIO modules */
 #include "lm3s_uart.h"           /* UART modules */
-#include "lm2s_ssi.h"            /* SSI modules */
+#include "lm3s_ssi.h"            /* SSI modules */
 #include "lm3s_ethernet.h"       /* Ethernet MAC and PHY */
 #include "lm3s_flash.h"          /* FLASH */
 

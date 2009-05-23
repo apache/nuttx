@@ -59,7 +59,7 @@
  * Definitions
  ****************************************************************************/
 
-/* The i.MX1/L supports 2 SPI interfaces.  Which have been endabled? */
+/* The i.MX1/L supports 2 SPI interfaces.  Which have been enabled? */
 
 #ifndef CONFIG_SPI1_DISABLE
 #  define SPI1_NDX 0           /* Index to SPI1 in g_spidev[] */
@@ -503,7 +503,7 @@ static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
   priv->nwords       = nwords;           /* Total number of exchanges */
 
   /* Set up the low-level data transfer function pointers */
- 
+
   if (priv->nbits > 8)
     {
       priv->txword = spi_txuint16;
@@ -514,7 +514,7 @@ static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
       priv->txword = spi_txubyte;
       priv->rxword = spi_rxubyte;
     }
-   
+
   if (!txbuffer)
     {
       priv->txword = spi_txnull;
@@ -533,7 +533,7 @@ static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
   spi_startxfr(priv, ntxd);
 
   /* Enable transmit empty interrupt */
- 
+
   regval = spi_getreg(priv, CSPI_INTCS_OFFSET);
   regval |= CSPI_INTCS_TEEN;
   spi_putreg(priv, CSPI_INTCS_OFFSET, regval);
@@ -809,7 +809,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  * Name: spi_setbits
  *
  * Description:
- *   Set the number if bits per word.
+ *   Set the number of bits per word.
  *
  * Input Parameters:
  *   dev -  Device-specific state data
@@ -995,11 +995,11 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
 #ifndef CONFIG_SPI2_DISABLE
     case 2:
-      /* Select SPI1 */
+      /* Select SPI2 */
 
       priv = &g_spidev[SPI2_NDX];
 
-      /* Configure SPI1 GPIOs */
+      /* Configure SPI2 GPIOs */
       /* SCLK: AIN of Port A, pin 0 -OR- AIN of Port D, pin 7 */
 
 #if 1

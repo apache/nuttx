@@ -47,7 +47,7 @@ CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
 CHIP_ASRCS	= 
 CHIP_CSRCS	= lm3s_start.c lm3s_syscontrol.c lm3s_irq.c \
 		  lm3s_gpio.c lm3s_gpioirq.c lm3s_timerisr.c lm3s_lowputc.c \
-		  lm3s_serial.c
+		  lm3s_serial.c lm3s_ssi.c
 
 ifdef CONFIG_NET
 CHIP_CSRCS	+= lm3s_ethernet.c

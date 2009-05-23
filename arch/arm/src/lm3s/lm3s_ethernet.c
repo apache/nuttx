@@ -179,7 +179,7 @@ struct lm3s_driver_s
    * multiple Ethernet controllers.
    */
 
-#if LMS_NETHCONTROLLERS > 1
+#if LM3S_NETHCONTROLLERS > 1
   uint32  ld_base;             /* Ethernet controller base address */
   int     ld-irq;              /* Ethernet controller IRQ */
 #endif
@@ -201,7 +201,7 @@ struct lm3s_driver_s
  * Private Data
  ****************************************************************************/
 
-static struct lm3s_driver_s g_lm3sdev[LMS_NETHCONTROLLERS];
+static struct lm3s_driver_s g_lm3sdev[LM3S_NETHCONTROLLERS];
 
 /****************************************************************************
  * Private Function Prototypes
@@ -209,7 +209,7 @@ static struct lm3s_driver_s g_lm3sdev[LMS_NETHCONTROLLERS];
 
 /* Miscellaneous low level helpers */
 
-#if LMS_NETHCONTROLLERS > 1
+#if LM3S_NETHCONTROLLERS > 1
 static uint32 lm3s_ethin(struct lm3s_driver_s *priv, int offset);
 static void   lm3s_ethout(struct lm3s_driver_s *priv, int offset, uint32 value);
 #else
@@ -263,7 +263,7 @@ static int   lm3s_txavail(struct uip_driver_s *dev);
  *
  ****************************************************************************/
 
-#if LMS_NETHCONTROLLERS > 1
+#if LM3S_NETHCONTROLLERS > 1
 static uint32 lm3s_ethin(struct lm3s_driver_s *priv, int offset)
 {
   return getreg32(priv->ld_base + offset);
@@ -291,7 +291,7 @@ static inline uint32 lm3s_ethin(struct lm3s_driver_s *priv, int offset)
  *
  ****************************************************************************/
 
-#if LMS_NETHCONTROLLERS > 1
+#if LM3S_NETHCONTROLLERS > 1
 static void lm3s_ethout(struct lm3s_driver_s *priv, int offset, uint32 value)
 {
   putreg32(value, priv->ld_base + offset);
@@ -325,7 +325,7 @@ static void lm3s_ethreset(struct lm3s_driver_s *priv)
   uint32 regval;
   volatile uint32 delay;
 
-#if LMS_NETHCONTROLLERS > 1
+#if LM3S_NETHCONTROLLERS > 1
 #  error "If multiple interfaces are supported, this function would have to be redesigned"
 #endif
 
@@ -830,7 +830,7 @@ static int lm3s_interrupt(int irq, FAR void *context)
   register struct lm3s_driver_s *priv;
   uint32 ris;
 
-#if LMS_NETHCONTROLLERS > 1
+#if LM3S_NETHCONTROLLERS > 1
 # error "A mechanism to associate and interface with an IRQ is needed"
 #else
   priv = &g_lm3sdev[0];
@@ -1096,7 +1096,7 @@ static int lm3s_ifup(struct uip_driver_s *dev)
 
   /* Enable the Ethernet interrupt */
 
-#if LMS_NETHCONTROLLERS > 1
+#if LM3S_NETHCONTROLLERS > 1
   up_enable_irq(priv->irq);
 #else
   up_enable_irq(LM3S_IRQ_ETHCON);
@@ -1164,7 +1164,7 @@ static int lm3s_ifdown(struct uip_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-#if LMS_NETHCONTROLLERS > 1
+#if LM3S_NETHCONTROLLERS > 1
   up_disable_irq(priv->irq);
 #else
   up_disable_irq(LM3S_IRQ_ETHCON);
@@ -1278,7 +1278,7 @@ static int lm3s_txavail(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-#if LMS_NETHCONTROLLERS > 1
+#if LM3S_NETHCONTROLLERS > 1
 int lm3s_initialize(int intf)
 #else
 static inline int lm3s_initialize(int intf)
@@ -1291,12 +1291,12 @@ static inline int lm3s_initialize(int intf)
 
   ndbg("Setting up eth%d\n", intf);
 
-#if LMS_NETHCONTROLLERS > 1
+#if LM3S_NETHCONTROLLERS > 1
 # error "This debug check only works with one interface"
 #else
   DEBUGASSERT((getreg32(LM3S_SYSCON_DC4) & (SYSCON_DC4_EMAC0|SYSCON_DC4_EPHY0)) == (SYSCON_DC4_EMAC0|SYSCON_DC4_EPHY0));
 #endif
-  DEBUGASSERT((unsigned)intf < LMS_NETHCONTROLLERS);
+  DEBUGASSERT((unsigned)intf < LM3S_NETHCONTROLLERS);
 
   /* Initialize the driver structure */
 
@@ -1308,7 +1308,7 @@ static inline int lm3s_initialize(int intf)
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-#if LMS_NETHCONTROLLERS > 1
+#if LM3S_NETHCONTROLLERS > 1
 # error "A mechanism to associate base address an IRQ with an interface is needed"
   priv->ld_base          = ??;            /* Ethernet controller base address */
   priv->ld_irq           = ??;            /* Ethernet controller IRQ number */
@@ -1335,7 +1335,7 @@ static inline int lm3s_initialize(int intf)
 
   /* Attach the IRQ to the driver */
 
-#if LMS_NETHCONTROLLERS > 1
+#if LM3S_NETHCONTROLLERS > 1
   ret = irq_attach(priv->irq, lm3s_interrupt);
 #else
   ret = irq_attach(LM3S_IRQ_ETHCON, lm3s_interrupt);
@@ -1364,7 +1364,7 @@ static inline int lm3s_initialize(int intf)
  *
  ************************************************************************************/
 
-#if LMS_NETHCONTROLLERS == 1
+#if LM3S_NETHCONTROLLERS == 1
 void up_netinitialize(void)
 {
   (void)lm3s_initialize(0);
