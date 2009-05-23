@@ -61,6 +61,16 @@ Where <sub-directory> is the specific board configuration that you
 wish to build.  The following board-specific configurations are
 available:
 
+dhcpd:
+    This builds the DCHP server using the examples/dhcpd application
+    (for execution from FLASH.) See examples/README.txt for information
+    about ostest.
+
+httpd:
+    This builds the uIP web server example using the examples/uip application
+    (for execution from FLASH). See examples/README.txt for information
+    about ostest.
+
 ostest
     This builds the examples/ostest application for execution from FLASH.
     See examples/README.txt for information about ostest.
