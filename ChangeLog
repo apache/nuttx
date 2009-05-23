@@ -724,8 +724,9 @@
 
 0.4.7 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* arch/arm/src/lm2s: Added an Ethernet driver for the LM3S6918
+	* arch/arm/src/lm3s: Added an Ethernet driver for the LM3S6918
 	* configs/eagle100/nettest: Added an examples/nettest configuration for the
 	  Micromint Eagle100 board.
 	* Documentation/NuttxPortingGuide.html: Added a section on NuttX device drivers.
+	* arch/arm/src/lm3s: Added an SSI driver for the LM3S6918
 
