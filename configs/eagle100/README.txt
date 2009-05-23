@@ -229,23 +229,26 @@ can be selected as follow:
 
 Where <subdir> is one of the following:
 
-nettest
-^^^^^^^
+  nettest:
+    This configuration directory may be used to enable networking using the
+    LM3S6918's Ethernet controller. It uses examples/nettest to excercise the
+    TCP/IP network.
 
-This configuration directory may be used to enable networking using the
-LM3S6918's Ethernet controller. It uses examples/nettest to excercise the
-TCP/IP network.
+  httpd:
+    This builds the uIP web server example using the examples/uip application
+    (for execution from FLASH). See examples/README.txt for information
+    about ostest.
 
-nsh
-^^^
+  nsh:
+    Configures the NuttShell (nsh) located at examples/nsh.  The
+    Configuration enables both the serial and telnetd NSH interfaces.
 
-Configures the NuttShell (nsh) located at examples/nsh.  The
-Configuration enables both the serial and telnetd NSH interfaces.
+  ostest:
+    This configuration directory, performs a simple OS test using
+    examples/ostest.
 
-ostest
-^^^^^^
-
-This configuration directory, performs a simple OS test using
-examples/ostest.
+By default, all of these examples are built to be used with the Luminary
+Ethernet Bootloader (you can change the ld.script file in any of these
+sub-directories to change that configuration).
 
 
