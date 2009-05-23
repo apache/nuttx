@@ -542,25 +542,34 @@ static int ssi_performtx(struct lm32_ssidev_s *priv)
           /* Update the count of words to to transferred */
 
           priv->ntxwords -= ntxd;
+        }
 
-          /* Make sure that the Tx FIFO half-empty interrupt is enabled */
+      /* Check again... Now have all of the Tx words been sent? */
 
 #ifndef CONFIG_SSI_POLLWAIT
-          regval = ssi_getreg(priv, LM3S_SSI_IM_OFFSET);
+      regval = ssi_getreg(priv, LM3S_SSI_IM_OFFSET);
+      if (priv->ntxwords > 0)
+        {
+          /* No.. Enable the Tx FIFO interrupt.  This interrupt occurs
+           * when the Tx FIFO is 1/2 full or less.
+           */
+
+#ifdef CONFIG_DEBUG
+          regval |= (SSI_IM_TX|SSI_RIS_ROR)
+#else
           regval |= SSI_IM_TX;
-          ssi_putreg(priv, LM3S_SSI_IM_OFFSET, regval);
 #endif
         }
-#ifndef CONFIG_SSI_POLLWAIT
       else
         {
-          /* Yes.. The transfer is complete, disable Tx FIFO half-empty interrupt */
+          /* Yes.. Disable the Tx FIFO interrupt.  The final stages of
+           * the transfer will be driven by Rx FIFO interrupts.
+           */
 
-          regval = ssi_getreg(priv, LM3S_SSI_IM_OFFSET);
-          regval &= ~SSI_IM_TX;
-          ssi_putreg(priv, LM3S_SSI_IM_OFFSET, regval);
+          regval &= ~(SSI_IM_TX|SSI_RIS_ROR);
         }
-#endif
+      ssi_putreg(priv, LM3S_SSI_IM_OFFSET, regval);
+#endif /* CONFIG_SSI_POLLWAIT */
     }
   return ntxd;
 }
@@ -582,6 +591,10 @@ static int ssi_performtx(struct lm32_ssidev_s *priv)
 
 static inline void ssi_performrx(struct lm32_ssidev_s *priv)
 {
+#ifndef CONFIG_SSI_POLLWAIT
+  uint32 regval;
+#endif
+
   /* Loop while data is available in the Rx FIFO */
 
   while (ssi_rxfifonotempty(priv))
@@ -596,6 +609,38 @@ static inline void ssi_performrx(struct lm32_ssidev_s *priv)
           priv->nrxwords++;
         }
     }
+
+  /* The Rx FIFO is now empty.  While there is Tx data to be sent, the
+   * transfer will be driven by Tx FIFO interrupts.  The final part
+   * of the transfer is driven by Rx FIFO interrupts only.
+   */
+
+#ifndef CONFIG_SSI_POLLWAIT
+  regval = ssi_getreg(priv, LM3S_SSI_IM_OFFSET);
+  if (priv->ntxwords == 0 && priv->nrxwords < priv->nwords)
+    {
+       /* There are no more outgoing words to send, but there are
+        * additional incoming words expected (I would think that this
+        * a real corner case, be we will handle it with an extra 
+        * interrupt, probably an Rx timeout).
+        */
+
+#ifdef CONFIG_DEBUG
+      regval |= (SSI_IM_RX|SSI_IM_RT|SSI_IM_ROR);
+#else
+      regval |= (SSI_IM_RX|SSI_IM_RT);
+#endif
+    }
+  else
+    {
+      /* No.. there are either more Tx words to send or all Rx words
+       * have received.  Disable Rx FIFO interrupts.
+       */
+
+      regval &= ~(SSI_IM_RX|SSI_IM_RT);
+    }
+  ssi_putreg(priv, LM3S_SSI_IM_OFFSET, regval);
+#endif /* CONFIG_SSI_POLLWAIT */
 }
 
 /****************************************************************************
@@ -659,7 +704,11 @@ static int ssi_transfer(struct lm32_ssidev_s *priv, const void *txbuffer,
       priv->rxword = ssi_rxnull;
     }
 
-  /* Prime the Tx FIFO to start the sequence (saves one interrupt) */
+  /* Prime the Tx FIFO to start the sequence (saves one interrupt).
+   * At this point, all SSI interrupts should be disabled, but the
+   * operation of ssi_performtx() will set up the interrupts
+   * approapriately.
+   */
 
 #ifndef CONFIG_SSI_POLLWAIT
   flags = irqsave();
@@ -671,7 +720,11 @@ static int ssi_transfer(struct lm32_ssidev_s *priv, const void *txbuffer,
    */
 
   irqrestore(flags);
-  ssi_semtake(&priv->xfrsem);
+  do
+    {
+      ssi_semtake(&priv->xfrsem);
+    }
+  while (priv->nrxwords < priv->nwords);
 
 #else
   /* Perform the transfer using polling logic.  This will totally
@@ -770,6 +823,15 @@ static int ssi_interrupt(int irq, void *context)
   regval = ssi_getreg(priv, LM3S_SSI_RIS_OFFSET);
   ssi_putreg(priv, LM3S_SSI_ICR_OFFSET, regval);
 
+  /* Check for Rx FIFO overruns */
+
+#ifdef CONFIG_DEBUG
+  if ((regval & SSI_RIS_ROR) != 0)
+    {
+      lldbg("Rx FIFO Overrun!\n");
+    }
+#endif
+
   /* Handle outgoing Tx FIFO transfers */
 
   ntxd = ssi_performtx(priv);
@@ -782,7 +844,11 @@ static int ssi_interrupt(int irq, void *context)
 
   if (priv->nrxwords >= priv->nwords)
     {
-      /* Yes, wake up the waiting thread */
+      /* Yes.. Disable all SSI interrupt sources */
+
+      ssi_putreg(priv, LM3S_SSI_IM_OFFSET, 0);
+
+      /* Wake up the waiting thread */
 
       ssi_semgive(&priv->xfrsem);
     }
@@ -1235,16 +1301,13 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   ssi_setfrequencyinternal(priv, 400000);
 
-  /* Enable interrupts on data ready in the RX FIFL (and certain error conditions) */
+  /* Disable all SSI interrupt sources */
 
-#ifndef CONFIG_SSI_POLLWAIT
-  ssi_putreg(priv, LM3S_SSI_IM_OFFSET,
-             SSI_IM_ROR |               /* SSI Rx FIFO Overrun */
-             SSI_IM_RT  |               /* SSI Rx FIFO Time-Out */
-             SSI_IM_RX);                /* SSI Rx FIFO half full or more */
+  ssi_putreg(priv, LM3S_SSI_IM_OFFSET, 0);
 
   /* Attach the interrupt */
 
+#ifndef CONFIG_SSI_POLLWAIT
 #if NSSI_ENABLED > 1
   irq_attach(priv->irq, (xcpt_t)ssi_interrupt);
 #else
@@ -1256,7 +1319,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   ssi_enable(priv, SSI_CR1_SSE);
 
-  /* Enable SSI interrupts */
+  /* Enable SSI interrupts (They are still disabled at the source). */
 
 #ifndef CONFIG_SSI_POLLWAIT
 #if NSSI_ENABLED > 1
@@ -1265,6 +1328,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   up_enable_irq(SSI_IRQ);
 #endif
 #endif /* CONFIG_SSI_POLLWAIT */
+
   irqrestore(flags);
   return (FAR struct spi_dev_s *)priv;
 }

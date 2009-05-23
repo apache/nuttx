@@ -1,7 +1,7 @@
 /****************************************************************************
- * examples/nsh/nsh_lpc214x.c
+ * examples/nsh/nsh_lm3s.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,22 +54,22 @@
 
 /* PORT and SLOT number probably depend on the board configuration */
 
-#ifdef CONFIG_ARCH_BOARD_MCU123
-#  define CONFIG_EXAMPLES_NSH_HAVEUSBDEV 1
+#ifdef CONFIG_ARCH_BOARD_EAGLE100
+#  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
 #  define CONFIG_EXAMPLES_NSH_HAVEMMCSD  1
-#  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO) || CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO != 1
-#    error "The LPC214x MMC/SD is on SPI1"
+#  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO) || CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO != 0
+#    error "The Eagle100 MMC/SD is on SSI0"
 #    undef CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO
-#    define CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO 1
+#    define CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO 0
 #  endif
 #  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSLOTNO) || CONFIG_EXAMPLES_NSH_MMCSDSLOTNO != 0
-#    error "The LPC214x MMC/SD is on SPI1"
+#    error "The Eagle100 MMC/SD is on SSI0 slot 0"
 #    undef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
 #    define CONFIG_EXAMPLES_NSH_MMCSDSLOTNO 0
 #  endif
 #else
    /* Add configuration for new LPC214x boards here */
-#  error "Unrecognized LPC214x board"
+#  error "Unrecognized lm3s board"
 #  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
 #  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
 #endif

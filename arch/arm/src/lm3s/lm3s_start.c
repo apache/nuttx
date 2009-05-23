@@ -134,10 +134,10 @@ void __start(void)
 #endif
   showprogress('D');
 
-  /* Initialize onboard LEDs */
+  /* Initialize onboard resources */
 
 #ifdef CONFIG_ARCH_LEDS
-  up_ledinit();
+  lm3s_boardinitialize();
 #endif
   showprogress('E');
 

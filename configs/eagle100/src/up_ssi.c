@@ -1,6 +1,6 @@
 /************************************************************************************
- * configs/eagle100/src/up_boot.c
- * arch/arm/src/board/up_boot.c
+ * configs/eagle100/src/up_ssi.c
+ * arch/arm/src/board/up_ssi.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -41,9 +41,11 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <nuttx/spi.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
+#include "lm3s_internal.h"
 
 /************************************************************************************
  * Definitions
@@ -57,24 +59,38 @@
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: lm3s_boardinitialize
+/****************************************************************************
+ * The external functions, lm3s_spiselect and lm3s_spistatus must be provided
+ * by board-specific logic.  The are implementations of the select and status
+ * methods SPI interface defined by struct spi_ops_s (see include/nuttx/spi.h).
+ * All othermethods (including up_spiinitialize()) are provided by common
+ * logic.  To use this common SPI logic on your board:
  *
- * Description:
- *   All LM3S architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
- ************************************************************************************/
+ *   1. Provide lm3s_spiselect() and lm3s_spistatus() functions in your
+ *      board-specific logic.  This function will perform chip selection and
+ *      status operations using GPIOs in the way your board is configured.
+ *   2. Add a call to up_spiinitialize() in your low level initialization
+ *      logic
+ *   3. The handle returned by up_spiinitialize() may then be used to bind the
+ *      SPI driver to higher level logic (e.g., calling 
+ *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
+ *      the SPI MMC/SD driver).
+ *
+ ****************************************************************************/
 
-void lm3s_boardinitialize(void)
+void lm3s_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
 {
-  /* Configure the SPI-based microSD CS GPIO */
+  if (devid == SPIDEV_MMCSD)
+    {
+      /* Assert the CS pin to the card */
 
-  lm3s_configgpio(SDC_CS | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | GPIO_VALUE_ONE);
-
-  /* Configure on-board LEDs */
-
-#ifdef CONFIG_ARCH_LEDS
-  up_ledinit();
-#endif
+      lm3s_gpiowrite(SDC_CS, selected ? 0 : 1);
+    }
 }
+
+ubyte lm3s_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+#warning "Need to check schematic"
+  return SPI_STATUS_PRESENT;
+}
+

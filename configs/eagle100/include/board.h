@@ -44,6 +44,7 @@
 #ifndef __ASSEMBLY__
 # include <sys/types.h>
 #endif
+#include "lm3s_internal.h"
 
 /************************************************************************************
  * Definitions
@@ -108,6 +109,12 @@
 #define LED_SIGNAL        5     /* ON   OFF */
 #define LED_ASSERTION     6     /* ON   OFF */
 #define LED_PANIC         7     /* ON   OFF */
+
+/* Eagle-100 GPIOs ******************************************************************/
+
+/* GPIO for microSD card chip select */
+
+#define SDC_CS   (GPIO_PORTG | 2)
 
 /************************************************************************************
  * Public Function Prototypes

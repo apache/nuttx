@@ -543,9 +543,9 @@ o ARM/LM3S6918 (arch/arm/src/lm3s/)
   Status:      Open
   Priority:    Low
 
-  Description: Still need to implement I2C, SSI, MMC/SD, and Ethernet
+  Description: Still need to implement I2C
   Status:      Open
-  Priority:    High
+  Priority:    Low
 
 o pjrc-8052 / MCS51 (arch/pjrc-8051/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
