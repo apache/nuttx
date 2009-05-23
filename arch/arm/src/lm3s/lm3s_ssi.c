@@ -760,9 +760,15 @@ static inline struct lm32_ssidev_s *ssi_mapirq(int irq)
 static int ssi_interrupt(int irq, void *context)
 {
   struct lm32_ssidev_s *priv = ssi_mapirq(irq);
+  uint32 regval;
   int ntxd;
 
   DEBUGASSERT(priv != NULL);
+
+  /* Clear pending interrupts */
+
+  regval = ssi_getreg(priv, LM3S_SSI_RIS_OFFSET);
+  ssi_putreg(priv, LM3S_SSI_ICR_OFFSET, regval);
 
   /* Handle outgoing Tx FIFO transfers */
 
