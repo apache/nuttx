@@ -121,12 +121,15 @@ CONFIG_UART0_2STOP=0
 CONFIG_UART1_2STOP=0
 
 #
-# LM3S6918 specific SPI device driver settings
+# LM3S6918 specific SSI device driver settings
 #
-# CONFIG_SPIn_DISABLE - select to disable all support for
-#   the SPI
-CONFIG_SPI1_DISABLE=n
-CONFIG_SPI2_DISABLE=y
+# CONFIG_SSIn_DISABLE - select to disable all support for
+#   the SSI
+# CONFIG_SSI_POLLWAIT - Select to disable interrupt driven SSI support
+#
+CONFIG_SSI0_DISABLE=n
+CONFIG_SSI1_DISABLE=y
+CONFIG_SSI_POLLWAIT=n
 
 #
 # LM3S6918 specific serial device driver settings
@@ -142,7 +145,7 @@ CONFIG_SPI2_DISABLE=y
 # CONFIG_LM3S_MULTICAST - Set to enable multicast frames
 # CONFIG_LM3S_PROMISCUOUS - Set to enable promiscuous mode
 # CONFIG_LM3S_BADCRC - Set to enable bad CRC rejection.
-# 
+#
 CONFIG_LM3S_ETHERNET=y
 CONFIG_LM3S_ETHLEDS=n
 CONFIG_LM3S_BOARDMAC=y

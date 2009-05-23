@@ -200,6 +200,10 @@ Eagle100-specific Configuration Options
 	CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
 	CONFIG_UARTn_2STOP - Two stop bits
 
+	CONFIG_SSI0_DISABLE - Select to disable support for SSI0
+	CONFIG_SSI1_DISABLE - Select to disable support for SSI1
+	CONFIG_SSI_POLLWAIT - Select to disable interrupt driven SSI support.
+
 	CONFIG_LM3S_ETHERNET - This must be set (along with CONFIG_NET)
 	  to build the LM3S Ethernet driver
 	CONFIG_LM3S_ETHLEDS - Enable to use Ethernet LEDs on the board.
