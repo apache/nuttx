@@ -41,6 +41,8 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <debug.h>
+
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -51,6 +53,28 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+/* Enables debug output from this file (needs CONFIG_DEBUG with
+ * CONFIG_DEBUG_VERBOSE too)
+ */
+
+#undef LED_DEBUG /* Define to enable debug */
+
+#ifdef LED_DEBUG
+#  define leddbg  lldbg
+#  define ledvdbg llvdbg
+#else
+#  define leddbg(x...)
+#  define ledvdbg(x...)
+#endif
+
+/* Dump GPIO registers */
+
+#ifdef LED_DEBUG
+#  define led_dumpgpio(m) lm3s_dumpgpio(LED_GPIO, m)
+#else
+#  define led_dumpgpio(m)
+#endif
 
 /****************************************************************************
  * Private Data
@@ -73,13 +97,13 @@ static boolean g_nest;
 #ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void)
 {
-  /* Make sure that the GPIOE peripheral is enabled */
-
-  modifyreg32(LM3S_SYSCON_RCGC2_OFFSET, 0, SYSCON_RCGC2_GPIOE);
+  leddbg("Initializing\n");
 
   /* Configure Port E, Bit 1 as an output, initial value=OFF */
 
-  lm3s_configgpio(GPIO_FUNC_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTE | 1);
+  led_dumpgpio("up_ledinit before lm3s_configgpio()");
+  lm3s_configgpio(LED_GPIO);
+  led_dumpgpio("up_ledinit after lm3s_configgpio()");
   g_nest = 0;
 }
 
@@ -103,7 +127,9 @@ void up_ledon(int led)
         g_nest++;
       case LED_IRQSENABLED:
       case LED_STACKCREATED:
-        modifyreg32(LM3S_GPIOE_DATA, 0, (1 << 1));
+        led_dumpgpio("up_ledon: before lm3s_gpiowrite()");
+        lm3s_gpiowrite(LED_GPIO, FALSE);
+        led_dumpgpio("up_ledon: after lm3s_gpiowrite()");
         break;
     }
 }
@@ -129,7 +155,9 @@ void up_ledoff(int led)
       case LED_PANIC:
         if (--g_nest <= 0)
           {
-            modifyreg32(LM3S_GPIOE_DATA, (1 << 1), 0);
+            led_dumpgpio("up_ledoff: before lm3s_gpiowrite()");
+            lm3s_gpiowrite(LED_GPIO, TRUE);
+            led_dumpgpio("up_ledoff: after lm3s_gpiowrite()");
           }
         break;
     }

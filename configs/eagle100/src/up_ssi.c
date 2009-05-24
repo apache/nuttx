@@ -84,7 +84,7 @@ void lm3s_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean sel
     {
       /* Assert the CS pin to the card */
 
-      lm3s_gpiowrite(SDC_CS, selected ? 0 : 1);
+      lm3s_gpiowrite(SDCCS_GPIO, !selected);
     }
 }
 
