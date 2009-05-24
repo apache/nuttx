@@ -114,7 +114,8 @@
 
 /* GPIO for microSD card chip select */
 
-#define SDC_CS   (GPIO_PORTG | 2)
+#define SDCCS_GPIO (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | GPIO_VALUE_ONE | GPIO_PORTG | 2)
+#define LED_GPIO   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTE | 1)
 
 /************************************************************************************
  * Public Function Prototypes

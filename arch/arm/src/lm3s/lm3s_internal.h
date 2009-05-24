@@ -280,6 +280,16 @@ EXTERN void lm3s_gpiowrite(uint32 pinset, boolean value);
 EXTERN boolean lm3s_gpioread(uint32 pinset, boolean value);
 
 /****************************************************************************
+ * Function:  lm3s_dumpgpio
+ *
+ * Description:
+ *   Dump all GPIO registers associated with the provided base address
+ *
+ ****************************************************************************/
+
+EXTERN int lm3s_dumpgpio(uint32 pinset, const char *msg);
+
+/****************************************************************************
  * Name: gpio_irqinitialize
  *
  * Description:

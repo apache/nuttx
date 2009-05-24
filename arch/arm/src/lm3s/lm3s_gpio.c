@@ -789,7 +789,7 @@ void lm3s_gpiowrite(uint32 pinset, boolean value)
    * "... All bits are cleared by a reset."
    */
 
-  putreg32((uint32)value << pinno, base + LM3S_GPIO_DATA_OFFSET + (pinno << 2));
+  putreg32((uint32)value << pinno, base + LM3S_GPIO_DATA_OFFSET + (1 << (pinno + 2)));
 }
 
 /****************************************************************************
@@ -828,5 +828,5 @@ boolean lm3s_gpioread(uint32 pinset, boolean value)
    *  are cleared by a reset."
    */
 
-  return (getreg32(base + LM3S_GPIO_DATA_OFFSET + (pinno << 2)) != 0);
+  return (getreg32(base + LM3S_GPIO_DATA_OFFSET + (1 << (pinno + 2))) != 0);
 }

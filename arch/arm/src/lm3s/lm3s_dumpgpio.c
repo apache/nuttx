@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/eagle100/src/up_leds.c
- * arch/arm/src/board/up_leds.c
+ * arch/arm/src/lm3s/lm3s_dumpgpio.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -43,124 +42,113 @@
 
 #include <debug.h>
 
-#include <arch/board/board.h>
+#include <nuttx/arch.h>
+
+#include "up_arch.h"
 
 #include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
 #include "lm3s_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
- */
-
-#undef LED_DEBUG /* Define to enable debug */
-
-#ifdef LED_DEBUG
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
-#endif
-
-/* Dump GPIO registers */
-
-#ifdef LED_DEBUG
-#  define led_dumpgpio(m) lm3s_dumpgpio(LED_GPIO, m)
-#else
-#  define led_dumpgpio(m)
-#endif
-
 /****************************************************************************
- * Private Data
+ * Private Types
  ****************************************************************************/
+
+/* NOTE: this is duplicated in lm3s_gpio.c */
+
+static const uint32 g_gpiobase[8] =
+{
+  LM3S_GPIOA_BASE, LM3S_GPIOB_BASE, LM3S_GPIOC_BASE, LM3S_GPIOD_BASE,
+  LM3S_GPIOE_BASE, LM3S_GPIOF_BASE, LM3S_GPIOG_BASE, LM3S_GPIOH_BASE,
+};
+
+static const char g_portchar[8]   = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Name: lm3s_gpiobaseaddress
+ *
+ * Description:
+ *   Given a GPIO enumeration value, return the base address of the
+ *   associated GPIO registers.
+ *
  ****************************************************************************/
 
-static boolean g_nest;
-
-/****************************************************************************
- * Name: up_ledinit
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
+static inline uint32 lm3s_gpiobaseaddress(int port)
 {
-  leddbg("Initializing\n");
-
-  /* Configure Port E, Bit 1 as an output, initial value=OFF */
-
-  led_dumpgpio("up_ledinit before lm3s_configgpio()");
-  lm3s_configgpio(LED_GPIO);
-  led_dumpgpio("up_ledinit after lm3s_configgpio()");
-  g_nest = 0;
+  return g_gpiobase[port & 7];
 }
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: lm3s_gpioport
+ *
+ * Description:
+ *   Given a GPIO enumeration value, return the base address of the
+ *   associated GPIO registers.
+ *
  ****************************************************************************/
 
-void up_ledon(int led)
+static inline ubyte lm3s_gpioport(int port)
 {
-  switch (led)
+  return g_portchar[port & 7];
+}
+
+/****************************************************************************
+ * Global Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  lm3s_dumpgpio
+ *
+ * Description:
+ *   Dump all GPIO registers associated with the provided base address
+ *
+ ****************************************************************************/
+
+int lm3s_dumpgpio(uint32 pinset, const char *msg)
+{
+  irqstate_t   flags;
+  unsigned int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  uint32       base;
+  uint32       rcgc2;
+  boolean      enabled;
+
+  /* Get the base address associated with the GPIO port */
+
+  base = lm3s_gpiobaseaddress(port);
+
+  /* The following requires exclusive access to the GPIO registers */
+
+  flags   = irqsave();
+  rcgc2   = getreg32(LM3S_SYSCON_RCGC2);
+  enabled = ((rcgc2 & SYSCON_RCGC2_GPIO(port)) != 0);
+
+  lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
+        lm3s_gpioport(port), pinset, base, msg);
+  lldbg("  RCGC2: %08x (%s)\n",
+        rcgc2, enabled ? "enabled" : "disabled" );
+
+  /* Don't bother with the rest unless the port is enabled */
+  
+  if (enabled)
     {
-      case LED_STARTED:
-      case LED_HEAPALLOCATE:
-      default:
-        break;
-
-      case LED_INIRQ:
-      case LED_SIGNAL:
-      case LED_ASSERTION:
-      case LED_PANIC:
-        g_nest++;
-      case LED_IRQSENABLED:
-      case LED_STACKCREATED:
-        led_dumpgpio("up_ledon: before lm3s_gpiowrite()");
-        lm3s_gpiowrite(LED_GPIO, FALSE);
-        led_dumpgpio("up_ledon: after lm3s_gpiowrite()");
-        break;
+      lldbg("  AFSEL: %02x DEN: %02x DIR: %02x DATA: %02x\n",
+            getreg32(base + LM3S_GPIO_AFSEL_OFFSET), getreg32(base + LM3S_GPIO_DEN_OFFSET),
+            getreg32(base + LM3S_GPIO_DIR_OFFSET), getreg32(base + LM3S_GPIO_DATA_OFFSET + 0x3fc));
+      lldbg("  IS:    %02x IBE: %02x IEV: %02x IM:  %02x RIS: %02x MIS: %02x\n",
+            getreg32(base + LM3S_GPIO_IEV_OFFSET), getreg32(base + LM3S_GPIO_IM_OFFSET),
+            getreg32(base + LM3S_GPIO_RIS_OFFSET), getreg32(base + LM3S_GPIO_MIS_OFFSET));
+      lldbg("  2MA:   %02x 4MA: %02x 8MA: %02x ODR: %02x PUR %02x PDR: %02x SLR: %02x\n",
+            getreg32(base + LM3S_GPIO_DR2R_OFFSET), getreg32(base + LM3S_GPIO_DR4R_OFFSET),
+            getreg32(base + LM3S_GPIO_DR8R_OFFSET), getreg32(base + LM3S_GPIO_ODR_OFFSET),
+            getreg32(base + LM3S_GPIO_PUR_OFFSET), getreg32(base + LM3S_GPIO_PDR_OFFSET),
+            getreg32(base + LM3S_GPIO_SLR_OFFSET));
     }
+  irqrestore(flags);
 }
-
-/****************************************************************************
- * Name: up_ledoff
- ****************************************************************************/
-
-void up_ledoff(int led)
-{
-  switch (led)
-    {
-      case LED_IRQSENABLED:
-      case LED_STACKCREATED:
-      case LED_STARTED:
-      case LED_HEAPALLOCATE:
-      default:
-        break;
-
-      case LED_INIRQ:
-      case LED_SIGNAL:
-      case LED_ASSERTION:
-      case LED_PANIC:
-        if (--g_nest <= 0)
-          {
-            led_dumpgpio("up_ledoff: before lm3s_gpiowrite()");
-            lm3s_gpiowrite(LED_GPIO, TRUE);
-            led_dumpgpio("up_ledoff: after lm3s_gpiowrite()");
-          }
-        break;
-    }
-}
-
-#endif /* CONFIG_ARCH_LEDS */

@@ -24,7 +24,7 @@ NuttX TODO List (Last updated April 12, 2009)
   (2)  ARM/i.MX (arch/arm/src/imx/)
   (3)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (4)  ARM/STR71x (arch/arm/src/str71x/)
-  (2)  ARM/LM3S6918 (arch/arm/src/lm3s/)
+  (1)  ARM/LM3S6918 (arch/arm/src/lm3s/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
@@ -538,10 +538,6 @@ o ARM/STR71x (arch/arm/src/str71x/)
 
 o ARM/LM3S6918 (arch/arm/src/lm3s/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  Description: Eagle-100 LEDs do not work.  This has to be a simple problem to fix.
-  Status:      Open
-  Priority:    Low
 
   Description: Still need to implement I2C
   Status:      Open

@@ -732,4 +732,6 @@
 	  Micromint Eagle100 board.
 	* arch/arm/src/lm3s: Added an SSI driver for the LM3S6918
 	* examples/nsh: Added MMC/SD support for the LM3S6918
+	* arch/arm/src/lm3s: Fix logic for setting and clearing output GPIOs (critical
+	  fix!).
 

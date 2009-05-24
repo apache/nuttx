@@ -41,6 +41,8 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <debug.h>
+
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -70,7 +72,7 @@ void lm3s_boardinitialize(void)
 {
   /* Configure the SPI-based microSD CS GPIO */
 
-  lm3s_configgpio(SDC_CS | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | GPIO_VALUE_ONE);
+  lm3s_configgpio(SDCCS_GPIO);
 
   /* Configure on-board LEDs */
 
