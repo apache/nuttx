@@ -141,7 +141,7 @@ int lm3s_dumpgpio(uint32 pinset, const char *msg)
       lldbg("  AFSEL: %02x DEN: %02x DIR: %02x DATA: %02x\n",
             getreg32(base + LM3S_GPIO_AFSEL_OFFSET), getreg32(base + LM3S_GPIO_DEN_OFFSET),
             getreg32(base + LM3S_GPIO_DIR_OFFSET), getreg32(base + LM3S_GPIO_DATA_OFFSET + 0x3fc));
-      lldbg("  IS:    %02x IBE: %02x IEV: %02x IM:  %02x RIS: %02x MIS: %02x\n",
+      lldbg("  IS:    %02x IBE: %02x IEV: %02x IM:  %02x RIS: %08x MIS: %08x\n",
             getreg32(base + LM3S_GPIO_IEV_OFFSET), getreg32(base + LM3S_GPIO_IM_OFFSET),
             getreg32(base + LM3S_GPIO_RIS_OFFSET), getreg32(base + LM3S_GPIO_MIS_OFFSET));
       lldbg("  2MA:   %02x 4MA: %02x 8MA: %02x ODR: %02x PUR %02x PDR: %02x SLR: %02x\n",
