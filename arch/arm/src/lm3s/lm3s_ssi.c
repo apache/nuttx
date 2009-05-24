@@ -64,7 +64,7 @@
  * CONFIG_DEBUG_VERBOSE too)
  */
 
-#undef SSI_DEBUG /* Define to enable debug */
+#undef SSI_DEBUG  /* Define to enable debug */
 
 #ifdef SSI_DEBUG
 #  define ssidbg  lldbg
@@ -426,12 +426,14 @@ static void ssi_semtake(sem_t *sem)
 
 static void ssi_txnull(struct lm32_ssidev_s *priv)
 {
+  ssivdbg("TX: ones\n");
   ssi_putreg(priv, LM3S_SSI_DR_OFFSET, 0xffff);
 }
 
 static void ssi_txuint16(struct lm32_ssidev_s *priv)
 {
   uint16 *ptr    = (uint16*)priv->txbuffer;
+  ssivdbg("TX: %p->%04x\n", ptr, *ptr);
   ssi_putreg(priv, LM3S_SSI_DR_OFFSET, (uint32)(*ptr++));
   priv->txbuffer = (void*)ptr;
 }
@@ -439,6 +441,7 @@ static void ssi_txuint16(struct lm32_ssidev_s *priv)
 static void ssi_txubyte(struct lm32_ssidev_s *priv)
 {
   ubyte *ptr     = (ubyte*)priv->txbuffer;
+  ssivdbg("TX: %p->%02x\n", ptr, *ptr);
   ssi_putreg(priv, LM3S_SSI_DR_OFFSET, (uint32)(*ptr++));
   priv->txbuffer = (void*)ptr;
 }
@@ -462,21 +465,28 @@ static void ssi_txubyte(struct lm32_ssidev_s *priv)
 
 static void ssi_rxnull(struct lm32_ssidev_s *priv)
 {
+#if defined(SSI_DEBUG) && defined(CONFIG_DEBUG_VERBOSE)
+  uint32 regval  = ssi_getreg(priv, LM3S_SSI_DR_OFFSET);
+  ssivdbg("RX: discard %04x\n", regval);
+#else
   (void)ssi_getreg(priv, LM3S_SSI_DR_OFFSET);
+#endif
 }
 
 static void ssi_rxuint16(struct lm32_ssidev_s *priv)
 {
   uint16 *ptr    = (uint16*)priv->rxbuffer;
-  *ptr++         = (uint16)ssi_getreg(priv, LM3S_SSI_DR_OFFSET);
-  priv->rxbuffer = (void*)ptr;
+  *ptr           = (uint16)ssi_getreg(priv, LM3S_SSI_DR_OFFSET);
+  ssivdbg("RX: %p<-%04x\n", ptr, *ptr);
+  priv->rxbuffer = (void*)(++ptr);
 }
 
 static void ssi_rxubyte(struct lm32_ssidev_s *priv)
 {
   ubyte *ptr     = (ubyte*)priv->rxbuffer;
-  *ptr++         = (ubyte)ssi_getreg(priv, LM3S_SSI_DR_OFFSET);
-  priv->rxbuffer = (void*)ptr;
+  *ptr           = (ubyte)ssi_getreg(priv, LM3S_SSI_DR_OFFSET);
+  ssivdbg("RX: %p<-%02x\n", ptr, *ptr);
+  priv->rxbuffer = (void*)(++ptr);
 }
 
 /****************************************************************************
